@@ -606,32 +606,6 @@ export default function FormsList({ onSelect, onEdit, onBuild, searchTerm }) {
     }
   };
 
-  if (isLoading && forms.length === 0) {
-    return (
-      <div className='subtleforms-loading'>
-        <Spinner />
-      </div>
-    );
-  }
-
-  if (filteredForms.length === 0) {
-    return (
-      <div className='subtleforms-empty-state'>
-        <div className='subtleforms-empty-state__icon'>📝</div>
-        <h2>
-          {searchTerm
-            ? __('No forms found', 'subtleforms')
-            : __('No forms yet', 'subtleforms')}
-        </h2>
-        <p>
-          {searchTerm
-            ? __('Try adjusting your search terms', 'subtleforms')
-            : __('Create your first form to get started', 'subtleforms')}
-        </p>
-      </div>
-    );
-  }
-
   return (
     <>
       <AdminTable
