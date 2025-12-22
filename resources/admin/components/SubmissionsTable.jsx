@@ -7,6 +7,7 @@ import {
   SearchControl,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
+import AdminTable from './AdminTable';
 
 const restBase =
   window.subtleformsAdmin && window.subtleformsAdmin.restUrl
@@ -35,20 +36,18 @@ export default function SubmissionsTable({
   formId,
   showFormColumn = true,
   onRowClick,
+  searchTerm,
+  statusFilter = 'all',
 }) {
-  const [submissions, setSubmissions] = useState(null);
+  const [submissions, setSubmissions] = useState([]);
   const [forms, setForms] = useState([]);
   const [error, setError] = useState(null);
-  const [total, setTotal] = useState(0);
-  const [filters, setFilters] = useState({
-    formId: formId || '',
-    status: 'all',
-    search: '',
-  });
-  const [pagination, setPagination] = useState({
-    perPage: 20,
-    offset: 0,
-  });
+  const [loading, setLoading] = useState(true);
+  const [totalItems, setTotalItems] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(20);
+  const [sortBy, setSortBy] = useState('created_at');
+  const [sortDirection, setSortDirection] = useState('desc');
 
   useEffect(() => {
     if (!formId) {
@@ -65,52 +64,75 @@ export default function SubmissionsTable({
   useEffect(() => {
     loadSubmissions();
   }, [
-    filters.formId,
-    filters.status,
-    filters.search,
-    pagination.perPage,
-    pagination.offset,
+    formId,
+    statusFilter,
+    searchTerm,
+    currentPage,
+    perPage,
+    sortBy,
+    sortDirection,
   ]);
 
-  const loadSubmissions = () => {
+  useEffect(() => {
+    // Reset to first page when filters change
+    setCurrentPage(1);
+  }, [statusFilter, searchTerm]);
+
+  const loadSubmissions = async () => {
     setError(null);
-    setSubmissions(null);
+    setLoading(true);
 
-    const params = [];
-    const targetFormId = formId || filters.formId;
+    try {
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        per_page: perPage.toString(),
+        orderby: sortBy,
+        order: sortDirection,
+      });
 
-    if (targetFormId) {
-      params.push(`form_id=${targetFormId}`);
-    }
+      if (formId) {
+        params.append('form_id', formId);
+      }
 
-    if (filters.status && filters.status !== 'all') {
-      params.push(`status=${filters.status}`);
-    }
+      if (statusFilter && statusFilter !== 'all') {
+        params.append('status', statusFilter);
+      }
 
-    if (filters.search) {
-      params.push(`search=${encodeURIComponent(filters.search)}`);
-    }
+      if (searchTerm) {
+        params.append('search', searchTerm);
+      }
 
-    params.push(`per_page=${pagination.perPage}`);
-    params.push(`offset=${pagination.offset}`);
+      const response = await fetch(`${restBase}/submissions?${params}`, {
+        credentials: 'same-origin',
+        headers: {
+          'X-WP-Nonce': restNonce,
+          'Content-Type': 'application/json',
+        },
+      });
 
-    const path = '/submissions?' + params.join('&');
+      if (response.ok) {
+        const data = await response.json();
+        const total = parseInt(response.headers.get('X-WP-Total') || '0');
 
-    apiGet(path)
-      .then((data) => {
         if (data && data.submissions) {
           setSubmissions(data.submissions);
-          setTotal(data.total || 0);
+          setTotalItems(data.total || 0);
         } else if (Array.isArray(data)) {
           setSubmissions(data);
-          setTotal(data.length);
+          setTotalItems(total);
         } else {
           setError(__('Invalid response format', 'subtleforms'));
         }
-      })
-      .catch(() => {
-        setError(__('Failed to load submissions', 'subtleforms'));
-      });
+      } else {
+        throw new Error('API request failed');
+      }
+    } catch (err) {
+      setError(__('Failed to load submissions', 'subtleforms'));
+      setSubmissions([]);
+      setTotalItems(0);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleRowClick = (submission) => {
@@ -123,8 +145,18 @@ export default function SubmissionsTable({
     }
   };
 
-  const handlePageChange = (newOffset) => {
-    setPagination({ ...pagination, offset: newOffset });
+  const handleSort = (column, direction) => {
+    setSortBy(column);
+    setSortDirection(direction);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePerPageChange = (newPerPage) => {
+    setPerPage(parseInt(newPerPage));
+    setCurrentPage(1);
   };
 
   const getRelativeTime = (dateString) => {
@@ -157,159 +189,96 @@ export default function SubmissionsTable({
     return { browser, device };
   };
 
-  if (error) return <Notice status='error'>{error}</Notice>;
-  if (submissions === null) return <Spinner />;
+  // Define table columns
+  const columns = [
+    {
+      key: 'id',
+      title: __('ID', 'subtleforms'),
+      sortable: true,
+      width: '8%',
+      render: (id) => <strong>#{id}</strong>,
+    },
+    ...(showFormColumn
+      ? [
+          {
+            key: 'form_title',
+            title: __('Form', 'subtleforms'),
+            width: '20%',
+            render: (formTitle, submission) => formTitle || submission.form_id,
+          },
+        ]
+      : []),
+    {
+      key: 'status',
+      title: __('Status', 'subtleforms'),
+      sortable: true,
+      width: '10%',
+      render: (status) => (
+        <span
+          className={`subtleforms-status-badge subtleforms-status-badge--${status}`}>
+          {status === 'unread'
+            ? __('Unread', 'subtleforms')
+            : __('Read', 'subtleforms')}
+        </span>
+      ),
+    },
+    {
+      key: 'user_agent',
+      title: __('Browser', 'subtleforms'),
+      width: '15%',
+      render: (userAgent) => getBrowserDevice(userAgent).browser,
+    },
+    {
+      key: 'user_agent',
+      title: __('Device', 'subtleforms'),
+      width: '10%',
+      render: (userAgent) => getBrowserDevice(userAgent).device,
+    },
+    {
+      key: 'created_at',
+      title: __('Submitted', 'subtleforms'),
+      sortable: true,
+      width: '20%',
+      render: (createdAt) => (
+        <span title={createdAt}>{getRelativeTime(createdAt)}</span>
+      ),
+    },
+    {
+      key: 'actions',
+      title: __('Actions', 'subtleforms'),
+      width: '15%',
+      render: (_, submission) => (
+        <Button
+          isSecondary
+          onClick={(e) => {
+            e.stopPropagation();
+            handleRowClick(submission);
+          }}>
+          {__('View', 'subtleforms')}
+        </Button>
+      ),
+    },
+  ];
 
-  const totalPages = Math.ceil(total / pagination.perPage);
-  const currentPage = Math.floor(pagination.offset / pagination.perPage) + 1;
+  if (error) {
+    return <Notice status='error'>{error}</Notice>;
+  }
 
   return (
-    <div className='wrap subtleforms-submissions-wrapper'>
-      <div className='subtleforms-filters'>
-        <div className='subtleforms-status-tabs'>
-          <button
-            className={`subtleforms-status-tab ${
-              filters.status === 'all' ? 'active' : ''
-            }`}
-            onClick={() => setFilters({ ...filters, status: 'all' })}>
-            {sprintf(__('All (%d)', 'subtleforms'), total)}
-          </button>
-          <button
-            className={`subtleforms-status-tab ${
-              filters.status === 'unread' ? 'active' : ''
-            }`}
-            onClick={() => setFilters({ ...filters, status: 'unread' })}>
-            {sprintf(
-              __('Unread (%d)', 'subtleforms'),
-              submissions.filter((s) => s.status === 'unread').length
-            )}
-          </button>
-          <button
-            className={`subtleforms-status-tab ${
-              filters.status === 'read' ? 'active' : ''
-            }`}
-            onClick={() => setFilters({ ...filters, status: 'read' })}>
-            {sprintf(
-              __('Read (%d)', 'subtleforms'),
-              submissions.filter((s) => s.status === 'read').length
-            )}
-          </button>
-        </div>
-        <div style={{ display: 'flex', gap: 15, alignItems: 'flex-end' }}>
-          {!formId && (
-            <SelectControl
-              label={__('Filter by Form', 'subtleforms')}
-              value={filters.formId}
-              onChange={(value) => setFilters({ ...filters, formId: value })}
-              options={[
-                { label: __('All Forms', 'subtleforms'), value: '' },
-                ...forms.map((form) => ({
-                  label: form.title,
-                  value: form.id,
-                })),
-              ]}
-            />
-          )}
-          <SearchControl
-            value={filters.search}
-            onChange={(value) => setFilters({ ...filters, search: value })}
-            placeholder={__('Search submissions...', 'subtleforms')}
-          />
-        </div>
-      </div>
-
-      {submissions.length === 0 ? (
-        <div className='subtleforms-empty-state'>
-          <p>{__('No submissions found.', 'subtleforms')}</p>
-        </div>
-      ) : (
-        <>
-          <table className='wp-list-table fixed widefat striped'>
-            <thead>
-              <tr>
-                <th style={{ width: '8%' }}>{__('ID', 'subtleforms')}</th>
-                {showFormColumn && (
-                  <th style={{ width: '20%' }}>{__('Form', 'subtleforms')}</th>
-                )}
-                <th style={{ width: '10%' }}>{__('Status', 'subtleforms')}</th>
-                <th style={{ width: '15%' }}>{__('Browser', 'subtleforms')}</th>
-                <th style={{ width: '10%' }}>{__('Device', 'subtleforms')}</th>
-                <th style={{ width: '20%' }}>
-                  {__('Submitted', 'subtleforms')}
-                </th>
-                <th style={{ width: '15%' }}>{__('Actions', 'subtleforms')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {submissions.map((sub) => {
-                const { browser, device } = getBrowserDevice(sub.user_agent);
-                return (
-                  <tr
-                    key={sub.id}
-                    style={{ cursor: 'pointer' }}
-                    onClick={() => handleRowClick(sub)}>
-                    <td>
-                      <strong>#{sub.id}</strong>
-                    </td>
-                    {showFormColumn && <td>{sub.form_title || sub.form_id}</td>}
-                    <td>
-                      <span
-                        className={`subtleforms-status-badge subtleforms-status-badge--${sub.status}`}>
-                        {sub.status === 'unread'
-                          ? __('Unread', 'subtleforms')
-                          : __('Read', 'subtleforms')}
-                      </span>
-                    </td>
-                    <td>{browser}</td>
-                    <td>{device}</td>
-                    <td title={sub.created_at}>
-                      {getRelativeTime(sub.created_at)}
-                    </td>
-                    <td>
-                      <Button
-                        isSecondary
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRowClick(sub);
-                        }}>
-                        {__('View', 'subtleforms')}
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-
-          {totalPages > 1 && (
-            <div className='subtleforms-pagination'>
-              <Button
-                disabled={currentPage === 1}
-                onClick={() =>
-                  handlePageChange(pagination.offset - pagination.perPage)
-                }
-                isSecondary>
-                {__('← Previous', 'subtleforms')}
-              </Button>
-              <span>
-                {sprintf(
-                  __('Page %d of %d', 'subtleforms'),
-                  currentPage,
-                  totalPages
-                )}
-              </span>
-              <Button
-                disabled={currentPage === totalPages}
-                onClick={() =>
-                  handlePageChange(pagination.offset + pagination.perPage)
-                }
-                isSecondary>
-                {__('Next →', 'subtleforms')}
-              </Button>
-            </div>
-          )}
-        </>
-      )}
-    </div>
+    <AdminTable
+      columns={columns}
+      data={submissions}
+      totalItems={totalItems}
+      currentPage={currentPage}
+      perPage={perPage}
+      sortBy={sortBy}
+      sortDirection={sortDirection}
+      onSort={handleSort}
+      onPageChange={handlePageChange}
+      onPerPageChange={handlePerPageChange}
+      loading={loading}
+      emptyMessage={__('No submissions found.', 'subtleforms')}
+      onRowClick={handleRowClick}
+    />
   );
 }
