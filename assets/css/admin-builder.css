@@ -166,6 +166,50 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	display: flex;
 	overflow: hidden;
 	background: #f3f4f5;
+	height: calc(100vh - 64px); /* Subtract header height */
+}
+
+/* Field dock (left sidebar) */
+.subtleforms-field-dock {
+	width: 320px;
+	background: #fff;
+	border-right: 1px solid #dcdcde;
+	display: flex;
+	flex-direction: column;
+	flex-shrink: 0;
+	overflow: hidden;
+	height: 100%;
+}
+
+.subtleforms-field-dock--collapsed {
+	width: 60px;
+}
+
+.subtleforms-field-dock__header {
+	padding: 16px;
+	padding-bottom: 8px;
+	flex-shrink: 0;
+	border-bottom: 1px solid #dcdcde;
+	position: sticky;
+	top: 0;
+	background: #fff;
+	z-index: 10;
+}
+
+.subtleforms-field-dock__content {
+	flex: 1;
+	overflow-y: auto;
+	overflow-x: hidden;
+	padding: 16px;
+	min-height: 0; /* Critical for proper flexbox scrolling */
+}
+
+.subtleforms-field-dock-button:hover {
+	background: #2271b1 !important;
+	color: #fff !important;
+	border-color: #2271b1 !important;
+	transform: translateY(-2px);
+	box-shadow: 0 2px 8px rgba(34, 113, 177, 0.3);
 }
 
 .subtleforms-builder-canvas {

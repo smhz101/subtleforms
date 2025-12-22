@@ -3,7 +3,7 @@
 /**
  * Plugin Name: SubtleForms
  * Description: Logic-first, workflow-driven form platform with extension architecture.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: Muzammil Hussain
  * Requires PHP: 7.2
  */
@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'SUBTLEFORMS_VERSION', '1.0.0' );
+define( 'SUBTLEFORMS_VERSION', '1.0.1' );
 define( 'SUBTLEFORMS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SUBTLEFORMS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'SUBTLEFORMS_PLUGIN_FILE', __FILE__ );

@@ -8,44 +8,19 @@ export default function FieldDock({ fieldGroups, onAddField }) {
 
   if (!fieldGroups || Object.keys(fieldGroups).length === 0) {
     return (
-      <div
-        style={{
-          width: collapsed ? '60px' : '320px',
-          background: '#fff',
-          borderRight: '1px solid #dcdcde',
-          display: 'flex',
-          flexDirection: 'column',
-          transition: 'width 0.2s',
-          flexShrink: 0,
-          padding: '16px',
-        }}>
-        <p style={{ color: '#646970', fontSize: '13px' }}>
-          {__('Loading fields...', 'subtleforms')}
-        </p>
+      <div className={`subtleforms-field-dock ${collapsed ? 'subtleforms-field-dock--collapsed' : ''}`}>
+        <div className="subtleforms-field-dock__header">
+          <p style={{ color: '#646970', fontSize: '13px', margin: 0 }}>
+            {__('Loading fields...', 'subtleforms')}
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        width: collapsed ? '60px' : '320px',
-        background: '#fff',
-        borderRight: '1px solid #dcdcde',
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'width 0.2s',
-        flexShrink: 0,
-        overflow: 'hidden',
-        height: '100%',
-      }}>
-      <div
-        style={{
-          padding: '16px',
-          paddingBottom: '8px',
-          flexShrink: 0,
-          borderBottom: '1px solid #dcdcde',
-        }}>
+    <div className={`subtleforms-field-dock ${collapsed ? 'subtleforms-field-dock--collapsed' : ''}`}>
+      <div className="subtleforms-field-dock__header">
         <div
           style={{
             display: 'flex',
@@ -72,14 +47,7 @@ export default function FieldDock({ fieldGroups, onAddField }) {
       </div>
 
       {!collapsed && (
-        <div
-          style={{
-            overflowY: 'auto',
-            overflowX: 'hidden',
-            flex: 1,
-            padding: '16px',
-            minHeight: 0,
-          }}>
+        <div className="subtleforms-field-dock__content">
           {Object.entries(fieldGroups).map(([category, categoryFields]) => (
             <div key={category} style={{ marginBottom: 20 }}>
               <div
@@ -119,21 +87,6 @@ export default function FieldDock({ fieldGroups, onAddField }) {
                       color: '#1e1e1e',
                       transition: 'all 0.15s',
                       textAlign: 'center',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#2271b1';
-                      e.currentTarget.style.color = '#fff';
-                      e.currentTarget.style.borderColor = '#2271b1';
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow =
-                        '0 2px 8px rgba(34, 113, 177, 0.3)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#f9f9f9';
-                      e.currentTarget.style.color = '#1e1e1e';
-                      e.currentTarget.style.borderColor = '#e5e5e5';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = 'none';
                     }}>
                     <span style={{ fontSize: '20px', display: 'flex' }}>
                       <Icon icon={getIcon(f.type)} size={24} />

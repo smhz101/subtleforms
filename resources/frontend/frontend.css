@@ -1,0 +1,321 @@
+/* SubtleForms Frontend Styles */
+
+.subtleforms-form-container {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 20px;
+}
+
+.subtleforms-form {
+	background: #fff;
+	border-radius: 8px;
+	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+	padding: 30px;
+}
+
+/* Loading State */
+.subtleforms-loading {
+	text-align: center;
+	padding: 40px 20px;
+	color: #666;
+}
+
+/* Error State */
+.subtleforms-error {
+	background: #f8d7da;
+	border: 1px solid #f5c6cb;
+	border-radius: 4px;
+	padding: 15px;
+	color: #721c24;
+	margin-bottom: 20px;
+}
+
+/* Step Navigation */
+.subtleforms-step-navigation {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: 30px;
+	padding-bottom: 20px;
+	border-bottom: 2px solid #e0e0e0;
+}
+
+.subtleforms-step {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	flex: 1;
+	position: relative;
+	cursor: default;
+}
+
+.subtleforms-step.completed {
+	cursor: pointer;
+}
+
+.subtleforms-step::after {
+	content: '';
+	position: absolute;
+	top: 15px;
+	left: 50%;
+	width: 100%;
+	height: 2px;
+	background: #e0e0e0;
+	z-index: -1;
+}
+
+.subtleforms-step:last-child::after {
+	display: none;
+}
+
+.subtleforms-step-number {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	background: #e0e0e0;
+	color: #666;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 600;
+	margin-bottom: 8px;
+	position: relative;
+	z-index: 1;
+}
+
+.subtleforms-step.active .subtleforms-step-number {
+	background: #0073aa;
+	color: #fff;
+}
+
+.subtleforms-step.completed .subtleforms-step-number {
+	background: #46b450;
+	color: #fff;
+}
+
+.subtleforms-step-title {
+	font-size: 12px;
+	color: #666;
+	text-align: center;
+}
+
+.subtleforms-step.active .subtleforms-step-title {
+	color: #0073aa;
+	font-weight: 600;
+}
+
+/* Step Content */
+.subtleforms-step-content {
+	margin-bottom: 30px;
+}
+
+.subtleforms-step-title-main {
+	font-size: 24px;
+	font-weight: 600;
+	margin-bottom: 8px;
+	color: #333;
+}
+
+.subtleforms-step-description {
+	color: #666;
+	margin-bottom: 20px;
+}
+
+/* Fields */
+.subtleforms-field {
+	margin-bottom: 20px;
+}
+
+.subtleforms-field-label {
+	display: block;
+	font-weight: 500;
+	margin-bottom: 6px;
+	color: #333;
+}
+
+.subtleforms-required {
+	color: #d63638;
+	margin-left: 2px;
+}
+
+.subtleforms-input,
+.subtleforms-textarea,
+.subtleforms-select {
+	width: 100%;
+	padding: 10px;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	font-size: 14px;
+	font-family: inherit;
+	transition: border-color 0.2s;
+}
+
+.subtleforms-input:focus,
+.subtleforms-textarea:focus,
+.subtleforms-select:focus {
+	outline: none;
+	border-color: #0073aa;
+	box-shadow: 0 0 0 1px #0073aa;
+}
+
+.subtleforms-textarea {
+	resize: vertical;
+	min-height: 100px;
+}
+
+/* Checkbox and Radio */
+.subtleforms-checkbox-label,
+.subtleforms-radio-label {
+	display: flex;
+	align-items: center;
+	cursor: pointer;
+	margin-bottom: 8px;
+}
+
+.subtleforms-checkbox,
+.subtleforms-radio {
+	margin-right: 8px;
+	cursor: pointer;
+}
+
+.subtleforms-radio-group {
+	display: flex;
+	flex-direction: column;
+}
+
+/* Field Errors */
+.subtleforms-field-error {
+	color: #d63638;
+	font-size: 13px;
+	margin-top: 6px;
+}
+
+/* Container Fields */
+.subtleforms-field-container {
+	border: 1px solid #e0e0e0;
+	border-radius: 4px;
+	padding: 20px;
+	margin-bottom: 20px;
+}
+
+.subtleforms-container-label {
+	font-weight: 600;
+	margin-bottom: 15px;
+	color: #333;
+}
+
+/* Column Layout */
+.subtleforms-field-columns {
+	display: flex;
+	gap: 20px;
+	margin-bottom: 20px;
+}
+
+.subtleforms-column {
+	flex: 1;
+}
+
+/* Buttons */
+.subtleforms-buttons {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 30px;
+	padding-top: 20px;
+	border-top: 1px solid #e0e0e0;
+}
+
+.subtleforms-button {
+	padding: 12px 24px;
+	border: none;
+	border-radius: 4px;
+	font-size: 14px;
+	font-weight: 500;
+	cursor: pointer;
+	transition: background-color 0.2s;
+}
+
+.subtleforms-button-prev {
+	background: #f0f0f0;
+	color: #333;
+}
+
+.subtleforms-button-prev:hover {
+	background: #e0e0e0;
+}
+
+.subtleforms-button-next,
+.subtleforms-button-submit {
+	background: #0073aa;
+	color: #fff;
+}
+
+.subtleforms-button-next:hover,
+.subtleforms-button-submit:hover {
+	background: #005a87;
+}
+
+.subtleforms-button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* Success Message */
+.subtleforms-success {
+	background: #d7f8e0;
+	border: 1px solid #b8e6c4;
+	border-radius: 4px;
+	padding: 20px;
+	color: #155724;
+	text-align: center;
+}
+
+.subtleforms-success h3 {
+	margin: 0 0 10px 0;
+	font-size: 18px;
+}
+
+.subtleforms-success p {
+	margin: 0;
+}
+
+/* Unsupported Field */
+.subtleforms-unsupported {
+	padding: 10px;
+	background: #fff3cd;
+	border: 1px solid #ffc107;
+	border-radius: 4px;
+	color: #856404;
+	font-size: 13px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+	.subtleforms-form-container {
+		padding: 10px;
+	}
+
+	.subtleforms-form {
+		padding: 20px;
+	}
+
+	.subtleforms-step-navigation {
+		gap: 10px;
+	}
+
+	.subtleforms-step-title {
+		font-size: 10px;
+	}
+
+	.subtleforms-field-columns {
+		flex-direction: column;
+		gap: 0;
+	}
+
+	.subtleforms-buttons {
+		flex-direction: column-reverse;
+		gap: 10px;
+	}
+
+	.subtleforms-button {
+		width: 100%;
+	}
+}
