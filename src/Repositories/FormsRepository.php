@@ -458,19 +458,4 @@ final class FormsRepository
         $result = $wpdb->delete($this->table, ['id' => $id], ['%d']);
         return $result !== false;
     }
-
-    /**
-     * Count forms.
-     */
-    public function count(array $args = []): int
-    {
-        global $wpdb;
-
-        $where = '';
-        if (!empty($args['status'])) {
-            $where = $wpdb->prepare(' WHERE status = %s', $args['status']);
-        }
-
-        return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$this->table}{$where}");
-    }
 }
