@@ -466,12 +466,16 @@ export default function FormsList({ onSelect, onEdit, onBuild, searchTerm }) {
         setForms(Array.isArray(data) ? data : []);
         setTotalItems(total);
       } else {
-        throw new Error('API request failed');
+        const errorText = await response.text();
+        console.error('API Error:', response.status, errorText);
+        throw new Error(`API request failed: ${response.status}`);
       }
     } catch (err) {
-      createErrorNotice(__('Failed to load forms', 'subtleforms'), {
-        type: 'snackbar',
-      });
+      console.error('FormsList fetch error:', err);
+      createErrorNotice(
+        err.message || __('Failed to load forms', 'subtleforms'),
+        { type: 'snackbar' }
+      );
       setForms([]);
       setTotalItems(0);
     } finally {
