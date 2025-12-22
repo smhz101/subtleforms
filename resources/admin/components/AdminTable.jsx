@@ -50,10 +50,13 @@ export default function AdminTable({
 
   if (loading) {
     return (
-      <div
-        className='subtleforms-table-loading'
-        style={{ padding: '40px', textAlign: 'center' }}>
-        <div className='spinner is-active'></div>
+      <div className='subtleforms-loading-container'>
+        <div className='subtleforms-loading-content'>
+          <div className='subtleforms-spinner'></div>
+          <p className='subtleforms-loading-text'>
+            {__('Loading...', 'subtleforms')}
+          </p>
+        </div>
       </div>
     );
   }

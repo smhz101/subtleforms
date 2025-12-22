@@ -160,7 +160,8 @@ final class RestController
         $orderby = in_array($request->get_param('orderby'), $allowed_orderby) 
             ? $request->get_param('orderby') 
             : 'created_at';
-        $order = strtoupper($request->get_param('order')) === 'ASC' ? 'ASC' : 'DESC';
+        $order_param = $request->get_param('order');
+        $order = (!empty($order_param) && strtoupper($order_param) === 'ASC') ? 'ASC' : 'DESC';
         
         $search = sanitize_text_field($request->get_param('search') ?: '');
         $status = sanitize_text_field($request->get_param('status') ?: '');
