@@ -2,6 +2,7 @@ import { useState } from '@wordpress/element';
 import { Panel, PanelBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import FormsList from './components/FormsList';
+import FormsPage from './components/FormsPage';
 import SubmissionsList from './components/SubmissionsList';
 import SubmissionsPage from './components/SubmissionsPage';
 import SubmissionDetailPage from './components/SubmissionDetailPage';
@@ -63,17 +64,7 @@ export default function App() {
     <div>
       <Panel>
         <PanelBody>
-          {page === 'forms-list' && (
-            <FormsList
-              onSelect={(id) => setSelectedForm(id)}
-              onEdit={(id) => {
-                window.location.href = `admin.php?page=subtleforms-new-form&form_id=${id}`;
-              }}
-              onBuild={(id) => {
-                window.location.href = `admin.php?page=subtleforms-new-form&form_id=${id}`;
-              }}
-            />
-          )}
+          {page === 'forms-list' && <FormsPage />}
           {page === 'submissions-list' && (
             <SubmissionsPage formId={initialFormId || null} />
           )}

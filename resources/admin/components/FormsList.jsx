@@ -255,13 +255,19 @@ function FormRow({
   );
 }
 
-export default function FormsList({ onSelect, onEdit, onBuild }) {
+export default function FormsList({ onSelect, onEdit, onBuild, searchTerm }) {
   const [forms, setForms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [deleteModal, setDeleteModal] = useState(null);
   const [statusModal, setStatusModal] = useState(null);
   const [statusValue, setStatusValue] = useState('draft');
   const { createSuccessNotice, createErrorNotice } = useDispatch(noticesStore);
+
+  // Filter forms based on search term
+  const filteredForms = forms.filter((form) => {
+    if (!searchTerm) return true;
+    return form.title.toLowerCase().includes(searchTerm.toLowerCase());
+  });
 
   const handleEditForm = (formId) => {
     window.location.href = `admin.php?page=subtleforms-new-form&form_id=${formId}`;
@@ -400,12 +406,20 @@ export default function FormsList({ onSelect, onEdit, onBuild }) {
     );
   }
 
-  if (forms.length === 0) {
+  if (filteredForms.length === 0) {
     return (
       <div className='subtleforms-empty-state'>
         <div className='subtleforms-empty-state__icon'>📝</div>
-        <h2>{__('No forms yet', 'subtleforms')}</h2>
-        <p>{__('Create your first form to get started', 'subtleforms')}</p>
+        <h2>
+          {searchTerm
+            ? __('No forms found', 'subtleforms')
+            : __('No forms yet', 'subtleforms')}
+        </h2>
+        <p>
+          {searchTerm
+            ? __('Try adjusting your search terms', 'subtleforms')
+            : __('Create your first form to get started', 'subtleforms')}
+        </p>
       </div>
     );
   }
@@ -413,7 +427,7 @@ export default function FormsList({ onSelect, onEdit, onBuild }) {
   return (
     <>
       <div className='subtleforms-forms-table-wrapper'>
-        <table className='subtleforms-forms-table wp-list-table fixed widefat striped'>
+        <table className='subtleforms-admin-table'>
           <thead>
             <tr>
               <th className='subtleforms-col-title'>
@@ -437,7 +451,7 @@ export default function FormsList({ onSelect, onEdit, onBuild }) {
             </tr>
           </thead>
           <tbody>
-            {forms.map((form) => (
+            {filteredForms.map((form) => (
               <FormRow
                 key={form.id}
                 form={form}

@@ -2,8 +2,235 @@
  * SubtleForms Admin Styles
  * 
  * @package SubtleForms
- * @version 1.0.0
+ * @version 1.0.1
  */
+
+/* ================================================================
+   SHARED ADMIN LAYOUT SHELL
+   ================================================================ */
+
+.subtleforms-admin-layout {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: #f0f0f1;
+  min-height: 100vh;
+}
+
+.subtleforms-admin-header {
+  position: sticky;
+  top: 32px; /* WP admin bar height */
+  z-index: 100;
+  background: #fff;
+  border-bottom: 1px solid #dcdcde;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  padding: 16px 24px;
+  margin: 0 -20px 0 -22px; /* Extend to screen edges */
+}
+
+.subtleforms-admin-header__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.subtleforms-admin-title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1e1e1e;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.subtleforms-admin-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.subtleforms-admin-filters {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  background: #fff;
+  border-bottom: 1px solid #dcdcde;
+  margin: 0 -20px 24px -22px; /* Extend to screen edges */
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.subtleforms-admin-filters__left {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+
+.subtleforms-admin-filters__right {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.subtleforms-admin-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  background: #fff;
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
+.subtleforms-admin-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 24px;
+  background: #fff;
+  border-top: 1px solid #dcdcde;
+  margin-top: 24px;
+  border-radius: 0 0 8px 8px;
+}
+
+/* ================================================================
+   UNIFIED TABLE STYLES
+   ================================================================ */
+
+.subtleforms-admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #fff;
+}
+
+.subtleforms-admin-table th,
+.subtleforms-admin-table td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid #dcdcde;
+}
+
+.subtleforms-admin-table th {
+  background: #f6f7f7;
+  font-weight: 600;
+  color: #1e1e1e;
+  font-size: 13px;
+  border-bottom: 1px solid #c3c4c7;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.subtleforms-admin-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.subtleforms-admin-table th.sortable:hover {
+  background: #f0f0f1;
+}
+
+.subtleforms-admin-table th .sort-indicator {
+  float: right;
+  margin-left: 8px;
+  color: #646970;
+}
+
+.subtleforms-admin-table tbody tr {
+  transition: background-color 0.15s ease;
+}
+
+.subtleforms-admin-table tbody tr:hover {
+  background: #f6f7f7;
+}
+
+.subtleforms-admin-table tbody tr.clickable {
+  cursor: pointer;
+}
+
+.subtleforms-admin-pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.subtleforms-admin-pagination-info {
+  font-size: 13px;
+  color: #646970;
+}
+
+.subtleforms-admin-page-size {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #646970;
+}
+
+/* ================================================================
+   STATUS TABS AND BADGES
+   ================================================================ */
+
+.subtleforms-status-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid #dcdcde;
+  margin-bottom: 16px;
+}
+
+.subtleforms-status-tab {
+  background: none;
+  border: none;
+  padding: 12px 16px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #646970;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.subtleforms-status-tab:hover {
+  color: #2271b1;
+}
+
+.subtleforms-status-tab.active {
+  color: #2271b1;
+  border-bottom-color: #2271b1;
+  font-weight: 600;
+}
+
+.subtleforms-status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+  font-size: 11px;
+  font-weight: 500;
+  border-radius: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.subtleforms-status-badge--unread {
+  background: #e0f2ff;
+  color: #0077b3;
+}
+
+.subtleforms-status-badge--read {
+  background: #f0f0f1;
+  color: #646970;
+}
+
+.subtleforms-status-badge--active {
+  background: #e8f4fd;
+  color: #1e8cbe;
+}
+
+.subtleforms-status-badge--draft {
+  background: #fef7e0;
+  color: #b45309;
+}
 
 /* Main admin wrapper */
 .subtleforms-admin {

@@ -8,6 +8,7 @@ import {
   TextareaControl,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
+import AdminLayout from './AdminLayout';
 
 const restBase =
   window.subtleformsAdmin && window.subtleformsAdmin.restUrl
@@ -139,30 +140,41 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
   );
   const apiLogs = logs.filter((log) => log.context === 'api');
 
-  return (
-    <div className='wrap subtleforms-admin'>
-      <div className='subtleforms-submission-header'>
-        <div>
-          <Button isSecondary onClick={onBack}>
-            ← {__('Back to Submissions', 'subtleforms')}
-          </Button>
-        </div>
-        <div className='subtleforms-submission-nav'>
-          <Button
-            disabled={!adjacent.prev}
-            onClick={() => navigate('prev')}
-            isSecondary>
-            {__('← Previous', 'subtleforms')}
-          </Button>
-          <Button
-            disabled={!adjacent.next}
-            onClick={() => navigate('next')}
-            isSecondary>
-            {__('Next →', 'subtleforms')}
-          </Button>
-        </div>
-      </div>
+  if (loading) return <Spinner />;
+  if (error) return <Notice status='error'>{error}</Notice>;
+  if (!submission)
+    return (
+      <Notice status='warning'>
+        {__('Submission not found', 'subtleforms')}
+      </Notice>
+    );
 
+  const headerActions = (
+    <>
+      <Button isSecondary onClick={onBack}>
+        ← {__('Back to Submissions', 'subtleforms')}
+      </Button>
+      <div className='subtleforms-submission-nav' style={{ display: 'flex', gap: '8px' }}>
+        <Button
+          disabled={!adjacent.prev}
+          onClick={() => navigate('prev')}
+          isSecondary>
+          {__('← Previous', 'subtleforms')}
+        </Button>
+        <Button
+          disabled={!adjacent.next}
+          onClick={() => navigate('next')}
+          isSecondary>
+          {__('Next →', 'subtleforms')}
+        </Button>
+      </div>
+    </>
+  );
+
+  return (
+    <AdminLayout
+      title={sprintf(__('Submission #%d', 'subtleforms'), submission.id)}
+      headerActions={headerActions}>
       <div className='subtleforms-submission-detail-wrapper'>
         <div className='subtleforms-submission-main'>
           <div className='subtleforms-detail-section'>
@@ -396,6 +408,6 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
           </div>
         </div>
       </div>
-    </div>
+    </AdminLayout>
   );
 }

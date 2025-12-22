@@ -8,8 +8,11 @@ export default function FieldDock({ fieldGroups, onAddField }) {
 
   if (!fieldGroups || Object.keys(fieldGroups).length === 0) {
     return (
-      <div className={`subtleforms-field-dock ${collapsed ? 'subtleforms-field-dock--collapsed' : ''}`}>
-        <div className="subtleforms-field-dock__header">
+      <div
+        className={`subtleforms-field-dock ${
+          collapsed ? 'subtleforms-field-dock--collapsed' : ''
+        }`}>
+        <div className='subtleforms-field-dock__header'>
           <p style={{ color: '#646970', fontSize: '13px', margin: 0 }}>
             {__('Loading fields...', 'subtleforms')}
           </p>
@@ -19,8 +22,11 @@ export default function FieldDock({ fieldGroups, onAddField }) {
   }
 
   return (
-    <div className={`subtleforms-field-dock ${collapsed ? 'subtleforms-field-dock--collapsed' : ''}`}>
-      <div className="subtleforms-field-dock__header">
+    <div
+      className={`subtleforms-field-dock ${
+        collapsed ? 'subtleforms-field-dock--collapsed' : ''
+      }`}>
+      <div className='subtleforms-field-dock__header'>
         <div
           style={{
             display: 'flex',
@@ -47,7 +53,7 @@ export default function FieldDock({ fieldGroups, onAddField }) {
       </div>
 
       {!collapsed && (
-        <div className="subtleforms-field-dock__content">
+        <div className='subtleforms-field-dock__content'>
           {Object.entries(fieldGroups).map(([category, categoryFields]) => (
             <div key={category} style={{ marginBottom: 20 }}>
               <div
