@@ -20,6 +20,7 @@ import {
   help,
   published,
 } from '@wordpress/icons';
+import AdminTable from './AdminTable';
 
 const restBase =
   window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
@@ -258,40 +259,243 @@ function FormRow({
 export default function FormsList({ onSelect, onEdit, onBuild, searchTerm }) {
   const [forms, setForms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [totalItems, setTotalItems] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [perPage, setPerPage] = useState(20);
+  const [sortBy, setSortBy] = useState('created_at');
+  const [sortDirection, setSortDirection] = useState('desc');
   const [deleteModal, setDeleteModal] = useState(null);
   const [statusModal, setStatusModal] = useState(null);
   const [statusValue, setStatusValue] = useState('draft');
   const { createSuccessNotice, createErrorNotice } = useDispatch(noticesStore);
 
-  // Filter forms based on search term
-  const filteredForms = forms.filter((form) => {
-    if (!searchTerm) return true;
-    return form.title.toLowerCase().includes(searchTerm.toLowerCase());
-  });
-
   const handleEditForm = (formId) => {
     window.location.href = `admin.php?page=subtleforms-new-form&form_id=${formId}`;
   };
 
+  const handleSort = (column, direction) => {
+    setSortBy(column);
+    setSortDirection(direction);
+  };
+
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+  };
+
+  const handlePerPageChange = (newPerPage) => {
+    setPerPage(parseInt(newPerPage));
+    setCurrentPage(1); // Reset to first page
+  };
+
+  // Define table columns
+  const columns = [
+    {
+      key: 'title',
+      title: __('Form Name', 'subtleforms'),
+      sortable: true,
+      width: '30%',
+      render: (title, form) => (
+        <div>
+          <strong>{title}</strong>
+        </div>
+      ),
+    },
+    {
+      key: 'status',
+      title: __('Status', 'subtleforms'),
+      sortable: true,
+      width: '15%',
+      render: (status) => {
+        const statusBadgeClass = `subtleforms-status-badge subtleforms-status-badge--${status}`;
+        return (
+          <span className={statusBadgeClass}>
+            {status === 'draft' && __('Draft', 'subtleforms')}
+            {status === 'published' && __('Published', 'subtleforms')}
+            {status === 'archived' && __('Archived', 'subtleforms')}
+          </span>
+        );
+      },
+    },
+    {
+      key: 'id',
+      title: __('Shortcode', 'subtleforms'),
+      width: '20%',
+      render: (id) => (
+        <button
+          type='button'
+          className='subtleforms-shortcode-button'
+          onClick={(e) => {
+            e.stopPropagation();
+            const shortcode = `[subtleform id="${id}"]`;
+            navigator.clipboard.writeText(shortcode);
+          }}
+          title={__('Click to copy', 'subtleforms')}>
+          <code>[subtleform id="{id}"]</code>
+        </button>
+      ),
+    },
+    {
+      key: 'submission_count',
+      title: __('Entries', 'subtleforms'),
+      width: '10%',
+      render: (submissionCount, form) => {
+        const unreadCount = form.unread_count || 0;
+        return (
+          <a
+            href={`admin.php?page=subtleforms-submissions&form_id=${form.id}`}
+            className='subtleforms-submission-count'
+            onClick={(e) => e.stopPropagation()}
+            title={sprintf(
+              __('%d unread, %d total entries', 'subtleforms'),
+              unreadCount,
+              submissionCount
+            )}>
+            {unreadCount > 0
+              ? `${unreadCount}/${submissionCount}`
+              : submissionCount}
+          </a>
+        );
+      },
+    },
+    {
+      key: 'updated_at',
+      title: __('Last Updated', 'subtleforms'),
+      sortable: true,
+      width: '15%',
+      render: (updatedAt) => (
+        <time>{new Date(updatedAt).toLocaleDateString()}</time>
+      ),
+    },
+    {
+      key: 'actions',
+      title: __('Actions', 'subtleforms'),
+      width: '10%',
+      render: (_, form) => (
+        <div className='subtleforms-row-actions'>
+          <Button
+            icon={pencil}
+            label={__('Edit', 'subtleforms')}
+            onClick={(e) => {
+              e.stopPropagation();
+              handleEditForm(form.id);
+            }}
+            isSmall
+          />
+          <Dropdown
+            renderToggle={({ onToggle }) => (
+              <Button
+                icon={moreVertical}
+                label={__('More actions', 'subtleforms')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onToggle();
+                }}
+                isSmall
+              />
+            )}
+            renderContent={({ onClose }) => (
+              <MenuGroup>
+                <MenuItem
+                  icon={published}
+                  onClick={() => {
+                    setStatusModal(form.id);
+                    setStatusValue(form.status);
+                    onClose();
+                  }}>
+                  {__('Change status', 'subtleforms')}
+                </MenuItem>
+                <MenuItem
+                  icon={copy}
+                  onClick={() => {
+                    handleDuplicate(form.id);
+                    onClose();
+                  }}>
+                  {__('Duplicate', 'subtleforms')}
+                </MenuItem>
+                <MenuItem
+                  icon={help}
+                  onClick={() => {
+                    window.location.href = `admin.php?page=subtleforms-submissions&form_id=${form.id}`;
+                    onClose();
+                  }}>
+                  {__('View submissions', 'subtleforms')}
+                </MenuItem>
+                <MenuItem
+                  icon={trash}
+                  onClick={() => {
+                    setDeleteModal(form.id);
+                    onClose();
+                  }}
+                  isDestructive>
+                  {__('Delete', 'subtleforms')}
+                </MenuItem>
+              </MenuGroup>
+            )}
+          />
+        </div>
+      ),
+    },
+  ];
+
   const fetchForms = useCallback(async () => {
     setIsLoading(true);
     try {
-      const { ok, body } = await apiRequest('/forms?per_page=100');
-      if (ok && Array.isArray(body)) {
-        setForms(body);
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        per_page: perPage.toString(),
+        orderby: sortBy,
+        order: sortDirection,
+      });
+
+      if (searchTerm) {
+        params.append('search', searchTerm);
+      }
+
+      const response = await fetch(`${restBase}/forms?${params}`, {
+        credentials: 'same-origin',
+        headers: {
+          'X-WP-Nonce': restNonce,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        const total = parseInt(response.headers.get('X-WP-Total') || '0');
+
+        setForms(Array.isArray(data) ? data : []);
+        setTotalItems(total);
+      } else {
+        throw new Error('API request failed');
       }
     } catch (err) {
       createErrorNotice(__('Failed to load forms', 'subtleforms'), {
         type: 'snackbar',
       });
+      setForms([]);
+      setTotalItems(0);
     } finally {
       setIsLoading(false);
     }
-  }, [createErrorNotice]);
+  }, [
+    currentPage,
+    perPage,
+    sortBy,
+    sortDirection,
+    searchTerm,
+    createErrorNotice,
+  ]);
 
   useEffect(() => {
     fetchForms();
   }, [fetchForms]);
+
+  useEffect(() => {
+    // Reset to first page when search changes
+    if (searchTerm !== undefined) {
+      setCurrentPage(1);
+    }
+  }, [searchTerm]);
 
   useEffect(() => {
     const handleFormSaved = () => fetchForms();
@@ -426,48 +630,28 @@ export default function FormsList({ onSelect, onEdit, onBuild, searchTerm }) {
 
   return (
     <>
-      <div className='subtleforms-forms-table-wrapper'>
-        <table className='subtleforms-admin-table'>
-          <thead>
-            <tr>
-              <th className='subtleforms-col-title'>
-                {__('Form Name', 'subtleforms')}
-              </th>
-              <th className='subtleforms-col-status'>
-                {__('Status', 'subtleforms')}
-              </th>
-              <th className='subtleforms-col-shortcode'>
-                {__('Shortcode', 'subtleforms')}
-              </th>
-              <th className='subtleforms-col-count'>
-                {__('Entries', 'subtleforms')}
-              </th>
-              <th className='subtleforms-col-date'>
-                {__('Last Updated', 'subtleforms')}
-              </th>
-              <th className='subtleforms-col-actions'>
-                {__('Actions', 'subtleforms')}
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredForms.map((form) => (
-              <FormRow
-                key={form.id}
-                form={form}
-                onEdit={handleEditForm}
-                onDuplicate={handleDuplicate}
-                onDelete={(id) => setDeleteModal(id)}
-                onStatusChange={(id, currentStatus) => {
-                  setStatusModal(id);
-                  setStatusValue(currentStatus);
-                }}
-                onRefresh={fetchForms}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
+      <AdminTable
+        columns={columns}
+        data={forms}
+        totalItems={totalItems}
+        currentPage={currentPage}
+        perPage={perPage}
+        sortBy={sortBy}
+        sortDirection={sortDirection}
+        onSort={handleSort}
+        onPageChange={handlePageChange}
+        onPerPageChange={handlePerPageChange}
+        loading={isLoading}
+        emptyMessage={
+          searchTerm
+            ? __('No forms found matching your search', 'subtleforms')
+            : __(
+                'No forms yet. Create your first form to get started.',
+                'subtleforms'
+              )
+        }
+        onRowClick={(form) => handleEditForm(form.id)}
+      />
 
       {deleteModal && (
         <Modal

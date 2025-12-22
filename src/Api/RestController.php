@@ -151,10 +151,36 @@ final class RestController
      */
     public function get_forms(WP_REST_Request $request): WP_REST_Response
     {
-        $forms = $this->formsRepo->all([
-            'limit' => $request->get_param('per_page') ?? 20,
-            'offset' => $request->get_param('offset') ?? 0,
-        ]);
+        $page = max(1, intval($request->get_param('page')) ?: 1);
+        $per_page = min(100, max(1, intval($request->get_param('per_page')) ?: 20));
+        $offset = ($page - 1) * $per_page;
+        
+        // Validate orderby and order params
+        $allowed_orderby = ['id', 'title', 'status', 'created_at', 'updated_at'];
+        $orderby = in_array($request->get_param('orderby'), $allowed_orderby) 
+            ? $request->get_param('orderby') 
+            : 'created_at';
+        $order = strtoupper($request->get_param('order')) === 'ASC' ? 'ASC' : 'DESC';
+        
+        $search = sanitize_text_field($request->get_param('search') ?: '');
+        $status = sanitize_text_field($request->get_param('status') ?: '');
+
+        $args = [
+            'limit' => $per_page,
+            'offset' => $offset,
+            'orderby' => $orderby,
+            'order' => $order,
+        ];
+
+        if ($search) {
+            $args['search'] = $search;
+        }
+        if ($status) {
+            $args['status'] = $status;
+        }
+
+        $forms = $this->formsRepo->all($args);
+        $total = $this->formsRepo->count($args);
 
         // v0.9.0+: Enhance forms with submission counts for admin UI (v0.9.1: add unread count)
         foreach ($forms as &$form) {
@@ -162,7 +188,11 @@ final class RestController
             $form['unread_count'] = $this->submissionsRepo->count($form['id'], ['status' => 'unread']);
         }
 
-        return new WP_REST_Response($forms, 200);
+        $response = new WP_REST_Response($forms, 200);
+        $response->header('X-WP-Total', $total);
+        $response->header('X-WP-TotalPages', ceil($total / $per_page));
+        
+        return $response;
     }
 
     /**

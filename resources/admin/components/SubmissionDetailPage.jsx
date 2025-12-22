@@ -154,7 +154,9 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
       <Button isSecondary onClick={onBack}>
         ← {__('Back to Submissions', 'subtleforms')}
       </Button>
-      <div className='subtleforms-submission-nav' style={{ display: 'flex', gap: '8px' }}>
+      <div
+        className='subtleforms-submission-nav'
+        style={{ display: 'flex', gap: '8px' }}>
         <Button
           disabled={!adjacent.prev}
           onClick={() => navigate('prev')}

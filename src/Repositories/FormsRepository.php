@@ -85,6 +85,7 @@ final class FormsRepository
 
         $defaults = [
             'status' => null,
+            'search' => null,
             'limit' => 20,
             'offset' => 0,
             'orderby' => 'created_at',
@@ -92,17 +93,29 @@ final class FormsRepository
         ];
 
         $args = wp_parse_args($args, $defaults);
-        $where = '';
+        $where_conditions = [];
 
         if ($args['status']) {
-            $where = $wpdb->prepare(' WHERE status = %s', $args['status']);
+            $where_conditions[] = $wpdb->prepare('status = %s', $args['status']);
         }
+
+        if ($args['search']) {
+            $search_term = '%' . $wpdb->esc_like($args['search']) . '%';
+            $where_conditions[] = $wpdb->prepare('title LIKE %s', $search_term);
+        }
+
+        $where = empty($where_conditions) ? '' : ' WHERE ' . implode(' AND ', $where_conditions);
+
+        // Validate orderby
+        $allowed_orderby = ['id', 'title', 'status', 'created_at', 'updated_at'];
+        $orderby = in_array($args['orderby'], $allowed_orderby) ? $args['orderby'] : 'created_at';
+        $order = strtoupper($args['order']) === 'ASC' ? 'ASC' : 'DESC';
 
         $sql = sprintf(
             "SELECT * FROM {$this->table}%s ORDER BY %s %s LIMIT %d OFFSET %d",
             $where,
-            esc_sql($args['orderby']),
-            esc_sql($args['order']),
+            esc_sql($orderby),
+            esc_sql($order),
             intval($args['limit']),
             intval($args['offset'])
         );
@@ -115,6 +128,31 @@ final class FormsRepository
         }
 
         return $results;
+    }
+
+    /**
+     * Count forms based on criteria.
+     */
+    public function count(array $args = []): int
+    {
+        global $wpdb;
+
+        $where_conditions = [];
+
+        if (!empty($args['status'])) {
+            $where_conditions[] = $wpdb->prepare('status = %s', $args['status']);
+        }
+
+        if (!empty($args['search'])) {
+            $search_term = '%' . $wpdb->esc_like($args['search']) . '%';
+            $where_conditions[] = $wpdb->prepare('title LIKE %s', $search_term);
+        }
+
+        $where = empty($where_conditions) ? '' : ' WHERE ' . implode(' AND ', $where_conditions);
+
+        $sql = "SELECT COUNT(*) FROM {$this->table}{$where}";
+        
+        return (int) $wpdb->get_var($sql);
     }
 
     /**
