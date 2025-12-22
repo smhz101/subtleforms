@@ -1,0 +1,17 @@
+{
+  "name": "muzammil/subtleforms",
+  "description": "most subtle and elite forms power house",
+  "type": "project",
+  "autoload": {
+    "psr-4": {
+      "SubtleForms\\": "src/"
+    }
+  },
+  "authors": [
+    {
+      "name": "Muzammil Hussain",
+      "email": "smhz101@gmail.com"
+    }
+  ],
+  "require": {}
+}
