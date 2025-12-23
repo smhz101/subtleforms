@@ -11,10 +11,11 @@
 		box-sizing: border-box;
 	}
 
-	/* SHARP, FLAT DESIGN - NO ROUNDED CORNERS, NO SHADOWS */
-	* {
-		border-radius: 0 !important;
-		box-shadow: none !important;
+	/* Minimal design - subtle polish */
+	.components-button,
+	.components-button.is-primary,
+	.components-button.is-secondary {
+		border-radius: 2px !important;
 	}
 
 	/* Custom scrollbar */
@@ -40,15 +41,21 @@
 		@apply bg-gray-500;
 	}
 
-	/* WordPress components override - remove rounded corners */
-	.components-button {
-		border-radius: 0 !important;
-	}
-
 	.components-select-control__input,
 	.components-text-control__input,
-	.components-textarea-control__input {
-		border-radius: 0 !important;
+	.components-textarea-control__input,
+	.components-search-control__input {
+		border-radius: 2px !important;
+	}
+
+	/* Tables */
+	table {
+		border-collapse: collapse;
+	}
+
+	th,
+	td {
+		border: none;
 	}
 
 	.subtleforms-btn-height {

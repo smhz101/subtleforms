@@ -43,7 +43,7 @@ export default function AdminShell({
       <div className='flex flex-col bg-white h-screen'>
         {/* TOP BAR - Sticky */}
         <div
-          className='flex flex-shrink-0 justify-between items-center bg-white px-6 border-gray-300 border-b'
+          className='flex flex-shrink-0 justify-between items-center bg-white shadow-sm px-6 border-gray-200 border-b'
           style={{
             height: `${TOP_BAR_HEIGHT}px`,
             position: 'sticky',

@@ -71,7 +71,7 @@ export default function DataTable({
       <div className='flex-1 overflow-auto'>
         <table className='w-full border-collapse'>
           <thead className='top-0 z-10 sticky bg-gray-50'>
-            <tr className='border-gray-300 border-b'>
+            <tr className='border-gray-200 border-b'>
               {columns.map((column) => (
                 <th
                   key={column.key}
@@ -119,7 +119,7 @@ export default function DataTable({
 
       {/* Pagination */}
       {totalPages > 0 && (
-        <div className='flex flex-shrink-0 justify-between items-center bg-white px-6 py-3 border-gray-300 border-t'>
+        <div className='flex flex-shrink-0 justify-between items-center bg-white px-6 py-4 border-gray-200 border-t'>
           <div className='flex items-center gap-4'>
             <span className='text-gray-700 text-sm'>
               {sprintf(
