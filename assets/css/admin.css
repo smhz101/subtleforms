@@ -9,6 +9,11 @@
    SHARED ADMIN LAYOUT SHELL
    ================================================================ */
 
+.subtle-forms_page_subtleforms-forms #wpcontent,
+.subtle-forms_page_subtleforms-submissions #wpcontent {
+	padding-left: 0;
+}
+
 .subtleforms-admin-layout {
 	margin: 0 !important;
 	padding: 0 !important;
@@ -234,7 +239,7 @@
 
 /* Main admin wrapper */
 .subtleforms-admin {
-	margin: 20px 0;
+	margin: 0;
 }
 
 /* Placeholder screen */
