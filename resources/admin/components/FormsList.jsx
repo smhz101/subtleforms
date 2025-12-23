@@ -257,7 +257,13 @@ function FormRow({
   );
 }
 
-export default function FormsList({ onSelect, onEdit, onBuild, searchTerm }) {
+export default function FormsList({
+  onSelect,
+  onEdit,
+  onBuild,
+  searchTerm,
+  statusFilter = 'all',
+}) {
   const [forms, setForms] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [totalItems, setTotalItems] = useState(0);
@@ -269,6 +275,28 @@ export default function FormsList({ onSelect, onEdit, onBuild, searchTerm }) {
   const [statusModal, setStatusModal] = useState(null);
   const [statusValue, setStatusValue] = useState('draft');
   const { createSuccessNotice, createErrorNotice } = useDispatch(noticesStore);
+
+  const handleCopyShortcode = (shortcode) => {
+    if (navigator.clipboard?.writeText) {
+      navigator.clipboard
+        .writeText(shortcode)
+        .then(() => {
+          createSuccessNotice(
+            __('Shortcode copied to clipboard', 'subtleforms'),
+            {
+              type: 'snackbar',
+              isDismissible: true,
+            }
+          );
+        })
+        .catch(() => {
+          createErrorNotice(__('Failed to copy shortcode', 'subtleforms'), {
+            type: 'snackbar',
+            isDismissible: true,
+          });
+        });
+    }
+  };
 
   const handleEditForm = (formId) => {
     window.location.href = `admin.php?page=subtleforms-new-form&form_id=${formId}`;
@@ -355,7 +383,7 @@ export default function FormsList({ onSelect, onEdit, onBuild, searchTerm }) {
             className='group flex items-center gap-2 bg-gray-50 hover:bg-blue-50 px-3 py-1.5 border border-gray-200 hover:border-blue-300 transition-all duration-150'
             onClick={(e) => {
               e.stopPropagation();
-              navigator.clipboard.writeText(shortcode);
+              handleCopyShortcode(shortcode);
             }}
             title={__('Click to copy', 'subtleforms')}>
             <code className='font-mono text-gray-700 group-hover:text-blue-700 text-xs'>
@@ -523,6 +551,10 @@ export default function FormsList({ onSelect, onEdit, onBuild, searchTerm }) {
         params.append('search', searchTerm);
       }
 
+      if (statusFilter && statusFilter !== 'all') {
+        params.append('status', statusFilter);
+      }
+
       const response = await fetch(`${restBase}/forms?${params}`, {
         credentials: 'same-origin',
         headers: {
@@ -559,6 +591,7 @@ export default function FormsList({ onSelect, onEdit, onBuild, searchTerm }) {
     sortBy,
     sortDirection,
     searchTerm,
+    statusFilter,
     createErrorNotice,
   ]);
 
@@ -567,11 +600,11 @@ export default function FormsList({ onSelect, onEdit, onBuild, searchTerm }) {
   }, [fetchForms]);
 
   useEffect(() => {
-    // Reset to first page when search changes
-    if (searchTerm !== undefined) {
+    // Reset to first page when search or status filter changes
+    if (searchTerm !== undefined || statusFilter !== undefined) {
       setCurrentPage(1);
     }
-  }, [searchTerm]);
+  }, [searchTerm, statusFilter]);
 
   useEffect(() => {
     const handleFormSaved = () => fetchForms();

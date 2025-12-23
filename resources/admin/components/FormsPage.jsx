@@ -3,10 +3,18 @@ import { Button, SearchControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { plus } from '@wordpress/icons';
 import AdminShell from './AdminShell';
+import TabBar from './TabBar';
 import FormsList from './FormsList';
 
 export default function FormsPage() {
   const [search, setSearch] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const tabs = [
+    { key: 'all', label: __('All', 'subtleforms') },
+    { key: 'published', label: __('Published', 'subtleforms') },
+    { key: 'draft', label: __('Draft', 'subtleforms') },
+  ];
 
   return (
     <AdminShell
@@ -21,6 +29,13 @@ export default function FormsPage() {
           {__('New Form', 'subtleforms')}
         </Button>
       }
+      tabs={
+        <TabBar
+          tabs={tabs}
+          activeTab={statusFilter}
+          onTabChange={setStatusFilter}
+        />
+      }
       search={
         <SearchControl
           value={search}
@@ -28,7 +43,7 @@ export default function FormsPage() {
           placeholder={__('Search forms...', 'subtleforms')}
         />
       }>
-      <FormsList searchTerm={search} />
+      <FormsList searchTerm={search} statusFilter={statusFilter} />
     </AdminShell>
   );
 }
