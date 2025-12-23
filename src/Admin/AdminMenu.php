@@ -51,8 +51,10 @@ class AdminMenu
         add_action('admin_enqueue_scripts', [$this, 'enqueue_assets']);
         add_action('admin_init', [$this, 'handle_actions']);
         add_filter('admin_body_class', [$this, 'filter_admin_body_class']);
-        add_filter('admin_title', [$this, 'filter_admin_title'], 10, 2);
-        add_action('admin_head', [$this, 'fix_admin_globals']);
+        // Hook title filter with highest priority to catch null values first
+        add_filter('admin_title', [$this, 'filter_admin_title'], 1, 2);
+        // Fix globals early before WordPress uses them
+        add_action('admin_init', [$this, 'fix_admin_globals'], 1);
     }
 
     /**
@@ -113,7 +115,7 @@ class AdminMenu
 
         // Submission Detail (hidden page)
         add_submenu_page(
-            null,  // null for hidden page - prevents menu display
+            '',  // empty string instead of null for hidden page - prevents menu display while avoiding null issues
             __('Submission Detail', 'subtleforms'),
             __('Submission Detail', 'subtleforms'),
             $this->caps->manage_cap(),
