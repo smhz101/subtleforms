@@ -177,50 +177,61 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
     <AdminLayout
       title={sprintf(__('Submission #%d', 'subtleforms'), submission.id)}
       headerActions={headerActions}>
-      <div className='subtleforms-submission-detail-wrapper'>
-        <div className='subtleforms-submission-main'>
-          <div className='subtleforms-detail-section'>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: 15,
-              }}>
-              <h2>{__('Submitted Data', 'subtleforms')}</h2>
-              <label>
+      <div className='space-y-8 subtleforms-admin'>
+        <div className='subtleforms-card'>
+          <div className='subtleforms-card-header'>
+            <div className='flex justify-between items-center'>
+              <h2 className='m-0 font-semibold text-gray-900 text-lg'>
+                {__('Submitted Data', 'subtleforms')}
+              </h2>
+              <label className='flex items-center gap-2 text-gray-600 text-sm'>
                 <input
                   type='checkbox'
                   checked={showEmpty}
                   onChange={(e) => setShowEmpty(e.target.checked)}
-                />{' '}
+                  className='border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-blue-600'
+                />
                 {__('Show empty fields', 'subtleforms')}
               </label>
             </div>
-            <table className='widefat'>
-              <tbody>
-                {Object.keys(filteredPayload).length > 0 ? (
-                  Object.entries(filteredPayload).map(([key, value]) => (
-                    <tr key={key}>
-                      <th style={{ width: '30%' }}>{getFieldLabel(key)}</th>
-                      <td style={{ whiteSpace: 'pre-wrap' }}>
-                        {String(value)}
+          </div>
+          <div className='subtleforms-card-content'>
+            <div className='ring-opacity-5 shadow md:rounded-lg ring-1 ring-black overflow-hidden'>
+              <table className='divide-y divide-gray-300 min-w-full'>
+                <tbody className='bg-white divide-y divide-gray-200'>
+                  {Object.keys(filteredPayload).length > 0 ? (
+                    Object.entries(filteredPayload).map(([key, value]) => (
+                      <tr key={key} className='hover:bg-gray-50'>
+                        <td className='px-6 py-4 w-1/3 font-medium text-gray-900 text-sm'>
+                          {getFieldLabel(key)}
+                        </td>
+                        <td className='px-6 py-4 text-gray-700 text-sm whitespace-pre-wrap'>
+                          {String(value)}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan='2'
+                        className='px-6 py-4 text-gray-500 text-sm text-center italic'>
+                        {__('No data to display', 'subtleforms')}
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan='2'>
-                      <em>{__('No data to display', 'subtleforms')}</em>
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+                  )}
+                </tbody>
+              </table>
+            </div>
           </div>
+        </div>
 
-          <div className='subtleforms-detail-section'>
-            <h2>{__('Submission Notes', 'subtleforms')}</h2>
+        <div className='subtleforms-card'>
+          <div className='subtleforms-card-header'>
+            <h2 className='m-0 font-semibold text-gray-900 text-lg'>
+              {__('Submission Notes', 'subtleforms')}
+            </h2>
+          </div>
+          <div className='subtleforms-card-content'>
             <TextareaControl
               rows={4}
               placeholder={__(
@@ -230,9 +241,15 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
               disabled
             />
           </div>
+        </div>
 
-          <div className='subtleforms-detail-section'>
-            <h2>{__('Execution Logs', 'subtleforms')}</h2>
+        <div className='subtleforms-card'>
+          <div className='subtleforms-card-header'>
+            <h2 className='m-0 font-semibold text-gray-900 text-lg'>
+              {__('Execution Logs', 'subtleforms')}
+            </h2>
+          </div>
+          <div className='subtleforms-card-content'>
             <TabPanel
               tabs={[
                 {

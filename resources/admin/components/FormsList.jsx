@@ -306,12 +306,27 @@ export default function FormsList({ onSelect, onEdit, onBuild, searchTerm }) {
       sortable: true,
       width: '15%',
       render: (status) => {
-        const statusBadgeClass = `subtleforms-status-badge subtleforms-status-badge--${status}`;
+        const statusConfig = {
+          draft: {
+            classes: 'bg-gray-100 text-gray-800',
+            label: __('Draft', 'subtleforms'),
+          },
+          published: {
+            classes: 'bg-green-100 text-green-800',
+            label: __('Published', 'subtleforms'),
+          },
+          archived: {
+            classes: 'bg-red-100 text-red-800',
+            label: __('Archived', 'subtleforms'),
+          },
+        };
+
+        const config = statusConfig[status] || statusConfig.draft;
+
         return (
-          <span className={statusBadgeClass}>
-            {status === 'draft' && __('Draft', 'subtleforms')}
-            {status === 'published' && __('Published', 'subtleforms')}
-            {status === 'archived' && __('Archived', 'subtleforms')}
+          <span
+            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.classes}`}>
+            {config.label}
           </span>
         );
       },
