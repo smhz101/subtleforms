@@ -76,7 +76,7 @@ export default function DataTable({
                 <th
                   key={column.key}
                   className={`
-                    px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider
+                    px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider first:pl-8 last:pr-8
                     ${
                       column.sortable
                         ? 'cursor-pointer hover:bg-gray-100 select-none'
@@ -93,19 +93,23 @@ export default function DataTable({
               ))}
             </tr>
           </thead>
-          <tbody className='bg-white'>
+          <tbody className='bg-white divide-y divide-gray-100'>
             {data.map((row, index) => (
               <tr
                 key={row.id || index}
                 className={`
-                  border-b border-gray-200 transition-colors
-                  ${onRowClick ? 'cursor-pointer hover:bg-gray-50' : ''}
+                  group transition-all duration-150
+                  ${
+                    onRowClick
+                      ? 'cursor-pointer hover:bg-blue-50 hover:shadow-sm'
+                      : ''
+                  }
                 `}
                 onClick={() => onRowClick && onRowClick(row)}>
                 {columns.map((column) => (
                   <td
                     key={column.key}
-                    className='px-6 py-4 text-gray-900 text-sm'>
+                    className='px-6 py-4 last:pr-8 first:pl-8 text-gray-900 text-sm'>
                     {column.render
                       ? column.render(row[column.key], row)
                       : row[column.key]}

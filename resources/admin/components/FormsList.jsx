@@ -19,6 +19,7 @@ import {
   copy,
   help,
   published,
+  plus,
 } from '@wordpress/icons';
 import DataTable from './DataTable';
 
@@ -293,10 +294,17 @@ export default function FormsList({ onSelect, onEdit, onBuild, searchTerm }) {
       key: 'title',
       title: __('Form Name', 'subtleforms'),
       sortable: true,
-      width: '30%',
+      width: '28%',
       render: (title, form) => (
-        <div>
-          <strong>{title}</strong>
+        <div className='flex items-center gap-2'>
+          <span className='font-semibold text-gray-900 group-hover:text-blue-600 text-base transition-colors'>
+            {title}
+          </span>
+          {form.submission_count === 0 && (
+            <span className='bg-gray-50 px-1.5 py-0.5 border border-gray-200 text-gray-400 text-xs'>
+              {__('New', 'subtleforms')}
+            </span>
+          )}
         </div>
       ),
     },
@@ -304,20 +312,23 @@ export default function FormsList({ onSelect, onEdit, onBuild, searchTerm }) {
       key: 'status',
       title: __('Status', 'subtleforms'),
       sortable: true,
-      width: '15%',
+      width: '12%',
       render: (status) => {
         const statusConfig = {
           draft: {
-            classes: 'bg-gray-100 text-gray-800',
+            classes: 'bg-amber-50 text-amber-700 border-amber-200',
             label: __('Draft', 'subtleforms'),
+            icon: '📝',
           },
           published: {
-            classes: 'bg-green-100 text-green-800',
+            classes: 'bg-emerald-50 text-emerald-700 border-emerald-200',
             label: __('Published', 'subtleforms'),
+            icon: '✓',
           },
           archived: {
-            classes: 'bg-red-100 text-red-800',
+            classes: 'bg-gray-50 text-gray-600 border-gray-200',
             label: __('Archived', 'subtleforms'),
+            icon: '📦',
           },
         };
 
@@ -325,7 +336,8 @@ export default function FormsList({ onSelect, onEdit, onBuild, searchTerm }) {
 
         return (
           <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${config.classes}`}>
+            className={`inline-flex items-center gap-1 px-2.5 py-1 border text-xs font-medium ${config.classes}`}>
+            <span>{config.icon}</span>
             {config.label}
           </span>
         );
@@ -335,39 +347,69 @@ export default function FormsList({ onSelect, onEdit, onBuild, searchTerm }) {
       key: 'id',
       title: __('Shortcode', 'subtleforms'),
       width: '20%',
-      render: (id) => (
-        <button
-          type='button'
-          className='subtleforms-shortcode-button'
-          onClick={(e) => {
-            e.stopPropagation();
-            const shortcode = `[subtleform id="${id}"]`;
-            navigator.clipboard.writeText(shortcode);
-          }}
-          title={__('Click to copy', 'subtleforms')}>
-          <code>[subtleform id="{id}"]</code>
-        </button>
-      ),
+      render: (id, form) => {
+        const shortcode = `[subtleform id="${id}"]`;
+        return (
+          <button
+            type='button'
+            className='group flex items-center gap-2 bg-gray-50 hover:bg-blue-50 px-3 py-1.5 border border-gray-200 hover:border-blue-300 transition-all duration-150'
+            onClick={(e) => {
+              e.stopPropagation();
+              navigator.clipboard.writeText(shortcode);
+            }}
+            title={__('Click to copy', 'subtleforms')}>
+            <code className='font-mono text-gray-700 group-hover:text-blue-700 text-xs'>
+              {shortcode}
+            </code>
+            <svg
+              className='flex-shrink-0 w-3.5 h-3.5 text-gray-400 group-hover:text-blue-500'
+              fill='none'
+              stroke='currentColor'
+              viewBox='0 0 24 24'>
+              <path
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                strokeWidth={2}
+                d='M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z'
+              />
+            </svg>
+          </button>
+        );
+      },
     },
     {
       key: 'submission_count',
       title: __('Entries', 'subtleforms'),
-      width: '10%',
+      width: '12%',
       render: (submissionCount, form) => {
         const unreadCount = form.unread_count || 0;
+        const hasUnread = unreadCount > 0;
         return (
           <a
             href={`admin.php?page=subtleforms-submissions&form_id=${form.id}`}
-            className='subtleforms-submission-count'
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 font-medium text-sm transition-colors ${
+              hasUnread
+                ? 'text-blue-600 bg-blue-50 hover:bg-blue-100'
+                : 'text-gray-600 hover:text-gray-900'
+            }`}
             onClick={(e) => e.stopPropagation()}
             title={sprintf(
               __('%d unread, %d total entries', 'subtleforms'),
               unreadCount,
               submissionCount
             )}>
-            {unreadCount > 0
-              ? `${unreadCount}/${submissionCount}`
-              : submissionCount}
+            {hasUnread && (
+              <span className='bg-blue-500 rounded-full w-2 h-2 animate-pulse'></span>
+            )}
+            {hasUnread ? (
+              <>
+                <span className='font-semibold'>{unreadCount}</span>
+                <span className='text-gray-400'>/</span>
+                <span>{submissionCount}</span>
+              </>
+            ) : (
+              <span>{submissionCount}</span>
+            )}
           </a>
         );
       },
@@ -376,10 +418,25 @@ export default function FormsList({ onSelect, onEdit, onBuild, searchTerm }) {
       key: 'updated_at',
       title: __('Last Updated', 'subtleforms'),
       sortable: true,
-      width: '15%',
-      render: (updatedAt) => (
-        <time>{new Date(updatedAt).toLocaleDateString()}</time>
-      ),
+      width: '13%',
+      render: (updatedAt) => {
+        const date = new Date(updatedAt);
+        const now = new Date();
+        const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
+
+        let displayText;
+        if (diffInHours < 1) displayText = __('Just now', 'subtleforms');
+        else if (diffInHours < 24)
+          displayText = sprintf(__('%d hours ago', 'subtleforms'), diffInHours);
+        else if (diffInHours < 48) displayText = __('Yesterday', 'subtleforms');
+        else displayText = date.toLocaleDateString();
+
+        return (
+          <time className='text-gray-600 text-sm' title={date.toLocaleString()}>
+            {displayText}
+          </time>
+        );
+      },
     },
     {
       key: 'actions',
@@ -636,12 +693,32 @@ export default function FormsList({ onSelect, onEdit, onBuild, searchTerm }) {
         onPerPageChange={handlePerPageChange}
         loading={isLoading}
         emptyMessage={
-          searchTerm
-            ? __('No forms found matching your search', 'subtleforms')
-            : __(
-                'No forms yet. Create your first form to get started.',
-                'subtleforms'
-              )
+          <div className='py-12 text-center'>
+            <div className='mb-4 text-6xl'>📋</div>
+            <h3 className='mb-2 font-semibold text-gray-900 text-lg'>
+              {searchTerm
+                ? __('No forms found', 'subtleforms')
+                : __('Create your first form', 'subtleforms')}
+            </h3>
+            <p className='mb-6 text-gray-600 text-sm'>
+              {searchTerm
+                ? __('Try adjusting your search terms', 'subtleforms')
+                : __(
+                    'Build beautiful forms with our drag-and-drop builder',
+                    'subtleforms'
+                  )}
+            </p>
+            {!searchTerm && (
+              <Button
+                isPrimary
+                icon={plus}
+                onClick={() =>
+                  (window.location.href = 'admin.php?page=subtleforms-new-form')
+                }>
+                {__('New Form', 'subtleforms')}
+              </Button>
+            )}
+          </div>
         }
         onRowClick={(form) => handleEditForm(form.id)}
       />
