@@ -11,11 +11,17 @@
 		box-sizing: border-box;
 	}
 
-	/* Custom component utilities */
+	/* SHARP, FLAT DESIGN - NO ROUNDED CORNERS, NO SHADOWS */
+	* {
+		border-radius: 0 !important;
+		box-shadow: none !important;
+	}
+
+	/* Custom scrollbar */
 	.subtleforms-scrollable {
 		@apply overflow-x-hidden overflow-y-auto;
 		scrollbar-width: thin;
-		scrollbar-color: #cbd5e1 transparent;
+		scrollbar-color: #9ca3af transparent;
 	}
 
 	.subtleforms-scrollable::-webkit-scrollbar {
@@ -27,27 +33,24 @@
 	}
 
 	.subtleforms-scrollable::-webkit-scrollbar-thumb {
-		@apply bg-slate-300 rounded-full;
+		@apply bg-gray-400;
 	}
 
 	.subtleforms-scrollable::-webkit-scrollbar-thumb:hover {
-		@apply bg-slate-400;
+		@apply bg-gray-500;
 	}
 
-	/* Sharp, minimal card styles */
-	.subtleforms-card {
-		@apply bg-white shadow-sm border border-slate-200;
+	/* WordPress components override - remove rounded corners */
+	.components-button {
+		border-radius: 0 !important;
 	}
 
-	.subtleforms-card-header {
-		@apply px-6 py-4 border-slate-200 border-b;
+	.components-select-control__input,
+	.components-text-control__input,
+	.components-textarea-control__input {
+		border-radius: 0 !important;
 	}
 
-	.subtleforms-card-content {
-		@apply p-6;
-	}
-
-	/* Consistent button sizing with WordPress components */
 	.subtleforms-btn-height {
 		@apply h-9; /* Match WordPress button height */
 	}

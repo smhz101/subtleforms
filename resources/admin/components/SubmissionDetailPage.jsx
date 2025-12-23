@@ -8,7 +8,7 @@ import {
   TextareaControl,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
-import AdminLayout from './AdminLayout';
+import AdminShell from './AdminShell';
 
 const restBase =
   window.subtleformsAdmin && window.subtleformsAdmin.restUrl
@@ -149,7 +149,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
       </Notice>
     );
 
-  const headerActions = (
+  const actions = (
     <>
       <Button isSecondary onClick={onBack}>
         ← {__('Back to Submissions', 'subtleforms')}
@@ -174,9 +174,9 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
   );
 
   return (
-    <AdminLayout
+    <AdminShell
       title={sprintf(__('Submission #%d', 'subtleforms'), submission.id)}
-      headerActions={headerActions}>
+      actions={actions}>
       <div className='space-y-8 subtleforms-admin'>
         <div className='subtleforms-card'>
           <div className='subtleforms-card-header'>
@@ -427,6 +427,6 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </AdminShell>
   );
 }

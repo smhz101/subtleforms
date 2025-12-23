@@ -7,7 +7,7 @@ import {
   SearchControl,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
-import AdminTable from './AdminTable';
+import DataTable from './DataTable';
 
 const restBase =
   window.subtleformsAdmin && window.subtleformsAdmin.restUrl
@@ -269,7 +269,7 @@ export default function SubmissionsTable({
   }
 
   return (
-    <AdminTable
+    <DataTable
       columns={columns}
       data={submissions}
       totalItems={totalItems}

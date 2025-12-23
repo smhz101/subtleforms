@@ -20,7 +20,7 @@ import {
   help,
   published,
 } from '@wordpress/icons';
-import AdminTable from './AdminTable';
+import DataTable from './DataTable';
 
 const restBase =
   window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
@@ -623,7 +623,7 @@ export default function FormsList({ onSelect, onEdit, onBuild, searchTerm }) {
 
   return (
     <>
-      <AdminTable
+      <DataTable
         columns={columns}
         data={forms}
         totalItems={totalItems}
