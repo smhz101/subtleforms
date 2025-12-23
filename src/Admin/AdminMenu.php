@@ -626,24 +626,27 @@ class AdminMenu
     public function filter_admin_title($admin_title, $title): string
     {
         // Ensure both parameters are strings to prevent deprecation warnings
-        $admin_title = $admin_title ?? '';
-        $title = $title ?? '';
+        $admin_title = Helpers::normalize_string($admin_title);
+        $title = Helpers::normalize_string($title);
 
         // If both are empty, provide a fallback for SubtleForms pages
         if (empty($title) && empty($admin_title)) {
             $current_screen = get_current_screen();
-            if ($current_screen && isset($current_screen->id) && strpos((string)$current_screen->id, 'subtleforms') !== false) {
-                return __('Subtle Forms', 'subtleforms') . ' &#8212; WordPress';
+            if ($current_screen && isset($current_screen->id)) {
+                $screen_id = Helpers::normalize_string($current_screen->id);
+                if (!empty($screen_id) && strpos($screen_id, 'subtleforms') !== false) {
+                    return __('Subtle Forms', 'subtleforms') . ' &#8212; WordPress';
+                }
             }
             return 'WordPress Admin';
         }
 
         // Return admin_title if title is empty, otherwise return admin_title (or fallback)
         if (empty($title)) {
-            return $admin_title ?: 'WordPress Admin';
+            return !empty($admin_title) ? $admin_title : 'WordPress Admin';
         }
 
-        return $admin_title ?: $title;
+        return !empty($admin_title) ? $admin_title : $title;
     }
 
     /**
@@ -653,22 +656,35 @@ class AdminMenu
     {
         global $title, $parent_file, $submenu_file;
 
-        // Ensure $title is never null
-        if ($title === null) {
+        // Ensure $title is never null using Helpers
+        if ($title === null || $title === '') {
             $current_screen = get_current_screen();
-            if ($current_screen && isset($current_screen->id) && strpos((string)$current_screen->id, 'subtleforms') !== false) {
-                $title = __('Subtle Forms', 'subtleforms');
+            if ($current_screen && isset($current_screen->id)) {
+                $screen_id = Helpers::normalize_string($current_screen->id);
+                if (!empty($screen_id) && strpos($screen_id, 'subtleforms') !== false) {
+                    $title = __('Subtle Forms', 'subtleforms');
+                } else {
+                    $title = '';
+                }
             } else {
                 $title = '';
             }
+        } else {
+            // Always ensure $title is a string
+            $title = Helpers::normalize_string($title);
         }
 
         // Ensure other globals are strings
         if ($parent_file === null) {
             $parent_file = '';
+        } else {
+            $parent_file = Helpers::normalize_string($parent_file);
         }
+        
         if ($submenu_file === null) {
             $submenu_file = '';
+        } else {
+            $submenu_file = Helpers::normalize_string($submenu_file);
         }
     }
 }
