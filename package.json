@@ -3,14 +3,19 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "start": "wp-scripts start ./resources/admin/index.jsx --output-path=./build/admin --output-filename=admin.js",
-    "build": "wp-scripts build ./resources/admin/index.jsx --output-path=./build/admin --output-filename=admin.js",
+    "start": "npm run build:tailwind:watch & wp-scripts start ./resources/admin/index.jsx --output-path=./build/admin --output-filename=admin.js",
+    "build": "npm run build:tailwind && wp-scripts build ./resources/admin/index.jsx --output-path=./build/admin --output-filename=admin.js",
+    "build:tailwind": "tailwindcss -i ./assets/css/tailwind.css -o ./build/admin/tailwind.css --minify",
+    "build:tailwind:watch": "tailwindcss -i ./assets/css/tailwind.css -o ./build/admin/tailwind.css --watch",
     "start:frontend": "wp-scripts start ./resources/frontend/index.jsx --output-path=./build/frontend --output-filename=frontend.js",
     "build:frontend": "wp-scripts build ./resources/frontend/index.jsx --output-path=./build/frontend --output-filename=frontend.js",
     "build:all": "npm run build && npm run build:frontend"
   },
   "devDependencies": {
-    "@wordpress/scripts": "^31.1.0"
+    "@tailwindcss/forms": "^0.5.11",
+    "@wordpress/scripts": "^31.1.0",
+    "autoprefixer": "^10.4.23",
+    "tailwindcss": "^4.1.18"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.0.8",

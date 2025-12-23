@@ -150,6 +150,14 @@ class AdminMenu
             SUBTLEFORMS_VERSION
         );
 
+        // Tailwind CSS for scoped admin UI
+        wp_enqueue_style(
+            'subtleforms-tailwind',
+            SUBTLEFORMS_PLUGIN_URL . 'build/admin/tailwind.css',
+            ['subtleforms-admin'],
+            SUBTLEFORMS_VERSION
+        );
+
         if ($this->is_builder_screen($hook)) {
             wp_enqueue_style(
                 'subtleforms-admin-builder',

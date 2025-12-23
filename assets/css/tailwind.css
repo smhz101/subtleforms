@@ -1,0 +1,54 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Scoped Tailwind styles for SubtleForms admin UI */
+.subtleforms-admin {
+	/* Ensure consistent box-sizing */
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	/* Custom component utilities */
+	.subtleforms-scrollable {
+		@apply overflow-x-hidden overflow-y-auto;
+		scrollbar-width: thin;
+		scrollbar-color: #cbd5e1 transparent;
+	}
+
+	.subtleforms-scrollable::-webkit-scrollbar {
+		@apply w-1;
+	}
+
+	.subtleforms-scrollable::-webkit-scrollbar-track {
+		@apply bg-transparent;
+	}
+
+	.subtleforms-scrollable::-webkit-scrollbar-thumb {
+		@apply bg-slate-300 rounded-full;
+	}
+
+	.subtleforms-scrollable::-webkit-scrollbar-thumb:hover {
+		@apply bg-slate-400;
+	}
+
+	/* Sharp, minimal card styles */
+	.subtleforms-card {
+		@apply bg-white shadow-sm border border-slate-200;
+	}
+
+	.subtleforms-card-header {
+		@apply px-6 py-4 border-slate-200 border-b;
+	}
+
+	.subtleforms-card-content {
+		@apply p-6;
+	}
+
+	/* Consistent button sizing with WordPress components */
+	.subtleforms-btn-height {
+		@apply h-9; /* Match WordPress button height */
+	}
+}
