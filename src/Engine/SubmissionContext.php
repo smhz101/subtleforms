@@ -10,22 +10,51 @@ namespace SubtleForms\Engine;
 final class SubmissionContext
 {
     /**
+     * @var int
+     */
+    public $formId;
+    
+    /**
+     * @var array<string,mixed>
+     */
+    public $payload;
+    
+    /**
+     * @var array<string,mixed>
+     */
+    public $meta;
+
+    /**
+     * @param int $formId
      * @param array<string,mixed> $payload
      * @param array<string,mixed> $meta
      */
     public function __construct(
-        public readonly int $formId,
-        public readonly array $payload,
-        public array $meta = []
-    ) {}
+        $formId,
+        $payload,
+        $meta = []
+    ) {
+        $this->formId = $formId;
+        $this->payload = $payload;
+        $this->meta = $meta;
+    }
 
-    public function setMeta(string $key, mixed $value): void
+    /**
+     * @param string $key
+     * @param mixed $value
+     */
+    public function setMeta($key, $value)
     {
         $this->meta[$key] = $value;
     }
 
-    public function getMeta(string $key, mixed $default = null): mixed
+    /**
+     * @param string $key
+     * @param mixed $default
+     * @return mixed
+     */
+    public function getMeta($key, $default = null)
     {
-        return $this->meta[$key] ?? $default;
+        return isset($this->meta[$key]) ? $this->meta[$key] : $default;
     }
 }

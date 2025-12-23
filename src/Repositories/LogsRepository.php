@@ -6,14 +6,17 @@
  * @version   0.1.0
  */
 
-namespace SubtleForms\Repositories;
+namespace SubtleForms\\Repositories;\n\nuse SubtleForms\\Support\\Helpers;
 
 /**
  * Repository for managing submission logs.
  */
 final class LogsRepository
 {
-    private string $table;
+    /**
+     * @var string
+     */
+    private $table;
 
     public function __construct()
     {

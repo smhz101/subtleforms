@@ -8,6 +8,8 @@
 
 namespace SubtleForms\Api;
 
+use SubtleForms\Support\Helpers;
+
 use SubtleForms\Engine\Pipeline;
 use SubtleForms\Engine\SubmissionContext;
 use SubtleForms\Repositories\FormsRepository;
@@ -26,16 +28,49 @@ final class RestController
 {
     private const NAMESPACE = 'subtleforms/v1';
 
-    private SchemaCompiler $compiler;
+    /**
+     * @var SchemaCompiler
+     */
+    private $compiler;
+    
+    /**
+     * @var Pipeline
+     */
+    private $pipeline;
+    
+    /**
+     * @var FormsRepository
+     */
+    private $formsRepo;
+    
+    /**
+     * @var SubmissionsRepository
+     */
+    private $submissionsRepo;
+    
+    /**
+     * @var FeatureGate
+     */
+    private $gate;
+    
+    /**
+     * @var FieldRegistry
+     */
+    private $fieldRegistry;
 
     public function __construct(
-        private Pipeline $pipeline,
-        private FormsRepository $formsRepo,
-        private SubmissionsRepository $submissionsRepo,
-        private FeatureGate $gate,
-        private FieldRegistry $fieldRegistry,
-        SchemaCompiler $compiler
+        $pipeline,
+        $formsRepo,
+        $submissionsRepo,
+        $gate,
+        $fieldRegistry,
+        $compiler
     ) {
+        $this->pipeline = $pipeline;
+        $this->formsRepo = $formsRepo;
+        $this->submissionsRepo = $submissionsRepo;
+        $this->gate = $gate;
+        $this->fieldRegistry = $fieldRegistry;
         $this->compiler = $compiler;
     }
 
@@ -163,8 +198,8 @@ final class RestController
         $order_param = $request->get_param('order');
         $order = (!empty($order_param) && strtoupper($order_param) === 'ASC') ? 'ASC' : 'DESC';
         
-        $search = sanitize_text_field($request->get_param('search') ?: '');
-        $status = sanitize_text_field($request->get_param('status') ?: '');
+        $search = Helpers::safe_sanitize_text($request->get_param('search') ?: '');
+        $status = Helpers::safe_sanitize_text($request->get_param('status') ?: '');
 
         $args = [
             'limit' => $per_page,

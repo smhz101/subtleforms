@@ -121,22 +121,33 @@ final class FieldValidator
     }
 
     /**
-     * Validate field value against field type.
+     * @param array $field
+     * @param mixed $value
+     * @return string|null
      */
-    private function validateFieldType(array $field, mixed $value): ?string
+    private function validateFieldType($field, $value)
     {
-        $type = $field['type'] ?? null;
+        $type = isset($field['type']) ? $field['type'] : null;
 
-        return match ($type) {
-            'email' => $this->validateEmail($value),
-            'url' => $this->validateUrl($value),
-            'number' => $this->validateNumber($value),
-            'phone' => $this->validatePhone($value),
-            default => null,
-        };
+        switch ($type) {
+            case 'email':
+                return $this->validateEmail($value);
+            case 'url':
+                return $this->validateUrl($value);
+            case 'number':
+                return $this->validateNumber($value);
+            case 'phone':
+                return $this->validatePhone($value);
+            default:
+                return null;
+        }
     }
 
-    private function validateEmail(mixed $value): ?string
+    /**
+     * @param mixed $value
+     * @return string|null
+     */
+    private function validateEmail($value)
     {
         if ($this->isEmpty($value)) {
             return null;
@@ -149,7 +160,11 @@ final class FieldValidator
         return null;
     }
 
-    private function validateUrl(mixed $value): ?string
+    /**
+     * @param mixed $value
+     * @return string|null
+     */
+    private function validateUrl($value)
     {
         if ($this->isEmpty($value)) {
             return null;
@@ -162,7 +177,11 @@ final class FieldValidator
         return null;
     }
 
-    private function validateNumber(mixed $value): ?string
+    /**
+     * @param mixed $value
+     * @return string|null
+     */
+    private function validateNumber($value)
     {
         if ($this->isEmpty($value)) {
             return null;
@@ -175,7 +194,11 @@ final class FieldValidator
         return null;
     }
 
-    private function validatePhone(mixed $value): ?string
+    /**
+     * @param mixed $value
+     * @return string|null
+     */
+    private function validatePhone($value)
     {
         if ($this->isEmpty($value)) {
             return null;
@@ -188,7 +211,11 @@ final class FieldValidator
         return null;
     }
 
-    private function isEmpty(mixed $value): bool
+    /**
+     * @param mixed $value
+     * @return bool
+     */
+    private function isEmpty($value)
     {
         if (is_null($value)) {
             return true;

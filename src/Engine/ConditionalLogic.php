@@ -206,26 +206,45 @@ final class ConditionalLogic
     }
 
     /**
-     * Evaluate a single condition.
+     * @param mixed $fieldValue
+     * @param string $operator
+     * @param mixed $compareValue
+     * @return bool
      */
-    private function evaluateCondition(mixed $fieldValue, string $operator, mixed $compareValue): bool
+    private function evaluateCondition($fieldValue, $operator, $compareValue)
     {
-        return match ($operator) {
-            'equals' => $this->compareEquals($fieldValue, $compareValue),
-            'not_equals' => !$this->compareEquals($fieldValue, $compareValue),
-            'contains' => $this->compareContains($fieldValue, $compareValue),
-            'not_contains' => !$this->compareContains($fieldValue, $compareValue),
-            'empty' => $this->isEmpty($fieldValue),
-            'not_empty' => !$this->isEmpty($fieldValue),
-            'greater_than' => $this->compareNumeric($fieldValue, $compareValue, '>'),
-            'less_than' => $this->compareNumeric($fieldValue, $compareValue, '<'),
-            'in' => $this->compareIn($fieldValue, $compareValue),
-            'not_in' => !$this->compareIn($fieldValue, $compareValue),
-            default => false,
-        };
+        switch ($operator) {
+            case 'equals':
+                return $this->compareEquals($fieldValue, $compareValue);
+            case 'not_equals':
+                return !$this->compareEquals($fieldValue, $compareValue);
+            case 'contains':
+                return $this->compareContains($fieldValue, $compareValue);
+            case 'not_contains':
+                return !$this->compareContains($fieldValue, $compareValue);
+            case 'empty':
+                return $this->isEmpty($fieldValue);
+            case 'not_empty':
+                return !$this->isEmpty($fieldValue);
+            case 'greater_than':
+                return $this->compareNumeric($fieldValue, $compareValue, '>');
+            case 'less_than':
+                return $this->compareNumeric($fieldValue, $compareValue, '<');
+            case 'in':
+                return $this->compareIn($fieldValue, $compareValue);
+            case 'not_in':
+                return !$this->compareIn($fieldValue, $compareValue);
+            default:
+                return false;
+        }
     }
 
-    private function compareEquals(mixed $a, mixed $b): bool
+    /**
+     * @param mixed $a
+     * @param mixed $b
+     * @return bool
+     */
+    private function compareEquals($a, $b)
     {
         // Type-safe comparison
         if (is_array($a) && is_array($b)) {
@@ -235,7 +254,12 @@ final class ConditionalLogic
         return (string) $a === (string) $b;
     }
 
-    private function compareContains(mixed $haystack, mixed $needle): bool
+    /**
+     * @param mixed $haystack
+     * @param mixed $needle
+     * @return bool
+     */
+    private function compareContains($haystack, $needle)
     {
         if (is_array($haystack)) {
             return in_array($needle, $haystack, true);
@@ -248,7 +272,11 @@ final class ConditionalLogic
         return str_contains($haystack, (string) $needle);
     }
 
-    private function isEmpty(mixed $value): bool
+    /**
+     * @param mixed $value
+     * @return bool
+     */
+    private function isEmpty($value)
     {
         if (is_null($value)) {
             return true;
@@ -265,7 +293,13 @@ final class ConditionalLogic
         return false;
     }
 
-    private function compareNumeric(mixed $a, mixed $b, string $op): bool
+    /**
+     * @param mixed $a
+     * @param mixed $b  
+     * @param string $op
+     * @return bool
+     */
+    private function compareNumeric($a, $b, $op)
     {
         if (!is_numeric($a) || !is_numeric($b)) {
             return false;
@@ -274,16 +308,26 @@ final class ConditionalLogic
         $numA = (float) $a;
         $numB = (float) $b;
 
-        return match ($op) {
-            '>' => $numA > $numB,
-            '<' => $numA < $numB,
-            '>=' => $numA >= $numB,
-            '<=' => $numA <= $numB,
-            default => false,
-        };
+        switch ($op) {
+            case '>':
+                return $numA > $numB;
+            case '<':
+                return $numA < $numB;
+            case '>=':
+                return $numA >= $numB;
+            case '<=':
+                return $numA <= $numB;
+            default:
+                return false;
+        }
     }
 
-    private function compareIn(mixed $needle, mixed $haystack): bool
+    /**
+     * @param mixed $needle
+     * @param mixed $haystack
+     * @return bool
+     */
+    private function compareIn($needle, $haystack)
     {
         if (!is_array($haystack)) {
             return false;

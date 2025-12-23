@@ -14,9 +14,19 @@ final class ExtensionManager
     /**
      * @var ExtensionInterface[]
      */
-    private array $extensions = [];
+    private $extensions = [];
+    
+    /**
+     * @var FeatureGate
+     */
+    private $gate;
 
-    public function __construct(private FeatureGate $gate) {}
+    /**
+     * @param FeatureGate $gate
+     */
+    public function __construct($gate) {
+        $this->gate = $gate;
+    }
 
     public function add(ExtensionInterface $ext): void
     {

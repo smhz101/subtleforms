@@ -8,12 +8,17 @@
 
 namespace SubtleForms\Repositories;
 
+use SubtleForms\Support\Helpers;
+
 /**
  * Repository for managing form submissions.
  */
 final class SubmissionsRepository
 {
-    private string $table;
+    /**
+     * @var string
+     */
+    private $table;
 
     public function __construct()
     {
@@ -110,13 +115,13 @@ final class SubmissionsRepository
         $inserted = $wpdb->insert(
             $this->table,
             [
-                'form_id' => intval($data['form_id']),
+                'form_id' => intval(Helpers::safe_array_get($data, 'form_id', 0)),
                 'form_version' => isset($data['form_version']) ? intval($data['form_version']) : null,
-                'payload' => wp_json_encode($data['payload']),
-                'meta' => wp_json_encode($data['meta']),
-                'status' => $data['status'],
-                'ip_address' => $data['ip_address'],
-                'user_agent' => $data['user_agent'],
+                'payload' => wp_json_encode(Helpers::safe_array_get($data, 'payload', [])),
+                'meta' => wp_json_encode(Helpers::safe_array_get($data, 'meta', [])),
+                'status' => Helpers::safe_array_get($data, 'status', 'unread'),
+                'ip_address' => Helpers::safe_array_get($data, 'ip_address', ''),
+                'user_agent' => Helpers::safe_array_get($data, 'user_agent', ''),
             ],
             ['%d', '%d', '%s', '%s', '%s', '%s', '%s']
         );

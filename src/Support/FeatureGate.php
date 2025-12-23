@@ -16,9 +16,16 @@ use RuntimeException;
 final class FeatureGate {
 
   /**
+   * @var Capabilities
+   */
+  private $caps;
+
+  /**
    * @param Capabilities $caps
    */
-  public function __construct(private Capabilities $caps) {}
+  public function __construct($caps) {
+    $this->caps = $caps;
+  }
 
   /**
    * Check if a capability is allowed.

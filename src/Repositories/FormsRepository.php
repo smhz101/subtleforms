@@ -8,13 +8,22 @@
 
 namespace SubtleForms\Repositories;
 
+use SubtleForms\Support\Helpers;
+
 /**
  * Repository for managing forms.
  */
 final class FormsRepository
 {
-    private string $table;
-    private string $schemas_table;
+    /**
+     * @var string
+     */
+    private $table;
+    
+    /**
+     * @var string
+     */
+    private $schemas_table;
 
     public function __construct()
     {
@@ -173,7 +182,7 @@ final class FormsRepository
         $wpdb->insert(
             $this->table,
             [
-                'title' => sanitize_text_field($data['title']),
+                'title' => Helpers::safe_sanitize_text(Helpers::safe_string_get($data, 'title')),
                 'config' => wp_json_encode($data['config']),
                 'status' => $data['status'],
             ],
@@ -420,7 +429,7 @@ final class FormsRepository
         $format = [];
 
         if (isset($data['title'])) {
-            $update_data['title'] = sanitize_text_field($data['title']);
+            $update_data['title'] = Helpers::safe_sanitize_text($data['title']);
             $format[] = '%s';
         }
 

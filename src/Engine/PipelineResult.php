@@ -9,13 +9,34 @@ namespace SubtleForms\Engine;
 final class PipelineResult
 {
     /**
+     * @var bool
+     */
+    public $ok;
+    
+    /**
+     * @var array<int,array<string,mixed>>
+     */
+    public $events;
+    
+    /**
+     * @var string|null
+     */
+    public $error;
+
+    /**
+     * @param bool $ok
      * @param array<int,array<string,mixed>> $events
+     * @param string|null $error
      */
     public function __construct(
-        public readonly bool $ok,
-        public readonly array $events = [],
-        public readonly ?string $error = null
-    ) {}
+        $ok,
+        $events = [],
+        $error = null
+    ) {
+        $this->ok = $ok;
+        $this->events = $events;
+        $this->error = $error;
+    }
 
     /**
      * Serialize result to array for API responses.

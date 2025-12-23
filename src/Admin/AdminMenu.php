@@ -9,6 +9,7 @@
 namespace SubtleForms\Admin;
 
 use SubtleForms\Support\Capabilities;
+use SubtleForms\Support\Helpers;
 use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Repositories\SubmissionsRepository;
 
@@ -17,10 +18,25 @@ use SubtleForms\Repositories\SubmissionsRepository;
  */
 class AdminMenu
 {
-    private Capabilities $caps;
-    private FormsRepository $formsRepo;
-    private SubmissionsRepository $submissionsRepo;
-    private string $currentPage = '';
+    /**
+     * @var Capabilities
+     */
+    private $caps;
+    
+    /**
+     * @var FormsRepository
+     */
+    private $formsRepo;
+    
+    /**
+     * @var SubmissionsRepository
+     */
+    private $submissionsRepo;
+    
+    /**
+     * @var string
+     */
+    private $currentPage = '';
 
     public function __construct(
         Capabilities $caps,
@@ -36,6 +52,7 @@ class AdminMenu
         add_action('admin_init', [$this, 'handle_actions']);
         add_filter('admin_body_class', [$this, 'filter_admin_body_class']);
         add_filter('admin_title', [$this, 'filter_admin_title'], 10, 2);
+        add_action('admin_head', [$this, 'fix_admin_globals']);
     }
 
     /**
@@ -134,7 +151,7 @@ class AdminMenu
     public function enqueue_assets(string $hook): void
     {
         // Ensure $hook is never null
-        $hook = $hook ?? '';
+        $hook = Helpers::normalize_string($hook);
         
         // Only load on our admin pages
         if (strpos($hook, 'subtleforms') === false) {
@@ -209,12 +226,12 @@ class AdminMenu
 
     private function is_builder_screen(string $hook): bool
     {
-        $hook = $hook ?? '';
+        $hook = Helpers::normalize_string($hook);
         if (strpos($hook, 'subtleforms-new-form') !== false) {
             return true;
         }
 
-        $page = isset($_GET['page']) ? sanitize_key((string) $_GET['page']) : '';
+        $page = isset($_GET['page']) ? sanitize_key(Helpers::normalize_string($_GET['page'])) : '';
 
         return $page === 'subtleforms-new-form';
     }
@@ -235,8 +252,8 @@ class AdminMenu
             $classes .= ' subtleforms-builder-page';
         }
 
-        $page = isset($_GET['page']) ? sanitize_key((string) $_GET['page']) : '';
-        if ($page === 'subtleforms-new-form' && strpos($classes, 'subtleforms-builder-page') === false) {
+        $page = isset($_GET['page']) ? sanitize_key(Helpers::normalize_string($_GET['page'])) : '';
+        if ($page === 'subtleforms-new-form' && strpos(Helpers::normalize_string($classes), 'subtleforms-builder-page') === false) {
             $classes .= ' subtleforms-builder-page';
         }
 
@@ -252,7 +269,7 @@ class AdminMenu
             return;
         }
 
-        $action = sanitize_key($_GET['action']);
+        $action = sanitize_key(Helpers::safe_string_get($_GET, 'action'));
 
         // Only handle SubtleForms-specific admin actions here.
         $allowed = [
@@ -266,11 +283,11 @@ class AdminMenu
         }
 
         // For our actions, require nonce and validate it.
-        if (empty($_GET['_wpnonce']) || !wp_verify_nonce((string) $_GET['_wpnonce'], 'subtleforms_action')) {
+        if (empty($_GET['_wpnonce']) || !wp_verify_nonce(Helpers::normalize_string($_GET['_wpnonce']), 'subtleforms_action')) {
             wp_die(__('Security check failed.', 'subtleforms'));
         }
 
-        $id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+        $id = isset($_GET['id']) ? intval(Helpers::normalize_scalar($_GET['id'], 0)) : 0;
 
         switch ($action) {
             case 'delete_form':
@@ -508,7 +525,7 @@ class AdminMenu
         extract($data);
         ?>
         <div class="wrap subtleforms-admin">
-            <h1><?php echo esc_html(ucwords(str_replace('-', ' ', $name))); ?></h1>
+            <h1><?php echo Helpers::safe_esc_html(ucwords(str_replace('-', ' ', $name))); ?></h1>
             
             <?php if (isset($_GET['message'])): ?>
                 <div class="notice notice-success is-dismissible">
@@ -521,7 +538,7 @@ class AdminMenu
                     <span class="dashicons dashicons-feedback"></span>
                 </div>
                 <h2><?php _e('Coming Soon', 'subtleforms'); ?></h2>
-                <p><?php printf(__('The %s interface is under development.', 'subtleforms'), '<strong>' . esc_html($name) . '</strong>'); ?></p>
+                <p><?php printf(__('The %s interface is under development.', 'subtleforms'), '<strong>' . Helpers::safe_esc_html($name) . '</strong>'); ?></p>
                 <p class="description">
                     <?php _e('This is a placeholder. Template files will be created in the templates/admin/ directory.', 'subtleforms'); ?>
                 </p>
@@ -541,12 +558,12 @@ class AdminMenu
                             <tbody>
                                 <?php foreach ($data['forms'] as $form): ?>
                                     <tr>
-                                        <td><strong><?php echo esc_html($form['title']); ?></strong></td>
-                                        <td><?php echo esc_html($form['status']); ?></td>
-                                        <td><?php echo esc_html($form['created_at']); ?></td>
+                                        <td><strong><?php echo Helpers::safe_esc_html(Helpers::safe_array_get($form, 'title')); ?></strong></td>
+                                        <td><?php echo Helpers::safe_esc_html(Helpers::safe_array_get($form, 'status')); ?></td>
+                                        <td><?php echo Helpers::safe_esc_html(Helpers::safe_array_get($form, 'created_at')); ?></td>
                                         <td>
-                                            <a href="<?php echo esc_url(wp_nonce_url(
-                                                add_query_arg(['action' => 'delete_form', 'id' => $form['id']], admin_url('admin.php')),
+                                            <a href="<?php echo Helpers::safe_esc_url(wp_nonce_url(
+                                                add_query_arg(['action' => 'delete_form', 'id' => Helpers::safe_array_get($form, 'id', 0)], admin_url('admin.php')),
                                                 'subtleforms_action'
                                             )); ?>" class="button button-small"><?php _e('Delete', 'subtleforms'); ?></a>
                                         </td>
@@ -561,15 +578,15 @@ class AdminMenu
                     <div class="subtleforms-stats" style="margin-top: 30px;">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; max-width: 800px; margin: 0 auto;">
                             <div class="subtleforms-stat-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
-                                <h3 style="margin: 0 0 10px;"><?php echo esc_html($data['total_forms']); ?></h3>
+                                <h3 style="margin: 0 0 10px;"><?php echo Helpers::safe_esc_html(Helpers::safe_array_get($data, 'total_forms', 0)); ?></h3>
                                 <p style="margin: 0; color: #666;"><?php _e('Total Forms', 'subtleforms'); ?></p>
                             </div>
                             <div class="subtleforms-stat-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
-                                <h3 style="margin: 0 0 10px;"><?php echo esc_html($data['active_forms']); ?></h3>
+                                <h3 style="margin: 0 0 10px;"><?php echo Helpers::safe_esc_html(Helpers::safe_array_get($data, 'active_forms', 0)); ?></h3>
                                 <p style="margin: 0; color: #666;"><?php _e('Active Forms', 'subtleforms'); ?></p>
                             </div>
                             <div class="subtleforms-stat-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
-                                <h3 style="margin: 0 0 10px;"><?php echo esc_html($data['total_submissions']); ?></h3>
+                                <h3 style="margin: 0 0 10px;"><?php echo Helpers::safe_esc_html(Helpers::safe_array_get($data, 'total_submissions', 0)); ?></h3>
                                 <p style="margin: 0; color: #666;"><?php _e('Total Submissions', 'subtleforms'); ?></p>
                             </div>
                         </div>
@@ -608,19 +625,50 @@ class AdminMenu
      */
     public function filter_admin_title($admin_title, $title): string
     {
-        // Ensure title is never null to prevent strip_tags() deprecation warning
-        if (empty($title) && !empty($admin_title)) {
-            return $admin_title;
+        // Ensure both parameters are strings to prevent deprecation warnings
+        $admin_title = $admin_title ?? '';
+        $title = $title ?? '';
+
+        // If both are empty, provide a fallback for SubtleForms pages
+        if (empty($title) && empty($admin_title)) {
+            $current_screen = get_current_screen();
+            if ($current_screen && isset($current_screen->id) && strpos((string)$current_screen->id, 'subtleforms') !== false) {
+                return __('Subtle Forms', 'subtleforms') . ' &#8212; WordPress';
+            }
+            return 'WordPress Admin';
         }
 
-        if (empty($title) && empty($admin_title)) {
-            // Fallback for SubtleForms pages
+        // Return admin_title if title is empty, otherwise return admin_title (or fallback)
+        if (empty($title)) {
+            return $admin_title ?: 'WordPress Admin';
+        }
+
+        return $admin_title ?: $title;
+    }
+
+    /**
+     * Fix admin global variables to prevent null deprecation warnings.
+     */
+    public function fix_admin_globals(): void
+    {
+        global $title, $parent_file, $submenu_file;
+
+        // Ensure $title is never null
+        if ($title === null) {
             $current_screen = get_current_screen();
-            if ($current_screen && strpos($current_screen->id, 'subtleforms') !== false) {
-                return __('Subtle Forms', 'subtleforms') . ' &#8212; WordPress';
+            if ($current_screen && isset($current_screen->id) && strpos((string)$current_screen->id, 'subtleforms') !== false) {
+                $title = __('Subtle Forms', 'subtleforms');
+            } else {
+                $title = '';
             }
         }
 
-        return $admin_title ?: ($title ?: '');
+        // Ensure other globals are strings
+        if ($parent_file === null) {
+            $parent_file = '';
+        }
+        if ($submenu_file === null) {
+            $submenu_file = '';
+        }
     }
 }

@@ -8,15 +8,58 @@ namespace SubtleForms\Engine;
  */
 final class PipelineEvent
 {
+    /**
+     * @var int
+     */
+    public $submissionId;
+    
+    /**
+     * @var int|null
+     */
+    public $schemaVersion;
+    
+    /**
+     * @var string
+     */
+    public $stepId;
+    
+    /**
+     * @var string
+     */
+    public $actionType;
+    
+    /**
+     * @var string
+     */
+    public $status;
+    
+    /**
+     * @var string|null
+     */
+    public $error;
+    
+    /**
+     * @var int
+     */
+    public $ts;
+
     public function __construct(
-        public readonly int $submissionId,
-        public readonly ?int $schemaVersion,
-        public readonly string $stepId,
-        public readonly string $actionType,
-        public readonly string $status,
-        public readonly ?string $error,
-        public readonly int $ts
-    ) {}
+        $submissionId,
+        $schemaVersion,
+        $stepId,
+        $actionType,
+        $status,
+        $error,
+        $ts
+    ) {
+        $this->submissionId = $submissionId;
+        $this->schemaVersion = $schemaVersion;
+        $this->stepId = $stepId;
+        $this->actionType = $actionType;
+        $this->status = $status;
+        $this->error = $error;
+        $this->ts = $ts;
+    }
 
     public function toArray(): array
     {

@@ -12,8 +12,15 @@ use InvalidArgumentException;
  */
 final class SchemaCompiler
 {
-    private AR $registry;
-    private ConditionalLogic $conditionalLogic;
+    /**
+     * @var AR
+     */
+    private $registry;
+    
+    /**
+     * @var ConditionalLogic
+     */
+    private $conditionalLogic;
 
     public function __construct(AR $registry, ?ConditionalLogic $conditionalLogic = null)
     {
