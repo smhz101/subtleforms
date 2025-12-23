@@ -192,4 +192,47 @@ final class Helpers {
   {
     return self::normalize_string(self::safe_array_get($array, $key, $default));
   }
+
+  /**
+   * Safe JSON decode with fallback
+   * 
+   * @param mixed $json JSON string to decode
+   * @param bool $assoc Return associative array when true
+   * @param mixed $default Default value if decode fails
+   * @return mixed
+   */
+  public static function safe_json_decode($json, bool $assoc = false, $default = null)
+  {
+    $json = self::normalize_string($json);
+    
+    if (empty($json)) {
+      return $assoc ? [] : ($default ?? new \stdClass());
+    }
+    
+    $decoded = json_decode($json, $assoc);
+    
+    if (json_last_error() !== JSON_ERROR_NONE) {
+      return $assoc ? [] : ($default ?? new \stdClass());
+    }
+    
+    return $decoded;
+  }
+
+  /**
+   * Safe JSON encode with fallback
+   * 
+   * @param mixed $value Value to encode
+   * @param string $default Default JSON if encode fails
+   * @return string
+   */
+  public static function safe_json_encode($value, string $default = '{}'): string
+  {
+    $encoded = wp_json_encode($value);
+    
+    if ($encoded === false) {
+      return $default;
+    }
+    
+    return $encoded;
+  }
 }

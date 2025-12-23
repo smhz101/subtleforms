@@ -81,7 +81,7 @@ final class FormsRepository
         }
 
         // Decode JSON config
-        $result['config'] = json_decode($result['config'], true);
+        $result['config'] = Helpers::safe_json_decode(Helpers::safe_array_get($result, 'config', '{}'), true, []);
         return $result;
     }
 
@@ -133,7 +133,7 @@ final class FormsRepository
 
         // Decode JSON config for each form
         foreach ($results as &$result) {
-            $result['config'] = json_decode($result['config'], true);
+            $result['config'] = Helpers::safe_json_decode(Helpers::safe_array_get($result, 'config', '{}'), true, []);
         }
 
         return $results;
@@ -311,12 +311,12 @@ final class FormsRepository
         }
 
         // Decode and validate JSON
-        $decodedSchema = json_decode($row['schema_data'], true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
+        $decodedSchema = Helpers::safe_json_decode(Helpers::safe_array_get($row, 'schema_data', '{}'), true, null);
+        if ($decodedSchema === null) {
             $error = sprintf(
                 'Failed to decode schema JSON for form %d version %d: %s',
                 $formId,
-                $row['version'],
+                Helpers::safe_array_get($row, 'version', 0),
                 json_last_error_msg()
             );
             error_log('SubtleForms: ' . $error);

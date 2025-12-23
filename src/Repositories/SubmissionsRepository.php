@@ -42,8 +42,8 @@ final class SubmissionsRepository
         }
 
         // Decode JSON fields
-        $result['payload'] = json_decode($result['payload'], true);
-        $result['meta'] = json_decode($result['meta'], true);
+        $result['payload'] = Helpers::safe_json_decode(Helpers::safe_array_get($result, 'payload', '{}'), true, []);
+        $result['meta'] = Helpers::safe_json_decode(Helpers::safe_array_get($result, 'meta', '{}'), true, []);
 
         return $result;
     }
@@ -84,8 +84,8 @@ final class SubmissionsRepository
 
         // Decode JSON fields
         foreach ($results as &$result) {
-            $result['payload'] = json_decode($result['payload'], true);
-            $result['meta'] = json_decode($result['meta'], true);
+            $result['payload'] = Helpers::safe_json_decode(Helpers::safe_array_get($result, 'payload', '{}'), true, []);
+            $result['meta'] = Helpers::safe_json_decode(Helpers::safe_array_get($result, 'meta', '{}'), true, []);
         }
 
         return $results;

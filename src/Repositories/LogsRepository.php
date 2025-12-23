@@ -60,7 +60,7 @@ final class LogsRepository
 
         // Decode JSON context
         foreach ($results as &$result) {
-            $result['context'] = json_decode($result['context'], true);
+            $result['context'] = Helpers::safe_json_decode(Helpers::safe_array_get($result, 'context', '{}'), true, []);
         }
 
         return $results;
