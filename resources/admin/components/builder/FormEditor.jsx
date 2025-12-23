@@ -295,52 +295,46 @@ export default function FormEditor({
   }, [selectedStepId, steps]);
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flex: 1,
-        overflow: 'hidden',
-        height: '100%',
-      }}>
+    <div className='flex h-screen overflow-hidden subtleforms-admin'>
       <FieldDock fieldGroups={fieldGroups} onAddField={handleDockAdd} />
 
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          flex: 1,
-          overflow: 'hidden',
-        }}>
+      <div className='flex flex-col flex-1 bg-gray-50 overflow-hidden'>
         {steps.length > 0 && (
-          <StepNavigator
-            steps={steps}
-            selectedStepId={selectedStepId}
-            onSelectStep={handleSelectStep}
-            onAddStep={handleAddStep}
-            onDeleteStep={handleDeleteStep}
-          />
+          <div className='flex-shrink-0 bg-white border-gray-200 border-b'>
+            <StepNavigator
+              steps={steps}
+              selectedStepId={selectedStepId}
+              onSelectStep={handleSelectStep}
+              onAddStep={handleAddStep}
+              onDeleteStep={handleDeleteStep}
+            />
+          </div>
         )}
 
-        <FormBuilder
-          tree={tree}
-          rootId={rootId}
-          selectedId={selectedId}
-          onSelect={setSelectedId}
-          onDelete={handleDelete}
-          onMove={handleMove}
-          onDuplicate={handleDuplicate}
-          onRequestInsert={handleRequestInsert}
-          selectedStepId={selectedStepId}
-        />
+        <div className='flex-1 p-6 subtleforms-scrollable'>
+          <FormBuilder
+            tree={tree}
+            rootId={rootId}
+            selectedId={selectedId}
+            onSelect={setSelectedId}
+            onDelete={handleDelete}
+            onMove={handleMove}
+            onDuplicate={handleDuplicate}
+            onRequestInsert={handleRequestInsert}
+            selectedStepId={selectedStepId}
+          />
+        </div>
       </div>
 
       {selectedField && (
-        <FieldInspector
-          field={selectedField}
-          allFields={allFields}
-          onUpdate={(changes) => handleUpdate(selectedId, changes)}
-          onClose={() => setSelectedId(null)}
-        />
+        <div className='flex-shrink-0 bg-white shadow-sm border-gray-200 border-l w-80'>
+          <FieldInspector
+            field={selectedField}
+            allFields={allFields}
+            onUpdate={(changes) => handleUpdate(selectedId, changes)}
+            onClose={() => setSelectedId(null)}
+          />
+        </div>
       )}
 
       {insertPicker?.anchor && (
