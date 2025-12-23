@@ -35,6 +35,7 @@ class AdminMenu
         add_action('admin_enqueue_scripts', [$this, 'enqueue_assets']);
         add_action('admin_init', [$this, 'handle_actions']);
         add_filter('admin_body_class', [$this, 'filter_admin_body_class']);
+        add_filter('admin_title', [$this, 'filter_admin_title'], 10, 2);
     }
 
     /**
@@ -95,7 +96,7 @@ class AdminMenu
 
         // Submission Detail (hidden page)
         add_submenu_page(
-            '',  // Empty string instead of null for hidden page
+            null,  // null for hidden page - prevents menu display
             __('Submission Detail', 'subtleforms'),
             __('Submission Detail', 'subtleforms'),
             $this->caps->manage_cap(),
@@ -600,5 +601,26 @@ class AdminMenu
         </style>
         <?php
         exit;
+    }
+
+    /**
+     * Filter admin title to ensure proper titles for SubtleForms pages.
+     */
+    public function filter_admin_title($admin_title, $title): string
+    {
+        // Ensure title is never null to prevent strip_tags() deprecation warning
+        if (empty($title) && !empty($admin_title)) {
+            return $admin_title;
+        }
+
+        if (empty($title) && empty($admin_title)) {
+            // Fallback for SubtleForms pages
+            $current_screen = get_current_screen();
+            if ($current_screen && strpos($current_screen->id, 'subtleforms') !== false) {
+                return __('Subtle Forms', 'subtleforms') . ' &#8212; WordPress';
+            }
+        }
+
+        return $admin_title ?: ($title ?: '');
     }
 }
