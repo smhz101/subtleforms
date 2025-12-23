@@ -461,12 +461,12 @@ final class RestController
         
         // Enhance with form titles
         foreach ($results as &$sub) {
-            $sub['payload'] = json_decode($sub['payload'], true);
-            $sub['meta'] = json_decode($sub['meta'], true);
+            $sub['payload'] = Helpers::safe_json_decode(Helpers::safe_array_get($sub, 'payload', '{}'), true, []);
+            $sub['meta'] = Helpers::safe_json_decode(Helpers::safe_array_get($sub, 'meta', '{}'), true, []);
             
-            if ($sub['form_id']) {
+            if (Helpers::safe_array_get($sub, 'form_id')) {
                 $form = $this->formsRepo->find($sub['form_id']);
-                $sub['form_title'] = $form['title'] ?? __('Unknown Form', 'subtleforms');
+                $sub['form_title'] = Helpers::safe_array_get($form, 'title', __('Unknown Form', 'subtleforms'));
             }
         }
         
@@ -588,7 +588,7 @@ final class RestController
         $formId = $request->get_param('form_id');
         $payload = $request->get_param('data') ?? [];
         if (is_string($payload)) {
-            $decoded = json_decode($payload, true);
+            $decoded = Helpers::safe_json_decode($payload, true, []);
             if (is_array($decoded)) {
                 $payload = $decoded;
             }

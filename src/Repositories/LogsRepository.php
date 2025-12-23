@@ -6,7 +6,9 @@
  * @version   0.1.0
  */
 
-namespace SubtleForms\\Repositories;\n\nuse SubtleForms\\Support\\Helpers;
+namespace SubtleForms\Repositories;
+
+use SubtleForms\Support\Helpers;
 
 /**
  * Repository for managing submission logs.
