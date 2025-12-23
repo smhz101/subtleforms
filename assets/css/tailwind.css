@@ -15,7 +15,7 @@
 	.components-button,
 	.components-button.is-primary,
 	.components-button.is-secondary {
-		border-radius: 2px !important;
+		border-radius: 0 !important;
 	}
 
 	/* Custom scrollbar */
@@ -45,7 +45,7 @@
 	.components-text-control__input,
 	.components-textarea-control__input,
 	.components-search-control__input {
-		border-radius: 2px !important;
+		border-radius: 0 !important;
 	}
 
 	/* Tables */
@@ -61,4 +61,140 @@
 	.subtleforms-btn-height {
 		@apply h-9; /* Match WordPress button height */
 	}
+
+	/* Builder Drag & Drop */
+	.subtleforms-column-dropzone {
+		min-height: 100px;
+		padding: var(--subtleforms-dropzone-padding, 8px);
+		display: flex;
+		flex-direction: column;
+		gap: var(--subtleforms-dropzone-gap, 16px);
+		transition:
+			background-color 0.2s ease,
+			border-color 0.2s ease;
+		border: 2px dashed transparent;
+		border-radius: 0;
+	}
+
+	.subtleforms-column-dropzone.is-over {
+		background-color: #f0f6fc;
+		border-color: #2271b1;
+	}
+
+	.subtleforms-dropzone-empty {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		height: 100px;
+		color: #757575;
+		border: 2px dashed #e0e0e0;
+		border-radius: 0;
+		background-color: #fafafa;
+		font-size: 13px;
+	}
+
+	.subtleforms-field-chrome {
+		position: relative;
+		transition: all 0.2s ease;
+		border: 1px solid transparent;
+		border-radius: 0;
+	}
+
+	.subtleforms-field-chrome:hover,
+	.subtleforms-field-chrome.is-hovered {
+		border-color: #dcdcde;
+		background-color: #fff;
+		box-shadow: none;
+	}
+
+	.subtleforms-field-chrome.is-selected {
+		border-color: #2271b1;
+		box-shadow: 0 0 0 1px #2271b1;
+		z-index: 1;
+	}
+
+	/* Insert Button */
+	.subtleforms-insert-button-wrapper {
+		position: relative;
+		height: 0;
+		overflow: visible;
+		display: flex;
+		justify-content: center;
+		z-index: 10;
+		opacity: 0;
+		transition: opacity 0.2s ease;
+	}
+
+	.subtleforms-column-dropzone:hover .subtleforms-insert-button-wrapper,
+	.subtleforms-insert-button-wrapper:hover {
+		opacity: 1;
+	}
+
+	.subtleforms-insert-button {
+		position: absolute;
+		top: -12px;
+		height: 24px;
+		background: #2271b1;
+		color: #fff;
+		border: none;
+		border-radius: 0;
+		padding: 0 12px;
+		font-size: 11px;
+		font-weight: 600;
+		cursor: pointer;
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		transform: scale(0.9);
+		transition: transform 0.1s ease;
+		box-shadow: none;
+	}
+
+	.subtleforms-insert-button:hover {
+		transform: scale(1);
+	}
+}
+
+/* Modal Customization */
+.subtleforms-create-modal .components-modal__frame {
+	max-width: 600px !important;
+	border-radius: 6px !important;
+	overflow: hidden !important;
+	box-shadow: none !important;
+	border: 1px solid #e5e7eb !important;
+}
+
+.subtleforms-create-modal .components-modal__header {
+	border-bottom: none !important;
+	padding: 0 !important;
+	position: absolute;
+	top: 16px;
+	right: 16px;
+	z-index: 20;
+}
+
+.subtleforms-create-modal .components-modal__content {
+	padding: 32px !important;
+	background-color: #ffffff !important;
+}
+
+/* Hide the default title if we are providing our own */
+.subtleforms-create-modal .components-modal__header-heading {
+	display: none !important;
+}
+
+/* Fix for close button */
+.subtleforms-create-modal .components-button.has-icon {
+	color: #9ca3af !important;
+	transition: color 0.2s ease;
+}
+
+.subtleforms-create-modal .components-button.has-icon:hover {
+	color: #4b5563 !important;
+	background-color: #f3f4f6 !important;
+	border-radius: 9999px !important;
+}
+
+.subtleforms-modal-overlay {
+	background: rgba(0, 0, 0, 0.4) !important;
 }

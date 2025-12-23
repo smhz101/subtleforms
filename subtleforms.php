@@ -3,7 +3,7 @@
 /**
  * Plugin Name: SubtleForms
  * Description: Logic-first, workflow-driven form platform with extension architecture.
- * Version: 1.0.6
+ * Version: 1.1.25
  * Author: Muzammil Hussain
  * Requires PHP: 7.2
  */
@@ -24,7 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'SUBTLEFORMS_VERSION', '1.0.6' );
+define( 'SUBTLEFORMS_VERSION', '1.1.25' );
 define( 'SUBTLEFORMS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SUBTLEFORMS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'SUBTLEFORMS_PLUGIN_FILE', __FILE__ );
@@ -45,5 +45,12 @@ register_deactivation_hook( __FILE__, function() {
 
 // Initialize plugin after WordPress loads
 add_action('plugins_loaded', function () {
+  // Check for DB updates
+  $installed_version = get_option('subtleforms_version');
+  if (version_compare($installed_version, SUBTLEFORMS_VERSION, '<')) {
+      SubtleForms\Activator::activate();
+      update_option('subtleforms_version', SUBTLEFORMS_VERSION);
+  }
+
   SubtleForms\init();
 });
