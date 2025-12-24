@@ -1,4 +1,7 @@
 import { __ } from '@wordpress/i18n';
+import AdminHeader from './AdminHeader';
+import ActionBar from './ActionBar';
+import Notices from './Notices';
 
 /**
  * Canonical Admin Shell Layout
@@ -6,22 +9,22 @@ import { __ } from '@wordpress/i18n';
  * All SubtleForms admin pages must use this component for consistent UX.
  *
  * Structure:
- * - Top Bar (sticky): Logo, page title, actions
- * - Action Bar (sticky): Filters, tabs, search
+ * - Top Bar (sticky): Logo, page title, actions (via AdminHeader component)
+ * - Action Bar (sticky): Filters, tabs, search (via ActionBar component)
  * - Content Area: Calculated height, scrollable
  * - Bottom Bar: Pagination (if provided)
  */
 export default function AdminShell({
   title,
   actions,
-  tabs,
-  filters,
-  search,
+  actionBarLeft,
+  actionBarRight,
   children,
   pagination,
+  noScroll = false,
 }) {
   const TOP_BAR_HEIGHT = 60;
-  const ACTION_BAR_HEIGHT = tabs || filters || search ? 56 : 0;
+  const ACTION_BAR_HEIGHT = actionBarLeft || actionBarRight ? 56 : 0;
   const WP_ADMIN_BAR_HEIGHT = 32;
 
   return (
@@ -38,77 +41,47 @@ export default function AdminShell({
         .subtleforms-admin-page #wpcontent {
           padding: 0 !important;
         }
+        /* Handle Admin Bar Height */
+        :root {
+          --wp-admin--admin-bar--height: 32px;
+        }
+        @media (max-width: 782px) {
+          :root {
+            --wp-admin--admin-bar--height: 46px;
+          }
+        }
       `}</style>
 
-      <div className='flex flex-col bg-white h-screen'>
-        {/* TOP BAR - Sticky */}
-        <div
-          className='flex flex-shrink-0 justify-between items-center bg-white shadow-sm px-6 border-gray-200 border-b'
-          style={{
-            height: `${TOP_BAR_HEIGHT}px`,
-            position: 'sticky',
-            top: `${WP_ADMIN_BAR_HEIGHT}px`,
-            zIndex: 100,
-          }}>
-          <div className='flex items-center gap-4'>
-            <div className='flex items-center gap-3'>
-              <svg
-                width='24'
-                height='24'
-                viewBox='0 0 24 24'
-                fill='none'
-                className='text-gray-900'>
-                <rect
-                  x='3'
-                  y='3'
-                  width='18'
-                  height='18'
-                  stroke='currentColor'
-                  strokeWidth='2'
-                />
-                <path
-                  d='M8 12h8M12 8v8'
-                  stroke='currentColor'
-                  strokeWidth='2'
-                />
-              </svg>
-              <h1 className='m-0 font-semibold text-gray-900 text-lg'>
-                {title}
-              </h1>
-            </div>
-          </div>
+      <div className='flex flex-col bg-white h-[calc(100vh-var(--wp-admin--admin-bar--height,32px))]'>
+        {/* TOP BAR - Sticky Header Component */}
+        <AdminHeader title={title} actions={actions} />
 
-          {actions && <div className='flex items-center gap-2'>{actions}</div>}
-        </div>
-
-        {/* ACTION BAR - Sticky */}
-        {(tabs || filters || search) && (
+        {/* ACTION BAR - Sticky ActionBar Component */}
+        {(actionBarLeft || actionBarRight) && (
           <div
-            className='flex flex-shrink-0 justify-between items-center bg-gray-50 px-6 border-gray-200 border-b'
+            className='flex-shrink-0'
             style={{
-              height: `${ACTION_BAR_HEIGHT}px`,
               position: 'sticky',
               top: `${WP_ADMIN_BAR_HEIGHT + TOP_BAR_HEIGHT}px`,
               zIndex: 99,
             }}>
-            <div className='flex items-center gap-4'>
-              {tabs}
-              {filters}
-            </div>
-
-            {search && <div className='flex items-center gap-4'>{search}</div>}
+            <ActionBar left={actionBarLeft} right={actionBarRight} />
           </div>
         )}
 
         {/* CONTENT AREA - Scrollable */}
-        <div
-          className='flex-1 overflow-hidden'
-          style={{
-            height: `calc(100vh - ${
-              WP_ADMIN_BAR_HEIGHT + TOP_BAR_HEIGHT + ACTION_BAR_HEIGHT
-            }px)`,
-          }}>
-          <div className='h-full overflow-y-auto'>{children}</div>
+        <div className='flex-1 overflow-hidden'>
+          <div
+            className={`h-full flex flex-col ${
+              noScroll ? 'overflow-hidden' : 'overflow-y-auto'
+            }`}>
+            <div className='empty:hidden flex-shrink-0 px-6 pt-4'>
+              <Notices />
+            </div>
+            <div className={`flex-1 ${noScroll ? 'overflow-hidden' : ''}`}>
+              {children}
+            </div>
+          </div>
         </div>
 
         {/* BOTTOM BAR - Pagination */}

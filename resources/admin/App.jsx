@@ -3,13 +3,10 @@ import { Panel, PanelBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import FormsList from './components/FormsList';
 import FormsPage from './components/FormsPage';
-import SubmissionsList from './components/SubmissionsList';
 import SubmissionsPage from './components/SubmissionsPage';
 import SubmissionDetailPage from './components/SubmissionDetailPage';
 import ExecutionLog from './components/ExecutionLog';
-import SchemaEditor from './components/SchemaEditor';
 import FormBuilder from './components/FormBuilder';
-import NewForm from './components/NewForm';
 import CreateFormModal from './components/CreateFormModal';
 
 export default function App() {
@@ -85,7 +82,7 @@ export default function App() {
           {page === 'dashboard' && (
             <div>{__('Dashboard coming soon', 'subtleforms')}</div>
           )}
-          {page === 'form-editor' && initialFormId && (
+          {page === 'form-editor' && !!initialFormId && (
             <FormBuilder
               formId={initialFormId}
               onSaved={handleFormSaved}
@@ -96,12 +93,6 @@ export default function App() {
           )}
           {selectedSubmission && (
             <ExecutionLog submissionId={selectedSubmission} />
-          )}
-          {view === 'schema-editor' && selectedForm && (
-            <SchemaEditor
-              formId={selectedForm}
-              onClose={() => setView('list')}
-            />
           )}
         </PanelBody>
       </Panel>

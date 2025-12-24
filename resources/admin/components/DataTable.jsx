@@ -1,11 +1,43 @@
-import { Button, SelectControl } from '@wordpress/components';
+import { memo } from '@wordpress/element';
+import { Button, SelectControl, CheckboxControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 
 /**
- * Standardized DataTable
- * Sharp, minimal table with sorting and pagination
+ * DataTable - Single Reusable Table Component
+ *
+ * Unified table component for all SubtleForms data displays.
+ * Replaces AdminTable, old DataTable, and raw table implementations.
+ *
+ * Features:
+ * - Sorting with direction indicators
+ * - Pagination with configurable page sizes
+ * - Row actions support
+ * - Scrollable table height (fits inside layout, not page)
+ * - Loading and empty states
+ * - Consistent styling across all pages
+ * - Memoized for performance
+ * - Bulk actions support
+ *
+ * @param {Object} props
+ * @param {Array} props.columns - Column definitions [{key, title, sortable, render, width}]
+ * @param {Array} props.data - Row data array
+ * @param {number} props.totalItems - Total items for pagination
+ * @param {number} props.currentPage - Current page number (1-indexed)
+ * @param {number} props.perPage - Items per page
+ * @param {string|null} props.sortBy - Current sort column key
+ * @param {string} props.sortDirection - Sort direction ('asc' or 'desc')
+ * @param {Function} props.onSort - Callback when sort changes (columnKey, direction)
+ * @param {Function} props.onPageChange - Callback when page changes (newPage)
+ * @param {Function} props.onPerPageChange - Callback when per page changes (newPerPage)
+ * @param {boolean} props.loading - Loading state
+ * @param {string} props.emptyMessage - Message when no data
+ * @param {Function|null} props.onRowClick - Optional row click handler (row)
+ * @param {boolean} props.selectable - Enable row selection
+ * @param {Array} props.selectedItems - Array of selected item IDs
+ * @param {Function} props.onSelectionChange - Callback when selection changes (newSelectedItems)
+ * @param {Array} props.bulkActions - Array of bulk actions [{ label, onClick, isDestructive }]
  */
-export default function DataTable({
+const DataTable = memo(function DataTable({
   columns = [],
   data = [],
   totalItems = 0,
@@ -19,8 +51,28 @@ export default function DataTable({
   loading = false,
   emptyMessage = __('No items found', 'subtleforms'),
   onRowClick = null,
+  selectable = false,
+  selectedItems = [],
+  onSelectionChange = () => {},
+  bulkActions = [],
 }) {
   const totalPages = Math.ceil(totalItems / perPage);
+
+  const handleSelectAll = (checked) => {
+    if (checked) {
+      onSelectionChange(data.map((item) => item.id));
+    } else {
+      onSelectionChange([]);
+    }
+  };
+
+  const handleSelectRow = (id, checked) => {
+    if (checked) {
+      onSelectionChange([...selectedItems, id]);
+    } else {
+      onSelectionChange(selectedItems.filter((itemId) => itemId !== id));
+    }
+  };
 
   const getSortIndicator = (column) => {
     if (!column.sortable) return null;
@@ -65,18 +117,57 @@ export default function DataTable({
     );
   }
 
+  const allSelected =
+    data.length > 0 && data.every((item) => selectedItems.includes(item.id));
+  const someSelected =
+    data.some((item) => selectedItems.includes(item.id)) && !allSelected;
+
   return (
     <div className='flex flex-col h-full'>
-      {/* Table */}
+      {/* Bulk Actions Bar */}
+      {selectable && selectedItems.length > 0 && (
+        <div className='flex items-center gap-4 bg-blue-50 px-6 py-2 border-blue-100 border-b text-sm'>
+          <span className='font-medium text-blue-900'>
+            {sprintf(
+              __('%d items selected', 'subtleforms'),
+              selectedItems.length
+            )}
+          </span>
+          <div className='flex items-center gap-2 h-8'>
+            {bulkActions.map((action, index) => (
+              <Button
+                key={index}
+                isSmall
+                isDestructive={action.isDestructive}
+                isSecondary={!action.isDestructive}
+                onClick={() => action.onClick(selectedItems)}>
+                {action.label}
+              </Button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Table - Scrollable */}
       <div className='flex-1 overflow-auto'>
         <table className='w-full border-collapse'>
           <thead className='top-0 z-10 sticky bg-gray-50'>
             <tr className='border-gray-200 border-b'>
+              {selectable && (
+                <th className='px-6 py-3 first:pl-8 w-10 text-left'>
+                  <CheckboxControl
+                    checked={allSelected}
+                    indeterminate={someSelected}
+                    onChange={handleSelectAll}
+                  />
+                </th>
+              )}
               {columns.map((column) => (
                 <th
                   key={column.key}
                   className={`
-                    px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider first:pl-8 last:pr-8
+                    px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider last:pr-8
+                    ${!selectable && 'first:pl-8'}
                     ${
                       column.sortable
                         ? 'cursor-pointer hover:bg-gray-100 select-none'
@@ -99,6 +190,7 @@ export default function DataTable({
                 key={row.id || index}
                 className={`
                   group transition-all duration-150
+                  ${selectedItems.includes(row.id) ? 'bg-blue-50' : ''}
                   ${
                     onRowClick
                       ? 'cursor-pointer hover:bg-blue-50 hover:shadow-sm'
@@ -106,10 +198,22 @@ export default function DataTable({
                   }
                 `}
                 onClick={() => onRowClick && onRowClick(row)}>
+                {selectable && (
+                  <td
+                    className='px-6 py-4 first:pl-8 w-10'
+                    onClick={(e) => e.stopPropagation()}>
+                    <CheckboxControl
+                      checked={selectedItems.includes(row.id)}
+                      onChange={(checked) => handleSelectRow(row.id, checked)}
+                    />
+                  </td>
+                )}
                 {columns.map((column) => (
                   <td
                     key={column.key}
-                    className='px-6 py-4 last:pr-8 first:pl-8 text-gray-900 text-sm'>
+                    className={`px-6 py-4 last:pr-8 text-gray-900 text-sm ${
+                      !selectable && 'first:pl-8'
+                    }`}>
                     {column.render
                       ? column.render(row[column.key], row)
                       : row[column.key]}
@@ -121,7 +225,7 @@ export default function DataTable({
         </table>
       </div>
 
-      {/* Pagination */}
+      {/* Pagination - Always show if data exists and totalPages > 0 */}
       {totalPages > 0 && (
         <div className='flex flex-shrink-0 justify-between items-center bg-white px-6 py-4 border-gray-200 border-t'>
           <div className='flex items-center gap-4'>
@@ -181,4 +285,6 @@ export default function DataTable({
       )}
     </div>
   );
-}
+});
+
+export default DataTable;
