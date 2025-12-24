@@ -196,6 +196,7 @@
 .subtleforms-create-modal .components-modal__content {
 	padding: 24px !important;
 	background-color: #ffffff !important;
+	margin: 0 !important;
 }
 
 /* Hide the default title if we are providing our own */
@@ -206,7 +207,9 @@
 /* Fix for close button - subtle gray, circular hover only */
 .subtleforms-create-modal .components-button.has-icon {
 	color: #6b7280 !important;
-	transition: color 0.15s ease, background-color 0.15s ease !important;
+	transition:
+		color 0.15s ease,
+		background-color 0.15s ease !important;
 	border-radius: 0 !important;
 	background: transparent !important;
 	width: 32px !important;

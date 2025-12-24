@@ -40,6 +40,11 @@ final class Shortcode
             return '<p class="subtleforms-error">Form not found.</p>';
         }
 
+        // Only render published forms on frontend
+        if ($form->status !== 'published') {
+            return '<p class="subtleforms-error">This form is not published yet.</p>';
+        }
+
         // Enqueue frontend assets
         $this->enqueueAssets();
 
