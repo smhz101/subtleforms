@@ -397,14 +397,11 @@ body.subtle-forms_page_subtleforms-new-form .wrap {
 	align-items: flex-start;
 	gap: 8px;
 	padding: 16px;
-	border: 1px solid #dcdcde;
-	border-radius: 10px;
+	border: 1px solid #d1d5db;
+	border-radius: 0;
 	background: #fff;
 	cursor: pointer;
-	transition:
-		border-color 0.15s ease,
-		box-shadow 0.15s ease,
-		transform 0.15s ease;
+	transition: border-color 0.15s ease;
 	position: relative;
 	text-align: left;
 }
@@ -418,9 +415,13 @@ body.subtle-forms_page_subtleforms-new-form .wrap {
 .subtleforms-create-form-option:not(:disabled):hover,
 .subtleforms-create-form-option:not(:disabled):focus {
 	border-color: #2271b1;
-	box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.12);
-	transform: translateY(-1px);
+	background: #f8fafc;
 	outline: none;
+}
+
+.subtleforms-create-form-option.selected {
+	border-color: #2271b1;
+	background: #eff6ff;
 }
 
 .subtleforms-create-form-option__icon {
