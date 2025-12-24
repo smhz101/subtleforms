@@ -55,6 +55,7 @@ final class Capabilities {
       'pipeline.retry'              => false,
       'pipeline.delay'              => false,
 
+      'actions.save'                => true,
       'actions.webhook'             => true,
       'actions.email'               => true,
       'actions.payment'             => false,

@@ -102,7 +102,7 @@ final class SubmissionsRepository
 
         $defaults = [
             'form_id' => 0,
-            'form_version' => null,
+            'schema_version' => null,
             'payload' => [],
             'meta' => [],
             'status' => 'unread',
@@ -116,7 +116,7 @@ final class SubmissionsRepository
             $this->table,
             [
                 'form_id' => intval(Helpers::safe_array_get($data, 'form_id', 0)),
-                'form_version' => isset($data['form_version']) ? intval($data['form_version']) : null,
+                'schema_version' => isset($data['schema_version']) ? intval($data['schema_version']) : null,
                 'payload' => wp_json_encode(Helpers::safe_array_get($data, 'payload', [])),
                 'meta' => wp_json_encode(Helpers::safe_array_get($data, 'meta', [])),
                 'status' => Helpers::safe_array_get($data, 'status', 'unread'),
@@ -276,8 +276,8 @@ final class SubmissionsRepository
 
         // Decode JSON fields
         foreach ($results as &$result) {
-            $result['payload'] = json_decode($result['payload'], true);
-            $result['meta'] = json_decode($result['meta'], true);
+            $result['payload'] = Helpers::safe_json_decode(Helpers::safe_array_get($result, 'payload', '{}'), true, []);
+            $result['meta'] = Helpers::safe_json_decode(Helpers::safe_array_get($result, 'meta', '{}'), true, []);
         }
 
         return $results;
@@ -286,21 +286,48 @@ final class SubmissionsRepository
     /**
      * Count submissions.
      */
-    public function count(int $formId = null, array $args = []): int
+    public function count(array $args = []): int
     {
         global $wpdb;
 
-        $where = '';
-        if ($formId) {
-            $where = $wpdb->prepare(' WHERE form_id = %d', $formId);
+        $defaults = [
+            'form_id' => null,
+            'status' => null,
+            'search' => null,
+        ];
+
+        $args = wp_parse_args($args, $defaults);
+
+        $where = [];
+        $params = [];
+
+        if ($args['form_id']) {
+            $where[] = 'form_id = %d';
+            $params[] = intval($args['form_id']);
         }
 
-        if (!empty($args['status'])) {
-            $operator = $formId ? ' AND' : ' WHERE';
-            $where .= $wpdb->prepare("{$operator} status = %s", $args['status']);
+        if ($args['status'] && $args['status'] !== 'all') {
+            $where[] = 'status = %s';
+            $params[] = $args['status'];
         }
 
-        return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$this->table}{$where}");
+        if ($args['search']) {
+            $searchTerm = '%' . $wpdb->esc_like($args['search']) . '%';
+            $where[] = '(id LIKE %s OR payload LIKE %s OR meta LIKE %s)';
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+            $params[] = $searchTerm;
+        }
+
+        $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
+
+        $sql = "SELECT COUNT(*) FROM {$this->table} {$whereClause}";
+
+        if (!empty($params)) {
+            return (int) $wpdb->get_var($wpdb->prepare($sql, ...$params));
+        }
+
+        return (int) $wpdb->get_var($sql);
     }
 
     /**
@@ -310,16 +337,38 @@ final class SubmissionsRepository
     {
         global $wpdb;
 
-        $where = $formId ? $wpdb->prepare(' WHERE form_id = %d', $formId) : '';
+        $conditions = [];
+        $params = [];
 
+        if ($formId) {
+            $conditions[] = 'form_id = %d';
+            $params[] = $formId;
+        }
+
+        // For Next
+        $nextConditions = $conditions;
+        $nextConditions[] = 'id > %d';
+        $nextParams = $params;
+        $nextParams[] = $currentId;
+        
+        $whereNext = 'WHERE ' . implode(' AND ', $nextConditions);
+        
         $next = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM {$this->table}{$where} AND id > %d ORDER BY id ASC LIMIT 1",
-            $currentId
+            "SELECT id FROM {$this->table} {$whereNext} ORDER BY id ASC LIMIT 1",
+            ...$nextParams
         ));
 
+        // For Prev
+        $prevConditions = $conditions;
+        $prevConditions[] = 'id < %d';
+        $prevParams = $params;
+        $prevParams[] = $currentId;
+
+        $wherePrev = 'WHERE ' . implode(' AND ', $prevConditions);
+
         $prev = $wpdb->get_var($wpdb->prepare(
-            "SELECT id FROM {$this->table}{$where} AND id < %d ORDER BY id DESC LIMIT 1",
-            $currentId
+            "SELECT id FROM {$this->table} {$wherePrev} ORDER BY id DESC LIMIT 1",
+            ...$prevParams
         ));
 
         return [

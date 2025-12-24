@@ -113,7 +113,7 @@ final class Pipeline
             return; // nothing to persist
         }
 
-        $schemaVersion = $ctx->getMeta('form_version');
+        $schemaVersion = $ctx->getMeta('schema_version');
 
         $evt = new PipelineEvent(
             $submissionId,

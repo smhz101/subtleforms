@@ -42,6 +42,9 @@ final class Activator
         // Create database tables
         self::create_tables();
 
+        // Migrate data if needed
+        self::migrate_submissions_table();
+
         // Set default options
         self::set_default_options();
 
@@ -79,7 +82,7 @@ final class Activator
         $submissions_sql = "CREATE TABLE {$submissions_table} (
   id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   form_id bigint(20) unsigned NOT NULL,
-  form_version int unsigned DEFAULT NULL,
+  schema_version int unsigned DEFAULT NULL,
   payload longtext NOT NULL,
   meta longtext,
   status varchar(20) NOT NULL DEFAULT 'pending',
@@ -169,6 +172,23 @@ final class Activator
 
         // Store database version
         update_option('subtleforms_db_version', SUBTLEFORMS_VERSION);
+    }
+
+    /**
+     * Migrate submissions table data.
+     */
+    private static function migrate_submissions_table(): void
+    {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'subtleforms_submissions';
+
+        // Check if form_version column exists (it might remain after dbDelta)
+        $column_exists = $wpdb->get_results("SHOW COLUMNS FROM {$table_name} LIKE 'form_version'");
+        
+        if (!empty($column_exists)) {
+            // Copy form_version to schema_version where schema_version is NULL
+            $wpdb->query("UPDATE {$table_name} SET schema_version = form_version WHERE schema_version IS NULL AND form_version IS NOT NULL");
+        }
     }
 
     /**

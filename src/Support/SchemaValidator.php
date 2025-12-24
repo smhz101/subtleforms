@@ -130,6 +130,15 @@ final class SchemaValidator
      */
     public function validate(array $schema): bool
     {
+        // Schema version is required (root level)
+        if (!isset($schema['schema_version'])) {
+            throw new InvalidArgumentException('Schema must contain a schema_version field.');
+        }
+
+        if (!is_int($schema['schema_version']) || $schema['schema_version'] < 1) {
+            throw new InvalidArgumentException('schema_version must be a positive integer.');
+        }
+
         // Root checks
         if (empty($schema['metadata']) || !is_array($schema['metadata'])) {
             throw new InvalidArgumentException('Schema must contain a metadata object.');

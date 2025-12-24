@@ -201,6 +201,11 @@ final class FormsRepository
      */
     public function saveSchemaVersion(int $formId, array $schema, bool $activate = false): int
     {
+        // Ensure schema_version exists, default to 1 if not present
+        if (!isset($schema['schema_version'])) {
+            $schema['schema_version'] = 1;
+        }
+
         // Validate schema before saving
         $validator = new \SubtleForms\Support\SchemaValidator();
         try {
@@ -322,6 +327,15 @@ final class FormsRepository
             error_log('SubtleForms: ' . $error);
             throw new \RuntimeException($error);
         }
+
+        // Ensure schema_version exists in decoded schema, default to 1 for legacy schemas
+        if (!isset($decodedSchema['schema_version'])) {
+            $decodedSchema['schema_version'] = 1;
+        }
+
+        // Run migrations
+        $migrator = new \SubtleForms\Support\SchemaMigrator();
+        $decodedSchema = $migrator->migrate($decodedSchema);
 
         return [
             'version' => (int) $row['version'],

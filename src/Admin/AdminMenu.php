@@ -433,7 +433,7 @@ class AdminMenu
             'active_forms' => $this->formsRepo->count(['status' => 'published']),
             'draft_forms' => $this->formsRepo->count(['status' => 'draft']),
             'total_submissions' => $this->submissionsRepo->count(),
-            'recent_submissions' => $this->submissionsRepo->count(null, [
+            'recent_submissions' => $this->submissionsRepo->count([
                 'status' => 'completed',
             ]),
         ];

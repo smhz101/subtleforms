@@ -220,8 +220,8 @@ final class RestController
 
         // v0.9.0+: Enhance forms with submission counts for admin UI (v0.9.1: add unread count)
         foreach ($forms as &$form) {
-            $form['submission_count'] = $this->submissionsRepo->count($form['id']);
-            $form['unread_count'] = $this->submissionsRepo->count($form['id'], ['status' => 'unread']);
+            $form['submission_count'] = $this->submissionsRepo->count(['form_id' => $form['id']]);
+            $form['unread_count'] = $this->submissionsRepo->count(['form_id' => $form['id'], 'status' => 'unread']);
         }
 
         $response = new WP_REST_Response($forms, 200);
@@ -401,15 +401,23 @@ final class RestController
      */
     public function get_submissions(WP_REST_Request $request): WP_REST_Response
     {
-        $submissions = $this->submissionsRepo->findByForm(
-            $request->get_param('form_id'),
-            [
-                'limit' => $request->get_param('per_page') ?? 20,
-                'offset' => $request->get_param('offset') ?? 0,
-            ]
-        );
+        $args = [
+            'form_id' => $request->get_param('form_id'),
+            'limit' => intval($request->get_param('per_page') ?? 20),
+            'offset' => intval($request->get_param('offset') ?? 0),
+            'orderby' => 'created_at',
+            'order' => 'DESC',
+        ];
 
-        return new WP_REST_Response($submissions, 200);
+        $submissions = $this->submissionsRepo->findAll($args);
+        $total = $this->submissionsRepo->count($args);
+
+        return new WP_REST_Response([
+            'submissions' => $submissions,
+            'total' => $total,
+            'per_page' => $args['limit'],
+            'offset' => $args['offset'],
+        ], 200);
     }
 
     /**
@@ -417,64 +425,36 @@ final class RestController
      */
     public function get_all_submissions(WP_REST_Request $request): WP_REST_Response
     {
-        global $wpdb;
-        $table = $wpdb->prefix . 'subtleforms_submissions';
-        
-        $formId = $request->get_param('form_id');
-        $status = $request->get_param('status');
-        $search = $request->get_param('search');
-        $perPage = intval($request->get_param('per_page') ?? 20);
-        $offset = intval($request->get_param('offset') ?? 0);
-        
-        $where = [];
-        $params = [];
-        
-        if ($formId) {
-            $where[] = 'form_id = %d';
-            $params[] = intval($formId);
-        }
-        
-        if ($status && $status !== 'all') {
-            $where[] = 'status = %s';
-            $params[] = $status;
-        }
-        
-        if ($search) {
-            $searchTerm = '%' . $wpdb->esc_like($search) . '%';
-            $where[] = '(id LIKE %s OR payload LIKE %s OR meta LIKE %s)';
-            $params[] = $searchTerm;
-            $params[] = $searchTerm;
-            $params[] = $searchTerm;
-        }
-        
-        $whereClause = !empty($where) ? 'WHERE ' . implode(' AND ', $where) : '';
-        
-        $sql = "SELECT * FROM {$table} {$whereClause} ORDER BY created_at DESC LIMIT %d OFFSET %d";
-        $params[] = $perPage;
-        $params[] = $offset;
-        
-        $results = $wpdb->get_results($wpdb->prepare($sql, ...$params), ARRAY_A);
-        
-        // Get total count for pagination
-        $countSql = "SELECT COUNT(*) FROM {$table} {$whereClause}";
-        $total = $wpdb->get_var($wpdb->prepare($countSql, array_slice($params, 0, -2)));
-        
+        $args = [
+            'form_id' => $request->get_param('form_id'),
+            'status' => $request->get_param('status'),
+            'search' => $request->get_param('search'),
+            'limit' => intval($request->get_param('per_page') ?? 20),
+            'offset' => intval($request->get_param('offset') ?? 0),
+            'orderby' => 'created_at',
+            'order' => 'DESC',
+        ];
+
+        $submissions = $this->submissionsRepo->findAll($args);
+        $total = $this->submissionsRepo->count($args);
+
         // Enhance with form titles
-        foreach ($results as &$sub) {
-            $sub['payload'] = Helpers::safe_json_decode(Helpers::safe_array_get($sub, 'payload', '{}'), true, []);
-            $sub['meta'] = Helpers::safe_json_decode(Helpers::safe_array_get($sub, 'meta', '{}'), true, []);
-            
+        foreach ($submissions as &$sub) {
             if (Helpers::safe_array_get($sub, 'form_id')) {
                 $form = $this->formsRepo->find($sub['form_id']);
-                $sub['form_title'] = Helpers::safe_array_get($form, 'title', __('Unknown Form', 'subtleforms'));
+                if (is_array($form)) {
+                    $sub['form_title'] = Helpers::safe_array_get($form, 'title', __('Unknown Form', 'subtleforms'));
+                } else {
+                    $sub['form_title'] = __('Unknown Form', 'subtleforms');
+                }
             }
         }
-        
+
         return new WP_REST_Response([
-            'submissions' => $results,
-            'total' => intval($total),
-            'per_page' => $perPage,
-            'offset' => $offset,
+            'submissions' => $submissions,
+            'total' => $total,
+            'per_page' => $args['limit'],
+            'offset' => $args['offset'],
         ], 200);
     }
 
@@ -502,11 +482,17 @@ final class RestController
             
             // Load schema to get field labels
             try {
-                $schema = $this->formsRepo->loadSchemaVersion($submission['form_id'], $submission['form_version']);
+                $schemaVersion = $submission['schema_version'] ?? null;
+                $schema = $this->formsRepo->loadSchemaVersion($submission['form_id'], $schemaVersion);
                 $submission['schema'] = $schema['schema'] ?? null;
             } catch (\RuntimeException $e) {
                 $submission['schema'] = null;
             }
+
+            // Enhance with adjacent IDs for navigation
+            $adjacent = $this->submissionsRepo->getAdjacentIds($submission['id'], $submission['form_id']);
+            $submission['next_id'] = $adjacent['next'];
+            $submission['prev_id'] = $adjacent['prev'];
         }
 
         return new WP_REST_Response($submission, 200);
@@ -616,11 +602,11 @@ final class RestController
         }
         $formVersion = $activeSchema['version'] ?? null;
 
-        // Create submission record (store form_version)
+        // Create submission record (store schema_version)
         try {
             $submissionId = $this->submissionsRepo->create([
                 'form_id' => $formId,
-                'form_version' => $formVersion,
+                'schema_version' => $formVersion,
                 'payload' => $payload,
                 'status' => 'processing',
                 'ip_address' => $_SERVER['REMOTE_ADDR'] ?? null,
@@ -639,7 +625,7 @@ final class RestController
         $context = new SubmissionContext($formId, $payload);
         $context->setMeta('submission_id', $submissionId);
         // Attach schema version used for this submission for logging
-        $context->setMeta('form_version', is_int($formVersion) ? $formVersion : null);
+        $context->setMeta('schema_version', is_int($formVersion) ? $formVersion : null);
 
         // If there's an active schema, compile it to deterministic pipeline steps and run.
         if (!empty($activeSchema['schema']) && is_array($activeSchema['schema'])) {
@@ -679,6 +665,12 @@ final class RestController
                 $this->submissionsRepo->update($submissionId, ['status' => 'failed']);
                 error_log('SubtleForms: Unexpected error in submission ' . $submissionId . ': ' . $e->getMessage());
                 return new WP_Error('pipeline_failed', 'An unexpected error occurred', ['status' => 500]);
+            }
+
+            if (!$result->ok) {
+                $this->submissionsRepo->update($submissionId, ['status' => 'failed']);
+                error_log('SubtleForms: Pipeline execution failed for submission ' . $submissionId . ': ' . $result->error);
+                return new WP_Error('pipeline_failed', $result->error, ['status' => 500]);
             }
 
             // Check final submission status - if SaveAction set it to 'saved', update to 'completed'
