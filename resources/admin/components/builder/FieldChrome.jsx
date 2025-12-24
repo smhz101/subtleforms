@@ -27,7 +27,7 @@ export default function FieldChrome({
       onClick={onSelect}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}>
-      <div className='subtleforms-field-chrome__inner'>{children}</div>
+      <div className='p-5 subtleforms-field-chrome__inner'>{children}</div>
       <FieldToolbar
         visible={showToolbar}
         dragHandleRef={dragHandleRef}

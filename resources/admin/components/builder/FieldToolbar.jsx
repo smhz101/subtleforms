@@ -43,53 +43,22 @@ export default function FieldToolbar({
     }
   };
 
-  const wrapperStyle = {
-    position: 'absolute',
-    top: '8px',
-    right: '8px',
-    display: 'flex',
-    gap: '4px',
-    padding: '4px',
-    background: '#fff',
-    borderRadius: '6px',
-    border: '1px solid #dcdcde',
-    boxShadow: '0 4px 16px rgba(17, 17, 17, 0.12)',
-    transition: 'opacity 0.15s ease',
-    opacity: visible ? 1 : 0,
-    pointerEvents: visible ? 'auto' : 'none',
-    zIndex: 2,
-  };
-
-  const buttonStyle = {
-    width: '28px',
-    height: '28px',
-    borderRadius: '4px',
-    border: '1px solid transparent',
-    background: 'transparent',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    cursor: 'pointer',
-    color: '#1e1e1e',
-    transition:
-      'background 0.15s ease, border-color 0.15s ease, color 0.15s ease',
-  };
-
-  const disabledStyle = {
-    cursor: 'default',
-    color: '#a7aaad',
-  };
-
   const renderButton = (icon, label, handler, disabled) => (
     <button
       type='button'
       onClick={createHandler(handler)}
       onMouseDown={(event) => event.stopPropagation()}
       onPointerDown={(event) => event.stopPropagation()}
-      style={{
-        ...buttonStyle,
-        ...(disabled ? disabledStyle : {}),
-      }}
+      className={`
+        w-7 h-7 flex items-center justify-center
+        border border-transparent bg-transparent
+        transition-colors duration-150
+        ${
+          disabled
+            ? 'text-text-tertiary cursor-default'
+            : 'text-text-primary cursor-pointer hover:bg-surface-alt hover:text-primary'
+        }
+      `}
       aria-label={label}
       disabled={disabled}>
       <Icon icon={icon} size={16} />
@@ -97,7 +66,20 @@ export default function FieldToolbar({
   );
 
   return (
-    <div style={wrapperStyle} aria-hidden={!visible}>
+    <div
+      className={`
+        absolute top-0 right-0 -mt-3 mr-2
+        flex gap-1 p-1
+        bg-white border border-border
+        transition-opacity duration-150
+        z-20
+        ${
+          visible
+            ? 'opacity-100 pointer-events-auto'
+            : 'opacity-0 pointer-events-none'
+        }
+      `}
+      aria-hidden={!visible}>
       <button
         type='button'
         ref={dragHandleRef}
@@ -106,10 +88,7 @@ export default function FieldToolbar({
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
         onClick={(event) => event.stopPropagation()}
-        style={{
-          ...buttonStyle,
-          cursor: 'grab',
-        }}
+        className='flex justify-center items-center bg-surface-alt hover:bg-secondary border border-border w-7 h-7 text-text-primary hover:text-primary-hover transition-colors duration-150 cursor-grab active:cursor-grabbing'
         aria-label={__('Drag field', 'subtleforms')}>
         <Icon icon='drag-handle' size={16} />
       </button>

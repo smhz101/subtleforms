@@ -18,35 +18,45 @@ export default function FieldInspector({
   return (
     <div
       style={{
-        width: '340px',
+        width: '320px',
         background: '#fff',
-        borderLeft: '1px solid #dcdcde',
+        borderLeft: '1px solid #ddd',
         overflow: 'auto',
-        boxShadow: '-2px 0 8px rgba(0,0,0,0.03)',
+        height: '100%',
       }}>
-      <div style={{ padding: '20px' }}>
-        <div
+      {/* Header */}
+      <div
+        style={{
+          padding: '16px 20px',
+          borderBottom: '1px solid #ddd',
+          background: '#fff',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}>
+        <strong
           style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: 20,
-            paddingBottom: 16,
-            borderBottom: '1px solid #e5e5e5',
+            fontSize: '14px',
+            fontWeight: 600,
+            color: '#1e1e1e',
+            textTransform: 'uppercase',
+            letterSpacing: '0.5px',
           }}>
-          <strong
-            style={{
-              fontSize: '15px',
-              fontWeight: 600,
-              color: '#1e1e1e',
-            }}>
-            {__('Field Settings', 'subtleforms')}
-          </strong>
-          <Button isSmall onClick={onClose}>
-            ×
-          </Button>
-        </div>
+          {__('Settings', 'subtleforms')}
+        </strong>
+        <Button
+          isSmall
+          onClick={onClose}
+          style={{
+            minWidth: 0,
+            padding: '4px 8px',
+          }}>
+          ×
+        </Button>
+      </div>
 
+      {/* Content */}
+      <div style={{ padding: '20px' }}>
         <TabPanel
           tabs={[
             { name: 'general', title: __('General', 'subtleforms') },

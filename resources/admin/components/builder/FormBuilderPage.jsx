@@ -9,6 +9,7 @@ import { useDispatch } from '@wordpress/data';
 import { Spinner, Notice, Button, TabPanel } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
+import AdminShell from '../AdminShell';
 import FormEditor from './FormEditor';
 import SubmissionsTable from '../SubmissionsTable';
 
@@ -453,94 +454,147 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
   if (loading || loadingFields) return <Spinner />;
   if (error) return <Notice status='error'>{error}</Notice>;
 
-  return (
-    <div className='subtleforms-builder-shell'>
-      <div className='subtleforms-builder-header'>
-        <div className='subtleforms-builder-header__meta'>
-          <div className='subtleforms-builder-title-row'>
-            {isEditingTitle ? (
-              <input
-                ref={titleInputRef}
-                className='subtleforms-builder-title-input'
-                value={formTitle}
-                onChange={(event) => setFormTitle(event.target.value)}
-                onBlur={() => persistTitle(formTitle)}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter') {
-                    event.preventDefault();
-                    persistTitle(formTitle);
-                  }
-                  if (event.key === 'Escape') {
-                    setIsEditingTitle(false);
-                    setFormTitle(draftSchema?.metadata?.title || formTitle);
-                  }
-                }}
-              />
-            ) : (
-              <>
-                <button
-                  type='button'
-                  className='subtleforms-builder-title-button'
-                  onClick={() => setIsEditingTitle(true)}>
-                  {formTitle || __('Untitled form', 'subtleforms')}
-                </button>
-                <Button
-                  icon='edit'
-                  label={__('Edit title', 'subtleforms')}
-                  onClick={() => setIsEditingTitle(true)}
-                  isSmall
-                  aria-label={__('Edit title', 'subtleforms')}
-                />
-              </>
-            )}
-          </div>
-          {shortcode ? (
-            <button
-              type='button'
-              className='subtleforms-builder-shortcode'
-              onClick={() => handleCopyShortcode(shortcode)}>
-              <span>{shortcode}</span>
-              <span className='subtleforms-builder-shortcode__helper'>
-                {copyState === 'copied'
-                  ? __('Copied!', 'subtleforms')
-                  : __('Click to copy shortcode', 'subtleforms')}
-              </span>
-            </button>
-          ) : null}
-        </div>
-        <div className='subtleforms-builder-header__actions'>
-          <div
-            className={`subtleforms-save-status subtleforms-save-status--${status}`}
-            role='status'
-            aria-live='polite'>
-            <span className='subtleforms-save-status__label'>
-              {statusLabel}
-            </span>
-            {statusDescription ? (
-              <span className='subtleforms-save-status__description'>
-                {statusDescription}
-              </span>
-            ) : null}
-          </div>
-          <Button isSecondary onClick={onClose}>
-            {__('Close', 'subtleforms')}
-          </Button>
-          <Button isPrimary onClick={handleSave} disabled={saving}>
-            {saving
-              ? __('Saving…', 'subtleforms')
-              : __('Save Form', 'subtleforms')}
-          </Button>
-        </div>
-      </div>
+  // Construct title with editable inline input
+  const titleElement = isEditingTitle ? (
+    <input
+      ref={titleInputRef}
+      type='text'
+      value={formTitle}
+      onChange={(event) => setFormTitle(event.target.value)}
+      onBlur={() => persistTitle(formTitle)}
+      onKeyDown={(event) => {
+        if (event.key === 'Enter') {
+          event.preventDefault();
+          persistTitle(formTitle);
+        }
+        if (event.key === 'Escape') {
+          setIsEditingTitle(false);
+          setFormTitle(draftSchema?.metadata?.title || formTitle);
+        }
+      }}
+      style={{
+        fontSize: '16px',
+        fontWeight: 600,
+        color: '#1e1e1e',
+        border: '1px solid #2271b1',
+        padding: '4px 8px',
+        outline: 'none',
+        minWidth: '200px',
+        background: '#fff',
+      }}
+    />
+  ) : (
+    <button
+      type='button'
+      onClick={() => setIsEditingTitle(true)}
+      style={{
+        fontSize: '16px',
+        fontWeight: 600,
+        color: '#1e1e1e',
+        border: 'none',
+        background: 'transparent',
+        padding: '4px 8px',
+        cursor: 'pointer',
+        outline: 'none',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.color = '#2271b1';
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.color = '#1e1e1e';
+      }}>
+      {formTitle || __('Untitled Form', 'subtleforms')}
+    </button>
+  );
 
-      {saveError && (
-        <div style={{ padding: '0 24px' }}>
-          <Notice status='error' isDismissible={false}>
-            {saveError}
-          </Notice>
-        </div>
+  // Build actions section with save status, shortcode, and buttons
+  const actions = (
+    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      {/* Shortcode Pill */}
+      {shortcode && (
+        <button
+          type='button'
+          onClick={() => handleCopyShortcode(shortcode)}
+          style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '6px',
+            padding: '4px 12px',
+            fontSize: '12px',
+            fontWeight: 500,
+            fontFamily: 'monospace',
+            color: copyState === 'copied' ? '#00a32a' : '#50575e',
+            background: copyState === 'copied' ? '#f0f6fc' : '#f6f7f7',
+            border:
+              copyState === 'copied'
+                ? '1px solid #00a32a'
+                : '1px solid #dcdcde',
+            cursor: 'pointer',
+            outline: 'none',
+          }}
+          onMouseEnter={(e) => {
+            if (copyState !== 'copied') {
+              e.currentTarget.style.borderColor = '#2271b1';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (copyState !== 'copied') {
+              e.currentTarget.style.borderColor = '#dcdcde';
+            }
+          }}>
+          {copyState === 'copied' ? __('Copied!', 'subtleforms') : shortcode}
+        </button>
       )}
 
+      {/* Save Status */}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '6px',
+          fontSize: '13px',
+          color: '#50575e',
+        }}>
+        <span
+          style={{
+            width: '6px',
+            height: '6px',
+            borderRadius: '50%',
+            background:
+              autoSaving || status === 'saving'
+                ? '#2271b1'
+                : status === 'saved'
+                ? '#00a32a'
+                : '#f0b849',
+          }}
+        />
+        {statusLabel}
+      </div>
+
+      {/* Manual Save Button */}
+      {status !== 'saved' && (
+        <Button
+          variant='primary'
+          onClick={handleSave}
+          disabled={saving}
+          style={{ height: '36px', padding: '0 16px' }}>
+          {saving ? __('Saving…', 'subtleforms') : __('Save', 'subtleforms')}
+        </Button>
+      )}
+
+      {/* Close Button */}
+      <Button
+        variant='secondary'
+        onClick={onClose}
+        style={{ height: '36px', padding: '0 16px' }}>
+        {__('Close', 'subtleforms')}
+      </Button>
+    </div>
+  );
+
+  // Tabs for Build/Entries
+  const tabs = (
+    <div className='subtleforms-builder-tabs-wrapper'>
       <TabPanel
         className='subtleforms-builder-tabs'
         activeClass='is-active'
@@ -555,7 +609,61 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
           },
         ]}>
         {(tab) => (
-          <div className='subtleforms-builder-main'>
+          <div style={{ display: 'none' }}>
+            {/* Tabs rendered below in children */}
+          </div>
+        )}
+      </TabPanel>
+    </div>
+  );
+
+  return (
+    <AdminShell
+      title={titleElement}
+      actions={actions}
+      tabs={tabs}
+      noScroll={true}>
+      <style>{`
+        .subtleforms-builder-tabs-content {
+          height: 100%;
+          display: flex;
+          flex-direction: column;
+        }
+        .subtleforms-builder-tabs-content > div[role="tabpanel"] {
+          flex: 1;
+          height: 100%;
+          overflow: hidden;
+        }
+      `}</style>
+      {saveError && (
+        <div
+          style={{
+            padding: '12px 24px',
+            background: '#fcf3f3',
+            borderBottom: '1px solid #f0b849',
+            marginBottom: '16px',
+          }}>
+          <span style={{ color: '#d63638', fontSize: '13px' }}>
+            {saveError}
+          </span>
+        </div>
+      )}
+
+      <TabPanel
+        className='subtleforms-builder-tabs-content'
+        activeClass='is-active'
+        tabs={[
+          {
+            name: 'build',
+            title: __('Build', 'subtleforms'),
+          },
+          {
+            name: 'entries',
+            title: __('Entries', 'subtleforms'),
+          },
+        ]}>
+        {(tab) => (
+          <>
             {tab.name === 'build' && (
               <FormEditor
                 schema={draftSchema}
@@ -565,16 +673,25 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
               />
             )}
             {tab.name === 'entries' && currentFormId && (
-              <SubmissionsTable formId={currentFormId} showFormColumn={false} />
+              <div
+                style={{ padding: '24px', height: '100%', overflowY: 'auto' }}>
+                <SubmissionsTable
+                  formId={currentFormId}
+                  showFormColumn={false}
+                />
+              </div>
             )}
             {tab.name === 'entries' && !currentFormId && (
-              <Notice status='info'>
-                {__('Save the form first to view entries', 'subtleforms')}
-              </Notice>
+              <div
+                style={{ padding: '24px', height: '100%', overflowY: 'auto' }}>
+                <Notice status='info'>
+                  {__('Save the form first to view entries', 'subtleforms')}
+                </Notice>
+              </div>
             )}
-          </div>
+          </>
         )}
       </TabPanel>
-    </div>
+    </AdminShell>
   );
 }

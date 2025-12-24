@@ -35,9 +35,21 @@ export default function FormEditor({
   const [tree, setTree] = useState(() => {
     // Initialize with empty tree if schema is null/undefined
     if (!schema) {
-      return normalizeSchema({ fields: [] });
+      return normalizeSchema({ schema_version: 1, fields: [] });
     }
-    return normalizeSchema(schema);
+    // Ensure schema_version exists, default to 1
+    const schemaWithVersion = {
+      ...schema,
+      schema_version: schema.schema_version || 1,
+    };
+
+    // Log schema version for debugging
+    console.debug(
+      '[SubtleForms] FormEditor initialized with schema version:',
+      schemaWithVersion.schema_version
+    );
+
+    return normalizeSchema(schemaWithVersion);
   });
   const [selectedId, setSelectedId] = useState(null);
   const [insertPicker, setInsertPicker] = useState(null);
@@ -59,8 +71,27 @@ export default function FormEditor({
       return;
     }
 
+    // If fields array reference is identical, skip tree rebuild
+    // This prevents UI reset when only metadata (like version) changes
+    if (schemaRef.current && schema.fields === schemaRef.current.fields) {
+      schemaRef.current = schema;
+      return;
+    }
+
     schemaRef.current = schema;
-    const newTree = normalizeSchema(schema);
+    // Ensure schema_version exists, default to 1
+    const schemaWithVersion = {
+      ...schema,
+      schema_version: schema.schema_version || 1,
+    };
+
+    // Log schema version update
+    console.debug(
+      '[SubtleForms] FormEditor received new schema version:',
+      schemaWithVersion.schema_version
+    );
+
+    const newTree = normalizeSchema(schemaWithVersion);
     setTree(newTree);
 
     // Preserve selection if the node still exists
@@ -87,6 +118,7 @@ export default function FormEditor({
         const fields = denormalizeTree(next);
         const updatedSchema = {
           ...schemaRef.current,
+          schema_version: schemaRef.current?.schema_version || 1,
           fields,
         };
 
@@ -295,12 +327,39 @@ export default function FormEditor({
   }, [selectedStepId, steps]);
 
   return (
-    <div className='flex h-screen overflow-hidden subtleforms-admin'>
-      <FieldDock fieldGroups={fieldGroups} onAddField={handleDockAdd} />
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: selectedField ? '280px 1fr 320px' : '280px 1fr',
+        height: '100%',
+        overflow: 'hidden',
+        background: '#fff',
+      }}>
+      {/* Field Library (Left Sidebar) */}
+      <div
+        style={{
+          borderRight: '1px solid #ddd',
+          background: '#fafafa',
+          overflow: 'auto',
+        }}>
+        <FieldDock fieldGroups={fieldGroups} onAddField={handleDockAdd} />
+      </div>
 
-      <div className='flex flex-col flex-1 bg-gray-50 overflow-hidden'>
+      {/* Canvas Area (Center) */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          overflow: 'hidden',
+          background: '#f5f5f5',
+        }}>
         {steps.length > 0 && (
-          <div className='flex-shrink-0 bg-white border-gray-200 border-b'>
+          <div
+            style={{
+              flexShrink: 0,
+              background: '#fff',
+              borderBottom: '1px solid #ddd',
+            }}>
             <StepNavigator
               steps={steps}
               selectedStepId={selectedStepId}
@@ -311,7 +370,12 @@ export default function FormEditor({
           </div>
         )}
 
-        <div className='flex-1 p-6 subtleforms-scrollable'>
+        <div
+          style={{
+            flex: 1,
+            overflow: 'auto',
+            padding: '24px',
+          }}>
           <FormBuilder
             tree={tree}
             rootId={rootId}
@@ -326,8 +390,14 @@ export default function FormEditor({
         </div>
       </div>
 
+      {/* Field Inspector (Right Sidebar) */}
       {selectedField && (
-        <div className='flex-shrink-0 bg-white shadow-sm border-gray-200 border-l w-80'>
+        <div
+          style={{
+            borderLeft: '1px solid #ddd',
+            background: '#fff',
+            overflow: 'auto',
+          }}>
           <FieldInspector
             field={selectedField}
             allFields={allFields}
@@ -337,6 +407,7 @@ export default function FormEditor({
         </div>
       )}
 
+      {/* Insert Picker Popover */}
       {insertPicker?.anchor && (
         <Popover
           anchor={insertPicker.anchor}
@@ -381,7 +452,6 @@ export default function FormEditor({
                       marginBottom: 4,
                       background: '#f9f9f9',
                       border: '1px solid #e5e5e5',
-                      borderRadius: '4px',
                       cursor: 'pointer',
                       fontSize: '13px',
                       color: '#1e1e1e',

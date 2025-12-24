@@ -3,40 +3,18 @@ import { __ } from '@wordpress/i18n';
 export default function FieldRenderer({ field }) {
   const { type, label, required, placeholder, options, subFields } = field;
 
-  const labelStyle = {
-    display: 'block',
-    marginBottom: '8px',
-    fontSize: '14px',
-    fontWeight: 500,
-    color: '#1e1e1e',
-  };
-
-  const inputStyle = {
-    width: '100%',
-    padding: '10px 12px',
-    fontSize: '14px',
-    border: '1px solid #8c8f94',
-    borderRadius: '4px',
-    fontFamily: 'inherit',
-    pointerEvents: 'none',
-  };
-
-  const selectStyle = {
-    ...inputStyle,
-    appearance: 'none',
-    background: `#fff url('data:image/svg+xml;utf8,<svg fill="%238c8f94" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M5 6l5 5 5-5 2 1-7 7-7-7z"/></svg>') no-repeat right 8px center`,
-    backgroundSize: '20px',
-    paddingRight: '36px',
-  };
+  const labelClass = 'block mb-2 text-sm font-medium text-text-primary';
+  const inputClass =
+    'w-full px-3 py-2 text-sm border border-border rounded-none font-inherit pointer-events-none bg-white text-text-primary';
+  const selectClass = `${inputClass} appearance-none pr-9 bg-no-repeat bg-[right_8px_center]`;
+  const selectBg = `url('data:image/svg+xml;utf8,<svg fill="%238c8f94" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M5 6l5 5 5-5 2 1-7 7-7-7z"/></svg>')`;
 
   return (
     <div>
       {/* Label */}
-      <label style={labelStyle}>
+      <label className={labelClass}>
         {label || field.name}
-        {required && (
-          <span style={{ color: '#d63638', marginLeft: '4px' }}>*</span>
-        )}
+        {required && <span className='ml-1 text-danger'>*</span>}
       </label>
 
       {/* Render appropriate input based on type */}
@@ -47,7 +25,7 @@ export default function FieldRenderer({ field }) {
         <input
           type={type === 'email' ? 'email' : type === 'url' ? 'url' : 'text'}
           placeholder={placeholder || ''}
-          style={inputStyle}
+          className={inputClass}
           readOnly
         />
       )}
@@ -56,7 +34,7 @@ export default function FieldRenderer({ field }) {
         <input
           type='number'
           placeholder={placeholder || ''}
-          style={inputStyle}
+          className={inputClass}
           readOnly
         />
       )}
@@ -65,56 +43,55 @@ export default function FieldRenderer({ field }) {
         <textarea
           rows={4}
           placeholder={placeholder || ''}
-          style={{ ...inputStyle, resize: 'vertical' }}
+          className={`${inputClass} resize-y`}
           readOnly
         />
       )}
 
       {type === 'checkbox' && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+        <div className='flex items-center gap-2'>
           <input
             type='checkbox'
-            style={{ width: '18px', height: '18px', pointerEvents: 'none' }}
+            className='border-border rounded-none focus:ring-0 w-4 h-4 text-primary pointer-events-none'
           />
-          <span style={{ fontSize: '14px' }}>{label}</span>
+          <span className='text-text-primary text-sm'>{label}</span>
         </div>
       )}
 
       {type === 'radio' && options && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div className='flex flex-col gap-2'>
           {options.map((opt, idx) => (
-            <div
-              key={idx}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div key={idx} className='flex items-center gap-2'>
               <input
                 type='radio'
                 name={field.key}
-                style={{ width: '18px', height: '18px', pointerEvents: 'none' }}
+                className='border-border rounded-full focus:ring-0 w-4 h-4 text-primary pointer-events-none'
               />
-              <span style={{ fontSize: '14px' }}>{opt.label}</span>
+              <span className='text-text-primary text-sm'>{opt.label}</span>
             </div>
           ))}
         </div>
       )}
 
       {type === 'multiple_choice' && options && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div className='flex flex-col gap-2'>
           {options.map((opt, idx) => (
-            <div
-              key={idx}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div key={idx} className='flex items-center gap-2'>
               <input
                 type='checkbox'
-                style={{ width: '18px', height: '18px', pointerEvents: 'none' }}
+                className='border-border rounded-none focus:ring-0 w-4 h-4 text-primary pointer-events-none'
               />
-              <span style={{ fontSize: '14px' }}>{opt.label}</span>
+              <span className='text-text-primary text-sm'>{opt.label}</span>
             </div>
           ))}
         </div>
       )}
 
       {type === 'dropdown' && options && (
-        <select style={selectStyle} disabled>
+        <select
+          className={selectClass}
+          style={{ backgroundImage: selectBg }}
+          disabled>
           <option>
             {placeholder || __('Select an option', 'subtleforms')}
           </option>
@@ -126,16 +103,19 @@ export default function FieldRenderer({ field }) {
         </select>
       )}
 
-      {type === 'date' && <input type='date' style={inputStyle} readOnly />}
+      {type === 'date' && <input type='date' className={inputClass} readOnly />}
 
-      {type === 'time' && <input type='time' style={inputStyle} readOnly />}
+      {type === 'time' && <input type='time' className={inputClass} readOnly />}
 
       {type === 'datetime' && (
-        <input type='datetime-local' style={inputStyle} readOnly />
+        <input type='datetime-local' className={inputClass} readOnly />
       )}
 
       {type === 'country' && (
-        <select style={selectStyle} disabled>
+        <select
+          className={selectClass}
+          style={{ backgroundImage: selectBg }}
+          disabled>
           <option>{__('Select a country', 'subtleforms')}</option>
           <option>United States</option>
           <option>Canada</option>
@@ -144,61 +124,30 @@ export default function FieldRenderer({ field }) {
       )}
 
       {type === 'hidden' && (
-        <div
-          style={{
-            padding: '12px',
-            background: '#f0f0f0',
-            border: '1px dashed #999',
-            borderRadius: '4px',
-            fontSize: '13px',
-            color: '#666',
-            fontStyle: 'italic',
-          }}>
+        <div className='bg-secondary p-3 border border-text-tertiary border-dashed rounded-none text-text-secondary text-xs italic'>
           {__('Hidden field (not visible to users)', 'subtleforms')}
         </div>
       )}
 
       {type === 'html' && (
-        <div
-          style={{
-            padding: '12px',
-            background: '#fffbea',
-            border: '1px solid #f59e0b',
-            borderRadius: '4px',
-            fontSize: '13px',
-            color: '#92400e',
-          }}>
+        <div className='bg-yellow-50 p-3 border border-yellow-200 rounded-none text-yellow-800 text-xs'>
           📝 {__('HTML Content Block', 'subtleforms')}
         </div>
       )}
 
       {type === 'image_upload' && (
-        <div
-          style={{
-            border: '2px dashed #8c8f94',
-            borderRadius: '4px',
-            padding: '40px 20px',
-            textAlign: 'center',
-            background: '#fafafa',
-          }}>
-          <div style={{ fontSize: '40px', marginBottom: '8px' }}>🖼️</div>
-          <div style={{ fontSize: '13px', color: '#666' }}>
+        <div className='bg-surface-alt p-10 border-2 border-border border-dashed rounded-none text-center'>
+          <div className='mb-2 text-4xl'>🖼️</div>
+          <div className='text-text-secondary text-xs'>
             {__('Click to upload or drag image here', 'subtleforms')}
           </div>
         </div>
       )}
 
       {type === 'file_upload' && (
-        <div
-          style={{
-            border: '2px dashed #8c8f94',
-            borderRadius: '4px',
-            padding: '40px 20px',
-            textAlign: 'center',
-            background: '#fafafa',
-          }}>
-          <div style={{ fontSize: '40px', marginBottom: '8px' }}>📎</div>
-          <div style={{ fontSize: '13px', color: '#666' }}>
+        <div className='bg-surface-alt p-10 border-2 border-border border-dashed rounded-none text-center'>
+          <div className='mb-2 text-4xl'>📎</div>
+          <div className='text-text-secondary text-xs'>
             {__('Click to upload or drag file here', 'subtleforms')}
           </div>
         </div>
@@ -206,24 +155,14 @@ export default function FieldRenderer({ field }) {
 
       {/* Composite field: Address */}
       {type === 'address' && subFields && (
-        <div
-          style={{
-            padding: '16px',
-            background: '#f9f9f9',
-            border: '1px solid #ddd',
-            borderRadius: '4px',
-          }}>
+        <div className='bg-surface-alt p-4 border border-border rounded-none'>
           {subFields.map((sub, idx) => (
-            <div
-              key={idx}
-              style={{ marginBottom: idx < subFields.length - 1 ? '12px' : 0 }}>
-              <label style={{ ...labelStyle, marginBottom: '4px' }}>
+            <div key={idx} className={idx < subFields.length - 1 ? 'mb-3' : ''}>
+              <label className='block mb-1 font-medium text-text-primary text-sm'>
                 {sub.label}
-                {sub.required && (
-                  <span style={{ color: '#d63638', marginLeft: '4px' }}>*</span>
-                )}
+                {sub.required && <span className='ml-1 text-danger'>*</span>}
               </label>
-              <input type='text' style={inputStyle} readOnly />
+              <input type='text' className={inputClass} readOnly />
             </div>
           ))}
         </div>
