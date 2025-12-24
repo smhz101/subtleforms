@@ -186,9 +186,11 @@
 	border-bottom: none !important;
 	padding: 0 !important;
 	position: absolute;
-	top: 12px;
-	right: 12px;
+	top: 8px;
+	right: 8px;
 	z-index: 20;
+	width: auto !important;
+	height: auto !important;
 }
 
 .subtleforms-create-modal .components-modal__content {
@@ -204,17 +206,27 @@
 /* Fix for close button - subtle gray, circular hover only */
 .subtleforms-create-modal .components-button.has-icon {
 	color: #6b7280 !important;
-	transition:
-		color 0.15s ease,
-		background-color 0.15s ease !important;
+	transition: color 0.15s ease, background-color 0.15s ease !important;
 	border-radius: 0 !important;
 	background: transparent !important;
+	width: 32px !important;
+	height: 32px !important;
+	min-width: 32px !important;
+	min-height: 32px !important;
+	padding: 4px !important;
 }
 
 .subtleforms-create-modal .components-button.has-icon:hover {
 	color: #374151 !important;
 	background-color: #f3f4f6 !important;
 	border-radius: 50% !important;
+}
+
+/* Fix WordPress component field margins */
+.subtleforms-create-modal .components-base-control,
+.subtleforms-create-modal .components-text-control__input,
+.subtleforms-create-modal .components-textarea-control__textarea {
+	margin: 0 !important;
 }
 
 .subtleforms-modal-overlay {

@@ -311,7 +311,6 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
                     onChange={setTitle}
                     disabled={creating}
                     placeholder={__('e.g. Contact Form', 'subtleforms')}
-                    className='!m-0 !px-3 !py-2 !border-gray-300 focus:!border-blue-500 focus:!ring-1 focus:!ring-blue-500 !w-full !text-sm'
                   />
                 </div>
 
@@ -331,7 +330,6 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
                       'Describe the purpose of this form...',
                       'subtleforms'
                     )}
-                    className='!m-0 !px-3 !py-2 !border-gray-300 focus:!border-blue-500 focus:!ring-1 focus:!ring-blue-500 !w-full !text-sm'
                   />
                 </div>
               </div>
