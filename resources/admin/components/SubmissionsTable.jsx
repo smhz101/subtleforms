@@ -5,8 +5,11 @@ import {
   Button,
   SelectControl,
   SearchControl,
+  Modal,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
+import { useDispatch } from '@wordpress/data';
+import { store as noticesStore } from '@wordpress/notices';
 import DataTable from './DataTable';
 
 const restBase =
@@ -32,6 +35,27 @@ async function apiGet(path) {
   return response.json();
 }
 
+async function apiRequest(path, options = {}) {
+  return fetch(restBase + path, {
+    credentials: 'same-origin',
+    headers: {
+      'X-WP-Nonce': restNonce,
+      'Content-Type': 'application/json',
+      ...options.headers,
+    },
+    ...options,
+  }).then(async (response) => {
+    let body = null;
+    try {
+      const text = await response.text();
+      body = text ? JSON.parse(text) : null;
+    } catch (err) {
+      body = null;
+    }
+    return { ok: response.ok, status: response.status, body };
+  });
+}
+
 export default function SubmissionsTable({
   formId,
   showFormColumn = true,
@@ -48,6 +72,9 @@ export default function SubmissionsTable({
   const [perPage, setPerPage] = useState(20);
   const [sortBy, setSortBy] = useState('created_at');
   const [sortDirection, setSortDirection] = useState('desc');
+  const [deleteModal, setDeleteModal] = useState(null);
+  const [selectedSubmissions, setSelectedSubmissions] = useState([]);
+  const { createSuccessNotice, createErrorNotice } = useDispatch(noticesStore);
 
   useEffect(() => {
     if (!formId) {
@@ -132,6 +159,114 @@ export default function SubmissionsTable({
       setTotalItems(0);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDelete = async (submissionId) => {
+    setDeleteModal(null);
+    setSubmissions((prev) => prev.filter((s) => s.id !== submissionId));
+
+    try {
+      const response = await fetch(`${restBase}/submissions/${submissionId}`, {
+        method: 'DELETE',
+        credentials: 'same-origin',
+        headers: {
+          'X-WP-Nonce': restNonce,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete');
+      }
+      createSuccessNotice(__('Submission deleted', 'subtleforms'), {
+        type: 'snackbar',
+      });
+    } catch (err) {
+      loadSubmissions(); // Revert on failure
+      createErrorNotice(__('Failed to delete submission', 'subtleforms'), {
+        type: 'snackbar',
+      });
+    }
+  };
+
+  const handleBulkDelete = async (ids) => {
+    if (
+      !window.confirm(
+        sprintf(
+          __('Are you sure you want to delete %d submissions?', 'subtleforms'),
+          ids.length
+        )
+      )
+    ) {
+      return;
+    }
+
+    setSubmissions((prev) => prev.filter((s) => !ids.includes(s.id)));
+    setSelectedSubmissions([]);
+
+    let successCount = 0;
+    for (const id of ids) {
+      const { ok } = await apiRequest(`/submissions/${id}`, {
+        method: 'DELETE',
+      });
+      if (ok) successCount++;
+    }
+
+    if (successCount === ids.length) {
+      createSuccessNotice(
+        sprintf(__('%d submissions deleted', 'subtleforms'), successCount),
+        { type: 'snackbar' }
+      );
+    } else {
+      createErrorNotice(
+        sprintf(
+          __(
+            'Failed to delete some submissions (%d/%d deleted)',
+            'subtleforms'
+          ),
+          successCount,
+          ids.length
+        ),
+        { type: 'snackbar' }
+      );
+      loadSubmissions(); // Reload to sync state
+    }
+  };
+
+  const handleBulkMarkStatus = async (ids, status) => {
+    setSubmissions((prev) =>
+      prev.map((s) => (ids.includes(s.id) ? { ...s, status } : s))
+    );
+    setSelectedSubmissions([]);
+
+    let successCount = 0;
+    for (const id of ids) {
+      const { ok } = await apiRequest(`/submissions/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ status }),
+      });
+      if (ok) successCount++;
+    }
+
+    if (successCount === ids.length) {
+      createSuccessNotice(
+        sprintf(__('%d submissions updated', 'subtleforms'), successCount),
+        { type: 'snackbar' }
+      );
+    } else {
+      createErrorNotice(
+        sprintf(
+          __(
+            'Failed to update some submissions (%d/%d updated)',
+            'subtleforms'
+          ),
+          successCount,
+          ids.length
+        ),
+        { type: 'snackbar' }
+      );
+      loadSubmissions(); // Reload to sync state
     }
   };
 
@@ -252,14 +387,26 @@ export default function SubmissionsTable({
       title: __('Actions', 'subtleforms'),
       width: '15%',
       render: (_, submission) => (
-        <Button
-          isSecondary
-          onClick={(e) => {
-            e.stopPropagation();
-            handleRowClick(submission);
-          }}>
-          {__('View', 'subtleforms')}
-        </Button>
+        <div className='flex gap-2'>
+          <Button
+            isSecondary
+            isSmall
+            onClick={(e) => {
+              e.stopPropagation();
+              handleRowClick(submission);
+            }}>
+            {__('View', 'subtleforms')}
+          </Button>
+          <Button
+            isDestructive
+            isSmall
+            onClick={(e) => {
+              e.stopPropagation();
+              setDeleteModal(submission.id);
+            }}>
+            {__('Delete', 'subtleforms')}
+          </Button>
+        </div>
       ),
     },
   ];
@@ -269,20 +416,67 @@ export default function SubmissionsTable({
   }
 
   return (
-    <DataTable
-      columns={columns}
-      data={submissions}
-      totalItems={totalItems}
-      currentPage={currentPage}
-      perPage={perPage}
-      sortBy={sortBy}
-      sortDirection={sortDirection}
-      onSort={handleSort}
-      onPageChange={handlePageChange}
-      onPerPageChange={handlePerPageChange}
-      loading={loading}
-      emptyMessage={__('No submissions found.', 'subtleforms')}
-      onRowClick={handleRowClick}
-    />
+    <>
+      <DataTable
+        columns={columns}
+        data={submissions}
+        totalItems={totalItems}
+        currentPage={currentPage}
+        perPage={perPage}
+        sortBy={sortBy}
+        sortDirection={sortDirection}
+        onSort={handleSort}
+        onPageChange={handlePageChange}
+        onPerPageChange={handlePerPageChange}
+        loading={loading}
+        emptyMessage={__('No submissions found.', 'subtleforms')}
+        onRowClick={handleRowClick}
+        selectable={true}
+        selectedItems={selectedSubmissions}
+        onSelectionChange={setSelectedSubmissions}
+        bulkActions={[
+          {
+            label: __('Mark as Read', 'subtleforms'),
+            onClick: (ids) => handleBulkMarkStatus(ids, 'read'),
+          },
+          {
+            label: __('Mark as Unread', 'subtleforms'),
+            onClick: (ids) => handleBulkMarkStatus(ids, 'unread'),
+          },
+          {
+            label: __('Delete', 'subtleforms'),
+            onClick: handleBulkDelete,
+            isDestructive: true,
+          },
+        ]}
+      />
+      {deleteModal && (
+        <Modal
+          title={__('Delete Submission', 'subtleforms')}
+          onRequestClose={() => setDeleteModal(null)}
+          className='subtleforms-delete-modal'
+          style={{ maxWidth: '400px' }}>
+          <div className='p-4'>
+            <p className='mb-6 text-text-secondary'>
+              {__(
+                'Are you sure you want to delete this submission? This action cannot be undone.',
+                'subtleforms'
+              )}
+            </p>
+            <div className='flex justify-end gap-3'>
+              <Button isSecondary onClick={() => setDeleteModal(null)}>
+                {__('Cancel', 'subtleforms')}
+              </Button>
+              <Button
+                isDestructive
+                isPrimary
+                onClick={() => handleDelete(deleteModal)}>
+                {__('Delete Submission', 'subtleforms')}
+              </Button>
+            </div>
+          </div>
+        </Modal>
+      )}
+    </>
   );
 }

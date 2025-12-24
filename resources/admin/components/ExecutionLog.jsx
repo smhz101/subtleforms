@@ -1,5 +1,7 @@
 import { useState, useEffect } from '@wordpress/element';
 import { Spinner, Notice } from '@wordpress/components';
+import { useDispatch } from '@wordpress/data';
+import { store as noticesStore } from '@wordpress/notices';
 import { __ } from '@wordpress/i18n';
 
 const restBase =
@@ -23,26 +25,30 @@ function apiGet(path) {
 
 export default function ExecutionLog({ submissionId }) {
   const [logs, setLogs] = useState(null);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const { createErrorNotice } = useDispatch(noticesStore);
 
   useEffect(() => {
     if (!submissionId) return;
+    setLoading(true);
     apiGet(`/submissions/${submissionId}/logs`)
       .then((data) => {
         if (data && Array.isArray(data)) setLogs(data);
-        else setError(__('Failed to load logs', 'subtleforms'));
+        else createErrorNotice(__('Failed to load logs', 'subtleforms'));
       })
-      .catch(() => setError(__('Failed to load logs', 'subtleforms')));
+      .catch(() => createErrorNotice(__('Failed to load logs', 'subtleforms')))
+      .finally(() => setLoading(false));
   }, [submissionId]);
 
   if (!submissionId)
     return (
-      <Notice status='info'>
+      <Notice status='info' isDismissible={false}>
         {__('Select a submission to view logs.', 'subtleforms')}
       </Notice>
     );
-  if (error) return <Notice status='error'>{error}</Notice>;
-  if (logs === null) return <Spinner />;
+
+  if (loading) return <Spinner />;
+  if (!logs) return null;
 
   return (
     <div>

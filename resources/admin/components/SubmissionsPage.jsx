@@ -22,18 +22,19 @@ export default function SubmissionsPage({ formId }) {
   return (
     <AdminShell
       title={title}
-      search={
-        <SearchControl
-          value={search}
-          onChange={setSearch}
-          placeholder={__('Search submissions...', 'subtleforms')}
-        />
-      }
-      tabs={
+      noScroll={true}
+      actionBarLeft={
         <TabBar
           tabs={tabs}
           activeTab={statusFilter}
           onTabChange={setStatusFilter}
+        />
+      }
+      actionBarRight={
+        <SearchControl
+          value={search}
+          onChange={setSearch}
+          placeholder={__('Search submissions...', 'subtleforms')}
         />
       }>
       <SubmissionsTable
