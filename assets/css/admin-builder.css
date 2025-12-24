@@ -63,7 +63,7 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	border: none;
 	padding: 4px 8px;
 	cursor: pointer;
-	border-radius: 4px;
+	border-radius: 0;
 	transition: background 0.15s;
 }
 
@@ -76,7 +76,7 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	font-weight: 600;
 	color: #1e1e1e;
 	border: 1px solid #8c8f94;
-	border-radius: 4px;
+	border-radius: 0;
 	padding: 4px 8px;
 	min-width: 200px;
 }
@@ -144,7 +144,7 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	padding: 6px 12px;
 	background: #f5f6f7;
 	border: 1px solid #d0d4d9;
-	border-radius: 6px;
+	border-radius: 0;
 	cursor: pointer;
 	user-select: none;
 }
@@ -228,9 +228,8 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	max-width: 900px;
 	margin: 0 auto;
 	background: #fff;
-	border-radius: 12px;
+	border-radius: 0;
 	border: 1px solid #e2e5ea;
-	box-shadow: 0 2px 12px rgba(15, 23, 42, 0.08);
 	padding: 40px;
 	min-height: 600px;
 }
@@ -240,7 +239,7 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	min-height: 76px;
 	padding: var(--subtleforms-dropzone-padding, 12px);
 	background: #f9fafb;
-	border-radius: 8px;
+	border-radius: 0;
 	border: 1px dashed #d8dde5;
 	transition:
 		background-color 0.15s ease,
@@ -275,7 +274,7 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	border: 1px dashed transparent;
 	background: transparent;
 	padding: 4px 8px;
-	border-radius: 4px;
+	border-radius: 0;
 	cursor: pointer;
 	transition:
 		border-color 0.1s ease,
@@ -311,12 +310,11 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	gap: 8px;
 	padding: 16px;
 	border: 1px solid #dcdcde;
-	border-radius: 10px;
+	border-radius: 0;
 	background: #fff;
 	cursor: pointer;
 	transition:
 		border-color 0.15s ease,
-		box-shadow 0.15s ease,
 		transform 0.15s ease;
 	position: relative;
 	text-align: left;
@@ -325,13 +323,11 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 .subtleforms-create-form-option:disabled {
 	cursor: not-allowed;
 	opacity: 0.6;
-	box-shadow: none;
 }
 
 .subtleforms-create-form-option:not(:disabled):hover,
 .subtleforms-create-form-option:not(:disabled):focus {
 	border-color: #2271b1;
-	box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.12);
 	transform: translateY(-1px);
 	outline: none;
 }
@@ -371,8 +367,7 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	width: 328px;
 	background: #fff;
 	border: 1px solid #d7dbe0;
-	border-radius: 14px;
-	box-shadow: -12px 0 28px rgba(15, 23, 42, 0.05);
+	border-radius: 0;
 	position: sticky;
 	top: 24px;
 	max-height: calc(100vh - 140px);
@@ -406,12 +401,11 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 /* Field chrome adjustments */
 .subtleforms-field-chrome {
 	position: relative;
-	border-radius: 12px;
+	border-radius: 0;
 	background: #fff;
-	transition:
-		border-color 0.15s ease,
-		box-shadow 0.15s ease;
-	border: 1px solid transparent;
+	transition: border-color 0.15s ease;
+	border: 1px solid #e5e5e5;
+	margin-bottom: 12px;
 }
 
 .subtleforms-field-chrome__inner {
@@ -419,18 +413,16 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 }
 
 .subtleforms-field-chrome:hover {
-	border-color: #cad1da;
-	box-shadow: 0 0 0 1px rgba(34, 113, 177, 0.14);
+	border-color: #8c8f94;
 }
 
 .subtleforms-field-chrome.is-hovered {
-	border-color: #bcc6d1;
-	box-shadow: 0 0 0 1px rgba(34, 113, 177, 0.18);
+	border-color: #8c8f94;
 }
 
 .subtleforms-field-chrome.is-selected {
 	border-color: #2271b1;
-	box-shadow: 0 0 0 1px rgba(34, 113, 177, 0.32);
+	background: #f6f7f7;
 }
 
 /* Step Navigator */
@@ -440,7 +432,7 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	gap: 8px;
 	padding: 12px 20px;
 	background: #fff;
-	border-bottom: 1px solid #dcdcde;
+	border-bottom: 1px solid #ddd;
 	overflow-x: auto;
 	flex-shrink: 0;
 }
@@ -450,8 +442,8 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	align-items: center;
 	gap: 8px;
 	padding: 8px 16px;
-	border: 1px solid #dcdcde;
-	border-radius: 6px;
+	border: 1px solid #ddd;
+	border-radius: 0;
 	background: #f6f7f7;
 	cursor: pointer;
 	transition: all 0.15s;
@@ -479,7 +471,7 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	background: transparent;
 	color: inherit;
 	cursor: pointer;
-	border-radius: 3px;
+	border-radius: 0;
 	font-size: 16px;
 	line-height: 1;
 	opacity: 0.7;
@@ -500,7 +492,7 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	gap: 6px;
 	padding: 8px 16px;
 	border: 1px dashed #8c8f94;
-	border-radius: 6px;
+	border-radius: 0;
 	background: transparent;
 	color: #2271b1;
 	cursor: pointer;

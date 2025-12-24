@@ -2,8 +2,52 @@
  * SubtleForms Admin Styles
  * 
  * @package SubtleForms
- * @version 1.0.1
+ * @version 1.0.7
  */
+
+/* ================================================================
+   GLOBAL ADMIN PAGE CONTROL - Prevent page-level scrolling
+   ================================================================ */
+
+/* Apply to all SubtleForms admin pages */
+body.toplevel_page_subtleforms,
+body.subtle-forms_page_subtleforms-forms,
+body.subtle-forms_page_subtleforms-submissions,
+body.subtle-forms_page_subtleforms-new-form {
+	overflow: hidden !important;
+	height: 100vh !important;
+}
+
+/* Ensure WordPress admin content wrapper is full height */
+body.toplevel_page_subtleforms #wpcontent,
+body.subtle-forms_page_subtleforms-forms #wpcontent,
+body.subtle-forms_page_subtleforms-submissions #wpcontent,
+body.subtle-forms_page_subtleforms-new-form #wpcontent {
+	padding-left: 0 !important;
+	height: 100vh !important;
+	overflow: hidden !important;
+}
+
+/* Remove default padding from wpbody-content */
+body.toplevel_page_subtleforms #wpbody-content,
+body.subtle-forms_page_subtleforms-forms #wpbody-content,
+body.subtle-forms_page_subtleforms-submissions #wpbody-content,
+body.subtle-forms_page_subtleforms-new-form #wpbody-content {
+	padding-bottom: 0 !important;
+	height: 100% !important;
+	overflow: hidden !important;
+}
+
+/* Remove margins from .wrap */
+body.toplevel_page_subtleforms .wrap,
+body.subtle-forms_page_subtleforms-forms .wrap,
+body.subtle-forms_page_subtleforms-submissions .wrap,
+body.subtle-forms_page_subtleforms-new-form .wrap {
+	margin: 0 !important;
+	padding: 0 !important;
+	height: 100% !important;
+	overflow: hidden !important;
+}
 
 /* ================================================================
    SHARED ADMIN LAYOUT SHELL
