@@ -49,214 +49,6 @@ function apiRequest(path, options = {}) {
   });
 }
 
-function FormRow({
-  form,
-  onEdit,
-  onDuplicate,
-  onDelete,
-  onStatusChange,
-  onRefresh,
-}) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [title, setTitle] = useState(form.title);
-  const [saving, setSaving] = useState(false);
-  const [copyState, setCopyState] = useState('idle');
-  const inputRef = useRef(null);
-  const { createSuccessNotice, createErrorNotice } = useDispatch(noticesStore);
-
-  const shortcode = `[subtleforms id="${form.id}"]`;
-  const submissionCount = form.submission_count || 0;
-  const unreadCount = form.unread_count || 0;
-  const updatedAt = form.updated_at || form.created_at || '';
-
-  useEffect(() => {
-    if (isEditing && inputRef.current) {
-      inputRef.current.focus();
-      inputRef.current.select();
-    }
-  }, [isEditing]);
-
-  const handleSaveTitle = async () => {
-    if (!title.trim() || title === form.title) {
-      setIsEditing(false);
-      setTitle(form.title);
-      return;
-    }
-
-    setSaving(true);
-    const { ok, body } = await apiRequest(`/forms/${form.id}`, {
-      method: 'PUT',
-      body: JSON.stringify({ title: title.trim() }),
-    });
-
-    setSaving(false);
-
-    if (ok) {
-      setIsEditing(false);
-      createSuccessNotice(__('Form renamed', 'subtleforms'), {
-        type: 'snackbar',
-        isDismissible: true,
-      });
-      onRefresh();
-    } else {
-      createErrorNotice(
-        body?.message || __('Failed to rename form', 'subtleforms'),
-        { type: 'snackbar', isDismissible: true }
-      );
-      setTitle(form.title);
-    }
-  };
-
-  const handleCopyShortcode = () => {
-    if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(shortcode).then(() => {
-        setCopyState('copied');
-        createSuccessNotice(__('Shortcode copied', 'subtleforms'), {
-          type: 'snackbar',
-          isDismissible: true,
-        });
-        setTimeout(() => setCopyState('idle'), 2000);
-      });
-    }
-  };
-
-  const statusBadgeClass =
-    {
-      draft: 'subtleforms-status-badge subtleforms-status-draft',
-      published: 'subtleforms-status-badge subtleforms-status-published',
-      archived: 'subtleforms-status-badge subtleforms-status-archived',
-    }[form.status] || 'subtleforms-status-badge';
-
-  return (
-    <tr>
-      <td className='subtleforms-form-title'>
-        {isEditing ? (
-          <div className='subtleforms-inline-edit'>
-            <input
-              ref={inputRef}
-              type='text'
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              onBlur={handleSaveTitle}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') handleSaveTitle();
-                if (e.key === 'Escape') {
-                  setIsEditing(false);
-                  setTitle(form.title);
-                }
-              }}
-              disabled={saving}
-              className='subtleforms-title-input'
-            />
-          </div>
-        ) : (
-          <button
-            type='button'
-            className='subtleforms-title-button'
-            onClick={() => setIsEditing(true)}>
-            <strong>{form.title}</strong>
-          </button>
-        )}
-      </td>
-      <td>
-        <span className={statusBadgeClass}>
-          {form.status === 'draft' && __('Draft', 'subtleforms')}
-          {form.status === 'published' && __('Published', 'subtleforms')}
-          {form.status === 'archived' && __('Archived', 'subtleforms')}
-        </span>
-      </td>
-      <td className='subtleforms-shortcode-cell'>
-        <button
-          type='button'
-          className='subtleforms-shortcode-button'
-          onClick={handleCopyShortcode}
-          title={__('Click to copy', 'subtleforms')}>
-          <code>{shortcode}</code>
-        </button>
-      </td>
-      <td className='subtleforms-count-cell'>
-        <a
-          href={`admin.php?page=subtleforms-submissions&form_id=${form.id}`}
-          className='subtleforms-submission-count'
-          title={sprintf(
-            __('%d unread, %d total entries', 'subtleforms'),
-            unreadCount,
-            submissionCount
-          )}>
-          {unreadCount > 0
-            ? `${unreadCount}/${submissionCount}`
-            : submissionCount}
-        </a>
-      </td>
-      <td className='subtleforms-date-cell'>
-        <time>{new Date(updatedAt).toLocaleDateString()}</time>
-      </td>
-      <td className='subtleforms-actions-cell'>
-        <div className='subtleforms-row-actions'>
-          <Button
-            icon={pencil}
-            label={__('Edit', 'subtleforms')}
-            onClick={() => onEdit(form.id)}
-            isSmall
-          />
-          <Dropdown
-            renderToggle={({ onToggle }) => (
-              <Button
-                icon={moreVertical}
-                label={__('More actions', 'subtleforms')}
-                onClick={onToggle}
-                isSmall
-              />
-            )}
-            renderContent={({ onClose }) => (
-              <MenuGroup>
-                <MenuItem
-                  icon={published}
-                  onClick={() => {
-                    onStatusChange(form.id, form.status);
-                    onClose();
-                  }}>
-                  {__('Change status', 'subtleforms')}
-                </MenuItem>
-                <MenuItem
-                  icon={copy}
-                  onClick={() => {
-                    onDuplicate(form.id);
-                    onClose();
-                  }}>
-                  {__('Duplicate', 'subtleforms')}
-                </MenuItem>
-                <MenuItem
-                  icon={help}
-                  onClick={() => {
-                    if (window.open) {
-                      window.open(
-                        `admin.php?page=subtleforms-submissions&form_id=${form.id}`,
-                        '_self'
-                      );
-                    }
-                    onClose();
-                  }}>
-                  {__('View submissions', 'subtleforms')}
-                </MenuItem>
-                <MenuItem
-                  icon={trash}
-                  onClick={() => {
-                    onDelete(form.id);
-                    onClose();
-                  }}
-                  isDestructive>
-                  {__('Delete', 'subtleforms')}
-                </MenuItem>
-              </MenuGroup>
-            )}
-          />
-        </div>
-      </td>
-    </tr>
-  );
-}
-
 export default function FormsList({
   onSelect,
   onEdit,
@@ -274,6 +66,7 @@ export default function FormsList({
   const [deleteModal, setDeleteModal] = useState(null);
   const [statusModal, setStatusModal] = useState(null);
   const [statusValue, setStatusValue] = useState('draft');
+  const [selectedForms, setSelectedForms] = useState([]);
   const { createSuccessNotice, createErrorNotice } = useDispatch(noticesStore);
 
   const handleCopyShortcode = (shortcode) => {
@@ -376,21 +169,21 @@ export default function FormsList({
       title: __('Shortcode', 'subtleforms'),
       width: '20%',
       render: (id, form) => {
-        const shortcode = `[subtleform id="${id}"]`;
+        const shortcode = `[subtleforms id="${id}"]`;
         return (
           <button
             type='button'
-            className='group flex items-center gap-2 bg-gray-50 hover:bg-blue-50 px-3 py-1.5 border border-gray-200 hover:border-blue-300 transition-all duration-150'
+            className='group flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded text-xs transition-colors'
             onClick={(e) => {
               e.stopPropagation();
               handleCopyShortcode(shortcode);
             }}
             title={__('Click to copy', 'subtleforms')}>
-            <code className='font-mono text-gray-700 group-hover:text-blue-700 text-xs'>
+            <code className='font-mono text-gray-600 group-hover:text-gray-900'>
               {shortcode}
             </code>
             <svg
-              className='flex-shrink-0 w-3.5 h-3.5 text-gray-400 group-hover:text-blue-500'
+              className='flex-shrink-0 w-3 h-3 text-gray-400 group-hover:text-gray-600'
               fill='none'
               stroke='currentColor'
               viewBox='0 0 24 24'>
@@ -497,7 +290,8 @@ export default function FormsList({
               <MenuGroup>
                 <MenuItem
                   icon={published}
-                  onClick={() => {
+                  onClick={(e) => {
+                    if (e && e.stopPropagation) e.stopPropagation();
                     setStatusModal(form.id);
                     setStatusValue(form.status);
                     onClose();
@@ -506,7 +300,8 @@ export default function FormsList({
                 </MenuItem>
                 <MenuItem
                   icon={copy}
-                  onClick={() => {
+                  onClick={(e) => {
+                    if (e && e.stopPropagation) e.stopPropagation();
                     handleDuplicate(form.id);
                     onClose();
                   }}>
@@ -514,7 +309,8 @@ export default function FormsList({
                 </MenuItem>
                 <MenuItem
                   icon={help}
-                  onClick={() => {
+                  onClick={(e) => {
+                    if (e && e.stopPropagation) e.stopPropagation();
                     window.location.href = `admin.php?page=subtleforms-submissions&form_id=${form.id}`;
                     onClose();
                   }}>
@@ -522,7 +318,8 @@ export default function FormsList({
                 </MenuItem>
                 <MenuItem
                   icon={trash}
-                  onClick={() => {
+                  onClick={(e) => {
+                    if (e && e.stopPropagation) e.stopPropagation();
                     setDeleteModal(form.id);
                     onClose();
                   }}
@@ -711,6 +508,80 @@ export default function FormsList({
     }
   };
 
+  const handleBulkDelete = async (ids) => {
+    if (
+      !window.confirm(
+        sprintf(
+          __('Are you sure you want to delete %d forms?', 'subtleforms'),
+          ids.length
+        )
+      )
+    ) {
+      return;
+    }
+
+    const oldForms = [...forms];
+    setForms((prev) => prev.filter((f) => !ids.includes(f.id)));
+    setSelectedForms([]);
+
+    let successCount = 0;
+    for (const id of ids) {
+      const { ok } = await apiRequest(`/forms/${id}`, { method: 'DELETE' });
+      if (ok) successCount++;
+    }
+
+    if (successCount === ids.length) {
+      createSuccessNotice(
+        sprintf(__('%d forms deleted', 'subtleforms'), successCount),
+        { type: 'snackbar' }
+      );
+    } else {
+      createErrorNotice(
+        sprintf(
+          __('Failed to delete some forms (%d/%d deleted)', 'subtleforms'),
+          successCount,
+          ids.length
+        ),
+        { type: 'snackbar' }
+      );
+      fetchForms(); // Reload to sync state
+    }
+  };
+
+  const handleBulkStatusChange = async (ids, status) => {
+    const oldForms = [...forms];
+    setForms((prev) =>
+      prev.map((f) => (ids.includes(f.id) ? { ...f, status } : f))
+    );
+    setSelectedForms([]);
+
+    let successCount = 0;
+    for (const id of ids) {
+      const { ok } = await apiRequest(`/forms/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify({ status }),
+      });
+      if (ok) successCount++;
+    }
+
+    if (successCount === ids.length) {
+      createSuccessNotice(
+        sprintf(__('%d forms updated', 'subtleforms'), successCount),
+        { type: 'snackbar' }
+      );
+    } else {
+      createErrorNotice(
+        sprintf(
+          __('Failed to update some forms (%d/%d updated)', 'subtleforms'),
+          successCount,
+          ids.length
+        ),
+        { type: 'snackbar' }
+      );
+      fetchForms(); // Reload to sync state
+    }
+  };
+
   return (
     <>
       <DataTable
@@ -725,6 +596,24 @@ export default function FormsList({
         onPageChange={handlePageChange}
         onPerPageChange={handlePerPageChange}
         loading={isLoading}
+        selectable={true}
+        selectedItems={selectedForms}
+        onSelectionChange={setSelectedForms}
+        bulkActions={[
+          {
+            label: __('Mark as Published', 'subtleforms'),
+            onClick: (ids) => handleBulkStatusChange(ids, 'published'),
+          },
+          {
+            label: __('Mark as Draft', 'subtleforms'),
+            onClick: (ids) => handleBulkStatusChange(ids, 'draft'),
+          },
+          {
+            label: __('Delete', 'subtleforms'),
+            onClick: handleBulkDelete,
+            isDestructive: true,
+          },
+        ]}
         emptyMessage={
           <div className='py-12 text-center'>
             <div className='mb-4 text-6xl'>📋</div>
@@ -760,23 +649,38 @@ export default function FormsList({
         <Modal
           title={__('Delete Form', 'subtleforms')}
           onRequestClose={() => setDeleteModal(null)}
-          className='subtleforms-delete-modal'>
-          <p>
-            {__(
-              'Are you sure you want to delete this form? This action cannot be undone.',
-              'subtleforms'
-            )}
-          </p>
-          <div className='subtleforms-modal-actions'>
-            <Button isSecondary onClick={() => setDeleteModal(null)}>
-              {__('Cancel', 'subtleforms')}
-            </Button>
-            <Button
-              isDestructive
-              isPrimary
-              onClick={() => handleDelete(deleteModal)}>
-              {__('Delete', 'subtleforms')}
-            </Button>
+          className='subtleforms-delete-modal'
+          style={{ maxWidth: '400px' }}>
+          <div className='p-4'>
+            <p className='mb-6 text-text-secondary'>
+              {(() => {
+                const form = forms.find((f) => f.id === deleteModal);
+                const count = form?.submission_count || 0;
+                return count > 0
+                  ? sprintf(
+                      __(
+                        'Are you sure you want to delete this form? It has %d submissions which will also be permanently deleted.',
+                        'subtleforms'
+                      ),
+                      count
+                    )
+                  : __(
+                      'Are you sure you want to delete this form? This action cannot be undone.',
+                      'subtleforms'
+                    );
+              })()}
+            </p>
+            <div className='flex justify-end gap-3'>
+              <Button isSecondary onClick={() => setDeleteModal(null)}>
+                {__('Cancel', 'subtleforms')}
+              </Button>
+              <Button
+                isDestructive
+                isPrimary
+                onClick={() => handleDelete(deleteModal)}>
+                {__('Delete Form', 'subtleforms')}
+              </Button>
+            </div>
           </div>
         </Modal>
       )}

@@ -18,7 +18,8 @@ export default function FormsPage() {
 
   return (
     <AdminShell
-      title={__('Forms', 'subtleforms')}
+      title={__('All Forms', 'subtleforms')}
+      noScroll={true}
       actions={
         <Button
           isPrimary
@@ -29,14 +30,14 @@ export default function FormsPage() {
           {__('New Form', 'subtleforms')}
         </Button>
       }
-      tabs={
+      actionBarLeft={
         <TabBar
           tabs={tabs}
           activeTab={statusFilter}
           onTabChange={setStatusFilter}
         />
       }
-      search={
+      actionBarRight={
         <SearchControl
           value={search}
           onChange={setSearch}
