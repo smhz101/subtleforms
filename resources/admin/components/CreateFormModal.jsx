@@ -32,12 +32,11 @@ function apiPost(path, payload) {
 }
 
 export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
-  const [step, setStep] = useState(1);
   const [creating, setCreating] = useState(false);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [template, setTemplate] = useState('blank');
-  const [formType, setFormType] = useState('');
+  const [formType, setFormType] = useState('regular');
   const { createErrorNotice } = useDispatch(noticesStore);
 
   const generateDefaultTitle = useCallback(() => {
@@ -49,9 +48,8 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
     if (isOpen) {
       setTitle(generateDefaultTitle());
       setDescription('');
-      setStep(1);
       setTemplate('blank');
-      setFormType('');
+      setFormType('regular');
       setCreating(false);
     }
   }, [isOpen, generateDefaultTitle]);
@@ -174,9 +172,10 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
     },
   ];
 
-  const renderOptionCard = (option, selected, onSelect) => {
+  const renderOptionCard = (option, selected, onSelect, size = 'default') => {
     const isSelected = selected === option.id;
     const isDisabled = option.disabled;
+    const isCompact = size === 'compact';
 
     return (
       <button
@@ -184,73 +183,59 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         type='button'
         onClick={() => !isDisabled && onSelect(option.id)}
         disabled={isDisabled}
-        className={`group relative flex flex-col items-center text-center p-5 transition-all duration-200 w-full rounded-sm border focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 ${
+        className={`group relative flex ${
+          isCompact
+            ? 'flex-row items-center gap-3 p-3'
+            : 'flex-col items-center text-center p-4'
+        } transition-all duration-150 w-full border focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-1 ${
           isSelected
-            ? 'border-primary bg-gray-50'
+            ? 'border-primary bg-blue-50 shadow-sm'
             : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
         } ${
           isDisabled
-            ? 'opacity-60 cursor-not-allowed bg-gray-50 border-dashed'
+            ? 'opacity-50 cursor-not-allowed bg-gray-50 border-dashed'
             : 'cursor-pointer'
         }`}>
         <div
-          className={`mb-3 p-2.5 rounded-sm transition-colors ${
+          className={`${isCompact ? 'flex-shrink-0' : 'mb-2'} ${
+            isCompact ? 'p-2' : 'p-2.5'
+          } rounded transition-colors ${
             isSelected
               ? 'bg-primary text-white'
-              : 'bg-gray-100 text-gray-600 group-hover:bg-white group-hover:text-primary'
+              : 'bg-gray-100 text-gray-600 group-hover:bg-gray-200 group-hover:text-primary'
           }`}>
-          <Icon icon={option.icon} size={28} />
+          <Icon icon={option.icon} size={isCompact ? 20 : 24} />
         </div>
 
-        <div
-          className={`mb-1 font-semibold text-sm ${
-            isSelected ? 'text-primary' : 'text-gray-900'
-          }`}>
-          {option.title}
-        </div>
+        <div className={`${isCompact ? 'flex-1 text-left' : 'w-full'}`}>
+          <div
+            className={`${isCompact ? 'text-xs' : 'text-sm'} font-semibold ${
+              isSelected ? 'text-primary' : 'text-gray-900'
+            }`}>
+            {option.title}
+          </div>
 
-        <div className='text-gray-500 text-xs leading-snug'>
-          {option.description}
+          {!isCompact && (
+            <div className='mt-1 text-gray-500 text-xs leading-snug'>
+              {option.description}
+            </div>
+          )}
         </div>
 
         {isSelected && (
-          <div className='top-3 right-3 absolute text-primary'>
-            <Icon icon={check} size={20} />
+          <div className='top-2 right-2 absolute text-primary'>
+            <Icon icon={check} size={16} />
           </div>
         )}
 
         {isDisabled && (
-          <div className='mt-2 font-semibold text-[11px] text-gray-500 uppercase tracking-wide'>
+          <div className='mt-1 font-medium text-[10px] text-gray-500 uppercase tracking-wider'>
             {__('Coming soon', 'subtleforms')}
           </div>
         )}
       </button>
     );
   };
-
-  const StepIndicator = () => (
-    <div className='flex justify-center items-center mb-6 px-6'>
-      <div className='flex items-center gap-3 font-medium text-gray-600 text-xs'>
-        <div
-          className={`px-3 py-1 rounded-sm border ${
-            step === 1
-              ? 'border-primary bg-gray-50 text-gray-900'
-              : 'border-gray-200 bg-white text-gray-500'
-          }`}>
-          {__('Details', 'subtleforms')}
-        </div>
-        <div className='bg-gray-200 w-10 h-px' aria-hidden />
-        <div
-          className={`px-3 py-1 rounded-sm border ${
-            step === 2
-              ? 'border-primary bg-gray-50 text-gray-900'
-              : 'border-gray-200 bg-white text-gray-500'
-          }`}>
-          {__('Structure', 'subtleforms')}
-        </div>
-      </div>
-    </div>
-  );
 
   return (
     <Modal
@@ -260,130 +245,98 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
       overlayClassName='subtleforms-modal-overlay'
       shouldCloseOnClickOutside={!creating}
       shouldCloseOnEsc={!creating}>
-      <div className='flex flex-col h-full'>
-        <div className='mb-6 text-left'>
-          <h2 className='m-0 font-semibold text-gray-900 text-xl tracking-tight'>
-            {step === 1
-              ? __('Create New Form', 'subtleforms')
-              : __('Select Form Type', 'subtleforms')}
+      <div className='flex flex-col'>
+        {/* Header */}
+        <div className='mb-5'>
+          <h2 className='m-0 font-bold text-gray-900 text-lg'>
+            {__('Create New Form', 'subtleforms')}
           </h2>
-          <p className='mt-1 text-gray-600 text-sm'>
-            {step === 1
-              ? __('Provide the basics and starting point.', 'subtleforms')
-              : __('Choose how this form should be structured.', 'subtleforms')}
+          <p className='mt-1 text-gray-500 text-sm'>
+            {__('Configure your form details and structure.', 'subtleforms')}
           </p>
         </div>
 
-        <StepIndicator />
-
-        <div className='flex-1 px-1 py-1 overflow-y-auto'>
-          {step === 1 && (
-            <div className='slide-in-from-right-4 max-w-xl animate-in duration-200 fade-in'>
-              <div className='flex flex-col gap-5'>
-                <div className='space-y-2'>
-                  <label className='block font-semibold text-gray-800 text-sm'>
-                    {__('Form Title', 'subtleforms')}{' '}
-                    <span className='text-red-500'>*</span>
-                  </label>
-                  <TextControl
-                    value={title}
-                    onChange={setTitle}
-                    disabled={creating}
-                    placeholder={__('e.g. Contact Us', 'subtleforms')}
-                    className='!m-0 !h-10 !text-base'
-                  />
-                </div>
-
-                <div className='space-y-2'>
-                  <label className='block font-semibold text-gray-800 text-sm'>
-                    {__('Description', 'subtleforms')}{' '}
-                    <span className='ml-1 font-normal text-gray-400 text-xs'>
-                      ({__('Optional', 'subtleforms')})
-                    </span>
-                  </label>
-                  <TextareaControl
-                    value={description}
-                    onChange={setDescription}
-                    disabled={creating}
-                    rows={3}
-                    className='!m-0 !text-base'
-                    placeholder={__(
-                      'Briefly describe the purpose of this form...',
-                      'subtleforms'
-                    )}
-                  />
-                </div>
-
-                <div className='pt-1'>
-                  <label className='block mb-3 font-semibold text-gray-800 text-xs uppercase tracking-wide'>
-                    {__('Template', 'subtleforms')}
-                  </label>
-                  <div className='gap-3 grid grid-cols-2'>
-                    {templates.map((t) =>
-                      renderOptionCard(t, template, setTemplate)
-                    )}
-                  </div>
-                </div>
-              </div>
+        {/* Main Content - Side by Side Layout */}
+        <div className='gap-6 grid grid-cols-5 mb-6'>
+          {/* Left Column - Form Details (3/5) */}
+          <div className='space-y-4 col-span-3'>
+            <div>
+              <label className='block mb-1.5 font-medium text-gray-700 text-sm'>
+                {__('Form Title', 'subtleforms')}{' '}
+                <span className='text-red-500'>*</span>
+              </label>
+              <TextControl
+                value={title}
+                onChange={setTitle}
+                disabled={creating}
+                placeholder={__('e.g. Contact Form', 'subtleforms')}
+                className='!m-0'
+              />
             </div>
-          )}
 
-          {step === 2 && (
-            <div className='slide-in-from-right-4 animate-in duration-200 fade-in'>
-              <div className='mb-4'>
-                <p className='text-gray-600 text-sm'>
-                  {__(
-                    'Pick the structure that matches your flow.',
-                    'subtleforms'
-                  )}
-                </p>
-              </div>
-              <div className='gap-3 grid grid-cols-1 md:grid-cols-3'>
-                {formTypes.map((t) =>
-                  renderOptionCard(t, formType, setFormType)
+            <div>
+              <label className='block mb-1.5 font-medium text-gray-700 text-sm'>
+                {__('Description', 'subtleforms')}{' '}
+                <span className='font-normal text-gray-400 text-xs'>
+                  ({__('Optional', 'subtleforms')})
+                </span>
+              </label>
+              <TextareaControl
+                value={description}
+                onChange={setDescription}
+                disabled={creating}
+                rows={3}
+                className='!m-0'
+                placeholder={__(
+                  'Describe the purpose of this form...',
+                  'subtleforms'
+                )}
+              />
+            </div>
+
+            <div>
+              <label className='block mb-2 font-medium text-gray-700 text-xs uppercase tracking-wide'>
+                {__('Template', 'subtleforms')}
+              </label>
+              <div className='gap-2 grid grid-cols-2'>
+                {templates.map((t) =>
+                  renderOptionCard(t, template, setTemplate, 'compact')
                 )}
               </div>
             </div>
-          )}
+          </div>
+
+          {/* Right Column - Form Type (2/5) */}
+          <div className='col-span-2'>
+            <label className='block mb-2 font-medium text-gray-700 text-xs uppercase tracking-wide'>
+              {__('Structure', 'subtleforms')}
+            </label>
+            <div className='space-y-2'>
+              {formTypes.map((t) =>
+                renderOptionCard(t, formType, setFormType, 'compact')
+              )}
+            </div>
+          </div>
         </div>
 
-        <div className='flex justify-end items-center gap-3 bg-white mt-6 pt-5 border-gray-100 border-t'>
-          {step === 1 ? (
-            <Button
-              variant='secondary'
-              onClick={handleRequestClose}
-              disabled={creating}
-              className='!px-4 !h-10 !text-sm'>
-              {__('Cancel', 'subtleforms')}
-            </Button>
-          ) : (
-            <Button
-              variant='secondary'
-              onClick={() => setStep(1)}
-              disabled={creating}
-              className='!px-4 !h-10 !text-sm'>
-              {__('Back', 'subtleforms')}
-            </Button>
-          )}
+        {/* Footer Actions */}
+        <div className='flex justify-end items-center gap-2 pt-4 border-gray-100 border-t'>
+          <Button
+            variant='secondary'
+            onClick={handleRequestClose}
+            disabled={creating}
+            className='!px-4 !h-9 !text-sm'>
+            {__('Cancel', 'subtleforms')}
+          </Button>
 
-          {step === 1 ? (
-            <Button
-              variant='primary'
-              onClick={() => setStep(2)}
-              disabled={!title.trim()}
-              className='!bg-primary hover:!bg-primary-dark !px-6 !border-none !rounded-sm !h-10 !font-semibold !text-white !text-sm'>
-              {__('Next Step', 'subtleforms')}
-            </Button>
-          ) : (
-            <Button
-              variant='primary'
-              onClick={handleCreate}
-              isBusy={creating}
-              disabled={creating || !formType}
-              className='!bg-primary hover:!bg-primary-dark !px-6 !border-none !rounded-sm !h-10 !font-semibold !text-white !text-sm'>
-              {__('Create Form', 'subtleforms')}
-            </Button>
-          )}
+          <Button
+            variant='primary'
+            onClick={handleCreate}
+            isBusy={creating}
+            disabled={creating || !title.trim()}
+            className='!bg-primary hover:!bg-primary-dark !shadow-sm !px-5 !border-none !h-9 !font-semibold !text-white !text-sm'>
+            {__('Create Form', 'subtleforms')}
+          </Button>
         </div>
       </div>
     </Modal>
