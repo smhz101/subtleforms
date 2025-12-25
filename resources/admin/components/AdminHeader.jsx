@@ -22,7 +22,7 @@ const AdminHeader = memo(function AdminHeader({ title, actions }) {
 
   return (
     <div
-      className='flex flex-shrink-0 justify-between items-center bg-white px-6 border-gray-200 border-b'
+      className='flex flex-shrink-0 justify-between items-center bg-white px-6 border-gray-300 border-b'
       style={{
         height: `${HEADER_HEIGHT}px`,
         position: 'sticky',

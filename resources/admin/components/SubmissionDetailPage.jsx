@@ -219,26 +219,28 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
   return (
     <AdminShell
       title={sprintf(__('Submission #%d', 'subtleforms'), submission.id)}
-      actions={actions}>
-      <div className='gap-6 grid grid-cols-1 lg:grid-cols-3 p-6'>
-        {/* LEFT COLUMN - 2/3 width */}
-        <div className='space-y-6 lg:col-span-2'>
-          {/* Form Entry Data */}
-          <div className='bg-white border border-gray-200'>
-            <div className='flex justify-between items-center px-6 py-4 border-gray-200 border-b'>
-              <h2 className='m-0 font-semibold text-gray-900 text-base'>
-                {__('Form Entry Data', 'subtleforms')}
-              </h2>
-              <label className='flex items-center gap-2 text-gray-600 text-sm cursor-pointer'>
-                <input
-                  type='checkbox'
-                  checked={showEmpty}
-                  onChange={(e) => setShowEmpty(e.target.checked)}
-                  className='border-gray-300 text-blue-600'
-                />
-                {__('Show empty fields', 'subtleforms')}
-              </label>
-            </div>
+      actions={actions}
+      noScroll={true}>
+      <div className='h-full overflow-y-auto'>
+        <div className='gap-6 grid grid-cols-1 lg:grid-cols-3 p-6'>
+          {/* LEFT COLUMN - 2/3 width */}
+          <div className='space-y-6 lg:col-span-2'>
+            {/* Form Entry Data */}
+            <div className='bg-white border border-gray-300'>
+              <div className='flex justify-between items-center bg-gray-50 px-6 py-4 border-gray-300 border-b'>
+                <h2 className='m-0 font-semibold text-gray-900 text-base'>
+                  {__('Form Entry Data', 'subtleforms')}
+                </h2>
+                <label className='flex items-center gap-2 text-gray-600 text-sm cursor-pointer'>
+                  <input
+                    type='checkbox'
+                    checked={showEmpty}
+                    onChange={(e) => setShowEmpty(e.target.checked)}
+                    className='border-gray-300 text-blue-600'
+                  />
+                  {__('Show empty fields', 'subtleforms')}
+                </label>
+              </div>
             <div>
               {Object.keys(filteredPayload).length > 0 ? (
                 <table className='w-full'>
@@ -268,8 +270,8 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
           </div>
 
           {/* Submission Notes */}
-          <div className='bg-white border border-gray-200'>
-            <div className='px-6 py-4 border-gray-200 border-b'>
+          <div className='bg-white border border-gray-300'>
+            <div className='bg-gray-50 px-6 py-4 border-gray-300 border-b'>
               <h2 className='m-0 font-semibold text-gray-900 text-base'>
                 {__('Submission Notes', 'subtleforms')}
               </h2>
@@ -288,13 +290,13 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
           </div>
 
           {/* Execution Logs */}
-          <div className='bg-white border border-gray-200'>
-            <div className='px-6 py-4 border-gray-200 border-b'>
+          <div className='bg-white border border-gray-300'>
+            <div className='bg-gray-50 px-6 py-4 border-gray-300 border-b'>
               <h2 className='m-0 font-semibold text-gray-900 text-base'>
                 {__('Execution Logs', 'subtleforms')}
               </h2>
             </div>
-            <div className='border-gray-200 border-b'>
+            <div className='border-gray-300 border-b'>
               <div className='flex'>
                 <button
                   onClick={() => setActiveLogTab('general')}
@@ -323,7 +325,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                 return displayLogs.length > 0 ? (
                   <table className='w-full text-sm'>
                     <thead>
-                      <tr className='border-gray-200 border-b'>
+                      <tr className='bg-gray-50 border-gray-300 border-b'>
                         <th className='px-3 py-2 font-semibold text-gray-700 text-xs text-left uppercase'>
                           {__('Time', 'subtleforms')}
                         </th>
@@ -372,8 +374,8 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
 
         {/* RIGHT COLUMN - 1/3 width */}
         <div className='lg:col-span-1'>
-          <div className='top-6 sticky bg-white border border-gray-200'>
-            <div className='px-6 py-4 border-gray-200 border-b'>
+          <div className='top-6 sticky bg-white border border-gray-300'>
+            <div className='bg-gray-50 px-6 py-4 border-gray-300 border-b'>
               <h3 className='m-0 font-semibold text-gray-900 text-base'>
                 {__('Submission Info', 'subtleforms')}
               </h3>

@@ -19,7 +19,7 @@ import { memo } from '@wordpress/element';
  */
 const ActionBar = memo(function ActionBar({ left, right }) {
   return (
-    <div className='flex flex-shrink-0 justify-between items-center bg-gray-50 px-6 border-gray-200 border-b h-14'>
+    <div className='flex flex-shrink-0 justify-between items-center bg-gray-50 px-6 border-gray-300 border-b h-14'>
       {/* Left Side: Tabs/Filters */}
       {left && <div className='flex items-center gap-4'>{left}</div>}
 

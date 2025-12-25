@@ -99,7 +99,7 @@ export default function AdminShell({
 
         {/* BOTTOM BAR - Pagination */}
         {pagination && (
-          <div className='flex-shrink-0 bg-white px-6 py-3 border-gray-200 border-t'>
+          <div className='flex-shrink-0 bg-white px-6 py-3 border-gray-300 border-t'>
             {pagination}
           </div>
         )}

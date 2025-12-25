@@ -152,7 +152,7 @@ const DataTable = memo(function DataTable({
       <div className='flex-1 overflow-auto'>
         <table className='w-full border-collapse'>
           <thead className='top-0 z-10 sticky bg-gray-50'>
-            <tr className='border-gray-200 border-b'>
+            <tr className='border-gray-300 border-b'>
               {selectable && (
                 <th className='px-6 py-3 first:pl-8 w-10 text-left'>
                   <CheckboxControl
@@ -227,7 +227,7 @@ const DataTable = memo(function DataTable({
 
       {/* Pagination - Always show if data exists and totalPages > 0 */}
       {totalPages > 0 && (
-        <div className='flex flex-shrink-0 justify-between items-center bg-white px-6 py-4 border-gray-200 border-t'>
+        <div className='flex flex-shrink-0 justify-between items-center bg-white px-6 py-4 border-gray-300 border-t'>
           <div className='flex items-center gap-4'>
             <span className='text-gray-700 text-sm'>
               {sprintf(
