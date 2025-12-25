@@ -16,6 +16,8 @@ import {
   FiList,
   FiCheckCircle,
   FiLoader,
+  FiMessageCircle,
+  FiCreditCard,
 } from 'react-icons/fi';
 import classNames from 'classnames';
 
@@ -106,6 +108,12 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
           children: [],
         },
       ];
+    } else if (formType === 'conversational') {
+      // Conversational forms start empty - fields will be displayed one at a time
+      fields = [];
+    } else if (formType === 'payment') {
+      // Payment forms start empty - payment fields will be added by user
+      fields = [];
     } else {
       // Regular form starts empty
       fields = [];
@@ -181,6 +189,24 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
       description: __('Grouped fields. Best for long forms.', 'subtleforms'),
       icon: FiList,
     },
+    {
+      id: 'conversational',
+      title: __('Conversational', 'subtleforms'),
+      description: __(
+        'One question at a time. Best for engaging surveys, quizzes.',
+        'subtleforms'
+      ),
+      icon: FiMessageCircle,
+    },
+    {
+      id: 'payment',
+      title: __('Payment', 'subtleforms'),
+      description: __(
+        'Collect payments. Best for orders, bookings, donations.',
+        'subtleforms'
+      ),
+      icon: FiCreditCard,
+    },
   ];
 
   const renderOptionCard = (option, selected, onSelect, size = 'default') => {
@@ -238,7 +264,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
 
         {isSelected && (
           <div className='top-2 right-2 absolute text-blue-600'>
-            <Icon icon={check} size={16} />
+            <FiCheckCircle className='w-4 h-4' />
           </div>
         )}
 
