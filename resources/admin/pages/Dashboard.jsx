@@ -7,8 +7,15 @@ import {
   Notice,
   Button,
 } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import {
+  FiFileText,
+  FiLayers,
+  FiList,
+  FiMessageCircle,
+  FiCreditCard,
+} from 'react-icons/fi';
 import './Dashboard.css';
 
 /**
@@ -212,6 +219,37 @@ export default function Dashboard() {
                           </a>
                         </div>
                         <div className='item-meta'>
+                          {/* Form Type Badge */}
+                          {(() => {
+                            const formType = form.metadata?.type || 'regular';
+                            const typeConfig = {
+                              regular: { icon: FiFileText, label: __('Regular', 'subtleforms'), color: 'gray' },
+                              multistep: { icon: FiLayers, label: __('Multi-step', 'subtleforms'), color: 'purple' },
+                              sectioned: { icon: FiList, label: __('Sectioned', 'subtleforms'), color: 'indigo' },
+                              conversational: { icon: FiMessageCircle, label: __('Conversational', 'subtleforms'), color: 'blue' },
+                              payment: { icon: FiCreditCard, label: __('Payment', 'subtleforms'), color: 'green' },
+                            };
+                            const config = typeConfig[formType] || typeConfig.regular;
+                            const Icon = config.icon;
+                            return (
+                              <span
+                                className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium border ${
+                                  config.color === 'gray'
+                                    ? 'bg-gray-50 text-gray-600 border-gray-200'
+                                    : config.color === 'purple'
+                                    ? 'bg-purple-50 text-purple-600 border-purple-200'
+                                    : config.color === 'indigo'
+                                    ? 'bg-indigo-50 text-indigo-600 border-indigo-200'
+                                    : config.color === 'blue'
+                                    ? 'bg-blue-50 text-blue-600 border-blue-200'
+                                    : 'bg-green-50 text-green-600 border-green-200'
+                                }`}
+                                style={{ borderRadius: '3px' }}>
+                                <Icon className='w-3 h-3' />
+                                {config.label}
+                              </span>
+                            );
+                          })()}
                           <span
                             className={`status-badge status-${form.status}`}>
                             {form.status}

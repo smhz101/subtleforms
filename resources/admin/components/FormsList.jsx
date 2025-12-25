@@ -23,6 +23,11 @@ import {
   FiFileText,
   FiEdit,
   FiPackage,
+  FiLayers,
+  FiColumns,
+  FiList,
+  FiMessageCircle,
+  FiCreditCard,
 } from 'react-icons/fi';
 import classNames from 'classnames';
 import DataTable from './DataTable';
@@ -120,7 +125,7 @@ export default function FormsList({
       key: 'title',
       title: __('Form Name', 'subtleforms'),
       sortable: true,
-      width: '28%',
+      width: '25%',
       render: (title, form) => (
         <div className='flex items-center gap-2'>
           <span className='font-semibold text-gray-900 group-hover:text-blue-600 text-base transition-colors'>
@@ -133,6 +138,55 @@ export default function FormsList({
           )}
         </div>
       ),
+    },
+    {
+      key: 'form_type',
+      title: __('Type', 'subtleforms'),
+      width: '13%',
+      render: (_, form) => {
+        const formType = form.metadata?.type || 'regular';
+        const typeConfig = {
+          regular: {
+            classes: 'bg-gray-50 text-gray-700 border-gray-200',
+            label: __('Regular', 'subtleforms'),
+            icon: FiFileText,
+          },
+          multistep: {
+            classes: 'bg-purple-50 text-purple-700 border-purple-200',
+            label: __('Multi-step', 'subtleforms'),
+            icon: FiLayers,
+          },
+          sectioned: {
+            classes: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+            label: __('Sectioned', 'subtleforms'),
+            icon: FiList,
+          },
+          conversational: {
+            classes: 'bg-blue-50 text-blue-700 border-blue-200',
+            label: __('Conversational', 'subtleforms'),
+            icon: FiMessageCircle,
+          },
+          payment: {
+            classes: 'bg-green-50 text-green-700 border-green-200',
+            label: __('Payment', 'subtleforms'),
+            icon: FiCreditCard,
+          },
+        };
+
+        const config = typeConfig[formType] || typeConfig.regular;
+        const IconComponent = config.icon;
+
+        return (
+          <span
+            className={classNames(
+              'inline-flex items-center gap-1 px-2.5 py-1 border text-xs font-medium',
+              config.classes
+            )}>
+            <IconComponent className='w-3 h-3' />
+            {config.label}
+          </span>
+        );
+      },
     },
     {
       key: 'status',

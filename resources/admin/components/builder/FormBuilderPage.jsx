@@ -15,6 +15,13 @@ import {
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
+import {
+  FiFileText,
+  FiLayers,
+  FiList,
+  FiMessageCircle,
+  FiCreditCard,
+} from 'react-icons/fi';
 import AdminShell from '../AdminShell';
 import FormEditor from './FormEditor';
 import FormSettings from './FormSettings';
@@ -694,39 +701,72 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
   if (loading) return <Spinner />;
   if (error) return <Notice status='error'>{error}</Notice>;
 
+  // Get form type badge config
+  const formType = draftSchema?.metadata?.type || 'regular';
+  const formTypeBadgeConfig = {
+    regular: { icon: FiFileText, label: __('Regular', 'subtleforms'), color: 'gray' },
+    multistep: { icon: FiLayers, label: __('Multi-step', 'subtleforms'), color: 'purple' },
+    sectioned: { icon: FiList, label: __('Sectioned', 'subtleforms'), color: 'indigo' },
+    conversational: { icon: FiMessageCircle, label: __('Conversational', 'subtleforms'), color: 'blue' },
+    payment: { icon: FiCreditCard, label: __('Payment', 'subtleforms'), color: 'green' },
+  };
+  const formTypeBadge = formTypeBadgeConfig[formType] || formTypeBadgeConfig.regular;
+  const FormTypeIcon = formTypeBadge.icon;
+
   // Construct title with editable inline input
-  const titleElement = isEditingTitle ? (
-    <input
-      ref={titleInputRef}
-      type='text'
-      value={formTitle}
-      onChange={(event) => setFormTitle(event.target.value)}
-      onBlur={() => persistTitle(formTitle)}
-      onKeyDown={(event) => {
-        if (event.key === 'Enter') {
-          event.preventDefault();
-          persistTitle(formTitle);
-        }
-        if (event.key === 'Escape') {
-          setIsEditingTitle(false);
-          setFormTitle(draftSchema?.metadata?.title || formTitle);
-        }
-      }}
-      className='bg-white px-2 py-1 border border-blue-600 outline-none min-w-[200px] font-semibold text-gray-900 text-base'
-    />
-  ) : (
-    <button
-      type='button'
-      onClick={() => setIsEditingTitle(true)}
-      className='bg-transparent px-2 py-1 border-none outline-none font-semibold text-gray-900 hover:text-blue-600 text-base cursor-pointer'
-      onMouseEnter={(e) => {
-        e.currentTarget.style.color = '#2271b1';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.color = '#1e1e1e';
-      }}>
-      {formTitle || __('Untitled Form', 'subtleforms')}
-    </button>
+  const titleElement = (
+    <div className='flex items-center gap-3'>
+      <span
+        className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium border ${
+          formTypeBadge.color === 'gray'
+            ? 'bg-gray-50 text-gray-700 border-gray-200'
+            : formTypeBadge.color === 'purple'
+            ? 'bg-purple-50 text-purple-700 border-purple-200'
+            : formTypeBadge.color === 'indigo'
+            ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
+            : formTypeBadge.color === 'blue'
+            ? 'bg-blue-50 text-blue-700 border-blue-200'
+            : 'bg-green-50 text-green-700 border-green-200'
+        }`}
+        style={{ borderRadius: '4px' }}
+        title={formTypeBadge.label}>
+        <FormTypeIcon className='w-3 h-3' />
+        {formTypeBadge.label}
+      </span>
+      {isEditingTitle ? (
+        <input
+          ref={titleInputRef}
+          type='text'
+          value={formTitle}
+          onChange={(event) => setFormTitle(event.target.value)}
+          onBlur={() => persistTitle(formTitle)}
+          onKeyDown={(event) => {
+            if (event.key === 'Enter') {
+              event.preventDefault();
+              persistTitle(formTitle);
+            }
+            if (event.key === 'Escape') {
+              setIsEditingTitle(false);
+              setFormTitle(draftSchema?.metadata?.title || formTitle);
+            }
+          }}
+          className='bg-white px-2 py-1 border border-blue-600 outline-none min-w-[200px] font-semibold text-gray-900 text-base'
+        />
+      ) : (
+        <button
+          type='button'
+          onClick={() => setIsEditingTitle(true)}
+          className='bg-transparent px-2 py-1 border-none outline-none font-semibold text-gray-900 hover:text-blue-600 text-base cursor-pointer'
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = '#2271b1';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = '#1e1e1e';
+          }}>
+          {formTitle || __('Untitled Form', 'subtleforms')}
+        </button>
+      )}
+    </div>
   );
 
   // Build actions section with save status, shortcode, and buttons

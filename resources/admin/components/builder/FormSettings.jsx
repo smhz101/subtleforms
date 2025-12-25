@@ -94,6 +94,68 @@ export default function FormSettings({ schema, onChange }) {
           {__('Form Settings', 'subtleforms')}
         </h2>
 
+        {/* Form Type Info Banner */}
+        {formType !== 'regular' && (
+          <div
+            className={`p-4 mb-6 border-l-4 ${
+              formType === 'multistep'
+                ? 'bg-purple-50 border-purple-500'
+                : formType === 'sectioned'
+                ? 'bg-indigo-50 border-indigo-500'
+                : formType === 'conversational'
+                ? 'bg-blue-50 border-blue-500'
+                : 'bg-green-50 border-green-500'
+            }`}>
+            <h3
+              className={`font-semibold mb-1 text-sm ${
+                formType === 'multistep'
+                  ? 'text-purple-900'
+                  : formType === 'sectioned'
+                  ? 'text-indigo-900'
+                  : formType === 'conversational'
+                  ? 'text-blue-900'
+                  : 'text-green-900'
+              }`}>
+              {formType === 'multistep' && __('Multi-step Form', 'subtleforms')}
+              {formType === 'sectioned' && __('Sectioned Form', 'subtleforms')}
+              {formType === 'conversational' &&
+                __('Conversational Form', 'subtleforms')}
+              {formType === 'payment' && __('Payment Form', 'subtleforms')}
+            </h3>
+            <p
+              className={`text-xs ${
+                formType === 'multistep'
+                  ? 'text-purple-700'
+                  : formType === 'sectioned'
+                  ? 'text-indigo-700'
+                  : formType === 'conversational'
+                  ? 'text-blue-700'
+                  : 'text-green-700'
+              }`}>
+              {formType === 'multistep' &&
+                __(
+                  'Fields are organized into steps. Users navigate through one step at a time with progress tracking.',
+                  'subtleforms'
+                )}
+              {formType === 'sectioned' &&
+                __(
+                  'Fields are grouped into collapsible sections. All sections are visible on a single page.',
+                  'subtleforms'
+                )}
+              {formType === 'conversational' &&
+                __(
+                  'Questions are presented one at a time. After completing all questions, users review answers before submitting.',
+                  'subtleforms'
+                )}
+              {formType === 'payment' &&
+                __(
+                  'This form collects payment information. Configure payment settings below to enable transactions.',
+                  'subtleforms'
+                )}
+            </p>
+          </div>
+        )}
+
         {/* General Settings */}
         <Panel>
           <PanelBody
@@ -134,7 +196,9 @@ export default function FormSettings({ schema, onChange }) {
                 {isConversationalForm && (
                   <div className='bg-blue-50 p-4 border border-blue-200 rounded'>
                     <p className='text-blue-800 text-sm'>
-                      <strong>{__('Conversational Payment:', 'subtleforms')}</strong>{' '}
+                      <strong>
+                        {__('Conversational Payment:', 'subtleforms')}
+                      </strong>{' '}
                       {__(
                         'When enabled, users will answer questions, review their answers, and then complete payment before submission.',
                         'subtleforms'
