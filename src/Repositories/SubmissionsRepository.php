@@ -333,7 +333,7 @@ final class SubmissionsRepository
     /**
      * Get next/previous submission IDs (v0.9.4).
      */
-    public function getAdjacentIds(int $currentId, int $formId = null): array
+    public function getAdjacentIds(int $currentId, ?int $formId = null): array
     {
         global $wpdb;
 

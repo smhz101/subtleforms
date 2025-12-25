@@ -201,7 +201,7 @@ final class Helpers {
    * @param mixed $default Default value if decode fails
    * @return mixed
    */
-  public static function safe_json_decode($json, bool $assoc = false, $default = null)
+  public static function safe_json_decode($json, bool $assoc = false, mixed $default = null)
   {
     $json = self::normalize_string($json);
     

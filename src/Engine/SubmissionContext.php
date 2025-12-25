@@ -53,7 +53,7 @@ final class SubmissionContext
      * @param mixed $default
      * @return mixed
      */
-    public function getMeta($key, $default = null)
+    public function getMeta($key, mixed $default = null)
     {
         return isset($this->meta[$key]) ? $this->meta[$key] : $default;
     }
