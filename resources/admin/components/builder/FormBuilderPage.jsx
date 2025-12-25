@@ -17,6 +17,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 import AdminShell from '../AdminShell';
 import FormEditor from './FormEditor';
+import FormSettings from './FormSettings';
 import SubmissionsTable from '../SubmissionsTable';
 import ConfirmModal from '../ConfirmModal';
 import { apiGet, apiPost, apiPut } from '../../utils/api';
@@ -895,6 +896,10 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
               title: __('Build', 'subtleforms'),
             },
             {
+              name: 'settings',
+              title: __('Settings', 'subtleforms'),
+            },
+            {
               name: 'entries',
               title: __('Entries', 'subtleforms'),
             },
@@ -906,6 +911,12 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
                   schema={draftSchema}
                   fieldGroups={fieldGroups}
                   fieldDefinitions={fieldDefinitions}
+                  onChange={handleSchemaChange}
+                />
+              )}
+              {tab.name === 'settings' && (
+                <FormSettings
+                  schema={draftSchema}
                   onChange={handleSchemaChange}
                 />
               )}

@@ -655,6 +655,45 @@ final class RestController
         // Attach schema version used for this submission for logging
         $context->setMeta('schema_version', is_int($formVersion) ? $formVersion : null);
 
+        // Detect payment form and prepare payment metadata
+        $isPaymentForm = false;
+        $paymentMetadata = null;
+        if (!empty($activeSchema['schema']['metadata']['type']) && 
+            $activeSchema['schema']['metadata']['type'] === 'payment') {
+            $isPaymentForm = true;
+            
+            // Extract payment settings
+            $paymentSettings = $activeSchema['schema']['metadata']['payment'] ?? [];
+            
+            // Calculate payment amount
+            $amount = 0;
+            if (!empty($paymentSettings['enabled'])) {
+                if (($paymentSettings['amountType'] ?? 'fixed') === 'fixed') {
+                    $amount = floatval($paymentSettings['fixedAmount'] ?? 0);
+                } elseif (($paymentSettings['amountType'] ?? '') === 'field') {
+                    $amountField = $paymentSettings['amountField'] ?? '';
+                    if (!empty($amountField) && isset($payload[$amountField])) {
+                        $amount = floatval($payload[$amountField]);
+                    }
+                }
+            }
+            
+            // Prepare payment intent metadata
+            $paymentMetadata = [
+                'status' => 'pending',
+                'amount' => $amount,
+                'currency' => $paymentSettings['currency'] ?? 'USD',
+                'mode' => $paymentSettings['mode'] ?? 'test',
+                'gateway' => null, // Will be set by payment gateway extension
+                'transaction_id' => null,
+                'created_at' => current_time('mysql'),
+            ];
+            
+            // Store payment metadata in context for extensions
+            $context->setMeta('payment_intent', $paymentMetadata);
+            $context->setMeta('is_payment_form', true);
+        }
+
         // If there's an active schema, compile it to deterministic pipeline steps and run.
         if (!empty($activeSchema['schema']) && is_array($activeSchema['schema'])) {
             // Attach schema to context for conditional logic and validation
@@ -704,7 +743,39 @@ final class RestController
             // Check final submission status - if SaveAction set it to 'saved', update to 'completed'
             $finalSubmission = $this->submissionsRepo->find($submissionId);
             if ($finalSubmission && $finalSubmission['status'] === 'saved') {
-                $this->submissionsRepo->update($submissionId, ['status' => 'completed']);
+                // For payment forms, keep status as 'saved' until payment is processed
+                if (!$isPaymentForm) {
+                    $this->submissionsRepo->update($submissionId, ['status' => 'completed']);
+                } else {
+                    // Store payment metadata in submission
+                    if ($paymentMetadata) {
+                        $currentMeta = $finalSubmission['meta'] ?? [];
+                        if (!is_array($currentMeta)) {
+                            $currentMeta = [];
+                        }
+                        
+                        $currentMeta['payment'] = $paymentMetadata;
+                        
+                        $this->submissionsRepo->update($submissionId, [
+                            'status' => 'payment_pending',
+                            'meta' => $currentMeta,
+                        ]);
+                    }
+                    
+                    /**
+                     * Hook: subtleforms_payment_required
+                     * 
+                     * Allows payment gateway extensions to process payment before completing submission.
+                     * Extensions should update submission status and payment metadata.
+                     * 
+                     * @param int $submissionId The submission ID
+                     * @param array $paymentMetadata Payment intent data
+                     * @param SubmissionContext $context Full submission context
+                     * 
+                     * @since 1.2.0
+                     */
+                    do_action('subtleforms_payment_required', $submissionId, $paymentMetadata, $context);
+                }
             } elseif (!$finalSubmission || $finalSubmission['status'] === 'processing') {
                 // SaveAction didn't run or failed - mark as failed
                 error_log('SubtleForms: Submission ' . $submissionId . ' did not reach saved status');
