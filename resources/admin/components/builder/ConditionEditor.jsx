@@ -51,20 +51,9 @@ export default function ConditionEditor({
   };
 
   return (
-    <div style={{ marginTop: 16 }}>
-      <div
-        style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: 12,
-        }}>
-        <label
-          style={{
-            fontSize: '13px',
-            fontWeight: 600,
-            color: '#1e1e1e',
-          }}>
+    <div className='mt-4'>
+      <div className='flex justify-between items-center mb-3'>
+        <label className='text-xs font-semibold text-gray-900'>
           {__('Conditional Logic', 'subtleforms')}
         </label>
         <Button isSmall isSecondary onClick={handleAddCondition}>
@@ -73,13 +62,7 @@ export default function ConditionEditor({
       </div>
 
       {(!conditions || conditions.length === 0) && (
-        <p
-          style={{
-            margin: '8px 0',
-            fontSize: '12px',
-            color: '#757575',
-            fontStyle: 'italic',
-          }}>
+        <p className='my-2 text-xs text-gray-600 italic'>
           {__('No conditions set', 'subtleforms')}
         </p>
       )}
@@ -88,27 +71,9 @@ export default function ConditionEditor({
         conditions.map((condition, index) => (
           <div
             key={index}
-            style={{
-              padding: 12,
-              marginBottom: 12,
-              border: '1px solid #dcdcde',
-              borderRadius: 4,
-              background: '#f9f9f9',
-            }}>
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginBottom: 8,
-              }}>
-              <span
-                style={{
-                  fontSize: '11px',
-                  fontWeight: 600,
-                  color: '#646970',
-                  textTransform: 'uppercase',
-                }}>
+            className='p-3 mb-3 border border-gray-300 bg-gray-50'>
+            <div className='flex justify-between items-center mb-2'>
+              <span className='text-[11px] font-semibold text-gray-600 uppercase'>
                 {__('Rule', 'subtleforms')} {index + 1}
               </span>
               <Button

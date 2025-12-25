@@ -220,7 +220,7 @@ export default function FormsList({
               submissionCount
             )}>
             {hasUnread && (
-              <span className='bg-blue-500 rounded-full w-2 h-2 animate-pulse'></span>
+              <span className='bg-blue-500 w-2 h-2 animate-pulse'></span>
             )}
             {hasUnread ? (
               <>

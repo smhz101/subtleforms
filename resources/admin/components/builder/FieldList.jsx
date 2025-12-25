@@ -35,9 +35,9 @@ export default function FieldList({
         const isHovered = isPathEqual(hoveredIndex, currentPath);
 
         return (
-          <div key={field.id || i} style={{ marginBottom: '16px' }}>
+          <div key={field.id || i} className='mb-4'>
             {/* Add Button Before */}
-            <div style={{ height: '10px', position: 'relative', zIndex: 10 }}>
+            <div className='h-2.5 relative z-10'>
               <InlineAddButton
                 index={i}
                 isHovered={isHovered}
@@ -79,7 +79,7 @@ export default function FieldList({
                   onShowPicker={onShowPicker}
                 />
                 {/* Add Button Inside Container (at end) */}
-                <div style={{ marginTop: '16px', textAlign: 'center' }}>
+                <div className='mt-4 text-center'>
                   <InlineAddButton
                     index={(field.fields || []).length}
                     isHovered={true}
@@ -125,7 +125,7 @@ export default function FieldList({
       })}
 
       {/* Add Button at the end of the list */}
-      <div style={{ padding: '20px', textAlign: 'center' }}>
+      <div className='p-5 text-center'>
         <InlineAddButton
           index={fields.length}
           isHovered={true}

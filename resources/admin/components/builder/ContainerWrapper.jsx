@@ -29,29 +29,14 @@ export default function ContainerWrapper({
         onHover(path);
       }}
       onMouseLeave={() => onHover(null)}
-      style={{
-        position: 'relative',
-        marginBottom: '16px',
-        border: isSelected ? '2px solid #2271b1' : '1px solid #e0e0e0',
-        borderRadius: '4px',
-        background: '#fff',
-        transition: 'all 0.2s',
-        boxShadow: isHovered ? '0 2px 8px rgba(0,0,0,0.05)' : 'none',
-      }}>
+      className={`relative mb-4 bg-white transition-all ${
+        isSelected ? 'border-2 border-blue-600' : 'border border-gray-300'
+      }`}>
       {/* Header */}
-      <div
-        style={{
-          padding: '8px 12px',
-          background: '#f0f0f1',
-          borderBottom: '1px solid #e0e0e0',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          cursor: 'move',
-        }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+      <div className='px-3 py-2 bg-gray-100 border-b border-gray-300 flex items-center justify-between cursor-move'>
+        <div className='flex items-center gap-2'>
           <Icon icon={getIcon(field.type)} size={20} />
-          <span style={{ fontWeight: 600, fontSize: '13px' }}>
+          <span className='font-semibold text-xs'>
             {field.label ||
               (isRepeat
                 ? __('Repeat Container', 'subtleforms')
@@ -61,7 +46,7 @@ export default function ContainerWrapper({
 
         {/* Actions */}
         {isSelected && (
-          <div style={{ display: 'flex', gap: '4px' }}>
+          <div className='flex gap-1'>
             <Button
               isSmall
               icon='arrow-up-alt2'
@@ -92,17 +77,10 @@ export default function ContainerWrapper({
       </div>
 
       {/* Content Area */}
-      <div style={{ padding: '16px', minHeight: '60px' }}>{children}</div>
+      <div className='p-4 min-h-[60px]'>{children}</div>
 
       {isRepeat && (
-        <div
-          style={{
-            padding: '8px 16px',
-            borderTop: '1px dashed #e0e0e0',
-            color: '#757575',
-            fontSize: '12px',
-            fontStyle: 'italic',
-          }}>
+        <div className='px-4 py-2 border-t border-dashed border-gray-300 text-gray-600 text-xs italic'>
           {__('Repeatable items will appear here', 'subtleforms')}
         </div>
       )}

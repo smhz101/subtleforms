@@ -350,7 +350,7 @@ export default function SubmissionsTable({
       width: '10%',
       render: (status) => (
         <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+          className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium ${
             status === 'unread'
               ? 'bg-blue-100 text-blue-800'
               : 'bg-gray-100 text-gray-800'

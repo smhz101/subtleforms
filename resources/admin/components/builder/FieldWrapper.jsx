@@ -16,19 +16,15 @@ export default function FieldWrapper({
   onDuplicate,
   onDelete,
 }) {
-  const containerStyle = {
-    padding: '20px',
-    background: isSelected ? '#f0f7ff' : isHovered ? '#fafafa' : '#fff',
-    border: isSelected ? '2px solid #2271b1' : '1px solid #e0e0e0',
-    borderRadius: '6px',
-    cursor: 'pointer',
-    transition: 'all 0.15s ease',
-    position: 'relative',
-  };
-
   return (
     <div
-      style={containerStyle}
+      className={`p-5 cursor-pointer transition-all relative ${
+        isSelected
+          ? 'bg-blue-50 border-2 border-blue-600'
+          : isHovered
+            ? 'bg-gray-50 border border-gray-300'
+            : 'bg-white border border-gray-300'
+      }`}
       onClick={onSelect}
       onMouseEnter={onHover}
       onMouseLeave={onLeave}>

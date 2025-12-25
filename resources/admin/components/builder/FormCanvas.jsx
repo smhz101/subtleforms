@@ -19,35 +19,14 @@ export default function FormCanvas({
   onShowPicker,
 }) {
   return (
-    <div
-      style={{
-        flex: 1,
-        overflow: 'auto',
-        padding: '32px',
-        background: '#f6f7f7',
-      }}>
-      <div
-        style={{
-          maxWidth: '720px',
-          margin: '0 auto',
-          background: '#fff',
-          padding: '48px',
-          borderRadius: '8px',
-          boxShadow: '0 2px 16px rgba(0,0,0,0.08)',
-          minHeight: '500px',
-        }}>
+    <div className='flex-1 overflow-auto p-8 bg-gray-100'>
+      <div className='max-w-3xl mx-auto bg-white p-12 min-h-[500px]'>
         {/* Form Title */}
-        <div style={{ marginBottom: 32 }}>
-          <h3
-            style={{
-              margin: '0 0 8px 0',
-              fontSize: '24px',
-              fontWeight: 600,
-              color: '#1e1e1e',
-            }}>
+        <div className='mb-8'>
+          <h3 className='m-0 mb-2 text-2xl font-semibold text-gray-900'>
             {schema?.metadata?.title || __('Untitled Form', 'subtleforms')}
           </h3>
-          <p style={{ margin: 0, fontSize: '14px', color: '#757575' }}>
+          <p className='m-0 text-sm text-gray-600'>
             {schema?.metadata?.description ||
               __('Fill out the form below', 'subtleforms')}
           </p>
@@ -55,30 +34,14 @@ export default function FormCanvas({
 
         {/* Empty State */}
         {fields.length === 0 && (
-          <div
-            style={{
-              textAlign: 'center',
-              padding: '80px 20px',
-              color: '#999',
-            }}>
-            <div
-              style={{
-                marginBottom: 16,
-                display: 'flex',
-                justifyContent: 'center',
-              }}>
+          <div className='text-center py-20 px-5 text-gray-500'>
+            <div className='mb-4 flex justify-center'>
               <Icon icon={getIcon('default')} size={56} />
             </div>
-            <h4
-              style={{
-                margin: '0 0 8px 0',
-                fontSize: '18px',
-                fontWeight: 600,
-                color: '#666',
-              }}>
+            <h4 className='m-0 mb-2 text-lg font-semibold text-gray-700'>
               {__('Start Building Your Form', 'subtleforms')}
             </h4>
-            <p style={{ margin: 0, fontSize: '14px', color: '#999' }}>
+            <p className='m-0 text-sm text-gray-500'>
               {__('Add fields from the left sidebar to begin', 'subtleforms')}
             </p>
           </div>

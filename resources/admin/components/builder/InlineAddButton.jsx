@@ -13,31 +13,15 @@ export default function InlineAddButton({
 }) {
   return (
     <div
-      style={{
-        textAlign: 'center',
-        padding: '12px 0',
-        marginBottom: 16,
-        opacity: isHovered || showFieldPicker ? 1 : 0.3,
-        transition: 'opacity 0.2s',
-      }}
+      className={`text-center py-3 mb-4 transition-opacity ${
+        isHovered || showFieldPicker ? 'opacity-100' : 'opacity-30'
+      }`}
       onMouseEnter={onHover}
       onMouseLeave={onLeave}>
       <button
         ref={anchorRef}
         onClick={onClick}
-        style={{
-          padding: '6px 16px',
-          fontSize: '12px',
-          border: '1px dashed #bbb',
-          background: 'transparent',
-          borderRadius: '4px',
-          cursor: 'pointer',
-          color: '#666',
-          fontWeight: 500,
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '4px',
-        }}>
+        className='px-4 py-1.5 text-xs border border-dashed border-gray-400 bg-transparent cursor-pointer text-gray-600 font-medium inline-flex items-center gap-1'>
         <Icon icon={getIcon('add')} size={16} />
         {__('Insert Field', 'subtleforms')}
       </button>

@@ -96,34 +96,11 @@ export default function FormEditorHeader({
   };
 
   return (
-    <div
-      style={{
-        height: '60px',
-        borderBottom: '1px solid #ddd',
-        background: '#fff',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '0 24px',
-        position: 'sticky',
-        top: 0,
-        zIndex: 100,
-      }}>
+    <div className='h-[60px] border-b border-gray-300 bg-white flex items-center justify-between px-6 sticky top-0 z-[100]'>
       {/* Left Section */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div className='flex items-center gap-4'>
         {/* Logo/Icon */}
-        <div
-          style={{
-            width: '32px',
-            height: '32px',
-            background: '#2271b1',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontSize: '16px',
-            fontWeight: 700,
-          }}>
+        <div className='w-8 h-8 bg-blue-600 flex items-center justify-center text-white text-base font-bold'>
           SF
         </div>
 
@@ -136,31 +113,13 @@ export default function FormEditorHeader({
             onChange={(e) => setTempTitle(e.target.value)}
             onBlur={handleTitleBlur}
             onKeyDown={handleTitleKeyDown}
-            style={{
-              fontSize: '16px',
-              fontWeight: 600,
-              color: '#1e1e1e',
-              border: '1px solid #2271b1',
-              padding: '4px 8px',
-              outline: 'none',
-              minWidth: '200px',
-              background: '#fff',
-            }}
+            className='text-base font-semibold text-gray-900 border border-blue-600 px-2 py-1 outline-none min-w-[200px] bg-white'
           />
         ) : (
           <button
             type='button'
             onClick={handleTitleClick}
-            style={{
-              fontSize: '16px',
-              fontWeight: 600,
-              color: '#1e1e1e',
-              border: 'none',
-              background: 'transparent',
-              padding: '4px 8px',
-              cursor: 'pointer',
-              outline: 'none',
-            }}
+            className='text-base font-semibold text-gray-900 border-none bg-transparent px-2 py-1 cursor-pointer outline-none hover:text-blue-600'
             onMouseEnter={(e) => {
               e.currentTarget.style.color = '#2271b1';
             }}
@@ -177,23 +136,11 @@ export default function FormEditorHeader({
             type='button'
             onClick={handleCopyShortcode}
             disabled={!formId}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '4px 12px',
-              fontSize: '12px',
-              fontWeight: 500,
-              fontFamily: 'monospace',
-              color: copyState === 'copied' ? '#00a32a' : '#50575e',
-              background: copyState === 'copied' ? '#f0f6fc' : '#f6f7f7',
-              border:
-                copyState === 'copied'
-                  ? '1px solid #00a32a'
-                  : '1px solid #dcdcde',
-              cursor: formId ? 'pointer' : 'not-allowed',
-              outline: 'none',
-            }}
+            className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium font-mono outline-none ${
+              copyState === 'copied'
+                ? 'text-green-600 bg-blue-50 border border-green-600'
+                : 'text-gray-700 bg-gray-100 border border-gray-300'
+            } ${formId ? 'cursor-pointer' : 'cursor-not-allowed'}`}
             onMouseEnter={(e) => {
               if (formId && copyState !== 'copied') {
                 e.currentTarget.style.borderColor = '#2271b1';
@@ -217,23 +164,12 @@ export default function FormEditorHeader({
       </div>
 
       {/* Right Section */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+      <div className='flex items-center gap-4'>
         {/* Save Status */}
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '13px',
-            color: '#50575e',
-          }}>
+        <div className='flex items-center gap-1.5 text-xs text-gray-700'>
           <span
-            style={{
-              width: '6px',
-              height: '6px',
-              borderRadius: '50%',
-              background: getStatusColor(),
-            }}
+            className='w-1.5 h-1.5 rounded-full'
+            style={{ background: getStatusColor() }}
           />
           {getStatusText()}
         </div>
@@ -244,11 +180,7 @@ export default function FormEditorHeader({
             variant='primary'
             onClick={onSave}
             disabled={saving}
-            style={{
-              borderRadius: 0,
-              height: '36px',
-              padding: '0 16px',
-            }}>
+            className='h-9 px-4'>
             {saving
               ? __('Saving...', 'subtleforms')
               : __('Save', 'subtleforms')}
@@ -260,12 +192,7 @@ export default function FormEditorHeader({
           icon={close}
           label={__('Close Editor', 'subtleforms')}
           onClick={onClose}
-          style={{
-            borderRadius: 0,
-            width: '36px',
-            height: '36px',
-            border: '1px solid #dcdcde',
-          }}
+          className='w-9 h-9 border border-gray-300'
         />
       </div>
     </div>
