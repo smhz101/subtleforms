@@ -1,6 +1,6 @@
 {
   "name": "subtleforms-admin",
-  "version": "1.1.29",
+  "version": "1.1.30",
   "private": true,
   "scripts": {
     "start": "npm run build:tailwind:watch & wp-scripts start ./resources/admin/index.jsx --output-path=./build/admin --output-filename=admin.js",

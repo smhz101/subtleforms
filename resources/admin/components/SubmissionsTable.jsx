@@ -11,6 +11,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import DataTable from './DataTable';
+import ConfirmModal from './ConfirmModal';
 
 const restBase =
   window.subtleformsAdmin && window.subtleformsAdmin.restUrl
@@ -450,33 +451,18 @@ export default function SubmissionsTable({
           },
         ]}
       />
-      {deleteModal && (
-        <Modal
-          title={__('Delete Submission', 'subtleforms')}
-          onRequestClose={() => setDeleteModal(null)}
-          className='subtleforms-delete-modal'
-          style={{ maxWidth: '400px' }}>
-          <div className='p-4'>
-            <p className='mb-6 text-text-secondary'>
-              {__(
-                'Are you sure you want to delete this submission? This action cannot be undone.',
-                'subtleforms'
-              )}
-            </p>
-            <div className='flex justify-end gap-3'>
-              <Button isSecondary onClick={() => setDeleteModal(null)}>
-                {__('Cancel', 'subtleforms')}
-              </Button>
-              <Button
-                isDestructive
-                isPrimary
-                onClick={() => handleDelete(deleteModal)}>
-                {__('Delete Submission', 'subtleforms')}
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
+      <ConfirmModal
+        isOpen={!!deleteModal}
+        onClose={() => setDeleteModal(null)}
+        title={__('Delete Submission', 'subtleforms')}
+        message={__(
+          'Are you sure you want to delete this submission? This action cannot be undone.',
+          'subtleforms'
+        )}
+        onConfirm={() => handleDelete(deleteModal)}
+        confirmText={__('Delete Submission', 'subtleforms')}
+        confirmVariant='destructive'
+      />
     </>
   );
 }

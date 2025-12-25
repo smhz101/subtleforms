@@ -22,6 +22,7 @@ import {
   plus,
 } from '@wordpress/icons';
 import DataTable from './DataTable';
+import ConfirmModal from './ConfirmModal';
 
 const restBase =
   window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
@@ -645,68 +646,61 @@ export default function FormsList({
         onRowClick={(form) => handleEditForm(form.id)}
       />
 
-      {deleteModal && (
-        <Modal
-          title={__('Delete Form', 'subtleforms')}
-          onRequestClose={() => setDeleteModal(null)}
-          className='subtleforms-delete-modal'
-          style={{ maxWidth: '400px' }}>
-          <div className='p-4'>
-            <p className='mb-6 text-text-secondary'>
-              {(() => {
-                const form = forms.find((f) => f.id === deleteModal);
-                const count = form?.submission_count || 0;
-                return count > 0
-                  ? sprintf(
-                      __(
-                        'Are you sure you want to delete this form? It has %d submissions which will also be permanently deleted.',
-                        'subtleforms'
-                      ),
-                      count
-                    )
-                  : __(
-                      'Are you sure you want to delete this form? This action cannot be undone.',
-                      'subtleforms'
-                    );
-              })()}
-            </p>
-            <div className='flex justify-end gap-3'>
-              <Button isSecondary onClick={() => setDeleteModal(null)}>
-                {__('Cancel', 'subtleforms')}
-              </Button>
-              <Button
-                isDestructive
-                isPrimary
-                onClick={() => handleDelete(deleteModal)}>
-                {__('Delete Form', 'subtleforms')}
-              </Button>
-            </div>
-          </div>
-        </Modal>
-      )}
+      <ConfirmModal
+        isOpen={!!deleteModal}
+        onClose={() => setDeleteModal(null)}
+        title={__('Delete Form', 'subtleforms')}
+        message={(() => {
+          const form = forms.find((f) => f.id === deleteModal);
+          const count = form?.submission_count || 0;
+          return count > 0
+            ? sprintf(
+                __(
+                  'Are you sure you want to delete this form? It has %d submissions which will also be permanently deleted.',
+                  'subtleforms'
+                ),
+                count
+              )
+            : __(
+                'Are you sure you want to delete this form? This action cannot be undone.',
+                'subtleforms'
+              );
+        })()}
+        onConfirm={() => handleDelete(deleteModal)}
+        confirmText={__('Delete Form', 'subtleforms')}
+        confirmVariant='destructive'
+      />
 
       {statusModal && (
         <Modal
           title={__('Change Status', 'subtleforms')}
           onRequestClose={() => setStatusModal(null)}
           className='subtleforms-status-modal'>
-          <SelectControl
-            label={__('Status', 'subtleforms')}
-            value={statusValue}
-            onChange={setStatusValue}
-            options={[
-              { label: __('Draft', 'subtleforms'), value: 'draft' },
-              { label: __('Published', 'subtleforms'), value: 'published' },
-              { label: __('Archived', 'subtleforms'), value: 'archived' },
-            ]}
-          />
-          <div className='subtleforms-modal-actions'>
-            <Button isSecondary onClick={() => setStatusModal(null)}>
-              {__('Cancel', 'subtleforms')}
-            </Button>
-            <Button isPrimary onClick={handleStatusChange}>
-              {__('Update', 'subtleforms')}
-            </Button>
+          <div className='subtleforms-admin'>
+            <SelectControl
+              label={__('Status', 'subtleforms')}
+              value={statusValue}
+              onChange={setStatusValue}
+              options={[
+                { label: __('Draft', 'subtleforms'), value: 'draft' },
+                { label: __('Published', 'subtleforms'), value: 'published' },
+                { label: __('Archived', 'subtleforms'), value: 'archived' },
+              ]}
+            />
+            <div className='flex justify-end items-center gap-3 mt-6'>
+              <Button
+                variant='tertiary'
+                onClick={() => setStatusModal(null)}
+                className='h-9 px-4 text-sm'>
+                {__('Cancel', 'subtleforms')}
+              </Button>
+              <Button
+                variant='primary'
+                onClick={handleStatusChange}
+                className='h-9 px-4 text-sm'>
+                {__('Update', 'subtleforms')}
+              </Button>
+            </div>
           </div>
         </Modal>
       )}

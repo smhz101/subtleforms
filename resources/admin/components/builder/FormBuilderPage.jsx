@@ -18,6 +18,7 @@ import { store as noticesStore } from '@wordpress/notices';
 import AdminShell from '../AdminShell';
 import FormEditor from './FormEditor';
 import SubmissionsTable from '../SubmissionsTable';
+import ConfirmModal from '../ConfirmModal';
 
 const restBase =
   window.subtleformsAdmin && window.subtleformsAdmin.restUrl
@@ -981,79 +982,48 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
       </AdminShell>
 
       {/* Delete Confirmation Modal */}
-      {showDeleteConfirm && (
-        <Modal
-          title={__('Delete Form', 'subtleforms')}
-          onRequestClose={() => setShowDeleteConfirm(false)}>
-          <p>
-            {__(
-              'Are you sure you want to delete this form? This action cannot be undone.',
-              'subtleforms'
-            )}
-          </p>
-          <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
-            <Button variant='primary' isDestructive onClick={handleDelete}>
-              {__('Delete', 'subtleforms')}
-            </Button>
-            <Button
-              variant='secondary'
-              onClick={() => setShowDeleteConfirm(false)}>
-              {__('Cancel', 'subtleforms')}
-            </Button>
-          </div>
-        </Modal>
-      )}
+      <ConfirmModal
+        isOpen={showDeleteConfirm}
+        onClose={() => setShowDeleteConfirm(false)}
+        title={__('Delete Form', 'subtleforms')}
+        message={__(
+          'Are you sure you want to delete this form? This action cannot be undone.',
+          'subtleforms'
+        )}
+        onConfirm={handleDelete}
+        confirmText={__('Delete', 'subtleforms')}
+        confirmVariant='destructive'
+      />
 
       {/* Publish Confirmation Modal */}
-      {showPublishConfirm && (
-        <Modal
-          title={__('Publish Form', 'subtleforms')}
-          onRequestClose={() => setShowPublishConfirm(false)}>
-          <p>
-            {__(
-              'Publishing this form will make it visible on the frontend. Are you ready to publish?',
-              'subtleforms'
-            )}
-          </p>
-          <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
-            <Button variant='primary' onClick={confirmPublish}>
-              {__('Publish', 'subtleforms')}
-            </Button>
-            <Button
-              variant='secondary'
-              onClick={() => setShowPublishConfirm(false)}>
-              {__('Cancel', 'subtleforms')}
-            </Button>
-          </div>
-        </Modal>
-      )}
+      <ConfirmModal
+        isOpen={showPublishConfirm}
+        onClose={() => setShowPublishConfirm(false)}
+        title={__('Publish Form', 'subtleforms')}
+        message={__(
+          'Publishing this form will make it visible on the frontend. Are you ready to publish?',
+          'subtleforms'
+        )}
+        onConfirm={confirmPublish}
+        confirmText={__('Publish', 'subtleforms')}
+        confirmVariant='primary'
+      />
 
       {/* Discard Changes Confirmation Modal */}
-      {showDiscardConfirm && (
-        <Modal
-          title={__('Unsaved Changes', 'subtleforms')}
-          onRequestClose={() => setShowDiscardConfirm(false)}>
-          <p>
-            {__(
-              'You have unsaved changes. Do you want to save before leaving?',
-              'subtleforms'
-            )}
-          </p>
-          <div style={{ display: 'flex', gap: '12px', marginTop: '20px' }}>
-            <Button variant='primary' onClick={handleSaveDraft}>
-              {__('Save Draft', 'subtleforms')}
-            </Button>
-            <Button variant='secondary' onClick={confirmDiscard} isDestructive>
-              {__('Discard Changes', 'subtleforms')}
-            </Button>
-            <Button
-              variant='tertiary'
-              onClick={() => setShowDiscardConfirm(false)}>
-              {__('Cancel', 'subtleforms')}
-            </Button>
-          </div>
-        </Modal>
-      )}
+      <ConfirmModal
+        isOpen={showDiscardConfirm}
+        onClose={() => setShowDiscardConfirm(false)}
+        title={__('Unsaved Changes', 'subtleforms')}
+        message={__(
+          'You have unsaved changes. Do you want to save before leaving?',
+          'subtleforms'
+        )}
+        onConfirm={handleSaveDraft}
+        confirmText={__('Save Draft', 'subtleforms')}
+        confirmVariant='primary'
+        onSecondary={confirmDiscard}
+        secondaryText={__('Discard Changes', 'subtleforms')}
+      />
     </>
   );
 }
