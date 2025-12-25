@@ -56,6 +56,7 @@ require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Extensions/ExtensionManager.php';
 // Admin / API
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Admin/AdminMenu.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Api/RestController.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Frontend/Shortcode.php';
 
 // Repositories
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Repositories/FormsRepository.php';

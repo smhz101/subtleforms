@@ -19,85 +19,7 @@ import AdminShell from '../AdminShell';
 import FormEditor from './FormEditor';
 import SubmissionsTable from '../SubmissionsTable';
 import ConfirmModal from '../ConfirmModal';
-
-const restBase =
-  window.subtleformsAdmin && window.subtleformsAdmin.restUrl
-    ? window.subtleformsAdmin.restUrl.replace(/\/$/, '')
-    : '/wp-json/subtleforms/v1';
-const restNonce =
-  window.subtleformsAdmin && window.subtleformsAdmin.restNonce
-    ? window.subtleformsAdmin.restNonce
-    : null;
-
-async function parseJsonResponse(response) {
-  if (!response) {
-    return null;
-  }
-
-  if (response.status === 204) {
-    return null;
-  }
-
-  const contentLength = response.headers?.get('Content-Length');
-  if (contentLength === '0') {
-    return null;
-  }
-
-  const text = await response.text();
-  if (!text) {
-    return null;
-  }
-
-  try {
-    return JSON.parse(text);
-  } catch (err) {
-    console.warn('Failed to parse JSON response', err);
-    return null;
-  }
-}
-
-async function apiGet(path) {
-  const response = await fetch(restBase + path, {
-    credentials: 'same-origin',
-    headers: {
-      'X-WP-Nonce': restNonce,
-      'Content-Type': 'application/json',
-    },
-  });
-
-  const body = await parseJsonResponse(response);
-  return { ok: response.ok, body };
-}
-
-async function apiPost(path, payload) {
-  const response = await fetch(restBase + path, {
-    method: 'POST',
-    credentials: 'same-origin',
-    headers: {
-      'X-WP-Nonce': restNonce,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const body = await parseJsonResponse(response);
-  return { ok: response.ok, body };
-}
-
-async function apiPut(path, payload) {
-  const response = await fetch(restBase + path, {
-    method: 'PUT',
-    credentials: 'same-origin',
-    headers: {
-      'X-WP-Nonce': restNonce,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const body = await parseJsonResponse(response);
-  return { ok: response.ok, body };
-}
+import { apiGet, apiPost, apiPut } from '../../utils/api';
 
 async function apiDelete(path) {
   const response = await fetch(restBase + path, {
@@ -133,6 +55,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
   const [autoSaveError, setAutoSaveError] = useState(null);
   const [isHydrating, setIsHydrating] = useState(false);
   const [isEphemeral, setIsEphemeral] = useState(!formId);
+  const [hasUserMutation, setHasUserMutation] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
@@ -302,6 +225,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
       return;
     }
     setIsDirty(true);
+    setHasUserMutation(true); // Track that user made a change
     setStatus('dirty');
     setAutoSaveError(null);
     setSaveError(null);
@@ -373,13 +297,18 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
         return;
       }
 
+      // In ephemeral mode, prevent autosave unless user has made changes
+      if (isEphemeral && auto && !hasUserMutation) {
+        return;
+      }
+
       if (autoSaveTimeoutRef.current) {
         clearTimeout(autoSaveTimeoutRef.current);
         autoSaveTimeoutRef.current = null;
       }
 
-      // In ephemeral mode, must create form first (only on manual save)
-      if (isEphemeral && !auto) {
+      // In ephemeral mode, create form first (only if user has made changes)
+      if (isEphemeral && hasUserMutation) {
         const finalStatus = targetStatus || 'draft';
 
         if (auto) {
@@ -588,6 +517,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
       formTitle,
       formStatus,
       isEphemeral,
+      hasUserMutation,
       removeNotice,
       createErrorNotice,
       createSuccessNotice,
@@ -663,13 +593,19 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
   ]);
 
   const handleDiscard = useCallback(() => {
-    if (isEphemeral || !isDirty) {
-      // Just close if ephemeral or no changes
+    // For ephemeral forms without user changes, just close
+    if (isEphemeral && !hasUserMutation) {
       window.location.href = 'admin.php?page=subtleforms-forms';
       return;
     }
-    setShowDiscardConfirm(true);
-  }, [isEphemeral, isDirty]);
+
+    // For ephemeral forms with changes or saved forms with changes, show confirmation
+    if (isDirty) {
+      setShowDiscardConfirm(true);
+    } else {
+      window.location.href = 'admin.php?page=subtleforms-forms';
+    }
+  }, [isEphemeral, hasUserMutation, isDirty]);
 
   const confirmDiscard = useCallback(() => {
     setShowDiscardConfirm(false);
@@ -685,17 +621,24 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
   }, []);
 
   const handleClose = useCallback(() => {
+    // For ephemeral forms without changes, just close
+    if (isEphemeral && !hasUserMutation) {
+      onClose();
+      return;
+    }
+
+    // For forms with changes, show confirmation
     if (isDirty) {
       setShowDiscardConfirm(true);
     } else {
       onClose();
     }
-  }, [isDirty, onClose]);
+  }, [isDirty, isEphemeral, hasUserMutation, onClose]);
 
-  // Autosave effect - ONLY runs if form is NOT ephemeral
+  // Autosave effect - ONLY runs if form is NOT ephemeral OR if user has made changes
   useEffect(() => {
-    // Guard: never autosave in ephemeral mode
-    if (isEphemeral) {
+    // Guard: never autosave in ephemeral mode unless user has made changes
+    if (isEphemeral && !hasUserMutation) {
       return;
     }
 
@@ -723,6 +666,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
     };
   }, [
     isEphemeral,
+    hasUserMutation,
     isDirty,
     draftSchema,
     saving,
@@ -737,9 +681,11 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
     if (autoSaving) return __('Saving...', 'subtleforms');
     if (status === 'saving') return __('Saving…', 'subtleforms');
     if (status === 'saved') return __('Saved', 'subtleforms');
-    if (isEphemeral) return __('Not saved yet', 'subtleforms');
+    if (isEphemeral && !hasUserMutation)
+      return __('No changes yet', 'subtleforms');
+    if (isEphemeral) return __('Not saved', 'subtleforms');
     return __('Unsaved changes', 'subtleforms');
-  }, [status, autoSaving, isEphemeral]);
+  }, [status, autoSaving, isEphemeral, hasUserMutation]);
 
   const statusDescription = status === 'error' ? autoSaveError : null;
 
@@ -785,106 +731,137 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
   // Build actions section with save status, shortcode, and buttons
   const actions = (
     <div className='flex items-center gap-3'>
-      {/* Status Badge */}
-      {!isEphemeral && (
-        <span
-          className={`inline-flex items-center px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white ${
-            formStatus === 'published' ? 'bg-green-600' : 'bg-yellow-500'
-          }`}
-          style={{ borderRadius: '3px' }}>
-          {formStatus === 'published'
-            ? __('Published', 'subtleforms')
-            : __('Draft', 'subtleforms')}
-        </span>
-      )}
+      {/* Status Badge - More prominent */}
+      <span
+        className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white ${
+          isEphemeral
+            ? 'bg-gray-400'
+            : formStatus === 'published'
+            ? 'bg-green-600'
+            : 'bg-yellow-500'
+        }`}
+        style={{ borderRadius: '4px' }}
+        title={
+          isEphemeral
+            ? __('Form not saved yet', 'subtleforms')
+            : formStatus === 'published'
+            ? __('Form is live and visible to users', 'subtleforms')
+            : __('Form is saved but not published', 'subtleforms')
+        }>
+        {isEphemeral
+          ? __('Unsaved', 'subtleforms')
+          : formStatus === 'published'
+          ? __('Published', 'subtleforms')
+          : __('Draft', 'subtleforms')}
+      </span>
 
       {/* Shortcode Pill - only show for saved forms */}
       {shortcode && (
         <button
           type='button'
           onClick={() => handleCopyShortcode(shortcode)}
-          className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium font-mono cursor-pointer outline-none ${
+          className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium font-mono cursor-pointer outline-none transition-all ${
             copyState === 'copied'
-              ? 'text-green-600 bg-blue-50 border border-green-600'
-              : 'text-gray-700 bg-gray-100 border border-gray-300'
+              ? 'text-green-700 bg-green-50 border border-green-500'
+              : 'text-gray-700 bg-gray-50 border border-gray-300 hover:border-blue-500 hover:bg-blue-50'
           }`}
-          style={{ borderRadius: '3px' }}
-          onMouseEnter={(e) => {
-            if (copyState !== 'copied') {
-              e.currentTarget.style.borderColor = '#2271b1';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (copyState !== 'copied') {
-              e.currentTarget.style.borderColor = '#dcdcde';
-            }
-          }}>
-          {copyState === 'copied' ? __('Copied!', 'subtleforms') : shortcode}
+          style={{ borderRadius: '4px' }}
+          title={
+            copyState === 'copied'
+              ? __('Copied to clipboard!', 'subtleforms')
+              : __('Click to copy shortcode', 'subtleforms')
+          }>
+          {copyState === 'copied' ? (
+            <>
+              <span>✓</span>
+              {__('Copied!', 'subtleforms')}
+            </>
+          ) : (
+            shortcode
+          )}
         </button>
       )}
 
       {/* Save Status Indicator */}
-      <div className='flex items-center gap-1.5 text-gray-700 text-xs'>
+      <div
+        className='flex items-center gap-2 px-2 py-1 text-xs'
+        title={statusDescription || undefined}>
         <span
           style={{
-            width: '6px',
-            height: '6px',
+            width: '8px',
+            height: '8px',
             borderRadius: '50%',
             background:
               autoSaving || status === 'saving'
                 ? '#2271b1'
                 : status === 'saved'
                 ? '#00a32a'
+                : status === 'error'
+                ? '#d63638'
                 : isEphemeral
                 ? '#999'
                 : '#f0b849',
+            boxShadow:
+              autoSaving || status === 'saving'
+                ? '0 0 4px rgba(34, 113, 177, 0.5)'
+                : 'none',
           }}
         />
-        {statusLabel}
+        <span
+          className={
+            status === 'error' ? 'text-red-600 font-medium' : 'text-gray-700'
+          }>
+          {statusLabel}
+        </span>
       </div>
 
-      {/* Save Draft Button */}
-      {(isDirty || isEphemeral) && (
+      <div
+        style={{
+          width: '1px',
+          height: '24px',
+          background: '#ddd',
+          margin: '0 4px',
+        }}
+      />
+
+      {/* Primary Actions Group */}
+      <div className='flex items-center gap-2'>
+        {/* Save Draft Button - Always visible for new forms or when dirty */}
+        {(isDirty || isEphemeral) && (
+          <Button
+            variant='secondary'
+            onClick={handleSaveDraft}
+            disabled={saving || autoSaving}
+            className='px-4 h-9 font-medium text-sm'>
+            {saving && !formStatus
+              ? __('Saving…', 'subtleforms')
+              : __('Save Draft', 'subtleforms')}
+          </Button>
+        )}
+
+        {/* Publish/Update Button - Primary action */}
         <Button
-          variant='secondary'
-          onClick={handleSaveDraft}
-          disabled={saving}
-          className='px-3 h-8 text-xs'>
-          {saving
-            ? __('Saving…', 'subtleforms')
-            : __('Save Draft', 'subtleforms')}
+          variant='primary'
+          onClick={handlePublish}
+          disabled={saving || autoSaving || (isEphemeral && !isDirty)}
+          className='px-4 h-9 font-medium text-sm'>
+          {formStatus === 'published'
+            ? __('Update', 'subtleforms')
+            : __('Publish', 'subtleforms')}
         </Button>
-      )}
 
-      {/* Publish Button */}
-      <Button
-        variant='primary'
-        onClick={handlePublish}
-        disabled={saving || (isEphemeral && !isDirty)}
-        className='px-3 h-8 text-xs'>
-        {formStatus === 'published'
-          ? __('Update', 'subtleforms')
-          : __('Publish', 'subtleforms')}
-      </Button>
-
-      {/* Delete Button - only show for existing forms */}
-      {!isEphemeral && (
-        <Button
-          variant='secondary'
-          onClick={() => setShowDeleteConfirm(true)}
-          isDestructive
-          className='px-3 h-8 text-xs'>
-          {__('Delete', 'subtleforms')}
-        </Button>
-      )}
-
-      {/* Close Button */}
-      <Button
-        variant='tertiary'
-        onClick={handleClose}
-        className='px-3 h-8 text-xs'>
-        {__('Close', 'subtleforms')}
-      </Button>
+        {/* Delete Button - Danger action, only for existing forms */}
+        {!isEphemeral && (
+          <Button
+            variant='secondary'
+            onClick={() => setShowDeleteConfirm(true)}
+            isDestructive
+            className='px-4 h-9 font-medium text-sm'
+            title={__('Delete this form permanently', 'subtleforms')}>
+            {__('Delete', 'subtleforms')}
+          </Button>
+        )}
+      </div>
     </div>
   );
 
@@ -918,7 +895,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
       <AdminShell
         title={titleElement}
         actions={actions}
-        tabs={tabs}
+        actionBarLeft={tabs}
         noScroll={true}>
         <style>{`
           .subtleforms-builder-tabs-content {
@@ -1013,16 +990,24 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
       <ConfirmModal
         isOpen={showDiscardConfirm}
         onClose={() => setShowDiscardConfirm(false)}
-        title={__('Unsaved Changes', 'subtleforms')}
-        message={__(
-          'You have unsaved changes. Do you want to save before leaving?',
-          'subtleforms'
-        )}
+        title={__('You have unsaved changes', 'subtleforms')}
+        message={
+          isEphemeral
+            ? __(
+                'This form has not been saved yet. All changes will be lost if you leave.',
+                'subtleforms'
+              )
+            : __(
+                'Your recent edits have not been saved. Would you like to save your changes before leaving, or discard them?',
+                'subtleforms'
+              )
+        }
         onConfirm={handleSaveDraft}
         confirmText={__('Save Draft', 'subtleforms')}
         confirmVariant='primary'
         onSecondary={confirmDiscard}
         secondaryText={__('Discard Changes', 'subtleforms')}
+        cancelText={__('Cancel', 'subtleforms')}
       />
     </>
   );

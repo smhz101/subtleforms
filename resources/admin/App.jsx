@@ -8,6 +8,8 @@ import SubmissionDetailPage from './components/SubmissionDetailPage';
 import ExecutionLog from './components/ExecutionLog';
 import FormBuilder from './components/FormBuilder';
 import CreateFormModal from './components/CreateFormModal';
+import Settings from './pages/Settings';
+import Dashboard from './pages/Dashboard';
 
 export default function App() {
   const mount = document.getElementById('subtleforms-admin-app');
@@ -79,9 +81,8 @@ export default function App() {
               }}
             />
           )}
-          {page === 'dashboard' && (
-            <div>{__('Dashboard coming soon', 'subtleforms')}</div>
-          )}
+          {page === 'dashboard' && <Dashboard />}
+          {page === 'settings' && <Settings />}
           {page === 'form-editor' && !!initialFormId && (
             <FormBuilder
               formId={initialFormId}

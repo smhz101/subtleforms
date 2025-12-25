@@ -63,6 +63,7 @@ export default function SubmissionsTable({
   onRowClick,
   searchTerm,
   statusFilter = 'all',
+  dateRange = 'all',
 }) {
   const [submissions, setSubmissions] = useState([]);
   const [forms, setForms] = useState([]);
@@ -95,6 +96,7 @@ export default function SubmissionsTable({
     formId,
     statusFilter,
     searchTerm,
+    dateRange,
     currentPage,
     perPage,
     sortBy,
@@ -104,7 +106,31 @@ export default function SubmissionsTable({
   useEffect(() => {
     // Reset to first page when filters change
     setCurrentPage(1);
-  }, [statusFilter, searchTerm]);
+  }, [statusFilter, searchTerm, dateRange]);
+
+  const getDateRangeParams = (range) => {
+    const now = new Date();
+    let startDate = null;
+
+    switch (range) {
+      case 'today':
+        startDate = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        break;
+      case '7days':
+        startDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        break;
+      case '30days':
+        startDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        break;
+      case '3months':
+        startDate = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
+        break;
+      default:
+        return {};
+    }
+
+    return startDate ? { after: startDate.toISOString().split('T')[0] } : {};
+  };
 
   const loadSubmissions = async () => {
     setError(null);
@@ -128,6 +154,12 @@ export default function SubmissionsTable({
 
       if (searchTerm) {
         params.append('search', searchTerm);
+      }
+
+      // Add date range filter
+      const dateParams = getDateRangeParams(dateRange);
+      if (dateParams.after) {
+        params.append('after', dateParams.after);
       }
 
       const response = await fetch(`${restBase}/submissions?${params}`, {

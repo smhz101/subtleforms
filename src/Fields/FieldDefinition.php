@@ -10,6 +10,8 @@ namespace SubtleForms\Fields;
 
 /**
  * Immutable field definition value object.
+ * 
+ * Normalized field architecture with common base attributes and field-specific config.
  */
 final class FieldDefinition
 {
@@ -44,14 +46,39 @@ final class FieldDefinition
     public $acceptsChildren;
     
     /**
-     * @var array Default field configuration
+     * @var array Common base attributes (all fields)
+     * - id: Unique field instance ID (generated)
+     * - key: Field key for data mapping
+     * - type: Field type identifier
+     * - label: Field label
+     * - required: Whether field is required
+     * - defaultValue: Default field value
+     * - visibility: Conditional visibility rules
+     * - validation: Base validation rules
      */
-    public $defaultConfig;
+    public $baseAttributes;
     
     /**
-     * @var array Settings schema definition
+     * @var array Field-specific attributes configuration
+     * This defines the unique attributes for each field type:
+     * - country: countryList (ISO-3166 countries)
+     * - password: minLength, strengthMeter, requireConfirmation
+     * - email: rfcValidation, allowMultiple
+     * - number: min, max, step
+     * - textarea: rows, maxLength
+     * - etc.
      */
-    public $settingsSchema;
+    public $fieldSpecificAttributes;
+    
+    /**
+     * @var array Inspector controls configuration
+     * Defines which controls to render in the field inspector:
+     * [
+     *   ['type' => 'text', 'name' => 'placeholder', 'label' => 'Placeholder'],
+     *   ['type' => 'number', 'name' => 'min', 'label' => 'Minimum Value'],
+     * ]
+     */
+    public $inspectorControls;
     
     /**
      * @var array Required capabilities to use this field
@@ -65,8 +92,9 @@ final class FieldDefinition
      * @param string $icon Icon slug or dashicon key
      * @param string $kind Field kind (input, structure, system, dynamic)
      * @param bool $acceptsChildren Whether this field can accept children
-     * @param array $defaultConfig Default field configuration
-     * @param array $settingsSchema Settings schema definition
+     * @param array $baseAttributes Common attributes for all fields
+     * @param array $fieldSpecificAttributes Field-type specific config
+     * @param array $inspectorControls Inspector UI controls configuration
      * @param array $requiredCapabilities Required capabilities to use this field
      */
     public function __construct(
@@ -76,8 +104,9 @@ final class FieldDefinition
         $icon,
         $kind = 'input',
         $acceptsChildren = false,
-        $defaultConfig = [],
-        $settingsSchema = [],
+        $baseAttributes = [],
+        $fieldSpecificAttributes = [],
+        $inspectorControls = [],
         $requiredCapabilities = []
     ) {
         $this->type = $type;
@@ -86,8 +115,21 @@ final class FieldDefinition
         $this->icon = $icon;
         $this->kind = $kind;
         $this->acceptsChildren = $acceptsChildren;
-        $this->defaultConfig = $defaultConfig;
-        $this->settingsSchema = $settingsSchema;
+        
+        // Merge with default base attributes
+        $this->baseAttributes = array_merge([
+            'id' => null, // Generated at runtime
+            'key' => null, // Generated at runtime
+            'type' => $type,
+            'label' => '',
+            'required' => false,
+            'defaultValue' => null,
+            'visibility' => null,
+            'validation' => [],
+        ], $baseAttributes);
+        
+        $this->fieldSpecificAttributes = $fieldSpecificAttributes;
+        $this->inspectorControls = $inspectorControls;
         $this->requiredCapabilities = $requiredCapabilities;
     }
 
@@ -105,10 +147,25 @@ final class FieldDefinition
             'icon' => $this->icon,
             'kind' => $this->kind,
             'acceptsChildren' => $this->acceptsChildren,
-            'defaultConfig' => $this->defaultConfig,
-            'settingsSchema' => $this->settingsSchema,
+            'baseAttributes' => $this->baseAttributes,
+            'fieldSpecificAttributes' => $this->fieldSpecificAttributes,
+            'inspectorControls' => $this->inspectorControls,
             'requiredCapabilities' => $this->requiredCapabilities,
         ];
+    }
+
+    /**
+     * Get default configuration for field instance creation.
+     * Merges base attributes with field-specific defaults.
+     *
+     * @return array
+     */
+    public function getDefaultConfig(): array
+    {
+        return array_merge(
+            $this->baseAttributes,
+            $this->fieldSpecificAttributes
+        );
     }
 
     /**

@@ -9,10 +9,14 @@
     "build:tailwind:watch": "tailwindcss -i ./assets/css/tailwind.css -o ./build/admin/tailwind.css --watch",
     "start:frontend": "wp-scripts start ./resources/frontend/index.jsx --output-path=./build/frontend --output-filename=frontend.js",
     "build:frontend": "wp-scripts build ./resources/frontend/index.jsx --output-path=./build/frontend --output-filename=frontend.js",
-    "build:all": "npm run build && npm run build:tailwind && npm run build:frontend"
+    "build:all": "npm run build && npm run build:tailwind && npm run build:frontend",
+    "test": "wp-scripts test-unit-js",
+    "test:e2e": "playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.57.0",
     "@tailwindcss/forms": "^0.5.11",
+    "@wordpress/e2e-test-utils-playwright": "^1.37.0",
     "@wordpress/scripts": "^31.1.0",
     "autoprefixer": "^10.4.23",
     "tailwindcss": "^4.1.18"

@@ -1,0 +1,266 @@
+<?php
+
+namespace SubtleForms\Support;
+
+/**
+ * Settings Manager
+ * 
+ * Handles plugin settings storage, retrieval, and validation.
+ */
+class Settings
+{
+    /**
+     * Option name in wp_options table
+     */
+    const OPTION_NAME = 'subtleforms_settings';
+
+    /**
+     * Default settings
+     */
+    const DEFAULTS = [
+        // General
+        'default_form_status' => 'draft',
+        'autosave_enabled' => true,
+        'autosave_interval' => 3,
+        'delete_behavior' => 'soft',
+        
+        // Frontend
+        'success_message' => 'Thank you! Your submission has been received.',
+        'error_message' => 'An error occurred. Please try again.',
+        'redirect_after_submit' => '',
+        'submission_limit_enabled' => false,
+        'submission_limit' => 1,
+        
+        // Email / Notifications
+        'admin_notification_enabled' => true,
+        'user_confirmation_enabled' => false,
+        'sender_name' => '',
+        'sender_email' => '',
+        'admin_email' => '',
+        
+        // Advanced
+        'debug_mode' => false,
+        'log_retention_days' => 30,
+    ];
+
+    /**
+     * Validation rules for settings
+     */
+    const VALIDATION_RULES = [
+        'default_form_status' => ['draft', 'published'],
+        'autosave_enabled' => 'boolean',
+        'autosave_interval' => ['integer', 'min' => 1, 'max' => 60],
+        'delete_behavior' => ['soft', 'hard'],
+        'success_message' => ['string', 'max' => 500],
+        'error_message' => ['string', 'max' => 500],
+        'redirect_after_submit' => ['string', 'max' => 500],
+        'submission_limit_enabled' => 'boolean',
+        'submission_limit' => ['integer', 'min' => 1, 'max' => 100],
+        'admin_notification_enabled' => 'boolean',
+        'user_confirmation_enabled' => 'boolean',
+        'sender_name' => ['string', 'max' => 100],
+        'sender_email' => 'email',
+        'admin_email' => 'email',
+        'debug_mode' => 'boolean',
+        'log_retention_days' => ['integer', 'min' => 1, 'max' => 365],
+    ];
+
+    /**
+     * Get all settings
+     * 
+     * @return array
+     */
+    public function getAll()
+    {
+        $settings = get_option(self::OPTION_NAME, []);
+        return wp_parse_args($settings, self::DEFAULTS);
+    }
+
+    /**
+     * Get a specific setting
+     * 
+     * @param string $key Setting key
+     * @param mixed $default Default value if not found
+     * @return mixed
+     */
+    public function get($key, $default = null)
+    {
+        $settings = $this->getAll();
+        
+        if (isset($settings[$key])) {
+            return $settings[$key];
+        }
+        
+        return $default !== null ? $default : (self::DEFAULTS[$key] ?? null);
+    }
+
+    /**
+     * Update settings
+     * 
+     * @param array $newSettings New settings to merge
+     * @return bool
+     */
+    public function update($newSettings)
+    {
+        $currentSettings = $this->getAll();
+        $mergedSettings = array_merge($currentSettings, $newSettings);
+        
+        // Validate settings
+        $validatedSettings = $this->validate($mergedSettings);
+        
+        return update_option(self::OPTION_NAME, $validatedSettings);
+    }
+
+    /**
+     * Reset settings to defaults
+     * 
+     * @return bool
+     */
+    public function reset()
+    {
+        return update_option(self::OPTION_NAME, self::DEFAULTS);
+    }
+
+    /**
+     * Validate settings
+     * 
+     * @param array $settings Settings to validate
+     * @return array Validated settings
+     * @throws \InvalidArgumentException If validation fails
+     */
+    public function validate($settings)
+    {
+        $validated = [];
+        
+        foreach ($settings as $key => $value) {
+            if (!isset(self::VALIDATION_RULES[$key])) {
+                continue;
+            }
+            
+            $rule = self::VALIDATION_RULES[$key];
+            
+            // Handle array of allowed values
+            if (is_array($rule) && isset($rule[0]) && is_string($rule[0])) {
+                if (!in_array($value, $rule, true)) {
+                    throw new \InvalidArgumentException("Invalid value for {$key}");
+                }
+                $validated[$key] = $value;
+                continue;
+            }
+            
+            // Handle type validation
+            if (is_string($rule)) {
+                $validated[$key] = $this->validateType($key, $value, $rule);
+                continue;
+            }
+            
+            // Handle complex validation rules
+            if (is_array($rule)) {
+                $validated[$key] = $this->validateWithRules($key, $value, $rule);
+                continue;
+            }
+        }
+        
+        return $validated;
+    }
+
+    /**
+     * Validate by type
+     * 
+     * @param string $key Setting key
+     * @param mixed $value Value to validate
+     * @param string $type Type to validate against
+     * @return mixed Validated value
+     * @throws \InvalidArgumentException If validation fails
+     */
+    private function validateType($key, $value, $type)
+    {
+        switch ($type) {
+            case 'boolean':
+                return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+            
+            case 'integer':
+                if (!is_numeric($value)) {
+                    throw new \InvalidArgumentException("{$key} must be an integer");
+                }
+                return (int) $value;
+            
+            case 'string':
+                return sanitize_text_field($value);
+            
+            case 'email':
+                if (!empty($value) && !is_email($value)) {
+                    throw new \InvalidArgumentException("{$key} must be a valid email");
+                }
+                return sanitize_email($value);
+            
+            default:
+                return $value;
+        }
+    }
+
+    /**
+     * Validate with complex rules
+     * 
+     * @param string $key Setting key
+     * @param mixed $value Value to validate
+     * @param array $rules Validation rules
+     * @return mixed Validated value
+     * @throws \InvalidArgumentException If validation fails
+     */
+    private function validateWithRules($key, $value, $rules)
+    {
+        $type = $rules[0] ?? 'string';
+        $validated = $this->validateType($key, $value, $type);
+        
+        // Check min value
+        if (isset($rules['min']) && $validated < $rules['min']) {
+            throw new \InvalidArgumentException("{$key} must be at least {$rules['min']}");
+        }
+        
+        // Check max value
+        if (isset($rules['max'])) {
+            if ($type === 'string' && strlen($validated) > $rules['max']) {
+                throw new \InvalidArgumentException("{$key} must be at most {$rules['max']} characters");
+            }
+            if ($type === 'integer' && $validated > $rules['max']) {
+                throw new \InvalidArgumentException("{$key} must be at most {$rules['max']}");
+            }
+        }
+        
+        return $validated;
+    }
+
+    /**
+     * Get sender email with fallback to admin email
+     * 
+     * @return string
+     */
+    public function getSenderEmail()
+    {
+        $email = $this->get('sender_email');
+        return !empty($email) ? $email : get_option('admin_email');
+    }
+
+    /**
+     * Get sender name with fallback to site name
+     * 
+     * @return string
+     */
+    public function getSenderName()
+    {
+        $name = $this->get('sender_name');
+        return !empty($name) ? $name : get_option('blogname');
+    }
+
+    /**
+     * Get admin email with fallback to WordPress admin email
+     * 
+     * @return string
+     */
+    public function getAdminEmail()
+    {
+        $email = $this->get('admin_email');
+        return !empty($email) ? $email : get_option('admin_email');
+    }
+}

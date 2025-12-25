@@ -9,12 +9,15 @@
 namespace SubtleForms\Api;
 
 use SubtleForms\Support\Helpers;
+use SubtleForms\Api\SettingsApi;
+use SubtleForms\Api\DashboardApi;
 
 use SubtleForms\Engine\Pipeline;
 use SubtleForms\Engine\SubmissionContext;
 use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Repositories\SubmissionsRepository;
 use SubtleForms\Support\FeatureGate;
+use SubtleForms\Support\Settings;
 use SubtleForms\Engine\SchemaCompiler;
 use SubtleForms\Fields\FieldRegistry;
 use WP_REST_Request;
@@ -57,6 +60,11 @@ final class RestController
      * @var FieldRegistry
      */
     private $fieldRegistry;
+    
+    /**
+     * @var Settings
+     */
+    private $settings;
 
     public function __construct(
         $pipeline,
@@ -64,7 +72,8 @@ final class RestController
         $submissionsRepo,
         $gate,
         $fieldRegistry,
-        $compiler
+        $compiler,
+        $settings = null
     ) {
         $this->pipeline = $pipeline;
         $this->formsRepo = $formsRepo;
@@ -72,6 +81,7 @@ final class RestController
         $this->gate = $gate;
         $this->fieldRegistry = $fieldRegistry;
         $this->compiler = $compiler;
+        $this->settings = $settings;
     }
 
     /**
@@ -179,6 +189,20 @@ final class RestController
             'callback' => [$this, 'get_fields'],
             'permission_callback' => [$this, 'check_read_permission'],
         ]);
+
+        // Settings endpoints (if Settings is available)
+        if ($this->settings) {
+            $settingsApi = new SettingsApi($this->settings);
+            $settingsApi->registerRoutes();
+        }
+
+        // Dashboard endpoint
+        $dashboardApi = new DashboardApi(
+            $this->formsRepo,
+            $this->submissionsRepo,
+            $this->settings
+        );
+        $dashboardApi->registerRoutes();
     }
 
     /**
@@ -334,10 +358,14 @@ final class RestController
     public function create_form(WP_REST_Request $request): WP_REST_Response
     {
         $params = $request->get_json_params();
+        
+        // Get default status from settings
+        $defaultStatus = $this->settings ? $this->settings->get('default_form_status', 'draft') : 'draft';
+        
         $data = [
             'title' => $params['title'] ?? 'Untitled Form',
             'config' => $params['config'] ?? [],
-            'status' => $params['status'] ?? 'draft',
+            'status' => $params['status'] ?? $defaultStatus,
         ];
 
         $id = $this->formsRepo->create($data);

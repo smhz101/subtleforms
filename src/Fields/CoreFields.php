@@ -9,7 +9,13 @@
 namespace SubtleForms\Fields;
 
 /**
- * Register all core field definitions.
+ * Register all core field definitions with normalized architecture.
+ * 
+ * All fields share common base attributes:
+ * - id, key, type, label, required, defaultValue, visibility, validation
+ * 
+ * Field-specific attributes are isolated in fieldSpecificAttributes.
+ * Inspector controls are defined per field type.
  */
 final class CoreFields
 {
@@ -21,161 +27,178 @@ final class CoreFields
      */
     public static function register(FieldRegistry $registry): void
     {
-        // Basic Fields
+        // ===== Basic Fields =====
+        
+        // Text Field
         $registry->register(new FieldDefinition(
             type: 'text',
             label: __('Text', 'subtleforms'),
             category: 'basic',
             icon: 'dashicons-text',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'placeholder' => '',
-                'required' => false,
                 'maxLength' => null,
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'placeholder' => ['type' => 'string'],
-                'required' => ['type' => 'boolean'],
-                'maxLength' => ['type' => 'integer'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'text', 'name' => 'placeholder', 'label' => __('Placeholder', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'number', 'name' => 'maxLength', 'label' => __('Max Length', 'subtleforms')],
             ]
         ));
 
+        // Email Field - with RFC validation toggle
         $registry->register(new FieldDefinition(
             type: 'email',
             label: __('Email', 'subtleforms'),
             category: 'basic',
             icon: 'dashicons-email',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'placeholder' => '',
-                'required' => false,
+                'rfcValidation' => true,
+                'allowMultiple' => false,
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'placeholder' => ['type' => 'string'],
-                'required' => ['type' => 'boolean'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'text', 'name' => 'placeholder', 'label' => __('Placeholder', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'rfcValidation', 'label' => __('RFC Validation', 'subtleforms'), 'help' => __('Use strict RFC 5322 email validation', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'allowMultiple', 'label' => __('Allow Multiple', 'subtleforms'), 'help' => __('Allow comma-separated email addresses', 'subtleforms')],
             ]
         ));
 
+        // Textarea Field - with rows and maxLength
         $registry->register(new FieldDefinition(
             type: 'textarea',
             label: __('Textarea', 'subtleforms'),
             category: 'basic',
             icon: 'dashicons-text-page',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'placeholder' => '',
-                'required' => false,
                 'rows' => 4,
+                'maxLength' => null,
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'placeholder' => ['type' => 'string'],
-                'required' => ['type' => 'boolean'],
-                'rows' => ['type' => 'integer'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'text', 'name' => 'placeholder', 'label' => __('Placeholder', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'number', 'name' => 'rows', 'label' => __('Rows', 'subtleforms'), 'min' => 2, 'max' => 20],
+                ['type' => 'number', 'name' => 'maxLength', 'label' => __('Max Length', 'subtleforms')],
             ]
         ));
 
+        // Number Field - with min/max/step
         $registry->register(new FieldDefinition(
             type: 'number',
             label: __('Number', 'subtleforms'),
             category: 'basic',
             icon: 'dashicons-calculator',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'placeholder' => '',
-                'required' => false,
                 'min' => null,
                 'max' => null,
                 'step' => 1,
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'placeholder' => ['type' => 'string'],
-                'required' => ['type' => 'boolean'],
-                'min' => ['type' => 'number'],
-                'max' => ['type' => 'number'],
-                'step' => ['type' => 'number'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'text', 'name' => 'placeholder', 'label' => __('Placeholder', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'number', 'name' => 'min', 'label' => __('Minimum Value', 'subtleforms')],
+                ['type' => 'number', 'name' => 'max', 'label' => __('Maximum Value', 'subtleforms')],
+                ['type' => 'number', 'name' => 'step', 'label' => __('Step', 'subtleforms')],
             ]
         ));
 
+        // Phone Field
         $registry->register(new FieldDefinition(
             type: 'phone',
             label: __('Phone', 'subtleforms'),
             category: 'basic',
             icon: 'dashicons-phone',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'placeholder' => '',
-                'required' => false,
                 'format' => 'international',
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'placeholder' => ['type' => 'string'],
-                'required' => ['type' => 'boolean'],
-                'format' => ['type' => 'string', 'enum' => ['international', 'us', 'custom']],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'text', 'name' => 'placeholder', 'label' => __('Placeholder', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'select', 'name' => 'format', 'label' => __('Format', 'subtleforms'), 'options' => [
+                    ['value' => 'international', 'label' => __('International', 'subtleforms')],
+                    ['value' => 'us', 'label' => __('US', 'subtleforms')],
+                    ['value' => 'custom', 'label' => __('Custom', 'subtleforms')],
+                ]],
             ]
         ));
 
+        // URL Field
         $registry->register(new FieldDefinition(
             type: 'url',
             label: __('URL', 'subtleforms'),
             category: 'basic',
             icon: 'dashicons-admin-links',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'placeholder' => '',
-                'required' => false,
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'placeholder' => ['type' => 'string'],
-                'required' => ['type' => 'boolean'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'text', 'name' => 'placeholder', 'label' => __('Placeholder', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
             ]
         ));
 
+        // Password Field - with strength meter and confirmation
         $registry->register(new FieldDefinition(
             type: 'password',
             label: __('Password', 'subtleforms'),
             category: 'basic',
             icon: 'dashicons-lock',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'placeholder' => '',
-                'required' => false,
+                'minLength' => 8,
+                'strengthMeter' => true,
+                'requireConfirmation' => false,
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'placeholder' => ['type' => 'string'],
-                'required' => ['type' => 'boolean'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'text', 'name' => 'placeholder', 'label' => __('Placeholder', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'number', 'name' => 'minLength', 'label' => __('Minimum Length', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'strengthMeter', 'label' => __('Show Strength Meter', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'requireConfirmation', 'label' => __('Require Confirmation', 'subtleforms')],
             ]
         ));
 
-        // Choice Fields
+        // ===== Choice Fields =====
+        
         $registry->register(new FieldDefinition(
             type: 'checkbox',
             label: __('Checkbox', 'subtleforms'),
             category: 'choices',
             icon: 'dashicons-yes',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
-                'required' => false,
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'options' => [],
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'required' => ['type' => 'boolean'],
-                'options' => ['type' => 'array', 'items' => ['type' => 'object']],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'options', 'name' => 'options', 'label' => __('Options', 'subtleforms')],
             ]
         ));
 
@@ -185,15 +208,14 @@ final class CoreFields
             category: 'choices',
             icon: 'dashicons-marker',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
-                'required' => false,
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'options' => [],
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'required' => ['type' => 'boolean'],
-                'options' => ['type' => 'array', 'items' => ['type' => 'object']],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'options', 'name' => 'options', 'label' => __('Options', 'subtleforms')],
             ]
         ));
 
@@ -203,17 +225,16 @@ final class CoreFields
             category: 'choices',
             icon: 'dashicons-list-view',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
-                'required' => false,
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'options' => [],
                 'allowMultiple' => false,
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'required' => ['type' => 'boolean'],
-                'options' => ['type' => 'array', 'items' => ['type' => 'object']],
-                'allowMultiple' => ['type' => 'boolean'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'options', 'name' => 'options', 'label' => __('Options', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'allowMultiple', 'label' => __('Allow Multiple', 'subtleforms')],
             ]
         ));
 
@@ -223,35 +244,35 @@ final class CoreFields
             category: 'choices',
             icon: 'dashicons-arrow-down-alt2',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'placeholder' => 'Select an option',
-                'required' => false,
                 'options' => [],
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'placeholder' => ['type' => 'string'],
-                'required' => ['type' => 'boolean'],
-                'options' => ['type' => 'array', 'items' => ['type' => 'object']],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'text', 'name' => 'placeholder', 'label' => __('Placeholder', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'options', 'name' => 'options', 'label' => __('Options', 'subtleforms')],
             ]
         ));
 
+        // Country Field - with full ISO-3166 country list
         $registry->register(new FieldDefinition(
             type: 'country',
             label: __('Country', 'subtleforms'),
             category: 'choices',
             icon: 'dashicons-admin-site',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'placeholder' => 'Select a country',
-                'required' => false,
+                'countryList' => CountryList::getOptions(), // Full ISO-3166 list
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'placeholder' => ['type' => 'string'],
-                'required' => ['type' => 'boolean'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'text', 'name' => 'placeholder', 'label' => __('Placeholder', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
             ]
         ));
 
@@ -261,38 +282,40 @@ final class CoreFields
             category: 'choices',
             icon: 'dashicons-networking',
             kind: 'dynamic',
-            defaultConfig: [
-                'label' => '',
-                'required' => false,
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'source' => 'csv', // or 'manual'
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'required' => ['type' => 'boolean'],
-                'source' => ['type' => 'string'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'select', 'name' => 'source', 'label' => __('Source', 'subtleforms'), 'options' => [
+                    ['value' => 'manual', 'label' => __('Manual', 'subtleforms')],
+                    ['value' => 'csv', 'label' => __('CSV', 'subtleforms')],
+                ]],
             ]
         ));
 
-        // Date & Time Fields
+        // ===== Date & Time Fields =====
+        
         $registry->register(new FieldDefinition(
             type: 'date',
             label: __('Date', 'subtleforms'),
             category: 'advanced',
             icon: 'dashicons-calendar-alt',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
-                'required' => false,
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'format' => 'Y-m-d',
                 'minDate' => null,
                 'maxDate' => null,
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'required' => ['type' => 'boolean'],
-                'format' => ['type' => 'string'],
-                'minDate' => ['type' => 'string'],
-                'maxDate' => ['type' => 'string'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'text', 'name' => 'format', 'label' => __('Date Format', 'subtleforms')],
+                ['type' => 'text', 'name' => 'minDate', 'label' => __('Min Date', 'subtleforms')],
+                ['type' => 'text', 'name' => 'maxDate', 'label' => __('Max Date', 'subtleforms')],
             ]
         ));
 
@@ -302,15 +325,14 @@ final class CoreFields
             category: 'advanced',
             icon: 'dashicons-clock',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
-                'required' => false,
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'format' => 'H:i',
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'required' => ['type' => 'boolean'],
-                'format' => ['type' => 'string'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'text', 'name' => 'format', 'label' => __('Time Format', 'subtleforms')],
             ]
         ));
 
@@ -320,36 +342,34 @@ final class CoreFields
             category: 'advanced',
             icon: 'dashicons-calendar',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
-                'required' => false,
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'format' => 'Y-m-d H:i',
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'required' => ['type' => 'boolean'],
-                'format' => ['type' => 'string'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'text', 'name' => 'format', 'label' => __('DateTime Format', 'subtleforms')],
             ]
         ));
 
-        // Media Fields
+        // ===== Media Fields =====
+        
         $registry->register(new FieldDefinition(
             type: 'image_upload',
             label: __('Image Upload', 'subtleforms'),
             category: 'media',
             icon: 'dashicons-format-image',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
-                'required' => false,
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'maxSize' => 5242880, // 5MB
                 'allowedTypes' => ['image/jpeg', 'image/png', 'image/gif', 'image/webp'],
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'required' => ['type' => 'boolean'],
-                'maxSize' => ['type' => 'integer'],
-                'allowedTypes' => ['type' => 'array', 'items' => ['type' => 'string']],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'number', 'name' => 'maxSize', 'label' => __('Max Size (bytes)', 'subtleforms')],
             ]
         ));
 
@@ -359,36 +379,34 @@ final class CoreFields
             category: 'media',
             icon: 'dashicons-media-document',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
-                'required' => false,
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'maxSize' => 10485760, // 10MB
                 'allowedTypes' => ['application/pdf', 'application/msword', 'text/plain'],
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'required' => ['type' => 'boolean'],
-                'maxSize' => ['type' => 'integer'],
-                'allowedTypes' => ['type' => 'array', 'items' => ['type' => 'string']],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'number', 'name' => 'maxSize', 'label' => __('Max Size (bytes)', 'subtleforms')],
             ]
         ));
 
-        // Advanced Fields
+        // ===== Advanced Fields =====
+        
         $registry->register(new FieldDefinition(
             type: 'rating',
             label: __('Rating', 'subtleforms'),
             category: 'advanced',
             icon: 'dashicons-star-filled',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
-                'required' => false,
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'max' => 5,
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'required' => ['type' => 'boolean'],
-                'max' => ['type' => 'integer'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'number', 'name' => 'max', 'label' => __('Max Rating', 'subtleforms'), 'min' => 1, 'max' => 10],
             ]
         ));
 
@@ -398,19 +416,18 @@ final class CoreFields
             category: 'advanced',
             icon: 'dashicons-leftright',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
-                'required' => false,
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'min' => 0,
                 'max' => 100,
                 'step' => 1,
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'required' => ['type' => 'boolean'],
-                'min' => ['type' => 'number'],
-                'max' => ['type' => 'number'],
-                'step' => ['type' => 'number'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'number', 'name' => 'min', 'label' => __('Minimum', 'subtleforms')],
+                ['type' => 'number', 'name' => 'max', 'label' => __('Maximum', 'subtleforms')],
+                ['type' => 'number', 'name' => 'step', 'label' => __('Step', 'subtleforms')],
             ]
         ));
 
@@ -420,15 +437,14 @@ final class CoreFields
             category: 'advanced',
             icon: 'dashicons-color-picker',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
-                'required' => false,
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'default' => '#000000',
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'required' => ['type' => 'boolean'],
-                'default' => ['type' => 'string'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'text', 'name' => 'default', 'label' => __('Default Color', 'subtleforms')],
             ]
         ));
 
@@ -438,13 +454,11 @@ final class CoreFields
             category: 'advanced',
             icon: 'dashicons-editor-bold',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
-                'required' => false,
-            ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'required' => ['type' => 'boolean'],
+            baseAttributes: [],
+            fieldSpecificAttributes: [],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
             ]
         ));
 
@@ -454,13 +468,11 @@ final class CoreFields
             category: 'advanced',
             icon: 'dashicons-chart-bar',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
-                'required' => false,
-            ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'required' => ['type' => 'boolean'],
+            baseAttributes: [],
+            fieldSpecificAttributes: [],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
             ]
         ));
 
@@ -470,17 +482,14 @@ final class CoreFields
             category: 'advanced',
             icon: 'dashicons-grid-view',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
-                'required' => false,
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'rows' => [],
                 'columns' => [],
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'required' => ['type' => 'boolean'],
-                'rows' => ['type' => 'array'],
-                'columns' => ['type' => 'array'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
             ]
         ));
 
@@ -490,15 +499,14 @@ final class CoreFields
             category: 'advanced',
             icon: 'dashicons-database',
             kind: 'dynamic',
-            defaultConfig: [
-                'label' => '',
-                'required' => false,
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'source' => '',
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'required' => ['type' => 'boolean'],
-                'source' => ['type' => 'string'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'text', 'name' => 'source', 'label' => __('Data Source', 'subtleforms')],
             ]
         ));
 
@@ -508,15 +516,14 @@ final class CoreFields
             category: 'advanced',
             icon: 'dashicons-admin-post',
             kind: 'dynamic',
-            defaultConfig: [
-                'label' => '',
-                'required' => false,
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'post_type' => 'post',
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'required' => ['type' => 'boolean'],
-                'post_type' => ['type' => 'string'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'text', 'name' => 'post_type', 'label' => __('Post Type', 'subtleforms')],
             ]
         ));
 
@@ -526,11 +533,12 @@ final class CoreFields
             category: 'advanced',
             icon: 'dashicons-editor-code',
             kind: 'structure',
-            defaultConfig: [
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'content' => '',
             ],
-            settingsSchema: [
-                'content' => ['type' => 'string'],
+            inspectorControls: [
+                ['type' => 'textarea', 'name' => 'content', 'label' => __('HTML Content', 'subtleforms')],
             ]
         ));
 
@@ -540,24 +548,25 @@ final class CoreFields
             category: 'advanced',
             icon: 'dashicons-hidden',
             kind: 'input',
-            defaultConfig: [
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'value' => '',
             ],
-            settingsSchema: [
-                'value' => ['type' => 'string'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'value', 'label' => __('Value', 'subtleforms')],
             ]
         ));
 
-        // Composite Fields
+        // ===== Composite Fields =====
+        
         $registry->register(new FieldDefinition(
             type: 'address',
             label: __('Address', 'subtleforms'),
             category: 'advanced',
             icon: 'dashicons-location',
             kind: 'input',
-            defaultConfig: [
-                'label' => '',
-                'required' => false,
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'subFields' => [
                     ['key' => 'street', 'label' => 'Street Address', 'type' => 'text', 'required' => true],
                     ['key' => 'city', 'label' => 'City', 'type' => 'text', 'required' => true],
@@ -565,27 +574,28 @@ final class CoreFields
                     ['key' => 'zip', 'label' => 'ZIP Code', 'type' => 'text', 'required' => true],
                 ],
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string', 'required' => true],
-                'required' => ['type' => 'boolean'],
-                'subFields' => ['type' => 'array'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
             ]
         ));
 
-        // Structural Fields
+        // ===== Structural Fields =====
+        
         $registry->register(new FieldDefinition(
             type: 'section_break',
             label: __('Section Break', 'subtleforms'),
             category: 'layout',
             icon: 'dashicons-minus',
             kind: 'structure',
-            defaultConfig: [
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'title' => '',
                 'description' => '',
             ],
-            settingsSchema: [
-                'title' => ['type' => 'string'],
-                'description' => ['type' => 'string'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'title', 'label' => __('Title', 'subtleforms')],
+                ['type' => 'textarea', 'name' => 'description', 'label' => __('Description', 'subtleforms')],
             ]
         ));
 
@@ -595,11 +605,12 @@ final class CoreFields
             category: 'layout',
             icon: 'dashicons-arrow-right-alt2',
             kind: 'structure',
-            defaultConfig: [
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'title' => '',
             ],
-            settingsSchema: [
-                'title' => ['type' => 'string'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'title', 'label' => __('Title', 'subtleforms')],
             ]
         ));
 
@@ -609,118 +620,42 @@ final class CoreFields
             category: 'layout',
             icon: 'dashicons-controls-repeat',
             kind: 'structure',
-            defaultConfig: [
-                'label' => '',
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'max' => 5,
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string'],
-                'max' => ['type' => 'integer'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'number', 'name' => 'max', 'label' => __('Max Items', 'subtleforms')],
             ]
         ));
 
-        // Layout Containers
-        $registry->register(new FieldDefinition(
-            type: 'one_column_container',
-            label: __('1 Column', 'subtleforms'),
-            category: 'layout',
-            icon: 'columns',
-            kind: 'structure',
-            acceptsChildren: true,
-            defaultConfig: [
-                'columns' => 1,
-                'spacing' => 16,
-            ],
-            settingsSchema: [
-                'columns' => ['type' => 'integer', 'readOnly' => true],
-                'spacing' => ['type' => 'integer'],
-            ]
-        ));
-
-        $registry->register(new FieldDefinition(
-            type: 'two_column_container',
-            label: __('2 Columns', 'subtleforms'),
-            category: 'layout',
-            icon: 'columns',
-            kind: 'structure',
-            acceptsChildren: true,
-            defaultConfig: [
-                'columns' => 2,
-                'spacing' => 16,
-            ],
-            settingsSchema: [
-                'columns' => ['type' => 'integer', 'readOnly' => true],
-                'spacing' => ['type' => 'integer'],
-            ]
-        ));
-
-        $registry->register(new FieldDefinition(
-            type: 'three_column_container',
-            label: __('3 Columns', 'subtleforms'),
-            category: 'layout',
-            icon: 'columns',
-            kind: 'structure',
-            acceptsChildren: true,
-            defaultConfig: [
-                'columns' => 3,
-                'spacing' => 16,
-            ],
-            settingsSchema: [
-                'columns' => ['type' => 'integer', 'readOnly' => true],
-                'spacing' => ['type' => 'integer'],
-            ]
-        ));
-
-        $registry->register(new FieldDefinition(
-            type: 'four_column_container',
-            label: __('4 Columns', 'subtleforms'),
-            category: 'layout',
-            icon: 'columns',
-            kind: 'structure',
-            acceptsChildren: true,
-            defaultConfig: [
-                'columns' => 4,
-                'spacing' => 16,
-            ],
-            settingsSchema: [
-                'columns' => ['type' => 'integer', 'readOnly' => true],
-                'spacing' => ['type' => 'integer'],
-            ]
-        ));
-
-        $registry->register(new FieldDefinition(
-            type: 'five_column_container',
-            label: __('5 Columns', 'subtleforms'),
-            category: 'layout',
-            icon: 'columns',
-            kind: 'structure',
-            acceptsChildren: true,
-            defaultConfig: [
-                'columns' => 5,
-                'spacing' => 16,
-            ],
-            settingsSchema: [
-                'columns' => ['type' => 'integer', 'readOnly' => true],
-                'spacing' => ['type' => 'integer'],
-            ]
-        ));
-
-        $registry->register(new FieldDefinition(
-            type: 'six_column_container',
-            label: __('6 Columns', 'subtleforms'),
-            category: 'layout',
-            icon: 'columns',
-            kind: 'structure',
-            acceptsChildren: true,
-            defaultConfig: [
-                'columns' => 6,
-                'spacing' => 16,
-            ],
-            settingsSchema: [
-                'columns' => ['type' => 'integer', 'readOnly' => true],
-                'spacing' => ['type' => 'integer'],
-            ]
-        ));
+        // ===== Layout Containers =====
+        
+        // Helper function to create column containers
+        $createColumnContainer = function($columns) use ($registry) {
+            $registry->register(new FieldDefinition(
+                type: "{$columns}_column_container",
+                label: __("$columns Column" . ($columns > 1 ? 's' : ''), 'subtleforms'),
+                category: 'layout',
+                icon: 'columns',
+                kind: 'structure',
+                acceptsChildren: true,
+                baseAttributes: [],
+                fieldSpecificAttributes: [
+                    'columns' => $columns,
+                    'spacing' => 16,
+                ],
+                inspectorControls: [
+                    ['type' => 'number', 'name' => 'spacing', 'label' => __('Spacing (px)', 'subtleforms')],
+                ]
+            ));
+        };
+        
+        // Register all column containers (1-6)
+        foreach (['one' => 1, 'two' => 2, 'three' => 3, 'four' => 4, 'five' => 5, 'six' => 6] as $name => $num) {
+            $createColumnContainer($name);
+        }
 
         $registry->register(new FieldDefinition(
             type: 'repeat_container',
@@ -729,17 +664,18 @@ final class CoreFields
             icon: 'controls-repeat',
             kind: 'structure',
             acceptsChildren: true,
-            defaultConfig: [
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'min' => 1,
                 'max' => 5,
                 'buttonLabel' => __('Add New', 'subtleforms'),
                 'spacing' => 16,
             ],
-            settingsSchema: [
-                'min' => ['type' => 'integer'],
-                'max' => ['type' => 'integer'],
-                'buttonLabel' => ['type' => 'string'],
-                'spacing' => ['type' => 'integer'],
+            inspectorControls: [
+                ['type' => 'number', 'name' => 'min', 'label' => __('Min Repeats', 'subtleforms')],
+                ['type' => 'number', 'name' => 'max', 'label' => __('Max Repeats', 'subtleforms')],
+                ['type' => 'text', 'name' => 'buttonLabel', 'label' => __('Button Label', 'subtleforms')],
+                ['type' => 'number', 'name' => 'spacing', 'label' => __('Spacing (px)', 'subtleforms')],
             ]
         ));
 
@@ -750,17 +686,19 @@ final class CoreFields
             icon: 'category',
             kind: 'structure',
             acceptsChildren: true,
-            defaultConfig: [
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'label' => __('Group', 'subtleforms'),
                 'spacing' => 16,
             ],
-            settingsSchema: [
-                'label' => ['type' => 'string'],
-                'spacing' => ['type' => 'integer'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'number', 'name' => 'spacing', 'label' => __('Spacing (px)', 'subtleforms')],
             ]
         ));
 
-        // Step/Page Container
+        // ===== Step/Page Container =====
+        
         $registry->register(new FieldDefinition(
             type: 'step',
             label: __('Step', 'subtleforms'),
@@ -768,28 +706,31 @@ final class CoreFields
             icon: 'dashicons-media-document',
             kind: 'structure',
             acceptsChildren: true,
-            defaultConfig: [
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'title' => __('Step', 'subtleforms'),
                 'description' => '',
             ],
-            settingsSchema: [
-                'title' => ['type' => 'string', 'required' => true],
-                'description' => ['type' => 'string'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'title', 'label' => __('Title', 'subtleforms')],
+                ['type' => 'textarea', 'name' => 'description', 'label' => __('Description', 'subtleforms')],
             ]
         ));
 
-        // System Fields
+        // ===== System Fields =====
+        
         $registry->register(new FieldDefinition(
             type: 'recaptcha',
             label: __('reCaptcha', 'subtleforms'),
             category: 'system',
             icon: 'dashicons-shield',
             kind: 'system',
-            defaultConfig: [
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'site_key' => '',
             ],
-            settingsSchema: [
-                'site_key' => ['type' => 'string'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'site_key', 'label' => __('Site Key', 'subtleforms')],
             ]
         ));
 
@@ -799,11 +740,12 @@ final class CoreFields
             category: 'system',
             icon: 'dashicons-shield-alt',
             kind: 'system',
-            defaultConfig: [
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'site_key' => '',
             ],
-            settingsSchema: [
-                'site_key' => ['type' => 'string'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'site_key', 'label' => __('Site Key', 'subtleforms')],
             ]
         ));
 
@@ -813,11 +755,12 @@ final class CoreFields
             category: 'system',
             icon: 'dashicons-lock',
             kind: 'system',
-            defaultConfig: [
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'site_key' => '',
             ],
-            settingsSchema: [
-                'site_key' => ['type' => 'string'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'site_key', 'label' => __('Site Key', 'subtleforms')],
             ]
         ));
 
@@ -827,11 +770,12 @@ final class CoreFields
             category: 'system',
             icon: 'dashicons-admin-plugins',
             kind: 'system',
-            defaultConfig: [
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'hook_name' => '',
             ],
-            settingsSchema: [
-                'hook_name' => ['type' => 'string'],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'hook_name', 'label' => __('Hook Name', 'subtleforms')],
             ]
         ));
 
@@ -841,11 +785,12 @@ final class CoreFields
             category: 'system',
             icon: 'dashicons-saved',
             kind: 'system',
-            defaultConfig: [
+            baseAttributes: [],
+            fieldSpecificAttributes: [
                 'enabled' => true,
             ],
-            settingsSchema: [
-                'enabled' => ['type' => 'boolean'],
+            inspectorControls: [
+                ['type' => 'checkbox', 'name' => 'enabled', 'label' => __('Enabled', 'subtleforms')],
             ]
         ));
 

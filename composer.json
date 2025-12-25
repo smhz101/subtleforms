@@ -13,5 +13,11 @@
       "email": "smhz101@gmail.com"
     }
   ],
-  "require": {}
+  "require-dev": {
+    "phpunit/phpunit": "^9.0",
+    "yoast/phpunit-polyfills": "^4.0"
+  },
+  "scripts": {
+    "test": "vendor/bin/phpunit"
+  }
 }

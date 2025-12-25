@@ -4,13 +4,21 @@ declare(strict_types=1);
 namespace SubtleForms\Frontend;
 
 use SubtleForms\Repositories\FormsRepository;
+use SubtleForms\Support\Settings;
 
 /**
  * Frontend shortcode handler.
  */
 final class Shortcode
 {
-    public function __construct(private FormsRepository $formsRepo) {}
+    private $formsRepo;
+    private $settings;
+
+    public function __construct(FormsRepository $formsRepo, Settings $settings = null)
+    {
+        $this->formsRepo = $formsRepo;
+        $this->settings = $settings;
+    }
 
     /**
      * Register [subtleforms] shortcode.
@@ -41,7 +49,7 @@ final class Shortcode
         }
 
         // Only render published forms on frontend
-        if ($form->status !== 'published') {
+        if ($form['status'] !== 'published') {
             return '<p class="subtleforms-error">This form is not published yet.</p>';
         }
 
@@ -80,6 +88,9 @@ final class Shortcode
         wp_localize_script('subtleforms-frontend', 'subtleformsFrontend', [
             'restUrl' => rest_url('subtleforms/v1'),
             'nonce' => wp_create_nonce('wp_rest'),
+            'successMessage' => $this->settings ? $this->settings->get('success_message') : 'Thank you! Your submission has been received.',
+            'errorMessage' => $this->settings ? $this->settings->get('error_message') : 'An error occurred. Please try again.',
+            'redirectUrl' => $this->settings ? $this->settings->get('redirect_after_submit') : '',
         ]);
 
         wp_enqueue_style(

@@ -11,6 +11,7 @@ namespace SubtleForms;
 use SubtleForms\Support\Capabilities;
 use SubtleForms\Support\FeatureGate;
 use SubtleForms\Support\Logger;
+use SubtleForms\Support\Settings;
 use SubtleForms\Engine\Pipeline;
 use SubtleForms\Engine\ActionRegistry;
 use SubtleForms\Engine\SchemaCompiler;
@@ -92,6 +93,7 @@ final class Container
         $this->singleton(Capabilities::class, fn() => new Capabilities());
         $this->singleton(FeatureGate::class, fn($c) => new FeatureGate($c->get(Capabilities::class)));
         $this->singleton(Logger::class, fn() => new Logger());
+        $this->singleton(Settings::class, fn() => new Settings());
 
         // Repositories
         $this->singleton(FormsRepository::class, fn() => new FormsRepository());
@@ -156,12 +158,14 @@ final class Container
             $c->get(SubmissionsRepository::class),
             $c->get(FeatureGate::class),
             $c->get(FieldRegistry::class),
-            $c->get(SchemaCompiler::class)
+            $c->get(SchemaCompiler::class),
+            $c->get(Settings::class)
         ));
 
         // Frontend
         $this->singleton(\SubtleForms\Frontend\Shortcode::class, fn($c) => new \SubtleForms\Frontend\Shortcode(
-            $c->get(FormsRepository::class)
+            $c->get(FormsRepository::class),
+            $c->get(Settings::class)
         ));
 
         // Register core action implementations now that definitions exist.

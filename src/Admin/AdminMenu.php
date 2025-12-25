@@ -178,6 +178,14 @@ class AdminMenu
             SUBTLEFORMS_VERSION
         );
 
+        // Component styles from wp-scripts build (Settings, Dashboard, etc.)
+        wp_enqueue_style(
+            'subtleforms-components',
+            SUBTLEFORMS_PLUGIN_URL . 'build/admin/index.jsx.css',
+            ['subtleforms-admin', 'subtleforms-tailwind'],
+            SUBTLEFORMS_VERSION
+        );
+
         if ($this->is_builder_screen($hook)) {
             wp_enqueue_style(
                 'subtleforms-admin-builder',
@@ -220,6 +228,12 @@ class AdminMenu
                 'error' => __('An error occurred. Please try again.', 'subtleforms'),
                 'success' => __('Action completed successfully.', 'subtleforms'),
             ],
+        ]);
+
+        // Additional data for Settings page
+        wp_localize_script('subtleforms-admin', 'subtleformsData', [
+            'siteName' => get_option('blogname'),
+            'adminEmail' => get_option('admin_email'),
         ]);
 
         // Allow extensions to enqueue their assets
