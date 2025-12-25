@@ -224,13 +224,163 @@
 	color: #6b7280;
 }
 
+/* Review Step */
+.subtleforms-review-card {
+	background: #ffffff;
+	border: 1px solid #e5e7eb;
+	border-radius: 8px;
+	padding: 2.5rem;
+	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+.subtleforms-review-title {
+	font-size: 1.5rem;
+	font-weight: 600;
+	color: #111827;
+	margin-bottom: 2rem;
+	text-align: center;
+}
+
+.subtleforms-review-list {
+	flex: 1;
+	margin-bottom: 2rem;
+	max-height: 400px;
+	overflow-y: auto;
+}
+
+.subtleforms-review-item {
+	padding: 1rem;
+	border: 1px solid #e5e7eb;
+	border-radius: 6px;
+	margin-bottom: 1rem;
+	display: grid;
+	grid-template-columns: 1fr auto;
+	gap: 0.5rem;
+	align-items: start;
+	transition: border-color 0.2s;
+}
+
+.subtleforms-review-item:hover {
+	border-color: #2563eb;
+}
+
+.subtleforms-review-label {
+	font-weight: 600;
+	color: #374151;
+	font-size: 0.875rem;
+	text-transform: uppercase;
+	letter-spacing: 0.025em;
+	grid-column: 1 / -1;
+}
+
+.subtleforms-review-value {
+	color: #111827;
+	font-size: 1rem;
+	word-break: break-word;
+}
+
+.subtleforms-review-edit {
+	background: transparent;
+	color: #2563eb;
+	border: none;
+	cursor: pointer;
+	font-size: 0.875rem;
+	font-weight: 500;
+	padding: 0.25rem 0.5rem;
+	border-radius: 4px;
+	transition: background 0.2s;
+}
+
+.subtleforms-review-edit:hover {
+	background: #eff6ff;
+}
+
+/* Payment Step */
+.subtleforms-payment-card {
+	background: #ffffff;
+	border: 1px solid #e5e7eb;
+	border-radius: 8px;
+	padding: 2.5rem;
+	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+.subtleforms-payment-title {
+	font-size: 1.5rem;
+	font-weight: 600;
+	color: #111827;
+	margin-bottom: 2rem;
+	text-align: center;
+}
+
+.subtleforms-payment-summary {
+	flex: 1;
+	margin-bottom: 2rem;
+}
+
+.subtleforms-payment-amount {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 1.5rem;
+	background: #f9fafb;
+	border: 2px solid #e5e7eb;
+	border-radius: 8px;
+	margin-bottom: 1rem;
+}
+
+.subtleforms-payment-label {
+	font-size: 1.125rem;
+	font-weight: 600;
+	color: #374151;
+}
+
+.subtleforms-payment-value {
+	font-size: 1.875rem;
+	font-weight: 700;
+	color: #111827;
+}
+
+.subtleforms-payment-test-notice {
+	background: #fef3c7;
+	border: 1px solid #fcd34d;
+	color: #92400e;
+	padding: 0.75rem 1rem;
+	border-radius: 6px;
+	font-size: 0.875rem;
+	text-align: center;
+	margin-bottom: 1rem;
+}
+
+.subtleforms-payment-gateway-placeholder {
+	background: #f3f4f6;
+	border: 2px dashed #d1d5db;
+	border-radius: 8px;
+	padding: 2rem;
+	text-align: center;
+}
+
+.subtleforms-payment-info {
+	color: #6b7280;
+	font-size: 0.875rem;
+	line-height: 1.5;
+	margin: 0;
+}
+
 /* Responsive */
 @media (max-width: 640px) {
 	.subtleforms-conversational {
 		padding: 1rem;
 	}
 
-	.subtleforms-question-card {
+	.subtleforms-question-card,
+	.subtleforms-review-card,
+	.subtleforms-payment-card {
 		padding: 1.5rem;
 	}
 
@@ -246,4 +396,17 @@
 		width: 100%;
 		justify-content: center;
 	}
-}
+
+	.subtleforms-review-title,
+	.subtleforms-payment-title {
+		font-size: 1.25rem;
+	}
+
+	.subtleforms-payment-amount {
+		flex-direction: column;
+		gap: 0.5rem;
+		text-align: center;
+	}
+
+	.subtleforms-payment-value {
+		font-size: 1.5rem;

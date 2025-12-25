@@ -17,10 +17,12 @@ export default function FormSettings({ schema, onChange }) {
   const metadata = schema?.metadata || {};
   const formType = metadata.type || 'regular';
   const isPaymentForm = formType === 'payment';
+  const isConversationalForm = formType === 'conversational';
+  const supportsPayment = isPaymentForm || isConversationalForm;
 
   // Payment settings
   const paymentSettings = metadata.payment || {
-    enabled: false,
+    enabled: isPaymentForm ? true : false, // Payment forms have payment enabled by default
     mode: 'test',
     currency: 'USD',
     amountType: 'fixed',
@@ -122,22 +124,36 @@ export default function FormSettings({ schema, onChange }) {
           </PanelBody>
         </Panel>
 
-        {/* Payment Settings - Only show for payment forms */}
-        {isPaymentForm && (
+        {/* Payment Settings - Show for payment forms and conversational forms */}
+        {supportsPayment && (
           <Panel className='mt-4'>
             <PanelBody
               title={__('Payment Settings', 'subtleforms')}
               initialOpen={true}>
               <div className='space-y-4'>
-                <div className='bg-blue-50 p-4 border border-blue-200 rounded'>
-                  <p className='text-blue-800 text-sm'>
-                    <strong>{__('Note:', 'subtleforms')}</strong>{' '}
-                    {__(
-                      'Payment gateway integration will be added in a future update. These settings prepare your form for payment processing.',
-                      'subtleforms'
-                    )}
-                  </p>
-                </div>
+                {isConversationalForm && (
+                  <div className='bg-blue-50 p-4 border border-blue-200 rounded'>
+                    <p className='text-blue-800 text-sm'>
+                      <strong>{__('Conversational Payment:', 'subtleforms')}</strong>{' '}
+                      {__(
+                        'When enabled, users will answer questions, review their answers, and then complete payment before submission.',
+                        'subtleforms'
+                      )}
+                    </p>
+                  </div>
+                )}
+
+                {isPaymentForm && (
+                  <div className='bg-blue-50 p-4 border border-blue-200 rounded'>
+                    <p className='text-blue-800 text-sm'>
+                      <strong>{__('Note:', 'subtleforms')}</strong>{' '}
+                      {__(
+                        'Payment gateway integration will be added in a future update. These settings prepare your form for payment processing.',
+                        'subtleforms'
+                      )}
+                    </p>
+                  </div>
+                )}
 
                 <ToggleControl
                   label={__('Enable Payments', 'subtleforms')}
@@ -272,15 +288,15 @@ export default function FormSettings({ schema, onChange }) {
           </Panel>
         )}
 
-        {/* Non-payment form message */}
-        {!isPaymentForm && (
+        {/* Non-payment/non-conversational form message */}
+        {!supportsPayment && (
           <Panel className='mt-4'>
             <PanelBody
               title={__('Payment Settings', 'subtleforms')}
               initialOpen={false}>
               <p className='text-gray-600 text-sm'>
                 {__(
-                  'Payment settings are only available for forms with type "Payment". Create a new payment form to enable payment collection.',
+                  'Payment settings are available for "Payment" and "Conversational" form types. Create a payment or conversational form to enable payment collection.',
                   'subtleforms'
                 )}
               </p>
