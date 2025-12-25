@@ -88,9 +88,9 @@ export default function FieldToolbar({
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
         onClick={(event) => event.stopPropagation()}
-        className='flex justify-center items-center bg-surface-alt hover:bg-secondary border border-border w-7 h-7 text-text-primary hover:text-primary-hover transition-colors duration-150 cursor-grab active:cursor-grabbing'
+        className='flex justify-center items-center bg-transparent hover:bg-secondary border border-transparent w-7 h-7 text-text-primary hover:text-primary-hover transition-colors transition-colors duration-150 duration-150 cursor-grab active:cursor-grabbing'
         aria-label={__('Drag field', 'subtleforms')}>
-        <Icon icon='drag-handle' size={16} />
+        <Icon icon='move' size={16} />
       </button>
       {renderButton(
         'arrow-up-alt2',
