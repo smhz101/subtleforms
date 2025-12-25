@@ -240,7 +240,9 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	margin-bottom: 16px;
 }
 
-.subtleforms-admin .subtleforms-column-dropzone .subtleforms-dropzone-item:last-child {
+.subtleforms-admin
+	.subtleforms-column-dropzone
+	.subtleforms-dropzone-item:last-child {
 	margin-bottom: 0;
 }
 
@@ -402,7 +404,9 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	background: rgba(0, 0, 0, 0.1);
 }
 
-.subtleforms-admin .subtleforms-step-tab.is-selected .subtleforms-step-tab-delete:hover {
+.subtleforms-admin
+	.subtleforms-step-tab.is-selected
+	.subtleforms-step-tab-delete:hover {
 	background: rgba(255, 255, 255, 0.2);
 }
 

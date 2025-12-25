@@ -124,6 +124,79 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
     return field?.label || key;
   };
 
+  const renderFieldValue = (value) => {
+    // Handle null, undefined, empty string
+    if (value === null || value === undefined) {
+      return <span className='text-gray-400 italic'>{__('(empty)', 'subtleforms')}</span>;
+    }
+    if (value === '') {
+      return <span className='text-gray-400 italic'>{__('(empty)', 'subtleforms')}</span>;
+    }
+
+    // Handle booleans
+    if (typeof value === 'boolean') {
+      return (
+        <span className={`inline-flex items-center px-2 py-0.5 text-xs font-medium ${
+          value ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'
+        }`}>
+          {value ? __('Yes', 'subtleforms') : __('No', 'subtleforms')}
+        </span>
+      );
+    }
+
+    // Handle arrays
+    if (Array.isArray(value)) {
+      if (value.length === 0) {
+        return <span className='text-gray-400 italic'>{__('(empty list)', 'subtleforms')}</span>;
+      }
+      return (
+        <ul className='space-y-1 list-disc list-inside'>
+          {value.map((item, idx) => (
+            <li key={idx} className='text-gray-700'>
+              {typeof item === 'object' ? JSON.stringify(item) : String(item)}
+            </li>
+          ))}
+        </ul>
+      );
+    }
+
+    // Handle objects
+    if (typeof value === 'object') {
+      return (
+        <pre className='bg-gray-50 p-3 border border-gray-200 overflow-x-auto text-xs'>
+          {JSON.stringify(value, null, 2)}
+        </pre>
+      );
+    }
+
+    // Handle URLs
+    if (typeof value === 'string' && (value.startsWith('http://') || value.startsWith('https://'))) {
+      return (
+        <a
+          href={value}
+          target='_blank'
+          rel='noopener noreferrer'
+          className='text-blue-600 hover:text-blue-800 break-all'>
+          {value}
+        </a>
+      );
+    }
+
+    // Handle emails
+    if (typeof value === 'string' && value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+      return (
+        <a
+          href={`mailto:${value}`}
+          className='text-blue-600 hover:text-blue-800'>
+          {value}
+        </a>
+      );
+    }
+
+    // Default: string
+    return <span className='whitespace-pre-wrap'>{String(value)}</span>;
+  };
+
   const navigate = (direction) => {
     const targetId = direction === 'next' ? adjacent.next : adjacent.prev;
     if (targetId) {
@@ -252,8 +325,8 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                         <td className='px-6 py-3 w-1/3 font-medium text-gray-900 text-sm align-top'>
                           {getFieldLabel(key)}
                         </td>
-                        <td className='px-6 py-3 text-gray-700 text-sm whitespace-pre-wrap'>
-                          {String(value)}
+                        <td className='px-6 py-3 text-gray-700 text-sm'>
+                          {renderFieldValue(value)}
                         </td>
                       </tr>
                     ))}
@@ -398,7 +471,16 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                       {__('Form', 'subtleforms')}
                     </td>
                     <td className='py-2 text-gray-900'>
-                      {submission.form_title || submission.form_id}
+                      {submission.form_title ? (
+                        <div className='flex flex-col gap-1'>
+                          <span className='font-medium'>{submission.form_title}</span>
+                          <span className='text-gray-500 text-xs'>
+                            {sprintf(__('Form ID: %d', 'subtleforms'), submission.form_id)}
+                          </span>
+                        </div>
+                      ) : (
+                        sprintf(__('Form #%d', 'subtleforms'), submission.form_id)
+                      )}
                     </td>
                   </tr>
                   <tr>
@@ -478,8 +560,13 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                     <td className='py-2 pr-4 font-medium text-gray-600 align-top'>
                       {__('Submitted', 'subtleforms')}
                     </td>
-                    <td className='py-2 text-gray-900' title={submission.created_at}>
-                      {getRelativeTime(submission.created_at)}
+                    <td className='py-2 text-gray-900'>
+                      <div className='flex flex-col gap-1'>
+                        <span className='font-medium'>{getRelativeTime(submission.created_at)}</span>
+                        <span className='text-gray-500 text-xs'>
+                          {new Date(submission.created_at).toLocaleString()}
+                        </span>
+                      </div>
                     </td>
                   </tr>
                 </tbody>

@@ -430,7 +430,16 @@ export default function SubmissionsTable({
         onPageChange={handlePageChange}
         onPerPageChange={handlePerPageChange}
         loading={loading}
-        emptyMessage={__('No submissions found.', 'subtleforms')}
+        emptyMessage={
+          searchTerm || statusFilter !== 'all'
+            ? __('No submissions match your filters.', 'subtleforms')
+            : formId
+            ? __('This form has no submissions yet.', 'subtleforms')
+            : __(
+                'No submissions yet. Forms will appear here once submitted.',
+                'subtleforms'
+              )
+        }
         onRowClick={handleRowClick}
         selectable={true}
         selectedItems={selectedSubmissions}
