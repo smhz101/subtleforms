@@ -180,6 +180,99 @@ function renderInput(field, value, onChange, placeholder) {
         />
       );
 
+    case 'payment_amount':
+      const min = field.config?.min || 0;
+      const max = field.config?.max;
+      const step = field.config?.step || 0.01;
+      const currency = field.config?.currency || 'USD';
+      const showSymbol = field.config?.showCurrencySymbol !== false;
+      const currencySymbol =
+        currency === 'USD'
+          ? '$'
+          : currency === 'EUR'
+          ? '€'
+          : currency === 'GBP'
+          ? '£'
+          : '';
+
+      return (
+        <div className='subtleforms-payment-amount'>
+          {showSymbol && currencySymbol && (
+            <span className='subtleforms-currency-symbol'>
+              {currencySymbol}
+            </span>
+          )}
+          <input
+            type='number'
+            className='subtleforms-input'
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={placeholder}
+            min={min}
+            max={max}
+            step={step}
+          />
+        </div>
+      );
+
+    case 'payment_summary':
+      // Payment summary is typically calculated server-side
+      // This is a read-only display component
+      return (
+        <div className='subtleforms-payment-summary'>
+          {field.config?.showSubtotal && (
+            <div className='summary-line'>
+              <span>{__('Subtotal:', 'subtleforms')}</span>
+              <span>{value?.subtotal || '0.00'}</span>
+            </div>
+          )}
+          {field.config?.showTax && (
+            <div className='summary-line'>
+              <span>{__('Tax:', 'subtleforms')}</span>
+              <span>{value?.tax || '0.00'}</span>
+            </div>
+          )}
+          {field.config?.showTotal && (
+            <div className='summary-line summary-total'>
+              <span>{__('Total:', 'subtleforms')}</span>
+              <span>{value?.total || '0.00'}</span>
+            </div>
+          )}
+        </div>
+      );
+
+    case 'payment_coupon':
+      return (
+        <div className='subtleforms-payment-coupon'>
+          <input
+            type='text'
+            className='subtleforms-input'
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={
+              field.config?.placeholder ||
+              __('Enter coupon code', 'subtleforms')
+            }
+            maxLength={field.config?.maxLength || 50}
+          />
+          <button
+            type='button'
+            className='subtleforms-button subtleforms-coupon-apply'
+            onClick={() => {
+              // Trigger coupon validation
+              if (window.subtleformsApplyCoupon) {
+                window.subtleformsApplyCoupon(value);
+              }
+            }}>
+            {field.config?.buttonText || __('Apply', 'subtleforms')}
+          </button>
+        </div>
+      );
+
+    case 'payment_hidden_price':
+      // Hidden pricing field - not rendered
+      return null;
+
     default:
       return (
         <div className='subtleforms-unsupported'>

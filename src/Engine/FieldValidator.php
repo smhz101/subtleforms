@@ -138,6 +138,10 @@ final class FieldValidator
                 return $this->validateNumber($value);
             case 'phone':
                 return $this->validatePhone($value);
+            case 'payment_amount':
+                return $this->validatePaymentAmount($value, $field);
+            case 'payment_coupon':
+                return $this->validatePaymentCoupon($value, $field);
             default:
                 return null;
         }
@@ -231,4 +235,77 @@ final class FieldValidator
 
         return false;
     }
-}
+
+    /**
+     * Validate payment amount field.
+     * 
+     * @param mixed $value
+     * @param array $field
+     * @return string|null
+     */
+    private function validatePaymentAmount($value, $field)
+    {
+        if ($this->isEmpty($value)) {
+            return null;
+        }
+
+        if (!is_numeric($value)) {
+            return 'Payment amount must be a valid number.';
+        }
+
+        $amount = floatval($value);
+        $config = $field['config'] ?? [];
+        
+        // Must be positive
+        if ($amount < 0) {
+            return 'Payment amount must be positive.';
+        }
+
+        // Check minimum
+        $min = isset($config['min']) ? floatval($config['min']) : 0;
+        if ($amount < $min) {
+            return sprintf('Payment amount must be at least %s.', number_format($min, 2));
+        }
+
+        // Check maximum
+        if (isset($config['max'])) {
+            $max = floatval($config['max']);
+            if ($amount > $max) {
+                return sprintf('Payment amount cannot exceed %s.', number_format($max, 2));
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Validate payment coupon field.
+     * 
+     * @param mixed $value
+     * @param array $field
+     * @return string|null
+     */
+    private function validatePaymentCoupon($value, $field)
+    {
+        if ($this->isEmpty($value)) {
+            return null;
+        }
+
+        if (!is_string($value)) {
+            return 'Coupon code must be a string.';
+        }
+
+        $config = $field['config'] ?? [];
+        $maxLength = isset($config['maxLength']) ? intval($config['maxLength']) : 50;
+
+        if (strlen($value) > $maxLength) {
+            return sprintf('Coupon code cannot exceed %d characters.', $maxLength);
+        }
+
+        // Basic sanitization check - alphanumeric and common special chars only
+        if (!preg_match('/^[a-zA-Z0-9\-_]+$/', $value)) {
+            return 'Coupon code contains invalid characters.';
+        }
+
+        return null;
+    }

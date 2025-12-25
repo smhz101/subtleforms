@@ -794,6 +794,106 @@ final class CoreFields
             ]
         ));
 
+        // ===== Payment Fields =====
+        
+        // Amount Field - User-defined payment amount
+        $registry->register(new FieldDefinition(
+            type: 'payment_amount',
+            label: __('Payment Amount', 'subtleforms'),
+            category: 'payment',
+            icon: 'dashicons-money-alt',
+            kind: 'input',
+            baseAttributes: [
+                'validation' => [
+                    'type' => 'number',
+                    'min' => 0,
+                    'required' => true,
+                ],
+            ],
+            fieldSpecificAttributes: [
+                'placeholder' => '',
+                'min' => 0,
+                'max' => null,
+                'step' => 0.01,
+                'currency' => 'USD',
+                'showCurrencySymbol' => true,
+            ],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'text', 'name' => 'placeholder', 'label' => __('Placeholder', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+                ['type' => 'number', 'name' => 'min', 'label' => __('Minimum Amount', 'subtleforms'), 'step' => 0.01],
+                ['type' => 'number', 'name' => 'max', 'label' => __('Maximum Amount', 'subtleforms'), 'step' => 0.01],
+                ['type' => 'number', 'name' => 'step', 'label' => __('Step', 'subtleforms'), 'step' => 0.01, 'default' => 0.01],
+                ['type' => 'checkbox', 'name' => 'showCurrencySymbol', 'label' => __('Show Currency Symbol', 'subtleforms')],
+            ]
+        ));
+
+        // Payment Summary - Displays total, items, taxes, etc.
+        $registry->register(new FieldDefinition(
+            type: 'payment_summary',
+            label: __('Payment Summary', 'subtleforms'),
+            category: 'payment',
+            icon: 'dashicons-calculator',
+            kind: 'dynamic',
+            baseAttributes: [],
+            fieldSpecificAttributes: [
+                'showSubtotal' => true,
+                'showTax' => false,
+                'taxRate' => 0,
+                'showTotal' => true,
+                'currency' => 'USD',
+            ],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'showSubtotal', 'label' => __('Show Subtotal', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'showTax', 'label' => __('Show Tax', 'subtleforms')],
+                ['type' => 'number', 'name' => 'taxRate', 'label' => __('Tax Rate (%)', 'subtleforms'), 'step' => 0.1, 'min' => 0, 'max' => 100],
+                ['type' => 'checkbox', 'name' => 'showTotal', 'label' => __('Show Total', 'subtleforms')],
+            ]
+        ));
+
+        // Coupon Code Field
+        $registry->register(new FieldDefinition(
+            type: 'payment_coupon',
+            label: __('Coupon Code', 'subtleforms'),
+            category: 'payment',
+            icon: 'dashicons-tag',
+            kind: 'input',
+            baseAttributes: [],
+            fieldSpecificAttributes: [
+                'placeholder' => __('Enter coupon code', 'subtleforms'),
+                'buttonText' => __('Apply', 'subtleforms'),
+                'maxLength' => 50,
+            ],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms')],
+                ['type' => 'text', 'name' => 'placeholder', 'label' => __('Placeholder', 'subtleforms')],
+                ['type' => 'text', 'name' => 'buttonText', 'label' => __('Button Text', 'subtleforms')],
+                ['type' => 'checkbox', 'name' => 'required', 'label' => __('Required', 'subtleforms')],
+            ]
+        ));
+
+        // Hidden Price Field - For conditional pricing logic
+        $registry->register(new FieldDefinition(
+            type: 'payment_hidden_price',
+            label: __('Hidden Price', 'subtleforms'),
+            category: 'payment',
+            icon: 'dashicons-hidden',
+            kind: 'system',
+            baseAttributes: [],
+            fieldSpecificAttributes: [
+                'amount' => 0,
+                'description' => '',
+                'conditions' => [],
+            ],
+            inspectorControls: [
+                ['type' => 'text', 'name' => 'label', 'label' => __('Label', 'subtleforms'), 'help' => __('Internal label for reference', 'subtleforms')],
+                ['type' => 'number', 'name' => 'amount', 'label' => __('Amount', 'subtleforms'), 'step' => 0.01],
+                ['type' => 'text', 'name' => 'description', 'label' => __('Description', 'subtleforms'), 'help' => __('Optional description for debugging', 'subtleforms')],
+            ]
+        ));
+
         // Allow extensions to register additional fields
         do_action('subtleforms/fields/register', $registry);
     }

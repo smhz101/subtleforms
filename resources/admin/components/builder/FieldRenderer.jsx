@@ -167,6 +167,69 @@ export default function FieldRenderer({ field }) {
           ))}
         </div>
       )}
+
+      {/* Payment fields */}
+      {type === 'payment_amount' && (
+        <div className='flex items-center gap-2'>
+          {field.currency && (
+            <span className='font-medium text-text-primary'>
+              {field.currency === 'USD'
+                ? '$'
+                : field.currency === 'EUR'
+                ? '€'
+                : field.currency === 'GBP'
+                ? '£'
+                : field.currency}
+            </span>
+          )}
+          <input
+            type='number'
+            placeholder={placeholder || '0.00'}
+            className={inputClass}
+            readOnly
+          />
+        </div>
+      )}
+
+      {type === 'payment_summary' && (
+        <div className='bg-surface-alt p-4 border border-border rounded-none'>
+          <div className='flex justify-between mb-2 text-text-primary text-sm'>
+            <span>{__('Subtotal:', 'subtleforms')}</span>
+            <span>$0.00</span>
+          </div>
+          <div className='flex justify-between mb-2 text-text-primary text-sm'>
+            <span>{__('Tax:', 'subtleforms')}</span>
+            <span>$0.00</span>
+          </div>
+          <div className='flex justify-between pt-2 border-border border-t font-medium text-text-primary'>
+            <span>{__('Total:', 'subtleforms')}</span>
+            <span>$0.00</span>
+          </div>
+        </div>
+      )}
+
+      {type === 'payment_coupon' && (
+        <div className='flex gap-2'>
+          <input
+            type='text'
+            placeholder={placeholder || __('Enter coupon code', 'subtleforms')}
+            className={`${inputClass} flex-1`}
+            readOnly
+          />
+          <button
+            type='button'
+            className='bg-primary px-4 py-2 font-medium text-white text-sm pointer-events-none'
+            disabled>
+            {__('Apply', 'subtleforms')}
+          </button>
+        </div>
+      )}
+
+      {type === 'payment_hidden_price' && (
+        <div className='bg-secondary p-3 border border-text-tertiary border-dashed rounded-none text-text-secondary text-xs italic'>
+          {__('Hidden pricing field (not visible to users)', 'subtleforms')}
+        </div>
+      )}
     </div>
   );
 }
