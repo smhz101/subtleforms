@@ -49,7 +49,7 @@ export default function ConfirmModal({
               onClick={onSecondary}
               disabled={isLoading}
               isDestructive={confirmVariant === 'primary'}
-              className='h-9 px-4 text-sm'>
+              className='px-4 h-9 text-sm'>
               {secondaryText}
             </Button>
           )}
@@ -58,7 +58,7 @@ export default function ConfirmModal({
             variant='tertiary'
             onClick={onClose}
             disabled={isLoading}
-            className='h-9 px-4 text-sm'>
+            className='px-4 h-9 text-sm'>
             {cancelText}
           </Button>
 
@@ -67,7 +67,7 @@ export default function ConfirmModal({
             onClick={onConfirm}
             disabled={isLoading}
             isDestructive={confirmVariant === 'destructive'}
-            className='h-9 px-4 text-sm'>
+            className='px-4 h-9 text-sm'>
             {isLoading ? __('Processing...', 'subtleforms') : confirmText}
           </Button>
         </div>

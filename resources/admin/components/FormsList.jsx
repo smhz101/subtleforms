@@ -691,13 +691,13 @@ export default function FormsList({
               <Button
                 variant='tertiary'
                 onClick={() => setStatusModal(null)}
-                className='h-9 px-4 text-sm'>
+                className='px-4 h-9 text-sm'>
                 {__('Cancel', 'subtleforms')}
               </Button>
               <Button
                 variant='primary'
                 onClick={handleStatusChange}
-                className='h-9 px-4 text-sm'>
+                className='px-4 h-9 text-sm'>
                 {__('Update', 'subtleforms')}
               </Button>
             </div>
