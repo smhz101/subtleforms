@@ -55,9 +55,9 @@ class AdminMenu
         add_filter('admin_title', [$this, 'filter_admin_title'], 1, 2);
         // Fix globals early before WordPress uses them
         add_action('admin_init', [$this, 'fix_admin_globals'], 1);
-        // Fix menu highlighting
-        add_filter('parent_file', [$this, 'fix_menu_highlighting']);
-        add_filter('submenu_file', [$this, 'fix_submenu_highlighting']);
+        // Fix menu highlighting for hidden pages
+        add_filter('parent_file', [$this, 'set_parent_file']);
+        add_filter('submenu_file', [$this, 'set_submenu_file']);
     }
 
     /**
@@ -118,7 +118,7 @@ class AdminMenu
 
         // Submission Detail (hidden page)
         add_submenu_page(
-            '',  // empty string instead of null for hidden page - prevents menu display while avoiding null issues
+            null,  // null hides from menu but maintains parent relationship
             __('Submission Detail', 'subtleforms'),
             __('Submission Detail', 'subtleforms'),
             $this->caps->manage_cap(),
@@ -708,22 +708,19 @@ class AdminMenu
     }
 
     /**
-     * Fix parent menu highlighting for SubtleForms pages.
+     * Set parent file for hidden submenu pages.
      * 
      * @param string $parent_file Current parent file.
      * @return string Modified parent file.
      */
-    public function fix_menu_highlighting($parent_file): string
+    public function set_parent_file($parent_file): string
     {
+        global $submenu_file;
         $page = isset($_GET['page']) ? sanitize_key(Helpers::normalize_string($_GET['page'])) : '';
         
-        // Handle submission detail page - keep menu open and highlight submissions
+        // Handle submission detail page - set parent to keep menu open
         if ($page === 'subtleforms-submission-detail') {
-            return 'subtleforms';
-        }
-        
-        // All other subtleforms pages should have subtleforms as parent
-        if (strpos($page, 'subtleforms') === 0) {
+            $submenu_file = 'subtleforms-submissions';
             return 'subtleforms';
         }
         
@@ -731,23 +728,18 @@ class AdminMenu
     }
 
     /**
-     * Fix submenu highlighting for SubtleForms pages.
+     * Set submenu file for hidden submenu pages.
      * 
      * @param string $submenu_file Current submenu file.
      * @return string Modified submenu file.
      */
-    public function fix_submenu_highlighting($submenu_file): string
+    public function set_submenu_file($submenu_file): string
     {
         $page = isset($_GET['page']) ? sanitize_key(Helpers::normalize_string($_GET['page'])) : '';
         
         // Handle submission detail page - highlight submissions submenu
         if ($page === 'subtleforms-submission-detail') {
             return 'subtleforms-submissions';
-        }
-        
-        // For dashboard and forms pages, return the actual page
-        if (in_array($page, ['subtleforms', 'subtleforms-forms', 'subtleforms-submissions'], true)) {
-            return $page;
         }
         
         return $submenu_file;
