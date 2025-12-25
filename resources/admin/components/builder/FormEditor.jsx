@@ -10,6 +10,7 @@ import { __ } from '@wordpress/i18n';
 import FieldDock from './FieldDock';
 import FieldInspector from './FieldInspector';
 import FormBuilder from './FormBuilder';
+import ConversationalCanvas from './ConversationalCanvas';
 import StepNavigator from './StepNavigator';
 import {
   normalizeSchema,
@@ -106,6 +107,14 @@ export default function FormEditor({
     () => fieldDefinitions || {},
     [fieldDefinitions]
   );
+
+  // Detect form type from schema metadata
+  const formType = useMemo(
+    () => schema?.metadata?.type || 'regular',
+    [schema?.metadata?.type]
+  );
+
+  const isConversational = formType === 'conversational';
 
   const updateTree = useCallback(
     (updater) => {
@@ -339,7 +348,7 @@ export default function FormEditor({
 
       {/* Canvas Area (Center) */}
       <div className='flex flex-col bg-gray-100 overflow-hidden'>
-        {steps.length > 0 && (
+        {steps.length > 0 && !isConversational && (
           <div className='flex-shrink-0 bg-white border-gray-300 border-b'>
             <StepNavigator
               steps={steps}
@@ -351,18 +360,30 @@ export default function FormEditor({
           </div>
         )}
 
-        <div className='flex-1 p-6 overflow-y-auto'>
-          <FormBuilder
-            tree={tree}
-            rootId={rootId}
-            selectedId={selectedId}
-            onSelect={setSelectedId}
-            onDelete={handleDelete}
-            onMove={handleMove}
-            onDuplicate={handleDuplicate}
-            onRequestInsert={handleRequestInsert}
-            selectedStepId={selectedStepId}
-          />
+        <div className='flex-1 overflow-hidden' style={{ padding: isConversational ? 0 : '1.5rem' }}>
+          {isConversational ? (
+            <ConversationalCanvas
+              tree={tree}
+              rootId={rootId}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              onDelete={handleDelete}
+              onDuplicate={handleDuplicate}
+              onRequestInsert={handleRequestInsert}
+            />
+          ) : (
+            <FormBuilder
+              tree={tree}
+              rootId={rootId}
+              selectedId={selectedId}
+              onSelect={setSelectedId}
+              onDelete={handleDelete}
+              onMove={handleMove}
+              onDuplicate={handleDuplicate}
+              onRequestInsert={handleRequestInsert}
+              selectedStepId={selectedStepId}
+            />
+          )}
         </div>
       </div>
 
