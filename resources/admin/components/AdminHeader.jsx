@@ -32,23 +32,34 @@ const AdminHeader = memo(function AdminHeader({ title, actions }) {
       {/* Left Side: Logo + Title */}
       <div className='flex items-center gap-4'>
         <div className='flex items-center gap-3'>
+          {/* SubtleForms Logo */}
           <svg
-            width='24'
-            height='24'
-            viewBox='0 0 24 24'
+            width='28'
+            height='28'
+            viewBox='0 0 32 32'
             fill='none'
-            className='text-gray-900'>
+            xmlns='http://www.w3.org/2000/svg'
+            className='flex-shrink-0'>
             <rect
-              x='3'
-              y='3'
-              width='18'
-              height='18'
-              stroke='currentColor'
-              strokeWidth='2'
+              x='4'
+              y='4'
+              width='24'
+              height='24'
+              rx='2'
+              stroke='#2271b1'
+              strokeWidth='2.5'
+              fill='none'
             />
-            <path d='M8 12h8M12 8v8' stroke='currentColor' strokeWidth='2' />
+            <path
+              d='M12 16h8M16 12v8'
+              stroke='#2271b1'
+              strokeWidth='2.5'
+              strokeLinecap='round'
+            />
           </svg>
-          <h1 className='m-0 font-semibold text-gray-900 text-lg'>{title}</h1>
+          <h1 className='m-0 font-semibold text-gray-900 text-lg leading-none'>
+            {title}
+          </h1>
         </div>
       </div>
 

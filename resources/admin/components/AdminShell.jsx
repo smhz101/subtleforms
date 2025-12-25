@@ -6,13 +6,26 @@ import Notices from './Notices';
 /**
  * Canonical Admin Shell Layout
  *
- * All SubtleForms admin pages must use this component for consistent UX.
+ * MANDATORY: All SubtleForms admin pages must use this component for consistent UX.
+ *
+ * Features:
+ * - Full-width layout (overrides WordPress .wrap spacing)
+ * - Sticky top header with logo, title, and contextual actions
+ * - Optional sticky action bar for filters/search
+ * - Fixed viewport height with internal scrolling (not body scroll)
+ * - Consistent spacing and typography across all admin pages
  *
  * Structure:
- * - Top Bar (sticky): Logo, page title, actions (via AdminHeader component)
- * - Action Bar (sticky): Filters, tabs, search (via ActionBar component)
- * - Content Area: Calculated height, scrollable
- * - Bottom Bar: Pagination (if provided)
+ * - Top Bar (sticky 60px): Logo, page title, actions (via AdminHeader component)
+ * - Action Bar (sticky 56px): Filters, tabs, search (via ActionBar component)
+ * - Content Area: Viewport-based height, scrollable
+ * - Bottom Bar: Optional pagination
+ *
+ * Used By:
+ * - All Forms page (FormsPage.jsx)
+ * - Form Builder page (FormBuilderPage.jsx)
+ * - Submissions list page (SubmissionsPage.jsx)
+ * - Submission detail page (SubmissionDetailPage.jsx)
  */
 export default function AdminShell({
   title,
