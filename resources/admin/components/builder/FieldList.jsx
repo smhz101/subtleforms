@@ -37,7 +37,7 @@ export default function FieldList({
         return (
           <div key={field.id || i} className='mb-4'>
             {/* Add Button Before */}
-            <div className='h-2.5 relative z-10'>
+            <div className='z-10 relative h-2.5'>
               <InlineAddButton
                 index={i}
                 isHovered={isHovered}

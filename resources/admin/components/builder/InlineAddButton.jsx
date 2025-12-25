@@ -21,7 +21,7 @@ export default function InlineAddButton({
       <button
         ref={anchorRef}
         onClick={onClick}
-        className='px-4 py-1.5 text-xs border border-dashed border-gray-400 bg-transparent cursor-pointer text-gray-600 font-medium inline-flex items-center gap-1'>
+        className='inline-flex items-center gap-1 bg-transparent px-4 py-1.5 border border-gray-400 border-dashed font-medium text-gray-600 text-xs cursor-pointer'>
         <Icon icon={getIcon('add')} size={16} />
         {__('Insert Field', 'subtleforms')}
       </button>

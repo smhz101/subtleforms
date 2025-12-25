@@ -33,7 +33,7 @@ export default function ContainerWrapper({
         isSelected ? 'border-2 border-blue-600' : 'border border-gray-300'
       }`}>
       {/* Header */}
-      <div className='px-3 py-2 bg-gray-100 border-b border-gray-300 flex items-center justify-between cursor-move'>
+      <div className='flex justify-between items-center bg-gray-100 px-3 py-2 border-gray-300 border-b cursor-move'>
         <div className='flex items-center gap-2'>
           <Icon icon={getIcon(field.type)} size={20} />
           <span className='font-semibold text-xs'>
@@ -80,7 +80,7 @@ export default function ContainerWrapper({
       <div className='p-4 min-h-[60px]'>{children}</div>
 
       {isRepeat && (
-        <div className='px-4 py-2 border-t border-dashed border-gray-300 text-gray-600 text-xs italic'>
+        <div className='px-4 py-2 border-gray-300 border-t border-dashed text-gray-600 text-xs italic'>
           {__('Repeatable items will appear here', 'subtleforms')}
         </div>
       )}

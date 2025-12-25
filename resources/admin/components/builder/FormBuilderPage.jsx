@@ -764,31 +764,13 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
           setFormTitle(draftSchema?.metadata?.title || formTitle);
         }
       }}
-      style={{
-        fontSize: '16px',
-        fontWeight: 600,
-        color: '#1e1e1e',
-        border: '1px solid #2271b1',
-        padding: '4px 8px',
-        outline: 'none',
-        minWidth: '200px',
-        background: '#fff',
-      }}
+      className='bg-white px-2 py-1 border border-blue-600 outline-none min-w-[200px] font-semibold text-gray-900 text-base'
     />
   ) : (
     <button
       type='button'
       onClick={() => setIsEditingTitle(true)}
-      style={{
-        fontSize: '16px',
-        fontWeight: 600,
-        color: '#1e1e1e',
-        border: 'none',
-        background: 'transparent',
-        padding: '4px 8px',
-        cursor: 'pointer',
-        outline: 'none',
-      }}
+      className='bg-transparent px-2 py-1 border-none outline-none font-semibold text-gray-900 hover:text-blue-600 text-base cursor-pointer'
       onMouseEnter={(e) => {
         e.currentTarget.style.color = '#2271b1';
       }}
@@ -801,22 +783,14 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
 
   // Build actions section with save status, shortcode, and buttons
   const actions = (
-    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+    <div className='flex items-center gap-3'>
       {/* Status Badge */}
       {!isEphemeral && (
         <span
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            padding: '4px 10px',
-            fontSize: '11px',
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-            borderRadius: '3px',
-            background: formStatus === 'published' ? '#00a32a' : '#f0b849',
-            color: '#fff',
-          }}>
+          className={`inline-flex items-center px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-white ${
+            formStatus === 'published' ? 'bg-green-600' : 'bg-yellow-500'
+          }`}
+          style={{ borderRadius: '3px' }}>
           {formStatus === 'published'
             ? __('Published', 'subtleforms')
             : __('Draft', 'subtleforms')}
@@ -828,24 +802,12 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
         <button
           type='button'
           onClick={() => handleCopyShortcode(shortcode)}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            padding: '4px 12px',
-            fontSize: '12px',
-            fontWeight: 500,
-            fontFamily: 'monospace',
-            color: copyState === 'copied' ? '#00a32a' : '#50575e',
-            background: copyState === 'copied' ? '#f0f6fc' : '#f6f7f7',
-            border:
-              copyState === 'copied'
-                ? '1px solid #00a32a'
-                : '1px solid #dcdcde',
-            borderRadius: '3px',
-            cursor: 'pointer',
-            outline: 'none',
-          }}
+          className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium font-mono cursor-pointer outline-none ${
+            copyState === 'copied'
+              ? 'text-green-600 bg-blue-50 border border-green-600'
+              : 'text-gray-700 bg-gray-100 border border-gray-300'
+          }`}
+          style={{ borderRadius: '3px' }}
           onMouseEnter={(e) => {
             if (copyState !== 'copied') {
               e.currentTarget.style.borderColor = '#2271b1';
@@ -861,14 +823,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
       )}
 
       {/* Save Status Indicator */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '6px',
-          fontSize: '13px',
-          color: '#50575e',
-        }}>
+      <div className='flex items-center gap-1.5 text-gray-700 text-xs'>
         <span
           style={{
             width: '6px',
@@ -893,7 +848,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
           variant='secondary'
           onClick={handleSaveDraft}
           disabled={saving}
-          style={{ height: '32px', padding: '0 12px', fontSize: '13px' }}>
+          className='px-3 h-8 text-xs'>
           {saving
             ? __('Saving…', 'subtleforms')
             : __('Save Draft', 'subtleforms')}
@@ -905,7 +860,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
         variant='primary'
         onClick={handlePublish}
         disabled={saving || (isEphemeral && !isDirty)}
-        style={{ height: '32px', padding: '0 12px', fontSize: '13px' }}>
+        className='px-3 h-8 text-xs'>
         {formStatus === 'published'
           ? __('Update', 'subtleforms')
           : __('Publish', 'subtleforms')}
@@ -917,7 +872,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
           variant='secondary'
           onClick={() => setShowDeleteConfirm(true)}
           isDestructive
-          style={{ height: '32px', padding: '0 12px', fontSize: '13px' }}>
+          className='px-3 h-8 text-xs'>
           {__('Delete', 'subtleforms')}
         </Button>
       )}
@@ -926,7 +881,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
       <Button
         variant='tertiary'
         onClick={handleClose}
-        style={{ height: '32px', padding: '0 12px', fontSize: '13px' }}>
+        className='px-3 h-8 text-xs'>
         {__('Close', 'subtleforms')}
       </Button>
     </div>
@@ -977,16 +932,8 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
           }
         `}</style>
         {saveError && (
-          <div
-            style={{
-              padding: '12px 24px',
-              background: '#fcf3f3',
-              borderBottom: '1px solid #f0b849',
-              marginBottom: '16px',
-            }}>
-            <span style={{ color: '#d63638', fontSize: '13px' }}>
-              {saveError}
-            </span>
+          <div className='bg-red-50 mb-4 px-6 py-3 border-yellow-500 border-b'>
+            <span className='text-red-600 text-xs'>{saveError}</span>
           </div>
         )}
 
@@ -1014,12 +961,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
                 />
               )}
               {tab.name === 'entries' && currentFormId && (
-                <div
-                  style={{
-                    padding: '24px',
-                    height: '100%',
-                    overflowY: 'auto',
-                  }}>
+                <div className='p-6 h-full overflow-y-auto'>
                   <SubmissionsTable
                     formId={currentFormId}
                     showFormColumn={false}
@@ -1027,12 +969,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
                 </div>
               )}
               {tab.name === 'entries' && !currentFormId && (
-                <div
-                  style={{
-                    padding: '24px',
-                    height: '100%',
-                    overflowY: 'auto',
-                  }}>
+                <div className='p-6 h-full overflow-y-auto'>
                   <Notice status='info'>
                     {__('Save the form first to view entries', 'subtleforms')}
                   </Notice>

@@ -22,8 +22,8 @@ export default function FieldWrapper({
         isSelected
           ? 'bg-blue-50 border-2 border-blue-600'
           : isHovered
-            ? 'bg-gray-50 border border-gray-300'
-            : 'bg-white border border-gray-300'
+          ? 'bg-gray-50 border border-gray-300'
+          : 'bg-white border border-gray-300'
       }`}
       onClick={onSelect}
       onMouseEnter={onHover}

@@ -19,14 +19,14 @@ export default function FormCanvas({
   onShowPicker,
 }) {
   return (
-    <div className='flex-1 overflow-auto p-8 bg-gray-100'>
-      <div className='max-w-3xl mx-auto bg-white p-12 min-h-[500px]'>
+    <div className='flex-1 bg-gray-100 p-8 overflow-auto'>
+      <div className='bg-white mx-auto p-12 max-w-3xl min-h-[500px]'>
         {/* Form Title */}
         <div className='mb-8'>
-          <h3 className='m-0 mb-2 text-2xl font-semibold text-gray-900'>
+          <h3 className='m-0 mb-2 font-semibold text-gray-900 text-2xl'>
             {schema?.metadata?.title || __('Untitled Form', 'subtleforms')}
           </h3>
-          <p className='m-0 text-sm text-gray-600'>
+          <p className='m-0 text-gray-600 text-sm'>
             {schema?.metadata?.description ||
               __('Fill out the form below', 'subtleforms')}
           </p>
@@ -34,14 +34,14 @@ export default function FormCanvas({
 
         {/* Empty State */}
         {fields.length === 0 && (
-          <div className='text-center py-20 px-5 text-gray-500'>
-            <div className='mb-4 flex justify-center'>
+          <div className='px-5 py-20 text-gray-500 text-center'>
+            <div className='flex justify-center mb-4'>
               <Icon icon={getIcon('default')} size={56} />
             </div>
-            <h4 className='m-0 mb-2 text-lg font-semibold text-gray-700'>
+            <h4 className='m-0 mb-2 font-semibold text-gray-700 text-lg'>
               {__('Start Building Your Form', 'subtleforms')}
             </h4>
-            <p className='m-0 text-sm text-gray-500'>
+            <p className='m-0 text-gray-500 text-sm'>
               {__('Add fields from the left sidebar to begin', 'subtleforms')}
             </p>
           </div>

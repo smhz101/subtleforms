@@ -96,11 +96,11 @@ export default function FormEditorHeader({
   };
 
   return (
-    <div className='h-[60px] border-b border-gray-300 bg-white flex items-center justify-between px-6 sticky top-0 z-[100]'>
+    <div className='top-0 z-[100] sticky flex justify-between items-center bg-white px-6 border-gray-300 border-b h-[60px]'>
       {/* Left Section */}
       <div className='flex items-center gap-4'>
         {/* Logo/Icon */}
-        <div className='w-8 h-8 bg-blue-600 flex items-center justify-center text-white text-base font-bold'>
+        <div className='flex justify-center items-center bg-blue-600 w-8 h-8 font-bold text-white text-base'>
           SF
         </div>
 
@@ -113,13 +113,13 @@ export default function FormEditorHeader({
             onChange={(e) => setTempTitle(e.target.value)}
             onBlur={handleTitleBlur}
             onKeyDown={handleTitleKeyDown}
-            className='text-base font-semibold text-gray-900 border border-blue-600 px-2 py-1 outline-none min-w-[200px] bg-white'
+            className='bg-white px-2 py-1 border border-blue-600 outline-none min-w-[200px] font-semibold text-gray-900 text-base'
           />
         ) : (
           <button
             type='button'
             onClick={handleTitleClick}
-            className='text-base font-semibold text-gray-900 border-none bg-transparent px-2 py-1 cursor-pointer outline-none hover:text-blue-600'
+            className='bg-transparent px-2 py-1 border-none outline-none font-semibold text-gray-900 hover:text-blue-600 text-base cursor-pointer'
             onMouseEnter={(e) => {
               e.currentTarget.style.color = '#2271b1';
             }}
@@ -166,9 +166,9 @@ export default function FormEditorHeader({
       {/* Right Section */}
       <div className='flex items-center gap-4'>
         {/* Save Status */}
-        <div className='flex items-center gap-1.5 text-xs text-gray-700'>
+        <div className='flex items-center gap-1.5 text-gray-700 text-xs'>
           <span
-            className='w-1.5 h-1.5 rounded-full'
+            className='rounded-full w-1.5 h-1.5'
             style={{ background: getStatusColor() }}
           />
           {getStatusText()}
@@ -180,7 +180,7 @@ export default function FormEditorHeader({
             variant='primary'
             onClick={onSave}
             disabled={saving}
-            className='h-9 px-4'>
+            className='px-4 h-9'>
             {saving
               ? __('Saving...', 'subtleforms')
               : __('Save', 'subtleforms')}
@@ -192,7 +192,7 @@ export default function FormEditorHeader({
           icon={close}
           label={__('Close Editor', 'subtleforms')}
           onClick={onClose}
-          className='w-9 h-9 border border-gray-300'
+          className='border border-gray-300 w-9 h-9'
         />
       </div>
     </div>

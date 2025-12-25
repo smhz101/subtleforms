@@ -328,38 +328,19 @@ export default function FormEditor({
 
   return (
     <div
+      className='grid bg-white h-full overflow-hidden'
       style={{
-        display: 'grid',
         gridTemplateColumns: selectedField ? '280px 1fr 320px' : '280px 1fr',
-        height: '100%',
-        overflow: 'hidden',
-        background: '#fff',
       }}>
       {/* Field Library (Left Sidebar) */}
-      <div
-        style={{
-          borderRight: '1px solid #ddd',
-          background: '#fafafa',
-          overflow: 'auto',
-        }}>
+      <div className='bg-gray-50 border-gray-300 border-r max-h-full overflow-y-auto'>
         <FieldDock fieldGroups={fieldGroups} onAddField={handleDockAdd} />
       </div>
 
       {/* Canvas Area (Center) */}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          overflow: 'hidden',
-          background: '#f5f5f5',
-        }}>
+      <div className='flex flex-col bg-gray-100 overflow-hidden'>
         {steps.length > 0 && (
-          <div
-            style={{
-              flexShrink: 0,
-              background: '#fff',
-              borderBottom: '1px solid #ddd',
-            }}>
+          <div className='flex-shrink-0 bg-white border-gray-300 border-b'>
             <StepNavigator
               steps={steps}
               selectedStepId={selectedStepId}
@@ -370,12 +351,7 @@ export default function FormEditor({
           </div>
         )}
 
-        <div
-          style={{
-            flex: 1,
-            overflow: 'auto',
-            padding: '24px',
-          }}>
+        <div className='flex-1 p-6 overflow-y-auto'>
           <FormBuilder
             tree={tree}
             rootId={rootId}
@@ -392,12 +368,7 @@ export default function FormEditor({
 
       {/* Field Inspector (Right Sidebar) */}
       {selectedField && (
-        <div
-          style={{
-            borderLeft: '1px solid #ddd',
-            background: '#fff',
-            overflow: 'auto',
-          }}>
+        <div className='bg-white border-gray-300 border-l max-h-full overflow-y-auto'>
           <FieldInspector
             field={selectedField}
             allFields={allFields}
@@ -413,31 +384,13 @@ export default function FormEditor({
           anchor={insertPicker.anchor}
           onClose={handleCloseInsert}
           position='bottom center'>
-          <div
-            style={{
-              padding: '16px',
-              minWidth: '240px',
-              maxHeight: '400px',
-              overflow: 'auto',
-            }}>
-            <h4
-              style={{
-                margin: '0 0 12px 0',
-                fontSize: '14px',
-                fontWeight: 600,
-              }}>
+          <div className='p-4 min-w-[240px] max-h-[400px] overflow-auto'>
+            <h4 className='m-0 mb-3 font-semibold text-sm'>
               {__('Add Field', 'subtleforms')}
             </h4>
             {Object.entries(fieldGroups).map(([category, categoryFields]) => (
-              <div key={category} style={{ marginBottom: 16 }}>
-                <div
-                  style={{
-                    fontSize: '11px',
-                    fontWeight: 600,
-                    color: '#757575',
-                    textTransform: 'uppercase',
-                    marginBottom: 8,
-                  }}>
+              <div key={category} className='mb-4'>
+                <div className='mb-2 font-semibold text-[11px] text-gray-600 uppercase'>
                   {category}
                 </div>
                 {categoryFields.map((f) => (
@@ -445,28 +398,7 @@ export default function FormEditor({
                     key={f.type}
                     type='button'
                     onClick={() => handleInsert(f.type, insertPicker.context)}
-                    style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      padding: '8px 10px',
-                      marginBottom: 4,
-                      background: '#f9f9f9',
-                      border: '1px solid #e5e5e5',
-                      cursor: 'pointer',
-                      fontSize: '13px',
-                      color: '#1e1e1e',
-                      transition: 'all 0.15s',
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#2271b1';
-                      e.currentTarget.style.color = '#fff';
-                      e.currentTarget.style.borderColor = '#2271b1';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = '#f9f9f9';
-                      e.currentTarget.style.color = '#1e1e1e';
-                      e.currentTarget.style.borderColor = '#e5e5e5';
-                    }}>
+                    className='bg-gray-50 hover:bg-blue-600 mb-1 px-2.5 py-2 border border-gray-300 hover:border-blue-600 w-full text-gray-900 hover:text-white text-xs text-left transition-all cursor-pointer'>
                     {f.label}
                   </button>
                 ))}
