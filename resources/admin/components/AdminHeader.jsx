@@ -1,4 +1,5 @@
 import { memo } from '@wordpress/element';
+import { FiSquare } from 'react-icons/fi';
 
 /**
  * AdminHeader - Sticky Header Component
@@ -33,30 +34,7 @@ const AdminHeader = memo(function AdminHeader({ title, actions }) {
       <div className='flex items-center gap-4'>
         <div className='flex items-center gap-3'>
           {/* SubtleForms Logo */}
-          <svg
-            width='28'
-            height='28'
-            viewBox='0 0 32 32'
-            fill='none'
-            xmlns='http://www.w3.org/2000/svg'
-            className='flex-shrink-0'>
-            <rect
-              x='4'
-              y='4'
-              width='24'
-              height='24'
-              rx='2'
-              stroke='#2271b1'
-              strokeWidth='2.5'
-              fill='none'
-            />
-            <path
-              d='M12 16h8M16 12v8'
-              stroke='#2271b1'
-              strokeWidth='2.5'
-              strokeLinecap='round'
-            />
-          </svg>
+          <FiSquare className='w-7 h-7 text-blue-600' strokeWidth={2.5} />
           <h1 className='m-0 font-semibold text-gray-900 text-lg leading-none'>
             {title}
           </h1>

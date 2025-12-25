@@ -14,7 +14,7 @@ final class Shortcode
     private $formsRepo;
     private $settings;
 
-    public function __construct(FormsRepository $formsRepo, Settings $settings = null)
+    public function __construct(FormsRepository $formsRepo, ?Settings $settings = null)
     {
         $this->formsRepo = $formsRepo;
         $this->settings = $settings;

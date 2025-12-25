@@ -41,7 +41,7 @@ class DashboardApi
     public function __construct(
         FormsRepository $formsRepo,
         SubmissionsRepository $submissionsRepo,
-        Settings $settings = null
+        ?Settings $settings = null
     ) {
         $this->formsRepo = $formsRepo;
         $this->submissionsRepo = $submissionsRepo;

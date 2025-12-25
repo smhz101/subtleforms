@@ -40,8 +40,8 @@ class AdminMenu
 
     public function __construct(
         Capabilities $caps,
-        FormsRepository $formsRepo = null,
-        SubmissionsRepository $submissionsRepo = null
+        ?FormsRepository $formsRepo = null,
+        ?SubmissionsRepository $submissionsRepo = null
     ) {
         $this->caps = $caps;
         $this->formsRepo = $formsRepo ?? new FormsRepository();

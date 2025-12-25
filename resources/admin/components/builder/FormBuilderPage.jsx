@@ -865,38 +865,9 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
     </div>
   );
 
-  // Tabs for Build/Entries
-  const tabs = (
-    <div className='subtleforms-builder-tabs-wrapper'>
-      <TabPanel
-        className='subtleforms-builder-tabs'
-        activeClass='is-active'
-        tabs={[
-          {
-            name: 'build',
-            title: __('Build', 'subtleforms'),
-          },
-          {
-            name: 'entries',
-            title: __('Entries', 'subtleforms'),
-          },
-        ]}>
-        {(tab) => (
-          <div style={{ display: 'none' }}>
-            {/* Tabs rendered below in children */}
-          </div>
-        )}
-      </TabPanel>
-    </div>
-  );
-
   return (
     <>
-      <AdminShell
-        title={titleElement}
-        actions={actions}
-        actionBarLeft={tabs}
-        noScroll={true}>
+      <AdminShell title={titleElement} actions={actions} noScroll={true}>
         <style>{`
           .subtleforms-builder-tabs-content {
             height: 100%;

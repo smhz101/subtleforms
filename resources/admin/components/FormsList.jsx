@@ -13,14 +13,18 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import {
-  moreVertical,
-  pencil,
-  trash,
-  copy,
-  help,
-  published,
-  plus,
-} from '@wordpress/icons';
+  FiMoreVertical,
+  FiEdit2,
+  FiTrash2,
+  FiCopy,
+  FiEye,
+  FiCheckCircle,
+  FiPlus,
+  FiFileText,
+  FiEdit,
+  FiPackage,
+} from 'react-icons/fi';
+import classNames from 'classnames';
 import DataTable from './DataTable';
 import ConfirmModal from './ConfirmModal';
 
@@ -140,26 +144,30 @@ export default function FormsList({
           draft: {
             classes: 'bg-amber-50 text-amber-700 border-amber-200',
             label: __('Draft', 'subtleforms'),
-            icon: '📝',
+            icon: FiEdit,
           },
           published: {
             classes: 'bg-emerald-50 text-emerald-700 border-emerald-200',
             label: __('Published', 'subtleforms'),
-            icon: '✓',
+            icon: FiCheckCircle,
           },
           archived: {
             classes: 'bg-gray-50 text-gray-600 border-gray-200',
             label: __('Archived', 'subtleforms'),
-            icon: '📦',
+            icon: FiPackage,
           },
         };
 
         const config = statusConfig[status] || statusConfig.draft;
 
+        const IconComponent = config.icon;
         return (
           <span
-            className={`inline-flex items-center gap-1 px-2.5 py-1 border text-xs font-medium ${config.classes}`}>
-            <span>{config.icon}</span>
+            className={classNames(
+              'inline-flex items-center gap-1 px-2.5 py-1 border text-xs font-medium',
+              config.classes
+            )}>
+            <IconComponent className='w-3 h-3' />
             {config.label}
           </span>
         );
@@ -183,18 +191,7 @@ export default function FormsList({
             <code className='font-mono text-gray-600 group-hover:text-gray-900'>
               {shortcode}
             </code>
-            <svg
-              className='flex-shrink-0 w-3 h-3 text-gray-400 group-hover:text-gray-600'
-              fill='none'
-              stroke='currentColor'
-              viewBox='0 0 24 24'>
-              <path
-                strokeLinecap='round'
-                strokeLinejoin='round'
-                strokeWidth={2}
-                d='M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z'
-              />
-            </svg>
+            <FiCopy className='flex-shrink-0 w-3 h-3 text-gray-400 group-hover:text-gray-600' />
           </button>
         );
       },
@@ -266,66 +263,74 @@ export default function FormsList({
       width: '10%',
       render: (_, form) => (
         <div className='subtleforms-row-actions'>
-          <Button
-            icon={pencil}
-            label={__('Edit', 'subtleforms')}
+          <button
             onClick={(e) => {
               e.stopPropagation();
               handleEditForm(form.id);
             }}
-            isSmall
-          />
+            className='hover:bg-gray-100 p-1 rounded'
+            title={__('Edit', 'subtleforms')}>
+            <FiEdit2 className='w-4 h-4 text-gray-600' />
+          </button>
           <Dropdown
             renderToggle={({ onToggle }) => (
-              <Button
-                icon={moreVertical}
-                label={__('More actions', 'subtleforms')}
+              <button
                 onClick={(e) => {
                   e.stopPropagation();
                   onToggle();
                 }}
-                isSmall
-              />
+                className='hover:bg-gray-100 p-1 rounded'
+                title={__('More actions', 'subtleforms')}>
+                <FiMoreVertical className='w-4 h-4 text-gray-600' />
+              </button>
             )}
             renderContent={({ onClose }) => (
               <MenuGroup>
                 <MenuItem
-                  icon={published}
                   onClick={(e) => {
                     if (e && e.stopPropagation) e.stopPropagation();
                     setStatusModal(form.id);
                     setStatusValue(form.status);
                     onClose();
                   }}>
-                  {__('Change status', 'subtleforms')}
+                  <div className='flex items-center gap-2'>
+                    <FiCheckCircle className='w-4 h-4' />
+                    {__('Change status', 'subtleforms')}
+                  </div>
                 </MenuItem>
                 <MenuItem
-                  icon={copy}
                   onClick={(e) => {
                     if (e && e.stopPropagation) e.stopPropagation();
                     handleDuplicate(form.id);
                     onClose();
                   }}>
-                  {__('Duplicate', 'subtleforms')}
+                  <div className='flex items-center gap-2'>
+                    <FiCopy className='w-4 h-4' />
+                    {__('Duplicate', 'subtleforms')}
+                  </div>
                 </MenuItem>
                 <MenuItem
-                  icon={help}
                   onClick={(e) => {
                     if (e && e.stopPropagation) e.stopPropagation();
                     window.location.href = `admin.php?page=subtleforms-submissions&form_id=${form.id}`;
                     onClose();
                   }}>
-                  {__('View submissions', 'subtleforms')}
+                  <div className='flex items-center gap-2'>
+                    <FiEye className='w-4 h-4' />
+                    {__('View submissions', 'subtleforms')}
+                  </div>
                 </MenuItem>
                 <MenuItem
-                  icon={trash}
                   onClick={(e) => {
                     if (e && e.stopPropagation) e.stopPropagation();
                     setDeleteModal(form.id);
                     onClose();
                   }}
                   isDestructive>
-                  {__('Delete', 'subtleforms')}
+                  <div className='flex items-center gap-2 text-red-600'>
+                    <FiTrash2 className='w-4 h-4' />
+                    {__('Delete', 'subtleforms')}
+                  </div>
                 </MenuItem>
               </MenuGroup>
             )}
@@ -634,10 +639,10 @@ export default function FormsList({
             {!searchTerm && (
               <Button
                 isPrimary
-                icon={plus}
                 onClick={() =>
                   (window.location.href = 'admin.php?page=subtleforms-new-form')
                 }>
+                <FiPlus className='inline mr-2 w-4 h-4' />
                 {__('New Form', 'subtleforms')}
               </Button>
             )}

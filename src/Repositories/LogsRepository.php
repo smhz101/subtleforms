@@ -150,7 +150,7 @@ final class LogsRepository
     /**
      * Count logs.
      */
-    public function count(int $submissionId = null, array $args = []): int
+    public function count(?int $submissionId = null, array $args = []): int
     {
         global $wpdb;
 

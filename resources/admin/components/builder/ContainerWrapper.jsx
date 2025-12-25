@@ -1,5 +1,7 @@
 import { __ } from '@wordpress/i18n';
 import { Icon, Button } from '@wordpress/components';
+import { FiArrowUp, FiArrowDown, FiCopy, FiTrash2 } from 'react-icons/fi';
+import classNames from 'classnames';
 import { getIcon } from './utils/iconMap';
 
 export default function ContainerWrapper({
@@ -29,9 +31,10 @@ export default function ContainerWrapper({
         onHover(path);
       }}
       onMouseLeave={() => onHover(null)}
-      className={`relative mb-4 bg-white transition-all ${
+      className={classNames(
+        'relative mb-4 bg-white transition-all',
         isSelected ? 'border-2 border-blue-600' : 'border border-gray-300'
-      }`}>
+      )}>
       {/* Header */}
       <div className='flex justify-between items-center bg-gray-100 px-3 py-2 border-gray-300 border-b cursor-move'>
         <div className='flex items-center gap-2'>
@@ -47,31 +50,30 @@ export default function ContainerWrapper({
         {/* Actions */}
         {isSelected && (
           <div className='flex gap-1'>
-            <Button
-              isSmall
-              icon='arrow-up-alt2'
+            <button
               onClick={() => onMoveUp(path)}
-              label={__('Move Up', 'subtleforms')}
-            />
-            <Button
-              isSmall
-              icon='arrow-down-alt2'
+              className='hover:bg-gray-200 p-1 rounded'
+              title={__('Move Up', 'subtleforms')}>
+              <FiArrowUp className='w-4 h-4' />
+            </button>
+            <button
               onClick={() => onMoveDown(path)}
-              label={__('Move Down', 'subtleforms')}
-            />
-            <Button
-              isSmall
-              icon='admin-page'
+              className='hover:bg-gray-200 p-1 rounded'
+              title={__('Move Down', 'subtleforms')}>
+              <FiArrowDown className='w-4 h-4' />
+            </button>
+            <button
               onClick={() => onDuplicate(path)}
-              label={__('Duplicate', 'subtleforms')}
-            />
-            <Button
-              isSmall
-              icon='trash'
-              isDestructive
+              className='hover:bg-gray-200 p-1 rounded'
+              title={__('Duplicate', 'subtleforms')}>
+              <FiCopy className='w-4 h-4' />
+            </button>
+            <button
               onClick={() => onDelete(path)}
-              label={__('Delete', 'subtleforms')}
-            />
+              className='hover:bg-red-100 p-1 rounded text-red-600'
+              title={__('Delete', 'subtleforms')}>
+              <FiTrash2 className='w-4 h-4' />
+            </button>
           </div>
         )}
       </div>

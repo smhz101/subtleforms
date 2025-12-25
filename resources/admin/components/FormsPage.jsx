@@ -1,7 +1,7 @@
 import { useState } from '@wordpress/element';
 import { Button, SearchControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { plus } from '@wordpress/icons';
+import { FiPlus } from 'react-icons/fi';
 import AdminShell from './AdminShell';
 import TabBar from './TabBar';
 import FormsList from './FormsList';
@@ -23,10 +23,10 @@ export default function FormsPage() {
       actions={
         <Button
           isPrimary
-          icon={plus}
           onClick={() => {
             window.location.href = 'admin.php?page=subtleforms-new-form';
           }}>
+          <FiPlus className='inline mr-2 w-4 h-4' />
           {__('New Form', 'subtleforms')}
         </Button>
       }
