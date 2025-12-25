@@ -1,3 +1,4 @@
+import React from 'react';
 import { useState, useEffect, useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
@@ -8,7 +9,15 @@ import {
   TextareaControl,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
-import { Icon, page, layout, columns, listView, check } from '@wordpress/icons';
+import {
+  FiFile,
+  FiColumns,
+  FiLayers,
+  FiList,
+  FiCheckCircle,
+  FiLoader,
+} from 'react-icons/fi';
+import classNames from 'classnames';
 
 const restBase =
   window.subtleformsAdmin && window.subtleformsAdmin.restUrl
@@ -135,14 +144,14 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
       id: 'blank',
       title: __('Blank Form', 'subtleforms'),
       description: __('Start from scratch.', 'subtleforms'),
-      icon: page,
+      icon: FiFile,
       disabled: false,
     },
     {
       id: 'preset',
       title: __('Preset Template', 'subtleforms'),
       description: __('Coming soon.', 'subtleforms'),
-      icon: layout,
+      icon: FiLayers,
       disabled: true,
     },
   ];
@@ -155,7 +164,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         'Single page form. Best for contact forms, leads.',
         'subtleforms'
       ),
-      icon: page,
+      icon: FiFile,
     },
     {
       id: 'multistep',
@@ -164,13 +173,13 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         'Broken into steps. Best for applications, surveys.',
         'subtleforms'
       ),
-      icon: columns,
+      icon: FiColumns,
     },
     {
       id: 'sectioned',
       title: __('Sectioned', 'subtleforms'),
       description: __('Grouped fields. Best for long forms.', 'subtleforms'),
-      icon: listView,
+      icon: FiList,
     },
   ];
 
@@ -185,35 +194,37 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         type='button'
         onClick={() => !isDisabled && onSelect(option.id)}
         disabled={isDisabled}
-        className={`group relative flex transition-all duration-150 w-full border focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
+        className={classNames(
+          'group relative flex transition-all duration-150 w-full border focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
           isHorizontal
             ? 'flex-row items-center gap-3 p-3 text-left'
-            : 'flex-col items-center text-center p-4'
-        } ${
+            : 'flex-col items-center text-center p-4',
           isSelected
             ? 'border-blue-500 bg-blue-50'
-            : 'border-gray-300 bg-white hover:border-gray-400 hover:bg-gray-50'
-        } ${
+            : 'border-gray-300 bg-white hover:border-gray-400 hover:bg-gray-50',
           isDisabled
             ? 'opacity-50 cursor-not-allowed bg-gray-50 border-dashed'
             : 'cursor-pointer'
-        }`}>
+        )}>
         <div
-          className={`flex-shrink-0 transition-colors ${
-            isHorizontal ? 'p-2' : 'p-3 mb-2'
-          } ${
+          className={classNames(
+            'flex-shrink-0 transition-colors',
+            isHorizontal ? 'p-2' : 'p-3 mb-2',
             isSelected
               ? 'bg-blue-600 text-white'
               : 'bg-gray-100 text-gray-600 group-hover:bg-gray-200'
-          }`}>
-          <Icon icon={option.icon} size={isHorizontal ? 18 : 24} />
+          )}>
+          {React.createElement(option.icon, {
+            className: isHorizontal ? 'w-[18px] h-[18px]' : 'w-6 h-6',
+          })}
         </div>
 
-        <div className={`${isHorizontal ? 'flex-1 min-w-0' : 'w-full'}`}>
+        <div className={isHorizontal ? 'flex-1 min-w-0' : 'w-full'}>
           <div
-            className={`font-semibold ${isHorizontal ? 'text-sm' : 'text-sm'} ${
+            className={classNames(
+              'font-semibold text-sm',
               isSelected ? 'text-blue-900' : 'text-gray-900'
-            }`}>
+            )}>
             {option.title}
           </div>
 
@@ -382,23 +393,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
             disabled={step === 1 ? !title.trim() : creating || !formType}
             className='inline-flex items-center bg-blue-600 hover:bg-blue-700 disabled:opacity-50 px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 font-medium text-white text-sm transition-colors disabled:cursor-not-allowed'>
             {creating && (
-              <svg
-                className='mr-2 -ml-1 w-4 h-4 text-white animate-spin'
-                xmlns='http://www.w3.org/2000/svg'
-                fill='none'
-                viewBox='0 0 24 24'>
-                <circle
-                  className='opacity-25'
-                  cx='12'
-                  cy='12'
-                  r='10'
-                  stroke='currentColor'
-                  strokeWidth='4'></circle>
-                <path
-                  className='opacity-75'
-                  fill='currentColor'
-                  d='m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
-              </svg>
+              <FiLoader className='mr-2 -ml-1 w-4 h-4 text-white animate-spin' />
             )}
             {step === 1
               ? __('Next Step', 'subtleforms')
