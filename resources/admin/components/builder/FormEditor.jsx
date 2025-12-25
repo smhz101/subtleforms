@@ -360,7 +360,9 @@ export default function FormEditor({
           </div>
         )}
 
-        <div className='flex-1 overflow-hidden' style={{ padding: isConversational ? 0 : '1.5rem' }}>
+        <div
+          className='flex-1 overflow-hidden'
+          style={{ padding: isConversational ? 0 : '1.5rem' }}>
           {isConversational ? (
             <ConversationalCanvas
               tree={tree}

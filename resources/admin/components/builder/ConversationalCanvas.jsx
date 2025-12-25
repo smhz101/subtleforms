@@ -8,7 +8,7 @@ import { nodeToField, nodeChildren } from './utils/schemaTree';
 
 /**
  * ConversationalCanvas - Single field at a time view for conversational forms
- * 
+ *
  * Displays one field at a time with Next/Previous navigation and progress indicator
  */
 export default function ConversationalCanvas({
@@ -27,7 +27,9 @@ export default function ConversationalCanvas({
     const allChildren = nodeChildren(tree, rootId);
     return allChildren
       .map((nodeId) => tree.nodes[nodeId])
-      .filter((node) => node && node.type !== 'step' && node.type !== 'section');
+      .filter(
+        (node) => node && node.type !== 'step' && node.type !== 'section'
+      );
   }, [tree, rootId]);
 
   const currentField = fields[currentIndex];
@@ -94,7 +96,8 @@ export default function ConversationalCanvas({
   }
 
   const field = currentField ? nodeToField(tree, currentField.id) : null;
-  const progressPercent = totalFields > 0 ? ((currentIndex + 1) / totalFields) * 100 : 0;
+  const progressPercent =
+    totalFields > 0 ? ((currentIndex + 1) / totalFields) * 100 : 0;
 
   return (
     <div className='flex flex-col bg-gray-50 mx-auto w-full max-w-3xl h-full'>
@@ -102,7 +105,8 @@ export default function ConversationalCanvas({
       <div className='bg-white px-6 py-4 border-gray-200 border-b'>
         <div className='flex justify-between items-center mb-2'>
           <span className='font-medium text-gray-700 text-sm'>
-            {__('Question', 'subtleforms')} {currentIndex + 1} {__('of', 'subtleforms')} {totalFields}
+            {__('Question', 'subtleforms')} {currentIndex + 1}{' '}
+            {__('of', 'subtleforms')} {totalFields}
           </span>
           <span className='text-gray-500 text-xs'>
             {Math.round(progressPercent)}% {__('Complete', 'subtleforms')}

@@ -1,0 +1,249 @@
+/**
+ * SubtleForms - Conversational Form Styles
+ * Frontend styles for conversational form rendering
+ */
+
+.subtleforms-conversational {
+	max-width: 700px;
+	margin: 0 auto;
+	padding: 2rem 1rem;
+	min-height: 500px;
+	display: flex;
+	flex-direction: column;
+}
+
+/* Progress Bar */
+.subtleforms-progress {
+	margin-bottom: 2rem;
+}
+
+.subtleforms-progress-bar {
+	background: #e5e7eb;
+	height: 6px;
+	border-radius: 999px;
+	overflow: hidden;
+	margin-bottom: 0.5rem;
+}
+
+.subtleforms-progress-fill {
+	background: #2563eb;
+	height: 100%;
+	transition: width 0.3s ease;
+}
+
+.subtleforms-progress-text {
+	text-align: right;
+	font-size: 0.875rem;
+	color: #6b7280;
+}
+
+/* Question Card */
+.subtleforms-question-card {
+	background: #ffffff;
+	border: 1px solid #e5e7eb;
+	border-radius: 8px;
+	padding: 2.5rem;
+	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+}
+
+.subtleforms-question-number {
+	font-size: 0.875rem;
+	color: #6b7280;
+	margin-bottom: 1.5rem;
+	font-weight: 500;
+}
+
+.subtleforms-field-wrapper {
+	flex: 1;
+	margin-bottom: 2rem;
+}
+
+.subtleforms-field-wrapper label {
+	font-size: 1.25rem;
+	font-weight: 600;
+	color: #111827;
+	margin-bottom: 1rem;
+	display: block;
+}
+
+.subtleforms-field-wrapper input[type='text'],
+.subtleforms-field-wrapper input[type='email'],
+.subtleforms-field-wrapper input[type='number'],
+.subtleforms-field-wrapper input[type='tel'],
+.subtleforms-field-wrapper input[type='url'],
+.subtleforms-field-wrapper textarea,
+.subtleforms-field-wrapper select {
+	width: 100%;
+	padding: 0.75rem 1rem;
+	font-size: 1rem;
+	border: 2px solid #d1d5db;
+	border-radius: 6px;
+	transition: border-color 0.2s;
+}
+
+.subtleforms-field-wrapper input:focus,
+.subtleforms-field-wrapper textarea:focus,
+.subtleforms-field-wrapper select:focus {
+	outline: none;
+	border-color: #2563eb;
+	box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.subtleforms-field-wrapper .subtleforms-error {
+	color: #dc2626;
+	font-size: 0.875rem;
+	margin-top: 0.5rem;
+}
+
+/* Navigation */
+.subtleforms-conversational-nav {
+	display: flex;
+	gap: 1rem;
+	justify-content: flex-end;
+	margin-top: auto;
+}
+
+.subtleforms-button {
+	padding: 0.75rem 1.5rem;
+	font-size: 1rem;
+	font-weight: 500;
+	border-radius: 6px;
+	cursor: pointer;
+	transition: all 0.2s;
+	border: none;
+	display: inline-flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.subtleforms-button-prev {
+	background: #f3f4f6;
+	color: #374151;
+}
+
+.subtleforms-button-prev:hover:not(:disabled) {
+	background: #e5e7eb;
+}
+
+.subtleforms-button-next,
+.subtleforms-button-submit {
+	background: #2563eb;
+	color: #ffffff;
+}
+
+.subtleforms-button-next:hover:not(:disabled),
+.subtleforms-button-submit:hover:not(:disabled) {
+	background: #1d4ed8;
+}
+
+.subtleforms-button:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
+/* Hint */
+.subtleforms-hint {
+	text-align: center;
+	font-size: 0.875rem;
+	color: #9ca3af;
+	margin-top: 1rem;
+}
+
+/* Dot Navigation */
+.subtleforms-dots {
+	display: flex;
+	justify-content: center;
+	gap: 0.5rem;
+	margin-top: 2rem;
+}
+
+.subtleforms-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	border: none;
+	padding: 0;
+	cursor: pointer;
+	transition: all 0.2s;
+	background: #d1d5db;
+}
+
+.subtleforms-dot.active {
+	width: 24px;
+	background: #2563eb;
+	border-radius: 4px;
+}
+
+.subtleforms-dot.completed {
+	background: #60a5fa;
+}
+
+.subtleforms-dot:disabled {
+	cursor: not-allowed;
+	opacity: 0.5;
+}
+
+/* Success Screen */
+.subtleforms-conversational-success {
+	text-align: center;
+	padding: 4rem 2rem;
+}
+
+.subtleforms-success-icon {
+	width: 64px;
+	height: 64px;
+	background: #10b981;
+	color: #ffffff;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 2rem;
+	margin: 0 auto 1.5rem;
+}
+
+.subtleforms-conversational-success h2 {
+	font-size: 1.5rem;
+	font-weight: 600;
+	color: #111827;
+	margin-bottom: 0.5rem;
+}
+
+.subtleforms-conversational-success p {
+	color: #6b7280;
+	font-size: 1rem;
+}
+
+/* Empty State */
+.subtleforms-empty {
+	text-align: center;
+	padding: 4rem 2rem;
+	color: #6b7280;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+	.subtleforms-conversational {
+		padding: 1rem;
+	}
+
+	.subtleforms-question-card {
+		padding: 1.5rem;
+	}
+
+	.subtleforms-field-wrapper label {
+		font-size: 1.125rem;
+	}
+
+	.subtleforms-conversational-nav {
+		flex-direction: column-reverse;
+	}
+
+	.subtleforms-button {
+		width: 100%;
+		justify-content: center;
+	}
+}

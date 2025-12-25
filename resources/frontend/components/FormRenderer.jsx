@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import FieldRenderer from './FieldRenderer';
 import StepNavigation from './StepNavigation';
+import ConversationalFormRenderer from './ConversationalFormRenderer';
 
 const restUrl =
   window.subtleformsFrontend?.restUrl || '/wp-json/subtleforms/v1';
@@ -48,6 +49,14 @@ export default function FormRenderer({ formId }) {
   }, [schema]);
 
   const hasSteps = steps.length > 0;
+
+  // Detect form type
+  const formType = useMemo(
+    () => schema?.metadata?.type || 'regular',
+    [schema?.metadata?.type]
+  );
+
+  const isConversational = formType === 'conversational';
   const currentStep = hasSteps ? steps[currentStepIndex] : null;
 
   // Get fields to render
@@ -292,6 +301,11 @@ export default function FormRenderer({ formId }) {
 
   if (error) {
     return <div className='subtleforms-error'>{error}</div>;
+  }
+
+  // Use conversational renderer for conversational forms
+  if (isConversational) {
+    return <ConversationalFormRenderer schema={schema} formId={formId} />;
   }
 
   if (submitSuccess) {
