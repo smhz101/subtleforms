@@ -42,20 +42,23 @@ touch resources/admin/pages/MyNewPage.jsx
 import AdminShell from '../components/AdminShell';
 
 export default function MyNewPage() {
-  return (
-    <AdminShell title="My New Page">
-      <p>Content goes here</p>
-    </AdminShell>
-  );
+	return (
+		<AdminShell title='My New Page'>
+			<p>Content goes here</p>
+		</AdminShell>
+	);
 }
 ```
 
 **Add route in `app/AdminApp.jsx`:**
+
 ```javascript
 import MyNewPage from '../pages/MyNewPage';
 
 // In the render method:
-{page === 'my-new-page' && <MyNewPage />}
+{
+	page === 'my-new-page' && <MyNewPage />;
+}
 ```
 
 ### 2. Create a Feature
@@ -71,11 +74,11 @@ touch resources/admin/features/myfeature/hooks.js
 import { apiGet, apiPost } from '../../utils/api';
 
 export async function getItems() {
-  return apiGet('/myfeature/items');
+	return apiGet('/myfeature/items');
 }
 
 export async function createItem(data) {
-  return apiPost('/myfeature/items', data);
+	return apiPost('/myfeature/items', data);
 }
 ```
 
@@ -85,16 +88,16 @@ import { useState, useEffect } from '@wordpress/element';
 import { getItems } from './api';
 
 export function useItems() {
-  const [items, setItems] = useState([]);
-  const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    getItems()
-      .then(response => setItems(response.body))
-      .finally(() => setLoading(false));
-  }, []);
-  
-  return { items, loading };
+	const [items, setItems] = useState([]);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		getItems()
+			.then((response) => setItems(response.body))
+			.finally(() => setLoading(false));
+	}, []);
+
+	return { items, loading };
 }
 ```
 
@@ -109,12 +112,12 @@ touch resources/admin/components/MyComponent.jsx
 import { Button } from '@wordpress/components';
 
 export default function MyComponent({ title, onAction }) {
-  return (
-    <div className="my-component">
-      <h2>{title}</h2>
-      <Button onClick={onAction}>Click Me</Button>
-    </div>
-  );
+	return (
+		<div className='my-component'>
+			<h2>{title}</h2>
+			<Button onClick={onAction}>Click Me</Button>
+		</div>
+	);
 }
 ```
 
@@ -129,21 +132,19 @@ touch resources/admin/modals/MyModal.jsx
 import { Modal, Button } from '@wordpress/components';
 
 export default function MyModal({ isOpen, onClose, onConfirm }) {
-  return (
-    <Modal
-      title="My Modal"
-      isOpen={isOpen}
-      onRequestClose={onClose}>
-      <p>Modal content</p>
-      <Button variant="primary" onClick={onConfirm}>
-        Confirm
-      </Button>
-    </Modal>
-  );
+	return (
+		<Modal title='My Modal' isOpen={isOpen} onRequestClose={onClose}>
+			<p>Modal content</p>
+			<Button variant='primary' onClick={onConfirm}>
+				Confirm
+			</Button>
+		</Modal>
+	);
 }
 ```
 
 **Export from `modals/index.js`:**
+
 ```javascript
 export { default as MyModal } from './MyModal';
 ```
@@ -177,9 +178,9 @@ import { useForms } from '../../features/forms/hooks'; // from features/submissi
 
 // API calls in components
 function MyComponent() {
-  useEffect(() => {
-    fetch('/api/data'); // ❌ Use features/hooks instead
-  }, []);
+	useEffect(() => {
+		fetch('/api/data'); // ❌ Use features/hooks instead
+	}, []);
 }
 ```
 
@@ -190,10 +191,10 @@ function MyComponent() {
 Use Tailwind utility classes:
 
 ```javascript
-<div className="flex items-center gap-4 p-4 bg-white rounded-lg shadow">
-  <Button className="px-4 py-2 text-white bg-blue-600 hover:bg-blue-700">
-    Click Me
-  </Button>
+<div className='flex items-center gap-4 p-4 bg-white rounded-lg shadow'>
+	<Button className='px-4 py-2 text-white bg-blue-600 hover:bg-blue-700'>
+		Click Me
+	</Button>
 </div>
 ```
 
@@ -204,15 +205,13 @@ For conditional classes:
 ```javascript
 import classNames from 'classnames';
 
-<div className={classNames(
-  'base-class',
-  {
-    'active': isActive,
-    'disabled': isDisabled,
-  }
-)}>
-  Content
-</div>
+<div
+	className={classNames('base-class', {
+		active: isActive,
+		disabled: isDisabled,
+	})}>
+	Content
+</div>;
 ```
 
 ### Component-specific CSS
@@ -223,61 +222,65 @@ Only for complex components:
 import './MyComponent.css';
 
 export default function MyComponent() {
-  return <div className="my-component">...</div>;
+	return <div className='my-component'>...</div>;
 }
 ```
 
 ## State Management
 
 ### Local State
+
 ```javascript
 const [count, setCount] = useState(0);
 ```
 
 ### Feature Hooks
+
 ```javascript
 const { forms, loading } = useForms();
 ```
 
 ### WordPress Data Stores (if needed)
+
 ```javascript
 import { useSelect, useDispatch } from '@wordpress/data';
 
-const notices = useSelect(select => 
-  select('core/notices').getNotices()
-);
+const notices = useSelect((select) => select('core/notices').getNotices());
 ```
 
 ## Common Patterns
 
 ### Loading States
+
 ```javascript
 if (loading) return <Spinner />;
-if (error) return <Notice status="error">{error}</Notice>;
+if (error) return <Notice status='error'>{error}</Notice>;
 if (!data) return null;
 ```
 
 ### Confirmation Dialogs
+
 ```javascript
 const [showConfirm, setShowConfirm] = useState(false);
 
 <ConfirmModal
-  isOpen={showConfirm}
-  onClose={() => setShowConfirm(false)}
-  onConfirm={handleDelete}
-  title="Delete Item"
-  message="Are you sure?"
-/>
+	isOpen={showConfirm}
+	onClose={() => setShowConfirm(false)}
+	onConfirm={handleDelete}
+	title='Delete Item'
+	message='Are you sure?'
+/>;
 ```
 
 ### Data Fetching
+
 ```javascript
 useEffect(() => {
-  setLoading(true);
-  getItems()
-    .then(response => setItems(response.body))
-    .catch(error => setError(error.message))
-    .finally(() => setLoading(false));
+	setLoading(true);
+	getItems()
+		.then((response) => setItems(response.body))
+		.catch((error) => setError(error.message))
+		.finally(() => setLoading(false));
 }, []);
 ```
 
@@ -288,7 +291,7 @@ Use react-icons (Feather Icons):
 ```javascript
 import { FiCheck, FiX, FiEdit } from 'react-icons/fi';
 
-<FiCheck className="w-4 h-4 text-green-600" />
+<FiCheck className='w-4 h-4 text-green-600' />;
 ```
 
 ## API Calls
@@ -314,15 +317,18 @@ const { ok, body } = await apiDelete('/forms/123');
 ## Debugging
 
 ### Browser Console
+
 ```javascript
 console.debug('Debug info:', data);
 console.error('Error occurred:', error);
 ```
 
 ### React DevTools
+
 Install React DevTools browser extension to inspect component tree.
 
 ### Network Tab
+
 Check the Network tab in browser DevTools for API calls.
 
 ## Git Workflow

@@ -15,6 +15,7 @@ import FormsPage from '../pages/FormsPage';
 import SubmissionsPage from '../pages/SubmissionsPage';
 import SubmissionDetailPage from '../pages/SubmissionDetailPage';
 import BuilderPage from '../pages/BuilderPage';
+import ExtensionsPage from '../pages/ExtensionsPage';
 
 // Modals
 import { CreateFormModal } from '../modals';
@@ -86,6 +87,8 @@ export default function AdminApp() {
           )}
 
           {page === ROUTES.SETTINGS && <SettingsPage />}
+
+          {page === ROUTES.EXTENSIONS && <ExtensionsPage />}
 
           {page === ROUTES.FORM_EDITOR && !!initialFormId && (
             <BuilderPage

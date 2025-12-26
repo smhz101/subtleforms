@@ -12,6 +12,7 @@ export const ROUTES = {
   SUBMISSIONS: 'submissions',
   SUBMISSION_DETAIL: 'submission-detail',
   SETTINGS: 'settings',
+  EXTENSIONS: 'extensions',
 };
 
 /**

@@ -87,12 +87,14 @@ resources/admin/
 ### 1. Import Direction Rules
 
 **Allowed:**
+
 - pages → features → components → utils
 - pages → modals
 - features → components → utils
 - components → utils
 
 **Never allowed:**
+
 - components importing pages
 - utils importing React
 - pages importing other pages
@@ -101,12 +103,14 @@ resources/admin/
 ### 2. File Responsibilities
 
 #### Pages (`pages/`)
+
 - Represent WordPress admin routes
 - Own layout and data fetching
 - Compose features and components
 - Handle routing-level logic
 
 #### Features (`features/`)
+
 - Domain-specific business logic
 - API calls for the domain
 - React hooks for data management
@@ -114,24 +118,28 @@ resources/admin/
 - **Never** import from other features
 
 #### Modals (`modals/`)
+
 - Self-contained modal dialogs
 - Mounted centrally via registry
 - Accept props, emit callbacks
 - No direct API calls
 
 #### Components (`components/`)
+
 - Pure UI components
 - Accept props, emit callbacks
 - No API calls or business logic
 - Reusable across features
 
 #### Hooks (`hooks/`)
+
 - Generic, reusable hooks
 - No feature-specific logic
 - No JSX rendering
 - Single responsibility
 
 #### Utils (`utils/`)
+
 - Pure functions
 - Stateless
 - UI-agnostic
@@ -148,6 +156,7 @@ resources/admin/
 ### 4. Import Patterns
 
 **Prefer:**
+
 ```javascript
 // Using index exports
 import { ConfirmModal, CreateFormModal } from '../modals';
@@ -155,6 +164,7 @@ import { useDebounce } from '../hooks';
 ```
 
 **Avoid:**
+
 ```javascript
 // Deep relative paths
 import Modal from '../../../components/modals/ConfirmModal';
@@ -163,60 +173,68 @@ import Modal from '../../../components/modals/ConfirmModal';
 ### 5. Component Guidelines
 
 **Good Component:**
+
 ```javascript
 export default function Button({ onClick, children, variant }) {
-  return (
-    <button onClick={onClick} className={`btn-${variant}`}>
-      {children}
-    </button>
-  );
+	return (
+		<button onClick={onClick} className={`btn-${variant}`}>
+			{children}
+		</button>
+	);
 }
 ```
 
 **Bad Component:**
+
 ```javascript
 export default function Button({ formId }) {
-  const [data, setData] = useState(null);
-  
-  useEffect(() => {
-    // ❌ API call in component
-    fetch(`/api/forms/${formId}`).then(r => r.json()).then(setData);
-  }, [formId]);
-  
-  return <button>{data?.title}</button>;
+	const [data, setData] = useState(null);
+
+	useEffect(() => {
+		// ❌ API call in component
+		fetch(`/api/forms/${formId}`)
+			.then((r) => r.json())
+			.then(setData);
+	}, [formId]);
+
+	return <button>{data?.title}</button>;
 }
 ```
 
 ### 6. Feature Guidelines
 
 **Good Feature Hook:**
+
 ```javascript
 // features/forms/hooks.js
 import { useEffect, useState } from '@wordpress/element';
 import { getForms } from './api';
 
 export function useForms() {
-  const [forms, setForms] = useState([]);
-  const [loading, setLoading] = useState(true);
-  
-  useEffect(() => {
-    getForms().then(setForms).finally(() => setLoading(false));
-  }, []);
-  
-  return { forms, loading };
+	const [forms, setForms] = useState([]);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		getForms()
+			.then(setForms)
+			.finally(() => setLoading(false));
+	}, []);
+
+	return { forms, loading };
 }
 ```
 
 **Usage in Page:**
+
 ```javascript
 // pages/FormsPage.jsx
 import { useForms } from '../features/forms/hooks';
 
 export default function FormsPage() {
-  const { forms, loading } = useForms();
-  
-  if (loading) return <Spinner />;
-  return <FormsList forms={forms} />;
+	const { forms, loading } = useForms();
+
+	if (loading) return <Spinner />;
+	return <FormsList forms={forms} />;
 }
 ```
 
@@ -258,6 +276,7 @@ export default function FormsPage() {
 ## Common Patterns
 
 ### Page with Data Fetching
+
 ```javascript
 import { useState, useEffect } from '@wordpress/element';
 import { useForms } from '../features/forms/hooks';
@@ -265,53 +284,58 @@ import FormsList from '../components/FormsList';
 import AdminShell from '../components/AdminShell';
 
 export default function FormsPage() {
-  const { forms, loading, error } = useForms();
-  
-  return (
-    <AdminShell title="All Forms">
-      {loading && <Spinner />}
-      {error && <Notice status="error">{error}</Notice>}
-      {forms && <FormsList forms={forms} />}
-    </AdminShell>
-  );
+	const { forms, loading, error } = useForms();
+
+	return (
+		<AdminShell title='All Forms'>
+			{loading && <Spinner />}
+			{error && <Notice status='error'>{error}</Notice>}
+			{forms && <FormsList forms={forms} />}
+		</AdminShell>
+	);
 }
 ```
 
 ### Component with Callback
+
 ```javascript
 export default function FormsList({ forms, onEdit, onDelete }) {
-  return (
-    <div className="forms-list">
-      {forms.map(form => (
-        <FormCard
-          key={form.id}
-          form={form}
-          onEdit={() => onEdit(form.id)}
-          onDelete={() => onDelete(form.id)}
-        />
-      ))}
-    </div>
-  );
+	return (
+		<div className='forms-list'>
+			{forms.map((form) => (
+				<FormCard
+					key={form.id}
+					form={form}
+					onEdit={() => onEdit(form.id)}
+					onDelete={() => onDelete(form.id)}
+				/>
+			))}
+		</div>
+	);
 }
 ```
 
 ### Feature Hook with Mutations
+
 ```javascript
 export function useForm(formId) {
-  const [form, setForm] = useState(null);
-  const [saving, setSaving] = useState(false);
-  
-  const saveForm = useCallback(async (data) => {
-    setSaving(true);
-    try {
-      const updated = await updateForm(formId, data);
-      setForm(updated);
-    } finally {
-      setSaving(false);
-    }
-  }, [formId]);
-  
-  return { form, saving, saveForm };
+	const [form, setForm] = useState(null);
+	const [saving, setSaving] = useState(false);
+
+	const saveForm = useCallback(
+		async (data) => {
+			setSaving(true);
+			try {
+				const updated = await updateForm(formId, data);
+				setForm(updated);
+			} finally {
+				setSaving(false);
+			}
+		},
+		[formId]
+	);
+
+	return { form, saving, saveForm };
 }
 ```
 
