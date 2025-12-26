@@ -65,7 +65,6 @@ export default function FieldInspector({
               title: __('Validation', 'subtleforms'),
             },
             { name: 'conditions', title: __('Conditions', 'subtleforms') },
-            { name: 'advanced', title: __('Advanced', 'subtleforms') },
           ]}>
           {(tab) => (
             <div style={{ padding: '12px 0' }}>
@@ -250,16 +249,6 @@ export default function FieldInspector({
                   availableFields={allFields || []}
                   onChange={(conditions) => onUpdate({ conditions })}
                 />
-              )}
-              {tab.name === 'advanced' && (
-                <p
-                  style={{
-                    margin: 0,
-                    fontSize: '13px',
-                    color: '#757575',
-                  }}>
-                  {__('Advanced settings coming soon', 'subtleforms')}
-                </p>
               )}
             </div>
           )}
