@@ -55,15 +55,12 @@ class AdminMenu
         add_filter('admin_title', [$this, 'filter_admin_title'], 1, 2);
         // Fix globals early before WordPress uses them
         add_action('admin_init', [$this, 'fix_admin_globals'], 1);
-        // Fix menu highlighting for hidden pages
-        add_filter('parent_file', [$this, 'set_parent_file']);
-        add_filter('submenu_file', [$this, 'set_submenu_file']);
     }
 
     /**
      * Register admin menu pages.
      */
-    public function register_menu(): void
+    public function register_menu()
     {
         // Main menu page - Dashboard
         add_menu_page(
@@ -114,16 +111,6 @@ class AdminMenu
             $this->caps->manage_cap(),
             'subtleforms-submissions',
             [$this, 'render_submissions']
-        );
-
-        // Submission Detail (hidden page)
-        add_submenu_page(
-            null,  // null hides from menu but maintains parent relationship
-            __('Submission Detail', 'subtleforms'),
-            __('Submission Detail', 'subtleforms'),
-            $this->caps->manage_cap(),
-            'subtleforms-submission-detail',
-            [$this, 'render_submission_detail']
         );
 
         // Extensions
@@ -397,23 +384,6 @@ class AdminMenu
             'forms' => $forms,
             'currentFormId' => $formId,
         ]);
-    }
-
-    /**
-     * Render submission detail page.
-     */
-    public function render_submission_detail(): void
-    {
-        if (!current_user_can($this->caps->manage_cap())) {
-            wp_die(__('You do not have permission to access this page.', 'subtleforms'));
-        }
-
-        $submissionId = isset($_GET['submission_id']) ? intval($_GET['submission_id']) : null;
-        if (!$submissionId) {
-            wp_die(__('Invalid submission ID.', 'subtleforms'));
-        }
-
-        $this->get_template('submission-detail', ['submissionId' => $submissionId]);
     }
 
     /**
@@ -705,43 +675,5 @@ class AdminMenu
         } else {
             $submenu_file = Helpers::normalize_string($submenu_file);
         }
-    }
-
-    /**
-     * Set parent file for hidden submenu pages.
-     * 
-     * @param string $parent_file Current parent file.
-     * @return string Modified parent file.
-     */
-    public function set_parent_file($parent_file): string
-    {
-        global $submenu_file;
-        $page = isset($_GET['page']) ? sanitize_key(Helpers::normalize_string($_GET['page'])) : '';
-        
-        // Handle submission detail page - set parent to keep menu open
-        if ($page === 'subtleforms-submission-detail') {
-            $submenu_file = 'subtleforms-submissions';
-            return 'subtleforms';
-        }
-        
-        return $parent_file;
-    }
-
-    /**
-     * Set submenu file for hidden submenu pages.
-     * 
-     * @param string $submenu_file Current submenu file.
-     * @return string Modified submenu file.
-     */
-    public function set_submenu_file($submenu_file): string
-    {
-        $page = isset($_GET['page']) ? sanitize_key(Helpers::normalize_string($_GET['page'])) : '';
-        
-        // Handle submission detail page - highlight submissions submenu
-        if ($page === 'subtleforms-submission-detail') {
-            return 'subtleforms-submissions';
-        }
-        
-        return $submenu_file;
     }
 }

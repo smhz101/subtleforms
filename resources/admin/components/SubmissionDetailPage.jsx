@@ -110,7 +110,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
   const navigate = (direction) => {
     const targetId = direction === 'next' ? adjacent.next : adjacent.prev;
     if (targetId) {
-      window.location.href = `admin.php?page=subtleforms-submission-detail&submission_id=${targetId}${
+      window.location.href = `admin.php?page=subtleforms-submissions&submission_id=${targetId}${
         formId ? `&form_id=${formId}` : ''
       }`;
     }

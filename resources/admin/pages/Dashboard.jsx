@@ -151,7 +151,7 @@ export default function Dashboard() {
                       <div className='item-content'>
                         <div className='item-title'>
                           <a
-                            href={`admin.php?page=subtleforms-submission-detail&id=${submission.id}`}>
+                            href={`admin.php?page=subtleforms-submissions&submission_id=${submission.id}`}>
                             {submission.form_title}
                           </a>
                         </div>
@@ -168,7 +168,7 @@ export default function Dashboard() {
                       <Button
                         variant='secondary'
                         isSmall
-                        href={`admin.php?page=subtleforms-submission-detail&id=${submission.id}`}>
+                        href={`admin.php?page=subtleforms-submissions&submission_id=${submission.id}`}>
                         {__('View', 'subtleforms')}
                       </Button>
                     </div>

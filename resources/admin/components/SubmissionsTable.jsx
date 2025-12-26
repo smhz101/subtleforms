@@ -307,7 +307,7 @@ export default function SubmissionsTable({
     if (onRowClick) {
       onRowClick(submission);
     } else {
-      window.location.href = `admin.php?page=subtleforms-submission-detail&submission_id=${
+      window.location.href = `admin.php?page=subtleforms-submissions&submission_id=${
         submission.id
       }${formId ? `&form_id=${formId}` : ''}`;
     }

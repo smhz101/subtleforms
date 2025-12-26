@@ -495,3 +495,4 @@ class API_Endpoints_Test extends WP_UnitTestCase {
         $wpdb->delete($wpdb->prefix . 'subtleforms_submissions', ['id' => $submission->id]);
         $wpdb->delete($wpdb->prefix . 'subtleforms_forms', ['id' => $payment_form_id]);
     }
+}
