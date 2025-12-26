@@ -50,7 +50,7 @@ export default function ColumnDropZone({
         columnIndex={columnIndex}
         position={0}
         onRequestInsert={onRequestInsert}
-        label={__('Add field', 'subtleforms')}
+        label={__('Add Field', 'subtleforms')}
       />
 
       <SortableContext

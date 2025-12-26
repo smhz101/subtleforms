@@ -28,7 +28,7 @@ export default function InsertFieldButton({
           );
         }}>
         <span aria-hidden='true'>＋</span>
-        <span>{label || __('Insert field', 'subtleforms')}</span>
+        <span>{label || __('Insert Field', 'subtleforms')}</span>
       </button>
     </div>
   );
