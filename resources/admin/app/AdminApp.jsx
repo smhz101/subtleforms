@@ -1,0 +1,106 @@
+/**
+ * Admin Application Root
+ * 
+ * Main application component that handles routing and global providers.
+ */
+
+import { useState } from '@wordpress/element';
+import { Panel, PanelBody } from '@wordpress/components';
+import { __ } from '@wordpress/i18n';
+
+// Pages
+import Dashboard from '../pages/Dashboard';
+import Settings from '../pages/Settings';
+
+// Components (to be moved to pages/)
+import FormsPage from '../components/FormsPage';
+import SubmissionsPage from '../components/SubmissionsPage';
+import SubmissionDetailPage from '../components/SubmissionDetailPage';
+import FormBuilder from '../components/builder/FormBuilderPage';
+
+// Modals (to be moved to modals/)
+import CreateFormModal from '../components/CreateFormModal';
+
+// Utils
+import { ROUTES, getRouteConfig } from './routes';
+
+export default function AdminApp() {
+  const config = getRouteConfig();
+  const { page, formId: initialFormId, submissionId: initialSubmissionId } = config;
+
+  // Debug: expose mount info to console for troubleshooting
+  console.debug('SubtleForms admin mount', {
+    page,
+    formId: initialFormId,
+    submissionId: initialSubmissionId,
+  });
+
+  // Modal state - only show create modal if on form-editor page AND no form_id is present
+  const [showCreateModal, setShowCreateModal] = useState(
+    page === ROUTES.FORM_EDITOR && !initialFormId
+  );
+
+  function handleModalClose() {
+    setShowCreateModal(false);
+    // Redirect to forms list when modal is closed without creating a form
+    if (page === ROUTES.FORM_EDITOR && !initialFormId) {
+      window.location.href = 'admin.php?page=subtleforms-forms';
+    }
+  }
+
+  function handleFormCreated(formId) {
+    setShowCreateModal(false);
+    // Navigate to the builder page with the new form ID
+    window.location.href = `admin.php?page=subtleforms-new-form&form_id=${formId}`;
+  }
+
+  function handleFormSaved(detail) {
+    console.debug('Form saved:', detail);
+  }
+
+  return (
+    <div>
+      <Panel>
+        <PanelBody>
+          {page === ROUTES.DASHBOARD && <Dashboard />}
+          
+          {page === ROUTES.FORMS_LIST && <FormsPage />}
+          
+          {(page === ROUTES.SUBMISSIONS_LIST || page === ROUTES.SUBMISSIONS) && (
+            <SubmissionsPage formId={initialFormId || null} />
+          )}
+          
+          {page === ROUTES.SUBMISSION_DETAIL && initialSubmissionId && (
+            <SubmissionDetailPage
+              submissionId={initialSubmissionId}
+              formId={initialFormId}
+              onBack={() => {
+                window.location.href = initialFormId
+                  ? `admin.php?page=subtleforms-submissions&form_id=${initialFormId}`
+                  : 'admin.php?page=subtleforms-submissions';
+              }}
+            />
+          )}
+          
+          {page === ROUTES.SETTINGS && <Settings />}
+          
+          {page === ROUTES.FORM_EDITOR && !!initialFormId && (
+            <FormBuilder
+              formId={initialFormId}
+              onSaved={handleFormSaved}
+              onClose={() => {
+                window.location.href = 'admin.php?page=subtleforms-forms';
+              }}
+            />
+          )}
+        </PanelBody>
+      </Panel>
+      
+      <CreateFormModal
+        isOpen={showCreateModal}
+        onClose={handleModalClose}
+        onFormCreated={handleFormCreated}
+      />
+    </div>
+  );
+}

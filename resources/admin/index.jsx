@@ -1,8 +1,8 @@
 import { render } from '@wordpress/element';
-import App from './App';
+import AdminApp from './app/AdminApp';
 
 document.addEventListener('DOMContentLoaded', () => {
   const mount = document.getElementById('subtleforms-admin-app');
   if (!mount) return;
-  render(<App />, mount);
+  render(<AdminApp />, mount);
 });
