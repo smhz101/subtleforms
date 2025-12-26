@@ -1,6 +1,6 @@
 /**
  * Admin Application Root
- * 
+ *
  * Main application component that handles routing and global providers.
  */
 
@@ -9,14 +9,12 @@ import { Panel, PanelBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 // Pages
-import Dashboard from '../pages/Dashboard';
-import Settings from '../pages/Settings';
-
-// Components (to be moved to pages/)
-import FormsPage from '../components/FormsPage';
-import SubmissionsPage from '../components/SubmissionsPage';
-import SubmissionDetailPage from '../components/SubmissionDetailPage';
-import FormBuilder from '../components/builder/FormBuilderPage';
+import DashboardPage from '../pages/DashboardPage';
+import SettingsPage from '../pages/SettingsPage';
+import FormsPage from '../pages/FormsPage';
+import SubmissionsPage from '../pages/SubmissionsPage';
+import SubmissionDetailPage from '../pages/SubmissionDetailPage';
+import BuilderPage from '../pages/BuilderPage';
 
 // Modals (to be moved to modals/)
 import CreateFormModal from '../components/CreateFormModal';
@@ -26,7 +24,11 @@ import { ROUTES, getRouteConfig } from './routes';
 
 export default function AdminApp() {
   const config = getRouteConfig();
-  const { page, formId: initialFormId, submissionId: initialSubmissionId } = config;
+  const {
+    page,
+    formId: initialFormId,
+    submissionId: initialSubmissionId,
+  } = config;
 
   // Debug: expose mount info to console for troubleshooting
   console.debug('SubtleForms admin mount', {
@@ -62,14 +64,15 @@ export default function AdminApp() {
     <div>
       <Panel>
         <PanelBody>
-          {page === ROUTES.DASHBOARD && <Dashboard />}
-          
+          {page === ROUTES.DASHBOARD && <DashboardPage />}
+
           {page === ROUTES.FORMS_LIST && <FormsPage />}
-          
-          {(page === ROUTES.SUBMISSIONS_LIST || page === ROUTES.SUBMISSIONS) && (
+
+          {(page === ROUTES.SUBMISSIONS_LIST ||
+            page === ROUTES.SUBMISSIONS) && (
             <SubmissionsPage formId={initialFormId || null} />
           )}
-          
+
           {page === ROUTES.SUBMISSION_DETAIL && initialSubmissionId && (
             <SubmissionDetailPage
               submissionId={initialSubmissionId}
@@ -81,11 +84,11 @@ export default function AdminApp() {
               }}
             />
           )}
-          
-          {page === ROUTES.SETTINGS && <Settings />}
-          
+
+          {page === ROUTES.SETTINGS && <SettingsPage />}
+
           {page === ROUTES.FORM_EDITOR && !!initialFormId && (
-            <FormBuilder
+            <BuilderPage
               formId={initialFormId}
               onSaved={handleFormSaved}
               onClose={() => {
@@ -95,7 +98,7 @@ export default function AdminApp() {
           )}
         </PanelBody>
       </Panel>
-      
+
       <CreateFormModal
         isOpen={showCreateModal}
         onClose={handleModalClose}

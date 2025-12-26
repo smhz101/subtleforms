@@ -2,9 +2,9 @@ import { useState } from '@wordpress/element';
 import { Button, SearchControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { FiPlus } from 'react-icons/fi';
-import AdminShell from './AdminShell';
-import TabBar from './TabBar';
-import FormsList from './FormsList';
+import AdminShell from '../components/AdminShell';
+import TabBar from '../components/TabBar';
+import FormsList from '../components/FormsList';
 
 export default function FormsPage() {
   const [search, setSearch] = useState('');

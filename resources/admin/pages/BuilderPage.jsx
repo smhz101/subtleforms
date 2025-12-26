@@ -22,12 +22,12 @@ import {
   FiMessageCircle,
   FiCreditCard,
 } from 'react-icons/fi';
-import AdminShell from '../AdminShell';
-import FormEditor from './FormEditor';
-import FormSettings from './FormSettings';
-import SubmissionsTable from '../SubmissionsTable';
-import ConfirmModal from '../ConfirmModal';
-import { apiGet, apiPost, apiPut } from '../../utils/api';
+import AdminShell from '../components/AdminShell';
+import FormEditor from '../components/builder/FormEditor';
+import FormSettings from '../components/builder/FormSettings';
+import SubmissionsTable from '../components/SubmissionsTable';
+import ConfirmModal from '../components/ConfirmModal';
+import { apiGet, apiPost, apiPut } from '../utils/api';
 
 async function apiDelete(path) {
   const response = await fetch(restBase + path, {
@@ -704,13 +704,34 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
   // Get form type badge config
   const formType = draftSchema?.metadata?.type || 'regular';
   const formTypeBadgeConfig = {
-    regular: { icon: FiFileText, label: __('Regular', 'subtleforms'), color: 'gray' },
-    multistep: { icon: FiLayers, label: __('Multi-step', 'subtleforms'), color: 'purple' },
-    sectioned: { icon: FiList, label: __('Sectioned', 'subtleforms'), color: 'indigo' },
-    conversational: { icon: FiMessageCircle, label: __('Conversational', 'subtleforms'), color: 'blue' },
-    payment: { icon: FiCreditCard, label: __('Payment', 'subtleforms'), color: 'green' },
+    regular: {
+      icon: FiFileText,
+      label: __('Regular', 'subtleforms'),
+      color: 'gray',
+    },
+    multistep: {
+      icon: FiLayers,
+      label: __('Multi-step', 'subtleforms'),
+      color: 'purple',
+    },
+    sectioned: {
+      icon: FiList,
+      label: __('Sectioned', 'subtleforms'),
+      color: 'indigo',
+    },
+    conversational: {
+      icon: FiMessageCircle,
+      label: __('Conversational', 'subtleforms'),
+      color: 'blue',
+    },
+    payment: {
+      icon: FiCreditCard,
+      label: __('Payment', 'subtleforms'),
+      color: 'green',
+    },
   };
-  const formTypeBadge = formTypeBadgeConfig[formType] || formTypeBadgeConfig.regular;
+  const formTypeBadge =
+    formTypeBadgeConfig[formType] || formTypeBadgeConfig.regular;
   const FormTypeIcon = formTypeBadge.icon;
 
   // Construct title with editable inline input

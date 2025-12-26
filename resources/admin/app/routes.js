@@ -1,6 +1,6 @@
 /**
  * Admin Application Routes
- * 
+ *
  * Centralized routing logic for the SubtleForms admin interface.
  */
 
@@ -19,7 +19,7 @@ export const ROUTES = {
  */
 export function getRouteConfig() {
   const mount = document.getElementById('subtleforms-admin-app');
-  
+
   if (!mount) {
     return {
       page: ROUTES.DASHBOARD,
@@ -31,8 +31,6 @@ export function getRouteConfig() {
   return {
     page: mount.dataset.page || ROUTES.DASHBOARD,
     formId: mount.dataset.formId ? parseInt(mount.dataset.formId, 10) : null,
-    submissionId: mount.dataset.submissionId 
-      ? parseInt(mount.dataset.submissionId, 10) 
-      : null,
+    submissionId: mount.dataset.submissionId ? parseInt(mount.dataset.submissionId, 10) : null,
   };
 }

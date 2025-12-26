@@ -1,9 +1,9 @@
 import { useState, useEffect } from '@wordpress/element';
 import { SearchControl, SelectControl, Button } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
-import AdminShell from './AdminShell';
-import TabBar from './TabBar';
-import SubmissionsTable from './SubmissionsTable';
+import AdminShell from '../components/AdminShell';
+import TabBar from '../components/TabBar';
+import SubmissionsTable from '../components/SubmissionsTable';
 
 const restBase =
   window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||

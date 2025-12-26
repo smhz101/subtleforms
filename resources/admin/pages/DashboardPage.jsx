@@ -17,7 +17,7 @@ import {
   FiMessageCircle,
   FiCreditCard,
 } from 'react-icons/fi';
-import './Dashboard.css';
+import './DashboardPage.css';
 
 /**
  * Dashboard Page Component

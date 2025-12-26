@@ -8,7 +8,7 @@ import {
   TextareaControl,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
-import AdminShell from './AdminShell';
+import AdminShell from '../components/AdminShell';
 
 const restBase =
   window.subtleformsAdmin && window.subtleformsAdmin.restUrl

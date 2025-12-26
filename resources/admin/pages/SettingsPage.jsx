@@ -13,7 +13,7 @@ import {
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import './Settings.css';
+import './SettingsPage.css';
 
 /**
  * Settings Page Component
