@@ -39,7 +39,16 @@ export default function Settings() {
       });
 
       if (response.success) {
-        setSettings(response.data);
+        // Ensure boolean values are properly typed
+        const normalizedSettings = {
+          ...response.data,
+          autosave_enabled: Boolean(response.data.autosave_enabled),
+          submission_limit_enabled: Boolean(response.data.submission_limit_enabled),
+          admin_notification_enabled: Boolean(response.data.admin_notification_enabled),
+          user_confirmation_enabled: Boolean(response.data.user_confirmation_enabled),
+          debug_mode: Boolean(response.data.debug_mode),
+        };
+        setSettings(normalizedSettings);
       }
     } catch (error) {
       console.error('Failed to load settings:', error);
@@ -100,7 +109,16 @@ export default function Settings() {
             __('Settings saved successfully!', 'subtleforms'),
         });
         setHasChanges(false);
-        setSettings(response.data);
+        // Ensure boolean values are properly typed after save
+        const normalizedSettings = {
+          ...response.data,
+          autosave_enabled: Boolean(response.data.autosave_enabled),
+          submission_limit_enabled: Boolean(response.data.submission_limit_enabled),
+          admin_notification_enabled: Boolean(response.data.admin_notification_enabled),
+          user_confirmation_enabled: Boolean(response.data.user_confirmation_enabled),
+          debug_mode: Boolean(response.data.debug_mode),
+        };
+        setSettings(normalizedSettings);
       }
     } catch (error) {
       console.error('Failed to save settings:', error);
@@ -143,7 +161,16 @@ export default function Settings() {
             response.message ||
             __('Settings reset successfully!', 'subtleforms'),
         });
-        setSettings(response.data);
+        // Ensure boolean values are properly typed after reset
+        const normalizedSettings = {
+          ...response.data,
+          autosave_enabled: Boolean(response.data.autosave_enabled),
+          submission_limit_enabled: Boolean(response.data.submission_limit_enabled),
+          admin_notification_enabled: Boolean(response.data.admin_notification_enabled),
+          user_confirmation_enabled: Boolean(response.data.user_confirmation_enabled),
+          debug_mode: Boolean(response.data.debug_mode),
+        };
+        setSettings(normalizedSettings);
         setHasChanges(false);
       }
     } catch (error) {

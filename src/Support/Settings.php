@@ -177,7 +177,14 @@ class Settings
     {
         switch ($type) {
             case 'boolean':
-                return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+                // Handle various boolean representations
+                if (is_bool($value)) {
+                    return $value;
+                }
+                if (is_string($value)) {
+                    return filter_var($value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) ?? false;
+                }
+                return (bool) $value;
             
             case 'integer':
                 if (!is_numeric($value)) {
