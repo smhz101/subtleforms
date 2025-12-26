@@ -44,7 +44,13 @@ export default function FieldToolbar({
     }
   };
 
-  const renderButton = (iconName, label, handler, disabled, variant = 'default') => {
+  const renderButton = (
+    iconName,
+    label,
+    handler,
+    disabled,
+    variant = 'default'
+  ) => {
     const IconComponent = getIcon(iconName);
     return (
       <button
@@ -58,8 +64,10 @@ export default function FieldToolbar({
           'transition-all duration-150',
           {
             'text-gray-400 cursor-not-allowed': disabled,
-            'text-gray-600 hover:bg-gray-100 hover:text-gray-900 cursor-pointer': !disabled && variant === 'default',
-            'text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer': !disabled && variant === 'danger',
+            'text-gray-600 hover:bg-gray-100 hover:text-gray-900 cursor-pointer':
+              !disabled && variant === 'default',
+            'text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer':
+              !disabled && variant === 'danger',
           }
         )}
         aria-label={label}
@@ -108,7 +116,7 @@ export default function FieldToolbar({
       </button>
 
       {/* Separator */}
-      <div className='w-px h-5 bg-gray-300 mx-0.5'></div>
+      <div className='bg-gray-300 mx-0.5 w-px h-5'></div>
 
       {/* Move Actions */}
       {renderButton(
@@ -125,7 +133,7 @@ export default function FieldToolbar({
       )}
 
       {/* Separator */}
-      <div className='w-px h-5 bg-gray-300 mx-0.5'></div>
+      <div className='bg-gray-300 mx-0.5 w-px h-5'></div>
 
       {/* Duplicate Action */}
       {renderButton(
@@ -136,7 +144,7 @@ export default function FieldToolbar({
       )}
 
       {/* Separator */}
-      <div className='w-px h-5 bg-gray-300 mx-0.5'></div>
+      <div className='bg-gray-300 mx-0.5 w-px h-5'></div>
 
       {/* Delete Action */}
       {renderButton(

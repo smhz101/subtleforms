@@ -19,14 +19,11 @@ export default function FieldWrapper({
 }) {
   return (
     <div
-      className={classNames(
-        'p-5 cursor-pointer transition-all relative',
-        {
-          'bg-blue-50 border-2 border-blue-600': isSelected,
-          'bg-gray-50 border border-gray-300': isHovered && !isSelected,
-          'bg-white border border-gray-300': !isSelected && !isHovered,
-        }
-      )}
+      className={classNames('p-5 cursor-pointer transition-all relative', {
+        'bg-blue-50 border-2 border-blue-600': isSelected,
+        'bg-gray-50 border border-gray-300': isHovered && !isSelected,
+        'bg-white border border-gray-300': !isSelected && !isHovered,
+      })}
       onClick={onSelect}
       onMouseEnter={onHover}
       onMouseLeave={onLeave}>

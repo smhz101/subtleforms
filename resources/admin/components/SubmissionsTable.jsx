@@ -384,10 +384,13 @@ export default function SubmissionsTable({
       width: '10%',
       render: (status) => (
         <span
-          className={classNames('inline-flex items-center px-2.5 py-0.5 text-xs font-medium', {
-            'bg-blue-100 text-blue-800': status === 'unread',
-            'bg-gray-100 text-gray-800': status !== 'unread',
-          })}>
+          className={classNames(
+            'inline-flex items-center px-2.5 py-0.5 text-xs font-medium',
+            {
+              'bg-blue-100 text-blue-800': status === 'unread',
+              'bg-gray-100 text-gray-800': status !== 'unread',
+            }
+          )}>
           {status === 'unread'
             ? __('Unread', 'subtleforms')
             : __('Read', 'subtleforms')}

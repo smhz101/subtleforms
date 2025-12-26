@@ -186,6 +186,37 @@ export default function FormSettings({ schema, onChange }) {
           </PanelBody>
         </Panel>
 
+        {/* Canvas Layout Settings */}
+        <Panel className='mt-4'>
+          <PanelBody
+            title={__('Canvas Layout', 'subtleforms')}
+            initialOpen={false}>
+            <RadioControl
+              label={__('Canvas Width', 'subtleforms')}
+              selected={metadata.canvasWidth || 'standard'}
+              options={[
+                {
+                  label: __('Narrow (640px)', 'subtleforms'),
+                  value: 'narrow',
+                },
+                {
+                  label: __('Standard (768px)', 'subtleforms'),
+                  value: 'standard',
+                },
+                {
+                  label: __('Wide (1024px)', 'subtleforms'),
+                  value: 'wide',
+                },
+              ]}
+              onChange={(value) => handleMetadataChange('canvasWidth', value)}
+              help={__(
+                'Controls the maximum width of the form canvas in the builder',
+                'subtleforms'
+              )}
+            />
+          </PanelBody>
+        </Panel>
+
         {/* Payment Settings - Show for payment forms and conversational forms */}
         {supportsPayment && (
           <Panel className='mt-4'>
