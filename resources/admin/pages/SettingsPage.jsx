@@ -43,9 +43,15 @@ export default function Settings() {
         const normalizedSettings = {
           ...response.data,
           autosave_enabled: Boolean(response.data.autosave_enabled),
-          submission_limit_enabled: Boolean(response.data.submission_limit_enabled),
-          admin_notification_enabled: Boolean(response.data.admin_notification_enabled),
-          user_confirmation_enabled: Boolean(response.data.user_confirmation_enabled),
+          submission_limit_enabled: Boolean(
+            response.data.submission_limit_enabled
+          ),
+          admin_notification_enabled: Boolean(
+            response.data.admin_notification_enabled
+          ),
+          user_confirmation_enabled: Boolean(
+            response.data.user_confirmation_enabled
+          ),
           debug_mode: Boolean(response.data.debug_mode),
         };
         setSettings(normalizedSettings);
@@ -113,9 +119,15 @@ export default function Settings() {
         const normalizedSettings = {
           ...response.data,
           autosave_enabled: Boolean(response.data.autosave_enabled),
-          submission_limit_enabled: Boolean(response.data.submission_limit_enabled),
-          admin_notification_enabled: Boolean(response.data.admin_notification_enabled),
-          user_confirmation_enabled: Boolean(response.data.user_confirmation_enabled),
+          submission_limit_enabled: Boolean(
+            response.data.submission_limit_enabled
+          ),
+          admin_notification_enabled: Boolean(
+            response.data.admin_notification_enabled
+          ),
+          user_confirmation_enabled: Boolean(
+            response.data.user_confirmation_enabled
+          ),
           debug_mode: Boolean(response.data.debug_mode),
         };
         setSettings(normalizedSettings);
@@ -165,9 +177,15 @@ export default function Settings() {
         const normalizedSettings = {
           ...response.data,
           autosave_enabled: Boolean(response.data.autosave_enabled),
-          submission_limit_enabled: Boolean(response.data.submission_limit_enabled),
-          admin_notification_enabled: Boolean(response.data.admin_notification_enabled),
-          user_confirmation_enabled: Boolean(response.data.user_confirmation_enabled),
+          submission_limit_enabled: Boolean(
+            response.data.submission_limit_enabled
+          ),
+          admin_notification_enabled: Boolean(
+            response.data.admin_notification_enabled
+          ),
+          user_confirmation_enabled: Boolean(
+            response.data.user_confirmation_enabled
+          ),
           debug_mode: Boolean(response.data.debug_mode),
         };
         setSettings(normalizedSettings);

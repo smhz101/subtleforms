@@ -139,24 +139,24 @@ class Settings
             
             $rule = self::VALIDATION_RULES[$key];
             
-            // Handle array of allowed values
-            if (is_array($rule) && isset($rule[0]) && is_string($rule[0])) {
-                if (!in_array($value, $rule, true)) {
-                    throw new \InvalidArgumentException("Invalid value for {$key}");
-                }
-                $validated[$key] = $value;
-                continue;
-            }
-            
             // Handle type validation
             if (is_string($rule)) {
                 $validated[$key] = $this->validateType($key, $value, $rule);
                 continue;
             }
             
-            // Handle complex validation rules
-            if (is_array($rule)) {
+            // Handle complex validation rules with type and constraints
+            if (is_array($rule) && isset($rule[0]) && (isset($rule['min']) || isset($rule['max']))) {
                 $validated[$key] = $this->validateWithRules($key, $value, $rule);
+                continue;
+            }
+            
+            // Handle array of allowed values (enum)
+            if (is_array($rule) && isset($rule[0])) {
+                if (!in_array($value, $rule, true)) {
+                    throw new \InvalidArgumentException("Invalid value for {$key}");
+                }
+                $validated[$key] = $value;
                 continue;
             }
         }
