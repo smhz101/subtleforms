@@ -26,6 +26,23 @@
 	margin-bottom: 20px;
 }
 
+/* Field Error Styles */
+.has-error input,
+.has-error textarea,
+.has-error select {
+	border-color: #cc1818 !important;
+	box-shadow: 0 0 0 1px #cc1818 !important;
+}
+
+.has-error .components-base-control__help {
+	color: #cc1818;
+}
+
+.components-base-control__help[style*='color: #cc1818'] {
+	font-weight: 500;
+	margin-top: 4px;
+}
+
 /* Tab Panel Styles */
 .subtleforms-settings-tabs .components-tab-panel__tabs {
 	border-bottom: 1px solid #ddd;

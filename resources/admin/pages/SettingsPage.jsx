@@ -13,6 +13,7 @@ import {
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import { validateSettings, validateField } from '../utils/validation';
 import './SettingsPage.css';
 
 /**
@@ -24,6 +25,7 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState({});
 
   // Load settings on mount
   useEffect(() => {
@@ -77,9 +79,16 @@ export default function Settings() {
     ) {
       finalValue = parseInt(value, 10);
       if (isNaN(finalValue)) {
-        return; // Don't update with invalid number
+        finalValue = value; // Keep as string for validation to catch
       }
     }
+
+    // Validate the field
+    const validation = validateField(key, finalValue);
+    setFieldErrors((prev) => ({
+      ...prev,
+      [key]: validation.error,
+    }));
 
     setSettings((prev) => ({
       ...prev,
@@ -100,6 +109,22 @@ export default function Settings() {
         submission_limit: parseInt(settings.submission_limit, 10) || 1,
         log_retention_days: parseInt(settings.log_retention_days, 10) || 30,
       };
+
+      // Validate all settings before saving
+      const validation = validateSettings(settingsToSave);
+      if (!validation.valid) {
+        setFieldErrors(validation.errors);
+        const errorMessages = Object.values(validation.errors).join('. ');
+        setMessage({
+          type: 'error',
+          text: errorMessages,
+        });
+        setSaving(false);
+        return;
+      }
+
+      // Clear field errors if validation passes
+      setFieldErrors({});
 
       const response = await apiFetch({
         path: '/subtleforms/v1/settings',
@@ -295,18 +320,21 @@ export default function Settings() {
               <GeneralSettings
                 settings={settings}
                 updateSetting={updateSetting}
+                fieldErrors={fieldErrors}
               />
             )}
             {tab.name === 'frontend' && (
               <FrontendSettings
                 settings={settings}
                 updateSetting={updateSetting}
+                fieldErrors={fieldErrors}
               />
             )}
             {tab.name === 'email' && (
               <EmailSettings
                 settings={settings}
                 updateSetting={updateSetting}
+                fieldErrors={fieldErrors}
               />
             )}
             {tab.name === 'advanced' && (
@@ -315,6 +343,7 @@ export default function Settings() {
                 updateSetting={updateSetting}
                 resetSettings={resetSettings}
                 saving={saving}
+                fieldErrors={fieldErrors}
               />
             )}
           </div>
@@ -325,7 +354,7 @@ export default function Settings() {
 }
 
 // General Settings Tab
-function GeneralSettings({ settings, updateSetting }) {
+function GeneralSettings({ settings, updateSetting, fieldErrors }) {
   return (
     <Card>
       <CardBody>
@@ -337,32 +366,49 @@ function GeneralSettings({ settings, updateSetting }) {
             { label: __('Published', 'subtleforms'), value: 'published' },
           ]}
           onChange={(value) => updateSetting('default_form_status', value)}
-          help={__('Default status when creating new forms', 'subtleforms')}
+          help={
+            fieldErrors.default_form_status ||
+            __('Default status when creating new forms', 'subtleforms')
+          }
+          className={fieldErrors.default_form_status ? 'has-error' : ''}
         />
 
         <ToggleControl
           label={__('Enable Autosave', 'subtleforms')}
           checked={settings.autosave_enabled}
           onChange={(value) => updateSetting('autosave_enabled', value)}
-          help={__(
-            'Automatically save form changes while editing',
-            'subtleforms'
-          )}
+          help={
+            fieldErrors.autosave_enabled ||
+            __('Automatically save form changes while editing', 'subtleforms')
+          }
         />
 
         {settings.autosave_enabled && (
-          <TextControl
-            label={__('Autosave Interval (seconds)', 'subtleforms')}
-            type='number'
-            value={String(settings.autosave_interval)}
-            onChange={(value) => updateSetting('autosave_interval', value)}
-            min='1'
-            max='60'
-            help={__(
-              'Time between autosave triggers (1-60 seconds)',
-              'subtleforms'
+          <div>
+            <TextControl
+              label={__('Autosave Interval (seconds)', 'subtleforms')}
+              type='number'
+              value={String(settings.autosave_interval)}
+              onChange={(value) => updateSetting('autosave_interval', value)}
+              min='1'
+              max='60'
+              help={
+                fieldErrors.autosave_interval ||
+                __(
+                  'Time between autosave triggers (1-60 seconds)',
+                  'subtleforms'
+                )
+              }
+              className={fieldErrors.autosave_interval ? 'has-error' : ''}
+            />
+            {fieldErrors.autosave_interval && (
+              <p
+                className='components-base-control__help'
+                style={{ color: '#cc1818' }}>
+                {fieldErrors.autosave_interval}
+              </p>
             )}
-          />
+          </div>
         )}
 
         <SelectControl
@@ -387,37 +433,76 @@ function GeneralSettings({ settings, updateSetting }) {
 }
 
 // Frontend Settings Tab
-function FrontendSettings({ settings, updateSetting }) {
+function FrontendSettings({ settings, updateSetting, fieldErrors }) {
   return (
     <Card>
       <CardBody>
-        <TextControl
-          label={__('Success Message', 'subtleforms')}
-          value={settings.success_message}
-          onChange={(value) => updateSetting('success_message', value)}
-          help={__('Message shown after successful submission', 'subtleforms')}
-        />
-
-        <TextControl
-          label={__('Error Message', 'subtleforms')}
-          value={settings.error_message}
-          onChange={(value) => updateSetting('error_message', value)}
-          help={__(
-            'Generic error message shown on submission failure',
-            'subtleforms'
+        <div>
+          <TextControl
+            label={__('Success Message', 'subtleforms')}
+            value={settings.success_message}
+            onChange={(value) => updateSetting('success_message', value)}
+            help={
+              fieldErrors.success_message ||
+              __('Message shown after successful submission', 'subtleforms')
+            }
+            className={fieldErrors.success_message ? 'has-error' : ''}
+          />
+          {fieldErrors.success_message && (
+            <p
+              className='components-base-control__help'
+              style={{ color: '#cc1818' }}>
+              {fieldErrors.success_message}
+            </p>
           )}
-        />
+        </div>
 
-        <TextControl
-          label={__('Redirect After Submit (URL)', 'subtleforms')}
-          value={settings.redirect_after_submit}
-          onChange={(value) => updateSetting('redirect_after_submit', value)}
-          help={__(
-            'Optional URL to redirect after submission (leave empty to show message)',
-            'subtleforms'
+        <div>
+          <TextControl
+            label={__('Error Message', 'subtleforms')}
+            value={settings.error_message}
+            onChange={(value) => updateSetting('error_message', value)}
+            help={
+              fieldErrors.error_message ||
+              __(
+                'Generic error message shown on submission failure',
+                'subtleforms'
+              )
+            }
+            className={fieldErrors.error_message ? 'has-error' : ''}
+          />
+          {fieldErrors.error_message && (
+            <p
+              className='components-base-control__help'
+              style={{ color: '#cc1818' }}>
+              {fieldErrors.error_message}
+            </p>
           )}
-          placeholder='https://example.com/thank-you'
-        />
+        </div>
+
+        <div>
+          <TextControl
+            label={__('Redirect After Submit (URL)', 'subtleforms')}
+            value={settings.redirect_after_submit}
+            onChange={(value) => updateSetting('redirect_after_submit', value)}
+            help={
+              fieldErrors.redirect_after_submit ||
+              __(
+                'Optional URL to redirect after submission (leave empty to show message)',
+                'subtleforms'
+              )
+            }
+            placeholder='https://example.com/thank-you'
+            className={fieldErrors.redirect_after_submit ? 'has-error' : ''}
+          />
+          {fieldErrors.redirect_after_submit && (
+            <p
+              className='components-base-control__help'
+              style={{ color: '#cc1818' }}>
+              {fieldErrors.redirect_after_submit}
+            </p>
+          )}
+        </div>
 
         <ToggleControl
           label={__('Enable Submission Limit', 'subtleforms')}
@@ -427,18 +512,31 @@ function FrontendSettings({ settings, updateSetting }) {
         />
 
         {settings.submission_limit_enabled && (
-          <TextControl
-            label={__('Maximum Submissions', 'subtleforms')}
-            type='number'
-            value={String(settings.submission_limit)}
-            onChange={(value) => updateSetting('submission_limit', value)}
-            min='1'
-            max='100'
-            help={__(
-              'Maximum number of submissions allowed per user',
-              'subtleforms'
+          <div>
+            <TextControl
+              label={__('Maximum Submissions', 'subtleforms')}
+              type='number'
+              value={String(settings.submission_limit)}
+              onChange={(value) => updateSetting('submission_limit', value)}
+              min='1'
+              max='100'
+              help={
+                fieldErrors.submission_limit ||
+                __(
+                  'Maximum number of submissions allowed per user',
+                  'subtleforms'
+                )
+              }
+              className={fieldErrors.submission_limit ? 'has-error' : ''}
+            />
+            {fieldErrors.submission_limit && (
+              <p
+                className='components-base-control__help'
+                style={{ color: '#cc1818' }}>
+                {fieldErrors.submission_limit}
+              </p>
             )}
-          />
+          </div>
         )}
       </CardBody>
     </Card>
@@ -446,7 +544,7 @@ function FrontendSettings({ settings, updateSetting }) {
 }
 
 // Email Settings Tab
-function EmailSettings({ settings, updateSetting }) {
+function EmailSettings({ settings, updateSetting, fieldErrors }) {
   return (
     <Card>
       <CardBody>
@@ -471,53 +569,95 @@ function EmailSettings({ settings, updateSetting }) {
           )}
         />
 
-        <TextControl
-          label={__('Sender Name', 'subtleforms')}
-          value={settings.sender_name}
-          onChange={(value) => updateSetting('sender_name', value)}
-          help={__(
-            'Email sender name (leave empty for site name)',
-            'subtleforms'
+        <div>
+          <TextControl
+            label={__('Sender Name', 'subtleforms')}
+            value={settings.sender_name}
+            onChange={(value) => updateSetting('sender_name', value)}
+            help={
+              fieldErrors.sender_name ||
+              __('Email sender name (leave empty for site name)', 'subtleforms')
+            }
+            placeholder={
+              window.subtleformsData?.siteName || __('Your Site', 'subtleforms')
+            }
+            className={fieldErrors.sender_name ? 'has-error' : ''}
+          />
+          {fieldErrors.sender_name && (
+            <p
+              className='components-base-control__help'
+              style={{ color: '#cc1818' }}>
+              {fieldErrors.sender_name}
+            </p>
           )}
-          placeholder={
-            window.subtleformsData?.siteName || __('Your Site', 'subtleforms')
-          }
-        />
+        </div>
 
-        <TextControl
-          label={__('Sender Email', 'subtleforms')}
-          type='email'
-          value={settings.sender_email}
-          onChange={(value) => updateSetting('sender_email', value)}
-          help={__(
-            'Email sender address (leave empty for admin email)',
-            'subtleforms'
+        <div>
+          <TextControl
+            label={__('Sender Email', 'subtleforms')}
+            type='email'
+            value={settings.sender_email}
+            onChange={(value) => updateSetting('sender_email', value)}
+            help={
+              fieldErrors.sender_email ||
+              __(
+                'Email sender address (leave empty for admin email)',
+                'subtleforms'
+              )
+            }
+            placeholder={
+              window.subtleformsData?.adminEmail || 'admin@example.com'
+            }
+            className={fieldErrors.sender_email ? 'has-error' : ''}
+          />
+          {fieldErrors.sender_email && (
+            <p
+              className='components-base-control__help'
+              style={{ color: '#cc1818' }}>
+              {fieldErrors.sender_email}
+            </p>
           )}
-          placeholder={
-            window.subtleformsData?.adminEmail || 'admin@example.com'
-          }
-        />
+        </div>
 
-        <TextControl
-          label={__('Admin Email', 'subtleforms')}
-          type='email'
-          value={settings.admin_email}
-          onChange={(value) => updateSetting('admin_email', value)}
-          help={__(
-            'Email to receive admin notifications (leave empty for WordPress admin email)',
-            'subtleforms'
+        <div>
+          <TextControl
+            label={__('Admin Email', 'subtleforms')}
+            type='email'
+            value={settings.admin_email}
+            onChange={(value) => updateSetting('admin_email', value)}
+            help={
+              fieldErrors.admin_email ||
+              __(
+                'Email to receive admin notifications (leave empty for WordPress admin email)',
+                'subtleforms'
+              )
+            }
+            placeholder={
+              window.subtleformsData?.adminEmail || 'admin@example.com'
+            }
+            className={fieldErrors.admin_email ? 'has-error' : ''}
+          />
+          {fieldErrors.admin_email && (
+            <p
+              className='components-base-control__help'
+              style={{ color: '#cc1818' }}>
+              {fieldErrors.admin_email}
+            </p>
           )}
-          placeholder={
-            window.subtleformsData?.adminEmail || 'admin@example.com'
-          }
-        />
+        </div>
       </CardBody>
     </Card>
   );
 }
 
 // Advanced Settings Tab
-function AdvancedSettings({ settings, updateSetting, resetSettings, saving }) {
+function AdvancedSettings({
+  settings,
+  updateSetting,
+  resetSettings,
+  saving,
+  fieldErrors,
+}) {
   return (
     <Card>
       <CardBody>
@@ -531,18 +671,28 @@ function AdvancedSettings({ settings, updateSetting, resetSettings, saving }) {
           )}
         />
 
-        <TextControl
-          label={__('Log Retention (days)', 'subtleforms')}
-          type='number'
-          value={String(settings.log_retention_days)}
-          onChange={(value) => updateSetting('log_retention_days', value)}
-          min='1'
-          max='365'
-          help={__(
-            'How long to keep submission logs (1-365 days)',
-            'subtleforms'
+        <div>
+          <TextControl
+            label={__('Log Retention (days)', 'subtleforms')}
+            type='number'
+            value={String(settings.log_retention_days)}
+            onChange={(value) => updateSetting('log_retention_days', value)}
+            min='1'
+            max='365'
+            help={
+              fieldErrors.log_retention_days ||
+              __('How long to keep submission logs (1-365 days)', 'subtleforms')
+            }
+            className={fieldErrors.log_retention_days ? 'has-error' : ''}
+          />
+          {fieldErrors.log_retention_days && (
+            <p
+              className='components-base-control__help'
+              style={{ color: '#cc1818' }}>
+              {fieldErrors.log_retention_days}
+            </p>
           )}
-        />
+        </div>
 
         <div className='subtleforms-settings-danger-zone'>
           <h3>{__('Danger Zone', 'subtleforms')}</h3>
