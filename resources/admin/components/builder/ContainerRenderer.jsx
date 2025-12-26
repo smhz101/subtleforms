@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import { Icon } from '@wordpress/components';
+import { FiMove } from 'react-icons/fi';
 import { getIcon } from './utils/iconMap';
 
 export default function ContainerRenderer({
@@ -89,10 +89,13 @@ export default function ContainerRenderer({
                 cursor: 'grab',
                 color: '#1e1e1e',
               }}>
-              <Icon icon='drag-handle' size={16} />
+              <FiMove size={16} />
             </button>
           )}
-          <Icon icon={getIcon(node.type)} size={18} />
+          {(() => {
+            const NodeIcon = getIcon(node.type);
+            return <NodeIcon size={18} />;
+          })()}
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <strong style={{ fontSize: '13px' }}>{title}</strong>
             {isStep && node.config?.description && (

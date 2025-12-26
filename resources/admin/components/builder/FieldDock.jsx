@@ -1,5 +1,5 @@
 import { useState } from '@wordpress/element';
-import { Button, Icon } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { getIcon } from './utils/iconMap';
 
@@ -180,8 +180,12 @@ export default function FieldDock({ fieldGroups, onAddField }) {
                           style={{
                             display: 'flex',
                             color: '#50575e',
+                            fontSize: '20px',
                           }}>
-                          <Icon icon={getIcon(f.type)} size={20} />
+                          {(() => {
+                            const IconComponent = getIcon(f.type);
+                            return <IconComponent />;
+                          })()}
                         </span>
                         <span
                           style={{

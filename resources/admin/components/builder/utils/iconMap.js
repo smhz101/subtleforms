@@ -1,82 +1,98 @@
 import {
-  paragraph,
-  shortcode,
-  image,
-  media,
-  calendar,
-  mapMarker,
-  check,
-  arrowDown,
-  envelope,
-  mobile,
-  globe,
-  code,
-  plus,
-  trash,
-  arrowUp,
-  arrowDown as arrowDownIcon,
-  copy,
-  close,
-  pencil,
-  moreVertical,
-  dragHandle,
-  timeToRead,
-  navigation,
-} from '@wordpress/icons';
+  FiType,
+  FiMail,
+  FiPhone,
+  FiGlobe,
+  FiHash,
+  FiAlignLeft,
+  FiCheckSquare,
+  FiCircle,
+  FiChevronDown,
+  FiCalendar,
+  FiClock,
+  FiMapPin,
+  FiCode,
+  FiImage,
+  FiFile,
+  FiPlus,
+  FiTrash2,
+  FiArrowUp,
+  FiArrowDown,
+  FiCopy,
+  FiX,
+  FiEdit2,
+  FiMoreVertical,
+  FiMove,
+  FiNavigation,
+  FiLock,
+  FiDollarSign,
+  FiCreditCard,
+  FiShoppingCart,
+} from 'react-icons/fi';
 
+/**
+ * Centralized icon mapping for SubtleForms
+ * Uses Feather Icons (react-icons/fi) for consistency
+ */
 export const getIcon = (iconNameOrType) => {
   const map = {
-    // Field Types
-    text: paragraph,
-    email: envelope,
-    phone: mobile,
-    url: globe,
-    number: shortcode,
-    textarea: paragraph,
-    checkbox: check,
-    radio: check, // Fallback as radio icon is missing
-    multiple_choice: check,
-    dropdown: arrowDown,
-    date: calendar,
-    time: timeToRead,
-    datetime: calendar,
-    country: globe,
-    hidden: code,
-    html: code,
-    image_upload: image,
-    file_upload: media,
-    address: mapMarker,
-    step: navigation,
+    // Field Types - Basic
+    text: FiType,
+    email: FiMail,
+    phone: FiPhone,
+    url: FiGlobe,
+    number: FiHash,
+    textarea: FiAlignLeft,
+    password: FiLock,
 
-    // Dashicons mapping (legacy support)
-    'dashicons-text': paragraph,
-    'dashicons-email': envelope,
-    'dashicons-phone': mobile,
-    'dashicons-admin-site': globe,
-    'dashicons-editor-paragraph': paragraph,
-    'dashicons-yes': check,
-    'dashicons-marker': mapMarker,
-    'dashicons-calendar': calendar,
-    'dashicons-clock': timeToRead,
-    'dashicons-format-image': image,
-    'dashicons-media-default': media,
-    'dashicons-arrow-down-alt2': arrowDown,
-    'dashicons-editor-code': code,
-    'dashicons-hidden': code,
+    // Field Types - Selection
+    checkbox: FiCheckSquare,
+    radio: FiCircle,
+    multiple_choice: FiCheckSquare,
+    dropdown: FiChevronDown,
+
+    // Field Types - Date/Time
+    date: FiCalendar,
+    time: FiClock,
+    datetime: FiCalendar,
+
+    // Field Types - Location
+    country: FiGlobe,
+    address: FiMapPin,
+
+    // Field Types - Special
+    hidden: FiCode,
+    html: FiCode,
+    image_upload: FiImage,
+    file_upload: FiFile,
+    step: FiNavigation,
+
+    // Field Types - Payment
+    payment_amount: FiDollarSign,
+    payment_card: FiCreditCard,
+    payment_product: FiShoppingCart,
+    payment_currency: FiDollarSign,
 
     // Actions
-    add: plus,
-    delete: trash,
-    moveUp: arrowUp,
-    moveDown: arrowDownIcon,
-    duplicate: copy,
-    close: close,
-    edit: pencil,
-    more: moreVertical,
-    drag: dragHandle,
+    add: FiPlus,
+    delete: FiTrash2,
+    moveUp: FiArrowUp,
+    moveDown: FiArrowDown,
+    duplicate: FiCopy,
+    close: FiX,
+    edit: FiEdit2,
+    more: FiMoreVertical,
+    drag: FiMove,
+    move: FiMove,
+
+    // Icon string names (for string-based references)
+    'arrow-up-alt2': FiArrowUp,
+    'arrow-down-alt2': FiArrowDown,
+    'admin-page': FiCopy,
+    trash: FiTrash2,
 
     // Fallback
-    default: paragraph,
+    default: FiType,
   };
 
   return map[iconNameOrType] || map.default;

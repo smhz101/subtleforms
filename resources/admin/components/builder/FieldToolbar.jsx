@@ -1,5 +1,5 @@
-import { Icon } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { getIcon } from './utils/iconMap';
 
 export default function FieldToolbar({
   visible,
@@ -43,27 +43,30 @@ export default function FieldToolbar({
     }
   };
 
-  const renderButton = (icon, label, handler, disabled) => (
-    <button
-      type='button'
-      onClick={createHandler(handler)}
-      onMouseDown={(event) => event.stopPropagation()}
-      onPointerDown={(event) => event.stopPropagation()}
-      className={`
-        w-7 h-7 flex items-center justify-center
-        border border-transparent bg-transparent
-        transition-colors duration-150
-        ${
-          disabled
-            ? 'text-text-tertiary cursor-default'
-            : 'text-text-primary cursor-pointer hover:bg-surface-alt hover:text-primary'
-        }
-      `}
-      aria-label={label}
-      disabled={disabled}>
-      <Icon icon={icon} size={16} />
-    </button>
-  );
+  const renderButton = (iconName, label, handler, disabled) => {
+    const IconComponent = getIcon(iconName);
+    return (
+      <button
+        type='button'
+        onClick={createHandler(handler)}
+        onMouseDown={(event) => event.stopPropagation()}
+        onPointerDown={(event) => event.stopPropagation()}
+        className={`
+          w-7 h-7 flex items-center justify-center
+          border border-transparent bg-transparent
+          transition-colors duration-150
+          ${
+            disabled
+              ? 'text-text-tertiary cursor-default'
+              : 'text-text-primary cursor-pointer hover:bg-surface-alt hover:text-primary'
+          }
+        `}
+        aria-label={label}
+        disabled={disabled}>
+        <IconComponent size={16} />
+      </button>
+    );
+  };
 
   return (
     <div
@@ -90,7 +93,10 @@ export default function FieldToolbar({
         onClick={(event) => event.stopPropagation()}
         className='flex justify-center items-center bg-transparent hover:bg-secondary border border-transparent w-7 h-7 text-text-primary hover:text-primary-hover transition-colors transition-colors duration-150 duration-150 cursor-grab active:cursor-grabbing'
         aria-label={__('Drag field', 'subtleforms')}>
-        <Icon icon='move' size={16} />
+        {(() => {
+          const DragIcon = getIcon('move');
+          return <DragIcon size={16} />;
+        })()}
       </button>
       {renderButton(
         'arrow-up-alt2',

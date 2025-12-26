@@ -1,5 +1,4 @@
 import { __ } from '@wordpress/i18n';
-import { Icon } from '@wordpress/components';
 import FieldList from './FieldList';
 import { getIcon } from './utils/iconMap';
 
@@ -36,7 +35,10 @@ export default function FormCanvas({
         {fields.length === 0 && (
           <div className='px-5 py-20 text-gray-500 text-center'>
             <div className='flex justify-center mb-4'>
-              <Icon icon={getIcon('default')} size={56} />
+              {(() => {
+                const EmptyIcon = getIcon('default');
+                return <EmptyIcon size={56} />;
+              })()}
             </div>
             <h4 className='m-0 mb-2 font-semibold text-gray-700 text-lg'>
               {__('Start Building Your Form', 'subtleforms')}

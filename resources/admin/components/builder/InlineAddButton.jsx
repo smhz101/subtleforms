@@ -1,5 +1,4 @@
 import { __ } from '@wordpress/i18n';
-import { Icon } from '@wordpress/components';
 import { getIcon } from './utils/iconMap';
 
 export default function InlineAddButton({
@@ -22,7 +21,10 @@ export default function InlineAddButton({
         ref={anchorRef}
         onClick={onClick}
         className='inline-flex items-center gap-1 bg-transparent px-4 py-1.5 border border-gray-400 border-dashed font-medium text-gray-600 text-xs cursor-pointer'>
-        <Icon icon={getIcon('add')} size={16} />
+        {(() => {
+          const AddIcon = getIcon('add');
+          return <AddIcon size={16} />;
+        })()}
         {__('Insert Field', 'subtleforms')}
       </button>
     </div>

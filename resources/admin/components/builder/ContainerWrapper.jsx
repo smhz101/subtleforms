@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import { Icon, Button } from '@wordpress/components';
+import { Button } from '@wordpress/components';
 import { FiArrowUp, FiArrowDown, FiCopy, FiTrash2 } from 'react-icons/fi';
 import classNames from 'classnames';
 import { getIcon } from './utils/iconMap';
@@ -38,7 +38,10 @@ export default function ContainerWrapper({
       {/* Header */}
       <div className='flex justify-between items-center bg-gray-100 px-3 py-2 border-gray-300 border-b cursor-move'>
         <div className='flex items-center gap-2'>
-          <Icon icon={getIcon(field.type)} size={20} />
+          {(() => {
+            const ContainerIcon = getIcon(field.type);
+            return <ContainerIcon size={20} />;
+          })()}
           <span className='font-semibold text-xs'>
             {field.label ||
               (isRepeat

@@ -223,13 +223,34 @@ export default function Dashboard() {
                           {(() => {
                             const formType = form.metadata?.type || 'regular';
                             const typeConfig = {
-                              regular: { icon: FiFileText, label: __('Regular', 'subtleforms'), color: 'gray' },
-                              multistep: { icon: FiLayers, label: __('Multi-step', 'subtleforms'), color: 'purple' },
-                              sectioned: { icon: FiList, label: __('Sectioned', 'subtleforms'), color: 'indigo' },
-                              conversational: { icon: FiMessageCircle, label: __('Conversational', 'subtleforms'), color: 'blue' },
-                              payment: { icon: FiCreditCard, label: __('Payment', 'subtleforms'), color: 'green' },
+                              regular: {
+                                icon: FiFileText,
+                                label: __('Regular', 'subtleforms'),
+                                color: 'gray',
+                              },
+                              multistep: {
+                                icon: FiLayers,
+                                label: __('Multi-step', 'subtleforms'),
+                                color: 'purple',
+                              },
+                              sectioned: {
+                                icon: FiList,
+                                label: __('Sectioned', 'subtleforms'),
+                                color: 'indigo',
+                              },
+                              conversational: {
+                                icon: FiMessageCircle,
+                                label: __('Conversational', 'subtleforms'),
+                                color: 'blue',
+                              },
+                              payment: {
+                                icon: FiCreditCard,
+                                label: __('Payment', 'subtleforms'),
+                                color: 'green',
+                              },
                             };
-                            const config = typeConfig[formType] || typeConfig.regular;
+                            const config =
+                              typeConfig[formType] || typeConfig.regular;
                             const Icon = config.icon;
                             return (
                               <span

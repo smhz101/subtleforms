@@ -55,6 +55,14 @@ class AdminMenu
         add_filter('admin_title', [$this, 'filter_admin_title'], 1, 2);
         // Fix globals early before WordPress uses them
         add_action('admin_init', [$this, 'fix_admin_globals'], 1);
+
+        add_action('admin_menu', function () {
+            global $submenu;
+
+            if (isset($submenu['subtleforms'][0])) {
+                $submenu['subtleforms'][0][0] = __('Dashboard', 'subtleforms');
+            }
+        }, 100);
     }
 
     /**
@@ -74,14 +82,14 @@ class AdminMenu
         );
 
         // Dashboard submenu (rename the first item)
-        add_submenu_page(
-            'subtleforms',
-            __('Dashboard', 'subtleforms'),
-            __('Dashboard', 'subtleforms'),
-            $this->caps->manage_cap(),
-            'subtleforms',
-            [$this, 'render_dashboard']
-        );
+        // add_submenu_page(
+        //     'subtleforms',
+        //     __('Dashboard', 'subtleforms'),
+        //     __('Dashboard', 'subtleforms'),
+        //     $this->caps->manage_cap(),
+        //     'subtleforms',
+        //     [$this, 'render_dashboard']
+        // );
 
         // All Forms
         add_submenu_page(
