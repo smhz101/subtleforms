@@ -17,21 +17,10 @@ export default function FieldDock({ fieldGroups, onAddField }) {
   if (!fieldGroups || Object.keys(fieldGroups).length === 0) {
     return (
       <div
-        style={{
-          width: collapsed ? '48px' : '280px',
-          background: '#fafafa',
-          borderRight: '1px solid #ddd',
-          display: 'flex',
-          flexDirection: 'column',
-          transition: 'width 0.2s',
-        }}>
-        <div
-          style={{
-            padding: '12px 16px',
-            borderBottom: '1px solid #ddd',
-            background: '#fff',
-          }}>
-          <p style={{ margin: 0, color: '#8c8f94', fontSize: '13px' }}>
+        className='flex flex-col bg-gray-50 border-gray-300 border-r transition-all duration-200'
+        style={{ width: collapsed ? '48px' : '280px' }}>
+        <div className='bg-white px-4 py-3 border-gray-300 border-b'>
+          <p className='m-0 text-gray-500 text-xs'>
             {__('Loading fields...', 'subtleforms')}
           </p>
         </div>
@@ -41,46 +30,19 @@ export default function FieldDock({ fieldGroups, onAddField }) {
 
   return (
     <div
-      style={{
-        width: collapsed ? '48px' : '280px',
-        background: '#fafafa',
-        borderRight: '1px solid #ddd',
-        display: 'flex',
-        flexDirection: 'column',
-        transition: 'width 0.2s',
-        height: '100%',
-      }}>
+      className='flex flex-col bg-gray-50 border-gray-300 border-r h-full transition-all duration-200'
+      style={{ width: collapsed ? '48px' : '280px' }}>
       {/* Sticky Header */}
-      <div
-        style={{
-          flexShrink: 0,
-          background: '#fff',
-          padding: '12px 16px',
-          borderBottom: '1px solid #ddd',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}>
+      <div className='flex flex-shrink-0 justify-between items-center bg-white px-4 py-3 border-gray-300 border-b'>
         {!collapsed && (
-          <h3
-            style={{
-              margin: 0,
-              fontSize: '14px',
-              fontWeight: 600,
-              color: '#1e1e1e',
-              textTransform: 'uppercase',
-              letterSpacing: '0.5px',
-            }}>
+          <h3 className='m-0 font-semibold text-gray-900 text-sm uppercase tracking-wide'>
             {__('Fields', 'subtleforms')}
           </h3>
         )}
         <Button
           isSmall
           onClick={() => setCollapsed(!collapsed)}
-          style={{
-            minWidth: 0,
-            padding: '4px 8px',
-          }}
+          className='px-2 py-1 min-w-0'
           title={
             collapsed
               ? __('Expand', 'subtleforms')
@@ -92,50 +54,25 @@ export default function FieldDock({ fieldGroups, onAddField }) {
 
       {/* Scrollable Content */}
       {!collapsed && (
-        <div
-          style={{
-            flex: 1,
-            overflow: 'auto',
-            padding: '16px 12px',
-          }}>
+        <div className='flex-1 px-3 py-4 overflow-auto'>
           {Object.entries(fieldGroups).map(([category, categoryFields]) => {
             const isCollapsed = collapsedGroups[category];
             return (
-              <div key={category} style={{ marginBottom: '16px' }}>
+              <div key={category} className='mb-4'>
                 {/* Category Header */}
                 <button
                   type='button'
                   onClick={() => toggleGroup(category)}
-                  style={{
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    padding: '8px',
-                    background: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    outline: 'none',
-                    marginBottom: '8px',
-                  }}>
-                  <span
-                    style={{
-                      fontSize: '12px',
-                      fontWeight: 600,
-                      color: '#50575e',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px',
-                    }}>
+                  className='flex justify-between items-center bg-transparent mb-2 p-2 border-none outline-none w-full cursor-pointer'>
+                  <span className='font-semibold text-gray-600 text-xs uppercase tracking-wide'>
                     {category}
                   </span>
                   <span
+                    className='text-[10px] text-gray-500 transition-transform duration-200'
                     style={{
-                      fontSize: '10px',
-                      color: '#8c8f94',
                       transform: isCollapsed
                         ? 'rotate(-90deg)'
                         : 'rotate(0deg)',
-                      transition: 'transform 0.2s',
                     }}>
                     ▼
                   </span>
@@ -143,59 +80,20 @@ export default function FieldDock({ fieldGroups, onAddField }) {
 
                 {/* Field Cards */}
                 {!isCollapsed && (
-                  <div
-                    style={{
-                      display: 'grid',
-                      gridTemplateColumns: '1fr 1fr',
-                      gap: '8px',
-                    }}>
+                  <div className='gap-2 grid grid-cols-2'>
                     {categoryFields.map((f) => (
                       <button
                         key={f.type}
                         type='button'
                         onClick={() => onAddField(f.type)}
-                        style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '6px',
-                          padding: '12px 8px',
-                          background: '#fff',
-                          border: '1px solid #ddd',
-                          cursor: 'pointer',
-                          outline: 'none',
-                          transition: 'all 0.15s',
-                          minHeight: '70px',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.borderColor = '#2271b1';
-                          e.currentTarget.style.background = '#f6f7f7';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.borderColor = '#ddd';
-                          e.currentTarget.style.background = '#fff';
-                        }}>
-                        <span
-                          style={{
-                            display: 'flex',
-                            color: '#50575e',
-                            fontSize: '20px',
-                          }}>
+                        className='flex flex-col justify-center items-center gap-1.5 bg-white hover:bg-gray-50 px-2 py-3 border border-gray-300 hover:border-blue-600 outline-none min-h-[70px] transition-all duration-150 cursor-pointer'>
+                        <span className='flex text-gray-600 text-xl'>
                           {(() => {
                             const IconComponent = getIcon(f.type);
                             return <IconComponent />;
                           })()}
                         </span>
-                        <span
-                          style={{
-                            fontSize: '11px',
-                            fontWeight: 500,
-                            color: '#1e1e1e',
-                            textAlign: 'center',
-                            lineHeight: 1.3,
-                            wordBreak: 'break-word',
-                          }}>
+                        <span className='font-medium text-[11px] text-gray-900 text-center break-words leading-tight'>
                           {f.label}
                         </span>
                       </button>

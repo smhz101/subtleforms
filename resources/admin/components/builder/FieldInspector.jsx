@@ -16,47 +16,19 @@ export default function FieldInspector({
   if (!field) return null;
 
   return (
-    <div
-      style={{
-        width: '320px',
-        background: '#fff',
-        borderLeft: '1px solid #ddd',
-        overflow: 'auto',
-        height: '100%',
-      }}>
+    <div className='bg-white border-gray-300 border-l w-80 h-full overflow-auto'>
       {/* Header */}
-      <div
-        style={{
-          padding: '16px 20px',
-          borderBottom: '1px solid #ddd',
-          background: '#fff',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-        }}>
-        <strong
-          style={{
-            fontSize: '14px',
-            fontWeight: 600,
-            color: '#1e1e1e',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-          }}>
+      <div className='flex justify-between items-center bg-white px-5 py-4 border-gray-300 border-b'>
+        <strong className='font-semibold text-gray-900 text-sm uppercase tracking-wide'>
           {__('Settings', 'subtleforms')}
         </strong>
-        <Button
-          isSmall
-          onClick={onClose}
-          style={{
-            minWidth: 0,
-            padding: '4px 8px',
-          }}>
+        <Button isSmall onClick={onClose} className='px-2 py-1 min-w-0'>
           ×
         </Button>
       </div>
 
       {/* Content */}
-      <div style={{ padding: '20px' }}>
+      <div className='p-5'>
         <TabPanel
           tabs={[
             { name: 'general', title: __('General', 'subtleforms') },
@@ -67,7 +39,7 @@ export default function FieldInspector({
             { name: 'conditions', title: __('Conditions', 'subtleforms') },
           ]}>
           {(tab) => (
-            <div style={{ padding: '12px 0' }}>
+            <div className='py-3'>
               {tab.name === 'general' && (
                 <>
                   {field.type === 'step' ? (
@@ -170,24 +142,12 @@ export default function FieldInspector({
                   {(field.type === 'radio' ||
                     field.type === 'multiple_choice' ||
                     field.type === 'dropdown') && (
-                    <div style={{ marginTop: 16 }}>
-                      <label
-                        style={{
-                          display: 'block',
-                          marginBottom: 8,
-                          fontSize: '13px',
-                          fontWeight: 600,
-                        }}>
+                    <div className='mt-4'>
+                      <label className='block mb-2 font-semibold text-xs'>
                         {__('Options', 'subtleforms')}
                       </label>
                       {(field.options || []).map((opt, idx) => (
-                        <div
-                          key={idx}
-                          style={{
-                            display: 'flex',
-                            gap: 8,
-                            marginBottom: 8,
-                          }}>
+                        <div key={idx} className='flex gap-2 mb-2'>
                           <TextControl
                             value={opt.label}
                             onChange={(v) => {

@@ -20,16 +20,21 @@ export default function FormCanvas({
 }) {
   // Get canvas width from schema metadata
   const canvasWidth = schema?.metadata?.canvasWidth || 'standard';
-  
-  const canvasWidthClass = {
-    narrow: 'max-w-2xl',
-    standard: 'max-w-3xl',
-    wide: 'max-w-5xl',
-  }[canvasWidth] || 'max-w-3xl';
+
+  const canvasWidthClass =
+    {
+      narrow: 'max-w-2xl',
+      standard: 'max-w-3xl',
+      wide: 'max-w-5xl',
+    }[canvasWidth] || 'max-w-3xl';
 
   return (
     <div className='flex-1 bg-gray-100 p-8 overflow-auto'>
-      <div className={classNames('bg-white mx-auto p-12 min-h-[500px]', canvasWidthClass)}>
+      <div
+        className={classNames(
+          'bg-white mx-auto p-12 min-h-[500px]',
+          canvasWidthClass
+        )}>
         {/* Form Title */}
         <div className='mb-8'>
           <h3 className='m-0 mb-2 font-semibold text-gray-900 text-2xl'>
