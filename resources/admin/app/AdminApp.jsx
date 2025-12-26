@@ -16,8 +16,8 @@ import SubmissionsPage from '../pages/SubmissionsPage';
 import SubmissionDetailPage from '../pages/SubmissionDetailPage';
 import BuilderPage from '../pages/BuilderPage';
 
-// Modals (to be moved to modals/)
-import CreateFormModal from '../components/CreateFormModal';
+// Modals
+import { CreateFormModal } from '../modals';
 
 // Utils
 import { ROUTES, getRouteConfig } from './routes';

@@ -26,7 +26,7 @@ import AdminShell from '../components/AdminShell';
 import FormEditor from '../components/builder/FormEditor';
 import FormSettings from '../components/builder/FormSettings';
 import SubmissionsTable from '../components/SubmissionsTable';
-import ConfirmModal from '../components/ConfirmModal';
+import { ConfirmModal } from '../modals';
 import { apiGet, apiPost, apiPut } from '../utils/api';
 
 async function apiDelete(path) {

@@ -12,7 +12,7 @@ import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import classNames from 'classnames';
 import DataTable from './DataTable';
-import ConfirmModal from './ConfirmModal';
+import { ConfirmModal } from '../modals';
 
 const restBase =
   window.subtleformsAdmin && window.subtleformsAdmin.restUrl

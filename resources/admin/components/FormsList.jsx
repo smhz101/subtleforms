@@ -31,7 +31,7 @@ import {
 } from 'react-icons/fi';
 import classNames from 'classnames';
 import DataTable from './DataTable';
-import ConfirmModal from './ConfirmModal';
+import { ConfirmModal } from '../modals';
 
 const restBase =
   window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
