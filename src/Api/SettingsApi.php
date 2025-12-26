@@ -177,6 +177,16 @@ class SettingsApi
                 'type' => 'integer',
                 'minimum' => 1,
                 'maximum' => 60,
+                'validate_callback' => function($value, $request, $key) {
+                    if (!is_numeric($value)) {
+                        return new \WP_Error('rest_invalid_param', 'autosave_interval must be a number', ['status' => 400]);
+                    }
+                    $int_value = intval($value);
+                    if ($int_value < 1 || $int_value > 60) {
+                        return new \WP_Error('rest_invalid_param', 'autosave_interval must be between 1 and 60', ['status' => 400]);
+                    }
+                    return true;
+                },
             ],
             'delete_behavior' => [
                 'type' => 'string',
@@ -202,6 +212,16 @@ class SettingsApi
                 'type' => 'integer',
                 'minimum' => 1,
                 'maximum' => 100,
+                'validate_callback' => function($value, $request, $key) {
+                    if (!is_numeric($value)) {
+                        return new \WP_Error('rest_invalid_param', 'submission_limit must be a number', ['status' => 400]);
+                    }
+                    $int_value = intval($value);
+                    if ($int_value < 1 || $int_value > 100) {
+                        return new \WP_Error('rest_invalid_param', 'submission_limit must be between 1 and 100', ['status' => 400]);
+                    }
+                    return true;
+                },
             ],
             'admin_notification_enabled' => [
                 'type' => 'boolean',
@@ -230,6 +250,16 @@ class SettingsApi
                 'type' => 'integer',
                 'minimum' => 1,
                 'maximum' => 365,
+                'validate_callback' => function($value, $request, $key) {
+                    if (!is_numeric($value)) {
+                        return new \WP_Error('rest_invalid_param', 'log_retention_days must be a number', ['status' => 400]);
+                    }
+                    $int_value = intval($value);
+                    if ($int_value < 1 || $int_value > 365) {
+                        return new \WP_Error('rest_invalid_param', 'log_retention_days must be between 1 and 365', ['status' => 400]);
+                    }
+                    return true;
+                },
             ],
         ];
     }

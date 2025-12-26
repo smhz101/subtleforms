@@ -96,9 +96,9 @@ export default function Settings() {
       // Ensure all integer fields are properly formatted
       const settingsToSave = {
         ...settings,
-        autosave_interval: parseInt(settings.autosave_interval, 10),
-        submission_limit: parseInt(settings.submission_limit, 10),
-        log_retention_days: parseInt(settings.log_retention_days, 10),
+        autosave_interval: parseInt(settings.autosave_interval, 10) || 3,
+        submission_limit: parseInt(settings.submission_limit, 10) || 1,
+        log_retention_days: parseInt(settings.log_retention_days, 10) || 30,
       };
 
       const response = await apiFetch({
