@@ -10,6 +10,7 @@ import {
 import { __, sprintf } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
+import classNames from 'classnames';
 import DataTable from './DataTable';
 import ConfirmModal from './ConfirmModal';
 
@@ -383,11 +384,10 @@ export default function SubmissionsTable({
       width: '10%',
       render: (status) => (
         <span
-          className={`inline-flex items-center px-2.5 py-0.5 text-xs font-medium ${
-            status === 'unread'
-              ? 'bg-blue-100 text-blue-800'
-              : 'bg-gray-100 text-gray-800'
-          }`}>
+          className={classNames('inline-flex items-center px-2.5 py-0.5 text-xs font-medium', {
+            'bg-blue-100 text-blue-800': status === 'unread',
+            'bg-gray-100 text-gray-800': status !== 'unread',
+          })}>
           {status === 'unread'
             ? __('Unread', 'subtleforms')
             : __('Read', 'subtleforms')}

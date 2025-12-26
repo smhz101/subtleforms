@@ -260,11 +260,13 @@ export default function FormsList({
         return (
           <a
             href={`admin.php?page=subtleforms-submissions&form_id=${form.id}`}
-            className={`inline-flex items-center gap-1.5 px-2.5 py-1 font-medium text-sm transition-colors ${
-              hasUnread
-                ? 'text-blue-600 bg-blue-50 hover:bg-blue-100'
-                : 'text-gray-600 hover:text-gray-900'
-            }`}
+            className={classNames(
+              'inline-flex items-center gap-1.5 px-2.5 py-1 font-medium text-sm transition-colors',
+              {
+                'text-blue-600 bg-blue-50 hover:bg-blue-100': hasUnread,
+                'text-gray-600 hover:text-gray-900': !hasUnread,
+              }
+            )}
             onClick={(e) => e.stopPropagation()}
             title={sprintf(
               __('%d unread, %d total entries', 'subtleforms'),

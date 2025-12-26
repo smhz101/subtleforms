@@ -1,5 +1,6 @@
 import FieldRenderer from './FieldRenderer';
 import FieldToolbar from './FieldToolbar';
+import classNames from 'classnames';
 
 export default function FieldWrapper({
   field,
@@ -18,13 +19,14 @@ export default function FieldWrapper({
 }) {
   return (
     <div
-      className={`p-5 cursor-pointer transition-all relative ${
-        isSelected
-          ? 'bg-blue-50 border-2 border-blue-600'
-          : isHovered
-          ? 'bg-gray-50 border border-gray-300'
-          : 'bg-white border border-gray-300'
-      }`}
+      className={classNames(
+        'p-5 cursor-pointer transition-all relative',
+        {
+          'bg-blue-50 border-2 border-blue-600': isSelected,
+          'bg-gray-50 border border-gray-300': isHovered && !isSelected,
+          'bg-white border border-gray-300': !isSelected && !isHovered,
+        }
+      )}
       onClick={onSelect}
       onMouseEnter={onHover}
       onMouseLeave={onLeave}>

@@ -1,4 +1,5 @@
 import { __ } from '@wordpress/i18n';
+import classNames from 'classnames';
 import { getIcon } from './utils/iconMap';
 
 export default function InlineAddButton({
@@ -12,9 +13,10 @@ export default function InlineAddButton({
 }) {
   return (
     <div
-      className={`text-center py-3 mb-4 transition-opacity ${
-        isHovered || showFieldPicker ? 'opacity-100' : 'opacity-30'
-      }`}
+      className={classNames('text-center py-3 mb-4 transition-opacity', {
+        'opacity-100': isHovered || showFieldPicker,
+        'opacity-30': !isHovered && !showFieldPicker,
+      })}
       onMouseEnter={onHover}
       onMouseLeave={onLeave}>
       <button

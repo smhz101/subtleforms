@@ -1,4 +1,5 @@
 import { __ } from '@wordpress/i18n';
+import classNames from 'classnames';
 import { getIcon } from './utils/iconMap';
 
 export default function FieldToolbar({
@@ -51,16 +52,15 @@ export default function FieldToolbar({
         onClick={createHandler(handler)}
         onMouseDown={(event) => event.stopPropagation()}
         onPointerDown={(event) => event.stopPropagation()}
-        className={`
-          w-7 h-7 flex items-center justify-center
-          border border-transparent bg-transparent
-          transition-colors duration-150
-          ${
-            disabled
-              ? 'text-text-tertiary cursor-default'
-              : 'text-text-primary cursor-pointer hover:bg-surface-alt hover:text-primary'
+        className={classNames(
+          'w-7 h-7 flex items-center justify-center',
+          'border border-transparent bg-transparent',
+          'transition-colors duration-150',
+          {
+            'text-text-tertiary cursor-default': disabled,
+            'text-text-primary cursor-pointer hover:bg-surface-alt hover:text-primary': !disabled,
           }
-        `}
+        )}
         aria-label={label}
         disabled={disabled}>
         <IconComponent size={16} />
@@ -70,18 +70,16 @@ export default function FieldToolbar({
 
   return (
     <div
-      className={`
-        absolute top-0 right-0 -mt-3 mr-2
-        flex gap-1 p-1
-        bg-white border border-border
-        transition-opacity duration-150
-        z-20
-        ${
-          visible
-            ? 'opacity-100 pointer-events-auto'
-            : 'opacity-0 pointer-events-none'
+      className={classNames(
+        'absolute top-0 right-0 -mt-3 mr-2',
+        'flex gap-1 p-1',
+        'bg-white border border-border',
+        'transition-opacity duration-150 z-20',
+        {
+          'opacity-100 pointer-events-auto': visible,
+          'opacity-0 pointer-events-none': !visible,
         }
-      `}
+      )}
       aria-hidden={!visible}>
       <button
         type='button'

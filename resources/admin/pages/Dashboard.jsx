@@ -9,6 +9,7 @@ import {
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import classNames from 'classnames';
 import {
   FiFileText,
   FiLayers,
@@ -254,17 +255,16 @@ export default function Dashboard() {
                             const Icon = config.icon;
                             return (
                               <span
-                                className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium border ${
-                                  config.color === 'gray'
-                                    ? 'bg-gray-50 text-gray-600 border-gray-200'
-                                    : config.color === 'purple'
-                                    ? 'bg-purple-50 text-purple-600 border-purple-200'
-                                    : config.color === 'indigo'
-                                    ? 'bg-indigo-50 text-indigo-600 border-indigo-200'
-                                    : config.color === 'blue'
-                                    ? 'bg-blue-50 text-blue-600 border-blue-200'
-                                    : 'bg-green-50 text-green-600 border-green-200'
-                                }`}
+                                className={classNames(
+                                  'inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium border',
+                                  {
+                                    'bg-gray-50 text-gray-600 border-gray-200': config.color === 'gray',
+                                    'bg-purple-50 text-purple-600 border-purple-200': config.color === 'purple',
+                                    'bg-indigo-50 text-indigo-600 border-indigo-200': config.color === 'indigo',
+                                    'bg-blue-50 text-blue-600 border-blue-200': config.color === 'blue',
+                                    'bg-green-50 text-green-600 border-green-200': config.color === 'green',
+                                  }
+                                )}
                                 style={{ borderRadius: '3px' }}>
                                 <Icon className='w-3 h-3' />
                                 {config.label}
