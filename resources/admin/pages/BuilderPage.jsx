@@ -27,6 +27,7 @@ import FormEditor from '../components/builder/FormEditor';
 import FormSettings from '../components/builder/FormSettings';
 import SubmissionsTable from '../components/SubmissionsTable';
 import BuilderTour from '../components/BuilderTour';
+import FormPreviewModal from '../components/FormPreviewModal';
 import { ConfirmModal } from '../modals';
 import { apiGet, apiPost, apiPut } from '../utils/api';
 
@@ -70,6 +71,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
   const [showTour, setShowTour] = useState(false);
   const [tourCompleted, setTourCompleted] = useState(true);
+  const [showPreview, setShowPreview] = useState(false);
   const titleInputRef = useRef(null);
   const copyTimeoutRef = useRef(null);
   const autoSaveTimeoutRef = useRef(null);
@@ -929,6 +931,15 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
 
       {/* Primary Actions Group */}
       <div className='flex items-center gap-2'>
+        {/* Preview Button */}
+        <Button
+          variant='secondary'
+          onClick={() => setShowPreview(true)}
+          disabled={!draftSchema || draftSchema.fields?.length === 0}
+          className='px-4 h-9 font-medium text-sm'>
+          {__('Preview', 'subtleforms')}
+        </Button>
+
         {/* Save Draft Button - Always visible for new forms or when dirty */}
         {(isDirty || isEphemeral) && (
           <Button
@@ -1098,6 +1109,14 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
       {/* Builder Tour */}
       {showTour && (
         <BuilderTour onComplete={handleTourComplete} onSkip={handleTourSkip} />
+      )}
+
+      {/* Form Preview Modal */}
+      {showPreview && (
+        <FormPreviewModal
+          schema={draftSchema}
+          onClose={() => setShowPreview(false)}
+        />
       )}
     </>
   );
