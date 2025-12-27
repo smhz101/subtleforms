@@ -11,7 +11,11 @@
     "build:frontend": "wp-scripts build ./resources/frontend/index.jsx --output-path=./build/frontend --output-filename=frontend.js",
     "build:all": "npm run build && npm run build:tailwind && npm run build:frontend",
     "test": "wp-scripts test-unit-js",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "dist": "gulp dist",
+    "dist:build": "gulp build",
+    "dist:zip": "gulp zip",
+    "dist:clean": "gulp clean"
   },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
@@ -19,6 +23,8 @@
     "@wordpress/e2e-test-utils-playwright": "^1.37.0",
     "@wordpress/scripts": "^31.1.0",
     "autoprefixer": "^10.4.23",
+    "gulp-zip": "^5.1.0",
+    "rimraf": "^6.1.2",
     "tailwindcss": "^4.1.18"
   },
   "dependencies": {
