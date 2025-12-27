@@ -2,7 +2,7 @@ import Joi from 'joi';
 import { __ } from '@wordpress/i18n';
 
 /**
- * Settings validation schema with detailed error messages
+ * Settings validation schema using Joi
  */
 export const settingsSchema = Joi.object({
   // General Settings
@@ -10,7 +10,7 @@ export const settingsSchema = Joi.object({
     .valid('draft', 'published')
     .required()
     .messages({
-      'any.only': __('Default form status must be either "draft" or "published"', 'subtleforms'),
+      'any.only': __('Form status must be either draft or published', 'subtleforms'),
       'any.required': __('Default form status is required', 'subtleforms'),
     }),
 
@@ -30,7 +30,7 @@ export const settingsSchema = Joi.object({
       'number.base': __('Autosave interval must be a number', 'subtleforms'),
       'number.integer': __('Autosave interval must be a whole number', 'subtleforms'),
       'number.min': __('Autosave interval must be at least 1 second', 'subtleforms'),
-      'number.max': __('Autosave interval cannot exceed 60 seconds (1 minute)', 'subtleforms'),
+      'number.max': __('Autosave interval cannot exceed 60 seconds', 'subtleforms'),
       'any.required': __('Autosave interval is required', 'subtleforms'),
     }),
 
@@ -38,7 +38,7 @@ export const settingsSchema = Joi.object({
     .valid('soft', 'hard')
     .required()
     .messages({
-      'any.only': __('Delete behavior must be either "soft" or "hard"', 'subtleforms'),
+      'any.only': __('Delete behavior must be either soft or hard', 'subtleforms'),
       'any.required': __('Delete behavior is required', 'subtleforms'),
     }),
 
@@ -88,7 +88,7 @@ export const settingsSchema = Joi.object({
       'number.base': __('Submission limit must be a number', 'subtleforms'),
       'number.integer': __('Submission limit must be a whole number', 'subtleforms'),
       'number.min': __('Submission limit must be at least 1', 'subtleforms'),
-      'number.max': __('Submission limit cannot exceed 100', 'subtleforms'),
+      'number.max': __('Submission limit cannot exceed 100 submissions', 'subtleforms'),
       'any.required': __('Submission limit is required', 'subtleforms'),
     }),
 
@@ -96,8 +96,8 @@ export const settingsSchema = Joi.object({
   admin_notification_enabled: Joi.boolean()
     .required()
     .messages({
-      'boolean.base': __('Admin notification setting must be true or false', 'subtleforms'),
-      'any.required': __('Admin notification setting is required', 'subtleforms'),
+      'boolean.base': __('Admin notifications setting must be true or false', 'subtleforms'),
+      'any.required': __('Admin notifications setting is required', 'subtleforms'),
     }),
 
   user_confirmation_enabled: Joi.boolean()
@@ -143,71 +143,60 @@ export const settingsSchema = Joi.object({
     .max(365)
     .required()
     .messages({
-      'number.base': __('Log retention must be a number', 'subtleforms'),
-      'number.integer': __('Log retention must be a whole number', 'subtleforms'),
+      'number.base': __('Log retention days must be a number', 'subtleforms'),
+      'number.integer': __('Log retention days must be a whole number', 'subtleforms'),
       'number.min': __('Log retention must be at least 1 day', 'subtleforms'),
-      'number.max': __('Log retention cannot exceed 365 days (1 year)', 'subtleforms'),
-      'any.required': __('Log retention setting is required', 'subtleforms'),
+      'number.max': __('Log retention cannot exceed 365 days', 'subtleforms'),
+      'any.required': __('Log retention days is required', 'subtleforms'),
     }),
 });
 
 /**
- * Validate settings and return user-friendly errors
+ * Validate settings and return formatted error messages
  *
- * @param {Object} settings - Settings object to validate
- * @returns {Object} - { valid: boolean, errors: Object, value: Object }
+ * @param {Object} settings Settings object to validate
+ * @returns {Object} { isValid: boolean, errors: Object }
  */
 export function validateSettings(settings) {
-  const { error, value } = settingsSchema.validate(settings, {
+  const { error } = settingsSchema.validate(settings, {
     abortEarly: false,
-    stripUnknown: true,
+    allowUnknown: true,
   });
 
-  if (error) {
-    const errors = {};
-    error.details.forEach((detail) => {
-      errors[detail.path[0]] = detail.message;
-    });
-
-    return {
-      valid: false,
-      errors,
-      value: null,
-    };
+  if (!error) {
+    return { isValid: true, errors: {} };
   }
 
-  return {
-    valid: true,
-    errors: {},
-    value,
-  };
+  // Format errors by field
+  const errors = {};
+  error.details.forEach((detail) => {
+    const field = detail.path[0];
+    if (!errors[field]) {
+      errors[field] = [];
+    }
+    errors[field].push(detail.message);
+  });
+
+  return { isValid: false, errors };
 }
 
 /**
  * Validate a single field
  *
- * @param {string} fieldName - Field name
- * @param {*} value - Field value
- * @returns {Object} - { valid: boolean, error: string|null }
+ * @param {string} field Field name
+ * @param {any} value Field value
+ * @returns {Object} { isValid: boolean, error: string|null }
  */
-export function validateField(fieldName, value) {
-  const fieldSchema = settingsSchema.extract(fieldName);
-
+export function validateField(field, value) {
+  const fieldSchema = settingsSchema.extract(field);
   if (!fieldSchema) {
-    return { valid: true, error: null };
+    return { isValid: true, error: null };
   }
 
   const { error } = fieldSchema.validate(value);
 
-  if (error) {
-    return {
-      valid: false,
-      error: error.message,
-    };
-  }
-
   return {
-    valid: true,
-    error: null,
+    isValid: !error,
+    error: error ? error.message : null,
   };
 }
