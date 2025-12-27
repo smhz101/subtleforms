@@ -203,6 +203,19 @@ final class RestController
             $this->settings
         );
         $dashboardApi->registerRoutes();
+
+        // Onboarding endpoints
+        register_rest_route(self::NAMESPACE, '/onboarding/dismiss', [
+            'methods' => 'POST',
+            'callback' => [$this, 'dismiss_onboarding'],
+            'permission_callback' => [$this, 'check_write_permission'],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/onboarding/status', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_onboarding_status'],
+            'permission_callback' => [$this, 'check_read_permission'],
+        ]);
     }
 
     /**
@@ -843,5 +856,47 @@ final class RestController
         }
 
         return new WP_REST_Response($fields, 200);
+    }
+
+    /**
+     * Dismiss onboarding wizard.
+     */
+    public function dismiss_onboarding(WP_REST_Request $request): WP_REST_Response
+    {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            return new WP_REST_Response([
+                'success' => false,
+                'message' => 'User not authenticated',
+            ], 401);
+        }
+
+        update_user_meta($user_id, 'subtleforms_onboarding_dismissed', true);
+
+        return new WP_REST_Response([
+            'success' => true,
+            'message' => 'Onboarding dismissed',
+        ], 200);
+    }
+
+    /**
+     * Get onboarding status.
+     */
+    public function get_onboarding_status(WP_REST_Request $request): WP_REST_Response
+    {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            return new WP_REST_Response([
+                'success' => false,
+                'dismissed' => false,
+            ], 200);
+        }
+
+        $dismissed = (bool) get_user_meta($user_id, 'subtleforms_onboarding_dismissed', true);
+
+        return new WP_REST_Response([
+            'success' => true,
+            'dismissed' => $dismissed,
+        ], 200);
     }
 }
