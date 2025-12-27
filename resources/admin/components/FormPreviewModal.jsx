@@ -27,9 +27,9 @@ export default function FormPreviewModal({ schema, onClose }) {
       case 'url':
         return (
           <div key={field.key || index} className='mb-4'>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>
+            <label className='block mb-1 font-medium text-gray-700 text-sm'>
               {label}
-              {required && <span className='text-red-500 ml-1'>*</span>}
+              {required && <span className='ml-1 text-red-500'>*</span>}
             </label>
             <input
               type={field.type}
@@ -37,16 +37,18 @@ export default function FormPreviewModal({ schema, onClose }) {
               className={baseClasses}
               disabled
             />
-            {helpText && <p className='text-xs text-gray-500 mt-1'>{helpText}</p>}
+            {helpText && (
+              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+            )}
           </div>
         );
 
       case 'number':
         return (
           <div key={field.key || index} className='mb-4'>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>
+            <label className='block mb-1 font-medium text-gray-700 text-sm'>
               {label}
-              {required && <span className='text-red-500 ml-1'>*</span>}
+              {required && <span className='ml-1 text-red-500'>*</span>}
             </label>
             <input
               type='number'
@@ -57,16 +59,18 @@ export default function FormPreviewModal({ schema, onClose }) {
               className={baseClasses}
               disabled
             />
-            {helpText && <p className='text-xs text-gray-500 mt-1'>{helpText}</p>}
+            {helpText && (
+              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+            )}
           </div>
         );
 
       case 'textarea':
         return (
           <div key={field.key || index} className='mb-4'>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>
+            <label className='block mb-1 font-medium text-gray-700 text-sm'>
               {label}
-              {required && <span className='text-red-500 ml-1'>*</span>}
+              {required && <span className='ml-1 text-red-500'>*</span>}
             </label>
             <textarea
               placeholder={placeholder}
@@ -74,7 +78,9 @@ export default function FormPreviewModal({ schema, onClose }) {
               className={baseClasses}
               disabled
             />
-            {helpText && <p className='text-xs text-gray-500 mt-1'>{helpText}</p>}
+            {helpText && (
+              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+            )}
           </div>
         );
 
@@ -82,28 +88,32 @@ export default function FormPreviewModal({ schema, onClose }) {
       case 'dropdown':
         return (
           <div key={field.key || index} className='mb-4'>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>
+            <label className='block mb-1 font-medium text-gray-700 text-sm'>
               {label}
-              {required && <span className='text-red-500 ml-1'>*</span>}
+              {required && <span className='ml-1 text-red-500'>*</span>}
             </label>
             <select className={baseClasses} disabled>
-              <option value=''>{placeholder || __('Select...', 'subtleforms')}</option>
+              <option value=''>
+                {placeholder || __('Select...', 'subtleforms')}
+              </option>
               {field.options?.map((opt, i) => (
                 <option key={i} value={opt.value}>
                   {opt.label}
                 </option>
               ))}
             </select>
-            {helpText && <p className='text-xs text-gray-500 mt-1'>{helpText}</p>}
+            {helpText && (
+              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+            )}
           </div>
         );
 
       case 'radio':
         return (
           <div key={field.key || index} className='mb-4'>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block mb-2 font-medium text-gray-700 text-sm'>
               {label}
-              {required && <span className='text-red-500 ml-1'>*</span>}
+              {required && <span className='ml-1 text-red-500'>*</span>}
             </label>
             <div className='space-y-2'>
               {field.options?.map((opt, i) => (
@@ -115,11 +125,13 @@ export default function FormPreviewModal({ schema, onClose }) {
                     className='mr-2'
                     disabled
                   />
-                  <span className='text-sm text-gray-700'>{opt.label}</span>
+                  <span className='text-gray-700 text-sm'>{opt.label}</span>
                 </label>
               ))}
             </div>
-            {helpText && <p className='text-xs text-gray-500 mt-1'>{helpText}</p>}
+            {helpText && (
+              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+            )}
           </div>
         );
 
@@ -130,21 +142,23 @@ export default function FormPreviewModal({ schema, onClose }) {
             <div key={field.key || index} className='mb-4'>
               <label className='flex items-center'>
                 <input type='checkbox' className='mr-2' disabled />
-                <span className='text-sm font-medium text-gray-700'>
+                <span className='font-medium text-gray-700 text-sm'>
                   {label}
-                  {required && <span className='text-red-500 ml-1'>*</span>}
+                  {required && <span className='ml-1 text-red-500'>*</span>}
                 </span>
               </label>
-              {helpText && <p className='text-xs text-gray-500 mt-1'>{helpText}</p>}
+              {helpText && (
+                <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+              )}
             </div>
           );
         }
         // Multiple checkboxes
         return (
           <div key={field.key || index} className='mb-4'>
-            <label className='block text-sm font-medium text-gray-700 mb-2'>
+            <label className='block mb-2 font-medium text-gray-700 text-sm'>
               {label}
-              {required && <span className='text-red-500 ml-1'>*</span>}
+              {required && <span className='ml-1 text-red-500'>*</span>}
             </label>
             <div className='space-y-2'>
               {field.options?.map((opt, i) => (
@@ -155,35 +169,41 @@ export default function FormPreviewModal({ schema, onClose }) {
                     className='mr-2'
                     disabled
                   />
-                  <span className='text-sm text-gray-700'>{opt.label}</span>
+                  <span className='text-gray-700 text-sm'>{opt.label}</span>
                 </label>
               ))}
             </div>
-            {helpText && <p className='text-xs text-gray-500 mt-1'>{helpText}</p>}
+            {helpText && (
+              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+            )}
           </div>
         );
 
       case 'date':
         return (
           <div key={field.key || index} className='mb-4'>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>
+            <label className='block mb-1 font-medium text-gray-700 text-sm'>
               {label}
-              {required && <span className='text-red-500 ml-1'>*</span>}
+              {required && <span className='ml-1 text-red-500'>*</span>}
             </label>
             <input type='date' className={baseClasses} disabled />
-            {helpText && <p className='text-xs text-gray-500 mt-1'>{helpText}</p>}
+            {helpText && (
+              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+            )}
           </div>
         );
 
       case 'time':
         return (
           <div key={field.key || index} className='mb-4'>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>
+            <label className='block mb-1 font-medium text-gray-700 text-sm'>
               {label}
-              {required && <span className='text-red-500 ml-1'>*</span>}
+              {required && <span className='ml-1 text-red-500'>*</span>}
             </label>
             <input type='time' className={baseClasses} disabled />
-            {helpText && <p className='text-xs text-gray-500 mt-1'>{helpText}</p>}
+            {helpText && (
+              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+            )}
           </div>
         );
 
@@ -191,16 +211,18 @@ export default function FormPreviewModal({ schema, onClose }) {
       case 'upload':
         return (
           <div key={field.key || index} className='mb-4'>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>
+            <label className='block mb-1 font-medium text-gray-700 text-sm'>
               {label}
-              {required && <span className='text-red-500 ml-1'>*</span>}
+              {required && <span className='ml-1 text-red-500'>*</span>}
             </label>
-            <div className='border-2 border-dashed border-gray-300 rounded-md p-6 text-center'>
-              <p className='text-sm text-gray-500'>
+            <div className='p-6 border-2 border-gray-300 border-dashed rounded-md text-center'>
+              <p className='text-gray-500 text-sm'>
                 {__('Click to upload or drag and drop', 'subtleforms')}
               </p>
             </div>
-            {helpText && <p className='text-xs text-gray-500 mt-1'>{helpText}</p>}
+            {helpText && (
+              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+            )}
           </div>
         );
 
@@ -210,9 +232,9 @@ export default function FormPreviewModal({ schema, onClose }) {
       default:
         return (
           <div key={field.key || index} className='mb-4'>
-            <label className='block text-sm font-medium text-gray-700 mb-1'>
+            <label className='block mb-1 font-medium text-gray-700 text-sm'>
               {label}
-              {required && <span className='text-red-500 ml-1'>*</span>}
+              {required && <span className='ml-1 text-red-500'>*</span>}
             </label>
             <input
               type='text'
@@ -220,7 +242,9 @@ export default function FormPreviewModal({ schema, onClose }) {
               className={baseClasses}
               disabled
             />
-            {helpText && <p className='text-xs text-gray-500 mt-1'>{helpText}</p>}
+            {helpText && (
+              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+            )}
           </div>
         );
     }
@@ -229,11 +253,11 @@ export default function FormPreviewModal({ schema, onClose }) {
   return (
     <Modal
       title={
-        <div className='flex items-center justify-between'>
+        <div className='flex justify-between items-center'>
           <span>{__('Form Preview', 'subtleforms')}</span>
           <button
             onClick={onClose}
-            className='text-gray-400 hover:text-gray-600 p-2'>
+            className='p-2 text-gray-400 hover:text-gray-600'>
             <FiX className='w-5 h-5' />
           </button>
         </div>
@@ -243,8 +267,8 @@ export default function FormPreviewModal({ schema, onClose }) {
       style={{ maxWidth: '700px', width: '100%' }}>
       <div className='bg-gray-50 -mx-6 -mt-4 -mb-6 p-6'>
         {/* Form Header */}
-        <div className='bg-white rounded-lg shadow-sm p-6 mb-4'>
-          <h2 className='text-2xl font-bold text-gray-900 mb-2'>
+        <div className='bg-white shadow-sm mb-4 p-6 rounded-lg'>
+          <h2 className='mb-2 font-bold text-gray-900 text-2xl'>
             {schema.metadata?.title || __('Untitled Form', 'subtleforms')}
           </h2>
           {schema.metadata?.description && (
@@ -253,11 +277,11 @@ export default function FormPreviewModal({ schema, onClose }) {
         </div>
 
         {/* Form Fields */}
-        <div className='bg-white rounded-lg shadow-sm p-6 max-h-[60vh] overflow-y-auto'>
+        <div className='bg-white shadow-sm p-6 rounded-lg max-h-[60vh] overflow-y-auto'>
           {isConversational ? (
             <div className='space-y-6'>
-              <div className='bg-blue-50 border-l-4 border-blue-500 p-4 rounded'>
-                <p className='text-sm text-blue-800'>
+              <div className='bg-blue-50 p-4 border-blue-500 border-l-4 rounded'>
+                <p className='text-blue-800 text-sm'>
                   {__(
                     'Conversational forms display one question at a time. This preview shows all fields together.',
                     'subtleforms'
@@ -267,25 +291,33 @@ export default function FormPreviewModal({ schema, onClose }) {
               {schema.fields.map((field, index) => renderField(field, index))}
             </div>
           ) : (
-            <div>{schema.fields.map((field, index) => renderField(field, index))}</div>
+            <div>
+              {schema.fields.map((field, index) => renderField(field, index))}
+            </div>
           )}
 
           {schema.fields.length === 0 && (
-            <div className='text-center py-12'>
+            <div className='py-12 text-center'>
               <p className='text-gray-500'>
-                {__('No fields added yet. Add fields to see the preview.', 'subtleforms')}
+                {__(
+                  'No fields added yet. Add fields to see the preview.',
+                  'subtleforms'
+                )}
               </p>
             </div>
           )}
         </div>
 
         {/* Submit Button */}
-        <div className='bg-white rounded-lg shadow-sm p-6 mt-4'>
-          <Button isPrimary disabled className='w-full justify-center'>
+        <div className='bg-white shadow-sm mt-4 p-6 rounded-lg'>
+          <Button isPrimary disabled className='justify-center w-full'>
             {__('Submit', 'subtleforms')}
           </Button>
-          <p className='text-xs text-gray-500 text-center mt-2'>
-            {__('This is a preview. The form is not functional.', 'subtleforms')}
+          <p className='mt-2 text-gray-500 text-xs text-center'>
+            {__(
+              'This is a preview. The form is not functional.',
+              'subtleforms'
+            )}
           </p>
         </div>
       </div>

@@ -6,6 +6,7 @@ import AdminShell from '../components/AdminShell';
 import TabBar from '../components/TabBar';
 import FormsList from '../components/FormsList';
 import OnboardingWizard from '../components/OnboardingWizard';
+import HelpMenu from '../components/HelpMenu';
 
 export default function FormsPage() {
   const [search, setSearch] = useState('');
@@ -134,14 +135,20 @@ export default function FormsPage() {
         title={__('All Forms', 'subtleforms')}
         noScroll={true}
         actions={
-          <Button
-            isPrimary
-            onClick={() => {
-              window.location.href = 'admin.php?page=subtleforms-new-form';
-            }}>
-            <FiPlus className='inline mr-2 w-4 h-4' />
-            {__('New Form', 'subtleforms')}
-          </Button>
+          <div className='flex items-center gap-2'>
+            <HelpMenu
+              onOpenWizard={() => setShowWizard(true)}
+              showWizard={true}
+            />
+            <Button
+              isPrimary
+              onClick={() => {
+                window.location.href = 'admin.php?page=subtleforms-new-form';
+              }}>
+              <FiPlus className='inline mr-2 w-4 h-4' />
+              {__('New Form', 'subtleforms')}
+            </Button>
+          </div>
         }
         actionBarLeft={
           <TabBar

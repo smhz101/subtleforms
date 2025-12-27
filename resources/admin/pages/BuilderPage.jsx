@@ -28,6 +28,7 @@ import FormSettings from '../components/builder/FormSettings';
 import SubmissionsTable from '../components/SubmissionsTable';
 import BuilderTour from '../components/BuilderTour';
 import FormPreviewModal from '../components/FormPreviewModal';
+import HelpMenu from '../components/HelpMenu';
 import { ConfirmModal } from '../modals';
 import { apiGet, apiPost, apiPut } from '../utils/api';
 
@@ -931,6 +932,9 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
 
       {/* Primary Actions Group */}
       <div className='flex items-center gap-2'>
+        {/* Help Menu */}
+        <HelpMenu onStartTour={() => setShowTour(true)} />
+
         {/* Preview Button */}
         <Button
           variant='secondary'
