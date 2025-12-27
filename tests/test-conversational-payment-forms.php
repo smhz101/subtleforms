@@ -230,7 +230,7 @@ class Conversational_Payment_Forms_Test extends WP_UnitTestCase {
 
 		// Update to conversational
 		$schema['metadata']['type'] = 'conversational';
-		$this->repository->updateSchema( $form_id, $schema );
+		$this->repository->saveSchemaVersion( $form_id, $schema, true );
 
 		$form = $this->repository->find( $form_id );
 		$saved_schema = json_decode( $form['schema'], true );
