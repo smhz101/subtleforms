@@ -26,6 +26,7 @@ import AdminShell from '../components/AdminShell';
 import FormEditor from '../components/builder/FormEditor';
 import FormSettings from '../components/builder/FormSettings';
 import SubmissionsTable from '../components/SubmissionsTable';
+import BuilderTour from '../components/BuilderTour';
 import { ConfirmModal } from '../modals';
 import { apiGet, apiPost, apiPut } from '../utils/api';
 
@@ -67,6 +68,8 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
+  const [showTour, setShowTour] = useState(false);
+  const [tourCompleted, setTourCompleted] = useState(true);
   const titleInputRef = useRef(null);
   const copyTimeoutRef = useRef(null);
   const autoSaveTimeoutRef = useRef(null);
@@ -138,6 +141,35 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
       setLoadingFields(false);
     });
   }, []);
+
+  // Check if tour should be shown
+  useEffect(() => {
+    const checkTourStatus = async () => {
+      try {
+        const response = await fetch(
+          (window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
+            '/wp-json/subtleforms/v1') + '/tour/status',
+          {
+            credentials: 'same-origin',
+            headers: {
+              'X-WP-Nonce': window.subtleformsAdmin?.restNonce || '',
+            },
+          }
+        );
+        const data = await response.json();
+        setTourCompleted(data.completed);
+        // Auto-show tour for first-time users
+        if (!data.completed && !formId) {
+          // Only show for new forms to avoid interrupting existing workflows
+          setTimeout(() => setShowTour(true), 1000);
+        }
+      } catch (error) {
+        console.error('Failed to check tour status:', error);
+      }
+    };
+
+    checkTourStatus();
+  }, [formId]);
 
   useEffect(() => {
     if (!formId) {
@@ -684,6 +716,15 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
     isHydrating,
   ]);
 
+  const handleTourComplete = useCallback(() => {
+    setShowTour(false);
+    setTourCompleted(true);
+  }, []);
+
+  const handleTourSkip = useCallback(() => {
+    setShowTour(false);
+  }, []);
+
   const shortcode = currentFormId ? `[subtleforms id="${currentFormId}"]` : '';
   const statusLabel = useMemo(() => {
     if (autoSaving) return __('Saving...', 'subtleforms');
@@ -736,7 +777,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
 
   // Construct title with editable inline input
   const titleElement = (
-    <div className='flex items-center gap-3'>
+    <div className='flex items-center gap-3' data-tour='header'>
       <span
         className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium border ${
           formTypeBadge.color === 'gray'
@@ -963,6 +1004,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
             {
               name: 'entries',
               title: __('Entries', 'subtleforms'),
+              className: 'data-tour-submissions-tab',
             },
           ]}>
           {(tab) => (
@@ -1052,6 +1094,11 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
         secondaryText={__('Discard Changes', 'subtleforms')}
         cancelText={__('Cancel', 'subtleforms')}
       />
+
+      {/* Builder Tour */}
+      {showTour && (
+        <BuilderTour onComplete={handleTourComplete} onSkip={handleTourSkip} />
+      )}
     </>
   );
 }

@@ -216,6 +216,19 @@ final class RestController
             'callback' => [$this, 'get_onboarding_status'],
             'permission_callback' => [$this, 'check_read_permission'],
         ]);
+
+        // Builder tour endpoints
+        register_rest_route(self::NAMESPACE, '/tour/complete', [
+            'methods' => 'POST',
+            'callback' => [$this, 'complete_tour'],
+            'permission_callback' => [$this, 'check_write_permission'],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/tour/status', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_tour_status'],
+            'permission_callback' => [$this, 'check_read_permission'],
+        ]);
     }
 
     /**
@@ -897,6 +910,48 @@ final class RestController
         return new WP_REST_Response([
             'success' => true,
             'dismissed' => $dismissed,
+        ], 200);
+    }
+
+    /**
+     * Complete builder tour.
+     */
+    public function complete_tour(WP_REST_Request $request): WP_REST_Response
+    {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            return new WP_REST_Response([
+                'success' => false,
+                'message' => 'User not authenticated',
+            ], 401);
+        }
+
+        update_user_meta($user_id, 'subtleforms_tour_completed', true);
+
+        return new WP_REST_Response([
+            'success' => true,
+            'message' => 'Tour completed',
+        ], 200);
+    }
+
+    /**
+     * Get builder tour status.
+     */
+    public function get_tour_status(WP_REST_Request $request): WP_REST_Response
+    {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            return new WP_REST_Response([
+                'success' => false,
+                'completed' => false,
+            ], 200);
+        }
+
+        $completed = (bool) get_user_meta($user_id, 'subtleforms_tour_completed', true);
+
+        return new WP_REST_Response([
+            'success' => true,
+            'completed' => $completed,
         ], 200);
     }
 }

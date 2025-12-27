@@ -342,12 +342,16 @@ export default function FormEditor({
         gridTemplateColumns: selectedField ? '280px 1fr 320px' : '280px 1fr',
       }}>
       {/* Field Library (Left Sidebar) */}
-      <div className='bg-gray-50 border-gray-300 border-r max-h-full overflow-y-auto'>
+      <div
+        className='bg-gray-50 border-gray-300 border-r max-h-full overflow-y-auto'
+        data-tour='fields-panel'>
         <FieldDock fieldGroups={fieldGroups} onAddField={handleDockAdd} />
       </div>
 
       {/* Canvas Area (Center) */}
-      <div className='flex flex-col bg-gray-100 overflow-hidden'>
+      <div
+        className='flex flex-col bg-gray-100 overflow-hidden'
+        data-tour='canvas'>
         {steps.length > 0 && !isConversational && (
           <div className='flex-shrink-0 bg-white border-gray-300 border-b'>
             <StepNavigator
@@ -391,7 +395,9 @@ export default function FormEditor({
 
       {/* Field Inspector (Right Sidebar) */}
       {selectedField && (
-        <div className='bg-white border-gray-300 border-l max-h-full overflow-y-auto'>
+        <div
+          className='bg-white border-gray-300 border-l max-h-full overflow-y-auto'
+          data-tour='field-inspector'>
           <FieldInspector
             field={selectedField}
             allFields={allFields}

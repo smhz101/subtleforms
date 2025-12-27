@@ -86,8 +86,8 @@ export default function FormsPage() {
           body: JSON.stringify({
             title:
               __('My ', 'subtleforms') +
-              (formData.goal?.charAt(0).toUpperCase() + formData.goal?.slice(1) ||
-                __('Form', 'subtleforms')),
+              (formData.goal?.charAt(0).toUpperCase() +
+                formData.goal?.slice(1) || __('Form', 'subtleforms')),
             status: 'draft',
           }),
         }
@@ -98,8 +98,7 @@ export default function FormsPage() {
         // Save schema
         await fetch(
           (window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
-            '/wp-json/subtleforms/v1') +
-            `/forms/${createData.id}/schema`,
+            '/wp-json/subtleforms/v1') + `/forms/${createData.id}/schema`,
           {
             method: 'POST',
             credentials: 'same-origin',

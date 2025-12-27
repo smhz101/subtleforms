@@ -90,7 +90,8 @@ export default function FieldToolbar({
           'opacity-0 pointer-events-none': !visible,
         }
       )}
-      aria-hidden={!visible}>
+      aria-hidden={!visible}
+      data-tour='field-toolbar'>
       {/* Drag Handle */}
       <button
         type='button'

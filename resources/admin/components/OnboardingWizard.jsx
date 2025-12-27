@@ -249,13 +249,13 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
         return (
           <div className='space-y-6'>
             <div className='text-center'>
-              <div className='inline-flex items-center justify-center w-16 h-16 mb-4 bg-blue-100 rounded-full'>
+              <div className='inline-flex justify-center items-center bg-blue-100 mb-4 rounded-full w-16 h-16'>
                 <FiCheckCircle className='w-8 h-8 text-blue-600' />
               </div>
-              <h2 className='text-2xl font-bold text-gray-900 mb-2'>
+              <h2 className='mb-2 font-bold text-gray-900 text-2xl'>
                 {__('Welcome to SubtleForms', 'subtleforms')}
               </h2>
-              <p className='text-gray-600 max-w-md mx-auto'>
+              <p className='mx-auto max-w-md text-gray-600'>
                 {__(
                   'Create beautiful, powerful forms in minutes. This wizard will help you build your first form quickly.',
                   'subtleforms'
@@ -263,19 +263,19 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
               </p>
             </div>
 
-            <div className='bg-gray-50 rounded-lg p-6 space-y-4'>
+            <div className='space-y-4 bg-gray-50 p-6 rounded-lg'>
               <h3 className='font-semibold text-gray-900'>
                 {__('What can you do with SubtleForms?', 'subtleforms')}
               </h3>
               <ul className='space-y-2'>
                 <li className='flex items-start'>
-                  <FiCheckCircle className='w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0' />
+                  <FiCheckCircle className='flex-shrink-0 mt-0.5 mr-2 w-5 h-5 text-green-500' />
                   <span className='text-gray-700'>
                     {__('Build forms with drag & drop', 'subtleforms')}
                   </span>
                 </li>
                 <li className='flex items-start'>
-                  <FiCheckCircle className='w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0' />
+                  <FiCheckCircle className='flex-shrink-0 mt-0.5 mr-2 w-5 h-5 text-green-500' />
                   <span className='text-gray-700'>
                     {__(
                       'Add conditional logic and multi-step flows',
@@ -284,7 +284,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                   </span>
                 </li>
                 <li className='flex items-start'>
-                  <FiCheckCircle className='w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0' />
+                  <FiCheckCircle className='flex-shrink-0 mt-0.5 mr-2 w-5 h-5 text-green-500' />
                   <span className='text-gray-700'>
                     {__(
                       'Manage submissions and integrate with services',
@@ -293,7 +293,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                   </span>
                 </li>
                 <li className='flex items-start'>
-                  <FiCheckCircle className='w-5 h-5 text-green-500 mr-2 mt-0.5 flex-shrink-0' />
+                  <FiCheckCircle className='flex-shrink-0 mt-0.5 mr-2 w-5 h-5 text-green-500' />
                   <span className='text-gray-700'>
                     {__(
                       'Accept payments and create conversational forms',
@@ -309,9 +309,9 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
       case 1:
         return (
           <div className='space-y-6'>
-            <div className='text-center mb-6'>
-              <h2 className='text-2xl font-bold text-gray-900 mb-2'>
-                {__('What\'s your form goal?', 'subtleforms')}
+            <div className='mb-6 text-center'>
+              <h2 className='mb-2 font-bold text-gray-900 text-2xl'>
+                {__("What's your form goal?", 'subtleforms')}
               </h2>
               <p className='text-gray-600'>
                 {__(
@@ -321,7 +321,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
               </p>
             </div>
 
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+            <div className='gap-4 grid grid-cols-1 sm:grid-cols-2'>
               {FORM_GOALS.map((goal) => {
                 const Icon = goal.icon;
                 const isSelected = selectedGoal === goal.id;
@@ -346,7 +346,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                         )}>
                         <Icon className='w-5 h-5' />
                       </div>
-                      <div className='ml-4 flex-1'>
+                      <div className='flex-1 ml-4'>
                         <h3
                           className={classNames(
                             'font-semibold mb-1',
@@ -354,7 +354,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                           )}>
                           {goal.label}
                         </h3>
-                        <p className='text-sm text-gray-600'>
+                        <p className='text-gray-600 text-sm'>
                           {goal.description}
                         </p>
                       </div>
@@ -369,8 +369,8 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
       case 2:
         return (
           <div className='space-y-6'>
-            <div className='text-center mb-6'>
-              <h2 className='text-2xl font-bold text-gray-900 mb-2'>
+            <div className='mb-6 text-center'>
+              <h2 className='mb-2 font-bold text-gray-900 text-2xl'>
                 {__('Choose your form type', 'subtleforms')}
               </h2>
               <p className='text-gray-600'>
@@ -381,7 +381,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
               </p>
             </div>
 
-            <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
+            <div className='gap-4 grid grid-cols-1 sm:grid-cols-2'>
               {FORM_TYPES.map((type) => {
                 const Icon = type.icon;
                 const isSelected = selectedType === type.id;
@@ -406,7 +406,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                         )}>
                         <Icon className='w-5 h-5' />
                       </div>
-                      <div className='ml-4 flex-1'>
+                      <div className='flex-1 ml-4'>
                         <h3
                           className={classNames(
                             'font-semibold mb-1',
@@ -414,7 +414,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                           )}>
                           {type.label}
                         </h3>
-                        <p className='text-sm text-gray-600'>
+                        <p className='text-gray-600 text-sm'>
                           {type.description}
                         </p>
                       </div>
@@ -431,31 +431,31 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
         const type = FORM_TYPES.find((t) => t.id === selectedType);
         return (
           <div className='space-y-6'>
-            <div className='text-center mb-6'>
-              <h2 className='text-2xl font-bold text-gray-900 mb-2'>
+            <div className='mb-6 text-center'>
+              <h2 className='mb-2 font-bold text-gray-900 text-2xl'>
                 {__('Field suggestions', 'subtleforms')}
               </h2>
               <p className='text-gray-600'>
                 {__(
-                  'Based on your selections, we\'ve pre-selected these fields. You can customize them in the builder.',
+                  "Based on your selections, we've pre-selected these fields. You can customize them in the builder.",
                   'subtleforms'
                 )}
               </p>
             </div>
 
-            <div className='bg-white rounded-lg border border-gray-200 p-6'>
+            <div className='bg-white p-6 border border-gray-200 rounded-lg'>
               <div className='space-y-4'>
-                <div className='flex items-center justify-between pb-4 border-b border-gray-200'>
+                <div className='flex justify-between items-center pb-4 border-gray-200 border-b'>
                   <div>
                     <div className='font-semibold text-gray-900'>
                       {goal?.label || __('Your Form', 'subtleforms')}
                     </div>
-                    <div className='text-sm text-gray-600'>
+                    <div className='text-gray-600 text-sm'>
                       {type?.label || __('Regular', 'subtleforms')}{' '}
                       {__('form', 'subtleforms')}
                     </div>
                   </div>
-                  <div className='text-sm text-gray-500'>
+                  <div className='text-gray-500 text-sm'>
                     {goal?.fields?.length || 0} {__('fields', 'subtleforms')}
                   </div>
                 </div>
@@ -467,13 +467,13 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                     return (
                       <div
                         key={fieldKey}
-                        className='flex items-center p-3 bg-gray-50 rounded-lg'>
-                        <FiCheckCircle className='w-5 h-5 text-green-500 mr-3 flex-shrink-0' />
+                        className='flex items-center bg-gray-50 p-3 rounded-lg'>
+                        <FiCheckCircle className='flex-shrink-0 mr-3 w-5 h-5 text-green-500' />
                         <div className='flex-1'>
                           <div className='font-medium text-gray-900'>
                             {field.config.label}
                           </div>
-                          <div className='text-sm text-gray-500'>
+                          <div className='text-gray-500 text-sm'>
                             {field.type}
                             {field.config.required &&
                               ` • ${__('Required', 'subtleforms')}`}
@@ -492,13 +492,13 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
         return (
           <div className='space-y-6'>
             <div className='text-center'>
-              <div className='inline-flex items-center justify-center w-16 h-16 mb-4 bg-green-100 rounded-full'>
+              <div className='inline-flex justify-center items-center bg-green-100 mb-4 rounded-full w-16 h-16'>
                 <FiCheckCircle className='w-8 h-8 text-green-600' />
               </div>
-              <h2 className='text-2xl font-bold text-gray-900 mb-2'>
-                {__('You\'re all set!', 'subtleforms')}
+              <h2 className='mb-2 font-bold text-gray-900 text-2xl'>
+                {__("You're all set!", 'subtleforms')}
               </h2>
-              <p className='text-gray-600 max-w-md mx-auto'>
+              <p className='mx-auto max-w-md text-gray-600'>
                 {__(
                   'Your form will be created with the selected fields. You can customize everything in the form builder.',
                   'subtleforms'
@@ -506,8 +506,8 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
               </p>
             </div>
 
-            <div className='bg-blue-50 rounded-lg p-6 border border-blue-200'>
-              <h3 className='font-semibold text-blue-900 mb-3'>
+            <div className='bg-blue-50 p-6 border border-blue-200 rounded-lg'>
+              <h3 className='mb-3 font-semibold text-blue-900'>
                 {__('Next steps:', 'subtleforms')}
               </h3>
               <ul className='space-y-2'>
@@ -564,7 +564,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
         {/* Progress Indicator */}
         {step > 0 && (
           <div className='mb-8'>
-            <div className='flex items-center justify-between text-sm text-gray-600 mb-2'>
+            <div className='flex justify-between items-center mb-2 text-gray-600 text-sm'>
               <span>
                 {__('Step', 'subtleforms')} {step} {__('of', 'subtleforms')}{' '}
                 {totalSteps}
@@ -574,9 +574,9 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                 {__('complete', 'subtleforms')}
               </span>
             </div>
-            <div className='h-2 bg-gray-200 rounded-full overflow-hidden'>
+            <div className='bg-gray-200 rounded-full h-2 overflow-hidden'>
               <div
-                className='h-full bg-blue-600 transition-all duration-300'
+                className='bg-blue-600 h-full transition-all duration-300'
                 style={{ width: `${(step / totalSteps) * 100}%` }}
               />
             </div>
@@ -587,8 +587,8 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
         <div className='min-h-[400px]'>{renderStepContent()}</div>
 
         {/* Actions */}
-        <div className='mt-8 pt-6 border-t border-gray-200'>
-          <div className='flex items-center justify-between'>
+        <div className='mt-8 pt-6 border-gray-200 border-t'>
+          <div className='flex justify-between items-center'>
             <div>
               {step === 0 && (
                 <CheckboxControl
