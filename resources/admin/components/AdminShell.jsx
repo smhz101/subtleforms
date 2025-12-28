@@ -2,6 +2,7 @@ import { __ } from '@wordpress/i18n';
 import AdminHeader from './AdminHeader';
 import ActionBar from './ActionBar';
 import Notices from './Notices';
+import './AdminShell.scss';
 
 /**
  * Canonical Admin Shell Layout
@@ -42,30 +43,7 @@ export default function AdminShell({
 
   return (
     <div className='subtleforms-admin'>
-      {/* Remove default WordPress page wrapper styling */}
-      <style>{`
-        .subtleforms-admin-page .wrap {
-          margin: 0 !important;
-          padding: 0 !important;
-        }
-        .subtleforms-admin-page #wpbody-content {
-          padding-bottom: 0 !important;
-        }
-        .subtleforms-admin-page #wpcontent {
-          padding: 0 !important;
-        }
-        /* Handle Admin Bar Height */
-        :root {
-          --wp-admin--admin-bar--height: 32px;
-        }
-        @media (max-width: 782px) {
-          :root {
-            --wp-admin--admin-bar--height: 46px;
-          }
-        }
-      `}</style>
-
-      <div className='flex flex-col bg-white h-[calc(100vh-var(--wp-admin--admin-bar--height,32px))]'>
+      <div className='flex flex-col bg-white h-[calc(100vh-var(--wp-admin--admin-bar--height,32px))] testig'>
         {/* TOP BAR - Sticky Header Component */}
         <AdminHeader title={title} actions={actions} />
 
@@ -75,7 +53,7 @@ export default function AdminShell({
             className='flex-shrink-0'
             style={{
               position: 'sticky',
-              top: `${WP_ADMIN_BAR_HEIGHT + TOP_BAR_HEIGHT}px`,
+              top: `${WP_ADMIN_BAR_HEIGHT}px`,
               zIndex: 99,
             }}>
             <ActionBar left={actionBarLeft} right={actionBarRight} />

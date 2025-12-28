@@ -27,7 +27,7 @@ const AdminHeader = memo(function AdminHeader({ title, actions }) {
       style={{
         height: `${HEADER_HEIGHT}px`,
         position: 'sticky',
-        top: `${WP_ADMIN_BAR_HEIGHT}px`,
+        // top: `${WP_ADMIN_BAR_HEIGHT}px`,
         zIndex: 100,
       }}>
       {/* Left Side: Logo + Title */}

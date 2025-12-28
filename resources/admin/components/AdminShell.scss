@@ -1,0 +1,37 @@
+/**
+ * AdminShell Component Styles
+ *
+ * This file contains the styling for the canonical admin shell layout
+ * that overrides default WordPress admin wrapper styling.
+ */
+
+// Remove default WordPress page wrapper styling
+.subtleforms-admin-page {
+	.wrap {
+		margin: 0 !important;
+		padding: 0 !important;
+	}
+
+	#wpbody-content {
+		padding-bottom: 0 !important;
+	}
+
+	#wpcontent {
+		padding: 0 !important;
+	}
+}
+
+#subtleforms-admin-app div > div > div.components-panel__body.is-opened {
+	padding: 0 !important;
+}
+
+// Handle Admin Bar Height
+:root {
+	--wp-admin--admin-bar--height: 32px;
+}
+
+@media (max-width: 782px) {
+	:root {
+		--wp-admin--admin-bar--height: 46px;
+	}
+}
