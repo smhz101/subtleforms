@@ -177,7 +177,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
     <AdminShell
       title={sprintf(__('Submission #%d', 'subtleforms'), submission.id)}
       actions={actions}>
-      <div className='space-y-8 subtleforms-admin'>
+      <div className='space-y-8'>
         <div className='subtleforms-card'>
           <div className='subtleforms-card-header'>
             <div className='flex justify-between items-center'>

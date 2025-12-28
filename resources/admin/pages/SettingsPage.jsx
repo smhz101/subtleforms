@@ -299,7 +299,8 @@ export default function Settings() {
   ];
 
   return (
-    <div className='subtleforms-settings'>
+    <div className='subtleforms-admin'>
+      <div className='subtleforms-settings'>
       {/* Header with Save/Discard buttons */}
       <div className='subtleforms-settings-header'>
         <h1 className='wp-heading-inline'>{__('Settings', 'subtleforms')}</h1>
@@ -375,6 +376,7 @@ export default function Settings() {
           </div>
         )}
       </TabPanel>
+    </div>
     </div>
   );
 }
