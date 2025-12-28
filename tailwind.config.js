@@ -1,6 +1,7 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: ['./resources/admin/**/*.{js,jsx,ts,tsx}'],
+  prefix: 'sf-', // Prefix all Tailwind utilities for WordPress safety
   corePlugins: {
     preflight: false, // Disable CSS reset to avoid conflicts with WordPress
   },
