@@ -90,7 +90,7 @@ export default function Dashboard() {
     <AdminShell
       title={__('Dashboard', 'subtleforms')}
       actions={
-        <div className='flex gap-2'>
+        <div className='sf-flex sf-gap-2'>
           <Button variant='secondary' href='admin.php?page=subtleforms-forms'>
             {__('All Forms', 'subtleforms')}
           </Button>
@@ -106,14 +106,14 @@ export default function Dashboard() {
           </Button>
         </div>
       }>
-      <div className='p-6'>
+      <div className='sf-p-6'>
         {/* Stats Overview */}
-        <div className='gap-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 mb-6'>
+        <div className='sf-gap-4 sf-grid sf-grid-cols-1 md:grid-cols-2 lg:grid-cols-4 sf-mb-6'>
           <StatCard
             title={__('Total Forms', 'subtleforms')}
             value={stats.total_forms}
             subtitle={`${stats.published_forms} published, ${stats.draft_forms} draft`}
-            icon={<FiFileText className='w-6 h-6 text-blue-600' />}
+            icon={<FiFileText className='sf-w-6 sf-h-6 sf-text-blue-600' />}
             link='admin.php?page=subtleforms-forms'
           />
           <StatCard
@@ -124,24 +124,24 @@ export default function Dashboard() {
                 ? `${stats.avg_submissions_per_form} avg per form`
                 : __('No published forms', 'subtleforms')
             }
-            icon={<FiDatabase className='w-6 h-6 text-green-600' />}
+            icon={<FiDatabase className='sf-w-6 sf-h-6 sf-text-green-600' />}
             link='admin.php?page=subtleforms-submissions'
           />
           <StatCard
             title={__('Submissions Today', 'subtleforms')}
             value={stats.submissions_today}
             subtitle={__('Last 24 hours', 'subtleforms')}
-            icon={<FiCalendar className='w-6 h-6 text-purple-600' />}
+            icon={<FiCalendar className='sf-w-6 sf-h-6 sf-text-purple-600' />}
           />
           <StatCard
             title={__('Submissions This Week', 'subtleforms')}
             value={stats.submissions_this_week}
             subtitle={__('Last 7 days', 'subtleforms')}
-            icon={<FiTrendingUp className='w-6 h-6 text-orange-600' />}
+            icon={<FiTrendingUp className='sf-w-6 sf-h-6 sf-text-orange-600' />}
           />
         </div>
 
-        <div className='gap-6 grid grid-cols-1 lg:grid-cols-2 mb-6'>
+        <div className='sf-gap-6 sf-grid sf-grid-cols-1 lg:grid-cols-2 sf-mb-6'>
           {/* Recent Submissions */}
           <div>
             <Card>
@@ -277,7 +277,7 @@ export default function Dashboard() {
                                     }
                                   )}
                                   style={{ borderRadius: '3px' }}>
-                                  <Icon className='w-3 h-3' />
+                                  <Icon className='sf-w-3 sf-h-3' />
                                   {config.label}
                                 </span>
                               );
@@ -336,7 +336,7 @@ export default function Dashboard() {
         <div>
           <Card>
             <CardHeader>
-              <div className='flex justify-between items-center'>
+              <div className='sf-flex sf-justify-between sf-items-center'>
                 <h2>{__('System Health', 'subtleforms')}</h2>
                 <span
                   className={classNames(
@@ -350,12 +350,12 @@ export default function Dashboard() {
                   )}>
                   {system_health.status === 'healthy' ? (
                     <>
-                      <FiCheckCircle className='w-3.5 h-3.5' />{' '}
+                      <FiCheckCircle className='sf-w-3.5 sf-h-3.5' />{' '}
                       {__('Healthy', 'subtleforms')}
                     </>
                   ) : (
                     <>
-                      <FiAlertCircle className='w-3.5 h-3.5' />{' '}
+                      <FiAlertCircle className='sf-w-3.5 sf-h-3.5' />{' '}
                       {__('Warning', 'subtleforms')}
                     </>
                   )}
@@ -363,70 +363,70 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardBody>
-              <div className='gap-4 grid grid-cols-2 md:grid-cols-4'>
-                <div className='flex flex-col'>
-                  <span className='mb-1 text-gray-500 text-xs'>
+              <div className='sf-gap-4 sf-grid sf-grid-cols-2 md:grid-cols-4'>
+                <div className='sf-flex sf-flex-col'>
+                  <span className='sf-mb-1 sf-text-gray-500 sf-text-xs'>
                     {__('Plugin Version', 'subtleforms')}
                   </span>
-                  <span className='font-medium text-gray-900 text-sm'>
+                  <span className='sf-font-medium sf-text-gray-900 sf-text-sm'>
                     {system_health.plugin_version}
                   </span>
                 </div>
-                <div className='flex flex-col'>
-                  <span className='mb-1 text-gray-500 text-xs'>
+                <div className='sf-flex sf-flex-col'>
+                  <span className='sf-mb-1 sf-text-gray-500 sf-text-xs'>
                     {__('WordPress', 'subtleforms')}
                   </span>
-                  <span className='font-medium text-gray-900 text-sm'>
+                  <span className='sf-font-medium sf-text-gray-900 sf-text-sm'>
                     {system_health.wordpress_version}
                   </span>
                 </div>
-                <div className='flex flex-col'>
-                  <span className='mb-1 text-gray-500 text-xs'>
+                <div className='sf-flex sf-flex-col'>
+                  <span className='sf-mb-1 sf-text-gray-500 sf-text-xs'>
                     {__('PHP Version', 'subtleforms')}
                   </span>
-                  <span className='font-medium text-gray-900 text-sm'>
+                  <span className='sf-font-medium sf-text-gray-900 sf-text-sm'>
                     {system_health.php_version}
                   </span>
                 </div>
-                <div className='flex flex-col'>
-                  <span className='mb-1 text-gray-500 text-xs'>
+                <div className='sf-flex sf-flex-col'>
+                  <span className='sf-mb-1 sf-text-gray-500 sf-text-xs'>
                     {__('Database', 'subtleforms')}
                   </span>
-                  <span className='font-medium text-gray-900 text-sm'>
+                  <span className='sf-font-medium sf-text-gray-900 sf-text-sm'>
                     {system_health.database_version}
                   </span>
                 </div>
-                <div className='flex flex-col'>
-                  <span className='mb-1 text-gray-500 text-xs'>
+                <div className='sf-flex sf-flex-col'>
+                  <span className='sf-mb-1 sf-text-gray-500 sf-text-xs'>
                     {__('Memory Limit', 'subtleforms')}
                   </span>
-                  <span className='font-medium text-gray-900 text-sm'>
+                  <span className='sf-font-medium sf-text-gray-900 sf-text-sm'>
                     {system_health.memory_limit}
                   </span>
                 </div>
-                <div className='flex flex-col'>
-                  <span className='mb-1 text-gray-500 text-xs'>
+                <div className='sf-flex sf-flex-col'>
+                  <span className='sf-mb-1 sf-text-gray-500 sf-text-xs'>
                     {__('Max Upload', 'subtleforms')}
                   </span>
-                  <span className='font-medium text-gray-900 text-sm'>
+                  <span className='sf-font-medium sf-text-gray-900 sf-text-sm'>
                     {system_health.max_upload_size}
                   </span>
                 </div>
-                <div className='flex flex-col'>
-                  <span className='mb-1 text-gray-500 text-xs'>
+                <div className='sf-flex sf-flex-col'>
+                  <span className='sf-mb-1 sf-text-gray-500 sf-text-xs'>
                     {__('Debug Mode', 'subtleforms')}
                   </span>
-                  <span className='font-medium text-gray-900 text-sm'>
+                  <span className='sf-font-medium sf-text-gray-900 sf-text-sm'>
                     {system_health.debug_mode
                       ? __('Enabled', 'subtleforms')
                       : __('Disabled', 'subtleforms')}
                   </span>
                 </div>
-                <div className='flex flex-col'>
-                  <span className='mb-1 text-gray-500 text-xs'>
+                <div className='sf-flex sf-flex-col'>
+                  <span className='sf-mb-1 sf-text-gray-500 sf-text-xs'>
                     {__('Autosave', 'subtleforms')}
                   </span>
-                  <span className='font-medium text-gray-900 text-sm'>
+                  <span className='sf-font-medium sf-text-gray-900 sf-text-sm'>
                     {system_health.autosave_enabled
                       ? __('Enabled', 'subtleforms')
                       : __('Disabled', 'subtleforms')}

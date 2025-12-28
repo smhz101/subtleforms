@@ -16,19 +16,19 @@ export default function FieldInspector({
   if (!field) return null;
 
   return (
-    <div className='bg-white border-gray-300 border-l w-80 h-full overflow-auto'>
+    <div className='sf-bg-white sf-border-gray-300 sf-border-l sf-w-80 sf-h-full sf-overflow-auto'>
       {/* Header */}
-      <div className='flex justify-between items-center bg-white px-5 py-4 border-gray-300 border-b'>
-        <strong className='font-semibold text-gray-900 text-sm uppercase tracking-wide'>
+      <div className='sf-flex sf-justify-between sf-items-center sf-bg-white sf-px-5 sf-py-4 sf-border-gray-300 sf-border-b'>
+        <strong className='sf-font-semibold sf-text-gray-900 sf-text-sm uppercase sf-tracking-wide'>
           {__('Settings', 'subtleforms')}
         </strong>
-        <Button isSmall onClick={onClose} className='px-2 py-1 min-w-0'>
+        <Button isSmall onClick={onClose} className='sf-px-2 sf-py-1 sf-min-w-0'>
           ×
         </Button>
       </div>
 
       {/* Content */}
-      <div className='p-5'>
+      <div className='sf-p-5'>
         <TabPanel
           tabs={[
             { name: 'general', title: __('General', 'subtleforms') },
@@ -39,7 +39,7 @@ export default function FieldInspector({
             { name: 'conditions', title: __('Conditions', 'subtleforms') },
           ]}>
           {(tab) => (
-            <div className='py-3'>
+            <div className='sf-py-3'>
               {tab.name === 'general' && (
                 <>
                   {field.type === 'step' ? (
@@ -142,12 +142,12 @@ export default function FieldInspector({
                   {(field.type === 'radio' ||
                     field.type === 'multiple_choice' ||
                     field.type === 'dropdown') && (
-                    <div className='mt-4'>
-                      <label className='block mb-2 font-semibold text-xs'>
+                    <div className='sf-mt-4'>
+                      <label className='sf-block sf-mb-2 sf-font-semibold sf-text-xs'>
                         {__('Options', 'subtleforms')}
                       </label>
                       {(field.options || []).map((opt, idx) => (
-                        <div key={idx} className='flex gap-2 mb-2'>
+                        <div key={idx} className='sf-flex sf-gap-2 sf-mb-2'>
                           <TextControl
                             value={opt.label}
                             onChange={(v) => {

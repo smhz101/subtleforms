@@ -14,7 +14,7 @@ export default function FieldRenderer({ field }) {
       {/* Label */}
       <label className={labelClass}>
         {label || field.name}
-        {required && <span className='ml-1 text-danger'>*</span>}
+        {required && <span className='sf-ml-1 sf-text-danger'>*</span>}
       </label>
 
       {/* Render appropriate input based on type */}
@@ -49,39 +49,39 @@ export default function FieldRenderer({ field }) {
       )}
 
       {type === 'checkbox' && (
-        <div className='flex items-center gap-2'>
+        <div className='sf-flex sf-items-center sf-gap-2'>
           <input
             type='checkbox'
-            className='border-border rounded-none focus:ring-0 w-4 h-4 text-primary pointer-events-none'
+            className='sf-border-border rounded-none focus:ring-0 sf-w-4 sf-h-4 sf-text-primary sf-pointer-events-none'
           />
-          <span className='text-text-primary text-sm'>{label}</span>
+          <span className='sf-text-text-primary sf-text-sm'>{label}</span>
         </div>
       )}
 
       {type === 'radio' && options && (
-        <div className='flex flex-col gap-2'>
+        <div className='sf-flex sf-flex-col sf-gap-2'>
           {options.map((opt, idx) => (
-            <div key={idx} className='flex items-center gap-2'>
+            <div key={idx} className='sf-flex sf-items-center sf-gap-2'>
               <input
                 type='radio'
                 name={field.key}
-                className='border-border rounded-full focus:ring-0 w-4 h-4 text-primary pointer-events-none'
+                className='sf-border-border rounded-full focus:ring-0 sf-w-4 sf-h-4 sf-text-primary sf-pointer-events-none'
               />
-              <span className='text-text-primary text-sm'>{opt.label}</span>
+              <span className='sf-text-text-primary sf-text-sm'>{opt.label}</span>
             </div>
           ))}
         </div>
       )}
 
       {type === 'multiple_choice' && options && (
-        <div className='flex flex-col gap-2'>
+        <div className='sf-flex sf-flex-col sf-gap-2'>
           {options.map((opt, idx) => (
-            <div key={idx} className='flex items-center gap-2'>
+            <div key={idx} className='sf-flex sf-items-center sf-gap-2'>
               <input
                 type='checkbox'
-                className='border-border rounded-none focus:ring-0 w-4 h-4 text-primary pointer-events-none'
+                className='sf-border-border rounded-none focus:ring-0 sf-w-4 sf-h-4 sf-text-primary sf-pointer-events-none'
               />
-              <span className='text-text-primary text-sm'>{opt.label}</span>
+              <span className='sf-text-text-primary sf-text-sm'>{opt.label}</span>
             </div>
           ))}
         </div>
@@ -124,30 +124,30 @@ export default function FieldRenderer({ field }) {
       )}
 
       {type === 'hidden' && (
-        <div className='bg-secondary p-3 border border-text-tertiary border-dashed rounded-none text-text-secondary text-xs italic'>
+        <div className='sf-bg-secondary sf-p-3 sf-border sf-border-text-tertiary sf-border-dashed rounded-none sf-text-text-secondary sf-text-xs italic'>
           {__('Hidden field (not visible to users)', 'subtleforms')}
         </div>
       )}
 
       {type === 'html' && (
-        <div className='bg-yellow-50 p-3 border border-yellow-200 rounded-none text-yellow-800 text-xs'>
+        <div className='sf-bg-yellow-50 sf-p-3 sf-border sf-border-yellow-200 rounded-none sf-text-yellow-800 sf-text-xs'>
           📝 {__('HTML Content Block', 'subtleforms')}
         </div>
       )}
 
       {type === 'image_upload' && (
-        <div className='bg-surface-alt p-10 border-2 border-border border-dashed rounded-none text-center'>
-          <div className='mb-2 text-4xl'>🖼️</div>
-          <div className='text-text-secondary text-xs'>
+        <div className='sf-bg-surface-alt sf-p-10 sf-border-2 sf-border-border sf-border-dashed rounded-none sf-text-center'>
+          <div className='sf-mb-2 sf-text-4xl'>🖼️</div>
+          <div className='sf-text-text-secondary sf-text-xs'>
             {__('Click to upload or drag image here', 'subtleforms')}
           </div>
         </div>
       )}
 
       {type === 'file_upload' && (
-        <div className='bg-surface-alt p-10 border-2 border-border border-dashed rounded-none text-center'>
-          <div className='mb-2 text-4xl'>📎</div>
-          <div className='text-text-secondary text-xs'>
+        <div className='sf-bg-surface-alt sf-p-10 sf-border-2 sf-border-border sf-border-dashed rounded-none sf-text-center'>
+          <div className='sf-mb-2 sf-text-4xl'>📎</div>
+          <div className='sf-text-text-secondary sf-text-xs'>
             {__('Click to upload or drag file here', 'subtleforms')}
           </div>
         </div>
@@ -155,12 +155,12 @@ export default function FieldRenderer({ field }) {
 
       {/* Composite field: Address */}
       {type === 'address' && subFields && (
-        <div className='bg-surface-alt p-4 border border-border rounded-none'>
+        <div className='sf-bg-surface-alt sf-p-4 sf-border sf-border-border rounded-none'>
           {subFields.map((sub, idx) => (
             <div key={idx} className={idx < subFields.length - 1 ? 'mb-3' : ''}>
-              <label className='block mb-1 font-medium text-text-primary text-sm'>
+              <label className='sf-block sf-mb-1 sf-font-medium sf-text-text-primary sf-text-sm'>
                 {sub.label}
-                {sub.required && <span className='ml-1 text-danger'>*</span>}
+                {sub.required && <span className='sf-ml-1 sf-text-danger'>*</span>}
               </label>
               <input type='text' className={inputClass} readOnly />
             </div>
@@ -170,9 +170,9 @@ export default function FieldRenderer({ field }) {
 
       {/* Payment fields */}
       {type === 'payment_amount' && (
-        <div className='flex items-center gap-2'>
+        <div className='sf-flex sf-items-center sf-gap-2'>
           {field.currency && (
-            <span className='font-medium text-text-primary'>
+            <span className='sf-font-medium sf-text-text-primary'>
               {field.currency === 'USD'
                 ? '$'
                 : field.currency === 'EUR'
@@ -192,16 +192,16 @@ export default function FieldRenderer({ field }) {
       )}
 
       {type === 'payment_summary' && (
-        <div className='bg-surface-alt p-4 border border-border rounded-none'>
-          <div className='flex justify-between mb-2 text-text-primary text-sm'>
+        <div className='sf-bg-surface-alt sf-p-4 sf-border sf-border-border rounded-none'>
+          <div className='sf-flex sf-justify-between sf-mb-2 sf-text-text-primary sf-text-sm'>
             <span>{__('Subtotal:', 'subtleforms')}</span>
             <span>$0.00</span>
           </div>
-          <div className='flex justify-between mb-2 text-text-primary text-sm'>
+          <div className='sf-flex sf-justify-between sf-mb-2 sf-text-text-primary sf-text-sm'>
             <span>{__('Tax:', 'subtleforms')}</span>
             <span>$0.00</span>
           </div>
-          <div className='flex justify-between pt-2 border-border border-t font-medium text-text-primary'>
+          <div className='sf-flex sf-justify-between sf-pt-2 sf-border-border sf-border-t sf-font-medium sf-text-text-primary'>
             <span>{__('Total:', 'subtleforms')}</span>
             <span>$0.00</span>
           </div>
@@ -209,7 +209,7 @@ export default function FieldRenderer({ field }) {
       )}
 
       {type === 'payment_coupon' && (
-        <div className='flex gap-2'>
+        <div className='sf-flex sf-gap-2'>
           <input
             type='text'
             placeholder={placeholder || __('Enter coupon code', 'subtleforms')}
@@ -218,7 +218,7 @@ export default function FieldRenderer({ field }) {
           />
           <button
             type='button'
-            className='bg-primary px-4 py-2 font-medium text-white text-sm pointer-events-none'
+            className='sf-bg-primary sf-px-4 sf-py-2 sf-font-medium sf-text-white sf-text-sm sf-pointer-events-none'
             disabled>
             {__('Apply', 'subtleforms')}
           </button>
@@ -226,7 +226,7 @@ export default function FieldRenderer({ field }) {
       )}
 
       {type === 'payment_hidden_price' && (
-        <div className='bg-secondary p-3 border border-text-tertiary border-dashed rounded-none text-text-secondary text-xs italic'>
+        <div className='sf-bg-secondary sf-p-3 sf-border sf-border-text-tertiary sf-border-dashed rounded-none sf-text-text-secondary sf-text-xs italic'>
           {__('Hidden pricing field (not visible to users)', 'subtleforms')}
         </div>
       )}

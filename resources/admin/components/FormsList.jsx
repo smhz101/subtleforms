@@ -127,12 +127,12 @@ export default function FormsList({
       sortable: true,
       width: '25%',
       render: (title, form) => (
-        <div className='flex items-center gap-2'>
-          <span className='font-semibold text-gray-900 group-hover:text-blue-600 text-base transition-colors'>
+        <div className='sf-flex sf-items-center sf-gap-2'>
+          <span className='sf-font-semibold sf-text-gray-900 group-hover:text-blue-600 sf-text-base sf-transition-colors'>
             {title}
           </span>
           {form.submission_count === 0 && (
-            <span className='bg-gray-50 px-1.5 py-0.5 border border-gray-200 text-gray-400 text-xs'>
+            <span className='sf-bg-gray-50 sf-px-1.5 sf-py-0.5 sf-border sf-border-gray-200 sf-text-gray-400 sf-text-xs'>
               {__('New', 'subtleforms')}
             </span>
           )}
@@ -182,7 +182,7 @@ export default function FormsList({
               'inline-flex items-center gap-1 px-2.5 py-1 border text-xs font-medium',
               config.classes
             )}>
-            <IconComponent className='w-3 h-3' />
+            <IconComponent className='sf-w-3 sf-h-3' />
             {config.label}
           </span>
         );
@@ -221,7 +221,7 @@ export default function FormsList({
               'inline-flex items-center gap-1 px-2.5 py-1 border text-xs font-medium',
               config.classes
             )}>
-            <IconComponent className='w-3 h-3' />
+            <IconComponent className='sf-w-3 sf-h-3' />
             {config.label}
           </span>
         );
@@ -236,16 +236,16 @@ export default function FormsList({
         return (
           <button
             type='button'
-            className='group flex items-center gap-2 bg-gray-100 hover:bg-gray-200 px-2 py-1 rounded text-xs transition-colors'
+            className='group sf-flex sf-items-center sf-gap-2 sf-bg-gray-100 hover:bg-gray-200 sf-px-2 sf-py-1 rounded sf-text-xs sf-transition-colors'
             onClick={(e) => {
               e.stopPropagation();
               handleCopyShortcode(shortcode);
             }}
             title={__('Click to copy', 'subtleforms')}>
-            <code className='font-mono text-gray-600 group-hover:text-gray-900'>
+            <code className='sf-font-mono sf-text-gray-600 group-hover:text-gray-900'>
               {shortcode}
             </code>
-            <FiCopy className='flex-shrink-0 w-3 h-3 text-gray-400 group-hover:text-gray-600' />
+            <FiCopy className='sf-flex-shrink-0 sf-w-3 sf-h-3 sf-text-gray-400 group-hover:text-gray-600' />
           </button>
         );
       },
@@ -274,12 +274,12 @@ export default function FormsList({
               submissionCount
             )}>
             {hasUnread && (
-              <span className='bg-blue-500 w-2 h-2 animate-pulse'></span>
+              <span className='sf-bg-blue-500 sf-w-2 sf-h-2 sf-animate-pulse'></span>
             )}
             {hasUnread ? (
               <>
-                <span className='font-semibold'>{unreadCount}</span>
-                <span className='text-gray-400'>/</span>
+                <span className='sf-font-semibold'>{unreadCount}</span>
+                <span className='sf-text-gray-400'>/</span>
                 <span>{submissionCount}</span>
               </>
             ) : (
@@ -307,7 +307,7 @@ export default function FormsList({
         else displayText = date.toLocaleDateString();
 
         return (
-          <time className='text-gray-600 text-sm' title={date.toLocaleString()}>
+          <time className='sf-text-gray-600 sf-text-sm' title={date.toLocaleString()}>
             {displayText}
           </time>
         );
@@ -324,9 +324,9 @@ export default function FormsList({
               e.stopPropagation();
               handleEditForm(form.id);
             }}
-            className='hover:bg-gray-100 p-1 rounded'
+            className='hover:bg-gray-100 sf-p-1 rounded'
             title={__('Edit', 'subtleforms')}>
-            <FiEdit2 className='w-4 h-4 text-gray-600' />
+            <FiEdit2 className='sf-w-4 sf-h-4 sf-text-gray-600' />
           </button>
           <Dropdown
             renderToggle={({ onToggle }) => (
@@ -335,9 +335,9 @@ export default function FormsList({
                   e.stopPropagation();
                   onToggle();
                 }}
-                className='hover:bg-gray-100 p-1 rounded'
+                className='hover:bg-gray-100 sf-p-1 rounded'
                 title={__('More actions', 'subtleforms')}>
-                <FiMoreVertical className='w-4 h-4 text-gray-600' />
+                <FiMoreVertical className='sf-w-4 sf-h-4 sf-text-gray-600' />
               </button>
             )}
             renderContent={({ onClose }) => (
@@ -349,8 +349,8 @@ export default function FormsList({
                     setStatusValue(form.status);
                     onClose();
                   }}>
-                  <div className='flex items-center gap-2'>
-                    <FiCheckCircle className='w-4 h-4' />
+                  <div className='sf-flex sf-items-center sf-gap-2'>
+                    <FiCheckCircle className='sf-w-4 sf-h-4' />
                     {__('Change status', 'subtleforms')}
                   </div>
                 </MenuItem>
@@ -360,8 +360,8 @@ export default function FormsList({
                     handleDuplicate(form.id);
                     onClose();
                   }}>
-                  <div className='flex items-center gap-2'>
-                    <FiCopy className='w-4 h-4' />
+                  <div className='sf-flex sf-items-center sf-gap-2'>
+                    <FiCopy className='sf-w-4 sf-h-4' />
                     {__('Duplicate', 'subtleforms')}
                   </div>
                 </MenuItem>
@@ -371,8 +371,8 @@ export default function FormsList({
                     window.location.href = `admin.php?page=subtleforms-submissions&form_id=${form.id}`;
                     onClose();
                   }}>
-                  <div className='flex items-center gap-2'>
-                    <FiEye className='w-4 h-4' />
+                  <div className='sf-flex sf-items-center sf-gap-2'>
+                    <FiEye className='sf-w-4 sf-h-4' />
                     {__('View submissions', 'subtleforms')}
                   </div>
                 </MenuItem>
@@ -383,8 +383,8 @@ export default function FormsList({
                     onClose();
                   }}
                   isDestructive>
-                  <div className='flex items-center gap-2 text-red-600'>
-                    <FiTrash2 className='w-4 h-4' />
+                  <div className='sf-flex sf-items-center sf-gap-2 sf-text-red-600'>
+                    <FiTrash2 className='sf-w-4 sf-h-4' />
                     {__('Delete', 'subtleforms')}
                   </div>
                 </MenuItem>
@@ -677,14 +677,14 @@ export default function FormsList({
           },
         ]}
         emptyMessage={
-          <div className='py-12 text-center'>
-            <div className='mb-4 text-6xl'>📋</div>
-            <h3 className='mb-2 font-semibold text-gray-900 text-lg'>
+          <div className='sf-py-12 sf-text-center'>
+            <div className='sf-mb-4 sf-text-6xl'>📋</div>
+            <h3 className='sf-mb-2 sf-font-semibold sf-text-gray-900 sf-text-lg'>
               {searchTerm
                 ? __('No forms found', 'subtleforms')
                 : __('Create your first form', 'subtleforms')}
             </h3>
-            <p className='mb-6 text-gray-600 text-sm'>
+            <p className='sf-mb-6 sf-text-gray-600 sf-text-sm'>
               {searchTerm
                 ? __('Try adjusting your search terms', 'subtleforms')
                 : __(
@@ -698,7 +698,7 @@ export default function FormsList({
                 onClick={() =>
                   (window.location.href = 'admin.php?page=subtleforms-new-form')
                 }>
-                <FiPlus className='inline mr-2 w-4 h-4' />
+                <FiPlus className='sf-inline sf-mr-2 sf-w-4 sf-h-4' />
                 {__('New Form', 'subtleforms')}
               </Button>
             )}
@@ -748,17 +748,17 @@ export default function FormsList({
                 { label: __('Archived', 'subtleforms'), value: 'archived' },
               ]}
             />
-            <div className='flex justify-end items-center gap-3 mt-6'>
+            <div className='sf-flex sf-justify-end sf-items-center sf-gap-3 sf-mt-6'>
               <Button
                 variant='tertiary'
                 onClick={() => setStatusModal(null)}
-                className='px-4 h-9 text-sm'>
+                className='sf-px-4 sf-h-9 sf-text-sm'>
                 {__('Cancel', 'subtleforms')}
               </Button>
               <Button
                 variant='primary'
                 onClick={handleStatusChange}
-                className='px-4 h-9 text-sm'>
+                className='sf-px-4 sf-h-9 sf-text-sm'>
                 {__('Update', 'subtleforms')}
               </Button>
             </div>

@@ -177,35 +177,35 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
     <AdminShell
       title={sprintf(__('Submission #%d', 'subtleforms'), submission.id)}
       actions={actions}>
-      <div className='space-y-8'>
+      <div className='sf-space-y-8'>
         <div className='subtleforms-card'>
           <div className='subtleforms-card-header'>
-            <div className='flex justify-between items-center'>
-              <h2 className='m-0 font-semibold text-gray-900 text-lg'>
+            <div className='sf-flex sf-justify-between sf-items-center'>
+              <h2 className='sf-m-0 sf-font-semibold sf-text-gray-900 sf-text-lg'>
                 {__('Submitted Data', 'subtleforms')}
               </h2>
-              <label className='flex items-center gap-2 text-gray-600 text-sm'>
+              <label className='sf-flex sf-items-center sf-gap-2 sf-text-gray-600 sf-text-sm'>
                 <input
                   type='checkbox'
                   checked={showEmpty}
                   onChange={(e) => setShowEmpty(e.target.checked)}
-                  className='border-gray-300 rounded focus:ring-2 focus:ring-blue-500 text-blue-600'
+                  className='sf-border-gray-300 sf-rounded sf-focus:ring-2 sf-focus:ring-blue-500 sf-text-blue-600'
                 />
                 {__('Show empty fields', 'subtleforms')}
               </label>
             </div>
           </div>
           <div className='subtleforms-card-content'>
-            <div className='ring-opacity-5 shadow md:rounded-lg ring-1 ring-black overflow-hidden'>
-              <table className='divide-y divide-gray-300 min-w-full'>
-                <tbody className='bg-white divide-y divide-gray-200'>
+            <div className='sf-ring-opacity-5 sf-shadow sf-md:rounded-lg sf-ring-1 sf-ring-black sf-overflow-hidden'>
+              <table className='sf-divide-y sf-divide-gray-300 sf-min-w-full'>
+                <tbody className='sf-bg-white sf-divide-y sf-divide-gray-200'>
                   {Object.keys(filteredPayload).length > 0 ? (
                     Object.entries(filteredPayload).map(([key, value]) => (
-                      <tr key={key} className='hover:bg-gray-50'>
-                        <td className='px-6 py-4 w-1/3 font-medium text-gray-900 text-sm'>
+                      <tr key={key} className='sf-hover:bg-gray-50'>
+                        <td className='sf-px-6 sf-py-4 sf-w-1/3 sf-font-medium sf-text-gray-900 sf-text-sm'>
                           {getFieldLabel(key)}
                         </td>
-                        <td className='px-6 py-4 text-gray-700 text-sm whitespace-pre-wrap'>
+                        <td className='sf-px-6 sf-py-4 sf-text-gray-700 sf-text-sm sf-whitespace-pre-wrap'>
                           {String(value)}
                         </td>
                       </tr>
@@ -214,7 +214,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                     <tr>
                       <td
                         colSpan='2'
-                        className='px-6 py-4 text-gray-500 text-sm text-center italic'>
+                        className='sf-px-6 sf-py-4 sf-text-gray-500 sf-text-sm sf-text-center sf-italic'>
                         {__('No data to display', 'subtleforms')}
                       </td>
                     </tr>
@@ -227,7 +227,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
 
         <div className='subtleforms-card'>
           <div className='subtleforms-card-header'>
-            <h2 className='m-0 font-semibold text-gray-900 text-lg'>
+            <h2 className='sf-m-0 sf-font-semibold sf-text-gray-900 sf-text-lg'>
               {__('Submission Notes', 'subtleforms')}
             </h2>
           </div>
@@ -245,7 +245,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
 
         <div className='subtleforms-card'>
           <div className='subtleforms-card-header'>
-            <h2 className='m-0 font-semibold text-gray-900 text-lg'>
+            <h2 className='sf-m-0 sf-font-semibold sf-text-gray-900 sf-text-lg'>
               {__('Execution Logs', 'subtleforms')}
             </h2>
           </div>

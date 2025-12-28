@@ -80,12 +80,12 @@ export default function ConversationalCanvas({
 
   if (totalFields === 0) {
     return (
-      <div className='flex flex-col justify-center items-center bg-white shadow-sm mx-auto p-12 border border-gray-200 rounded-lg w-full max-w-2xl h-full text-center'>
-        <div className='mb-4 text-4xl'>💬</div>
-        <h3 className='mb-2 font-semibold text-gray-900 text-lg'>
+      <div className='sf-flex sf-flex-col sf-justify-center sf-items-center sf-bg-white sf-shadow-sm sf-mx-auto sf-p-12 sf-border sf-border-gray-200 rounded-lg sf-w-full sf-max-w-2xl sf-h-full sf-text-center'>
+        <div className='sf-mb-4 sf-text-4xl'>💬</div>
+        <h3 className='sf-mb-2 sf-font-semibold sf-text-gray-900 sf-text-lg'>
           {__('No Questions Yet', 'subtleforms')}
         </h3>
-        <p className='mb-6 text-gray-600 text-sm'>
+        <p className='sf-mb-6 sf-text-gray-600 sf-text-sm'>
           {__(
             'Add fields from the left sidebar to create your conversational form. Each field will be displayed one at a time.',
             'subtleforms'
@@ -100,29 +100,29 @@ export default function ConversationalCanvas({
     totalFields > 0 ? ((currentIndex + 1) / totalFields) * 100 : 0;
 
   return (
-    <div className='flex flex-col bg-gray-50 mx-auto w-full max-w-3xl h-full'>
+    <div className='sf-flex sf-flex-col sf-bg-gray-50 sf-mx-auto sf-w-full sf-max-w-3xl sf-h-full'>
       {/* Progress Bar */}
-      <div className='bg-white px-6 py-4 border-gray-200 border-b'>
-        <div className='flex justify-between items-center mb-2'>
-          <span className='font-medium text-gray-700 text-sm'>
+      <div className='sf-bg-white sf-px-6 sf-py-4 sf-border-gray-200 sf-border-b'>
+        <div className='sf-flex sf-justify-between sf-items-center sf-mb-2'>
+          <span className='sf-font-medium sf-text-gray-700 sf-text-sm'>
             {__('Question', 'subtleforms')} {currentIndex + 1}{' '}
             {__('of', 'subtleforms')} {totalFields}
           </span>
-          <span className='text-gray-500 text-xs'>
+          <span className='sf-text-gray-500 sf-text-xs'>
             {Math.round(progressPercent)}% {__('Complete', 'subtleforms')}
           </span>
         </div>
-        <div className='bg-gray-200 rounded-full w-full h-2 overflow-hidden'>
+        <div className='sf-bg-gray-200 rounded-full sf-w-full sf-h-2 sf-overflow-hidden'>
           <div
-            className='bg-blue-600 h-full transition-all duration-300'
+            className='sf-bg-blue-600 sf-h-full sf-transition-all sf-duration-300'
             style={{ width: `${progressPercent}%` }}
           />
         </div>
       </div>
 
       {/* Question Card */}
-      <div className='flex flex-col flex-1 justify-center p-8 overflow-y-auto'>
-        <div className='bg-white shadow-md mx-auto p-8 border border-gray-200 rounded-lg w-full'>
+      <div className='sf-flex sf-flex-col sf-flex-1 sf-justify-center sf-p-8 sf-overflow-y-auto'>
+        <div className='sf-bg-white sf-shadow-md sf-mx-auto sf-p-8 sf-border sf-border-gray-200 rounded-lg sf-w-full'>
           {field && (
             <FieldChrome
               field={field}
@@ -140,17 +140,17 @@ export default function ConversationalCanvas({
       </div>
 
       {/* Navigation Controls */}
-      <div className='flex justify-between items-center bg-white px-6 py-4 border-gray-200 border-t'>
+      <div className='sf-flex sf-justify-between sf-items-center sf-bg-white sf-px-6 sf-py-4 sf-border-gray-200 sf-border-t'>
         <Button
           variant='secondary'
           onClick={handlePrevious}
           disabled={!hasPrevious}
-          className='inline-flex items-center'>
-          <FiChevronLeft className='mr-1 w-4 h-4' />
+          className='sf-inline-flex sf-items-center'>
+          <FiChevronLeft className='sf-mr-1 sf-w-4 sf-h-4' />
           {__('Previous', 'subtleforms')}
         </Button>
 
-        <div className='flex gap-1.5'>
+        <div className='sf-flex sf-gap-1.5'>
           {fields.map((f, index) => (
             <button
               key={f.id}
@@ -174,9 +174,9 @@ export default function ConversationalCanvas({
           variant='primary'
           onClick={handleNext}
           disabled={!hasNext}
-          className='inline-flex items-center'>
+          className='sf-inline-flex sf-items-center'>
           {__('Next', 'subtleforms')}
-          <FiChevronRight className='ml-1 w-4 h-4' />
+          <FiChevronRight className='sf-ml-1 sf-w-4 sf-h-4' />
         </Button>
       </div>
     </div>

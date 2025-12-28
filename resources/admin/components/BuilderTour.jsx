@@ -228,14 +228,14 @@ export default function BuilderTour({ onComplete, onSkip }) {
     <>
       {/* Overlay */}
       <div
-        className='z-40 fixed inset-0 bg-black bg-opacity-50'
+        className='sf-z-40 sf-fixed sf-inset-0 sf-bg-black sf-bg-opacity-50'
         style={{ pointerEvents: 'none' }}
       />
 
       {/* Spotlight */}
       {step.selector && (
         <div
-          className='z-50 fixed pointer-events-none'
+          className='sf-z-50 sf-fixed sf-pointer-events-none'
           style={{
             boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
             borderRadius: '8px',
@@ -272,14 +272,14 @@ export default function BuilderTour({ onComplete, onSkip }) {
         {/* Close Button */}
         <button
           onClick={handleSkip}
-          className='top-4 right-4 absolute text-gray-400 hover:text-gray-600 transition-colors'
+          className='sf-top-4 sf-right-4 sf-absolute sf-text-gray-400 hover:text-gray-600 sf-transition-colors'
           aria-label={__('Close tour', 'subtleforms')}>
-          <FiX className='w-5 h-5' />
+          <FiX className='sf-w-5 sf-h-5' />
         </button>
 
         {/* Progress */}
-        <div className='mb-4'>
-          <div className='flex justify-between items-center mb-2 text-gray-500 text-sm'>
+        <div className='sf-mb-4'>
+          <div className='sf-flex sf-justify-between sf-items-center sf-mb-2 sf-text-gray-500 sf-text-sm'>
             <span>
               {currentStep + 1} / {TOUR_STEPS.length}
             </span>
@@ -287,9 +287,9 @@ export default function BuilderTour({ onComplete, onSkip }) {
               {Math.round(((currentStep + 1) / TOUR_STEPS.length) * 100)}%
             </span>
           </div>
-          <div className='bg-gray-200 rounded-full h-1 overflow-hidden'>
+          <div className='sf-bg-gray-200 rounded-full sf-h-1 sf-overflow-hidden'>
             <div
-              className='bg-blue-600 h-full transition-all duration-300'
+              className='sf-bg-blue-600 sf-h-full sf-transition-all sf-duration-300'
               style={{
                 width: `${((currentStep + 1) / TOUR_STEPS.length) * 100}%`,
               }}
@@ -298,24 +298,24 @@ export default function BuilderTour({ onComplete, onSkip }) {
         </div>
 
         {/* Content */}
-        <div className='mb-6'>
-          <h3 className='mb-2 font-semibold text-gray-900 text-lg'>
+        <div className='sf-mb-6'>
+          <h3 className='sf-mb-2 sf-font-semibold sf-text-gray-900 sf-text-lg'>
             {step.title}
           </h3>
-          <p className='text-gray-600 leading-relaxed'>{step.content}</p>
+          <p className='sf-text-gray-600 sf-leading-relaxed'>{step.content}</p>
         </div>
 
         {/* Actions */}
-        <div className='flex justify-between items-center'>
+        <div className='sf-flex sf-justify-between sf-items-center'>
           <div>
             {currentStep > 0 && (
               <Button isSecondary onClick={handlePrev}>
-                <FiChevronLeft className='inline mr-1 w-4 h-4' />
+                <FiChevronLeft className='sf-inline sf-mr-1 sf-w-4 sf-h-4' />
                 {__('Back', 'subtleforms')}
               </Button>
             )}
           </div>
-          <div className='flex items-center space-x-2'>
+          <div className='sf-flex sf-items-center sf-space-x-2'>
             <Button isSecondary onClick={handleSkip}>
               {__('Skip Tour', 'subtleforms')}
             </Button>
@@ -325,7 +325,7 @@ export default function BuilderTour({ onComplete, onSkip }) {
               ) : (
                 <>
                   {__('Next', 'subtleforms')}
-                  <FiChevronRight className='inline ml-1 w-4 h-4' />
+                  <FiChevronRight className='sf-inline sf-ml-1 sf-w-4 sf-h-4' />
                 </>
               )}
             </Button>

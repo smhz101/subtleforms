@@ -423,7 +423,7 @@ export default function SubmissionsTable({
       title: __('Actions', 'subtleforms'),
       width: '15%',
       render: (_, submission) => (
-        <div className='flex gap-2'>
+        <div className='sf-flex sf-gap-2'>
           <Button
             isSecondary
             isSmall

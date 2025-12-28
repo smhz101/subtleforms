@@ -135,7 +135,7 @@ export default function FormsPage() {
         title={__('All Forms', 'subtleforms')}
         noScroll={true}
         actions={
-          <div className='flex items-center gap-2'>
+          <div className='sf-flex sf-items-center sf-gap-2'>
             <HelpMenu
               onOpenWizard={() => setShowWizard(true)}
               showWizard={true}
@@ -145,7 +145,7 @@ export default function FormsPage() {
               onClick={() => {
                 window.location.href = 'admin.php?page=subtleforms-new-form';
               }}>
-              <FiPlus className='inline mr-2 w-4 h-4' />
+              <FiPlus className='sf-inline sf-mr-2 sf-w-4 sf-h-4' />
               {__('New Form', 'subtleforms')}
             </Button>
           </div>

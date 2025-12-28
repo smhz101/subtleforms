@@ -51,9 +51,9 @@ export default function ConditionEditor({
   };
 
   return (
-    <div className='mt-4'>
-      <div className='flex justify-between items-center mb-3'>
-        <label className='font-semibold text-gray-900 text-xs'>
+    <div className='sf-mt-4'>
+      <div className='sf-flex sf-justify-between sf-items-center sf-mb-3'>
+        <label className='sf-font-semibold sf-text-gray-900 sf-text-xs'>
           {__('Conditional Logic', 'subtleforms')}
         </label>
         <Button isSmall isSecondary onClick={handleAddCondition}>
@@ -62,7 +62,7 @@ export default function ConditionEditor({
       </div>
 
       {(!conditions || conditions.length === 0) && (
-        <p className='my-2 text-gray-600 text-xs italic'>
+        <p className='sf-my-2 sf-text-gray-600 sf-text-xs italic'>
           {__('No conditions set', 'subtleforms')}
         </p>
       )}
@@ -71,9 +71,9 @@ export default function ConditionEditor({
         conditions.map((condition, index) => (
           <div
             key={index}
-            className='bg-gray-50 mb-3 p-3 border border-gray-300'>
-            <div className='flex justify-between items-center mb-2'>
-              <span className='font-semibold text-[11px] text-gray-600 uppercase'>
+            className='sf-bg-gray-50 sf-mb-3 sf-p-3 sf-border sf-border-gray-300'>
+            <div className='sf-flex sf-justify-between sf-items-center sf-mb-2'>
+              <span className='sf-font-semibold sf-text-[11px] sf-text-gray-600 uppercase'>
                 {__('Rule', 'subtleforms')} {index + 1}
               </span>
               <Button

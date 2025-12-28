@@ -17,8 +17,8 @@ export default function HelpMenu({
           onClick={onToggle}
           aria-expanded={isOpen}
           variant='secondary'
-          icon={<FiHelpCircle className='w-5 h-5' />}
-          className='px-3 h-9'
+          icon={<FiHelpCircle className='sf-w-5 sf-h-5' />}
+          className='sf-px-3 sf-h-9'
           title={__('Help & Documentation', 'subtleforms')}
         />
       )}
@@ -26,20 +26,20 @@ export default function HelpMenu({
         <MenuGroup>
           {onStartTour && (
             <MenuItem
-              icon={<FiPlay className='w-4 h-4' />}
+              icon={<FiPlay className='sf-w-4 sf-h-4' />}
               onClick={onStartTour}>
               {__('Start Tour', 'subtleforms')}
             </MenuItem>
           )}
           {showWizard && onOpenWizard && (
             <MenuItem
-              icon={<FiZap className='w-4 h-4' />}
+              icon={<FiZap className='sf-w-4 sf-h-4' />}
               onClick={onOpenWizard}>
               {__('Quick Start Wizard', 'subtleforms')}
             </MenuItem>
           )}
           <MenuItem
-            icon={<FiBook className='w-4 h-4' />}
+            icon={<FiBook className='sf-w-4 sf-h-4' />}
             onClick={() => {
               // Placeholder for documentation
               window.open('https://subtleforms.com/docs', '_blank');

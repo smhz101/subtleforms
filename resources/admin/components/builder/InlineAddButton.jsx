@@ -22,7 +22,7 @@ export default function InlineAddButton({
       <button
         ref={anchorRef}
         onClick={onClick}
-        className='inline-flex items-center gap-1 bg-transparent px-4 py-1.5 border border-gray-400 border-dashed font-medium text-gray-600 text-xs cursor-pointer'>
+        className='sf-inline-flex sf-items-center sf-gap-1 sf-bg-transparent sf-px-4 sf-py-1.5 sf-border sf-border-gray-400 sf-border-dashed sf-font-medium sf-text-gray-600 sf-text-xs sf-cursor-pointer'>
         {(() => {
           const AddIcon = getIcon('add');
           return <AddIcon size={16} />;

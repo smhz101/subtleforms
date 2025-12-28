@@ -23,24 +23,24 @@ export default function FormCanvas({
 
   const canvasWidthClass =
     {
-      narrow: 'max-w-2xl',
-      standard: 'max-w-3xl',
-      wide: 'max-w-5xl',
-    }[canvasWidth] || 'max-w-3xl';
+      narrow: 'sf-max-w-2xl',
+      standard: 'sf-max-w-3xl',
+      wide: 'sf-max-w-5xl',
+    }[canvasWidth] || 'sf-max-w-3xl';
 
   return (
-    <div className='flex-1 bg-gray-100 p-8 overflow-auto'>
+    <div className='sf-flex-1 sf-bg-gray-100 sf-p-8 sf-overflow-auto'>
       <div
         className={classNames(
-          'bg-white mx-auto p-12 min-h-[500px]',
+          'sf-bg-white sf-mx-auto sf-p-12 sf-min-h-[500px]',
           canvasWidthClass
         )}>
         {/* Form Title */}
-        <div className='mb-8'>
-          <h3 className='m-0 mb-2 font-semibold text-gray-900 text-2xl'>
+        <div className='sf-mb-8'>
+          <h3 className='sf-m-0 sf-mb-2 sf-font-semibold sf-text-gray-900 sf-text-2xl'>
             {schema?.metadata?.title || __('Untitled Form', 'subtleforms')}
           </h3>
-          <p className='m-0 text-gray-600 text-sm'>
+          <p className='sf-m-0 sf-text-gray-600 sf-text-sm'>
             {schema?.metadata?.description ||
               __('Fill out the form below', 'subtleforms')}
           </p>
@@ -48,17 +48,17 @@ export default function FormCanvas({
 
         {/* Empty State */}
         {fields.length === 0 && (
-          <div className='px-5 py-20 text-gray-500 text-center'>
-            <div className='flex justify-center mb-4'>
+          <div className='sf-px-5 sf-py-20 sf-text-gray-500 sf-text-center'>
+            <div className='sf-flex sf-justify-center sf-mb-4'>
               {(() => {
                 const EmptyIcon = getIcon('default');
                 return <EmptyIcon size={56} />;
               })()}
             </div>
-            <h4 className='m-0 mb-2 font-semibold text-gray-700 text-lg'>
+            <h4 className='sf-m-0 sf-mb-2 sf-font-semibold sf-text-gray-700 sf-text-lg'>
               {__('Start Building Your Form', 'subtleforms')}
             </h4>
-            <p className='m-0 text-gray-500 text-sm'>
+            <p className='sf-m-0 sf-text-gray-500 sf-text-sm'>
               {__('Add fields from the left sidebar to begin', 'subtleforms')}
             </p>
           </div>

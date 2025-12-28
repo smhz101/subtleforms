@@ -337,23 +337,23 @@ export default function FormEditor({
 
   return (
     <div
-      className='grid bg-white h-full overflow-hidden'
+      className='sf-grid sf-bg-white sf-h-full sf-overflow-hidden'
       style={{
         gridTemplateColumns: selectedField ? '280px 1fr 320px' : '280px 1fr',
       }}>
       {/* Field Library (Left Sidebar) */}
       <div
-        className='bg-gray-50 border-gray-300 border-r max-h-full overflow-y-auto'
+        className='sf-bg-gray-50 sf-border-gray-300 sf-border-r sf-max-h-full sf-overflow-y-auto'
         data-tour='fields-panel'>
         <FieldDock fieldGroups={fieldGroups} onAddField={handleDockAdd} />
       </div>
 
       {/* Canvas Area (Center) */}
       <div
-        className='flex flex-col bg-gray-100 overflow-hidden'
+        className='sf-flex sf-flex-col sf-bg-gray-100 sf-overflow-hidden'
         data-tour='canvas'>
         {steps.length > 0 && !isConversational && (
-          <div className='flex-shrink-0 bg-white border-gray-300 border-b'>
+          <div className='sf-flex-shrink-0 sf-bg-white sf-border-gray-300 sf-border-b'>
             <StepNavigator
               steps={steps}
               selectedStepId={selectedStepId}
@@ -365,7 +365,7 @@ export default function FormEditor({
         )}
 
         <div
-          className='flex-1 overflow-hidden'
+          className='sf-flex-1 sf-overflow-hidden'
           style={{ padding: isConversational ? 0 : '1.5rem' }}>
           {isConversational ? (
             <ConversationalCanvas
@@ -396,7 +396,7 @@ export default function FormEditor({
       {/* Field Inspector (Right Sidebar) */}
       {selectedField && (
         <div
-          className='bg-white border-gray-300 border-l max-h-full overflow-y-auto'
+          className='sf-bg-white sf-border-gray-300 sf-border-l sf-max-h-full sf-overflow-y-auto'
           data-tour='field-inspector'>
           <FieldInspector
             field={selectedField}
@@ -413,13 +413,13 @@ export default function FormEditor({
           anchor={insertPicker.anchor}
           onClose={handleCloseInsert}
           position='bottom center'>
-          <div className='p-4 min-w-[240px] max-h-[400px] overflow-auto'>
-            <h4 className='m-0 mb-3 font-semibold text-sm'>
+          <div className='sf-p-4 sf-min-w-[240px] sf-max-h-[400px] sf-overflow-auto'>
+            <h4 className='sf-m-0 sf-mb-3 sf-font-semibold sf-text-sm'>
               {__('Add Field', 'subtleforms')}
             </h4>
             {Object.entries(fieldGroups).map(([category, categoryFields]) => (
-              <div key={category} className='mb-4'>
-                <div className='mb-2 font-semibold text-[11px] text-gray-600 uppercase'>
+              <div key={category} className='sf-mb-4'>
+                <div className='sf-mb-2 sf-font-semibold sf-text-[11px] sf-text-gray-600 uppercase'>
                   {category}
                 </div>
                 {categoryFields.map((f) => (
@@ -427,7 +427,7 @@ export default function FormEditor({
                     key={f.type}
                     type='button'
                     onClick={() => handleInsert(f.type, insertPicker.context)}
-                    className='bg-gray-50 hover:bg-blue-600 mb-1 px-2.5 py-2 border border-gray-300 hover:border-blue-600 w-full text-gray-900 hover:text-white text-xs text-left transition-all cursor-pointer'>
+                    className='sf-bg-gray-50 hover:bg-blue-600 sf-mb-1 sf-px-2.5 sf-py-2 sf-border sf-border-gray-300 hover:border-blue-600 sf-w-full sf-text-gray-900 hover:text-white sf-text-xs sf-text-left sf-transition-all sf-cursor-pointer'>
                     {f.label}
                   </button>
                 ))}

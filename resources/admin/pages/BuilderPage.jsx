@@ -780,9 +780,9 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
 
   // Construct title with editable inline input
   const titleElement = (
-    <div className='flex items-center gap-3' data-tour='header'>
+    <div className='sf-flex sf-items-center sf-gap-3' data-tour='header'>
       <span
-        className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium border ${
+        className={`sf-inline-flex sf-items-center sf-gap-1.5 sf-px-2.5 sf-py-1 sf-text-xs sf-font-medium sf-border ${
           formTypeBadge.color === 'gray'
             ? 'bg-gray-50 text-gray-700 border-gray-200'
             : formTypeBadge.color === 'purple'
@@ -795,7 +795,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
         }`}
         style={{ borderRadius: '4px' }}
         title={formTypeBadge.label}>
-        <FormTypeIcon className='w-3 h-3' />
+        <FormTypeIcon className='sf-w-3 sf-h-3' />
         {formTypeBadge.label}
       </span>
       {isEditingTitle ? (
@@ -815,13 +815,13 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
               setFormTitle(draftSchema?.metadata?.title || formTitle);
             }
           }}
-          className='bg-white px-2 py-1 border border-blue-600 outline-none min-w-[200px] font-semibold text-gray-900 text-base'
+          className='sf-bg-white sf-px-2 sf-py-1 sf-border sf-border-blue-600 sf-outline-none sf-min-w-[200px] sf-font-semibold sf-text-gray-900 sf-text-base'
         />
       ) : (
         <button
           type='button'
           onClick={() => setIsEditingTitle(true)}
-          className='bg-transparent px-2 py-1 border-none outline-none font-semibold text-gray-900 hover:text-blue-600 text-base cursor-pointer'
+          className='sf-bg-transparent sf-px-2 sf-py-1 sf-border-none sf-outline-none sf-font-semibold sf-text-gray-900 hover:sf-text-blue-600 sf-text-base sf-cursor-pointer'
           onMouseEnter={(e) => {
             e.currentTarget.style.color = '#2271b1';
           }}
@@ -836,10 +836,10 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
 
   // Build actions section with save status, shortcode, and buttons
   const actions = (
-    <div className='flex items-center gap-3'>
+    <div className='sf-flex sf-items-center sf-gap-3'>
       {/* Status Badge - More prominent */}
       <span
-        className={`inline-flex items-center px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-white ${
+        className={`sf-inline-flex sf-items-center sf-px-3 sf-py-1.5 sf-text-xs sf-font-semibold sf-uppercase sf-tracking-wide sf-text-white ${
           isEphemeral
             ? 'bg-gray-400'
             : formStatus === 'published'
@@ -866,7 +866,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
         <button
           type='button'
           onClick={() => handleCopyShortcode(shortcode)}
-          className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium font-mono cursor-pointer outline-none transition-all ${
+          className={`sf-inline-flex sf-items-center sf-gap-1.5 sf-px-3 sf-py-1.5 sf-text-xs sf-font-medium sf-font-mono sf-cursor-pointer sf-outline-none sf-transition-all ${
             copyState === 'copied'
               ? 'text-green-700 bg-green-50 border border-green-500'
               : 'text-gray-700 bg-gray-50 border border-gray-300 hover:border-blue-500 hover:bg-blue-50'
@@ -890,7 +890,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
 
       {/* Save Status Indicator */}
       <div
-        className='flex items-center gap-2 px-2 py-1 text-xs'
+        className='sf-flex sf-items-center sf-gap-2 sf-px-2 sf-py-1 sf-text-xs'
         title={statusDescription || undefined}>
         <span
           style={{
@@ -931,7 +931,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
       />
 
       {/* Primary Actions Group */}
-      <div className='flex items-center gap-2'>
+      <div className='sf-flex sf-items-center sf-gap-2'>
         {/* Help Menu */}
         <HelpMenu onStartTour={() => setShowTour(true)} />
 
@@ -940,7 +940,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
           variant='secondary'
           onClick={() => setShowPreview(true)}
           disabled={!draftSchema || draftSchema.fields?.length === 0}
-          className='px-4 h-9 font-medium text-sm'>
+          className='sf-px-4 sf-h-9 sf-font-medium sf-text-sm'>
           {__('Preview', 'subtleforms')}
         </Button>
 
@@ -950,7 +950,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
             variant='secondary'
             onClick={handleSaveDraft}
             disabled={saving || autoSaving}
-            className='px-4 h-9 font-medium text-sm'>
+            className='sf-px-4 sf-h-9 sf-font-medium sf-text-sm'>
             {saving && !formStatus
               ? __('Saving…', 'subtleforms')
               : __('Save Draft', 'subtleforms')}
@@ -962,7 +962,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
           variant='primary'
           onClick={handlePublish}
           disabled={saving || autoSaving || (isEphemeral && !isDirty)}
-          className='px-4 h-9 font-medium text-sm'>
+          className='sf-px-4 sf-h-9 sf-font-medium sf-text-sm'>
           {formStatus === 'published'
             ? __('Update', 'subtleforms')
             : __('Publish', 'subtleforms')}
@@ -974,7 +974,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
             variant='secondary'
             onClick={() => setShowDeleteConfirm(true)}
             isDestructive
-            className='px-4 h-9 font-medium text-sm'
+            className='sf-px-4 sf-h-9 sf-font-medium sf-text-sm'
             title={__('Delete this form permanently', 'subtleforms')}>
             {__('Delete', 'subtleforms')}
           </Button>
@@ -999,8 +999,8 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
           }
         `}</style>
         {saveError && (
-          <div className='bg-red-50 mb-4 px-6 py-3 border-yellow-500 border-b'>
-            <span className='text-red-600 text-xs'>{saveError}</span>
+          <div className='sf-bg-red-50 sf-mb-4 sf-px-6 sf-py-3 sf-border-yellow-500 sf-border-b'>
+            <span className='sf-text-red-600 sf-text-xs'>{saveError}</span>
           </div>
         )}
 
@@ -1039,7 +1039,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
                 />
               )}
               {tab.name === 'entries' && currentFormId && (
-                <div className='p-6 h-full overflow-y-auto'>
+                <div className='sf-p-6 sf-h-full sf-overflow-y-auto'>
                   <SubmissionsTable
                     formId={currentFormId}
                     showFormColumn={false}
@@ -1047,7 +1047,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
                 </div>
               )}
               {tab.name === 'entries' && !currentFormId && (
-                <div className='p-6 h-full overflow-y-auto'>
+                <div className='sf-p-6 sf-h-full sf-overflow-y-auto'>
                   <Notice status='info'>
                     {__('Save the form first to view entries', 'subtleforms')}
                   </Notice>

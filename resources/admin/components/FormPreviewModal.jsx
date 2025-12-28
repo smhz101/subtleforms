@@ -26,10 +26,10 @@ export default function FormPreviewModal({ schema, onClose }) {
       case 'tel':
       case 'url':
         return (
-          <div key={field.key || index} className='mb-4'>
-            <label className='block mb-1 font-medium text-gray-700 text-sm'>
+          <div key={field.key || index} className='sf-mb-4'>
+            <label className='sf-block sf-mb-1 sf-font-medium sf-text-gray-700 sf-text-sm'>
               {label}
-              {required && <span className='ml-1 text-red-500'>*</span>}
+              {required && <span className='sf-ml-1 sf-text-red-500'>*</span>}
             </label>
             <input
               type={field.type}
@@ -38,17 +38,17 @@ export default function FormPreviewModal({ schema, onClose }) {
               disabled
             />
             {helpText && (
-              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+              <p className='sf-mt-1 sf-text-gray-500 sf-text-xs'>{helpText}</p>
             )}
           </div>
         );
 
       case 'number':
         return (
-          <div key={field.key || index} className='mb-4'>
-            <label className='block mb-1 font-medium text-gray-700 text-sm'>
+          <div key={field.key || index} className='sf-mb-4'>
+            <label className='sf-block sf-mb-1 sf-font-medium sf-text-gray-700 sf-text-sm'>
               {label}
-              {required && <span className='ml-1 text-red-500'>*</span>}
+              {required && <span className='sf-ml-1 sf-text-red-500'>*</span>}
             </label>
             <input
               type='number'
@@ -60,17 +60,17 @@ export default function FormPreviewModal({ schema, onClose }) {
               disabled
             />
             {helpText && (
-              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+              <p className='sf-mt-1 sf-text-gray-500 sf-text-xs'>{helpText}</p>
             )}
           </div>
         );
 
       case 'textarea':
         return (
-          <div key={field.key || index} className='mb-4'>
-            <label className='block mb-1 font-medium text-gray-700 text-sm'>
+          <div key={field.key || index} className='sf-mb-4'>
+            <label className='sf-block sf-mb-1 sf-font-medium sf-text-gray-700 sf-text-sm'>
               {label}
-              {required && <span className='ml-1 text-red-500'>*</span>}
+              {required && <span className='sf-ml-1 sf-text-red-500'>*</span>}
             </label>
             <textarea
               placeholder={placeholder}
@@ -79,7 +79,7 @@ export default function FormPreviewModal({ schema, onClose }) {
               disabled
             />
             {helpText && (
-              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+              <p className='sf-mt-1 sf-text-gray-500 sf-text-xs'>{helpText}</p>
             )}
           </div>
         );
@@ -87,10 +87,10 @@ export default function FormPreviewModal({ schema, onClose }) {
       case 'select':
       case 'dropdown':
         return (
-          <div key={field.key || index} className='mb-4'>
-            <label className='block mb-1 font-medium text-gray-700 text-sm'>
+          <div key={field.key || index} className='sf-mb-4'>
+            <label className='sf-block sf-mb-1 sf-font-medium sf-text-gray-700 sf-text-sm'>
               {label}
-              {required && <span className='ml-1 text-red-500'>*</span>}
+              {required && <span className='sf-ml-1 sf-text-red-500'>*</span>}
             </label>
             <select className={baseClasses} disabled>
               <option value=''>
@@ -103,34 +103,34 @@ export default function FormPreviewModal({ schema, onClose }) {
               ))}
             </select>
             {helpText && (
-              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+              <p className='sf-mt-1 sf-text-gray-500 sf-text-xs'>{helpText}</p>
             )}
           </div>
         );
 
       case 'radio':
         return (
-          <div key={field.key || index} className='mb-4'>
-            <label className='block mb-2 font-medium text-gray-700 text-sm'>
+          <div key={field.key || index} className='sf-mb-4'>
+            <label className='sf-block sf-mb-2 sf-font-medium sf-text-gray-700 sf-text-sm'>
               {label}
-              {required && <span className='ml-1 text-red-500'>*</span>}
+              {required && <span className='sf-ml-1 sf-text-red-500'>*</span>}
             </label>
-            <div className='space-y-2'>
+            <div className='sf-space-y-2'>
               {field.options?.map((opt, i) => (
-                <label key={i} className='flex items-center'>
+                <label key={i} className='sf-flex sf-items-center'>
                   <input
                     type='radio'
                     name={field.key}
                     value={opt.value}
-                    className='mr-2'
+                    className='sf-mr-2'
                     disabled
                   />
-                  <span className='text-gray-700 text-sm'>{opt.label}</span>
+                  <span className='sf-text-gray-700 sf-text-sm'>{opt.label}</span>
                 </label>
               ))}
             </div>
             {helpText && (
-              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+              <p className='sf-mt-1 sf-text-gray-500 sf-text-xs'>{helpText}</p>
             )}
           </div>
         );
@@ -139,70 +139,70 @@ export default function FormPreviewModal({ schema, onClose }) {
         // Single checkbox
         if (!field.options || field.options.length === 0) {
           return (
-            <div key={field.key || index} className='mb-4'>
-              <label className='flex items-center'>
-                <input type='checkbox' className='mr-2' disabled />
-                <span className='font-medium text-gray-700 text-sm'>
+            <div key={field.key || index} className='sf-mb-4'>
+              <label className='sf-flex sf-items-center'>
+                <input type='checkbox' className='sf-mr-2' disabled />
+                <span className='sf-font-medium sf-text-gray-700 sf-text-sm'>
                   {label}
-                  {required && <span className='ml-1 text-red-500'>*</span>}
+                  {required && <span className='sf-ml-1 sf-text-red-500'>*</span>}
                 </span>
               </label>
               {helpText && (
-                <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+                <p className='sf-mt-1 sf-text-gray-500 sf-text-xs'>{helpText}</p>
               )}
             </div>
           );
         }
         // Multiple checkboxes
         return (
-          <div key={field.key || index} className='mb-4'>
-            <label className='block mb-2 font-medium text-gray-700 text-sm'>
+          <div key={field.key || index} className='sf-mb-4'>
+            <label className='sf-block sf-mb-2 sf-font-medium sf-text-gray-700 sf-text-sm'>
               {label}
-              {required && <span className='ml-1 text-red-500'>*</span>}
+              {required && <span className='sf-ml-1 sf-text-red-500'>*</span>}
             </label>
-            <div className='space-y-2'>
+            <div className='sf-space-y-2'>
               {field.options?.map((opt, i) => (
-                <label key={i} className='flex items-center'>
+                <label key={i} className='sf-flex sf-items-center'>
                   <input
                     type='checkbox'
                     value={opt.value}
-                    className='mr-2'
+                    className='sf-mr-2'
                     disabled
                   />
-                  <span className='text-gray-700 text-sm'>{opt.label}</span>
+                  <span className='sf-text-gray-700 sf-text-sm'>{opt.label}</span>
                 </label>
               ))}
             </div>
             {helpText && (
-              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+              <p className='sf-mt-1 sf-text-gray-500 sf-text-xs'>{helpText}</p>
             )}
           </div>
         );
 
       case 'date':
         return (
-          <div key={field.key || index} className='mb-4'>
-            <label className='block mb-1 font-medium text-gray-700 text-sm'>
+          <div key={field.key || index} className='sf-mb-4'>
+            <label className='sf-block sf-mb-1 sf-font-medium sf-text-gray-700 sf-text-sm'>
               {label}
-              {required && <span className='ml-1 text-red-500'>*</span>}
+              {required && <span className='sf-ml-1 sf-text-red-500'>*</span>}
             </label>
             <input type='date' className={baseClasses} disabled />
             {helpText && (
-              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+              <p className='sf-mt-1 sf-text-gray-500 sf-text-xs'>{helpText}</p>
             )}
           </div>
         );
 
       case 'time':
         return (
-          <div key={field.key || index} className='mb-4'>
-            <label className='block mb-1 font-medium text-gray-700 text-sm'>
+          <div key={field.key || index} className='sf-mb-4'>
+            <label className='sf-block sf-mb-1 sf-font-medium sf-text-gray-700 sf-text-sm'>
               {label}
-              {required && <span className='ml-1 text-red-500'>*</span>}
+              {required && <span className='sf-ml-1 sf-text-red-500'>*</span>}
             </label>
             <input type='time' className={baseClasses} disabled />
             {helpText && (
-              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+              <p className='sf-mt-1 sf-text-gray-500 sf-text-xs'>{helpText}</p>
             )}
           </div>
         );
@@ -210,18 +210,18 @@ export default function FormPreviewModal({ schema, onClose }) {
       case 'file':
       case 'upload':
         return (
-          <div key={field.key || index} className='mb-4'>
-            <label className='block mb-1 font-medium text-gray-700 text-sm'>
+          <div key={field.key || index} className='sf-mb-4'>
+            <label className='sf-block sf-mb-1 sf-font-medium sf-text-gray-700 sf-text-sm'>
               {label}
-              {required && <span className='ml-1 text-red-500'>*</span>}
+              {required && <span className='sf-ml-1 sf-text-red-500'>*</span>}
             </label>
-            <div className='p-6 border-2 border-gray-300 border-dashed rounded-md text-center'>
-              <p className='text-gray-500 text-sm'>
+            <div className='sf-p-6 sf-border-2 sf-border-gray-300 sf-border-dashed rounded-md sf-text-center'>
+              <p className='sf-text-gray-500 sf-text-sm'>
                 {__('Click to upload or drag and drop', 'subtleforms')}
               </p>
             </div>
             {helpText && (
-              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+              <p className='sf-mt-1 sf-text-gray-500 sf-text-xs'>{helpText}</p>
             )}
           </div>
         );
@@ -231,10 +231,10 @@ export default function FormPreviewModal({ schema, onClose }) {
 
       default:
         return (
-          <div key={field.key || index} className='mb-4'>
-            <label className='block mb-1 font-medium text-gray-700 text-sm'>
+          <div key={field.key || index} className='sf-mb-4'>
+            <label className='sf-block sf-mb-1 sf-font-medium sf-text-gray-700 sf-text-sm'>
               {label}
-              {required && <span className='ml-1 text-red-500'>*</span>}
+              {required && <span className='sf-ml-1 sf-text-red-500'>*</span>}
             </label>
             <input
               type='text'
@@ -243,7 +243,7 @@ export default function FormPreviewModal({ schema, onClose }) {
               disabled
             />
             {helpText && (
-              <p className='mt-1 text-gray-500 text-xs'>{helpText}</p>
+              <p className='sf-mt-1 sf-text-gray-500 sf-text-xs'>{helpText}</p>
             )}
           </div>
         );
@@ -253,35 +253,35 @@ export default function FormPreviewModal({ schema, onClose }) {
   return (
     <Modal
       title={
-        <div className='flex justify-between items-center'>
+        <div className='sf-flex sf-justify-between sf-items-center'>
           <span>{__('Form Preview', 'subtleforms')}</span>
           <button
             onClick={onClose}
-            className='p-2 text-gray-400 hover:text-gray-600'>
-            <FiX className='w-5 h-5' />
+            className='sf-p-2 sf-text-gray-400 hover:text-gray-600'>
+            <FiX className='sf-w-5 sf-h-5' />
           </button>
         </div>
       }
       onRequestClose={onClose}
       className='subtleforms-preview-modal'
       style={{ maxWidth: '700px', width: '100%' }}>
-      <div className='bg-gray-50 -mx-6 -mt-4 -mb-6 p-6'>
+      <div className='sf-bg-gray-50 -mx-6 -mt-4 -mb-6 sf-p-6'>
         {/* Form Header */}
-        <div className='bg-white shadow-sm mb-4 p-6 rounded-lg'>
-          <h2 className='mb-2 font-bold text-gray-900 text-2xl'>
+        <div className='sf-bg-white sf-shadow-sm sf-mb-4 sf-p-6 rounded-lg'>
+          <h2 className='sf-mb-2 sf-font-bold sf-text-gray-900 sf-text-2xl'>
             {schema.metadata?.title || __('Untitled Form', 'subtleforms')}
           </h2>
           {schema.metadata?.description && (
-            <p className='text-gray-600'>{schema.metadata.description}</p>
+            <p className='sf-text-gray-600'>{schema.metadata.description}</p>
           )}
         </div>
 
         {/* Form Fields */}
-        <div className='bg-white shadow-sm p-6 rounded-lg max-h-[60vh] overflow-y-auto'>
+        <div className='sf-bg-white sf-shadow-sm sf-p-6 rounded-lg sf-max-h-[60vh] sf-overflow-y-auto'>
           {isConversational ? (
-            <div className='space-y-6'>
-              <div className='bg-blue-50 p-4 border-blue-500 border-l-4 rounded'>
-                <p className='text-blue-800 text-sm'>
+            <div className='sf-space-y-6'>
+              <div className='sf-bg-blue-50 sf-p-4 sf-border-blue-500 sf-border-l-4 rounded'>
+                <p className='sf-text-blue-800 sf-text-sm'>
                   {__(
                     'Conversational forms display one question at a time. This preview shows all fields together.',
                     'subtleforms'
@@ -297,8 +297,8 @@ export default function FormPreviewModal({ schema, onClose }) {
           )}
 
           {schema.fields.length === 0 && (
-            <div className='py-12 text-center'>
-              <p className='text-gray-500'>
+            <div className='sf-py-12 sf-text-center'>
+              <p className='sf-text-gray-500'>
                 {__(
                   'No fields added yet. Add fields to see the preview.',
                   'subtleforms'
@@ -309,11 +309,11 @@ export default function FormPreviewModal({ schema, onClose }) {
         </div>
 
         {/* Submit Button */}
-        <div className='bg-white shadow-sm mt-4 p-6 rounded-lg'>
-          <Button isPrimary disabled className='justify-center w-full'>
+        <div className='sf-bg-white sf-shadow-sm sf-mt-4 sf-p-6 rounded-lg'>
+          <Button isPrimary disabled className='sf-justify-center sf-w-full'>
             {__('Submit', 'subtleforms')}
           </Button>
-          <p className='mt-2 text-gray-500 text-xs text-center'>
+          <p className='sf-mt-2 sf-text-gray-500 sf-text-xs sf-text-center'>
             {__(
               'This is a preview. The form is not functional.',
               'subtleforms'

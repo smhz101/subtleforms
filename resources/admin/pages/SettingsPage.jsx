@@ -27,7 +27,7 @@ function FieldError({ errors }) {
   return (
     <div className='subtleforms-field-error'>
       {errors.map((error, index) => (
-        <span key={index} className='text-red-600 text-sm'>
+        <span key={index} className='sf-text-red-600 sf-text-sm'>
           {error}
         </span>
       ))}
@@ -301,82 +301,82 @@ export default function Settings() {
   return (
     <div className='subtleforms-admin'>
       <div className='subtleforms-settings'>
-      {/* Header with Save/Discard buttons */}
-      <div className='subtleforms-settings-header'>
-        <h1 className='wp-heading-inline'>{__('Settings', 'subtleforms')}</h1>
-        <div className='subtleforms-settings-actions'>
-          {hasChanges && (
+        {/* Header with Save/Discard buttons */}
+        <div className='subtleforms-settings-header'>
+          <h1 className='wp-heading-inline'>{__('Settings', 'subtleforms')}</h1>
+          <div className='subtleforms-settings-actions'>
+            {hasChanges && (
+              <Button
+                variant='secondary'
+                onClick={loadSettings}
+                disabled={saving}>
+                {__('Discard Changes', 'subtleforms')}
+              </Button>
+            )}
             <Button
-              variant='secondary'
-              onClick={loadSettings}
-              disabled={saving}>
-              {__('Discard Changes', 'subtleforms')}
+              variant='primary'
+              onClick={saveSettings}
+              isBusy={saving}
+              disabled={saving || !hasChanges}>
+              {saving
+                ? __('Saving...', 'subtleforms')
+                : __('Save Settings', 'subtleforms')}
             </Button>
-          )}
-          <Button
-            variant='primary'
-            onClick={saveSettings}
-            isBusy={saving}
-            disabled={saving || !hasChanges}>
-            {saving
-              ? __('Saving...', 'subtleforms')
-              : __('Save Settings', 'subtleforms')}
-          </Button>
-        </div>
-      </div>
-
-      {/* Messages */}
-      {message && (
-        <Notice
-          status={message.type}
-          isDismissible
-          onRemove={() => setMessage(null)}
-          className='subtleforms-settings-notice'>
-          {message.text}
-        </Notice>
-      )}
-
-      {/* Tabbed Content */}
-      <TabPanel
-        className='subtleforms-settings-tabs'
-        activeClass='is-active'
-        tabs={tabs}>
-        {(tab) => (
-          <div className='subtleforms-settings-tab-content'>
-            {tab.name === 'general' && (
-              <GeneralSettings
-                settings={settings}
-                updateSetting={updateSetting}
-                fieldErrors={fieldErrors}
-              />
-            )}
-            {tab.name === 'frontend' && (
-              <FrontendSettings
-                settings={settings}
-                updateSetting={updateSetting}
-                fieldErrors={fieldErrors}
-              />
-            )}
-            {tab.name === 'email' && (
-              <EmailSettings
-                settings={settings}
-                updateSetting={updateSetting}
-                fieldErrors={fieldErrors}
-              />
-            )}
-            {tab.name === 'advanced' && (
-              <AdvancedSettings
-                settings={settings}
-                updateSetting={updateSetting}
-                resetSettings={resetSettings}
-                saving={saving}
-                fieldErrors={fieldErrors}
-              />
-            )}
           </div>
+        </div>
+
+        {/* Messages */}
+        {message && (
+          <Notice
+            status={message.type}
+            isDismissible
+            onRemove={() => setMessage(null)}
+            className='subtleforms-settings-notice'>
+            {message.text}
+          </Notice>
         )}
-      </TabPanel>
-    </div>
+
+        {/* Tabbed Content */}
+        <TabPanel
+          className='subtleforms-settings-tabs'
+          activeClass='is-active'
+          tabs={tabs}>
+          {(tab) => (
+            <div className='subtleforms-settings-tab-content'>
+              {tab.name === 'general' && (
+                <GeneralSettings
+                  settings={settings}
+                  updateSetting={updateSetting}
+                  fieldErrors={fieldErrors}
+                />
+              )}
+              {tab.name === 'frontend' && (
+                <FrontendSettings
+                  settings={settings}
+                  updateSetting={updateSetting}
+                  fieldErrors={fieldErrors}
+                />
+              )}
+              {tab.name === 'email' && (
+                <EmailSettings
+                  settings={settings}
+                  updateSetting={updateSetting}
+                  fieldErrors={fieldErrors}
+                />
+              )}
+              {tab.name === 'advanced' && (
+                <AdvancedSettings
+                  settings={settings}
+                  updateSetting={updateSetting}
+                  resetSettings={resetSettings}
+                  saving={saving}
+                  fieldErrors={fieldErrors}
+                />
+              )}
+            </div>
+          )}
+        </TabPanel>
+      </div>
     </div>
   );
 }
@@ -386,7 +386,7 @@ function GeneralSettings({ settings, updateSetting, fieldErrors = {} }) {
   return (
     <Card>
       <CardBody>
-        <div className='space-y-4'>
+        <div className='sf-space-y-4'>
           <div>
             <SelectControl
               label={__('Default New Form Status', 'subtleforms')}
@@ -462,7 +462,7 @@ function FrontendSettings({ settings, updateSetting, fieldErrors = {} }) {
   return (
     <Card>
       <CardBody>
-        <div className='space-y-4'>
+        <div className='sf-space-y-4'>
           <div>
             <TextControl
               label={__('Success Message', 'subtleforms')}
@@ -545,7 +545,7 @@ function EmailSettings({ settings, updateSetting, fieldErrors = {} }) {
   return (
     <Card>
       <CardBody>
-        <div className='space-y-4'>
+        <div className='sf-space-y-4'>
           <div>
             <ToggleControl
               label={__('Admin Notifications', 'subtleforms')}
@@ -640,7 +640,7 @@ function AdvancedSettings({
   return (
     <Card>
       <CardBody>
-        <div className='space-y-4'>
+        <div className='sf-space-y-4'>
           <div>
             <ToggleControl
               label={__('Debug Mode', 'subtleforms')}

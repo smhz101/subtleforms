@@ -11,7 +11,7 @@
 	/* ================================================================
 	   CORE LAYOUT & BOX MODEL
 	   ================================================================ */
-	
+
 	.subtleforms-admin *,
 	.subtleforms-admin *::before,
 	.subtleforms-admin *::after {
@@ -21,7 +21,7 @@
 	/* ================================================================
 	   WORDPRESS COMPONENT OVERRIDES (Scoped)
 	   ================================================================ */
-	
+
 	.subtleforms-admin .components-button,
 	.subtleforms-admin .components-button.is-primary,
 	.subtleforms-admin .components-button.is-secondary {
@@ -38,7 +38,7 @@
 	/* ================================================================
 	   TABLES
 	   ================================================================ */
-	
+
 	.subtleforms-admin table {
 		border-collapse: collapse;
 	}
@@ -51,7 +51,7 @@
 	/* ================================================================
 	   CUSTOM SCROLLBAR
 	   ================================================================ */
-	
+
 	.subtleforms-scrollable {
 		overflow-x: hidden;
 		overflow-y: auto;
@@ -78,7 +78,7 @@
 	/* ================================================================
 	   BUILDER DRAG & DROP
 	   ================================================================ */
-	
+
 	.subtleforms-column-dropzone {
 		min-height: 100px;
 		padding: var(--subtleforms-dropzone-padding, 8px);
@@ -112,7 +112,7 @@
 	/* ================================================================
 	   FIELD CHROME
 	   ================================================================ */
-	
+
 	.subtleforms-field-chrome {
 		position: relative;
 		transition: all 0.2s ease;
@@ -136,7 +136,7 @@
 	/* ================================================================
 	   INSERT BUTTON
 	   ================================================================ */
-	
+
 	.subtleforms-insert-button-wrapper {
 		position: relative;
 		height: 0;
@@ -180,7 +180,7 @@
 	/* ================================================================
 	   BUTTON UTILITIES
 	   ================================================================ */
-	
+
 	.subtleforms-btn-height {
 		height: 2.25rem; /* 36px - Match WordPress button height */
 	}
@@ -201,9 +201,12 @@
 	.subtleforms-btn:focus {
 		outline: 2px solid transparent;
 		outline-offset: 2px;
-		--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-		--tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-		box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
+		--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
+			var(--tw-ring-offset-width) var(--tw-ring-offset-color);
+		--tw-ring-shadow: var(--tw-ring-inset) 0 0 0
+			calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
+		box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
+			var(--tw-shadow, 0 0 #0000);
 	}
 
 	.subtleforms-btn-primary {
@@ -239,7 +242,7 @@
 	/* ================================================================
 	   MODAL SYSTEM - Clean, Flat, Minimal
 	   ================================================================ */
-	
+
 	/* Modal Overlay */
 	.components-modal__screen-overlay {
 		background: rgba(0, 0, 0, 0.5) !important;

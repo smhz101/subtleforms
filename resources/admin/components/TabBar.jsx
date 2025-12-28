@@ -6,7 +6,7 @@ import { __ } from '@wordpress/i18n';
  */
 export default function TabBar({ tabs, activeTab, onTabChange }) {
   return (
-    <div className='flex -mb-px'>
+    <div className='sf-flex -mb-px'>
       {tabs.map((tab) => (
         <button
           key={tab.key}

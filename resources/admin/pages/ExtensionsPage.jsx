@@ -19,19 +19,19 @@ import AdminShell from '../components/AdminShell';
  */
 function ExtensionCard({ icon, title, description, features, comingSoon }) {
   return (
-    <Card className='h-full'>
+    <Card className='sf-h-full'>
       <CardBody>
-        <div className='flex flex-col h-full'>
+        <div className='sf-flex sf-flex-col sf-h-full'>
           {/* Header */}
-          <div className='flex justify-between items-start mb-4'>
-            <div className='flex items-start gap-3'>
-              <div className='bg-blue-50 p-3 rounded-lg'>{icon}</div>
+          <div className='sf-flex sf-justify-between sf-items-start sf-mb-4'>
+            <div className='sf-flex sf-items-start sf-gap-3'>
+              <div className='sf-bg-blue-50 sf-p-3 rounded-lg'>{icon}</div>
               <div>
-                <h3 className='mb-1 font-semibold text-gray-900 text-base'>
+                <h3 className='sf-mb-1 sf-font-semibold sf-text-gray-900 sf-text-base'>
                   {title}
                 </h3>
                 {comingSoon && (
-                  <span className='inline-flex items-center bg-yellow-50 px-2 py-0.5 rounded-full font-medium text-yellow-700 text-xs'>
+                  <span className='sf-inline-flex sf-items-center sf-bg-yellow-50 sf-px-2 sf-py-0.5 rounded-full sf-font-medium sf-text-yellow-700 sf-text-xs'>
                     {__('Coming Soon', 'subtleforms')}
                   </span>
                 )}
@@ -40,16 +40,16 @@ function ExtensionCard({ icon, title, description, features, comingSoon }) {
           </div>
 
           {/* Description */}
-          <p className='mb-4 text-gray-600 text-sm'>{description}</p>
+          <p className='sf-mb-4 sf-text-gray-600 sf-text-sm'>{description}</p>
 
           {/* Features */}
-          <div className='flex-1'>
-            <ul className='space-y-2 mb-4'>
+          <div className='sf-flex-1'>
+            <ul className='sf-space-y-2 sf-mb-4'>
               {features.map((feature, index) => (
                 <li
                   key={index}
-                  className='flex items-start gap-2 text-gray-600 text-sm'>
-                  <span className='mt-0.5 text-green-500'>✓</span>
+                  className='sf-flex sf-items-start sf-gap-2 sf-text-gray-600 sf-text-sm'>
+                  <span className='sf-mt-0.5 sf-text-green-500'>✓</span>
                   <span>{feature}</span>
                 </li>
               ))}
@@ -57,11 +57,11 @@ function ExtensionCard({ icon, title, description, features, comingSoon }) {
           </div>
 
           {/* Action */}
-          <div className='pt-4 border-gray-100 border-t'>
+          <div className='sf-pt-4 sf-border-gray-100 sf-border-t'>
             <Button
               variant='secondary'
               disabled={comingSoon}
-              className='justify-center w-full'>
+              className='sf-justify-center sf-w-full'>
               {comingSoon
                 ? __('Coming Soon', 'subtleforms')
                 : __('Install', 'subtleforms')}
@@ -79,7 +79,7 @@ function ExtensionCard({ icon, title, description, features, comingSoon }) {
 export default function ExtensionsPage() {
   const extensions = [
     {
-      icon: <FiCreditCard className='w-6 h-6 text-blue-600' />,
+      icon: <FiCreditCard className='sf-w-6 sf-h-6 sf-text-blue-600' />,
       title: __('Payment Gateway Integration', 'subtleforms'),
       description: __(
         'Accept payments directly through your forms with support for popular payment processors.',
@@ -94,7 +94,7 @@ export default function ExtensionsPage() {
       comingSoon: true,
     },
     {
-      icon: <FiMail className='w-6 h-6 text-purple-600' />,
+      icon: <FiMail className='sf-w-6 sf-h-6 sf-text-purple-600' />,
       title: __('Email Marketing', 'subtleforms'),
       description: __(
         'Automatically sync form submissions with your favorite email marketing services.',
@@ -109,7 +109,7 @@ export default function ExtensionsPage() {
       comingSoon: true,
     },
     {
-      icon: <FiUsers className='w-6 h-6 text-green-600' />,
+      icon: <FiUsers className='sf-w-6 sf-h-6 sf-text-green-600' />,
       title: __('CRM Integration', 'subtleforms'),
       description: __(
         'Send form data directly to your CRM and keep your contacts organized and up-to-date.',
@@ -124,7 +124,7 @@ export default function ExtensionsPage() {
       comingSoon: true,
     },
     {
-      icon: <FiBarChart2 className='w-6 h-6 text-orange-600' />,
+      icon: <FiBarChart2 className='sf-w-6 sf-h-6 sf-text-orange-600' />,
       title: __('Advanced Analytics', 'subtleforms'),
       description: __(
         'Get detailed insights into form performance with advanced analytics and reporting.',
@@ -139,7 +139,7 @@ export default function ExtensionsPage() {
       comingSoon: true,
     },
     {
-      icon: <FiShoppingCart className='w-6 h-6 text-red-600' />,
+      icon: <FiShoppingCart className='sf-w-6 sf-h-6 sf-text-red-600' />,
       title: __('E-commerce Integration', 'subtleforms'),
       description: __(
         'Connect your forms with WooCommerce and other e-commerce platforms.',
@@ -154,7 +154,7 @@ export default function ExtensionsPage() {
       comingSoon: true,
     },
     {
-      icon: <FiFileText className='w-6 h-6 text-indigo-600' />,
+      icon: <FiFileText className='sf-w-6 sf-h-6 sf-text-indigo-600' />,
       title: __('Document Generation', 'subtleforms'),
       description: __(
         'Automatically generate PDF documents from form submissions with custom templates.',
@@ -169,7 +169,7 @@ export default function ExtensionsPage() {
       comingSoon: true,
     },
     {
-      icon: <FiGlobe className='w-6 h-6 text-teal-600' />,
+      icon: <FiGlobe className='sf-w-6 sf-h-6 sf-text-teal-600' />,
       title: __('Multi-language Support', 'subtleforms'),
       description: __(
         'Create multilingual forms with automatic translation and language detection.',
@@ -184,7 +184,7 @@ export default function ExtensionsPage() {
       comingSoon: true,
     },
     {
-      icon: <FiZap className='w-6 h-6 text-yellow-600' />,
+      icon: <FiZap className='sf-w-6 sf-h-6 sf-text-yellow-600' />,
       title: __('Automation & Webhooks', 'subtleforms'),
       description: __(
         'Automate workflows and connect with thousands of apps using webhooks and Zapier.',
@@ -208,20 +208,20 @@ export default function ExtensionsPage() {
           variant='secondary'
           href='https://subtleforms.com/extensions'
           target='_blank'>
-          <FiExternalLink className='mr-1.5 w-4 h-4' />
+          <FiExternalLink className='sf-mr-1.5 sf-w-4 sf-h-4' />
           {__('Browse All Extensions', 'subtleforms')}
         </Button>
       }>
-      <div className='p-6'>
+      <div className='sf-p-6'>
         {/* Info Notice */}
-        <Notice status='info' isDismissible={false} className='mb-6'>
-          <div className='flex items-start gap-2'>
-            <FiDownloadCloud className='mt-0.5 w-5 h-5 text-blue-600' />
+        <Notice status='info' isDismissible={false} className='sf-mb-6'>
+          <div className='sf-flex sf-items-start sf-gap-2'>
+            <FiDownloadCloud className='sf-mt-0.5 sf-w-5 sf-h-5 sf-text-blue-600' />
             <div>
-              <p className='mb-1 font-medium'>
+              <p className='sf-mb-1 sf-font-medium'>
                 {__('Extend SubtleForms functionality', 'subtleforms')}
               </p>
-              <p className='text-sm'>
+              <p className='sf-text-sm'>
                 {__(
                   'These extensions are currently in development. Sign up for early access and be notified when they become available.',
                   'subtleforms'
@@ -232,19 +232,19 @@ export default function ExtensionsPage() {
         </Notice>
 
         {/* Extensions Grid */}
-        <div className='gap-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3'>
+        <div className='sf-gap-6 sf-grid sf-grid-cols-1 md:grid-cols-2 lg:grid-cols-3'>
           {extensions.map((extension, index) => (
             <ExtensionCard key={index} {...extension} />
           ))}
         </div>
 
         {/* Footer CTA */}
-        <div className='bg-gradient-to-r from-blue-50 to-purple-50 mt-8 p-6 border border-blue-100 rounded-lg'>
-          <div className='mx-auto max-w-2xl text-center'>
-            <h3 className='mb-2 font-semibold text-gray-900 text-lg'>
+        <div className='sf-bg-gradient-to-r from-blue-50 to-purple-50 sf-mt-8 sf-p-6 sf-border sf-border-blue-100 rounded-lg'>
+          <div className='sf-mx-auto sf-max-w-2xl sf-text-center'>
+            <h3 className='sf-mb-2 sf-font-semibold sf-text-gray-900 sf-text-lg'>
               {__('Have an extension idea?', 'subtleforms')}
             </h3>
-            <p className='mb-4 text-gray-600 text-sm'>
+            <p className='sf-mb-4 sf-text-gray-600 sf-text-sm'>
               {__(
                 "We're always looking for ways to improve SubtleForms. Let us know what extensions you'd like to see!",
                 'subtleforms'
@@ -254,7 +254,7 @@ export default function ExtensionsPage() {
               variant='primary'
               href='https://subtleforms.com/suggest-extension'
               target='_blank'>
-              <FiExternalLink className='mr-1.5 w-4 h-4' />
+              <FiExternalLink className='sf-mr-1.5 sf-w-4 sf-h-4' />
               {__('Suggest an Extension', 'subtleforms')}
             </Button>
           </div>

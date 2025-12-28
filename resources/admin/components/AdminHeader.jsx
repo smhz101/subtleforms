@@ -23,7 +23,7 @@ const AdminHeader = memo(function AdminHeader({ title, actions }) {
 
   return (
     <div
-      className='flex flex-shrink-0 justify-between items-center bg-white px-6 border-gray-300 border-b'
+      className='sf-flex sf-flex-shrink-0 sf-justify-between sf-items-center sf-bg-white sf-px-6 sf-border-gray-300 sf-border-b'
       style={{
         height: `${HEADER_HEIGHT}px`,
         position: 'sticky',
@@ -31,18 +31,18 @@ const AdminHeader = memo(function AdminHeader({ title, actions }) {
         zIndex: 100,
       }}>
       {/* Left Side: Logo + Title */}
-      <div className='flex items-center gap-4'>
-        <div className='flex items-center gap-3'>
+      <div className='sf-flex sf-items-center sf-gap-4'>
+        <div className='sf-flex sf-items-center sf-gap-3'>
           {/* SubtleForms Logo */}
-          <FiSquare className='w-7 h-7 text-blue-600' strokeWidth={2.5} />
-          <h1 className='m-0 font-semibold text-gray-900 text-lg leading-none'>
+          <FiSquare className='sf-w-7 sf-h-7 sf-text-blue-600' strokeWidth={2.5} />
+          <h1 className='sf-m-0 sf-font-semibold sf-text-gray-900 sf-text-lg sf-leading-none'>
             {title}
           </h1>
         </div>
       </div>
 
       {/* Right Side: Action Buttons (Context-Aware) */}
-      {actions && <div className='flex items-center gap-2'>{actions}</div>}
+      {actions && <div className='sf-flex sf-items-center sf-gap-2'>{actions}</div>}
     </div>
   );
 });

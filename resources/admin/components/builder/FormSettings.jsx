@@ -88,9 +88,9 @@ export default function FormSettings({ schema, onChange }) {
   const fieldOptions = amountFieldOptions();
 
   return (
-    <div className='bg-gray-50 p-6 h-full overflow-y-auto subtleforms-form-settings'>
-      <div className='mx-auto max-w-3xl'>
-        <h2 className='mb-6 font-semibold text-gray-900 text-xl'>
+    <div className='sf-bg-gray-50 sf-p-6 sf-h-full sf-overflow-y-auto subtleforms-form-settings'>
+      <div className='sf-mx-auto sf-max-w-3xl'>
+        <h2 className='sf-mb-6 sf-font-semibold sf-text-gray-900 sf-text-xl'>
           {__('Form Settings', 'subtleforms')}
         </h2>
 
@@ -187,7 +187,7 @@ export default function FormSettings({ schema, onChange }) {
         </Panel>
 
         {/* Canvas Layout Settings */}
-        <Panel className='mt-4'>
+        <Panel className='sf-mt-4'>
           <PanelBody
             title={__('Canvas Layout', 'subtleforms')}
             initialOpen={false}>
@@ -219,14 +219,14 @@ export default function FormSettings({ schema, onChange }) {
 
         {/* Payment Settings - Show for payment forms and conversational forms */}
         {supportsPayment && (
-          <Panel className='mt-4'>
+          <Panel className='sf-mt-4'>
             <PanelBody
               title={__('Payment Settings', 'subtleforms')}
               initialOpen={true}>
-              <div className='space-y-4'>
+              <div className='sf-space-y-4'>
                 {isConversationalForm && (
-                  <div className='bg-blue-50 p-4 border border-blue-200 rounded'>
-                    <p className='text-blue-800 text-sm'>
+                  <div className='sf-bg-blue-50 sf-p-4 sf-border sf-border-blue-200 rounded'>
+                    <p className='sf-text-blue-800 sf-text-sm'>
                       <strong>
                         {__('Conversational Payment:', 'subtleforms')}
                       </strong>{' '}
@@ -239,8 +239,8 @@ export default function FormSettings({ schema, onChange }) {
                 )}
 
                 {isPaymentForm && (
-                  <div className='bg-blue-50 p-4 border border-blue-200 rounded'>
-                    <p className='text-blue-800 text-sm'>
+                  <div className='sf-bg-blue-50 sf-p-4 sf-border sf-border-blue-200 rounded'>
+                    <p className='sf-text-blue-800 sf-text-sm'>
                       <strong>{__('Note:', 'subtleforms')}</strong>{' '}
                       {__(
                         'Payment gateway integration will be added in a future update. These settings prepare your form for payment processing.',
@@ -367,8 +367,8 @@ export default function FormSettings({ schema, onChange }) {
                       />
                     )}
 
-                    <div className='bg-yellow-50 mt-4 p-4 border border-yellow-200 rounded'>
-                      <p className='text-yellow-800 text-sm'>
+                    <div className='sf-bg-yellow-50 sf-mt-4 sf-p-4 sf-border sf-border-yellow-200 rounded'>
+                      <p className='sf-text-yellow-800 sf-text-sm'>
                         <strong>{__('Extension Point:', 'subtleforms')}</strong>{' '}
                         {__(
                           'Payment gateway settings will appear here when payment extensions are installed.',
@@ -385,11 +385,11 @@ export default function FormSettings({ schema, onChange }) {
 
         {/* Non-payment/non-conversational form message */}
         {!supportsPayment && (
-          <Panel className='mt-4'>
+          <Panel className='sf-mt-4'>
             <PanelBody
               title={__('Payment Settings', 'subtleforms')}
               initialOpen={false}>
-              <p className='text-gray-600 text-sm'>
+              <p className='sf-text-gray-600 sf-text-sm'>
                 {__(
                   'Payment settings are available for "Payment" and "Conversational" form types. Create a payment or conversational form to enable payment collection.',
                   'subtleforms'

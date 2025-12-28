@@ -96,12 +96,12 @@ export default function SubmissionsPage({ formId }) {
         />
       }
       actionBarRight={
-        <div className='flex items-center gap-2'>
+        <div className='sf-flex sf-items-center sf-gap-2'>
           {!formId && (
             <Button
               variant={showFilters ? 'primary' : 'secondary'}
               onClick={() => setShowFilters(!showFilters)}
-              className='h-9'>
+              className='sf-h-9'>
               {showFilters
                 ? __('Hide Filters', 'subtleforms')
                 : __('Filters', 'subtleforms')}
@@ -116,13 +116,13 @@ export default function SubmissionsPage({ formId }) {
       }>
       {/* Filter Bar */}
       {!formId && showFilters && (
-        <div className='flex items-center gap-4 bg-gray-50 px-6 py-4 border-gray-200 border-b'>
+        <div className='sf-flex sf-items-center sf-gap-4 sf-bg-gray-50 sf-px-6 sf-py-4 sf-border-gray-200 sf-border-b'>
           <SelectControl
             label={__('Form', 'subtleforms')}
             value={selectedFormId}
             options={formOptions}
             onChange={setSelectedFormId}
-            className='m-0'
+            className='sf-m-0'
             style={{ minWidth: '200px' }}
           />
           <SelectControl
@@ -130,14 +130,14 @@ export default function SubmissionsPage({ formId }) {
             value={dateRange}
             options={dateRangeOptions}
             onChange={setDateRange}
-            className='m-0'
+            className='sf-m-0'
             style={{ minWidth: '200px' }}
           />
           {hasActiveFilters && (
             <Button
               variant='link'
               onClick={clearFilters}
-              className='text-sm'
+              className='sf-text-sm'
               style={{ marginTop: '22px' }}>
               {__('Clear all filters', 'subtleforms')}
             </Button>

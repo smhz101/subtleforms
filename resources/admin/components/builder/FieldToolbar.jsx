@@ -117,7 +117,7 @@ export default function FieldToolbar({
       </button>
 
       {/* Separator */}
-      <div className='bg-gray-300 mx-0.5 w-px h-5'></div>
+      <div className='sf-bg-gray-300 sf-mx-0.5 sf-w-px sf-h-5'></div>
 
       {/* Move Actions */}
       {renderButton(
@@ -134,7 +134,7 @@ export default function FieldToolbar({
       )}
 
       {/* Separator */}
-      <div className='bg-gray-300 mx-0.5 w-px h-5'></div>
+      <div className='sf-bg-gray-300 sf-mx-0.5 sf-w-px sf-h-5'></div>
 
       {/* Duplicate Action */}
       {renderButton(
@@ -145,7 +145,7 @@ export default function FieldToolbar({
       )}
 
       {/* Separator */}
-      <div className='bg-gray-300 mx-0.5 w-px h-5'></div>
+      <div className='sf-bg-gray-300 sf-mx-0.5 sf-w-px sf-h-5'></div>
 
       {/* Delete Action */}
       {renderButton(

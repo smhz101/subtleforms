@@ -9,7 +9,7 @@ export default function Notices() {
   return (
     <>
       <NoticeList
-        className='mb-4 subtleforms-notices'
+        className='sf-mb-4 subtleforms-notices'
         notices={notices.filter((notice) => notice.type !== 'snackbar')}
         onRemove={removeNotice}
       />

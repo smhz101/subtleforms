@@ -17,10 +17,10 @@ export default function FieldDock({ fieldGroups, onAddField }) {
   if (!fieldGroups || Object.keys(fieldGroups).length === 0) {
     return (
       <div
-        className='flex flex-col bg-gray-50 border-gray-300 border-r transition-all duration-200'
+        className='sf-flex sf-flex-col sf-bg-gray-50 sf-border-gray-300 sf-border-r sf-transition-all sf-duration-200'
         style={{ width: collapsed ? '48px' : '280px' }}>
-        <div className='bg-white px-4 py-3 border-gray-300 border-b'>
-          <p className='m-0 text-gray-500 text-xs'>
+        <div className='sf-bg-white sf-px-4 sf-py-3 sf-border-gray-300 sf-border-b'>
+          <p className='sf-m-0 sf-text-gray-500 sf-text-xs'>
             {__('Loading fields...', 'subtleforms')}
           </p>
         </div>
@@ -30,19 +30,19 @@ export default function FieldDock({ fieldGroups, onAddField }) {
 
   return (
     <div
-      className='flex flex-col bg-gray-50 border-gray-300 border-r h-full transition-all duration-200'
+      className='sf-flex sf-flex-col sf-bg-gray-50 sf-border-gray-300 sf-border-r sf-h-full sf-transition-all sf-duration-200'
       style={{ width: collapsed ? '48px' : '280px' }}>
       {/* Sticky Header */}
-      <div className='flex flex-shrink-0 justify-between items-center bg-white px-4 py-3 border-gray-300 border-b'>
+      <div className='sf-flex sf-flex-shrink-0 sf-justify-between sf-items-center sf-bg-white sf-px-4 sf-py-3 sf-border-gray-300 sf-border-b'>
         {!collapsed && (
-          <h3 className='m-0 font-semibold text-gray-900 text-sm uppercase tracking-wide'>
+          <h3 className='sf-m-0 sf-font-semibold sf-text-gray-900 sf-text-sm sf-uppercase sf-tracking-wide'>
             {__('Fields', 'subtleforms')}
           </h3>
         )}
         <Button
           isSmall
           onClick={() => setCollapsed(!collapsed)}
-          className='px-2 py-1 min-w-0'
+          className='sf-px-2 sf-py-1 sf-min-w-0'
           title={
             collapsed
               ? __('Expand', 'subtleforms')
@@ -54,21 +54,21 @@ export default function FieldDock({ fieldGroups, onAddField }) {
 
       {/* Scrollable Content */}
       {!collapsed && (
-        <div className='flex-1 px-3 py-4 overflow-auto'>
+        <div className='sf-flex-1 sf-px-3 sf-py-4 sf-overflow-auto'>
           {Object.entries(fieldGroups).map(([category, categoryFields]) => {
             const isCollapsed = collapsedGroups[category];
             return (
-              <div key={category} className='mb-4'>
+              <div key={category} className='sf-mb-4'>
                 {/* Category Header */}
                 <button
                   type='button'
                   onClick={() => toggleGroup(category)}
-                  className='flex justify-between items-center bg-transparent mb-2 p-2 border-none outline-none w-full cursor-pointer'>
-                  <span className='font-semibold text-gray-600 text-xs uppercase tracking-wide'>
+                  className='sf-flex sf-justify-between sf-items-center sf-bg-transparent sf-mb-2 sf-p-2 sf-border-none sf-outline-none sf-w-full sf-cursor-pointer'>
+                  <span className='sf-font-semibold sf-text-gray-600 sf-text-xs sf-uppercase sf-tracking-wide'>
                     {category}
                   </span>
                   <span
-                    className='text-[10px] text-gray-500 transition-transform duration-200'
+                    className='sf-text-[10px] sf-text-gray-500 sf-transition-transform sf-duration-200'
                     style={{
                       transform: isCollapsed
                         ? 'rotate(-90deg)'
@@ -80,20 +80,20 @@ export default function FieldDock({ fieldGroups, onAddField }) {
 
                 {/* Field Cards */}
                 {!isCollapsed && (
-                  <div className='gap-2 grid grid-cols-2'>
+                  <div className='sf-gap-2 sf-grid sf-grid-cols-2'>
                     {categoryFields.map((f) => (
                       <button
                         key={f.type}
                         type='button'
                         onClick={() => onAddField(f.type)}
-                        className='flex flex-col justify-center items-center gap-1.5 bg-white hover:bg-gray-50 px-2 py-3 border border-gray-300 hover:border-blue-600 outline-none min-h-[70px] transition-all duration-150 cursor-pointer'>
-                        <span className='flex text-gray-600 text-xl'>
+                        className='sf-flex sf-flex-col sf-justify-center sf-items-center sf-gap-1.5 sf-bg-white hover:sf-bg-gray-50 sf-px-2 sf-py-3 sf-border sf-border-gray-300 hover:sf-border-blue-600 sf-outline-none sf-min-h-[70px] sf-transition-all sf-duration-150 sf-cursor-pointer'>
+                        <span className='sf-flex sf-text-gray-600 sf-text-xl'>
                           {(() => {
                             const IconComponent = getIcon(f.type);
                             return <IconComponent />;
                           })()}
                         </span>
-                        <span className='font-medium text-[11px] text-gray-900 text-center break-words leading-tight'>
+                        <span className='sf-font-medium sf-text-[11px] sf-text-gray-900 sf-text-center sf-break-words sf-leading-tight'>
                           {f.label}
                         </span>
                       </button>

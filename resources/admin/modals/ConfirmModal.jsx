@@ -40,16 +40,16 @@ export default function ConfirmModal({
       shouldCloseOnClickOutside={!isLoading}
       shouldCloseOnEsc={!isLoading}>
       <div className='subtleforms-admin'>
-        <p className='mb-6 text-gray-700 text-sm leading-relaxed'>{message}</p>
+        <p className='sf-mb-6 sf-text-gray-700 sf-text-sm sf-leading-relaxed'>{message}</p>
 
-        <div className='flex justify-end items-center gap-3'>
+        <div className='sf-flex sf-justify-end sf-items-center sf-gap-3'>
           {onSecondary && secondaryText && (
             <Button
               variant='secondary'
               onClick={onSecondary}
               disabled={isLoading}
               isDestructive={confirmVariant === 'primary'}
-              className='px-4 h-9 text-sm'>
+              className='sf-px-4 sf-h-9 sf-text-sm'>
               {secondaryText}
             </Button>
           )}
@@ -58,7 +58,7 @@ export default function ConfirmModal({
             variant='tertiary'
             onClick={onClose}
             disabled={isLoading}
-            className='px-4 h-9 text-sm'>
+            className='sf-px-4 sf-h-9 sf-text-sm'>
             {cancelText}
           </Button>
 
@@ -67,7 +67,7 @@ export default function ConfirmModal({
             onClick={onConfirm}
             disabled={isLoading}
             isDestructive={confirmVariant === 'destructive'}
-            className='px-4 h-9 text-sm'>
+            className='sf-px-4 sf-h-9 sf-text-sm'>
             {isLoading ? __('Processing...', 'subtleforms') : confirmText}
           </Button>
         </div>

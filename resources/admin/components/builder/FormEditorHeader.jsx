@@ -96,11 +96,11 @@ export default function FormEditorHeader({
   };
 
   return (
-    <div className='top-0 z-[100] sticky flex justify-between items-center bg-white px-6 border-gray-300 border-b h-[60px]'>
+    <div className='sf-top-0 sf-z-[100] sf-sticky sf-flex sf-justify-between sf-items-center sf-bg-white sf-px-6 sf-border-gray-300 sf-border-b sf-h-[60px]'>
       {/* Left Section */}
-      <div className='flex items-center gap-4'>
+      <div className='sf-flex sf-items-center sf-gap-4'>
         {/* Logo/Icon */}
-        <div className='flex justify-center items-center bg-blue-600 w-8 h-8 font-bold text-white text-base'>
+        <div className='sf-flex sf-justify-center sf-items-center sf-bg-blue-600 sf-w-8 sf-h-8 sf-font-bold sf-text-white sf-text-base'>
           SF
         </div>
 
@@ -113,13 +113,13 @@ export default function FormEditorHeader({
             onChange={(e) => setTempTitle(e.target.value)}
             onBlur={handleTitleBlur}
             onKeyDown={handleTitleKeyDown}
-            className='bg-white px-2 py-1 border border-blue-600 outline-none min-w-[200px] font-semibold text-gray-900 text-base'
+            className='sf-bg-white sf-px-2 sf-py-1 sf-border sf-border-blue-600 sf-outline-none sf-min-w-[200px] sf-font-semibold sf-text-gray-900 sf-text-base'
           />
         ) : (
           <button
             type='button'
             onClick={handleTitleClick}
-            className='bg-transparent px-2 py-1 border-none outline-none font-semibold text-gray-900 hover:text-blue-600 text-base cursor-pointer'
+            className='sf-bg-transparent sf-px-2 sf-py-1 sf-border-none sf-outline-none sf-font-semibold sf-text-gray-900 hover:text-blue-600 sf-text-base sf-cursor-pointer'
             onMouseEnter={(e) => {
               e.currentTarget.style.color = '#2271b1';
             }}
@@ -164,11 +164,11 @@ export default function FormEditorHeader({
       </div>
 
       {/* Right Section */}
-      <div className='flex items-center gap-4'>
+      <div className='sf-flex sf-items-center sf-gap-4'>
         {/* Save Status */}
-        <div className='flex items-center gap-1.5 text-gray-700 text-xs'>
+        <div className='sf-flex sf-items-center sf-gap-1.5 sf-text-gray-700 sf-text-xs'>
           <span
-            className='rounded-full w-1.5 h-1.5'
+            className='rounded-full sf-w-1.5 sf-h-1.5'
             style={{ background: getStatusColor() }}
           />
           {getStatusText()}
@@ -180,7 +180,7 @@ export default function FormEditorHeader({
             variant='primary'
             onClick={onSave}
             disabled={saving}
-            className='px-4 h-9'>
+            className='sf-px-4 sf-h-9'>
             {saving
               ? __('Saving...', 'subtleforms')
               : __('Save', 'subtleforms')}
@@ -192,7 +192,7 @@ export default function FormEditorHeader({
           icon={close}
           label={__('Close Editor', 'subtleforms')}
           onClick={onClose}
-          className='border border-gray-300 w-9 h-9'
+          className='sf-border sf-border-gray-300 sf-w-9 sf-h-9'
         />
       </div>
     </div>

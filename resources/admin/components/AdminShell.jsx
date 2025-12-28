@@ -43,14 +43,14 @@ export default function AdminShell({
 
   return (
     <div className='subtleforms-admin'>
-      <div className='flex flex-col bg-white h-[calc(100vh-var(--wp-admin--admin-bar--height,32px))] testig'>
+      <div className='sf-flex sf-flex-col sf-bg-white sf-h-[calc(100vh-var(--wp-admin--admin-bar--height,32px))] testig'>
         {/* TOP BAR - Sticky Header Component */}
         <AdminHeader title={title} actions={actions} />
 
         {/* ACTION BAR - Sticky ActionBar Component */}
         {(actionBarLeft || actionBarRight) && (
           <div
-            className='flex-shrink-0'
+            className='sf-flex-shrink-0'
             style={{
               position: 'sticky',
               top: `${WP_ADMIN_BAR_HEIGHT}px`,
@@ -61,12 +61,12 @@ export default function AdminShell({
         )}
 
         {/* CONTENT AREA - Scrollable */}
-        <div className='flex-1 overflow-hidden'>
+        <div className='sf-flex-1 sf-overflow-hidden'>
           <div
             className={`h-full flex flex-col ${
               noScroll ? 'overflow-hidden' : 'overflow-y-auto'
             }`}>
-            <div className='empty:hidden flex-shrink-0 px-6 pt-4'>
+            <div className='empty:hidden sf-flex-shrink-0 sf-px-6 sf-pt-4'>
               <Notices />
             </div>
             <div className={`flex-1 ${noScroll ? 'overflow-hidden' : ''}`}>
@@ -77,7 +77,7 @@ export default function AdminShell({
 
         {/* BOTTOM BAR - Pagination */}
         {pagination && (
-          <div className='flex-shrink-0 bg-white px-6 py-3 border-gray-300 border-t'>
+          <div className='sf-flex-shrink-0 sf-bg-white sf-px-6 sf-py-3 sf-border-gray-300 sf-border-t'>
             {pagination}
           </div>
         )}
