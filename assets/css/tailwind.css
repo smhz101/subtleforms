@@ -366,4 +366,43 @@
 		background-color: #ffffff !important;
 		margin: 0 !important;
 	}
+
+	/* Preview Modal */
+	.subtleforms-preview-modal .components-modal__frame {
+		border: 1px solid #d1d5db !important;
+		background: #ffffff !important;
+		max-width: 800px !important;
+		box-shadow:
+			0 20px 25px -5px rgba(0, 0, 0, 0.1),
+			0 10px 10px -5px rgba(0, 0, 0, 0.04) !important;
+	}
+
+	.subtleforms-preview-modal .components-modal__header {
+		border-bottom: 1px solid #e5e7eb !important;
+		padding: 20px 24px !important;
+		background: #ffffff !important;
+	}
+
+	.subtleforms-preview-modal .components-modal__content {
+		padding: 24px !important;
+		background-color: #f9fafb !important;
+		margin: 0 !important;
+	}
+
+	.subtleforms-preview-modal .components-modal__header-heading {
+		font-size: 18px !important;
+		font-weight: 600 !important;
+		color: #111827 !important;
+	}
+
+	.subtleforms-preview-modal .components-button.has-icon {
+		color: #6b7280 !important;
+		transition: all 0.15s ease !important;
+		background: transparent !important;
+	}
+
+	.subtleforms-preview-modal .components-button.has-icon:hover {
+		color: #374151 !important;
+		background-color: #f3f4f6 !important;
+	}
 }
