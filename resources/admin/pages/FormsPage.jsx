@@ -1,7 +1,7 @@
 import { useState, useEffect } from '@wordpress/element';
 import { Button, SearchControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { FiPlus } from 'react-icons/fi';
+import Icon from '../components/ui/Icon';
 import AdminShell from '../components/AdminShell';
 import TabBar from '../components/TabBar';
 import FormsList from '../components/FormsList';
@@ -145,7 +145,7 @@ export default function FormsPage() {
               onClick={() => {
                 window.location.href = 'admin.php?page=subtleforms-new-form';
               }}>
-              <FiPlus className='sf-inline sf-mr-2 sf-w-4 sf-h-4' />
+              <Icon.Add className='sf-inline sf-mr-2 sf-w-4 sf-h-4' />
               {__('New Form', 'subtleforms')}
             </Button>
           </div>

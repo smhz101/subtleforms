@@ -1,17 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import { Card, CardBody, Button, Notice } from '@wordpress/components';
-import {
-  FiCreditCard,
-  FiMail,
-  FiUsers,
-  FiBarChart2,
-  FiShoppingCart,
-  FiFileText,
-  FiGlobe,
-  FiZap,
-  FiDownloadCloud,
-  FiExternalLink,
-} from 'react-icons/fi';
+import Icon from '../components/ui/Icon';
 import AdminShell from '../components/AdminShell';
 
 /**
@@ -79,7 +68,7 @@ function ExtensionCard({ icon, title, description, features, comingSoon }) {
 export default function ExtensionsPage() {
   const extensions = [
     {
-      icon: <FiCreditCard className='sf-w-6 sf-h-6 sf-text-blue-600' />,
+      icon: <Icon.CreditCard className='sf-w-6 sf-h-6 sf-text-blue-600' />,
       title: __('Payment Gateway Integration', 'subtleforms'),
       description: __(
         'Accept payments directly through your forms with support for popular payment processors.',
@@ -94,7 +83,7 @@ export default function ExtensionsPage() {
       comingSoon: true,
     },
     {
-      icon: <FiMail className='sf-w-6 sf-h-6 sf-text-purple-600' />,
+      icon: <Icon.Mail className='sf-w-6 sf-h-6 sf-text-purple-600' />,
       title: __('Email Marketing', 'subtleforms'),
       description: __(
         'Automatically sync form submissions with your favorite email marketing services.',
@@ -109,7 +98,7 @@ export default function ExtensionsPage() {
       comingSoon: true,
     },
     {
-      icon: <FiUsers className='sf-w-6 sf-h-6 sf-text-green-600' />,
+      icon: <Icon.Users className='sf-w-6 sf-h-6 sf-text-green-600' />,
       title: __('CRM Integration', 'subtleforms'),
       description: __(
         'Send form data directly to your CRM and keep your contacts organized and up-to-date.',
@@ -124,7 +113,7 @@ export default function ExtensionsPage() {
       comingSoon: true,
     },
     {
-      icon: <FiBarChart2 className='sf-w-6 sf-h-6 sf-text-orange-600' />,
+      icon: <Icon.BarChart2 className='sf-w-6 sf-h-6 sf-text-orange-600' />,
       title: __('Advanced Analytics', 'subtleforms'),
       description: __(
         'Get detailed insights into form performance with advanced analytics and reporting.',
@@ -139,7 +128,7 @@ export default function ExtensionsPage() {
       comingSoon: true,
     },
     {
-      icon: <FiShoppingCart className='sf-w-6 sf-h-6 sf-text-red-600' />,
+      icon: <Icon.ShoppingCart className='sf-w-6 sf-h-6 sf-text-red-600' />,
       title: __('E-commerce Integration', 'subtleforms'),
       description: __(
         'Connect your forms with WooCommerce and other e-commerce platforms.',
@@ -154,7 +143,7 @@ export default function ExtensionsPage() {
       comingSoon: true,
     },
     {
-      icon: <FiFileText className='sf-w-6 sf-h-6 sf-text-indigo-600' />,
+      icon: <Icon.FileText className='sf-w-6 sf-h-6 sf-text-indigo-600' />,
       title: __('Document Generation', 'subtleforms'),
       description: __(
         'Automatically generate PDF documents from form submissions with custom templates.',
@@ -169,7 +158,7 @@ export default function ExtensionsPage() {
       comingSoon: true,
     },
     {
-      icon: <FiGlobe className='sf-w-6 sf-h-6 sf-text-teal-600' />,
+      icon: <Icon.Globe className='sf-w-6 sf-h-6 sf-text-teal-600' />,
       title: __('Multi-language Support', 'subtleforms'),
       description: __(
         'Create multilingual forms with automatic translation and language detection.',
@@ -184,7 +173,7 @@ export default function ExtensionsPage() {
       comingSoon: true,
     },
     {
-      icon: <FiZap className='sf-w-6 sf-h-6 sf-text-yellow-600' />,
+      icon: <Icon.Zap className='sf-w-6 sf-h-6 sf-text-yellow-600' />,
       title: __('Automation & Webhooks', 'subtleforms'),
       description: __(
         'Automate workflows and connect with thousands of apps using webhooks and Zapier.',
@@ -208,7 +197,7 @@ export default function ExtensionsPage() {
           variant='secondary'
           href='https://subtleforms.com/extensions'
           target='_blank'>
-          <FiExternalLink className='sf-mr-1.5 sf-w-4 sf-h-4' />
+          <Icon.ExternalLink className='sf-mr-1.5 sf-w-4 sf-h-4' />
           {__('Browse All Extensions', 'subtleforms')}
         </Button>
       }>
@@ -216,7 +205,7 @@ export default function ExtensionsPage() {
         {/* Info Notice */}
         <Notice status='info' isDismissible={false} className='sf-mb-6'>
           <div className='sf-flex sf-items-start sf-gap-2'>
-            <FiDownloadCloud className='sf-mt-0.5 sf-w-5 sf-h-5 sf-text-blue-600' />
+            <Icon.DownloadCloud className='sf-mt-0.5 sf-w-5 sf-h-5 sf-text-blue-600' />
             <div>
               <p className='sf-mb-1 sf-font-medium'>
                 {__('Extend SubtleForms functionality', 'subtleforms')}
@@ -254,7 +243,7 @@ export default function ExtensionsPage() {
               variant='primary'
               href='https://subtleforms.com/suggest-extension'
               target='_blank'>
-              <FiExternalLink className='sf-mr-1.5 sf-w-4 sf-h-4' />
+              <Icon.ExternalLink className='sf-mr-1.5 sf-w-4 sf-h-4' />
               {__('Suggest an Extension', 'subtleforms')}
             </Button>
           </div>

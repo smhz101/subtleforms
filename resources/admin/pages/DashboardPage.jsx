@@ -10,18 +10,7 @@ import {
 import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import clsx from 'clsx';
-import {
-  FiFileText,
-  FiLayers,
-  FiList,
-  FiMessageCircle,
-  FiCreditCard,
-  FiDatabase,
-  FiCalendar,
-  FiTrendingUp,
-  FiCheckCircle,
-  FiAlertCircle,
-} from 'react-icons/fi';
+import Icon from '../components/ui/Icon';
 import AdminShell from '../components/AdminShell';
 import './DashboardPage.css';
 
@@ -113,7 +102,7 @@ export default function Dashboard() {
             title={__('Total Forms', 'subtleforms')}
             value={stats.total_forms}
             subtitle={`${stats.published_forms} published, ${stats.draft_forms} draft`}
-            icon={<FiFileText className='sf-w-6 sf-h-6 sf-text-blue-600' />}
+            icon={<Icon.FileText className='sf-w-6 sf-h-6 sf-text-blue-600' />}
             link='admin.php?page=subtleforms-forms'
           />
           <StatCard
@@ -124,20 +113,20 @@ export default function Dashboard() {
                 ? `${stats.avg_submissions_per_form} avg per form`
                 : __('No published forms', 'subtleforms')
             }
-            icon={<FiDatabase className='sf-w-6 sf-h-6 sf-text-green-600' />}
+            icon={<Icon.Database className='sf-w-6 sf-h-6 sf-text-green-600' />}
             link='admin.php?page=subtleforms-submissions'
           />
           <StatCard
             title={__('Submissions Today', 'subtleforms')}
             value={stats.submissions_today}
             subtitle={__('Last 24 hours', 'subtleforms')}
-            icon={<FiCalendar className='sf-w-6 sf-h-6 sf-text-purple-600' />}
+            icon={<Icon.Calendar className='sf-w-6 sf-h-6 sf-text-purple-600' />}
           />
           <StatCard
             title={__('Submissions This Week', 'subtleforms')}
             value={stats.submissions_this_week}
             subtitle={__('Last 7 days', 'subtleforms')}
-            icon={<FiTrendingUp className='sf-w-6 sf-h-6 sf-text-orange-600' />}
+            icon={<Icon.TrendingUp className='sf-w-6 sf-h-6 sf-text-orange-600' />}
           />
         </div>
 
@@ -231,27 +220,27 @@ export default function Dashboard() {
                               const formType = form.metadata?.type || 'regular';
                               const typeConfig = {
                                 regular: {
-                                  icon: FiFileText,
+                                  icon: Icon.FileText,
                                   label: __('Regular', 'subtleforms'),
                                   color: 'gray',
                                 },
                                 multistep: {
-                                  icon: FiLayers,
+                                  icon: Icon.Layers,
                                   label: __('Multi-step', 'subtleforms'),
                                   color: 'purple',
                                 },
                                 sectioned: {
-                                  icon: FiList,
+                                  icon: Icon.List,
                                   label: __('Sectioned', 'subtleforms'),
                                   color: 'indigo',
                                 },
                                 conversational: {
-                                  icon: FiMessageCircle,
+                                  icon: Icon.MessageCircle,
                                   label: __('Conversational', 'subtleforms'),
                                   color: 'blue',
                                 },
                                 payment: {
-                                  icon: FiCreditCard,
+                                  icon: Icon.CreditCard,
                                   label: __('Payment', 'subtleforms'),
                                   color: 'green',
                                 },
@@ -262,7 +251,7 @@ export default function Dashboard() {
                               return (
                                 <span
                                   className={clsx(
-                                    'sf-inline-flex sf-items-center sf-gap-1 sf-px-2 sf-py-0.5 sf-text-xs sf-font-medium sf-border',
+                                    'sf-inline-flex sf-items-center sf-gap-1 sf-px-2 sf-py-0.5 sf-border sf-font-medium sf-text-xs',
                                     {
                                       'sf-bg-gray-50 sf-text-gray-600 sf-border-gray-200':
                                         config.color === 'gray',
@@ -340,7 +329,7 @@ export default function Dashboard() {
                 <h2>{__('System Health', 'subtleforms')}</h2>
                 <span
                   className={clsx(
-                    'sf-inline-flex sf-items-center sf-gap-1.5 sf-px-2.5 sf-py-1 sf-text-xs sf-font-medium sf-rounded-full',
+                    'sf-inline-flex sf-items-center sf-gap-1.5 sf-px-2.5 sf-py-1 sf-rounded-full sf-font-medium sf-text-xs',
                     {
                       'sf-bg-green-50 sf-text-green-700':
                         system_health.status === 'healthy',
@@ -350,12 +339,12 @@ export default function Dashboard() {
                   )}>
                   {system_health.status === 'healthy' ? (
                     <>
-                      <FiCheckCircle className='sf-w-3.5 sf-h-3.5' />{' '}
+                      <Icon.CheckCircle className='sf-w-3.5 sf-h-3.5' />{' '}
                       {__('Healthy', 'subtleforms')}
                     </>
                   ) : (
                     <>
-                      <FiAlertCircle className='sf-w-3.5 sf-h-3.5' />{' '}
+                      <Icon.AlertCircle className='sf-w-3.5 sf-h-3.5' />{' '}
                       {__('Warning', 'subtleforms')}
                     </>
                   )}

@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { FiArrowUp, FiArrowDown, FiCopy, FiTrash2 } from 'react-icons/fi';
+import Icon from '../ui/Icon';
 import clsx from 'clsx';
 import { getIcon } from './utils/iconMap';
 
@@ -59,25 +59,25 @@ export default function ContainerWrapper({
               onClick={() => onMoveUp(path)}
               className='hover:sf-bg-gray-200 sf-p-1 sf-rounded'
               title={__('Move Up', 'subtleforms')}>
-              <FiArrowUp className='sf-w-4 sf-h-4' />
+              <Icon.Up className='sf-w-4 sf-h-4' />
             </button>
             <button
               onClick={() => onMoveDown(path)}
               className='hover:sf-bg-gray-200 sf-p-1 sf-rounded'
               title={__('Move Down', 'subtleforms')}>
-              <FiArrowDown className='sf-w-4 sf-h-4' />
+              <Icon.Down className='sf-w-4 sf-h-4' />
             </button>
             <button
               onClick={() => onDuplicate(path)}
               className='hover:sf-bg-gray-200 sf-p-1 sf-rounded'
               title={__('Duplicate', 'subtleforms')}>
-              <FiCopy className='sf-w-4 sf-h-4' />
+              <Icon.Copy className='sf-w-4 sf-h-4' />
             </button>
             <button
               onClick={() => onDelete(path)}
               className='hover:sf-bg-red-100 sf-p-1 sf-rounded sf-text-red-600'
               title={__('Delete', 'subtleforms')}>
-              <FiTrash2 className='sf-w-4 sf-h-4' />
+              <Icon.Delete className='sf-w-4 sf-h-4' />
             </button>
           </div>
         )}

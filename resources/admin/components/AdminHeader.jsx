@@ -1,5 +1,5 @@
 import { memo } from '@wordpress/element';
-import { FiSquare } from 'react-icons/fi';
+import Icon from './ui/Icon';
 
 /**
  * AdminHeader - Sticky Header Component
@@ -34,7 +34,7 @@ const AdminHeader = memo(function AdminHeader({ title, actions }) {
       <div className='sf-flex sf-items-center sf-gap-4'>
         <div className='sf-flex sf-items-center sf-gap-3'>
           {/* SubtleForms Logo */}
-          <FiSquare
+          <Icon.Square
             className='sf-w-7 sf-h-7 sf-text-blue-600'
             strokeWidth={2.5}
           />

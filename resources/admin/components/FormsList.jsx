@@ -12,24 +12,8 @@ import {
 import { __, sprintf } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
-import {
-  FiMoreVertical,
-  FiEdit2,
-  FiTrash2,
-  FiCopy,
-  FiEye,
-  FiCheckCircle,
-  FiPlus,
-  FiFileText,
-  FiEdit,
-  FiPackage,
-  FiLayers,
-  FiColumns,
-  FiList,
-  FiMessageCircle,
-  FiCreditCard,
-} from 'react-icons/fi';
 import clsx from 'clsx';
+import Icon from './ui/Icon';
 import DataTable from './DataTable';
 import { ConfirmModal } from '../modals';
 
@@ -149,27 +133,27 @@ export default function FormsList({
           regular: {
             classes: 'bg-gray-50 text-gray-700 border-gray-200',
             label: __('Regular', 'subtleforms'),
-            icon: FiFileText,
+            icon: Icon.FileText,
           },
           multistep: {
             classes: 'bg-purple-50 text-purple-700 border-purple-200',
             label: __('Multi-step', 'subtleforms'),
-            icon: FiLayers,
+            icon: Icon.Layers,
           },
           sectioned: {
             classes: 'bg-indigo-50 text-indigo-700 border-indigo-200',
             label: __('Sectioned', 'subtleforms'),
-            icon: FiList,
+            icon: Icon.List,
           },
           conversational: {
             classes: 'bg-blue-50 text-blue-700 border-blue-200',
             label: __('Conversational', 'subtleforms'),
-            icon: FiMessageCircle,
+            icon: Icon.MessageCircle,
           },
           payment: {
             classes: 'bg-green-50 text-green-700 border-green-200',
             label: __('Payment', 'subtleforms'),
-            icon: FiCreditCard,
+            icon: Icon.CreditCard,
           },
         };
 
@@ -203,12 +187,12 @@ export default function FormsList({
           published: {
             classes: 'bg-emerald-50 text-emerald-700 border-emerald-200',
             label: __('Published', 'subtleforms'),
-            icon: FiCheckCircle,
+            icon: Icon.CheckCircle,
           },
           archived: {
             classes: 'bg-gray-50 text-gray-600 border-gray-200',
             label: __('Archived', 'subtleforms'),
-            icon: FiPackage,
+            icon: Icon.Package,
           },
         };
 
@@ -245,7 +229,7 @@ export default function FormsList({
             <code className='sf-font-mono sf-text-gray-600 group-hover:sf-text-gray-900'>
               {shortcode}
             </code>
-            <FiCopy className='sf-flex-shrink-0 sf-w-3 sf-h-3 sf-text-gray-400 group-hover:sf-text-gray-600' />
+            <Icon.Copy className='sf-flex-shrink-0 sf-w-3 sf-h-3 sf-text-gray-400 group-hover:sf-text-gray-600' />
           </button>
         );
       },
@@ -329,7 +313,7 @@ export default function FormsList({
             }}
             className='hover:sf-bg-gray-100 sf-p-1 sf-rounded'
             title={__('Edit', 'subtleforms')}>
-            <FiEdit2 className='sf-w-4 sf-h-4 sf-text-gray-600' />
+            <Icon.Edit className='sf-w-4 sf-h-4 sf-text-gray-600' />
           </button>
           <Dropdown
             renderToggle={({ onToggle }) => (
@@ -340,7 +324,7 @@ export default function FormsList({
                 }}
                 className='hover:sf-bg-gray-100 sf-p-1 sf-rounded'
                 title={__('More actions', 'subtleforms')}>
-                <FiMoreVertical className='sf-w-4 sf-h-4 sf-text-gray-600' />
+                <Icon.MoreVertical className='sf-w-4 sf-h-4 sf-text-gray-600' />
               </button>
             )}
             renderContent={({ onClose }) => (
@@ -353,7 +337,7 @@ export default function FormsList({
                     onClose();
                   }}>
                   <div className='sf-flex sf-items-center sf-gap-2'>
-                    <FiCheckCircle className='sf-w-4 sf-h-4' />
+                    <Icon.CheckCircle className='sf-w-4 sf-h-4' />
                     {__('Change status', 'subtleforms')}
                   </div>
                 </MenuItem>
@@ -364,7 +348,7 @@ export default function FormsList({
                     onClose();
                   }}>
                   <div className='sf-flex sf-items-center sf-gap-2'>
-                    <FiCopy className='sf-w-4 sf-h-4' />
+                    <Icon.Copy className='sf-w-4 sf-h-4' />
                     {__('Duplicate', 'subtleforms')}
                   </div>
                 </MenuItem>
@@ -375,7 +359,7 @@ export default function FormsList({
                     onClose();
                   }}>
                   <div className='sf-flex sf-items-center sf-gap-2'>
-                    <FiEye className='sf-w-4 sf-h-4' />
+                    <Icon.Eye className='sf-w-4 sf-h-4' />
                     {__('View submissions', 'subtleforms')}
                   </div>
                 </MenuItem>
@@ -387,7 +371,7 @@ export default function FormsList({
                   }}
                   isDestructive>
                   <div className='sf-flex sf-items-center sf-gap-2 sf-text-red-600'>
-                    <FiTrash2 className='sf-w-4 sf-h-4' />
+                    <Icon.Delete className='sf-w-4 sf-h-4' />
                     {__('Delete', 'subtleforms')}
                   </div>
                 </MenuItem>
@@ -701,7 +685,7 @@ export default function FormsList({
                 onClick={() =>
                   (window.location.href = 'admin.php?page=subtleforms-new-form')
                 }>
-                <FiPlus className='sf-inline sf-mr-2 sf-w-4 sf-h-4' />
+                <Icon.Add className='sf-inline sf-mr-2 sf-w-4 sf-h-4' />
                 {__('New Form', 'subtleforms')}
               </Button>
             )}

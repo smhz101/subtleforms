@@ -9,16 +9,7 @@ import {
   TextareaControl,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
-import {
-  FiFile,
-  FiColumns,
-  FiLayers,
-  FiList,
-  FiCheckCircle,
-  FiLoader,
-  FiMessageCircle,
-  FiCreditCard,
-} from 'react-icons/fi';
+import Icon from '../components/ui/Icon';
 import clsx from 'clsx';
 
 const restBase =
@@ -152,14 +143,14 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
       id: 'blank',
       title: __('Blank Form', 'subtleforms'),
       description: __('Start from scratch.', 'subtleforms'),
-      icon: FiFile,
+      icon: Icon.File,
       disabled: false,
     },
     {
       id: 'preset',
       title: __('Preset Template', 'subtleforms'),
       description: __('Coming soon.', 'subtleforms'),
-      icon: FiLayers,
+      icon: Icon.Layers,
       disabled: true,
     },
   ];
@@ -172,7 +163,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         'Single page form. Best for contact forms, leads.',
         'subtleforms'
       ),
-      icon: FiFile,
+      icon: Icon.File,
     },
     {
       id: 'multistep',
@@ -181,13 +172,13 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         'Broken into steps. Best for applications, surveys.',
         'subtleforms'
       ),
-      icon: FiColumns,
+      icon: Icon.Columns,
     },
     {
       id: 'sectioned',
       title: __('Sectioned', 'subtleforms'),
       description: __('Grouped fields. Best for long forms.', 'subtleforms'),
-      icon: FiList,
+      icon: Icon.List,
     },
     {
       id: 'conversational',
@@ -196,7 +187,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         'One question at a time. Best for engaging surveys, quizzes.',
         'subtleforms'
       ),
-      icon: FiMessageCircle,
+      icon: Icon.MessageCircle,
     },
     {
       id: 'payment',
@@ -205,7 +196,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         'Collect payments. Best for orders, bookings, donations.',
         'subtleforms'
       ),
-      icon: FiCreditCard,
+      icon: Icon.CreditCard,
     },
   ];
 
@@ -221,7 +212,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         onClick={() => !isDisabled && onSelect(option.id)}
         disabled={isDisabled}
         className={clsx(
-          'sf-group sf-relative sf-flex sf-transition-all sf-duration-150 sf-w-full sf-border sf-focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+          'sf-group sf-relative sf-flex sf-border sf-focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sf-w-full sf-transition-all sf-duration-150',
           isHorizontal
             ? 'sf-flex-row sf-items-center sf-gap-3 sf-p-3 sf-text-left'
             : 'sf-flex-col sf-items-center sf-text-center sf-p-4',
@@ -266,7 +257,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
 
         {isSelected && (
           <div className='sf-top-2 sf-right-2 sf-absolute sf-text-blue-600'>
-            <FiCheckCircle className='sf-w-4 sf-h-4' />
+            <Icon.CheckCircle className='sf-w-4 sf-h-4' />
           </div>
         )}
 
@@ -421,7 +412,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
             disabled={step === 1 ? !title.trim() : creating || !formType}
             className='sf-inline-flex sf-items-center sf-bg-blue-600 hover:sf-bg-blue-700 disabled:sf-opacity-50 sf-px-4 sf-py-2 focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-blue-500 focus:sf-ring-offset-2 sf-font-medium sf-text-white sf-text-sm sf-transition-colors disabled:sf-cursor-not-allowed'>
             {creating && (
-              <FiLoader className='sf-mr-2 -ml-1 sf-w-4 sf-h-4 sf-text-white sf-animate-spin' />
+              <Icon.Loader className='sf-mr-2 -ml-1 sf-w-4 sf-h-4 sf-text-white sf-animate-spin' />
             )}
             {step === 1
               ? __('Next Step', 'subtleforms')

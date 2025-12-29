@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import Icon from './ui/Icon';
 import clsx from 'clsx';
 
 const TOUR_STEPS = [
@@ -259,7 +259,7 @@ export default function BuilderTour({ onComplete, onSkip }) {
       <div
         ref={tooltipRef}
         className={clsx(
-          'sf-fixed sf-z-50 sf-bg-white sf-rounded-lg sf-shadow-2xl sf-p-6 sf-max-w-md',
+          'sf-z-50 sf-fixed sf-bg-white sf-shadow-2xl sf-p-6 sf-rounded-lg sf-max-w-md',
           'sf-transition-opacity sf-duration-300',
           isPositioned ? 'opacity-100' : 'opacity-0'
         )}
@@ -274,7 +274,7 @@ export default function BuilderTour({ onComplete, onSkip }) {
           onClick={handleSkip}
           className='sf-top-4 sf-right-4 sf-absolute sf-text-gray-400 hover:sf-text-gray-600 sf-transition-colors'
           aria-label={__('Close tour', 'subtleforms')}>
-          <FiX className='sf-w-5 sf-h-5' />
+          <Icon.Close className='sf-w-5 sf-h-5' />
         </button>
 
         {/* Progress */}
@@ -310,7 +310,7 @@ export default function BuilderTour({ onComplete, onSkip }) {
           <div>
             {currentStep > 0 && (
               <Button isSecondary onClick={handlePrev}>
-                <FiChevronLeft className='sf-inline sf-mr-1 sf-w-4 sf-h-4' />
+                <Icon.Left className='sf-inline sf-mr-1 sf-w-4 sf-h-4' />
                 {__('Back', 'subtleforms')}
               </Button>
             )}
@@ -325,7 +325,7 @@ export default function BuilderTour({ onComplete, onSkip }) {
               ) : (
                 <>
                   {__('Next', 'subtleforms')}
-                  <FiChevronRight className='sf-inline sf-ml-1 sf-w-4 sf-h-4' />
+                  <Icon.Right className='sf-inline sf-ml-1 sf-w-4 sf-h-4' />
                 </>
               )}
             </Button>

@@ -1,6 +1,6 @@
 import { Modal, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { FiX } from 'react-icons/fi';
+import Icon from './ui/Icon';
 
 export default function FormPreviewModal({ schema, onClose }) {
   if (!schema || !schema.fields) {
@@ -266,7 +266,7 @@ export default function FormPreviewModal({ schema, onClose }) {
           <button
             onClick={onClose}
             className='sf-p-2 sf-text-gray-400 hover:sf-text-gray-600'>
-            <FiX className='sf-w-5 sf-h-5' />
+            <Icon.Close className='sf-w-5 sf-h-5' />
           </button>
         </div>
       }

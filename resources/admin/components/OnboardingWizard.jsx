@@ -1,52 +1,42 @@
 import { useState } from '@wordpress/element';
 import { Modal, Button, CheckboxControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import {
-  FiFileText,
-  FiMail,
-  FiClipboard,
-  FiCreditCard,
-  FiMessageCircle,
-  FiLayers,
-  FiColumns,
-  FiList,
-  FiCheckCircle,
-} from 'react-icons/fi';
 import clsx from 'clsx';
+import Icon from './ui/Icon';
 
 const FORM_GOALS = [
   {
     id: 'contact',
     label: __('Contact Form', 'subtleforms'),
-    icon: FiMail,
+    icon: Icon.Mail,
     description: __('Simple contact form for inquiries', 'subtleforms'),
     fields: ['name', 'email', 'message'],
   },
   {
     id: 'lead',
     label: __('Lead Capture', 'subtleforms'),
-    icon: FiClipboard,
+    icon: Icon.Clipboard,
     description: __('Capture leads with essential info', 'subtleforms'),
     fields: ['name', 'email', 'company', 'phone'],
   },
   {
     id: 'survey',
     label: __('Survey', 'subtleforms'),
-    icon: FiList,
+    icon: Icon.List,
     description: __('Collect feedback and opinions', 'subtleforms'),
     fields: ['name', 'email', 'rating', 'feedback'],
   },
   {
     id: 'payment',
     label: __('Payment Form', 'subtleforms'),
-    icon: FiCreditCard,
+    icon: Icon.CreditCard,
     description: __('Accept payments online', 'subtleforms'),
     fields: ['name', 'email', 'amount', 'payment'],
   },
   {
     id: 'conversational',
     label: __('Conversational', 'subtleforms'),
-    icon: FiMessageCircle,
+    icon: Icon.MessageCircle,
     description: __('Chat-like interactive form', 'subtleforms'),
     fields: ['name', 'email', 'message'],
   },
@@ -56,25 +46,25 @@ const FORM_TYPES = [
   {
     id: 'regular',
     label: __('Regular', 'subtleforms'),
-    icon: FiFileText,
+    icon: Icon.FileText,
     description: __('Standard single-page form', 'subtleforms'),
   },
   {
     id: 'multi-step',
     label: __('Multi-Step', 'subtleforms'),
-    icon: FiLayers,
+    icon: Icon.Layers,
     description: __('Break form into multiple steps', 'subtleforms'),
   },
   {
     id: 'sectioned',
     label: __('Sectioned', 'subtleforms'),
-    icon: FiColumns,
+    icon: Icon.Columns,
     description: __('Organize into logical sections', 'subtleforms'),
   },
   {
     id: 'conversational',
     label: __('Conversational', 'subtleforms'),
-    icon: FiMessageCircle,
+    icon: Icon.MessageCircle,
     description: __('Chat-style one question at a time', 'subtleforms'),
   },
 ];
@@ -250,7 +240,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
           <div className='sf-space-y-6'>
             <div className='sf-text-center'>
               <div className='sf-inline-flex sf-justify-center sf-items-center sf-bg-blue-100 sf-mb-4 sf-rounded-full sf-w-16 sf-h-16'>
-                <FiCheckCircle className='sf-w-8 sf-h-8 sf-text-blue-600' />
+                <Icon.CheckCircle className='sf-w-8 sf-h-8 sf-text-blue-600' />
               </div>
               <h2 className='sf-mb-2 sf-font-bold sf-text-gray-900 sf-text-2xl'>
                 {__('Welcome to SubtleForms', 'subtleforms')}
@@ -269,13 +259,13 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
               </h3>
               <ul className='sf-space-y-2'>
                 <li className='sf-flex sf-items-start'>
-                  <FiCheckCircle className='sf-flex-shrink-0 sf-mt-0.5 sf-mr-2 sf-w-5 sf-h-5 sf-text-green-500' />
+                  <Icon.CheckCircle className='sf-flex-shrink-0 sf-mt-0.5 sf-mr-2 sf-w-5 sf-h-5 sf-text-green-500' />
                   <span className='sf-text-gray-700'>
                     {__('Build forms with drag & drop', 'subtleforms')}
                   </span>
                 </li>
                 <li className='sf-flex sf-items-start'>
-                  <FiCheckCircle className='sf-flex-shrink-0 sf-mt-0.5 sf-mr-2 sf-w-5 sf-h-5 sf-text-green-500' />
+                  <Icon.CheckCircle className='sf-flex-shrink-0 sf-mt-0.5 sf-mr-2 sf-w-5 sf-h-5 sf-text-green-500' />
                   <span className='sf-text-gray-700'>
                     {__(
                       'Add conditional logic and multi-step flows',
@@ -284,7 +274,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                   </span>
                 </li>
                 <li className='sf-flex sf-items-start'>
-                  <FiCheckCircle className='sf-flex-shrink-0 sf-mt-0.5 sf-mr-2 sf-w-5 sf-h-5 sf-text-green-500' />
+                  <Icon.CheckCircle className='sf-flex-shrink-0 sf-mt-0.5 sf-mr-2 sf-w-5 sf-h-5 sf-text-green-500' />
                   <span className='sf-text-gray-700'>
                     {__(
                       'Manage submissions and integrate with services',
@@ -293,7 +283,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                   </span>
                 </li>
                 <li className='sf-flex sf-items-start'>
-                  <FiCheckCircle className='sf-flex-shrink-0 sf-mt-0.5 sf-mr-2 sf-w-5 sf-h-5 sf-text-green-500' />
+                  <Icon.CheckCircle className='sf-flex-shrink-0 sf-mt-0.5 sf-mr-2 sf-w-5 sf-h-5 sf-text-green-500' />
                   <span className='sf-text-gray-700'>
                     {__(
                       'Accept payments and create conversational forms',
@@ -330,7 +320,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                     key={goal.id}
                     onClick={() => setSelectedGoal(goal.id)}
                     className={clsx(
-                      'sf-p-6 sf-rounded-lg sf-border-2 sf-text-left sf-transition-all',
+                      'sf-p-6 sf-border-2 sf-rounded-lg sf-text-left sf-transition-all',
                       'hover:sf-border-blue-500 hover:sf-shadow-md',
                       isSelected
                         ? 'sf-border-blue-500 sf-bg-blue-50'
@@ -339,7 +329,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                     <div className='sf-flex sf-items-start'>
                       <div
                         className={clsx(
-                          'sf-flex-shrink-0 sf-w-10 sf-h-10 sf-rounded-lg sf-flex sf-items-center sf-justify-center',
+                          'sf-flex sf-flex-shrink-0 sf-justify-center sf-items-center sf-rounded-lg sf-w-10 sf-h-10',
                           isSelected
                             ? 'bg-blue-600 text-white'
                             : 'bg-gray-100 text-gray-600'
@@ -349,7 +339,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                       <div className='sf-flex-1 sf-ml-4'>
                         <h3
                           className={clsx(
-                            'font-semibold mb-1',
+                            'mb-1 font-semibold',
                             isSelected ? 'text-blue-900' : 'text-gray-900'
                           )}>
                           {goal.label}
@@ -390,7 +380,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                     key={type.id}
                     onClick={() => setSelectedType(type.id)}
                     className={clsx(
-                      'sf-p-6 sf-rounded-lg sf-border-2 sf-text-left sf-transition-all',
+                      'sf-p-6 sf-border-2 sf-rounded-lg sf-text-left sf-transition-all',
                       'hover:sf-border-blue-500 hover:sf-shadow-md',
                       isSelected
                         ? 'sf-border-blue-500 sf-bg-blue-50'
@@ -399,7 +389,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                     <div className='sf-flex sf-items-start'>
                       <div
                         className={clsx(
-                          'sf-flex-shrink-0 sf-w-10 sf-h-10 sf-rounded-lg sf-flex sf-items-center sf-justify-center',
+                          'sf-flex sf-flex-shrink-0 sf-justify-center sf-items-center sf-rounded-lg sf-w-10 sf-h-10',
                           isSelected
                             ? 'sf-bg-blue-600 sf-text-white'
                             : 'sf-bg-gray-100 sf-text-gray-600'
@@ -409,7 +399,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                       <div className='sf-flex-1 sf-ml-4'>
                         <h3
                           className={clsx(
-                            'font-semibold mb-1',
+                            'mb-1 font-semibold',
                             isSelected ? 'text-blue-900' : 'text-gray-900'
                           )}>
                           {type.label}
@@ -468,7 +458,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                       <div
                         key={fieldKey}
                         className='sf-flex sf-items-center sf-bg-gray-50 sf-p-3 sf-rounded-lg'>
-                        <FiCheckCircle className='sf-flex-shrink-0 sf-mr-3 sf-w-5 sf-h-5 sf-text-green-500' />
+                        <Icon.CheckCircle className='sf-flex-shrink-0 sf-mr-3 sf-w-5 sf-h-5 sf-text-green-500' />
                         <div className='sf-flex-1'>
                           <div className='sf-font-medium sf-text-gray-900'>
                             {field.config.label}
@@ -493,7 +483,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
           <div className='sf-space-y-6'>
             <div className='sf-text-center'>
               <div className='sf-inline-flex sf-justify-center sf-items-center sf-bg-green-100 sf-mb-4 sf-rounded-full sf-w-16 sf-h-16'>
-                <FiCheckCircle className='sf-w-8 sf-h-8 sf-text-green-600' />
+                <Icon.CheckCircle className='sf-w-8 sf-h-8 sf-text-green-600' />
               </div>
               <h2 className='sf-mb-2 sf-font-bold sf-text-gray-900 sf-text-2xl'>
                 {__("You're all set!", 'subtleforms')}

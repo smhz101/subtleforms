@@ -1,6 +1,6 @@
 import { Dropdown, Button, MenuGroup, MenuItem } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { FiHelpCircle, FiPlay, FiBook, FiZap } from 'react-icons/fi';
+import Icon from './ui/Icon';
 
 export default function HelpMenu({
   onStartTour,
@@ -17,7 +17,7 @@ export default function HelpMenu({
           onClick={onToggle}
           aria-expanded={isOpen}
           variant='secondary'
-          icon={<FiHelpCircle className='sf-w-5 sf-h-5' />}
+          icon={<Icon.HelpCircle className='sf-w-5 sf-h-5' />}
           className='sf-px-3 sf-h-9'
           title={__('Help & Documentation', 'subtleforms')}
         />
@@ -26,20 +26,20 @@ export default function HelpMenu({
         <MenuGroup>
           {onStartTour && (
             <MenuItem
-              icon={<FiPlay className='sf-w-4 sf-h-4' />}
+              icon={<Icon.Play className='sf-w-4 sf-h-4' />}
               onClick={onStartTour}>
               {__('Start Tour', 'subtleforms')}
             </MenuItem>
           )}
           {showWizard && onOpenWizard && (
             <MenuItem
-              icon={<FiZap className='sf-w-4 sf-h-4' />}
+              icon={<Icon.Zap className='sf-w-4 sf-h-4' />}
               onClick={onOpenWizard}>
               {__('Quick Start Wizard', 'subtleforms')}
             </MenuItem>
           )}
           <MenuItem
-            icon={<FiBook className='sf-w-4 sf-h-4' />}
+            icon={<Icon.Book className='sf-w-4 sf-h-4' />}
             onClick={() => {
               // Placeholder for documentation
               window.open('https://subtleforms.com/docs', '_blank');

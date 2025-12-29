@@ -1,98 +1,68 @@
-import {
-  FiType,
-  FiMail,
-  FiPhone,
-  FiGlobe,
-  FiHash,
-  FiAlignLeft,
-  FiCheckSquare,
-  FiCircle,
-  FiChevronDown,
-  FiCalendar,
-  FiClock,
-  FiMapPin,
-  FiCode,
-  FiImage,
-  FiFile,
-  FiPlus,
-  FiTrash2,
-  FiArrowUp,
-  FiArrowDown,
-  FiCopy,
-  FiX,
-  FiEdit2,
-  FiMoreVertical,
-  FiMove,
-  FiNavigation,
-  FiLock,
-  FiDollarSign,
-  FiCreditCard,
-  FiShoppingCart,
-} from 'react-icons/fi';
+import Icon from '../../ui/Icon';
 
 /**
  * Centralized icon mapping for SubtleForms
- * Uses Feather Icons (react-icons/fi) for consistency
+ * Uses lucide-react icons via internal Icon abstraction
  */
 export const getIcon = (iconNameOrType) => {
   const map = {
     // Field Types - Basic
-    text: FiType,
-    email: FiMail,
-    phone: FiPhone,
-    url: FiGlobe,
-    number: FiHash,
-    textarea: FiAlignLeft,
-    password: FiLock,
+    text: Icon.Type,
+    email: Icon.Mail,
+    phone: Icon.Phone,
+    url: Icon.Globe,
+    number: Icon.Hash,
+    textarea: Icon.AlignLeft,
+    password: Icon.Lock,
 
     // Field Types - Selection
-    checkbox: FiCheckSquare,
-    radio: FiCircle,
-    multiple_choice: FiCheckSquare,
-    dropdown: FiChevronDown,
+    checkbox: Icon.CheckSquare,
+    radio: Icon.Circle,
+    multiple_choice: Icon.CheckSquare,
+    dropdown: Icon.ChevronDown,
 
     // Field Types - Date/Time
-    date: FiCalendar,
-    time: FiClock,
-    datetime: FiCalendar,
+    date: Icon.Calendar,
+    time: Icon.Clock,
+    datetime: Icon.Calendar,
 
     // Field Types - Location
-    country: FiGlobe,
-    address: FiMapPin,
+    country: Icon.Globe,
+    address: Icon.MapPin,
 
     // Field Types - Special
-    hidden: FiCode,
-    html: FiCode,
-    image_upload: FiImage,
-    file_upload: FiFile,
-    step: FiNavigation,
+    hidden: Icon.Code,
+    html: Icon.Code,
+    image_upload: Icon.Image,
+    file_upload: Icon.File,
+    step: Icon.Navigation,
 
     // Field Types - Payment
-    payment_amount: FiDollarSign,
-    payment_card: FiCreditCard,
-    payment_product: FiShoppingCart,
-    payment_currency: FiDollarSign,
+    payment_amount: Icon.DollarSign,
+    payment_card: Icon.CreditCard,
+    payment_product: Icon.ShoppingCart,
+    payment_currency: Icon.DollarSign,
 
     // Actions
-    add: FiPlus,
-    delete: FiTrash2,
-    moveUp: FiArrowUp,
-    moveDown: FiArrowDown,
-    duplicate: FiCopy,
-    close: FiX,
-    edit: FiEdit2,
-    more: FiMoreVertical,
-    drag: FiMove,
-    move: FiMove,
+    add: Icon.Add,
+    delete: Icon.Delete,
+    moveUp: Icon.Up,
+    moveDown: Icon.Down,
+    duplicate: Icon.Copy,
+    close: Icon.Close,
+    edit: Icon.Edit,
+    more: Icon.MoreVertical,
+    drag: Icon.Move,
+    move: Icon.Move,
 
     // Icon string names (for string-based references)
-    'arrow-up-alt2': FiArrowUp,
-    'arrow-down-alt2': FiArrowDown,
-    'admin-page': FiCopy,
-    trash: FiTrash2,
+    'arrow-up-alt2': Icon.Up,
+    'arrow-down-alt2': Icon.Down,
+    'admin-page': Icon.Copy,
+    trash: Icon.Delete,
 
     // Fallback
-    default: FiType,
+    default: Icon.Type,
   };
 
   return map[iconNameOrType] || map.default;

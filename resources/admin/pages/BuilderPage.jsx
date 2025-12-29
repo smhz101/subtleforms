@@ -15,13 +15,7 @@ import {
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
-import {
-  FiFileText,
-  FiLayers,
-  FiList,
-  FiMessageCircle,
-  FiCreditCard,
-} from 'react-icons/fi';
+import Icon from '../components/ui/Icon';
 import AdminShell from '../components/AdminShell';
 import FormEditor from '../components/builder/FormEditor';
 import FormSettings from '../components/builder/FormSettings';
@@ -749,27 +743,27 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
   const formType = draftSchema?.metadata?.type || 'regular';
   const formTypeBadgeConfig = {
     regular: {
-      icon: FiFileText,
+      icon: Icon.FileText,
       label: __('Regular', 'subtleforms'),
       color: 'gray',
     },
     multistep: {
-      icon: FiLayers,
+      icon: Icon.Layers,
       label: __('Multi-step', 'subtleforms'),
       color: 'purple',
     },
     sectioned: {
-      icon: FiList,
+      icon: Icon.List,
       label: __('Sectioned', 'subtleforms'),
       color: 'indigo',
     },
     conversational: {
-      icon: FiMessageCircle,
+      icon: Icon.MessageCircle,
       label: __('Conversational', 'subtleforms'),
       color: 'blue',
     },
     payment: {
-      icon: FiCreditCard,
+      icon: Icon.CreditCard,
       label: __('Payment', 'subtleforms'),
       color: 'green',
     },

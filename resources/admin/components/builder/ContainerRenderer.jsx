@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import { FiMove } from 'react-icons/fi';
+import Icon from '../ui/Icon';
 import { getIcon } from './utils/iconMap';
 
 export default function ContainerRenderer({
@@ -89,7 +89,7 @@ export default function ContainerRenderer({
                 cursor: 'grab',
                 color: '#1e1e1e',
               }}>
-              <FiMove size={16} />
+              <Icon.Move size={16} />
             </button>
           )}
           {(() => {

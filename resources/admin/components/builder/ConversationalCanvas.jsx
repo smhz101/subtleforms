@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import Icon from '../ui/Icon';
 import FieldRenderer from './FieldRenderer';
 import FieldChrome from './FieldChrome';
 import { nodeToField, nodeChildren } from './utils/schemaTree';
@@ -146,7 +146,7 @@ export default function ConversationalCanvas({
           onClick={handlePrevious}
           disabled={!hasPrevious}
           className='sf-inline-flex sf-items-center'>
-          <FiChevronLeft className='sf-mr-1 sf-w-4 sf-h-4' />
+          <Icon.Left className='sf-mr-1 sf-w-4 sf-h-4' />
           {__('Previous', 'subtleforms')}
         </Button>
 
@@ -176,7 +176,7 @@ export default function ConversationalCanvas({
           disabled={!hasNext}
           className='sf-inline-flex sf-items-center'>
           {__('Next', 'subtleforms')}
-          <FiChevronRight className='sf-ml-1 sf-w-4 sf-h-4' />
+          <Icon.Right className='sf-ml-1 sf-w-4 sf-h-4' />
         </Button>
       </div>
     </div>

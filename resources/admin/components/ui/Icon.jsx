@@ -53,6 +53,19 @@ import {
   Columns,
   Loader,
   Square,
+  Type,
+  Phone,
+  Hash,
+  AlignLeft,
+  CheckSquare,
+  Circle,
+  Clock,
+  MapPin,
+  Code,
+  Image,
+  Navigation,
+  Lock,
+  DollarSign,
 } from 'lucide-react';
 
 /**
@@ -133,6 +146,26 @@ export const Icon = {
   Globe,
   DownloadCloud,
   ExternalLink,
+
+  // Form Field Types
+  Type,
+  Text: Type,
+  Phone,
+  Hash,
+  Number: Hash,
+  AlignLeft,
+  Textarea: AlignLeft,
+  CheckSquare,
+  Circle,
+  Clock,
+  MapPin,
+  Address: MapPin,
+  Code,
+  Image,
+  Navigation,
+  Lock,
+  Password: Lock,
+  DollarSign,
 };
 
 // Default export for convenience

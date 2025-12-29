@@ -36,7 +36,6 @@
     "@wordpress/i18n": "^6.9.0",
     "clsx": "^2.1.1",
     "joi": "^18.0.2",
-    "lucide-react": "^0.562.0",
-    "react-icons": "^5.5.0"
+    "lucide-react": "^0.562.0"
   }
 }

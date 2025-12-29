@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { FiCheck } from 'react-icons/fi';
+import Icon from '../ui/Icon';
 
 export default function FormEditorHeader({
   formTitle,
@@ -153,7 +153,7 @@ export default function FormEditorHeader({
             }}>
             {copyState === 'copied' ? (
               <>
-                <FiCheck size={14} />
+                <Icon.Check size={14} />
                 {__('Copied!', 'subtleforms')}
               </>
             ) : (
