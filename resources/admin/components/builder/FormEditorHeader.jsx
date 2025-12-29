@@ -119,7 +119,7 @@ export default function FormEditorHeader({
           <button
             type='button'
             onClick={handleTitleClick}
-            className='sf-bg-transparent sf-px-2 sf-py-1 sf-border-none sf-outline-none sf-font-semibold sf-text-gray-900 hover:text-blue-600 sf-text-base sf-cursor-pointer'
+            className='sf-bg-transparent sf-px-2 sf-py-1 sf-border-none sf-outline-none sf-font-semibold sf-text-gray-900 hover:sf-text-blue-600 sf-text-base sf-cursor-pointer'
             onMouseEnter={(e) => {
               e.currentTarget.style.color = '#2271b1';
             }}
@@ -168,7 +168,7 @@ export default function FormEditorHeader({
         {/* Save Status */}
         <div className='sf-flex sf-items-center sf-gap-1.5 sf-text-gray-700 sf-text-xs'>
           <span
-            className='rounded-full sf-w-1.5 sf-h-1.5'
+            className='sf-rounded-full sf-w-1.5 sf-h-1.5'
             style={{ background: getStatusColor() }}
           />
           {getStatusText()}

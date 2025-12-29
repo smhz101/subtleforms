@@ -221,27 +221,29 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         onClick={() => !isDisabled && onSelect(option.id)}
         disabled={isDisabled}
         className={classNames(
-          'group relative flex transition-all duration-150 w-full border focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
+          'sf-group sf-relative sf-flex sf-transition-all sf-duration-150 sf-w-full sf-border sf-focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
           isHorizontal
-            ? 'flex-row items-center gap-3 p-3 text-left'
-            : 'flex-col items-center text-center p-4',
+            ? 'sf-flex-row sf-items-center sf-gap-3 sf-p-3 sf-text-left'
+            : 'sf-flex-col sf-items-center sf-text-center sf-p-4',
           isSelected
-            ? 'border-blue-500 bg-blue-50'
-            : 'border-gray-300 bg-white hover:border-gray-400 hover:bg-gray-50',
+            ? 'sf-border-blue-500 sf-bg-blue-50'
+            : 'sf-border-gray-300 sf-bg-white hover:sf-border-gray-400 hover:sf-bg-gray-50',
           isDisabled
-            ? 'opacity-50 cursor-not-allowed bg-gray-50 border-dashed'
-            : 'cursor-pointer'
+            ? 'sf-opacity-50 sf-cursor-not-allowed sf-bg-gray-50 sf-border-dashed'
+            : 'sf-cursor-pointer'
         )}>
         <div
           className={classNames(
             'flex-shrink-0 transition-colors',
             isHorizontal ? 'p-2' : 'p-3 mb-2',
             isSelected
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-600 group-hover:bg-gray-200'
+              ? 'sf-bg-blue-600 sf-text-white'
+              : 'sf-bg-gray-100 sf-text-gray-600 group-hover:sf-bg-gray-200'
           )}>
           {React.createElement(option.icon, {
-            className: isHorizontal ? 'w-[18px] h-[18px]' : 'w-6 h-6',
+            className: isHorizontal
+              ? 'sf-w-[18px] sf-h-[18px]'
+              : 'sf-w-6 sf-h-6',
           })}
         </div>
 
@@ -373,7 +375,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
 
               {/* Templates */}
               <div>
-                <label className='sf-block sf-mb-3 sf-font-medium sf-text-gray-700 sf-text-sm uppercase sf-tracking-wide'>
+                <label className='sf-block sf-mb-3 sf-font-medium sf-text-gray-700 sf-text-sm sf-uppercase sf-tracking-wide'>
                   {__('Starting Template', 'subtleforms')}
                 </label>
                 <div className='sf-gap-3 sf-grid sf-grid-cols-2'>
@@ -388,7 +390,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
           {step === 2 && (
             <div className='sf-space-y-6'>
               <div>
-                <label className='sf-block sf-mb-3 sf-font-medium sf-text-gray-700 sf-text-sm uppercase sf-tracking-wide'>
+                <label className='sf-block sf-mb-3 sf-font-medium sf-text-gray-700 sf-text-sm sf-uppercase sf-tracking-wide'>
                   {__('Form Structure', 'subtleforms')}
                 </label>
                 <div className='sf-space-y-3'>
@@ -407,7 +409,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
             type='button'
             onClick={step === 1 ? handleRequestClose : () => setStep(1)}
             disabled={creating}
-            className='sf-px-3 sf-py-1 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sf-text-gray-600 hover:text-gray-800 sf-text-sm sf-transition-colors'>
+            className='sf-px-3 sf-py-1 focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-blue-500 focus:sf-ring-offset-2 sf-text-gray-600 hover:sf-text-gray-800 sf-text-sm sf-transition-colors'>
             {step === 1
               ? __('Cancel', 'subtleforms')
               : __('Back', 'subtleforms')}
@@ -417,7 +419,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
             type='button'
             onClick={step === 1 ? () => setStep(2) : handleCreate}
             disabled={step === 1 ? !title.trim() : creating || !formType}
-            className='sf-inline-flex sf-items-center sf-bg-blue-600 hover:bg-blue-700 disabled:opacity-50 sf-px-4 sf-py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sf-font-medium sf-text-white sf-text-sm sf-transition-colors disabled:cursor-not-allowed'>
+            className='sf-inline-flex sf-items-center sf-bg-blue-600 hover:sf-bg-blue-700 disabled:sf-opacity-50 sf-px-4 sf-py-2 focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-blue-500 focus:sf-ring-offset-2 sf-font-medium sf-text-white sf-text-sm sf-transition-colors disabled:sf-cursor-not-allowed'>
             {creating && (
               <FiLoader className='sf-mr-2 -ml-1 sf-w-4 sf-h-4 sf-text-white sf-animate-spin' />
             )}

@@ -19,11 +19,15 @@ export default function FieldWrapper({
 }) {
   return (
     <div
-      className={classNames('sf-p-5 sf-cursor-pointer sf-transition-all sf-relative', {
-        'sf-bg-blue-50 sf-border-2 sf-border-blue-600': isSelected,
-        'sf-bg-gray-50 sf-border sf-border-gray-300': isHovered && !isSelected,
-        'sf-bg-white sf-border sf-border-gray-300': !isSelected && !isHovered,
-      })}
+      className={classNames(
+        'sf-p-5 sf-cursor-pointer sf-transition-all sf-relative',
+        {
+          'sf-bg-blue-50 sf-border-2 sf-border-blue-600': isSelected,
+          'sf-bg-gray-50 sf-border sf-border-gray-300':
+            isHovered && !isSelected,
+          'sf-bg-white sf-border sf-border-gray-300': !isSelected && !isHovered,
+        }
+      )}
       onClick={onSelect}
       onMouseEnter={onHover}
       onMouseLeave={onLeave}>

@@ -3,9 +3,10 @@ import { __ } from '@wordpress/i18n';
 export default function FieldRenderer({ field }) {
   const { type, label, required, placeholder, options, subFields } = field;
 
-  const labelClass = 'block mb-2 text-sm font-medium text-text-primary';
+  const labelClass =
+    'sf-block sf-mb-2 sf-text-sm sf-font-medium sf-text-text-primary';
   const inputClass =
-    'w-full px-3 py-2 text-sm border border-border rounded-none font-inherit pointer-events-none bg-white text-text-primary';
+    'sf-w-full sf-px-3 sf-py-2 sf-text-sm sf-border sf-border-border sf-rounded-none sf-font-inherit sf-pointer-events-none sf-bg-white sf-text-text-primary';
   const selectClass = `${inputClass} appearance-none pr-9 bg-no-repeat bg-[right_8px_center]`;
   const selectBg = `url('data:image/svg+xml;utf8,<svg fill="%238c8f94" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M5 6l5 5 5-5 2 1-7 7-7-7z"/></svg>')`;
 
@@ -65,9 +66,11 @@ export default function FieldRenderer({ field }) {
               <input
                 type='radio'
                 name={field.key}
-                className='sf-border-border rounded-full focus:ring-0 sf-w-4 sf-h-4 sf-text-primary sf-pointer-events-none'
+                className='sf-border-border sf-rounded-full focus:sf-ring-0 sf-w-4 sf-h-4 sf-text-primary sf-pointer-events-none'
               />
-              <span className='sf-text-text-primary sf-text-sm'>{opt.label}</span>
+              <span className='sf-text-text-primary sf-text-sm'>
+                {opt.label}
+              </span>
             </div>
           ))}
         </div>
@@ -81,7 +84,9 @@ export default function FieldRenderer({ field }) {
                 type='checkbox'
                 className='sf-border-border rounded-none focus:ring-0 sf-w-4 sf-h-4 sf-text-primary sf-pointer-events-none'
               />
-              <span className='sf-text-text-primary sf-text-sm'>{opt.label}</span>
+              <span className='sf-text-text-primary sf-text-sm'>
+                {opt.label}
+              </span>
             </div>
           ))}
         </div>
@@ -160,7 +165,9 @@ export default function FieldRenderer({ field }) {
             <div key={idx} className={idx < subFields.length - 1 ? 'mb-3' : ''}>
               <label className='sf-block sf-mb-1 sf-font-medium sf-text-text-primary sf-text-sm'>
                 {sub.label}
-                {sub.required && <span className='sf-ml-1 sf-text-danger'>*</span>}
+                {sub.required && (
+                  <span className='sf-ml-1 sf-text-danger'>*</span>
+                )}
               </label>
               <input type='text' className={inputClass} readOnly />
             </div>
@@ -213,7 +220,7 @@ export default function FieldRenderer({ field }) {
           <input
             type='text'
             placeholder={placeholder || __('Enter coupon code', 'subtleforms')}
-            className={`${inputClass} flex-1`}
+            className={`${inputClass} sf-flex-1`}
             readOnly
           />
           <button

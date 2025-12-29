@@ -80,7 +80,7 @@ export default function ConversationalCanvas({
 
   if (totalFields === 0) {
     return (
-      <div className='sf-flex sf-flex-col sf-justify-center sf-items-center sf-bg-white sf-shadow-sm sf-mx-auto sf-p-12 sf-border sf-border-gray-200 rounded-lg sf-w-full sf-max-w-2xl sf-h-full sf-text-center'>
+      <div className='sf-flex sf-flex-col sf-justify-center sf-items-center sf-bg-white sf-shadow-sm sf-mx-auto sf-p-12 sf-border sf-border-gray-200 sf-rounded-lg sf-w-full sf-max-w-2xl sf-h-full sf-text-center'>
         <div className='sf-mb-4 sf-text-4xl'>💬</div>
         <h3 className='sf-mb-2 sf-font-semibold sf-text-gray-900 sf-text-lg'>
           {__('No Questions Yet', 'subtleforms')}
@@ -112,7 +112,7 @@ export default function ConversationalCanvas({
             {Math.round(progressPercent)}% {__('Complete', 'subtleforms')}
           </span>
         </div>
-        <div className='sf-bg-gray-200 rounded-full sf-w-full sf-h-2 sf-overflow-hidden'>
+        <div className='sf-bg-gray-200 sf-rounded-full sf-w-full sf-h-2 sf-overflow-hidden'>
           <div
             className='sf-bg-blue-600 sf-h-full sf-transition-all sf-duration-300'
             style={{ width: `${progressPercent}%` }}
@@ -122,7 +122,7 @@ export default function ConversationalCanvas({
 
       {/* Question Card */}
       <div className='sf-flex sf-flex-col sf-flex-1 sf-justify-center sf-p-8 sf-overflow-y-auto'>
-        <div className='sf-bg-white sf-shadow-md sf-mx-auto sf-p-8 sf-border sf-border-gray-200 rounded-lg sf-w-full'>
+        <div className='sf-bg-white sf-shadow-md sf-mx-auto sf-p-8 sf-border sf-border-gray-200 sf-rounded-lg sf-w-full'>
           {field && (
             <FieldChrome
               field={field}

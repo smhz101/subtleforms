@@ -108,7 +108,7 @@ export default function Dashboard() {
       }>
       <div className='sf-p-6'>
         {/* Stats Overview */}
-        <div className='sf-gap-4 sf-grid sf-grid-cols-1 md:grid-cols-2 lg:grid-cols-4 sf-mb-6'>
+        <div className='sf-gap-4 sf-grid sf-grid-cols-1 md:sf-grid-cols-2 lg:sf-grid-cols-4 sf-mb-6'>
           <StatCard
             title={__('Total Forms', 'subtleforms')}
             value={stats.total_forms}
@@ -141,7 +141,7 @@ export default function Dashboard() {
           />
         </div>
 
-        <div className='sf-gap-6 sf-grid sf-grid-cols-1 lg:grid-cols-2 sf-mb-6'>
+        <div className='sf-gap-6 sf-grid sf-grid-cols-1 lg:sf-grid-cols-2 sf-mb-6'>
           {/* Recent Submissions */}
           <div>
             <Card>
@@ -363,7 +363,7 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardBody>
-              <div className='sf-gap-4 sf-grid sf-grid-cols-2 md:grid-cols-4'>
+              <div className='sf-gap-4 sf-grid sf-grid-cols-2 md:sf-grid-cols-4'>
                 <div className='sf-flex sf-flex-col'>
                   <span className='sf-mb-1 sf-text-gray-500 sf-text-xs'>
                     {__('Plugin Version', 'subtleforms')}

@@ -259,8 +259,8 @@ export default function BuilderTour({ onComplete, onSkip }) {
       <div
         ref={tooltipRef}
         className={classNames(
-          'fixed z-50 bg-white rounded-lg shadow-2xl p-6 max-w-md',
-          'transition-opacity duration-300',
+          'sf-fixed sf-z-50 sf-bg-white sf-rounded-lg sf-shadow-2xl sf-p-6 sf-max-w-md',
+          'sf-transition-opacity sf-duration-300',
           isPositioned ? 'opacity-100' : 'opacity-0'
         )}
         style={{
@@ -272,7 +272,7 @@ export default function BuilderTour({ onComplete, onSkip }) {
         {/* Close Button */}
         <button
           onClick={handleSkip}
-          className='sf-top-4 sf-right-4 sf-absolute sf-text-gray-400 hover:text-gray-600 sf-transition-colors'
+          className='sf-top-4 sf-right-4 sf-absolute sf-text-gray-400 hover:sf-text-gray-600 sf-transition-colors'
           aria-label={__('Close tour', 'subtleforms')}>
           <FiX className='sf-w-5 sf-h-5' />
         </button>
@@ -287,7 +287,7 @@ export default function BuilderTour({ onComplete, onSkip }) {
               {Math.round(((currentStep + 1) / TOUR_STEPS.length) * 100)}%
             </span>
           </div>
-          <div className='sf-bg-gray-200 rounded-full sf-h-1 sf-overflow-hidden'>
+          <div className='sf-bg-gray-200 sf-rounded-full sf-h-1 sf-overflow-hidden'>
             <div
               className='sf-bg-blue-600 sf-h-full sf-transition-all sf-duration-300'
               style={{

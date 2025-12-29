@@ -6,7 +6,9 @@
  */
 
 // Remove default WordPress page wrapper styling
-.subtleforms-admin-page {
+.subtleforms-admin-page,
+.subtle-forms_page_subtleforms-settings,
+.subtle-forms_page_subtleforms-extensions {
 	.wrap {
 		margin: 0 !important;
 		padding: 0 !important;

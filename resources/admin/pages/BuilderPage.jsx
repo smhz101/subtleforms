@@ -869,7 +869,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
           className={`sf-inline-flex sf-items-center sf-gap-1.5 sf-px-3 sf-py-1.5 sf-text-xs sf-font-medium sf-font-mono sf-cursor-pointer sf-outline-none sf-transition-all ${
             copyState === 'copied'
               ? 'text-green-700 bg-green-50 border border-green-500'
-              : 'text-gray-700 bg-gray-50 border border-gray-300 hover:border-blue-500 hover:bg-blue-50'
+              : 'sf-text-gray-700 sf-bg-gray-50 sf-border sf-border-gray-300 hover:sf-border-blue-500 hover:sf-bg-blue-50'
           }`}
           style={{ borderRadius: '4px' }}
           title={

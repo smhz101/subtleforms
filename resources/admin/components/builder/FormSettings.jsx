@@ -225,7 +225,7 @@ export default function FormSettings({ schema, onChange }) {
               initialOpen={true}>
               <div className='sf-space-y-4'>
                 {isConversationalForm && (
-                  <div className='sf-bg-blue-50 sf-p-4 sf-border sf-border-blue-200 rounded'>
+                  <div className='sf-bg-blue-50 sf-p-4 sf-border sf-border-blue-200 sf-rounded'>
                     <p className='sf-text-blue-800 sf-text-sm'>
                       <strong>
                         {__('Conversational Payment:', 'subtleforms')}
@@ -239,7 +239,7 @@ export default function FormSettings({ schema, onChange }) {
                 )}
 
                 {isPaymentForm && (
-                  <div className='sf-bg-blue-50 sf-p-4 sf-border sf-border-blue-200 rounded'>
+                  <div className='sf-bg-blue-50 sf-p-4 sf-border sf-border-blue-200 sf-rounded'>
                     <p className='sf-text-blue-800 sf-text-sm'>
                       <strong>{__('Note:', 'subtleforms')}</strong>{' '}
                       {__(
@@ -367,7 +367,7 @@ export default function FormSettings({ schema, onChange }) {
                       />
                     )}
 
-                    <div className='sf-bg-yellow-50 sf-mt-4 sf-p-4 sf-border sf-border-yellow-200 rounded'>
+                    <div className='sf-bg-yellow-50 sf-mt-4 sf-p-4 sf-border sf-border-yellow-200 sf-rounded'>
                       <p className='sf-text-yellow-800 sf-text-sm'>
                         <strong>{__('Extension Point:', 'subtleforms')}</strong>{' '}
                         {__(

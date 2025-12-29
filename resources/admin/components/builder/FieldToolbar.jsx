@@ -60,13 +60,13 @@ export default function FieldToolbar({
         onPointerDown={(event) => event.stopPropagation()}
         className={classNames(
           'w-8 h-8 flex items-center justify-center',
-          'border border-transparent rounded',
+          'sf-border sf-border-transparent sf-rounded',
           'transition-all duration-150',
           {
             'text-gray-400 cursor-not-allowed': disabled,
-            'text-gray-600 hover:bg-gray-100 hover:text-gray-900 cursor-pointer':
+            'sf-text-gray-600 hover:sf-bg-gray-100 hover:sf-text-gray-900 sf-cursor-pointer':
               !disabled && variant === 'default',
-            'text-red-600 hover:bg-red-50 hover:text-red-700 cursor-pointer':
+            'sf-text-red-600 hover:sf-bg-red-50 hover:sf-text-red-700 sf-cursor-pointer':
               !disabled && variant === 'danger',
           }
         )}
@@ -83,7 +83,7 @@ export default function FieldToolbar({
       className={classNames(
         'absolute top-0 right-0 -mt-2 mr-2',
         'flex items-center gap-0.5 p-0.5',
-        'bg-white border border-gray-300 rounded shadow-sm',
+        'sf-bg-white sf-border sf-border-gray-300 sf-rounded sf-shadow-sm',
         'transition-opacity duration-150 z-20',
         {
           'opacity-100 pointer-events-auto': visible,
@@ -103,8 +103,8 @@ export default function FieldToolbar({
         onClick={(event) => event.stopPropagation()}
         className={classNames(
           'flex justify-center items-center',
-          'w-8 h-8 rounded',
-          'text-gray-500 hover:bg-gray-100 hover:text-gray-700',
+          'sf-w-8 sf-h-8 sf-rounded',
+          'sf-text-gray-500 hover:sf-bg-gray-100 hover:sf-text-gray-700',
           'transition-all duration-150',
           'cursor-grab active:cursor-grabbing'
         )}

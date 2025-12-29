@@ -25,13 +25,13 @@ function ExtensionCard({ icon, title, description, features, comingSoon }) {
           {/* Header */}
           <div className='sf-flex sf-justify-between sf-items-start sf-mb-4'>
             <div className='sf-flex sf-items-start sf-gap-3'>
-              <div className='sf-bg-blue-50 sf-p-3 rounded-lg'>{icon}</div>
+              <div className='sf-bg-blue-50 sf-p-3 sf-rounded-lg'>{icon}</div>
               <div>
                 <h3 className='sf-mb-1 sf-font-semibold sf-text-gray-900 sf-text-base'>
                   {title}
                 </h3>
                 {comingSoon && (
-                  <span className='sf-inline-flex sf-items-center sf-bg-yellow-50 sf-px-2 sf-py-0.5 rounded-full sf-font-medium sf-text-yellow-700 sf-text-xs'>
+                  <span className='sf-inline-flex sf-items-center sf-bg-yellow-50 sf-px-2 sf-py-0.5 sf-rounded-full sf-font-medium sf-text-yellow-700 sf-text-xs'>
                     {__('Coming Soon', 'subtleforms')}
                   </span>
                 )}
@@ -232,14 +232,14 @@ export default function ExtensionsPage() {
         </Notice>
 
         {/* Extensions Grid */}
-        <div className='sf-gap-6 sf-grid sf-grid-cols-1 md:grid-cols-2 lg:grid-cols-3'>
+        <div className='sf-gap-6 sf-grid sf-grid-cols-1 md:sf-grid-cols-2 lg:sf-grid-cols-3'>
           {extensions.map((extension, index) => (
             <ExtensionCard key={index} {...extension} />
           ))}
         </div>
 
         {/* Footer CTA */}
-        <div className='sf-bg-gradient-to-r from-blue-50 to-purple-50 sf-mt-8 sf-p-6 sf-border sf-border-blue-100 rounded-lg'>
+        <div className='sf-bg-gradient-to-r sf-from-blue-50 sf-to-purple-50 sf-mt-8 sf-p-6 sf-border sf-border-blue-100 sf-rounded-lg'>
           <div className='sf-mx-auto sf-max-w-2xl sf-text-center'>
             <h3 className='sf-mb-2 sf-font-semibold sf-text-gray-900 sf-text-lg'>
               {__('Have an extension idea?', 'subtleforms')}

@@ -18,7 +18,7 @@ export default function FormPreviewModal({ schema, onClose }) {
     const helpText = config.help || '';
 
     const baseClasses =
-      'w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500';
+      'sf-w-full sf-px-4 sf-py-2 sf-border sf-border-gray-300 sf-rounded-md focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-blue-500';
 
     switch (field.type) {
       case 'text':
@@ -125,7 +125,9 @@ export default function FormPreviewModal({ schema, onClose }) {
                     className='sf-mr-2'
                     disabled
                   />
-                  <span className='sf-text-gray-700 sf-text-sm'>{opt.label}</span>
+                  <span className='sf-text-gray-700 sf-text-sm'>
+                    {opt.label}
+                  </span>
                 </label>
               ))}
             </div>
@@ -144,11 +146,15 @@ export default function FormPreviewModal({ schema, onClose }) {
                 <input type='checkbox' className='sf-mr-2' disabled />
                 <span className='sf-font-medium sf-text-gray-700 sf-text-sm'>
                   {label}
-                  {required && <span className='sf-ml-1 sf-text-red-500'>*</span>}
+                  {required && (
+                    <span className='sf-ml-1 sf-text-red-500'>*</span>
+                  )}
                 </span>
               </label>
               {helpText && (
-                <p className='sf-mt-1 sf-text-gray-500 sf-text-xs'>{helpText}</p>
+                <p className='sf-mt-1 sf-text-gray-500 sf-text-xs'>
+                  {helpText}
+                </p>
               )}
             </div>
           );
@@ -169,7 +175,9 @@ export default function FormPreviewModal({ schema, onClose }) {
                     className='sf-mr-2'
                     disabled
                   />
-                  <span className='sf-text-gray-700 sf-text-sm'>{opt.label}</span>
+                  <span className='sf-text-gray-700 sf-text-sm'>
+                    {opt.label}
+                  </span>
                 </label>
               ))}
             </div>
@@ -215,7 +223,7 @@ export default function FormPreviewModal({ schema, onClose }) {
               {label}
               {required && <span className='sf-ml-1 sf-text-red-500'>*</span>}
             </label>
-            <div className='sf-p-6 sf-border-2 sf-border-gray-300 sf-border-dashed rounded-md sf-text-center'>
+            <div className='sf-p-6 sf-border-2 sf-border-gray-300 sf-border-dashed sf-rounded-md sf-text-center'>
               <p className='sf-text-gray-500 sf-text-sm'>
                 {__('Click to upload or drag and drop', 'subtleforms')}
               </p>
@@ -257,7 +265,7 @@ export default function FormPreviewModal({ schema, onClose }) {
           <span>{__('Form Preview', 'subtleforms')}</span>
           <button
             onClick={onClose}
-            className='sf-p-2 sf-text-gray-400 hover:text-gray-600'>
+            className='sf-p-2 sf-text-gray-400 hover:sf-text-gray-600'>
             <FiX className='sf-w-5 sf-h-5' />
           </button>
         </div>
@@ -267,7 +275,7 @@ export default function FormPreviewModal({ schema, onClose }) {
       style={{ maxWidth: '700px', width: '100%' }}>
       <div className='sf-bg-gray-50 -mx-6 -mt-4 -mb-6 sf-p-6'>
         {/* Form Header */}
-        <div className='sf-bg-white sf-shadow-sm sf-mb-4 sf-p-6 rounded-lg'>
+        <div className='sf-bg-white sf-shadow-sm sf-mb-4 sf-p-6 sf-rounded-lg'>
           <h2 className='sf-mb-2 sf-font-bold sf-text-gray-900 sf-text-2xl'>
             {schema.metadata?.title || __('Untitled Form', 'subtleforms')}
           </h2>
@@ -277,10 +285,10 @@ export default function FormPreviewModal({ schema, onClose }) {
         </div>
 
         {/* Form Fields */}
-        <div className='sf-bg-white sf-shadow-sm sf-p-6 rounded-lg sf-max-h-[60vh] sf-overflow-y-auto'>
+        <div className='sf-bg-white sf-shadow-sm sf-p-6 sf-rounded-lg sf-max-h-[60vh] sf-overflow-y-auto'>
           {isConversational ? (
             <div className='sf-space-y-6'>
-              <div className='sf-bg-blue-50 sf-p-4 sf-border-blue-500 sf-border-l-4 rounded'>
+              <div className='sf-bg-blue-50 sf-p-4 sf-border-blue-500 sf-border-l-4 sf-rounded'>
                 <p className='sf-text-blue-800 sf-text-sm'>
                   {__(
                     'Conversational forms display one question at a time. This preview shows all fields together.',
@@ -309,7 +317,7 @@ export default function FormPreviewModal({ schema, onClose }) {
         </div>
 
         {/* Submit Button */}
-        <div className='sf-bg-white sf-shadow-sm sf-mt-4 sf-p-6 rounded-lg'>
+        <div className='sf-bg-white sf-shadow-sm sf-mt-4 sf-p-6 sf-rounded-lg'>
           <Button isPrimary disabled className='sf-justify-center sf-w-full'>
             {__('Submit', 'subtleforms')}
           </Button>

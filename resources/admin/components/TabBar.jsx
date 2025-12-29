@@ -1,4 +1,5 @@
 import { __ } from '@wordpress/i18n';
+import classNames from 'classnames';
 
 /**
  * Standardized Tab Bar
@@ -7,29 +8,42 @@ import { __ } from '@wordpress/i18n';
 export default function TabBar({ tabs, activeTab, onTabChange }) {
   return (
     <div className='sf-flex -mb-px'>
-      {tabs.map((tab) => (
-        <button
-          key={tab.key}
-          onClick={() => onTabChange(tab.key)}
-          className={`
-            px-4 py-3 text-sm font-medium border-b-2 transition-colors duration-150
-            ${
-              activeTab === tab.key
-                ? 'border-blue-600 text-blue-600 bg-blue-50'
-                : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'
-            }
-          `}>
-          {tab.label}
-          {tab.count !== undefined && (
-            <span
-              className={`sf-ml-2 sf-text-xs ${
-                activeTab === tab.key ? 'sf-text-gray-600' : 'sf-text-gray-400'
-              }`}>
-              ({tab.count})
-            </span>
-          )}
-        </button>
-      ))}
+      {tabs.map((tab) => {
+        const isActive = activeTab === tab.key;
+
+        return (
+          <button
+            key={tab.key}
+            onClick={() => onTabChange(tab.key)}
+            className={classNames(
+              // base
+              'sf-group sf-relative sf-px-2.5 sf-py-1.5 sf-text-sm sf-font-medium sf-border-b-2 sf-transition-all sf-duration-200 sf-ease-out focus:sf-outline-none focus-visible:sf-ring-2 focus-visible:sf-ring-blue-500/50',
+              // active vs inactive
+              isActive
+                ? 'sf-border-blue-600 sf-text-blue-600 sf-bg-blue-50'
+                : 'sf-border-transparent sf-text-gray-600 sf-bg-transparent hover:sf-text-gray-900 hover:sf-border-gray-300 hover:sf-bg-gray-50'
+            )}>
+            <span className='sf-z-10 sf-relative'>{tab.label}</span>
+
+            {tab.count !== undefined && (
+              <span
+                className={classNames(
+                  'sf-ml-2 sf-text-xs sf-transition-colors sf-duration-200',
+                  isActive
+                    ? 'sf-text-gray-600'
+                    : 'sf-text-gray-400 group-hover:sf-text-gray-600'
+                )}>
+                ({tab.count})
+              </span>
+            )}
+
+            {/* subtle hover underline animation */}
+            {!isActive && (
+              <span className='sf-bottom-0 sf-absolute sf-inset-x-0 sf-bg-blue-500 sf-h-0.5 sf-scale-x-0 group-hover:sf-scale-x-100 sf-origin-left sf-transition-transform sf-duration-200 sf-pointer-events-none' />
+            )}
+          </button>
+        );
+      })}
     </div>
   );
 }

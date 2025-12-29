@@ -23,7 +23,7 @@ const AdminHeader = memo(function AdminHeader({ title, actions }) {
 
   return (
     <div
-      className='sf-flex sf-flex-shrink-0 sf-justify-between sf-items-center sf-bg-white sf-px-6 sf-border-gray-300 sf-border-b'
+      className='sf-flex sf-flex-shrink-0 sf-justify-between sf-items-center sf-bg-blue-200 sf-px-6 sf-border-gray-300 sf-border-b'
       style={{
         height: `${HEADER_HEIGHT}px`,
         position: 'sticky',
@@ -34,7 +34,10 @@ const AdminHeader = memo(function AdminHeader({ title, actions }) {
       <div className='sf-flex sf-items-center sf-gap-4'>
         <div className='sf-flex sf-items-center sf-gap-3'>
           {/* SubtleForms Logo */}
-          <FiSquare className='sf-w-7 sf-h-7 sf-text-blue-600' strokeWidth={2.5} />
+          <FiSquare
+            className='sf-w-7 sf-h-7 sf-text-blue-600'
+            strokeWidth={2.5}
+          />
           <h1 className='sf-m-0 sf-font-semibold sf-text-gray-900 sf-text-lg sf-leading-none'>
             {title}
           </h1>
@@ -42,7 +45,9 @@ const AdminHeader = memo(function AdminHeader({ title, actions }) {
       </div>
 
       {/* Right Side: Action Buttons (Context-Aware) */}
-      {actions && <div className='sf-flex sf-items-center sf-gap-2'>{actions}</div>}
+      {actions && (
+        <div className='sf-flex sf-items-center sf-gap-2'>{actions}</div>
+      )}
     </div>
   );
 });

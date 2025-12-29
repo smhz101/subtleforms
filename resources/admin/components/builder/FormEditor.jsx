@@ -427,7 +427,7 @@ export default function FormEditor({
                     key={f.type}
                     type='button'
                     onClick={() => handleInsert(f.type, insertPicker.context)}
-                    className='sf-bg-gray-50 hover:bg-blue-600 sf-mb-1 sf-px-2.5 sf-py-2 sf-border sf-border-gray-300 hover:border-blue-600 sf-w-full sf-text-gray-900 hover:text-white sf-text-xs sf-text-left sf-transition-all sf-cursor-pointer'>
+                    className='sf-bg-gray-50 hover:sf-bg-blue-600 sf-mb-1 sf-px-2.5 sf-py-2 sf-border sf-border-gray-300 hover:sf-border-blue-600 sf-w-full sf-text-gray-900 hover:sf-text-white sf-text-xs sf-text-left sf-transition-all sf-cursor-pointer'>
                     {f.label}
                   </button>
                 ))}

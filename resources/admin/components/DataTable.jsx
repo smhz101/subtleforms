@@ -170,7 +170,7 @@ const DataTable = memo(function DataTable({
                     ${!selectable && 'first:pl-8'}
                     ${
                       column.sortable
-                        ? 'cursor-pointer hover:bg-gray-100 select-none'
+                        ? 'sf-cursor-pointer hover:sf-bg-gray-100 sf-select-none'
                         : ''
                     }
                   `}
@@ -193,7 +193,7 @@ const DataTable = memo(function DataTable({
                   ${selectedItems.includes(row.id) ? 'bg-blue-50' : ''}
                   ${
                     onRowClick
-                      ? 'cursor-pointer hover:bg-blue-50 hover:shadow-sm'
+                      ? 'sf-cursor-pointer hover:sf-bg-blue-50 hover:sf-shadow-sm'
                       : ''
                   }
                 `}

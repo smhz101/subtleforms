@@ -128,7 +128,7 @@ export default function FormsList({
       width: '25%',
       render: (title, form) => (
         <div className='sf-flex sf-items-center sf-gap-2'>
-          <span className='sf-font-semibold sf-text-gray-900 group-hover:text-blue-600 sf-text-base sf-transition-colors'>
+          <span className='sf-font-semibold sf-text-gray-900 group-hover:sf-text-blue-600 sf-text-base sf-transition-colors'>
             {title}
           </span>
           {form.submission_count === 0 && (
@@ -236,16 +236,16 @@ export default function FormsList({
         return (
           <button
             type='button'
-            className='group sf-flex sf-items-center sf-gap-2 sf-bg-gray-100 hover:bg-gray-200 sf-px-2 sf-py-1 rounded sf-text-xs sf-transition-colors'
+            className='group sf-flex sf-items-center sf-gap-2 sf-bg-gray-100 hover:sf-bg-gray-200 sf-px-2 sf-py-1 sf-rounded sf-text-xs sf-transition-colors'
             onClick={(e) => {
               e.stopPropagation();
               handleCopyShortcode(shortcode);
             }}
             title={__('Click to copy', 'subtleforms')}>
-            <code className='sf-font-mono sf-text-gray-600 group-hover:text-gray-900'>
+            <code className='sf-font-mono sf-text-gray-600 group-hover:sf-text-gray-900'>
               {shortcode}
             </code>
-            <FiCopy className='sf-flex-shrink-0 sf-w-3 sf-h-3 sf-text-gray-400 group-hover:text-gray-600' />
+            <FiCopy className='sf-flex-shrink-0 sf-w-3 sf-h-3 sf-text-gray-400 group-hover:sf-text-gray-600' />
           </button>
         );
       },
@@ -263,8 +263,9 @@ export default function FormsList({
             className={classNames(
               'inline-flex items-center gap-1.5 px-2.5 py-1 font-medium text-sm transition-colors',
               {
-                'text-blue-600 bg-blue-50 hover:bg-blue-100': hasUnread,
-                'text-gray-600 hover:text-gray-900': !hasUnread,
+                'sf-text-blue-600 sf-bg-blue-50 hover:sf-bg-blue-100':
+                  hasUnread,
+                'sf-text-gray-600 hover:sf-text-gray-900': !hasUnread,
               }
             )}
             onClick={(e) => e.stopPropagation()}
@@ -307,7 +308,9 @@ export default function FormsList({
         else displayText = date.toLocaleDateString();
 
         return (
-          <time className='sf-text-gray-600 sf-text-sm' title={date.toLocaleString()}>
+          <time
+            className='sf-text-gray-600 sf-text-sm'
+            title={date.toLocaleString()}>
             {displayText}
           </time>
         );
@@ -324,7 +327,7 @@ export default function FormsList({
               e.stopPropagation();
               handleEditForm(form.id);
             }}
-            className='hover:bg-gray-100 sf-p-1 rounded'
+            className='hover:sf-bg-gray-100 sf-p-1 sf-rounded'
             title={__('Edit', 'subtleforms')}>
             <FiEdit2 className='sf-w-4 sf-h-4 sf-text-gray-600' />
           </button>
@@ -335,7 +338,7 @@ export default function FormsList({
                   e.stopPropagation();
                   onToggle();
                 }}
-                className='hover:bg-gray-100 sf-p-1 rounded'
+                className='hover:sf-bg-gray-100 sf-p-1 sf-rounded'
                 title={__('More actions', 'subtleforms')}>
                 <FiMoreVertical className='sf-w-4 sf-h-4 sf-text-gray-600' />
               </button>

@@ -66,7 +66,7 @@ export default function AdminShell({
             className={`sf-h-full sf-flex sf-flex-col ${
               noScroll ? 'sf-overflow-hidden' : 'sf-overflow-y-auto'
             }`}>
-            <div className='empty:hidden sf-flex-shrink-0 sf-px-6 sf-pt-4'>
+            <div className='sf-empty:hidden sf-flex-shrink-0 sf-px-6 sf-pt-4'>
               <Notices />
             </div>
             <div
