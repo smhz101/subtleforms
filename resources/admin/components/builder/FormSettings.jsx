@@ -97,21 +97,21 @@ export default function FormSettings({ schema, onChange }) {
         {/* Form Type Info Banner */}
         {formType !== 'regular' && (
           <div
-            className={`p-4 mb-6 border-l-4 ${
+            className={`sf-p-4 sf-mb-6 sf-border-l-4 ${
               formType === 'multistep'
-                ? 'bg-purple-50 border-purple-500'
+                ? 'sf-bg-purple-50 sf-border-purple-500'
                 : formType === 'sectioned'
-                ? 'bg-indigo-50 border-indigo-500'
+                ? 'sf-bg-indigo-50 sf-border-indigo-500'
                 : formType === 'conversational'
-                ? 'bg-blue-50 border-blue-500'
-                : 'bg-green-50 border-green-500'
+                ? 'sf-bg-blue-50 sf-border-blue-500'
+                : 'sf-bg-green-50 sf-border-green-500'
             }`}>
             <h3
-              className={`font-semibold mb-1 text-sm ${
+              className={`sf-font-semibold sf-mb-1 sf-text-sm ${
                 formType === 'multistep'
-                  ? 'text-purple-900'
+                  ? 'sf-text-purple-900'
                   : formType === 'sectioned'
-                  ? 'text-indigo-900'
+                  ? 'sf-text-indigo-900'
                   : formType === 'conversational'
                   ? 'text-blue-900'
                   : 'text-green-900'

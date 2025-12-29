@@ -245,7 +245,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
           })}
         </div>
 
-        <div className={isHorizontal ? 'flex-1 min-w-0' : 'w-full'}>
+        <div className={isHorizontal ? 'sf-flex-1 sf-min-w-0' : 'sf-w-full'}>
           <div
             className={classNames(
               'font-semibold text-sm',
@@ -255,8 +255,8 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
           </div>
 
           <div
-            className={`text-gray-500 text-xs leading-snug ${
-              isHorizontal ? 'mt-1' : 'mt-1'
+            className={`sf-text-gray-500 sf-text-xs sf-leading-snug ${
+              isHorizontal ? 'sf-mt-1' : 'sf-mt-1'
             }`}>
             {option.description}
           </div>
@@ -270,8 +270,8 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
 
         {isDisabled && (
           <div
-            className={`font-medium text-[10px] text-gray-500 uppercase tracking-wider ${
-              isHorizontal ? 'mt-1' : 'mt-2'
+            className={`sf-font-medium sf-text-[10px] sf-text-gray-500 sf-uppercase sf-tracking-wider ${
+              isHorizontal ? 'sf-mt-1' : 'sf-mt-2'
             }`}>
             {__('Coming soon', 'subtleforms')}
           </div>
@@ -313,19 +313,19 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         <div className='sf-flex sf-justify-center sf-mb-6'>
           <div className='sf-flex sf-items-center sf-space-x-3'>
             <div
-              className={`px-3 py-1 text-xs font-medium border transition-colors ${
+              className={`sf-px-3 sf-py-1 sf-text-xs sf-font-medium sf-border sf-transition-colors ${
                 step === 1
-                  ? 'bg-blue-50 border-blue-300 text-blue-800'
-                  : 'bg-white border-gray-200 text-gray-500'
+                  ? 'sf-bg-blue-50 sf-border-blue-300 sf-text-blue-800'
+                  : 'sf-bg-white sf-border-gray-200 sf-text-gray-500'
               }`}>
               {__('Details', 'subtleforms')}
             </div>
             <div className='sf-bg-gray-200 sf-w-8 sf-h-px'></div>
             <div
-              className={`px-3 py-1 text-xs font-medium border transition-colors ${
+              className={`sf-px-3 sf-py-1 sf-text-xs sf-font-medium sf-border sf-transition-colors ${
                 step === 2
-                  ? 'bg-blue-50 border-blue-300 text-blue-800'
-                  : 'bg-white border-gray-200 text-gray-500'
+                  ? 'sf-bg-blue-50 sf-border-blue-300 sf-text-blue-800'
+                  : 'sf-bg-white sf-border-gray-200 sf-text-gray-500'
               }`}>
               {__('Structure', 'subtleforms')}
             </div>

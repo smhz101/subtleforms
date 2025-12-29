@@ -22,8 +22,8 @@ export default function TabBar({ tabs, activeTab, onTabChange }) {
           {tab.label}
           {tab.count !== undefined && (
             <span
-              className={`ml-2 text-xs ${
-                activeTab === tab.key ? 'text-gray-600' : 'text-gray-400'
+              className={`sf-ml-2 sf-text-xs ${
+                activeTab === tab.key ? 'sf-text-gray-600' : 'sf-text-gray-400'
               }`}>
               ({tab.count})
             </span>

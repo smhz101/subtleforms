@@ -158,12 +158,12 @@ export default function ConversationalCanvas({
                 setCurrentIndex(index);
                 onSelect(f.id);
               }}
-              className={`w-2 h-2 rounded-full transition-all ${
+              className={`sf-w-2 sf-h-2 sf-rounded-full sf-transition-all ${
                 index === currentIndex
-                  ? 'bg-blue-600 w-6'
+                  ? 'sf-bg-blue-600 sf-w-6'
                   : index < currentIndex
-                  ? 'bg-blue-300'
-                  : 'bg-gray-300'
+                  ? 'sf-bg-blue-300'
+                  : 'sf-bg-gray-300'
               }`}
               title={`${__('Question', 'subtleforms')} ${index + 1}`}
             />

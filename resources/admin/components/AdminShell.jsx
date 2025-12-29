@@ -63,13 +63,14 @@ export default function AdminShell({
         {/* CONTENT AREA - Scrollable */}
         <div className='sf-flex-1 sf-overflow-hidden'>
           <div
-            className={`h-full flex flex-col ${
-              noScroll ? 'overflow-hidden' : 'overflow-y-auto'
+            className={`sf-h-full sf-flex sf-flex-col ${
+              noScroll ? 'sf-overflow-hidden' : 'sf-overflow-y-auto'
             }`}>
             <div className='empty:hidden sf-flex-shrink-0 sf-px-6 sf-pt-4'>
               <Notices />
             </div>
-            <div className={`flex-1 ${noScroll ? 'overflow-hidden' : ''}`}>
+            <div
+              className={`sf-flex-1 ${noScroll ? 'sf-overflow-hidden' : ''}`}>
               {children}
             </div>
           </div>

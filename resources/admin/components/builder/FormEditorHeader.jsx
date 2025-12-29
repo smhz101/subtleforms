@@ -136,11 +136,11 @@ export default function FormEditorHeader({
             type='button'
             onClick={handleCopyShortcode}
             disabled={!formId}
-            className={`inline-flex items-center gap-1.5 px-3 py-1 text-xs font-medium font-mono outline-none ${
+            className={`sf-inline-flex sf-items-center sf-gap-1.5 sf-px-3 sf-py-1 sf-text-xs sf-font-medium sf-font-mono sf-outline-none ${
               copyState === 'copied'
-                ? 'text-green-600 bg-blue-50 border border-green-600'
-                : 'text-gray-700 bg-gray-100 border border-gray-300'
-            } ${formId ? 'cursor-pointer' : 'cursor-not-allowed'}`}
+                ? 'sf-text-green-600 sf-bg-blue-50 sf-border sf-border-green-600'
+                : 'sf-text-gray-700 sf-bg-gray-100 sf-border sf-border-gray-300'
+            } ${formId ? 'sf-cursor-pointer' : 'sf-cursor-not-allowed'}`}
             onMouseEnter={(e) => {
               if (formId && copyState !== 'copied') {
                 e.currentTarget.style.borderColor = '#2271b1';

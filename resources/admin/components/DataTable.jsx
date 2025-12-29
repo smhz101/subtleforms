@@ -211,8 +211,8 @@ const DataTable = memo(function DataTable({
                 {columns.map((column) => (
                   <td
                     key={column.key}
-                    className={`px-6 py-4 last:pr-8 text-gray-900 text-sm ${
-                      !selectable && 'first:pl-8'
+                    className={`sf-px-6 sf-py-4 last:sf-pr-8 sf-text-gray-900 sf-text-sm ${
+                      !selectable && 'first:sf-pl-8'
                     }`}>
                     {column.render
                       ? column.render(row[column.key], row)
