@@ -262,17 +262,17 @@ export default function Dashboard() {
                               return (
                                 <span
                                   className={classNames(
-                                    'inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium border',
+                                    'sf-inline-flex sf-items-center sf-gap-1 sf-px-2 sf-py-0.5 sf-text-xs sf-font-medium sf-border',
                                     {
-                                      'bg-gray-50 text-gray-600 border-gray-200':
+                                      'sf-bg-gray-50 sf-text-gray-600 sf-border-gray-200':
                                         config.color === 'gray',
-                                      'bg-purple-50 text-purple-600 border-purple-200':
+                                      'sf-bg-purple-50 sf-text-purple-600 sf-border-purple-200':
                                         config.color === 'purple',
-                                      'bg-indigo-50 text-indigo-600 border-indigo-200':
+                                      'sf-bg-indigo-50 sf-text-indigo-600 sf-border-indigo-200':
                                         config.color === 'indigo',
-                                      'bg-blue-50 text-blue-600 border-blue-200':
+                                      'sf-bg-blue-50 sf-text-blue-600 sf-border-blue-200':
                                         config.color === 'blue',
-                                      'bg-green-50 text-green-600 border-green-200':
+                                      'sf-bg-green-50 sf-text-green-600 sf-border-green-200':
                                         config.color === 'green',
                                     }
                                   )}
@@ -340,11 +340,11 @@ export default function Dashboard() {
                 <h2>{__('System Health', 'subtleforms')}</h2>
                 <span
                   className={classNames(
-                    'inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium rounded-full',
+                    'sf-inline-flex sf-items-center sf-gap-1.5 sf-px-2.5 sf-py-1 sf-text-xs sf-font-medium sf-rounded-full',
                     {
-                      'bg-green-50 text-green-700':
+                      'sf-bg-green-50 sf-text-green-700':
                         system_health.status === 'healthy',
-                      'bg-yellow-50 text-yellow-700':
+                      'sf-bg-yellow-50 sf-text-yellow-700':
                         system_health.status !== 'healthy',
                     }
                   )}>

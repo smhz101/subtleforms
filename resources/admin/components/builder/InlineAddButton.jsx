@@ -13,9 +13,9 @@ export default function InlineAddButton({
 }) {
   return (
     <div
-      className={classNames('text-center py-3 mb-4 transition-opacity', {
-        'opacity-100': isHovered || showFieldPicker,
-        'opacity-30': !isHovered && !showFieldPicker,
+      className={classNames('sf-text-center sf-py-3 sf-mb-4 sf-transition-opacity', {
+        'sf-opacity-100': isHovered || showFieldPicker,
+        'sf-opacity-30': !isHovered && !showFieldPicker,
       })}
       onMouseEnter={onHover}
       onMouseLeave={onLeave}>
