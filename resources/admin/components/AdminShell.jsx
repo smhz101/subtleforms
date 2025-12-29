@@ -43,7 +43,7 @@ export default function AdminShell({
 
   return (
     <div className='subtleforms-admin'>
-      <div className='sf-flex sf-flex-col sf-bg-white sf-h-[calc(100vh-var(--wp-admin--admin-bar--height,32px))] testig'>
+      <div className='sf-flex sf-flex-col sf-bg-white sf-h-[calc(100vh-var(--wp-admin--admin-bar--height,32px))] shell-container'>
         {/* TOP BAR - Sticky Header Component */}
         <AdminHeader title={title} actions={actions} />
 
