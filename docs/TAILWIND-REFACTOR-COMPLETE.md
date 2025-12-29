@@ -48,6 +48,9 @@ Successfully completed comprehensive UI refactor to isolate Tailwind CSS, elimin
 - Processed **44 JSX files**
 - Updated **1,482 Tailwind utility classes** with `sf-` prefix
 - Preserved custom classes (subtleforms-_, components-_, wp-\*)
+- **Bug Fix**: Manually fixed missed prefixes in template literals (commit 4c6ced1)
+  - Script couldn't handle template literals with interpolations
+  - Fixed 7 files: AdminShell, CreateFormModal, FormEditorHeader, FormSettings, ConversationalCanvas, TabBar, DataTable
 - Build successful with zero errors
 - **Version**: 1.1.43 → 1.1.44
 
