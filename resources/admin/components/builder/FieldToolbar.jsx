@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { getIcon } from './utils/iconMap';
 
 export default function FieldToolbar({
@@ -58,7 +58,7 @@ export default function FieldToolbar({
         onClick={createHandler(handler)}
         onMouseDown={(event) => event.stopPropagation()}
         onPointerDown={(event) => event.stopPropagation()}
-        className={classNames(
+        className={clsx(
           'w-8 h-8 flex items-center justify-center',
           'sf-border sf-border-transparent sf-rounded',
           'transition-all duration-150',
@@ -80,7 +80,7 @@ export default function FieldToolbar({
 
   return (
     <div
-      className={classNames(
+      className={clsx(
         'absolute top-0 right-0 -mt-2 mr-2',
         'flex items-center gap-0.5 p-0.5',
         'sf-bg-white sf-border sf-border-gray-300 sf-rounded sf-shadow-sm',
@@ -101,7 +101,7 @@ export default function FieldToolbar({
         onMouseDown={handleMouseDown}
         onTouchStart={handleTouchStart}
         onClick={(event) => event.stopPropagation()}
-        className={classNames(
+        className={clsx(
           'flex justify-center items-center',
           'sf-w-8 sf-h-8 sf-rounded',
           'sf-text-gray-500 hover:sf-bg-gray-100 hover:sf-text-gray-700',

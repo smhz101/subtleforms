@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { FiX, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 const TOUR_STEPS = [
   {
@@ -258,7 +258,7 @@ export default function BuilderTour({ onComplete, onSkip }) {
       {/* Tooltip */}
       <div
         ref={tooltipRef}
-        className={classNames(
+        className={clsx(
           'sf-fixed sf-z-50 sf-bg-white sf-rounded-lg sf-shadow-2xl sf-p-6 sf-max-w-md',
           'sf-transition-opacity sf-duration-300',
           isPositioned ? 'opacity-100' : 'opacity-0'

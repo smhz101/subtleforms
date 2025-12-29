@@ -29,7 +29,7 @@ import {
   FiMessageCircle,
   FiCreditCard,
 } from 'react-icons/fi';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import DataTable from './DataTable';
 import { ConfirmModal } from '../modals';
 
@@ -178,8 +178,8 @@ export default function FormsList({
 
         return (
           <span
-            className={classNames(
-              'inline-flex items-center gap-1 px-2.5 py-1 border text-xs font-medium',
+            className={clsx(
+              'inline-flex items-center gap-1 px-2.5 py-1 border font-medium text-xs',
               config.classes
             )}>
             <IconComponent className='sf-w-3 sf-h-3' />
@@ -217,8 +217,8 @@ export default function FormsList({
         const IconComponent = config.icon;
         return (
           <span
-            className={classNames(
-              'inline-flex items-center gap-1 px-2.5 py-1 border text-xs font-medium',
+            className={clsx(
+              'inline-flex items-center gap-1 px-2.5 py-1 border font-medium text-xs',
               config.classes
             )}>
             <IconComponent className='sf-w-3 sf-h-3' />
@@ -260,7 +260,7 @@ export default function FormsList({
         return (
           <a
             href={`admin.php?page=subtleforms-submissions&form_id=${form.id}`}
-            className={classNames(
+            className={clsx(
               'inline-flex items-center gap-1.5 px-2.5 py-1 font-medium text-sm transition-colors',
               {
                 'sf-text-blue-600 sf-bg-blue-50 hover:sf-bg-blue-100':

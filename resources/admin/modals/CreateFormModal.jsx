@@ -19,7 +19,7 @@ import {
   FiMessageCircle,
   FiCreditCard,
 } from 'react-icons/fi';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 const restBase =
   window.subtleformsAdmin && window.subtleformsAdmin.restUrl
@@ -220,7 +220,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         type='button'
         onClick={() => !isDisabled && onSelect(option.id)}
         disabled={isDisabled}
-        className={classNames(
+        className={clsx(
           'sf-group sf-relative sf-flex sf-transition-all sf-duration-150 sf-w-full sf-border sf-focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2',
           isHorizontal
             ? 'sf-flex-row sf-items-center sf-gap-3 sf-p-3 sf-text-left'
@@ -233,7 +233,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
             : 'sf-cursor-pointer'
         )}>
         <div
-          className={classNames(
+          className={clsx(
             'flex-shrink-0 transition-colors',
             isHorizontal ? 'p-2' : 'p-3 mb-2',
             isSelected
@@ -249,7 +249,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
 
         <div className={isHorizontal ? 'sf-flex-1 sf-min-w-0' : 'sf-w-full'}>
           <div
-            className={classNames(
+            className={clsx(
               'font-semibold text-sm',
               isSelected ? 'text-blue-900' : 'text-gray-900'
             )}>

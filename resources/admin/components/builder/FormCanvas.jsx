@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import FieldList from './FieldList';
 import { getIcon } from './utils/iconMap';
 
@@ -31,7 +31,7 @@ export default function FormCanvas({
   return (
     <div className='sf-flex-1 sf-bg-gray-100 sf-p-8 sf-overflow-auto'>
       <div
-        className={classNames(
+        className={clsx(
           'sf-bg-white sf-mx-auto sf-p-12 sf-min-h-[500px]',
           canvasWidthClass
         )}>

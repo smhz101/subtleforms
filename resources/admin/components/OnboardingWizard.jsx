@@ -12,7 +12,7 @@ import {
   FiList,
   FiCheckCircle,
 } from 'react-icons/fi';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 const FORM_GOALS = [
   {
@@ -329,7 +329,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                   <button
                     key={goal.id}
                     onClick={() => setSelectedGoal(goal.id)}
-                    className={classNames(
+                    className={clsx(
                       'sf-p-6 sf-rounded-lg sf-border-2 sf-text-left sf-transition-all',
                       'hover:sf-border-blue-500 hover:sf-shadow-md',
                       isSelected
@@ -338,7 +338,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                     )}>
                     <div className='sf-flex sf-items-start'>
                       <div
-                        className={classNames(
+                        className={clsx(
                           'sf-flex-shrink-0 sf-w-10 sf-h-10 sf-rounded-lg sf-flex sf-items-center sf-justify-center',
                           isSelected
                             ? 'bg-blue-600 text-white'
@@ -348,7 +348,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                       </div>
                       <div className='sf-flex-1 sf-ml-4'>
                         <h3
-                          className={classNames(
+                          className={clsx(
                             'font-semibold mb-1',
                             isSelected ? 'text-blue-900' : 'text-gray-900'
                           )}>
@@ -389,7 +389,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                   <button
                     key={type.id}
                     onClick={() => setSelectedType(type.id)}
-                    className={classNames(
+                    className={clsx(
                       'sf-p-6 sf-rounded-lg sf-border-2 sf-text-left sf-transition-all',
                       'hover:sf-border-blue-500 hover:sf-shadow-md',
                       isSelected
@@ -398,7 +398,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                     )}>
                     <div className='sf-flex sf-items-start'>
                       <div
-                        className={classNames(
+                        className={clsx(
                           'sf-flex-shrink-0 sf-w-10 sf-h-10 sf-rounded-lg sf-flex sf-items-center sf-justify-center',
                           isSelected
                             ? 'sf-bg-blue-600 sf-text-white'
@@ -408,7 +408,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                       </div>
                       <div className='sf-flex-1 sf-ml-4'>
                         <h3
-                          className={classNames(
+                          className={clsx(
                             'font-semibold mb-1',
                             isSelected ? 'text-blue-900' : 'text-gray-900'
                           )}>

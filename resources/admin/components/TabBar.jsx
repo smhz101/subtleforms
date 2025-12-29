@@ -1,5 +1,5 @@
 import { __ } from '@wordpress/i18n';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 /**
  * Standardized Tab Bar
@@ -15,7 +15,7 @@ export default function TabBar({ tabs, activeTab, onTabChange }) {
           <button
             key={tab.key}
             onClick={() => onTabChange(tab.key)}
-            className={classNames(
+            className={clsx(
               // base
               'sf-group sf-relative sf-px-2.5 sf-py-1.5 sf-text-sm sf-font-medium sf-border-b-2 sf-transition-all sf-duration-200 sf-ease-out focus:sf-outline-none focus-visible:sf-ring-2 focus-visible:sf-ring-blue-500/50',
               // active vs inactive
@@ -27,7 +27,7 @@ export default function TabBar({ tabs, activeTab, onTabChange }) {
 
             {tab.count !== undefined && (
               <span
-                className={classNames(
+                className={clsx(
                   'sf-ml-2 sf-text-xs sf-transition-colors sf-duration-200',
                   isActive
                     ? 'sf-text-gray-600'

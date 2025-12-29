@@ -9,7 +9,7 @@ import {
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import {
   FiFileText,
   FiLayers,
@@ -261,7 +261,7 @@ export default function Dashboard() {
                               const Icon = config.icon;
                               return (
                                 <span
-                                  className={classNames(
+                                  className={clsx(
                                     'sf-inline-flex sf-items-center sf-gap-1 sf-px-2 sf-py-0.5 sf-text-xs sf-font-medium sf-border',
                                     {
                                       'sf-bg-gray-50 sf-text-gray-600 sf-border-gray-200':
@@ -339,7 +339,7 @@ export default function Dashboard() {
               <div className='sf-flex sf-justify-between sf-items-center'>
                 <h2>{__('System Health', 'subtleforms')}</h2>
                 <span
-                  className={classNames(
+                  className={clsx(
                     'sf-inline-flex sf-items-center sf-gap-1.5 sf-px-2.5 sf-py-1 sf-text-xs sf-font-medium sf-rounded-full',
                     {
                       'sf-bg-green-50 sf-text-green-700':

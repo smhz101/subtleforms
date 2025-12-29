@@ -1,7 +1,7 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { FiArrowUp, FiArrowDown, FiCopy, FiTrash2 } from 'react-icons/fi';
-import classNames from 'classnames';
+import clsx from 'clsx';
 import { getIcon } from './utils/iconMap';
 
 export default function ContainerWrapper({
@@ -31,8 +31,8 @@ export default function ContainerWrapper({
         onHover(path);
       }}
       onMouseLeave={() => onHover(null)}
-      className={classNames(
-        'sf-relative sf-mb-4 sf-bg-white sf-transition-all',
+      className={clsx(
+        'sf-relative sf-bg-white sf-mb-4 sf-transition-all',
         isSelected
           ? 'sf-border-2 sf-border-blue-600'
           : 'sf-border sf-border-gray-300'

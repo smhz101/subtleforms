@@ -1,6 +1,6 @@
 import FieldRenderer from './FieldRenderer';
 import FieldToolbar from './FieldToolbar';
-import classNames from 'classnames';
+import clsx from 'clsx';
 
 export default function FieldWrapper({
   field,
@@ -19,8 +19,8 @@ export default function FieldWrapper({
 }) {
   return (
     <div
-      className={classNames(
-        'sf-p-5 sf-cursor-pointer sf-transition-all sf-relative',
+      className={clsx(
+        'sf-relative sf-p-5 sf-transition-all sf-cursor-pointer',
         {
           'sf-bg-blue-50 sf-border-2 sf-border-blue-600': isSelected,
           'sf-bg-gray-50 sf-border sf-border-gray-300':
