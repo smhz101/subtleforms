@@ -45,7 +45,7 @@ export async function apiGet(path) {
   });
 
   const body = await parseJsonResponse(response);
-  return { ok: response.ok, body };
+  return { ok: response.ok, status: response.status, body };
 }
 
 export async function apiPost(path, payload) {
@@ -60,7 +60,7 @@ export async function apiPost(path, payload) {
   });
 
   const body = await parseJsonResponse(response);
-  return { ok: response.ok, body };
+  return { ok: response.ok, status: response.status, body };
 }
 
 export async function apiPut(path, payload) {
@@ -75,5 +75,19 @@ export async function apiPut(path, payload) {
   });
 
   const body = await parseJsonResponse(response);
-  return { ok: response.ok, body };
+  return { ok: response.ok, status: response.status, body };
+}
+
+export async function apiDelete(path) {
+  const response = await fetch(getRestBase() + path, {
+    method: 'DELETE',
+    credentials: 'same-origin',
+    headers: {
+      'X-WP-Nonce': getRestNonce(),
+      'Content-Type': 'application/json',
+    },
+  });
+
+  const body = await parseJsonResponse(response);
+  return { ok: response.ok, status: response.status, body };
 }

@@ -120,13 +120,17 @@ export default function Dashboard() {
             title={__('Submissions Today', 'subtleforms')}
             value={stats.submissions_today}
             subtitle={__('Last 24 hours', 'subtleforms')}
-            icon={<Icon.Calendar className='sf-w-6 sf-h-6 sf-text-purple-600' />}
+            icon={
+              <Icon.Calendar className='sf-w-6 sf-h-6 sf-text-purple-600' />
+            }
           />
           <StatCard
             title={__('Submissions This Week', 'subtleforms')}
             value={stats.submissions_this_week}
             subtitle={__('Last 7 days', 'subtleforms')}
-            icon={<Icon.TrendingUp className='sf-w-6 sf-h-6 sf-text-orange-600' />}
+            icon={
+              <Icon.TrendingUp className='sf-w-6 sf-h-6 sf-text-orange-600' />
+            }
           />
         </div>
 
@@ -247,7 +251,7 @@ export default function Dashboard() {
                               };
                               const config =
                                 typeConfig[formType] || typeConfig.regular;
-                              const Icon = config.icon;
+                              const IconComponent = config.icon;
                               return (
                                 <span
                                   className={clsx(
@@ -266,7 +270,7 @@ export default function Dashboard() {
                                     }
                                   )}
                                   style={{ borderRadius: '3px' }}>
-                                  <Icon className='sf-w-3 sf-h-3' />
+                                  <IconComponent className='sf-w-3 sf-h-3' />
                                   {config.label}
                                 </span>
                               );
