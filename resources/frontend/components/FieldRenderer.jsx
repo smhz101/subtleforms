@@ -1,17 +1,21 @@
 import { __ } from '@wordpress/i18n';
+import { getIn } from '../utils/valuePaths';
 
 export default function FieldRenderer({
   field,
-  value,
+  fieldPath,
+  values,
   onChange,
-  error,
+  errors,
   hiddenFields,
 }) {
-  const fieldKey = field.config?.key || field.key;
-  const label = field.config?.label || field.label || fieldKey;
+  const resolvedPath = fieldPath || field.config?.key || field.key;
+  const label = field.config?.label || field.label || resolvedPath;
   const placeholder = field.config?.placeholder || '';
   const required = field.config?.required || false;
-  const isHidden = hiddenFields?.has(fieldKey);
+  const isHidden = hiddenFields?.has(resolvedPath);
+
+  const error = errors?.[resolvedPath];
 
   if (isHidden) {
     return null;
@@ -31,9 +35,10 @@ export default function FieldRenderer({
             <FieldRenderer
               key={child.config?.key || child.key}
               field={child}
-              value={value}
               onChange={onChange}
-              error={error}
+              fieldPath={child.config?.key || child.key}
+              values={values}
+              errors={errors}
               hiddenFields={hiddenFields}
             />
           ))}
@@ -59,9 +64,10 @@ export default function FieldRenderer({
                 <FieldRenderer
                   key={child.config?.key || child.key}
                   field={child}
-                  value={value}
                   onChange={onChange}
-                  error={error}
+                  fieldPath={child.config?.key || child.key}
+                  values={values}
+                  errors={errors}
                   hiddenFields={hiddenFields}
                 />
               ))}
@@ -71,6 +77,8 @@ export default function FieldRenderer({
     );
   }
 
+  const value = getIn(values, resolvedPath, '');
+
   // Render input fields
   return (
     <div className={`subtleforms-field subtleforms-field-${field.type}`}>
@@ -79,7 +87,12 @@ export default function FieldRenderer({
         {required && <span className='subtleforms-required'>*</span>}
       </label>
 
-      {renderInput(field, value, onChange, placeholder)}
+      {renderInput(
+        field,
+        value,
+        (next) => onChange(resolvedPath, next),
+        placeholder
+      )}
 
       {error && <div className='subtleforms-field-error'>{error}</div>}
     </div>

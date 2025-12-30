@@ -1,6 +1,9 @@
 import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import FieldRenderer from './FieldRenderer';
+import { getIn, setIn, flattenToPathMap } from '../utils/valuePaths';
+import { collectLeafInputPaths } from '../utils/schemaLeaves';
+import { warnOnce } from '../utils/warnOnce';
 
 const restUrl =
   window.subtleformsFrontend?.restUrl || '/wp-json/subtleforms/v1';
@@ -19,6 +22,11 @@ export default function ConversationalFormRenderer({ schema, formId }) {
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+
+  const leafPaths = useMemo(
+    () => collectLeafInputPaths(schema?.fields || []),
+    [schema]
+  );
 
   // Check if payment is enabled
   const paymentEnabled =
@@ -64,7 +72,7 @@ export default function ConversationalFormRenderer({ schema, formId }) {
       const conditions = field.config?.conditions || [];
 
       conditions.forEach((condition) => {
-        const sourceValue = values[condition.sourceField];
+        const sourceValue = getIn(values, condition.sourceField);
         let matches = false;
 
         switch (condition.operator) {
@@ -126,7 +134,7 @@ export default function ConversationalFormRenderer({ schema, formId }) {
     if (!currentField) return true;
 
     const fieldKey = currentField.config?.key || currentField.key;
-    const value = values[fieldKey];
+    const value = getIn(values, fieldKey);
     const isRequired = currentField.config?.required === true;
 
     // Clear previous error
@@ -149,16 +157,21 @@ export default function ConversationalFormRenderer({ schema, formId }) {
   }, [currentField, values]);
 
   // Handle field change
-  const handleChange = useCallback((fieldKey, value) => {
-    setValues((prev) => ({
-      ...prev,
-      [fieldKey]: value,
-    }));
+  const handleChange = useCallback((path, value) => {
+    if (typeof path !== 'string' || !path.trim()) {
+      warnOnce(
+        'subtleforms:missing-field-path:conversational',
+        '[SubtleForms] Field attempted to write without a path. Ignoring update.'
+      );
+      return;
+    }
+
+    setValues((prev) => setIn(prev, path, value));
 
     // Clear validation error when user types
     setValidationErrors((prev) => {
       const next = { ...prev };
-      delete next[fieldKey];
+      delete next[path];
       return next;
     });
   }, []);
@@ -218,10 +231,7 @@ export default function ConversationalFormRenderer({ schema, formId }) {
         currentField?.type !== 'textarea'
       ) {
         e.preventDefault();
-        if (
-          currentStep === 'questions' &&
-          currentIndex === totalFields - 1
-        ) {
+        if (currentStep === 'questions' && currentIndex === totalFields - 1) {
           // Last question - go to review
           handleNext();
         } else if (currentStep === 'questions') {
@@ -244,6 +254,14 @@ export default function ConversationalFormRenderer({ schema, formId }) {
       setSubmitting(true);
       setSubmitError(null);
 
+      const flatValues = flattenToPathMap(values);
+      const payload = {};
+      leafPaths.forEach((path) => {
+        if (Object.prototype.hasOwnProperty.call(flatValues, path)) {
+          payload[path] = flatValues[path];
+        }
+      });
+
       try {
         const response = await fetch(`${restUrl}/submit`, {
           method: 'POST',
@@ -253,7 +271,7 @@ export default function ConversationalFormRenderer({ schema, formId }) {
           },
           body: JSON.stringify({
             form_id: formId,
-            data: values,
+            data: payload,
           }),
         });
 
@@ -275,7 +293,7 @@ export default function ConversationalFormRenderer({ schema, formId }) {
         setSubmitting(false);
       }
     },
-    [formId, values]
+    [formId, values, leafPaths]
   );
 
   if (submitSuccess) {
@@ -306,7 +324,7 @@ export default function ConversationalFormRenderer({ schema, formId }) {
   }
 
   const fieldKey = currentField?.config?.key || currentField?.key;
-  const currentValue = values[fieldKey] || '';
+  const currentValue = getIn(values, fieldKey, '') || '';
   const currentError = validationErrors[fieldKey];
 
   // Calculate total payment amount
@@ -323,7 +341,13 @@ export default function ConversationalFormRenderer({ schema, formId }) {
   const totalAmount = calculateTotal();
   const currency = paymentSettings.currency || 'USD';
   const currencySymbol =
-    currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : currency;
+    currency === 'USD'
+      ? '$'
+      : currency === 'EUR'
+      ? '€'
+      : currency === 'GBP'
+      ? '£'
+      : currency;
 
   // Render Review Step
   if (currentStep === 'review') {
@@ -332,7 +356,10 @@ export default function ConversationalFormRenderer({ schema, formId }) {
         {/* Progress indicator */}
         <div className='subtleforms-progress'>
           <div className='subtleforms-progress-bar'>
-            <div className='subtleforms-progress-fill' style={{ width: '90%' }} />
+            <div
+              className='subtleforms-progress-fill'
+              style={{ width: '90%' }}
+            />
           </div>
           <div className='subtleforms-progress-text'>
             {__('Review Your Answers', 'subtleforms')}
@@ -344,7 +371,9 @@ export default function ConversationalFormRenderer({ schema, formId }) {
             {__('Please review your answers', 'subtleforms')}
           </h2>
 
-          {submitError && <div className='subtleforms-error'>{submitError}</div>}
+          {submitError && (
+            <div className='subtleforms-error'>{submitError}</div>
+          )}
 
           <div className='subtleforms-review-list'>
             {visibleFields.map((field, index) => {
@@ -406,7 +435,10 @@ export default function ConversationalFormRenderer({ schema, formId }) {
         {/* Progress indicator */}
         <div className='subtleforms-progress'>
           <div className='subtleforms-progress-bar'>
-            <div className='subtleforms-progress-fill' style={{ width: '95%' }} />
+            <div
+              className='subtleforms-progress-fill'
+              style={{ width: '95%' }}
+            />
           </div>
           <div className='subtleforms-progress-text'>
             {__('Payment', 'subtleforms')}
@@ -418,7 +450,9 @@ export default function ConversationalFormRenderer({ schema, formId }) {
             {__('Complete Payment', 'subtleforms')}
           </h2>
 
-          {submitError && <div className='subtleforms-error'>{submitError}</div>}
+          {submitError && (
+            <div className='subtleforms-error'>{submitError}</div>
+          )}
 
           <div className='subtleforms-payment-summary'>
             <div className='subtleforms-payment-amount'>
@@ -503,9 +537,10 @@ export default function ConversationalFormRenderer({ schema, formId }) {
           {currentField && (
             <FieldRenderer
               field={currentField}
-              value={currentValue}
-              onChange={(value) => handleChange(fieldKey, value)}
-              error={currentError}
+              fieldPath={fieldKey}
+              values={values}
+              onChange={handleChange}
+              errors={validationErrors}
               hiddenFields={hiddenFields}
               autoFocus={true}
             />

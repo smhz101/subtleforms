@@ -3,6 +3,9 @@ import { __ } from '@wordpress/i18n';
 import FieldRenderer from './FieldRenderer';
 import StepNavigation from './StepNavigation';
 import ConversationalFormRenderer from './ConversationalFormRenderer';
+import { getIn, setIn, flattenToPathMap } from '../utils/valuePaths';
+import { collectLeafInputPaths } from '../utils/schemaLeaves';
+import { warnOnce } from '../utils/warnOnce';
 
 const restUrl =
   window.subtleformsFrontend?.restUrl || '/wp-json/subtleforms/v1';
@@ -99,6 +102,87 @@ export default function FormRenderer({ formId }) {
     return flatten(schema.fields);
   }, [schema]);
 
+  const containerPaths = useMemo(() => {
+    const paths = new Set();
+    if (!schema?.fields) {
+      return paths;
+    }
+
+    const visit = (nodes) => {
+      if (!Array.isArray(nodes)) {
+        return;
+      }
+
+      nodes.forEach((field) => {
+        if (!field || typeof field !== 'object') {
+          return;
+        }
+
+        const key = field.config?.key || field.key;
+        const hasChildren =
+          Array.isArray(field.children) && field.children.length > 0;
+        const hasColumns =
+          Array.isArray(field.columns) && field.columns.length > 0;
+        const isColumnContainer =
+          typeof field.type === 'string' &&
+          field.type.includes('_column_container');
+        const isContainerType =
+          field.type === 'group_container' ||
+          field.type === 'repeat_container' ||
+          field.type === 'step' ||
+          field.type === 'section' ||
+          isColumnContainer;
+
+        if (
+          (hasChildren || hasColumns || isContainerType) &&
+          typeof key === 'string' &&
+          key.trim()
+        ) {
+          paths.add(key);
+        }
+
+        if (Array.isArray(field.children)) {
+          visit(field.children);
+        }
+
+        if (Array.isArray(field.columns)) {
+          field.columns.forEach((col) => {
+            if (Array.isArray(col)) {
+              visit(col);
+            }
+          });
+        }
+      });
+    };
+
+    visit(schema.fields);
+    return paths;
+  }, [schema]);
+
+  const leafPaths = useMemo(() => {
+    const paths = collectLeafInputPaths(schema?.fields || []);
+
+    // Dev-only: detect duplicates.
+    const seen = new Set();
+    const dupes = new Set();
+    paths.forEach((p) => {
+      if (seen.has(p)) {
+        dupes.add(p);
+      }
+      seen.add(p);
+    });
+
+    if (dupes.size > 0) {
+      warnOnce(
+        `subtleforms:duplicate-leaf-paths:${Array.from(dupes).join(',')}`,
+        '[SubtleForms] Duplicate field paths detected in schema (leaf keys must be unique):',
+        Array.from(dupes)
+      );
+    }
+
+    return paths;
+  }, [schema]);
+
   // Evaluate conditional logic (show/hide only)
   const hiddenFields = useMemo(() => {
     const hidden = new Set();
@@ -107,7 +191,7 @@ export default function FormRenderer({ formId }) {
       const conditions = field.config?.conditions || [];
 
       conditions.forEach((condition) => {
-        const sourceValue = values[condition.sourceField];
+        const sourceValue = getIn(values, condition.sourceField);
         let matches = false;
 
         switch (condition.operator) {
@@ -152,19 +236,42 @@ export default function FormRenderer({ formId }) {
   }, [allFields, values]);
 
   // Handle field change
-  const handleChange = useCallback((fieldKey, value) => {
-    setValues((prev) => ({
-      ...prev,
-      [fieldKey]: value,
-    }));
+  const handleChange = useCallback(
+    (path, value) => {
+      if (typeof path !== 'string' || !path.trim()) {
+        warnOnce(
+          'subtleforms:missing-field-path',
+          '[SubtleForms] Field attempted to write without a path. Ignoring update.'
+        );
+        return;
+      }
 
-    // Clear validation error for this field
-    setValidationErrors((prev) => {
-      const next = { ...prev };
-      delete next[fieldKey];
-      return next;
-    });
-  }, []);
+      if (containerPaths.has(path)) {
+        warnOnce(
+          `subtleforms:container-write:${path}`,
+          '[SubtleForms] Container field attempted to write a value. This is a bug; ignoring update.',
+          { path }
+        );
+        return;
+      }
+
+      setValues((prev) => setIn(prev, path, value));
+
+      // Clear validation error for this field
+      setValidationErrors((prev) => {
+        if (!prev || typeof prev !== 'object') {
+          return prev;
+        }
+        if (!prev[path]) {
+          return prev;
+        }
+        const next = { ...prev };
+        delete next[path];
+        return next;
+      });
+    },
+    [containerPaths]
+  );
 
   // Validate current step
   const validateStep = useCallback(() => {
@@ -202,7 +309,7 @@ export default function FormRenderer({ formId }) {
         return;
       }
 
-      const value = values[fieldKey];
+      const value = getIn(values, fieldKey);
       const isRequired = field.config?.required;
 
       if (isRequired && (!value || value === '')) {
@@ -258,6 +365,15 @@ export default function FormRenderer({ formId }) {
       setSubmitting(true);
       setSubmitError(null);
 
+      const flatValues = flattenToPathMap(values);
+      const payload = {};
+
+      leafPaths.forEach((path) => {
+        if (Object.prototype.hasOwnProperty.call(flatValues, path)) {
+          payload[path] = flatValues[path];
+        }
+      });
+
       try {
         const response = await fetch(`${restUrl}/submit`, {
           method: 'POST',
@@ -267,7 +383,7 @@ export default function FormRenderer({ formId }) {
           },
           body: JSON.stringify({
             form_id: formId,
-            data: values,
+            data: payload,
           }),
         });
 
@@ -278,6 +394,11 @@ export default function FormRenderer({ formId }) {
           setValues({});
           setCurrentStepIndex(0);
         } else {
+          // If backend returned structured field errors, store them for per-field display.
+          const errors = result?.data?.errors || result?.errors;
+          if (errors && typeof errors === 'object') {
+            setValidationErrors(errors);
+          }
           setSubmitError(
             result.message || __('Submission failed.', 'subtleforms')
           );
@@ -288,7 +409,7 @@ export default function FormRenderer({ formId }) {
         setSubmitting(false);
       }
     },
-    [formId, values, validateStep]
+    [formId, values, validateStep, leafPaths]
   );
 
   if (loading) {
@@ -364,9 +485,10 @@ export default function FormRenderer({ formId }) {
               <FieldRenderer
                 key={fieldKey}
                 field={field}
-                value={values[fieldKey] || ''}
-                onChange={(value) => handleChange(fieldKey, value)}
-                error={validationErrors[fieldKey]}
+                fieldPath={fieldKey}
+                values={values}
+                onChange={handleChange}
+                errors={validationErrors}
                 hiddenFields={hiddenFields}
               />
             );
