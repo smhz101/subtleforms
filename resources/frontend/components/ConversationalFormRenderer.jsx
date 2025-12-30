@@ -14,7 +14,12 @@ const restUrl =
  * Displays fields sequentially with smooth transitions and per-field validation
  * Supports payment flow: Questions → Review → Payment → Submit
  */
-export default function ConversationalFormRenderer({ schema, formId }) {
+export default function ConversationalFormRenderer({
+  schema,
+  formId,
+  preview = false,
+  onSubmit: customOnSubmit = null,
+}) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentStep, setCurrentStep] = useState('questions'); // 'questions', 'review', 'payment'
   const [values, setValues] = useState({});
@@ -251,6 +256,15 @@ export default function ConversationalFormRenderer({ schema, formId }) {
     async (e) => {
       e?.preventDefault();
 
+      // In preview mode, prevent submission
+      if (preview) {
+        console.warn('SubtleForms: Form submission disabled in preview mode');
+        if (customOnSubmit) {
+          customOnSubmit();
+        }
+        return;
+      }
+
       setSubmitting(true);
       setSubmitError(null);
 
@@ -282,6 +296,10 @@ export default function ConversationalFormRenderer({ schema, formId }) {
           setValues({});
           setCurrentIndex(0);
           setCurrentStep('questions');
+
+          if (customOnSubmit) {
+            customOnSubmit(result);
+          }
         } else {
           setSubmitError(
             result.message || __('Submission failed.', 'subtleforms')
@@ -293,7 +311,7 @@ export default function ConversationalFormRenderer({ schema, formId }) {
         setSubmitting(false);
       }
     },
-    [formId, values, leafPaths]
+    [formId, values, leafPaths, preview, customOnSubmit]
   );
 
   if (submitSuccess) {

@@ -1,0 +1,23 @@
+/**
+ * Editor styles for SubtleForms block
+ */
+.subtleforms-block-preview {
+	padding: 20px;
+	background: #f9f9f9;
+	border: 1px solid #ddd;
+	border-radius: 4px;
+	min-height: 200px;
+}
+
+.subtleforms-block-preview::after {
+	content: 'Preview Mode - Form submissions disabled in editor';
+	display: block;
+	margin-top: 20px;
+	padding: 10px;
+	background: #fff3cd;
+	border: 1px solid #ffc107;
+	border-radius: 3px;
+	color: #856404;
+	font-size: 12px;
+	text-align: center;
+}

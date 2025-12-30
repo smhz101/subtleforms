@@ -68,6 +68,9 @@ final class Plugin
             $this->container->get(\SubtleForms\Frontend\Shortcode::class)->register();
         });
 
+        // Register Gutenberg block
+        \SubtleForms\Blocks\SubtleFormsBlock::init();
+
         // Boot extensions
         add_action('init', function () {
             $this->container->get(ExtensionManager::class)->boot();

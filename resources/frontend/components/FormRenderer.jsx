@@ -11,9 +11,14 @@ const restUrl =
   window.subtleformsFrontend?.restUrl || '/wp-json/subtleforms/v1';
 const nonce = window.subtleformsFrontend?.nonce || '';
 
-export default function FormRenderer({ formId }) {
-  const [loading, setLoading] = useState(true);
-  const [schema, setSchema] = useState(null);
+export default function FormRenderer({
+  formId,
+  preloadedSchema = null,
+  preview = false,
+  onSubmit: customOnSubmit = null,
+}) {
+  const [loading, setLoading] = useState(!preloadedSchema);
+  const [schema, setSchema] = useState(preloadedSchema);
   const [error, setError] = useState(null);
   const [values, setValues] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -22,8 +27,13 @@ export default function FormRenderer({ formId }) {
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [validationErrors, setValidationErrors] = useState({});
 
-  // Load schema
+  // Load schema (skip if preloaded)
   useEffect(() => {
+    if (preloadedSchema) {
+      setLoading(false);
+      return;
+    }
+
     fetch(`${restUrl}/forms/${formId}/schema`, {
       credentials: 'same-origin',
       headers: {
@@ -43,7 +53,7 @@ export default function FormRenderer({ formId }) {
         setError(__('Failed to load form.', 'subtleforms'));
         setLoading(false);
       });
-  }, [formId]);
+  }, [formId, preloadedSchema]);
 
   // Extract steps from schema
   const steps = useMemo(() => {
@@ -358,6 +368,15 @@ export default function FormRenderer({ formId }) {
     async (e) => {
       e.preventDefault();
 
+      // In preview mode, prevent submission
+      if (preview) {
+        console.warn('SubtleForms: Form submission disabled in preview mode');
+        if (customOnSubmit) {
+          customOnSubmit();
+        }
+        return;
+      }
+
       if (!validateStep()) {
         return;
       }
@@ -393,6 +412,10 @@ export default function FormRenderer({ formId }) {
           setSubmitSuccess(true);
           setValues({});
           setCurrentStepIndex(0);
+
+          if (customOnSubmit) {
+            customOnSubmit(result);
+          }
         } else {
           // If backend returned structured field errors, store them for per-field display.
           const errors = result?.data?.errors || result?.errors;
@@ -409,7 +432,7 @@ export default function FormRenderer({ formId }) {
         setSubmitting(false);
       }
     },
-    [formId, values, validateStep, leafPaths]
+    [formId, values, validateStep, leafPaths, preview, customOnSubmit]
   );
 
   if (loading) {
@@ -426,7 +449,14 @@ export default function FormRenderer({ formId }) {
 
   // Use conversational renderer for conversational forms
   if (isConversational) {
-    return <ConversationalFormRenderer schema={schema} formId={formId} />;
+    return (
+      <ConversationalFormRenderer
+        schema={schema}
+        formId={formId}
+        preview={preview}
+        onSubmit={customOnSubmit}
+      />
+    );
   }
 
   if (submitSuccess) {

@@ -62,3 +62,6 @@ require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Frontend/Shortcode.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Repositories/FormsRepository.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Repositories/SubmissionsRepository.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Repositories/LogsRepository.php';
+
+// Blocks
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Blocks/SubtleFormsBlock.php';
