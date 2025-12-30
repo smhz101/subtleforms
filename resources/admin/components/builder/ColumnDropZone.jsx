@@ -72,7 +72,10 @@ export default function ColumnDropZone({
 
       {items.length === 0 && (
         <div className='subtleforms-dropzone-empty'>
-          {__('Drop fields here', 'subtleforms')}
+          {__(
+            'Use “Add Field” or drag a field from the left panel.',
+            'subtleforms'
+          )}
         </div>
       )}
     </div>

@@ -87,7 +87,7 @@ export default function ConversationalCanvas({
         </h3>
         <p className='sf-mb-6 sf-text-gray-600 sf-text-sm'>
           {__(
-            'Add fields from the left sidebar to create your conversational form. Each field will be displayed one at a time.',
+            'Add your first question from the left panel. Each field will be displayed one at a time.',
             'subtleforms'
           )}
         </p>

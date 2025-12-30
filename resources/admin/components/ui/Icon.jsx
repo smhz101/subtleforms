@@ -20,6 +20,8 @@ import {
   Edit2,
   Edit3,
   Move,
+  RotateCcw,
+  RotateCw,
   ChevronUp,
   ChevronDown,
   ChevronLeft,
@@ -72,11 +74,11 @@ import {
  * Exported Icon Library
  *
  * Usage:
- * import { Icon } from '../components/ui/Icon';
+ * import Icon from '../components/ui/Icon';
  * <Icon.Check size={16} />
  * <Icon.Plus className="sf-text-blue-600" />
  */
-export const Icon = {
+const Icon = {
   // Actions
   Check,
   Close: X,
@@ -88,6 +90,8 @@ export const Icon = {
   Edit2,
   Edit3,
   Move,
+  Undo: RotateCcw,
+  Redo: RotateCw,
 
   // Navigation
   Up: ChevronUp,
@@ -149,24 +153,27 @@ export const Icon = {
 
   // Form Field Types
   Type,
-  Text: Type,
   Phone,
   Hash,
-  Number: Hash,
   AlignLeft,
-  Textarea: AlignLeft,
   CheckSquare,
   Circle,
   Clock,
   MapPin,
-  Address: MapPin,
   Code,
   Image,
   Navigation,
   Lock,
-  Password: Lock,
   DollarSign,
+
+  // Aliases for convenience
+  Text: Type,
+  Number: Hash,
+  Textarea: AlignLeft,
+  Address: MapPin,
+  Password: Lock,
 };
 
-// Default export for convenience
+// Export both named and default
+export { Icon };
 export default Icon;

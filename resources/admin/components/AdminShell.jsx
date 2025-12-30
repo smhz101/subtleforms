@@ -42,7 +42,7 @@ export default function AdminShell({
   const WP_ADMIN_BAR_HEIGHT = 32;
 
   return (
-    <div className='subtleforms-admin'>
+    <div className='subtleforms-admin sf-admin-shell'>
       <div className='sf-flex sf-flex-col sf-bg-white sf-h-[calc(100vh-var(--wp-admin--admin-bar--height,32px))] shell-container'>
         {/* TOP BAR - Sticky Header Component */}
         <AdminHeader title={title} actions={actions} />
@@ -66,9 +66,7 @@ export default function AdminShell({
             className={`sf-h-full sf-flex sf-flex-col ${
               noScroll ? 'sf-overflow-hidden' : 'sf-overflow-y-auto'
             }`}>
-            <div className='sf-empty:hidden sf-flex-shrink-0 sf-px-6 sf-pt-4'>
-              <Notices />
-            </div>
+            <Notices />
             <div
               className={`sf-flex-1 ${noScroll ? 'sf-overflow-hidden' : ''}`}>
               {children}

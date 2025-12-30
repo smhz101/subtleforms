@@ -452,7 +452,7 @@ export default function SubmissionsTable({
   }
 
   return (
-    <>
+    <div className='sf-submissions-table'>
       <DataTable
         columns={columns}
         data={submissions}
@@ -498,6 +498,6 @@ export default function SubmissionsTable({
         confirmText={__('Delete Submission', 'subtleforms')}
         confirmVariant='destructive'
       />
-    </>
+    </div>
   );
 }

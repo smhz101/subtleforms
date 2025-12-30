@@ -484,7 +484,9 @@ export default function FormsList({
 
     if (ok && body?.id) {
       const newFormId = body.id;
-      const { ok: schemaOk } = await apiRequest(`/forms/${formId}/schema?context=builder`);
+      const { ok: schemaOk } = await apiRequest(
+        `/forms/${formId}/schema?context=builder`
+      );
 
       if (schemaOk) {
         await apiRequest(`/forms/${formId}/schema?context=builder`).then(

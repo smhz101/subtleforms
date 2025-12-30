@@ -16,6 +16,16 @@ const TOUR_STEPS = [
     position: 'bottom',
   },
   {
+    id: 'draft-vs-publish',
+    title: __('Draft vs Publish', 'subtleforms'),
+    content: __(
+      'Draft means your changes are saved but not live. Publish makes the form live. If it is already published, Update applies your latest changes.',
+      'subtleforms'
+    ),
+    selector: '[data-tour="status-badge"]',
+    position: 'bottom',
+  },
+  {
     id: 'left-panel',
     title: __('Fields Panel', 'subtleforms'),
     content: __(
@@ -62,7 +72,7 @@ const TOUR_STEPS = [
       'Switch to this tab to view form submissions. You can see all responses, filter them, and export data.',
       'subtleforms'
     ),
-    selector: '[role="tab"][aria-selected]',
+    selector: '.data-tour-submissions-tab',
     position: 'bottom',
   },
   {

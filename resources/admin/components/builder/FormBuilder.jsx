@@ -71,6 +71,7 @@ export default function FormBuilder({
   onMove,
   onDuplicate,
   onRequestInsert,
+  validationErrorsByFieldKey = {},
 }) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -193,6 +194,11 @@ export default function FormBuilder({
       return null;
     }
 
+    const validationMessages =
+      field?.key && validationErrorsByFieldKey[field.key]
+        ? validationErrorsByFieldKey[field.key]
+        : [];
+
     const siblings = nodeChildren(tree, parentId, columnIndex);
     const canMoveUp = position > 0;
     const canMoveDown = position < siblings.length - 1;
@@ -248,6 +254,7 @@ export default function FormBuilder({
               onSelect={() => onSelect(nodeId)}
               dragHandleRef={dragHandleRef}
               dragHandleListeners={dragHandleListeners}
+              validationMessages={validationMessages}
               toolbarActions={{
                 canMoveUp,
                 canMoveDown,

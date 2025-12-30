@@ -2,6 +2,10 @@ import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { getIcon } from './utils/iconMap';
 
+/**
+ * FieldToolbar
+ * Enhanced UI styling: glass effect, clearer affordances, smoother motion.
+ */
 export default function FieldToolbar({
   visible,
   dragHandleRef,
@@ -16,32 +20,11 @@ export default function FieldToolbar({
   const { onPointerDown, onMouseDown, onTouchStart, ...handleRest } =
     dragHandleListeners || {};
 
-  const handlePointerDown = (event) => {
-    event.stopPropagation();
-    if (typeof onPointerDown === 'function') {
-      onPointerDown(event);
-    }
-  };
-
-  const handleMouseDown = (event) => {
-    event.stopPropagation();
-    if (typeof onMouseDown === 'function') {
-      onMouseDown(event);
-    }
-  };
-
-  const handleTouchStart = (event) => {
-    event.stopPropagation();
-    if (typeof onTouchStart === 'function') {
-      onTouchStart(event);
-    }
-  };
+  const stop = (e) => e.stopPropagation();
 
   const createHandler = (callback) => (event) => {
-    event.stopPropagation();
-    if (typeof callback === 'function') {
-      callback();
-    }
+    stop(event);
+    callback?.();
   };
 
   const renderButton = (
@@ -51,75 +34,90 @@ export default function FieldToolbar({
     disabled,
     variant = 'default'
   ) => {
-    const IconComponent = getIcon(iconName);
+    const Icon = getIcon(iconName);
+
     return (
       <button
         type='button'
         onClick={createHandler(handler)}
-        onMouseDown={(event) => event.stopPropagation()}
-        onPointerDown={(event) => event.stopPropagation()}
-        className={clsx(
-          'w-8 h-8 flex items-center justify-center',
-          'sf-border sf-border-transparent sf-rounded',
-          'transition-all duration-150',
-          {
-            'text-gray-400 cursor-not-allowed': disabled,
-            'sf-text-gray-600 hover:sf-bg-gray-100 hover:sf-text-gray-900 sf-cursor-pointer':
-              !disabled && variant === 'default',
-            'sf-text-red-600 hover:sf-bg-red-50 hover:sf-text-red-700 sf-cursor-pointer':
-              !disabled && variant === 'danger',
-          }
-        )}
+        onMouseDown={stop}
+        onPointerDown={stop}
+        disabled={disabled}
         aria-label={label}
         title={label}
-        disabled={disabled}>
-        <IconComponent size={16} />
+        className={clsx(
+          'sf-flex sf-justify-center sf-items-center',
+          'sf-w-8 sf-h-8 sf-rounded-md',
+          'sf-transition-all sf-duration-150 sf-ease-out',
+          'focus:sf-outline-none focus-visible:sf-ring-2 focus-visible:sf-ring-offset-1',
+          {
+            'sf-text-gray-400 sf-cursor-not-allowed': disabled,
+
+            'sf-text-gray-600 hover:sf-text-gray-900 hover:sf-bg-gray-100 active:sf-scale-95':
+              !disabled && variant === 'default',
+
+            'sf-text-red-600 hover:sf-bg-red-50 hover:sf-text-red-700 active:sf-scale-95':
+              !disabled && variant === 'danger',
+          }
+        )}>
+        <Icon size={16} />
       </button>
     );
   };
 
   return (
     <div
-      className={clsx(
-        'absolute top-0 right-0 -mt-2 mr-2',
-        'flex items-center gap-0.5 p-0.5',
-        'sf-bg-white sf-border sf-border-gray-300 sf-rounded sf-shadow-sm',
-        'transition-opacity duration-150 z-20',
-        {
-          'opacity-100 pointer-events-auto': visible,
-          'opacity-0 pointer-events-none': !visible,
-        }
-      )}
       aria-hidden={!visible}
-      data-tour='field-toolbar'>
+      data-tour='field-toolbar'
+      className={clsx(
+        'sf-top-0 sf-right-0 sf-absolute -sf-mt-2 sf-mr-2',
+        'sf-flex sf-items-center sf-gap-1 sf-p-1',
+        'sf-rounded-lg sf-border sf-border-gray-200',
+        'sf-bg-white/90 sf-backdrop-blur',
+        'sf-shadow-md',
+        'sf-transition-all sf-duration-200 sf-ease-out sf-z-20',
+        {
+          'sf-opacity-100 sf-translate-y-0 sf-pointer-events-auto': visible,
+          'sf-opacity-0 sf-translate-y-1 sf-pointer-events-none': !visible,
+        }
+      )}>
       {/* Drag Handle */}
       <button
         type='button'
         ref={dragHandleRef}
         {...handleRest}
-        onPointerDown={handlePointerDown}
-        onMouseDown={handleMouseDown}
-        onTouchStart={handleTouchStart}
-        onClick={(event) => event.stopPropagation()}
-        className={clsx(
-          'flex justify-center items-center',
-          'sf-w-8 sf-h-8 sf-rounded',
-          'sf-text-gray-500 hover:sf-bg-gray-100 hover:sf-text-gray-700',
-          'transition-all duration-150',
-          'cursor-grab active:cursor-grabbing'
-        )}
+        onPointerDown={(e) => {
+          stop(e);
+          onPointerDown?.(e);
+        }}
+        onMouseDown={(e) => {
+          stop(e);
+          onMouseDown?.(e);
+        }}
+        onTouchStart={(e) => {
+          stop(e);
+          onTouchStart?.(e);
+        }}
+        onClick={stop}
         title={__('Drag to reorder', 'subtleforms')}
-        aria-label={__('Drag field', 'subtleforms')}>
+        aria-label={__('Drag field', 'subtleforms')}
+        className={clsx(
+          'sf-flex sf-justify-center sf-items-center',
+          'sf-w-8 sf-h-8 sf-rounded-md',
+          'sf-text-gray-500',
+          'hover:sf-bg-gray-100 hover:sf-text-gray-700',
+          'active:sf-scale-95',
+          'sf-cursor-grab active:sf-cursor-grabbing',
+          'sf-transition-all sf-duration-150'
+        )}>
         {(() => {
           const DragIcon = getIcon('move');
           return <DragIcon size={16} />;
         })()}
       </button>
 
-      {/* Separator */}
-      <div className='sf-bg-gray-300 sf-mx-0.5 sf-w-px sf-h-5'></div>
+      <div className='sf-bg-gray-200 sf-w-px sf-h-5' />
 
-      {/* Move Actions */}
       {renderButton(
         'arrow-up-alt2',
         __('Move up', 'subtleforms'),
@@ -133,10 +131,8 @@ export default function FieldToolbar({
         !canMoveDown
       )}
 
-      {/* Separator */}
-      <div className='sf-bg-gray-300 sf-mx-0.5 sf-w-px sf-h-5'></div>
+      <div className='sf-bg-gray-200 sf-w-px sf-h-5' />
 
-      {/* Duplicate Action */}
       {renderButton(
         'admin-page',
         __('Duplicate field', 'subtleforms'),
@@ -144,10 +140,8 @@ export default function FieldToolbar({
         false
       )}
 
-      {/* Separator */}
-      <div className='sf-bg-gray-300 sf-mx-0.5 sf-w-px sf-h-5'></div>
+      <div className='sf-bg-gray-200 sf-w-px sf-h-5' />
 
-      {/* Delete Action */}
       {renderButton(
         'trash',
         __('Delete field', 'subtleforms'),

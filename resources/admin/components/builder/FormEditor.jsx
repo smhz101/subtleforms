@@ -29,6 +29,7 @@ export default function FormEditor({
   schema,
   fieldGroups,
   fieldDefinitions,
+  validationErrors = [],
   onChange,
 }) {
   const rootId = getRootNodeId();
@@ -56,6 +57,28 @@ export default function FormEditor({
   const [insertPicker, setInsertPicker] = useState(null);
   const [selectedStepId, setSelectedStepId] = useState(null);
   const selectedIdRef = useRef(selectedId);
+
+  const validationErrorsByFieldKey = useMemo(() => {
+    const map = {};
+
+    if (!Array.isArray(validationErrors)) {
+      return map;
+    }
+
+    validationErrors.forEach((err) => {
+      const fieldKey = err?.fieldKey || err?.field_key || null;
+      const message = err?.message || null;
+      if (!fieldKey || !message) {
+        return;
+      }
+      if (!map[fieldKey]) {
+        map[fieldKey] = [];
+      }
+      map[fieldKey].push(message);
+    });
+
+    return map;
+  }, [validationErrors]);
 
   useEffect(() => {
     selectedIdRef.current = selectedId;
@@ -249,6 +272,14 @@ export default function FormEditor({
     [selectedId, tree]
   );
 
+  const selectedFieldValidationMessages = useMemo(() => {
+    const key = selectedField?.key;
+    if (!key) {
+      return [];
+    }
+    return validationErrorsByFieldKey[key] || [];
+  }, [selectedField, validationErrorsByFieldKey]);
+
   // Flatten all fields for condition editor
   const allFields = useMemo(() => {
     const fields = [];
@@ -337,9 +368,9 @@ export default function FormEditor({
 
   return (
     <div
-      className='sf-grid sf-bg-white sf-h-full sf-overflow-hidden'
+      className='sf-grid sf-bg-white sf-h-full sf-overflow-hidden sf-form-editor'
       style={{
-        gridTemplateColumns: selectedField ? '280px 1fr 320px' : '280px 1fr',
+        gridTemplateColumns: '280px 1fr 320px',
       }}>
       {/* Field Library (Left Sidebar) */}
       <div
@@ -364,8 +395,19 @@ export default function FormEditor({
           </div>
         )}
 
+        {!selectedField && allFields.length > 0 && (
+          <div className='sf-flex-shrink-0 sf-bg-white sf-px-4 sf-py-2 sf-border-gray-200 sf-border-b'>
+            <div className='sf-text-gray-600 sf-text-xs'>
+              {__(
+                'Tip: Click a field (or container) to edit its settings.',
+                'subtleforms'
+              )}
+            </div>
+          </div>
+        )}
+
         <div
-          className='sf-flex-1 sf-overflow-hidden'
+          className='sf-flex-1 sf-overflow-y-auto'
           style={{ padding: isConversational ? 0 : '1.5rem' }}>
           {isConversational ? (
             <ConversationalCanvas
@@ -376,6 +418,7 @@ export default function FormEditor({
               onDelete={handleDelete}
               onDuplicate={handleDuplicate}
               onRequestInsert={handleRequestInsert}
+              validationErrorsByFieldKey={validationErrorsByFieldKey}
             />
           ) : (
             <FormBuilder
@@ -388,24 +431,27 @@ export default function FormEditor({
               onDuplicate={handleDuplicate}
               onRequestInsert={handleRequestInsert}
               selectedStepId={selectedStepId}
+              validationErrorsByFieldKey={validationErrorsByFieldKey}
             />
           )}
         </div>
       </div>
 
       {/* Field Inspector (Right Sidebar) */}
-      {selectedField && (
-        <div
-          className='sf-bg-white sf-border-gray-300 sf-border-l sf-max-h-full sf-overflow-y-auto'
-          data-tour='field-inspector'>
-          <FieldInspector
-            field={selectedField}
-            allFields={allFields}
-            onUpdate={(changes) => handleUpdate(selectedId, changes)}
-            onClose={() => setSelectedId(null)}
-          />
-        </div>
-      )}
+      <div
+        className='sf-bg-white sf-border-gray-300 sf-border-l sf-max-h-full sf-overflow-y-auto'
+        data-tour='field-inspector'>
+        <FieldInspector
+          field={selectedField}
+          allFields={allFields}
+          onUpdate={(changes) => {
+            if (!selectedId) return;
+            handleUpdate(selectedId, changes);
+          }}
+          onClose={() => setSelectedId(null)}
+          validationMessages={selectedFieldValidationMessages}
+        />
+      </div>
 
       {/* Insert Picker Popover */}
       {insertPicker?.anchor && (

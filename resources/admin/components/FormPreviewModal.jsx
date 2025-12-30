@@ -2,7 +2,16 @@ import { Modal, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import Icon from './ui/Icon';
 
-export default function FormPreviewModal({ schema, onClose }) {
+/**
+ * FormPreviewModal Component
+ *
+ * ⚠️ TASK 5.4 - Preview Uses Draft Schema (NEVER Active)
+ * - Renders read-only preview of current draft schema
+ * - NO backend mutations (all inputs disabled)
+ * - Does NOT fetch active schema from server
+ * - Schema prop is draftSchema from BuilderPage state
+ */
+export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
   if (!schema || !schema.fields) {
     return null;
   }
@@ -279,6 +288,14 @@ export default function FormPreviewModal({ schema, onClose }) {
           <h2 className='sf-mb-2 sf-font-bold sf-text-gray-900 sf-text-2xl'>
             {schema.metadata?.title || __('Untitled Form', 'subtleforms')}
           </h2>
+          <p className='sf-mb-2 sf-text-gray-600 sf-text-sm'>
+            {isDirty
+              ? __(
+                  'Preview shows your current draft (including unsaved changes).',
+                  'subtleforms'
+                )
+              : __('Preview shows your current draft.', 'subtleforms')}
+          </p>
           {schema.metadata?.description && (
             <p className='sf-text-gray-600'>{schema.metadata.description}</p>
           )}

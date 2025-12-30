@@ -34,10 +34,14 @@ const AdminHeader = memo(function AdminHeader({ title, actions }) {
       <div className='sf-flex sf-items-center sf-gap-4'>
         <div className='sf-flex sf-items-center sf-gap-3'>
           {/* SubtleForms Logo */}
-          <Icon.Square
-            className='sf-w-7 sf-h-7 sf-text-blue-600'
-            strokeWidth={2.5}
-          />
+
+          <div
+            class='sf-inline-flex sf-justify-center sf-items-center sf-bg-white sf-shadow-sm sf-border sf-border-gray-200 sf-rounded-md sf-w-8 sf-h-8 sf-font-semibold sf-text-gray-800 sf-text-xs'
+            aria-label='SubtleForms'
+            title='SubtleForms'>
+            SF
+          </div>
+
           <h1 className='sf-m-0 sf-font-semibold sf-text-gray-900 sf-text-lg sf-leading-none'>
             {title}
           </h1>
