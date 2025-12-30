@@ -231,6 +231,15 @@ final class FormsRepository
         
         $next = $max ? $max + 1 : 1;
 
+        // Log activation to help debug autosave issues
+        if ($activate) {
+            error_log(sprintf(
+                'SubtleForms: Activating schema version %d for form %d',
+                $next,
+                $formId
+            ));
+        }
+
         $inserted = $wpdb->insert(
             $this->schemas_table,
             [
@@ -481,4 +490,102 @@ final class FormsRepository
         $result = $wpdb->delete($this->table, ['id' => $id], ['%d']);
         return $result !== false;
     }
+
+    /**
+     * Save draft schema (non-versioned, unpublished).
+     * 
+     * Draft schemas are stored directly in the forms table and do NOT create versions.
+     * This is used for autosave and any edits that haven't been published yet.
+     * 
+     * @param int $formId Form ID
+     * @param array $schema Schema data
+     * @return bool Success status
+     * @throws \InvalidArgumentException If schema validation fails
+     */
+    public function saveDraftSchema(int $formId, array $schema): bool
+    {
+        // Validate schema before saving
+        $validator = new \SubtleForms\Support\SchemaValidator();
+        try {
+            $validator->validate($schema);
+        } catch (\InvalidArgumentException $e) {
+            throw $e;
+        }
+
+        global $wpdb;
+        
+        $result = $wpdb->update(
+            $this->table,
+            ['draft_schema' => wp_json_encode($schema)],
+            ['id' => $formId],
+            ['%s'],
+            ['%d']
+        );
+
+        if ($result === false) {
+            error_log(sprintf(
+                'SubtleForms: Failed to save draft schema for form %d: %s',
+                $formId,
+                $wpdb->last_error
+            ));
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Get draft schema for a form.
+     * 
+     * @param int $formId Form ID
+     * @return array|null Draft schema or null if none exists
+     */
+    public function getDraftSchema(int $formId): ?array
+    {
+        global $wpdb;
+        
+        $draft = $wpdb->get_var($wpdb->prepare(
+            "SELECT draft_schema FROM {$this->table} WHERE id = %d",
+            $formId
+        ));
+
+        if (!$draft) {
+            return null;
+        }
+
+        $decoded = json_decode($draft, true);
+        return is_array($decoded) ? $decoded : null;
+    }
+
+    /**
+     * Promote draft schema to active version.
+     * 
+     * This creates a new versioned schema from the current draft and activates it.
+     * Used when publishing a form or manually saving with activation.
+     * 
+     * @param int $formId Form ID
+     * @return int New version number
+     * @throws \InvalidArgumentException If draft schema is invalid
+     * @throws \RuntimeException If no draft schema exists or save fails
+     */
+    public function promoteDraftToActive(int $formId): int
+    {
+        $draftSchema = $this->getDraftSchema($formId);
+        
+        if (!$draftSchema) {
+            throw new \RuntimeException('No draft schema to promote');
+        }
+
+        // Create versioned schema and activate it
+        $version = $this->saveSchemaVersion($formId, $draftSchema, true);
+
+        error_log(sprintf(
+            'SubtleForms: Promoted draft schema to version %d for form %d',
+            $version,
+            $formId
+        ));
+
+        return $version;
+    }
 }
+

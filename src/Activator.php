@@ -44,6 +44,7 @@ final class Activator
 
         // Migrate data if needed
         self::migrate_submissions_table();
+        self::migrate_draft_schema_column();
 
         // Set default options
         self::set_default_options();
@@ -69,6 +70,7 @@ final class Activator
   id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   title varchar(255) NOT NULL,
   config longtext NOT NULL,
+  draft_schema longtext DEFAULT NULL,
   active_version int unsigned DEFAULT NULL,
   status varchar(20) NOT NULL DEFAULT 'draft',
   created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -188,6 +190,25 @@ final class Activator
         if (!empty($column_exists)) {
             // Copy form_version to schema_version where schema_version is NULL
             $wpdb->query("UPDATE {$table_name} SET schema_version = form_version WHERE schema_version IS NULL AND form_version IS NOT NULL");
+        }
+    }
+
+    /**
+     * Migrate forms table to add draft_schema column.
+     * Added in version 1.4.0 to support draft/active schema separation.
+     */
+    private static function migrate_draft_schema_column(): void
+    {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'subtleforms_forms';
+
+        // Check if draft_schema column exists
+        $column_exists = $wpdb->get_results("SHOW COLUMNS FROM {$table_name} LIKE 'draft_schema'");
+        
+        if (empty($column_exists)) {
+            // Add draft_schema column
+            $wpdb->query("ALTER TABLE {$table_name} ADD COLUMN draft_schema longtext DEFAULT NULL AFTER config");
+            error_log('SubtleForms: Added draft_schema column to forms table');
         }
     }
 

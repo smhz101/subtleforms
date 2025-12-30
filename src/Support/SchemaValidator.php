@@ -282,4 +282,249 @@ final class SchemaValidator
 
         return true;
     }
+
+    /**
+     * Validate schema and return structured errors instead of throwing.
+     *
+     * Error shape:
+     * - path: string (e.g. "metadata.title", "fields[0].key")
+     * - message: string
+     * - fieldKey?: string (when applicable)
+     * - index?: int (when applicable)
+     */
+    public function validateWithErrors(array $schema): array
+    {
+        $errors = [];
+
+        $push = static function (array &$errors, string $path, string $message, array $meta = []): void {
+            $errors[] = array_merge(
+                [
+                    'path' => $path,
+                    'message' => $message,
+                ],
+                $meta
+            );
+        };
+
+        if (!isset($schema['schema_version'])) {
+            $push($errors, 'schema_version', 'Schema must contain a schema_version field.');
+        } elseif (!is_int($schema['schema_version']) || $schema['schema_version'] < 1) {
+            $push($errors, 'schema_version', 'schema_version must be a positive integer.');
+        }
+
+        if (empty($schema['metadata']) || !is_array($schema['metadata'])) {
+            $push($errors, 'metadata', 'Schema must contain a metadata object.');
+        } else {
+            if (empty($schema['metadata']['name']) || !is_string($schema['metadata']['name'])) {
+                $push($errors, 'metadata.name', 'Metadata.name is required and must be a string.');
+            }
+
+            if (
+                isset($schema['metadata']['status']) &&
+                !in_array($schema['metadata']['status'], ['draft', 'published', 'archived'], true)
+            ) {
+                $push($errors, 'metadata.status', 'Metadata.status must be one of draft, published or archived.');
+            }
+        }
+
+        if (!isset($schema['fields']) || !is_array($schema['fields'])) {
+            $push($errors, 'fields', 'Schema must include a fields array.');
+        } else {
+            $keys = [];
+            foreach ($schema['fields'] as $i => $field) {
+                if (!is_array($field)) {
+                    $push($errors, "fields[{$i}]", "Each field must be an object (index {$i}).", ['index' => $i]);
+                    continue;
+                }
+
+                $fieldKey = isset($field['key']) && is_string($field['key']) ? $field['key'] : null;
+
+                if (empty($field['type']) || !is_string($field['type'])) {
+                    $push(
+                        $errors,
+                        "fields[{$i}].type",
+                        "Field at index {$i} must have a string 'type'.",
+                        array_filter(['index' => $i, 'fieldKey' => $fieldKey], fn($v) => $v !== null)
+                    );
+                } elseif (!in_array($field['type'], $this->allowedFieldTypes, true)) {
+                    $push(
+                        $errors,
+                        "fields[{$i}].type",
+                        "Field type '{$field['type']}' at index {$i} is not allowed.",
+                        array_filter(['index' => $i, 'fieldKey' => $fieldKey], fn($v) => $v !== null)
+                    );
+                }
+
+                if (empty($field['key']) || !is_string($field['key'])) {
+                    $push($errors, "fields[{$i}].key", "Field at index {$i} must have a string 'key'.", ['index' => $i]);
+                } else {
+                    if (!preg_match('/^[a-zA-Z0-9_]+$/', $field['key'])) {
+                        $push(
+                            $errors,
+                            "fields[{$i}].key",
+                            "Field key '{$field['key']}' at index {$i} contains invalid characters.",
+                            ['index' => $i, 'fieldKey' => $field['key']]
+                        );
+                    }
+
+                    if (in_array($field['key'], $keys, true)) {
+                        $push(
+                            $errors,
+                            "fields[{$i}].key",
+                            "Duplicate field key '{$field['key']}' at index {$i}.",
+                            ['index' => $i, 'fieldKey' => $field['key']]
+                        );
+                    } else {
+                        $keys[] = $field['key'];
+                    }
+                }
+
+                if (isset($field['label']) && !is_string($field['label'])) {
+                    $push(
+                        $errors,
+                        "fields[{$i}].label",
+                        "Field label for '{$fieldKey}' must be a string.",
+                        array_filter(['index' => $i, 'fieldKey' => $fieldKey], fn($v) => $v !== null)
+                    );
+                }
+
+                if (isset($field['settings']) && !is_array($field['settings'])) {
+                    $push(
+                        $errors,
+                        "fields[{$i}].settings",
+                        "Field settings for '{$fieldKey}' must be an object.",
+                        array_filter(['index' => $i, 'fieldKey' => $fieldKey], fn($v) => $v !== null)
+                    );
+                }
+
+                if (isset($field['validations']) && !is_array($field['validations'])) {
+                    $push(
+                        $errors,
+                        "fields[{$i}].validations",
+                        "Field validations for '{$fieldKey}' must be an object.",
+                        array_filter(['index' => $i, 'fieldKey' => $fieldKey], fn($v) => $v !== null)
+                    );
+                }
+            }
+        }
+
+        if (isset($schema['logic']) && !is_array($schema['logic'])) {
+            $push($errors, 'logic', 'Schema.logic must be an array of rules.');
+        }
+
+        if (isset($schema['actions']) && !is_array($schema['actions'])) {
+            $push($errors, 'actions', 'Schema.actions must be an array.');
+        }
+
+        if (isset($schema['version']) && !is_int($schema['version'])) {
+            $push($errors, 'version', 'Schema.version must be an integer when present.');
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Validate schema for publishing (stricter rules than draft).
+     * Ensures form is ready for public use.
+     */
+    public function validateForPublishing(array $schema): bool
+    {
+        // First run standard validation
+        $this->validate($schema);
+
+        // Additional publishing requirements
+        if (empty($schema['fields']) || count($schema['fields']) === 0) {
+            throw new InvalidArgumentException('Cannot publish: Form must contain at least one field.');
+        }
+
+        // Ensure metadata has a title for published forms
+        if (empty($schema['metadata']['title']) || trim($schema['metadata']['title']) === '') {
+            throw new InvalidArgumentException('Cannot publish: Form must have a title.');
+        }
+
+        // Check for at least one input field (not just containers/layout)
+        $inputFieldTypes = ['text', 'email', 'textarea', 'number', 'phone', 'url', 'password', 
+                           'checkbox', 'radio', 'multiple_choice', 'dropdown', 'select', 
+                           'date', 'time', 'datetime', 'file_upload', 'image_upload'];
+
+        $hasInputField = $this->hasInputFieldRecursive($schema['fields'], $inputFieldTypes);
+
+        if (!$hasInputField) {
+            throw new InvalidArgumentException('Cannot publish: Form must contain at least one input field (not just layout elements).');
+        }
+
+        return true;
+    }
+
+    /**
+     * Publishing validation with structured errors (no exceptions).
+     */
+    public function validateForPublishingWithErrors(array $schema): array
+    {
+        $errors = $this->validateWithErrors($schema);
+
+        $push = static function (array &$errors, string $path, string $message, array $meta = []): void {
+            $errors[] = array_merge(
+                [
+                    'path' => $path,
+                    'message' => $message,
+                ],
+                $meta
+            );
+        };
+
+        if (!isset($schema['fields']) || !is_array($schema['fields']) || count($schema['fields']) === 0) {
+            $push($errors, 'fields', 'Cannot publish: Form must contain at least one field.');
+        }
+
+        if (
+            empty($schema['metadata']) ||
+            !is_array($schema['metadata']) ||
+            empty($schema['metadata']['title']) ||
+            trim((string) $schema['metadata']['title']) === ''
+        ) {
+            $push($errors, 'metadata.title', 'Cannot publish: Form must have a title.');
+        }
+
+        $inputFieldTypes = [
+            'text', 'email', 'textarea', 'number', 'phone', 'url', 'password',
+            'checkbox', 'radio', 'multiple_choice', 'dropdown', 'select',
+            'date', 'time', 'datetime', 'file_upload', 'image_upload',
+        ];
+
+        if (isset($schema['fields']) && is_array($schema['fields']) && count($schema['fields']) > 0) {
+            $hasInputField = $this->hasInputFieldRecursive($schema['fields'], $inputFieldTypes);
+
+            if (!$hasInputField) {
+                $push(
+                    $errors,
+                    'fields',
+                    'Cannot publish: Form must contain at least one input field (not just layout elements).'
+                );
+            }
+        }
+
+        return $errors;
+    }
+
+    private function hasInputFieldRecursive(array $fields, array $inputFieldTypes): bool
+    {
+        foreach ($fields as $field) {
+            if (!is_array($field)) {
+                continue;
+            }
+
+            if (isset($field['type']) && in_array($field['type'], $inputFieldTypes, true)) {
+                return true;
+            }
+
+            if (isset($field['fields']) && is_array($field['fields'])) {
+                if ($this->hasInputFieldRecursive($field['fields'], $inputFieldTypes)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
 }
