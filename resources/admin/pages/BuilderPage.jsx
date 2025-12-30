@@ -23,44 +23,68 @@ import SubmissionsTable from '../components/SubmissionsTable';
 import BuilderTour from '../components/BuilderTour';
 import FormPreviewModal from '../components/FormPreviewModal';
 import HelpMenu from '../components/HelpMenu';
+import CreateFormWizard from '../components/CreateFormWizard';
 import { ConfirmModal } from '../modals';
-import { apiGet, apiPost, apiPut } from '../utils/api';
+import { apiGet, apiPost, apiPut, apiDelete } from '../utils/api';
+import { createInitialSchema } from '../utils/initialSchema';
+import useBuilderReducer, {
+  BUILDER_ACTIONS,
+  BUILDER_STATES,
+} from '../hooks/useBuilderReducer';
+import useDraftAutosave from '../hooks/useDraftAutosave';
 
-async function apiDelete(path) {
-  const response = await fetch(restBase + path, {
-    method: 'DELETE',
-    credentials: 'same-origin',
-    headers: {
-      'X-WP-Nonce': restNonce,
-      'Content-Type': 'application/json',
-    },
-  });
+function FormBuilderInner({
+  formId,
+  onClose,
+  onSaved,
+  bootstrap = null,
+  onOpenWizard,
+  showWizard = false,
+  autoShowTour = false,
+}) {
+  // Builder FSM State (replaces individual useState calls)
+  const [builderState, dispatch] = useBuilderReducer(formId);
 
-  const body = await parseJsonResponse(response);
-  return { ok: response.ok, body };
-}
+  // Extract commonly used state for convenience
+  const {
+    state: fsmState,
+    loading,
+    draftSchema,
+    isDirty,
+    saving,
+    autoSaving,
+    formStatus,
+    error,
+    saveError,
+    autoSaveError,
+    validationErrors,
+    formTitle: stateFormTitle,
+    formId: stateFormId,
+    lastSaveTime,
+    lastAutoSaveTime,
+    schemaHistoryPast,
+    schemaHistoryFuture,
+  } = builderState;
 
-export default function FormBuilderPage({ formId, onClose, onSaved }) {
-  const [loading, setLoading] = useState(!!formId);
-  const [draftSchema, setDraftSchema] = useState(null);
-  const [error, setError] = useState(null);
-  const [saveError, setSaveError] = useState(null);
-  const [saving, setSaving] = useState(false);
+  const hasValidationErrors =
+    Array.isArray(validationErrors) && validationErrors.length > 0;
+
+  const canUndo =
+    Array.isArray(schemaHistoryPast) && schemaHistoryPast.length > 0;
+  const canRedo =
+    Array.isArray(schemaHistoryFuture) && schemaHistoryFuture.length > 0;
+
+  // UI-specific state (not part of FSM)
   const [fieldGroups, setFieldGroups] = useState({});
   const [fieldDefinitions, setFieldDefinitions] = useState({});
   const [loadingFields, setLoadingFields] = useState(true);
-  const [formTitle, setFormTitle] = useState('');
+  const [formTitle, setFormTitle] = useState(stateFormTitle || '');
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [copyState, setCopyState] = useState('idle');
-  const [currentFormId, setCurrentFormId] = useState(formId ?? null);
-  const [formStatus, setFormStatus] = useState('draft');
-  const [status, setStatus] = useState('saved');
-  const [isDirty, setIsDirty] = useState(false);
-  const [autoSaving, setAutoSaving] = useState(false);
-  const [autoSaveError, setAutoSaveError] = useState(null);
+  const [currentFormId, setCurrentFormId] = useState(
+    stateFormId || formId || null
+  );
   const [isHydrating, setIsHydrating] = useState(false);
-  const [isEphemeral, setIsEphemeral] = useState(!formId);
-  const [hasUserMutation, setHasUserMutation] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showPublishConfirm, setShowPublishConfirm] = useState(false);
   const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
@@ -74,6 +98,52 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
     useDispatch(noticesStore);
   const SUCCESS_NOTICE_ID = 'subtleforms-form-save-success';
   const ERROR_NOTICE_ID = 'subtleforms-form-save-error';
+
+  // Legacy status mapping for UI components
+  const status = useMemo(() => {
+    switch (fsmState) {
+      case BUILDER_STATES.AUTOSAVING:
+      case BUILDER_STATES.PUBLISHING:
+        return 'saving';
+      case BUILDER_STATES.SAVED:
+      case BUILDER_STATES.PUBLISHED:
+        return 'saved';
+      case BUILDER_STATES.DIRTY:
+        return 'dirty';
+      case BUILDER_STATES.ERROR:
+        return 'error';
+      default:
+        return 'saved';
+    }
+  }, [fsmState]);
+
+  const effectiveStatus = useMemo(() => {
+    // Task 5.6: Keep FSM stable, but still surface recoverable errors.
+    if (autoSaveError || saveError) {
+      return 'error';
+    }
+    return status;
+  }, [autoSaveError, saveError, status]);
+
+  // Autosave hook - handles automatic draft saving
+  const { forceAutosave } = useDraftAutosave({
+    builderState,
+    dispatch,
+    formId: currentFormId,
+    enabled: !isHydrating, // Don't autosave during hydration
+  });
+
+  const lastManualSaveRef = useRef({ targetStatus: null });
+
+  const dismissRecoverableErrors = useCallback(() => {
+    dispatch({ type: BUILDER_ACTIONS.DISMISS_ERROR });
+  }, [dispatch]);
+
+  const retryAutosave = useCallback(() => {
+    if (typeof forceAutosave === 'function') {
+      forceAutosave();
+    }
+  }, [forceAutosave]);
 
   useEffect(
     () => () => {
@@ -90,7 +160,7 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
   // Navigation protection
   useEffect(() => {
     const handleBeforeUnload = (e) => {
-      if (isDirty && !isEphemeral) {
+      if (isDirty) {
         e.preventDefault();
         e.returnValue = '';
         return '';
@@ -99,11 +169,10 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [isDirty, isEphemeral]);
+  }, [isDirty]);
 
   useEffect(() => {
     setCurrentFormId(formId ?? null);
-    setIsEphemeral(!formId);
   }, [formId]);
 
   function generateDefaultTitle() {
@@ -155,9 +224,8 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
         );
         const data = await response.json();
         setTourCompleted(data.completed);
-        // Auto-show tour for first-time users
-        if (!data.completed && !formId) {
-          // Only show for new forms to avoid interrupting existing workflows
+        // Auto-show tour once per user when caller opts in (e.g. first-run/new form)
+        if (autoShowTour && !data.completed) {
           setTimeout(() => setShowTour(true), 1000);
         }
       } catch (error) {
@@ -166,40 +234,63 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
     };
 
     checkTourStatus();
-  }, [formId]);
+  }, [autoShowTour, formId]);
 
   useEffect(() => {
     if (!formId) {
-      // Ephemeral mode: initialize empty schema
-      setLoading(false);
-      setDraftSchema({
-        fields: [],
-        metadata: {
-          name: 'form_schema',
-          title: generateDefaultTitle(),
-          description: '',
-        },
-      });
-      setFormTitle(generateDefaultTitle());
-      setStatus('saved');
-      setIsDirty(false);
-      setFormStatus('draft');
       return;
     }
 
-    setLoading(true);
+    if (bootstrap?.form?.id === formId && bootstrap?.schema) {
+      const payload = { ...bootstrap.schema };
+      payload.fields = Array.isArray(payload.fields) ? payload.fields : [];
+      payload.schema_version = payload.schema_version || 1;
+      if (!payload.metadata) payload.metadata = {};
+      if (!payload.metadata.name) payload.metadata.name = 'form_schema';
+
+      const title =
+        bootstrap.form?.title ||
+        payload.metadata?.title ||
+        generateDefaultTitle();
+      payload.metadata.title = title;
+
+      setFormTitle(title || '');
+      setCurrentFormId(formId);
+      setIsHydrating(true);
+
+      dispatch({
+        type: BUILDER_ACTIONS.LOAD_SUCCESS,
+        payload: {
+          form: {
+            id: formId,
+            title,
+            status: bootstrap.form?.status || 'draft',
+          },
+          schema: payload,
+        },
+      });
+
+      setTimeout(() => setIsHydrating(false), 0);
+      return;
+    }
+
+    dispatch({ type: BUILDER_ACTIONS.INIT_BUILDER, payload: { formId } });
     setIsHydrating(true);
 
     // Load both schema and form metadata
     Promise.all([
-      apiGet(`/forms/${formId}/schema`),
+      apiGet(`/forms/${formId}/schema?context=builder`),
       apiGet(`/forms/${formId}`),
     ]).then(([schemaRes, formRes]) => {
       if (!schemaRes.ok) {
-        setError(
-          schemaRes.body?.message || __('Failed to load schema', 'subtleforms')
-        );
-        setLoading(false);
+        dispatch({
+          type: BUILDER_ACTIONS.AUTOSAVE_ERROR,
+          payload: {
+            error:
+              schemaRes.body?.message ||
+              __('Failed to load schema', 'subtleforms'),
+          },
+        });
         return;
       }
 
@@ -223,22 +314,28 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
         payload.metadata.title = generateDefaultTitle();
       }
 
-      // Load form status
-      if (formRes.ok && formRes.body) {
-        setFormStatus(formRes.body.status || 'draft');
-      }
-
-      setDraftSchema(payload);
       setFormTitle(payload.metadata.title || '');
-      setStatus('saved');
-      setIsDirty(false);
-      setAutoSaveError(null);
-      setLoading(false);
+      setCurrentFormId(formId);
+
+      dispatch({
+        type: BUILDER_ACTIONS.LOAD_SUCCESS,
+        payload: {
+          form: {
+            id: formId,
+            title: payload.metadata.title,
+            status:
+              formRes.ok && formRes.body
+                ? formRes.body.status || 'draft'
+                : 'draft',
+          },
+          schema: payload,
+        },
+      });
 
       // Clear hydrating flag after next render to allow FormEditor to initialize
       setTimeout(() => setIsHydrating(false), 0);
     });
-  }, [formId]);
+  }, [formId, bootstrap]);
 
   useEffect(() => {
     if (isEditingTitle && titleInputRef.current) {
@@ -257,23 +354,88 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
     }
   }, [draftSchema, formTitle, isEditingTitle]);
 
+  useEffect(() => {
+    function isTypingTarget(target) {
+      if (!target) {
+        return false;
+      }
+
+      const tagName = target.tagName ? target.tagName.toLowerCase() : '';
+      if (
+        tagName === 'input' ||
+        tagName === 'textarea' ||
+        tagName === 'select'
+      ) {
+        return true;
+      }
+
+      if (target.isContentEditable) {
+        return true;
+      }
+
+      return false;
+    }
+
+    function onKeyDown(event) {
+      if (event.defaultPrevented) {
+        return;
+      }
+
+      if (isHydrating || saving || autoSaving) {
+        return;
+      }
+
+      if (isTypingTarget(event.target)) {
+        return;
+      }
+
+      const key = String(event.key || '').toLowerCase();
+      const isModifier = event.metaKey || event.ctrlKey;
+      if (!isModifier) {
+        return;
+      }
+
+      const isUndo = key === 'z' && !event.shiftKey;
+      const isRedo =
+        (key === 'z' && event.shiftKey) ||
+        (key === 'y' && event.ctrlKey && !event.metaKey);
+
+      if (isUndo && canUndo) {
+        event.preventDefault();
+        dispatch({ type: BUILDER_ACTIONS.UNDO_SCHEMA });
+      }
+
+      if (isRedo && canRedo) {
+        event.preventDefault();
+        dispatch({ type: BUILDER_ACTIONS.REDO_SCHEMA });
+      }
+    }
+
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [autoSaving, canRedo, canUndo, dispatch, isHydrating, saving]);
+
   const markDirty = useCallback(() => {
     if (isHydrating) {
       return;
     }
-    setIsDirty(true);
-    setHasUserMutation(true); // Track that user made a change
-    setStatus('dirty');
-    setAutoSaveError(null);
-    setSaveError(null);
-  }, [isHydrating]);
+    dispatch({
+      type: BUILDER_ACTIONS.EDIT_SCHEMA,
+      payload: { schema: draftSchema },
+    });
+  }, [isHydrating, draftSchema, dispatch]);
 
   const handleSchemaChange = useCallback(
     (nextSchema) => {
-      setDraftSchema(nextSchema);
-      markDirty();
+      if (isHydrating) {
+        return;
+      }
+      dispatch({
+        type: BUILDER_ACTIONS.EDIT_SCHEMA,
+        payload: { schema: nextSchema },
+      });
     },
-    [markDirty]
+    [dispatch, isHydrating]
   );
 
   function persistTitle(nextTitle) {
@@ -284,27 +446,26 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
 
     const trimmed = nextTitle.trim() || generateDefaultTitle();
     setFormTitle(trimmed);
-    setDraftSchema((current) => {
-      if (!current) {
-        return current;
-      }
 
-      const metadata = {
-        ...(current.metadata || {}),
-        title: trimmed,
-      };
+    const metadata = {
+      ...(draftSchema.metadata || {}),
+      title: trimmed,
+    };
 
-      if (!metadata.name) {
-        metadata.name = 'form_schema';
-      }
+    if (!metadata.name) {
+      metadata.name = 'form_schema';
+    }
 
-      return {
-        ...current,
-        metadata,
-      };
+    const updatedSchema = {
+      ...draftSchema,
+      metadata,
+    };
+
+    dispatch({
+      type: BUILDER_ACTIONS.EDIT_SCHEMA,
+      payload: { schema: updatedSchema },
     });
 
-    markDirty();
     setIsEditingTitle(false);
   }
 
@@ -334,109 +495,24 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
         return;
       }
 
-      // In ephemeral mode, prevent autosave unless user has made changes
-      if (isEphemeral && auto && !hasUserMutation) {
-        return;
-      }
-
       if (autoSaveTimeoutRef.current) {
         clearTimeout(autoSaveTimeoutRef.current);
         autoSaveTimeoutRef.current = null;
       }
 
-      // In ephemeral mode, create form first (only if user has made changes)
-      if (isEphemeral && hasUserMutation) {
-        const finalStatus = targetStatus || 'draft';
-
-        if (auto) {
-          setAutoSaving(true);
-        } else {
-          setSaving(true);
-          setSaveError(null);
-          setAutoSaveError(null);
-          removeNotice(ERROR_NOTICE_ID);
-        }
-
-        setStatus('saving');
-
-        try {
-          // Create new form
-          const { ok: createOk, body: createBody } = await apiPost('/forms', {
-            title: formTitle || generateDefaultTitle(),
-            status: finalStatus,
-            schema: draftSchema,
-          });
-
-          if (!createOk) {
-            throw new Error(
-              createBody?.message || __('Failed to create form', 'subtleforms')
-            );
-          }
-
-          const newFormId = createBody.id;
-          setCurrentFormId(newFormId);
-          setIsEphemeral(false);
-          setFormStatus(finalStatus);
-          setIsDirty(false);
-          setStatus('saved');
-          setSaveError(null);
-          setAutoSaveError(null);
-
-          // Update URL to include form_id
-          const newUrl = new URL(window.location.href);
-          newUrl.searchParams.set('form_id', newFormId);
-          window.history.replaceState({}, '', newUrl.toString());
-
-          const detail = {
-            id: newFormId,
-            version: null,
-          };
-          window.dispatchEvent(
-            new CustomEvent('subtleforms:form-saved', { detail })
-          );
-          onSaved?.(detail);
-
-          removeNotice(ERROR_NOTICE_ID);
-          createSuccessNotice(
-            finalStatus === 'published'
-              ? __('Form published', 'subtleforms')
-              : __('Form saved as draft', 'subtleforms'),
-            {
-              id: SUCCESS_NOTICE_ID,
-              isDismissible: true,
-              type: 'snackbar',
-              actions: [],
-            }
-          );
-        } catch (err) {
-          const message =
-            err?.message || __('Failed to save form', 'subtleforms');
-          setStatus('error');
-          setIsDirty(true);
-          setSaveError(message);
-          removeNotice(SUCCESS_NOTICE_ID);
-          createErrorNotice(message, {
-            id: ERROR_NOTICE_ID,
-            isDismissible: true,
-            type: 'snackbar',
-            actions: [],
-          });
-        } finally {
-          setSaving(false);
-        }
-        return;
-      }
-
-      // Regular save for existing forms
+      // Save to existing form (no ephemeral mode)
       const resolvedFormId = currentFormId ?? formId;
       if (!resolvedFormId) {
         const message = __('Form identifier missing', 'subtleforms');
-        setStatus('error');
-        setIsDirty(true);
-        if (auto) {
-          setAutoSaveError(message);
-        } else {
-          setSaveError(message);
+
+        dispatch({
+          type: auto
+            ? BUILDER_ACTIONS.AUTOSAVE_ERROR
+            : BUILDER_ACTIONS.PUBLISH_ERROR,
+          payload: { error: message },
+        });
+
+        if (!auto) {
           removeNotice(SUCCESS_NOTICE_ID);
           createErrorNotice(message, {
             id: ERROR_NOTICE_ID,
@@ -447,24 +523,66 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
         return;
       }
 
+      // Dispatch start actions
       if (auto) {
-        setAutoSaving(true);
-      } else {
-        setSaving(true);
-        setSaveError(null);
-        setAutoSaveError(null);
-        removeNotice(ERROR_NOTICE_ID);
+        dispatch({ type: BUILDER_ACTIONS.START_AUTOSAVE });
+      } else if (targetStatus === 'published') {
+        dispatch({ type: BUILDER_ACTIONS.START_PUBLISH });
       }
 
-      setStatus('saving');
+      if (!auto) {
+        lastManualSaveRef.current = { targetStatus };
+      }
 
       try {
-        // Save schema
-        const { ok, body } = await apiPost(`/forms/${resolvedFormId}/schema`, {
+        // Save schema (activate only on manual save or publish, not autosave)
+        const {
+          ok,
+          body,
+          status: saveStatus,
+        } = await apiPost(`/forms/${resolvedFormId}/schema`, {
           schema: draftSchema,
+          activate: auto ? false : true, // Autosave: draft only, Manual save: activate
         });
 
         if (!ok) {
+          const maybeValidationErrors =
+            saveStatus === 422
+              ? body?.data?.errors || body?.errors || null
+              : null;
+
+          if (
+            !auto &&
+            Array.isArray(maybeValidationErrors) &&
+            maybeValidationErrors.length > 0
+          ) {
+            dispatch({
+              type: BUILDER_ACTIONS.PUBLISH_ERROR,
+              payload: {
+                error: __(
+                  'Fix validation errors before publishing.',
+                  'subtleforms'
+                ),
+                validationErrors: maybeValidationErrors,
+              },
+            });
+
+            removeNotice(SUCCESS_NOTICE_ID);
+            createErrorNotice(
+              __(
+                'Validation failed. Please fix the highlighted fields.',
+                'subtleforms'
+              ),
+              {
+                id: ERROR_NOTICE_ID,
+                isDismissible: true,
+                type: 'snackbar',
+                actions: [],
+              }
+            );
+            return;
+          }
+
           const message =
             body?.message ||
             body?.data?.message ||
@@ -474,28 +592,77 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
 
         // Update status if specified
         if (targetStatus && targetStatus !== formStatus) {
-          const { ok: statusOk } = await apiPut(`/forms/${resolvedFormId}`, {
+          const {
+            ok: statusOk,
+            body: statusBody,
+            status: statusCode,
+          } = await apiPut(`/forms/${resolvedFormId}`, {
             status: targetStatus,
           });
 
-          if (statusOk) {
-            setFormStatus(targetStatus);
+          if (!statusOk) {
+            const maybeValidationErrors =
+              statusCode === 422
+                ? statusBody?.data?.errors || statusBody?.errors || null
+                : null;
+
+            if (
+              targetStatus === 'published' &&
+              Array.isArray(maybeValidationErrors) &&
+              maybeValidationErrors.length > 0
+            ) {
+              dispatch({
+                type: BUILDER_ACTIONS.PUBLISH_ERROR,
+                payload: {
+                  error: __(
+                    'Fix validation errors before publishing.',
+                    'subtleforms'
+                  ),
+                  validationErrors: maybeValidationErrors,
+                },
+              });
+
+              removeNotice(SUCCESS_NOTICE_ID);
+              createErrorNotice(
+                __(
+                  'Validation failed. Please fix the highlighted fields.',
+                  'subtleforms'
+                ),
+                {
+                  id: ERROR_NOTICE_ID,
+                  isDismissible: true,
+                  type: 'snackbar',
+                  actions: [],
+                }
+              );
+              return;
+            }
+
+            // Handle other publish errors
+            const errorMessage =
+              statusBody?.message ||
+              __('Failed to update form status', 'subtleforms');
+            throw new Error(errorMessage);
           }
         }
 
         setCurrentFormId(resolvedFormId);
-        setDraftSchema((current) =>
-          current
-            ? {
-                ...current,
-                version: body?.version ?? current.version,
-              }
-            : current
-        );
-        setIsDirty(false);
-        setStatus('saved');
-        setSaveError(null);
-        setAutoSaveError(null);
+
+        // Dispatch success actions
+        if (targetStatus === 'published') {
+          dispatch({ type: BUILDER_ACTIONS.PUBLISH_SUCCESS });
+        } else if (auto) {
+          // Check if still dirty (user edited during autosave)
+          dispatch({
+            type: BUILDER_ACTIONS.AUTOSAVE_SUCCESS,
+            payload: { stillDirty: false }, // TODO: track concurrent edits
+          });
+        } else {
+          dispatch({
+            type: BUILDER_ACTIONS.AUTOSAVE_SUCCESS,
+            payload: { stillDirty: false },
+          });
+        }
 
         const detail = {
           id: resolvedFormId,
@@ -523,12 +690,15 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
       } catch (err) {
         const message =
           err?.message || __('Failed to save form', 'subtleforms');
-        setStatus('error');
-        setIsDirty(true);
-        if (auto) {
-          setAutoSaveError(message);
-        } else {
-          setSaveError(message);
+
+        dispatch({
+          type: auto
+            ? BUILDER_ACTIONS.AUTOSAVE_ERROR
+            : BUILDER_ACTIONS.PUBLISH_ERROR,
+          payload: { error: message },
+        });
+
+        if (!auto) {
           removeNotice(SUCCESS_NOTICE_ID);
           createErrorNotice(message, {
             id: ERROR_NOTICE_ID,
@@ -536,12 +706,6 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
             type: 'snackbar',
             actions: [],
           });
-        }
-      } finally {
-        if (auto) {
-          setAutoSaving(false);
-        } else {
-          setSaving(false);
         }
       }
     },
@@ -551,18 +715,21 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
       autoSaving,
       currentFormId,
       formId,
-      formTitle,
       formStatus,
-      isEphemeral,
-      hasUserMutation,
+      dispatch,
       removeNotice,
-      createErrorNotice,
       createSuccessNotice,
+      createErrorNotice,
       onSaved,
-      SUCCESS_NOTICE_ID,
-      ERROR_NOTICE_ID,
     ]
   );
+
+  const retryLastManualSave = useCallback(() => {
+    performSave({
+      auto: false,
+      targetStatus: lastManualSaveRef.current.targetStatus,
+    });
+  }, [performSave]);
 
   const handleSave = useCallback(() => {
     performSave({ auto: false });
@@ -573,17 +740,56 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
   }, [performSave]);
 
   const handlePublish = useCallback(() => {
+    if (hasValidationErrors) {
+      removeNotice(SUCCESS_NOTICE_ID);
+      createErrorNotice(
+        __('Fix validation errors before publishing.', 'subtleforms'),
+        {
+          id: ERROR_NOTICE_ID,
+          isDismissible: true,
+          type: 'snackbar',
+          actions: [],
+        }
+      );
+      return;
+    }
+
     if (formStatus === 'draft') {
       setShowPublishConfirm(true);
     } else {
       performSave({ auto: false, targetStatus: 'published' });
     }
-  }, [formStatus, performSave]);
+  }, [
+    createErrorNotice,
+    formStatus,
+    hasValidationErrors,
+    performSave,
+    removeNotice,
+  ]);
 
   const confirmPublish = useCallback(() => {
     setShowPublishConfirm(false);
     performSave({ auto: false, targetStatus: 'published' });
   }, [performSave]);
+
+  const handleSaveAndClose = useCallback(async () => {
+    if (!isDirty) {
+      // No changes, just close
+      window.location.href = 'admin.php?page=subtleforms-forms';
+      return;
+    }
+
+    // Save first, then redirect on success
+    try {
+      await performSave({ auto: false });
+      // Redirect after successful save
+      setTimeout(() => {
+        window.location.href = 'admin.php?page=subtleforms-forms';
+      }, 300);
+    } catch (err) {
+      // Error already handled in performSave
+    }
+  }, [isDirty, performSave]);
 
   const handleDelete = useCallback(async () => {
     if (!currentFormId) return;
@@ -629,22 +835,27 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
     ERROR_NOTICE_ID,
   ]);
 
-  const handleDiscard = useCallback(() => {
-    // For ephemeral forms without user changes, just close
-    if (isEphemeral && !hasUserMutation) {
+  const handleDiscard = useCallback(async () => {
+    // If no changes made, delete the draft form and navigate away
+    if (!isDirty && currentFormId) {
+      try {
+        await apiDelete(`/forms/${currentFormId}`);
+      } catch (err) {
+        console.error('Failed to delete draft form:', err);
+      }
       window.location.href = 'admin.php?page=subtleforms-forms';
       return;
     }
 
-    // For ephemeral forms with changes or saved forms with changes, show confirmation
+    // If changes were made, show confirmation
     if (isDirty) {
       setShowDiscardConfirm(true);
     } else {
       window.location.href = 'admin.php?page=subtleforms-forms';
     }
-  }, [isEphemeral, hasUserMutation, isDirty]);
+  }, [isDirty, currentFormId]);
 
-  const confirmDiscard = useCallback(() => {
+  const confirmDiscard = useCallback(async () => {
     setShowDiscardConfirm(false);
 
     // Clear autosave timer
@@ -653,65 +864,27 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
       autoSaveTimeoutRef.current = null;
     }
 
-    // Redirect without saving
-    window.location.href = 'admin.php?page=subtleforms-forms';
-  }, []);
-
-  const handleClose = useCallback(() => {
-    // For ephemeral forms without changes, just close
-    if (isEphemeral && !hasUserMutation) {
-      onClose();
-      return;
+    // Delete the draft form if it was never saved with edits
+    if (currentFormId && !isDirty) {
+      try {
+        await apiDelete(`/forms/${currentFormId}`);
+      } catch (err) {
+        console.error('Failed to delete draft form:', err);
+      }
     }
 
+    // Redirect without saving
+    window.location.href = 'admin.php?page=subtleforms-forms';
+  }, [currentFormId, isDirty]);
+
+  const handleClose = useCallback(() => {
     // For forms with changes, show confirmation
     if (isDirty) {
       setShowDiscardConfirm(true);
     } else {
       onClose();
     }
-  }, [isDirty, isEphemeral, hasUserMutation, onClose]);
-
-  // Autosave effect - ONLY runs if form is NOT ephemeral OR if user has made changes
-  useEffect(() => {
-    // Guard: never autosave in ephemeral mode unless user has made changes
-    if (isEphemeral && !hasUserMutation) {
-      return;
-    }
-
-    if (!isDirty || !draftSchema || isHydrating) {
-      return;
-    }
-
-    if (saving || autoSaving || status === 'error') {
-      return;
-    }
-
-    if (autoSaveTimeoutRef.current) {
-      clearTimeout(autoSaveTimeoutRef.current);
-    }
-
-    autoSaveTimeoutRef.current = setTimeout(() => {
-      performSave({ auto: true });
-    }, 2000);
-
-    return () => {
-      if (autoSaveTimeoutRef.current) {
-        clearTimeout(autoSaveTimeoutRef.current);
-        autoSaveTimeoutRef.current = null;
-      }
-    };
-  }, [
-    isEphemeral,
-    hasUserMutation,
-    isDirty,
-    draftSchema,
-    saving,
-    autoSaving,
-    status,
-    performSave,
-    isHydrating,
-  ]);
+  }, [isDirty, onClose]);
 
   const handleTourComplete = useCallback(() => {
     setShowTour(false);
@@ -725,15 +898,43 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
   const shortcode = currentFormId ? `[subtleforms id="${currentFormId}"]` : '';
   const statusLabel = useMemo(() => {
     if (autoSaving) return __('Saving...', 'subtleforms');
-    if (status === 'saving') return __('Saving…', 'subtleforms');
-    if (status === 'saved') return __('Saved', 'subtleforms');
-    if (isEphemeral && !hasUserMutation)
-      return __('No changes yet', 'subtleforms');
-    if (isEphemeral) return __('Not saved', 'subtleforms');
+    if (effectiveStatus === 'saving') return __('Saving…', 'subtleforms');
+    if (effectiveStatus === 'saved') return __('Saved', 'subtleforms');
     return __('Unsaved changes', 'subtleforms');
-  }, [status, autoSaving, isEphemeral, hasUserMutation]);
+  }, [effectiveStatus, autoSaving]);
 
-  const statusDescription = status === 'error' ? autoSaveError : null;
+  const statusDescription = useMemo(() => {
+    if (effectiveStatus === 'error') {
+      return autoSaveError || saveError || null;
+    }
+
+    const lastTime = lastSaveTime || lastAutoSaveTime;
+    if (!lastTime) {
+      return null;
+    }
+
+    const time = new Date(lastTime).toLocaleTimeString([], {
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+
+    if (autoSaving || effectiveStatus === 'saving') {
+      return sprintf(__('Saving… (last saved at %s)', 'subtleforms'), time);
+    }
+
+    if (effectiveStatus === 'saved') {
+      return sprintf(__('Last saved at %s', 'subtleforms'), time);
+    }
+
+    return null;
+  }, [
+    autoSaveError,
+    autoSaving,
+    effectiveStatus,
+    lastAutoSaveTime,
+    lastSaveTime,
+    saveError,
+  ]);
 
   if (loadingFields) return <Spinner />;
   if (loading) return <Spinner />;
@@ -833,24 +1034,17 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
     <div className='sf-flex sf-items-center sf-gap-3'>
       {/* Status Badge - More prominent */}
       <span
+        data-tour='status-badge'
         className={`sf-inline-flex sf-items-center sf-px-3 sf-py-1.5 sf-text-xs sf-font-semibold sf-uppercase sf-tracking-wide sf-text-white ${
-          isEphemeral
-            ? 'bg-gray-400'
-            : formStatus === 'published'
-            ? 'bg-green-600'
-            : 'bg-yellow-500'
+          formStatus === 'published' ? 'bg-green-600' : 'bg-yellow-500'
         }`}
         style={{ borderRadius: '4px' }}
         title={
-          isEphemeral
-            ? __('Form not saved yet', 'subtleforms')
-            : formStatus === 'published'
+          formStatus === 'published'
             ? __('Form is live and visible to users', 'subtleforms')
             : __('Form is saved but not published', 'subtleforms')
         }>
-        {isEphemeral
-          ? __('Unsaved', 'subtleforms')
-          : formStatus === 'published'
+        {formStatus === 'published'
           ? __('Published', 'subtleforms')
           : __('Draft', 'subtleforms')}
       </span>
@@ -892,28 +1086,58 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
             height: '8px',
             borderRadius: '50%',
             background:
-              autoSaving || status === 'saving'
+              autoSaving || effectiveStatus === 'saving'
                 ? '#2271b1'
-                : status === 'saved'
+                : effectiveStatus === 'saved'
                 ? '#00a32a'
-                : status === 'error'
+                : effectiveStatus === 'error'
                 ? '#d63638'
-                : isEphemeral
-                ? '#999'
                 : '#f0b849',
             boxShadow:
-              autoSaving || status === 'saving'
+              autoSaving || effectiveStatus === 'saving'
                 ? '0 0 4px rgba(34, 113, 177, 0.5)'
                 : 'none',
           }}
         />
         <span
           className={
-            status === 'error' ? 'text-red-600 font-medium' : 'text-gray-700'
+            effectiveStatus === 'error'
+              ? 'text-red-600 font-medium'
+              : 'text-gray-700'
           }>
           {statusLabel}
         </span>
       </div>
+
+      {(autoSaveError || saveError) && (
+        <div className='sf-flex sf-items-center sf-gap-1'>
+          {autoSaveError && (
+            <Button
+              variant='secondary'
+              isSmall
+              onClick={retryAutosave}
+              className='sf-h-7'>
+              {__('Retry autosave', 'subtleforms')}
+            </Button>
+          )}
+          {saveError && (
+            <Button
+              variant='secondary'
+              isSmall
+              onClick={retryLastManualSave}
+              className='sf-h-7'>
+              {__('Retry save', 'subtleforms')}
+            </Button>
+          )}
+          <Button
+            variant='tertiary'
+            isSmall
+            onClick={dismissRecoverableErrors}
+            className='sf-h-7'>
+            {__('Dismiss', 'subtleforms')}
+          </Button>
+        </div>
+      )}
 
       <div
         style={{
@@ -926,20 +1150,46 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
 
       {/* Primary Actions Group */}
       <div className='sf-flex sf-items-center sf-gap-2'>
-        {/* Help Menu */}
-        <HelpMenu onStartTour={() => setShowTour(true)} />
+        <Button
+          variant='tertiary'
+          onClick={() => dispatch({ type: BUILDER_ACTIONS.UNDO_SCHEMA })}
+          disabled={!canUndo || saving || autoSaving}
+          className='sf-px-3 sf-h-9 sf-font-medium sf-text-sm'
+          title={__('Undo (Ctrl/Cmd+Z)', 'subtleforms')}>
+          <Icon.Undo className='sf-mr-2 sf-w-4 sf-h-4' />
+          {__('Undo', 'subtleforms')}
+        </Button>
 
+        <Button
+          variant='tertiary'
+          onClick={() => dispatch({ type: BUILDER_ACTIONS.REDO_SCHEMA })}
+          disabled={!canRedo || saving || autoSaving}
+          className='sf-px-3 sf-h-9 sf-font-medium sf-text-sm'
+          title={__('Redo (Shift+Ctrl/Cmd+Z)', 'subtleforms')}>
+          <Icon.Redo className='sf-mr-2 sf-w-4 sf-h-4' />
+          {__('Redo', 'subtleforms')}
+        </Button>
+
+        {/* Help Menu */}
+        <HelpMenu
+          onStartTour={() => setShowTour(true)}
+          onOpenWizard={onOpenWizard}
+          showWizard={showWizard}
+        />
         {/* Preview Button */}
+        {/* TASK 5.4: Preview uses draftSchema from builder state (not active) */}
         <Button
           variant='secondary'
-          onClick={() => setShowPreview(true)}
+          onClick={() => {
+            dispatch({ type: BUILDER_ACTIONS.OPEN_PREVIEW });
+            setShowPreview(true);
+          }}
           disabled={!draftSchema || draftSchema.fields?.length === 0}
           className='sf-px-4 sf-h-9 sf-font-medium sf-text-sm'>
           {__('Preview', 'subtleforms')}
         </Button>
-
-        {/* Save Draft Button - Always visible for new forms or when dirty */}
-        {(isDirty || isEphemeral) && (
+        {/* Save Draft Button - Always visible when dirty */}
+        {isDirty && (
           <Button
             variant='secondary'
             onClick={handleSaveDraft}
@@ -950,29 +1200,37 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
               : __('Save Draft', 'subtleforms')}
           </Button>
         )}
-
         {/* Publish/Update Button - Primary action */}
         <Button
           variant='primary'
+          data-tour='publish-button'
           onClick={handlePublish}
-          disabled={saving || autoSaving || (isEphemeral && !isDirty)}
+          disabled={saving || autoSaving || hasValidationErrors}
           className='sf-px-4 sf-h-9 sf-font-medium sf-text-sm'>
           {formStatus === 'published'
             ? __('Update', 'subtleforms')
             : __('Publish', 'subtleforms')}
         </Button>
 
-        {/* Delete Button - Danger action, only for existing forms */}
-        {!isEphemeral && (
-          <Button
-            variant='secondary'
-            onClick={() => setShowDeleteConfirm(true)}
-            isDestructive
-            className='sf-px-4 sf-h-9 sf-font-medium sf-text-sm'
-            title={__('Delete this form permanently', 'subtleforms')}>
-            {__('Delete', 'subtleforms')}
-          </Button>
-        )}
+        {/* Save & Close Button - Quick action */}
+        <Button
+          variant='secondary'
+          onClick={handleSaveAndClose}
+          disabled={saving || autoSaving}
+          className='sf-px-4 sf-h-9 sf-font-medium sf-text-sm'
+          title={__('Save changes and return to forms list', 'subtleforms')}>
+          {__('Save & Close', 'subtleforms')}
+        </Button>
+
+        {/* Delete Button - Danger action */}
+        <Button
+          variant='secondary'
+          onClick={() => setShowDeleteConfirm(true)}
+          isDestructive
+          className='sf-px-4 sf-h-9 sf-font-medium sf-text-sm'
+          title={__('Delete this form permanently', 'subtleforms')}>
+          {__('Delete', 'subtleforms')}
+        </Button>
       </div>
     </div>
   );
@@ -995,6 +1253,34 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
         {saveError && (
           <div className='sf-bg-red-50 sf-mb-4 sf-px-6 sf-py-3 sf-border-yellow-500 sf-border-b'>
             <span className='sf-text-red-600 sf-text-xs'>{saveError}</span>
+          </div>
+        )}
+
+        {hasValidationErrors && (
+          <div className='sf-mb-4 sf-px-6'>
+            <Notice status='warning' isDismissible={false}>
+              <p className='sf-m-0 sf-text-sm'>
+                {__(
+                  'Validation issues detected. Publishing is blocked until these are fixed:',
+                  'subtleforms'
+                )}
+              </p>
+              <ul className='sf-m-0 sf-mt-2 sf-pl-5 sf-text-sm'>
+                {validationErrors.slice(0, 6).map((err, idx) => (
+                  <li key={idx}>
+                    {err?.message || __('Validation error', 'subtleforms')}
+                  </li>
+                ))}
+                {validationErrors.length > 6 && (
+                  <li>
+                    {sprintf(
+                      __('…and %d more', 'subtleforms'),
+                      validationErrors.length - 6
+                    )}
+                  </li>
+                )}
+              </ul>
+            </Notice>
           </div>
         )}
 
@@ -1023,12 +1309,14 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
                   schema={draftSchema}
                   fieldGroups={fieldGroups}
                   fieldDefinitions={fieldDefinitions}
+                  validationErrors={validationErrors}
                   onChange={handleSchemaChange}
                 />
               )}
               {tab.name === 'settings' && (
                 <FormSettings
                   schema={draftSchema}
+                  validationErrors={validationErrors}
                   onChange={handleSchemaChange}
                 />
               )}
@@ -1085,17 +1373,10 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
         isOpen={showDiscardConfirm}
         onClose={() => setShowDiscardConfirm(false)}
         title={__('You have unsaved changes', 'subtleforms')}
-        message={
-          isEphemeral
-            ? __(
-                'This form has not been saved yet. All changes will be lost if you leave.',
-                'subtleforms'
-              )
-            : __(
-                'Your recent edits have not been saved. Would you like to save your changes before leaving, or discard them?',
-                'subtleforms'
-              )
-        }
+        message={__(
+          'Your recent edits have not been saved. Would you like to save your changes before leaving, or discard them?',
+          'subtleforms'
+        )}
         onConfirm={handleSaveDraft}
         confirmText={__('Save Draft', 'subtleforms')}
         confirmVariant='primary'
@@ -1110,12 +1391,255 @@ export default function FormBuilderPage({ formId, onClose, onSaved }) {
       )}
 
       {/* Form Preview Modal */}
+      {/* TASK 5.4: Preview modal receives draftSchema (never active schema) */}
       {showPreview && (
         <FormPreviewModal
           schema={draftSchema}
-          onClose={() => setShowPreview(false)}
+          isDirty={isDirty}
+          onClose={() => {
+            dispatch({ type: BUILDER_ACTIONS.CLOSE_PREVIEW });
+            setShowPreview(false);
+          }}
         />
       )}
     </>
+  );
+}
+
+export default function FormBuilderPage(props) {
+  const { formId } = props;
+
+  const [wizardStatusLoaded, setWizardStatusLoaded] = useState(!!formId);
+  const [wizardDismissed, setWizardDismissed] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState(null);
+
+  const [createdFormId, setCreatedFormId] = useState(null);
+  const [bootstrap, setBootstrap] = useState(null);
+
+  const [showQuickWizard, setShowQuickWizard] = useState(false);
+  const [quickWizardInitialTitle, setQuickWizardInitialTitle] = useState('');
+
+  const isNewForm = !formId;
+
+  const effectiveFormId = createdFormId || formId;
+
+  const handleCancelWizard = useCallback(() => {
+    window.location.href = 'admin.php?page=subtleforms-forms';
+  }, []);
+
+  const generateDefaultTitleForWizard = useCallback(() => {
+    const suffix = Math.floor(1000 + Math.random() * 9000);
+    return sprintf(__('Untitled Form %d', 'subtleforms'), suffix);
+  }, []);
+
+  const openQuickWizard = useCallback(() => {
+    setQuickWizardInitialTitle(generateDefaultTitleForWizard());
+    setShowQuickWizard(true);
+  }, [generateDefaultTitleForWizard]);
+
+  useEffect(() => {
+    if (!isNewForm) {
+      return;
+    }
+
+    let cancelled = false;
+    apiGet('/create-wizard/status').then(({ ok, body }) => {
+      if (cancelled) {
+        return;
+      }
+
+      // Fail-open: if endpoint fails, show wizard.
+      const dismissed = ok ? !!body?.dismissed : false;
+      setWizardDismissed(dismissed);
+      setWizardStatusLoaded(true);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isNewForm]);
+
+  const createDraftFormWithSchema = useCallback(
+    async ({ title, description, formType, startingPoint, dontShowAgain }) => {
+      setCreateError(null);
+      setCreating(true);
+
+      try {
+        const resolvedTitle =
+          (title || '').trim() || generateDefaultTitleForWizard();
+        const resolvedDescription = (description || '').trim();
+
+        const schema = createInitialSchema({
+          title: resolvedTitle,
+          description: resolvedDescription,
+          formType,
+          startingPoint,
+        });
+
+        const formRes = await apiPost('/forms', {
+          title: resolvedTitle,
+          status: 'draft',
+          config: {
+            description: resolvedDescription,
+            type: formType,
+          },
+        });
+
+        if (!formRes.ok) {
+          throw new Error(
+            formRes.body?.message ||
+              __('Failed to create draft form', 'subtleforms')
+          );
+        }
+
+        const newId = formRes.body?.id;
+        if (!newId) {
+          throw new Error(__('Failed to create draft form', 'subtleforms'));
+        }
+
+        const schemaRes = await apiPost(`/forms/${newId}/schema`, {
+          schema,
+          activate: false,
+        });
+
+        if (!schemaRes.ok) {
+          throw new Error(
+            schemaRes.body?.message ||
+              __('Failed to initialize draft schema', 'subtleforms')
+          );
+        }
+
+        if (dontShowAgain) {
+          // Best-effort (do not block creation).
+          apiPost('/create-wizard/dismiss', {});
+        }
+
+        // Update URL to include form_id
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('form_id', newId);
+        window.history.replaceState({}, '', newUrl.toString());
+
+        setCreatedFormId(newId);
+        setBootstrap({
+          form: { id: newId, title: resolvedTitle, status: 'draft' },
+          schema,
+        });
+      } catch (e) {
+        setCreateError(
+          e?.message || __('Failed to create form', 'subtleforms')
+        );
+        throw e;
+      } finally {
+        setCreating(false);
+      }
+    },
+    [generateDefaultTitleForWizard]
+  );
+
+  // If user opted out of the wizard, still create a sensible starter form before mounting the builder.
+  useEffect(() => {
+    if (!isNewForm) {
+      return;
+    }
+    if (!wizardStatusLoaded) {
+      return;
+    }
+    if (!wizardDismissed) {
+      return;
+    }
+    if (effectiveFormId || creating) {
+      return;
+    }
+
+    createDraftFormWithSchema({
+      title: generateDefaultTitleForWizard(),
+      description: '',
+      formType: 'regular',
+      startingPoint: 'minimal',
+      dontShowAgain: false,
+    }).catch((e) => {
+      setCreateError(e?.message || __('Failed to create form', 'subtleforms'));
+      setCreating(false);
+    });
+  }, [
+    creating,
+    createDraftFormWithSchema,
+    effectiveFormId,
+    generateDefaultTitleForWizard,
+    isNewForm,
+    wizardDismissed,
+    wizardStatusLoaded,
+  ]);
+
+  if (showQuickWizard) {
+    return (
+      <AdminShell>
+        <CreateFormWizard
+          initialTitle={
+            quickWizardInitialTitle || generateDefaultTitleForWizard()
+          }
+          onCancel={() => setShowQuickWizard(false)}
+          onComplete={async (data) => {
+            await createDraftFormWithSchema(data);
+            setShowQuickWizard(false);
+          }}
+        />
+      </AdminShell>
+    );
+  }
+
+  if (!isNewForm) {
+    return (
+      <FormBuilderInner
+        {...props}
+        formId={effectiveFormId}
+        bootstrap={bootstrap?.form?.id === effectiveFormId ? bootstrap : null}
+        onOpenWizard={openQuickWizard}
+        showWizard={true}
+        autoShowTour={false}
+      />
+    );
+  }
+
+  if (!wizardStatusLoaded) {
+    return <Spinner />;
+  }
+
+  if (!effectiveFormId && !wizardDismissed) {
+    return (
+      <AdminShell>
+        <CreateFormWizard
+          initialTitle={generateDefaultTitleForWizard()}
+          onCancel={handleCancelWizard}
+          onComplete={createDraftFormWithSchema}
+        />
+      </AdminShell>
+    );
+  }
+
+  if (!effectiveFormId) {
+    return (
+      <AdminShell>
+        {createError ? (
+          <Notice status='error' isDismissible={false}>
+            {createError}
+          </Notice>
+        ) : (
+          <Spinner />
+        )}
+      </AdminShell>
+    );
+  }
+
+  return (
+    <FormBuilderInner
+      {...props}
+      formId={effectiveFormId}
+      bootstrap={bootstrap?.form?.id === effectiveFormId ? bootstrap : null}
+      onOpenWizard={openQuickWizard}
+      showWizard={true}
+      autoShowTour={true}
+    />
   );
 }

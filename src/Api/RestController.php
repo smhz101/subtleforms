@@ -217,6 +217,19 @@ final class RestController
             'permission_callback' => [$this, 'check_read_permission'],
         ]);
 
+        // Create form wizard endpoints (per-user)
+        register_rest_route(self::NAMESPACE, '/create-wizard/dismiss', [
+            'methods' => 'POST',
+            'callback' => [$this, 'dismiss_create_wizard'],
+            'permission_callback' => [$this, 'check_write_permission'],
+        ]);
+
+        register_rest_route(self::NAMESPACE, '/create-wizard/status', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_create_wizard_status'],
+            'permission_callback' => [$this, 'check_read_permission'],
+        ]);
+
         // Builder tour endpoints
         register_rest_route(self::NAMESPACE, '/tour/complete', [
             'methods' => 'POST',
@@ -296,33 +309,93 @@ final class RestController
     }
 
     /**
-     * Get a form schema (specific version or active when ?version omitted).
+     * Get form schema.
+     * 
+     * SECURITY POLICY (Phase 6.2):
+     * 
+     * Public (unauthenticated):
+     *   - Only ACTIVE schemas
+     *   - Only for PUBLISHED forms
+     *   - Never draft schema
+     * 
+     * Authenticated (admin/editor):
+     *   - Draft schema when context=builder
+     *   - Active schema otherwise
+     *   - Works for all form statuses
+     * 
+     * @param WP_REST_Request $request
+     * @return WP_REST_Response|WP_Error
      */
     public function get_form_schema(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $formId = intval($request->get_param('id'));
         $version = $request->get_param('version');
         $version = $version !== null ? intval($version) : null;
+        $context = $request->get_param('context');
 
         // Verify form exists first
         $form = $this->formsRepo->find($formId);
         if (!$form) {
-            return new WP_Error('form_not_found', 'Form not found', ['status' => 404]);
+            return new WP_Error('form_not_found', 'Form not available', ['status' => 404]);
         }
 
+        $isAuthenticated = is_user_logged_in() && current_user_can('edit_posts');
+        $isPublished = isset($form['status']) && $form['status'] === 'published';
+        $requestsDraft = $context === 'builder';
+
+        // PUBLIC ACCESS (unauthenticated): Only active schema for published forms
+        if (!$isAuthenticated) {
+            if (!$isPublished) {
+                return new WP_Error('form_not_available', 'Form not available', ['status' => 404]);
+            }
+
+            // Load active schema only
+            try {
+                $schema = $this->formsRepo->loadSchemaVersion($formId, $version);
+            } catch (\RuntimeException $e) {
+                error_log('SubtleForms API Error: ' . $e->getMessage());
+                return new WP_Error('schema_not_available', 'Schema not available', ['status' => 404]);
+            }
+
+            if (!$schema) {
+                return new WP_Error('schema_not_available', 'Schema not available', ['status' => 404]);
+            }
+
+            return new WP_REST_Response([
+                'form' => $form,
+                'schema' => $schema['schema'] ?? $schema,
+                'version' => $schema['version'] ?? null,
+            ], 200);
+        }
+
+        // AUTHENTICATED ACCESS: Allow draft schema with explicit context=builder
+        if ($requestsDraft && !$version) {
+            $draftSchema = $this->formsRepo->getDraftSchema($formId);
+            
+            if ($draftSchema) {
+                return new WP_REST_Response([
+                    'form' => $form,
+                    'schema' => $draftSchema,
+                    'version' => null,
+                    'draft' => true,
+                ], 200);
+            }
+        }
+
+        // Fall back to versioned schema (authenticated users)
         try {
             $schema = $this->formsRepo->loadSchemaVersion($formId, $version);
         } catch (\RuntimeException $e) {
             error_log('SubtleForms API Error: ' . $e->getMessage());
             return new WP_Error(
                 'schema_load_failed',
-                'Failed to load form schema: ' . $e->getMessage(),
+                'Failed to load form schema',
                 ['status' => 500]
             );
         }
 
         if (!$schema) {
-            // Return empty schema for new forms instead of 404
+            // Return empty schema for authenticated users creating new forms
             return new WP_REST_Response([
                 'form' => $form,
                 'schema' => [
@@ -346,7 +419,16 @@ final class RestController
     }
 
     /**
-     * Save a new schema version for a form.
+     * Save form schema (draft or versioned).
+     * 
+     * If activate=false (default for autosave):
+     *   - Saves to draft_schema column (no versioning)
+     *   - Fast, lightweight saves
+     * 
+     * If activate=true (manual save or publish):
+     *   - Creates new schema version
+     *   - Activates the version
+     *   - Immutable and public
      */
     public function save_form_schema(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
@@ -359,23 +441,56 @@ final class RestController
 
         $params = $request->get_json_params();
         $schema = $params['schema'] ?? null;
-        // Auto-activate schemas by default unless explicitly set to false
-        $activate = !isset($params['activate']) || !empty($params['activate']);
+        // Safe default: do NOT activate unless explicitly requested
+        // This prevents autosave from creating active versions
+        $activate = isset($params['activate']) && $params['activate'] === true;
 
         if (!is_array($schema)) {
             return new WP_Error('invalid_schema', 'Schema must be a JSON object', ['status' => 400]);
         }
 
-        // Attempt to save; saveSchemaVersion will validate and may throw InvalidArgumentException
+        // Task 5.5: Structured validation errors for builder UI
+        // - Manual save creates an active version (validate basic schema)
+        // - If the form is already published, activating a new schema must pass publish validation
+        if ($activate) {
+            $validator = new \SubtleForms\Support\SchemaValidator();
+            $validationErrors = ($form['status'] ?? '') === 'published'
+                ? $validator->validateForPublishingWithErrors($schema)
+                : $validator->validateWithErrors($schema);
+
+            if (!empty($validationErrors)) {
+                return new WP_Error(
+                    'schema_validation_failed',
+                    'Schema validation failed',
+                    [
+                        'status' => 422,
+                        'errors' => $validationErrors,
+                    ]
+                );
+            }
+        }
+
+        // Route based on activate flag
         try {
-            $version = $this->formsRepo->saveSchemaVersion($formId, $schema, $activate);
+            if ($activate) {
+                // Manual save or publish: create versioned schema
+                $version = $this->formsRepo->saveSchemaVersion($formId, $schema, true);
+                return new WP_REST_Response(['version' => $version, 'active' => true], 201);
+            } else {
+                // Autosave: save to draft (no versioning)
+                $success = $this->formsRepo->saveDraftSchema($formId, $schema);
+                
+                if (!$success) {
+                    return new WP_Error('save_failed', 'Failed to save draft schema', ['status' => 500]);
+                }
+                
+                return new WP_REST_Response(['draft' => true, 'active' => false], 200);
+            }
         } catch (\InvalidArgumentException $e) {
             return new WP_Error('invalid_schema', $e->getMessage(), ['status' => 400]);
         } catch (\RuntimeException $e) {
             return new WP_Error('save_failed', $e->getMessage(), ['status' => 500]);
         }
-
-        return new WP_REST_Response(['version' => $version, 'active' => $activate], 201);
     }
 
     /**
@@ -427,6 +542,72 @@ final class RestController
             'config' => $request->get_param('config'),
             'status' => $request->get_param('status'),
         ], fn($value) => $value !== null);
+
+        // CRITICAL: Block publishing if no active schema exists
+        if (isset($data['status']) && $data['status'] === 'published') {
+            try {
+                // First, check if there's a draft schema to promote
+                $draftSchema = $this->formsRepo->getDraftSchema($id);
+                
+                if ($draftSchema) {
+                    // Promote draft to active version before publishing
+                    error_log(sprintf('SubtleForms: Promoting draft schema to active for form %d before publishing', $id));
+                    $this->formsRepo->promoteDraftToActive($id);
+                }
+                
+                // Now validate that an active schema exists
+                $activeSchema = $this->formsRepo->loadSchemaVersion($id, null);
+                
+                if (!$activeSchema) {
+                    return new WP_Error(
+                        'publish_blocked',
+                        'Cannot publish form: No schema exists. Please save your form first.',
+                        ['status' => 400]
+                    );
+                }
+
+                // Check if the loaded schema is actually active
+                if (!isset($activeSchema['active']) || $activeSchema['active'] != 1) {
+                    return new WP_Error(
+                        'publish_blocked',
+                        'Cannot publish form: No active schema version. Please save and activate a schema first.',
+                        ['status' => 400]
+                    );
+                }
+
+                // Validate that schema has required fields
+                $schemaData = json_decode($activeSchema['schema_data'], true);
+                if (!$schemaData || !is_array($schemaData)) {
+                    return new WP_Error(
+                        'publish_blocked',
+                        'Cannot publish form: Schema data is corrupt or invalid.',
+                        ['status' => 400]
+                    );
+                }
+
+                // Run comprehensive publish validation
+                $validator = new \SubtleForms\Support\SchemaValidator();
+                $validationErrors = $validator->validateForPublishingWithErrors($schemaData);
+
+                if (!empty($validationErrors)) {
+                    return new WP_Error(
+                        'publish_blocked',
+                        'Cannot publish form: Fix validation errors.',
+                        [
+                            'status' => 422,
+                            'errors' => $validationErrors,
+                        ]
+                    );
+                }
+
+            } catch (\RuntimeException $e) {
+                return new WP_Error(
+                    'publish_blocked',
+                    'Cannot publish form: ' . $e->getMessage(),
+                    ['status' => 500]
+                );
+            }
+        }
 
         $this->formsRepo->update($id, $data);
 
@@ -840,7 +1021,16 @@ final class RestController
      */
     public function check_read_permission(): bool
     {
-        return $this->gate->allows('api.read');
+        if (!is_user_logged_in()) {
+            return false;
+        }
+
+        // All admin API endpoints require a WordPress capability.
+        if (!current_user_can('manage_options')) {
+            return false;
+        }
+
+        return (bool) $this->gate->allows('api.read');
     }
 
     /**
@@ -848,7 +1038,16 @@ final class RestController
      */
     public function check_write_permission(): bool
     {
-        return $this->gate->allows('api.write');
+        if (!is_user_logged_in()) {
+            return false;
+        }
+
+        // All admin API endpoints require a WordPress capability.
+        if (!current_user_can('manage_options')) {
+            return false;
+        }
+
+        return (bool) $this->gate->allows('api.write');
     }
 
     /**
@@ -906,6 +1105,48 @@ final class RestController
         }
 
         $dismissed = (bool) get_user_meta($user_id, 'subtleforms_onboarding_dismissed', true);
+
+        return new WP_REST_Response([
+            'success' => true,
+            'dismissed' => $dismissed,
+        ], 200);
+    }
+
+    /**
+     * Dismiss create form wizard ("Don't show again").
+     */
+    public function dismiss_create_wizard(WP_REST_Request $request): WP_REST_Response
+    {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            return new WP_REST_Response([
+                'success' => false,
+                'message' => 'User not authenticated',
+            ], 401);
+        }
+
+        update_user_meta($user_id, 'subtleforms_create_wizard_dismissed', true);
+
+        return new WP_REST_Response([
+            'success' => true,
+            'message' => 'Create wizard dismissed',
+        ], 200);
+    }
+
+    /**
+     * Get create form wizard status.
+     */
+    public function get_create_wizard_status(WP_REST_Request $request): WP_REST_Response
+    {
+        $user_id = get_current_user_id();
+        if (!$user_id) {
+            return new WP_REST_Response([
+                'success' => false,
+                'dismissed' => false,
+            ], 200);
+        }
+
+        $dismissed = (bool) get_user_meta($user_id, 'subtleforms_create_wizard_dismissed', true);
 
         return new WP_REST_Response([
             'success' => true,

@@ -182,7 +182,7 @@ export default function FormsList({
           draft: {
             classes: 'bg-amber-50 text-amber-700 border-amber-200',
             label: __('Draft', 'subtleforms'),
-            icon: FiEdit,
+            icon: Icon.Edit,
           },
           published: {
             classes: 'bg-emerald-50 text-emerald-700 border-emerald-200',
@@ -484,10 +484,10 @@ export default function FormsList({
 
     if (ok && body?.id) {
       const newFormId = body.id;
-      const { ok: schemaOk } = await apiRequest(`/forms/${formId}/schema`);
+      const { ok: schemaOk } = await apiRequest(`/forms/${formId}/schema?context=builder`);
 
       if (schemaOk) {
-        await apiRequest(`/forms/${formId}/schema`).then(
+        await apiRequest(`/forms/${formId}/schema?context=builder`).then(
           ({ ok: loadOk, body: schemaBody }) => {
             if (loadOk && schemaBody?.schema) {
               return apiRequest(`/forms/${newFormId}/schema`, {
@@ -632,7 +632,7 @@ export default function FormsList({
   };
 
   return (
-    <>
+    <div className='sf-forms-list'>
       <DataTable
         columns={columns}
         data={forms}
@@ -752,6 +752,6 @@ export default function FormsList({
           </div>
         </Modal>
       )}
-    </>
+    </div>
   );
 }

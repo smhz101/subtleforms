@@ -40,7 +40,7 @@ export async function deleteForm(id) {
 }
 
 export async function getFormSchema(formId) {
-  return await apiGet(`/forms/${formId}/schema`);
+  return await apiGet(`/forms/${formId}/schema?context=builder`);
 }
 
 export async function saveFormSchema(formId, schema) {
