@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 /* ================================================================
-   SubtleForms Admin UI - Scoped Components & Utilities
+   SubtleForms Admin UI - Structural Overrides Only
    All styles are scoped to .subtleforms-admin to prevent WordPress conflicts
    ================================================================ */
 
@@ -178,69 +178,7 @@
 	}
 
 	/* ================================================================
-	   BUTTON UTILITIES
-	   ================================================================ */
-
-	.subtleforms-btn-height {
-		height: 2.25rem; /* 36px - Match WordPress button height */
-	}
-
-	.subtleforms-btn {
-		padding-left: 1rem;
-		padding-right: 1rem;
-		padding-top: 0.5rem;
-		padding-bottom: 0.5rem;
-		font-weight: 500;
-		font-size: 0.875rem;
-		line-height: 1.25rem;
-		transition-property: color, background-color, border-color;
-		transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-		transition-duration: 150ms;
-	}
-
-	.subtleforms-btn:focus {
-		outline: 2px solid transparent;
-		outline-offset: 2px;
-		--tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0
-			var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-		--tw-ring-shadow: var(--tw-ring-inset) 0 0 0
-			calc(2px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-		box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow),
-			var(--tw-shadow, 0 0 #0000);
-	}
-
-	.subtleforms-btn-primary {
-		background-color: #2563eb;
-		color: #ffffff;
-		--tw-ring-color: #3b82f6;
-	}
-
-	.subtleforms-btn-primary:hover {
-		background-color: #1d4ed8;
-	}
-
-	.subtleforms-btn-secondary {
-		border-width: 1px;
-		border-color: #d1d5db;
-		color: #374151;
-		--tw-ring-color: #3b82f6;
-	}
-
-	.subtleforms-btn-secondary:hover {
-		background-color: #f9fafb;
-	}
-
-	.subtleforms-btn-text {
-		color: #4b5563;
-		--tw-ring-color: #3b82f6;
-	}
-
-	.subtleforms-btn-text:hover {
-		color: #1f2937;
-	}
-
-	/* ================================================================
-	   MODAL SYSTEM - Clean, Flat, Minimal
+	   MODAL SYSTEM - Frame & Header Overrides Only
 	   ================================================================ */
 
 	/* Modal Overlay */
