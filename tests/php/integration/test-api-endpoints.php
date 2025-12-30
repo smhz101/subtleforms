@@ -8,43 +8,56 @@
 class API_Endpoints_Test extends WP_UnitTestCase {
     private $admin_user_id;
     private $test_form_id;
+    private $forms_repo;
 
     public function setUp(): void {
         parent::setUp();
+
+        // Ensure plugin tables exist
+        \SubtleForms\Activator::activate();
+
+        $this->forms_repo = new \SubtleForms\Repositories\FormsRepository();
         
         // Create admin user
         $this->admin_user_id = $this->factory->user->create([
             'role' => 'administrator'
         ]);
         
-        // Create a test form
-        global $wpdb;
-        $wpdb->insert(
-            $wpdb->prefix . 'subtleforms_forms',
-            [
-                'name' => 'API Test Form',
-                'schema' => json_encode([
-                    'fields' => [
-                        [
-                            'key' => 'field_1',
-                            'type' => 'text',
-                            'label' => 'Name',
-                            'required' => true
-                        ]
-                    ]
-                ]),
-                'settings' => json_encode([]),
-                'status' => 'published',
-                'created_at' => current_time('mysql'),
-                'updated_at' => current_time('mysql')
-            ]
-        );
-        $this->test_form_id = $wpdb->insert_id;
+        // Create a test form + active schema
+        $this->test_form_id = $this->forms_repo->create([
+            'title' => 'API Test Form',
+            'config' => [],
+            'status' => 'draft',
+        ]);
+
+        $schema = [
+            'schema_version' => 1,
+            'metadata' => [
+                'title' => 'API Test Form',
+                'name' => 'form_schema',
+                'description' => '',
+                'type' => 'regular',
+            ],
+            'fields' => [
+                [
+                    'key' => 'field_1',
+                    'type' => 'text',
+                    'config' => [
+                        'label' => 'Name',
+                        'required' => true,
+                    ],
+                ],
+            ],
+            'actions' => [],
+        ];
+
+        $this->forms_repo->saveSchemaVersion($this->test_form_id, $schema, true);
     }
 
     public function tearDown(): void {
-        global $wpdb;
-        $wpdb->delete($wpdb->prefix . 'subtleforms_forms', ['id' => $this->test_form_id]);
+        if ($this->forms_repo && $this->test_form_id) {
+            $this->forms_repo->delete($this->test_form_id);
+        }
         parent::tearDown();
     }
 
@@ -66,14 +79,14 @@ class API_Endpoints_Test extends WP_UnitTestCase {
         // Find our test form
         $test_form = null;
         foreach ($data as $form) {
-            if ($form['id'] === $this->test_form_id) {
+            if ($form['id'] == $this->test_form_id) {
                 $test_form = $form;
                 break;
             }
         }
         
         $this->assertNotNull($test_form);
-        $this->assertEquals('API Test Form', $test_form['name']);
+        $this->assertEquals('API Test Form', $test_form['title']);
     }
 
     /**
@@ -89,8 +102,7 @@ class API_Endpoints_Test extends WP_UnitTestCase {
         $data = $response->get_data();
         
         $this->assertEquals($this->test_form_id, $data['id']);
-        $this->assertEquals('API Test Form', $data['name']);
-        $this->assertArrayHasKey('schema', $data);
+        $this->assertEquals('API Test Form', $data['title']);
     }
 
     /**
@@ -100,20 +112,31 @@ class API_Endpoints_Test extends WP_UnitTestCase {
         wp_set_current_user($this->admin_user_id);
         
         $request = new WP_REST_Request('POST', '/subtleforms/v1/forms');
-        $request->set_body_params([
-            'name' => 'New API Form',
+        $request->set_header('Content-Type', 'application/json');
+        $request->set_body(wp_json_encode([
+            'title' => 'New API Form',
+            'status' => 'draft',
             'schema' => [
+                'schema_version' => 1,
+                'metadata' => [
+                    'title' => 'New API Form',
+                    'name' => 'form_schema',
+                    'description' => '',
+                    'type' => 'regular',
+                ],
                 'fields' => [
                     [
                         'key' => 'field_1',
                         'type' => 'email',
-                        'label' => 'Email',
-                        'required' => true
-                    ]
-                ]
+                        'config' => [
+                            'label' => 'Email',
+                            'required' => true,
+                        ],
+                    ],
+                ],
+                'actions' => [],
             ],
-            'settings' => []
-        ]);
+        ]));
         
         $response = rest_do_request($request);
         
@@ -121,11 +144,15 @@ class API_Endpoints_Test extends WP_UnitTestCase {
         $data = $response->get_data();
         
         $this->assertArrayHasKey('id', $data);
-        $this->assertEquals('New API Form', $data['name']);
+
+        $request2 = new WP_REST_Request('GET', '/subtleforms/v1/forms/' . $data['id']);
+        $response2 = rest_do_request($request2);
+        $this->assertEquals(200, $response2->get_status());
+        $formData = $response2->get_data();
+        $this->assertEquals('New API Form', $formData['title']);
         
         // Cleanup
-        global $wpdb;
-        $wpdb->delete($wpdb->prefix . 'subtleforms_forms', ['id' => $data['id']]);
+        $this->forms_repo->delete($data['id']);
     }
 
     /**
@@ -135,26 +162,23 @@ class API_Endpoints_Test extends WP_UnitTestCase {
         wp_set_current_user($this->admin_user_id);
         
         $request = new WP_REST_Request('PUT', '/subtleforms/v1/forms/' . $this->test_form_id);
-        $request->set_body_params([
-            'name' => 'Updated API Form',
-            'schema' => [
-                'fields' => [
-                    [
-                        'key' => 'field_1',
-                        'type' => 'text',
-                        'label' => 'Full Name',
-                        'required' => true
-                    ]
-                ]
-            ]
-        ]);
+        $request->set_header('Content-Type', 'application/json');
+        $request->set_body(wp_json_encode([
+            'title' => 'Updated API Form',
+        ]));
         
         $response = rest_do_request($request);
         
         $this->assertEquals(200, $response->get_status());
         $data = $response->get_data();
-        
-        $this->assertEquals('Updated API Form', $data['name']);
+
+        $this->assertTrue($data['success']);
+
+        $request2 = new WP_REST_Request('GET', '/subtleforms/v1/forms/' . $this->test_form_id);
+        $response2 = rest_do_request($request2);
+        $this->assertEquals(200, $response2->get_status());
+        $formData = $response2->get_data();
+        $this->assertEquals('Updated API Form', $formData['title']);
     }
 
     /**
@@ -164,30 +188,21 @@ class API_Endpoints_Test extends WP_UnitTestCase {
         wp_set_current_user($this->admin_user_id);
         
         // Create a form to delete
-        global $wpdb;
-        $wpdb->insert(
-            $wpdb->prefix . 'subtleforms_forms',
-            [
-                'name' => 'Form to Delete',
-                'schema' => json_encode(['fields' => []]),
-                'settings' => json_encode([]),
-                'status' => 'draft',
-                'created_at' => current_time('mysql'),
-                'updated_at' => current_time('mysql')
-            ]
-        );
-        $form_id = $wpdb->insert_id;
+        $form_id = $this->forms_repo->create([
+            'title' => 'Form to Delete',
+            'config' => [],
+            'status' => 'draft',
+        ]);
         
         $request = new WP_REST_Request('DELETE', '/subtleforms/v1/forms/' . $form_id);
         $response = rest_do_request($request);
         
         $this->assertEquals(200, $response->get_status());
+        $data = $response->get_data();
+        $this->assertTrue($data['success']);
         
         // Verify deletion
-        $form = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}subtleforms_forms WHERE id = %d",
-            $form_id
-        ));
+        $form = $this->forms_repo->find($form_id);
         $this->assertNull($form);
     }
 
@@ -198,11 +213,11 @@ class API_Endpoints_Test extends WP_UnitTestCase {
         wp_set_current_user(0); // Not logged in
         
         $request = new WP_REST_Request('POST', '/subtleforms/v1/forms');
-        $request->set_body_params([
-            'name' => 'Unauthorized Form',
-            'schema' => ['fields' => []],
-            'settings' => []
-        ]);
+        $request->set_header('Content-Type', 'application/json');
+        $request->set_body(wp_json_encode([
+            'title' => 'Unauthorized Form',
+            'status' => 'draft',
+        ]));
         
         $response = rest_do_request($request);
         
@@ -213,11 +228,12 @@ class API_Endpoints_Test extends WP_UnitTestCase {
      * Test submission endpoint
      */
     public function test_submit_form_endpoint() {
-        $request = new WP_REST_Request('POST', '/subtleforms/v1/forms/' . $this->test_form_id . '/submit');
+        $request = new WP_REST_Request('POST', '/subtleforms/v1/submit');
         $request->set_body_params([
+            'form_id' => $this->test_form_id,
             'data' => [
                 'field_1' => 'John Doe'
-            ]
+            ],
         ]);
         
         $response = rest_do_request($request);
@@ -227,17 +243,20 @@ class API_Endpoints_Test extends WP_UnitTestCase {
         
         $this->assertArrayHasKey('success', $data);
         $this->assertTrue($data['success']);
+        $this->assertArrayHasKey('submission_id', $data);
         
         // Verify submission was stored
         global $wpdb;
-        $submission = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}subtleforms_submissions WHERE form_id = %d ORDER BY id DESC LIMIT 1",
-            $this->test_form_id
-        ));
+        $submission = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM {$wpdb->prefix}subtleforms_submissions WHERE id = %d",
+                $data['submission_id']
+            )
+        );
         
         $this->assertNotNull($submission);
-        $submission_data = json_decode($submission->data, true);
-        $this->assertEquals('John Doe', $submission_data['field_1']);
+        $submission_payload = json_decode($submission->payload, true);
+        $this->assertEquals('John Doe', $submission_payload['field_1']);
         
         // Cleanup
         $wpdb->delete($wpdb->prefix . 'subtleforms_submissions', ['id' => $submission->id]);
@@ -250,9 +269,11 @@ class API_Endpoints_Test extends WP_UnitTestCase {
         wp_set_current_user($this->admin_user_id);
         
         $request = new WP_REST_Request('POST', '/subtleforms/v1/forms');
-        $request->set_body_params([
-            'name' => 'Conversational Form',
+        $request->set_header('Content-Type', 'application/json');
+        $request->set_body(wp_json_encode([
+            'title' => 'Conversational Form',
             'schema' => [
+                'schema_version' => 1,
                 'fields' => [
                     [
                         'key' => 'name',
@@ -272,35 +293,32 @@ class API_Endpoints_Test extends WP_UnitTestCase {
                     ]
                 ],
                 'metadata' => [
+                    'name' => 'form_schema',
                     'type' => 'conversational',
-                    'title' => 'Conversational Test Form'
-                ]
+                    'title' => 'Conversational Test Form',
+                ],
+                'actions' => [],
             ],
-            'settings' => [],
             'status' => 'draft'
-        ]);
+        ]));
         
         $response = rest_do_request($request);
         
-        $this->assertEquals(200, $response->get_status());
+        $this->assertEquals(201, $response->get_status());
         $data = $response->get_data();
         
         $this->assertArrayHasKey('id', $data);
         $form_id = $data['id'];
         
-        // Verify form type is conversational
-        global $wpdb;
-        $form = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}subtleforms_forms WHERE id = %d",
-            $form_id
-        ));
-        
-        $this->assertNotNull($form);
-        $schema = json_decode($form->schema, true);
-        $this->assertEquals('conversational', $schema['metadata']['type']);
+        // Verify form type is conversational via schema endpoint
+        $schemaReq = new WP_REST_Request('GET', '/subtleforms/v1/forms/' . $form_id . '/schema');
+        $schemaRes = rest_do_request($schemaReq);
+        $this->assertEquals(200, $schemaRes->get_status());
+        $schemaData = $schemaRes->get_data();
+        $this->assertEquals('conversational', $schemaData['schema']['metadata']['type']);
         
         // Cleanup
-        $wpdb->delete($wpdb->prefix . 'subtleforms_forms', ['id' => $form_id]);
+        $this->forms_repo->delete($form_id);
     }
 
     /**
@@ -310,9 +328,11 @@ class API_Endpoints_Test extends WP_UnitTestCase {
         wp_set_current_user($this->admin_user_id);
         
         $request = new WP_REST_Request('POST', '/subtleforms/v1/forms');
-        $request->set_body_params([
-            'name' => 'Payment Form',
+        $request->set_header('Content-Type', 'application/json');
+        $request->set_body(wp_json_encode([
+            'title' => 'Payment Form',
             'schema' => [
+                'schema_version' => 1,
                 'fields' => [
                     [
                         'key' => 'name',
@@ -335,6 +355,7 @@ class API_Endpoints_Test extends WP_UnitTestCase {
                     ]
                 ],
                 'metadata' => [
+                    'name' => 'form_schema',
                     'type' => 'payment',
                     'title' => 'Payment Test Form',
                     'payment' => [
@@ -344,35 +365,31 @@ class API_Endpoints_Test extends WP_UnitTestCase {
                         'amountType' => 'field',
                         'amountField' => 'amount'
                     ]
-                ]
+                ],
+                'actions' => [],
             ],
-            'settings' => [],
             'status' => 'draft'
-        ]);
+        ]));
         
         $response = rest_do_request($request);
         
-        $this->assertEquals(200, $response->get_status());
+        $this->assertEquals(201, $response->get_status());
         $data = $response->get_data();
         
         $this->assertArrayHasKey('id', $data);
         $form_id = $data['id'];
         
-        // Verify form type is payment with settings
-        global $wpdb;
-        $form = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}subtleforms_forms WHERE id = %d",
-            $form_id
-        ));
-        
-        $this->assertNotNull($form);
-        $schema = json_decode($form->schema, true);
-        $this->assertEquals('payment', $schema['metadata']['type']);
-        $this->assertTrue($schema['metadata']['payment']['enabled']);
-        $this->assertEquals('test', $schema['metadata']['payment']['mode']);
+        // Verify form type is payment with settings via schema endpoint
+        $schemaReq = new WP_REST_Request('GET', '/subtleforms/v1/forms/' . $form_id . '/schema');
+        $schemaRes = rest_do_request($schemaReq);
+        $this->assertEquals(200, $schemaRes->get_status());
+        $schemaData = $schemaRes->get_data();
+        $this->assertEquals('payment', $schemaData['schema']['metadata']['type']);
+        $this->assertTrue($schemaData['schema']['metadata']['payment']['enabled']);
+        $this->assertEquals('test', $schemaData['schema']['metadata']['payment']['mode']);
         
         // Cleanup
-        $wpdb->delete($wpdb->prefix . 'subtleforms_forms', ['id' => $form_id]);
+        $this->forms_repo->delete($form_id);
     }
 
     /**
@@ -382,81 +399,85 @@ class API_Endpoints_Test extends WP_UnitTestCase {
         wp_set_current_user($this->admin_user_id);
         
         // Get current schema
-        global $wpdb;
-        $form = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}subtleforms_forms WHERE id = %d",
-            $this->test_form_id
-        ));
-        $schema = json_decode($form->schema, true);
+        $schemaReq = new WP_REST_Request('GET', '/subtleforms/v1/forms/' . $this->test_form_id . '/schema');
+        $schemaRes = rest_do_request($schemaReq);
+        $this->assertEquals(200, $schemaRes->get_status());
+        $schemaData = $schemaRes->get_data();
+        $schema = $schemaData['schema'];
         
         // Update to conversational
         $schema['metadata']['type'] = 'conversational';
         
         $request = new WP_REST_Request('POST', '/subtleforms/v1/forms/' . $this->test_form_id . '/schema');
-        $request->set_body_params(['schema' => $schema]);
+                $request->set_header('Content-Type', 'application/json');
+                $request->set_body(wp_json_encode([
+            'schema' => $schema,
+            'activate' => true,
+                ]));
         
         $response = rest_do_request($request);
-        
-        $this->assertEquals(200, $response->get_status());
+        $this->assertEquals(201, $response->get_status());
         
         // Verify update
-        $form = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}subtleforms_forms WHERE id = %d",
-            $this->test_form_id
-        ));
-        $updated_schema = json_decode($form->schema, true);
-        $this->assertEquals('conversational', $updated_schema['metadata']['type']);
+        $schemaReq2 = new WP_REST_Request('GET', '/subtleforms/v1/forms/' . $this->test_form_id . '/schema');
+        $schemaRes2 = rest_do_request($schemaReq2);
+        $this->assertEquals(200, $schemaRes2->get_status());
+        $schemaData2 = $schemaRes2->get_data();
+        $this->assertEquals('conversational', $schemaData2['schema']['metadata']['type']);
     }
 
     /**
      * Test submission to payment form via API (with payment metadata)
      */
     public function test_submit_payment_form_via_api() {
-        // Create payment form
         global $wpdb;
-        $wpdb->insert(
-            $wpdb->prefix . 'subtleforms_forms',
-            [
-                'name' => 'API Payment Form',
-                'schema' => json_encode([
-                    'fields' => [
-                        [
-                            'key' => 'name',
-                            'type' => 'text',
-                            'config' => [
-                                'label' => 'Name',
-                                'required' => true
-                            ]
-                        ],
-                        [
-                            'key' => 'amount',
-                            'type' => 'payment_amount',
-                            'config' => [
-                                'label' => 'Amount',
-                                'required' => true,
-                                'min' => 1,
-                                'currency' => 'USD'
-                            ]
-                        ]
+
+        // Create payment form + active schema
+        $payment_form_id = $this->forms_repo->create([
+            'title' => 'API Payment Form',
+            'config' => [],
+            'status' => 'draft',
+        ]);
+
+        $paymentSchema = [
+            'schema_version' => 1,
+            'metadata' => [
+                'title' => 'API Payment Form',
+                'name' => 'form_schema',
+                'description' => '',
+                'type' => 'payment',
+                'payment' => [
+                    'enabled' => true,
+                    'mode' => 'test',
+                    'currency' => 'USD',
+                    'amountType' => 'field',
+                    'amountField' => 'amount',
+                ],
+            ],
+            'fields' => [
+                [
+                    'key' => 'name',
+                    'type' => 'text',
+                    'config' => [
+                        'label' => 'Name',
+                        'required' => true,
                     ],
-                    'metadata' => [
-                        'type' => 'payment',
-                        'payment' => [
-                            'enabled' => true,
-                            'mode' => 'test',
-                            'currency' => 'USD',
-                            'amountType' => 'field',
-                            'amountField' => 'amount'
-                        ]
-                    ]
-                ]),
-                'settings' => json_encode([]),
-                'status' => 'published',
-                'created_at' => current_time('mysql'),
-                'updated_at' => current_time('mysql')
-            ]
-        );
-        $payment_form_id = $wpdb->insert_id;
+                ],
+                [
+                    'key' => 'amount',
+                    'type' => 'payment_amount',
+                    'config' => [
+                        'label' => 'Amount',
+                        'required' => true,
+                        'min' => 1,
+                        'currency' => 'USD',
+                    ],
+                ],
+            ],
+            'actions' => [],
+        ];
+
+        $this->forms_repo->saveSchemaVersion($payment_form_id, $paymentSchema, true);
         
         // Submit to payment form
         $request = new WP_REST_Request('POST', '/subtleforms/v1/submit');
@@ -476,10 +497,12 @@ class API_Endpoints_Test extends WP_UnitTestCase {
         $this->assertTrue($data['success']);
         
         // Verify submission has payment metadata
-        $submission = $wpdb->get_row($wpdb->prepare(
-            "SELECT * FROM {$wpdb->prefix}subtleforms_submissions WHERE form_id = %d ORDER BY id DESC LIMIT 1",
-            $payment_form_id
-        ));
+        $submission = $wpdb->get_row(
+            $wpdb->prepare(
+                "SELECT * FROM {$wpdb->prefix}subtleforms_submissions WHERE form_id = %d ORDER BY id DESC LIMIT 1",
+                $payment_form_id
+            )
+        );
         
         $this->assertNotNull($submission);
         $meta = json_decode($submission->meta, true);
@@ -487,12 +510,12 @@ class API_Endpoints_Test extends WP_UnitTestCase {
         // Check for payment metadata
         $this->assertArrayHasKey('payment', $meta);
         $this->assertEquals('pending', $meta['payment']['status']);
-        $this->assertEquals('50.00', $meta['payment']['amount']);
+        $this->assertEquals(50.0, (float) $meta['payment']['amount']);
         $this->assertEquals('USD', $meta['payment']['currency']);
         $this->assertEquals('test', $meta['payment']['mode']);
         
         // Cleanup
         $wpdb->delete($wpdb->prefix . 'subtleforms_submissions', ['id' => $submission->id]);
-        $wpdb->delete($wpdb->prefix . 'subtleforms_forms', ['id' => $payment_form_id]);
+        $this->forms_repo->delete($payment_form_id);
     }
 }

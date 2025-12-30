@@ -34,6 +34,7 @@ class Conversational_Payment_Forms_Test extends WP_UnitTestCase {
 	 */
 	public function test_create_conversational_form() {
 		$schema = [
+			'schema_version' => 1,
 			'fields' => [
 				[
 					'key' => 'name',
@@ -58,21 +59,21 @@ class Conversational_Payment_Forms_Test extends WP_UnitTestCase {
 				'title' => 'Conversational Test Form',
 				'description' => 'A conversational form for testing',
 			],
+			'actions' => [],
 		];
 
-		$data = [
+		$form_id = $this->repository->create([
 			'title' => 'Conversational Test Form',
 			'status' => 'draft',
-			'schema' => $schema,
-		];
-
-		$form_id = $this->repository->create( $data );
+			'config' => [],
+		]);
+		$this->repository->saveSchemaVersion( $form_id, $schema, true );
 
 		$this->assertIsInt( $form_id );
 		$this->assertGreaterThan( 0, $form_id );
 
-		$form = $this->repository->find( $form_id );
-		$saved_schema = json_decode( $form['schema'], true );
+		$loaded = $this->repository->loadSchemaVersion( $form_id );
+		$saved_schema = $loaded['schema'];
 
 		$this->assertEquals( 'conversational', $saved_schema['metadata']['type'] );
 		$this->assertEquals( 'Conversational Test Form', $saved_schema['metadata']['title'] );
@@ -84,6 +85,7 @@ class Conversational_Payment_Forms_Test extends WP_UnitTestCase {
 	 */
 	public function test_create_payment_form() {
 		$schema = [
+			'schema_version' => 1,
 			'fields' => [
 				[
 					'key' => 'name',
@@ -119,21 +121,21 @@ class Conversational_Payment_Forms_Test extends WP_UnitTestCase {
 					'amountField' => 'amount',
 				],
 			],
+			'actions' => [],
 		];
 
-		$data = [
+		$form_id = $this->repository->create([
 			'title' => 'Payment Test Form',
 			'status' => 'draft',
-			'schema' => $schema,
-		];
-
-		$form_id = $this->repository->create( $data );
+			'config' => [],
+		]);
+		$this->repository->saveSchemaVersion( $form_id, $schema, true );
 
 		$this->assertIsInt( $form_id );
 		$this->assertGreaterThan( 0, $form_id );
 
-		$form = $this->repository->find( $form_id );
-		$saved_schema = json_decode( $form['schema'], true );
+		$loaded = $this->repository->loadSchemaVersion( $form_id );
+		$saved_schema = $loaded['schema'];
 
 		$this->assertEquals( 'payment', $saved_schema['metadata']['type'] );
 		$this->assertTrue( $saved_schema['metadata']['payment']['enabled'] );
@@ -147,6 +149,7 @@ class Conversational_Payment_Forms_Test extends WP_UnitTestCase {
 	 */
 	public function test_create_conversational_payment_form() {
 		$schema = [
+			'schema_version' => 1,
 			'fields' => [
 				[
 					'key' => 'name',
@@ -180,21 +183,21 @@ class Conversational_Payment_Forms_Test extends WP_UnitTestCase {
 					'amountField' => 'amount',
 				],
 			],
+			'actions' => [],
 		];
 
-		$data = [
+		$form_id = $this->repository->create([
 			'title' => 'Conversational Payment Form',
 			'status' => 'draft',
-			'schema' => $schema,
-		];
-
-		$form_id = $this->repository->create( $data );
+			'config' => [],
+		]);
+		$this->repository->saveSchemaVersion( $form_id, $schema, true );
 
 		$this->assertIsInt( $form_id );
 		$this->assertGreaterThan( 0, $form_id );
 
-		$form = $this->repository->find( $form_id );
-		$saved_schema = json_decode( $form['schema'], true );
+		$loaded = $this->repository->loadSchemaVersion( $form_id );
+		$saved_schema = $loaded['schema'];
 
 		// Verify it's conversational type with payment enabled
 		$this->assertEquals( 'conversational', $saved_schema['metadata']['type'] );
@@ -208,6 +211,7 @@ class Conversational_Payment_Forms_Test extends WP_UnitTestCase {
 	public function test_update_form_type_to_conversational() {
 		// Create regular form
 		$schema = [
+			'schema_version' => 1,
 			'fields' => [
 				[
 					'key' => 'name',
@@ -220,20 +224,22 @@ class Conversational_Payment_Forms_Test extends WP_UnitTestCase {
 				'type' => 'regular',
 				'title' => 'Regular Form',
 			],
+			'actions' => [],
 		];
 
 		$form_id = $this->repository->create([
 			'title' => 'Regular Form',
 			'status' => 'draft',
-			'schema' => $schema,
+			'config' => [],
 		]);
+		$this->repository->saveSchemaVersion( $form_id, $schema, true );
 
 		// Update to conversational
 		$schema['metadata']['type'] = 'conversational';
 		$this->repository->saveSchemaVersion( $form_id, $schema, true );
 
-		$form = $this->repository->find( $form_id );
-		$saved_schema = json_decode( $form['schema'], true );
+		$loaded = $this->repository->loadSchemaVersion( $form_id );
+		$saved_schema = $loaded['schema'];
 
 		$this->assertEquals( 'conversational', $saved_schema['metadata']['type'] );
 	}
@@ -243,6 +249,7 @@ class Conversational_Payment_Forms_Test extends WP_UnitTestCase {
 	 */
 	public function test_payment_field_types() {
 		$schema = [
+			'schema_version' => 1,
 			'fields' => [
 				[
 					'key' => 'amount',
@@ -273,6 +280,7 @@ class Conversational_Payment_Forms_Test extends WP_UnitTestCase {
 				],
 			],
 			'metadata' => [
+				'name' => 'payment_fields_test',
 				'type' => 'payment',
 				'payment' => [
 					'enabled' => true,
@@ -280,16 +288,18 @@ class Conversational_Payment_Forms_Test extends WP_UnitTestCase {
 					'currency' => 'USD',
 				],
 			],
+			'actions' => [],
 		];
 
 		$form_id = $this->repository->create([
 			'title' => 'Payment Fields Test',
 			'status' => 'draft',
-			'schema' => $schema,
+			'config' => [],
 		]);
+		$this->repository->saveSchemaVersion( $form_id, $schema, true );
 
-		$form = $this->repository->find( $form_id );
-		$saved_schema = json_decode( $form['schema'], true );
+		$loaded = $this->repository->loadSchemaVersion( $form_id );
+		$saved_schema = $loaded['schema'];
 
 		// Verify all payment field types are preserved
 		$field_types = array_column( $saved_schema['fields'], 'type' );
@@ -303,23 +313,27 @@ class Conversational_Payment_Forms_Test extends WP_UnitTestCase {
 	 */
 	public function test_regular_form_no_payment() {
 		$schema = [
+			'schema_version' => 1,
 			'fields' => [
 				[ 'key' => 'name', 'type' => 'text', 'config' => [ 'label' => 'Name' ] ],
 			],
 			'metadata' => [
+				'name' => 'regular_no_payment',
 				'type' => 'regular',
 				'title' => 'Regular Form',
 			],
+			'actions' => [],
 		];
 
 		$form_id = $this->repository->create([
 			'title' => 'Regular Form',
 			'status' => 'draft',
-			'schema' => $schema,
+			'config' => [],
 		]);
+		$this->repository->saveSchemaVersion( $form_id, $schema, true );
 
-		$form = $this->repository->find( $form_id );
-		$saved_schema = json_decode( $form['schema'], true );
+		$loaded = $this->repository->loadSchemaVersion( $form_id );
+		$saved_schema = $loaded['schema'];
 
 		$this->assertEquals( 'regular', $saved_schema['metadata']['type'] );
 		$this->assertArrayNotHasKey( 'payment', $saved_schema['metadata'] );
@@ -330,6 +344,9 @@ class Conversational_Payment_Forms_Test extends WP_UnitTestCase {
 	 */
 	public function tearDown(): void {
 		global $wpdb;
+		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}subtleforms_form_schemas" );
+		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}subtleforms_submissions" );
+		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}subtleforms_logs" );
 		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}subtleforms_forms" );
 		parent::tearDown();
 	}
