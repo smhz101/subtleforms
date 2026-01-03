@@ -11,6 +11,7 @@ import FieldRenderer from './FieldRenderer';
 import ContainerRenderer from './ContainerRenderer';
 import ColumnDropZone from './ColumnDropZone';
 import FieldChrome from './FieldChrome';
+import StepCanvas from './StepCanvas';
 import {
   nodeToField,
   isColumnContainer,
@@ -79,20 +80,22 @@ export default function FormBuilder({
     })
   );
 
+  // Detect if this is a multi-step form
   const rootChildren = useMemo(() => {
-    const allChildren = nodeChildren(tree, rootId);
+    return nodeChildren(tree, rootId);
+  }, [tree, rootId]);
 
-    // If selectedStepId is set, only show that step's children
-    if (selectedStepId) {
-      const stepNode = tree.nodes[selectedStepId];
-      if (stepNode && stepNode.type === 'step') {
-        return [selectedStepId];
-      }
-    }
+  const stepNodes = useMemo(() => {
+    return rootChildren.filter((id) => tree.nodes[id]?.type === 'step');
+  }, [rootChildren, tree]);
 
-    // Otherwise show all children (backward compatible with non-step forms)
-    return allChildren;
-  }, [tree, rootId, selectedStepId]);
+  const isMultiStepForm = stepNodes.length > 0;
+
+  // For multi-step forms, get the active step
+  const activeStep = useMemo(() => {
+    if (!isMultiStepForm || !selectedStepId) return null;
+    return tree.nodes[selectedStepId];
+  }, [isMultiStepForm, selectedStepId, tree]);
 
   const handleDragEnd = useCallback(
     ({ active, over }) => {
@@ -276,16 +279,35 @@ export default function FormBuilder({
       <div className='subtleforms-builder-canvas__scroll'>
         <div className='subtleforms-builder-canvas__surface'>
           <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-            <ColumnDropZone
-              containerId={rootId}
-              columnIndex={null}
-              items={rootChildren}
-              onRequestInsert={onRequestInsert}
-              spacing={24}
-              renderItem={(nodeId, index) =>
-                renderNode(nodeId, rootId, null, index)
-              }
-            />
+            {isMultiStepForm && activeStep ? (
+              /* Multi-step form: Show step-scoped canvas */
+              <StepCanvas
+                tree={tree}
+                stepId={selectedStepId}
+                stepNumber={stepNodes.indexOf(selectedStepId) + 1}
+                totalSteps={stepNodes.length}
+                selectedId={selectedId}
+                onSelect={onSelect}
+                onDelete={onDelete}
+                onDuplicate={onDuplicate}
+                onMove={onMove}
+                onRequestInsert={onRequestInsert}
+                validationErrorsByFieldKey={validationErrorsByFieldKey}
+                renderNode={renderNode}
+              />
+            ) : (
+              /* Regular form: Show all fields */
+              <ColumnDropZone
+                containerId={rootId}
+                columnIndex={null}
+                items={rootChildren}
+                onRequestInsert={onRequestInsert}
+                spacing={24}
+                renderItem={(nodeId, index) =>
+                  renderNode(nodeId, rootId, null, index)
+                }
+              />
+            )}
           </DndContext>
         </div>
       </div>

@@ -171,18 +171,53 @@ export default function FormEditor({
         return;
       }
 
+      // Guardrail: Prevent nesting steps inside steps
+      if (type === 'step' && context.parentId) {
+        const parentNode = tree.nodes[context.parentId];
+        if (parentNode?.type === 'step') {
+          // eslint-disable-next-line no-alert
+          alert(
+            __(
+              'Cannot add a step inside another step. Steps can only be added at the root level.',
+              'subtleforms'
+            )
+          );
+          return;
+        }
+      }
+
       const node = createNodeFromDefinition(definition);
+
+      // DEBUG: Log field creation
+      console.log('[SubtleForms] Creating field:', {
+        fieldType: type,
+        fieldId: node.id,
+        fieldLabel: node.config?.label,
+        targetParentId: context.parentId,
+        selectedStepId: selectedStepId,
+        columnIndex: context.columnIndex,
+        position: context.position,
+      });
+
       updateTree((currentTree) => addNodeToTree(currentTree, node, context));
       setSelectedId(node.id);
       setInsertPicker(null);
     },
-    [definitionMap, updateTree]
+    [definitionMap, updateTree, tree, selectedStepId]
   );
 
   const handleDockAdd = useCallback(
     (type) => {
       // If a step is selected, add to that step; otherwise add to root
       const targetParentId = selectedStepId || rootId;
+
+      // DEBUG: Log dock add
+      console.log('[SubtleForms] Dock Add:', {
+        fieldType: type,
+        selectedStepId: selectedStepId,
+        targetParentId: targetParentId,
+        isStep: targetParentId !== rootId,
+      });
 
       handleInsert(type, {
         parentId: targetParentId,
@@ -195,10 +230,31 @@ export default function FormEditor({
 
   const handleDelete = useCallback(
     (nodeId) => {
+      const node = tree.nodes[nodeId];
+
+      // Guardrail: Prevent deleting the last step in a multi-step form
+      if (node?.type === 'step') {
+        const rootNode = tree.nodes[rootId];
+        const stepCount = (rootNode?.children || []).filter(
+          (id) => tree.nodes[id]?.type === 'step'
+        ).length;
+
+        if (stepCount <= 1) {
+          // eslint-disable-next-line no-alert
+          alert(
+            __(
+              'Cannot delete the last step. Multi-step forms require at least one step.',
+              'subtleforms'
+            )
+          );
+          return;
+        }
+      }
+
       updateTree((currentTree) => deleteNode(currentTree, nodeId));
       setSelectedId((prev) => (prev === nodeId ? null : prev));
     },
-    [updateTree]
+    [updateTree, tree, rootId]
   );
 
   const handleUpdate = useCallback(
@@ -218,7 +274,11 @@ export default function FormEditor({
           return currentTree;
         }
 
+        // Guardrail: Prevent moving fields across steps
         if (node.parentId !== destination.parentId) {
+          console.warn(
+            '[SubtleForms] Moving fields between different parents (steps) is not supported'
+          );
           return currentTree;
         }
 
@@ -355,9 +415,19 @@ export default function FormEditor({
     [steps, updateTree, selectedStepId]
   );
 
-  const handleSelectStep = useCallback((stepId) => {
-    setSelectedStepId(stepId);
-  }, []);
+  const handleSelectStep = useCallback(
+    (stepId) => {
+      const stepNode = tree.nodes[stepId];
+      console.log('[SubtleForms] Step Selected:', {
+        stepId: stepId,
+        stepTitle: stepNode?.config?.title,
+        childrenCount: stepNode?.children?.length || 0,
+        childrenIds: stepNode?.children || [],
+      });
+      setSelectedStepId(stepId);
+    },
+    [tree]
+  );
 
   // Set initial step if none selected
   useEffect(() => {

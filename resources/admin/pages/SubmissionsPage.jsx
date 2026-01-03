@@ -1,9 +1,10 @@
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef } from '@wordpress/element';
 import { SearchControl, SelectControl, Button } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import AdminShell from '../components/AdminShell';
 import TabBar from '../components/TabBar';
 import SubmissionsTable from '../components/SubmissionsTable';
+import useRealTimeUpdates from '../hooks/useRealTimeUpdates';
 
 const restBase =
   window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
@@ -31,6 +32,31 @@ export default function SubmissionsPage({ formId }) {
   const [selectedFormId, setSelectedFormId] = useState(formId || 'all');
   const [dateRange, setDateRange] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
+  const submissionsTableRef = useRef(null);
+
+  // Real-time updates for live badge and table refresh
+  const { unreadCount, lastUpdate, isPolling } = useRealTimeUpdates({
+    pollInterval: 30000, // Poll every 30 seconds
+    enabled: true,
+    onUnreadCountChange: (newCount, previousCount) => {
+      // Update browser title badge if on submissions page
+      if (document.title.includes('Submissions')) {
+        document.title = document.title.replace(/\(\d+\)/, '');
+        if (newCount > 0) {
+          document.title = `(${newCount}) ${document.title}`;
+        }
+      }
+    },
+    onSubmissionsUpdate: () => {
+      // Refresh the submissions table when changes detected
+      if (
+        submissionsTableRef.current &&
+        submissionsTableRef.current.refreshData
+      ) {
+        submissionsTableRef.current.refreshData();
+      }
+    },
+  });
 
   useEffect(() => {
     if (!formId) {
@@ -146,6 +172,7 @@ export default function SubmissionsPage({ formId }) {
       )}
 
       <SubmissionsTable
+        ref={submissionsTableRef}
         formId={selectedFormId !== 'all' ? parseInt(selectedFormId) : formId}
         showFormColumn={!formId && selectedFormId === 'all'}
         searchTerm={search}

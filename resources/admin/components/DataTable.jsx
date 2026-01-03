@@ -36,6 +36,7 @@ import { __, sprintf } from '@wordpress/i18n';
  * @param {Array} props.selectedItems - Array of selected item IDs
  * @param {Function} props.onSelectionChange - Callback when selection changes (newSelectedItems)
  * @param {Array} props.bulkActions - Array of bulk actions [{ label, onClick, isDestructive }]
+ * @param {Function|null} props.rowClassName - Optional function to get additional classes for row (row)
  */
 const DataTable = memo(function DataTable({
   columns = [],
@@ -55,6 +56,7 @@ const DataTable = memo(function DataTable({
   selectedItems = [],
   onSelectionChange = () => {},
   bulkActions = [],
+  rowClassName = null,
 }) {
   const totalPages = Math.ceil(totalItems / perPage);
 
@@ -196,6 +198,7 @@ const DataTable = memo(function DataTable({
                       ? 'sf-cursor-pointer hover:sf-bg-blue-50 hover:sf-shadow-sm'
                       : ''
                   }
+                  ${rowClassName ? rowClassName(row) : ''}
                 `}
                 onClick={() => onRowClick && onRowClick(row)}>
                 {selectable && (

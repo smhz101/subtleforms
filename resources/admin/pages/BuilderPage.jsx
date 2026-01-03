@@ -467,6 +467,32 @@ function FormBuilderInner({
     });
 
     setIsEditingTitle(false);
+
+    // Update both the schema (via autosave) and the form title (via direct API call)
+    const updateTitleAsync = async () => {
+      try {
+        // Update form title at the top level
+        if (currentFormId) {
+          await apiPut(`/forms/${currentFormId}`, {
+            title: trimmed,
+          });
+        }
+
+        // Force autosave to persist the schema title change
+        if (typeof forceAutosave === 'function') {
+          forceAutosave();
+        }
+      } catch (error) {
+        console.error('Failed to update form title:', error);
+        // Still attempt autosave even if form title update fails
+        if (typeof forceAutosave === 'function') {
+          forceAutosave();
+        }
+      }
+    };
+
+    // Small delay to ensure the schema update is processed first
+    setTimeout(updateTitleAsync, 100);
   }
 
   function handleCopyShortcode(shortcode) {

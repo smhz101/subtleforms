@@ -3,102 +3,108 @@ import { __, sprintf } from '@wordpress/i18n';
 
 export default function StepNavigator({
   steps,
+  selectedStepId,
   onSelectStep,
   onAddStep,
   onDeleteStep,
 }) {
   if (!steps || steps.length === 0) {
     return (
-      <div
-        style={{
-          padding: '12px 16px',
-          background: '#f9f9f9',
-          borderBottom: '1px solid #dcdcde',
-          display: 'flex',
-          gap: '8px',
-          alignItems: 'center',
-        }}>
-        <Button isSecondary onClick={onAddStep} style={{ padding: '6px 12px' }}>
-          {__('Add First Step', 'subtleforms')}
-        </Button>
+      <div className="sf-bg-gray-50 sf-px-6 sf-py-4 sf-border-gray-200 sf-border-b sf-w-full">
+        <div className="sf-flex sf-justify-between sf-items-center">
+          <div className="sf-text-gray-600 sf-text-sm">
+            {__('No steps created yet. Add your first step to get started.', 'subtleforms')}
+          </div>
+          <Button 
+            isPrimary 
+            onClick={onAddStep}
+            className="sf-text-sm"
+          >
+            <span className="sf-flex sf-items-center sf-gap-2">
+              <svg className="sf-w-4 sf-h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              {__('Add First Step', 'subtleforms')}
+            </span>
+          </Button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div
-      style={{
-        padding: '12px 16px',
-        background: '#f9f9f9',
-        borderBottom: '1px solid #dcdcde',
-        display: 'flex',
-        gap: '8px',
-        alignItems: 'center',
-        overflowX: 'auto',
-        flexWrap: 'nowrap',
-      }}>
-      {steps.map((step, index) => (
-        <div
-          key={step.id}
-          style={{
-            display: 'flex',
-            gap: '4px',
-            alignItems: 'center',
-            flexShrink: 0,
-          }}>
-          <button
-            type='button'
-            onClick={() => onSelectStep(step.id)}
-            style={{
-              padding: '6px 12px',
-              background: step.selected ? '#2271b1' : '#fff',
-              color: step.selected ? '#fff' : '#1e1e1e',
-              border: '1px solid #dcdcde',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '13px',
-              fontWeight: 500,
-              transition: 'all 0.15s',
-            }}
-            onMouseEnter={(e) => {
-              if (!step.selected) {
-                e.currentTarget.style.background = '#f0f0f1';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!step.selected) {
-                e.currentTarget.style.background = '#fff';
-              }
-            }}>
-            {sprintf(__('Step %d', 'subtleforms'), index + 1)}:{' '}
-            {step.title || __('Untitled', 'subtleforms')}
-          </button>
-          {steps.length > 1 && (
-            <button
-              type='button'
-              onClick={() => onDeleteStep(step.id)}
-              style={{
-                padding: '4px 6px',
-                background: 'transparent',
-                color: '#d63638',
-                border: 'none',
-                borderRadius: '4px',
-                cursor: 'pointer',
-                fontSize: '14px',
-                lineHeight: 1,
-              }}
-              title={__('Delete step', 'subtleforms')}>
-              ×
-            </button>
-          )}
+    <div className="sf-bg-white sf-px-6 sf-py-3 sf-border-gray-200 sf-border-b sf-w-full">
+      <div className="sf-flex sf-items-center sf-gap-3 sf-overflow-x-auto">
+        <div className="sf-flex sf-flex-shrink-0 sf-items-center sf-gap-2">
+          <span className="sf-font-medium sf-text-gray-700 sf-text-sm">
+            {__('Steps:', 'subtleforms')}
+          </span>
         </div>
-      ))}
-      <Button
-        isSecondary
-        onClick={onAddStep}
-        style={{ padding: '6px 12px', marginLeft: '8px' }}>
-        + {__('Add Step', 'subtleforms')}
-      </Button>
+        
+        <div className="sf-flex sf-flex-nowrap sf-items-center sf-gap-2 sf-min-w-0">
+          {steps.map((step, index) => {
+            const isSelected = step.id === selectedStepId;
+            const stepTitle = step.config?.title || step.title || __('Untitled', 'subtleforms');
+            
+            return (
+              <div
+                key={step.id}
+                className="sf-flex sf-flex-shrink-0 sf-items-center sf-gap-1"
+              >
+                <button
+                  type="button"
+                  onClick={() => onSelectStep(step.id)}
+                  className={`sf-group sf-relative sf-flex sf-items-center sf-gap-2 sf-px-3 sf-py-2 sf-text-sm sf-font-medium sf-rounded-md sf-border sf-transition-all sf-duration-150 sf-whitespace-nowrap ${
+                    isSelected
+                      ? 'sf-bg-blue-600 sf-text-white sf-border-blue-600 sf-shadow-sm'
+                      : 'sf-bg-white sf-text-gray-700 sf-border-gray-300 hover:sf-bg-gray-50 hover:sf-border-gray-400'
+                  }`}
+                  title={`${sprintf(__('Step %d', 'subtleforms'), index + 1)}: ${stepTitle}`}
+                >
+                  <div className={`sf-flex sf-items-center sf-justify-center sf-w-5 sf-h-5 sf-rounded-full sf-text-xs sf-font-semibold ${
+                    isSelected 
+                      ? 'sf-bg-blue-500 sf-text-white' 
+                      : 'sf-bg-gray-100 sf-text-gray-600 group-hover:sf-bg-gray-200'
+                  }`}>
+                    {index + 1}
+                  </div>
+                  <span className="sf-max-w-[120px] sf-truncate">
+                    {stepTitle}
+                  </span>
+                </button>
+                
+                {steps.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => onDeleteStep(step.id)}
+                    className="sf-flex sf-justify-center sf-items-center hover:sf-bg-red-50 sf-rounded sf-w-6 sf-h-6 sf-text-red-600 hover:sf-text-red-700 sf-transition-colors sf-duration-150"
+                    title={sprintf(__('Delete step %d', 'subtleforms'), index + 1)}
+                  >
+                    <svg className="sf-w-4 sf-h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+        
+        <div className="sf-flex-shrink-0">
+          <Button
+            isSecondary
+            onClick={onAddStep}
+            className="sf-text-blue-600 hover:sf-text-blue-700 sf-text-sm"
+          >
+            <span className="sf-flex sf-items-center sf-gap-1">
+              <svg className="sf-w-4 sf-h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+              </svg>
+              {__('Add Step', 'subtleforms')}
+            </span>
+          </Button>
+        </div>
+      </div>
     </div>
   );
 }
