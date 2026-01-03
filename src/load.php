@@ -65,3 +65,4 @@ require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Repositories/LogsRepository.php';
 
 // Blocks
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Blocks/SubtleFormsBlock.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Blocks/SubtleFormsFormBlock.php';

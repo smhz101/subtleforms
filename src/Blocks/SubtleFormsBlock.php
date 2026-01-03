@@ -22,6 +22,7 @@ final class SubtleFormsBlock
     {
         add_action('init', [self::class, 'register_block']);
         add_action('enqueue_block_assets', [self::class, 'enqueue_frontend_assets']);
+        add_action('enqueue_block_editor_assets', [self::class, 'enqueue_editor_assets']);
     }
 
     /**
@@ -115,12 +116,15 @@ final class SubtleFormsBlock
             return;
         }
 
+        // Load asset file with proper dependencies
+        $asset_file = include SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/frontend.asset.php';
+
         // Enqueue the same frontend bundle used by shortcodes
         wp_enqueue_script(
             'subtleforms-frontend',
             SUBTLEFORMS_PLUGIN_URL . 'build/frontend/frontend.js',
-            ['wp-element'],
-            SUBTLEFORMS_VERSION,
+            $asset_file['dependencies'],
+            $asset_file['version'],
             true
         );
 
@@ -129,6 +133,49 @@ final class SubtleFormsBlock
             SUBTLEFORMS_PLUGIN_URL . 'build/frontend/index.jsx.css',
             [],
             SUBTLEFORMS_VERSION
+        );
+
+        // Pass REST URL and nonce to frontend
+        wp_localize_script('subtleforms-frontend', 'subtleformsFrontend', array(
+            'restUrl' => rest_url('subtleforms/v1/'),
+            'nonce' => wp_create_nonce('wp_rest'),
+        ));
+    }
+
+    /**
+     * Enqueue assets needed in block editor.
+     * 
+     * The frontend renderer is needed for live preview in the editor.
+     */
+    public static function enqueue_editor_assets(): void
+    {
+        // Load asset file with proper dependencies
+        $asset_file = include SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/frontend.asset.php';
+
+        // Enqueue frontend renderer for block preview
+        wp_enqueue_script(
+            'subtleforms-frontend-preview',
+            SUBTLEFORMS_PLUGIN_URL . 'build/frontend/frontend.js',
+            $asset_file['dependencies'],
+            $asset_file['version'],
+            true
+        );
+
+        wp_enqueue_style(
+            'subtleforms-frontend-preview',
+            SUBTLEFORMS_PLUGIN_URL . 'build/frontend/index.jsx.css',
+            [],
+            SUBTLEFORMS_VERSION
+        );
+
+        // Pass REST URL and nonce for block editor
+        wp_localize_script(
+            'subtleforms-frontend-preview',
+            'subtleformsAdmin',
+            array(
+                'restUrl' => rest_url('subtleforms/v1/'),
+                'nonce' => wp_create_nonce('wp_rest')
+            )
         );
     }
 

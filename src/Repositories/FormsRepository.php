@@ -231,14 +231,14 @@ final class FormsRepository
         
         $next = $max ? $max + 1 : 1;
 
-        // Log activation to help debug autosave issues
-        if ($activate) {
-            error_log(sprintf(
-                'SubtleForms: Activating schema version %d for form %d',
-                $next,
-                $formId
-            ));
-        }
+        // Development: Uncomment to debug schema versioning
+        // if ($activate) {
+        //     error_log(sprintf(
+        //         'SubtleForms: Activating schema version %d for form %d',
+        //         $next,
+        //         $formId
+        //     ));
+        // }
 
         $inserted = $wpdb->insert(
             $this->schemas_table,
@@ -579,11 +579,12 @@ final class FormsRepository
         // Create versioned schema and activate it
         $version = $this->saveSchemaVersion($formId, $draftSchema, true);
 
-        error_log(sprintf(
-            'SubtleForms: Promoted draft schema to version %d for form %d',
-            $version,
-            $formId
-        ));
+        // Development: Uncomment to debug schema promotion
+        // error_log(sprintf(
+        //     'SubtleForms: Promoted draft schema to version %d for form %d',
+        //     $version,
+        //     $formId
+        // ));
 
         return $version;
     }

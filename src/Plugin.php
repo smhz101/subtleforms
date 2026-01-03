@@ -70,6 +70,17 @@ final class Plugin
 
         // Register Gutenberg block
         \SubtleForms\Blocks\SubtleFormsBlock::init();
+        
+        // Register form embed block (only once on init)
+        add_action('init', function() {
+            static $registered = false;
+            if ($registered) {
+                return;
+            }
+            $formBlock = new \SubtleForms\Blocks\SubtleFormsFormBlock();
+            $formBlock->register_block();
+            $registered = true;
+        });
 
         // Boot extensions
         add_action('init', function () {

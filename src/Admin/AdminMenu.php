@@ -66,6 +66,27 @@ class AdminMenu
     }
 
     /**
+     * Get submission menu title with unread count badge.
+     */
+    private function getSubmissionMenuTitle(): string
+    {
+        $baseTitle = __('Submissions', 'subtleforms');
+        
+        try {
+            $unreadCount = $this->submissionsRepo->count(['status' => 'unread']);
+            
+            if ($unreadCount > 0) {
+                $badge = sprintf('<span class="awaiting-mod count-%d"><span class="pending-count">%d</span></span>', $unreadCount, $unreadCount);
+                return $baseTitle . ' ' . $badge;
+            }
+        } catch (\Exception $e) {
+            // Silently fail if there's an issue getting the count
+        }
+        
+        return $baseTitle;
+    }
+
+    /**
      * Register admin menu pages.
      */
     public function register_menu()
@@ -111,11 +132,12 @@ class AdminMenu
             [$this, 'render_new_form']
         );
 
-        // Submissions
+        // Submissions with count badge
+        $submissionMenuTitle = $this->getSubmissionMenuTitle();
         add_submenu_page(
             'subtleforms',
             __('Submissions', 'subtleforms'),
-            __('Submissions', 'subtleforms'),
+            $submissionMenuTitle,
             $this->caps->manage_cap(),
             'subtleforms-submissions',
             [$this, 'render_submissions']

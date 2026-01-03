@@ -176,6 +176,13 @@ final class RestController
             'permission_callback' => [$this, 'check_read_permission'],
         ]);
 
+        // Unread submissions count (for real-time badge updates)
+        register_rest_route(self::NAMESPACE, '/submissions/unread-count', [
+            'methods' => 'GET',
+            'callback' => [$this, 'get_unread_count'],
+            'permission_callback' => [$this, 'check_read_permission'],
+        ]);
+
         // Public submission endpoint
         register_rest_route(self::NAMESPACE, '/submit', [
             'methods' => 'POST',
@@ -475,6 +482,14 @@ final class RestController
             if ($activate) {
                 // Manual save or publish: create versioned schema
                 $version = $this->formsRepo->saveSchemaVersion($formId, $schema, true);
+                
+                // Verify the schema was saved correctly
+                $savedSchema = $this->formsRepo->loadSchemaVersion($formId, $version);
+                if (!$savedSchema) {
+                    error_log(sprintf('SubtleForms: Failed to load just-saved schema version %d for form %d', $version, $formId));
+                    return new WP_Error('save_verification_failed', 'Schema was saved but could not be loaded back', ['status' => 500]);
+                }
+                
                 return new WP_REST_Response(['version' => $version, 'active' => true], 201);
             } else {
                 // Autosave: save to draft (no versioning)
@@ -487,8 +502,10 @@ final class RestController
                 return new WP_REST_Response(['draft' => true, 'active' => false], 200);
             }
         } catch (\InvalidArgumentException $e) {
+            error_log(sprintf('SubtleForms: Schema validation error for form %d: %s', $formId, $e->getMessage()));
             return new WP_Error('invalid_schema', $e->getMessage(), ['status' => 400]);
         } catch (\RuntimeException $e) {
+            error_log(sprintf('SubtleForms: Save failed for form %d: %s', $formId, $e->getMessage()));
             return new WP_Error('save_failed', $e->getMessage(), ['status' => 500]);
         }
     }
@@ -551,14 +568,25 @@ final class RestController
                 
                 if ($draftSchema) {
                     // Promote draft to active version before publishing
-                    error_log(sprintf('SubtleForms: Promoting draft schema to active for form %d before publishing', $id));
-                    $this->formsRepo->promoteDraftToActive($id);
+                    // Development: Uncomment to debug publish flow
+                    // error_log(sprintf('SubtleForms: Promoting draft schema to active for form %d before publishing', $id));
+                    try {
+                        $this->formsRepo->promoteDraftToActive($id);
+                    } catch (\Exception $e) {
+                        error_log(sprintf('SubtleForms: Failed to promote draft: %s', $e->getMessage()));
+                        return new WP_Error(
+                            'publish_blocked',
+                            'Cannot publish form: Failed to activate schema. ' . $e->getMessage(),
+                            ['status' => 500]
+                        );
+                    }
                 }
                 
                 // Now validate that an active schema exists
                 $activeSchema = $this->formsRepo->loadSchemaVersion($id, null);
                 
                 if (!$activeSchema) {
+                    error_log(sprintf('SubtleForms: No active schema found for form %d after promotion attempt', $id));
                     return new WP_Error(
                         'publish_blocked',
                         'Cannot publish form: No schema exists. Please save your form first.',
@@ -575,12 +603,17 @@ final class RestController
                     );
                 }
 
-                // Validate that schema has required fields
-                $schemaData = json_decode($activeSchema['schema_data'], true);
+                // loadSchemaVersion returns decoded schema in 'schema' key, not 'schema_data'
+                $schemaData = $activeSchema['schema'] ?? null;
                 if (!$schemaData || !is_array($schemaData)) {
+                    error_log(sprintf(
+                        'SubtleForms: Schema missing or invalid for form %d. Available keys: %s',
+                        $id,
+                        implode(', ', array_keys($activeSchema))
+                    ));
                     return new WP_Error(
                         'publish_blocked',
-                        'Cannot publish form: Schema data is corrupt or invalid.',
+                        'Cannot publish form: Schema data is corrupt or invalid. Check error logs for details.',
                         ['status' => 400]
                     );
                 }
@@ -799,6 +832,23 @@ final class RestController
         ]);
 
         return new WP_REST_Response($logs, 200);
+    }
+
+    /**
+     * Get unread submissions count.
+     */
+    public function get_unread_count(WP_REST_Request $request): WP_REST_Response|WP_Error
+    {
+        try {
+            $unreadCount = $this->submissionsRepo->count(['status' => 'unread']);
+            
+            return new WP_REST_Response([
+                'count' => $unreadCount,
+                'timestamp' => current_time('mysql'),
+            ], 200);
+        } catch (\Exception $e) {
+            return new WP_Error('count_error', 'Error fetching unread count', ['status' => 500]);
+        }
     }
 
     /**
