@@ -2,6 +2,9 @@
   "name": "subtleforms-admin",
   "version": "1.5.0",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "start": "npm run build:tailwind:watch & wp-scripts start ./resources/admin/index.jsx --output-path=./build/admin --output-filename=admin.js",
     "build": "npm run build:tailwind && wp-scripts build ./resources/admin/index.jsx --output-path=./build/admin --output-filename=admin.js",
@@ -10,10 +13,14 @@
     "start:frontend": "wp-scripts start ./resources/frontend/index.jsx --output-path=./build/frontend --output-filename=frontend.js",
     "build:frontend": "wp-scripts build ./resources/frontend/index.jsx --output-path=./build/frontend --output-filename=frontend.js",
     "start:block": "wp-scripts start ./resources/blocks/form/index.js --output-path=./build/blocks/form",
-    "build:block": "wp-scripts build ./resources/blocks/form/index.js --output-path=./build/blocks/form",
-    "build:all": "npm run build && npm run build:frontend && npm run build:block",
+    "build:block": "wp-scripts build ./resources/blocks/form/index.js --output-path=./build/blocks/form && cp resources/blocks/form/block.json resources/blocks/form/editor.css build/blocks/form/",
+    "build:subtleforms-block": "wp-scripts build ./resources/blocks/subtleforms-form/index.js --output-path=./build/blocks/subtleforms-form && cp resources/blocks/subtleforms-form/block.json resources/blocks/subtleforms-form/editor.css build/blocks/subtleforms-form/",
+    "build:all": "npm run build && npm run build:frontend && npm run build:block && npm run build:subtleforms-block",
     "test": "wp-scripts test-unit-js",
     "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:regression": "playwright test tests/e2e/regression-*.spec.js --reporter=html,list --timeout=90000",
+    "test:regression:headed": "playwright test tests/e2e/regression-*.spec.js --reporter=list --timeout=90000 --headed",
     "dist": "gulp dist",
     "dist:build": "gulp build",
     "dist:zip": "gulp zip",
