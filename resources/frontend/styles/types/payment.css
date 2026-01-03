@@ -1,0 +1,146 @@
+/**
+ * SubtleForms - Payment Form Type Styles
+ * 
+ * Trust-oriented styling with clear grouping and monetary emphasis.
+ */
+
+.subtleforms--type-payment {
+	max-width: 600px;
+	margin: 0 auto;
+}
+
+/* ===== Payment Sections ===== */
+.subtleforms-payment-section {
+	background: #fafafa;
+	border: 1px solid var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-md);
+	padding: var(--subtleforms-spacing-lg);
+	margin-bottom: var(--subtleforms-spacing-lg);
+}
+
+.subtleforms-payment-section-title {
+	font-size: 1.25rem;
+	font-weight: 600;
+	margin-bottom: var(--subtleforms-spacing-md);
+	color: var(--subtleforms-color-text);
+}
+
+/* ===== Amount Field ===== */
+.subtleforms--type-payment .subtleforms-field-amount input {
+	font-size: 2rem;
+	font-weight: 700;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+/* ===== Order Summary ===== */
+.subtleforms-payment-summary {
+	background: white;
+	border: 2px solid var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-md);
+	padding: var(--subtleforms-spacing-lg);
+	margin-bottom: var(--subtleforms-spacing-lg);
+}
+
+.subtleforms-summary-row {
+	display: flex;
+	justify-content: space-between;
+	padding: var(--subtleforms-spacing-sm) 0;
+	border-bottom: 1px solid var(--subtleforms-color-border);
+}
+
+.subtleforms-summary-row:last-child {
+	border-bottom: none;
+}
+
+.subtleforms-summary-label {
+	font-weight: 500;
+	color: var(--subtleforms-color-text-light);
+}
+
+.subtleforms-summary-value {
+	font-weight: 600;
+	color: var(--subtleforms-color-text);
+	font-variant-numeric: tabular-nums;
+}
+
+/* ===== Total Row (Emphasized) ===== */
+.subtleforms-summary-total {
+	margin-top: var(--subtleforms-spacing-md);
+	padding-top: var(--subtleforms-spacing-md);
+	border-top: 2px solid var(--subtleforms-color-text);
+}
+
+.subtleforms-summary-total .subtleforms-summary-label {
+	font-size: 1.25rem;
+	font-weight: 700;
+	color: var(--subtleforms-color-text);
+}
+
+.subtleforms-summary-total .subtleforms-summary-value {
+	font-size: 1.75rem;
+	font-weight: 700;
+	color: var(--subtleforms-color-primary);
+}
+
+/* ===== Coupon Field ===== */
+.subtleforms-coupon-field {
+	display: flex;
+	gap: var(--subtleforms-spacing-sm);
+	margin-bottom: var(--subtleforms-spacing-lg);
+}
+
+.subtleforms-coupon-field input {
+	flex: 1;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+.subtleforms-coupon-apply {
+	padding: 0.75rem 1.5rem;
+	background: var(--subtleforms-color-text);
+	color: white;
+	border: none;
+	border-radius: var(--subtleforms-radius-sm);
+	font-weight: 600;
+	cursor: pointer;
+	transition: all var(--subtleforms-transition-base);
+}
+
+.subtleforms-coupon-apply:hover {
+	background: #000;
+}
+
+/* ===== Security Badges ===== */
+.subtleforms-payment-security {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--subtleforms-spacing-sm);
+	padding: var(--subtleforms-spacing-md);
+	color: var(--subtleforms-color-text-light);
+	font-size: var(--subtleforms-font-size-sm);
+}
+
+.subtleforms-payment-security::before {
+	content: '🔒';
+	font-size: 1.25rem;
+}
+
+/* ===== Submit Button (Payment Emphasis) ===== */
+.subtleforms--type-payment .subtleforms-button-submit {
+	width: 100%;
+	padding: 1.25rem;
+	font-size: 1.125rem;
+	font-weight: 700;
+	background: var(--subtleforms-color-success);
+	border-radius: var(--subtleforms-radius-md);
+	box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+	transition: all var(--subtleforms-transition-base);
+}
+
+.subtleforms--type-payment .subtleforms-button-submit:hover {
+	background: #218838;
+	box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
+	transform: translateY(-1px);
+}

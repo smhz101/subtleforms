@@ -1,0 +1,23 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "subtleforms/form",
+  "title": "SubtleForm",
+  "category": "widgets",
+  "icon": "forms",
+  "description": "Embed a published SubtleForm",
+  "keywords": ["form", "subtleforms", "contact"],
+  "textdomain": "subtleforms",
+  "attributes": {
+    "formId": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "supports": {
+    "html": false,
+    "align": true
+  },
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./editor.css"
+}
