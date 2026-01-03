@@ -1,0 +1,307 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - link [ref=e3] [cursor=pointer]:
+      - /url: "#wpbody-content"
+      - text: Skip to main content
+    - link [ref=e4] [cursor=pointer]:
+      - /url: "#wp-toolbar"
+      - text: Skip to toolbar
+    - list [ref=e7]:
+      - listitem [ref=e8]:
+        - link [ref=e9] [cursor=pointer]:
+          - /url: index.php
+          - generic [ref=e10]: 
+          - generic [ref=e11]: Dashboard
+        - list [ref=e12]:
+          - listitem [ref=e13]:
+            - link [ref=e14] [cursor=pointer]:
+              - /url: index.php
+              - text: Home
+          - listitem [ref=e15]:
+            - link [ref=e16] [cursor=pointer]:
+              - /url: update-core.php
+              - text: Updates
+      - listitem [ref=e17]
+      - listitem [ref=e19]:
+        - link [ref=e20] [cursor=pointer]:
+          - /url: edit.php
+          - generic [ref=e21]: 
+          - generic [ref=e22]: Posts
+        - list [ref=e23]:
+          - listitem [ref=e24]:
+            - link [ref=e25] [cursor=pointer]:
+              - /url: edit.php
+              - text: All Posts
+          - listitem [ref=e26]:
+            - link [ref=e27] [cursor=pointer]:
+              - /url: post-new.php
+              - text: Add Post
+          - listitem [ref=e28]:
+            - link [ref=e29] [cursor=pointer]:
+              - /url: edit-tags.php?taxonomy=category
+              - text: Categories
+          - listitem [ref=e30]:
+            - link [ref=e31] [cursor=pointer]:
+              - /url: edit-tags.php?taxonomy=post_tag
+              - text: Tags
+      - listitem [ref=e32]:
+        - link [ref=e33] [cursor=pointer]:
+          - /url: upload.php
+          - generic [ref=e34]: 
+          - generic [ref=e35]: Media
+        - list [ref=e36]:
+          - listitem [ref=e37]:
+            - link [ref=e38] [cursor=pointer]:
+              - /url: upload.php
+              - text: Library
+          - listitem [ref=e39]:
+            - link [ref=e40] [cursor=pointer]:
+              - /url: media-new.php
+              - text: Add Media File
+      - listitem [ref=e41]:
+        - link [ref=e42] [cursor=pointer]:
+          - /url: edit.php?post_type=page
+          - generic [ref=e43]: 
+          - generic [ref=e44]: Pages
+        - list [ref=e45]:
+          - listitem [ref=e46]:
+            - link [ref=e47] [cursor=pointer]:
+              - /url: edit.php?post_type=page
+              - text: All Pages
+          - listitem [ref=e48]:
+            - link [ref=e49] [cursor=pointer]:
+              - /url: post-new.php?post_type=page
+              - text: Add Page
+      - listitem [ref=e50]:
+        - link [ref=e51] [cursor=pointer]:
+          - /url: edit-comments.php
+          - generic [ref=e52]: 
+          - generic [ref=e53]: Comments
+      - listitem [ref=e54]:
+        - link [ref=e55] [cursor=pointer]:
+          - /url: admin.php?page=subtleforms
+          - generic [ref=e56]: 
+          - generic [ref=e57]: Subtle Forms
+        - list [ref=e58]:
+          - listitem [ref=e59]:
+            - link [ref=e60] [cursor=pointer]:
+              - /url: admin.php?page=subtleforms
+              - text: Dashboard
+          - listitem [ref=e61]:
+            - link [ref=e62] [cursor=pointer]:
+              - /url: admin.php?page=subtleforms-forms
+              - text: All Forms
+          - listitem [ref=e63]:
+            - link [ref=e64] [cursor=pointer]:
+              - /url: admin.php?page=subtleforms-new-form
+              - text: Add New
+          - listitem [ref=e65]:
+            - link [ref=e66] [cursor=pointer]:
+              - /url: admin.php?page=subtleforms-submissions
+              - text: Submissions
+          - listitem [ref=e67]:
+            - link [ref=e68] [cursor=pointer]:
+              - /url: admin.php?page=subtleforms-extensions
+              - text: Extensions
+          - listitem [ref=e69]:
+            - link [ref=e70] [cursor=pointer]:
+              - /url: admin.php?page=subtleforms-settings
+              - text: Settings
+      - listitem [ref=e71]
+      - listitem [ref=e73]:
+        - link [ref=e74] [cursor=pointer]:
+          - /url: themes.php
+          - generic [ref=e75]: 
+          - generic [ref=e76]: Appearance
+        - list [ref=e77]:
+          - listitem [ref=e78]:
+            - link [ref=e79] [cursor=pointer]:
+              - /url: themes.php
+              - text: Themes
+          - listitem [ref=e80]:
+            - link [ref=e81] [cursor=pointer]:
+              - /url: site-editor.php
+              - text: Editor
+      - listitem [ref=e82]:
+        - link [ref=e83] [cursor=pointer]:
+          - /url: plugins.php
+          - generic [ref=e84]: 
+          - generic [ref=e85]: Plugins
+        - list [ref=e86]:
+          - listitem [ref=e87]:
+            - link [ref=e88] [cursor=pointer]:
+              - /url: plugins.php
+              - text: Installed Plugins
+          - listitem [ref=e89]:
+            - link [ref=e90] [cursor=pointer]:
+              - /url: plugin-install.php
+              - text: Add Plugin
+      - listitem [ref=e91]:
+        - link [ref=e92] [cursor=pointer]:
+          - /url: users.php
+          - generic [ref=e93]: 
+          - generic [ref=e94]: Users
+        - list [ref=e95]:
+          - listitem [ref=e96]:
+            - link [ref=e97] [cursor=pointer]:
+              - /url: users.php
+              - text: All Users
+          - listitem [ref=e98]:
+            - link [ref=e99] [cursor=pointer]:
+              - /url: user-new.php
+              - text: Add User
+          - listitem [ref=e100]:
+            - link [ref=e101] [cursor=pointer]:
+              - /url: profile.php
+              - text: Profile
+      - listitem [ref=e102]:
+        - link [ref=e103] [cursor=pointer]:
+          - /url: tools.php
+          - generic [ref=e104]: 
+          - generic [ref=e105]: Tools
+        - list [ref=e106]:
+          - listitem [ref=e107]:
+            - link [ref=e108] [cursor=pointer]:
+              - /url: tools.php
+              - text: Available Tools
+          - listitem [ref=e109]:
+            - link [ref=e110] [cursor=pointer]:
+              - /url: import.php
+              - text: Import
+          - listitem [ref=e111]:
+            - link [ref=e112] [cursor=pointer]:
+              - /url: export.php
+              - text: Export
+          - listitem [ref=e113]:
+            - link [ref=e114] [cursor=pointer]:
+              - /url: site-health.php
+              - text: Site Health
+              - generic [ref=e115]: "2"
+          - listitem [ref=e116]:
+            - link [ref=e117] [cursor=pointer]:
+              - /url: export-personal-data.php
+              - text: Export Personal Data
+          - listitem [ref=e118]:
+            - link [ref=e119] [cursor=pointer]:
+              - /url: erase-personal-data.php
+              - text: Erase Personal Data
+          - listitem [ref=e120]:
+            - link [ref=e121] [cursor=pointer]:
+              - /url: theme-editor.php
+              - text: Theme File Editor
+          - listitem [ref=e122]:
+            - link [ref=e123] [cursor=pointer]:
+              - /url: plugin-editor.php
+              - text: Plugin File Editor
+      - listitem [ref=e124]:
+        - link [ref=e125] [cursor=pointer]:
+          - /url: options-general.php
+          - generic [ref=e126]: 
+          - generic [ref=e127]: Settings
+        - list [ref=e128]:
+          - listitem [ref=e129]:
+            - link [ref=e130] [cursor=pointer]:
+              - /url: options-general.php
+              - text: General
+          - listitem [ref=e131]:
+            - link [ref=e132] [cursor=pointer]:
+              - /url: options-writing.php
+              - text: Writing
+          - listitem [ref=e133]:
+            - link [ref=e134] [cursor=pointer]:
+              - /url: options-reading.php
+              - text: Reading
+          - listitem [ref=e135]:
+            - link [ref=e136] [cursor=pointer]:
+              - /url: options-discussion.php
+              - text: Discussion
+          - listitem [ref=e137]:
+            - link [ref=e138] [cursor=pointer]:
+              - /url: options-media.php
+              - text: Media
+          - listitem [ref=e139]:
+            - link [ref=e140] [cursor=pointer]:
+              - /url: options-permalink.php
+              - text: Permalinks
+          - listitem [ref=e141]:
+            - link [ref=e142] [cursor=pointer]:
+              - /url: options-privacy.php
+              - text: Privacy
+      - listitem [ref=e143]:
+        - button [expanded] [ref=e144] [cursor=pointer]:
+          - generic [ref=e146]: Collapse Menu
+    - generic [ref=e147]:
+      - generic [ref=e148]:
+        - group [ref=e149]:
+          - menuitem [ref=e150] [cursor=pointer]:
+            - generic [ref=e152]: About WordPress
+        - group [ref=e153]:
+          - menuitem [ref=e154] [cursor=pointer]: WP6.9
+        - group [ref=e155]:
+          - menuitem [ref=e156] [cursor=pointer]:
+            - generic [ref=e158]: "0"
+            - generic [ref=e159]: 0 Comments in moderation
+        - group [ref=e160]:
+          - menuitem [ref=e161] [cursor=pointer]:
+            - generic [ref=e163]: New
+        - menu [ref=e164]:
+          - group [ref=e165]:
+            - menuitem [ref=e166] [cursor=pointer]: Howdy, admin
+      - main [ref=e167]
+    - contentinfo [ref=e174]:
+      - paragraph [ref=e175]:
+        - generic [ref=e176]:
+          - text: Thank you for creating with
+          - link [ref=e177] [cursor=pointer]:
+            - /url: https://wordpress.org/
+            - text: WordPress
+          - text: .
+      - paragraph [ref=e178]:
+        - text: You are using a development version (7.0-alpha-61422). Cool! Please
+        - link [ref=e179] [cursor=pointer]:
+          - /url: https://theme-wp.test/wp-admin/update-core.php
+          - text: stay updated
+        - text: .
+  - dialog [active] [ref=e183]:
+    - document "Scrollable section" [ref=e184]:
+      - button "Close" [ref=e186] [cursor=pointer]:
+        - img [ref=e187]
+      - generic [ref=e190]:
+        - generic [ref=e191]:
+          - heading "Create New Form" [level=2] [ref=e192]
+          - paragraph [ref=e193]: Provide basic information and choose a starting template.
+        - generic [ref=e195]:
+          - generic [ref=e196]: Details
+          - generic [ref=e198]: Structure
+        - generic [ref=e200]:
+          - generic [ref=e201]:
+            - generic [ref=e202]:
+              - generic [ref=e203]: Form Title*
+              - textbox "e.g. Contact Form" [ref=e206]: New Form 3651
+            - generic [ref=e207]:
+              - generic [ref=e208]:
+                - text: Description
+                - generic [ref=e209]: (Optional)
+              - textbox "Describe the purpose of this form..." [ref=e212]
+          - generic [ref=e213]:
+            - generic [ref=e214]: Starting Template
+            - generic [ref=e215]:
+              - button "Blank Form Start from scratch." [ref=e216] [cursor=pointer]:
+                - img [ref=e218]
+                - generic [ref=e221]:
+                  - generic [ref=e222]: Blank Form
+                  - generic [ref=e223]: Start from scratch.
+                - img [ref=e225]
+              - button "Preset Template Coming soon. Coming soon" [disabled] [ref=e228]:
+                - img [ref=e230]
+                - generic [ref=e234]:
+                  - generic [ref=e235]: Preset Template
+                  - generic [ref=e236]: Coming soon.
+                - generic [ref=e237]: Coming soon
+        - generic [ref=e238]:
+          - button "Cancel" [ref=e239]
+          - button "Next Step" [ref=e240]
+```
