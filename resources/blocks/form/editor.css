@@ -1,14 +1,100 @@
 /**
  * Editor styles for SubtleForms block
+ * Ensures block preview matches frontend appearance
  */
+
+/* Block Preview Container */
 .subtleforms-block-preview {
 	padding: 20px;
 	background: #f9f9f9;
 	border: 1px solid #ddd;
 	border-radius: 4px;
 	min-height: 200px;
+	position: relative;
 }
 
+/* Ensure step navigation styles work in block editor */
+.subtleforms-block-preview .subtleforms--multistep {
+	position: relative;
+}
+
+.subtleforms-block-preview .subtleforms-step-nav {
+	margin-bottom: 2rem;
+}
+
+.subtleforms-block-preview .sf-step-navigation {
+	display: flex;
+	align-items: flex-start;
+	gap: 1rem;
+	padding: 1.5rem 0;
+	border-bottom: 1px solid #e5e7eb;
+	overflow-x: auto;
+}
+
+.subtleforms-block-preview .sf-step-item,
+.subtleforms-block-preview .subtleforms-step-nav-item {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	flex: 1;
+	min-width: 120px;
+}
+
+.subtleforms-block-preview .sf-step-indicator {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 2.5rem;
+	height: 2.5rem;
+	border-radius: 50%;
+	border: 2px solid #d1d5db;
+	background: #f9fafb;
+	color: #6b7280;
+	font-weight: 600;
+	font-size: 0.875rem;
+	transition: all 0.2s ease;
+	position: relative;
+	z-index: 10;
+}
+
+.subtleforms-block-preview .sf-step-item.is-active .sf-step-indicator,
+.subtleforms-block-preview .sf-step-active .sf-step-indicator {
+	border-color: #3b82f6;
+	background: #3b82f6;
+	color: white;
+	box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+}
+
+.subtleforms-block-preview .sf-step-item.is-complete .sf-step-indicator,
+.subtleforms-block-preview .sf-step-completed .sf-step-indicator {
+	border-color: #10b981;
+	background: #10b981;
+	color: white;
+}
+
+.subtleforms-block-preview .sf-step-title {
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: #374151;
+	transition: color 0.2s ease;
+	text-align: center;
+	line-height: 1.2;
+	margin-top: 0.75rem;
+}
+
+.subtleforms-block-preview .sf-step-active .sf-step-title,
+.subtleforms-block-preview .sf-step-item.is-active .sf-step-title {
+	color: #3b82f6;
+	font-weight: 600;
+}
+
+.subtleforms-block-preview .sf-step-completed .sf-step-title,
+.subtleforms-block-preview .sf-step-item.is-complete .sf-step-title {
+	color: #10b981;
+}
+
+/* Preview Mode Indicator */
 .subtleforms-block-preview::after {
 	content: 'Preview Mode - Form submissions disabled in editor';
 	display: block;

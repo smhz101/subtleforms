@@ -6,6 +6,7 @@ import ConversationalFormRenderer from './ConversationalFormRenderer';
 import { getIn, setIn, flattenToPathMap } from '../utils/valuePaths';
 import { collectLeafInputPaths } from '../utils/schemaLeaves';
 import { warnOnce } from '../utils/warnOnce';
+import { getFormClassNames } from '../utils/formStyles';
 
 const restUrl =
   window.subtleformsFrontend?.restUrl || '/wp-json/subtleforms/v1';
@@ -26,6 +27,7 @@ export default function FormRenderer({
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [validationErrors, setValidationErrors] = useState({});
+  const [isSubmitIntentional, setIsSubmitIntentional] = useState(false);
 
   // Load schema (skip if preloaded)
   useEffect(() => {
@@ -34,7 +36,7 @@ export default function FormRenderer({
       return;
     }
 
-    fetch(`${restUrl}/forms/${formId}/schema`, {
+    fetch(`${restUrl}forms/${formId}/schema`, {
       credentials: 'same-origin',
       headers: {
         'X-WP-Nonce': nonce,
@@ -56,20 +58,51 @@ export default function FormRenderer({
   }, [formId, preloadedSchema]);
 
   // Extract steps from schema
-  const steps = useMemo(() => {
-    if (!schema?.fields) return [];
-    return schema.fields.filter((f) => f.type === 'step');
-  }, [schema]);
-
-  const hasSteps = steps.length > 0;
-
-  // Detect form type
+  // Detect form type from metadata
   const formType = useMemo(
     () => schema?.metadata?.type || 'regular',
     [schema?.metadata?.type]
   );
 
+  const isMultistep =
+    formType === 'multistep' ||
+    formType === 'multi-step' ||
+    formType === 'steps';
   const isConversational = formType === 'conversational';
+
+  const steps = useMemo(() => {
+    if (!schema?.fields) return [];
+
+    // First check if there are explicit step fields
+    const stepFields = schema.fields.filter((f) => f.type === 'step');
+    if (stepFields.length > 0) {
+      return stepFields;
+    }
+
+    // If form is marked as multistep but has no step fields,
+    // treat field groups or sections as steps
+    if (isMultistep) {
+      const fieldGroups = schema.fields.filter(
+        (f) => f.type === 'fieldGroup' || f.type === 'section'
+      );
+      if (fieldGroups.length > 0) {
+        return fieldGroups;
+      }
+      // If no field groups either, create a single step with all fields
+      return [
+        {
+          type: 'step',
+          id: 'step-1',
+          config: { label: schema.metadata?.title || 'Form' },
+          fields: schema.fields,
+        },
+      ];
+    }
+
+    return [];
+  }, [schema, isMultistep]);
+
+  const hasSteps = steps.length > 0;
   const currentStep = hasSteps ? steps[currentStepIndex] : null;
 
   // Get fields to render
@@ -77,8 +110,12 @@ export default function FormRenderer({
     if (!schema?.fields) return [];
 
     if (hasSteps && currentStep) {
-      // Show current step's children
-      return currentStep.children || [];
+      // Show current step's children (or fields for backward compat)
+      // Check length because empty array is truthy
+      const children =
+        currentStep.children?.length > 0 ? currentStep.children : null;
+      const fields = currentStep.fields?.length > 0 ? currentStep.fields : null;
+      return children || fields || [];
     }
 
     // Show all non-step fields
@@ -95,8 +132,10 @@ export default function FormRenderer({
         if (field.type !== 'step') {
           result.push(field);
         }
-        if (field.children && Array.isArray(field.children)) {
-          result = result.concat(flatten(field.children));
+        // Support both children and fields properties
+        const childFields = field.children || field.fields;
+        if (childFields && Array.isArray(childFields)) {
+          result = result.concat(flatten(childFields));
         }
         if (field.columns && Array.isArray(field.columns)) {
           field.columns.forEach((col) => {
@@ -129,8 +168,9 @@ export default function FormRenderer({
         }
 
         const key = field.config?.key || field.key;
+        const childFields = field.children || field.fields;
         const hasChildren =
-          Array.isArray(field.children) && field.children.length > 0;
+          Array.isArray(childFields) && childFields.length > 0;
         const hasColumns =
           Array.isArray(field.columns) && field.columns.length > 0;
         const isColumnContainer =
@@ -151,8 +191,9 @@ export default function FormRenderer({
           paths.add(key);
         }
 
-        if (Array.isArray(field.children)) {
-          visit(field.children);
+        const childFieldsToVisit = field.children || field.fields;
+        if (Array.isArray(childFieldsToVisit)) {
+          visit(childFieldsToVisit);
         }
 
         if (Array.isArray(field.columns)) {
@@ -171,6 +212,15 @@ export default function FormRenderer({
 
   const leafPaths = useMemo(() => {
     const paths = collectLeafInputPaths(schema?.fields || []);
+
+    console.log('[SubtleForms] Leaf Paths Calculation:', {
+      schemaFields: schema?.fields,
+      schemaFieldsCount: (schema?.fields || []).length,
+      hasSteps: hasSteps,
+      stepsCount: steps.length,
+      calculatedPaths: paths,
+      pathsCount: paths.length,
+    });
 
     // Dev-only: detect duplicates.
     const seen = new Set();
@@ -265,7 +315,17 @@ export default function FormRenderer({
         return;
       }
 
-      setValues((prev) => setIn(prev, path, value));
+      setValues((prev) => {
+        const newValues = setIn(prev, path, value);
+        console.log('[SubtleForms] Value Update:', {
+          path: path,
+          value: value,
+          previousValues: prev,
+          newValues: newValues,
+          currentStepIndex: currentStepIndex,
+        });
+        return newValues;
+      });
 
       // Clear validation error for this field
       setValidationErrors((prev) => {
@@ -287,7 +347,11 @@ export default function FormRenderer({
   const validateStep = useCallback(() => {
     const errors = {};
     const fieldsOnCurrentStep =
-      hasSteps && currentStep ? currentStep.children || [] : fieldsToRender;
+      hasSteps && currentStep
+        ? (currentStep.children?.length > 0
+            ? currentStep.children
+            : currentStep.fields) || []
+        : fieldsToRender;
 
     const flattenForValidation = (fields) => {
       let result = [];
@@ -295,8 +359,9 @@ export default function FormRenderer({
         if (field.type !== 'step' && field.config?.key) {
           result.push(field);
         }
-        if (field.children && Array.isArray(field.children)) {
-          result = result.concat(flattenForValidation(field.children));
+        const childFields = field.children || field.fields;
+        if (childFields && Array.isArray(childFields)) {
+          result = result.concat(flattenForValidation(childFields));
         }
         if (field.columns && Array.isArray(field.columns)) {
           field.columns.forEach((col) => {
@@ -345,28 +410,60 @@ export default function FormRenderer({
   }, [hasSteps, currentStep, fieldsToRender, hiddenFields, values]);
 
   // Handle step navigation
+  // IMPORTANT: Step navigation NEVER triggers submission
+  // This is intentional to prevent accidental form submission
   const handleNextStep = useCallback(() => {
+    console.log('[SubtleForms] Next Step:', {
+      currentStepIndex: currentStepIndex,
+      currentValues: values,
+      valuesKeys: Object.keys(values),
+    });
+
     if (!validateStep()) {
       return;
     }
 
+    // Only advance to next step, never submit
     if (currentStepIndex < steps.length - 1) {
       setCurrentStepIndex((prev) => prev + 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [currentStepIndex, steps, validateStep]);
+
+    // DEFENSIVE: Explicitly do NOT call handleSubmit here
+    // Multi-step forms should only submit when user clicks Submit button
+  }, [currentStepIndex, steps, validateStep, values]);
 
   const handlePrevStep = useCallback(() => {
+    console.log('[SubtleForms] Prev Step:', {
+      currentStepIndex: currentStepIndex,
+      currentValues: values,
+      valuesKeys: Object.keys(values),
+    });
+
     if (currentStepIndex > 0) {
       setCurrentStepIndex((prev) => prev - 1);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [currentStepIndex]);
+  }, [currentStepIndex, values]);
 
   // Handle form submission
+  // SUBMISSION GUARD: Only submit when explicitly requested via Submit button
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
+
+      // GUARD: Prevent accidental submission from navigation or other sources
+      if (!isSubmitIntentional && hasSteps) {
+        console.warn(
+          '[SubtleForms] Submission blocked: Not triggered by Submit button'
+        );
+        return;
+      }
+
+      // Reset intent flag after checking
+      if (isSubmitIntentional) {
+        setIsSubmitIntentional(false);
+      }
 
       // In preview mode, prevent submission
       if (preview) {
@@ -377,7 +474,78 @@ export default function FormRenderer({
         return;
       }
 
-      if (!validateStep()) {
+      // For submission, validate all required fields across all steps, not just current step
+      const validateAllSteps = () => {
+        if (!hasSteps) {
+          return validateStep(); // For non-step forms, use normal validation
+        }
+
+        const errors = {};
+
+        // Get all fields from all steps
+        const allStepFields = [];
+        steps.forEach((step) => {
+          const stepFields = step.children || step.fields || [];
+          allStepFields.push(...stepFields);
+        });
+
+        const flattenForValidation = (fields) => {
+          let result = [];
+          fields.forEach((field) => {
+            if (field.type !== 'step' && field.config?.key) {
+              result.push(field);
+            }
+            const childFields = field.children || field.fields;
+            if (childFields && Array.isArray(childFields)) {
+              result = result.concat(flattenForValidation(childFields));
+            }
+            if (field.columns && Array.isArray(field.columns)) {
+              field.columns.forEach((col) => {
+                if (Array.isArray(col)) {
+                  result = result.concat(flattenForValidation(col));
+                }
+              });
+            }
+          });
+          return result;
+        };
+
+        const allFields = flattenForValidation(allStepFields);
+
+        allFields.forEach((field) => {
+          const fieldKey = field.config?.key || field.key;
+
+          // Skip hidden fields
+          if (hiddenFields.has(fieldKey)) {
+            return;
+          }
+
+          const value = getIn(values, fieldKey);
+          const isRequired = field.config?.required;
+
+          if (isRequired && (!value || value === '')) {
+            errors[fieldKey] = __('This field is required.', 'subtleforms');
+          }
+
+          // Type validation
+          if (value && value !== '') {
+            if (
+              field.type === 'email' &&
+              !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
+            ) {
+              errors[fieldKey] = __('Invalid email address.', 'subtleforms');
+            }
+            if (field.type === 'url' && !/^https?:\/\/.+/.test(value)) {
+              errors[fieldKey] = __('Invalid URL.', 'subtleforms');
+            }
+          }
+        });
+
+        setValidationErrors(errors);
+        return Object.keys(errors).length === 0;
+      };
+
+      if (!validateAllSteps()) {
         return;
       }
 
@@ -393,8 +561,29 @@ export default function FormRenderer({
         }
       });
 
+      // Debug logging for empty submissions
+      console.log('[SubtleForms] Submission Debug:', {
+        leafPathsCount: leafPaths.length,
+        leafPaths: leafPaths,
+        valuesKeys: Object.keys(values),
+        values: values,
+        flatValuesKeys: Object.keys(flatValues),
+        flatValues: flatValues,
+        payloadKeys: Object.keys(payload),
+        payload: payload,
+        hasSteps: hasSteps,
+        currentStepIndex: currentStepIndex,
+        totalSteps: steps.length,
+        stepsInfo: steps.map((step) => ({
+          type: step.type,
+          id: step.id,
+          title: step.config?.title || step.config?.label,
+          childrenCount: (step.children || step.fields || []).length,
+        })),
+      });
+
       try {
-        const response = await fetch(`${restUrl}/submit`, {
+        const response = await fetch(`${restUrl}submit`, {
           method: 'POST',
           credentials: 'same-origin',
           headers: {
@@ -432,8 +621,24 @@ export default function FormRenderer({
         setSubmitting(false);
       }
     },
-    [formId, values, validateStep, leafPaths, preview, customOnSubmit]
+    [
+      formId,
+      values,
+      validateStep,
+      leafPaths,
+      preview,
+      customOnSubmit,
+      isSubmitIntentional,
+      hasSteps,
+    ]
   );
+
+  // Handle explicit submit button click
+  // Sets intent flag before form submission
+  const handleExplicitSubmit = useCallback(() => {
+    setIsSubmitIntentional(true);
+    // Form onSubmit will be triggered naturally by button type="submit"
+  }, []);
 
   if (loading) {
     return (
@@ -470,8 +675,11 @@ export default function FormRenderer({
 
   const isLastStep = !hasSteps || currentStepIndex === steps.length - 1;
 
+  // Generate form type-aware CSS classes
+  const formClassNames = getFormClassNames(schema);
+
   return (
-    <div className='subtleforms-form'>
+    <div className={formClassNames}>
       {schema.metadata?.title && (
         <h2 className='subtleforms-form-title'>{schema.metadata.title}</h2>
       )}
@@ -536,6 +744,7 @@ export default function FormRenderer({
           )}
 
           {hasSteps && !isLastStep ? (
+            // Multi-step: Show Next button (does NOT submit)
             <button
               type='button'
               className='subtleforms-button subtleforms-button-next'
@@ -543,10 +752,12 @@ export default function FormRenderer({
               {__('Next', 'subtleforms')}
             </button>
           ) : (
+            // Final step or single-page: Show Submit button (DOES submit)
             <button
               type='submit'
               className='subtleforms-button subtleforms-button-submit'
-              disabled={submitting}>
+              disabled={submitting}
+              onClick={handleExplicitSubmit}>
               {submitting
                 ? __('Submitting...', 'subtleforms')
                 : __('Submit', 'subtleforms')}

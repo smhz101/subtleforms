@@ -21,15 +21,22 @@ import {
  */
 async function fetchPublishedForms() {
   try {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    // Add nonce for authenticated requests
+    if (window.subtleformsAdmin?.nonce) {
+      headers['X-WP-Nonce'] = window.subtleformsAdmin.nonce;
+    }
+
     const response = await fetch(
       `${
-        window.subtleformsAdmin?.restUrl || '/wp-json/'
-      }subtleforms/v1/forms?status=published&context=view`,
+        window.subtleformsAdmin?.restUrl || '/wp-json/subtleforms/v1/'
+      }forms?status=published&context=view`,
       {
         credentials: 'same-origin',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       }
     );
 
@@ -38,7 +45,8 @@ async function fetchPublishedForms() {
     }
 
     const data = await response.json();
-    return data.forms || [];
+    // API returns forms directly as array, not wrapped in { forms: [] }
+    return Array.isArray(data) ? data : [];
   } catch (error) {
     console.error('SubtleForms block: Failed to fetch forms', error);
     return [];
@@ -50,15 +58,22 @@ async function fetchPublishedForms() {
  */
 async function fetchFormSchema(formId) {
   try {
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    // Add nonce for authenticated requests
+    if (window.subtleformsAdmin?.nonce) {
+      headers['X-WP-Nonce'] = window.subtleformsAdmin.nonce;
+    }
+
     const response = await fetch(
       `${
-        window.subtleformsAdmin?.restUrl || '/wp-json/'
-      }subtleforms/v1/forms/${formId}/schema?context=view`,
+        window.subtleformsAdmin?.restUrl || '/wp-json/subtleforms/v1/'
+      }forms/${formId}/schema?context=view`,
       {
         credentials: 'same-origin',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
       }
     );
 
@@ -93,11 +108,12 @@ function FormPreview({ formId }) {
       setLoading(true);
       setError(null);
 
-      const formSchema = await fetchFormSchema(formId);
+      const formData = await fetchFormSchema(formId);
+      console.log('SubtleForms block: Fetched form data:', formData);
 
       if (!mounted) return;
 
-      if (!formSchema) {
+      if (!formData || !formData.schema) {
         setError(
           __('Form not available or has been unpublished', 'subtleforms')
         );
@@ -105,7 +121,8 @@ function FormPreview({ formId }) {
         return;
       }
 
-      setSchema(formSchema);
+      console.log('SubtleForms block: Setting schema:', formData.schema);
+      setSchema(formData.schema);
       setLoading(false);
     }
 
@@ -119,8 +136,20 @@ function FormPreview({ formId }) {
   useEffect(() => {
     // Mount the frontend renderer when schema is available
     if (!schema || !containerRef.current) {
+      console.log(
+        'SubtleForms block: Cannot mount - schema or container missing',
+        {
+          hasSchema: !!schema,
+          hasContainer: !!containerRef.current,
+        }
+      );
       return;
     }
+
+    console.log(
+      'SubtleForms block: Mounting form preview with schema:',
+      schema
+    );
 
     // Check if SubtleForms frontend renderer is available
     if (typeof window.SubtleForms?.mount === 'function') {
@@ -139,6 +168,8 @@ function FormPreview({ formId }) {
         },
       });
 
+      console.log('SubtleForms block: Form mounted successfully');
+
       return () => {
         // Cleanup if renderer provides unmount
         if (typeof window.SubtleForms?.unmount === 'function') {
@@ -146,6 +177,9 @@ function FormPreview({ formId }) {
         }
       };
     } else {
+      console.error(
+        'SubtleForms block: window.SubtleForms.mount not available'
+      );
       setError(
         __(
           'Form renderer not loaded. Frontend preview unavailable.',

@@ -4,6 +4,7 @@ import FieldRenderer from './FieldRenderer';
 import { getIn, setIn, flattenToPathMap } from '../utils/valuePaths';
 import { collectLeafInputPaths } from '../utils/schemaLeaves';
 import { warnOnce } from '../utils/warnOnce';
+import { getFormClassNames } from '../utils/formStyles';
 
 const restUrl =
   window.subtleformsFrontend?.restUrl || '/wp-json/subtleforms/v1';
@@ -68,6 +69,9 @@ export default function ConversationalFormRenderer({
 
     return flatten(schema.fields);
   }, [schema]);
+
+  // Generate form type-aware CSS classes (early, before any returns)
+  const formClassNames = getFormClassNames(schema);
 
   // Evaluate conditional logic
   const hiddenFields = useMemo(() => {
@@ -277,7 +281,7 @@ export default function ConversationalFormRenderer({
       });
 
       try {
-        const response = await fetch(`${restUrl}/submit`, {
+        const response = await fetch(`${restUrl}submit`, {
           method: 'POST',
           credentials: 'same-origin',
           headers: {
@@ -316,7 +320,7 @@ export default function ConversationalFormRenderer({
 
   if (submitSuccess) {
     return (
-      <div className='subtleforms-conversational'>
+      <div className={formClassNames}>
         <div className='subtleforms-conversational-success'>
           <div className='subtleforms-success-icon'>✓</div>
           <h2>{__('Thank you!', 'subtleforms')}</h2>
@@ -333,7 +337,7 @@ export default function ConversationalFormRenderer({
 
   if (totalFields === 0) {
     return (
-      <div className='subtleforms-conversational'>
+      <div className={formClassNames}>
         <div className='subtleforms-empty'>
           <p>{__('This form has no questions.', 'subtleforms')}</p>
         </div>
@@ -370,7 +374,7 @@ export default function ConversationalFormRenderer({
   // Render Review Step
   if (currentStep === 'review') {
     return (
-      <div className='subtleforms-conversational'>
+      <div className={formClassNames}>
         {/* Progress indicator */}
         <div className='subtleforms-progress'>
           <div className='subtleforms-progress-bar'>
@@ -449,7 +453,7 @@ export default function ConversationalFormRenderer({
   // Render Payment Step
   if (currentStep === 'payment') {
     return (
-      <div className='subtleforms-conversational'>
+      <div className={formClassNames}>
         {/* Progress indicator */}
         <div className='subtleforms-progress'>
           <div className='subtleforms-progress-bar'>
@@ -529,7 +533,7 @@ export default function ConversationalFormRenderer({
 
   // Render Questions Step (default)
   return (
-    <div className='subtleforms-conversational'>
+    <div className={formClassNames}>
       {/* Progress Bar */}
       <div className='subtleforms-progress'>
         <div className='subtleforms-progress-bar'>

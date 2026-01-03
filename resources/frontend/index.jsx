@@ -52,25 +52,60 @@ window.SubtleForms = {
   unmount,
 };
 
-// Auto-mount forms on page load
-document.addEventListener('DOMContentLoaded', () => {
+// Auto-mount function
+function autoMountForms() {
+  console.log('SubtleForms: Auto-mounting forms...');
+
   // Mount shortcode containers
   const shortcodeContainers = document.querySelectorAll(
     '.subtleforms-form-container'
   );
+  console.log(
+    `SubtleForms: Found ${shortcodeContainers.length} shortcode containers`
+  );
   shortcodeContainers.forEach((container) => {
     const formId = parseInt(container.dataset.formId, 10);
     if (formId) {
+      console.log(
+        `SubtleForms: Mounting form ${formId} in shortcode container`
+      );
       mount(container, { formId });
     }
   });
 
   // Mount block containers
   const blockContainers = document.querySelectorAll('.subtleforms-block');
+  console.log(`SubtleForms: Found ${blockContainers.length} block containers`);
   blockContainers.forEach((container) => {
     const formId = parseInt(container.dataset.formId, 10);
     if (formId) {
+      console.log(`SubtleForms: Mounting form ${formId} in block container`);
       mount(container, { formId });
     }
   });
-});
+}
+
+// Auto-mount forms when DOM is fully ready (frontend only, not in editor)
+// Use 'DOMContentLoaded' to ensure all dependencies (wp-element) are loaded
+console.log(
+  'SubtleForms: Script loaded, document.readyState:',
+  document.readyState
+);
+
+// Don't auto-mount in the block editor - the editor uses manual mounting for preview
+const isBlockEditor = typeof window.wp !== 'undefined' && window.wp.blockEditor;
+
+if (!isBlockEditor) {
+  if (document.readyState === 'loading') {
+    // Still loading, wait for DOMContentLoaded
+    document.addEventListener('DOMContentLoaded', autoMountForms);
+  } else if (document.readyState === 'interactive') {
+    // DOM parsed but resources still loading, wait for full load
+    window.addEventListener('load', autoMountForms);
+  } else {
+    // DOM and all resources loaded, run immediately
+    autoMountForms();
+  }
+} else {
+  console.log('SubtleForms: Block editor detected, skipping auto-mount');
+}
