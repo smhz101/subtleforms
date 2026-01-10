@@ -590,16 +590,16 @@ export default function FormsList({
 
     if (successCount === ids.length) {
       createSuccessNotice(
-        sprintf(__('%d forms deleted', 'subtleforms'), successCount),
+        ( () => { /* translators: %d: number of forms deleted */ return sprintf(__('%d forms deleted', 'subtleforms'), successCount); } )(),
         { type: 'snackbar' }
       );
     } else {
       createErrorNotice(
-        sprintf(
+        ( () => { /* translators: 1: number deleted, 2: total requested */ return sprintf(
           __('Failed to delete some forms (%d/%d deleted)', 'subtleforms'),
           successCount,
           ids.length
-        ),
+        ); } )(),
         { type: 'snackbar' }
       );
       fetchForms(); // Reload to sync state
@@ -624,16 +624,16 @@ export default function FormsList({
 
     if (successCount === ids.length) {
       createSuccessNotice(
-        sprintf(__('%d forms updated', 'subtleforms'), successCount),
+        ( () => { /* translators: %d: number of forms updated */ return sprintf(__('%d forms updated', 'subtleforms'), successCount); } )(),
         { type: 'snackbar' }
       );
     } else {
       createErrorNotice(
-        sprintf(
+        ( () => { /* translators: 1: number updated, 2: total requested */ return sprintf(
           __('Failed to update some forms (%d/%d updated)', 'subtleforms'),
           successCount,
           ids.length
-        ),
+        ); } )(),
         { type: 'snackbar' }
       );
       fetchForms(); // Reload to sync state
