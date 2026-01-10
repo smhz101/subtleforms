@@ -53,6 +53,7 @@ require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/Logger.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/Capabilities.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/FeatureGate.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/Helpers.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/Settings.php';
 
 // Extensions
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Extensions/ExtensionManager.php';
