@@ -59,7 +59,7 @@ export default function StepNavigator({
                       ? 'sf-bg-blue-600 sf-text-white sf-border-blue-600 sf-shadow-sm'
                       : 'sf-bg-white sf-text-gray-700 sf-border-gray-300 hover:sf-bg-gray-50 hover:sf-border-gray-400'
                   }`}
-                  title={`${sprintf(__('Step %d', 'subtleforms'), index + 1)}: ${stepTitle}`}
+                  title={`${( () => { /* translators: %d: step number */ return sprintf(__('Step %d', 'subtleforms'), index + 1); })()}: ${stepTitle}`}
                 >
                   <div className={`sf-flex sf-items-center sf-justify-center sf-w-5 sf-h-5 sf-rounded-full sf-text-xs sf-font-semibold ${
                     isSelected 
@@ -78,7 +78,7 @@ export default function StepNavigator({
                     type="button"
                     onClick={() => onDeleteStep(step.id)}
                     className="sf-flex sf-justify-center sf-items-center hover:sf-bg-red-50 sf-rounded sf-w-6 sf-h-6 sf-text-red-600 hover:sf-text-red-700 sf-transition-colors sf-duration-150"
-                    title={sprintf(__('Delete step %d', 'subtleforms'), index + 1)}
+                    title={( () => { /* translators: %d: step number */ return sprintf(__('Delete step %d', 'subtleforms'), index + 1); } )()}
                   >
                     <svg className="sf-w-4 sf-h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
