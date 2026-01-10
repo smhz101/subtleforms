@@ -178,8 +178,7 @@ export default function FormBuilder() {
           nodeId={nodeId}
           parentId={parentId}
           columnIndex={parentColumnIndex}
-          position={position}
-        >
+          position={position}>
           {({ setNodeRef, style, dragHandleRef, dragHandleListeners }) => (
             <div ref={setNodeRef} style={style}>
               <ContainerRenderer
@@ -267,8 +266,7 @@ export default function FormBuilder() {
         nodeId={nodeId}
         parentId={parentId}
         columnIndex={columnIndex}
-        position={position}
-      >
+        position={position}>
         {({ setNodeRef, style, dragHandleRef, dragHandleListeners }) => (
           <div ref={setNodeRef} style={style}>
             <FieldChrome

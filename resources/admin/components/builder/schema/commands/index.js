@@ -226,17 +226,22 @@ export function duplicateNode(tree, command) {
   if (!nodeId) {
     throw new Error('[duplicateNode] nodeId is required');
   }
-  if (!destination) {
-    throw new Error('[duplicateNode] destination is required');
-  }
+
+  // If destination is not provided, default to the original node's parent
+  const originalNode = tree.nodes[nodeId];
+  const effectiveDestination = destination || {
+    parentId: originalNode?.parentId || ROOT_NODE_ID,
+    columnIndex: originalNode?.columnIndex ?? null,
+    position: null,
+  };
 
   // Validate invariants
   assertNodeExists(tree, nodeId, 'duplicateNode');
-  assertParentExists(tree, destination.parentId, 'duplicateNode');
+  assertParentExists(tree, effectiveDestination.parentId, 'duplicateNode');
 
-  const destParent = tree.nodes[destination.parentId];
-  if (destination.columnIndex !== null && destParent) {
-    assertValidColumnIndex(destParent, destination.columnIndex, 'duplicateNode');
+  const destParent = tree.nodes[effectiveDestination.parentId];
+  if (effectiveDestination.columnIndex !== null && destParent) {
+    assertValidColumnIndex(destParent, effectiveDestination.columnIndex, 'duplicateNode');
   }
 
   // Clone the node and all descendants
@@ -294,7 +299,7 @@ export function duplicateNode(tree, command) {
     return { tree, newNodeId: null };
   }
 
-  clones[rootCloneId].parentId = destination.parentId;
+  clones[rootCloneId].parentId = effectiveDestination.parentId;
 
   // Add clones to tree
   const treeWithClones = {
@@ -306,7 +311,7 @@ export function duplicateNode(tree, command) {
   };
 
   // Insert cloned subtree at destination
-  const updatedTree = addNodeToTree(treeWithClones, clones[rootCloneId], destination);
+  const updatedTree = addNodeToTree(treeWithClones, clones[rootCloneId], effectiveDestination);
 
   // Validate tree integrity after mutation
   if (process.env.NODE_ENV === 'development') {

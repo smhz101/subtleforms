@@ -108,7 +108,15 @@ export default function FieldRenderer({
   );
 }
 
-function renderInput(field, value, onChange, placeholder, inputId, required, error) {
+function renderInput(
+  field,
+  value,
+  onChange,
+  placeholder,
+  inputId,
+  required,
+  error
+) {
   switch (field.type) {
     case 'text':
     case 'email':

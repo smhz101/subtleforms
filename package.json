@@ -26,7 +26,14 @@
     "dist:zip": "gulp zip",
     "dist:clean": "gulp clean"
   },
+  "jest": {
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/tests/e2e/"
+    ]
+  },
   "devDependencies": {
+    "@testing-library/react-hooks": "^7.0.2",
     "@playwright/test": "^1.57.0",
     "@tailwindcss/forms": "^0.5.11",
     "@wordpress/e2e-test-utils-playwright": "^1.37.0",
