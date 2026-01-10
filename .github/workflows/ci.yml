@@ -34,7 +34,7 @@ jobs:
      run: npm ci --legacy-peer-deps
 
    - name: Build assets
-     run: npm run build --silent
+     run: npm run build --verbose
 
    - name: PHP syntax check
      run: find . -name "*.php" -not -path "./node_modules/*" -print0 | xargs -0 -n1 php -l
