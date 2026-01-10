@@ -27,7 +27,6 @@
     "dist:clean": "gulp clean"
   },
   "jest": {
-    "testEnvironment": "jsdom",
     "testPathIgnorePatterns": [
       "/node_modules/",
       "/tests/e2e/"
