@@ -45,6 +45,7 @@ describe('useDraftAutosave', () => {
     expect(mockDispatch).toHaveBeenCalledWith({ type: BUILDER_ACTIONS.START_AUTOSAVE });
     expect(apiPost).toHaveBeenCalledWith('/forms/123/schema', {
       schema: { some: 'schema' },
+      activate: false,
     });
   });
 
@@ -74,7 +75,7 @@ describe('useDraftAutosave', () => {
 
     expect(mockDispatch).toHaveBeenCalledWith({
       type: BUILDER_ACTIONS.AUTOSAVE_SUCCESS,
-      payload: { schema: { some: 'schema' } },
+      payload: { stillDirty: false },
     });
   });
 
