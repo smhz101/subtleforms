@@ -8,8 +8,8 @@
   "scripts": {
     "start": "npm run build:tailwind:watch & wp-scripts start ./resources/admin/index.jsx --output-path=./build/admin --output-filename=admin.js",
     "build": "npm run build:tailwind && wp-scripts build ./resources/admin/index.jsx --output-path=./build/admin --output-filename=admin.js",
-    "build:tailwind": "tailwindcss -i ./assets/css/tailwind.css -o ./build/admin/tailwind.css --minify",
-    "build:tailwind:watch": "tailwindcss -i ./assets/css/tailwind.css -o ./build/admin/tailwind.css --watch",
+    "build:tailwind": "npx tailwindcss -i ./assets/css/tailwind.css -o ./build/admin/tailwind.css --minify",
+    "build:tailwind:watch": "npx tailwindcss -i ./assets/css/tailwind.css -o ./build/admin/tailwind.css --watch",
     "start:frontend": "wp-scripts start ./resources/frontend/index.jsx --output-path=./build/frontend --output-filename=frontend.js",
     "build:frontend": "wp-scripts build ./resources/frontend/index.jsx --output-path=./build/frontend --output-filename=frontend.js",
     "start:block": "wp-scripts start ./resources/blocks/form/index.js --output-path=./build/blocks/form",
