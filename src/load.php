@@ -7,22 +7,22 @@
  */
 
 // If this file is called directly, abort.
-if (!defined('ABSPATH')) {
-  exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 
 // Prefer Composer autoloader when available
-if (file_exists(SUBTLEFORMS_PLUGIN_DIR . 'vendor/autoload.php')) {
-  require_once SUBTLEFORMS_PLUGIN_DIR . 'vendor/autoload.php';
+if ( file_exists( SUBTLEFORMS_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
+	require_once SUBTLEFORMS_PLUGIN_DIR . 'vendor/autoload.php';
 
-  // Composer will autoload classes, but standalone functions (like the
-  // `SubtleForms\init()` helper) are defined in src/Plugin.php and must
-  // be included explicitly.
-  if (file_exists(SUBTLEFORMS_PLUGIN_DIR . 'src/Plugin.php')) {
-    require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Plugin.php';
-  }
+	// Composer will autoload classes, but standalone functions (like the
+	// `SubtleForms\init()` helper) are defined in src/Plugin.php and must
+	// be included explicitly.
+	if ( file_exists( SUBTLEFORMS_PLUGIN_DIR . 'src/Plugin.php' ) ) {
+		require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Plugin.php';
+	}
 
-  return;
+	return;
 }
 
 // Fallback to manual includes for development environments

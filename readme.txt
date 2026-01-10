@@ -32,9 +32,14 @@ Key features:
 
 == Screenshots ==
 
-1. `assets/screenshot-builder.png` — Form builder interface
-2. `assets/screenshot-form-preview.png` — Frontend form preview example
-3. `assets/screenshot-submissions.png` — Submissions list and export
+1. `assets/screenshot-builder.svg` — Form builder interface (placeholder)
+2. `assets/screenshot-form-preview.svg` — Frontend form preview example (placeholder)
+3. `assets/screenshot-submissions.svg` — Submissions list and export (placeholder)
+
+== Assets ==
+
+- `assets/banner-772x250.svg` — Listing banner (replace with final PNG/JPG as required)
+- `assets/icon-256x256.svg` — Plugin icon (replace with final PNG as required)
 
 == Frequently Asked Questions ==
 

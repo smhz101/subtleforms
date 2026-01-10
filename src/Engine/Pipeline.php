@@ -13,125 +13,145 @@ use Throwable;
  *
  * This is the authoritative layer: UI/REST/CLI all feed into this.
  */
-final class Pipeline
-{
-    public function __construct(
-        private FeatureGate $gate,
-        private LogsRepository $logs,
-        private ?SchemaCompiler $compiler = null
-    ) {}
+final class Pipeline {
 
-    /**
-     * @param PipelineStepInterface[] $steps
-     */
-    public function run(array $steps, SubmissionContext $ctx, ?array $schema = null): PipelineResult
-    {
-        $events = [];
+	/**
+	 * @var FeatureGate
+	 */
+	private $gate;
 
-        try {
-            // Evaluate conditional logic before executing steps
-            if ($schema && $this->compiler) {
-                $this->compiler->evaluateConditions($schema, $ctx);
-            }
+	/**
+	 * @var LogsRepository
+	 */
+	private $logs;
 
-            foreach ($steps as $step) {
-                $ts = time();
+	/**
+	 * @var SchemaCompiler|null
+	 */
+	private $compiler;
 
-                // Log start
-                $this->logEvent($ctx, $step, 'started', null, $ts);
+	/**
+	 * @param FeatureGate      $gate
+	 * @param LogsRepository   $logs
+	 * @param SchemaCompiler|null $compiler
+	 */
+	public function __construct( $gate, $logs, $compiler = null ) {
+		$this->gate     = $gate;
+		$this->logs     = $logs;
+		$this->compiler = $compiler;
+	}
 
-                foreach ($step->requires() as $cap) {
-                    if ($this->gate->allows($cap)) {
-                        continue;
-                    }
+	/**
+	 * @param PipelineStepInterface[] $steps
+	 */
+	public function run( array $steps, SubmissionContext $ctx, ?array $schema = null ): PipelineResult {
+		$events = array();
 
-                    if ($step->skippable()) {
-                        $this->logEvent($ctx, $step, 'skipped', 'capability_denied', $ts);
-                        continue 2; // skip this step entirely
-                    }
+		try {
+			// Evaluate conditional logic before executing steps
+			if ( $schema && $this->compiler ) {
+				$this->compiler->evaluateConditions( $schema, $ctx );
+			}
 
-                    $this->gate->require($cap, sprintf('Step "%s" requires capability "%s".', $step->id(), $cap));
-                }
+			foreach ( $steps as $step ) {
+				$ts = time();
 
-                // Expose current step id/settings in context for action implementations
-                $ctx->setMeta('current_step_id', $step->id());
-                $ctx->setMeta('current_step_settings', $step->settings());
+				// Log start
+				$this->logEvent( $ctx, $step, 'started', null, $ts );
 
-                try {
-                    $step->action()->handle($ctx);
-                } catch (Throwable $e) {
-                    // Hard failure: log and rethrow to be handled by outer catch
-                    $this->logEvent($ctx, $step, 'failed', $e->getMessage(), time());
-                    throw $e;
-                }
+				foreach ( $step->requires() as $cap ) {
+					if ( $this->gate->allows( $cap ) ) {
+						continue;
+					}
 
-                // Check for soft failures recorded by action implementations
-                $fails = $ctx->getMeta('action_failures', []);
-                $found = false;
-                if (is_array($fails)) {
-                    $remaining = [];
-                    foreach ($fails as $f) {
-                        if (isset($f['action']) && $f['action'] === $step->action()->id()) {
-                            $found = true;
-                            $reason = $f['reason'] ?? 'failure';
-                            $this->logEvent($ctx, $step, 'failed', (string) ($f['response'] ?? $reason), time());
-                            // don't add to remaining
-                        } else {
-                            $remaining[] = $f;
-                        }
-                    }
+					if ( $step->skippable() ) {
+						$this->logEvent( $ctx, $step, 'skipped', 'capability_denied', $ts );
+						continue 2; // skip this step entirely
+					}
 
-                    // update remaining failures back into context to avoid duplicate logging
-                    $ctx->setMeta('action_failures', $remaining);
-                }
+					$this->gate->require( $cap, sprintf( 'Step "%s" requires capability "%s".', $step->id(), $cap ) );
+				}
 
-                if (!$found) {
-                    $this->logEvent($ctx, $step, 'succeeded', null, time());
-                }
+				// Expose current step id/settings in context for action implementations
+				$ctx->setMeta( 'current_step_id', $step->id() );
+				$ctx->setMeta( 'current_step_settings', $step->settings() );
 
-                // Clear step-specific transient meta
-                $ctx->setMeta('current_step_id', null);
-                $ctx->setMeta('current_step_settings', null);
-            }
+				try {
+					$step->action()->handle( $ctx );
+				} catch ( Throwable $e ) {
+					// Hard failure: log and rethrow to be handled by outer catch
+					$this->logEvent( $ctx, $step, 'failed', $e->getMessage(), time() );
+					throw $e;
+				}
 
-            return new PipelineResult(true, $events, null);
-        } catch (Throwable $e) {
-            $events[] = [
-                'type' => 'pipeline.error',
-                'message' => $e->getMessage(),
-                'ts' => time(),
-            ];
+				// Check for soft failures recorded by action implementations
+				$fails = $ctx->getMeta( 'action_failures', array() );
+				$found = false;
+				if ( is_array( $fails ) ) {
+					$remaining = array();
+					foreach ( $fails as $f ) {
+						if ( isset( $f['action'] ) && $f['action'] === $step->action()->id() ) {
+							$found  = true;
+							$reason = $f['reason'] ?? 'failure';
+							$this->logEvent( $ctx, $step, 'failed', (string) ( $f['response'] ?? $reason ), time() );
+							// don't add to remaining
+						} else {
+							$remaining[] = $f;
+						}
+					}
 
-            return new PipelineResult(false, $events, $e->getMessage());
-        }
-    }
+					// update remaining failures back into context to avoid duplicate logging
+					$ctx->setMeta( 'action_failures', $remaining );
+				}
 
-    private function logEvent(SubmissionContext $ctx, PipelineStepInterface $step, string $status, ?string $error, int $ts): void
-    {
-        $submissionId = $ctx->getMeta('submission_id');
-        if (empty($submissionId) || !is_int($submissionId)) {
-            return; // nothing to persist
-        }
+				if ( ! $found ) {
+					$this->logEvent( $ctx, $step, 'succeeded', null, time() );
+				}
 
-        $schemaVersion = $ctx->getMeta('schema_version');
+				// Clear step-specific transient meta
+				$ctx->setMeta( 'current_step_id', null );
+				$ctx->setMeta( 'current_step_settings', null );
+			}
 
-        $evt = new PipelineEvent(
-            $submissionId,
-            is_int($schemaVersion) ? $schemaVersion : null,
-            $step->id(),
-            $step->action()->id(),
-            $status,
-            $error,
-            $ts
-        );
+			return new PipelineResult( true, $events, null );
+		} catch ( Throwable $e ) {
+			$events[] = array(
+				'type'    => 'pipeline.error',
+				'message' => $e->getMessage(),
+				'ts'      => time(),
+			);
 
-        $level = $status === 'succeeded' || $status === 'started' || $status === 'skipped' ? 'info' : 'error';
+			return new PipelineResult( false, $events, $e->getMessage() );
+		}
+	}
 
-        $this->logs->create([
-            'submission_id' => $submissionId,
-            'level' => $level,
-            'message' => sprintf('Step %s: %s', $step->id(), $status),
-            'context' => $evt->toArray(),
-        ]);
-    }
+	private function logEvent( SubmissionContext $ctx, PipelineStepInterface $step, string $status, ?string $error, int $ts ): void {
+		$submissionId = $ctx->getMeta( 'submission_id' );
+		if ( empty( $submissionId ) || ! is_int( $submissionId ) ) {
+			return; // nothing to persist
+		}
+
+		$schemaVersion = $ctx->getMeta( 'schema_version' );
+
+		$evt = new PipelineEvent(
+			$submissionId,
+			is_int( $schemaVersion ) ? $schemaVersion : null,
+			$step->id(),
+			$step->action()->id(),
+			$status,
+			$error,
+			$ts
+		);
+
+		$level = $status === 'succeeded' || $status === 'started' || $status === 'skipped' ? 'info' : 'error';
+
+		$this->logs->create(
+			array(
+				'submission_id' => $submissionId,
+				'level'         => $level,
+				'message'       => sprintf( 'Step %s: %s', $step->id(), $status ),
+				'context'       => $evt->toArray(),
+			)
+		);
+	}
 }

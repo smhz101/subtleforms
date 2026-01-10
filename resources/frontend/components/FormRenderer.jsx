@@ -31,6 +31,11 @@ export default function FormRenderer({
 
   // Load schema (skip if preloaded)
   useEffect(() => {
+    // Set render time for spam protection time trap
+    if (!window.subtleformsRenderTime) {
+      window.subtleformsRenderTime = Math.floor(Date.now() / 1000);
+    }
+
     if (preloadedSchema) {
       setLoading(false);
       return;
@@ -583,6 +588,14 @@ export default function FormRenderer({
       });
 
       try {
+        // Add honeypot and time trap fields to payload
+        const submissionPayload = {
+          ...payload,
+          website_url: '', // Honeypot field (should always be empty)
+          form_rendered_at:
+            window.subtleformsRenderTime || Math.floor(Date.now() / 1000),
+        };
+
         const response = await fetch(`${restUrl}submit`, {
           method: 'POST',
           credentials: 'same-origin',
@@ -591,7 +604,7 @@ export default function FormRenderer({
           },
           body: JSON.stringify({
             form_id: formId,
-            data: payload,
+            data: submissionPayload,
           }),
         });
 

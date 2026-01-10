@@ -489,7 +489,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                   <div data-tab='schema'>
                     <div className='sf-bg-gray-50 sf-p-4 sf-border sf-rounded'>
                       <pre className='sf-max-h-96 sf-overflow-y-auto sf-font-mono sf-text-gray-700 sf-text-xs sf-whitespace-pre-wrap'>
-                        {JSON.stringify(form?.attributes || {}, null, 2)}
+                        {JSON.stringify(submission.schema || {}, null, 2)}
                       </pre>
                     </div>
                   </div>

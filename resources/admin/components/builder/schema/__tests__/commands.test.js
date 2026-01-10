@@ -1,5 +1,5 @@
 import { insertNode, moveNode, deleteNode, duplicateNode } from '../index';
-import { normalizeSchema } from '../../../utils/schemaTree';
+import { normalizeSchema } from '../../utils/schemaTree';
 
 describe('Schema Commands', () => {
   let initialTree;

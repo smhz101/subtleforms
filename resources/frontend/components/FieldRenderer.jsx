@@ -16,7 +16,10 @@ export default function FieldRenderer({
   const isHidden = hiddenFields?.has(resolvedPath);
 
   // Accessible input id
-  const inputId = `subtleforms-field-${(resolvedPath || field.key).replace(/[^a-zA-Z0-9\-_:.]/g, '-')}`;
+  const inputId = `subtleforms-field-${(resolvedPath || field.key).replace(
+    /[^a-zA-Z0-9\-_:.]/g,
+    '-'
+  )}`;
 
   const error = errors?.[resolvedPath];
 
@@ -94,7 +97,10 @@ export default function FieldRenderer({
         field,
         value,
         (next) => onChange(resolvedPath, next),
-        placeholder
+        placeholder,
+        inputId,
+        required,
+        error
       )}
 
       {error && <div className='subtleforms-field-error'>{error}</div>}
@@ -102,7 +108,7 @@ export default function FieldRenderer({
   );
 }
 
-function renderInput(field, value, onChange, placeholder) {
+function renderInput(field, value, onChange, placeholder, inputId, required, error) {
   switch (field.type) {
     case 'text':
     case 'email':

@@ -5,6 +5,7 @@
  * @package SubtleForms
  */
 
+use PHPUnit\Framework\TestCase;
 use SubtleForms\Engine\FieldValidator;
 
 /**

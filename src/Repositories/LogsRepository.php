@@ -13,157 +13,155 @@ use SubtleForms\Support\Helpers;
 /**
  * Repository for managing submission logs.
  */
-final class LogsRepository
-{
-    /**
-     * @var string
-     */
-    private $table;
+final class LogsRepository {
 
-    public function __construct()
-    {
-        global $wpdb;
-        $this->table = $wpdb->prefix . 'subtleforms_logs';
-    }
+	/**
+	 * @var string
+	 */
+	private $table;
 
-    /**
-     * Get logs for a submission.
-     */
-    public function findBySubmission(int $submissionId, array $args = []): array
-    {
-        global $wpdb;
+	public function __construct() {
+		global $wpdb;
+		$this->table = $wpdb->prefix . 'subtleforms_logs';
+	}
 
-        $defaults = [
-            'level' => null,
-            'limit' => 50,
-            'offset' => 0,
-            'orderby' => 'created_at',
-            'order' => 'ASC',
-        ];
+	/**
+	 * Get logs for a submission.
+	 */
+	public function findBySubmission( int $submissionId, array $args = array() ): array {
+		global $wpdb;
 
-        $args = wp_parse_args($args, $defaults);
+		$defaults = array(
+			'level'   => null,
+			'limit'   => 50,
+			'offset'  => 0,
+			'orderby' => 'created_at',
+			'order'   => 'ASC',
+		);
 
-        $where = $wpdb->prepare('WHERE submission_id = %d', $submissionId);
+		$args = wp_parse_args( $args, $defaults );
 
-        if ($args['level']) {
-            $where .= $wpdb->prepare(' AND level = %s', $args['level']);
-        }
+		$where = $wpdb->prepare( 'WHERE submission_id = %d', $submissionId );
 
-        $sql = sprintf(
-            "SELECT * FROM {$this->table} %s ORDER BY %s %s LIMIT %d OFFSET %d",
-            $where,
-            esc_sql($args['orderby']),
-            esc_sql($args['order']),
-            intval($args['limit']),
-            intval($args['offset'])
-        );
+		if ( $args['level'] ) {
+			$where .= $wpdb->prepare( ' AND level = %s', $args['level'] );
+		}
 
-        $results = $wpdb->get_results($sql, ARRAY_A);
+		$sql = sprintf(
+			"SELECT * FROM {$this->table} %s ORDER BY %s %s LIMIT %d OFFSET %d",
+			$where,
+			esc_sql( $args['orderby'] ),
+			esc_sql( $args['order'] ),
+			intval( $args['limit'] ),
+			intval( $args['offset'] )
+		);
 
-        // Decode JSON context
-        foreach ($results as &$result) {
-            $result['context'] = Helpers::safe_json_decode(Helpers::safe_array_get($result, 'context', '{}'), true, []);
-        }
+		$results = $wpdb->get_results( $sql, ARRAY_A );
 
-        return $results;
-    }
+		// Decode JSON context
+		foreach ( $results as &$result ) {
+			$result['context'] = Helpers::safe_json_decode( Helpers::safe_array_get( $result, 'context', '{}' ), true, array() );
+		}
 
-    /**
-     * Create a new log entry.
-     */
-    public function create(array $data): int
-    {
-        global $wpdb;
+		return $results;
+	}
 
-        $defaults = [
-            'submission_id' => 0,
-            'level' => 'info',
-            'message' => '',
-            'context' => [],
-        ];
+	/**
+	 * Create a new log entry.
+	 */
+	public function create( array $data ): int {
+		global $wpdb;
 
-        $data = wp_parse_args($data, $defaults);
+		$defaults = array(
+			'submission_id' => 0,
+			'level'         => 'info',
+			'message'       => '',
+			'context'       => array(),
+		);
 
-        $wpdb->insert(
-            $this->table,
-            [
-                'submission_id' => intval($data['submission_id']),
-                'level' => $data['level'],
-                'message' => $data['message'],
-                'context' => wp_json_encode($data['context']),
-            ],
-            ['%d', '%s', '%s', '%s']
-        );
+		$data = wp_parse_args( $data, $defaults );
 
-        return $wpdb->insert_id;
-    }
+		$wpdb->insert(
+			$this->table,
+			array(
+				'submission_id' => intval( $data['submission_id'] ),
+				'level'         => $data['level'],
+				'message'       => $data['message'],
+				'context'       => wp_json_encode( $data['context'] ),
+			),
+			array( '%d', '%s', '%s', '%s' )
+		);
 
-    /**
-     * Log an info message.
-     */
-    public function info(int $submissionId, string $message, array $context = []): int
-    {
-        return $this->create([
-            'submission_id' => $submissionId,
-            'level' => 'info',
-            'message' => $message,
-            'context' => $context,
-        ]);
-    }
+		return $wpdb->insert_id;
+	}
 
-    /**
-     * Log an error message.
-     */
-    public function error(int $submissionId, string $message, array $context = []): int
-    {
-        return $this->create([
-            'submission_id' => $submissionId,
-            'level' => 'error',
-            'message' => $message,
-            'context' => $context,
-        ]);
-    }
+	/**
+	 * Log an info message.
+	 */
+	public function info( int $submissionId, string $message, array $context = array() ): int {
+		return $this->create(
+			array(
+				'submission_id' => $submissionId,
+				'level'         => 'info',
+				'message'       => $message,
+				'context'       => $context,
+			)
+		);
+	}
 
-    /**
-     * Log a warning message.
-     */
-    public function warning(int $submissionId, string $message, array $context = []): int
-    {
-        return $this->create([
-            'submission_id' => $submissionId,
-            'level' => 'warning',
-            'message' => $message,
-            'context' => $context,
-        ]);
-    }
+	/**
+	 * Log an error message.
+	 */
+	public function error( int $submissionId, string $message, array $context = array() ): int {
+		return $this->create(
+			array(
+				'submission_id' => $submissionId,
+				'level'         => 'error',
+				'message'       => $message,
+				'context'       => $context,
+			)
+		);
+	}
 
-    /**
-     * Delete logs for a submission.
-     */
-    public function deleteBySubmission(int $submissionId): bool
-    {
-        global $wpdb;
-        $result = $wpdb->delete($this->table, ['submission_id' => $submissionId], ['%d']);
-        return $result !== false;
-    }
+	/**
+	 * Log a warning message.
+	 */
+	public function warning( int $submissionId, string $message, array $context = array() ): int {
+		return $this->create(
+			array(
+				'submission_id' => $submissionId,
+				'level'         => 'warning',
+				'message'       => $message,
+				'context'       => $context,
+			)
+		);
+	}
 
-    /**
-     * Count logs.
-     */
-    public function count(?int $submissionId = null, array $args = []): int
-    {
-        global $wpdb;
+	/**
+	 * Delete logs for a submission.
+	 */
+	public function deleteBySubmission( int $submissionId ): bool {
+		global $wpdb;
+		$result = $wpdb->delete( $this->table, array( 'submission_id' => $submissionId ), array( '%d' ) );
+		return $result !== false;
+	}
 
-        $where = '';
-        if ($submissionId) {
-            $where = $wpdb->prepare(' WHERE submission_id = %d', $submissionId);
-        }
+	/**
+	 * Count logs.
+	 */
+	public function count( ?int $submissionId = null, array $args = array() ): int {
+		global $wpdb;
 
-        if (!empty($args['level'])) {
-            $operator = $submissionId ? ' AND' : ' WHERE';
-            $where .= $wpdb->prepare("{$operator} level = %s", $args['level']);
-        }
+		$where = '';
+		if ( $submissionId ) {
+			$where = $wpdb->prepare( ' WHERE submission_id = %d', $submissionId );
+		}
 
-        return (int) $wpdb->get_var("SELECT COUNT(*) FROM {$this->table}{$where}");
-    }
+		if ( ! empty( $args['level'] ) ) {
+			$operator = $submissionId ? ' AND' : ' WHERE';
+			$where   .= $wpdb->prepare( "{$operator} level = %s", $args['level'] );
+		}
+
+		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table}{$where}" );
+	}
 }

@@ -179,12 +179,8 @@ export default function FormBuilder() {
           parentId={parentId}
           columnIndex={parentColumnIndex}
           position={position}
-          children={({
-            setNodeRef,
-            style,
-            dragHandleRef,
-            dragHandleListeners,
-          }) => (
+        >
+          {({ setNodeRef, style, dragHandleRef, dragHandleListeners }) => (
             <div ref={setNodeRef} style={style}>
               <ContainerRenderer
                 node={node}
@@ -216,7 +212,7 @@ export default function FormBuilder() {
               />
             </div>
           )}
-        />
+        </SortableWrapper>
       );
     }
 
@@ -272,12 +268,8 @@ export default function FormBuilder() {
         parentId={parentId}
         columnIndex={columnIndex}
         position={position}
-        children={({
-          setNodeRef,
-          style,
-          dragHandleRef,
-          dragHandleListeners,
-        }) => (
+      >
+        {({ setNodeRef, style, dragHandleRef, dragHandleListeners }) => (
           <div ref={setNodeRef} style={style}>
             <FieldChrome
               isSelected={selectedId === nodeId}
@@ -297,7 +289,7 @@ export default function FormBuilder() {
             </FieldChrome>
           </div>
         )}
-      />
+      </SortableWrapper>
     );
   };
 
