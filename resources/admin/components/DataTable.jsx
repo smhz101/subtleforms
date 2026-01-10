@@ -233,12 +233,15 @@ const DataTable = memo(function DataTable({
         <div className='sf-flex sf-flex-shrink-0 sf-justify-between sf-items-center sf-bg-white sf-px-6 sf-py-4 sf-border-gray-300 sf-border-t'>
           <div className='sf-flex sf-items-center sf-gap-4'>
             <span className='sf-text-gray-700 sf-text-sm'>
-              {sprintf(
-                __('Showing %d to %d of %d', 'subtleforms'),
-                (currentPage - 1) * perPage + 1,
-                Math.min(currentPage * perPage, totalItems),
-                totalItems
-              )}
+              {(() => {
+                /* translators: 1: Starting item number, 2: Ending item number, 3: Total items */
+                return sprintf(
+                  __('Showing %d to %d of %d', 'subtleforms'),
+                  (currentPage - 1) * perPage + 1,
+                  Math.min(currentPage * perPage, totalItems),
+                  totalItems
+                );
+              })()}
             </span>
 
             <div className='sf-flex sf-items-center sf-gap-2'>
@@ -269,11 +272,14 @@ const DataTable = memo(function DataTable({
             </Button>
 
             <span className='sf-bg-gray-50 sf-px-3 sf-py-1 sf-border sf-border-gray-300 sf-text-gray-700 sf-text-sm'>
-              {sprintf(
-                __('Page %d of %d', 'subtleforms'),
-                currentPage,
-                totalPages
-              )}
+              {(() => {
+                /* translators: 1: Current page number, 2: Total pages */
+                return sprintf(
+                  __('Page %d of %d', 'subtleforms'),
+                  currentPage,
+                  totalPages
+                );
+              })()}
             </span>
 
             <Button
