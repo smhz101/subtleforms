@@ -43,6 +43,7 @@ require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Engine/PipelineResult.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Engine/ActionRegistry.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Engine/SubmissionContext.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Engine/Pipeline.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Engine/ActionDefinition.php';
 
 // Support
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/Logger.php';
