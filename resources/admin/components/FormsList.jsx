@@ -253,11 +253,14 @@ export default function FormsList({
               }
             )}
             onClick={(e) => e.stopPropagation()}
-            title={sprintf(
-              __('%d unread, %d total entries', 'subtleforms'),
-              unreadCount,
-              submissionCount
-            )}>
+            title={(() => {
+              /* translators: 1: unread count, 2: total submissions */
+              return sprintf(
+                __('%d unread, %d total entries', 'subtleforms'),
+                unreadCount,
+                submissionCount
+              );
+            })()}>
             {hasUnread && (
               <span className='sf-bg-blue-500 sf-w-2 sf-h-2 sf-animate-pulse'></span>
             )}
@@ -287,6 +290,7 @@ export default function FormsList({
         let displayText;
         if (diffInHours < 1) displayText = __('Just now', 'subtleforms');
         else if (diffInHours < 24)
+          /* translators: %d: number of hours ago */
           displayText = sprintf(__('%d hours ago', 'subtleforms'), diffInHours);
         else if (diffInHours < 48) displayText = __('Yesterday', 'subtleforms');
         else displayText = date.toLocaleDateString();
@@ -562,10 +566,13 @@ export default function FormsList({
   const handleBulkDelete = async (ids) => {
     if (
       !window.confirm(
-        sprintf(
-          __('Are you sure you want to delete %d forms?', 'subtleforms'),
-          ids.length
-        )
+        ( () => {
+          /* translators: %d: number of forms to delete */
+          return sprintf(
+            __('Are you sure you want to delete %d forms?', 'subtleforms'),
+            ids.length
+          );
+        } )()
       )
     ) {
       return;
