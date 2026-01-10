@@ -230,7 +230,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
 
   return (
     <AdminShell
-      title={sprintf(__('Submission #%d', 'subtleforms'), submission.id)}
+      title={(() => { /* translators: %1$d: submission id */ return sprintf(__('Submission #%1$d', 'subtleforms'), submission.id); })()}
       actions={actions}>
       <div className='sf-space-y-8'>
         <div className='subtleforms-card'>
@@ -245,7 +245,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                     type='checkbox'
                     checked={showEmpty}
                     onChange={(e) => setShowEmpty(e.target.checked)}
-                    className='sf-border-gray-300 sf-rounded sf-focus:ring-2 sf-focus:ring-blue-500 sf-text-blue-600'
+                    className='sf-border-gray-300 sf-rounded sf-focus:sf-ring-2 sf-focus:sf-ring-blue-500 sf-text-blue-600'
                   />
                   {__('Show empty fields', 'subtleforms')}
                 </label>
@@ -254,7 +254,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                     type='checkbox'
                     checked={showTechnical}
                     onChange={(e) => setShowTechnical(e.target.checked)}
-                    className='sf-border-gray-300 sf-rounded sf-focus:ring-2 sf-focus:ring-blue-500 sf-text-blue-600'
+                    className='sf-border-gray-300 sf-rounded sf-focus:sf-ring-2 sf-focus:sf-ring-blue-500 sf-text-blue-600'
                   />
                   {__('Show technical fields', 'subtleforms')}
                 </label>
@@ -529,14 +529,16 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                 {
                   name: 'general',
                   title: sprintf(
-                    __('General (%d)', 'subtleforms'),
+                    /* translators: %1$d: number of general log entries */
+                    __('General (%1$d)', 'subtleforms'),
                     generalLogs.length
                   ),
                 },
                 {
                   name: 'api',
                   title: sprintf(
-                    __('API Calls (%d)', 'subtleforms'),
+                    /* translators: %1$d: number of API call logs */
+                    __('API Calls (%1$d)', 'subtleforms'),
                     apiLogs.length
                   ),
                 },
@@ -663,7 +665,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                   <th>{__('User', 'subtleforms')}</th>
                   <td>
                     {meta.user_id
-                      ? sprintf(__('User #%d', 'subtleforms'), meta.user_id)
+                      ? sprintf(/* translators: %1$d: user id */ __('User #%1$d', 'subtleforms'), meta.user_id)
                       : __('Guest', 'subtleforms')}
                   </td>
                 </tr>
@@ -675,24 +677,12 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                       const now = new Date();
                       const diff = Math.floor((now - date) / 1000);
                       if (diff < 60)
-                        return sprintf(
-                          __('%d seconds ago', 'subtleforms'),
-                          diff
-                        );
+                        return (() => { /* translators: %1$d: number of seconds */ return sprintf( __('%1$d seconds ago', 'subtleforms'), diff ); })();
                       if (diff < 3600)
-                        return sprintf(
-                          __('%d minutes ago', 'subtleforms'),
-                          Math.floor(diff / 60)
-                        );
+                        return (() => { /* translators: %1$d: number of minutes */ return sprintf( __('%1$d minutes ago', 'subtleforms'), Math.floor(diff / 60) ); })();
                       if (diff < 86400)
-                        return sprintf(
-                          __('%d hours ago', 'subtleforms'),
-                          Math.floor(diff / 3600)
-                        );
-                      return sprintf(
-                        __('%d days ago', 'subtleforms'),
-                        Math.floor(diff / 86400)
-                      );
+                        return (() => { /* translators: %1$d: number of hours ago */ return sprintf( __('%1$d hours ago', 'subtleforms'), Math.floor(diff / 3600) ); })();
+                      return (() => { /* translators: %1$d: number of days */ return sprintf( __('%1$d days ago', 'subtleforms'), Math.floor(diff / 86400) ); })();
                     })()}
                   </td>
                 </tr>

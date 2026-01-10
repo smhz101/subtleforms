@@ -59,9 +59,9 @@ export default function BuilderCanvasArea({
               {validationErrors.length > 6 && (
                 <li>
                   {(() => {
-                    /* translators: %d: number of additional validation issues */
                     return sprintf(
-                      __('…and %d more', 'subtleforms'),
+                      /* translators: %1$d: number of additional validation issues */
+                      __('…and %1$d more', 'subtleforms'),
                       validationErrors.length - 6
                     );
                   })()}

@@ -20,8 +20,6 @@ import {
   Edit2,
   Edit3,
   Move,
-  RotateCcw,
-  RotateCw,
   ChevronUp,
   ChevronDown,
   ChevronLeft,
@@ -68,6 +66,8 @@ import {
   Navigation,
   Lock,
   DollarSign,
+  Undo2,
+  Redo2,
 } from 'lucide-react';
 
 /**
@@ -90,8 +90,8 @@ const Icon = {
   Edit2,
   Edit3,
   Move,
-  Undo: RotateCcw,
-  Redo: RotateCw,
+  Undo: Undo2,
+  Redo: Redo2,
 
   // Navigation
   Up: ChevronUp,

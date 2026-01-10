@@ -32,6 +32,7 @@ export default function SubmissionsPage({ formId }) {
   const [selectedFormId, setSelectedFormId] = useState(formId || 'all');
   const [dateRange, setDateRange] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const submissionsTableRef = useRef(null);
 
   // Real-time updates for live badge and table refresh
@@ -92,7 +93,7 @@ export default function SubmissionsPage({ formId }) {
   const formOptions = [
     { label: __('All forms', 'subtleforms'), value: 'all' },
     ...forms.map((form) => ({
-      label: form.title || sprintf(__('Form #%d', 'subtleforms'), form.id),
+      label: form.title || sprintf(/* translators: %1$d: form id */ __('Form #%1$d', 'subtleforms'), form.id),
       value: String(form.id),
     })),
   ];
@@ -110,6 +111,49 @@ export default function SubmissionsPage({ formId }) {
     setDateRange('all');
   };
 
+  const exportSubmissions = async () => {
+    setExporting(true);
+
+    try {
+      const response = await apiFetch({
+        path: '/subtleforms/v1/submissions/export',
+        method: 'POST',
+        data: {
+          form_id: selectedFormId !== 'all' ? parseInt(selectedFormId) : null,
+          status: statusFilter !== 'all' ? statusFilter : null,
+          search: search || null,
+        },
+      });
+
+      if (response.success && response.csv) {
+        // Decode base64 CSV
+        const csvData = atob(response.csv);
+        const blob = new Blob([csvData], {
+          type: 'text/csv;charset=utf-8;',
+        });
+
+        // Create download link
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', response.filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        alert(
+          response.message || __('Failed to export submissions', 'subtleforms')
+        );
+      }
+    } catch (error) {
+      console.error('Export failed:', error);
+      alert(__('Failed to export submissions', 'subtleforms'));
+    } finally {
+      setExporting(false);
+    }
+  };
+
   return (
     <AdminShell
       title={title}
@@ -123,6 +167,15 @@ export default function SubmissionsPage({ formId }) {
       }
       actionBarRight={
         <div className='sf-flex sf-items-center sf-gap-2'>
+          <Button
+            variant='secondary'
+            onClick={exportSubmissions}
+            disabled={exporting}
+            className='sf-h-9'>
+            {exporting
+              ? __('Exporting...', 'subtleforms')
+              : __('Export CSV', 'subtleforms')}
+          </Button>
           {!formId && (
             <Button
               variant={showFilters ? 'primary' : 'secondary'}

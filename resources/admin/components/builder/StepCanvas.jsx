@@ -5,22 +5,39 @@
  * Provides step-scoped drag & drop, insert zones, and empty states.
  */
 import { __ } from '@wordpress/i18n';
+import { useBuilder } from './context/BuilderContext';
 import ColumnDropZone from './ColumnDropZone';
 
 export default function StepCanvas({
-  tree,
   stepId,
   stepNumber,
   totalSteps,
-  selectedId,
-  onSelect,
-  onDelete,
-  onDuplicate,
-  onMove,
-  onRequestInsert,
-  validationErrorsByFieldKey,
   renderNode,
 }) {
+  // Get state from context
+  const {
+    tree,
+    selectedId,
+    setSelectedId,
+    actions: { onDelete, onDuplicate, onMove, onRequestInsert },
+    validationErrors,
+  } = useBuilder();
+
+  // Build validation errors map
+  const validationErrorsByFieldKey = {};
+  if (Array.isArray(validationErrors)) {
+    validationErrors.forEach((err) => {
+      const fieldKey = err?.fieldKey || err?.field_key || null;
+      const message = err?.message || null;
+      if (fieldKey && message) {
+        if (!validationErrorsByFieldKey[fieldKey]) {
+          validationErrorsByFieldKey[fieldKey] = [];
+        }
+        validationErrorsByFieldKey[fieldKey].push(message);
+      }
+    });
+  }
+
   const stepNode = tree.nodes[stepId];
 
   if (!stepNode) {
@@ -53,12 +70,12 @@ export default function StepCanvas({
       {/* Step Context Header - Clickable to select step */}
       <div
         className='sf-bg-blue-50 hover:sf-bg-blue-100 sf-mb-6 sf-px-4 sf-py-3 sf-border sf-border-blue-200 sf-rounded-lg sf-cursor-pointer'
-        onClick={() => onSelect(stepId)}
+        onClick={() => setSelectedId(stepId)}
         role='button'
         tabIndex={0}
         onKeyPress={(e) => {
           if (e.key === 'Enter' || e.key === ' ') {
-            onSelect(stepId);
+            setSelectedId(stepId);
           }
         }}
         data-testid={`step-header-${stepNumber}`}>

@@ -2,11 +2,13 @@ import { useMemo, useCallback } from '@wordpress/element';
 import {
   DndContext,
   PointerSensor,
+  KeyboardSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { useSortable } from '@dnd-kit/sortable';
+import { useSortable, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useBuilder } from './context/BuilderContext';
 import FieldRenderer from './FieldRenderer';
 import ContainerRenderer from './ContainerRenderer';
 import ColumnDropZone from './ColumnDropZone';
@@ -16,6 +18,7 @@ import {
   nodeToField,
   isColumnContainer,
   nodeChildren,
+  getRootNodeId,
 } from './utils/schemaTree';
 
 function SortableWrapper({
@@ -62,21 +65,45 @@ function SortableWrapper({
   });
 }
 
-export default function FormBuilder({
-  tree,
-  rootId,
-  selectedId,
-  selectedStepId,
-  onSelect,
-  onDelete,
-  onMove,
-  onDuplicate,
-  onRequestInsert,
-  validationErrorsByFieldKey = {},
-}) {
+export default function FormBuilder() {
+  // Get all state from context
+  const {
+    tree,
+    selectedId,
+    selectedStepId,
+    setSelectedId,
+    actions: { onMove, onDelete, onDuplicate, onRequestInsert },
+    validationErrors,
+  } = useBuilder();
+
+  // Build validation errors map
+  const validationErrorsByFieldKey = useMemo(() => {
+    const map = {};
+    if (!Array.isArray(validationErrors)) {
+      return map;
+    }
+    validationErrors.forEach((err) => {
+      const fieldKey = err?.fieldKey || err?.field_key || null;
+      const message = err?.message || null;
+      if (!fieldKey || !message) {
+        return;
+      }
+      if (!map[fieldKey]) {
+        map[fieldKey] = [];
+      }
+      map[fieldKey].push(message);
+    });
+    return map;
+  }, [validationErrors]);
+
+  const rootId = getRootNodeId();
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 6 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
@@ -163,7 +190,7 @@ export default function FormBuilder({
                 node={node}
                 columns={columns}
                 isSelected={selectedId === nodeId}
-                onSelect={() => onSelect(nodeId)}
+                onSelect={() => setSelectedId(nodeId)}
                 onDelete={() => onDelete(nodeId)}
                 spacing={spacing}
                 dragHandleRef={dragHandleRef}
@@ -254,7 +281,7 @@ export default function FormBuilder({
           <div ref={setNodeRef} style={style}>
             <FieldChrome
               isSelected={selectedId === nodeId}
-              onSelect={() => onSelect(nodeId)}
+              onSelect={() => setSelectedId(nodeId)}
               dragHandleRef={dragHandleRef}
               dragHandleListeners={dragHandleListeners}
               validationMessages={validationMessages}
@@ -282,17 +309,9 @@ export default function FormBuilder({
             {isMultiStepForm && activeStep ? (
               /* Multi-step form: Show step-scoped canvas */
               <StepCanvas
-                tree={tree}
                 stepId={selectedStepId}
                 stepNumber={stepNodes.indexOf(selectedStepId) + 1}
                 totalSteps={stepNodes.length}
-                selectedId={selectedId}
-                onSelect={onSelect}
-                onDelete={onDelete}
-                onDuplicate={onDuplicate}
-                onMove={onMove}
-                onRequestInsert={onRequestInsert}
-                validationErrorsByFieldKey={validationErrorsByFieldKey}
                 renderNode={renderNode}
               />
             ) : (

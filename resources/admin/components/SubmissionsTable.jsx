@@ -254,12 +254,9 @@ const SubmissionsTable = forwardRef(
       if (
         !window.confirm(
           (() => {
-            /* translators: %d: number of submissions to delete */
             return sprintf(
-              __(
-                'Are you sure you want to delete %d submissions?',
-                'subtleforms'
-              ),
+              /* translators: %1$d: number of submissions to delete */
+              __('Are you sure you want to delete %1$d submissions?', 'subtleforms'),
               ids.length
             );
           })()
@@ -281,25 +278,25 @@ const SubmissionsTable = forwardRef(
 
       if (successCount === ids.length) {
         createSuccessNotice(
-          ( () => {
-            /* translators: %d: number of submissions deleted */
-            return sprintf(__('%d submissions deleted', 'subtleforms'), successCount);
-          } )(),
+          (() => {
+            return sprintf(
+              /* translators: %1$d: number of submissions deleted */
+              __('%1$d submissions deleted', 'subtleforms'),
+              successCount
+            );
+          })(),
           { type: 'snackbar' }
         );
       } else {
         createErrorNotice(
-          ( () => {
-            /* translators: 1: number deleted, 2: total requested */
+          (() => {
             return sprintf(
-              __(
-                'Failed to delete some submissions (%d/%d deleted)',
-                'subtleforms'
-              ),
+              /* translators: %1$d: number deleted, %2$d: total requested */
+              __('Failed to delete some submissions (%1$d/%2$d deleted)', 'subtleforms'),
               successCount,
               ids.length
             );
-          } )(),
+          })(),
           { type: 'snackbar' }
         );
         loadSubmissions(); // Reload to sync state
@@ -323,16 +320,18 @@ const SubmissionsTable = forwardRef(
 
       if (successCount === ids.length) {
         createSuccessNotice(
-          sprintf(__('%d submissions updated', 'subtleforms'), successCount),
+          sprintf(
+            /* translators: %1$d: number of submissions updated */
+            __('%1$d submissions updated', 'subtleforms'),
+            successCount
+          ),
           { type: 'snackbar' }
         );
       } else {
         createErrorNotice(
           sprintf(
-            __(
-              'Failed to update some submissions (%d/%d updated)',
-              'subtleforms'
-            ),
+            /* translators: %1$d: number updated, %2$d: total requested */
+            __('Failed to update some submissions (%1$d/%2$d updated)', 'subtleforms'),
             successCount,
             ids.length
           ),
@@ -377,21 +376,34 @@ const SubmissionsTable = forwardRef(
       const date = new Date(dateString);
       const now = new Date();
       const diff = Math.floor((now - date) / 1000);
-      if (diff < 60) return sprintf(__('%d seconds ago', 'subtleforms'), diff);
+      if (diff < 60)
+        return (() => {
+          /* translators: %1$d: number of seconds */
+          return sprintf(__('%1$d seconds ago', 'subtleforms'), diff);
+        })();
       if (diff < 3600)
-        return sprintf(
-          __('%d minutes ago', 'subtleforms'),
-          Math.floor(diff / 60)
-        );
+        return (() => {
+          /* translators: %1$d: number of minutes */
+          return sprintf(
+            __('%1$d minutes ago', 'subtleforms'),
+            Math.floor(diff / 60)
+          );
+        })();
       if (diff < 86400)
+        return (() => {
+          /* translators: %1$d: number of hours ago */
+          return sprintf(
+            __('%1$d hours ago', 'subtleforms'),
+            Math.floor(diff / 3600)
+          );
+        })();
+      return (() => {
+        /* translators: %1$d: number of days */
         return sprintf(
-          __('%d hours ago', 'subtleforms'),
-          Math.floor(diff / 3600)
+          __('%1$d days ago', 'subtleforms'),
+          Math.floor(diff / 86400)
         );
-      return sprintf(
-        __('%d days ago', 'subtleforms'),
-        Math.floor(diff / 86400)
-      );
+      })();
     };
 
     const getBrowserDevice = (userAgent) => {

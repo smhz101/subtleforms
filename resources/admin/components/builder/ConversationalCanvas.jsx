@@ -1,25 +1,27 @@
 import { useState, useMemo, useEffect } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { useBuilder } from './context/BuilderContext';
 import Icon from '../ui/Icon';
 import FieldRenderer from './FieldRenderer';
 import FieldChrome from './FieldChrome';
-import { nodeToField, nodeChildren } from './utils/schemaTree';
+import { nodeToField, nodeChildren, getRootNodeId } from './utils/schemaTree';
 
 /**
  * ConversationalCanvas - Single field at a time view for conversational forms
  *
  * Displays one field at a time with Next/Previous navigation and progress indicator
  */
-export default function ConversationalCanvas({
-  tree,
-  rootId,
-  selectedId,
-  onSelect,
-  onDelete,
-  onDuplicate,
-  onRequestInsert,
-}) {
+export default function ConversationalCanvas() {
+  // Get all state from context
+  const {
+    tree,
+    selectedId,
+    setSelectedId,
+    actions: { onDelete, onDuplicate, onRequestInsert },
+  } = useBuilder();
+
+  const rootId = getRootNodeId();
   const [currentIndex, setCurrentIndex] = useState(0);
 
   // Get all top-level fields (non-container fields)
@@ -58,7 +60,7 @@ export default function ConversationalCanvas({
     if (hasNext) {
       const nextIndex = currentIndex + 1;
       setCurrentIndex(nextIndex);
-      onSelect(fields[nextIndex]?.id);
+      setSelectedId(fields[nextIndex]?.id);
     }
   };
 
@@ -66,12 +68,12 @@ export default function ConversationalCanvas({
     if (hasPrevious) {
       const prevIndex = currentIndex - 1;
       setCurrentIndex(prevIndex);
-      onSelect(fields[prevIndex]?.id);
+      setSelectedId(fields[prevIndex]?.id);
     }
   };
 
   const handleSelect = (nodeId) => {
-    onSelect(nodeId);
+    setSelectedId(nodeId);
     const index = fields.findIndex((f) => f.id === nodeId);
     if (index >= 0) {
       setCurrentIndex(index);
@@ -156,7 +158,7 @@ export default function ConversationalCanvas({
               key={f.id}
               onClick={() => {
                 setCurrentIndex(index);
-                onSelect(f.id);
+                setSelectedId(f.id);
               }}
               className={`sf-w-2 sf-h-2 sf-rounded-full sf-transition-all ${
                 index === currentIndex

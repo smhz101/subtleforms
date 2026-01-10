@@ -1,24 +1,14 @@
 import { __ } from '@wordpress/i18n';
+import {
+  createNodeId,
+  createFieldKey,
+  ensureUniqueFieldKey,
+  collectExistingKeys,
+} from './idGenerator';
 
 const ROOT_NODE_ID = 'root';
 
 const COLUMN_CONTAINER_SUFFIX = '_column_container';
-
-function createNodeId() {
-  return `node_${Math.random().toString(36).slice(2, 11)}`;
-}
-
-function createFieldKey(type) {
-  const base = typeof type === 'string' && type.length ? type : 'field';
-  const normalized = base
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '_')
-    .replace(/^_+|_+$/g, '')
-    .slice(0, 24);
-  const prefix = normalized || 'field';
-  const uniqueSegment = `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
-  return `${prefix}_${uniqueSegment}`;
-}
 
 function isColumnContainerType(type) {
   return typeof type === 'string' && type.endsWith(COLUMN_CONTAINER_SUFFIX);
@@ -218,9 +208,9 @@ export function nodeToField(tree, nodeId) {
   return buildField(nodeId, tree);
 }
 
-export function createNodeFromDefinition(definition) {
+export function createNodeFromDefinition(definition, existingKeys = new Set()) {
   const id = createNodeId();
-  const key = createFieldKey(definition.type);
+  const key = createFieldKey(definition.type, existingKeys);
   const node = {
     id,
     type: definition.type,
@@ -310,7 +300,7 @@ export function addNodeToTree(tree, node, { parentId, columnIndex = null, positi
   return updatedTree;
 }
 
-function removeNodeFromParent(tree, nodeId) {
+export function removeNodeFromParent(tree, nodeId) {
   const nodes = { ...tree.nodes };
   const node = nodes[nodeId];
   if (!node) {

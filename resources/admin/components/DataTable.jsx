@@ -130,10 +130,13 @@ const DataTable = memo(function DataTable({
       {selectable && selectedItems.length > 0 && (
         <div className='sf-flex sf-items-center sf-gap-4 sf-bg-blue-50 sf-px-6 sf-py-2 sf-border-blue-100 sf-border-b sf-text-sm'>
           <span className='sf-font-medium sf-text-blue-900'>
-            {sprintf(
-              __('%d items selected', 'subtleforms'),
-              selectedItems.length
-            )}
+            {(() => {
+              return sprintf(
+                /* translators: %1$d: number of selected items */
+                __('%1$d items selected', 'subtleforms'),
+                selectedItems.length
+              );
+            })()}
           </span>
           <div className='sf-flex sf-items-center sf-gap-2 sf-h-8'>
             {bulkActions.map((action, index) => (
@@ -234,9 +237,9 @@ const DataTable = memo(function DataTable({
           <div className='sf-flex sf-items-center sf-gap-4'>
             <span className='sf-text-gray-700 sf-text-sm'>
               {(() => {
-                /* translators: 1: Starting item number, 2: Ending item number, 3: Total items */
                 return sprintf(
-                  __('Showing %d to %d of %d', 'subtleforms'),
+                  /* translators: %1$d: starting item number, %2$d: ending item number, %3$d: total items */
+                  __('Showing %1$d to %2$d of %3$d', 'subtleforms'),
                   (currentPage - 1) * perPage + 1,
                   Math.min(currentPage * perPage, totalItems),
                   totalItems
@@ -273,9 +276,9 @@ const DataTable = memo(function DataTable({
 
             <span className='sf-bg-gray-50 sf-px-3 sf-py-1 sf-border sf-border-gray-300 sf-text-gray-700 sf-text-sm'>
               {(() => {
-                /* translators: 1: Current page number, 2: Total pages */
                 return sprintf(
-                  __('Page %d of %d', 'subtleforms'),
+                  /* translators: %1$d: Current page number, %2$d: Total pages */
+                  __('Page %1$d of %2$d', 'subtleforms'),
                   currentPage,
                   totalPages
                 );

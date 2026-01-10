@@ -7,16 +7,29 @@ import {
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import ConditionEditor from './ConditionEditor';
+import { useBuilder } from './context/BuilderContext';
 
-export default function FieldInspector({
-  field,
-  onUpdate,
-  onClose,
-  allFields,
-  validationMessages = [],
-}) {
+export default function FieldInspector({ field, allFields }) {
+  const { setSelectedId, actions, validationErrors, selectedId } = useBuilder();
+
+  const selectedFieldValidationMessages = selectedId
+    ? (validationErrors || [])
+        .filter((v) => v.fieldKey === field?.config?.key)
+        .map((v) => v.message)
+    : [];
+
   const hasValidationMessages =
-    Array.isArray(validationMessages) && validationMessages.length > 0;
+    Array.isArray(selectedFieldValidationMessages) &&
+    selectedFieldValidationMessages.length > 0;
+
+  const handleUpdate = (changes) => {
+    if (!selectedId) return;
+    actions.onUpdate(selectedId, changes);
+  };
+
+  const handleClose = () => {
+    setSelectedId(null);
+  };
 
   return (
     <div className='sf-bg-white sf-border-gray-300 sf-border-l sf-w-80 sf-h-full sf-overflow-auto sf-field-inspector'>
@@ -27,7 +40,7 @@ export default function FieldInspector({
         </strong>
         <Button
           isSmall
-          onClick={onClose}
+          onClick={handleClose}
           disabled={!field}
           className='sf-px-2 sf-py-1 sf-min-w-0'>
           ×
@@ -54,7 +67,9 @@ export default function FieldInspector({
           <>
             {hasValidationMessages && (
               <Notice status='warning' isDismissible={false}>
-                <p className='sf-m-0 sf-text-sm'>{validationMessages[0]}</p>
+                <p className='sf-m-0 sf-text-sm'>
+                  {selectedFieldValidationMessages[0]}
+                </p>
               </Notice>
             )}
             <TabPanel
@@ -85,7 +100,7 @@ export default function FieldInspector({
                           <TextControl
                             label={__('Step Title', 'subtleforms')}
                             value={field.title || ''}
-                            onChange={(v) => onUpdate({ title: v })}
+                            onChange={(v) => handleUpdate({ title: v })}
                             help={__(
                               'Title shown in step navigation',
                               'subtleforms'
@@ -94,7 +109,7 @@ export default function FieldInspector({
                           <TextControl
                             label={__('Description', 'subtleforms')}
                             value={field.description || ''}
-                            onChange={(v) => onUpdate({ description: v })}
+                            onChange={(v) => handleUpdate({ description: v })}
                             help={__(
                               'Optional description for this step',
                               'subtleforms'
@@ -118,14 +133,16 @@ export default function FieldInspector({
                               <TextControl
                                 label={__('Button Label', 'subtleforms')}
                                 value={field.buttonLabel || ''}
-                                onChange={(v) => onUpdate({ buttonLabel: v })}
+                                onChange={(v) =>
+                                  handleUpdate({ buttonLabel: v })
+                                }
                               />
                               <TextControl
                                 label={__('Min Repeats', 'subtleforms')}
                                 type='number'
                                 value={field.min || 1}
                                 onChange={(v) =>
-                                  onUpdate({ min: parseInt(v, 10) })
+                                  handleUpdate({ min: parseInt(v, 10) })
                                 }
                               />
                               <TextControl
@@ -133,7 +150,7 @@ export default function FieldInspector({
                                 type='number'
                                 value={field.max || 5}
                                 onChange={(v) =>
-                                  onUpdate({ max: parseInt(v, 10) })
+                                  handleUpdate({ max: parseInt(v, 10) })
                                 }
                               />
                             </>
@@ -144,7 +161,7 @@ export default function FieldInspector({
                             value={field.spacing ?? ''}
                             onChange={(v) => {
                               const next = parseInt(v, 10);
-                              onUpdate({
+                              handleUpdate({
                                 spacing: Number.isNaN(next) ? 0 : next,
                               });
                             }}
@@ -155,7 +172,7 @@ export default function FieldInspector({
                           <TextControl
                             label={__('Field Label', 'subtleforms')}
                             value={field.label || ''}
-                            onChange={(v) => onUpdate({ label: v })}
+                            onChange={(v) => handleUpdate({ label: v })}
                             help={__(
                               'The label displayed above the field',
                               'subtleforms'
@@ -164,7 +181,7 @@ export default function FieldInspector({
                           <TextControl
                             label={__('Placeholder Text', 'subtleforms')}
                             value={field.placeholder || ''}
-                            onChange={(v) => onUpdate({ placeholder: v })}
+                            onChange={(v) => handleUpdate({ placeholder: v })}
                             help={__(
                               'Hint text shown inside the field',
                               'subtleforms'
@@ -197,7 +214,7 @@ export default function FieldInspector({
                                 onChange={(v) => {
                                   const newOptions = [...(field.options || [])];
                                   newOptions[idx] = { ...opt, label: v };
-                                  onUpdate({ options: newOptions });
+                                  handleUpdate({ options: newOptions });
                                 }}
                                 placeholder={__('Option label', 'subtleforms')}
                               />
@@ -207,7 +224,7 @@ export default function FieldInspector({
                                 onClick={() => {
                                   const newOptions = [...(field.options || [])];
                                   newOptions.splice(idx, 1);
-                                  onUpdate({ options: newOptions });
+                                  handleUpdate({ options: newOptions });
                                 }}>
                                 ×
                               </Button>
@@ -226,7 +243,7 @@ export default function FieldInspector({
                                   value: `option_${Date.now()}`,
                                 },
                               ];
-                              onUpdate({ options: newOptions });
+                              handleUpdate({ options: newOptions });
                             }}>
                             {__('+ Add Option', 'subtleforms')}
                           </Button>
@@ -239,7 +256,9 @@ export default function FieldInspector({
                       <CheckboxControl
                         label={__('Required Field', 'subtleforms')}
                         checked={!!field.required}
-                        onChange={(checked) => onUpdate({ required: checked })}
+                        onChange={(checked) =>
+                          handleUpdate({ required: checked })
+                        }
                         help={__(
                           'User must fill this field to submit',
                           'subtleforms'
@@ -251,7 +270,7 @@ export default function FieldInspector({
                     <ConditionEditor
                       conditions={field.conditions || []}
                       availableFields={allFields || []}
-                      onChange={(conditions) => onUpdate({ conditions })}
+                      onChange={(conditions) => handleUpdate({ conditions })}
                     />
                   )}
                 </div>

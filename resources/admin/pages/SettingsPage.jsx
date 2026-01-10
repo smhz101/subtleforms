@@ -670,6 +670,67 @@ function AdvancedSettings({
             <FieldError errors={fieldErrors.log_retention_days} />
           </div>
 
+          <div>
+            <h4 className='sf-mb-2 sf-font-semibold'>
+              {__('Spam Protection', 'subtleforms')}
+            </h4>
+            <ToggleControl
+              label={__('Enable Honeypot Protection', 'subtleforms')}
+              checked={settings.enable_honeypot ?? true}
+              onChange={(value) => updateSetting('enable_honeypot', value)}
+              help={__(
+                'Adds invisible fields to detect and block spam bots',
+                'subtleforms'
+              )}
+            />
+            <FieldError errors={fieldErrors.enable_honeypot} />
+          </div>
+
+          <div>
+            <TextControl
+              label={__('Minimum Submission Time (seconds)', 'subtleforms')}
+              type='number'
+              value={String(settings.min_submission_time ?? 3)}
+              onChange={(value) =>
+                updateSetting('min_submission_time', parseInt(value))
+              }
+              min='0'
+              max='60'
+              help={__(
+                'Minimum time required before form submission (prevents instant bot submissions)',
+                'subtleforms'
+              )}
+            />
+            <FieldError errors={fieldErrors.min_submission_time} />
+          </div>
+
+          <div>
+            <h4 className='sf-mb-2 sf-font-semibold'>
+              {__('Privacy & GDPR', 'subtleforms')}
+            </h4>
+            <TextControl
+              label={__('Data Retention Period (days)', 'subtleforms')}
+              type='number'
+              value={String(settings.data_retention_days ?? 0)}
+              onChange={(value) =>
+                updateSetting('data_retention_days', parseInt(value))
+              }
+              min='0'
+              max='3650'
+              help={__(
+                'Automatically delete submissions older than this many days. Set to 0 to keep submissions forever. Recommended: 365-730 days for GDPR compliance.',
+                'subtleforms'
+              )}
+            />
+            <FieldError errors={fieldErrors.data_retention_days} />
+            <p className='sf-mt-2 sf-text-gray-600 sf-text-sm'>
+              {__(
+                'Note: Submissions can also be exported or erased via WordPress Privacy Tools (Tools → Export/Erase Personal Data).',
+                'subtleforms'
+              )}
+            </p>
+          </div>
+
           <div className='subtleforms-settings-danger-zone'>
             <h3>{__('Danger Zone', 'subtleforms')}</h3>
             <p>
