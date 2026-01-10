@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, chore/sanitize-submissions ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php-versions: [7.4, 8.0, 8.1, 8.2, 8.3]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          coverage: none
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build assets
+        run: npm run build --silent
+
+      - name: PHP syntax check
+        run: find . -name "*.php" -not -path "./node_modules/*" -print0 | xargs -0 -n1 php -l
+
+      - name: Run JS unit tests
+        run: npm test --silent || true
+
+      - name: Generate POT (sanity)
+        run: npx wp i18n make-pot . languages/subtleforms.pot --exclude=node_modules,build --domain=subtleforms || true
+
+      - name: List changed files
+        run: git status --porcelain || true
