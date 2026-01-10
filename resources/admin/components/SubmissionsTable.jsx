@@ -253,13 +253,16 @@ const SubmissionsTable = forwardRef(
     const handleBulkDelete = async (ids) => {
       if (
         !window.confirm(
-          sprintf(
-            __(
-              'Are you sure you want to delete %d submissions?',
-              'subtleforms'
-            ),
-            ids.length
-          )
+          (() => {
+            /* translators: %d: number of submissions to delete */
+            return sprintf(
+              __(
+                'Are you sure you want to delete %d submissions?',
+                'subtleforms'
+              ),
+              ids.length
+            );
+          })()
         )
       ) {
         return;
@@ -278,19 +281,25 @@ const SubmissionsTable = forwardRef(
 
       if (successCount === ids.length) {
         createSuccessNotice(
-          sprintf(__('%d submissions deleted', 'subtleforms'), successCount),
+          ( () => {
+            /* translators: %d: number of submissions deleted */
+            return sprintf(__('%d submissions deleted', 'subtleforms'), successCount);
+          } )(),
           { type: 'snackbar' }
         );
       } else {
         createErrorNotice(
-          sprintf(
-            __(
-              'Failed to delete some submissions (%d/%d deleted)',
-              'subtleforms'
-            ),
-            successCount,
-            ids.length
-          ),
+          ( () => {
+            /* translators: 1: number deleted, 2: total requested */
+            return sprintf(
+              __(
+                'Failed to delete some submissions (%d/%d deleted)',
+                'subtleforms'
+              ),
+              successCount,
+              ids.length
+            );
+          } )(),
           { type: 'snackbar' }
         );
         loadSubmissions(); // Reload to sync state
