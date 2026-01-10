@@ -62,6 +62,11 @@ require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Admin/AdminMenu.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Api/RestController.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Frontend/Shortcode.php';
 
+// Privacy
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Privacy/PrivacyEraser.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Privacy/PrivacyExporter.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Privacy/PrivacyManager.php';
+
 // Repositories
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Repositories/FormsRepository.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Repositories/SubmissionsRepository.php';
