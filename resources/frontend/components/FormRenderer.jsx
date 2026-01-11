@@ -41,7 +41,7 @@ export default function FormRenderer({
       return;
     }
 
-    fetch(`${restUrl}forms/${formId}/schema`, {
+    fetch(`${restUrl.replace(/\/$/, '')}/forms/${formId}/schema`, {
       credentials: 'same-origin',
       headers: {
         'X-WP-Nonce': nonce,
@@ -596,7 +596,7 @@ export default function FormRenderer({
             window.subtleformsRenderTime || Math.floor(Date.now() / 1000),
         };
 
-        const response = await fetch(`${restUrl}submit`, {
+        const response = await fetch(`${restUrl.replace(/\/$/, '')}/submit`, {
           method: 'POST',
           credentials: 'same-origin',
           headers: {
