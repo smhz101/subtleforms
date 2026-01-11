@@ -6,14 +6,14 @@ namespace SubtleForms\Contracts;
 /**
  * Extensions register actions, admin pages, settings, etc.
  */
-interface ExtensionInterface
-{
-    public function slug(): string;
+interface ExtensionInterface {
 
-    public function register(): void;
+	public function slug(): string;
 
-    /**
-     * @return string[] Required capabilities to enable this extension.
-     */
-    public function requiredCapabilities(): array;
+	public function register(): void;
+
+	/**
+	 * @return string[] Required capabilities to enable this extension.
+	 */
+	public function requiredCapabilities(): array;
 }

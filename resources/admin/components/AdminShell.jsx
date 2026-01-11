@@ -15,6 +15,7 @@ import './AdminShell.scss';
  * - Optional sticky action bar for filters/search
  * - Fixed viewport height with internal scrolling (not body scroll)
  * - Consistent spacing and typography across all admin pages
+ * - Editable title support
  *
  * Structure:
  * - Top Bar (sticky 60px): Logo, page title, actions (via AdminHeader component)
@@ -36,6 +37,8 @@ export default function AdminShell({
   children,
   pagination,
   noScroll = false,
+  editableTitle = false,
+  onTitleChange,
 }) {
   const TOP_BAR_HEIGHT = 60;
   const ACTION_BAR_HEIGHT = actionBarLeft || actionBarRight ? 56 : 0;
@@ -45,7 +48,12 @@ export default function AdminShell({
     <div className='subtleforms-admin sf-admin-shell'>
       <div className='sf-flex sf-flex-col sf-bg-white sf-h-[calc(100vh-var(--wp-admin--admin-bar--height,32px))] shell-container'>
         {/* TOP BAR - Sticky Header Component */}
-        <AdminHeader title={title} actions={actions} />
+        <AdminHeader
+          title={title}
+          actions={actions}
+          editableTitle={editableTitle}
+          onTitleChange={onTitleChange}
+        />
 
         {/* ACTION BAR - Sticky ActionBar Component */}
         {(actionBarLeft || actionBarRight) && (

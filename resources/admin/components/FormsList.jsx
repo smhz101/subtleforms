@@ -253,11 +253,14 @@ export default function FormsList({
               }
             )}
             onClick={(e) => e.stopPropagation()}
-            title={sprintf(
-              __('%d unread, %d total entries', 'subtleforms'),
-              unreadCount,
-              submissionCount
-            )}>
+            title={(() => {
+                return sprintf(
+                /* translators: %1$d: unread count, %2$d: total submissions */
+                __('%1$d unread, %2$d total entries', 'subtleforms'),
+                unreadCount,
+                submissionCount
+              );
+            })()}>
             {hasUnread && (
               <span className='sf-bg-blue-500 sf-w-2 sf-h-2 sf-animate-pulse'></span>
             )}
@@ -287,7 +290,8 @@ export default function FormsList({
         let displayText;
         if (diffInHours < 1) displayText = __('Just now', 'subtleforms');
         else if (diffInHours < 24)
-          displayText = sprintf(__('%d hours ago', 'subtleforms'), diffInHours);
+          /* translators: %1$d: number of hours ago */
+          displayText = sprintf(__('%1$d hours ago', 'subtleforms'), diffInHours);
         else if (diffInHours < 48) displayText = __('Yesterday', 'subtleforms');
         else displayText = date.toLocaleDateString();
 
@@ -477,7 +481,7 @@ export default function FormsList({
     const { ok, body } = await apiRequest('/forms', {
       method: 'POST',
       body: JSON.stringify({
-        title: sprintf(__('%s (Copy)', 'subtleforms'), form.title),
+        title: ( () => { /* translators: %s: form title */ return sprintf(__('%1$s (Copy)', 'subtleforms'), form.title); } )(),
         status: 'draft',
       }),
     });
@@ -562,10 +566,13 @@ export default function FormsList({
   const handleBulkDelete = async (ids) => {
     if (
       !window.confirm(
-        sprintf(
-          __('Are you sure you want to delete %d forms?', 'subtleforms'),
-          ids.length
-        )
+        (() => {
+          return sprintf(
+            /* translators: %1$d: number of forms to delete */
+            __('Are you sure you want to delete %1$d forms?', 'subtleforms'),
+            ids.length
+          );
+        })()
       )
     ) {
       return;
@@ -583,16 +590,25 @@ export default function FormsList({
 
     if (successCount === ids.length) {
       createSuccessNotice(
-        sprintf(__('%d forms deleted', 'subtleforms'), successCount),
+        (() => {
+          return sprintf(
+            /* translators: %1$d: number of forms deleted */
+            __('%1$d forms deleted', 'subtleforms'),
+            successCount
+          );
+        })(),
         { type: 'snackbar' }
       );
     } else {
       createErrorNotice(
-        sprintf(
-          __('Failed to delete some forms (%d/%d deleted)', 'subtleforms'),
-          successCount,
-          ids.length
-        ),
+        (() => {
+          return sprintf(
+            /* translators: %1$d: number deleted, %2$d: total requested */
+            __('Failed to delete some forms (%1$d/%2$d deleted)', 'subtleforms'),
+            successCount,
+            ids.length
+          );
+        })(),
         { type: 'snackbar' }
       );
       fetchForms(); // Reload to sync state
@@ -617,16 +633,24 @@ export default function FormsList({
 
     if (successCount === ids.length) {
       createSuccessNotice(
-        sprintf(__('%d forms updated', 'subtleforms'), successCount),
+        (() => {
+          /* translators: %1$d: number of forms updated */ return sprintf(
+            __('%1$d forms updated', 'subtleforms'),
+            successCount
+          );
+        })(),
         { type: 'snackbar' }
       );
     } else {
       createErrorNotice(
-        sprintf(
-          __('Failed to update some forms (%d/%d updated)', 'subtleforms'),
-          successCount,
-          ids.length
-        ),
+        (() => {
+          return sprintf(
+            /* translators: %1$d: number updated, %2$d: total requested */
+            __('Failed to update some forms (%1$d/%2$d updated)', 'subtleforms'),
+            successCount,
+            ids.length
+          );
+        })(),
         { type: 'snackbar' }
       );
       fetchForms(); // Reload to sync state
@@ -705,10 +729,8 @@ export default function FormsList({
           const count = form?.submission_count || 0;
           return count > 0
             ? sprintf(
-                __(
-                  'Are you sure you want to delete this form? It has %d submissions which will also be permanently deleted.',
-                  'subtleforms'
-                ),
+                /* translators: %1$d: number of submissions belonging to this form */
+                __('Are you sure you want to delete this form? It has %1$d submissions which will also be permanently deleted.', 'subtleforms'),
                 count
               )
             : __(

@@ -2,28 +2,47 @@
   "name": "subtleforms-admin",
   "version": "1.5.0",
   "private": true,
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "scripts": {
     "start": "npm run build:tailwind:watch & wp-scripts start ./resources/admin/index.jsx --output-path=./build/admin --output-filename=admin.js",
     "build": "npm run build:tailwind && wp-scripts build ./resources/admin/index.jsx --output-path=./build/admin --output-filename=admin.js",
-    "build:tailwind": "tailwindcss -i ./assets/css/tailwind.css -o ./build/admin/tailwind.css --minify",
-    "build:tailwind:watch": "tailwindcss -i ./assets/css/tailwind.css -o ./build/admin/tailwind.css --watch",
+    "build:tailwind": "node_modules/.bin/tailwindcss -i ./assets/css/tailwind.css -o ./build/admin/tailwind.css --minify",
+    "build:tailwind:watch": "node_modules/.bin/tailwindcss -i ./assets/css/tailwind.css -o ./build/admin/tailwind.css --watch",
     "start:frontend": "wp-scripts start ./resources/frontend/index.jsx --output-path=./build/frontend --output-filename=frontend.js",
     "build:frontend": "wp-scripts build ./resources/frontend/index.jsx --output-path=./build/frontend --output-filename=frontend.js",
-    "build:all": "npm run build && npm run build:tailwind && npm run build:frontend",
+    "start:block": "wp-scripts start ./resources/blocks/form/index.js --output-path=./build/blocks/form",
+    "build:block": "wp-scripts build ./resources/blocks/form/index.js --output-path=./build/blocks/form && cp resources/blocks/form/block.json resources/blocks/form/editor.css build/blocks/form/",
+    "build:subtleforms-block": "wp-scripts build ./resources/blocks/subtleforms-form/index.js --output-path=./build/blocks/subtleforms-form && cp resources/blocks/subtleforms-form/block.json resources/blocks/subtleforms-form/editor.css build/blocks/subtleforms-form/",
+    "build:all": "npm run build && npm run build:frontend && npm run build:block && npm run build:subtleforms-block",
     "test": "wp-scripts test-unit-js",
     "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:regression": "playwright test tests/e2e/regression-*.spec.js --reporter=html,list --timeout=90000",
+    "test:regression:headed": "playwright test tests/e2e/regression-*.spec.js --reporter=list --timeout=90000 --headed",
     "dist": "gulp dist",
     "dist:build": "gulp build",
     "dist:zip": "gulp zip",
     "dist:clean": "gulp clean"
   },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/tests/e2e/"
+    ]
+  },
   "devDependencies": {
     "@playwright/test": "^1.57.0",
+    "@tailwindcss/cli": "^4.1.18",
     "@tailwindcss/forms": "^0.5.11",
+    "@testing-library/react-hooks": "^7.0.2",
     "@wordpress/e2e-test-utils-playwright": "^1.37.0",
     "@wordpress/scripts": "^31.1.0",
     "autoprefixer": "^10.4.23",
     "gulp-zip": "^5.1.0",
+    "postcss": "^8.5.6",
     "rimraf": "^6.1.2",
     "tailwindcss": "^4.1.18"
   },
@@ -36,6 +55,7 @@
     "@wordpress/i18n": "^6.9.0",
     "clsx": "^2.1.1",
     "joi": "^18.0.2",
-    "lucide-react": "^0.562.0"
+    "lucide-react": "^0.562.0",
+    "nanoid": "^3.3.11"
   }
 }

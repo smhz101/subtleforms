@@ -1,0 +1,207 @@
+/**
+ * SubtleForms - Conversational Form Type Styles
+ * 
+ * One question at a time with strong visual hierarchy and focus.
+ */
+
+.subtleforms--type-conversational {
+	max-width: 700px;
+	margin: 0 auto;
+	padding: var(--subtleforms-spacing-xl);
+}
+
+/* ===== Progress Bar ===== */
+.subtleforms-progress {
+	margin-bottom: var(--subtleforms-spacing-xl);
+}
+
+.subtleforms-progress-bar {
+	height: 8px;
+	background: #e0e0e0;
+	border-radius: 4px;
+	overflow: hidden;
+	margin-bottom: var(--subtleforms-spacing-xs);
+}
+
+.subtleforms-progress-fill {
+	height: 100%;
+	background: linear-gradient(
+		90deg,
+		var(--subtleforms-color-primary) 0%,
+		#0080ff 100%
+	);
+	transition: width var(--subtleforms-transition-base);
+	border-radius: 4px;
+}
+
+.subtleforms-progress-text {
+	font-size: var(--subtleforms-font-size-sm);
+	color: var(--subtleforms-color-text-light);
+	text-align: right;
+}
+
+/* ===== Question Container ===== */
+.subtleforms-conversational-question {
+	animation: slideInUp 0.3s ease-out;
+	min-height: 400px;
+	display: flex;
+	flex-direction: column;
+}
+
+@keyframes slideInUp {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.subtleforms-conversational-question-label {
+	font-size: 1.75rem;
+	font-weight: 700;
+	line-height: 1.3;
+	margin-bottom: var(--subtleforms-spacing-lg);
+	color: var(--subtleforms-color-text);
+}
+
+.subtleforms-conversational-question-description {
+	font-size: var(--subtleforms-font-size-lg);
+	color: var(--subtleforms-color-text-light);
+	margin-bottom: var(--subtleforms-spacing-xl);
+	line-height: 1.6;
+}
+
+/* ===== Field Focus ===== */
+.subtleforms--type-conversational .subtleforms-field {
+	margin-bottom: var(--subtleforms-spacing-lg);
+}
+
+.subtleforms--type-conversational input,
+.subtleforms--type-conversational textarea,
+.subtleforms--type-conversational select {
+	font-size: 1.125rem;
+	padding: 1rem;
+	border: 2px solid var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-sm);
+	transition: all var(--subtleforms-transition-base);
+	width: 100%;
+}
+
+.subtleforms--type-conversational input:focus,
+.subtleforms--type-conversational textarea:focus,
+.subtleforms--type-conversational select:focus {
+	outline: none;
+	border-color: var(--subtleforms-color-primary);
+	box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
+}
+
+/* ===== Navigation Buttons ===== */
+.subtleforms--type-conversational .subtleforms-buttons {
+	display: flex;
+	gap: var(--subtleforms-spacing-sm);
+	margin-top: auto;
+	padding-top: var(--subtleforms-spacing-lg);
+}
+
+.subtleforms--type-conversational .subtleforms-button {
+	padding: 1rem 2rem;
+	font-size: 1.125rem;
+	font-weight: 600;
+	border-radius: var(--subtleforms-radius-md);
+}
+
+.subtleforms--type-conversational .subtleforms-button-next {
+	flex: 1;
+}
+
+/* ===== Success State ===== */
+.subtleforms-conversational-success {
+	text-align: center;
+	padding: var(--subtleforms-spacing-xl);
+	animation: fadeIn 0.5s ease-out;
+}
+
+@keyframes fadeIn {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+.subtleforms-success-icon {
+	width: 80px;
+	height: 80px;
+	margin: 0 auto var(--subtleforms-spacing-lg);
+	background: var(--subtleforms-color-success);
+	color: white;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 3rem;
+	font-weight: bold;
+}
+
+.subtleforms-conversational-success h2 {
+	font-size: 2rem;
+	margin-bottom: var(--subtleforms-spacing-sm);
+	color: var(--subtleforms-color-text);
+}
+
+.subtleforms-conversational-success p {
+	font-size: var(--subtleforms-font-size-lg);
+	color: var(--subtleforms-color-text-light);
+}
+
+/* ===== Review Step ===== */
+.subtleforms-conversational-review {
+	animation: slideInUp 0.3s ease-out;
+}
+
+.subtleforms-conversational-review h3 {
+	font-size: 1.5rem;
+	margin-bottom: var(--subtleforms-spacing-lg);
+	color: var(--subtleforms-color-text);
+}
+
+.subtleforms-review-item {
+	display: flex;
+	justify-content: space-between;
+	padding: var(--subtleforms-spacing-md);
+	border-bottom: 1px solid var(--subtleforms-color-border);
+}
+
+.subtleforms-review-item:last-child {
+	border-bottom: none;
+}
+
+.subtleforms-review-label {
+	font-weight: 600;
+	color: var(--subtleforms-color-text-light);
+}
+
+.subtleforms-review-value {
+	font-weight: 500;
+	color: var(--subtleforms-color-text);
+}
+
+/* ===== Mobile Responsive ===== */
+@media (max-width: 640px) {
+	.subtleforms--type-conversational {
+		padding: var(--subtleforms-spacing-md);
+	}
+
+	.subtleforms-conversational-question-label {
+		font-size: 1.5rem;
+	}
+
+	.subtleforms--type-conversational .subtleforms-button {
+		padding: 0.875rem 1.5rem;
+		font-size: 1rem;
+	}
+}

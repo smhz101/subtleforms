@@ -2,19 +2,23 @@ import { useMemo, useCallback } from '@wordpress/element';
 import {
   DndContext,
   PointerSensor,
+  KeyboardSensor,
   useSensor,
   useSensors,
 } from '@dnd-kit/core';
-import { useSortable } from '@dnd-kit/sortable';
+import { useSortable, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useBuilder } from './context/BuilderContext';
 import FieldRenderer from './FieldRenderer';
 import ContainerRenderer from './ContainerRenderer';
 import ColumnDropZone from './ColumnDropZone';
 import FieldChrome from './FieldChrome';
+import StepCanvas from './StepCanvas';
 import {
   nodeToField,
   isColumnContainer,
   nodeChildren,
+  getRootNodeId,
 } from './utils/schemaTree';
 
 function SortableWrapper({
@@ -61,38 +65,64 @@ function SortableWrapper({
   });
 }
 
-export default function FormBuilder({
-  tree,
-  rootId,
-  selectedId,
-  selectedStepId,
-  onSelect,
-  onDelete,
-  onMove,
-  onDuplicate,
-  onRequestInsert,
-  validationErrorsByFieldKey = {},
-}) {
+export default function FormBuilder() {
+  // Get all state from context
+  const {
+    tree,
+    selectedId,
+    selectedStepId,
+    setSelectedId,
+    actions: { onMove, onDelete, onDuplicate, onRequestInsert },
+    validationErrors,
+  } = useBuilder();
+
+  // Build validation errors map
+  const validationErrorsByFieldKey = useMemo(() => {
+    const map = {};
+    if (!Array.isArray(validationErrors)) {
+      return map;
+    }
+    validationErrors.forEach((err) => {
+      const fieldKey = err?.fieldKey || err?.field_key || null;
+      const message = err?.message || null;
+      if (!fieldKey || !message) {
+        return;
+      }
+      if (!map[fieldKey]) {
+        map[fieldKey] = [];
+      }
+      map[fieldKey].push(message);
+    });
+    return map;
+  }, [validationErrors]);
+
+  const rootId = getRootNodeId();
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 6 },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
     })
   );
 
+  // Detect if this is a multi-step form
   const rootChildren = useMemo(() => {
-    const allChildren = nodeChildren(tree, rootId);
+    return nodeChildren(tree, rootId);
+  }, [tree, rootId]);
 
-    // If selectedStepId is set, only show that step's children
-    if (selectedStepId) {
-      const stepNode = tree.nodes[selectedStepId];
-      if (stepNode && stepNode.type === 'step') {
-        return [selectedStepId];
-      }
-    }
+  const stepNodes = useMemo(() => {
+    return rootChildren.filter((id) => tree.nodes[id]?.type === 'step');
+  }, [rootChildren, tree]);
 
-    // Otherwise show all children (backward compatible with non-step forms)
-    return allChildren;
-  }, [tree, rootId, selectedStepId]);
+  const isMultiStepForm = stepNodes.length > 0;
+
+  // For multi-step forms, get the active step
+  const activeStep = useMemo(() => {
+    if (!isMultiStepForm || !selectedStepId) return null;
+    return tree.nodes[selectedStepId];
+  }, [isMultiStepForm, selectedStepId, tree]);
 
   const handleDragEnd = useCallback(
     ({ active, over }) => {
@@ -148,19 +178,14 @@ export default function FormBuilder({
           nodeId={nodeId}
           parentId={parentId}
           columnIndex={parentColumnIndex}
-          position={position}
-          children={({
-            setNodeRef,
-            style,
-            dragHandleRef,
-            dragHandleListeners,
-          }) => (
+          position={position}>
+          {({ setNodeRef, style, dragHandleRef, dragHandleListeners }) => (
             <div ref={setNodeRef} style={style}>
               <ContainerRenderer
                 node={node}
                 columns={columns}
                 isSelected={selectedId === nodeId}
-                onSelect={() => onSelect(nodeId)}
+                onSelect={() => setSelectedId(nodeId)}
                 onDelete={() => onDelete(nodeId)}
                 spacing={spacing}
                 dragHandleRef={dragHandleRef}
@@ -186,7 +211,7 @@ export default function FormBuilder({
               />
             </div>
           )}
-        />
+        </SortableWrapper>
       );
     }
 
@@ -241,17 +266,12 @@ export default function FormBuilder({
         nodeId={nodeId}
         parentId={parentId}
         columnIndex={columnIndex}
-        position={position}
-        children={({
-          setNodeRef,
-          style,
-          dragHandleRef,
-          dragHandleListeners,
-        }) => (
+        position={position}>
+        {({ setNodeRef, style, dragHandleRef, dragHandleListeners }) => (
           <div ref={setNodeRef} style={style}>
             <FieldChrome
               isSelected={selectedId === nodeId}
-              onSelect={() => onSelect(nodeId)}
+              onSelect={() => setSelectedId(nodeId)}
               dragHandleRef={dragHandleRef}
               dragHandleListeners={dragHandleListeners}
               validationMessages={validationMessages}
@@ -267,7 +287,7 @@ export default function FormBuilder({
             </FieldChrome>
           </div>
         )}
-      />
+      </SortableWrapper>
     );
   };
 
@@ -276,16 +296,27 @@ export default function FormBuilder({
       <div className='subtleforms-builder-canvas__scroll'>
         <div className='subtleforms-builder-canvas__surface'>
           <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-            <ColumnDropZone
-              containerId={rootId}
-              columnIndex={null}
-              items={rootChildren}
-              onRequestInsert={onRequestInsert}
-              spacing={24}
-              renderItem={(nodeId, index) =>
-                renderNode(nodeId, rootId, null, index)
-              }
-            />
+            {isMultiStepForm && activeStep ? (
+              /* Multi-step form: Show step-scoped canvas */
+              <StepCanvas
+                stepId={selectedStepId}
+                stepNumber={stepNodes.indexOf(selectedStepId) + 1}
+                totalSteps={stepNodes.length}
+                renderNode={renderNode}
+              />
+            ) : (
+              /* Regular form: Show all fields */
+              <ColumnDropZone
+                containerId={rootId}
+                columnIndex={null}
+                items={rootChildren}
+                onRequestInsert={onRequestInsert}
+                spacing={24}
+                renderItem={(nodeId, index) =>
+                  renderNode(nodeId, rootId, null, index)
+                }
+              />
+            )}
           </DndContext>
         </div>
       </div>

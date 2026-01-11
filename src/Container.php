@@ -28,152 +28,190 @@ use SubtleForms\Fields\CoreFields;
 /**
  * Simple dependency injection container.
  */
-final class Container
-{
-    private array $services = [];
-    private array $singletons = [];
+final class Container {
 
-    /**
-     * Register a service factory.
-     */
-    public function register(string $id, callable $factory): void
-    {
-        $this->services[$id] = $factory;
-    }
+	private array $services   = array();
+	private array $singletons = array();
 
-    /**
-     * Register a singleton service.
-     */
-    public function singleton(string $id, callable $factory): void
-    {
-        $this->register($id, $factory);
-        $this->singletons[$id] = true;
-    }
+	/**
+	 * Register a service factory.
+	 */
+	public function register( string $id, callable $factory ): void {
+		$this->services[ $id ] = $factory;
+	}
 
-    /**
-     * Get a service from the container.
-     */
-    public function get(string $id)
-    {
-        if (!isset($this->services[$id])) {
-            throw new \RuntimeException("Service '{$id}' not found in container.");
-        }
+	/**
+	 * Register a singleton service.
+	 */
+	public function singleton( string $id, callable $factory ): void {
+		$this->register( $id, $factory );
+		$this->singletons[ $id ] = true;
+	}
 
-        // If it's a singleton and already instantiated, return the cached instance
-        if (isset($this->singletons[$id]) && isset($this->instances[$id])) {
-            return $this->instances[$id];
-        }
+	/**
+	 * Get a service from the container.
+	 */
+	public function get( string $id ) {
+		if ( ! isset( $this->services[ $id ] ) ) {
+			throw new \RuntimeException( "Service '{$id}' not found in container." );
+		}
 
-        $service = $this->services[$id]($this);
+		// If it's a singleton and already instantiated, return the cached instance
+		if ( isset( $this->singletons[ $id ] ) && isset( $this->instances[ $id ] ) ) {
+			return $this->instances[ $id ];
+		}
 
-        // Cache singleton instances
-        if (isset($this->singletons[$id])) {
-            $this->instances[$id] = $service;
-        }
+		$service = $this->services[ $id ]( $this );
 
-        return $service;
-    }
+		// Cache singleton instances
+		if ( isset( $this->singletons[ $id ] ) ) {
+			$this->instances[ $id ] = $service;
+		}
 
-    private array $instances = [];
+		return $service;
+	}
 
-    /**
-     * Check if a service exists.
-     */
-    public function has(string $id): bool
-    {
-        return isset($this->services[$id]);
-    }
+	private array $instances = array();
 
-    /**
-     * Bootstrap default services.
-     */
-    public function bootstrap(): void
-    {
-        // Support services
-        $this->singleton(Capabilities::class, fn() => new Capabilities());
-        $this->singleton(FeatureGate::class, fn($c) => new FeatureGate($c->get(Capabilities::class)));
-        $this->singleton(Logger::class, fn() => new Logger());
-        $this->singleton(Settings::class, fn() => new Settings());
+	/**
+	 * Check if a service exists.
+	 */
+	public function has( string $id ): bool {
+		return isset( $this->services[ $id ] );
+	}
 
-        // Repositories
-        $this->singleton(FormsRepository::class, fn() => new FormsRepository());
-        $this->singleton(SubmissionsRepository::class, fn() => new SubmissionsRepository());
-        $this->singleton(LogsRepository::class, fn() => new LogsRepository());
+	/**
+	 * Bootstrap default services.
+	 */
+	public function bootstrap(): void {
+		// Support services
+		$this->singleton( Capabilities::class, fn() => new Capabilities() );
+		$this->singleton( FeatureGate::class, fn( $c ) => new FeatureGate( $c->get( Capabilities::class ) ) );
+		$this->singleton( Logger::class, fn() => new Logger() );
+		$this->singleton( Settings::class, fn() => new Settings() );
 
-        // Field Registry
-        $this->singleton(FieldRegistry::class, function() {
-            $registry = new FieldRegistry();
-            CoreFields::register($registry);
-            
-            // Allow extensions to register custom fields
-            if (function_exists('do_action')) {
-                do_action('subtleforms/fields/register', $registry);
-            }
-            
-            return $registry;
-        });
+		// Repositories
+		$this->singleton( FormsRepository::class, fn() => new FormsRepository() );
+		$this->singleton( SubmissionsRepository::class, fn() => new SubmissionsRepository() );
+		$this->singleton( LogsRepository::class, fn() => new LogsRepository() );
 
-        // Engine
-        $this->singleton(ActionRegistry::class, function() {
-            $reg = new ActionRegistry();
+		// Field Registry
+		$this->singleton(
+			FieldRegistry::class,
+			function () {
+				$registry = new FieldRegistry();
+				CoreFields::register( $registry );
 
-            // Register core action definitions (metadata only). Implementations
-            // may be registered later by core or extensions.
-            $reg->registerDefinition(new ActionDefinition('save', 'Save submission', 'Persist submission to storage', ['actions.save']));
-            $reg->registerDefinition(new ActionDefinition('email', 'Send email', 'Send notification email', ['actions.email']));
-            $reg->registerDefinition(new ActionDefinition('webhook', 'Call webhook', 'Send payload to external HTTP endpoint', ['actions.webhook']));
+				// Allow extensions to register custom fields
+				if ( function_exists( 'do_action' ) ) {
+					do_action( 'subtleforms/fields/register', $registry );
+				}
 
-            /** Allow extensions to register additional definitions/implementations via action hook */
-            if (function_exists('do_action')) {
-                do_action('subtleforms.register_actions', $reg);
-            }
+				return $registry;
+			}
+		);
 
-            return $reg;
-        });
-        $this->singleton(Pipeline::class, fn($c) => new Pipeline(
-            $c->get(FeatureGate::class),
-            $c->get(LogsRepository::class),
-            $c->get(SchemaCompiler::class)
-        ));
+		// Engine
+		$this->singleton(
+			ActionRegistry::class,
+			function () {
+				$reg = new ActionRegistry();
 
-        // Extensions
-        $this->singleton(ExtensionManager::class, fn($c) => new ExtensionManager($c->get(FeatureGate::class)));
+				// Register core action definitions (metadata only). Implementations
+				// may be registered later by core or extensions.
+				$reg->registerDefinition( new ActionDefinition( 'save', 'Save submission', 'Persist submission to storage', array( 'actions.save' ) ) );
+				$reg->registerDefinition( new ActionDefinition( 'email', 'Send email', 'Send notification email', array( 'actions.email' ) ) );
+				$reg->registerDefinition( new ActionDefinition( 'webhook', 'Call webhook', 'Send payload to external HTTP endpoint', array( 'actions.webhook' ) ) );
 
-        // Compiler with conditional logic
-        $this->singleton(\SubtleForms\Engine\ConditionalLogic::class, fn($c) => new \SubtleForms\Engine\ConditionalLogic());
-        $this->singleton(SchemaCompiler::class, fn($c) => new SchemaCompiler(
-            $c->get(ActionRegistry::class),
-            $c->get(\SubtleForms\Engine\ConditionalLogic::class)
-        ));
+				/** Allow extensions to register additional definitions/implementations via action hook */
+				if ( function_exists( 'do_action' ) ) {
+					do_action( 'subtleforms.register_actions', $reg );
+				}
 
-        // Admin & API
-        $this->singleton(AdminMenu::class, fn($c) => new AdminMenu(
-            $c->get(Capabilities::class),
-            $c->get(FormsRepository::class),
-            $c->get(SubmissionsRepository::class)
-        ));
-        $this->singleton(RestController::class, fn($c) => new RestController(
-            $c->get(Pipeline::class),
-            $c->get(FormsRepository::class),
-            $c->get(SubmissionsRepository::class),
-            $c->get(FeatureGate::class),
-            $c->get(FieldRegistry::class),
-            $c->get(SchemaCompiler::class),
-            $c->get(Settings::class)
-        ));
+				return $reg;
+			}
+		);
+		$this->singleton(
+			Pipeline::class,
+			fn( $c ) => new Pipeline(
+				$c->get( FeatureGate::class ),
+				$c->get( LogsRepository::class ),
+				$c->get( SchemaCompiler::class )
+			)
+		);
 
-        // Frontend
-        $this->singleton(\SubtleForms\Frontend\Shortcode::class, fn($c) => new \SubtleForms\Frontend\Shortcode(
-            $c->get(FormsRepository::class),
-            $c->get(Settings::class)
-        ));
+		// Extensions
+		$this->singleton( ExtensionManager::class, fn( $c ) => new ExtensionManager( $c->get( FeatureGate::class ) ) );
 
-        // Register core action implementations now that definitions exist.
-        // Implementations must be registered after the ActionRegistry (and its definitions) are created.
-        $reg = $this->get(ActionRegistry::class);
-        // Save action depends on SubmissionsRepository
-        $reg->register(new \SubtleForms\Engine\Actions\SaveAction($this->get(SubmissionsRepository::class)));
-        $reg->register(new \SubtleForms\Engine\Actions\EmailAction());
-        $reg->register(new \SubtleForms\Engine\Actions\WebhookAction());
-    }
+		// Compiler with conditional logic
+		$this->singleton( \SubtleForms\Engine\ConditionalLogic::class, fn( $c ) => new \SubtleForms\Engine\ConditionalLogic() );
+		$this->singleton(
+			SchemaCompiler::class,
+			fn( $c ) => new SchemaCompiler(
+				$c->get( ActionRegistry::class ),
+				$c->get( \SubtleForms\Engine\ConditionalLogic::class )
+			)
+		);
+
+		// Admin & API
+		$this->singleton(
+			AdminMenu::class,
+			fn( $c ) => new AdminMenu(
+				$c->get( Capabilities::class ),
+				$c->get( FormsRepository::class ),
+				$c->get( SubmissionsRepository::class )
+			)
+		);
+		$this->singleton(
+			RestController::class,
+			fn( $c ) => new RestController(
+				$c->get( Pipeline::class ),
+				$c->get( FormsRepository::class ),
+				$c->get( SubmissionsRepository::class ),
+				$c->get( FeatureGate::class ),
+				$c->get( FieldRegistry::class ),
+				$c->get( SchemaCompiler::class ),
+				$c->get( Settings::class )
+			)
+		);
+
+		// Frontend
+		$this->singleton(
+			\SubtleForms\Frontend\Shortcode::class,
+			fn( $c ) => new \SubtleForms\Frontend\Shortcode(
+				$c->get( FormsRepository::class ),
+				$c->get( Settings::class )
+			)
+		);
+
+		// Privacy & GDPR
+		$this->singleton(
+			\SubtleForms\Privacy\PrivacyExporter::class,
+			fn( $c ) => new \SubtleForms\Privacy\PrivacyExporter(
+				$c->get( SubmissionsRepository::class ),
+				$c->get( FormsRepository::class )
+			)
+		);
+		$this->singleton(
+			\SubtleForms\Privacy\PrivacyEraser::class,
+			fn( $c ) => new \SubtleForms\Privacy\PrivacyEraser(
+				$c->get( SubmissionsRepository::class )
+			)
+		);
+		$this->singleton(
+			\SubtleForms\Privacy\PrivacyManager::class,
+			fn( $c ) => new \SubtleForms\Privacy\PrivacyManager(
+				$c->get( Settings::class ),
+				$c->get( SubmissionsRepository::class )
+			)
+		);
+
+		// Register core action implementations now that definitions exist.
+		// Implementations must be registered after the ActionRegistry (and its definitions) are created.
+		$reg = $this->get( ActionRegistry::class );
+		// Save action depends on SubmissionsRepository
+		$reg->register( new \SubtleForms\Engine\Actions\SaveAction( $this->get( SubmissionsRepository::class ) ) );
+		$reg->register( new \SubtleForms\Engine\Actions\EmailAction() );
+		$reg->register( new \SubtleForms\Engine\Actions\WebhookAction() );
+	}
 }

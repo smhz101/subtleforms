@@ -9,40 +9,38 @@ use SubtleForms\Support\FeatureGate;
 /**
  * Central extension loader with capability enforcement.
  */
-final class ExtensionManager
-{
-    /**
-     * @var ExtensionInterface[]
-     */
-    private $extensions = [];
-    
-    /**
-     * @var FeatureGate
-     */
-    private $gate;
+final class ExtensionManager {
 
-    /**
-     * @param FeatureGate $gate
-     */
-    public function __construct($gate) {
-        $this->gate = $gate;
-    }
+	/**
+	 * @var ExtensionInterface[]
+	 */
+	private $extensions = array();
 
-    public function add(ExtensionInterface $ext): void
-    {
-        $this->extensions[] = $ext;
-    }
+	/**
+	 * @var FeatureGate
+	 */
+	private $gate;
 
-    public function boot(): void
-    {
-        foreach ($this->extensions as $ext) {
-            foreach ($ext->requiredCapabilities() as $cap) {
-                if (!$this->gate->allows($cap)) {
-                    continue 2; // extension disabled
-                }
-            }
+	/**
+	 * @param FeatureGate $gate
+	 */
+	public function __construct( $gate ) {
+		$this->gate = $gate;
+	}
 
-            $ext->register();
-        }
-    }
+	public function add( ExtensionInterface $ext ): void {
+		$this->extensions[] = $ext;
+	}
+
+	public function boot(): void {
+		foreach ( $this->extensions as $ext ) {
+			foreach ( $ext->requiredCapabilities() as $cap ) {
+				if ( ! $this->gate->allows( $cap ) ) {
+					continue 2; // extension disabled
+				}
+			}
+
+			$ext->register();
+		}
+	}
 }

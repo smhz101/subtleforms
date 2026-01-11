@@ -15,6 +15,12 @@ export default function FieldRenderer({
   const required = field.config?.required || false;
   const isHidden = hiddenFields?.has(resolvedPath);
 
+  // Accessible input id
+  const inputId = `subtleforms-field-${(resolvedPath || field.key).replace(
+    /[^a-zA-Z0-9\-_:.]/g,
+    '-'
+  )}`;
+
   const error = errors?.[resolvedPath];
 
   if (isHidden) {
@@ -82,7 +88,7 @@ export default function FieldRenderer({
   // Render input fields
   return (
     <div className={`subtleforms-field subtleforms-field-${field.type}`}>
-      <label className='subtleforms-field-label'>
+      <label htmlFor={inputId} className='subtleforms-field-label'>
         {label}
         {required && <span className='subtleforms-required'>*</span>}
       </label>
@@ -91,7 +97,10 @@ export default function FieldRenderer({
         field,
         value,
         (next) => onChange(resolvedPath, next),
-        placeholder
+        placeholder,
+        inputId,
+        required,
+        error
       )}
 
       {error && <div className='subtleforms-field-error'>{error}</div>}
@@ -99,7 +108,15 @@ export default function FieldRenderer({
   );
 }
 
-function renderInput(field, value, onChange, placeholder) {
+function renderInput(
+  field,
+  value,
+  onChange,
+  placeholder,
+  inputId,
+  required,
+  error
+) {
   switch (field.type) {
     case 'text':
     case 'email':
@@ -108,33 +125,42 @@ function renderInput(field, value, onChange, placeholder) {
     case 'phone':
       return (
         <input
+          id={inputId}
           type={getInputType(field.type)}
           className='subtleforms-input'
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
+          aria-required={required}
+          aria-invalid={!!error}
         />
       );
 
     case 'textarea':
       return (
         <textarea
+          id={inputId}
           className='subtleforms-textarea'
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={4}
+          aria-required={required}
+          aria-invalid={!!error}
         />
       );
 
     case 'checkbox':
       return (
-        <label className='subtleforms-checkbox-label'>
+        <label className='subtleforms-checkbox-label' htmlFor={inputId}>
           <input
+            id={inputId}
             type='checkbox'
             className='subtleforms-checkbox'
             checked={!!value}
             onChange={(e) => onChange(e.target.checked)}
+            aria-required={required}
+            aria-invalid={!!error}
           />
           <span>
             {field.config?.checkboxLabel || __('I agree', 'subtleforms')}
@@ -147,21 +173,26 @@ function renderInput(field, value, onChange, placeholder) {
       const options = field.config?.options || [];
       return (
         <div className='subtleforms-radio-group'>
-          {options.map((option, index) => (
-            <label
-              key={option.value || index}
-              className='subtleforms-radio-label'>
-              <input
-                type='radio'
-                className='subtleforms-radio'
-                name={field.config?.key || field.key}
-                value={option.value}
-                checked={value === option.value}
-                onChange={(e) => onChange(e.target.value)}
-              />
-              <span>{option.label}</span>
-            </label>
-          ))}
+          {options.map((option, index) => {
+            const optionId = `${inputId}-${index}`;
+            return (
+              <label
+                key={option.value || index}
+                htmlFor={optionId}
+                className='subtleforms-radio-label'>
+                <input
+                  id={optionId}
+                  type='radio'
+                  className='subtleforms-radio'
+                  name={field.config?.key || field.key}
+                  value={option.value}
+                  checked={value === option.value}
+                  onChange={(e) => onChange(e.target.value)}
+                />
+                <span>{option.label}</span>
+              </label>
+            );
+          })}
         </div>
       );
 
@@ -170,9 +201,12 @@ function renderInput(field, value, onChange, placeholder) {
       const selectOptions = field.config?.options || [];
       return (
         <select
+          id={inputId}
           className='subtleforms-select'
           value={value}
-          onChange={(e) => onChange(e.target.value)}>
+          onChange={(e) => onChange(e.target.value)}
+          aria-required={required}
+          aria-invalid={!!error}>
           <option value=''>
             {placeholder || __('Select an option', 'subtleforms')}
           </option>
@@ -187,6 +221,7 @@ function renderInput(field, value, onChange, placeholder) {
     case 'hidden':
       return (
         <input
+          id={inputId}
           type='hidden'
           value={value}
           onChange={(e) => onChange(e.target.value)}
@@ -216,6 +251,7 @@ function renderInput(field, value, onChange, placeholder) {
             </span>
           )}
           <input
+            id={inputId}
             type='number'
             className='subtleforms-input'
             value={value}
@@ -224,6 +260,8 @@ function renderInput(field, value, onChange, placeholder) {
             min={min}
             max={max}
             step={step}
+            aria-required={required}
+            aria-invalid={!!error}
           />
         </div>
       );
@@ -258,6 +296,7 @@ function renderInput(field, value, onChange, placeholder) {
       return (
         <div className='subtleforms-payment-coupon'>
           <input
+            id={inputId}
             type='text'
             className='subtleforms-input'
             value={value}
@@ -267,6 +306,8 @@ function renderInput(field, value, onChange, placeholder) {
               __('Enter coupon code', 'subtleforms')
             }
             maxLength={field.config?.maxLength || 50}
+            aria-required={required}
+            aria-invalid={!!error}
           />
           <button
             type='button'

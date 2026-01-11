@@ -1,0 +1,22 @@
+/**
+ * SubtleForms - Default Form Type Styles
+ * 
+ * Traditional form layout with all fields visible at once.
+ */
+
+.subtleforms--type-default {
+	max-width: 800px;
+	margin: 0 auto;
+}
+
+/* Field spacing for default forms */
+.subtleforms--type-default .subtleforms-field {
+	margin-bottom: var(--subtleforms-spacing-md);
+}
+
+/* Group multiple fields horizontally if they fit */
+.subtleforms--type-default .subtleforms-field-group {
+	display: flex;
+	gap: var(--subtleforms-spacing-sm);
+	flex-wrap: wrap;
+}

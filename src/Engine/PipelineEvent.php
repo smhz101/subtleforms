@@ -6,71 +6,70 @@ namespace SubtleForms\Engine;
 /**
  * Structured execution event for pipeline steps.
  */
-final class PipelineEvent
-{
-    /**
-     * @var int
-     */
-    public $submissionId;
-    
-    /**
-     * @var int|null
-     */
-    public $schemaVersion;
-    
-    /**
-     * @var string
-     */
-    public $stepId;
-    
-    /**
-     * @var string
-     */
-    public $actionType;
-    
-    /**
-     * @var string
-     */
-    public $status;
-    
-    /**
-     * @var string|null
-     */
-    public $error;
-    
-    /**
-     * @var int
-     */
-    public $ts;
+final class PipelineEvent {
 
-    public function __construct(
-        $submissionId,
-        $schemaVersion,
-        $stepId,
-        $actionType,
-        $status,
-        $error,
-        $ts
-    ) {
-        $this->submissionId = $submissionId;
-        $this->schemaVersion = $schemaVersion;
-        $this->stepId = $stepId;
-        $this->actionType = $actionType;
-        $this->status = $status;
-        $this->error = $error;
-        $this->ts = $ts;
-    }
+	/**
+	 * @var int
+	 */
+	public $submissionId;
 
-    public function toArray(): array
-    {
-        return [
-            'submission_id' => $this->submissionId,
-            'schema_version' => $this->schemaVersion,
-            'step_id' => $this->stepId,
-            'action_type' => $this->actionType,
-            'status' => $this->status,
-            'error' => $this->error,
-            'ts' => $this->ts,
-        ];
-    }
+	/**
+	 * @var int|null
+	 */
+	public $schemaVersion;
+
+	/**
+	 * @var string
+	 */
+	public $stepId;
+
+	/**
+	 * @var string
+	 */
+	public $actionType;
+
+	/**
+	 * @var string
+	 */
+	public $status;
+
+	/**
+	 * @var string|null
+	 */
+	public $error;
+
+	/**
+	 * @var int
+	 */
+	public $ts;
+
+	public function __construct(
+		$submissionId,
+		$schemaVersion,
+		$stepId,
+		$actionType,
+		$status,
+		$error,
+		$ts
+	) {
+		$this->submissionId  = $submissionId;
+		$this->schemaVersion = $schemaVersion;
+		$this->stepId        = $stepId;
+		$this->actionType    = $actionType;
+		$this->status        = $status;
+		$this->error         = $error;
+		$this->ts            = $ts;
+	}
+
+	public function toArray(): array {
+		return array(
+			'submission_id'  => $this->submissionId,
+			'schema_version' => $this->schemaVersion,
+			'step_id'        => $this->stepId,
+			'action_type'    => $this->actionType,
+			'status'         => $this->status,
+			'error'          => $this->error,
+			'ts'             => $this->ts,
+		);
+	}
 }

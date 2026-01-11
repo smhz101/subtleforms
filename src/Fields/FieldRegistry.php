@@ -13,90 +13,84 @@ use InvalidArgumentException;
 /**
  * Central registry for field definitions.
  */
-final class FieldRegistry
-{
-    /**
-     * @var array<string, FieldDefinition>
-     */
-    private array $fields = [];
+final class FieldRegistry {
 
-    /**
-     * Register a field definition.
-     *
-     * @param FieldDefinition $definition
-     * @return void
-     * @throws InvalidArgumentException If field type is already registered
-     */
-    public function register(FieldDefinition $definition): void
-    {
-        if (isset($this->fields[$definition->type])) {
-            throw new InvalidArgumentException(
-                sprintf('Field type "%s" is already registered.', $definition->type)
-            );
-        }
+	/**
+	 * @var array<string, FieldDefinition>
+	 */
+	private array $fields = array();
 
-        $this->fields[$definition->type] = $definition;
-    }
+	/**
+	 * Register a field definition.
+	 *
+	 * @param FieldDefinition $definition
+	 * @return void
+	 * @throws InvalidArgumentException If field type is already registered
+	 */
+	public function register( FieldDefinition $definition ): void {
+		if ( isset( $this->fields[ $definition->type ] ) ) {
+			throw new InvalidArgumentException(
+				sprintf( 'Field type "%s" is already registered.', $definition->type )
+			);
+		}
 
-    /**
-     * Get a field definition by type.
-     *
-     * @param string $type
-     * @return FieldDefinition|null
-     */
-    public function get(string $type): ?FieldDefinition
-    {
-        return $this->fields[$type] ?? null;
-    }
+		$this->fields[ $definition->type ] = $definition;
+	}
 
-    /**
-     * Get all registered field definitions.
-     *
-     * @return array<string, FieldDefinition>
-     */
-    public function all(): array
-    {
-        return $this->fields;
-    }
+	/**
+	 * Get a field definition by type.
+	 *
+	 * @param string $type
+	 * @return FieldDefinition|null
+	 */
+	public function get( string $type ): ?FieldDefinition {
+		return $this->fields[ $type ] ?? null;
+	}
 
-    /**
-     * Get fields grouped by category.
-     *
-     * @return array<string, array<FieldDefinition>>
-     */
-    public function byCategory(): array
-    {
-        $grouped = [];
+	/**
+	 * Get all registered field definitions.
+	 *
+	 * @return array<string, FieldDefinition>
+	 */
+	public function all(): array {
+		return $this->fields;
+	}
 
-        foreach ($this->fields as $field) {
-            $category = $field->category;
-            if (!isset($grouped[$category])) {
-                $grouped[$category] = [];
-            }
-            $grouped[$category][] = $field;
-        }
+	/**
+	 * Get fields grouped by category.
+	 *
+	 * @return array<string, array<FieldDefinition>>
+	 */
+	public function byCategory(): array {
+		$grouped = array();
 
-        return $grouped;
-    }
+		foreach ( $this->fields as $field ) {
+			$category = $field->category;
+			if ( ! isset( $grouped[ $category ] ) ) {
+				$grouped[ $category ] = array();
+			}
+			$grouped[ $category ][] = $field;
+		}
 
-    /**
-     * Check if a field type exists.
-     *
-     * @param string $type
-     * @return bool
-     */
-    public function has(string $type): bool
-    {
-        return isset($this->fields[$type]);
-    }
+		return $grouped;
+	}
 
-    /**
-     * Get all field definitions as array representation.
-     *
-     * @return array
-     */
-    public function toArray(): array
-    {
-        return array_map(fn($field) => $field->toArray(), $this->fields);
-    }
+	/**
+	 * Check if a field type exists.
+	 *
+	 * @param string $type
+	 * @return bool
+	 */
+	public function has( string $type ): bool {
+		return isset( $this->fields[ $type ] );
+	}
+
+	/**
+	 * Get all field definitions as array representation.
+	 *
+	 * @return array
+	 */
+	public function toArray(): array {
+		return array_map( fn( $field ) => $field->toArray(), $this->fields );
+	}
 }

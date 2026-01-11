@@ -36,3 +36,9 @@ tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
 // Start up the WP testing environment.
 require "{$_tests_dir}/includes/bootstrap.php";
+
+// Ensure PHPUnit assertion methods are available for IDE
+if (class_exists('PHPUnit\\Framework\\TestCase') && !method_exists('WP_UnitTestCase', 'assertIsInt')) {
+    // This is handled automatically by WordPress test framework
+    // but helps with IDE analysis
+}

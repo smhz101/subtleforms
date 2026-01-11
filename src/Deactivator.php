@@ -11,34 +11,38 @@ namespace SubtleForms;
 /**
  * Handles plugin deactivation tasks.
  */
-final class Deactivator
-{
-    /**
-     * Deactivate the plugin.
-     */
-    public static function deactivate(): void
-    {
-        // Flush rewrite rules
-        flush_rewrite_rules();
+final class Deactivator {
 
-        // Clear any scheduled cron jobs
-        self::clear_scheduled_events();
+	/**
+	 * Deactivate the plugin.
+	 */
+	public static function deactivate(): void {
+		// Flush rewrite rules
+		flush_rewrite_rules();
 
-        // Store deactivation timestamp
-        update_option('subtleforms_deactivated_at', time());
+		// Clear any scheduled cron jobs
+		self::clear_scheduled_events();
 
-        // Allow extensions to hook into deactivation
-        do_action('subtleforms/deactivated');
-    }
+		// Store deactivation timestamp
+		update_option( 'subtleforms_deactivated_at', time() );
 
-    /**
-     * Clear scheduled cron events.
-     */
-    private static function clear_scheduled_events(): void
-    {
-        $timestamp = wp_next_scheduled('subtleforms_cleanup');
-        if ($timestamp) {
-            wp_unschedule_event($timestamp, 'subtleforms_cleanup');
-        }
-    }
+		// Allow extensions to hook into deactivation
+		do_action( 'subtleforms/deactivated' );
+	}
+
+	/**
+	 * Clear scheduled cron events.
+	 */
+	private static function clear_scheduled_events(): void {
+		$timestamp = wp_next_scheduled( 'subtleforms_cleanup' );
+		if ( $timestamp ) {
+			wp_unschedule_event( $timestamp, 'subtleforms_cleanup' );
+		}
+
+		// Clear privacy cleanup cron
+		$timestamp = wp_next_scheduled( 'subtleforms_daily_cleanup' );
+		if ( $timestamp ) {
+			wp_unschedule_event( $timestamp, 'subtleforms_daily_cleanup' );
+		}
+	}
 }

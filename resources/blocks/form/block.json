@@ -1,0 +1,33 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 2,
+  "name": "subtleforms/form",
+  "version": "1.0.0",
+  "title": "SubtleForms",
+  "category": "widgets",
+  "description": "Embed a SubtleForms form",
+  "icon": "feedback",
+  "keywords": ["form", "contact", "subtleforms", "embed"],
+  "textdomain": "subtleforms",
+  "supports": {
+    "align": true,
+    "html": false,
+    "customClassName": true
+  },
+  "attributes": {
+    "formId": {
+      "type": "number",
+      "default": 0
+    },
+    "align": {
+      "type": "string"
+    }
+  },
+  "example": {
+    "attributes": {
+      "formId": 0
+    }
+  },
+  "editorScript": "file:./index.js",
+  "editorStyle": "file:./editor.css"
+}

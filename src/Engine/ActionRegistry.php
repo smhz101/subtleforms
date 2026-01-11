@@ -14,94 +14,85 @@ use InvalidArgumentException;
 /**
  * Registry for action definitions and implementations.
  */
-final class ActionRegistry
-{
-    /**
-     * @var array<string, ActionInterface>
-     */
-    private array $actions = [];
+final class ActionRegistry {
 
-    /**
-     * @var array<string, ActionDefinition>
-     */
-    private array $definitions = [];
+	/**
+	 * @var array<string, ActionInterface>
+	 */
+	private array $actions = array();
 
-    /**
-     * Register an action implementation. A definition must exist first.
-     */
-    public function register(ActionInterface $action): void
-    {
-        $type = $action->id();
-        if (!isset($this->definitions[$type])) {
-            throw new InvalidArgumentException(sprintf('Cannot register implementation for unknown action type "%s". Register an ActionDefinition first.', $type));
-        }
+	/**
+	 * @var array<string, ActionDefinition>
+	 */
+	private array $definitions = array();
 
-        $this->actions[$type] = $action;
-    }
+	/**
+	 * Register an action implementation. A definition must exist first.
+	 */
+	public function register( ActionInterface $action ): void {
+		$type = $action->id();
+		if ( ! isset( $this->definitions[ $type ] ) ) {
+			throw new InvalidArgumentException( sprintf( 'Cannot register implementation for unknown action type "%s". Register an ActionDefinition first.', $type ) );
+		}
 
-    /**
-     * Register an action definition (metadata + capability requirements).
-     */
-    public function registerDefinition(ActionDefinition $def): void
-    {
-        $this->definitions[$def->type()] = $def;
-    }
+		$this->actions[ $type ] = $action;
+	}
 
-    /**
-     * Get an action definition by type or null.
-     */
-    public function getDefinition(string $type): ?ActionDefinition
-    {
-        return $this->definitions[$type] ?? null;
-    }
+	/**
+	 * Register an action definition (metadata + capability requirements).
+	 */
+	public function registerDefinition( ActionDefinition $def ): void {
+		$this->definitions[ $def->type() ] = $def;
+	}
 
-    /**
-     * Whether a definition exists for type.
-     */
-    public function hasDefinition(string $type): bool
-    {
-        return isset($this->definitions[$type]);
-    }
+	/**
+	 * Get an action definition by type or null.
+	 */
+	public function getDefinition( string $type ): ?ActionDefinition {
+		return $this->definitions[ $type ] ?? null;
+	}
 
-    /**
-     * Get an action by ID.
-     */
-    public function get(string $id): ?ActionInterface
-    {
-        return $this->actions[$id] ?? null;
-    }
+	/**
+	 * Whether a definition exists for type.
+	 */
+	public function hasDefinition( string $type ): bool {
+		return isset( $this->definitions[ $type ] );
+	}
 
-    /**
-     * Get an implementation by type.
-     */
-    public function getImplementation(string $type): ?ActionInterface
-    {
-        return $this->actions[$type] ?? null;
-    }
+	/**
+	 * Get an action by ID.
+	 */
+	public function get( string $id ): ?ActionInterface {
+		return $this->actions[ $id ] ?? null;
+	}
 
-    /**
-     * Check if an action exists.
-     */
-    public function has(string $id): bool
-    {
-        return isset($this->actions[$id]);
-    }
+	/**
+	 * Get an implementation by type.
+	 */
+	public function getImplementation( string $type ): ?ActionInterface {
+		return $this->actions[ $type ] ?? null;
+	}
 
-    /**
-     * Get all registered action implementations.
-     *
-     * @return array<string, ActionInterface>
-     */
-    public function all(): array
-    {
-        return $this->actions;
-    }
+	/**
+	 * Check if an action exists.
+	 */
+	public function has( string $id ): bool {
+		return isset( $this->actions[ $id ] );
+	}
 
-    /**
-     * Remove an action implementation.
-     */
-    public function remove(string $id): void
-    {
-        unset($this->actions[$id]);
-    }
+	/**
+	 * Get all registered action implementations.
+	 *
+	 * @return array<string, ActionInterface>
+	 */
+	public function all(): array {
+		return $this->actions;
+	}
+
+	/**
+	 * Remove an action implementation.
+	 */
+	public function remove( string $id ): void {
+		unset( $this->actions[ $id ] );
+	}
 }

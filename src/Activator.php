@@ -11,62 +11,65 @@ namespace SubtleForms;
 /**
  * Handles plugin activation tasks.
  */
-final class Activator
-{
-    /**
-     * Activate the plugin.
-     */
-    public static function activate(): void
-    {
-        // Check PHP version requirement
-        if (version_compare(PHP_VERSION, '7.4', '<')) {
-            deactivate_plugins(SUBTLEFORMS_PLUGIN_BASENAME);
-            wp_die(
-                'SubtleForms requires PHP 7.4 or higher. Your server is running PHP ' . PHP_VERSION,
-                'Plugin Activation Error',
-                ['back_link' => true]
-            );
-        }
+final class Activator {
 
-        // Check WordPress version requirement
-        global $wp_version;
-        if (version_compare($wp_version, '5.0', '<')) {
-            deactivate_plugins(SUBTLEFORMS_PLUGIN_BASENAME);
-            wp_die(
-                'SubtleForms requires WordPress 5.0 or higher. You are running ' . $wp_version,
-                'Plugin Activation Error',
-                ['back_link' => true]
-            );
-        }
+	/**
+	 * Activate the plugin.
+	 */
+	public static function activate(): void {
+		// Check PHP version requirement
+		if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
+			deactivate_plugins( SUBTLEFORMS_PLUGIN_BASENAME );
+			wp_die(
+				'SubtleForms requires PHP 7.4 or higher. Your server is running PHP ' . PHP_VERSION,
+				'Plugin Activation Error',
+				array( 'back_link' => true )
+			);
+		}
 
-        // Create database tables
-        self::create_tables();
+		// Check WordPress version requirement
+		global $wp_version;
+		if ( version_compare( $wp_version, '5.0', '<' ) ) {
+			deactivate_plugins( SUBTLEFORMS_PLUGIN_BASENAME );
+			wp_die(
+				'SubtleForms requires WordPress 5.0 or higher. You are running ' . $wp_version,
+				'Plugin Activation Error',
+				array( 'back_link' => true )
+			);
+		}
 
-        // Migrate data if needed
-        self::migrate_submissions_table();
-        self::migrate_draft_schema_column();
+		// Create database tables
+		self::create_tables();
 
-        // Set default options
-        self::set_default_options();
+		// Migrate data if needed
+		self::migrate_submissions_table();
+		self::migrate_draft_schema_column();
 
-        // Flush rewrite rules
-        flush_rewrite_rules();
+		// Set default options
+		self::set_default_options();
 
-        // Store activation timestamp
-        update_option('subtleforms_activated_at', time());
-    }
+		// Schedule privacy cron jobs
+		if ( ! wp_next_scheduled( 'subtleforms_daily_cleanup' ) ) {
+			wp_schedule_event( time(), 'daily', 'subtleforms_daily_cleanup' );
+		}
 
-    /**
-     * Create plugin database tables.
-     */
-    private static function create_tables(): void
-    {
-        global $wpdb;
-        $charset_collate = $wpdb->get_charset_collate();
+		// Flush rewrite rules
+		flush_rewrite_rules();
 
-        // Forms table - dbDelta requires exact syntax (no IF NOT EXISTS, two spaces after PRIMARY KEY)
-        $forms_table = $wpdb->prefix . 'subtleforms_forms';
-        $forms_sql = "CREATE TABLE {$forms_table} (
+		// Store activation timestamp
+		update_option( 'subtleforms_activated_at', time() );
+	}
+
+	/**
+	 * Create plugin database tables.
+	 */
+	private static function create_tables(): void {
+		global $wpdb;
+		$charset_collate = $wpdb->get_charset_collate();
+
+		// Forms table - dbDelta requires exact syntax (no IF NOT EXISTS, two spaces after PRIMARY KEY)
+		$forms_table = $wpdb->prefix . 'subtleforms_forms';
+		$forms_sql   = "CREATE TABLE {$forms_table} (
   id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   title varchar(255) NOT NULL,
   config longtext NOT NULL,
@@ -79,9 +82,9 @@ final class Activator
   KEY status (status)
 ) {$charset_collate};";
 
-        // Submissions table
-        $submissions_table = $wpdb->prefix . 'subtleforms_submissions';
-        $submissions_sql = "CREATE TABLE {$submissions_table} (
+		// Submissions table
+		$submissions_table = $wpdb->prefix . 'subtleforms_submissions';
+		$submissions_sql   = "CREATE TABLE {$submissions_table} (
   id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   form_id bigint(20) unsigned NOT NULL,
   schema_version int unsigned DEFAULT NULL,
@@ -97,9 +100,9 @@ final class Activator
   KEY created_at (created_at)
 ) {$charset_collate};";
 
-        // Schemas table (versioned form schemas)
-        $schemas_table = $wpdb->prefix . 'subtleforms_form_schemas';
-        $schemas_sql = "CREATE TABLE {$schemas_table} (
+		// Schemas table (versioned form schemas)
+		$schemas_table = $wpdb->prefix . 'subtleforms_form_schemas';
+		$schemas_sql   = "CREATE TABLE {$schemas_table} (
   id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   form_id bigint(20) unsigned NOT NULL,
   version int unsigned NOT NULL,
@@ -112,9 +115,9 @@ final class Activator
   KEY active (active)
 ) {$charset_collate};";
 
-        // Logs table
-        $logs_table = $wpdb->prefix . 'subtleforms_logs';
-        $logs_sql = "CREATE TABLE {$logs_table} (
+		// Logs table
+		$logs_table = $wpdb->prefix . 'subtleforms_logs';
+		$logs_sql   = "CREATE TABLE {$logs_table} (
   id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
   submission_id bigint(20) unsigned NOT NULL,
   level varchar(20) NOT NULL DEFAULT 'info',
@@ -127,106 +130,103 @@ final class Activator
   KEY created_at (created_at)
 ) {$charset_collate};";
 
-        require_once ABSPATH . 'wp-admin/includes/upgrade.php';
-        
-        $results = [];
-        $results['forms'] = dbDelta($forms_sql);
-        $results['submissions'] = dbDelta($submissions_sql);
-        $results['schemas'] = dbDelta($schemas_sql);
-        $results['logs'] = dbDelta($logs_sql);
+		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
-        // Verify tables were created
-        $tables_to_check = [
-            'forms' => $forms_table,
-            'submissions' => $submissions_table,
-            'schemas' => $schemas_table,
-            'logs' => $logs_table,
-        ];
+		$results                = array();
+		$results['forms']       = dbDelta( $forms_sql );
+		$results['submissions'] = dbDelta( $submissions_sql );
+		$results['schemas']     = dbDelta( $schemas_sql );
+		$results['logs']        = dbDelta( $logs_sql );
 
-        $missing_tables = [];
-        foreach ($tables_to_check as $name => $table_name) {
-            $table_exists = $wpdb->get_var("SHOW TABLES LIKE '{$table_name}'");
-            if ($table_exists !== $table_name) {
-                $missing_tables[] = $name;
-            }
-        }
+		// Verify tables were created
+		$tables_to_check = array(
+			'forms'       => $forms_table,
+			'submissions' => $submissions_table,
+			'schemas'     => $schemas_table,
+			'logs'        => $logs_table,
+		);
 
-        if (!empty($missing_tables)) {
-            $error_message = sprintf(
-                'SubtleForms failed to create the following database tables: %s. Please check your database permissions or contact your hosting provider.',
-                implode(', ', $missing_tables)
-            );
-            
-            // Log the error
-            error_log('SubtleForms Activation Error: ' . $error_message);
-            error_log('dbDelta results: ' . print_r($results, true));
-            
-            // Show admin notice instead of wp_die to allow debugging
-            add_option('subtleforms_activation_error', $error_message);
-            
-            deactivate_plugins(SUBTLEFORMS_PLUGIN_BASENAME);
-            wp_die(
-                $error_message . '<br><br>Debug info has been logged to your error log.',
-                'Database Creation Error',
-                ['back_link' => true]
-            );
-        }
+		$missing_tables = array();
+		foreach ( $tables_to_check as $name => $table_name ) {
+			$table_exists = $wpdb->get_var( "SHOW TABLES LIKE '{$table_name}'" );
+			if ( $table_exists !== $table_name ) {
+				$missing_tables[] = $name;
+			}
+		}
 
-        // Store database version
-        update_option('subtleforms_db_version', SUBTLEFORMS_VERSION);
-    }
+		if ( ! empty( $missing_tables ) ) {
+			$error_message = sprintf(
+				'SubtleForms failed to create the following database tables: %s. Please check your database permissions or contact your hosting provider.',
+				implode( ', ', $missing_tables )
+			);
 
-    /**
-     * Migrate submissions table data.
-     */
-    private static function migrate_submissions_table(): void
-    {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'subtleforms_submissions';
+			// Log the error
+			error_log( 'SubtleForms Activation Error: ' . $error_message );
+			error_log( 'dbDelta results: ' . print_r( $results, true ) );
 
-        // Check if form_version column exists (it might remain after dbDelta)
-        $column_exists = $wpdb->get_results("SHOW COLUMNS FROM {$table_name} LIKE 'form_version'");
-        
-        if (!empty($column_exists)) {
-            // Copy form_version to schema_version where schema_version is NULL
-            $wpdb->query("UPDATE {$table_name} SET schema_version = form_version WHERE schema_version IS NULL AND form_version IS NOT NULL");
-        }
-    }
+			// Show admin notice instead of wp_die to allow debugging
+			add_option( 'subtleforms_activation_error', $error_message );
 
-    /**
-     * Migrate forms table to add draft_schema column.
-     * Added in version 1.4.0 to support draft/active schema separation.
-     */
-    private static function migrate_draft_schema_column(): void
-    {
-        global $wpdb;
-        $table_name = $wpdb->prefix . 'subtleforms_forms';
+			deactivate_plugins( SUBTLEFORMS_PLUGIN_BASENAME );
+			wp_die(
+				$error_message . '<br><br>Debug info has been logged to your error log.',
+				'Database Creation Error',
+				array( 'back_link' => true )
+			);
+		}
 
-        // Check if draft_schema column exists
-        $column_exists = $wpdb->get_results("SHOW COLUMNS FROM {$table_name} LIKE 'draft_schema'");
-        
-        if (empty($column_exists)) {
-            // Add draft_schema column
-            $wpdb->query("ALTER TABLE {$table_name} ADD COLUMN draft_schema longtext DEFAULT NULL AFTER config");
-            error_log('SubtleForms: Added draft_schema column to forms table');
-        }
-    }
+		// Store database version
+		update_option( 'subtleforms_db_version', SUBTLEFORMS_VERSION );
+	}
 
-    /**
-     * Set default plugin options.
-     */
-    private static function set_default_options(): void
-    {
-        $defaults = [
-            'subtleforms_version' => SUBTLEFORMS_VERSION,
-            'subtleforms_capabilities' => [],
-            'subtleforms_extensions_enabled' => [],
-        ];
+	/**
+	 * Migrate submissions table data.
+	 */
+	private static function migrate_submissions_table(): void {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'subtleforms_submissions';
 
-        foreach ($defaults as $key => $value) {
-            if (get_option($key) === false) {
-                add_option($key, $value);
-            }
-        }
-    }
+		// Check if form_version column exists (it might remain after dbDelta)
+		$column_exists = $wpdb->get_results( "SHOW COLUMNS FROM {$table_name} LIKE 'form_version'" );
+
+		if ( ! empty( $column_exists ) ) {
+			// Copy form_version to schema_version where schema_version is NULL
+			$wpdb->query( "UPDATE {$table_name} SET schema_version = form_version WHERE schema_version IS NULL AND form_version IS NOT NULL" );
+		}
+	}
+
+	/**
+	 * Migrate forms table to add draft_schema column.
+	 * Added in version 1.4.0 to support draft/active schema separation.
+	 */
+	private static function migrate_draft_schema_column(): void {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'subtleforms_forms';
+
+		// Check if draft_schema column exists
+		$column_exists = $wpdb->get_results( "SHOW COLUMNS FROM {$table_name} LIKE 'draft_schema'" );
+
+		if ( empty( $column_exists ) ) {
+			// Add draft_schema column
+			$wpdb->query( "ALTER TABLE {$table_name} ADD COLUMN draft_schema longtext DEFAULT NULL AFTER config" );
+			error_log( 'SubtleForms: Added draft_schema column to forms table' );
+		}
+	}
+
+	/**
+	 * Set default plugin options.
+	 */
+	private static function set_default_options(): void {
+		$defaults = array(
+			'subtleforms_version'            => SUBTLEFORMS_VERSION,
+			'subtleforms_capabilities'       => array(),
+			'subtleforms_extensions_enabled' => array(),
+		);
+
+		foreach ( $defaults as $key => $value ) {
+			if ( get_option( $key ) === false ) {
+				add_option( $key, $value );
+			}
+		}
+	}
 }

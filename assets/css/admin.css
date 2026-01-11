@@ -83,3 +83,16 @@ body.subtle-forms_page_subtleforms-submission-detail .wrap {
 .subtleforms-admin-page {
 	/* Placeholder for any global page-level styles */
 }
+
+/* Unread submission highlighting */
+.subtleforms-admin .sf-bg-blue-50 {
+	background-color: rgba(59, 130, 246, 0.05) !important;
+}
+
+.subtleforms-admin .sf-border-l-4 {
+	border-left-width: 4px;
+}
+
+.subtleforms-admin .sf-border-l-blue-500 {
+	border-left-color: #3b82f6;
+}

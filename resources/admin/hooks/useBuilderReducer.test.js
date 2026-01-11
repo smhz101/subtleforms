@@ -6,7 +6,7 @@ import {
 } from './useBuilderReducer';
 
 describe('useBuilderReducer undo/redo', () => {
-  test('EDIT_SCHEMA records past and clears future', () => {
+  test('EDIT_SCHEMA with skipBatching records past and clears future', () => {
     const s1 = { metadata: { title: 'One' }, fields: [] };
     const s2 = { metadata: { title: 'Two' }, fields: [] };
 
@@ -21,13 +21,67 @@ describe('useBuilderReducer undo/redo', () => {
 
     const next = builderReducer(state, {
       type: BUILDER_ACTIONS.EDIT_SCHEMA,
-      payload: { schema: s2 },
+      payload: { schema: s2, skipBatching: true },
     });
 
     expect(next.draftSchema).toBe(s2);
     expect(next.schemaHistoryPast).toEqual([s1]);
     expect(next.schemaHistoryFuture).toEqual([]);
     expect(next.isDirty).toBe(true);
+  });
+
+  test('EDIT_SCHEMA with batching defers history commit', () => {
+    const s1 = { metadata: { title: 'One' }, fields: [] };
+    const s2 = { metadata: { title: 'Two' }, fields: [] };
+
+    const state = {
+      ...initialBuilderState,
+      state: BUILDER_STATES.EDITING,
+      loading: false,
+      draftSchema: s1,
+      schemaHistoryPast: [],
+      schemaHistoryFuture: [],
+    };
+
+    const next = builderReducer(state, {
+      type: BUILDER_ACTIONS.EDIT_SCHEMA,
+      payload: { schema: s2 },
+    });
+
+    expect(next.draftSchema).toBe(s2);
+    // History should NOT be updated yet (batching)
+    expect(next.schemaHistoryPast).toEqual([]);
+    expect(next.schemaHistoryFuture).toEqual([]);
+    // Batch tracking should be active
+    expect(next.historyBatchPendingSchema).toBe(s2);
+    expect(next.historyBatchStartSchema).toBe(s1);
+    expect(next.isDirty).toBe(true);
+  });
+
+  test('COMMIT_HISTORY_BATCH adds start schema to history', () => {
+    const s1 = { metadata: { title: 'One' }, fields: [] };
+    const s2 = { metadata: { title: 'Two' }, fields: [] };
+
+    const state = {
+      ...initialBuilderState,
+      state: BUILDER_STATES.DIRTY,
+      loading: false,
+      draftSchema: s2,
+      schemaHistoryPast: [],
+      schemaHistoryFuture: [],
+      historyBatchPendingSchema: s2,
+      historyBatchStartSchema: s1,
+    };
+
+    const next = builderReducer(state, {
+      type: BUILDER_ACTIONS.COMMIT_HISTORY_BATCH,
+    });
+
+    expect(next.draftSchema).toBe(s2);
+    expect(next.schemaHistoryPast).toEqual([s1]);
+    expect(next.schemaHistoryFuture).toEqual([]);
+    expect(next.historyBatchPendingSchema).toBeNull();
+    expect(next.historyBatchStartSchema).toBeNull();
   });
 
   test('EDIT_SCHEMA with same schema reference does not affect history', () => {

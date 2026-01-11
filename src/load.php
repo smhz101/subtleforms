@@ -7,22 +7,22 @@
  */
 
 // If this file is called directly, abort.
-if (!defined('ABSPATH')) {
-  exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 
 // Prefer Composer autoloader when available
-if (file_exists(SUBTLEFORMS_PLUGIN_DIR . 'vendor/autoload.php')) {
-  require_once SUBTLEFORMS_PLUGIN_DIR . 'vendor/autoload.php';
+if ( file_exists( SUBTLEFORMS_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
+	require_once SUBTLEFORMS_PLUGIN_DIR . 'vendor/autoload.php';
 
-  // Composer will autoload classes, but standalone functions (like the
-  // `SubtleForms\init()` helper) are defined in src/Plugin.php and must
-  // be included explicitly.
-  if (file_exists(SUBTLEFORMS_PLUGIN_DIR . 'src/Plugin.php')) {
-    require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Plugin.php';
-  }
+	// Composer will autoload classes, but standalone functions (like the
+	// `SubtleForms\init()` helper) are defined in src/Plugin.php and must
+	// be included explicitly.
+	if ( file_exists( SUBTLEFORMS_PLUGIN_DIR . 'src/Plugin.php' ) ) {
+		require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Plugin.php';
+	}
 
-  return;
+	return;
 }
 
 // Fallback to manual includes for development environments
@@ -43,12 +43,17 @@ require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Engine/PipelineResult.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Engine/ActionRegistry.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Engine/SubmissionContext.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Engine/Pipeline.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Engine/ActionDefinition.php';require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Engine/FieldValidator.php';// Core actions (required when Composer is not present)
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Engine/Actions/SaveAction.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Engine/Actions/EmailAction.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Engine/Actions/WebhookAction.php';
 
 // Support
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/Logger.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/Capabilities.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/FeatureGate.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/Helpers.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/Settings.php';
 
 // Extensions
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Extensions/ExtensionManager.php';
@@ -58,7 +63,16 @@ require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Admin/AdminMenu.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Api/RestController.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Frontend/Shortcode.php';
 
+// Privacy
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Privacy/PrivacyEraser.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Privacy/PrivacyExporter.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Privacy/PrivacyManager.php';
+
 // Repositories
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Repositories/FormsRepository.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Repositories/SubmissionsRepository.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Repositories/LogsRepository.php';
+
+// Blocks
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Blocks/SubtleFormsBlock.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Blocks/SubtleFormsFormBlock.php';

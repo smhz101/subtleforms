@@ -5,6 +5,8 @@
  * @package SubtleForms
  */
 
+use PHPUnit\Framework\TestCase;
+
 class API_Endpoints_Test extends WP_UnitTestCase {
     private $admin_user_id;
     private $test_form_id;

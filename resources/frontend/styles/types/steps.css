@@ -1,0 +1,156 @@
+/**
+ * SubtleForms - Step/Multi-Step Form Type Styles
+ * 
+ * Clear step separation, visible progress, predictable navigation.
+ */
+
+.subtleforms--type-steps,
+.subtleforms--type-multistep {
+	max-width: 900px;
+	margin: 0 auto;
+}
+
+/* ===== Step Navigation ===== */
+.subtleforms--type-steps .subtleforms-step-navigation,
+.subtleforms--type-multistep .subtleforms-step-navigation {
+	display: flex;
+	justify-content: space-between;
+	margin-bottom: var(--subtleforms-spacing-xl);
+	padding-bottom: var(--subtleforms-spacing-md);
+	border-bottom: 2px solid var(--subtleforms-color-border);
+}
+
+.subtleforms-step {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	flex: 1;
+	position: relative;
+	cursor: default;
+}
+
+.subtleforms-step-number {
+	width: 40px;
+	height: 40px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 600;
+	font-size: var(--subtleforms-font-size-base);
+	background: var(--subtleforms-color-border);
+	color: var(--subtleforms-color-text-light);
+	transition: all var(--subtleforms-transition-base);
+	margin-bottom: 0.5rem;
+	position: relative;
+	z-index: 2;
+}
+
+.subtleforms-step.active .subtleforms-step-number {
+	background: var(--subtleforms-color-primary);
+	color: white;
+	box-shadow: 0 0 0 4px rgba(0, 102, 204, 0.1);
+}
+
+.subtleforms-step.completed .subtleforms-step-number {
+	background: var(--subtleforms-color-success);
+	color: white;
+}
+
+.subtleforms-step.completed .subtleforms-step-number::after {
+	content: '✓';
+	position: absolute;
+	inset: 0;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.subtleforms-step-title {
+	font-size: var(--subtleforms-font-size-sm);
+	color: var(--subtleforms-color-text-light);
+	text-align: center;
+	font-weight: 500;
+}
+
+.subtleforms-step.active .subtleforms-step-title {
+	color: var(--subtleforms-color-primary);
+	font-weight: 600;
+}
+
+/* Connector lines between steps */
+.subtleforms-step:not(:last-child)::after {
+	content: '';
+	position: absolute;
+	top: 20px;
+	left: 50%;
+	width: 100%;
+	height: 2px;
+	background: var(--subtleforms-color-border);
+	z-index: 1;
+}
+
+.subtleforms-step.completed:not(:last-child)::after {
+	background: var(--subtleforms-color-success);
+}
+
+/* ===== Step Content ===== */
+.subtleforms--type-steps .subtleforms-step-content,
+.subtleforms--type-multistep .subtleforms-step-content {
+	min-height: 300px;
+	padding: var(--subtleforms-spacing-lg);
+	background: #fafafa;
+	border-radius: var(--subtleforms-radius-md);
+	margin-bottom: var(--subtleforms-spacing-lg);
+}
+
+.subtleforms--type-steps .subtleforms-step-label,
+.subtleforms--type-multistep .subtleforms-step-label {
+	font-size: 1.5rem;
+	font-weight: 700;
+	margin-bottom: var(--subtleforms-spacing-md);
+	color: var(--subtleforms-color-text);
+	padding-bottom: var(--subtleforms-spacing-sm);
+	border-bottom: 2px solid var(--subtleforms-color-border);
+}
+
+.subtleforms--type-steps .subtleforms-step-description,
+.subtleforms--type-multistep .subtleforms-step-description {
+	font-size: var(--subtleforms-font-size-base);
+	color: var(--subtleforms-color-text-light);
+	margin-bottom: var(--subtleforms-spacing-lg);
+	line-height: 1.6;
+}
+
+/* Field spacing within steps */
+.subtleforms--type-steps .subtleforms-field,
+.subtleforms--type-multistep .subtleforms-field {
+	margin-bottom: var(--subtleforms-spacing-lg);
+}
+
+/* ===== Navigation Buttons ===== */
+.subtleforms--type-steps .subtleforms-buttons,
+.subtleforms--type-multistep .subtleforms-buttons {
+	display: flex;
+	justify-content: space-between;
+	gap: var(--subtleforms-spacing-sm);
+	padding-top: var(--subtleforms-spacing-md);
+	border-top: 1px solid var(--subtleforms-color-border);
+}
+
+/* Mobile responsive */
+@media (max-width: 768px) {
+	.subtleforms--type-steps .subtleforms-step-navigation,
+	.subtleforms--type-multistep .subtleforms-step-navigation {
+		overflow-x: auto;
+		padding-bottom: var(--subtleforms-spacing-sm);
+	}
+
+	.subtleforms-step {
+		min-width: 80px;
+	}
+
+	.subtleforms-step-title {
+		font-size: 12px;
+	}
+}

@@ -44,7 +44,11 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
 
   const generateDefaultTitle = useCallback(() => {
     const suffix = Math.floor(1000 + Math.random() * 9000);
-    return sprintf(__('New Form %d', 'subtleforms'), suffix);
+    return sprintf(
+      /* translators: %1$d: numeric suffix used to create a unique title */
+      __('New Form %1$d', 'subtleforms'),
+      suffix
+    );
   }, []);
 
   useEffect(() => {
@@ -212,7 +216,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         onClick={() => !isDisabled && onSelect(option.id)}
         disabled={isDisabled}
         className={clsx(
-          'sf-group sf-relative sf-flex sf-border sf-focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 sf-w-full sf-transition-all sf-duration-150',
+          'sf-group sf-relative sf-flex sf-border sf-focus:outline-none sf-focus:ring-2 sf-focus:ring-blue-500 sf-focus:ring-offset-2 sf-w-full sf-transition-all sf-duration-150',
           isHorizontal
             ? 'sf-flex-row sf-items-center sf-gap-3 sf-p-3 sf-text-left'
             : 'sf-flex-col sf-items-center sf-text-center sf-p-4',
@@ -225,11 +229,11 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         )}>
         <div
           className={clsx(
-            'flex-shrink-0 transition-colors',
-            isHorizontal ? 'p-2' : 'p-3 mb-2',
+            'sf-transition-colors sf-shrink-0',
+            isHorizontal ? 'sf-p-2' : 'sf-p-3 sf-mb-2',
             isSelected
               ? 'sf-bg-blue-600 sf-text-white'
-              : 'sf-bg-gray-100 sf-text-gray-600 group-hover:sf-bg-gray-200'
+              : 'sf-bg-gray-100 sf-text-gray-600 sf-group-hover:sf-bg-gray-200'
           )}>
           {React.createElement(option.icon, {
             className: isHorizontal
@@ -241,8 +245,8 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         <div className={isHorizontal ? 'sf-flex-1 sf-min-w-0' : 'sf-w-full'}>
           <div
             className={clsx(
-              'font-semibold text-sm',
-              isSelected ? 'text-blue-900' : 'text-gray-900'
+              'sf-font-semibold sf-text-sm',
+              isSelected ? 'sf-text-blue-900' : 'sf-text-gray-900'
             )}>
             {option.title}
           </div>

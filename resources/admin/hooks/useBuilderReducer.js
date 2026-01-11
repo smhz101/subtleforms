@@ -6,8 +6,50 @@
  * States: INIT, EMPTY_DRAFT, EDITING, DIRTY, AUTOSAVING, SAVED,
  *         PREVIEWING, PUBLISHING, PUBLISHED, ERROR
  *
+ * ===========================================================================
+ * HISTORY BATCHING STRATEGY (v1.5.0)
+ * ===========================================================================
+ *
+ * PROBLEM:
+ * High-frequency operations (drag, reorder) can create dozens of history
+ * entries per second, making undo/redo unusable and consuming memory.
+ *
+ * SOLUTION:
+ * Implement commit-on-quiet batching:
+ *
+ * 1. IMMEDIATE UI UPDATE:
+ *    - draftSchema updates instantly for smooth UX
+ *    - User sees real-time changes during drag
+ *
+ * 2. DEFERRED HISTORY COMMIT:
+ *    - During rapid edits, track:
+ *      * historyBatchStartSchema: Schema before batch started
+ *      * historyBatchPendingSchema: Latest schema (same as draftSchema)
+ *    - Do NOT add to schemaHistoryPast yet
+ *
+ * 3. COMMIT ON QUIET:
+ *    - After HISTORY_BATCH_WINDOW_MS (300ms) of no edits
+ *    - Commit the START schema to history as a single undo point
+ *    - User can undo the entire drag sequence in one step
+ *
+ * 4. CONFIGURATION:
+ *    - MAX_HISTORY_LENGTH: Limits memory (default 50)
+ *    - HISTORY_BATCH_WINDOW_MS: Time window for batching (default 300ms)
+ *
+ * BENEFITS:
+ * - Clean history: Drag sequences = 1 undo point
+ * - Smooth UX: No lag during drag
+ * - Memory safe: Configurable limits
+ * - Backward compatible: Undo/redo UX unchanged
+ *
+ * IMPLEMENTATION NOTES:
+ * - Manual edits (typing) naturally have pauses, so they commit normally
+ * - Batch timer managed in BuilderPage useEffect
+ * - Undo/redo clear pending batches to stay consistent
+ * - skipBatching flag available for operations that should commit immediately
+ *
  * @package SubtleForms
- * @version 1.3.0
+ * @version 1.5.0
  */
 
 import { useReducer } from '@wordpress/element';
@@ -37,6 +79,7 @@ export const BUILDER_ACTIONS = {
   INIT_BUILDER: 'INIT_BUILDER',
   LOAD_SUCCESS: 'LOAD_SUCCESS',
   EDIT_SCHEMA: 'EDIT_SCHEMA',
+  COMMIT_HISTORY_BATCH: 'COMMIT_HISTORY_BATCH',
   UNDO_SCHEMA: 'UNDO_SCHEMA',
   REDO_SCHEMA: 'REDO_SCHEMA',
   SET_VALIDATION_ERRORS: 'SET_VALIDATION_ERRORS',
@@ -56,7 +99,7 @@ export const BUILDER_ACTIONS = {
 // Allowed Transitions Map
 // ============================================================================
 
-const ALLOWED_TRANSITIONS = {
+export const ALLOWED_TRANSITIONS = {
   [BUILDER_STATES.INIT]: [
     BUILDER_STATES.EMPTY_DRAFT,
     BUILDER_STATES.EDITING,
@@ -112,18 +155,34 @@ function validateTransition(currentState, nextState, actionType) {
     const errorMsg = `[FSM] Illegal transition: ${currentState} → ${nextState} (action: ${actionType})`;
 
     if (process.env.NODE_ENV === 'development') {
-      console.error(errorMsg);
-      console.trace('Stack trace:');
+      // Development: Throw to catch bugs early
       throw new Error(errorMsg);
-    } else {
-      console.warn(errorMsg);
     }
-
+    // Production: Fail safely by returning false
     return false;
   }
 
   return true;
 }
+
+// ============================================================================
+// History Configuration
+// ============================================================================
+
+/**
+ * Maximum number of undo history entries to retain.
+ * Configurable to prevent memory bloat during high-frequency edits.
+ * @type {number}
+ */
+export const MAX_HISTORY_LENGTH = 50;
+
+/**
+ * Time window (ms) for batching rapid schema changes.
+ * Operations within this window are treated as a single history entry.
+ * Prevents history spam during drag operations.
+ * @type {number}
+ */
+export const HISTORY_BATCH_WINDOW_MS = 300;
 
 // ============================================================================
 // Initial State
@@ -145,6 +204,14 @@ export const initialBuilderState = {
   // Task 6.4: Undo/Redo history for schema edits
   schemaHistoryPast: [],
   schemaHistoryFuture: [],
+
+  // History batching state (prevents spam during drag operations)
+  // When non-null, indicates a batch is in progress
+  historyBatchTimer: null,
+  // Stores the schema that will be committed when the batch window closes
+  historyBatchPendingSchema: null,
+  // Stores the schema that existed before the batch started (for undo)
+  historyBatchStartSchema: null,
 
   // Task 5.5: Structured schema validation errors
   validationErrors: [],
@@ -171,13 +238,6 @@ export const initialBuilderState = {
 // ============================================================================
 
 function builderReducer(state, action) {
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[FSM] Action: ${action.type}`, {
-      currentState: state.state,
-      payload: action.payload,
-    });
-  }
-
   switch (action.type) {
     // ------------------------------------------------------------------------
     // INIT_BUILDER
@@ -255,21 +315,97 @@ function builderReducer(state, action) {
         };
       }
 
-      const MAX_HISTORY = 50;
+      /**
+       * HISTORY BATCHING STRATEGY:
+       *
+       * High-frequency operations (drag/reorder) can create dozens of history
+       * entries in seconds. To prevent history spam while preserving undo/redo UX:
+       *
+       * 1. IMMEDIATE UPDATE: Always update draftSchema immediately for real-time UI
+       * 2. BATCHING: Defer committing to history during rapid changes
+       * 3. COMMIT-ON-QUIET: After HISTORY_BATCH_WINDOW_MS of quiet, commit the
+       *    final state as a single history entry
+       *
+       * This gives users smooth drag experience while keeping history clean.
+       * Manual edits (typing, etc.) naturally have pauses, so they commit normally.
+       */
+
       const past = Array.isArray(state.schemaHistoryPast) ? state.schemaHistoryPast : [];
+      const isFirstEdit = past.length === 0 && !state.draftSchema;
 
-      const nextPast = state.draftSchema ? [...past, state.draftSchema].slice(-MAX_HISTORY) : past;
+      // For first edit or if batching is disabled, commit immediately to history
+      if (isFirstEdit || action.payload?.skipBatching) {
+        const nextPast = state.draftSchema
+          ? [...past, state.draftSchema].slice(-MAX_HISTORY_LENGTH)
+          : past;
 
+        return {
+          ...state,
+          state: nextState,
+          draftSchema: nextSchema,
+          isDirty: true,
+          schemaHistoryPast: nextPast,
+          schemaHistoryFuture: [],
+          validationErrors: [],
+          autoSaveError: null,
+          historyBatchTimer: null,
+          historyBatchPendingSchema: null,
+        };
+      }
+
+      // BATCHING ACTIVE: Update current schema but defer history commit
+      // The pending schema will be committed when the batch window expires
       return {
         ...state,
         state: nextState,
         draftSchema: nextSchema,
         isDirty: true,
-        schemaHistoryPast: nextPast,
-        schemaHistoryFuture: [],
-        // Clear previous validation results; they may be stale after edits
+        historyBatchPendingSchema: nextSchema,
+        // Track the schema before the batch started (for undo point)
+        // Only set this on the FIRST edit in a batch
+        historyBatchStartSchema: state.historyBatchStartSchema || state.draftSchema,
+        // Keep existing history unchanged during batch
+        // Clear validation errors as schema changed
         validationErrors: [],
         autoSaveError: null,
+      };
+    }
+
+    // ------------------------------------------------------------------------
+    // COMMIT_HISTORY_BATCH
+    // Commits the pending batched schema to history.
+    // Called after HISTORY_BATCH_WINDOW_MS of no edits.
+    // ------------------------------------------------------------------------
+    case BUILDER_ACTIONS.COMMIT_HISTORY_BATCH: {
+      // If there's no pending schema or no start schema tracked, nothing to commit
+      if (!state.historyBatchStartSchema) {
+        return {
+          ...state,
+          historyBatchTimer: null,
+          historyBatchPendingSchema: null,
+        };
+      }
+
+      const past = Array.isArray(state.schemaHistoryPast) ? state.schemaHistoryPast : [];
+
+      /**
+       * BATCH COMMIT LOGIC:
+       * During a batch (e.g., dragging), we tracked:
+       * - historyBatchStartSchema: The schema before the batch started
+       * - draftSchema: Updated in real-time as user dragged
+       *
+       * Now we commit: Add the START schema to history as a single undo point.
+       * This lets users undo the entire drag sequence in one step.
+       */
+      const nextPast = [...past, state.historyBatchStartSchema].slice(-MAX_HISTORY_LENGTH);
+
+      return {
+        ...state,
+        schemaHistoryPast: nextPast,
+        schemaHistoryFuture: [], // Clear redo on new commit
+        historyBatchTimer: null,
+        historyBatchPendingSchema: null,
+        historyBatchStartSchema: null,
       };
     }
 
@@ -302,6 +438,10 @@ function builderReducer(state, action) {
         schemaHistoryFuture: nextFuture,
         validationErrors: [],
         autoSaveError: null,
+        // Clear any pending batch on undo
+        historyBatchTimer: null,
+        historyBatchPendingSchema: null,
+        historyBatchStartSchema: null,
       };
     }
 
@@ -323,8 +463,9 @@ function builderReducer(state, action) {
       const nextSchema = future[0];
       const nextFuture = future.slice(1);
       const past = Array.isArray(state.schemaHistoryPast) ? state.schemaHistoryPast : [];
-      const MAX_HISTORY = 50;
-      const nextPast = state.draftSchema ? [...past, state.draftSchema].slice(-MAX_HISTORY) : past;
+      const nextPast = state.draftSchema
+        ? [...past, state.draftSchema].slice(-MAX_HISTORY_LENGTH)
+        : past;
 
       return {
         ...state,
@@ -335,6 +476,10 @@ function builderReducer(state, action) {
         schemaHistoryFuture: nextFuture,
         validationErrors: [],
         autoSaveError: null,
+        // Clear any pending batch on redo
+        historyBatchTimer: null,
+        historyBatchPendingSchema: null,
+        historyBatchStartSchema: null,
       };
     }
 
@@ -572,8 +717,9 @@ function builderReducer(state, action) {
     // ------------------------------------------------------------------------
     default: {
       if (process.env.NODE_ENV === 'development') {
-        console.warn(`[FSM] Unknown action type: ${action.type}`);
+        throw new Error(`[FSM] Unknown action type: ${action.type}`);
       }
+      // Production: Silently ignore unknown actions
       return state;
     }
   }

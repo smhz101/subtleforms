@@ -28,6 +28,7 @@ export default function FieldRenderer({ field }) {
           placeholder={placeholder || ''}
           className={inputClass}
           readOnly
+          tabIndex='-1'
         />
       )}
 
@@ -37,6 +38,7 @@ export default function FieldRenderer({ field }) {
           placeholder={placeholder || ''}
           className={inputClass}
           readOnly
+          tabIndex='-1'
         />
       )}
 
@@ -46,6 +48,7 @@ export default function FieldRenderer({ field }) {
           placeholder={placeholder || ''}
           className={`${inputClass} resize-y`}
           readOnly
+          tabIndex='-1'
         />
       )}
 
@@ -53,7 +56,8 @@ export default function FieldRenderer({ field }) {
         <div className='sf-flex sf-items-center sf-gap-2'>
           <input
             type='checkbox'
-            className='sf-border-border rounded-none focus:ring-0 sf-w-4 sf-h-4 sf-text-primary sf-pointer-events-none'
+            className='sf-border-border sf-rounded-none sf-focus:sf-ring-0 sf-w-4 sf-h-4 sf-text-primary sf-pointer-events-none'
+            tabIndex='-1'
           />
           <span className='sf-text-text-primary sf-text-sm'>{label}</span>
         </div>
@@ -67,6 +71,7 @@ export default function FieldRenderer({ field }) {
                 type='radio'
                 name={field.key}
                 className='sf-border-border sf-rounded-full focus:sf-ring-0 sf-w-4 sf-h-4 sf-text-primary sf-pointer-events-none'
+                tabIndex='-1'
               />
               <span className='sf-text-text-primary sf-text-sm'>
                 {opt.label}
@@ -82,7 +87,8 @@ export default function FieldRenderer({ field }) {
             <div key={idx} className='sf-flex sf-items-center sf-gap-2'>
               <input
                 type='checkbox'
-                className='sf-border-border rounded-none focus:ring-0 sf-w-4 sf-h-4 sf-text-primary sf-pointer-events-none'
+                className='sf-border-border sf-rounded-none sf-focus:sf-ring-0 sf-w-4 sf-h-4 sf-text-primary sf-pointer-events-none'
+                tabIndex='-1'
               />
               <span className='sf-text-text-primary sf-text-sm'>
                 {opt.label}
@@ -96,7 +102,8 @@ export default function FieldRenderer({ field }) {
         <select
           className={selectClass}
           style={{ backgroundImage: selectBg }}
-          disabled>
+          disabled
+          tabIndex='-1'>
           <option>
             {placeholder || __('Select an option', 'subtleforms')}
           </option>
@@ -162,7 +169,9 @@ export default function FieldRenderer({ field }) {
       {type === 'address' && subFields && (
         <div className='sf-bg-surface-alt sf-p-4 sf-border sf-border-border rounded-none'>
           {subFields.map((sub, idx) => (
-            <div key={idx} className={idx < subFields.length - 1 ? 'mb-3' : ''}>
+            <div
+              key={idx}
+              className={idx < subFields.length - 1 ? 'sf-mb-3' : ''}>
               <label className='sf-block sf-mb-1 sf-font-medium sf-text-text-primary sf-text-sm'>
                 {sub.label}
                 {sub.required && (
