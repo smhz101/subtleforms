@@ -9,6 +9,7 @@ import {
   Spinner,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import './CreateFormWizard.scss';
 
 const STEPS = [
   { key: 'basics', title: __('Form basics', 'subtleforms') },
@@ -87,21 +88,21 @@ export default function CreateFormWizard({
   }
 
   return (
-    <div className='sf-flex sf-justify-center sf-items-center sf-p-6 sf-min-h-[calc(100vh-32px)]'>
-      <div className='sf-bg-white sf-shadow-sm sf-border sf-border-gray-200 sf-rounded sf-w-full sf-max-w-[680px]'>
-        <div className='sf-px-6 sf-py-5 sf-border-gray-200 sf-border-b'>
-          <div className='sf-flex sf-justify-between sf-items-center sf-gap-4'>
+    <div className='create-form-wizard__container'>
+      <div className='create-form-wizard__card'>
+        <div className='create-form-wizard__header'>
+          <div className='create-form-wizard__header-content'>
             <div>
-              <h1 className='sf-m-0 sf-font-semibold sf-text-lg'>
+              <h1>
                 {__('Create form', 'subtleforms')}
               </h1>
-              <div className='sf-mt-1 sf-text-gray-600 sf-text-sm'>
+              <div className='create-form-wizard__header-subtitle'>
                 {step.title} ({stepIndex + 1}/{STEPS.length})
               </div>
             </div>
 
             {submitting && (
-              <div className='sf-flex sf-items-center sf-gap-2 sf-text-gray-600 sf-text-sm'>
+              <div className='create-form-wizard__header-loading'>
                 <Spinner />
                 {__('Creating…', 'subtleforms')}
               </div>
@@ -109,7 +110,7 @@ export default function CreateFormWizard({
           </div>
         </div>
 
-        <div className='sf-px-6 sf-py-5'>
+        <div className='create-form-wizard__body'>
           {error && (
             <Notice status='error' isDismissible={false}>
               {error}
@@ -117,7 +118,7 @@ export default function CreateFormWizard({
           )}
 
           {step.key === 'basics' && (
-            <div className='sf-flex sf-flex-col sf-gap-4'>
+            <div className='create-form-wizard__body-fields'>
               <TextControl
                 label={__('Form name', 'subtleforms')}
                 value={title}
@@ -158,7 +159,7 @@ export default function CreateFormWizard({
           )}
 
           {step.key === 'start' && (
-            <div className='sf-flex sf-flex-col sf-gap-4'>
+            <div className='create-form-wizard__body-fields'>
               <RadioControl
                 label={__('Starting point', 'subtleforms')}
                 selected={startingPoint}
@@ -186,8 +187,8 @@ export default function CreateFormWizard({
           )}
         </div>
 
-        <div className='sf-flex sf-justify-between sf-items-center sf-px-6 sf-py-4 sf-border-gray-200 sf-border-t'>
-          <div className='sf-flex sf-items-center sf-gap-2'>
+        <div className='create-form-wizard__footer'>
+          <div className='create-form-wizard__footer-left'>
             {stepIndex > 0 ? (
               <Button isSecondary onClick={handleBack} disabled={submitting}>
                 {__('Back', 'subtleforms')}

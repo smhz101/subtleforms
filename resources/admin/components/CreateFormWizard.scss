@@ -1,0 +1,80 @@
+/**
+ * CreateFormWizard Component Styles
+ *
+ * Styles for the create form wizard modal with multi-step form.
+ */
+
+.create-form-wizard {
+  &__container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1.5rem;
+    min-height: calc(100vh - 32px);
+  }
+
+  &__card {
+    background-color: #fff;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    border: 1px solid #e5e7eb;
+    border-radius: 0.25rem;
+    width: 100%;
+    max-width: 680px;
+  }
+
+  &__header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+
+    &-content {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    h1 {
+      margin: 0;
+      font-weight: 600;
+      font-size: 1.125rem;
+    }
+
+    &-subtitle {
+      margin-top: 0.25rem;
+      color: #4b5563;
+      font-size: 0.875rem;
+    }
+
+    &-loading {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      color: #4b5563;
+      font-size: 0.875rem;
+    }
+  }
+
+  &__body {
+    padding: 1.25rem 1.5rem;
+
+    &-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+  }
+
+  &__footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #e5e7eb;
+
+    &-left {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  }
+}
