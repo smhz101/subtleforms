@@ -45,8 +45,8 @@ export default function AdminShell({
   const WP_ADMIN_BAR_HEIGHT = 32;
 
   return (
-    <div className='subtleforms-admin sf-admin-shell'>
-      <div className='sf-flex sf-flex-col sf-bg-white sf-h-[calc(100vh-var(--wp-admin--admin-bar--height,32px))] shell-container'>
+    <div className='subtleforms-admin admin-shell'>
+      <div className='admin-shell__container'>
         {/* TOP BAR - Sticky Header Component */}
         <AdminHeader
           title={title}
@@ -58,7 +58,7 @@ export default function AdminShell({
         {/* ACTION BAR - Sticky ActionBar Component */}
         {(actionBarLeft || actionBarRight) && (
           <div
-            className='sf-flex-shrink-0'
+            className='admin-shell__action-bar-wrapper'
             style={{
               position: 'sticky',
               top: `${WP_ADMIN_BAR_HEIGHT}px`,
@@ -69,14 +69,10 @@ export default function AdminShell({
         )}
 
         {/* CONTENT AREA - Scrollable */}
-        <div className='sf-flex-1 sf-overflow-hidden'>
-          <div
-            className={`sf-h-full sf-flex sf-flex-col ${
-              noScroll ? 'sf-overflow-hidden' : 'sf-overflow-y-auto'
-            }`}>
+        <div className='admin-shell__content'>
+          <div className={`admin-shell__content-inner ${noScroll ? 'admin-shell__content-inner--no-scroll' : ''}`}>
             <Notices />
-            <div
-              className={`sf-flex-1 ${noScroll ? 'sf-overflow-hidden' : ''}`}>
+            <div className={`admin-shell__content-body ${noScroll ? 'admin-shell__content-body--no-scroll' : ''}`}>
               {children}
             </div>
           </div>
@@ -84,7 +80,7 @@ export default function AdminShell({
 
         {/* BOTTOM BAR - Pagination */}
         {pagination && (
-          <div className='sf-flex-shrink-0 sf-bg-white sf-px-6 sf-py-3 sf-border-gray-300 sf-border-t'>
+          <div className='admin-shell__pagination'>
             {pagination}
           </div>
         )}

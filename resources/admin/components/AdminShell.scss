@@ -37,3 +37,48 @@
 		--wp-admin--admin-bar--height: 46px;
 	}
 }
+
+// Admin Shell Component
+.admin-shell {
+	&__container {
+		display: flex;
+		flex-direction: column;
+		background-color: #fff;
+		height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
+	}
+
+	&__action-bar-wrapper {
+		flex-shrink: 0;
+	}
+
+	&__content {
+		flex: 1;
+		overflow: hidden;
+
+		&-inner {
+			height: 100%;
+			display: flex;
+			flex-direction: column;
+			overflow-y: auto;
+
+			&--no-scroll {
+				overflow: hidden;
+			}
+		}
+
+		&-body {
+			flex: 1;
+
+			&--no-scroll {
+				overflow: hidden;
+			}
+		}
+	}
+
+	&__pagination {
+		flex-shrink: 0;
+		background-color: #fff;
+		padding: 0.75rem 1.5rem;
+		border-top: 1px solid #d1d5db;
+	}
+}
