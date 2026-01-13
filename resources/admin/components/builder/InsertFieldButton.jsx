@@ -12,11 +12,11 @@ export default function InsertFieldButton({
   const buttonRef = useRef(null);
 
   return (
-    <div className='insert-field-button__wrapper'>
+    <div className='sf-insert-field-button__wrapper'>
       <button
         type='button'
         ref={buttonRef}
-        className='insert-field-button__button'
+        className='sf-insert-field-button__button'
         onClick={(event) => {
           event.stopPropagation();
           onRequestInsert(

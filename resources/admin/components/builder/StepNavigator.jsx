@@ -11,8 +11,8 @@ export default function StepNavigator({
 }) {
   if (!steps || steps.length === 0) {
     return (
-      <div className='step-navigator step-navigator--empty'>
-        <div className='step-navigator__empty-container'>
+      <div className='sf-step-navigator sf-step-navigator--empty'>
+        <div className='sf-step-navigator__empty-container'>
           <div className='sf-text-gray-600 sf-text-sm'>
             {__(
               'No steps created yet. Add your first step to get started.',
@@ -42,22 +42,22 @@ export default function StepNavigator({
   }
 
   return (
-    <div className='step-navigator'>
-      <div className='step-navigator__container'>
-        <div className='step-navigator__label'>
+    <div className='sf-step-navigator'>
+      <div className='sf-step-navigator__container'>
+        <div className='sf-step-navigator__label'>
           <span className='sf-font-medium sf-text-gray-700 sf-text-sm'>
             {__('Steps:', 'subtleforms')}
           </span>
         </div>
 
-        <div className='step-navigator__steps-list'>
+        <div className='sf-step-navigator__steps-list'>
           {steps.map((step, index) => {
             const isSelected = step.id === selectedStepId;
             const stepTitle =
               step.config?.title || step.title || __('Untitled', 'subtleforms');
 
             return (
-              <div key={step.id} className='step-navigator__step-item'>
+              <div key={step.id} className='sf-step-navigator__step-item'>
                 <button
                   type='button'
                   onClick={() => onSelectStep(step.id)}
@@ -80,7 +80,7 @@ export default function StepNavigator({
                     }`}>
                     {index + 1}
                   </div>
-                  <span className='step-navigator__step-title'>
+                  <span className='sf-step-navigator__step-title'>
                     {stepTitle}
                   </span>
                 </button>
@@ -115,14 +115,14 @@ export default function StepNavigator({
           })}
         </div>
 
-        <div className='step-navigator__add-button'>
+        <div className='sf-step-navigator__add-button'>
           <Button
             isSecondary
             onClick={onAddStep}
             className='sf-text-blue-600 hover:sf-text-blue-700 sf-text-sm'>
-            <span className='step-navigator__add-button'>
+            <span className='sf-step-navigator__add-button'>
               <svg
-                className='step-navigator__add-icon'
+                className='sf-step-navigator__add-icon'
                 fill='none'
                 stroke='currentColor'
                 viewBox='0 0 24 24'>

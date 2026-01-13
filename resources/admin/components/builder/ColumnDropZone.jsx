@@ -36,7 +36,7 @@ export default function ColumnDropZone({
   return (
     <div
       ref={setNodeRef}
-      className={clsx('column-dropzone', { 'is-over': isOver })}
+      className={clsx('sf-column-dropzone', { 'is-over': isOver })}
       style={{
         '--dropzone-padding': padding,
         '--dropzone-gap': `${gap}px`,
@@ -54,7 +54,7 @@ export default function ColumnDropZone({
         items={items}
         strategy={verticalListSortingStrategy}>
         {items.map((itemId, index) => (
-          <div key={itemId} className='column-dropzone__item'>
+          <div key={itemId} className='sf-column-dropzone__item'>
             {renderItem(itemId, index)}
             <InsertFieldButton
               parentId={containerId}
@@ -67,7 +67,7 @@ export default function ColumnDropZone({
       </SortableContext>
 
       {items.length === 0 && (
-        <div className='column-dropzone__empty'>
+        <div className='sf-column-dropzone__empty'>
           {__(
             'Use “Add Field” or drag a field from the left panel.',
             'subtleforms'

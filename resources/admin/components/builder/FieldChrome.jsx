@@ -29,10 +29,10 @@ export default function FieldChrome({
 
   return (
     <div
-      className={clsx('field-chrome', {
+      className={clsx('sf-field-chrome', {
         'is-selected': isSelected,
         'is-hovered': isHovered,
-        'field-chrome--validation-error': hasValidationMessages,
+        'sf-field-chrome--validation-error': hasValidationMessages,
       })}
       onClick={onSelect}
       onMouseEnter={() => setIsHovered(true)}
@@ -43,9 +43,9 @@ export default function FieldChrome({
       tabIndex='0'
       role='group'
       aria-label={__('Field group. Press Enter to select.', 'subtleforms')}>
-      <div className='field-chrome__inner'>
+      <div className='sf-field-chrome__inner'>
         {hasValidationMessages && (isSelected || isHovered) && (
-          <div className='field-chrome__validation-message'>
+          <div className='sf-field-chrome__validation-message'>
             {validationMessages[0]}
           </div>
         )}

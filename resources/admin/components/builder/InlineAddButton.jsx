@@ -16,16 +16,16 @@ export default function InlineAddButton({
 
   return (
     <div
-      className={clsx('inline-add-button', {
-        'inline-add-button--active': isActive,
-        'inline-add-button--idle': !isActive,
+      className={clsx('sf-inline-add-button', {
+        'sf-inline-add-button--active': isActive,
+        'sf-inline-add-button--idle': !isActive,
       })}
       onMouseEnter={onHover}
       onMouseLeave={onLeave}>
       <button
         ref={anchorRef}
         onClick={onClick}
-        className='inline-add-button__button'>
+        className='sf-inline-add-button__button'>
         {(() => {
           const AddIcon = getIcon('add');
           return <AddIcon size={16} />;

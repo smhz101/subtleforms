@@ -81,9 +81,7 @@ export default function StepCanvas({
         }}
         data-testid={`step-header-${stepNumber}`}>
         <div className='sf-step-header__container'>
-          <div className='sf-step-header__number'>
-            {stepNumber}
-          </div>
+          <div className='sf-step-header__number'>{stepNumber}</div>
           <div className='sf-step-header__content'>
             <div className='sf-font-semibold sf-text-gray-900 sf-text-sm'>
               {stepTitle}

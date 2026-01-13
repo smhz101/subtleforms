@@ -46,10 +46,10 @@ export default function FieldToolbar({
         disabled={disabled}
         aria-label={label}
         title={label}
-        className={clsx('field-toolbar__button', {
-          'field-toolbar__button--disabled': disabled,
-          'field-toolbar__button--default': !disabled && variant === 'default',
-          'field-toolbar__button--danger': !disabled && variant === 'danger',
+        className={clsx('sf-field-toolbar__button', {
+          'sf-field-toolbar__button--disabled': disabled,
+          'sf-field-toolbar__button--default': !disabled && variant === 'default',
+          'sf-field-toolbar__button--danger': !disabled && variant === 'danger',
         })}>
         <Icon size={16} />
       </button>
@@ -60,9 +60,9 @@ export default function FieldToolbar({
     <div
       aria-hidden={!visible}
       data-tour='field-toolbar'
-      className={clsx('field-toolbar', {
-        'field-toolbar--visible': visible,
-        'field-toolbar--hidden': !visible,
+      className={clsx('sf-field-toolbar', {
+        'sf-field-toolbar--visible': visible,
+        'sf-field-toolbar--hidden': !visible,
       })}>
       {/* Drag Handle */}
       <button
@@ -84,14 +84,14 @@ export default function FieldToolbar({
         onClick={stop}
         title={__('Drag to reorder', 'subtleforms')}
         aria-label={__('Drag field', 'subtleforms')}
-        className='field-toolbar__button field-toolbar__button--drag'>
+        className='sf-field-toolbar__button sf-field-toolbar__button--drag'>
         {(() => {
           const DragIcon = getIcon('move');
           return <DragIcon size={16} />;
         })()}
       </button>
 
-      <div className='field-toolbar__divider' />
+      <div className='sf-field-toolbar__divider' />
 
       {renderButton(
         'arrow-up-alt2',
@@ -106,7 +106,7 @@ export default function FieldToolbar({
         !canMoveDown
       )}
 
-      <div className='field-toolbar__divider' />
+      <div className='sf-field-toolbar__divider' />
 
       {renderButton(
         'admin-page',
@@ -115,7 +115,7 @@ export default function FieldToolbar({
         false
       )}
 
-      <div className='field-toolbar__divider' />
+      <div className='sf-field-toolbar__divider' />
 
       {renderButton(
         'trash',
