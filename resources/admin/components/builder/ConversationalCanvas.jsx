@@ -6,6 +6,7 @@ import Icon from '../ui/Icon';
 import FieldRenderer from './FieldRenderer';
 import FieldChrome from './FieldChrome';
 import { nodeToField, nodeChildren, getRootNodeId } from './utils/schemaTree';
+import './ConversationalCanvas.scss';
 
 /**
  * ConversationalCanvas - Single field at a time view for conversational forms
@@ -82,7 +83,7 @@ export default function ConversationalCanvas() {
 
   if (totalFields === 0) {
     return (
-      <div className='sf-flex sf-flex-col sf-justify-center sf-items-center sf-bg-white sf-shadow-sm sf-mx-auto sf-p-12 sf-border sf-border-gray-200 sf-rounded-lg sf-w-full sf-max-w-2xl sf-h-full sf-text-center'>
+      <div className='sf-conversational-canvas__empty'>
         <div className='sf-mb-4 sf-text-4xl'>💬</div>
         <h3 className='sf-mb-2 sf-font-semibold sf-text-gray-900 sf-text-lg'>
           {__('No Questions Yet', 'subtleforms')}
@@ -102,10 +103,10 @@ export default function ConversationalCanvas() {
     totalFields > 0 ? ((currentIndex + 1) / totalFields) * 100 : 0;
 
   return (
-    <div className='sf-flex sf-flex-col sf-bg-gray-50 sf-mx-auto sf-w-full sf-max-w-3xl sf-h-full'>
+    <div className='sf-conversational-canvas'>
       {/* Progress Bar */}
-      <div className='sf-bg-white sf-px-6 sf-py-4 sf-border-gray-200 sf-border-b'>
-        <div className='sf-flex sf-justify-between sf-items-center sf-mb-2'>
+      <div className='sf-conversational-canvas__progress-header'>
+        <div className='sf-conversational-canvas__progress-info'>
           <span className='sf-font-medium sf-text-gray-700 sf-text-sm'>
             {__('Question', 'subtleforms')} {currentIndex + 1}{' '}
             {__('of', 'subtleforms')} {totalFields}
@@ -114,17 +115,17 @@ export default function ConversationalCanvas() {
             {Math.round(progressPercent)}% {__('Complete', 'subtleforms')}
           </span>
         </div>
-        <div className='sf-bg-gray-200 sf-rounded-full sf-w-full sf-h-2 sf-overflow-hidden'>
+        <div className='sf-conversational-canvas__progress-bar'>
           <div
-            className='sf-bg-blue-600 sf-h-full sf-transition-all sf-duration-300'
+            className='sf-conversational-canvas__progress-fill'
             style={{ width: `${progressPercent}%` }}
           />
         </div>
       </div>
 
       {/* Question Card */}
-      <div className='sf-flex sf-flex-col sf-flex-1 sf-justify-center sf-p-8 sf-overflow-y-auto'>
-        <div className='sf-bg-white sf-shadow-md sf-mx-auto sf-p-8 sf-border sf-border-gray-200 sf-rounded-lg sf-w-full'>
+      <div className='sf-conversational-canvas__content'>
+        <div className='sf-conversational-canvas__card'>
           {field && (
             <FieldChrome
               field={field}
@@ -142,17 +143,17 @@ export default function ConversationalCanvas() {
       </div>
 
       {/* Navigation Controls */}
-      <div className='sf-flex sf-justify-between sf-items-center sf-bg-white sf-px-6 sf-py-4 sf-border-gray-200 sf-border-t'>
+      <div className='sf-conversational-canvas__navigation'>
         <Button
           variant='secondary'
           onClick={handlePrevious}
           disabled={!hasPrevious}
-          className='sf-inline-flex sf-items-center'>
-          <Icon.Left className='sf-mr-1 sf-w-4 sf-h-4' />
+          className='sf-conversational-canvas__nav-button'>
+          <Icon.Left className='sf-conversational-canvas__nav-icon' />
           {__('Previous', 'subtleforms')}
         </Button>
 
-        <div className='sf-flex sf-gap-1.5'>
+        <div className='sf-conversational-canvas__dots'>
           {fields.map((f, index) => (
             <button
               key={f.id}
@@ -160,12 +161,12 @@ export default function ConversationalCanvas() {
                 setCurrentIndex(index);
                 setSelectedId(f.id);
               }}
-              className={`sf-w-2 sf-h-2 sf-rounded-full sf-transition-all ${
+              className={`sf-conversational-canvas__dot ${
                 index === currentIndex
-                  ? 'sf-bg-blue-600 sf-w-6'
+                  ? 'sf-conversational-canvas__dot--active'
                   : index < currentIndex
-                  ? 'sf-bg-blue-300'
-                  : 'sf-bg-gray-300'
+                  ? 'sf-conversational-canvas__dot--completed'
+                  : 'sf-conversational-canvas__dot--upcoming'
               }`}
               title={`${__('Question', 'subtleforms')} ${index + 1}`}
             />
@@ -176,9 +177,9 @@ export default function ConversationalCanvas() {
           variant='primary'
           onClick={handleNext}
           disabled={!hasNext}
-          className='sf-inline-flex sf-items-center'>
+          className='sf-conversational-canvas__nav-button'>
           {__('Next', 'subtleforms')}
-          <Icon.Right className='sf-ml-1 sf-w-4 sf-h-4' />
+          <Icon.Right className='sf-conversational-canvas__nav-icon' />
         </Button>
       </div>
     </div>
