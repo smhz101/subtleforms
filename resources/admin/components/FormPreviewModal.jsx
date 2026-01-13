@@ -257,7 +257,7 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
         <div className='form-preview-modal__header'>
           <span>{__('Form Preview', 'subtleforms')}</span>
           <button onClick={onClose} className='form-preview-modal__close-btn'>
-            <Icon.Close className='sf-w-5 sf-h-5' />
+            <Icon.Close />
           </button>
         </div>
       }
@@ -319,7 +319,7 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
 
         {/* Submit Button */}
         <div className='form-preview-modal__submit-section'>
-          <Button isPrimary disabled className='sf-justify-center sf-w-full'>
+          <Button isPrimary disabled>
             {__('Submit', 'subtleforms')}
           </Button>
           <p className='form-preview-modal__submit-section-note'>
