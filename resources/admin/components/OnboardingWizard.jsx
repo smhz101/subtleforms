@@ -3,6 +3,7 @@ import { Modal, Button, CheckboxControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import Icon from './ui/Icon';
+import './OnboardingWizard.scss';
 
 const FORM_GOALS = [
   {
@@ -237,15 +238,15 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
     switch (step) {
       case 0:
         return (
-          <div className='sf-space-y-6'>
-            <div className='sf-text-center'>
-              <div className='sf-inline-flex sf-justify-center sf-items-center sf-bg-blue-100 sf-mb-4 sf-rounded-full sf-w-16 sf-h-16'>
-                <Icon.CheckCircle className='sf-w-8 sf-h-8 sf-text-blue-600' />
+          <div className='onboarding-wizard__content-wrapper'>
+            <div className='onboarding-wizard__welcome'>
+              <div className='onboarding-wizard__welcome-icon'>
+                <Icon.CheckCircle />
               </div>
-              <h2 className='sf-mb-2 sf-font-bold sf-text-gray-900 sf-text-2xl'>
+              <h2>
                 {__('Welcome to SubtleForms', 'subtleforms')}
               </h2>
-              <p className='sf-mx-auto sf-max-w-md sf-text-gray-600'>
+              <p>
                 {__(
                   'Create beautiful, powerful forms in minutes. This wizard will help you build your first form quickly.',
                   'subtleforms'
@@ -253,38 +254,38 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
               </p>
             </div>
 
-            <div className='sf-space-y-4 sf-bg-gray-50 sf-p-6 sf-rounded-lg'>
-              <h3 className='sf-font-semibold sf-text-gray-900'>
+            <div className='onboarding-wizard__features'>
+              <h3>
                 {__('What can you do with SubtleForms?', 'subtleforms')}
               </h3>
-              <ul className='sf-space-y-2'>
-                <li className='sf-flex sf-items-start'>
-                  <Icon.CheckCircle className='sf-flex-shrink-0 sf-mt-0.5 sf-mr-2 sf-w-5 sf-h-5 sf-text-green-500' />
-                  <span className='sf-text-gray-700'>
+              <ul>
+                <li className='onboarding-wizard__features-item'>
+                  <Icon.CheckCircle />
+                  <span>
                     {__('Build forms with drag & drop', 'subtleforms')}
                   </span>
                 </li>
-                <li className='sf-flex sf-items-start'>
-                  <Icon.CheckCircle className='sf-flex-shrink-0 sf-mt-0.5 sf-mr-2 sf-w-5 sf-h-5 sf-text-green-500' />
-                  <span className='sf-text-gray-700'>
+                <li className='onboarding-wizard__features-item'>
+                  <Icon.CheckCircle />
+                  <span>
                     {__(
                       'Add conditional logic and multi-step flows',
                       'subtleforms'
                     )}
                   </span>
                 </li>
-                <li className='sf-flex sf-items-start'>
-                  <Icon.CheckCircle className='sf-flex-shrink-0 sf-mt-0.5 sf-mr-2 sf-w-5 sf-h-5 sf-text-green-500' />
-                  <span className='sf-text-gray-700'>
+                <li className='onboarding-wizard__features-item'>
+                  <Icon.CheckCircle />
+                  <span>
                     {__(
                       'Manage submissions and integrate with services',
                       'subtleforms'
                     )}
                   </span>
                 </li>
-                <li className='sf-flex sf-items-start'>
-                  <Icon.CheckCircle className='sf-flex-shrink-0 sf-mt-0.5 sf-mr-2 sf-w-5 sf-h-5 sf-text-green-500' />
-                  <span className='sf-text-gray-700'>
+                <li className='onboarding-wizard__features-item'>
+                  <Icon.CheckCircle />
+                  <span>
                     {__(
                       'Accept payments and create conversational forms',
                       'subtleforms'
@@ -550,11 +551,11 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
       onRequestClose={handleSkip}
       className='subtleforms-onboarding-wizard'
       style={{ maxWidth: '640px' }}>
-      <div className='sf-p-6'>
+      <div className='onboarding-wizard'>
         {/* Progress Indicator */}
         {step > 0 && (
-          <div className='sf-mb-8'>
-            <div className='sf-flex sf-justify-between sf-items-center sf-mb-2 sf-text-gray-600 sf-text-sm'>
+          <div className='onboarding-wizard__progress'>
+            <div className='onboarding-wizard__progress-header'>
               <span>
                 {__('Step', 'subtleforms')} {step} {__('of', 'subtleforms')}{' '}
                 {totalSteps}
@@ -564,9 +565,9 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                 {__('complete', 'subtleforms')}
               </span>
             </div>
-            <div className='sf-bg-gray-200 sf-rounded-full sf-h-2 sf-overflow-hidden'>
+            <div className='onboarding-wizard__progress-bar-container'>
               <div
-                className='sf-bg-blue-600 sf-h-full sf-transition-all sf-duration-300'
+                className='onboarding-wizard__progress-bar'
                 style={{ width: `${(step / totalSteps) * 100}%` }}
               />
             </div>
@@ -574,11 +575,11 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
         )}
 
         {/* Step Content */}
-        <div className='sf-min-h-[400px]'>{renderStepContent()}</div>
+        <div className='onboarding-wizard__content'>{renderStepContent()}</div>
 
         {/* Actions */}
-        <div className='sf-mt-8 sf-pt-6 sf-border-gray-200 sf-border-t'>
-          <div className='sf-flex sf-justify-between sf-items-center'>
+        <div className='onboarding-wizard__actions'>
+          <div className='onboarding-wizard__actions-container'>
             <div>
               {step === 0 && (
                 <CheckboxControl
@@ -588,7 +589,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                 />
               )}
             </div>
-            <div className='sf-flex sf-items-center sf-space-x-3'>
+            <div className='onboarding-wizard__actions-buttons'>
               {step > 0 && (
                 <Button isSecondary onClick={handleBack}>
                   {__('Back', 'subtleforms')}

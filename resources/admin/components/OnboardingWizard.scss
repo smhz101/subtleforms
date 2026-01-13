@@ -1,0 +1,373 @@
+/**
+ * OnboardingWizard Component Styles
+ *
+ * Styles for the onboarding wizard modal with multi-step form.
+ */
+
+.subtleforms-onboarding-wizard {
+  .components-modal__content {
+    max-width: 640px;
+  }
+}
+
+.onboarding-wizard {
+  padding: 1.5rem;
+
+  &__progress {
+    margin-bottom: 2rem;
+
+    &-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+      color: #4b5563;
+      font-size: 0.875rem;
+    }
+
+    &-bar-container {
+      background-color: #e5e7eb;
+      border-radius: 9999px;
+      height: 0.5rem;
+      overflow: hidden;
+    }
+
+    &-bar {
+      background-color: #2563eb;
+      height: 100%;
+      transition: width 0.3s;
+    }
+  }
+
+  &__content {
+    min-height: 400px;
+
+    &-wrapper {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+  }
+
+  &__welcome {
+    text-align: center;
+
+    &-icon {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #dbeafe;
+      margin-bottom: 1rem;
+      border-radius: 9999px;
+      width: 4rem;
+      height: 4rem;
+
+      svg {
+        width: 2rem;
+        height: 2rem;
+        color: #2563eb;
+      }
+    }
+
+    h2 {
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+      color: #111827;
+      font-size: 1.5rem;
+    }
+
+    p {
+      margin: 0 auto;
+      max-width: 28rem;
+      color: #4b5563;
+    }
+  }
+
+  &__features {
+    background-color: #f9fafb;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+
+    h3 {
+      margin-bottom: 1rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    ul {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    &-item {
+      display: flex;
+      align-items: flex-start;
+
+      svg {
+        flex-shrink: 0;
+        margin-top: 0.125rem;
+        margin-right: 0.5rem;
+        width: 1.25rem;
+        height: 1.25rem;
+        color: #10b981;
+      }
+
+      span {
+        color: #374151;
+      }
+    }
+  }
+
+  &__header {
+    margin-bottom: 1.5rem;
+    text-align: center;
+
+    h2 {
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+      color: #111827;
+      font-size: 1.5rem;
+    }
+
+    p {
+      color: #4b5563;
+    }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+
+    @media (min-width: 640px) {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  &__option {
+    padding: 1.5rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+    text-align: left;
+    transition: all 0.2s;
+    background-color: #fff;
+    cursor: pointer;
+
+    &:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+
+    &--selected {
+      border-color: #3b82f6;
+      background-color: #eff6ff;
+    }
+
+    &-content {
+      display: flex;
+      align-items: flex-start;
+    }
+
+    &-icon {
+      display: flex;
+      flex-shrink: 0;
+      justify-content: center;
+      align-items: center;
+      border-radius: 0.5rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      background-color: #f3f4f6;
+      color: #4b5563;
+
+      svg {
+        width: 1.25rem;
+        height: 1.25rem;
+      }
+    }
+
+    &--selected &-icon {
+      background-color: #2563eb;
+      color: #fff;
+    }
+
+    &-text {
+      flex: 1;
+      margin-left: 1rem;
+    }
+
+    &-title {
+      margin-bottom: 0.25rem;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    &--selected &-title {
+      color: #1e3a8a;
+    }
+
+    &-description {
+      color: #4b5563;
+      font-size: 0.875rem;
+    }
+  }
+
+  &__summary {
+    background-color: #fff;
+    padding: 1.5rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+
+    &-fields {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    &-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 1rem;
+      border-bottom: 1px solid #e5e7eb;
+
+      &-title {
+        font-weight: 600;
+        color: #111827;
+      }
+
+      &-subtitle {
+        color: #4b5563;
+        font-size: 0.875rem;
+      }
+
+      &-count {
+        color: #6b7280;
+        font-size: 0.875rem;
+      }
+    }
+
+    &-field-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    &-field {
+      display: flex;
+      align-items: center;
+      background-color: #f9fafb;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+
+      svg {
+        flex-shrink: 0;
+        margin-right: 0.75rem;
+        width: 1.25rem;
+        height: 1.25rem;
+        color: #10b981;
+      }
+
+      &-info {
+        flex: 1;
+      }
+
+      &-name {
+        font-weight: 500;
+        color: #111827;
+      }
+
+      &-meta {
+        color: #6b7280;
+        font-size: 0.875rem;
+      }
+    }
+  }
+
+  &__finish {
+    text-align: center;
+
+    &-icon {
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+      background-color: #d1fae5;
+      margin-bottom: 1rem;
+      border-radius: 9999px;
+      width: 4rem;
+      height: 4rem;
+
+      svg {
+        width: 2rem;
+        height: 2rem;
+        color: #10b981;
+      }
+    }
+
+    h2 {
+      margin-bottom: 0.5rem;
+      font-weight: 700;
+      color: #111827;
+      font-size: 1.5rem;
+    }
+
+    p {
+      margin: 0 auto;
+      max-width: 28rem;
+      color: #4b5563;
+    }
+  }
+
+  &__next-steps {
+    background-color: #eff6ff;
+    padding: 1.5rem;
+    border: 1px solid #bfdbfe;
+    border-radius: 0.5rem;
+
+    h3 {
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+      color: #1e3a8a;
+    }
+
+    ul {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+    }
+
+    &-item {
+      display: flex;
+      align-items: flex-start;
+      color: #1e40af;
+
+      span:first-child {
+        margin-right: 0.5rem;
+      }
+    }
+  }
+
+  &__actions {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid #e5e7eb;
+
+    &-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    &-buttons {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+  }
+}
