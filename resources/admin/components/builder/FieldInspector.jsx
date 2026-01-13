@@ -32,29 +32,29 @@ export default function FieldInspector({ field, allFields }) {
   };
 
   return (
-    <div className='sf-bg-white sf-border-gray-300 sf-border-l sf-w-80 sf-h-full sf-overflow-auto sf-field-inspector'>
+    <div className='sf-field-inspector'>
       {/* Header */}
-      <div className='sf-flex sf-justify-between sf-items-center sf-bg-white sf-px-5 sf-py-4 sf-border-gray-300 sf-border-b'>
-        <strong className='sf-font-semibold sf-text-gray-900 sf-text-sm uppercase sf-tracking-wide'>
+      <div className='sf-field-inspector__header'>
+        <strong className='sf-field-inspector__title'>
           {__('Settings', 'subtleforms')}
         </strong>
         <Button
           isSmall
           onClick={handleClose}
           disabled={!field}
-          className='sf-px-2 sf-py-1 sf-min-w-0'>
+          className='sf-field-inspector__close-button'>
           ×
         </Button>
       </div>
 
       {/* Content */}
-      <div className='sf-p-5'>
+      <div className='sf-field-inspector__content'>
         {!field && (
-          <div className='sf-text-gray-700 sf-text-sm'>
-            <p className='sf-m-0 sf-mb-2 sf-font-medium'>
+          <div className='sf-field-inspector__empty'>
+            <p className='sf-field-inspector__empty-paragraph'>
               {__('Nothing selected', 'subtleforms')}
             </p>
-            <p className='sf-m-0 sf-text-gray-600 sf-text-sm'>
+            <p className='sf-field-inspector__empty-subtext'>
               {__(
                 'Click a field (or container) in the canvas to edit its settings, validation, and conditions.',
                 'subtleforms'
@@ -67,7 +67,7 @@ export default function FieldInspector({ field, allFields }) {
           <>
             {hasValidationMessages && (
               <Notice status='warning' isDismissible={false}>
-                <p className='sf-m-0 sf-text-sm'>
+                <p className='sf-field-inspector__notice-paragraph'>
                   {selectedFieldValidationMessages[0]}
                 </p>
               </Notice>
@@ -78,11 +78,11 @@ export default function FieldInspector({ field, allFields }) {
                 {
                   name: 'validation',
                   title: (
-                    <span className='sf-inline-flex sf-items-center sf-gap-1'>
+                    <span className='sf-field-inspector__tab-label'>
                       {__('Validation', 'subtleforms')}
                       {hasValidationMessages && (
                         <span
-                          className='sf-inline-block sf-bg-red-500 sf-rounded-full sf-w-2 sf-h-2'
+                          className='sf-field-inspector__tab-warning-indicator'
                           aria-hidden='true'
                         />
                       )}
@@ -92,7 +92,7 @@ export default function FieldInspector({ field, allFields }) {
                 { name: 'conditions', title: __('Conditions', 'subtleforms') },
               ]}>
               {(tab) => (
-                <div className='sf-py-3'>
+                <div className='sf-field-inspector__tab-content'>
                   {tab.name === 'general' && (
                     <>
                       {field.type === 'step' ? (
@@ -203,12 +203,12 @@ export default function FieldInspector({ field, allFields }) {
                       {(field.type === 'radio' ||
                         field.type === 'multiple_choice' ||
                         field.type === 'dropdown') && (
-                        <div className='sf-mt-4'>
-                          <label className='sf-block sf-mb-2 sf-font-semibold sf-text-xs'>
+                        <div className='sf-field-inspector__options-section'>
+                          <label className='sf-field-inspector__options-label'>
                             {__('Options', 'subtleforms')}
                           </label>
                           {(field.options || []).map((opt, idx) => (
-                            <div key={idx} className='sf-flex sf-gap-2 sf-mb-2'>
+                            <div key={idx} className='sf-field-inspector__option-row'>
                               <TextControl
                                 value={opt.label}
                                 onChange={(v) => {

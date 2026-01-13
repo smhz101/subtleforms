@@ -54,8 +54,27 @@
 		font-size: 0.875rem;
 	}
 
+	&__empty-paragraph {
+		margin: 0 0 0.5rem 0;
+		font-weight: 500;
+		font-size: 0.875rem;
+		color: #374151;
+	}
+
+	&__empty-subtext {
+		margin: 0;
+		color: #6b7280;
+		font-size: 0.875rem;
+	}
+
 	&__tabs {
 		padding: 0.75rem 0;
+	}
+
+	&__tab-label {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.25rem;
 	}
 
 	&__tab-warning-indicator {
@@ -64,6 +83,15 @@
 		border-radius: 9999px;
 		width: 0.5rem;
 		height: 0.5rem;
+	}
+
+	&__tab-content {
+		padding: 0.75rem 0;
+	}
+
+	&__notice-paragraph {
+		margin: 0;
+		font-size: 0.875rem;
 	}
 
 	&__options-section {
