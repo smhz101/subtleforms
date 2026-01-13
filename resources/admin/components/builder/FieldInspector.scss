@@ -6,7 +6,9 @@
 .field-inspector {
 	background-color: #ffffff;
 	border-left: 1px solid #d1d5db;
-	width: 20rem;
+	width: 20rem; // Fixed 320px
+	flex-shrink: 0; // CRITICAL: prevent shrinking
+	flex-grow: 0; // CRITICAL: prevent growing - don't steal canvas width
 	height: 100%;
 	overflow: auto;
 

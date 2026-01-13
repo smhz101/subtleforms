@@ -11,6 +11,8 @@
 	border-right: 1px solid #e5e7eb;
 	transition: all 200ms ease-out;
 	width: 280px;
+	flex-shrink: 0; // CRITICAL: prevent shrinking
+	flex-grow: 0; // CRITICAL: prevent growing
 
 	&--loading {
 		width: 280px;
