@@ -1,5 +1,6 @@
 import { Button } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
+import './StepNavigator.scss';
 
 export default function StepNavigator({
   steps,
@@ -10,8 +11,8 @@ export default function StepNavigator({
 }) {
   if (!steps || steps.length === 0) {
     return (
-      <div className='sf-bg-gray-50 sf-px-6 sf-py-4 sf-border-gray-200 sf-border-b sf-w-full'>
-        <div className='sf-flex sf-justify-between sf-items-center'>
+      <div className='step-navigator step-navigator--empty'>
+        <div className='step-navigator__empty-container'>
           <div className='sf-text-gray-600 sf-text-sm'>
             {__(
               'No steps created yet. Add your first step to get started.',
@@ -19,9 +20,9 @@ export default function StepNavigator({
             )}
           </div>
           <Button isPrimary onClick={onAddStep} className='sf-text-sm'>
-            <span className='sf-flex sf-items-center sf-gap-2'>
+            <span className='step-navigator__add-button'>
               <svg
-                className='sf-w-4 sf-h-4'
+                className='step-navigator__add-icon'
                 fill='none'
                 stroke='currentColor'
                 viewBox='0 0 24 24'>
@@ -41,15 +42,15 @@ export default function StepNavigator({
   }
 
   return (
-    <div className='sf-bg-white sf-px-6 sf-py-3 sf-border-gray-200 sf-border-b sf-w-full'>
-      <div className='sf-flex sf-items-center sf-gap-3 sf-overflow-x-auto'>
-        <div className='sf-flex sf-flex-shrink-0 sf-items-center sf-gap-2'>
+    <div className='step-navigator'>
+      <div className='step-navigator__container'>
+        <div className='step-navigator__label'>
           <span className='sf-font-medium sf-text-gray-700 sf-text-sm'>
             {__('Steps:', 'subtleforms')}
           </span>
         </div>
 
-        <div className='sf-flex sf-flex-nowrap sf-items-center sf-gap-2 sf-min-w-0'>
+        <div className='step-navigator__steps-list'>
           {steps.map((step, index) => {
             const isSelected = step.id === selectedStepId;
             const stepTitle =
@@ -58,14 +59,14 @@ export default function StepNavigator({
             return (
               <div
                 key={step.id}
-                className='sf-flex sf-flex-shrink-0 sf-items-center sf-gap-1'>
+                className='step-navigator__step-item'>
                 <button
                   type='button'
                   onClick={() => onSelectStep(step.id)}
-                  className={`sf-group sf-relative sf-flex sf-items-center sf-gap-2 sf-px-3 sf-py-2 sf-text-sm sf-font-medium sf-rounded-md sf-border sf-transition-all sf-duration-150 sf-whitespace-nowrap ${
+                  className={`step-navigator__step-button ${
                     isSelected
-                      ? 'sf-bg-blue-600 sf-text-white sf-border-blue-600 sf-shadow-sm'
-                      : 'sf-bg-white sf-text-gray-700 sf-border-gray-300 hover:sf-bg-gray-50 hover:sf-border-gray-400'
+                      ? 'step-navigator__step-button--selected'
+                      : 'step-navigator__step-button--default'
                   }`}
                   title={`${(() => {
                     /* translators: %d: step number */ return sprintf(
@@ -74,14 +75,14 @@ export default function StepNavigator({
                     );
                   })()}: ${stepTitle}`}>
                   <div
-                    className={`sf-flex sf-items-center sf-justify-center sf-w-5 sf-h-5 sf-rounded-full sf-text-xs sf-font-semibold ${
+                    className={`step-navigator__step-number ${
                       isSelected
-                        ? 'sf-bg-blue-500 sf-text-white'
-                        : 'sf-bg-gray-100 sf-text-gray-600 group-hover:sf-bg-gray-200'
+                        ? 'step-navigator__step-number--selected'
+                        : 'step-navigator__step-number--default'
                     }`}>
                     {index + 1}
                   </div>
-                  <span className='sf-max-w-[120px] sf-truncate'>
+                  <span className='step-navigator__step-title'>
                     {stepTitle}
                   </span>
                 </button>
@@ -90,7 +91,7 @@ export default function StepNavigator({
                   <button
                     type='button'
                     onClick={() => onDeleteStep(step.id)}
-                    className='sf-flex sf-justify-center sf-items-center hover:sf-bg-red-50 sf-rounded sf-w-6 sf-h-6 sf-text-red-600 hover:sf-text-red-700 sf-transition-colors sf-duration-150'
+                    className='step-navigator__delete-button'
                     title={(() => {
                       /* translators: %d: step number */ return sprintf(
                         __('Delete step %d', 'subtleforms'),
@@ -98,7 +99,7 @@ export default function StepNavigator({
                       );
                     })()}>
                     <svg
-                      className='sf-w-4 sf-h-4'
+                      className='step-navigator__delete-icon'
                       fill='none'
                       stroke='currentColor'
                       viewBox='0 0 24 24'>
@@ -116,14 +117,14 @@ export default function StepNavigator({
           })}
         </div>
 
-        <div className='sf-flex-shrink-0'>
+        <div className='step-navigator__add-button'>
           <Button
             isSecondary
             onClick={onAddStep}
             className='sf-text-blue-600 hover:sf-text-blue-700 sf-text-sm'>
-            <span className='sf-flex sf-items-center sf-gap-1'>
+            <span className='step-navigator__add-button'>
               <svg
-                className='sf-w-4 sf-h-4'
+                className='step-navigator__add-icon'
                 fill='none'
                 stroke='currentColor'
                 viewBox='0 0 24 24'>
