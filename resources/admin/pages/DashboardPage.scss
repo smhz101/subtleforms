@@ -55,30 +55,30 @@ a.subtleforms-stat-card:hover {
 	color: inherit;
 }
 
-.stat-icon {
+.sf-stat-icon {
 	font-size: 32px;
 	line-height: 1;
 }
 
-.stat-content {
+.sf-stat-content {
 	flex: 1;
 }
 
-.stat-value {
+.sf-stat-value {
 	font-size: 28px;
 	font-weight: 600;
 	line-height: 1.2;
 	color: #1e1e1e;
 }
 
-.stat-title {
+.sf-stat-title {
 	font-size: 13px;
 	font-weight: 500;
 	color: #646970;
 	margin-top: 4px;
 }
 
-.stat-subtitle {
+.sf-stat-subtitle {
 	font-size: 12px;
 	color: #8c8f94;
 	margin-top: 2px;
@@ -138,28 +138,28 @@ a.subtleforms-stat-card:hover {
 	background-color: #f6f7f7;
 }
 
-.item-content {
+.sf-item-content {
 	flex: 1;
 	min-width: 0;
 }
 
-.item-title {
+.sf-item-title {
 	font-size: 14px;
 	font-weight: 500;
 	margin-bottom: 6px;
 }
 
-.item-title a {
+.sf-item-title a {
 	color: #2271b1;
 	text-decoration: none;
 }
 
-.item-title a:hover {
+.sf-item-title a:hover {
 	color: #135e96;
 	text-decoration: underline;
 }
 
-.item-meta {
+.sf-item-meta {
 	display: flex;
 	align-items: center;
 	gap: 12px;
@@ -167,7 +167,7 @@ a.subtleforms-stat-card:hover {
 	color: #646970;
 }
 
-.status-badge {
+.sf-status-badge {
 	display: inline-block;
 	padding: 2px 8px;
 	font-size: 11px;
@@ -178,28 +178,28 @@ a.subtleforms-stat-card:hover {
 	color: #50575e;
 }
 
-.status-badge.status-published {
+.sf-status-badge.status-published {
 	background-color: #00a32a;
 	color: #fff;
 }
 
-.status-badge.status-draft {
+.sf-status-badge.status-draft {
 	background-color: #dba617;
 	color: #fff;
 }
 
-.status-badge.status-unread {
+.sf-status-badge.status-unread {
 	background-color: #2271b1;
 	color: #fff;
 }
 
-.status-badge.status-read {
+.sf-status-badge.status-read {
 	background-color: #646970;
 	color: #fff;
 }
 
 .time-ago,
-.submission-count {
+.sf-submission-count {
 	color: #8c8f94;
 }
 
@@ -250,20 +250,20 @@ a.subtleforms-stat-card:hover {
 	margin: 0;
 }
 
-.system-header {
+.sf-system-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
 	width: 100%;
 }
 
-.system-header h2 {
+.sf-system-header h2 {
 	margin: 0;
 	font-size: 16px;
 	font-weight: 600;
 }
 
-.health-status {
+.sf-health-status {
 	display: inline-flex;
 	align-items: center;
 	gap: 6px;
@@ -274,30 +274,30 @@ a.subtleforms-stat-card:hover {
 	text-transform: uppercase;
 }
 
-.health-status.health-healthy {
+.sf-health-status.health-healthy {
 	background-color: #d7f8e0;
 	color: #00a32a;
 }
 
-.health-status.health-warning {
+.sf-health-status.health-warning {
 	background-color: #fcf3cd;
 	color: #996800;
 }
 
-.system-info-grid {
+.sf-system-info-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
 	gap: 16px;
 	padding: 20px;
 }
 
-.system-info-item {
+.sf-system-info-item {
 	display: flex;
 	flex-direction: column;
 	gap: 4px;
 }
 
-.system-info-item .label {
+.sf-system-info-item .label {
 	font-size: 12px;
 	font-weight: 500;
 	color: #646970;
@@ -305,7 +305,7 @@ a.subtleforms-stat-card:hover {
 	letter-spacing: 0.5px;
 }
 
-.system-info-item .value {
+.sf-system-info-item .value {
 	font-size: 14px;
 	font-weight: 500;
 	color: #1e1e1e;

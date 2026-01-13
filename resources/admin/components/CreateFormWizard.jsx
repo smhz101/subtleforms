@@ -88,19 +88,19 @@ export default function CreateFormWizard({
   }
 
   return (
-    <div className='create-form-wizard__container'>
-      <div className='create-form-wizard__card'>
-        <div className='create-form-wizard__header'>
-          <div className='create-form-wizard__header-content'>
+    <div className='sf-create-form-wizard__container'>
+      <div className='sf-create-form-wizard__card'>
+        <div className='sf-create-form-wizard__header'>
+          <div className='sf-create-form-wizard__header-content'>
             <div>
               <h1>{__('Create form', 'subtleforms')}</h1>
-              <div className='create-form-wizard__header-subtitle'>
+              <div className='sf-create-form-wizard__header-subtitle'>
                 {step.title} ({stepIndex + 1}/{STEPS.length})
               </div>
             </div>
 
             {submitting && (
-              <div className='create-form-wizard__header-loading'>
+              <div className='sf-create-form-wizard__header-loading'>
                 <Spinner />
                 {__('Creating…', 'subtleforms')}
               </div>
@@ -108,7 +108,7 @@ export default function CreateFormWizard({
           </div>
         </div>
 
-        <div className='create-form-wizard__body'>
+        <div className='sf-create-form-wizard__body'>
           {error && (
             <Notice status='error' isDismissible={false}>
               {error}
@@ -116,7 +116,7 @@ export default function CreateFormWizard({
           )}
 
           {step.key === 'basics' && (
-            <div className='create-form-wizard__body-fields'>
+            <div className='sf-create-form-wizard__body-fields'>
               <TextControl
                 label={__('Form name', 'subtleforms')}
                 value={title}
@@ -157,7 +157,7 @@ export default function CreateFormWizard({
           )}
 
           {step.key === 'start' && (
-            <div className='create-form-wizard__body-fields'>
+            <div className='sf-create-form-wizard__body-fields'>
               <RadioControl
                 label={__('Starting point', 'subtleforms')}
                 selected={startingPoint}
@@ -185,8 +185,8 @@ export default function CreateFormWizard({
           )}
         </div>
 
-        <div className='create-form-wizard__footer'>
-          <div className='create-form-wizard__footer-left'>
+        <div className='sf-create-form-wizard__footer'>
+          <div className='sf-create-form-wizard__footer-left'>
             {stepIndex > 0 ? (
               <Button isSecondary onClick={handleBack} disabled={submitting}>
                 {__('Back', 'subtleforms')}

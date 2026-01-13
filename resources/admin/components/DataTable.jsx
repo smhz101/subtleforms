@@ -81,13 +81,13 @@ const DataTable = memo(function DataTable({
     if (!column.sortable) return null;
     if (sortBy !== column.key) {
       return (
-        <span className='data-table__sort-indicator data-table__sort-indicator--inactive'>
+        <span className='sf-data-table__sort-indicator sf-data-table__sort-indicator--inactive'>
           ⬍
         </span>
       );
     }
     return (
-      <span className='data-table__sort-indicator data-table__sort-indicator--active'>
+      <span className='sf-data-table__sort-indicator sf-data-table__sort-indicator--active'>
         {sortDirection === 'asc' ? '↑' : '↓'}
       </span>
     );
@@ -102,9 +102,9 @@ const DataTable = memo(function DataTable({
 
   if (loading) {
     return (
-      <div className='data-table__loading'>
-        <div className='data-table__loading-content'>
-          <div className='data-table__loading-content-spinner'></div>
+      <div className='sf-data-table__loading'>
+        <div className='sf-data-table__loading-content'>
+          <div className='sf-data-table__loading-content-spinner'></div>
           <p>{__('Loading...', 'subtleforms')}</p>
         </div>
       </div>
@@ -113,9 +113,9 @@ const DataTable = memo(function DataTable({
 
   if (data.length === 0) {
     return (
-      <div className='data-table__empty'>
-        <div className='data-table__empty-content'>
-          <div className='data-table__empty-content-icon'>📝</div>
+      <div className='sf-data-table__empty'>
+        <div className='sf-data-table__empty-content'>
+          <div className='sf-data-table__empty-content-icon'>📝</div>
           <p>{emptyMessage}</p>
         </div>
       </div>
@@ -131,8 +131,8 @@ const DataTable = memo(function DataTable({
     <div className='data-table'>
       {/* Bulk Actions Bar */}
       {selectable && selectedItems.length > 0 && (
-        <div className='data-table__bulk-actions'>
-          <span className='data-table__bulk-actions-selected'>
+        <div className='sf-data-table__bulk-actions'>
+          <span className='sf-data-table__bulk-actions-selected'>
             {(() => {
               return sprintf(
                 /* translators: %1$d: number of selected items */
@@ -141,7 +141,7 @@ const DataTable = memo(function DataTable({
               );
             })()}
           </span>
-          <div className='data-table__bulk-actions-buttons'>
+          <div className='sf-data-table__bulk-actions-buttons'>
             {bulkActions.map((action, index) => (
               <Button
                 key={index}
@@ -157,12 +157,12 @@ const DataTable = memo(function DataTable({
       )}
 
       {/* Table - Scrollable */}
-      <div className='data-table__scroll-container'>
-        <table className='data-table__table'>
-          <thead className='data-table__header'>
+      <div className='sf-data-table__scroll-container'>
+        <table className='sf-data-table__table'>
+          <thead className='sf-data-table__header'>
             <tr>
               {selectable && (
-                <th className='data-table__header-cell'>
+                <th className='sf-data-table__header-cell'>
                   <CheckboxControl
                     checked={allSelected}
                     indeterminate={someSelected}
@@ -174,11 +174,11 @@ const DataTable = memo(function DataTable({
                 <th
                   key={column.key}
                   className={`${
-                    column.sortable ? 'data-table__header-th--sortable' : ''
+                    column.sortable ? 'sf-data-table__header-th--sortable' : ''
                   }`}
                   style={{ width: column.width || 'auto' }}
                   onClick={() => handleHeaderClick(column)}>
-                  <div className='data-table__header-th-content'>
+                  <div className='sf-data-table__header-th-content'>
                     {column.title}
                     {getSortIndicator(column)}
                   </div>
@@ -186,7 +186,7 @@ const DataTable = memo(function DataTable({
               ))}
             </tr>
           </thead>
-          <tbody className='data-table__body'>
+          <tbody className='sf-data-table__body'>
             {data.map((row, index) => (
               <tr
                 key={row.id || index}
@@ -194,10 +194,10 @@ const DataTable = memo(function DataTable({
                   group transition-all duration-150
                   ${
                     selectedItems.includes(row.id)
-                      ? 'data-table__row--selected'
+                      ? 'sf-data-table__row--selected'
                       : ''
                   }
-                  ${onRowClick ? 'data-table__row--clickable' : ''}
+                  ${onRowClick ? 'sf-data-table__row--clickable' : ''}
                   ${rowClassName ? rowClassName(row) : ''}
                 `}
                 onClick={() => onRowClick && onRowClick(row)}>
@@ -224,9 +224,9 @@ const DataTable = memo(function DataTable({
 
       {/* Pagination - Always show if data exists and totalPages > 0 */}
       {totalPages > 0 && (
-        <div className='data-table__pagination'>
-          <div className='data-table__pagination-info'>
-            <span className='data-table__pagination-info-text'>
+        <div className='sf-data-table__pagination'>
+          <div className='sf-data-table__pagination-info'>
+            <span className='sf-data-table__pagination-info-text'>
               {(() => {
                 return sprintf(
                   /* translators: %1$d: starting item number, %2$d: ending item number, %3$d: total items */
@@ -238,7 +238,7 @@ const DataTable = memo(function DataTable({
               })()}
             </span>
 
-            <div className='data-table__pagination-info-controls'>
+            <div className='sf-data-table__pagination-info-controls'>
               <label>{__('Per page:', 'subtleforms')}</label>
               <SelectControl
                 value={perPage.toString()}
@@ -253,7 +253,7 @@ const DataTable = memo(function DataTable({
             </div>
           </div>
 
-          <div className='data-table__pagination-buttons'>
+          <div className='sf-data-table__pagination-buttons'>
             <Button
               disabled={currentPage === 1}
               onClick={() => onPageChange(currentPage - 1)}
@@ -262,7 +262,7 @@ const DataTable = memo(function DataTable({
               {__('Previous', 'subtleforms')}
             </Button>
 
-            <span className='data-table__pagination-page-indicator'>
+            <span className='sf-data-table__pagination-page-indicator'>
               {(() => {
                 return sprintf(
                   /* translators: %1$d: Current page number, %2$d: Total pages */

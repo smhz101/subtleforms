@@ -456,13 +456,13 @@ const SubmissionsTable = forwardRef(
         render: (status) => (
           <span
             className={clsx(
-              'submissions-table__status-badge',
+              'sf-submissions-table__status-badge',
               status === 'unread'
-                ? 'submissions-table__status-badge--unread'
-                : 'submissions-table__status-badge--read'
+                ? 'sf-submissions-table__status-badge--unread'
+                : 'sf-submissions-table__status-badge--read'
             )}>
             {status === 'unread' && (
-              <span className='submissions-table__status-badge-indicator'></span>
+              <span className='sf-submissions-table__status-badge-indicator'></span>
             )}
             {status === 'unread'
               ? __('New', 'subtleforms')
@@ -496,7 +496,7 @@ const SubmissionsTable = forwardRef(
         title: __('Actions', 'subtleforms'),
         width: '15%',
         render: (_, submission) => (
-          <div className='submissions-table__actions'>
+          <div className='sf-submissions-table__actions'>
             <Button
               isSecondary
               isSmall

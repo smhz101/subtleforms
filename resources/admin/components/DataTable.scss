@@ -5,7 +5,7 @@
  * Layout: Flexbox column with scrollable middle section and fixed pagination
  */
 
-.data-table {
+.sf-data-table {
 	display: flex;
 	flex-direction: column;
 	height: 100%;
@@ -94,11 +94,11 @@
 			border-bottom: 1px solid #f3f4f6;
 			transition: all 150ms;
 
-			&.data-table__row--selected {
+			&.sf-data-table__row--selected {
 				background-color: #eff6ff;
 			}
 
-			&.data-table__row--clickable {
+			&.sf-data-table__row--clickable {
 				cursor: pointer;
 
 				&:hover {

@@ -49,38 +49,38 @@ export default function TemplateSelector({ onSelect, onClose }) {
     <Modal
       title={__('Choose a Template', 'subtleforms')}
       onRequestClose={onClose}
-      className='subtleforms-template-selector-modal'
+      className='subtleforms-sf-template-selector-modal'
       size='large'>
-      <div className='subtleforms-template-selector'>
+      <div className='subtleforms-sf-template-selector'>
         {loading ? (
-          <div className='template-selector__loading'>
+          <div className='sf-template-selector__loading'>
             <p>{__('Loading templates...', 'subtleforms')}</p>
           </div>
         ) : (
           <>
-            <p className='template-selector__description'>
+            <p className='sf-template-selector__description'>
               {__(
                 'Start with a pre-built template or create a blank form from scratch.',
                 'subtleforms'
               )}
             </p>
 
-            <div className='template-grid'>
+            <div className='sf-template-grid'>
               {/* Blank Template */}
               <Card
-                className='template-card template-blank'
+                className='sf-template-card sf-template-blank'
                 onClick={handleStartBlank}>
                 <CardBody>
-                  <div className='template-icon'>
+                  <div className='sf-template-icon'>
                     <span className='dashicons dashicons-plus-alt2'></span>
                   </div>
-                  <h3 className='template-name'>
+                  <h3 className='sf-template-name'>
                     {__('Blank Form', 'subtleforms')}
                   </h3>
-                  <p className='template-description'>
+                  <p className='sf-template-description'>
                     {__('Start from scratch with a blank form', 'subtleforms')}
                   </p>
-                  <Button variant='secondary' className='template-button'>
+                  <Button variant='secondary' className='sf-template-button'>
                     {__('Start Blank', 'subtleforms')}
                   </Button>
                 </CardBody>
@@ -90,20 +90,20 @@ export default function TemplateSelector({ onSelect, onClose }) {
               {templates.map((template) => (
                 <Card
                   key={template.id}
-                  className='template-card'
+                  className='sf-template-card'
                   onClick={() => handleTemplateSelect(template)}>
                   <CardBody>
-                    <div className='template-icon'>
+                    <div className='sf-template-icon'>
                       <span
                         className={`dashicons dashicons-${
                           template.icon || 'feedback'
                         }`}></span>
                     </div>
-                    <h3 className='template-name'>{template.name}</h3>
-                    <p className='template-description'>
+                    <h3 className='sf-template-name'>{template.name}</h3>
+                    <p className='sf-template-description'>
                       {template.description}
                     </p>
-                    <Button variant='primary' className='template-button'>
+                    <Button variant='primary' className='sf-template-button'>
                       {__('Use Template', 'subtleforms')}
                     </Button>
                   </CardBody>
