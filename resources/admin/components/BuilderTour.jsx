@@ -284,7 +284,7 @@ export default function BuilderTour({ onComplete, onSkip }) {
           onClick={handleSkip}
           className='builder-tour__close-btn'
           aria-label={__('Close tour', 'subtleforms')}>
-          <Icon.Close className='sf-w-5 sf-h-5' />
+          <Icon.Close />
         </button>
 
         {/* Progress */}
@@ -320,7 +320,7 @@ export default function BuilderTour({ onComplete, onSkip }) {
           <div className='builder-tour__actions-left'>
             {currentStep > 0 && (
               <Button isSecondary onClick={handlePrev}>
-                <Icon.Left className='sf-inline sf-mr-1 sf-w-4 sf-h-4' />
+                <Icon.Left />
                 {__('Back', 'subtleforms')}
               </Button>
             )}
@@ -335,7 +335,7 @@ export default function BuilderTour({ onComplete, onSkip }) {
               ) : (
                 <>
                   {__('Next', 'subtleforms')}
-                  <Icon.Right className='sf-inline sf-ml-1 sf-w-4 sf-h-4' />
+                  <Icon.Right />
                 </>
               )}
             </Button>
