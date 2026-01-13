@@ -308,7 +308,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
               </p>
             </div>
 
-            <div className='sf-gap-4 sf-grid sf-grid-cols-1 sm:sf-grid-cols-2'>
+            <div className='onboarding-wizard__grid'>
               {FORM_GOALS.map((goal) => {
                 const Icon = goal.icon;
                 const isSelected = selectedGoal === goal.id;
@@ -323,7 +323,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                         ? 'sf-border-blue-500 sf-bg-blue-50'
                         : 'sf-border-gray-200 sf-bg-white'
                     )}>
-                    <div className='sf-flex sf-items-start'>
+                    <div className='onboarding-wizard__option-content'>
                       <div
                         className={clsx(
                           'sf-flex sf-flex-shrink-0 sf-justify-center sf-items-center sf-rounded-lg sf-w-10 sf-h-10',
@@ -331,9 +331,9 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                             ? 'bg-blue-600 text-white'
                             : 'bg-gray-100 text-gray-600'
                         )}>
-                        <Icon className='sf-w-5 sf-h-5' />
+                        <Icon />
                       </div>
-                      <div className='sf-flex-1 sf-ml-4'>
+                      <div className='onboarding-wizard__option-text'>
                         <h3
                           className={clsx(
                             'mb-1 font-semibold',
@@ -368,7 +368,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
               </p>
             </div>
 
-            <div className='sf-gap-4 sf-grid sf-grid-cols-1 sm:sf-grid-cols-2'>
+            <div className='onboarding-wizard__grid'>
               {FORM_TYPES.map((type) => {
                 const Icon = type.icon;
                 const isSelected = selectedType === type.id;
@@ -383,7 +383,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                         ? 'sf-border-blue-500 sf-bg-blue-50'
                         : 'sf-border-gray-200 sf-bg-white'
                     )}>
-                    <div className='sf-flex sf-items-start'>
+                    <div className='onboarding-wizard__option-content'>
                       <div
                         className={clsx(
                           'sf-flex sf-flex-shrink-0 sf-justify-center sf-items-center sf-rounded-lg sf-w-10 sf-h-10',
@@ -391,9 +391,9 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                             ? 'sf-bg-blue-600 sf-text-white'
                             : 'sf-bg-gray-100 sf-text-gray-600'
                         )}>
-                        <Icon className='sf-w-5 sf-h-5' />
+                        <Icon />
                       </div>
-                      <div className='sf-flex-1 sf-ml-4'>
+                      <div className='onboarding-wizard__option-text'>
                         <h3
                           className={clsx(
                             'mb-1 font-semibold',
@@ -430,9 +430,9 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
               </p>
             </div>
 
-            <div className='sf-bg-white sf-p-6 sf-border sf-border-gray-200 sf-rounded-lg'>
+            <div className='onboarding-wizard__review-card'>
               <div className='sf-space-y-4'>
-                <div className='sf-flex sf-justify-between sf-items-center sf-pb-4 sf-border-gray-200 sf-border-b'>
+                <div className='onboarding-wizard__review-header'>
                   <div>
                     <div className='sf-font-semibold sf-text-gray-900'>
                       {goal?.label || __('Your Form', 'subtleforms')}
@@ -454,9 +454,9 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                     return (
                       <div
                         key={fieldKey}
-                        className='sf-flex sf-items-center sf-bg-gray-50 sf-p-3 sf-rounded-lg'>
-                        <Icon.CheckCircle className='sf-flex-shrink-0 sf-mr-3 sf-w-5 sf-h-5 sf-text-green-500' />
-                        <div className='sf-flex-1'>
+                        className='onboarding-wizard__review-field'>
+                        <Icon.CheckCircle />
+                        <div className='onboarding-wizard__review-field-info'>
                           <div className='sf-font-medium sf-text-gray-900'>
                             {field.config.label}
                           </div>
@@ -479,8 +479,8 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
         return (
           <div className='sf-space-y-6'>
             <div className='sf-text-center'>
-              <div className='sf-inline-flex sf-justify-center sf-items-center sf-bg-green-100 sf-mb-4 sf-rounded-full sf-w-16 sf-h-16'>
-                <Icon.CheckCircle className='sf-w-8 sf-h-8 sf-text-green-600' />
+              <div className='onboarding-wizard__finish-icon'>
+                <Icon.CheckCircle />
               </div>
               <h2 className='sf-mb-2 sf-font-bold sf-text-gray-900 sf-text-2xl'>
                 {__("You're all set!", 'subtleforms')}
@@ -493,12 +493,12 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
               </p>
             </div>
 
-            <div className='sf-bg-blue-50 sf-p-6 sf-border sf-border-blue-200 sf-rounded-lg'>
+            <div className='onboarding-wizard__next-steps'>
               <h3 className='sf-mb-3 sf-font-semibold sf-text-blue-900'>
                 {__('Next steps:', 'subtleforms')}
               </h3>
               <ul className='sf-space-y-2'>
-                <li className='sf-flex sf-items-start sf-text-blue-800'>
+                <li className='onboarding-wizard__next-steps-item'>
                   <span className='sf-mr-2'>1.</span>
                   <span>
                     {__(
@@ -507,7 +507,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                     )}
                   </span>
                 </li>
-                <li className='sf-flex sf-items-start sf-text-blue-800'>
+                <li className='onboarding-wizard__next-steps-item'>
                   <span className='sf-mr-2'>2.</span>
                   <span>
                     {__(
@@ -516,13 +516,13 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                     )}
                   </span>
                 </li>
-                <li className='sf-flex sf-items-start sf-text-blue-800'>
+                <li className='onboarding-wizard__next-steps-item'>
                   <span className='sf-mr-2'>3.</span>
                   <span>
                     {__('Preview your form to test it out', 'subtleforms')}
                   </span>
                 </li>
-                <li className='sf-flex sf-items-start sf-text-blue-800'>
+                <li className='onboarding-wizard__next-steps-item'>
                   <span className='sf-mr-2'>4.</span>
                   <span>
                     {__(
