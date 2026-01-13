@@ -5,22 +5,27 @@
 
 .sf-field-chrome {
 	position: relative;
-	transition: all 200ms;
-	border-radius: 4px;
+	transition: all 180ms ease-out; /* Smooth, subtle transition */
+	border-radius: 6px; /* Softer corners */
 	cursor: pointer;
+	border: 1px solid #e5e7eb; /* Default soft border */
+	background-color: #ffffff; /* Clean white background */
 
 	&:focus {
 		outline: none;
 	}
 
-	&.is-selected {
-		border: 2px solid #2271b1;
-		box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.1);
+	&.is-hovered:not(.is-selected) {
+		background-color: #fafafa; /* Very subtle hover background */
+		border-color: #d1d5db; /* Slightly darker border on hover */
+		box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05); /* Subtle lift effect */
+		transform: translateY(-1px); /* Slight upward movement */
 	}
 
-	&.is-hovered:not(.is-selected) {
-		background-color: #f3f4f6;
-		border: 1px solid #9ca3af;
+	&.is-selected {
+		border: 2px solid #2271b1; /* WordPress blue */
+		box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.08); /* Subtle blue glow */
+		background-color: #ffffff;
 	}
 
 	&--validation-error {
@@ -37,3 +42,4 @@
 		font-size: 0.75rem;
 	}
 }
+
