@@ -173,7 +173,11 @@ export default function FieldRenderer({ field }) {
           {subFields.map((sub, idx) => (
             <div
               key={idx}
-              className={idx < subFields.length - 1 ? 'sf-field-renderer__repeater-subfield' : 'sf-field-renderer__repeater-subfield sf-field-renderer__repeater-subfield--last'}>
+              className={
+                idx < subFields.length - 1
+                  ? 'sf-field-renderer__repeater-subfield'
+                  : 'sf-field-renderer__repeater-subfield sf-field-renderer__repeater-subfield--last'
+              }>
               <label className='sf-field-renderer__repeater-label'>
                 {sub.label}
                 {sub.required && (

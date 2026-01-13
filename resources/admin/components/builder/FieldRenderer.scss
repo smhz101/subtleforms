@@ -128,14 +128,13 @@
 		border-radius: 0;
 	}
 
-  &__repeater-subfield {
-    margin-bottom: 0.75rem;
-  }
+	&__repeater-subfield {
+		margin-bottom: 0.75rem;
+	}
 
-  &__repeater-subfield--last {
-    margin-bottom: 0;
-  }
-
+	&__repeater-subfield--last {
+		margin-bottom: 0;
+	}
 
 	&__rating-wrapper {
 		display: flex;

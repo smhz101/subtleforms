@@ -13,6 +13,7 @@ import { __ } from '@wordpress/i18n';
 import Icon from '../../ui/Icon';
 import HelpMenu from '../../HelpMenu';
 import { BUILDER_ACTIONS } from '../../../hooks/useBuilderReducer';
+import './BuilderHeaderBar.scss';
 
 /**
  * BuilderTitle - Editable form title with type badge
@@ -30,7 +31,7 @@ export function BuilderTitle({
   const titleInputRef = useRef(null);
 
   return (
-    <div className='sf-flex sf-items-center sf-gap-3' data-tour='header'>
+    <div className='sf-builder-header-bar__left' data-tour='header'>
       {isEditingTitle ? (
         <input
           ref={titleInputRef}
@@ -48,13 +49,13 @@ export function BuilderTitle({
               setFormTitle(draftSchema?.metadata?.title || formTitle);
             }
           }}
-          className='sf-bg-white sf-px-2 sf-py-1 sf-border sf-border-blue-600 sf-outline-none sf-min-w-[200px] sf-font-semibold sf-text-gray-900 sf-text-base'
+          className='sf-builder-header-bar__title-input'
         />
       ) : (
         <button
           type='button'
           onClick={() => setIsEditingTitle(true)}
-          className='sf-bg-transparent sf-px-2 sf-py-1 sf-border-none sf-outline-none sf-font-semibold sf-text-gray-900 hover:sf-text-blue-600 sf-text-base sf-cursor-pointer'
+          className='sf-builder-header-bar__title-button'
           onMouseEnter={(e) => {
             e.currentTarget.style.color = '#2271b1';
           }}
@@ -67,7 +68,7 @@ export function BuilderTitle({
 
       {/** form type */}
       <span
-        className={`sf-form-type-text sf-inline-flex sf-items-center sf-gap-1.5 sf-px-2.5 sf-py-1 sf-text-xs sf-font-medium sf-border ${
+        className={`sf-builder-header-bar__form-type-badge ${
           formTypeBadge.color === 'gray'
             ? 'bg-gray-50 text-gray-700 border-gray-200'
             : formTypeBadge.color === 'purple'
@@ -80,7 +81,7 @@ export function BuilderTitle({
         }`}
         style={{ borderRadius: '4px' }}
         title={formTypeBadge.label}>
-        <FormTypeIcon className='sf-w-3 sf-h-3' />
+        <FormTypeIcon className='sf-builder-header-bar__form-type-icon' />
         {formTypeBadge.label}
       </span>
     </div>
@@ -124,11 +125,11 @@ export function BuilderActions({
   showWizard,
 }) {
   return (
-    <div className='sf-flex sf-items-center sf-gap-3'>
+    <div className='sf-builder-header-bar__center'>
       {/* Status Badge */}
       <span
         data-tour='status-badge'
-        className={`sf-inline-flex sf-items-center sf-px-3 sf-py-1.5 sf-text-xs sf-font-semibold sf-uppercase sf-tracking-wide sf-text-white ${
+        className={`sf-builder-header-bar__mode-badge ${
           formStatus === 'published' ? 'bg-green-600' : 'bg-yellow-500'
         }`}
         style={{ borderRadius: '4px' }}
@@ -147,7 +148,7 @@ export function BuilderActions({
         <button
           type='button'
           onClick={() => onCopyShortcode(shortcode)}
-          className={`sf-inline-flex sf-items-center sf-gap-1.5 sf-px-3 sf-py-1.5 sf-text-xs sf-font-medium sf-font-mono sf-cursor-pointer sf-outline-none sf-transition-all ${
+          className={`sf-builder-header-bar__shortcode-button ${
             copyState === 'copied'
               ? 'text-green-700 bg-green-50 border border-green-500'
               : 'sf-text-gray-700 sf-bg-gray-50 sf-border sf-border-gray-300 hover:sf-border-blue-500 hover:sf-bg-blue-50'
@@ -171,7 +172,7 @@ export function BuilderActions({
 
       {/* Save Status Indicator */}
       <div
-        className='sf-flex sf-items-center sf-gap-2 sf-px-2 sf-py-1 sf-text-xs'
+        className='sf-builder-header-bar__save-status'
         title={statusDescription || undefined}>
         <span
           style={{
@@ -204,13 +205,13 @@ export function BuilderActions({
 
       {/* Error Actions */}
       {(autoSaveError || saveError) && (
-        <div className='sf-flex sf-items-center sf-gap-1'>
+        <div className='sf-builder-header-bar__tour-buttons'>
           {autoSaveError && (
             <Button
               variant='secondary'
               isSmall
               onClick={onRetryAutosave}
-              className='sf-h-7'>
+              className='sf-builder-header-bar__tour-button'>
               {__('Retry autosave', 'subtleforms')}
             </Button>
           )}
@@ -219,7 +220,7 @@ export function BuilderActions({
               variant='secondary'
               isSmall
               onClick={onRetryLastManualSave}
-              className='sf-h-7'>
+              className='sf-builder-header-bar__tour-button'>
               {__('Retry save', 'subtleforms')}
             </Button>
           )}
@@ -227,7 +228,7 @@ export function BuilderActions({
             variant='tertiary'
             isSmall
             onClick={onDismissErrors}
-            className='sf-h-7'>
+            className='sf-builder-header-bar__tour-button'>
             {__('Dismiss', 'subtleforms')}
           </Button>
         </div>
@@ -243,23 +244,23 @@ export function BuilderActions({
       />
 
       {/* Primary Actions Group */}
-      <div className='sf-flex sf-items-center sf-gap-2'>
+      <div className='sf-builder-header-bar__action-buttons'>
         <Button
           variant='tertiary'
           onClick={() => dispatch({ type: BUILDER_ACTIONS.UNDO_SCHEMA })}
           disabled={!canUndo || saving || autoSaving}
-          className='sf-px-3 sf-h-9 sf-font-medium sf-text-sm'
+          className='sf-builder-header-bar__undo-button'
           title={__('Undo (Ctrl/Cmd+Z)', 'subtleforms')}>
-          <Icon.Undo className='sf-fill-none sf-mr-2 sf-w-4 sf-h-4' />
+          <Icon.Undo className='sf-builder-header-bar__undo-icon' />
         </Button>
 
         <Button
           variant='tertiary'
           onClick={() => dispatch({ type: BUILDER_ACTIONS.REDO_SCHEMA })}
           disabled={!canRedo || saving || autoSaving}
-          className='sf-px-3 sf-h-9 sf-font-medium sf-text-sm'
+          className='sf-builder-header-bar__redo-button'
           title={__('Redo (Shift+Ctrl/Cmd+Z)', 'subtleforms')}>
-          <Icon.Redo className='sf-fill-none sf-mr-2 sf-w-4 sf-h-4' />
+          <Icon.Redo className='sf-builder-header-bar__redo-icon' />
         </Button>
 
         <HelpMenu
@@ -272,7 +273,7 @@ export function BuilderActions({
           variant='secondary'
           onClick={onPreview}
           disabled={!draftSchema || draftSchema.fields?.length === 0}
-          className='sf-px-4 sf-h-9 sf-font-medium sf-text-sm'>
+          className='sf-builder-header-bar__preview-button'>
           {__('Preview', 'subtleforms')}
         </Button>
 
@@ -281,7 +282,7 @@ export function BuilderActions({
             variant='secondary'
             onClick={onSaveDraft}
             disabled={saving || autoSaving}
-            className='sf-px-4 sf-h-9 sf-font-medium sf-text-sm'>
+            className='sf-builder-header-bar__settings-button'>
             {saving && !formStatus
               ? __('Saving…', 'subtleforms')
               : __('Save Draft', 'subtleforms')}
@@ -293,7 +294,7 @@ export function BuilderActions({
           data-tour='publish-button'
           onClick={onPublish}
           disabled={saving || autoSaving || hasValidationErrors}
-          className='sf-px-4 sf-h-9 sf-font-medium sf-text-sm'>
+          className='sf-builder-header-bar__save-button'>
           {formStatus === 'published'
             ? __('Update', 'subtleforms')
             : __('Publish', 'subtleforms')}
@@ -303,7 +304,7 @@ export function BuilderActions({
           variant='secondary'
           onClick={onSaveAndClose}
           disabled={saving || autoSaving}
-          className='sf-px-4 sf-h-9 sf-font-medium sf-text-sm'
+          className='sf-builder-header-bar__close-button'
           title={__('Save changes and return to forms list', 'subtleforms')}>
           {__('Save & Close', 'subtleforms')}
         </Button>
@@ -312,7 +313,7 @@ export function BuilderActions({
           variant='secondary'
           onClick={onDelete}
           isDestructive
-          className='sf-px-4 sf-h-9 sf-font-medium sf-text-sm'
+          className='sf-builder-header-bar__close-button'
           title={__('Delete this form permanently', 'subtleforms')}>
           {__('Delete', 'subtleforms')}
         </Button>
