@@ -1,0 +1,29 @@
+/**
+ * ConditionEditor Component Styles
+ * Conditional logic rule builder
+ */
+
+.sf-condition-editor {
+	margin-top: 1rem;
+
+	&__header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 0.75rem;
+	}
+
+	&__rule {
+		background-color: #f9fafb;
+		margin-bottom: 0.75rem;
+		padding: 0.75rem;
+		border: 1px solid #d1d5db;
+	}
+
+	&__rule-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 0.5rem;
+	}
+}

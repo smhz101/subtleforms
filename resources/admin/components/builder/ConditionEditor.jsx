@@ -1,5 +1,6 @@
 import { Button, SelectControl, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import './ConditionEditor.scss';
 
 export default function ConditionEditor({
   conditions,
@@ -51,8 +52,8 @@ export default function ConditionEditor({
   };
 
   return (
-    <div className='sf-mt-4'>
-      <div className='sf-flex sf-justify-between sf-items-center sf-mb-3'>
+    <div className='sf-condition-editor'>
+      <div className='sf-condition-editor__header'>
         <label className='sf-font-semibold sf-text-gray-900 sf-text-xs'>
           {__('Conditional Logic', 'subtleforms')}
         </label>
@@ -71,8 +72,8 @@ export default function ConditionEditor({
         conditions.map((condition, index) => (
           <div
             key={index}
-            className='sf-bg-gray-50 sf-mb-3 sf-p-3 sf-border sf-border-gray-300'>
-            <div className='sf-flex sf-justify-between sf-items-center sf-mb-2'>
+            className='sf-condition-editor__rule'>
+            <div className='sf-condition-editor__rule-header'>
               <span className='sf-font-semibold sf-text-[11px] sf-text-gray-600 uppercase'>
                 {__('Rule', 'subtleforms')} {index + 1}
               </span>
