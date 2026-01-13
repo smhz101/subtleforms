@@ -1,0 +1,27 @@
+/**
+ * ActionBar Component Styles
+ * Co-located with ActionBar.jsx
+ */
+
+.sf-action-bar {
+  display: flex;
+  flex-shrink: 0;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f9fafb;
+  padding: 0 1.5rem;
+  border-bottom: 1px solid #d1d5db;
+  height: 3.5rem; // 56px
+
+  &__left {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  &__right {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+}

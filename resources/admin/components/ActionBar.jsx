@@ -1,4 +1,5 @@
 import { memo } from '@wordpress/element';
+import './ActionBar.scss';
 
 /**
  * ActionBar - Reusable Horizontal Bar Component
@@ -19,12 +20,12 @@ import { memo } from '@wordpress/element';
  */
 const ActionBar = memo(function ActionBar({ left, right }) {
   return (
-    <div className='sf-flex sf-flex-shrink-0 sf-justify-between sf-items-center sf-bg-gray-50 sf-px-6 sf-border-gray-300 sf-border-b sf-h-14'>
+    <div className='sf-action-bar'>
       {/* Left Side: Tabs/Filters */}
-      {left && <div className='sf-flex sf-items-center sf-gap-4'>{left}</div>}
+      {left && <div className='sf-action-bar__left'>{left}</div>}
 
       {/* Right Side: Search/Bulk Actions */}
-      {right && <div className='sf-flex sf-items-center sf-gap-4'>{right}</div>}
+      {right && <div className='sf-action-bar__right'>{right}</div>}
     </div>
   );
 });
