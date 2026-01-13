@@ -11,6 +11,7 @@ import {
 import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../components/ui/Icon';
 import clsx from 'clsx';
+import './CreateFormModal.scss';
 
 const restBase =
   window.subtleformsAdmin && window.subtleformsAdmin.restUrl
@@ -216,60 +217,48 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         onClick={() => !isDisabled && onSelect(option.id)}
         disabled={isDisabled}
         className={clsx(
-          'sf-group sf-relative sf-flex sf-border sf-focus:outline-none sf-focus:ring-2 sf-focus:ring-blue-500 sf-focus:ring-offset-2 sf-w-full sf-transition-all sf-duration-150',
-          isHorizontal
-            ? 'sf-flex-row sf-items-center sf-gap-3 sf-p-3 sf-text-left'
-            : 'sf-flex-col sf-items-center sf-text-center sf-p-4',
-          isSelected
-            ? 'sf-border-blue-500 sf-bg-blue-50'
-            : 'sf-border-gray-300 sf-bg-white hover:sf-border-gray-400 hover:sf-bg-gray-50',
-          isDisabled
-            ? 'sf-opacity-50 sf-cursor-not-allowed sf-bg-gray-50 sf-border-dashed'
-            : 'sf-cursor-pointer'
+          'sf-option-card',
+          isHorizontal ? 'sf-option-card--horizontal' : 'sf-option-card--vertical',
+          isSelected ? 'sf-option-card--selected' : 'sf-option-card--unselected',
+          isDisabled && 'sf-option-card--disabled'
         )}>
         <div
           className={clsx(
-            'sf-transition-colors sf-shrink-0',
-            isHorizontal ? 'sf-p-2' : 'sf-p-3 sf-mb-2',
-            isSelected
-              ? 'sf-bg-blue-600 sf-text-white'
-              : 'sf-bg-gray-100 sf-text-gray-600 sf-group-hover:sf-bg-gray-200'
+            'sf-option-card__icon-wrapper',
+            isHorizontal ? 'sf-option-card__icon-wrapper--horizontal' : 'sf-option-card__icon-wrapper--vertical',
+            isSelected ? 'sf-option-card__icon-wrapper--selected' : 'sf-option-card__icon-wrapper--unselected'
           )}>
           {React.createElement(option.icon, {
-            className: isHorizontal
-              ? 'sf-w-[18px] sf-h-[18px]'
-              : 'sf-w-6 sf-h-6',
+            className: clsx(
+              'sf-option-card__icon',
+              isHorizontal ? 'sf-option-card__icon--horizontal' : 'sf-option-card__icon--vertical'
+            ),
           })}
         </div>
 
-        <div className={isHorizontal ? 'sf-flex-1 sf-min-w-0' : 'sf-w-full'}>
+        <div className={clsx(
+          'sf-option-card__content',
+          isHorizontal ? 'sf-option-card__content--horizontal' : 'sf-option-card__content--vertical'
+        )}>
           <div
             className={clsx(
-              'sf-font-semibold sf-text-sm',
-              isSelected ? 'sf-text-blue-900' : 'sf-text-gray-900'
+              'sf-option-card__title',
+              isSelected ? 'sf-option-card__title--selected' : 'sf-option-card__title--unselected'
             )}>
             {option.title}
           </div>
 
-          <div
-            className={`sf-text-gray-500 sf-text-xs sf-leading-snug ${
-              isHorizontal ? 'sf-mt-1' : 'sf-mt-1'
-            }`}>
+          <div className='sf-option-card__description'>
             {option.description}
           </div>
         </div>
 
         {isSelected && (
-          <div className='sf-top-2 sf-right-2 sf-absolute sf-text-blue-600'>
-            <Icon.CheckCircle className='sf-w-4 sf-h-4' />
-          </div>
+          <Icon.CheckCircle className='sf-option-card__check-icon' />
         )}
 
         {isDisabled && (
-          <div
-            className={`sf-font-medium sf-text-[10px] sf-text-gray-500 sf-uppercase sf-tracking-wider ${
-              isHorizontal ? 'sf-mt-1' : 'sf-mt-2'
-            }`}>
+          <div className='sf-option-card__coming-soon'>
             {__('Coming soon', 'subtleforms')}
           </div>
         )}
@@ -285,15 +274,15 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
       overlayClassName='subtleforms-modal-overlay'
       shouldCloseOnClickOutside={!creating}
       shouldCloseOnEsc={!creating}>
-      <div className='sf-flex sf-flex-col sf-h-full sf-min-h-[500px] subtleforms-admin'>
+      <div className='sf-create-form-modal__container subtleforms-admin'>
         {/* Header */}
-        <div className='sf-mb-6'>
-          <h2 className='sf-mb-2 sf-font-semibold sf-text-gray-900 sf-text-lg'>
+        <div className='sf-create-form-modal__header'>
+          <h2 className='sf-create-form-modal__title'>
             {step === 1
               ? __('Create New Form', 'subtleforms')
               : __('Choose Form Structure', 'subtleforms')}
           </h2>
-          <p className='sf-text-gray-600 sf-text-sm sf-leading-relaxed'>
+          <p className='sf-create-form-modal__subtitle'>
             {step === 1
               ? __(
                   'Provide basic information and choose a starting template.',
@@ -307,38 +296,36 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         </div>
 
         {/* Step Indicator */}
-        <div className='sf-flex sf-justify-center sf-mb-6'>
-          <div className='sf-flex sf-items-center sf-space-x-3'>
+        <div className='sf-create-form-modal__step-indicator'>
+          <div className='sf-create-form-modal__step-wrapper'>
             <div
-              className={`sf-px-3 sf-py-1 sf-text-xs sf-font-medium sf-border sf-transition-colors ${
-                step === 1
-                  ? 'sf-bg-blue-50 sf-border-blue-300 sf-text-blue-800'
-                  : 'sf-bg-white sf-border-gray-200 sf-text-gray-500'
-              }`}>
+              className={clsx(
+                'sf-create-form-modal__step',
+                step === 1 ? 'sf-create-form-modal__step--active' : 'sf-create-form-modal__step--inactive'
+              )}>
               {__('Details', 'subtleforms')}
             </div>
-            <div className='sf-bg-gray-200 sf-w-8 sf-h-px'></div>
+            <div className='sf-create-form-modal__step-divider'></div>
             <div
-              className={`sf-px-3 sf-py-1 sf-text-xs sf-font-medium sf-border sf-transition-colors ${
-                step === 2
-                  ? 'sf-bg-blue-50 sf-border-blue-300 sf-text-blue-800'
-                  : 'sf-bg-white sf-border-gray-200 sf-text-gray-500'
-              }`}>
+              className={clsx(
+                'sf-create-form-modal__step',
+                step === 2 ? 'sf-create-form-modal__step--active' : 'sf-create-form-modal__step--inactive'
+              )}>
               {__('Structure', 'subtleforms')}
             </div>
           </div>
         </div>
 
         {/* Form Content */}
-        <div className='sf-flex-1'>
+        <div className='sf-create-form-modal__content'>
           {step === 1 && (
-            <div className='sf-space-y-6'>
+            <div className='sf-create-form-modal__form-section'>
               {/* Form Details */}
-              <div className='sf-space-y-4'>
+              <div className='sf-create-form-modal__form-details'>
                 <div>
-                  <label className='sf-block sf-mb-2 sf-font-medium sf-text-gray-700 sf-text-sm'>
+                  <label className='sf-create-form-modal__label'>
                     {__('Form Title', 'subtleforms')}
-                    <span className='sf-ml-1 sf-text-red-500'>*</span>
+                    <span className='sf-create-form-modal__required'>*</span>
                   </label>
                   <TextControl
                     value={title}
@@ -349,9 +336,9 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
                 </div>
 
                 <div>
-                  <label className='sf-block sf-mb-2 sf-font-medium sf-text-gray-700 sf-text-sm'>
+                  <label className='sf-create-form-modal__label'>
                     {__('Description', 'subtleforms')}
-                    <span className='sf-ml-2 sf-font-normal sf-text-gray-400 sf-text-xs'>
+                    <span className='sf-create-form-modal__optional'>
                       ({__('Optional', 'subtleforms')})
                     </span>
                   </label>
@@ -370,10 +357,10 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
 
               {/* Templates */}
               <div>
-                <label className='sf-block sf-mb-3 sf-font-medium sf-text-gray-700 sf-text-sm sf-uppercase sf-tracking-wide'>
+                <label className='sf-create-form-modal__label-section'>
                   {__('Starting Template', 'subtleforms')}
                 </label>
-                <div className='sf-gap-3 sf-grid sf-grid-cols-2'>
+                <div className='sf-create-form-modal__templates-grid'>
                   {templates.map((t) =>
                     renderOptionCard(t, template, setTemplate)
                   )}
@@ -383,12 +370,12 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
           )}
 
           {step === 2 && (
-            <div className='sf-space-y-6'>
+            <div className='sf-create-form-modal__form-section'>
               <div>
-                <label className='sf-block sf-mb-3 sf-font-medium sf-text-gray-700 sf-text-sm sf-uppercase sf-tracking-wide'>
+                <label className='sf-create-form-modal__label-section'>
                   {__('Form Structure', 'subtleforms')}
                 </label>
-                <div className='sf-space-y-3'>
+                <div className='sf-create-form-modal__form-types'>
                   {formTypes.map((t) =>
                     renderOptionCard(t, formType, setFormType, 'horizontal')
                   )}
@@ -399,12 +386,12 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         </div>
 
         {/* Footer Actions */}
-        <div className='sf-flex sf-justify-between sf-items-center sf-mt-6 sf-pt-6 sf-border-gray-200 sf-border-t'>
+        <div className='sf-create-form-modal__footer'>
           <button
             type='button'
             onClick={step === 1 ? handleRequestClose : () => setStep(1)}
             disabled={creating}
-            className='sf-px-3 sf-py-1 focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-blue-500 focus:sf-ring-offset-2 sf-text-gray-600 hover:sf-text-gray-800 sf-text-sm sf-transition-colors'>
+            className={step === 1 ? 'sf-create-form-modal__cancel-button' : 'sf-create-form-modal__back-button'}>
             {step === 1
               ? __('Cancel', 'subtleforms')
               : __('Back', 'subtleforms')}
@@ -414,9 +401,9 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
             type='button'
             onClick={step === 1 ? () => setStep(2) : handleCreate}
             disabled={step === 1 ? !title.trim() : creating || !formType}
-            className='sf-inline-flex sf-items-center sf-bg-blue-600 hover:sf-bg-blue-700 disabled:sf-opacity-50 sf-px-4 sf-py-2 focus:sf-outline-none focus:sf-ring-2 focus:sf-ring-blue-500 focus:sf-ring-offset-2 sf-font-medium sf-text-white sf-text-sm sf-transition-colors disabled:sf-cursor-not-allowed'>
+            className='sf-create-form-modal__primary-button'>
             {creating && (
-              <Icon.Loader className='sf-mr-2 -ml-1 sf-w-4 sf-h-4 sf-text-white sf-animate-spin' />
+              <Icon.Loader className='sf-create-form-modal__spinner' />
             )}
             {step === 1
               ? __('Next Step', 'subtleforms')
