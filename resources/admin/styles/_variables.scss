@@ -1,0 +1,55 @@
+/**
+ * SubtleForms WordPress Admin Variables
+ *
+ * Colors and spacing aligned with WordPress admin UI
+ */
+
+// WordPress Admin Colors
+$wp-admin-primary: #2271b1;
+$wp-admin-primary-hover: #135e96;
+$wp-admin-primary-dark: #0c3f69;
+
+$wp-admin-gray-50: #f0f0f1;
+$wp-admin-gray-100: #dcdcde;
+$wp-admin-gray-200: #c3c4c7;
+$wp-admin-gray-300: #a7aaad;
+$wp-admin-gray-400: #8c8f94;
+$wp-admin-gray-600: #50575e;
+$wp-admin-gray-900: #1d2327;
+
+$wp-admin-blue: #2271b1;
+$wp-admin-green: #00a32a;
+$wp-admin-red: #d63638;
+$wp-admin-orange: #f56e28;
+$wp-admin-yellow: #f0b849;
+
+// Typography
+$wp-admin-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+  Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+$wp-admin-font-size-base: 13px;
+$wp-admin-font-size-small: 12px;
+$wp-admin-line-height: 1.4em;
+
+// Spacing (WordPress uses fixed pixels)
+$wp-spacing-xs: 4px;
+$wp-spacing-sm: 8px;
+$wp-spacing-md: 12px;
+$wp-spacing-lg: 16px;
+$wp-spacing-xl: 20px;
+$wp-spacing-2xl: 24px;
+
+// Border radius
+$wp-border-radius-sm: 2px;
+$wp-border-radius-md: 3px;
+$wp-border-radius-lg: 4px;
+
+// Shadows
+$wp-box-shadow-sm: 0 1px 1px rgba(0, 0, 0, 0.04);
+$wp-box-shadow-md: 0 1px 3px rgba(0, 0, 0, 0.13);
+$wp-box-shadow-lg: 0 2px 6px rgba(0, 0, 0, 0.15);
+
+// Z-index layers
+$z-modal-overlay: 100000;
+$z-modal: 100001;
+$z-tooltip: 1000000;
+$z-admin-bar: 99999;

@@ -5,6 +5,9 @@
  * Co-located component styles are imported from their respective directories.
  */
 
+// Variables (WordPress-aligned)
+@use 'variables' as *;
+
 // Component Styles
 @use '../components/AdminShell.scss';
 @use '../components/Notices.scss';
