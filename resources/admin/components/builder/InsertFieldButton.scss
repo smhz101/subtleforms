@@ -21,15 +21,15 @@
 		max-width: 300px;
 		padding: 0.625rem 1rem;
 
-		/* Soft, subtle appearance */
-		background-color: #fafafa;
-		border: 1px dashed #d1d5db;
+		/* Demoted, subtle appearance - blend into canvas */
+		background-color: transparent;
+		border: 1px dashed #e5e7eb; /* Lighter, less prominent border */
 		border-radius: 6px;
 
-		/* Typography */
-		font-size: 0.875rem;
-		font-weight: 500;
-		color: #6b7280;
+		/* Typography - lower contrast */
+		font-size: 0.8125rem; /* Slightly smaller */
+		font-weight: 400; /* Normal weight, not medium */
+		color: #9ca3af; /* Lighter gray, less dominant */
 
 		/* Smooth transitions */
 		transition: all 180ms ease-out;
@@ -38,17 +38,17 @@
 		cursor: pointer;
 		outline: none;
 
-		/* Hover state - more inviting */
+		/* Hover state - contextual discovery */
 		&:hover {
-			background-color: #f0f9ff;
-			border-color: #93c5fd;
-			color: #1e40af;
+			background-color: #f9fafb;
+			border-color: #d1d5db;
+			color: #6b7280;
 		}
 
 		/* Active/pressed state */
 		&:active {
 			border-color: #2271b1;
-			background-color: #eff6ff;
+			background-color: #f3f4f6;
 			transform: scale(0.98);
 		}
 
@@ -58,19 +58,19 @@
 			outline-offset: 2px;
 		}
 
-		/* Icon (plus symbol) styling */
+		/* Icon (plus symbol) styling - more subtle */
 		> span:first-child {
 			display: inline-flex;
 			align-items: center;
-			font-size: 1rem;
+			font-size: 0.875rem; /* Smaller icon */
 			line-height: 1;
-			opacity: 0.7;
+			opacity: 0.5; /* More muted by default */
 			transition: opacity 180ms ease-out;
 		}
 
 		/* Icon becomes more prominent on hover */
 		&:hover > span:first-child {
-			opacity: 1;
+			opacity: 0.8;
 		}
 	}
 }
