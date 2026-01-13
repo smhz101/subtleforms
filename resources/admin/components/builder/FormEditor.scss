@@ -23,13 +23,10 @@ $breakpoint-tablet: 768px;
 
 	// Left panel: Field Dock (FIXED WIDTH)
 	&__dock {
-		width: 280px;
-		flex-shrink: 0; // CRITICAL: prevent shrinking
-		flex-grow: 0; // CRITICAL: prevent growing
-		background-color: #f9fafb;
-		border-right: 1px solid #d1d5db;
-		max-height: 100%;
-		overflow-y: auto;
+		// FieldDock component handles its own height and scrolling
+		display: flex;
+		flex-direction: column;
+		overflow: hidden; /* Prevent wrapper from scrolling */
 	}
 
 	// Center panel: Canvas (CRITICAL: must fill available space)
@@ -67,7 +64,6 @@ $breakpoint-tablet: 768px;
 			min-height: 0; /* CRITICAL: allow proper flex shrinking */
 			overflow-y: auto; /* CRITICAL: vertical scroll ownership */
 			overflow-x: hidden;
-			height: 100%; /* Ensure full height within flex container */
 		}
 	}
 
