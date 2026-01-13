@@ -10,6 +10,29 @@
 	cursor: pointer;
 	border-radius: 6px; /* Softer, more modern corners */
 
+	/* Subtle divider for visual rhythm */
+	&::after {
+		content: '';
+		position: absolute;
+		bottom: -0.4375rem; /* Half of margin-bottom */
+		left: 1rem;
+		right: 1rem;
+		height: 1px;
+		background: linear-gradient(
+			to right,
+			transparent,
+			rgba(0, 0, 0, 0.04) 20%,
+			rgba(0, 0, 0, 0.04) 80%,
+			transparent
+		);
+		pointer-events: none;
+	}
+
+	/* Hide divider on last field */
+	&:last-child::after {
+		display: none;
+	}
+
 	/* Default state - clean and minimal */
 	&--default {
 		background-color: #ffffff;
