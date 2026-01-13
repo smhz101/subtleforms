@@ -5,6 +5,7 @@ import AdminShell from '../components/AdminShell';
 import TabBar from '../components/TabBar';
 import SubmissionsTable from '../components/SubmissionsTable';
 import useRealTimeUpdates from '../hooks/useRealTimeUpdates';
+import './SubmissionsPage.scss';
 
 const restBase =
   window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
@@ -166,12 +167,12 @@ export default function SubmissionsPage({ formId }) {
         />
       }
       actionBarRight={
-        <div className='sf-flex sf-items-center sf-gap-2'>
+        <div className='sf-submissions-actions'>
           <Button
             variant='secondary'
             onClick={exportSubmissions}
             disabled={exporting}
-            className='sf-h-9'>
+            className='sf-button-height'>
             {exporting
               ? __('Exporting...', 'subtleforms')
               : __('Export CSV', 'subtleforms')}
@@ -180,7 +181,7 @@ export default function SubmissionsPage({ formId }) {
             <Button
               variant={showFilters ? 'primary' : 'secondary'}
               onClick={() => setShowFilters(!showFilters)}
-              className='sf-h-9'>
+              className='sf-button-height'>
               {showFilters
                 ? __('Hide Filters', 'subtleforms')
                 : __('Filters', 'subtleforms')}
@@ -195,13 +196,13 @@ export default function SubmissionsPage({ formId }) {
       }>
       {/* Filter Bar */}
       {!formId && showFilters && (
-        <div className='sf-flex sf-items-center sf-gap-4 sf-bg-gray-50 sf-px-6 sf-py-4 sf-border-gray-200 sf-border-b'>
+        <div className='sf-filter-bar'>
           <SelectControl
             label={__('Form', 'subtleforms')}
             value={selectedFormId}
             options={formOptions}
             onChange={setSelectedFormId}
-            className='sf-m-0'
+            className='sf-filter-control'
             style={{ minWidth: '200px' }}
           />
           <SelectControl
@@ -209,14 +210,14 @@ export default function SubmissionsPage({ formId }) {
             value={dateRange}
             options={dateRangeOptions}
             onChange={setDateRange}
-            className='sf-m-0'
+            className='sf-filter-control'
             style={{ minWidth: '200px' }}
           />
           {hasActiveFilters && (
             <Button
               variant='link'
               onClick={clearFilters}
-              className='sf-text-sm'
+              className='sf-filter-clear-link'
               style={{ marginTop: '22px' }}>
               {__('Clear all filters', 'subtleforms')}
             </Button>

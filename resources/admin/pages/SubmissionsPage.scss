@@ -1,0 +1,31 @@
+/**
+ * SubmissionsPage Styles
+ */
+
+/* Tailwind to SCSS Conversions */
+.sf-submissions-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.sf-button-height {
+	height: 2.25rem;
+}
+
+.sf-filter-bar {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 1rem 1.5rem;
+	background-color: #f9fafb;
+	border-bottom: 1px solid #e5e7eb;
+}
+
+.sf-filter-control {
+	margin: 0;
+}
+
+.sf-filter-clear-link {
+	font-size: 0.875rem;
+}
