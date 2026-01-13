@@ -1,0 +1,17 @@
+/**
+ * FormsPage Styles
+ */
+
+/* Tailwind to SCSS Conversions */
+.sf-forms-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+}
+
+.sf-icon-button {
+	display: inline-flex;
+	margin-right: 0.5rem;
+	width: 1rem;
+	height: 1rem;
+}

@@ -7,6 +7,7 @@ import TabBar from '../components/TabBar';
 import FormsList from '../components/FormsList';
 import OnboardingWizard from '../components/OnboardingWizard';
 import HelpMenu from '../components/HelpMenu';
+import './FormsPage.scss';
 
 export default function FormsPage() {
   const [search, setSearch] = useState('');
@@ -135,7 +136,7 @@ export default function FormsPage() {
         title={__('All Forms', 'subtleforms')}
         noScroll={true}
         actions={
-          <div className='sf-flex sf-items-center sf-gap-2'>
+          <div className='sf-forms-actions'>
             <HelpMenu
               onOpenWizard={() => setShowWizard(true)}
               showWizard={true}
@@ -145,7 +146,7 @@ export default function FormsPage() {
               onClick={() => {
                 window.location.href = 'admin.php?page=subtleforms-new-form';
               }}>
-              <Icon.Add className='sf-inline sf-mr-2 sf-w-4 sf-h-4' />
+              <Icon.Add className='sf-icon-button' />
               {__('New Form', 'subtleforms')}
             </Button>
           </div>
