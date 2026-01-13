@@ -7,7 +7,9 @@
 		width: 100%;
 		display: flex;
 		justify-content: center;
-		margin: 1rem 0;
+		/* Comfortable spacing to avoid crowding fields */
+		margin: 1.25rem 0;
+		padding: 0 1rem;
 	}
 
 	&__button {
