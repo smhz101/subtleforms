@@ -130,3 +130,24 @@
 .subtleforms-field-error {
 	margin-top: 4px;
 }
+
+/* Tailwind to SCSS Conversions */
+.sf-error-text {
+	font-size: 0.875rem;
+	color: #dc2626;
+}
+
+.sf-space-y-4 > * + * {
+	margin-top: 1rem;
+}
+
+.sf-section-title {
+	margin-bottom: 0.5rem;
+	font-weight: 600;
+}
+
+.sf-section-description {
+	margin-top: 0.5rem;
+	font-size: 0.875rem;
+	color: #4b5563;
+}

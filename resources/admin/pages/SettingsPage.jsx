@@ -14,7 +14,7 @@ import {
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { validateSettings, validateField } from '../utils/validation';
-import './SettingsPage.css';
+import './SettingsPage.scss';
 
 /**
  * Field Error Display Component
@@ -27,7 +27,7 @@ function FieldError({ errors }) {
   return (
     <div className='subtleforms-field-error'>
       {errors.map((error, index) => (
-        <span key={index} className='sf-text-red-600 sf-text-sm'>
+        <span key={index} className='sf-error-text'>
           {error}
         </span>
       ))}
@@ -671,7 +671,7 @@ function AdvancedSettings({
           </div>
 
           <div>
-            <h4 className='sf-mb-2 sf-font-semibold'>
+            <h4 className='sf-section-title'>
               {__('Spam Protection', 'subtleforms')}
             </h4>
             <ToggleControl
@@ -705,7 +705,7 @@ function AdvancedSettings({
           </div>
 
           <div>
-            <h4 className='sf-mb-2 sf-font-semibold'>
+            <h4 className='sf-section-title'>
               {__('Privacy & GDPR', 'subtleforms')}
             </h4>
             <TextControl
@@ -723,7 +723,7 @@ function AdvancedSettings({
               )}
             />
             <FieldError errors={fieldErrors.data_retention_days} />
-            <p className='sf-mt-2 sf-text-gray-600 sf-text-sm'>
+            <p className='sf-section-description'>
               {__(
                 'Note: Submissions can also be exported or erased via WordPress Privacy Tools (Tools → Export/Erase Personal Data).',
                 'subtleforms'
