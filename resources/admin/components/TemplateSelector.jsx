@@ -2,7 +2,7 @@ import { useState, useEffect } from '@wordpress/element';
 import { Button, Modal, Card, CardBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import './TemplateSelector.css';
+import './TemplateSelector.scss';
 
 /**
  * Template Selector Component
@@ -53,12 +53,12 @@ export default function TemplateSelector({ onSelect, onClose }) {
       size='large'>
       <div className='subtleforms-template-selector'>
         {loading ? (
-          <div className='sf-py-8 sf-text-center'>
+          <div className='template-selector__loading'>
             <p>{__('Loading templates...', 'subtleforms')}</p>
           </div>
         ) : (
           <>
-            <p className='sf-mb-6 sf-text-gray-600'>
+            <p className='template-selector__description'>
               {__(
                 'Start with a pre-built template or create a blank form from scratch.',
                 'subtleforms'

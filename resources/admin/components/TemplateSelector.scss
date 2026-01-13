@@ -10,6 +10,18 @@
 	max-width: 900px;
 }
 
+.template-selector {
+	&__loading {
+		padding: 2rem 0;
+		text-align: center;
+	}
+
+	&__description {
+		margin-bottom: 1.5rem;
+		color: #4b5563;
+	}
+}
+
 .template-grid {
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
