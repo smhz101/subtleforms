@@ -7,6 +7,7 @@
 import { __ } from '@wordpress/i18n';
 import { useBuilder } from './context/BuilderContext';
 import ColumnDropZone from './ColumnDropZone';
+import './StepCanvas.scss';
 
 export default function StepCanvas({
   stepId,
@@ -69,7 +70,7 @@ export default function StepCanvas({
       data-testid={`step-canvas-${stepNumber}`}>
       {/* Step Context Header - Clickable to select step */}
       <div
-        className='sf-bg-blue-50 hover:sf-bg-blue-100 sf-mb-6 sf-px-4 sf-py-3 sf-border sf-border-blue-200 sf-rounded-lg sf-cursor-pointer'
+        className='sf-step-header'
         onClick={() => setSelectedId(stepId)}
         role='button'
         tabIndex={0}
@@ -79,11 +80,11 @@ export default function StepCanvas({
           }
         }}
         data-testid={`step-header-${stepNumber}`}>
-        <div className='sf-flex sf-items-center sf-gap-3'>
-          <div className='sf-flex sf-flex-shrink-0 sf-justify-center sf-items-center sf-bg-blue-600 sf-rounded-full sf-w-8 sf-h-8 sf-font-semibold sf-text-white sf-text-sm'>
+        <div className='sf-step-header__container'>
+          <div className='sf-step-header__number'>
             {stepNumber}
           </div>
-          <div className='sf-flex-1'>
+          <div className='sf-step-header__content'>
             <div className='sf-font-semibold sf-text-gray-900 sf-text-sm'>
               {stepTitle}
             </div>
@@ -119,7 +120,7 @@ export default function StepCanvas({
         <div className='sf-px-4 sf-py-12 sf-text-center'>
           <div className='sf-mb-3 sf-text-gray-400'>
             <svg
-              className='sf-mx-auto sf-w-16 sf-h-16'
+              className='sf-step-empty-icon'
               fill='none'
               stroke='currentColor'
               viewBox='0 0 24 24'>

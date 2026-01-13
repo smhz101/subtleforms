@@ -1,0 +1,52 @@
+/**
+ * StepCanvas Component Styles
+ * Multi-step form canvas with step headers
+ */
+
+.subtleforms-step-canvas {
+	// Step header - clickable context indicator
+	.sf-step-header {
+		background-color: #eff6ff;
+		margin-bottom: 1.5rem;
+		padding: 0.75rem 1rem;
+		border: 1px solid #bfdbfe;
+		border-radius: 0.5rem;
+		cursor: pointer;
+
+		&:hover {
+			background-color: #dbeafe;
+		}
+	}
+
+	.sf-step-header__container {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+	}
+
+	.sf-step-header__number {
+		display: flex;
+		flex-shrink: 0;
+		justify-content: center;
+		align-items: center;
+		background-color: #2563eb;
+		border-radius: 9999px;
+		width: 2rem;
+		height: 2rem;
+		font-weight: 600;
+		color: #ffffff;
+		font-size: 0.875rem;
+	}
+
+	.sf-step-header__content {
+		flex: 1;
+	}
+
+	// Empty state
+	.sf-step-empty-icon {
+		margin-left: auto;
+		margin-right: auto;
+		width: 4rem;
+		height: 4rem;
+	}
+}
