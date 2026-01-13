@@ -158,30 +158,42 @@
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		background-color: #f9fafb;
-		border-radius: 0.5rem;
+		background-color: #f3f4f6; /* Slightly darker muted background */
+		border-radius: 8px; /* Softer, more rounded */
 		width: 2.5rem;
 		height: 2.5rem;
-		transition: colors 200ms;
+		transition: all 180ms ease-out; /* Smooth transition */
+		flex-shrink: 0; /* Prevent squishing */
 
-		.field-dock__field-button:hover & {
-			background-color: #dbeafe;
+		.sf-field-dock__field-button:hover & {
+			background-color: #dbeafe; /* Light blue on hover */
+			transform: scale(1.05); /* Subtle scale up */
 		}
 	}
 
 	&__field-icon {
-		color: #6b7280;
-		transition: colors 200ms;
+		color: #6b7280; /* Neutral gray */
+		transition: all 180ms ease-out;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 
-		.field-dock__field-button:hover & {
-			color: #3b82f6;
+		.sf-field-dock__field-button:hover & {
+			color: #2563eb; /* Brighter blue on hover */
+		}
+
+		/* Normalize icon sizing */
+		svg {
+			width: 20px;
+			height: 20px;
 		}
 	}
 
 	&__field-label {
 		font-weight: 500;
-		color: #1f2937;
+		color: #374151; /* Slightly darker for better readability */
 		font-size: 0.75rem;
 		line-height: 1.25;
+		text-align: center;
 	}
 }

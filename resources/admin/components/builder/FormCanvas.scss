@@ -12,7 +12,9 @@
 	min-height: 500px;
 	border-radius: 8px; /* Soft rounded corners */
 	border: 1px solid #e5e7eb; /* Subtle border */
-	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06); /* Soft elevation */
+	box-shadow:
+		0 1px 3px 0 rgba(0, 0, 0, 0.1),
+		0 1px 2px 0 rgba(0, 0, 0, 0.06); /* Soft elevation */
 }
 
 .sf-form-canvas__inner--narrow {

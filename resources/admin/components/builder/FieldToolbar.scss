@@ -17,7 +17,9 @@
 	border: 1px solid #d1d5db; /* Slightly more visible border */
 	background: rgba(255, 255, 255, 0.95); /* Slightly more opaque */
 	backdrop-filter: blur(8px);
-	box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.1), 0 1px 3px 0 rgba(0, 0, 0, 0.06); /* Refined shadow */
+	box-shadow:
+		0 2px 8px 0 rgba(0, 0, 0, 0.1),
+		0 1px 3px 0 rgba(0, 0, 0, 0.06); /* Refined shadow */
 	transition: all 180ms ease-out; /* Match field transitions */
 	z-index: 20;
 
@@ -61,7 +63,9 @@
 			box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.15);
 			opacity: 0;
 			pointer-events: none;
-			transition: opacity 150ms ease-out, transform 150ms ease-out;
+			transition:
+				opacity 150ms ease-out,
+				transform 150ms ease-out;
 			z-index: 30;
 		}
 
@@ -76,7 +80,9 @@
 			border-top-color: #1f2937;
 			opacity: 0;
 			pointer-events: none;
-			transition: opacity 150ms ease-out, transform 150ms ease-out;
+			transition:
+				opacity 150ms ease-out,
+				transform 150ms ease-out;
 			z-index: 30;
 		}
 
