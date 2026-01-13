@@ -3,6 +3,7 @@ import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import Icon from './ui/Icon';
 import clsx from 'clsx';
+import './BuilderTour.scss';
 
 const TOUR_STEPS = [
   {
@@ -238,14 +239,14 @@ export default function BuilderTour({ onComplete, onSkip }) {
     <>
       {/* Overlay */}
       <div
-        className='sf-z-40 sf-fixed sf-inset-0 sf-bg-black sf-bg-opacity-50'
+        className='builder-tour__overlay'
         style={{ pointerEvents: 'none' }}
       />
 
       {/* Spotlight */}
       {step.selector && (
         <div
-          className='sf-z-50 sf-fixed sf-pointer-events-none'
+          className='builder-tour__spotlight'
           style={{
             boxShadow: '0 0 0 9999px rgba(0, 0, 0, 0.5)',
             borderRadius: '8px',
@@ -269,9 +270,8 @@ export default function BuilderTour({ onComplete, onSkip }) {
       <div
         ref={tooltipRef}
         className={clsx(
-          'sf-z-50 sf-fixed sf-bg-white sf-shadow-2xl sf-p-6 sf-rounded-lg sf-max-w-md',
-          'sf-transition-opacity sf-duration-300',
-          isPositioned ? 'opacity-100' : 'opacity-0'
+          'builder-tour__tooltip',
+          isPositioned && 'builder-tour__tooltip--positioned'
         )}
         style={{
           ...tooltipPosition,
@@ -282,14 +282,14 @@ export default function BuilderTour({ onComplete, onSkip }) {
         {/* Close Button */}
         <button
           onClick={handleSkip}
-          className='sf-top-4 sf-right-4 sf-absolute sf-text-gray-400 hover:sf-text-gray-600 sf-transition-colors'
+          className='builder-tour__close-btn'
           aria-label={__('Close tour', 'subtleforms')}>
           <Icon.Close className='sf-w-5 sf-h-5' />
         </button>
 
         {/* Progress */}
-        <div className='sf-mb-4'>
-          <div className='sf-flex sf-justify-between sf-items-center sf-mb-2 sf-text-gray-500 sf-text-sm'>
+        <div className='builder-tour__progress'>
+          <div className='builder-tour__progress-text'>
             <span>
               {currentStep + 1} / {TOUR_STEPS.length}
             </span>
@@ -297,9 +297,9 @@ export default function BuilderTour({ onComplete, onSkip }) {
               {Math.round(((currentStep + 1) / TOUR_STEPS.length) * 100)}%
             </span>
           </div>
-          <div className='sf-bg-gray-200 sf-rounded-full sf-h-1 sf-overflow-hidden'>
+          <div className='builder-tour__progress-bar-container'>
             <div
-              className='sf-bg-blue-600 sf-h-full sf-transition-all sf-duration-300'
+              className='builder-tour__progress-bar'
               style={{
                 width: `${((currentStep + 1) / TOUR_STEPS.length) * 100}%`,
               }}
@@ -308,7 +308,7 @@ export default function BuilderTour({ onComplete, onSkip }) {
         </div>
 
         {/* Content */}
-        <div className='sf-mb-6'>
+        <div className='builder-tour__content'>
           <h3 className='sf-mb-2 sf-font-semibold sf-text-gray-900 sf-text-lg'>
             {step.title}
           </h3>
@@ -316,8 +316,8 @@ export default function BuilderTour({ onComplete, onSkip }) {
         </div>
 
         {/* Actions */}
-        <div className='sf-flex sf-justify-between sf-items-center'>
-          <div>
+        <div className='builder-tour__actions'>
+          <div className='builder-tour__actions-left'>
             {currentStep > 0 && (
               <Button isSecondary onClick={handlePrev}>
                 <Icon.Left className='sf-inline sf-mr-1 sf-w-4 sf-h-4' />
@@ -325,7 +325,7 @@ export default function BuilderTour({ onComplete, onSkip }) {
               </Button>
             )}
           </div>
-          <div className='sf-flex sf-items-center sf-space-x-2'>
+          <div className='builder-tour__actions-right'>
             <Button isSecondary onClick={handleSkip}>
               {__('Skip Tour', 'subtleforms')}
             </Button>
