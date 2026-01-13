@@ -1,0 +1,151 @@
+/**
+ * ExtensionsPage Styles
+ */
+
+/* Tailwind to SCSS Conversions */
+
+.sf-ext-card {
+	height: 100%;
+}
+
+.sf-ext-card-content {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+}
+
+.sf-ext-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 1rem;
+}
+
+.sf-ext-header-left {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.75rem;
+}
+
+.sf-ext-icon {
+	padding: 0.75rem;
+	background-color: #eff6ff;
+	border-radius: 0.5rem;
+}
+
+.sf-ext-title {
+	margin-bottom: 0.25rem;
+	font-size: 1rem;
+	font-weight: 600;
+	color: #111827;
+}
+
+.sf-ext-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.125rem 0.5rem;
+	background-color: #fef3c7;
+	border-radius: 9999px;
+	font-size: 0.75rem;
+	font-weight: 500;
+	color: #92400e;
+}
+
+.sf-ext-description {
+	margin-bottom: 1rem;
+	font-size: 0.875rem;
+	color: #4b5563;
+}
+
+.sf-ext-features {
+	flex: 1;
+}
+
+.sf-ext-features-list {
+	margin-bottom: 1rem;
+
+	li {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.5rem;
+		margin-top: 0.5rem;
+		font-size: 0.875rem;
+		color: #4b5563;
+
+		&:first-child {
+			margin-top: 0;
+		}
+	}
+}
+
+.sf-ext-checkmark {
+	margin-top: 0.125rem;
+	color: #10b981;
+}
+
+.sf-ext-footer {
+	padding-top: 1rem;
+	border-top: 1px solid #f3f4f6;
+}
+
+.sf-ext-button {
+	justify-content: center;
+	width: 100%;
+}
+
+.sf-ext-grid {
+	display: grid;
+	grid-template-columns: repeat(1, minmax(0, 1fr));
+	gap: 1.5rem;
+
+	@media (min-width: 768px) {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	@media (min-width: 1024px) {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+.sf-icon-lg {
+	width: 1.5rem;
+	height: 1.5rem;
+}
+
+.sf-icon-with-margin {
+	margin-right: 0.375rem;
+	width: 1rem;
+	height: 1rem;
+}
+
+.sf-icon-blue {
+	color: #2563eb;
+}
+
+.sf-icon-purple {
+	color: #9333ea;
+}
+
+.sf-icon-green {
+	color: #16a34a;
+}
+
+.sf-icon-orange {
+	color: #ea580c;
+}
+
+.sf-icon-red {
+	color: #dc2626;
+}
+
+.sf-icon-indigo {
+	color: #6366f1;
+}
+
+.sf-icon-teal {
+	color: #14b8a6;
+}
+
+.sf-icon-yellow {
+	color: #eab308;
+}

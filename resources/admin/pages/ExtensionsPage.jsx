@@ -2,19 +2,20 @@ import { __ } from '@wordpress/i18n';
 import { Card, CardBody, Button, Notice } from '@wordpress/components';
 import Icon from '../components/ui/Icon';
 import AdminShell from '../components/AdminShell';
+import './ExtensionsPage.scss';
 
 /**
  * Extension Card Component
  */
 function ExtensionCard({ icon, title, description, features, comingSoon }) {
   return (
-    <Card className='sf-h-full'>
+    <Card className='sf-ext-card'>
       <CardBody>
-        <div className='sf-flex sf-flex-col sf-h-full'>
+        <div className='sf-ext-card-content'>
           {/* Header */}
-          <div className='sf-flex sf-justify-between sf-items-start sf-mb-4'>
-            <div className='sf-flex sf-items-start sf-gap-3'>
-              <div className='sf-bg-blue-50 sf-p-3 sf-rounded-lg'>{icon}</div>
+          <div className='sf-ext-header'>
+            <div className='sf-ext-header-left'>
+              <div className='sf-ext-icon'>{icon}</div>
               <div>
                 <h3 className='sf-mb-1 sf-font-semibold sf-text-gray-900 sf-text-base'>
                   {title}
@@ -221,7 +222,7 @@ export default function ExtensionsPage() {
         </Notice>
 
         {/* Extensions Grid */}
-        <div className='sf-gap-6 sf-grid sf-grid-cols-1 md:sf-grid-cols-2 lg:sf-grid-cols-3'>
+        <div className='sf-ext-grid'>
           {extensions.map((extension, index) => (
             <ExtensionCard key={index} {...extension} />
           ))}
