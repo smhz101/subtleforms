@@ -13,11 +13,12 @@
 @use '../components/HelpMenu.scss';
 @use '../components/AdminHeader.scss';
 @use '../components/ExecutionLog.scss';
+@use '../components/FormsList.scss';
 
 // Modal Styles
 @use '../modals/ConfirmModal.scss';
 @use '../modals/CreateFormModal.scss';
 
-// Page Styles (will be migrated to SCSS)
-// @use '../pages/DashboardPage.scss';
+// Page Styles
+@use '../pages/DashboardPage.scss';
 // @use '../pages/SettingsPage.scss';

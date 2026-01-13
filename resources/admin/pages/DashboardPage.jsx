@@ -12,7 +12,7 @@ import apiFetch from '@wordpress/api-fetch';
 import clsx from 'clsx';
 import Icon from '../components/ui/Icon';
 import AdminShell from '../components/AdminShell';
-import './DashboardPage.css';
+import './DashboardPage.scss';
 
 /**
  * Dashboard Page Component
@@ -79,7 +79,7 @@ export default function Dashboard() {
     <AdminShell
       title={__('Dashboard', 'subtleforms')}
       actions={
-        <div className='sf-flex sf-gap-2'>
+        <div className='sf-dashboard-actions'>
           <Button variant='secondary' href='admin.php?page=subtleforms-forms'>
             {__('All Forms', 'subtleforms')}
           </Button>
@@ -97,12 +97,12 @@ export default function Dashboard() {
       }>
       <div className='sf-p-6'>
         {/* Stats Overview */}
-        <div className='sf-gap-4 sf-grid sf-grid-cols-1 md:sf-grid-cols-2 lg:sf-grid-cols-4 sf-mb-6'>
+        <div className='sf-stats-grid'>
           <StatCard
             title={__('Total Forms', 'subtleforms')}
             value={stats.total_forms}
             subtitle={`${stats.published_forms} published, ${stats.draft_forms} draft`}
-            icon={<Icon.FileText className='sf-w-6 sf-h-6 sf-text-blue-600' />}
+            icon={<Icon.FileText className='sf-icon-lg sf-text-blue-600' />}
             link='admin.php?page=subtleforms-forms'
           />
           <StatCard
@@ -113,7 +113,7 @@ export default function Dashboard() {
                 ? `${stats.avg_submissions_per_form} avg per form`
                 : __('No published forms', 'subtleforms')
             }
-            icon={<Icon.Database className='sf-w-6 sf-h-6 sf-text-green-600' />}
+            icon={<Icon.Database className='sf-icon-lg sf-text-green-600' />}
             link='admin.php?page=subtleforms-submissions'
           />
           <StatCard
@@ -121,7 +121,7 @@ export default function Dashboard() {
             value={stats.submissions_today}
             subtitle={__('Last 24 hours', 'subtleforms')}
             icon={
-              <Icon.Calendar className='sf-w-6 sf-h-6 sf-text-purple-600' />
+              <Icon.Calendar className='sf-icon-lg sf-text-purple-600' />
             }
           />
           <StatCard
@@ -129,12 +129,12 @@ export default function Dashboard() {
             value={stats.submissions_this_week}
             subtitle={__('Last 7 days', 'subtleforms')}
             icon={
-              <Icon.TrendingUp className='sf-w-6 sf-h-6 sf-text-orange-600' />
+              <Icon.TrendingUp className='sf-icon-lg sf-text-orange-600' />
             }
           />
         </div>
 
-        <div className='sf-gap-6 sf-grid sf-grid-cols-1 lg:sf-grid-cols-2 sf-mb-6'>
+        <div className='sf-content-grid'>
           {/* Recent Submissions */}
           <div>
             <Card>
@@ -254,23 +254,14 @@ export default function Dashboard() {
                               const IconComponent = config.icon;
                               return (
                                 <span
-                                  className={clsx(
-                                    'sf-inline-flex sf-items-center sf-gap-1 sf-px-2 sf-py-0.5 sf-border sf-font-medium sf-text-xs',
-                                    {
-                                      'sf-bg-gray-50 sf-text-gray-600 sf-border-gray-200':
-                                        config.color === 'gray',
-                                      'sf-bg-purple-50 sf-text-purple-600 sf-border-purple-200':
-                                        config.color === 'purple',
-                                      'sf-bg-indigo-50 sf-text-indigo-600 sf-border-indigo-200':
-                                        config.color === 'indigo',
-                                      'sf-bg-blue-50 sf-text-blue-600 sf-border-blue-200':
-                                        config.color === 'blue',
-                                      'sf-bg-green-50 sf-text-green-600 sf-border-green-200':
-                                        config.color === 'green',
-                                    }
-                                  )}
-                                  style={{ borderRadius: '3px' }}>
-                                  <IconComponent className='sf-w-3 sf-h-3' />
+                                  className={clsx('sf-form-type-badge', {
+                                    'sf-type-gray': config.color === 'gray',
+                                    'sf-type-purple': config.color === 'purple',
+                                    'sf-type-indigo': config.color === 'indigo',
+                                    'sf-type-blue': config.color === 'blue',
+                                    'sf-type-green': config.color === 'green',
+                                  })}>
+                                  <IconComponent className='sf-icon-sm' />
                                   {config.label}
                                 </span>
                               );
@@ -329,26 +320,21 @@ export default function Dashboard() {
         <div>
           <Card>
             <CardHeader>
-              <div className='sf-flex sf-justify-between sf-items-center'>
+              <div className='sf-system-health-header'>
                 <h2>{__('System Health', 'subtleforms')}</h2>
                 <span
-                  className={clsx(
-                    'sf-inline-flex sf-items-center sf-gap-1.5 sf-px-2.5 sf-py-1 sf-rounded-full sf-font-medium sf-text-xs',
-                    {
-                      'sf-bg-green-50 sf-text-green-700':
-                        system_health.status === 'healthy',
-                      'sf-bg-yellow-50 sf-text-yellow-700':
-                        system_health.status !== 'healthy',
-                    }
-                  )}>
+                  className={clsx('sf-badge', {
+                    'sf-badge-healthy': system_health.status === 'healthy',
+                    'sf-badge-warning': system_health.status !== 'healthy',
+                  })}>
                   {system_health.status === 'healthy' ? (
                     <>
-                      <Icon.CheckCircle className='sf-w-3.5 sf-h-3.5' />{' '}
+                      <Icon.CheckCircle className='sf-icon-md' />{' '}
                       {__('Healthy', 'subtleforms')}
                     </>
                   ) : (
                     <>
-                      <Icon.AlertCircle className='sf-w-3.5 sf-h-3.5' />{' '}
+                      <Icon.AlertCircle className='sf-icon-md' />{' '}
                       {__('Warning', 'subtleforms')}
                     </>
                   )}
@@ -356,70 +342,70 @@ export default function Dashboard() {
               </div>
             </CardHeader>
             <CardBody>
-              <div className='sf-gap-4 sf-grid sf-grid-cols-2 md:sf-grid-cols-4'>
-                <div className='sf-flex sf-flex-col'>
-                  <span className='sf-mb-1 sf-text-gray-500 sf-text-xs'>
+              <div className='sf-system-health-grid'>
+                <div className='sf-system-info-item'>
+                  <span className='sf-label'>
                     {__('Plugin Version', 'subtleforms')}
                   </span>
-                  <span className='sf-font-medium sf-text-gray-900 sf-text-sm'>
+                  <span className='sf-value'>
                     {system_health.plugin_version}
                   </span>
                 </div>
-                <div className='sf-flex sf-flex-col'>
-                  <span className='sf-mb-1 sf-text-gray-500 sf-text-xs'>
+                <div className='sf-system-info-item'>
+                  <span className='sf-label'>
                     {__('WordPress', 'subtleforms')}
                   </span>
-                  <span className='sf-font-medium sf-text-gray-900 sf-text-sm'>
+                  <span className='sf-value'>
                     {system_health.wordpress_version}
                   </span>
                 </div>
-                <div className='sf-flex sf-flex-col'>
-                  <span className='sf-mb-1 sf-text-gray-500 sf-text-xs'>
+                <div className='sf-system-info-item'>
+                  <span className='sf-label'>
                     {__('PHP Version', 'subtleforms')}
                   </span>
-                  <span className='sf-font-medium sf-text-gray-900 sf-text-sm'>
+                  <span className='sf-value'>
                     {system_health.php_version}
                   </span>
                 </div>
-                <div className='sf-flex sf-flex-col'>
-                  <span className='sf-mb-1 sf-text-gray-500 sf-text-xs'>
+                <div className='sf-system-info-item'>
+                  <span className='sf-label'>
                     {__('Database', 'subtleforms')}
                   </span>
-                  <span className='sf-font-medium sf-text-gray-900 sf-text-sm'>
+                  <span className='sf-value'>
                     {system_health.database_version}
                   </span>
                 </div>
-                <div className='sf-flex sf-flex-col'>
-                  <span className='sf-mb-1 sf-text-gray-500 sf-text-xs'>
+                <div className='sf-system-info-item'>
+                  <span className='sf-label'>
                     {__('Memory Limit', 'subtleforms')}
                   </span>
-                  <span className='sf-font-medium sf-text-gray-900 sf-text-sm'>
+                  <span className='sf-value'>
                     {system_health.memory_limit}
                   </span>
                 </div>
-                <div className='sf-flex sf-flex-col'>
-                  <span className='sf-mb-1 sf-text-gray-500 sf-text-xs'>
+                <div className='sf-system-info-item'>
+                  <span className='sf-label'>
                     {__('Max Upload', 'subtleforms')}
                   </span>
-                  <span className='sf-font-medium sf-text-gray-900 sf-text-sm'>
+                  <span className='sf-value'>
                     {system_health.max_upload_size}
                   </span>
                 </div>
-                <div className='sf-flex sf-flex-col'>
-                  <span className='sf-mb-1 sf-text-gray-500 sf-text-xs'>
+                <div className='sf-system-info-item'>
+                  <span className='sf-label'>
                     {__('Debug Mode', 'subtleforms')}
                   </span>
-                  <span className='sf-font-medium sf-text-gray-900 sf-text-sm'>
+                  <span className='sf-value'>
                     {system_health.debug_mode
                       ? __('Enabled', 'subtleforms')
                       : __('Disabled', 'subtleforms')}
                   </span>
                 </div>
-                <div className='sf-flex sf-flex-col'>
-                  <span className='sf-mb-1 sf-text-gray-500 sf-text-xs'>
+                <div className='sf-system-info-item'>
+                  <span className='sf-label'>
                     {__('Autosave', 'subtleforms')}
                   </span>
-                  <span className='sf-font-medium sf-text-gray-900 sf-text-sm'>
+                  <span className='sf-value'>
                     {system_health.autosave_enabled
                       ? __('Enabled', 'subtleforms')
                       : __('Disabled', 'subtleforms')}
