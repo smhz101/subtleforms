@@ -1,6 +1,7 @@
 import { memo, useState, useRef, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import Icon from './ui/Icon';
+import './AdminHeader.scss';
 
 /**
  * AdminHeader - Sticky Header Component
@@ -82,7 +83,7 @@ const AdminHeader = memo(function AdminHeader({
     // If not editable, render as static text
     if (!editableTitle) {
       return (
-        <h1 className='sf-m-0 sf-font-semibold sf-text-gray-900 sf-text-lg sf-leading-none'>
+        <h1 className='sf-admin-header__title'>
           {title}
         </h1>
       );
@@ -98,7 +99,7 @@ const AdminHeader = memo(function AdminHeader({
           onChange={(event) => setTitleValue(event.target.value)}
           onBlur={handleTitleSave}
           onKeyDown={handleKeyDown}
-          className='sf-bg-white sf-px-2 sf-py-1 sf-border sf-border-blue-600 sf-outline-none sf-min-w-[200px] sf-font-semibold sf-text-gray-900 sf-text-lg sf-leading-none'
+          className='sf-admin-header__title-input'
           placeholder={__('Enter title...', 'subtleforms')}
         />
       );
@@ -108,7 +109,7 @@ const AdminHeader = memo(function AdminHeader({
       <button
         type='button'
         onClick={() => setIsEditingTitle(true)}
-        className='sf-bg-transparent sf-px-2 sf-py-1 sf-border-none sf-outline-none sf-font-semibold sf-text-gray-900 hover:sf-text-blue-600 sf-text-lg sf-leading-none sf-transition-colors sf-cursor-pointer'
+        className='sf-admin-header__title-button'
         title={__('Click to edit title', 'subtleforms')}>
         {title || __('Untitled', 'subtleforms')}
       </button>
@@ -117,7 +118,7 @@ const AdminHeader = memo(function AdminHeader({
 
   return (
     <div
-      className='sf-flex sf-flex-shrink-0 sf-justify-between sf-items-center sf-bg-blue-200 sf-px-6 sf-border-gray-300 sf-border-b'
+      className='sf-admin-header'
       style={{
         height: `${HEADER_HEIGHT}px`,
         position: 'sticky',
@@ -125,12 +126,12 @@ const AdminHeader = memo(function AdminHeader({
         zIndex: 100,
       }}>
       {/* Left Side: Logo + Title */}
-      <div className='sf-flex sf-items-center sf-gap-4'>
-        <div className='sf-flex sf-items-center sf-gap-3'>
+      <div className='sf-admin-header__left'>
+        <div className='sf-admin-header__logo-title'>
           {/* SubtleForms Logo */}
 
           <div
-            className='sf-inline-flex sf-justify-center sf-items-center sf-bg-white sf-shadow-sm sf-border sf-border-gray-200 sf-rounded-md sf-w-8 sf-h-8 sf-font-semibold sf-text-gray-800 sf-text-xs'
+            className='sf-admin-header__logo'
             aria-label={__('SubtleForms', 'subtleforms')}
             title={__('SubtleForms', 'subtleforms')}>
             SF
@@ -142,7 +143,7 @@ const AdminHeader = memo(function AdminHeader({
 
       {/* Right Side: Action Buttons (Context-Aware) */}
       {actions && (
-        <div className='sf-flex sf-items-center sf-gap-2'>{actions}</div>
+        <div className='sf-admin-header__actions'>{actions}</div>
       )}
     </div>
   );
