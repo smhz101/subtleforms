@@ -57,9 +57,7 @@ export default function StepNavigator({
               step.config?.title || step.title || __('Untitled', 'subtleforms');
 
             return (
-              <div
-                key={step.id}
-                className='step-navigator__step-item'>
+              <div key={step.id} className='step-navigator__step-item'>
                 <button
                   type='button'
                   onClick={() => onSelectStep(step.id)}

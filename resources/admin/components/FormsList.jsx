@@ -113,9 +113,7 @@ export default function FormsList({
       width: '25%',
       render: (title, form) => (
         <div className='sf-form-name'>
-          <span className='sf-form-name__title'>
-            {title}
-          </span>
+          <span className='sf-form-name__title'>{title}</span>
           {form.submission_count === 0 && (
             <span className='sf-form-name__new-badge'>
               {__('New', 'subtleforms')}
@@ -162,11 +160,7 @@ export default function FormsList({
         const IconComponent = config.icon;
 
         return (
-          <span
-            className={clsx(
-              'sf-form-type-badge',
-              config.classes
-            )}>
+          <span className={clsx('sf-form-type-badge', config.classes)}>
             <IconComponent />
             {config.label}
           </span>
@@ -201,11 +195,7 @@ export default function FormsList({
 
         const IconComponent = config.icon;
         return (
-          <span
-            className={clsx(
-              'sf-status-badge',
-              config.classes
-            )}>
+          <span className={clsx('sf-status-badge', config.classes)}>
             <IconComponent />
             {config.label}
           </span>
@@ -227,9 +217,7 @@ export default function FormsList({
               handleCopyShortcode(shortcode);
             }}
             title={__('Click to copy', 'subtleforms')}>
-            <code>
-              {shortcode}
-            </code>
+            <code>{shortcode}</code>
             <Icon.Copy />
           </button>
         );
@@ -245,28 +233,25 @@ export default function FormsList({
         return (
           <a
             href={`admin.php?page=subtleforms-submissions&form_id=${form.id}`}
-            className={clsx(
-              'sf-entries-display',
-              {
-                'sf-entries-display--unread': hasUnread,
-                'sf-entries-display--read': !hasUnread,
-              }
-            )}
+            className={clsx('sf-entries-display', {
+              'sf-entries-display--unread': hasUnread,
+              'sf-entries-display--read': !hasUnread,
+            })}
             onClick={(e) => e.stopPropagation()}
             title={(() => {
-                return sprintf(
+              return sprintf(
                 /* translators: %1$d: unread count, %2$d: total submissions */
                 __('%1$d unread, %2$d total entries', 'subtleforms'),
                 unreadCount,
                 submissionCount
               );
             })()}>
-            {hasUnread && (
-              <span className='sf-entries-display__pulse'></span>
-            )}
+            {hasUnread && <span className='sf-entries-display__pulse'></span>}
             {hasUnread ? (
               <>
-                <span className='sf-entries-display__unread'>{unreadCount}</span>
+                <span className='sf-entries-display__unread'>
+                  {unreadCount}
+                </span>
                 <span className='sf-entries-display__separator'>/</span>
                 <span>{submissionCount}</span>
               </>
@@ -291,14 +276,15 @@ export default function FormsList({
         if (diffInHours < 1) displayText = __('Just now', 'subtleforms');
         else if (diffInHours < 24)
           /* translators: %1$d: number of hours ago */
-          displayText = sprintf(__('%1$d hours ago', 'subtleforms'), diffInHours);
+          displayText = sprintf(
+            __('%1$d hours ago', 'subtleforms'),
+            diffInHours
+          );
         else if (diffInHours < 48) displayText = __('Yesterday', 'subtleforms');
         else displayText = date.toLocaleDateString();
 
         return (
-          <time
-            className='sf-form-date'
-            title={date.toLocaleString()}>
+          <time className='sf-form-date' title={date.toLocaleString()}>
             {displayText}
           </time>
         );
@@ -481,7 +467,12 @@ export default function FormsList({
     const { ok, body } = await apiRequest('/forms', {
       method: 'POST',
       body: JSON.stringify({
-        title: ( () => { /* translators: %s: form title */ return sprintf(__('%1$s (Copy)', 'subtleforms'), form.title); } )(),
+        title: (() => {
+          /* translators: %s: form title */ return sprintf(
+            __('%1$s (Copy)', 'subtleforms'),
+            form.title
+          );
+        })(),
         status: 'draft',
       }),
     });
@@ -604,7 +595,10 @@ export default function FormsList({
         (() => {
           return sprintf(
             /* translators: %1$d: number deleted, %2$d: total requested */
-            __('Failed to delete some forms (%1$d/%2$d deleted)', 'subtleforms'),
+            __(
+              'Failed to delete some forms (%1$d/%2$d deleted)',
+              'subtleforms'
+            ),
             successCount,
             ids.length
           );
@@ -646,7 +640,10 @@ export default function FormsList({
         (() => {
           return sprintf(
             /* translators: %1$d: number updated, %2$d: total requested */
-            __('Failed to update some forms (%1$d/%2$d updated)', 'subtleforms'),
+            __(
+              'Failed to update some forms (%1$d/%2$d updated)',
+              'subtleforms'
+            ),
             successCount,
             ids.length
           );
@@ -730,7 +727,10 @@ export default function FormsList({
           return count > 0
             ? sprintf(
                 /* translators: %1$d: number of submissions belonging to this form */
-                __('Are you sure you want to delete this form? It has %1$d submissions which will also be permanently deleted.', 'subtleforms'),
+                __(
+                  'Are you sure you want to delete this form? It has %1$d submissions which will also be permanently deleted.',
+                  'subtleforms'
+                ),
                 count
               )
             : __(
@@ -760,14 +760,10 @@ export default function FormsList({
               ]}
             />
             <div className='sf-modal-actions'>
-              <Button
-                variant='tertiary'
-                onClick={() => setStatusModal(null)}>
+              <Button variant='tertiary' onClick={() => setStatusModal(null)}>
                 {__('Cancel', 'subtleforms')}
               </Button>
-              <Button
-                variant='primary'
-                onClick={handleStatusChange}>
+              <Button variant='primary' onClick={handleStatusChange}>
                 {__('Update', 'subtleforms')}
               </Button>
             </div>

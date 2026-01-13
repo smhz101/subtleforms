@@ -70,9 +70,7 @@ export default function ConditionEditor({
 
       {conditions &&
         conditions.map((condition, index) => (
-          <div
-            key={index}
-            className='sf-condition-editor__rule'>
+          <div key={index} className='sf-condition-editor__rule'>
             <div className='sf-condition-editor__rule-header'>
               <span className='sf-font-semibold sf-text-[11px] sf-text-gray-600 uppercase'>
                 {__('Rule', 'subtleforms')} {index + 1}
