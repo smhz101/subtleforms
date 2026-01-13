@@ -85,4 +85,48 @@ $breakpoint-tablet: 768px;
 			display: none;
 		}
 	}
+
+	// RESPONSIVE: Mobile Layout (< 768px)
+	@media (max-width: 767px) {
+		// Single column: Canvas only
+		grid-template-columns: 1fr;
+		position: relative;
+
+		// Hide dock by default, position off-canvas left
+		&__dock {
+			position: fixed;
+			left: 0;
+			top: 0;
+			bottom: 0;
+			z-index: 100;
+			transform: translateX(-100%);
+			transition: transform 300ms ease-out;
+
+			// Show when toggled
+			&.is-open {
+				transform: translateX(0);
+			}
+		}
+
+		// Canvas takes full width
+		&__canvas {
+			grid-column: 1;
+		}
+
+		// Inspector stays hidden, positioned off-canvas right
+		&__inspector {
+			position: fixed;
+			right: 0;
+			top: 0;
+			bottom: 0;
+			z-index: 100;
+			transform: translateX(100%);
+			transition: transform 300ms ease-out;
+
+			// Show when toggled
+			&.is-open {
+				transform: translateX(0);
+			}
+		}
+	}
 }
