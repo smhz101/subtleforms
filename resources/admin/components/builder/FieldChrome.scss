@@ -5,11 +5,13 @@
 
 .sf-field-chrome {
 	position: relative;
+	margin-bottom: 1.5rem; /* More breathing room between fields */
 	transition: all 180ms ease-out; /* Smooth, subtle transition */
 	border-radius: 6px; /* Softer corners */
 	cursor: pointer;
 	border: 1px solid #e5e7eb; /* Default soft border */
 	background-color: #ffffff; /* Clean white background */
+	box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03); /* Very subtle depth */
 
 	&:focus {
 		outline: none;

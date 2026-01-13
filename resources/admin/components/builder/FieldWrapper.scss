@@ -5,23 +5,30 @@
 
 .sf-field-wrapper {
 	position: relative;
-	padding: 1.25rem;
-	transition: all 200ms;
+	margin-bottom: 1.5rem; /* CRITICAL: more breathing room between fields */
+	transition: all 180ms ease-out; /* Consistent timing */
 	cursor: pointer;
-	border-radius: 4px;
+	border-radius: 6px; /* Softer, more modern corners */
 
-	&--selected {
-		background-color: #eff6ff;
-		border: 2px solid #3b82f6;
-	}
-
-	&--hovered:not(&--selected) {
-		background-color: #f9fafb;
-		border: 1px solid #d1d5db;
-	}
-
+	/* Default state - clean and minimal */
 	&--default {
 		background-color: #ffffff;
-		border: 1px solid #d1d5db;
+		border: 1px solid #e5e7eb; /* Lighter, softer border */
+		box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04); /* Very subtle depth */
+	}
+
+	/* Hover state - subtle emphasis */
+	&--hovered:not(&--selected) {
+		background-color: #fafafa;
+		border: 1px solid #d1d5db; /* Slightly stronger border */
+		box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06); /* More prominent shadow */
+		transform: translateY(-1px); /* Subtle lift */
+	}
+
+	/* Selected state - WordPress blue with glow */
+	&--selected {
+		background-color: #ffffff;
+		border: 2px solid #2271b1; /* WordPress blue */
+		box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.1); /* Blue glow */
 	}
 }

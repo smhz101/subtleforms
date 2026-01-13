@@ -7,7 +7,11 @@ import { getIcon } from './utils/iconMap';
  * FieldDock
  * UI polish only: spacing, depth, motion, affordances.
  */
-export default function FieldDock({ fieldGroups, onAddField, onCollapsedChange }) {
+export default function FieldDock({
+  fieldGroups,
+  onAddField,
+  onCollapsedChange,
+}) {
   const [collapsed, setCollapsed] = useState(false);
 
   const handleToggleCollapsed = () => {

@@ -15,7 +15,7 @@ $breakpoint-tablet: 768px;
 	height: 100%;
 	background-color: #fff;
 	overflow: hidden;
-	
+
 	/* CRITICAL: When dock is collapsed, adjust grid to expand canvas */
 	&--dock-collapsed {
 		grid-template-columns: 48px 1fr 320px;

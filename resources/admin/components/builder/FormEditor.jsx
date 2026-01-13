@@ -487,11 +487,14 @@ export default function FormEditor({
       onMove={handleMove}
       onDuplicate={handleDuplicate}
       onRequestInsert={handleRequestInsert}>
-      <div className={`sf-form-editor ${isDockCollapsed ? 'sf-form-editor--dock-collapsed' : ''}`}>
+      <div
+        className={`sf-form-editor ${
+          isDockCollapsed ? 'sf-form-editor--dock-collapsed' : ''
+        }`}>
         {/* Field Library (Left Sidebar) */}
         <div className='sf-form-editor__dock' data-tour='fields-panel'>
-          <FieldDock 
-            fieldGroups={fieldGroups} 
+          <FieldDock
+            fieldGroups={fieldGroups}
             onAddField={handleDockAdd}
             onCollapsedChange={setIsDockCollapsed}
           />
