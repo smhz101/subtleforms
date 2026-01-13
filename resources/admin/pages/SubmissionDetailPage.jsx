@@ -9,6 +9,7 @@ import {
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import AdminShell from '../components/AdminShell';
+import './SubmissionDetailPage.scss';
 
 const restBase =
   window.subtleformsAdmin && window.subtleformsAdmin.restUrl
@@ -173,7 +174,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
       <Button isSecondary onClick={onBack}>
         ← {__('Back to Submissions', 'subtleforms')}
       </Button>
-      <div className='sf-flex sf-items-center sf-gap-3'>
+      <div className='sf-submission-header-actions'>
         {/* Status Badge */}
         <span
           className={`sf-inline-flex sf-items-center sf-gap-1 sf-px-3 sf-py-1 sf-text-xs sf-font-medium sf-rounded-full ${

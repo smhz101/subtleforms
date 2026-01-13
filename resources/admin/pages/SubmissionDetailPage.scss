@@ -1,0 +1,393 @@
+/**
+ * SubmissionDetailPage Styles
+ */
+
+/* Tailwind to SCSS Conversions */
+
+// Layout Utility Classes
+.sf-space-y-8 > * + * {
+	margin-top: 2rem;
+}
+
+.sf-space-y-3 > * + * {
+	margin-top: 0.75rem;
+}
+
+// Header Actions
+.sf-submission-header-actions {
+	display: flex;
+	align-items: center;
+	gap: 0.75rem;
+}
+
+// Status Badge
+.sf-status-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.25rem;
+	padding: 0.25rem 0.75rem;
+	font-size: 0.75rem;
+	font-weight: 500;
+	border-radius: 9999px;
+
+	&.sf-status-unread {
+		background-color: #3b82f6;
+		color: #ffffff;
+	}
+
+	&.sf-status-read {
+		background-color: #f3f4f6;
+		color: #4b5563;
+	}
+}
+
+.sf-status-indicator {
+	width: 0.5rem;
+	height: 0.5rem;
+	background-color: #ffffff;
+	border-radius: 9999px;
+	animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+// Text Utilities
+.sf-text-secondary {
+	font-size: 0.875rem;
+	color: #4b5563;
+}
+
+.sf-text-muted {
+	font-size: 0.875rem;
+	color: #6b7280;
+}
+
+.sf-form-link {
+	color: #2563eb;
+	text-decoration: none;
+
+	&:hover {
+		color: #1d4ed8;
+	}
+}
+
+// Card Header
+.sf-card-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+
+.sf-card-title {
+	margin: 0;
+	font-size: 1.125rem;
+	font-weight: 600;
+	color: #111827;
+}
+
+.sf-card-options {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+}
+
+.sf-checkbox-label {
+	display: flex;
+	align-items: center;
+	gap: 0.5rem;
+	font-size: 0.875rem;
+	color: #4b5563;
+
+	input[type='checkbox'] {
+		border-color: #d1d5db;
+		border-radius: 0.25rem;
+		color: #2563eb;
+
+		&:focus {
+			ring: 2px;
+			ring-color: #3b82f6;
+		}
+	}
+}
+
+// Field Item
+.sf-field-item {
+	background-color: #ffffff;
+	border: 1px solid #e5e7eb;
+	border-radius: 0.5rem;
+	box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+	overflow: hidden;
+}
+
+.sf-field-item-content {
+	padding: 1rem 1.5rem;
+}
+
+.sf-field-layout {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	gap: 1rem;
+}
+
+.sf-field-label-area {
+	flex-shrink: 0;
+}
+
+.sf-field-label {
+	font-size: 0.875rem;
+	font-weight: 600;
+	line-height: 1.5;
+	color: #111827;
+}
+
+.sf-field-key {
+	margin-top: 0.25rem;
+	font-family: monospace;
+	font-size: 0.75rem;
+	color: #6b7280;
+}
+
+.sf-field-value-area {
+	flex: 1;
+	min-width: 0;
+}
+
+.sf-field-value {
+	font-size: 0.875rem;
+	color: #111827;
+	word-break: break-word;
+	white-space: pre-wrap;
+}
+
+.sf-field-value-content {
+	margin-top: 0.5rem;
+}
+
+.sf-field-value-strong {
+	font-weight: 500;
+}
+
+.sf-field-value-empty {
+	font-style: italic;
+	color: #9ca3af;
+}
+
+.sf-json-container {
+	margin-top: 0.5rem;
+	padding: 0.75rem;
+	background-color: #f9fafb;
+	border: 1px solid #e5e7eb;
+	border-radius: 0.25rem;
+}
+
+.sf-json-label {
+	margin-bottom: 0.5rem;
+	font-size: 0.75rem;
+	font-weight: 500;
+	color: #4b5563;
+}
+
+.sf-json-pre {
+	max-height: 10rem;
+	overflow: auto;
+	font-family: monospace;
+	font-size: 0.75rem;
+	color: #1f2937;
+}
+
+// Empty State
+.sf-empty-state {
+	padding: 3rem 1.5rem;
+	text-align: center;
+	color: #6b7280;
+}
+
+// Meta Grid
+.sf-meta-grid {
+	display: grid;
+	grid-template-columns: repeat(1, minmax(0, 1fr));
+	gap: 1rem;
+
+	@media (min-width: 768px) {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+.sf-meta-item {
+	display: flex;
+	justify-content: space-between;
+	padding: 0.75rem;
+	background-color: #f9fafb;
+	border-radius: 0.375rem;
+}
+
+.sf-meta-label {
+	font-size: 0.875rem;
+	font-weight: 500;
+	color: #6b7280;
+}
+
+.sf-meta-value {
+	font-family: monospace;
+	font-size: 0.75rem;
+	color: #111827;
+}
+
+// Log Entry
+.sf-log-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.sf-log-entry {
+	padding: 0.75rem 1rem;
+	background-color: #f9fafb;
+	border-left: 3px solid #d1d5db;
+	border-radius: 0.25rem;
+
+	&.sf-log-level-error {
+		background-color: #fef2f2;
+		border-left-color: #ef4444;
+	}
+
+	&.sf-log-level-warning {
+		background-color: #fffbeb;
+		border-left-color: #f59e0b;
+	}
+
+	&.sf-log-level-info {
+		background-color: #eff6ff;
+		border-left-color: #3b82f6;
+	}
+}
+
+.sf-log-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 0.5rem;
+}
+
+.sf-log-level {
+	display: inline-block;
+	padding: 0.125rem 0.5rem;
+	font-size: 0.75rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	border-radius: 0.25rem;
+	color: #ffffff;
+
+	&.sf-level-error {
+		background-color: #ef4444;
+	}
+
+	&.sf-level-warning {
+		background-color: #f59e0b;
+	}
+
+	&.sf-level-info {
+		background-color: #3b82f6;
+	}
+
+	&.sf-level-debug {
+		background-color: #6b7280;
+	}
+}
+
+.sf-log-time {
+	font-size: 0.75rem;
+	color: #6b7280;
+}
+
+.sf-log-message {
+	font-size: 0.875rem;
+	color: #111827;
+}
+
+.sf-log-context {
+	margin-top: 0.5rem;
+	padding: 0.5rem;
+	background-color: #ffffff;
+	border: 1px solid #e5e7eb;
+	border-radius: 0.25rem;
+	font-family: monospace;
+	font-size: 0.75rem;
+	overflow-x: auto;
+}
+
+// Note Form
+.sf-note-form {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.sf-note-textarea {
+	width: 100%;
+	min-height: 6rem;
+	padding: 0.75rem;
+	border: 1px solid #d1d5db;
+	border-radius: 0.375rem;
+	font-size: 0.875rem;
+
+	&:focus {
+		outline: none;
+		border-color: #3b82f6;
+		ring: 2px;
+		ring-color: rgba(59, 130, 246, 0.5);
+	}
+}
+
+.sf-note-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 0.5rem;
+}
+
+// Notes List
+.sf-notes-list {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+}
+
+.sf-note-item {
+	padding: 1rem;
+	background-color: #fffbeb;
+	border-left: 3px solid #f59e0b;
+	border-radius: 0.25rem;
+}
+
+.sf-note-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	margin-bottom: 0.5rem;
+}
+
+.sf-note-author {
+	font-size: 0.875rem;
+	font-weight: 600;
+	color: #111827;
+}
+
+.sf-note-date {
+	font-size: 0.75rem;
+	color: #6b7280;
+}
+
+.sf-note-text {
+	font-size: 0.875rem;
+	color: #111827;
+	white-space: pre-wrap;
+}
+
+@keyframes pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.5;
+	}
+}
