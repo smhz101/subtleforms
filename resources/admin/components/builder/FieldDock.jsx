@@ -7,8 +7,16 @@ import { getIcon } from './utils/iconMap';
  * FieldDock
  * UI polish only: spacing, depth, motion, affordances.
  */
-export default function FieldDock({ fieldGroups, onAddField }) {
+export default function FieldDock({ fieldGroups, onAddField, onCollapsedChange }) {
   const [collapsed, setCollapsed] = useState(false);
+
+  const handleToggleCollapsed = () => {
+    const newCollapsed = !collapsed;
+    setCollapsed(newCollapsed);
+    if (onCollapsedChange) {
+      onCollapsedChange(newCollapsed);
+    }
+  };
   const [collapsedGroups, setCollapsedGroups] = useState({});
 
   const toggleGroup = (category) => {
@@ -46,7 +54,7 @@ export default function FieldDock({ fieldGroups, onAddField }) {
 
         <Button
           isSmall
-          onClick={() => setCollapsed(!collapsed)}
+          onClick={handleToggleCollapsed}
           className='sf-field-dock__toggle-button'
           title={
             collapsed
