@@ -20,6 +20,7 @@
 	padding: 1rem 1.5rem;
 	background-color: #f9fafb;
 	border-bottom: 1px solid #e5e7eb;
+	flex-shrink: 0; // Don't let filter bar shrink
 }
 
 .sf-filter-control {
@@ -28,4 +29,13 @@
 
 .sf-filter-clear-link {
 	font-size: 0.875rem;
+}
+
+/* Page Layout - SubmissionsPage uses noScroll, content must scroll internally */
+.sf-submissions-page-content {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0; // CRITICAL: allows flex child to shrink
+	overflow: hidden;
 }

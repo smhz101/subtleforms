@@ -2,12 +2,14 @@
  * DataTable Component Styles
  *
  * Unified table component for all SubtleForms data displays.
+ * Layout: Flexbox column with scrollable middle section and fixed pagination
  */
 
 .data-table {
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0; // CRITICAL: allows flex child to shrink below content size
 
   &__bulk-actions {
     display: flex;
@@ -33,7 +35,8 @@
 
   &__scroll-container {
     flex: 1;
-    overflow: auto;
+    min-height: 0; // CRITICAL: allows scroll container to shrink
+    overflow: auto; // Enable scrolling here
   }
 
   &__table {

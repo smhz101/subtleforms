@@ -15,3 +15,12 @@
 	width: 1rem;
 	height: 1rem;
 }
+
+/* Page Layout - FormsPage uses noScroll, so FormsList must handle scroll */
+.sf-forms-page-content {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0; // CRITICAL: allows flex child to shrink
+	overflow: hidden;
+}

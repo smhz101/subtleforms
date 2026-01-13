@@ -3,10 +3,14 @@
  *
  * Styles for the submissions table wrapper.
  * Most styling is in DataTable component.
+ * Layout: Must work in both page and builder contexts
  */
 
 .submissions-table {
+  display: flex;
+  flex-direction: column;
   height: 100%;
+  min-height: 0; // CRITICAL: allows component to shrink in flex parent
 
   &__status-badge {
     display: inline-flex;

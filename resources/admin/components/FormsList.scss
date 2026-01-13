@@ -1,8 +1,14 @@
 /**
  * FormsList Component Styles
+ * Layout: Uses DataTable internally, must fit in page scroll container
  */
 
 .sf-forms-list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0; // CRITICAL: allows component to shrink in flex parent
+
   // Form name cell
   .sf-form-name {
     display: flex;
