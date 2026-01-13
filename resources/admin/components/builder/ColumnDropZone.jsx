@@ -4,7 +4,9 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { __ } from '@wordpress/i18n';
+import clsx from 'clsx';
 import InsertFieldButton from './InsertFieldButton';
+import './ColumnDropZone.scss';
 
 export default function ColumnDropZone({
   containerId,
@@ -29,21 +31,15 @@ export default function ColumnDropZone({
   });
 
   const gap = parseInt(spacing, 10) || 16;
-  const dropzoneClassName = [
-    'subtleforms-column-dropzone',
-    isOver ? 'is-over' : null,
-  ]
-    .filter(Boolean)
-    .join(' ');
   const padding = `${Math.max(8, Math.round(gap / 2))}px`;
 
   return (
     <div
       ref={setNodeRef}
-      className={dropzoneClassName}
+      className={clsx('column-dropzone', { 'is-over': isOver })}
       style={{
-        '--subtleforms-dropzone-padding': padding,
-        '--subtleforms-dropzone-gap': `${gap}px`,
+        '--dropzone-padding': padding,
+        '--dropzone-gap': `${gap}px`,
       }}>
       <InsertFieldButton
         parentId={containerId}
@@ -58,7 +54,7 @@ export default function ColumnDropZone({
         items={items}
         strategy={verticalListSortingStrategy}>
         {items.map((itemId, index) => (
-          <div key={itemId} className='subtleforms-dropzone-item'>
+          <div key={itemId} className='column-dropzone__item'>
             {renderItem(itemId, index)}
             <InsertFieldButton
               parentId={containerId}
@@ -71,7 +67,7 @@ export default function ColumnDropZone({
       </SortableContext>
 
       {items.length === 0 && (
-        <div className='subtleforms-dropzone-empty'>
+        <div className='column-dropzone__empty'>
           {__(
             'Use “Add Field” or drag a field from the left panel.',
             'subtleforms'

@@ -1,5 +1,6 @@
 import { useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import './InsertFieldButton.scss';
 
 export default function InsertFieldButton({
   parentId,
@@ -11,11 +12,11 @@ export default function InsertFieldButton({
   const buttonRef = useRef(null);
 
   return (
-    <div className='subtleforms-insert-button-wrapper'>
+    <div className='insert-field-button__wrapper'>
       <button
         type='button'
         ref={buttonRef}
-        className='subtleforms-insert-button'
+        className='insert-field-button__button'
         onClick={(event) => {
           event.stopPropagation();
           onRequestInsert(

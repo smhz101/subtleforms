@@ -1,0 +1,35 @@
+/**
+ * ColumnDropZone Component Styles
+ */
+
+.column-dropzone {
+  --dropzone-padding: 8px;
+  --dropzone-gap: 16px;
+
+  display: flex;
+  flex-direction: column;
+  gap: var(--dropzone-gap);
+  padding: var(--dropzone-padding);
+  min-height: 100px;
+  transition: background-color 200ms;
+
+  &.is-over {
+    background-color: rgba(59, 130, 246, 0.05);
+    border: 2px dashed #3b82f6;
+    border-radius: 4px;
+  }
+
+  &__item {
+    // Individual sortable item wrapper
+  }
+
+  &__empty {
+    padding: 2rem 1rem;
+    text-align: center;
+    color: #6b7280;
+    font-size: 0.875rem;
+    border: 2px dashed #d1d5db;
+    border-radius: 4px;
+    background-color: #f9fafb;
+  }
+}

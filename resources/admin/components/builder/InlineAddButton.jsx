@@ -1,6 +1,7 @@
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { getIcon } from './utils/iconMap';
+import './InlineAddButton.scss';
 
 export default function InlineAddButton({
   index,
@@ -11,18 +12,20 @@ export default function InlineAddButton({
   onClick,
   anchorRef,
 }) {
+  const isActive = isHovered || showFieldPicker;
+  
   return (
     <div
-      className={clsx('sf-mb-4 sf-py-3 sf-text-center sf-transition-opacity', {
-        'sf-opacity-100': isHovered || showFieldPicker,
-        'sf-opacity-30': !isHovered && !showFieldPicker,
+      className={clsx('inline-add-button', {
+        'inline-add-button--active': isActive,
+        'inline-add-button--idle': !isActive,
       })}
       onMouseEnter={onHover}
       onMouseLeave={onLeave}>
       <button
         ref={anchorRef}
         onClick={onClick}
-        className='sf-inline-flex sf-items-center sf-gap-1 sf-bg-transparent sf-px-4 sf-py-1.5 sf-border sf-border-gray-400 sf-border-dashed sf-font-medium sf-text-gray-600 sf-text-xs sf-cursor-pointer'>
+        className='inline-add-button__button'>
         {(() => {
           const AddIcon = getIcon('add');
           return <AddIcon size={16} />;

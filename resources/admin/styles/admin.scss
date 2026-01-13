@@ -33,3 +33,8 @@
 @use '../pages/SubmissionsPage.scss';
 @use '../pages/SubmissionDetailPage.scss';
 @use '../pages/ExtensionsPage.scss';
+
+// Builder Component Styles
+@use '../components/builder/InlineAddButton.scss';
+@use '../components/builder/InsertFieldButton.scss';
+@use '../components/builder/ColumnDropZone.scss';
