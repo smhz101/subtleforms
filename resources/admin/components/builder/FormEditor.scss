@@ -3,6 +3,10 @@
  * Three-column builder layout: FieldDock, Canvas, Inspector
  */
 
+// Responsive Breakpoints
+$breakpoint-desktop: 1200px;
+$breakpoint-tablet: 768px;
+
 .sf-form-editor {
 	// Root horizontal flex container
 	display: grid;
