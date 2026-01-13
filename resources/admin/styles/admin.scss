@@ -1,0 +1,13 @@
+/**
+ * SubtleForms Admin Styles Aggregator
+ *
+ * This file imports all component-scoped SCSS files.
+ * Co-located component styles are imported from their respective directories.
+ */
+
+// Component Styles
+@use '../components/AdminShell.scss';
+
+// Page Styles (will be migrated to SCSS)
+// @use '../pages/DashboardPage.scss';
+// @use '../pages/SettingsPage.scss';
