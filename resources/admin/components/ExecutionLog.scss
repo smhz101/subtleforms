@@ -1,0 +1,27 @@
+/**
+ * ExecutionLog Component Styles
+ * Co-located with ExecutionLog.jsx
+ */
+
+.sf-execution-log {
+  &__title {
+    // Add any custom styles if needed in future
+  }
+
+  &__list {
+    // Add any custom styles if needed in future
+  }
+
+  &__item {
+    // Add any custom styles if needed in future
+  }
+
+  &__message {
+    font-weight: 700;
+  }
+
+  &__timestamp,
+  &__details {
+    // Add any custom styles if needed in future
+  }
+}

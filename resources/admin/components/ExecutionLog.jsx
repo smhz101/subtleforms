@@ -3,6 +3,7 @@ import { Spinner, Notice } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import { __ } from '@wordpress/i18n';
+import './ExecutionLog.scss';
 
 const restBase =
   window.subtleformsAdmin && window.subtleformsAdmin.restUrl
@@ -51,9 +52,9 @@ export default function ExecutionLog({ submissionId }) {
   if (!logs) return null;
 
   return (
-    <div>
-      <h3>{__('Execution Log', 'subtleforms')}</h3>
-      <ol>
+    <div className='sf-execution-log'>
+      <h3 className='sf-execution-log__title'>{__('Execution Log', 'subtleforms')}</h3>
+      <ol className='sf-execution-log__list'>
         {logs.map((l) => {
           const ctx = l.context || {};
           const ts = ctx.ts
@@ -63,12 +64,12 @@ export default function ExecutionLog({ submissionId }) {
             ctx.status ?? l.level
           }`;
           return (
-            <li key={l.id}>
-              <div>
+            <li key={l.id} className='sf-execution-log__item'>
+              <div className='sf-execution-log__message'>
                 <strong>{msg}</strong>
               </div>
-              <div>{ts}</div>
-              <div>{ctx.error ?? l.message ?? ''}</div>
+              <div className='sf-execution-log__timestamp'>{ts}</div>
+              <div className='sf-execution-log__details'>{ctx.error ?? l.message ?? ''}</div>
             </li>
           );
         })}
