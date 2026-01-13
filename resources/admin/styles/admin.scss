@@ -14,6 +14,9 @@
 @use '../components/AdminHeader.scss';
 @use '../components/ExecutionLog.scss';
 
+// Modal Styles
+@use '../modals/ConfirmModal.scss';
+
 // Page Styles (will be migrated to SCSS)
 // @use '../pages/DashboardPage.scss';
 // @use '../pages/SettingsPage.scss';

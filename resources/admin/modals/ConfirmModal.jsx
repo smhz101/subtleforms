@@ -1,5 +1,6 @@
 import { Modal, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import './ConfirmModal.scss';
 
 /**
  * Standardized confirmation modal with flat UI design.
@@ -40,16 +41,16 @@ export default function ConfirmModal({
       shouldCloseOnClickOutside={!isLoading}
       shouldCloseOnEsc={!isLoading}>
       <div className='subtleforms-admin'>
-        <p className='sf-mb-6 sf-text-gray-700 sf-text-sm sf-leading-relaxed'>{message}</p>
+        <p className='sf-confirm-modal__message'>{message}</p>
 
-        <div className='sf-flex sf-justify-end sf-items-center sf-gap-3'>
+        <div className='sf-confirm-modal__actions'>
           {onSecondary && secondaryText && (
             <Button
               variant='secondary'
               onClick={onSecondary}
               disabled={isLoading}
               isDestructive={confirmVariant === 'primary'}
-              className='sf-px-4 sf-h-9 sf-text-sm'>
+              className='sf-confirm-modal__button'>
               {secondaryText}
             </Button>
           )}
@@ -58,7 +59,7 @@ export default function ConfirmModal({
             variant='tertiary'
             onClick={onClose}
             disabled={isLoading}
-            className='sf-px-4 sf-h-9 sf-text-sm'>
+            className='sf-confirm-modal__button'>
             {cancelText}
           </Button>
 
@@ -67,7 +68,7 @@ export default function ConfirmModal({
             onClick={onConfirm}
             disabled={isLoading}
             isDestructive={confirmVariant === 'destructive'}
-            className='sf-px-4 sf-h-9 sf-text-sm'>
+            className='sf-confirm-modal__button'>
             {isLoading ? __('Processing...', 'subtleforms') : confirmText}
           </Button>
         </div>
