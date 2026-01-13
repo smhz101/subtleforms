@@ -4,11 +4,36 @@
 
 .sf-insert-field-button {
 	&__wrapper {
-		// Container styles if needed
+		width: 100%;
+		display: flex;
+		justify-content: center;
+		margin: 1rem 0;
 	}
 
 	&__button {
-		// Base button styles - using WordPress Components Button
-		// Additional custom styles can be added here if needed
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: 0.5rem;
+		width: 100%;
+		max-width: 300px;
+		padding: 0.625rem 1rem;
+		
+		/* Soft, subtle appearance */
+		background-color: #fafafa;
+		border: 1px dashed #d1d5db;
+		border-radius: 6px;
+		
+		/* Typography */
+		font-size: 0.875rem;
+		font-weight: 500;
+		color: #6b7280;
+		
+		/* Smooth transitions */
+		transition: all 180ms ease-out;
+		
+		/* Remove default button styles */
+		cursor: pointer;
+		outline: none;
 	}
 }
