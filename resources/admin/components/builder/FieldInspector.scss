@@ -1,0 +1,83 @@
+/**
+ * FieldInspector Component Styles
+ * Right sidebar for editing field properties
+ */
+
+.field-inspector {
+  background-color: #ffffff;
+  border-left: 1px solid #d1d5db;
+  width: 20rem;
+  height: 100%;
+  overflow: auto;
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffffff;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid #d1d5db;
+  }
+
+  &__title {
+    font-weight: 600;
+    color: #111827;
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  &__close-button {
+    padding: 0.25rem 0.5rem;
+    min-width: 0;
+  }
+
+  &__content {
+    padding: 1.25rem;
+  }
+
+  &__empty {
+    color: #374151;
+    font-size: 0.875rem;
+  }
+
+  &__empty-title {
+    margin: 0 0 0.5rem 0;
+    font-weight: 500;
+  }
+
+  &__empty-description {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.875rem;
+  }
+
+  &__tabs {
+    padding: 0.75rem 0;
+  }
+
+  &__tab-warning-indicator {
+    display: inline-block;
+    background-color: #ef4444;
+    border-radius: 9999px;
+    width: 0.5rem;
+    height: 0.5rem;
+  }
+
+  &__options-section {
+    margin-top: 1rem;
+  }
+
+  &__options-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    font-size: 0.75rem;
+  }
+
+  &__option-row {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+}
