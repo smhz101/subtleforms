@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import Icon from '../ui/Icon';
+import './FormEditorHeader.scss';
 
 export default function FormEditorHeader({
   formTitle,
@@ -96,11 +97,11 @@ export default function FormEditorHeader({
   };
 
   return (
-    <div className='sf-top-0 sf-z-[100] sf-sticky sf-flex sf-justify-between sf-items-center sf-bg-white sf-px-6 sf-border-gray-300 sf-border-b sf-h-[60px]'>
+    <div className='sf-form-editor-header'>
       {/* Left Section */}
-      <div className='sf-flex sf-items-center sf-gap-4'>
+      <div className='sf-form-editor-header__left'>
         {/* Logo/Icon */}
-        <div className='sf-flex sf-justify-center sf-items-center sf-bg-blue-600 sf-w-8 sf-h-8 sf-font-bold sf-text-white sf-text-base'>
+        <div className='sf-form-editor-header__logo'>
           SF
         </div>
 
@@ -113,13 +114,13 @@ export default function FormEditorHeader({
             onChange={(e) => setTempTitle(e.target.value)}
             onBlur={handleTitleBlur}
             onKeyDown={handleTitleKeyDown}
-            className='sf-bg-white sf-px-2 sf-py-1 sf-border sf-border-blue-600 sf-outline-none sf-min-w-[200px] sf-font-semibold sf-text-gray-900 sf-text-base'
+            className='sf-form-editor-header__title-input'
           />
         ) : (
           <button
             type='button'
             onClick={handleTitleClick}
-            className='sf-bg-transparent sf-px-2 sf-py-1 sf-border-none sf-outline-none sf-font-semibold sf-text-gray-900 hover:sf-text-blue-600 sf-text-base sf-cursor-pointer'
+            className='sf-form-editor-header__title-button'
             onMouseEnter={(e) => {
               e.currentTarget.style.color = '#2271b1';
             }}
@@ -136,11 +137,9 @@ export default function FormEditorHeader({
             type='button'
             onClick={handleCopyShortcode}
             disabled={!formId}
-            className={`sf-inline-flex sf-items-center sf-gap-1.5 sf-px-3 sf-py-1 sf-text-xs sf-font-medium sf-font-mono sf-outline-none ${
-              copyState === 'copied'
-                ? 'sf-text-green-600 sf-bg-blue-50 sf-border sf-border-green-600'
-                : 'sf-text-gray-700 sf-bg-gray-100 sf-border sf-border-gray-300'
-            } ${formId ? 'sf-cursor-pointer' : 'sf-cursor-not-allowed'}`}
+            className={copyState === 'copied'
+              ? 'sf-form-editor-header__shortcode sf-form-editor-header__shortcode--copied'
+              : 'sf-form-editor-header__shortcode'}
             onMouseEnter={(e) => {
               if (formId && copyState !== 'copied') {
                 e.currentTarget.style.borderColor = '#2271b1';
@@ -164,11 +163,11 @@ export default function FormEditorHeader({
       </div>
 
       {/* Right Section */}
-      <div className='sf-flex sf-items-center sf-gap-4'>
+      <div className='sf-form-editor-header__right'>
         {/* Save Status */}
-        <div className='sf-flex sf-items-center sf-gap-1.5 sf-text-gray-700 sf-text-xs'>
+        <div className='sf-form-editor-header__status'>
           <span
-            className='sf-rounded-full sf-w-1.5 sf-h-1.5'
+            className='sf-form-editor-header__status-dot'
             style={{ background: getStatusColor() }}
           />
           {getStatusText()}
@@ -180,7 +179,7 @@ export default function FormEditorHeader({
             variant='primary'
             onClick={onSave}
             disabled={saving}
-            className='sf-px-4 sf-h-9'>
+            className='sf-form-editor-header__save-btn'>
             {saving
               ? __('Saving...', 'subtleforms')
               : __('Save', 'subtleforms')}
@@ -192,7 +191,7 @@ export default function FormEditorHeader({
           icon={close}
           label={__('Close Editor', 'subtleforms')}
           onClick={onClose}
-          className='sf-border sf-border-gray-300 sf-w-9 sf-h-9'
+          className='sf-form-editor-header__close-btn'
         />
       </div>
     </div>
