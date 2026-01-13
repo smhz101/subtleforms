@@ -1,0 +1,22 @@
+/**
+ * FieldList Component Styles
+ * Recursive field list with drop zones
+ */
+
+.sf-field-list {
+	&__add-button-zone {
+		z-index: 10;
+		position: relative;
+		height: 0.625rem;
+	}
+
+	&__add-button-container {
+		padding: 1.25rem;
+		text-align: center;
+	}
+
+	&__container-add-button {
+		margin-top: 1rem;
+		text-align: center;
+	}
+}

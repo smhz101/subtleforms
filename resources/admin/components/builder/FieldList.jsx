@@ -2,6 +2,7 @@ import { __ } from '@wordpress/i18n';
 import FieldWrapper from './FieldWrapper';
 import ContainerWrapper from './ContainerWrapper';
 import InlineAddButton from './InlineAddButton';
+import './FieldList.scss';
 
 export default function FieldList({
   fields,
@@ -37,7 +38,7 @@ export default function FieldList({
         return (
           <div key={field.id || i} className='sf-mb-4'>
             {/* Add Button Before */}
-            <div className='sf-z-10 sf-relative sf-h-2.5'>
+            <div className='sf-field-list__add-button-zone'>
               <InlineAddButton
                 index={i}
                 isHovered={isHovered}
@@ -79,7 +80,7 @@ export default function FieldList({
                   onShowPicker={onShowPicker}
                 />
                 {/* Add Button Inside Container (at end) */}
-                <div className='sf-mt-4 sf-text-center'>
+                <div className='sf-field-list__container-add-button'>
                   <InlineAddButton
                     index={(field.fields || []).length}
                     isHovered={true}
@@ -125,7 +126,7 @@ export default function FieldList({
       })}
 
       {/* Add Button at the end of the list */}
-      <div className='sf-p-5 sf-text-center'>
+      <div className='sf-field-list__add-button-container'>
         <InlineAddButton
           index={fields.length}
           isHovered={true}
