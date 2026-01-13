@@ -167,7 +167,7 @@ export default function FormsList({
               'sf-form-type-badge',
               config.classes
             )}>
-            <IconComponent className='sf-w-3 sf-h-3' />
+            <IconComponent />
             {config.label}
           </span>
         );
@@ -206,7 +206,7 @@ export default function FormsList({
               'sf-status-badge',
               config.classes
             )}>
-            <IconComponent className='sf-w-3 sf-h-3' />
+            <IconComponent />
             {config.label}
           </span>
         );
@@ -341,7 +341,7 @@ export default function FormsList({
                     onClose();
                   }}>
                   <div className='sf-menu-item'>
-                    <Icon.CheckCircle className='sf-w-4 sf-h-4' />
+                    <Icon.CheckCircle />
                     {__('Change status', 'subtleforms')}
                   </div>
                 </MenuItem>
@@ -352,7 +352,7 @@ export default function FormsList({
                     onClose();
                   }}>
                   <div className='sf-menu-item'>
-                    <Icon.Copy className='sf-w-4 sf-h-4' />
+                    <Icon.Copy />
                     {__('Duplicate', 'subtleforms')}
                   </div>
                 </MenuItem>
@@ -363,7 +363,7 @@ export default function FormsList({
                     onClose();
                   }}>
                   <div className='sf-menu-item'>
-                    <Icon.Eye className='sf-w-4 sf-h-4' />
+                    <Icon.Eye />
                     {__('View submissions', 'subtleforms')}
                   </div>
                 </MenuItem>
@@ -375,7 +375,7 @@ export default function FormsList({
                   }}
                   isDestructive>
                   <div className='sf-menu-item sf-menu-item--danger'>
-                    <Icon.Delete className='sf-w-4 sf-h-4' />
+                    <Icon.Delete />
                     {__('Delete', 'subtleforms')}
                   </div>
                 </MenuItem>
@@ -711,7 +711,7 @@ export default function FormsList({
                 onClick={() =>
                   (window.location.href = 'admin.php?page=subtleforms-new-form')
                 }>
-                <Icon.Add className='sf-inline sf-mr-2 sf-w-4 sf-h-4' />
+                <Icon.Add />
                 {__('New Form', 'subtleforms')}
               </Button>
             )}
