@@ -69,14 +69,20 @@ export default function FieldDock({ fieldGroups, onAddField }) {
                 <button
                   type='button'
                   onClick={() => toggleGroup(category)}
-                  className={`sf-field-dock__category-header ${isCollapsed ? 'sf-field-dock__category-header--collapsed' : ''}`}>
+                  className={`sf-field-dock__category-header ${
+                    isCollapsed
+                      ? 'sf-field-dock__category-header--collapsed'
+                      : ''
+                  }`}>
                   <span className='sf-field-dock__category-name'>
                     {category}
                   </span>
 
                   <span
                     className={`sf-field-dock__category-icon ${
-                      isCollapsed ? 'sf-field-dock__category-icon--collapsed' : 'sf-field-dock__category-icon--expanded'
+                      isCollapsed
+                        ? 'sf-field-dock__category-icon--collapsed'
+                        : 'sf-field-dock__category-icon--expanded'
                     }`}>
                     ▼
                   </span>

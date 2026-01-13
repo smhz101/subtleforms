@@ -208,7 +208,9 @@ export default function FieldInspector({ field, allFields }) {
                             {__('Options', 'subtleforms')}
                           </label>
                           {(field.options || []).map((opt, idx) => (
-                            <div key={idx} className='sf-field-inspector__option-row'>
+                            <div
+                              key={idx}
+                              className='sf-field-inspector__option-row'>
                               <TextControl
                                 value={opt.label}
                                 onChange={(v) => {

@@ -101,9 +101,7 @@ export default function FormEditorHeader({
       {/* Left Section */}
       <div className='sf-form-editor-header__left'>
         {/* Logo/Icon */}
-        <div className='sf-form-editor-header__logo'>
-          SF
-        </div>
+        <div className='sf-form-editor-header__logo'>SF</div>
 
         {/* Editable Title */}
         {isEditingTitle ? (
@@ -137,9 +135,11 @@ export default function FormEditorHeader({
             type='button'
             onClick={handleCopyShortcode}
             disabled={!formId}
-            className={copyState === 'copied'
-              ? 'sf-form-editor-header__shortcode sf-form-editor-header__shortcode--copied'
-              : 'sf-form-editor-header__shortcode'}
+            className={
+              copyState === 'copied'
+                ? 'sf-form-editor-header__shortcode sf-form-editor-header__shortcode--copied'
+                : 'sf-form-editor-header__shortcode'
+            }
             onMouseEnter={(e) => {
               if (formId && copyState !== 'copied') {
                 e.currentTarget.style.borderColor = '#2271b1';

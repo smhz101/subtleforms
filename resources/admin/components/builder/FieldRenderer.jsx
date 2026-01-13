@@ -1,10 +1,10 @@
 import { __ } from '@wordpress/i18n';
+import './FieldRenderer.scss';
 
 export default function FieldRenderer({ field }) {
   const { type, label, required, placeholder, options, subFields } = field;
 
-  const labelClass =
-    'sf-block sf-mb-2 sf-text-sm sf-font-medium sf-text-text-primary';
+  const labelClass = 'sf-field-renderer__label';
   const inputClass =
     'sf-w-full sf-px-3 sf-py-2 sf-text-sm sf-border sf-border-border sf-rounded-none sf-font-inherit sf-pointer-events-none sf-bg-white sf-text-text-primary';
   const selectClass = `${inputClass} appearance-none pr-9 bg-no-repeat bg-[right_8px_center]`;
@@ -15,7 +15,9 @@ export default function FieldRenderer({ field }) {
       {/* Label */}
       <label className={labelClass}>
         {label || field.name}
-        {required && <span className='sf-ml-1 sf-text-danger'>*</span>}
+        {required && (
+          <span className='sf-field-renderer__required-mark'>*</span>
+        )}
       </label>
 
       {/* Render appropriate input based on type */}
@@ -53,27 +55,27 @@ export default function FieldRenderer({ field }) {
       )}
 
       {type === 'checkbox' && (
-        <div className='sf-flex sf-items-center sf-gap-2'>
+        <div className='sf-field-renderer__checkbox-wrapper'>
           <input
             type='checkbox'
-            className='sf-border-border sf-rounded-none sf-focus:sf-ring-0 sf-w-4 sf-h-4 sf-text-primary sf-pointer-events-none'
+            className='sf-field-renderer__checkbox'
             tabIndex='-1'
           />
-          <span className='sf-text-text-primary sf-text-sm'>{label}</span>
+          <span className='sf-field-renderer__checkbox-label'>{label}</span>
         </div>
       )}
 
       {type === 'radio' && options && (
-        <div className='sf-flex sf-flex-col sf-gap-2'>
+        <div className='sf-field-renderer__options-list'>
           {options.map((opt, idx) => (
-            <div key={idx} className='sf-flex sf-items-center sf-gap-2'>
+            <div key={idx} className='sf-field-renderer__checkbox-wrapper'>
               <input
                 type='radio'
                 name={field.key}
-                className='sf-border-border sf-rounded-full focus:sf-ring-0 sf-w-4 sf-h-4 sf-text-primary sf-pointer-events-none'
+                className='sf-field-renderer__radio'
                 tabIndex='-1'
               />
-              <span className='sf-text-text-primary sf-text-sm'>
+              <span className='sf-field-renderer__checkbox-label'>
                 {opt.label}
               </span>
             </div>
@@ -82,15 +84,15 @@ export default function FieldRenderer({ field }) {
       )}
 
       {type === 'multiple_choice' && options && (
-        <div className='sf-flex sf-flex-col sf-gap-2'>
+        <div className='sf-field-renderer__options-list'>
           {options.map((opt, idx) => (
-            <div key={idx} className='sf-flex sf-items-center sf-gap-2'>
+            <div key={idx} className='sf-field-renderer__checkbox-wrapper'>
               <input
                 type='checkbox'
-                className='sf-border-border sf-rounded-none sf-focus:sf-ring-0 sf-w-4 sf-h-4 sf-text-primary sf-pointer-events-none'
+                className='sf-field-renderer__checkbox'
                 tabIndex='-1'
               />
-              <span className='sf-text-text-primary sf-text-sm'>
+              <span className='sf-field-renderer__checkbox-label'>
                 {opt.label}
               </span>
             </div>
@@ -136,30 +138,30 @@ export default function FieldRenderer({ field }) {
       )}
 
       {type === 'hidden' && (
-        <div className='sf-bg-secondary sf-p-3 sf-border sf-border-text-tertiary sf-border-dashed rounded-none sf-text-text-secondary sf-text-xs italic'>
+        <div className='sf-field-renderer__hidden-field'>
           {__('Hidden field (not visible to users)', 'subtleforms')}
         </div>
       )}
 
       {type === 'html' && (
-        <div className='sf-bg-yellow-50 sf-p-3 sf-border sf-border-yellow-200 rounded-none sf-text-yellow-800 sf-text-xs'>
+        <div className='sf-field-renderer__warning-box'>
           📝 {__('HTML Content Block', 'subtleforms')}
         </div>
       )}
 
       {type === 'image_upload' && (
-        <div className='sf-bg-surface-alt sf-p-10 sf-border-2 sf-border-border sf-border-dashed rounded-none sf-text-center'>
-          <div className='sf-mb-2 sf-text-4xl'>🖼️</div>
-          <div className='sf-text-text-secondary sf-text-xs'>
+        <div className='sf-field-renderer__image-placeholder'>
+          <div className='sf-field-renderer__image-icon'>🖼️</div>
+          <div className='sf-field-renderer__image-text'>
             {__('Click to upload or drag image here', 'subtleforms')}
           </div>
         </div>
       )}
 
       {type === 'file_upload' && (
-        <div className='sf-bg-surface-alt sf-p-10 sf-border-2 sf-border-border sf-border-dashed rounded-none sf-text-center'>
-          <div className='sf-mb-2 sf-text-4xl'>📎</div>
-          <div className='sf-text-text-secondary sf-text-xs'>
+        <div className='sf-field-renderer__file-placeholder'>
+          <div className='sf-field-renderer__file-icon'>📎</div>
+          <div className='sf-field-renderer__file-text'>
             {__('Click to upload or drag file here', 'subtleforms')}
           </div>
         </div>
@@ -167,15 +169,15 @@ export default function FieldRenderer({ field }) {
 
       {/* Composite field: Address */}
       {type === 'address' && subFields && (
-        <div className='sf-bg-surface-alt sf-p-4 sf-border sf-border-border rounded-none'>
+        <div className='sf-field-renderer__repeater-item'>
           {subFields.map((sub, idx) => (
             <div
               key={idx}
-              className={idx < subFields.length - 1 ? 'sf-mb-3' : ''}>
-              <label className='sf-block sf-mb-1 sf-font-medium sf-text-text-primary sf-text-sm'>
+              className={idx < subFields.length - 1 ? 'sf-field-renderer__repeater-subfield' : 'sf-field-renderer__repeater-subfield sf-field-renderer__repeater-subfield--last'}>
+              <label className='sf-field-renderer__repeater-label'>
                 {sub.label}
                 {sub.required && (
-                  <span className='sf-ml-1 sf-text-danger'>*</span>
+                  <span className='sf-field-renderer__required-mark'>*</span>
                 )}
               </label>
               <input type='text' className={inputClass} readOnly />
@@ -186,9 +188,9 @@ export default function FieldRenderer({ field }) {
 
       {/* Payment fields */}
       {type === 'payment_amount' && (
-        <div className='sf-flex sf-items-center sf-gap-2'>
+        <div className='sf-field-renderer__rating-wrapper'>
           {field.currency && (
-            <span className='sf-font-medium sf-text-text-primary'>
+            <span className='sf-field-renderer__rating-text'>
               {field.currency === 'USD'
                 ? '$'
                 : field.currency === 'EUR'
@@ -208,16 +210,16 @@ export default function FieldRenderer({ field }) {
       )}
 
       {type === 'payment_summary' && (
-        <div className='sf-bg-surface-alt sf-p-4 sf-border sf-border-border rounded-none'>
-          <div className='sf-flex sf-justify-between sf-mb-2 sf-text-text-primary sf-text-sm'>
+        <div className='sf-field-renderer__calculation-box'>
+          <div className='sf-field-renderer__calc-row'>
             <span>{__('Subtotal:', 'subtleforms')}</span>
             <span>$0.00</span>
           </div>
-          <div className='sf-flex sf-justify-between sf-mb-2 sf-text-text-primary sf-text-sm'>
+          <div className='sf-field-renderer__calc-row'>
             <span>{__('Tax:', 'subtleforms')}</span>
             <span>$0.00</span>
           </div>
-          <div className='sf-flex sf-justify-between sf-pt-2 sf-border-border sf-border-t sf-font-medium sf-text-text-primary'>
+          <div className='sf-field-renderer__calc-total'>
             <span>{__('Total:', 'subtleforms')}</span>
             <span>$0.00</span>
           </div>
@@ -225,16 +227,16 @@ export default function FieldRenderer({ field }) {
       )}
 
       {type === 'payment_coupon' && (
-        <div className='sf-flex sf-gap-2'>
+        <div className='sf-field-renderer__subscribe-wrapper'>
           <input
             type='text'
             placeholder={placeholder || __('Enter coupon code', 'subtleforms')}
-            className={`${inputClass} sf-flex-1`}
+            className={`${inputClass} sf-field-renderer__subscribe-input`}
             readOnly
           />
           <button
             type='button'
-            className='sf-bg-primary sf-px-4 sf-py-2 sf-font-medium sf-text-white sf-text-sm sf-pointer-events-none'
+            className='sf-field-renderer__subscribe-button'
             disabled>
             {__('Apply', 'subtleforms')}
           </button>
@@ -242,7 +244,7 @@ export default function FieldRenderer({ field }) {
       )}
 
       {type === 'payment_hidden_price' && (
-        <div className='sf-bg-secondary sf-p-3 sf-border sf-border-text-tertiary sf-border-dashed rounded-none sf-text-text-secondary sf-text-xs italic'>
+        <div className='sf-field-renderer__hidden-field'>
           {__('Hidden pricing field (not visible to users)', 'subtleforms')}
         </div>
       )}
