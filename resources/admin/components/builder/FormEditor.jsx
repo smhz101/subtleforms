@@ -561,10 +561,10 @@ export default function FormEditor({
             position='bottom center'
             focusOnMount>
             <div
-              className='sf-p-4 sf-min-w-[240px] sf-max-h-[400px] sf-overflow-auto'
+              className='sf-field-picker-popover'
               role='dialog'
               aria-label={__('Add Field', 'subtleforms')}>
-              <h4 className='sf-m-0 sf-mb-3 sf-font-semibold sf-text-sm'>
+              <h4 className='sf-field-picker-popover__title'>
                 {__('Add Field', 'subtleforms')}
               </h4>
               {Object.entries(fieldGroups).map(([category, categoryFields]) => (
@@ -577,7 +577,7 @@ export default function FormEditor({
                       key={f.type}
                       type='button'
                       onClick={() => handleInsert(f.type, insertPicker.context)}
-                      className='sf-bg-gray-50 hover:sf-bg-blue-600 sf-mb-1 sf-px-2.5 sf-py-2 sf-border sf-border-gray-300 hover:sf-border-blue-600 sf-w-full sf-text-gray-900 hover:sf-text-white sf-text-xs sf-text-left sf-transition-all sf-cursor-pointer'>
+                      className='sf-field-picker-popover__button'>
                       {f.label}
                     </button>
                   ))}

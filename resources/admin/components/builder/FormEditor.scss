@@ -139,3 +139,36 @@ $breakpoint-tablet: 768px;
 		}
 	}
 }
+
+// Field picker popover
+.sf-field-picker-popover {
+	padding: 1rem;
+	min-width: 240px;
+	max-height: 400px;
+	overflow: auto;
+
+	&__title {
+		margin: 0 0 0.75rem 0;
+		font-weight: 600;
+		font-size: 0.875rem;
+	}
+
+	&__button {
+		background-color: #f9fafb;
+		margin-bottom: 0.25rem;
+		padding: 0.5rem 0.625rem;
+		border: 1px solid #d1d5db;
+		width: 100%;
+		color: #111827;
+		font-size: 0.75rem;
+		text-align: left;
+		transition: all 150ms;
+		cursor: pointer;
+
+		&:hover {
+			background-color: #2563eb;
+			border-color: #2563eb;
+			color: #ffffff;
+		}
+	}
+}
