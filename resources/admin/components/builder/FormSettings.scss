@@ -6,6 +6,13 @@
 .subtleforms-form-settings {
 	// Root already styled in BuilderCanvasArea.scss
 
+	// Form type info banner
+	.sf-form-type-banner {
+		padding: 1rem;
+		margin-bottom: 1.5rem;
+		border-left: 4px solid;
+	}
+
 	.sf-info-box {
 		&--blue {
 			background-color: #eff6ff;

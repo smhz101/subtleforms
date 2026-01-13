@@ -97,7 +97,7 @@ export default function FormSettings({ schema, onChange }) {
         {/* Form Type Info Banner */}
         {formType !== 'regular' && (
           <div
-            className={`sf-p-4 sf-mb-6 sf-border-l-4 ${
+            className={`sf-form-type-banner ${
               formType === 'multistep'
                 ? 'sf-bg-purple-50 sf-border-purple-500'
                 : formType === 'sectioned'
