@@ -9,6 +9,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import FormEditor from '../FormEditor';
 import FormSettings from '../FormSettings';
 import SubmissionsTable from '../../SubmissionsTable';
+import './BuilderCanvasArea.scss';
 
 export default function BuilderCanvasArea({
   draftSchema,
@@ -22,19 +23,6 @@ export default function BuilderCanvasArea({
 }) {
   return (
     <>
-      <style>{`
-        .subtleforms-builder-tabs-content {
-          height: 100%;
-          display: flex;
-          flex-direction: column;
-        }
-        .subtleforms-builder-tabs-content > div[role="tabpanel"] {
-          flex: 1;
-          height: 100%;
-          overflow: hidden;
-        }
-      `}</style>
-
       {saveError && (
         <div className='sf-bg-red-50 sf-mb-4 sf-px-6 sf-py-3 sf-border-yellow-500 sf-border-b'>
           <span className='sf-text-red-600 sf-text-xs'>{saveError}</span>

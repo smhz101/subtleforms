@@ -80,7 +80,11 @@ const DataTable = memo(function DataTable({
   const getSortIndicator = (column) => {
     if (!column.sortable) return null;
     if (sortBy !== column.key) {
-      return <span className='data-table__sort-indicator data-table__sort-indicator--inactive'>⬍</span>;
+      return (
+        <span className='data-table__sort-indicator data-table__sort-indicator--inactive'>
+          ⬍
+        </span>
+      );
     }
     return (
       <span className='data-table__sort-indicator data-table__sort-indicator--active'>
@@ -101,9 +105,7 @@ const DataTable = memo(function DataTable({
       <div className='data-table__loading'>
         <div className='data-table__loading-content'>
           <div className='data-table__loading-content-spinner'></div>
-          <p>
-            {__('Loading...', 'subtleforms')}
-          </p>
+          <p>{__('Loading...', 'subtleforms')}</p>
         </div>
       </div>
     );
@@ -190,18 +192,17 @@ const DataTable = memo(function DataTable({
                 key={row.id || index}
                 className={`
                   group transition-all duration-150
-                  ${selectedItems.includes(row.id) ? 'data-table__row--selected' : ''}
                   ${
-                    onRowClick
-                      ? 'data-table__row--clickable'
+                    selectedItems.includes(row.id)
+                      ? 'data-table__row--selected'
                       : ''
                   }
+                  ${onRowClick ? 'data-table__row--clickable' : ''}
                   ${rowClassName ? rowClassName(row) : ''}
                 `}
                 onClick={() => onRowClick && onRowClick(row)}>
                 {selectable && (
-                  <td
-                    onClick={(e) => e.stopPropagation()}>
+                  <td onClick={(e) => e.stopPropagation()}>
                     <CheckboxControl
                       checked={selectedItems.includes(row.id)}
                       onChange={(checked) => handleSelectRow(row.id, checked)}
@@ -209,8 +210,7 @@ const DataTable = memo(function DataTable({
                   </td>
                 )}
                 {columns.map((column) => (
-                  <td
-                    key={column.key}>
+                  <td key={column.key}>
                     {column.render
                       ? column.render(row[column.key], row)
                       : row[column.key]}
@@ -239,9 +239,7 @@ const DataTable = memo(function DataTable({
             </span>
 
             <div className='data-table__pagination-info-controls'>
-              <label>
-                {__('Per page:', 'subtleforms')}
-              </label>
+              <label>{__('Per page:', 'subtleforms')}</label>
               <SelectControl
                 value={perPage.toString()}
                 onChange={(value) => onPerPageChange(parseInt(value))}

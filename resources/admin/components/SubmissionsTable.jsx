@@ -257,7 +257,10 @@ const SubmissionsTable = forwardRef(
           (() => {
             return sprintf(
               /* translators: %1$d: number of submissions to delete */
-              __('Are you sure you want to delete %1$d submissions?', 'subtleforms'),
+              __(
+                'Are you sure you want to delete %1$d submissions?',
+                'subtleforms'
+              ),
               ids.length
             );
           })()
@@ -293,7 +296,10 @@ const SubmissionsTable = forwardRef(
           (() => {
             return sprintf(
               /* translators: %1$d: number deleted, %2$d: total requested */
-              __('Failed to delete some submissions (%1$d/%2$d deleted)', 'subtleforms'),
+              __(
+                'Failed to delete some submissions (%1$d/%2$d deleted)',
+                'subtleforms'
+              ),
               successCount,
               ids.length
             );
@@ -332,7 +338,10 @@ const SubmissionsTable = forwardRef(
         createErrorNotice(
           sprintf(
             /* translators: %1$d: number updated, %2$d: total requested */
-            __('Failed to update some submissions (%1$d/%2$d updated)', 'subtleforms'),
+            __(
+              'Failed to update some submissions (%1$d/%2$d updated)',
+              'subtleforms'
+            ),
             successCount,
             ids.length
           ),

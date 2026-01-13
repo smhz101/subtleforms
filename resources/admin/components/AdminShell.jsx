@@ -70,9 +70,15 @@ export default function AdminShell({
 
         {/* CONTENT AREA - Scrollable */}
         <div className='admin-shell__content'>
-          <div className={`admin-shell__content-inner ${noScroll ? 'admin-shell__content-inner--no-scroll' : ''}`}>
+          <div
+            className={`admin-shell__content-inner ${
+              noScroll ? 'admin-shell__content-inner--no-scroll' : ''
+            }`}>
             <Notices />
-            <div className={`admin-shell__content-body ${noScroll ? 'admin-shell__content-body--no-scroll' : ''}`}>
+            <div
+              className={`admin-shell__content-body ${
+                noScroll ? 'admin-shell__content-body--no-scroll' : ''
+              }`}>
               {children}
             </div>
           </div>
@@ -80,9 +86,7 @@ export default function AdminShell({
 
         {/* BOTTOM BAR - Pagination */}
         {pagination && (
-          <div className='admin-shell__pagination'>
-            {pagination}
-          </div>
+          <div className='admin-shell__pagination'>{pagination}</div>
         )}
       </div>
     </div>

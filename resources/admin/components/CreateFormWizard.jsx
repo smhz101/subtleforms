@@ -93,9 +93,7 @@ export default function CreateFormWizard({
         <div className='create-form-wizard__header'>
           <div className='create-form-wizard__header-content'>
             <div>
-              <h1>
-                {__('Create form', 'subtleforms')}
-              </h1>
+              <h1>{__('Create form', 'subtleforms')}</h1>
               <div className='create-form-wizard__header-subtitle'>
                 {step.title} ({stepIndex + 1}/{STEPS.length})
               </div>

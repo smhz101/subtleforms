@@ -36,7 +36,9 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
           <div key={field.key || index} className='form-preview-field'>
             <label>
               {label}
-              {required && <span className='form-preview-field__required'>*</span>}
+              {required && (
+                <span className='form-preview-field__required'>*</span>
+              )}
             </label>
             <input
               type={field.type}
@@ -44,9 +46,7 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
               className='form-preview-field__input'
               disabled
             />
-            {helpText && (
-              <p className='form-preview-field__help'>{helpText}</p>
-            )}
+            {helpText && <p className='form-preview-field__help'>{helpText}</p>}
           </div>
         );
 
@@ -55,7 +55,9 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
           <div key={field.key || index} className='form-preview-field'>
             <label>
               {label}
-              {required && <span className='form-preview-field__required'>*</span>}
+              {required && (
+                <span className='form-preview-field__required'>*</span>
+              )}
             </label>
             <input
               type='number'
@@ -66,9 +68,7 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
               className='form-preview-field__input'
               disabled
             />
-            {helpText && (
-              <p className='form-preview-field__help'>{helpText}</p>
-            )}
+            {helpText && <p className='form-preview-field__help'>{helpText}</p>}
           </div>
         );
 
@@ -77,7 +77,9 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
           <div key={field.key || index} className='form-preview-field'>
             <label>
               {label}
-              {required && <span className='form-preview-field__required'>*</span>}
+              {required && (
+                <span className='form-preview-field__required'>*</span>
+              )}
             </label>
             <textarea
               placeholder={placeholder}
@@ -85,9 +87,7 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
               className='form-preview-field__input'
               disabled
             />
-            {helpText && (
-              <p className='form-preview-field__help'>{helpText}</p>
-            )}
+            {helpText && <p className='form-preview-field__help'>{helpText}</p>}
           </div>
         );
 
@@ -97,7 +97,9 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
           <div key={field.key || index} className='form-preview-field'>
             <label>
               {label}
-              {required && <span className='form-preview-field__required'>*</span>}
+              {required && (
+                <span className='form-preview-field__required'>*</span>
+              )}
             </label>
             <select className='form-preview-field__input' disabled>
               <option value=''>
@@ -109,9 +111,7 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
                 </option>
               ))}
             </select>
-            {helpText && (
-              <p className='form-preview-field__help'>{helpText}</p>
-            )}
+            {helpText && <p className='form-preview-field__help'>{helpText}</p>}
           </div>
         );
 
@@ -120,7 +120,9 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
           <div key={field.key || index} className='form-preview-field'>
             <label>
               {label}
-              {required && <span className='form-preview-field__required'>*</span>}
+              {required && (
+                <span className='form-preview-field__required'>*</span>
+              )}
             </label>
             <div className='form-preview-field__radio-group'>
               {field.options?.map((opt, i) => (
@@ -131,15 +133,11 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
                     value={opt.value}
                     disabled
                   />
-                  <span>
-                    {opt.label}
-                  </span>
+                  <span>{opt.label}</span>
                 </label>
               ))}
             </div>
-            {helpText && (
-              <p className='form-preview-field__help'>{helpText}</p>
-            )}
+            {helpText && <p className='form-preview-field__help'>{helpText}</p>}
           </div>
         );
 
@@ -158,9 +156,7 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
                 </span>
               </label>
               {helpText && (
-                <p className='form-preview-field__help'>
-                  {helpText}
-                </p>
+                <p className='form-preview-field__help'>{helpText}</p>
               )}
             </div>
           );
@@ -170,25 +166,19 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
           <div key={field.key || index} className='form-preview-field'>
             <label>
               {label}
-              {required && <span className='form-preview-field__required'>*</span>}
+              {required && (
+                <span className='form-preview-field__required'>*</span>
+              )}
             </label>
             <div className='form-preview-field__checkbox-group'>
               {field.options?.map((opt, i) => (
                 <label key={i} className='form-preview-field__option'>
-                  <input
-                    type='checkbox'
-                    value={opt.value}
-                    disabled
-                  />
-                  <span>
-                    {opt.label}
-                  </span>
+                  <input type='checkbox' value={opt.value} disabled />
+                  <span>{opt.label}</span>
                 </label>
               ))}
             </div>
-            {helpText && (
-              <p className='form-preview-field__help'>{helpText}</p>
-            )}
+            {helpText && <p className='form-preview-field__help'>{helpText}</p>}
           </div>
         );
 
@@ -197,12 +187,12 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
           <div key={field.key || index} className='form-preview-field'>
             <label>
               {label}
-              {required && <span className='form-preview-field__required'>*</span>}
+              {required && (
+                <span className='form-preview-field__required'>*</span>
+              )}
             </label>
             <input type='date' className='form-preview-field__input' disabled />
-            {helpText && (
-              <p className='form-preview-field__help'>{helpText}</p>
-            )}
+            {helpText && <p className='form-preview-field__help'>{helpText}</p>}
           </div>
         );
 
@@ -211,12 +201,12 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
           <div key={field.key || index} className='form-preview-field'>
             <label>
               {label}
-              {required && <span className='form-preview-field__required'>*</span>}
+              {required && (
+                <span className='form-preview-field__required'>*</span>
+              )}
             </label>
             <input type='time' className='form-preview-field__input' disabled />
-            {helpText && (
-              <p className='form-preview-field__help'>{helpText}</p>
-            )}
+            {helpText && <p className='form-preview-field__help'>{helpText}</p>}
           </div>
         );
 
@@ -226,16 +216,14 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
           <div key={field.key || index} className='form-preview-field'>
             <label>
               {label}
-              {required && <span className='form-preview-field__required'>*</span>}
+              {required && (
+                <span className='form-preview-field__required'>*</span>
+              )}
             </label>
             <div className='form-preview-field__upload'>
-              <p>
-                {__('Click to upload or drag and drop', 'subtleforms')}
-              </p>
+              <p>{__('Click to upload or drag and drop', 'subtleforms')}</p>
             </div>
-            {helpText && (
-              <p className='form-preview-field__help'>{helpText}</p>
-            )}
+            {helpText && <p className='form-preview-field__help'>{helpText}</p>}
           </div>
         );
 
@@ -247,7 +235,9 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
           <div key={field.key || index} className='form-preview-field'>
             <label>
               {label}
-              {required && <span className='form-preview-field__required'>*</span>}
+              {required && (
+                <span className='form-preview-field__required'>*</span>
+              )}
             </label>
             <input
               type='text'
@@ -255,9 +245,7 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
               className='form-preview-field__input'
               disabled
             />
-            {helpText && (
-              <p className='form-preview-field__help'>{helpText}</p>
-            )}
+            {helpText && <p className='form-preview-field__help'>{helpText}</p>}
           </div>
         );
     }
@@ -268,9 +256,7 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
       title={
         <div className='form-preview-modal__header'>
           <span>{__('Form Preview', 'subtleforms')}</span>
-          <button
-            onClick={onClose}
-            className='form-preview-modal__close-btn'>
+          <button onClick={onClose} className='form-preview-modal__close-btn'>
             <Icon.Close className='sf-w-5 sf-h-5' />
           </button>
         </div>
@@ -293,7 +279,9 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
               : __('Preview shows your current draft.', 'subtleforms')}
           </p>
           {schema.metadata?.description && (
-            <p className='form-preview-modal__form-header-description'>{schema.metadata.description}</p>
+            <p className='form-preview-modal__form-header-description'>
+              {schema.metadata.description}
+            </p>
           )}
         </div>
 

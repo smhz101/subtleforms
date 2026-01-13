@@ -243,9 +243,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
               <div className='onboarding-wizard__welcome-icon'>
                 <Icon.CheckCircle />
               </div>
-              <h2>
-                {__('Welcome to SubtleForms', 'subtleforms')}
-              </h2>
+              <h2>{__('Welcome to SubtleForms', 'subtleforms')}</h2>
               <p>
                 {__(
                   'Create beautiful, powerful forms in minutes. This wizard will help you build your first form quickly.',
@@ -255,9 +253,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
             </div>
 
             <div className='onboarding-wizard__features'>
-              <h3>
-                {__('What can you do with SubtleForms?', 'subtleforms')}
-              </h3>
+              <h3>{__('What can you do with SubtleForms?', 'subtleforms')}</h3>
               <ul>
                 <li className='onboarding-wizard__features-item'>
                   <Icon.CheckCircle />

@@ -13,7 +13,7 @@ export default function InlineAddButton({
   anchorRef,
 }) {
   const isActive = isHovered || showFieldPicker;
-  
+
   return (
     <div
       className={clsx('inline-add-button', {

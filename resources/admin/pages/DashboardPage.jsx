@@ -102,7 +102,7 @@ export default function Dashboard() {
             title={__('Total Forms', 'subtleforms')}
             value={stats.total_forms}
             subtitle={`${stats.published_forms} published, ${stats.draft_forms} draft`}
-            icon={<Icon.FileText className='sf-icon-lg sf-text-blue-600' />}
+            icon={<Icon.FileText className='sf-text-blue-600 sf-icon-lg' />}
             link='admin.php?page=subtleforms-forms'
           />
           <StatCard
@@ -113,7 +113,7 @@ export default function Dashboard() {
                 ? `${stats.avg_submissions_per_form} avg per form`
                 : __('No published forms', 'subtleforms')
             }
-            icon={<Icon.Database className='sf-icon-lg sf-text-green-600' />}
+            icon={<Icon.Database className='sf-text-green-600 sf-icon-lg' />}
             link='admin.php?page=subtleforms-submissions'
           />
           <StatCard
@@ -121,7 +121,7 @@ export default function Dashboard() {
             value={stats.submissions_today}
             subtitle={__('Last 24 hours', 'subtleforms')}
             icon={
-              <Icon.Calendar className='sf-icon-lg sf-text-purple-600' />
+              <Icon.Calendar className='sf-text-purple-600 sf-icon-lg' />
             }
           />
           <StatCard
@@ -129,7 +129,7 @@ export default function Dashboard() {
             value={stats.submissions_this_week}
             subtitle={__('Last 7 days', 'subtleforms')}
             icon={
-              <Icon.TrendingUp className='sf-icon-lg sf-text-orange-600' />
+              <Icon.TrendingUp className='sf-text-orange-600 sf-icon-lg' />
             }
           />
         </div>

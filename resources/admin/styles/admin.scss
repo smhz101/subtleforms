@@ -48,3 +48,6 @@
 @use '../components/builder/FieldDock.scss';
 @use '../components/builder/StepNavigator.scss';
 @use '../components/builder/FieldInspector.scss';
+
+// Builder Layout Styles
+@use '../components/builder/layout/BuilderCanvasArea.scss';
