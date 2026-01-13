@@ -256,6 +256,6 @@ files.forEach((file) => {
   }
 });
 
-console.log(`\\n✅ Complete!`);
+console.log(`\n✅ Complete!`);
 console.log(`Files modified: ${filesModified}`);
 console.log(`Total classes prefixed: ${totalChanges}`);
