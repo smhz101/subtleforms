@@ -1,0 +1,44 @@
+/**
+ * FormEditor Component Styles
+ * Three-column builder layout: FieldDock, Canvas, Inspector
+ */
+
+.sf-form-editor {
+	// Root horizontal flex container
+	display: grid;
+	grid-template-columns: 280px 1fr 320px;
+	width: 100%;
+	height: 100%;
+	background-color: #fff;
+	overflow: hidden;
+
+	// Left panel: Field Dock
+	&__dock {
+		width: 280px;
+		flex-shrink: 0;
+		background-color: #f9fafb;
+		border-right: 1px solid #d1d5db;
+		max-height: 100%;
+		overflow-y: auto;
+	}
+
+	// Center panel: Canvas (must flex-grow)
+	&__canvas {
+		flex: 1 1 auto; // CRITICAL: allows canvas to grow and fill space
+		min-width: 0; // CRITICAL: allows flex shrinking
+		display: flex;
+		flex-direction: column;
+		background-color: #f3f4f6;
+		overflow: hidden;
+	}
+
+	// Right panel: Inspector
+	&__inspector {
+		width: 320px;
+		flex-shrink: 0;
+		background-color: #fff;
+		border-left: 1px solid #d1d5db;
+		max-height: 100%;
+		overflow-y: auto;
+	}
+}

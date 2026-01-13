@@ -20,6 +20,7 @@ import {
   nodeChildren,
   getRootNodeId,
 } from './utils/schemaTree';
+import './FormBuilder.scss';
 
 function SortableWrapper({
   nodeId,

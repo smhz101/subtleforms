@@ -26,6 +26,7 @@ import {
   moveNode,
   duplicateNode,
 } from './schema/commands';
+import './FormEditor.scss';
 
 export default function FormEditor({
   schema,

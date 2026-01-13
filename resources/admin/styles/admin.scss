@@ -38,6 +38,8 @@
 @use '../pages/ExtensionsPage.scss';
 
 // Builder Component Styles
+@use '../components/builder/FormEditor.scss';
+@use '../components/builder/FormBuilder.scss';
 @use '../components/builder/InlineAddButton.scss';
 @use '../components/builder/InsertFieldButton.scss';
 @use '../components/builder/ColumnDropZone.scss';
