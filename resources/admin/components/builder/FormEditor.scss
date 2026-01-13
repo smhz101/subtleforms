@@ -74,4 +74,15 @@ $breakpoint-tablet: 768px;
 		max-height: 100%;
 		overflow-y: auto;
 	}
+
+	// RESPONSIVE: Tablet Layout (< 1200px)
+	@media (max-width: 1199px) {
+		// Switch to 2-column layout: Fields | Canvas
+		grid-template-columns: 280px 1fr;
+
+		// Hide inspector panel
+		&__inspector {
+			display: none;
+		}
+	}
 }
