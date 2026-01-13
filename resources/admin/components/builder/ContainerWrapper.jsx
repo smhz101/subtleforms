@@ -1,14 +1,14 @@
 import { __ } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
 import Icon from '../ui/Icon';
 import clsx from 'clsx';
 import { getIcon } from './utils/iconMap';
+import './ContainerWrapper.scss';
 
 export default function ContainerWrapper({
   field,
   path,
   isSelected,
-  isHovered,
+  isHovered: _isHovered,
   onSelect,
   onHover,
   onMoveUp,
@@ -31,20 +31,18 @@ export default function ContainerWrapper({
         onHover(path);
       }}
       onMouseLeave={() => onHover(null)}
-      className={clsx(
-        'sf-relative sf-bg-white sf-mb-4 sf-transition-all',
-        isSelected
-          ? 'sf-border-2 sf-border-blue-600'
-          : 'sf-border sf-border-gray-300'
-      )}>
+      className={clsx('container-wrapper', {
+        'container-wrapper--selected': isSelected,
+        'container-wrapper--default': !isSelected,
+      })}>
       {/* Header */}
-      <div className='sf-flex sf-justify-between sf-items-center sf-bg-gray-100 sf-px-3 sf-py-2 sf-border-gray-300 sf-border-b sf-cursor-move'>
-        <div className='sf-flex sf-items-center sf-gap-2'>
+      <div className='container-wrapper__header'>
+        <div className='container-wrapper__header-title'>
           {(() => {
             const ContainerIcon = getIcon(field.type);
             return <ContainerIcon size={20} />;
           })()}
-          <span className='sf-font-semibold sf-text-xs'>
+          <span className='container-wrapper__header-label'>
             {field.label ||
               (isRepeat
                 ? __('Repeat Container', 'subtleforms')
@@ -54,40 +52,40 @@ export default function ContainerWrapper({
 
         {/* Actions */}
         {isSelected && (
-          <div className='sf-flex sf-gap-1'>
+          <div className='container-wrapper__actions'>
             <button
               onClick={() => onMoveUp(path)}
-              className='hover:sf-bg-gray-200 sf-p-1 sf-rounded'
+              className='container-wrapper__action-button'
               title={__('Move Up', 'subtleforms')}>
-              <Icon.Up className='sf-w-4 sf-h-4' />
+              <Icon.Up className='container-wrapper__icon' />
             </button>
             <button
               onClick={() => onMoveDown(path)}
-              className='hover:sf-bg-gray-200 sf-p-1 sf-rounded'
+              className='container-wrapper__action-button'
               title={__('Move Down', 'subtleforms')}>
-              <Icon.Down className='sf-w-4 sf-h-4' />
+              <Icon.Down className='container-wrapper__icon' />
             </button>
             <button
               onClick={() => onDuplicate(path)}
-              className='hover:sf-bg-gray-200 sf-p-1 sf-rounded'
+              className='container-wrapper__action-button'
               title={__('Duplicate', 'subtleforms')}>
-              <Icon.Copy className='sf-w-4 sf-h-4' />
+              <Icon.Copy className='container-wrapper__icon' />
             </button>
             <button
               onClick={() => onDelete(path)}
-              className='hover:sf-bg-red-100 sf-p-1 sf-rounded sf-text-red-600'
+              className='container-wrapper__action-button container-wrapper__action-button--danger'
               title={__('Delete', 'subtleforms')}>
-              <Icon.Delete className='sf-w-4 sf-h-4' />
+              <Icon.Delete className='container-wrapper__icon' />
             </button>
           </div>
         )}
       </div>
 
       {/* Content Area */}
-      <div className='sf-p-4 sf-min-h-[60px]'>{children}</div>
+      <div className='container-wrapper__content'>{children}</div>
 
       {isRepeat && (
-        <div className='sf-px-4 sf-py-2 sf-border-gray-300 sf-border-t sf-border-dashed sf-text-gray-600 sf-text-xs sf-italic'>
+        <div className='container-wrapper__repeat-note'>
           {__('Repeatable items will appear here', 'subtleforms')}
         </div>
       )}

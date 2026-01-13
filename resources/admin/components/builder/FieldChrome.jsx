@@ -1,6 +1,8 @@
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import clsx from 'clsx';
 import FieldToolbar from './FieldToolbar';
+import './FieldChrome.scss';
 
 export default function FieldChrome({
   children,
@@ -14,22 +16,9 @@ export default function FieldChrome({
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const showToolbar = isSelected || isHovered || isFocused;
-  const chromeClasses = ['subtleforms-field-chrome'];
 
   const hasValidationMessages =
     Array.isArray(validationMessages) && validationMessages.length > 0;
-
-  if (isSelected) {
-    chromeClasses.push('is-selected');
-  }
-
-  if (isHovered) {
-    chromeClasses.push('is-hovered');
-  }
-
-  if (hasValidationMessages) {
-    chromeClasses.push('sf-border-l-4', 'sf-border-red-500');
-  }
 
   const handleKeyDown = (e) => {
     if (e.key === 'Enter' || e.key === ' ') {
@@ -40,7 +29,11 @@ export default function FieldChrome({
 
   return (
     <div
-      className={chromeClasses.join(' ')}
+      className={clsx('field-chrome', {
+        'is-selected': isSelected,
+        'is-hovered': isHovered,
+        'field-chrome--validation-error': hasValidationMessages,
+      })}
       onClick={onSelect}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -50,9 +43,9 @@ export default function FieldChrome({
       tabIndex='0'
       role='group'
       aria-label={__('Field group. Press Enter to select.', 'subtleforms')}>
-      <div className='sf-p-5 subtleforms-field-chrome__inner'>
+      <div className='field-chrome__inner'>
         {hasValidationMessages && (isSelected || isHovered) && (
-          <div className='sf-mb-2 sf-text-red-600 sf-text-xs'>
+          <div className='field-chrome__validation-message'>
             {validationMessages[0]}
           </div>
         )}

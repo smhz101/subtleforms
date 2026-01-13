@@ -1,0 +1,27 @@
+/**
+ * FieldWrapper Component Styles
+ * Wrapper for individual fields in the builder
+ */
+
+.field-wrapper {
+  position: relative;
+  padding: 1.25rem;
+  transition: all 200ms;
+  cursor: pointer;
+  border-radius: 4px;
+
+  &--selected {
+    background-color: #eff6ff;
+    border: 2px solid #3b82f6;
+  }
+
+  &--hovered:not(&--selected) {
+    background-color: #f9fafb;
+    border: 1px solid #d1d5db;
+  }
+
+  &--default {
+    background-color: #ffffff;
+    border: 1px solid #d1d5db;
+  }
+}

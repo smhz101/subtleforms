@@ -1,6 +1,7 @@
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { getIcon } from './utils/iconMap';
+import './FieldToolbar.scss';
 
 /**
  * FieldToolbar
@@ -45,21 +46,11 @@ export default function FieldToolbar({
         disabled={disabled}
         aria-label={label}
         title={label}
-        className={clsx(
-          'sf-flex sf-justify-center sf-items-center',
-          'sf-w-8 sf-h-8 sf-rounded-md',
-          'sf-transition-all sf-duration-150 sf-ease-out',
-          'focus:sf-outline-none focus-visible:sf-ring-2 focus-visible:sf-ring-offset-1',
-          {
-            'sf-text-gray-400 sf-cursor-not-allowed': disabled,
-
-            'sf-text-gray-600 hover:sf-text-gray-900 hover:sf-bg-gray-100 active:sf-scale-95':
-              !disabled && variant === 'default',
-
-            'sf-text-red-600 hover:sf-bg-red-50 hover:sf-text-red-700 active:sf-scale-95':
-              !disabled && variant === 'danger',
-          }
-        )}>
+        className={clsx('field-toolbar__button', {
+          'field-toolbar__button--disabled': disabled,
+          'field-toolbar__button--default': !disabled && variant === 'default',
+          'field-toolbar__button--danger': !disabled && variant === 'danger',
+        })}>
         <Icon size={16} />
       </button>
     );
@@ -69,18 +60,10 @@ export default function FieldToolbar({
     <div
       aria-hidden={!visible}
       data-tour='field-toolbar'
-      className={clsx(
-        'sf-top-0 sf-right-0 sf-absolute -sf-mt-2 sf-mr-2',
-        'sf-flex sf-items-center sf-gap-1 sf-p-1',
-        'sf-rounded-lg sf-border sf-border-gray-200',
-        'sf-bg-white/90 sf-backdrop-blur',
-        'sf-shadow-md',
-        'sf-transition-all sf-duration-200 sf-ease-out sf-z-20',
-        {
-          'sf-opacity-100 sf-translate-y-0 sf-pointer-events-auto': visible,
-          'sf-opacity-0 sf-translate-y-1 sf-pointer-events-none': !visible,
-        }
-      )}>
+      className={clsx('field-toolbar', {
+        'field-toolbar--visible': visible,
+        'field-toolbar--hidden': !visible,
+      })}>
       {/* Drag Handle */}
       <button
         type='button'
@@ -101,22 +84,14 @@ export default function FieldToolbar({
         onClick={stop}
         title={__('Drag to reorder', 'subtleforms')}
         aria-label={__('Drag field', 'subtleforms')}
-        className={clsx(
-          'sf-flex sf-justify-center sf-items-center',
-          'sf-w-8 sf-h-8 sf-rounded-md',
-          'sf-text-gray-500',
-          'hover:sf-bg-gray-100 hover:sf-text-gray-700',
-          'active:sf-scale-95',
-          'sf-cursor-grab active:sf-cursor-grabbing',
-          'sf-transition-all sf-duration-150'
-        )}>
+        className='field-toolbar__button field-toolbar__button--drag'>
         {(() => {
           const DragIcon = getIcon('move');
           return <DragIcon size={16} />;
         })()}
       </button>
 
-      <div className='sf-bg-gray-200 sf-w-px sf-h-5' />
+      <div className='field-toolbar__divider' />
 
       {renderButton(
         'arrow-up-alt2',
@@ -131,7 +106,7 @@ export default function FieldToolbar({
         !canMoveDown
       )}
 
-      <div className='sf-bg-gray-200 sf-w-px sf-h-5' />
+      <div className='field-toolbar__divider' />
 
       {renderButton(
         'admin-page',
@@ -140,7 +115,7 @@ export default function FieldToolbar({
         false
       )}
 
-      <div className='sf-bg-gray-200 sf-w-px sf-h-5' />
+      <div className='field-toolbar__divider' />
 
       {renderButton(
         'trash',

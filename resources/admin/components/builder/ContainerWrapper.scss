@@ -1,0 +1,82 @@
+/**
+ * ContainerWrapper Component Styles
+ * Wrapper for container fields (repeat, columns)
+ */
+
+.container-wrapper {
+  position: relative;
+  background-color: #ffffff;
+  margin-bottom: 1rem;
+  transition: all 200ms;
+  border-radius: 4px;
+
+  &--selected {
+    border: 2px solid #3b82f6;
+  }
+
+  &--default {
+    border: 1px solid #d1d5db;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #f3f4f6;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid #d1d5db;
+    cursor: move;
+
+    &-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    &-label {
+      font-weight: 600;
+      font-size: 0.75rem;
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  &__action-button {
+    padding: 0.25rem;
+    border-radius: 0.25rem;
+    transition: background-color 150ms;
+
+    &:hover {
+      background-color: #e5e7eb;
+    }
+
+    &--danger {
+      color: #dc2626;
+
+      &:hover {
+        background-color: #fee2e2;
+      }
+    }
+  }
+
+  &__content {
+    padding: 1rem;
+    min-height: 60px;
+  }
+
+  &__repeat-note {
+    padding: 0.5rem 1rem;
+    border-top: 1px dashed #d1d5db;
+    color: #6b7280;
+    font-size: 0.75rem;
+    font-style: italic;
+  }
+
+  &__icon {
+    width: 1rem;
+    height: 1rem;
+  }
+}

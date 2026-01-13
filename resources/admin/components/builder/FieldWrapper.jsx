@@ -1,6 +1,7 @@
 import FieldRenderer from './FieldRenderer';
 import FieldToolbar from './FieldToolbar';
 import clsx from 'clsx';
+import './FieldWrapper.scss';
 
 export default function FieldWrapper({
   field,
@@ -19,15 +20,11 @@ export default function FieldWrapper({
 }) {
   return (
     <div
-      className={clsx(
-        'sf-relative sf-p-5 sf-transition-all sf-cursor-pointer',
-        {
-          'sf-bg-blue-50 sf-border-2 sf-border-blue-600': isSelected,
-          'sf-bg-gray-50 sf-border sf-border-gray-300':
-            isHovered && !isSelected,
-          'sf-bg-white sf-border sf-border-gray-300': !isSelected && !isHovered,
-        }
-      )}
+      className={clsx('field-wrapper', {
+        'field-wrapper--selected': isSelected,
+        'field-wrapper--hovered': isHovered && !isSelected,
+        'field-wrapper--default': !isSelected && !isHovered,
+      })}
       onClick={onSelect}
       onMouseEnter={onHover}
       onMouseLeave={onLeave}>
