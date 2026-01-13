@@ -22,14 +22,41 @@
 		overflow-y: auto;
 	}
 
-	// Center panel: Canvas (must flex-grow)
+	// Center panel: Canvas (CRITICAL: must fill available space)
 	&__canvas {
-		flex: 1 1 auto; // CRITICAL: allows canvas to grow and fill space
-		min-width: 0; // CRITICAL: allows flex shrinking
+		// Grid child gets 1fr, but we still need flex for internal layout
 		display: flex;
 		flex-direction: column;
 		background-color: #f3f4f6;
 		overflow: hidden;
+		min-width: 0; // CRITICAL: allows grid cell to shrink if needed
+		
+		// Step navigator bar
+		&-step-nav {
+			flex-shrink: 0;
+			background-color: #fff;
+			border-bottom: 1px solid #d1d5db;
+		}
+
+		// Tip bar
+		&-tip {
+			flex-shrink: 0;
+			background-color: #fff;
+			border-bottom: 1px solid #e5e7eb;
+			padding: 0.5rem 1rem;
+
+			&-text {
+				color: #6b7280;
+				font-size: 0.75rem;
+			}
+		}
+
+		// Main canvas scroll area
+		&-scroll {
+			flex: 1;
+			overflow-y: auto;
+			overflow-x: hidden;
+		}
 	}
 
 	// Right panel: Inspector

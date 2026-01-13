@@ -486,24 +486,16 @@ export default function FormEditor({
       onMove={handleMove}
       onDuplicate={handleDuplicate}
       onRequestInsert={handleRequestInsert}>
-      <div
-        className='sf-grid sf-bg-white sf-h-full sf-overflow-hidden sf-form-editor'
-        style={{
-          gridTemplateColumns: '280px 1fr 320px',
-        }}>
+      <div className='sf-form-editor'>
         {/* Field Library (Left Sidebar) */}
-        <div
-          className='sf-bg-gray-50 sf-border-gray-300 sf-border-r sf-max-h-full sf-overflow-y-auto'
-          data-tour='fields-panel'>
+        <div className='sf-form-editor__dock' data-tour='fields-panel'>
           <FieldDock fieldGroups={fieldGroups} onAddField={handleDockAdd} />
         </div>
 
         {/* Canvas Area (Center) */}
-        <div
-          className='sf-flex sf-flex-col sf-bg-gray-100 sf-overflow-hidden'
-          data-tour='canvas'>
+        <div className='sf-form-editor__canvas' data-tour='canvas'>
           {steps.length > 0 && !isConversational && (
-            <div className='sf-flex-shrink-0 sf-bg-white sf-border-gray-300 sf-border-b'>
+            <div className='sf-form-editor__canvas-step-nav'>
               <StepNavigator
                 steps={steps}
                 selectedStepId={selectedStepId}
@@ -515,8 +507,8 @@ export default function FormEditor({
           )}
 
           {!selectedField && allFields.length > 0 && (
-            <div className='sf-flex-shrink-0 sf-bg-white sf-px-4 sf-py-2 sf-border-gray-200 sf-border-b'>
-              <div className='sf-text-gray-600 sf-text-xs'>
+            <div className='sf-form-editor__canvas-tip'>
+              <div className='sf-form-editor__canvas-tip-text'>
                 {__(
                   'Tip: Click a field (or container) to edit its settings.',
                   'subtleforms'
@@ -526,7 +518,7 @@ export default function FormEditor({
           )}
 
           <div
-            className='sf-flex-1 sf-overflow-y-auto'
+            className='sf-form-editor__canvas-scroll'
             style={{ padding: isConversational ? 0 : '1.5rem' }}>
             {isConversational ? (
               <ConversationalCanvas
@@ -557,9 +549,7 @@ export default function FormEditor({
         </div>
 
         {/* Field Inspector (Right Sidebar) */}
-        <div
-          className='sf-bg-white sf-border-gray-300 sf-border-l sf-max-h-full sf-overflow-y-auto'
-          data-tour='field-inspector'>
+        <div className='sf-form-editor__inspector' data-tour='field-inspector'>
           <FieldInspector field={selectedField} allFields={allFields} />
         </div>
 
