@@ -2,6 +2,7 @@ import { useSelect, useDispatch } from '@wordpress/data';
 import { NoticeList, SnackbarList } from '@wordpress/components';
 import { store as noticesStore } from '@wordpress/notices';
 import { createPortal } from '@wordpress/element';
+import './Notices.scss';
 
 export default function Notices() {
   const notices = useSelect((select) => select(noticesStore).getNotices(), []);
@@ -16,9 +17,9 @@ export default function Notices() {
     <>
       {/* Regular notices - inline, only render wrapper when notices exist */}
       {regularNotices.length > 0 && (
-        <div className='sf-flex-shrink-0 sf-px-6 sf-pt-4'>
+        <div className='sf-notices-wrapper'>
           <NoticeList
-            className='sf-mb-4 subtleforms-notices'
+            className='subtleforms-notices'
             notices={regularNotices}
             onRemove={removeNotice}
           />
