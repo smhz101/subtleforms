@@ -45,8 +45,8 @@ export default function AdminShell({
   const WP_ADMIN_BAR_HEIGHT = 32;
 
   return (
-    <div className='subtleforms-admin admin-shell'>
-      <div className='admin-shell__container'>
+    <div className='subtleforms-admin sf-admin-shell'>
+      <div className='sf-admin-shell__container'>
         {/* TOP BAR - Sticky Header Component */}
         <AdminHeader
           title={title}
@@ -86,7 +86,7 @@ export default function AdminShell({
 
         {/* BOTTOM BAR - Pagination */}
         {pagination && (
-          <div className='admin-shell__pagination'>{pagination}</div>
+          <div className='sf-admin-shell__pagination'>{pagination}</div>
         )}
       </div>
     </div>

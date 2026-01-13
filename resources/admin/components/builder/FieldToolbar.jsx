@@ -48,7 +48,8 @@ export default function FieldToolbar({
         title={label}
         className={clsx('sf-field-toolbar__button', {
           'sf-field-toolbar__button--disabled': disabled,
-          'sf-field-toolbar__button--default': !disabled && variant === 'default',
+          'sf-field-toolbar__button--default':
+            !disabled && variant === 'default',
           'sf-field-toolbar__button--danger': !disabled && variant === 'danger',
         })}>
         <Icon size={16} />
