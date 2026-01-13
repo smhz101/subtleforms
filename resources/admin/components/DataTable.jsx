@@ -1,6 +1,7 @@
 import { memo } from '@wordpress/element';
 import { Button, SelectControl, CheckboxControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
+import './DataTable.scss';
 
 /**
  * DataTable - Single Reusable Table Component
@@ -79,10 +80,10 @@ const DataTable = memo(function DataTable({
   const getSortIndicator = (column) => {
     if (!column.sortable) return null;
     if (sortBy !== column.key) {
-      return <span className='sf-ml-1 sf-text-gray-400'>⬍</span>;
+      return <span className='data-table__sort-indicator data-table__sort-indicator--inactive'>⬍</span>;
     }
     return (
-      <span className='sf-ml-1 sf-text-gray-900'>
+      <span className='data-table__sort-indicator data-table__sort-indicator--active'>
         {sortDirection === 'asc' ? '↑' : '↓'}
       </span>
     );
@@ -97,10 +98,10 @@ const DataTable = memo(function DataTable({
 
   if (loading) {
     return (
-      <div className='sf-flex sf-justify-center sf-items-center sf-py-20'>
-        <div className='sf-text-center'>
-          <div className='sf-inline-block sf-mb-4 sf-border-2 sf-border-gray-300 sf-border-t-gray-900 sf-w-8 sf-h-8 sf-animate-spin'></div>
-          <p className='sf-font-medium sf-text-gray-600 sf-text-sm'>
+      <div className='data-table__loading'>
+        <div className='data-table__loading-content'>
+          <div className='data-table__loading-content-spinner'></div>
+          <p>
             {__('Loading...', 'subtleforms')}
           </p>
         </div>
@@ -110,10 +111,10 @@ const DataTable = memo(function DataTable({
 
   if (data.length === 0) {
     return (
-      <div className='sf-flex sf-justify-center sf-items-center sf-py-20'>
-        <div className='sf-text-gray-500 sf-text-center'>
-          <div className='sf-mb-4 sf-text-4xl'>📝</div>
-          <p className='sf-font-medium sf-text-lg'>{emptyMessage}</p>
+      <div className='data-table__empty'>
+        <div className='data-table__empty-content'>
+          <div className='data-table__empty-content-icon'>📝</div>
+          <p>{emptyMessage}</p>
         </div>
       </div>
     );
@@ -125,11 +126,11 @@ const DataTable = memo(function DataTable({
     data.some((item) => selectedItems.includes(item.id)) && !allSelected;
 
   return (
-    <div className='sf-flex sf-flex-col sf-h-full'>
+    <div className='data-table'>
       {/* Bulk Actions Bar */}
       {selectable && selectedItems.length > 0 && (
-        <div className='sf-flex sf-items-center sf-gap-4 sf-bg-blue-50 sf-px-6 sf-py-2 sf-border-blue-100 sf-border-b sf-text-sm'>
-          <span className='sf-font-medium sf-text-blue-900'>
+        <div className='data-table__bulk-actions'>
+          <span className='data-table__bulk-actions-selected'>
             {(() => {
               return sprintf(
                 /* translators: %1$d: number of selected items */
@@ -138,7 +139,7 @@ const DataTable = memo(function DataTable({
               );
             })()}
           </span>
-          <div className='sf-flex sf-items-center sf-gap-2 sf-h-8'>
+          <div className='data-table__bulk-actions-buttons'>
             {bulkActions.map((action, index) => (
               <Button
                 key={index}
@@ -154,12 +155,12 @@ const DataTable = memo(function DataTable({
       )}
 
       {/* Table - Scrollable */}
-      <div className='sf-flex-1 sf-overflow-auto'>
-        <table className='sf-w-full sf-border-collapse'>
-          <thead className='sf-top-0 sf-z-10 sf-sticky sf-bg-gray-50'>
-            <tr className='sf-border-gray-300 sf-border-b'>
+      <div className='data-table__scroll-container'>
+        <table className='data-table__table'>
+          <thead className='data-table__header'>
+            <tr>
               {selectable && (
-                <th className='sf-px-6 sf-py-3 first:pl-8 sf-w-10 sf-text-left'>
+                <th className='data-table__header-cell'>
                   <CheckboxControl
                     checked={allSelected}
                     indeterminate={someSelected}
@@ -170,18 +171,12 @@ const DataTable = memo(function DataTable({
               {columns.map((column) => (
                 <th
                   key={column.key}
-                  className={`
-                    px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider last:pr-8
-                    ${!selectable && 'first:pl-8'}
-                    ${
-                      column.sortable
-                        ? 'sf-cursor-pointer hover:sf-bg-gray-100 sf-select-none'
-                        : ''
-                    }
-                  `}
+                  className={`${
+                    column.sortable ? 'data-table__header-th--sortable' : ''
+                  }`}
                   style={{ width: column.width || 'auto' }}
                   onClick={() => handleHeaderClick(column)}>
-                  <div className='sf-flex sf-items-center'>
+                  <div className='data-table__header-th-content'>
                     {column.title}
                     {getSortIndicator(column)}
                   </div>
@@ -189,16 +184,16 @@ const DataTable = memo(function DataTable({
               ))}
             </tr>
           </thead>
-          <tbody className='sf-bg-white sf-divide-y sf-divide-gray-100'>
+          <tbody className='data-table__body'>
             {data.map((row, index) => (
               <tr
                 key={row.id || index}
                 className={`
                   group transition-all duration-150
-                  ${selectedItems.includes(row.id) ? 'bg-blue-50' : ''}
+                  ${selectedItems.includes(row.id) ? 'data-table__row--selected' : ''}
                   ${
                     onRowClick
-                      ? 'sf-cursor-pointer hover:sf-bg-blue-50 hover:sf-shadow-sm'
+                      ? 'data-table__row--clickable'
                       : ''
                   }
                   ${rowClassName ? rowClassName(row) : ''}
@@ -206,7 +201,6 @@ const DataTable = memo(function DataTable({
                 onClick={() => onRowClick && onRowClick(row)}>
                 {selectable && (
                   <td
-                    className='sf-px-6 sf-py-4 first:pl-8 sf-w-10'
                     onClick={(e) => e.stopPropagation()}>
                     <CheckboxControl
                       checked={selectedItems.includes(row.id)}
@@ -216,10 +210,7 @@ const DataTable = memo(function DataTable({
                 )}
                 {columns.map((column) => (
                   <td
-                    key={column.key}
-                    className={`sf-px-6 sf-py-4 last:sf-pr-8 sf-text-gray-900 sf-text-sm ${
-                      !selectable && 'first:sf-pl-8'
-                    }`}>
+                    key={column.key}>
                     {column.render
                       ? column.render(row[column.key], row)
                       : row[column.key]}
@@ -233,9 +224,9 @@ const DataTable = memo(function DataTable({
 
       {/* Pagination - Always show if data exists and totalPages > 0 */}
       {totalPages > 0 && (
-        <div className='sf-flex sf-flex-shrink-0 sf-justify-between sf-items-center sf-bg-white sf-px-6 sf-py-4 sf-border-gray-300 sf-border-t'>
-          <div className='sf-flex sf-items-center sf-gap-4'>
-            <span className='sf-text-gray-700 sf-text-sm'>
+        <div className='data-table__pagination'>
+          <div className='data-table__pagination-info'>
+            <span className='data-table__pagination-info-text'>
               {(() => {
                 return sprintf(
                   /* translators: %1$d: starting item number, %2$d: ending item number, %3$d: total items */
@@ -247,8 +238,8 @@ const DataTable = memo(function DataTable({
               })()}
             </span>
 
-            <div className='sf-flex sf-items-center sf-gap-2'>
-              <label className='sf-text-gray-700 sf-text-sm'>
+            <div className='data-table__pagination-info-controls'>
+              <label>
                 {__('Per page:', 'subtleforms')}
               </label>
               <SelectControl
@@ -260,12 +251,11 @@ const DataTable = memo(function DataTable({
                   { label: '50', value: '50' },
                   { label: '100', value: '100' },
                 ]}
-                className='sf-w-20'
               />
             </div>
           </div>
 
-          <div className='sf-flex sf-items-center sf-gap-2'>
+          <div className='data-table__pagination-buttons'>
             <Button
               disabled={currentPage === 1}
               onClick={() => onPageChange(currentPage - 1)}
@@ -274,7 +264,7 @@ const DataTable = memo(function DataTable({
               {__('Previous', 'subtleforms')}
             </Button>
 
-            <span className='sf-bg-gray-50 sf-px-3 sf-py-1 sf-border sf-border-gray-300 sf-text-gray-700 sf-text-sm'>
+            <span className='data-table__pagination-page-indicator'>
               {(() => {
                 return sprintf(
                   /* translators: %1$d: Current page number, %2$d: Total pages */

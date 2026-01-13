@@ -1,0 +1,233 @@
+/**
+ * DataTable Component Styles
+ *
+ * Unified table component for all SubtleForms data displays.
+ */
+
+.data-table {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+
+  &__bulk-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background-color: #eff6ff;
+    padding: 0.5rem 1.5rem;
+    border-bottom: 1px solid #bfdbfe;
+    font-size: 0.875rem;
+
+    &-selected {
+      font-weight: 500;
+      color: #1e3a8a;
+    }
+
+    &-buttons {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      height: 2rem;
+    }
+  }
+
+  &__scroll-container {
+    flex: 1;
+    overflow: auto;
+  }
+
+  &__table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  &__header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background-color: #f9fafb;
+
+    tr {
+      border-bottom: 1px solid #d1d5db;
+    }
+
+    th {
+      padding: 0.75rem 1.5rem;
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #374151;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+
+      &:first-child {
+        padding-left: 2rem;
+      }
+
+      &:last-child {
+        padding-right: 2rem;
+      }
+
+      &--sortable {
+        cursor: pointer;
+        user-select: none;
+
+        &:hover {
+          background-color: #f3f4f6;
+        }
+      }
+
+      &-content {
+        display: flex;
+        align-items: center;
+      }
+    }
+  }
+
+  &__body {
+    background-color: #fff;
+
+    tr {
+      border-bottom: 1px solid #f3f4f6;
+      transition: all 150ms;
+
+      &.data-table__row--selected {
+        background-color: #eff6ff;
+      }
+
+      &.data-table__row--clickable {
+        cursor: pointer;
+
+        &:hover {
+          background-color: #eff6ff;
+          box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+      }
+    }
+
+    td {
+      padding: 1rem 1.5rem;
+      color: #111827;
+      font-size: 0.875rem;
+
+      &:first-child {
+        padding-left: 2rem;
+      }
+
+      &:last-child {
+        padding-right: 2rem;
+      }
+    }
+  }
+
+  &__loading,
+  &__empty {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5rem 0;
+  }
+
+  &__loading-content {
+    text-align: center;
+
+    &-spinner {
+      display: inline-block;
+      margin-bottom: 1rem;
+      border: 2px solid #d1d5db;
+      border-top-color: #111827;
+      width: 2rem;
+      height: 2rem;
+      animation: spin 1s linear infinite;
+    }
+
+    p {
+      font-weight: 500;
+      color: #4b5563;
+      font-size: 0.875rem;
+    }
+  }
+
+  &__empty-content {
+    color: #6b7280;
+    text-align: center;
+
+    &-icon {
+      margin-bottom: 1rem;
+      font-size: 2.25rem;
+    }
+
+    p {
+      font-weight: 500;
+      font-size: 1.125rem;
+    }
+  }
+
+  &__pagination {
+    display: flex;
+    flex-shrink: 0;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #d1d5db;
+
+    &-info {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+
+      &-text {
+        color: #374151;
+        font-size: 0.875rem;
+      }
+
+      &-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+
+        label {
+          color: #374151;
+          font-size: 0.875rem;
+        }
+
+        .components-select-control__input {
+          width: 5rem;
+        }
+      }
+    }
+
+    &-buttons {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    &-page-indicator {
+      background-color: #f9fafb;
+      padding: 0.25rem 0.75rem;
+      border: 1px solid #d1d5db;
+      color: #374151;
+      font-size: 0.875rem;
+    }
+  }
+
+  &__sort-indicator {
+    margin-left: 0.25rem;
+
+    &--inactive {
+      color: #9ca3af;
+    }
+
+    &--active {
+      color: #111827;
+    }
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

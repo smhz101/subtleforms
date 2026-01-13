@@ -18,6 +18,7 @@ import { store as noticesStore } from '@wordpress/notices';
 import clsx from 'clsx';
 import DataTable from './DataTable';
 import { ConfirmModal } from '../modals';
+import './SubmissionsTable.scss';
 
 const restBase =
   window.subtleformsAdmin && window.subtleformsAdmin.restUrl
@@ -446,14 +447,13 @@ const SubmissionsTable = forwardRef(
         render: (status) => (
           <span
             className={clsx(
-              'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-medium text-xs',
-              {
-                'bg-blue-500 text-white sf-shadow-sm': status === 'unread',
-                'bg-gray-100 text-gray-600': status !== 'unread',
-              }
+              'submissions-table__status-badge',
+              status === 'unread'
+                ? 'submissions-table__status-badge--unread'
+                : 'submissions-table__status-badge--read'
             )}>
             {status === 'unread' && (
-              <span className='sf-bg-white sf-rounded-full sf-w-2 sf-h-2 sf-animate-pulse'></span>
+              <span className='submissions-table__status-badge-indicator'></span>
             )}
             {status === 'unread'
               ? __('New', 'subtleforms')
@@ -487,7 +487,7 @@ const SubmissionsTable = forwardRef(
         title: __('Actions', 'subtleforms'),
         width: '15%',
         render: (_, submission) => (
-          <div className='sf-flex sf-gap-2'>
+          <div className='submissions-table__actions'>
             <Button
               isSecondary
               isSmall
@@ -516,7 +516,7 @@ const SubmissionsTable = forwardRef(
     }
 
     return (
-      <div className='sf-submissions-table'>
+      <div className='submissions-table'>
         <DataTable
           columns={columns}
           data={submissions}
