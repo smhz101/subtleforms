@@ -1,0 +1,87 @@
+/**
+ * TabBar Component Styles
+ * Co-located with TabBar.jsx
+ */
+
+.sf-tab-bar {
+  display: flex;
+  margin-bottom: -1px;
+
+  &__tab {
+    position: relative;
+    padding: 0.375rem 0.625rem; // py-1.5 px-2.5
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s ease-out;
+    background-color: transparent;
+    border-left: none;
+    border-right: none;
+    border-top: none;
+    cursor: pointer;
+
+    &:focus {
+      outline: none;
+    }
+
+    &:focus-visible {
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+    }
+
+    &--active {
+      border-bottom-color: #2563eb; // blue-600
+      color: #2563eb;
+      background-color: #eff6ff; // blue-50
+    }
+
+    &--inactive {
+      color: #4b5563; // gray-600
+
+      &:hover {
+        color: #111827; // gray-900
+        border-bottom-color: #d1d5db; // gray-300
+        background-color: #f9fafb; // gray-50
+      }
+    }
+  }
+
+  &__label {
+    position: relative;
+    z-index: 10;
+  }
+
+  &__count {
+    margin-left: 0.5rem;
+    font-size: 0.75rem;
+    transition: color 0.2s;
+  }
+
+  &__count--active {
+    color: #4b5563; // gray-600
+  }
+
+  &__count--inactive {
+    color: #9ca3af; // gray-400
+  }
+
+  .sf-tab-bar__tab:hover &__count--inactive {
+    color: #4b5563; // gray-600
+  }
+
+  &__hover-line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background-color: #3b82f6; // blue-500
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.2s;
+    pointer-events: none;
+  }
+
+  .sf-tab-bar__tab:hover &__hover-line {
+    transform: scaleX(1);
+  }
+}
