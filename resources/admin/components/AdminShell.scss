@@ -45,6 +45,7 @@
 		flex-direction: column;
 		background-color: #fff;
 		height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
+		overflow: hidden; // Prevent shell itself from scrolling
 	}
 
 	&__action-bar-wrapper {
@@ -53,24 +54,28 @@
 
 	&__content {
 		flex: 1;
-		overflow: hidden;
+		min-height: 0; // CRITICAL: allows flex child to shrink below content size
+		overflow: hidden; // Shell content area should not scroll
 
 		&-inner {
 			height: 100%;
 			display: flex;
 			flex-direction: column;
-			overflow-y: auto;
+			overflow-y: auto; // Default: content scrolls here
 
 			&--no-scroll {
-				overflow: hidden;
+				overflow: hidden; // When noScroll={true}, content doesn't scroll at shell level
 			}
 		}
 
 		&-body {
 			flex: 1;
+			min-height: 0; // CRITICAL: allows content body to shrink
 
 			&--no-scroll {
-				overflow: hidden;
+				overflow: hidden; // Child components manage their own scroll
+				display: flex;
+				flex-direction: column;
 			}
 		}
 	}
