@@ -35,5 +35,25 @@
 		/* Remove default button styles */
 		cursor: pointer;
 		outline: none;
+		
+		/* Hover state - more inviting */
+		&:hover {
+			background-color: #f0f9ff;
+			border-color: #93c5fd;
+			color: #1e40af;
+		}
+		
+		/* Active/pressed state */
+		&:active {
+			border-color: #2271b1;
+			background-color: #eff6ff;
+			transform: scale(0.98);
+		}
+		
+		/* Focus state for keyboard navigation */
+		&:focus {
+			outline: 2px solid #2271b1;
+			outline-offset: 2px;
+		}
 	}
 }
