@@ -16,6 +16,7 @@ import clsx from 'clsx';
 import Icon from './ui/Icon';
 import DataTable from './DataTable';
 import { ConfirmModal } from '../modals';
+import './FormsList.scss';
 
 const restBase =
   window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
@@ -111,12 +112,12 @@ export default function FormsList({
       sortable: true,
       width: '25%',
       render: (title, form) => (
-        <div className='sf-flex sf-items-center sf-gap-2'>
-          <span className='sf-font-semibold sf-text-gray-900 group-hover:sf-text-blue-600 sf-text-base sf-transition-colors'>
+        <div className='sf-form-name'>
+          <span className='sf-form-name__title'>
             {title}
           </span>
           {form.submission_count === 0 && (
-            <span className='sf-bg-gray-50 sf-px-1.5 sf-py-0.5 sf-border sf-border-gray-200 sf-text-gray-400 sf-text-xs'>
+            <span className='sf-form-name__new-badge'>
               {__('New', 'subtleforms')}
             </span>
           )}
@@ -131,27 +132,27 @@ export default function FormsList({
         const formType = form.metadata?.type || 'regular';
         const typeConfig = {
           regular: {
-            classes: 'bg-gray-50 text-gray-700 border-gray-200',
+            classes: 'sf-form-type-badge--regular',
             label: __('Regular', 'subtleforms'),
             icon: Icon.FileText,
           },
           multistep: {
-            classes: 'bg-purple-50 text-purple-700 border-purple-200',
+            classes: 'sf-form-type-badge--multistep',
             label: __('Multi-step', 'subtleforms'),
             icon: Icon.Layers,
           },
           sectioned: {
-            classes: 'bg-indigo-50 text-indigo-700 border-indigo-200',
+            classes: 'sf-form-type-badge--sectioned',
             label: __('Sectioned', 'subtleforms'),
             icon: Icon.List,
           },
           conversational: {
-            classes: 'bg-blue-50 text-blue-700 border-blue-200',
+            classes: 'sf-form-type-badge--conversational',
             label: __('Conversational', 'subtleforms'),
             icon: Icon.MessageCircle,
           },
           payment: {
-            classes: 'bg-green-50 text-green-700 border-green-200',
+            classes: 'sf-form-type-badge--payment',
             label: __('Payment', 'subtleforms'),
             icon: Icon.CreditCard,
           },
@@ -163,7 +164,7 @@ export default function FormsList({
         return (
           <span
             className={clsx(
-              'inline-flex items-center gap-1 px-2.5 py-1 border font-medium text-xs',
+              'sf-form-type-badge',
               config.classes
             )}>
             <IconComponent className='sf-w-3 sf-h-3' />
@@ -180,17 +181,17 @@ export default function FormsList({
       render: (status) => {
         const statusConfig = {
           draft: {
-            classes: 'bg-amber-50 text-amber-700 border-amber-200',
+            classes: 'sf-status-badge--draft',
             label: __('Draft', 'subtleforms'),
             icon: Icon.Edit,
           },
           published: {
-            classes: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+            classes: 'sf-status-badge--published',
             label: __('Published', 'subtleforms'),
             icon: Icon.CheckCircle,
           },
           archived: {
-            classes: 'bg-gray-50 text-gray-600 border-gray-200',
+            classes: 'sf-status-badge--archived',
             label: __('Archived', 'subtleforms'),
             icon: Icon.Package,
           },
@@ -202,7 +203,7 @@ export default function FormsList({
         return (
           <span
             className={clsx(
-              'inline-flex items-center gap-1 px-2.5 py-1 border font-medium text-xs',
+              'sf-status-badge',
               config.classes
             )}>
             <IconComponent className='sf-w-3 sf-h-3' />
@@ -220,16 +221,16 @@ export default function FormsList({
         return (
           <button
             type='button'
-            className='group sf-flex sf-items-center sf-gap-2 sf-bg-gray-100 hover:sf-bg-gray-200 sf-px-2 sf-py-1 sf-rounded sf-text-xs sf-transition-colors'
+            className='sf-shortcode-btn'
             onClick={(e) => {
               e.stopPropagation();
               handleCopyShortcode(shortcode);
             }}
             title={__('Click to copy', 'subtleforms')}>
-            <code className='sf-font-mono sf-text-gray-600 group-hover:sf-text-gray-900'>
+            <code>
               {shortcode}
             </code>
-            <Icon.Copy className='sf-flex-shrink-0 sf-w-3 sf-h-3 sf-text-gray-400 group-hover:sf-text-gray-600' />
+            <Icon.Copy />
           </button>
         );
       },
@@ -245,11 +246,10 @@ export default function FormsList({
           <a
             href={`admin.php?page=subtleforms-submissions&form_id=${form.id}`}
             className={clsx(
-              'inline-flex items-center gap-1.5 px-2.5 py-1 font-medium text-sm transition-colors',
+              'sf-entries-display',
               {
-                'sf-text-blue-600 sf-bg-blue-50 hover:sf-bg-blue-100':
-                  hasUnread,
-                'sf-text-gray-600 hover:sf-text-gray-900': !hasUnread,
+                'sf-entries-display--unread': hasUnread,
+                'sf-entries-display--read': !hasUnread,
               }
             )}
             onClick={(e) => e.stopPropagation()}
@@ -262,12 +262,12 @@ export default function FormsList({
               );
             })()}>
             {hasUnread && (
-              <span className='sf-bg-blue-500 sf-w-2 sf-h-2 sf-animate-pulse'></span>
+              <span className='sf-entries-display__pulse'></span>
             )}
             {hasUnread ? (
               <>
-                <span className='sf-font-semibold'>{unreadCount}</span>
-                <span className='sf-text-gray-400'>/</span>
+                <span className='sf-entries-display__unread'>{unreadCount}</span>
+                <span className='sf-entries-display__separator'>/</span>
                 <span>{submissionCount}</span>
               </>
             ) : (
@@ -297,7 +297,7 @@ export default function FormsList({
 
         return (
           <time
-            className='sf-text-gray-600 sf-text-sm'
+            className='sf-form-date'
             title={date.toLocaleString()}>
             {displayText}
           </time>
@@ -315,9 +315,9 @@ export default function FormsList({
               e.stopPropagation();
               handleEditForm(form.id);
             }}
-            className='hover:sf-bg-gray-100 sf-p-1 sf-rounded'
+            className='sf-row-action-btn'
             title={__('Edit', 'subtleforms')}>
-            <Icon.Edit className='sf-w-4 sf-h-4 sf-text-gray-600' />
+            <Icon.Edit />
           </button>
           <Dropdown
             renderToggle={({ onToggle }) => (
@@ -326,9 +326,9 @@ export default function FormsList({
                   e.stopPropagation();
                   onToggle();
                 }}
-                className='hover:sf-bg-gray-100 sf-p-1 sf-rounded'
+                className='sf-row-action-btn'
                 title={__('More actions', 'subtleforms')}>
-                <Icon.MoreVertical className='sf-w-4 sf-h-4 sf-text-gray-600' />
+                <Icon.MoreVertical />
               </button>
             )}
             renderContent={({ onClose }) => (
@@ -340,7 +340,7 @@ export default function FormsList({
                     setStatusValue(form.status);
                     onClose();
                   }}>
-                  <div className='sf-flex sf-items-center sf-gap-2'>
+                  <div className='sf-menu-item'>
                     <Icon.CheckCircle className='sf-w-4 sf-h-4' />
                     {__('Change status', 'subtleforms')}
                   </div>
@@ -351,7 +351,7 @@ export default function FormsList({
                     handleDuplicate(form.id);
                     onClose();
                   }}>
-                  <div className='sf-flex sf-items-center sf-gap-2'>
+                  <div className='sf-menu-item'>
                     <Icon.Copy className='sf-w-4 sf-h-4' />
                     {__('Duplicate', 'subtleforms')}
                   </div>
@@ -362,7 +362,7 @@ export default function FormsList({
                     window.location.href = `admin.php?page=subtleforms-submissions&form_id=${form.id}`;
                     onClose();
                   }}>
-                  <div className='sf-flex sf-items-center sf-gap-2'>
+                  <div className='sf-menu-item'>
                     <Icon.Eye className='sf-w-4 sf-h-4' />
                     {__('View submissions', 'subtleforms')}
                   </div>
@@ -374,7 +374,7 @@ export default function FormsList({
                     onClose();
                   }}
                   isDestructive>
-                  <div className='sf-flex sf-items-center sf-gap-2 sf-text-red-600'>
+                  <div className='sf-menu-item sf-menu-item--danger'>
                     <Icon.Delete className='sf-w-4 sf-h-4' />
                     {__('Delete', 'subtleforms')}
                   </div>
@@ -690,14 +690,14 @@ export default function FormsList({
           },
         ]}
         emptyMessage={
-          <div className='sf-py-12 sf-text-center'>
-            <div className='sf-mb-4 sf-text-6xl'>📋</div>
-            <h3 className='sf-mb-2 sf-font-semibold sf-text-gray-900 sf-text-lg'>
+          <div className='sf-empty-state'>
+            <div className='sf-empty-state__emoji'>📋</div>
+            <h3 className='sf-empty-state__title'>
               {searchTerm
                 ? __('No forms found', 'subtleforms')
                 : __('Create your first form', 'subtleforms')}
             </h3>
-            <p className='sf-mb-6 sf-text-gray-600 sf-text-sm'>
+            <p className='sf-empty-state__description'>
               {searchTerm
                 ? __('Try adjusting your search terms', 'subtleforms')
                 : __(
@@ -759,17 +759,15 @@ export default function FormsList({
                 { label: __('Archived', 'subtleforms'), value: 'archived' },
               ]}
             />
-            <div className='sf-flex sf-justify-end sf-items-center sf-gap-3 sf-mt-6'>
+            <div className='sf-modal-actions'>
               <Button
                 variant='tertiary'
-                onClick={() => setStatusModal(null)}
-                className='sf-px-4 sf-h-9 sf-text-sm'>
+                onClick={() => setStatusModal(null)}>
                 {__('Cancel', 'subtleforms')}
               </Button>
               <Button
                 variant='primary'
-                onClick={handleStatusChange}
-                className='sf-px-4 sf-h-9 sf-text-sm'>
+                onClick={handleStatusChange}>
                 {__('Update', 'subtleforms')}
               </Button>
             </div>
