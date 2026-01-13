@@ -1,0 +1,71 @@
+.sf-form-canvas {
+	flex: 1;
+	background-color: #f3f4f6;
+	padding: 2rem;
+	overflow: auto;
+}
+
+.sf-form-canvas__inner {
+	background-color: #ffffff;
+	margin: 0 auto;
+	padding: 3rem;
+	min-height: 500px;
+}
+
+.sf-form-canvas__inner--narrow {
+	max-width: 672px;
+}
+
+.sf-form-canvas__inner--standard {
+	max-width: 768px;
+}
+
+.sf-form-canvas__inner--wide {
+	max-width: 1024px;
+}
+
+.sf-form-canvas__header {
+	margin-bottom: 2rem;
+}
+
+.sf-form-canvas__title {
+	margin: 0 0 0.5rem 0;
+	font-weight: 600;
+	font-size: 1.5rem;
+	line-height: 2rem;
+	color: #111827;
+}
+
+.sf-form-canvas__description {
+	margin: 0;
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+	color: #4b5563;
+}
+
+.sf-form-canvas__empty {
+	padding: 5rem 1.25rem;
+	text-align: center;
+	color: #6b7280;
+}
+
+.sf-form-canvas__empty-icon {
+	display: flex;
+	justify-content: center;
+	margin-bottom: 1rem;
+}
+
+.sf-form-canvas__empty-title {
+	margin: 0 0 0.5rem 0;
+	font-weight: 600;
+	font-size: 1.125rem;
+	line-height: 1.75rem;
+	color: #374151;
+}
+
+.sf-form-canvas__empty-text {
+	margin: 0;
+	font-size: 0.875rem;
+	line-height: 1.25rem;
+	color: #6b7280;
+}

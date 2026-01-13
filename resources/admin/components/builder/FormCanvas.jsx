@@ -2,6 +2,7 @@ import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import FieldList from './FieldList';
 import { getIcon } from './utils/iconMap';
+import './FormCanvas.scss';
 
 export default function FormCanvas({
   schema,
@@ -23,24 +24,20 @@ export default function FormCanvas({
 
   const canvasWidthClass =
     {
-      narrow: 'sf-max-w-2xl',
-      standard: 'sf-max-w-3xl',
-      wide: 'sf-max-w-5xl',
-    }[canvasWidth] || 'sf-max-w-3xl';
+      narrow: 'sf-form-canvas__inner--narrow',
+      standard: 'sf-form-canvas__inner--standard',
+      wide: 'sf-form-canvas__inner--wide',
+    }[canvasWidth] || 'sf-form-canvas__inner--standard';
 
   return (
-    <div className='sf-flex-1 sf-bg-gray-100 sf-p-8 sf-overflow-auto'>
-      <div
-        className={clsx(
-          'sf-bg-white sf-mx-auto sf-p-12 sf-min-h-[500px]',
-          canvasWidthClass
-        )}>
+    <div className='sf-form-canvas'>
+      <div className={clsx('sf-form-canvas__inner', canvasWidthClass)}>
         {/* Form Title */}
-        <div className='sf-mb-8'>
-          <h3 className='sf-m-0 sf-mb-2 sf-font-semibold sf-text-gray-900 sf-text-2xl'>
+        <div className='sf-form-canvas__header'>
+          <h3 className='sf-form-canvas__title'>
             {schema?.metadata?.title || __('Untitled Form', 'subtleforms')}
           </h3>
-          <p className='sf-m-0 sf-text-gray-600 sf-text-sm'>
+          <p className='sf-form-canvas__description'>
             {schema?.metadata?.description ||
               __('Fill out the form below', 'subtleforms')}
           </p>
@@ -48,17 +45,17 @@ export default function FormCanvas({
 
         {/* Empty State */}
         {fields.length === 0 && (
-          <div className='sf-px-5 sf-py-20 sf-text-gray-500 sf-text-center'>
-            <div className='sf-flex sf-justify-center sf-mb-4'>
+          <div className='sf-form-canvas__empty'>
+            <div className='sf-form-canvas__empty-icon'>
               {(() => {
                 const EmptyIcon = getIcon('default');
                 return <EmptyIcon size={56} />;
               })()}
             </div>
-            <h4 className='sf-m-0 sf-mb-2 sf-font-semibold sf-text-gray-700 sf-text-lg'>
+            <h4 className='sf-form-canvas__empty-title'>
               {__('Start Building Your Form', 'subtleforms')}
             </h4>
-            <p className='sf-m-0 sf-text-gray-500 sf-text-sm'>
+            <p className='sf-form-canvas__empty-text'>
               {__('Add fields from the left sidebar to begin', 'subtleforms')}
             </p>
           </div>
