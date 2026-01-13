@@ -26,6 +26,7 @@
 		padding: 0.75rem 1rem;
 		border-bottom: 1px solid #e5e7eb;
 		box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+		flex-shrink: 0; /* CRITICAL: header must not shrink */
 	}
 
 	&__title {
@@ -48,9 +49,10 @@
 	}
 
 	&__content {
-		flex: 1;
+		flex: 1; /* CRITICAL: take remaining space */
+		min-height: 0; /* CRITICAL: allows overflow to work */
 		padding: 1rem 0.75rem;
-		overflow: auto;
+		overflow-y: auto; /* CRITICAL: enable scrolling */
 	}
 
 	&__loading-message {

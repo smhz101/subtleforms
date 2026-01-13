@@ -20,44 +20,44 @@
 		width: 100%;
 		max-width: 300px;
 		padding: 0.625rem 1rem;
-		
+
 		/* Soft, subtle appearance */
 		background-color: #fafafa;
 		border: 1px dashed #d1d5db;
 		border-radius: 6px;
-		
+
 		/* Typography */
 		font-size: 0.875rem;
 		font-weight: 500;
 		color: #6b7280;
-		
+
 		/* Smooth transitions */
 		transition: all 180ms ease-out;
-		
+
 		/* Remove default button styles */
 		cursor: pointer;
 		outline: none;
-		
+
 		/* Hover state - more inviting */
 		&:hover {
 			background-color: #f0f9ff;
 			border-color: #93c5fd;
 			color: #1e40af;
 		}
-		
+
 		/* Active/pressed state */
 		&:active {
 			border-color: #2271b1;
 			background-color: #eff6ff;
 			transform: scale(0.98);
 		}
-		
+
 		/* Focus state for keyboard navigation */
 		&:focus {
 			outline: 2px solid #2271b1;
 			outline-offset: 2px;
 		}
-		
+
 		/* Icon (plus symbol) styling */
 		> span:first-child {
 			display: inline-flex;
@@ -67,7 +67,7 @@
 			opacity: 0.7;
 			transition: opacity 180ms ease-out;
 		}
-		
+
 		/* Icon becomes more prominent on hover */
 		&:hover > span:first-child {
 			opacity: 1;
