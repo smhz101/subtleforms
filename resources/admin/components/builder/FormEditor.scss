@@ -63,9 +63,11 @@ $breakpoint-tablet: 768px;
 
 		// Main canvas scroll area
 		&-scroll {
-			flex: 1;
-			overflow-y: auto;
+			flex: 1; /* CRITICAL: take all remaining vertical space */
+			min-height: 0; /* CRITICAL: allow proper flex shrinking */
+			overflow-y: auto; /* CRITICAL: vertical scroll ownership */
 			overflow-x: hidden;
+			height: 100%; /* Ensure full height within flex container */
 		}
 	}
 
