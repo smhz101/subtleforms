@@ -24,21 +24,21 @@ export default function BuilderCanvasArea({
   return (
     <>
       {saveError && (
-        <div className='sf-bg-red-50 sf-mb-4 sf-px-6 sf-py-3 sf-border-yellow-500 sf-border-b'>
+        <div className='sf-builder-canvas-area__error-banner'>
           <span className='sf-text-red-600 sf-text-xs'>{saveError}</span>
         </div>
       )}
 
       {hasValidationErrors && (
-        <div className='sf-mb-4 sf-px-6'>
+        <div className='sf-builder-canvas-area__validation-notice'>
           <Notice status='warning' isDismissible={false}>
-            <p className='sf-m-0 sf-text-sm'>
+            <p className='sf-builder-canvas-area__validation-text'>
               {__(
                 'Validation issues detected. Publishing is blocked until these are fixed:',
                 'subtleforms'
               )}
             </p>
-            <ul className='sf-m-0 sf-mt-2 sf-pl-5 sf-text-sm'>
+            <ul className='sf-builder-canvas-area__validation-list'>
               {validationErrors.slice(0, 6).map((err, idx) => (
                 <li key={idx}>
                   {err?.message || __('Validation error', 'subtleforms')}
@@ -97,7 +97,7 @@ export default function BuilderCanvasArea({
               />
             )}
             {tab.name === 'entries' && currentFormId && (
-              <div className='sf-p-6 sf-h-full sf-overflow-y-auto'>
+              <div className='sf-builder-canvas-area__entries-container'>
                 <SubmissionsTable
                   formId={currentFormId}
                   showFormColumn={false}
@@ -105,7 +105,7 @@ export default function BuilderCanvasArea({
               </div>
             )}
             {tab.name === 'entries' && !currentFormId && (
-              <div className='sf-p-6 sf-h-full sf-overflow-y-auto'>
+              <div className='sf-builder-canvas-area__entries-container'>
                 <Notice status='info'>
                   {__('Save the form first to view entries', 'subtleforms')}
                 </Notice>

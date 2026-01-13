@@ -32,3 +32,38 @@
 	background-color: #f9fafb;
 	padding: 1.5rem;
 }
+
+// Save error banner
+.sf-builder-canvas-area {
+	&__error-banner {
+		background-color: rgb(254 242 242);
+		margin-bottom: 1rem;
+		padding: 0.75rem 1.5rem;
+		border-bottom: 1px solid rgb(234 179 8);
+	}
+
+	// Validation notice container
+	&__validation-notice {
+		margin-bottom: 1rem;
+		padding: 0 1.5rem;
+	}
+
+	&__validation-text {
+		margin: 0;
+		font-size: 0.875rem;
+	}
+
+	&__validation-list {
+		margin: 0;
+		margin-top: 0.5rem;
+		padding-left: 1.25rem;
+		font-size: 0.875rem;
+	}
+
+	// Entries tab content
+	&__entries-container {
+		padding: 1.5rem;
+		height: 100%;
+		overflow-y: auto;
+	}
+}
