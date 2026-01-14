@@ -130,7 +130,12 @@ export default function FormsPage() {
           try {
             const testData = await testRes.json();
             if (testData.success) {
-              alert(__('A test email has been sent to your admin email.', 'subtleforms'));
+              alert(
+                __(
+                  'A test email has been sent to your admin email.',
+                  'subtleforms'
+                )
+              );
             } else {
               console.warn('Test email response:', testData);
             }
@@ -190,7 +195,8 @@ export default function FormsPage() {
                 <Button
                   isPrimary
                   onClick={() => {
-                    window.location.href = 'admin.php?page=subtleforms-new-form';
+                    window.location.href =
+                      'admin.php?page=subtleforms-new-form';
                   }}>
                   <Icon.Add className='sf-icon-button' />
                   {__('New Form', 'subtleforms')}
