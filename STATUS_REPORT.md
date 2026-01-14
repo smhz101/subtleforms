@@ -27,6 +27,7 @@ SubtleForms is a FREE WordPress form builder plugin with a visual drag-and-drop 
 ### Security Audit & Production Readiness (1 commit)
 
 **WordPress.org Security Compliance**
+
 - ✅ Audited all 22 REST API routes - 100% have permission callbacks
 - ✅ Verified 3-layer security: authentication + capabilities + feature gates
 - ✅ Checked all 7 template files - all use `esc_attr()` correctly
@@ -37,21 +38,24 @@ SubtleForms is a FREE WordPress form builder plugin with a visual drag-and-drop 
 - ✅ Created comprehensive `SECURITY_AUDIT.md` report (13KB)
 
 **Exit Criteria Achieved:**
+
 - Zero critical PHPCS violations
 - No unescaped output paths
 - Reviewer-safe REST API
 - Production-ready codebase
 
 **Files Audited (3000+ lines):**
+
 - src/Api/RestController.php (1567 lines, 19 routes)
 - src/Api/DashboardApi.php (290 lines, 1 route)
 - src/Api/SettingsApi.php (2 routes)
 - src/Repositories/FormsRepository.php (603 lines)
 - src/Repositories/SubmissionsRepository.php
 - src/Repositories/LogsRepository.php
-- templates/admin/*.php (all 7 templates)
+- templates/admin/\*.php (all 7 templates)
 
 **Security Highlights:**
+
 - 3-layer permission system (auth + manage_options + feature gate)
 - All templates use `esc_attr()` for output escaping
 - All queries use prepared statements with placeholders

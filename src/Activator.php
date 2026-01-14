@@ -21,8 +21,12 @@ final class Activator {
 		if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
 			deactivate_plugins( SUBTLEFORMS_PLUGIN_BASENAME );
 			wp_die(
-				'SubtleForms requires PHP 7.4 or higher. Your server is running PHP ' . PHP_VERSION,
-				'Plugin Activation Error',
+				sprintf(
+					/* translators: %s: Current PHP version */
+					esc_html__( 'SubtleForms requires PHP 7.4 or higher. Your server is running PHP %s', 'subtleforms' ),
+					PHP_VERSION
+				),
+				esc_html__( 'Plugin Activation Error', 'subtleforms' ),
 				array( 'back_link' => true )
 			);
 		}
@@ -32,8 +36,12 @@ final class Activator {
 		if ( version_compare( $wp_version, '5.0', '<' ) ) {
 			deactivate_plugins( SUBTLEFORMS_PLUGIN_BASENAME );
 			wp_die(
-				'SubtleForms requires WordPress 5.0 or higher. You are running ' . $wp_version,
-				'Plugin Activation Error',
+				sprintf(
+					/* translators: %s: Current WordPress version */
+					esc_html__( 'SubtleForms requires WordPress 5.0 or higher. You are running %s', 'subtleforms' ),
+					$wp_version
+				),
+				esc_html__( 'Plugin Activation Error', 'subtleforms' ),
 				array( 'back_link' => true )
 			);
 		}
@@ -170,7 +178,7 @@ final class Activator {
 			deactivate_plugins( SUBTLEFORMS_PLUGIN_BASENAME );
 			wp_die(
 				$error_message . '<br><br>Debug info has been logged to your error log.',
-				'Database Creation Error',
+				esc_html__( 'Database Creation Error', 'subtleforms' ),
 				array( 'back_link' => true )
 			);
 		}

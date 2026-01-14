@@ -112,6 +112,35 @@ export default function FormsPage() {
           }
         );
 
+        // Send onboarding test email to admin to validate delivery
+        try {
+          const testRes = await fetch(
+            (window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
+              '/wp-json/subtleforms/v1') + '/onboarding/send-test-email',
+            {
+              method: 'POST',
+              credentials: 'same-origin',
+              headers: {
+                'X-WP-Nonce': window.subtleformsAdmin?.restNonce || '',
+                'Content-Type': 'application/json',
+              },
+            }
+          );
+
+          try {
+            const testData = await testRes.json();
+            if (testData.success) {
+              alert(__('A test email has been sent to your admin email.', 'subtleforms'));
+            } else {
+              console.warn('Test email response:', testData);
+            }
+          } catch (e) {
+            // ignore parse errors
+          }
+        } catch (err) {
+          console.warn('Failed to send onboarding test email:', err);
+        }
+
         // Redirect to builder
         window.location.href = `admin.php?page=subtleforms-builder&id=${createData.id}`;
       }
@@ -137,18 +166,37 @@ export default function FormsPage() {
         noScroll={true}
         actions={
           <div className='sf-forms-actions'>
-            <HelpMenu
-              onOpenWizard={() => setShowWizard(true)}
-              showWizard={true}
-            />
-            <Button
-              isPrimary
-              onClick={() => {
-                window.location.href = 'admin.php?page=subtleforms-new-form';
-              }}>
-              <Icon.Add className='sf-icon-button' />
-              {__('New Form', 'subtleforms')}
-            </Button>
+            {formsCount === 0 ? (
+              <div className='sf-first-run-cta'>
+                <h3 className='sf-first-run-cta__title'>
+                  {__('Create your first form', 'subtleforms')}
+                </h3>
+                <p className='sf-first-run-cta__desc'>
+                  {__(
+                    'Let us help you get started — create a contact form in seconds.',
+                    'subtleforms'
+                  )}
+                </p>
+                <Button isPrimary onClick={() => setShowWizard(true)}>
+                  {__('Create your first form', 'subtleforms')}
+                </Button>
+              </div>
+            ) : (
+              <>
+                <HelpMenu
+                  onOpenWizard={() => setShowWizard(true)}
+                  showWizard={true}
+                />
+                <Button
+                  isPrimary
+                  onClick={() => {
+                    window.location.href = 'admin.php?page=subtleforms-new-form';
+                  }}>
+                  <Icon.Add className='sf-icon-button' />
+                  {__('New Form', 'subtleforms')}
+                </Button>
+              </>
+            )}
           </div>
         }
         actionBarLeft={

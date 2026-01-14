@@ -26,6 +26,7 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
     const required = config.required || false;
     const placeholder = config.placeholder || '';
     const helpText = config.help || '';
+    const inputId = `preview-${field.key || index}`;
 
     switch (field.type) {
       case 'text':
@@ -34,32 +35,36 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
       case 'url':
         return (
           <div key={field.key || index} className='sf-form-preview-field'>
-            <label>
+            <label htmlFor={inputId}>
               {label}
               {required && (
                 <span className='sf-form-preview-field__required'>*</span>
               )}
             </label>
             <input
+              id={inputId}
               type={field.type}
               placeholder={placeholder}
               className='sf-form-preview-field__input'
               disabled
             />
-            {helpText && <p className='sf-form-preview-field__help'>{helpText}</p>}
+            {helpText && (
+              <p className='sf-form-preview-field__help'>{helpText}</p>
+            )}
           </div>
         );
 
       case 'number':
         return (
           <div key={field.key || index} className='sf-form-preview-field'>
-            <label>
+            <label htmlFor={inputId}>
               {label}
               {required && (
                 <span className='sf-form-preview-field__required'>*</span>
               )}
             </label>
             <input
+              id={inputId}
               type='number'
               placeholder={placeholder}
               min={config.min}
@@ -68,26 +73,31 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
               className='sf-form-preview-field__input'
               disabled
             />
-            {helpText && <p className='sf-form-preview-field__help'>{helpText}</p>}
+            {helpText && (
+              <p className='sf-form-preview-field__help'>{helpText}</p>
+            )}
           </div>
         );
 
       case 'textarea':
         return (
           <div key={field.key || index} className='sf-form-preview-field'>
-            <label>
+            <label htmlFor={inputId}>
               {label}
               {required && (
                 <span className='sf-form-preview-field__required'>*</span>
               )}
             </label>
             <textarea
+              id={inputId}
               placeholder={placeholder}
               rows={config.rows || 4}
               className='sf-form-preview-field__input'
               disabled
             />
-            {helpText && <p className='sf-form-preview-field__help'>{helpText}</p>}
+            {helpText && (
+              <p className='sf-form-preview-field__help'>{helpText}</p>
+            )}
           </div>
         );
 
@@ -95,13 +105,16 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
       case 'dropdown':
         return (
           <div key={field.key || index} className='sf-form-preview-field'>
-            <label>
+            <label htmlFor={inputId}>
               {label}
               {required && (
                 <span className='sf-form-preview-field__required'>*</span>
               )}
             </label>
-            <select className='sf-form-preview-field__input' disabled>
+            <select
+              id={inputId}
+              className='sf-form-preview-field__input'
+              disabled>
               <option value=''>
                 {placeholder || __('Select...', 'subtleforms')}
               </option>
@@ -111,7 +124,9 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
                 </option>
               ))}
             </select>
-            {helpText && <p className='sf-form-preview-field__help'>{helpText}</p>}
+            {helpText && (
+              <p className='sf-form-preview-field__help'>{helpText}</p>
+            )}
           </div>
         );
 
@@ -137,7 +152,9 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
                 </label>
               ))}
             </div>
-            {helpText && <p className='sf-form-preview-field__help'>{helpText}</p>}
+            {helpText && (
+              <p className='sf-form-preview-field__help'>{helpText}</p>
+            )}
           </div>
         );
 
@@ -178,7 +195,9 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
                 </label>
               ))}
             </div>
-            {helpText && <p className='sf-form-preview-field__help'>{helpText}</p>}
+            {helpText && (
+              <p className='sf-form-preview-field__help'>{helpText}</p>
+            )}
           </div>
         );
 
@@ -191,8 +210,14 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
                 <span className='sf-form-preview-field__required'>*</span>
               )}
             </label>
-            <input type='date' className='sf-form-preview-field__input' disabled />
-            {helpText && <p className='sf-form-preview-field__help'>{helpText}</p>}
+            <input
+              type='date'
+              className='sf-form-preview-field__input'
+              disabled
+            />
+            {helpText && (
+              <p className='sf-form-preview-field__help'>{helpText}</p>
+            )}
           </div>
         );
 
@@ -205,8 +230,14 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
                 <span className='sf-form-preview-field__required'>*</span>
               )}
             </label>
-            <input type='time' className='sf-form-preview-field__input' disabled />
-            {helpText && <p className='sf-form-preview-field__help'>{helpText}</p>}
+            <input
+              type='time'
+              className='sf-form-preview-field__input'
+              disabled
+            />
+            {helpText && (
+              <p className='sf-form-preview-field__help'>{helpText}</p>
+            )}
           </div>
         );
 
@@ -223,7 +254,9 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
             <div className='sf-form-preview-field__upload'>
               <p>{__('Click to upload or drag and drop', 'subtleforms')}</p>
             </div>
-            {helpText && <p className='sf-form-preview-field__help'>{helpText}</p>}
+            {helpText && (
+              <p className='sf-form-preview-field__help'>{helpText}</p>
+            )}
           </div>
         );
 
@@ -245,7 +278,9 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
               className='sf-form-preview-field__input'
               disabled
             />
-            {helpText && <p className='sf-form-preview-field__help'>{helpText}</p>}
+            {helpText && (
+              <p className='sf-form-preview-field__help'>{helpText}</p>
+            )}
           </div>
         );
     }
@@ -256,7 +291,9 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
       title={
         <div className='sf-form-preview-modal__header'>
           <span>{__('Form Preview', 'subtleforms')}</span>
-          <button onClick={onClose} className='sf-form-preview-modal__close-btn'>
+          <button
+            onClick={onClose}
+            className='sf-form-preview-modal__close-btn'>
             <Icon.Close />
           </button>
         </div>

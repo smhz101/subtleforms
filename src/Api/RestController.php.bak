@@ -316,6 +316,28 @@ final class RestController {
 				'permission_callback' => array( $this, 'check_read_permission' ),
 			)
 		);
+
+		// Form templates endpoint
+		register_rest_route(
+			self::NAMESPACE,
+			'/templates',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_templates' ),
+				'permission_callback' => array( $this, 'check_read_permission' ),
+			)
+		);
+
+		// CSV export endpoint
+		register_rest_route(
+			self::NAMESPACE,
+			'/submissions/export',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'export_submissions_csv' ),
+				'permission_callback' => array( $this, 'check_read_permission' ),
+			)
+		);
 	}
 
 	/**
@@ -375,7 +397,7 @@ final class RestController {
 	/**
 	 * Get a single form.
 	 */
-	public function get_form( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+	public function get_form( WP_REST_Request $request ) {
 		$form = $this->formsRepo->find( $request->get_param( 'id' ) );
 
 		if ( ! $form ) {
@@ -403,21 +425,11 @@ final class RestController {
 	 * @param WP_REST_Request $request
 	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_form_schema( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+	public function get_form_schema( WP_REST_Request $request ) {
 		$formId  = intval( $request->get_param( 'id' ) );
 		$version = $request->get_param( 'version' );
 		$version = $version !== null ? intval( $version ) : null;
 		$context = $request->get_param( 'context' );
-
-		// Check spam protection (honeypot + time trap)
-		if ( \SubtleForms\Engine\SpamProtection::is_enabled() ) {
-			$tempContext = new SubmissionContext( $formId, $payload );
-			if ( \SubtleForms\Engine\SpamProtection::is_spam( $tempContext ) ) {
-				$reason = $tempContext->getMeta( 'spam_reason', 'spam_detected' );
-				error_log( sprintf( 'SubtleForms: Spam blocked (form %d): %s', $formId, $reason ) );
-				return new WP_REST_Response( array( 'success' => true, 'message' => __( 'Thank you.', 'subtleforms' ) ), 200 );
-			}
-		}
 
 		// Verify form exists first
 		$form = $this->formsRepo->find( $formId );
@@ -528,7 +540,7 @@ final class RestController {
 	 *   - Activates the version
 	 *   - Immutable and public
 	 */
-	public function save_form_schema( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+	public function save_form_schema( WP_REST_Request $request ) {
 		$formId = intval( $request->get_param( 'id' ) );
 
 		$form = $this->formsRepo->find( $formId );
@@ -646,7 +658,7 @@ final class RestController {
 	/**
 	 * Update a form.
 	 */
-	public function update_form( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+	public function update_form( WP_REST_Request $request ) {
 		$id   = $request->get_param( 'id' );
 		$form = $this->formsRepo->find( $id );
 
@@ -754,7 +766,7 @@ final class RestController {
 	/**
 	 * Delete a form.
 	 */
-	public function delete_form( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+	public function delete_form( WP_REST_Request $request ) {
 		$id   = $request->get_param( 'id' );
 		$form = $this->formsRepo->find( $id );
 
@@ -836,7 +848,7 @@ final class RestController {
 	/**
 	 * Get a single submission (v0.9.1: auto-marks as read).
 	 */
-	public function get_submission( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+	public function get_submission( WP_REST_Request $request ) {
 		$submission = $this->submissionsRepo->find( $request->get_param( 'id' ) );
 
 		if ( ! $submission ) {
@@ -875,7 +887,7 @@ final class RestController {
 	/**
 	 * Update a submission (v0.9.1: for status changes).
 	 */
-	public function update_submission( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+	public function update_submission( WP_REST_Request $request ) {
 		$id         = intval( $request->get_param( 'id' ) );
 		$submission = $this->submissionsRepo->find( $id );
 
@@ -903,7 +915,7 @@ final class RestController {
 	/**
 	 * Get adjacent submission IDs (v0.9.4).
 	 */
-	public function get_adjacent_submissions( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+	public function get_adjacent_submissions( WP_REST_Request $request ) {
 		$id     = intval( $request->get_param( 'id' ) );
 		$formId = $request->get_param( 'form_id' ) ? intval( $request->get_param( 'form_id' ) ) : null;
 
@@ -920,7 +932,7 @@ final class RestController {
 	/**
 	 * Get execution logs for a submission.
 	 */
-	public function get_submission_logs( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+	public function get_submission_logs( WP_REST_Request $request ) {
 		$submissionId = intval( $request->get_param( 'id' ) );
 
 		$submission = $this->submissionsRepo->find( $submissionId );
@@ -946,7 +958,7 @@ final class RestController {
 	/**
 	 * Get unread submissions count.
 	 */
-	public function get_unread_count( WP_REST_Request $request ): WP_REST_Response|WP_Error {
+	public function get_unread_count( WP_REST_Request $request ) {
 		try {
 			$unreadCount = $this->submissionsRepo->count( array( 'status' => 'unread' ) );
 
@@ -1404,6 +1416,149 @@ final class RestController {
 			array(
 				'success'   => true,
 				'completed' => $completed,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Get form templates.
+	 */
+	public function get_templates( WP_REST_Request $request ): WP_REST_Response {
+		$templates = \SubtleForms\Templates\FormTemplates::get_all();
+
+		return new WP_REST_Response(
+			array(
+				'success'   => true,
+				'templates' => $templates,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Export submissions as CSV.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response Response with CSV data.
+	 */
+	public function export_submissions_csv( WP_REST_Request $request ): WP_REST_Response {
+		$params = $request->get_json_params();
+
+		// Build query args from request
+		$args = array(
+			'form_id' => isset( $params['form_id'] ) ? intval( $params['form_id'] ) : null,
+			'status'  => isset( $params['status'] ) ? Helpers::safe_sanitize_text( $params['status'] ) : null,
+			'search'  => isset( $params['search'] ) ? Helpers::safe_sanitize_text( $params['search'] ) : null,
+			'orderby' => 'created_at',
+			'order'   => 'DESC',
+			'limit'   => 10000, // Max export limit
+		);
+
+		// Remove null values
+		$args = array_filter( $args, fn( $value ) => $value !== null );
+
+		$submissions = $this->submissionsRepo->findAll( $args );
+
+		if ( empty( $submissions ) ) {
+			return new WP_REST_Response(
+				array(
+					'success' => false,
+					'message' => __( 'No submissions to export', 'subtleforms' ),
+				),
+				200
+			);
+		}
+
+		// Build CSV data
+		$csv_data = array();
+
+		// Determine all field keys from first submission
+		$first_submission = $submissions[0];
+		$payload          = is_string( $first_submission['payload'] )
+			? json_decode( $first_submission['payload'], true )
+			: $first_submission['payload'];
+
+		// CSV Headers
+		$headers = array(
+			__( 'ID', 'subtleforms' ),
+			__( 'Form ID', 'subtleforms' ),
+			__( 'Status', 'subtleforms' ),
+			__( 'Submitted At', 'subtleforms' ),
+		);
+
+		// Add field headers from payload
+		if ( is_array( $payload ) ) {
+			foreach ( array_keys( $payload ) as $field_key ) {
+				// Skip honeypot fields
+				if ( in_array( $field_key, array( 'website_url', 'form_rendered_at' ), true ) ) {
+					continue;
+				}
+				$headers[] = ucwords( str_replace( '_', ' ', $field_key ) );
+			}
+		}
+
+		$csv_data[] = $headers;
+
+		// Add submission rows
+		foreach ( $submissions as $submission ) {
+			$payload = is_string( $submission['payload'] )
+				? json_decode( $submission['payload'], true )
+				: $submission['payload'];
+
+			$row = array(
+				$submission['id'],
+				$submission['form_id'],
+				$submission['status'],
+				$submission['created_at'],
+			);
+
+			// Add field values
+			if ( is_array( $payload ) ) {
+				foreach ( array_keys( $first_submission['payload'] ) as $field_key ) {
+					// Skip honeypot fields
+					if ( in_array( $field_key, array( 'website_url', 'form_rendered_at' ), true ) ) {
+						continue;
+					}
+
+					$value = $payload[ $field_key ] ?? '';
+
+					// Handle arrays (checkboxes, multi-select)
+					if ( is_array( $value ) ) {
+						$value = implode( ', ', $value );
+					}
+
+					$row[] = $value;
+				}
+			}
+
+			$csv_data[] = $row;
+		}
+
+		// Convert to CSV string with UTF-8 BOM for Excel compatibility
+		$csv_string = "\xEF\xBB\xBF"; // UTF-8 BOM
+
+		foreach ( $csv_data as $row ) {
+			// Escape values and wrap in quotes
+			$escaped_row = array_map(
+				function ( $value ) {
+					$value = str_replace( '"', '""', $value ); // Escape quotes
+					return '"' . $value . '"';
+				},
+				$row
+			);
+
+			$csv_string .= implode( ',', $escaped_row ) . "\r\n";
+		}
+
+		// Generate filename
+		$filename = 'subtleforms-submissions-' . gmdate( 'Y-m-d-His' ) . '.csv';
+
+		return new WP_REST_Response(
+			array(
+				'success'  => true,
+				'csv'      => base64_encode( $csv_string ),
+				'filename' => $filename,
 			),
 			200
 		);

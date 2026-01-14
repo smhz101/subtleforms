@@ -6,6 +6,8 @@
  * Version: 1.5.0
  * Author: Muzammil Hussain
  * Requires PHP: 7.4
+ * Text Domain: subtleforms
+ * Domain Path: /languages
  */
 
 /**
@@ -20,7 +22,7 @@
 
 // If this file is called directly, abort.
 if ( ! defined( 'ABSPATH' ) ) {
-	wp_die( 'Direct access not allowed.' );
+	wp_die( esc_html__( 'Direct access not allowed.', 'subtleforms' ) );
 }
 
 // Define plugin constants.
@@ -53,6 +55,9 @@ register_deactivation_hook(
 add_action(
 	'plugins_loaded',
 	function () {
+		// Load text domain for translations
+		load_plugin_textdomain( 'subtleforms', false, dirname( SUBTLEFORMS_PLUGIN_BASENAME ) . '/languages' );
+
 		// Check for DB updates
 		$installed_version = get_option( 'subtleforms_version' );
 		if ( version_compare( $installed_version, SUBTLEFORMS_VERSION, '<' ) ) {

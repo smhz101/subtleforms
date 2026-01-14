@@ -257,6 +257,15 @@ final class RestController {
 		// Onboarding endpoints
 		register_rest_route(
 			self::NAMESPACE,
+			'/onboarding/send-test-email',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'send_onboarding_test_email' ),
+				'permission_callback' => array( $this, 'check_write_permission' ),
+			),
+		);
+		register_rest_route(
+			self::NAMESPACE,
 			'/onboarding/dismiss',
 			array(
 				'methods'             => 'POST',
@@ -401,7 +410,7 @@ final class RestController {
 		$form = $this->formsRepo->find( $request->get_param( 'id' ) );
 
 		if ( ! $form ) {
-			return new WP_Error( 'form_not_found', 'Form not found', array( 'status' => 404 ) );
+			return new WP_Error( 'form_not_found', __( 'Form not found', 'subtleforms' ), array( 'status' => 404 ) );
 		}
 
 		return new WP_REST_Response( $form, 200 );
@@ -434,7 +443,7 @@ final class RestController {
 		// Verify form exists first
 		$form = $this->formsRepo->find( $formId );
 		if ( ! $form ) {
-			return new WP_Error( 'form_not_found', 'Form not available', array( 'status' => 404 ) );
+			return new WP_Error( 'form_not_found', __( 'Form not available', 'subtleforms' ), array( 'status' => 404 ) );
 		}
 
 		$isAuthenticated = is_user_logged_in() && current_user_can( 'edit_posts' );
@@ -444,7 +453,7 @@ final class RestController {
 		// PUBLIC ACCESS (unauthenticated): Only active schema for published forms
 		if ( ! $isAuthenticated ) {
 			if ( ! $isPublished ) {
-				return new WP_Error( 'form_not_available', 'Form not available', array( 'status' => 404 ) );
+				return new WP_Error( 'form_not_available', __( 'Form not available', 'subtleforms' ), array( 'status' => 404 ) );
 			}
 
 			// Load active schema only
@@ -452,11 +461,11 @@ final class RestController {
 				$schema = $this->formsRepo->loadSchemaVersion( $formId, $version );
 			} catch ( \RuntimeException $e ) {
 				error_log( 'SubtleForms API Error: ' . $e->getMessage() );
-				return new WP_Error( 'schema_not_available', 'Schema not available', array( 'status' => 404 ) );
+				return new WP_Error( 'schema_not_available', __( 'Schema not available', 'subtleforms' ), array( 'status' => 404 ) );
 			}
 
 			if ( ! $schema ) {
-				return new WP_Error( 'schema_not_available', 'Schema not available', array( 'status' => 404 ) );
+				return new WP_Error( 'schema_not_available', __( 'Schema not available', 'subtleforms' ), array( 'status' => 404 ) );
 			}
 
 			return new WP_REST_Response(
@@ -545,7 +554,7 @@ final class RestController {
 
 		$form = $this->formsRepo->find( $formId );
 		if ( ! $form ) {
-			return new WP_Error( 'form_not_found', 'Form not found', array( 'status' => 404 ) );
+			return new WP_Error( 'form_not_found', __( 'Form not found', 'subtleforms' ), array( 'status' => 404 ) );
 		}
 
 		$params = $request->get_json_params();
@@ -555,7 +564,7 @@ final class RestController {
 		$activate = isset( $params['activate'] ) && $params['activate'] === true;
 
 		if ( ! is_array( $schema ) ) {
-			return new WP_Error( 'invalid_schema', 'Schema must be a JSON object', array( 'status' => 400 ) );
+			return new WP_Error( 'invalid_schema', __( 'Schema must be a JSON object', 'subtleforms' ), array( 'status' => 400 ) );
 		}
 
 		// Task 5.5: Structured validation errors for builder UI
@@ -589,7 +598,7 @@ final class RestController {
 				$savedSchema = $this->formsRepo->loadSchemaVersion( $formId, $version );
 				if ( ! $savedSchema ) {
 					error_log( sprintf( 'SubtleForms: Failed to load just-saved schema version %d for form %d', $version, $formId ) );
-					return new WP_Error( 'save_verification_failed', 'Schema was saved but could not be loaded back', array( 'status' => 500 ) );
+					return new WP_Error( 'save_verification_failed', __( 'Schema was saved but could not be loaded back', 'subtleforms' ), array( 'status' => 500 ) );
 				}
 
 				return new WP_REST_Response(
@@ -604,7 +613,7 @@ final class RestController {
 				$success = $this->formsRepo->saveDraftSchema( $formId, $schema );
 
 				if ( ! $success ) {
-					return new WP_Error( 'save_failed', 'Failed to save draft schema', array( 'status' => 500 ) );
+					return new WP_Error( 'save_failed', __( 'Failed to save draft schema', 'subtleforms' ), array( 'status' => 500 ) );
 				}
 
 				return new WP_REST_Response(
@@ -663,7 +672,7 @@ final class RestController {
 		$form = $this->formsRepo->find( $id );
 
 		if ( ! $form ) {
-			return new WP_Error( 'form_not_found', 'Form not found', array( 'status' => 404 ) );
+			return new WP_Error( 'form_not_found', __( 'Form not found', 'subtleforms' ), array( 'status' => 404 ) );
 		}
 
 		$data = array_filter(
@@ -771,7 +780,7 @@ final class RestController {
 		$form = $this->formsRepo->find( $id );
 
 		if ( ! $form ) {
-			return new WP_Error( 'form_not_found', 'Form not found', array( 'status' => 404 ) );
+			return new WP_Error( 'form_not_found', __( 'Form not found', 'subtleforms' ), array( 'status' => 404 ) );
 		}
 
 		$this->formsRepo->delete( $id );
@@ -852,7 +861,7 @@ final class RestController {
 		$submission = $this->submissionsRepo->find( $request->get_param( 'id' ) );
 
 		if ( ! $submission ) {
-			return new WP_Error( 'submission_not_found', 'Submission not found', array( 'status' => 404 ) );
+			return new WP_Error( 'submission_not_found', __( 'Submission not found', 'subtleforms' ), array( 'status' => 404 ) );
 		}
 
 		// Auto-mark as read when viewed
@@ -892,7 +901,7 @@ final class RestController {
 		$submission = $this->submissionsRepo->find( $id );
 
 		if ( ! $submission ) {
-			return new WP_Error( 'submission_not_found', 'Submission not found', array( 'status' => 404 ) );
+			return new WP_Error( 'submission_not_found', __( 'Submission not found', 'subtleforms' ), array( 'status' => 404 ) );
 		}
 
 		$params = $request->get_json_params();
@@ -904,7 +913,7 @@ final class RestController {
 		);
 
 		if ( empty( $data ) ) {
-			return new WP_Error( 'no_changes', 'No valid changes provided', array( 'status' => 400 ) );
+			return new WP_Error( 'no_changes', __( 'No valid changes provided', 'subtleforms' ), array( 'status' => 400 ) );
 		}
 
 		$this->submissionsRepo->update( $id, $data );
@@ -921,7 +930,7 @@ final class RestController {
 
 		$submission = $this->submissionsRepo->find( $id );
 		if ( ! $submission ) {
-			return new WP_Error( 'submission_not_found', 'Submission not found', array( 'status' => 404 ) );
+			return new WP_Error( 'submission_not_found', __( 'Submission not found', 'subtleforms' ), array( 'status' => 404 ) );
 		}
 
 		$adjacent = $this->submissionsRepo->getAdjacentIds( $id, $formId );
@@ -937,7 +946,7 @@ final class RestController {
 
 		$submission = $this->submissionsRepo->find( $submissionId );
 		if ( ! $submission ) {
-			return new WP_Error( 'submission_not_found', 'Submission not found', array( 'status' => 404 ) );
+			return new WP_Error( 'submission_not_found', __( 'Submission not found', 'subtleforms' ), array( 'status' => 404 ) );
 		}
 
 		// Use LogsRepository to fetch logs
@@ -970,7 +979,7 @@ final class RestController {
 				200
 			);
 		} catch ( \Exception $e ) {
-			return new WP_Error( 'count_error', 'Error fetching unread count', array( 'status' => 500 ) );
+			return new WP_Error( 'count_error', __( 'Error fetching unread count', 'subtleforms' ), array( 'status' => 500 ) );
 		}
 	}
 
@@ -1005,7 +1014,7 @@ final class RestController {
 		// Verify form exists
 		$form = $this->formsRepo->find( $formId );
 		if ( ! $form ) {
-			return new WP_Error( 'form_not_found', 'Form not found', array( 'status' => 404 ) );
+			return new WP_Error( 'form_not_found', __( 'Form not found', 'subtleforms' ), array( 'status' => 404 ) );
 		}
 
 		// Resolve active schema version for this form and attach to submission
@@ -1124,7 +1133,7 @@ final class RestController {
 			} catch ( \Throwable $e ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
 				error_log( 'SubtleForms: Unexpected error in submission ' . $submissionId . ': ' . $e->getMessage() );
-				return new WP_Error( 'pipeline_failed', 'An unexpected error occurred', array( 'status' => 500 ) );
+				return new WP_Error( 'pipeline_failed', __( 'An unexpected error occurred', 'subtleforms' ), array( 'status' => 500 ) );
 			}
 
 			if ( ! $result->ok ) {
@@ -1315,6 +1324,28 @@ final class RestController {
 			),
 			200
 		);
+	}
+
+	/**
+	 * Send a test email to admin_email to validate email delivery
+	 */
+	public function send_onboarding_test_email( WP_REST_Request $request ): WP_REST_Response {
+		try {
+			$settings = new \SubtleForms\Support\Settings();
+			$to = $settings->getAdminEmail();
+			$subject = __( 'SubtleForms: Test email', 'subtleforms' );
+			$message = __( 'This is a test email sent from SubtleForms to verify delivery to your admin email address.', 'subtleforms' );
+
+			$sent = \SubtleForms\Support\Mailer::send( $to, $subject, $message );
+
+			if ( $sent ) {
+				return new WP_REST_Response( array( 'success' => true ), 200 );
+			} else {
+				return new WP_REST_Response( array( 'success' => false, 'message' => __( 'Failed to send test email', 'subtleforms' ) ), 200 );
+			}
+		} catch ( \Exception $e ) {
+			return new WP_REST_Response( array( 'success' => false, 'message' => $e->getMessage() ), 500 );
+		}
 	}
 
 	/**

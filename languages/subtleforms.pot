@@ -9,13 +9,17 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-01-10T01:23:59+00:00\n"
+"POT-Creation-Date: 2026-01-14T12:41:55+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: subtleforms\n"
 
 #. Plugin Name of the plugin
 #: subtleforms.php
+#: build/admin/admin.js:1
+#: build/blocks/form/index.js:1
+#: resources/admin/components/AdminHeader.jsx:135
+#: resources/admin/components/AdminHeader.jsx:136
 #: resources/blocks/form/edit.jsx:205
 #: resources/blocks/form/edit.jsx:280
 msgid "SubtleForms"
@@ -31,7 +35,27 @@ msgstr ""
 msgid "Muzammil Hussain"
 msgstr ""
 
+#. translators: %s: Current PHP version
+#: src/Activator.php:26
+msgid "SubtleForms requires PHP 7.4 or higher. Your server is running PHP %s"
+msgstr ""
+
+#: src/Activator.php:29
+#: src/Activator.php:44
+msgid "Plugin Activation Error"
+msgstr ""
+
+#. translators: %s: Current WordPress version
+#: src/Activator.php:41
+msgid "SubtleForms requires WordPress 5.0 or higher. You are running %s"
+msgstr ""
+
+#: src/Activator.php:181
+msgid "Database Creation Error"
+msgstr ""
+
 #: src/Admin/AdminMenu.php:65
+#: build/admin/admin.js:1
 #: resources/admin/pages/DashboardPage.jsx:80
 msgid "Dashboard"
 msgstr ""
@@ -43,15 +67,17 @@ msgstr ""
 
 #: src/Admin/AdminMenu.php:98
 #: src/Admin/AdminMenu.php:99
-#: src/Admin/AdminMenu.php:694
-#: src/Admin/AdminMenu.php:720
+#: src/Admin/AdminMenu.php:686
+#: src/Admin/AdminMenu.php:712
 msgid "Subtle Forms"
 msgstr ""
 
 #: src/Admin/AdminMenu.php:120
 #: src/Admin/AdminMenu.php:121
+#: build/admin/admin.js:1
+#: build/admin/admin.js:11
 #: resources/admin/pages/DashboardPage.jsx:84
-#: resources/admin/pages/FormsPage.jsx:135
+#: resources/admin/pages/FormsPage.jsx:136
 msgid "All Forms"
 msgstr ""
 
@@ -66,127 +92,177 @@ msgstr ""
 
 #: src/Admin/AdminMenu.php:151
 #: src/Admin/AdminMenu.php:152
-#: resources/admin/pages/ExtensionsPage.jsx:194
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:195
 msgid "Extensions"
 msgstr ""
 
 #: src/Admin/AdminMenu.php:161
 #: src/Admin/AdminMenu.php:162
+#: build/admin/admin.js:1
+#: build/admin/admin.js:18
+#: build/admin/admin.js:19
 #: resources/admin/components/builder/FieldInspector.jsx:39
-#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:85
+#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:73
 #: resources/admin/pages/DashboardPage.jsx:94
 #: resources/admin/pages/SettingsPage.jsx:306
 msgid "Settings"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:251
+#: src/Admin/AdminMenu.php:243
 msgid "Are you sure you want to delete this item?"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:252
+#: src/Admin/AdminMenu.php:244
 msgid "An error occurred. Please try again."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:253
-#: src/Admin/AdminMenu.php:572
+#: src/Admin/AdminMenu.php:245
+#: src/Admin/AdminMenu.php:564
 msgid "Action completed successfully."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:331
+#: src/Admin/AdminMenu.php:323
 msgid "Security check failed."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:355
-#: src/Admin/AdminMenu.php:368
-#: src/Admin/AdminMenu.php:387
-#: src/Admin/AdminMenu.php:409
-#: src/Admin/AdminMenu.php:434
-#: src/Admin/AdminMenu.php:445
+#: src/Admin/AdminMenu.php:347
+#: src/Admin/AdminMenu.php:360
+#: src/Admin/AdminMenu.php:379
+#: src/Admin/AdminMenu.php:401
+#: src/Admin/AdminMenu.php:426
+#: src/Admin/AdminMenu.php:437
 msgid "You do not have permission to access this page."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:397
-#: src/Admin/AdminMenu.php:500
+#: src/Admin/AdminMenu.php:389
+#: src/Admin/AdminMenu.php:492
 msgid "Form not found."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:473
-#: src/Admin/AdminMenu.php:495
-#: src/Admin/AdminMenu.php:528
+#: src/Admin/AdminMenu.php:465
+#: src/Admin/AdminMenu.php:487
+#: src/Admin/AdminMenu.php:520
 msgid "Invalid request."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:580
-#: resources/admin/pages/ExtensionsPage.jsx:24
-#: resources/admin/pages/ExtensionsPage.jsx:55
+#: src/Admin/AdminMenu.php:572
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:25
+#: resources/admin/pages/ExtensionsPage.jsx:56
 msgid "Coming Soon"
 msgstr ""
 
 #. translators: %s: Name of the interface being developed
-#: src/Admin/AdminMenu.php:584
+#: src/Admin/AdminMenu.php:576
 msgid "The %s interface is under development."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:588
+#: src/Admin/AdminMenu.php:580
 msgid "This is a placeholder. Template files will be created in the templates/admin/ directory."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:593
+#: src/Admin/AdminMenu.php:585
 msgid "Your Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:597
+#: src/Admin/AdminMenu.php:589
 #: src/Fields/CoreFields.php:1089
 #: src/Fields/CoreFields.php:1115
 #: src/Fields/CoreFields.php:1274
 msgid "Title"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:598
+#: src/Admin/AdminMenu.php:590
 #: src/Api/RestController.php:1486
 #: src/Privacy/PrivacyExporter.php:96
-#: resources/admin/components/FormsList.jsx:177
+#: build/admin/admin.js:5
+#: build/admin/admin.js:11
+#: build/admin/admin.js:13
+#: build/admin/admin.js:16
+#: build/admin/admin.js:18
+#: resources/admin/components/FormsList.jsx:172
 #: resources/admin/components/FormsList.jsx:753
-#: resources/admin/components/SubmissionsTable.jsx:443
-#: resources/admin/pages/SubmissionDetailPage.jsx:479
-#: resources/admin/pages/SubmissionDetailPage.jsx:601
+#: resources/admin/components/SubmissionsTable.jsx:453
+#: resources/admin/pages/SubmissionDetailPage.jsx:480
+#: resources/admin/pages/SubmissionDetailPage.jsx:602
 msgid "Status"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:599
-#: resources/admin/pages/SubmissionDetailPage.jsx:471
+#: src/Admin/AdminMenu.php:591
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:472
 msgid "Created"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:600
-#: resources/admin/components/FormsList.jsx:309
-#: resources/admin/components/SubmissionsTable.jsx:487
+#: src/Admin/AdminMenu.php:592
+#: build/admin/admin.js:6
+#: build/admin/admin.js:13
+#: resources/admin/components/FormsList.jsx:295
+#: resources/admin/components/SubmissionsTable.jsx:496
 msgid "Actions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:625
-#: resources/admin/components/builder/ContainerWrapper.jsx:79
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:317
+#: src/Admin/AdminMenu.php:617
+#: build/admin/admin.js:6
+#: build/admin/admin.js:7
+#: build/admin/admin.js:13
+#: build/admin/admin.js:18
+#: build/admin/admin.js:19
+#: resources/admin/components/builder/ContainerWrapper.jsx:77
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:318
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:52
-#: resources/admin/components/FormsList.jsx:379
-#: resources/admin/components/FormsList.jsx:687
-#: resources/admin/components/SubmissionsTable.jsx:507
-#: resources/admin/components/SubmissionsTable.jsx:548
+#: resources/admin/components/FormsList.jsx:365
+#: resources/admin/components/FormsList.jsx:684
+#: resources/admin/components/SubmissionsTable.jsx:516
+#: resources/admin/components/SubmissionsTable.jsx:557
 msgid "Delete"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:639
+#: src/Admin/AdminMenu.php:631
+#: build/admin/admin.js:1
 #: resources/admin/pages/DashboardPage.jsx:102
 msgid "Total Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:643
+#: src/Admin/AdminMenu.php:635
 msgid "Active Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:647
+#: src/Admin/AdminMenu.php:639
+#: build/admin/admin.js:1
 #: resources/admin/pages/DashboardPage.jsx:109
 msgid "Total Submissions"
+msgstr ""
+
+#: src/Api/RestController.php:404
+#: src/Api/RestController.php:548
+#: src/Api/RestController.php:666
+#: src/Api/RestController.php:774
+#: src/Api/RestController.php:1008
+msgid "Form not found"
+msgstr ""
+
+#: src/Api/RestController.php:437
+#: src/Api/RestController.php:447
+msgid "Form not available"
+msgstr ""
+
+#: src/Api/RestController.php:455
+#: src/Api/RestController.php:459
+msgid "Schema not available"
+msgstr ""
+
+#: src/Api/RestController.php:558
+msgid "Schema must be a JSON object"
+msgstr ""
+
+#: src/Api/RestController.php:592
+msgid "Schema was saved but could not be loaded back"
+msgstr ""
+
+#: src/Api/RestController.php:607
+msgid "Failed to save draft schema"
 msgstr ""
 
 #: src/Api/RestController.php:830
@@ -196,8 +272,30 @@ msgstr ""
 msgid "Unknown Form"
 msgstr ""
 
+#: src/Api/RestController.php:855
+#: src/Api/RestController.php:895
+#: src/Api/RestController.php:924
+#: src/Api/RestController.php:940
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:143
+#: resources/admin/pages/SubmissionDetailPage.jsx:167
+msgid "Submission not found"
+msgstr ""
+
+#: src/Api/RestController.php:907
+msgid "No valid changes provided"
+msgstr ""
+
+#: src/Api/RestController.php:973
+msgid "Error fetching unread count"
+msgstr ""
+
 #: src/Api/RestController.php:1001
 msgid "Thank you."
+msgstr ""
+
+#: src/Api/RestController.php:1127
+msgid "An unexpected error occurred"
 msgstr ""
 
 #: src/Api/RestController.php:1467
@@ -205,13 +303,16 @@ msgid "No submissions to export"
 msgstr ""
 
 #: src/Api/RestController.php:1484
-#: resources/admin/components/SubmissionsTable.jsx:425
-#: resources/admin/pages/SubmissionDetailPage.jsx:591
+#: build/admin/admin.js:13
+#: build/admin/admin.js:18
+#: resources/admin/components/SubmissionsTable.jsx:435
+#: resources/admin/pages/SubmissionDetailPage.jsx:592
 msgid "ID"
 msgstr ""
 
 #: src/Api/RestController.php:1485
-#: resources/admin/pages/SubmissionDetailPage.jsx:463
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:464
 msgid "Form ID"
 msgstr ""
 
@@ -310,7 +411,8 @@ msgstr ""
 #: src/Fields/CoreFields.php:1065
 #: src/Fields/CoreFields.php:1431
 #: src/Fields/CoreFields.php:1543
-#: resources/admin/components/OnboardingWizard.jsx:469
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:466
 msgid "Required"
 msgstr ""
 
@@ -320,7 +422,9 @@ msgid "Max Length"
 msgstr ""
 
 #: src/Fields/CoreFields.php:73
-#: resources/admin/components/OnboardingWizard.jsx:86
+#: build/admin/admin.js:11
+#: build/admin/admin.js:22
+#: resources/admin/components/OnboardingWizard.jsx:87
 #: resources/admin/utils/initialSchema.js:162
 #: resources/admin/utils/initialSchema.js:211
 msgid "Email"
@@ -368,14 +472,19 @@ msgstr ""
 #: src/Fields/CoreFields.php:1260
 #: src/Fields/CoreFields.php:1267
 #: src/Fields/CoreFields.php:1448
+#: build/admin/admin.js:11
+#: build/admin/admin.js:18
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
 #: resources/admin/components/builder/ContainerRenderer.jsx:19
-#: resources/admin/components/OnboardingWizard.jsx:559
+#: resources/admin/components/OnboardingWizard.jsx:556
 #: resources/frontend/components/StepNavigation.jsx:26
 msgid "Step"
 msgstr ""
 
 #: src/Fields/CoreFields.php:215
-#: resources/admin/components/OnboardingWizard.jsx:114
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:115
 msgid "Phone"
 msgstr ""
 
@@ -423,6 +532,7 @@ msgstr ""
 #: src/Fields/CoreFields.php:403
 #: src/Fields/CoreFields.php:435
 #: src/Fields/CoreFields.php:477
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FieldInspector.jsx:208
 msgid "Options"
 msgstr ""
@@ -476,7 +586,8 @@ msgid "Max Date"
 msgstr ""
 
 #: src/Fields/CoreFields.php:605
-#: resources/admin/pages/SubmissionDetailPage.jsx:553
+#: build/admin/admin.js:18
+#: resources/admin/pages/SubmissionDetailPage.jsx:554
 msgid "Time"
 msgstr ""
 
@@ -506,7 +617,8 @@ msgid "File Upload"
 msgstr ""
 
 #: src/Fields/CoreFields.php:735
-#: resources/admin/components/OnboardingWizard.jsx:123
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:124
 msgid "Rating"
 msgstr ""
 
@@ -575,7 +687,8 @@ msgid "Hidden"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1012
-#: resources/admin/components/builder/ConditionEditor.jsx:109
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:108
 msgid "Value"
 msgstr ""
 
@@ -590,8 +703,10 @@ msgstr ""
 #: src/Fields/CoreFields.php:1094
 #: src/Fields/CoreFields.php:1279
 #: src/Fields/CoreFields.php:1579
+#: build/admin/admin.js:5
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FieldInspector.jsx:110
-#: resources/admin/modals/CreateFormModal.jsx:353
+#: resources/admin/modals/CreateFormModal.jsx:340
 msgid "Description"
 msgstr ""
 
@@ -610,26 +725,30 @@ msgstr ""
 #: src/Fields/CoreFields.php:1168
 #: src/Fields/CoreFields.php:1221
 #: src/Fields/CoreFields.php:1249
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FieldInspector.jsx:159
 msgid "Spacing (px)"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1190
-#: resources/admin/components/builder/ContainerWrapper.jsx:50
+#: resources/admin/components/builder/ContainerWrapper.jsx:48
 msgid "Repeat Container"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1206
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FieldInspector.jsx:141
 msgid "Min Repeats"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1211
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FieldInspector.jsx:149
 msgid "Max Repeats"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1216
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FieldInspector.jsx:134
 msgid "Button Label"
 msgstr ""
@@ -670,8 +789,9 @@ msgid "Save & Resume"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1386
-#: resources/admin/pages/DashboardPage.jsx:414
-#: resources/admin/pages/DashboardPage.jsx:424
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:400
+#: resources/admin/pages/DashboardPage.jsx:410
 msgid "Enabled"
 msgstr ""
 
@@ -716,14 +836,20 @@ msgid "Coupon Code"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1520
-#: resources/admin/components/builder/FieldRenderer.jsx:231
-#: resources/frontend/components/FieldRenderer.jsx:295
+#: build/admin/admin.js:18
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/admin/components/builder/FieldRenderer.jsx:237
+#: resources/frontend/components/FieldRenderer.jsx:306
 msgid "Enter coupon code"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1521
-#: resources/admin/components/builder/FieldRenderer.jsx:239
-#: resources/frontend/components/FieldRenderer.jsx:310
+#: build/admin/admin.js:18
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/admin/components/builder/FieldRenderer.jsx:245
+#: resources/frontend/components/FieldRenderer.jsx:321
 msgid "Apply"
 msgstr ""
 
@@ -740,7 +866,8 @@ msgid "Internal label for reference"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1573
-#: resources/admin/components/OnboardingWizard.jsx:148
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:149
 msgid "Amount"
 msgstr ""
 
@@ -1572,8 +1699,10 @@ msgid "Error deleting submission #%1$d: %2$s"
 msgstr ""
 
 #: src/Privacy/PrivacyExporter.php:88
+#: build/admin/admin.js:5
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:166
-#: resources/admin/components/FormsList.jsx:110
+#: resources/admin/components/FormsList.jsx:111
 msgid "Form Name"
 msgstr ""
 
@@ -1582,7 +1711,8 @@ msgid "Submission Date"
 msgstr ""
 
 #: src/Privacy/PrivacyExporter.php:122
-#: resources/admin/pages/SubmissionsPage.jsx:76
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionsPage.jsx:77
 msgid "Form Submissions"
 msgstr ""
 
@@ -1628,7 +1758,8 @@ msgid "<p>Form submissions may trigger email notifications which are sent throug
 msgstr ""
 
 #: src/Templates/FormTemplates.php:51
-#: resources/admin/components/OnboardingWizard.jsx:10
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:11
 msgid "Contact Form"
 msgstr ""
 
@@ -1645,7 +1776,9 @@ msgid "Get in touch with us"
 msgstr ""
 
 #: src/Templates/FormTemplates.php:65
-#: resources/admin/components/OnboardingWizard.jsx:77
+#: build/admin/admin.js:11
+#: build/admin/admin.js:22
+#: resources/admin/components/OnboardingWizard.jsx:78
 #: resources/admin/utils/initialSchema.js:156
 #: resources/admin/utils/initialSchema.js:205
 msgid "Name"
@@ -1661,8 +1794,10 @@ msgid "Subject"
 msgstr ""
 
 #: src/Templates/FormTemplates.php:83
-#: resources/admin/components/OnboardingWizard.jsx:95
-#: resources/admin/pages/SubmissionDetailPage.jsx:555
+#: build/admin/admin.js:11
+#: build/admin/admin.js:18
+#: resources/admin/components/OnboardingWizard.jsx:96
+#: resources/admin/pages/SubmissionDetailPage.jsx:556
 msgid "Message"
 msgstr ""
 
@@ -1685,7 +1820,8 @@ msgid ""
 msgstr ""
 
 #: src/Templates/FormTemplates.php:120
-#: resources/admin/components/OnboardingWizard.jsx:17
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:18
 msgid "Lead Capture"
 msgstr ""
 
@@ -1731,409 +1867,2538 @@ msgid ""
 "Consent: {{consent}}"
 msgstr ""
 
-#: resources/admin/components/AdminHeader.jsx:102
+#: subtleforms.php:25
+msgid "Direct access not allowed."
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/components/AdminHeader.jsx:103
 msgid "Enter title..."
 msgstr ""
 
-#: resources/admin/components/AdminHeader.jsx:112
+#: build/admin/admin.js:1
+#: resources/admin/components/AdminHeader.jsx:113
 msgid "Click to edit title"
 msgstr ""
 
-#: resources/admin/components/AdminHeader.jsx:113
-#: resources/admin/components/builder/StepNavigator.jsx:56
+#: build/admin/admin.js:1
+#: build/admin/admin.js:18
+#: resources/admin/components/AdminHeader.jsx:114
+#: resources/admin/components/builder/StepNavigator.jsx:57
 msgid "Untitled"
 msgstr ""
 
-#: resources/admin/components/builder/ColumnDropZone.jsx:53
-#: resources/admin/components/builder/FieldList.jsx:102
-#: resources/admin/components/builder/FieldList.jsx:143
-#: resources/admin/components/builder/FormEditor.jsx:575
-#: resources/admin/components/builder/FormEditor.jsx:577
-msgid "Add Field"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:54
+msgid "Loading dashboard..."
 msgstr ""
 
-#: resources/admin/components/builder/ColumnDropZone.jsx:75
-msgid "Use “Add Field” or drag a field from the left panel."
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:66
+#: resources/admin/pages/SettingsPage.jsx:272
+msgid "Retry"
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:10
-msgid "Equals"
+#: build/admin/admin.js:1
+#: build/admin/admin.js:16
+#: resources/admin/pages/DashboardPage.jsx:89
+#: resources/admin/pages/SubmissionsPage.jsx:78
+msgid "All Submissions"
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:11
-msgid "Not Equals"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:114
+msgid "No published forms"
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:12
-msgid "Contains"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:120
+msgid "Submissions Today"
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:13
-msgid "Not Contains"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:122
+msgid "Last 24 hours"
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:14
-msgid "Is Empty"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:128
+msgid "Submissions This Week"
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:15
-msgid "Is Not Empty"
+#: build/admin/admin.js:1
+#: build/admin/admin.js:16
+#: resources/admin/pages/DashboardPage.jsx:130
+#: resources/admin/pages/SubmissionsPage.jsx:89
+msgid "Last 7 days"
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:16
-msgid "Greater Than"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:142
+msgid "Recent Submissions"
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:17
-msgid "Less Than"
+#: build/admin/admin.js:1
+#: build/admin/admin.js:13
+#: resources/admin/components/SubmissionsTable.jsx:507
+#: resources/admin/pages/DashboardPage.jsx:172
+msgid "View"
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:21
-msgid "Show"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:179
+msgid "No submissions yet."
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:22
-msgid "Hide"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:181
+msgid "Submissions will appear here once users start submitting your forms."
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:23
-msgid "Require"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:193
+msgid "View all submissions →"
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:24
-msgid "Disable"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:205
+msgid "Recently Edited Forms"
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:57
-msgid "Conditional Logic"
+#: build/admin/admin.js:1
+#: build/admin/admin.js:5
+#: build/admin/admin.js:11
+#: build/admin/admin.js:20
+#: resources/admin/components/FormsList.jsx:134
+#: resources/admin/components/OnboardingWizard.jsx:49
+#: resources/admin/components/OnboardingWizard.jsx:441
+#: resources/admin/modals/CreateFormModal.jsx:166
+#: resources/admin/pages/BuilderPage.jsx:828
+#: resources/admin/pages/DashboardPage.jsx:228
+msgid "Regular"
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:60
-msgid "+ Add Rule"
+#: build/admin/admin.js:1
+#: build/admin/admin.js:5
+#: build/admin/admin.js:20
+#: resources/admin/components/FormsList.jsx:139
+#: resources/admin/modals/CreateFormModal.jsx:175
+#: resources/admin/pages/BuilderPage.jsx:833
+#: resources/admin/pages/DashboardPage.jsx:233
+msgid "Multi-step"
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:66
-msgid "No conditions set"
+#: build/admin/admin.js:1
+#: build/admin/admin.js:5
+#: build/admin/admin.js:11
+#: build/admin/admin.js:20
+#: resources/admin/components/FormsList.jsx:144
+#: resources/admin/components/OnboardingWizard.jsx:61
+#: resources/admin/modals/CreateFormModal.jsx:184
+#: resources/admin/pages/BuilderPage.jsx:838
+#: resources/admin/pages/DashboardPage.jsx:238
+msgid "Sectioned"
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:77
-msgid "Rule"
+#: build/admin/admin.js:1
+#: build/admin/admin.js:5
+#: build/admin/admin.js:11
+#: build/admin/admin.js:20
+#: resources/admin/components/FormsList.jsx:149
+#: resources/admin/components/OnboardingWizard.jsx:39
+#: resources/admin/components/OnboardingWizard.jsx:67
+#: resources/admin/modals/CreateFormModal.jsx:190
+#: resources/admin/pages/BuilderPage.jsx:843
+#: resources/admin/pages/DashboardPage.jsx:243
+msgid "Conversational"
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:88
-msgid "When field"
+#: build/admin/admin.js:1
+#: build/admin/admin.js:5
+#: build/admin/admin.js:20
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/admin/components/FormsList.jsx:154
+#: resources/admin/modals/CreateFormModal.jsx:199
+#: resources/admin/pages/BuilderPage.jsx:848
+#: resources/admin/pages/DashboardPage.jsx:248
+#: resources/frontend/components/ConversationalFormRenderer.jsx:466
+msgid "Payment"
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:91
-msgid "Select field..."
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:275
+msgid "submissions"
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:101
-msgid "Operator"
+#: build/admin/admin.js:1
+#: build/admin/admin.js:6
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/admin/components/FormsList.jsx:305
+#: resources/admin/pages/DashboardPage.jsx:284
+#: resources/frontend/components/ConversationalFormRenderer.jsx:421
+msgid "Edit"
 msgstr ""
 
-#: resources/admin/components/builder/ConditionEditor.jsx:116
-msgid "Then"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:291
+msgid "No forms yet."
 msgstr ""
 
-#: resources/admin/components/builder/ContainerRenderer.jsx:20
-msgid "Container"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:293
+msgid "Create your first form to get started."
 msgstr ""
 
-#: resources/admin/components/builder/ContainerRenderer.jsx:79
-msgid "Drag container"
+#: build/admin/admin.js:1
+#: build/admin/admin.js:5
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:606
+#: resources/admin/modals/CreateFormModal.jsx:412
+#: resources/admin/pages/DashboardPage.jsx:301
+msgid "Create Form"
 msgstr ""
 
-#: resources/admin/components/builder/ContainerWrapper.jsx:61
-msgid "Move Up"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:310
+msgid "View all forms →"
 msgstr ""
 
-#: resources/admin/components/builder/ContainerWrapper.jsx:67
-msgid "Move Down"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:324
+msgid "System Health"
 msgstr ""
 
-#: resources/admin/components/builder/ContainerWrapper.jsx:73
-#: resources/admin/components/FormsList.jsx:356
-msgid "Duplicate"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:333
+msgid "Healthy"
 msgstr ""
 
-#: resources/admin/components/builder/ContainerWrapper.jsx:91
-msgid "Repeatable items will appear here"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:338
+msgid "Warning"
 msgstr ""
 
-#: resources/admin/components/builder/ConversationalCanvas.jsx:88
-msgid "No Questions Yet"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:348
+msgid "Plugin Version"
 msgstr ""
 
-#: resources/admin/components/builder/ConversationalCanvas.jsx:91
-msgid "Add your first question from the left panel. Each field will be displayed one at a time."
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:356
+msgid "WordPress"
 msgstr ""
 
-#: resources/admin/components/builder/ConversationalCanvas.jsx:110
-#: resources/admin/components/builder/ConversationalCanvas.jsx:170
-#: resources/admin/utils/initialSchema.js:147
-#: resources/frontend/components/ConversationalFormRenderer.jsx:624
-msgid "Question"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:364
+msgid "PHP Version"
 msgstr ""
 
-#: resources/admin/components/builder/ConversationalCanvas.jsx:111
-#: resources/admin/components/builder/StepCanvas.jsx:98
-#: resources/admin/components/OnboardingWizard.jsx:559
-msgid "of"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:372
+msgid "Database"
 msgstr ""
 
-#: resources/admin/components/builder/ConversationalCanvas.jsx:114
-#: resources/frontend/components/ConversationalFormRenderer.jsx:546
-msgid "Complete"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:380
+msgid "Memory Limit"
 msgstr ""
 
-#: resources/admin/components/builder/ConversationalCanvas.jsx:152
-#: resources/admin/components/DataTable.jsx:274
-#: resources/frontend/components/FormRenderer.jsx:755
-msgid "Previous"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:388
+msgid "Max Upload"
 msgstr ""
 
-#: resources/admin/components/builder/ConversationalCanvas.jsx:180
-#: resources/admin/components/BuilderTour.jsx:337
-#: resources/admin/components/CreateFormWizard.jsx:51
-#: resources/admin/components/DataTable.jsx:293
-#: resources/admin/components/OnboardingWizard.jsx:605
-#: resources/frontend/components/ConversationalFormRenderer.jsx:591
-#: resources/frontend/components/FormRenderer.jsx:765
-msgid "Next"
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:396
+#: resources/admin/pages/SettingsPage.jsx:646
+msgid "Debug Mode"
 msgstr ""
 
-#: resources/admin/components/builder/FieldChrome.jsx:52
-msgid "Field group. Press Enter to select."
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:401
+#: resources/admin/pages/DashboardPage.jsx:411
+msgid "Disabled"
 msgstr ""
 
-#: resources/admin/components/builder/FieldDock.jsx:34
-msgid "Loading fields..."
+#: build/admin/admin.js:1
+#: resources/admin/pages/DashboardPage.jsx:406
+msgid "Autosave"
 msgstr ""
 
-#: resources/admin/components/builder/FieldDock.jsx:63
-msgid "Fields"
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:13
+msgid "Form status must be either draft or published"
 msgstr ""
 
-#: resources/admin/components/builder/FieldDock.jsx:73
-msgid "Expand"
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:14
+msgid "Default form status is required"
 msgstr ""
 
-#: resources/admin/components/builder/FieldDock.jsx:74
-msgid "Collapse"
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:20
+msgid "Autosave enabled must be true or false"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:55
-msgid "Nothing selected"
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:21
+msgid "Autosave enabled setting is required"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:58
-msgid "Click a field (or container) in the canvas to edit its settings, validation, and conditions."
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:30
+msgid "Autosave interval must be a number"
 msgstr ""
 
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:31
+msgid "Autosave interval must be a whole number"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:32
+msgid "Autosave interval must be at least 1 second"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:33
+msgid "Autosave interval cannot exceed 60 seconds"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:34
+msgid "Autosave interval is required"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:41
+msgid "Delete behavior must be either soft or hard"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:42
+msgid "Delete behavior is required"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:51
+msgid "Success message must be text"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:52
+msgid "Success message cannot exceed 500 characters"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:53
+msgid "Success message is required"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:61
+msgid "Error message must be text"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:62
+msgid "Error message cannot exceed 500 characters"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:63
+msgid "Error message is required"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:71
+msgid "Redirect URL must be a valid URL"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:72
+msgid "Redirect URL cannot exceed 500 characters"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:78
+msgid "Submission limit enabled must be true or false"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:79
+msgid "Submission limit enabled setting is required"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:88
+msgid "Submission limit must be a number"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:89
+msgid "Submission limit must be a whole number"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:90
+msgid "Submission limit must be at least 1"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:91
+msgid "Submission limit cannot exceed 100 submissions"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:92
+msgid "Submission limit is required"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:99
+msgid "Admin notifications setting must be true or false"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:100
+msgid "Admin notifications setting is required"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:106
+msgid "User confirmation setting must be true or false"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:107
+msgid "User confirmation setting is required"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:114
+msgid "Sender name must be text"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:115
+msgid "Sender name cannot exceed 100 characters"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:122
+msgid "Sender email must be a valid email address"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:129
+msgid "Admin email must be a valid email address"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:136
+msgid "Debug mode must be true or false"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:137
+msgid "Debug mode setting is required"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:146
+msgid "Log retention days must be a number"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:147
+msgid "Log retention days must be a whole number"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:148
+msgid "Log retention must be at least 1 day"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:149
+msgid "Log retention cannot exceed 365 days"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/utils/validation.js:150
+msgid "Log retention days is required"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:84
+msgid "Failed to load settings. Please try again."
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:104
+msgid "Must be a valid number"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:202
+msgid "Are you sure you want to reset all settings to defaults? This cannot be undone."
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:225
+msgid "Settings reset successfully!"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:249
+msgid "Failed to reset settings. Please try again."
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:260
+msgid "Loading settings..."
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:269
+msgid "Failed to load settings."
+msgstr ""
+
+#: build/admin/admin.js:1
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FieldInspector.jsx:77
 #: resources/admin/pages/SettingsPage.jsx:281
 msgid "General"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:82
-msgid "Validation"
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:286
+msgid "Frontend"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:92
-msgid "Conditions"
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:291
+msgid "Email / Notifications"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:101
-msgid "Step Title"
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:296
+msgid "Advanced"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:104
-msgid "Title shown in step navigation"
+#: build/admin/admin.js:1
+#: build/admin/admin.js:19
+#: resources/admin/components/builder/layout/BuilderModalsController.jsx:83
+#: resources/admin/pages/SettingsPage.jsx:313
+msgid "Discard Changes"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:113
-msgid "Optional description for this step"
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:147
+msgid "Please fix the validation errors below before saving."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:125
-msgid "Columns"
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:166
+msgid "Settings saved successfully!"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:128
-msgid "Number of columns"
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:192
+msgid "Failed to save settings. Please try again."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:173
-msgid "Field Label"
-msgstr ""
-
-#: resources/admin/components/builder/FieldInspector.jsx:176
-msgid "The label displayed above the field"
-msgstr ""
-
-#: resources/admin/components/builder/FieldInspector.jsx:182
-msgid "Placeholder Text"
-msgstr ""
-
-#: resources/admin/components/builder/FieldInspector.jsx:185
-msgid "Hint text shown inside the field"
-msgstr ""
-
-#: resources/admin/components/builder/FieldInspector.jsx:191
-msgid "Field Key"
-msgstr ""
-
-#: resources/admin/components/builder/FieldInspector.jsx:194
-msgid "Unique identifier for data mapping"
-msgstr ""
-
-#: resources/admin/components/builder/FieldInspector.jsx:219
-msgid "Option label"
-msgstr ""
-
-#: resources/admin/components/builder/FieldInspector.jsx:248
-msgid "+ Add Option"
-msgstr ""
-
-#: resources/admin/components/builder/FieldInspector.jsx:257
-msgid "Required Field"
-msgstr ""
-
-#: resources/admin/components/builder/FieldInspector.jsx:262
-msgid "User must fill this field to submit"
-msgstr ""
-
-#: resources/admin/components/builder/FieldRenderer.jsx:108
-#: resources/frontend/components/FieldRenderer.jsx:200
-msgid "Select an option"
-msgstr ""
-
-#: resources/admin/components/builder/FieldRenderer.jsx:131
-msgid "Select a country"
-msgstr ""
-
-#: resources/admin/components/builder/FieldRenderer.jsx:140
-msgid "Hidden field (not visible to users)"
-msgstr ""
-
-#: resources/admin/components/builder/FieldRenderer.jsx:146
-msgid "HTML Content Block"
-msgstr ""
-
-#: resources/admin/components/builder/FieldRenderer.jsx:154
-msgid "Click to upload or drag image here"
-msgstr ""
-
-#: resources/admin/components/builder/FieldRenderer.jsx:163
-msgid "Click to upload or drag file here"
-msgstr ""
-
-#: resources/admin/components/builder/FieldRenderer.jsx:213
-#: resources/frontend/components/FieldRenderer.jsx:265
-msgid "Subtotal:"
-msgstr ""
-
-#: resources/admin/components/builder/FieldRenderer.jsx:217
-#: resources/frontend/components/FieldRenderer.jsx:271
-msgid "Tax:"
-msgstr ""
-
-#: resources/admin/components/builder/FieldRenderer.jsx:221
-#: resources/frontend/components/FieldRenderer.jsx:277
-msgid "Total:"
-msgstr ""
-
-#: resources/admin/components/builder/FieldRenderer.jsx:246
-msgid "Hidden pricing field (not visible to users)"
-msgstr ""
-
-#: resources/admin/components/builder/FieldToolbar.jsx:102
-msgid "Drag to reorder"
-msgstr ""
-
-#: resources/admin/components/builder/FieldToolbar.jsx:103
-msgid "Drag field"
-msgstr ""
-
-#: resources/admin/components/builder/FieldToolbar.jsx:123
-msgid "Move up"
-msgstr ""
-
-#: resources/admin/components/builder/FieldToolbar.jsx:129
-msgid "Move down"
-msgstr ""
-
-#: resources/admin/components/builder/FieldToolbar.jsx:138
-msgid "Duplicate field"
-msgstr ""
-
-#: resources/admin/components/builder/FieldToolbar.jsx:147
-msgid "Delete field"
-msgstr ""
-
-#: resources/admin/components/builder/FormCanvas.jsx:41
-#: resources/admin/components/builder/FormEditorHeader.jsx:129
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:64
-#: resources/admin/components/FormPreviewModal.jsx:289
-#: resources/admin/utils/initialSchema.js:88
-#: resources/blocks/subtleforms-form/index.js:131
-msgid "Untitled Form"
-msgstr ""
-
-#: resources/admin/components/builder/FormCanvas.jsx:45
-msgid "Fill out the form below"
-msgstr ""
-
-#: resources/admin/components/builder/FormCanvas.jsx:59
-msgid "Start Building Your Form"
-msgstr ""
-
-#: resources/admin/components/builder/FormCanvas.jsx:62
-msgid "Add fields from the left sidebar to begin"
-msgstr ""
-
-#: resources/admin/components/builder/FormEditor.jsx:182
-msgid "Cannot add a step inside another step. Steps can only be added at the root level."
-msgstr ""
-
-#: resources/admin/components/builder/FormEditor.jsx:264
-msgid "Cannot delete the last step. Multi-step forms require at least one step."
-msgstr ""
-
-#: resources/admin/components/builder/FormEditor.jsx:519
-msgid "Tip: Click a field (or container) to edit its settings."
-msgstr ""
-
-#: resources/admin/components/builder/FormEditorHeader.jsx:87
-#: resources/admin/components/builder/FormEditorHeader.jsx:185
+#: build/admin/admin.js:1
+#: build/admin/admin.js:20
+#: resources/admin/components/builder/FormEditorHeader.jsx:88
+#: resources/admin/components/builder/FormEditorHeader.jsx:184
 #: resources/admin/pages/BuilderPage.jsx:780
 #: resources/admin/pages/SettingsPage.jsx:322
 msgid "Saving..."
 msgstr ""
 
-#: resources/admin/components/builder/FormEditorHeader.jsx:88
-#: resources/admin/pages/BuilderPage.jsx:783
-msgid "Unsaved changes"
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:323
+msgid "Save Settings"
 msgstr ""
 
-#: resources/admin/components/builder/FormEditorHeader.jsx:89
-msgid "All changes saved"
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:392
+msgid "Default New Form Status"
 msgstr ""
 
-#: resources/admin/components/builder/FormEditorHeader.jsx:157
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:164
-msgid "Copied!"
+#: build/admin/admin.js:1
+#: build/admin/admin.js:5
+#: build/admin/admin.js:11
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:143
+#: resources/admin/components/FormsList.jsx:179
+#: resources/admin/components/FormsList.jsx:757
+#: resources/admin/pages/FormsPage.jsx:130
+#: resources/admin/pages/SettingsPage.jsx:395
+msgid "Draft"
 msgstr ""
 
-#: resources/admin/components/builder/FormEditorHeader.jsx:186
-msgid "Save"
+#: build/admin/admin.js:1
+#: build/admin/admin.js:5
+#: build/admin/admin.js:11
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:142
+#: resources/admin/components/FormsList.jsx:184
+#: resources/admin/components/FormsList.jsx:758
+#: resources/admin/pages/FormsPage.jsx:129
+#: resources/admin/pages/SettingsPage.jsx:396
+msgid "Published"
 msgstr ""
 
-#: resources/admin/components/builder/FormEditorHeader.jsx:193
-msgid "Close Editor"
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:399
+msgid "Default status when creating new forms"
 msgstr ""
 
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:406
+msgid "Enable Autosave"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:409
+msgid "Automatically save form changes while editing"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:420
+msgid "Autosave Interval (seconds)"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:426
+msgid "Time between autosave triggers (1-60 seconds)"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:437
+msgid "Delete Behavior"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:441
+msgid "Soft Delete (Move to Trash)"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:445
+msgid "Hard Delete (Permanent)"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:450
+msgid "How forms and submissions are deleted"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:468
+msgid "Success Message"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:471
+msgid "Message shown after successful submission"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:481
+msgid "Error Message"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:484
+msgid "Generic error message shown on submission failure"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:494
+msgid "Redirect After Submit (URL)"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:499
+msgid "Optional URL to redirect after submission (leave empty to show message)"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:510
+msgid "Enable Submission Limit"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:515
+msgid "Limit submissions per user/IP address"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:523
+msgid "Maximum Submissions"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:529
+msgid "Maximum number of submissions allowed per user"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:551
+msgid "Admin Notifications"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:556
+msgid "Send email to admin on new submissions"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:563
+msgid "User Confirmation Emails"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:568
+msgid "Send confirmation email to users after submission"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:578
+msgid "Sender Name"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:581
+msgid "Email sender name (leave empty for site name)"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:587
+msgid "Your Site"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:595
+msgid "Sender Email"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:599
+msgid "Email sender address (leave empty for admin email)"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:612
+msgid "Admin Email"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:616
+msgid "Email to receive admin notifications (leave empty for WordPress admin email)"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:649
+msgid "Enable detailed logging for troubleshooting"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:659
+msgid "Log Retention (days)"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:665
+msgid "How long to keep submission logs (1-365 days)"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:675
+msgid "Spam Protection"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:678
+msgid "Enable Honeypot Protection"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:681
+msgid "Adds invisible fields to detect and block spam bots"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:691
+msgid "Minimum Submission Time (seconds)"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:699
+msgid "Minimum time required before form submission (prevents instant bot submissions)"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:709
+msgid "Privacy & GDPR"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:712
+msgid "Data Retention Period (days)"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:720
+msgid "Automatically delete submissions older than this many days. Set to 0 to keep submissions forever. Recommended: 365-730 days for GDPR compliance."
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:727
+msgid "Note: Submissions can also be exported or erased via WordPress Privacy Tools (Tools → Export/Erase Personal Data)."
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:735
+msgid "Danger Zone"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:737
+msgid "Resetting will restore all settings to their default values. This action cannot be undone."
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/pages/SettingsPage.jsx:747
+msgid "Reset All Settings"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/components/DataTable.jsx:54
+msgid "No items found"
+msgstr ""
+
+#: build/admin/admin.js:1
+#: resources/admin/components/DataTable.jsx:108
+msgid "Loading..."
+msgstr ""
+
+#. translators: %1$d: number of selected items
+#: build/admin/admin.js:2
+#: resources/admin/components/DataTable.jsx:139
+msgid "%1$d items selected"
+msgstr ""
+
+#. translators: %1$d: starting item number, %2$d: ending item number, %3$d: total items
+#: build/admin/admin.js:3
+#: resources/admin/components/DataTable.jsx:233
+msgid "Showing %1$d to %2$d of %3$d"
+msgstr ""
+
+#: build/admin/admin.js:3
+#: resources/admin/components/DataTable.jsx:242
+msgid "Per page:"
+msgstr ""
+
+#: build/admin/admin.js:3
+#: build/admin/admin.js:18
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/admin/components/builder/ConversationalCanvas.jsx:153
+#: resources/admin/components/DataTable.jsx:262
+#: resources/frontend/components/FormRenderer.jsx:755
+msgid "Previous"
+msgstr ""
+
+#. translators: %1$d: Current page number, %2$d: Total pages
+#: build/admin/admin.js:4
+#: resources/admin/components/DataTable.jsx:269
+msgid "Page %1$d of %2$d"
+msgstr ""
+
+#: build/admin/admin.js:4
+#: build/admin/admin.js:11
+#: build/admin/admin.js:18
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/admin/components/builder/ConversationalCanvas.jsx:181
+#: resources/admin/components/BuilderTour.jsx:337
+#: resources/admin/components/CreateFormWizard.jsx:52
+#: resources/admin/components/DataTable.jsx:281
+#: resources/admin/components/OnboardingWizard.jsx:602
+#: resources/frontend/components/ConversationalFormRenderer.jsx:591
+#: resources/frontend/components/FormRenderer.jsx:765
+msgid "Next"
+msgstr ""
+
+#. translators: %1$d: numeric suffix used to create a unique title
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:50
+msgid "New Form %1$d"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/components/TemplateSelector.jsx:78
+#: resources/admin/modals/CreateFormModal.jsx:149
+msgid "Blank Form"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:150
+msgid "Start from scratch."
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:156
+msgid "Preset Template"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:157
+msgid "Coming soon."
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:167
+msgid "Single page form. Best for contact forms, leads."
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:176
+msgid "Broken into steps. Best for applications, surveys."
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:185
+msgid "Grouped fields. Best for long forms."
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:191
+msgid "One question at a time. Best for engaging surveys, quizzes."
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:200
+msgid "Collect payments. Best for orders, bookings, donations."
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:262
+msgid "Coming soon"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:282
+msgid "Create New Form"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:283
+msgid "Choose Form Structure"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:287
+msgid "Provide basic information and choose a starting template."
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:291
+msgid "Select the structure that best fits your form requirements."
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:306
+msgid "Details"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:314
+msgid "Structure"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:327
+msgid "Form Title"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:334
+msgid "e.g. Contact Form"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:342
+msgid "Optional"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:350
+msgid "Describe the purpose of this form..."
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:361
+msgid "Starting Template"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:376
+msgid "Form Structure"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: build/admin/admin.js:11
+#: build/admin/admin.js:18
+#: build/admin/admin.js:19
+#: resources/admin/components/builder/layout/BuilderModalsController.jsx:84
+#: resources/admin/components/CreateFormWizard.jsx:196
+#: resources/admin/components/FormsList.jsx:764
+#: resources/admin/modals/ConfirmModal.jsx:31
+#: resources/admin/modals/CreateFormModal.jsx:396
+msgid "Cancel"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: build/admin/admin.js:11
+#: build/admin/admin.js:18
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/admin/components/BuilderTour.jsx:324
+#: resources/admin/components/CreateFormWizard.jsx:192
+#: resources/admin/components/OnboardingWizard.jsx:591
+#: resources/admin/modals/CreateFormModal.jsx:397
+#: resources/frontend/components/ConversationalFormRenderer.jsx:434
+#: resources/frontend/components/ConversationalFormRenderer.jsx:580
+msgid "Back"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: build/admin/admin.js:22
+#: resources/admin/modals/CreateFormModal.jsx:89
+#: resources/admin/utils/initialSchema.js:142
+msgid "Step 1"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: build/admin/admin.js:22
+#: resources/admin/modals/CreateFormModal.jsx:101
+#: resources/admin/utils/initialSchema.js:142
+msgid "Section 1"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: build/admin/admin.js:22
+#: resources/admin/modals/CreateFormModal.jsx:137
+#: resources/admin/pages/BuilderPage.jsx:1070
+#: resources/admin/pages/BuilderPage.jsx:1102
+msgid "Failed to create form"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:409
+msgid "Next Step"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/CreateFormModal.jsx:411
+msgid "Creating..."
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/modals/ConfirmModal.jsx:27
+msgid "Confirm"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/admin/modals/ConfirmModal.jsx:72
+#: resources/frontend/components/ConversationalFormRenderer.jsx:524
+msgid "Processing..."
+msgstr ""
+
+#: build/admin/admin.js:5
+#: build/admin/admin.js:13
+#: build/admin/admin.js:16
+#: resources/admin/components/FormsList.jsx:119
+#: resources/admin/components/SubmissionsTable.jsx:468
+#: resources/admin/pages/SubmissionDetailPage.jsx:189
+msgid "New"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/components/FormsList.jsx:127
+msgid "Type"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: build/admin/admin.js:11
+#: resources/admin/components/FormsList.jsx:189
+#: resources/admin/components/FormsList.jsx:759
+msgid "Archived"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/components/FormsList.jsx:207
+msgid "Shortcode"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/components/FormsList.jsx:73
+msgid "Shortcode copied to clipboard"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/components/FormsList.jsx:81
+msgid "Failed to copy shortcode"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: resources/admin/components/FormsList.jsx:219
+msgid "Click to copy"
+msgstr ""
+
+#: build/admin/admin.js:5
+#: build/admin/admin.js:19
+#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:77
+#: resources/admin/components/FormsList.jsx:228
+msgid "Entries"
+msgstr ""
+
+#. translators: %1$d: unread count, %2$d: total submissions
+#: build/admin/admin.js:6
+#: resources/admin/components/FormsList.jsx:244
+msgid "%1$d unread, %2$d total entries"
+msgstr ""
+
+#: build/admin/admin.js:6
+#: resources/admin/components/FormsList.jsx:267
+msgid "Last Updated"
+msgstr ""
+
+#: build/admin/admin.js:6
+#: resources/admin/components/FormsList.jsx:276
+msgid "Just now"
+msgstr ""
+
+#. translators: %1$d: number of hours ago
+#: build/admin/admin.js:6
+#: build/admin/admin.js:13
+#: build/admin/admin.js:18
+#: resources/admin/components/FormsList.jsx:280
+#: resources/admin/components/SubmissionsTable.jsx:406
+#: resources/admin/pages/SubmissionDetailPage.jsx:685
+msgid "%1$d hours ago"
+msgstr ""
+
+#: build/admin/admin.js:6
+#: resources/admin/components/FormsList.jsx:283
+msgid "Yesterday"
+msgstr ""
+
+#: build/admin/admin.js:6
+#: resources/admin/components/FormsList.jsx:316
+msgid "More actions"
+msgstr ""
+
+#: build/admin/admin.js:6
+#: resources/admin/components/FormsList.jsx:331
+msgid "Change status"
+msgstr ""
+
+#: build/admin/admin.js:6
+#: resources/admin/components/builder/ContainerWrapper.jsx:71
+#: resources/admin/components/FormsList.jsx:342
+msgid "Duplicate"
+msgstr ""
+
+#: build/admin/admin.js:6
+#: resources/admin/components/FormsList.jsx:353
+msgid "View submissions"
+msgstr ""
+
+#: build/admin/admin.js:6
+#: resources/admin/components/FormsList.jsx:416
+msgid "Failed to load forms"
+msgstr ""
+
+#. translators: %s: form title
+#: build/admin/admin.js:6
+#: resources/admin/components/FormsList.jsx:472
+msgid "%1$s (Copy)"
+msgstr ""
+
+#: build/admin/admin.js:6
+#: resources/admin/components/FormsList.jsx:499
+msgid "Form duplicated"
+msgstr ""
+
+#: build/admin/admin.js:6
+#: resources/admin/components/FormsList.jsx:505
+msgid "Failed to duplicate form"
+msgstr ""
+
+#. translators: %1$d: number of forms updated
+#: build/admin/admin.js:6
+#: resources/admin/components/FormsList.jsx:632
+msgid "%1$d forms updated"
+msgstr ""
+
+#. translators: %1$d: number updated, %2$d: total requested
+#: build/admin/admin.js:7
+#: resources/admin/components/FormsList.jsx:643
+msgid "Failed to update some forms (%1$d/%2$d updated)"
+msgstr ""
+
+#: build/admin/admin.js:7
+#: resources/admin/components/FormsList.jsx:676
+msgid "Mark as Published"
+msgstr ""
+
+#: build/admin/admin.js:7
+#: resources/admin/components/FormsList.jsx:680
+msgid "Mark as Draft"
+msgstr ""
+
+#. translators: %1$d: number of forms to delete
+#: build/admin/admin.js:8
+#: resources/admin/components/FormsList.jsx:563
+msgid "Are you sure you want to delete %1$d forms?"
+msgstr ""
+
+#. translators: %1$d: number of forms deleted
+#: build/admin/admin.js:9
+#: resources/admin/components/FormsList.jsx:587
+msgid "%1$d forms deleted"
+msgstr ""
+
+#. translators: %1$d: number deleted, %2$d: total requested
+#: build/admin/admin.js:10
+#: resources/admin/components/FormsList.jsx:598
+msgid "Failed to delete some forms (%1$d/%2$d deleted)"
+msgstr ""
+
+#: build/admin/admin.js:10
+#: resources/admin/components/FormsList.jsx:694
+msgid "No forms found"
+msgstr ""
+
+#: build/admin/admin.js:10
+#: resources/admin/components/FormsList.jsx:695
+msgid "Create your first form"
+msgstr ""
+
+#: build/admin/admin.js:10
+#: resources/admin/components/FormsList.jsx:699
+msgid "Try adjusting your search terms"
+msgstr ""
+
+#: build/admin/admin.js:10
+#: resources/admin/components/FormsList.jsx:700
+msgid "Build beautiful forms with our drag-and-drop builder"
+msgstr ""
+
+#: build/admin/admin.js:10
+#: build/admin/admin.js:11
+#: resources/admin/components/FormsList.jsx:712
+#: resources/admin/pages/FormsPage.jsx:73
+#: resources/admin/pages/FormsPage.jsx:150
+msgid "New Form"
+msgstr ""
+
+#: build/admin/admin.js:10
+#: build/admin/admin.js:11
+#: build/admin/admin.js:19
+#: resources/admin/components/builder/layout/BuilderModalsController.jsx:46
+#: resources/admin/components/FormsList.jsx:723
+#: resources/admin/components/FormsList.jsx:742
+msgid "Delete Form"
+msgstr ""
+
+#. translators: %1$d: number of submissions belonging to this form
+#: build/admin/admin.js:11
+#: resources/admin/components/FormsList.jsx:730
+msgid "Are you sure you want to delete this form? It has %1$d submissions which will also be permanently deleted."
+msgstr ""
+
+#: build/admin/admin.js:11
+#: build/admin/admin.js:19
+#: resources/admin/components/builder/layout/BuilderModalsController.jsx:47
+#: resources/admin/components/FormsList.jsx:736
+msgid "Are you sure you want to delete this form? This action cannot be undone."
+msgstr ""
+
+#: build/admin/admin.js:11
+#: build/admin/admin.js:20
+#: resources/admin/components/FormsList.jsx:518
+#: resources/admin/pages/BuilderPage.jsx:692
+msgid "Form deleted"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: build/admin/admin.js:20
+#: resources/admin/components/FormsList.jsx:522
+#: resources/admin/pages/BuilderPage.jsx:683
+#: resources/admin/pages/BuilderPage.jsx:702
+msgid "Failed to delete form"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/FormsList.jsx:748
+msgid "Change Status"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/FormsList.jsx:546
+msgid "Status updated"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: build/admin/admin.js:18
+#: resources/admin/components/FormsList.jsx:551
+#: resources/admin/pages/SubmissionDetailPage.jsx:100
+msgid "Failed to update status"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:299
+#: resources/admin/components/FormsList.jsx:767
+msgid "Update"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:13
+msgid "Simple contact form for inquiries"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:20
+msgid "Capture leads with essential info"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:25
+msgid "Survey"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:27
+msgid "Collect feedback and opinions"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FormSettings.jsx:123
+#: resources/admin/components/OnboardingWizard.jsx:32
+msgid "Payment Form"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:34
+msgid "Accept payments online"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:41
+msgid "Chat-like interactive form"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:51
+msgid "Standard single-page form"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:55
+msgid "Multi-Step"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:57
+msgid "Break form into multiple steps"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:63
+msgid "Organize into logical sections"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:69
+msgid "Chat-style one question at a time"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: build/admin/admin.js:22
+#: resources/admin/components/OnboardingWizard.jsx:79
+#: resources/admin/utils/initialSchema.js:125
+msgid "Your name"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:88
+msgid "your@email.com"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:97
+msgid "Your message..."
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:106
+msgid "Company"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:107
+msgid "Company name"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:116
+msgid "+1 (555) 123-4567"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:128
+msgid "Excellent"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:129
+msgid "Good"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:130
+msgid "Average"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:131
+msgid "Poor"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:132
+msgid "Very Poor"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:139
+msgid "Feedback"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:140
+msgid "Your feedback..."
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:150
+msgid "0.00"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:160
+msgid "Payment Details"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:546
+msgid "Form Setup Wizard"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConversationalCanvas.jsx:112
+#: resources/admin/components/builder/StepCanvas.jsx:97
+#: resources/admin/components/OnboardingWizard.jsx:556
+msgid "of"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:561
+msgid "complete"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:246
+msgid "Welcome to SubtleForms"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:248
+msgid "Create beautiful, powerful forms in minutes. This wizard will help you build your first form quickly."
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:256
+msgid "What can you do with SubtleForms?"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:261
+msgid "Build forms with drag & drop"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:267
+msgid "Add conditional logic and multi-step flows"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:276
+msgid "Manage submissions and integrate with services"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:285
+msgid "Accept payments and create conversational forms"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:301
+msgid "What's your form goal?"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:304
+msgid "Select the purpose of your form to get started with the right fields."
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:361
+msgid "Choose your form type"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:364
+msgid "How would you like to present your form to users?"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:423
+msgid "Field suggestions"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:426
+msgid "Based on your selections, we've pre-selected these fields. You can customize them in the builder."
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:438
+msgid "Your Form"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:442
+msgid "form"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:446
+msgid "fields"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:486
+msgid "You're all set!"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:489
+msgid "Your form will be created with the selected fields. You can customize everything in the form builder."
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:498
+msgid "Next steps:"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:504
+msgid "Customize your form fields in the builder"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:513
+msgid "Configure validation rules and conditional logic"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:522
+msgid "Preview your form to test it out"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:528
+msgid "Publish and embed it on your site with a shortcode"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:582
+msgid "Don't show this again"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/OnboardingWizard.jsx:595
+msgid "Skip"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/HelpMenu.jsx:23
+msgid "Help & Documentation"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/HelpMenu.jsx:32
+msgid "Start Tour"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/HelpMenu.jsx:39
+msgid "Quick Start Wizard"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/HelpMenu.jsx:48
+msgid "View Documentation"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: build/admin/admin.js:16
+#: resources/admin/pages/FormsPage.jsx:128
+#: resources/admin/pages/SubmissionsPage.jsx:81
+msgid "All"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/pages/FormsPage.jsx:165
+msgid "Search forms..."
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/pages/FormsPage.jsx:90
+msgid "My "
+msgstr ""
+
+#: build/admin/admin.js:11
+#: build/admin/admin.js:13
+#: build/admin/admin.js:16
+#: build/admin/admin.js:18
+#: resources/admin/components/SubmissionsTable.jsx:444
+#: resources/admin/pages/FormsPage.jsx:92
+#: resources/admin/pages/SubmissionDetailPage.jsx:598
+#: resources/admin/pages/SubmissionsPage.jsx:201
+msgid "Form"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/SubmissionsTable.jsx:200
+msgid "Invalid response format"
+msgstr ""
+
+#: build/admin/admin.js:11
+#: resources/admin/components/SubmissionsTable.jsx:206
+msgid "Failed to load submissions"
+msgstr ""
+
+#. translators: %1$d: number of submissions updated
+#: build/admin/admin.js:12
+#: resources/admin/components/SubmissionsTable.jsx:332
+msgid "%1$d submissions updated"
+msgstr ""
+
+#. translators: %1$d: number updated, %2$d: total requested
+#: build/admin/admin.js:13
+#: resources/admin/components/SubmissionsTable.jsx:341
+msgid "Failed to update some submissions (%1$d/%2$d updated)"
+msgstr ""
+
+#. translators: %1$d: number of seconds
+#: build/admin/admin.js:13
+#: build/admin/admin.js:18
+#: resources/admin/components/SubmissionsTable.jsx:392
+#: resources/admin/pages/SubmissionDetailPage.jsx:681
+msgid "%1$d seconds ago"
+msgstr ""
+
+#. translators: %1$d: number of minutes
+#: build/admin/admin.js:13
+#: build/admin/admin.js:18
+#: resources/admin/components/SubmissionsTable.jsx:398
+#: resources/admin/pages/SubmissionDetailPage.jsx:683
+msgid "%1$d minutes ago"
+msgstr ""
+
+#. translators: %1$d: number of days
+#: build/admin/admin.js:13
+#: build/admin/admin.js:18
+#: resources/admin/components/SubmissionsTable.jsx:413
+#: resources/admin/pages/SubmissionDetailPage.jsx:686
+msgid "%1$d days ago"
+msgstr ""
+
+#: build/admin/admin.js:13
+#: build/admin/admin.js:16
+#: build/admin/admin.js:18
+#: resources/admin/components/SubmissionsTable.jsx:469
+#: resources/admin/pages/SubmissionDetailPage.jsx:190
+#: resources/admin/pages/SubmissionDetailPage.jsx:610
+#: resources/admin/pages/SubmissionsPage.jsx:83
+msgid "Read"
+msgstr ""
+
+#: build/admin/admin.js:13
+#: build/admin/admin.js:18
+#: resources/admin/components/SubmissionsTable.jsx:475
+#: resources/admin/pages/SubmissionDetailPage.jsx:624
+msgid "Browser"
+msgstr ""
+
+#: build/admin/admin.js:13
+#: build/admin/admin.js:18
+#: resources/admin/components/SubmissionsTable.jsx:481
+#: resources/admin/pages/SubmissionDetailPage.jsx:639
+msgid "Device"
+msgstr ""
+
+#: build/admin/admin.js:13
+#: build/admin/admin.js:18
+#: resources/admin/components/SubmissionsTable.jsx:487
+#: resources/admin/pages/SubmissionDetailPage.jsx:674
+msgid "Submitted"
+msgstr ""
+
+#: build/admin/admin.js:13
+#: resources/admin/components/SubmissionsTable.jsx:541
+msgid "No submissions found."
+msgstr ""
+
+#: build/admin/admin.js:13
+#: resources/admin/components/SubmissionsTable.jsx:549
+msgid "Mark as Read"
+msgstr ""
+
+#: build/admin/admin.js:13
+#: resources/admin/components/SubmissionsTable.jsx:553
+msgid "Mark as Unread"
+msgstr ""
+
+#. translators: %1$d: number of submissions to delete
+#: build/admin/admin.js:14
+#: resources/admin/components/SubmissionsTable.jsx:260
+msgid "Are you sure you want to delete %1$d submissions?"
+msgstr ""
+
+#. translators: %1$d: number of submissions deleted
+#: build/admin/admin.js:15
+#: resources/admin/components/SubmissionsTable.jsx:288
+msgid "%1$d submissions deleted"
+msgstr ""
+
+#. translators: %1$d: number deleted, %2$d: total requested
+#: build/admin/admin.js:16
+#: resources/admin/components/SubmissionsTable.jsx:299
+msgid "Failed to delete some submissions (%1$d/%2$d deleted)"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/components/SubmissionsTable.jsx:566
+#: resources/admin/components/SubmissionsTable.jsx:572
+msgid "Delete Submission"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/components/SubmissionsTable.jsx:567
+msgid "Are you sure you want to delete this submission? This action cannot be undone."
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/components/SubmissionsTable.jsx:243
+msgid "Submission deleted"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/components/SubmissionsTable.jsx:248
+msgid "Failed to delete submission"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: build/admin/admin.js:18
+#: resources/admin/pages/SubmissionDetailPage.jsx:609
+#: resources/admin/pages/SubmissionsPage.jsx:82
+msgid "Unread"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionsPage.jsx:87
+msgid "All time"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionsPage.jsx:88
+msgid "Today"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionsPage.jsx:90
+msgid "Last 30 days"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionsPage.jsx:91
+msgid "Last 3 months"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionsPage.jsx:95
+msgid "All forms"
+msgstr ""
+
+#. translators: %1$d: form id
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionsPage.jsx:97
+msgid "Form #%1$d"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionsPage.jsx:147
+#: resources/admin/pages/SubmissionsPage.jsx:152
+msgid "Failed to export submissions"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionsPage.jsx:177
+msgid "Exporting..."
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionsPage.jsx:178
+msgid "Export CSV"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionsPage.jsx:186
+msgid "Hide Filters"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionsPage.jsx:187
+msgid "Filters"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionsPage.jsx:193
+msgid "Search submissions..."
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionsPage.jsx:209
+msgid "Date Range"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionsPage.jsx:222
+msgid "Clear all filters"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:86
+msgid "Failed to load submission"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:175
+msgid "Back to Submissions"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:220
+msgid "← Previous"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:226
+msgid "Next →"
+msgstr ""
+
+#. translators: %1$d: submission id
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:234
+msgid "Submission #%1$d"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:241
+msgid "Submitted Data"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:251
+msgid "Show empty fields"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:260
+msgid "Show technical fields"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:289
+msgid "JSON Data:"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:303
+msgid "empty"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:333
+msgid "No Data Submitted"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:336
+msgid "This submission was recorded but contains no field data."
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:343
+msgid "Possible causes:"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:347
+msgid "Form fields were not properly configured with keys"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:353
+msgid "JavaScript error prevented data collection"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:359
+msgid "Multi-step form field paths not correctly collected"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:365
+msgid "Browser console may show errors during submission"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:372
+msgid "Debug tip:"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:373
+msgid "Check the Execution Logs below for clues."
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:388
+msgid "Technical Information"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:396
+msgid "Raw Payload"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:400
+msgid "Meta Data"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:404
+msgid "Form Schema"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:419
+msgid "Request Info"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: build/admin/admin.js:18
+#: resources/admin/pages/SubmissionDetailPage.jsx:424
+#: resources/admin/pages/SubmissionDetailPage.jsx:616
+msgid "IP Address"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: build/admin/admin.js:18
+#: resources/admin/pages/SubmissionDetailPage.jsx:427
+#: resources/admin/pages/SubmissionDetailPage.jsx:436
+#: resources/admin/pages/SubmissionDetailPage.jsx:444
+#: resources/admin/pages/SubmissionDetailPage.jsx:619
+#: resources/admin/pages/SubmissionDetailPage.jsx:635
+#: resources/admin/pages/SubmissionDetailPage.jsx:647
+#: resources/admin/pages/SubmissionDetailPage.jsx:661
+msgid "N/A"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:432
+msgid "User Agent"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:441
+msgid "Referrer"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:451
+msgid "Database Info"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:456
+msgid "Submission ID"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:506
+msgid "Submission Notes"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:512
+msgid "Add notes about this submission (not yet implemented)"
+msgstr ""
+
+#: build/admin/admin.js:16
+#: resources/admin/pages/SubmissionDetailPage.jsx:524
+msgid "Execution Logs"
+msgstr ""
+
+#. translators: %1$d: number of general log entries
+#: build/admin/admin.js:17
+#: resources/admin/pages/SubmissionDetailPage.jsx:534
+msgid "General (%1$d)"
+msgstr ""
+
+#. translators: %1$d: number of API call logs
+#: build/admin/admin.js:18
+#: resources/admin/pages/SubmissionDetailPage.jsx:542
+msgid "API Calls (%1$d)"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/pages/SubmissionDetailPage.jsx:555
+msgid "Level"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/pages/SubmissionDetailPage.jsx:578
+msgid "No logs"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/pages/SubmissionDetailPage.jsx:588
+msgid "Submission Info"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/pages/SubmissionDetailPage.jsx:645
+msgid "Mobile"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/pages/SubmissionDetailPage.jsx:646
+msgid "Desktop"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/pages/SubmissionDetailPage.jsx:651
+msgid "Source URL"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/pages/SubmissionDetailPage.jsx:666
+msgid "User"
+msgstr ""
+
+#. translators: %1$d: user id
+#: build/admin/admin.js:18
+#: resources/admin/pages/SubmissionDetailPage.jsx:669
+msgid "User #%1$d"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/pages/SubmissionDetailPage.jsx:670
+msgid "Guest"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldDock.jsx:55
+msgid "Fields"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldDock.jsx:65
+msgid "Expand"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldDock.jsx:66
+msgid "Collapse"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldDock.jsx:40
+msgid "Loading fields..."
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:11
+msgid "Equals"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:12
+msgid "Not Equals"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:13
+msgid "Contains"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:14
+msgid "Not Contains"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:15
+msgid "Is Empty"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:16
+msgid "Is Not Empty"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:17
+msgid "Greater Than"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:18
+msgid "Less Than"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:22
+msgid "Show"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:23
+msgid "Hide"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:24
+msgid "Require"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:25
+msgid "Disable"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:58
+msgid "Conditional Logic"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:61
+msgid "+ Add Rule"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:67
+msgid "No conditions set"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:76
+msgid "Rule"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:87
+msgid "When field"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:90
+msgid "Select field..."
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:100
+msgid "Operator"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConditionEditor.jsx:115
+msgid "Then"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldInspector.jsx:55
+msgid "Nothing selected"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldInspector.jsx:58
+msgid "Click a field (or container) in the canvas to edit its settings, validation, and conditions."
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldInspector.jsx:82
+msgid "Validation"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldInspector.jsx:92
+msgid "Conditions"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldInspector.jsx:101
+msgid "Step Title"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldInspector.jsx:104
+msgid "Title shown in step navigation"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldInspector.jsx:113
+msgid "Optional description for this step"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldInspector.jsx:125
+msgid "Columns"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldInspector.jsx:128
+msgid "Number of columns"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldInspector.jsx:173
+msgid "Field Label"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldInspector.jsx:176
+msgid "The label displayed above the field"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldInspector.jsx:182
+msgid "Placeholder Text"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldInspector.jsx:185
+msgid "Hint text shown inside the field"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldInspector.jsx:191
+msgid "Field Key"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldInspector.jsx:194
+msgid "Unique identifier for data mapping"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldInspector.jsx:221
+msgid "Option label"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldInspector.jsx:250
+msgid "+ Add Option"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldInspector.jsx:259
+msgid "Required Field"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldInspector.jsx:264
+msgid "User must fill this field to submit"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/admin/components/builder/FieldRenderer.jsx:110
+#: resources/frontend/components/FieldRenderer.jsx:211
+msgid "Select an option"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldRenderer.jsx:133
+msgid "Select a country"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldRenderer.jsx:142
+msgid "Hidden field (not visible to users)"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldRenderer.jsx:148
+msgid "HTML Content Block"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldRenderer.jsx:156
+msgid "Click to upload or drag image here"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldRenderer.jsx:165
+msgid "Click to upload or drag file here"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/admin/components/builder/FieldRenderer.jsx:219
+#: resources/frontend/components/FieldRenderer.jsx:276
+msgid "Subtotal:"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/admin/components/builder/FieldRenderer.jsx:223
+#: resources/frontend/components/FieldRenderer.jsx:282
+msgid "Tax:"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/admin/components/builder/FieldRenderer.jsx:227
+#: resources/frontend/components/FieldRenderer.jsx:288
+msgid "Total:"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldRenderer.jsx:252
+msgid "Hidden pricing field (not visible to users)"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ContainerRenderer.jsx:20
+msgid "Container"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ContainerRenderer.jsx:79
+msgid "Drag container"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/InlineAddButton.jsx:33
+#: resources/admin/components/builder/InsertFieldButton.jsx:32
+msgid "Insert Field"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ColumnDropZone.jsx:49
+#: resources/admin/components/builder/FieldList.jsx:103
+#: resources/admin/components/builder/FieldList.jsx:144
+#: resources/admin/components/builder/FormEditor.jsx:574
+#: resources/admin/components/builder/FormEditor.jsx:576
+msgid "Add Field"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ColumnDropZone.jsx:71
+msgid "Use “Add Field” or drag a field from the left panel."
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldToolbar.jsx:86
+msgid "Drag to reorder"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldToolbar.jsx:87
+msgid "Drag field"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldToolbar.jsx:99
+msgid "Move up"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldToolbar.jsx:105
+msgid "Move down"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldToolbar.jsx:114
+msgid "Duplicate field"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldToolbar.jsx:123
+msgid "Delete field"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FieldChrome.jsx:45
+msgid "Field group. Press Enter to select."
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/StepCanvas.jsx:47
+msgid "Step not found"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/StepCanvas.jsx:54
+msgid "Untitled Step"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/StepCanvas.jsx:96
+msgid "Editing Step"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/StepCanvas.jsx:134
+msgid "This step is empty"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/StepCanvas.jsx:137
+msgid "Drag fields from the left panel to add them to this step"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConversationalCanvas.jsx:89
+msgid "No Questions Yet"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/ConversationalCanvas.jsx:92
+msgid "Add your first question from the left panel. Each field will be displayed one at a time."
+msgstr ""
+
+#: build/admin/admin.js:18
+#: build/admin/admin.js:22
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/admin/components/builder/ConversationalCanvas.jsx:111
+#: resources/admin/components/builder/ConversationalCanvas.jsx:171
+#: resources/admin/utils/initialSchema.js:147
+#: resources/frontend/components/ConversationalFormRenderer.jsx:624
+msgid "Question"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/admin/components/builder/ConversationalCanvas.jsx:115
+#: resources/frontend/components/ConversationalFormRenderer.jsx:546
+msgid "Complete"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/StepNavigator.jsx:49
+msgid "Steps:"
+msgstr ""
+
+#. translators: %d: step number
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/StepNavigator.jsx:71
+msgid "Step %d"
+msgstr ""
+
+#. translators: %d: step number
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/StepNavigator.jsx:95
+msgid "Delete step %d"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/StepNavigator.jsx:136
+msgid "Add Step"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/StepNavigator.jsx:17
+msgid "No steps created yet. Add your first step to get started."
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/StepNavigator.jsx:36
+msgid "Add First Step"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/utils/schemaTree.js:226
+msgid "Untitled Field"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FormEditor.jsx:184
+msgid "Cannot add a step inside another step. Steps can only be added at the root level."
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FormEditor.jsx:266
+msgid "Cannot delete the last step. Multi-step forms require at least one step."
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FormEditor.jsx:520
+msgid "Tip: Click a field (or container) to edit its settings."
+msgstr ""
+
+#: build/admin/admin.js:18
+#: build/blocks/form/index.js:1
+#: build/blocks/subtleforms-form/index.js:1
 #: resources/admin/components/builder/FormSettings.jsx:94
 #: resources/blocks/form/edit.jsx:265
 #: resources/blocks/form/edit.jsx:302
@@ -2141,1177 +4406,1292 @@ msgstr ""
 msgid "Form Settings"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:119
 msgid "Multi-step Form"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:120
 msgid "Sectioned Form"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:122
 msgid "Conversational Form"
 msgstr ""
 
-#: resources/admin/components/builder/FormSettings.jsx:123
-#: resources/admin/components/OnboardingWizard.jsx:31
-msgid "Payment Form"
-msgstr ""
-
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:136
 msgid "Fields are organized into steps. Users navigate through one step at a time with progress tracking."
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:141
 msgid "Fields are grouped into collapsible sections. All sections are visible on a single page."
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:146
 msgid "Questions are presented one at a time. After completing all questions, users review answers before submitting."
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:151
 msgid "This form collects payment information. Configure payment settings below to enable transactions."
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:162
 msgid "General Settings"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:169
 msgid "Internal identifier for this form schema"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:177
 msgid "Form Description"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:180
 msgid "Optional description for documentation purposes"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:192
 msgid "Canvas Layout"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:195
 msgid "Canvas Width"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:199
 msgid "Narrow (640px)"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:203
 msgid "Standard (768px)"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:207
 msgid "Wide (1024px)"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:212
 msgid "Controls the maximum width of the form canvas in the builder"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:224
 #: resources/admin/components/builder/FormSettings.jsx:390
 msgid "Payment Settings"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:231
 msgid "Conversational Payment:"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:233
 msgid "When enabled, users will answer questions, review their answers, and then complete payment before submission."
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:244
 msgid "Note:"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:245
 msgid "Payment gateway integration will be added in a future update. These settings prepare your form for payment processing."
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:254
 msgid "Enable Payments"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:259
 msgid "Require payment for form submission"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:268
 msgid "Payment Mode"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:272
 msgid "Test Mode"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:276
 msgid "Live Mode"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:283
 msgid "Test mode will not process real payments"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:290
 msgid "Currency"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:304
 msgid "Currency for payment transactions"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:311
 msgid "Amount Type"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:315
 #: resources/admin/components/builder/FormSettings.jsx:334
 msgid "Fixed Amount"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:319
 msgid "From Field"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:326
 msgid "Set a fixed amount or use a field value"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:342
 msgid "The amount to charge (e.g., 29.99)"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:351
 msgid "Amount Field"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:355
 msgid "Select a field..."
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:363
 msgid "Field that contains the payment amount"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:372
 msgid "Extension Point:"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:373
 msgid "Payment gateway settings will appear here when payment extensions are installed."
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/builder/FormSettings.jsx:393
 msgid "Payment settings are available for \"Payment\" and \"Conversational\" form types. Create a payment or conversational form to enable payment collection."
 msgstr ""
 
-#: resources/admin/components/builder/InlineAddButton.jsx:30
-#: resources/admin/components/builder/InsertFieldButton.jsx:31
-msgid "Insert Field"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:48
-msgid "Validation issues detected. Publishing is blocked until these are fixed:"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:56
-msgid "Validation error"
-msgstr ""
-
-#. translators: %1$d: number of additional validation issues
-#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:64
-msgid "…and %1$d more"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:81
-msgid "Build"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:89
-#: resources/admin/components/FormsList.jsx:239
-msgid "Entries"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:122
-msgid "Save the form first to view entries"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:137
-msgid "Form is live and visible to users"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:138
-msgid "Form is saved but not published"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:141
-#: resources/admin/components/FormsList.jsx:189
-#: resources/admin/components/FormsList.jsx:758
-#: resources/admin/pages/FormsPage.jsx:128
-#: resources/admin/pages/SettingsPage.jsx:396
-msgid "Published"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:142
-#: resources/admin/components/FormsList.jsx:184
-#: resources/admin/components/FormsList.jsx:757
-#: resources/admin/pages/FormsPage.jsx:129
-#: resources/admin/pages/SettingsPage.jsx:395
-msgid "Draft"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:158
-msgid "Copied to clipboard!"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:159
-msgid "Click to copy shortcode"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:214
-msgid "Retry autosave"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:223
-msgid "Retry save"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:231
-msgid "Dismiss"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:252
-msgid "Undo (Ctrl/Cmd+Z)"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:261
-msgid "Redo (Shift+Ctrl/Cmd+Z)"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:276
-msgid "Preview"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:286
-#: resources/admin/pages/BuilderPage.jsx:781
-msgid "Saving…"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:287
-#: resources/admin/components/builder/layout/BuilderModalsController.jsx:80
-msgid "Save Draft"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:298
-#: resources/admin/components/FormsList.jsx:773
-msgid "Update"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:299
-#: resources/admin/components/builder/layout/BuilderModalsController.jsx:66
-msgid "Publish"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:307
-msgid "Save changes and return to forms list"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:308
-msgid "Save & Close"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:316
-msgid "Delete this form permanently"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderModalsController.jsx:46
-#: resources/admin/components/FormsList.jsx:726
-#: resources/admin/components/FormsList.jsx:742
-msgid "Delete Form"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderModalsController.jsx:47
-#: resources/admin/components/FormsList.jsx:736
-msgid "Are you sure you want to delete this form? This action cannot be undone."
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderModalsController.jsx:60
-msgid "Publish Form"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderModalsController.jsx:61
-msgid "Publishing this form will make it visible on the frontend. Are you ready to publish?"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderModalsController.jsx:74
-msgid "You have unsaved changes"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderModalsController.jsx:75
-msgid "Your recent edits have not been saved. Would you like to save your changes before leaving, or discard them?"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderModalsController.jsx:83
-#: resources/admin/pages/SettingsPage.jsx:313
-msgid "Discard Changes"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderModalsController.jsx:84
-#: resources/admin/components/CreateFormWizard.jsx:197
-#: resources/admin/components/FormsList.jsx:767
-#: resources/admin/modals/ConfirmModal.jsx:30
-#: resources/admin/modals/CreateFormModal.jsx:409
-msgid "Cancel"
-msgstr ""
-
-#: resources/admin/components/builder/StepCanvas.jsx:46
-msgid "Step not found"
-msgstr ""
-
-#: resources/admin/components/builder/StepCanvas.jsx:53
-msgid "Untitled Step"
-msgstr ""
-
-#: resources/admin/components/builder/StepCanvas.jsx:97
-msgid "Editing Step"
-msgstr ""
-
-#: resources/admin/components/builder/StepCanvas.jsx:135
-msgid "This step is empty"
-msgstr ""
-
-#: resources/admin/components/builder/StepCanvas.jsx:138
-msgid "Drag fields from the left panel to add them to this step"
-msgstr ""
-
-#: resources/admin/components/builder/StepNavigator.jsx:16
-msgid "No steps created yet. Add your first step to get started."
-msgstr ""
-
-#: resources/admin/components/builder/StepNavigator.jsx:35
-msgid "Add First Step"
-msgstr ""
-
-#: resources/admin/components/builder/StepNavigator.jsx:48
-msgid "Steps:"
-msgstr ""
-
-#. translators: %d: step number
-#: resources/admin/components/builder/StepNavigator.jsx:72
-msgid "Step %d"
-msgstr ""
-
-#. translators: %d: step number
-#: resources/admin/components/builder/StepNavigator.jsx:96
-msgid "Delete step %d"
-msgstr ""
-
-#: resources/admin/components/builder/StepNavigator.jsx:137
-msgid "Add Step"
-msgstr ""
-
-#: resources/admin/components/builder/utils/schemaTree.js:226
-msgid "Untitled Field"
-msgstr ""
-
-#: resources/admin/components/BuilderTour.jsx:10
+#: build/admin/admin.js:18
+#: resources/admin/components/BuilderTour.jsx:11
 msgid "Form Header"
 msgstr ""
 
-#: resources/admin/components/BuilderTour.jsx:11
+#: build/admin/admin.js:18
+#: resources/admin/components/BuilderTour.jsx:12
 msgid "This is your form title. Click to edit it. You can see the form status (Draft/Published) and use Save, Publish, or Delete buttons."
 msgstr ""
 
-#: resources/admin/components/BuilderTour.jsx:20
+#: build/admin/admin.js:18
+#: resources/admin/components/BuilderTour.jsx:21
 msgid "Draft vs Publish"
 msgstr ""
 
-#: resources/admin/components/BuilderTour.jsx:21
+#: build/admin/admin.js:18
+#: resources/admin/components/BuilderTour.jsx:22
 msgid "Draft means your changes are saved but not live. Publish makes the form live. If it is already published, Update applies your latest changes."
 msgstr ""
 
-#: resources/admin/components/BuilderTour.jsx:30
+#: build/admin/admin.js:18
+#: resources/admin/components/BuilderTour.jsx:31
 msgid "Fields Panel"
 msgstr ""
 
-#: resources/admin/components/BuilderTour.jsx:31
+#: build/admin/admin.js:18
+#: resources/admin/components/BuilderTour.jsx:32
 msgid "Browse available field types organized by category. Click any field to add it to your form canvas."
 msgstr ""
 
-#: resources/admin/components/BuilderTour.jsx:40
+#: build/admin/admin.js:18
+#: resources/admin/components/BuilderTour.jsx:41
 msgid "Form Canvas"
 msgstr ""
 
-#: resources/admin/components/BuilderTour.jsx:41
+#: build/admin/admin.js:18
+#: resources/admin/components/BuilderTour.jsx:42
 msgid "This is your form canvas. Add fields, drag to reorder, and organize your form structure. Click any field to select and configure it."
 msgstr ""
 
-#: resources/admin/components/BuilderTour.jsx:50
+#: build/admin/admin.js:18
+#: resources/admin/components/BuilderTour.jsx:51
 msgid "Field Toolbar"
 msgstr ""
 
-#: resources/admin/components/BuilderTour.jsx:51
+#: build/admin/admin.js:18
+#: resources/admin/components/BuilderTour.jsx:52
 msgid "When a field is selected, use these tools to move it up/down, duplicate, or delete it."
 msgstr ""
 
-#: resources/admin/components/BuilderTour.jsx:60
+#: build/admin/admin.js:18
+#: resources/admin/components/BuilderTour.jsx:61
 msgid "Field Inspector"
 msgstr ""
 
-#: resources/admin/components/BuilderTour.jsx:61
+#: build/admin/admin.js:18
+#: resources/admin/components/BuilderTour.jsx:62
 msgid "Configure the selected field here. Set properties, validation rules, and conditional logic in the tabs."
 msgstr ""
 
-#: resources/admin/components/BuilderTour.jsx:70
+#: build/admin/admin.js:18
+#: resources/admin/components/BuilderTour.jsx:71
 msgid "Submissions Tab"
 msgstr ""
 
-#: resources/admin/components/BuilderTour.jsx:71
+#: build/admin/admin.js:18
+#: resources/admin/components/BuilderTour.jsx:72
 msgid "Switch to this tab to view form submissions. You can see all responses, filter them, and export data."
 msgstr ""
 
-#: resources/admin/components/BuilderTour.jsx:80
+#: build/admin/admin.js:18
+#: resources/admin/components/BuilderTour.jsx:81
 msgid "Tour Complete!"
 msgstr ""
 
-#: resources/admin/components/BuilderTour.jsx:81
+#: build/admin/admin.js:18
+#: resources/admin/components/BuilderTour.jsx:82
 msgid "You're ready to build amazing forms! Click the help icon anytime to restart this tour."
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/BuilderTour.jsx:286
 msgid "Close tour"
 msgstr ""
 
-#: resources/admin/components/BuilderTour.jsx:324
-#: resources/admin/components/CreateFormWizard.jsx:193
-#: resources/admin/components/OnboardingWizard.jsx:594
-#: resources/admin/modals/CreateFormModal.jsx:410
-#: resources/frontend/components/ConversationalFormRenderer.jsx:434
-#: resources/frontend/components/ConversationalFormRenderer.jsx:580
-msgid "Back"
-msgstr ""
-
+#: build/admin/admin.js:18
 #: resources/admin/components/BuilderTour.jsx:330
 msgid "Skip Tour"
 msgstr ""
 
+#: build/admin/admin.js:18
 #: resources/admin/components/BuilderTour.jsx:334
 msgid "Finish"
 msgstr ""
 
-#: resources/admin/components/CreateFormWizard.jsx:14
-msgid "Form basics"
-msgstr ""
-
-#: resources/admin/components/CreateFormWizard.jsx:15
-msgid "Form type"
-msgstr ""
-
-#: resources/admin/components/CreateFormWizard.jsx:16
-#: resources/admin/components/CreateFormWizard.jsx:163
-msgid "Starting point"
-msgstr ""
-
-#: resources/admin/components/CreateFormWizard.jsx:53
-#: resources/admin/components/CreateFormWizard.jsx:96
-msgid "Create form"
-msgstr ""
-
-#: resources/admin/components/CreateFormWizard.jsx:79
-msgid "Failed to create form."
-msgstr ""
-
-#: resources/admin/components/CreateFormWizard.jsx:106
-msgid "Creating…"
-msgstr ""
-
-#: resources/admin/components/CreateFormWizard.jsx:122
-msgid "Form name"
-msgstr ""
-
-#: resources/admin/components/CreateFormWizard.jsx:128
-msgid "Short description (optional)"
-msgstr ""
-
-#: resources/admin/components/CreateFormWizard.jsx:138
-msgid "Choose a form type"
-msgstr ""
-
-#: resources/admin/components/CreateFormWizard.jsx:141
-msgid "Regular form"
-msgstr ""
-
-#: resources/admin/components/CreateFormWizard.jsx:143
-msgid "Multi-step form"
-msgstr ""
-
-#: resources/admin/components/CreateFormWizard.jsx:147
-msgid "Sectioned form"
-msgstr ""
-
-#: resources/admin/components/CreateFormWizard.jsx:151
-msgid "Conversational form"
-msgstr ""
-
-#: resources/admin/components/CreateFormWizard.jsx:166
-msgid "Blank"
-msgstr ""
-
-#: resources/admin/components/CreateFormWizard.jsx:168
-msgid "Minimal template (based on form type)"
-msgstr ""
-
-#: resources/admin/components/CreateFormWizard.jsx:180
-msgid "Don't show again"
-msgstr ""
-
-#: resources/admin/components/DataTable.jsx:53
-msgid "No items found"
-msgstr ""
-
-#: resources/admin/components/DataTable.jsx:104
-msgid "Loading..."
-msgstr ""
-
-#. translators: %1$d: number of selected items
-#: resources/admin/components/DataTable.jsx:136
-msgid "%1$d items selected"
-msgstr ""
-
-#. translators: %1$d: starting item number, %2$d: ending item number, %3$d: total items
-#: resources/admin/components/DataTable.jsx:242
-msgid "Showing %1$d to %2$d of %3$d"
-msgstr ""
-
-#: resources/admin/components/DataTable.jsx:252
-msgid "Per page:"
-msgstr ""
-
-#. translators: %1$d: Current page number, %2$d: Total pages
-#: resources/admin/components/DataTable.jsx:281
-msgid "Page %1$d of %2$d"
-msgstr ""
-
-#: resources/admin/components/ExecutionLog.jsx:37
-#: resources/admin/components/ExecutionLog.jsx:39
-msgid "Failed to load logs"
-msgstr ""
-
-#: resources/admin/components/ExecutionLog.jsx:46
-msgid "Select a submission to view logs."
-msgstr ""
-
-#: resources/admin/components/ExecutionLog.jsx:55
-msgid "Execution Log"
-msgstr ""
-
+#: build/admin/admin.js:18
 #: resources/admin/components/FormPreviewModal.jsx:106
 msgid "Select..."
 msgstr ""
 
-#: resources/admin/components/FormPreviewModal.jsx:237
+#: build/admin/admin.js:18
+#: resources/admin/components/FormPreviewModal.jsx:224
 msgid "Click to upload or drag and drop"
 msgstr ""
 
-#: resources/admin/components/FormPreviewModal.jsx:274
+#: build/admin/admin.js:18
+#: resources/admin/components/FormPreviewModal.jsx:258
 msgid "Form Preview"
 msgstr ""
 
-#: resources/admin/components/FormPreviewModal.jsx:293
+#: build/admin/admin.js:18
+#: build/admin/admin.js:22
+#: build/blocks/subtleforms-form/index.js:1
+#: resources/admin/components/builder/FormCanvas.jsx:38
+#: resources/admin/components/builder/FormEditorHeader.jsx:128
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:65
+#: resources/admin/components/FormPreviewModal.jsx:271
+#: resources/admin/utils/initialSchema.js:88
+#: resources/blocks/subtleforms-form/index.js:131
+msgid "Untitled Form"
+msgstr ""
+
+#: build/admin/admin.js:18
+#: resources/admin/components/FormPreviewModal.jsx:275
 msgid "Preview shows your current draft (including unsaved changes)."
 msgstr ""
 
-#: resources/admin/components/FormPreviewModal.jsx:297
+#: build/admin/admin.js:18
+#: resources/admin/components/FormPreviewModal.jsx:279
 msgid "Preview shows your current draft."
 msgstr ""
 
-#: resources/admin/components/FormPreviewModal.jsx:310
+#: build/admin/admin.js:18
+#: resources/admin/components/FormPreviewModal.jsx:294
 msgid "Conversational forms display one question at a time. This preview shows all fields together."
 msgstr ""
 
-#: resources/admin/components/FormPreviewModal.jsx:327
+#: build/admin/admin.js:18
+#: resources/admin/components/FormPreviewModal.jsx:311
 msgid "No fields added yet. Add fields to see the preview."
 msgstr ""
 
-#: resources/admin/components/FormPreviewModal.jsx:339
+#: build/admin/admin.js:18
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/admin/components/FormPreviewModal.jsx:323
 #: resources/frontend/components/ConversationalFormRenderer.jsx:444
 #: resources/frontend/components/FormRenderer.jsx:776
 msgid "Submit"
 msgstr ""
 
-#: resources/admin/components/FormPreviewModal.jsx:342
+#: build/admin/admin.js:18
+#: resources/admin/components/FormPreviewModal.jsx:326
 msgid "This is a preview. The form is not functional."
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:72
-msgid "Shortcode copied to clipboard"
+#: build/admin/admin.js:18
+#: resources/admin/components/CreateFormWizard.jsx:15
+msgid "Form basics"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:80
-msgid "Failed to copy shortcode"
+#: build/admin/admin.js:18
+#: resources/admin/components/CreateFormWizard.jsx:16
+msgid "Form type"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:120
-#: resources/admin/components/SubmissionsTable.jsx:459
-#: resources/admin/pages/SubmissionDetailPage.jsx:188
-msgid "New"
+#: build/admin/admin.js:18
+#: resources/admin/components/CreateFormWizard.jsx:17
+#: resources/admin/components/CreateFormWizard.jsx:162
+msgid "Starting point"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:128
-msgid "Type"
+#: build/admin/admin.js:18
+#: resources/admin/components/CreateFormWizard.jsx:54
+#: resources/admin/components/CreateFormWizard.jsx:96
+msgid "Create form"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:135
-#: resources/admin/components/OnboardingWizard.jsx:48
-#: resources/admin/components/OnboardingWizard.jsx:444
-#: resources/admin/modals/CreateFormModal.jsx:165
-#: resources/admin/pages/BuilderPage.jsx:828
-#: resources/admin/pages/DashboardPage.jsx:228
-msgid "Regular"
+#: build/admin/admin.js:18
+#: resources/admin/components/CreateFormWizard.jsx:105
+msgid "Creating…"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:140
-#: resources/admin/modals/CreateFormModal.jsx:174
-#: resources/admin/pages/BuilderPage.jsx:833
-#: resources/admin/pages/DashboardPage.jsx:233
-msgid "Multi-step"
+#: build/admin/admin.js:18
+#: resources/admin/components/CreateFormWizard.jsx:121
+msgid "Form name"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:145
-#: resources/admin/components/OnboardingWizard.jsx:60
-#: resources/admin/modals/CreateFormModal.jsx:183
-#: resources/admin/pages/BuilderPage.jsx:838
-#: resources/admin/pages/DashboardPage.jsx:238
-msgid "Sectioned"
+#: build/admin/admin.js:18
+#: resources/admin/components/CreateFormWizard.jsx:127
+msgid "Short description (optional)"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:150
-#: resources/admin/components/OnboardingWizard.jsx:38
-#: resources/admin/components/OnboardingWizard.jsx:66
-#: resources/admin/modals/CreateFormModal.jsx:189
-#: resources/admin/pages/BuilderPage.jsx:843
-#: resources/admin/pages/DashboardPage.jsx:243
-msgid "Conversational"
+#: build/admin/admin.js:18
+#: resources/admin/components/CreateFormWizard.jsx:137
+msgid "Choose a form type"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:155
-#: resources/admin/modals/CreateFormModal.jsx:198
-#: resources/admin/pages/BuilderPage.jsx:848
-#: resources/admin/pages/DashboardPage.jsx:248
-#: resources/frontend/components/ConversationalFormRenderer.jsx:466
-msgid "Payment"
+#: build/admin/admin.js:18
+#: resources/admin/components/CreateFormWizard.jsx:140
+msgid "Regular form"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:194
-#: resources/admin/components/FormsList.jsx:759
-msgid "Archived"
+#: build/admin/admin.js:18
+#: resources/admin/components/CreateFormWizard.jsx:142
+msgid "Multi-step form"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:216
-msgid "Shortcode"
+#: build/admin/admin.js:18
+#: resources/admin/components/CreateFormWizard.jsx:146
+msgid "Sectioned form"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:228
-msgid "Click to copy"
+#: build/admin/admin.js:18
+#: resources/admin/components/CreateFormWizard.jsx:150
+msgid "Conversational form"
 msgstr ""
 
-#. translators: %1$d: unread count, %2$d: total submissions
-#: resources/admin/components/FormsList.jsx:259
-msgid "%1$d unread, %2$d total entries"
+#: build/admin/admin.js:18
+#: resources/admin/components/CreateFormWizard.jsx:165
+msgid "Blank"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:282
-msgid "Last Updated"
+#: build/admin/admin.js:18
+#: resources/admin/components/CreateFormWizard.jsx:167
+msgid "Minimal template (based on form type)"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:291
-msgid "Just now"
+#: build/admin/admin.js:18
+#: resources/admin/components/CreateFormWizard.jsx:179
+msgid "Don't show again"
 msgstr ""
 
-#. translators: %1$d: number of hours ago
-#: resources/admin/components/FormsList.jsx:294
-#: resources/admin/components/SubmissionsTable.jsx:396
-#: resources/admin/pages/SubmissionDetailPage.jsx:684
-msgid "%1$d hours ago"
+#: build/admin/admin.js:18
+#: resources/admin/components/CreateFormWizard.jsx:80
+msgid "Failed to create form."
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:295
-msgid "Yesterday"
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:138
+msgid "Form is live and visible to users"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:319
-#: resources/admin/pages/DashboardPage.jsx:293
-#: resources/frontend/components/ConversationalFormRenderer.jsx:421
-msgid "Edit"
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:139
+msgid "Form is saved but not published"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:330
-msgid "More actions"
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:159
+msgid "Copied to clipboard!"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:345
-msgid "Change status"
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:160
+msgid "Click to copy shortcode"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:367
-msgid "View submissions"
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/FormEditorHeader.jsx:156
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:165
+msgid "Copied!"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:430
-msgid "Failed to load forms"
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:215
+msgid "Retry autosave"
 msgstr ""
 
-#. translators: %s: form title
-#: resources/admin/components/FormsList.jsx:484
-msgid "%1$s (Copy)"
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:224
+msgid "Retry save"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:508
-msgid "Form duplicated"
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:232
+msgid "Dismiss"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:514
-msgid "Failed to duplicate form"
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:253
+msgid "Undo (Ctrl/Cmd+Z)"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:527
-#: resources/admin/pages/BuilderPage.jsx:692
-msgid "Form deleted"
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:262
+msgid "Redo (Shift+Ctrl/Cmd+Z)"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:531
-#: resources/admin/pages/BuilderPage.jsx:683
-#: resources/admin/pages/BuilderPage.jsx:702
-msgid "Failed to delete form"
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:277
+msgid "Preview"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:555
-msgid "Status updated"
+#: build/admin/admin.js:18
+#: build/admin/admin.js:20
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:287
+#: resources/admin/pages/BuilderPage.jsx:781
+msgid "Saving…"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:560
-#: resources/admin/pages/SubmissionDetailPage.jsx:99
-msgid "Failed to update status"
+#: build/admin/admin.js:18
+#: build/admin/admin.js:19
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:288
+#: resources/admin/components/builder/layout/BuilderModalsController.jsx:80
+msgid "Save Draft"
 msgstr ""
 
-#. translators: %1$d: number of forms to delete
-#: resources/admin/components/FormsList.jsx:572
-msgid "Are you sure you want to delete %1$d forms?"
+#: build/admin/admin.js:18
+#: build/admin/admin.js:19
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:300
+#: resources/admin/components/builder/layout/BuilderModalsController.jsx:66
+msgid "Publish"
 msgstr ""
 
-#. translators: %1$d: number of forms deleted
-#: resources/admin/components/FormsList.jsx:596
-msgid "%1$d forms deleted"
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:308
+msgid "Save changes and return to forms list"
 msgstr ""
 
-#. translators: %1$d: number deleted, %2$d: total requested
-#: resources/admin/components/FormsList.jsx:607
-msgid "Failed to delete some forms (%1$d/%2$d deleted)"
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:309
+msgid "Save & Close"
 msgstr ""
 
-#. translators: %1$d: number of forms updated
-#: resources/admin/components/FormsList.jsx:638
-msgid "%1$d forms updated"
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:317
+msgid "Delete this form permanently"
 msgstr ""
 
-#. translators: %1$d: number updated, %2$d: total requested
-#: resources/admin/components/FormsList.jsx:649
-msgid "Failed to update some forms (%1$d/%2$d updated)"
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:36
+msgid "Validation issues detected. Publishing is blocked until these are fixed:"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:679
-msgid "Mark as Published"
+#: build/admin/admin.js:18
+#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:44
+msgid "Validation error"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:683
-msgid "Mark as Draft"
+#. translators: %1$d: number of additional validation issues
+#: build/admin/admin.js:19
+#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:52
+msgid "…and %1$d more"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:697
-msgid "No forms found"
+#: build/admin/admin.js:19
+#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:69
+msgid "Build"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:698
-msgid "Create your first form"
+#: build/admin/admin.js:19
+#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:110
+msgid "Save the form first to view entries"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:702
-msgid "Try adjusting your search terms"
+#: build/admin/admin.js:19
+#: resources/admin/components/builder/layout/BuilderModalsController.jsx:60
+msgid "Publish Form"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:703
-msgid "Build beautiful forms with our drag-and-drop builder"
+#: build/admin/admin.js:19
+#: resources/admin/components/builder/layout/BuilderModalsController.jsx:61
+msgid "Publishing this form will make it visible on the frontend. Are you ready to publish?"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:715
-#: resources/admin/pages/FormsPage.jsx:72
-#: resources/admin/pages/FormsPage.jsx:149
-msgid "New Form"
+#: build/admin/admin.js:19
+#: resources/admin/components/builder/layout/BuilderModalsController.jsx:74
+msgid "You have unsaved changes"
 msgstr ""
 
-#. translators: %1$d: number of submissions belonging to this form
-#: resources/admin/components/FormsList.jsx:733
-msgid "Are you sure you want to delete this form? It has %1$d submissions which will also be permanently deleted."
+#: build/admin/admin.js:19
+#: resources/admin/components/builder/layout/BuilderModalsController.jsx:75
+msgid "Your recent edits have not been saved. Would you like to save your changes before leaving, or discard them?"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:748
-msgid "Change Status"
+#. translators: %1$d: numeric suffix used to create a unique title
+#: build/admin/admin.js:20
+#: build/admin/admin.js:21
+#: build/admin/admin.js:22
+#: resources/admin/hooks/builder/useBuilderBoot.js:24
+#: resources/admin/pages/BuilderPage.jsx:459
+#: resources/admin/pages/BuilderPage.jsx:971
+msgid "Untitled Form %1$d"
 msgstr ""
 
-#: resources/admin/components/HelpMenu.jsx:22
-msgid "Help & Documentation"
+#: build/admin/admin.js:20
+#: resources/admin/hooks/builder/useBuilderBoot.js:131
+msgid "Failed to load schema"
 msgstr ""
 
-#: resources/admin/components/HelpMenu.jsx:31
-msgid "Start Tour"
+#: build/admin/admin.js:20
+#: resources/admin/pages/BuilderPage.jsx:178
+msgid "Form identifier missing"
 msgstr ""
 
-#: resources/admin/components/HelpMenu.jsx:38
-msgid "Quick Start Wizard"
+#: build/admin/admin.js:20
+#: resources/admin/pages/BuilderPage.jsx:234
+#: resources/admin/pages/BuilderPage.jsx:289
+#: resources/admin/pages/BuilderPage.jsx:626
+msgid "Fix validation errors before publishing."
 msgstr ""
 
-#: resources/admin/components/HelpMenu.jsx:47
-msgid "View Documentation"
+#: build/admin/admin.js:20
+#: resources/admin/pages/BuilderPage.jsx:244
+#: resources/admin/pages/BuilderPage.jsx:299
+msgid "Validation failed. Please fix the highlighted fields."
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:12
-msgid "Simple contact form for inquiries"
+#: build/admin/admin.js:20
+#: resources/admin/pages/BuilderPage.jsx:261
+#: resources/admin/pages/BuilderPage.jsx:364
+msgid "Failed to save form"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:19
-msgid "Capture leads with essential info"
+#: build/admin/admin.js:20
+#: resources/admin/pages/BuilderPage.jsx:316
+msgid "Failed to update form status"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:24
-msgid "Survey"
+#: build/admin/admin.js:20
+#: resources/admin/pages/BuilderPage.jsx:352
+msgid "Form published"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:26
-msgid "Collect feedback and opinions"
+#: build/admin/admin.js:20
+#: resources/admin/pages/BuilderPage.jsx:353
+msgid "Form saved"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:33
-msgid "Accept payments online"
+#: build/admin/admin.js:20
+#: resources/admin/pages/BuilderPage.jsx:782
+msgid "Saved"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:40
-msgid "Chat-like interactive form"
+#: build/admin/admin.js:20
+#: resources/admin/components/builder/FormEditorHeader.jsx:89
+#: resources/admin/pages/BuilderPage.jsx:783
+msgid "Unsaved changes"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:50
-msgid "Standard single-page form"
+#. translators: %1$s: localized time string (e.g. 12:34 PM)
+#: build/admin/admin.js:20
+#: resources/admin/pages/BuilderPage.jsx:802
+msgid "Saving… (last saved at %1$s)"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:54
-msgid "Multi-Step"
+#. translators: %1$s: localized time string (e.g. 12:34 PM)
+#: build/admin/admin.js:20
+#: resources/admin/pages/BuilderPage.jsx:806
+msgid "Last saved at %1$s"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:56
-msgid "Break form into multiple steps"
+#: build/admin/admin.js:22
+#: resources/admin/utils/initialSchema.js:101
+msgid "Intro"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:62
-msgid "Organize into logical sections"
+#: build/admin/admin.js:22
+#: resources/admin/utils/initialSchema.js:102
+msgid "Welcome! This is the start of your conversational form. Edit this block or remove it."
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:68
-msgid "Chat-style one question at a time"
+#: build/admin/admin.js:22
+#: resources/admin/utils/initialSchema.js:113
+msgid "First question"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:78
-#: resources/admin/utils/initialSchema.js:125
-msgid "Your name"
+#: build/admin/admin.js:22
+#: resources/admin/utils/initialSchema.js:115
+#: resources/admin/utils/initialSchema.js:149
+#: resources/admin/utils/initialSchema.js:190
+msgid "Type your answer…"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:87
-msgid "your@email.com"
+#: build/admin/admin.js:22
+#: resources/admin/utils/initialSchema.js:127
+#: resources/admin/utils/initialSchema.js:158
+#: resources/admin/utils/initialSchema.js:207
+msgid "Jane Doe"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:96
-msgid "Your message..."
+#: build/admin/admin.js:22
+#: resources/admin/utils/initialSchema.js:131
+msgid "Email address"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:105
-msgid "Company"
+#: build/admin/admin.js:22
+#: resources/admin/utils/initialSchema.js:133
+#: resources/admin/utils/initialSchema.js:164
+#: resources/admin/utils/initialSchema.js:213
+msgid "name@example.com"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:106
-msgid "Company name"
+#: build/admin/admin.js:22
+#: resources/admin/utils/initialSchema.js:184
+#: resources/admin/utils/initialSchema.js:201
+msgid "Layout"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:115
-msgid "+1 (555) 123-4567"
+#: build/admin/admin.js:22
+#: resources/admin/utils/initialSchema.js:188
+msgid "Text field"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:127
-msgid "Excellent"
+#: build/admin/admin.js:22
+#: resources/admin/pages/BuilderPage.jsx:1032
+#: resources/admin/pages/BuilderPage.jsx:1038
+msgid "Failed to create draft form"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:128
-msgid "Good"
+#: build/admin/admin.js:22
+#: resources/admin/pages/BuilderPage.jsx:1049
+msgid "Failed to initialize draft schema"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:129
-msgid "Average"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:57
+msgid "Install"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:130
-msgid "Poor"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:73
+msgid "Payment Gateway Integration"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:131
-msgid "Very Poor"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:74
+msgid "Accept payments directly through your forms with support for popular payment processors."
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:138
-msgid "Feedback"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:79
+msgid "Stripe integration"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:139
-msgid "Your feedback..."
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:80
+msgid "PayPal support"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:149
-msgid "0.00"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:81
+msgid "One-time and recurring payments"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:159
-msgid "Payment Details"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:82
+msgid "Secure payment processing"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:246
-msgid "Welcome to SubtleForms"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:88
+msgid "Email Marketing"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:249
-msgid "Create beautiful, powerful forms in minutes. This wizard will help you build your first form quickly."
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:89
+msgid "Automatically sync form submissions with your favorite email marketing services."
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:258
-msgid "What can you do with SubtleForms?"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:94
+msgid "Mailchimp integration"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:264
-msgid "Build forms with drag & drop"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:95
+msgid "ConvertKit support"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:270
-msgid "Add conditional logic and multi-step flows"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:96
+msgid "Automatic list syncing"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:279
-msgid "Manage submissions and integrate with services"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:97
+msgid "Custom field mapping"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:288
-msgid "Accept payments and create conversational forms"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:103
+msgid "CRM Integration"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:304
-msgid "What's your form goal?"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:104
+msgid "Send form data directly to your CRM and keep your contacts organized and up-to-date."
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:307
-msgid "Select the purpose of your form to get started with the right fields."
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:109
+msgid "Salesforce integration"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:364
-msgid "Choose your form type"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:110
+msgid "HubSpot support"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:367
-msgid "How would you like to present your form to users?"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:111
+msgid "Real-time data sync"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:426
-msgid "Field suggestions"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:112
+msgid "Custom object mapping"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:429
-msgid "Based on your selections, we've pre-selected these fields. You can customize them in the builder."
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:118
+msgid "Advanced Analytics"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:441
-msgid "Your Form"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:119
+msgid "Get detailed insights into form performance with advanced analytics and reporting."
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:445
-msgid "form"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:124
+msgid "Conversion tracking"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:449
-msgid "fields"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:125
+msgid "Detailed reports"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:489
-msgid "You're all set!"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:126
+msgid "Field analytics"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:492
-msgid "Your form will be created with the selected fields. You can customize everything in the form builder."
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:127
+msgid "Export capabilities"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:501
-msgid "Next steps:"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:133
+msgid "E-commerce Integration"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:507
-msgid "Customize your form fields in the builder"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:134
+msgid "Connect your forms with WooCommerce and other e-commerce platforms."
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:516
-msgid "Configure validation rules and conditional logic"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:139
+msgid "WooCommerce integration"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:525
-msgid "Preview your form to test it out"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:140
+msgid "Product selection fields"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:531
-msgid "Publish and embed it on your site with a shortcode"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:141
+msgid "Order form creation"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:549
-msgid "Form Setup Wizard"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:142
+msgid "Cart abandonment tracking"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:564
-msgid "complete"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:148
+msgid "Document Generation"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:585
-msgid "Don't show this again"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:149
+msgid "Automatically generate PDF documents from form submissions with custom templates."
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:598
-msgid "Skip"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:154
+msgid "PDF generation"
 msgstr ""
 
-#: resources/admin/components/OnboardingWizard.jsx:609
-#: resources/admin/modals/CreateFormModal.jsx:425
-#: resources/admin/pages/DashboardPage.jsx:310
-msgid "Create Form"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:155
+msgid "Custom templates"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:199
-msgid "Invalid response format"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:156
+msgid "Digital signatures"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:205
-msgid "Failed to load submissions"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:157
+msgid "Email attachments"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:242
-msgid "Submission deleted"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:163
+msgid "Multi-language Support"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:247
-msgid "Failed to delete submission"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:164
+msgid "Create multilingual forms with automatic translation and language detection."
 msgstr ""
 
-#. translators: %1$d: number of submissions to delete
-#: resources/admin/components/SubmissionsTable.jsx:259
-msgid "Are you sure you want to delete %1$d submissions?"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:169
+msgid "WPML integration"
 msgstr ""
 
-#. translators: %1$d: number of submissions deleted
-#: resources/admin/components/SubmissionsTable.jsx:284
-msgid "%1$d submissions deleted"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:170
+msgid "Polylang support"
 msgstr ""
 
-#. translators: %1$d: number deleted, %2$d: total requested
-#: resources/admin/components/SubmissionsTable.jsx:295
-msgid "Failed to delete some submissions (%1$d/%2$d deleted)"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:171
+msgid "RTL language support"
 msgstr ""
 
-#. translators: %1$d: number of submissions updated
-#: resources/admin/components/SubmissionsTable.jsx:325
-msgid "%1$d submissions updated"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:172
+msgid "Translation management"
 msgstr ""
 
-#. translators: %1$d: number updated, %2$d: total requested
-#: resources/admin/components/SubmissionsTable.jsx:334
-msgid "Failed to update some submissions (%1$d/%2$d updated)"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:178
+msgid "Automation & Webhooks"
 msgstr ""
 
-#. translators: %1$d: number of seconds
-#: resources/admin/components/SubmissionsTable.jsx:382
-#: resources/admin/pages/SubmissionDetailPage.jsx:680
-msgid "%1$d seconds ago"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:179
+msgid "Automate workflows and connect with thousands of apps using webhooks and Zapier."
 msgstr ""
 
-#. translators: %1$d: number of minutes
-#: resources/admin/components/SubmissionsTable.jsx:388
-#: resources/admin/pages/SubmissionDetailPage.jsx:682
-msgid "%1$d minutes ago"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:184
+msgid "Zapier integration"
 msgstr ""
 
-#. translators: %1$d: number of days
-#: resources/admin/components/SubmissionsTable.jsx:403
-#: resources/admin/pages/SubmissionDetailPage.jsx:685
-msgid "%1$d days ago"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:185
+msgid "Custom webhooks"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:434
-#: resources/admin/pages/FormsPage.jsx:91
-#: resources/admin/pages/SubmissionDetailPage.jsx:597
-#: resources/admin/pages/SubmissionsPage.jsx:200
-msgid "Form"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:186
+msgid "Conditional logic"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:460
-#: resources/admin/pages/SubmissionDetailPage.jsx:189
-#: resources/admin/pages/SubmissionDetailPage.jsx:609
-#: resources/admin/pages/SubmissionsPage.jsx:82
-msgid "Read"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:187
+msgid "Real-time triggers"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:466
-#: resources/admin/pages/SubmissionDetailPage.jsx:623
-msgid "Browser"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:202
+msgid "Browse All Extensions"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:472
-#: resources/admin/pages/SubmissionDetailPage.jsx:638
-msgid "Device"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:212
+msgid "Extend SubtleForms functionality"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:478
-#: resources/admin/pages/SubmissionDetailPage.jsx:673
-msgid "Submitted"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:215
+msgid "These extensions are currently in development. Sign up for early access and be notified when they become available."
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:498
-#: resources/admin/pages/DashboardPage.jsx:172
-msgid "View"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:235
+msgid "Have an extension idea?"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:532
-msgid "No submissions found."
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:238
+msgid "We're always looking for ways to improve SubtleForms. Let us know what extensions you'd like to see!"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:540
-msgid "Mark as Read"
+#: build/admin/admin.js:22
+#: resources/admin/pages/ExtensionsPage.jsx:248
+msgid "Suggest an Extension"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:544
-msgid "Mark as Unread"
+#: build/blocks/form/index.js:1
+#: resources/blocks/form/edit.jsx:118
+msgid "Form not available or has been unpublished"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:557
-#: resources/admin/components/SubmissionsTable.jsx:563
-msgid "Delete Submission"
+#: build/blocks/form/index.js:1
+#: resources/blocks/form/edit.jsx:184
+msgid "Form renderer not loaded. Frontend preview unavailable."
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:558
-msgid "Are you sure you want to delete this submission? This action cannot be undone."
+#: build/blocks/form/index.js:1
+#: build/blocks/subtleforms-form/index.js:1
+#: resources/blocks/form/edit.jsx:196
+#: resources/blocks/subtleforms-form/index.js:125
+msgid "Loading form preview..."
+msgstr ""
+
+#: build/blocks/form/index.js:1
+#: resources/blocks/form/edit.jsx:253
+msgid "— Select a form —"
+msgstr ""
+
+#: build/blocks/form/index.js:1
+#: build/blocks/subtleforms-form/index.js:1
+#: resources/blocks/form/edit.jsx:267
+#: resources/blocks/form/edit.jsx:304
+#: resources/blocks/subtleforms-form/index.js:96
+msgid "Select Form"
+msgstr ""
+
+#: build/blocks/form/index.js:1
+#: resources/blocks/form/edit.jsx:281
+msgid "Select a published form to embed"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/FieldRenderer.jsx:166
+msgid "I agree"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/FieldRenderer.jsx:333
+msgid "Field type not supported:"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/ConversationalFormRenderer.jsx:160
+#: resources/frontend/components/FormRenderer.jsx:396
+#: resources/frontend/components/FormRenderer.jsx:532
+msgid "This field is required."
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/ConversationalFormRenderer.jsx:309
+#: resources/frontend/components/FormRenderer.jsx:628
+msgid "Submission failed."
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/ConversationalFormRenderer.jsx:313
+#: resources/frontend/components/FormRenderer.jsx:632
+msgid "Network error. Please try again."
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/ConversationalFormRenderer.jsx:326
+#: resources/frontend/components/FormRenderer.jsx:683
+msgid "Thank you!"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/ConversationalFormRenderer.jsx:328
+msgid "Your response has been submitted successfully."
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/ConversationalFormRenderer.jsx:342
+msgid "This form has no questions."
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/ConversationalFormRenderer.jsx:387
+msgid "Review Your Answers"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/ConversationalFormRenderer.jsx:393
+msgid "Please review your answers"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/ConversationalFormRenderer.jsx:443
+msgid "Continue to Payment"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/ConversationalFormRenderer.jsx:472
+msgid "Complete Payment"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/ConversationalFormRenderer.jsx:482
+msgid "Amount Due:"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/ConversationalFormRenderer.jsx:492
+msgid "⚠️ Test Mode: No actual payment will be processed"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/ConversationalFormRenderer.jsx:501
+msgid "Payment gateway integration will appear here. For now, click Submit to complete the form."
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/ConversationalFormRenderer.jsx:515
+msgid "Back to Review"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/ConversationalFormRenderer.jsx:525
+msgid "Complete Submission"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/ConversationalFormRenderer.jsx:590
+msgid "Review"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/ConversationalFormRenderer.jsx:598
+msgid "Press Enter ↵"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/FormRenderer.jsx:55
+#: resources/frontend/components/FormRenderer.jsx:60
+msgid "Failed to load form."
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/FormRenderer.jsx:405
+#: resources/frontend/components/FormRenderer.jsx:541
+msgid "Invalid email address."
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/FormRenderer.jsx:408
+#: resources/frontend/components/FormRenderer.jsx:544
+msgid "Invalid URL."
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/FormRenderer.jsx:659
+msgid "Loading form..."
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/FormRenderer.jsx:684
+msgid "Your form has been submitted successfully."
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: build/frontend/frontend.js:1
+#: resources/frontend/components/FormRenderer.jsx:775
+msgid "Submitting..."
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: resources/blocks/subtleforms-form/index.js:20
+#: resources/blocks/subtleforms-form/index.js:107
+#: resources/blocks/subtleforms-form/index.js:114
+#: resources/blocks/subtleforms-form/index.js:140
+msgid "SubtleForm"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: resources/blocks/subtleforms-form/index.js:21
+msgid "Embed a published SubtleForm"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: resources/blocks/subtleforms-form/index.js:84
+msgid "Select a form..."
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: resources/blocks/subtleforms-form/index.js:100
+msgid "Choose a published form to embed"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: resources/blocks/subtleforms-form/index.js:109
+msgid "Loading forms..."
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: resources/blocks/subtleforms-form/index.js:123
+msgid "SubtleForm Preview"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: resources/blocks/subtleforms-form/index.js:130
+msgid "Form Preview:"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: resources/blocks/subtleforms-form/index.js:141
+msgid "Failed to load form preview"
+msgstr ""
+
+#: build/blocks/subtleforms-form/index.js:1
+#: resources/blocks/subtleforms-form/index.js:115
+msgid "Select a form from the sidebar to begin."
+msgstr ""
+
+#: resources/admin/components/builder/ContainerWrapper.jsx:59
+msgid "Move Up"
+msgstr ""
+
+#: resources/admin/components/builder/ContainerWrapper.jsx:65
+msgid "Move Down"
+msgstr ""
+
+#: resources/admin/components/builder/ContainerWrapper.jsx:89
+msgid "Repeatable items will appear here"
+msgstr ""
+
+#: resources/admin/components/builder/FormCanvas.jsx:42
+msgid "Fill out the form below"
+msgstr ""
+
+#: resources/admin/components/builder/FormCanvas.jsx:56
+msgid "Start Building Your Form"
+msgstr ""
+
+#: resources/admin/components/builder/FormCanvas.jsx:59
+msgid "Add fields from the left sidebar to begin"
+msgstr ""
+
+#: resources/admin/components/builder/FormEditorHeader.jsx:90
+msgid "All changes saved"
+msgstr ""
+
+#: resources/admin/components/builder/FormEditorHeader.jsx:185
+msgid "Save"
+msgstr ""
+
+#: resources/admin/components/builder/FormEditorHeader.jsx:192
+msgid "Close Editor"
+msgstr ""
+
+#: resources/admin/components/ExecutionLog.jsx:38
+#: resources/admin/components/ExecutionLog.jsx:40
+msgid "Failed to load logs"
+msgstr ""
+
+#: resources/admin/components/ExecutionLog.jsx:47
+msgid "Select a submission to view logs."
+msgstr ""
+
+#: resources/admin/components/ExecutionLog.jsx:56
+msgid "Execution Log"
 msgstr ""
 
 #: resources/admin/components/TemplateSelector.jsx:50
@@ -3326,11 +5706,6 @@ msgstr ""
 msgid "Start with a pre-built template or create a blank form from scratch."
 msgstr ""
 
-#: resources/admin/components/TemplateSelector.jsx:78
-#: resources/admin/modals/CreateFormModal.jsx:148
-msgid "Blank Form"
-msgstr ""
-
 #: resources/admin/components/TemplateSelector.jsx:81
 msgid "Start from scratch with a blank form"
 msgstr ""
@@ -3343,1462 +5718,55 @@ msgstr ""
 msgid "Use Template"
 msgstr ""
 
-#. translators: %1$d: numeric suffix used to create a unique title
-#: resources/admin/hooks/builder/useBuilderBoot.js:24
-#: resources/admin/pages/BuilderPage.jsx:459
-#: resources/admin/pages/BuilderPage.jsx:971
-msgid "Untitled Form %1$d"
-msgstr ""
-
-#: resources/admin/hooks/builder/useBuilderBoot.js:131
-msgid "Failed to load schema"
-msgstr ""
-
-#: resources/admin/modals/ConfirmModal.jsx:26
-msgid "Confirm"
-msgstr ""
-
-#: resources/admin/modals/ConfirmModal.jsx:71
-#: resources/frontend/components/ConversationalFormRenderer.jsx:524
-msgid "Processing..."
-msgstr ""
-
-#. translators: %1$d: numeric suffix used to create a unique title
-#: resources/admin/modals/CreateFormModal.jsx:49
-msgid "New Form %1$d"
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:88
-#: resources/admin/utils/initialSchema.js:142
-msgid "Step 1"
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:100
-#: resources/admin/utils/initialSchema.js:142
-msgid "Section 1"
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:136
-#: resources/admin/pages/BuilderPage.jsx:1070
-#: resources/admin/pages/BuilderPage.jsx:1102
-msgid "Failed to create form"
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:149
-msgid "Start from scratch."
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:155
-msgid "Preset Template"
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:156
-msgid "Coming soon."
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:166
-msgid "Single page form. Best for contact forms, leads."
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:175
-msgid "Broken into steps. Best for applications, surveys."
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:184
-msgid "Grouped fields. Best for long forms."
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:190
-msgid "One question at a time. Best for engaging surveys, quizzes."
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:199
-msgid "Collect payments. Best for orders, bookings, donations."
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:273
-msgid "Coming soon"
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:293
-msgid "Create New Form"
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:294
-msgid "Choose Form Structure"
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:298
-msgid "Provide basic information and choose a starting template."
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:302
-msgid "Select the structure that best fits your form requirements."
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:318
-msgid "Details"
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:327
-msgid "Structure"
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:340
-msgid "Form Title"
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:347
-msgid "e.g. Contact Form"
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:355
-msgid "Optional"
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:363
-msgid "Describe the purpose of this form..."
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:374
-msgid "Starting Template"
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:389
-msgid "Form Structure"
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:422
-msgid "Next Step"
-msgstr ""
-
-#: resources/admin/modals/CreateFormModal.jsx:424
-msgid "Creating..."
-msgstr ""
-
-#: resources/admin/pages/BuilderPage.jsx:178
-msgid "Form identifier missing"
-msgstr ""
-
-#: resources/admin/pages/BuilderPage.jsx:234
-#: resources/admin/pages/BuilderPage.jsx:289
-#: resources/admin/pages/BuilderPage.jsx:626
-msgid "Fix validation errors before publishing."
-msgstr ""
-
-#: resources/admin/pages/BuilderPage.jsx:244
-#: resources/admin/pages/BuilderPage.jsx:299
-msgid "Validation failed. Please fix the highlighted fields."
-msgstr ""
-
-#: resources/admin/pages/BuilderPage.jsx:261
-#: resources/admin/pages/BuilderPage.jsx:364
-msgid "Failed to save form"
-msgstr ""
-
-#: resources/admin/pages/BuilderPage.jsx:316
-msgid "Failed to update form status"
-msgstr ""
-
-#: resources/admin/pages/BuilderPage.jsx:352
-msgid "Form published"
-msgstr ""
-
-#: resources/admin/pages/BuilderPage.jsx:353
-msgid "Form saved"
-msgstr ""
-
-#: resources/admin/pages/BuilderPage.jsx:782
-msgid "Saved"
-msgstr ""
-
-#. translators: %1$s: localized time string (e.g. 12:34 PM)
-#: resources/admin/pages/BuilderPage.jsx:802
-msgid "Saving… (last saved at %1$s)"
-msgstr ""
-
-#. translators: %1$s: localized time string (e.g. 12:34 PM)
-#: resources/admin/pages/BuilderPage.jsx:806
-msgid "Last saved at %1$s"
-msgstr ""
-
-#: resources/admin/pages/BuilderPage.jsx:1032
-#: resources/admin/pages/BuilderPage.jsx:1038
-msgid "Failed to create draft form"
-msgstr ""
-
-#: resources/admin/pages/BuilderPage.jsx:1049
-msgid "Failed to initialize draft schema"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:54
-msgid "Loading dashboard..."
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:66
-#: resources/admin/pages/SettingsPage.jsx:272
-msgid "Retry"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:89
-#: resources/admin/pages/SubmissionsPage.jsx:77
-msgid "All Submissions"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:114
-msgid "No published forms"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:120
-msgid "Submissions Today"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:122
-msgid "Last 24 hours"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:128
-msgid "Submissions This Week"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:130
-#: resources/admin/pages/SubmissionsPage.jsx:88
-msgid "Last 7 days"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:142
-msgid "Recent Submissions"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:179
-msgid "No submissions yet."
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:181
-msgid "Submissions will appear here once users start submitting your forms."
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:193
-msgid "View all submissions →"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:205
-msgid "Recently Edited Forms"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:284
-msgid "submissions"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:300
-msgid "No forms yet."
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:302
-msgid "Create your first form to get started."
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:319
-msgid "View all forms →"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:333
-msgid "System Health"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:347
-msgid "Healthy"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:352
-msgid "Warning"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:362
-msgid "Plugin Version"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:370
-msgid "WordPress"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:378
-msgid "PHP Version"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:386
-msgid "Database"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:394
-msgid "Memory Limit"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:402
-msgid "Max Upload"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:410
-#: resources/admin/pages/SettingsPage.jsx:646
-msgid "Debug Mode"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:415
-#: resources/admin/pages/DashboardPage.jsx:425
-msgid "Disabled"
-msgstr ""
-
-#: resources/admin/pages/DashboardPage.jsx:420
-msgid "Autosave"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:56
-msgid "Install"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:72
-msgid "Payment Gateway Integration"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:73
-msgid "Accept payments directly through your forms with support for popular payment processors."
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:78
-msgid "Stripe integration"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:79
-msgid "PayPal support"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:80
-msgid "One-time and recurring payments"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:81
-msgid "Secure payment processing"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:87
-msgid "Email Marketing"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:88
-msgid "Automatically sync form submissions with your favorite email marketing services."
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:93
-msgid "Mailchimp integration"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:94
-msgid "ConvertKit support"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:95
-msgid "Automatic list syncing"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:96
-msgid "Custom field mapping"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:102
-msgid "CRM Integration"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:103
-msgid "Send form data directly to your CRM and keep your contacts organized and up-to-date."
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:108
-msgid "Salesforce integration"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:109
-msgid "HubSpot support"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:110
-msgid "Real-time data sync"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:111
-msgid "Custom object mapping"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:117
-msgid "Advanced Analytics"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:118
-msgid "Get detailed insights into form performance with advanced analytics and reporting."
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:123
-msgid "Conversion tracking"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:124
-msgid "Detailed reports"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:125
-msgid "Field analytics"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:126
-msgid "Export capabilities"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:132
-msgid "E-commerce Integration"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:133
-msgid "Connect your forms with WooCommerce and other e-commerce platforms."
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:138
-msgid "WooCommerce integration"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:139
-msgid "Product selection fields"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:140
-msgid "Order form creation"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:141
-msgid "Cart abandonment tracking"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:147
-msgid "Document Generation"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:148
-msgid "Automatically generate PDF documents from form submissions with custom templates."
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:153
-msgid "PDF generation"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:154
-msgid "Custom templates"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:155
-msgid "Digital signatures"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:156
-msgid "Email attachments"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:162
-msgid "Multi-language Support"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:163
-msgid "Create multilingual forms with automatic translation and language detection."
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:168
-msgid "WPML integration"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:169
-msgid "Polylang support"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:170
-msgid "RTL language support"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:171
-msgid "Translation management"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:177
-msgid "Automation & Webhooks"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:178
-msgid "Automate workflows and connect with thousands of apps using webhooks and Zapier."
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:183
-msgid "Zapier integration"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:184
-msgid "Custom webhooks"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:185
-msgid "Conditional logic"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:186
-msgid "Real-time triggers"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:201
-msgid "Browse All Extensions"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:211
-msgid "Extend SubtleForms functionality"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:214
-msgid "These extensions are currently in development. Sign up for early access and be notified when they become available."
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:234
-msgid "Have an extension idea?"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:237
-msgid "We're always looking for ways to improve SubtleForms. Let us know what extensions you'd like to see!"
-msgstr ""
-
-#: resources/admin/pages/ExtensionsPage.jsx:247
-msgid "Suggest an Extension"
-msgstr ""
-
-#: resources/admin/pages/FormsPage.jsx:89
-msgid "My "
-msgstr ""
-
-#: resources/admin/pages/FormsPage.jsx:127
-#: resources/admin/pages/SubmissionsPage.jsx:80
-msgid "All"
-msgstr ""
-
-#: resources/admin/pages/FormsPage.jsx:164
-msgid "Search forms..."
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:84
-msgid "Failed to load settings. Please try again."
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:104
-msgid "Must be a valid number"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:147
-msgid "Please fix the validation errors below before saving."
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:166
-msgid "Settings saved successfully!"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:192
-msgid "Failed to save settings. Please try again."
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:202
-msgid "Are you sure you want to reset all settings to defaults? This cannot be undone."
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:225
-msgid "Settings reset successfully!"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:249
-msgid "Failed to reset settings. Please try again."
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:260
-msgid "Loading settings..."
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:269
-msgid "Failed to load settings."
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:286
-msgid "Frontend"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:291
-msgid "Email / Notifications"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:296
-msgid "Advanced"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:323
-msgid "Save Settings"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:392
-msgid "Default New Form Status"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:399
-msgid "Default status when creating new forms"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:406
-msgid "Enable Autosave"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:409
-msgid "Automatically save form changes while editing"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:420
-msgid "Autosave Interval (seconds)"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:426
-msgid "Time between autosave triggers (1-60 seconds)"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:437
-msgid "Delete Behavior"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:441
-msgid "Soft Delete (Move to Trash)"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:445
-msgid "Hard Delete (Permanent)"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:450
-msgid "How forms and submissions are deleted"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:468
-msgid "Success Message"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:471
-msgid "Message shown after successful submission"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:481
-msgid "Error Message"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:484
-msgid "Generic error message shown on submission failure"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:494
-msgid "Redirect After Submit (URL)"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:499
-msgid "Optional URL to redirect after submission (leave empty to show message)"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:510
-msgid "Enable Submission Limit"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:515
-msgid "Limit submissions per user/IP address"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:523
-msgid "Maximum Submissions"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:529
-msgid "Maximum number of submissions allowed per user"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:551
-msgid "Admin Notifications"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:556
-msgid "Send email to admin on new submissions"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:563
-msgid "User Confirmation Emails"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:568
-msgid "Send confirmation email to users after submission"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:578
-msgid "Sender Name"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:581
-msgid "Email sender name (leave empty for site name)"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:587
-msgid "Your Site"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:595
-msgid "Sender Email"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:599
-msgid "Email sender address (leave empty for admin email)"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:612
-msgid "Admin Email"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:616
-msgid "Email to receive admin notifications (leave empty for WordPress admin email)"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:649
-msgid "Enable detailed logging for troubleshooting"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:659
-msgid "Log Retention (days)"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:665
-msgid "How long to keep submission logs (1-365 days)"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:675
-msgid "Spam Protection"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:678
-msgid "Enable Honeypot Protection"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:681
-msgid "Adds invisible fields to detect and block spam bots"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:691
-msgid "Minimum Submission Time (seconds)"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:699
-msgid "Minimum time required before form submission (prevents instant bot submissions)"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:709
-msgid "Privacy & GDPR"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:712
-msgid "Data Retention Period (days)"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:720
-msgid "Automatically delete submissions older than this many days. Set to 0 to keep submissions forever. Recommended: 365-730 days for GDPR compliance."
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:727
-msgid "Note: Submissions can also be exported or erased via WordPress Privacy Tools (Tools → Export/Erase Personal Data)."
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:735
-msgid "Danger Zone"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:737
-msgid "Resetting will restore all settings to their default values. This action cannot be undone."
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:747
-msgid "Reset All Settings"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:85
-msgid "Failed to load submission"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:142
-#: resources/admin/pages/SubmissionDetailPage.jsx:166
-msgid "Submission not found"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:174
-msgid "Back to Submissions"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:219
-msgid "← Previous"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:225
-msgid "Next →"
-msgstr ""
-
-#. translators: %1$d: submission id
-#: resources/admin/pages/SubmissionDetailPage.jsx:233
-msgid "Submission #%1$d"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:240
-msgid "Submitted Data"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:250
-msgid "Show empty fields"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:259
-msgid "Show technical fields"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:288
-msgid "JSON Data:"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:302
-msgid "empty"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:332
-msgid "No Data Submitted"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:335
-msgid "This submission was recorded but contains no field data."
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:342
-msgid "Possible causes:"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:346
-msgid "Form fields were not properly configured with keys"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:352
-msgid "JavaScript error prevented data collection"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:358
-msgid "Multi-step form field paths not correctly collected"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:364
-msgid "Browser console may show errors during submission"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:371
-msgid "Debug tip:"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:372
-msgid "Check the Execution Logs below for clues."
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:387
-msgid "Technical Information"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:395
-msgid "Raw Payload"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:399
-msgid "Meta Data"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:403
-msgid "Form Schema"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:418
-msgid "Request Info"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:423
-#: resources/admin/pages/SubmissionDetailPage.jsx:615
-msgid "IP Address"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:426
-#: resources/admin/pages/SubmissionDetailPage.jsx:435
-#: resources/admin/pages/SubmissionDetailPage.jsx:443
-#: resources/admin/pages/SubmissionDetailPage.jsx:618
-#: resources/admin/pages/SubmissionDetailPage.jsx:634
-#: resources/admin/pages/SubmissionDetailPage.jsx:646
-#: resources/admin/pages/SubmissionDetailPage.jsx:660
-msgid "N/A"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:431
-msgid "User Agent"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:440
-msgid "Referrer"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:450
-msgid "Database Info"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:455
-msgid "Submission ID"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:505
-msgid "Submission Notes"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:511
-msgid "Add notes about this submission (not yet implemented)"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:523
-msgid "Execution Logs"
-msgstr ""
-
-#. translators: %1$d: number of general log entries
-#: resources/admin/pages/SubmissionDetailPage.jsx:533
-msgid "General (%1$d)"
-msgstr ""
-
-#. translators: %1$d: number of API call logs
-#: resources/admin/pages/SubmissionDetailPage.jsx:541
-msgid "API Calls (%1$d)"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:554
-msgid "Level"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:577
-msgid "No logs"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:587
-msgid "Submission Info"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:608
-#: resources/admin/pages/SubmissionsPage.jsx:81
-msgid "Unread"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:644
-msgid "Mobile"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:645
-msgid "Desktop"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:650
-msgid "Source URL"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:665
-msgid "User"
-msgstr ""
-
-#. translators: %1$d: user id
-#: resources/admin/pages/SubmissionDetailPage.jsx:668
-msgid "User #%1$d"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:669
-msgid "Guest"
-msgstr ""
-
-#: resources/admin/pages/SubmissionsPage.jsx:86
-msgid "All time"
-msgstr ""
-
-#: resources/admin/pages/SubmissionsPage.jsx:87
-msgid "Today"
-msgstr ""
-
-#: resources/admin/pages/SubmissionsPage.jsx:89
-msgid "Last 30 days"
-msgstr ""
-
-#: resources/admin/pages/SubmissionsPage.jsx:90
-msgid "Last 3 months"
-msgstr ""
-
-#: resources/admin/pages/SubmissionsPage.jsx:94
-msgid "All forms"
-msgstr ""
-
-#. translators: %1$d: form id
-#: resources/admin/pages/SubmissionsPage.jsx:96
-msgid "Form #%1$d"
-msgstr ""
-
-#: resources/admin/pages/SubmissionsPage.jsx:146
-#: resources/admin/pages/SubmissionsPage.jsx:151
-msgid "Failed to export submissions"
-msgstr ""
-
-#: resources/admin/pages/SubmissionsPage.jsx:176
-msgid "Exporting..."
-msgstr ""
-
-#: resources/admin/pages/SubmissionsPage.jsx:177
-msgid "Export CSV"
-msgstr ""
-
-#: resources/admin/pages/SubmissionsPage.jsx:185
-msgid "Hide Filters"
-msgstr ""
-
-#: resources/admin/pages/SubmissionsPage.jsx:186
-msgid "Filters"
-msgstr ""
-
-#: resources/admin/pages/SubmissionsPage.jsx:192
-msgid "Search submissions..."
-msgstr ""
-
-#: resources/admin/pages/SubmissionsPage.jsx:208
-msgid "Date Range"
-msgstr ""
-
-#: resources/admin/pages/SubmissionsPage.jsx:221
-msgid "Clear all filters"
-msgstr ""
-
-#: resources/admin/utils/initialSchema.js:101
-msgid "Intro"
-msgstr ""
-
-#: resources/admin/utils/initialSchema.js:102
-msgid "Welcome! This is the start of your conversational form. Edit this block or remove it."
-msgstr ""
-
-#: resources/admin/utils/initialSchema.js:113
-msgid "First question"
-msgstr ""
-
-#: resources/admin/utils/initialSchema.js:115
-#: resources/admin/utils/initialSchema.js:149
-#: resources/admin/utils/initialSchema.js:190
-msgid "Type your answer…"
-msgstr ""
-
-#: resources/admin/utils/initialSchema.js:127
-#: resources/admin/utils/initialSchema.js:158
-#: resources/admin/utils/initialSchema.js:207
-msgid "Jane Doe"
-msgstr ""
-
-#: resources/admin/utils/initialSchema.js:131
-msgid "Email address"
-msgstr ""
-
-#: resources/admin/utils/initialSchema.js:133
-#: resources/admin/utils/initialSchema.js:164
-#: resources/admin/utils/initialSchema.js:213
-msgid "name@example.com"
-msgstr ""
-
-#: resources/admin/utils/initialSchema.js:184
-#: resources/admin/utils/initialSchema.js:201
-msgid "Layout"
-msgstr ""
-
-#: resources/admin/utils/initialSchema.js:188
-msgid "Text field"
-msgstr ""
-
-#: resources/admin/utils/validation.js:13
-msgid "Form status must be either draft or published"
-msgstr ""
-
-#: resources/admin/utils/validation.js:14
-msgid "Default form status is required"
-msgstr ""
-
-#: resources/admin/utils/validation.js:20
-msgid "Autosave enabled must be true or false"
-msgstr ""
-
-#: resources/admin/utils/validation.js:21
-msgid "Autosave enabled setting is required"
-msgstr ""
-
-#: resources/admin/utils/validation.js:30
-msgid "Autosave interval must be a number"
-msgstr ""
-
-#: resources/admin/utils/validation.js:31
-msgid "Autosave interval must be a whole number"
-msgstr ""
-
-#: resources/admin/utils/validation.js:32
-msgid "Autosave interval must be at least 1 second"
-msgstr ""
-
-#: resources/admin/utils/validation.js:33
-msgid "Autosave interval cannot exceed 60 seconds"
-msgstr ""
-
-#: resources/admin/utils/validation.js:34
-msgid "Autosave interval is required"
-msgstr ""
-
-#: resources/admin/utils/validation.js:41
-msgid "Delete behavior must be either soft or hard"
-msgstr ""
-
-#: resources/admin/utils/validation.js:42
-msgid "Delete behavior is required"
-msgstr ""
-
-#: resources/admin/utils/validation.js:51
-msgid "Success message must be text"
-msgstr ""
-
-#: resources/admin/utils/validation.js:52
-msgid "Success message cannot exceed 500 characters"
-msgstr ""
-
-#: resources/admin/utils/validation.js:53
-msgid "Success message is required"
-msgstr ""
-
-#: resources/admin/utils/validation.js:61
-msgid "Error message must be text"
-msgstr ""
-
-#: resources/admin/utils/validation.js:62
-msgid "Error message cannot exceed 500 characters"
-msgstr ""
-
-#: resources/admin/utils/validation.js:63
-msgid "Error message is required"
-msgstr ""
-
-#: resources/admin/utils/validation.js:71
-msgid "Redirect URL must be a valid URL"
-msgstr ""
-
-#: resources/admin/utils/validation.js:72
-msgid "Redirect URL cannot exceed 500 characters"
-msgstr ""
-
-#: resources/admin/utils/validation.js:78
-msgid "Submission limit enabled must be true or false"
-msgstr ""
-
-#: resources/admin/utils/validation.js:79
-msgid "Submission limit enabled setting is required"
-msgstr ""
-
-#: resources/admin/utils/validation.js:88
-msgid "Submission limit must be a number"
-msgstr ""
-
-#: resources/admin/utils/validation.js:89
-msgid "Submission limit must be a whole number"
-msgstr ""
-
-#: resources/admin/utils/validation.js:90
-msgid "Submission limit must be at least 1"
-msgstr ""
-
-#: resources/admin/utils/validation.js:91
-msgid "Submission limit cannot exceed 100 submissions"
-msgstr ""
-
-#: resources/admin/utils/validation.js:92
-msgid "Submission limit is required"
-msgstr ""
-
-#: resources/admin/utils/validation.js:99
-msgid "Admin notifications setting must be true or false"
-msgstr ""
-
-#: resources/admin/utils/validation.js:100
-msgid "Admin notifications setting is required"
-msgstr ""
-
-#: resources/admin/utils/validation.js:106
-msgid "User confirmation setting must be true or false"
-msgstr ""
-
-#: resources/admin/utils/validation.js:107
-msgid "User confirmation setting is required"
-msgstr ""
-
-#: resources/admin/utils/validation.js:114
-msgid "Sender name must be text"
-msgstr ""
-
-#: resources/admin/utils/validation.js:115
-msgid "Sender name cannot exceed 100 characters"
-msgstr ""
-
-#: resources/admin/utils/validation.js:122
-msgid "Sender email must be a valid email address"
-msgstr ""
-
-#: resources/admin/utils/validation.js:129
-msgid "Admin email must be a valid email address"
-msgstr ""
-
-#: resources/admin/utils/validation.js:136
-msgid "Debug mode must be true or false"
-msgstr ""
-
-#: resources/admin/utils/validation.js:137
-msgid "Debug mode setting is required"
-msgstr ""
-
-#: resources/admin/utils/validation.js:146
-msgid "Log retention days must be a number"
-msgstr ""
-
-#: resources/admin/utils/validation.js:147
-msgid "Log retention days must be a whole number"
-msgstr ""
-
-#: resources/admin/utils/validation.js:148
-msgid "Log retention must be at least 1 day"
-msgstr ""
-
-#: resources/admin/utils/validation.js:149
-msgid "Log retention cannot exceed 365 days"
-msgstr ""
-
-#: resources/admin/utils/validation.js:150
-msgid "Log retention days is required"
-msgstr ""
-
-#: resources/blocks/form/edit.jsx:118
-msgid "Form not available or has been unpublished"
-msgstr ""
-
-#: resources/blocks/form/edit.jsx:184
-msgid "Form renderer not loaded. Frontend preview unavailable."
-msgstr ""
-
-#: resources/blocks/form/edit.jsx:196
-#: resources/blocks/subtleforms-form/index.js:125
-msgid "Loading form preview..."
-msgstr ""
-
-#: resources/blocks/form/edit.jsx:253
-msgid "— Select a form —"
-msgstr ""
-
-#: resources/blocks/form/edit.jsx:267
-#: resources/blocks/form/edit.jsx:304
-#: resources/blocks/subtleforms-form/index.js:96
-msgid "Select Form"
-msgstr ""
-
-#: resources/blocks/form/edit.jsx:281
-msgid "Select a published form to embed"
-msgstr ""
-
-#: resources/blocks/subtleforms-form/index.js:20
-#: resources/blocks/subtleforms-form/index.js:107
-#: resources/blocks/subtleforms-form/index.js:114
-#: resources/blocks/subtleforms-form/index.js:140
-msgid "SubtleForm"
-msgstr ""
-
-#: resources/blocks/subtleforms-form/index.js:21
-msgid "Embed a published SubtleForm"
-msgstr ""
-
-#: resources/blocks/subtleforms-form/index.js:84
-msgid "Select a form..."
-msgstr ""
-
-#: resources/blocks/subtleforms-form/index.js:100
-msgid "Choose a published form to embed"
-msgstr ""
-
-#: resources/blocks/subtleforms-form/index.js:109
-msgid "Loading forms..."
-msgstr ""
-
-#: resources/blocks/subtleforms-form/index.js:115
-msgid "Select a form from the sidebar to begin."
-msgstr ""
-
-#: resources/blocks/subtleforms-form/index.js:123
-msgid "SubtleForm Preview"
-msgstr ""
-
-#: resources/blocks/subtleforms-form/index.js:130
-msgid "Form Preview:"
-msgstr ""
-
-#: resources/blocks/subtleforms-form/index.js:141
-msgid "Failed to load form preview"
-msgstr ""
-
-#: resources/frontend/components/ConversationalFormRenderer.jsx:160
-#: resources/frontend/components/FormRenderer.jsx:396
-#: resources/frontend/components/FormRenderer.jsx:532
-msgid "This field is required."
-msgstr ""
-
-#: resources/frontend/components/ConversationalFormRenderer.jsx:309
-#: resources/frontend/components/FormRenderer.jsx:628
-msgid "Submission failed."
-msgstr ""
-
-#: resources/frontend/components/ConversationalFormRenderer.jsx:313
-#: resources/frontend/components/FormRenderer.jsx:632
-msgid "Network error. Please try again."
-msgstr ""
-
-#: resources/frontend/components/ConversationalFormRenderer.jsx:326
-#: resources/frontend/components/FormRenderer.jsx:683
-msgid "Thank you!"
-msgstr ""
-
-#: resources/frontend/components/ConversationalFormRenderer.jsx:328
-msgid "Your response has been submitted successfully."
-msgstr ""
-
-#: resources/frontend/components/ConversationalFormRenderer.jsx:342
-msgid "This form has no questions."
-msgstr ""
-
-#: resources/frontend/components/ConversationalFormRenderer.jsx:387
-msgid "Review Your Answers"
-msgstr ""
-
-#: resources/frontend/components/ConversationalFormRenderer.jsx:393
-msgid "Please review your answers"
-msgstr ""
-
-#: resources/frontend/components/ConversationalFormRenderer.jsx:443
-msgid "Continue to Payment"
-msgstr ""
-
-#: resources/frontend/components/ConversationalFormRenderer.jsx:472
-msgid "Complete Payment"
-msgstr ""
-
-#: resources/frontend/components/ConversationalFormRenderer.jsx:482
-msgid "Amount Due:"
-msgstr ""
-
-#: resources/frontend/components/ConversationalFormRenderer.jsx:492
-msgid "⚠️ Test Mode: No actual payment will be processed"
-msgstr ""
-
-#: resources/frontend/components/ConversationalFormRenderer.jsx:501
-msgid "Payment gateway integration will appear here. For now, click Submit to complete the form."
-msgstr ""
-
-#: resources/frontend/components/ConversationalFormRenderer.jsx:515
-msgid "Back to Review"
-msgstr ""
-
-#: resources/frontend/components/ConversationalFormRenderer.jsx:525
-msgid "Complete Submission"
-msgstr ""
-
-#: resources/frontend/components/ConversationalFormRenderer.jsx:590
-msgid "Review"
-msgstr ""
-
-#: resources/frontend/components/ConversationalFormRenderer.jsx:598
-msgid "Press Enter ↵"
-msgstr ""
-
-#: resources/frontend/components/FieldRenderer.jsx:155
-msgid "I agree"
-msgstr ""
-
-#: resources/frontend/components/FieldRenderer.jsx:322
-msgid "Field type not supported:"
-msgstr ""
-
-#: resources/frontend/components/FormRenderer.jsx:55
-#: resources/frontend/components/FormRenderer.jsx:60
-msgid "Failed to load form."
-msgstr ""
-
-#: resources/frontend/components/FormRenderer.jsx:405
-#: resources/frontend/components/FormRenderer.jsx:541
-msgid "Invalid email address."
-msgstr ""
-
-#: resources/frontend/components/FormRenderer.jsx:408
-#: resources/frontend/components/FormRenderer.jsx:544
-msgid "Invalid URL."
-msgstr ""
-
-#: resources/frontend/components/FormRenderer.jsx:659
-msgid "Loading form..."
-msgstr ""
-
-#: resources/frontend/components/FormRenderer.jsx:684
-msgid "Your form has been submitted successfully."
-msgstr ""
-
-#: resources/frontend/components/FormRenderer.jsx:775
-msgid "Submitting..."
-msgstr ""
-
+#: build/blocks/form/block.json
 #: resources/blocks/form/block.json
 msgctxt "block title"
 msgid "SubtleForms"
 msgstr ""
 
+#: build/blocks/form/block.json
 #: resources/blocks/form/block.json
 msgctxt "block description"
 msgid "Embed a SubtleForms form"
 msgstr ""
 
+#: build/blocks/form/block.json
+#: build/blocks/subtleforms-form/block.json
 #: resources/blocks/form/block.json
 #: resources/blocks/subtleforms-form/block.json
 msgctxt "block keyword"
 msgid "form"
 msgstr ""
 
+#: build/blocks/form/block.json
+#: build/blocks/subtleforms-form/block.json
 #: resources/blocks/form/block.json
 #: resources/blocks/subtleforms-form/block.json
 msgctxt "block keyword"
 msgid "contact"
 msgstr ""
 
+#: build/blocks/form/block.json
+#: build/blocks/subtleforms-form/block.json
 #: resources/blocks/form/block.json
 #: resources/blocks/subtleforms-form/block.json
 msgctxt "block keyword"
 msgid "subtleforms"
 msgstr ""
 
+#: build/blocks/form/block.json
 #: resources/blocks/form/block.json
 msgctxt "block keyword"
 msgid "embed"
 msgstr ""
 
+#: build/blocks/subtleforms-form/block.json
 #: resources/blocks/subtleforms-form/block.json
 msgctxt "block title"
 msgid "SubtleForm"
 msgstr ""
 
+#: build/blocks/subtleforms-form/block.json
 #: resources/blocks/subtleforms-form/block.json
 msgctxt "block description"
 msgid "Embed a published SubtleForm"

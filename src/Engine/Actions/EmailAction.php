@@ -96,8 +96,8 @@ final class EmailAction implements ActionInterface {
 			)
 		);
 
-		// Send email
-		$sent = wp_mail( $to, $subject, $body, $headers );
+// Send email via Mailer wrapper
+        $sent = \SubtleForms\Support\Mailer::send( $to, $subject, $body, $headers );
 
 		if ( $sent === false ) {
 			$fail   = $context->getMeta( 'action_failures', array() );
