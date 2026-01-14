@@ -1,50 +1,50 @@
 name: i18n-check
 
 on:
-  pull_request:
-  push:
-    branches: [ main ]
+ pull_request:
+ push:
+  branches: [main]
 
 jobs:
-  i18n:
-    name: POT freshness check
-    runs-on: ubuntu-latest
+ i18n:
+  name: POT freshness check
+  runs-on: ubuntu-latest
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+  steps:
+   - name: Checkout repository
+     uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.0'
+   - name: Setup PHP
+     uses: shivammathur/setup-php@v2
+     with:
+      php-version: '8.0'
 
-      - name: Install WP-CLI
-        run: |
-          curl -sSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o wp-cli.phar
-          php wp-cli.phar --info
-          chmod +x wp-cli.phar
-          sudo mv wp-cli.phar /usr/local/bin/wp
+   - name: Install WP-CLI
+     run: |
+      curl -sSL https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -o wp-cli.phar
+      php wp-cli.phar --info
+      chmod +x wp-cli.phar
+      sudo mv wp-cli.phar /usr/local/bin/wp
 
-      - name: Generate POT files
-        run: |
-          # Generate PHP pot
-          wp i18n make-pot . languages/subtleforms.pot --exclude="node_modules,vendor,____subtleforms.orig____" || true
-          # Generate JS pot (resources folder)
-          wp i18n make-pot resources languages/subtleforms-js.pot --include="resources" || true
+   - name: Generate POT files
+     run: |
+      # Generate PHP pot
+      wp i18n make-pot . languages/subtleforms.pot --exclude="node_modules,vendor,____subtleforms.orig____" || true
+      # Generate JS pot (resources folder)
+      wp i18n make-pot resources languages/subtleforms-js.pot --include="resources" || true
 
-      - name: Fail if POT files are not committed
-        run: |
-          set -euo pipefail
-          git fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main || true
-          git diff --exit-code -- languages/subtleforms.pot || (echo "languages/subtleforms.pot is out of date. Run 'wp i18n make-pot .' and commit the updated file." && exit 1)
-          git diff --exit-code -- languages/subtleforms-js.pot || (echo "languages/subtleforms-js.pot is out of date. Run 'wp i18n make-pot resources languages/subtleforms-js.pot' and commit the updated file." && exit 1)
+   - name: Fail if POT files are not committed
+     run: |
+      set -euo pipefail
+      git fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main || true
+      git diff --exit-code -- languages/subtleforms.pot || (echo "languages/subtleforms.pot is out of date. Run 'wp i18n make-pot .' and commit the updated file." && exit 1)
+      git diff --exit-code -- languages/subtleforms-js.pot || (echo "languages/subtleforms-js.pot is out of date. Run 'wp i18n make-pot resources languages/subtleforms-js.pot' and commit the updated file." && exit 1)
 
-      - name: Basic lint (spot check untranslated PHP strings)
-        run: |
-          # Find likely hardcoded PHP strings (very basic heuristic)
-          set -euo pipefail
-          UNWRAPPED=$(grep -R --exclude-dir={node_modules,vendor,.__subtleforms.orig__} -n "echo \"\|echo '\\|_e(\|__\(" src || true)
-          # This step intentionally only prints summaries to assist maintainers; it's not failing the build
-          echo "Spot check results for echo and i18n usage:" 
-          echo "$UNWRAPPED" | sed -n '1,200p' || true
+   - name: Basic lint (spot check untranslated PHP strings)
+     run: |
+      # Find likely hardcoded PHP strings (very basic heuristic)
+      set -euo pipefail
+      UNWRAPPED=$(grep -R --exclude-dir={node_modules,vendor,.__subtleforms.orig__} -n "echo \"\|echo '\\|_e(\|__\(" src || true)
+      # This step intentionally only prints summaries to assist maintainers; it's not failing the build
+      echo "Spot check results for echo and i18n usage:" 
+      echo "$UNWRAPPED" | sed -n '1,200p' || true
