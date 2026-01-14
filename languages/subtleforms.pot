@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-01-14T12:41:55+00:00\n"
+"POT-Creation-Date: 2026-01-14T15:49:18+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: subtleforms\n"
@@ -77,7 +77,7 @@ msgstr ""
 #: build/admin/admin.js:1
 #: build/admin/admin.js:11
 #: resources/admin/pages/DashboardPage.jsx:84
-#: resources/admin/pages/FormsPage.jsx:136
+#: resources/admin/pages/FormsPage.jsx:170
 msgid "All Forms"
 msgstr ""
 
@@ -174,7 +174,7 @@ msgid "Title"
 msgstr ""
 
 #: src/Admin/AdminMenu.php:590
-#: src/Api/RestController.php:1486
+#: src/Api/RestController.php:1517
 #: src/Privacy/PrivacyExporter.php:96
 #: build/admin/admin.js:5
 #: build/admin/admin.js:11
@@ -235,74 +235,86 @@ msgstr ""
 msgid "Total Submissions"
 msgstr ""
 
-#: src/Api/RestController.php:404
-#: src/Api/RestController.php:548
-#: src/Api/RestController.php:666
-#: src/Api/RestController.php:774
-#: src/Api/RestController.php:1008
+#: src/Api/RestController.php:413
+#: src/Api/RestController.php:557
+#: src/Api/RestController.php:675
+#: src/Api/RestController.php:783
+#: src/Api/RestController.php:1017
 msgid "Form not found"
 msgstr ""
 
-#: src/Api/RestController.php:437
-#: src/Api/RestController.php:447
+#: src/Api/RestController.php:446
+#: src/Api/RestController.php:456
 msgid "Form not available"
 msgstr ""
 
-#: src/Api/RestController.php:455
-#: src/Api/RestController.php:459
+#: src/Api/RestController.php:464
+#: src/Api/RestController.php:468
 msgid "Schema not available"
 msgstr ""
 
-#: src/Api/RestController.php:558
+#: src/Api/RestController.php:567
 msgid "Schema must be a JSON object"
 msgstr ""
 
-#: src/Api/RestController.php:592
+#: src/Api/RestController.php:601
 msgid "Schema was saved but could not be loaded back"
 msgstr ""
 
-#: src/Api/RestController.php:607
+#: src/Api/RestController.php:616
 msgid "Failed to save draft schema"
 msgstr ""
 
-#: src/Api/RestController.php:830
-#: src/Api/RestController.php:832
-#: src/Api/RestController.php:867
+#: src/Api/RestController.php:839
+#: src/Api/RestController.php:841
+#: src/Api/RestController.php:876
 #: src/Privacy/PrivacyExporter.php:83
 msgid "Unknown Form"
 msgstr ""
 
-#: src/Api/RestController.php:855
-#: src/Api/RestController.php:895
-#: src/Api/RestController.php:924
-#: src/Api/RestController.php:940
+#: src/Api/RestController.php:864
+#: src/Api/RestController.php:904
+#: src/Api/RestController.php:933
+#: src/Api/RestController.php:949
 #: build/admin/admin.js:16
 #: resources/admin/pages/SubmissionDetailPage.jsx:143
 #: resources/admin/pages/SubmissionDetailPage.jsx:167
 msgid "Submission not found"
 msgstr ""
 
-#: src/Api/RestController.php:907
+#: src/Api/RestController.php:916
 msgid "No valid changes provided"
 msgstr ""
 
-#: src/Api/RestController.php:973
+#: src/Api/RestController.php:982
 msgid "Error fetching unread count"
 msgstr ""
 
-#: src/Api/RestController.php:1001
+#: src/Api/RestController.php:1010
 msgid "Thank you."
 msgstr ""
 
-#: src/Api/RestController.php:1127
+#: src/Api/RestController.php:1136
 msgid "An unexpected error occurred"
 msgstr ""
 
-#: src/Api/RestController.php:1467
+#: src/Api/RestController.php:1336
+msgid "SubtleForms: Test email"
+msgstr ""
+
+#: src/Api/RestController.php:1337
+msgid "This is a test email sent from SubtleForms to verify delivery to your admin email address."
+msgstr ""
+
+#: src/Api/RestController.php:1344
+msgid "Failed to send test email"
+msgstr ""
+
+#: src/Api/RestController.php:1498
 msgid "No submissions to export"
 msgstr ""
 
-#: src/Api/RestController.php:1484
+#: src/Api/RestController.php:1515
 #: build/admin/admin.js:13
 #: build/admin/admin.js:18
 #: resources/admin/components/SubmissionsTable.jsx:435
@@ -310,13 +322,13 @@ msgstr ""
 msgid "ID"
 msgstr ""
 
-#: src/Api/RestController.php:1485
+#: src/Api/RestController.php:1516
 #: build/admin/admin.js:16
 #: resources/admin/pages/SubmissionDetailPage.jsx:464
 msgid "Form ID"
 msgstr ""
 
-#: src/Api/RestController.php:1487
+#: src/Api/RestController.php:1518
 msgid "Submitted At"
 msgstr ""
 
@@ -2437,7 +2449,7 @@ msgstr ""
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:143
 #: resources/admin/components/FormsList.jsx:179
 #: resources/admin/components/FormsList.jsx:757
-#: resources/admin/pages/FormsPage.jsx:130
+#: resources/admin/pages/FormsPage.jsx:164
 #: resources/admin/pages/SettingsPage.jsx:395
 msgid "Draft"
 msgstr ""
@@ -2449,7 +2461,7 @@ msgstr ""
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:142
 #: resources/admin/components/FormsList.jsx:184
 #: resources/admin/components/FormsList.jsx:758
-#: resources/admin/pages/FormsPage.jsx:129
+#: resources/admin/pages/FormsPage.jsx:163
 #: resources/admin/pages/SettingsPage.jsx:396
 msgid "Published"
 msgstr ""
@@ -3093,6 +3105,8 @@ msgstr ""
 
 #: build/admin/admin.js:10
 #: resources/admin/components/FormsList.jsx:695
+#: resources/admin/pages/FormsPage.jsx:177
+#: resources/admin/pages/FormsPage.jsx:186
 msgid "Create your first form"
 msgstr ""
 
@@ -3110,7 +3124,7 @@ msgstr ""
 #: build/admin/admin.js:11
 #: resources/admin/components/FormsList.jsx:712
 #: resources/admin/pages/FormsPage.jsx:73
-#: resources/admin/pages/FormsPage.jsx:150
+#: resources/admin/pages/FormsPage.jsx:202
 msgid "New Form"
 msgstr ""
 
@@ -3479,13 +3493,13 @@ msgstr ""
 
 #: build/admin/admin.js:11
 #: build/admin/admin.js:16
-#: resources/admin/pages/FormsPage.jsx:128
+#: resources/admin/pages/FormsPage.jsx:162
 #: resources/admin/pages/SubmissionsPage.jsx:81
 msgid "All"
 msgstr ""
 
 #: build/admin/admin.js:11
-#: resources/admin/pages/FormsPage.jsx:165
+#: resources/admin/pages/FormsPage.jsx:219
 msgid "Search forms..."
 msgstr ""
 
@@ -4709,17 +4723,17 @@ msgid "Finish"
 msgstr ""
 
 #: build/admin/admin.js:18
-#: resources/admin/components/FormPreviewModal.jsx:106
+#: resources/admin/components/FormPreviewModal.jsx:119
 msgid "Select..."
 msgstr ""
 
 #: build/admin/admin.js:18
-#: resources/admin/components/FormPreviewModal.jsx:224
+#: resources/admin/components/FormPreviewModal.jsx:255
 msgid "Click to upload or drag and drop"
 msgstr ""
 
 #: build/admin/admin.js:18
-#: resources/admin/components/FormPreviewModal.jsx:258
+#: resources/admin/components/FormPreviewModal.jsx:293
 msgid "Form Preview"
 msgstr ""
 
@@ -4729,43 +4743,43 @@ msgstr ""
 #: resources/admin/components/builder/FormCanvas.jsx:38
 #: resources/admin/components/builder/FormEditorHeader.jsx:128
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:65
-#: resources/admin/components/FormPreviewModal.jsx:271
+#: resources/admin/components/FormPreviewModal.jsx:308
 #: resources/admin/utils/initialSchema.js:88
 #: resources/blocks/subtleforms-form/index.js:131
 msgid "Untitled Form"
 msgstr ""
 
 #: build/admin/admin.js:18
-#: resources/admin/components/FormPreviewModal.jsx:275
+#: resources/admin/components/FormPreviewModal.jsx:312
 msgid "Preview shows your current draft (including unsaved changes)."
 msgstr ""
 
 #: build/admin/admin.js:18
-#: resources/admin/components/FormPreviewModal.jsx:279
+#: resources/admin/components/FormPreviewModal.jsx:316
 msgid "Preview shows your current draft."
 msgstr ""
 
 #: build/admin/admin.js:18
-#: resources/admin/components/FormPreviewModal.jsx:294
+#: resources/admin/components/FormPreviewModal.jsx:331
 msgid "Conversational forms display one question at a time. This preview shows all fields together."
 msgstr ""
 
 #: build/admin/admin.js:18
-#: resources/admin/components/FormPreviewModal.jsx:311
+#: resources/admin/components/FormPreviewModal.jsx:348
 msgid "No fields added yet. Add fields to see the preview."
 msgstr ""
 
 #: build/admin/admin.js:18
 #: build/blocks/subtleforms-form/index.js:1
 #: build/frontend/frontend.js:1
-#: resources/admin/components/FormPreviewModal.jsx:323
+#: resources/admin/components/FormPreviewModal.jsx:360
 #: resources/frontend/components/ConversationalFormRenderer.jsx:444
 #: resources/frontend/components/FormRenderer.jsx:776
 msgid "Submit"
 msgstr ""
 
 #: build/admin/admin.js:18
-#: resources/admin/components/FormPreviewModal.jsx:326
+#: resources/admin/components/FormPreviewModal.jsx:363
 msgid "This is a preview. The form is not functional."
 msgstr ""
 
@@ -5716,6 +5730,14 @@ msgstr ""
 
 #: resources/admin/components/TemplateSelector.jsx:107
 msgid "Use Template"
+msgstr ""
+
+#: resources/admin/pages/FormsPage.jsx:134
+msgid "A test email has been sent to your admin email."
+msgstr ""
+
+#: resources/admin/pages/FormsPage.jsx:180
+msgid "Let us help you get started — create a contact form in seconds."
 msgstr ""
 
 #: build/blocks/form/block.json
