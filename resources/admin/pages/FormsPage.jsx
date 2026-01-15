@@ -168,7 +168,6 @@ export default function FormsPage() {
     <>
       <AdminShell
         title={__('All Forms', 'subtleforms')}
-        noScroll={true}
         actions={
           <div className='sf-forms-actions'>
             {formsCount === 0 ? (

@@ -94,7 +94,12 @@ export default function SubmissionsPage({ formId }) {
   const formOptions = [
     { label: __('All forms', 'subtleforms'), value: 'all' },
     ...forms.map((form) => ({
-      label: form.title || sprintf(/* translators: %1$d: form id */ __('Form #%1$d', 'subtleforms'), form.id),
+      label:
+        form.title ||
+        sprintf(
+          /* translators: %1$d: form id */ __('Form #%1$d', 'subtleforms'),
+          form.id
+        ),
       value: String(form.id),
     })),
   ];
@@ -158,7 +163,6 @@ export default function SubmissionsPage({ formId }) {
   return (
     <AdminShell
       title={title}
-      noScroll={true}
       actionBarLeft={
         <TabBar
           tabs={tabs}
