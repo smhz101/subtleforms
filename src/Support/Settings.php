@@ -46,6 +46,17 @@ class Settings {
 		'enable_honeypot'            => true,
 		'min_submission_time'        => 3,
 
+		// CAPTCHA
+		'captcha_enabled'            => false,
+		'captcha_provider'           => '',
+		'captcha_recaptcha_site_key' => '',
+		'captcha_recaptcha_secret_key' => '',
+		'captcha_recaptcha_version'  => 'v2',
+		'captcha_hcaptcha_site_key'  => '',
+		'captcha_hcaptcha_secret_key' => '',
+		'captcha_turnstile_site_key' => '',
+		'captcha_turnstile_secret_key' => '',
+
 		// Privacy & GDPR
 		'data_retention_days'        => 0, // 0 = keep forever
 	);
@@ -93,6 +104,33 @@ class Settings {
 			'integer',
 			'min' => 1,
 			'max' => 365,
+		),
+		'captcha_enabled'            => 'boolean',
+		'captcha_provider'           => array( '', 'recaptcha', 'hcaptcha', 'turnstile' ),
+		'captcha_recaptcha_site_key' => array(
+			'string',
+			'max' => 200,
+		),
+		'captcha_recaptcha_secret_key' => array(
+			'string',
+			'max' => 200,
+		),
+		'captcha_recaptcha_version'  => array( 'v2', 'v3' ),
+		'captcha_hcaptcha_site_key'  => array(
+			'string',
+			'max' => 200,
+		),
+		'captcha_hcaptcha_secret_key' => array(
+			'string',
+			'max' => 200,
+		),
+		'captcha_turnstile_site_key' => array(
+			'string',
+			'max' => 200,
+		),
+		'captcha_turnstile_secret_key' => array(
+			'string',
+			'max' => 200,
 		),
 	);
 

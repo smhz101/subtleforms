@@ -74,6 +74,7 @@ export default function Settings() {
             response.data.user_confirmation_enabled
           ),
           debug_mode: Boolean(response.data.debug_mode),
+          captcha_enabled: Boolean(response.data.captcha_enabled),
         };
         setSettings(normalizedSettings);
       }
@@ -703,6 +704,135 @@ function AdvancedSettings({
             />
             <FieldError errors={fieldErrors.min_submission_time} />
           </div>
+
+          <div>
+            <h4 className='sf-section-title'>
+              {__('CAPTCHA', 'subtleforms')}
+            </h4>
+            <ToggleControl
+              label={__('Enable CAPTCHA', 'subtleforms')}
+              checked={settings.captcha_enabled ?? false}
+              onChange={(value) => updateSetting('captcha_enabled', value)}
+              help={__(
+                'Require CAPTCHA verification on forms to prevent spam and bot submissions',
+                'subtleforms'
+              )}
+            />
+            <FieldError errors={fieldErrors.captcha_enabled} />
+          </div>
+
+          {settings.captcha_enabled && (
+            <>
+              <div>
+                <SelectControl
+                  label={__('CAPTCHA Provider', 'subtleforms')}
+                  value={settings.captcha_provider ?? ''}
+                  onChange={(value) => updateSetting('captcha_provider', value)}
+                  options={[
+                    { label: __('-- Select Provider --', 'subtleforms'), value: '' },
+                    { label: 'Google reCAPTCHA', value: 'recaptcha' },
+                    { label: 'hCaptcha', value: 'hcaptcha' },
+                    { label: 'Cloudflare Turnstile', value: 'turnstile' },
+                  ]}
+                  help={__(
+                    'Choose which CAPTCHA service to use',
+                    'subtleforms'
+                  )}
+                />
+                <FieldError errors={fieldErrors.captcha_provider} />
+              </div>
+
+              {settings.captcha_provider === 'recaptcha' && (
+                <>
+                  <div>
+                    <SelectControl
+                      label={__('reCAPTCHA Version', 'subtleforms')}
+                      value={settings.captcha_recaptcha_version ?? 'v2'}
+                      onChange={(value) => updateSetting('captcha_recaptcha_version', value)}
+                      options={[
+                        { label: 'v2 (Checkbox)', value: 'v2' },
+                        { label: 'v3 (Invisible)', value: 'v3' },
+                      ]}
+                    />
+                    <FieldError errors={fieldErrors.captcha_recaptcha_version} />
+                  </div>
+                  <div>
+                    <TextControl
+                      label={__('Site Key', 'subtleforms')}
+                      value={settings.captcha_recaptcha_site_key ?? ''}
+                      onChange={(value) => updateSetting('captcha_recaptcha_site_key', value)}
+                      help={__(
+                        'Get your keys from https://www.google.com/recaptcha/admin',
+                        'subtleforms'
+                      )}
+                    />
+                    <FieldError errors={fieldErrors.captcha_recaptcha_site_key} />
+                  </div>
+                  <div>
+                    <TextControl
+                      label={__('Secret Key', 'subtleforms')}
+                      type='password'
+                      value={settings.captcha_recaptcha_secret_key ?? ''}
+                      onChange={(value) => updateSetting('captcha_recaptcha_secret_key', value)}
+                    />
+                    <FieldError errors={fieldErrors.captcha_recaptcha_secret_key} />
+                  </div>
+                </>
+              )}
+
+              {settings.captcha_provider === 'hcaptcha' && (
+                <>
+                  <div>
+                    <TextControl
+                      label={__('Site Key', 'subtleforms')}
+                      value={settings.captcha_hcaptcha_site_key ?? ''}
+                      onChange={(value) => updateSetting('captcha_hcaptcha_site_key', value)}
+                      help={__(
+                        'Get your keys from https://dashboard.hcaptcha.com/',
+                        'subtleforms'
+                      )}
+                    />
+                    <FieldError errors={fieldErrors.captcha_hcaptcha_site_key} />
+                  </div>
+                  <div>
+                    <TextControl
+                      label={__('Secret Key', 'subtleforms')}
+                      type='password'
+                      value={settings.captcha_hcaptcha_secret_key ?? ''}
+                      onChange={(value) => updateSetting('captcha_hcaptcha_secret_key', value)}
+                    />
+                    <FieldError errors={fieldErrors.captcha_hcaptcha_secret_key} />
+                  </div>
+                </>
+              )}
+
+              {settings.captcha_provider === 'turnstile' && (
+                <>
+                  <div>
+                    <TextControl
+                      label={__('Site Key', 'subtleforms')}
+                      value={settings.captcha_turnstile_site_key ?? ''}
+                      onChange={(value) => updateSetting('captcha_turnstile_site_key', value)}
+                      help={__(
+                        'Get your keys from https://dash.cloudflare.com/?to=/:account/turnstile',
+                        'subtleforms'
+                      )}
+                    />
+                    <FieldError errors={fieldErrors.captcha_turnstile_site_key} />
+                  </div>
+                  <div>
+                    <TextControl
+                      label={__('Secret Key', 'subtleforms')}
+                      type='password'
+                      value={settings.captcha_turnstile_secret_key ?? ''}
+                      onChange={(value) => updateSetting('captcha_turnstile_secret_key', value)}
+                    />
+                    <FieldError errors={fieldErrors.captcha_turnstile_secret_key} />
+                  </div>
+                </>
+              )}
+            </>
+          )}
 
           <div>
             <h4 className='sf-section-title'>
