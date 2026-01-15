@@ -9,7 +9,6 @@ import {
   SelectControl,
   Notice,
   Spinner,
-  TabPanel,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
@@ -46,6 +45,7 @@ export default function Settings() {
   const [message, setMessage] = useState(null);
   const [hasChanges, setHasChanges] = useState(false);
   const [fieldErrors, setFieldErrors] = useState({});
+  const [activeTab, setActiveTab] = useState('general');
 
   // Load settings on mount
   useEffect(() => {
@@ -285,22 +285,22 @@ export default function Settings() {
     {
       name: 'general',
       title: __('General', 'subtleforms'),
-      className: 'subtleforms-settings-tab',
+      icon: 'admin-settings',
     },
     {
       name: 'frontend',
       title: __('Frontend', 'subtleforms'),
-      className: 'subtleforms-settings-tab',
+      icon: 'admin-appearance',
     },
     {
       name: 'email',
       title: __('Email / Notifications', 'subtleforms'),
-      className: 'subtleforms-settings-tab',
+      icon: 'email',
     },
     {
       name: 'advanced',
       title: __('Advanced', 'subtleforms'),
-      className: 'subtleforms-settings-tab',
+      icon: 'admin-tools',
     },
   ];
 
@@ -332,51 +332,68 @@ export default function Settings() {
             status={message.type}
             isDismissible
             onRemove={() => setMessage(null)}
-            className='subtleforms-settings-notice'>
+            className='sf-settings-notice'>
             {message.text}
           </Notice>
         )}
 
-        {/* Tabbed Content */}
-        <TabPanel
-          className='sf-settings-tabs'
-          activeClass='is-active'
-          tabs={tabs}>
-          {(tab) => (
-            <div className='sf-settings-tab-content'>
-              {tab.name === 'general' && (
-                <GeneralSettings
-                  settings={settings}
-                  updateSetting={updateSetting}
-                  fieldErrors={fieldErrors}
-                />
-              )}
-              {tab.name === 'frontend' && (
-                <FrontendSettings
-                  settings={settings}
-                  updateSetting={updateSetting}
-                  fieldErrors={fieldErrors}
-                />
-              )}
-              {tab.name === 'email' && (
-                <EmailSettings
-                  settings={settings}
-                  updateSetting={updateSetting}
-                  fieldErrors={fieldErrors}
-                />
-              )}
-              {tab.name === 'advanced' && (
-                <AdvancedSettings
-                  settings={settings}
-                  updateSetting={updateSetting}
-                  resetSettings={resetSettings}
-                  saving={saving}
-                  fieldErrors={fieldErrors}
-                />
-              )}
-            </div>
-          )}
-        </TabPanel>
+        {/* Two-Column Layout: Sidebar + Content */}
+        <div className='sf-settings-layout'>
+          {/* Sidebar Navigation */}
+          <nav className='sf-settings-sidebar'>
+            <ul className='sf-settings-nav'>
+              {tabs.map((tab) => (
+                <li key={tab.name}>
+                  <button
+                    type='button'
+                    className={`sf-settings-nav-item ${
+                      activeTab === tab.name ? 'sf-settings-nav-item--active' : ''
+                    }`}
+                    onClick={() => setActiveTab(tab.name)}>
+                    <span className={`dashicons dashicons-${tab.icon}`} />
+                    <span className='sf-settings-nav-item__label'>
+                      {tab.title}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </nav>
+
+          {/* Content Area */}
+          <div className='sf-settings-content'>
+            {activeTab === 'general' && (
+              <GeneralSettings
+                settings={settings}
+                updateSetting={updateSetting}
+                fieldErrors={fieldErrors}
+              />
+            )}
+            {activeTab === 'frontend' && (
+              <FrontendSettings
+                settings={settings}
+                updateSetting={updateSetting}
+                fieldErrors={fieldErrors}
+              />
+            )}
+            {activeTab === 'email' && (
+              <EmailSettings
+                settings={settings}
+                updateSetting={updateSetting}
+                fieldErrors={fieldErrors}
+              />
+            )}
+            {activeTab === 'advanced' && (
+              <AdvancedSettings
+                settings={settings}
+                updateSetting={updateSetting}
+                resetSettings={resetSettings}
+                saving={saving}
+                fieldErrors={fieldErrors}
+              />
+            )}
+          </div>
+        </div>
       </div>
     </AdminShell>
   );
