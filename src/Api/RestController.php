@@ -581,7 +581,7 @@ final class RestController {
 	 */
 	private function processCaptchaFields( $fields, $captcha_html ) {
 		foreach ( $fields as &$field ) {
-			if ( $field['type'] === 'captcha' ) {
+			if ( in_array( $field['type'], array( 'captcha', 'recaptcha', 'hcaptcha', 'turnstile' ), true ) ) {
 				$field['config']['captchaHtml'] = $captcha_html;
 			}
 
