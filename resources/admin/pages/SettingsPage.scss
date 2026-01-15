@@ -1,6 +1,12 @@
 /**
  * Settings Page Styles
  * Using AdminShell - no custom page layout needed
+ *
+ * LAYOUT CONTRACT:
+ * - Settings wrapped in AdminShell (scrolls automatically)
+ * - Content constrained to max-width: 1100px and centered
+ * - Save/Discard buttons in AdminShell header (sticky)
+ * - Tabs and cards flow naturally with proper spacing
  */
 
 .sf-settings-container {
