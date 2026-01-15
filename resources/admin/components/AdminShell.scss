@@ -8,9 +8,9 @@
  * - NO page may manage its own body scrolling
  */
 
-// CRITICAL: Ensure body and html never scroll in admin
+// CRITICAL: Ensure body and html never scroll in admin (all color schemes)
 html,
-body.admin-color-fresh {
+body {
 	overflow: hidden !important;
 }
 
