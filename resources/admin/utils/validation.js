@@ -149,6 +149,89 @@ export const settingsSchema = Joi.object({
       'number.max': __('Log retention cannot exceed 365 days', 'subtleforms'),
       'any.required': __('Log retention days is required', 'subtleforms'),
     }),
+
+  // Security Settings
+  enable_honeypot: Joi.boolean()
+    .messages({
+      'boolean.base': __('Honeypot protection must be true or false', 'subtleforms'),
+    }),
+
+  min_submission_time: Joi.number()
+    .integer()
+    .min(0)
+    .max(60)
+    .messages({
+      'number.base': __('Minimum submission time must be a number', 'subtleforms'),
+      'number.integer': __('Minimum submission time must be a whole number', 'subtleforms'),
+      'number.min': __('Minimum submission time cannot be negative', 'subtleforms'),
+      'number.max': __('Minimum submission time cannot exceed 60 seconds', 'subtleforms'),
+    }),
+
+  captcha_enabled: Joi.boolean()
+    .required()
+    .messages({
+      'boolean.base': __('Captcha enabled must be true or false', 'subtleforms'),
+      'any.required': __('Captcha enabled setting is required', 'subtleforms'),
+    }),
+
+  captcha_provider: Joi.string()
+    .valid('', 'recaptcha', 'hcaptcha', 'turnstile')
+    .allow('')
+    .messages({
+      'any.only': __('Captcha provider must be recaptcha, hcaptcha, or turnstile', 'subtleforms'),
+    }),
+
+  // reCAPTCHA settings
+  captcha_recaptcha_version: Joi.string()
+    .valid('v2', 'v3')
+    .allow('')
+    .messages({
+      'any.only': __('reCAPTCHA version must be v2 or v3', 'subtleforms'),
+    }),
+
+  captcha_recaptcha_site_key: Joi.string()
+    .max(100)
+    .allow('')
+    .messages({
+      'string.max': __('reCAPTCHA site key cannot exceed 100 characters', 'subtleforms'),
+    }),
+
+  captcha_recaptcha_secret_key: Joi.string()
+    .max(100)
+    .allow('')
+    .messages({
+      'string.max': __('reCAPTCHA secret key cannot exceed 100 characters', 'subtleforms'),
+    }),
+
+  // hCaptcha settings
+  captcha_hcaptcha_site_key: Joi.string()
+    .max(100)
+    .allow('')
+    .messages({
+      'string.max': __('hCaptcha site key cannot exceed 100 characters', 'subtleforms'),
+    }),
+
+  captcha_hcaptcha_secret_key: Joi.string()
+    .max(100)
+    .allow('')
+    .messages({
+      'string.max': __('hCaptcha secret key cannot exceed 100 characters', 'subtleforms'),
+    }),
+
+  // Turnstile settings
+  captcha_turnstile_site_key: Joi.string()
+    .max(100)
+    .allow('')
+    .messages({
+      'string.max': __('Turnstile site key cannot exceed 100 characters', 'subtleforms'),
+    }),
+
+  captcha_turnstile_secret_key: Joi.string()
+    .max(100)
+    .allow('')
+    .messages({
+      'string.max': __('Turnstile secret key cannot exceed 100 characters', 'subtleforms'),
+    }),
 });
 
 /**

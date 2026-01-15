@@ -175,7 +175,11 @@
 			left: 0;
 			right: 0;
 			bottom: 0;
-			background: linear-gradient(135deg, rgba(59, 130, 246, 0.05), rgba(147, 197, 253, 0.05));
+			background: linear-gradient(
+				135deg,
+				rgba(59, 130, 246, 0.05),
+				rgba(147, 197, 253, 0.05)
+			);
 			opacity: 0;
 			transition: opacity 220ms ease-out;
 			pointer-events: none;
