@@ -42,6 +42,37 @@
 		line-height: 1rem;
 		font-weight: 500;
 		border: 1px solid;
+		border-radius: 4px;
+
+		&--gray {
+			background-color: #f9fafb;
+			color: #374151;
+			border-color: #e5e7eb;
+		}
+
+		&--purple {
+			background-color: #faf5ff;
+			color: #7c3aed;
+			border-color: #e9d5ff;
+		}
+
+		&--indigo {
+			background-color: #eef2ff;
+			color: #4f46e5;
+			border-color: #c7d2fe;
+		}
+
+		&--blue {
+			background-color: #eff6ff;
+			color: #1d4ed8;
+			border-color: #bfdbfe;
+		}
+
+		&--green {
+			background-color: #f0fdf4;
+			color: #16a34a;
+			border-color: #bbf7d0;
+		}
 	}
 
 	&__form-type-icon {
@@ -79,6 +110,26 @@
 		cursor: pointer;
 		outline: none;
 		transition: all 150ms;
+		border-radius: 4px;
+		background-color: #f9fafb;
+		color: #374151;
+		border: 1px solid #d1d5db;
+
+		&:hover {
+			border-color: #3b82f6;
+			background-color: #eff6ff;
+		}
+
+		&--copied {
+			background-color: #f0fdf4;
+			color: #16a34a;
+			border-color: #16a34a;
+
+			&:hover {
+				border-color: #16a34a;
+				background-color: #f0fdf4;
+			}
+		}
 	}
 
 	&__save-status {

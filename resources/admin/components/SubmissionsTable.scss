@@ -13,6 +13,11 @@
 	min-height: 0; // CRITICAL: allows component to shrink in flex parent
 	// NOTE: DataTable component handles scrolling internally
 
+	&__row--unread {
+		background-color: #eff6ff;
+		border-left: 4px solid #3b82f6;
+	}
+
 	&__status-badge {
 		display: inline-flex;
 		align-items: center;

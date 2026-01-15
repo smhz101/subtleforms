@@ -309,10 +309,10 @@ export default function BuilderTour({ onComplete, onSkip }) {
 
         {/* Content */}
         <div className='sf-builder-tour__content'>
-          <h3 className='sf-mb-2 sf-font-semibold sf-text-gray-900 sf-text-lg'>
+          <h3 className='sf-builder-tour__title'>
             {step.title}
           </h3>
-          <p className='sf-text-gray-600 sf-leading-relaxed'>{step.content}</p>
+          <p className='sf-builder-tour__text'>{step.content}</p>
         </div>
 
         {/* Actions */}

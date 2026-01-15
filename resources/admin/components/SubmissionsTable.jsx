@@ -353,7 +353,7 @@ const SubmissionsTable = forwardRef(
 
     const getRowClassName = (submission) => {
       if (submission.status === 'unread') {
-        return 'sf-bg-blue-50 sf-border-l-4 sf-border-l-blue-500';
+        return 'sf-submissions-table__row--unread';
       }
       return '';
     };

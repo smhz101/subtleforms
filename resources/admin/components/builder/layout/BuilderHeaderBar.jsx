@@ -68,18 +68,7 @@ export function BuilderTitle({
 
       {/** form type */}
       <span
-        className={`sf-builder-header-bar__form-type-badge ${
-          formTypeBadge.color === 'gray'
-            ? 'bg-gray-50 text-gray-700 border-gray-200'
-            : formTypeBadge.color === 'purple'
-            ? 'bg-purple-50 text-purple-700 border-purple-200'
-            : formTypeBadge.color === 'indigo'
-            ? 'bg-indigo-50 text-indigo-700 border-indigo-200'
-            : formTypeBadge.color === 'blue'
-            ? 'bg-blue-50 text-blue-700 border-blue-200'
-            : 'bg-green-50 text-green-700 border-green-200'
-        }`}
-        style={{ borderRadius: '4px' }}
+        className={`sf-builder-header-bar__form-type-badge sf-builder-header-bar__form-type-badge--${formTypeBadge.color}`}
         title={formTypeBadge.label}>
         <FormTypeIcon className='sf-builder-header-bar__form-type-icon' />
         {formTypeBadge.label}
@@ -150,10 +139,9 @@ export function BuilderActions({
           onClick={() => onCopyShortcode(shortcode)}
           className={`sf-builder-header-bar__shortcode-button ${
             copyState === 'copied'
-              ? 'text-green-700 bg-green-50 border border-green-500'
-              : 'sf-text-gray-700 sf-bg-gray-50 sf-border sf-border-gray-300 hover:sf-border-blue-500 hover:sf-bg-blue-50'
+              ? 'sf-builder-header-bar__shortcode-button--copied'
+              : ''
           }`}
-          style={{ borderRadius: '4px' }}
           title={
             copyState === 'copied'
               ? __('Copied to clipboard!', 'subtleforms')
