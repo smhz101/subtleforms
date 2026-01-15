@@ -294,32 +294,30 @@ export default function FormBuilder() {
 
   return (
     <div className='subtleforms-builder-canvas'>
-      <div className='subtleforms-builder-canvas__scroll'>
-        <div className='subtleforms-builder-canvas__surface'>
-          <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
-            {isMultiStepForm && activeStep ? (
-              /* Multi-step form: Show step-scoped canvas */
-              <StepCanvas
-                stepId={selectedStepId}
-                stepNumber={stepNodes.indexOf(selectedStepId) + 1}
-                totalSteps={stepNodes.length}
-                renderNode={renderNode}
-              />
-            ) : (
-              /* Regular form: Show all fields */
-              <ColumnDropZone
-                containerId={rootId}
-                columnIndex={null}
-                items={rootChildren}
-                onRequestInsert={onRequestInsert}
-                spacing={24}
-                renderItem={(nodeId, index) =>
-                  renderNode(nodeId, rootId, null, index)
-                }
-              />
-            )}
-          </DndContext>
-        </div>
+      <div className='subtleforms-builder-canvas__surface'>
+        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+          {isMultiStepForm && activeStep ? (
+            /* Multi-step form: Show step-scoped canvas */
+            <StepCanvas
+              stepId={selectedStepId}
+              stepNumber={stepNodes.indexOf(selectedStepId) + 1}
+              totalSteps={stepNodes.length}
+              renderNode={renderNode}
+            />
+          ) : (
+            /* Regular form: Show all fields */
+            <ColumnDropZone
+              containerId={rootId}
+              columnIndex={null}
+              items={rootChildren}
+              onRequestInsert={onRequestInsert}
+              spacing={24}
+              renderItem={(nodeId, index) =>
+                renderNode(nodeId, rootId, null, index)
+              }
+            />
+          )}
+        </DndContext>
       </div>
     </div>
   );

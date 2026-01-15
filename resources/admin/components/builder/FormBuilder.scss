@@ -1,34 +1,26 @@
 /**
  * FormBuilder Component Styles  
- * Canvas area with scrollable surface for drag-and-drop
+ * Canvas area with white surface for drag-and-drop
+ * NOTE: Parent FormEditor owns scrolling via sf-form-editor__canvas-scroll
  */
 
 .subtleforms-builder-canvas {
-	// Canvas root - must fill parent and establish flex context
-	flex: 1 1 auto; // CRITICAL: allows canvas to grow
-	min-width: 0; // CRITICAL: allows flex shrinking
-	min-height: 0; // CRITICAL: allows vertical shrinking
+	// Canvas root - fills parent scroll container
 	display: flex;
-	flex-direction: column;
-	overflow: hidden;
-	height: 100%;
-
-	// Scroll container
-	&__scroll {
-		flex: 1;
-		overflow-y: auto;
-		overflow-x: hidden;
-		padding: 24px;
-	}
+	justify-content: center;
+	align-items: flex-start;
+	width: 100%;
+	min-height: 100%;
+	padding: 1.5rem;
 
 	// White surface where fields are rendered
 	&__surface {
+		width: 100%;
 		max-width: 900px;
-		margin: 0 auto;
 		background: #fff;
 		border: 1px solid #d1d5db;
 		border-radius: 4px;
-		padding: 40px;
+		padding: 2.5rem;
 		min-height: 600px;
 	}
 }
