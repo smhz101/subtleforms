@@ -3,8 +3,8 @@
  */
 
 .sf-column-dropzone {
-	--dropzone-padding: 8px;
-	--dropzone-gap: 16px;
+	--dropzone-padding: 6px; /* Reduced from 8px */
+	--dropzone-gap: 12px; /* Reduced from 16px for tighter spacing */
 
 	display: flex;
 	flex-direction: column;

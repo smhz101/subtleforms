@@ -41,8 +41,8 @@
 	// Step header - clickable context indicator
 	.sf-step-header {
 		background-color: #eff6ff;
-		margin-bottom: 1.5rem;
-		padding: 0.75rem 1rem;
+		margin-bottom: 1rem; /* Reduced from 1.5rem for better density */
+		padding: 0.625rem 0.875rem; /* Slightly tighter padding */
 		border: 1px solid #bfdbfe;
 		border-radius: 0.5rem;
 		cursor: pointer;

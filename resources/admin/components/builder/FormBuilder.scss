@@ -11,7 +11,7 @@
 	align-items: flex-start;
 	width: 100%;
 	min-height: 100%; // CRITICAL: Ensures canvas is tall enough to scroll
-	padding: 1.5rem;
+	padding: 1rem; // Reduced from 1.5rem for better density
 
 	// White surface where fields are rendered
 	&__surface {
@@ -20,7 +20,7 @@
 		background: #fff;
 		border: 1px solid #d1d5db;
 		border-radius: 4px;
-		padding: 2.5rem;
+		padding: 1.75rem; // Reduced from 2.5rem for better density
 		min-height: 600px;
 	}
 }

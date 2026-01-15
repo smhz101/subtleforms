@@ -5,7 +5,7 @@
 
 .sf-field-chrome {
 	position: relative;
-	margin-bottom: 0.875rem; /* Tighter spacing for connected feel */
+	margin-bottom: 0.75rem; /* Reduced from 0.875rem for tighter spacing */
 	transition: all 180ms ease-out; /* Smooth, subtle transition */
 	border-radius: 6px; /* Softer corners */
 	cursor: pointer;
@@ -35,7 +35,7 @@
 	}
 
 	&__inner {
-		padding: 1.25rem;
+		padding: 1rem; /* Reduced from 1.25rem for better density */
 	}
 
 	&__validation-message {
