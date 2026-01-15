@@ -28,7 +28,7 @@ test.describe('Admin Layout and Scroll Contract', () => {
     // Test Settings page
     await page.goto('/wp-admin/admin.php?page=subtleforms-settings');
     await page.waitForSelector('.sf-admin-shell');
-    
+
     let bodyOverflow = await page.evaluate(() => {
       return window.getComputedStyle(document.body).overflow;
     });
@@ -37,7 +37,7 @@ test.describe('Admin Layout and Scroll Contract', () => {
     // Test Forms List page
     await page.goto('/wp-admin/admin.php?page=subtleforms-forms');
     await page.waitForSelector('.sf-admin-shell');
-    
+
     bodyOverflow = await page.evaluate(() => {
       return window.getComputedStyle(document.body).overflow;
     });
@@ -46,7 +46,7 @@ test.describe('Admin Layout and Scroll Contract', () => {
     // Test Submissions page
     await page.goto('/wp-admin/admin.php?page=subtleforms-submissions');
     await page.waitForSelector('.sf-admin-shell');
-    
+
     bodyOverflow = await page.evaluate(() => {
       return window.getComputedStyle(document.body).overflow;
     });
@@ -74,7 +74,7 @@ test.describe('Admin Layout and Scroll Contract', () => {
       scrollHeight: el.scrollHeight,
       clientHeight: el.clientHeight,
     }));
-    
+
     // Settings should have enough content to scroll
     // If not scrollable now, at least verify overflow is set correctly
     expect(scrollHeight).toBeGreaterThanOrEqual(clientHeight);
@@ -88,7 +88,7 @@ test.describe('Admin Layout and Scroll Contract', () => {
     // Create a test form first
     await page.goto('/wp-admin/admin.php?page=subtleforms-forms');
     await page.waitForSelector('.sf-admin-shell');
-    
+
     // Click "Add New Form" if available
     const addNewButton = page.locator('text=Add New Form').first();
     if (await addNewButton.isVisible({ timeout: 2000 }).catch(() => false)) {
@@ -131,13 +131,13 @@ test.describe('Admin Layout and Scroll Contract', () => {
     // Navigate to builder (skip if no forms exist)
     await page.goto('/wp-admin/admin.php?page=subtleforms-forms');
     await page.waitForSelector('.sf-admin-shell');
-    
+
     const firstFormEdit = page.locator('[data-test-id="edit-form-button"]').first();
     if (!(await firstFormEdit.isVisible({ timeout: 2000 }).catch(() => false))) {
       test.skip();
       return;
     }
-    
+
     await firstFormEdit.click();
     await page.waitForSelector('.sf-form-editor');
 
@@ -166,13 +166,13 @@ test.describe('Admin Layout and Scroll Contract', () => {
     // Navigate to builder
     await page.goto('/wp-admin/admin.php?page=subtleforms-forms');
     await page.waitForSelector('.sf-admin-shell');
-    
+
     const firstFormEdit = page.locator('[data-test-id="edit-form-button"]').first();
     if (!(await firstFormEdit.isVisible({ timeout: 2000 }).catch(() => false))) {
       test.skip();
       return;
     }
-    
+
     await firstFormEdit.click();
     await page.waitForSelector('.sf-form-editor');
 
@@ -201,13 +201,13 @@ test.describe('Admin Layout and Scroll Contract', () => {
     // Navigate to builder
     await page.goto('/wp-admin/admin.php?page=subtleforms-forms');
     await page.waitForSelector('.sf-admin-shell');
-    
+
     const firstFormEdit = page.locator('[data-test-id="edit-form-button"]').first();
     if (!(await firstFormEdit.isVisible({ timeout: 2000 }).catch(() => false))) {
       test.skip();
       return;
     }
-    
+
     await firstFormEdit.click();
     await page.waitForSelector('.sf-form-editor');
 
@@ -225,7 +225,7 @@ test.describe('Admin Layout and Scroll Contract', () => {
 
     // Verify dock is collapsed (class added or width changed)
     const formEditor = page.locator('.sf-form-editor').first();
-    const hasCollapsedClass = await formEditor.evaluate((el) => 
+    const hasCollapsedClass = await formEditor.evaluate((el) =>
       el.classList.contains('sf-form-editor--dock-collapsed')
     );
     expect(hasCollapsedClass).toBeTruthy();
@@ -284,7 +284,7 @@ test.describe('Admin Layout and Scroll Contract', () => {
       const style = window.getComputedStyle(el);
       const height = style.height;
       const expectedHeight = 'calc(100vh - var(--wp-admin--admin-bar--height, 32px))';
-      
+
       return {
         height,
         computedHeight: el.offsetHeight,
@@ -311,7 +311,7 @@ test.describe('Admin Layout and Scroll Contract', () => {
 
     for (const url of pages) {
       await page.goto(url);
-      
+
       const hasAdminShell = await page.locator('.sf-admin-shell').isVisible({ timeout: 5000 });
       expect(hasAdminShell).toBeTruthy();
 

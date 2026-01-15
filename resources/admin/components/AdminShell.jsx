@@ -58,7 +58,7 @@ export default function AdminShell({
         {/* ACTION BAR - Sticky ActionBar Component */}
         {(actionBarLeft || actionBarRight) && (
           <div
-            className='admin-shell__action-bar-wrapper'
+            className='sf-admin-shell__action-bar-wrapper'
             style={{
               position: 'sticky',
               top: `${WP_ADMIN_BAR_HEIGHT}px`,
@@ -69,15 +69,15 @@ export default function AdminShell({
         )}
 
         {/* CONTENT AREA - Scrollable */}
-        <div className='admin-shell__content'>
+        <div className='sf-admin-shell__content'>
           <div
-            className={`admin-shell__content-inner ${
-              noScroll ? 'admin-shell__content-inner--no-scroll' : ''
+            className={`sf-admin-shell__content-inner ${
+              noScroll ? 'sf-admin-shell__content-inner--no-scroll' : ''
             }`}>
             <Notices />
             <div
-              className={`admin-shell__content-body ${
-                noScroll ? 'admin-shell__content-body--no-scroll' : ''
+              className={`sf-admin-shell__content-body ${
+                noScroll ? 'sf-admin-shell__content-body--no-scroll' : ''
               }`}>
               {children}
             </div>

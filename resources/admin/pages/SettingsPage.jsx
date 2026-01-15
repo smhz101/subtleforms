@@ -347,7 +347,9 @@ export default function Settings() {
                   <button
                     type='button'
                     className={`sf-settings-nav-item ${
-                      activeTab === tab.name ? 'sf-settings-nav-item--active' : ''
+                      activeTab === tab.name
+                        ? 'sf-settings-nav-item--active'
+                        : ''
                     }`}
                     onClick={() => setActiveTab(tab.name)}>
                     <span className={`dashicons dashicons-${tab.icon}`} />
