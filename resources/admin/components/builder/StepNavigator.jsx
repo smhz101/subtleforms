@@ -13,13 +13,13 @@ export default function StepNavigator({
     return (
       <div className='sf-step-navigator sf-step-navigator--empty'>
         <div className='sf-step-navigator__empty-container'>
-          <div className='sf-text-gray-600 sf-text-sm'>
+          <div className='sf-step-navigator__empty-text'>
             {__(
               'No steps created yet. Add your first step to get started.',
               'subtleforms'
             )}
           </div>
-          <Button isPrimary onClick={onAddStep} className='sf-text-sm'>
+          <Button isPrimary onClick={onAddStep}>
             <span className='step-navigator__add-button'>
               <svg
                 className='step-navigator__add-icon'
@@ -45,7 +45,7 @@ export default function StepNavigator({
     <div className='sf-step-navigator'>
       <div className='sf-step-navigator__container'>
         <div className='sf-step-navigator__label'>
-          <span className='sf-font-medium sf-text-gray-700 sf-text-sm'>
+          <span className='sf-step-navigator__label-text'>
             {__('Steps:', 'subtleforms')}
           </span>
         </div>
@@ -118,8 +118,7 @@ export default function StepNavigator({
         <div className='sf-step-navigator__add-button'>
           <Button
             isSecondary
-            onClick={onAddStep}
-            className='sf-text-blue-600 hover:sf-text-blue-700 sf-text-sm'>
+            onClick={onAddStep}>
             <span className='sf-step-navigator__add-button'>
               <svg
                 className='sf-step-navigator__add-icon'

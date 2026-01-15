@@ -36,7 +36,7 @@ export default function FieldList({
         const isHovered = isPathEqual(hoveredIndex, currentPath);
 
         return (
-          <div key={field.id || i} className='sf-mb-4'>
+          <div key={field.id || i} className='sf-field-list__item'>
             {/* Add Button Before */}
             <div className='sf-field-list__add-button-zone'>
               <InlineAddButton

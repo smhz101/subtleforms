@@ -43,7 +43,7 @@ export default function StepCanvas({
 
   if (!stepNode) {
     return (
-      <div className='sf-py-12 sf-text-gray-500 sf-text-center'>
+      <div className='sf-step-canvas__not-found'>
         {__('Step not found', 'subtleforms')}
       </div>
     );
@@ -83,16 +83,16 @@ export default function StepCanvas({
         <div className='sf-step-header__container'>
           <div className='sf-step-header__number'>{stepNumber}</div>
           <div className='sf-step-header__content'>
-            <div className='sf-font-semibold sf-text-gray-900 sf-text-sm'>
+            <div className='sf-step-header__title'>
               {stepTitle}
             </div>
             {stepDescription && (
-              <div className='sf-mt-1 sf-text-gray-600 sf-text-xs'>
+              <div className='sf-step-header__description'>
                 {stepDescription}
               </div>
             )}
           </div>
-          <div className='sf-text-gray-500 sf-text-xs'>
+          <div className='sf-step-header__edit-label'>
             {__('Editing Step', 'subtleforms')} {stepNumber}{' '}
             {__('of', 'subtleforms')} {totalSteps}
           </div>
@@ -115,8 +115,8 @@ export default function StepCanvas({
 
       {/* Empty State */}
       {children.length === 0 && (
-        <div className='sf-px-4 sf-py-12 sf-text-center'>
-          <div className='sf-mb-3 sf-text-gray-400'>
+        <div className='sf-step-canvas__empty'>
+          <div className='sf-step-canvas__empty-icon'>
             <svg
               className='sf-step-empty-icon'
               fill='none'
@@ -130,10 +130,10 @@ export default function StepCanvas({
               />
             </svg>
           </div>
-          <p className='sf-mb-2 sf-font-medium sf-text-gray-600'>
+          <p className='sf-step-canvas__empty-title'>
             {__('This step is empty', 'subtleforms')}
           </p>
-          <p className='sf-text-gray-500 sf-text-sm'>
+          <p className='sf-step-canvas__empty-description'>
             {__(
               'Drag fields from the left panel to add them to this step',
               'subtleforms'

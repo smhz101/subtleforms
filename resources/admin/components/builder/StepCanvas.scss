@@ -3,6 +3,40 @@
  * Multi-step form canvas with step headers
  */
 
+.sf-step-canvas {
+	&__not-found {
+		padding: 3rem 0;
+		text-align: center;
+		color: #6b7280;
+	}
+
+	&__empty {
+		padding: 3rem 1rem;
+		text-align: center;
+	}
+
+	&__empty-icon {
+		margin: 0 auto 0.75rem auto;
+		width: 4rem;
+		height: 4rem;
+		color: #d1d5db;
+	}
+
+	&__empty-title {
+		font-size: 0.875rem;
+		line-height: 1.25rem;
+		font-weight: 500;
+		color: #6b7280;
+		margin-bottom: 0.5rem;
+	}
+
+	&__empty-description {
+		font-size: 0.875rem;
+		line-height: 1.25rem;
+		color: #9ca3af;
+	}
+}
+
 .subtleforms-step-canvas {
 	// Step header - clickable context indicator
 	.sf-step-header {
@@ -42,11 +76,23 @@
 		flex: 1;
 	}
 
-	// Empty state
-	.sf-step-empty-icon {
-		margin-left: auto;
-		margin-right: auto;
-		width: 4rem;
-		height: 4rem;
+	.sf-step-header__title {
+		font-size: 0.875rem;
+		line-height: 1.25rem;
+		font-weight: 600;
+		color: #111827;
+	}
+
+	.sf-step-header__description {
+		font-size: 0.75rem;
+		line-height: 1rem;
+		color: #6b7280;
+		margin-top: 0.25rem;
+	}
+
+	.sf-step-header__edit-label {
+		font-size: 0.75rem;
+		line-height: 1rem;
+		color: #9ca3af;
 	}
 }

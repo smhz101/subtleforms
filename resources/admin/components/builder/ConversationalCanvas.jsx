@@ -84,11 +84,11 @@ export default function ConversationalCanvas() {
   if (totalFields === 0) {
     return (
       <div className='sf-conversational-canvas__empty'>
-        <div className='sf-mb-4 sf-text-4xl'>💬</div>
-        <h3 className='sf-mb-2 sf-font-semibold sf-text-gray-900 sf-text-lg'>
+        <div className='sf-conversational-canvas__empty-icon'>💬</div>
+        <h3 className='sf-conversational-canvas__empty-title'>
           {__('No Questions Yet', 'subtleforms')}
         </h3>
-        <p className='sf-mb-6 sf-text-gray-600 sf-text-sm'>
+        <p className='sf-conversational-canvas__empty-description'>
           {__(
             'Add your first question from the left panel. Each field will be displayed one at a time.',
             'subtleforms'
@@ -107,11 +107,11 @@ export default function ConversationalCanvas() {
       {/* Progress Bar */}
       <div className='sf-conversational-canvas__progress-header'>
         <div className='sf-conversational-canvas__progress-info'>
-          <span className='sf-font-medium sf-text-gray-700 sf-text-sm'>
+          <span className='sf-conversational-canvas__progress-label'>
             {__('Question', 'subtleforms')} {currentIndex + 1}{' '}
             {__('of', 'subtleforms')} {totalFields}
           </span>
-          <span className='sf-text-gray-500 sf-text-xs'>
+          <span className='sf-conversational-canvas__progress-percent'>
             {Math.round(progressPercent)}% {__('Complete', 'subtleforms')}
           </span>
         </div>

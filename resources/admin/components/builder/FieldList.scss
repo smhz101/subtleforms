@@ -4,6 +4,10 @@
  */
 
 .sf-field-list {
+	&__item {
+		margin-bottom: 1rem;
+	}
+
 	&__add-button-zone {
 		z-index: 10;
 		position: relative;

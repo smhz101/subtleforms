@@ -54,7 +54,7 @@ export default function ConditionEditor({
   return (
     <div className='sf-condition-editor'>
       <div className='sf-condition-editor__header'>
-        <label className='sf-font-semibold sf-text-gray-900 sf-text-xs'>
+        <label className='sf-condition-editor__label'>
           {__('Conditional Logic', 'subtleforms')}
         </label>
         <Button isSmall isSecondary onClick={handleAddCondition}>
@@ -63,7 +63,7 @@ export default function ConditionEditor({
       </div>
 
       {(!conditions || conditions.length === 0) && (
-        <p className='sf-my-2 sf-text-gray-600 sf-text-xs italic'>
+        <p className='sf-condition-editor__empty'>
           {__('No conditions set', 'subtleforms')}
         </p>
       )}
@@ -72,7 +72,7 @@ export default function ConditionEditor({
         conditions.map((condition, index) => (
           <div key={index} className='sf-condition-editor__rule'>
             <div className='sf-condition-editor__rule-header'>
-              <span className='sf-font-semibold sf-text-[11px] sf-text-gray-600 uppercase'>
+              <span className='sf-condition-editor__rule-number'>
                 {__('Rule', 'subtleforms')} {index + 1}
               </span>
               <Button

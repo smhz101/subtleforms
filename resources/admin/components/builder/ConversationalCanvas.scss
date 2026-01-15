@@ -32,6 +32,27 @@
 		text-align: center;
 	}
 
+	&__empty-icon {
+		font-size: 2.25rem;
+		line-height: 2.5rem;
+		margin-bottom: 1rem;
+	}
+
+	&__empty-title {
+		font-size: 1.125rem;
+		line-height: 1.75rem;
+		font-weight: 600;
+		color: #111827;
+		margin-bottom: 0.5rem;
+	}
+
+	&__empty-description {
+		font-size: 0.875rem;
+		line-height: 1.25rem;
+		color: #6b7280;
+		margin-bottom: 1.5rem;
+	}
+
 	// Progress header
 	&__progress-header {
 		background-color: #ffffff;
@@ -44,6 +65,19 @@
 		justify-content: space-between;
 		align-items: center;
 		margin-bottom: 0.5rem;
+	}
+
+	&__progress-label {
+		font-size: 0.875rem;
+		line-height: 1.25rem;
+		font-weight: 500;
+		color: #374151;
+	}
+
+	&__progress-percent {
+		font-size: 0.75rem;
+		line-height: 1rem;
+		color: #6b7280;
 	}
 
 	&__progress-bar {

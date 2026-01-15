@@ -606,8 +606,8 @@ export default function FormEditor({
                 {__('Add Field', 'subtleforms')}
               </h4>
               {Object.entries(fieldGroups).map(([category, categoryFields]) => (
-                <div key={category} className='sf-mb-4'>
-                  <div className='sf-mb-2 sf-font-semibold sf-text-[11px] sf-text-gray-600 uppercase'>
+                <div key={category} className='sf-field-picker-popover__category'>
+                  <div className='sf-field-picker-popover__category-label'>
                     {category}
                   </div>
                   {categoryFields.map((f) => (
