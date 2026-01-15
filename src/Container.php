@@ -12,6 +12,7 @@ use SubtleForms\Support\Capabilities;
 use SubtleForms\Support\FeatureGate;
 use SubtleForms\Support\Logger;
 use SubtleForms\Support\Settings;
+use SubtleForms\Support\Captcha\CaptchaManager;
 use SubtleForms\Engine\Pipeline;
 use SubtleForms\Engine\ActionRegistry;
 use SubtleForms\Engine\SchemaCompiler;
@@ -89,6 +90,7 @@ final class Container {
 		$this->singleton( FeatureGate::class, fn( $c ) => new FeatureGate( $c->get( Capabilities::class ) ) );
 		$this->singleton( Logger::class, fn() => new Logger() );
 		$this->singleton( Settings::class, fn() => new Settings() );
+		$this->singleton( CaptchaManager::class, fn( $c ) => new CaptchaManager( $c->get( Settings::class ) ) );
 
 		// Repositories
 		$this->singleton( FormsRepository::class, fn() => new FormsRepository() );
