@@ -279,10 +279,47 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
                   {__('CAPTCHA Verification', 'subtleforms')}
                 </div>
                 <div className='sf-captcha-preview__description'>
-                  {__('CAPTCHA will appear here on the live form', 'subtleforms')}
+                  {__(
+                    'CAPTCHA will appear here on the live form',
+                    'subtleforms'
+                  )}
                 </div>
               </div>
             </div>
+            {helpText && (
+              <p className='sf-form-preview-field__help'>{helpText}</p>
+            )}
+          </div>
+        );
+
+      case 'country':
+        return (
+          <div key={field.key || index} className='sf-form-preview-field'>
+            <label htmlFor={inputId}>
+              {label}
+              {required && (
+                <span className='sf-form-preview-field__required'>*</span>
+              )}
+            </label>
+            <select
+              id={inputId}
+              className='sf-form-preview-field__input sf-country-field__select'
+              disabled>
+              <option>
+                {placeholder || __('Select a country', 'subtleforms')}
+              </option>
+              <option>United States</option>
+              <option>United Kingdom</option>
+              <option>Canada</option>
+              <option>Australia</option>
+              <option>Germany</option>
+              <option>France</option>
+              <option>Spain</option>
+              <option>Italy</option>
+              <option>Japan</option>
+              <option>China</option>
+              <option>{__('...and 200+ more countries', 'subtleforms')}</option>
+            </select>
             {helpText && (
               <p className='sf-form-preview-field__help'>{helpText}</p>
             )}

@@ -260,3 +260,24 @@
 		border-color: #d1d5db;
 	}
 }
+// Country Field
+.sf-country-field {
+	&__select {
+		width: 100%;
+		appearance: none;
+		padding: 0.5rem 2.25rem 0.5rem 0.75rem;
+		font-size: 0.875rem;
+		border: 1px solid var(--sf-border);
+		border-radius: 0;
+		font-family: inherit;
+		background-color: #fff;
+		color: var(--sf-text-primary);
+		background-repeat: no-repeat;
+		background-position: right 0.5rem center;
+
+		option:last-child {
+			font-style: italic;
+			color: #6b7280;
+		}
+	}
+}

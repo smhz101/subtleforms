@@ -125,15 +125,28 @@ export default function FieldRenderer({ field }) {
       )}
 
       {type === 'country' && (
-        <select
-          className={selectClass}
-          style={{ backgroundImage: selectBg }}
-          disabled>
-          <option>{__('Select a country', 'subtleforms')}</option>
-          <option>United States</option>
-          <option>Canada</option>
-          <option>United Kingdom</option>
-        </select>
+        <div className='sf-country-field'>
+          <select
+            className={selectClass}
+            style={{ backgroundImage: selectBg }}
+            disabled
+            tabIndex='-1'>
+            <option>
+              {placeholder || __('Select a country', 'subtleforms')}
+            </option>
+            <option>United States</option>
+            <option>United Kingdom</option>
+            <option>Canada</option>
+            <option>Australia</option>
+            <option>Germany</option>
+            <option>France</option>
+            <option>Spain</option>
+            <option>Italy</option>
+            <option>Japan</option>
+            <option>China</option>
+            <option>{__('...and 200+ more countries', 'subtleforms')}</option>
+          </select>
+        </div>
       )}
 
       {type === 'hidden' && (
