@@ -1583,6 +1583,29 @@ final class CoreFields {
 			)
 		);
 
+		// CAPTCHA Field
+		$registry->register(
+			new FieldDefinition(
+				type: 'captcha',
+				label: __( 'CAPTCHA', 'subtleforms' ),
+				category: 'advanced',
+				icon: 'dashicons-shield',
+				kind: 'system',
+				baseAttributes: array(),
+				fieldSpecificAttributes: array(
+					'provider' => '', // Will be populated from settings
+				),
+				inspectorControls: array(
+					array(
+						'type'  => 'notice',
+						'name'  => 'captcha_info',
+						'label' => __( 'CAPTCHA Configuration', 'subtleforms' ),
+						'help'  => __( 'CAPTCHA provider is configured in SubtleForms → Settings. Only one CAPTCHA field is allowed per form.', 'subtleforms' ),
+					),
+				)
+			)
+		);
+
 		// Allow extensions to register additional fields
 		do_action( 'subtleforms/fields/register', $registry );
 	}

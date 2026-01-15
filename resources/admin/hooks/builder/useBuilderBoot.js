@@ -16,6 +16,7 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
   const [isHydrating, setIsHydrating] = useState(false);
   const [showTour, setShowTour] = useState(false);
   const [tourCompleted, setTourCompleted] = useState(true);
+  const [settings, setSettings] = useState(null);
 
   function generateDefaultTitle() {
     const suffix = Math.floor(1000 + Math.random() * 9000);
@@ -28,25 +29,45 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
 
   // Load field definitions from API
   useEffect(() => {
-    apiGet('/fields?grouped=true').then(({ ok, body }) => {
-      if (!ok) {
+    Promise.all([
+      apiGet('/fields?grouped=true'),
+      apiGet('/settings'),
+    ]).then(([fieldsRes, settingsRes]) => {
+      if (!fieldsRes.ok) {
         console.error('Failed to load field definitions');
         setLoadingFields(false);
         return;
       }
+
+      const settingsData = settingsRes.ok ? settingsRes.body : {};
+      setSettings(settingsData);
+
+      // Check CAPTCHA availability
+      const captchaEnabled = settingsData.captcha_enabled ?? false;
+      const captchaProvider = settingsData.captcha_provider ?? '';
+      const captchaConfigured = captchaEnabled && captchaProvider !== '';
+
       // Transform API response to component format
       const groups = {};
       const definitions = {};
-      Object.entries(body).forEach(([category, categoryFields]) => {
-        groups[category] = categoryFields.map((field) => {
-          definitions[field.type] = field;
-          return {
-            type: field.type,
-            label: field.label,
-            icon: field.icon || 'text', // Default to text icon key
-            kind: field.kind || 'input',
-          };
-        });
+      Object.entries(fieldsRes.body).forEach(([category, categoryFields]) => {
+        groups[category] = categoryFields
+          .filter((field) => {
+            // Filter out CAPTCHA field if not enabled/configured
+            if (field.type === 'captcha' && !captchaConfigured) {
+              return false;
+            }
+            return true;
+          })
+          .map((field) => {
+            definitions[field.type] = field;
+            return {
+              type: field.type,
+              label: field.label,
+              icon: field.icon || 'text', // Default to text icon key
+              kind: field.kind || 'input',
+            };
+          });
       });
       setFieldGroups(groups);
       setFieldDefinitions(definitions);

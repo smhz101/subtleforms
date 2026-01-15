@@ -229,6 +229,23 @@ export default function FormEditor({
 
   const handleDockAdd = useCallback(
     (type) => {
+      // Check for duplicate CAPTCHA field
+      if (type === 'captcha') {
+        const hasCaptcha = Object.values(tree.nodes).some(
+          (node) => node?.type === 'captcha'
+        );
+        if (hasCaptcha) {
+          // eslint-disable-next-line no-alert
+          alert(
+            __(
+              'Only one CAPTCHA field is allowed per form.',
+              'subtleforms'
+            )
+          );
+          return;
+        }
+      }
+
       // If a step is selected, add to that step; otherwise add to root
       const targetParentId = selectedStepId || rootId;
 
@@ -246,7 +263,7 @@ export default function FormEditor({
         position: null,
       });
     },
-    [handleInsert, rootId, selectedStepId]
+    [handleInsert, rootId, selectedStepId, tree.nodes]
   );
 
   const handleDelete = useCallback(
@@ -326,6 +343,19 @@ export default function FormEditor({
         return;
       }
 
+      // Prevent duplicating CAPTCHA fields
+      const node = tree.nodes[nodeId];
+      if (node?.type === 'captcha') {
+        // eslint-disable-next-line no-alert
+        alert(
+          __(
+            'CAPTCHA fields cannot be duplicated. Only one CAPTCHA field is allowed per form.',
+            'subtleforms'
+          )
+        );
+        return;
+      }
+
       setTree((currentTree) => {
         const { tree: nextTree, newNodeId } = duplicateNode(currentTree, {
           nodeId,
@@ -349,7 +379,7 @@ export default function FormEditor({
         return nextTree;
       });
     },
-    [onChange]
+    [onChange, tree.nodes]
   );
 
   const selectedField = useMemo(
