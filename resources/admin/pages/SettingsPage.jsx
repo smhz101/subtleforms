@@ -14,6 +14,7 @@ import {
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { validateSettings, validateField } from '../utils/validation';
+import AdminShell from '../components/AdminShell';
 import './SettingsPage.scss';
 
 /**
@@ -256,23 +257,27 @@ export default function Settings() {
 
   if (loading) {
     return (
-      <div className='subtleforms-settings-loading'>
-        <Spinner />
-        <p>{__('Loading settings...', 'subtleforms')}</p>
-      </div>
+      <AdminShell title={__('Settings', 'subtleforms')}>
+        <div className='subtleforms-settings-loading'>
+          <Spinner />
+          <p>{__('Loading settings...', 'subtleforms')}</p>
+        </div>
+      </AdminShell>
     );
   }
 
   if (!settings) {
     return (
-      <div className='subtleforms-settings-error'>
-        <Notice status='error' isDismissible={false}>
-          {__('Failed to load settings.', 'subtleforms')}
-        </Notice>
-        <Button variant='primary' onClick={loadSettings}>
-          {__('Retry', 'subtleforms')}
-        </Button>
-      </div>
+      <AdminShell title={__('Settings', 'subtleforms')}>
+        <div className='subtleforms-settings-error'>
+          <Notice status='error' isDismissible={false}>
+            {__('Failed to load settings.', 'subtleforms')}
+          </Notice>
+          <Button variant='primary' onClick={loadSettings}>
+            {__('Retry', 'subtleforms')}
+          </Button>
+        </div>
+      </AdminShell>
     );
   }
 
@@ -295,40 +300,40 @@ export default function Settings() {
     {
       name: 'advanced',
       title: __('Advanced', 'subtleforms'),
-      className: 'subtleforms-settings-tab',
-    },
-  ];
+  const actions = (
+    <>
+      {hasChanges && (
+        <Button
+          variant='secondary'
+          onClick={loadSettings}
+          disabled={saving}>
+          {__('Discard Changes', 'subtleforms')}
+        </Button>
+      )}
+      <Button
+        variant='primary'
+        onClick={saveSettings}
+        isBusy={saving}
+        disabled={saving || !hasChanges}>
+        {saving
+          ? __('Saving...', 'subtleforms')
+          : __('Save Settings', 'subtleforms')}
+      </Button>
+    </>
+  );
 
   return (
-    <div className='subtleforms-admin'>
-      <div className='subtleforms-settings'>
-        {/* Header with Save/Discard buttons */}
-        <div className='subtleforms-settings-header'>
-          <h1 className='wp-heading-inline'>{__('Settings', 'subtleforms')}</h1>
-          <div className='subtleforms-settings-actions'>
-            {hasChanges && (
-              <Button
-                variant='secondary'
-                onClick={loadSettings}
-                disabled={saving}>
-                {__('Discard Changes', 'subtleforms')}
-              </Button>
-            )}
-            <Button
-              variant='primary'
-              onClick={saveSettings}
-              isBusy={saving}
-              disabled={saving || !hasChanges}>
-              {saving
-                ? __('Saving...', 'subtleforms')
-                : __('Save Settings', 'subtleforms')}
-            </Button>
-          </div>
-        </div>
-
+    <AdminShell
+      title={__('Settings', 'subtleforms')}
+      actions={actions}>
+      <div className='sf-settings-container'>
         {/* Messages */}
         {message && (
           <Notice
+            status={message.type}
+            isDismissible
+            onRemove={() => setMessage(null)}
+            className='sf
             status={message.type}
             isDismissible
             onRemove={() => setMessage(null)}
@@ -339,11 +344,11 @@ export default function Settings() {
 
         {/* Tabbed Content */}
         <TabPanel
-          className='subtleforms-settings-tabs'
+          className='sf-settings-tabs'
           activeClass='is-active'
           tabs={tabs}>
           {(tab) => (
-            <div className='subtleforms-settings-tab-content'>
+            <div className='sf-settings-tab-content'>
               {tab.name === 'general' && (
                 <GeneralSettings
                   settings={settings}
@@ -378,7 +383,7 @@ export default function Settings() {
           )}
         </TabPanel>
       </div>
-    </div>
+    </AdminShell>
   );
 }
 

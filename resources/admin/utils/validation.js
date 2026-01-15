@@ -151,10 +151,9 @@ export const settingsSchema = Joi.object({
     }),
 
   // Security Settings
-  enable_honeypot: Joi.boolean()
-    .messages({
-      'boolean.base': __('Honeypot protection must be true or false', 'subtleforms'),
-    }),
+  enable_honeypot: Joi.boolean().messages({
+    'boolean.base': __('Honeypot protection must be true or false', 'subtleforms'),
+  }),
 
   min_submission_time: Joi.number()
     .integer()
