@@ -22,6 +22,7 @@ All requested internationalization and accessibility tasks have been implemented
 ## Files changed (high level)
 
 - i18n:
+
   - `src/Templates/FormTemplates.php` (templates localized)
   - `src/Api/*.php` (wrapped error messages with `__()`)
   - `subtleforms.php` (added Text Domain and `load_plugin_textdomain()`)
@@ -29,11 +30,13 @@ All requested internationalization and accessibility tasks have been implemented
   - `languages/subtleforms.pot` (generated, 1108 strings)
 
 - Accessibility & Onboarding:
+
   - `resources/admin/components/FormPreviewModal.jsx` (added `inputId` and `htmlFor` attributes)
   - `resources/admin/pages/FormsPage.jsx` (first-run CTA, send-test-email request)
   - `resources/admin/components/OnboardingWizard.jsx` (wizard flow, no upsells)
 
 - Email reliability & logging:
+
   - `src/Support/Mailer.php` (new wrapper)
   - `src/Engine/Actions/EmailAction.php` (now uses Mailer::send)
   - `src/Api/RestController.php` (new `send_onboarding_test_email` endpoint)
