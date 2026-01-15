@@ -328,6 +328,9 @@ function renderInput(
       return null;
 
     case 'captcha':
+    case 'recaptcha':
+    case 'hcaptcha':
+    case 'turnstile':
       // CAPTCHA widget - rendered via provider-specific HTML
       return (
         <div
