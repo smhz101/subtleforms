@@ -95,14 +95,14 @@ export default function Dashboard() {
           </Button>
         </div>
       }>
-      <div className='sf-p-6'>
+      <div className='sf-dashboard-page__content'>
         {/* Stats Overview */}
         <div className='sf-stats-grid'>
           <StatCard
             title={__('Total Forms', 'subtleforms')}
             value={stats.total_forms}
             subtitle={`${stats.published_forms} published, ${stats.draft_forms} draft`}
-            icon={<Icon.FileText className='sf-text-blue-600 sf-icon-lg' />}
+            icon={<Icon.FileText className='sf-icon-lg sf-icon--blue' />}
             link='admin.php?page=subtleforms-forms'
           />
           <StatCard
@@ -113,24 +113,20 @@ export default function Dashboard() {
                 ? `${stats.avg_submissions_per_form} avg per form`
                 : __('No published forms', 'subtleforms')
             }
-            icon={<Icon.Database className='sf-text-green-600 sf-icon-lg' />}
+            icon={<Icon.Database className='sf-icon-lg sf-icon--green' />}
             link='admin.php?page=subtleforms-submissions'
           />
           <StatCard
             title={__('Submissions Today', 'subtleforms')}
             value={stats.submissions_today}
             subtitle={__('Last 24 hours', 'subtleforms')}
-            icon={
-              <Icon.Calendar className='sf-text-purple-600 sf-icon-lg' />
-            }
+            icon={<Icon.Calendar className='sf-icon-lg sf-icon--purple' />}
           />
           <StatCard
             title={__('Submissions This Week', 'subtleforms')}
             value={stats.submissions_this_week}
             subtitle={__('Last 7 days', 'subtleforms')}
-            icon={
-              <Icon.TrendingUp className='sf-text-orange-600 sf-icon-lg' />
-            }
+            icon={<Icon.TrendingUp className='sf-icon-lg sf-icon--orange' />}
           />
         </div>
 
@@ -363,9 +359,7 @@ export default function Dashboard() {
                   <span className='sf-label'>
                     {__('PHP Version', 'subtleforms')}
                   </span>
-                  <span className='sf-value'>
-                    {system_health.php_version}
-                  </span>
+                  <span className='sf-value'>{system_health.php_version}</span>
                 </div>
                 <div className='sf-system-info-item'>
                   <span className='sf-label'>
@@ -379,9 +373,7 @@ export default function Dashboard() {
                   <span className='sf-label'>
                     {__('Memory Limit', 'subtleforms')}
                   </span>
-                  <span className='sf-value'>
-                    {system_health.memory_limit}
-                  </span>
+                  <span className='sf-value'>{system_health.memory_limit}</span>
                 </div>
                 <div className='sf-system-info-item'>
                   <span className='sf-label'>

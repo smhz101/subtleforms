@@ -4,6 +4,12 @@
 	padding: 20px;
 }
 
+.sf-dashboard-page {
+	&__content {
+		padding: 1.5rem;
+	}
+}
+
 /* Header */
 .subtleforms-dashboard-header {
 	display: flex;
@@ -532,18 +538,19 @@ a.subtleforms-stat-card:hover {
 	height: 1.5rem;
 }
 
-.sf-text-blue-600 {
+// Icon color modifiers
+.sf-icon--blue {
 	color: #2563eb;
 }
 
-.sf-text-green-600 {
+.sf-icon--green {
 	color: #16a34a;
 }
 
-.sf-text-purple-600 {
+.sf-icon--purple {
 	color: #9333ea;
 }
 
-.sf-text-orange-600 {
+.sf-icon--orange {
 	color: #ea580c;
 }
