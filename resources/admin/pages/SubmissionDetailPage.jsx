@@ -177,13 +177,13 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
       <div className='sf-submission-header-actions'>
         {/* Status Badge */}
         <span
-          className={`sf-inline-flex sf-items-center sf-gap-1 sf-px-3 sf-py-1 sf-text-xs sf-font-medium sf-rounded-full ${
+          className={`sf-submission-badge ${
             submission.status === 'unread'
-              ? 'sf-bg-blue-500 sf-text-white'
-              : 'sf-bg-gray-100 sf-text-gray-600'
+              ? 'sf-submission-badge--unread'
+              : 'sf-submission-badge--read'
           }`}>
           {submission.status === 'unread' && (
-            <span className='sf-bg-white sf-rounded-full sf-w-2 sf-h-2 sf-animate-pulse'></span>
+            <span className='sf-submission-badge__pulse'></span>
           )}
           {submission.status === 'unread'
             ? __('New', 'subtleforms')
@@ -191,18 +191,18 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
         </span>
 
         {/* Form Link */}
-        <span className='sf-text-gray-600 sf-text-sm'>
+        <span className='sf-submission-header__form-link'>
           {submission.form_title && (
             <a
               href={`admin.php?page=subtleforms-forms&form_id=${submission.form_id}`}
-              className='sf-text-blue-600 hover:sf-text-blue-700 sf-no-underline'>
+              className='sf-submission-header__link'>
               {submission.form_title}
             </a>
           )}
         </span>
 
         {/* Created Date */}
-        <span className='sf-text-gray-500 sf-text-sm'>
+        <span className='sf-submission-header__date'>
           {(() => {
             const date = new Date(submission.created_at);
             return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
@@ -231,31 +231,36 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
 
   return (
     <AdminShell
-      title={(() => { /* translators: %1$d: submission id */ return sprintf(__('Submission #%1$d', 'subtleforms'), submission.id); })()}
+      title={(() => {
+        /* translators: %1$d: submission id */ return sprintf(
+          __('Submission #%1$d', 'subtleforms'),
+          submission.id
+        );
+      })()}
       actions={actions}>
-      <div className='sf-space-y-8'>
+      <div className='sf-submission-detail__content'>
         <div className='subtleforms-card'>
           <div className='subtleforms-card-header'>
-            <div className='sf-flex sf-justify-between sf-items-center'>
-              <h2 className='sf-m-0 sf-font-semibold sf-text-gray-900 sf-text-lg'>
+            <div className='sf-submission-card__header'>
+              <h2 className='sf-submission-card__title'>
                 {__('Submitted Data', 'subtleforms')}
               </h2>
-              <div className='sf-flex sf-items-center sf-gap-4'>
-                <label className='sf-flex sf-items-center sf-gap-2 sf-text-gray-600 sf-text-sm'>
+              <div className='sf-submission-card__controls'>
+                <label className='sf-submission-card__control-label'>
                   <input
                     type='checkbox'
                     checked={showEmpty}
                     onChange={(e) => setShowEmpty(e.target.checked)}
-                    className='sf-border-gray-300 sf-rounded sf-focus:sf-ring-2 sf-focus:sf-ring-blue-500 sf-text-blue-600'
+                    className='sf-submission-card__checkbox'
                   />
                   {__('Show empty fields', 'subtleforms')}
                 </label>
-                <label className='sf-flex sf-items-center sf-gap-2 sf-text-gray-600 sf-text-sm'>
+                <label className='sf-submission-card__control-label'>
                   <input
                     type='checkbox'
                     checked={showTechnical}
                     onChange={(e) => setShowTechnical(e.target.checked)}
-                    className='sf-border-gray-300 sf-rounded sf-focus:sf-ring-2 sf-focus:sf-ring-blue-500 sf-text-blue-600'
+                    className='sf-submission-card__checkbox'
                   />
                   {__('Show technical fields', 'subtleforms')}
                 </label>
@@ -264,42 +269,40 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
           </div>
           <div className='subtleforms-card-content'>
             {Object.keys(filteredPayload).length > 0 ? (
-              <div className='sf-space-y-3'>
-                {Object.entries(filteredPayload).map(([key, value], index) => (
-                  <div
-                    key={key}
-                    className='sf-bg-white sf-shadow-sm sf-border sf-border-gray-200 sf-rounded-lg sf-overflow-hidden'>
-                    <div className='sf-px-6 sf-py-4'>
-                      <div className='sf-flex sf-justify-between sf-items-start sf-gap-4'>
-                        <div className='sf-flex-shrink-0'>
-                          <h3 className='sf-font-semibold sf-text-gray-900 sf-text-sm sf-leading-6'>
+              <div className='sf-submission-fields'>
+                {Object.entries(filteredPayload).map(([key, value]) => (
+                  <div key={key} className='sf-submission-field'>
+                    <div className='sf-submission-field__content'>
+                      <div className='sf-submission-field__layout'>
+                        <div className='sf-submission-field__label-section'>
+                          <h3 className='sf-submission-field__label'>
                             {getFieldLabel(key)}
                           </h3>
                           {showTechnical && (
-                            <p className='sf-mt-1 sf-font-mono sf-text-gray-500 sf-text-xs'>
+                            <p className='sf-submission-field__tech-name'>
                               {key}
                             </p>
                           )}
                         </div>
-                        <div className='sf-flex-1 sf-min-w-0'>
-                          <div className='sf-text-gray-900 sf-text-sm sf-break-words sf-whitespace-pre-wrap'>
+                        <div className='sf-submission-field__value-section'>
+                          <div className='sf-submission-field__value'>
                             {value && typeof value === 'object' ? (
-                              <div className='sf-bg-gray-50 sf-mt-2 sf-p-3 sf-border sf-border-gray-200 sf-rounded'>
-                                <div className='sf-mb-2 sf-font-medium sf-text-gray-600 sf-text-xs'>
+                              <div className='sf-submission-field__json'>
+                                <div className='sf-submission-field__json-label'>
                                   {__('JSON Data:', 'subtleforms')}
                                 </div>
-                                <pre className='sf-max-h-40 sf-overflow-auto sf-font-mono sf-text-gray-800 sf-text-xs'>
+                                <pre className='sf-submission-field__json-code'>
                                   {JSON.stringify(value, null, 2)}
                                 </pre>
                               </div>
                             ) : (
-                              <div className='sf-mt-2'>
+                              <div className='sf-submission-field__value-text'>
                                 {value ? (
-                                  <span className='sf-font-medium'>
+                                  <span className='sf-submission-field__value-filled'>
                                     {String(value)}
                                   </span>
                                 ) : (
-                                  <span className='sf-text-gray-400 sf-italic'>
+                                  <span className='sf-submission-field__value-empty'>
                                     ({__('empty', 'subtleforms')})
                                   </span>
                                 )}
@@ -314,10 +317,10 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                 \n{' '}
               </div>
             ) : (
-              <div className='sf-py-12 sf-text-center'>
-                <div className='sf-inline-flex sf-justify-center sf-items-center sf-bg-gray-100 sf-mb-4 sf-rounded-full sf-w-16 sf-h-16'>
+              <div className='sf-submission-empty'>
+                <div className='sf-submission-empty__icon'>
                   <svg
-                    className='sf-w-8 sf-h-8 sf-text-gray-400'
+                    className='sf-submission-empty__icon-svg'
                     fill='none'
                     stroke='currentColor'
                     viewBox='0 0 24 24'>
@@ -329,20 +332,20 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                     />
                   </svg>
                 </div>
-                <h3 className='sf-mb-2 sf-font-medium sf-text-gray-900 sf-text-lg'>
+                <h3 className='sf-submission-empty__title'>
                   {__('No Data Submitted', 'subtleforms')}
                 </h3>
-                <p className='sf-mb-4 sf-text-gray-500 sf-text-sm'>
+                <p className='sf-submission-empty__description'>
                   {__(
                     'This submission was recorded but contains no field data.',
                     'subtleforms'
                   )}
                 </p>
-                <div className='sf-bg-blue-50 sf-mx-auto sf-p-4 sf-border sf-border-blue-200 sf-rounded-lg sf-max-w-2xl sf-text-left'>
-                  <p className='sf-mb-2 sf-font-semibold sf-text-blue-800 sf-text-sm'>
+                <div className='sf-submission-empty__info'>
+                  <p className='sf-submission-empty__info-title'>
                     {__('Possible causes:', 'subtleforms')}
                   </p>
-                  <ul className='sf-space-y-1 sf-text-blue-700 sf-text-sm sf-list-disc sf-list-inside'>
+                  <ul className='sf-submission-empty__info-list'>
                     <li>
                       {__(
                         'Form fields were not properly configured with keys',
@@ -368,7 +371,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                       )}
                     </li>
                   </ul>
-                  <p className='sf-mt-3 sf-text-blue-600 sf-text-xs'>
+                  <p className='sf-submission-empty__info-tip'>
                     <strong>{__('Debug tip:', 'subtleforms')}</strong>{' '}
                     {__(
                       'Check the Execution Logs below for clues.',
@@ -384,7 +387,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
         {showTechnical && (
           <div className='subtleforms-card'>
             <div className='subtleforms-card-header'>
-              <h2 className='sf-m-0 sf-font-semibold sf-text-gray-900 sf-text-lg'>
+              <h2 className='sf-submission-card__title'>
                 {__('Technical Information', 'subtleforms')}
               </h2>
             </div>
@@ -404,82 +407,82 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                     title: __('Form Schema', 'subtleforms'),
                   },
                 ]}>
-                <div className='sf-space-y-4'>
+                <div className='sf-submission-tech__tabs'>
                   <div data-tab='raw'>
-                    <div className='sf-bg-gray-50 sf-p-4 sf-border sf-rounded'>
-                      <pre className='sf-max-h-96 sf-overflow-y-auto sf-font-mono sf-text-gray-700 sf-text-xs sf-whitespace-pre-wrap'>
+                    <div className='sf-submission-tech__code-block'>
+                      <pre className='sf-submission-tech__code'>
                         {JSON.stringify(submission.data, null, 2)}
                       </pre>
                     </div>
                   </div>
                   <div data-tab='meta'>
-                    <div className='sf-gap-4 sf-grid sf-grid-cols-2'>
-                      <div className='sf-bg-gray-50 sf-p-4 sf-border sf-rounded'>
-                        <h4 className='sf-mb-2 sf-font-semibold sf-text-gray-900 sf-text-sm'>
+                    <div className='sf-submission-tech__grid'>
+                      <div className='sf-submission-tech__section'>
+                        <h4 className='sf-submission-tech__section-title'>
                           {__('Request Info', 'subtleforms')}
                         </h4>
-                        <dl className='sf-space-y-2'>
+                        <dl className='sf-submission-tech__list'>
                           <div>
-                            <dt className='sf-font-semibold sf-text-gray-500 sf-text-xs'>
+                            <dt className='sf-submission-tech__label'>
                               {__('IP Address', 'subtleforms')}
                             </dt>
-                            <dd className='sf-font-mono sf-text-sm'>
+                            <dd className='sf-submission-tech__value'>
                               {submission.ip || __('N/A', 'subtleforms')}
                             </dd>
                           </div>
                           <div>
-                            <dt className='sf-font-semibold sf-text-gray-500 sf-text-xs'>
+                            <dt className='sf-submission-tech__label'>
                               {__('User Agent', 'subtleforms')}
                             </dt>
-                            <dd className='sf-font-mono sf-text-sm sf-break-all'>
+                            <dd className='sf-submission-tech__value sf-submission-tech__value--break'>
                               {submission.user_agent ||
                                 __('N/A', 'subtleforms')}
                             </dd>
                           </div>
                           <div>
-                            <dt className='sf-font-semibold sf-text-gray-500 sf-text-xs'>
+                            <dt className='sf-submission-tech__label'>
                               {__('Referrer', 'subtleforms')}
                             </dt>
-                            <dd className='sf-font-mono sf-text-sm sf-break-all'>
+                            <dd className='sf-submission-tech__value sf-submission-tech__value--break'>
                               {submission.referrer || __('N/A', 'subtleforms')}
                             </dd>
                           </div>
                         </dl>
                       </div>
-                      <div className='sf-bg-gray-50 sf-p-4 sf-border sf-rounded'>
-                        <h4 className='sf-mb-2 sf-font-semibold sf-text-gray-900 sf-text-sm'>
+                      <div className='sf-submission-tech__section'>
+                        <h4 className='sf-submission-tech__section-title'>
                           {__('Database Info', 'subtleforms')}
                         </h4>
-                        <dl className='sf-space-y-2'>
+                        <dl className='sf-submission-tech__list'>
                           <div>
-                            <dt className='sf-font-semibold sf-text-gray-500 sf-text-xs'>
+                            <dt className='sf-submission-tech__label'>
                               {__('Submission ID', 'subtleforms')}
                             </dt>
-                            <dd className='sf-font-mono sf-text-sm'>
+                            <dd className='sf-submission-tech__value'>
                               {submission.id}
                             </dd>
                           </div>
                           <div>
-                            <dt className='sf-font-semibold sf-text-gray-500 sf-text-xs'>
+                            <dt className='sf-submission-tech__label'>
                               {__('Form ID', 'subtleforms')}
                             </dt>
-                            <dd className='sf-font-mono sf-text-sm'>
+                            <dd className='sf-submission-tech__value'>
                               {submission.form_id}
                             </dd>
                           </div>
                           <div>
-                            <dt className='sf-font-semibold sf-text-gray-500 sf-text-xs'>
+                            <dt className='sf-submission-tech__label'>
                               {__('Created', 'subtleforms')}
                             </dt>
-                            <dd className='sf-font-mono sf-text-sm'>
+                            <dd className='sf-submission-tech__value'>
                               {submission.created_at}
                             </dd>
                           </div>
                           <div>
-                            <dt className='sf-font-semibold sf-text-gray-500 sf-text-xs'>
+                            <dt className='sf-submission-tech__label'>
                               {__('Status', 'subtleforms')}
                             </dt>
-                            <dd className='sf-font-mono sf-text-sm'>
+                            <dd className='sf-submission-tech__value'>
                               {submission.status}
                             </dd>
                           </div>
@@ -488,8 +491,8 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                     </div>
                   </div>
                   <div data-tab='schema'>
-                    <div className='sf-bg-gray-50 sf-p-4 sf-border sf-rounded'>
-                      <pre className='sf-max-h-96 sf-overflow-y-auto sf-font-mono sf-text-gray-700 sf-text-xs sf-whitespace-pre-wrap'>
+                    <div className='sf-submission-tech__section'>
+                      <pre className='sf-submission-tech__code'>
                         {JSON.stringify(submission.schema || {}, null, 2)}
                       </pre>
                     </div>
@@ -502,7 +505,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
 
         <div className='subtleforms-card'>
           <div className='subtleforms-card-header'>
-            <h2 className='sf-m-0 sf-font-semibold sf-text-gray-900 sf-text-lg'>
+            <h2 className='sf-submission-card__title'>
               {__('Submission Notes', 'subtleforms')}
             </h2>
           </div>
@@ -520,7 +523,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
 
         <div className='subtleforms-card'>
           <div className='subtleforms-card-header'>
-            <h2 className='sf-m-0 sf-font-semibold sf-text-gray-900 sf-text-lg'>
+            <h2 className='sf-submission-card__title'>
               {__('Execution Logs', 'subtleforms')}
             </h2>
           </div>
@@ -666,7 +669,13 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                   <th>{__('User', 'subtleforms')}</th>
                   <td>
                     {meta.user_id
-                      ? sprintf(/* translators: %1$d: user id */ __('User #%1$d', 'subtleforms'), meta.user_id)
+                      ? sprintf(
+                          /* translators: %1$d: user id */ __(
+                            'User #%1$d',
+                            'subtleforms'
+                          ),
+                          meta.user_id
+                        )
                       : __('Guest', 'subtleforms')}
                   </td>
                 </tr>
@@ -678,12 +687,32 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                       const now = new Date();
                       const diff = Math.floor((now - date) / 1000);
                       if (diff < 60)
-                        return (() => { /* translators: %1$d: number of seconds */ return sprintf( __('%1$d seconds ago', 'subtleforms'), diff ); })();
+                        return (() => {
+                          /* translators: %1$d: number of seconds */ return sprintf(
+                            __('%1$d seconds ago', 'subtleforms'),
+                            diff
+                          );
+                        })();
                       if (diff < 3600)
-                        return (() => { /* translators: %1$d: number of minutes */ return sprintf( __('%1$d minutes ago', 'subtleforms'), Math.floor(diff / 60) ); })();
+                        return (() => {
+                          /* translators: %1$d: number of minutes */ return sprintf(
+                            __('%1$d minutes ago', 'subtleforms'),
+                            Math.floor(diff / 60)
+                          );
+                        })();
                       if (diff < 86400)
-                        return (() => { /* translators: %1$d: number of hours ago */ return sprintf( __('%1$d hours ago', 'subtleforms'), Math.floor(diff / 3600) ); })();
-                      return (() => { /* translators: %1$d: number of days */ return sprintf( __('%1$d days ago', 'subtleforms'), Math.floor(diff / 86400) ); })();
+                        return (() => {
+                          /* translators: %1$d: number of hours ago */ return sprintf(
+                            __('%1$d hours ago', 'subtleforms'),
+                            Math.floor(diff / 3600)
+                          );
+                        })();
+                      return (() => {
+                        /* translators: %1$d: number of days */ return sprintf(
+                          __('%1$d days ago', 'subtleforms'),
+                          Math.floor(diff / 86400)
+                        );
+                      })();
                     })()}
                   </td>
                 </tr>
