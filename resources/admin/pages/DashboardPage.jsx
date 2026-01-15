@@ -144,16 +144,16 @@ export default function Dashboard() {
                       <div
                         key={submission.id}
                         className='subtleforms-dashboard-list-item'>
-                        <div className='item-content'>
-                          <div className='item-title'>
+                        <div className='sf-item-content'>
+                          <div className='sf-item-title'>
                             <a
                               href={`admin.php?page=subtleforms-submissions&submission_id=${submission.id}`}>
                               {submission.form_title}
                             </a>
                           </div>
-                          <div className='item-meta'>
+                          <div className='sf-item-meta'>
                             <span
-                              className={`status-badge status-${submission.status}`}>
+                              className={`sf-status-badge sf-status-badge--${submission.status}`}>
                               {submission.status}
                             </span>
                             <span className='time-ago'>
@@ -207,14 +207,14 @@ export default function Dashboard() {
                       <div
                         key={form.id}
                         className='subtleforms-dashboard-list-item'>
-                        <div className='item-content'>
-                          <div className='item-title'>
+                        <div className='sf-item-content'>
+                          <div className='sf-item-title'>
                             <a
                               href={`admin.php?page=subtleforms-new-form&form_id=${form.id}`}>
                               {form.title}
                             </a>
                           </div>
-                          <div className='item-meta'>
+                          <div className='sf-item-meta'>
                             {/* Form Type Badge */}
                             {(() => {
                               const formType = form.metadata?.type || 'regular';
@@ -263,7 +263,7 @@ export default function Dashboard() {
                               );
                             })()}
                             <span
-                              className={`status-badge status-${form.status}`}>
+                              className={`sf-status-badge sf-status-badge--${form.status}`}>
                               {form.status}
                             </span>
                             <span className='submission-count'>

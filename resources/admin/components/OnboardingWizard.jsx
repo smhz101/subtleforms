@@ -324,7 +324,8 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                       <div
                         className={clsx(
                           'sf-onboarding-wizard__option-icon',
-                          isSelected && 'sf-onboarding-wizard__option-icon--selected'
+                          isSelected &&
+                            'sf-onboarding-wizard__option-icon--selected'
                         )}>
                         <Icon />
                       </div>
@@ -375,7 +376,8 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                       <div
                         className={clsx(
                           'sf-onboarding-wizard__option-icon',
-                          isSelected && 'sf-onboarding-wizard__option-icon--selected'
+                          isSelected &&
+                            'sf-onboarding-wizard__option-icon--selected'
                         )}>
                         <Icon />
                       </div>
