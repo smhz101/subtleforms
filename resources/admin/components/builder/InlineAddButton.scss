@@ -1,12 +1,13 @@
 /**
  * InlineAddButton Component Styles
+ * Phase 4: Enhanced with improved subtlety and interaction states
  */
 
 .sf-inline-add-button {
-	margin-bottom: 0.75rem; /* Reduced from 1rem for better density */
-	padding: 0.5rem 0; /* Reduced from 0.75rem */
+	margin-bottom: 0.75rem;
+	padding: 0.5rem 0;
 	text-align: center;
-	transition: opacity 200ms;
+	transition: opacity 250ms cubic-bezier(0.4, 0, 0.2, 1);
 
 	&--hovered,
 	&--active {
@@ -14,25 +15,54 @@
 	}
 
 	&--idle {
-		opacity: 0.3;
+		opacity: 0.25; /* Even more subtle when idle */
 	}
 
 	&__button {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.25rem;
+		gap: 0.375rem;
 		background: transparent;
-		padding: 0.375rem 1rem;
-		border: 1px dashed #9ca3af;
+		padding: 0.375rem 0.875rem;
+		border: 1px dashed rgba(156, 163, 175, 0.5); /* Semi-transparent */
+		border-radius: 4px;
 		font-weight: 500;
-		color: #4b5563;
+		color: #9ca3af;
 		font-size: 0.75rem;
 		cursor: pointer;
-		transition: all 150ms;
+		transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+		outline: none;
 
+		/* Enhanced hover state */
 		&:hover {
+			background-color: #f9fafb;
 			border-color: #6b7280;
-			color: #1f2937;
+			border-style: solid;
+			color: #374151;
+			transform: translateY(-1px);
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+		}
+
+		/* Active/pressed state */
+		&:active {
+			transform: translateY(0) scale(0.97);
+			box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+		}
+
+		/* Focus state */
+		&:focus {
+			outline: 2px solid #2271b1;
+			outline-offset: 2px;
+		}
+
+		/* Icon styling */
+		svg {
+			opacity: 0.6;
+			transition: opacity 200ms ease-out;
+		}
+
+		&:hover svg {
+			opacity: 1;
 		}
 	}
 }

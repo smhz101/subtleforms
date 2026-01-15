@@ -1,5 +1,6 @@
 /**
  * InsertFieldButton Component Styles
+ * Phase 4: Enhanced subtle styling with contextual discovery
  */
 
 .sf-insert-field-button {
@@ -7,9 +8,16 @@
 		width: 100%;
 		display: flex;
 		justify-content: center;
-		/* Reduced spacing for better density */
-		margin: 0.5rem 0; /* Reduced from 0.625rem */
+		margin: 0.5rem 0;
 		padding: 0 1rem;
+		/* Subtle fade-in for reduced visual noise */
+		opacity: 0.4;
+		transition: opacity 200ms ease-out;
+
+		/* Show more prominently on hover */
+		&:hover {
+			opacity: 1;
+		}
 	}
 
 	&__button {
@@ -18,59 +26,65 @@
 		justify-content: center;
 		gap: 0.5rem;
 		width: 100%;
-		max-width: 300px;
-		padding: 0.625rem 1rem;
+		max-width: 280px; /* Slightly narrower for subtlety */
+		padding: 0.5rem 0.875rem; /* More compact */
 
-		/* Demoted, subtle appearance - blend into canvas */
+		/* Ultra-subtle default appearance */
 		background-color: transparent;
-		border: 1px dashed #e5e7eb; /* Lighter, less prominent border */
+		border: 1px dashed rgba(229, 231, 235, 0.6); /* Semi-transparent border */
 		border-radius: 6px;
 
-		/* Typography - lower contrast */
-		font-size: 0.8125rem; /* Slightly smaller */
-		font-weight: 400; /* Normal weight, not medium */
-		color: #9ca3af; /* Lighter gray, less dominant */
+		/* Typography - minimal contrast */
+		font-size: 0.8125rem;
+		font-weight: 400;
+		color: #b9bdc4; /* Even lighter gray */
+		letter-spacing: 0.01em;
 
 		/* Smooth transitions */
-		transition: all 180ms ease-out;
+		transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
 
 		/* Remove default button styles */
 		cursor: pointer;
 		outline: none;
 
-		/* Hover state - contextual discovery */
+		/* Hover state - clear discovery */
 		&:hover {
 			background-color: #f9fafb;
-			border-color: #d1d5db;
-			color: #6b7280;
+			border-color: #cbd5e1;
+			border-style: solid; /* Switch from dashed to solid */
+			color: #64748b;
+			transform: translateY(-1px); /* Subtle lift */
+			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
 		}
 
 		/* Active/pressed state */
 		&:active {
 			border-color: #2271b1;
 			background-color: #f3f4f6;
-			transform: scale(0.98);
+			transform: translateY(0) scale(0.98);
+			box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
 		}
 
 		/* Focus state for keyboard navigation */
 		&:focus {
 			outline: 2px solid #2271b1;
 			outline-offset: 2px;
+			opacity: 1;
 		}
 
-		/* Icon (plus symbol) styling - more subtle */
+		/* Icon (plus symbol) styling - subtle default */
 		> span:first-child {
 			display: inline-flex;
 			align-items: center;
-			font-size: 0.875rem; /* Smaller icon */
+			font-size: 0.875rem;
 			line-height: 1;
-			opacity: 0.5; /* More muted by default */
-			transition: opacity 180ms ease-out;
+			opacity: 0.4; /* Very muted by default */
+			transition: opacity 200ms ease-out;
 		}
 
-		/* Icon becomes more prominent on hover */
+		/* Icon becomes fully visible on hover */
 		&:hover > span:first-child {
-			opacity: 0.8;
+			opacity: 1;
 		}
 	}
 }
