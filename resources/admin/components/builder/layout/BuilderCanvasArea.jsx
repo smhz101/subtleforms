@@ -25,7 +25,9 @@ export default function BuilderCanvasArea({
     <>
       {saveError && (
         <div className='sf-builder-canvas-area__error-banner'>
-          <span className='sf-builder-canvas-area__error-text'>{saveError}</span>
+          <span className='sf-builder-canvas-area__error-text'>
+            {saveError}
+          </span>
         </div>
       )}
 

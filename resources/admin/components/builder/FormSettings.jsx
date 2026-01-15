@@ -89,49 +89,22 @@ export default function FormSettings({ schema, onChange }) {
 
   return (
     <div className='subtleforms-form-settings'>
-      <div className='sf-mx-auto sf-max-w-3xl'>
-        <h2 className='sf-mb-6 sf-font-semibold sf-text-gray-900 sf-text-xl'>
+      <div className='sf-form-settings__container'>
+        <h2 className='sf-form-settings__title'>
           {__('Form Settings', 'subtleforms')}
         </h2>
 
         {/* Form Type Info Banner */}
         {formType !== 'regular' && (
-          <div
-            className={`sf-form-type-banner ${
-              formType === 'multistep'
-                ? 'sf-bg-purple-50 sf-border-purple-500'
-                : formType === 'sectioned'
-                ? 'sf-bg-indigo-50 sf-border-indigo-500'
-                : formType === 'conversational'
-                ? 'sf-bg-blue-50 sf-border-blue-500'
-                : 'sf-bg-green-50 sf-border-green-500'
-            }`}>
-            <h3
-              className={`sf-font-semibold sf-mb-1 sf-text-sm ${
-                formType === 'multistep'
-                  ? 'sf-text-purple-900'
-                  : formType === 'sectioned'
-                  ? 'sf-text-indigo-900'
-                  : formType === 'conversational'
-                  ? 'text-blue-900'
-                  : 'text-green-900'
-              }`}>
+          <div className='sf-form-type-banner' data-form-type={formType}>
+            <h3 className='sf-form-type-banner__title'>
               {formType === 'multistep' && __('Multi-step Form', 'subtleforms')}
               {formType === 'sectioned' && __('Sectioned Form', 'subtleforms')}
               {formType === 'conversational' &&
                 __('Conversational Form', 'subtleforms')}
               {formType === 'payment' && __('Payment Form', 'subtleforms')}
             </h3>
-            <p
-              className={`text-xs ${
-                formType === 'multistep'
-                  ? 'text-purple-700'
-                  : formType === 'sectioned'
-                  ? 'text-indigo-700'
-                  : formType === 'conversational'
-                  ? 'text-blue-700'
-                  : 'text-green-700'
-              }`}>
+            <p className='sf-form-type-banner__description'>
               {formType === 'multistep' &&
                 __(
                   'Fields are organized into steps. Users navigate through one step at a time with progress tracking.',
@@ -187,7 +160,7 @@ export default function FormSettings({ schema, onChange }) {
         </Panel>
 
         {/* Canvas Layout Settings */}
-        <Panel className='sf-mt-4'>
+        <Panel>
           <PanelBody
             title={__('Canvas Layout', 'subtleforms')}
             initialOpen={false}>
@@ -219,14 +192,14 @@ export default function FormSettings({ schema, onChange }) {
 
         {/* Payment Settings - Show for payment forms and conversational forms */}
         {supportsPayment && (
-          <Panel className='sf-mt-4'>
+          <Panel>
             <PanelBody
               title={__('Payment Settings', 'subtleforms')}
               initialOpen={true}>
-              <div className='sf-space-y-4'>
+              <div className='sf-form-settings__section'>
                 {isConversationalForm && (
                   <div className='sf-info-box sf-info-box--blue'>
-                    <p className='sf-text-blue-800 sf-text-sm'>
+                    <p className='sf-info-box__text'>
                       <strong>
                         {__('Conversational Payment:', 'subtleforms')}
                       </strong>{' '}
@@ -240,7 +213,7 @@ export default function FormSettings({ schema, onChange }) {
 
                 {isPaymentForm && (
                   <div className='sf-info-box sf-info-box--blue'>
-                    <p className='sf-text-blue-800 sf-text-sm'>
+                    <p className='sf-info-box__text'>
                       <strong>{__('Note:', 'subtleforms')}</strong>{' '}
                       {__(
                         'Payment gateway integration will be added in a future update. These settings prepare your form for payment processing.',
@@ -368,7 +341,7 @@ export default function FormSettings({ schema, onChange }) {
                     )}
 
                     <div className='sf-info-box sf-info-box--yellow'>
-                      <p className='sf-text-yellow-800 sf-text-sm'>
+                      <p className='sf-info-box__text'>
                         <strong>{__('Extension Point:', 'subtleforms')}</strong>{' '}
                         {__(
                           'Payment gateway settings will appear here when payment extensions are installed.',
@@ -385,11 +358,11 @@ export default function FormSettings({ schema, onChange }) {
 
         {/* Non-payment/non-conversational form message */}
         {!supportsPayment && (
-          <Panel className='sf-mt-4'>
+          <Panel>
             <PanelBody
               title={__('Payment Settings', 'subtleforms')}
               initialOpen={false}>
-              <p className='sf-text-gray-600 sf-text-sm'>
+              <p className='sf-form-settings__hint'>
                 {__(
                   'Payment settings are available for "Payment" and "Conversational" form types. Create a payment or conversational form to enable payment collection.',
                   'subtleforms'

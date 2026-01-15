@@ -116,9 +116,7 @@ export default function StepNavigator({
         </div>
 
         <div className='sf-step-navigator__add-button'>
-          <Button
-            isSecondary
-            onClick={onAddStep}>
+          <Button isSecondary onClick={onAddStep}>
             <span className='sf-step-navigator__add-button'>
               <svg
                 className='sf-step-navigator__add-icon'

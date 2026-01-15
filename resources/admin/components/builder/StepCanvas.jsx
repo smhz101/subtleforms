@@ -83,9 +83,7 @@ export default function StepCanvas({
         <div className='sf-step-header__container'>
           <div className='sf-step-header__number'>{stepNumber}</div>
           <div className='sf-step-header__content'>
-            <div className='sf-step-header__title'>
-              {stepTitle}
-            </div>
+            <div className='sf-step-header__title'>{stepTitle}</div>
             {stepDescription && (
               <div className='sf-step-header__description'>
                 {stepDescription}

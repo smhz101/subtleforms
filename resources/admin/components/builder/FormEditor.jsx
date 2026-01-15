@@ -237,10 +237,7 @@ export default function FormEditor({
         if (hasCaptcha) {
           // eslint-disable-next-line no-alert
           alert(
-            __(
-              'Only one CAPTCHA field is allowed per form.',
-              'subtleforms'
-            )
+            __('Only one CAPTCHA field is allowed per form.', 'subtleforms')
           );
           return;
         }
@@ -606,7 +603,9 @@ export default function FormEditor({
                 {__('Add Field', 'subtleforms')}
               </h4>
               {Object.entries(fieldGroups).map(([category, categoryFields]) => (
-                <div key={category} className='sf-field-picker-popover__category'>
+                <div
+                  key={category}
+                  className='sf-field-picker-popover__category'>
                   <div className='sf-field-picker-popover__category-label'>
                     {category}
                   </div>
