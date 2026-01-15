@@ -1,9 +1,17 @@
 /**
  * AdminShell Component Styles
  *
- * This file contains the styling for the canonical admin shell layout
- * that overrides default WordPress admin wrapper styling.
+ * SCROLL CONTRACT:
+ * - html/body: overflow hidden (WordPress default)
+ * - AdminShell: Single vertical scroll container per page
+ * - Nested panels (Dock/Inspector): Scroll internally
+ * - NO page may manage its own body scrolling
  */
+
+// CRITICAL: Ensure body never scrolls in admin
+body.admin-color-fresh {
+	overflow: hidden !important;
+}
 
 // Remove default WordPress page wrapper styling
 .subtleforms-admin-page,
@@ -16,15 +24,22 @@
 
 	#wpbody-content {
 		padding-bottom: 0 !important;
+		overflow: hidden !important;
 	}
 
 	#wpcontent {
 		padding: 0 !important;
+		overflow: hidden !important;
 	}
 }
 
-#subtleforms-admin-app div > div > div.components-panel__body.is-opened {
-	padding: 0 !important;
+#subtleforms-admin-app {
+	height: 100%;
+	overflow: hidden;
+	
+	div > div > div.components-panel__body.is-opened {
+		padding: 0 !important;
+	}
 }
 
 // Handle Admin Bar Height
@@ -45,26 +60,27 @@
 		flex-direction: column;
 		background-color: #fff;
 		height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
-		overflow: hidden; // Prevent shell itself from scrolling
+		overflow: hidden; // CRITICAL: Prevent shell itself from scrolling
 	}
 
 	&__action-bar-wrapper {
 		flex-shrink: 0;
+		background-color: #fff;
 	}
 
 	&__content {
 		flex: 1;
 		min-height: 0; // CRITICAL: allows flex child to shrink below content size
-		overflow: hidden; // Shell content area should not scroll
+		overflow: hidden; // CRITICAL: Shell content area should not scroll
 
 		&-inner {
 			height: 100%;
 			display: flex;
 			flex-direction: column;
-			overflow-y: auto; // Default: content scrolls here
+			overflow-y: auto; // CRITICAL: Default single scroll container
 
 			&--no-scroll {
-				overflow: hidden; // When noScroll={true}, content doesn't scroll at shell level
+				overflow: hidden; // CRITICAL: When noScroll={true}, child components manage scroll
 			}
 		}
 
@@ -73,9 +89,10 @@
 			min-height: 0; // CRITICAL: allows content body to shrink
 
 			&--no-scroll {
-				overflow: hidden; // Child components manage their own scroll
+				overflow: hidden; // CRITICAL: Child components manage their own scroll
 				display: flex;
 				flex-direction: column;
+				height: 100%;
 			}
 		}
 	}
