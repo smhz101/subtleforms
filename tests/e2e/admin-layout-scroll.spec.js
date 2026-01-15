@@ -62,7 +62,7 @@ test.describe('Admin Layout and Scroll Contract', () => {
     await page.waitForSelector('.sf-admin-shell');
 
     // Check AdminShell content area has scroll
-    const contentInner = await page.locator('.admin-shell__content-inner').first();
+    const contentInner = await page.locator('.sf-admin-shell__content-inner').first();
     const hasScroll = await contentInner.evaluate((el) => {
       const style = window.getComputedStyle(el);
       return style.overflowY === 'auto' || style.overflowY === 'scroll';
@@ -318,7 +318,7 @@ test.describe('Admin Layout and Scroll Contract', () => {
       const hasContainer = await page.locator('.sf-admin-shell__container').isVisible();
       expect(hasContainer).toBeTruthy();
 
-      const hasContent = await page.locator('.admin-shell__content').isVisible();
+      const hasContent = await page.locator('.sf-admin-shell__content').isVisible();
       expect(hasContent).toBeTruthy();
     }
   });
