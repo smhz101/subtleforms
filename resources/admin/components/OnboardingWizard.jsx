@@ -487,7 +487,9 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
               </h3>
               <ul className='onboarding-wizard__next-steps-list'>
                 <li className='onboarding-wizard__next-steps-item'>
-                  <span className='onboarding-wizard__next-steps-number'>1.</span>
+                  <span className='onboarding-wizard__next-steps-number'>
+                    1.
+                  </span>
                   <span>
                     {__(
                       'Customize your form fields in the builder',
@@ -496,7 +498,9 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                   </span>
                 </li>
                 <li className='onboarding-wizard__next-steps-item'>
-                  <span className='onboarding-wizard__next-steps-number'>2.</span>
+                  <span className='onboarding-wizard__next-steps-number'>
+                    2.
+                  </span>
                   <span>
                     {__(
                       'Configure validation rules and conditional logic',
@@ -505,13 +509,17 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                   </span>
                 </li>
                 <li className='onboarding-wizard__next-steps-item'>
-                  <span className='onboarding-wizard__next-steps-number'>3.</span>
+                  <span className='onboarding-wizard__next-steps-number'>
+                    3.
+                  </span>
                   <span>
                     {__('Preview your form to test it out', 'subtleforms')}
                   </span>
                 </li>
                 <li className='onboarding-wizard__next-steps-item'>
-                  <span className='onboarding-wizard__next-steps-number'>4.</span>
+                  <span className='onboarding-wizard__next-steps-number'>
+                    4.
+                  </span>
                   <span>
                     {__(
                       'Publish and embed it on your site with a shortcode',
