@@ -10,7 +10,7 @@
 	justify-content: center;
 	align-items: flex-start;
 	width: 100%;
-	min-height: 100%;
+	min-height: 100%; // CRITICAL: Ensures canvas is tall enough to scroll
 	padding: 1.5rem;
 
 	// White surface where fields are rendered

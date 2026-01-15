@@ -8,6 +8,7 @@
 	flex-direction: column;
 	height: 100%;
 	min-height: 0; // CRITICAL: allows component to shrink in flex parent
+	// NOTE: DataTable component handles scrolling internally
 
 	// Form name cell
 	.sf-form-name {
