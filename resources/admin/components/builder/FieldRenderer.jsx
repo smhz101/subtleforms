@@ -251,6 +251,20 @@ export default function FieldRenderer({ field }) {
           {__('Hidden pricing field (not visible to users)', 'subtleforms')}
         </div>
       )}
+
+      {type === 'captcha' && (
+        <div className='sf-captcha-preview'>
+          <div className='sf-captcha-preview__icon'>🔒</div>
+          <div className='sf-captcha-preview__content'>
+            <div className='sf-captcha-preview__title'>
+              {__('CAPTCHA Verification', 'subtleforms')}
+            </div>
+            <div className='sf-captcha-preview__description'>
+              {__('CAPTCHA will appear here on the live form', 'subtleforms')}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

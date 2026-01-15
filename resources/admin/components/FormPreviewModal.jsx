@@ -263,6 +263,32 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
       case 'hidden':
         return null;
 
+      case 'captcha':
+        return (
+          <div key={field.key || index} className='sf-form-preview-field'>
+            <label>
+              {label}
+              {required && (
+                <span className='sf-form-preview-field__required'>*</span>
+              )}
+            </label>
+            <div className='sf-captcha-preview sf-captcha-preview--preview-mode'>
+              <div className='sf-captcha-preview__icon'>🔒</div>
+              <div className='sf-captcha-preview__content'>
+                <div className='sf-captcha-preview__title'>
+                  {__('CAPTCHA Verification', 'subtleforms')}
+                </div>
+                <div className='sf-captcha-preview__description'>
+                  {__('CAPTCHA will appear here on the live form', 'subtleforms')}
+                </div>
+              </div>
+            </div>
+            {helpText && (
+              <p className='sf-form-preview-field__help'>{helpText}</p>
+            )}
+          </div>
+        );
+
       default:
         return (
           <div key={field.key || index} className='sf-form-preview-field'>

@@ -220,3 +220,43 @@
 		font-style: italic;
 	}
 }
+// CAPTCHA Preview Placeholder
+.sf-captcha-preview {
+	display: flex;
+	align-items: center;
+	gap: 1rem;
+	padding: 1.5rem;
+	background-color: #f9fafb;
+	border: 1px solid #e5e7eb;
+	border-radius: 4px;
+	min-height: 78px;
+
+	&__icon {
+		font-size: 2rem;
+		line-height: 1;
+		opacity: 0.7;
+	}
+
+	&__content {
+		flex: 1;
+	}
+
+	&__title {
+		font-weight: 600;
+		font-size: 0.875rem;
+		color: #374151;
+		margin-bottom: 0.25rem;
+	}
+
+	&__description {
+		font-size: 0.75rem;
+		color: #6b7280;
+		font-style: italic;
+	}
+
+	// Variant for preview modal (slightly different styling)
+	&--preview-mode {
+		background-color: #f3f4f6;
+		border-color: #d1d5db;
+	}
+}
