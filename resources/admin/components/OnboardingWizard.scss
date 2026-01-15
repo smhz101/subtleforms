@@ -49,6 +49,29 @@
 		}
 	}
 
+	&__step {
+		display: flex;
+		flex-direction: column;
+		gap: 1.5rem;
+
+		&-header {
+			text-align: center;
+			margin-bottom: 1rem;
+		}
+
+		&-title {
+			margin-bottom: 0.5rem;
+			font-weight: 700;
+			color: #1e1e1e;
+			font-size: 1.5rem;
+		}
+
+		&-description {
+			color: #646970;
+			font-size: 1rem;
+		}
+	}
+
 	&__welcome {
 		text-align: center;
 
@@ -187,11 +210,11 @@
 				width: 1.25rem;
 				height: 1.25rem;
 			}
-		}
 
-		&--selected &-icon {
-			background-color: #2563eb;
-			color: #fff;
+			&--selected {
+				background-color: #2563eb;
+				color: #fff;
+			}
 		}
 
 		&-text {

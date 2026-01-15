@@ -295,12 +295,12 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
 
       case 1:
         return (
-          <div className='sf-space-y-6'>
-            <div className='sf-mb-6 sf-text-center'>
-              <h2 className='sf-mb-2 sf-font-bold sf-text-gray-900 sf-text-2xl'>
+          <div className='sf-onboarding-wizard__step'>
+            <div className='sf-onboarding-wizard__step-header'>
+              <h2 className='sf-onboarding-wizard__step-title'>
                 {__("What's your form goal?", 'subtleforms')}
               </h2>
-              <p className='sf-text-gray-600'>
+              <p className='sf-onboarding-wizard__step-description'>
                 {__(
                   'Select the purpose of your form to get started with the right fields.',
                   'subtleforms'
@@ -317,31 +317,22 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                     key={goal.id}
                     onClick={() => setSelectedGoal(goal.id)}
                     className={clsx(
-                      'sf-p-6 sf-border-2 sf-rounded-lg sf-text-left sf-transition-all',
-                      'hover:sf-border-blue-500 hover:sf-shadow-md',
-                      isSelected
-                        ? 'sf-border-blue-500 sf-bg-blue-50'
-                        : 'sf-border-gray-200 sf-bg-white'
+                      'sf-onboarding-wizard__option',
+                      isSelected && 'sf-onboarding-wizard__option--selected'
                     )}>
-                    <div className='onboarding-wizard__option-content'>
+                    <div className='sf-onboarding-wizard__option-content'>
                       <div
                         className={clsx(
-                          'sf-flex sf-flex-shrink-0 sf-justify-center sf-items-center sf-rounded-lg sf-w-10 sf-h-10',
-                          isSelected
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-600'
+                          'sf-onboarding-wizard__option-icon',
+                          isSelected && 'sf-onboarding-wizard__option-icon--selected'
                         )}>
                         <Icon />
                       </div>
-                      <div className='onboarding-wizard__option-text'>
-                        <h3
-                          className={clsx(
-                            'mb-1 font-semibold',
-                            isSelected ? 'text-blue-900' : 'text-gray-900'
-                          )}>
+                      <div className='sf-onboarding-wizard__option-text'>
+                        <h3 className='sf-onboarding-wizard__option-title'>
                           {goal.label}
                         </h3>
-                        <p className='sf-text-gray-600 sf-text-sm'>
+                        <p className='sf-onboarding-wizard__option-description'>
                           {goal.description}
                         </p>
                       </div>
@@ -355,12 +346,12 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
 
       case 2:
         return (
-          <div className='sf-space-y-6'>
-            <div className='sf-mb-6 sf-text-center'>
-              <h2 className='sf-mb-2 sf-font-bold sf-text-gray-900 sf-text-2xl'>
+          <div className='sf-onboarding-wizard__step'>
+            <div className='sf-onboarding-wizard__step-header'>
+              <h2 className='sf-onboarding-wizard__step-title'>
                 {__('Choose your form type', 'subtleforms')}
               </h2>
-              <p className='sf-text-gray-600'>
+              <p className='sf-onboarding-wizard__step-description'>
                 {__(
                   'How would you like to present your form to users?',
                   'subtleforms'
@@ -377,19 +368,14 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                     key={type.id}
                     onClick={() => setSelectedType(type.id)}
                     className={clsx(
-                      'sf-p-6 sf-border-2 sf-rounded-lg sf-text-left sf-transition-all',
-                      'hover:sf-border-blue-500 hover:sf-shadow-md',
-                      isSelected
-                        ? 'sf-border-blue-500 sf-bg-blue-50'
-                        : 'sf-border-gray-200 sf-bg-white'
+                      'sf-onboarding-wizard__option',
+                      isSelected && 'sf-onboarding-wizard__option--selected'
                     )}>
-                    <div className='onboarding-wizard__option-content'>
+                    <div className='sf-onboarding-wizard__option-content'>
                       <div
                         className={clsx(
-                          'sf-flex sf-flex-shrink-0 sf-justify-center sf-items-center sf-rounded-lg sf-w-10 sf-h-10',
-                          isSelected
-                            ? 'sf-bg-blue-600 sf-text-white'
-                            : 'sf-bg-gray-100 sf-text-gray-600'
+                          'sf-onboarding-wizard__option-icon',
+                          isSelected && 'sf-onboarding-wizard__option-icon--selected'
                         )}>
                         <Icon />
                       </div>
