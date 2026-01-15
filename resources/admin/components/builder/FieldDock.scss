@@ -1,6 +1,11 @@
 /**
  * FieldDock Component Styles
  * Phase 5: Enhanced UX with improved organization and visual polish
+ *
+ * SCROLL CONTRACT:
+ * - Dock wrapper: display: flex, overflow: hidden
+ * - Dock header: flex-shrink: 0 (never collapses)
+ * - Dock content: flex: 1, overflow-y: auto (owns vertical scroll)
  */
 
 .sf-field-dock {
@@ -11,8 +16,8 @@
 	border-right: 1px solid #e2e8f0;
 	transition: all 250ms cubic-bezier(0.4, 0, 0.2, 1);
 	width: 280px;
-	flex-shrink: 0; // CRITICAL: prevent shrinking
-	flex-grow: 0; // CRITICAL: prevent growing
+	flex-shrink: 0; // CRITICAL: prevent dock from shrinking in grid
+	flex-grow: 0; // CRITICAL: prevent dock from growing in grid
 
 	&--loading {
 		width: 280px;

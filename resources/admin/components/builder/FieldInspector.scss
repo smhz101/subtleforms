@@ -1,16 +1,21 @@
 /**
  * FieldInspector Component Styles
  * Phase 6: Enhanced settings architecture with improved visual hierarchy
+ *
+ * SCROLL CONTRACT:
+ * - Inspector: Fixed width 320px, overflow: auto (owns vertical scroll)
+ * - Header: position: sticky, stays at top during scroll
+ * - flex-shrink: 0 prevents inspector from collapsing in grid
  */
 
 .sf-field-inspector {
 	background-color: #fafbfc;
 	border-left: 1px solid #e2e8f0;
 	width: 20rem; // Fixed 320px
-	flex-shrink: 0; // CRITICAL: prevent shrinking
-	flex-grow: 0; // CRITICAL: prevent growing - don't steal canvas width
+	flex-shrink: 0; // CRITICAL: prevent inspector from shrinking in grid
+	flex-grow: 0; // CRITICAL: prevent inspector from growing - don't steal canvas width
 	height: 100%;
-	overflow: auto;
+	overflow: auto; // CRITICAL: Inspector owns its vertical scroll
 	/* Custom scrollbar */
 	&::-webkit-scrollbar {
 		width: 6px;

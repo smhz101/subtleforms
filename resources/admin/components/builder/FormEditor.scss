@@ -1,6 +1,14 @@
 /**
  * FormEditor Component Styles
  * Three-column builder layout: FieldDock, Canvas, Inspector
+ *
+ * SCROLL CONTRACT:
+ * - FormEditor: overflow: hidden (no scroll at root)
+ * - FieldDock: Independent vertical scroll (overflow-y: auto)
+ * - Canvas: Independent vertical scroll (overflow-y: auto)
+ * - Inspector: Independent vertical scroll (overflow-y: auto)
+ * - All panels use flex-shrink: 0 to prevent collapse
+ * - Canvas uses min-width: 0 to allow grid shrinking
  */
 
 // Responsive Breakpoints
@@ -8,44 +16,44 @@ $breakpoint-desktop: 1200px;
 $breakpoint-tablet: 768px;
 
 .sf-form-editor {
-	// Root horizontal flex container
+	// Root horizontal CSS Grid container
 	display: grid;
 	grid-template-columns: 280px 1fr 320px;
 	width: 100%;
 	height: 100%;
 	background-color: #fff;
-	overflow: hidden;
+	overflow: hidden; // CRITICAL: No scrolling at form editor level
 
 	/* CRITICAL: When dock is collapsed, adjust grid to expand canvas */
 	&--dock-collapsed {
 		grid-template-columns: 48px 1fr 320px;
 	}
 
-	// Left panel: Field Dock (FIXED WIDTH)
+	// Left panel: Field Dock (FIXED WIDTH 280px)
 	&__dock {
 		// FieldDock component handles its own height and scrolling
 		display: flex;
 		flex-direction: column;
-		overflow: hidden; /* Prevent wrapper from scrolling */
+		overflow: hidden; // CRITICAL: Wrapper doesn't scroll, FieldDock__content does
 	}
 
-	// Center panel: Canvas (CRITICAL: must fill available space)
+	// Center panel: Canvas (FLEXIBLE 1fr - takes remaining space)
 	&__canvas {
-		// Grid child gets 1fr, but we still need flex for internal layout
+		// Grid child gets 1fr, flex container for internal layout
 		display: flex;
 		flex-direction: column;
 		background-color: #f3f4f6;
-		overflow: hidden;
+		overflow: hidden; // CRITICAL: No scroll at canvas wrapper level
 		min-width: 0; // CRITICAL: allows grid cell to shrink if needed
 
-		// Step navigator bar
+		// Step navigator bar (multi-step forms)
 		&-step-nav {
 			flex-shrink: 0;
 			background-color: #fff;
 			border-bottom: 1px solid #d1d5db;
 		}
 
-		// Tip bar
+		// Tip bar (contextual help)
 		&-tip {
 			flex-shrink: 0;
 			background-color: #fff;
@@ -60,14 +68,14 @@ $breakpoint-tablet: 768px;
 
 		// Main canvas scroll area
 		&-scroll {
-			flex: 1; /* CRITICAL: take all remaining vertical space */
-			min-height: 0; /* CRITICAL: allow proper flex shrinking */
-			overflow-y: auto; /* CRITICAL: vertical scroll ownership */
+			flex: 1; // CRITICAL: take all remaining vertical space
+			min-height: 0; // CRITICAL: allow proper flex shrinking
+			overflow-y: auto; // CRITICAL: Canvas vertical scroll ownership
 			overflow-x: hidden;
 		}
 	}
 
-	// Right panel: Inspector (FIXED WIDTH)
+	// Right panel: Inspector (FIXED WIDTH 320px)
 	&__inspector {
 		width: 320px;
 		flex-shrink: 0; // CRITICAL: prevent shrinking
@@ -75,7 +83,7 @@ $breakpoint-tablet: 768px;
 		background-color: #fff;
 		border-left: 1px solid #d1d5db;
 		max-height: 100%;
-		overflow-y: auto;
+		overflow-y: auto; // CRITICAL: Inspector vertical scroll ownership
 	}
 
 	// RESPONSIVE: Tablet Layout (< 1200px)
