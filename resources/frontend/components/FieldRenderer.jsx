@@ -327,6 +327,15 @@ function renderInput(
       // Hidden pricing field - not rendered
       return null;
 
+    case 'captcha':
+      // CAPTCHA widget - rendered via provider-specific HTML
+      return (
+        <div
+          className='subtleforms-captcha-container'
+          dangerouslySetInnerHTML={{ __html: field.config?.captchaHtml || '' }}
+        />
+      );
+
     default:
       return (
         <div className='subtleforms-unsupported'>

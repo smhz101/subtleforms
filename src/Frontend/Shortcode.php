@@ -5,6 +5,7 @@ namespace SubtleForms\Frontend;
 
 use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Support\Settings;
+use SubtleForms\Support\Captcha\CaptchaManager;
 
 /**
  * Frontend shortcode handler.
@@ -13,10 +14,12 @@ final class Shortcode {
 
 	private $formsRepo;
 	private $settings;
+	private $captchaManager;
 
-	public function __construct( FormsRepository $formsRepo, ?Settings $settings = null ) {
-		$this->formsRepo = $formsRepo;
-		$this->settings  = $settings;
+	public function __construct( FormsRepository $formsRepo, ?Settings $settings = null, ?CaptchaManager $captchaManager = null ) {
+		$this->formsRepo       = $formsRepo;
+		$this->settings        = $settings;
+		$this->captchaManager  = $captchaManager;
 	}
 
 	/**
@@ -105,5 +108,19 @@ final class Shortcode {
 			array(),
 			$asset['version']
 		);
+
+		// Enqueue CAPTCHA provider script if enabled and configured
+		if ( $this->captchaManager && $this->captchaManager->isEnabled() && $this->captchaManager->isConfigured() ) {
+			$script_url = $this->captchaManager->getScriptUrl();
+			if ( ! empty( $script_url ) ) {
+				wp_enqueue_script(
+					'subtleforms-captcha',
+					$script_url,
+					array(),
+					null,
+					true
+				);
+			}
+		}
 	}
 }

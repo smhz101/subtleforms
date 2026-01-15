@@ -18,6 +18,7 @@ use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Repositories\SubmissionsRepository;
 use SubtleForms\Support\FeatureGate;
 use SubtleForms\Support\Settings;
+use SubtleForms\Support\Captcha\CaptchaManager;
 use SubtleForms\Engine\SchemaCompiler;
 use SubtleForms\Fields\FieldRegistry;
 use WP_REST_Request;
@@ -66,6 +67,11 @@ final class RestController {
 	 */
 	private $settings;
 
+	/**
+	 * @var CaptchaManager
+	 */
+	private $captchaManager;
+
 	public function __construct(
 		$pipeline,
 		$formsRepo,
@@ -73,7 +79,8 @@ final class RestController {
 		$gate,
 		$fieldRegistry,
 		$compiler,
-		$settings = null
+		$settings = null,
+		$captchaManager = null
 	) {
 		$this->pipeline        = $pipeline;
 		$this->formsRepo       = $formsRepo;
@@ -82,6 +89,7 @@ final class RestController {
 		$this->fieldRegistry   = $fieldRegistry;
 		$this->compiler        = $compiler;
 		$this->settings        = $settings;
+		$this->captchaManager  = $captchaManager;
 	}
 
 	/**
@@ -468,10 +476,14 @@ final class RestController {
 				return new WP_Error( 'schema_not_available', __( 'Schema not available', 'subtleforms' ), array( 'status' => 404 ) );
 			}
 
+			// Inject CAPTCHA HTML for frontend rendering
+			$schemaData = $schema['schema'] ?? $schema;
+			$schemaData = $this->injectCaptchaHtml( $schemaData );
+
 			return new WP_REST_Response(
 				array(
 					'form'    => $form,
-					'schema'  => $schema['schema'] ?? $schema,
+					'schema'  => $schemaData,
 					'version' => $schema['version'] ?? null,
 				),
 				200
@@ -535,6 +547,59 @@ final class RestController {
 			),
 			200
 		);
+	}
+
+	/**
+	 * Inject CAPTCHA HTML into schema fields for frontend rendering
+	 *
+	 * @param array $schema Form schema
+	 * @return array Modified schema with CAPTCHA HTML
+	 */
+	private function injectCaptchaHtml( $schema ) {
+		if ( ! $this->captchaManager || ! $this->captchaManager->isEnabled() || ! $this->captchaManager->isConfigured() ) {
+			return $schema;
+		}
+
+		$captcha_html = $this->captchaManager->render();
+
+		if ( empty( $captcha_html ) ) {
+			return $schema;
+		}
+
+		// Recursively inject CAPTCHA HTML into fields
+		$schema['fields'] = $this->processCaptchaFields( $schema['fields'] ?? array(), $captcha_html );
+
+		return $schema;
+	}
+
+	/**
+	 * Recursively process fields to inject CAPTCHA HTML
+	 *
+	 * @param array $fields Array of field definitions
+	 * @param string $captcha_html CAPTCHA widget HTML
+	 * @return array Modified fields
+	 */
+	private function processCaptchaFields( $fields, $captcha_html ) {
+		foreach ( $fields as &$field ) {
+			if ( $field['type'] === 'captcha' ) {
+				$field['config']['captchaHtml'] = $captcha_html;
+			}
+
+			// Process nested fields (containers, columns)
+			if ( ! empty( $field['children'] ) && is_array( $field['children'] ) ) {
+				$field['children'] = $this->processCaptchaFields( $field['children'], $captcha_html );
+			}
+
+			if ( ! empty( $field['columns'] ) && is_array( $field['columns'] ) ) {
+				foreach ( $field['columns'] as &$column ) {
+					if ( is_array( $column ) ) {
+						$column = $this->processCaptchaFields( $column, $captcha_html );
+					}
+				}
+			}
+		}
+
+		return $fields;
 	}
 
 	/**
@@ -1008,6 +1073,18 @@ final class RestController {
 				$reason = $tempContext->getMeta( 'spam_reason', 'spam_detected' );
 				error_log( sprintf( 'SubtleForms: Spam blocked (form %d): %s', $formId, $reason ) );
 				return new WP_REST_Response( array( 'success' => true, 'message' => __( 'Thank you.', 'subtleforms' ) ), 200 );
+			}
+		}
+
+		// Verify CAPTCHA if enabled
+		if ( $this->captchaManager && $this->captchaManager->isEnabled() && $this->captchaManager->isConfigured() ) {
+			$verification = $this->captchaManager->verify( $payload );
+			if ( ! $verification['success'] ) {
+				return new WP_Error(
+					'captcha_verification_failed',
+					$verification['error'] ?? __( 'CAPTCHA verification failed.', 'subtleforms' ),
+					array( 'status' => 400 )
+				);
 			}
 		}
 

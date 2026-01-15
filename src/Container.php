@@ -173,7 +173,8 @@ final class Container {
 				$c->get( FeatureGate::class ),
 				$c->get( FieldRegistry::class ),
 				$c->get( SchemaCompiler::class ),
-				$c->get( Settings::class )
+				$c->get( Settings::class ),
+				$c->get( CaptchaManager::class )
 			)
 		);
 
@@ -182,7 +183,8 @@ final class Container {
 			\SubtleForms\Frontend\Shortcode::class,
 			fn( $c ) => new \SubtleForms\Frontend\Shortcode(
 				$c->get( FormsRepository::class ),
-				$c->get( Settings::class )
+				$c->get( Settings::class ),
+				$c->get( CaptchaManager::class )
 			)
 		);
 
