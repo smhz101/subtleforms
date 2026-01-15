@@ -1,80 +1,111 @@
 /**
  * FieldInspector Component Styles
- * Right sidebar for editing field properties
+ * Phase 6: Enhanced settings architecture with improved visual hierarchy
  */
 
 .sf-field-inspector {
-	background-color: #ffffff;
-	border-left: 1px solid #d1d5db;
+	background-color: #fafbfc;
+	border-left: 1px solid #e2e8f0;
 	width: 20rem; // Fixed 320px
 	flex-shrink: 0; // CRITICAL: prevent shrinking
 	flex-grow: 0; // CRITICAL: prevent growing - don't steal canvas width
 	height: 100%;
 	overflow: auto;
+	/* Custom scrollbar */
+	&::-webkit-scrollbar {
+		width: 6px;
+	}
+	&::-webkit-scrollbar-track {
+		background: transparent;
+	}
+	&::-webkit-scrollbar-thumb {
+		background: #cbd5e1;
+		border-radius: 3px;
+		&:hover {
+			background: #94a3b8;
+		}
+	}
 
 	&__header {
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		background-color: #ffffff;
-		padding: 1rem 1.25rem;
-		border-bottom: 1px solid #d1d5db;
+		background: linear-gradient(to bottom, #ffffff, #fafbfc);
+		padding: 0.875rem 1rem;
+		border-bottom: 1px solid #e2e8f0;
+		box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06);
+		position: sticky;
+		top: 0;
+		z-index: 10;
 	}
 
 	&__title {
-		font-weight: 600;
-		color: #111827;
-		font-size: 0.875rem;
+		font-weight: 700;
+		color: #0f172a;
+		font-size: 0.6875rem;
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		letter-spacing: 0.08em;
 	}
 
 	&__close-button {
-		padding: 0.25rem 0.5rem;
+		padding: 0.375rem 0.625rem;
 		min-width: 0;
+		border-radius: 6px;
+		transition: all 180ms ease-out;
+		color: #64748b;
+
+		&:hover:not(:disabled) {
+			color: #0f172a;
+			background-color: #f1f5f9;
+		}
 	}
 
 	&__content {
-		padding: 1.25rem;
+		padding: 1rem;
 	}
 
 	&__empty {
-		color: #374151;
-		font-size: 0.875rem;
+		background-color: #ffffff;
+		border-radius: 8px;
+		padding: 2rem 1.5rem;
+		text-align: center;
+		box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06);
 	}
 
 	&__empty-title {
 		margin: 0 0 0.5rem 0;
-		font-weight: 500;
+		font-weight: 600;
 	}
 
 	&__empty-description {
 		margin: 0;
-		color: #6b7280;
+		color: #64748b;
 		font-size: 0.875rem;
+		line-height: 1.5;
 	}
 
 	&__empty-paragraph {
-		margin: 0 0 0.5rem 0;
-		font-weight: 500;
-		font-size: 0.875rem;
-		color: #374151;
+		margin: 0 0 0.75rem 0;
+		font-weight: 600;
+		font-size: 0.9375rem;
+		color: #1e293b;
 	}
 
 	&__empty-subtext {
 		margin: 0;
-		color: #6b7280;
-		font-size: 0.875rem;
+		color: #64748b;
+		font-size: 0.8125rem;
+		line-height: 1.6;
 	}
 
 	&__tabs {
-		padding: 0.75rem 0;
+		padding: 0;
 	}
 
 	&__tab-label {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.25rem;
+		gap: 0.375rem;
 	}
 
 	&__tab-warning-indicator {
@@ -83,31 +114,74 @@
 		border-radius: 9999px;
 		width: 0.5rem;
 		height: 0.5rem;
+		animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+	}
+
+	@keyframes pulse {
+		0%, 100% {
+			opacity: 1;
+		}
+		50% {
+			opacity: 0.6;
+		}
 	}
 
 	&__tab-content {
-		padding: 0.75rem 0;
+		padding: 1rem;
+		background-color: #ffffff;
+		border-radius: 8px;
+		margin-top: 0.75rem;
+		box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+
+		/* Form controls spacing */
+		> * + * {
+			margin-top: 1rem;
+		}
 	}
 
 	&__notice-paragraph {
 		margin: 0;
-		font-size: 0.875rem;
+		font-size: 0.8125rem;
+		line-height: 1.5;
 	}
 
 	&__options-section {
-		margin-top: 1rem;
+		margin-top: 1.25rem;
+		padding: 0.875rem;
+		background-color: #f8fafc;
+		border-radius: 6px;
+		border: 1px solid #e2e8f0;
 	}
 
 	&__options-label {
 		display: block;
-		margin-bottom: 0.5rem;
-		font-weight: 600;
-		font-size: 0.75rem;
+		margin-bottom: 0.625rem;
+		font-weight: 700;
+		font-size: 0.6875rem;
+		color: #475569;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
 	}
 
 	&__option-row {
 		display: flex;
 		gap: 0.5rem;
-		margin-bottom: 0.5rem;
+		margin-bottom: 0.625rem;
+		align-items: flex-start;
+
+		&:last-child {
+			margin-bottom: 0;
+		}
+
+		/* Make input take available space */
+		> *:first-child {
+			flex: 1;
+		}
+
+		/* Delete button styling */
+		button {
+			flex-shrink: 0;
+			margin-top: 1.875rem; /* Align with input field */
+		}
 	}
 }
