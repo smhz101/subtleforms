@@ -98,7 +98,7 @@ export default function StepCanvas({
       </div>
 
       {/* Step Content Area */}
-      <div className='sf-min-h-[300px]'>
+      <div className='sf-step-content'>
         <ColumnDropZone
           containerId={stepId}
           columnIndex={null}
