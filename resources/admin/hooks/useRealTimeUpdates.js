@@ -31,6 +31,16 @@ export function useRealTimeUpdates(options = {}) {
   const [isPolling, setIsPolling] = useState(false);
   const intervalRef = useRef(null);
   const lastUnreadCountRef = useRef(0);
+  
+  // Store callbacks in refs to prevent dependency changes
+  const onUnreadCountChangeRef = useRef(onUnreadCountChange);
+  const onSubmissionsUpdateRef = useRef(onSubmissionsUpdate);
+  
+  // Update refs when callbacks change
+  useEffect(() => {
+    onUnreadCountChangeRef.current = onUnreadCountChange;
+    onSubmissionsUpdateRef.current = onSubmissionsUpdate;
+  }, [onUnreadCountChange, onSubmissionsUpdate]);
 
   const fetchUnreadCount = useCallback(async () => {
     if (!enabled) return;
@@ -61,14 +71,14 @@ export function useRealTimeUpdates(options = {}) {
         const previousCount = lastUnreadCountRef.current;
         lastUnreadCountRef.current = newCount;
 
-        if (onUnreadCountChange) {
-          onUnreadCountChange(newCount, previousCount);
+        if (onUnreadCountChangeRef.current) {
+          onUnreadCountChangeRef.current(newCount, previousCount);
         }
 
         // If count decreased, it might mean submissions were read
         // Trigger submissions update to refresh the list
-        if (newCount < previousCount && onSubmissionsUpdate) {
-          onSubmissionsUpdate();
+        if (newCount < previousCount && onSubmissionsUpdateRef.current) {
+          onSubmissionsUpdateRef.current();
         }
       }
     } catch (error) {
@@ -76,7 +86,7 @@ export function useRealTimeUpdates(options = {}) {
     } finally {
       setIsPolling(false);
     }
-  }, [enabled, onUnreadCountChange, onSubmissionsUpdate]);
+  }, [enabled]);
 
   const startPolling = useCallback(() => {
     if (!enabled || intervalRef.current) return;
@@ -85,7 +95,9 @@ export function useRealTimeUpdates(options = {}) {
     fetchUnreadCount();
 
     // Start interval
-    intervalRef.current = setInterval(fetchUnreadCount, pollInterval);
+    intervalRef.current = setInterval(() => {
+      fetchUnreadCount();
+    }, pollInterval);
   }, [enabled, pollInterval, fetchUnreadCount]);
 
   const stopPolling = useCallback(() => {
