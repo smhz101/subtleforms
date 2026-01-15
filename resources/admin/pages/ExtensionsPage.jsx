@@ -32,12 +32,10 @@ function ExtensionCard({ icon, title, description, features, comingSoon }) {
 
           {/* Features */}
           <div className='sf-ext-card__features'>
-            <ul className='sf-space-y-2 sf-mb-4'>
+            <ul className='sf-ext-card__features-list'>
               {features.map((feature, index) => (
-                <li
-                  key={index}
-                  className='sf-flex sf-items-start sf-gap-2 sf-text-gray-600 sf-text-sm'>
-                  <span className='sf-mt-0.5 sf-text-green-500'>✓</span>
+                <li key={index} className='sf-ext-card__feature-item'>
+                  <span className='sf-ext-card__feature-check'>✓</span>
                   <span>{feature}</span>
                 </li>
               ))}
@@ -200,9 +198,12 @@ export default function ExtensionsPage() {
           {__('Browse All Extensions', 'subtleforms')}
         </Button>
       }>
-      <div className='sf-p-6'>
+      <div className='sf-extensions-page__content'>
         {/* Info Notice */}
-        <Notice status='info' isDismissible={false} className='sf-extensions-page__notice'>
+        <Notice
+          status='info'
+          isDismissible={false}
+          className='sf-extensions-page__notice'>
           <div className='sf-extensions-page__notice-content'>
             <Icon.DownloadCloud className='sf-extensions-page__notice-icon' />
             <div>

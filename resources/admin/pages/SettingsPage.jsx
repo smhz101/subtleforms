@@ -387,7 +387,7 @@ function GeneralSettings({ settings, updateSetting, fieldErrors = {} }) {
   return (
     <Card>
       <CardBody>
-        <div className='sf-space-y-4'>
+        <div className='sf-settings-section'>
           <div>
             <SelectControl
               label={__('Default New Form Status', 'subtleforms')}
@@ -463,7 +463,7 @@ function FrontendSettings({ settings, updateSetting, fieldErrors = {} }) {
   return (
     <Card>
       <CardBody>
-        <div className='sf-space-y-4'>
+        <div className='sf-settings-section'>
           <div>
             <TextControl
               label={__('Success Message', 'subtleforms')}
@@ -546,7 +546,7 @@ function EmailSettings({ settings, updateSetting, fieldErrors = {} }) {
   return (
     <Card>
       <CardBody>
-        <div className='sf-space-y-4'>
+        <div className='sf-settings-section'>
           <div>
             <ToggleControl
               label={__('Admin Notifications', 'subtleforms')}
@@ -641,7 +641,7 @@ function AdvancedSettings({
   return (
     <Card>
       <CardBody>
-        <div className='sf-space-y-4'>
+        <div className='sf-settings-section'>
           <div>
             <ToggleControl
               label={__('Debug Mode', 'subtleforms')}
@@ -706,9 +706,7 @@ function AdvancedSettings({
           </div>
 
           <div>
-            <h4 className='sf-section-title'>
-              {__('CAPTCHA', 'subtleforms')}
-            </h4>
+            <h4 className='sf-section-title'>{__('CAPTCHA', 'subtleforms')}</h4>
             <ToggleControl
               label={__('Enable CAPTCHA', 'subtleforms')}
               checked={settings.captcha_enabled ?? false}
@@ -729,7 +727,10 @@ function AdvancedSettings({
                   value={settings.captcha_provider ?? ''}
                   onChange={(value) => updateSetting('captcha_provider', value)}
                   options={[
-                    { label: __('-- Select Provider --', 'subtleforms'), value: '' },
+                    {
+                      label: __('-- Select Provider --', 'subtleforms'),
+                      value: '',
+                    },
                     { label: 'Google reCAPTCHA', value: 'recaptcha' },
                     { label: 'hCaptcha', value: 'hcaptcha' },
                     { label: 'Cloudflare Turnstile', value: 'turnstile' },
@@ -748,34 +749,46 @@ function AdvancedSettings({
                     <SelectControl
                       label={__('reCAPTCHA Version', 'subtleforms')}
                       value={settings.captcha_recaptcha_version ?? 'v2'}
-                      onChange={(value) => updateSetting('captcha_recaptcha_version', value)}
+                      onChange={(value) =>
+                        updateSetting('captcha_recaptcha_version', value)
+                      }
                       options={[
                         { label: 'v2 (Checkbox)', value: 'v2' },
                         { label: 'v3 (Invisible)', value: 'v3' },
                       ]}
                     />
-                    <FieldError errors={fieldErrors.captcha_recaptcha_version} />
+                    <FieldError
+                      errors={fieldErrors.captcha_recaptcha_version}
+                    />
                   </div>
                   <div>
                     <TextControl
                       label={__('Site Key', 'subtleforms')}
                       value={settings.captcha_recaptcha_site_key ?? ''}
-                      onChange={(value) => updateSetting('captcha_recaptcha_site_key', value)}
+                      onChange={(value) =>
+                        updateSetting('captcha_recaptcha_site_key', value)
+                      }
                       help={__(
                         'Get your keys from https://www.google.com/recaptcha/admin',
                         'subtleforms'
                       )}
                     />
-                    <FieldError errors={fieldErrors.captcha_recaptcha_site_key} />
+                    <FieldError
+                      errors={fieldErrors.captcha_recaptcha_site_key}
+                    />
                   </div>
                   <div>
                     <TextControl
                       label={__('Secret Key', 'subtleforms')}
                       type='password'
                       value={settings.captcha_recaptcha_secret_key ?? ''}
-                      onChange={(value) => updateSetting('captcha_recaptcha_secret_key', value)}
+                      onChange={(value) =>
+                        updateSetting('captcha_recaptcha_secret_key', value)
+                      }
                     />
-                    <FieldError errors={fieldErrors.captcha_recaptcha_secret_key} />
+                    <FieldError
+                      errors={fieldErrors.captcha_recaptcha_secret_key}
+                    />
                   </div>
                 </>
               )}
@@ -786,22 +799,30 @@ function AdvancedSettings({
                     <TextControl
                       label={__('Site Key', 'subtleforms')}
                       value={settings.captcha_hcaptcha_site_key ?? ''}
-                      onChange={(value) => updateSetting('captcha_hcaptcha_site_key', value)}
+                      onChange={(value) =>
+                        updateSetting('captcha_hcaptcha_site_key', value)
+                      }
                       help={__(
                         'Get your keys from https://dashboard.hcaptcha.com/',
                         'subtleforms'
                       )}
                     />
-                    <FieldError errors={fieldErrors.captcha_hcaptcha_site_key} />
+                    <FieldError
+                      errors={fieldErrors.captcha_hcaptcha_site_key}
+                    />
                   </div>
                   <div>
                     <TextControl
                       label={__('Secret Key', 'subtleforms')}
                       type='password'
                       value={settings.captcha_hcaptcha_secret_key ?? ''}
-                      onChange={(value) => updateSetting('captcha_hcaptcha_secret_key', value)}
+                      onChange={(value) =>
+                        updateSetting('captcha_hcaptcha_secret_key', value)
+                      }
                     />
-                    <FieldError errors={fieldErrors.captcha_hcaptcha_secret_key} />
+                    <FieldError
+                      errors={fieldErrors.captcha_hcaptcha_secret_key}
+                    />
                   </div>
                 </>
               )}
@@ -812,22 +833,30 @@ function AdvancedSettings({
                     <TextControl
                       label={__('Site Key', 'subtleforms')}
                       value={settings.captcha_turnstile_site_key ?? ''}
-                      onChange={(value) => updateSetting('captcha_turnstile_site_key', value)}
+                      onChange={(value) =>
+                        updateSetting('captcha_turnstile_site_key', value)
+                      }
                       help={__(
                         'Get your keys from https://dash.cloudflare.com/?to=/:account/turnstile',
                         'subtleforms'
                       )}
                     />
-                    <FieldError errors={fieldErrors.captcha_turnstile_site_key} />
+                    <FieldError
+                      errors={fieldErrors.captcha_turnstile_site_key}
+                    />
                   </div>
                   <div>
                     <TextControl
                       label={__('Secret Key', 'subtleforms')}
                       type='password'
                       value={settings.captcha_turnstile_secret_key ?? ''}
-                      onChange={(value) => updateSetting('captcha_turnstile_secret_key', value)}
+                      onChange={(value) =>
+                        updateSetting('captcha_turnstile_secret_key', value)
+                      }
                     />
-                    <FieldError errors={fieldErrors.captcha_turnstile_secret_key} />
+                    <FieldError
+                      errors={fieldErrors.captcha_turnstile_secret_key}
+                    />
                   </div>
                 </>
               )}
