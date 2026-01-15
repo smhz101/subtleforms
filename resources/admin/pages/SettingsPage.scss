@@ -42,14 +42,12 @@
 	transition: all 180ms ease-out;
 }
 
-.sf-settings-tabs
-	.components-button.components-tab-panel__tabs-item:hover {
+.sf-settings-tabs .components-button.components-tab-panel__tabs-item:hover {
 	color: #0f172a;
 	background: transparent;
 }
 
-.sf-settings-tabs
-	.components-button.components-tab-panel__tabs-item.is-active {
+.sf-settings-tabs .components-button.components-tab-panel__tabs-item.is-active {
 	color: #2563eb;
 	border-bottom-color: #2563eb;
 	background: transparent;
@@ -134,7 +132,7 @@
 	font-weight: 600;
 	color: #0f172a;
 	margin: 1.5rem 0 0.75rem;
-	
+
 	&:first-child {
 		margin-top: 0;
 	}
@@ -145,13 +143,4 @@
 	color: #64748b;
 	margin-top: 0.5rem;
 	line-height: 1.5;
-}
-	margin-bottom: 0.5rem;
-	font-weight: 600;
-}
-
-.sf-section-description {
-	margin-top: 0.5rem;
-	font-size: 0.875rem;
-	color: #4b5563;
 }

@@ -300,13 +300,14 @@ export default function Settings() {
     {
       name: 'advanced',
       title: __('Advanced', 'subtleforms'),
+      className: 'subtleforms-settings-tab',
+    },
+  ];
+
   const actions = (
     <>
       {hasChanges && (
-        <Button
-          variant='secondary'
-          onClick={loadSettings}
-          disabled={saving}>
+        <Button variant='secondary' onClick={loadSettings} disabled={saving}>
           {__('Discard Changes', 'subtleforms')}
         </Button>
       )}
@@ -323,17 +324,11 @@ export default function Settings() {
   );
 
   return (
-    <AdminShell
-      title={__('Settings', 'subtleforms')}
-      actions={actions}>
+    <AdminShell title={__('Settings', 'subtleforms')} actions={actions}>
       <div className='sf-settings-container'>
         {/* Messages */}
         {message && (
           <Notice
-            status={message.type}
-            isDismissible
-            onRemove={() => setMessage(null)}
-            className='sf
             status={message.type}
             isDismissible
             onRemove={() => setMessage(null)}
