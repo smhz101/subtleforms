@@ -12,6 +12,27 @@
 		color: var(--sf-danger);
 	}
 
+	&__input,
+	&__select,
+	&__textarea {
+		width: 100%;
+		padding: 0.5rem 0.75rem;
+		font-size: 0.875rem;
+		border: 1px solid var(--sf-border);
+		border-radius: 0;
+		font-family: inherit;
+		pointer-events: none;
+		background-color: #fff;
+		color: var(--sf-text-primary);
+	}
+
+	&__select {
+		appearance: none;
+		padding-right: 2.25rem;
+		background-repeat: no-repeat;
+		background-position: right 0.5rem center;
+	}
+
 	&__checkbox-wrapper {
 		display: flex;
 		align-items: center;

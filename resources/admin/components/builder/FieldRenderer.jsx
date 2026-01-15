@@ -5,9 +5,8 @@ export default function FieldRenderer({ field }) {
   const { type, label, required, placeholder, options, subFields } = field;
 
   const labelClass = 'sf-field-renderer__label';
-  const inputClass =
-    'sf-w-full sf-px-3 sf-py-2 sf-text-sm sf-border sf-border-border sf-rounded-none sf-font-inherit sf-pointer-events-none sf-bg-white sf-text-text-primary';
-  const selectClass = `${inputClass} appearance-none pr-9 bg-no-repeat bg-[right_8px_center]`;
+  const inputClass = 'sf-field-renderer__input';
+  const selectClass = 'sf-field-renderer__select';
   const selectBg = `url('data:image/svg+xml;utf8,<svg fill="%238c8f94" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M5 6l5 5 5-5 2 1-7 7-7-7z"/></svg>')`;
 
   return (
