@@ -68,3 +68,55 @@ add_action(
 		SubtleForms\init();
 	}
 );
+
+// Add REST API nonce verification for authenticated endpoints
+add_filter(
+	'rest_authentication_errors',
+	function ( $result ) {
+		// Skip if already authenticated or error exists
+		if ( ! empty( $result ) ) {
+			return $result;
+		}
+
+		// Skip for non-logged-in users (public endpoints)
+		if ( ! is_user_logged_in() ) {
+			return $result;
+		}
+
+		// Get current endpoint
+		$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_URI'] ) ) : '';
+
+		// Only check SubtleForms endpoints
+		if ( strpos( $request_uri, '/wp-json/subtleforms/v1' ) === false ) {
+			return $result;
+		}
+
+		// Allow GET requests (read-only, less risk)
+		if ( isset( $_SERVER['REQUEST_METHOD'] ) && $_SERVER['REQUEST_METHOD'] === 'GET' ) {
+			return $result;
+		}
+
+		// Verify nonce from header or cookie
+		$nonce = '';
+
+		// Check X-WP-Nonce header (used by wp-api-fetch)
+		if ( isset( $_SERVER['HTTP_X_WP_NONCE'] ) ) {
+			$nonce = sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_WP_NONCE'] ) );
+		} elseif ( isset( $_COOKIE['wp_rest'] ) ) {
+			// Fallback to REST cookie
+			$nonce = sanitize_text_field( wp_unslash( $_COOKIE['wp_rest'] ) );
+		}
+
+		// Verify nonce
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+			return new WP_Error(
+				'rest_cookie_invalid_nonce',
+				__( 'Cookie nonce is invalid. Please refresh and try again.', 'subtleforms' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return $result;
+	},
+	99
+);
