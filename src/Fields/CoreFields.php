@@ -490,8 +490,12 @@ final class CoreFields {
 				kind: 'input',
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
-					'placeholder' => 'Select a country',
-					'countryList' => CountryList::getOptions(), // Full ISO-3166 list
+					'placeholder'        => 'Select a country',
+					'countryList'        => CountryList::getOptions(), // Full ISO-3166 list
+					'default_country'    => '',
+					'preferred_countries' => array(), // ISO codes for countries to show at top
+					'searchable'         => true,
+					'output_format'      => 'code', // 'code' or 'name'
 				),
 				inspectorControls: array(
 					array(
@@ -508,6 +512,20 @@ final class CoreFields {
 						'type'  => 'checkbox',
 						'name'  => 'required',
 						'label' => __( 'Required', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'select',
+						'name'  => 'output_format',
+						'label' => __( 'Output Format', 'subtleforms' ),
+						'options' => array(
+							array( 'value' => 'code', 'label' => __( 'ISO Code (US, GB)', 'subtleforms' ) ),
+							array( 'value' => 'name', 'label' => __( 'Country Name', 'subtleforms' ) ),
+						),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'searchable',
+						'label' => __( 'Enable Search', 'subtleforms' ),
 					),
 				)
 			)

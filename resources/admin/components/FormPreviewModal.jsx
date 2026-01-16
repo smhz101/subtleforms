@@ -315,18 +315,24 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
               <option>
                 {placeholder || __('Select a country', 'subtleforms')}
               </option>
-              <option>United States</option>
-              <option>United Kingdom</option>
-              <option>Canada</option>
-              <option>Australia</option>
-              <option>Germany</option>
-              <option>France</option>
-              <option>Spain</option>
-              <option>Italy</option>
-              <option>Japan</option>
-              <option>China</option>
-              <option>{__('...and 200+ more countries', 'subtleforms')}</option>
+              <option>🇺🇸 United States</option>
+              <option>🇬🇧 United Kingdom</option>
+              <option>🇨🇦 Canada</option>
+              <option>🇦🇺 Australia</option>
+              <option>🇩🇪 Germany</option>
+              <option>🇫🇷 France</option>
+              <option>🇪🇸 Spain</option>
+              <option>🇮🇹 Italy</option>
+              <option>🇯🇵 Japan</option>
+              <option>🇨🇳 China</option>
+              <option>{__('...and 235+ more countries', 'subtleforms')}</option>
             </select>
+            <div className='sf-country-field__info' style={{ marginTop: '0.5rem' }}>
+              <span className='dashicons dashicons-admin-site' style={{ fontSize: '16px', width: '16px', height: '16px' }}></span>
+              <span style={{ fontSize: '0.75rem', fontStyle: 'italic', color: '#0369a1' }}>
+                {__('Full ISO-3166 country list available on frontend', 'subtleforms')}
+              </span>
+            </div>
             {helpText && (
               <p className='sf-form-preview-field__help'>{helpText}</p>
             )}

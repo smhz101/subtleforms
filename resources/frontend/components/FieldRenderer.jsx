@@ -218,6 +218,32 @@ function renderInput(
         </select>
       );
 
+    case 'country':
+      const countryList = field.config?.countryList || [];
+      const outputFormat = field.config?.output_format || 'code';
+      const searchable = field.config?.searchable !== false;
+      return (
+        <select
+          id={inputId}
+          className='subtleforms-select subtleforms-country-select'
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          aria-required={required}
+          aria-invalid={!!error}
+          data-searchable={searchable}>
+          <option value=''>
+            {placeholder || __('Select a country', 'subtleforms')}
+          </option>
+          {countryList.map((country, index) => (
+            <option
+              key={country.value || index}
+              value={outputFormat === 'code' ? country.value : country.label}>
+              {country.label}
+            </option>
+          ))}
+        </select>
+      );
+
     case 'hidden':
       return (
         <input

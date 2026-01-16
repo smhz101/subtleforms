@@ -134,18 +134,24 @@ export default function FieldRenderer({ field }) {
             <option>
               {placeholder || __('Select a country', 'subtleforms')}
             </option>
-            <option>United States</option>
-            <option>United Kingdom</option>
-            <option>Canada</option>
-            <option>Australia</option>
-            <option>Germany</option>
-            <option>France</option>
-            <option>Spain</option>
-            <option>Italy</option>
-            <option>Japan</option>
-            <option>China</option>
-            <option>{__('...and 200+ more countries', 'subtleforms')}</option>
+            <option>🇺🇸 United States</option>
+            <option>🇬🇧 United Kingdom</option>
+            <option>🇨🇦 Canada</option>
+            <option>🇦🇺 Australia</option>
+            <option>🇩🇪 Germany</option>
+            <option>🇫🇷 France</option>
+            <option>🇪🇸 Spain</option>
+            <option>🇮🇹 Italy</option>
+            <option>🇯🇵 Japan</option>
+            <option>🇨🇳 China</option>
+            <option>{__('...and 235+ more countries', 'subtleforms')}</option>
           </select>
+          <div className='sf-country-field__info'>
+            <span className='dashicons dashicons-admin-site'></span>
+            <span className='sf-country-field__text'>
+              {__('Full ISO-3166 country list available on frontend', 'subtleforms')}
+            </span>
+          </div>
         </div>
       )}
 
