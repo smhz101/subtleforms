@@ -100,6 +100,14 @@ class DashboardApi {
 	 * @return array
 	 */
 	private function getStats() {
+		// v1.7.0: Cache dashboard stats for 5 minutes to reduce DB load
+		$cache_key = 'subtleforms_dashboard_stats';
+		$cached    = get_transient( $cache_key );
+
+		if ( false !== $cached && is_array( $cached ) ) {
+			return $cached;
+		}
+
 		global $wpdb;
 		$formsTable       = $wpdb->prefix . 'subtleforms_forms';
 		$submissionsTable = $wpdb->prefix . 'subtleforms_submissions';
@@ -135,7 +143,7 @@ class DashboardApi {
 			? round( $totalSubmissions / $publishedForms, 1 )
 			: 0;
 
-		return array(
+		$stats = array(
 			'total_forms'              => $totalForms,
 			'published_forms'          => $publishedForms,
 			'draft_forms'              => $draftForms,
@@ -144,6 +152,11 @@ class DashboardApi {
 			'submissions_this_week'    => $submissionsThisWeek,
 			'avg_submissions_per_form' => $avgSubmissionsPerForm,
 		);
+
+		// Cache for 5 minutes
+		set_transient( $cache_key, $stats, 5 * MINUTE_IN_SECONDS );
+
+		return $stats;
 	}
 
 	/**
@@ -285,5 +298,13 @@ class DashboardApi {
 	 */
 	public function checkPermissions() {
 		return current_user_can( 'manage_options' );
+	}
+
+	/**
+	 * Clear dashboard stats cache (called when forms or submissions change)
+	 * v1.7.0: Performance optimization - invalidate cache on data changes
+	 */
+	public static function clearStatsCache() {
+		delete_transient( 'subtleforms_dashboard_stats' );
 	}
 }

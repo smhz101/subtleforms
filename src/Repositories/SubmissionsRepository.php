@@ -393,4 +393,52 @@ $cutoff_date
 
 		return $deleted !== false ? (int) $deleted : 0;
 	}
+
+	/**
+	 * Get submission counts grouped by form_id in bulk (performance optimization)
+	 *
+	 * @param array $form_ids Array of form IDs to get counts for
+	 * @param string $status Optional status filter ('unread', 'saved', etc.)
+	 * @return array Associative array [form_id => count]
+	 */
+	public function get_counts_by_forms( array $form_ids, $status = null ): array {
+		if ( empty( $form_ids ) ) {
+			return array();
+		}
+
+		global $wpdb;
+		$placeholders = implode( ',', array_fill( 0, count( $form_ids ), '%d' ) );
+
+		if ( $status ) {
+			$query = $wpdb->prepare(
+				"SELECT form_id, COUNT(*) as count FROM {$this->table} 
+                WHERE form_id IN ({$placeholders}) AND status = %s 
+                GROUP BY form_id",
+				array_merge( $form_ids, array( $status ) )
+			);
+		} else {
+			$query = $wpdb->prepare(
+				"SELECT form_id, COUNT(*) as count FROM {$this->table} 
+                WHERE form_id IN ({$placeholders}) 
+                GROUP BY form_id",
+				$form_ids
+			);
+		}
+
+		$results = $wpdb->get_results( $query, ARRAY_A );
+		$counts  = array();
+
+		foreach ( $results as $row ) {
+			$counts[ (int) $row['form_id'] ] = (int) $row['count'];
+		}
+
+		// Fill in zero counts for forms with no submissions
+		foreach ( $form_ids as $id ) {
+			if ( ! isset( $counts[ $id ] ) ) {
+				$counts[ $id ] = 0;
+			}
+		}
+
+		return $counts;
+	}
 }

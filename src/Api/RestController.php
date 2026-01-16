@@ -394,14 +394,16 @@ final class RestController {
 		$total = $this->formsRepo->count( $args );
 
 		// v0.9.0+: Enhance forms with submission counts for admin UI (v0.9.1: add unread count)
-		foreach ( $forms as &$form ) {
-			$form['submission_count'] = $this->submissionsRepo->count( array( 'form_id' => $form['id'] ) );
-			$form['unread_count']     = $this->submissionsRepo->count(
-				array(
-					'form_id' => $form['id'],
-					'status'  => 'unread',
-				)
-			);
+		// v1.7.0: Optimized to eliminate N+1 queries by fetching counts in bulk
+		if ( ! empty( $forms ) ) {
+			$form_ids        = array_column( $forms, 'id' );
+			$total_counts    = $this->submissionsRepo->get_counts_by_forms( $form_ids );
+			$unread_counts   = $this->submissionsRepo->get_counts_by_forms( $form_ids, 'unread' );
+
+			foreach ( $forms as &$form ) {
+				$form['submission_count'] = $total_counts[ $form['id'] ] ?? 0;
+				$form['unread_count']     = $unread_counts[ $form['id'] ] ?? 0;
+			}
 		}
 
 		$response = new WP_REST_Response( $forms, 200 );
