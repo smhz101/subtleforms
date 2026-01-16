@@ -199,5 +199,6 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
     setShowTour,
     tourCompleted,
     setTourCompleted,
+    settings,
   };
 }

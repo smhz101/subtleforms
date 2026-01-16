@@ -275,6 +275,13 @@ export default function FieldRenderer({ field }) {
             <div className='sf-captcha-preview__description'>
               {__('CAPTCHA will appear here on the live form', 'subtleforms')}
             </div>
+            {field.config?.providerName && (
+              <div className='sf-captcha-preview__provider'>
+                {field.config.providerName === 'recaptcha' && 'Google reCAPTCHA'}
+                {field.config.providerName === 'hcaptcha' && 'hCaptcha'}
+                {field.config.providerName === 'turnstile' && 'Cloudflare Turnstile'}
+              </div>
+            )}
           </div>
         </div>
       )}

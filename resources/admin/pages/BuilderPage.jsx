@@ -90,6 +90,7 @@ function FormBuilderInner({
     setShowTour,
     tourCompleted,
     setTourCompleted,
+    settings,
   } = useBuilderBoot({
     formId,
     bootstrap,

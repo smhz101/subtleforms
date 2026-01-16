@@ -284,6 +284,13 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
                     'subtleforms'
                   )}
                 </div>
+                {field.config?.providerName && (
+                  <div className='sf-captcha-preview__provider'>
+                    {field.config.providerName === 'recaptcha' && 'Google reCAPTCHA'}
+                    {field.config.providerName === 'hcaptcha' && 'hCaptcha'}
+                    {field.config.providerName === 'turnstile' && 'Cloudflare Turnstile'}
+                  </div>
+                )}
               </div>
             </div>
             {helpText && (

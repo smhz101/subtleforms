@@ -254,6 +254,19 @@
 		font-style: italic;
 	}
 
+	&__provider {
+		margin-top: 0.5rem;
+		padding: 0.25rem 0.5rem;
+		background-color: #dbeafe;
+		color: #1e40af;
+		font-size: 0.625rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.025em;
+		border-radius: 3px;
+		display: inline-block;
+	}
+
 	// Variant for preview modal (slightly different styling)
 	&--preview-mode {
 		background-color: #f3f4f6;

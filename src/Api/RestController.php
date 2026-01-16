@@ -580,9 +580,12 @@ final class RestController {
 	 * @return array Modified fields
 	 */
 	private function processCaptchaFields( $fields, $captcha_html ) {
+		$provider_name = $this->captchaManager ? $this->captchaManager->getActiveProviderName() : '';
+
 		foreach ( $fields as &$field ) {
 			if ( in_array( $field['type'], array( 'captcha', 'recaptcha', 'hcaptcha', 'turnstile' ), true ) ) {
-				$field['config']['captchaHtml'] = $captcha_html;
+				$field['config']['captchaHtml']   = $captcha_html;
+				$field['config']['providerName']  = $provider_name;
 			}
 
 			// Process nested fields (containers, columns)
