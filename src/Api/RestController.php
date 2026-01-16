@@ -497,6 +497,9 @@ final class RestController {
 			$draftSchema = $this->formsRepo->getDraftSchema( $formId );
 
 			if ( $draftSchema ) {
+				// Inject provider name for builder preview (not full CAPTCHA HTML)
+				$draftSchema = $this->injectCaptchaProvider( $draftSchema );
+
 				return new WP_REST_Response(
 					array(
 						'form'    => $form,
@@ -599,6 +602,59 @@ final class RestController {
 				foreach ( $field['columns'] as &$column ) {
 					if ( is_array( $column ) ) {
 						$column = $this->processCaptchaFields( $column, $captcha_html );
+					}
+				}
+			}
+		}
+
+		return $fields;
+	}
+
+	/**
+	 * Inject CAPTCHA provider name only (for builder preview)
+	 *
+	 * @param array $schema Schema data
+	 * @return array Modified schema
+	 */
+	private function injectCaptchaProvider( $schema ) {
+		if ( ! $this->captchaManager || ! $this->captchaManager->isEnabled() || ! $this->captchaManager->isConfigured() ) {
+			return $schema;
+		}
+
+		$provider_name = $this->captchaManager->getActiveProviderName();
+
+		if ( empty( $provider_name ) ) {
+			return $schema;
+		}
+
+		// Recursively inject provider name into fields
+		$schema['fields'] = $this->processCaptchaProvider( $schema['fields'] ?? array(), $provider_name );
+
+		return $schema;
+	}
+
+	/**
+	 * Recursively process fields to inject CAPTCHA provider name
+	 *
+	 * @param array $fields Array of field definitions
+	 * @param string $provider_name Provider name
+	 * @return array Modified fields
+	 */
+	private function processCaptchaProvider( $fields, $provider_name ) {
+		foreach ( $fields as &$field ) {
+			if ( in_array( $field['type'], array( 'captcha', 'recaptcha', 'hcaptcha', 'turnstile' ), true ) ) {
+				$field['config']['providerName'] = $provider_name;
+			}
+
+			// Process nested fields (containers, columns)
+			if ( ! empty( $field['children'] ) && is_array( $field['children'] ) ) {
+				$field['children'] = $this->processCaptchaProvider( $field['children'], $provider_name );
+			}
+
+			if ( ! empty( $field['columns'] ) && is_array( $field['columns'] ) ) {
+				foreach ( $field['columns'] as &$column ) {
+					if ( is_array( $column ) ) {
+						$column = $this->processCaptchaProvider( $column, $provider_name );
 					}
 				}
 			}
