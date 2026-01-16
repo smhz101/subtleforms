@@ -51,6 +51,15 @@ coverage/
 *.test.js.snap
 phpunit.xml
 .phpunit.result.cache
+test-results/
+playwright-report/
+
+# Distribution archives (generate on release)
+dist/*.zip
+*.zip
+
+# IDE metadata cache
+.phpstorm.meta.php/
 
 # Temporary files
 *.tmp
