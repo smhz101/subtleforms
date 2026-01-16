@@ -1115,6 +1115,40 @@ final class RestController {
 			return new WP_Error( 'form_not_found', __( 'Form not found', 'subtleforms' ), array( 'status' => 404 ) );
 		}
 
+		// Check submission limit if enabled
+		$settings = get_option( 'subtleforms_settings', array() );
+		if ( ! empty( $settings['submission_limit_enabled'] ) ) {
+			$limit    = isset( $settings['submission_limit'] ) ? (int) $settings['submission_limit'] : 1;
+			$user_key = get_current_user_id();
+
+			// If not logged in, use IP address as identifier
+			if ( ! $user_key && $ip ) {
+				$user_key = 'ip_' . md5( $ip );
+			}
+
+			if ( $user_key ) {
+				// Count existing submissions from this user/IP for this form
+				global $wpdb;
+				$table_name = $wpdb->prefix . 'subtleforms_submissions';
+				$count      = $wpdb->get_var(
+					$wpdb->prepare(
+						"SELECT COUNT(*) FROM {$table_name} WHERE form_id = %d AND (user_id = %d OR ip_address = %s) AND status != 'spam'",
+						$formId,
+						is_numeric( $user_key ) ? $user_key : 0,
+						$ip ? $ip : ''
+					)
+				);
+
+				if ( $count >= $limit ) {
+					return new WP_Error(
+						'submission_limit_exceeded',
+						__( 'You have reached the maximum number of submissions for this form.', 'subtleforms' ),
+						array( 'status' => 403 )
+					);
+				}
+			}
+		}
+
 		// Resolve active schema version for this form and attach to submission
 		try {
 			$activeSchema = $this->formsRepo->loadSchemaVersion( $formId );

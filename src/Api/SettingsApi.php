@@ -265,21 +265,6 @@ class SettingsApi {
 			'debug_mode'                 => array(
 				'type' => 'boolean',
 			),
-			'log_retention_days'         => array(
-				'type'              => 'integer',
-				'minimum'           => 1,
-				'maximum'           => 365,
-				'validate_callback' => function ( $value, $request, $key ) {
-					if ( ! is_numeric( $value ) ) {
-						return new \WP_Error( 'rest_invalid_param', 'log_retention_days must be a number', array( 'status' => 400 ) );
-					}
-					$int_value = intval( $value );
-					if ( $int_value < 1 || $int_value > 365 ) {
-						return new \WP_Error( 'rest_invalid_param', 'log_retention_days must be between 1 and 365', array( 'status' => 400 ) );
-					}
-					return true;
-				},
-			),
 		);
 	}
 }

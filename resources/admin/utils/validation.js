@@ -137,19 +137,6 @@ export const settingsSchema = Joi.object({
       'any.required': __('Debug mode setting is required', 'subtleforms'),
     }),
 
-  log_retention_days: Joi.number()
-    .integer()
-    .min(1)
-    .max(365)
-    .required()
-    .messages({
-      'number.base': __('Log retention days must be a number', 'subtleforms'),
-      'number.integer': __('Log retention days must be a whole number', 'subtleforms'),
-      'number.min': __('Log retention must be at least 1 day', 'subtleforms'),
-      'number.max': __('Log retention cannot exceed 365 days', 'subtleforms'),
-      'any.required': __('Log retention days is required', 'subtleforms'),
-    }),
-
   // Security Settings
   enable_honeypot: Joi.boolean().messages({
     'boolean.base': __('Honeypot protection must be true or false', 'subtleforms'),

@@ -800,11 +800,21 @@ function FormBuilderInner({
     });
 
     if (autoSaving || effectiveStatus === 'saving') {
-      return (() => { /* translators: %1$s: localized time string (e.g. 12:34 PM) */ return sprintf(__('Saving… (last saved at %1$s)', 'subtleforms'), time); })();
+      return (() => {
+        /* translators: %1$s: localized time string (e.g. 12:34 PM) */ return sprintf(
+          __('Saving… (last saved at %1$s)', 'subtleforms'),
+          time
+        );
+      })();
     }
 
     if (effectiveStatus === 'saved') {
-      return (() => { /* translators: %1$s: localized time string (e.g. 12:34 PM) */ return sprintf(__('Last saved at %1$s', 'subtleforms'), time); })();
+      return (() => {
+        /* translators: %1$s: localized time string (e.g. 12:34 PM) */ return sprintf(
+          __('Last saved at %1$s', 'subtleforms'),
+          time
+        );
+      })();
     }
 
     return null;

@@ -40,7 +40,6 @@ class Settings {
 
 		// Advanced
 		'debug_mode'                 => false,
-		'log_retention_days'         => 30,
 
 		// Spam Protection
 		'enable_honeypot'            => true,
@@ -100,11 +99,6 @@ class Settings {
 		'sender_email'               => 'email',
 		'admin_email'                => 'email',
 		'debug_mode'                 => 'boolean',
-		'log_retention_days'         => array(
-			'integer',
-			'min' => 1,
-			'max' => 365,
-		),
 		'captcha_enabled'            => 'boolean',
 		'captcha_provider'           => array( '', 'recaptcha', 'hcaptcha', 'turnstile' ),
 		'captcha_recaptcha_site_key' => array(

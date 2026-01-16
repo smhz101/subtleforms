@@ -95,8 +95,7 @@ export default function Settings() {
     let finalValue = value;
     if (
       key === 'autosave_interval' ||
-      key === 'submission_limit' ||
-      key === 'log_retention_days'
+      key === 'submission_limit'
     ) {
       finalValue = parseInt(value, 10);
       if (isNaN(finalValue)) {
@@ -136,7 +135,6 @@ export default function Settings() {
         ...settings,
         autosave_interval: parseInt(settings.autosave_interval, 10) || 3,
         submission_limit: parseInt(settings.submission_limit, 10) || 1,
-        log_retention_days: parseInt(settings.log_retention_days, 10) || 30,
       };
 
       // Validate all settings with Joi
@@ -672,22 +670,6 @@ function AdvancedSettings({
               )}
             />
             <FieldError errors={fieldErrors.debug_mode} />
-          </div>
-
-          <div>
-            <TextControl
-              label={__('Log Retention (days)', 'subtleforms')}
-              type='number'
-              value={String(settings.log_retention_days)}
-              onChange={(value) => updateSetting('log_retention_days', value)}
-              min='1'
-              max='365'
-              help={__(
-                'How long to keep submission logs (1-365 days)',
-                'subtleforms'
-              )}
-            />
-            <FieldError errors={fieldErrors.log_retention_days} />
           </div>
 
           <div>

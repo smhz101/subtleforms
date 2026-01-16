@@ -33,6 +33,7 @@ final class SpamProtection {
 
 	/**
 	 * Minimum seconds required before form submission (prevents instant bot submissions).
+	 * This is now sourced from settings; the constant serves as a fallback.
 	 *
 	 * @var int
 	 */
@@ -69,6 +70,14 @@ final class SpamProtection {
 	 * @return bool True if honeypot was filled.
 	 */
 	private static function check_honeypot( array $data ): bool {
+		// Check if honeypot is enabled in settings
+		$settings = get_option( 'subtleforms_settings', array() );
+		$enabled  = isset( $settings['enable_honeypot'] ) ? (bool) $settings['enable_honeypot'] : true;
+
+		if ( ! $enabled ) {
+			return false; // Honeypot disabled
+		}
+
 		if ( ! isset( $data[ self::HONEYPOT_FIELD ] ) ) {
 			return false; // Field not present, skip check.
 		}
@@ -90,13 +99,22 @@ final class SpamProtection {
 			return false; // Field not present, skip check.
 		}
 
+		// Get minimum submission time from settings
+		$settings          = get_option( 'subtleforms_settings', array() );
+		$min_time          = isset( $settings['min_submission_time'] ) ? (int) $settings['min_submission_time'] : self::MIN_SUBMISSION_TIME;
+
+		// If set to 0, time trap is disabled
+		if ( $min_time <= 0 ) {
+			return false;
+		}
+
 		$rendered_at = (int) $data[ self::TIME_FIELD ];
 		$now         = time();
 
 		$time_diff = $now - $rendered_at;
 
 		// If less than minimum time, likely a bot
-		return $time_diff < self::MIN_SUBMISSION_TIME;
+		return $time_diff < $min_time;
 	}
 
 	/**

@@ -149,7 +149,10 @@ export default function FieldRenderer({ field }) {
           <div className='sf-country-field__info'>
             <span className='dashicons dashicons-admin-site'></span>
             <span className='sf-country-field__text'>
-              {__('Full ISO-3166 country list available on frontend', 'subtleforms')}
+              {__(
+                'Full ISO-3166 country list available on frontend',
+                'subtleforms'
+              )}
             </span>
           </div>
         </div>
@@ -283,9 +286,11 @@ export default function FieldRenderer({ field }) {
             </div>
             {field.config?.providerName && (
               <div className='sf-captcha-preview__provider'>
-                {field.config.providerName === 'recaptcha' && 'Google reCAPTCHA'}
+                {field.config.providerName === 'recaptcha' &&
+                  'Google reCAPTCHA'}
                 {field.config.providerName === 'hcaptcha' && 'hCaptcha'}
-                {field.config.providerName === 'turnstile' && 'Cloudflare Turnstile'}
+                {field.config.providerName === 'turnstile' &&
+                  'Cloudflare Turnstile'}
               </div>
             )}
           </div>

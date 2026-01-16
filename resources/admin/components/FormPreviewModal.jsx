@@ -286,9 +286,11 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
                 </div>
                 {field.config?.providerName && (
                   <div className='sf-captcha-preview__provider'>
-                    {field.config.providerName === 'recaptcha' && 'Google reCAPTCHA'}
+                    {field.config.providerName === 'recaptcha' &&
+                      'Google reCAPTCHA'}
                     {field.config.providerName === 'hcaptcha' && 'hCaptcha'}
-                    {field.config.providerName === 'turnstile' && 'Cloudflare Turnstile'}
+                    {field.config.providerName === 'turnstile' &&
+                      'Cloudflare Turnstile'}
                   </div>
                 )}
               </div>
@@ -327,10 +329,26 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
               <option>🇨🇳 China</option>
               <option>{__('...and 235+ more countries', 'subtleforms')}</option>
             </select>
-            <div className='sf-country-field__info' style={{ marginTop: '0.5rem' }}>
-              <span className='dashicons dashicons-admin-site' style={{ fontSize: '16px', width: '16px', height: '16px' }}></span>
-              <span style={{ fontSize: '0.75rem', fontStyle: 'italic', color: '#0369a1' }}>
-                {__('Full ISO-3166 country list available on frontend', 'subtleforms')}
+            <div
+              className='sf-country-field__info'
+              style={{ marginTop: '0.5rem' }}>
+              <span
+                className='dashicons dashicons-admin-site'
+                style={{
+                  fontSize: '16px',
+                  width: '16px',
+                  height: '16px',
+                }}></span>
+              <span
+                style={{
+                  fontSize: '0.75rem',
+                  fontStyle: 'italic',
+                  color: '#0369a1',
+                }}>
+                {__(
+                  'Full ISO-3166 country list available on frontend',
+                  'subtleforms'
+                )}
               </span>
             </div>
             {helpText && (
