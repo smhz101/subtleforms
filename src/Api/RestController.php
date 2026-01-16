@@ -1054,6 +1054,24 @@ final class RestController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function submit_form( WP_REST_Request $request ) {
+		// Rate limiting: 10 submissions per minute per IP
+		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? filter_var( wp_unslash( $_SERVER['REMOTE_ADDR'] ), FILTER_VALIDATE_IP ) : null;
+
+		if ( $ip ) {
+			$transient_key = 'subtleforms_ratelimit_' . md5( $ip );
+			$count         = (int) get_transient( $transient_key );
+
+			if ( $count >= 10 ) {
+				return new WP_Error(
+					'rate_limit_exceeded',
+					__( 'Too many requests. Please try again in a minute.', 'subtleforms' ),
+					array( 'status' => 429 )
+				);
+			}
+
+			set_transient( $transient_key, $count + 1, MINUTE_IN_SECONDS );
+		}
+
 		$formId  = $request->get_param( 'form_id' );
 		$payload = $request->get_param( 'data' ) ?? array();
 		if ( is_string( $payload ) ) {
