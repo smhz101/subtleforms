@@ -1,21 +1,43 @@
-# SubtleForms Architecture Skills
+---
+name: subtleforms-architecture
+description: "Use when working on SubtleForms codebase: repository pattern, dependency injection, schema versioning, REST API structure, performance rules, and security patterns."
+compatibility: "Targets WordPress 6.0+ (PHP 7.4+). Uses @wordpress/scripts for React admin UI."
+---
 
-## Overview
-SubtleForms follows a clean, repository-pattern architecture with strict separation of concerns.
+# SubtleForms Architecture
 
-## Core Principles
+## When to use
 
-### 1. Repository Pattern
-- All database access MUST go through repositories
+Use this skill when:
+- Adding new database operations or repositories
+- Creating/modifying REST API endpoints
+- Working with form schema or submissions
+- Implementing new field types or validators
+- Refactoring plugin architecture
+- Troubleshooting performance or security issues
+
+## Inputs required
+
+- Repo root: `/wp-content/plugins/subtleforms/`
+- Target WordPress version: 6.0+ minimum
+- PHP version: 7.4+ minimum
+- Node.js: 20+ for build tooling
+
+## Procedure
+
+### 1. Core Architecture Principles
+
+**Repository Pattern**
+- All database access MUST go through repositories (`src/Repositories/`)
 - Never use `$wpdb` directly in controllers or business logic
 - Repository methods return arrays or throw exceptions
 
-### 2. Dependency Injection
+**Dependency Injection**
 - Controllers receive dependencies via constructor
 - No global state access except WordPress core functions
 - Use Settings class for all configuration
 
-### 3. Immutable Schema Versioning
+**Immutable Schema Versioning**
 - Draft schema: Mutable, stored in `draft_schema` column
 - Active schema: Immutable, stored in `schema_versions` table
 - Never modify active schema after publication
