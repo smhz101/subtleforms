@@ -120,3 +120,23 @@ add_filter(
 	},
 	99
 );
+
+// Register privacy policy content
+add_action(
+	'admin_init',
+	function () {
+		if ( function_exists( 'wp_add_privacy_policy_content' ) ) {
+			$content = sprintf(
+				'<h2>%s</h2><p>%s</p><ul><li>%s</li><li>%s</li><li>%s</li></ul><p>%s</p>',
+				esc_html__( 'SubtleForms Data Collection', 'subtleforms' ),
+				esc_html__( 'When you submit a form on this website, SubtleForms collects and stores the following information:', 'subtleforms' ),
+				esc_html__( 'Form field data (as entered by you)', 'subtleforms' ),
+				esc_html__( 'Your IP address (for spam prevention)', 'subtleforms' ),
+				esc_html__( 'Your browser user agent (for spam prevention)', 'subtleforms' ),
+				esc_html__( 'This data is stored according to the configured data retention policy. Contact the site administrator for more information about data retention and deletion.', 'subtleforms' )
+			);
+
+			wp_add_privacy_policy_content( 'SubtleForms', $content );
+		}
+	}
+);
