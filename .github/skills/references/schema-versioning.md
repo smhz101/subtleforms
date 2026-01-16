@@ -104,6 +104,7 @@ $forms_repository->update($form['id'], [
 ```
 
 **What happens:**
+
 1. Schema copied from `draft_schema` to `schema_versions` table
 2. `active_schema_id` points to new schema version
 3. Form status changes to 'published'
@@ -183,14 +184,14 @@ $submission_id = $submissions_repository->create([
 // Get all versions for a form
 function getSchemaVersions(int $form_id): array {
     global $wpdb;
-    
+
     $table = $wpdb->prefix . 'subtleforms_schema_versions';
-    
+
     $query = $wpdb->prepare(
         "SELECT * FROM {$table} WHERE form_id = %d ORDER BY version DESC",
         $form_id
     );
-    
+
     return $wpdb->get_results($query, ARRAY_A);
 }
 ```
@@ -200,21 +201,21 @@ function getSchemaVersions(int $form_id): array {
 ### Adding a field (non-breaking)
 
 **Old schema:**
+
 ```json
 {
-  "fields": [
-    {"id": "field_1", "type": "text", "label": "Name"}
-  ]
+	"fields": [{ "id": "field_1", "type": "text", "label": "Name" }]
 }
 ```
 
 **New schema:**
+
 ```json
 {
-  "fields": [
-    {"id": "field_1", "type": "text", "label": "Name"},
-    {"id": "field_2", "type": "email", "label": "Email"}
-  ]
+	"fields": [
+		{ "id": "field_1", "type": "text", "label": "Name" },
+		{ "id": "field_2", "type": "email", "label": "Email" }
+	]
 }
 ```
 
@@ -223,25 +224,26 @@ function getSchemaVersions(int $form_id): array {
 ### Removing a field (breaking)
 
 **Old schema:**
+
 ```json
 {
-  "fields": [
-    {"id": "field_1", "type": "text", "label": "Name"},
-    {"id": "field_2", "type": "phone", "label": "Phone"}
-  ]
+	"fields": [
+		{ "id": "field_1", "type": "text", "label": "Name" },
+		{ "id": "field_2", "type": "phone", "label": "Phone" }
+	]
 }
 ```
 
 **New schema:**
+
 ```json
 {
-  "fields": [
-    {"id": "field_1", "type": "text", "label": "Name"}
-  ]
+	"fields": [{ "id": "field_1", "type": "text", "label": "Name" }]
 }
 ```
 
 **Impact:** Old submissions have `field_2` data that no longer maps to schema. Consider:
+
 1. Keep field hidden but present in schema
 2. Export old data before migration
 3. Add migration script to clean up old submissions
@@ -249,13 +251,15 @@ function getSchemaVersions(int $form_id): array {
 ### Changing field type (breaking)
 
 **Old schema:**
+
 ```json
-{"id": "field_1", "type": "text", "label": "Age"}
+{ "id": "field_1", "type": "text", "label": "Age" }
 ```
 
 **New schema:**
+
 ```json
-{"id": "field_1", "type": "number", "label": "Age"}
+{ "id": "field_1", "type": "number", "label": "Age" }
 ```
 
 **Impact:** Old text values may not be valid numbers. Requires data migration.
@@ -266,13 +270,13 @@ function getSchemaVersions(int $form_id): array {
 // Rollback to previous version
 function rollbackToVersion(int $form_id, int $version_id) {
     global $forms_repository;
-    
+
     // Verify version exists
     $version = getSchemaVersion($version_id);
     if (!$version || $version['form_id'] !== $form_id) {
         throw new Exception('Invalid version');
     }
-    
+
     // Set as active
     $forms_repository->update($form_id, [
         'active_schema_id' => $version_id,
@@ -284,6 +288,7 @@ function rollbackToVersion(int $form_id, int $version_id) {
 ## Common pitfalls
 
 ❌ **Modifying draft_schema of published form without creating version:**
+
 ```php
 $forms_repository->update($form_id, [
     'draft_schema' => json_encode($new_schema)
@@ -292,6 +297,7 @@ $forms_repository->update($form_id, [
 ```
 
 ✅ **Create new version and activate:**
+
 ```php
 $version_id = $forms_repository->createSchemaVersion($form_id, $new_schema);
 $forms_repository->update($form_id, [
@@ -301,17 +307,20 @@ $forms_repository->update($form_id, [
 ```
 
 ❌ **Loading wrong schema for submission processing:**
+
 ```php
 $form = $forms_repository->find($form_id);
 $schema = json_decode($form['draft_schema'], true); // Wrong!
 ```
 
 ✅ **Load active schema:**
+
 ```php
 $schema = $forms_repository->loadSchemaVersion($form_id);
 ```
 
 ❌ **Not storing schema_version_id with submission:**
+
 ```php
 $submissions_repository->create([
     'form_id' => $form_id,
@@ -321,6 +330,7 @@ $submissions_repository->create([
 ```
 
 ✅ **Always link to schema version:**
+
 ```php
 $submissions_repository->create([
     'form_id' => $form_id,
@@ -339,14 +349,14 @@ public function test_publishing_creates_schema_version() {
         'settings' => '{}',
         'status' => 'draft'
     ]);
-    
+
     $version_id = $this->forms_repository->createSchemaVersion(
         $form['id'],
         ['fields' => []]
     );
-    
+
     $this->assertGreaterThan(0, $version_id);
-    
+
     $schema = $this->forms_repository->loadSchemaVersion($form['id']);
     $this->assertEquals($version_id, $schema['schema_version_id']);
 }
@@ -354,15 +364,15 @@ public function test_publishing_creates_schema_version() {
 public function test_active_schema_is_immutable() {
     // Create and publish form
     $form = $this->createPublishedForm();
-    
+
     // Load active schema
     $schema1 = $this->forms_repository->loadSchemaVersion($form['id']);
-    
+
     // Modify draft_schema
     $this->forms_repository->update($form['id'], [
         'draft_schema' => json_encode(['fields' => ['new_field']])
     ]);
-    
+
     // Active schema should be unchanged
     $schema2 = $this->forms_repository->loadSchemaVersion($form['id']);
     $this->assertEquals($schema1, $schema2);

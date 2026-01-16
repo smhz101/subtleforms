@@ -25,14 +25,14 @@ POST   /forms/{id}/submit  Public submission endpoint
 
 #### Permission requirements
 
-| Endpoint | Permission | Nonce |
-|----------|-----------|-------|
-| GET /forms | `manage_options` | Required |
-| POST /forms | `manage_options` | Required |
-| PUT /forms/{id} | `manage_options` | Required |
-| DELETE /forms/{id} | `manage_options` | Required |
+| Endpoint                 | Permission       | Nonce    |
+| ------------------------ | ---------------- | -------- |
+| GET /forms               | `manage_options` | Required |
+| POST /forms              | `manage_options` | Required |
+| PUT /forms/{id}          | `manage_options` | Required |
+| DELETE /forms/{id}       | `manage_options` | Required |
 | POST /forms/{id}/publish | `manage_options` | Required |
-| POST /forms/{id}/submit | Public | Required |
+| POST /forms/{id}/submit  | Public           | Required |
 
 ### DashboardApi
 
@@ -97,7 +97,7 @@ public function submit_form(WP_REST_Request $request) {
             ['status' => 403]
         );
     }
-    
+
     // Process submission...
 }
 ```
@@ -107,68 +107,73 @@ public function submit_form(WP_REST_Request $request) {
 ### List endpoint (paginated)
 
 **Request:**
+
 ```http
 GET /wp-json/subtleforms/v1/forms?page=1&per_page=20&status=published
 X-WP-Nonce: abc123xyz
 ```
 
 **Response:**
+
 ```json
 {
-  "forms": [
-    {
-      "id": 1,
-      "title": "Contact Form",
-      "status": "published",
-      "submission_count": 42,
-      "created_at": "2026-01-15T10:30:00",
-      "updated_at": "2026-01-16T14:20:00"
-    }
-  ],
-  "total": 100,
-  "page": 1,
-  "per_page": 20,
-  "total_pages": 5
+	"forms": [
+		{
+			"id": 1,
+			"title": "Contact Form",
+			"status": "published",
+			"submission_count": 42,
+			"created_at": "2026-01-15T10:30:00",
+			"updated_at": "2026-01-16T14:20:00"
+		}
+	],
+	"total": 100,
+	"page": 1,
+	"per_page": 20,
+	"total_pages": 5
 }
 ```
 
 ### Single resource
 
 **Request:**
+
 ```http
 GET /wp-json/subtleforms/v1/forms/1
 X-WP-Nonce: abc123xyz
 ```
 
 **Response:**
+
 ```json
 {
-  "id": 1,
-  "title": "Contact Form",
-  "status": "published",
-  "schema": {
-    "fields": [
-      {
-        "id": "field_1",
-        "type": "text",
-        "label": "Name",
-        "required": true
-      }
-    ]
-  },
-  "settings": {
-    "notifications": true,
-    "captcha_enabled": true,
-    "captcha_provider": "recaptcha_v2"
-  },
-  "created_at": "2026-01-15T10:30:00",
-  "updated_at": "2026-01-16T14:20:00"
+	"id": 1,
+	"title": "Contact Form",
+	"status": "published",
+	"schema": {
+		"fields": [
+			{
+				"id": "field_1",
+				"type": "text",
+				"label": "Name",
+				"required": true
+			}
+		]
+	},
+	"settings": {
+		"notifications": true,
+		"captcha_enabled": true,
+		"captcha_provider": "recaptcha_v2"
+	},
+	"created_at": "2026-01-15T10:30:00",
+	"updated_at": "2026-01-16T14:20:00"
 }
 ```
 
 ### Create/Update
 
 **Request:**
+
 ```http
 POST /wp-json/subtleforms/v1/forms
 Content-Type: application/json
@@ -184,32 +189,35 @@ X-WP-Nonce: abc123xyz
 ```
 
 **Response (success):**
+
 ```json
 {
-  "id": 5,
-  "title": "New Form",
-  "status": "draft",
-  "created_at": "2026-01-17T08:15:00"
+	"id": 5,
+	"title": "New Form",
+	"status": "draft",
+	"created_at": "2026-01-17T08:15:00"
 }
 ```
 
 **Response (error):**
+
 ```json
 {
-  "code": "rest_invalid_param",
-  "message": "Invalid parameter(s): title",
-  "data": {
-    "status": 400,
-    "params": {
-      "title": "Title is required"
-    }
-  }
+	"code": "rest_invalid_param",
+	"message": "Invalid parameter(s): title",
+	"data": {
+		"status": 400,
+		"params": {
+			"title": "Title is required"
+		}
+	}
 }
 ```
 
 ### Public submission endpoint
 
 **Request:**
+
 ```http
 POST /wp-json/subtleforms/v1/forms/1/submit
 Content-Type: application/json
@@ -228,35 +236,38 @@ X-WP-Nonce: abc123xyz
 ```
 
 **Response (success):**
+
 ```json
 {
-  "success": true,
-  "message": "Form submitted successfully",
-  "submission_id": 123
+	"success": true,
+	"message": "Form submitted successfully",
+	"submission_id": 123
 }
 ```
 
 **Response (spam detected):**
+
 ```json
 {
-  "code": "spam_detected",
-  "message": "Submission failed spam check",
-  "data": {
-    "status": 403,
-    "reason": "honeypot"
-  }
+	"code": "spam_detected",
+	"message": "Submission failed spam check",
+	"data": {
+		"status": 403,
+		"reason": "honeypot"
+	}
 }
 ```
 
 **Response (rate limited):**
+
 ```json
 {
-  "code": "rate_limit_exceeded",
-  "message": "Too many requests. Please try again later.",
-  "data": {
-    "status": 429,
-    "retry_after": 60
-  }
+	"code": "rate_limit_exceeded",
+	"message": "Too many requests. Please try again later.",
+	"data": {
+		"status": 429,
+		"retry_after": 60
+	}
 }
 ```
 
@@ -277,15 +288,15 @@ return new WP_Error(
 
 ### Common error codes
 
-| Code | Status | Meaning |
-|------|--------|---------|
-| `rest_forbidden` | 403 | Permission denied |
-| `rest_cookie_invalid_nonce` | 403 | Invalid/missing nonce |
-| `rest_invalid_param` | 400 | Invalid request parameters |
-| `rest_not_found` | 404 | Resource not found |
-| `spam_detected` | 403 | Submission failed spam check |
-| `rate_limit_exceeded` | 429 | Too many requests |
-| `captcha_verification_failed` | 400 | CAPTCHA token invalid |
+| Code                          | Status | Meaning                      |
+| ----------------------------- | ------ | ---------------------------- |
+| `rest_forbidden`              | 403    | Permission denied            |
+| `rest_cookie_invalid_nonce`   | 403    | Invalid/missing nonce        |
+| `rest_invalid_param`          | 400    | Invalid request parameters   |
+| `rest_not_found`              | 404    | Resource not found           |
+| `spam_detected`               | 403    | Submission failed spam check |
+| `rate_limit_exceeded`         | 429    | Too many requests            |
+| `captcha_verification_failed` | 400    | CAPTCHA token invalid        |
 
 ## Rate limiting
 
@@ -351,7 +362,7 @@ add_action('subtleforms_after_submission', [DashboardApi::class, 'clearStatsCach
 public function test_get_forms_requires_authentication() {
     $request = new WP_REST_Request('GET', '/subtleforms/v1/forms');
     $response = $this->server->dispatch($request);
-    
+
     $this->assertEquals(403, $response->get_status());
 }
 
@@ -359,7 +370,7 @@ public function test_submit_form_verifies_nonce() {
     $request = new WP_REST_Request('POST', '/subtleforms/v1/forms/1/submit');
     $request->set_header('X-WP-Nonce', 'invalid');
     $response = $this->server->dispatch($request);
-    
+
     $this->assertEquals(403, $response->get_status());
 }
 ```
@@ -367,6 +378,7 @@ public function test_submit_form_verifies_nonce() {
 ## Common pitfalls
 
 ❌ **Missing permission callback:**
+
 ```php
 register_rest_route('subtleforms/v1', '/forms', [
     'methods' => 'GET',
@@ -376,6 +388,7 @@ register_rest_route('subtleforms/v1', '/forms', [
 ```
 
 ✅ **Always define permission callback:**
+
 ```php
 register_rest_route('subtleforms/v1', '/forms', [
     'methods' => 'GET',
@@ -387,21 +400,25 @@ register_rest_route('subtleforms/v1', '/forms', [
 ```
 
 ❌ **Not sanitizing input:**
+
 ```php
 $title = $request->get_param('title'); // Direct use
 ```
 
 ✅ **Always sanitize:**
+
 ```php
 $title = Helpers::safe_sanitize_text($request->get_param('title'));
 ```
 
 ❌ **Inconsistent error responses:**
+
 ```php
 return ['error' => 'Something went wrong']; // Wrong format
 ```
 
 ✅ **Use WP_Error:**
+
 ```php
 return new WP_Error('error_code', 'Error message', ['status' => 400]);
 ```

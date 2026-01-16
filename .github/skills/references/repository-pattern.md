@@ -55,7 +55,7 @@ public function get_forms(WP_REST_Request $request) {
         'per_page' => 20,
         'page' => 1
     ]);
-    
+
     return rest_ensure_response($forms);
 }
 ```
@@ -112,11 +112,13 @@ foreach ($forms as &$form) {
 ## Adding new repository methods
 
 1. **Method signature must be type-safe:**
+
 ```php
 public function methodName(int $id, array $data): ?array
 ```
 
 2. **Always use prepared statements:**
+
 ```php
 $query = $wpdb->prepare(
     "SELECT * FROM {$wpdb->prefix}subtleforms_forms WHERE id = %d",
@@ -125,6 +127,7 @@ $query = $wpdb->prepare(
 ```
 
 3. **Return consistent data types:**
+
    - Single record: `?array` (null if not found)
    - Multiple records: `array` (empty array if none)
    - Write operations: `bool` (success/failure) or `int` (new ID)
@@ -152,7 +155,7 @@ $wpdb->query('START TRANSACTION');
 try {
     $form_id = $this->forms_repository->create($form_data);
     $this->forms_repository->createSchemaVersion($form_id, $schema);
-    
+
     $wpdb->query('COMMIT');
 } catch (Exception $e) {
     $wpdb->query('ROLLBACK');
@@ -163,6 +166,7 @@ try {
 ## Common pitfalls
 
 ❌ **Using `$wpdb` directly in controller:**
+
 ```php
 // In RestController.php
 global $wpdb;
@@ -170,12 +174,14 @@ $results = $wpdb->get_results("SELECT * FROM {$wpdb->prefix}subtleforms_forms");
 ```
 
 ✅ **Using repository:**
+
 ```php
 // In RestController.php
 $results = $this->forms_repository->all();
 ```
 
 ❌ **Looping to get related data:**
+
 ```php
 foreach ($forms as &$form) {
     $form['count'] = $this->submissions_repository->count($form['id']);
@@ -183,6 +189,7 @@ foreach ($forms as &$form) {
 ```
 
 ✅ **Using bulk query:**
+
 ```php
 $counts = $this->submissions_repository->get_counts_by_forms($form_ids);
 ```
@@ -197,7 +204,7 @@ public function test_it_creates_a_form() {
         'schema' => '{}',
         'settings' => '{}'
     ]);
-    
+
     $this->assertIsArray($form);
     $this->assertEquals('Test Form', $form['title']);
 }
@@ -211,7 +218,7 @@ Repositories are injected via constructor:
 class RestController {
     private FormsRepository $forms_repository;
     private SubmissionsRepository $submissions_repository;
-    
+
     public function __construct(
         FormsRepository $forms_repository,
         SubmissionsRepository $submissions_repository

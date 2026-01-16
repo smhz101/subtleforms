@@ -1,7 +1,7 @@
 ---
 name: subtleforms-architecture
-description: "Use when working on SubtleForms codebase: repository pattern, dependency injection, schema versioning, REST API structure, performance rules, and security patterns."
-compatibility: "Targets WordPress 6.0+ (PHP 7.4+). Uses @wordpress/scripts for React admin UI."
+description: 'Use when working on SubtleForms codebase: repository pattern, dependency injection, schema versioning, REST API structure, performance rules, and security patterns.'
+compatibility: 'Targets WordPress 6.0+ (PHP 7.4+). Uses @wordpress/scripts for React admin UI.'
 ---
 
 # SubtleForms Architecture
@@ -9,6 +9,7 @@ compatibility: "Targets WordPress 6.0+ (PHP 7.4+). Uses @wordpress/scripts for R
 ## When to use
 
 Use this skill when:
+
 - Adding new database operations or repositories
 - Creating/modifying REST API endpoints
 - Working with form schema or submissions
@@ -28,21 +29,25 @@ Use this skill when:
 ### 1. Core Architecture Principles
 
 **Repository Pattern**
+
 - All database access MUST go through repositories (`src/Repositories/`)
 - Never use `$wpdb` directly in controllers or business logic
 - Repository methods return arrays or throw exceptions
 
 **Dependency Injection**
+
 - Controllers receive dependencies via constructor
 - No global state access except WordPress core functions
 - Use Settings class for all configuration
 
 **Immutable Schema Versioning**
+
 - Draft schema: Mutable, stored in `draft_schema` column
 - Active schema: Immutable, stored in `schema_versions` table
 - Never modify active schema after publication
 
 ### 4. State Machine Discipline
+
 - Builder state transitions are strictly enforced
 - See `ALLOWED_TRANSITIONS` map in `useBuilderReducer.js`
 - Invalid transitions fail silently (FSM constraint)
@@ -72,17 +77,20 @@ resources/
 ## Key Components
 
 ### Forms Repository
+
 - `all()`: Paginated form list with filtering
 - `find()`: Single form by ID
 - `loadSchemaVersion()`: Get active schema for form
 - `createSchemaVersion()`: Create immutable version
 
 ### Submissions Repository
+
 - `create()`: Insert submission with metadata
 - `findAll()`: Advanced filtering and search
 - `get_counts_by_forms()`: Bulk counts (avoid N+1)
 
 ### REST API Structure
+
 - `/subtleforms/v1/forms` - CRUD for forms
 - `/subtleforms/v1/forms/{id}/schema` - Schema versioning
 - `/subtleforms/v1/forms/{id}/submit` - Public submission endpoint
@@ -90,11 +98,13 @@ resources/
 - `/subtleforms/v1/dashboard` - Dashboard stats (cached)
 
 ### Field Registry
+
 - Fields defined in `CoreFields.php`
 - Each field has: type, category, icon, inspector controls
 - Custom fields via `subtleforms_register_fields` filter
 
 ### Engine Pipeline
+
 - Submission → SpamProtection → CAPTCHA → Validation → Actions
 - Actions: Email, Webhook, Calculation (extensible)
 - Context object carries state through pipeline
@@ -102,12 +112,14 @@ resources/
 ## Performance Rules
 
 ### Database Optimization
+
 - ✅ Use bulk queries (e.g., `get_counts_by_forms()`)
 - ❌ Never loop over forms/submissions to fetch related data
 - ✅ Add indexes on frequently queried columns
 - ✅ Use transient caching for expensive queries (5-minute TTL)
 
 ### Frontend Optimization
+
 - Build separates admin and frontend bundles
 - Lazy load heavy components when possible
 - Use React.memo() for pure components
@@ -116,16 +128,19 @@ resources/
 ## Security Patterns
 
 ### REST API Authentication
+
 - Admin endpoints: Check `current_user_can('manage_options')`
 - Public endpoints: Nonce verification via `X-WP-Nonce` header
 - Rate limiting on submission endpoint (10/min per IP)
 
 ### Input Validation
+
 - All user input sanitized via `Helpers::safe_sanitize_text()`
 - Schema validation via `SchemaValidator`
 - CAPTCHA verification before submission processing
 
 ### SQL Injection Prevention
+
 - Always use `$wpdb->prepare()` with placeholders
 - Never interpolate user input into SQL
 - Use `%d`, `%s`, `%f` for type-safe queries
@@ -133,11 +148,13 @@ resources/
 ## Extension Points
 
 ### Filters
+
 - `subtleforms_register_fields` - Add custom field types
 - `subtleforms_captcha_providers` - Add CAPTCHA providers
 - `subtleforms_captcha_provider_config` - Customize provider config
 
 ### Actions
+
 - `subtleforms_before_submission` - Pre-submission hook
 - `subtleforms_after_submission` - Post-submission hook
 - `subtleforms_form_published` - Form status change
@@ -145,11 +162,13 @@ resources/
 ## Testing Guidelines
 
 ### Unit Tests
+
 - Test repository methods with mock data
 - Test validation logic in isolation
 - Test field registry registration
 
 ### Integration Tests
+
 - Test full submission pipeline
 - Test schema versioning workflow
 - Test REST API endpoints
@@ -178,6 +197,7 @@ resources/
 - **MAJOR** (1.x.x → 2.0.0): Breaking changes, API changes
 
 Version MUST be synchronized in:
+
 1. `subtleforms.php` (plugin header)
 2. `SUBTLEFORMS_VERSION` constant
 3. `package.json`
@@ -195,6 +215,7 @@ Version MUST be synchronized in:
 Format: `type: subject`
 
 Types:
+
 - `feat:` - New feature
 - `fix:` - Bug fix
 - `perf:` - Performance improvement
@@ -203,6 +224,7 @@ Types:
 - `chore:` - Maintenance (deps, config)
 
 Each commit must:
+
 - Be atomic (one responsibility)
 - Include version bump if behavior changes
 - Pass build without errors
