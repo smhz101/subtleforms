@@ -132,6 +132,17 @@ class Settings {
 			'string',
 			'max' => 200,
 		),
+		'enable_honeypot'            => 'boolean',
+		'min_submission_time'        => array(
+			'integer',
+			'min' => 0,
+			'max' => 60,
+		),
+		'data_retention_days'        => array(
+			'integer',
+			'min' => 0,
+			'max' => 3650,
+		),
 	);
 
 	/**
