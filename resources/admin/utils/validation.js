@@ -167,6 +167,22 @@ export const settingsSchema = Joi.object({
       'any.only': __('Captcha provider must be recaptcha, hcaptcha, or turnstile', 'subtleforms'),
     }),
 
+  // CAPTCHA provider enable flags
+  captcha_recaptcha_enabled: Joi.boolean()
+    .messages({
+      'boolean.base': __('reCAPTCHA enabled must be true or false', 'subtleforms'),
+    }),
+
+  captcha_hcaptcha_enabled: Joi.boolean()
+    .messages({
+      'boolean.base': __('hCaptcha enabled must be true or false', 'subtleforms'),
+    }),
+
+  captcha_turnstile_enabled: Joi.boolean()
+    .messages({
+      'boolean.base': __('Turnstile enabled must be true or false', 'subtleforms'),
+    }),
+
   // reCAPTCHA settings
   captcha_recaptcha_version: Joi.string()
     .valid('v2', 'v3')
