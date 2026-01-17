@@ -138,6 +138,11 @@ final class FieldValidator {
 				return $this->validatePaymentAmount( $value, $field );
 			case 'payment_coupon':
 				return $this->validatePaymentCoupon( $value, $field );
+			case 'name_group':
+			case 'address_group':
+				// Grouped fields submit as arrays/objects - no specific validation needed
+				// Individual sub-parts are strings and will be sanitized by SaveAction
+				return null;
 			default:
 				return null;
 		}
