@@ -76,6 +76,15 @@ export default function Settings() {
           ),
           debug_mode: Boolean(response.data.debug_mode),
           captcha_enabled: Boolean(response.data.captcha_enabled),
+          captcha_recaptcha_enabled: Boolean(
+            response.data.captcha_recaptcha_enabled
+          ),
+          captcha_hcaptcha_enabled: Boolean(
+            response.data.captcha_hcaptcha_enabled
+          ),
+          captcha_turnstile_enabled: Boolean(
+            response.data.captcha_turnstile_enabled
+          ),
         };
         setSettings(normalizedSettings);
       }
@@ -722,29 +731,26 @@ function AdvancedSettings({
 
           {settings.captcha_enabled && (
             <>
+              {/* Google reCAPTCHA */}
               <div>
-                <SelectControl
-                  label={__('CAPTCHA Provider', 'subtleforms')}
-                  value={settings.captcha_provider ?? ''}
-                  onChange={(value) => updateSetting('captcha_provider', value)}
-                  options={[
-                    {
-                      label: __('-- Select Provider --', 'subtleforms'),
-                      value: '',
-                    },
-                    { label: 'Google reCAPTCHA', value: 'recaptcha' },
-                    { label: 'hCaptcha', value: 'hcaptcha' },
-                    { label: 'Cloudflare Turnstile', value: 'turnstile' },
-                  ]}
+                <h5 className='sf-subsection-title'>
+                  {__('Google reCAPTCHA', 'subtleforms')}
+                </h5>
+                <ToggleControl
+                  label={__('Enable reCAPTCHA', 'subtleforms')}
+                  checked={settings.captcha_recaptcha_enabled ?? false}
+                  onChange={(value) =>
+                    updateSetting('captcha_recaptcha_enabled', value)
+                  }
                   help={__(
-                    'Choose which CAPTCHA service to use',
+                    'Allow forms to use Google reCAPTCHA',
                     'subtleforms'
                   )}
                 />
-                <FieldError errors={fieldErrors.captcha_provider} />
+                <FieldError errors={fieldErrors.captcha_recaptcha_enabled} />
               </div>
 
-              {settings.captcha_provider === 'recaptcha' && (
+              {settings.captcha_recaptcha_enabled && (
                 <>
                   <div>
                     <SelectControl
@@ -794,7 +800,26 @@ function AdvancedSettings({
                 </>
               )}
 
-              {settings.captcha_provider === 'hcaptcha' && (
+              {/* hCaptcha */}
+              <div>
+                <h5 className='sf-subsection-title'>
+                  {__('hCaptcha', 'subtleforms')}
+                </h5>
+                <ToggleControl
+                  label={__('Enable hCaptcha', 'subtleforms')}
+                  checked={settings.captcha_hcaptcha_enabled ?? false}
+                  onChange={(value) =>
+                    updateSetting('captcha_hcaptcha_enabled', value)
+                  }
+                  help={__(
+                    'Allow forms to use hCaptcha',
+                    'subtleforms'
+                  )}
+                />
+                <FieldError errors={fieldErrors.captcha_hcaptcha_enabled} />
+              </div>
+
+              {settings.captcha_hcaptcha_enabled && (
                 <>
                   <div>
                     <TextControl
@@ -828,7 +853,26 @@ function AdvancedSettings({
                 </>
               )}
 
-              {settings.captcha_provider === 'turnstile' && (
+              {/* Cloudflare Turnstile */}
+              <div>
+                <h5 className='sf-subsection-title'>
+                  {__('Cloudflare Turnstile', 'subtleforms')}
+                </h5>
+                <ToggleControl
+                  label={__('Enable Turnstile', 'subtleforms')}
+                  checked={settings.captcha_turnstile_enabled ?? false}
+                  onChange={(value) =>
+                    updateSetting('captcha_turnstile_enabled', value)
+                  }
+                  help={__(
+                    'Allow forms to use Cloudflare Turnstile',
+                    'subtleforms'
+                  )}
+                />
+                <FieldError errors={fieldErrors.captcha_turnstile_enabled} />
+              </div>
+
+              {settings.captcha_turnstile_enabled && (
                 <>
                   <div>
                     <TextControl
