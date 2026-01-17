@@ -358,6 +358,17 @@ function renderInput(
     case 'hcaptcha':
     case 'turnstile':
       // CAPTCHA widget - rendered via provider-specific HTML
+      // Debug: Log captcha rendering
+      if (field.config?.captchaHtml) {
+        console.log('[SubtleForms] CAPTCHA rendering:', {
+          type: field.type,
+          provider: field.config.providerName,
+          htmlLength: field.config.captchaHtml.length
+        });
+      } else {
+        console.error('[SubtleForms] CAPTCHA HTML is missing! Check if CAPTCHA is enabled and keys are configured in Settings > Advanced.');
+      }
+      
       return (
         <div
           className='subtleforms-captcha-container'

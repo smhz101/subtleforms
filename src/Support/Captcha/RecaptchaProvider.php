@@ -27,7 +27,18 @@ class RecaptchaProvider implements CaptchaProviderInterface {
 	 */
 	public function isConfigured() {
 		$settings = get_option( 'subtleforms_settings', array() );
-		return ! empty( $settings['captcha_recaptcha_site_key'] ) && ! empty( $settings['captcha_recaptcha_secret_key'] );
+		$has_site_key   = ! empty( $settings['captcha_recaptcha_site_key'] );
+		$has_secret_key = ! empty( $settings['captcha_recaptcha_secret_key'] );
+
+		if ( ! $has_site_key ) {
+			error_log( 'SubtleForms reCAPTCHA: Site key is missing or empty' );
+		}
+
+		if ( ! $has_secret_key ) {
+			error_log( 'SubtleForms reCAPTCHA: Secret key is missing or empty' );
+		}
+
+		return $has_site_key && $has_secret_key;
 	}
 
 	/**

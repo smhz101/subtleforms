@@ -561,15 +561,29 @@ final class RestController {
 	 * @return array Modified schema with CAPTCHA HTML
 	 */
 	private function injectCaptchaHtml( $schema ) {
-		if ( ! $this->captchaManager || ! $this->captchaManager->isEnabled() || ! $this->captchaManager->isConfigured() ) {
+		if ( ! $this->captchaManager ) {
+			error_log( 'SubtleForms CAPTCHA: CaptchaManager not initialized' );
+			return $schema;
+		}
+
+		if ( ! $this->captchaManager->isEnabled() ) {
+			error_log( 'SubtleForms CAPTCHA: CAPTCHA is disabled in settings' );
+			return $schema;
+		}
+
+		if ( ! $this->captchaManager->isConfigured() ) {
+			error_log( 'SubtleForms CAPTCHA: CAPTCHA is not configured (missing site key or secret key)' );
 			return $schema;
 		}
 
 		$captcha_html = $this->captchaManager->render();
 
 		if ( empty( $captcha_html ) ) {
+			error_log( 'SubtleForms CAPTCHA: render() returned empty HTML' );
 			return $schema;
 		}
+
+		error_log( 'SubtleForms CAPTCHA: Successfully generated HTML (' . strlen( $captcha_html ) . ' bytes)' );
 
 		// Recursively inject CAPTCHA HTML into fields
 		$schema['fields'] = $this->processCaptchaFields( $schema['fields'] ?? array(), $captcha_html );

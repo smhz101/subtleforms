@@ -101,10 +101,18 @@ class CaptchaManager {
 		$provider = $this->getActiveProvider();
 
 		if ( ! $provider ) {
+			$provider_name = $this->getActiveProviderName();
+			error_log( "SubtleForms CAPTCHA: Provider '{$provider_name}' not found in registered providers" );
 			return false;
 		}
 
-		return $provider->isConfigured();
+		$is_configured = $provider->isConfigured();
+		
+		if ( ! $is_configured ) {
+			error_log( 'SubtleForms CAPTCHA: Provider ' . $provider->getName() . ' is not configured (missing keys)' );
+		}
+
+		return $is_configured;
 	}
 
 	/**
@@ -120,7 +128,18 @@ class CaptchaManager {
 		$provider = $this->getActiveProvider();
 		$config   = $this->getProviderConfig( $provider->getName() );
 
-		return $provider->render( $config );
+		error_log( 'SubtleForms CAPTCHA: Rendering with config: ' . wp_json_encode( array(
+			'provider'      => $provider->getName(),
+			'has_site_key'  => ! empty( $config['site_key'] ),
+			'site_key_len'  => strlen( $config['site_key'] ?? '' ),
+			'version'       => $config['version'] ?? 'v2',
+		) ) );
+
+		$html = $provider->render( $config );
+
+		error_log( 'SubtleForms CAPTCHA: Provider rendered HTML length: ' . strlen( $html ) );
+
+		return $html;
 	}
 
 	/**
