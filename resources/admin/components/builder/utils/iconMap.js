@@ -36,12 +36,9 @@ export const getIcon = (iconNameOrType) => {
     image_upload: Icon.Image,
     file_upload: Icon.File,
     step: Icon.Navigation,
-    name: Icon.User,
-    address: Icon.MapPin,
-    country: Icon.Globe,
-    'captcha-recaptcha': Icon.Shield,
-    'captcha-hcaptcha': Icon.Shield,
-    'captcha-turnstile': Icon.Shield,
+    recaptcha: Icon.Shield,
+    hcaptcha: Icon.Shield,
+    turnstile: Icon.Shield,
 
     // Field Types - Payment
     payment_amount: Icon.DollarSign,

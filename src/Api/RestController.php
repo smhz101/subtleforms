@@ -1519,12 +1519,12 @@ final class RestController {
 						function ( $field ) use ( $captchaEnabled, $recaptchaEnabled, $hcaptchaEnabled, $turnstileEnabled ) {
 							$fieldArray = $field->toArray();
 							
-							// Add enabled status for CAPTCHA fields
-							if ( $field->type === 'captcha-recaptcha' ) {
+							// Add enabled status for System CAPTCHA fields
+							if ( $field->type === 'recaptcha' ) {
 								$fieldArray['enabled'] = $captchaEnabled && $recaptchaEnabled;
-							} elseif ( $field->type === 'captcha-hcaptcha' ) {
+							} elseif ( $field->type === 'hcaptcha' ) {
 								$fieldArray['enabled'] = $captchaEnabled && $hcaptchaEnabled;
-							} elseif ( $field->type === 'captcha-turnstile' ) {
+							} elseif ( $field->type === 'turnstile' ) {
 								$fieldArray['enabled'] = $captchaEnabled && $turnstileEnabled;
 							} else {
 								$fieldArray['enabled'] = true; // All non-CAPTCHA fields are always enabled
@@ -1543,11 +1543,11 @@ final class RestController {
 			$fields = array_map(
 				function ( $fieldArray ) use ( $captchaEnabled, $recaptchaEnabled, $hcaptchaEnabled, $turnstileEnabled ) {
 					if ( isset( $fieldArray['type'] ) ) {
-						if ( $fieldArray['type'] === 'captcha-recaptcha' ) {
+						if ( $fieldArray['type'] === 'recaptcha' ) {
 							$fieldArray['enabled'] = $captchaEnabled && $recaptchaEnabled;
-						} elseif ( $fieldArray['type'] === 'captcha-hcaptcha' ) {
+						} elseif ( $fieldArray['type'] === 'hcaptcha' ) {
 							$fieldArray['enabled'] = $captchaEnabled && $hcaptchaEnabled;
-						} elseif ( $fieldArray['type'] === 'captcha-turnstile' ) {
+						} elseif ( $fieldArray['type'] === 'turnstile' ) {
 							$fieldArray['enabled'] = $captchaEnabled && $turnstileEnabled;
 						} else {
 							$fieldArray['enabled'] = true;

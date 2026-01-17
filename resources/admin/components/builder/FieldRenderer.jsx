@@ -274,7 +274,6 @@ export default function FieldRenderer({ field }) {
         </div>
       )}
 
-      {/* CAPTCHA Fields - old single type */}
       {type === 'captcha' && (
         <div className='sf-captcha-preview'>
           <div className='sf-captcha-preview__icon'>🔒</div>
@@ -292,111 +291,6 @@ export default function FieldRenderer({ field }) {
                 {field.config.providerName === 'hcaptcha' && 'hCaptcha'}
                 {field.config.providerName === 'turnstile' &&
                   'Cloudflare Turnstile'}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* CAPTCHA Fields - new separate types */}
-      {(type === 'captcha-recaptcha' || type === 'captcha-hcaptcha' || type === 'captcha-turnstile') && (
-        <div className='sf-captcha-preview'>
-          <div className='sf-captcha-preview__icon'>🔒</div>
-          <div className='sf-captcha-preview__content'>
-            <div className='sf-captcha-preview__title'>
-              {type === 'captcha-recaptcha' && __('Google reCAPTCHA', 'subtleforms')}
-              {type === 'captcha-hcaptcha' && __('hCaptcha', 'subtleforms')}
-              {type === 'captcha-turnstile' && __('Cloudflare Turnstile', 'subtleforms')}
-            </div>
-            <div className='sf-captcha-preview__description'>
-              {__('CAPTCHA verification will appear here on live form', 'subtleforms')}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Name Field - Composite */}
-      {type === 'name' && (
-        <div className='sf-field-renderer__composite'>
-          <div className='sf-field-renderer__composite-grid'>
-            {field.config?.enable_prefix !== false && (
-              <div className='sf-field-renderer__composite-item'>
-                <label>{__('Prefix', 'subtleforms')}</label>
-                <select disabled>
-                  <option>{__('Select...', 'subtleforms')}</option>
-                </select>
-              </div>
-            )}
-            {field.config?.enable_first_name !== false && (
-              <div className='sf-field-renderer__composite-item'>
-                <label>{__('First Name', 'subtleforms')} *</label>
-                <input type='text' disabled placeholder={__('First Name', 'subtleforms')} />
-              </div>
-            )}
-            {field.config?.enable_middle_name !== false && (
-              <div className='sf-field-renderer__composite-item'>
-                <label>{__('Middle Name', 'subtleforms')}</label>
-                <input type='text' disabled placeholder={__('Middle Name', 'subtleforms')} />
-              </div>
-            )}
-            {field.config?.enable_last_name !== false && (
-              <div className='sf-field-renderer__composite-item'>
-                <label>{__('Last Name', 'subtleforms')} *</label>
-                <input type='text' disabled placeholder={__('Last Name', 'subtleforms')} />
-              </div>
-            )}
-            {field.config?.enable_suffix && (
-              <div className='sf-field-renderer__composite-item'>
-                <label>{__('Suffix', 'subtleforms')}</label>
-                <select disabled>
-                  <option>{__('Select...', 'subtleforms')}</option>
-                </select>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Address Field - Composite */}
-      {type === 'address' && (
-        <div className='sf-field-renderer__composite'>
-          <div className='sf-field-renderer__composite-grid'>
-            {field.config?.enable_street_address !== false && (
-              <div className='sf-field-renderer__composite-item sf-field-renderer__composite-item--full'>
-                <label>{__('Street Address', 'subtleforms')} *</label>
-                <input type='text' disabled placeholder={__('Street Address', 'subtleforms')} />
-              </div>
-            )}
-            {field.config?.enable_address_line_2 !== false && (
-              <div className='sf-field-renderer__composite-item sf-field-renderer__composite-item--full'>
-                <label>{__('Address Line 2', 'subtleforms')}</label>
-                <input type='text' disabled placeholder={__('Apt, Suite, etc.', 'subtleforms')} />
-              </div>
-            )}
-            {field.config?.enable_city !== false && (
-              <div className='sf-field-renderer__composite-item'>
-                <label>{__('City', 'subtleforms')} *</label>
-                <input type='text' disabled placeholder={__('City', 'subtleforms')} />
-              </div>
-            )}
-            {field.config?.enable_state !== false && (
-              <div className='sf-field-renderer__composite-item'>
-                <label>{__('State/Province', 'subtleforms')}</label>
-                <input type='text' disabled placeholder={__('State', 'subtleforms')} />
-              </div>
-            )}
-            {field.config?.enable_postal_code !== false && (
-              <div className='sf-field-renderer__composite-item'>
-                <label>{__('Postal Code', 'subtleforms')} *</label>
-                <input type='text' disabled placeholder={__('ZIP/Postal Code', 'subtleforms')} />
-              </div>
-            )}
-            {field.config?.enable_country !== false && (
-              <div className='sf-field-renderer__composite-item sf-field-renderer__composite-item--full'>
-                <label>{__('Country', 'subtleforms')}</label>
-                <select disabled>
-                  <option>{__('Select Country', 'subtleforms')}</option>
-                </select>
               </div>
             )}
           </div>
