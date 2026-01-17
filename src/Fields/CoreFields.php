@@ -1300,6 +1300,108 @@ final class CoreFields {
 			)
 		);
 
+		// ===== Special Fields =====
+
+		// Name Group Field
+		$registry->register(
+			new FieldDefinition(
+				type: 'name_group',
+				label: __( 'Name', 'subtleforms' ),
+				category: 'special',
+				icon: 'dashicons-admin-users',
+				kind: 'group',
+				baseAttributes: array(),
+				fieldSpecificAttributes: array(
+					'enable_prefix'     => false,
+					'enable_suffix'     => false,
+					'enable_first_name' => true,
+					'enable_middle_name' => false,
+					'enable_last_name'  => true,
+					'prefix_options'    => array( 'Mr.', 'Ms.', 'Mrs.', 'Dr.', 'Prof.' ),
+					'suffix_options'    => array( 'Jr.', 'Sr.', 'II', 'III', 'IV' ),
+				),
+				inspectorControls: array(
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'enable_prefix',
+						'label' => __( 'Enable Prefix', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'enable_suffix',
+						'label' => __( 'Enable Suffix', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'enable_first_name',
+						'label' => __( 'Enable First Name', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'enable_middle_name',
+						'label' => __( 'Enable Middle Name', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'enable_last_name',
+						'label' => __( 'Enable Last Name', 'subtleforms' ),
+					),
+				)
+			)
+		);
+
+		// Address Group Field
+		$registry->register(
+			new FieldDefinition(
+				type: 'address_group',
+				label: __( 'Address', 'subtleforms' ),
+				category: 'special',
+				icon: 'dashicons-location',
+				kind: 'group',
+				baseAttributes: array(),
+				fieldSpecificAttributes: array(
+					'enable_street1'      => true,
+					'enable_street2'      => true,
+					'enable_city'         => true,
+					'enable_state'        => true,
+					'enable_postal_code'  => true,
+					'enable_country'      => true,
+				),
+				inspectorControls: array(
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'enable_street1',
+						'label' => __( 'Enable Street Address 1', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'enable_street2',
+						'label' => __( 'Enable Street Address 2', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'enable_city',
+						'label' => __( 'Enable City', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'enable_state',
+						'label' => __( 'Enable State / Province', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'enable_postal_code',
+						'label' => __( 'Enable Postal Code / ZIP', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'enable_country',
+						'label' => __( 'Enable Country', 'subtleforms' ),
+					),
+				)
+			)
+		);
+
 		// ===== System Fields =====
 
 		$registry->register(

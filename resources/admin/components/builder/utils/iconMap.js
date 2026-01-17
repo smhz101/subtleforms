@@ -39,6 +39,8 @@ export const getIcon = (iconNameOrType) => {
     recaptcha: Icon.Shield,
     hcaptcha: Icon.Shield,
     turnstile: Icon.Shield,
+    name_group: Icon.User,
+    address_group: Icon.MapPin,
 
     // Field Types - Payment
     payment_amount: Icon.DollarSign,
