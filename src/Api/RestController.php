@@ -1504,17 +1504,59 @@ final class RestController {
 	public function get_fields( WP_REST_Request $request ): WP_REST_Response {
 		$grouped = $request->get_param( 'grouped' );
 
+		// Get CAPTCHA enabled states from settings
+		$captchaEnabled = $this->settings ? (bool) $this->settings->get( 'captcha_enabled', false ) : false;
+		$recaptchaEnabled = $this->settings ? (bool) $this->settings->get( 'captcha_recaptcha_enabled', false ) : false;
+		$hcaptchaEnabled = $this->settings ? (bool) $this->settings->get( 'captcha_hcaptcha_enabled', false ) : false;
+		$turnstileEnabled = $this->settings ? (bool) $this->settings->get( 'captcha_turnstile_enabled', false ) : false;
+
 		if ( $grouped === 'true' || $grouped === '1' ) {
 			$fields = $this->fieldRegistry->byCategory();
-			// Convert FieldDefinition objects to arrays
+			// Convert FieldDefinition objects to arrays and add enabled status
 			$fields = array_map(
-				function ( $categoryFields ) {
-					return array_map( fn( $field ) => $field->toArray(), $categoryFields );
+				function ( $categoryFields ) use ( $captchaEnabled, $recaptchaEnabled, $hcaptchaEnabled, $turnstileEnabled ) {
+					return array_map(
+						function ( $field ) use ( $captchaEnabled, $recaptchaEnabled, $hcaptchaEnabled, $turnstileEnabled ) {
+							$fieldArray = $field->toArray();
+							
+							// Add enabled status for CAPTCHA fields
+							if ( $field->type === 'captcha-recaptcha' ) {
+								$fieldArray['enabled'] = $captchaEnabled && $recaptchaEnabled;
+							} elseif ( $field->type === 'captcha-hcaptcha' ) {
+								$fieldArray['enabled'] = $captchaEnabled && $hcaptchaEnabled;
+							} elseif ( $field->type === 'captcha-turnstile' ) {
+								$fieldArray['enabled'] = $captchaEnabled && $turnstileEnabled;
+							} else {
+								$fieldArray['enabled'] = true; // All non-CAPTCHA fields are always enabled
+							}
+							
+							return $fieldArray;
+						},
+						$categoryFields
+					);
 				},
 				$fields
 			);
 		} else {
 			$fields = $this->fieldRegistry->toArray();
+			// Add enabled status for non-grouped response
+			$fields = array_map(
+				function ( $fieldArray ) use ( $captchaEnabled, $recaptchaEnabled, $hcaptchaEnabled, $turnstileEnabled ) {
+					if ( isset( $fieldArray['type'] ) ) {
+						if ( $fieldArray['type'] === 'captcha-recaptcha' ) {
+							$fieldArray['enabled'] = $captchaEnabled && $recaptchaEnabled;
+						} elseif ( $fieldArray['type'] === 'captcha-hcaptcha' ) {
+							$fieldArray['enabled'] = $captchaEnabled && $hcaptchaEnabled;
+						} elseif ( $fieldArray['type'] === 'captcha-turnstile' ) {
+							$fieldArray['enabled'] = $captchaEnabled && $turnstileEnabled;
+						} else {
+							$fieldArray['enabled'] = true;
+						}
+					}
+					return $fieldArray;
+				},
+				$fields
+			);
 		}
 
 		return new WP_REST_Response( $fields, 200 );

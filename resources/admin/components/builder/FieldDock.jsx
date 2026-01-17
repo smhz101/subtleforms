@@ -103,26 +103,38 @@ export default function FieldDock({
                 {/* Fields */}
                 {!isCollapsed && (
                   <div className='sf-field-dock__fields-grid'>
-                    {categoryFields.map((f) => (
-                      <button
-                        key={f.type}
-                        type='button'
-                        onClick={() => onAddField(f.type)}
-                        className='sf-field-dock__field-button'>
-                        <span className='sf-field-dock__field-icon-wrapper'>
-                          <span className='sf-field-dock__field-icon'>
-                            {(() => {
-                              const IconComponent = getIcon(f.type);
-                              return <IconComponent size={20} />;
-                            })()}
+                    {categoryFields.map((f) => {
+                      const isDisabled = f.enabled === false;
+                      
+                      return (
+                        <button
+                          key={f.type}
+                          type='button'
+                          onClick={() => !isDisabled && onAddField(f.type)}
+                          disabled={isDisabled}
+                          className={`sf-field-dock__field-button ${
+                            isDisabled ? 'sf-field-dock__field-button--disabled' : ''
+                          }`}
+                          title={
+                            isDisabled
+                              ? __('Enable this CAPTCHA provider in Settings to use it', 'subtleforms')
+                              : f.label
+                          }>
+                          <span className='sf-field-dock__field-icon-wrapper'>
+                            <span className='sf-field-dock__field-icon'>
+                              {(() => {
+                                const IconComponent = getIcon(f.type);
+                                return <IconComponent size={20} />;
+                              })()}
+                            </span>
                           </span>
-                        </span>
 
-                        <span className='sf-field-dock__field-label'>
-                          {f.label}
-                        </span>
-                      </button>
-                    ))}
+                          <span className='sf-field-dock__field-label'>
+                            {f.label}
+                          </span>
+                        </button>
+                      );
+                    })}
                   </div>
                 )}
               </div>

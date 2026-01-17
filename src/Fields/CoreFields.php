@@ -1601,24 +1601,68 @@ final class CoreFields {
 			)
 		);
 
-		// CAPTCHA Field
+		// CAPTCHA Fields - separate type per provider
 		$registry->register(
 			new FieldDefinition(
-				type: 'captcha',
-				label: __( 'CAPTCHA', 'subtleforms' ),
+				type: 'captcha-recaptcha',
+				label: __( 'Google reCAPTCHA', 'subtleforms' ),
 				category: 'advanced',
 				icon: 'dashicons-shield',
 				kind: 'system',
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
-					'provider' => '', // Will be populated from settings
+					'provider' => 'recaptcha',
 				),
 				inspectorControls: array(
 					array(
 						'type'  => 'notice',
 						'name'  => 'captcha_info',
-						'label' => __( 'CAPTCHA Configuration', 'subtleforms' ),
-						'help'  => __( 'CAPTCHA provider is configured in SubtleForms → Settings. Only one CAPTCHA field is allowed per form.', 'subtleforms' ),
+						'label' => __( 'reCAPTCHA Configuration', 'subtleforms' ),
+						'help'  => __( 'Google reCAPTCHA is configured in SubtleForms → Settings.', 'subtleforms' ),
+					),
+				)
+			)
+		);
+
+		$registry->register(
+			new FieldDefinition(
+				type: 'captcha-hcaptcha',
+				label: __( 'hCaptcha', 'subtleforms' ),
+				category: 'advanced',
+				icon: 'dashicons-shield',
+				kind: 'system',
+				baseAttributes: array(),
+				fieldSpecificAttributes: array(
+					'provider' => 'hcaptcha',
+				),
+				inspectorControls: array(
+					array(
+						'type'  => 'notice',
+						'name'  => 'captcha_info',
+						'label' => __( 'hCaptcha Configuration', 'subtleforms' ),
+						'help'  => __( 'hCaptcha is configured in SubtleForms → Settings.', 'subtleforms' ),
+					),
+				)
+			)
+		);
+
+		$registry->register(
+			new FieldDefinition(
+				type: 'captcha-turnstile',
+				label: __( 'Cloudflare Turnstile', 'subtleforms' ),
+				category: 'advanced',
+				icon: 'dashicons-shield',
+				kind: 'system',
+				baseAttributes: array(),
+				fieldSpecificAttributes: array(
+					'provider' => 'turnstile',
+				),
+				inspectorControls: array(
+					array(
+						'type'  => 'notice',
+						'name'  => 'captcha_info',
+						'label' => __( 'Turnstile Configuration', 'subtleforms' ),
+						'help'  => __( 'Cloudflare Turnstile is configured in SubtleForms → Settings.', 'subtleforms' ),
 					),
 				)
 			)

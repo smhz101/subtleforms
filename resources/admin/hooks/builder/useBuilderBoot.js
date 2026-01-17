@@ -40,37 +40,20 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
         const settingsData = settingsRes.ok ? settingsRes.body : {};
         setSettings(settingsData);
 
-        // Check CAPTCHA availability - check each provider individually
-        const captchaEnabled = settingsData.captcha_enabled ?? false;
-        const recaptchaEnabled = settingsData.captcha_recaptcha_enabled ?? false;
-        const hcaptchaEnabled = settingsData.captcha_hcaptcha_enabled ?? false;
-        const turnstileEnabled = settingsData.captcha_turnstile_enabled ?? false;
-
-        // Check if any provider is configured
-        const anyCaptchaConfigured =
-          captchaEnabled && (recaptchaEnabled || hcaptchaEnabled || turnstileEnabled);
-
         // Transform API response to component format
         const groups = {};
         const definitions = {};
         Object.entries(fieldsRes.body).forEach(([category, categoryFields]) => {
-          groups[category] = categoryFields
-            .filter((field) => {
-              // Filter out CAPTCHA field if no providers enabled/configured
-              if (field.type === 'captcha' && !anyCaptchaConfigured) {
-                return false;
-              }
-              return true;
-            })
-            .map((field) => {
-              definitions[field.type] = field;
-              return {
-                type: field.type,
-                label: field.label,
-                icon: field.icon || 'text', // Default to text icon key
-                kind: field.kind || 'input',
-              };
-            });
+          groups[category] = categoryFields.map((field) => {
+            definitions[field.type] = field;
+            return {
+              type: field.type,
+              label: field.label,
+              icon: field.icon || 'text',
+              kind: field.kind || 'input',
+              enabled: field.enabled !== false, // Pass through enabled status from API
+            };
+          });
         });
         setFieldGroups(groups);
         setFieldDefinitions(definitions);

@@ -213,6 +213,33 @@
 			outline: 2px solid #3b82f6;
 			outline-offset: 2px;
 		}
+
+		// Disabled state for CAPTCHA fields not enabled in settings
+		&--disabled {
+			opacity: 0.5;
+			cursor: not-allowed;
+			background-color: #f8fafc;
+			border-color: #e2e8f0;
+			pointer-events: none;
+
+			&::before {
+				display: none;
+			}
+
+			&:hover {
+				border-color: #e2e8f0;
+				box-shadow: none;
+				transform: none;
+			}
+
+			.sf-field-dock__field-icon {
+				opacity: 0.5;
+			}
+
+			.sf-field-dock__field-label {
+				opacity: 0.5;
+			}
+		}
 	}
 
 	&__field-icon-wrapper {
