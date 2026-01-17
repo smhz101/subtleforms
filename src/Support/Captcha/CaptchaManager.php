@@ -207,13 +207,51 @@ class CaptchaManager {
 	 * Verify CAPTCHA response
 	 *
 	 * @param array $request Request data containing CAPTCHA response
+	 * @param string|null $provider_type Optional specific provider type to verify
 	 * @return array ['success' => bool, 'error' => string|null]
 	 */
-	public function verify( $request ) {
+	public function verify( $request, $provider_type = null ) {
 		if ( ! $this->isEnabled() ) {
 			return array( 'success' => true ); // CAPTCHA disabled, pass through
 		}
 
+		// If provider type specified, verify that specific provider
+		if ( $provider_type ) {
+			if ( ! $this->isProviderEnabled( $provider_type ) ) {
+				return array(
+					'success' => false,
+					'error'   => __( 'CAPTCHA provider is not enabled.', 'subtleforms' ),
+				);
+			}
+
+			if ( ! $this->isProviderConfigured( $provider_type ) ) {
+				return array(
+					'success' => false,
+					'error'   => __( 'CAPTCHA is not properly configured.', 'subtleforms' ),
+				);
+			}
+
+			$provider = $this->getProviderByType( $provider_type );
+			if ( ! $provider ) {
+				return array(
+					'success' => false,
+					'error'   => __( 'CAPTCHA provider not found.', 'subtleforms' ),
+				);
+			}
+
+			return $this->verifyWithProvider( $provider, $request );
+		}
+
+		// Legacy behavior: try to detect provider from request
+		$detected_provider = $this->detectProviderFromRequest( $request );
+		if ( $detected_provider && $this->isProviderEnabled( $detected_provider ) ) {
+			$provider = $this->getProviderByType( $detected_provider );
+			if ( $provider && $this->isProviderConfigured( $detected_provider ) ) {
+				return $this->verifyWithProvider( $provider, $request );
+			}
+		}
+
+		// Fallback to deprecated single-provider behavior
 		if ( ! $this->isConfigured() ) {
 			return array(
 				'success' => false,
@@ -221,7 +259,44 @@ class CaptchaManager {
 			);
 		}
 
-		$provider      = $this->getActiveProvider();
+		$provider = $this->getActiveProvider();
+		if ( ! $provider ) {
+			return array(
+				'success' => false,
+				'error'   => __( 'CAPTCHA provider not found.', 'subtleforms' ),
+			);
+		}
+
+		return $this->verifyWithProvider( $provider, $request );
+	}
+
+	/**
+	 * Detect provider from request payload
+	 *
+	 * @param array $request
+	 * @return string|null Provider type or null if not detected
+	 */
+	private function detectProviderFromRequest( $request ) {
+		if ( isset( $request['g-recaptcha-response'] ) ) {
+			return 'recaptcha';
+		}
+		if ( isset( $request['h-captcha-response'] ) ) {
+			return 'hcaptcha';
+		}
+		if ( isset( $request['cf-turnstile-response'] ) ) {
+			return 'turnstile';
+		}
+		return null;
+	}
+
+	/**
+	 * Verify CAPTCHA with specific provider
+	 *
+	 * @param CaptchaProviderInterface $provider
+	 * @param array $request
+	 * @return array ['success' => bool, 'error' => string|null]
+	 */
+	private function verifyWithProvider( $provider, $request ) {
 		$provider_name = $provider->getName();
 
 		// Get response token from request
