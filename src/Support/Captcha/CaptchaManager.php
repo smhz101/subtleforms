@@ -64,8 +64,9 @@ class CaptchaManager {
 	}
 
 	/**
-	 * Get active provider name
+	 * Get active provider name (DEPRECATED - use getConfiguredProviders)
 	 *
+	 * @deprecated 1.7.2 Use getConfiguredProviders() instead
 	 * @return string
 	 */
 	public function getActiveProviderName() {
@@ -74,8 +75,9 @@ class CaptchaManager {
 	}
 
 	/**
-	 * Get active provider instance
+	 * Get active provider instance (DEPRECATED - use getProviderByType)
 	 *
+	 * @deprecated 1.7.2 Use getProviderByType() instead
 	 * @return CaptchaProviderInterface|null
 	 */
 	public function getActiveProvider() {
@@ -93,8 +95,67 @@ class CaptchaManager {
 	}
 
 	/**
-	 * Check if active provider is properly configured
+	 * Get all configured providers
 	 *
+	 * @return array Array of provider names that are enabled AND configured
+	 */
+	public function getConfiguredProviders() {
+		if ( ! $this->isEnabled() ) {
+			return array();
+		}
+
+		$configured = array();
+
+		foreach ( $this->providers as $name => $provider ) {
+			if ( $this->isProviderEnabled( $name ) && $this->isProviderConfigured( $name ) ) {
+				$configured[] = $name;
+			}
+		}
+
+		return $configured;
+	}
+
+	/**
+	 * Check if a specific provider is enabled
+	 *
+	 * @param string $type Provider type (recaptcha, hcaptcha, turnstile)
+	 * @return bool
+	 */
+	public function isProviderEnabled( $type ) {
+		$setting_key = 'captcha_' . $type . '_enabled';
+		return (bool) $this->settings->get( $setting_key, false );
+	}
+
+	/**
+	 * Get provider instance by type
+	 *
+	 * @param string $type Provider type (recaptcha, hcaptcha, turnstile)
+	 * @return CaptchaProviderInterface|null
+	 */
+	public function getProviderByType( $type ) {
+		return $this->providers[ $type ] ?? null;
+	}
+
+	/**
+	 * Check if a specific provider is properly configured
+	 *
+	 * @param string $type Provider type (recaptcha, hcaptcha, turnstile)
+	 * @return bool
+	 */
+	public function isProviderConfigured( $type ) {
+		$provider = $this->getProviderByType( $type );
+
+		if ( ! $provider ) {
+			return false;
+		}
+
+		return $provider->isConfigured();
+	}
+
+	/**
+	 * Check if active provider is properly configured (DEPRECATED)
+	 *
+	 * @deprecated 1.7.2 Use isProviderConfigured($type) instead
 	 * @return bool
 	 */
 	public function isConfigured() {
