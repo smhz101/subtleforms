@@ -251,6 +251,101 @@ export default function FieldInspector({ field, allFields }) {
                           </Button>
                         </div>
                       )}
+
+                      {/* Name Group Field Config */}
+                      {field.type === 'name_group' && (
+                        <div className='sf-field-inspector__name-group-section'>
+                          <label className='sf-field-inspector__section-label'>
+                            {__('Name Parts', 'subtleforms')}
+                          </label>
+                          <CheckboxControl
+                            label={__('Enable Prefix', 'subtleforms')}
+                            checked={!!field.enable_prefix}
+                            onChange={(v) =>
+                              handleUpdate({ enable_prefix: v })
+                            }
+                          />
+                          <CheckboxControl
+                            label={__('Enable First Name', 'subtleforms')}
+                            checked={field.enable_first_name !== false}
+                            onChange={(v) =>
+                              handleUpdate({ enable_first_name: v })
+                            }
+                          />
+                          <CheckboxControl
+                            label={__('Enable Middle Name', 'subtleforms')}
+                            checked={!!field.enable_middle_name}
+                            onChange={(v) =>
+                              handleUpdate({ enable_middle_name: v })
+                            }
+                          />
+                          <CheckboxControl
+                            label={__('Enable Last Name', 'subtleforms')}
+                            checked={field.enable_last_name !== false}
+                            onChange={(v) =>
+                              handleUpdate({ enable_last_name: v })
+                            }
+                          />
+                          <CheckboxControl
+                            label={__('Enable Suffix', 'subtleforms')}
+                            checked={!!field.enable_suffix}
+                            onChange={(v) =>
+                              handleUpdate({ enable_suffix: v })
+                            }
+                          />
+                        </div>
+                      )}
+
+                      {/* Address Group Field Config */}
+                      {field.type === 'address_group' && (
+                        <div className='sf-field-inspector__address-group-section'>
+                          <label className='sf-field-inspector__section-label'>
+                            {__('Address Parts', 'subtleforms')}
+                          </label>
+                          <CheckboxControl
+                            label={__('Enable Street Address', 'subtleforms')}
+                            checked={field.enable_street1 !== false}
+                            onChange={(v) =>
+                              handleUpdate({ enable_street1: v })
+                            }
+                          />
+                          <CheckboxControl
+                            label={__('Enable Street Address Line 2', 'subtleforms')}
+                            checked={field.enable_street2 !== false}
+                            onChange={(v) =>
+                              handleUpdate({ enable_street2: v })
+                            }
+                          />
+                          <CheckboxControl
+                            label={__('Enable City', 'subtleforms')}
+                            checked={field.enable_city !== false}
+                            onChange={(v) =>
+                              handleUpdate({ enable_city: v })
+                            }
+                          />
+                          <CheckboxControl
+                            label={__('Enable State / Province', 'subtleforms')}
+                            checked={field.enable_state !== false}
+                            onChange={(v) =>
+                              handleUpdate({ enable_state: v })
+                            }
+                          />
+                          <CheckboxControl
+                            label={__('Enable Postal Code', 'subtleforms')}
+                            checked={field.enable_postal_code !== false}
+                            onChange={(v) =>
+                              handleUpdate({ enable_postal_code: v })
+                            }
+                          />
+                          <CheckboxControl
+                            label={__('Enable Country', 'subtleforms')}
+                            checked={field.enable_country !== false}
+                            onChange={(v) =>
+                              handleUpdate({ enable_country: v })
+                            }
+                          />
+                        </div>
+                      )}
                     </>
                   )}
                   {tab.name === 'validation' && (
