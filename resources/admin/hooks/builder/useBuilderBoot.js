@@ -40,10 +40,16 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
         const settingsData = settingsRes.ok ? settingsRes.body : {};
         setSettings(settingsData);
 
-        // Check CAPTCHA availability
+        // Check CAPTCHA availability - check each provider individually
         const captchaEnabled = settingsData.captcha_enabled ?? false;
-        const captchaProvider = settingsData.captcha_provider ?? '';
-        const captchaConfigured = captchaEnabled && captchaProvider !== '';
+        const recaptchaEnabled = settingsData.captcha_recaptcha_enabled ?? false;
+        const hcaptchaEnabled = settingsData.captcha_hcaptcha_enabled ?? false;
+        const turnstileEnabled = settingsData.captcha_turnstile_enabled ?? false;
+
+        // Check if any provider is configured
+        const anyCaptchaConfigured =
+          captchaEnabled &&
+          (recaptchaEnabled || hcaptchaEnabled || turnstileEnabled);
 
         // Transform API response to component format
         const groups = {};
@@ -51,8 +57,8 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
         Object.entries(fieldsRes.body).forEach(([category, categoryFields]) => {
           groups[category] = categoryFields
             .filter((field) => {
-              // Filter out CAPTCHA field if not enabled/configured
-              if (field.type === 'captcha' && !captchaConfigured) {
+              // Filter out CAPTCHA field if no providers enabled/configured
+              if (field.type === 'captcha' && !anyCaptchaConfigured) {
                 return false;
               }
               return true;

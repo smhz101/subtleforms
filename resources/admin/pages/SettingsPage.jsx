@@ -102,10 +102,7 @@ export default function Settings() {
   const updateSetting = (key, value) => {
     // Ensure integers are properly converted
     let finalValue = value;
-    if (
-      key === 'autosave_interval' ||
-      key === 'submission_limit'
-    ) {
+    if (key === 'autosave_interval' || key === 'submission_limit') {
       finalValue = parseInt(value, 10);
       if (isNaN(finalValue)) {
         // Set field error and don't update
@@ -811,10 +808,7 @@ function AdvancedSettings({
                   onChange={(value) =>
                     updateSetting('captcha_hcaptcha_enabled', value)
                   }
-                  help={__(
-                    'Allow forms to use hCaptcha',
-                    'subtleforms'
-                  )}
+                  help={__('Allow forms to use hCaptcha', 'subtleforms')}
                 />
                 <FieldError errors={fieldErrors.captcha_hcaptcha_enabled} />
               </div>
