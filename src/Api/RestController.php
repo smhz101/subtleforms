@@ -90,6 +90,15 @@ final class RestController {
 		$this->compiler        = $compiler;
 		$this->settings        = $settings;
 		$this->captchaManager  = $captchaManager;
+
+		// Debug: Log constructor initialization
+		error_log( '[SubtleForms] RestController initialized' );
+		error_log( '[SubtleForms] CaptchaManager injected: ' . ( $captchaManager ? 'YES' : 'NO' ) );
+		error_log( '[SubtleForms] Settings injected: ' . ( $settings ? 'YES' : 'NO' ) );
+		
+		if ( $captchaManager ) {
+			error_log( '[SubtleForms] CaptchaManager class: ' . get_class( $captchaManager ) );
+		}
 	}
 
 	/**
@@ -450,6 +459,8 @@ final class RestController {
 		$version = $version !== null ? intval( $version ) : null;
 		$context = $request->get_param( 'context' );
 
+		error_log( '[SubtleForms] get_form_schema called for form ' . $formId . ' with context: ' . $context );
+
 		// Verify form exists first
 		$form = $this->formsRepo->find( $formId );
 		if ( ! $form ) {
@@ -460,8 +471,13 @@ final class RestController {
 		$isPublished     = isset( $form['status'] ) && $form['status'] === 'published';
 		$requestsDraft   = $context === 'builder';
 
+		error_log( '[SubtleForms] isAuthenticated: ' . ( $isAuthenticated ? 'YES' : 'NO' ) );
+		error_log( '[SubtleForms] isPublished: ' . ( $isPublished ? 'YES' : 'NO' ) );
+		error_log( '[SubtleForms] requestsDraft: ' . ( $requestsDraft ? 'YES' : 'NO' ) );
+
 		// PUBLIC ACCESS (unauthenticated): Only active schema for published forms
 		if ( ! $isAuthenticated ) {
+			error_log( '[SubtleForms] BRANCH: Public access (unauthenticated)' );
 			if ( ! $isPublished ) {
 				return new WP_Error( 'form_not_available', __( 'Form not available', 'subtleforms' ), array( 'status' => 404 ) );
 			}
@@ -479,6 +495,7 @@ final class RestController {
 			}
 
 			// Inject CAPTCHA HTML for frontend rendering
+			error_log( '[SubtleForms] Injecting CAPTCHA HTML for frontend' );
 			$schemaData = $schema['schema'] ?? $schema;
 			$schemaData = $this->injectCaptchaHtml( $schemaData );
 
@@ -494,9 +511,11 @@ final class RestController {
 
 		// AUTHENTICATED ACCESS: Allow draft schema with explicit context=builder
 		if ( $requestsDraft && ! $version ) {
+			error_log( '[SubtleForms] BRANCH: Authenticated access - loading draft schema' );
 			$draftSchema = $this->formsRepo->getDraftSchema( $formId );
 
 			if ( $draftSchema ) {
+				error_log( '[SubtleForms] Draft schema found, injecting provider name' );
 				// Inject provider name for builder preview (not full CAPTCHA HTML)
 				$draftSchema = $this->injectCaptchaProvider( $draftSchema );
 
@@ -510,9 +529,11 @@ final class RestController {
 					200
 				);
 			}
+			error_log( '[SubtleForms] No draft schema found, falling back to versioned schema' );
 		}
 
 		// Fall back to versioned schema (authenticated users)
+		error_log( '[SubtleForms] BRANCH: Loading versioned schema' );
 		try {
 			$schema = $this->formsRepo->loadSchemaVersion( $formId, $version );
 		} catch ( \RuntimeException $e ) {
@@ -544,10 +565,15 @@ final class RestController {
 			);
 		}
 
+		// Inject CAPTCHA HTML for authenticated users viewing frontend too
+		error_log( '[SubtleForms] Injecting CAPTCHA HTML for authenticated user' );
+		$schemaData = $schema['schema'] ?? $schema;
+		$schemaData = $this->injectCaptchaHtml( $schemaData );
+
 		return new WP_REST_Response(
 			array(
 				'form'    => $form,
-				'schema'  => $schema['schema'] ?? $schema,
+				'schema'  => $schemaData,
 				'version' => $schema['version'] ?? null,
 			),
 			200
@@ -631,18 +657,34 @@ final class RestController {
 	 * @return array Modified schema
 	 */
 	private function injectCaptchaProvider( $schema ) {
-		if ( ! $this->captchaManager || ! $this->captchaManager->isEnabled() || ! $this->captchaManager->isConfigured() ) {
+		error_log( '[SubtleForms] injectCaptchaProvider() called' );
+		error_log( '[SubtleForms] CaptchaManager exists: ' . ( $this->captchaManager ? 'YES' : 'NO' ) );
+		
+		if ( ! $this->captchaManager ) {
+			error_log( '[SubtleForms] ABORT: CaptchaManager is NULL' );
+			return $schema;
+		}
+		
+		error_log( '[SubtleForms] CaptchaManager->isEnabled(): ' . ( $this->captchaManager->isEnabled() ? 'YES' : 'NO' ) );
+		error_log( '[SubtleForms] CaptchaManager->isConfigured(): ' . ( $this->captchaManager->isConfigured() ? 'YES' : 'NO' ) );
+		
+		if ( ! $this->captchaManager->isEnabled() || ! $this->captchaManager->isConfigured() ) {
+			error_log( '[SubtleForms] ABORT: CAPTCHA not enabled or not configured' );
 			return $schema;
 		}
 
 		$provider_name = $this->captchaManager->getActiveProviderName();
+		error_log( '[SubtleForms] Active provider name: ' . $provider_name );
 
 		if ( empty( $provider_name ) ) {
+			error_log( '[SubtleForms] ABORT: Provider name is empty' );
 			return $schema;
 		}
 
 		// Recursively inject provider name into fields
+		error_log( '[SubtleForms] Processing fields to inject provider name' );
 		$schema['fields'] = $this->processCaptchaProvider( $schema['fields'] ?? array(), $provider_name );
+		error_log( '[SubtleForms] Provider name injection complete' );
 
 		return $schema;
 	}

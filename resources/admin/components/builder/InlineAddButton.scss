@@ -1,11 +1,11 @@
 /**
  * InlineAddButton Component Styles
- * Phase 4: Enhanced with improved subtlety and interaction states
+ * Modern inline field insertion with circular "+" button
  */
 
 .sf-inline-add-button {
-	margin-bottom: 0.75rem;
-	padding: 0.5rem 0;
+	margin: 0.5rem 0;
+	padding: 0.25rem 0;
 	text-align: center;
 	transition: opacity 250ms cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -15,54 +15,56 @@
 	}
 
 	&--idle {
-		opacity: 0.25; /* Even more subtle when idle */
+		opacity: 0.3;
 	}
 
 	&__button {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.375rem;
-		background: transparent;
-		padding: 0.375rem 0.875rem;
-		border: 1px dashed rgba(156, 163, 175, 0.5); /* Semi-transparent */
-		border-radius: 4px;
-		font-weight: 500;
-		color: #9ca3af;
-		font-size: 0.75rem;
+		justify-content: center;
+		gap: 0.5rem;
+		background: white;
+		padding: 0.5rem;
+		border: 1.5px solid #d1d5db;
+		border-radius: 50%;
+		color: #6b7280;
 		cursor: pointer;
 		transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
 		outline: none;
+		width: 32px;
+		height: 32px;
 
-		/* Enhanced hover state */
 		&:hover {
-			background-color: #f9fafb;
-			border-color: #6b7280;
-			border-style: solid;
-			color: #374151;
-			transform: translateY(-1px);
-			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+			background-color: #4f9cf9;
+			border-color: #4f9cf9;
+			color: white;
+			transform: scale(1.1);
+			box-shadow: 0 4px 8px rgba(79, 156, 249, 0.3);
 		}
 
-		/* Active/pressed state */
 		&:active {
-			transform: translateY(0) scale(0.97);
-			box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+			transform: scale(1.05);
+			box-shadow: 0 2px 4px rgba(79, 156, 249, 0.2);
 		}
 
-		/* Focus state */
 		&:focus {
 			outline: 2px solid #2271b1;
 			outline-offset: 2px;
 		}
 
-		/* Icon styling */
 		svg {
-			opacity: 0.6;
-			transition: opacity 200ms ease-out;
+			flex-shrink: 0;
+			transition: transform 200ms ease-out;
 		}
 
 		&:hover svg {
-			opacity: 1;
+			transform: rotate(90deg);
 		}
+	}
+
+	&__label {
+		font-size: 0.875rem;
+		font-weight: 500;
+		white-space: nowrap;
 	}
 }

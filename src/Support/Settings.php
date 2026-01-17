@@ -47,12 +47,15 @@ class Settings {
 
 		// CAPTCHA
 		'captcha_enabled'            => false,
-		'captcha_provider'           => '',
+		'captcha_provider'           => '', // Deprecated: kept for backwards compatibility
+		'captcha_recaptcha_enabled'  => false,
 		'captcha_recaptcha_site_key' => '',
 		'captcha_recaptcha_secret_key' => '',
 		'captcha_recaptcha_version'  => 'v2',
+		'captcha_hcaptcha_enabled'   => false,
 		'captcha_hcaptcha_site_key'  => '',
 		'captcha_hcaptcha_secret_key' => '',
+		'captcha_turnstile_enabled'  => false,
 		'captcha_turnstile_site_key' => '',
 		'captcha_turnstile_secret_key' => '',
 
@@ -100,7 +103,8 @@ class Settings {
 		'admin_email'                => 'email',
 		'debug_mode'                 => 'boolean',
 		'captcha_enabled'            => 'boolean',
-		'captcha_provider'           => array( '', 'recaptcha', 'hcaptcha', 'turnstile' ),
+		'captcha_provider'           => array( '', 'recaptcha', 'hcaptcha', 'turnstile' ), // Deprecated
+		'captcha_recaptcha_enabled'  => 'boolean',
 		'captcha_recaptcha_site_key' => array(
 			'string',
 			'max' => 200,
@@ -110,6 +114,7 @@ class Settings {
 			'max' => 200,
 		),
 		'captcha_recaptcha_version'  => array( 'v2', 'v3' ),
+		'captcha_hcaptcha_enabled'   => 'boolean',
 		'captcha_hcaptcha_site_key'  => array(
 			'string',
 			'max' => 200,
@@ -118,6 +123,7 @@ class Settings {
 			'string',
 			'max' => 200,
 		),
+		'captcha_turnstile_enabled'  => 'boolean',
 		'captcha_turnstile_site_key' => array(
 			'string',
 			'max' => 200,

@@ -85,6 +85,23 @@ export default function FieldRenderer({
 
   const value = getIn(values, resolvedPath, '');
 
+  // Handle reCAPTCHA v3 separately (invisible, no label/wrapper needed)
+  if (
+    (field.type === 'captcha' ||
+      field.type === 'recaptcha' ||
+      field.type === 'hcaptcha' ||
+      field.type === 'turnstile') &&
+    field.config?.captchaHtml?.includes('subtleforms-recaptcha-v3')
+  ) {
+    console.log('[SubtleForms] Rendering reCAPTCHA v3 (invisible)');
+    return (
+      <div
+        className='subtleforms-captcha-hidden'
+        dangerouslySetInnerHTML={{ __html: field.config?.captchaHtml || '' }}
+      />
+    );
+  }
+
   // Render input fields
   return (
     <div className={`subtleforms-field subtleforms-field-${field.type}`}>
@@ -358,17 +375,19 @@ function renderInput(
     case 'hcaptcha':
     case 'turnstile':
       // CAPTCHA widget - rendered via provider-specific HTML
-      // Debug: Log captcha rendering
+      // Note: reCAPTCHA v3 is handled earlier to avoid wrapper/label
       if (field.config?.captchaHtml) {
         console.log('[SubtleForms] CAPTCHA rendering:', {
           type: field.type,
           provider: field.config.providerName,
-          htmlLength: field.config.captchaHtml.length
+          htmlLength: field.config.captchaHtml.length,
         });
       } else {
-        console.error('[SubtleForms] CAPTCHA HTML is missing! Check if CAPTCHA is enabled and keys are configured in Settings > Advanced.');
+        console.error(
+          '[SubtleForms] CAPTCHA HTML is missing! Check if CAPTCHA is enabled and keys are configured in Settings > Advanced.'
+        );
       }
-      
+
       return (
         <div
           className='subtleforms-captcha-container'

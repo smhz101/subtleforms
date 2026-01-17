@@ -272,6 +272,39 @@ export default function ConversationalFormRenderer({
       setSubmitting(true);
       setSubmitError(null);
 
+      // Handle reCAPTCHA v3 if present
+      const recaptchaV3Input = document.querySelector(
+        '.subtleforms-recaptcha-v3'
+      );
+      if (recaptchaV3Input && window.grecaptcha && window.grecaptcha.execute) {
+        try {
+          const siteKey = recaptchaV3Input.getAttribute('data-sitekey');
+          console.log(
+            '[SubtleForms] Executing reCAPTCHA v3 with site key:',
+            siteKey
+          );
+
+          // Execute reCAPTCHA v3 to get token
+          const token = await window.grecaptcha.execute(siteKey, {
+            action: 'submit',
+          });
+          console.log(
+            '[SubtleForms] reCAPTCHA v3 token obtained:',
+            token ? 'YES' : 'NO'
+          );
+
+          // Set the token in the hidden input
+          recaptchaV3Input.value = token;
+        } catch (error) {
+          console.error('[SubtleForms] reCAPTCHA v3 execution failed:', error);
+          setSubmitError(
+            __('CAPTCHA verification failed. Please try again.', 'subtleforms')
+          );
+          setSubmitting(false);
+          return;
+        }
+      }
+
       const flatValues = flattenToPathMap(values);
       const payload = {};
       leafPaths.forEach((path) => {
@@ -280,12 +313,38 @@ export default function ConversationalFormRenderer({
         }
       });
 
+      // Include CAPTCHA response (v2 or v3)
+      const recaptchaResponse = document.querySelector(
+        'input[name="g-recaptcha-response"]'
+      );
+      if (recaptchaResponse && recaptchaResponse.value) {
+        payload['g-recaptcha-response'] = recaptchaResponse.value;
+        console.log('[SubtleForms] Including g-recaptcha-response in payload');
+      }
+
+      const hcaptchaResponse = document.querySelector(
+        'input[name="h-captcha-response"]'
+      );
+      if (hcaptchaResponse && hcaptchaResponse.value) {
+        payload['h-captcha-response'] = hcaptchaResponse.value;
+        console.log('[SubtleForms] Including h-captcha-response in payload');
+      }
+
+      const turnstileResponse = document.querySelector(
+        'input[name="cf-turnstile-response"]'
+      );
+      if (turnstileResponse && turnstileResponse.value) {
+        payload['cf-turnstile-response'] = turnstileResponse.value;
+        console.log('[SubtleForms] Including cf-turnstile-response in payload');
+      }
+
       try {
         const response = await fetch(`${restUrl}submit`, {
           method: 'POST',
           credentials: 'same-origin',
           headers: {
             'Content-Type': 'application/json',
+            'X-WP-Nonce': nonce,
           },
           body: JSON.stringify({
             form_id: formId,

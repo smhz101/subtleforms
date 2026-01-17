@@ -82,10 +82,28 @@ final class Shortcode {
 			'version'      => '1.0.0',
 		);
 
+		// Enqueue CAPTCHA provider script FIRST if enabled and configured
+		// This ensures the CAPTCHA API is loaded before our frontend script
+		$dependencies = $asset['dependencies'];
+		if ( $this->captchaManager && $this->captchaManager->isEnabled() && $this->captchaManager->isConfigured() ) {
+			$script_url = $this->captchaManager->getScriptUrl();
+			if ( ! empty( $script_url ) ) {
+				wp_enqueue_script(
+					'subtleforms-captcha',
+					$script_url,
+					array(),
+					null,
+					true
+				);
+				// Add CAPTCHA script as a dependency of frontend script
+				$dependencies[] = 'subtleforms-captcha';
+			}
+		}
+
 		wp_enqueue_script(
 			'subtleforms-frontend',
 			SUBTLEFORMS_PLUGIN_URL . 'build/frontend/frontend.js',
-			$asset['dependencies'],
+			$dependencies,
 			$asset['version'],
 			true
 		);
@@ -108,19 +126,5 @@ final class Shortcode {
 			array(),
 			$asset['version']
 		);
-
-		// Enqueue CAPTCHA provider script if enabled and configured
-		if ( $this->captchaManager && $this->captchaManager->isEnabled() && $this->captchaManager->isConfigured() ) {
-			$script_url = $this->captchaManager->getScriptUrl();
-			if ( ! empty( $script_url ) ) {
-				wp_enqueue_script(
-					'subtleforms-captcha',
-					$script_url,
-					array(),
-					null,
-					true
-				);
-			}
-		}
 	}
 }
