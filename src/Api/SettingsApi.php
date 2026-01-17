@@ -265,6 +265,57 @@ class SettingsApi {
 			'debug_mode'                 => array(
 				'type' => 'boolean',
 			),
+			'captcha_enabled'            => array(
+				'type' => 'boolean',
+			),
+			'captcha_provider'           => array(
+				'type'              => 'string',
+				'enum'              => array( '', 'recaptcha', 'hcaptcha', 'turnstile' ),
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'captcha_recaptcha_enabled'  => array(
+				'type' => 'boolean',
+			),
+			'captcha_recaptcha_site_key' => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'captcha_recaptcha_secret_key' => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'captcha_recaptcha_version'  => array(
+				'type'              => 'string',
+				'enum'              => array( 'v2', 'v3' ),
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'captcha_hcaptcha_enabled'   => array(
+				'type' => 'boolean',
+			),
+			'captcha_hcaptcha_site_key'  => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'captcha_hcaptcha_secret_key' => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'captcha_turnstile_enabled'  => array(
+				'type' => 'boolean',
+			),
+			'captcha_turnstile_site_key' => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'captcha_turnstile_secret_key' => array(
+				'type'              => 'string',
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'data_retention_days'        => array(
+				'type'    => 'integer',
+				'minimum' => 0,
+				'maximum' => 3650,
+			),
 		);
 	}
 }
