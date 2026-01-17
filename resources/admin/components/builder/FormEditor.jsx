@@ -240,7 +240,9 @@ export default function FormEditor({
             'subtleforms'
           );
           // eslint-disable-next-line no-alert
-          if (!confirm(message + '\n\n' + __('Continue anyway?', 'subtleforms'))) {
+          if (
+            !confirm(message + '\n\n' + __('Continue anyway?', 'subtleforms'))
+          ) {
             return;
           }
         }
@@ -351,7 +353,9 @@ export default function FormEditor({
           'subtleforms'
         );
         // eslint-disable-next-line no-alert
-        if (!confirm(message + '\n\n' + __('Continue anyway?', 'subtleforms'))) {
+        if (
+          !confirm(message + '\n\n' + __('Continue anyway?', 'subtleforms'))
+        ) {
           return;
         }
       }
