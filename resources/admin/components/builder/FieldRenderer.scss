@@ -317,3 +317,43 @@
 		}
 	}
 }
+// Composite Fields (Name, Address)
+.sf-field-renderer__composite {
+	&-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+		gap: 0.75rem;
+	}
+
+	&-item {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+
+		&--full {
+			grid-column: 1 / -1;
+		}
+
+		label {
+			font-size: 0.75rem;
+			font-weight: 500;
+			color: #374151;
+			margin: 0;
+		}
+
+		input,
+		select {
+			padding: 0.5rem;
+			border: 1px solid #d1d5db;
+			border-radius: 4px;
+			font-size: 0.875rem;
+			background-color: #f9fafb;
+			color: #6b7280;
+			cursor: not-allowed;
+
+			&::placeholder {
+				color: #9ca3af;
+			}
+		}
+	}
+}

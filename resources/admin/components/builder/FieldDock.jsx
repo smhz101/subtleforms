@@ -105,7 +105,7 @@ export default function FieldDock({
                   <div className='sf-field-dock__fields-grid'>
                     {categoryFields.map((f) => {
                       const isDisabled = f.enabled === false;
-                      
+
                       return (
                         <button
                           key={f.type}
@@ -113,11 +113,16 @@ export default function FieldDock({
                           onClick={() => !isDisabled && onAddField(f.type)}
                           disabled={isDisabled}
                           className={`sf-field-dock__field-button ${
-                            isDisabled ? 'sf-field-dock__field-button--disabled' : ''
+                            isDisabled
+                              ? 'sf-field-dock__field-button--disabled'
+                              : ''
                           }`}
                           title={
                             isDisabled
-                              ? __('Enable this CAPTCHA provider in Settings to use it', 'subtleforms')
+                              ? __(
+                                  'Enable this CAPTCHA provider in Settings to use it',
+                                  'subtleforms'
+                                )
                               : f.label
                           }>
                           <span className='sf-field-dock__field-icon-wrapper'>

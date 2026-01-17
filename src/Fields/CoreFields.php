@@ -485,7 +485,7 @@ final class CoreFields {
 			new FieldDefinition(
 				type: 'country',
 				label: __( 'Country', 'subtleforms' ),
-				category: 'choices',
+				category: 'special',
 				icon: 'dashicons-admin-site',
 				kind: 'input',
 				baseAttributes: array(),
@@ -1304,69 +1304,6 @@ final class CoreFields {
 
 		$registry->register(
 			new FieldDefinition(
-				type: 'recaptcha',
-				label: __( 'reCaptcha', 'subtleforms' ),
-				category: 'system',
-				icon: 'dashicons-shield',
-				kind: 'system',
-				baseAttributes: array(),
-				fieldSpecificAttributes: array(
-					'site_key' => '',
-				),
-				inspectorControls: array(
-					array(
-						'type'  => 'text',
-						'name'  => 'site_key',
-						'label' => __( 'Site Key', 'subtleforms' ),
-					),
-				)
-			)
-		);
-
-		$registry->register(
-			new FieldDefinition(
-				type: 'hcaptcha',
-				label: __( 'hCaptcha', 'subtleforms' ),
-				category: 'system',
-				icon: 'dashicons-shield-alt',
-				kind: 'system',
-				baseAttributes: array(),
-				fieldSpecificAttributes: array(
-					'site_key' => '',
-				),
-				inspectorControls: array(
-					array(
-						'type'  => 'text',
-						'name'  => 'site_key',
-						'label' => __( 'Site Key', 'subtleforms' ),
-					),
-				)
-			)
-		);
-
-		$registry->register(
-			new FieldDefinition(
-				type: 'turnstile',
-				label: __( 'Turnstile', 'subtleforms' ),
-				category: 'system',
-				icon: 'dashicons-lock',
-				kind: 'system',
-				baseAttributes: array(),
-				fieldSpecificAttributes: array(
-					'site_key' => '',
-				),
-				inspectorControls: array(
-					array(
-						'type'  => 'text',
-						'name'  => 'site_key',
-						'label' => __( 'Site Key', 'subtleforms' ),
-					),
-				)
-			)
-		);
-
-		$registry->register(
-			new FieldDefinition(
 				type: 'action_hook',
 				label: __( 'Action Hook', 'subtleforms' ),
 				category: 'system',
@@ -1596,6 +1533,106 @@ final class CoreFields {
 						'name'  => 'description',
 						'label' => __( 'Description', 'subtleforms' ),
 						'help'  => __( 'Optional description for debugging', 'subtleforms' ),
+					),
+				)
+			)
+		);
+
+		// ===== Special Fields =====
+
+		// Name Field - Compound field with configurable parts
+		$registry->register(
+			new FieldDefinition(
+				type: 'name',
+				label: __( 'Name (Full)', 'subtleforms' ),
+				category: 'special',
+				icon: 'dashicons-admin-users',
+				kind: 'composite',
+				baseAttributes: array(),
+				fieldSpecificAttributes: array(
+					'enable_prefix'     => true,
+					'enable_first_name' => true,
+					'enable_middle_name' => true,
+					'enable_last_name'  => true,
+					'enable_suffix'     => false,
+					'prefix_options'    => array( 'Mr', 'Mrs', 'Ms', 'Dr', 'Prof' ),
+					'suffix_options'    => array( 'Jr', 'Sr', 'II', 'III', 'IV' ),
+					'required_parts'    => array( 'first_name', 'last_name' ),
+				),
+				inspectorControls: array(
+					array(
+						'type'  => 'text',
+						'name'  => 'label',
+						'label' => __( 'Label', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'required',
+						'label' => __( 'Required', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'enable_prefix',
+						'label' => __( 'Enable Prefix (Mr, Mrs, etc.)', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'enable_middle_name',
+						'label' => __( 'Enable Middle/Maiden Name', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'enable_suffix',
+						'label' => __( 'Enable Suffix (Jr, Sr, etc.)', 'subtleforms' ),
+					),
+				)
+			)
+		);
+
+		// Address Field - Compound field with configurable parts
+		$registry->register(
+			new FieldDefinition(
+				type: 'address',
+				label: __( 'Address (Full)', 'subtleforms' ),
+				category: 'special',
+				icon: 'dashicons-location',
+				kind: 'composite',
+				baseAttributes: array(),
+				fieldSpecificAttributes: array(
+					'enable_street_address' => true,
+					'enable_address_line_2' => true,
+					'enable_city'           => true,
+					'enable_state'          => true,
+					'enable_postal_code'    => true,
+					'enable_country'        => true,
+					'required_parts'        => array( 'street_address', 'city', 'postal_code' ),
+					'default_country'       => '',
+				),
+				inspectorControls: array(
+					array(
+						'type'  => 'text',
+						'name'  => 'label',
+						'label' => __( 'Label', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'required',
+						'label' => __( 'Required', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'enable_address_line_2',
+						'label' => __( 'Enable Address Line 2', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'enable_state',
+						'label' => __( 'Enable State/Province', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'enable_country',
+						'label' => __( 'Enable Country', 'subtleforms' ),
 					),
 				)
 			)
