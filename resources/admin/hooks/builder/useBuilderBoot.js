@@ -48,8 +48,7 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
 
         // Check if any provider is configured
         const anyCaptchaConfigured =
-          captchaEnabled &&
-          (recaptchaEnabled || hcaptchaEnabled || turnstileEnabled);
+          captchaEnabled && (recaptchaEnabled || hcaptchaEnabled || turnstileEnabled);
 
         // Transform API response to component format
         const groups = {};

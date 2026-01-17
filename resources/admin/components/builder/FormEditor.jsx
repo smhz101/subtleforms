@@ -229,17 +229,20 @@ export default function FormEditor({
 
   const handleDockAdd = useCallback(
     (type) => {
-      // Check for duplicate CAPTCHA field
+      // Check for multiple CAPTCHA fields (warning, non-blocking)
       if (type === 'captcha') {
-        const hasCaptcha = Object.values(tree.nodes).some(
+        const captchaCount = Object.values(tree.nodes).filter(
           (node) => node?.type === 'captcha'
-        );
-        if (hasCaptcha) {
-          // eslint-disable-next-line no-alert
-          alert(
-            __('Only one CAPTCHA field is allowed per form.', 'subtleforms')
+        ).length;
+        if (captchaCount >= 1) {
+          const message = __(
+            'Warning: Adding multiple CAPTCHA fields may cause conflicts. Most forms should only use one CAPTCHA field.',
+            'subtleforms'
           );
-          return;
+          // eslint-disable-next-line no-alert
+          if (!confirm(message + '\n\n' + __('Continue anyway?', 'subtleforms'))) {
+            return;
+          }
         }
       }
 
@@ -340,17 +343,17 @@ export default function FormEditor({
         return;
       }
 
-      // Prevent duplicating CAPTCHA fields
+      // Warn when duplicating CAPTCHA fields (non-blocking)
       const node = tree.nodes[nodeId];
       if (node?.type === 'captcha') {
-        // eslint-disable-next-line no-alert
-        alert(
-          __(
-            'CAPTCHA fields cannot be duplicated. Only one CAPTCHA field is allowed per form.',
-            'subtleforms'
-          )
+        const message = __(
+          'Warning: Duplicating CAPTCHA fields may cause conflicts. Most forms should only use one CAPTCHA field.',
+          'subtleforms'
         );
-        return;
+        // eslint-disable-next-line no-alert
+        if (!confirm(message + '\n\n' + __('Continue anyway?', 'subtleforms'))) {
+          return;
+        }
       }
 
       setTree((currentTree) => {
