@@ -299,16 +299,22 @@ export default function FieldRenderer({ field }) {
 
       {type === 'name_group' && (
         <div className='sf-field-renderer__name-group'>
-          {field.config?.enable_prefix && (
+          {field.enable_prefix && (
             <div className='sf-field-renderer__name-part'>
               <label className={labelClass}>
                 {__('Prefix', 'subtleforms')}
               </label>
               <select className={selectClass} readOnly tabIndex='-1'>
-                <option value=''>
-                  {__('Select...', 'subtleforms')}
-                </option>
-                {(field.config?.prefix_options || ['Mr.', 'Ms.', 'Mrs.', 'Dr.', 'Prof.']).map((opt) => (
+                <option value=''>{__('Select...', 'subtleforms')}</option>
+                {(
+                  field.prefix_options || [
+                    'Mr.',
+                    'Ms.',
+                    'Mrs.',
+                    'Dr.',
+                    'Prof.',
+                  ]
+                ).map((opt) => (
                   <option key={opt} value={opt}>
                     {opt}
                   </option>
@@ -316,7 +322,7 @@ export default function FieldRenderer({ field }) {
               </select>
             </div>
           )}
-          {field.config?.enable_first_name !== false && (
+          {field.enable_first_name !== false && (
             <div className='sf-field-renderer__name-part'>
               <label className={labelClass}>
                 {__('First Name', 'subtleforms')}
@@ -330,7 +336,7 @@ export default function FieldRenderer({ field }) {
               />
             </div>
           )}
-          {field.config?.enable_middle_name && (
+          {field.enable_middle_name && (
             <div className='sf-field-renderer__name-part'>
               <label className={labelClass}>
                 {__('Middle Name', 'subtleforms')}
@@ -344,7 +350,7 @@ export default function FieldRenderer({ field }) {
               />
             </div>
           )}
-          {field.config?.enable_last_name !== false && (
+          {field.enable_last_name !== false && (
             <div className='sf-field-renderer__name-part'>
               <label className={labelClass}>
                 {__('Last Name', 'subtleforms')}
@@ -358,16 +364,22 @@ export default function FieldRenderer({ field }) {
               />
             </div>
           )}
-          {field.config?.enable_suffix && (
+          {field.enable_suffix && (
             <div className='sf-field-renderer__name-part'>
               <label className={labelClass}>
                 {__('Suffix', 'subtleforms')}
               </label>
               <select className={selectClass} readOnly tabIndex='-1'>
-                <option value=''>
-                  {__('Select...', 'subtleforms')}
-                </option>
-                {(field.config?.suffix_options || ['Jr.', 'Sr.', 'II', 'III', 'IV']).map((opt) => (
+                <option value=''>{__('Select...', 'subtleforms')}</option>
+                {(
+                  field.suffix_options || [
+                    'Jr.',
+                    'Sr.',
+                    'II',
+                    'III',
+                    'IV',
+                  ]
+                ).map((opt) => (
                   <option key={opt} value={opt}>
                     {opt}
                   </option>
@@ -380,8 +392,8 @@ export default function FieldRenderer({ field }) {
 
       {type === 'address_group' && (
         <div className='sf-field-renderer__address-group'>
-          {field.config?.enable_street1 !== false && (
-            <div className='sf-field-renderer__address-part'>
+          {field.enable_street1 !== false && (
+            <div className='sf-field-renderer__address-part sf-field-renderer__address-part--full'>
               <label className={labelClass}>
                 {__('Street Address', 'subtleforms')}
               </label>
@@ -394,8 +406,8 @@ export default function FieldRenderer({ field }) {
               />
             </div>
           )}
-          {field.config?.enable_street2 !== false && (
-            <div className='sf-field-renderer__address-part'>
+          {field.enable_street2 !== false && (
+            <div className='sf-field-renderer__address-part sf-field-renderer__address-part--full'>
               <label className={labelClass}>
                 {__('Street Address Line 2', 'subtleforms')}
               </label>
@@ -408,11 +420,9 @@ export default function FieldRenderer({ field }) {
               />
             </div>
           )}
-          {field.config?.enable_city !== false && (
+          {field.enable_city !== false && (
             <div className='sf-field-renderer__address-part'>
-              <label className={labelClass}>
-                {__('City', 'subtleforms')}
-              </label>
+              <label className={labelClass}>{__('City', 'subtleforms')}</label>
               <input
                 type='text'
                 placeholder={__('City', 'subtleforms')}
@@ -422,7 +432,7 @@ export default function FieldRenderer({ field }) {
               />
             </div>
           )}
-          {field.config?.enable_state !== false && (
+          {field.enable_state !== false && (
             <div className='sf-field-renderer__address-part'>
               <label className={labelClass}>
                 {__('State / Province', 'subtleforms')}
@@ -436,7 +446,7 @@ export default function FieldRenderer({ field }) {
               />
             </div>
           )}
-          {field.config?.enable_postal_code !== false && (
+          {field.enable_postal_code !== false && (
             <div className='sf-field-renderer__address-part'>
               <label className={labelClass}>
                 {__('Postal Code', 'subtleforms')}
@@ -450,15 +460,13 @@ export default function FieldRenderer({ field }) {
               />
             </div>
           )}
-          {field.config?.enable_country !== false && (
-            <div className='sf-field-renderer__address-part'>
+          {field.enable_country !== false && (
+            <div className='sf-field-renderer__address-part sf-field-renderer__address-part--full'>
               <label className={labelClass}>
                 {__('Country', 'subtleforms')}
               </label>
               <select className={selectClass} readOnly tabIndex='-1'>
-                <option value=''>
-                  {__('Select Country', 'subtleforms')}
-                </option>
+                <option value=''>{__('Select Country', 'subtleforms')}</option>
               </select>
             </div>
           )}

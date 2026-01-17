@@ -5,3 +5,37 @@
  */
 
 // Frontend component styles will be imported here
+
+// Name Group Field Styles
+.subtleforms-name-group {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+	gap: 1rem;
+
+	@media (max-width: 640px) {
+		grid-template-columns: 1fr;
+	}
+}
+
+.subtleforms-name-part {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}
+
+// Address Group Field Styles
+.subtleforms-address-group {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+	gap: 1rem;
+
+	@media (max-width: 640px) {
+		grid-template-columns: 1fr;
+	}
+}
+
+.subtleforms-address-part {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25rem;
+}

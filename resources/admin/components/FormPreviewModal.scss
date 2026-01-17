@@ -198,4 +198,34 @@
 			font-size: 0.875rem;
 		}
 	}
+
+	// Name Group Field Styles
+	&__name-group {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+		gap: 0.75rem;
+	}
+
+	&__name-part {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+	}
+
+	// Address Group Field Styles
+	&__address-group {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+		gap: 0.75rem;
+	}
+
+	&__address-part {
+		display: flex;
+		flex-direction: column;
+		gap: 0.25rem;
+
+		&--full {
+			grid-column: 1 / -1;
+		}
+	}
 }

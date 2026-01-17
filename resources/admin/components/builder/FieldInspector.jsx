@@ -261,9 +261,7 @@ export default function FieldInspector({ field, allFields }) {
                           <CheckboxControl
                             label={__('Enable Prefix', 'subtleforms')}
                             checked={!!field.enable_prefix}
-                            onChange={(v) =>
-                              handleUpdate({ enable_prefix: v })
-                            }
+                            onChange={(v) => handleUpdate({ enable_prefix: v })}
                           />
                           <CheckboxControl
                             label={__('Enable First Name', 'subtleforms')}
@@ -289,9 +287,7 @@ export default function FieldInspector({ field, allFields }) {
                           <CheckboxControl
                             label={__('Enable Suffix', 'subtleforms')}
                             checked={!!field.enable_suffix}
-                            onChange={(v) =>
-                              handleUpdate({ enable_suffix: v })
-                            }
+                            onChange={(v) => handleUpdate({ enable_suffix: v })}
                           />
                         </div>
                       )}
@@ -310,7 +306,10 @@ export default function FieldInspector({ field, allFields }) {
                             }
                           />
                           <CheckboxControl
-                            label={__('Enable Street Address Line 2', 'subtleforms')}
+                            label={__(
+                              'Enable Street Address Line 2',
+                              'subtleforms'
+                            )}
                             checked={field.enable_street2 !== false}
                             onChange={(v) =>
                               handleUpdate({ enable_street2: v })
@@ -319,16 +318,12 @@ export default function FieldInspector({ field, allFields }) {
                           <CheckboxControl
                             label={__('Enable City', 'subtleforms')}
                             checked={field.enable_city !== false}
-                            onChange={(v) =>
-                              handleUpdate({ enable_city: v })
-                            }
+                            onChange={(v) => handleUpdate({ enable_city: v })}
                           />
                           <CheckboxControl
                             label={__('Enable State / Province', 'subtleforms')}
                             checked={field.enable_state !== false}
-                            onChange={(v) =>
-                              handleUpdate({ enable_state: v })
-                            }
+                            onChange={(v) => handleUpdate({ enable_state: v })}
                           />
                           <CheckboxControl
                             label={__('Enable Postal Code', 'subtleforms')}

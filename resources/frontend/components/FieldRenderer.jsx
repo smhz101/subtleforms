@@ -401,17 +401,29 @@ function renderInput(
         <div className='subtleforms-name-group'>
           {field.config?.enable_prefix && (
             <div className='subtleforms-name-part'>
-              <label htmlFor={`${inputId}-prefix`} className='subtleforms-field-label'>
+              <label
+                htmlFor={`${inputId}-prefix`}
+                className='subtleforms-field-label'>
                 {__('Prefix', 'subtleforms')}
               </label>
               <select
                 id={`${inputId}-prefix`}
                 className='subtleforms-select'
                 value={nameValue.prefix || ''}
-                onChange={(e) => onChange({ ...nameValue, prefix: e.target.value })}
+                onChange={(e) =>
+                  onChange({ ...nameValue, prefix: e.target.value })
+                }
                 aria-invalid={!!error}>
                 <option value=''>{__('Select...', 'subtleforms')}</option>
-                {(field.config?.prefix_options || ['Mr.', 'Ms.', 'Mrs.', 'Dr.', 'Prof.']).map((opt) => (
+                {(
+                  field.config?.prefix_options || [
+                    'Mr.',
+                    'Ms.',
+                    'Mrs.',
+                    'Dr.',
+                    'Prof.',
+                  ]
+                ).map((opt) => (
                   <option key={opt} value={opt}>
                     {opt}
                   </option>
@@ -421,7 +433,9 @@ function renderInput(
           )}
           {field.config?.enable_first_name !== false && (
             <div className='subtleforms-name-part'>
-              <label htmlFor={`${inputId}-first`} className='subtleforms-field-label'>
+              <label
+                htmlFor={`${inputId}-first`}
+                className='subtleforms-field-label'>
                 {__('First Name', 'subtleforms')}
                 {required && <span className='subtleforms-required'>*</span>}
               </label>
@@ -430,7 +444,9 @@ function renderInput(
                 type='text'
                 className='subtleforms-input'
                 value={nameValue.first || ''}
-                onChange={(e) => onChange({ ...nameValue, first: e.target.value })}
+                onChange={(e) =>
+                  onChange({ ...nameValue, first: e.target.value })
+                }
                 placeholder={__('First Name', 'subtleforms')}
                 aria-required={required}
                 aria-invalid={!!error}
@@ -439,7 +455,9 @@ function renderInput(
           )}
           {field.config?.enable_middle_name && (
             <div className='subtleforms-name-part'>
-              <label htmlFor={`${inputId}-middle`} className='subtleforms-field-label'>
+              <label
+                htmlFor={`${inputId}-middle`}
+                className='subtleforms-field-label'>
                 {__('Middle Name', 'subtleforms')}
               </label>
               <input
@@ -447,7 +465,9 @@ function renderInput(
                 type='text'
                 className='subtleforms-input'
                 value={nameValue.middle || ''}
-                onChange={(e) => onChange({ ...nameValue, middle: e.target.value })}
+                onChange={(e) =>
+                  onChange({ ...nameValue, middle: e.target.value })
+                }
                 placeholder={__('Middle Name', 'subtleforms')}
                 aria-invalid={!!error}
               />
@@ -455,7 +475,9 @@ function renderInput(
           )}
           {field.config?.enable_last_name !== false && (
             <div className='subtleforms-name-part'>
-              <label htmlFor={`${inputId}-last`} className='subtleforms-field-label'>
+              <label
+                htmlFor={`${inputId}-last`}
+                className='subtleforms-field-label'>
                 {__('Last Name', 'subtleforms')}
                 {required && <span className='subtleforms-required'>*</span>}
               </label>
@@ -464,7 +486,9 @@ function renderInput(
                 type='text'
                 className='subtleforms-input'
                 value={nameValue.last || ''}
-                onChange={(e) => onChange({ ...nameValue, last: e.target.value })}
+                onChange={(e) =>
+                  onChange({ ...nameValue, last: e.target.value })
+                }
                 placeholder={__('Last Name', 'subtleforms')}
                 aria-required={required}
                 aria-invalid={!!error}
@@ -473,17 +497,29 @@ function renderInput(
           )}
           {field.config?.enable_suffix && (
             <div className='subtleforms-name-part'>
-              <label htmlFor={`${inputId}-suffix`} className='subtleforms-field-label'>
+              <label
+                htmlFor={`${inputId}-suffix`}
+                className='subtleforms-field-label'>
                 {__('Suffix', 'subtleforms')}
               </label>
               <select
                 id={`${inputId}-suffix`}
                 className='subtleforms-select'
                 value={nameValue.suffix || ''}
-                onChange={(e) => onChange({ ...nameValue, suffix: e.target.value })}
+                onChange={(e) =>
+                  onChange({ ...nameValue, suffix: e.target.value })
+                }
                 aria-invalid={!!error}>
                 <option value=''>{__('Select...', 'subtleforms')}</option>
-                {(field.config?.suffix_options || ['Jr.', 'Sr.', 'II', 'III', 'IV']).map((opt) => (
+                {(
+                  field.config?.suffix_options || [
+                    'Jr.',
+                    'Sr.',
+                    'II',
+                    'III',
+                    'IV',
+                  ]
+                ).map((opt) => (
                   <option key={opt} value={opt}>
                     {opt}
                   </option>
@@ -500,7 +536,9 @@ function renderInput(
         <div className='subtleforms-address-group'>
           {field.config?.enable_street1 !== false && (
             <div className='subtleforms-address-part'>
-              <label htmlFor={`${inputId}-street1`} className='subtleforms-field-label'>
+              <label
+                htmlFor={`${inputId}-street1`}
+                className='subtleforms-field-label'>
                 {__('Street Address', 'subtleforms')}
                 {required && <span className='subtleforms-required'>*</span>}
               </label>
@@ -509,7 +547,9 @@ function renderInput(
                 type='text'
                 className='subtleforms-input'
                 value={addressValue.street1 || ''}
-                onChange={(e) => onChange({ ...addressValue, street1: e.target.value })}
+                onChange={(e) =>
+                  onChange({ ...addressValue, street1: e.target.value })
+                }
                 placeholder={__('Street Address', 'subtleforms')}
                 aria-required={required}
                 aria-invalid={!!error}
@@ -518,7 +558,9 @@ function renderInput(
           )}
           {field.config?.enable_street2 !== false && (
             <div className='subtleforms-address-part'>
-              <label htmlFor={`${inputId}-street2`} className='subtleforms-field-label'>
+              <label
+                htmlFor={`${inputId}-street2`}
+                className='subtleforms-field-label'>
                 {__('Street Address Line 2', 'subtleforms')}
               </label>
               <input
@@ -526,7 +568,9 @@ function renderInput(
                 type='text'
                 className='subtleforms-input'
                 value={addressValue.street2 || ''}
-                onChange={(e) => onChange({ ...addressValue, street2: e.target.value })}
+                onChange={(e) =>
+                  onChange({ ...addressValue, street2: e.target.value })
+                }
                 placeholder={__('Apt, Suite, etc.', 'subtleforms')}
                 aria-invalid={!!error}
               />
@@ -534,7 +578,9 @@ function renderInput(
           )}
           {field.config?.enable_city !== false && (
             <div className='subtleforms-address-part'>
-              <label htmlFor={`${inputId}-city`} className='subtleforms-field-label'>
+              <label
+                htmlFor={`${inputId}-city`}
+                className='subtleforms-field-label'>
                 {__('City', 'subtleforms')}
                 {required && <span className='subtleforms-required'>*</span>}
               </label>
@@ -543,7 +589,9 @@ function renderInput(
                 type='text'
                 className='subtleforms-input'
                 value={addressValue.city || ''}
-                onChange={(e) => onChange({ ...addressValue, city: e.target.value })}
+                onChange={(e) =>
+                  onChange({ ...addressValue, city: e.target.value })
+                }
                 placeholder={__('City', 'subtleforms')}
                 aria-required={required}
                 aria-invalid={!!error}
@@ -552,7 +600,9 @@ function renderInput(
           )}
           {field.config?.enable_state !== false && (
             <div className='subtleforms-address-part'>
-              <label htmlFor={`${inputId}-state`} className='subtleforms-field-label'>
+              <label
+                htmlFor={`${inputId}-state`}
+                className='subtleforms-field-label'>
                 {__('State / Province', 'subtleforms')}
                 {required && <span className='subtleforms-required'>*</span>}
               </label>
@@ -561,7 +611,9 @@ function renderInput(
                 type='text'
                 className='subtleforms-input'
                 value={addressValue.state || ''}
-                onChange={(e) => onChange({ ...addressValue, state: e.target.value })}
+                onChange={(e) =>
+                  onChange({ ...addressValue, state: e.target.value })
+                }
                 placeholder={__('State / Province', 'subtleforms')}
                 aria-required={required}
                 aria-invalid={!!error}
@@ -570,7 +622,9 @@ function renderInput(
           )}
           {field.config?.enable_postal_code !== false && (
             <div className='subtleforms-address-part'>
-              <label htmlFor={`${inputId}-postal`} className='subtleforms-field-label'>
+              <label
+                htmlFor={`${inputId}-postal`}
+                className='subtleforms-field-label'>
                 {__('Postal Code', 'subtleforms')}
                 {required && <span className='subtleforms-required'>*</span>}
               </label>
@@ -579,7 +633,9 @@ function renderInput(
                 type='text'
                 className='subtleforms-input'
                 value={addressValue.postal_code || ''}
-                onChange={(e) => onChange({ ...addressValue, postal_code: e.target.value })}
+                onChange={(e) =>
+                  onChange({ ...addressValue, postal_code: e.target.value })
+                }
                 placeholder={__('Postal Code', 'subtleforms')}
                 aria-required={required}
                 aria-invalid={!!error}
@@ -588,7 +644,9 @@ function renderInput(
           )}
           {field.config?.enable_country !== false && (
             <div className='subtleforms-address-part'>
-              <label htmlFor={`${inputId}-country`} className='subtleforms-field-label'>
+              <label
+                htmlFor={`${inputId}-country`}
+                className='subtleforms-field-label'>
                 {__('Country', 'subtleforms')}
                 {required && <span className='subtleforms-required'>*</span>}
               </label>
@@ -596,7 +654,9 @@ function renderInput(
                 id={`${inputId}-country`}
                 className='subtleforms-select'
                 value={addressValue.country || ''}
-                onChange={(e) => onChange({ ...addressValue, country: e.target.value })}
+                onChange={(e) =>
+                  onChange({ ...addressValue, country: e.target.value })
+                }
                 aria-required={required}
                 aria-invalid={!!error}>
                 <option value=''>{__('Select Country', 'subtleforms')}</option>
