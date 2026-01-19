@@ -3,11 +3,20 @@
  */
 
 .sf-notices-wrapper {
-  flex-shrink: 0;
-  padding: 1rem 1.5rem;
-  padding-bottom: 0;
+	flex-shrink: 0;
+	padding: 1rem 1.5rem;
+	padding-bottom: 0;
 }
 
 .subtleforms-notices {
-  margin-bottom: 1rem;
+	margin-bottom: 1rem;
+}
+
+// Ensure snackbars never inherit full width from parent containers
+.components-snackbar {
+	max-width: 600px !important;
+
+	@media (min-width: 600px) {
+		width: fit-content !important;
+	}
 }

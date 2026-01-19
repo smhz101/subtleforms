@@ -367,50 +367,26 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
               )}
             </label>
             <div className='sf-form-preview-field__name-group'>
-              {(field.enable_prefix || config.enable_prefix) && (
-                <div className='sf-form-preview-field__name-part'>
-                  <label htmlFor={`${inputId}-prefix`}>
-                    {__('Prefix', 'subtleforms')}
-                  </label>
-                  <select
-                    id={`${inputId}-prefix`}
-                    className='sf-form-preview-field__input'
-                    disabled>
-                    <option>{__('Select...', 'subtleforms')}</option>
-                    {(
-                      field.prefix_options ||
-                      config.prefix_options || [
-                        'Mr.',
-                        'Ms.',
-                        'Mrs.',
-                        'Dr.',
-                        'Prof.',
-                      ]
-                    ).map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-              {(field.enable_first_name !== false && config.enable_first_name !== false) && (
-                <div className='sf-form-preview-field__name-part'>
-                  <label htmlFor={`${inputId}-first`}>
-                    {__('First Name', 'subtleforms')}
-                    {required && (
-                      <span className='sf-form-preview-field__required'>*</span>
-                    )}
-                  </label>
-                  <input
-                    id={`${inputId}-first`}
-                    type='text'
-                    placeholder={__('First Name', 'subtleforms')}
-                    className='sf-form-preview-field__input'
-                    disabled
-                  />
-                </div>
-              )}
+              {field.enable_first_name !== false &&
+                config.enable_first_name !== false && (
+                  <div className='sf-form-preview-field__name-part'>
+                    <label htmlFor={`${inputId}-first`}>
+                      {__('First Name', 'subtleforms')}
+                      {required && (
+                        <span className='sf-form-preview-field__required'>
+                          *
+                        </span>
+                      )}
+                    </label>
+                    <input
+                      id={`${inputId}-first`}
+                      type='text'
+                      placeholder={__('First Name', 'subtleforms')}
+                      className='sf-form-preview-field__input'
+                      disabled
+                    />
+                  </div>
+                )}
               {(field.enable_middle_name || config.enable_middle_name) && (
                 <div className='sf-form-preview-field__name-part'>
                   <label htmlFor={`${inputId}-middle`}>
@@ -425,44 +401,26 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
                   />
                 </div>
               )}
-              {(field.enable_last_name !== false && config.enable_last_name !== false) && (
-                <div className='sf-form-preview-field__name-part'>
-                  <label htmlFor={`${inputId}-last`}>
-                    {__('Last Name', 'subtleforms')}
-                    {required && (
-                      <span className='sf-form-preview-field__required'>*</span>
-                    )}
-                  </label>
-                  <input
-                    id={`${inputId}-last`}
-                    type='text'
-                    placeholder={__('Last Name', 'subtleforms')}
-                    className='sf-form-preview-field__input'
-                    disabled
-                  />
-                </div>
-              )}
-              {(field.enable_suffix || config.enable_suffix) && (
-                <div className='sf-form-preview-field__name-part'>
-                  <label htmlFor={`${inputId}-suffix`}>
-                    {__('Suffix', 'subtleforms')}
-                  </label>
-                  <select
-                    id={`${inputId}-suffix`}
-                    className='sf-form-preview-field__input'
-                    disabled>
-                    <option>{__('Select...', 'subtleforms')}</option>
-                    {(
-                      field.suffix_options ||
-                      config.suffix_options || ['Jr.', 'Sr.', 'II', 'III', 'IV']
-                    ).map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+              {field.enable_last_name !== false &&
+                config.enable_last_name !== false && (
+                  <div className='sf-form-preview-field__name-part'>
+                    <label htmlFor={`${inputId}-last`}>
+                      {__('Last Name', 'subtleforms')}
+                      {required && (
+                        <span className='sf-form-preview-field__required'>
+                          *
+                        </span>
+                      )}
+                    </label>
+                    <input
+                      id={`${inputId}-last`}
+                      type='text'
+                      placeholder={__('Last Name', 'subtleforms')}
+                      className='sf-form-preview-field__input'
+                      disabled
+                    />
+                  </div>
+                )}
             </div>
             {helpText && (
               <p className='sf-form-preview-field__help'>{helpText}</p>
@@ -480,24 +438,27 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
               )}
             </label>
             <div className='sf-form-preview-field__address-group'>
-              {(field.enable_street1 !== false && config.enable_street1 !== false) && (
-                <div className='sf-form-preview-field__address-part sf-form-preview-field__address-part--full'>
-                  <label htmlFor={`${inputId}-street1`}>
-                    {__('Street Address', 'subtleforms')}
-                    {required && (
-                      <span className='sf-form-preview-field__required'>*</span>
-                    )}
-                  </label>
-                  <input
-                    id={`${inputId}-street1`}
-                    type='text'
-                    placeholder={__('Street Address', 'subtleforms')}
-                    className='sf-form-preview-field__input'
-                    disabled
-                  />
-                </div>
-              )}
-              {(field.enable_street2 !== false && config.enable_street2 !== false) && (
+              {field.enable_street1 !== false &&
+                config.enable_street1 !== false && (
+                  <div className='sf-form-preview-field__address-part sf-form-preview-field__address-part--full'>
+                    <label htmlFor={`${inputId}-street1`}>
+                      {__('Street Address', 'subtleforms')}
+                      {required && (
+                        <span className='sf-form-preview-field__required'>
+                          *
+                        </span>
+                      )}
+                    </label>
+                    <input
+                      id={`${inputId}-street1`}
+                      type='text'
+                      placeholder={__('Street Address', 'subtleforms')}
+                      className='sf-form-preview-field__input'
+                      disabled
+                    />
+                  </div>
+                )}
+              {field.enable_street2 && config.enable_street2 && (
                 <div className='sf-form-preview-field__address-part sf-form-preview-field__address-part--full'>
                   <label htmlFor={`${inputId}-street2`}>
                     {__('Street Address Line 2', 'subtleforms')}
@@ -511,7 +472,7 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
                   />
                 </div>
               )}
-              {(field.enable_city !== false && config.enable_city !== false) && (
+              {field.enable_city !== false && config.enable_city !== false && (
                 <div className='sf-form-preview-field__address-part'>
                   <label htmlFor={`${inputId}-city`}>
                     {__('City', 'subtleforms')}
@@ -528,56 +489,65 @@ export default function FormPreviewModal({ schema, onClose, isDirty = false }) {
                   />
                 </div>
               )}
-              {(field.enable_state !== false && config.enable_state !== false) && (
-                <div className='sf-form-preview-field__address-part'>
-                  <label htmlFor={`${inputId}-state`}>
-                    {__('State / Province', 'subtleforms')}
-                    {required && (
-                      <span className='sf-form-preview-field__required'>*</span>
-                    )}
-                  </label>
-                  <input
-                    id={`${inputId}-state`}
-                    type='text'
-                    placeholder={__('State / Province', 'subtleforms')}
-                    className='sf-form-preview-field__input'
-                    disabled
-                  />
-                </div>
-              )}
-              {(field.enable_postal_code !== false && config.enable_postal_code !== false) && (
-                <div className='sf-form-preview-field__address-part'>
-                  <label htmlFor={`${inputId}-postal`}>
-                    {__('Postal Code', 'subtleforms')}
-                    {required && (
-                      <span className='sf-form-preview-field__required'>*</span>
-                    )}
-                  </label>
-                  <input
-                    id={`${inputId}-postal`}
-                    type='text'
-                    placeholder={__('Postal Code', 'subtleforms')}
-                    className='sf-form-preview-field__input'
-                    disabled
-                  />
-                </div>
-              )}
-              {(field.enable_country !== false && config.enable_country !== false) && (
-                <div className='sf-form-preview-field__address-part sf-form-preview-field__address-part--full'>
-                  <label htmlFor={`${inputId}-country`}>
-                    {__('Country', 'subtleforms')}
-                    {required && (
-                      <span className='sf-form-preview-field__required'>*</span>
-                    )}
-                  </label>
-                  <select
-                    id={`${inputId}-country`}
-                    className='sf-form-preview-field__input'
-                    disabled>
-                    <option>{__('Select Country', 'subtleforms')}</option>
-                  </select>
-                </div>
-              )}
+              {field.enable_state !== false &&
+                config.enable_state !== false && (
+                  <div className='sf-form-preview-field__address-part'>
+                    <label htmlFor={`${inputId}-state`}>
+                      {__('State / Province', 'subtleforms')}
+                      {required && (
+                        <span className='sf-form-preview-field__required'>
+                          *
+                        </span>
+                      )}
+                    </label>
+                    <input
+                      id={`${inputId}-state`}
+                      type='text'
+                      placeholder={__('State / Province', 'subtleforms')}
+                      className='sf-form-preview-field__input'
+                      disabled
+                    />
+                  </div>
+                )}
+              {field.enable_postal_code !== false &&
+                config.enable_postal_code !== false && (
+                  <div className='sf-form-preview-field__address-part'>
+                    <label htmlFor={`${inputId}-postal`}>
+                      {__('Postal Code', 'subtleforms')}
+                      {required && (
+                        <span className='sf-form-preview-field__required'>
+                          *
+                        </span>
+                      )}
+                    </label>
+                    <input
+                      id={`${inputId}-postal`}
+                      type='text'
+                      placeholder={__('Postal Code', 'subtleforms')}
+                      className='sf-form-preview-field__input'
+                      disabled
+                    />
+                  </div>
+                )}
+              {field.enable_country !== false &&
+                config.enable_country !== false && (
+                  <div className='sf-form-preview-field__address-part'>
+                    <label htmlFor={`${inputId}-country`}>
+                      {__('Country', 'subtleforms')}
+                      {required && (
+                        <span className='sf-form-preview-field__required'>
+                          *
+                        </span>
+                      )}
+                    </label>
+                    <select
+                      id={`${inputId}-country`}
+                      className='sf-form-preview-field__input'
+                      disabled>
+                      <option>{__('Select Country', 'subtleforms')}</option>
+                    </select>
+                  </div>
+                )}
             </div>
             {helpText && (
               <p className='sf-form-preview-field__help'>{helpText}</p>
