@@ -1,5 +1,6 @@
 import { useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import Icon from '../ui/Icon';
 import './InsertFieldButton.scss';
 
 export default function InsertFieldButton({
@@ -27,9 +28,14 @@ export default function InsertFieldButton({
             },
             buttonRef.current
           );
-        }}>
-        <span aria-hidden='true'>＋</span>
-        <span>{label || __('Insert Field', 'subtleforms')}</span>
+        }}
+        aria-label={label || __('Insert Field', 'subtleforms')}>
+        <span className='sf-insert-field-button__icon'>
+          <Icon.Plus />
+        </span>
+        <span className='sf-insert-field-button__text'>
+          {label || __('Insert Field', 'subtleforms')}
+        </span>
       </button>
     </div>
   );

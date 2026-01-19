@@ -1,6 +1,6 @@
 /**
  * InsertFieldButton Component Styles
- * Phase 4: Enhanced subtle styling with contextual discovery
+ * Gutenberg-inspired minimal inserter pattern
  */
 
 .sf-insert-field-button {
@@ -8,83 +8,93 @@
 		width: 100%;
 		display: flex;
 		justify-content: center;
-		margin: 0.5rem 0;
-		padding: 0 1rem;
-		/* Subtle fade-in for reduced visual noise */
-		opacity: 0.4;
-		transition: opacity 200ms ease-out;
+		margin: 0.375rem 0;
+		padding: 0;
+		opacity: 0.6;
+		transition: opacity 150ms ease;
 
-		/* Show more prominently on hover */
 		&:hover {
 			opacity: 1;
 		}
 	}
 
 	&__button {
-		display: flex;
+		display: inline-flex;
 		align-items: center;
 		justify-content: center;
 		gap: 0.5rem;
-		width: 100%;
-		max-width: 280px; /* Slightly narrower for subtlety */
-		padding: 0.5rem 0.875rem; /* More compact */
+		height: 36px;
+		padding: 0 0.75rem;
 
-		/* Ultra-subtle default appearance */
+		/* Gutenberg-style minimal appearance */
 		background-color: transparent;
-		border: 1px dashed rgba(229, 231, 235, 0.6); /* Semi-transparent border */
-		border-radius: 6px;
+		border: 1px dashed #ddd;
+		border-radius: 4px;
 
-		/* Typography - minimal contrast */
-		font-size: 0.8125rem;
+		/* WordPress admin typography */
+		font-size: 13px;
 		font-weight: 400;
-		color: #b9bdc4; /* Even lighter gray */
-		letter-spacing: 0.01em;
+		color: #757575;
+		line-height: 1;
 
 		/* Smooth transitions */
-		transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+		transition:
+			all 150ms ease,
+			transform 100ms ease;
 
 		/* Remove default button styles */
 		cursor: pointer;
 		outline: none;
 
-		/* Hover state - clear discovery */
+		/* Hover state - WordPress blue tint */
 		&:hover {
-			background-color: #f9fafb;
-			border-color: #cbd5e1;
-			border-style: solid; /* Switch from dashed to solid */
-			color: #64748b;
-			transform: translateY(-1px); /* Subtle lift */
-			box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-		}
-
-		/* Active/pressed state */
-		&:active {
+			background-color: #f0f6fc;
 			border-color: #2271b1;
-			background-color: #f3f4f6;
-			transform: translateY(0) scale(0.98);
-			box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+			border-style: solid;
+			color: #2271b1;
 		}
 
-		/* Focus state for keyboard navigation */
-		&:focus {
+		/* Active state */
+		&:active {
+			background-color: #e9f2fb;
+			transform: scale(0.98);
+		}
+
+		/* Focus state - accessibility */
+		&:focus-visible {
 			outline: 2px solid #2271b1;
 			outline-offset: 2px;
-			opacity: 1;
+			border-color: #2271b1;
+		}
+	}
+
+	&__icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 20px;
+		height: 20px;
+		border-radius: 50%;
+		background-color: #f0f0f0;
+		color: #757575;
+		transition: all 150ms ease;
+
+		svg {
+			width: 14px;
+			height: 14px;
 		}
 
-		/* Icon (plus symbol) styling - subtle default */
-		> span:first-child {
-			display: inline-flex;
-			align-items: center;
-			font-size: 0.875rem;
-			line-height: 1;
-			opacity: 0.4; /* Very muted by default */
-			transition: opacity 200ms ease-out;
+		.sf-insert-field-button__button:hover & {
+			background-color: #2271b1;
+			color: #ffffff;
 		}
+	}
 
-		/* Icon becomes fully visible on hover */
-		&:hover > span:first-child {
-			opacity: 1;
+	&__text {
+		display: inline-block;
+
+		@media (max-width: 640px) {
+			display: none;
 		}
 	}
 }
