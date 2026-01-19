@@ -2,16 +2,14 @@ import React from 'react';
 import { useState, useEffect, useCallback } from '@wordpress/element';
 import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
-import {
-  Modal,
-  Button,
-  TextControl,
-  TextareaControl,
-} from '@wordpress/components';
+import { Modal, TextControl, TextareaControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../components/ui/Icon';
 import clsx from 'clsx';
+import TemplateSelector from '../templates/TemplateSelector';
+import { getTemplateById } from '../templates';
 import './CreateFormModal.scss';
+import '../templates/TemplateSelector.scss';
 
 const restBase =
   window.subtleformsAdmin && window.subtleformsAdmin.restUrl
@@ -40,6 +38,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [template, setTemplate] = useState('blank');
+  const [selectedTemplateId, setSelectedTemplateId] = useState(null);
   const [formType, setFormType] = useState('regular');
   const { createErrorNotice } = useDispatch(noticesStore);
 
@@ -58,6 +57,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
       setTitle(generateDefaultTitle());
       setDescription('');
       setTemplate('blank');
+      setSelectedTemplateId(null);
       setFormType('regular');
       setCreating(false);
     }
@@ -78,41 +78,53 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
     const safeTitle = (title || '').trim() || generateDefaultTitle();
 
     let fields = [];
+    let templateMetadata = template;
+    let schemaType = formType;
 
-    // Initialize fields based on form type
-    if (formType === 'multistep') {
-      fields = [
-        {
-          type: 'step',
-          key: `step_${Date.now()}`,
-          config: {
-            title: __('Step 1', 'subtleforms'),
-            description: '',
+    // If preset template is selected, load template schema
+    if (template === 'preset' && selectedTemplateId) {
+      const templateData = getTemplateById(selectedTemplateId);
+      if (templateData) {
+        fields = templateData.schema.fields;
+        templateMetadata = templateData.id;
+        schemaType = templateData.schema.metadata.type || 'regular';
+      }
+    } else if (template === 'blank') {
+      // Initialize fields based on form type (blank template)
+      if (formType === 'multistep') {
+        fields = [
+          {
+            type: 'step',
+            key: `step_${Date.now()}`,
+            config: {
+              title: __('Step 1', 'subtleforms'),
+              description: '',
+            },
+            children: [],
           },
-          children: [],
-        },
-      ];
-    } else if (formType === 'sectioned') {
-      fields = [
-        {
-          type: 'section',
-          key: `section_${Date.now()}`,
-          config: {
-            title: __('Section 1', 'subtleforms'),
-            description: '',
+        ];
+      } else if (formType === 'sectioned') {
+        fields = [
+          {
+            type: 'section',
+            key: `section_${Date.now()}`,
+            config: {
+              title: __('Section 1', 'subtleforms'),
+              description: '',
+            },
+            children: [],
           },
-          children: [],
-        },
-      ];
-    } else if (formType === 'conversational') {
-      // Conversational forms start empty - fields will be displayed one at a time
-      fields = [];
-    } else if (formType === 'payment') {
-      // Payment forms start empty - payment fields will be added by user
-      fields = [];
-    } else {
-      // Regular form starts empty
-      fields = [];
+        ];
+      } else if (formType === 'conversational') {
+        // Conversational forms start empty - fields will be displayed one at a time
+        fields = [];
+      } else if (formType === 'payment') {
+        // Payment forms start empty - payment fields will be added by user
+        fields = [];
+      } else {
+        // Regular form starts empty
+        fields = [];
+      }
     }
 
     const { ok, body } = await apiPost('/forms', {
@@ -123,8 +135,8 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
           name: 'form_schema',
           title: safeTitle,
           description: description,
-          type: formType,
-          template,
+          type: schemaType,
+          template: templateMetadata,
         },
       },
     });
@@ -154,9 +166,9 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
     {
       id: 'preset',
       title: __('Preset Template', 'subtleforms'),
-      description: __('Coming soon.', 'subtleforms'),
+      description: __('Choose from ready-made templates.', 'subtleforms'),
       icon: Icon.Layers,
-      disabled: true,
+      disabled: false,
     },
   ];
 
@@ -218,32 +230,47 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         disabled={isDisabled}
         className={clsx(
           'sf-option-card',
-          isHorizontal ? 'sf-option-card--horizontal' : 'sf-option-card--vertical',
-          isSelected ? 'sf-option-card--selected' : 'sf-option-card--unselected',
+          isHorizontal
+            ? 'sf-option-card--horizontal'
+            : 'sf-option-card--vertical',
+          isSelected
+            ? 'sf-option-card--selected'
+            : 'sf-option-card--unselected',
           isDisabled && 'sf-option-card--disabled'
         )}>
         <div
           className={clsx(
             'sf-option-card__icon-wrapper',
-            isHorizontal ? 'sf-option-card__icon-wrapper--horizontal' : 'sf-option-card__icon-wrapper--vertical',
-            isSelected ? 'sf-option-card__icon-wrapper--selected' : 'sf-option-card__icon-wrapper--unselected'
+            isHorizontal
+              ? 'sf-option-card__icon-wrapper--horizontal'
+              : 'sf-option-card__icon-wrapper--vertical',
+            isSelected
+              ? 'sf-option-card__icon-wrapper--selected'
+              : 'sf-option-card__icon-wrapper--unselected'
           )}>
           {React.createElement(option.icon, {
             className: clsx(
               'sf-option-card__icon',
-              isHorizontal ? 'sf-option-card__icon--horizontal' : 'sf-option-card__icon--vertical'
+              isHorizontal
+                ? 'sf-option-card__icon--horizontal'
+                : 'sf-option-card__icon--vertical'
             ),
           })}
         </div>
 
-        <div className={clsx(
-          'sf-option-card__content',
-          isHorizontal ? 'sf-option-card__content--horizontal' : 'sf-option-card__content--vertical'
-        )}>
+        <div
+          className={clsx(
+            'sf-option-card__content',
+            isHorizontal
+              ? 'sf-option-card__content--horizontal'
+              : 'sf-option-card__content--vertical'
+          )}>
           <div
             className={clsx(
               'sf-option-card__title',
-              isSelected ? 'sf-option-card__title--selected' : 'sf-option-card__title--unselected'
+              isSelected
+                ? 'sf-option-card__title--selected'
+                : 'sf-option-card__title--unselected'
             )}>
             {option.title}
           </div>
@@ -270,7 +297,10 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
     <Modal
       title={null}
       onRequestClose={handleRequestClose}
-      className='subtleforms-create-modal'
+      className={clsx(
+        'subtleforms-create-modal',
+        step === 2 && template === 'preset' && 'subtleforms-create-modal--wide'
+      )}
       overlayClassName='subtleforms-modal-overlay'
       shouldCloseOnClickOutside={!creating}
       shouldCloseOnEsc={!creating}>
@@ -280,6 +310,8 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
           <h2 className='sf-create-form-modal__title'>
             {step === 1
               ? __('Create New Form', 'subtleforms')
+              : step === 2 && template === 'preset'
+              ? __('Choose a Template', 'subtleforms')
               : __('Choose Form Structure', 'subtleforms')}
           </h2>
           <p className='sf-create-form-modal__subtitle'>
@@ -288,32 +320,16 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
                   'Provide basic information and choose a starting template.',
                   'subtleforms'
                 )
+              : step === 2 && template === 'preset'
+              ? __(
+                  'Select a pre-made template to get started quickly.',
+                  'subtleforms'
+                )
               : __(
                   'Select the structure that best fits your form requirements.',
                   'subtleforms'
                 )}
           </p>
-        </div>
-
-        {/* Step Indicator */}
-        <div className='sf-create-form-modal__step-indicator'>
-          <div className='sf-create-form-modal__step-wrapper'>
-            <div
-              className={clsx(
-                'sf-create-form-modal__step',
-                step === 1 ? 'sf-create-form-modal__step--active' : 'sf-create-form-modal__step--inactive'
-              )}>
-              {__('Details', 'subtleforms')}
-            </div>
-            <div className='sf-create-form-modal__step-divider'></div>
-            <div
-              className={clsx(
-                'sf-create-form-modal__step',
-                step === 2 ? 'sf-create-form-modal__step--active' : 'sf-create-form-modal__step--inactive'
-              )}>
-              {__('Structure', 'subtleforms')}
-            </div>
-          </div>
         </div>
 
         {/* Form Content */}
@@ -369,7 +385,16 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
             </div>
           )}
 
-          {step === 2 && (
+          {step === 2 && template === 'preset' && (
+            <div className='sf-create-form-modal__form-section'>
+              <TemplateSelector
+                onSelectTemplate={setSelectedTemplateId}
+                selectedTemplate={selectedTemplateId}
+              />
+            </div>
+          )}
+
+          {step === 2 && template === 'blank' && (
             <div className='sf-create-form-modal__form-section'>
               <div>
                 <label className='sf-create-form-modal__label-section'>
@@ -389,9 +414,19 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         <div className='sf-create-form-modal__footer'>
           <button
             type='button'
-            onClick={step === 1 ? handleRequestClose : () => setStep(1)}
+            onClick={() => {
+              if (step === 1) {
+                handleRequestClose();
+              } else {
+                setStep(step - 1);
+              }
+            }}
             disabled={creating}
-            className={step === 1 ? 'sf-create-form-modal__cancel-button' : 'sf-create-form-modal__back-button'}>
+            className={
+              step === 1
+                ? 'sf-create-form-modal__cancel-button'
+                : 'sf-create-form-modal__back-button'
+            }>
             {step === 1
               ? __('Cancel', 'subtleforms')
               : __('Back', 'subtleforms')}
@@ -399,8 +434,24 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
 
           <button
             type='button'
-            onClick={step === 1 ? () => setStep(2) : handleCreate}
-            disabled={step === 1 ? !title.trim() : creating || !formType}
+            onClick={() => {
+              if (step === 1) {
+                setStep(2);
+              } else if (step === 2 && template === 'preset') {
+                // Preset templates: create form immediately (skip structure step)
+                handleCreate();
+              } else {
+                // Blank form: create with selected structure
+                handleCreate();
+              }
+            }}
+            disabled={
+              step === 1
+                ? !title.trim()
+                : step === 2 && template === 'preset'
+                ? !selectedTemplateId
+                : creating || !formType
+            }
             className='sf-create-form-modal__primary-button'>
             {creating && (
               <Icon.Loader className='sf-create-form-modal__spinner' />
