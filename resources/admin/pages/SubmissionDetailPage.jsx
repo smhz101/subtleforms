@@ -299,7 +299,12 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                               <div className='sf-submission-field__value-text'>
                                 {value ? (
                                   <span className='sf-submission-field__value-filled'>
-                                    {String(value)}
+                                    {String(value).split('\n').map((line, i, arr) => (
+                                      <span key={i}>
+                                        {line}
+                                        {i < arr.length - 1 && <br />}
+                                      </span>
+                                    ))}
                                   </span>
                                 ) : (
                                   <span className='sf-submission-field__value-empty'>
@@ -314,7 +319,6 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                     </div>
                   </div>
                 ))}
-                \n{' '}
               </div>
             ) : (
               <div className='sf-submission-empty'>
