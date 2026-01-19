@@ -1312,39 +1312,25 @@ final class CoreFields {
 				kind: 'group',
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
-					'enable_prefix'     => false,
-					'enable_suffix'     => false,
 					'enable_first_name' => true,
 					'enable_middle_name' => false,
 					'enable_last_name'  => true,
-					'prefix_options'    => array( 'Mr.', 'Ms.', 'Mrs.', 'Dr.', 'Prof.' ),
-					'suffix_options'    => array( 'Jr.', 'Sr.', 'II', 'III', 'IV' ),
 				),
 				inspectorControls: array(
 					array(
-						'type'  => 'checkbox',
-						'name'  => 'enable_prefix',
-						'label' => __( 'Enable Prefix', 'subtleforms' ),
-					),
-					array(
-						'type'  => 'checkbox',
-						'name'  => 'enable_suffix',
-						'label' => __( 'Enable Suffix', 'subtleforms' ),
-					),
-					array(
-						'type'  => 'checkbox',
+						'type'  => 'toggle',
 						'name'  => 'enable_first_name',
-						'label' => __( 'Enable First Name', 'subtleforms' ),
+						'label' => __( 'First Name', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
+						'type'  => 'toggle',
 						'name'  => 'enable_middle_name',
-						'label' => __( 'Enable Middle Name', 'subtleforms' ),
+						'label' => __( 'Middle Name', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
+						'type'  => 'toggle',
 						'name'  => 'enable_last_name',
-						'label' => __( 'Enable Last Name', 'subtleforms' ),
+						'label' => __( 'Last Name', 'subtleforms' ),
 					),
 				)
 			)
@@ -1369,34 +1355,34 @@ final class CoreFields {
 				),
 				inspectorControls: array(
 					array(
-						'type'  => 'checkbox',
+						'type'  => 'toggle',
 						'name'  => 'enable_street1',
-						'label' => __( 'Enable Street Address 1', 'subtleforms' ),
+						'label' => __( 'Street Address', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
+						'type'  => 'toggle',
 						'name'  => 'enable_street2',
-						'label' => __( 'Enable Street Address 2', 'subtleforms' ),
+						'label' => __( 'Street Address Line 2', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
+						'type'  => 'toggle',
 						'name'  => 'enable_city',
-						'label' => __( 'Enable City', 'subtleforms' ),
+						'label' => __( 'City', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
+						'type'  => 'toggle',
 						'name'  => 'enable_state',
-						'label' => __( 'Enable State / Province', 'subtleforms' ),
+						'label' => __( 'State / Province', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
+						'type'  => 'toggle',
 						'name'  => 'enable_postal_code',
-						'label' => __( 'Enable Postal Code / ZIP', 'subtleforms' ),
+						'label' => __( 'Postal Code', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
+						'type'  => 'toggle',
 						'name'  => 'enable_country',
-						'label' => __( 'Enable Country', 'subtleforms' ),
+						'label' => __( 'Country', 'subtleforms' ),
 					),
 				)
 			)
