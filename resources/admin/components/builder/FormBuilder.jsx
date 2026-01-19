@@ -11,7 +11,7 @@ import { CSS } from '@dnd-kit/utilities';
 
 // Log version on module load
 console.log(
-  '%c[SubtleForms] Builder v1.7.6 Loaded',
+  '%c[SubtleForms] Builder v1.7.7 Loaded',
   'background: #4f9cf9; color: white; padding: 4px 8px; border-radius: 4px; font-weight: bold'
 );
 import { useBuilder } from './context/BuilderContext';
