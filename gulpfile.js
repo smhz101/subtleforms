@@ -1,10 +1,12 @@
 const { src, dest, series } = require('gulp');
 const zip = require('gulp-zip');
 const fs = require('fs');
+const path = require('path');
 
 // Plugin configuration
 const PLUGIN_NAME = 'subtleforms';
 const DIST_DIR = 'dist';
+const TEMP_DIR = `${DIST_DIR}/temp`;
 
 // Get version from PHP file
 function getPluginVersion() {
@@ -26,6 +28,7 @@ function cleanDist(cb) {
   const rimrafSync = require('rimraf').sync;
   try {
     rimrafSync(`${DIST_DIR}/*.zip`);
+    rimrafSync(TEMP_DIR);
     cb();
   } catch (err) {
     cb(err);
@@ -40,13 +43,11 @@ function ensureDistDir(cb) {
   cb();
 }
 
-// Create production zip
-function createZip() {
+// Copy files to temp directory with proper structure
+function copyFilesToTemp() {
   const version = getPluginVersion();
-  const zipName = `${PLUGIN_NAME}-v${version}.zip`;
-
-  console.log(`Creating production zip: ${zipName}`);
-  console.log(`Files to include:`);
+  console.log(`\nPreparing files for ${PLUGIN_NAME}-${version}.zip`);
+  console.log(`Files will extract to: ${PLUGIN_NAME}/\n`);
 
   return src(
     [
@@ -58,8 +59,12 @@ function createZip() {
       // Built assets
       'build/**/*',
 
-      // Source code
+      // Source code (CRITICAL: includes CaptchaManager and all PHP classes)
       'src/**/*',
+
+      // Composer autoloader (CRITICAL: required for class autoloading)
+      'vendor/autoload.php',
+      'vendor/composer/**/*',
 
       // Templates and assets
       'templates/**/*',
@@ -67,17 +72,68 @@ function createZip() {
 
       // Exclude built tailwind source
       '!assets/css/tailwind.css',
+
+      // Exclude development files
+      '!node_modules/**',
+      '!resources/**',
+      '!tests/**',
+      '!.git/**',
+      '!dist/**',
+      '!gulpfile.js',
+      '!package*.json',
+      '!.*',
+
+      // Exclude dev dependencies from vendor
+      '!vendor/bin/**',
+      '!vendor/phpunit/**',
+      '!vendor/sebastian/**',
+      '!vendor/phar-io/**',
+      '!vendor/myclabs/**',
+      '!vendor/doctrine/**',
+      '!vendor/nikic/**',
+      '!vendor/theseer/**',
+      '!vendor/yoast/**',
     ],
     {
       base: '.',
       allowEmpty: true,
+      dot: false,
     }
   )
     .on('data', (file) => {
       console.log('Including:', file.relative);
     })
+    .pipe(dest(`${TEMP_DIR}/${PLUGIN_NAME}`));
+}
+
+// Create production zip from temp directory
+function createZip() {
+  const version = getPluginVersion();
+  const zipName = `${PLUGIN_NAME}-${version}.zip`;
+
+  console.log(`\nCreating zip archive: ${zipName}`);
+
+  return src(`${TEMP_DIR}/${PLUGIN_NAME}/**/*`, {
+    base: TEMP_DIR,
+    dot: true,
+  })
     .pipe(zip(zipName))
-    .pipe(dest(DIST_DIR));
+    .pipe(dest(DIST_DIR))
+    .on('end', () => {
+      console.log(`\n✓ Zip created: ${DIST_DIR}/${zipName}`);
+      console.log(`✓ When extracted, files will be in: ${PLUGIN_NAME}/\n`);
+    });
+}
+
+// Clean up temp directory
+function cleanTemp(cb) {
+  const rimrafSync = require('rimraf').sync;
+  try {
+    rimrafSync(TEMP_DIR);
+    cb();
+  } catch (err) {
+    cb(err);
+  }
 }
 
 // Build production assets
@@ -109,13 +165,14 @@ function buildProduction() {
 
 // Main tasks
 const build = series(buildProduction);
-const dist = series(ensureDistDir, cleanDist, build, createZip);
-const quickZip = series(ensureDistDir, cleanDist, createZip);
+const packageZip = series(ensureDistDir, cleanDist, copyFilesToTemp, createZip, cleanTemp);
+const dist = series(buildProduction, packageZip);
+const quickZip = series(ensureDistDir, cleanDist, copyFilesToTemp, createZip, cleanTemp);
 
 // Export tasks
 exports.clean = cleanDist;
 exports.build = build;
-exports.zip = createZip;
+exports.zip = packageZip;
 exports.quickZip = quickZip; // Create zip without building
 exports.dist = dist;
 exports.default = dist;
