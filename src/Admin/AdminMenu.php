@@ -55,6 +55,9 @@ class AdminMenu {
 		add_filter( 'admin_title', array( $this, 'filter_admin_title' ), 1, 2 );
 		// Fix globals early before WordPress uses them
 		add_action( 'admin_init', array( $this, 'fix_admin_globals' ), 1 );
+		// Fix menu highlighting for correct active states
+		add_filter( 'parent_file', array( $this, 'fix_parent_file' ) );
+		add_filter( 'submenu_file', array( $this, 'fix_submenu_file' ) );
 
 		add_action(
 			'admin_menu',
@@ -733,5 +736,58 @@ class AdminMenu {
 		} else {
 			$submenu_file = Helpers::normalize_string( $submenu_file );
 		}
+	}
+
+	/**
+	 * Fix parent_file to ensure correct top-level menu highlighting.
+	 * 
+	 * WordPress needs parent_file to match the top-level menu slug
+	 * for all SubtleForms admin pages.
+	 *
+	 * @param string $parent_file The current parent file.
+	 * @return string The corrected parent file.
+	 */
+	public function fix_parent_file( $parent_file ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only check for admin screen routing.
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+
+		// For all SubtleForms pages, ensure parent is 'subtleforms'
+		if ( ! empty( $page ) && strpos( $page, 'subtleforms' ) === 0 ) {
+			return 'subtleforms';
+		}
+
+		return $parent_file;
+	}
+
+	/**
+	 * Fix submenu_file to ensure correct submenu highlighting.
+	 * 
+	 * This tells WordPress which submenu item should be highlighted as active.
+	 * The dashboard page uses 'subtleforms' (same as parent), which WordPress
+	 * auto-converts to the first submenu item.
+	 *
+	 * @param string $submenu_file The current submenu file.
+	 * @return string The corrected submenu file.
+	 */
+	public function fix_submenu_file( $submenu_file ) {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only check for admin screen routing.
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+
+		if ( empty( $page ) ) {
+			return $submenu_file;
+		}
+
+		// Map each page to its correct submenu slug
+		// Dashboard uses the parent slug, which WordPress highlights as first submenu
+		if ( $page === 'subtleforms' ) {
+			return 'subtleforms';
+		}
+
+		// All other pages should highlight themselves
+		if ( strpos( $page, 'subtleforms' ) === 0 ) {
+			return $page;
+		}
+
+		return $submenu_file;
 	}
 }
