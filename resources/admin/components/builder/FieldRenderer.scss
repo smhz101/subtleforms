@@ -319,21 +319,23 @@
 
 	// Name Group Field Styles
 	&__name-group {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+		display: flex;
 		gap: 0.75rem;
+		flex-wrap: wrap;
 	}
 
 	&__name-part {
 		display: flex;
 		flex-direction: column;
 		gap: 0.25rem;
+		flex: 1;
+		min-width: 150px;
 	}
 
 	// Address Group Field Styles
 	&__address-group {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+		grid-template-columns: 1fr 1fr;
 		gap: 0.75rem;
 	}
 
