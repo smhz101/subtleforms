@@ -68,6 +68,7 @@ import {
   DollarSign,
   Undo2,
   Redo2,
+  Search,
 } from 'lucide-react';
 
 /**
@@ -83,6 +84,7 @@ const Icon = {
   Check,
   Close: X,
   Add: Plus,
+  Plus,
   Copy,
   Delete: Trash2,
   Trash: Trash2,
@@ -150,6 +152,7 @@ const Icon = {
   Globe,
   DownloadCloud,
   ExternalLink,
+  Search,
 
   // Form Field Types
   Type,
