@@ -1,6 +1,6 @@
 import React from 'react';
 import { useState, useMemo } from '@wordpress/element';
-import { TextControl } from '@wordpress/components';
+import { TextControl, Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import Icon from '../components/ui/Icon';
@@ -13,16 +13,35 @@ export default function TemplateSelector({
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // Check Pro template capability from window.subtleformsAdmin.capabilities
+  const capabilities = window.subtleformsAdmin?.capabilities || {};
+  const hasProTemplates = capabilities['templates.pro'] === true;
+  const hasProFeature = capabilities['pro_features'] === true;
+  
+  // Determine license state (grace period shows pro_features but limited capabilities)
+  const isInGracePeriod = hasProFeature && !hasProTemplates;
+  const canUseProTemplates = hasProTemplates || isInGracePeriod;
+
   const filteredTemplates = useMemo(() => {
     return searchTemplates(searchQuery, selectedCategory);
   }, [searchQuery, selectedCategory]);
 
   const handleTemplateClick = (template) => {
+    // If it's a Pro template, check license state
     if (template.is_pro) {
-      // Show upgrade notice (non-blocking)
-      return;
+      if (canUseProTemplates) {
+        // License active or in grace period - allow selection
+        onSelectTemplate(template.id);
+      } else {
+        // License expired/inactive - show notice (TODO: implement modal/notice)
+        console.warn('Pro template requires active license');
+        // In production, this would trigger an upgrade modal
+        return;
+      }
+    } else {
+      // Free template - always allow
+      onSelectTemplate(template.id);
     }
-    onSelectTemplate(template.id);
   };
 
   const getFormTypeLabel = (type) => {
@@ -53,6 +72,13 @@ export default function TemplateSelector({
         />
       </div>
 
+      {/* Grace Period Notice */}
+      {isInGracePeriod && (
+        <Notice status='warning' isDismissible={false}>
+          {__('License in grace period - Pro features available with limited access', 'subtleforms')}
+        </Notice>
+      )}
+
       {/* Main Content */}
       <div className='sf-template-selector__content'>
         {/* Left: Categories */}
@@ -80,21 +106,30 @@ export default function TemplateSelector({
               <p className='sf-template-selector__empty-text'>
                 {__('No templates found', 'subtleforms')}
               </p>
+              {!hasProTemplates && (
+                <p className='sf-template-selector__empty-subtext'>
+                  {__('Unlock premium templates by activating your Pro license', 'subtleforms')}
+                </p>
+              )}
             </div>
           ) : (
             <div className='sf-template-selector__grid'>
-              {filteredTemplates.map((template) => (
-                <button
-                  key={template.id}
-                  type='button'
-                  onClick={() => handleTemplateClick(template)}
-                  disabled={template.is_pro}
-                  className={clsx(
-                    'sf-template-card',
-                    selectedTemplate === template.id &&
-                      'sf-template-card--selected',
-                    template.is_pro && 'sf-template-card--locked'
-                  )}>
+              {filteredTemplates.map((template) => {
+                // Pro template is locked only if license is expired/inactive
+                const isLocked = template.is_pro && !canUseProTemplates;
+                
+                return (
+                  <button
+                    key={template.id}
+                    type='button'
+                    onClick={() => handleTemplateClick(template)}
+                    disabled={isLocked}
+                    className={clsx(
+                      'sf-template-card',
+                      selectedTemplate === template.id &&
+                        'sf-template-card--selected',
+                      isLocked && 'sf-template-card--locked'
+                    )}>
                   {/* Badge */}
                   <div className='sf-template-card__badge-wrapper'>
                     {template.is_pro ? (
@@ -124,14 +159,15 @@ export default function TemplateSelector({
                     <Icon.CheckCircle className='sf-template-card__check-icon' />
                   )}
 
-                  {/* Pro Lock Icon */}
-                  {template.is_pro && (
+                  {/* Pro Lock Icon - only show if locked */}
+                  {isLocked && (
                     <div className='sf-template-card__lock'>
                       <Icon.Lock className='sf-template-card__lock-icon' />
                     </div>
                   )}
                 </button>
-              ))}
+              );
+            })}
             </div>
           )}
         </div>
