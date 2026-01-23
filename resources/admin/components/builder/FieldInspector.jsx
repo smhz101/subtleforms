@@ -69,7 +69,7 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
             {isReadOnly && (
               <Notice status='info' isDismissible={false}>
                 <p className='sf-field-inspector__notice-paragraph'>
-                  {__('Read-only mode - Activate Pro license to edit this form', 'subtleforms')}
+                  {__('Read-only mode: Activate your Pro license to edit. Your form continues working—no data loss.', 'subtleforms')}
                 </p>
               </Notice>
             )}

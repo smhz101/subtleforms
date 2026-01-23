@@ -12,6 +12,7 @@ import apiFetch from '@wordpress/api-fetch';
 import clsx from 'clsx';
 import Icon from '../components/ui/Icon';
 import AdminShell from '../components/AdminShell';
+import LicenseStatusIndicator from '../components/LicenseStatusIndicator';
 import './DashboardPage.scss';
 
 /**
@@ -80,6 +81,7 @@ export default function Dashboard() {
       title={__('Dashboard', 'subtleforms')}
       actions={
         <div className='sf-dashboard-actions'>
+          <LicenseStatusIndicator variant="compact" />
           <Button variant='secondary' href='admin.php?page=subtleforms-forms'>
             {__('All Forms', 'subtleforms')}
           </Button>

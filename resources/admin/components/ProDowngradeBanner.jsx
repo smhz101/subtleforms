@@ -29,11 +29,11 @@ export default function ProDowngradeBanner({ featuresUsed = [] }) {
               {__('This form uses Pro features', 'subtleforms')}
             </strong>
             <p className='sf-pro-downgrade-banner__message'>
-              {__('Activate your Pro license to edit this form. The form will continue to work on the frontend.', 'subtleforms')}
+              {__('This form is in read-only mode. Activate a Pro license to edit. Your form continues working on the frontend—no data loss, no interruption.', 'subtleforms')}
             </p>
             {featuresUsed.length > 0 && (
               <p className='sf-pro-downgrade-banner__features'>
-                <strong>{__('Features used:', 'subtleforms')}</strong> {featuresUsed.join(', ')}
+                <strong>{__('Pro features in use:', 'subtleforms')}</strong> {featuresUsed.join(', ')}
               </p>
             )}
           </div>

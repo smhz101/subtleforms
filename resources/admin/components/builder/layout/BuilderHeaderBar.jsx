@@ -12,6 +12,7 @@ import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import Icon from '../../ui/Icon';
 import HelpMenu from '../../HelpMenu';
+import LicenseStatusIndicator from '../../LicenseStatusIndicator';
 import { BUILDER_ACTIONS } from '../../../hooks/useBuilderReducer';
 import './BuilderHeaderBar.scss';
 
@@ -233,6 +234,8 @@ export function BuilderActions({
 
       {/* Primary Actions Group */}
       <div className='sf-builder-header-bar__action-buttons'>
+        <LicenseStatusIndicator variant="inline" showDescription={false} />
+        
         <Button
           variant='tertiary'
           onClick={() => dispatch({ type: BUILDER_ACTIONS.UNDO_SCHEMA })}
