@@ -16,6 +16,7 @@ import clsx from 'clsx';
 import Icon from './ui/Icon';
 import DataTable from './DataTable';
 import { ConfirmModal } from '../modals';
+import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
 import './FormsList.scss';
 
 const restBase =
@@ -487,9 +488,13 @@ export default function FormsList({
         await apiRequest(`/forms/${formId}/schema?context=builder`).then(
           ({ ok: loadOk, body: schemaBody }) => {
             if (loadOk && schemaBody?.schema) {
+              // Enrich schema with Pro markers before saving to duplicate
+              const enrichedSchema = enrichSchemaWithProMarkers(
+                schemaBody.schema
+              );
               return apiRequest(`/forms/${newFormId}/schema`, {
                 method: 'POST',
-                body: JSON.stringify({ schema: schemaBody.schema }),
+                body: JSON.stringify({ schema: enrichedSchema }),
               });
             }
           }

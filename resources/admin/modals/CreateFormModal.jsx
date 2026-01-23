@@ -8,6 +8,7 @@ import Icon from '../components/ui/Icon';
 import clsx from 'clsx';
 import TemplateSelector from '../templates/TemplateSelector';
 import { getTemplateById } from '../templates';
+import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
 import './CreateFormModal.scss';
 import '../templates/TemplateSelector.scss';
 
@@ -129,7 +130,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
 
     const { ok, body } = await apiPost('/forms', {
       title: safeTitle,
-      schema: {
+      schema: enrichSchemaWithProMarkers({
         fields,
         metadata: {
           name: 'form_schema',
@@ -138,7 +139,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
           type: schemaType,
           template: templateMetadata,
         },
-      },
+      }),
     });
 
     setCreating(false);

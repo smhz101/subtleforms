@@ -41,6 +41,7 @@ import {
 } from '../components/builder/layout/BuilderHeaderBar';
 import BuilderCanvasArea from '../components/builder/layout/BuilderCanvasArea';
 import BuilderModalsController from '../components/builder/layout/BuilderModalsController';
+import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
 
 function FormBuilderInner({
   formId,
@@ -208,13 +209,16 @@ function FormBuilderInner({
       }
 
       try {
+        // Enrich schema with Pro markers before save
+        const enrichedSchema = enrichSchemaWithProMarkers(draftSchema);
+
         // Save schema (activate only on manual save or publish, not autosave)
         const {
           ok,
           body,
           status: saveStatus,
         } = await apiPost(`/forms/${resolvedFormId}/schema`, {
-          schema: draftSchema,
+          schema: enrichedSchema,
           activate: auto ? false : true, // Autosave: draft only, Manual save: activate
         });
 
@@ -1028,6 +1032,9 @@ export default function FormBuilderPage(props) {
           startingPoint,
         });
 
+        // Enrich schema with Pro markers before creating form
+        const enrichedSchema = enrichSchemaWithProMarkers(schema);
+
         const formRes = await apiPost('/forms', {
           title: resolvedTitle,
           status: 'draft',
@@ -1050,7 +1057,7 @@ export default function FormBuilderPage(props) {
         }
 
         const schemaRes = await apiPost(`/forms/${newId}/schema`, {
-          schema,
+          schema: enrichedSchema,
           activate: false,
         });
 
@@ -1074,7 +1081,7 @@ export default function FormBuilderPage(props) {
         setCreatedFormId(newId);
         setBootstrap({
           form: { id: newId, title: resolvedTitle, status: 'draft' },
-          schema,
+          schema: enrichedSchema,
         });
       } catch (e) {
         setCreateError(
