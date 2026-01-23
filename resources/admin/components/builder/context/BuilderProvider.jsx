@@ -30,6 +30,7 @@ export function BuilderProvider({
   onMove,
   onDuplicate,
   onRequestInsert,
+  isReadOnly = false,
 }) {
   const contextValue = useMemo(
     () => ({
@@ -39,6 +40,7 @@ export function BuilderProvider({
       selectedStepId,
       validationErrors,
       fieldDefinitions,
+      isReadOnly,
 
       // Selection actions
       setSelectedId,
@@ -71,6 +73,7 @@ export function BuilderProvider({
       setSelectedStepId,
       validationErrors,
       fieldDefinitions,
+      isReadOnly,
       onInsert,
       onDelete,
       onUpdate,

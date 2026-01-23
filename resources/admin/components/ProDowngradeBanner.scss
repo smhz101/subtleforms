@@ -1,0 +1,83 @@
+/**
+ * Pro Downgrade Banner Styles
+ */
+
+.sf-pro-downgrade-banner {
+  margin-bottom: 1rem;
+
+  &__notice {
+    margin: 0;
+    padding: 0;
+  }
+
+  &__content {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0.75rem;
+  }
+
+  &__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    color: #f59e0b;
+
+    svg {
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  &__text {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__title {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: #854d0e;
+    margin-bottom: 0.25rem;
+  }
+
+  &__message {
+    margin: 0;
+    font-size: 13px;
+    color: #92400e;
+    line-height: 1.5;
+  }
+
+  &__features {
+    margin: 0.5rem 0 0;
+    font-size: 12px;
+    color: #92400e;
+    
+    strong {
+      font-weight: 600;
+    }
+  }
+
+  &__button {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+
+// Responsive adjustments
+@media (max-width: 768px) {
+  .sf-pro-downgrade-banner {
+    &__content {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    &__button {
+      width: 100%;
+    }
+  }
+}

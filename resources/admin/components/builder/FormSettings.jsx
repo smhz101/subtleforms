@@ -7,13 +7,14 @@ import {
   PanelBody,
   PanelRow,
   RadioControl,
+  Notice,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 
 /**
  * FormSettings - Configure form-wide settings including payment options
  */
-export default function FormSettings({ schema, onChange }) {
+export default function FormSettings({ schema, onChange, isReadOnly = false }) {
   const metadata = schema?.metadata || {};
   const formType = metadata.type || 'regular';
   const isPaymentForm = formType === 'payment';
@@ -31,6 +32,7 @@ export default function FormSettings({ schema, onChange }) {
   };
 
   const handleMetadataChange = (key, value) => {
+    if (isReadOnly) return;
     const updated = {
       ...schema,
       metadata: {
@@ -42,6 +44,7 @@ export default function FormSettings({ schema, onChange }) {
   };
 
   const handlePaymentSettingChange = (key, value) => {
+    if (isReadOnly) return;
     const updated = {
       ...schema,
       metadata: {
@@ -93,6 +96,13 @@ export default function FormSettings({ schema, onChange }) {
         <h2 className='sf-form-settings__title'>
           {__('Form Settings', 'subtleforms')}
         </h2>
+
+        {/* Read-only Notice */}
+        {isReadOnly && (
+          <Notice status='info' isDismissible={false}>
+            <p>{__('Settings are read-only - Activate Pro license to edit this form', 'subtleforms')}</p>
+          </Notice>
+        )}
 
         {/* Form Type Info Banner */}
         {formType !== 'regular' && (

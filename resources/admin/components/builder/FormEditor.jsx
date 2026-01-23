@@ -34,6 +34,7 @@ export default function FormEditor({
   fieldDefinitions,
   validationErrors = [],
   onChange,
+  isReadOnly = false,
 }) {
   const rootId = getRootNodeId();
   const schemaRef = useRef(schema);
@@ -145,6 +146,12 @@ export default function FormEditor({
 
   const updateTree = useCallback(
     (updater) => {
+      // Block updates in read-only mode
+      if (isReadOnly) {
+        console.warn('[SubtleForms] Cannot edit form - Pro license required');
+        return;
+      }
+
       setTree((current) => {
         const next = updater(current);
         if (!next || next === current) {
@@ -164,11 +171,16 @@ export default function FormEditor({
         return next;
       });
     },
-    [onChange]
+    [onChange, isReadOnly]
   );
 
   const handleInsert = useCallback(
     (type, context) => {
+      // Block inserts in read-only mode
+      if (isReadOnly) {
+        return;
+      }
+
       const definition = definitionMap[type];
       if (!definition) {
         console.warn('Missing field definition for', type);
@@ -224,7 +236,7 @@ export default function FormEditor({
 
       setInsertPicker(null);
     },
-    [definitionMap, updateTree, tree, selectedStepId]
+    [definitionMap, updateTree, tree, selectedStepId, isReadOnly]
   );
 
   const handleDockAdd = useCallback(
@@ -270,6 +282,11 @@ export default function FormEditor({
 
   const handleDelete = useCallback(
     (nodeId) => {
+      // Block deletes in read-only mode
+      if (isReadOnly) {
+        return;
+      }
+
       const node = tree.nodes[nodeId];
 
       // Guardrail: Prevent deleting the last step in a multi-step form
@@ -299,15 +316,25 @@ export default function FormEditor({
 
   const handleUpdate = useCallback(
     (nodeId, changes) => {
+      // Block updates in read-only mode
+      if (isReadOnly) {
+        return;
+      }
+
       updateTree((currentTree) =>
         updateNodeConfig(currentTree, { nodeId, changes })
       );
     },
-    [updateTree]
+    [updateTree, isReadOnly]
   );
 
   const handleMove = useCallback(
     (nodeId, destination) => {
+      // Block moves in read-only mode
+      if (isReadOnly) {
+        return;
+      }
+
       updateTree((currentTree) => {
         const node = currentTree.nodes[nodeId];
         if (!node) {
@@ -330,7 +357,7 @@ export default function FormEditor({
         });
       });
     },
-    [updateTree]
+    [updateTree, isReadOnly]
   );
 
   const handleRequestInsert = useCallback((context, anchor) => {
@@ -341,6 +368,11 @@ export default function FormEditor({
 
   const handleDuplicate = useCallback(
     (nodeId, destination) => {
+      // Block duplicates in read-only mode
+      if (isReadOnly) {
+        return;
+      }
+
       if (!destination) {
         return;
       }
@@ -520,12 +552,14 @@ export default function FormEditor({
       onUpdate={handleUpdate}
       onMove={handleMove}
       onDuplicate={handleDuplicate}
-      onRequestInsert={handleRequestInsert}>
+      onRequestInsert={handleRequestInsert}
+      isReadOnly={isReadOnly}>
       <div
         className={`sf-form-editor ${
           isDockCollapsed ? 'sf-form-editor--dock-collapsed' : ''
-        }`}>
-        {/* Field Library (Left Sidebar) */}
+        } ${isReadOnly ? 'sf-form-editor--read-only' : ''}`}>
+        {/* Field Library (Left Sidebar) - Hidden in read-only mode */}
+        {!isReadOnly && (
         <div className='sf-form-editor__dock' data-tour='fields-panel'>
           <FieldDock
             fieldGroups={fieldGroups}
@@ -533,6 +567,7 @@ export default function FormEditor({
             onCollapsedChange={setIsDockCollapsed}
           />
         </div>
+        )}
 
         {/* Canvas Area (Center) */}
         <div className='sf-form-editor__canvas' data-tour='canvas'>
@@ -592,7 +627,11 @@ export default function FormEditor({
 
         {/* Field Inspector (Right Sidebar) */}
         <div className='sf-form-editor__inspector' data-tour='field-inspector'>
-          <FieldInspector field={selectedField} allFields={allFields} />
+          <FieldInspector 
+            field={selectedField} 
+            allFields={allFields} 
+            isReadOnly={isReadOnly} 
+          />
         </div>
 
         {/* Insert Picker Popover */}

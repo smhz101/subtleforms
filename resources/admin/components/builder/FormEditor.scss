@@ -29,6 +29,17 @@ $breakpoint-tablet: 768px;
 		grid-template-columns: 48px 1fr 320px;
 	}
 
+	/* Read-only mode: Hide dock, expand canvas */
+	&--read-only {
+		grid-template-columns: 1fr 320px;
+		
+		.sf-form-editor__canvas {
+			opacity: 0.9;
+			pointer-events: none; // Disable all interactions in canvas
+			user-select: none;
+		}
+	}
+
 	// Left panel: Field Dock (FIXED WIDTH 280px)
 	&__dock {
 		// FieldDock component handles its own height and scrolling

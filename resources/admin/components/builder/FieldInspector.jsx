@@ -10,7 +10,7 @@ import { __ } from '@wordpress/i18n';
 import ConditionEditor from './ConditionEditor';
 import { useBuilder } from './context/BuilderContext';
 
-export default function FieldInspector({ field, allFields }) {
+export default function FieldInspector({ field, allFields, isReadOnly = false }) {
   const { setSelectedId, actions, validationErrors, selectedId } = useBuilder();
 
   const selectedFieldValidationMessages = selectedId
@@ -24,7 +24,7 @@ export default function FieldInspector({ field, allFields }) {
     selectedFieldValidationMessages.length > 0;
 
   const handleUpdate = (changes) => {
-    if (!selectedId) return;
+    if (!selectedId || isReadOnly) return;
     actions.onUpdate(selectedId, changes);
   };
 
@@ -66,6 +66,13 @@ export default function FieldInspector({ field, allFields }) {
 
         {field && (
           <>
+            {isReadOnly && (
+              <Notice status='info' isDismissible={false}>
+                <p className='sf-field-inspector__notice-paragraph'>
+                  {__('Read-only mode - Activate Pro license to edit this form', 'subtleforms')}
+                </p>
+              </Notice>
+            )}
             {hasValidationMessages && (
               <Notice status='warning' isDismissible={false}>
                 <p className='sf-field-inspector__notice-paragraph'>

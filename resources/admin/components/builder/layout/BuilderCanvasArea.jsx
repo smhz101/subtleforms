@@ -4,11 +4,14 @@
  * Pure UI component for the builder canvas with tabs (Build, Settings, Entries).
  */
 
+import { useMemo } from '@wordpress/element';
 import { TabPanel, Notice } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import FormEditor from '../FormEditor';
 import FormSettings from '../FormSettings';
 import SubmissionsTable from '../../SubmissionsTable';
+import ProDowngradeBanner from '../../ProDowngradeBanner';
+import { formUsesProFeatures, getProFeaturesUsed } from '../../../utils/proFeatureDetector';
 import './BuilderCanvasArea.scss';
 
 export default function BuilderCanvasArea({
@@ -21,8 +24,20 @@ export default function BuilderCanvasArea({
   saveError,
   hasValidationErrors,
 }) {
+  // Detect Pro feature usage and license state
+  const usesProFeatures = useMemo(() => formUsesProFeatures(draftSchema), [draftSchema]);
+  const capabilities = window.subtleformsAdmin?.capabilities || {};
+  const hasProLicense = capabilities['templates.pro'] === true;
+  const isReadOnly = usesProFeatures && !hasProLicense;
+  const proFeaturesUsed = useMemo(() => 
+    isReadOnly ? getProFeaturesUsed(draftSchema) : [],
+    [isReadOnly, draftSchema]
+  );
   return (
     <>
+      {/* Pro Downgrade Banner */}
+      {isReadOnly && <ProDowngradeBanner featuresUsed={proFeaturesUsed} />}
+
       {saveError && (
         <div className='sf-builder-canvas-area__error-banner'>
           <span className='sf-builder-canvas-area__error-text'>
@@ -89,6 +104,7 @@ export default function BuilderCanvasArea({
                 fieldDefinitions={fieldDefinitions}
                 validationErrors={validationErrors}
                 onChange={onSchemaChange}
+                isReadOnly={isReadOnly}
               />
             )}
             {tab.name === 'settings' && (
@@ -96,6 +112,7 @@ export default function BuilderCanvasArea({
                 schema={draftSchema}
                 validationErrors={validationErrors}
                 onChange={onSchemaChange}
+                isReadOnly={isReadOnly}
               />
             )}
             {tab.name === 'entries' && currentFormId && (
