@@ -294,9 +294,21 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
     );
   };
 
+  const getModalTitle = () => {
+    // Correct and predictable modal title logic
+    if (step === 1) {
+      return __('Create New Form', 'subtleforms');
+    }
+    if (step === 2 && template === 'preset') {
+      return __('Choose a Template', 'subtleforms');
+    }
+    return __('Choose Form Structure', 'subtleforms');
+  };
+
   return (
     <Modal
       title={null}
+      __experimentalHideHeader={true}
       onRequestClose={handleRequestClose}
       className={clsx(
         'subtleforms-create-modal',
