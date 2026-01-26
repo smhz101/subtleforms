@@ -603,41 +603,210 @@
 	}
 }
 
+	// Coupon Code Container
+	&__coupon-container {
+		background: linear-gradient(135deg, #fef3c7 0%, #fde68a 50%, #fcd34d 100%);
+		padding: 1.5rem;
+		border: 2px solid #fbbf24;
+		border-radius: 12px;
+		box-shadow: 0 4px 6px -1px rgba(251, 191, 36, 0.1),
+					0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		position: relative;
+		overflow: hidden;
+
+		&::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			right: 0;
+			width: 100px;
+			height: 100px;
+			background: radial-gradient(circle, rgba(255, 255, 255, 0.3) 0%, transparent 70%);
+			border-radius: 50%;
+			transform: translate(30%, -30%);
+		}
+
+		&:hover {
+			transform: translateY(-2px);
+			box-shadow: 0 10px 15px -3px rgba(251, 191, 36, 0.2),
+						0 4px 6px -2px rgba(0, 0, 0, 0.05);
+			border-color: #f59e0b;
+		}
+	}
+
+	&__coupon-header {
+		display: flex;
+		align-items: center;
+		gap: 0.625rem;
+		margin-bottom: 1rem;
+	}
+
+	&__coupon-icon {
+		font-size: 1.5rem;
+		line-height: 1;
+		filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+		animation: swing-tag 3s ease-in-out infinite;
+	}
+
+	&__coupon-title {
+		font-size: 1rem;
+		font-weight: 700;
+		color: #92400e;
+		letter-spacing: -0.01em;
+	}
+
+	&__input-wrapper {
+		position: relative;
+		flex: 1;
+	}
+
+	&__coupon-badge {
+		position: absolute;
+		right: 1rem;
+		top: 50%;
+		transform: translateY(-50%);
+		font-size: 1.25rem;
+		line-height: 1;
+		opacity: 0.4;
+		transition: all 0.2s ease;
+		pointer-events: none;
+	}
+
+	&__input-wrapper:hover &__coupon-badge {
+		opacity: 0.8;
+		transform: translateY(-50%) scale(1.1);
+	}
+
+	&__coupon-hint {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-top: 1rem;
+		padding: 0.75rem;
+		background: rgba(255, 255, 255, 0.7);
+		border-radius: 6px;
+		border: 1px solid rgba(251, 191, 36, 0.3);
+	}
+
+	&__coupon-hint-icon {
+		font-size: 1rem;
+		line-height: 1;
+		flex-shrink: 0;
+	}
+
+	&__coupon-hint-text {
+		font-size: 0.8125rem;
+		color: #78350f;
+		font-weight: 600;
+		line-height: 1.4;
+		font-style: italic;
+	}
+
 	&__subscribe-wrapper {
 		display: flex;
 		gap: 0.75rem;
 		align-items: stretch;
+		position: relative;
+		z-index: 1;
 	}
 
 	&__subscribe-input {
 		flex: 1;
+		background: white !important;
+		border: 2px solid #fbbf24 !important;
+		font-weight: 600;
+		letter-spacing: 0.05em;
+		text-transform: uppercase;
+		font-size: 0.9375rem;
+
+		&::placeholder {
+			text-transform: none;
+			letter-spacing: normal;
+			font-weight: 500;
+		}
+
+		&:hover {
+			border-color: #f59e0b !important;
+			box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15) !important;
+		}
+
+		&:focus {
+			border-color: #f59e0b !important;
+			box-shadow: 0 0 0 4px rgba(251, 191, 36, 0.2) !important;
+		}
 	}
 
 	&__subscribe-button {
-		background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-		padding: 0.75rem 1.5rem;
+		background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+		padding: 0.75rem 1.75rem;
 		font-weight: 700;
 		font-size: 0.875rem;
 		color: #ffffff;
 		pointer-events: none;
 		border: none;
 		border-radius: 8px;
-		box-shadow: 0 2px 4px 0 rgba(59, 130, 246, 0.3), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-		transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+		box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3), 
+					0 2px 4px -1px rgba(0, 0, 0, 0.06);
+		transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 		letter-spacing: 0.025em;
 		text-transform: uppercase;
 		font-size: 0.8125rem;
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		position: relative;
+		overflow: hidden;
+
+		&::before {
+			content: '';
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			width: 0;
+			height: 0;
+			background: rgba(255, 255, 255, 0.3);
+			border-radius: 50%;
+			transform: translate(-50%, -50%);
+			transition: width 0.4s ease, height 0.4s ease;
+		}
 
 		&:hover {
-			box-shadow: 0 8px 16px -4px rgba(59, 130, 246, 0.4), 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-			transform: translateY(-2px);
-			background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+			box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.4), 
+						0 4px 6px -2px rgba(0, 0, 0, 0.1);
+			transform: translateY(-2px) scale(1.02);
+			background: linear-gradient(135deg, #059669 0%, #047857 100%);
+
+			&::before {
+				width: 300px;
+				height: 300px;
+			}
 		}
 
 		&:active {
-			transform: translateY(0);
+			transform: translateY(0) scale(1);
 		}
 	}
+
+	&__button-icon {
+		font-size: 1rem;
+		font-weight: bold;
+		line-height: 1;
+		position: relative;
+		z-index: 1;
+	}
+
+@keyframes swing-tag {
+	0%, 100% {
+		transform: rotate(0deg);
+	}
+	25% {
+		transform: rotate(-8deg);
+	}
+	75% {
+		transform: rotate(8deg);
+	}
+}
 
 	&__html-content {
 		background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);

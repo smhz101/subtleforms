@@ -301,19 +301,38 @@ export default function FieldRenderer({ field }) {
       )}
 
       {type === 'payment_coupon' && (
-        <div className='sf-field-renderer__subscribe-wrapper'>
-          <input
-            type='text'
-            placeholder={placeholder || __('Enter coupon code', 'subtleforms')}
-            className={`${inputClass} sf-field-renderer__subscribe-input`}
-            readOnly
-          />
-          <button
-            type='button'
-            className='sf-field-renderer__subscribe-button'
-            disabled>
-            {__('Apply', 'subtleforms')}
-          </button>
+        <div className='sf-field-renderer__coupon-container'>
+          <div className='sf-field-renderer__coupon-header'>
+            <span className='sf-field-renderer__coupon-icon'>🏷️</span>
+            <span className='sf-field-renderer__coupon-title'>
+              {__('Have a coupon code?', 'subtleforms')}
+            </span>
+          </div>
+          <div className='sf-field-renderer__subscribe-wrapper'>
+            <div className='sf-field-renderer__input-wrapper'>
+              <input
+                type='text'
+                placeholder={placeholder || __('Enter coupon code', 'subtleforms')}
+                className={`${inputClass} sf-field-renderer__subscribe-input`}
+                readOnly
+                tabIndex='-1'
+              />
+              <span className='sf-field-renderer__coupon-badge'>🎉</span>
+            </div>
+            <button
+              type='button'
+              className='sf-field-renderer__subscribe-button'
+              disabled>
+              <span className='sf-field-renderer__button-icon'>✓</span>
+              {__('Apply', 'subtleforms')}
+            </button>
+          </div>
+          <div className='sf-field-renderer__coupon-hint'>
+            <span className='sf-field-renderer__coupon-hint-icon'>💡</span>
+            <span className='sf-field-renderer__coupon-hint-text'>
+              {__('Enter your discount code to save on your purchase', 'subtleforms')}
+            </span>
+          </div>
         </div>
       )}
 
