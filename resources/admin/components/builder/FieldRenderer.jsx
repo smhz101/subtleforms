@@ -255,17 +255,47 @@ export default function FieldRenderer({ field }) {
 
       {type === 'payment_summary' && (
         <div className='sf-field-renderer__calculation-box'>
+          <div className='sf-field-renderer__calc-header'>
+            <span className='sf-field-renderer__calc-icon'>📋</span>
+            <span className='sf-field-renderer__calc-title'>
+              {__('Payment Summary', 'subtleforms')}
+            </span>
+          </div>
+          <div className='sf-field-renderer__calc-divider'></div>
           <div className='sf-field-renderer__calc-row'>
-            <span>{__('Subtotal:', 'subtleforms')}</span>
-            <span>$0.00</span>
+            <span>
+              <span className='sf-field-renderer__calc-row-icon'>💵</span>
+              {__('Subtotal:', 'subtleforms')}
+            </span>
+            <span className='sf-field-renderer__calc-value'>$0.00</span>
           </div>
           <div className='sf-field-renderer__calc-row'>
-            <span>{__('Tax:', 'subtleforms')}</span>
-            <span>$0.00</span>
+            <span>
+              <span className='sf-field-renderer__calc-row-icon'>🏦</span>
+              {__('Tax:', 'subtleforms')}
+            </span>
+            <span className='sf-field-renderer__calc-value'>$0.00</span>
           </div>
+          <div className='sf-field-renderer__calc-row sf-field-renderer__calc-row--discount'>
+            <span>
+              <span className='sf-field-renderer__calc-row-icon'>🏷️</span>
+              {__('Discount:', 'subtleforms')}
+            </span>
+            <span className='sf-field-renderer__calc-value sf-field-renderer__calc-value--discount'>-$0.00</span>
+          </div>
+          <div className='sf-field-renderer__calc-divider sf-field-renderer__calc-divider--bold'></div>
           <div className='sf-field-renderer__calc-total'>
-            <span>{__('Total:', 'subtleforms')}</span>
-            <span>$0.00</span>
+            <span>
+              <span className='sf-field-renderer__calc-total-icon'>💰</span>
+              {__('Total:', 'subtleforms')}
+            </span>
+            <span className='sf-field-renderer__calc-total-value'>$0.00</span>
+          </div>
+          <div className='sf-field-renderer__calc-footer'>
+            <span className='sf-field-renderer__calc-footer-icon'>ℹ️</span>
+            <span className='sf-field-renderer__calc-footer-text'>
+              {__('Amount will be calculated automatically', 'subtleforms')}
+            </span>
           </div>
         </div>
       )}

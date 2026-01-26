@@ -424,16 +424,64 @@
 	}
 
 	&__calculation-box {
-		background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-		padding: 1.5rem;
-		border: 1px solid #93c5fd;
+		background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+		padding: 1.75rem;
+		border: 2px solid #e5e7eb;
 		border-radius: 12px;
-		box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
-		transition: all 0.2s ease;
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05),
+					0 2px 4px -1px rgba(0, 0, 0, 0.03);
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		position: relative;
+		overflow: hidden;
+
+		&::before {
+			content: '';
+			position: absolute;
+			top: 0;
+			left: 0;
+			right: 0;
+			height: 4px;
+			background: linear-gradient(90deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%);
+			opacity: 0.8;
+		}
 
 		&:hover {
-			box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-			transform: translateY(-1px);
+			box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 
+						0 4px 6px -2px rgba(0, 0, 0, 0.05);
+			transform: translateY(-2px);
+			border-color: #3b82f6;
+		}
+	}
+
+	&__calc-header {
+		display: flex;
+		align-items: center;
+		gap: 0.75rem;
+		margin-bottom: 1rem;
+	}
+
+	&__calc-icon {
+		font-size: 1.5rem;
+		line-height: 1;
+		filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+	}
+
+	&__calc-title {
+		font-size: 1.125rem;
+		font-weight: 700;
+		color: #1f2937;
+		letter-spacing: -0.01em;
+	}
+
+	&__calc-divider {
+		height: 1px;
+		background: linear-gradient(90deg, transparent 0%, #e5e7eb 50%, transparent 100%);
+		margin: 1rem 0;
+
+		&--bold {
+			height: 2px;
+			background: linear-gradient(90deg, transparent 0%, #3b82f6 50%, transparent 100%);
+			margin: 1.25rem 0;
 		}
 	}
 
@@ -441,20 +489,44 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		margin-bottom: 0.875rem;
-		padding: 0.5rem 0;
-		color: #374151;
+		padding: 0.75rem 0.5rem;
+		color: #4b5563;
 		font-size: 0.9375rem;
 		line-height: 1.5;
 		font-weight: 500;
+		transition: all 0.2s ease;
+		border-radius: 6px;
 
-		&:last-of-type {
-			margin-bottom: 0;
+		&:hover {
+			background: rgba(59, 130, 246, 0.05);
+			transform: translateX(3px);
 		}
 
-		span:last-child {
-			font-weight: 600;
-			color: #1f2937;
+		&--discount {
+			color: #059669;
+		}
+
+		span:first-child {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+		}
+	}
+
+	&__calc-row-icon {
+		font-size: 1rem;
+		line-height: 1;
+		opacity: 0.8;
+	}
+
+	&__calc-value {
+		font-weight: 700;
+		color: #1f2937;
+		font-variant-numeric: tabular-nums;
+		letter-spacing: -0.02em;
+
+		&--discount {
+			color: #059669;
 		}
 	}
 
@@ -462,18 +534,74 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		padding-top: 1rem;
-		margin-top: 1rem;
-		border-top: 2px solid #60a5fa;
+		padding: 1rem 0.75rem;
+		background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+		border-radius: 8px;
 		font-weight: 700;
 		font-size: 1.125rem;
 		color: #1e3a8a;
+		transition: all 0.2s ease;
 
-		span:last-child {
-			color: #1e3a8a;
-			font-size: 1.25rem;
+		&:hover {
+			background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+			transform: scale(1.02);
+		}
+
+		span:first-child {
+			display: flex;
+			align-items: center;
+			gap: 0.625rem;
 		}
 	}
+
+	&__calc-total-icon {
+		font-size: 1.25rem;
+		line-height: 1;
+		filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+		animation: bounce-coin 2s infinite;
+	}
+
+	&__calc-total-value {
+		color: #1e3a8a;
+		font-size: 1.5rem;
+		font-weight: 800;
+		font-variant-numeric: tabular-nums;
+		letter-spacing: -0.03em;
+	}
+
+	&__calc-footer {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		margin-top: 1rem;
+		padding: 0.75rem;
+		background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+		border-radius: 6px;
+		border: 1px solid #fbbf24;
+	}
+
+	&__calc-footer-icon {
+		font-size: 0.875rem;
+		line-height: 1;
+		flex-shrink: 0;
+	}
+
+	&__calc-footer-text {
+		font-size: 0.8125rem;
+		color: #92400e;
+		font-weight: 600;
+		font-style: italic;
+		line-height: 1.4;
+	}
+
+@keyframes bounce-coin {
+	0%, 100% {
+		transform: translateY(0);
+	}
+	50% {
+		transform: translateY(-3px);
+	}
+}
 
 	&__subscribe-wrapper {
 		display: flex;
