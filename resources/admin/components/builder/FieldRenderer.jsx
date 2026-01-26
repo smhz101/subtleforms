@@ -342,6 +342,75 @@ export default function FieldRenderer({ field }) {
         </div>
       )}
 
+      {type === 'action_hook' && (
+        <div className='sf-action-hook-preview'>
+          <div className='sf-action-hook-preview__header'>
+            <span className='sf-action-hook-preview__icon'>⚚️</span>
+            <div className='sf-action-hook-preview__title-group'>
+              <div className='sf-action-hook-preview__title'>
+                {__('Action Hook', 'subtleforms')}
+              </div>
+              <div className='sf-action-hook-preview__subtitle'>
+                {__('WordPress Action Integration', 'subtleforms')}
+              </div>
+            </div>
+          </div>
+          <div className='sf-action-hook-preview__body'>
+            <div className='sf-action-hook-preview__code'>
+              <span className='sf-action-hook-preview__code-keyword'>do_action</span>
+              <span className='sf-action-hook-preview__code-bracket'>(</span>
+              <span className='sf-action-hook-preview__code-string'>
+                '{field.config?.hookName || 'subtleforms_custom_action'}'
+              </span>
+              <span className='sf-action-hook-preview__code-bracket'>)</span>
+            </div>
+            <div className='sf-action-hook-preview__info'>
+              <span className='sf-action-hook-preview__info-icon'>🔌</span>
+              <span className='sf-action-hook-preview__info-text'>
+                {__('Triggers custom WordPress actions during form processing', 'subtleforms')}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {type === 'step' && (
+        <div className='sf-step-preview'>
+          <div className='sf-step-preview__header'>
+            <div className='sf-step-preview__number'>
+              <span className='sf-step-preview__number-icon'>🗂️</span>
+              <span className='sf-step-preview__number-text'>
+                {field.config?.stepNumber || '1'}
+              </span>
+            </div>
+            <div className='sf-step-preview__title-group'>
+              <div className='sf-step-preview__title'>
+                {field.config?.title || field.label || __('Step Title', 'subtleforms')}
+              </div>
+              <div className='sf-step-preview__subtitle'>
+                {field.config?.description || __('Multi-step form container', 'subtleforms')}
+              </div>
+            </div>
+          </div>
+          <div className='sf-step-preview__progress'>
+            <div className='sf-step-preview__progress-bar'>
+              <div className='sf-step-preview__progress-fill'></div>
+            </div>
+            <div className='sf-step-preview__progress-text'>
+              {__('Step navigation will appear here', 'subtleforms')}
+            </div>
+          </div>
+          <div className='sf-step-preview__fields'>
+            <div className='sf-step-preview__field-indicator'>●</div>
+            <div className='sf-step-preview__field-indicator'>●</div>
+            <div className='sf-step-preview__field-indicator'>●</div>
+            <span className='sf-step-preview__fields-text'>
+              {__('Form fields will be displayed here', 'subtleforms')}
+            </span>
+          </div>
+        </div>
+      )}
+
       {type === 'captcha' && (
         <div className='sf-captcha-preview'>
           <div className='sf-captcha-preview__header'>
