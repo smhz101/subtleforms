@@ -318,8 +318,8 @@ export function duplicateNode(tree, command) {
     validateTreeIntegrity(updatedTree, 'after duplicateNode');
   }
 
-  // For backwards compatibility tests expect the function to return the updated tree
-  return updatedTree;
+  // Return the updated tree and new node ID
+  return { tree: updatedTree, newNodeId: rootCloneId };
 }
 
 /**
