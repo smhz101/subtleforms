@@ -116,12 +116,31 @@ export default function FieldRenderer({ field }) {
         </select>
       )}
 
-      {type === 'date' && <input type='date' className={inputClass} readOnly />}
+      {type === 'date' && (
+        <div className='sf-field-renderer__date-placeholder'>
+          <span className='sf-field-renderer__date-icon'>📅</span>
+          <span className='sf-field-renderer__date-text'>
+            {placeholder || __('Select a date', 'subtleforms')}
+          </span>
+        </div>
+      )}
 
-      {type === 'time' && <input type='time' className={inputClass} readOnly />}
+      {type === 'time' && (
+        <div className='sf-field-renderer__time-placeholder'>
+          <span className='sf-field-renderer__time-icon'>🕐</span>
+          <span className='sf-field-renderer__time-text'>
+            {placeholder || __('Select a time', 'subtleforms')}
+          </span>
+        </div>
+      )}
 
       {type === 'datetime' && (
-        <input type='datetime-local' className={inputClass} readOnly />
+        <div className='sf-field-renderer__datetime-placeholder'>
+          <span className='sf-field-renderer__datetime-icon'>📅🕐</span>
+          <span className='sf-field-renderer__datetime-text'>
+            {placeholder || __('Select date and time', 'subtleforms')}
+          </span>
+        </div>
       )}
 
       {type === 'country' && (
@@ -276,23 +295,55 @@ export default function FieldRenderer({ field }) {
 
       {type === 'captcha' && (
         <div className='sf-captcha-preview'>
-          <div className='sf-captcha-preview__icon'>🔒</div>
-          <div className='sf-captcha-preview__content'>
-            <div className='sf-captcha-preview__title'>
-              {__('CAPTCHA Verification', 'subtleforms')}
+          <div className='sf-captcha-preview__header'>
+            <div className='sf-captcha-preview__icon'>🛡️</div>
+            <div className='sf-captcha-preview__title-group'>
+              <div className='sf-captcha-preview__title'>
+                {__('Security Verification', 'subtleforms')}
+              </div>
+              <div className='sf-captcha-preview__subtitle'>
+                {__('Verify you\'re human', 'subtleforms')}
+              </div>
             </div>
-            <div className='sf-captcha-preview__description'>
-              {__('CAPTCHA will appear here on the live form', 'subtleforms')}
+          </div>
+          
+          <div className='sf-captcha-preview__body'>
+            <div className='sf-captcha-preview__checkbox-wrapper'>
+              <div className='sf-captcha-preview__checkbox'></div>
+              <span className='sf-captcha-preview__checkbox-label'>
+                {__('I\'m not a robot', 'subtleforms')}
+              </span>
             </div>
+            
             {field.config?.providerName && (
-              <div className='sf-captcha-preview__provider'>
-                {field.config.providerName === 'recaptcha' &&
-                  'Google reCAPTCHA'}
-                {field.config.providerName === 'hcaptcha' && 'hCaptcha'}
-                {field.config.providerName === 'turnstile' &&
-                  'Cloudflare Turnstile'}
+              <div className='sf-captcha-preview__provider-badge'>
+                {field.config.providerName === 'recaptcha' && (
+                  <>
+                    <span className='sf-captcha-preview__provider-icon'>🔐</span>
+                    <span>Google reCAPTCHA</span>
+                  </>
+                )}
+                {field.config.providerName === 'hcaptcha' && (
+                  <>
+                    <span className='sf-captcha-preview__provider-icon'>✅</span>
+                    <span>hCaptcha</span>
+                  </>
+                )}
+                {field.config.providerName === 'turnstile' && (
+                  <>
+                    <span className='sf-captcha-preview__provider-icon'>☁️</span>
+                    <span>Cloudflare Turnstile</span>
+                  </>
+                )}
               </div>
             )}
+          </div>
+          
+          <div className='sf-captcha-preview__footer'>
+            <div className='sf-captcha-preview__status'>
+              <span className='sf-captcha-preview__status-icon'>ℹ️</span>
+              {__('CAPTCHA will appear here on the live form', 'subtleforms')}
+            </div>
           </div>
         </div>
       )}
