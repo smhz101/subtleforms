@@ -9,6 +9,7 @@ import {
 import { __ } from '@wordpress/i18n';
 import ConditionEditor from './ConditionEditor';
 import { useBuilder } from './context/BuilderContext';
+import { PanelSection } from '../../ui';
 
 export default function FieldInspector({ field, allFields, isReadOnly = false }) {
   const { setSelectedId, actions, validationErrors, selectedId } = useBuilder();
@@ -137,7 +138,9 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
                             />
                           )}
                           {field.type === 'repeat_container' && (
-                            <>
+                            <PanelSection
+                              title={__('Repeater Settings', 'subtleforms')}
+                              initialOpen={true}>
                               <TextControl
                                 label={__('Button Label', 'subtleforms')}
                                 value={field.buttonLabel || ''}
@@ -161,19 +164,24 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
                                   handleUpdate({ max: parseInt(v, 10) })
                                 }
                               />
-                            </>
+                            </PanelSection>
                           )}
-                          <TextControl
-                            label={__('Spacing (px)', 'subtleforms')}
-                            type='number'
-                            value={field.spacing ?? ''}
-                            onChange={(v) => {
-                              const next = parseInt(v, 10);
-                              handleUpdate({
-                                spacing: Number.isNaN(next) ? 0 : next,
-                              });
-                            }}
-                          />
+                          <PanelSection
+                            title={__('Layout', 'subtleforms')}
+                            initialOpen={false}
+                            variant="subtle">
+                            <TextControl
+                              label={__('Spacing (px)', 'subtleforms')}
+                              type='number'
+                              value={field.spacing ?? ''}
+                              onChange={(v) => {
+                                const next = parseInt(v, 10);
+                                handleUpdate({
+                                  spacing: Number.isNaN(next) ? 0 : next,
+                                });
+                              }}
+                            />
+                          </PanelSection>
                         </>
                       ) : (
                         <>
@@ -195,15 +203,21 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
                               'subtleforms'
                             )}
                           />
-                          <TextControl
-                            label={__('Field Key', 'subtleforms')}
-                            value={field.key || ''}
-                            disabled
-                            help={__(
-                              'Unique identifier for data mapping',
-                              'subtleforms'
-                            )}
-                          />
+                          
+                          <PanelSection
+                            title={__('Advanced', 'subtleforms')}
+                            initialOpen={false}
+                            variant="subtle">
+                            <TextControl
+                              label={__('Field Key', 'subtleforms')}
+                              value={field.key || ''}
+                              disabled
+                              help={__(
+                                'Unique identifier for data mapping',
+                                'subtleforms'
+                              )}
+                            />
+                          </PanelSection>
                         </>
                       )}
 
@@ -262,11 +276,9 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
 
                       {/* Name Group Field Config */}
                       {field.type === 'name_group' && (
-                        <div className='sf-field-inspector__name-group-section'>
-                          {' '}
-                          <label className='sf-field-inspector__section-label'>
-                            {__('Name Parts', 'subtleforms')}
-                          </label>
+                        <PanelSection
+                          title={__('Name Parts', 'subtleforms')}
+                          initialOpen={false}>
                           <ToggleControl
                             label={__('First Name', 'subtleforms')}
                             checked={field.enable_first_name !== false}
@@ -288,15 +300,14 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
                               handleUpdate({ enable_last_name: v })
                             }
                           />
-                        </div>
+                        </PanelSection>
                       )}
 
                       {/* Address Group Field Config */}
                       {field.type === 'address_group' && (
-                        <div className='sf-field-inspector__address-group-section'>
-                          <label className='sf-field-inspector__section-label'>
-                            {__('Address Parts', 'subtleforms')}
-                          </label>
+                        <PanelSection
+                          title={__('Address Parts', 'subtleforms')}
+                          initialOpen={false}>
                           <ToggleControl
                             label={__('Street Address', 'subtleforms')}
                             checked={field.enable_street1 !== false}
@@ -335,7 +346,7 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
                               handleUpdate({ enable_country: v })
                             }
                           />
-                        </div>
+                        </PanelSection>
                       )}
                     </>
                   )}

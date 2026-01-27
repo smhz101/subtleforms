@@ -6,6 +6,7 @@ import {
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import InsertFieldButton from './InsertFieldButton';
+import { ContextualTip } from '../ui';
 import './ColumnDropZone.scss';
 
 export default function ColumnDropZone({
@@ -68,10 +69,12 @@ export default function ColumnDropZone({
 
       {items.length === 0 && (
         <div className='sf-column-dropzone__empty'>
-          {__(
-            'Use “Add Field” or drag a field from the left panel.',
-            'subtleforms'
-          )}
+          <ContextualTip 
+            id='builder-canvas-empty'
+            variant='info'
+            dismissible>
+            {__('👋 Get started by clicking "Add Field" below, or drag a field from the panel on the left. You can always rearrange them later!', 'subtleforms')}
+          </ContextualTip>
         </div>
       )}
     </div>
