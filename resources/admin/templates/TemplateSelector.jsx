@@ -1,10 +1,13 @@
 import React from 'react';
 import { useState, useMemo } from '@wordpress/element';
-import { TextControl, Notice } from '@wordpress/components';
+import { TextControl, Notice, Modal } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { useTemplates } from '../data';
+import { useAbility } from '../policies';
 import clsx from 'clsx';
 import Icon from '../components/ui/Icon';
-import { TEMPLATE_CATEGORIES, searchTemplates } from './index';
+import { UpgradePrompt } from '../components/ui';
+import { TEMPLATE_CATEGORIES } from './index';
 
 export default function TemplateSelector({
   onSelectTemplate,
@@ -12,36 +15,47 @@ export default function TemplateSelector({
 }) {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-
-  // Check Pro template capability from window.subtleformsAdmin.capabilities
-  const capabilities = window.subtleformsAdmin?.capabilities || {};
-  const hasProTemplates = capabilities['templates.pro'] === true;
-  const hasProFeature = capabilities['pro_features'] === true;
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [selectedProTemplate, setSelectedProTemplate] = useState(null);
   
-  // Determine license state (grace period shows pro_features but limited capabilities)
-  const isInGracePeriod = hasProFeature && !hasProTemplates;
-  const canUseProTemplates = hasProTemplates || isInGracePeriod;
+  const { data: templatesResponse, isLoading } = useTemplates();
+  const { can: canUseProTemplates } = useAbility('templates.pro');
+  
+  const templates = templatesResponse?.success && templatesResponse?.templates 
+    ? Object.values(templatesResponse.templates) 
+    : [];
 
+  // Filter templates by search and category
   const filteredTemplates = useMemo(() => {
-    return searchTemplates(searchQuery, selectedCategory);
-  }, [searchQuery, selectedCategory]);
+    let filtered = templates;
+
+    // Filter by category
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter((t) => t.category === selectedCategory);
+    }
+
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (t) =>
+          t.name.toLowerCase().includes(query) ||
+          t.description?.toLowerCase().includes(query)
+      );
+    }
+
+    return filtered;
+  }, [templates, searchQuery, selectedCategory]);
 
   const handleTemplateClick = (template) => {
-    // If it's a Pro template, check license state
-    if (template.is_pro) {
-      if (canUseProTemplates) {
-        // License active or in grace period - allow selection
-        onSelectTemplate(template.id);
-      } else {
-        // License expired/inactive - show notice (TODO: implement modal/notice)
-        console.warn('Pro template requires active license');
-        // In production, this would trigger an upgrade modal
-        return;
-      }
-    } else {
-      // Free template - always allow
-      onSelectTemplate(template.id);
+    if (template.is_pro && !canUseProTemplates) {
+      // Show contextual upgrade prompt
+      setSelectedProTemplate(template);
+      setShowUpgradeModal(true);
+      return;
     }
+    
+    onSelectTemplate(template);
   };
 
   const getFormTypeLabel = (type) => {
@@ -72,13 +86,6 @@ export default function TemplateSelector({
         />
       </div>
 
-      {/* Grace Period Notice */}
-      {isInGracePeriod && (
-        <Notice status='warning' isDismissible={false}>
-          {__('License in grace period - Pro features available with limited access', 'subtleforms')}
-        </Notice>
-      )}
-
       {/* Main Content */}
       <div className='sf-template-selector__content'>
         {/* Left: Categories */}
@@ -100,7 +107,11 @@ export default function TemplateSelector({
 
         {/* Right: Template Cards */}
         <div className='sf-template-selector__templates'>
-          {filteredTemplates.length === 0 ? (
+          {isLoading ? (
+            <div className='sf-template-selector__loading'>
+              <p>{__('Loading templates...', 'subtleforms')}</p>
+            </div>
+          ) : filteredTemplates.length === 0 ? (
             <div className='sf-template-selector__empty'>
               <Icon.Search className='sf-template-selector__empty-icon' />
               <p className='sf-template-selector__empty-text'>
@@ -118,6 +129,11 @@ export default function TemplateSelector({
                 // Pro template is locked only if license is expired/inactive
                 const isLocked = template.is_pro && !canUseProTemplates;
                 
+                // Check if this template is selected (handle both ID string and full object)
+                const isSelected = selectedTemplate?.id ? 
+                  selectedTemplate.id === template.id : 
+                  selectedTemplate === template.id;
+                
                 return (
                   <button
                     key={template.id}
@@ -126,8 +142,7 @@ export default function TemplateSelector({
                     disabled={isLocked}
                     className={clsx(
                       'sf-template-card',
-                      selectedTemplate === template.id &&
-                        'sf-template-card--selected',
+                      isSelected && 'sf-template-card--selected',
                       isLocked && 'sf-template-card--locked'
                     )}>
                   {/* Badge */}
@@ -155,7 +170,7 @@ export default function TemplateSelector({
                   </div>
 
                   {/* Selected Check */}
-                  {selectedTemplate === template.id && (
+                  {isSelected && (
                     <Icon.CheckCircle className='sf-template-card__check-icon' />
                   )}
 
@@ -172,6 +187,26 @@ export default function TemplateSelector({
           )}
         </div>
       </div>
+      
+      {/* Upgrade Modal */}
+      {showUpgradeModal && selectedProTemplate && (
+        <Modal
+          title={__('Unlock Pro Templates', 'subtleforms')}
+          onRequestClose={() => setShowUpgradeModal(false)}
+          className='sf-upgrade-modal'>
+          <UpgradePrompt
+            variant='card'
+            feature={selectedProTemplate.name}
+            benefits={[
+              __('Access all premium templates', 'subtleforms'),
+              __('Advanced form types (multi-step, conversational)', 'subtleforms'),
+              __('Priority support', 'subtleforms'),
+              __('Regular template updates', 'subtleforms'),
+            ]}
+            ctaText={__('View Pro Plans', 'subtleforms')}
+          />
+        </Modal>
+      )}
     </div>
   );
 }

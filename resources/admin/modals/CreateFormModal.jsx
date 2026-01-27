@@ -1,47 +1,27 @@
 import React from 'react';
 import { useState, useEffect, useCallback } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
-import { store as noticesStore } from '@wordpress/notices';
 import { Modal, TextControl, TextareaControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
+import { useCreateForm } from '../data';
+import { useNotice } from '../ui/feedback';
 import Icon from '../components/ui/Icon';
 import clsx from 'clsx';
 import TemplateSelector from '../templates/TemplateSelector';
-import { getTemplateById } from '../templates';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
 import './CreateFormModal.scss';
 import '../templates/TemplateSelector.scss';
 
-const restBase =
-  window.subtleformsAdmin && window.subtleformsAdmin.restUrl
-    ? window.subtleformsAdmin.restUrl.replace(/\/$/, '')
-    : '/wp-json/subtleforms/v1';
-const restNonce =
-  window.subtleformsAdmin && window.subtleformsAdmin.restNonce
-    ? window.subtleformsAdmin.restNonce
-    : null;
-
-function apiPost(path, payload) {
-  return fetch(restBase + path, {
-    method: 'POST',
-    credentials: 'same-origin',
-    headers: {
-      'X-WP-Nonce': restNonce,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  }).then((r) => r.json().then((j) => ({ ok: r.ok, body: j })));
-}
-
 export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
-  const [creating, setCreating] = useState(false);
   const [step, setStep] = useState(1);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [template, setTemplate] = useState('blank');
   const [selectedTemplateId, setSelectedTemplateId] = useState(null);
   const [formType, setFormType] = useState('regular');
-  const { createErrorNotice } = useDispatch(noticesStore);
+  const { error: showError } = useNotice();
+  const createFormMutation = useCreateForm();
+
+
 
   const generateDefaultTitle = useCallback(() => {
     const suffix = Math.floor(1000 + Math.random() * 9000);
@@ -60,38 +40,37 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
       setTemplate('blank');
       setSelectedTemplateId(null);
       setFormType('regular');
-      setCreating(false);
     }
   }, [isOpen, generateDefaultTitle]);
 
   const handleRequestClose = useCallback(() => {
-    if (!creating) {
+    if (!createFormMutation.isPending) {
       onClose();
     }
-  }, [creating, onClose]);
+  }, [createFormMutation.isPending, onClose]);
 
   const handleCreate = async () => {
-    if (creating) {
+    if (createFormMutation.isPending) {
       return;
     }
 
-    setCreating(true);
     const safeTitle = (title || '').trim() || generateDefaultTitle();
 
     let fields = [];
     let templateMetadata = template;
     let schemaType = formType;
 
-    // If preset template is selected, load template schema
+    // Load template schema if preset selected
     if (template === 'preset' && selectedTemplateId) {
-      const templateData = getTemplateById(selectedTemplateId);
-      if (templateData) {
-        fields = templateData.schema.fields;
+      const templateData = selectedTemplateId;
+      
+      if (templateData && templateData.schema) {
+        fields = templateData.schema.fields || [];
         templateMetadata = templateData.id;
-        schemaType = templateData.schema.metadata.type || 'regular';
+        schemaType = templateData.schema.metadata?.type || 'regular';
       }
     } else if (template === 'blank') {
-      // Initialize fields based on form type (blank template)
+      // Initialize fields based on form type
       if (formType === 'multistep') {
         fields = [
           {
@@ -116,39 +95,31 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
             children: [],
           },
         ];
-      } else if (formType === 'conversational') {
-        // Conversational forms start empty - fields will be displayed one at a time
-        fields = [];
-      } else if (formType === 'payment') {
-        // Payment forms start empty - payment fields will be added by user
-        fields = [];
-      } else {
-        // Regular form starts empty
-        fields = [];
       }
     }
-
-    const { ok, body } = await apiPost('/forms', {
-      title: safeTitle,
-      schema: enrichSchemaWithProMarkers({
-        fields,
-        metadata: {
-          name: 'form_schema',
-          title: safeTitle,
-          description: description,
-          type: schemaType,
-          template: templateMetadata,
-        },
-      }),
+    
+    const schemaToSend = enrichSchemaWithProMarkers({
+      fields,
+      metadata: {
+        name: 'form_schema',
+        title: safeTitle,
+        description: description,
+        type: schemaType,
+        template: templateMetadata,
+      },
     });
 
-    setCreating(false);
-    if (ok && body?.id) {
-      onFormCreated(body.id);
-    } else {
-      createErrorNotice(
-        body?.message || __('Failed to create form', 'subtleforms')
-      );
+    try {
+      const result = await createFormMutation.mutateAsync({
+        title: safeTitle,
+        schema: schemaToSend,
+      });
+
+      if (result?.id) {
+        onFormCreated(result.id);
+      }
+    } catch (error) {
+      showError(error);
     }
   };
 
@@ -315,8 +286,8 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
         step === 2 && template === 'preset' && 'subtleforms-create-modal--wide'
       )}
       overlayClassName='subtleforms-modal-overlay'
-      shouldCloseOnClickOutside={!creating}
-      shouldCloseOnEsc={!creating}>
+      shouldCloseOnClickOutside={!createFormMutation.isPending}
+      shouldCloseOnEsc={!createFormMutation.isPending}>
       <div className='sf-create-form-modal__container subtleforms-admin'>
         {/* Header */}
         <div className='sf-create-form-modal__header'>
@@ -359,7 +330,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
                   <TextControl
                     value={title}
                     onChange={setTitle}
-                    disabled={creating}
+                    disabled={createFormMutation.isPending}
                     placeholder={__('e.g. Contact Form', 'subtleforms')}
                   />
                 </div>
@@ -374,7 +345,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
                   <TextareaControl
                     value={description}
                     onChange={setDescription}
-                    disabled={creating}
+                    disabled={createFormMutation.isPending}
                     rows={3}
                     placeholder={__(
                       'Describe the purpose of this form...',
@@ -434,7 +405,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
                 setStep(step - 1);
               }
             }}
-            disabled={creating}
+            disabled={createFormMutation.isPending}
             className={
               step === 1
                 ? 'sf-create-form-modal__cancel-button'
@@ -463,15 +434,15 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
                 ? !title.trim()
                 : step === 2 && template === 'preset'
                 ? !selectedTemplateId
-                : creating || !formType
+                : createFormMutation.isPending || !formType
             }
             className='sf-create-form-modal__primary-button'>
-            {creating && (
+            {createFormMutation.isPending && (
               <Icon.Loader className='sf-create-form-modal__spinner' />
             )}
             {step === 1
               ? __('Next Step', 'subtleforms')
-              : creating
+              : createFormMutation.isPending
               ? __('Creating...', 'subtleforms')
               : __('Create Form', 'subtleforms')}
           </button>
