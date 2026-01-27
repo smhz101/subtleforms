@@ -237,12 +237,14 @@ class AdminMenu {
 			'subtleforms-admin',
 			'subtleformsAdmin',
 			array(
-				'ajaxUrl'      => admin_url( 'admin-ajax.php' ),
-				'restUrl'      => rest_url( 'subtleforms/v1' ),
-				'nonce'        => wp_create_nonce( 'subtleforms_admin' ),
-				'restNonce'    => wp_create_nonce( 'wp_rest' ),
-				'capabilities' => $this->caps->all(),
-				'i18n'         => array(
+				'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
+				'restUrl'       => rest_url( 'subtleforms/v1' ),
+				'nonce'         => wp_create_nonce( 'subtleforms_admin' ),
+				'restNonce'     => wp_create_nonce( 'wp_rest' ),
+				'capabilities'  => $this->caps->all(),
+				'hasProPlugin'  => defined( 'SUBTLEFORMS_PRO_VERSION' ),
+				'licenseKey'    => get_option( 'subtleforms_pro_license_key', '' ),
+				'i18n'          => array(
 					'confirmDelete' => __( 'Are you sure you want to delete this item?', 'subtleforms' ),
 					'error'         => __( 'An error occurred. Please try again.', 'subtleforms' ),
 					'success'       => __( 'Action completed successfully.', 'subtleforms' ),

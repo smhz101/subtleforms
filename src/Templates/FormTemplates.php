@@ -21,10 +21,20 @@ class FormTemplates {
 	 * @return array Array of template definitions.
 	 */
 	public static function get_all() {
-		return array(
+		$templates = array(
 			'contact'      => self::contact_form(),
 			'lead_capture' => self::lead_capture_form(),
 		);
+
+		/**
+		 * Filter available form templates.
+		 *
+		 * Allows extensions (like Pro) to add additional templates.
+		 *
+		 * @param array $templates Associative array of template definitions.
+		 * @since 1.5.0
+		 */
+		return apply_filters( 'subtleforms/templates', $templates );
 	}
 
 	/**

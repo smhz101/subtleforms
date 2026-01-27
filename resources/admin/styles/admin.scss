@@ -8,6 +8,13 @@
 // Variables (WordPress-aligned)
 @use 'variables' as *;
 
+// UI System
+@use '../ui/feedback/feedback.scss';
+@use '../ui/loading/loading.scss';
+@use '../components/ui/PanelSection.scss';
+@use '../components/ui/ContextualTip.scss';
+@use '../components/ui/UpgradePrompt.scss';
+
 // Component Styles
 @use '../components/AdminShell.scss';
 @use '../components/Notices.scss';
@@ -22,6 +29,7 @@
 @use '../components/CreateFormWizard.scss';
 @use '../components/SubmissionsTable.scss';
 @use '../components/DataTable.scss';
+@use '../components/TableSkeleton.scss';
 @use '../components/TemplateSelector.scss';
 @use '../components/OnboardingWizard.scss';
 
