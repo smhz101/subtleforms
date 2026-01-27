@@ -1,0 +1,137 @@
+/**
+ * Upgrade Prompt Styles
+ */
+
+.sf-upgrade-prompt {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, #f6f7f9 0%, #ffffff 100%);
+  border: 1px solid #dcdcde;
+  border-radius: 4px;
+  
+  &--inline {
+    align-items: center;
+    padding: 12px 16px;
+  }
+  
+  &--card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+    background: #ffffff;
+    border: 2px solid #0073aa;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  &--banner {
+    align-items: center;
+    padding: 16px 24px;
+    background: linear-gradient(90deg, #0073aa 0%, #005a87 100%);
+    border: none;
+    color: #ffffff;
+    
+    .sf-upgrade-prompt__title {
+      color: #ffffff;
+    }
+    
+    .sf-upgrade-prompt__benefit {
+      color: #ffffff;
+    }
+  }
+}
+
+.sf-upgrade-prompt__icon {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0073aa 0%, #005a87 100%);
+  border-radius: 50%;
+  color: #ffffff;
+  
+  svg {
+    width: 18px;
+    height: 18px;
+  }
+  
+  .sf-upgrade-prompt--banner & {
+    background: rgba(255, 255, 255, 0.2);
+  }
+}
+
+.sf-upgrade-prompt__content {
+  flex: 1;
+  min-width: 0;
+}
+
+.sf-upgrade-prompt__title {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1d2327;
+  
+  .sf-upgrade-prompt--inline & {
+    margin-bottom: 0;
+  }
+}
+
+.sf-upgrade-prompt__benefits {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.sf-upgrade-prompt__benefit {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #50575e;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.sf-upgrade-prompt__check {
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 1px;
+  color: #46b450;
+  
+  .sf-upgrade-prompt--banner & {
+    color: #ffffff;
+  }
+}
+
+.sf-upgrade-prompt__actions {
+  flex-shrink: 0;
+}
+
+.sf-upgrade-prompt__button {
+  white-space: nowrap;
+  
+  .sf-upgrade-prompt--card & {
+    width: 100%;
+    justify-content: center;
+    margin-top: 12px;
+  }
+  
+  .sf-upgrade-prompt--banner & {
+    background: #ffffff;
+    border-color: #ffffff;
+    color: #0073aa;
+    
+    &:hover,
+    &:focus {
+      background: #f0f0f0;
+      border-color: #f0f0f0;
+      color: #005a87;
+    }
+  }
+}
