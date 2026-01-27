@@ -1,0 +1,123 @@
+/**
+ * UI Panel Extension Styles
+ */
+
+.ui-panel-stats {
+  margin-top: 16px;
+}
+
+.ui-panel-stats .sf-panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.ui-panel-stats .stats-section {
+  padding: 12px 0;
+}
+
+.ui-panel-stats .stats-section + .stats-section {
+  border-top: 1px solid #e0e0e0;
+  margin-top: 12px;
+  padding-top: 16px;
+}
+
+.ui-panel-stats .stats-pro {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);
+  padding: 16px;
+  border-radius: 8px;
+  margin-top: 12px;
+}
+
+.ui-panel-stats .sf-stat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+}
+
+.ui-panel-stats .sf-stat label {
+  font-size: 13px;
+  color: #666;
+  margin: 0;
+}
+
+.ui-panel-stats .sf-stat strong {
+  font-size: 14px;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.ui-panel-stats .sf-loading {
+  text-align: center;
+  padding: 24px;
+  color: #666;
+  font-style: italic;
+}
+
+.ui-panel-stats .sf-error {
+  padding: 12px;
+  background: #fff3f3;
+  border: 1px solid #ffcccc;
+  border-radius: 4px;
+  color: #d32f2f;
+  font-size: 13px;
+}
+
+.ui-panel-stats .sf-upgrade-prompt {
+  text-align: center;
+  padding: 24px 16px;
+  background: linear-gradient(135deg, #fff9f0 0%, #fff3e0 100%);
+  border-radius: 8px;
+  margin-top: 12px;
+}
+
+.ui-panel-stats .upgrade-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.ui-panel-stats .sf-upgrade-prompt h4 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
+  color: #1a1a1a;
+}
+
+.ui-panel-stats .sf-upgrade-prompt p {
+  font-size: 13px;
+  color: #666;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+.ui-panel-stats .sf-button {
+  padding: 8px 16px;
+  font-size: 13px;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ui-panel-stats .sf-button-primary {
+  background: #2563eb;
+  color: white;
+}
+
+.ui-panel-stats .sf-button-primary:hover {
+  background: #1d4ed8;
+}
+
+.ui-panel-stats .sf-button-link {
+  background: transparent;
+  color: #2563eb;
+  padding: 8px 0;
+  width: 100%;
+  text-align: left;
+}
+
+.ui-panel-stats .sf-button-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
