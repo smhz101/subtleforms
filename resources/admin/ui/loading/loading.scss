@@ -1,0 +1,173 @@
+/**
+ * Loading UI Styles
+ */
+
+// Skeleton
+.sf-skeleton {
+  background: linear-gradient(
+    90deg,
+    #f0f0f1 0%,
+    #e8e8e9 50%,
+    #f0f0f1 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-loading {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.sf-skeleton-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sf-skeleton-card {
+  border: 1px solid #dcdcde;
+  border-radius: 4px;
+  overflow: hidden;
+
+  &__image {
+    border-radius: 0;
+  }
+
+  &__content {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+.sf-skeleton-table {
+  &__header,
+  &__row {
+    display: flex;
+    gap: 16px;
+    padding: 12px;
+    border-bottom: 1px solid #dcdcde;
+  }
+
+  &__header {
+    background: #f6f7f7;
+  }
+}
+
+.sf-skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  &__item {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+  }
+
+  &__avatar {
+    border-radius: 50%;
+  }
+
+  &__content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+}
+
+// Spinner
+.sf-spinner {
+  display: inline-block;
+
+  &--small {
+    width: 16px;
+    height: 16px;
+  }
+
+  &--medium {
+    width: 24px;
+    height: 24px;
+  }
+
+  &--large {
+    width: 32px;
+    height: 32px;
+  }
+
+  &__circle {
+    width: 100%;
+    height: 100%;
+    border: 2px solid #f0f0f1;
+    border-top-color: #2271b1;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.sf-inline-spinner {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+
+  &__text {
+    font-size: 14px;
+    color: #646970;
+  }
+}
+
+// Empty State
+.sf-empty-state {
+  text-align: center;
+  padding: 60px 20px;
+  max-width: 400px;
+  margin: 0 auto;
+
+  &__icon {
+    font-size: 48px;
+    color: #a7aaad;
+    margin-bottom: 16px;
+  }
+
+  &__title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1e1e1e;
+    margin-bottom: 8px;
+  }
+
+  &__description {
+    font-size: 14px;
+    color: #646970;
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  &__action {
+    padding: 10px 24px;
+    background: #2271b1;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+
+    &:hover {
+      background: #135e96;
+    }
+  }
+}
