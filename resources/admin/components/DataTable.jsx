@@ -1,6 +1,7 @@
 import { memo } from '@wordpress/element';
 import { Button, SelectControl, CheckboxControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
+import TableSkeleton from './TableSkeleton';
 import './DataTable.scss';
 
 /**
@@ -102,12 +103,11 @@ const DataTable = memo(function DataTable({
 
   if (loading) {
     return (
-      <div className='sf-data-table__loading'>
-        <div className='sf-data-table__loading-content'>
-          <div className='sf-data-table__loading-content-spinner'></div>
-          <p>{__('Loading...', 'subtleforms')}</p>
-        </div>
-      </div>
+      <TableSkeleton 
+        rows={perPage > 10 ? 10 : perPage}
+        columns={columns.length}
+        selectable={selectable}
+      />
     );
   }
 

@@ -5,8 +5,28 @@
  */
 
 import { useState } from '@wordpress/element';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Panel, PanelBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { NoticeProvider, ErrorBoundary } from '../ui/feedback';
+import { ModalProvider } from '../ui/modals';
+
+// Query Client Configuration
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 30 * 1000,
+    },
+    mutations: {
+      retry: 1,
+      onError: (error) => {
+        console.error('Mutation error:', error);
+      },
+    },
+  },
+});
 
 // Pages
 import DashboardPage from '../pages/DashboardPage';
@@ -62,7 +82,11 @@ export default function AdminApp() {
   }
 
   return (
-    <div>
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <NoticeProvider>
+          <ModalProvider>
+            <div>
       <Panel>
         <PanelBody>
           {page === ROUTES.DASHBOARD && <DashboardPage />}
@@ -107,6 +131,10 @@ export default function AdminApp() {
         onClose={handleModalClose}
         onFormCreated={handleFormCreated}
       />
-    </div>
+            </div>
+          </ModalProvider>
+        </NoticeProvider>
+      </QueryClientProvider>
+    </ErrorBoundary>
   );
 }

@@ -14,9 +14,11 @@ import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import clsx from 'clsx';
 import Icon from './ui/Icon';
+import { ContextualTip } from './ui';
 import DataTable from './DataTable';
 import { ConfirmModal } from '../modals';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
+import { logger, perfMarkers } from '../diagnostics';
 import './FormsList.scss';
 
 const restBase =
@@ -375,6 +377,7 @@ export default function FormsList({
   ];
 
   const fetchForms = useCallback(async () => {
+    perfMarkers.start('fetch-forms');
     setIsLoading(true);
     try {
       const params = new URLSearchParams({
@@ -400,6 +403,9 @@ export default function FormsList({
         },
       });
 
+      const duration = perfMarkers.end('fetch-forms');
+      logger.slow('fetch-forms', duration, 2000);
+
       if (response.ok) {
         const data = await response.json();
         const total = parseInt(response.headers.get('X-WP-Total') || '0');
@@ -409,10 +415,15 @@ export default function FormsList({
       } else {
         const errorText = await response.text();
         console.error('API Error:', response.status, errorText);
+        logger.error('fetch-forms-failed', new Error(`Status ${response.status}`), {
+          statusFilter,
+          searchTerm,
+        });
         throw new Error(`API request failed: ${response.status}`);
       }
     } catch (err) {
       console.error('FormsList fetch error:', err);
+      logger.error('fetch-forms-error', err, { statusFilter, searchTerm });
       createErrorNotice(
         err.message || __('Failed to load forms', 'subtleforms'),
         { type: 'snackbar' }
@@ -661,6 +672,15 @@ export default function FormsList({
 
   return (
     <div className='sf-forms-list'>
+      {forms.length > 0 && forms.length <= 3 && (
+        <ContextualTip 
+          id='forms-list-shortcuts' 
+          variant='info'
+          dismissible>
+          {__('💡 Tip: Click on any form row to edit, or use the menu (⋮) for quick actions like duplicate, export, or delete.', 'subtleforms')}
+        </ContextualTip>
+      )}
+      
       <DataTable
         columns={columns}
         data={forms}
@@ -708,14 +728,22 @@ export default function FormsList({
                   )}
             </p>
             {!searchTerm && (
-              <Button
-                isPrimary
-                onClick={() =>
-                  (window.location.href = 'admin.php?page=subtleforms-new-form')
-                }>
-                <Icon.Add />
-                {__('New Form', 'subtleforms')}
-              </Button>
+              <>
+                <Button
+                  isPrimary
+                  onClick={() =>
+                    (window.location.href = 'admin.php?page=subtleforms-new-form')
+                  }>
+                  <Icon.Add />
+                  {__('New Form', 'subtleforms')}
+                </Button>
+                <ContextualTip 
+                  id='first-form-tip' 
+                  variant='info'
+                  dismissible>
+                  {__('💡 Start with a template or build from scratch. You can always switch between them.', 'subtleforms')}
+                </ContextualTip>
+              </>
             )}
           </div>
         }
