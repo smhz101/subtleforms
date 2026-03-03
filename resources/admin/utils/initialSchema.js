@@ -8,51 +8,12 @@ function createKey(value) {
   return base || 'field';
 }
 
-function createTextField({ key, label, required = false, placeholder = '' } = {}) {
-  return {
-    type: 'text',
-    key,
-    label,
-    required,
-    placeholder,
-  };
-}
-
-function createEmailField({ key, label, required = false, placeholder = '' } = {}) {
-  return {
-    type: 'email',
-    key,
-    label,
-    required,
-    placeholder,
-  };
-}
-
-function createTextareaField({ key, label, required = false, placeholder = '' } = {}) {
-  return {
-    type: 'textarea',
-    key,
-    label,
-    required,
-    placeholder,
-  };
-}
-
 function createHtmlBlock({ key, label, html = '' } = {}) {
   return {
     type: 'html',
     key,
     label,
     html,
-  };
-}
-
-function createOneColumnContainer({ key, label, fields = [] } = {}) {
-  return {
-    type: 'one_column_container',
-    key,
-    label,
-    fields,
   };
 }
 
@@ -106,114 +67,33 @@ export function createInitialSchema({
     });
 
     if (mode === 'blank') {
-      base.fields = [
-        intro,
-        createTextField({
-          key: createKey('question_1'),
-          label: __('First question', 'subtleforms'),
-          required: false,
-          placeholder: __('Type your answer…', 'subtleforms'),
-        }),
-      ];
+      // Conversational: just the intro block, no pre-populated questions
+      base.fields = [intro];
       return base;
     }
 
-    base.fields = [
-      intro,
-      createTextField({
-        key: createKey('name'),
-        label: __('Your name', 'subtleforms'),
-        required: true,
-        placeholder: __('Jane Doe', 'subtleforms'),
-      }),
-      createEmailField({
-        key: createKey('email'),
-        label: __('Email address', 'subtleforms'),
-        required: true,
-        placeholder: __('name@example.com', 'subtleforms'),
-      }),
-    ];
+    // Minimal: also just the intro block
+    base.fields = [intro];
     return base;
   }
 
-  // Multi-step and sectioned forms
+  // Multi-step and sectioned forms — start with one empty step
   if (resolvedType === 'multi-step' || resolvedType === 'sectioned') {
     const stepTitle =
       resolvedType === 'sectioned' ? __('Section 1', 'subtleforms') : __('Step 1', 'subtleforms');
-
-    const blankStepFields = [
-      createTextField({
-        key: createKey('question_1'),
-        label: __('Question', 'subtleforms'),
-        required: false,
-        placeholder: __('Type your answer…', 'subtleforms'),
-      }),
-    ];
-
-    const minimalStepFields = [
-      createTextField({
-        key: createKey('name'),
-        label: __('Name', 'subtleforms'),
-        required: true,
-        placeholder: __('Jane Doe', 'subtleforms'),
-      }),
-      createEmailField({
-        key: createKey('email'),
-        label: __('Email', 'subtleforms'),
-        required: true,
-        placeholder: __('name@example.com', 'subtleforms'),
-      }),
-    ];
 
     base.fields = [
       createStep({
         key: createKey('step_1'),
         title: stepTitle,
         description: '',
-        fields: mode === 'minimal' ? minimalStepFields : blankStepFields,
+        fields: [],
       }),
     ];
     return base;
   }
 
-  // Regular forms
-  if (mode === 'blank') {
-    base.fields = [
-      createOneColumnContainer({
-        key: createKey('layout_1'),
-        label: __('Layout', 'subtleforms'),
-        fields: [
-          createTextField({
-            key: createKey('text_1'),
-            label: __('Text field', 'subtleforms'),
-            required: false,
-            placeholder: __('Type your answer…', 'subtleforms'),
-          }),
-        ],
-      }),
-    ];
-    return base;
-  }
-
-  base.fields = [
-    createOneColumnContainer({
-      key: createKey('layout_1'),
-      label: __('Layout', 'subtleforms'),
-      fields: [
-        createTextField({
-          key: createKey('name'),
-          label: __('Name', 'subtleforms'),
-          required: true,
-          placeholder: __('Jane Doe', 'subtleforms'),
-        }),
-        createEmailField({
-          key: createKey('email'),
-          label: __('Email', 'subtleforms'),
-          required: true,
-          placeholder: __('name@example.com', 'subtleforms'),
-        }),
-      ],
-    }),
-  ];
+  // Regular forms — always start with an empty canvas
+  // Users build their form from scratch using the field panel.
   return base;
 }

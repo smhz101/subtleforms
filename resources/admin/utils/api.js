@@ -91,3 +91,34 @@ export async function apiDelete(path) {
   const body = await parseJsonResponse(response);
   return { ok: response.ok, status: response.status, body };
 }
+
+/**
+ * Check if error is a validation error (HTTP 422)
+ */
+export const isValidationError = (error) => {
+  return error?.status === 422 || error?.isValidationError === true;
+};
+
+/**
+ * Check if error is a rate limit error (HTTP 429)
+ */
+export const isRateLimitError = (error) => {
+  return error?.status === 429 || error?.isRateLimited === true;
+};
+
+/**
+ * Check if error is a conflict error (HTTP 409)
+ */
+export const isConflictError = (error) => {
+  return error?.status === 409 || error?.isConflict === true;
+};
+
+/**
+ * Extract field errors from validation error
+ */
+export const getFieldErrors = (error) => {
+  if (isValidationError(error)) {
+    return error?.fields || {};
+  }
+  return {};
+};
