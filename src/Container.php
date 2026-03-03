@@ -33,11 +33,15 @@ use SubtleForms\Security\RateLimiter;
 
 /**
  * Simple dependency injection container.
+ *
+ * @since 0.1.0
+ * @since 1.9.0 Added set(), reset(), forgetInstance() for testability (Phase 1.3).
  */
 final class Container {
 
 	private array $services   = array();
 	private array $singletons = array();
+	private array $instances  = array();
 
 	/**
 	 * Register a service factory.
@@ -52,6 +56,23 @@ final class Container {
 	public function singleton( string $id, callable $factory ): void {
 		$this->register( $id, $factory );
 		$this->singletons[ $id ] = true;
+	}
+
+	/**
+	 * Directly inject a pre-built instance into the container.
+	 *
+	 * This bypasses the factory and caches the instance as a singleton.
+	 * Primarily intended for test doubles (mocks, stubs), but also useful
+	 * for extensions that construct their own service instances.
+	 *
+	 * @param string $id       Service identifier (usually FQCN).
+	 * @param mixed  $instance The pre-built instance to inject.
+	 */
+	public function set( string $id, $instance ): void {
+		// Register a no-op factory so has() returns true.
+		$this->services[ $id ]   = static fn() => $instance;
+		$this->singletons[ $id ] = true;
+		$this->instances[ $id ]  = $instance;
 	}
 
 	/**
@@ -77,13 +98,31 @@ final class Container {
 		return $service;
 	}
 
-	private array $instances = array();
-
 	/**
 	 * Check if a service exists.
 	 */
 	public function has( string $id ): bool {
 		return isset( $this->services[ $id ] );
+	}
+
+	/**
+	 * Forget a cached singleton instance so the next get() re-resolves it.
+	 *
+	 * @param string $id Service identifier.
+	 */
+	public function forgetInstance( string $id ): void {
+		unset( $this->instances[ $id ] );
+	}
+
+	/**
+	 * Reset the entire container — clears all services, singletons, and instances.
+	 *
+	 * Intended for test teardown to avoid state leaking between tests.
+	 */
+	public function reset(): void {
+		$this->services   = array();
+		$this->singletons = array();
+		$this->instances  = array();
 	}
 
 	/**
