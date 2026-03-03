@@ -189,7 +189,7 @@ class DashboardApi {
 				return array(
 					'id'         => (int) $row['id'],
 					'form_id'    => (int) $row['form_id'],
-					'form_title' => $row['form_title'] ?? 'Unknown Form',
+					'form_title' => $row['form_title'] ?? __( 'Unknown Form', 'subtleforms' ),
 					'status'     => $row['status'],
 					'created_at' => $row['created_at'],
 					'time_ago'   => $this->timeAgo( $row['created_at'] ),
@@ -279,16 +279,20 @@ class DashboardApi {
 		$diff      = time() - $timestamp;
 
 		if ( $diff < 60 ) {
-			return $diff . ' seconds ago';
+			/* translators: %d: number of seconds */
+			return sprintf( _n( '%d second ago', '%d seconds ago', $diff, 'subtleforms' ), $diff );
 		} elseif ( $diff < 3600 ) {
-			$minutes = floor( $diff / 60 );
-			return $minutes . ' minute' . ( $minutes > 1 ? 's' : '' ) . ' ago';
+			$minutes = (int) floor( $diff / 60 );
+			/* translators: %d: number of minutes */
+			return sprintf( _n( '%d minute ago', '%d minutes ago', $minutes, 'subtleforms' ), $minutes );
 		} elseif ( $diff < 86400 ) {
-			$hours = floor( $diff / 3600 );
-			return $hours . ' hour' . ( $hours > 1 ? 's' : '' ) . ' ago';
+			$hours = (int) floor( $diff / 3600 );
+			/* translators: %d: number of hours */
+			return sprintf( _n( '%d hour ago', '%d hours ago', $hours, 'subtleforms' ), $hours );
 		} elseif ( $diff < 604800 ) {
-			$days = floor( $diff / 86400 );
-			return $days . ' day' . ( $days > 1 ? 's' : '' ) . ' ago';
+			$days = (int) floor( $diff / 86400 );
+			/* translators: %d: number of days */
+			return sprintf( _n( '%d day ago', '%d days ago', $days, 'subtleforms' ), $days );
 		} else {
 			return gmdate( 'M j, Y', $timestamp );
 		}
@@ -315,7 +319,7 @@ class DashboardApi {
 		if ( ! $result['allowed'] ) {
 			$headers = RateLimiter::headers( $result, $policy['limit'] );
 			return ApiResponse::rate_limited(
-				'Too many requests. Please try again later.',
+				__( 'Too many requests. Please try again later.', 'subtleforms' ),
 				$result['retry_after'],
 				array(),
 				$headers

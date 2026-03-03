@@ -712,12 +712,12 @@ class AdminMenu {
 					return __( 'Subtle Forms', 'subtleforms' ) . ' &#8212; WordPress';
 				}
 			}
-			return 'WordPress Admin';
+			return __( 'WordPress Admin', 'subtleforms' );
 		}
 
 		// Return admin_title if title is empty, otherwise return admin_title (or fallback)
 		if ( empty( $title ) ) {
-			return ! empty( $admin_title ) ? $admin_title : 'WordPress Admin';
+			return ! empty( $admin_title ) ? $admin_title : __( 'WordPress Admin', 'subtleforms' );
 		}
 
 		return ! empty( $admin_title ) ? $admin_title : $title;

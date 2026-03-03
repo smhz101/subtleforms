@@ -100,7 +100,7 @@ final class OnboardingApi {
 	public function dismiss_onboarding( WP_REST_Request $request ): WP_REST_Response {
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
-			return ApiResponse::unauthorized( 'User not authenticated' );
+			return ApiResponse::unauthorized( __( 'User not authenticated', 'subtleforms' ) );
 		}
 
 		update_user_meta( $user_id, 'subtleforms_onboarding_dismissed', true );
@@ -108,7 +108,7 @@ final class OnboardingApi {
 		return ApiResponse::success(
 			array(
 				'success' => true,
-				'message' => 'Onboarding dismissed',
+				'message' => __( 'Onboarding dismissed', 'subtleforms' ),
 			)
 		);
 	}
@@ -163,7 +163,7 @@ final class OnboardingApi {
 	public function dismiss_create_wizard( WP_REST_Request $request ): WP_REST_Response {
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
-			return ApiResponse::unauthorized( 'User not authenticated' );
+			return ApiResponse::unauthorized( __( 'User not authenticated', 'subtleforms' ) );
 		}
 
 		update_user_meta( $user_id, 'subtleforms_create_wizard_dismissed', true );
@@ -171,7 +171,7 @@ final class OnboardingApi {
 		return ApiResponse::success(
 			array(
 				'success' => true,
-				'message' => 'Create wizard dismissed',
+				'message' => __( 'Create wizard dismissed', 'subtleforms' ),
 			)
 		);
 	}
@@ -202,7 +202,7 @@ final class OnboardingApi {
 	public function complete_tour( WP_REST_Request $request ): WP_REST_Response {
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
-			return ApiResponse::unauthorized( 'User not authenticated' );
+			return ApiResponse::unauthorized( __( 'User not authenticated', 'subtleforms' ) );
 		}
 
 		update_user_meta( $user_id, 'subtleforms_tour_completed', true );
@@ -210,7 +210,7 @@ final class OnboardingApi {
 		return ApiResponse::success(
 			array(
 				'success' => true,
-				'message' => 'Tour completed',
+				'message' => __( 'Tour completed', 'subtleforms' ),
 			)
 		);
 	}

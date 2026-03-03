@@ -40,7 +40,7 @@ trait ApiGuards {
 		if ( ! $result['allowed'] ) {
 			$headers = RateLimiter::headers( $result, $policy['limit'] );
 			return ApiResponse::rate_limited(
-				'Too many requests. Please try again later.',
+				__( 'Too many requests. Please try again later.', 'subtleforms' ),
 				$result['retry_after'],
 				array(),
 				$headers
@@ -72,7 +72,11 @@ trait ApiGuards {
 		}
 
 		return ApiResponse::conflict(
-			sprintf( 'The %s has been modified by another user. Please refresh and try again.', $resourceName ),
+			sprintf(
+				/* translators: %s: resource type (e.g. "form", "submission") */
+				__( 'The %s has been modified by another user. Please refresh and try again.', 'subtleforms' ),
+				$resourceName
+			),
 			array(
 				'resource'          => $resourceName,
 				'provided_if_match' => $ifMatch,

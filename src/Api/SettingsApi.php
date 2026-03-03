@@ -126,7 +126,7 @@ class SettingsApi {
 		if ( ! $result['allowed'] ) {
 			$headers = RateLimiter::headers( $result, $policy['limit'] );
 			return ApiResponse::rate_limited(
-				'Too many requests. Please try again later.',
+				__( 'Too many requests. Please try again later.', 'subtleforms' ),
 				$result['retry_after'],
 				array(),
 				$headers
@@ -153,7 +153,7 @@ class SettingsApi {
 			$input = $request->get_json_params();
 
 			if ( empty( $input ) || ! is_array( $input ) ) {
-				return ApiResponse::bad_request( 'Invalid settings data' );
+				return ApiResponse::bad_request( __( 'Invalid settings data', 'subtleforms' ) );
 			}
 
 			// Phase A3-P2: Check If-Match for optimistic locking
@@ -179,7 +179,7 @@ class SettingsApi {
 			$response = ApiResponse::success(
 				array(
 					'success' => true,
-					'message' => 'Settings updated successfully',
+					'message' => __( 'Settings updated successfully', 'subtleforms' ),
 					'data'    => $updatedSettings,
 				)
 			);
@@ -189,7 +189,7 @@ class SettingsApi {
 		} catch ( \InvalidArgumentException $e ) {
 			return ApiResponse::bad_request( $e->getMessage() );
 		} catch ( \Exception $e ) {
-			return ApiResponse::server_error( 'Failed to update settings: ' . $e->getMessage() );
+			return ApiResponse::server_error( __( 'Failed to update settings: ', 'subtleforms' ) . $e->getMessage() );
 		}
 	}
 
@@ -213,12 +213,12 @@ class SettingsApi {
 			return ApiResponse::success(
 				array(
 					'success' => true,
-					'message' => 'Settings reset to defaults',
+					'message' => __( 'Settings reset to defaults', 'subtleforms' ),
 					'data'    => $settings,
 				)
 			);
 		} catch ( \Exception $e ) {
-			return ApiResponse::server_error( 'Failed to reset settings: ' . $e->getMessage() );
+			return ApiResponse::server_error( __( 'Failed to reset settings: ', 'subtleforms' ) . $e->getMessage() );
 		}
 	}
 
@@ -247,7 +247,7 @@ class SettingsApi {
 
 		// Conflict - return 409 with current ETag
 		return ApiResponse::conflict(
-			'Settings have been modified by another user. Please refresh and try again.',
+			__( 'Settings have been modified by another user. Please refresh and try again.', 'subtleforms' ),
 			array(
 				'resource'          => 'settings',
 				'provided_if_match' => $ifMatch,

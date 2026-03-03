@@ -88,7 +88,10 @@ final class ApiResponse {
 	 * @param array  $meta    Optional metadata.
 	 * @return WP_REST_Response
 	 */
-	public static function not_found( string $message = 'Resource not found', array $meta = [] ): WP_REST_Response {
+	public static function not_found( string $message = '', array $meta = [] ): WP_REST_Response {
+		if ( empty( $message ) ) {
+			$message = __( 'Resource not found', 'subtleforms' );
+		}
 		return self::error( 'not_found', $message, 404, $meta );
 	}
 
@@ -99,7 +102,10 @@ final class ApiResponse {
 	 * @param array  $meta    Optional metadata.
 	 * @return WP_REST_Response
 	 */
-	public static function forbidden( string $message = 'Forbidden', array $meta = [] ): WP_REST_Response {
+	public static function forbidden( string $message = '', array $meta = [] ): WP_REST_Response {
+		if ( empty( $message ) ) {
+			$message = __( 'Forbidden', 'subtleforms' );
+		}
 		return self::error( 'forbidden', $message, 403, $meta );
 	}
 
@@ -110,7 +116,10 @@ final class ApiResponse {
 	 * @param array  $meta    Optional metadata.
 	 * @return WP_REST_Response
 	 */
-	public static function unauthorized( string $message = 'Unauthorized', array $meta = [] ): WP_REST_Response {
+	public static function unauthorized( string $message = '', array $meta = [] ): WP_REST_Response {
+		if ( empty( $message ) ) {
+			$message = __( 'Unauthorized', 'subtleforms' );
+		}
 		return self::error( 'unauthorized', $message, 401, $meta );
 	}
 
@@ -121,7 +130,10 @@ final class ApiResponse {
 	 * @param array  $meta    Optional metadata.
 	 * @return WP_REST_Response
 	 */
-	public static function bad_request( string $message = 'Bad request', array $meta = [] ): WP_REST_Response {
+	public static function bad_request( string $message = '', array $meta = [] ): WP_REST_Response {
+		if ( empty( $message ) ) {
+			$message = __( 'Bad request', 'subtleforms' );
+		}
 		return self::error( 'bad_request', $message, 400, $meta );
 	}
 
@@ -134,7 +146,10 @@ final class ApiResponse {
 	 * @param array  $fields  Field-level errors: ['field_name' => 'error message'].
 	 * @return WP_REST_Response
 	 */
-	public static function validation_error( string $message = 'Validation failed', array $fields = [] ): WP_REST_Response {
+	public static function validation_error( string $message = '', array $fields = [] ): WP_REST_Response {
+		if ( empty( $message ) ) {
+			$message = __( 'Validation failed', 'subtleforms' );
+		}
 		$meta = array();
 		if ( ! empty( $fields ) ) {
 			$meta['fields'] = $fields;
@@ -153,7 +168,10 @@ final class ApiResponse {
 	 * @param array  $headers Optional headers (e.g., ETag with current value).
 	 * @return WP_REST_Response
 	 */
-	public static function conflict( string $message = 'Resource version conflict', array $meta = array(), array $headers = array() ): WP_REST_Response {
+	public static function conflict( string $message = '', array $meta = array(), array $headers = array() ): WP_REST_Response {
+		if ( empty( $message ) ) {
+			$message = __( 'Resource version conflict', 'subtleforms' );
+		}
 		$response = self::error( 'version_conflict', $message, 409, $meta );
 		
 		// Add headers (e.g., ETag with current value)
@@ -175,7 +193,10 @@ final class ApiResponse {
 	 * @param array  $headers     Optional additional headers (e.g., X-RateLimit-*).
 	 * @return WP_REST_Response
 	 */
-	public static function rate_limited( string $message = 'Too many requests', int $retry_after = 60, array $meta = array(), array $headers = array() ): WP_REST_Response {
+	public static function rate_limited( string $message = '', int $retry_after = 60, array $meta = array(), array $headers = array() ): WP_REST_Response {
+		if ( empty( $message ) ) {
+			$message = __( 'Too many requests', 'subtleforms' );
+		}
 		// Merge retry_after into meta
 		$meta['retry_after'] = $retry_after;
 		
@@ -199,7 +220,10 @@ final class ApiResponse {
 	 * @param array  $meta    Optional metadata (avoid exposing sensitive data).
 	 * @return WP_REST_Response
 	 */
-	public static function server_error( string $message = 'Internal server error', array $meta = [] ): WP_REST_Response {
+	public static function server_error( string $message = '', array $meta = [] ): WP_REST_Response {
+		if ( empty( $message ) ) {
+			$message = __( 'Internal server error', 'subtleforms' );
+		}
 		// In production, sanitize error details
 		if ( ! defined( 'WP_DEBUG' ) || ! WP_DEBUG ) {
 			$meta = array(); // Don't expose internal details in production

@@ -114,8 +114,8 @@ final class Shortcode {
 			array(
 				'restUrl'        => rest_url( 'subtleforms/v1' ),
 				'nonce'          => wp_create_nonce( 'wp_rest' ),
-				'successMessage' => $this->settings ? $this->settings->get( 'success_message' ) : 'Thank you! Your submission has been received.',
-				'errorMessage'   => $this->settings ? $this->settings->get( 'error_message' ) : 'An error occurred. Please try again.',
+				'successMessage' => $this->settings ? $this->settings->get( 'success_message' ) : __( 'Thank you! Your submission has been received.', 'subtleforms' ),
+				'errorMessage'   => $this->settings ? $this->settings->get( 'error_message' ) : __( 'An error occurred. Please try again.', 'subtleforms' ),
 				'redirectUrl'    => $this->settings ? $this->settings->get( 'redirect_after_submit' ) : '',
 			)
 		);

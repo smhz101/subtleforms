@@ -185,7 +185,7 @@ final class PublicSubmitApi {
 			$activeSchema = $this->formsRepo->loadSchemaVersion( $formId );
 		} catch ( \RuntimeException $e ) {
 			Logger::error( 'Submission Error: %s', $e->getMessage() );
-			return ApiResponse::server_error( 'Failed to load form schema: ' . $e->getMessage() );
+			return ApiResponse::server_error( __( 'Failed to load form schema: ', 'subtleforms' ) . $e->getMessage() );
 		}
 		$formVersion = $activeSchema['version'] ?? null;
 
@@ -203,7 +203,7 @@ final class PublicSubmitApi {
 			);
 		} catch ( \RuntimeException $e ) {
 			Logger::error( 'Failed to create submission record: %s', $e->getMessage() );
-			return ApiResponse::server_error( 'Failed to create submission record' );
+			return ApiResponse::server_error( __( 'Failed to create submission record', 'subtleforms' ) );
 		}
 
 		// Build submission context
@@ -266,7 +266,7 @@ final class PublicSubmitApi {
 
 				$validationErrors = $context->getMeta( 'validation_errors' );
 				if ( is_array( $validationErrors ) && ! empty( $validationErrors ) ) {
-					return ApiResponse::validation_error( 'Form validation failed', $validationErrors );
+					return ApiResponse::validation_error( __( 'Form validation failed', 'subtleforms' ), $validationErrors );
 				}
 
 				return ApiResponse::server_error( $e->getMessage() );
@@ -317,7 +317,7 @@ final class PublicSubmitApi {
 			} elseif ( ! $finalSubmission || $finalSubmission['status'] === 'processing' ) {
 				Logger::error( 'Submission %d did not reach saved status', $submissionId );
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
-				return ApiResponse::server_error( 'Failed to save submission data' );
+				return ApiResponse::server_error( __( 'Failed to save submission data', 'subtleforms' ) );
 			}
 
 			return ApiResponse::success(
