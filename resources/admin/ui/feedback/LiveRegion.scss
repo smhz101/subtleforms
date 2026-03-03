@@ -1,0 +1,89 @@
+/**
+ * LiveRegion Styles
+ *
+ * ARIA live region styling for screen reader announcements.
+ */
+
+/* Screen Reader Only - Hidden visually, accessible to AT */
+.sf-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Live Region Container */
+.sf-live-region-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  z-index: 999999;
+}
+
+/* Visible Live Region (for debugging or persistent notifications) */
+.sf-live-region--visible {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  max-width: 400px;
+  padding: 12px 16px;
+  background: #1f2937;
+  color: #ffffff;
+  border-radius: 0; /* Flat UI */
+  font-size: 14px;
+  line-height: 1.5;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  animation: sf-live-slide-in 0.3s ease-out;
+  z-index: 999999;
+  pointer-events: auto;
+}
+
+@keyframes sf-live-slide-in {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Assertive announcements - more prominent */
+.sf-live-assertive.sf-live-region--visible {
+  background: #dc2626;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+/* Polite announcements - subtle */
+.sf-live-polite.sf-live-region--visible {
+  background: #059669;
+  color: #ffffff;
+}
+
+/* Status announcements - informational */
+.sf-live-status.sf-live-region--visible {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .sf-live-region--visible {
+    animation: none;
+  }
+}
+
+/* High contrast mode */
+@media (prefers-contrast: high) {
+  .sf-live-region--visible {
+    border: 2px solid #ffffff;
+  }
+}

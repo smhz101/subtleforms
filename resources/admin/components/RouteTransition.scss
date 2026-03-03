@@ -1,0 +1,74 @@
+/**
+ * RouteTransition Styles
+ */
+
+.sf-route-transition {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 400px;
+	padding: var(--space-6);
+}
+
+.sf-route-transition__container {
+	text-align: center;
+	animation: sf-fade-in 0.2s ease-out;
+}
+
+.sf-route-transition__spinner {
+	margin: 0 auto var(--space-3);
+	color: var(--sf-lime-500);
+
+	svg {
+		display: block;
+	}
+}
+
+.sf-route-transition__spinner-circle {
+	animation: sf-spin 1s linear infinite;
+	transform-origin: center;
+}
+
+.sf-route-transition__text {
+	font-family: var(--font-mono);
+	font-size: 0.875rem;
+	color: var(--sf-stone-600);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+}
+
+/* Loading Bar - Top of page */
+.sf-route-loading-bar {
+	position: fixed;
+	top: 32px; /* Below WordPress admin bar */
+	left: 0;
+	right: 0;
+	height: 3px;
+	background: var(--sf-stone-200);
+	z-index: 999999;
+	overflow: hidden;
+}
+
+.sf-route-loading-bar__progress {
+	height: 100%;
+	background: linear-gradient(
+		90deg,
+		var(--sf-lime-500) 0%,
+		var(--sf-lime-400) 50%,
+		var(--sf-lime-500) 100%
+	);
+	animation: sf-loading-bar 1.5s ease-in-out infinite;
+	transform-origin: left;
+}
+
+@keyframes sf-loading-bar {
+	0% {
+		transform: translateX(-100%) scaleX(0.3);
+	}
+	50% {
+		transform: translateX(0) scaleX(1);
+	}
+	100% {
+		transform: translateX(100%) scaleX(0.3);
+	}
+}

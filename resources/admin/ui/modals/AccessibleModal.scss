@@ -1,0 +1,165 @@
+/**
+ * AccessibleModal Styles
+ *
+ * Flat UI design with enhanced accessibility features:
+ * - High contrast focus indicators
+ * - Clear visual hierarchy
+ * - Loading state overlays
+ * - Screen reader only content
+ */
+
+/* Size Variants */
+.sf-modal--small {
+  max-width: 400px !important;
+  width: 100% !important;
+}
+
+.sf-modal--medium {
+  max-width: 600px !important;
+  width: 100% !important;
+}
+
+.sf-modal--large {
+  max-width: 900px !important;
+  width: 100% !important;
+}
+
+.sf-modal--full {
+  max-width: 95vw !important;
+  width: 100% !important;
+  height: 90vh !important;
+}
+
+/* Modal Description */
+.sf-modal__description {
+  margin: 0 0 1.5rem 0;
+  padding: 0.75rem 1rem;
+  background: #f3f4f6;
+  border-left: 3px solid #2563eb;
+  color: #4b5563;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+/* Modal Content */
+.sf-modal__content {
+  position: relative;
+}
+
+/* Loading Overlay */
+.sf-modal__loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  pointer-events: all;
+  cursor: wait;
+}
+
+.sf-modal__loading-overlay::after {
+  content: '';
+  width: 40px;
+  height: 40px;
+  border: 4px solid #e5e7eb;
+  border-top-color: #2563eb;
+  border-radius: 50%;
+  animation: sf-modal-spin 0.8s linear infinite;
+}
+
+@keyframes sf-modal-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Screen Reader Only Content */
+.sf-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Focus Indicators - WCAG 2.1 AA Compliant */
+.subtleforms-accessible-modal *:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  box-shadow: none; /* Flat UI - no shadows */
+}
+
+.subtleforms-accessible-modal button:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+/* Modal in Loading State */
+.sf-modal--loading {
+  pointer-events: none;
+}
+
+.sf-modal--loading .components-modal__content {
+  cursor: wait;
+}
+
+/* Ensure proper contrast for modal title */
+.components-modal__header-heading {
+  color: #1f2937 !important;
+  font-weight: 600;
+}
+
+/* Close button accessibility */
+.components-modal__header button[aria-label]:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .sf-modal__description {
+    border-left-width: 4px;
+    background: #ffffff;
+    border: 2px solid #000000;
+    border-left-width: 4px;
+  }
+
+  .subtleforms-accessible-modal *:focus-visible {
+    outline-width: 3px;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .sf-modal__loading-overlay::after {
+    animation: none;
+    border-top-color: transparent;
+  }
+
+  .components-modal__frame {
+    animation: none !important;
+  }
+}
+
+/* Dark mode support (if needed) */
+@media (prefers-color-scheme: dark) {
+  .sf-modal__description {
+    background: #1f2937;
+    color: #e5e7eb;
+    border-left-color: #3b82f6;
+  }
+
+  .components-modal__header-heading {
+    color: #f9fafb !important;
+  }
+}

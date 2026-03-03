@@ -1,0 +1,73 @@
+/**
+ * Pro Badge Styles
+ *
+ * @package SubtleForms
+ * @since 2.0.0
+ */
+
+@import '../../styles/variables';
+
+.sf-pro-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: $space-1;
+	padding: $space-1 $space-2;
+	background: linear-gradient(135deg, $sf-lime-500, $sf-lime-600);
+	color: white;
+	border-radius: $radius-full;
+	font-size: $font-size-xs;
+	font-weight: 700;
+	font-family: $sf-font-mono;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+	white-space: nowrap;
+	transition: transform $transition-fast, box-shadow $transition-fast;
+
+	&:hover {
+		transform: translateY(-1px);
+		box-shadow: $shadow-sm, $shadow-lime;
+	}
+}
+
+.sf-pro-badge__icon {
+	font-size: 1em;
+	line-height: 1;
+}
+
+.sf-pro-badge__text {
+	line-height: 1;
+}
+
+/* Variants */
+.sf-pro-badge--small {
+	padding: 2px $space-2;
+	font-size: 10px;
+	gap: 2px;
+}
+
+.sf-pro-badge--large {
+	padding: $space-2 $space-4;
+	font-size: $font-size-sm;
+	gap: $space-2;
+}
+
+/* Feature Label with Badge */
+.sf-feature-label {
+	display: inline-flex;
+	align-items: center;
+	gap: $space-2;
+	font-weight: 600;
+}
+
+/* Pro Lock Icon */
+.sf-pro-lock {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	font-size: 12px;
+	opacity: 0.6;
+	filter: grayscale(100%);
+}

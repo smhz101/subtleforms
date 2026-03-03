@@ -1,0 +1,221 @@
+/**
+ * EmptyFormWelcome Component Styles
+ * Beautiful onboarding for empty forms
+ */
+
+@use '../../styles/variables' as *;
+
+.sf-empty-form-welcome {
+	min-height: 500px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: $space-10;
+	background: linear-gradient(
+		135deg,
+		rgba(247, 254, 231, 0.3) 0%,
+		rgba(237, 233, 254, 0.3) 100%
+	);
+	position: relative;
+	overflow: hidden;
+
+	// Decorative background pattern
+	&::before {
+		content: '';
+		position: absolute;
+		top: -50%;
+		left: -50%;
+		width: 200%;
+		height: 200%;
+		background-image: radial-gradient(
+			circle at 20% 50%,
+			rgba(132, 204, 22, 0.05) 0%,
+			transparent 50%
+		),
+		radial-gradient(
+			circle at 80% 50%,
+			rgba(139, 92, 246, 0.05) 0%,
+			transparent 50%
+		);
+		animation: sf-welcome-bg-drift 20s ease-in-out infinite;
+		pointer-events: none;
+	}
+}
+
+@keyframes sf-welcome-bg-drift {
+	0%, 100% {
+		transform: translate(0, 0) rotate(0deg);
+	}
+	50% {
+		transform: translate(-5%, 5%) rotate(2deg);
+	}
+}
+
+.sf-empty-form-welcome__container {
+	position: relative;
+	z-index: 1;
+	max-width: 600px;
+	text-align: center;
+	animation: sf-welcome-fade-in 0.4s ease-out;
+}
+
+@keyframes sf-welcome-fade-in {
+	from {
+		opacity: 0;
+		transform: translateY(20px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+	}
+}
+
+.sf-empty-form-welcome__icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 80px;
+	height: 80px;
+	background: linear-gradient(135deg, $sf-lime-400 0%, $sf-violet-400 100%);
+	border-radius: $radius-full;
+	margin-bottom: $space-6;
+	box-shadow: $shadow-lg, 0 0 40px rgba(132, 204, 22, 0.2);
+
+	svg {
+		width: 40px;
+		height: 40px;
+		color: white;
+		filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+	}
+
+	animation: sf-icon-pulse 2s ease-in-out infinite;
+}
+
+@keyframes sf-icon-pulse {
+	0%, 100% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.05);
+	}
+}
+
+.sf-empty-form-welcome__title {
+	font-family: var(--font-sans);
+	font-size: $font-size-3xl;
+	font-weight: 600;
+	color: $sf-stone-900;
+	margin: 0 0 $space-4 0;
+	line-height: 1.2;
+	letter-spacing: -0.02em;
+}
+
+.sf-empty-form-welcome__description {
+	font-size: $font-size-lg;
+	color: $sf-stone-600;
+	margin: 0 0 $space-8 0;
+	line-height: 1.6;
+}
+
+.sf-empty-form-welcome__suggestions {
+	display: flex;
+	flex-direction: column;
+	gap: $space-4;
+	margin-bottom: $space-8;
+	text-align: left;
+}
+
+.sf-empty-form-suggestion {
+	display: flex;
+	align-items: flex-start;
+	gap: $space-4;
+	padding: $space-4;
+	background: white;
+	border-radius: $radius-lg;
+	box-shadow: $shadow-sm;
+	transition: all $transition-base;
+
+	&:hover {
+		box-shadow: $shadow-md;
+		transform: translateY(-2px);
+	}
+}
+
+.sf-empty-form-suggestion__number {
+	flex-shrink: 0;
+	width: 32px;
+	height: 32px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	background: linear-gradient(135deg, $sf-lime-500 0%, $sf-lime-600 100%);
+	color: white;
+	border-radius: $radius-full;
+	font-weight: 700;
+	font-size: $font-size-sm;
+	font-family: var(--font-mono);
+}
+
+.sf-empty-form-suggestion__content {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: $space-1;
+
+	strong {
+		font-weight: 600;
+		color: $sf-stone-900;
+		font-size: $font-size-base;
+	}
+
+	span {
+		font-size: $font-size-sm;
+		color: $sf-stone-600;
+	}
+}
+
+.sf-empty-form-welcome__hint {
+	display: inline-flex;
+	align-items: center;
+	gap: $space-2;
+	padding: $space-3 $space-4;
+	background: rgba(255, 255, 255, 0.8);
+	border: 1px solid rgba(132, 204, 22, 0.2);
+	border-radius: $radius-full;
+	font-size: $font-size-sm;
+	color: $sf-stone-700;
+	backdrop-filter: blur(10px);
+
+	svg {
+		width: 16px;
+		height: 16px;
+		color: $sf-amber-500;
+		flex-shrink: 0;
+	}
+}
+
+// Responsive
+@media (max-width: 768px) {
+	.sf-empty-form-welcome {
+		min-height: 400px;
+		padding: $space-6;
+	}
+
+	.sf-empty-form-welcome__title {
+		font-size: $font-size-2xl;
+	}
+
+	.sf-empty-form-welcome__description {
+		font-size: $font-size-base;
+	}
+
+	.sf-empty-form-welcome__icon {
+		width: 64px;
+		height: 64px;
+
+		svg {
+			width: 32px;
+			height: 32px;
+		}
+	}
+}
