@@ -63,22 +63,28 @@ final class SubmissionsRepository {
 
 		$args = wp_parse_args( $args, $defaults );
 
-		$where = $wpdb->prepare( 'WHERE form_id = %d', $formId );
+		$where  = array( 'form_id = %d' );
+		$params = array( $formId );
 
 		if ( $args['status'] ) {
-			$where .= $wpdb->prepare( ' AND status = %s', $args['status'] );
+			$where[]  = 'status = %s';
+			$params[] = $args['status'];
 		}
 
-		$sql = sprintf(
-			"SELECT * FROM {$this->table} %s ORDER BY %s %s LIMIT %d OFFSET %d",
-			$where,
-			esc_sql( $args['orderby'] ),
-			esc_sql( $args['order'] ),
-			intval( $args['limit'] ),
-			intval( $args['offset'] )
-		);
+		$where_clause = 'WHERE ' . implode( ' AND ', $where );
 
-		$results = $wpdb->get_results( $sql, ARRAY_A );
+		// Validate orderby (whitelist — safe to interpolate)
+		$allowed_orderby = array( 'id', 'form_id', 'status', 'created_at' );
+		$orderby         = in_array( $args['orderby'], $allowed_orderby, true ) ? $args['orderby'] : 'created_at';
+		$order           = strtoupper( $args['order'] ) === 'ASC' ? 'ASC' : 'DESC';
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name, orderby and order are whitelisted.
+		$sql = "SELECT * FROM {$this->table} {$where_clause} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d";
+
+		$params[] = intval( $args['limit'] );
+		$params[] = intval( $args['offset'] );
+
+		$results = $wpdb->get_results( $wpdb->prepare( $sql, ...$params ), ARRAY_A );
 
 		// Decode JSON fields
 		foreach ( $results as &$result ) {
@@ -277,12 +283,18 @@ final class SubmissionsRepository {
 
 		$whereClause = ! empty( $where ) ? 'WHERE ' . implode( ' AND ', $where ) : '';
 
+		// Validate orderby (whitelist — safe to interpolate)
+		$allowed_orderby = array( 'id', 'form_id', 'status', 'created_at' );
+		$orderby         = in_array( $args['orderby'], $allowed_orderby, true ) ? $args['orderby'] : 'created_at';
+		$order           = strtoupper( $args['order'] ) === 'ASC' ? 'ASC' : 'DESC';
+
 		       // Fetch all columns needed for admin list (including payload/meta)
+		       // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name, orderby and order are whitelisted.
 				       $sql = sprintf(
 					       "SELECT id, form_id, status, created_at, payload, meta, ip_address, user_agent FROM {$this->table} %s ORDER BY %s %s LIMIT %%d OFFSET %%d",
 					       $whereClause,
-					       esc_sql( $args['orderby'] ),
-					       esc_sql( $args['order'] )
+					       $orderby,
+					       $order
 				       );
 
 		       $params[] = intval( $args['limit'] );

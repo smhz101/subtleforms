@@ -41,22 +41,28 @@ final class LogsRepository {
 
 		$args = wp_parse_args( $args, $defaults );
 
-		$where = $wpdb->prepare( 'WHERE submission_id = %d', $submissionId );
+		$where  = array( 'submission_id = %d' );
+		$params = array( $submissionId );
 
 		if ( $args['level'] ) {
-			$where .= $wpdb->prepare( ' AND level = %s', $args['level'] );
+			$where[]  = 'level = %s';
+			$params[] = $args['level'];
 		}
 
-		$sql = sprintf(
-			"SELECT * FROM {$this->table} %s ORDER BY %s %s LIMIT %d OFFSET %d",
-			$where,
-			esc_sql( $args['orderby'] ),
-			esc_sql( $args['order'] ),
-			intval( $args['limit'] ),
-			intval( $args['offset'] )
-		);
+		$where_clause = 'WHERE ' . implode( ' AND ', $where );
 
-		$results = $wpdb->get_results( $sql, ARRAY_A );
+		// Validate orderby (whitelist — safe to interpolate)
+		$allowed_orderby = array( 'id', 'submission_id', 'level', 'created_at' );
+		$orderby         = in_array( $args['orderby'], $allowed_orderby, true ) ? $args['orderby'] : 'created_at';
+		$order           = strtoupper( $args['order'] ) === 'ASC' ? 'ASC' : 'DESC';
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name, orderby and order are whitelisted.
+		$sql = "SELECT * FROM {$this->table} {$where_clause} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d";
+
+		$params[] = intval( $args['limit'] );
+		$params[] = intval( $args['offset'] );
+
+		$results = $wpdb->get_results( $wpdb->prepare( $sql, ...$params ), ARRAY_A );
 
 		// Decode JSON context
 		foreach ( $results as &$result ) {
@@ -152,16 +158,28 @@ final class LogsRepository {
 	public function count( ?int $submissionId = null, array $args = array() ): int {
 		global $wpdb;
 
-		$where = '';
+		$where  = array();
+		$params = array();
+
 		if ( $submissionId ) {
-			$where = $wpdb->prepare( ' WHERE submission_id = %d', $submissionId );
+			$where[]  = 'submission_id = %d';
+			$params[] = $submissionId;
 		}
 
 		if ( ! empty( $args['level'] ) ) {
-			$operator = $submissionId ? ' AND' : ' WHERE';
-			$where   .= $wpdb->prepare( "{$operator} level = %s", $args['level'] );
+			$where[]  = 'level = %s';
+			$params[] = $args['level'];
 		}
 
-		return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$this->table}{$where}" );
+		$where_clause = empty( $where ) ? '' : ' WHERE ' . implode( ' AND ', $where );
+
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe.
+		$sql = "SELECT COUNT(*) FROM {$this->table}{$where_clause}";
+
+		if ( ! empty( $params ) ) {
+			return (int) $wpdb->get_var( $wpdb->prepare( $sql, ...$params ) );
+		}
+
+		return (int) $wpdb->get_var( $sql );
 	}
 }

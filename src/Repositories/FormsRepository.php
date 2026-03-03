@@ -103,36 +103,35 @@ final class FormsRepository {
 			'order'   => 'DESC',
 		);
 
-		$args             = wp_parse_args( $args, $defaults );
-		$where_conditions = array();
+		$args   = wp_parse_args( $args, $defaults );
+		$where  = array();
+		$params = array();
 
 		if ( $args['status'] ) {
-			$where_conditions[] = $wpdb->prepare( 'status = %s', $args['status'] );
+			$where[]  = 'status = %s';
+			$params[] = $args['status'];
 		}
 
 		if ( $args['search'] ) {
-			$search_term        = '%' . $wpdb->esc_like( $args['search'] ) . '%';
-			$where_conditions[] = $wpdb->prepare( 'title LIKE %s', $search_term );
+			$where[]  = 'title LIKE %s';
+			$params[] = '%' . $wpdb->esc_like( $args['search'] ) . '%';
 		}
 
-		$where = empty( $where_conditions ) ? '' : ' WHERE ' . implode( ' AND ', $where_conditions );
+		$where_clause = empty( $where ) ? '' : ' WHERE ' . implode( ' AND ', $where );
 
-		// Validate orderby
+		// Validate orderby (whitelist — safe to interpolate)
 		$allowed_orderby = array( 'id', 'title', 'status', 'created_at', 'updated_at' );
-		$orderby         = in_array( $args['orderby'], $allowed_orderby ) ? $args['orderby'] : 'created_at';
+		$orderby         = in_array( $args['orderby'], $allowed_orderby, true ) ? $args['orderby'] : 'created_at';
 		$order           = strtoupper( $args['order'] ) === 'ASC' ? 'ASC' : 'DESC';
 
 		// Phase B3: Only fetch needed columns for list views (skip large config JSON)
-		$sql = sprintf(
-			"SELECT id, title, status, created_at, updated_at FROM {$this->table}%s ORDER BY %s %s LIMIT %d OFFSET %d",
-			$where,
-			esc_sql( $orderby ),
-			esc_sql( $order ),
-			intval( $args['limit'] ),
-			intval( $args['offset'] )
-		);
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name, orderby and order are whitelisted.
+		$sql = "SELECT id, title, status, created_at, updated_at FROM {$this->table}{$where_clause} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d";
 
-		$results = $wpdb->get_results( $sql, ARRAY_A );
+		$params[] = intval( $args['limit'] );
+		$params[] = intval( $args['offset'] );
+
+		$results = $wpdb->get_results( $wpdb->prepare( $sql, ...$params ), ARRAY_A );
 
 		// No JSON decoding needed - config not fetched
 
@@ -147,20 +146,27 @@ final class FormsRepository {
 	public function count( array $args = array() ): int {
 		global $wpdb;
 
-		$where_conditions = array();
+		$where  = array();
+		$params = array();
 
 		if ( ! empty( $args['status'] ) ) {
-			$where_conditions[] = $wpdb->prepare( 'status = %s', $args['status'] );
+			$where[]  = 'status = %s';
+			$params[] = $args['status'];
 		}
 
 		if ( ! empty( $args['search'] ) ) {
-			$search_term        = '%' . $wpdb->esc_like( $args['search'] ) . '%';
-			$where_conditions[] = $wpdb->prepare( 'title LIKE %s', $search_term );
+			$where[]  = 'title LIKE %s';
+			$params[] = '%' . $wpdb->esc_like( $args['search'] ) . '%';
 		}
 
-		$where = empty( $where_conditions ) ? '' : ' WHERE ' . implode( ' AND ', $where_conditions );
+		$where_clause = empty( $where ) ? '' : ' WHERE ' . implode( ' AND ', $where );
 
-		$sql = "SELECT COUNT(*) FROM {$this->table}{$where}";
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe.
+		$sql = "SELECT COUNT(*) FROM {$this->table}{$where_clause}";
+
+		if ( ! empty( $params ) ) {
+			return (int) $wpdb->get_var( $wpdb->prepare( $sql, ...$params ) );
+		}
 
 		return (int) $wpdb->get_var( $sql );
 	}
