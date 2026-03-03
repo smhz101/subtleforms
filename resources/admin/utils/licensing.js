@@ -1,7 +1,15 @@
 /**
- * License Utilities
+ * License Utilities (Legacy)
  *
  * Frontend utilities for checking license status and feature availability.
+ * Currently used by LicenseSettings.jsx for activate/deactivate/validate.
+ *
+ * @deprecated 1.9.0 Query functions (getLicenseStatus, isPro, hasFeature, etc.)
+ *   are superseded by the TanStack Query hook in data/queries/settings.js.
+ *   Mutation functions (activateLicense, deactivateLicense, validateLicense)
+ *   are superseded by hooks in data/mutations/settings.js.
+ *   Prefer the data/* layer for new code. This file will be removed once
+ *   LicenseSettings.jsx is migrated to TanStack Query hooks.
  *
  * @package SubtleForms
  * @since 2.0.0

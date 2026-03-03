@@ -50,3 +50,17 @@ export function useDeactivateLicense() {
     },
   });
 }
+
+/**
+ * Force-validate (refresh) license from the remote server
+ */
+export function useValidateLicense() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: () => apiClient.post('/license/validate'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: queryKeys.settings.license() });
+    },
+  });
+}

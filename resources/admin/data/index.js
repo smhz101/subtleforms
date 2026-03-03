@@ -49,4 +49,5 @@ export {
   useUpdateSettings,
   useActivateLicense,
   useDeactivateLicense,
+  useValidateLicense,
 } from './mutations/settings';
