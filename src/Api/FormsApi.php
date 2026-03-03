@@ -115,7 +115,7 @@ final class FormsApi {
 				array(
 					'methods'             => 'GET',
 					'callback'            => array( $this, 'get_form_schema' ),
-					'permission_callback' => '__return_true', // Public access for frontend rendering
+					'permission_callback' => array( $this, 'check_public_schema_permission' ),
 				),
 				array(
 					'methods'             => 'POST',
@@ -124,6 +124,48 @@ final class FormsApi {
 				),
 			)
 		);
+	}
+
+	// ────────────────────────────────────────────────────────────────────
+	// Permission callbacks
+	// ────────────────────────────────────────────────────────────────────
+
+	/**
+	 * Permission check for the public schema GET endpoint.
+	 *
+	 * Authenticated admins are always allowed. Unauthenticated users may
+	 * only access schemas for published forms — we reject early with a
+	 * 404 so the handler code is never executed for invalid requests.
+	 *
+	 * @param WP_REST_Request $request REST request.
+	 * @return bool|\WP_Error True if allowed, WP_Error to deny.
+	 */
+	public function check_public_schema_permission( WP_REST_Request $request ) {
+		// Admins always pass
+		if ( is_user_logged_in() && current_user_can( 'manage_options' ) ) {
+			return true;
+		}
+
+		$formId = intval( $request->get_param( 'id' ) );
+		$form   = $this->formsRepo->find( $formId );
+
+		if ( ! $form ) {
+			return new \WP_Error(
+				'rest_not_found',
+				__( 'Form not available', 'subtleforms' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		if ( ( $form['status'] ?? '' ) !== 'published' ) {
+			return new \WP_Error(
+				'rest_not_found',
+				__( 'Form not available', 'subtleforms' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		return true;
 	}
 
 	// ────────────────────────────────────────────────────────────────────
@@ -232,6 +274,11 @@ final class FormsApi {
 	 * - Authenticated (admin): Draft schema when context=builder, active otherwise
 	 */
 	public function get_form_schema( WP_REST_Request $request ): WP_REST_Response {
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
 		$formId  = intval( $request->get_param( 'id' ) );
 		$version = $request->get_param( 'version' );
 		$version = $version !== null ? intval( $version ) : null;
