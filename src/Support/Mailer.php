@@ -37,7 +37,7 @@ class Mailer {
         }
 
         // Allow filtering of mail args
-        $mail_args = apply_filters( 'subtleforms_mail_args', array(
+        $mail_args = apply_filters( 'subtleforms/mail/args', array(
             'to' => $to,
             'subject' => $subject,
             'message' => $message,
@@ -48,6 +48,6 @@ class Mailer {
         $sent = wp_mail( $mail_args['to'], $mail_args['subject'], $mail_args['message'], $mail_args['headers'], $mail_args['attachments'] );
 
         // Allow filter on send result
-        return (bool) apply_filters( 'subtleforms_mail_sent', $sent, $mail_args );
+        return (bool) apply_filters( 'subtleforms/mail/sent', $sent, $mail_args );
     }
 }

@@ -42,7 +42,7 @@ class CaptchaManager {
 		$this->registerProvider( new TurnstileProvider() );
 
 		// Allow custom providers via filter
-		$this->providers = apply_filters( 'subtleforms_captcha_providers', $this->providers );
+		$this->providers = apply_filters( 'subtleforms/captcha/providers', $this->providers );
 	}
 
 	/**
@@ -61,7 +61,7 @@ class CaptchaManager {
 	 */
 	public function isEnabled() {
 		$enabled = (bool) $this->settings->get( 'captcha_enabled', false );
-		return apply_filters( 'subtleforms_captcha_enabled', $enabled );
+		return apply_filters( 'subtleforms/captcha/enabled', $enabled );
 	}
 
 	/**
@@ -72,7 +72,7 @@ class CaptchaManager {
 	 */
 	public function getActiveProviderName() {
 		$provider = $this->settings->get( 'captcha_provider', '' );
-		return apply_filters( 'subtleforms_captcha_provider', $provider );
+		return apply_filters( 'subtleforms/captcha/provider', $provider );
 	}
 
 	/**
@@ -361,7 +361,7 @@ class CaptchaManager {
 				break;
 		}
 
-		return apply_filters( 'subtleforms_captcha_provider_config', $config, $provider_name );
+		return apply_filters( 'subtleforms/captcha/provider_config', $config, $provider_name );
 	}
 
 	/**

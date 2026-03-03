@@ -190,7 +190,7 @@ final class Container {
 
 				/** Allow extensions to register additional definitions/implementations via action hook */
 				if ( function_exists( 'do_action' ) ) {
-					do_action( 'subtleforms.register_actions', $reg );
+					do_action( 'subtleforms/register_actions', $reg );
 				}
 
 				return $reg;
