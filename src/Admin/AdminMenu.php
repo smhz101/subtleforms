@@ -587,7 +587,7 @@ class AdminMenu {
 			
 			<?php if ( isset( $_GET['message'] ) ) : ?>
 				<div class="notice notice-success is-dismissible">
-					<p><?php _e( 'Action completed successfully.', 'subtleforms' ); ?></p>
+					<p><?php esc_html_e( 'Action completed successfully.', 'subtleforms' ); ?></p>
 				</div>
 			<?php endif; ?>
 
@@ -595,27 +595,27 @@ class AdminMenu {
 				<div class="subtleforms-placeholder-icon">
 					<span class="dashicons dashicons-feedback"></span>
 				</div>
-				<h2><?php _e( 'Coming Soon', 'subtleforms' ); ?></h2>
+				<h2><?php esc_html_e( 'Coming Soon', 'subtleforms' ); ?></h2>
 				<p>
 					<?php
 					/* translators: %s: Name of the interface being developed */
-					printf( __( 'The %s interface is under development.', 'subtleforms' ), '<strong>' . Helpers::safe_esc_html( $name ) . '</strong>' );
+					printf( esc_html__( 'The %s interface is under development.', 'subtleforms' ), '<strong>' . Helpers::safe_esc_html( $name ) . '</strong>' );
 					?>
 				</p>
 				<p class="description">
-					<?php _e( 'This is a placeholder. Template files will be created in the templates/admin/ directory.', 'subtleforms' ); ?>
+					<?php esc_html_e( 'This is a placeholder. Template files will be created in the templates/admin/ directory.', 'subtleforms' ); ?>
 				</p>
 				
 				<?php if ( $name === 'forms-list' && ! empty( $data['forms'] ) ) : ?>
 					<div class="subtleforms-quick-list">
-						<h3><?php _e( 'Your Forms', 'subtleforms' ); ?></h3>
+						<h3><?php esc_html_e( 'Your Forms', 'subtleforms' ); ?></h3>
 						<table class="widefat">
 							<thead>
 								<tr>
-									<th><?php _e( 'Title', 'subtleforms' ); ?></th>
-									<th><?php _e( 'Status', 'subtleforms' ); ?></th>
-									<th><?php _e( 'Created', 'subtleforms' ); ?></th>
-									<th><?php _e( 'Actions', 'subtleforms' ); ?></th>
+										<th><?php esc_html_e( 'Title', 'subtleforms' ); ?></th>
+										<th><?php esc_html_e( 'Status', 'subtleforms' ); ?></th>
+										<th><?php esc_html_e( 'Created', 'subtleforms' ); ?></th>
+										<th><?php esc_html_e( 'Actions', 'subtleforms' ); ?></th>
 								</tr>
 							</thead>
 							<tbody>
@@ -640,7 +640,7 @@ class AdminMenu {
 												)
 											);
 											?>
-														" class="button button-small"><?php _e( 'Delete', 'subtleforms' ); ?></a>
+														" class="button button-small"><?php esc_html_e( 'Delete', 'subtleforms' ); ?></a>
 										</td>
 									</tr>
 								<?php endforeach; ?>
@@ -654,15 +654,15 @@ class AdminMenu {
 						<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; max-width: 800px; margin: 0 auto;">
 							<div class="subtleforms-stat-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
 								<h3 style="margin: 0 0 10px;"><?php echo Helpers::safe_esc_html( Helpers::safe_array_get( $data, 'total_forms', 0 ) ); ?></h3>
-								<p style="margin: 0; color: #666;"><?php _e( 'Total Forms', 'subtleforms' ); ?></p>
+								<p style="margin: 0; color: #666;"><?php esc_html_e( 'Total Forms', 'subtleforms' ); ?></p>
 							</div>
 							<div class="subtleforms-stat-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
 								<h3 style="margin: 0 0 10px;"><?php echo Helpers::safe_esc_html( Helpers::safe_array_get( $data, 'active_forms', 0 ) ); ?></h3>
-								<p style="margin: 0; color: #666;"><?php _e( 'Active Forms', 'subtleforms' ); ?></p>
+								<p style="margin: 0; color: #666;"><?php esc_html_e( 'Active Forms', 'subtleforms' ); ?></p>
 							</div>
 							<div class="subtleforms-stat-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
 								<h3 style="margin: 0 0 10px;"><?php echo Helpers::safe_esc_html( Helpers::safe_array_get( $data, 'total_submissions', 0 ) ); ?></h3>
-								<p style="margin: 0; color: #666;"><?php _e( 'Total Submissions', 'subtleforms' ); ?></p>
+								<p style="margin: 0; color: #666;"><?php esc_html_e( 'Total Submissions', 'subtleforms' ); ?></p>
 							</div>
 						</div>
 					</div>

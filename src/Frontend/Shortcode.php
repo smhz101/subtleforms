@@ -42,18 +42,18 @@ final class Shortcode {
 
 		$formId = intval( $atts['id'] );
 		if ( $formId <= 0 ) {
-			return '<p class="subtleforms-error">Invalid form ID.</p>';
+			return '<p class="subtleforms-error">' . esc_html__( 'Invalid form ID.', 'subtleforms' ) . '</p>';
 		}
 
 		// Verify form exists
 		$form = $this->formsRepo->find( $formId );
 		if ( ! $form ) {
-			return '<p class="subtleforms-error">Form not found.</p>';
+			return '<p class="subtleforms-error">' . esc_html__( 'Form not found.', 'subtleforms' ) . '</p>';
 		}
 
 		// Only render published forms on frontend
 		if ( $form['status'] !== 'published' ) {
-			return '<p class="subtleforms-error">This form is not published yet.</p>';
+			return '<p class="subtleforms-error">' . esc_html__( 'This form is not published yet.', 'subtleforms' ) . '</p>';
 		}
 
 		// Enqueue frontend assets
