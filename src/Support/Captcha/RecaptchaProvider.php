@@ -4,6 +4,7 @@ namespace SubtleForms\Support\Captcha;
 
 use SubtleForms\Contracts\CaptchaProviderInterface;
 
+use SubtleForms\Support\Logger;
 /**
  * Google reCAPTCHA Provider
  *
@@ -31,11 +32,11 @@ class RecaptchaProvider implements CaptchaProviderInterface {
 		$has_secret_key = ! empty( $settings['captcha_recaptcha_secret_key'] );
 
 		if ( ! $has_site_key ) {
-			error_log( 'SubtleForms reCAPTCHA: Site key is missing or empty' );
+			Logger::error( 'reCAPTCHA: Site key is missing or empty' );
 		}
 
 		if ( ! $has_secret_key ) {
-			error_log( 'SubtleForms reCAPTCHA: Secret key is missing or empty' );
+			Logger::error( 'reCAPTCHA: Secret key is missing or empty' );
 		}
 
 		return $has_site_key && $has_secret_key;

@@ -10,6 +10,7 @@ namespace SubtleForms\Repositories;
 
 use SubtleForms\Support\Helpers;
 
+use SubtleForms\Support\Logger;
 /**
  * Repository for managing forms.
  */
@@ -60,7 +61,7 @@ final class FormsRepository {
 				'SubtleForms database tables are missing: %s. Please deactivate and reactivate the plugin to create them.',
 				implode( ', ', $missing )
 			);
-			error_log( 'SubtleForms Repository Error: ' . $error );
+			Logger::error( 'Repository Error: ' . $error );
 			throw new \RuntimeException( $error );
 		}
 	}
@@ -271,13 +272,13 @@ final class FormsRepository {
 		}
 		if ( empty( $schema['metadata']['name'] ) || ! is_string( $schema['metadata']['name'] ) ) {
 			$schema['metadata']['name'] = 'form_schema';
-			error_log( sprintf( 'SubtleForms: Injected default metadata.name="%s" for form %d in saveSchemaVersion', $schema['metadata']['name'], $formId ) );
+			Logger::debug( 'Injected default metadata.name="%s" for form %d in saveSchemaVersion', $schema['metadata']['name'], $formId );
 		}
 
 		// Ensure fields array exists (allow empty drafts)
 		if ( ! isset( $schema['fields'] ) || ! is_array( $schema['fields'] ) ) {
 			$schema['fields'] = array();
-			error_log( sprintf( 'SubtleForms: Injected default empty fields array for form %d in saveSchemaVersion', $formId ) );
+			Logger::debug( 'Injected default empty fields array for form %d in saveSchemaVersion', $formId );
 		}
 
 		// Validate schema before saving
@@ -300,7 +301,7 @@ final class FormsRepository {
 				$formId,
 				$wpdb->last_error
 			);
-			error_log( 'SubtleForms: ' . $error );
+			Logger::error( '' . $error );
 			throw new \RuntimeException( $error );
 		}
 
@@ -333,7 +334,7 @@ final class FormsRepository {
 				$formId,
 				$wpdb->last_error ?: 'Unknown database error'
 			);
-			error_log( 'SubtleForms: ' . $error );
+			Logger::error( '' . $error );
 			throw new \RuntimeException( $error );
 		}
 
@@ -343,7 +344,7 @@ final class FormsRepository {
 				$this->setActiveSchemaVersion( $formId, $next );
 			} catch ( \RuntimeException $e ) {
 				// Log but don't fail - the schema was saved successfully
-				error_log( 'SubtleForms: Failed to activate schema version ' . $next . ': ' . $e->getMessage() );
+				Logger::error( 'Failed to activate schema version ' . $next . ': ' . $e->getMessage() );
 			}
 		}
 
@@ -365,7 +366,7 @@ final class FormsRepository {
 
 			// If no active version, fall back to the latest version
 			if ( ! $row && ! $wpdb->last_error ) {
-				error_log( "SubtleForms: No active schema found for form {$formId}, using latest version as fallback" );
+				Logger::error( "SubtleForms: No active schema found for form {$formId}, using latest version as fallback" );
 				$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$this->schemas_table} WHERE form_id = %d ORDER BY version DESC LIMIT 1", $formId ), ARRAY_A );
 			}
 		} else {
@@ -379,7 +380,7 @@ final class FormsRepository {
 				$formId,
 				$wpdb->last_error
 			);
-			error_log( 'SubtleForms: ' . $error );
+			Logger::error( '' . $error );
 			throw new \RuntimeException( $error );
 		}
 
@@ -394,7 +395,7 @@ final class FormsRepository {
 				$formId,
 				$row['version'] ?? 'unknown'
 			);
-			error_log( 'SubtleForms: ' . $error );
+			Logger::error( '' . $error );
 			throw new \RuntimeException( $error );
 		}
 
@@ -407,7 +408,7 @@ final class FormsRepository {
 				Helpers::safe_array_get( $row, 'version', 0 ),
 				json_last_error_msg()
 			);
-			error_log( 'SubtleForms: ' . $error );
+			Logger::error( '' . $error );
 			throw new \RuntimeException( $error );
 		}
 
@@ -445,7 +446,7 @@ final class FormsRepository {
 				$formId,
 				$wpdb->last_error
 			);
-			error_log( 'SubtleForms: ' . $error );
+			Logger::error( '' . $error );
 			throw new \RuntimeException( $error );
 		}
 
@@ -468,7 +469,7 @@ final class FormsRepository {
 				$formId,
 				$wpdb->last_error ?: 'Version may not exist'
 			);
-			error_log( 'SubtleForms: ' . $error );
+			Logger::error( '' . $error );
 			throw new \RuntimeException( $error );
 		}
 
@@ -482,7 +483,7 @@ final class FormsRepository {
 				$version,
 				$wpdb->last_error
 			);
-			error_log( 'SubtleForms: ' . $error );
+			Logger::error( '' . $error );
 			throw new \RuntimeException( $error );
 		}
 
@@ -504,7 +505,7 @@ final class FormsRepository {
 					$formId,
 					$wpdb->last_error
 				);
-				error_log( 'SubtleForms: ' . $error );
+				Logger::error( '' . $error );
 				// Don't throw - schema is already activated, this is just sync
 			}
 		}
@@ -610,7 +611,7 @@ final class FormsRepository {
 		);
 
 		if ( $result === false ) {
-			error_log(
+			Logger::error(
 				sprintf(
 					'SubtleForms: Failed to save draft schema for form %d: %s',
 					$formId,

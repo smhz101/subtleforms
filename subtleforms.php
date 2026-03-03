@@ -58,10 +58,11 @@ add_action(
 		// Load text domain for translations
 		load_plugin_textdomain( 'subtleforms', false, dirname( SUBTLEFORMS_PLUGIN_BASENAME ) . '/languages' );
 
-		// Check for DB updates
-		$installed_version = get_option( 'subtleforms_version' );
-		if ( version_compare( $installed_version, SUBTLEFORMS_VERSION, '<' ) ) {
+		// Check for DB schema updates (only runs dbDelta when db_version changes).
+		$db_version = get_option( 'subtleforms_db_version' );
+		if ( $db_version !== SUBTLEFORMS_VERSION ) {
 			SubtleForms\Activator::activate();
+			update_option( 'subtleforms_db_version', SUBTLEFORMS_VERSION );
 			update_option( 'subtleforms_version', SUBTLEFORMS_VERSION );
 		}
 

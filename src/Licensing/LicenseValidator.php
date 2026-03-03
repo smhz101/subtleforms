@@ -2,6 +2,8 @@
 
 namespace SubtleForms\Licensing;
 
+
+use SubtleForms\Support\Logger;
 /**
  * License Validator
  *
@@ -180,7 +182,7 @@ class LicenseValidator {
 	private function handleApiError( $error ) {
 		// Log error for debugging
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			error_log( 'SubtleForms License API Error: ' . $error->get_error_message() );
+			Logger::error( 'License API Error: ' . $error->get_error_message() );
 		}
 
 		return array(

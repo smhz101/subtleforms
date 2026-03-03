@@ -3,10 +3,14 @@
 namespace SubtleForms\Licensing;
 
 /**
- * Feature Gate Utility
+ * Feature Gate Utility (Licensing Facade)
  *
- * Provides convenient methods for checking feature availability.
+ * Provides convenient static methods for checking feature availability.
  * Acts as a facade for LicenseManager with caching.
+ *
+ * @deprecated 1.9.0 This class will be merged into \SubtleForms\Support\FeatureGate
+ *             in a future release. For DI-friendly feature gating, inject
+ *             \SubtleForms\Support\FeatureGate via the Container instead.
  *
  * @package SubtleForms\Licensing
  * @since 2.0.0

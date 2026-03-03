@@ -3,6 +3,10 @@
  * SubtleForms Form Block
  *
  * Gutenberg block for embedding published forms.
+ *
+ * @deprecated 1.9.0 Use {@see \SubtleForms\Blocks\SubtleFormsBlock} instead.
+ *             Both classes register the same 'subtleforms/form' block.
+ *             SubtleFormsBlock is the canonical registration.
  */
 
 namespace SubtleForms\Blocks;

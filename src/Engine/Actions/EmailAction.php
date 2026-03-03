@@ -6,6 +6,7 @@ namespace SubtleForms\Engine\Actions;
 use SubtleForms\Contracts\ActionInterface;
 use SubtleForms\Engine\SubmissionContext;
 
+use SubtleForms\Support\Logger;
 final class EmailAction implements ActionInterface {
 
 	public function id(): string {
@@ -189,7 +190,7 @@ final class EmailAction implements ActionInterface {
 
 		$submission_id = $context->getMeta( 'submission_id', 'unknown' );
 
-		error_log(
+		Logger::error(
 			sprintf(
 				'SubtleForms Email Debug [Submission #%s]: %s | Data: %s',
 				$submission_id,

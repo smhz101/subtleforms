@@ -47,8 +47,7 @@ final class Plugin {
 	 * Initialize the plugin.
 	 */
 	public function init(): void {
-		// Load text domain for translations
-		add_action( 'init', array( $this, 'load_textdomain' ) );
+		// Text domain already loaded in subtleforms.php on plugins_loaded.
 
 		// Initialize admin
 		if ( is_admin() ) {
@@ -72,22 +71,8 @@ final class Plugin {
 			}
 		);
 
-		// Register Gutenberg block
+		// Register Gutenberg block (single registration via SubtleFormsBlock).
 		\SubtleForms\Blocks\SubtleFormsBlock::init();
-
-		// Register form embed block (only once on init)
-		add_action(
-			'init',
-			function () {
-				static $registered = false;
-				if ( $registered ) {
-					return;
-				}
-				$formBlock = new \SubtleForms\Blocks\SubtleFormsFormBlock();
-				$formBlock->register_block();
-				$registered = true;
-			}
-		);
 
 		// Boot extensions
 		add_action(

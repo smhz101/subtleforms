@@ -8,6 +8,8 @@
 
 namespace SubtleForms;
 
+
+use SubtleForms\Support\Logger;
 /**
  * Handles plugin activation tasks.
  */
@@ -192,8 +194,8 @@ final class Activator {
 			);
 
 			// Log the error
-			error_log( 'SubtleForms Activation Error: ' . $error_message );
-			error_log( 'dbDelta results: ' . print_r( $results, true ) );
+			Logger::error( 'Activation Error: ' . $error_message );
+			Logger::error( 'dbDelta results: ' . print_r( $results, true ) );
 
 			// Show admin notice instead of wp_die to allow debugging
 			add_option( 'subtleforms_activation_error', $error_message );
@@ -240,7 +242,7 @@ final class Activator {
 		if ( empty( $column_exists ) ) {
 			// Add draft_schema column
 			$wpdb->query( "ALTER TABLE {$table_name} ADD COLUMN draft_schema longtext DEFAULT NULL AFTER config" );
-			error_log( 'SubtleForms: Added draft_schema column to forms table' );
+			Logger::info( 'Added draft_schema column to forms table' );
 		}
 	}
 

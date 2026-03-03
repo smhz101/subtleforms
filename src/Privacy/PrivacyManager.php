@@ -13,6 +13,7 @@ namespace SubtleForms\Privacy;
 use SubtleForms\Support\Settings;
 use SubtleForms\Repositories\SubmissionsRepository;
 
+use SubtleForms\Support\Logger;
 /**
  * Main privacy manager class.
  */
@@ -120,7 +121,7 @@ final class PrivacyManager {
 		$deleted = $this->submissionsRepo->delete_older_than( $retention_days );
 
 		if ( $deleted > 0 ) {
-			error_log( sprintf( 'SubtleForms: Deleted %d submissions older than %d days', $deleted, $retention_days ) );
+			Logger::info( 'Deleted %d submissions older than %d days', $deleted, $retention_days );
 		}
 	}
 

@@ -4,6 +4,7 @@ namespace SubtleForms\Licensing;
 
 use SubtleForms\Licensing\LicenseManager;
 
+use SubtleForms\Support\Logger;
 /**
  * License Scheduler
  *
@@ -63,7 +64,7 @@ class LicenseScheduler {
 
 		// Log check for debugging
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			error_log( 'SubtleForms License Check: Status = ' . $data['status'] );
+			Logger::error( 'License Check: Status = ' . $data['status'] );
 		}
 
 		// Send expiration warnings if needed

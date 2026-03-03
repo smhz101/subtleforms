@@ -12,6 +12,8 @@
 
 namespace SubtleForms\Support;
 
+
+use SubtleForms\Support\Logger;
 /**
  * Query performance instrumentation.
  */
@@ -48,7 +50,7 @@ final class QueryInstrumentation {
 		$elapsed_ms = ( microtime( true ) - $start_time ) * 1000;
 
 		if ( $elapsed_ms >= self::SLOW_QUERY_THRESHOLD_MS ) {
-			error_log(
+			Logger::error(
 				sprintf(
 					'[SubtleForms Query] SLOW: %s took %.2fms | Query: %s',
 					$context,
@@ -74,7 +76,7 @@ final class QueryInstrumentation {
 
 		$level = $time_ms >= self::SLOW_QUERY_THRESHOLD_MS ? 'SLOW' : 'OK';
 
-		error_log(
+		Logger::error(
 			sprintf(
 				'[SubtleForms Query] %s: %s | %.2fms | Query: %s',
 				$level,

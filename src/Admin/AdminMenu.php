@@ -568,7 +568,7 @@ class AdminMenu {
 		$templatePath = SUBTLEFORMS_PLUGIN_DIR . 'templates/admin/' . $name . '.php';
 
 		if ( file_exists( $templatePath ) ) {
-			extract( $data );
+			// $data is available to the template via the local scope.
 			include $templatePath;
 			return;
 		}
@@ -581,7 +581,6 @@ class AdminMenu {
 	 * Render inline fallback template when file doesn't exist.
 	 */
 	private function render_fallback_template( string $name, array $data ): void {
-		extract( $data );
 		?>
 		<div class="wrap subtleforms-admin">
 			<h1><?php echo Helpers::safe_esc_html( ucwords( str_replace( '-', ' ', $name ) ) ); ?></h1>

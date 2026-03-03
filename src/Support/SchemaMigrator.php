@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace SubtleForms\Support;
 
+
+use SubtleForms\Support\Logger;
 class SchemaMigrator {
 
 	/**
@@ -37,7 +39,7 @@ class SchemaMigrator {
 			return $schema;
 		}
 
-		error_log( sprintf( 'SubtleForms: Migrating schema from version %d to %d', $currentVersion, $latestVersion ) );
+		Logger::info( 'Migrating schema from version %d to %d', $currentVersion, $latestVersion );
 
 		$migratedSchema = $schema;
 
@@ -49,9 +51,9 @@ class SchemaMigrator {
 					$migratedSchema = call_user_func( $this->migrations[ $v ], $migratedSchema );
 					// Ensure version is updated in the schema array
 					$migratedSchema['schema_version'] = $v;
-					error_log( sprintf( 'SubtleForms: Applied migration for version %d', $v ) );
+					Logger::info( 'Applied migration for version %d', $v );
 				} catch ( \Throwable $e ) {
-					error_log( sprintf( 'SubtleForms: Migration to version %d failed: %s', $v, $e->getMessage() ) );
+					Logger::error( 'Migration to version %d failed: %s', $v, $e->getMessage() );
 					// Stop migration on failure to prevent corruption, return last successful state
 					break;
 				}

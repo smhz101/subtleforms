@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace SubtleForms\Async;
 
+
+use SubtleForms\Support\Logger;
 /**
  * AsyncDispatcher - WordPress-native async job dispatcher
  * 
@@ -271,6 +273,6 @@ final class AsyncDispatcher {
 	 */
 	private static function log( string $message, array $context = array() ): void {
 		$context_str = empty( $context ) ? '' : ' | ' . wp_json_encode( $context );
-		error_log( "[SubtleForms Async] {$message}{$context_str}" );
+		Logger::error( "[SubtleForms Async] {$message}{$context_str}" );
 	}
 }

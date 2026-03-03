@@ -10,6 +10,7 @@ namespace SubtleForms\Repositories;
 
 use SubtleForms\Support\Helpers;
 
+use SubtleForms\Support\Logger;
 /**
  * Repository for managing form submissions.
  */
@@ -128,14 +129,14 @@ final class SubmissionsRepository {
 				$data['form_id'],
 				$wpdb->last_error ?: 'Unknown database error'
 			);
-			error_log( 'SubtleForms: ' . $error );
+			Logger::error( '' . $error );
 			throw new \RuntimeException( $error );
 		}
 
 		$submissionId = $wpdb->insert_id;
 		if ( ! $submissionId ) {
 			$error = 'Failed to get submission ID after insert';
-			error_log( 'SubtleForms: ' . $error );
+			Logger::error( '' . $error );
 			throw new \RuntimeException( $error );
 		}
 
@@ -190,7 +191,7 @@ final class SubmissionsRepository {
 				$id,
 				$wpdb->last_error
 			);
-			error_log( 'SubtleForms: ' . $error );
+			Logger::error( '' . $error );
 			throw new \RuntimeException( $error );
 		}
 
@@ -201,7 +202,7 @@ final class SubmissionsRepository {
 				'Failed to update submission %d - submission may not exist',
 				$id
 			);
-			error_log( 'SubtleForms: ' . $error );
+			Logger::error( '' . $error );
 			throw new \RuntimeException( $error );
 		}
 

@@ -9,6 +9,7 @@
 namespace SubtleForms\Api;
 
 use SubtleForms\Support\Helpers;
+use SubtleForms\Support\Logger;
 use SubtleForms\Api\SettingsApi;
 use SubtleForms\Api\DashboardApi;
 use SubtleForms\Api\ApiResponse;
@@ -99,12 +100,12 @@ final class RestController {
 		$this->captchaManager  = $captchaManager;
 
 		// Debug: Log constructor initialization
-		error_log( '[SubtleForms] RestController initialized' );
-		error_log( '[SubtleForms] CaptchaManager injected: ' . ( $captchaManager ? 'YES' : 'NO' ) );
-		error_log( '[SubtleForms] Settings injected: ' . ( $settings ? 'YES' : 'NO' ) );
+		Logger::debug( 'RestController initialized' );
+		Logger::debug( 'CaptchaManager injected: ' . ( $captchaManager ? 'YES' : 'NO' ) );
+		Logger::debug( 'Settings injected: ' . ( $settings ? 'YES' : 'NO' ) );
 		
 		if ( $captchaManager ) {
-			error_log( '[SubtleForms] CaptchaManager class: ' . get_class( $captchaManager ) );
+			Logger::debug( 'CaptchaManager class: ' . get_class( $captchaManager ) );
 		}
 	}
 
@@ -278,77 +279,9 @@ final class RestController {
 		);
 		$dashboardApi->registerRoutes();
 
-		// Onboarding endpoints
-		register_rest_route(
-			self::NAMESPACE,
-			'/onboarding/send-test-email',
-			array(
-				'methods'             => 'POST',
-				'callback'            => array( $this, 'send_onboarding_test_email' ),
-				'permission_callback' => array( $this, 'check_write_permission' ),
-			),
-		);
-		register_rest_route(
-			self::NAMESPACE,
-			'/onboarding/dismiss',
-			array(
-				'methods'             => 'POST',
-				'callback'            => array( $this, 'dismiss_onboarding' ),
-				'permission_callback' => array( $this, 'check_write_permission' ),
-			)
-		);
-
-		register_rest_route(
-			self::NAMESPACE,
-			'/onboarding/status',
-			array(
-				'methods'             => 'GET',
-				'callback'            => array( $this, 'get_onboarding_status' ),
-				'permission_callback' => array( $this, 'check_read_permission' ),
-			)
-		);
-
-		// Create form wizard endpoints (per-user)
-		register_rest_route(
-			self::NAMESPACE,
-			'/create-wizard/dismiss',
-			array(
-				'methods'             => 'POST',
-				'callback'            => array( $this, 'dismiss_create_wizard' ),
-				'permission_callback' => array( $this, 'check_write_permission' ),
-			)
-		);
-
-		register_rest_route(
-			self::NAMESPACE,
-			'/create-wizard/status',
-			array(
-				'methods'             => 'GET',
-				'callback'            => array( $this, 'get_create_wizard_status' ),
-				'permission_callback' => array( $this, 'check_read_permission' ),
-			)
-		);
-
-		// Builder tour endpoints
-		register_rest_route(
-			self::NAMESPACE,
-			'/tour/complete',
-			array(
-				'methods'             => 'POST',
-				'callback'            => array( $this, 'complete_tour' ),
-				'permission_callback' => array( $this, 'check_write_permission' ),
-			)
-		);
-
-		register_rest_route(
-			self::NAMESPACE,
-			'/tour/status',
-			array(
-				'methods'             => 'GET',
-				'callback'            => array( $this, 'get_tour_status' ),
-				'permission_callback' => array( $this, 'check_read_permission' ),
-			)
-		);
+		// Onboarding, wizard, and tour endpoints (delegated to OnboardingApi)
+		$onboardingApi = new OnboardingApi();
+		$onboardingApi->registerRoutes();
 
 		// Form templates endpoint
 		register_rest_route(
@@ -592,7 +525,7 @@ final class RestController {
 		$version = $version !== null ? intval( $version ) : null;
 		$context = $request->get_param( 'context' );
 
-		error_log( '[SubtleForms] get_form_schema called for form ' . $formId . ' with context: ' . $context );
+		Logger::debug( 'get_form_schema called for form ' . $formId . ' with context: ' . $context );
 
 		// Verify form exists first
 		$form = $this->formsRepo->find( $formId );
@@ -604,13 +537,13 @@ final class RestController {
 		$isPublished     = isset( $form['status'] ) && $form['status'] === 'published';
 		$requestsDraft   = $context === 'builder';
 
-		error_log( '[SubtleForms] isAuthenticated: ' . ( $isAuthenticated ? 'YES' : 'NO' ) );
-		error_log( '[SubtleForms] isPublished: ' . ( $isPublished ? 'YES' : 'NO' ) );
-		error_log( '[SubtleForms] requestsDraft: ' . ( $requestsDraft ? 'YES' : 'NO' ) );
+		Logger::debug( 'isAuthenticated: ' . ( $isAuthenticated ? 'YES' : 'NO' ) );
+		Logger::debug( 'isPublished: ' . ( $isPublished ? 'YES' : 'NO' ) );
+		Logger::debug( 'requestsDraft: ' . ( $requestsDraft ? 'YES' : 'NO' ) );
 
 		// PUBLIC ACCESS (unauthenticated): Only active schema for published forms
 		if ( ! $isAuthenticated ) {
-			error_log( '[SubtleForms] BRANCH: Public access (unauthenticated)' );
+			Logger::debug( 'BRANCH: Public access (unauthenticated)' );
 			if ( ! $isPublished ) {
 				return ApiResponse::not_found( __( 'Form not available', 'subtleforms' ) );
 			}
@@ -619,7 +552,7 @@ final class RestController {
 			try {
 				$schema = $this->formsRepo->loadSchemaVersion( $formId, $version );
 			} catch ( \RuntimeException $e ) {
-				error_log( 'SubtleForms API Error: ' . $e->getMessage() );
+				Logger::error( 'API Error: ' . $e->getMessage() );
 				return ApiResponse::not_found( __( 'Schema not available', 'subtleforms' ) );
 			}
 
@@ -628,7 +561,7 @@ final class RestController {
 			}
 
 			// Inject CAPTCHA HTML for frontend rendering
-			error_log( '[SubtleForms] Injecting CAPTCHA HTML for frontend' );
+			Logger::debug( 'Injecting CAPTCHA HTML for frontend' );
 			$schemaData = $schema['schema'] ?? $schema;
 			$schemaData = $this->injectCaptchaHtml( $schemaData );
 
@@ -643,11 +576,11 @@ final class RestController {
 
 		// AUTHENTICATED ACCESS: Allow draft schema with explicit context=builder
 		if ( $requestsDraft && ! $version ) {
-			error_log( '[SubtleForms] BRANCH: Authenticated access - loading draft schema' );
+			Logger::debug( 'BRANCH: Authenticated access - loading draft schema' );
 			$draftSchema = $this->formsRepo->getDraftSchema( $formId );
 
 			if ( $draftSchema ) {
-				error_log( '[SubtleForms] Draft schema found, injecting provider name' );
+				Logger::debug( 'Draft schema found, injecting provider name' );
 				// Inject provider name for builder preview (not full CAPTCHA HTML)
 				$draftSchema = $this->injectCaptchaProvider( $draftSchema );
 
@@ -660,15 +593,15 @@ final class RestController {
 					)
 				);
 			}
-			error_log( '[SubtleForms] No draft schema found, falling back to versioned schema' );
+			Logger::debug( 'No draft schema found, falling back to versioned schema' );
 		}
 
 		// Fall back to versioned schema (authenticated users)
-		error_log( '[SubtleForms] BRANCH: Loading versioned schema' );
+		Logger::debug( 'BRANCH: Loading versioned schema' );
 		try {
 			$schema = $this->formsRepo->loadSchemaVersion( $formId, $version );
 		} catch ( \RuntimeException $e ) {
-			error_log( 'SubtleForms API Error: ' . $e->getMessage() );
+			Logger::error( 'API Error: ' . $e->getMessage() );
 			return ApiResponse::server_error( __( 'Failed to load form schema', 'subtleforms' ) );
 		}
 
@@ -692,7 +625,7 @@ final class RestController {
 		}
 
 		// Inject CAPTCHA HTML for authenticated users viewing frontend too
-		error_log( '[SubtleForms] Injecting CAPTCHA HTML for authenticated user' );
+		Logger::debug( 'Injecting CAPTCHA HTML for authenticated user' );
 		$schemaData = $schema['schema'] ?? $schema;
 		$schemaData = $this->injectCaptchaHtml( $schemaData );
 
@@ -713,28 +646,28 @@ final class RestController {
 	 */
 	private function injectCaptchaHtml( $schema ) {
 		if ( ! $this->captchaManager ) {
-			error_log( 'SubtleForms CAPTCHA: CaptchaManager not initialized' );
+			Logger::warning( 'CAPTCHA: CaptchaManager not initialized' );
 			return $schema;
 		}
 
 		if ( ! $this->captchaManager->isEnabled() ) {
-			error_log( 'SubtleForms CAPTCHA: CAPTCHA is disabled in settings' );
+			Logger::warning( 'CAPTCHA: CAPTCHA is disabled in settings' );
 			return $schema;
 		}
 
 		if ( ! $this->captchaManager->isConfigured() ) {
-			error_log( 'SubtleForms CAPTCHA: CAPTCHA is not configured (missing site key or secret key)' );
+			Logger::warning( 'CAPTCHA: CAPTCHA is not configured (missing site key or secret key)' );
 			return $schema;
 		}
 
 		$captcha_html = $this->captchaManager->render();
 
 		if ( empty( $captcha_html ) ) {
-			error_log( 'SubtleForms CAPTCHA: render() returned empty HTML' );
+			Logger::warning( 'CAPTCHA: render() returned empty HTML' );
 			return $schema;
 		}
 
-		error_log( 'SubtleForms CAPTCHA: Successfully generated HTML (' . strlen( $captcha_html ) . ' bytes)' );
+		Logger::debug( 'CAPTCHA: Successfully generated HTML (' . strlen( $captcha_html ) . ' bytes)' );
 
 		// Recursively inject CAPTCHA HTML into fields
 		$schema['fields'] = $this->processCaptchaFields( $schema['fields'] ?? array(), $captcha_html );
@@ -782,34 +715,34 @@ final class RestController {
 	 * @return array Modified schema
 	 */
 	private function injectCaptchaProvider( $schema ) {
-		error_log( '[SubtleForms] injectCaptchaProvider() called' );
-		error_log( '[SubtleForms] CaptchaManager exists: ' . ( $this->captchaManager ? 'YES' : 'NO' ) );
+		Logger::debug( 'injectCaptchaProvider() called' );
+		Logger::debug( 'CaptchaManager exists: ' . ( $this->captchaManager ? 'YES' : 'NO' ) );
 		
 		if ( ! $this->captchaManager ) {
-			error_log( '[SubtleForms] ABORT: CaptchaManager is NULL' );
+			Logger::warning( 'ABORT: CaptchaManager is NULL' );
 			return $schema;
 		}
 		
-		error_log( '[SubtleForms] CaptchaManager->isEnabled(): ' . ( $this->captchaManager->isEnabled() ? 'YES' : 'NO' ) );
-		error_log( '[SubtleForms] CaptchaManager->isConfigured(): ' . ( $this->captchaManager->isConfigured() ? 'YES' : 'NO' ) );
+		Logger::debug( 'CaptchaManager->isEnabled(): ' . ( $this->captchaManager->isEnabled() ? 'YES' : 'NO' ) );
+		Logger::debug( 'CaptchaManager->isConfigured(): ' . ( $this->captchaManager->isConfigured() ? 'YES' : 'NO' ) );
 		
 		if ( ! $this->captchaManager->isEnabled() || ! $this->captchaManager->isConfigured() ) {
-			error_log( '[SubtleForms] ABORT: CAPTCHA not enabled or not configured' );
+			Logger::warning( 'ABORT: CAPTCHA not enabled or not configured' );
 			return $schema;
 		}
 
 		$provider_name = $this->captchaManager->getActiveProviderName();
-		error_log( '[SubtleForms] Active provider name: ' . $provider_name );
+		Logger::debug( 'Active provider name: ' . $provider_name );
 
 		if ( empty( $provider_name ) ) {
-			error_log( '[SubtleForms] ABORT: Provider name is empty' );
+			Logger::warning( 'ABORT: Provider name is empty' );
 			return $schema;
 		}
 
 		// Recursively inject provider name into fields
-		error_log( '[SubtleForms] Processing fields to inject provider name' );
+		Logger::debug( 'Processing fields to inject provider name' );
 		$schema['fields'] = $this->processCaptchaProvider( $schema['fields'] ?? array(), $provider_name );
-		error_log( '[SubtleForms] Provider name injection complete' );
+		Logger::debug( 'Provider name injection complete' );
 
 		return $schema;
 	}
@@ -898,7 +831,7 @@ final class RestController {
 		if ( ! isset( $schema['schema_version'] ) ) {
 			$schema['schema_version'] = 1;
 			// Debug: Log that we injected a default schema_version
-			error_log( sprintf( 'SubtleForms: Injected default schema_version=1 for form %d during schema save', $formId ) );
+			Logger::debug( 'Injected default schema_version=1 for form %d during schema save', $formId );
 		}
 
 		// Ensure metadata and metadata.name exist (fallback to form title)
@@ -907,13 +840,13 @@ final class RestController {
 		}
 		if ( empty( $schema['metadata']['name'] ) || ! is_string( $schema['metadata']['name'] ) ) {
 			$schema['metadata']['name'] = Helpers::safe_string_get( $form, 'title', 'form_schema' );
-			error_log( sprintf( 'SubtleForms: Injected default metadata.name="%s" for form %d during schema save', $schema['metadata']['name'], $formId ) );
+			Logger::debug( 'Injected default metadata.name="%s" for form %d during schema save', $schema['metadata']['name'], $formId );
 		}
 
 		// Ensure fields array exists (allow empty drafts)
 		if ( ! isset( $schema['fields'] ) || ! is_array( $schema['fields'] ) ) {
 			$schema['fields'] = array();
-			error_log( sprintf( 'SubtleForms: Injected default empty fields array for form %d during schema save', $formId ) );
+			Logger::debug( 'Injected default empty fields array for form %d during schema save', $formId );
 		}
 
 		// Task 5.5: Structured validation errors for builder UI
@@ -942,7 +875,7 @@ final class RestController {
 				// Verify the schema was saved correctly
 				$savedSchema = $this->formsRepo->loadSchemaVersion( $formId, $version );
 				if ( ! $savedSchema ) {
-					error_log( sprintf( 'SubtleForms: Failed to load just-saved schema version %d for form %d', $version, $formId ) );
+					Logger::error( 'Failed to load just-saved schema version %d for form %d', $version, $formId );
 					return ApiResponse::server_error( __( 'Schema was saved but could not be loaded back', 'subtleforms' ) );
 				}
 
@@ -969,10 +902,10 @@ final class RestController {
 				);
 			}
 		} catch ( \InvalidArgumentException $e ) {
-			error_log( sprintf( 'SubtleForms: Schema validation error for form %d: %s', $formId, $e->getMessage() ) );
+			Logger::error( 'Schema validation error for form %d: %s', $formId, $e->getMessage() );
 			return ApiResponse::bad_request( $e->getMessage() );
 		} catch ( \RuntimeException $e ) {
-			error_log( sprintf( 'SubtleForms: Save failed for form %d: %s', $formId, $e->getMessage() ) );
+			Logger::error( 'Save failed for form %d: %s', $formId, $e->getMessage() );
 			return ApiResponse::server_error( $e->getMessage() );
 		}
 	}
@@ -1007,13 +940,13 @@ final class RestController {
 		// Validate input
 		try {
 			// Debug log incoming input for troubleshooting
-			error_log( 'SubtleForms:create_form - raw input: ' . print_r( $input, true ) );
+			Logger::debug( 'create_form - raw input: ' . print_r( $input, true ) );
 			$validator = new RequestValidator( array( 'schemas' => Schemas::all() ) );
 			$validated = $validator->validateOrFail( $input, Schemas::get( Schemas::FORM_CREATE ) );
 			// Debug log validated data
-			error_log( 'SubtleForms:create_form - validated: ' . print_r( $validated, true ) );
+			Logger::debug( 'create_form - validated: ' . print_r( $validated, true ) );
 		} catch ( ValidationException $e ) {
-			error_log( 'SubtleForms:create_form - validation failed: ' . $e->getMessage() . ' Fields: ' . print_r( $e->getFields(), true ) );
+			Logger::error( 'create_form - validation failed: ' . $e->getMessage() . ' Fields: ' . print_r( $e->getFields(), true ) );
 			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
 		}
 
@@ -1038,20 +971,20 @@ final class RestController {
 			}
 			if ( empty( $schema['metadata']['name'] ) || ! is_string( $schema['metadata']['name'] ) ) {
 				$schema['metadata']['name'] = Helpers::safe_string_get( $validated, 'title', 'form_schema' );
-				error_log( sprintf( 'SubtleForms: Injected default metadata.name="%s" for new form %d during create', $schema['metadata']['name'], $id ) );
+				Logger::debug( 'Injected default metadata.name="%s" for new form %d during create', $schema['metadata']['name'], $id );
 			}
 
 			// Ensure fields array exists (allow empty initial schemas)
 			if ( ! isset( $schema['fields'] ) || ! is_array( $schema['fields'] ) ) {
 				$schema['fields'] = array();
-				error_log( sprintf( 'SubtleForms: Injected default empty fields array for new form %d during create', $id ) );
+				Logger::debug( 'Injected default empty fields array for new form %d during create', $id );
 			}
 
 			try {
 				$this->formsRepo->saveSchemaVersion( $id, $schema, true );
 			} catch ( \InvalidArgumentException $e ) {
 				// If schema is invalid, still return the form but log the error
-				error_log( 'Failed to save initial schema for form ' . $id . ': ' . $e->getMessage() );
+				Logger::error( 'Failed to save initial schema for form ' . $id . ': ' . $e->getMessage() );
 			}
 		}
 
@@ -1118,7 +1051,7 @@ final class RestController {
 					try {
 						$this->formsRepo->promoteDraftToActive( $id );
 					} catch ( \Exception $e ) {
-						error_log( sprintf( 'SubtleForms: Failed to promote draft: %s', $e->getMessage() ) );
+						Logger::error( 'Failed to promote draft: %s', $e->getMessage() );
 						return ApiResponse::server_error( __( 'Cannot publish form: Failed to activate schema.', 'subtleforms' ) . ' ' . $e->getMessage() );
 					}
 				}
@@ -1127,7 +1060,7 @@ final class RestController {
 				$activeSchema = $this->formsRepo->loadSchemaVersion( $id, null );
 
 				if ( ! $activeSchema ) {
-					error_log( sprintf( 'SubtleForms: No active schema found for form %d after promotion attempt', $id ) );
+					Logger::error( 'No active schema found for form %d after promotion attempt', $id );
 					return ApiResponse::bad_request( __( 'Cannot publish form: No schema exists. Please save your form first.', 'subtleforms' ) );
 				}
 
@@ -1139,7 +1072,7 @@ final class RestController {
 				// loadSchemaVersion returns decoded schema in 'schema' key, not 'schema_data'
 				$schemaData = $activeSchema['schema'] ?? null;
 				if ( ! $schemaData || ! is_array( $schemaData ) ) {
-					error_log(
+					Logger::error(
 						sprintf(
 							'SubtleForms: Schema missing or invalid for form %d. Available keys: %s',
 							$id,
@@ -1498,6 +1431,9 @@ final class RestController {
 			return $rateLimitResponse;
 		}
 
+		// Resolve client IP for submission tracking and rate limiting
+		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+
 		// Validate form ID
 		try {
 			$formId = Schemas::validateId( $request->get_param( 'form_id' ) );
@@ -1528,7 +1464,7 @@ final class RestController {
 			$tempContext = new SubmissionContext( $formId, $payload );
 			if ( \SubtleForms\Engine\SpamProtection::is_spam( $tempContext ) ) {
 				$reason = $tempContext->getMeta( 'spam_reason', 'spam_detected' );
-				error_log( sprintf( 'SubtleForms: Spam blocked (form %d): %s', $formId, $reason ) );
+				Logger::info( 'Spam blocked (form %d): %s', $formId, $reason );
 				return ApiResponse::success(
 					array(
 						'success' => true,
@@ -1590,7 +1526,7 @@ final class RestController {
 		try {
 			$activeSchema = $this->formsRepo->loadSchemaVersion( $formId );
 		} catch ( \RuntimeException $e ) {
-			error_log( 'SubtleForms Submission Error: ' . $e->getMessage() );
+			Logger::error( 'Submission Error: ' . $e->getMessage() );
 			return ApiResponse::server_error(
 				'Failed to load form schema: ' . $e->getMessage()
 			);
@@ -1605,12 +1541,12 @@ final class RestController {
 					'schema_version' => $formVersion,
 					'payload'        => $payload,
 					'status'         => 'processing',
-					'ip_address'     => $_SERVER['REMOTE_ADDR'] ?? null,
-					'user_agent'     => $_SERVER['HTTP_USER_AGENT'] ?? null,
+					'ip_address'     => $ip ?: null,
+					'user_agent'     => isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : null,
 				)
 			);
 		} catch ( \RuntimeException $e ) {
-			error_log( 'SubtleForms: Failed to create submission record: ' . $e->getMessage() );
+			Logger::error( 'Failed to create submission record: ' . $e->getMessage() );
 			return ApiResponse::server_error( 'Failed to create submission record' );
 		}
 
@@ -1668,7 +1604,7 @@ final class RestController {
 				$steps = $this->compiler->compile( $activeSchema['schema'] );
 			} catch ( \InvalidArgumentException $e ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
-				error_log( 'SubtleForms: Schema compilation failed for form ' . $formId . ': ' . $e->getMessage() );
+				Logger::error( 'Schema compilation failed for form ' . $formId . ': ' . $e->getMessage() );
 				return ApiResponse::bad_request( $e->getMessage() );
 			}
 
@@ -1676,7 +1612,7 @@ final class RestController {
 				$result = $this->pipeline->run( $steps, $context, $activeSchema['schema'] );
 			} catch ( \RuntimeException $e ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
-				error_log( 'SubtleForms: Pipeline execution failed for submission ' . $submissionId . ': ' . $e->getMessage() );
+				Logger::error( 'Pipeline execution failed for submission ' . $submissionId . ': ' . $e->getMessage() );
 
 				// Check if this is a validation error with field details
 				$validationErrors = $context->getMeta( 'validation_errors' );
@@ -1691,13 +1627,13 @@ final class RestController {
 				return ApiResponse::server_error( $e->getMessage() );
 			} catch ( \Throwable $e ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
-				error_log( 'SubtleForms: Unexpected error in submission ' . $submissionId . ': ' . $e->getMessage() );
+				Logger::error( 'Unexpected error in submission ' . $submissionId . ': ' . $e->getMessage() );
 				return ApiResponse::server_error( __( 'An unexpected error occurred', 'subtleforms' ) );
 			}
 
 			if ( ! $result->ok ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
-				error_log( 'SubtleForms: Pipeline execution failed for submission ' . $submissionId . ': ' . $result->error );
+				Logger::error( 'Pipeline execution failed for submission ' . $submissionId . ': ' . $result->error );
 				return ApiResponse::server_error( $result->error );
 			}
 
@@ -1742,7 +1678,7 @@ final class RestController {
 				}
 			} elseif ( ! $finalSubmission || $finalSubmission['status'] === 'processing' ) {
 				// SaveAction didn't run or failed - mark as failed
-				error_log( 'SubtleForms: Submission ' . $submissionId . ' did not reach saved status' );
+				Logger::error( 'Submission ' . $submissionId . ' did not reach saved status' );
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
 				return ApiResponse::server_error( 'Failed to save submission data' );
 			}
@@ -1818,7 +1754,7 @@ final class RestController {
 
 		$grouped = $request->get_param( 'grouped' );
 		// Debug: log invocation and grouped param
-		error_log( sprintf( 'SubtleForms: get_fields called with grouped=%s by user=%d', var_export( $grouped, true ), get_current_user_id() ) );
+		Logger::debug( 'get_fields called with grouped=%s by user=%d', var_export( $grouped, true ), get_current_user_id() );
 
 		// Get CAPTCHA enabled states from settings
 		$captchaEnabled = $this->settings ? (bool) $this->settings->get( 'captcha_enabled', false ) : false;
@@ -1876,207 +1812,9 @@ final class RestController {
 		}
 
 		// Debug: Log the fields response shape for troubleshooting
-		error_log( sprintf( 'SubtleForms: get_fields response: %s', print_r( $fields, true ) ) );
+		Logger::debug( 'get_fields response: %s', print_r( $fields, true ) );
 
 		return ApiResponse::success( $fields );
-	}
-
-	/**
-	 * Dismiss onboarding wizard.
-	 */
-	public function dismiss_onboarding( WP_REST_Request $request ): WP_REST_Response {
-		// Rate limiting (Phase A3-P1)
-		$rateLimitResponse = $this->guardRateLimit( $request );
-		if ( $rateLimitResponse ) {
-			return $rateLimitResponse;
-		}
-
-		$user_id = get_current_user_id();
-		if ( ! $user_id ) {
-			return ApiResponse::unauthorized( 'User not authenticated' );
-		}
-
-		update_user_meta( $user_id, 'subtleforms_onboarding_dismissed', true );
-
-		return ApiResponse::success(
-			array(
-				'success' => true,
-				'message' => 'Onboarding dismissed',
-			)
-		);
-	}
-
-	/**
-	 * Get onboarding status.
-	 */
-	public function get_onboarding_status( WP_REST_Request $request ): WP_REST_Response {
-		// Rate limiting (Phase A3-P1)
-		$rateLimitResponse = $this->guardRateLimit( $request );
-		if ( $rateLimitResponse ) {
-			return $rateLimitResponse;
-		}
-
-		$user_id = get_current_user_id();
-		if ( ! $user_id ) {
-			return ApiResponse::success(
-				array(
-					'success'   => false,
-					'dismissed' => false,
-				)
-			);
-		}
-
-		$dismissed = (bool) get_user_meta( $user_id, 'subtleforms_onboarding_dismissed', true );
-
-		return ApiResponse::success(
-			array(
-				'success'   => true,
-				'dismissed' => $dismissed,
-			)
-		);
-	}
-
-	/**
-	 * Send a test email to admin_email to validate email delivery
-	 */
-	public function send_onboarding_test_email( WP_REST_Request $request ): WP_REST_Response {
-		// Rate limiting (Phase A3-P1)
-		$rateLimitResponse = $this->guardRateLimit( $request );
-		if ( $rateLimitResponse ) {
-			return $rateLimitResponse;
-		}
-
-		try {
-			$settings = new \SubtleForms\Support\Settings();
-			$to = $settings->getAdminEmail();
-			$subject = __( 'SubtleForms: Test email', 'subtleforms' );
-			$message = __( 'This is a test email sent from SubtleForms to verify delivery to your admin email address.', 'subtleforms' );
-
-			$sent = \SubtleForms\Support\Mailer::send( $to, $subject, $message );
-
-			if ( $sent ) {
-				return ApiResponse::success( array( 'success' => true ) );
-			} else {
-				return ApiResponse::success(
-					array(
-						'success' => false,
-						'message' => __( 'Failed to send test email', 'subtleforms' ),
-					)
-				);
-			}
-		} catch ( \Exception $e ) {
-			return ApiResponse::server_error( $e->getMessage() );
-		}
-	}
-
-	/**
-	 * Dismiss create form wizard ("Don't show again").
-	 */
-	public function dismiss_create_wizard( WP_REST_Request $request ): WP_REST_Response {
-		// Rate limiting (Phase A3-P1)
-		$rateLimitResponse = $this->guardRateLimit( $request );
-		if ( $rateLimitResponse ) {
-			return $rateLimitResponse;
-		}
-
-		$user_id = get_current_user_id();
-		if ( ! $user_id ) {
-			return ApiResponse::unauthorized( 'User not authenticated' );
-		}
-
-		update_user_meta( $user_id, 'subtleforms_create_wizard_dismissed', true );
-
-		return ApiResponse::success(
-			array(
-				'success' => true,
-				'message' => 'Create wizard dismissed',
-			)
-		);
-	}
-
-	/**
-	 * Get create form wizard status.
-	 */
-	public function get_create_wizard_status( WP_REST_Request $request ): WP_REST_Response {
-		// Rate limiting (Phase A3-P1)
-		$rateLimitResponse = $this->guardRateLimit( $request );
-		if ( $rateLimitResponse ) {
-			return $rateLimitResponse;
-		}
-
-		$user_id = get_current_user_id();
-		if ( ! $user_id ) {
-			return ApiResponse::success(
-				array(
-					'success'   => false,
-					'dismissed' => false,
-				)
-			);
-		}
-
-		$dismissed = (bool) get_user_meta( $user_id, 'subtleforms_create_wizard_dismissed', true );
-
-		return ApiResponse::success(
-			array(
-				'success'   => true,
-				'dismissed' => $dismissed,
-			)
-		);
-	}
-
-	/**
-	 * Complete builder tour.
-	 */
-	public function complete_tour( WP_REST_Request $request ): WP_REST_Response {
-		// Rate limiting (Phase A3-P1)
-		$rateLimitResponse = $this->guardRateLimit( $request );
-		if ( $rateLimitResponse ) {
-			return $rateLimitResponse;
-		}
-
-		$user_id = get_current_user_id();
-		if ( ! $user_id ) {
-			return ApiResponse::unauthorized( 'User not authenticated' );
-		}
-
-		update_user_meta( $user_id, 'subtleforms_tour_completed', true );
-
-		return ApiResponse::success(
-			array(
-				'success' => true,
-				'message' => 'Tour completed',
-			)
-		);
-	}
-
-	/**
-	 * Get builder tour status.
-	 */
-	public function get_tour_status( WP_REST_Request $request ): WP_REST_Response {
-		// Rate limiting (Phase A3-P1)
-		$rateLimitResponse = $this->guardRateLimit( $request );
-		if ( $rateLimitResponse ) {
-			return $rateLimitResponse;
-		}
-
-		$user_id = get_current_user_id();
-		if ( ! $user_id ) {
-			return ApiResponse::success(
-				array(
-					'success'   => false,
-					'completed' => false,
-				)
-			);
-		}
-
-		$completed = (bool) get_user_meta( $user_id, 'subtleforms_tour_completed', true );
-
-		return ApiResponse::success(
-			array(
-				'success'   => true,
-				'completed' => $completed,
-			)
-		);
 	}
 
 	/**
