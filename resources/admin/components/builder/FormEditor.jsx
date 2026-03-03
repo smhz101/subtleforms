@@ -1,10 +1,4 @@
-import {
-  useState,
-  useRef,
-  useEffect,
-  useMemo,
-  useCallback,
-} from '@wordpress/element';
+import { useCallback, useMemo } from '@wordpress/element';
 import { Popover } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import FieldDock from './FieldDock';
@@ -13,19 +7,7 @@ import FormBuilder from './FormBuilder';
 import ConversationalCanvas from './ConversationalCanvas';
 import StepNavigator from './StepNavigator';
 import { BuilderProvider } from './context/BuilderProvider';
-import {
-  normalizeSchema,
-  denormalizeTree,
-  getRootNodeId,
-  nodeToField,
-} from './utils/schemaTree';
-import {
-  insertNode,
-  deleteNode,
-  updateNodeConfig,
-  moveNode,
-  duplicateNode,
-} from './schema/commands';
+import { useBuilderState, useSchemaCommands, useInsertPicker } from './state';
 import './FormEditor.scss';
 
 export default function FormEditor({
@@ -33,488 +15,75 @@ export default function FormEditor({
   fieldGroups,
   fieldDefinitions,
   validationErrors = [],
+  fieldErrors = {},
   onChange,
   isReadOnly = false,
+  renderCanvas = null,
 }) {
-  const rootId = getRootNodeId();
-  const schemaRef = useRef(schema);
-  const [isDockCollapsed, setIsDockCollapsed] = useState(false);
-  const [tree, setTree] = useState(() => {
-    // Initialize with empty tree if schema is null/undefined
-    if (!schema) {
-      return normalizeSchema({ schema_version: 1, fields: [] });
-    }
-    // Ensure schema_version exists, default to 1
-    const schemaWithVersion = {
-      ...schema,
-      schema_version: schema.schema_version || 1,
-    };
-
-    // Log schema version for debugging
-    console.debug(
-      '[SubtleForms] FormEditor initialized with schema version:',
-      schemaWithVersion.schema_version
-    );
-
-    return normalizeSchema(schemaWithVersion);
-  });
-  const [selectedId, setSelectedId] = useState(null);
-  const [insertPicker, setInsertPicker] = useState(null);
-  const [selectedStepId, setSelectedStepId] = useState(null);
-  const selectedIdRef = useRef(selectedId);
-
-  const validationErrorsByFieldKey = useMemo(() => {
-    const map = {};
-
-    if (!Array.isArray(validationErrors)) {
-      return map;
-    }
-
-    validationErrors.forEach((err) => {
-      const fieldKey = err?.fieldKey || err?.field_key || null;
-      const message = err?.message || null;
-      if (!fieldKey || !message) {
-        return;
-      }
-      if (!map[fieldKey]) {
-        map[fieldKey] = [];
-      }
-      map[fieldKey].push(message);
-    });
-
-    return map;
-  }, [validationErrors]);
-
-  useEffect(() => {
-    selectedIdRef.current = selectedId;
-  }, [selectedId]);
-
-  useEffect(() => {
-    // Skip if schema hasn't changed
-    if (schemaRef.current === schema) {
-      return;
-    }
-
-    // Skip if schema is still null/undefined
-    if (!schema) {
-      return;
-    }
-
-    // If fields array reference is identical, skip tree rebuild
-    // This prevents UI reset when only metadata (like version) changes
-    if (schemaRef.current && schema.fields === schemaRef.current.fields) {
-      schemaRef.current = schema;
-      return;
-    }
-
-    schemaRef.current = schema;
-    // Ensure schema_version exists, default to 1
-    const schemaWithVersion = {
-      ...schema,
-      schema_version: schema.schema_version || 1,
-    };
-
-    // Log schema version update
-    console.debug(
-      '[SubtleForms] FormEditor received new schema version:',
-      schemaWithVersion.schema_version
-    );
-
-    const newTree = normalizeSchema(schemaWithVersion);
-    setTree(newTree);
-
-    // Preserve selection if the node still exists
-    if (selectedIdRef.current && newTree.nodes[selectedIdRef.current]) {
-      // Keep selection intact
-    } else {
-      setSelectedId(null);
-    }
-  }, [schema]);
+  // State management
+  const builderState = useBuilderState(schema, validationErrors, fieldErrors, onChange, isReadOnly);
+  const {
+    tree,
+    setTree,
+    selectedId,
+    setSelectedId,
+    selectedStepId,
+    setSelectedStepId,
+    isDockCollapsed,
+    setIsDockCollapsed,
+    rootId,
+    formType,
+    isConversational,
+    validationErrorsByFieldKey,
+    selectedField,
+    selectedFieldValidationMessages,
+    allFields,
+    steps,
+    updateTree,
+    schemaRef,
+  } = builderState;
 
   const definitionMap = useMemo(
     () => fieldDefinitions || {},
     [fieldDefinitions]
   );
 
-  // Detect form type from schema metadata
-  const formType = useMemo(
-    () => schema?.metadata?.type || 'regular',
-    [schema?.metadata?.type]
-  );
+  // Command handlers
+  const commands = useSchemaCommands({
+    tree,
+    updateTree,
+    setTree,
+    setSelectedId,
+    selectedStepId,
+    rootId,
+    definitionMap,
+    isReadOnly,
+    onChange,
+    schemaRef,
+  });
+  const {
+    handleInsert,
+    handleDockAdd,
+    handleDelete,
+    handleUpdate,
+    handleMove,
+    handleDuplicate,
+    handleAddStep,
+    handleDeleteStep,
+  } = commands;
 
-  const isConversational = formType === 'conversational';
+  // Insert picker state
+  const insertPickerState = useInsertPicker();
+  const { insertPicker, setInsertPicker, handleRequestInsert, handleCloseInsert } =
+    insertPickerState;
 
-  const updateTree = useCallback(
-    (updater) => {
-      // Block updates in read-only mode
-      if (isReadOnly) {
-        console.warn('[SubtleForms] Cannot edit form - Pro license required');
-        return;
-      }
-
-      setTree((current) => {
-        const next = updater(current);
-        if (!next || next === current) {
-          return current;
-        }
-
-        const fields = denormalizeTree(next);
-        const updatedSchema = {
-          ...schemaRef.current,
-          schema_version: schemaRef.current?.schema_version || 1,
-          fields,
-        };
-
-        schemaRef.current = updatedSchema;
-        onChange(updatedSchema);
-
-        return next;
-      });
-    },
-    [onChange, isReadOnly]
-  );
-
-  const handleInsert = useCallback(
+  // Close insert picker after insertion
+  const handleInsertWithClose = useCallback(
     (type, context) => {
-      // Block inserts in read-only mode
-      if (isReadOnly) {
-        return;
-      }
-
-      const definition = definitionMap[type];
-      if (!definition) {
-        console.warn('Missing field definition for', type);
-        return;
-      }
-
-      // Guardrail: Prevent nesting steps inside steps
-      if (type === 'step' && context.parentId) {
-        const parentNode = tree.nodes[context.parentId];
-        if (parentNode?.type === 'step') {
-          // eslint-disable-next-line no-alert
-          alert(
-            __(
-              'Cannot add a step inside another step. Steps can only be added at the root level.',
-              'subtleforms'
-            )
-          );
-          return;
-        }
-      }
-
-      // Use command layer for insertion
-      updateTree((currentTree) => {
-        const newTree = insertNode(currentTree, {
-          definition,
-          parentId: context.parentId,
-          columnIndex: context.columnIndex,
-          position: context.position,
-        });
-
-        // Find the new node ID by comparing trees
-        const newNodeId = Object.keys(newTree.nodes).find(
-          (id) => !currentTree.nodes[id]
-        );
-
-        // DEBUG: Log field creation
-        if (newNodeId) {
-          const node = newTree.nodes[newNodeId];
-          console.log('[SubtleForms] Creating field:', {
-            fieldType: type,
-            fieldId: node.id,
-            fieldLabel: node.config?.label,
-            targetParentId: context.parentId,
-            selectedStepId: selectedStepId,
-            columnIndex: context.columnIndex,
-            position: context.position,
-          });
-          setSelectedId(node.id);
-        }
-
-        return newTree;
-      });
-
+      handleInsert(type, context);
       setInsertPicker(null);
     },
-    [definitionMap, updateTree, tree, selectedStepId, isReadOnly]
-  );
-
-  const handleDockAdd = useCallback(
-    (type) => {
-      // Check for multiple CAPTCHA fields (warning, non-blocking)
-      if (type === 'captcha') {
-        const captchaCount = Object.values(tree.nodes).filter(
-          (node) => node?.type === 'captcha'
-        ).length;
-        if (captchaCount >= 1) {
-          const message = __(
-            'Warning: Adding multiple CAPTCHA fields may cause conflicts. Most forms should only use one CAPTCHA field.',
-            'subtleforms'
-          );
-          // eslint-disable-next-line no-alert
-          if (
-            !confirm(message + '\n\n' + __('Continue anyway?', 'subtleforms'))
-          ) {
-            return;
-          }
-        }
-      }
-
-      // If a step is selected, add to that step; otherwise add to root
-      const targetParentId = selectedStepId || rootId;
-
-      // DEBUG: Log dock add
-      console.log('[SubtleForms] Dock Add:', {
-        fieldType: type,
-        selectedStepId: selectedStepId,
-        targetParentId: targetParentId,
-        isStep: targetParentId !== rootId,
-      });
-
-      handleInsert(type, {
-        parentId: targetParentId,
-        columnIndex: null,
-        position: null,
-      });
-    },
-    [handleInsert, rootId, selectedStepId, tree.nodes]
-  );
-
-  const handleDelete = useCallback(
-    (nodeId) => {
-      // Block deletes in read-only mode
-      if (isReadOnly) {
-        return;
-      }
-
-      const node = tree.nodes[nodeId];
-
-      // Guardrail: Prevent deleting the last step in a multi-step form
-      if (node?.type === 'step') {
-        const rootNode = tree.nodes[rootId];
-        const stepCount = (rootNode?.children || []).filter(
-          (id) => tree.nodes[id]?.type === 'step'
-        ).length;
-
-        if (stepCount <= 1) {
-          // eslint-disable-next-line no-alert
-          alert(
-            __(
-              'Cannot delete the last step. Multi-step forms require at least one step.',
-              'subtleforms'
-            )
-          );
-          return;
-        }
-      }
-
-      updateTree((currentTree) => deleteNode(currentTree, { nodeId }));
-      setSelectedId((prev) => (prev === nodeId ? null : prev));
-    },
-    [updateTree, tree, rootId]
-  );
-
-  const handleUpdate = useCallback(
-    (nodeId, changes) => {
-      // Block updates in read-only mode
-      if (isReadOnly) {
-        return;
-      }
-
-      updateTree((currentTree) =>
-        updateNodeConfig(currentTree, { nodeId, changes })
-      );
-    },
-    [updateTree, isReadOnly]
-  );
-
-  const handleMove = useCallback(
-    (nodeId, destination) => {
-      // Block moves in read-only mode
-      if (isReadOnly) {
-        return;
-      }
-
-      updateTree((currentTree) => {
-        const node = currentTree.nodes[nodeId];
-        if (!node) {
-          return currentTree;
-        }
-
-        // Guardrail: Prevent moving fields across steps
-        if (node.parentId !== destination.parentId) {
-          console.warn(
-            '[SubtleForms] Moving fields between different parents (steps) is not supported'
-          );
-          return currentTree;
-        }
-
-        return moveNode(currentTree, {
-          nodeId,
-          parentId: destination.parentId,
-          columnIndex: destination.columnIndex,
-          position: destination.position,
-        });
-      });
-    },
-    [updateTree, isReadOnly]
-  );
-
-  const handleRequestInsert = useCallback((context, anchor) => {
-    setInsertPicker({ context, anchor });
-  }, []);
-
-  const handleCloseInsert = useCallback(() => setInsertPicker(null), []);
-
-  const handleDuplicate = useCallback(
-    (nodeId, destination) => {
-      // Block duplicates in read-only mode
-      if (isReadOnly) {
-        return;
-      }
-
-      if (!destination) {
-        return;
-      }
-
-      // Warn when duplicating CAPTCHA fields (non-blocking)
-      const node = tree.nodes[nodeId];
-      if (node?.type === 'captcha') {
-        const message = __(
-          'Warning: Duplicating CAPTCHA fields may cause conflicts. Most forms should only use one CAPTCHA field.',
-          'subtleforms'
-        );
-        // eslint-disable-next-line no-alert
-        if (
-          !confirm(message + '\n\n' + __('Continue anyway?', 'subtleforms'))
-        ) {
-          return;
-        }
-      }
-
-      setTree((currentTree) => {
-        const { tree: nextTree, newNodeId } = duplicateNode(currentTree, {
-          nodeId,
-          destination,
-        });
-
-        if (!newNodeId || nextTree === currentTree) {
-          return currentTree;
-        }
-
-        const fields = denormalizeTree(nextTree);
-        const updatedSchema = {
-          ...schemaRef.current,
-          fields,
-        };
-
-        schemaRef.current = updatedSchema;
-        onChange(updatedSchema);
-        setSelectedId(newNodeId);
-
-        return nextTree;
-      });
-    },
-    [onChange, tree.nodes]
-  );
-
-  const selectedField = useMemo(
-    () => (selectedId ? nodeToField(tree, selectedId) : null),
-    [selectedId, tree]
-  );
-
-  const selectedFieldValidationMessages = useMemo(() => {
-    const key = selectedField?.key;
-    if (!key) {
-      return [];
-    }
-    return validationErrorsByFieldKey[key] || [];
-  }, [selectedField, validationErrorsByFieldKey]);
-
-  // Flatten all fields for condition editor
-  const allFields = useMemo(() => {
-    const fields = [];
-    const traverse = (nodes) => {
-      Object.values(nodes).forEach((node) => {
-        if (
-          node.type &&
-          node.type !== 'step' &&
-          !node.type.includes('container')
-        ) {
-          const field = nodeToField(tree, node.id);
-          if (field) {
-            fields.push({
-              key: field.key,
-              label: field.label || field.key,
-              type: field.type,
-            });
-          }
-        }
-      });
-    };
-    traverse(tree.nodes);
-    return fields;
-  }, [tree]);
-
-  // Extract step nodes
-  const steps = useMemo(() => {
-    const rootNode = tree.nodes[rootId];
-    if (!rootNode?.children) return [];
-
-    return rootNode.children
-      .map((id) => tree.nodes[id])
-      .filter((node) => node && node.type === 'step');
-  }, [tree, rootId]);
-
-  const handleAddStep = useCallback(() => {
-    const definition = definitionMap['step'];
-    if (!definition) {
-      console.warn('Step field definition not found');
-      return;
-    }
-
-    const stepNumber = steps.length + 1;
-
-    updateTree((currentTree) => {
-      const result = insertNode(currentTree, {
-        definition,
-        parentId: rootId,
-        columnIndex: null,
-        position: null,
-      });
-
-      // Find the newly inserted node
-      const newNodeId = Object.keys(result.nodes).find(
-        (id) => !currentTree.nodes[id]
-      );
-
-      if (newNodeId) {
-        setSelectedStepId(newNodeId);
-        return updateNodeConfig(result, {
-          nodeId: newNodeId,
-          changes: {
-            title: `Step ${stepNumber}`,
-            description: '',
-          },
-        });
-      }
-
-      return result;
-    });
-  }, [definitionMap, steps.length, updateTree, rootId]);
-
-  const handleDeleteStep = useCallback(
-    (stepId) => {
-      if (steps.length <= 1) return;
-
-      updateTree((currentTree) => deleteNode(currentTree, { nodeId: stepId }));
-
-      if (selectedStepId === stepId) {
-        const remainingSteps = steps.filter((s) => s.id !== stepId);
-        setSelectedStepId(remainingSteps[0]?.id || null);
-      }
-    },
-    [steps, updateTree, selectedStepId]
+    [handleInsert, setInsertPicker]
   );
 
   const handleSelectStep = useCallback(
@@ -528,15 +97,8 @@ export default function FormEditor({
       });
       setSelectedStepId(stepId);
     },
-    [tree]
+    [tree, setSelectedStepId]
   );
-
-  // Set initial step if none selected
-  useEffect(() => {
-    if (!selectedStepId && steps.length > 0) {
-      setSelectedStepId(steps[0].id);
-    }
-  }, [selectedStepId, steps]);
 
   return (
     <BuilderProvider
@@ -546,7 +108,9 @@ export default function FormEditor({
       selectedStepId={selectedStepId}
       setSelectedStepId={setSelectedStepId}
       validationErrors={validationErrors}
+      validationErrorsByFieldKey={validationErrorsByFieldKey}
       fieldDefinitions={definitionMap}
+      formType={formType}
       onInsert={handleInsert}
       onDelete={handleDelete}
       onUpdate={handleUpdate}
@@ -597,7 +161,9 @@ export default function FormEditor({
           <div
             className='sf-form-editor__canvas-scroll'
             style={{ padding: isConversational ? 0 : '1.5rem' }}>
-            {isConversational ? (
+            {renderCanvas ? (
+              renderCanvas()
+            ) : isConversational ? (
               <ConversationalCanvas
                 tree={tree}
                 rootId={rootId}
@@ -606,7 +172,6 @@ export default function FormEditor({
                 onDelete={handleDelete}
                 onDuplicate={handleDuplicate}
                 onRequestInsert={handleRequestInsert}
-                validationErrorsByFieldKey={validationErrorsByFieldKey}
               />
             ) : (
               <FormBuilder
@@ -619,7 +184,6 @@ export default function FormEditor({
                 onDuplicate={handleDuplicate}
                 onRequestInsert={handleRequestInsert}
                 selectedStepId={selectedStepId}
-                validationErrorsByFieldKey={validationErrorsByFieldKey}
               />
             )}
           </div>
@@ -659,7 +223,7 @@ export default function FormEditor({
                     <button
                       key={f.type}
                       type='button'
-                      onClick={() => handleInsert(f.type, insertPicker.context)}
+                      onClick={() => handleInsertWithClose(f.type, insertPicker.context)}
                       className='sf-field-picker-popover__button'>
                       {f.label}
                     </button>

@@ -11,6 +11,7 @@ import FormEditor from '../FormEditor';
 import FormSettings from '../FormSettings';
 import SubmissionsTable from '../../SubmissionsTable';
 import ProDowngradeBanner from '../../ProDowngradeBanner';
+import EmptyFormWelcome from '../EmptyFormWelcome';
 import { formUsesProFeatures, getProFeaturesUsed } from '../../../utils/proFeatureDetector';
 import './BuilderCanvasArea.scss';
 
@@ -19,10 +20,12 @@ export default function BuilderCanvasArea({
   fieldGroups,
   fieldDefinitions,
   validationErrors,
+  fieldErrors = {},
   onSchemaChange,
   currentFormId,
   saveError,
   hasValidationErrors,
+  showWelcome = false,
 }) {
   // Detect Pro feature usage and license state
   const usesProFeatures = useMemo(() => formUsesProFeatures(draftSchema), [draftSchema]);
@@ -103,6 +106,7 @@ export default function BuilderCanvasArea({
                 fieldGroups={fieldGroups}
                 fieldDefinitions={fieldDefinitions}
                 validationErrors={validationErrors}
+                fieldErrors={fieldErrors}
                 onChange={onSchemaChange}
                 isReadOnly={isReadOnly}
               />
@@ -111,6 +115,7 @@ export default function BuilderCanvasArea({
               <FormSettings
                 schema={draftSchema}
                 validationErrors={validationErrors}
+                fieldErrors={fieldErrors}
                 onChange={onSchemaChange}
                 isReadOnly={isReadOnly}
               />

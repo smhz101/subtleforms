@@ -73,7 +73,7 @@ function SortableWrapper({
 }
 
 export default function FormBuilder() {
-  // Get all state from context
+  // Get all state from context (including validationErrorsByFieldKey)
   const {
     tree,
     selectedId,
@@ -81,10 +81,15 @@ export default function FormBuilder() {
     setSelectedId,
     actions: { onMove, onDelete, onDuplicate, onRequestInsert },
     validationErrors,
+    validationErrorsByFieldKey: validationErrorsByFieldKeyFromContext,
   } = useBuilder();
 
-  // Build validation errors map
+  // Build validation errors map (fallback if not in context)
   const validationErrorsByFieldKey = useMemo(() => {
+    if (validationErrorsByFieldKeyFromContext && Object.keys(validationErrorsByFieldKeyFromContext).length > 0) {
+      return validationErrorsByFieldKeyFromContext;
+    }
+    
     const map = {};
     if (!Array.isArray(validationErrors)) {
       return map;
@@ -101,7 +106,7 @@ export default function FormBuilder() {
       map[fieldKey].push(message);
     });
     return map;
-  }, [validationErrors]);
+  }, [validationErrors, validationErrorsByFieldKeyFromContext]);
 
   const rootId = getRootNodeId();
 
@@ -167,8 +172,10 @@ export default function FormBuilder() {
     }
 
     const field = nodeToField(tree, nodeId);
+    // Treat both column-containers AND any node that HAS a children array (even empty)
+    // as container nodes so they render with drop zones immediately after being added.
     const isContainerNode =
-      isColumnContainer(node) || (node.children && node.children.length);
+      isColumnContainer(node) || Array.isArray(node.children);
 
     if (isContainerNode) {
       const columns = isColumnContainer(node)

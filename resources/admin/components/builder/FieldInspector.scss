@@ -1,33 +1,42 @@
 /**
- * FieldInspector Component Styles
- * Phase 6: Enhanced settings architecture with improved visual hierarchy
+ * FieldInspector Component Styles - Technical Elegance Design
+ * Field settings panel with warm stone palette + precise typography
+ *
+ * Design Philosophy:
+ * - Warm stone neutrals for settings background
+ * - IBM Plex Serif for elegant section headers
+ * - IBM Plex Mono for technical labels
+ * - Electric lime accents for warnings/active states
+ * - 8px spacing grid
  *
  * SCROLL CONTRACT:
- * - Inspector: Fixed width 320px, overflow: auto (owns vertical scroll)
+ * - Inspector: Fixed width 360px, overflow: auto (owns vertical scroll)
  * - Header: position: sticky, stays at top during scroll
  * - flex-shrink: 0 prevents inspector from collapsing in grid
  */
 
+@use '../../styles/variables' as *;
+
 .sf-field-inspector {
-	background-color: #fafbfc;
-	border-left: 1px solid #e2e8f0;
-	width: 20rem; // Fixed 320px
+	background-color: white;
+	border-left: 1px solid $sf-stone-200;
+	width: 360px; // Fixed width (up from 320px)
 	flex-shrink: 0; // CRITICAL: prevent inspector from shrinking in grid
-	flex-grow: 0; // CRITICAL: prevent inspector from growing - don't steal canvas width
+	flex-grow: 0; // CRITICAL: prevent inspector from growing
 	height: 100%;
 	overflow: auto; // CRITICAL: Inspector owns its vertical scroll
 	/* Custom scrollbar */
 	&::-webkit-scrollbar {
-		width: 6px;
+		width: 8px;
 	}
 	&::-webkit-scrollbar-track {
 		background: transparent;
 	}
 	&::-webkit-scrollbar-thumb {
-		background: #cbd5e1;
-		border-radius: 3px;
+		background: $sf-stone-300;
+		border-radius: $radius-full;
 		&:hover {
-			background: #94a3b8;
+			background: $sf-stone-400;
 		}
 	}
 
@@ -35,10 +44,10 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		background: linear-gradient(to bottom, #ffffff, #fafbfc);
-		padding: 0.875rem 1rem;
-		border-bottom: 1px solid #e2e8f0;
-		box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06);
+		background: white;
+		padding: $space-4;
+		border-bottom: 1px solid $sf-stone-200;
+		box-shadow: $shadow-sm;
 		position: sticky;
 		top: 0;
 		z-index: 10;
@@ -46,60 +55,68 @@
 
 	&__title {
 		font-weight: 700;
-		color: #0f172a;
-		font-size: 0.6875rem;
+		font-family: $sf-font-mono;
+		color: $sf-stone-900;
+		font-size: $font-size-xs;
 		text-transform: uppercase;
-		letter-spacing: 0.08em;
+		letter-spacing: 0.1em;
 	}
 
 	&__close-button {
-		padding: 0.375rem 0.625rem;
+		padding: $space-2 $space-3;
 		min-width: 0;
-		border-radius: 6px;
-		transition: all 180ms ease-out;
-		color: #64748b;
+		border-radius: $radius-md;
+		transition: all $transition-fast;
+		color: $sf-stone-500;
 
 		&:hover:not(:disabled) {
-			color: #0f172a;
-			background-color: #f1f5f9;
+			color: $sf-stone-900;
+			background-color: $sf-stone-100;
 		}
 	}
 
 	&__content {
-		padding: 1rem;
+		padding: $space-4;
 	}
 
 	&__empty {
-		background-color: #ffffff;
-		border-radius: 8px;
-		padding: 2rem 1.5rem;
+		background-color: $sf-stone-50;
+		border: 1px solid $sf-stone-200;
+		border-radius: $radius-lg;
+		padding: $space-8 $space-6;
 		text-align: center;
-		box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.06);
+		box-shadow: $shadow-sm;
 	}
 
 	&__empty-title {
-		margin: 0 0 0.5rem 0;
+		margin: 0 0 $space-2 0;
 		font-weight: 600;
+		font-family: $sf-font-sans;
+		font-size: $font-size-lg;
+		color: $sf-stone-900;
 	}
 
 	&__empty-description {
 		margin: 0;
-		color: #64748b;
-		font-size: 0.875rem;
+		color: $sf-stone-600;
+		font-family: $sf-font-sans;
+		font-size: $font-size-sm;
 		line-height: 1.5;
 	}
 
 	&__empty-paragraph {
-		margin: 0 0 0.75rem 0;
+		margin: 0 0 $space-3 0;
 		font-weight: 600;
-		font-size: 0.9375rem;
-		color: #1e293b;
+		font-size: $font-size-base;
+		font-family: $sf-font-sans;
+		color: $sf-stone-900;
 	}
 
 	&__empty-subtext {
 		margin: 0;
-		color: #64748b;
-		font-size: 0.8125rem;
+		color: $sf-stone-600;
+		font-family: $sf-font-sans;
+		font-size: $font-size-sm;
 		line-height: 1.6;
 	}
 
@@ -110,19 +127,20 @@
 	&__tab-label {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.375rem;
+		gap: $space-2;
+		font-family: $sf-font-sans;
 	}
 
 	&__tab-warning-indicator {
 		display: inline-block;
-		background-color: #ef4444;
-		border-radius: 9999px;
+		background-color: $sf-lime-500;
+		border-radius: $radius-full;
 		width: 0.5rem;
 		height: 0.5rem;
-		animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+		animation: sf-pulse $transition-slow cubic-bezier(0.4, 0, 0.6, 1) infinite;
 	}
 
-	@keyframes pulse {
+	@keyframes sf-pulse {
 		0%,
 		100% {
 			opacity: 1;
@@ -133,46 +151,51 @@
 	}
 
 	&__tab-content {
-		padding: 1rem;
-		background-color: #ffffff;
-		border-radius: 8px;
-		margin-top: 0.75rem;
-		box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+		padding: $space-4;
+		background-color: $sf-stone-50;
+		border: 1px solid $sf-stone-200;
+		border-radius: $radius-lg;
+		margin-top: $space-3;
+		box-shadow: $shadow-xs;
 
 		/* Form controls spacing */
 		> * + * {
-			margin-top: 1rem;
+			margin-top: $space-4;
 		}
 	}
 
 	&__notice-paragraph {
 		margin: 0;
-		font-size: 0.8125rem;
+		font-size: $font-size-sm;
+		font-family: $sf-font-sans;
 		line-height: 1.5;
+		color: $sf-stone-700;
 	}
 
 	&__options-section {
-		margin-top: 1.25rem;
-		padding: 0.875rem;
-		background-color: #f8fafc;
-		border-radius: 6px;
-		border: 1px solid #e2e8f0;
+		margin-top: $space-5;
+		padding: $space-4;
+		background-color: white;
+		border-radius: $radius-lg;
+		border: 1px solid $sf-stone-200;
+		box-shadow: $shadow-xs;
 	}
 
 	&__options-label {
 		display: block;
-		margin-bottom: 0.625rem;
+		margin-bottom: $space-2;
 		font-weight: 700;
-		font-size: 0.6875rem;
-		color: #475569;
+		font-size: $font-size-xs;
+		font-family: $sf-font-mono;
+		color: $sf-stone-700;
 		text-transform: uppercase;
-		letter-spacing: 0.05em;
+		letter-spacing: 0.1em;
 	}
 
 	&__option-row {
 		display: flex;
-		gap: 0.5rem;
-		margin-bottom: 0.625rem;
+		gap: $space-2;
+		margin-bottom: $space-2;
 		align-items: flex-start;
 
 		&:last-child {

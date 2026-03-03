@@ -5,7 +5,7 @@
  * This hook is isolated from UI concerns and publishing logic.
  *
  * @package SubtleForms
- * @version 1.3.1
+ * @version 1.4.0
  */
 
 import { useEffect, useRef } from '@wordpress/element';
@@ -15,9 +15,9 @@ import { apiPost } from '../utils/api';
 /**
  * Autosave configuration
  */
-const AUTOSAVE_DEBOUNCE_MS = 500;
-const AUTOSAVE_RETRY_DELAY_MS = 2000;
-const MAX_RETRY_ATTEMPTS = 3;
+const AUTOSAVE_DEBOUNCE_MS = 3000;       // Wait 3s after last change before saving
+const AUTOSAVE_RETRY_DELAY_MS = 5000;    // 5s between retries
+const MAX_RETRY_ATTEMPTS = 2;            // Max 2 retries (not counting the first attempt)
 
 /**
  * Hook to handle automatic draft saving
@@ -35,6 +35,11 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
   const retryCountRef = useRef(0);
   const lastSchemaRef = useRef(null);
   const latestBuilderStateRef = useRef(builderState);
+
+  // Track when we're rate-limited and should pause all save attempts
+  const rateLimitedUntilRef = useRef(0);
+  // Track if a save is already in flight to prevent concurrent saves
+  const saveInFlightRef = useRef(false);
 
   useEffect(() => {
     latestBuilderStateRef.current = builderState;
@@ -63,15 +68,21 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
       return;
     }
 
-    // Clear any pending autosave
+    // Clear any pending autosave (reset debounce timer on each change)
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
 
-    // Debounce autosave
+    // Debounce autosave - delay is extended if we're currently rate-limited
+    const now = Date.now();
+    const rateLimitedFor = rateLimitedUntilRef.current - now;
+    const delay = rateLimitedFor > 0
+      ? rateLimitedFor + 500  // Wait until rate limit clears + small buffer
+      : AUTOSAVE_DEBOUNCE_MS;
+
     timeoutRef.current = setTimeout(() => {
       performAutosave();
-    }, AUTOSAVE_DEBOUNCE_MS);
+    }, delay);
 
     return () => {
       if (timeoutRef.current) {
@@ -85,68 +96,108 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
    * Perform the actual autosave operation
    */
   const performAutosave = async () => {
-    if (!draftSchema || !formId) {
+    const latest = latestBuilderStateRef.current;
+
+    if (!latest?.draftSchema || !formId) {
       return;
     }
 
-    // Store current schema for retry comparison
-    lastSchemaRef.current = draftSchema;
+    // Prevent concurrent saves
+    if (saveInFlightRef.current) {
+      return;
+    }
+
+    // Check if still rate-limited
+    if (Date.now() < rateLimitedUntilRef.current) {
+      return;
+    }
+
+    // Store current schema snapshot for dirty comparison after save
+    lastSchemaRef.current = latest.draftSchema;
+    saveInFlightRef.current = true;
 
     // Dispatch start action
     dispatch({ type: BUILDER_ACTIONS.START_AUTOSAVE });
 
     try {
-      const { ok, body } = await apiPost(`/forms/${formId}/schema`, {
-        schema: draftSchema,
+      const { ok, status, body } = await apiPost(`/forms/${formId}/schema`, {
+        schema: latest.draftSchema,
         activate: false, // Autosave NEVER activates schema
       });
+
+      saveInFlightRef.current = false;
+
+      // Handle rate limiting (429) specifically
+      if (status === 429) {
+        const retryAfterSeconds = body?.error?.meta?.retry_after || body?.data?.error?.meta?.retry_after || 30;
+        const waitMs = (retryAfterSeconds + 2) * 1000; // Add 2s buffer
+
+        rateLimitedUntilRef.current = Date.now() + waitMs;
+
+        console.warn(`[useDraftAutosave] Rate limited. Pausing autosave for ${retryAfterSeconds + 2}s.`);
+
+        // Dispatch error so UI can show a gentle notice
+        dispatch({
+          type: BUILDER_ACTIONS.AUTOSAVE_ERROR,
+          payload: { error: 'Autosave paused briefly. Your changes are safe.' },
+        });
+
+        // Schedule a single retry after the rate limit clears
+        timeoutRef.current = setTimeout(() => {
+          const current = latestBuilderStateRef.current;
+          if (current?.state === BUILDER_STATES.DIRTY && !saveInFlightRef.current) {
+            performAutosave();
+          }
+        }, waitMs + 500);
+
+        return;
+      }
 
       if (!ok) {
         const message = body?.message || body?.data?.message || 'Failed to autosave';
         throw new Error(message);
       }
 
-      // Reset retry count on success
+      // Success - reset counters
       retryCountRef.current = 0;
+      rateLimitedUntilRef.current = 0;
 
-      // Check if user made changes during autosave
-      const stillDirty = lastSchemaRef.current !== builderState.draftSchema;
+      // Check if user made changes during the save
+      const currentLatest = latestBuilderStateRef.current;
+      const stillDirty = currentLatest?.draftSchema !== lastSchemaRef.current;
 
       dispatch({
         type: BUILDER_ACTIONS.AUTOSAVE_SUCCESS,
         payload: { stillDirty },
       });
+
     } catch (error) {
+      saveInFlightRef.current = false;
       console.error('[useDraftAutosave] Save failed:', error);
 
-      // Increment retry count
       retryCountRef.current += 1;
 
-      // Dispatch error
       dispatch({
         type: BUILDER_ACTIONS.AUTOSAVE_ERROR,
         payload: { error: error.message },
       });
 
-      // Retry if under max attempts
+      // Exponential backoff retry (only for non-rate-limit errors)
       if (retryCountRef.current < MAX_RETRY_ATTEMPTS) {
+        const backoffMs = AUTOSAVE_RETRY_DELAY_MS * retryCountRef.current;
         console.log(
-          `[useDraftAutosave] Retrying in ${AUTOSAVE_RETRY_DELAY_MS}ms (attempt ${
-            retryCountRef.current + 1
-          }/${MAX_RETRY_ATTEMPTS})`
+          `[useDraftAutosave] Retrying in ${backoffMs}ms (attempt ${retryCountRef.current + 1}/${MAX_RETRY_ATTEMPTS})`
         );
 
-        setTimeout(() => {
-          const latest = latestBuilderStateRef.current;
-
-          // Only retry if still in dirty state
-          if (latest?.state === BUILDER_STATES.DIRTY) {
+        timeoutRef.current = setTimeout(() => {
+          const current = latestBuilderStateRef.current;
+          if (current?.state === BUILDER_STATES.DIRTY && !saveInFlightRef.current) {
             performAutosave();
           }
-        }, AUTOSAVE_RETRY_DELAY_MS);
+        }, backoffMs);
       } else {
-        console.error('[useDraftAutosave] Max retry attempts reached');
-        retryCountRef.current = 0; // Reset for next time
+        console.error('[useDraftAutosave] Max retry attempts reached. Will retry on next change.');
+        retryCountRef.current = 0; // Reset so the next user change can trigger autosave again
       }
     }
   };
@@ -159,6 +210,9 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
       clearTimeout(timeoutRef.current);
       timeoutRef.current = null;
     }
+    // Reset rate limit block for forced saves
+    rateLimitedUntilRef.current = 0;
+    retryCountRef.current = 0;
     performAutosave();
   };
 

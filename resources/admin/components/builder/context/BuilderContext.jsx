@@ -1,86 +1,114 @@
 /**
- * BuilderContext
+ * BuilderContext - Convenience Hooks
  *
- * Internal context for builder components to access shared state and commands.
- * This eliminates prop drilling within the builder while keeping external APIs unchanged.
+ * Provides easy-to-use hooks that compose the underlying split contexts.
+ * Components should prefer specific hooks (useTree, useSelection, etc.) over useBuilder()
+ * to minimize re-renders.
  *
- * IMPORTANT: This context is INTERNAL to builder components only.
- * External pages/APIs must continue using FormEditor's props interface.
+ * PERFORMANCE NOTE:
+ * - useBuilder() subscribes to ALL contexts and re-renders on any change
+ * - Use specific hooks (useBuilderTree, useBuilderSelection, etc.) when possible
+ * - Only use useBuilder() if you truly need access to everything
  */
 
-import { createContext, useContext } from '@wordpress/element';
+import { useTree } from './TreeContext';
+import { useSelection } from './SelectionContext';
+import { useValidation } from './ValidationContext';
+import { useCommands } from './CommandsContext';
+import { useConfig } from './ConfigContext';
 
 /**
- * BuilderContext provides:
- * - tree: Current schema tree structure
- * - selectedId: Currently selected node ID
- * - selectedStepId: Currently selected step ID (for multi-step forms)
- * - validationErrors: Array of validation errors
- * - fieldDefinitions: Map of field type definitions
- * - commands: Object containing all mutation commands
- *   - insertNode(tree, command)
- *   - deleteNode(tree, command)
- *   - updateNodeConfig(tree, command)
- *   - moveNode(tree, command)
- *   - duplicateNode(tree, command)
- * - actions: Object containing UI state actions
- *   - setSelectedId(id)
- *   - setSelectedStepId(id)
- *   - onInsert(type, context)
- *   - onDelete(nodeId)
- *   - onUpdate(nodeId, changes)
- *   - onMove(nodeId, destination)
- *   - onDuplicate(nodeId, destination)
- */
-export const BuilderContext = createContext(null);
-
-/**
- * Hook to access BuilderContext
- * @throws {Error} if used outside BuilderProvider
+ * Hook to access ALL builder state and commands.
+ * 
+ * ⚠️ WARNING: This hook re-renders on ANY context change.
+ * Prefer specific hooks when you only need part of the state.
+ * 
+ * @returns {Object} Complete builder context
  */
 export function useBuilder() {
-  const context = useContext(BuilderContext);
+	const tree = useTree();
+	const selection = useSelection();
+	const validation = useValidation();
+	const commands = useCommands();
+	const config = useConfig();
 
-  if (!context) {
-    throw new Error(
-      'useBuilder must be used within BuilderProvider. ' +
-        'This is an internal builder hook and should only be used in builder components.'
-    );
-  }
+	return {
+		// Tree state
+		tree,
 
-  return context;
+		// Selection state & actions
+		selectedId: selection.selectedId,
+		setSelectedId: selection.setSelectedId,
+		selectedStepId: selection.selectedStepId,
+		setSelectedStepId: selection.setSelectedStepId,
+
+		// Validation state
+		validationErrors: validation.validationErrors,
+		validationErrorsByFieldKey: validation.validationErrorsByFieldKey,
+
+		// Config
+		fieldDefinitions: config.fieldDefinitions,
+		formType: config.formType,
+		isReadOnly: config.isReadOnly,
+
+		// Commands
+		commands: commands.commands,
+		actions: commands.actions,
+	};
 }
 
 /**
- * Hook to access only the tree state
- * Useful for read-only components
+ * Hook to access only the tree state.
+ * Re-renders only when the schema tree changes.
+ * 
+ * @returns {Object} Schema tree
  */
 export function useBuilderTree() {
-  const { tree } = useBuilder();
-  return tree;
+	return useTree();
 }
 
 /**
- * Hook to access only the selection state
+ * Hook to access only the selection state.
+ * Re-renders only when selection changes (frequent).
+ * 
+ * @returns {Object} Selection state and setters
  */
 export function useBuilderSelection() {
-  const { selectedId, selectedStepId, setSelectedId, setSelectedStepId } =
-    useBuilder();
-  return { selectedId, selectedStepId, setSelectedId, setSelectedStepId };
+	return useSelection();
 }
 
 /**
- * Hook to access only the command methods
- */
-export function useBuilderCommands() {
-  const { commands, actions } = useBuilder();
-  return { ...commands, ...actions };
-}
-
-/**
- * Hook to access only validation state
+ * Hook to access only validation state.
+ * Re-renders only when validation errors change.
+ * 
+ * @returns {Object} Validation errors
  */
 export function useBuilderValidation() {
-  const { validationErrors } = useBuilder();
-  return validationErrors;
+	return useValidation();
 }
+
+/**
+ * Hook to access only command methods.
+ * Never re-renders (commands are stable).
+ * 
+ * @returns {Object} Command functions and action handlers
+ */
+export function useBuilderCommands() {
+	const commands = useCommands();
+	return { ...commands.commands, ...commands.actions };
+}
+
+/**
+ * Hook to access only config state.
+ * Re-renders only when config changes (rare).
+ * 
+ * @returns {Object} Field definitions, form type, read-only state
+ */
+export function useBuilderConfig() {
+	return useConfig();
+}
+
+// Legacy exports for backward compatibility
+// Deprecated: Use split contexts instead
+export { useBuilder as default };
+

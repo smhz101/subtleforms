@@ -30,11 +30,28 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
   // Load field definitions from API
   useEffect(() => {
     Promise.all([apiGet('/fields?grouped=true'), apiGet('/settings')]).then(
-      ([fieldsRes, settingsRes]) => {
+      async ([fieldsRes, settingsRes]) => {
         if (!fieldsRes.ok) {
-          console.error('Failed to load field definitions');
-          setLoadingFields(false);
-          return;
+          console.warn('Failed to load grouped field definitions, attempting fallback to ungrouped endpoint', fieldsRes);
+          // Try fallback to ungrouped fields endpoint and categorize on the client
+          const fallback = await apiGet('/fields');
+          if (!fallback.ok) {
+            console.error('Fallback /fields failed, cannot load fields', fallback);
+            setLoadingFields(false);
+            return;
+          }
+
+          // Build grouped structure from ungrouped list
+          const ungrouped = Array.isArray(fallback.body) ? fallback.body : [];
+          const fallbackGroups = {};
+          ungrouped.forEach((f) => {
+            const cat = f.category || 'general';
+            if (!fallbackGroups[cat]) fallbackGroups[cat] = [];
+            fallbackGroups[cat].push(f);
+          });
+
+          // Replace fieldsRes.body with fallback grouped structure for the rest of the logic
+          fieldsRes.body = fallbackGroups;
         }
 
         const settingsData = settingsRes.ok ? settingsRes.body : {};
@@ -43,8 +60,25 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
         // Transform API response to component format
         const groups = {};
         const definitions = {};
-        Object.entries(fieldsRes.body).forEach(([category, categoryFields]) => {
-          groups[category] = categoryFields.map((field) => {
+        if (!fieldsRes.ok) {
+          console.error('Failed to load fields from API:', fieldsRes);
+        }
+
+        // Extract field groups from the 'data' wrapper if it exists
+        const fieldGroupsData = fieldsRes.body?.data || fieldsRes.body || {};
+        const entries = Object.entries(fieldGroupsData);
+        if (entries.length === 0) {
+          console.warn('Fields API returned empty groups or invalid payload:', fieldGroupsData);
+        }
+
+        entries.forEach(([category, categoryFields]) => {
+          // Defensive: categoryFields must be an array; if not, coerce to an empty array and warn
+          const items = Array.isArray(categoryFields) ? categoryFields : [];
+          if (!Array.isArray(categoryFields)) {
+            console.warn('Invalid field group from API, expected array for category:', category, categoryFields);
+          }
+
+          groups[category] = items.map((field) => {
             definitions[field.type] = field;
             return {
               type: field.type,
@@ -142,7 +176,9 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
         return;
       }
 
-      const rawPayload = schemaRes.body?.schema ?? schemaRes.body ?? {};
+      // API wraps responses in { data: ... } — unwrap before extracting the schema
+      const responseBody = schemaRes.body?.data ?? schemaRes.body ?? {};
+      const rawPayload = responseBody?.schema ?? responseBody ?? {};
       const payload = rawPayload && typeof rawPayload === 'object' ? { ...rawPayload } : {};
 
       // Ensure fields array exists
@@ -153,7 +189,7 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
       if (!payload.metadata.name) payload.metadata.name = 'form_schema';
 
       // Load title from form metadata if available
-      const loadedTitle = schemaRes.body?.form?.title || payload.metadata?.title;
+      const loadedTitle = responseBody?.form?.title || payload.metadata?.title;
       if (loadedTitle) {
         payload.metadata.title = loadedTitle;
       } else if (!payload.metadata.title) {

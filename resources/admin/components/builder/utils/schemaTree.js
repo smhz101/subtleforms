@@ -208,28 +208,48 @@ export function nodeToField(tree, nodeId) {
   return buildField(nodeId, tree);
 }
 
+/**
+ * Maps English word-names used by the PHP column registration to integer counts.
+ * The PHP loop runs: $createColumnContainer( $name ) where $name is 'one', 'two', etc.
+ * So fieldSpecificAttributes.columns is the string name, not an integer.
+ */
+const COLUMN_WORD_TO_NUM = { one: 1, two: 2, three: 3, four: 4, five: 5, six: 6 };
+
 export function createNodeFromDefinition(definition, existingKeys = new Set()) {
   const id = createNodeId();
   const key = createFieldKey(definition.type, existingKeys);
+
+  // Merge defaults: fieldSpecificAttributes (API) takes precedence over the legacy defaultConfig key
+  const defaults = {
+    ...(definition.fieldSpecificAttributes || {}),
+    ...(definition.defaultConfig || {}),
+  };
+
   const node = {
     id,
     type: definition.type,
     kind: definition.kind || 'input',
     parentId: null,
     config: {
-      ...definition.defaultConfig,
+      ...defaults,
       id,
       type: definition.type,
       kind: definition.kind || 'input',
       key,
-      label:
-        definition.defaultConfig?.label || definition.label || __('Untitled Field', 'subtleforms'),
+      label: defaults.label || definition.label || __('Untitled Field', 'subtleforms'),
     },
   };
 
   if (definition.acceptsChildren) {
     if (isColumnContainerType(definition.type)) {
-      const columnCount = parseInt(definition.defaultConfig?.columns, 10) || 1;
+      // Derive column count:
+      // 1. Look up the word prefix from the type name (most reliable)
+      // 2. Fall back to the numeric columns attribute if it is already an integer
+      const typePrefix = definition.type.replace(COLUMN_CONTAINER_SUFFIX, '');
+      const columnCount =
+        COLUMN_WORD_TO_NUM[typePrefix] ||
+        parseInt(defaults.columns, 10) ||
+        1;
       node.columns = Array.from({ length: columnCount }, () => []);
     } else {
       node.children = [];

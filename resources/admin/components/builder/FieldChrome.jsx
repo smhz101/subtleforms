@@ -1,10 +1,16 @@
-import { useState } from '@wordpress/element';
+import { useState, memo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import FieldToolbar from './FieldToolbar';
 import './FieldChrome.scss';
 
-export default function FieldChrome({
+/**
+ * FieldChrome - Memoized field container with toolbar
+ * 
+ * Wrapped in memo() to prevent re-renders when unrelated fields change selection.
+ * Only re-renders when its own props change (isSelected, validationMessages, etc.).
+ */
+const FieldChrome = memo(function FieldChrome({
   children,
   isSelected,
   onSelect,
@@ -64,4 +70,6 @@ export default function FieldChrome({
       />
     </div>
   );
-}
+});
+
+export default FieldChrome;

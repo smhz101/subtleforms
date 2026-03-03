@@ -14,7 +14,13 @@ import { __ } from '@wordpress/i18n';
 /**
  * FormSettings - Configure form-wide settings including payment options
  */
-export default function FormSettings({ schema, onChange, isReadOnly = false }) {
+export default function FormSettings({ 
+  schema, 
+  onChange, 
+  validationErrors = [], 
+  fieldErrors = {}, 
+  isReadOnly = false 
+}) {
   const metadata = schema?.metadata || {};
   const formType = metadata.type || 'regular';
   const isPaymentForm = formType === 'payment';

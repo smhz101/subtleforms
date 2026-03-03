@@ -215,6 +215,8 @@ export const initialBuilderState = {
 
   // Task 5.5: Structured schema validation errors
   validationErrors: [],
+  // Field-level validation errors: { fieldId: 'error message' }
+  fieldErrors: {},
 
   // Operation flags
   loading: true,
@@ -227,6 +229,14 @@ export const initialBuilderState = {
   error: null,
   saveError: null,
   autoSaveError: null,
+  
+  // Rate limiting state
+  isRateLimited: false,
+  rateLimitRetryAfter: null,
+  
+  // Conflict state (optimistic locking)
+  hasConflict: false,
+  conflictData: null,
 
   // Metadata
   lastSaveTime: null,
@@ -487,16 +497,23 @@ function builderReducer(state, action) {
     // SET_VALIDATION_ERRORS (TASK 5.5)
     // Does not change FSM state; used to show validation issues while keeping
     // autosave and editing flow intact.
+    // Supports both form-level errors and field-level errors.
     // ------------------------------------------------------------------------
     case BUILDER_ACTIONS.SET_VALIDATION_ERRORS: {
       const nextErrors = Array.isArray(action.payload?.validationErrors)
         ? action.payload.validationErrors
         : [];
+      
+      // Extract field-level errors from payload
+      const nextFieldErrors = action.payload?.fieldErrors || {};
 
       return {
         ...state,
         validationErrors: nextErrors,
+        fieldErrors: nextFieldErrors,
         saveError: null,
+        isRateLimited: false,
+        hasConflict: false,
       };
     }
 
@@ -553,13 +570,21 @@ function builderReducer(state, action) {
           return state;
         }
       }
+      
+      const error = action.payload.error;
 
       return {
         ...state,
         state: nextState,
         autoSaving: false,
-        autoSaveError: action.payload.error,
+        autoSaveError: error,
         isDirty: true,
+        // Set rate limit state if error is rate limited
+        isRateLimited: error?.isRateLimited || false,
+        rateLimitRetryAfter: error?.retryAfter || null,
+        // Set field errors if validation error
+        fieldErrors: error?.fields || state.fieldErrors,
+        validationErrors: error?.isValidationError ? [error.message] : state.validationErrors,
       };
     }
 
@@ -610,6 +635,7 @@ function builderReducer(state, action) {
     // PUBLISH_ERROR
     // ------------------------------------------------------------------------
     case BUILDER_ACTIONS.PUBLISH_ERROR: {
+      const error = action.payload?.error;
       const hasValidationErrors =
         Array.isArray(action.payload?.validationErrors) &&
         action.payload.validationErrors.length > 0;
@@ -630,10 +656,21 @@ function builderReducer(state, action) {
         state: nextState,
         publishing: false,
         saving: false,
-        saveError: hasValidationErrors ? null : action.payload.error,
+        saveError: hasValidationErrors ? null : error,
         validationErrors: hasValidationErrors
           ? action.payload.validationErrors
           : state.validationErrors,
+        // Set field errors from validation error
+        fieldErrors: error?.fields || {},
+        // Set rate limit state
+        isRateLimited: error?.isRateLimited || false,
+        rateLimitRetryAfter: error?.retryAfter || null,
+        // Set conflict state for optimistic locking
+        hasConflict: error?.isConflict || false,
+        conflictData: error?.isConflict ? {
+          currentETag: error.currentETag,
+          providedIfMatch: error.providedIfMatch,
+        } : null,
       };
     }
 
@@ -701,6 +738,12 @@ function builderReducer(state, action) {
         error: null,
         saveError: null,
         autoSaveError: null,
+        validationErrors: [],
+        fieldErrors: {},
+        isRateLimited: false,
+        rateLimitRetryAfter: null,
+        hasConflict: false,
+        conflictData: null,
       };
     }
 

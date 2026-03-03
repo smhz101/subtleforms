@@ -1,15 +1,21 @@
 /**
- * FormEditor Component Styles
+ * FormEditor Component Styles - Technical Elegance Design
  * Three-column builder layout: FieldDock, Canvas, Inspector
+ *
+ * Design Philosophy:
+ * - Warm stone neutrals with electric lime accents
+ * - Generous spacing following 8px grid
+ * - Soft, layered shadows for depth
+ * - Precise transitions for all interactions
  *
  * SCROLL CONTRACT:
  * - FormEditor: overflow: hidden (no scroll at root)
  * - FieldDock: Independent vertical scroll (overflow-y: auto)
  * - Canvas: Independent vertical scroll (overflow-y: auto)
  * - Inspector: Independent vertical scroll (overflow-y: auto)
- * - All panels use flex-shrink: 0 to prevent collapse
- * - Canvas uses min-width: 0 to allow grid shrinking
  */
+
+@use '../../styles/variables' as *;
 
 // Responsive Breakpoints
 $breakpoint-desktop: 1200px;
@@ -18,62 +24,65 @@ $breakpoint-tablet: 768px;
 .sf-form-editor {
 	// Root horizontal CSS Grid container
 	display: grid;
-	grid-template-columns: 280px 1fr 320px;
+	grid-template-columns: 280px 1fr 360px;
 	width: 100%;
 	height: 100%;
-	background-color: #fff;
+	background-color: $sf-stone-50;
 	overflow: hidden; // CRITICAL: No scrolling at form editor level
+	font-family: $sf-font-sans;
 
 	/* CRITICAL: When dock is collapsed, adjust grid to expand canvas */
 	&--dock-collapsed {
-		grid-template-columns: 48px 1fr 320px;
+		grid-template-columns: 48px 1fr 360px;
 	}
 
 	/* Read-only mode: Hide dock, expand canvas */
 	&--read-only {
-		grid-template-columns: 1fr 320px;
-		
+		grid-template-columns: 1fr 360px;
+
 		.sf-form-editor__canvas {
 			opacity: 0.9;
-			pointer-events: none; // Disable all interactions in canvas
+			pointer-events: none;
 			user-select: none;
 		}
 	}
 
 	// Left panel: Field Dock (FIXED WIDTH 280px)
 	&__dock {
-		// FieldDock component handles its own height and scrolling
 		display: flex;
 		flex-direction: column;
 		overflow: hidden; // CRITICAL: Wrapper doesn't scroll, FieldDock__content does
+		background: white;
+		border-right: 1px solid $sf-stone-200;
 	}
 
 	// Center panel: Canvas (FLEXIBLE 1fr - takes remaining space)
 	&__canvas {
-		// Grid child gets 1fr, flex container for internal layout
 		display: flex;
 		flex-direction: column;
-		background-color: #f3f4f6;
+		background-color: var(--sf-canvas-bg, #{$sf-stone-50});
 		overflow: hidden; // CRITICAL: No scroll at canvas wrapper level
 		min-width: 0; // CRITICAL: allows grid cell to shrink if needed
 
 		// Step navigator bar (multi-step forms)
 		&-step-nav {
 			flex-shrink: 0;
-			background-color: #fff;
-			border-bottom: 1px solid #d1d5db;
+			background-color: white;
+			border-bottom: 1px solid $sf-stone-200;
+			padding: $space-3 $space-4;
 		}
 
 		// Tip bar (contextual help)
 		&-tip {
 			flex-shrink: 0;
-			background-color: #fff;
-			border-bottom: 1px solid #e5e7eb;
-			padding: 0.5rem 1rem;
+			background-color: rgba(132, 204, 22, 0.05);
+			border-bottom: 1px solid rgba(132, 204, 22, 0.2);
+			padding: $space-2 $space-4;
 
 			&-text {
-				color: #6b7280;
-				font-size: 0.75rem;
+				color: $sf-stone-700;
+				font-size: $font-size-sm;
+				font-weight: 500;
 			}
 		}
 
@@ -83,18 +92,48 @@ $breakpoint-tablet: 768px;
 			min-height: 0; // CRITICAL: allow proper flex shrinking
 			overflow-y: auto; // CRITICAL: Canvas vertical scroll ownership
 			overflow-x: hidden;
+
+			// Custom scrollbar
+			&::-webkit-scrollbar {
+				width: 8px;
+			}
+			&::-webkit-scrollbar-track {
+				background: $sf-stone-100;
+			}
+			&::-webkit-scrollbar-thumb {
+				background: $sf-stone-300;
+				border-radius: $radius-full;
+				&:hover {
+					background: $sf-stone-400;
+				}
+			}
 		}
 	}
 
-	// Right panel: Inspector (FIXED WIDTH 320px)
+	// Right panel: Inspector (FIXED WIDTH 360px)
 	&__inspector {
-		width: 320px;
+		width: 360px;
 		flex-shrink: 0; // CRITICAL: prevent shrinking
-		flex-grow: 0; // CRITICAL: prevent growing - don't steal canvas width
-		background-color: #fff;
-		border-left: 1px solid #d1d5db;
+		flex-grow: 0; // CRITICAL: prevent growing
+		background-color: white;
+		border-left: 1px solid $sf-stone-200;
 		max-height: 100%;
 		overflow-y: auto; // CRITICAL: Inspector vertical scroll ownership
+
+		// Custom scrollbar
+		&::-webkit-scrollbar {
+			width: 8px;
+		}
+		&::-webkit-scrollbar-track {
+			background: $sf-stone-50;
+		}
+		&::-webkit-scrollbar-thumb {
+			background: $sf-stone-300;
+			border-radius: $radius-full;
+			&:hover {
+				background: $sf-stone-400;
+			}
+		}
 	}
 
 	// RESPONSIVE: Tablet Layout (< 1200px)
@@ -122,9 +161,9 @@ $breakpoint-tablet: 768px;
 			bottom: 0;
 			z-index: 100;
 			transform: translateX(-100%);
-			transition: transform 300ms ease-out;
+			transition: transform $transition-base;
+			box-shadow: $shadow-2xl;
 
-			// CSS Hook: Show when toggled (for future JS implementation)
 			&.is-open {
 				transform: translateX(0);
 			}
@@ -143,67 +182,66 @@ $breakpoint-tablet: 768px;
 			bottom: 0;
 			z-index: 100;
 			transform: translateX(100%);
-			transition: transform 300ms ease-out;
+			transition: transform $transition-base;
+			box-shadow: $shadow-2xl;
 
-			// CSS Hook: Show when toggled (for future JS implementation)
 			&.is-open {
 				transform: translateX(0);
 			}
-		}
-
-		// CSS Hook: Add backdrop when panels are open
-		&.has-panel-open::before {
-			content: '';
-			position: fixed;
-			inset: 0;
-			background-color: rgba(0, 0, 0, 0.5);
-			z-index: 99;
 		}
 	}
 }
 
 // Field picker popover
 .sf-field-picker-popover {
-	padding: 1rem;
+	padding: $space-4;
 	min-width: 240px;
 	max-height: 400px;
 	overflow: auto;
 
 	&__title {
-		margin: 0 0 0.75rem 0;
+		margin: 0 0 $space-3 0;
 		font-weight: 600;
-		font-size: 0.875rem;
+		font-size: $font-size-base;
+		font-family: $sf-font-sans;
+		color: $sf-stone-900;
 	}
 
 	&__category {
-		margin-bottom: 1rem;
+		margin-bottom: $space-4;
 	}
 
 	&__category-label {
-		font-size: 0.6875rem;
+		font-size: $font-size-xs;
 		line-height: 1rem;
-		font-weight: 600;
-		color: #6b7280;
+		font-weight: 700;
+		font-family: $sf-font-mono;
+		color: $sf-stone-600;
 		text-transform: uppercase;
-		margin-bottom: 0.5rem;
+		letter-spacing: 0.05em;
+		margin-bottom: $space-2;
 	}
 
 	&__button {
-		background-color: #f9fafb;
-		margin-bottom: 0.25rem;
-		padding: 0.5rem 0.625rem;
-		border: 1px solid #d1d5db;
+		background-color: $sf-stone-50;
+		margin-bottom: $space-1;
+		padding: $space-2 $space-3;
+		border: 1px solid $sf-stone-200;
+		border-radius: $radius-md;
 		width: 100%;
-		color: #111827;
-		font-size: 0.75rem;
+		color: $sf-stone-900;
+		font-size: $font-size-sm;
+		font-family: $sf-font-sans;
 		text-align: left;
-		transition: all 150ms;
+		transition: all $transition-fast;
 		cursor: pointer;
 
 		&:hover {
-			background-color: #2563eb;
-			border-color: #2563eb;
-			color: #ffffff;
+			background-color: $sf-lime-500;
+			border-color: $sf-lime-600;
+			color: white;
+			box-shadow: $shadow-lime;
+			transform: translateY(-1px);
 		}
 	}
 }

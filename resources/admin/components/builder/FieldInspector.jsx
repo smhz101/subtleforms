@@ -1,15 +1,13 @@
-import {
-  Button,
-  TextControl,
-  TabPanel,
-  CheckboxControl,
-  ToggleControl,
-  Notice,
-} from '@wordpress/components';
+import { Button, TabPanel, Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import ConditionEditor from './ConditionEditor';
 import { useBuilder } from './context/BuilderContext';
-import { PanelSection } from '../../ui';
+import {
+  GeneralSettingsPanel,
+  OptionsPanel,
+  CompositeFieldPanel,
+  ValidationPanel,
+} from './inspector/panels';
 
 export default function FieldInspector({ field, allFields, isReadOnly = false }) {
   const { setSelectedId, actions, validationErrors, selectedId } = useBuilder();
@@ -104,266 +102,29 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
                 <div className='sf-field-inspector__tab-content'>
                   {tab.name === 'general' && (
                     <>
-                      {field.type === 'step' ? (
-                        <>
-                          <TextControl
-                            label={__('Step Title', 'subtleforms')}
-                            value={field.title || ''}
-                            onChange={(v) => handleUpdate({ title: v })}
-                            help={__(
-                              'Title shown in step navigation',
-                              'subtleforms'
-                            )}
-                          />
-                          <TextControl
-                            label={__('Description', 'subtleforms')}
-                            value={field.description || ''}
-                            onChange={(v) => handleUpdate({ description: v })}
-                            help={__(
-                              'Optional description for this step',
-                              'subtleforms'
-                            )}
-                          />
-                        </>
-                      ) : field.type.endsWith('_column_container') ||
-                        field.type === 'repeat_container' ||
-                        field.type === 'group_container' ? (
-                        <>
-                          {field.type.endsWith('_column_container') && (
-                            <TextControl
-                              label={__('Columns', 'subtleforms')}
-                              value={field.columns}
-                              readOnly
-                              help={__('Number of columns', 'subtleforms')}
-                            />
-                          )}
-                          {field.type === 'repeat_container' && (
-                            <PanelSection
-                              title={__('Repeater Settings', 'subtleforms')}
-                              initialOpen={true}>
-                              <TextControl
-                                label={__('Button Label', 'subtleforms')}
-                                value={field.buttonLabel || ''}
-                                onChange={(v) =>
-                                  handleUpdate({ buttonLabel: v })
-                                }
-                              />
-                              <TextControl
-                                label={__('Min Repeats', 'subtleforms')}
-                                type='number'
-                                value={field.min || 1}
-                                onChange={(v) =>
-                                  handleUpdate({ min: parseInt(v, 10) })
-                                }
-                              />
-                              <TextControl
-                                label={__('Max Repeats', 'subtleforms')}
-                                type='number'
-                                value={field.max || 5}
-                                onChange={(v) =>
-                                  handleUpdate({ max: parseInt(v, 10) })
-                                }
-                              />
-                            </PanelSection>
-                          )}
-                          <PanelSection
-                            title={__('Layout', 'subtleforms')}
-                            initialOpen={false}
-                            variant="subtle">
-                            <TextControl
-                              label={__('Spacing (px)', 'subtleforms')}
-                              type='number'
-                              value={field.spacing ?? ''}
-                              onChange={(v) => {
-                                const next = parseInt(v, 10);
-                                handleUpdate({
-                                  spacing: Number.isNaN(next) ? 0 : next,
-                                });
-                              }}
-                            />
-                          </PanelSection>
-                        </>
-                      ) : (
-                        <>
-                          <TextControl
-                            label={__('Field Label', 'subtleforms')}
-                            value={field.label || ''}
-                            onChange={(v) => handleUpdate({ label: v })}
-                            help={__(
-                              'The label displayed above the field',
-                              'subtleforms'
-                            )}
-                          />
-                          <TextControl
-                            label={__('Placeholder Text', 'subtleforms')}
-                            value={field.placeholder || ''}
-                            onChange={(v) => handleUpdate({ placeholder: v })}
-                            help={__(
-                              'Hint text shown inside the field',
-                              'subtleforms'
-                            )}
-                          />
-                          
-                          <PanelSection
-                            title={__('Advanced', 'subtleforms')}
-                            initialOpen={false}
-                            variant="subtle">
-                            <TextControl
-                              label={__('Field Key', 'subtleforms')}
-                              value={field.key || ''}
-                              disabled
-                              help={__(
-                                'Unique identifier for data mapping',
-                                'subtleforms'
-                              )}
-                            />
-                          </PanelSection>
-                        </>
-                      )}
-
-                      {/* Options editor for choice fields */}
-                      {(field.type === 'radio' ||
-                        field.type === 'multiple_choice' ||
-                        field.type === 'dropdown') && (
-                        <div className='sf-field-inspector__options-section'>
-                          <label className='sf-field-inspector__options-label'>
-                            {__('Options', 'subtleforms')}
-                          </label>
-                          {(field.options || []).map((opt, idx) => (
-                            <div
-                              key={idx}
-                              className='sf-field-inspector__option-row'>
-                              <TextControl
-                                value={opt.label}
-                                onChange={(v) => {
-                                  const newOptions = [...(field.options || [])];
-                                  newOptions[idx] = { ...opt, label: v };
-                                  handleUpdate({ options: newOptions });
-                                }}
-                                placeholder={__('Option label', 'subtleforms')}
-                              />
-                              <Button
-                                isSmall
-                                isDestructive
-                                onClick={() => {
-                                  const newOptions = [...(field.options || [])];
-                                  newOptions.splice(idx, 1);
-                                  handleUpdate({ options: newOptions });
-                                }}>
-                                ×
-                              </Button>
-                            </div>
-                          ))}
-                          <Button
-                            isSecondary
-                            isSmall
-                            onClick={() => {
-                              const newOptions = [
-                                ...(field.options || []),
-                                {
-                                  label: `Option ${
-                                    (field.options?.length || 0) + 1
-                                  }`,
-                                  value: `option_${Date.now()}`,
-                                },
-                              ];
-                              handleUpdate({ options: newOptions });
-                            }}>
-                            {__('+ Add Option', 'subtleforms')}
-                          </Button>
-                        </div>
-                      )}
-
-                      {/* Name Group Field Config */}
-                      {field.type === 'name_group' && (
-                        <PanelSection
-                          title={__('Name Parts', 'subtleforms')}
-                          initialOpen={false}>
-                          <ToggleControl
-                            label={__('First Name', 'subtleforms')}
-                            checked={field.enable_first_name !== false}
-                            onChange={(v) =>
-                              handleUpdate({ enable_first_name: v })
-                            }
-                          />
-                          <ToggleControl
-                            label={__('Middle Name', 'subtleforms')}
-                            checked={!!field.enable_middle_name}
-                            onChange={(v) =>
-                              handleUpdate({ enable_middle_name: v })
-                            }
-                          />
-                          <ToggleControl
-                            label={__('Last Name', 'subtleforms')}
-                            checked={field.enable_last_name !== false}
-                            onChange={(v) =>
-                              handleUpdate({ enable_last_name: v })
-                            }
-                          />
-                        </PanelSection>
-                      )}
-
-                      {/* Address Group Field Config */}
-                      {field.type === 'address_group' && (
-                        <PanelSection
-                          title={__('Address Parts', 'subtleforms')}
-                          initialOpen={false}>
-                          <ToggleControl
-                            label={__('Street Address', 'subtleforms')}
-                            checked={field.enable_street1 !== false}
-                            onChange={(v) =>
-                              handleUpdate({ enable_street1: v })
-                            }
-                          />
-                          <ToggleControl
-                            label={__('Street Address Line 2', 'subtleforms')}
-                            checked={field.enable_street2 !== false}
-                            onChange={(v) =>
-                              handleUpdate({ enable_street2: v })
-                            }
-                          />
-                          <ToggleControl
-                            label={__('City', 'subtleforms')}
-                            checked={field.enable_city !== false}
-                            onChange={(v) => handleUpdate({ enable_city: v })}
-                          />
-                          <ToggleControl
-                            label={__('State / Province', 'subtleforms')}
-                            checked={field.enable_state !== false}
-                            onChange={(v) => handleUpdate({ enable_state: v })}
-                          />
-                          <ToggleControl
-                            label={__('Postal Code', 'subtleforms')}
-                            checked={field.enable_postal_code !== false}
-                            onChange={(v) =>
-                              handleUpdate({ enable_postal_code: v })
-                            }
-                          />
-                          <ToggleControl
-                            label={__('Country', 'subtleforms')}
-                            checked={field.enable_country !== false}
-                            onChange={(v) =>
-                              handleUpdate({ enable_country: v })
-                            }
-                          />
-                        </PanelSection>
-                      )}
+                      <GeneralSettingsPanel
+                        field={field}
+                        onUpdate={handleUpdate}
+                        isReadOnly={isReadOnly}
+                      />
+                      <OptionsPanel
+                        field={field}
+                        onUpdate={handleUpdate}
+                        isReadOnly={isReadOnly}
+                      />
+                      <CompositeFieldPanel
+                        field={field}
+                        onUpdate={handleUpdate}
+                        isReadOnly={isReadOnly}
+                      />
                     </>
                   )}
                   {tab.name === 'validation' && (
-                    <>
-                      <CheckboxControl
-                        label={__('Required Field', 'subtleforms')}
-                        checked={!!field.required}
-                        onChange={(checked) =>
-                          handleUpdate({ required: checked })
-                        }
-                        help={__(
-                          'User must fill this field to submit',
-                          'subtleforms'
-                        )}
-                      />
-                    </>
+                    <ValidationPanel
+                      field={field}
+                      onUpdate={handleUpdate}
+                      isReadOnly={isReadOnly}
+                    />
                   )}
                   {tab.name === 'conditions' && (
                     <ConditionEditor

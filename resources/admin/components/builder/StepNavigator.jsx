@@ -20,9 +20,9 @@ export default function StepNavigator({
             )}
           </div>
           <Button isPrimary onClick={onAddStep}>
-            <span className='step-navigator__add-button'>
+            <span className='sf-step-navigator__add-button'>
               <svg
-                className='step-navigator__add-icon'
+                className='sf-step-navigator__add-icon'
                 fill='none'
                 stroke='currentColor'
                 viewBox='0 0 24 24'>
@@ -61,10 +61,10 @@ export default function StepNavigator({
                 <button
                   type='button'
                   onClick={() => onSelectStep(step.id)}
-                  className={`step-navigator__step-button ${
+                  className={`sf-step-navigator__step-button ${
                     isSelected
-                      ? 'step-navigator__step-button--selected'
-                      : 'step-navigator__step-button--default'
+                      ? 'sf-step-navigator__step-button--selected'
+                      : 'sf-step-navigator__step-button--default'
                   }`}
                   title={`${(() => {
                     /* translators: %d: step number */ return sprintf(
@@ -73,10 +73,10 @@ export default function StepNavigator({
                     );
                   })()}: ${stepTitle}`}>
                   <div
-                    className={`step-navigator__step-number ${
+                    className={`sf-step-navigator__step-number ${
                       isSelected
-                        ? 'step-navigator__step-number--selected'
-                        : 'step-navigator__step-number--default'
+                        ? 'sf-step-navigator__step-number--selected'
+                        : 'sf-step-navigator__step-number--default'
                     }`}>
                     {index + 1}
                   </div>
@@ -89,7 +89,7 @@ export default function StepNavigator({
                   <button
                     type='button'
                     onClick={() => onDeleteStep(step.id)}
-                    className='step-navigator__delete-button'
+                    className='sf-step-navigator__delete-button'
                     title={(() => {
                       /* translators: %d: step number */ return sprintf(
                         __('Delete step %d', 'subtleforms'),
@@ -97,7 +97,7 @@ export default function StepNavigator({
                       );
                     })()}>
                     <svg
-                      className='step-navigator__delete-icon'
+                      className='sf-step-navigator__delete-icon'
                       fill='none'
                       stroke='currentColor'
                       viewBox='0 0 24 24'>

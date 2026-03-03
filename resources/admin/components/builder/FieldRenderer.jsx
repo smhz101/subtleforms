@@ -1,13 +1,41 @@
+import { memo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { getFieldRenderer } from './canvas/renderers';
 import './FieldRenderer.scss';
 
-export default function FieldRenderer({ field }) {
+/**
+ * FieldRenderer - Memoized field preview component
+ * 
+ * Wrapped in memo() to prevent unnecessary re-renders during drag operations.
+ * Only re-renders when field prop changes.
+ */
+const FieldRenderer = memo(function FieldRenderer({ field }) {
   const { type, label, required, placeholder, options, subFields } = field;
 
   const labelClass = 'sf-field-renderer__label';
   const inputClass = 'sf-field-renderer__input';
   const selectClass = 'sf-field-renderer__select';
   const selectBg = `url('data:image/svg+xml;utf8,<svg fill="%238c8f94" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M5 6l5 5 5-5 2 1-7 7-7-7z"/></svg>')`;
+
+  // ── Section Break ───────────────────────────────────────────────────────────
+  if (type === 'section_break') {
+    return (
+      <div className='sf-field-renderer__section-break'>
+        <div className='sf-field-renderer__section-break-line' />
+        {field.title && (
+          <div className='sf-field-renderer__section-break-title'>{field.title}</div>
+        )}
+        {field.description && (
+          <div className='sf-field-renderer__section-break-desc'>{field.description}</div>
+        )}
+        {!field.title && !field.description && (
+          <span className='sf-field-renderer__section-break-placeholder'>
+            {__('Section Break', 'subtleforms')}
+          </span>
+        )}
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -597,4 +625,6 @@ export default function FieldRenderer({ field }) {
       )}
     </div>
   );
-}
+});
+
+export default FieldRenderer;

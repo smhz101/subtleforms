@@ -687,7 +687,7 @@
 	padding: 1.5rem;
 	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
 	transition: all 0.2s ease;
-	font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+	font-family: var(--font-mono);
 
 	&:hover {
 		border-color: #6366f1;
@@ -725,7 +725,7 @@
 		font-size: 0.8125rem;
 		color: #6b7280;
 		font-weight: 500;
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+		font-family: var(--font-sans);
 	}
 
 	&__body {
@@ -780,7 +780,7 @@
 		color: #6b7280;
 		font-weight: 500;
 		line-height: 1.5;
-		font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+		font-family: var(--font-sans);
 	}
 }
 
@@ -1272,4 +1272,35 @@
 .sf-field-renderer__datetime-text {
 	font-weight: 500;
 	letter-spacing: 0.01em;
+}
+
+// ── Section Break ─────────────────────────────────────────────────────────────
+.sf-field-renderer__section-break {
+	padding: 0.5rem 0;
+
+	&-line {
+		height: 1px;
+		background: currentColor;
+		opacity: 0.15;
+		margin-bottom: 0.5rem;
+	}
+
+	&-title {
+		font-size: 0.875rem;
+		font-weight: 600;
+		color: var(--sf-builder-text-primary, #0f172a);
+		margin-bottom: 0.25rem;
+	}
+
+	&-desc {
+		font-size: 0.75rem;
+		color: var(--sf-builder-text-secondary, #334155);
+	}
+
+	&-placeholder {
+		font-size: 0.75rem;
+		color: var(--sf-stone-400, #a8a29e);
+		font-style: italic;
+		letter-spacing: 0.02em;
+	}
 }

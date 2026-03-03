@@ -7,7 +7,7 @@
 import { __ } from '@wordpress/i18n';
 import ConfirmModal from '../../../modals/ConfirmModal';
 import BuilderTour from '../../BuilderTour';
-import FormPreviewModal from '../../FormPreviewModal';
+import { FormPreviewModal } from '../../form-preview';
 
 export default function BuilderModalsController({
   // Delete modal

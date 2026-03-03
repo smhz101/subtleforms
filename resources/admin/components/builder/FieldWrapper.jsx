@@ -1,9 +1,16 @@
+import { memo } from '@wordpress/element';
 import FieldRenderer from './FieldRenderer';
 import FieldToolbar from './FieldToolbar';
 import clsx from 'clsx';
 import './FieldWrapper.scss';
 
-export default function FieldWrapper({
+/**
+ * FieldWrapper - Memoized field container
+ * 
+ * Wrapped in memo() to prevent re-renders when unrelated fields change.
+ * Only re-renders when its own props change.
+ */
+const FieldWrapper = memo(function FieldWrapper({
   field,
   index,
   isHovered,
@@ -43,4 +50,6 @@ export default function FieldWrapper({
       )}
     </div>
   );
-}
+});
+
+export default FieldWrapper;

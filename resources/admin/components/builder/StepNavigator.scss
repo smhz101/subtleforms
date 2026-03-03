@@ -1,18 +1,47 @@
 /**
- * StepNavigator Component Styles
- * Multi-step form navigation
+ * StepNavigator Component Styles - Technical Elegance Design
+ * Multi-step form navigation with warm stone + electric lime
+ *
+ * Design Philosophy:
+ * - Horizontal progress bar with step indicators
+ * - IBM Plex Mono for step numbers (technical precision)
+ * - IBM Plex Serif for step titles (elegant clarity)
+ * - Electric lime accent for active state
+ * - Smooth animations with cubic-bezier timing
+ * - 8px spacing grid
  */
 
+@use '../../styles/variables' as *;
+
 .sf-step-navigator {
-	background-color: #ffffff;
-	padding: 0.75rem 1.5rem;
-	border-bottom: 1px solid #e5e7eb;
+	background-color: white;
+	padding: $space-4 $space-6;
+	border-bottom: 1px solid $sf-stone-200;
 	width: 100%;
+	position: relative;
+
+	// Progress bar base
+	&::before {
+		content: '';
+		position: absolute;
+		top: 50%;
+		left: $space-6;
+		right: $space-6;
+		height: 2px;
+		background-color: $sf-stone-200;
+		transform: translateY(-50%);
+		z-index: 1;
+		pointer-events: none;
+	}
 
 	&--empty {
-		background-color: #f9fafb;
-		padding: 1rem 1.5rem;
-		border-bottom: 1px solid #e5e7eb;
+		background-color: $sf-stone-50;
+		padding: $space-4 $space-6;
+		border-bottom: 1px solid $sf-stone-200;
+
+		&::before {
+			display: none;
+		}
 	}
 
 	&__empty-container {
@@ -22,73 +51,109 @@
 	}
 
 	&__empty-text {
-		color: #6b7280;
-		font-size: 0.875rem;
+		color: $sf-stone-600;
+		font-size: $font-size-sm;
+		font-family: $sf-font-sans;
 	}
 
 	&__container {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
+		gap: $space-3;
 		overflow-x: auto;
+		position: relative;
+		z-index: 2;
 	}
 
 	&__label {
 		display: flex;
 		flex-shrink: 0;
 		align-items: center;
-		gap: 0.5rem;
+		gap: $space-2;
+		padding-right: $space-3;
+		border-right: 1px solid $sf-stone-200;
 	}
 
 	&__label-text {
-		font-weight: 500;
-		color: #374151;
-		font-size: 0.875rem;
+		font-weight: 700;
+		font-family: $sf-font-mono;
+		color: $sf-stone-700;
+		font-size: $font-size-xs;
+		text-transform: uppercase;
+		letter-spacing: 0.1em;
 	}
 
 	&__steps-list {
 		display: flex;
 		flex-wrap: nowrap;
 		align-items: center;
-		gap: 0.5rem;
+		gap: $space-6;
 		min-width: 0;
+		flex: 1;
+		position: relative;
 	}
 
 	&__step-item {
 		display: flex;
 		flex-shrink: 0;
 		align-items: center;
-		gap: 0.25rem;
+		gap: $space-2;
+		position: relative;
+		z-index: 2;
 	}
 
 	&__step-button {
 		position: relative;
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem 0.75rem;
-		font-size: 0.875rem;
+		flex-direction: column;
+		gap: $space-2;
+		padding: $space-2 $space-3;
+		font-size: $font-size-sm;
 		font-weight: 500;
-		border-radius: 0.375rem;
-		border: 1px solid;
-		transition: all 150ms;
+		border-radius: $radius-lg;
+		border: 2px solid;
+		transition: all $transition-base;
 		white-space: nowrap;
+		cursor: pointer;
+		background-color: white;
+		box-shadow: $shadow-sm;
 
 		&--selected {
-			background-color: #2271b1;
-			color: #ffffff;
-			border-color: #2271b1;
-			box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+			background-color: $sf-lime-50;
+			color: $sf-lime-900;
+			border-color: $sf-lime-500;
+			box-shadow: $shadow-lime;
+			transform: scale(1.05);
+
+			.sf-step-navigator__step-number {
+				background: linear-gradient(135deg, $sf-lime-500, $sf-lime-600);
+				color: white;
+				box-shadow: $shadow-lime;
+				animation: sf-pulse-subtle 2s ease-in-out infinite;
+			}
+
+			.sf-step-navigator__step-title {
+				color: $sf-lime-900;
+				font-weight: 600;
+			}
 		}
 
 		&--default {
-			background-color: #ffffff;
-			color: #374151;
-			border-color: #d1d5db;
+			background-color: white;
+			color: $sf-stone-700;
+			border-color: $sf-stone-200;
 
 			&:hover {
-				background-color: #f9fafb;
-				border-color: #9ca3af;
+				background-color: $sf-stone-50;
+				border-color: $sf-stone-300;
+				transform: translateY(-2px);
+				box-shadow: $shadow-md;
+
+				.sf-step-navigator__step-number {
+					background: linear-gradient(135deg, $sf-stone-200, $sf-stone-300);
+					transform: scale(1.1);
+				}
 			}
 		}
 	}
@@ -97,63 +162,82 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		width: 1.25rem;
-		height: 1.25rem;
-		border-radius: 9999px;
-		font-size: 0.75rem;
-		font-weight: 600;
-
-		&--selected {
-			background-color: #1d5d8b;
-			color: #ffffff;
-		}
-
-		&--default {
-			background-color: #f3f4f6;
-			color: #6b7280;
-
-			.step-navigator__step-button:hover & {
-				background-color: #e5e7eb;
-			}
-		}
+		width: 2rem;
+		height: 2rem;
+		border-radius: $radius-full;
+		font-size: $font-size-sm;
+		font-weight: 700;
+		font-family: $sf-font-mono;
+		transition: all $transition-base;
+		background: linear-gradient(135deg, $sf-stone-100, $sf-stone-200);
+		color: $sf-stone-600;
+		box-shadow: $shadow-xs;
 	}
 
 	&__step-title {
-		max-width: 120px;
+		font-family: $sf-font-sans;
+		font-size: $font-size-sm;
+		font-weight: 500;
+		color: $sf-stone-700;
+		max-width: 140px;
 		overflow: hidden;
 		text-overflow: ellipsis;
+		text-align: center;
+		transition: all $transition-fast;
 	}
 
 	&__delete-button {
 		display: flex;
 		justify-content: center;
 		align-items: center;
-		border-radius: 0.25rem;
-		width: 1.5rem;
-		height: 1.5rem;
-		color: #dc2626;
-		transition: colors 150ms;
+		border-radius: $radius-md;
+		width: $space-6;
+		height: $space-6;
+		color: $sf-stone-400;
+		transition: all $transition-fast;
+		cursor: pointer;
+		background-color: transparent;
 
 		&:hover {
-			background-color: #fef2f2;
-			color: #b91c1c;
+			background-color: rgba(220, 38, 38, 0.1);
+			color: #dc2626;
+			transform: scale(1.1);
+		}
+
+		&:active {
+			transform: scale(0.95);
 		}
 	}
 
 	&__delete-icon {
-		width: 1rem;
-		height: 1rem;
+		width: $space-4;
+		height: $space-4;
 	}
 
 	&__add-button {
 		flex-shrink: 0;
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: $space-2;
+		margin-left: $space-3;
+		padding-left: $space-3;
+		border-left: 1px solid $sf-stone-200;
 	}
 
 	&__add-icon {
-		width: 1rem;
-		height: 1rem;
+		width: $space-4;
+		height: $space-4;
+	}
+}
+
+// Subtle pulse animation for active step
+@keyframes sf-pulse-subtle {
+	0%, 100% {
+		opacity: 1;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.9;
+		transform: scale(1.02);
 	}
 }
