@@ -5,14 +5,14 @@
  */
 
 export const ROUTES = {
-  DASHBOARD: 'dashboard',
-  FORMS_LIST: 'forms-list',
-  FORM_EDITOR: 'form-editor',
-  SUBMISSIONS_LIST: 'submissions-list',
-  SUBMISSIONS: 'submissions',
-  SUBMISSION_DETAIL: 'submission-detail',
-  SETTINGS: 'settings',
-  EXTENSIONS: 'extensions',
+  DASHBOARD:        '/',
+  FORMS_LIST:       '/forms',
+  FORM_EDITOR:      '/forms/new',
+  SUBMISSIONS_LIST: '/submissions',
+  SUBMISSIONS:      '/submissions',
+  SUBMISSION_DETAIL: '/submissions',
+  SETTINGS:         '/settings',
+  EXTENSIONS:       '/extensions',
 };
 
 /**

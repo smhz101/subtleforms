@@ -2,139 +2,259 @@
  * Admin Application Root
  *
  * Main application component that handles routing and global providers.
+ * Uses react-router-dom MemoryRouter for SPA navigation within WordPress admin.
+ * Initial route is derived from WordPress URL params on page load.
+ *
+ * Route structure:
+ *   /                       → Dashboard
+ *   /forms                  → Forms list
+ *   /forms/new              → Form builder (new form wizard)
+ *   /forms/:formId          → Form builder (existing form)
+ *   /submissions            → Submissions list  (?form_id=N for filtered view)
+ *   /submissions/:id        → Submission detail (?form_id=N for back navigation)
+ *   /settings               → Settings
+ *   /extensions             → Extensions
  */
 
-import { useState } from '@wordpress/element';
+import { useState, useEffect, Suspense, lazy } from '@wordpress/element';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Panel, PanelBody } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import {
+	MemoryRouter,
+	Routes,
+	Route,
+	useNavigate,
+	useParams,
+	useSearchParams,
+	useLocation,
+} from 'react-router-dom';
 import { NoticeProvider, ErrorBoundary } from '../ui/feedback';
 import { ModalProvider } from '../ui/modals';
-
-// Query Client Configuration
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 30 * 1000,
-    },
-    mutations: {
-      retry: 1,
-      onError: (error) => {
-        console.error('Mutation error:', error);
-      },
-    },
-  },
-});
-
-// Pages
-import DashboardPage from '../pages/DashboardPage';
-import SettingsPage from '../pages/SettingsPage';
-import FormsPage from '../pages/FormsPage';
-import SubmissionsPage from '../pages/SubmissionsPage';
-import SubmissionDetailPage from '../pages/SubmissionDetailPage';
-import BuilderPage from '../pages/BuilderPage';
-import ExtensionsPage from '../pages/ExtensionsPage';
-
-// Modals
+import PageErrorBoundary from '../components/PageErrorBoundary';
+import { RouteLoadingFallback } from '../components/RouteTransition';
 import { CreateFormModal } from '../modals';
 
-// Utils
-import { ROUTES, getRouteConfig } from './routes';
+// ─── Query Client ─────────────────────────────────────────────────────────────
+
+const queryClient = new QueryClient({
+	defaultOptions: {
+		queries: {
+			refetchOnWindowFocus: false,
+			retry: 1,
+			staleTime: 30 * 1000,
+		},
+		mutations: {
+			retry: 1,
+		},
+	},
+});
+
+// ─── Code-split pages ─────────────────────────────────────────────────────────
+
+const DashboardPage      = lazy(() => import('../pages/DashboardPage'));
+const SettingsPage       = lazy(() => import('../pages/SettingsPage'));
+const FormsPage          = lazy(() => import('../pages/FormsPage'));
+const SubmissionsPage    = lazy(() => import('../pages/SubmissionsPage'));
+const SubmissionDetailPage = lazy(() => import('../pages/SubmissionDetailPage'));
+const BuilderPage        = lazy(() => import('../pages/BuilderPage'));
+const ExtensionsPage     = lazy(() => import('../pages/ExtensionsPage'));
+
+// ─── Initial path resolver ────────────────────────────────────────────────────
+
+/**
+ * Map WordPress admin URL params to a MemoryRouter initial entry path.
+ * Called once at startup — not reactive.
+ */
+function getInitialPath() {
+	const url        = new URL(window.location.href);
+	const page       = url.searchParams.get('page') || 'subtleforms';
+	const formId     = url.searchParams.get('form_id');
+	const subId      = url.searchParams.get('submission_id');
+
+	switch (page) {
+		case 'subtleforms-forms':
+			return '/forms';
+
+		case 'subtleforms-new-form':
+			return formId ? `/forms/${formId}` : '/forms/new';
+
+		case 'subtleforms-submissions': {
+			if (subId) {
+				return `/submissions/${subId}${formId ? `?form_id=${formId}` : ''}`;
+			}
+			return formId ? `/submissions?form_id=${formId}` : '/submissions';
+		}
+
+		case 'subtleforms-settings':
+			return '/settings';
+
+		case 'subtleforms-extensions':
+			return '/extensions';
+
+		default:
+			return '/';
+	}
+}
+
+// ─── Route wrapper components ─────────────────────────────────────────────────
+
+/** Submissions list — reads optional ?form_id query param */
+function SubmissionsRoute() {
+	const [searchParams] = useSearchParams();
+	const formId = searchParams.get('form_id')
+		? parseInt(searchParams.get('form_id'), 10)
+		: null;
+	return (
+		<PageErrorBoundary pageName='Submissions'>
+			<SubmissionsPage formId={formId} />
+		</PageErrorBoundary>
+	);
+}
+
+/** Submission detail — reads :submissionId param + optional ?form_id */
+function SubmissionDetailRoute() {
+	const { submissionId } = useParams();
+	const [searchParams]   = useSearchParams();
+	const navigate         = useNavigate();
+	const formId = searchParams.get('form_id')
+		? parseInt(searchParams.get('form_id'), 10)
+		: null;
+	const parsedId = parseInt(submissionId, 10);
+
+	return (
+		<PageErrorBoundary pageName='Submission Detail'>
+			<SubmissionDetailPage
+				submissionId={parsedId}
+				formId={formId}
+				onBack={() =>
+					navigate(formId ? `/submissions?form_id=${formId}` : '/submissions')
+				}
+			/>
+		</PageErrorBoundary>
+	);
+}
+
+// ─── App content (inside router context) ─────────────────────────────────────
+
+function AppContent() {
+	const navigate  = useNavigate();
+	const location  = useLocation();
+
+	// Show "create form" modal when route is /forms/new
+	const [showCreateModal, setShowCreateModal] = useState(
+		location.pathname === '/forms/new'
+	);
+
+	useEffect(() => {
+		if (location.pathname === '/forms/new') {
+			setShowCreateModal(true);
+		}
+	}, [location.pathname]);
+
+	function handleModalClose() {
+		setShowCreateModal(false);
+		navigate('/forms');
+	}
+
+	function handleFormCreated(createdFormId) {
+		setShowCreateModal(false);
+		navigate('/forms/' + createdFormId);
+	}
+
+	function handleFormSaved(detail) {
+		// intentionally quiet in production
+		void detail;
+	}
+
+	return (
+		<div>
+			<Panel>
+				<PanelBody>
+					<Suspense fallback={<RouteLoadingFallback />}>
+						<Routes>
+							<Route
+								path='/'
+								element={
+									<PageErrorBoundary pageName='Dashboard'>
+										<DashboardPage />
+									</PageErrorBoundary>
+								}
+							/>
+							<Route
+								path='/forms'
+								element={
+									<PageErrorBoundary pageName='Forms'>
+										<FormsPage />
+									</PageErrorBoundary>
+								}
+							/>
+							{/* /forms/new — wizard; modal handled by AppContent */}
+							<Route
+								path='/forms/new'
+								element={
+									<PageErrorBoundary pageName='Form Builder'>
+										<BuilderPage onFormSaved={handleFormSaved} />
+									</PageErrorBoundary>
+								}
+							/>
+							{/* /forms/:formId — existing form */}
+							<Route
+								path='/forms/:formId'
+								element={
+									<PageErrorBoundary pageName='Form Builder'>
+										<BuilderPage onFormSaved={handleFormSaved} />
+									</PageErrorBoundary>
+								}
+							/>
+							<Route path='/submissions' element={<SubmissionsRoute />} />
+							<Route
+								path='/submissions/:submissionId'
+								element={<SubmissionDetailRoute />}
+							/>
+							<Route
+								path='/settings'
+								element={
+									<PageErrorBoundary pageName='Settings'>
+										<SettingsPage />
+									</PageErrorBoundary>
+								}
+							/>
+							<Route
+								path='/extensions'
+								element={
+									<PageErrorBoundary pageName='Extensions'>
+										<ExtensionsPage />
+									</PageErrorBoundary>
+								}
+							/>
+						</Routes>
+					</Suspense>
+				</PanelBody>
+			</Panel>
+
+			<CreateFormModal
+				isOpen={showCreateModal}
+				onClose={handleModalClose}
+				onFormCreated={handleFormCreated}
+			/>
+		</div>
+	);
+}
+
+// ─── Root export ──────────────────────────────────────────────────────────────
 
 export default function AdminApp() {
-  const config = getRouteConfig();
-  const {
-    page,
-    formId: initialFormId,
-    submissionId: initialSubmissionId,
-  } = config;
-
-  // Debug: expose mount info to console for troubleshooting
-  console.debug('SubtleForms admin mount', {
-    page,
-    formId: initialFormId,
-    submissionId: initialSubmissionId,
-  });
-
-  // Modal state - only show create modal if on form-editor page AND no form_id is present
-  const [showCreateModal, setShowCreateModal] = useState(
-    page === ROUTES.FORM_EDITOR && !initialFormId
-  );
-
-  function handleModalClose() {
-    setShowCreateModal(false);
-    // Redirect to forms list when modal is closed without creating a form
-    if (page === ROUTES.FORM_EDITOR && !initialFormId) {
-      window.location.href = 'admin.php?page=subtleforms-forms';
-    }
-  }
-
-  function handleFormCreated(formId) {
-    setShowCreateModal(false);
-    // Navigate to the builder page with the new form ID
-    window.location.href = `admin.php?page=subtleforms-new-form&form_id=${formId}`;
-  }
-
-  function handleFormSaved(detail) {
-    console.debug('Form saved:', detail);
-  }
-
-  return (
-    <ErrorBoundary>
-      <QueryClientProvider client={queryClient}>
-        <NoticeProvider>
-          <ModalProvider>
-            <div>
-      <Panel>
-        <PanelBody>
-          {page === ROUTES.DASHBOARD && <DashboardPage />}
-
-          {page === ROUTES.FORMS_LIST && <FormsPage />}
-
-          {(page === ROUTES.SUBMISSIONS_LIST ||
-            page === ROUTES.SUBMISSIONS) && (
-            <SubmissionsPage formId={initialFormId || null} />
-          )}
-
-          {page === ROUTES.SUBMISSION_DETAIL && initialSubmissionId && (
-            <SubmissionDetailPage
-              submissionId={initialSubmissionId}
-              formId={initialFormId}
-              onBack={() => {
-                window.location.href = initialFormId
-                  ? `admin.php?page=subtleforms-submissions&form_id=${initialFormId}`
-                  : 'admin.php?page=subtleforms-submissions';
-              }}
-            />
-          )}
-
-          {page === ROUTES.SETTINGS && <SettingsPage />}
-
-          {page === ROUTES.EXTENSIONS && <ExtensionsPage />}
-
-          {page === ROUTES.FORM_EDITOR && !!initialFormId && (
-            <BuilderPage
-              formId={initialFormId}
-              onSaved={handleFormSaved}
-              onClose={() => {
-                window.location.href = 'admin.php?page=subtleforms-forms';
-              }}
-            />
-          )}
-        </PanelBody>
-      </Panel>
-
-      <CreateFormModal
-        isOpen={showCreateModal}
-        onClose={handleModalClose}
-        onFormCreated={handleFormCreated}
-      />
-            </div>
-          </ModalProvider>
-        </NoticeProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
-  );
+	return (
+		<ErrorBoundary>
+			<QueryClientProvider client={queryClient}>
+				<NoticeProvider>
+					<ModalProvider>
+						<MemoryRouter initialEntries={[getInitialPath()]}>
+							<AppContent />
+						</MemoryRouter>
+					</ModalProvider>
+				</NoticeProvider>
+			</QueryClientProvider>
+		</ErrorBoundary>
+	);
 }
