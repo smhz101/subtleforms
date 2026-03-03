@@ -67,6 +67,9 @@ dist/*.zip
 tmp/
 temp/
 
+# Internal planning docs (not shipped)
+_plan/
+
 # Composer
 composer.phar
 composer.lock
