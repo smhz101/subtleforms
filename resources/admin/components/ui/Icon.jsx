@@ -69,6 +69,8 @@ import {
   Undo2,
   Redo2,
   Search,
+  Sparkles,
+  Lightbulb,
 } from 'lucide-react';
 
 /**
@@ -153,6 +155,8 @@ const Icon = {
   DownloadCloud,
   ExternalLink,
   Search,
+  Sparkles,
+  Lightbulb,
 
   // Form Field Types
   Type,

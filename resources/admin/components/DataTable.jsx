@@ -1,6 +1,7 @@
-import { memo } from '@wordpress/element';
+import { memo, useRef } from '@wordpress/element';
 import { Button, SelectControl, CheckboxControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import TableSkeleton from './TableSkeleton';
 import './DataTable.scss';
 
@@ -61,6 +62,25 @@ const DataTable = memo(function DataTable({
   rowClassName = null,
 }) {
   const totalPages = Math.ceil(totalItems / perPage);
+  
+  // Virtualization setup - only for large lists
+  const parentRef = useRef(null);
+  const shouldVirtualize = data.length > 20;
+  
+  const rowVirtualizer = useVirtualizer({
+    count: shouldVirtualize ? data.length : 0,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 60, // Estimated row height in pixels
+    overscan: 5, // Render 5 extra rows above/below viewport
+    enabled: shouldVirtualize,
+  });
+
+  // Dev warning for large datasets without pagination
+  if (process.env.NODE_ENV === 'development' && data.length > 200 && !shouldVirtualize) {
+    console.warn(
+      `[SubtleForms Performance] Large dataset detected (${data.length} rows) without virtualization. Consider increasing perPage or enabling virtualization.`
+    );
+  }
 
   const handleSelectAll = (checked) => {
     if (checked) {
@@ -157,7 +177,14 @@ const DataTable = memo(function DataTable({
       )}
 
       {/* Table - Scrollable */}
-      <div className='sf-data-table__scroll-container'>
+      <div 
+        className='sf-data-table__scroll-container'
+        ref={parentRef}
+        style={{
+          height: shouldVirtualize ? '600px' : 'auto',
+          overflow: shouldVirtualize ? 'auto' : 'visible',
+        }}
+      >
         <table className='sf-data-table__table'>
           <thead className='sf-data-table__header'>
             <tr>
@@ -186,38 +213,91 @@ const DataTable = memo(function DataTable({
               ))}
             </tr>
           </thead>
-          <tbody className='sf-data-table__body'>
-            {data.map((row, index) => (
-              <tr
-                key={row.id || index}
-                className={`
-                  group transition-all duration-150
-                  ${
-                    selectedItems.includes(row.id)
-                      ? 'sf-data-table__row--selected'
-                      : ''
-                  }
-                  ${onRowClick ? 'sf-data-table__row--clickable' : ''}
-                  ${rowClassName ? rowClassName(row) : ''}
-                `}
-                onClick={() => onRowClick && onRowClick(row)}>
-                {selectable && (
-                  <td onClick={(e) => e.stopPropagation()}>
-                    <CheckboxControl
-                      checked={selectedItems.includes(row.id)}
-                      onChange={(checked) => handleSelectRow(row.id, checked)}
-                    />
-                  </td>
-                )}
-                {columns.map((column) => (
-                  <td key={column.key}>
-                    {column.render
-                      ? column.render(row[column.key], row)
-                      : row[column.key]}
-                  </td>
-                ))}
-              </tr>
-            ))}
+          <tbody 
+            className='sf-data-table__body'
+            style={{
+              height: shouldVirtualize ? `${rowVirtualizer.getTotalSize()}px` : 'auto',
+              position: 'relative',
+            }}
+          >
+            {shouldVirtualize ? (
+              // Virtualized rendering for large lists
+              rowVirtualizer.getVirtualItems().map((virtualRow) => {
+                const row = data[virtualRow.index];
+                return (
+                  <tr
+                    key={row.id || virtualRow.index}
+                    className={`
+                      group transition-all duration-150
+                      ${
+                        selectedItems.includes(row.id)
+                          ? 'sf-data-table__row--selected'
+                          : ''
+                      }
+                      ${onRowClick ? 'sf-data-table__row--clickable' : ''}
+                      ${rowClassName ? rowClassName(row) : ''}
+                    `}
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      width: '100%',
+                      height: `${virtualRow.size}px`,
+                      transform: `translateY(${virtualRow.start}px)`,
+                    }}
+                    onClick={() => onRowClick && onRowClick(row)}>
+                    {selectable && (
+                      <td onClick={(e) => e.stopPropagation()}>
+                        <CheckboxControl
+                          checked={selectedItems.includes(row.id)}
+                          onChange={(checked) => handleSelectRow(row.id, checked)}
+                        />
+                      </td>
+                    )}
+                    {columns.map((column) => (
+                      <td key={column.key}>
+                        {column.render
+                          ? column.render(row[column.key], row)
+                          : row[column.key]}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })
+            ) : (
+              // Standard rendering for small lists
+              data.map((row, index) => (
+                <tr
+                  key={row.id || index}
+                  className={`
+                    group transition-all duration-150
+                    ${
+                      selectedItems.includes(row.id)
+                        ? 'sf-data-table__row--selected'
+                        : ''
+                    }
+                    ${onRowClick ? 'sf-data-table__row--clickable' : ''}
+                    ${rowClassName ? rowClassName(row) : ''}
+                  `}
+                  onClick={() => onRowClick && onRowClick(row)}>
+                  {selectable && (
+                    <td onClick={(e) => e.stopPropagation()}>
+                      <CheckboxControl
+                        checked={selectedItems.includes(row.id)}
+                        onChange={(checked) => handleSelectRow(row.id, checked)}
+                      />
+                    </td>
+                  )}
+                  {columns.map((column) => (
+                    <td key={column.key}>
+                      {column.render
+                        ? column.render(row[column.key], row)
+                        : row[column.key]}
+                    </td>
+                  ))}
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

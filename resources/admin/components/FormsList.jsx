@@ -410,8 +410,11 @@ export default function FormsList({
         const data = await response.json();
         const total = parseInt(response.headers.get('X-WP-Total') || '0');
 
-        setForms(Array.isArray(data) ? data : []);
-        setTotalItems(total);
+        // Patch: Use data.data for forms array (API returns { data: [...], meta: {...} })
+        setForms(Array.isArray(data.data) ? data.data : []);
+        setTotalItems(
+          (data.meta && typeof data.meta.total === 'number') ? data.meta.total : total
+        );
       } else {
         const errorText = await response.text();
         console.error('API Error:', response.status, errorText);

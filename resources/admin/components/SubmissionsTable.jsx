@@ -190,7 +190,13 @@ const SubmissionsTable = forwardRef(
           const data = await response.json();
           const total = parseInt(response.headers.get('X-WP-Total') || '0');
 
-          if (data && data.submissions) {
+          // Patch: Use data.data for submissions array (API returns { data: [...], meta: {...} })
+          if (data && Array.isArray(data.data)) {
+            setSubmissions(data.data);
+            setTotalItems(
+              (data.meta && typeof data.meta.total === 'number') ? data.meta.total : total
+            );
+          } else if (data && data.submissions) {
             setSubmissions(data.submissions);
             setTotalItems(data.total || 0);
           } else if (Array.isArray(data)) {

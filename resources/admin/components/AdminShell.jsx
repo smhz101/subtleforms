@@ -18,7 +18,7 @@ import './AdminShell.scss';
  * - Editable title support
  *
  * Structure:
- * - Top Bar (sticky 60px): Logo, page title, actions (via AdminHeader component)
+ * - Top Bar (sticky 48px): Logo, page title, actions (via AdminHeader component)
  * - Action Bar (sticky 56px): Filters, tabs, search (via ActionBar component)
  * - Content Area: Viewport-based height, scrollable
  * - Bottom Bar: Optional pagination
@@ -40,7 +40,7 @@ export default function AdminShell({
   editableTitle = false,
   onTitleChange,
 }) {
-  const TOP_BAR_HEIGHT = 60;
+  const TOP_BAR_HEIGHT = 48;
   const ACTION_BAR_HEIGHT = actionBarLeft || actionBarRight ? 56 : 0;
   const WP_ADMIN_BAR_HEIGHT = 32;
 

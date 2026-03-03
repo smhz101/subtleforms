@@ -2,16 +2,23 @@
  * AdminShell Component Styles
  *
  * SCROLL CONTRACT:
- * - html/body: overflow hidden (WordPress default)
+ * - html/body: overflow hidden ONLY on SubtleForms pages
  * - AdminShell: Single vertical scroll container per page
  * - Nested panels (Dock/Inspector): Scroll internally
  * - NO page may manage its own body scrolling
  */
 
-// CRITICAL: Ensure body and html never scroll in admin (all color schemes)
-html,
-body {
-	overflow: hidden !important;
+// CRITICAL: Scope overflow:hidden to ONLY SubtleForms pages (prevent WP admin bleeding)
+.subtleforms-admin-page,
+.subtle-forms_page_subtleforms-settings,
+.subtle-forms_page_subtleforms-extensions,
+.subtle-forms_page_subtleforms-forms,
+.subtle-forms_page_subtleforms-submissions,
+.toplevel_page_subtleforms {
+	html,
+	body {
+		overflow: hidden !important;
+	}
 }
 
 // Remove default WordPress page wrapper styling
