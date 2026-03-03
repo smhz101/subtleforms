@@ -2,7 +2,13 @@
 
 namespace SubtleForms\Api;
 
+use SubtleForms\Api\ApiResponse;
 use SubtleForms\Support\Settings;
+use SubtleForms\Validation\RequestValidator;
+use SubtleForms\Validation\ValidationException;
+use SubtleForms\Validation\Schemas;
+use SubtleForms\Security\RateLimiter;
+use SubtleForms\Security\ETag;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_Error;
@@ -68,23 +74,64 @@ class SettingsApi {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function getSettings( WP_REST_Request $request ) {
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
 		try {
 			$settings = $this->settings->getAll();
 
-			return new WP_REST_Response(
+			// Phase A3-P2: Add ETag header for optimistic locking
+			$etag     = ETag::fromSettings( $settings );
+			$response = ApiResponse::success(
 				array(
 					'success' => true,
 					'data'    => $settings,
-				),
-				200
+				)
 			);
+			return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
 		} catch ( \Exception $e ) {
-			return new WP_Error(
-				'settings_error',
-				$e->getMessage(),
-				array( 'status' => 500 )
+			return ApiResponse::server_error( $e->getMessage() );
+		}
+	}
+
+	/**
+	 * Guard rate limit for request (Phase A3-P1)
+	 *
+	 * Checks rate limit and returns error response if exceeded.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|null Error response if rate limited, null if allowed.
+	 */
+	private function guardRateLimit( WP_REST_Request $request ): ?WP_REST_Response {
+		$userId = get_current_user_id() ?: null;
+		$ip     = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+		$route  = $request->get_route();
+		$method = $request->get_method();
+
+		// Get policy for this endpoint
+		$policy = RateLimiter::policy( $route, $method );
+		
+		// Build rate limit key
+		$key = RateLimiter::buildKey( $route, $method, $userId, $ip );
+		
+		// Check limit
+		$result = RateLimiter::check( $key, $policy['limit'], $policy['window'] );
+		
+		// If blocked, return 429 response
+		if ( ! $result['allowed'] ) {
+			$headers = RateLimiter::headers( $result, $policy['limit'] );
+			return ApiResponse::rate_limited(
+				'Too many requests. Please try again later.',
+				$result['retry_after'],
+				array(),
+				$headers
 			);
 		}
+
+		return null;
 	}
 
 	/**
@@ -94,40 +141,53 @@ class SettingsApi {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function updateSettings( WP_REST_Request $request ) {
-		try {
-			$newSettings = $request->get_json_params();
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
 
-			if ( empty( $newSettings ) || ! is_array( $newSettings ) ) {
-				return new WP_Error(
-					'invalid_settings',
-					'Invalid settings data',
-					array( 'status' => 400 )
-				);
+		try {
+			$input = $request->get_json_params();
+
+			if ( empty( $input ) || ! is_array( $input ) ) {
+				return ApiResponse::bad_request( 'Invalid settings data' );
 			}
 
-			$this->settings->update( $newSettings );
-			$updatedSettings = $this->settings->getAll();
+			// Phase A3-P2: Check If-Match for optimistic locking
+			$currentSettings  = $this->settings->getAll();
+			$conflictResponse = $this->guardIfMatch( $request, $currentSettings );
+			if ( $conflictResponse ) {
+				return $conflictResponse;
+			}
 
-			return new WP_REST_Response(
+			// Validate input
+			$validator = new RequestValidator( array( 'schemas' => Schemas::all() ) );
+			$validated = $validator->validateOrFail( $input, Schemas::get( Schemas::SETTINGS_UPDATE ) );
+
+			// Update with validated data only
+			$this->settings->update( $validated );
+
+			// Phase A3-P2: Increment settings version for ETag
+			ETag::incrementSettingsVersion();
+
+			$updatedSettings = $this->settings->getAll();
+			$etag            = ETag::fromSettings( $updatedSettings );
+
+			$response = ApiResponse::success(
 				array(
 					'success' => true,
 					'message' => 'Settings updated successfully',
 					'data'    => $updatedSettings,
-				),
-				200
+				)
 			);
+			return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
+		} catch ( ValidationException $e ) {
+			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
 		} catch ( \InvalidArgumentException $e ) {
-			return new WP_Error(
-				'validation_error',
-				$e->getMessage(),
-				array( 'status' => 400 )
-			);
+			return ApiResponse::bad_request( $e->getMessage() );
 		} catch ( \Exception $e ) {
-			return new WP_Error(
-				'settings_error',
-				'Failed to update settings: ' . $e->getMessage(),
-				array( 'status' => 500 )
-			);
+			return ApiResponse::server_error( 'Failed to update settings: ' . $e->getMessage() );
 		}
 	}
 
@@ -138,25 +198,61 @@ class SettingsApi {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function resetSettings( WP_REST_Request $request ) {
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
 		try {
 			$this->settings->reset();
 			$settings = $this->settings->getAll();
 
-			return new WP_REST_Response(
+			return ApiResponse::success(
 				array(
 					'success' => true,
 					'message' => 'Settings reset to defaults',
 					'data'    => $settings,
-				),
-				200
+				)
 			);
 		} catch ( \Exception $e ) {
-			return new WP_Error(
-				'settings_error',
-				'Failed to reset settings: ' . $e->getMessage(),
-				array( 'status' => 500 )
-			);
+			return ApiResponse::server_error( 'Failed to reset settings: ' . $e->getMessage() );
 		}
+	}
+
+	/**
+	 * Guard If-Match for optimistic locking (Phase A3-P2)
+	 *
+	 * @param WP_REST_Request $request         Request object.
+	 * @param array           $currentSettings Current settings data.
+	 * @return WP_REST_Response|null 409 response if conflict, null if allowed.
+	 */
+	private function guardIfMatch( WP_REST_Request $request, array $currentSettings ): ?WP_REST_Response {
+		$ifMatch = $request->get_header( 'If-Match' );
+
+		// No If-Match header = optimistic locking not requested
+		if ( empty( $ifMatch ) ) {
+			return null;
+		}
+
+		// Generate current ETag
+		$currentETag = ETag::fromSettings( $currentSettings );
+
+		// Check if ETags match
+		if ( ETag::match( $ifMatch, $currentETag ) ) {
+			return null; // Match - allow operation
+		}
+
+		// Conflict - return 409 with current ETag
+		return ApiResponse::conflict(
+			'Settings have been modified by another user. Please refresh and try again.',
+			array(
+				'resource'          => 'settings',
+				'provided_if_match' => $ifMatch,
+				'current_etag'      => $currentETag,
+			),
+			array( 'ETag' => $currentETag )
+		);
 	}
 
 	/**

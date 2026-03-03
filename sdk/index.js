@@ -53,12 +53,18 @@ export {
   getUpgradeMessage,
 } from '../resources/admin/policies';
 
-// Re-export data hooks for extensions that need server state
+/**
+ * Data hooks for server state
+ * 
+ * NOTE: useLicense reads from PHP-localized data (window.subtleformsAdmin.license)
+ * NO external API calls are made from the free version.
+ * Pro version manages license via PHP and passes data through localize_script.
+ */
 export {
   useForms,
   useForm,
   useTemplates,
-  useLicense,
+  useLicense, // Reads from PHP, no API calls
 } from '../resources/admin/data';
 
 /**

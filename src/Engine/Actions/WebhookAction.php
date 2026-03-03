@@ -37,21 +37,23 @@ final class WebhookAction implements ActionInterface {
 			return;
 		}
 
-		$response = wp_remote_post(
-			$url,
-			array(
-				'headers' => $headers,
-				'body'    => $body,
-				'timeout' => 5,
-			)
-		);
+		// Dispatch webhook asynchronously - returns immediately
+		$submission_id = $context->getMeta( 'submission_id' );
+		$dispatched = \SubtleForms\Async\AsyncDispatcher::dispatchWebhook( array(
+			'url'           => $url,
+			'headers'       => $headers,
+			'body'          => $body,
+			'timeout'       => 10,
+			'submission_id' => $submission_id,
+		) );
 
-		if ( is_wp_error( $response ) || wp_remote_retrieve_response_code( $response ) >= 400 ) {
+		if ( ! $dispatched ) {
+			// Failed to schedule (rare - only if cron system broken)
 			$fail   = $context->getMeta( 'action_failures', array() );
 			$fail[] = array(
 				'action'   => 'webhook',
-				'reason'   => 'request_failed',
-				'response' => is_wp_error( $response ) ? $response->get_error_message() : wp_remote_retrieve_response_message( $response ),
+				'reason'   => 'async_dispatch_failed',
+				'url'      => $url,
 			);
 			$context->setMeta( 'action_failures', $fail );
 		}

@@ -186,6 +186,14 @@ class AdminMenu {
 
 		$this->currentPage = $hook;
 
+		// Load Google Fonts for design system
+		wp_enqueue_style(
+			'subtleforms-fonts',
+			'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Serif:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap',
+			array(),
+			null
+		);
+
 		// Main admin CSS
 		wp_enqueue_style(
 			'subtleforms-admin',
@@ -232,6 +240,20 @@ class AdminMenu {
 			);
 		}
 
+		// Get license data if Pro is active (no API calls, just read from options)
+		$license_data = array();
+		if ( defined( 'SUBTLEFORMS_PRO_VERSION' ) && function_exists( 'subtleforms_pro' ) ) {
+			$license_manager = subtleforms_pro()->get_license_manager();
+			$license_status  = $license_manager->get_license_status();
+			$raw_license_data = $license_manager->get_license_data();
+			
+			$license_data = array(
+				'status'     => $license_status, // active, inactive, expired, grace
+				'plan'       => ! empty( $raw_license_data['plan'] ) ? $raw_license_data['plan'] : 'pro',
+				'expiresAt'  => ! empty( $raw_license_data['expires'] ) ? $raw_license_data['expires'] : null,
+			);
+		}
+
 		// Localize script with data
 		wp_localize_script(
 			'subtleforms-admin',
@@ -243,7 +265,7 @@ class AdminMenu {
 				'restNonce'     => wp_create_nonce( 'wp_rest' ),
 				'capabilities'  => $this->caps->all(),
 				'hasProPlugin'  => defined( 'SUBTLEFORMS_PRO_VERSION' ),
-				'licenseKey'    => get_option( 'subtleforms_pro_license_key', '' ),
+				'license'       => $license_data, // License info from Pro plugin (no API calls)
 				'i18n'          => array(
 					'confirmDelete' => __( 'Are you sure you want to delete this item?', 'subtleforms' ),
 					'error'         => __( 'An error occurred. Please try again.', 'subtleforms' ),

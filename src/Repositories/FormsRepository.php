@@ -91,6 +91,8 @@ final class FormsRepository {
 	public function all( array $args = array() ): array {
 		global $wpdb;
 
+		$start = \SubtleForms\Support\QueryInstrumentation::start( __METHOD__ );
+
 		$defaults = array(
 			'status'  => null,
 			'search'  => null,
@@ -119,8 +121,9 @@ final class FormsRepository {
 		$orderby         = in_array( $args['orderby'], $allowed_orderby ) ? $args['orderby'] : 'created_at';
 		$order           = strtoupper( $args['order'] ) === 'ASC' ? 'ASC' : 'DESC';
 
+		// Phase B3: Only fetch needed columns for list views (skip large config JSON)
 		$sql = sprintf(
-			"SELECT * FROM {$this->table}%s ORDER BY %s %s LIMIT %d OFFSET %d",
+			"SELECT id, title, status, created_at, updated_at FROM {$this->table}%s ORDER BY %s %s LIMIT %d OFFSET %d",
 			$where,
 			esc_sql( $orderby ),
 			esc_sql( $order ),
@@ -130,10 +133,9 @@ final class FormsRepository {
 
 		$results = $wpdb->get_results( $sql, ARRAY_A );
 
-		// Decode JSON config for each form
-		foreach ( $results as &$result ) {
-			$result['config'] = Helpers::safe_json_decode( Helpers::safe_array_get( $result, 'config', '{}' ), true, array() );
-		}
+		// No JSON decoding needed - config not fetched
+
+		\SubtleForms\Support\QueryInstrumentation::end( $start, __METHOD__, $sql );
 
 		return $results;
 	}
@@ -163,6 +165,42 @@ final class FormsRepository {
 	}
 
 	/**
+	 * Find multiple forms by IDs in a single query (v1.8.2).
+	 * Returns a map of form_id => form data.
+	 * Only fetches id and title columns for performance.
+	 */
+	public function findMultiple( array $ids ): array {
+		global $wpdb;
+
+		if ( empty( $ids ) ) {
+			return array();
+		}
+
+		// Sanitize IDs
+		$ids = array_map( 'intval', $ids );
+		$ids = array_filter( $ids );
+
+		if ( empty( $ids ) ) {
+			return array();
+		}
+
+		$placeholders = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
+
+		// Only fetch id and title for list views
+		$sql = "SELECT id, title FROM {$this->table} WHERE id IN ($placeholders)";
+
+		$results = $wpdb->get_results( $wpdb->prepare( $sql, ...$ids ), ARRAY_A );
+
+		// Return as map: form_id => form
+		$map = array();
+		foreach ( $results as $form ) {
+			$map[ $form['id'] ] = $form;
+		}
+
+		return $map;
+	}
+
+	/**
 	 * Create a new form.
 	 */
 	public function create( array $data ): int {
@@ -172,9 +210,34 @@ final class FormsRepository {
 			'title'  => '',
 			'config' => array(),
 			'status' => 'draft',
+			'schema' => null,
 		);
 
 		$data = wp_parse_args( $data, $defaults );
+
+		// Inject default schema if missing or empty
+		if (empty($data['schema']) || !is_array($data['schema']) || empty($data['schema']['fields'])) {
+			$data['schema'] = array(
+				'metadata' => array(
+					'type' => 'regular',
+					'name' => $data['title'] ?: 'Untitled Form',
+				),
+				'schema_version' => 1,
+				'fields' => array(
+					array(
+						'type' => 'text',
+						'name' => 'field_1',
+						'label' => 'Text',
+						'required' => false,
+						'placeholder' => '',
+						'options' => array(),
+						'defaultValue' => '',
+						'validation' => array(),
+						'attributes' => array(),
+					),
+				),
+			);
+		}
 
 		$wpdb->insert(
 			$this->table,
@@ -200,6 +263,21 @@ final class FormsRepository {
 		// Ensure schema_version exists, default to 1 if not present
 		if ( ! isset( $schema['schema_version'] ) ) {
 			$schema['schema_version'] = 1;
+		}
+
+		// Ensure metadata and metadata.name exist with a safe default
+		if ( ! isset( $schema['metadata'] ) || ! is_array( $schema['metadata'] ) ) {
+			$schema['metadata'] = array();
+		}
+		if ( empty( $schema['metadata']['name'] ) || ! is_string( $schema['metadata']['name'] ) ) {
+			$schema['metadata']['name'] = 'form_schema';
+			error_log( sprintf( 'SubtleForms: Injected default metadata.name="%s" for form %d in saveSchemaVersion', $schema['metadata']['name'], $formId ) );
+		}
+
+		// Ensure fields array exists (allow empty drafts)
+		if ( ! isset( $schema['fields'] ) || ! is_array( $schema['fields'] ) ) {
+			$schema['fields'] = array();
+			error_log( sprintf( 'SubtleForms: Injected default empty fields array for form %d in saveSchemaVersion', $formId ) );
 		}
 
 		// Validate schema before saving

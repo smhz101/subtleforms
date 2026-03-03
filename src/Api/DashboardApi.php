@@ -2,9 +2,11 @@
 
 namespace SubtleForms\Api;
 
+use SubtleForms\Api\ApiResponse;
 use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Repositories\SubmissionsRepository;
 use SubtleForms\Support\Settings;
+use SubtleForms\Security\RateLimiter;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_Error;
@@ -70,6 +72,12 @@ class DashboardApi {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function getDashboard( WP_REST_Request $request ) {
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
 		try {
 			$data = array(
 				'stats'              => $this->getStats(),
@@ -78,19 +86,14 @@ class DashboardApi {
 				'system_health'      => $this->getSystemHealth(),
 			);
 
-			return new WP_REST_Response(
+			return ApiResponse::success(
 				array(
 					'success' => true,
 					'data'    => $data,
-				),
-				200
+				)
 			);
 		} catch ( \Exception $e ) {
-			return new WP_Error(
-				'dashboard_error',
-				$e->getMessage(),
-				array( 'status' => 500 )
-			);
+			return ApiResponse::server_error( $e->getMessage() );
 		}
 	}
 
@@ -289,6 +292,35 @@ class DashboardApi {
 		} else {
 			return gmdate( 'M j, Y', $timestamp );
 		}
+	}
+
+	/**
+	 * Guard rate limit for request (Phase A3-P1)
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|null Error response if rate limited, null if allowed.
+	 */
+	private function guardRateLimit( WP_REST_Request $request ): ?WP_REST_Response {
+		$userId = get_current_user_id() ?: null;
+		$ip     = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+		$route  = $request->get_route();
+		$method = $request->get_method();
+
+		$policy = RateLimiter::policy( $route, $method );
+		$key    = RateLimiter::buildKey( $route, $method, $userId, $ip );
+		$result = RateLimiter::check( $key, $policy['limit'], $policy['window'] );
+
+		if ( ! $result['allowed'] ) {
+			$headers = RateLimiter::headers( $result, $policy['limit'] );
+			return ApiResponse::rate_limited(
+				'Too many requests. Please try again later.',
+				$result['retry_after'],
+				array(),
+				$headers
+			);
+		}
+
+		return null;
 	}
 
 	/**

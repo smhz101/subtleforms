@@ -1,9 +1,13 @@
 /**
  * Custom webpack configuration for SubtleForms
- * Extends @wordpress/scripts default config to enable source maps
+ * Extends @wordpress/scripts default config to enable source maps and bundle analysis
  */
 
 const defaultConfig = require('@wordpress/scripts/config/webpack.config');
+const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+
+// Check if we should run the analyzer
+const shouldAnalyze = process.env.ANALYZE === 'true';
 
 module.exports = {
 	...defaultConfig,
@@ -41,4 +45,19 @@ module.exports = {
 			return rule;
 		}),
 	},
+	// Add bundle analyzer plugin if enabled
+	plugins: [
+		...defaultConfig.plugins,
+		...(shouldAnalyze
+			? [
+					new BundleAnalyzerPlugin({
+						analyzerMode: 'static',
+						reportFilename: '../bundle-report.html',
+						openAnalyzer: true,
+						generateStatsFile: true,
+						statsFilename: '../bundle-stats.json',
+					}),
+			  ]
+			: []),
+	],
 };

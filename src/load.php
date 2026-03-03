@@ -55,11 +55,34 @@ require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/FeatureGate.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/Helpers.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/Settings.php';
 
+// Validation (Phase A2)
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Validation/ValidationException.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Validation/Sanitizer.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Validation/Rules.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Validation/RequestValidator.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Validation/Schemas.php';
+
 // Extensions
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Extensions/ExtensionManager.php';
 
+// Validation (Phase A2-P1)
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Validation/ValidationException.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Validation/Sanitizer.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Validation/Rules.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Validation/RequestValidator.php';
+
+// Security (Phase A3-P1)
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Security/RateLimiter.php';
+
+// Security (Phase A3-P2)
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Security/ETag.php';
+
+// Async (Phase B2)
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Async/AsyncDispatcher.php';
+
 // Admin / API
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Admin/AdminMenu.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Api/ApiResponse.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Api/RestController.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Frontend/Shortcode.php';
 

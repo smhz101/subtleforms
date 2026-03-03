@@ -11,6 +11,7 @@ namespace SubtleForms\Api;
 use SubtleForms\Support\Helpers;
 use SubtleForms\Api\SettingsApi;
 use SubtleForms\Api\DashboardApi;
+use SubtleForms\Api\ApiResponse;
 
 use SubtleForms\Engine\Pipeline;
 use SubtleForms\Engine\SubmissionContext;
@@ -21,6 +22,12 @@ use SubtleForms\Support\Settings;
 use SubtleForms\Support\Captcha\CaptchaManager;
 use SubtleForms\Engine\SchemaCompiler;
 use SubtleForms\Fields\FieldRegistry;
+use SubtleForms\Validation\RequestValidator;
+use SubtleForms\Validation\ValidationException;
+use SubtleForms\Validation\Schemas;
+use SubtleForms\Validation\Sanitizer;
+use SubtleForms\Security\RateLimiter;
+use SubtleForms\Security\ETag;
 use WP_REST_Request;
 use WP_REST_Response;
 use WP_Error;
@@ -367,12 +374,126 @@ final class RestController {
 	}
 
 	/**
+	 * Guard rate limit for request (Phase A3-P1)
+	 *
+	 * Checks rate limit and returns error response if exceeded.
+	 *
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|null Error response if rate limited, null if allowed.
+	 */
+	private function guardRateLimit( WP_REST_Request $request ): ?WP_REST_Response {
+		$userId = get_current_user_id() ?: null;
+		$ip     = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+		$route  = $request->get_route();
+		$method = $request->get_method();
+
+		// Get policy for this endpoint
+		$policy = RateLimiter::policy( $route, $method );
+		
+		// Build rate limit key
+		$key = RateLimiter::buildKey( $route, $method, $userId, $ip );
+		
+		// Check limit
+		$result = RateLimiter::check( $key, $policy['limit'], $policy['window'] );
+		
+		// If blocked, return 429 response
+		if ( ! $result['allowed'] ) {
+			$headers = RateLimiter::headers( $result, $policy['limit'] );
+			return ApiResponse::rate_limited(
+				'Too many requests. Please try again later.',
+				$result['retry_after'],
+				array(),
+				$headers
+			);
+		}
+		
+		// Allowed - could optionally attach rate limit headers to success responses
+		// For now, we only send headers on 429 responses
+		return null;
+	}
+
+	/**
+	 * Guard If-Match for optimistic locking (Phase A3-P2)
+	 *
+	 * Checks If-Match header against current resource ETag.
+	 * Returns 409 Conflict if mismatch, null if match or no If-Match.
+	 *
+	 * @param WP_REST_Request $request         Request object.
+	 * @param array           $currentResource Current resource data.
+	 * @param string          $resourceName    Resource type (e.g., "form", "submission").
+	 * @return WP_REST_Response|null 409 response if conflict, null if allowed.
+	 */
+	private function guardIfMatch( WP_REST_Request $request, array $currentResource, string $resourceName ): ?WP_REST_Response {
+		$ifMatch = $request->get_header( 'If-Match' );
+
+		// No If-Match header = optimistic locking not requested
+		if ( empty( $ifMatch ) ) {
+			return null;
+		}
+
+		// Generate current ETag
+		$currentETag = $this->generateETag( $currentResource, $resourceName );
+
+		// Check if ETags match
+		if ( ETag::match( $ifMatch, $currentETag ) ) {
+			return null; // Match - allow operation
+		}
+
+		// Conflict - return 409 with current ETag
+		return ApiResponse::conflict(
+			sprintf( 'The %s has been modified by another user. Please refresh and try again.', $resourceName ),
+			array(
+				'resource'          => $resourceName,
+				'provided_if_match' => $ifMatch,
+				'current_etag'      => $currentETag,
+			),
+			array( 'ETag' => $currentETag )
+		);
+	}
+
+	/**
+	 * Generate ETag for a resource (Phase A3-P2)
+	 *
+	 * @param array  $resource     Resource data.
+	 * @param string $resourceName Resource type.
+	 * @return string ETag value.
+	 */
+	private function generateETag( array $resource, string $resourceName ): string {
+		switch ( $resourceName ) {
+			case 'form':
+				return ETag::fromForm( $resource );
+			case 'submission':
+				return ETag::fromSubmission( $resource );
+			default:
+				return ETag::fromResource( $resource );
+		}
+	}
+
+	/**
 	 * Get all forms.
 	 */
 	public function get_forms( WP_REST_Request $request ): WP_REST_Response {
-		$page     = max( 1, intval( $request->get_param( 'page' ) ) ?: 1 );
-		$per_page = min( 100, max( 1, intval( $request->get_param( 'per_page' ) ) ?: 20 ) );
-		$offset   = ( $page - 1 ) * $per_page;
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		// Validate pagination parameters
+		try {
+			$pagination = Schemas::validatePagination(
+				array(
+					'page'     => $request->get_param( 'page' ),
+					'per_page' => $request->get_param( 'per_page' ),
+				)
+			);
+			$page     = $pagination['page'];
+			$per_page = $pagination['per_page'];
+		} catch ( ValidationException $e ) {
+			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
+		}
+
+		$offset = ( $page - 1 ) * $per_page;
 
 		// Validate orderby and order params
 		$allowed_orderby = array( 'id', 'title', 'status', 'created_at', 'updated_at' );
@@ -415,24 +536,36 @@ final class RestController {
 			}
 		}
 
-		$response = new WP_REST_Response( $forms, 200 );
-		$response->header( 'X-WP-Total', $total );
-		$response->header( 'X-WP-TotalPages', ceil( $total / $per_page ) );
-
-		return $response;
+		return ApiResponse::paginated( $forms, $total, $page, $per_page );
 	}
 
 	/**
 	 * Get a single form.
 	 */
 	public function get_form( WP_REST_Request $request ) {
-		$form = $this->formsRepo->find( $request->get_param( 'id' ) );
-
-		if ( ! $form ) {
-			return new WP_Error( 'form_not_found', __( 'Form not found', 'subtleforms' ), array( 'status' => 404 ) );
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
 		}
 
-		return new WP_REST_Response( $form, 200 );
+		// Validate ID
+		try {
+			$id = Schemas::validateId( $request->get_param( 'id' ) );
+		} catch ( ValidationException $e ) {
+			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
+		}
+
+		$form = $this->formsRepo->find( $id );
+
+		if ( ! $form ) {
+			return ApiResponse::not_found( __( 'Form not found', 'subtleforms' ) );
+		}
+
+		// Phase A3-P2: Add ETag header for optimistic locking
+		$etag     = $this->generateETag( $form, 'form' );
+		$response = ApiResponse::success( $form );
+		return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
 	}
 
 	/**
@@ -464,7 +597,7 @@ final class RestController {
 		// Verify form exists first
 		$form = $this->formsRepo->find( $formId );
 		if ( ! $form ) {
-			return new WP_Error( 'form_not_found', __( 'Form not available', 'subtleforms' ), array( 'status' => 404 ) );
+			return ApiResponse::not_found( __( 'Form not available', 'subtleforms' ) );
 		}
 
 		$isAuthenticated = is_user_logged_in() && current_user_can( 'edit_posts' );
@@ -479,7 +612,7 @@ final class RestController {
 		if ( ! $isAuthenticated ) {
 			error_log( '[SubtleForms] BRANCH: Public access (unauthenticated)' );
 			if ( ! $isPublished ) {
-				return new WP_Error( 'form_not_available', __( 'Form not available', 'subtleforms' ), array( 'status' => 404 ) );
+				return ApiResponse::not_found( __( 'Form not available', 'subtleforms' ) );
 			}
 
 			// Load active schema only
@@ -487,11 +620,11 @@ final class RestController {
 				$schema = $this->formsRepo->loadSchemaVersion( $formId, $version );
 			} catch ( \RuntimeException $e ) {
 				error_log( 'SubtleForms API Error: ' . $e->getMessage() );
-				return new WP_Error( 'schema_not_available', __( 'Schema not available', 'subtleforms' ), array( 'status' => 404 ) );
+				return ApiResponse::not_found( __( 'Schema not available', 'subtleforms' ) );
 			}
 
 			if ( ! $schema ) {
-				return new WP_Error( 'schema_not_available', __( 'Schema not available', 'subtleforms' ), array( 'status' => 404 ) );
+				return ApiResponse::not_found( __( 'Schema not available', 'subtleforms' ) );
 			}
 
 			// Inject CAPTCHA HTML for frontend rendering
@@ -499,13 +632,12 @@ final class RestController {
 			$schemaData = $schema['schema'] ?? $schema;
 			$schemaData = $this->injectCaptchaHtml( $schemaData );
 
-			return new WP_REST_Response(
+			return ApiResponse::success(
 				array(
 					'form'    => $form,
 					'schema'  => $schemaData,
 					'version' => $schema['version'] ?? null,
-				),
-				200
+				)
 			);
 		}
 
@@ -519,14 +651,13 @@ final class RestController {
 				// Inject provider name for builder preview (not full CAPTCHA HTML)
 				$draftSchema = $this->injectCaptchaProvider( $draftSchema );
 
-				return new WP_REST_Response(
+				return ApiResponse::success(
 					array(
 						'form'    => $form,
 						'schema'  => $draftSchema,
 						'version' => null,
 						'draft'   => true,
-					),
-					200
+					)
 				);
 			}
 			error_log( '[SubtleForms] No draft schema found, falling back to versioned schema' );
@@ -538,16 +669,12 @@ final class RestController {
 			$schema = $this->formsRepo->loadSchemaVersion( $formId, $version );
 		} catch ( \RuntimeException $e ) {
 			error_log( 'SubtleForms API Error: ' . $e->getMessage() );
-			return new WP_Error(
-				'schema_load_failed',
-				'Failed to load form schema',
-				array( 'status' => 500 )
-			);
+			return ApiResponse::server_error( __( 'Failed to load form schema', 'subtleforms' ) );
 		}
 
 		if ( ! $schema ) {
 			// Return empty schema for authenticated users creating new forms
-			return new WP_REST_Response(
+			return ApiResponse::success(
 				array(
 					'form'    => $form,
 					'schema'  => array(
@@ -560,8 +687,7 @@ final class RestController {
 						'actions'  => array(),
 					),
 					'version' => null,
-				),
-				200
+				)
 			);
 		}
 
@@ -570,13 +696,12 @@ final class RestController {
 		$schemaData = $schema['schema'] ?? $schema;
 		$schemaData = $this->injectCaptchaHtml( $schemaData );
 
-		return new WP_REST_Response(
+		return ApiResponse::success(
 			array(
 				'form'    => $form,
 				'schema'  => $schemaData,
 				'version' => $schema['version'] ?? null,
-			),
-			200
+			)
 		);
 	}
 
@@ -732,21 +857,63 @@ final class RestController {
 	 *   - Immutable and public
 	 */
 	public function save_form_schema( WP_REST_Request $request ) {
-		$formId = intval( $request->get_param( 'id' ) );
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		// Validate ID
+		try {
+			$formId = Schemas::validateId( $request->get_param( 'id' ) );
+		} catch ( ValidationException $e ) {
+			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
+		}
 
 		$form = $this->formsRepo->find( $formId );
 		if ( ! $form ) {
-			return new WP_Error( 'form_not_found', __( 'Form not found', 'subtleforms' ), array( 'status' => 404 ) );
+			return ApiResponse::not_found( __( 'Form not found', 'subtleforms' ) );
 		}
 
-		$params = $request->get_json_params();
-		$schema = $params['schema'] ?? null;
-		// Safe default: do NOT activate unless explicitly requested
-		// This prevents autosave from creating active versions
-		$activate = isset( $params['activate'] ) && $params['activate'] === true;
+		// Phase A3-P2: Check If-Match for optimistic locking (schema changes)
+		$conflictResponse = $this->guardIfMatch( $request, $form, 'form' );
+		if ( $conflictResponse ) {
+			return $conflictResponse;
+		}
 
-		if ( ! is_array( $schema ) ) {
-			return new WP_Error( 'invalid_schema', __( 'Schema must be a JSON object', 'subtleforms' ), array( 'status' => 400 ) );
+		// Validate input
+		$input = $request->get_json_params();
+		try {
+			$validator = new RequestValidator( array( 'schemas' => Schemas::all() ) );
+			$validated = $validator->validateOrFail( $input, Schemas::get( Schemas::FORM_SCHEMA_SAVE ) );
+		} catch ( ValidationException $e ) {
+			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
+		}
+
+		$schema = $validated['schema'];
+		$activate = $validated['activate'] ?? false;
+
+		// Ensure a schema_version exists so server-side validation and versioning
+		// can proceed even when clients omit it (clients may rely on server-assigned versions).
+		if ( ! isset( $schema['schema_version'] ) ) {
+			$schema['schema_version'] = 1;
+			// Debug: Log that we injected a default schema_version
+			error_log( sprintf( 'SubtleForms: Injected default schema_version=1 for form %d during schema save', $formId ) );
+		}
+
+		// Ensure metadata and metadata.name exist (fallback to form title)
+		if ( ! isset( $schema['metadata'] ) || ! is_array( $schema['metadata'] ) ) {
+			$schema['metadata'] = array();
+		}
+		if ( empty( $schema['metadata']['name'] ) || ! is_string( $schema['metadata']['name'] ) ) {
+			$schema['metadata']['name'] = Helpers::safe_string_get( $form, 'title', 'form_schema' );
+			error_log( sprintf( 'SubtleForms: Injected default metadata.name="%s" for form %d during schema save', $schema['metadata']['name'], $formId ) );
+		}
+
+		// Ensure fields array exists (allow empty drafts)
+		if ( ! isset( $schema['fields'] ) || ! is_array( $schema['fields'] ) ) {
+			$schema['fields'] = array();
+			error_log( sprintf( 'SubtleForms: Injected default empty fields array for form %d during schema save', $formId ) );
 		}
 
 		// Task 5.5: Structured validation errors for builder UI
@@ -759,13 +926,9 @@ final class RestController {
 				: $validator->validateWithErrors( $schema );
 
 			if ( ! empty( $validationErrors ) ) {
-				return new WP_Error(
-					'schema_validation_failed',
-					'Schema validation failed',
-					array(
-						'status' => 422,
-						'errors' => $validationErrors,
-					)
+				return ApiResponse::validation_error(
+					__( 'Schema validation failed', 'subtleforms' ),
+					$validationErrors
 				);
 			}
 		}
@@ -780,10 +943,10 @@ final class RestController {
 				$savedSchema = $this->formsRepo->loadSchemaVersion( $formId, $version );
 				if ( ! $savedSchema ) {
 					error_log( sprintf( 'SubtleForms: Failed to load just-saved schema version %d for form %d', $version, $formId ) );
-					return new WP_Error( 'save_verification_failed', __( 'Schema was saved but could not be loaded back', 'subtleforms' ), array( 'status' => 500 ) );
+					return ApiResponse::server_error( __( 'Schema was saved but could not be loaded back', 'subtleforms' ) );
 				}
 
-				return new WP_REST_Response(
+				return ApiResponse::success(
 					array(
 						'version' => $version,
 						'active'  => true,
@@ -795,23 +958,22 @@ final class RestController {
 				$success = $this->formsRepo->saveDraftSchema( $formId, $schema );
 
 				if ( ! $success ) {
-					return new WP_Error( 'save_failed', __( 'Failed to save draft schema', 'subtleforms' ), array( 'status' => 500 ) );
+					return ApiResponse::server_error( __( 'Failed to save draft schema', 'subtleforms' ) );
 				}
 
-				return new WP_REST_Response(
+				return ApiResponse::success(
 					array(
 						'draft'  => true,
 						'active' => false,
-					),
-					200
+					)
 				);
 			}
 		} catch ( \InvalidArgumentException $e ) {
 			error_log( sprintf( 'SubtleForms: Schema validation error for form %d: %s', $formId, $e->getMessage() ) );
-			return new WP_Error( 'invalid_schema', $e->getMessage(), array( 'status' => 400 ) );
+			return ApiResponse::bad_request( $e->getMessage() );
 		} catch ( \RuntimeException $e ) {
 			error_log( sprintf( 'SubtleForms: Save failed for form %d: %s', $formId, $e->getMessage() ) );
-			return new WP_Error( 'save_failed', $e->getMessage(), array( 'status' => 500 ) );
+			return ApiResponse::server_error( $e->getMessage() );
 		}
 	}
 
@@ -819,22 +981,72 @@ final class RestController {
 	 * Create a new form.
 	 */
 	public function create_form( WP_REST_Request $request ): WP_REST_Response {
-		$params = $request->get_json_params();
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		$input = $request->get_json_params();
+
+		// Coerce stringified JSON fields (some clients stringify nested objects accidentally)
+		foreach ( array( 'config', 'schema' ) as $maybeJsonField ) {
+			if ( isset( $input[ $maybeJsonField ] ) && is_string( $input[ $maybeJsonField ] ) ) {
+				$trimmed = trim( $input[ $maybeJsonField ] );
+				if ( $trimmed === '' ) {
+					unset( $input[ $maybeJsonField ] );
+				} else {
+					$decoded = json_decode( $input[ $maybeJsonField ], true );
+					if ( json_last_error() === JSON_ERROR_NONE && is_array( $decoded ) ) {
+						$input[ $maybeJsonField ] = $decoded;
+					}
+				}
+			}
+		}
+
+		// Validate input
+		try {
+			// Debug log incoming input for troubleshooting
+			error_log( 'SubtleForms:create_form - raw input: ' . print_r( $input, true ) );
+			$validator = new RequestValidator( array( 'schemas' => Schemas::all() ) );
+			$validated = $validator->validateOrFail( $input, Schemas::get( Schemas::FORM_CREATE ) );
+			// Debug log validated data
+			error_log( 'SubtleForms:create_form - validated: ' . print_r( $validated, true ) );
+		} catch ( ValidationException $e ) {
+			error_log( 'SubtleForms:create_form - validation failed: ' . $e->getMessage() . ' Fields: ' . print_r( $e->getFields(), true ) );
+			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
+		}
 
 		// Get default status from settings
 		$defaultStatus = $this->settings ? $this->settings->get( 'default_form_status', 'draft' ) : 'draft';
 
 		$data = array(
-			'title'  => $params['title'] ?? 'Untitled Form',
-			'config' => $params['config'] ?? array(),
-			'status' => $params['status'] ?? $defaultStatus,
+			'title'  => $validated['title'],
+			'config' => $validated['config'] ?? array(),
+			'status' => $defaultStatus,
 		);
 
 		$id = $this->formsRepo->create( $data );
 
 		// If schema provided, save as initial schema version and activate
-		$schema = $params['schema'] ?? null;
+		// Use validated schema if present
+		$schema = $validated['schema'] ?? null;
 		if ( is_array( $schema ) && ! empty( $schema ) ) {
+			// Ensure metadata.name exists (prefer form title)
+			if ( ! isset( $schema['metadata'] ) || ! is_array( $schema['metadata'] ) ) {
+				$schema['metadata'] = array();
+			}
+			if ( empty( $schema['metadata']['name'] ) || ! is_string( $schema['metadata']['name'] ) ) {
+				$schema['metadata']['name'] = Helpers::safe_string_get( $validated, 'title', 'form_schema' );
+				error_log( sprintf( 'SubtleForms: Injected default metadata.name="%s" for new form %d during create', $schema['metadata']['name'], $id ) );
+			}
+
+			// Ensure fields array exists (allow empty initial schemas)
+			if ( ! isset( $schema['fields'] ) || ! is_array( $schema['fields'] ) ) {
+				$schema['fields'] = array();
+				error_log( sprintf( 'SubtleForms: Injected default empty fields array for new form %d during create', $id ) );
+			}
+
 			try {
 				$this->formsRepo->saveSchemaVersion( $id, $schema, true );
 			} catch ( \InvalidArgumentException $e ) {
@@ -843,25 +1055,52 @@ final class RestController {
 			}
 		}
 
-		return new WP_REST_Response( array( 'id' => $id ), 201 );
+		return ApiResponse::success( array( 'id' => $id ), 201 );
 	}
 
 	/**
 	 * Update a form.
 	 */
 	public function update_form( WP_REST_Request $request ) {
-		$id   = $request->get_param( 'id' );
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		// Validate ID
+		try {
+			$id = Schemas::validateId( $request->get_param( 'id' ) );
+		} catch ( ValidationException $e ) {
+			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
+		}
+
 		$form = $this->formsRepo->find( $id );
 
 		if ( ! $form ) {
-			return new WP_Error( 'form_not_found', __( 'Form not found', 'subtleforms' ), array( 'status' => 404 ) );
+			return ApiResponse::not_found( __( 'Form not found', 'subtleforms' ) );
+		}
+
+		// Phase A3-P2: Check If-Match for optimistic locking
+		$conflictResponse = $this->guardIfMatch( $request, $form, 'form' );
+		if ( $conflictResponse ) {
+			return $conflictResponse;
+		}
+
+		// Validate input
+		$input = $request->get_json_params();
+		try {
+			$validator = new RequestValidator( array( 'schemas' => Schemas::all() ) );
+			$validated = $validator->validateOrFail( $input, Schemas::get( Schemas::FORM_UPDATE ) );
+		} catch ( ValidationException $e ) {
+			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
 		}
 
 		$data = array_filter(
 			array(
-				'title'  => $request->get_param( 'title' ),
-				'config' => $request->get_param( 'config' ),
-				'status' => $request->get_param( 'status' ),
+				'title'  => $validated['title'] ?? null,
+				'config' => $validated['config'] ?? null,
+				'status' => $validated['status'] ?? null,
 			),
 			fn( $value ) => $value !== null
 		);
@@ -880,11 +1119,7 @@ final class RestController {
 						$this->formsRepo->promoteDraftToActive( $id );
 					} catch ( \Exception $e ) {
 						error_log( sprintf( 'SubtleForms: Failed to promote draft: %s', $e->getMessage() ) );
-						return new WP_Error(
-							'publish_blocked',
-							'Cannot publish form: Failed to activate schema. ' . $e->getMessage(),
-							array( 'status' => 500 )
-						);
+						return ApiResponse::server_error( __( 'Cannot publish form: Failed to activate schema.', 'subtleforms' ) . ' ' . $e->getMessage() );
 					}
 				}
 
@@ -893,20 +1128,12 @@ final class RestController {
 
 				if ( ! $activeSchema ) {
 					error_log( sprintf( 'SubtleForms: No active schema found for form %d after promotion attempt', $id ) );
-					return new WP_Error(
-						'publish_blocked',
-						'Cannot publish form: No schema exists. Please save your form first.',
-						array( 'status' => 400 )
-					);
+					return ApiResponse::bad_request( __( 'Cannot publish form: No schema exists. Please save your form first.', 'subtleforms' ) );
 				}
 
 				// Check if the loaded schema is actually active
 				if ( ! isset( $activeSchema['active'] ) || $activeSchema['active'] != 1 ) {
-					return new WP_Error(
-						'publish_blocked',
-						'Cannot publish form: No active schema version. Please save and activate a schema first.',
-						array( 'status' => 400 )
-					);
+					return ApiResponse::bad_request( __( 'Cannot publish form: No active schema version. Please save and activate a schema first.', 'subtleforms' ) );
 				}
 
 				// loadSchemaVersion returns decoded schema in 'schema' key, not 'schema_data'
@@ -919,11 +1146,7 @@ final class RestController {
 							implode( ', ', array_keys( $activeSchema ) )
 						)
 					);
-					return new WP_Error(
-						'publish_blocked',
-						'Cannot publish form: Schema data is corrupt or invalid. Check error logs for details.',
-						array( 'status' => 400 )
-					);
+					return ApiResponse::bad_request( __( 'Cannot publish form: Schema data is corrupt or invalid. Check error logs for details.', 'subtleforms' ) );
 				}
 
 				// Run comprehensive publish validation
@@ -931,49 +1154,69 @@ final class RestController {
 				$validationErrors = $validator->validateForPublishingWithErrors( $schemaData );
 
 				if ( ! empty( $validationErrors ) ) {
-					return new WP_Error(
-						'publish_blocked',
-						'Cannot publish form: Fix validation errors.',
-						array(
-							'status' => 422,
-							'errors' => $validationErrors,
-						)
+					return ApiResponse::validation_error(
+						__( 'Cannot publish form: Fix validation errors.', 'subtleforms' ),
+						$validationErrors
 					);
 				}
 			} catch ( \RuntimeException $e ) {
-				return new WP_Error(
-					'publish_blocked',
-					'Cannot publish form: ' . $e->getMessage(),
-					array( 'status' => 500 )
-				);
+				return ApiResponse::server_error( __( 'Cannot publish form:', 'subtleforms' ) . ' ' . $e->getMessage() );
 			}
 		}
 
 		$this->formsRepo->update( $id, $data );
 
-		return new WP_REST_Response( array( 'success' => true ), 200 );
+		// Phase A3-P2: Return updated form with new ETag
+		$updatedForm = $this->formsRepo->find( $id );
+		$etag        = $this->generateETag( $updatedForm, 'form' );
+		$response    = ApiResponse::success( array( 'success' => true, 'form' => $updatedForm ) );
+		return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
 	}
 
 	/**
 	 * Delete a form.
 	 */
 	public function delete_form( WP_REST_Request $request ) {
-		$id   = $request->get_param( 'id' );
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		// Validate ID
+		try {
+			$id = Schemas::validateId( $request->get_param( 'id' ) );
+		} catch ( ValidationException $e ) {
+			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
+		}
+
 		$form = $this->formsRepo->find( $id );
 
 		if ( ! $form ) {
-			return new WP_Error( 'form_not_found', __( 'Form not found', 'subtleforms' ), array( 'status' => 404 ) );
+			return ApiResponse::not_found( __( 'Form not found', 'subtleforms' ) );
+		}
+
+		// Phase A3-P2: Check If-Match for optimistic locking (optional for DELETE)
+		$conflictResponse = $this->guardIfMatch( $request, $form, 'form' );
+		if ( $conflictResponse ) {
+			return $conflictResponse;
 		}
 
 		$this->formsRepo->delete( $id );
 
-		return new WP_REST_Response( array( 'success' => true ), 200 );
+		return ApiResponse::success( array( 'success' => true ) );
 	}
 
 	/**
 	 * Get submissions for a form.
 	 */
 	public function get_submissions( WP_REST_Request $request ): WP_REST_Response {
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
 		$args = array(
 			'form_id' => $request->get_param( 'form_id' ),
 			'limit'   => intval( $request->get_param( 'per_page' ) ?? 20 ),
@@ -985,14 +1228,11 @@ final class RestController {
 		$submissions = $this->submissionsRepo->findAll( $args );
 		$total       = $this->submissionsRepo->count( $args );
 
-		return new WP_REST_Response(
-			array(
-				'submissions' => $submissions,
-				'total'       => $total,
-				'per_page'    => $args['limit'],
-				'offset'      => $args['offset'],
-			),
-			200
+		return ApiResponse::paginated(
+			$submissions,
+			$total,
+			($args['offset'] / $args['limit']) + 1,
+			$args['limit']
 		);
 	}
 
@@ -1000,11 +1240,29 @@ final class RestController {
 	 * Get all submissions with optional filtering (v0.9.0+ enhanced v0.9.1 for search).
 	 */
 	public function get_all_submissions( WP_REST_Request $request ): WP_REST_Response {
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		// Validate pagination parameters
+		try {
+			$pagination = Schemas::validatePagination(
+				array(
+					'page'     => ( intval( $request->get_param( 'offset' ) ?? 0 ) / intval( $request->get_param( 'per_page' ) ?? 20 ) ) + 1,
+					'per_page' => $request->get_param( 'per_page' ),
+				)
+			);
+		} catch ( ValidationException $e ) {
+			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
+		}
+
 		$args = array(
 			'form_id' => $request->get_param( 'form_id' ),
 			'status'  => $request->get_param( 'status' ),
 			'search'  => $request->get_param( 'search' ),
-			'limit'   => intval( $request->get_param( 'per_page' ) ?? 20 ),
+			'limit'   => $pagination['per_page'],
 			'offset'  => intval( $request->get_param( 'offset' ) ?? 0 ),
 			'orderby' => 'created_at',
 			'order'   => 'DESC',
@@ -1013,26 +1271,25 @@ final class RestController {
 		$submissions = $this->submissionsRepo->findAll( $args );
 		$total       = $this->submissionsRepo->count( $args );
 
+		// Bulk fetch form titles to avoid N+1 queries (v1.8.2 - Phase B3)
+		$form_ids = array_unique( array_filter( array_column( $submissions, 'form_id' ) ) );
+		$forms_map = $this->formsRepo->findMultiple( $form_ids );
+
 		// Enhance with form titles
 		foreach ( $submissions as &$sub ) {
-			if ( Helpers::safe_array_get( $sub, 'form_id' ) ) {
-				$form = $this->formsRepo->find( $sub['form_id'] );
-				if ( is_array( $form ) ) {
-					$sub['form_title'] = Helpers::safe_array_get( $form, 'title', __( 'Unknown Form', 'subtleforms' ) );
-				} else {
-					$sub['form_title'] = __( 'Unknown Form', 'subtleforms' );
-				}
+			$form_id = Helpers::safe_array_get( $sub, 'form_id' );
+			if ( $form_id && isset( $forms_map[ $form_id ] ) ) {
+				$sub['form_title'] = Helpers::safe_array_get( $forms_map[ $form_id ], 'title', __( 'Unknown Form', 'subtleforms' ) );
+			} else {
+				$sub['form_title'] = __( 'Unknown Form', 'subtleforms' );
 			}
 		}
 
-		return new WP_REST_Response(
-			array(
-				'submissions' => $submissions,
-				'total'       => $total,
-				'per_page'    => $args['limit'],
-				'offset'      => $args['offset'],
-			),
-			200
+		return ApiResponse::paginated(
+			$submissions,
+			$total,
+			($args['offset'] / $args['limit']) + 1,
+			$args['limit']
 		);
 	}
 
@@ -1040,10 +1297,23 @@ final class RestController {
 	 * Get a single submission (v0.9.1: auto-marks as read).
 	 */
 	public function get_submission( WP_REST_Request $request ) {
-		$submission = $this->submissionsRepo->find( $request->get_param( 'id' ) );
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		// Validate ID
+		try {
+			$id = Schemas::validateId( $request->get_param( 'id' ) );
+		} catch ( ValidationException $e ) {
+			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
+		}
+
+		$submission = $this->submissionsRepo->find( $id );
 
 		if ( ! $submission ) {
-			return new WP_Error( 'submission_not_found', __( 'Submission not found', 'subtleforms' ), array( 'status' => 404 ) );
+			return ApiResponse::not_found( __( 'Submission not found', 'subtleforms' ) );
 		}
 
 		// Auto-mark as read when viewed
@@ -1072,63 +1342,109 @@ final class RestController {
 			$submission['prev_id'] = $adjacent['prev'];
 		}
 
-		return new WP_REST_Response( $submission, 200 );
+		// Phase A3-P2: Add ETag header for optimistic locking
+		$etag     = $this->generateETag( $submission, 'submission' );
+		$response = ApiResponse::success( $submission );
+		return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
 	}
 
 	/**
 	 * Update a submission (v0.9.1: for status changes).
 	 */
 	public function update_submission( WP_REST_Request $request ) {
-		$id         = intval( $request->get_param( 'id' ) );
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		// Validate ID
+		try {
+			$id = Schemas::validateId( $request->get_param( 'id' ) );
+		} catch ( ValidationException $e ) {
+			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
+		}
+
 		$submission = $this->submissionsRepo->find( $id );
 
 		if ( ! $submission ) {
-			return new WP_Error( 'submission_not_found', __( 'Submission not found', 'subtleforms' ), array( 'status' => 404 ) );
+			return ApiResponse::not_found( __( 'Submission not found', 'subtleforms' ) );
 		}
 
-		$params = $request->get_json_params();
-		$data   = array_filter(
+		// Phase A3-P2: Check If-Match for optimistic locking
+		$conflictResponse = $this->guardIfMatch( $request, $submission, 'submission' );
+		if ( $conflictResponse ) {
+			return $conflictResponse;
+		}
+
+		// Validate input
+		$input = $request->get_json_params();
+		try {
+			$validator = new RequestValidator( array( 'schemas' => Schemas::all() ) );
+			$validated = $validator->validateOrFail( $input, Schemas::get( Schemas::SUBMISSION_UPDATE ) );
+		} catch ( ValidationException $e ) {
+			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
+		}
+
+		$data = array_filter(
 			array(
-				'status' => $params['status'] ?? null,
+				'status' => $validated['status'] ?? null,
+				'notes'  => $validated['notes'] ?? null,
 			),
 			fn( $value ) => $value !== null
 		);
 
 		if ( empty( $data ) ) {
-			return new WP_Error( 'no_changes', __( 'No valid changes provided', 'subtleforms' ), array( 'status' => 400 ) );
+			return ApiResponse::bad_request( __( 'No valid changes provided', 'subtleforms' ) );
 		}
 
 		$this->submissionsRepo->update( $id, $data );
 
-		return new WP_REST_Response( array( 'success' => true ), 200 );
+		// Phase A3-P2: Return updated submission with new ETag
+		$updatedSubmission = $this->submissionsRepo->find( $id );
+		$etag              = $this->generateETag( $updatedSubmission, 'submission' );
+		$response          = ApiResponse::success( array( 'success' => true, 'submission' => $updatedSubmission ) );
+		return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
 	}
 
 	/**
 	 * Get adjacent submission IDs (v0.9.4).
 	 */
 	public function get_adjacent_submissions( WP_REST_Request $request ) {
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
 		$id     = intval( $request->get_param( 'id' ) );
 		$formId = $request->get_param( 'form_id' ) ? intval( $request->get_param( 'form_id' ) ) : null;
 
 		$submission = $this->submissionsRepo->find( $id );
 		if ( ! $submission ) {
-			return new WP_Error( 'submission_not_found', __( 'Submission not found', 'subtleforms' ), array( 'status' => 404 ) );
+			return ApiResponse::not_found( __( 'Submission not found', 'subtleforms' ) );
 		}
 
 		$adjacent = $this->submissionsRepo->getAdjacentIds( $id, $formId );
 
-		return new WP_REST_Response( $adjacent, 200 );
+		return ApiResponse::success( $adjacent );
 	}
 
 	/**
 	 * Get execution logs for a submission.
 	 */
 	public function get_submission_logs( WP_REST_Request $request ) {
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
 		$submissionId = intval( $request->get_param( 'id' ) );
 
 		$submission = $this->submissionsRepo->find( $submissionId );
 		if ( ! $submission ) {
-			return new WP_Error( 'submission_not_found', __( 'Submission not found', 'subtleforms' ), array( 'status' => 404 ) );
+			return ApiResponse::not_found( __( 'Submission not found', 'subtleforms' ) );
 		}
 
 		// Use LogsRepository to fetch logs
@@ -1143,25 +1459,30 @@ final class RestController {
 			)
 		);
 
-		return new WP_REST_Response( $logs, 200 );
+		return ApiResponse::success( $logs );
 	}
 
 	/**
 	 * Get unread submissions count.
 	 */
 	public function get_unread_count( WP_REST_Request $request ) {
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
 		try {
 			$unreadCount = $this->submissionsRepo->count( array( 'status' => 'unread' ) );
 
-			return new WP_REST_Response(
+			return ApiResponse::success(
 				array(
 					'count'     => $unreadCount,
 					'timestamp' => current_time( 'mysql' ),
-				),
-				200
+				)
 			);
 		} catch ( \Exception $e ) {
-			return new WP_Error( 'count_error', __( 'Error fetching unread count', 'subtleforms' ), array( 'status' => 500 ) );
+			return ApiResponse::server_error( __( 'Error fetching unread count', 'subtleforms' ) );
 		}
 	}
 
@@ -1171,35 +1492,36 @@ final class RestController {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function submit_form( WP_REST_Request $request ) {
-		// Rate limiting: 10 submissions per minute per IP
-		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? filter_var( wp_unslash( $_SERVER['REMOTE_ADDR'] ), FILTER_VALIDATE_IP ) : null;
-
-		if ( $ip ) {
-			$transient_key = 'subtleforms_ratelimit_' . md5( $ip );
-			$count         = (int) get_transient( $transient_key );
-
-			if ( $count >= 10 ) {
-				return new WP_Error(
-					'rate_limit_exceeded',
-					__( 'Too many requests. Please try again in a minute.', 'subtleforms' ),
-					array( 'status' => 429 )
-				);
-			}
-
-			set_transient( $transient_key, $count + 1, MINUTE_IN_SECONDS );
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
 		}
 
-		$formId  = $request->get_param( 'form_id' );
-		$payload = $request->get_param( 'data' ) ?? array();
-		if ( is_string( $payload ) ) {
-			$decoded = Helpers::safe_json_decode( $payload, true, array() );
-			if ( is_array( $decoded ) ) {
-				$payload = $decoded;
-			}
+		// Validate form ID
+		try {
+			$formId = Schemas::validateId( $request->get_param( 'form_id' ) );
+		} catch ( ValidationException $e ) {
+			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
 		}
-		if ( ! is_array( $payload ) ) {
-			$payload = array();
+
+		// Validate and sanitize submission payload
+		$rawInput = $request->get_json_params();
+		if ( ! is_array( $rawInput ) ) {
+			$rawInput = array();
 		}
+
+		try {
+			$validator = new RequestValidator( array( 'schemas' => Schemas::all() ) );
+			$validated = $validator->validateOrFail( $rawInput, Schemas::get( Schemas::PUBLIC_SUBMIT ) );
+		} catch ( ValidationException $e ) {
+			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
+		}
+
+		// Extract validated and sanitized payload
+		$payload = $validated['data'] ?? array();
+		// Phase A2-P3: Deeply sanitize payload to strip ALL HTML (XSS prevention)
+		$payload = Sanitizer::sanitizeSubmissionValue( $payload );
 
 		// Check spam protection (honeypot + time trap)
 		if ( \SubtleForms\Engine\SpamProtection::is_enabled() ) {
@@ -1207,7 +1529,12 @@ final class RestController {
 			if ( \SubtleForms\Engine\SpamProtection::is_spam( $tempContext ) ) {
 				$reason = $tempContext->getMeta( 'spam_reason', 'spam_detected' );
 				error_log( sprintf( 'SubtleForms: Spam blocked (form %d): %s', $formId, $reason ) );
-				return new WP_REST_Response( array( 'success' => true, 'message' => __( 'Thank you.', 'subtleforms' ) ), 200 );
+				return ApiResponse::success(
+					array(
+						'success' => true,
+						'message' => __( 'Thank you.', 'subtleforms' ),
+					)
+				);
 			}
 		}
 
@@ -1215,10 +1542,8 @@ final class RestController {
 		if ( $this->captchaManager && $this->captchaManager->isEnabled() && $this->captchaManager->isConfigured() ) {
 			$verification = $this->captchaManager->verify( $payload );
 			if ( ! $verification['success'] ) {
-				return new WP_Error(
-					'captcha_verification_failed',
-					$verification['error'] ?? __( 'CAPTCHA verification failed.', 'subtleforms' ),
-					array( 'status' => 400 )
+				return ApiResponse::bad_request(
+					$verification['error'] ?? __( 'CAPTCHA verification failed.', 'subtleforms' )
 				);
 			}
 		}
@@ -1226,7 +1551,7 @@ final class RestController {
 		// Verify form exists
 		$form = $this->formsRepo->find( $formId );
 		if ( ! $form ) {
-			return new WP_Error( 'form_not_found', __( 'Form not found', 'subtleforms' ), array( 'status' => 404 ) );
+			return ApiResponse::not_found( __( 'Form not found', 'subtleforms' ) );
 		}
 
 		// Check submission limit if enabled
@@ -1254,10 +1579,8 @@ final class RestController {
 				);
 
 				if ( $count >= $limit ) {
-					return new WP_Error(
-						'submission_limit_exceeded',
-						__( 'You have reached the maximum number of submissions for this form.', 'subtleforms' ),
-						array( 'status' => 403 )
+					return ApiResponse::forbidden(
+						__( 'You have reached the maximum number of submissions for this form.', 'subtleforms' )
 					);
 				}
 			}
@@ -1268,10 +1591,8 @@ final class RestController {
 			$activeSchema = $this->formsRepo->loadSchemaVersion( $formId );
 		} catch ( \RuntimeException $e ) {
 			error_log( 'SubtleForms Submission Error: ' . $e->getMessage() );
-			return new WP_Error(
-				'schema_load_failed',
-				'Failed to load form schema: ' . $e->getMessage(),
-				array( 'status' => 500 )
+			return ApiResponse::server_error(
+				'Failed to load form schema: ' . $e->getMessage()
 			);
 		}
 		$formVersion = $activeSchema['version'] ?? null;
@@ -1290,11 +1611,7 @@ final class RestController {
 			);
 		} catch ( \RuntimeException $e ) {
 			error_log( 'SubtleForms: Failed to create submission record: ' . $e->getMessage() );
-			return new WP_Error(
-				'submission_create_failed',
-				'Failed to create submission record',
-				array( 'status' => 500 )
-			);
+			return ApiResponse::server_error( 'Failed to create submission record' );
 		}
 
 		// Create submission context
@@ -1352,7 +1669,7 @@ final class RestController {
 			} catch ( \InvalidArgumentException $e ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
 				error_log( 'SubtleForms: Schema compilation failed for form ' . $formId . ': ' . $e->getMessage() );
-				return new WP_Error( 'invalid_schema', $e->getMessage(), array( 'status' => 400 ) );
+				return ApiResponse::bad_request( $e->getMessage() );
 			}
 
 			try {
@@ -1364,28 +1681,24 @@ final class RestController {
 				// Check if this is a validation error with field details
 				$validationErrors = $context->getMeta( 'validation_errors' );
 				if ( is_array( $validationErrors ) && ! empty( $validationErrors ) ) {
-					return new WP_Error(
-						'validation_failed',
+					return ApiResponse::validation_error(
 						'Form validation failed',
-						array(
-							'status' => 400,
-							'errors' => $validationErrors,
-						)
+						$validationErrors
 					);
 				}
 
 				// Generic pipeline failure
-				return new WP_Error( 'pipeline_failed', $e->getMessage(), array( 'status' => 500 ) );
+				return ApiResponse::server_error( $e->getMessage() );
 			} catch ( \Throwable $e ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
 				error_log( 'SubtleForms: Unexpected error in submission ' . $submissionId . ': ' . $e->getMessage() );
-				return new WP_Error( 'pipeline_failed', __( 'An unexpected error occurred', 'subtleforms' ), array( 'status' => 500 ) );
+				return ApiResponse::server_error( __( 'An unexpected error occurred', 'subtleforms' ) );
 			}
 
 			if ( ! $result->ok ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
 				error_log( 'SubtleForms: Pipeline execution failed for submission ' . $submissionId . ': ' . $result->error );
-				return new WP_Error( 'pipeline_failed', $result->error, array( 'status' => 500 ) );
+				return ApiResponse::server_error( $result->error );
 			}
 
 			// Check final submission status - if SaveAction set it to 'saved', update to 'completed'
@@ -1431,11 +1744,7 @@ final class RestController {
 				// SaveAction didn't run or failed - mark as failed
 				error_log( 'SubtleForms: Submission ' . $submissionId . ' did not reach saved status' );
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
-				return new WP_Error(
-					'save_failed',
-					'Failed to save submission data',
-					array( 'status' => 500 )
-				);
+				return ApiResponse::server_error( 'Failed to save submission data' );
 			}
 
 			$payloadResult = null;
@@ -1445,19 +1754,18 @@ final class RestController {
 				$payloadResult = $result;
 			}
 
-			return new WP_REST_Response(
+			return ApiResponse::success(
 				array(
 					'success'       => true,
 					'submission_id' => $submissionId,
-				),
-				200
+				)
 			);
 		}
 
 		// No schema configured; mark completed
 		$this->submissionsRepo->update( $submissionId, array( 'status' => 'completed' ) );
 
-		return new WP_REST_Response(
+		return ApiResponse::success(
 			array(
 				'success'       => true,
 				'submission_id' => $submissionId,
@@ -1502,7 +1810,15 @@ final class RestController {
 	 * Get all registered field definitions.
 	 */
 	public function get_fields( WP_REST_Request $request ): WP_REST_Response {
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
 		$grouped = $request->get_param( 'grouped' );
+		// Debug: log invocation and grouped param
+		error_log( sprintf( 'SubtleForms: get_fields called with grouped=%s by user=%d', var_export( $grouped, true ), get_current_user_id() ) );
 
 		// Get CAPTCHA enabled states from settings
 		$captchaEnabled = $this->settings ? (bool) $this->settings->get( 'captcha_enabled', false ) : false;
@@ -1559,32 +1875,34 @@ final class RestController {
 			);
 		}
 
-		return new WP_REST_Response( $fields, 200 );
+		// Debug: Log the fields response shape for troubleshooting
+		error_log( sprintf( 'SubtleForms: get_fields response: %s', print_r( $fields, true ) ) );
+
+		return ApiResponse::success( $fields );
 	}
 
 	/**
 	 * Dismiss onboarding wizard.
 	 */
 	public function dismiss_onboarding( WP_REST_Request $request ): WP_REST_Response {
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
-			return new WP_REST_Response(
-				array(
-					'success' => false,
-					'message' => 'User not authenticated',
-				),
-				401
-			);
+			return ApiResponse::unauthorized( 'User not authenticated' );
 		}
 
 		update_user_meta( $user_id, 'subtleforms_onboarding_dismissed', true );
 
-		return new WP_REST_Response(
+		return ApiResponse::success(
 			array(
 				'success' => true,
 				'message' => 'Onboarding dismissed',
-			),
-			200
+			)
 		);
 	}
 
@@ -1592,25 +1910,29 @@ final class RestController {
 	 * Get onboarding status.
 	 */
 	public function get_onboarding_status( WP_REST_Request $request ): WP_REST_Response {
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
-			return new WP_REST_Response(
+			return ApiResponse::success(
 				array(
 					'success'   => false,
 					'dismissed' => false,
-				),
-				200
+				)
 			);
 		}
 
 		$dismissed = (bool) get_user_meta( $user_id, 'subtleforms_onboarding_dismissed', true );
 
-		return new WP_REST_Response(
+		return ApiResponse::success(
 			array(
 				'success'   => true,
 				'dismissed' => $dismissed,
-			),
-			200
+			)
 		);
 	}
 
@@ -1618,6 +1940,12 @@ final class RestController {
 	 * Send a test email to admin_email to validate email delivery
 	 */
 	public function send_onboarding_test_email( WP_REST_Request $request ): WP_REST_Response {
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
 		try {
 			$settings = new \SubtleForms\Support\Settings();
 			$to = $settings->getAdminEmail();
@@ -1627,12 +1955,17 @@ final class RestController {
 			$sent = \SubtleForms\Support\Mailer::send( $to, $subject, $message );
 
 			if ( $sent ) {
-				return new WP_REST_Response( array( 'success' => true ), 200 );
+				return ApiResponse::success( array( 'success' => true ) );
 			} else {
-				return new WP_REST_Response( array( 'success' => false, 'message' => __( 'Failed to send test email', 'subtleforms' ) ), 200 );
+				return ApiResponse::success(
+					array(
+						'success' => false,
+						'message' => __( 'Failed to send test email', 'subtleforms' ),
+					)
+				);
 			}
 		} catch ( \Exception $e ) {
-			return new WP_REST_Response( array( 'success' => false, 'message' => $e->getMessage() ), 500 );
+			return ApiResponse::server_error( $e->getMessage() );
 		}
 	}
 
@@ -1640,25 +1973,24 @@ final class RestController {
 	 * Dismiss create form wizard ("Don't show again").
 	 */
 	public function dismiss_create_wizard( WP_REST_Request $request ): WP_REST_Response {
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
-			return new WP_REST_Response(
-				array(
-					'success' => false,
-					'message' => 'User not authenticated',
-				),
-				401
-			);
+			return ApiResponse::unauthorized( 'User not authenticated' );
 		}
 
 		update_user_meta( $user_id, 'subtleforms_create_wizard_dismissed', true );
 
-		return new WP_REST_Response(
+		return ApiResponse::success(
 			array(
 				'success' => true,
 				'message' => 'Create wizard dismissed',
-			),
-			200
+			)
 		);
 	}
 
@@ -1666,25 +1998,29 @@ final class RestController {
 	 * Get create form wizard status.
 	 */
 	public function get_create_wizard_status( WP_REST_Request $request ): WP_REST_Response {
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
-			return new WP_REST_Response(
+			return ApiResponse::success(
 				array(
 					'success'   => false,
 					'dismissed' => false,
-				),
-				200
+				)
 			);
 		}
 
 		$dismissed = (bool) get_user_meta( $user_id, 'subtleforms_create_wizard_dismissed', true );
 
-		return new WP_REST_Response(
+		return ApiResponse::success(
 			array(
 				'success'   => true,
 				'dismissed' => $dismissed,
-			),
-			200
+			)
 		);
 	}
 
@@ -1692,25 +2028,24 @@ final class RestController {
 	 * Complete builder tour.
 	 */
 	public function complete_tour( WP_REST_Request $request ): WP_REST_Response {
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
-			return new WP_REST_Response(
-				array(
-					'success' => false,
-					'message' => 'User not authenticated',
-				),
-				401
-			);
+			return ApiResponse::unauthorized( 'User not authenticated' );
 		}
 
 		update_user_meta( $user_id, 'subtleforms_tour_completed', true );
 
-		return new WP_REST_Response(
+		return ApiResponse::success(
 			array(
 				'success' => true,
 				'message' => 'Tour completed',
-			),
-			200
+			)
 		);
 	}
 
@@ -1718,25 +2053,29 @@ final class RestController {
 	 * Get builder tour status.
 	 */
 	public function get_tour_status( WP_REST_Request $request ): WP_REST_Response {
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
 		$user_id = get_current_user_id();
 		if ( ! $user_id ) {
-			return new WP_REST_Response(
+			return ApiResponse::success(
 				array(
 					'success'   => false,
 					'completed' => false,
-				),
-				200
+				)
 			);
 		}
 
 		$completed = (bool) get_user_meta( $user_id, 'subtleforms_tour_completed', true );
 
-		return new WP_REST_Response(
+		return ApiResponse::success(
 			array(
 				'success'   => true,
 				'completed' => $completed,
-			),
-			200
+			)
 		);
 	}
 
@@ -1744,14 +2083,19 @@ final class RestController {
 	 * Get form templates.
 	 */
 	public function get_templates( WP_REST_Request $request ): WP_REST_Response {
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
 		$templates = \SubtleForms\Templates\FormTemplates::get_all();
 
-		return new WP_REST_Response(
+		return ApiResponse::success(
 			array(
 				'success'   => true,
 				'templates' => $templates,
-			),
-			200
+			)
 		);
 	}
 
@@ -1762,6 +2106,12 @@ final class RestController {
 	 * @return WP_REST_Response Response with CSV data.
 	 */
 	public function export_submissions_csv( WP_REST_Request $request ): WP_REST_Response {
+		// Rate limiting (Phase A3-P1)
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
 		$params = $request->get_json_params();
 
 		// Build query args from request
@@ -1780,12 +2130,11 @@ final class RestController {
 		$submissions = $this->submissionsRepo->findAll( $args );
 
 		if ( empty( $submissions ) ) {
-			return new WP_REST_Response(
+			return ApiResponse::success(
 				array(
 					'success' => false,
 					'message' => __( 'No submissions to export', 'subtleforms' ),
-				),
-				200
+				)
 			);
 		}
 
@@ -1873,13 +2222,12 @@ final class RestController {
 		// Generate filename
 		$filename = 'subtleforms-submissions-' . gmdate( 'Y-m-d-His' ) . '.csv';
 
-		return new WP_REST_Response(
+		return ApiResponse::success(
 			array(
 				'success'  => true,
 				'csv'      => base64_encode( $csv_string ),
 				'filename' => $filename,
-			),
-			200
+			)
 		);
 	}
 }

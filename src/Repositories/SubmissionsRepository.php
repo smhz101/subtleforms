@@ -139,6 +139,9 @@ final class SubmissionsRepository {
 			throw new \RuntimeException( $error );
 		}
 
+		// Phase B3: Invalidate count cache for this form
+		$this->invalidate_count_cache( $data['form_id'] );
+
 		return $submissionId;
 	}
 
@@ -202,6 +205,12 @@ final class SubmissionsRepository {
 			throw new \RuntimeException( $error );
 		}
 
+		// Phase B3: Invalidate count cache (fetch submission to get form_id)
+		$submission = $this->find( $id );
+		if ( $submission && isset( $submission['form_id'] ) ) {
+			$this->invalidate_count_cache( $submission['form_id'] );
+		}
+
 		return true;
 	}
 
@@ -210,7 +219,17 @@ final class SubmissionsRepository {
 	 */
 	public function delete( int $id ): bool {
 		global $wpdb;
+
+		// Phase B3: Get form_id before delete for cache invalidation
+		$submission = $this->find( $id );
+
 		$result = $wpdb->delete( $this->table, array( 'id' => $id ), array( '%d' ) );
+
+		// Invalidate count cache
+		if ( $result !== false && $submission && isset( $submission['form_id'] ) ) {
+			$this->invalidate_count_cache( $submission['form_id'] );
+		}
+
 		return $result !== false;
 	}
 
@@ -219,6 +238,8 @@ final class SubmissionsRepository {
 	 */
 	public function findAll( array $args = array() ): array {
 		global $wpdb;
+
+		$start = \SubtleForms\Support\QueryInstrumentation::start( __METHOD__ );
 
 		$defaults = array(
 			'form_id' => null,
@@ -255,25 +276,29 @@ final class SubmissionsRepository {
 
 		$whereClause = ! empty( $where ) ? 'WHERE ' . implode( ' AND ', $where ) : '';
 
-		$sql = sprintf(
-			"SELECT * FROM {$this->table} %s ORDER BY %s %s LIMIT %%d OFFSET %%d",
-			$whereClause,
-			esc_sql( $args['orderby'] ),
-			esc_sql( $args['order'] )
-		);
+		       // Fetch all columns needed for admin list (including payload/meta)
+				       $sql = sprintf(
+					       "SELECT id, form_id, status, created_at, payload, meta, ip_address, user_agent FROM {$this->table} %s ORDER BY %s %s LIMIT %%d OFFSET %%d",
+					       $whereClause,
+					       esc_sql( $args['orderby'] ),
+					       esc_sql( $args['order'] )
+				       );
 
-		$params[] = intval( $args['limit'] );
-		$params[] = intval( $args['offset'] );
+		       $params[] = intval( $args['limit'] );
+		       $params[] = intval( $args['offset'] );
 
-		$results = $wpdb->get_results( $wpdb->prepare( $sql, ...$params ), ARRAY_A );
+		       $results = $wpdb->get_results( $wpdb->prepare( $sql, ...$params ), ARRAY_A );
 
-		// Decode JSON fields
-		foreach ( $results as &$result ) {
-			$result['payload'] = Helpers::safe_json_decode( Helpers::safe_array_get( $result, 'payload', '{}' ), true, array() );
-			$result['meta']    = Helpers::safe_json_decode( Helpers::safe_array_get( $result, 'meta', '{}' ), true, array() );
-		}
+		       // Decode JSON fields for each result
+		       foreach ( $results as &$result ) {
+			       $result['payload'] = \SubtleForms\Support\Helpers::safe_json_decode( \SubtleForms\Support\Helpers::safe_array_get( $result, 'payload', '{}' ), true, array() );
+			       $result['meta']    = \SubtleForms\Support\Helpers::safe_json_decode( \SubtleForms\Support\Helpers::safe_array_get( $result, 'meta', '{}' ), true, array() );
+		       }
+		       unset($result);
 
-		return $results;
+		       \SubtleForms\Support\QueryInstrumentation::end( $start, __METHOD__, $sql );
+
+		       return $results;
 	}
 
 	/**
@@ -406,6 +431,15 @@ $cutoff_date
 			return array();
 		}
 
+		// Phase B3: Cache dashboard aggregates (60s TTL)
+		sort( $form_ids ); // Consistent key ordering
+		$cache_key = 'subtleforms:1.8.2:counts:' . md5( serialize( $form_ids ) . '|' . $status );
+		$cached    = get_transient( $cache_key );
+
+		if ( false !== $cached ) {
+			return $cached;
+		}
+
 		global $wpdb;
 		$placeholders = implode( ',', array_fill( 0, count( $form_ids ), '%d' ) );
 
@@ -439,6 +473,18 @@ $cutoff_date
 			}
 		}
 
+		// Cache for 60 seconds
+		set_transient( $cache_key, $counts, 60 );
+
 		return $counts;
+	}
+
+	/**
+	 * Invalidate count cache for a specific form (v1.8.2 - Phase B3).
+	 */
+	private function invalidate_count_cache( int $form_id ): void {
+		// Delete all cached counts that include this form
+		global $wpdb;
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", '_transient_subtleforms:1.8.2:counts:%' ) );
 	}
 }

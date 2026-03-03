@@ -96,21 +96,30 @@ final class EmailAction implements ActionInterface {
 			)
 		);
 
-// Send email via Mailer wrapper
-        $sent = \SubtleForms\Support\Mailer::send( $to, $subject, $body, $headers );
+		// Dispatch email asynchronously - returns immediately
+		$submission_id = $context->getMeta( 'submission_id' );
+		$dispatched = \SubtleForms\Async\AsyncDispatcher::dispatchEmail( array(
+			'to'            => $to,
+			'subject'       => $subject,
+			'body'          => $body,
+			'headers'       => $headers,
+			'submission_id' => $submission_id,
+		) );
 
-		if ( $sent === false ) {
+		if ( ! $dispatched ) {
+			// Failed to schedule (rare - only if cron system broken)
 			$fail   = $context->getMeta( 'action_failures', array() );
 			$fail[] = array(
 				'action' => 'email',
-				'reason' => 'wp_mail_failed',
+				'reason' => 'async_dispatch_failed',
 				'to'     => $to,
 			);
 			$context->setMeta( 'action_failures', $fail );
 
-			$this->log_debug( $context, 'Email failed: wp_mail returned false', array( 'to' => $to ) );
+			$this->log_debug( $context, 'Email async dispatch failed', array( 'to' => $to ) );
 		} else {
-			$this->log_debug( $context, 'Email sent successfully', array( 'to' => $to ) );
+			// Successfully queued (actual send happens async)
+			$this->log_debug( $context, 'Email queued for async delivery', array( 'to' => $to ) );
 		}
 	}
 

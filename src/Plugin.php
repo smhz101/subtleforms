@@ -10,6 +10,7 @@ namespace SubtleForms;
 
 use SubtleForms\Admin\AdminMenu;
 use SubtleForms\Api\RestController;
+use SubtleForms\Api\LicenseApi;
 use SubtleForms\Extensions\ExtensionManager;
 
 /**
@@ -59,6 +60,7 @@ final class Plugin {
 			'rest_api_init',
 			function () {
 				$this->container->get( RestController::class )->register_routes();
+				$this->container->get( LicenseApi::class )->register_routes();
 			}
 		);
 
@@ -99,6 +101,12 @@ final class Plugin {
 		// Initialize privacy features
 		$this->init_privacy();
 
+		// Initialize license scheduler
+		$this->init_license_scheduler();
+
+		// Initialize async processing (Phase B2)
+		$this->init_async_processing();
+
 		// Allow other plugins/themes to hook in
 		do_action( 'subtleforms/loaded', $this );
 	}
@@ -128,6 +136,27 @@ final class Plugin {
 
 		// Initialize privacy manager (handles cron and policy content)
 		$privacy_manager->init();
+	}
+
+	/**
+	 * Initialize license scheduler for Pro features.
+	 */
+	private function init_license_scheduler(): void {
+		$scheduler = $this->container->get( \SubtleForms\Licensing\LicenseScheduler::class );
+		$scheduler->register();
+	}
+
+	/**
+	 * Initialize async processing for emails and webhooks.
+	 * 
+	 * @since 1.8.2
+	 */
+	private function init_async_processing(): void {
+		// Register async email handler
+		add_action( 'subtleforms_async_email', array( \SubtleForms\Async\AsyncDispatcher::class, 'executeEmail' ), 10, 1 );
+
+		// Register async webhook handler
+		add_action( 'subtleforms_async_webhook', array( \SubtleForms\Async\AsyncDispatcher::class, 'executeWebhook' ), 10, 1 );
 	}
 
 	/**

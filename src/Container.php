@@ -20,11 +20,16 @@ use SubtleForms\Engine\ActionDefinition;
 use SubtleForms\Extensions\ExtensionManager;
 use SubtleForms\Admin\AdminMenu;
 use SubtleForms\Api\RestController;
+use SubtleForms\Api\LicenseApi;
 use SubtleForms\Repositories\SubmissionsRepository;
 use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Repositories\LogsRepository;
 use SubtleForms\Fields\FieldRegistry;
 use SubtleForms\Fields\CoreFields;
+use SubtleForms\Licensing\LicenseManager;
+use SubtleForms\Licensing\LicenseValidator;
+use SubtleForms\Licensing\LicenseScheduler;
+use SubtleForms\Security\RateLimiter;
 
 /**
  * Simple dependency injection container.
@@ -91,6 +96,25 @@ final class Container {
 		$this->singleton( Logger::class, fn() => new Logger() );
 		$this->singleton( Settings::class, fn() => new Settings() );
 		$this->singleton( CaptchaManager::class, fn( $c ) => new CaptchaManager( $c->get( Settings::class ) ) );
+
+		// Security services
+		$this->singleton( RateLimiter::class, fn() => new RateLimiter() );
+
+		// Licensing services
+		$this->singleton( LicenseValidator::class, fn() => new LicenseValidator() );
+		$this->singleton(
+			LicenseManager::class,
+			fn( $c ) => new LicenseManager(
+				$c->get( Settings::class ),
+				$c->get( LicenseValidator::class )
+			)
+		);
+		$this->singleton(
+			LicenseScheduler::class,
+			fn( $c ) => new LicenseScheduler(
+				$c->get( LicenseManager::class )
+			)
+		);
 
 		// Repositories
 		$this->singleton( FormsRepository::class, fn() => new FormsRepository() );
@@ -175,6 +199,13 @@ final class Container {
 				$c->get( SchemaCompiler::class ),
 				$c->get( Settings::class ),
 				$c->get( CaptchaManager::class )
+			)
+		);
+		$this->singleton(
+			LicenseApi::class,
+			fn( $c ) => new LicenseApi(
+				$c->get( LicenseManager::class ),
+				$c->get( RateLimiter::class )
 			)
 		);
 
