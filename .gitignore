@@ -80,3 +80,4 @@ pnpm-lock.yaml
 .cache/
 .parcel-cache/
 .webpack/
+.DS_Store
