@@ -1,16 +1,19 @@
 <?xml version="1.0"?>
 <phpunit
-	bootstrap="tests/bootstrap.php"
+	bootstrap="tests/unit/bootstrap.php"
 	backupGlobals="false"
 	colors="true"
-	convertErrorsToExceptions="true"
-	convertNoticesToExceptions="true"
-	convertWarningsToExceptions="true"
 	>
 	<testsuites>
-		<testsuite name="testing">
+		<testsuite name="unit">
+			<directory suffix="Test.php">./tests/unit/</directory>
+		</testsuite>
+		<testsuite name="integration">
 			<directory prefix="test-" suffix=".php">./tests/</directory>
+			<exclude>./tests/unit/</exclude>
 			<exclude>./tests/test-sample.php</exclude>
+			<exclude>./tests/manual/</exclude>
+			<exclude>./tests/e2e/</exclude>
 		</testsuite>
 	</testsuites>
 </phpunit>
