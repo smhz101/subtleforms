@@ -77,11 +77,52 @@ final class FormsApi {
 					'methods'             => 'GET',
 					'callback'            => array( $this, 'get_forms' ),
 					'permission_callback' => array( $this, 'check_read_permission' ),
+					'args'                => array(
+						'page'     => array(
+							'type'              => 'integer',
+							'default'           => 1,
+							'sanitize_callback' => 'absint',
+						),
+						'per_page' => array(
+							'type'              => 'integer',
+							'default'           => 20,
+							'sanitize_callback' => 'absint',
+						),
+						'status'   => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'search'   => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'orderby'  => array(
+							'type'              => 'string',
+							'default'           => 'created_at',
+							'sanitize_callback' => 'sanitize_key',
+						),
+						'order'    => array(
+							'type'              => 'string',
+							'default'           => 'DESC',
+							'enum'              => array( 'ASC', 'DESC' ),
+						),
+					),
 				),
 				array(
 					'methods'             => 'POST',
 					'callback'            => array( $this, 'create_form' ),
 					'permission_callback' => array( $this, 'check_write_permission' ),
+					'args'                => array(
+						'title'  => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'status' => array(
+							'type'              => 'string',
+							'default'           => 'draft',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
 				),
 			)
 		);
@@ -94,16 +135,45 @@ final class FormsApi {
 					'methods'             => 'GET',
 					'callback'            => array( $this, 'get_form' ),
 					'permission_callback' => array( $this, 'check_read_permission' ),
+					'args'                => array(
+						'id' => array(
+							'type'              => 'integer',
+							'required'          => true,
+							'sanitize_callback' => 'absint',
+						),
+					),
 				),
 				array(
 					'methods'             => 'PUT',
 					'callback'            => array( $this, 'update_form' ),
 					'permission_callback' => array( $this, 'check_write_permission' ),
+					'args'                => array(
+						'id'     => array(
+							'type'              => 'integer',
+							'required'          => true,
+							'sanitize_callback' => 'absint',
+						),
+						'title'  => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'status' => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
 				),
 				array(
 					'methods'             => 'DELETE',
 					'callback'            => array( $this, 'delete_form' ),
 					'permission_callback' => array( $this, 'check_write_permission' ),
+					'args'                => array(
+						'id' => array(
+							'type'              => 'integer',
+							'required'          => true,
+							'sanitize_callback' => 'absint',
+						),
+					),
 				),
 			)
 		);
@@ -116,11 +186,33 @@ final class FormsApi {
 					'methods'             => 'GET',
 					'callback'            => array( $this, 'get_form_schema' ),
 					'permission_callback' => array( $this, 'check_public_schema_permission' ),
+					'args'                => array(
+						'id'      => array(
+							'type'              => 'integer',
+							'required'          => true,
+							'sanitize_callback' => 'absint',
+						),
+						'version' => array(
+							'type'              => 'integer',
+							'sanitize_callback' => 'absint',
+						),
+						'context' => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_key',
+						),
+					),
 				),
 				array(
 					'methods'             => 'POST',
 					'callback'            => array( $this, 'save_form_schema' ),
 					'permission_callback' => array( $this, 'check_write_permission' ),
+					'args'                => array(
+						'id' => array(
+							'type'              => 'integer',
+							'required'          => true,
+							'sanitize_callback' => 'absint',
+						),
+					),
 				),
 			)
 		);

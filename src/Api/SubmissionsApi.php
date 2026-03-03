@@ -63,6 +63,37 @@ final class SubmissionsApi {
 				'methods'             => 'GET',
 				'callback'            => array( $this, 'get_submissions' ),
 				'permission_callback' => array( $this, 'check_read_permission' ),
+				'args'                => array(
+					'form_id'  => array(
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					),
+					'page'     => array(
+						'type'              => 'integer',
+						'default'           => 1,
+						'sanitize_callback' => 'absint',
+					),
+					'per_page' => array(
+						'type'              => 'integer',
+						'default'           => 20,
+						'sanitize_callback' => 'absint',
+					),
+					'status'   => array(
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'orderby'  => array(
+						'type'              => 'string',
+						'default'           => 'created_at',
+						'sanitize_callback' => 'sanitize_key',
+					),
+					'order'    => array(
+						'type'              => 'string',
+						'default'           => 'DESC',
+						'enum'              => array( 'ASC', 'DESC' ),
+					),
+				),
 			)
 		);
 
@@ -73,6 +104,40 @@ final class SubmissionsApi {
 				'methods'             => 'GET',
 				'callback'            => array( $this, 'get_all_submissions' ),
 				'permission_callback' => array( $this, 'check_read_permission' ),
+				'args'                => array(
+					'page'     => array(
+						'type'              => 'integer',
+						'default'           => 1,
+						'sanitize_callback' => 'absint',
+					),
+					'per_page' => array(
+						'type'              => 'integer',
+						'default'           => 20,
+						'sanitize_callback' => 'absint',
+					),
+					'form_id'  => array(
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+					),
+					'status'   => array(
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'search'   => array(
+						'type'              => 'string',
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+					'orderby'  => array(
+						'type'              => 'string',
+						'default'           => 'created_at',
+						'sanitize_callback' => 'sanitize_key',
+					),
+					'order'    => array(
+						'type'              => 'string',
+						'default'           => 'DESC',
+						'enum'              => array( 'ASC', 'DESC' ),
+					),
+				),
 			)
 		);
 
@@ -84,11 +149,29 @@ final class SubmissionsApi {
 					'methods'             => 'GET',
 					'callback'            => array( $this, 'get_submission' ),
 					'permission_callback' => array( $this, 'check_read_permission' ),
+					'args'                => array(
+						'id' => array(
+							'type'              => 'integer',
+							'required'          => true,
+							'sanitize_callback' => 'absint',
+						),
+					),
 				),
 				array(
 					'methods'             => 'PUT',
 					'callback'            => array( $this, 'update_submission' ),
 					'permission_callback' => array( $this, 'check_write_permission' ),
+					'args'                => array(
+						'id'     => array(
+							'type'              => 'integer',
+							'required'          => true,
+							'sanitize_callback' => 'absint',
+						),
+						'status' => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
 				),
 			)
 		);
@@ -100,6 +183,17 @@ final class SubmissionsApi {
 				'methods'             => 'GET',
 				'callback'            => array( $this, 'get_adjacent_submissions' ),
 				'permission_callback' => array( $this, 'check_read_permission' ),
+				'args'                => array(
+					'id'      => array(
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					),
+					'form_id' => array(
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+					),
+				),
 			)
 		);
 
@@ -110,6 +204,13 @@ final class SubmissionsApi {
 				'methods'             => 'GET',
 				'callback'            => array( $this, 'get_submission_logs' ),
 				'permission_callback' => array( $this, 'check_read_permission' ),
+				'args'                => array(
+					'id' => array(
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					),
+				),
 			)
 		);
 
@@ -130,6 +231,13 @@ final class SubmissionsApi {
 				'methods'             => 'POST',
 				'callback'            => array( $this, 'export_submissions_csv' ),
 				'permission_callback' => array( $this, 'check_read_permission' ),
+				'args'                => array(
+					'form_id' => array(
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					),
+				),
 			)
 		);
 	}
