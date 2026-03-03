@@ -107,7 +107,9 @@ class SettingsApi {
 	 */
 	private function guardRateLimit( WP_REST_Request $request ): ?WP_REST_Response {
 		$userId = get_current_user_id() ?: null;
-		$ip     = $_SERVER['REMOTE_ADDR'] ?? '0.0.0.0';
+		$ip     = isset( $_SERVER['REMOTE_ADDR'] )
+			? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) )
+			: '0.0.0.0';
 		$route  = $request->get_route();
 		$method = $request->get_method();
 
