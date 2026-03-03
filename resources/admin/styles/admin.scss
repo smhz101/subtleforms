@@ -5,8 +5,12 @@
  * Co-located component styles are imported from their respective directories.
  */
 
-// Variables (WordPress-aligned)
+// Accessibility Foundation - WCAG 2.1 AA Compliance
+@use '../scss/accessibility';
+
+// Variables & Design System
 @use 'variables' as *;
+@use 'design-system';
 
 // UI System
 @use '../ui/feedback/feedback.scss';
@@ -32,6 +36,8 @@
 @use '../components/TableSkeleton.scss';
 @use '../components/TemplateSelector.scss';
 @use '../components/OnboardingWizard.scss';
+@use '../components/PageErrorBoundary.scss';
+@use '../components/RouteTransition.scss';
 
 // Modal Styles
 @use '../modals/ConfirmModal.scss';
@@ -58,6 +64,7 @@
 @use '../components/builder/FieldDock.scss';
 @use '../components/builder/StepNavigator.scss';
 @use '../components/builder/FieldInspector.scss';
+@use '../components/builder/EmptyFormWelcome.scss';
 
 // Builder Layout Styles
 @use '../components/builder/layout/BuilderCanvasArea.scss';
