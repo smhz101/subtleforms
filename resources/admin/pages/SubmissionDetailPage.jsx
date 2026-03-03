@@ -2,11 +2,12 @@ import { useState, useEffect } from '@wordpress/element';
 import {
   Spinner,
   Notice,
-  Button,
   SelectControl,
   TabPanel,
   TextareaControl,
 } from '@wordpress/components';
+import { Button } from '../components/navigation';
+import { useNavigate } from 'react-router-dom';
 import { __, sprintf } from '@wordpress/i18n';
 import AdminShell from '../components/AdminShell';
 import './SubmissionDetailPage.scss';
@@ -51,6 +52,7 @@ async function apiPut(path, payload) {
 }
 
 export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
+  const routerNavigate = useNavigate();
   const [submission, setSubmission] = useState(null);
   const [logs, setLogs] = useState([]);
   const [adjacent, setAdjacent] = useState({ next: null, prev: null });
@@ -79,9 +81,16 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
         ),
       ]);
 
-      setSubmission(subData);
-      setLogs(logsData);
-      setAdjacent(adjData);
+      // ApiResponse wraps payloads in { data: ... } for consistency. Unwrap if present.
+      setSubmission(subData && subData.data ? subData.data : subData);
+      setLogs(
+        Array.isArray(logsData)
+          ? logsData
+          : Array.isArray(logsData?.data)
+          ? logsData.data
+          : []
+      );
+      setAdjacent(adjData && adjData.data ? adjData.data : adjData);
     } catch (err) {
       setError(__('Failed to load submission', 'subtleforms'));
     } finally {
@@ -129,9 +138,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
   const navigate = (direction) => {
     const targetId = direction === 'next' ? adjacent.next : adjacent.prev;
     if (targetId) {
-      window.location.href = `admin.php?page=subtleforms-submissions&submission_id=${targetId}${
-        formId ? `&form_id=${formId}` : ''
-      }`;
+      routerNavigate(`/submissions/${targetId}${formId ? `?form_id=${formId}` : ''}`);
     }
   };
 
@@ -238,7 +245,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
         );
       })()}
       actions={actions}>
-      <div className='sf-submission-detail__content'>
+      <div className='sf-dashboard-page__content sf-submission-detail__content'>
         <div className='subtleforms-card'>
           <div className='subtleforms-card-header'>
             <div className='sf-submission-card__header'>
@@ -433,7 +440,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                               {__('IP Address', 'subtleforms')}
                             </dt>
                             <dd className='sf-submission-tech__value'>
-                              {submission.ip || __('N/A', 'subtleforms')}
+                              {submission.ip_address || __('N/A', 'subtleforms')}
                             </dd>
                           </div>
                           <div>
@@ -441,16 +448,16 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                               {__('User Agent', 'subtleforms')}
                             </dt>
                             <dd className='sf-submission-tech__value sf-submission-tech__value--break'>
-                              {submission.user_agent ||
-                                __('N/A', 'subtleforms')}
+                              {submission.user_agent || __('N/A', 'subtleforms')}
                             </dd>
                           </div>
+                          {/* Referrer is not available in backend, so always show N/A */}
                           <div>
                             <dt className='sf-submission-tech__label'>
                               {__('Referrer', 'subtleforms')}
                             </dt>
                             <dd className='sf-submission-tech__value sf-submission-tech__value--break'>
-                              {submission.referrer || __('N/A', 'subtleforms')}
+                              {__('N/A', 'subtleforms')}
                             </dd>
                           </div>
                         </dl>

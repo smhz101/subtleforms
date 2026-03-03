@@ -1,13 +1,13 @@
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useCallback } from '@wordpress/element';
 import {
   Card,
   CardBody,
   CardHeader,
   Spinner,
   Notice,
-  Button,
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
+import { Button } from '../components/navigation';
 import apiFetch from '@wordpress/api-fetch';
 import clsx from 'clsx';
 import Icon from '../components/ui/Icon';
@@ -23,11 +23,7 @@ export default function Dashboard() {
   const [data, setData] = useState(null);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    loadDashboard();
-  }, []);
-
-  const loadDashboard = async () => {
+  const loadDashboard = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -37,16 +33,23 @@ export default function Dashboard() {
         method: 'GET',
       });
 
-      if (response.success) {
+      if (response?.success) {
         setData(response.data);
+      } else {
+        setError('Invalid response from server');
       }
     } catch (err) {
       console.error('Failed to load dashboard:', err);
-      setError(err.message || 'Failed to load dashboard data');
+      const errorMessage = err?.message || err?.toString() || 'Failed to load dashboard data';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
 
   if (loading) {
     return (

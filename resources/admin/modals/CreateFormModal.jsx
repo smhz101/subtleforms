@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback } from '@wordpress/element';
 import { Modal, TextControl, TextareaControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { useCreateForm } from '../data';
-import { useNotice } from '../ui/feedback';
+import { useNotice, useLiveAnnounce } from '../ui/feedback';
 import Icon from '../components/ui/Icon';
 import clsx from 'clsx';
 import TemplateSelector from '../templates/TemplateSelector';
@@ -20,8 +20,22 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
   const [formType, setFormType] = useState('regular');
   const { error: showError } = useNotice();
   const createFormMutation = useCreateForm();
+  const announce = useLiveAnnounce();
 
-
+  // Announce step changes to screen readers
+  useEffect(() => {
+    if (isOpen && announce) {
+      if (step === 1) {
+        announce(__('Step 1 of 2: Form details', 'subtleforms'), 'polite');
+      } else if (step === 2) {
+        if (template === 'preset') {
+          announce(__('Step 2 of 2: Choose a template', 'subtleforms'), 'polite');
+        } else {
+          announce(__('Step 2 of 2: Choose form structure', 'subtleforms'), 'polite');
+        }
+      }
+    }
+  }, [step, template, isOpen, announce]);
 
   const generateDefaultTitle = useCallback(() => {
     const suffix = Math.floor(1000 + Math.random() * 9000);
@@ -51,11 +65,10 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
 
   const handleCreate = async () => {
     if (createFormMutation.isPending) {
-      return;
+      return; // Prevent duplicate submissions
     }
 
-    const safeTitle = (title || '').trim() || generateDefaultTitle();
-
+    const safeTitle = title.trim() || generateDefaultTitle();
     let fields = [];
     let templateMetadata = template;
     let schemaType = formType;
@@ -63,7 +76,6 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
     // Load template schema if preset selected
     if (template === 'preset' && selectedTemplateId) {
       const templateData = selectedTemplateId;
-      
       if (templateData && templateData.schema) {
         fields = templateData.schema.fields || [];
         templateMetadata = templateData.id;
@@ -72,10 +84,12 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
     } else if (template === 'blank') {
       // Initialize fields based on form type
       if (formType === 'multistep') {
+        const timestamp = Date.now();
         fields = [
           {
             type: 'step',
-            key: `step_${Date.now()}`,
+            key: `step_${timestamp}`,
+            name: `step_${timestamp}`,
             config: {
               title: __('Step 1', 'subtleforms'),
               description: '',
@@ -84,10 +98,12 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
           },
         ];
       } else if (formType === 'sectioned') {
+        const timestamp = Date.now();
         fields = [
           {
             type: 'section',
-            key: `section_${Date.now()}`,
+            key: `section_${timestamp}`,
+            name: `section_${timestamp}`,
             config: {
               title: __('Section 1', 'subtleforms'),
               description: '',
@@ -96,6 +112,23 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
           },
         ];
       }
+    }
+
+    // Always inject a default text field if fields are empty
+    if (!fields || fields.length === 0) {
+      const timestamp = Date.now();
+      fields = [
+        {
+          type: 'text',
+          key: `field_${timestamp}`,
+          name: `field_${timestamp}`,
+          config: {
+            label: __('Text', 'subtleforms'),
+            required: false,
+            placeholder: '',
+          },
+        },
+      ];
     }
     
     const schemaToSend = enrichSchemaWithProMarkers({
@@ -109,14 +142,47 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
       },
     });
 
+    // Always include a schema_version for initial saves so server and client
+    // agree on a baseline version even when the server will assign the true
+    // persistent version number on activation.
+    schemaToSend.schema_version = 1;
+
+    // Ensure fields exists and is an array (protect against incomplete templates)
+    if (!Array.isArray(schemaToSend.fields)) {
+      schemaToSend.fields = [];
+    }
+
+    // Debug: Log what we're sending
+    console.log('Schema being sent:', JSON.stringify(schemaToSend, null, 2));
+
     try {
-      const result = await createFormMutation.mutateAsync({
-        title: safeTitle,
-        schema: schemaToSend,
-      });
+      // Create form first
+      const result = await createFormMutation.mutateAsync({ title: safeTitle });
 
       if (result?.id) {
-        onFormCreated(result.id);
+        const newFormId = result.id;
+
+        // Attempt to save schema separately for better error visibility
+        try {
+          await fetch(
+            (window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
+              '/wp-json/subtleforms/v1') + `/forms/${newFormId}/schema`,
+            {
+              method: 'POST',
+              credentials: 'same-origin',
+              headers: {
+                'X-WP-Nonce': window.subtleformsAdmin?.restNonce || '',
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({ schema: schemaToSend }),
+            }
+          );
+        } catch (schemaErr) {
+          // Log but continue - form exists even if schema save failed
+          console.warn('Failed to save initial schema:', schemaErr);
+        }
+
+        onFormCreated(newFormId);
       }
     } catch (error) {
       showError(error);
@@ -198,6 +264,11 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
       <button
         key={option.id}
         type='button'
+        role='radio'
+        aria-checked={isSelected}
+        aria-disabled={isDisabled}
+        aria-labelledby={`${option.id}-title`}
+        aria-describedby={`${option.id}-desc`}
         onClick={() => !isDisabled && onSelect(option.id)}
         disabled={isDisabled}
         className={clsx(
@@ -238,6 +309,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
               : 'sf-option-card__content--vertical'
           )}>
           <div
+            id={`${option.id}-title`}
             className={clsx(
               'sf-option-card__title',
               isSelected
@@ -247,17 +319,17 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
             {option.title}
           </div>
 
-          <div className='sf-option-card__description'>
+          <div id={`${option.id}-desc`} className='sf-option-card__description'>
             {option.description}
           </div>
         </div>
 
         {isSelected && (
-          <Icon.CheckCircle className='sf-option-card__check-icon' />
+          <Icon.CheckCircle className='sf-option-card__check-icon' aria-hidden='true' />
         )}
 
         {isDisabled && (
-          <div className='sf-option-card__coming-soon'>
+          <div className='sf-option-card__coming-soon' aria-label={__('Coming soon', 'subtleforms')}>
             {__('Coming soon', 'subtleforms')}
           </div>
         )}
@@ -287,18 +359,20 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
       )}
       overlayClassName='subtleforms-modal-overlay'
       shouldCloseOnClickOutside={!createFormMutation.isPending}
-      shouldCloseOnEsc={!createFormMutation.isPending}>
+      shouldCloseOnEsc={!createFormMutation.isPending}
+      aria-labelledby='create-form-modal-title'
+      aria-describedby='create-form-modal-description'>
       <div className='sf-create-form-modal__container subtleforms-admin'>
         {/* Header */}
         <div className='sf-create-form-modal__header'>
-          <h2 className='sf-create-form-modal__title'>
+          <h2 id='create-form-modal-title' className='sf-create-form-modal__title'>
             {step === 1
               ? __('Create New Form', 'subtleforms')
               : step === 2 && template === 'preset'
               ? __('Choose a Template', 'subtleforms')
               : __('Choose Form Structure', 'subtleforms')}
           </h2>
-          <p className='sf-create-form-modal__subtitle'>
+          <p id='create-form-modal-description' className='sf-create-form-modal__subtitle'>
             {step === 1
               ? __(
                   'Provide basic information and choose a starting template.',
@@ -314,6 +388,15 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
                   'subtleforms'
                 )}
           </p>
+          {/* Step progress indicator for screen readers */}
+          <div className='sf-sr-only' role='status' aria-live='polite' aria-atomic='true'>
+            {sprintf(
+              /* translators: %1$d: current step, %2$d: total steps */
+              __('Step %1$d of %2$d', 'subtleforms'),
+              step,
+              2
+            )}
+          </div>
         </div>
 
         {/* Form Content */}
@@ -323,26 +406,29 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
               {/* Form Details */}
               <div className='sf-create-form-modal__form-details'>
                 <div>
-                  <label className='sf-create-form-modal__label'>
+                  <label htmlFor='form-title-input' className='sf-create-form-modal__label'>
                     {__('Form Title', 'subtleforms')}
-                    <span className='sf-create-form-modal__required'>*</span>
+                    <span className='sf-create-form-modal__required' aria-label='required'>*</span>
                   </label>
                   <TextControl
+                    id='form-title-input'
                     value={title}
                     onChange={setTitle}
                     disabled={createFormMutation.isPending}
                     placeholder={__('e.g. Contact Form', 'subtleforms')}
+                    aria-required='true'
                   />
                 </div>
 
                 <div>
-                  <label className='sf-create-form-modal__label'>
+                  <label htmlFor='form-description-input' className='sf-create-form-modal__label'>
                     {__('Description', 'subtleforms')}
                     <span className='sf-create-form-modal__optional'>
                       ({__('Optional', 'subtleforms')})
                     </span>
                   </label>
                   <TextareaControl
+                    id='form-description-input'
                     value={description}
                     onChange={setDescription}
                     disabled={createFormMutation.isPending}
@@ -356,16 +442,16 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
               </div>
 
               {/* Templates */}
-              <div>
-                <label className='sf-create-form-modal__label-section'>
+              <fieldset>
+                <legend className='sf-create-form-modal__label-section'>
                   {__('Starting Template', 'subtleforms')}
-                </label>
-                <div className='sf-create-form-modal__templates-grid'>
+                </legend>
+                <div className='sf-create-form-modal__templates-grid' role='radiogroup' aria-label={__('Choose starting template', 'subtleforms')}>
                   {templates.map((t) =>
                     renderOptionCard(t, template, setTemplate)
                   )}
                 </div>
-              </div>
+              </fieldset>
             </div>
           )}
 
@@ -380,16 +466,16 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
 
           {step === 2 && template === 'blank' && (
             <div className='sf-create-form-modal__form-section'>
-              <div>
-                <label className='sf-create-form-modal__label-section'>
+              <fieldset>
+                <legend className='sf-create-form-modal__label-section'>
                   {__('Form Structure', 'subtleforms')}
-                </label>
-                <div className='sf-create-form-modal__form-types'>
+                </legend>
+                <div className='sf-create-form-modal__form-types' role='radiogroup' aria-label={__('Choose form structure', 'subtleforms')}>
                   {formTypes.map((t) =>
                     renderOptionCard(t, formType, setFormType, 'horizontal')
                   )}
                 </div>
-              </div>
+              </fieldset>
             </div>
           )}
         </div>
@@ -406,6 +492,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
               }
             }}
             disabled={createFormMutation.isPending}
+            aria-label={step === 1 ? __('Cancel form creation', 'subtleforms') : __('Go back to previous step', 'subtleforms')}
             className={
               step === 1
                 ? 'sf-create-form-modal__cancel-button'
@@ -436,9 +523,17 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
                 ? !selectedTemplateId
                 : createFormMutation.isPending || !formType
             }
+            aria-label={
+              step === 1
+                ? __('Proceed to next step', 'subtleforms')
+                : createFormMutation.isPending
+                ? __('Creating form, please wait', 'subtleforms')
+                : __('Create form', 'subtleforms')
+            }
+            aria-busy={createFormMutation.isPending}
             className='sf-create-form-modal__primary-button'>
             {createFormMutation.isPending && (
-              <Icon.Loader className='sf-create-form-modal__spinner' />
+              <Icon.Loader className='sf-create-form-modal__spinner' aria-hidden='true' />
             )}
             {step === 1
               ? __('Next Step', 'subtleforms')

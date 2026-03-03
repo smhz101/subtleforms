@@ -8,10 +8,11 @@ import {
 import {
   Spinner,
   Notice,
-  Button,
   TabPanel,
   Modal,
 } from '@wordpress/components';
+import { Button } from '../components/navigation';
+import { useNavigate, useParams } from 'react-router-dom';
 import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../components/ui/Icon';
 import AdminShell from '../components/AdminShell';
@@ -19,11 +20,21 @@ import FormEditor from '../components/builder/FormEditor';
 import FormSettings from '../components/builder/FormSettings';
 import SubmissionsTable from '../components/SubmissionsTable';
 import BuilderTour from '../components/BuilderTour';
-import FormPreviewModal from '../components/FormPreviewModal';
+import { FormPreviewModal } from '../components/form-preview';
 import HelpMenu from '../components/HelpMenu';
 import CreateFormWizard from '../components/CreateFormWizard';
+import EmptyFormWelcome from '../components/builder/EmptyFormWelcome';
 import { ConfirmModal } from '../modals';
-import { apiGet, apiPost, apiPut, apiDelete } from '../utils/api';
+import {
+  apiGet,
+  apiPost,
+  apiPut,
+  apiDelete,
+  isValidationError,
+  isRateLimitError,
+  isConflictError,
+  getFieldErrors,
+} from '../utils/api';
 import { createInitialSchema } from '../utils/initialSchema';
 import useBuilderReducer, {
   BUILDER_ACTIONS,
@@ -52,6 +63,7 @@ function FormBuilderInner({
   showWizard = false,
   autoShowTour = false,
 }) {
+  const navigate = useNavigate();
   // Builder FSM State (replaces individual useState calls)
   const [builderState, dispatch] = useBuilderReducer(formId);
 
@@ -68,6 +80,11 @@ function FormBuilderInner({
     saveError,
     autoSaveError,
     validationErrors,
+    fieldErrors,
+    isRateLimited,
+    rateLimitRetryAfter,
+    hasConflict,
+    conflictData,
     formTitle: stateFormTitle,
     formId: stateFormId,
     lastSaveTime,
@@ -223,38 +240,101 @@ function FormBuilderInner({
         });
 
         if (!ok) {
-          const maybeValidationErrors =
-            saveStatus === 422
-              ? body?.data?.errors || body?.errors || null
-              : null;
+          // Check for validation error (HTTP 422)
+          if (isValidationError({ status: saveStatus })) {
+            const fieldErrs = getFieldErrors({ status: saveStatus, fields: body?.data?.errors?.fields });
+            const maybeValidationErrors = body?.data?.errors || body?.errors || [];
 
-          if (
-            !auto &&
-            Array.isArray(maybeValidationErrors) &&
-            maybeValidationErrors.length > 0
-          ) {
+            if (!auto && maybeValidationErrors.length > 0) {
+              dispatch({
+                type: BUILDER_ACTIONS.PUBLISH_ERROR,
+                payload: {
+                  error: {
+                    message: __('Fix validation errors before publishing.', 'subtleforms'),
+                    fields: fieldErrs,
+                    isValidationError: true,
+                  },
+                  validationErrors: Array.isArray(maybeValidationErrors) ? maybeValidationErrors : [maybeValidationErrors],
+                },
+              });
+
+              removeNotice(SUCCESS_NOTICE_ID);
+              createErrorNotice(
+                __('Validation failed. Please fix the highlighted fields.', 'subtleforms'),
+                {
+                  id: ERROR_NOTICE_ID,
+                  isDismissible: true,
+                  type: 'snackbar',
+                  actions: [],
+                }
+              );
+              return;
+            }
+          }
+
+          // Check for rate limit (HTTP 429)
+          if (isRateLimitError({ status: saveStatus })) {
+            const retryAfter = body?.data?.retry_after || body?.retry_after || 60;
+            
             dispatch({
-              type: BUILDER_ACTIONS.PUBLISH_ERROR,
+              type: auto ? BUILDER_ACTIONS.AUTOSAVE_ERROR : BUILDER_ACTIONS.PUBLISH_ERROR,
               payload: {
-                error: __(
-                  'Fix validation errors before publishing.',
-                  'subtleforms'
-                ),
-                validationErrors: maybeValidationErrors,
+                error: {
+                  message: sprintf(
+                    __('Rate limit exceeded. Please try again in %d seconds.', 'subtleforms'),
+                    retryAfter
+                  ),
+                  isRateLimited: true,
+                  retryAfter,
+                },
               },
             });
 
             removeNotice(SUCCESS_NOTICE_ID);
             createErrorNotice(
-              __(
-                'Validation failed. Please fix the highlighted fields.',
-                'subtleforms'
+              sprintf(
+                __('Too many requests. Please wait %d seconds before trying again.', 'subtleforms'),
+                retryAfter
               ),
               {
                 id: ERROR_NOTICE_ID,
                 isDismissible: true,
                 type: 'snackbar',
-                actions: [],
+              }
+            );
+            return;
+          }
+
+          // Check for conflict (HTTP 409)
+          if (isConflictError({ status: saveStatus })) {
+            const currentETag = body?.data?.current_etag;
+            const providedIfMatch = body?.data?.provided_if_match;
+            
+            dispatch({
+              type: auto ? BUILDER_ACTIONS.AUTOSAVE_ERROR : BUILDER_ACTIONS.PUBLISH_ERROR,
+              payload: {
+                error: {
+                  message: __('This form was modified by another user. Please reload to see the latest version.', 'subtleforms'),
+                  isConflict: true,
+                  currentETag,
+                  providedIfMatch,
+                },
+              },
+            });
+
+            removeNotice(SUCCESS_NOTICE_ID);
+            createErrorNotice(
+              __('Conflict detected. The form was modified elsewhere. Please reload.', 'subtleforms'),
+              {
+                id: ERROR_NOTICE_ID,
+                isDismissible: false,
+                type: 'snackbar',
+                actions: [
+                  {
+                    label: __('Reload', 'subtleforms'),
+                    onClick: () => window.location.reload(),
+                  },
+                ],
               }
             );
             return;
@@ -278,38 +358,103 @@ function FormBuilderInner({
           });
 
           if (!statusOk) {
-            const maybeValidationErrors =
-              statusCode === 422
-                ? statusBody?.data?.errors || statusBody?.errors || null
-                : null;
+            // Check for validation error (HTTP 422)
+            if (isValidationError({ status: statusCode })) {
+              const fieldErrs = getFieldErrors({ status: statusCode, fields: statusBody?.data?.errors?.fields });
+              const maybeValidationErrors = statusBody?.data?.errors || statusBody?.errors || [];
 
-            if (
-              targetStatus === 'published' &&
-              Array.isArray(maybeValidationErrors) &&
-              maybeValidationErrors.length > 0
-            ) {
+              if (
+                targetStatus === 'published' &&
+                maybeValidationErrors.length > 0
+              ) {
+                dispatch({
+                  type: BUILDER_ACTIONS.PUBLISH_ERROR,
+                  payload: {
+                    error: {
+                      message: __('Fix validation errors before publishing.', 'subtleforms'),
+                      fields: fieldErrs,
+                      isValidationError: true,
+                    },
+                    validationErrors: Array.isArray(maybeValidationErrors) ? maybeValidationErrors : [maybeValidationErrors],
+                  },
+                });
+
+                removeNotice(SUCCESS_NOTICE_ID);
+                createErrorNotice(
+                  __('Validation failed. Please fix the highlighted fields.', 'subtleforms'),
+                  {
+                    id: ERROR_NOTICE_ID,
+                    isDismissible: true,
+                    type: 'snackbar',
+                  }
+                );
+                return;
+              }
+            }
+
+            // Check for rate limit (HTTP 429)
+            if (isRateLimitError({ status: statusCode })) {
+              const retryAfter = statusBody?.data?.retry_after || statusBody?.retry_after || 60;
+              
               dispatch({
                 type: BUILDER_ACTIONS.PUBLISH_ERROR,
                 payload: {
-                  error: __(
-                    'Fix validation errors before publishing.',
-                    'subtleforms'
-                  ),
-                  validationErrors: maybeValidationErrors,
+                  error: {
+                    message: sprintf(
+                      __('Rate limit exceeded. Please try again in %d seconds.', 'subtleforms'),
+                      retryAfter
+                    ),
+                    isRateLimited: true,
+                    retryAfter,
+                  },
                 },
               });
 
               removeNotice(SUCCESS_NOTICE_ID);
               createErrorNotice(
-                __(
-                  'Validation failed. Please fix the highlighted fields.',
-                  'subtleforms'
+                sprintf(
+                  __('Too many requests. Please wait %d seconds.', 'subtleforms'),
+                  retryAfter
                 ),
                 {
                   id: ERROR_NOTICE_ID,
                   isDismissible: true,
                   type: 'snackbar',
-                  actions: [],
+                }
+              );
+              return;
+            }
+
+            // Check for conflict (HTTP 409)
+            if (isConflictError({ status: statusCode })) {
+              const currentETag = statusBody?.data?.current_etag;
+              const providedIfMatch = statusBody?.data?.provided_if_match;
+              
+              dispatch({
+                type: BUILDER_ACTIONS.PUBLISH_ERROR,
+                payload: {
+                  error: {
+                    message: __('This form was modified by another user. Please reload.', 'subtleforms'),
+                    isConflict: true,
+                    currentETag,
+                    providedIfMatch,
+                  },
+                },
+              });
+
+              removeNotice(SUCCESS_NOTICE_ID);
+              createErrorNotice(
+                __('Conflict detected. Please reload to see latest changes.', 'subtleforms'),
+                {
+                  id: ERROR_NOTICE_ID,
+                  isDismissible: false,
+                  type: 'snackbar',
+                  actions: [
+                    {
+                      label: __('Reload', 'subtleforms'),
+                      onClick: () => window.location.reload(),
+                    },
+                  ],
                 }
               );
               return;
@@ -660,21 +805,21 @@ function FormBuilderInner({
   const handleSaveAndClose = useCallback(async () => {
     if (!isDirty) {
       // No changes, just close
-      window.location.href = 'admin.php?page=subtleforms-forms';
+      navigate('/forms');
       return;
     }
 
     // Save first, then redirect on success
     try {
       await performSave({ auto: false });
-      // Redirect after successful save
+      // Navigate after successful save
       setTimeout(() => {
-        window.location.href = 'admin.php?page=subtleforms-forms';
+        navigate('/forms');
       }, 300);
     } catch (err) {
       // Error already handled in performSave
     }
-  }, [isDirty, performSave]);
+  }, [isDirty, performSave, navigate]);
 
   const handleDelete = useCallback(async () => {
     if (!currentFormId) return;
@@ -700,8 +845,8 @@ function FormBuilderInner({
         type: 'snackbar',
       });
 
-      // Redirect to forms list
-      window.location.href = 'admin.php?page=subtleforms-forms';
+      // Navigate to forms list
+      navigate('/forms');
     } catch (err) {
       createErrorNotice(
         err?.message || __('Failed to delete form', 'subtleforms'),
@@ -718,6 +863,7 @@ function FormBuilderInner({
     createErrorNotice,
     SUCCESS_NOTICE_ID,
     ERROR_NOTICE_ID,
+    navigate,
   ]);
 
   const handleDiscard = useCallback(async () => {
@@ -728,7 +874,7 @@ function FormBuilderInner({
       } catch (err) {
         console.error('Failed to delete draft form:', err);
       }
-      window.location.href = 'admin.php?page=subtleforms-forms';
+      navigate('/forms');
       return;
     }
 
@@ -736,9 +882,9 @@ function FormBuilderInner({
     if (isDirty) {
       setShowDiscardConfirm(true);
     } else {
-      window.location.href = 'admin.php?page=subtleforms-forms';
+      navigate('/forms');
     }
-  }, [isDirty, currentFormId]);
+  }, [isDirty, currentFormId, navigate]);
 
   const confirmDiscard = useCallback(async () => {
     setShowDiscardConfirm(false);
@@ -758,9 +904,9 @@ function FormBuilderInner({
       }
     }
 
-    // Redirect without saving
-    window.location.href = 'admin.php?page=subtleforms-forms';
-  }, [currentFormId, isDirty]);
+    // Navigate without saving
+    navigate('/forms');
+  }, [currentFormId, isDirty, navigate]);
 
   const handleClose = useCallback(() => {
     // For forms with changes, show confirmation
@@ -868,6 +1014,9 @@ function FormBuilderInner({
     formTypeBadgeConfig[formType] || formTypeBadgeConfig.regular;
   const FormTypeIcon = formTypeBadge.icon;
 
+  // Fallback UI if schema has no fields
+  const hasFields = Array.isArray(draftSchema?.fields) && draftSchema.fields.length > 0;
+
   return (
     <>
       <AdminShell
@@ -922,12 +1071,14 @@ function FormBuilderInner({
         <BuilderCanvasArea
           saveError={saveError}
           validationErrors={validationErrors}
+          fieldErrors={fieldErrors}
           hasValidationErrors={hasValidationErrors}
           draftSchema={draftSchema}
           fieldGroups={fieldGroups}
           fieldDefinitions={fieldDefinitions}
           onSchemaChange={handleSchemaChange}
           currentFormId={currentFormId}
+          showWelcome={!hasFields}
         />
       </AdminShell>
 
@@ -958,7 +1109,10 @@ function FormBuilderInner({
 }
 
 export default function FormBuilderPage(props) {
-  const { formId } = props;
+  const { formId: paramFormId } = useParams();
+  const formId = paramFormId ? parseInt(paramFormId, 10) : null;
+  // Router (navigate/back) used by wizard callbacks
+  const navigate = useNavigate();
 
   const [wizardStatusLoaded, setWizardStatusLoaded] = useState(!!formId);
   const [wizardDismissed, setWizardDismissed] = useState(false);
@@ -976,8 +1130,8 @@ export default function FormBuilderPage(props) {
   const effectiveFormId = createdFormId || formId;
 
   const handleCancelWizard = useCallback(() => {
-    window.location.href = 'admin.php?page=subtleforms-forms';
-  }, []);
+    navigate('/forms');
+  }, [navigate]);
 
   const generateDefaultTitleForWizard = useCallback(() => {
     const suffix = Math.floor(1000 + Math.random() * 9000);
@@ -1072,11 +1226,6 @@ export default function FormBuilderPage(props) {
           // Best-effort (do not block creation).
           apiPost('/create-wizard/dismiss', {});
         }
-
-        // Update URL to include form_id
-        const newUrl = new URL(window.location.href);
-        newUrl.searchParams.set('form_id', newId);
-        window.history.replaceState({}, '', newUrl.toString());
 
         setCreatedFormId(newId);
         setBootstrap({

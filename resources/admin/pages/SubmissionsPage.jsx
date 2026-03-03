@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from '@wordpress/element';
-import { SearchControl, SelectControl, Button } from '@wordpress/components';
+import { SearchControl, SelectControl } from '@wordpress/components';
+import { Button } from '../components/navigation';
 import { __, sprintf } from '@wordpress/i18n';
 import AdminShell from '../components/AdminShell';
 import TabBar from '../components/TabBar';

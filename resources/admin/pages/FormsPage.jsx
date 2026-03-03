@@ -1,5 +1,7 @@
 import { useState, useEffect } from '@wordpress/element';
-import { Button, SearchControl } from '@wordpress/components';
+import { SearchControl } from '@wordpress/components';
+import { Button } from '../components/navigation';
+import { useNavigate } from 'react-router-dom';
 import { __ } from '@wordpress/i18n';
 import { useForms, useCreateForm } from '../data';
 import Icon from '../components/ui/Icon';
@@ -11,6 +13,7 @@ import HelpMenu from '../components/HelpMenu';
 import './FormsPage.scss';
 
 export default function FormsPage() {
+  const navigate = useNavigate();
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showWizard, setShowWizard] = useState(false);
@@ -147,8 +150,8 @@ export default function FormsPage() {
           console.warn('Failed to send onboarding test email:', err);
         }
 
-        // Redirect to builder
-        window.location.href = `admin.php?page=subtleforms-builder&id=${createData.id}`;
+        // Navigate to builder
+        navigate('/forms/' + createData.id);
       }
     } catch (error) {
       console.error('Failed to create form:', error);
@@ -195,8 +198,7 @@ export default function FormsPage() {
                 <Button
                   isPrimary
                   onClick={() => {
-                    window.location.href =
-                      'admin.php?page=subtleforms-new-form';
+                    navigate('/forms/new');
                   }}>
                   <Icon.Add className='sf-icon-button' />
                   {__('New Form', 'subtleforms')}
