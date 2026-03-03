@@ -1,74 +1,46 @@
-import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
-import {
-  getLicenseState,
-  getLicenseStateLabel,
-  getLicenseStateDescription,
-  getLicenseStateColor,
-  getProLicenseUrl,
-} from '../utils/licenseState';
-import './LicenseStatusIndicator.scss';
 
 /**
- * LicenseStatusIndicator Component
+ * LicenseStatusIndicator Component (Free — placeholder)
  *
- * Displays current license state consistently across admin.
- * Shows: label, description, and clickable link to license page.
+ * When SubtleForms Pro is installed this component is replaced by the
+ * Pro version via the global `window.SubtleFormsPro` slot.  In the free
+ * plugin this renders a subtle "Upgrade to Pro" link, or nothing if the
+ * variant is 'inline'.
  *
  * Props:
- * - variant: 'full' | 'compact' | 'inline' (default: 'full')
- * - showDescription: boolean (default: true for full, false for compact/inline)
- * - className: string (optional)
+ * - variant: 'full' | 'compact' | 'inline'
+ * - showDescription: boolean
+ * - className: string
  */
 export default function LicenseStatusIndicator({
   variant = 'full',
-  showDescription = variant === 'full',
+  // eslint-disable-next-line no-unused-vars
+  showDescription = false,
   className = '',
 }) {
-  const state = useMemo(() => getLicenseState(), []);
-  const label = useMemo(() => getLicenseStateLabel(state), [state]);
-  const description = useMemo(() => getLicenseStateDescription(state), [state]);
-  const color = useMemo(() => getLicenseStateColor(state), [state]);
-  const licenseUrl = useMemo(() => getProLicenseUrl(), []);
+  // If Pro is loaded, delegate to its component.
+  if ( window.SubtleFormsPro?.ProFeatureBadge ) {
+    const Badge = window.SubtleFormsPro.ProFeatureBadge;
+    return <Badge active={ false } compact={ variant !== 'full' } />;
+  }
 
-  // Don't show indicator if no Pro plugin
-  if (state === 'inactive' && !window.subtleformsAdmin?.hasProPlugin) {
+  // Inline variant: don't clutter the builder header.
+  if ( variant === 'inline' ) {
     return null;
   }
 
-  const handleClick = (e) => {
-    e.preventDefault();
-    window.location.href = licenseUrl;
-  };
-
   return (
-    <div
-      className={clsx(
-        'sf-license-status',
-        `sf-license-status--${variant}`,
-        `sf-license-status--${color}`,
-        className
-      )}
-      role="status"
-      aria-live="polite">
-      <button
-        type="button"
-        className="sf-license-status__button"
-        onClick={handleClick}
-        title={__('View license settings', 'subtleforms')}>
-        <span className="sf-license-status__indicator" aria-hidden="true" />
-        
-        <span className="sf-license-status__content">
-          <span className="sf-license-status__label">{label}</span>
-          
-          {showDescription && description && (
-            <span className="sf-license-status__description">
-              {description}
-            </span>
-          )}
-        </span>
-      </button>
-    </div>
+    <a
+      href="https://subtleforms.com/pro"
+      target="_blank"
+      rel="noopener noreferrer"
+      className={ clsx( 'sf-license-status', `sf-license-status--${ variant }`, 'sf-license-status--neutral', className ) }
+    >
+      <span className="sf-license-status__label">
+        { __( 'Upgrade to Pro', 'subtleforms' ) }
+      </span>
+    </a>
   );
 }

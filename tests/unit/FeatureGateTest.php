@@ -90,20 +90,20 @@ final class FeatureGateTest extends TestCase {
 	// ── licensing (with mock LicenseManager) ───────────────────────────
 
 	public function test_has_licensing_true_with_manager(): void {
-		$mock = $this->createMock( \SubtleForms\Licensing\LicenseManager::class );
+		$mock = $this->createMock( \SubtleForms\Contracts\LicenseManagerInterface::class );
 		$gate = new FeatureGate( new Capabilities(), $mock );
 		$this->assertTrue( $gate->hasLicensing() );
 	}
 
 	public function test_is_pro_delegates_to_license_manager(): void {
-		$mock = $this->createMock( \SubtleForms\Licensing\LicenseManager::class );
+		$mock = $this->createMock( \SubtleForms\Contracts\LicenseManagerInterface::class );
 		$mock->method( 'isValid' )->willReturn( true );
 		$gate = new FeatureGate( new Capabilities(), $mock );
 		$this->assertTrue( $gate->isPro() );
 	}
 
 	public function test_has_feature_delegates_to_license_manager(): void {
-		$mock = $this->createMock( \SubtleForms\Licensing\LicenseManager::class );
+		$mock = $this->createMock( \SubtleForms\Contracts\LicenseManagerInterface::class );
 		$mock->method( 'hasFeature' )->with( 'conditional_logic' )->willReturn( true );
 		$gate = new FeatureGate( new Capabilities(), $mock );
 		$this->assertTrue( $gate->hasFeature( 'conditional_logic' ) );

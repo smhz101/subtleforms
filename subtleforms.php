@@ -27,6 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Define plugin constants.
 define( 'SUBTLEFORMS_VERSION', '1.8.1' );
+define( 'SUBTLEFORMS_API_VERSION', 1 );
 define( 'SUBTLEFORMS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SUBTLEFORMS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'SUBTLEFORMS_PLUGIN_FILE', __FILE__ );

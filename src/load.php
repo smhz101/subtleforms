@@ -29,6 +29,7 @@ if ( file_exists( SUBTLEFORMS_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
 // Contracts first
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Contracts/ExtensionInterface.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Contracts/ActionInterface.php';
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Contracts/LicenseManagerInterface.php';
 
 // Core
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Container.php';

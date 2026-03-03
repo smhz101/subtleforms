@@ -9,8 +9,18 @@
 
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { getUpgradeUrl } from '../../utils/licensing';
 import './UpgradePrompt.scss';
+
+/**
+ * Build the upgrade URL, optionally tagged with a feature slug.
+ *
+ * @param {string} feature Feature slug for UTM tracking.
+ * @return {string}
+ */
+function getUpgradeUrl( feature = '' ) {
+	const base = 'https://subtleforms.com/pro';
+	return feature ? `${ base }?utm_source=plugin&utm_medium=upgrade&utm_campaign=${ encodeURIComponent( feature ) }` : base;
+}
 
 /**
  * Upgrade Prompt Component

@@ -13,7 +13,7 @@
 
 namespace SubtleForms\Support;
 
-use SubtleForms\Licensing\LicenseManager;
+use SubtleForms\Contracts\LicenseManagerInterface;
 use RuntimeException;
 
 /**
@@ -27,13 +27,13 @@ final class FeatureGate {
 	private $caps;
 
 	/**
-	 * @var LicenseManager|null
+	 * @var LicenseManagerInterface|null
 	 */
 	private $licenseManager;
 
 	/**
-	 * @param Capabilities        $caps           Capability map.
-	 * @param LicenseManager|null $licenseManager Optional license manager (Pro).
+	 * @param Capabilities                 $caps           Capability map.
+	 * @param LicenseManagerInterface|null $licenseManager Optional license manager (Pro).
 	 */
 	public function __construct( $caps, $licenseManager = null ) {
 		$this->caps           = $caps;
@@ -117,9 +117,9 @@ final class FeatureGate {
 	/**
 	 * Get the LicenseManager, if available.
 	 *
-	 * @return LicenseManager|null
+	 * @return LicenseManagerInterface|null
 	 */
-	public function getLicenseManager(): ?LicenseManager {
+	public function getLicenseManager(): ?LicenseManagerInterface {
 		return $this->licenseManager;
 	}
 }
