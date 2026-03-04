@@ -105,6 +105,7 @@ final class FormsApi {
 							'type'              => 'string',
 							'default'           => 'DESC',
 							'enum'              => array( 'ASC', 'DESC' ),
+							'sanitize_callback' => 'strtoupper',
 						),
 					),
 				),

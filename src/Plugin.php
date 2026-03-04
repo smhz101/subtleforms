@@ -9,6 +9,7 @@
 namespace SubtleForms;
 
 use SubtleForms\Admin\AdminMenu;
+use SubtleForms\Admin\AdminNotices;
 use SubtleForms\Api\RestController;
 use SubtleForms\Extensions\ExtensionManager;
 
@@ -51,6 +52,7 @@ final class Plugin {
 		// Initialize admin
 		if ( is_admin() ) {
 			$this->container->get( AdminMenu::class );
+			AdminNotices::register();
 		}
 
 		// Register REST API

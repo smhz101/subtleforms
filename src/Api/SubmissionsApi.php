@@ -92,6 +92,7 @@ final class SubmissionsApi {
 						'type'              => 'string',
 						'default'           => 'DESC',
 						'enum'              => array( 'ASC', 'DESC' ),
+						'sanitize_callback' => 'strtoupper',
 					),
 				),
 			)
@@ -136,6 +137,7 @@ final class SubmissionsApi {
 						'type'              => 'string',
 						'default'           => 'DESC',
 						'enum'              => array( 'ASC', 'DESC' ),
+						'sanitize_callback' => 'strtoupper',
 					),
 				),
 			)
@@ -259,8 +261,8 @@ final class SubmissionsApi {
 			'form_id' => $request->get_param( 'form_id' ),
 			'limit'   => intval( $request->get_param( 'per_page' ) ?? 20 ),
 			'offset'  => intval( $request->get_param( 'offset' ) ?? 0 ),
-			'orderby' => 'created_at',
-			'order'   => 'DESC',
+			'orderby' => in_array( $request->get_param( 'orderby' ), array( 'id', 'created_at', 'updated_at', 'status' ), true ) ? $request->get_param( 'orderby' ) : 'created_at',
+			'order'   => strtoupper( $request->get_param( 'order' ) ?? 'DESC' ) === 'ASC' ? 'ASC' : 'DESC',
 		);
 
 		$submissions = $this->submissionsRepo->findAll( $args );
@@ -300,8 +302,8 @@ final class SubmissionsApi {
 			'search'  => $request->get_param( 'search' ),
 			'limit'   => $pagination['per_page'],
 			'offset'  => intval( $request->get_param( 'offset' ) ?? 0 ),
-			'orderby' => 'created_at',
-			'order'   => 'DESC',
+			'orderby' => in_array( $request->get_param( 'orderby' ), array( 'id', 'created_at', 'updated_at', 'status' ), true ) ? $request->get_param( 'orderby' ) : 'created_at',
+			'order'   => strtoupper( $request->get_param( 'order' ) ?? 'DESC' ) === 'ASC' ? 'ASC' : 'DESC',
 		);
 
 		$submissions = $this->submissionsRepo->findAll( $args );
