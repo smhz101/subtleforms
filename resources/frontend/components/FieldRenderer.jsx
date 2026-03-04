@@ -360,7 +360,9 @@ export default function FieldRenderer({
     <div className={`subtleforms-field subtleforms-field-${field.type}`}>
       <label htmlFor={inputId} className='subtleforms-field-label'>
         {label}
-        {required && <span className='subtleforms-required'>*</span>}
+        {required && (
+          <span className='subtleforms-required' aria-label={', required'}>*</span>
+        )}
       </label>
 
       {renderInput(
@@ -373,7 +375,16 @@ export default function FieldRenderer({
         error
       )}
 
-      {error && <div className='subtleforms-field-error'>{error}</div>}
+      {error && (
+        <div
+          id={`${inputId}-error`}
+          className='subtleforms-field-error'
+          role='alert'
+          aria-live='assertive'
+        >
+          {error}
+        </div>
+      )}
     </div>
   );
 }
@@ -403,6 +414,7 @@ function renderInput(
           placeholder={placeholder}
           aria-required={required}
           aria-invalid={!!error}
+          aria-describedby={error ? `${inputId}-error` : undefined}
         />
       );
 
@@ -417,6 +429,7 @@ function renderInput(
           rows={4}
           aria-required={required}
           aria-invalid={!!error}
+          aria-describedby={error ? `${inputId}-error` : undefined}
         />
       );
 
@@ -431,6 +444,7 @@ function renderInput(
             onChange={(e) => onChange(e.target.checked)}
             aria-required={required}
             aria-invalid={!!error}
+            aria-describedby={error ? `${inputId}-error` : undefined}
           />
           <span>
             {field.config?.checkboxLabel || __('I agree', 'subtleforms')}

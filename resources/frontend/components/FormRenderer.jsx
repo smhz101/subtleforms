@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { useState, useEffect, useCallback, useMemo, useRef } from '@wordpress/element';
+import { __, sprintf, _n } from '@wordpress/i18n';
 import FieldRenderer from './FieldRenderer';
 import StepNavigation from './StepNavigation';
 import ConversationalFormRenderer from './ConversationalFormRenderer';
@@ -28,6 +28,8 @@ export default function FormRenderer({
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [validationErrors, setValidationErrors] = useState({});
   const [isSubmitIntentional, setIsSubmitIntentional] = useState(false);
+  const [liveMessage, setLiveMessage] = useState('');
+  const liveRegionRef = useRef(null);
 
   // Load schema (skip if preloaded)
   useEffect(() => {
@@ -551,6 +553,31 @@ export default function FormRenderer({
       };
 
       if (!validateAllSteps()) {
+        // Focus first errored field for keyboard/screen reader users
+        requestAnimationFrame(() => {
+          const firstErrorInput = document.querySelector(
+            '.subtleforms-field [aria-invalid="true"]'
+          );
+          if (firstErrorInput) {
+            firstErrorInput.focus();
+            firstErrorInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+          // Announce error count to screen readers
+          const errorCount = Object.keys(validationErrors).length;
+          if (errorCount > 0) {
+            setLiveMessage(
+              sprintf(
+                _n(
+                  'Please fix %d error before submitting.',
+                  'Please fix %d errors before submitting.',
+                  errorCount,
+                  'subtleforms'
+                ),
+                errorCount
+              )
+            );
+          }
+        });
         return;
       }
 
@@ -743,8 +770,15 @@ export default function FormRenderer({
   if (submitSuccess) {
     return (
       <div className='subtleforms-success'>
-        <h3>{__('Thank you!', 'subtleforms')}</h3>
-        <p>{__('Your form has been submitted successfully.', 'subtleforms')}</p>
+        <div
+          role='status'
+          aria-live='polite'
+          aria-atomic='true'
+          className='subtleforms-success-message'
+        >
+          <h3>{__('Thank you!', 'subtleforms')}</h3>
+          <p>{__('Your form has been submitted successfully.', 'subtleforms')}</p>
+        </div>
       </div>
     );
   }
@@ -756,6 +790,17 @@ export default function FormRenderer({
 
   return (
     <div className={formClassNames}>
+      {/* Screen reader live region for submission results and validation announcements */}
+      <div
+        ref={liveRegionRef}
+        role='status'
+        aria-live='assertive'
+        aria-atomic='true'
+        className='subtleforms-sr-only'
+      >
+        {liveMessage}
+      </div>
+
       {schema.metadata?.title && (
         <h2 className='subtleforms-form-title'>{schema.metadata.title}</h2>
       )}
@@ -773,8 +818,16 @@ export default function FormRenderer({
         />
       )}
 
-      <form onSubmit={handleSubmit}>
-        {submitError && <div className='subtleforms-error'>{submitError}</div>}
+      <form
+        role='form'
+        aria-label={schema.metadata?.title || __('Form', 'subtleforms')}
+        noValidate
+        onSubmit={handleSubmit}>
+        {submitError && (
+          <div className='subtleforms-error' role='alert'>
+            {submitError}
+          </div>
+        )}
 
         <div className='subtleforms-step-content'>
           {currentStep?.config?.label && (

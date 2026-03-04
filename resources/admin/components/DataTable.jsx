@@ -197,20 +197,32 @@ const DataTable = memo(function DataTable({
                   />
                 </th>
               )}
-              {columns.map((column) => (
-                <th
-                  key={column.key}
-                  className={`${
-                    column.sortable ? 'sf-data-table__header-th--sortable' : ''
-                  }`}
-                  style={{ width: column.width || 'auto' }}
-                  onClick={() => handleHeaderClick(column)}>
-                  <div className='sf-data-table__header-th-content'>
-                    {column.title}
-                    {getSortIndicator(column)}
-                  </div>
-                </th>
-              ))}
+              {columns.map((column) => {
+                let ariaSortValue;
+                if (column.sortable) {
+                  if (sortBy === column.key) {
+                    ariaSortValue = sortDirection === 'asc' ? 'ascending' : 'descending';
+                  } else {
+                    ariaSortValue = 'none';
+                  }
+                }
+                return (
+                  <th
+                    key={column.key}
+                    scope='col'
+                    className={`${
+                      column.sortable ? 'sf-data-table__header-th--sortable' : ''
+                    }`}
+                    style={{ width: column.width || 'auto' }}
+                    aria-sort={ariaSortValue}
+                    onClick={() => handleHeaderClick(column)}>
+                    <div className='sf-data-table__header-th-content'>
+                      {column.title}
+                      {getSortIndicator(column)}
+                    </div>
+                  </th>
+                );
+              })}
             </tr>
           </thead>
           <tbody 

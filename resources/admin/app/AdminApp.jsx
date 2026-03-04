@@ -17,6 +17,7 @@
  */
 
 import { useState, useEffect, Suspense } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Panel, PanelBody } from '@wordpress/components';
 import {
@@ -136,6 +137,48 @@ function SubmissionDetailRoute() {
 	);
 }
 
+// ─── Route announcer for screen readers ──────────────────────────────────────
+
+function getPageNameFromPath(pathname) {
+	const map = {
+		'/': __('Dashboard', 'subtleforms'),
+		'/forms': __('Forms', 'subtleforms'),
+		'/forms/new': __('Form Builder', 'subtleforms'),
+		'/submissions': __('Submissions', 'subtleforms'),
+		'/settings': __('Settings', 'subtleforms'),
+		'/extensions': __('Extensions', 'subtleforms'),
+	};
+	if (pathname.startsWith('/forms/') && pathname !== '/forms/new') {
+		return __('Form Builder', 'subtleforms');
+	}
+	if (pathname.startsWith('/submissions/')) {
+		return __('Submission Detail', 'subtleforms');
+	}
+	return map[pathname] || __('SubtleForms', 'subtleforms');
+}
+
+function RouteAnnouncer() {
+	const location = useLocation();
+	const [announcement, setAnnouncement] = useState('');
+
+	useEffect(() => {
+		setAnnouncement(
+			sprintf(__('Navigated to %s', 'subtleforms'), getPageNameFromPath(location.pathname))
+		);
+	}, [location.pathname]);
+
+	return (
+		<div
+			role='status'
+			aria-live='polite'
+			aria-atomic='true'
+			className='sf-sr-only'
+		>
+			{announcement}
+		</div>
+	);
+}
+
 // ─── App content (inside router context) ─────────────────────────────────────
 
 function AppContent() {
@@ -170,6 +213,7 @@ function AppContent() {
 
 	return (
 		<div>
+			<RouteAnnouncer />
 			<Panel>
 				<PanelBody>
 					<Suspense fallback={<RouteLoadingFallback />}>
