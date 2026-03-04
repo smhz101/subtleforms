@@ -240,6 +240,17 @@ class AdminMenu {
 			);
 		}
 
+		// Expose build URL so webpack async chunks (code-split pages) load correctly.
+		// This must run BEFORE the admin script executes.
+		wp_add_inline_script(
+			'subtleforms-admin',
+			sprintf(
+				'window.__subtleformsPublicPath = %s;',
+				wp_json_encode( SUBTLEFORMS_PLUGIN_URL . 'build/admin/' )
+			),
+			'before'
+		);
+
 		// Get license data if Pro is active (no API calls, just read from options)
 		$license_data = array();
 		if ( defined( 'SUBTLEFORMS_PRO_VERSION' ) && function_exists( 'subtleforms_pro' ) ) {
