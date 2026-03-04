@@ -84,3 +84,4 @@ pnpm-lock.yaml
 .parcel-cache/
 .webpack/
 .DS_Store
+storybook-static/

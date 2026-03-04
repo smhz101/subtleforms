@@ -25,6 +25,13 @@ import { __ } from '@wordpress/i18n';
 import Icon from './Icon';
 import './UpgradePrompt.scss';
 
+export function getUpgradeUrl(feature = '') {
+  const base = window.subtleformsAdmin?.proUrl || 'https://subtleforms.com/pro';
+  return feature
+    ? `${base}?utm_source=plugin&utm_medium=upgrade&utm_campaign=${encodeURIComponent(feature)}`
+    : base;
+}
+
 export default function UpgradePrompt({
   feature,
   benefits = [],
@@ -39,9 +46,7 @@ export default function UpgradePrompt({
     if (onUpgrade) {
       onUpgrade();
     } else {
-      // Default: navigate to Pro license page
-      const licenseUrl = window.subtleformsAdmin?.proLicenseUrl || '/wp-admin/admin.php?page=subtleforms-pro';
-      window.location.href = licenseUrl;
+      window.location.href = getUpgradeUrl(feature || '');
     }
   };
 
