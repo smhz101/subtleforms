@@ -18,6 +18,7 @@ import { store as noticesStore } from '@wordpress/notices';
 import clsx from 'clsx';
 import DataTable from './DataTable';
 import { ConfirmModal } from '../modals';
+import { buildApiUrl } from '../utils/api';
 import './SubmissionsTable.scss';
 
 const restBase =
@@ -30,7 +31,7 @@ const restNonce =
     : null;
 
 async function apiGet(path) {
-  const response = await fetch(restBase + path, {
+  const response = await fetch(buildApiUrl(path), {
     credentials: 'same-origin',
     headers: {
       'X-WP-Nonce': restNonce,
@@ -44,7 +45,7 @@ async function apiGet(path) {
 }
 
 async function apiRequest(path, options = {}) {
-  return fetch(restBase + path, {
+  return fetch(buildApiUrl(path), {
     credentials: 'same-origin',
     headers: {
       'X-WP-Nonce': restNonce,
@@ -178,7 +179,7 @@ const SubmissionsTable = forwardRef(
           params.append('after', dateParams.after);
         }
 
-        const response = await fetch(`${restBase}/submissions?${params}`, {
+        const response = await fetch(buildApiUrl(`/submissions?${params}`), {
           credentials: 'same-origin',
           headers: {
             'X-WP-Nonce': restNonce,

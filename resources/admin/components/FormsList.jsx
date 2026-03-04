@@ -18,6 +18,7 @@ import { ContextualTip } from './ui';
 import DataTable from './DataTable';
 import { ConfirmModal } from '../modals';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
+import { buildApiUrl } from '../utils/api';
 import { logger, perfMarkers } from '../diagnostics';
 import './FormsList.scss';
 
@@ -27,7 +28,7 @@ const restBase =
 const restNonce = window.subtleformsAdmin?.restNonce || '';
 
 function apiRequest(path, options = {}) {
-  return fetch(restBase + path, {
+  return fetch(buildApiUrl(path), {
     credentials: 'same-origin',
     headers: {
       'X-WP-Nonce': restNonce,
@@ -395,7 +396,7 @@ export default function FormsList({
         params.append('status', statusFilter);
       }
 
-      const response = await fetch(`${restBase}/forms?${params}`, {
+      const response = await fetch(buildApiUrl(`/forms?${params}`), {
         credentials: 'same-origin',
         headers: {
           'X-WP-Nonce': restNonce,

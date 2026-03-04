@@ -10,6 +10,7 @@ import TabBar from '../components/TabBar';
 import FormsList from '../components/FormsList';
 import OnboardingWizard from '../components/OnboardingWizard';
 import HelpMenu from '../components/HelpMenu';
+import { buildApiUrl } from '../utils/api';
 import './FormsPage.scss';
 
 export default function FormsPage() {
@@ -40,8 +41,7 @@ export default function FormsPage() {
 
         // Check forms count
         const formsResponse = await fetch(
-          (window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
-            '/wp-json/subtleforms/v1') + '/forms?per_page=1',
+          buildApiUrl('/forms?per_page=1'),
           {
             credentials: 'same-origin',
             headers: {

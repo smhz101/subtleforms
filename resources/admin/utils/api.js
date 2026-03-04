@@ -3,6 +3,30 @@ const getRestBase = () =>
     ? window.subtleformsAdmin.restUrl.replace(/\/$/, '')
     : '/wp-json/subtleforms/v1';
 
+/**
+ * Build a REST API URL compatible with both pretty-permalink and fallback
+ * (index.php?rest_route=…) modes.
+ *
+ * When pretty permalinks are DISABLED, WordPress sets restUrl to something
+ * like "https://site.com/index.php?rest_route=/subtleforms/v1/".
+ * Naively appending "/endpoint?param=1" produces a malformed URL:
+ *   …index.php?rest_route=/subtleforms/v1/endpoint?param=1   ← WRONG
+ * because the second "?" makes "param=1" part of the rest_route value.
+ * The correct form separates query params with "&":
+ *   …index.php?rest_route=/subtleforms/v1/endpoint&param=1   ← CORRECT
+ */
+export const buildApiUrl = (path) => {
+  const base = getRestBase();
+  if (!base.includes('?rest_route=')) {
+    // Pretty permalinks – simple concatenation is fine.
+    return base + path;
+  }
+  // Fallback mode – split path at the first '?' and join with '&'.
+  const sepIdx = path.indexOf('?');
+  if (sepIdx === -1) return base + path;
+  return `${base}${path.slice(0, sepIdx)}&${path.slice(sepIdx + 1)}`;
+};
+
 const getRestNonce = () =>
   window.subtleformsAdmin && window.subtleformsAdmin.restNonce
     ? window.subtleformsAdmin.restNonce
@@ -36,7 +60,7 @@ async function parseJsonResponse(response) {
 }
 
 export async function apiGet(path) {
-  const response = await fetch(getRestBase() + path, {
+  const response = await fetch(buildApiUrl(path), {
     credentials: 'same-origin',
     headers: {
       'X-WP-Nonce': getRestNonce(),
@@ -49,7 +73,7 @@ export async function apiGet(path) {
 }
 
 export async function apiPost(path, payload) {
-  const response = await fetch(getRestBase() + path, {
+  const response = await fetch(buildApiUrl(path), {
     method: 'POST',
     credentials: 'same-origin',
     headers: {
@@ -64,7 +88,7 @@ export async function apiPost(path, payload) {
 }
 
 export async function apiPut(path, payload) {
-  const response = await fetch(getRestBase() + path, {
+  const response = await fetch(buildApiUrl(path), {
     method: 'PUT',
     credentials: 'same-origin',
     headers: {
@@ -79,7 +103,7 @@ export async function apiPut(path, payload) {
 }
 
 export async function apiDelete(path) {
-  const response = await fetch(getRestBase() + path, {
+  const response = await fetch(buildApiUrl(path), {
     method: 'DELETE',
     credentials: 'same-origin',
     headers: {
