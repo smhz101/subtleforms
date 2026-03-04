@@ -17,8 +17,8 @@
 	&__surface {
 		width: 100%;
 		max-width: 900px;
-		background: #fff;
-		border: 1px solid #d1d5db;
+		background: var(--sf-surface);
+		border: 1px solid var(--sf-gray-300);
 		border-radius: 4px;
 		padding: 1.75rem; // Reduced from 2.5rem for better density
 		min-height: 600px;

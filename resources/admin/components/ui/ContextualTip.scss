@@ -9,21 +9,21 @@
   margin-bottom: 16px;
 
   &--info {
-    background: #e7f5fe;
-    border-left: 3px solid #0073aa;
-    color: #1e1e1e;
+    background: var(--sf-blue-50);
+    border-left: 3px solid var(--wp-blue-link);
+    color: var(--sf-slate-900);
   }
 
   &--success {
-    background: #ecf7ed;
-    border-left: 3px solid #46b450;
-    color: #1e1e1e;
+    background: var(--sf-green-50);
+    border-left: 3px solid var(--wp-green-hover);
+    color: var(--sf-slate-900);
   }
 
   &--warning {
-    background: #fff8e5;
-    border-left: 3px solid #f0b849;
-    color: #1e1e1e;
+    background: var(--sf-amber-50);
+    border-left: 3px solid var(--sf-amber-500);
+    color: var(--sf-slate-900);
   }
 
   &__icon {
@@ -42,11 +42,11 @@
     }
 
     a {
-      color: #0073aa;
+      color: var(--wp-blue-link);
       text-decoration: underline;
 
       &:hover {
-        color: #005177;
+        color: var(--wp-blue-800);
       }
     }
   }

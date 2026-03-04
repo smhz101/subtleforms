@@ -6,8 +6,8 @@
   display: flex;
   gap: 16px;
   padding: 16px;
-  background: linear-gradient(135deg, #f6f7f9 0%, #ffffff 100%);
-  border: 1px solid #dcdcde;
+  background: linear-gradient(135deg, var(--sf-gray-50) 0%, var(--sf-surface) 100%);
+  border: 1px solid var(--wp-gray-30);
   border-radius: 4px;
   
   &--inline {
@@ -19,24 +19,24 @@
     flex-direction: column;
     align-items: flex-start;
     padding: 20px;
-    background: #ffffff;
-    border: 2px solid #0073aa;
+    background: var(--sf-surface);
+    border: 2px solid var(--wp-blue-link);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
   
   &--banner {
     align-items: center;
     padding: 16px 24px;
-    background: linear-gradient(90deg, #0073aa 0%, #005a87 100%);
+    background: linear-gradient(90deg, var(--wp-blue-link) 0%, var(--wp-blue-700) 100%);
     border: none;
-    color: #ffffff;
+    color: var(--sf-surface);
     
     .sf-upgrade-prompt__title {
-      color: #ffffff;
+      color: var(--sf-surface);
     }
     
     .sf-upgrade-prompt__benefit {
-      color: #ffffff;
+      color: var(--sf-surface);
     }
   }
 }
@@ -48,9 +48,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0073aa 0%, #005a87 100%);
+  background: linear-gradient(135deg, var(--wp-blue-link) 0%, var(--wp-blue-700) 100%);
   border-radius: 50%;
-  color: #ffffff;
+  color: var(--sf-surface);
   
   svg {
     width: 18px;
@@ -71,7 +71,7 @@
   margin: 0 0 8px;
   font-size: 14px;
   font-weight: 600;
-  color: #1d2327;
+  color: var(--wp-dark);
   
   .sf-upgrade-prompt--inline & {
     margin-bottom: 0;
@@ -90,7 +90,7 @@
   gap: 8px;
   margin-bottom: 6px;
   font-size: 13px;
-  color: #50575e;
+  color: var(--wp-gray-70);
   
   &:last-child {
     margin-bottom: 0;
@@ -102,10 +102,10 @@
   width: 16px;
   height: 16px;
   margin-top: 1px;
-  color: #46b450;
+  color: var(--wp-green-hover);
   
   .sf-upgrade-prompt--banner & {
-    color: #ffffff;
+    color: var(--sf-surface);
   }
 }
 
@@ -123,15 +123,15 @@
   }
   
   .sf-upgrade-prompt--banner & {
-    background: #ffffff;
-    border-color: #ffffff;
-    color: #0073aa;
+    background: var(--sf-surface);
+    border-color: var(--sf-surface);
+    color: var(--wp-blue-link);
     
     &:hover,
     &:focus {
-      background: #f0f0f0;
-      border-color: #f0f0f0;
-      color: #005a87;
+      background: var(--sf-neutral-100);
+      border-color: var(--sf-neutral-100);
+      color: var(--wp-blue-700);
     }
   }
 }

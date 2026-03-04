@@ -18,7 +18,7 @@
 
 	&__description {
 		margin-bottom: 1.5rem;
-		color: #4b5563;
+		color: var(--sf-gray-600);
 	}
 }
 
@@ -36,7 +36,7 @@
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
 	&:hover {
-		border-color: #2563eb;
+		border-color: var(--sf-blue-600);
 		box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
 		transform: translateY(-2px);
 	}
@@ -48,12 +48,12 @@
 }
 
 .sf-sf-template-blank {
-	border: 2px dashed #cbd5e1;
-	background: #f8fafc;
+	border: 2px dashed var(--sf-slate-300);
+	background: var(--sf-slate-50);
 
 	&:hover {
-		border-color: #64748b;
-		background: #f1f5f9;
+		border-color: var(--sf-slate-500);
+		background: var(--sf-slate-100);
 	}
 }
 
@@ -64,22 +64,22 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: #e0e7ff;
+	background: var(--sf-indigo-100);
 	border-radius: 50%;
 
 	.dashicons {
 		font-size: 32px;
 		width: 32px;
 		height: 32px;
-		color: #4f46e5;
+		color: var(--sf-indigo-600);
 	}
 }
 
 .sf-sf-template-blank .sf-template-icon {
-	background: #e2e8f0;
+	background: var(--sf-slate-200);
 
 	.dashicons {
-		color: #64748b;
+		color: var(--sf-slate-500);
 	}
 }
 
@@ -87,12 +87,12 @@
 	font-size: 18px;
 	font-weight: 600;
 	margin: 0 0 8px;
-	color: #1e293b;
+	color: var(--sf-slate-800);
 }
 
 .sf-sf-template-description {
 	font-size: 14px;
-	color: #64748b;
+	color: var(--sf-slate-500);
 	margin: 0 0 16px;
 	line-height: 1.5;
 }

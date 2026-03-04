@@ -6,7 +6,7 @@
 .sf-conversational-canvas {
 	display: flex;
 	flex-direction: column;
-	background-color: #f9fafb;
+	background-color: var(--sf-gray-50);
 	margin-left: auto;
 	margin-right: auto;
 	width: 100%;
@@ -19,12 +19,12 @@
 		flex-direction: column;
 		justify-content: center;
 		align-items: center;
-		background-color: #ffffff;
+		background-color: var(--sf-surface);
 		box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 		margin-left: auto;
 		margin-right: auto;
 		padding: 3rem;
-		border: 1px solid #e5e7eb;
+		border: 1px solid var(--sf-gray-200);
 		border-radius: 0.5rem;
 		width: 100%;
 		max-width: 42rem;
@@ -42,22 +42,22 @@
 		font-size: 1.125rem;
 		line-height: 1.75rem;
 		font-weight: 600;
-		color: #111827;
+		color: var(--sf-gray-900);
 		margin-bottom: 0.5rem;
 	}
 
 	&__empty-description {
 		font-size: 0.875rem;
 		line-height: 1.25rem;
-		color: #6b7280;
+		color: var(--sf-gray-500);
 		margin-bottom: 1.5rem;
 	}
 
 	// Progress header
 	&__progress-header {
-		background-color: #ffffff;
+		background-color: var(--sf-surface);
 		padding: 1rem 1.5rem;
-		border-bottom: 1px solid #e5e7eb;
+		border-bottom: 1px solid var(--sf-gray-200);
 	}
 
 	&__progress-info {
@@ -71,17 +71,17 @@
 		font-size: 0.875rem;
 		line-height: 1.25rem;
 		font-weight: 500;
-		color: #374151;
+		color: var(--sf-gray-700);
 	}
 
 	&__progress-percent {
 		font-size: 0.75rem;
 		line-height: 1rem;
-		color: #6b7280;
+		color: var(--sf-gray-500);
 	}
 
 	&__progress-bar {
-		background-color: #e5e7eb;
+		background-color: var(--sf-gray-200);
 		border-radius: 9999px;
 		width: 100%;
 		height: 0.5rem;
@@ -89,7 +89,7 @@
 	}
 
 	&__progress-fill {
-		background-color: #2563eb;
+		background-color: var(--sf-blue-600);
 		height: 100%;
 		transition: all 300ms;
 	}
@@ -105,14 +105,14 @@
 	}
 
 	&__card {
-		background-color: #ffffff;
+		background-color: var(--sf-surface);
 		box-shadow:
 			0 4px 6px -1px rgba(0, 0, 0, 0.1),
 			0 2px 4px -1px rgba(0, 0, 0, 0.06);
 		margin-left: auto;
 		margin-right: auto;
 		padding: 2rem;
-		border: 1px solid #e5e7eb;
+		border: 1px solid var(--sf-gray-200);
 		border-radius: 0.5rem;
 		width: 100%;
 	}
@@ -122,9 +122,9 @@
 		display: flex;
 		justify-content: space-between;
 		align-items: center;
-		background-color: #ffffff;
+		background-color: var(--sf-surface);
 		padding: 1rem 1.5rem;
-		border-top: 1px solid #e5e7eb;
+		border-top: 1px solid var(--sf-gray-200);
 	}
 
 	&__nav-button {
@@ -153,18 +153,18 @@
 
 		// Active dot
 		&--active {
-			background-color: #2563eb;
+			background-color: var(--sf-blue-600);
 			width: 1.5rem;
 		}
 
 		// Completed dot
 		&--completed {
-			background-color: #93c5fd;
+			background-color: var(--sf-blue-200);
 		}
 
 		// Upcoming dot
 		&--upcoming {
-			background-color: #d1d5db;
+			background-color: var(--sf-gray-300);
 		}
 	}
 }

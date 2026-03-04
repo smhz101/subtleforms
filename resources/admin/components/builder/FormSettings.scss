@@ -17,7 +17,7 @@
 		font-size: 1.25rem;
 		line-height: 1.75rem;
 		font-weight: 600;
-		color: #111827;
+		color: var(--sf-gray-900);
 		margin-bottom: 1.5rem;
 	}
 
@@ -30,7 +30,7 @@
 	&__hint {
 		font-size: 0.875rem;
 		line-height: 1.25rem;
-		color: #6b7280;
+		color: var(--sf-gray-500);
 	}
 
 	// Form type info banner
@@ -41,54 +41,54 @@
 
 		// Color variants using data attributes
 		&[data-form-type='multistep'] {
-			background-color: #faf5ff;
-			border-color: #a855f7;
+			background-color: var(--sf-purple-50);
+			border-color: var(--sf-purple-500);
 
 			.sf-form-type-banner__title {
-				color: #581c87;
+				color: var(--sf-purple-900);
 			}
 
 			.sf-form-type-banner__description {
-				color: #7e22ce;
+				color: var(--sf-purple-700);
 			}
 		}
 
 		&[data-form-type='sectioned'] {
-			background-color: #eef2ff;
-			border-color: #6366f1;
+			background-color: var(--sf-indigo-50);
+			border-color: var(--sf-indigo-500);
 
 			.sf-form-type-banner__title {
-				color: #312e81;
+				color: var(--sf-indigo-900);
 			}
 
 			.sf-form-type-banner__description {
-				color: #4338ca;
+				color: var(--sf-indigo-700);
 			}
 		}
 
 		&[data-form-type='conversational'] {
-			background-color: #eff6ff;
-			border-color: #3b82f6;
+			background-color: var(--sf-blue-50);
+			border-color: var(--sf-blue-500);
 
 			.sf-form-type-banner__title {
-				color: #1e3a8a;
+				color: var(--sf-blue-900);
 			}
 
 			.sf-form-type-banner__description {
-				color: #1d4ed8;
+				color: var(--sf-blue-700);
 			}
 		}
 
 		&[data-form-type='payment'] {
-			background-color: #f0fdf4;
-			border-color: #22c55e;
+			background-color: var(--sf-green-50);
+			border-color: var(--sf-green-500);
 
 			.sf-form-type-banner__title {
-				color: #14532d;
+				color: var(--sf-green-900);
 			}
 
 			.sf-form-type-banner__description {
-				color: #15803d;
+				color: var(--sf-emerald-900);
 			}
 		}
 	}
@@ -112,25 +112,25 @@
 		}
 
 		&--blue {
-			background-color: #eff6ff;
+			background-color: var(--sf-blue-50);
 			padding: 1rem;
-			border: 1px solid #bfdbfe;
+			border: 1px solid var(--sf-blue-200);
 			border-radius: 0.25rem;
 
 			.sf-info-box__text {
-				color: #1e40af;
+				color: var(--sf-blue-800);
 			}
 		}
 
 		&--yellow {
-			background-color: #fef3c7;
+			background-color: var(--sf-amber-100);
 			margin-top: 1rem;
 			padding: 1rem;
-			border: 1px solid #fde68a;
+			border: 1px solid var(--sf-yellow-400);
 			border-radius: 0.25rem;
 
 			.sf-info-box__text {
-				color: #92400e;
+				color: var(--sf-amber-800);
 			}
 		}
 	}

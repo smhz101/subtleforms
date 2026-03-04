@@ -31,7 +31,7 @@
 			right: 0;
 			top: 0;
 			height: 1px;
-			background: #e5e7eb;
+			background: var(--sf-gray-200);
 			opacity: 0.5;
 			transition: all 0.2s ease;
 		}
@@ -39,7 +39,7 @@
 		/* Thick blue line on hover */
 		&:hover::before {
 			height: 3px;
-			background: #3b82f6;
+			background: var(--sf-blue-500);
 			opacity: 1;
 		}
 	}
@@ -53,10 +53,10 @@
 		width: 32px;
 		height: 32px;
 		padding: 0;
-		background: #ffffff;
-		border: 1.5px solid #e5e7eb;
+		background: var(--sf-surface);
+		border: 1.5px solid var(--sf-gray-200);
 		border-radius: 50%;
-		color: #6b7280;
+		color: var(--sf-gray-500);
 		cursor: pointer;
 		outline: none;
 		box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
@@ -66,9 +66,9 @@
 		/* Hover state */
 		&:hover {
 			opacity: 1;
-			background: #3b82f6;
-			border-color: #3b82f6;
-			color: #ffffff;
+			background: var(--sf-blue-500);
+			border-color: var(--sf-blue-500);
+			color: var(--sf-surface);
 			box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
 			transform: scale(1.1);
 		}
@@ -81,7 +81,7 @@
 
 		/* Focus state */
 		&:focus-visible {
-			outline: 2px solid #3b82f6;
+			outline: 2px solid var(--sf-blue-500);
 			outline-offset: 2px;
 		}
 	}

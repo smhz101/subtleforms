@@ -14,8 +14,8 @@
 	// NOTE: DataTable component handles scrolling internally
 
 	&__row--unread {
-		background-color: #eff6ff;
-		border-left: 4px solid #3b82f6;
+		background-color: var(--sf-blue-50);
+		border-left: 4px solid var(--sf-blue-500);
 	}
 
 	&__status-badge {
@@ -28,18 +28,18 @@
 		font-size: 0.75rem;
 
 		&--unread {
-			background-color: #3b82f6;
-			color: #fff;
+			background-color: var(--sf-blue-500);
+			color: var(--sf-surface);
 			box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
 		}
 
 		&--read {
-			background-color: #f3f4f6;
-			color: #4b5563;
+			background-color: var(--sf-gray-100);
+			color: var(--sf-gray-600);
 		}
 
 		&-indicator {
-			background-color: #fff;
+			background-color: var(--sf-surface);
 			border-radius: 9999px;
 			width: 0.5rem;
 			height: 0.5rem;

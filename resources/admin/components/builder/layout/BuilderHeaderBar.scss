@@ -6,15 +6,15 @@
 	}
 
 	&__title-input {
-		background-color: #ffffff;
+		background-color: var(--sf-surface);
 		padding: 0.25rem 0.5rem;
-		border: 1px solid #2271b1;
+		border: 1px solid var(--wp-blue-500);
 		outline: none;
 		min-width: 200px;
 		font-weight: 600;
 		font-size: 1rem;
 		line-height: 1.5rem;
-		color: #111827;
+		color: var(--sf-gray-900);
 	}
 
 	&__title-button {
@@ -25,11 +25,11 @@
 		font-weight: 600;
 		font-size: 1rem;
 		line-height: 1.5rem;
-		color: #111827;
+		color: var(--sf-gray-900);
 		cursor: pointer;
 
 		&:hover {
-			color: #2271b1;
+			color: var(--wp-blue-500);
 		}
 	}
 
@@ -45,33 +45,33 @@
 		border-radius: 4px;
 
 		&--gray {
-			background-color: #f9fafb;
-			color: #374151;
-			border-color: #e5e7eb;
+			background-color: var(--sf-gray-50);
+			color: var(--sf-gray-700);
+			border-color: var(--sf-gray-200);
 		}
 
 		&--purple {
-			background-color: #faf5ff;
-			color: #7c3aed;
-			border-color: #e9d5ff;
+			background-color: var(--sf-purple-50);
+			color: var(--sf-violet-600);
+			border-color: var(--sf-purple-200);
 		}
 
 		&--indigo {
-			background-color: #eef2ff;
-			color: #4f46e5;
-			border-color: #c7d2fe;
+			background-color: var(--sf-indigo-50);
+			color: var(--sf-indigo-600);
+			border-color: var(--sf-indigo-200);
 		}
 
 		&--blue {
-			background-color: #eff6ff;
-			color: #1d4ed8;
-			border-color: #bfdbfe;
+			background-color: var(--sf-blue-50);
+			color: var(--sf-blue-700);
+			border-color: var(--sf-blue-200);
 		}
 
 		&--green {
-			background-color: #f0fdf4;
-			color: #16a34a;
-			border-color: #bbf7d0;
+			background-color: var(--sf-green-50);
+			color: var(--sf-green-600);
+			border-color: var(--sf-green-100);
 		}
 	}
 
@@ -95,7 +95,7 @@
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
-		color: #ffffff;
+		color: var(--sf-surface);
 	}
 
 	&__shortcode-button {
@@ -111,23 +111,23 @@
 		outline: none;
 		transition: all 150ms;
 		border-radius: 4px;
-		background-color: #f9fafb;
-		color: #374151;
-		border: 1px solid #d1d5db;
+		background-color: var(--sf-gray-50);
+		color: var(--sf-gray-700);
+		border: 1px solid var(--sf-gray-300);
 
 		&:hover {
-			border-color: #3b82f6;
-			background-color: #eff6ff;
+			border-color: var(--sf-blue-500);
+			background-color: var(--sf-blue-50);
 		}
 
 		&--copied {
-			background-color: #f0fdf4;
-			color: #16a34a;
-			border-color: #16a34a;
+			background-color: var(--sf-green-50);
+			color: var(--sf-green-600);
+			border-color: var(--sf-green-600);
 
 			&:hover {
-				border-color: #16a34a;
-				background-color: #f0fdf4;
+				border-color: var(--sf-green-600);
+				background-color: var(--sf-green-50);
 			}
 		}
 	}

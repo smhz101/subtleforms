@@ -32,8 +32,8 @@
 .sf-settings-sidebar {
 	flex-shrink: 0;
 	width: 240px;
-	background-color: #ffffff;
-	border: 1px solid #e2e8f0;
+	background-color: var(--sf-surface);
+	border: 1px solid var(--sf-slate-200);
 	border-radius: 8px;
 	padding: 1rem;
 	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
@@ -56,7 +56,7 @@
 	padding: 0.75rem 1rem;
 	border: none;
 	background: transparent;
-	color: #64748b;
+	color: var(--sf-slate-500);
 	font-size: 0.875rem;
 	font-weight: 500;
 	text-align: left;
@@ -68,26 +68,26 @@
 		font-size: 18px;
 		width: 18px;
 		height: 18px;
-		color: #94a3b8;
+		color: var(--sf-slate-400);
 		transition: color 180ms ease-out;
 	}
 
 	&:hover:not(&--active) {
-		background-color: #f8fafc;
-		color: #334155;
+		background-color: var(--sf-slate-50);
+		color: var(--sf-slate-700);
 
 		.dashicons {
-			color: #64748b;
+			color: var(--sf-slate-500);
 		}
 	}
 
 	&--active {
-		background-color: #eff6ff;
-		color: #2563eb;
+		background-color: var(--sf-blue-50);
+		color: var(--sf-blue-600);
 		font-weight: 600;
 
 		.dashicons {
-			color: #2563eb;
+			color: var(--sf-blue-600);
 		}
 	}
 }
@@ -108,7 +108,7 @@
 .sf-settings-content .components-card {
 	margin: 0;
 	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-	border: 1px solid #e2e8f0;
+	border: 1px solid var(--sf-slate-200);
 	border-radius: 8px;
 }
 
@@ -127,20 +127,20 @@
 .subtleforms-settings-danger-zone {
 	margin-top: 2rem;
 	padding-top: 1.5rem;
-	border-top: 1px solid #e2e8f0;
+	border-top: 1px solid var(--sf-slate-200);
 }
 
 .subtleforms-settings-danger-zone h3 {
 	margin: 0 0 0.5rem;
 	font-size: 0.875rem;
 	font-weight: 600;
-	color: #dc2626;
+	color: var(--sf-red-600);
 }
 
 .subtleforms-settings-danger-zone p {
 	margin: 0 0 1rem;
 	font-size: 0.8125rem;
-	color: #64748b;
+	color: var(--sf-slate-500);
 }
 
 .subtleforms-settings-loading,
@@ -226,14 +226,14 @@
 
 .sf-error-text {
 	font-size: 0.875rem;
-	color: #dc2626;
+	color: var(--sf-red-600);
 	display: block;
 }
 
 .sf-section-title {
 	font-size: 0.9375rem;
 	font-weight: 600;
-	color: #0f172a;
+	color: var(--sf-slate-900);
 	margin: 1.5rem 0 0.75rem;
 
 	&:first-child {
@@ -243,7 +243,7 @@
 
 .sf-section-description {
 	font-size: 0.8125rem;
-	color: #64748b;
+	color: var(--sf-slate-500);
 	margin-top: 0.5rem;
 	line-height: 1.5;
 }
@@ -384,17 +384,17 @@
 
 		&--spam {
 			background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.2));
-			color: #10b981;
+			color: var(--sf-emerald-500);
 		}
 
 		&--workflow {
 			background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.2));
-			color: #3b82f6;
+			color: var(--sf-blue-500);
 		}
 
 		&--assist {
 			background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(249, 115, 22, 0.2));
-			color: #f97316;
+			color: var(--sf-orange-500);
 		}
 
 		&--routing {

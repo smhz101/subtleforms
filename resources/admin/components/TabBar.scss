@@ -29,18 +29,18 @@
     }
 
     &--active {
-      border-bottom-color: #2563eb; // blue-600
-      color: #2563eb;
-      background-color: #eff6ff; // blue-50
+      border-bottom-color: var(--sf-blue-600); // blue-600
+      color: var(--sf-blue-600);
+      background-color: var(--sf-blue-50); // blue-50
     }
 
     &--inactive {
-      color: #4b5563; // gray-600
+      color: var(--sf-gray-600); // gray-600
 
       &:hover {
-        color: #111827; // gray-900
-        border-bottom-color: #d1d5db; // gray-300
-        background-color: #f9fafb; // gray-50
+        color: var(--sf-gray-900); // gray-900
+        border-bottom-color: var(--sf-gray-300); // gray-300
+        background-color: var(--sf-gray-50); // gray-50
       }
     }
   }
@@ -57,15 +57,15 @@
   }
 
   &__count--active {
-    color: #4b5563; // gray-600
+    color: var(--sf-gray-600); // gray-600
   }
 
   &__count--inactive {
-    color: #9ca3af; // gray-400
+    color: var(--sf-gray-400); // gray-400
   }
 
   .sf-tab-bar__tab:hover &__count--inactive {
-    color: #4b5563; // gray-600
+    color: var(--sf-gray-600); // gray-600
   }
 
   &__hover-line {
@@ -74,7 +74,7 @@
     left: 0;
     right: 0;
     height: 2px;
-    background-color: #3b82f6; // blue-500
+    background-color: var(--sf-blue-500); // blue-500
     transform: scaleX(0);
     transform-origin: left;
     transition: transform 0.2s;

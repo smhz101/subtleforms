@@ -1,17 +1,17 @@
 .sf-form-canvas {
 	flex: 1;
-	background-color: #f9fafb; /* Lighter, more neutral background */
+	background-color: var(--sf-gray-50); /* Lighter, more neutral background */
 	padding: 2rem;
 	overflow: auto;
 }
 
 .sf-form-canvas__inner {
-	background-color: #ffffff;
+	background-color: var(--sf-surface);
 	margin: 0 auto;
 	padding: 3rem;
 	min-height: 500px;
 	border-radius: 8px; /* Soft rounded corners */
-	border: 1px solid #e5e7eb; /* Subtle border */
+	border: 1px solid var(--sf-gray-200); /* Subtle border */
 	box-shadow:
 		0 1px 3px 0 rgba(0, 0, 0, 0.1),
 		0 1px 2px 0 rgba(0, 0, 0, 0.06); /* Soft elevation */
@@ -38,14 +38,14 @@
 	font-weight: 600;
 	font-size: 1.5rem;
 	line-height: 2rem;
-	color: #111827;
+	color: var(--sf-gray-900);
 }
 
 .sf-form-canvas__description {
 	margin: 0;
 	font-size: 0.875rem;
 	line-height: 1.25rem;
-	color: #4b5563;
+	color: var(--sf-gray-600);
 }
 
 .sf-form-canvas__empty {
@@ -68,7 +68,7 @@
 	width: 64px;
 	height: 64px;
 	border-radius: 50%;
-	background: #4f9cf9;
+	background: var(--sf-blue-500);
 	border: none;
 	color: white;
 	display: flex;
@@ -79,7 +79,7 @@
 	box-shadow: 0 4px 12px rgba(79, 156, 249, 0.3);
 
 	&:hover {
-		background: #3b82f6;
+		background: var(--sf-blue-500);
 		transform: scale(1.05);
 		box-shadow: 0 6px 16px rgba(79, 156, 249, 0.4);
 	}
@@ -114,7 +114,7 @@
 	margin-top: 30px;
 	font-size: 1rem;
 	line-height: 1.5rem;
-	color: #4f9cf9;
+	color: var(--sf-blue-500);
 	font-weight: 500;
 }
 
@@ -129,5 +129,5 @@
 	font-weight: 600;
 	font-size: 1.125rem;
 	line-height: 1.75rem;
-	color: #374151;
+	color: var(--sf-gray-700);
 }

@@ -12,21 +12,21 @@
 	justify-content: center;
 	gap: var(--space-2, 8px);
 	padding: var(--space-6, 24px) var(--space-4, 16px);
-	border: 1px dashed var(--sf-stone-300, #cbd5e1);
+	border: 1px dashed var(--sf-stone-300, var(--sf-slate-300));
 	border-radius: var(--radius-md, 6px);
-	background: var(--sf-stone-50, #f8fafc);
+	background: var(--sf-stone-50, var(--sf-slate-50));
 	text-align: center;
 	min-height: 120px;
 }
 
 .sf-component-error__icon {
-	color: var(--sf-coral-500, #ef4444);
+	color: var(--sf-coral-500, var(--sf-red-500));
 	opacity: 0.8;
 }
 
 .sf-component-error__message {
 	font-size: 0.875rem;
-	color: var(--sf-stone-600, #475569);
+	color: var(--sf-stone-600, var(--sf-slate-600));
 	line-height: 1.5;
 	margin: 0;
 	max-width: 320px;

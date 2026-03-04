@@ -44,6 +44,133 @@ $sf-emerald-400: #34d399; // success light
 $sf-emerald-500: #10b981; // success
 $sf-emerald-600: #059669;
 
+// Cool Gray palette (Tailwind gray — used throughout component SCSS)
+$sf-gray-50:  #f9fafb;
+$sf-gray-100: #f3f4f6;
+$sf-gray-200: #e5e7eb;
+$sf-gray-300: #d1d5db;
+$sf-gray-400: #9ca3af;
+$sf-gray-500: #6b7280;
+$sf-gray-600: #4b5563;
+$sf-gray-700: #374151;
+$sf-gray-800: #1f2937;
+$sf-gray-900: #111827;
+
+// Blue palette (Tailwind blue — primary interactive)
+$sf-blue-50:  #eff6ff;
+$sf-blue-100: #dbeafe;
+$sf-blue-200: #bfdbfe;
+$sf-blue-500: #3b82f6;
+$sf-blue-600: #2563eb;
+$sf-blue-700: #1d4ed8;
+$sf-blue-800: #1e40af;
+$sf-blue-900: #1e3a8a;
+
+// Red palette (errors & destructive)
+$sf-red-50:  #fef2f2;
+$sf-red-100: #fee2e2;
+$sf-red-500: #ef4444;
+$sf-red-600: #dc2626;
+
+// Green palette (success states visible in UI)
+$sf-green-50:  #f0fdf4;
+$sf-green-100: #dcfce7;
+$sf-green-500: #22c55e;
+$sf-green-600: #16a34a;
+$sf-green-700: #059669;
+
+// Amber extended
+$sf-amber-50:  #fffbeb;
+$sf-amber-100: #fef3c7;
+$sf-amber-800: #92400e;
+
+// Purple
+$sf-purple-50: #faf5ff;
+$sf-purple-100: #f3e8ff;
+
+// Indigo (extended)
+$sf-indigo-50:  #eef2ff;
+$sf-indigo-100: #e0e7ff;
+$sf-indigo-200: #c7d2fe;
+$sf-indigo-400: #818cf8;
+$sf-indigo-500: #6366f1;
+$sf-indigo-600: #4f46e5;
+$sf-indigo-700: #4338ca;
+$sf-indigo-800: #3730a3;
+$sf-indigo-900: #312e81;
+
+// Purple (extended)
+$sf-purple-200: #e9d5ff;
+$sf-purple-300: #d8b4fe;
+$sf-purple-400: #c084fc;
+$sf-purple-500: #a855f7;
+$sf-purple-600: #9333ea;
+$sf-purple-700: #7e22ce;
+$sf-purple-900: #581c87;
+
+// Slate palette (dark UIs, code blocks, admin areas)
+$sf-slate-50:  #f8fafc;
+$sf-slate-100: #f1f5f9;
+$sf-slate-200: #e2e8f0;
+$sf-slate-300: #cbd5e1;
+$sf-slate-400: #94a3b8;
+$sf-slate-500: #64748b;
+$sf-slate-600: #475569;
+$sf-slate-700: #334155;
+$sf-slate-800: #1e293b;
+$sf-slate-900: #0f172a;
+
+// Green extended (dark shades for text on light green backgrounds)
+$sf-green-800: #166534;
+$sf-green-900: #14532d;
+$sf-emerald-700: #047857;
+$sf-emerald-800: #065f46;
+$sf-emerald-900: #15803d;
+
+// Teal
+$sf-teal-500: #14b8a6;
+
+// Orange
+$sf-orange-500: #f97316;
+$sf-orange-600: #ea580c;
+
+// Yellow
+$sf-yellow-300: #fde047;
+$sf-yellow-400: #facc15;
+$sf-yellow-500: #eab308;
+$sf-yellow-800: #854d0e;
+
+// Neutral grays (Tailwind neutral — used in some WP-adjacent UI)
+$sf-neutral-50:  #fafafa;
+$sf-neutral-100: #f5f5f5;
+$sf-neutral-200: #e5e5e5;
+$sf-neutral-300: #d4d4d4;
+$sf-neutral-400: #a3a3a3;
+$sf-neutral-500: #737373;
+$sf-neutral-600: #525252;
+$sf-neutral-700: #404040;
+$sf-neutral-800: #262626;
+$sf-neutral-900: #171717;
+
+// WordPress admin palette
+$wp-blue-500: #2271b1;    // WP primary button
+$wp-blue-600: #135e96;    // WP primary button hover
+$wp-blue-700: #005a87;    // WP primary button active
+$wp-blue-800: #005177;    // Deeper WP blue
+$wp-blue-link: #0073aa;   // Legacy WP link color
+$wp-blue-light: #00a0d2;  // WP menu hover
+$wp-green: #00a32a;       // WP success
+$wp-green-hover: #46b450; // WP success hover alt
+$wp-dark: #1d2327;        // WP admin body bg
+$wp-gray-10: #eef0f0;     // WP notice bg
+$wp-gray-30: #dcdcde;     // WP border
+$wp-gray-40: #c3c4c7;     // WP placeholder
+$wp-gray-50: #8c8f94;     // WP secondary text
+$wp-gray-70: #50575e;     // WP label text
+$wp-gray-100: #1d2327;    // WP heading color
+$wp-orange: #996800;      // WP warning text
+$wp-orange-bg: #fcf3cd;   // WP warning bg
+
 // AI Brand Colors (Violet)
 $sf-violet-50: #f5f3ff;   // Very light violet for backgrounds
 $sf-violet-100: #ede9fe;  // Light violet

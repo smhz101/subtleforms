@@ -108,14 +108,159 @@
 	--sf-inspector-width:         360px;
 
 	// Builder surface (Phase 4)
-	--sf-canvas-bg:               #F8FAFC;
-	--sf-canvas-border:           1px solid #E2E8F0;
-	--sf-builder-text-primary:    #0F172A;
-	--sf-builder-text-secondary:  #334155;
-	--sf-builder-border:          #E2E8F0;
-	--sf-builder-surface:         #FFFFFF;
-	--sf-builder-surface-hover:   #F8FAFC;
+	--sf-canvas-bg:               #{$sf-gray-50};
+	--sf-canvas-border:           1px solid #{$sf-gray-200};
+	--sf-builder-text-primary:    #{$sf-gray-900};
+	--sf-builder-text-secondary:  #{$sf-gray-600};
+	--sf-builder-border:          #{$sf-gray-200};
+	--sf-builder-surface:         #ffffff;
+	--sf-builder-surface-hover:   #{$sf-gray-50};
 	--sf-field-selected-shadow:   0 2px 8px rgba(0, 0, 0, 0.05);
+
+	// ── Cool Gray palette (component SCSS) ──────────────────────────────
+	--sf-gray-50:  #{$sf-gray-50};
+	--sf-gray-100: #{$sf-gray-100};
+	--sf-gray-200: #{$sf-gray-200};
+	--sf-gray-300: #{$sf-gray-300};
+	--sf-gray-400: #{$sf-gray-400};
+	--sf-gray-500: #{$sf-gray-500};
+	--sf-gray-600: #{$sf-gray-600};
+	--sf-gray-700: #{$sf-gray-700};
+	--sf-gray-800: #{$sf-gray-800};
+	--sf-gray-900: #{$sf-gray-900};
+
+	// ── Blue palette ────────────────────────────────────────────────────
+	--sf-blue-50:  #{$sf-blue-50};
+	--sf-blue-100: #{$sf-blue-100};
+	--sf-blue-200: #{$sf-blue-200};
+	--sf-blue-500: #{$sf-blue-500};
+	--sf-blue-600: #{$sf-blue-600};
+	--sf-blue-700: #{$sf-blue-700};
+	--sf-blue-800: #{$sf-blue-800};
+	--sf-blue-900: #{$sf-blue-900};
+
+	// ── Red palette ─────────────────────────────────────────────────────
+	--sf-red-50:  #{$sf-red-50};
+	--sf-red-100: #{$sf-red-100};
+	--sf-red-500: #{$sf-red-500};
+	--sf-red-600: #{$sf-red-600};
+
+	// ── Green palette ───────────────────────────────────────────────────
+	--sf-green-50:  #{$sf-green-50};
+	--sf-green-100: #{$sf-green-100};
+	--sf-green-500: #{$sf-green-500};
+	--sf-green-600: #{$sf-green-600};
+	--sf-green-700: #{$sf-green-700};
+	--sf-green-800: #{$sf-green-800};
+	--sf-green-900: #{$sf-green-900};
+
+	// ── Emerald extended ────────────────────────────────────────────────
+	--sf-emerald-700: #{$sf-emerald-700};
+	--sf-emerald-800: #{$sf-emerald-800};
+	--sf-emerald-900: #{$sf-emerald-900};
+
+	// ── Amber extended ──────────────────────────────────────────────────
+	--sf-amber-50:  #{$sf-amber-50};
+	--sf-amber-100: #{$sf-amber-100};
+	--sf-amber-800: #{$sf-amber-800};
+
+	// ── Purple (extended) ───────────────────────────────────────────────
+	--sf-purple-50:  #{$sf-purple-50};
+	--sf-purple-100: #{$sf-purple-100};
+	--sf-purple-200: #{$sf-purple-200};
+	--sf-purple-400: #{$sf-purple-400};
+	--sf-purple-500: #{$sf-purple-500};
+	--sf-purple-600: #{$sf-purple-600};
+	--sf-purple-700: #{$sf-purple-700};
+	--sf-purple-900: #{$sf-purple-900};
+
+	// ── Indigo (extended) ───────────────────────────────────────────────
+	--sf-indigo-50:  #{$sf-indigo-50};
+	--sf-indigo-100: #{$sf-indigo-100};
+	--sf-indigo-200: #{$sf-indigo-200};
+	--sf-indigo-500: #{$sf-indigo-500};
+	--sf-indigo-600: #{$sf-indigo-600};
+	--sf-indigo-700: #{$sf-indigo-700};
+	--sf-indigo-900: #{$sf-indigo-900};
+
+	// ── Slate palette ────────────────────────────────────────────────────
+	--sf-slate-50:  #{$sf-slate-50};
+	--sf-slate-100: #{$sf-slate-100};
+	--sf-slate-200: #{$sf-slate-200};
+	--sf-slate-300: #{$sf-slate-300};
+	--sf-slate-400: #{$sf-slate-400};
+	--sf-slate-500: #{$sf-slate-500};
+	--sf-slate-600: #{$sf-slate-600};
+	--sf-slate-700: #{$sf-slate-700};
+	--sf-slate-800: #{$sf-slate-800};
+	--sf-slate-900: #{$sf-slate-900};
+
+	// ── Teal / Orange / Yellow ───────────────────────────────────────────
+	--sf-teal-500:   #{$sf-teal-500};
+	--sf-orange-500: #{$sf-orange-500};
+	--sf-orange-600: #{$sf-orange-600};
+	--sf-yellow-400: #{$sf-yellow-400};
+	--sf-yellow-500: #{$sf-yellow-500};
+	--sf-yellow-800: #{$sf-yellow-800};
+
+	// ── Neutral grays ────────────────────────────────────────────────────
+	--sf-neutral-50:  #{$sf-neutral-50};
+	--sf-neutral-100: #{$sf-neutral-100};
+	--sf-neutral-200: #{$sf-neutral-200};
+	--sf-neutral-400: #{$sf-neutral-400};
+	--sf-neutral-500: #{$sf-neutral-500};
+	--sf-neutral-600: #{$sf-neutral-600};
+	--sf-neutral-700: #{$sf-neutral-700};
+
+	// ── WordPress admin palette ──────────────────────────────────────────
+	--wp-blue-500:   #{$wp-blue-500};
+	--wp-blue-600:   #{$wp-blue-600};
+	--wp-blue-700:   #{$wp-blue-700};
+	--wp-blue-800:   #{$wp-blue-800};
+	--wp-blue-link:  #{$wp-blue-link};
+	--wp-blue-light: #{$wp-blue-light};
+	--wp-green:      #{$wp-green};
+	--wp-green-hover:#{$wp-green-hover};
+	--wp-dark:       #{$wp-dark};
+	--wp-gray-30:    #{$wp-gray-30};
+	--wp-gray-40:    #{$wp-gray-40};
+	--wp-gray-50:    #{$wp-gray-50};
+	--wp-gray-70:    #{$wp-gray-70};
+	--wp-orange:     #{$wp-orange};
+	--wp-orange-bg:  #{$wp-orange-bg};
+
+	// ── Semantic surface tokens ─────────────────────────────────────────
+	--sf-surface:         #ffffff;
+	--sf-surface-raised:  #ffffff;
+	--sf-surface-sunken:  var(--sf-gray-50);
+	--sf-surface-hover:   var(--sf-gray-100);
+	--sf-bg:              var(--sf-gray-50);
+
+	// ── Semantic text tokens ────────────────────────────────────────────
+	--sf-text:            var(--sf-gray-900);
+	--sf-text-secondary:  var(--sf-gray-500);
+	--sf-text-tertiary:   var(--sf-gray-400);
+	--sf-text-muted:      var(--sf-gray-600);
+	--sf-text-heading:    var(--sf-gray-800);
+	--sf-text-inverse:    #ffffff;
+
+	// ── Semantic border tokens ──────────────────────────────────────────
+	--sf-border:          var(--sf-gray-200);
+	--sf-border-strong:   var(--sf-gray-300);
+	--sf-border-subtle:   var(--sf-gray-100);
+
+	// ── Semantic feedback tokens ────────────────────────────────────────
+	--sf-primary:         var(--sf-blue-500);
+	--sf-primary-hover:   var(--sf-blue-600);
+	--sf-primary-bg:      var(--sf-blue-50);
+	--sf-primary-border:  var(--sf-blue-200);
+
+	--sf-success:         var(--sf-green-600);
+	--sf-success-bg:      var(--sf-green-50);
+	--sf-error:           var(--sf-red-600);
+	--sf-error-bg:        var(--sf-red-50);
+	--sf-warning:         #{$sf-amber-500};
+	--sf-warning-bg:      var(--sf-amber-50);
 }
 
 // ============================================================================

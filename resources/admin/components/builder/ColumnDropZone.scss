@@ -15,7 +15,7 @@
 
 	&.is-over {
 		background-color: rgba(59, 130, 246, 0.05);
-		border: 2px dashed #3b82f6;
+		border: 2px dashed var(--sf-blue-500);
 		border-radius: 4px;
 	}
 
@@ -26,10 +26,10 @@
 	&__empty {
 		padding: 2rem 1rem;
 		text-align: center;
-		color: #6b7280;
+		color: var(--sf-gray-500);
 		font-size: 0.875rem;
-		border: 2px dashed #d1d5db;
+		border: 2px dashed var(--sf-gray-300);
 		border-radius: 4px;
-		background-color: #f9fafb;
+		background-color: var(--sf-gray-50);
 	}
 }

@@ -33,8 +33,8 @@
   right: 20px;
   max-width: 400px;
   padding: 12px 16px;
-  background: #1f2937;
-  color: #ffffff;
+  background: var(--sf-gray-800);
+  color: var(--sf-surface);
   border-radius: 0; /* Flat UI */
   font-size: 14px;
   line-height: 1.5;
@@ -57,21 +57,21 @@
 
 /* Assertive announcements - more prominent */
 .sf-live-assertive.sf-live-region--visible {
-  background: #dc2626;
-  color: #ffffff;
+  background: var(--sf-red-600);
+  color: var(--sf-surface);
   font-weight: 600;
 }
 
 /* Polite announcements - subtle */
 .sf-live-polite.sf-live-region--visible {
-  background: #059669;
-  color: #ffffff;
+  background: var(--sf-emerald-600);
+  color: var(--sf-surface);
 }
 
 /* Status announcements - informational */
 .sf-live-status.sf-live-region--visible {
-  background: #2563eb;
-  color: #ffffff;
+  background: var(--sf-blue-600);
+  color: var(--sf-surface);
 }
 
 /* Reduced motion support */
@@ -84,6 +84,6 @@
 /* High contrast mode */
 @media (prefers-contrast: high) {
   .sf-live-region--visible {
-    border: 2px solid #ffffff;
+    border: 2px solid var(--sf-surface);
   }
 }

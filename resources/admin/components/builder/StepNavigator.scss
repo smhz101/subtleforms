@@ -200,7 +200,7 @@
 
 		&:hover {
 			background-color: rgba(220, 38, 38, 0.1);
-			color: #dc2626;
+			color: var(--sf-red-600);
 			transform: scale(1.1);
 		}
 

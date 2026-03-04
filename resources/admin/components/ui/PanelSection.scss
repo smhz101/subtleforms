@@ -9,16 +9,16 @@
     padding: 12px 0;
     background: none;
     border: none;
-    border-bottom: 1px solid #e0e0e0;
+    border-bottom: 1px solid var(--sf-neutral-200);
     cursor: pointer;
     text-align: left;
     transition: all 0.15s ease;
 
     &:hover {
-      color: #0073aa;
+      color: var(--wp-blue-link);
 
       .sf-panel-section__icon {
-        color: #0073aa;
+        color: var(--wp-blue-link);
       }
     }
 
@@ -35,13 +35,13 @@
   &__title {
     font-size: 13px;
     font-weight: 600;
-    color: #1e1e1e;
+    color: var(--sf-slate-900);
   }
 
   &__icon {
     width: 20px;
     height: 20px;
-    color: #757575;
+    color: var(--sf-neutral-500);
     transition: color 0.15s ease;
   }
 
@@ -58,13 +58,13 @@
   &--subtle {
     .sf-panel-section__toggle {
       padding: 8px 0;
-      border-bottom-color: #f0f0f0;
+      border-bottom-color: var(--sf-neutral-100);
     }
 
     .sf-panel-section__title {
       font-size: 12px;
       font-weight: 500;
-      color: #757575;
+      color: var(--sf-neutral-500);
     }
   }
 }

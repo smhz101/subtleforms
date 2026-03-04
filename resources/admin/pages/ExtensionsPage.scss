@@ -21,7 +21,7 @@
 		margin-top: 0.125rem;
 		width: 1.25rem;
 		height: 1.25rem;
-		color: #2563eb;
+		color: var(--sf-blue-600);
 	}
 
 	&__notice-title {
@@ -35,10 +35,10 @@
 	}
 
 	&__cta {
-		background: linear-gradient(to right, #eff6ff, #faf5ff);
+		background: linear-gradient(to right, var(--sf-blue-50), var(--sf-purple-50));
 		margin-top: 2rem;
 		padding: 1.5rem;
-		border: 1px solid #bfdbfe;
+		border: 1px solid var(--sf-blue-200);
 		border-radius: 0.5rem;
 	}
 
@@ -52,14 +52,14 @@
 		font-size: 1.125rem;
 		line-height: 1.75rem;
 		font-weight: 600;
-		color: #111827;
+		color: var(--sf-gray-900);
 		margin-bottom: 0.5rem;
 	}
 
 	&__cta-desc {
 		font-size: 0.875rem;
 		line-height: 1.25rem;
-		color: #6b7280;
+		color: var(--sf-gray-500);
 		margin-bottom: 1rem;
 	}
 }
@@ -72,7 +72,7 @@
 		font-size: 1rem;
 		line-height: 1.5rem;
 		font-weight: 600;
-		color: #111827;
+		color: var(--sf-gray-900);
 		margin-bottom: 0.25rem;
 	}
 
@@ -80,17 +80,17 @@
 		display: inline-flex;
 		align-items: center;
 		padding: 0.125rem 0.5rem;
-		background-color: #fef3c7;
+		background-color: var(--sf-amber-100);
 		border-radius: 9999px;
 		font-size: 0.75rem;
 		font-weight: 500;
-		color: #92400e;
+		color: var(--sf-amber-800);
 	}
 
 	&__description {
 		font-size: 0.875rem;
 		line-height: 1.25rem;
-		color: #6b7280;
+		color: var(--sf-gray-500);
 		margin-bottom: 1rem;
 	}
 
@@ -111,17 +111,17 @@
 		gap: 0.5rem;
 		font-size: 0.875rem;
 		line-height: 1.25rem;
-		color: #6b7280;
+		color: var(--sf-gray-500);
 	}
 
 	&__feature-check {
 		margin-top: 0.125rem;
-		color: #10b981;
+		color: var(--sf-emerald-500);
 	}
 
 	&__action {
 		padding-top: 1rem;
-		border-top: 1px solid #f3f4f6;
+		border-top: 1px solid var(--sf-gray-100);
 	}
 
 	&__install-btn {
@@ -146,7 +146,7 @@
 
 .sf-ext-icon {
 	padding: 0.75rem;
-	background-color: #eff6ff;
+	background-color: var(--sf-blue-50);
 	border-radius: 0.5rem;
 
 	&__svg {
@@ -178,33 +178,33 @@
 
 // Icon color modifiers (used across dashboard and extensions)
 .sf-icon--blue {
-	color: #2563eb;
+	color: var(--sf-blue-600);
 }
 
 .sf-icon--purple {
-	color: #9333ea;
+	color: var(--sf-purple-600);
 }
 
 .sf-icon--green {
-	color: #16a34a;
+	color: var(--sf-green-600);
 }
 
 .sf-icon--orange {
-	color: #ea580c;
+	color: var(--sf-orange-600);
 }
 
 .sf-icon--red {
-	color: #dc2626;
+	color: var(--sf-red-600);
 }
 
 .sf-icon--indigo {
-	color: #6366f1;
+	color: var(--sf-indigo-500);
 }
 
 .sf-icon--teal {
-	color: #14b8a6;
+	color: var(--sf-teal-500);
 }
 
 .sf-icon--yellow {
-	color: #eab308;
+	color: var(--sf-yellow-500);
 }

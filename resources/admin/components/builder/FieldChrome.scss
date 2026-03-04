@@ -9,8 +9,8 @@
 	transition: all 180ms ease-out; /* Smooth, subtle transition */
 	border-radius: 6px; /* Softer corners */
 	cursor: pointer;
-	border: 1px solid #e5e7eb; /* Default soft border */
-	background-color: #ffffff; /* Clean white background */
+	border: 1px solid var(--sf-gray-200); /* Default soft border */
+	background-color: var(--sf-surface); /* Clean white background */
 	box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.03); /* Very subtle depth */
 
 	&:focus {
@@ -18,20 +18,20 @@
 	}
 
 	&.is-hovered:not(.is-selected) {
-		background-color: #fafafa; /* Very subtle hover background */
-		border-color: #d1d5db; /* Slightly darker border on hover */
+		background-color: var(--sf-neutral-50); /* Very subtle hover background */
+		border-color: var(--sf-gray-300); /* Slightly darker border on hover */
 		box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.05); /* Subtle lift effect */
 		transform: translateY(-1px); /* Slight upward movement */
 	}
 
 	&.is-selected {
-		border: 2px solid #2271b1; /* WordPress blue */
+		border: 2px solid var(--wp-blue-500); /* WordPress blue */
 		box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.08); /* Subtle blue glow */
-		background-color: #ffffff;
+		background-color: var(--sf-surface);
 	}
 
 	&--validation-error {
-		border-left: 4px solid #dc2626;
+		border-left: 4px solid var(--sf-red-600);
 	}
 
 	&__inner {
@@ -40,7 +40,7 @@
 
 	&__validation-message {
 		margin-bottom: 0.5rem;
-		color: #dc2626;
+		color: var(--sf-red-600);
 		font-size: 0.75rem;
 	}
 }

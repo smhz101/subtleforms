@@ -35,23 +35,23 @@
 
 	/* Default state - clean and minimal */
 	&--default {
-		background-color: #ffffff;
-		border: 1px solid #e5e7eb; /* Lighter, softer border */
+		background-color: var(--sf-surface);
+		border: 1px solid var(--sf-gray-200); /* Lighter, softer border */
 		box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04); /* Very subtle depth */
 	}
 
 	/* Hover state - subtle emphasis */
 	&--hovered:not(&--selected) {
-		background-color: #fafafa;
-		border: 1px solid #d1d5db; /* Slightly stronger border */
+		background-color: var(--sf-neutral-50);
+		border: 1px solid var(--sf-gray-300); /* Slightly stronger border */
 		box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06); /* More prominent shadow */
 		transform: translateY(-1px); /* Subtle lift */
 	}
 
 	/* Selected state - WordPress blue with glow */
 	&--selected {
-		background-color: #ffffff;
-		border: 2px solid #2271b1; /* WordPress blue */
+		background-color: var(--sf-surface);
+		border: 2px solid var(--wp-blue-500); /* WordPress blue */
 		box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.1); /* Blue glow */
 	}
 }

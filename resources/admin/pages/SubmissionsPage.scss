@@ -18,8 +18,8 @@
 	align-items: center;
 	gap: 1rem;
 	padding: 1rem 1.5rem;
-	background-color: #f9fafb;
-	border-bottom: 1px solid #e5e7eb;
+	background-color: var(--sf-gray-50);
+	border-bottom: 1px solid var(--sf-gray-200);
 	flex-shrink: 0; // Don't let filter bar shrink
 }
 

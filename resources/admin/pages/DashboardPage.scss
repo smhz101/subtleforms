@@ -43,8 +43,8 @@
 	align-items: center;
 	gap: 16px;
 	padding: 20px;
-	background: #fff;
-	border: 1px solid #dcdcde;
+	background: var(--sf-surface);
+	border: 1px solid var(--wp-gray-30);
 	border-radius: 4px;
 	text-decoration: none;
 	color: inherit;
@@ -52,7 +52,7 @@
 }
 
 .subtleforms-stat-card:hover {
-	border-color: #2271b1;
+	border-color: var(--wp-blue-500);
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	transform: translateY(-2px);
 }
@@ -74,19 +74,19 @@ a.subtleforms-stat-card:hover {
 	font-size: 28px;
 	font-weight: 600;
 	line-height: 1.2;
-	color: #1e1e1e;
+	color: var(--sf-slate-900);
 }
 
 .sf-stat-title {
 	font-size: 13px;
 	font-weight: 500;
-	color: #646970;
+	color: var(--wp-gray-50);
 	margin-top: 4px;
 }
 
 .sf-stat-subtitle {
 	font-size: 12px;
-	color: #8c8f94;
+	color: var(--sf-gray-400);
 	margin-top: 2px;
 }
 
@@ -132,7 +132,7 @@ a.subtleforms-stat-card:hover {
 	justify-content: space-between;
 	align-items: center;
 	padding: 16px 20px;
-	border-bottom: 1px solid #f0f0f1;
+	border-bottom: 1px solid var(--sf-gray-100);
 	transition: background-color 0.2s ease;
 }
 
@@ -141,7 +141,7 @@ a.subtleforms-stat-card:hover {
 }
 
 .subtleforms-dashboard-list-item:hover {
-	background-color: #f6f7f7;
+	background-color: var(--sf-neutral-50);
 }
 
 .sf-item-content {
@@ -156,12 +156,12 @@ a.subtleforms-stat-card:hover {
 }
 
 .sf-item-title a {
-	color: #2271b1;
+	color: var(--wp-blue-500);
 	text-decoration: none;
 }
 
 .sf-item-title a:hover {
-	color: #135e96;
+	color: var(--wp-blue-600);
 	text-decoration: underline;
 }
 
@@ -170,7 +170,7 @@ a.subtleforms-stat-card:hover {
 	align-items: center;
 	gap: 12px;
 	font-size: 13px;
-	color: #646970;
+	color: var(--wp-gray-50);
 }
 
 .sf-status-badge {
@@ -180,33 +180,33 @@ a.subtleforms-stat-card:hover {
 	font-weight: 500;
 	text-transform: uppercase;
 	border-radius: 3px;
-	background-color: #f0f0f1;
-	color: #50575e;
+	background-color: var(--sf-gray-100);
+	color: var(--wp-gray-70);
 }
 
 .sf-status-badge.status-published {
-	background-color: #00a32a;
-	color: #fff;
+	background-color: var(--wp-green);
+	color: var(--sf-surface);
 }
 
 .sf-status-badge.status-draft {
-	background-color: #dba617;
-	color: #fff;
+	background-color: var(--sf-amber-600);
+	color: var(--sf-surface);
 }
 
 .sf-status-badge.status-unread {
-	background-color: #2271b1;
-	color: #fff;
+	background-color: var(--wp-blue-500);
+	color: var(--sf-surface);
 }
 
 .sf-status-badge.status-read {
-	background-color: #646970;
-	color: #fff;
+	background-color: var(--wp-gray-50);
+	color: var(--sf-surface);
 }
 
 .time-ago,
 .sf-submission-count {
-	color: #8c8f94;
+	color: var(--sf-gray-400);
 }
 
 /* Empty States */
@@ -222,29 +222,29 @@ a.subtleforms-stat-card:hover {
 .subtleforms-dashboard-empty p {
 	margin: 0 0 8px;
 	font-size: 14px;
-	color: #646970;
+	color: var(--wp-gray-50);
 }
 
 .subtleforms-dashboard-empty .description {
 	font-size: 13px;
-	color: #8c8f94;
+	color: var(--sf-gray-400);
 	margin-bottom: 20px;
 }
 
 /* Footer */
 .subtleforms-dashboard-footer {
 	padding: 16px 20px;
-	border-top: 1px solid #f0f0f1;
+	border-top: 1px solid var(--sf-gray-100);
 	text-align: center;
 }
 
 .subtleforms-dashboard-footer .components-button {
-	color: #2271b1;
+	color: var(--wp-blue-500);
 	text-decoration: none;
 }
 
 .subtleforms-dashboard-footer .components-button:hover {
-	color: #135e96;
+	color: var(--wp-blue-600);
 }
 
 /* System Health */
@@ -281,13 +281,13 @@ a.subtleforms-stat-card:hover {
 }
 
 .sf-health-status.health-healthy {
-	background-color: #d7f8e0;
-	color: #00a32a;
+	background-color: var(--sf-green-100);
+	color: var(--wp-green);
 }
 
 .sf-health-status.health-warning {
-	background-color: #fcf3cd;
-	color: #996800;
+	background-color: var(--wp-orange-bg);
+	color: var(--wp-orange);
 }
 
 .sf-system-info-grid {
@@ -306,7 +306,7 @@ a.subtleforms-stat-card:hover {
 .sf-system-info-item .label {
 	font-size: 12px;
 	font-weight: 500;
-	color: #646970;
+	color: var(--wp-gray-50);
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
 }
@@ -314,7 +314,7 @@ a.subtleforms-stat-card:hover {
 .sf-system-info-item .value {
 	font-size: 14px;
 	font-weight: 500;
-	color: #1e1e1e;
+	color: var(--sf-slate-900);
 }
 
 /* Loading & Error States */
@@ -453,13 +453,13 @@ a.subtleforms-stat-card:hover {
 .sf-label {
 	margin-bottom: 0.25rem;
 	font-size: 0.75rem;
-	color: #6b7280;
+	color: var(--sf-gray-500);
 }
 
 .sf-value {
 	font-size: 0.875rem;
 	font-weight: 500;
-	color: #111827;
+	color: var(--sf-gray-900);
 }
 
 .sf-badge {
@@ -473,13 +473,13 @@ a.subtleforms-stat-card:hover {
 }
 
 .sf-badge-healthy {
-	background-color: #ecfdf5;
-	color: #047857;
+	background-color: var(--sf-green-50);
+	color: var(--sf-emerald-700);
 }
 
 .sf-badge-warning {
-	background-color: #fef3c7;
-	color: #92400e;
+	background-color: var(--sf-amber-100);
+	color: var(--sf-amber-800);
 }
 
 .sf-form-type-badge {
@@ -494,33 +494,33 @@ a.subtleforms-stat-card:hover {
 }
 
 .sf-type-gray {
-	background-color: #f9fafb;
-	color: #4b5563;
-	border-color: #e5e7eb;
+	background-color: var(--sf-gray-50);
+	color: var(--sf-gray-600);
+	border-color: var(--sf-gray-200);
 }
 
 .sf-type-purple {
-	background-color: #faf5ff;
-	color: #7c3aed;
-	border-color: #e9d5ff;
+	background-color: var(--sf-purple-50);
+	color: var(--sf-violet-600);
+	border-color: var(--sf-purple-200);
 }
 
 .sf-type-indigo {
-	background-color: #eef2ff;
-	color: #4f46e5;
-	border-color: #c7d2fe;
+	background-color: var(--sf-indigo-50);
+	color: var(--sf-indigo-600);
+	border-color: var(--sf-indigo-200);
 }
 
 .sf-type-blue {
-	background-color: #eff6ff;
-	color: #2563eb;
-	border-color: #bfdbfe;
+	background-color: var(--sf-blue-50);
+	color: var(--sf-blue-600);
+	border-color: var(--sf-blue-200);
 }
 
 .sf-type-green {
-	background-color: #f0fdf4;
-	color: #16a34a;
-	border-color: #bbf7d0;
+	background-color: var(--sf-green-50);
+	color: var(--sf-green-600);
+	border-color: var(--sf-green-100);
 }
 
 .sf-icon-sm {
@@ -540,17 +540,17 @@ a.subtleforms-stat-card:hover {
 
 // Icon color modifiers
 .sf-icon--blue {
-	color: #2563eb;
+	color: var(--sf-blue-600);
 }
 
 .sf-icon--green {
-	color: #16a34a;
+	color: var(--sf-green-600);
 }
 
 .sf-icon--purple {
-	color: #9333ea;
+	color: var(--sf-purple-600);
 }
 
 .sf-icon--orange {
-	color: #ea580c;
+	color: var(--sf-orange-600);
 }

@@ -29,7 +29,7 @@
 .subtleforms-form-settings {
 	height: 100%;
 	overflow-y: auto; // Settings panel scrolls
-	background-color: #f9fafb;
+	background-color: var(--sf-gray-50);
 	padding: 1.5rem;
 }
 
@@ -45,7 +45,7 @@
 	&__error-text {
 		font-size: 0.75rem;
 		line-height: 1rem;
-		color: #dc2626;
+		color: var(--sf-red-600);
 	}
 
 	// Validation notice container

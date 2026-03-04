@@ -34,9 +34,9 @@
 .sf-modal__description {
   margin: 0 0 1.5rem 0;
   padding: 0.75rem 1rem;
-  background: #f3f4f6;
-  border-left: 3px solid #2563eb;
-  color: #4b5563;
+  background: var(--sf-gray-100);
+  border-left: 3px solid var(--sf-blue-600);
+  color: var(--sf-gray-600);
   font-size: 0.875rem;
   line-height: 1.5;
 }
@@ -66,8 +66,8 @@
   content: '';
   width: 40px;
   height: 40px;
-  border: 4px solid #e5e7eb;
-  border-top-color: #2563eb;
+  border: 4px solid var(--sf-gray-200);
+  border-top-color: var(--sf-blue-600);
   border-radius: 50%;
   animation: sf-modal-spin 0.8s linear infinite;
 }
@@ -93,13 +93,13 @@
 
 /* Focus Indicators - WCAG 2.1 AA Compliant */
 .subtleforms-accessible-modal *:focus-visible {
-  outline: 2px solid #2563eb;
+  outline: 2px solid var(--sf-blue-600);
   outline-offset: 2px;
   box-shadow: none; /* Flat UI - no shadows */
 }
 
 .subtleforms-accessible-modal button:focus-visible {
-  outline: 2px solid #2563eb;
+  outline: 2px solid var(--sf-blue-600);
   outline-offset: 2px;
 }
 
@@ -114,13 +114,13 @@
 
 /* Ensure proper contrast for modal title */
 .components-modal__header-heading {
-  color: #1f2937 !important;
+  color: var(--sf-gray-800) !important;
   font-weight: 600;
 }
 
 /* Close button accessibility */
 .components-modal__header button[aria-label]:focus-visible {
-  outline: 2px solid #2563eb;
+  outline: 2px solid var(--sf-blue-600);
   outline-offset: 2px;
   box-shadow: none;
 }
@@ -129,8 +129,8 @@
 @media (prefers-contrast: high) {
   .sf-modal__description {
     border-left-width: 4px;
-    background: #ffffff;
-    border: 2px solid #000000;
+    background: var(--sf-surface);
+    border: 2px solid var(--sf-gray-900);
     border-left-width: 4px;
   }
 
@@ -154,12 +154,12 @@
 /* Dark mode support (if needed) */
 @media (prefers-color-scheme: dark) {
   .sf-modal__description {
-    background: #1f2937;
-    color: #e5e7eb;
-    border-left-color: #3b82f6;
+    background: var(--sf-gray-800);
+    color: var(--sf-gray-200);
+    border-left-color: var(--sf-blue-500);
   }
 
   .components-modal__header-heading {
-    color: #f9fafb !important;
+    color: var(--sf-gray-50) !important;
   }
 }
