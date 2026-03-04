@@ -9,6 +9,17 @@
 	min-height: 400px;
 	padding: var(--space-6);
 	background: var(--sf-stone-50);
+
+	&--retrying {
+		min-height: 200px;
+		flex-direction: column;
+		gap: var(--space-3, 12px);
+
+		.components-spinner {
+			width: 32px;
+			height: 32px;
+		}
+	}
 }
 
 .sf-page-error-boundary__container {

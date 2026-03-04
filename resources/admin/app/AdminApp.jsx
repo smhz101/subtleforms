@@ -16,7 +16,7 @@
  *   /extensions             → Extensions
  */
 
-import { useState, useEffect, Suspense, lazy } from '@wordpress/element';
+import { useState, useEffect, Suspense } from '@wordpress/element';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Panel, PanelBody } from '@wordpress/components';
 import {
@@ -51,13 +51,15 @@ const queryClient = new QueryClient({
 
 // ─── Code-split pages ─────────────────────────────────────────────────────────
 
-const DashboardPage      = lazy(() => import('../pages/DashboardPage'));
-const SettingsPage       = lazy(() => import('../pages/SettingsPage'));
-const FormsPage          = lazy(() => import('../pages/FormsPage'));
-const SubmissionsPage    = lazy(() => import('../pages/SubmissionsPage'));
-const SubmissionDetailPage = lazy(() => import('../pages/SubmissionDetailPage'));
-const BuilderPage        = lazy(() => import('../pages/BuilderPage'));
-const ExtensionsPage     = lazy(() => import('../pages/ExtensionsPage'));
+import lazyWithRetry from '../utils/lazyWithRetry';
+
+const DashboardPage      = lazyWithRetry(() => import(/* webpackChunkName: "page-dashboard" */      '../pages/DashboardPage'));
+const SettingsPage       = lazyWithRetry(() => import(/* webpackChunkName: "page-settings" */       '../pages/SettingsPage'));
+const FormsPage          = lazyWithRetry(() => import(/* webpackChunkName: "page-forms" */          '../pages/FormsPage'));
+const SubmissionsPage    = lazyWithRetry(() => import(/* webpackChunkName: "page-submissions" */    '../pages/SubmissionsPage'));
+const SubmissionDetailPage = lazyWithRetry(() => import(/* webpackChunkName: "page-submission-detail" */ '../pages/SubmissionDetailPage'));
+const BuilderPage        = lazyWithRetry(() => import(/* webpackChunkName: "page-builder" */        '../pages/BuilderPage'));
+const ExtensionsPage     = lazyWithRetry(() => import(/* webpackChunkName: "page-extensions" */     '../pages/ExtensionsPage'));
 
 // ─── Initial path resolver ────────────────────────────────────────────────────
 

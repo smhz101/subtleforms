@@ -4,6 +4,7 @@
 
 export { NoticeProvider, useNotice } from './NoticeProvider';
 export { ErrorBoundary } from './ErrorBoundary';
+export { ComponentErrorBoundary } from './ComponentErrorBoundary';
 export { normalizeError, getUserFriendlyMessage } from './normalizeError';
 export { default as LiveRegion, LiveRegionContainer, srOnlyClass } from './LiveRegion';
 export {

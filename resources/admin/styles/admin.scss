@@ -14,6 +14,7 @@
 
 // UI System
 @use '../ui/feedback/feedback.scss';
+@use '../ui/feedback/ComponentErrorBoundary.scss';
 @use '../ui/loading/loading.scss';
 @use '../components/ui/PanelSection.scss';
 @use '../components/ui/ContextualTip.scss';
