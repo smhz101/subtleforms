@@ -354,18 +354,18 @@ export default function ConversationalFormRenderer({
 
         const result = await response.json();
 
-        if (response.ok && result.success) {
+        if (response.ok && result?.data?.success) {
           setSubmitSuccess(true);
           setValues({});
           setCurrentIndex(0);
           setCurrentStep('questions');
 
           if (customOnSubmit) {
-            customOnSubmit(result);
+            customOnSubmit(result.data);
           }
         } else {
           setSubmitError(
-            result.message || __('Submission failed.', 'subtleforms')
+            result?.error?.message || result?.data?.message || __('Submission failed.', 'subtleforms')
           );
         }
       } catch (err) {

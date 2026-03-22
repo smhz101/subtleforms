@@ -13,6 +13,9 @@ const INPUT_FIELD_TYPES = new Set([
   'hidden',
   'payment_amount',
   'payment_coupon',
+  // Composite group fields — store object values at their root key
+  'name_group',
+  'address_group',
 ]);
 
 export function isLeafInputField(field) {

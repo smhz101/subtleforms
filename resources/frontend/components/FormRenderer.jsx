@@ -51,8 +51,10 @@ export default function FormRenderer({
     })
       .then((res) => res.json())
       .then((data) => {
-        if (data.schema) {
-          setSchema(data.schema);
+        // API wraps responses in { data: ... }, but fall back to root-level schema for compatibility
+        const schemaPayload = data?.data?.schema ?? data?.schema ?? null;
+        if (schemaPayload) {
+          setSchema(schemaPayload);
         } else {
           setError(__('Failed to load form.', 'subtleforms'));
         }
@@ -623,6 +625,13 @@ export default function FormRenderer({
       leafPaths.forEach((path) => {
         if (Object.prototype.hasOwnProperty.call(flatValues, path)) {
           payload[path] = flatValues[path];
+        } else {
+          // For composite group fields (name_group, address_group) the value is
+          // stored as an object at the root key, not flattened with dots.
+          const directValue = getIn(values, path);
+          if (directValue !== undefined) {
+            payload[path] = directValue;
+          }
         }
       });
 
@@ -700,22 +709,22 @@ export default function FormRenderer({
 
         const result = await response.json();
 
-        if (response.ok && result.success) {
+        if (response.ok && result?.data?.success) {
           setSubmitSuccess(true);
           setValues({});
           setCurrentStepIndex(0);
 
           if (customOnSubmit) {
-            customOnSubmit(result);
+            customOnSubmit(result.data);
           }
         } else {
           // If backend returned structured field errors, store them for per-field display.
-          const errors = result?.data?.errors || result?.errors;
+          const errors = result?.data?.errors || result?.error?.meta?.errors || result?.errors;
           if (errors && typeof errors === 'object') {
             setValidationErrors(errors);
           }
           setSubmitError(
-            result.message || __('Submission failed.', 'subtleforms')
+            result?.error?.message || result?.data?.message || __('Submission failed.', 'subtleforms')
           );
         }
       } catch (err) {
