@@ -77,7 +77,8 @@ final class PublicSubmitApi {
 					'form_id' => array(
 						'type'              => 'integer',
 						'required'          => true,
-						'sanitize_callback' => 'absint',
+						'minimum'           => 1,
+						'sanitize_callback' => static function ( $value ) { return (int) $value; },
 					),
 				),
 			)
@@ -117,7 +118,7 @@ final class PublicSubmitApi {
 		}
 
 		$payload = $validated['data'] ?? array();
-		$payload = Sanitizer::sanitizeSubmissionValue( $payload );
+		$payload = is_array( $payload ) ? Sanitizer::sanitizeArrayDeep( $payload ) : array();
 
 		// Spam protection
 		if ( \SubtleForms\Engine\SpamProtection::is_enabled() ) {
@@ -146,7 +147,7 @@ final class PublicSubmitApi {
 
 		// Verify form exists
 		$form = $this->formsRepo->find( $formId );
-		if ( ! $form ) {
+		if ( ! $form || ( $form['status'] ?? '' ) !== 'published' ) {
 			return ApiResponse::not_found( __( 'Form not found', 'subtleforms' ) );
 		}
 
@@ -248,6 +249,11 @@ final class PublicSubmitApi {
 
 		// Compile and run pipeline
 		if ( ! empty( $activeSchema['schema'] ) && is_array( $activeSchema['schema'] ) ) {
+			// Inject a virtual webhook action for forms that still use the legacy
+			// metadata.integrations.webhooks.url convention, provided no pipeline-
+			// level webhook action has been configured yet (avoids double-firing).
+			$activeSchema['schema'] = $this->injectLegacyWebhookAction( $activeSchema['schema'] );
+
 			$context->setMeta( 'form_schema', $activeSchema['schema'] );
 
 			try {
@@ -279,6 +285,12 @@ final class PublicSubmitApi {
 			if ( ! $result->ok ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
 				Logger::error( 'Pipeline execution failed for submission %d: %s', $submissionId, $result->error );
+
+				$validationErrors = $context->getMeta( 'validation_errors' );
+				if ( is_array( $validationErrors ) && ! empty( $validationErrors ) ) {
+					return ApiResponse::validation_error( __( 'Form validation failed', 'subtleforms' ), $validationErrors );
+				}
+
 				return ApiResponse::server_error( $result->error );
 			}
 
@@ -371,4 +383,55 @@ final class PublicSubmitApi {
 
 		return null;
 	}
+
+        /**
+         * Compatibility bridge for legacy webhook configuration.
+         *
+         * If the form schema stores a webhook URL in
+         * metadata.integrations.webhooks.url (the pre-1.9.0 convention) and no
+         * schema-level webhook action has been configured, inject a virtual
+         * webhook action so the pipeline still delivers the webhook.
+         *
+         * @param  array $schema  Active schema array (may be mutated).
+         * @return array          Schema with virtual action injected (or unchanged).
+         */
+        private function injectLegacyWebhookAction( array $schema ): array {
+                $legacy_url = $schema['metadata']['integrations']['webhooks']['url'] ?? '';
+                if ( empty( $legacy_url ) || ! is_string( $legacy_url ) ) {
+                        return $schema;
+                }
+
+                // Sanitize the URL stored in metadata.
+                $legacy_url = esc_url_raw( $legacy_url );
+                if ( ! wp_http_validate_url( $legacy_url ) ) {
+                        return $schema;
+                }
+
+                // Check if a pipeline-level webhook action already exists — no double-fire.
+                $actions = $schema['actions'] ?? array();
+                foreach ( $actions as $action ) {
+                        if ( isset( $action['type'] ) && $action['type'] === 'webhook' ) {
+                                return $schema;
+                        }
+                }
+
+                // Inject virtual webhook action (full payload, POST, no custom headers or signing).
+                Logger::info( '[SubtleForms] Legacy webhook compatibility used | url=%s', $legacy_url );
+
+                $schema_version        = $schema['schema_version'] ?? '0';
+                $schema['actions'][]   = array(
+                        'id'       => 'legacy-compat-' . $schema_version,
+                        'type'     => 'webhook',
+                        'enabled'  => true,
+                        'settings' => array(
+                                'url'          => $legacy_url,
+                                'method'       => 'POST',
+                                'payload_mode' => 'full',
+                                'headers'      => array(),
+                                'signing'      => array( 'enabled' => false, 'secret' => '' ),
+                        ),
+                );
+
+                return $schema;
+        }
 }

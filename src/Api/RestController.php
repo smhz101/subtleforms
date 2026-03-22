@@ -22,6 +22,7 @@ use SubtleForms\Support\Settings;
 use SubtleForms\Support\Captcha\CaptchaManager;
 use SubtleForms\Engine\SchemaCompiler;
 use SubtleForms\Fields\FieldRegistry;
+use SubtleForms\Licensing\SubscriptionManager;
 
 /**
  * REST API router for SubtleForms.
@@ -55,6 +56,9 @@ final class RestController {
 	/** @var CaptchaManager|null */
 	private $captchaManager;
 
+	/** @var SubscriptionManager|null */
+	private $subscriptionManager;
+
 	/**
 	 * Constructor — same signature as pre-1.9.0 for backward compatibility.
 	 *
@@ -66,6 +70,7 @@ final class RestController {
 	 * @param SchemaCompiler        $compiler        Schema compiler.
 	 * @param Settings|null         $settings        Plugin settings.
 	 * @param CaptchaManager|null   $captchaManager  CAPTCHA manager.
+	 * @param SubscriptionManager|null $subscriptionManager Subscription manager.
 	 */
 	public function __construct(
 		$pipeline,
@@ -75,16 +80,18 @@ final class RestController {
 		$fieldRegistry,
 		$compiler,
 		$settings = null,
-		$captchaManager = null
+		$captchaManager = null,
+		$subscriptionManager = null
 	) {
-		$this->pipeline        = $pipeline;
-		$this->formsRepo       = $formsRepo;
-		$this->submissionsRepo = $submissionsRepo;
-		$this->gate            = $gate;
-		$this->fieldRegistry   = $fieldRegistry;
-		$this->compiler        = $compiler;
-		$this->settings        = $settings;
-		$this->captchaManager  = $captchaManager;
+		$this->pipeline            = $pipeline;
+		$this->formsRepo           = $formsRepo;
+		$this->submissionsRepo     = $submissionsRepo;
+		$this->gate                = $gate;
+		$this->fieldRegistry       = $fieldRegistry;
+		$this->compiler            = $compiler;
+		$this->settings            = $settings;
+		$this->captchaManager      = $captchaManager;
+		$this->subscriptionManager = $subscriptionManager;
 
 		Logger::debug( 'RestController (router) initialized' );
 	}
@@ -144,5 +151,10 @@ final class RestController {
 
 		$onboardingApi = new OnboardingApi();
 		$onboardingApi->registerRoutes();
+
+		if ( $this->subscriptionManager ) {
+			$licenseApi = new LicenseApi( $this->subscriptionManager );
+			$licenseApi->registerRoutes();
+		}
 	}
 }

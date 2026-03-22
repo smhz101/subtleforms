@@ -522,6 +522,12 @@ final class FormsApi {
 		if ( empty( $schema['metadata']['name'] ) || ! is_string( $schema['metadata']['name'] ) ) {
 			$schema['metadata']['name'] = Helpers::safe_string_get( $form, 'title', 'form_schema' );
 		}
+		// Also ensure metadata.title is populated (required by publish validation).
+		// Fall back to the form's top-level title so the schema is always
+		// self-consistent even if the client omits it.
+		if ( empty( $schema['metadata']['title'] ) || ! is_string( $schema['metadata']['title'] ) ) {
+			$schema['metadata']['title'] = Helpers::safe_string_get( $form, 'title', '' );
+		}
 
 		// Ensure fields array exists
 		if ( ! isset( $schema['fields'] ) || ! is_array( $schema['fields'] ) ) {
@@ -708,6 +714,15 @@ final class FormsApi {
 				if ( ! $schemaData || ! is_array( $schemaData ) ) {
 					Logger::error( 'Schema missing or invalid for form %d. Available keys: %s', $id, implode( ', ', array_keys( $activeSchema ) ) );
 					return ApiResponse::bad_request( __( 'Cannot publish form: Schema data is corrupt or invalid.', 'subtleforms' ) );
+				}
+
+				// Inject title from form record if the stored schema is missing it.
+				// This guards against schemas saved before the title-injection was added.
+				if ( empty( $schemaData['metadata']['title'] ) ) {
+					if ( ! isset( $schemaData['metadata'] ) || ! is_array( $schemaData['metadata'] ) ) {
+						$schemaData['metadata'] = array();
+					}
+					$schemaData['metadata']['title'] = $form['title'] ?? '';
 				}
 
 				$schemaValidator  = new \SubtleForms\Support\SchemaValidator();
