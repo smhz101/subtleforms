@@ -270,7 +270,13 @@ export function validateSettings(settings) {
  * @returns {Object} { isValid: boolean, error: string|null }
  */
 export function validateField(field, value) {
-  const fieldSchema = settingsSchema.extract(field);
+  let fieldSchema;
+  try {
+    fieldSchema = settingsSchema.extract(field);
+  } catch {
+    // Field not in schema — skip client-side validation
+    return { isValid: true, error: null };
+  }
   if (!fieldSchema) {
     return { isValid: true, error: null };
   }

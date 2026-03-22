@@ -51,6 +51,45 @@ async function apiPut(path, payload) {
   return response.json();
 }
 
+/**
+ * Recursively render object or array values in a readable format
+ * @param {any} data - The data to render
+ * @returns JSX.Element
+ */
+const renderReadableData = (data) => {
+  // Handle arrays
+  if (Array.isArray(data)) {
+    return (
+      <ul className="sf-submission-field__list">
+        {data.map((item, index) => (
+          <li key={index}>{renderReadableData(item)}</li>
+        ))}
+      </ul>
+    );
+  }
+
+  // Handle objects
+  if (typeof data === 'object' && data !== null) {
+    return (
+      <div className="sf-submission-field__object">
+        {Object.entries(data).map(([key, val]) => (
+          <div key={key} className="sf-submission-field__row">
+            <strong className="sf-submission-field__key">
+              {key.replace(/_/g, ' ')}:
+            </strong>{' '}
+            <span className="sf-submission-field__value">
+              {renderReadableData(val)}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // Primitive values
+  return <span>{String(data)}</span>;
+};
+
 export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
   const routerNavigate = useNavigate();
   const [submission, setSubmission] = useState(null);
@@ -294,13 +333,16 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                         <div className='sf-submission-field__value-section'>
                           <div className='sf-submission-field__value'>
                             {value && typeof value === 'object' ? (
-                              <div className='sf-submission-field__json'>
-                                <div className='sf-submission-field__json-label'>
-                                  {__('JSON Data:', 'subtleforms')}
-                                </div>
-                                <pre className='sf-submission-field__json-code'>
-                                  {JSON.stringify(value, null, 2)}
-                                </pre>
+                              // <div className='sf-submission-field__json'>
+                              //   <div className='sf-submission-field__json-label'>
+                              //     {__('JSON Data:', 'subtleforms')}
+                              //   </div>
+                              //   <pre className='sf-submission-field__json-code'>
+                              //     {JSON.stringify(value, null, 2)}
+                              //   </pre>
+                              // </div>
+                              <div className="sf-submission-field__readable">
+                                {renderReadableData(value)}
                               </div>
                             ) : (
                               <div className='sf-submission-field__value-text'>

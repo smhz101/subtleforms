@@ -135,3 +135,136 @@
 		}
 	}
 }
+
+// ── ActionsPanel ─────────────────────────────────────────────────────────────
+.sf-actions-panel {
+	display: flex;
+	flex-direction: column;
+	gap: 0.75rem;
+
+	&__empty {
+		font-size: 0.875rem;
+		color: var(--sf-gray-500);
+		margin-bottom: 0.5rem;
+	}
+
+	&__footer {
+		padding-top: 0.5rem;
+	}
+
+	// Individual action card
+	&__item {
+		border: 1px solid var(--sf-gray-200);
+		border-radius: 0.375rem;
+		background: var(--sf-gray-50);
+		overflow: hidden;
+
+		&.is-dragging {
+			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+			background: #fff;
+		}
+
+		&-header {
+			display: flex;
+			align-items: center;
+			gap: 0.5rem;
+			padding: 0.5rem 0.75rem;
+			background: #fff;
+			border-bottom: 1px solid var(--sf-gray-200);
+		}
+
+		&-type {
+			font-size: 0.8125rem;
+			font-weight: 600;
+			text-transform: uppercase;
+			letter-spacing: 0.04em;
+			color: var(--sf-gray-700);
+		}
+
+		&-summary {
+			flex: 1;
+			font-size: 0.8125rem;
+			color: var(--sf-gray-400);
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		&-controls {
+			display: flex;
+			align-items: center;
+			gap: 0.25rem;
+			margin-left: auto;
+
+			// Shrink the toggle label area
+			.components-toggle-control {
+				margin-bottom: 0;
+				.components-base-control__field {
+					margin-bottom: 0;
+				}
+			}
+		}
+
+		&-body {
+			padding: 0.75rem;
+			display: flex;
+			flex-direction: column;
+			gap: 0.75rem;
+
+			.components-base-control {
+				margin-bottom: 0;
+			}
+
+			.components-text-control__input,
+			.components-select-control__input,
+			.components-textarea-control__input {
+				font-size: 0.875rem;
+			}
+		}
+
+		// Disabled / inactive state
+		&.is-disabled {
+			opacity: 0.6;
+		}
+	}
+
+	// Two-column row for Method + Payload Mode selects
+	&__row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: 0.75rem;
+
+		.components-base-control {
+			margin-bottom: 0;
+		}
+	}
+
+	// Signing section
+	&__signing {
+		border-top: 1px solid var(--sf-gray-200);
+		padding-top: 0.75rem;
+		margin-top: 0.25rem;
+
+		.components-toggle-control {
+			margin-bottom: 0;
+		}
+	}
+
+	// Drag handle
+	&__drag-handle {
+		cursor: grab;
+		color: var(--sf-gray-400);
+		font-size: 1rem;
+		padding: 0 0.25rem;
+		user-select: none;
+		line-height: 1;
+
+		&:hover {
+			color: var(--sf-gray-600);
+		}
+
+		&:active {
+			cursor: grabbing;
+		}
+	}
+}

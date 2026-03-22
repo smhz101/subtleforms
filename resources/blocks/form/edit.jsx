@@ -34,6 +34,7 @@ async function fetchPublishedForms() {
       `${
         window.subtleformsAdmin?.restUrl || '/wp-json/subtleforms/v1/'
       }forms?status=published&context=view`,
+
       {
         credentials: 'same-origin',
         headers,
@@ -45,8 +46,8 @@ async function fetchPublishedForms() {
     }
 
     const data = await response.json();
-    // API returns forms directly as array, not wrapped in { forms: [] }
-    return Array.isArray(data) ? data : [];
+    // API returns paginated response: { data: [...], meta: { pagination: {...} } }
+    return Array.isArray(data?.data) ? data.data : (Array.isArray(data) ? data : []);
   } catch (error) {
     console.error('SubtleForms block: Failed to fetch forms', error);
     return [];
@@ -71,6 +72,7 @@ async function fetchFormSchema(formId) {
       `${
         window.subtleformsAdmin?.restUrl || '/wp-json/subtleforms/v1/'
       }forms/${formId}/schema?context=view`,
+
       {
         credentials: 'same-origin',
         headers,
@@ -84,7 +86,10 @@ async function fetchFormSchema(formId) {
       throw new Error('Failed to fetch form schema');
     }
 
-    return await response.json();
+    const data = await response.json();
+    // API wraps responses in { data: ... }, normalise for the caller
+    const schemaPayload = data?.data?.schema ?? data?.schema ?? null;
+    return schemaPayload ? { schema: schemaPayload } : null;
   } catch (error) {
     console.error('SubtleForms block: Failed to fetch schema', error);
     return null;

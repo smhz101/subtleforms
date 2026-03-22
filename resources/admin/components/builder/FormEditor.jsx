@@ -160,7 +160,7 @@ export default function FormEditor({
 
           <div
             className='sf-form-editor__canvas-scroll'
-            style={{ padding: isConversational ? 0 : '1.5rem' }}>
+            style={{ padding: isConversational ? 0 : 0 }}>
             {renderCanvas ? (
               renderCanvas()
             ) : isConversational ? (
@@ -204,6 +204,7 @@ export default function FormEditor({
             anchor={insertPicker.anchor}
             onClose={handleCloseInsert}
             position='bottom center'
+            resize={false}
             focusOnMount>
             <div
               className='sf-field-picker-popover'

@@ -555,10 +555,6 @@ function FormBuilderInner({
             onPublish={handlePublish}
             onSaveAndClose={handleSaveAndClose}
             onDelete={() => setShowDeleteConfirm(true)}
-            onPreview={() => {
-              dispatch({ type: BUILDER_ACTIONS.OPEN_PREVIEW });
-              setShowPreview(true);
-            }}
             onStartTour={() => setShowTour(true)}
             onOpenWizard={onOpenWizard}
             showWizard={showWizard}
@@ -576,6 +572,7 @@ function FormBuilderInner({
           onSchemaChange={handleSchemaChange}
           currentFormId={currentFormId}
           showWelcome={!hasFields}
+          isDirty={isDirty}
         />
       </AdminShell>
 

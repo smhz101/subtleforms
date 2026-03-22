@@ -64,6 +64,316 @@
 	}
 }
 
+// ── Summary bar ────────────────────────────────────────────────────────────
+
+.sf-ext-summary {
+	display: flex;
+	align-items: center;
+	gap: 1.25rem;
+	background: var(--sf-surface);
+	border: 1px solid var(--sf-slate-200);
+	border-radius: 8px;
+	padding: 0.875rem 1.25rem;
+	margin-bottom: 1.5rem;
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+
+	&__stat {
+		display: flex;
+		align-items: baseline;
+		gap: 0.375rem;
+	}
+
+	&__num {
+		font-size: 1.25rem;
+		font-weight: 700;
+		color: var(--sf-gray-700);
+
+		&--active {
+			color: #16a34a;
+		}
+	}
+
+	&__label {
+		font-size: 0.8125rem;
+		color: var(--sf-gray-500);
+	}
+
+	&__divider {
+		width: 1px;
+		height: 1.5rem;
+		background: var(--sf-slate-200);
+	}
+
+	&__upgrade {
+		display: flex;
+		align-items: center;
+		gap: 0.375rem;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		color: var(--sf-lime-700, #4d7c0f);
+		text-decoration: none;
+
+		&:hover {
+			color: var(--sf-lime-900, #365314);
+			text-decoration: underline;
+		}
+	}
+
+	&__upgrade-icon {
+		width: 0.875rem;
+		height: 0.875rem;
+	}
+}
+
+// ── Extension Cards ────────────────────────────────────────────────────────
+
+.sf-ext-grid {
+	display: grid;
+	grid-template-columns: repeat(1, minmax(0, 1fr));
+	gap: 1.25rem;
+
+	@media (min-width: 768px) {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+
+	@media (min-width: 1200px) {
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+	}
+}
+
+.sf-ext-empty {
+	grid-column: 1 / -1;
+	color: var(--sf-gray-500);
+	font-style: italic;
+	padding: 2rem;
+	text-align: center;
+}
+
+.sf-ext-card {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	background: var(--sf-surface);
+	border: 1px solid var(--sf-slate-200);
+	border-radius: 10px;
+	overflow: hidden;
+	transition: box-shadow 0.15s ease, border-color 0.15s ease;
+
+	&:hover {
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+		border-color: var(--sf-slate-300);
+	}
+
+	&--locked {
+		opacity: 0.75;
+	}
+
+	&__overlay {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		gap: 0.375rem;
+		background: rgba(248, 250, 252, 0.85);
+		backdrop-filter: blur(2px);
+		z-index: 2;
+		border-radius: 10px;
+	}
+
+	&__overlay-lock {
+		font-size: 1.5rem;
+	}
+
+	&__overlay-label {
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: var(--sf-gray-600);
+		letter-spacing: 0.03em;
+		text-transform: uppercase;
+	}
+
+	&__body {
+		padding: 1.25rem;
+		flex: 1;
+	}
+
+	&__head {
+		display: flex;
+		justify-content: space-between;
+		align-items: flex-start;
+		margin-bottom: 0.875rem;
+	}
+
+	&__icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 2.25rem;
+		height: 2.25rem;
+		border-radius: 8px;
+		flex-shrink: 0;
+
+		&--blue   { background: var(--sf-blue-50);   color: var(--sf-blue-600); }
+		&--purple { background: #f3e8ff;              color: #7c3aed; }
+		&--green  { background: #dcfce7;              color: #16a34a; }
+		&--orange { background: #fff7ed;              color: #ea580c; }
+		&--red    { background: #fef2f2;              color: #dc2626; }
+		&--indigo { background: #eef2ff;              color: #4f46e5; }
+		&--teal   { background: #f0fdfa;              color: #0d9488; }
+		&--yellow { background: #fefce8;              color: #ca8a04; }
+		&--gray   { background: var(--sf-slate-100);  color: var(--sf-gray-600); }
+	}
+
+	&__icon-svg {
+		width: 1.125rem;
+		height: 1.125rem;
+	}
+
+	&__title {
+		font-size: 0.9375rem;
+		font-weight: 600;
+		color: var(--sf-gray-900);
+		margin: 0 0 0.375rem;
+	}
+
+	&__desc {
+		font-size: 0.8125rem;
+		line-height: 1.5;
+		color: var(--sf-gray-500);
+		margin: 0;
+	}
+
+	&__footer {
+		padding: 0.875rem 1.25rem;
+		border-top: 1px solid var(--sf-slate-100);
+	}
+
+	&__btn {
+		width: 100%;
+		justify-content: center;
+	}
+}
+
+// ── Status badges ──────────────────────────────────────────────────────────
+
+.sf-ext-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 0.125rem 0.5rem;
+	border-radius: 9999px;
+	font-size: 0.6875rem;
+	font-weight: 600;
+	letter-spacing: 0.03em;
+	text-transform: uppercase;
+
+	&--active   { background: #dcfce7; color: #166534; }
+	&--setup    { background: #fef9c3; color: #854d0e; }
+	&--inactive { background: var(--sf-slate-100); color: var(--sf-gray-500); }
+	&--pro      { background: linear-gradient(135deg, #f0abfc, #a5b4fc); color: #3730a3; }
+}
+
+// ── Legacy card (kept for compatibility) ──────────────────────────────────
+
+.sf-ext-card {
+	&__badge {
+		display: inline-flex;
+		align-items: center;
+		padding: 0.125rem 0.5rem;
+		background-color: var(--sf-amber-100);
+		border-radius: 9999px;
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: var(--sf-amber-800);
+	}
+
+	&__description {
+		font-size: 0.875rem;
+		line-height: 1.25rem;
+		color: var(--sf-gray-500);
+		margin-bottom: 1rem;
+	}
+
+	&__features {
+		flex: 1;
+	}
+
+	&__features-list {
+		display: flex;
+		flex-direction: column;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	&__feature-item {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.5rem;
+		font-size: 0.875rem;
+		line-height: 1.25rem;
+		color: var(--sf-gray-500);
+	}
+
+	&__feature-check {
+		margin-top: 0.125rem;
+		color: var(--sf-emerald-500);
+	}
+
+	&__action {
+		padding-top: 1rem;
+		border-top: 1px solid var(--sf-gray-100);
+	}
+
+	&__install-btn {
+		justify-content: center;
+		width: 100%;
+	}
+}
+
+// Extension icon with card header
+.sf-ext-header {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+	margin-bottom: 1rem;
+}
+
+.sf-ext-header-left {
+	display: flex;
+	align-items: flex-start;
+	gap: 0.75rem;
+}
+
+.sf-ext-icon {
+	padding: 0.75rem;
+	background-color: var(--sf-blue-50);
+	border-radius: 0.5rem;
+
+	&__svg {
+		width: 1.5rem;
+		height: 1.5rem;
+	}
+}
+
+// Button icons
+.sf-button-icon {
+	margin-right: 0.375rem;
+	width: 1rem;
+	height: 1rem;
+}
+
+// Icon color modifiers (used across dashboard and extensions)
+.sf-icon--blue   { color: var(--sf-blue-600); }
+.sf-icon--purple { color: var(--sf-purple-600); }
+.sf-icon--green  { color: var(--sf-green-600); }
+.sf-icon--orange { color: var(--sf-orange-600); }
+.sf-icon--red    { color: var(--sf-red-600); }
+.sf-icon--indigo { color: var(--sf-indigo-500); }
+.sf-icon--teal   { color: var(--sf-teal-500); }
+.sf-icon--yellow { color: var(--sf-yellow-500); }
+
+
 // Extension Card
 .sf-ext-card {
 	height: 100%;

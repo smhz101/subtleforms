@@ -29,6 +29,17 @@ function normalizeSettings( data ) {
 		captcha_recaptcha_enabled: Boolean( data.captcha_recaptcha_enabled ),
 		captcha_hcaptcha_enabled: Boolean( data.captcha_hcaptcha_enabled ),
 		captcha_turnstile_enabled: Boolean( data.captcha_turnstile_enabled ),
+		ext_webhooks_enabled: Boolean( data.ext_webhooks_enabled ),
+		ext_email_marketing_enabled: Boolean( data.ext_email_marketing_enabled ),
+		ext_email_marketing_double_optin: Boolean( data.ext_email_marketing_double_optin ),
+		ext_crm_enabled: Boolean( data.ext_crm_enabled ),
+		ext_analytics_enabled: Boolean( data.ext_analytics_enabled ),
+		ext_analytics_view_tracking: Boolean( data.ext_analytics_view_tracking ),
+		ext_ecommerce_enabled: Boolean( data.ext_ecommerce_enabled ),
+		ext_pdf_enabled: Boolean( data.ext_pdf_enabled ),
+		ext_pdf_attach_to_email: Boolean( data.ext_pdf_attach_to_email ),
+		ext_multilanguage_enabled: Boolean( data.ext_multilanguage_enabled ),
+		ext_payments_enabled: Boolean( data.ext_payments_enabled ),
 	};
 }
 

@@ -12,6 +12,7 @@ import FormSettings from '../FormSettings';
 import SubmissionsTable from '../../SubmissionsTable';
 import ProDowngradeBanner from '../../ProDowngradeBanner';
 import EmptyFormWelcome from '../EmptyFormWelcome';
+import FormPreviewPane from '../../FormPreviewPane';
 import { formUsesProFeatures, getProFeaturesUsed } from '../../../utils/proFeatureDetector';
 import './BuilderCanvasArea.scss';
 
@@ -26,6 +27,7 @@ export default function BuilderCanvasArea({
   saveError,
   hasValidationErrors,
   showWelcome = false,
+  isDirty = false,
 }) {
   // Detect Pro feature usage and license state
   const usesProFeatures = useMemo(() => formUsesProFeatures(draftSchema), [draftSchema]);
@@ -97,10 +99,17 @@ export default function BuilderCanvasArea({
             title: __('Entries', 'subtleforms'),
             className: 'data-tour-submissions-tab',
           },
+          {
+            name: 'preview',
+            title: __('Preview', 'subtleforms'),
+          },
         ]}>
         {(tab) => (
           <>
-            {tab.name === 'build' && (
+            {tab.name === 'build' && showWelcome && (
+              <EmptyFormWelcome />
+            )}
+            {tab.name === 'build' && !showWelcome && (
               <FormEditor
                 schema={draftSchema}
                 fieldGroups={fieldGroups}
@@ -133,6 +142,11 @@ export default function BuilderCanvasArea({
                 <Notice status='info'>
                   {__('Save the form first to view entries', 'subtleforms')}
                 </Notice>
+              </div>
+            )}
+            {tab.name === 'preview' && (
+              <div className='sf-builder-canvas-area__preview-container'>
+                <FormPreviewPane schema={draftSchema} isDirty={isDirty} />
               </div>
             )}
           </>

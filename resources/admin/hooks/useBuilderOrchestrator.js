@@ -49,6 +49,7 @@ export default function useBuilderOrchestrator( {
 } ) {
 	const {
 		draftSchema,
+		formTitle: stateFormTitle,
 		saving,
 		autoSaving,
 		formStatus,
@@ -136,6 +137,16 @@ export default function useBuilderOrchestrator( {
 				const enrichedSchema =
 					enrichSchemaWithProMarkers( draftSchema );
 
+				// Guarantee metadata.title is always non-empty before persisting.
+				// The server requires it when the form is published; setting it here
+				// prevents a round-trip 422 caused by a title missing from the schema.
+				if ( ! enrichedSchema.metadata ) {
+					enrichedSchema.metadata = {};
+				}
+				if ( ! enrichedSchema.metadata.title ) {
+					enrichedSchema.metadata.title = stateFormTitle || '';
+				}
+
 				const {
 					ok,
 					body,
@@ -148,12 +159,21 @@ export default function useBuilderOrchestrator( {
 				if ( ! ok ) {
 					// HTTP 422 — Validation error
 					if ( isValidationError( { status: saveStatus } ) ) {
-						const fieldErrs = getFieldErrors( {
-							status: saveStatus,
-							fields: body?.data?.errors?.fields,
-						} );
-						const maybeValidationErrors =
-							body?.data?.errors || body?.errors || [];
+						// Normalise across two API shapes:
+						//   new: { error: { meta: { fields: [...] } } }
+						//   old: { data: { errors: [...] } }  /  { errors: [...] }
+						const rawValidationFields =
+							body?.error?.meta?.fields ||
+							body?.data?.errors?.fields ||
+							body?.data?.errors ||
+							body?.errors ||
+							[];
+						const maybeValidationErrors = Array.isArray(
+							rawValidationFields
+						)
+							? rawValidationFields
+							: [];
+						const fieldErrs = {}; // kept for compat
 
 						if (
 							! auto &&
@@ -288,6 +308,7 @@ export default function useBuilderOrchestrator( {
 					}
 
 					const message =
+						body?.error?.message ||
 						body?.message ||
 						body?.data?.message ||
 						__( 'Failed to save form', 'subtleforms' );
@@ -309,15 +330,21 @@ export default function useBuilderOrchestrator( {
 						if (
 							isValidationError( { status: statusCode } )
 						) {
-							const fieldErrs = getFieldErrors( {
-								status: statusCode,
-								fields:
-									statusBody?.data?.errors?.fields,
-							} );
-							const maybeValidationErrors =
+							// Normalise across two API shapes:
+							//   new: { error: { meta: { fields: [...] } } }
+							//   old: { data: { errors: [...] } }  /  { errors: [...] }
+							const rawValidationFields =
+								statusBody?.error?.meta?.fields ||
+								statusBody?.data?.errors?.fields ||
 								statusBody?.data?.errors ||
 								statusBody?.errors ||
 								[];
+							const maybeValidationErrors = Array.isArray(
+								rawValidationFields
+							)
+								? rawValidationFields
+								: [];
+							const fieldErrs = {}; // kept for compat
 
 							if (
 								targetStatus === 'published' &&
@@ -452,6 +479,7 @@ export default function useBuilderOrchestrator( {
 						}
 
 						const errorMessage =
+							statusBody?.error?.message ||
 							statusBody?.message ||
 							__(
 								'Failed to update form status',
@@ -528,6 +556,7 @@ export default function useBuilderOrchestrator( {
 		},
 		[
 			draftSchema,
+			stateFormTitle,
 			saving,
 			autoSaving,
 			currentFormId,
@@ -554,7 +583,82 @@ export default function useBuilderOrchestrator( {
 		performSave( { auto: false, targetStatus: 'draft' } );
 	}, [ performSave ] );
 
+	/**
+	 * Bug 3 fix: walk the field tree and return true when at least one
+	 * non-container field exists (regular, multistep, and sectioned forms).
+	 */
+	function hasLeafFields( fields ) {
+		if ( ! Array.isArray( fields ) || fields.length === 0 ) {
+			return false;
+		}
+		const containerTypes = new Set( [ 'step', 'section', 'column', 'row', 'fieldset' ] );
+		for ( const field of fields ) {
+			if ( containerTypes.has( field.type ) ) {
+				if ( hasLeafFields( field.children ) ) {
+					return true;
+				}
+			} else {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	const handlePublish = useCallback( () => {
+		// ── Bug 3: client-side pre-publish validation ──────────────────
+		const prePublishErrors = [];
+
+		// Check both the schema metadata title and the UI form title.
+		// They can diverge if the title was changed but not yet committed to the schema.
+		const title = (
+			( draftSchema?.metadata?.title || '' ) ||
+			( stateFormTitle || '' )
+		).trim();
+		if ( ! title ) {
+			prePublishErrors.push( {
+				path: 'metadata.title',
+				message: __( 'Form title is required.', 'subtleforms' ),
+			} );
+		}
+
+		if ( ! hasLeafFields( draftSchema?.fields ) ) {
+			prePublishErrors.push( {
+				path: 'fields',
+				message: __(
+					'Form must contain at least one field before publishing.',
+					'subtleforms'
+				),
+			} );
+		}
+
+		if ( prePublishErrors.length > 0 ) {
+			dispatch( {
+				type: BUILDER_ACTIONS.PUBLISH_ERROR,
+				payload: {
+					error: {
+						message: __(
+							'Cannot publish: Fix validation errors.',
+							'subtleforms'
+						),
+						isValidationError: true,
+					},
+					validationErrors: prePublishErrors,
+				},
+			} );
+			removeNotice( SUCCESS_NOTICE_ID );
+			createErrorNotice(
+				__( 'Cannot publish: Fix validation errors.', 'subtleforms' ),
+				{
+					id: ERROR_NOTICE_ID,
+					isDismissible: true,
+					type: 'snackbar',
+					actions: [],
+				}
+			);
+			return;
+		}
+		// ── end pre-publish validation ──────────────────────────────────
+
 		if ( hasValidationErrors ) {
 			removeNotice( SUCCESS_NOTICE_ID );
 			createErrorNotice(
@@ -579,6 +683,9 @@ export default function useBuilderOrchestrator( {
 		}
 	}, [
 		createErrorNotice,
+		dispatch,
+		draftSchema,
+		stateFormTitle,
 		formStatus,
 		hasValidationErrors,
 		performSave,

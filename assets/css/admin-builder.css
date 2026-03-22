@@ -205,14 +205,11 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	align-items: flex-start;
 	width: 100%;
 	min-height: 100%;
-	padding: 1rem; /* Reduced for better density */
 }
 
 .subtleforms-admin .subtleforms-builder-canvas__surface {
 	width: 100%;
-	max-width: 900px;
 	background: #fff;
-	border: 1px solid #d1d5db;
 	border-radius: 4px;
 	padding: 1.75rem; /* Reduced for better density */
 	min-height: 600px;

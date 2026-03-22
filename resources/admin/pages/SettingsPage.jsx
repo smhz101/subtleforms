@@ -8,6 +8,7 @@ import EmailSettings from '../components/settings/EmailSettings';
 import AISettings from '../components/settings/AISettings';
 import AdvancedSettings from '../components/settings/AdvancedSettings';
 import LicenseSettings from '../components/settings/LicenseSettings';
+import ExtensionsSettings from '../components/settings/ExtensionsSettings';
 import './SettingsPage.scss';
 
 /**
@@ -20,6 +21,7 @@ const TABS = [
   { name: 'email', title: __('Email / Notifications', 'subtleforms'), icon: 'email' },
   { name: 'ai', title: __('AI Configuration', 'subtleforms'), icon: 'admin-site-alt3' },
   { name: 'advanced', title: __('Advanced', 'subtleforms'), icon: 'admin-tools' },
+  { name: 'extensions', title: __('Extensions', 'subtleforms'), icon: 'admin-plugins' },
 ];
 
 /**
@@ -170,6 +172,13 @@ export default function Settings() {
                 updateSetting={updateSetting}
                 resetSettings={resetSettings}
                 saving={saving}
+                fieldErrors={fieldErrors}
+              />
+            )}
+            {activeTab === 'extensions' && (
+              <ExtensionsSettings
+                settings={settings}
+                updateSetting={updateSetting}
                 fieldErrors={fieldErrors}
               />
             )}

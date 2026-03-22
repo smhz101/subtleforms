@@ -263,6 +263,26 @@
 	--sf-warning-bg:      var(--sf-amber-50);
 }
 
+.subtleforms-admin {
+	.components-panel {
+		&__body {
+			h3 {
+				margin: 0;
+			}
+		}
+	}
+	.components-tab-panel {
+		&__tabs {
+			border-bottom: 1px solid var(--sf-border);
+		}
+	}
+	.components-button {
+		svg {
+			fill: none;
+		}
+	}
+}
+
 // ============================================================================
 // TYPOGRAPHY UTILITIES
 // ============================================================================

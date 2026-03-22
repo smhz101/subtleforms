@@ -3,6 +3,20 @@
  * Co-located with CreateFormModal.jsx
  */
 
+/**
+ * Bug 1 fix: Scope the modal overlay to the plugin content area only.
+ * The overlay is rendered by @wordpress/components Modal as a portal on <body>,
+ * but overlayClassName="subtleforms-modal-overlay" is applied to it so we can
+ * restrict its edges to match the WP content area via CSS custom properties
+ * that are set dynamically by AppContent (--sf-modal-offset-left / --sf-modal-offset-top).
+ */
+.subtleforms-modal-overlay {
+	&.components-modal__screen-overlay {
+		left: var(--sf-modal-offset-left, 0px) !important;
+		top: var(--sf-modal-offset-top, 32px) !important;
+	}
+}
+
 .subtleforms-create-modal {
 	.components-modal__content {
 		margin-top: 5px;

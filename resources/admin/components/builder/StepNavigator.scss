@@ -76,7 +76,6 @@
 
 	&__label-text {
 		font-weight: 700;
-		font-family: $sf-font-mono;
 		color: $sf-stone-700;
 		font-size: $font-size-xs;
 		text-transform: uppercase;
@@ -167,7 +166,6 @@
 		border-radius: $radius-full;
 		font-size: $font-size-sm;
 		font-weight: 700;
-		font-family: $sf-font-mono;
 		transition: all $transition-base;
 		background: linear-gradient(135deg, $sf-stone-100, $sf-stone-200);
 		color: $sf-stone-600;

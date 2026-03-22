@@ -9,6 +9,17 @@
 	gap: 0.5rem;
 }
 
+.sf-first-run-cta {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 1.5rem;
+
+	&__title {
+		margin-bottom: 0;
+	}
+}
+
 .sf-icon-button {
 	display: inline-flex;
 	margin-right: 0.5rem;

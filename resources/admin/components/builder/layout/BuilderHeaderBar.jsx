@@ -109,7 +109,6 @@ export function BuilderActions({
   onPublish,
   onSaveAndClose,
   onDelete,
-  onPreview,
   onStartTour,
   onOpenWizard,
   showWizard,
@@ -259,14 +258,6 @@ export function BuilderActions({
           onOpenWizard={onOpenWizard}
           showWizard={showWizard}
         />
-
-        <Button
-          variant='secondary'
-          onClick={onPreview}
-          disabled={!draftSchema || draftSchema.fields?.length === 0}
-          className='sf-builder-header-bar__preview-button'>
-          {__('Preview', 'subtleforms')}
-        </Button>
 
         {isDirty && (
           <Button

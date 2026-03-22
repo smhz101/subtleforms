@@ -196,6 +196,30 @@ function AppContent() {
 		}
 	}, [location.pathname]);
 
+	// Bug 1 fix: compute content-area offset so the modal overlay can be
+	// scoped to the plugin container rather than the full viewport.
+	useEffect(() => {
+		const updateBounds = () => {
+			const contentEl = document.getElementById('wpcontent');
+			const adminBar  = document.getElementById('wpadminbar');
+			if (contentEl) {
+				const { left } = contentEl.getBoundingClientRect();
+				document.documentElement.style.setProperty(
+					'--sf-modal-offset-left',
+					`${Math.round(left)}px`
+				);
+			}
+			const barHeight = adminBar ? adminBar.offsetHeight : 32;
+			document.documentElement.style.setProperty(
+				'--sf-modal-offset-top',
+				`${barHeight}px`
+			);
+		};
+		updateBounds();
+		window.addEventListener('resize', updateBounds);
+		return () => window.removeEventListener('resize', updateBounds);
+	}, []);
+
 	function handleModalClose() {
 		setShowCreateModal(false);
 		navigate('/forms');
@@ -234,13 +258,15 @@ function AppContent() {
 									</PageErrorBoundary>
 								}
 							/>
-							{/* /forms/new — wizard; modal handled by AppContent */}
+							{/* /forms/new — modal handled by AppContent; suppress builder while modal is open (Bug 1.2) */}
 							<Route
 								path='/forms/new'
 								element={
-									<PageErrorBoundary pageName='Form Builder'>
-										<BuilderPage onFormSaved={handleFormSaved} />
-									</PageErrorBoundary>
+									showCreateModal ? null : (
+										<PageErrorBoundary pageName='Form Builder'>
+											<BuilderPage onFormSaved={handleFormSaved} />
+										</PageErrorBoundary>
+									)
 								}
 							/>
 							{/* /forms/:formId — existing form */}

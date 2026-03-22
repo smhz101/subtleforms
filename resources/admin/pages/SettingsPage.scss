@@ -437,7 +437,6 @@
 	.sf-ai-cost-estimator__amount {
 		font-size: $font-size-3xl;
 		font-weight: 700;
-		font-family: $sf-font-mono;
 		color: $sf-violet-600;
 		letter-spacing: -0.02em;
 		text-shadow: 0 2px 4px rgba(139, 92, 246, 0.1);
@@ -492,13 +491,14 @@
 }
 
 .sf-license-status {
-	display: flex;
-	flex-direction: column;
-	gap: $space-3;
-	margin-bottom: $space-6;
-	padding: $space-4;
-	background-color: $sf-stone-50;
-	border-radius: $radius-md;
+	text-decoration: none;
+	// display: flex;
+	// flex-direction: column;
+	// gap: $space-3;
+	// margin-bottom: $space-6;
+	// padding: $space-4;
+	// background-color: $sf-stone-50;
+	// border-radius: $radius-md;
 }
 
 .sf-license-status__row {
@@ -508,16 +508,15 @@
 }
 
 .sf-license-status__label {
-	font-weight: 600;
+	// font-weight: 600;
 	font-size: $font-size-sm;
 	color: $sf-stone-600;
-	text-transform: uppercase;
+	// text-transform: uppercase;
 	letter-spacing: 0.05em;
 	min-width: 100px;
 }
 
 .sf-license-status__value {
-	font-family: $sf-font-mono;
 	font-size: $font-size-base;
 	color: $sf-stone-900;
 }
@@ -547,7 +546,6 @@
 	}
 
 	.components-text-control__input {
-		font-family: $sf-font-mono;
 		font-size: $font-size-base;
 		padding: $space-3;
 		border: 2px solid $sf-stone-200;
@@ -717,4 +715,483 @@
 			box-shadow: $shadow-lg, $shadow-lime;
 		}
 	}
+}
+// ── License Settings — new subscription UI ────────────────────────────────
+
+.sf-license-settings {
+	display: flex;
+	flex-direction: column;
+	gap: $space-6;
+	max-width: 640px;
+}
+
+// Dev mode banner
+.sf-license-dev-banner {
+	display: flex;
+	align-items: flex-start;
+	gap: $space-4;
+	padding: $space-5 $space-6;
+	background: linear-gradient(135deg, #fef3c7, #fffbeb);
+	border: 2px solid #f59e0b;
+	border-radius: $radius-lg;
+
+	&__icon {
+		font-size: 28px;
+		color: #d97706;
+		flex-shrink: 0;
+		margin-top: 2px;
+	}
+
+	&__body {
+		strong {
+			display: block;
+			font-size: $font-size-base;
+			font-weight: 700;
+			color: #92400e;
+			margin-bottom: $space-1;
+		}
+
+		p {
+			margin: 0;
+			font-size: $font-size-sm;
+			color: #78350f;
+			line-height: 1.6;
+		}
+	}
+}
+
+// Generic section with heading
+.sf-license-section {
+	h3 {
+		margin: 0 0 $space-3;
+		font-family: $sf-font-serif;
+		font-size: $font-size-base;
+		font-weight: 600;
+		color: $sf-stone-800;
+	}
+}
+
+// Feature list (shared by all modes)
+.sf-feature-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: $space-2;
+
+	&__item {
+		display: flex;
+		align-items: center;
+		gap: $space-2;
+		font-size: $font-size-sm;
+		color: $sf-stone-700;
+
+		.dashicons {
+			color: $sf-stone-400;
+			flex-shrink: 0;
+		}
+
+		&--active {
+			color: $sf-stone-800;
+
+			.dashicons {
+				color: $sf-lime-600;
+			}
+		}
+	}
+}
+
+// Notices (success / error)
+.sf-license-notice {
+	padding: $space-3 $space-4;
+	border-radius: $radius-md;
+	font-size: $font-size-sm;
+	font-weight: 500;
+
+	&--success {
+		background: #f0fdf4;
+		border: 1px solid #bbf7d0;
+		color: #166534;
+	}
+
+	&--error {
+		background: #fef2f2;
+		border: 1px solid #fecaca;
+		color: #991b1b;
+	}
+}
+
+// Account card (connected state)
+.sf-license-account-card {
+	padding: $space-6;
+	background: #fff;
+	border: 2px solid $sf-lime-300;
+	border-radius: $radius-lg;
+	box-shadow: $shadow-md, $shadow-lime;
+
+	&__header {
+		display: flex;
+		align-items: flex-start;
+		gap: $space-4;
+		margin-bottom: $space-4;
+	}
+
+	&__icon {
+		font-size: 32px;
+		color: $sf-lime-600;
+		flex-shrink: 0;
+		margin-top: 2px;
+	}
+
+	&__email {
+		margin: 0 0 $space-2;
+		font-size: $font-size-base;
+		font-weight: 600;
+		color: $sf-stone-900;
+	}
+
+	&__badges {
+		display: flex;
+		gap: $space-2;
+		flex-wrap: wrap;
+	}
+
+	&__expiry {
+		margin: 0 0 $space-4;
+		font-size: $font-size-sm;
+		color: $sf-stone-600;
+	}
+
+	&__actions {
+		display: flex;
+		gap: $space-3;
+		flex-wrap: wrap;
+	}
+}
+
+.sf-license-disconnect-btn {
+	color: #dc2626 !important;
+	border-color: #fca5a5 !important;
+
+	&:hover:not(:disabled) {
+		background: #fef2f2 !important;
+		border-color: #dc2626 !important;
+	}
+}
+
+// Connect card (disconnected state)
+.sf-license-connect-card {
+	padding: $space-6;
+	background: #fff;
+	border: 2px solid $sf-stone-200;
+	border-radius: $radius-lg;
+	box-shadow: $shadow-md;
+
+	&__header {
+		display: flex;
+		align-items: flex-start;
+		gap: $space-4;
+		margin-bottom: $space-6;
+	}
+
+	&__icon {
+		font-size: 32px;
+		color: $sf-stone-400;
+		flex-shrink: 0;
+		margin-top: 2px;
+	}
+
+	h3 {
+		margin: 0 0 $space-1;
+		font-family: $sf-font-serif;
+		font-size: $font-size-lg;
+		font-weight: 600;
+		color: $sf-stone-900;
+	}
+
+	p {
+		margin: 0;
+		font-size: $font-size-sm;
+		color: $sf-stone-600;
+	}
+}
+
+.sf-license-form {
+	display: flex;
+	flex-direction: column;
+	gap: $space-4;
+
+	&__field {
+		display: flex;
+		flex-direction: column;
+		gap: $space-1;
+
+		label {
+			font-size: $font-size-sm;
+			font-weight: 600;
+			color: $sf-stone-700;
+		}
+
+		input {
+			width: 100%;
+		}
+
+		.description {
+			margin: 0;
+			font-size: $font-size-xs;
+			color: $sf-stone-500;
+		}
+	}
+
+	&__key-input {
+		font-family: $sf-font-mono;
+		letter-spacing: 0.05em;
+	}
+}
+
+// Upgrade card (disconnected state, below the form)
+.sf-license-upgrade-card {
+	padding: $space-6;
+	background: linear-gradient(135deg, $sf-lime-50, #fff);
+	border: 2px solid $sf-lime-200;
+	border-radius: $radius-lg;
+
+	h3 {
+		margin: 0 0 $space-4;
+		font-family: $sf-font-serif;
+		font-size: $font-size-base;
+		font-weight: 600;
+		color: $sf-stone-800;
+	}
+
+	.sf-feature-list {
+		margin-bottom: $space-6;
+	}
+}
+
+// Status & plan badges
+.sf-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px $space-2;
+	font-size: $font-size-xs;
+	font-weight: 600;
+	border-radius: 9999px;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+
+	&--active  { background: #dcfce7; color: #166534; }
+	&--warning { background: #fef9c3; color: #713f12; }
+	&--danger  { background: #fee2e2; color: #991b1b; }
+	&--neutral { background: $sf-stone-100; color: $sf-stone-600; }
+}
+
+.sf-plan-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px $space-3;
+	font-size: $font-size-xs;
+	font-weight: 700;
+	border-radius: 9999px;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+
+	&--free    { background: $sf-stone-100; color: $sf-stone-600; }
+	&--starter { background: #e0f2fe; color: #0369a1; }
+	&--pro     { background: linear-gradient(90deg, $sf-lime-100, $sf-lime-200); color: $sf-lime-900; border: 1px solid $sf-lime-300; }
+	&--agency  { background: linear-gradient(90deg, #fdf4ff, #f3e8ff); color: #7e22ce; border: 1px solid #e9d5ff; }
+}
+
+// ── Extensions Settings (within Settings page) ────────────────────────────
+
+.sf-ext-settings {
+  display: flex;
+  gap: 1.5rem;
+  align-items: flex-start;
+
+  &__sidebar {
+    flex-shrink: 0;
+    width: 200px;
+    background: var(--sf-surface);
+    border: 1px solid var(--sf-slate-200);
+    border-radius: 8px;
+    padding: 0.625rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+
+  &__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.8125rem;
+    color: var(--sf-gray-700);
+    text-align: left;
+    transition: background 0.1s ease;
+
+    &:hover {
+      background: var(--sf-slate-100);
+    }
+
+    &--active {
+      background: var(--sf-slate-100);
+      color: var(--sf-gray-900);
+      font-weight: 600;
+    }
+  }
+
+  &__item-label {
+    flex: 1;
+  }
+
+  &__content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  &__panel-wrap {
+    position: relative;
+  }
+}
+
+// ── Extension status dots (sidebar)  ──────────────────────────────────────
+
+.sf-ext-status {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-left: 0.375rem;
+
+  &--active   { background: #16a34a; }
+  &--warning  { background: #ca8a04; }
+  &--inactive { background: var(--sf-slate-300); }
+  &--locked   {
+    background: transparent;
+    width: auto;
+    height: auto;
+    font-size: 0.6875rem;
+    line-height: 1;
+  }
+}
+
+// ── Extension Panel ────────────────────────────────────────────────────────
+
+.sf-ext-panel {
+  &__header {
+    margin-bottom: 1.5rem;
+  }
+
+  &__title {
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--sf-gray-900);
+    margin: 0 0 0.375rem;
+  }
+
+  &__description {
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: var(--sf-gray-500);
+    margin: 0;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  &__info {
+    background: var(--sf-slate-50);
+    border: 1px solid var(--sf-slate-200);
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+  }
+
+  &__info-text {
+    font-size: 0.8125rem;
+    line-height: 1.6;
+    color: var(--sf-gray-500);
+    margin: 0;
+  }
+}
+
+.sf-settings-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+// ── Pro-lock overlay (inside settings panel) ──────────────────────────────
+
+.sf-ext-pro-overlay {
+  position: absolute;
+  inset: -0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(248, 250, 252, 0.88);
+  backdrop-filter: blur(3px);
+  border-radius: 8px;
+  z-index: 10;
+
+  &__inner {
+    text-align: center;
+    padding: 1.5rem;
+  }
+
+  &__icon {
+    display: block;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  &__title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--sf-gray-900);
+    margin: 0 0 0.375rem;
+  }
+
+  &__desc {
+    font-size: 0.8125rem;
+    color: var(--sf-gray-500);
+    margin: 0 0 1rem;
+    max-width: 240px;
+  }
+
+  &__cta {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.5rem 1.25rem;
+    background: $sf-lime-500;
+    color: white;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.15s ease;
+
+    &:hover {
+      background: $sf-lime-600;
+      color: white;
+    }
+  }
 }

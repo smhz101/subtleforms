@@ -8,8 +8,10 @@ import {
   PanelRow,
   RadioControl,
   Notice,
+  Button,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import ActionsPanel from './ActionsPanel';
 
 /**
  * FormSettings - Configure form-wide settings including payment options
@@ -387,6 +389,96 @@ export default function FormSettings({
             </PanelBody>
           </Panel>
         )}
+
+        {/* Integrations — visible when at least one extension is active */}
+        {(() => {
+          const extensions = window.subtleformsAdmin?.extensions ?? {};
+          const activeExts = Object.values(extensions).filter((e) => e.enabled && e.available);
+          if (activeExts.length === 0) return null;
+
+          const integrations = metadata.integrations || {};
+
+          const handleIntegrationChange = (extSlug, key, value) => {
+            if (isReadOnly) return;
+            onChange({
+              ...schema,
+              metadata: {
+                ...metadata,
+                integrations: {
+                  ...integrations,
+                  [extSlug]: {
+                    ...(integrations[extSlug] || {}),
+                    [key]: value,
+                  },
+                },
+              },
+            });
+          };
+
+          return (
+            <Panel>
+              <PanelBody
+                title={__('Integrations', 'subtleforms')}
+                initialOpen={false}>
+                {activeExts.map((ext) => (
+                  <div key={ext.slug} className='sf-form-settings__integration'>
+                    <h4 className='sf-form-settings__integration-title'>{ext.label}</h4>
+
+                    {/* Webhooks: per-form endpoint URL override */}
+                    {ext.slug === 'webhooks' && (
+                      <TextControl
+                        label={__('Endpoint URL (this form)', 'subtleforms')}
+                        value={(integrations.webhooks || {}).url || ''}
+                        onChange={(v) => handleIntegrationChange('webhooks', 'url', v)}
+                        help={__(
+                          'Override the global webhook URL for this form only. Leave blank to skip.',
+                          'subtleforms'
+                        )}
+                      />
+                    )}
+
+                    {/* Email Marketing: per-form opt-in override */}
+                    {ext.slug === 'email_marketing' && (
+                      <ToggleControl
+                        label={__('Subscribe submitters from this form', 'subtleforms')}
+                        checked={!!(integrations.email_marketing || {}).enabled !== false}
+                        onChange={(v) => handleIntegrationChange('email_marketing', 'enabled', v)}
+                        help={__(
+                          'Turn off to exclude this form\'s submitters from the global email list.',
+                          'subtleforms'
+                        )}
+                      />
+                    )}
+
+                    {/* CRM: per-form sync toggle */}
+                    {ext.slug === 'crm' && (
+                      <ToggleControl
+                        label={__('Sync submissions to CRM', 'subtleforms')}
+                        checked={!!(integrations.crm || {}).enabled !== false}
+                        onChange={(v) => handleIntegrationChange('crm', 'enabled', v)}
+                      />
+                    )}
+
+                    {/* Analytics: per-form tracking toggle */}
+                    {ext.slug === 'analytics' && (
+                      <ToggleControl
+                        label={__('Track analytics for this form', 'subtleforms')}
+                        checked={!!(integrations.analytics || {}).enabled !== false}
+                        onChange={(v) => handleIntegrationChange('analytics', 'enabled', v)}
+                      />
+                    )}
+                  </div>
+                ))}
+              </PanelBody>
+            </Panel>
+          );
+        })()}
+
+        <ActionsPanel
+          schema={schema}
+          onChange={onChange}
+          isReadOnly={isReadOnly}
+        />
       </div>
     </div>
   );
