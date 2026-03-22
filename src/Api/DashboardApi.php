@@ -332,10 +332,28 @@ class DashboardApi {
 	/**
 	 * Check permissions
 	 *
-	 * @return bool
+	 * @param \WP_REST_Request $request Incoming request.
+	 * @return true|\WP_Error
 	 */
-	public function checkPermissions() {
-		return current_user_can( 'manage_options' );
+	public function checkPermissions( \WP_REST_Request $request ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return new \WP_Error(
+				'subtleforms_forbidden',
+				__( 'You are not allowed to perform this action.', 'subtleforms' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		$nonce = $request->get_header( 'X-WP-Nonce' );
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+			return new \WP_Error(
+				'subtleforms_invalid_nonce',
+				__( 'Security check failed. Please refresh and try again.', 'subtleforms' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
 	}
 
 	/**

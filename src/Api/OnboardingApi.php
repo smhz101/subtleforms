@@ -238,11 +238,45 @@ final class OnboardingApi {
 
 	// ── Permissions ─────────────────────────────────────────────────────────
 
-	public function check_read_permission(): bool {
-		return current_user_can( 'edit_posts' );
+	public function check_read_permission( \WP_REST_Request $request ) {
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			return new \WP_Error(
+				'subtleforms_forbidden',
+				__( 'You are not allowed to perform this action.', 'subtleforms' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		$nonce = $request->get_header( 'X-WP-Nonce' );
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+			return new \WP_Error(
+				'subtleforms_invalid_nonce',
+				__( 'Security check failed. Please refresh and try again.', 'subtleforms' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
 	}
 
-	public function check_write_permission(): bool {
-		return current_user_can( 'edit_posts' );
+	public function check_write_permission( \WP_REST_Request $request ) {
+		if ( ! current_user_can( 'edit_posts' ) ) {
+			return new \WP_Error(
+				'subtleforms_forbidden',
+				__( 'You are not allowed to perform this action.', 'subtleforms' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		$nonce = $request->get_header( 'X-WP-Nonce' );
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+			return new \WP_Error(
+				'subtleforms_invalid_nonce',
+				__( 'Security check failed. Please refresh and try again.', 'subtleforms' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
 	}
 }

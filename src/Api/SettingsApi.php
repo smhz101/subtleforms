@@ -260,10 +260,28 @@ class SettingsApi {
 	/**
 	 * Check permissions
 	 *
-	 * @return bool
+	 * @param \WP_REST_Request $request Incoming request.
+	 * @return true|\WP_Error
 	 */
-	public function checkPermissions() {
-		return current_user_can( 'manage_options' );
+	public function checkPermissions( \WP_REST_Request $request ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return new \WP_Error(
+				'subtleforms_forbidden',
+				__( 'You are not allowed to perform this action.', 'subtleforms' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		$nonce = $request->get_header( 'X-WP-Nonce' );
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+			return new \WP_Error(
+				'subtleforms_invalid_nonce',
+				__( 'Security check failed. Please refresh and try again.', 'subtleforms' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
 	}
 
 	/**
@@ -414,6 +432,55 @@ class SettingsApi {
 				'minimum' => 0,
 				'maximum' => 3650,
 			),
+
+			// ── Extensions ────────────────────────────────────────────────────
+
+			// Webhooks
+			'ext_webhooks_enabled'              => array( 'type' => 'boolean' ),
+			'ext_webhooks_signing_secret'       => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_webhooks_events'               => array( 'type' => 'array' ),
+
+			// Email Marketing
+			'ext_email_marketing_enabled'       => array( 'type' => 'boolean' ),
+			'ext_email_marketing_provider'      => array( 'type' => 'string', 'enum' => array( 'mailchimp', 'convertkit' ), 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_email_marketing_api_key'       => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_email_marketing_list_id'       => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_email_marketing_double_optin'  => array( 'type' => 'boolean' ),
+
+			// CRM
+			'ext_crm_enabled'                   => array( 'type' => 'boolean' ),
+			'ext_crm_provider'                  => array( 'type' => 'string', 'enum' => array( 'hubspot' ), 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_crm_api_key'                   => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_crm_portal_id'                 => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
+
+			// Analytics
+			'ext_analytics_enabled'             => array( 'type' => 'boolean' ),
+			'ext_analytics_view_tracking'       => array( 'type' => 'boolean' ),
+			'ext_analytics_retention_days'      => array( 'type' => 'integer', 'minimum' => 1, 'maximum' => 3650 ),
+
+			// E-commerce
+			'ext_ecommerce_enabled'             => array( 'type' => 'boolean' ),
+			'ext_ecommerce_product_id'          => array( 'type' => 'integer', 'minimum' => 0 ),
+			'ext_ecommerce_currency'            => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
+
+			// PDF
+			'ext_pdf_enabled'                   => array( 'type' => 'boolean' ),
+			'ext_pdf_template'                  => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_pdf_attach_to_email'           => array( 'type' => 'boolean' ),
+
+			// Multilanguage
+			'ext_multilanguage_enabled'         => array( 'type' => 'boolean' ),
+			'ext_multilanguage_provider'        => array( 'type' => 'string', 'enum' => array( 'wpml', 'polylang' ), 'sanitize_callback' => 'sanitize_text_field' ),
+
+			// Payments
+			'ext_payments_enabled'              => array( 'type' => 'boolean' ),
+			'ext_payments_provider'             => array( 'type' => 'string', 'enum' => array( 'stripe', 'paypal' ), 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_payments_stripe_pk'            => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_payments_stripe_sk'            => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_payments_paypal_client_id'     => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_payments_paypal_client_secret' => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_payments_currency'             => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_payments_mode'                 => array( 'type' => 'string', 'enum' => array( 'test', 'live' ), 'sanitize_callback' => 'sanitize_text_field' ),
 		);
 	}
 }

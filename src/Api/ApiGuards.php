@@ -105,25 +105,109 @@ trait ApiGuards {
 	}
 
 	/**
-	 * Check if user can read.
+	 * Verify the WP REST nonce sent in the X-WP-Nonce header.
+	 *
+	 * @wordpress/api-fetch automatically attaches this header for every request.
+	 * Returns true when valid, WP_Error(403) when missing or invalid.
+	 *
+	 * @param WP_REST_Request $request Incoming request.
+	 * @return true|\WP_Error
 	 */
-	public function check_read_permission(): bool {
-		if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-			return false;
+	protected function verifyNonce( WP_REST_Request $request ) {
+		static $verified = null;
+
+		if ($verified === true) {
+			return true;
 		}
 
-		return (bool) $this->getGate()->allows( 'api.read' );
+		$nonce = $request->get_header( 'X-WP-Nonce' );
+
+		if ( empty( $nonce ) ) {
+			$nonce = $request->get_param( '_wpnonce' );
+		}
+
+		if ( empty( $nonce ) ) {
+			error_log( '[SubtleForms] Invalid nonce detected for REST request' );
+			return new \WP_Error(
+				'subtleforms_invalid_nonce',
+				__( 'Security check failed. Please refresh and try again.', 'subtleforms' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		if ( ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+			error_log( '[SubtleForms] Invalid nonce detected for REST request' );
+			return new \WP_Error(
+				'subtleforms_invalid_nonce',
+				__( 'Security check failed. Please refresh and try again.', 'subtleforms' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		$verified = true;
+		return true;
+	}
+
+	/**
+	 * Check if user can read.
+	 *
+	 * @param WP_REST_Request $request Incoming request.
+	 * @return true|\WP_Error
+	 */
+	public function check_read_permission( WP_REST_Request $request ) {
+		if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
+			return new \WP_Error(
+				'subtleforms_forbidden',
+				__( 'You are not allowed to perform this action.', 'subtleforms' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		$nonce_check = $this->verifyNonce( $request );
+		if ( is_wp_error( $nonce_check ) ) {
+			return $nonce_check;
+		}
+
+		if ( ! $this->getGate()->allows( 'api.read' ) ) {
+			return new \WP_Error(
+				'subtleforms_forbidden',
+				__( 'You are not allowed to perform this action.', 'subtleforms' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
 	}
 
 	/**
 	 * Check if user can write.
+	 *
+	 * @param WP_REST_Request $request Incoming request.
+	 * @return true|\WP_Error
 	 */
-	public function check_write_permission(): bool {
+	public function check_write_permission( WP_REST_Request $request ) {
 		if ( ! is_user_logged_in() || ! current_user_can( 'manage_options' ) ) {
-			return false;
+			return new \WP_Error(
+				'subtleforms_forbidden',
+				__( 'You are not allowed to perform this action.', 'subtleforms' ),
+				array( 'status' => 403 )
+			);
 		}
 
-		return (bool) $this->getGate()->allows( 'api.write' );
+		$nonce_check = $this->verifyNonce( $request );
+		if ( is_wp_error( $nonce_check ) ) {
+			return $nonce_check;
+		}
+
+		if ( ! $this->getGate()->allows( 'api.write' ) ) {
+			return new \WP_Error(
+				'subtleforms_forbidden',
+				__( 'You are not allowed to perform this action.', 'subtleforms' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		return true;
 	}
 
 	/**
