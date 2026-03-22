@@ -1,5 +1,9 @@
 import { __ } from '@wordpress/i18n';
 
+function uid() {
+  return Math.random().toString(36).slice(2, 10) + Date.now().toString(36);
+}
+
 function createKey(value) {
   const base = String(value || '')
     .toLowerCase()
@@ -51,6 +55,18 @@ export function createInitialSchema({
       type: resolvedType,
     },
     fields: [],
+    actions: [
+      {
+        id:       uid(),
+        type:     'email',
+        enabled:  true,
+        settings: {
+          to:      '',
+          subject: '',
+          message: '',
+        },
+      },
+    ],
   };
 
   const mode = startingPoint === 'minimal' ? 'minimal' : 'blank';
