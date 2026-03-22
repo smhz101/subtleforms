@@ -70,6 +70,12 @@ final class FormsRepository {
 	 * Get a form by ID.
 	 */
 	public function find( int $id ): ?array {
+		$cache_key = "subtleforms_form_{$id}";
+		$cached    = wp_cache_get( $cache_key, 'subtleforms' );
+		if ( $cached !== false ) {
+			return $cached;
+		}
+
 		global $wpdb;
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery -- Table name is safe. Direct query needed for dynamic form data.
 		$result = $wpdb->get_row(
@@ -83,6 +89,8 @@ final class FormsRepository {
 
 		// Decode JSON config
 		$result['config'] = Helpers::safe_json_decode( Helpers::safe_array_get( $result, 'config', '{}' ), true, array() );
+
+		wp_cache_set( $cache_key, $result, 'subtleforms', 60 );
 		return $result;
 	}
 
@@ -367,6 +375,13 @@ final class FormsRepository {
 		global $wpdb;
 
 		if ( $version === null ) {
+			// Serve the active schema from object cache when no specific version is requested.
+			$cache_key    = "subtleforms_schema_{$formId}";
+			$cached_schema = wp_cache_get( $cache_key, 'subtleforms' );
+			if ( $cached_schema !== false ) {
+				return $cached_schema;
+			}
+
 			// Try to get active version first
 			$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$this->schemas_table} WHERE form_id = %d AND active = 1 ORDER BY version DESC LIMIT 1", $formId ), ARRAY_A );
 
@@ -427,12 +442,19 @@ final class FormsRepository {
 		$migrator      = new \SubtleForms\Support\SchemaMigrator();
 		$decodedSchema = $migrator->migrate( $decodedSchema );
 
-		return array(
+		$schemaResult = array(
 			'version'    => (int) $row['version'],
 			'schema'     => $decodedSchema,
 			'created_at' => $row['created_at'],
 			'active'     => (bool) $row['active'],
 		);
+
+		// Cache active-version lookups (version === null path, set above).
+		if ( isset( $cache_key ) ) {
+			wp_cache_set( $cache_key, $schemaResult, 'subtleforms', 60 );
+		}
+
+		return $schemaResult;
 	}
 
 	/**
@@ -516,6 +538,12 @@ final class FormsRepository {
 			}
 		}
 
+		if ( $updated !== false ) {
+			// Invalidate both the form row and the cached active schema.
+			wp_cache_delete( "subtleforms_form_{$formId}", 'subtleforms' );
+			wp_cache_delete( "subtleforms_schema_{$formId}", 'subtleforms' );
+		}
+
 		return $updated !== false;
 	}
 
@@ -574,6 +602,10 @@ final class FormsRepository {
 			array( '%d' )
 		);
 
+		if ( $result !== false ) {
+			wp_cache_delete( "subtleforms_form_{$id}", 'subtleforms' );
+		}
+
 		return $result !== false;
 	}
 
@@ -583,6 +615,10 @@ final class FormsRepository {
 	public function delete( int $id ): bool {
 		global $wpdb;
 		$result = $wpdb->delete( $this->table, array( 'id' => $id ), array( '%d' ) );
+		if ( $result !== false ) {
+			wp_cache_delete( "subtleforms_form_{$id}", 'subtleforms' );
+			wp_cache_delete( "subtleforms_schema_{$id}", 'subtleforms' );
+		}
 		return $result !== false;
 	}
 
