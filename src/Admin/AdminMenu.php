@@ -12,6 +12,7 @@ use SubtleForms\Support\Capabilities;
 use SubtleForms\Support\Helpers;
 use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Repositories\SubmissionsRepository;
+use SubtleForms\Licensing\SubscriptionManager;
 
 /**
  * Admin menu and interface management.
@@ -34,6 +35,11 @@ class AdminMenu {
 	private $submissionsRepo;
 
 	/**
+	 * @var SubscriptionManager|null
+	 */
+	private $subscriptionManager;
+
+	/**
 	 * @var string
 	 */
 	private $currentPage = '';
@@ -41,11 +47,13 @@ class AdminMenu {
 	public function __construct(
 		Capabilities $caps,
 		?FormsRepository $formsRepo = null,
-		?SubmissionsRepository $submissionsRepo = null
+		?SubmissionsRepository $submissionsRepo = null,
+		?SubscriptionManager $subscriptionManager = null
 	) {
-		$this->caps            = $caps;
-		$this->formsRepo       = $formsRepo ?? new FormsRepository();
-		$this->submissionsRepo = $submissionsRepo ?? new SubmissionsRepository();
+		$this->caps                = $caps;
+		$this->formsRepo           = $formsRepo ?? new FormsRepository();
+		$this->submissionsRepo     = $submissionsRepo ?? new SubmissionsRepository();
+		$this->subscriptionManager = $subscriptionManager;
 
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
@@ -270,14 +278,16 @@ class AdminMenu {
 			'subtleforms-admin',
 			'subtleformsAdmin',
 			array(
-				'ajaxUrl'       => admin_url( 'admin-ajax.php' ),
-				'restUrl'       => rest_url( 'subtleforms/v1' ),
-				'nonce'         => wp_create_nonce( 'subtleforms_admin' ),
-				'restNonce'     => wp_create_nonce( 'wp_rest' ),
-				'capabilities'  => $this->caps->all(),
-				'hasProPlugin'  => defined( 'SUBTLEFORMS_PRO_VERSION' ),
-				'license'       => $license_data, // License info from Pro plugin (no API calls)
-				'i18n'          => array(
+				'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
+				'restUrl'        => rest_url( 'subtleforms/v1' ),
+				'nonce'          => wp_create_nonce( 'subtleforms_admin' ),
+				'restNonce'      => wp_create_nonce( 'wp_rest' ),
+				'capabilities'   => $this->caps->all(),
+				'hasProPlugin'   => defined( 'SUBTLEFORMS_PRO_VERSION' ),
+				'license'        => $license_data, // Legacy: License info from Pro plugin (no API calls)
+				'subscription'   => $this->buildSubscriptionData(), // New: subtleforms.com subscription
+				'extensions'     => $this->buildExtensionsData(),
+				'i18n'           => array(
 					'confirmDelete' => __( 'Are you sure you want to delete this item?', 'subtleforms' ),
 					'error'         => __( 'An error occurred. Please try again.', 'subtleforms' ),
 					'success'       => __( 'Action completed successfully.', 'subtleforms' ),
@@ -297,6 +307,131 @@ class AdminMenu {
 
 		// Allow extensions to enqueue their assets
 		do_action( 'subtleforms/admin_enqueue_scripts', $hook );
+	}
+
+	/**
+	 * Build subscription data for JS exposure.
+	 *
+	 * @return array
+	 */
+	private function buildSubscriptionData(): array {
+		if ( $this->subscriptionManager !== null ) {
+			return $this->subscriptionManager->toArray();
+		}
+		return array(
+			'status'    => 'inactive',
+			'plan'      => 'free',
+			'email'     => '',
+			'expiresAt' => null,
+			'isDev'     => false,
+			'connected' => false,
+		);
+	}
+
+	/**
+	 * Build the extensions data array for the front end.
+	 *
+	 * Returns a map of slug => {label, enabled, configured, available} where:
+	 *   - enabled:    admin has turned the extension on in Settings
+	 *   - configured: the required API keys / settings appear to be present
+	 *   - available:  the capability gate allows this extension (Pro licence)
+	 */
+	private function buildExtensionsData(): array {
+		$settings = new \SubtleForms\Support\Settings();
+		$gate     = new \SubtleForms\Support\FeatureGate( $this->caps );
+
+		$extensions = array(
+			array(
+				'slug'        => 'webhooks',
+				'label'       => __( 'Webhooks', 'subtleforms' ),
+				'description' => __( 'Send real-time HTTP POST payloads to external URLs on form submissions.', 'subtleforms' ),
+			),
+			array(
+				'slug'        => 'email_marketing',
+				'label'       => __( 'Email Marketing', 'subtleforms' ),
+				'description' => __( 'Automatically subscribe form submitters to Mailchimp or ConvertKit audiences.', 'subtleforms' ),
+			),
+			array(
+				'slug'        => 'crm',
+				'label'       => __( 'CRM', 'subtleforms' ),
+				'description' => __( 'Create or update contacts in HubSpot from every form submission.', 'subtleforms' ),
+			),
+			array(
+				'slug'        => 'analytics',
+				'label'       => __( 'Analytics', 'subtleforms' ),
+				'description' => __( 'Track form views and submission rates directly in your dashboard.', 'subtleforms' ),
+			),
+			array(
+				'slug'        => 'ecommerce',
+				'label'       => __( 'E-commerce', 'subtleforms' ),
+				'description' => __( 'Create WooCommerce orders automatically when a form is submitted.', 'subtleforms' ),
+			),
+			array(
+				'slug'        => 'pdf',
+				'label'       => __( 'PDF Generator', 'subtleforms' ),
+				'description' => __( 'Generate PDF documents from submissions and attach them to emails.', 'subtleforms' ),
+			),
+			array(
+				'slug'        => 'multilanguage',
+				'label'       => __( 'Multilanguage', 'subtleforms' ),
+				'description' => __( 'Register form strings with WPML or Polylang for full translation support.', 'subtleforms' ),
+			),
+			array(
+				'slug'        => 'payments',
+				'label'       => __( 'Payments', 'subtleforms' ),
+				'description' => __( 'Accept Stripe or PayPal payments directly through your forms.', 'subtleforms' ),
+			),
+		);
+
+		$result = array();
+
+		foreach ( $extensions as $meta ) {
+			$slug      = $meta['slug'];
+			$cap_key   = 'extensions.' . $slug;
+			$sk        = 'ext_' . $slug;
+			$available = $gate->allows( $cap_key );
+			$enabled   = (bool) $settings->get( $sk . '_enabled' );
+
+			// Lightweight check: does the extension have its primary credential set?
+			$configured = $this->isExtensionConfigured( $slug, $settings );
+
+			$result[ $slug ] = array(
+				'slug'        => $slug,
+				'label'       => $meta['label'],
+				'description' => $meta['description'],
+				'available'   => $available,  // false = Pro feature locked
+				'enabled'     => $enabled && $available,
+				'configured'  => $configured,
+			);
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Rough check whether the critical settings for an extension look populated.
+	 */
+	private function isExtensionConfigured( string $slug, \SubtleForms\Support\Settings $settings ): bool {
+		$checks = array(
+			'webhooks'       => array(), // no required key — endpoint can be per-form
+			'email_marketing' => array( 'ext_email_marketing_api_key', 'ext_email_marketing_list_id' ),
+			'crm'            => array( 'ext_crm_api_key' ),
+			'analytics'      => array(), // no external API needed
+			'ecommerce'      => array(), // depends on WooCommerce products
+			'pdf'            => array(), // no API key needed
+			'multilanguage'  => array(), // no API key needed
+			'payments'       => array( 'ext_payments_stripe_pk' ), // either stripe or paypal
+		);
+
+		$required = $checks[ $slug ] ?? array();
+
+		foreach ( $required as $key ) {
+			if ( ! $settings->get( $key ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	private function is_builder_screen( string $hook ): bool {
