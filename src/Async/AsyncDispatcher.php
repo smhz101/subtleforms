@@ -96,7 +96,8 @@ final class AsyncDispatcher {
 		// Normalize payload
 		$job = array(
 			'url'           => $payload['url'],
-			'headers'       => $payload['headers'] ?? array( 'content-type' => 'application/json' ),
+			'method'        => $payload['method'] ?? 'POST',
+			'headers'       => $payload['headers'] ?? array( 'Content-Type' => 'application/json' ),
 			'body'          => $payload['body'] ?? '',
 			'timeout'       => $payload['timeout'] ?? 10,
 			'submission_id' => $payload['submission_id'] ?? null,
@@ -202,12 +203,16 @@ final class AsyncDispatcher {
 		try {
 			self::log( "Executing webhook job (attempt #{$retry_count})", array(
 				'url'           => $job['url'],
+				'method'        => $job['method'] ?? 'POST',
 				'submission_id' => $job['submission_id'] ?? null,
 			) );
 
-			$response = wp_remote_post(
+			$method = strtoupper( $job['method'] ?? 'POST' );
+
+			$response = wp_remote_request(
 				$job['url'],
 				array(
+					'method'  => $method,
 					'headers' => $job['headers'],
 					'body'    => $job['body'],
 					'timeout' => $job['timeout'] ?? 10,
@@ -225,6 +230,7 @@ final class AsyncDispatcher {
 
 			self::log( 'Webhook executed successfully', array(
 				'url'           => $job['url'],
+				'method'        => $method,
 				'status'        => $code,
 				'submission_id' => $job['submission_id'] ?? null,
 			) );
