@@ -23,10 +23,20 @@ final class Capabilities {
 	private array $map;
 
 	/**
-	 * @param array<string,bool> $defaults
+	 * @param array<string,bool>                                       $defaults
+	 * @param \SubtleForms\Licensing\SubscriptionManager|null $subscriptionManager
 	 */
-	public function __construct( array $defaults = array() ) {
+	public function __construct( array $defaults = array(), $subscriptionManager = null ) {
 		$this->map = $defaults ?: self::defaults();
+
+		// Apply subscription-based overrides (after free defaults, before Pro plugin filter).
+		if ( $subscriptionManager !== null ) {
+			$subCaps = $subscriptionManager->getCapabilities();
+			if ( ! empty( $subCaps ) ) {
+				$this->map = array_merge( $this->map, $subCaps );
+			}
+		}
+
 		$this->map = apply_filters( 'subtleforms/capabilities', $this->map );
 	}
 
@@ -63,6 +73,19 @@ final class Capabilities {
 
 			'api.read'                   => true,
 			'api.write'                  => true,
+
+			// Extensions — all disabled in free tier, Pro plugin overrides via subtleforms/capabilities filter
+			'extensions.webhooks'        => false,
+			'extensions.email_marketing' => false,
+			'extensions.crm'             => false,
+			'extensions.analytics'       => false,
+			'extensions.ecommerce'       => false,
+			'extensions.pdf'             => false,
+			'extensions.multilanguage'   => false,
+			'extensions.payments'        => false,
+
+			// Templates (existing Pro feature key)
+			'templates.pro'              => false,
 		);
 	}
 

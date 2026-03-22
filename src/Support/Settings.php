@@ -61,6 +61,55 @@ class Settings {
 
 		// Privacy & GDPR
 		'data_retention_days'        => 0, // 0 = keep forever
+
+		// ── Extensions ───────────────────────────────────────────────────────
+
+		// Webhooks
+		'ext_webhooks_enabled'              => false,
+		'ext_webhooks_signing_secret'       => '',
+		'ext_webhooks_events'               => array( 'submission.created' ),
+
+		// Email Marketing
+		'ext_email_marketing_enabled'       => false,
+		'ext_email_marketing_provider'      => 'mailchimp', // mailchimp|convertkit
+		'ext_email_marketing_api_key'       => '',
+		'ext_email_marketing_list_id'       => '',
+		'ext_email_marketing_double_optin'  => false,
+
+		// CRM (HubSpot)
+		'ext_crm_enabled'                   => false,
+		'ext_crm_provider'                  => 'hubspot',
+		'ext_crm_api_key'                   => '',
+		'ext_crm_portal_id'                 => '',
+
+		// Analytics
+		'ext_analytics_enabled'             => false,
+		'ext_analytics_view_tracking'       => true,
+		'ext_analytics_retention_days'      => 90,
+
+		// E-commerce (WooCommerce)
+		'ext_ecommerce_enabled'             => false,
+		'ext_ecommerce_product_id'          => 0,
+		'ext_ecommerce_currency'            => 'USD',
+
+		// PDF Generation
+		'ext_pdf_enabled'                   => false,
+		'ext_pdf_template'                  => 'default',
+		'ext_pdf_attach_to_email'           => false,
+
+		// Multilanguage
+		'ext_multilanguage_enabled'         => false,
+		'ext_multilanguage_provider'        => 'wpml', // wpml|polylang
+
+		// Payments (Stripe / PayPal)
+		'ext_payments_enabled'              => false,
+		'ext_payments_provider'             => 'stripe', // stripe|paypal
+		'ext_payments_stripe_pk'            => '',
+		'ext_payments_stripe_sk'            => '',
+		'ext_payments_paypal_client_id'     => '',
+		'ext_payments_paypal_client_secret' => '',
+		'ext_payments_currency'             => 'USD',
+		'ext_payments_mode'                 => 'test', // test|live
 	);
 
 	/**
@@ -143,6 +192,39 @@ class Settings {
 			'min' => 0,
 			'max' => 3650,
 		),
+
+		// Extensions
+		'ext_webhooks_enabled'              => 'boolean',
+		'ext_webhooks_signing_secret'       => array( 'string', 'max' => 200 ),
+		'ext_webhooks_events'               => 'array',
+		'ext_email_marketing_enabled'       => 'boolean',
+		'ext_email_marketing_provider'      => array( 'mailchimp', 'convertkit' ),
+		'ext_email_marketing_api_key'       => array( 'string', 'max' => 500 ),
+		'ext_email_marketing_list_id'       => array( 'string', 'max' => 200 ),
+		'ext_email_marketing_double_optin'  => 'boolean',
+		'ext_crm_enabled'                   => 'boolean',
+		'ext_crm_provider'                  => array( 'hubspot' ),
+		'ext_crm_api_key'                   => array( 'string', 'max' => 500 ),
+		'ext_crm_portal_id'                 => array( 'string', 'max' => 100 ),
+		'ext_analytics_enabled'             => 'boolean',
+		'ext_analytics_view_tracking'       => 'boolean',
+		'ext_analytics_retention_days'      => array( 'integer', 'min' => 1, 'max' => 3650 ),
+		'ext_ecommerce_enabled'             => 'boolean',
+		'ext_ecommerce_product_id'          => array( 'integer', 'min' => 0 ),
+		'ext_ecommerce_currency'            => array( 'string', 'max' => 10 ),
+		'ext_pdf_enabled'                   => 'boolean',
+		'ext_pdf_template'                  => array( 'string', 'max' => 100 ),
+		'ext_pdf_attach_to_email'           => 'boolean',
+		'ext_multilanguage_enabled'         => 'boolean',
+		'ext_multilanguage_provider'        => array( 'wpml', 'polylang' ),
+		'ext_payments_enabled'              => 'boolean',
+		'ext_payments_provider'             => array( 'stripe', 'paypal' ),
+		'ext_payments_stripe_pk'            => array( 'string', 'max' => 500 ),
+		'ext_payments_stripe_sk'            => array( 'string', 'max' => 500 ),
+		'ext_payments_paypal_client_id'     => array( 'string', 'max' => 500 ),
+		'ext_payments_paypal_client_secret' => array( 'string', 'max' => 500 ),
+		'ext_payments_currency'             => array( 'string', 'max' => 10 ),
+		'ext_payments_mode'                 => array( 'test', 'live' ),
 	);
 
 	/**
