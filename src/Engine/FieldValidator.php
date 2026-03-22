@@ -193,6 +193,11 @@ final class FieldValidator {
 			return 'Must be a valid number.';
 		}
 
+		$float = (float) $value;
+		if ( is_infinite( $float ) || is_nan( $float ) ) {
+			return 'Must be a valid finite number.';
+		}
+
 		return null;
 	}
 

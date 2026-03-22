@@ -5,6 +5,7 @@ namespace SubtleForms\Engine;
 
 use SubtleForms\Engine\ActionRegistry as AR;
 use SubtleForms\Contracts\ActionInterface;
+use SubtleForms\Support\Logger;
 use InvalidArgumentException;
 
 /**
@@ -78,16 +79,27 @@ final class SchemaCompiler {
 
 			$type = $act['type'];
 
-			// Resolve definition first
+			// Resolve definition first — soft-skip unknown types so that Pro
+			// deactivation or schema migration gaps don't break live submissions.
 			$def = $this->registry->getDefinition( $type );
 			if ( $def === null ) {
-				throw new InvalidArgumentException( sprintf( "Action type '%s' is not defined. Register an ActionDefinition before using it in schemas.", $type ) );
+				Logger::warning(
+					"SchemaCompiler: Unknown action type '%s' at index %d — skipping. Activate the required plugin or remove this action from the schema.",
+					$type,
+					$i
+				);
+				continue;
 			}
 
-			// Resolve implementation
+			// Resolve implementation — same soft-skip if definition exists but class is missing.
 			$actionImpl = $this->registry->getImplementation( $type );
 			if ( $actionImpl === null ) {
-				throw new InvalidArgumentException( sprintf( "No implementation registered for action type '%s'.", $type ) );
+				Logger::warning(
+					"SchemaCompiler: No implementation for action type '%s' at index %d — skipping.",
+					$type,
+					$i
+				);
+				continue;
 			}
 
 			// Deterministic step id: action:type:index

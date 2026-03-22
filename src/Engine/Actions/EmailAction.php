@@ -57,8 +57,20 @@ final class EmailAction implements ActionInterface {
 			return;
 		}
 
-		// Validate email address
-		if ( ! is_email( $to ) ) {
+		// Support comma-separated recipients; sanitize and validate each address.
+		$raw_recipients = array_map( 'trim', explode( ',', $to ) );
+		$valid_recipients = array();
+		$invalid_recipients = array();
+		foreach ( $raw_recipients as $addr ) {
+			$addr = sanitize_email( $addr );
+			if ( is_email( $addr ) ) {
+				$valid_recipients[] = $addr;
+			} else {
+				$invalid_recipients[] = $addr;
+			}
+		}
+
+		if ( empty( $valid_recipients ) ) {
 			$fail   = $context->getMeta( 'action_failures', array() );
 			$fail[] = array(
 				'action' => 'email',
@@ -67,9 +79,15 @@ final class EmailAction implements ActionInterface {
 			);
 			$context->setMeta( 'action_failures', $fail );
 
-			$this->log_debug( $context, 'Email failed: Invalid recipient address', array( 'to' => $to ) );
+			$this->log_debug( $context, 'Email failed: No valid recipient addresses', array( 'to' => $to ) );
 			return;
 		}
+
+		if ( ! empty( $invalid_recipients ) ) {
+			$this->log_debug( $context, 'Email: Skipping invalid addresses', array( 'invalid' => $invalid_recipients ) );
+		}
+
+		$to = implode( ', ', $valid_recipients );
 
 		// Deterministic content: use payload JSON if body not provided
 		if ( $body === '' ) {
@@ -80,6 +98,14 @@ final class EmailAction implements ActionInterface {
 		if ( ! is_array( $headers ) ) {
 			$headers = array();
 		}
+
+		// Strip CRLF from each header to prevent header injection attacks.
+		$headers = array_map(
+			static function ( $header ) {
+				return is_string( $header ) ? preg_replace( '/[\r\n]+/', '', $header ) : $header;
+			},
+			$headers
+		);
 
 		// Add default headers
 		if ( ! $this->has_header( $headers, 'Content-Type' ) ) {
