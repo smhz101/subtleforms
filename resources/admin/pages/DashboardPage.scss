@@ -8,6 +8,12 @@
 	&__content {
 		padding: 1.5rem;
 	}
+	&__card-heading {
+		margin: 0;
+	}
+	&__card {
+		padding: 0 !important;
+	}
 }
 
 /* Header */
@@ -409,6 +415,14 @@ a.subtleforms-stat-card:hover {
 	grid-template-columns: repeat(1, minmax(0, 1fr));
 	gap: 1rem;
 	margin-bottom: 1.5rem;
+
+	.stat-content {
+		.stat-value {
+			margin-top: 0;
+			font-size: 3rem;
+			font-weight: 600;
+		}
+	}
 
 	@media (min-width: 768px) {
 		grid-template-columns: repeat(2, minmax(0, 1fr));

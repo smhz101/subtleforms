@@ -19,12 +19,17 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
   const [settings, setSettings] = useState(null);
 
   function generateDefaultTitle() {
-    const suffix = Math.floor(1000 + Math.random() * 9000);
-    return sprintf(
-      /* translators: %1$d: numeric suffix used to create a unique title */
-      __('Untitled Form %1$d', 'subtleforms'),
-      suffix
-    );
+    try {
+      const next = parseInt( localStorage.getItem( 'sf_form_seq' ) || '0', 10 ) + 1;
+      localStorage.setItem( 'sf_form_seq', String( next ) );
+      return sprintf(
+        /* translators: %1$d: sequential form number */
+        __( 'New Form %1$d', 'subtleforms' ),
+        next
+      );
+    } catch ( _e ) {
+      return sprintf( __( 'New Form %1$d', 'subtleforms' ), Date.now() % 10000 );
+    }
   }
 
   // Load field definitions from API
@@ -136,6 +141,8 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
       payload.schema_version = payload.schema_version || 1;
       if (!payload.metadata) payload.metadata = {};
       if (!payload.metadata.name) payload.metadata.name = 'form_schema';
+      // Normalize legacy/alias form types to canonical values
+      if (payload.metadata.type === 'multistep' || payload.metadata.type === 'sectioned') payload.metadata.type = 'multi-step';
 
       const title = bootstrap.form?.title || payload.metadata?.title || generateDefaultTitle();
       payload.metadata.title = title;
@@ -187,6 +194,8 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
       // Ensure metadata.name exists (required by backend validator)
       if (!payload.metadata) payload.metadata = {};
       if (!payload.metadata.name) payload.metadata.name = 'form_schema';
+      // Normalize legacy/alias form types to canonical values
+      if (payload.metadata.type === 'multistep' || payload.metadata.type === 'sectioned') payload.metadata.type = 'multi-step';
 
       // Load title from form metadata if available
       const loadedTitle = responseBody?.form?.title || payload.metadata?.title;

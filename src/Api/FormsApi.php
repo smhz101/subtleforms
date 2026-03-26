@@ -611,6 +611,20 @@ final class FormsApi {
 			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
 		}
 
+		// Gate Pro-template usage server-side.
+		$_schema_check = $validated['schema'] ?? null;
+		if ( is_array( $_schema_check ) ) {
+			$_tpl_id = $_schema_check['metadata']['template'] ?? null;
+			if ( $_tpl_id && $_tpl_id !== 'blank' ) {
+				$_tpl = \SubtleForms\Templates\FormTemplates::get( $_tpl_id );
+				if ( $_tpl && ! empty( $_tpl['is_pro'] ) && ! $this->gate->allows( 'templates.pro' ) ) {
+					return ApiResponse::forbidden(
+						__( 'This template requires a Pro license.', 'subtleforms' )
+					);
+				}
+			}
+		}
+
 		$defaultStatus = $this->settings ? $this->settings->get( 'default_form_status', 'draft' ) : 'draft';
 
 		$data = array(

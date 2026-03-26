@@ -140,9 +140,9 @@ export default function Dashboard() {
           <div>
             <Card>
               <CardHeader>
-                <h2>{__('Recent Submissions', 'subtleforms')}</h2>
+                <h2 className='sf-dashboard-page__card-heading'>{__('Recent Submissions', 'subtleforms')}</h2>
               </CardHeader>
-              <CardBody>
+              <CardBody className='sf-dashboard-page__card'>
                 {recent_submissions.length > 0 ? (
                   <div className='subtleforms-dashboard-list'>
                     {recent_submissions.map((submission) => (
@@ -203,9 +203,9 @@ export default function Dashboard() {
           <div>
             <Card>
               <CardHeader>
-                <h2>{__('Recently Edited Forms', 'subtleforms')}</h2>
+                <h2 className='sf-dashboard-page__card-heading'>{__('Recently Edited Forms', 'subtleforms')}</h2>
               </CardHeader>
-              <CardBody>
+              <CardBody className='sf-dashboard-page__card'>
                 {recent_forms.length > 0 ? (
                   <div className='subtleforms-dashboard-list'>
                     {recent_forms.map((form) => (
@@ -222,32 +222,27 @@ export default function Dashboard() {
                           <div className='sf-item-meta'>
                             {/* Form Type Badge */}
                             {(() => {
-                              const formType = form.metadata?.type || 'regular';
+                              const raw = form.metadata?.type || 'regular';
+                              // Normalize legacy/alias types to canonical values
+                              const formType =
+                                raw === 'multistep' || raw === 'sectioned'
+                                  ? 'multi-step'
+                                  : raw;
                               const typeConfig = {
                                 regular: {
                                   icon: Icon.FileText,
-                                  label: __('Regular', 'subtleforms'),
+                                  label: __('Standard', 'subtleforms'),
                                   color: 'gray',
                                 },
-                                multistep: {
+                                'multi-step': {
                                   icon: Icon.Layers,
                                   label: __('Multi-step', 'subtleforms'),
                                   color: 'purple',
-                                },
-                                sectioned: {
-                                  icon: Icon.List,
-                                  label: __('Sectioned', 'subtleforms'),
-                                  color: 'indigo',
                                 },
                                 conversational: {
                                   icon: Icon.MessageCircle,
                                   label: __('Conversational', 'subtleforms'),
                                   color: 'blue',
-                                },
-                                payment: {
-                                  icon: Icon.CreditCard,
-                                  label: __('Payment', 'subtleforms'),
-                                  color: 'green',
                                 },
                               };
                               const config =
@@ -425,7 +420,7 @@ function StatCard({ title, value, subtitle, icon, link }) {
     <>
       <div className='stat-icon'>{icon}</div>
       <div className='stat-content'>
-        <div className='stat-value'>{value.toLocaleString()}</div>
+        <h1 className='stat-value'>{value.toLocaleString()}</h1>
         <div className='stat-title'>{title}</div>
         {subtitle && <div className='stat-subtitle'>{subtitle}</div>}
       </div>

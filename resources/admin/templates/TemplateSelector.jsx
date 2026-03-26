@@ -60,6 +60,7 @@ export default function TemplateSelector({
 
   const getFormTypeLabel = (type) => {
     switch (type) {
+      case 'multi-step':
       case 'multistep':
         return __('Multi-Step', 'subtleforms');
       case 'conversational':
@@ -117,17 +118,12 @@ export default function TemplateSelector({
               <p className='sf-template-selector__empty-text'>
                 {__('No templates found', 'subtleforms')}
               </p>
-              {!hasProTemplates && (
-                <p className='sf-template-selector__empty-subtext'>
-                  {__('Unlock premium templates by activating your Pro license', 'subtleforms')}
-                </p>
-              )}
             </div>
           ) : (
             <div className='sf-template-selector__grid'>
               {filteredTemplates.map((template) => {
-                // Pro template is locked only if license is expired/inactive
-                const isLocked = template.is_pro && !canUseProTemplates;
+                // Use server-supplied is_locked flag; fall back to JS capability check.
+                const isLocked = template.is_locked || (template.is_pro && !canUseProTemplates);
                 
                 // Check if this template is selected (handle both ID string and full object)
                 const isSelected = selectedTemplate?.id ? 
@@ -139,7 +135,6 @@ export default function TemplateSelector({
                     key={template.id}
                     type='button'
                     onClick={() => handleTemplateClick(template)}
-                    disabled={isLocked}
                     className={clsx(
                       'sf-template-card',
                       isSelected && 'sf-template-card--selected',
@@ -191,7 +186,7 @@ export default function TemplateSelector({
       {/* Upgrade Modal */}
       {showUpgradeModal && selectedProTemplate && (
         <Modal
-          title={__('Unlock Pro Templates', 'subtleforms')}
+          title={__('Unlock this template', 'subtleforms')}
           onRequestClose={() => setShowUpgradeModal(false)}
           className='sf-upgrade-modal'>
           <UpgradePrompt

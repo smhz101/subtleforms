@@ -156,7 +156,22 @@ final class FieldsApi {
 			return $rateLimitResponse;
 		}
 
-		$templates = \SubtleForms\Templates\FormTemplates::get_all();
+		$templates  = \SubtleForms\Templates\FormTemplates::get_all();
+		$canUsePro  = $this->gate->allows( 'templates.pro' );
+
+		// Mark Pro templates as locked when the current user lacks the capability.
+		// Templates are NOT removed — the UI uses is_locked to show upgrade prompts.
+		if ( ! $canUsePro ) {
+			$templates = array_map(
+				function ( $tpl ) {
+					if ( ! empty( $tpl['is_pro'] ) ) {
+						$tpl['is_locked'] = true;
+					}
+					return $tpl;
+				},
+				$templates
+			);
+		}
 
 		return ApiResponse::success(
 			array(

@@ -1,6 +1,12 @@
 /**
  * Template Registry Index
  * Aggregates all templates and provides API
+ *
+ * @deprecated The TEMPLATES array and helper functions below (getTemplatesByCategory,
+ * searchTemplates, getTemplateById) are not consumed by any UI component. Template
+ * data is served from the REST API (GET /subtleforms/v1/templates) via useTemplates().
+ * The only active export used outside this file is TEMPLATE_CATEGORIES (re-exported
+ * from ./categories), which is still imported by CreateFormPage.jsx and TemplateSelector.jsx.
  */
 
 // Re-export categories

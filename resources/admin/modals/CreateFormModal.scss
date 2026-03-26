@@ -377,3 +377,39 @@
 		transform: rotate(360deg);
 	}
 }
+
+.sf-create-form-modal {
+	&__sub-options {
+		display: flex;
+		flex-direction: column;
+		gap: 0.375rem;
+		margin-top: 0.75rem;
+		padding: 0.75rem 1rem;
+		background: var(--sf-gray-50, #f9fafb);
+		border: 1px solid var(--sf-gray-200, #e5e7eb);
+		border-radius: 0.5rem;
+	}
+
+	&__radio-option {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		cursor: pointer;
+
+		input[type="radio"] {
+			margin: 0;
+			cursor: pointer;
+			accent-color: var(--sf-blue-600, #2563eb);
+		}
+	}
+
+	&__radio-label {
+		font-size: 0.875rem;
+		color: var(--sf-gray-700, #374151);
+		line-height: 1.25rem;
+	}
+
+	&__template-selector {
+		margin-top: 1rem;
+	}
+}

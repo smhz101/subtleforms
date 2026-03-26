@@ -13,229 +13,396 @@
 
 @use '../../styles/variables' as *;
 
+// .sf-step-navigator {
+// 	background-color: white;
+// 	padding: $space-4 $space-6;
+// 	border-bottom: 1px solid $sf-stone-200;
+// 	width: 100%;
+// 	position: relative;
+
+// 	// Progress bar base
+// 	&::before {
+// 		content: '';
+// 		position: absolute;
+// 		top: 50%;
+// 		left: $space-6;
+// 		right: $space-6;
+// 		height: 2px;
+// 		background-color: $sf-stone-200;
+// 		transform: translateY(-50%);
+// 		z-index: 1;
+// 		pointer-events: none;
+// 	}
+
+// 	&--empty {
+// 		background-color: $sf-stone-50;
+// 		padding: $space-4 $space-6;
+// 		border-bottom: 1px solid $sf-stone-200;
+
+// 		&::before {
+// 			display: none;
+// 		}
+// 	}
+
+// 	&__empty-container {
+// 		display: flex;
+// 		justify-content: space-between;
+// 		align-items: center;
+// 	}
+
+// 	&__empty-text {
+// 		color: $sf-stone-600;
+// 		font-size: $font-size-sm;
+// 		font-family: $sf-font-sans;
+// 	}
+
+// 	&__container {
+// 		display: flex;
+// 		align-items: center;
+// 		gap: $space-3;
+// 		overflow-x: auto;
+// 		position: relative;
+// 		z-index: 2;
+// 	}
+
+// 	&__label {
+// 		display: flex;
+// 		flex-shrink: 0;
+// 		align-items: center;
+// 		gap: $space-2;
+// 		padding-right: $space-3;
+// 		border-right: 1px solid $sf-stone-200;
+// 	}
+
+// 	&__label-text {
+// 		font-weight: 700;
+// 		color: $sf-stone-700;
+// 		font-size: $font-size-xs;
+// 		text-transform: uppercase;
+// 		letter-spacing: 0.1em;
+// 	}
+
+// 	&__steps-list {
+// 		display: flex;
+// 		flex-wrap: nowrap;
+// 		align-items: center;
+// 		gap: $space-6;
+// 		min-width: 0;
+// 		flex: 1;
+// 		position: relative;
+// 	}
+
+// 	&__step-item {
+// 		display: flex;
+// 		flex-shrink: 0;
+// 		align-items: center;
+// 		gap: $space-2;
+// 		position: relative;
+// 		z-index: 2;
+// 	}
+
+// 	&__step-button {
+// 		position: relative;
+// 		display: flex;
+// 		align-items: center;
+// 		flex-direction: column;
+// 		gap: $space-2;
+// 		padding: $space-2 $space-3;
+// 		font-size: $font-size-sm;
+// 		font-weight: 500;
+// 		border-radius: $radius-lg;
+// 		border: 2px solid;
+// 		transition: all $transition-base;
+// 		white-space: nowrap;
+// 		cursor: pointer;
+// 		background-color: white;
+// 		box-shadow: $shadow-sm;
+
+// 		&--selected {
+// 			background-color: $sf-lime-50;
+// 			color: $sf-lime-900;
+// 			border-color: $sf-lime-500;
+// 			box-shadow: $shadow-lime;
+// 			transform: scale(1.05);
+
+// 			.sf-step-navigator__step-number {
+// 				background: linear-gradient(135deg, $sf-lime-500, $sf-lime-600);
+// 				color: white;
+// 				box-shadow: $shadow-lime;
+// 				animation: sf-pulse-subtle 2s ease-in-out infinite;
+// 			}
+
+// 			.sf-step-navigator__step-title {
+// 				color: $sf-lime-900;
+// 				font-weight: 600;
+// 			}
+// 		}
+
+// 		&--default {
+// 			background-color: white;
+// 			color: $sf-stone-700;
+// 			border-color: $sf-stone-200;
+
+// 			&:hover {
+// 				background-color: $sf-stone-50;
+// 				border-color: $sf-stone-300;
+// 				transform: translateY(-2px);
+// 				box-shadow: $shadow-md;
+
+// 				.sf-step-navigator__step-number {
+// 					background: linear-gradient(135deg, $sf-stone-200, $sf-stone-300);
+// 					transform: scale(1.1);
+// 				}
+// 			}
+// 		}
+// 	}
+
+// 	&__step-number {
+// 		display: flex;
+// 		align-items: center;
+// 		justify-content: center;
+// 		width: 2rem;
+// 		height: 2rem;
+// 		border-radius: $radius-full;
+// 		font-size: $font-size-sm;
+// 		font-weight: 700;
+// 		transition: all $transition-base;
+// 		background: linear-gradient(135deg, $sf-stone-100, $sf-stone-200);
+// 		color: $sf-stone-600;
+// 		box-shadow: $shadow-xs;
+// 	}
+
+// 	&__step-title {
+// 		font-family: $sf-font-sans;
+// 		font-size: $font-size-sm;
+// 		font-weight: 500;
+// 		color: $sf-stone-700;
+// 		max-width: 140px;
+// 		overflow: hidden;
+// 		text-overflow: ellipsis;
+// 		text-align: center;
+// 		transition: all $transition-fast;
+// 	}
+
+// 	&__delete-button {
+// 		display: flex;
+// 		justify-content: center;
+// 		align-items: center;
+// 		border-radius: $radius-md;
+// 		width: $space-6;
+// 		height: $space-6;
+// 		color: $sf-stone-400;
+// 		transition: all $transition-fast;
+// 		cursor: pointer;
+// 		background-color: transparent;
+
+// 		&:hover {
+// 			background-color: rgba(220, 38, 38, 0.1);
+// 			color: var(--sf-red-600);
+// 			transform: scale(1.1);
+// 		}
+
+// 		&:active {
+// 			transform: scale(0.95);
+// 		}
+// 	}
+
+// 	&__delete-icon {
+// 		width: $space-4;
+// 		height: $space-4;
+// 	}
+
+// 	&__add-button {
+// 		flex-shrink: 0;
+// 		display: flex;
+// 		align-items: center;
+// 		gap: $space-2;
+// 		margin-left: $space-3;
+// 		padding-left: $space-3;
+// 		border-left: 1px solid $sf-stone-200;
+// 	}
+
+// 	&__add-icon {
+// 		width: $space-4;
+// 		height: $space-4;
+// 	}
+// }
+
+// // Subtle pulse animation for active step
+// @keyframes sf-pulse-subtle {
+// 	0%, 100% {
+// 		opacity: 1;
+// 		transform: scale(1);
+// 	}
+// 	50% {
+// 		opacity: 0.9;
+// 		transform: scale(1.02);
+// 	}
+// }
+
+/**
+ * SaaS Segmented Step Navigator (Improved / Production Grade)
+ * Inspired by Linear / Stripe / Notion
+ */
+
 .sf-step-navigator {
-	background-color: white;
-	padding: $space-4 $space-6;
-	border-bottom: 1px solid $sf-stone-200;
-	width: 100%;
-	position: relative;
-
-	// Progress bar base
-	&::before {
-		content: '';
-		position: absolute;
-		top: 50%;
-		left: $space-6;
-		right: $space-6;
-		height: 2px;
-		background-color: $sf-stone-200;
-		transform: translateY(-50%);
-		z-index: 1;
-		pointer-events: none;
-	}
-
-	&--empty {
-		background-color: $sf-stone-50;
-		padding: $space-4 $space-6;
-		border-bottom: 1px solid $sf-stone-200;
-
-		&::before {
-			display: none;
-		}
-	}
-
-	&__empty-container {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-	}
-
-	&__empty-text {
-		color: $sf-stone-600;
-		font-size: $font-size-sm;
-		font-family: $sf-font-sans;
-	}
+	// box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
 
 	&__container {
 		display: flex;
 		align-items: center;
-		gap: $space-3;
-		overflow-x: auto;
-		position: relative;
-		z-index: 2;
-	}
-
-	&__label {
-		display: flex;
-		flex-shrink: 0;
-		align-items: center;
-		gap: $space-2;
-		padding-right: $space-3;
-		border-right: 1px solid $sf-stone-200;
+		gap: 10px;
 	}
 
 	&__label-text {
-		font-weight: 700;
-		color: $sf-stone-700;
-		font-size: $font-size-xs;
+		font-size: 11px;
+		font-weight: 600;
+		color: #9ca3af;
 		text-transform: uppercase;
-		letter-spacing: 0.1em;
+		letter-spacing: 0.05em;
+		padding: 0 4px;
 	}
 
 	&__steps-list {
 		display: flex;
-		flex-wrap: nowrap;
 		align-items: center;
-		gap: $space-6;
-		min-width: 0;
-		flex: 1;
-		position: relative;
+		background: #f7f8fa;
+		border-radius: 10px;
+		padding: 4px;
+		gap: 4px;
+		box-shadow: inset 0 1px 2px rgba(0,0,0,0.04);
 	}
 
 	&__step-item {
 		display: flex;
-		flex-shrink: 0;
 		align-items: center;
-		gap: $space-2;
 		position: relative;
-		z-index: 2;
 	}
 
 	&__step-button {
-		position: relative;
 		display: flex;
 		align-items: center;
-		flex-direction: column;
-		gap: $space-2;
-		padding: $space-2 $space-3;
-		font-size: $font-size-sm;
-		font-weight: 500;
-		border-radius: $radius-lg;
-		border: 2px solid;
-		transition: all $transition-base;
-		white-space: nowrap;
+		gap: 8px;
+		padding: 6px 12px;
+		border-radius: 8px;
+		border: none;
+		background: transparent;
 		cursor: pointer;
-		background-color: white;
-		box-shadow: $shadow-sm;
+		font-size: 13px;
+		font-weight: 500;
+		color: #4b5563;
+		transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
+	}
 
-		&--selected {
-			background-color: $sf-lime-50;
-			color: $sf-lime-900;
-			border-color: $sf-lime-500;
-			box-shadow: $shadow-lime;
-			transform: scale(1.05);
-
-			.sf-step-navigator__step-number {
-				background: linear-gradient(135deg, $sf-lime-500, $sf-lime-600);
-				color: white;
-				box-shadow: $shadow-lime;
-				animation: sf-pulse-subtle 2s ease-in-out infinite;
-			}
-
-			.sf-step-navigator__step-title {
-				color: $sf-lime-900;
-				font-weight: 600;
-			}
-		}
-
-		&--default {
-			background-color: white;
-			color: $sf-stone-700;
-			border-color: $sf-stone-200;
-
-			&:hover {
-				background-color: $sf-stone-50;
-				border-color: $sf-stone-300;
-				transform: translateY(-2px);
-				box-shadow: $shadow-md;
-
-				.sf-step-navigator__step-number {
-					background: linear-gradient(135deg, $sf-stone-200, $sf-stone-300);
-					transform: scale(1.1);
-				}
-			}
-		}
+	&__step-button:hover {
+		background: rgba(255,255,255,0.7);
+		color: #111827;
 	}
 
 	&__step-number {
-		display: flex;
+		min-width: 20px;
+		height: 20px;
+		padding: 0 6px;
+		border-radius: 999px;
+		background: #e5e7eb;
+		color: #374151;
+		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 2rem;
-		height: 2rem;
-		border-radius: $radius-full;
-		font-size: $font-size-sm;
-		font-weight: 700;
-		transition: all $transition-base;
-		background: linear-gradient(135deg, $sf-stone-100, $sf-stone-200);
-		color: $sf-stone-600;
-		box-shadow: $shadow-xs;
+		font-size: 11px;
+		font-weight: 600;
+		transition: all 0.18s ease;
 	}
 
 	&__step-title {
-		font-family: $sf-font-sans;
-		font-size: $font-size-sm;
-		font-weight: 500;
-		color: $sf-stone-700;
-		max-width: 140px;
-		overflow: hidden;
-		text-overflow: ellipsis;
-		text-align: center;
-		transition: all $transition-fast;
+		white-space: nowrap;
+	}
+
+	&__step-button--selected {
+		background: #ffffff;
+		color: #111827;
+		box-shadow:
+				0 1px 2px rgba(16, 24, 40, 0.06),
+				0 0 0 1px rgba(229, 231, 235, 0.9);
+	}
+
+	&__step-number--selected {
+		background: #111827;
+		color: #ffffff;
+	}
+
+	&__step-button:active {
+		transform: scale(0.97);
 	}
 
 	&__delete-button {
-		display: flex;
-		justify-content: center;
-		align-items: center;
-		border-radius: $radius-md;
-		width: $space-6;
-		height: $space-6;
-		color: $sf-stone-400;
-		transition: all $transition-fast;
+		opacity: 0;
+		border: none;
+		background: transparent;
 		cursor: pointer;
-		background-color: transparent;
-
-		&:hover {
-			background-color: rgba(220, 38, 38, 0.1);
-			color: var(--sf-red-600);
-			transform: scale(1.1);
-		}
-
-		&:active {
-			transform: scale(0.95);
-		}
+		padding: 4px;
+		border-radius: 6px;
+		transition: all 0.15s ease;
 	}
 
+	&__step-item:hover {
+		.sf-step-navigator__delete-button {
+			opacity: 0.5;
+		}
+	}
+	&__delete-button:hover {
+		opacity: 1;
+		background: rgba(0,0,0,0.05);
+	}
 	&__delete-icon {
-		width: $space-4;
-		height: $space-4;
+		width: 12px;
+		height: 12px;
+		color: #6b7280;
 	}
 
-	&__add-button {
-		flex-shrink: 0;
+	/* Add button (now feels native to segmented UI) */
+	&__add-button button {
 		display: flex;
 		align-items: center;
-		gap: $space-2;
-		margin-left: $space-3;
-		padding-left: $space-3;
-		border-left: 1px solid $sf-stone-200;
+		gap: 6px;
+		padding: 6px 12px;
+		border-radius: 8px;
+		font-size: 13px;
+		font-weight: 500;
+		background: #f7f8fa;
+		border: 1px solid #e5e7eb;
+		color: #4b5563;
+		transition: all 0.18s ease;
+	}
+
+	&__add-button button:hover {
+		background: #111827;
+		border-color: #111827;
+		color: #ffffff;
 	}
 
 	&__add-icon {
-		width: $space-4;
-		height: $space-4;
+		width: 14px;
+		height: 14px;
 	}
+	
+	&__step-button:focus-visible,
+	&__add-button button:focus-visible {
+		outline: 2px solid #6366f1;
+		outline-offset: 2px;
+	}
+
 }
 
-// Subtle pulse animation for active step
-@keyframes sf-pulse-subtle {
-	0%, 100% {
-		opacity: 1;
-		transform: scale(1);
-	}
-	50% {
-		opacity: 0.9;
-		transform: scale(1.02);
+/* Responsive */
+@media (max-width: 640px) {
+	.sf-step-navigator {
+		&__steps-list {
+			overflow-x: auto;
+		}
+
+		&__step-title {
+		display: none;
+		}
 	}
 }

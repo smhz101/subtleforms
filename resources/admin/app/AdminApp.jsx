@@ -61,6 +61,7 @@ const SubmissionsPage    = lazyWithRetry(() => import(/* webpackChunkName: "page
 const SubmissionDetailPage = lazyWithRetry(() => import(/* webpackChunkName: "page-submission-detail" */ '../pages/SubmissionDetailPage'));
 const BuilderPage        = lazyWithRetry(() => import(/* webpackChunkName: "page-builder" */        '../pages/BuilderPage'));
 const ExtensionsPage     = lazyWithRetry(() => import(/* webpackChunkName: "page-extensions" */     '../pages/ExtensionsPage'));
+const CreateFormPage     = lazyWithRetry(() => import(/* webpackChunkName: "page-create-form" */    '../pages/CreateFormPage'));
 
 // ─── Initial path resolver ────────────────────────────────────────────────────
 
@@ -185,16 +186,8 @@ function AppContent() {
 	const navigate  = useNavigate();
 	const location  = useLocation();
 
-	// Show "create form" modal when route is /forms/new
-	const [showCreateModal, setShowCreateModal] = useState(
-		location.pathname === '/forms/new'
-	);
-
-	useEffect(() => {
-		if (location.pathname === '/forms/new') {
-			setShowCreateModal(true);
-		}
-	}, [location.pathname]);
+	// Modal kept intact but no longer triggered by /forms/new (now a full page)
+	const [showCreateModal, setShowCreateModal] = useState(false);
 
 	// Bug 1 fix: compute content-area offset so the modal overlay can be
 	// scoped to the plugin container rather than the full viewport.
@@ -238,7 +231,7 @@ function AppContent() {
 	return (
 		<div>
 			<RouteAnnouncer />
-			<Panel>
+			<Panel className='hello-body'>
 				<PanelBody>
 					<Suspense fallback={<RouteLoadingFallback />}>
 						<Routes>
@@ -258,15 +251,13 @@ function AppContent() {
 									</PageErrorBoundary>
 								}
 							/>
-							{/* /forms/new — modal handled by AppContent; suppress builder while modal is open (Bug 1.2) */}
+							{/* /forms/new — full-page creation experience */}
 							<Route
 								path='/forms/new'
 								element={
-									showCreateModal ? null : (
-										<PageErrorBoundary pageName='Form Builder'>
-											<BuilderPage onFormSaved={handleFormSaved} />
-										</PageErrorBoundary>
-									)
+									<PageErrorBoundary pageName='Create Form'>
+										<CreateFormPage />
+									</PageErrorBoundary>
 								}
 							/>
 							{/* /forms/:formId — existing form */}

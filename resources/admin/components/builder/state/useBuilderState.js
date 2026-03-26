@@ -137,11 +137,12 @@ export function useBuilderState(schema, validationErrors, fieldErrors, onChange,
     return map;
   }, [validationErrors, fieldErrors]);
 
-  // Detect form type from schema metadata
-  const formType = useMemo(
-    () => schema?.metadata?.type || 'regular',
-    [schema?.metadata?.type]
-  );
+  // Detect form type from schema metadata — normalize legacy/alias types to canonical values
+  const formType = useMemo(() => {
+    const raw = schema?.metadata?.type || 'regular';
+    if (raw === 'multistep' || raw === 'sectioned') return 'multi-step';
+    return raw;
+  }, [schema?.metadata?.type]);
 
   const isConversational = formType === 'conversational';
 

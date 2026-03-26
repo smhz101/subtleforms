@@ -131,32 +131,27 @@ export default function FormsList({
       title: __('Type', 'subtleforms'),
       width: '13%',
       render: (_, form) => {
-        const formType = form.metadata?.type || 'regular';
+        // form_type is extracted from schema on the server; fall back to metadata.type for
+        // any cached/legacy responses, then default to 'regular'.
+        const raw = form.form_type || form.metadata?.type || 'regular';
+        // Normalize legacy/alias types to canonical values
+        const formType =
+          raw === 'multistep' || raw === 'sectioned' ? 'multi-step' : raw;
         const typeConfig = {
           regular: {
             classes: 'sf-form-type-badge--regular',
-            label: __('Regular', 'subtleforms'),
+            label: __('Standard', 'subtleforms'),
             icon: Icon.FileText,
           },
-          multistep: {
+          'multi-step': {
             classes: 'sf-form-type-badge--multistep',
             label: __('Multi-step', 'subtleforms'),
             icon: Icon.Layers,
-          },
-          sectioned: {
-            classes: 'sf-form-type-badge--sectioned',
-            label: __('Sectioned', 'subtleforms'),
-            icon: Icon.List,
           },
           conversational: {
             classes: 'sf-form-type-badge--conversational',
             label: __('Conversational', 'subtleforms'),
             icon: Icon.MessageCircle,
-          },
-          payment: {
-            classes: 'sf-form-type-badge--payment',
-            label: __('Payment', 'subtleforms'),
-            icon: Icon.CreditCard,
           },
         };
 

@@ -19,6 +19,8 @@ import {
   apiGet,
   apiPost,
   apiPut,
+  apiDelete,
+  buildApiUrl,
 } from '../utils/api';
 import { createInitialSchema } from '../utils/initialSchema';
 import useBuilderReducer, {
@@ -246,6 +248,66 @@ function FormBuilderInner({
     setCurrentFormId(formId ?? null);
   }, [formId]);
 
+  // ── New-form lifecycle ───────────────────────────────────────────────────
+  // Track whether this form was just created via CreateFormModal and has never
+  // been manually saved. If the user closes the builder without making any
+  // edits we delete the orphan draft automatically.
+  const isNewFormRef = useRef(false);
+  const hasEverBeenDirtyRef = useRef(false);
+
+  // Keep stable refs so the unmount cleanup can read the latest values.
+  const isDirtyRef = useRef(isDirty);
+  useEffect(() => { isDirtyRef.current = isDirty; }, [isDirty]);
+  const currentFormIdRef = useRef(currentFormId);
+  useEffect(() => { currentFormIdRef.current = currentFormId; }, [currentFormId]);
+
+  // On mount: detect if the form was just created by the modal.
+  useEffect(() => {
+    try {
+      const newId = sessionStorage.getItem('sf_new_form_id');
+      if (newId && parseInt(newId, 10) === formId) {
+        isNewFormRef.current = true;
+      }
+    } catch (_) {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally runs once on mount
+
+  // When the user makes the first schema change, clear the "new form" marker.
+  useEffect(() => {
+    if (isDirty && !hasEverBeenDirtyRef.current) {
+      hasEverBeenDirtyRef.current = true;
+      isNewFormRef.current = false;
+      try { sessionStorage.removeItem('sf_new_form_id'); } catch (_) {}
+    }
+  }, [isDirty]);
+
+  // On unmount: if the user navigated away (e.g. via WP admin sidebar or browser
+  // back) without ever editing the form, fire a best-effort keepalive DELETE to
+  // clean up the orphan draft.
+  useEffect(() => {
+    return () => {
+      if (
+        isNewFormRef.current &&
+        !hasEverBeenDirtyRef.current &&
+        currentFormIdRef.current
+      ) {
+        const url = buildApiUrl(`/forms/${currentFormIdRef.current}`);
+        const nonce = window.subtleformsAdmin?.restNonce || null;
+        void fetch(url, {
+          method: 'DELETE',
+          credentials: 'same-origin',
+          keepalive: true,
+          headers: {
+            'X-WP-Nonce': nonce,
+            'Content-Type': 'application/json',
+          },
+        }).catch(() => {});
+        try { sessionStorage.removeItem('sf_new_form_id'); } catch (_) {}
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally runs only on unmount
+
   function generateDefaultTitle() {
     const suffix = Math.floor(1000 + Math.random() * 9000);
     return sprintf(
@@ -410,9 +472,24 @@ function FormBuilderInner({
     if (isDirty) {
       setShowDiscardConfirm(true);
     } else {
-      onClose();
+      onClose?.() ?? navigate('/forms');
     }
-  }, [isDirty, onClose, setShowDiscardConfirm]);
+  }, [isDirty, onClose, navigate, setShowDiscardConfirm]);
+
+  // Wrap handleSaveAndClose to delete the form when the user clicks "Save & Close"
+  // on a newly created form they never edited (instead of leaving an orphan draft).
+  const handleSaveAndCloseWrapped = useCallback(async () => {
+    if (isNewFormRef.current && !isDirty && currentFormId) {
+      try {
+        await apiDelete(`/forms/${currentFormId}`);
+        sessionStorage.removeItem('sf_new_form_id');
+      } catch (_) {}
+      isNewFormRef.current = false;
+      navigate('/forms');
+      return;
+    }
+    handleSaveAndClose();
+  }, [isDirty, currentFormId, navigate, handleSaveAndClose]);
 
   const handleTourComplete = useCallback(() => {
     setShowTour(false);
@@ -479,40 +556,38 @@ function FormBuilderInner({
   if (error) return <Notice status='error'>{error}</Notice>;
 
   // Get form type badge config
-  const formType = draftSchema?.metadata?.type || 'regular';
+  // Normalize legacy types: 'multistep' → 'multi-step', 'sectioned' → 'multi-step', 'payment' → 'regular'
+  const rawFormType = draftSchema?.metadata?.type || 'regular';
+  const formType = (() => {
+    if (rawFormType === 'multistep' || rawFormType === 'sectioned') return 'multi-step';
+    if (rawFormType === 'payment') return 'regular';
+    return rawFormType;
+  })();
   const formTypeBadgeConfig = {
     regular: {
       icon: Icon.FileText,
-      label: __('Regular', 'subtleforms'),
+      label: __('Standard', 'subtleforms'),
       color: 'gray',
     },
-    multistep: {
+    'multi-step': {
       icon: Icon.Layers,
       label: __('Multi-step', 'subtleforms'),
       color: 'purple',
-    },
-    sectioned: {
-      icon: Icon.List,
-      label: __('Sectioned', 'subtleforms'),
-      color: 'indigo',
     },
     conversational: {
       icon: Icon.MessageCircle,
       label: __('Conversational', 'subtleforms'),
       color: 'blue',
     },
-    payment: {
-      icon: Icon.CreditCard,
-      label: __('Payment', 'subtleforms'),
-      color: 'green',
-    },
   };
   const formTypeBadge =
     formTypeBadgeConfig[formType] || formTypeBadgeConfig.regular;
   const FormTypeIcon = formTypeBadge.icon;
 
-  // Fallback UI if schema has no fields
-  const hasFields = Array.isArray(draftSchema?.fields) && draftSchema.fields.length > 0;
+  // Always show the builder canvas — even blank forms should open the editor
+  // so users can immediately add fields. The welcome screen was blocking builder
+  // access for regular and payment form types with empty fields arrays.
+  const showWelcomeScreen = false;
 
   return (
     <>
@@ -553,7 +628,7 @@ function FormBuilderInner({
             draftSchema={draftSchema}
             onSaveDraft={handleSaveDraft}
             onPublish={handlePublish}
-            onSaveAndClose={handleSaveAndClose}
+            onSaveAndClose={handleSaveAndCloseWrapped}
             onDelete={() => setShowDeleteConfirm(true)}
             onStartTour={() => setShowTour(true)}
             onOpenWizard={onOpenWizard}
@@ -571,7 +646,7 @@ function FormBuilderInner({
           fieldDefinitions={fieldDefinitions}
           onSchemaChange={handleSchemaChange}
           currentFormId={currentFormId}
-          showWelcome={!hasFields}
+          showWelcome={showWelcomeScreen}
           isDirty={isDirty}
         />
       </AdminShell>
@@ -628,12 +703,18 @@ export default function FormBuilderPage(props) {
   }, [navigate]);
 
   const generateDefaultTitleForWizard = useCallback(() => {
-    const suffix = Math.floor(1000 + Math.random() * 9000);
-    return sprintf(
-      /* translators: %1$d: numeric suffix used to create a unique title */
-      __('Untitled Form %1$d', 'subtleforms'),
-      suffix
-    );
+    try {
+      const next = parseInt( localStorage.getItem( 'sf_form_seq' ) || '0', 10 ) + 1;
+      localStorage.setItem( 'sf_form_seq', String( next ) );
+      return sprintf(
+        /* translators: %1$d: sequential form number */
+        __( 'New Form %1$d', 'subtleforms' ),
+        next
+      );
+    } catch ( _e ) {
+      // localStorage unavailable (private browsing etc.) — fall back to timestamp
+      return sprintf( __( 'New Form %1$d', 'subtleforms' ), Date.now() % 10000 );
+    }
   }, []);
 
   const openQuickWizard = useCallback(() => {

@@ -50,10 +50,11 @@ export default function FormsPage() {
           }
         );
         const formsData = await formsResponse.json();
-        setFormsCount(formsData.total || 0);
+        const totalForms = formsData.meta?.total ?? 0;
+        setFormsCount(totalForms);
 
         // Show wizard if not dismissed and no forms exist
-        if (!statusData.dismissed && formsData.total === 0) {
+        if (!statusData.dismissed && totalForms === 0) {
           setShowWizard(true);
         }
       } catch (error) {
@@ -190,20 +191,30 @@ export default function FormsPage() {
                 </Button>
               </div>
             ) : (
-              <>
-                <HelpMenu
-                  onOpenWizard={() => setShowWizard(true)}
-                  showWizard={true}
-                />
-                <Button
-                  isPrimary
-                  onClick={() => {
-                    navigate('/forms/new');
-                  }}>
-                  <Icon.Add className='sf-icon-button' />
-                  {__('New Form', 'subtleforms')}
-                </Button>
-              </>
+              <div className='sf-forms-header'>
+                <div className='sf-forms-header__text'>
+                  <h3 className='sf-forms-header__title'>
+                    {__('Build and manage forms', 'subtleforms')}
+                  </h3>
+                  <p className='sf-forms-header__desc'>
+                    {__('Create new forms or optimize existing ones.', 'subtleforms')}
+                  </p>
+                </div>
+                <div className='sf-forms-header__actions'>
+                  <HelpMenu
+                    onOpenWizard={() => setShowWizard(true)}
+                    showWizard={true}
+                  />
+                  <Button
+                    isPrimary
+                    onClick={() => {
+                      navigate('/forms/new');
+                    }}>
+                    <Icon.Add className='sf-icon-button' />
+                    {__('New Form', 'subtleforms')}
+                  </Button>
+                </div>
+              </div>
             )}
           </div>
         }

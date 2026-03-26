@@ -369,7 +369,7 @@ class Schemas {
 
 			// FormMetadata
 			'FormMetadata' => array(
-			'type'        => 'optional|in:regular,contact,newsletter,survey,order,payment,registration',
+			'type'        => 'optional|in:regular,contact,newsletter,survey,order,payment,registration,multi-step,sectioned,conversational',
 				'version'     => 'optional|int|min:1',
 				'description' => 'optional|string|max:500',
 				'tags'        => 'optional|array',
