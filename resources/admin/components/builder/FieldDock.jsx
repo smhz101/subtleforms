@@ -1,7 +1,9 @@
 import { useState, useMemo, useRef } from '@wordpress/element';
-import { Button } from '@wordpress/components';
+import { Button, Modal } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { getIcon } from './utils/iconMap';
+import Icon from '../ui/Icon';
+import { UpgradePrompt } from '../ui';
 
 function HighlightMatch({ text, query }) {
   if (!query) return text;
@@ -30,6 +32,8 @@ export default function FieldDock({
   const [collapsed, setCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const searchInputRef = useRef(null);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [lockedFieldLabel, setLockedFieldLabel] = useState('');
 
   const handleToggleCollapsed = () => {
     const newCollapsed = !collapsed;
@@ -80,6 +84,7 @@ export default function FieldDock({
   }
 
   return (
+    <>
     <div
       className='sf-field-dock'
       style={{ width: collapsed ? '48px' : '320px' }}>
@@ -111,12 +116,7 @@ export default function FieldDock({
       {!collapsed && (
         <div className='sf-field-dock__search'>
           <span className='sf-field-dock__search-icon' aria-hidden='true'>
-            <svg width='14' height='14' viewBox='0 0 24 24' fill='none'
-              stroke='currentColor' strokeWidth='2.5'
-              strokeLinecap='round' strokeLinejoin='round'>
-              <circle cx='11' cy='11' r='8' />
-              <line x1='21' y1='21' x2='16.65' y2='16.65' />
-            </svg>
+            <Icon.Search size={16} />
           </span>
           <input
             ref={searchInputRef}
@@ -160,18 +160,29 @@ export default function FieldDock({
                 <div className='sf-field-dock__fields-grid sf-field-dock__fields-grid--search'>
                   {searchResults.map((f) => {
                     const isDisabled = f.enabled === false;
+                    const isProLocked = f.is_pro_locked === true;
                     return (
                       <button
                         key={f.type}
                         type='button'
-                        onClick={() => !isDisabled && onAddField(f.type)}
+                        onClick={() => {
+                          if (isDisabled) return;
+                          if (isProLocked) {
+                            setLockedFieldLabel(f.label);
+                            setShowUpgradeModal(true);
+                            return;
+                          }
+                          onAddField(f.type);
+                        }}
                         disabled={isDisabled}
                         className={`sf-field-dock__field-button ${
                           isDisabled ? 'sf-field-dock__field-button--disabled' : ''
-                        }`}
+                        }${isProLocked ? ' sf-field-dock__field-button--pro-locked' : ''}`}
                         title={
                           isDisabled
                             ? __('Enable this CAPTCHA provider in Settings to use it', 'subtleforms')
+                            : isProLocked
+                            ? `${f.label} — Pro feature. Click to unlock`
                             : f.label
                         }>
                         <span className='sf-field-dock__field-icon-wrapper'>
@@ -181,9 +192,15 @@ export default function FieldDock({
                               return <IconComponent size={20} />;
                             })()}
                           </span>
+                          {isProLocked && (
+                            <span className='sf-field-dock__pro-lock-overlay'>🔒</span>
+                          )}
                         </span>
                         <span className='sf-field-dock__field-label'>
                           <HighlightMatch text={f.label} query={searchQuery} />
+                          {isProLocked && (
+                            <span className='sf-field-dock__pro-label'>{__('Pro', 'subtleforms')}</span>
+                          )}
                         </span>
                       </button>
                     );
@@ -227,24 +244,35 @@ export default function FieldDock({
                   <div className='sf-field-dock__fields-grid'>
                     {categoryFields.map((f) => {
                       const isDisabled = f.enabled === false;
+                      const isProLocked = f.is_pro_locked === true;
 
                       return (
                         <button
                           key={f.type}
                           type='button'
-                          onClick={() => !isDisabled && onAddField(f.type)}
+                          onClick={() => {
+                            if (isDisabled) return;
+                            if (isProLocked) {
+                              setLockedFieldLabel(f.label);
+                              setShowUpgradeModal(true);
+                              return;
+                            }
+                            onAddField(f.type);
+                          }}
                           disabled={isDisabled}
                           className={`sf-field-dock__field-button ${
                             isDisabled
                               ? 'sf-field-dock__field-button--disabled'
                               : ''
-                          }`}
+                          }${isProLocked ? ' sf-field-dock__field-button--pro-locked' : ''}`}
                           title={
                             isDisabled
                               ? __(
                                   'Enable this CAPTCHA provider in Settings to use it',
                                   'subtleforms'
                                 )
+                              : isProLocked
+                              ? `${f.label} — Pro feature. Click to unlock`
                               : f.label
                           }>
                           <span className='sf-field-dock__field-icon-wrapper'>
@@ -254,10 +282,16 @@ export default function FieldDock({
                                 return <IconComponent size={20} />;
                               })()}
                             </span>
+                            {isProLocked && (
+                              <span className='sf-field-dock__pro-lock-overlay'>🔒</span>
+                            )}
                           </span>
 
                           <span className='sf-field-dock__field-label'>
                             {f.label}
+                            {isProLocked && (
+                              <span className='sf-field-dock__pro-label'>{__('Pro', 'subtleforms')}</span>
+                            )}
                           </span>
                         </button>
                       );
@@ -270,5 +304,24 @@ export default function FieldDock({
         </div>
       )}
     </div>
+
+    {showUpgradeModal && (
+      <Modal
+        title={__('Pro Feature', 'subtleforms')}
+        onRequestClose={() => setShowUpgradeModal(false)}
+        className='sf-upgrade-modal'>
+        <UpgradePrompt
+          variant='card'
+          feature={lockedFieldLabel}
+          benefits={[
+            __('Collect payments directly in your forms', 'subtleforms'),
+            __('Add pricing, coupons, and totals', 'subtleforms'),
+            __('Unlock advanced form capabilities', 'subtleforms'),
+          ]}
+          ctaText={__('View Pro Plans', 'subtleforms')}
+        />
+      </Modal>
+    )}
+    </>
   );
 }

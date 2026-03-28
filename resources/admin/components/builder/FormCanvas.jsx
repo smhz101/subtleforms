@@ -2,6 +2,7 @@ import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import FieldList from './FieldList';
 import { getIcon } from './utils/iconMap';
+import Icon from '../ui/Icon';
 import './FormCanvas.scss';
 
 export default function FormCanvas({
@@ -51,19 +52,7 @@ export default function FormCanvas({
                 className='sf-form-canvas__empty-add-btn'
                 onClick={() => onShowPicker([0])}
                 type='button'>
-                <svg
-                  width='24'
-                  height='24'
-                  viewBox='0 0 24 24'
-                  fill='none'
-                  xmlns='http://www.w3.org/2000/svg'>
-                  <path
-                    d='M12 5v14m-7-7h14'
-                    stroke='currentColor'
-                    strokeWidth='2'
-                    strokeLinecap='round'
-                  />
-                </svg>
+                <Icon.Plus size={24} />
               </button>
               <div className='sf-form-canvas__empty-instruction'>
                 <svg

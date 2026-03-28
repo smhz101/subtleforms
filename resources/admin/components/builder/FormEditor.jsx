@@ -88,16 +88,9 @@ export default function FormEditor({
 
   const handleSelectStep = useCallback(
     (stepId) => {
-      const stepNode = tree.nodes[stepId];
-      console.log('[SubtleForms] Step Selected:', {
-        stepId: stepId,
-        stepTitle: stepNode?.config?.title,
-        childrenCount: stepNode?.children?.length || 0,
-        childrenIds: stepNode?.children || [],
-      });
       setSelectedStepId(stepId);
     },
-    [tree, setSelectedStepId]
+    [setSelectedStepId]
   );
 
   return (
@@ -220,7 +213,9 @@ export default function FormEditor({
                   <div className='sf-field-picker-popover__category-label'>
                     {category}
                   </div>
-                  {categoryFields.map((f) => (
+                  {categoryFields
+                    .filter(f => !f.is_pro_locked)
+                    .map((f) => (
                     <button
                       key={f.type}
                       type='button'

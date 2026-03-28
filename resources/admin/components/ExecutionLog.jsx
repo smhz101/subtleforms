@@ -3,26 +3,8 @@ import { Spinner, Notice } from '@wordpress/components';
 import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import { __ } from '@wordpress/i18n';
+import { apiClient } from '../data';
 import './ExecutionLog.scss';
-
-const restBase =
-  window.subtleformsAdmin && window.subtleformsAdmin.restUrl
-    ? window.subtleformsAdmin.restUrl.replace(/\/$/, '')
-    : '/wp-json/subtleforms/v1';
-const restNonce =
-  window.subtleformsAdmin && window.subtleformsAdmin.restNonce
-    ? window.subtleformsAdmin.restNonce
-    : null;
-
-function apiGet(path) {
-  return fetch(restBase + path, {
-    credentials: 'same-origin',
-    headers: {
-      'X-WP-Nonce': restNonce,
-      'Content-Type': 'application/json',
-    },
-  }).then((r) => r.json());
-}
 
 export default function ExecutionLog({ submissionId }) {
   const [logs, setLogs] = useState(null);
@@ -32,7 +14,7 @@ export default function ExecutionLog({ submissionId }) {
   useEffect(() => {
     if (!submissionId) return;
     setLoading(true);
-    apiGet(`/submissions/${submissionId}/logs`)
+    apiClient.get(`/submissions/${submissionId}/logs`)
       .then((data) => {
         if (data && Array.isArray(data)) setLogs(data);
         else createErrorNotice(__('Failed to load logs', 'subtleforms'));

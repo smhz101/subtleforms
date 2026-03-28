@@ -19,51 +19,13 @@ import clsx from 'clsx';
 import DataTable from './DataTable';
 import { ConfirmModal } from '../modals';
 import { buildApiUrl } from '../utils/api';
+import { apiClient } from '../data';
 import './SubmissionsTable.scss';
 
-const restBase =
-  window.subtleformsAdmin && window.subtleformsAdmin.restUrl
-    ? window.subtleformsAdmin.restUrl.replace(/\/$/, '')
-    : '/wp-json/subtleforms/v1';
 const restNonce =
   window.subtleformsAdmin && window.subtleformsAdmin.restNonce
     ? window.subtleformsAdmin.restNonce
     : null;
-
-async function apiGet(path) {
-  const response = await fetch(buildApiUrl(path), {
-    credentials: 'same-origin',
-    headers: {
-      'X-WP-Nonce': restNonce,
-      'Content-Type': 'application/json',
-    },
-  });
-  if (!response.ok) {
-    throw new Error('API request failed');
-  }
-  return response.json();
-}
-
-async function apiRequest(path, options = {}) {
-  return fetch(buildApiUrl(path), {
-    credentials: 'same-origin',
-    headers: {
-      'X-WP-Nonce': restNonce,
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    ...options,
-  }).then(async (response) => {
-    let body = null;
-    try {
-      const text = await response.text();
-      body = text ? JSON.parse(text) : null;
-    } catch (err) {
-      body = null;
-    }
-    return { ok: response.ok, status: response.status, body };
-  });
-}
 
 const SubmissionsTable = forwardRef(
   (
@@ -78,7 +40,6 @@ const SubmissionsTable = forwardRef(
     ref
   ) => {
     const [submissions, setSubmissions] = useState([]);
-    const [forms, setForms] = useState([]);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
     const [totalItems, setTotalItems] = useState(0);
@@ -90,18 +51,6 @@ const SubmissionsTable = forwardRef(
     const [selectedSubmissions, setSelectedSubmissions] = useState([]);
     const { createSuccessNotice, createErrorNotice } =
       useDispatch(noticesStore);
-
-    useEffect(() => {
-      if (!formId) {
-        apiGet('/forms')
-          .then((data) => {
-            if (Array.isArray(data)) {
-              setForms(data);
-            }
-          })
-          .catch(() => {});
-      }
-    }, [formId]);
 
     useEffect(() => {
       loadSubmissions();
@@ -232,21 +181,7 @@ const SubmissionsTable = forwardRef(
       setSubmissions((prev) => prev.filter((s) => s.id !== submissionId));
 
       try {
-        const response = await fetch(
-          `${restBase}/submissions/${submissionId}`,
-          {
-            method: 'DELETE',
-            credentials: 'same-origin',
-            headers: {
-              'X-WP-Nonce': restNonce,
-              'Content-Type': 'application/json',
-            },
-          }
-        );
-
-        if (!response.ok) {
-          throw new Error('Failed to delete');
-        }
+        await apiClient.delete(`/submissions/${submissionId}`);
         createSuccessNotice(__('Submission deleted', 'subtleforms'), {
           type: 'snackbar',
         });
@@ -281,10 +216,12 @@ const SubmissionsTable = forwardRef(
 
       let successCount = 0;
       for (const id of ids) {
-        const { ok } = await apiRequest(`/submissions/${id}`, {
-          method: 'DELETE',
-        });
-        if (ok) successCount++;
+        try {
+          await apiClient.delete(`/submissions/${id}`);
+          successCount++;
+        } catch (_err) {
+          // individual failure counted below
+        }
       }
 
       if (successCount === ids.length) {
@@ -325,11 +262,12 @@ const SubmissionsTable = forwardRef(
 
       let successCount = 0;
       for (const id of ids) {
-        const { ok } = await apiRequest(`/submissions/${id}`, {
-          method: 'PUT',
-          body: JSON.stringify({ status }),
-        });
-        if (ok) successCount++;
+        try {
+          await apiClient.put(`/submissions/${id}`, { status });
+          successCount++;
+        } catch (_err) {
+          // individual failure counted below
+        }
       }
 
       if (successCount === ids.length) {

@@ -11,7 +11,6 @@ export default function ChoiceFieldRenderer({ field }) {
 
   const labelClass = 'sf-field-renderer__label';
   const selectClass = 'sf-field-renderer__select';
-  const selectBg = `url('data:image/svg+xml;utf8,<svg fill="%238c8f94" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M5 6l5 5 5-5 2 1-7 7-7-7z"/></svg>')`;
 
   return (
     <div>
@@ -91,12 +90,6 @@ export default function ChoiceFieldRenderer({ field }) {
           </label>
           <select
             className={selectClass}
-            style={{
-              backgroundImage: selectBg,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 0.5rem center',
-              backgroundSize: '16px 12px',
-            }}
             tabIndex='-1'>
             <option value=''>
               {__('Select an option', 'subtleforms')}

@@ -152,7 +152,7 @@ export default function FormEditorHeader({
             }}>
             {copyState === 'copied' ? (
               <>
-                <Icon.Check size={14} />
+                <Icon.Check size={16} />
                 {__('Copied!', 'subtleforms')}
               </>
             ) : (

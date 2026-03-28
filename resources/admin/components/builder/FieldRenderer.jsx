@@ -1,6 +1,7 @@
 import { memo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { getFieldRenderer } from './canvas/renderers';
+import { getFieldIcon } from '../../utils/iconRegistry';
 import './FieldRenderer.scss';
 
 /**
@@ -15,7 +16,6 @@ const FieldRenderer = memo(function FieldRenderer({ field }) {
   const labelClass = 'sf-field-renderer__label';
   const inputClass = 'sf-field-renderer__input';
   const selectClass = 'sf-field-renderer__select';
-  const selectBg = `url('data:image/svg+xml;utf8,<svg fill="%238c8f94" height="20" viewBox="0 0 20 20" width="20" xmlns="http://www.w3.org/2000/svg"><path d="M5 6l5 5 5-5 2 1-7 7-7-7z"/></svg>')`;
 
   // ── Section Break ───────────────────────────────────────────────────────────
   if (type === 'section_break') {
@@ -130,7 +130,6 @@ const FieldRenderer = memo(function FieldRenderer({ field }) {
       {type === 'dropdown' && options && (
         <select
           className={selectClass}
-          style={{ backgroundImage: selectBg }}
           disabled
           tabIndex='-1'>
           <option>
@@ -175,7 +174,6 @@ const FieldRenderer = memo(function FieldRenderer({ field }) {
         <div className='sf-country-field'>
           <select
             className={selectClass}
-            style={{ backgroundImage: selectBg }}
             disabled
             tabIndex='-1'>
             <option>
@@ -194,7 +192,7 @@ const FieldRenderer = memo(function FieldRenderer({ field }) {
             <option>{__('...and 235+ more countries', 'subtleforms')}</option>
           </select>
           <div className='sf-country-field__info'>
-            <span className='dashicons dashicons-admin-site'></span>
+            {(() => { const CountryIcon = getFieldIcon('country'); return <CountryIcon size={16} />; })()}
             <span className='sf-country-field__text'>
               {__(
                 'Full ISO-3166 country list available on frontend',

@@ -1,4 +1,5 @@
 import { __ } from '@wordpress/i18n';
+import { getFieldIcon } from '../../../utils/iconRegistry';
 
 /**
  * SpecialFieldPreview Component
@@ -58,10 +59,7 @@ export default function SpecialFieldPreview({ field, fieldId }) {
           <option>{__('...and 235+ more countries', 'subtleforms')}</option>
         </select>
         <div className='sf-country-field__info' style={{ marginTop: '0.5rem' }}>
-          <span
-            className='dashicons dashicons-admin-site'
-            style={{ fontSize: '16px', width: '16px', height: '16px' }}
-            aria-hidden='true'></span>
+          {(() => { const CountryIcon = getFieldIcon('country'); return <CountryIcon size={16} aria-hidden='true' />; })()}
           <span style={{ fontSize: '0.75rem', fontStyle: 'italic', color: '#0369a1' }}>
             {__('Full ISO-3166 country list available on frontend', 'subtleforms')}
           </span>

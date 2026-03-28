@@ -54,16 +54,7 @@ export default function StepCanvas({
     stepNode.config?.title || __('Untitled Step', 'subtleforms');
   const stepDescription = stepNode.config?.description || '';
 
-  // DEBUG: Log step rendering
-  console.log('[SubtleForms] StepCanvas render:', {
-    stepId: stepId,
-    stepTitle: stepTitle,
-    stepNumber: stepNumber,
-    childrenCount: children.length,
-    childrenIds: children,
-    stepNodeType: stepNode.type,
-  });
-
+  // Render step canvas
   return (
     <div
       className='subtleforms-step-canvas'

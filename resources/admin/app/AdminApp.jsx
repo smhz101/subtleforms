@@ -34,6 +34,7 @@ import { ModalProvider } from '../ui/modals';
 import PageErrorBoundary from '../components/PageErrorBoundary';
 import { RouteLoadingFallback } from '../components/RouteTransition';
 import { CreateFormModal } from '../modals';
+import { UpgradeModal } from '../components/ui';
 
 // ─── Query Client ─────────────────────────────────────────────────────────────
 
@@ -300,6 +301,7 @@ function AppContent() {
 				onClose={handleModalClose}
 				onFormCreated={handleFormCreated}
 			/>
+			<UpgradeModal />
 		</div>
 	);
 }

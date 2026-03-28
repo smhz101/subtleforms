@@ -370,6 +370,19 @@
 				opacity: 0.5;
 			}
 		}
+
+		// Pro-locked state for payment fields
+		&--pro-locked {
+			cursor: not-allowed;
+			border-color: var(--sf-violet-200, #ddd6fe);
+		}
+	}
+
+	&__pro-lock-overlay {
+		position: absolute;
+		top: 3px;
+		right: 3px;
+		font-size: 10px;
 	}
 
 	&__field-icon-wrapper {
@@ -425,5 +438,21 @@
 		.sf-field-dock__field-button:hover & {
 			color: $sf-lime-700;
 		}
+	}
+
+	&__pro-label {
+		display: inline-block;
+		margin-left: 4px;
+		padding: 0 4px;
+		font-size: 9px;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--sf-violet-600, #7c3aed);
+		background-color: var(--sf-violet-50, #f5f3ff);
+		border: 1px solid var(--sf-violet-200, #ddd6fe);
+		border-radius: 3px;
+		vertical-align: middle;
+		line-height: 1.6;
 	}
 }

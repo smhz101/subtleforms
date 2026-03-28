@@ -251,13 +251,13 @@
 	&__container {
 		display: flex;
 		align-items: center;
-		gap: 10px;
+		gap: 8px;
 	}
 
 	&__label-text {
 		font-size: 11px;
 		font-weight: 600;
-		color: #9ca3af;
+		color: var(--sf-gray-400, #9ca3af);
 		text-transform: uppercase;
 		letter-spacing: 0.05em;
 		padding: 0 4px;
@@ -266,7 +266,7 @@
 	&__steps-list {
 		display: flex;
 		align-items: center;
-		background: #f7f8fa;
+		background: var(--sf-gray-50, #f9fafb);
 		border-radius: 10px;
 		padding: 4px;
 		gap: 4px;
@@ -283,29 +283,29 @@
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		padding: 6px 12px;
+		padding: 8px 12px;
 		border-radius: 8px;
 		border: none;
 		background: transparent;
 		cursor: pointer;
 		font-size: 13px;
 		font-weight: 500;
-		color: #4b5563;
+		color: var(--sf-gray-600, #4b5563);
 		transition: all 0.18s cubic-bezier(0.4, 0, 0.2, 1);
 	}
 
 	&__step-button:hover {
 		background: rgba(255,255,255,0.7);
-		color: #111827;
+		color: var(--sf-gray-900, #111827);
 	}
 
 	&__step-number {
 		min-width: 20px;
 		height: 20px;
-		padding: 0 6px;
+		padding: 0 8px;
 		border-radius: 999px;
-		background: #e5e7eb;
-		color: #374151;
+		background: var(--sf-gray-200, #e5e7eb);
+		color: var(--sf-gray-700, #374151);
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -319,16 +319,16 @@
 	}
 
 	&__step-button--selected {
-		background: #ffffff;
-		color: #111827;
+		background: var(--sf-surface, #fff);
+		color: var(--sf-gray-900, #111827);
 		box-shadow:
 				0 1px 2px rgba(16, 24, 40, 0.06),
 				0 0 0 1px rgba(229, 231, 235, 0.9);
 	}
 
 	&__step-number--selected {
-		background: #111827;
-		color: #ffffff;
+		background: var(--sf-gray-900, #111827);
+		color: var(--sf-surface, #fff);
 	}
 
 	&__step-button:active {
@@ -357,28 +357,28 @@
 	&__delete-icon {
 		width: 12px;
 		height: 12px;
-		color: #6b7280;
+		color: var(--sf-gray-500, #6b7280);
 	}
 
 	/* Add button (now feels native to segmented UI) */
 	&__add-button button {
 		display: flex;
 		align-items: center;
-		gap: 6px;
-		padding: 6px 12px;
+		gap: 8px;
+		padding: 8px 12px;
 		border-radius: 8px;
 		font-size: 13px;
 		font-weight: 500;
-		background: #f7f8fa;
-		border: 1px solid #e5e7eb;
-		color: #4b5563;
+		background: var(--sf-gray-50, #f9fafb);
+		border: 1px solid var(--sf-gray-200, #e5e7eb);
+		color: var(--sf-gray-600, #4b5563);
 		transition: all 0.18s ease;
 	}
 
 	&__add-button button:hover {
-		background: #111827;
-		border-color: #111827;
-		color: #ffffff;
+		background: var(--sf-gray-900, #111827);
+		border-color: var(--sf-gray-900, #111827);
+		color: var(--sf-surface, #fff);
 	}
 
 	&__add-icon {
@@ -388,7 +388,7 @@
 	
 	&__step-button:focus-visible,
 	&__add-button button:focus-visible {
-		outline: 2px solid #6366f1;
+		outline: 2px solid var(--sf-blue-600, #2563eb);
 		outline-offset: 2px;
 	}
 

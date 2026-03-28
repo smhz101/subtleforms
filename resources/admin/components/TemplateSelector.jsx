@@ -2,6 +2,7 @@ import { useState, useEffect } from '@wordpress/element';
 import { Button, Modal, Card, CardBody } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import { getUIIcon } from '../utils/iconRegistry';
 import './TemplateSelector.scss';
 
 /**
@@ -72,7 +73,7 @@ export default function TemplateSelector({ onSelect, onClose }) {
                 onClick={handleStartBlank}>
                 <CardBody>
                   <div className='sf-template-icon'>
-                    <span className='dashicons dashicons-plus-alt2'></span>
+                    {(() => { const BlankIcon = getUIIcon('blank-form'); return <BlankIcon size={20} />; })()}
                   </div>
                   <h3 className='sf-template-name'>
                     {__('Blank Form', 'subtleforms')}
@@ -94,10 +95,7 @@ export default function TemplateSelector({ onSelect, onClose }) {
                   onClick={() => handleTemplateSelect(template)}>
                   <CardBody>
                     <div className='sf-template-icon'>
-                      <span
-                        className={`dashicons dashicons-${
-                          template.icon || 'feedback'
-                        }`}></span>
+                      {(() => { const TplIcon = getUIIcon('template'); return <TplIcon size={20} />; })()}
                     </div>
                     <h3 className='sf-template-name'>{template.name}</h3>
                     <p className='sf-template-description'>

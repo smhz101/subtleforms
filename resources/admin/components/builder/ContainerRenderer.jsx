@@ -87,14 +87,14 @@ export default function ContainerRenderer({
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'grab',
-                color: '#1e1e1e',
+                color: '#111827',
               }}>
               <Icon.Move size={16} />
             </button>
           )}
           {(() => {
             const NodeIcon = getIcon(node.type);
-            return <NodeIcon size={18} />;
+            return <NodeIcon size={20} />;
           })()}
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <strong style={{ fontSize: '13px' }}>{title}</strong>
@@ -102,7 +102,7 @@ export default function ContainerRenderer({
               <span
                 style={{
                   fontSize: '11px',
-                  color: '#646970',
+                  color: '#6b7280',
                   marginTop: '2px',
                 }}>
                 {node.config.description}

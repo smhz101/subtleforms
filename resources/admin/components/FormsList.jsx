@@ -18,6 +18,7 @@ import { ContextualTip } from './ui';
 import DataTable from './DataTable';
 import { ConfirmModal } from '../modals';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
+import { PRO_TEMPLATE_IDS } from '../utils/proFeatureDetector';
 import { buildApiUrl } from '../utils/api';
 import { logger, perfMarkers } from '../diagnostics';
 import './FormsList.scss';
@@ -118,6 +119,11 @@ export default function FormsList({
       render: (title, form) => (
         <div className='sf-form-name'>
           <span className='sf-form-name__title'>{title}</span>
+          {form.template_id && PRO_TEMPLATE_IDS.includes(form.template_id) && (
+            <span className='sf-form-name__pro-badge'>
+              {__('Pro', 'subtleforms')}
+            </span>
+          )}
           {form.submission_count === 0 && (
             <span className='sf-form-name__new-badge'>
               {__('New', 'subtleforms')}

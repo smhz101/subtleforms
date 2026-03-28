@@ -193,39 +193,31 @@ export class PageErrorBoundary extends Component {
 						{/* Error Message */}
 						<h2 className="sf-page-error-boundary__title">
 							{ retriesExhausted
-								? __( 'Failed to load page', 'subtleforms' )
-								: __( 'Something went wrong', 'subtleforms' ) }
-						</h2>
+                                ? __( 'Unable to load page', 'subtleforms' )
+                                : __( 'Oops! Something interrupted this page.', 'subtleforms' ) }
+                        </h2>
 
-						<p className="sf-page-error-boundary__message">
-							{ retriesExhausted
-								? __(
-										'The page could not be loaded after several attempts. Please reload the browser.',
-										'subtleforms'
-								  )
-								: sprintf(
-										/* translators: %s: page name */
-										__(
-											'An error occurred while loading %s. This page may not work correctly.',
-											'subtleforms'
-										),
-										pageName
-								  ) }
-						</p>
+                        <p className="sf-page-error-boundary__message">
+                            { retriesExhausted
+                                ? __( 'This page couldn\'t load after several attempts. Please refresh the browser and try again.', 'subtleforms' )
+                                : sprintf(
+                                        /* translators: %s: page name */
+                                        __( 'We hit an issue loading %s. You can retry or continue working with existing content.', 'subtleforms' ),
+                                        pageName
+                                  ) }
+                        </p>
 
-						{/* Error Details (dev mode only) */}
-						{ isDev && this.state.error && (
-							<details className="sf-page-error-boundary__details">
-								<summary>{ __( 'Error Details', 'subtleforms' ) }</summary>
-								<pre className="sf-page-error-boundary__stack">
-									<code>{ this.state.error.toString() }</code>
-									{ this.state.errorInfo?.componentStack && (
-										<code>{ this.state.errorInfo.componentStack }</code>
-									) }
-								</pre>
-							</details>
-						) }
-
+                        { isDev && this.state.error && (
+                            <details className="sf-page-error-boundary__details">
+                                <summary>{ __( 'Error Details', 'subtleforms' ) }</summary>
+                                <pre className="sf-page-error-boundary__stack">
+                                    <code>{ this.state.error.toString() }</code>
+                                    { this.state.errorInfo?.componentStack && (
+                                        <code>{ this.state.errorInfo.componentStack }</code>
+                                    ) }
+                                </pre>
+                            </details>
+                        ) }
 						{/* Recovery Actions */}
 						<div className="sf-page-error-boundary__actions">
 							{ retriesExhausted ? (

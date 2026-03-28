@@ -1,6 +1,7 @@
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { getIcon } from './utils/iconMap';
+import Icon from '../ui/Icon';
 import './InlineAddButton.scss';
 
 export default function InlineAddButton({
@@ -28,26 +29,7 @@ export default function InlineAddButton({
         onClick={onClick}
         className='sf-inline-add-button__button'
         title={__('Add Field', 'subtleforms')}>
-        <svg
-          width='20'
-          height='20'
-          viewBox='0 0 20 20'
-          fill='none'
-          xmlns='http://www.w3.org/2000/svg'>
-          <circle
-            cx='10'
-            cy='10'
-            r='9'
-            stroke='currentColor'
-            strokeWidth='1.5'
-          />
-          <path
-            d='M10 6v8m-4-4h8'
-            stroke='currentColor'
-            strokeWidth='1.5'
-            strokeLinecap='round'
-          />
-        </svg>
+        <Icon.Plus size={20} />
         {label && <span className='sf-inline-add-button__label'>{label}</span>}
       </button>
     </div>
