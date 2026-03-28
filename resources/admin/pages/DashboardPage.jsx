@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from '@wordpress/element';
+import { useDashboardStats } from '../data';
 import {
   Card,
   CardBody,
@@ -8,7 +8,6 @@ import {
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '../components/navigation';
-import apiFetch from '@wordpress/api-fetch';
 import clsx from 'clsx';
 import Icon from '../components/ui/Icon';
 import AdminShell from '../components/AdminShell';
@@ -19,37 +18,7 @@ import './DashboardPage.scss';
  * Dashboard Page Component
  */
 export default function Dashboard() {
-  const [loading, setLoading] = useState(true);
-  const [data, setData] = useState(null);
-  const [error, setError] = useState(null);
-
-  const loadDashboard = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-
-      const response = await apiFetch({
-        path: '/subtleforms/v1/dashboard',
-        method: 'GET',
-      });
-
-      if (response?.success) {
-        setData(response.data);
-      } else {
-        setError('Invalid response from server');
-      }
-    } catch (err) {
-      console.error('Failed to load dashboard:', err);
-      const errorMessage = err?.message || err?.toString() || 'Failed to load dashboard data';
-      setError(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadDashboard();
-  }, [loadDashboard]);
+  const { data, isLoading: loading, error, refetch } = useDashboardStats();
 
   if (loading) {
     return (
@@ -64,9 +33,9 @@ export default function Dashboard() {
     return (
       <div className='subtleforms-dashboard-error'>
         <Notice status='error' isDismissible={false}>
-          {error}
+          {error?.message || __('Failed to load dashboard data', 'subtleforms')}
         </Notice>
-        <Button variant='primary' onClick={loadDashboard}>
+        <Button variant='primary' onClick={() => refetch()}>
           {__('Retry', 'subtleforms')}
         </Button>
       </div>
@@ -177,6 +146,7 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <div className='subtleforms-dashboard-empty'>
+                    <Icon.Clipboard style={{ width: 32, height: 32, color: 'var(--sf-gray-300, #d1d5db)', marginBottom: 4 }} />
                     <p>{__('No submissions yet.', 'subtleforms')}</p>
                     <p className='description'>
                       {__(
@@ -284,6 +254,7 @@ export default function Dashboard() {
                   </div>
                 ) : (
                   <div className='subtleforms-dashboard-empty'>
+                    <Icon.FileText style={{ width: 32, height: 32, color: 'var(--sf-gray-300, #d1d5db)', marginBottom: 4 }} />
                     <p>{__('No forms yet.', 'subtleforms')}</p>
                     <p className='description'>
                       {__(
