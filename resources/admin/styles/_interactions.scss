@@ -1,0 +1,96 @@
+/**
+ * SubtleForms Interaction Polish
+ *
+ * Global interaction layer: transitions, hover states, focus-visible.
+ * Scoped to .subtleforms-admin to prevent bleed into WordPress admin.
+ *
+ * Rules:
+ *   - No layout changes.
+ *   - No color tokens — use values from _tokens.scss.
+ *   - Do not duplicate rules from _accessibility.scss.
+ *   - 150ms cubic-bezier(0.4, 0, 0.2, 1) is the canonical UI transition.
+ */
+
+.subtleforms-admin {
+  // ── Canonical transition CSS variable ────────────────────────────────────
+  --sf-transition-ui: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  // ── WordPress components-button ───────────────────────────────────────────
+  // Unify focus-visible ring across all WP button variants.
+  .components-button:focus-visible {
+    outline: 2px solid var(--sf-blue-600, #2563eb) !important;
+    outline-offset: 2px !important;
+    box-shadow: none !important;
+  }
+
+  // Primary button: hover lift + active settle.
+  .components-button.is-primary:not(:disabled):not(.is-busy) {
+    transition: background-color var(--sf-transition-ui),
+                transform var(--sf-transition-ui),
+                box-shadow var(--sf-transition-ui);
+
+    &:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+  }
+
+  // Secondary / tertiary buttons: hover gray + lift.
+  .components-button.is-secondary:not(:disabled):not(.is-busy),
+  .components-button.is-tertiary:not(:disabled) {
+    transition: background-color var(--sf-transition-ui),
+                border-color var(--sf-transition-ui),
+                transform var(--sf-transition-ui);
+
+    &:hover {
+      background-color: var(--sf-gray-100, #f3f4f6);
+      transform: translateY(-1px);
+    }
+
+    &:active {
+      transform: translateY(0);
+    }
+  }
+
+  // ── Settings nav item: focus-visible ─────────────────────────────────────
+  .sf-settings-nav-item:focus-visible {
+    outline: 2px solid var(--sf-blue-600, #2563eb);
+    outline-offset: -2px;
+  }
+
+  // ── Input focus: blue ring ────────────────────────────────────────────────
+  // Builder / settings panels: WP text/select/textarea controls.
+  // Adds a consistent blue glow on focus for the blue-accented parts of the UI.
+  .sf-settings-content,
+  .sf-builder-panel,
+  .sf-field-inspector {
+    .components-text-control__input,
+    .components-select-control__input,
+    .components-textarea-control__textarea {
+      transition: border-color var(--sf-transition-ui),
+                  box-shadow var(--sf-transition-ui);
+
+      &:focus,
+      &:focus-visible {
+        border-color: var(--sf-blue-600, #2563eb);
+        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+        outline: none;
+      }
+    }
+  }
+
+  // ── Card hover transitions ────────────────────────────────────────────────
+  // Ensures shadow and border changes on card hover animate smoothly.
+  // Hover rules themselves live in each component's SCSS file.
+  .sf-ext-card,
+  .sf-connection-card {
+    transition: box-shadow var(--sf-transition-ui),
+                border-color var(--sf-transition-ui),
+                transform var(--sf-transition-ui);
+  }
+}

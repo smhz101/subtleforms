@@ -1,0 +1,63 @@
+/**
+ * SubtleForms Semantic Color Tokens
+ *
+ * Maps semantic roles to design-system primitives.
+ * Single source of truth for: primary, success, danger, text, border, surface.
+ *
+ * Rules:
+ *   - Use these tokens in component SCSS instead of bare hex values.
+ *   - One success color: #16a34a (green-600).
+ *   - One primary: #2563eb (blue-600) + hover #3b82f6 (blue-500).
+ *   - Gray scale only — no slate.
+ */
+
+@use 'variables' as *;
+
+// ── Primary ───────────────────────────────────────────────────────────────────
+$sf-token-primary:       $sf-blue-600;   // #2563eb
+$sf-token-primary-hover: $sf-blue-500;   // #3b82f6
+$sf-token-primary-dark:  $sf-blue-700;   // #1d4ed8  (hover on white bg)
+
+// ── Success ───────────────────────────────────────────────────────────────────
+// Canonical success: #16a34a (green-600). Do NOT use #059669 (emerald-600).
+$sf-token-success:        $sf-green-600;  // #16a34a
+$sf-token-success-bg:     $sf-green-50;   // #f0fdf4
+$sf-token-success-border: $sf-green-100;  // #dcfce7
+
+// ── Danger ────────────────────────────────────────────────────────────────────
+$sf-token-danger:         $sf-red-600;    // #dc2626
+$sf-token-danger-bg:      $sf-red-50;     // #fef2f2
+$sf-token-danger-border:  $sf-red-100;    // #fee2e2
+
+// ── Text ──────────────────────────────────────────────────────────────────────
+$sf-token-text-primary:   $sf-gray-900;   // #111827
+$sf-token-text-secondary: $sf-gray-600;   // #4b5563
+$sf-token-text-muted:     $sf-gray-500;   // #6b7280
+$sf-token-text-subtle:    $sf-gray-400;   // #9ca3af
+
+// ── Borders ───────────────────────────────────────────────────────────────────
+$sf-token-border:         $sf-gray-200;   // #e5e7eb
+$sf-token-border-strong:  $sf-gray-300;   // #d1d5db
+
+// ── Backgrounds ───────────────────────────────────────────────────────────────
+$sf-token-bg-surface:     #fff;
+$sf-token-bg-subtle:      $sf-gray-50;    // #f9fafb
+$sf-token-bg-muted:       $sf-gray-100;   // #f3f4f6
+
+// ── Spacing Scale (sub-component) ─────────────────────────────────────────────
+// Fine-grained scale for internal component spacing: gap, padding, margin.
+// Use $sf-space-* (variables.scss) for layout-level spacing.
+// Canonical values: 4, 8, 12, 16, 20, 24, 32 — nothing else.
+$sf-sp-1: 4px;
+$sf-sp-2: 8px;
+$sf-sp-3: 12px;
+$sf-sp-4: 16px;
+$sf-sp-5: 20px;
+$sf-sp-6: 24px;
+$sf-sp-8: 32px;
+
+// ── Icon utility ──────────────────────────────────────────────────────────────
+// Ensures lucide-react SVG icons inherit the surrounding text color.
+.sf-icon {
+  color: currentColor;
+}
