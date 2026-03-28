@@ -71,6 +71,10 @@ import {
   Search,
   Sparkles,
   Lightbulb,
+  Settings,
+  Key,
+  Monitor,
+  Wrench,
 } from 'lucide-react';
 
 /**
@@ -157,6 +161,10 @@ const Icon = {
   Search,
   Sparkles,
   Lightbulb,
+  Settings,
+  Key,
+  Monitor,
+  Wrench,
 
   // Form Field Types
   Type,

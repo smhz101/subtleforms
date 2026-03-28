@@ -46,7 +46,7 @@ export default function UpgradePrompt({
     if (onUpgrade) {
       onUpgrade();
     } else {
-      window.location.href = getUpgradeUrl(feature || '');
+      window.open(getUpgradeUrl(feature || ''), '_blank');
     }
   };
 

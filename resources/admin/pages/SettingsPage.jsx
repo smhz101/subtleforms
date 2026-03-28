@@ -9,19 +9,22 @@ import AISettings from '../components/settings/AISettings';
 import AdvancedSettings from '../components/settings/AdvancedSettings';
 import LicenseSettings from '../components/settings/LicenseSettings';
 import ExtensionsSettings from '../components/settings/ExtensionsSettings';
+import { isProFeature, openUpgradeModal } from '../utils/featureGate';
+import Icon from '../components/ui/Icon';
+import { getUIIcon } from '../utils/iconRegistry';
 import './SettingsPage.scss';
 
 /**
  * Tab definitions for the settings sidebar.
  */
 const TABS = [
-  { name: 'general', title: __('General', 'subtleforms'), icon: 'admin-settings' },
-  { name: 'license', title: __('License', 'subtleforms'), icon: 'admin-network' },
-  { name: 'frontend', title: __('Frontend', 'subtleforms'), icon: 'admin-appearance' },
-  { name: 'email', title: __('Email / Notifications', 'subtleforms'), icon: 'email' },
-  { name: 'ai', title: __('AI Configuration', 'subtleforms'), icon: 'admin-site-alt3' },
-  { name: 'advanced', title: __('Advanced', 'subtleforms'), icon: 'admin-tools' },
-  { name: 'extensions', title: __('Extensions', 'subtleforms'), icon: 'admin-plugins' },
+  { name: 'general', title: __('General', 'subtleforms') },
+  { name: 'license', title: __('License', 'subtleforms') },
+  { name: 'frontend', title: __('Frontend', 'subtleforms') },
+  { name: 'email', title: __('Email / Notifications', 'subtleforms') },
+  { name: 'ai', title: __('AI Configuration', 'subtleforms') },
+  { name: 'advanced', title: __('Advanced', 'subtleforms') },
+  { name: 'extensions', title: __('Extensions', 'subtleforms'), pro: true },
 ];
 
 /**
@@ -74,7 +77,7 @@ export default function Settings() {
       </AdminShell>
     );
   }
-
+  const hasPro = isProFeature( 'extensions.webhooks' );
   // ── Action buttons ───────────────────────────────────────────────────
   const actions = (
     <>
@@ -115,7 +118,9 @@ export default function Settings() {
           {/* Sidebar Navigation */}
           <nav className='sf-settings-sidebar'>
             <ul className='sf-settings-nav'>
-              {TABS.map((tab) => (
+              {TABS.map((tab) => {
+              const TabIcon = getUIIcon(tab.name);
+              return (
                 <li key={tab.name}>
                   <button
                     type='button'
@@ -124,14 +129,19 @@ export default function Settings() {
                         ? 'sf-settings-nav-item--active'
                         : ''
                     }`}
+                    title={tab.pro && !hasPro ? __('Upgrade to Pro to unlock', 'subtleforms') : undefined}
                     onClick={() => setActiveTab(tab.name)}>
-                    <span className={`dashicons dashicons-${tab.icon}`} />
+                    {TabIcon && <TabIcon size={20} />}
                     <span className='sf-settings-nav-item__label'>
                       {tab.title}
                     </span>
+                    {tab.pro && !hasPro && (
+                      <Icon.Lock size={16} className='sf-settings-nav-item__lock' />
+                    )}
                   </button>
                 </li>
-              ))}
+              );
+            })}
             </ul>
           </nav>
 
