@@ -10,46 +10,9 @@ import { Button } from '../components/navigation';
 import { useNavigate } from 'react-router-dom';
 import { __, sprintf } from '@wordpress/i18n';
 import AdminShell from '../components/AdminShell';
+import { apiClient } from '../data';
+import Icon from '../components/ui/Icon';
 import './SubmissionDetailPage.scss';
-
-const restBase =
-  window.subtleformsAdmin && window.subtleformsAdmin.restUrl
-    ? window.subtleformsAdmin.restUrl.replace(/\/$/, '')
-    : '/wp-json/subtleforms/v1';
-const restNonce =
-  window.subtleformsAdmin && window.subtleformsAdmin.restNonce
-    ? window.subtleformsAdmin.restNonce
-    : null;
-
-async function apiGet(path) {
-  const response = await fetch(restBase + path, {
-    credentials: 'same-origin',
-    headers: {
-      'X-WP-Nonce': restNonce,
-      'Content-Type': 'application/json',
-    },
-  });
-  if (!response.ok) {
-    throw new Error('API request failed');
-  }
-  return response.json();
-}
-
-async function apiPut(path, payload) {
-  const response = await fetch(restBase + path, {
-    method: 'PUT',
-    credentials: 'same-origin',
-    headers: {
-      'X-WP-Nonce': restNonce,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
-  if (!response.ok) {
-    throw new Error('API request failed');
-  }
-  return response.json();
-}
 
 /**
  * Recursively render object or array values in a readable format
@@ -111,9 +74,9 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
 
     try {
       const [subData, logsData, adjData] = await Promise.all([
-        apiGet(`/submissions/${submissionId}`),
-        apiGet(`/submissions/${submissionId}/logs`),
-        apiGet(
+        apiClient.get(`/submissions/${submissionId}`),
+        apiClient.get(`/submissions/${submissionId}/logs`),
+        apiClient.get(
           `/submissions/${submissionId}/adjacent${
             formId ? `?form_id=${formId}` : ''
           }`
@@ -142,7 +105,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
 
     setUpdating(true);
     try {
-      await apiPut(`/submissions/${submission.id}`, { status: newStatus });
+      await apiClient.put(`/submissions/${submission.id}`, { status: newStatus });
       setSubmission({ ...submission, status: newStatus });
     } catch (err) {
       setError(__('Failed to update status', 'subtleforms'));
@@ -374,18 +337,11 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
             ) : (
               <div className='sf-submission-empty'>
                 <div className='sf-submission-empty__icon'>
-                  <svg
+                  <Icon.FileText
                     className='sf-submission-empty__icon-svg'
-                    fill='none'
-                    stroke='currentColor'
-                    viewBox='0 0 24 24'>
-                    <path
-                      strokeLinecap='round'
-                      strokeLinejoin='round'
-                      strokeWidth={2}
-                      d='M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z'
-                    />
-                  </svg>
+                    size={24}
+                    strokeWidth={1.5}
+                  />
                 </div>
                 <h3 className='sf-submission-empty__title'>
                   {__('No Data Submitted', 'subtleforms')}

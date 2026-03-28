@@ -31,6 +31,31 @@
 	font-size: 0.875rem;
 }
 
+.sf-export-btn--locked {
+	background: rgba(79, 70, 229, 0.1);
+	border: 1px solid rgba(79, 70, 229, 0.4);
+	box-shadow: inset 0 0 0 1px rgba(79, 70, 229, 0.2);
+	opacity: 0.9;
+	cursor: pointer !important;
+	display: inline-flex !important;
+	align-items: center;
+	gap: 5px;
+	transition: all 0.2s ease;
+
+	&:hover {
+		opacity: 1;
+		transform: translateY(-1px);
+		box-shadow: 0 0 18px rgba(79, 70, 229, 0.32);
+	}
+}
+
+.sf-export-btn__icon {
+	flex-shrink: 0;
+	pointer-events: none;
+	color: var(--sf-blue-600, #2563eb);
+	font-weight: 700;
+}
+
 /* Page Layout - SubmissionsPage uses noScroll, content must scroll internally */
 .sf-submissions-page-content {
 	display: flex;

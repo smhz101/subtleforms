@@ -1,13 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
-
-const restBase =
-  window.subtleformsAdmin && window.subtleformsAdmin.restUrl
-    ? window.subtleformsAdmin.restUrl.replace(/\/$/, '')
-    : '/wp-json/subtleforms/v1';
-const restNonce =
-  window.subtleformsAdmin && window.subtleformsAdmin.restNonce
-    ? window.subtleformsAdmin.restNonce
-    : null;
+import { apiClient } from '../data';
 
 /**
  * Custom hook for real-time updates of submission counts and data
@@ -48,19 +40,7 @@ export function useRealTimeUpdates(options = {}) {
     try {
       setIsPolling(true);
 
-      const response = await fetch(`${restBase}/submissions/unread-count`, {
-        credentials: 'same-origin',
-        headers: {
-          'X-WP-Nonce': restNonce,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
+      const data = await apiClient.get('/submissions/unread-count');
       const newCount = data.count || 0;
 
       setUnreadCount(newCount);

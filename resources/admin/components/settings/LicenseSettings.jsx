@@ -13,6 +13,7 @@
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import Icon from '../ui/Icon';
 
 const PLAN_LABELS = {
 	free:    __( 'Free', 'subtleforms' ),
@@ -138,7 +139,7 @@ export default function LicenseSettings() {
 		return (
 			<div className="sf-license-settings sf-license-settings--dev">
 				<div className="sf-license-dev-banner">
-					<span className="sf-license-dev-banner__icon dashicons dashicons-hammer"></span>
+					<Icon.Wrench size={20} className="sf-license-dev-banner__icon" />
 					<div className="sf-license-dev-banner__body">
 						<strong>{ __( 'Development Mode Active', 'subtleforms' ) }</strong>
 						<p>
@@ -152,13 +153,13 @@ export default function LicenseSettings() {
 					<ul className="sf-feature-list">
 						{ PLAN_FEATURES.pro.map( ( f ) => (
 							<li key={ f } className="sf-feature-list__item sf-feature-list__item--active">
-								<span className="dashicons dashicons-yes-alt"></span>
-								{ f }
-							</li>
-						) ) }
-						{ PLAN_FEATURES.agency.filter( ( f ) => ! PLAN_FEATURES.pro.includes( f ) ).map( ( f ) => (
-							<li key={ f } className="sf-feature-list__item sf-feature-list__item--active">
-								<span className="dashicons dashicons-yes-alt"></span>
+							<Icon.CheckCircle size={16} />
+							{ f }
+						</li>
+					) ) }
+					{ PLAN_FEATURES.agency.filter( ( f ) => ! PLAN_FEATURES.pro.includes( f ) ).map( ( f ) => (
+						<li key={ f } className="sf-feature-list__item sf-feature-list__item--active">
+							<Icon.CheckCircle size={16} />
 								{ f }
 							</li>
 						) ) }
@@ -179,7 +180,7 @@ export default function LicenseSettings() {
 
 				<div className="sf-license-account-card">
 					<div className="sf-license-account-card__header">
-						<span className="dashicons dashicons-admin-users sf-license-account-card__icon"></span>
+					<Icon.Users size={20} className="sf-license-account-card__icon" />
 						<div>
 							<p className="sf-license-account-card__email">{ subData.email }</p>
 							<div className="sf-license-account-card__badges">
@@ -220,7 +221,7 @@ export default function LicenseSettings() {
 					<ul className="sf-feature-list">
 						{ features.map( ( f ) => (
 							<li key={ f } className="sf-feature-list__item sf-feature-list__item--active">
-								<span className="dashicons dashicons-yes-alt"></span>
+							<Icon.CheckCircle size={16} />
 								{ f }
 							</li>
 						) ) }
@@ -238,7 +239,7 @@ export default function LicenseSettings() {
 
 			<div className="sf-license-connect-card">
 				<div className="sf-license-connect-card__header">
-					<span className="dashicons dashicons-lock sf-license-connect-card__icon"></span>
+				<Icon.Lock size={20} className="sf-license-connect-card__icon" />
 					<div>
 						<h3>{ __( 'Activate SubtleForms Pro', 'subtleforms' ) }</h3>
 						<p>{ __( 'Enter your license key to unlock Pro features and extensions.', 'subtleforms' ) }</p>
@@ -295,7 +296,7 @@ export default function LicenseSettings() {
 				<ul className="sf-feature-list">
 					{ PLAN_FEATURES.starter.map( ( f ) => (
 						<li key={ f } className="sf-feature-list__item">
-							<span className="dashicons dashicons-yes"></span>
+							<Icon.Check size={16} />
 							{ f }
 						</li>
 					) ) }
@@ -303,7 +304,7 @@ export default function LicenseSettings() {
 						.filter( ( f ) => ! PLAN_FEATURES.starter.includes( f ) )
 						.map( ( f ) => (
 							<li key={ f } className="sf-feature-list__item">
-								<span className="dashicons dashicons-yes"></span>
+								<Icon.Check size={16} />
 								{ f }
 							</li>
 						) ) }

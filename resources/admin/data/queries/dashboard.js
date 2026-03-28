@@ -14,7 +14,7 @@ import { queryKeys } from '../queryKeys';
 export function useDashboardStats(options = {}) {
   return useQuery({
     queryKey: queryKeys.dashboard.stats(),
-    queryFn: () => apiClient.get('/dashboard/stats'),
+    queryFn: () => apiClient.get('/dashboard'),
     refetchInterval: 60 * 1000, // Refetch every minute
     ...options,
   });

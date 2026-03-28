@@ -86,12 +86,7 @@ class DashboardApi {
 				'system_health'      => $this->getSystemHealth(),
 			);
 
-			return ApiResponse::success(
-				array(
-					'success' => true,
-					'data'    => $data,
-				)
-			);
+			return ApiResponse::success( $data );
 		} catch ( \Exception $e ) {
 			return ApiResponse::server_error( $e->getMessage() );
 		}

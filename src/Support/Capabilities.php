@@ -86,6 +86,9 @@ final class Capabilities {
 
 			// Templates (existing Pro feature key)
 			'templates.pro'              => false,
+
+			// Submissions
+			'submissions.export'         => false,
 		);
 	}
 

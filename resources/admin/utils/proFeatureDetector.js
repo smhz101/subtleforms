@@ -9,30 +9,17 @@
 
 /**
  * List of Pro template IDs
- * These match the template IDs from resources/admin/templates/pro/
+ * These match the PHP ProTemplates::get_all() array keys (snake_case)
  */
-const PRO_TEMPLATE_IDS = [
-  // Contact
-  'advanced-contact',
-  'sales-inquiry',
-  'partnership-request',
-  // Registration
-  'event-registration',
-  'webinar-signup',
-  'course-enrollment',
-  'membership-application',
-  'sectioned-membership',
-  // Support
-  'support-ticket',
-  'bug-report',
-  'feature-request',
-  'technical-support',
-  // Payment
-  'payment-request',
-  'donation-form',
-  'invoice-payment',
-  'charity-donation',
-  'simple-payment',
+export const PRO_TEMPLATE_IDS = [
+  'event_registration',
+  'support_ticket',
+  'payment_form',
+  'booking_form',
+  'job_application',
+  'advanced_contact',
+  'survey_nps',
+  'membership_application',
 ];
 
 /**

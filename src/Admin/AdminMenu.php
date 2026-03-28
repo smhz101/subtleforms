@@ -260,16 +260,12 @@ class AdminMenu {
 		);
 
 		// Get license data if Pro is active (no API calls, just read from options)
-		$license_data = array();
-		if ( defined( 'SUBTLEFORMS_PRO_VERSION' ) && function_exists( 'subtleforms_pro' ) ) {
-			$license_manager = subtleforms_pro()->get_license_manager();
-			$license_status  = $license_manager->get_license_status();
-			$raw_license_data = $license_manager->get_license_data();
-			
-			$license_data = array(
-				'status'     => $license_status, // active, inactive, expired, grace
-				'plan'       => ! empty( $raw_license_data['plan'] ) ? $raw_license_data['plan'] : 'pro',
-				'expiresAt'  => ! empty( $raw_license_data['expires'] ) ? $raw_license_data['expires'] : null,
+		$license_data = null;
+		if ( class_exists( \SubtleFormsPro\Licensing\LicenseManager::class ) ) {
+			$licenseManager = \SubtleForms\Plugin::instance()->container()->get( \SubtleFormsPro\Licensing\LicenseManager::class );
+			$license_data   = array(
+				'status' => $licenseManager->getStatus(),
+				'data'   => $licenseManager->getLicenseData(),
 			);
 		}
 

@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from '@wordpress/element';
+import { useState, useRef } from '@wordpress/element';
 import { SearchControl, SelectControl } from '@wordpress/components';
 import { Button } from '../components/navigation';
 import { __, sprintf } from '@wordpress/i18n';
@@ -6,36 +6,25 @@ import AdminShell from '../components/AdminShell';
 import TabBar from '../components/TabBar';
 import SubmissionsTable from '../components/SubmissionsTable';
 import useRealTimeUpdates from '../hooks/useRealTimeUpdates';
+import { isProFeature, requirePro } from '../utils/featureGate';
+import { Icon } from '../components/ui';
+import apiFetch from '@wordpress/api-fetch';
+import { useForms } from '../data';
 import './SubmissionsPage.scss';
 
-const restBase =
-  window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
-  '/wp-json/subtleforms/v1';
-const restNonce = window.subtleformsAdmin?.restNonce || '';
-
-async function apiGet(path) {
-  const response = await fetch(restBase + path, {
-    credentials: 'same-origin',
-    headers: {
-      'X-WP-Nonce': restNonce,
-      'Content-Type': 'application/json',
-    },
-  });
-  if (!response.ok) {
-    throw new Error('API request failed');
-  }
-  return response.json();
-}
-
 export default function SubmissionsPage({ formId }) {
+  const canExport = isProFeature('submissions.export');
   const [search, setSearch] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+  const searchTimerRef = useRef(null);
   const [statusFilter, setStatusFilter] = useState('all');
-  const [forms, setForms] = useState([]);
   const [selectedFormId, setSelectedFormId] = useState(formId || 'all');
   const [dateRange, setDateRange] = useState('all');
   const [showFilters, setShowFilters] = useState(false);
   const [exporting, setExporting] = useState(false);
   const submissionsTableRef = useRef(null);
+
+  const { data: formsData = [] } = useForms({}, { enabled: !formId });
 
   // Real-time updates for live badge and table refresh
   const { unreadCount, lastUpdate, isPolling } = useRealTimeUpdates({
@@ -61,18 +50,15 @@ export default function SubmissionsPage({ formId }) {
     },
   });
 
-  useEffect(() => {
-    if (!formId) {
-      // Load forms for filter dropdown
-      apiGet('/forms')
-        .then((data) => {
-          if (Array.isArray(data)) {
-            setForms(data);
-          }
-        })
-        .catch(() => {});
-    }
-  }, [formId]);
+  const forms = Array.isArray(formsData) ? formsData : [];
+
+  const handleSearchChange = (value) => {
+    setSearch(value);
+    clearTimeout(searchTimerRef.current);
+    searchTimerRef.current = setTimeout(() => {
+      setDebouncedSearch(value);
+    }, 300);
+  };
 
   const title = formId
     ? __('Form Submissions', 'subtleforms')
@@ -175,12 +161,18 @@ export default function SubmissionsPage({ formId }) {
         <div className='sf-submissions-actions'>
           <Button
             variant='secondary'
-            onClick={exportSubmissions}
+            onClick={() => requirePro('submissions.export', exportSubmissions)}
             disabled={exporting}
-            className='sf-button-height'>
-            {exporting
-              ? __('Exporting...', 'subtleforms')
-              : __('Export CSV', 'subtleforms')}
+            title={!canExport && !exporting ? __('Export all submissions to CSV instantly', 'subtleforms') : undefined}
+            className={`sf-button-height${!canExport && !exporting ? ' sf-export-btn--locked' : ''}`}>
+            {exporting ? (
+              __('Exporting...', 'subtleforms')
+            ) : !canExport ? (
+              <>
+                <Icon.Lock size={13} className='sf-export-btn__icon' />
+                {__('Export CSV (Pro)', 'subtleforms')}
+              </>
+            ) : __('Export CSV', 'subtleforms')}
           </Button>
           {!formId && (
             <Button
@@ -194,7 +186,7 @@ export default function SubmissionsPage({ formId }) {
           )}
           <SearchControl
             value={search}
-            onChange={setSearch}
+            onChange={handleSearchChange}
             placeholder={__('Search submissions...', 'subtleforms')}
           />
         </div>
@@ -234,10 +226,12 @@ export default function SubmissionsPage({ formId }) {
         ref={submissionsTableRef}
         formId={selectedFormId !== 'all' ? parseInt(selectedFormId) : formId}
         showFormColumn={!formId && selectedFormId === 'all'}
-        searchTerm={search}
+        searchTerm={debouncedSearch}
         statusFilter={statusFilter}
         dateRange={dateRange}
       />
+
+
     </AdminShell>
   );
 }

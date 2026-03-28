@@ -280,7 +280,7 @@ export default function CreateFormPage() {
                             key={tpl.id}
                             type='button'
                             onClick={() => handleSelectTemplate(tpl)}
-                            disabled={isLocked}
+                            title={isLocked ? __('Pro template — click to unlock', 'subtleforms') : undefined}
                             className={clsx(
                               'sf-cfp-tcard',
                               isSelected && 'sf-cfp-tcard--selected',

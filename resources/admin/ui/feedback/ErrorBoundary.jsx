@@ -35,8 +35,8 @@ export class ErrorBoundary extends React.Component {
       return (
         <div className="sf-error-boundary">
           <div className="sf-error-boundary__content">
-            <h2>{__('Something went wrong', 'subtleforms')}</h2>
-            <p>{__('An error occurred while rendering this component.', 'subtleforms')}</p>
+            <h2>{__('Unexpected issue detected', 'subtleforms')}</h2>
+            <p>{__('Something interrupted the page. Please refresh or try again in a moment.', 'subtleforms')}</p>
             {process.env.NODE_ENV === 'development' && this.state.error && (
               <details className="sf-error-boundary__details">
                 <summary>{__('Error details', 'subtleforms')}</summary>

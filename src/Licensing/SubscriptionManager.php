@@ -268,6 +268,7 @@ class SubscriptionManager {
 				'extensions.multilanguage'   => true,
 				'extensions.payments'        => true,
 				'templates.pro'              => true,
+				'submissions.export'         => true,
 			);
 		}
 
@@ -278,6 +279,7 @@ class SubscriptionManager {
 				'extensions.analytics'       => true,
 				'templates.pro'              => true,
 				'logic.conditional.advanced' => true,
+				'submissions.export'         => true,
 			);
 		}
 

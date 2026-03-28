@@ -1,5 +1,7 @@
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import Icon from '../ui/Icon';
+import { requirePro } from '../../utils/featureGate';
 import WebhooksPanel from './extensions/WebhooksPanel';
 import EmailMarketingPanel from './extensions/EmailMarketingPanel';
 import CrmPanel from './extensions/CrmPanel';
@@ -43,27 +45,24 @@ function StatusDot({ enabled, configured, available }) {
 }
 
 /**
- * Pro-lock overlay for unavailable extensions
+ * Pro-lock overlay for unavailable extensions.
+ * Minimal inline notice — no blur, no blocking overlay.
  */
-function ProLockOverlay() {
+function ProLockOverlay({ slug, label }) {
   return (
     <div className='sf-ext-pro-overlay'>
       <div className='sf-ext-pro-overlay__inner'>
-        <span className='sf-ext-pro-overlay__icon'>🔒</span>
-        <h3 className='sf-ext-pro-overlay__title'>{__('Pro Feature', 'subtleforms')}</h3>
+        <Icon.Lock size={24} className='sf-ext-pro-overlay__icon' />
+        <h3 className='sf-ext-pro-overlay__title'>{__('Pro feature', 'subtleforms')}</h3>
         <p className='sf-ext-pro-overlay__desc'>
-          {__(
-            'This extension requires an active SubtleForms Pro licence.',
-            'subtleforms'
-          )}
+          {__('Upgrade your plan to configure this extension.', 'subtleforms')}
         </p>
-        <a
-          href='https://subtleforms.com/pro'
-          target='_blank'
-          rel='noreferrer'
-          className='sf-ext-pro-overlay__cta'>
+        <button
+          type='button'
+          className='sf-ext-pro-overlay__cta'
+          onClick={() => requirePro( `extensions.${slug}`, () => {}, { label } )}>
           {__('Upgrade to Pro', 'subtleforms')}
-        </a>
+        </button>
       </div>
     </div>
   );
@@ -118,7 +117,7 @@ export default function ExtensionsSettings({ settings, updateSetting, fieldError
       <div className='sf-ext-settings__content'>
         {ActivePanel && (
           <div className='sf-ext-settings__panel-wrap'>
-            {!activeExt.available && <ProLockOverlay />}
+            {!activeExt.available && <ProLockOverlay slug={activeSlug} label={activeExt.label} />}
             <ActivePanel
               settings={settings}
               updateSetting={updateSetting}

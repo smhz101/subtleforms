@@ -11,7 +11,7 @@ import { queryKeys } from '../queryKeys';
 /**
  * Fetch all forms with optional filters
  */
-export function useForms(filters = {}) {
+export function useForms(filters = {}, options = {}) {
   return useQuery({
     queryKey: queryKeys.forms.list(filters),
     queryFn: async () => {
@@ -20,6 +20,7 @@ export function useForms(filters = {}) {
       return apiClient.get(path);
     },
     staleTime: 30 * 1000, // Consider fresh for 30 seconds
+    ...options,
   });
 }
 
