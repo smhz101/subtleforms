@@ -23,24 +23,24 @@
         }
 
         &.is-hovered:not(.is-selected) {
-                background-color: rgba(59, 130, 246, 0.03);
-                border-color: var(--sf-blue-200, #bfdbfe);
-                box-shadow: 0 3px 8px 0 rgba(59, 130, 246, 0.10);
+                background-color: var(--sf-gray-50);
+                border-color: var(--sf-gray-400);
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
                 transform: translateY(-1px);
         }
 
         &.is-selected {
-                border-color: var(--wp-blue-500, #2271b1);
-                box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.12), 0 2px 8px 0 rgba(34, 113, 177, 0.08);
-                background-color: rgba(34, 113, 177, 0.03);
+                border-color: var(--sf-lime-500);
+                box-shadow: 0 0 0 1px var(--sf-lime-500), 0 2px 6px rgba(0, 0, 0, 0.06);
+                background-color: #ffffff;
                 animation: sf-field-select-flash 0.45s cubic-bezier(0.4, 0, 0.2, 1) 1;
         }
 
         // Lighter treatment for nodes in the multi-select set (not the primary active node)
         &.is-multi-selected {
-                border-color: var(--sf-blue-300, #93c5fd);
-                box-shadow: 0 0 0 2px rgba(34, 113, 177, 0.08);
-                background-color: rgba(34, 113, 177, 0.05);
+                border-color: var(--sf-lime-400);
+                box-shadow: 0 0 0 1px rgba(132, 204, 22, 0.3);
+                background-color: rgba(132, 204, 22, 0.03);
         }
 
         &--validation-error {
@@ -58,19 +58,19 @@
         }
 }
 
-// Entry animation: soft scale-in glow that settles to steady-state border + shadow
+// Entry animation: soft scale-in glow that settles to steady-state lime border + shadow
 @keyframes sf-field-select-flash {
         0% {
                 transform: scale(1.012);
-                background-color: rgba(34, 113, 177, 0.09);
-                box-shadow: 0 0 0 4px rgba(34, 113, 177, 0.18);
+                background-color: rgba(132, 204, 22, 0.07);
+                box-shadow: 0 0 0 3px rgba(132, 204, 22, 0.25);
         }
         55% {
                 transform: scale(1.003);
         }
         100% {
                 transform: scale(1);
-                background-color: rgba(34, 113, 177, 0.03);
-                box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.12), 0 2px 8px 0 rgba(34, 113, 177, 0.08);
+                background-color: #ffffff;
+                box-shadow: 0 0 0 1px var(--sf-lime-500), 0 2px 6px rgba(0, 0, 0, 0.06);
         }
 }
