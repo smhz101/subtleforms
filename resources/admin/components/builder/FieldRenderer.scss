@@ -1,10 +1,24 @@
 .sf-field-renderer {
+	&__header {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+		margin-bottom: 0.5rem;
+	}
+
+	&__icon {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--sf-gray-400);
+		flex-shrink: 0;
+	}
+
 	&__label {
 		display: block;
-		margin-bottom: 0.5rem;
-		font-weight: 600;
+		font-weight: 500;
 		font-size: 0.875rem;
-		color: var(--sf-gray-800);
+		color: var(--sf-gray-700);
 		line-height: 1.5;
 		letter-spacing: -0.01em;
 		transition: color 0.2s ease;
@@ -26,9 +40,9 @@
 		display: block;
 		width: 100%;
 		margin-bottom: 0.5rem;
-		font-weight: 600;
+		font-weight: 500;
 		font-size: 0.875rem;
-		color: var(--sf-gray-800);
+		color: var(--sf-gray-700);
 		line-height: 1.5;
 		letter-spacing: -0.01em;
 		background: var(--sf-surface, #fff);

@@ -117,6 +117,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
   }
 
   const showRequired = required && !NON_INPUT_TYPES.has(type);
+  const FieldIcon = getFieldIcon(type);
 
   // ── Section Break ───────────────────────────────────────────────────────────
   if (type === 'section_break') {
@@ -153,15 +154,20 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           onClick={(e) => e.stopPropagation()}
         />
       ) : (
-        <label
-          className={`${labelClass}${onLabelChange ? ' sf-field-renderer__label--editable' : ''}`}
-          onClick={handleLabelClick}
-        >
-          {label || field.name}
-          {showRequired && (
-            <span className='sf-field-renderer__required-mark'>*</span>
-          )}
-        </label>
+        <div className='sf-field-renderer__header'>
+          <span className='sf-field-renderer__icon'>
+            <FieldIcon size={14} />
+          </span>
+          <label
+            className={`${labelClass}${onLabelChange ? ' sf-field-renderer__label--editable' : ''}`}
+            onClick={handleLabelClick}
+          >
+            {label || field.name}
+            {showRequired && (
+              <span className='sf-field-renderer__required-mark'>*</span>
+            )}
+          </label>
+        </div>
       )}
 
       {/* Render appropriate input based on type */}

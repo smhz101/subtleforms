@@ -1,4 +1,5 @@
 import { memo, useMemo } from '@wordpress/element';
+import Icon from '../ui/Icon';
 import FieldRenderer from './FieldRenderer';
 import FieldToolbar from './FieldToolbar';
 import clsx from 'clsx';
@@ -47,7 +48,7 @@ const FieldWrapper = memo(function FieldWrapper({
       onMouseLeave={onLeave}>
       {configWarning && (
         <span className='sf-field-wrapper__config-warning' title={configWarning}>
-          ⚠ {configWarning}
+          <Icon.AlertCircle size={12} /> {configWarning}
         </span>
       )}
       <FieldRenderer field={field} />
