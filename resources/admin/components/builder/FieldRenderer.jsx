@@ -141,8 +141,13 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
     );
   }
 
+  const isCompositeType = type === 'name_group' || type === 'address_group';
+
   return (
-    <div className={previewMode && showRequired && touched ? 'sf-field-renderer--preview-error' : undefined}>
+    <div className={[
+      previewMode && showRequired && touched ? 'sf-field-renderer--preview-error' : null,
+      isCompositeType ? 'sf-field-renderer--composite' : null,
+    ].filter(Boolean).join(' ') || undefined}>
       {/* Label — inline editable when onLabelChange is provided */}
       {isEditingLabel ? (
         <input
