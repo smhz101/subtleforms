@@ -771,6 +771,100 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
+      {/* ── Password ────────────────────────────────────────────────────────── */}
+      {type === 'password' && (
+        <input
+          type='password'
+          placeholder={placeholder || '••••••••'}
+          className={inputClass}
+          readOnly
+          tabIndex='-1'
+        />
+      )}
+
+      {/* ── Rating ──────────────────────────────────────────────────────────── */}
+      {type === 'rating' && (
+        <div className='sf-field-renderer__rating'>
+          {Array.from({ length: field.max || 5 }, (_, i) => (
+            <span key={i} className='sf-field-renderer__rating-star'>
+              <Icon.Star size={22} />
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* ── Range Slider ────────────────────────────────────────────────────── */}
+      {type === 'range_slider' && (
+        <div className='sf-field-renderer__range-slider'>
+          <div className='sf-field-renderer__range-track'>
+            <div className='sf-field-renderer__range-fill' />
+            <div className='sf-field-renderer__range-thumb' />
+          </div>
+          <div className='sf-field-renderer__range-labels'>
+            <span>{field.min ?? 0}</span>
+            <span>{field.max ?? 100}</span>
+          </div>
+        </div>
+      )}
+
+      {/* ── Rich Text ───────────────────────────────────────────────────────── */}
+      {type === 'rich_text' && (
+        <div className='sf-field-renderer__rich-text'>
+          <div className='sf-field-renderer__rich-text-toolbar'>
+            <span className='sf-field-renderer__rich-text-btn'>B</span>
+            <span className='sf-field-renderer__rich-text-btn'>I</span>
+            <span className='sf-field-renderer__rich-text-btn'>U</span>
+            <span className='sf-field-renderer__rich-text-sep' />
+            <span className='sf-field-renderer__rich-text-btn'>≡</span>
+          </div>
+          <div className='sf-field-renderer__rich-text-body'>
+            {__('Rich text content…', 'subtleforms')}
+          </div>
+        </div>
+      )}
+
+      {/* ── Net Promoter Score ──────────────────────────────────────────────── */}
+      {type === 'net_promoter_score' && (
+        <div className='sf-field-renderer__nps'>
+          <div className='sf-field-renderer__nps-scale'>
+            {Array.from({ length: 11 }, (_, i) => (
+              <span key={i} className='sf-field-renderer__nps-option'>{i}</span>
+            ))}
+          </div>
+          <div className='sf-field-renderer__nps-labels'>
+            <span>{__('Not likely', 'subtleforms')}</span>
+            <span>{__('Very likely', 'subtleforms')}</span>
+          </div>
+        </div>
+      )}
+
+      {/* ── Checkbox Grid ───────────────────────────────────────────────────── */}
+      {type === 'checkbox_grid' && (() => {
+        const gridCols = field.columns?.length ? field.columns : ['Option 1', 'Option 2'];
+        const gridRows = field.rows?.length ? field.rows : ['Row 1', 'Row 2'];
+        const gridStyle = { gridTemplateColumns: `auto ${gridCols.map(() => '1fr').join(' ')}` };
+        return (
+          <div className='sf-field-renderer__checkbox-grid'>
+            <div className='sf-field-renderer__checkbox-grid-header' style={gridStyle}>
+              <span />
+              {gridCols.map((col, i) => (
+                <span key={i} className='sf-field-renderer__checkbox-grid-col'>{col}</span>
+              ))}
+            </div>
+            {gridRows.map((row, i) => (
+              <div key={i} className='sf-field-renderer__checkbox-grid-row' style={gridStyle}>
+                <span className='sf-field-renderer__checkbox-grid-row-label'>{row}</span>
+                {gridCols.map((_, j) => (
+                  <span key={j} className='sf-field-renderer__checkbox-grid-cell'>
+                    <input type='checkbox' className='sf-field-renderer__checkbox' readOnly tabIndex='-1' />
+                  </span>
+                ))}
+              </div>
+            ))}
+          </div>
+        );
+      })()}
+
       {/* Unknown / legacy field type — safe fallback, do NOT crash builder */}
       {!KNOWN_TYPES.has(type) && (
         <div className='sf-field-renderer__unknown-field'>
