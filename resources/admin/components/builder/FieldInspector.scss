@@ -51,6 +51,26 @@
 		position: sticky;
 		top: 0;
 		z-index: 10;
+		gap: $space-2;
+	}
+
+	&__header-info {
+		display: flex;
+		flex-direction: column;
+		gap: 0.125rem;
+		min-width: 0;
+		flex: 1;
+	}
+
+	&__field-type {
+		font-size: 0.6875rem;
+		color: $sf-stone-400;
+		font-weight: 400;
+		line-height: 1.3;
+		text-transform: capitalize;
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	&__title {
@@ -147,7 +167,8 @@
 
 	&__tab-content {
 		padding: $space-4 $space-3;
-		
+		animation: sf-inspector-tab-in 150ms ease-out;
+
 		/* Form controls spacing */
 		> * + * {
 			margin-top: $space-4;
@@ -201,5 +222,45 @@
 			flex-shrink: 0;
 			margin-top: 1.875rem; /* Align with input field */
 		}
+	}
+
+	// Smart hint shown at bottom of General tab
+	&__smart-hint {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.5rem;
+		padding: 0.75rem 1rem;
+		background: #f5f5f4; /* stone-100 */
+		border-top: 1px solid #e7e5e4; /* stone-200 */
+		font-size: 0.8125rem;
+		color: #57534e; /* stone-600 */
+		line-height: 1.5;
+
+		span {
+			flex-shrink: 0;
+			line-height: 1.5;
+		}
+
+		p {
+			margin: 0;
+		}
+	}
+
+	// Paragraph inside Notice components
+	&__notice-paragraph {
+		margin: 0;
+		font-size: 0.8125rem;
+		line-height: 1.5;
+	}
+}
+
+@keyframes sf-inspector-tab-in {
+	from {
+		opacity: 0.6;
+		transform: translateY(3px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
 	}
 }

@@ -86,6 +86,25 @@ final class FieldDefinition {
 	public $requiredCapabilities;
 
 	/**
+	 * @var array Field meta information — routing and categorisation
+	 * ['category' => 'regular|composite|layout|system']
+	 */
+	public $meta;
+
+	/**
+	 * @var array Inspector controls for layout/container fields.
+	 * Uses the same control schema as inspectorControls.
+	 * Rendered instead of inspectorControls when meta.category === 'layout'.
+	 */
+	public $layoutControls;
+
+	/**
+	 * @var bool Whether this field is hidden from the builder field palette.
+	 * Set to true for internal/system-only fields that should not be user-addable.
+	 */
+	public $paletteHidden;
+
+	/**
 	 * @param string $type Unique field type identifier
 	 * @param string $label Human-readable label
 	 * @param string $category Field category (basic, choices, media, advanced)
@@ -96,6 +115,9 @@ final class FieldDefinition {
 	 * @param array  $fieldSpecificAttributes Field-type specific config
 	 * @param array  $inspectorControls Inspector UI controls configuration
 	 * @param array  $requiredCapabilities Required capabilities to use this field
+	 * @param array  $meta Field meta (category: regular|composite|layout|system)
+	 * @param array  $layoutControls Inspector controls for layout/container fields
+	 * @param bool   $paletteHidden Whether to hide this field from the builder palette
 	 */
 	public function __construct(
 		$type,
@@ -107,7 +129,10 @@ final class FieldDefinition {
 		$baseAttributes = array(),
 		$fieldSpecificAttributes = array(),
 		$inspectorControls = array(),
-		$requiredCapabilities = array()
+		$requiredCapabilities = array(),
+		$meta = array(),
+		$layoutControls = array(),
+		$paletteHidden = false
 	) {
 		$this->type            = $type;
 		$this->label           = $label;
@@ -134,6 +159,9 @@ final class FieldDefinition {
 		$this->fieldSpecificAttributes = $fieldSpecificAttributes;
 		$this->inspectorControls       = $inspectorControls;
 		$this->requiredCapabilities    = $requiredCapabilities;
+		$this->meta                    = array_merge( array( 'category' => 'regular' ), $meta );
+		$this->layoutControls          = $layoutControls;
+		$this->paletteHidden           = $paletteHidden;
 	}
 
 	/**
@@ -153,6 +181,9 @@ final class FieldDefinition {
 			'fieldSpecificAttributes' => $this->fieldSpecificAttributes,
 			'inspectorControls'       => $this->inspectorControls,
 			'requiredCapabilities'    => $this->requiredCapabilities,
+			'meta'                    => $this->meta,
+			'layoutControls'          => $this->layoutControls,
+			'paletteHidden'           => $this->paletteHidden,
 		);
 	}
 

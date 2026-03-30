@@ -239,7 +239,9 @@ export default function LicenseSettings() {
 
 			<div className="sf-license-connect-card">
 				<div className="sf-license-connect-card__header">
-				<Icon.Lock size={20} className="sf-license-connect-card__icon" />
+					<div className="sf-license-connect-card__icon-wrapper">
+						<Icon.Lock size={20} className="sf-license-connect-card__icon" />
+					</div>
 					<div>
 						<h3>{ __( 'Activate SubtleForms Pro', 'subtleforms' ) }</h3>
 						<p>{ __( 'Enter your license key to unlock Pro features and extensions.', 'subtleforms' ) }</p>

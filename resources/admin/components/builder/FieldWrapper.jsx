@@ -1,4 +1,4 @@
-import { memo } from '@wordpress/element';
+import { memo, useMemo } from '@wordpress/element';
 import FieldRenderer from './FieldRenderer';
 import FieldToolbar from './FieldToolbar';
 import clsx from 'clsx';
@@ -25,6 +25,16 @@ const FieldWrapper = memo(function FieldWrapper({
   onDuplicate,
   onDelete,
 }) {
+  const configWarning = useMemo(() => {
+    if (!field) return null;
+    if (field.required && !field.label?.trim()) return 'No label set';
+    const OPTION_TYPES = ['dropdown', 'radio', 'multiple_choice'];
+    if (OPTION_TYPES.includes(field.type) && (!field.options || field.options.length === 0)) {
+      return 'No options configured';
+    }
+    return null;
+  }, [field]);
+
   return (
     <div
       className={clsx('field-wrapper', {
@@ -35,6 +45,11 @@ const FieldWrapper = memo(function FieldWrapper({
       onClick={onSelect}
       onMouseEnter={onHover}
       onMouseLeave={onLeave}>
+      {configWarning && (
+        <span className='sf-field-wrapper__config-warning' title={configWarning}>
+          ⚠ {configWarning}
+        </span>
+      )}
       <FieldRenderer field={field} />
 
       {isSelected && (

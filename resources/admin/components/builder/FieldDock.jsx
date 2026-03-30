@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef } from '@wordpress/element';
+import { useState, useMemo, useRef, useCallback, useEffect } from '@wordpress/element';
 import { Button, Modal } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { getIcon } from './utils/iconMap';
@@ -43,6 +43,56 @@ export default function FieldDock({
     }
   };
   const [collapsedGroups, setCollapsedGroups] = useState({});
+
+  // Timer ref for deduplicating single-click and double-click.
+  // A double-click fires: click → click → dblclick.
+  // onClick queues the add behind a short delay; onDoubleClick cancels the
+  // pending timer and fires once immediately — so both paths produce exactly 1 field.
+  const clickTimerRef = useRef(null);
+
+  const handleFieldClick = useCallback(
+    (type) => {
+      if (clickTimerRef.current) {
+        clearTimeout(clickTimerRef.current);
+      }
+      clickTimerRef.current = setTimeout(() => {
+        clickTimerRef.current = null;
+        onAddField(type);
+        setSearchQuery(''); // reset search after field is added
+      }, 200);
+    },
+    [onAddField]
+  );
+
+  const handleFieldDoubleClick = useCallback(
+    (type) => {
+      if (clickTimerRef.current) {
+        clearTimeout(clickTimerRef.current);
+        clickTimerRef.current = null;
+      }
+      onAddField(type);
+      setSearchQuery(''); // reset search after field is added
+    },
+    [onAddField]
+  );
+
+  // Stable ref so the event handler never needs to re-register on collapsed changes
+  const collapsedRef = useRef(collapsed);
+  useEffect(() => { collapsedRef.current = collapsed; }, [collapsed]);
+
+  // "/" quick-add shortcut dispatched from the canvas keyboard handler
+  useEffect(() => {
+    const handleQuickAdd = () => {
+      if (collapsedRef.current) {
+        setCollapsed(false);
+      }
+      requestAnimationFrame(() => {
+        searchInputRef.current?.focus();
+      });
+    };
+    window.addEventListener('sf:builder:quick-add', handleQuickAdd);
+    return () => window.removeEventListener('sf:builder:quick-add', handleQuickAdd);
+  }, []); // stable — all referenced values are refs or stable setters
 
   const toggleGroup = (category) => {
     setCollapsedGroups((prev) => ({
@@ -125,6 +175,12 @@ export default function FieldDock({
             placeholder={__('Search fields…', 'subtleforms')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'Escape') {
+                setSearchQuery('');
+                e.currentTarget.blur();
+              }
+            }}
             aria-label={__('Search fields', 'subtleforms')}
           />
           {searchQuery && (
@@ -172,7 +228,11 @@ export default function FieldDock({
                             setShowUpgradeModal(true);
                             return;
                           }
-                          onAddField(f.type);
+                          handleFieldClick(f.type);
+                        }}
+                        onDoubleClick={() => {
+                          if (isDisabled || isProLocked) return;
+                          handleFieldDoubleClick(f.type);
                         }}
                         disabled={isDisabled}
                         className={`sf-field-dock__field-button ${
@@ -257,7 +317,11 @@ export default function FieldDock({
                               setShowUpgradeModal(true);
                               return;
                             }
-                            onAddField(f.type);
+                            handleFieldClick(f.type);
+                          }}
+                          onDoubleClick={() => {
+                            if (isDisabled || isProLocked) return;
+                            handleFieldDoubleClick(f.type);
                           }}
                           disabled={isDisabled}
                           className={`sf-field-dock__field-button ${

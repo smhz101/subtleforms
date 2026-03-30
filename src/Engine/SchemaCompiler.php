@@ -139,4 +139,51 @@ final class SchemaCompiler {
 		$ctx->setMeta( 'disabled_fields', $conditionalState['disabled_fields'] );
 		$ctx->setMeta( 'hidden_steps', $conditionalState['hidden_steps'] );
 	}
+
+	/**
+	 * Normalize schema field nodes to ensure each has the required keys:
+	 * id, type, label, config. Safe defaults are assigned for missing keys.
+	 *
+	 * @param array $schema
+	 * @return array Normalized schema
+	 */
+	public function normalizeSchema( array $schema ): array {
+		if ( isset( $schema['fields'] ) && is_array( $schema['fields'] ) ) {
+			$schema['fields'] = $this->normalizeFieldList( $schema['fields'] );
+		}
+		return $schema;
+	}
+
+	/**
+	 * Recursively normalize a list of field nodes.
+	 *
+	 * @param array $fields
+	 * @return array
+	 */
+	private function normalizeFieldList( array $fields ): array {
+		foreach ( $fields as &$field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+			// Ensure every field has id, type, label, config
+			$field['id']     = $field['id'] ?? $field['key'] ?? '';
+			$field['type']   = $field['type'] ?? '';
+			$field['label']  = $field['label'] ?? '';
+			$field['config'] = is_array( $field['config'] ?? null ) ? $field['config'] : array();
+
+			if ( ! empty( $field['children'] ) && is_array( $field['children'] ) ) {
+				$field['children'] = $this->normalizeFieldList( $field['children'] );
+			}
+			if ( ! empty( $field['columns'] ) && is_array( $field['columns'] ) ) {
+				foreach ( $field['columns'] as &$column ) {
+					if ( is_array( $column ) ) {
+						$column = $this->normalizeFieldList( $column );
+					}
+				}
+				unset( $column );
+			}
+		}
+		unset( $field );
+		return $fields;
+	}
 }

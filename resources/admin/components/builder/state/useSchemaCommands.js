@@ -86,19 +86,20 @@ export function useSchemaCommands({
           (id) => !currentTree.nodes[id]
         );
 
-        // DEBUG: Log field creation
         if (newNodeId) {
-          const node = newTree.nodes[newNodeId];
-          console.log('[SubtleForms] Creating field:', {
-            fieldType: type,
-            fieldId: node.id,
-            fieldLabel: node.config?.label,
-            targetParentId: context.parentId,
-            selectedStepId: selectedStepId,
-            columnIndex: context.columnIndex,
-            position: context.position,
-          });
-          setSelectedId(node.id);
+          if (process.env.NODE_ENV !== 'production') {
+            const node = newTree.nodes[newNodeId];
+            console.log('[SubtleForms] Creating field:', {
+              fieldType: type,
+              fieldId: node.id,
+              fieldLabel: node.config?.label,
+              targetParentId: context.parentId,
+              selectedStepId: selectedStepId,
+              columnIndex: context.columnIndex,
+              position: context.position,
+            });
+          }
+          setSelectedId(newNodeId);
         }
 
         return newTree;
@@ -131,13 +132,14 @@ export function useSchemaCommands({
       // If a step is selected, add to that step; otherwise add to root
       const targetParentId = selectedStepId || rootId;
 
-      // DEBUG: Log dock add
-      console.log('[SubtleForms] Dock Add:', {
-        fieldType: type,
-        selectedStepId: selectedStepId,
-        targetParentId: targetParentId,
-        isStep: targetParentId !== rootId,
-      });
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[SubtleForms] Dock Add:', {
+          fieldType: type,
+          selectedStepId: selectedStepId,
+          targetParentId: targetParentId,
+          isStep: targetParentId !== rootId,
+        });
+      }
 
       handleInsert(type, {
         parentId: targetParentId,

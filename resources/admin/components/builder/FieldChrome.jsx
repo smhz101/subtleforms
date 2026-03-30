@@ -1,4 +1,4 @@
-import { useState, memo } from '@wordpress/element';
+import { useState, memo, useRef, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import FieldToolbar from './FieldToolbar';
@@ -13,6 +13,7 @@ import './FieldChrome.scss';
 const FieldChrome = memo(function FieldChrome({
   children,
   isSelected,
+  isMultiSelected = false,
   onSelect,
   dragHandleRef,
   dragHandleListeners,
@@ -22,6 +23,14 @@ const FieldChrome = memo(function FieldChrome({
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
   const showToolbar = isSelected || isHovered || isFocused;
+  const chromeRef = useRef(null);
+
+  // Scroll newly selected field into view
+  useEffect(() => {
+    if (isSelected && chromeRef.current) {
+      chromeRef.current.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }, [isSelected]);
 
   const hasValidationMessages =
     Array.isArray(validationMessages) && validationMessages.length > 0;
@@ -35,8 +44,10 @@ const FieldChrome = memo(function FieldChrome({
 
   return (
     <div
+      ref={chromeRef}
       className={clsx('sf-field-chrome', {
         'is-selected': isSelected,
+        'is-multi-selected': isMultiSelected && !isSelected,
         'is-hovered': isHovered,
         'sf-field-chrome--validation-error': hasValidationMessages,
       })}

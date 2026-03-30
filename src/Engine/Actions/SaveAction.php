@@ -47,6 +47,10 @@ final class SaveAction implements ActionInterface {
 		// Validate with conditional logic
 		$schema = $context->getMeta( 'form_schema' );
 		if ( is_array( $schema ) ) {
+			// Task 1: Normalize field schema shape — ensure id, type, label, config on every node
+			$schema = $this->normalize_schema_fields( $schema );
+			$context->setMeta( 'form_schema', $schema );
+
 			$conditionalState = $context->getMeta(
 				'conditional_state',
 				array(
@@ -109,39 +113,62 @@ final class SaveAction implements ActionInterface {
 		foreach ( $payload as $key => $value ) {
 			$field = $fields[ $key ] ?? null;
 
+			// Task 3: Strip unknown field keys — not present in schema, prevents injection and data pollution
+			if ( ! $field ) {
+				continue;
+			}
+
+			$type   = $field['type'] ?? '';
+			$config = $field['config'] ?? array();
+
+			// Task 5: Normalize null — stored as null
+			if ( is_null( $value ) ) {
+				$sanitized[ $key ] = null;
+				continue;
+			}
+
+			// Task 2: Normalize composite field payloads (name_group, address_group)
+			if ( $type === 'name_group' || $type === 'address_group' ) {
+				$sanitized[ $key ] = $this->normalize_composite_value( $value );
+				continue;
+			}
+
 			if ( is_array( $value ) ) {
-				// Recursively sanitize arrays
+				// Task 5: Empty array stored as []
+				if ( empty( $value ) ) {
+					$sanitized[ $key ] = array();
+					continue;
+				}
+				// Recursively sanitize non-empty arrays
 				$sanitized[ $key ] = $this->sanitize_array_recursive( $value, $field );
 				continue;
 			}
 
-			if ( $field ) {
-				$type   = $field['type'] ?? '';
-				$config = $field['config'] ?? array();
+			// Task 5: Empty string stored as ""
+			if ( $value === '' ) {
+				$sanitized[ $key ] = '';
+				continue;
+			}
 
-				switch ( $type ) {
-					case 'email':
-						$sanitized[ $key ] = sanitize_email( sanitize_text_field( (string) $value ) );
-						break;
-					case 'url':
-						$sanitized[ $key ] = esc_url_raw( sanitize_text_field( (string) $value ) );
-						break;
-					case 'number':
-					case 'payment_amount':
-						$sanitized[ $key ] = is_numeric( $value ) ? $value : 0;
-						break;
-					default:
-						// Allow filtered HTML when field explicitly allows it
-						if ( ! empty( $config['allow_html'] ) ) {
-							$sanitized[ $key ] = wp_kses_post( (string) $value );
-						} else {
-							$sanitized[ $key ] = sanitize_text_field( (string) $value );
-						}
-						break;
-				}
-			} else {
-				// Unknown field - sanitize conservatively
-				$sanitized[ $key ] = is_string( $value ) ? sanitize_text_field( $value ) : $value;
+			switch ( $type ) {
+				case 'email':
+					$sanitized[ $key ] = sanitize_email( sanitize_text_field( (string) $value ) );
+					break;
+				case 'url':
+					$sanitized[ $key ] = esc_url_raw( sanitize_text_field( (string) $value ) );
+					break;
+				case 'number':
+				case 'payment_amount':
+					$sanitized[ $key ] = is_numeric( $value ) ? $value : 0;
+					break;
+				default:
+					// Allow filtered HTML when field explicitly allows it
+					if ( ! empty( $config['allow_html'] ) ) {
+						$sanitized[ $key ] = wp_kses_post( (string) $value );
+					} else {
+						$sanitized[ $key ] = sanitize_text_field( (string) $value );
+					}
+					break;
 			}
 		}
 
@@ -185,6 +212,9 @@ final class SaveAction implements ActionInterface {
 	 */
 	private function flatten_fields( array $fields, array &$map = array() ): array {
 		foreach ( $fields as $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
 			if ( ! empty( $field['key'] ) ) {
 				$map[ $field['key'] ] = $field;
 			}
@@ -203,6 +233,77 @@ final class SaveAction implements ActionInterface {
 		}
 
 		return $map;
+	}
+
+	/**
+	 * Task 1: Normalize schema field nodes — ensure every field has id, type, label, config.
+	 * Assigns safe defaults for missing keys. Does not throw.
+	 *
+	 * @param array $schema
+	 * @return array
+	 */
+	private function normalize_schema_fields( array $schema ): array {
+		if ( isset( $schema['fields'] ) && is_array( $schema['fields'] ) ) {
+			$schema['fields'] = $this->normalize_field_list( $schema['fields'] );
+		}
+		return $schema;
+	}
+
+	/**
+	 * Recursively normalize a list of field nodes.
+	 *
+	 * @param array $fields
+	 * @return array
+	 */
+	private function normalize_field_list( array $fields ): array {
+		foreach ( $fields as &$field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+			$field['id']     = $field['id'] ?? $field['key'] ?? '';
+			$field['type']   = $field['type'] ?? '';
+			$field['label']  = $field['label'] ?? '';
+			$field['config'] = is_array( $field['config'] ?? null ) ? $field['config'] : array();
+
+			if ( ! empty( $field['children'] ) && is_array( $field['children'] ) ) {
+				$field['children'] = $this->normalize_field_list( $field['children'] );
+			}
+			if ( ! empty( $field['columns'] ) && is_array( $field['columns'] ) ) {
+				foreach ( $field['columns'] as &$column ) {
+					if ( is_array( $column ) ) {
+						$column = $this->normalize_field_list( $column );
+					}
+				}
+				unset( $column );
+			}
+		}
+		unset( $field );
+		return $fields;
+	}
+
+	/**
+	 * Task 2: Normalize a composite field value (name_group, address_group).
+	 * Ensures the value is always an array of sanitized string sub-values.
+	 * Malformed input is normalized — submission is NOT rejected.
+	 *
+	 * @param mixed $value
+	 * @return array
+	 */
+	private function normalize_composite_value( $value ): array {
+		if ( ! is_array( $value ) ) {
+			// Null, string, or other scalar — return empty composite
+			return array();
+		}
+		$normalized = array();
+		foreach ( $value as $sub_key => $sub_val ) {
+			if ( ! is_string( $sub_key ) ) {
+				continue;
+			}
+			$normalized[ $sub_key ] = is_string( $sub_val )
+				? sanitize_text_field( $sub_val )
+				: ( is_null( $sub_val ) ? null : sanitize_text_field( (string) $sub_val ) );
+		}
+		return $normalized;
 	}
 }
 

@@ -1,16 +1,18 @@
 import { Button, TabPanel, Notice } from '@wordpress/components';
+import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import ConditionEditor from './ConditionEditor';
 import { useBuilder } from './context/BuilderContext';
+import { useConfig } from './context/ConfigContext';
 import {
-  GeneralSettingsPanel,
   OptionsPanel,
-  CompositeFieldPanel,
   ValidationPanel,
+  DynamicInspectorPanel,
 } from './inspector/panels';
 
 export default function FieldInspector({ field, allFields, isReadOnly = false }) {
   const { setSelectedId, actions, validationErrors, selectedId } = useBuilder();
+  const { fieldDefinitions } = useConfig();
 
   const selectedFieldValidationMessages = selectedId
     ? (validationErrors || [])
@@ -31,13 +33,50 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
     setSelectedId(null);
   };
 
+  // Derive meta category from PHP field definitions for tab gating.
+  const fieldCategory = fieldDefinitions?.[ field?.type ]?.meta?.category;
+  const isInputLike = !fieldCategory || fieldCategory === 'regular' || fieldCategory === 'composite';
+
+  // Detect config problems that should be surfaced to the builder
+  const fieldWarnings = useMemo(() => {
+    if (!field) return [];
+    const warnings = [];
+    if (field.required && !field.label?.trim()) {
+      warnings.push(__('This required field has no label — users won\'t know what to fill in.', 'subtleforms'));
+    }
+    const OPTION_TYPES = ['dropdown', 'radio', 'multiple_choice'];
+    if (OPTION_TYPES.includes(field.type) && (!field.options || field.options.length === 0)) {
+      warnings.push(__('No options configured — users will see an empty list.', 'subtleforms'));
+    }
+    return warnings;
+  }, [field]);
+
+  // Type-specific smart hints shown in the General tab
+  const smartHint = useMemo(() => {
+    if (!field) return null;
+    if (field.type === 'email') return __('Email format is automatically validated on submission.', 'subtleforms');
+    if (field.type === 'url') return __('URL format is automatically validated on submission.', 'subtleforms');
+    if (field.type === 'number') return __('Set Min / Max in the controls above to restrict this field\'s input range.', 'subtleforms');
+    if (field.type === 'phone') return __('Tip: add a placeholder (e.g. +1 555 000 0000) for better UX.', 'subtleforms');
+    return null;
+  }, [field]);
+
   return (
     <div className='sf-field-inspector'>
       {/* Header */}
       <div className='sf-field-inspector__header'>
-        <strong className='sf-field-inspector__title'>
-          {__('Settings', 'subtleforms')}
-        </strong>
+        <div className='sf-field-inspector__header-info'>
+          <strong className='sf-field-inspector__title'>
+            {field
+              ? field.label || field.name || field.type
+              : __('Settings', 'subtleforms')}
+          </strong>
+          {field && (
+            <span className='sf-field-inspector__field-type'>
+              {field.type?.replace(/_/g, ' ')}
+            </span>
+          )}
+        </div>
         <Button
           isSmall
           onClick={handleClose}
@@ -79,30 +118,37 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
                 </p>
               </Notice>
             )}
+            {fieldWarnings.map((warning, i) => (
+              <Notice key={i} status='warning' isDismissible={false}>
+                <p className='sf-field-inspector__notice-paragraph'>{warning}</p>
+              </Notice>
+            ))}
             <TabPanel
               tabs={[
                 { name: 'general', title: __('General', 'subtleforms') },
-                {
-                  name: 'validation',
-                  title: (
-                    <span className='sf-field-inspector__tab-label'>
-                      {__('Validation', 'subtleforms')}
-                      {hasValidationMessages && (
-                        <span
-                          className='sf-field-inspector__tab-warning-indicator'
-                          aria-hidden='true'
-                        />
-                      )}
-                    </span>
-                  ),
-                },
-                { name: 'conditions', title: __('Conditions', 'subtleforms') },
+                ...( isInputLike ? [
+                  {
+                    name: 'validation',
+                    title: (
+                      <span className='sf-field-inspector__tab-label'>
+                        {__('Validation', 'subtleforms')}
+                        {hasValidationMessages && (
+                          <span
+                            className='sf-field-inspector__tab-warning-indicator'
+                            aria-hidden='true'
+                          />
+                        )}
+                      </span>
+                    ),
+                  },
+                  { name: 'conditions', title: __('Conditions', 'subtleforms') },
+                ] : [] ),
               ]}>
               {(tab) => (
                 <div className='sf-field-inspector__tab-content'>
                   {tab.name === 'general' && (
                     <>
-                      <GeneralSettingsPanel
+                      <DynamicInspectorPanel
                         field={field}
                         onUpdate={handleUpdate}
                         isReadOnly={isReadOnly}
@@ -112,11 +158,12 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
                         onUpdate={handleUpdate}
                         isReadOnly={isReadOnly}
                       />
-                      <CompositeFieldPanel
-                        field={field}
-                        onUpdate={handleUpdate}
-                        isReadOnly={isReadOnly}
-                      />
+                      {smartHint && (
+                        <div className='sf-field-inspector__smart-hint'>
+                          <span aria-hidden='true'>💡</span>
+                          <p>{smartHint}</p>
+                        </div>
+                      )}
                     </>
                   )}
                   {tab.name === 'validation' && (

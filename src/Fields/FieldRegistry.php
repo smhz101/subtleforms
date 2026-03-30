@@ -65,6 +65,11 @@ final class FieldRegistry {
 		$grouped = array();
 
 		foreach ( $this->fields as $field ) {
+			// Skip palette-hidden (internal/system) fields
+			if ( $field->paletteHidden ) {
+				continue;
+			}
+
 			$category = $field->category;
 			if ( ! isset( $grouped[ $category ] ) ) {
 				$grouped[ $category ] = array();

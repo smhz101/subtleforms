@@ -1,8 +1,30 @@
-import { memo } from '@wordpress/element';
+import { memo, useState, useRef, useCallback, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { getFieldRenderer } from './canvas/renderers';
 import { getFieldIcon } from '../../utils/iconRegistry';
 import './FieldRenderer.scss';
+
+// Types that do not accept user input — required indicator suppressed
+const NON_INPUT_TYPES = new Set([
+  'section_break', 'form_step', 'repeat_field', 'html', 'hidden',
+  'one_column_container', 'two_column_container', 'three_column_container',
+  'four_column_container', 'five_column_container', 'six_column_container',
+  'repeat_container', 'group_container', 'step', 'action_hook',
+  'payment_summary', 'payment_hidden_price', 'captcha',
+  'recaptcha', 'hcaptcha', 'turnstile',
+]);
+
+// All field types recognized by this renderer — unknown types get legacy fallback
+const KNOWN_TYPES = new Set([
+  ...NON_INPUT_TYPES,
+  'text', 'email', 'phone', 'url', 'number', 'textarea', 'checkbox',
+  'radio', 'multiple_choice', 'dropdown', 'date', 'time', 'datetime',
+  'country', 'chained_select', 'password', 'rating', 'range_slider',
+  'color_picker', 'signature', 'image_upload', 'file_upload',
+  'name_group', 'address_group',
+  'payment_amount', 'payment_coupon',
+  'post_create', 'quiz_score',
+]);
 
 /**
  * FieldRenderer - Memoized field preview component
@@ -10,12 +32,91 @@ import './FieldRenderer.scss';
  * Wrapped in memo() to prevent unnecessary re-renders during drag operations.
  * Only re-renders when field prop changes.
  */
-const FieldRenderer = memo(function FieldRenderer({ field }) {
-  const { type, label, required, placeholder, options, subFields } = field;
+const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, onLabelChange }) {
+  // Null-safe destructure — required before hooks so all hooks run unconditionally
+  const { type, label, required, placeholder, options, subFields } = field || {};
 
   const labelClass = 'sf-field-renderer__label';
   const inputClass = 'sf-field-renderer__input';
   const selectClass = 'sf-field-renderer__select';
+
+  // ── Inline label editing state — ALL hooks before any early return ──────────
+  const [isEditingLabel, setIsEditingLabel] = useState(false);
+  const [editLabelValue, setEditLabelValue] = useState('');
+  const labelInputRef = useRef(null);
+
+  useEffect(() => {
+    if (isEditingLabel && labelInputRef.current) {
+      labelInputRef.current.focus();
+      labelInputRef.current.select();
+    }
+  }, [isEditingLabel]);
+
+  // Reset editing state when label changes externally (e.g. undo/redo)
+  useEffect(() => {
+    setIsEditingLabel(false);
+    setEditLabelValue(label || '');
+  }, [label]);
+
+  const handleLabelClick = useCallback((e) => {
+    if (!onLabelChange) return;
+    // Do NOT stopPropagation — let the click bubble to FieldChrome so the field
+    // gets selected (inspector opens) before / alongside entering edit mode.
+    setEditLabelValue(label || field?.name || '');
+    setIsEditingLabel(true);
+  }, [onLabelChange, label, field?.name]);
+
+  const commitLabelEdit = useCallback(() => {
+    setIsEditingLabel(false);
+    if (onLabelChange) {
+      const trimmed = (editLabelValue || '').trim();
+      // Fallback to original label rather than saving an empty string
+      onLabelChange(field?.id, trimmed || label || field?.name || __('Untitled', 'subtleforms'));
+    }
+  }, [onLabelChange, editLabelValue, field?.id, label, field?.name]);
+
+  const handleLabelKeyDown = useCallback((e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      commitLabelEdit();
+    }
+    if (e.key === 'Escape') {
+      e.stopPropagation();
+      setIsEditingLabel(false);
+    }
+  }, [commitLabelEdit]);
+
+  // ── Preview validation touched state ────────────────────────────────────
+  // Fields already on canvas when preview toggles on show errors immediately.
+  // Fields added while preview is already active get a brief grace period so
+  // the user isn’t confronted with an error the instant they drop the field.
+  const previewModeOnMount = useRef(previewMode);
+  const [touched, setTouched] = useState(false);
+
+  useEffect(() => {
+    if (!previewMode) {
+      setTouched(false);
+      return;
+    }
+    if (previewModeOnMount.current) {
+      // Field was added while preview was already active — grace period.
+      const t = setTimeout(() => {
+        setTouched(true);
+        previewModeOnMount.current = false;
+      }, 700);
+      return () => clearTimeout(t);
+    }
+    // Preview was off when this field was first rendered, now turned on.
+    setTouched(true);
+  }, [previewMode]);
+
+  // ── Early return AFTER all hooks ────────────────────────────────────────────
+  // Guard against null/undefined field or missing type — do NOT crash builder
+  if (!field || !field.type) {
+    return null;
+  }
+
+  const showRequired = required && !NON_INPUT_TYPES.has(type);
 
   // ── Section Break ───────────────────────────────────────────────────────────
   if (type === 'section_break') {
@@ -38,14 +139,30 @@ const FieldRenderer = memo(function FieldRenderer({ field }) {
   }
 
   return (
-    <div>
-      {/* Label */}
-      <label className={labelClass}>
-        {label || field.name}
-        {required && (
-          <span className='sf-field-renderer__required-mark'>*</span>
-        )}
-      </label>
+    <div className={previewMode && showRequired && touched ? 'sf-field-renderer--preview-error' : undefined}>
+      {/* Label — inline editable when onLabelChange is provided */}
+      {isEditingLabel ? (
+        <input
+          ref={labelInputRef}
+          type='text'
+          className='sf-field-renderer__label-input'
+          value={editLabelValue}
+          onChange={(e) => setEditLabelValue(e.target.value)}
+          onBlur={commitLabelEdit}
+          onKeyDown={handleLabelKeyDown}
+          onClick={(e) => e.stopPropagation()}
+        />
+      ) : (
+        <label
+          className={`${labelClass}${onLabelChange ? ' sf-field-renderer__label--editable' : ''}`}
+          onClick={handleLabelClick}
+        >
+          {label || field.name}
+          {showRequired && (
+            <span className='sf-field-renderer__required-mark'>*</span>
+          )}
+        </label>
+      )}
 
       {/* Render appropriate input based on type */}
       {(type === 'text' ||
@@ -233,28 +350,7 @@ const FieldRenderer = memo(function FieldRenderer({ field }) {
         </div>
       )}
 
-      {/* Composite field: Address */}
-      {type === 'address' && subFields && (
-        <div className='sf-field-renderer__repeater-item'>
-          {subFields.map((sub, idx) => (
-            <div
-              key={idx}
-              className={
-                idx < subFields.length - 1
-                  ? 'sf-field-renderer__repeater-subfield'
-                  : 'sf-field-renderer__repeater-subfield sf-field-renderer__repeater-subfield--last'
-              }>
-              <label className='sf-field-renderer__repeater-label'>
-                {sub.label}
-                {sub.required && (
-                  <span className='sf-field-renderer__required-mark'>*</span>
-                )}
-              </label>
-              <input type='text' className={inputClass} readOnly />
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Legacy address field detected — deprecated and ignored */}
 
       {/* Payment fields */}
       {type === 'payment_amount' && (
@@ -620,6 +716,78 @@ const FieldRenderer = memo(function FieldRenderer({ field }) {
             </div>
           )}
         </div>
+      )}
+
+      {/* ── Chained Select ──────────────────────────────────────────────────── */}
+      {type === 'chained_select' && (
+        <div className='sf-field-renderer__chained-select'>
+          <select className={selectClass} disabled tabIndex='-1'>
+            <option>{placeholder || __('Select category…', 'subtleforms')}</option>
+          </select>
+          <select className={selectClass} disabled tabIndex='-1' style={{ marginTop: '6px' }}>
+            <option>{__('Select subcategory…', 'subtleforms')}</option>
+          </select>
+          <div className='sf-field-renderer__field-hint'>
+            {__('Options load based on parent selection', 'subtleforms')}
+          </div>
+        </div>
+      )}
+
+      {/* ── Color Picker ────────────────────────────────────────────────────── */}
+      {type === 'color_picker' && (
+        <div className='sf-field-renderer__color-picker'>
+          <div className='sf-field-renderer__color-swatch-row'>
+            {['#e74c3c', '#e67e22', '#f1c40f', '#2ecc71', '#3498db', '#9b59b6'].map((c) => (
+              <span
+                key={c}
+                className='sf-field-renderer__color-swatch'
+                style={{ backgroundColor: c }}
+              />
+            ))}
+          </div>
+          <input
+            type='text'
+            placeholder={placeholder || __('#000000', 'subtleforms')}
+            className={inputClass}
+            readOnly
+            tabIndex='-1'
+          />
+        </div>
+      )}
+
+      {/* ── Signature ───────────────────────────────────────────────────────── */}
+      {type === 'signature' && (
+        <div className='sf-field-renderer__signature'>
+          <div className='sf-field-renderer__signature-canvas'>
+            <span className='sf-field-renderer__signature-placeholder'>
+              {__('Sign here', 'subtleforms')}
+            </span>
+          </div>
+          <div className='sf-field-renderer__field-hint'>
+            {__('Draw your signature on the live form', 'subtleforms')}
+          </div>
+        </div>
+      )}
+
+      {/* Unknown / legacy field type — safe fallback, do NOT crash builder */}
+      {!KNOWN_TYPES.has(type) && (
+        <div className='sf-field-renderer__unknown-field'>
+          {__('Unsupported field (legacy)', 'subtleforms')}
+        </div>
+      )}
+
+      {/* ── Builder: required field hint (normal mode) ── */}
+      {showRequired && !previewMode && (
+        <p className='sf-field-renderer__required-hint'>
+          {__('Required', 'subtleforms')}
+        </p>
+      )}
+
+      {/* ── Builder: preview validation error ── */}
+      {previewMode && showRequired && touched && (
+        <p className='sf-field-renderer__preview-error'>
+          {__('This field is required.', 'subtleforms')}
+        </p>
       )}
     </div>
   );

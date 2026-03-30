@@ -40,10 +40,12 @@ export function useBuilderState(schema, validationErrors, fieldErrors, onChange,
     };
 
     // Log schema version for debugging
-    console.debug(
-      '[SubtleForms] FormEditor initialized with schema version:',
-      schemaWithVersion.schema_version
-    );
+    if (process.env.NODE_ENV !== 'production') {
+      console.debug(
+        '[SubtleForms] FormEditor initialized with schema version:',
+        schemaWithVersion.schema_version
+      );
+    }
 
     return normalizeSchema(schemaWithVersion);
   });
@@ -85,10 +87,12 @@ export function useBuilderState(schema, validationErrors, fieldErrors, onChange,
     };
 
     // Log schema version update
-    console.debug(
-      '[SubtleForms] FormEditor received new schema version:',
-      schemaWithVersion.schema_version
-    );
+    if (process.env.NODE_ENV !== 'production') {
+      console.debug(
+        '[SubtleForms] FormEditor received new schema version:',
+        schemaWithVersion.schema_version
+      );
+    }
 
     const newTree = normalizeSchema(schemaWithVersion);
     setTree(newTree);

@@ -1,6 +1,8 @@
-import { useMemo, useCallback } from '@wordpress/element';
+import { memo, useMemo, useCallback, useEffect, useState, useRef } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import {
   DndContext,
+  DragOverlay,
   PointerSensor,
   KeyboardSensor,
   useSensor,
@@ -23,11 +25,34 @@ import {
 } from './utils/schemaTree';
 import './FormBuilder.scss';
 
+/**
+ * Finds a node's parentId, columnIndex, and position within its parent.
+ */
+function getNodeLocation(tree, nodeId) {
+  const node = tree.nodes[nodeId];
+  if (!node) return null;
+  const { parentId } = node;
+  const parent = tree.nodes[parentId];
+  if (!parent) return null;
+  if (Array.isArray(parent.columns)) {
+    for (let colIdx = 0; colIdx < parent.columns.length; colIdx++) {
+      const idx = (parent.columns[colIdx] || []).indexOf(nodeId);
+      if (idx !== -1) return { parentId, columnIndex: colIdx, position: idx };
+    }
+  }
+  if (Array.isArray(parent.children)) {
+    const idx = parent.children.indexOf(nodeId);
+    if (idx !== -1) return { parentId, columnIndex: null, position: idx };
+  }
+  return null;
+}
+
 function SortableWrapper({
   nodeId,
   parentId,
   columnIndex,
   position,
+  disabled,
   children,
 }) {
   const {
@@ -45,6 +70,7 @@ function SortableWrapper({
       columnIndex,
       position,
     },
+    disabled, // prevents drag while multi-select is active
   });
 
   const style = {
@@ -67,6 +93,120 @@ function SortableWrapper({
   });
 }
 
+/**
+ * FieldNode — memoized wrapper for a single leaf field on the canvas.
+ *
+ * Receives only primitive / stable-reference props so React.memo can bail out
+ * when unrelated state (e.g. a different field's selectedId) changes.
+ * `field` and `toolbarActions` are derived internally via useMemo so their
+ * references only change when their inputs change.
+ */
+const FieldNode = memo(function FieldNode({
+  nodeId,
+  parentId,
+  columnIndex,
+  position,
+  tree,
+  selectedId,
+  setSelectedId,
+  onMove,
+  onDelete,
+  onDuplicate,
+  validationErrorsByFieldKey,
+  previewValidation,
+  onLabelChange,
+  isMultiSelected,
+  onShiftSelect,
+  isDragDisabled,
+}) {
+  const field = useMemo(() => nodeToField(tree, nodeId), [tree, nodeId]);
+
+  const validationMessages = useMemo(() => {
+    const key = field?.key;
+    return key && validationErrorsByFieldKey[key]
+      ? validationErrorsByFieldKey[key]
+      : [];
+  }, [field, validationErrorsByFieldKey]);
+
+  const siblings = useMemo(
+    () => nodeChildren(tree, parentId, columnIndex),
+    [tree, parentId, columnIndex]
+  );
+  const canMoveUp = position > 0;
+  const canMoveDown = position < siblings.length - 1;
+
+  const onSelect = useCallback(() => setSelectedId(nodeId), [setSelectedId, nodeId]);
+
+  const toolbarActions = useMemo(() => ({
+    canMoveUp,
+    canMoveDown,
+    onMoveUp: canMoveUp
+      ? () => onMove(nodeId, { parentId, columnIndex, position: position - 1 })
+      : null,
+    onMoveDown: canMoveDown
+      ? () => onMove(nodeId, { parentId, columnIndex, position: position + 1 })
+      : null,
+    onDuplicate: () => {
+      if (typeof onDuplicate === 'function') {
+        onDuplicate(nodeId, { parentId, columnIndex, position: position + 1 });
+      }
+    },
+    onDelete: () => onDelete(nodeId),
+  }), [canMoveUp, canMoveDown, nodeId, parentId, columnIndex, position, onMove, onDuplicate, onDelete]);
+
+  if (!field) return null;
+
+  return (
+    <SortableWrapper
+      nodeId={nodeId}
+      parentId={parentId}
+      columnIndex={columnIndex}
+      position={position}
+      disabled={isDragDisabled}>
+      {({ setNodeRef, style, dragHandleRef, dragHandleListeners }) => (
+        <div
+          ref={setNodeRef}
+          style={style}
+          onClickCapture={(e) => {
+            if (e.shiftKey) {
+              e.stopPropagation();
+              onShiftSelect(nodeId);
+            }
+          }}>
+          <FieldChrome
+            isSelected={selectedId === nodeId}
+            isMultiSelected={isMultiSelected}
+            onSelect={onSelect}
+            dragHandleRef={dragHandleRef}
+            dragHandleListeners={dragHandleListeners}
+            validationMessages={validationMessages}
+            toolbarActions={toolbarActions}>
+            <FieldRenderer
+              field={field}
+              previewMode={previewValidation}
+              onLabelChange={onLabelChange}
+            />
+          </FieldChrome>
+        </div>
+      )}
+    </SortableWrapper>
+  );
+});
+
+/**
+ * DragGhost — lightweight overlay card shown while dragging a field.
+ */
+const DragGhost = memo(function DragGhost({ tree, nodeId }) {
+  const node = tree.nodes[nodeId];
+  if (!node) return null;
+  const label = node.config?.label || node.config?.title || node.type || '';
+  return (
+    <div className='sf-drag-ghost'>
+      <span className='sf-drag-ghost__label'>{label}</span>
+    </div>
+  );
+});
+
 export default function FormBuilder() {
   // Get all state from context (including validationErrorsByFieldKey)
   const {
@@ -74,10 +214,51 @@ export default function FormBuilder() {
     selectedId,
     selectedStepId,
     setSelectedId,
-    actions: { onMove, onDelete, onDuplicate, onRequestInsert },
+    actions: { onMove, onDelete, onDuplicate, onRequestInsert, onUpdate },
     validationErrors,
     validationErrorsByFieldKey: validationErrorsByFieldKeyFromContext,
   } = useBuilder();
+
+  const [previewValidation, setPreviewValidation] = useState(false);
+
+  // Multi-select: shift-click accumulates node IDs; bulk ops act on this set
+  const [selectedIds, setSelectedIds] = useState([]);
+  const selectedIdsRef = useRef([]);
+  useEffect(() => { selectedIdsRef.current = selectedIds; }, [selectedIds]);
+
+  // Drag overlay: tracks which node is actively being dragged
+  const [activeNodeId, setActiveNodeId] = useState(null);
+
+  // O(1) Set lookup — avoids O(n) .includes() per FieldNode in renderNode (Task 7: memo perf)
+  const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+
+  // Sync selectedIds with tree — prune stale IDs after undo/redo or cascading parent deletes (Task 3)
+  useEffect(() => {
+    setSelectedIds((prev) => {
+      if (prev.length === 0) return prev;
+      const filtered = prev.filter((id) => id in tree.nodes);
+      return filtered.length === prev.length ? prev : filtered;
+    });
+  }, [tree]);
+
+  // Ref to always-current tree for keyboard handlers (avoids stale closure without re-registering)
+  const treeRef = useRef(tree);
+  useEffect(() => { treeRef.current = tree; });
+
+  // Stable label change handler for inline editing
+  const handleLabelChange = useCallback(
+    (nodeId, label) => {
+      onUpdate(nodeId, { label });
+    },
+    [onUpdate]
+  );
+
+  // Shift-click: toggle nodeId in the multi-select set (does not change single selectedId)
+  const onShiftSelect = useCallback((nodeId) => {
+    setSelectedIds((prev) =>
+      prev.includes(nodeId) ? prev.filter((id) => id !== nodeId) : [...prev, nodeId]
+    );
+  }, []);
 
   // Build validation errors map (fallback if not in context)
   const validationErrorsByFieldKey = useMemo(() => {
@@ -105,6 +286,116 @@ export default function FormBuilder() {
 
   const rootId = getRootNodeId();
 
+  // Keyboard shortcuts: ESC deselect, Delete/Backspace remove field, Ctrl+D duplicate
+  useEffect(() => {
+    function isTypingTarget(target) {
+      if (!target) return false;
+      const tag = (target.tagName || '').toLowerCase();
+      return (
+        tag === 'input' ||
+        tag === 'textarea' ||
+        tag === 'select' ||
+        target.isContentEditable
+      );
+    }
+
+    const handleKeyDown = (e) => {
+      // Guard first — never steal keys from inputs
+      if (isTypingTarget(e.target)) return;
+
+      // "/" → focus FieldDock search (quick field add without touching the mouse)
+      if (e.key === '/') {
+        e.preventDefault();
+        window.dispatchEvent(new CustomEvent('sf:builder:quick-add'));
+        return;
+      }
+
+      if (e.key === 'Escape') {
+        if (selectedIdsRef.current.length > 0) {
+          setSelectedIds([]);
+        } else if (selectedId) {
+          setSelectedId(null);
+        }
+        return;
+      }
+
+      const hasMulti = selectedIdsRef.current.length > 0;
+      if (!selectedId && !hasMulti) return;
+
+      // Delete / Backspace → remove selected field(s)
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        e.preventDefault();
+        if (hasMulti) {
+          const ids = selectedIdsRef.current;
+          const idsSet = new Set(ids);
+          // Only delete top-level nodes — parent deletion cascades to children
+          // Walk every node's ancestry; skip it if any ancestor is also selected
+          // (deleting the ancestor cascades and avoids a double-delete attempt).
+          // A visited set guards against cycles in malformed tree data.
+          const topLevel = ids.filter((id) => {
+            const visited = new Set([id]);
+            let node = treeRef.current.nodes[id];
+            while (node && node.parentId) {
+              if (visited.has(node.parentId)) break; // cycle safety
+              visited.add(node.parentId);
+              if (idsSet.has(node.parentId)) return false;
+              node = treeRef.current.nodes[node.parentId];
+            }
+            return true;
+          });
+          topLevel.forEach((id) => onDelete(id));
+          setSelectedIds([]);
+          setSelectedId(null);
+        } else {
+          onDelete(selectedId);
+        }
+        return;
+      }
+
+      // Ctrl/Cmd + D → duplicate selected field(s)
+      if ((e.metaKey || e.ctrlKey) && e.key === 'd') {
+        e.preventDefault();
+        if (hasMulti) {
+          // Sort descending by position so earlier dups don’t shift later indices
+          const withLocs = selectedIdsRef.current
+            .map((id) => ({ id, loc: getNodeLocation(treeRef.current, id) }))
+            .filter(({ loc }) => loc !== null)
+            .sort((a, b) => {
+              if (
+                a.loc.parentId === b.loc.parentId &&
+                a.loc.columnIndex === b.loc.columnIndex
+              ) {
+                return b.loc.position - a.loc.position;
+              }
+              return 0;
+            });
+          withLocs.forEach(({ id, loc }) => {
+            onDuplicate(id, { ...loc, position: loc.position + 1 });
+          });
+        } else {
+          const loc = getNodeLocation(treeRef.current, selectedId);
+          if (loc) {
+            onDuplicate(selectedId, { ...loc, position: loc.position + 1 });
+          }
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [selectedId, setSelectedId, onDelete, onDuplicate]);
+
+  // Deselect when clicking empty canvas (not on a field)
+  const handleCanvasClick = useCallback(
+    (e) => {
+      if (!e.target.closest('.sf-field-chrome')) {
+        setSelectedId(null);
+        setSelectedIds([]);
+      }
+    },
+    [setSelectedId]
+  );
+
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 6 },
@@ -131,8 +422,14 @@ export default function FormBuilder() {
     return tree.nodes[selectedStepId];
   }, [isMultiStepForm, selectedStepId, tree]);
 
+  const handleDragStart = useCallback(({ active }) => {
+    setActiveNodeId(active.id);
+    setSelectedIds([]); // clear multi-select when drag begins
+  }, []);
+
   const handleDragEnd = useCallback(
     ({ active, over }) => {
+      setActiveNodeId(null);
       if (!over) return;
 
       const activeData = active.data.current;
@@ -140,6 +437,9 @@ export default function FormBuilder() {
       if (!activeData || !overData) return;
 
       if (activeData.parentId !== overData.parentId) {
+        if (process.env.NODE_ENV !== 'production') {
+          console.warn('[SubtleForms] Cannot move field between sections (cross-parent drag blocked)');
+        }
         return;
       }
 
@@ -207,6 +507,7 @@ export default function FormBuilder() {
                     items={columnChildren}
                     onRequestInsert={onRequestInsert}
                     spacing={spacing}
+                    compact
                     renderItem={(childId, childPosition) =>
                       renderNode(
                         childId,
@@ -228,82 +529,43 @@ export default function FormBuilder() {
       return null;
     }
 
-    const validationMessages =
-      field?.key && validationErrorsByFieldKey[field.key]
-        ? validationErrorsByFieldKey[field.key]
-        : [];
-
-    const siblings = nodeChildren(tree, parentId, columnIndex);
-    const canMoveUp = position > 0;
-    const canMoveDown = position < siblings.length - 1;
-
-    const moveUp = () => {
-      if (!canMoveUp) {
-        return;
-      }
-      onMove(nodeId, {
-        parentId,
-        columnIndex,
-        position: position - 1,
-      });
-    };
-
-    const moveDown = () => {
-      if (!canMoveDown) {
-        return;
-      }
-      onMove(nodeId, {
-        parentId,
-        columnIndex,
-        position: position + 1,
-      });
-    };
-
-    const duplicate = () => {
-      if (typeof onDuplicate === 'function') {
-        onDuplicate(nodeId, {
-          parentId,
-          columnIndex,
-          position: position + 1,
-        });
-      }
-    };
-
     return (
-      <SortableWrapper
+      <FieldNode
         key={nodeId}
         nodeId={nodeId}
         parentId={parentId}
         columnIndex={columnIndex}
-        position={position}>
-        {({ setNodeRef, style, dragHandleRef, dragHandleListeners }) => (
-          <div ref={setNodeRef} style={style}>
-            <FieldChrome
-              isSelected={selectedId === nodeId}
-              onSelect={() => setSelectedId(nodeId)}
-              dragHandleRef={dragHandleRef}
-              dragHandleListeners={dragHandleListeners}
-              validationMessages={validationMessages}
-              toolbarActions={{
-                canMoveUp,
-                canMoveDown,
-                onMoveUp: moveUp,
-                onMoveDown: moveDown,
-                onDuplicate: duplicate,
-                onDelete: () => onDelete(nodeId),
-              }}>
-              <FieldRenderer field={field} />
-            </FieldChrome>
-          </div>
-        )}
-      </SortableWrapper>
+        position={position}
+        tree={tree}
+        selectedId={selectedId}
+        setSelectedId={setSelectedId}
+        onMove={onMove}
+        onDelete={onDelete}
+        onDuplicate={onDuplicate}
+        validationErrorsByFieldKey={validationErrorsByFieldKey}
+        previewValidation={previewValidation}
+        onLabelChange={handleLabelChange}
+        isMultiSelected={selectedIdsSet.has(nodeId)}
+        onShiftSelect={onShiftSelect}
+        isDragDisabled={selectedIds.length > 1}
+      />
     );
   };
 
   return (
-    <div className='subtleforms-builder-canvas'>
-      <div className='subtleforms-builder-canvas__surface'>
-        <DndContext sensors={sensors} onDragEnd={handleDragEnd}>
+    <div className='subtleforms-builder-canvas' onClick={handleCanvasClick}>
+      <div className='subtleforms-builder-canvas__surface'>          <div className='subtleforms-builder-canvas__toolbar'>
+            <button
+              type='button'
+              className={`sf-preview-toggle${previewValidation ? ' sf-preview-toggle--active' : ''}`}
+              onClick={(e) => { e.stopPropagation(); setPreviewValidation((v) => !v); }}>
+              {previewValidation ? __('Exit Preview', 'subtleforms') : __('Preview Errors', 'subtleforms')}
+            </button>
+          </div>        <DndContext
+          sensors={sensors}
+          onDragStart={handleDragStart}
+          onDragEnd={handleDragEnd}
+          autoScroll={{ threshold: { x: 0.2, y: 0.2 }, acceleration: 25, interval: 5 }}>
           {isMultiStepForm && activeStep ? (
             /* Multi-step form: Show step-scoped canvas */
             <StepCanvas
@@ -325,6 +587,9 @@ export default function FormBuilder() {
               }
             />
           )}
+          <DragOverlay dropAnimation={null}>
+            {activeNodeId ? <DragGhost tree={tree} nodeId={activeNodeId} /> : null}
+          </DragOverlay>
         </DndContext>
       </div>
     </div>

@@ -46,9 +46,18 @@ export default function ContainerRenderer({
 
   return (
     <div
+      tabIndex={0}
+      role='button'
       onClick={(e) => {
         e.stopPropagation();
         onSelect();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          e.stopPropagation();
+          onSelect();
+        }
       }}
       style={{
         border: isSelected ? '2px solid #2271b1' : '1px solid #dcdcde',

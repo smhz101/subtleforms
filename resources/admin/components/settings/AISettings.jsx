@@ -1,9 +1,6 @@
 import { useState } from '@wordpress/element';
 import {
 	Button,
-	Card,
-	CardBody,
-	CardHeader,
 	TextControl,
 	ToggleControl,
 	SelectControl,
@@ -81,8 +78,8 @@ export default function AISettings( {
 
 	return (
 		<div className="sf-ai-settings">
-			<Card className="sf-ai-card">
-				<CardHeader>
+			<div className="sf-ai-card">
+				<div className="sf-license-connect-card__header">
 					<div className="sf-ai-card__header">
 						<div className="sf-ai-card__header-icon">
 							<svg
@@ -115,8 +112,8 @@ export default function AISettings( {
 							</p>
 						</div>
 					</div>
-				</CardHeader>
-				<CardBody>
+				</div>
+				<div>
 					<div className="sf-settings-section">
 						{/* Provider Selection */ }
 						<div>
@@ -547,8 +544,8 @@ export default function AISettings( {
 							</p>
 						</div>
 					</div>
-				</CardBody>
-			</Card>
+				</div>
+			</div>
 		</div>
 	);
 }

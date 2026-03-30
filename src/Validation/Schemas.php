@@ -296,6 +296,7 @@ class Schemas {
 
 			// FieldDefinition
 			// Accepts both legacy (name) and builder tree node (key/id/kind) formats.
+			// Advanced validation (min, max, pattern, minLength, maxLength) not supported yet (intentionally disabled).
 			'FieldDefinition' => array(
 				'type'         => 'optional|string|max:100',
 				'name'         => 'optional|string|max:100',
@@ -307,20 +308,10 @@ class Schemas {
 				'required'     => 'optional|bool|default:false',
 				'options'      => 'optional|array',
 				'defaultValue' => 'optional|string|max:500',
-				'validation'   => 'optional|object|map:FieldValidation',
 				'attributes'   => 'optional|object',
 				'config'       => 'optional|object',
 				'children'     => 'optional|array',
 				'columns'      => 'optional|array',
-			),
-
-			// FieldValidation
-			'FieldValidation' => array(
-				'pattern' => 'optional|string|max:500',
-				'min'     => 'optional|int',
-				'max'     => 'optional|int',
-				'minLength' => 'optional|int',
-				'maxLength' => 'optional|int',
 			),
 
 			// ActionConfig

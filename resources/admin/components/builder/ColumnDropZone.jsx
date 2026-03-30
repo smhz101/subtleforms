@@ -6,7 +6,6 @@ import {
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import InsertFieldButton from './InsertFieldButton';
-import { ContextualTip } from '../ui';
 import './ColumnDropZone.scss';
 
 export default function ColumnDropZone({
@@ -16,6 +15,7 @@ export default function ColumnDropZone({
   onRequestInsert,
   renderItem,
   spacing,
+  compact = false,
 }) {
   const droppableId =
     columnIndex === null
@@ -68,14 +68,47 @@ export default function ColumnDropZone({
       </SortableContext>
 
       {items.length === 0 && (
-        <div className='sf-column-dropzone__empty'>
-          <ContextualTip 
-            id='builder-canvas-empty'
-            variant='info'
-            dismissible>
-            {__('👋 Get started by clicking "Add Field" below, or drag a field from the panel on the left. You can always rearrange them later!', 'subtleforms')}
-          </ContextualTip>
-        </div>
+        compact ? (
+          <div className='sf-column-dropzone__empty sf-column-dropzone__empty--compact'>
+            <svg
+              className='sf-column-dropzone__empty-icon'
+              xmlns='http://www.w3.org/2000/svg'
+              width='18'
+              height='18'
+              viewBox='0 0 24 24'
+              fill='none'
+              stroke='currentColor'
+              strokeWidth='1.5'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              aria-hidden='true'>
+              <path d='M12 5v14M5 12l7 7 7-7'/>
+            </svg>
+            <span>{__('Drop a field here', 'subtleforms')}</span>
+          </div>
+        ) : (
+          <div className='sf-column-dropzone__empty'>
+            <svg
+              className='sf-column-dropzone__empty-icon'
+              xmlns='http://www.w3.org/2000/svg'
+              width='28'
+              height='28'
+              viewBox='0 0 24 24'
+              fill='none'
+              stroke='currentColor'
+              strokeWidth='1.5'
+              strokeLinecap='round'
+              strokeLinejoin='round'
+              aria-hidden='true'>
+              <rect x='3' y='3' width='18' height='4' rx='1'/>
+              <rect x='3' y='10' width='18' height='4' rx='1'/>
+              <rect x='3' y='17' width='11' height='4' rx='1'/>
+              <path d='M18 19l2-2-2-2'/>
+              <path d='M16 17h4'/>
+            </svg>
+            <span>{__('Drag fields here or click \u002b to add', 'subtleforms')}</span>
+          </div>
+        )
       )}
     </div>
   );

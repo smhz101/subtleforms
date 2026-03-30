@@ -32,7 +32,13 @@ export default function FormCanvas({
 
   return (
     <div className='sf-form-canvas'>
-      <div className={clsx('sf-form-canvas__inner', canvasWidthClass)}>
+      <div
+        className={clsx('sf-form-canvas__inner', canvasWidthClass)}
+        onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            onSelect(null);
+          }
+        }}>
         {/* Form Title */}
         <div className='sf-form-canvas__header'>
           <h3 className='sf-form-canvas__title'>
@@ -48,6 +54,9 @@ export default function FormCanvas({
         {fields.length === 0 && (
           <div className='sf-form-canvas__empty'>
             <div className='sf-form-canvas__empty-content'>
+              <p className='sf-form-canvas__empty-heading'>
+                {__('Add your first field', 'subtleforms')}
+              </p>
               <button
                 className='sf-form-canvas__empty-add-btn'
                 onClick={() => onShowPicker([0])}
@@ -77,7 +86,7 @@ export default function FormCanvas({
                   />
                 </svg>
                 <p className='sf-form-canvas__empty-text'>
-                  {__('Click to add your first field', 'subtleforms')}
+                  {__('Pick a field from the panel on the left', 'subtleforms')}
                 </p>
               </div>
             </div>

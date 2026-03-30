@@ -13,8 +13,7 @@
 
 .sf-settings-container {
 	max-width: 1200px;
-	margin: 0 auto;
-	padding: 1.5rem;
+	margin: 0 auto 0 0;
 }
 
 .sf-settings-notice {
@@ -24,7 +23,7 @@
 /* Two-Column Layout: Sidebar + Content */
 .sf-settings-layout {
 	display: flex;
-	gap: 2rem;
+	gap: 1rem;
 	align-items: flex-start;
 }
 
@@ -32,11 +31,7 @@
 .sf-settings-sidebar {
 	flex-shrink: 0;
 	width: 240px;
-	background-color: var(--sf-surface);
-	border: 1px solid var(--sf-gray-200);
-	border-radius: 8px;
-	padding: 1rem;
-	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+	padding: $space-4 $space-2;
 }
 
 .sf-settings-nav {
@@ -104,6 +99,7 @@
 .sf-settings-content {
 	flex: 1;
 	min-width: 0;
+	padding: $space-4 $space-4 $space-4 $space-2;
 }
 
 .sf-settings-section {
@@ -259,10 +255,7 @@
 /* AI Configuration Styles - Violet Branding */
 
 .sf-ai-settings {
-	.sf-ai-card {
-		border: 2px solid $sf-violet-200;
-		box-shadow: 0 4px 6px -1px rgba(139, 92, 246, 0.1);
-		
+	.sf-ai-card {		
 		.components-card__header {
 			background: linear-gradient(135deg, $sf-violet-50, $sf-violet-100);
 			border-bottom: 1px solid $sf-violet-200;
@@ -300,7 +293,6 @@
 		h3 {
 			margin: 0 0 $space-2 0;
 			font-size: $font-size-lg;
-			font-family: $sf-font-serif;
 			color: $sf-violet-900;
 			font-weight: 700;
 		}
@@ -308,7 +300,6 @@
 		p {
 			margin: 0;
 			font-size: $font-size-sm;
-			font-family: $sf-font-sans;
 			color: $sf-violet-700;
 			line-height: 1.5;
 		}
@@ -413,7 +404,6 @@
 
 	.sf-ai-agent-card__description {
 		font-size: $font-size-sm;
-		font-family: $sf-font-sans;
 		color: $sf-stone-600;
 		line-height: 1.5;
 		margin: 0;
@@ -438,7 +428,6 @@
 		.sf-section-title {
 			margin: 0;
 			color: $sf-violet-900;
-			font-family: $sf-font-serif;
 		}
 	}
 
@@ -469,12 +458,6 @@
 	}
 }
 
-.sf-license-settings {
-	display: flex;
-	flex-direction: column;
-	gap: $space-6;
-}
-
 /* License Card */
 .sf-license-card {
 	border: 2px solid $sf-lime-200;
@@ -486,7 +469,6 @@
 
 		h2 {
 			margin: 0;
-			font-family: $sf-font-serif;
 			font-size: $font-size-xl;
 			font-weight: 600;
 			color: $sf-stone-900;
@@ -532,7 +514,6 @@
 .sf-license-status__days {
 	font-size: $font-size-sm;
 	color: $sf-stone-500;
-	font-family: $sf-font-sans;
 }
 
 .sf-license-warnings {
@@ -608,7 +589,6 @@
 
 		h2 {
 			margin: 0;
-			font-family: $sf-font-serif;
 			font-size: $font-size-xl;
 			font-weight: 600;
 			color: $sf-stone-900;
@@ -659,7 +639,6 @@
 	align-items: center;
 	gap: $space-2;
 	margin: 0;
-	font-family: $sf-font-serif;
 	font-size: $font-size-base;
 	font-weight: 600;
 	color: $sf-stone-900;
@@ -728,9 +707,10 @@
 
 .sf-license-settings {
 	display: flex;
-	flex-direction: column;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	justify-content: space-between;
 	gap: $space-6;
-	max-width: 640px;
 }
 
 // Dev mode banner
@@ -772,7 +752,6 @@
 .sf-license-section {
 	h3 {
 		margin: 0 0 $space-3;
-		font-family: $sf-font-serif;
 		font-size: $font-size-base;
 		font-weight: 600;
 		color: $sf-stone-800;
@@ -889,39 +868,48 @@
 }
 
 // Connect card (disconnected state)
-.sf-license-connect-card {
-	padding: $space-6;
-	background: #fff;
-	border: 2px solid $sf-stone-200;
-	border-radius: $radius-lg;
-	box-shadow: $shadow-md;
+.subtleforms-admin {
+	.components-panel__body {
+		.sf-license-connect-card {
+			background: #fff;
 
-	&__header {
-		display: flex;
-		align-items: flex-start;
-		gap: $space-4;
-		margin-bottom: $space-6;
-	}
+			&__icon-wrapper {
+				padding: $space-2 $space-1;
+				background: $sf-blue-900;
+				border-radius: $radius-xl;
+			}
 
-	&__icon {
-		font-size: 32px;
-		color: $sf-stone-400;
-		flex-shrink: 0;
-		margin-top: 2px;
-	}
+			&__header {
+				display: flex;
+				align-items: flex-start;
+				gap: $space-2;
+				margin-bottom: $space-4;
 
-	h3 {
-		margin: 0 0 $space-1;
-		font-family: $sf-font-serif;
-		font-size: $font-size-lg;
-		font-weight: 600;
-		color: $sf-stone-900;
-	}
+				h3 {
+					margin-bottom: $space-2;
+				}
+			}
 
-	p {
-		margin: 0;
-		font-size: $font-size-sm;
-		color: $sf-stone-600;
+			&__icon {
+				font-size: 32px;
+				color: $sf-slate-50;
+				flex-shrink: 0;
+				margin-top: 2px;
+			}
+
+			h3 {
+				margin: 0 0 $space-1;
+				font-size: $font-size-lg;
+				font-weight: 600;
+				color: $sf-stone-900;
+			}
+
+			p {
+				margin: 0;
+				font-size: $font-size-sm;
+				color: $sf-stone-600;
+			}
+		}
 	}
 }
 
@@ -953,28 +941,30 @@
 	}
 
 	&__key-input {
-		font-family: $sf-font-mono;
 		letter-spacing: 0.05em;
 	}
 }
 
 // Upgrade card (disconnected state, below the form)
-.sf-license-upgrade-card {
-	padding: $space-6;
-	background: linear-gradient(135deg, $sf-lime-50, #fff);
-	border: 2px solid $sf-lime-200;
-	border-radius: $radius-lg;
+.subtleforms-admin {
+	.components-panel__body {
+		.sf-license-upgrade-card {
+			padding: $space-6;
+			background: linear-gradient(135deg, $sf-blue-100, $sf-blue-50);
+			border: 2px solid $sf-blue-200;
+			width: 440px;
 
-	h3 {
-		margin: 0 0 $space-4;
-		font-family: $sf-font-serif;
-		font-size: $font-size-base;
-		font-weight: 600;
-		color: $sf-stone-800;
-	}
+			h3 {
+				margin: 0 0 $space-4;
+				font-size: $font-size-base;
+				font-weight: 600;
+				color: $sf-stone-800;
+			}
 
-	.sf-feature-list {
-		margin-bottom: $space-6;
+			.sf-feature-list {
+				margin-bottom: $space-6;
+			}
+		}
 	}
 }
 

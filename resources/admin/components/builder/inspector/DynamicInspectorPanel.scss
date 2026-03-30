@@ -1,0 +1,19 @@
+.sf-dynamic-inspector {
+	display: flex;
+	flex-direction: column;
+	gap: 0;
+
+	// Collapse default bottom margin on WP base controls so our gap handles spacing
+	.components-base-control {
+		margin-bottom: var( --sf-space-3, 12px );
+	}
+
+	// Last control in a flat group needs no extra bottom margin
+	> .components-base-control:last-child {
+		margin-bottom: 0;
+	}
+
+	&__empty {
+		margin: var( --sf-space-3, 12px ) 0;
+	}
+}

@@ -53,16 +53,12 @@ final class CoreFields {
 						'label' => __( 'Placeholder', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
 						'type'  => 'number',
 						'name'  => 'maxLength',
 						'label' => __( 'Max Length', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -93,11 +89,6 @@ final class CoreFields {
 					),
 					array(
 						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
-						'type'  => 'checkbox',
 						'name'  => 'rfcValidation',
 						'label' => __( 'RFC Validation', 'subtleforms' ),
 						'help'  => __( 'Use strict RFC 5322 email validation', 'subtleforms' ),
@@ -108,7 +99,8 @@ final class CoreFields {
 						'label' => __( 'Allow Multiple', 'subtleforms' ),
 						'help'  => __( 'Allow comma-separated email addresses', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -138,11 +130,6 @@ final class CoreFields {
 						'label' => __( 'Placeholder', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
 						'type'  => 'number',
 						'name'  => 'rows',
 						'label' => __( 'Rows', 'subtleforms' ),
@@ -154,7 +141,8 @@ final class CoreFields {
 						'name'  => 'maxLength',
 						'label' => __( 'Max Length', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -185,11 +173,6 @@ final class CoreFields {
 						'label' => __( 'Placeholder', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
 						'type'  => 'number',
 						'name'  => 'min',
 						'label' => __( 'Minimum Value', 'subtleforms' ),
@@ -204,7 +187,8 @@ final class CoreFields {
 						'name'  => 'step',
 						'label' => __( 'Step', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -233,11 +217,6 @@ final class CoreFields {
 						'label' => __( 'Placeholder', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
 						'type'    => 'select',
 						'name'    => 'format',
 						'label'   => __( 'Format', 'subtleforms' ),
@@ -256,7 +235,8 @@ final class CoreFields {
 							),
 						),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -283,12 +263,8 @@ final class CoreFields {
 						'name'  => 'placeholder',
 						'label' => __( 'Placeholder', 'subtleforms' ),
 					),
-					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -319,11 +295,6 @@ final class CoreFields {
 						'label' => __( 'Placeholder', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
 						'type'  => 'number',
 						'name'  => 'minLength',
 						'label' => __( 'Minimum Length', 'subtleforms' ),
@@ -338,7 +309,8 @@ final class CoreFields {
 						'name'  => 'requireConfirmation',
 						'label' => __( 'Require Confirmation', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -361,17 +333,8 @@ final class CoreFields {
 						'name'  => 'label',
 						'label' => __( 'Label', 'subtleforms' ),
 					),
-					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
-						'type'  => 'options',
-						'name'  => 'options',
-						'label' => __( 'Options', 'subtleforms' ),
-					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -392,17 +355,8 @@ final class CoreFields {
 						'name'  => 'label',
 						'label' => __( 'Label', 'subtleforms' ),
 					),
-					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
-						'type'  => 'options',
-						'name'  => 'options',
-						'label' => __( 'Options', 'subtleforms' ),
-					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -426,20 +380,11 @@ final class CoreFields {
 					),
 					array(
 						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
-						'type'  => 'options',
-						'name'  => 'options',
-						'label' => __( 'Options', 'subtleforms' ),
-					),
-					array(
-						'type'  => 'checkbox',
 						'name'  => 'allowMultiple',
 						'label' => __( 'Allow Multiple', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -466,17 +411,8 @@ final class CoreFields {
 						'name'  => 'placeholder',
 						'label' => __( 'Placeholder', 'subtleforms' ),
 					),
-					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
-						'type'  => 'options',
-						'name'  => 'options',
-						'label' => __( 'Options', 'subtleforms' ),
-					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -509,11 +445,6 @@ final class CoreFields {
 						'label' => __( 'Placeholder', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
 						'type'  => 'select',
 						'name'  => 'output_format',
 						'label' => __( 'Output Format', 'subtleforms' ),
@@ -527,7 +458,8 @@ final class CoreFields {
 						'name'  => 'searchable',
 						'label' => __( 'Enable Search', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -549,11 +481,6 @@ final class CoreFields {
 						'label' => __( 'Label', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
 						'type'    => 'select',
 						'name'    => 'source',
 						'label'   => __( 'Source', 'subtleforms' ),
@@ -568,7 +495,8 @@ final class CoreFields {
 							),
 						),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -594,11 +522,6 @@ final class CoreFields {
 						'label' => __( 'Label', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
 						'type'  => 'text',
 						'name'  => 'format',
 						'label' => __( 'Date Format', 'subtleforms' ),
@@ -613,7 +536,8 @@ final class CoreFields {
 						'name'  => 'maxDate',
 						'label' => __( 'Max Date', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -635,16 +559,12 @@ final class CoreFields {
 						'label' => __( 'Label', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
 						'type'  => 'text',
 						'name'  => 'format',
 						'label' => __( 'Time Format', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -666,16 +586,12 @@ final class CoreFields {
 						'label' => __( 'Label', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
 						'type'  => 'text',
 						'name'  => 'format',
 						'label' => __( 'DateTime Format', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -700,16 +616,12 @@ final class CoreFields {
 						'label' => __( 'Label', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
 						'type'  => 'number',
 						'name'  => 'maxSize',
 						'label' => __( 'Max Size (bytes)', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -732,16 +644,12 @@ final class CoreFields {
 						'label' => __( 'Label', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
 						'type'  => 'number',
 						'name'  => 'maxSize',
 						'label' => __( 'Max Size (bytes)', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -765,18 +673,14 @@ final class CoreFields {
 						'label' => __( 'Label', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
 						'type'  => 'number',
 						'name'  => 'max',
 						'label' => __( 'Max Rating', 'subtleforms' ),
 						'min'   => 1,
 						'max'   => 10,
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -800,11 +704,6 @@ final class CoreFields {
 						'label' => __( 'Label', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
 						'type'  => 'number',
 						'name'  => 'min',
 						'label' => __( 'Minimum', 'subtleforms' ),
@@ -819,7 +718,8 @@ final class CoreFields {
 						'name'  => 'step',
 						'label' => __( 'Step', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -841,16 +741,12 @@ final class CoreFields {
 						'label' => __( 'Label', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
 						'type'  => 'text',
 						'name'  => 'default',
 						'label' => __( 'Default Color', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -869,12 +765,8 @@ final class CoreFields {
 						'name'  => 'label',
 						'label' => __( 'Label', 'subtleforms' ),
 					),
-					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -893,12 +785,8 @@ final class CoreFields {
 						'name'  => 'label',
 						'label' => __( 'Label', 'subtleforms' ),
 					),
-					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -920,12 +808,8 @@ final class CoreFields {
 						'name'  => 'label',
 						'label' => __( 'Label', 'subtleforms' ),
 					),
-					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -947,16 +831,12 @@ final class CoreFields {
 						'label' => __( 'Label', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
 						'type'  => 'text',
 						'name'  => 'source',
 						'label' => __( 'Data Source', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -978,16 +858,12 @@ final class CoreFields {
 						'label' => __( 'Label', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-					array(
 						'type'  => 'text',
 						'name'  => 'post_type',
 						'label' => __( 'Post Type', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -1008,7 +884,8 @@ final class CoreFields {
 						'name'  => 'content',
 						'label' => __( 'HTML Content', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -1029,62 +906,15 @@ final class CoreFields {
 						'name'  => 'value',
 						'label' => __( 'Value', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'system' ),
+				paletteHidden: true,
 			)
 		);
 
 		// ===== Composite Fields =====
 
-		$registry->register(
-			new FieldDefinition(
-				type: 'address',
-				label: __( 'Address', 'subtleforms' ),
-				category: 'advanced',
-				icon: 'dashicons-location',
-				kind: 'input',
-				baseAttributes: array(),
-				fieldSpecificAttributes: array(
-					'subFields' => array(
-						array(
-							'key'      => 'street',
-							'label'    => 'Street Address',
-							'type'     => 'text',
-							'required' => true,
-						),
-						array(
-							'key'      => 'city',
-							'label'    => 'City',
-							'type'     => 'text',
-							'required' => true,
-						),
-						array(
-							'key'      => 'state',
-							'label'    => 'State',
-							'type'     => 'text',
-							'required' => true,
-						),
-						array(
-							'key'      => 'zip',
-							'label'    => 'ZIP Code',
-							'type'     => 'text',
-							'required' => true,
-						),
-					),
-				),
-				inspectorControls: array(
-					array(
-						'type'  => 'text',
-						'name'  => 'label',
-						'label' => __( 'Label', 'subtleforms' ),
-					),
-					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-				)
-			)
-		);
+		// Legacy field removed: replaced by address_group
 
 		// ===== Structural Fields =====
 
@@ -1100,7 +930,9 @@ final class CoreFields {
 					'title'       => '',
 					'description' => '',
 				),
-				inspectorControls: array(
+				inspectorControls: array(),
+				meta: array( 'category' => 'layout' ),
+				layoutControls: array(
 					array(
 						'type'  => 'text',
 						'name'  => 'title',
@@ -1111,7 +943,7 @@ final class CoreFields {
 						'name'  => 'description',
 						'label' => __( 'Description', 'subtleforms' ),
 					),
-				)
+				),
 			)
 		);
 
@@ -1126,13 +958,15 @@ final class CoreFields {
 				fieldSpecificAttributes: array(
 					'title' => '',
 				),
-				inspectorControls: array(
+				inspectorControls: array(),
+				meta: array( 'category' => 'layout' ),
+				layoutControls: array(
 					array(
 						'type'  => 'text',
 						'name'  => 'title',
 						'label' => __( 'Title', 'subtleforms' ),
 					),
-				)
+				),
 			)
 		);
 
@@ -1147,7 +981,9 @@ final class CoreFields {
 				fieldSpecificAttributes: array(
 					'max' => 5,
 				),
-				inspectorControls: array(
+				inspectorControls: array(),
+				meta: array( 'category' => 'layout' ),
+				layoutControls: array(
 					array(
 						'type'  => 'text',
 						'name'  => 'label',
@@ -1158,7 +994,7 @@ final class CoreFields {
 						'name'  => 'max',
 						'label' => __( 'Max Items', 'subtleforms' ),
 					),
-				)
+				),
 			)
 		);
 
@@ -1179,13 +1015,15 @@ final class CoreFields {
 						'columns' => $columns,
 						'spacing' => 16,
 					),
-					inspectorControls: array(
+					inspectorControls: array(),
+					meta: array( 'category' => 'layout' ),
+					layoutControls: array(
 						array(
 							'type'  => 'number',
 							'name'  => 'spacing',
 							'label' => __( 'Spacing (px)', 'subtleforms' ),
 						),
-					)
+					),
 				)
 			);
 		};
@@ -1217,7 +1055,9 @@ final class CoreFields {
 					'buttonLabel' => __( 'Add New', 'subtleforms' ),
 					'spacing'     => 16,
 				),
-				inspectorControls: array(
+				inspectorControls: array(),
+				meta: array( 'category' => 'layout' ),
+				layoutControls: array(
 					array(
 						'type'  => 'number',
 						'name'  => 'min',
@@ -1238,7 +1078,7 @@ final class CoreFields {
 						'name'  => 'spacing',
 						'label' => __( 'Spacing (px)', 'subtleforms' ),
 					),
-				)
+				),
 			)
 		);
 
@@ -1255,7 +1095,9 @@ final class CoreFields {
 					'label'   => __( 'Group', 'subtleforms' ),
 					'spacing' => 16,
 				),
-				inspectorControls: array(
+				inspectorControls: array(),
+				meta: array( 'category' => 'layout' ),
+				layoutControls: array(
 					array(
 						'type'  => 'text',
 						'name'  => 'label',
@@ -1266,7 +1108,7 @@ final class CoreFields {
 						'name'  => 'spacing',
 						'label' => __( 'Spacing (px)', 'subtleforms' ),
 					),
-				)
+				),
 			)
 		);
 
@@ -1285,7 +1127,9 @@ final class CoreFields {
 					'title'       => __( 'Step', 'subtleforms' ),
 					'description' => '',
 				),
-				inspectorControls: array(
+				inspectorControls: array(),
+				meta: array( 'category' => 'layout' ),
+				layoutControls: array(
 					array(
 						'type'  => 'text',
 						'name'  => 'title',
@@ -1296,7 +1140,7 @@ final class CoreFields {
 						'name'  => 'description',
 						'label' => __( 'Description', 'subtleforms' ),
 					),
-				)
+				),
 			)
 		);
 
@@ -1332,7 +1176,8 @@ final class CoreFields {
 						'name'  => 'enable_last_name',
 						'label' => __( 'Last Name', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'composite' ),
 			)
 		);
 
@@ -1384,7 +1229,8 @@ final class CoreFields {
 						'name'  => 'enable_country',
 						'label' => __( 'Country', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'composite' ),
 			)
 		);
 
@@ -1407,7 +1253,8 @@ final class CoreFields {
 						'name'  => 'site_key',
 						'label' => __( 'Site Key', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'system' ),
 			)
 		);
 
@@ -1428,7 +1275,8 @@ final class CoreFields {
 						'name'  => 'site_key',
 						'label' => __( 'Site Key', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'system' ),
 			)
 		);
 
@@ -1449,7 +1297,8 @@ final class CoreFields {
 						'name'  => 'site_key',
 						'label' => __( 'Site Key', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'system' ),
 			)
 		);
 
@@ -1470,7 +1319,9 @@ final class CoreFields {
 						'name'  => 'hook_name',
 						'label' => __( 'Hook Name', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'system' ),
+				paletteHidden: true,
 			)
 		);
 
@@ -1491,7 +1342,8 @@ final class CoreFields {
 						'name'  => 'enabled',
 						'label' => __( 'Enabled', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'system' ),
 			)
 		);
 
@@ -1506,13 +1358,7 @@ final class CoreFields {
 				icon: 'dashicons-money-alt',
 				kind: 'input',
 				requiredCapabilities: array( 'actions.payment' ),
-				baseAttributes: array(
-					'validation' => array(
-						'type'     => 'number',
-						'min'      => 0,
-						'required' => true,
-					),
-				),
+				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					'placeholder'        => '',
 					'min'                => 0,
@@ -1531,11 +1377,6 @@ final class CoreFields {
 						'type'  => 'text',
 						'name'  => 'placeholder',
 						'label' => __( 'Placeholder', 'subtleforms' ),
-					),
-					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
 					),
 					array(
 						'type'  => 'number',
@@ -1561,7 +1402,8 @@ final class CoreFields {
 						'name'  => 'showCurrencySymbol',
 						'label' => __( 'Show Currency Symbol', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -1611,7 +1453,8 @@ final class CoreFields {
 						'name'  => 'showTotal',
 						'label' => __( 'Show Total', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -1646,12 +1489,8 @@ final class CoreFields {
 						'name'  => 'buttonText',
 						'label' => __( 'Button Text', 'subtleforms' ),
 					),
-					array(
-						'type'  => 'checkbox',
-						'name'  => 'required',
-						'label' => __( 'Required', 'subtleforms' ),
-					),
-				)
+				),
+				meta: array( 'category' => 'regular' ),
 			)
 		);
 
@@ -1689,7 +1528,8 @@ final class CoreFields {
 						'label' => __( 'Description', 'subtleforms' ),
 						'help'  => __( 'Optional description for debugging', 'subtleforms' ),
 					),
-				)
+				),
+				meta: array( 'category' => 'system' ),
 			)
 		);
 

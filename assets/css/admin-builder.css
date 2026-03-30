@@ -207,14 +207,6 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	min-height: 100%;
 }
 
-.subtleforms-admin .subtleforms-builder-canvas__surface {
-	width: 100%;
-	background: #fff;
-	border-radius: 4px;
-	padding: 1.75rem; /* Reduced for better density */
-	min-height: 600px;
-}
-
 /* Drop zones */
 .subtleforms-admin .subtleforms-column-dropzone {
 	min-height: 76px;
