@@ -2,6 +2,8 @@ import { memo, useState, useRef, useCallback, useEffect } from '@wordpress/eleme
 import { __ } from '@wordpress/i18n';
 import { getFieldIcon } from '../../utils/iconRegistry';
 import Icon from '../../components/ui/Icon';
+import NameFieldRenderer from './NameFieldRenderer';
+import AddressFieldRenderer from './AddressFieldRenderer';
 import './FieldRenderer.scss';
 
 // Types that do not accept user input — required indicator suppressed
@@ -677,6 +679,12 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           </div>
         );
       })()}
+
+      {/* ── Name (composite) ────────────────────────────────────────────────── */}
+      {type === 'name_group' && <NameFieldRenderer field={field} />}
+
+      {/* ── Address (composite) ─────────────────────────────────────────────── */}
+      {type === 'address_group' && <AddressFieldRenderer field={field} />}
 
       {/* Unknown / legacy field type — safe fallback, do NOT crash builder */}
       {!KNOWN_TYPES.has(type) && (

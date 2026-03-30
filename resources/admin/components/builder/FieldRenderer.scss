@@ -1398,3 +1398,33 @@
 		gap: 6px;
 	}
 }
+
+// ── Composite Fields (Name, Address) ─────────────────────────────────────────
+.sf-composite-field {
+	display: flex;
+	flex-direction: column;
+	gap: 0.5rem;
+
+	&__row {
+		display: flex;
+		gap: 0.5rem;
+	}
+
+	&__col {
+		flex: 1;
+		display: flex;
+		flex-direction: column;
+		gap: 0.1875rem;
+
+		&--narrow {
+			flex: 0 0 140px;
+		}
+	}
+
+	&__sub-label {
+		font-size: 0.6875rem;
+		font-weight: 500;
+		color: var(--sf-gray-600);
+		letter-spacing: 0.01em;
+	}
+}

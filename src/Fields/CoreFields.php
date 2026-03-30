@@ -1153,15 +1153,27 @@ final class CoreFields {
 				label: __( 'Name', 'subtleforms' ),
 				category: 'special',
 				icon: 'dashicons-admin-users',
-				kind: 'group',
-				acceptsChildren: true,
+				kind: 'input',
 				baseAttributes: array(),
-				fieldSpecificAttributes: array(),
+				fieldSpecificAttributes: array(
+					'enable_middle_name' => false,
+					'enable_suffix'      => false,
+				),
 				inspectorControls: array(
 					array(
 						'type'  => 'text',
 						'name'  => 'label',
 						'label' => __( 'Label', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'toggle',
+						'name'  => 'enable_middle_name',
+						'label' => __( 'Include Middle Name', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'toggle',
+						'name'  => 'enable_suffix',
+						'label' => __( 'Include Suffix', 'subtleforms' ),
 					),
 				),
 				meta: array( 'category' => 'composite' ),
@@ -1175,15 +1187,39 @@ final class CoreFields {
 				label: __( 'Address', 'subtleforms' ),
 				category: 'special',
 				icon: 'dashicons-location',
-				kind: 'group',
-				acceptsChildren: true,
+				kind: 'input',
 				baseAttributes: array(),
-				fieldSpecificAttributes: array(),
+				fieldSpecificAttributes: array(
+					'enable_street2' => false,
+					'enable_state'   => true,
+					'enable_postal'  => true,
+					'enable_country' => true,
+				),
 				inspectorControls: array(
 					array(
 						'type'  => 'text',
 						'name'  => 'label',
 						'label' => __( 'Label', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'toggle',
+						'name'  => 'enable_street2',
+						'label' => __( 'Include Street Address Line 2', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'toggle',
+						'name'  => 'enable_state',
+						'label' => __( 'Include State / Province', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'toggle',
+						'name'  => 'enable_postal',
+						'label' => __( 'Include Postal Code', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'toggle',
+						'name'  => 'enable_country',
+						'label' => __( 'Include Country', 'subtleforms' ),
 					),
 				),
 				meta: array( 'category' => 'composite' ),

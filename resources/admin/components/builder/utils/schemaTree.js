@@ -10,6 +10,10 @@ const ROOT_NODE_ID = 'root';
 
 const COLUMN_CONTAINER_SUFFIX = '_column_container';
 
+// Composite field types are single leaf nodes — any saved children from an old
+// group-style version are intentionally discarded when loading the schema.
+const COMPOSITE_FIELD_TYPES = new Set( [ 'name_group', 'address_group' ] );
+
 function isColumnContainerType(type) {
   return typeof type === 'string' && type.endsWith(COLUMN_CONTAINER_SUFFIX);
 }
@@ -78,11 +82,18 @@ export function normalizeSchema(schema) {
     const {
       id: existingId,
       config,
-      childFields,
+      childFields: rawChildFields,
       columnChildren,
       type,
-      kind,
+      kind: rawKind,
     } = extractConfig(field);
+
+    // Migration guard: composite fields are always leaf nodes.
+    // Discard any children that may have been saved when these types were
+    // erroneously treated as group containers.
+    const isComposite = COMPOSITE_FIELD_TYPES.has( type );
+    const kind = isComposite ? 'input' : rawKind;
+    const childFields = isComposite ? [] : rawChildFields;
 
     const nodeId = existingId || createNodeId();
 
