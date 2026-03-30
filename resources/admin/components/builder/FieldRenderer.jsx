@@ -11,7 +11,7 @@ const NON_INPUT_TYPES = new Set([
   'one_column_container', 'two_column_container', 'three_column_container',
   'four_column_container', 'five_column_container', 'six_column_container',
   'repeat_container', 'group_container', 'step', 'action_hook',
-  'payment_summary', 'payment_hidden_price', 'captcha',
+  'payment_summary', 'payment_hidden_price',
   'recaptcha', 'hcaptcha', 'turnstile',
 ]);
 
@@ -496,7 +496,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
               <span className='sf-action-hook-preview__code-keyword'>do_action</span>
               <span className='sf-action-hook-preview__code-bracket'>(</span>
               <span className='sf-action-hook-preview__code-string'>
-                '{field.config?.hookName || 'subtleforms_custom_action'}'
+                '{field.hook_name || 'subtleforms_custom_action'}'
               </span>
               <span className='sf-action-hook-preview__code-bracket'>)</span>
             </div>
@@ -515,16 +515,13 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           <div className='sf-step-preview__header'>
             <div className='sf-step-preview__number'>
               <span className='sf-step-preview__number-icon'><Icon.Layers size={14} /></span>
-              <span className='sf-step-preview__number-text'>
-                {field.config?.stepNumber || '1'}
-              </span>
             </div>
             <div className='sf-step-preview__title-group'>
               <div className='sf-step-preview__title'>
-                {field.config?.title || field.label || __('Step Title', 'subtleforms')}
+                {field.title || field.label || __('Step', 'subtleforms')}
               </div>
               <div className='sf-step-preview__subtitle'>
-                {field.config?.description || __('Multi-step form container', 'subtleforms')}
+                {field.description || __('Multi-step form container', 'subtleforms')}
               </div>
             </div>
           </div>
@@ -547,20 +544,19 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
-      {type === 'captcha' && (
+      {(type === 'recaptcha' || type === 'hcaptcha' || type === 'turnstile') && (
         <div className='sf-captcha-preview'>
           <div className='sf-captcha-preview__header'>
             <div className='sf-captcha-preview__icon'><Icon.Lock size={20} /></div>
             <div className='sf-captcha-preview__title-group'>
               <div className='sf-captcha-preview__title'>
-                {__('Security Verification', 'subtleforms')}
+                {type === 'recaptcha' ? 'Google reCAPTCHA' : type === 'hcaptcha' ? 'hCaptcha' : 'Cloudflare Turnstile'}
               </div>
               <div className='sf-captcha-preview__subtitle'>
                 {__('Verify you\'re human', 'subtleforms')}
               </div>
             </div>
           </div>
-          
           <div className='sf-captcha-preview__body'>
             <div className='sf-captcha-preview__checkbox-wrapper'>
               <div className='sf-captcha-preview__checkbox'></div>
@@ -568,31 +564,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
                 {__('I\'m not a robot', 'subtleforms')}
               </span>
             </div>
-            
-            {field.config?.providerName && (
-              <div className='sf-captcha-preview__provider-badge'>
-                {field.config.providerName === 'recaptcha' && (
-                  <>
-                    <span className='sf-captcha-preview__provider-icon'><Icon.Lock size={12} /></span>
-                    <span>Google reCAPTCHA</span>
-                  </>
-                )}
-                {field.config.providerName === 'hcaptcha' && (
-                  <>
-                    <span className='sf-captcha-preview__provider-icon'><Icon.Check size={12} /></span>
-                    <span>hCaptcha</span>
-                  </>
-                )}
-                {field.config.providerName === 'turnstile' && (
-                  <>
-                    <span className='sf-captcha-preview__provider-icon'><Icon.Globe size={12} /></span>
-                    <span>Cloudflare Turnstile</span>
-                  </>
-                )}
-              </div>
-            )}
           </div>
-          
           <div className='sf-captcha-preview__footer'>
             <div className='sf-captcha-preview__status'>
               <span className='sf-captcha-preview__status-icon'><Icon.HelpCircle size={12} /></span>
