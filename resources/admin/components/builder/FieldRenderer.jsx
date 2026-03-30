@@ -191,7 +191,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
 
       {type === 'textarea' && (
         <textarea
-          rows={4}
+          rows={field.rows || 4}
           placeholder={placeholder || ''}
           className={`${inputClass} resize-y`}
           readOnly
@@ -364,7 +364,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       {/* Payment fields */}
       {type === 'payment_amount' && (
         <div className='sf-field-renderer__rating-wrapper'>
-          {field.currency && (
+          {field.showCurrencySymbol !== false && field.currency && (
             <span className='sf-field-renderer__rating-text'>
               {field.currency === 'USD'
                 ? '$'
