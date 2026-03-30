@@ -119,7 +119,6 @@ final class SaveAction implements ActionInterface {
 			}
 
 			$type   = $field['type'] ?? '';
-			$config = $field['config'] ?? array();
 
 			// Task 5: Normalize null — stored as null
 			if ( is_null( $value ) ) {
@@ -163,7 +162,7 @@ final class SaveAction implements ActionInterface {
 					break;
 				default:
 					// Allow filtered HTML when field explicitly allows it
-					if ( ! empty( $config['allow_html'] ) ) {
+					if ( ! empty( $field['allow_html'] ) ) {
 						$sanitized[ $key ] = wp_kses_post( (string) $value );
 					} else {
 						$sanitized[ $key ] = sanitize_text_field( (string) $value );
@@ -191,7 +190,7 @@ final class SaveAction implements ActionInterface {
 			}
 
 			if ( is_string( $v ) ) {
-				if ( $field && ! empty( $field['config']['allow_html'] ) ) {
+				if ( $field && ! empty( $field['allow_html'] ) ) {
 					$result[ $k ] = wp_kses_post( $v );
 				} else {
 					$result[ $k ] = sanitize_text_field( $v );
@@ -260,10 +259,9 @@ final class SaveAction implements ActionInterface {
 			if ( ! is_array( $field ) ) {
 				continue;
 			}
-			$field['id']     = $field['id'] ?? $field['key'] ?? '';
-			$field['type']   = $field['type'] ?? '';
-			$field['label']  = $field['label'] ?? '';
-			$field['config'] = is_array( $field['config'] ?? null ) ? $field['config'] : array();
+			$field['id']    = $field['id'] ?? $field['key'] ?? '';
+			$field['type']  = $field['type'] ?? '';
+			$field['label'] = $field['label'] ?? '';
 
 			if ( ! empty( $field['children'] ) && is_array( $field['children'] ) ) {
 				$field['children'] = $this->normalize_field_list( $field['children'] );

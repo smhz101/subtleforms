@@ -142,7 +142,7 @@ final class SchemaCompiler {
 
 	/**
 	 * Normalize schema field nodes to ensure each has the required keys:
-	 * id, type, label, config. Safe defaults are assigned for missing keys.
+	 * id, type, label. Safe defaults are assigned for missing keys.
 	 *
 	 * @param array $schema
 	 * @return array Normalized schema
@@ -165,11 +165,10 @@ final class SchemaCompiler {
 			if ( ! is_array( $field ) ) {
 				continue;
 			}
-			// Ensure every field has id, type, label, config
-			$field['id']     = $field['id'] ?? $field['key'] ?? '';
-			$field['type']   = $field['type'] ?? '';
-			$field['label']  = $field['label'] ?? '';
-			$field['config'] = is_array( $field['config'] ?? null ) ? $field['config'] : array();
+			// Ensure every field has id, type, label
+			$field['id']    = $field['id'] ?? $field['key'] ?? '';
+			$field['type']  = $field['type'] ?? '';
+			$field['label'] = $field['label'] ?? '';
 
 			if ( ! empty( $field['children'] ) && is_array( $field['children'] ) ) {
 				$field['children'] = $this->normalizeFieldList( $field['children'] );
