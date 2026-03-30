@@ -856,6 +856,11 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
+      {/* ── Help text — shown for input fields only ─────────────────────────── */}
+      {field.description && !NON_INPUT_TYPES.has(type) && (
+        <p className='sf-field-renderer__help-text'>{field.description}</p>
+      )}
+
       {/* ── Builder: required field hint (normal mode) ── */}
       {showRequired && !previewMode && (
         <p className='sf-field-renderer__required-hint'>

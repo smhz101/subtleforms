@@ -1322,6 +1322,14 @@
 
 // ── Builder validation hints ─────────────────────────────────────────────────
 .sf-field-renderer {
+	// Help text / description shown below the input
+	&__help-text {
+		margin: 0.375rem 0 0;
+		font-size: 0.75rem;
+		color: var(--sf-gray-500);
+		line-height: 1.5;
+	}
+
 	// Subtle "Required" note shown in normal builder mode
 	&__required-hint {
 		margin: 0.375rem 0 0;
