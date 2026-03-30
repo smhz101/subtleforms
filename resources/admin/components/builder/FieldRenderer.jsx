@@ -200,13 +200,19 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       )}
 
       {type === 'checkbox' && (
-        <div className='sf-field-renderer__checkbox-wrapper'>
-          <input
-            type='checkbox'
-            className='sf-field-renderer__checkbox'
-            tabIndex='-1'
-          />
-          <span className='sf-field-renderer__checkbox-label'>{label}</span>
+        <div className='sf-field-renderer__options-list'>
+          {(options || [{ label: __('Option', 'subtleforms') }]).map((opt, idx) => (
+            <div key={idx} className='sf-field-renderer__checkbox-wrapper'>
+              <input
+                type='checkbox'
+                className='sf-field-renderer__checkbox'
+                tabIndex='-1'
+              />
+              <span className='sf-field-renderer__checkbox-label'>
+                {opt.label}
+              </span>
+            </div>
+          ))}
         </div>
       )}
 
@@ -387,20 +393,24 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
             </span>
           </div>
           <div className='sf-field-renderer__calc-divider'></div>
-          <div className='sf-field-renderer__calc-row'>
-            <span>
-              <span className='sf-field-renderer__calc-row-icon'><Icon.DollarSign size={12} /></span>
-              {__('Subtotal:', 'subtleforms')}
-            </span>
-            <span className='sf-field-renderer__calc-value'>$0.00</span>
-          </div>
-          <div className='sf-field-renderer__calc-row'>
-            <span>
-              <span className='sf-field-renderer__calc-row-icon'><Icon.Database size={12} /></span>
-              {__('Tax:', 'subtleforms')}
-            </span>
-            <span className='sf-field-renderer__calc-value'>$0.00</span>
-          </div>
+          {field.showSubtotal !== false && (
+            <div className='sf-field-renderer__calc-row'>
+              <span>
+                <span className='sf-field-renderer__calc-row-icon'><Icon.DollarSign size={12} /></span>
+                {__('Subtotal:', 'subtleforms')}
+              </span>
+              <span className='sf-field-renderer__calc-value'>$0.00</span>
+            </div>
+          )}
+          {field.showTax && (
+            <div className='sf-field-renderer__calc-row'>
+              <span>
+                <span className='sf-field-renderer__calc-row-icon'><Icon.Database size={12} /></span>
+                {field.taxRate ? `${__('Tax', 'subtleforms')} (${field.taxRate}%):` : __('Tax:', 'subtleforms')}
+              </span>
+              <span className='sf-field-renderer__calc-value'>$0.00</span>
+            </div>
+          )}
           <div className='sf-field-renderer__calc-row sf-field-renderer__calc-row--discount'>
             <span>
               <span className='sf-field-renderer__calc-row-icon'><Icon.Tag size={12} /></span>
@@ -409,13 +419,15 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
             <span className='sf-field-renderer__calc-value sf-field-renderer__calc-value--discount'>-$0.00</span>
           </div>
           <div className='sf-field-renderer__calc-divider sf-field-renderer__calc-divider--bold'></div>
-          <div className='sf-field-renderer__calc-total'>
-            <span>
-              <span className='sf-field-renderer__calc-total-icon'><Icon.DollarSign size={14} /></span>
-              {__('Total:', 'subtleforms')}
-            </span>
-            <span className='sf-field-renderer__calc-total-value'>$0.00</span>
-          </div>
+          {field.showTotal !== false && (
+            <div className='sf-field-renderer__calc-total'>
+              <span>
+                <span className='sf-field-renderer__calc-total-icon'><Icon.DollarSign size={14} /></span>
+                {__('Total:', 'subtleforms')}
+              </span>
+              <span className='sf-field-renderer__calc-total-value'>$0.00</span>
+            </div>
+          )}
           <div className='sf-field-renderer__calc-footer'>
             <span className='sf-field-renderer__calc-footer-icon'><Icon.HelpCircle size={12} /></span>
             <span className='sf-field-renderer__calc-footer-text'>
@@ -448,7 +460,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
               className='sf-field-renderer__subscribe-button'
               disabled>
               <span className='sf-field-renderer__button-icon'><Icon.Check size={12} /></span>
-              {__('Apply', 'subtleforms')}
+              {field.buttonText || __('Apply', 'subtleforms')}
             </button>
           </div>
           <div className='sf-field-renderer__coupon-hint'>
