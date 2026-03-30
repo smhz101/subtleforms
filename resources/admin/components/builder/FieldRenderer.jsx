@@ -386,13 +386,6 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
 
       {type === 'payment_summary' && (
         <div className='sf-field-renderer__calculation-box'>
-          <div className='sf-field-renderer__calc-header'>
-            <span className='sf-field-renderer__calc-icon'><Icon.FileText size={14} /></span>
-            <span className='sf-field-renderer__calc-title'>
-              {__('Payment Summary', 'subtleforms')}
-            </span>
-          </div>
-          <div className='sf-field-renderer__calc-divider'></div>
           {field.showSubtotal !== false && (
             <div className='sf-field-renderer__calc-row'>
               <span>
@@ -418,7 +411,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
             </span>
             <span className='sf-field-renderer__calc-value sf-field-renderer__calc-value--discount'>-$0.00</span>
           </div>
-          <div className='sf-field-renderer__calc-divider sf-field-renderer__calc-divider--bold'></div>
+          <div className='sf-field-renderer__calc-divider'></div>
           {field.showTotal !== false && (
             <div className='sf-field-renderer__calc-total'>
               <span>
@@ -428,47 +421,25 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
               <span className='sf-field-renderer__calc-total-value'>$0.00</span>
             </div>
           )}
-          <div className='sf-field-renderer__calc-footer'>
-            <span className='sf-field-renderer__calc-footer-icon'><Icon.HelpCircle size={12} /></span>
-            <span className='sf-field-renderer__calc-footer-text'>
-              {__('Amount will be calculated automatically', 'subtleforms')}
-            </span>
-          </div>
         </div>
       )}
 
       {type === 'payment_coupon' && (
-        <div className='sf-field-renderer__coupon-container'>
-          <div className='sf-field-renderer__coupon-header'>
-            <span className='sf-field-renderer__coupon-icon'><Icon.Tag size={14} /></span>
-            <span className='sf-field-renderer__coupon-title'>
-              {__('Have a coupon code?', 'subtleforms')}
-            </span>
-          </div>
-          <div className='sf-field-renderer__subscribe-wrapper'>
-            <div className='sf-field-renderer__input-wrapper'>
-              <input
-                type='text'
-                placeholder={placeholder || __('Enter coupon code', 'subtleforms')}
-                className={`${inputClass} sf-field-renderer__subscribe-input`}
-                readOnly
-                tabIndex='-1'
-              />
-            </div>
-            <button
-              type='button'
-              className='sf-field-renderer__subscribe-button'
-              disabled>
-              <span className='sf-field-renderer__button-icon'><Icon.Check size={12} /></span>
-              {field.buttonText || __('Apply', 'subtleforms')}
-            </button>
-          </div>
-          <div className='sf-field-renderer__coupon-hint'>
-            <span className='sf-field-renderer__coupon-hint-icon'><Icon.Lightbulb size={12} /></span>
-            <span className='sf-field-renderer__coupon-hint-text'>
-              {__('Enter your discount code to save on your purchase', 'subtleforms')}
-            </span>
-          </div>
+        <div className='sf-field-renderer__subscribe-wrapper'>
+          <input
+            type='text'
+            placeholder={placeholder || __('Enter coupon code', 'subtleforms')}
+            className={`${inputClass} sf-field-renderer__subscribe-input`}
+            readOnly
+            tabIndex='-1'
+          />
+          <button
+            type='button'
+            className='sf-field-renderer__subscribe-button'
+            disabled>
+            <span className='sf-field-renderer__button-icon'><Icon.Check size={12} /></span>
+            {field.buttonText || __('Apply', 'subtleforms')}
+          </button>
         </div>
       )}
 
@@ -500,12 +471,6 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
               </span>
               <span className='sf-action-hook-preview__code-bracket'>)</span>
             </div>
-            <div className='sf-action-hook-preview__info'>
-              <span className='sf-action-hook-preview__info-icon'><Icon.Zap size={12} /></span>
-              <span className='sf-action-hook-preview__info-text'>
-                {__('Triggers custom WordPress actions during form processing', 'subtleforms')}
-              </span>
-            </div>
           </div>
         </div>
       )}
@@ -529,17 +494,6 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
             <div className='sf-step-preview__progress-bar'>
               <div className='sf-step-preview__progress-fill'></div>
             </div>
-            <div className='sf-step-preview__progress-text'>
-              {__('Step navigation will appear here', 'subtleforms')}
-            </div>
-          </div>
-          <div className='sf-step-preview__fields'>
-            <div className='sf-step-preview__field-indicator'>●</div>
-            <div className='sf-step-preview__field-indicator'>●</div>
-            <div className='sf-step-preview__field-indicator'>●</div>
-            <span className='sf-step-preview__fields-text'>
-              {__('Form fields will be displayed here', 'subtleforms')}
-            </span>
           </div>
         </div>
       )}
@@ -710,7 +664,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           <select className={selectClass} disabled tabIndex='-1'>
             <option>{placeholder || __('Select category…', 'subtleforms')}</option>
           </select>
-          <select className={selectClass} disabled tabIndex='-1' style={{ marginTop: '6px' }}>
+          <select className={selectClass} disabled tabIndex='-1'>
             <option>{__('Select subcategory…', 'subtleforms')}</option>
           </select>
           <div className='sf-field-renderer__field-hint'>
@@ -826,7 +780,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       {type === 'checkbox_grid' && (() => {
         const gridCols = field.columns?.length ? field.columns : ['Option 1', 'Option 2'];
         const gridRows = field.rows?.length ? field.rows : ['Row 1', 'Row 2'];
-        const gridStyle = { gridTemplateColumns: `auto ${gridCols.map(() => '1fr').join(' ')}` };
+        const gridStyle = { '--sf-grid-cols': gridCols.length };
         return (
           <div className='sf-field-renderer__checkbox-grid'>
             <div className='sf-field-renderer__checkbox-grid-header' style={gridStyle}>

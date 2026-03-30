@@ -111,7 +111,6 @@
 
 		&:hover {
 			background-color: var(--sf-gray-50);
-			transform: translateX(3px);
 
 			.sf-field-renderer__checkbox {
 				border-color: var(--sf-blue-500);
@@ -271,7 +270,7 @@
 
 	&__image-placeholder {
 		background: linear-gradient(135deg, var(--sf-neutral-50) 0%, var(--sf-neutral-100) 100%);
-		padding: 3.5rem 2.5rem;
+		padding: 1.5rem 2rem;
 		border: 2px dashed var(--sf-gray-300);
 		border-radius: 12px;
 		text-align: center;
@@ -314,7 +313,7 @@
 	}
 
 	&__image-icon {
-		margin-bottom: 1rem;
+		margin-bottom: 0.75rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -332,7 +331,7 @@
 
 	&__file-placeholder {
 		background: linear-gradient(135deg, var(--sf-neutral-50) 0%, var(--sf-neutral-100) 100%);
-		padding: 3.5rem 2.5rem;
+		padding: 1.5rem 2rem;
 		border: 2px dashed var(--sf-gray-300);
 		border-radius: 12px;
 		text-align: center;
@@ -374,7 +373,7 @@
 	}
 
 	&__file-icon {
-		margin-bottom: 1rem;
+		margin-bottom: 0.75rem;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -449,7 +448,7 @@
 
 	&__calculation-box {
 		background: var(--sf-surface);
-		padding: 1.5rem;
+		padding: 1rem;
 		border: 1.5px solid var(--sf-gray-200);
 		border-radius: 8px;
 		box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
@@ -461,37 +460,10 @@
 		}
 	}
 
-	&__calc-header {
-		display: flex;
-		align-items: center;
-		gap: 0.625rem;
-		margin-bottom: 1rem;
-		padding-bottom: 0.875rem;
-		border-bottom: 1px solid var(--sf-gray-100);
-	}
-
-	&__calc-icon {
-		display: flex;
-		align-items: center;
-		color: var(--sf-gray-500);
-	}
-
-	&__calc-title {
-		font-size: 0.9375rem;
-		font-weight: 600;
-		color: var(--sf-gray-900);
-	}
-
 	&__calc-divider {
 		height: 1px;
 		background: var(--sf-gray-100);
 		margin: 0.875rem 0;
-
-		&--bold {
-			height: 1px;
-			background: var(--sf-gray-200);
-			margin: 1rem 0;
-		}
 	}
 
 	&__calc-row {
@@ -561,110 +533,6 @@
 		font-variant-numeric: tabular-nums;
 	}
 
-	&__calc-footer {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		margin-top: 1rem;
-		padding: 0.75rem;
-		background: var(--sf-neutral-50);
-		border-radius: 6px;
-		border: 1px solid var(--sf-gray-200);
-	}
-
-	&__calc-footer-icon {
-		display: flex;
-		align-items: center;
-		color: var(--sf-gray-400);
-		flex-shrink: 0;
-	}
-
-	&__calc-footer-text {
-		font-size: 0.75rem;
-		color: var(--sf-gray-500);
-		font-weight: 500;
-		font-style: italic;
-		line-height: 1.4;
-	}
-
-	// Coupon Code Container - Minimal Design
-	&__coupon-container {
-		background: var(--sf-surface);
-		padding: 1.5rem;
-		border: 1.5px solid var(--sf-gray-200);
-		border-radius: 8px;
-		box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-		transition: all 0.2s ease;
-
-		&:hover {
-			box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
-			border-color: var(--sf-blue-500);
-		}
-	}
-
-	&__coupon-header {
-		display: flex;
-		align-items: center;
-		gap: 0.625rem;
-		margin-bottom: 1rem;
-		padding-bottom: 0.875rem;
-		border-bottom: 1px solid var(--sf-gray-100);
-	}
-
-	&__coupon-icon {
-		display: flex;
-		align-items: center;
-		color: var(--sf-gray-500);
-	}
-
-	&__coupon-title {
-		font-size: 0.9375rem;
-		font-weight: 600;
-		color: var(--sf-gray-900);
-	}
-
-	&__input-wrapper {
-		position: relative;
-		flex: 1;
-	}
-
-	&__coupon-badge {
-		position: absolute;
-		right: 1rem;
-		top: 50%;
-		transform: translateY(-50%);
-		font-size: 1rem;
-		line-height: 1;
-		opacity: 0.3;
-		pointer-events: none;
-	}
-
-	&__coupon-hint {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-		margin-top: 1rem;
-		padding: 0.75rem;
-		background: var(--sf-neutral-50);
-		border-radius: 6px;
-		border: 1px solid var(--sf-gray-200);
-	}
-
-	&__coupon-hint-icon {
-		display: flex;
-		align-items: center;
-		color: var(--sf-gray-400);
-		flex-shrink: 0;
-	}
-
-	&__coupon-hint-text {
-		font-size: 0.75rem;
-		color: var(--sf-gray-500);
-		font-weight: 500;
-		line-height: 1.4;
-		font-style: italic;
-	}
-
 	&__subscribe-wrapper {
 		display: flex;
 		gap: 0.75rem;
@@ -707,7 +575,7 @@
 	background: var(--sf-surface);
 	border: 1.5px solid var(--sf-gray-200);
 	border-radius: 8px;
-	padding: 1.5rem;
+	padding: 1rem;
 	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
 	transition: all 0.2s ease;
 	font-family: var(--font-mono);
@@ -781,30 +649,6 @@
 		color: var(--sf-emerald-600);
 	}
 
-	&__info {
-		display: flex;
-		align-items: center;
-		gap: 0.625rem;
-		padding: 0.75rem;
-		background: var(--sf-neutral-50);
-		border-radius: 6px;
-		border: 1px solid var(--sf-gray-200);
-	}
-
-	&__info-icon {
-		display: flex;
-		align-items: center;
-		color: var(--sf-gray-400);
-		flex-shrink: 0;
-	}
-
-	&__info-text {
-		font-size: 0.75rem;
-		color: var(--sf-gray-500);
-		font-weight: 500;
-		line-height: 1.5;
-		font-family: var(--font-sans);
-	}
 }
 
 // Step Preview - Minimal Design
@@ -813,7 +657,7 @@
 	border: 1.5px solid var(--sf-gray-200);
 	border-left: 3px solid var(--sf-blue-500);
 	border-radius: 8px;
-	padding: 1.5rem;
+	padding: 1rem;
 	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
 	transition: all 0.2s ease;
 
@@ -895,36 +739,6 @@
 		transition: width 0.5s ease;
 	}
 
-	&__progress-text {
-		font-size: 0.75rem;
-		color: var(--sf-gray-500);
-		font-weight: 500;
-		text-align: center;
-		font-style: italic;
-	}
-
-	&__fields {
-		display: flex;
-		align-items: center;
-		gap: 0.75rem;
-		padding: 1rem;
-		background: var(--sf-neutral-50);
-		border: 1px dashed var(--sf-gray-300);
-		border-radius: 6px;
-	}
-
-	&__field-indicator {
-		color: var(--sf-blue-500);
-		font-size: 0.5rem;
-		opacity: 0.5;
-	}
-
-	&__fields-text {
-		font-size: 0.75rem;
-		color: var(--sf-gray-500);
-		font-weight: 500;
-		font-style: italic;
-	}
 }
 
 // CAPTCHA Preview - Minimal & Sleek
@@ -932,7 +746,7 @@
 	background: var(--sf-surface);
 	border: 1.5px solid var(--sf-gray-200);
 	border-radius: 8px;
-	padding: 1.5rem;
+	padding: 1rem;
 	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
 	transition: all 0.2s ease;
 
@@ -1524,6 +1338,7 @@
 
 	&__checkbox-grid-header {
 		display: grid;
+		grid-template-columns: auto repeat(var(--sf-grid-cols, 2), 1fr);
 		gap: 4px;
 		padding: 4px 8px;
 		background: var(--sf-gray-50);
@@ -1540,6 +1355,7 @@
 
 	&__checkbox-grid-row {
 		display: grid;
+		grid-template-columns: auto repeat(var(--sf-grid-cols, 2), 1fr);
 		gap: 4px;
 		align-items: center;
 		padding: 5px 8px;
@@ -1560,5 +1376,11 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+	}
+
+	&__chained-select {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
 	}
 }
