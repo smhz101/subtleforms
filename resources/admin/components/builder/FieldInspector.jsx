@@ -16,7 +16,7 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
 
   const selectedFieldValidationMessages = selectedId
     ? (validationErrors || [])
-        .filter((v) => v.fieldKey === field?.config?.key)
+        .filter((v) => v.fieldKey === field?.key)
         .map((v) => v.message)
     : [];
 
