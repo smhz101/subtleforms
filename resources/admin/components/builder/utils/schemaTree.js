@@ -262,6 +262,57 @@ export function createNodeFromDefinition(definition, existingKeys = new Set()) {
   return node;
 }
 
+const GROUP_DEFAULT_CHILDREN = {
+  name_group: [
+    { label: __( 'First Name', 'subtleforms' ),  placeholder: __( 'First Name', 'subtleforms' ) },
+    { label: __( 'Middle Name', 'subtleforms' ), placeholder: __( 'Middle Name (optional)', 'subtleforms' ) },
+    { label: __( 'Last Name', 'subtleforms' ),   placeholder: __( 'Last Name', 'subtleforms' ) },
+  ],
+  address_group: [
+    { label: __( 'Street Address', 'subtleforms' ),        placeholder: __( 'Street Address', 'subtleforms' ) },
+    { label: __( 'Street Address Line 2', 'subtleforms' ), placeholder: __( 'Apt, Suite, etc.', 'subtleforms' ) },
+    { label: __( 'City', 'subtleforms' ),                  placeholder: __( 'City', 'subtleforms' ) },
+    { label: __( 'State / Province', 'subtleforms' ),      placeholder: __( 'State / Province', 'subtleforms' ) },
+    { label: __( 'Postal Code', 'subtleforms' ),           placeholder: __( 'Postal Code', 'subtleforms' ) },
+    { label: __( 'Country', 'subtleforms' ),               placeholder: __( 'Country', 'subtleforms' ) },
+  ],
+};
+
+/**
+ * Create default child nodes for a group field (name_group, address_group).
+ *
+ * @param {string} groupType  - Field type of the parent group ('name_group' | 'address_group')
+ * @param {string} parentId   - Node id of the parent group (will be corrected by addNodeToTree)
+ * @param {Set}    existingKeys - Mutable set of keys already in use; new keys are added in-place
+ * @returns {Array<Object>} Array of child node objects ready for addNodeToTree
+ */
+export function createGroupDefaultChildren( groupType, parentId, existingKeys ) {
+  const specs = GROUP_DEFAULT_CHILDREN[ groupType ] || [];
+  return specs.map( ( { label, placeholder } ) => {
+    const id  = createNodeId();
+    const key = createFieldKey( 'text', existingKeys );
+    existingKeys.add( key );
+    return {
+      id,
+      type: 'text',
+      kind: 'input',
+      parentId,
+      config: {
+        id,
+        type: 'text',
+        kind: 'input',
+        key,
+        label,
+        placeholder,
+        required:     false,
+        defaultValue: null,
+        visibility:   null,
+        validation:   [],
+      },
+    };
+  } );
+}
+
 export function addNodeToTree(tree, node, { parentId, columnIndex = null, position = null }) {
   const nodes = {
     ...tree.nodes,
