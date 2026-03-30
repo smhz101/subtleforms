@@ -49,8 +49,10 @@ function fieldUsesProFeatures(field) {
   }
 
   // Check nested fields (for groups, steps, columns)
-  if (field.fields && Array.isArray(field.fields)) {
-    return field.fields.some((child) => fieldUsesProFeatures(child));
+  // Accept both 'children' (canonical key) and 'fields' (legacy key for backward compat)
+  const nestedFields = field.children || field.fields;
+  if (Array.isArray(nestedFields) && nestedFields.length > 0) {
+    return nestedFields.some((child) => fieldUsesProFeatures(child));
   }
 
   if (field.columns && Array.isArray(field.columns)) {

@@ -32,7 +32,9 @@ function ensureArray(value, length) {
 
 function extractConfig(field) {
   const {
-    fields: childFields,
+    // Accept both 'children' (new canonical key) and 'fields' (legacy key for backward compat)
+    children: childrenArray,
+    fields: fieldsArray,
     columns: columnChildren,
     id,
     type,
@@ -52,7 +54,8 @@ function extractConfig(field) {
   return {
     id: id || field.key || null,
     config,
-    childFields: Array.isArray(childFields) ? childFields : [],
+    // Prefer 'children' (canonical); fall back to 'fields' for schemas saved before this fix
+    childFields: Array.isArray(childrenArray) ? childrenArray : (Array.isArray(fieldsArray) ? fieldsArray : []),
     columnChildren: Array.isArray(columnChildren) ? columnChildren : [],
     type,
     kind: kind || 'input',
@@ -189,7 +192,7 @@ function buildField(nodeId, tree) {
       return columnChildren.map((childId) => buildField(childId, tree)).filter(Boolean);
     });
   } else if (Array.isArray(node.children) && node.children.length) {
-    field.fields = node.children.map((childId) => buildField(childId, tree)).filter(Boolean);
+    field.children = node.children.map((childId) => buildField(childId, tree)).filter(Boolean);
   }
 
   return field;

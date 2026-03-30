@@ -75,8 +75,8 @@ $breakpoint-tablet: 768px;
 		// Tip bar (contextual help)
 		&-tip {
 			flex-shrink: 0;
-			background-color: rgba(132, 204, 22, 0.05);
-			border-bottom: 1px solid rgba(132, 204, 22, 0.2);
+			background-color: $sf-blue-50;
+			border-bottom: 1px solid $sf-blue-200;
 			padding: $space-2 $space-4;
 
 			&-text {
