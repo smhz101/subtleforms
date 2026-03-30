@@ -1,6 +1,5 @@
 import { memo, useState, useRef, useCallback, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { getFieldRenderer } from './canvas/renderers';
 import { getFieldIcon } from '../../utils/iconRegistry';
 import Icon from '../../components/ui/Icon';
 import './FieldRenderer.scss';
