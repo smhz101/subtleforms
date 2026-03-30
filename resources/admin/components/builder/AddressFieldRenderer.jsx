@@ -1,127 +1,82 @@
-import { __ } from '@wordpress/i18n';
-
 /**
  * AddressFieldRenderer
  *
  * Builder canvas preview for the address_group composite field.
- * Renders static sub-field inputs controlled by enable_* toggles.
- * City is always rendered; all other sub-fields default to true and
- * can be hidden via the inspector toggles.
+ * Reads sub-field config from field.fields — label, placeholder and
+ * enabled state are all driven by stored config with seeded defaults.
+ * All inputs are read-only: this is a layout preview, not a live form.
  */
+
+const DEFAULTS = {
+	street:  { enabled: true,  label: 'Street Address',        placeholder: '' },
+	street2: { enabled: false, label: 'Street Address Line 2', placeholder: 'Apt, Suite, etc.' },
+	city:    { enabled: true,  label: 'City',                  placeholder: '' },
+	state:   { enabled: true,  label: 'State / Province',      placeholder: '' },
+	postal:  { enabled: true,  label: 'Postal Code',           placeholder: '' },
+	country: { enabled: true,  label: 'Country',               placeholder: '' },
+};
+
+function getSub( fields, key ) {
+	const stored = ( fields && typeof fields === 'object' ) ? ( fields[ key ] ?? {} ) : {};
+	const def    = DEFAULTS[ key ] ?? {};
+	return {
+		enabled:     stored.enabled     ?? def.enabled     ?? true,
+		label:       stored.label       || def.label       || key,
+		placeholder: stored.placeholder || def.placeholder || '',
+	};
+}
+
+function SubInput( { sub, cls } ) {
+	return (
+		<div className={ `${ cls }__col` }>
+			<div className={ `${ cls }__sub-label` }>{ sub.label }</div>
+			<input
+				type='text'
+				placeholder={ sub.placeholder || sub.label }
+				className='sf-field-renderer__input'
+				readOnly
+				tabIndex='-1'
+			/>
+		</div>
+	);
+}
+
 export default function AddressFieldRenderer( { field } ) {
-	const {
-		enable_street2,
-		enable_state,
-		enable_postal,
-		enable_country,
-	} = field || {};
-
-	// Default-true fields: treat undefined as enabled
-	const showState   = enable_state   !== false;
-	const showPostal  = enable_postal  !== false;
-	const showCountry = enable_country !== false;
-
+	const { fields } = field || {};
 	const cls = 'sf-composite-field';
+
+	const street  = getSub( fields, 'street' );
+	const street2 = getSub( fields, 'street2' );
+	const city    = getSub( fields, 'city' );
+	const state   = getSub( fields, 'state' );
+	const postal  = getSub( fields, 'postal' );
+	const country = getSub( fields, 'country' );
 
 	return (
 		<div className={ cls }>
-			{ /* Street Address — always shown */ }
+			{ /* Street (always) */ }
 			<div className={ `${ cls }__row` }>
-				<div className={ `${ cls }__col` }>
-					<div className={ `${ cls }__sub-label` }>
-						{ __( 'Street Address', 'subtleforms' ) }
-					</div>
-					<input
-						type='text'
-						placeholder={ __( 'Street Address', 'subtleforms' ) }
-						className='sf-field-renderer__input'
-						readOnly
-						tabIndex='-1'
-					/>
-				</div>
+				<SubInput sub={ street } cls={ cls } />
 			</div>
 
-			{ /* Street Address Line 2 — optional (default off) */ }
-			{ enable_street2 && (
+			{ /* Street 2 — optional */ }
+			{ street2.enabled && (
 				<div className={ `${ cls }__row` }>
-					<div className={ `${ cls }__col` }>
-						<div className={ `${ cls }__sub-label` }>
-							{ __( 'Street Address Line 2', 'subtleforms' ) }
-						</div>
-						<input
-							type='text'
-							placeholder={ __( 'Apt, Suite, etc.', 'subtleforms' ) }
-							className='sf-field-renderer__input'
-							readOnly
-							tabIndex='-1'
-						/>
-					</div>
+					<SubInput sub={ street2 } cls={ cls } />
 				</div>
 			) }
 
 			{ /* City (always) + State (optional) */ }
 			<div className={ `${ cls }__row` }>
-				<div className={ `${ cls }__col` }>
-					<div className={ `${ cls }__sub-label` }>
-						{ __( 'City', 'subtleforms' ) }
-					</div>
-					<input
-						type='text'
-						placeholder={ __( 'City', 'subtleforms' ) }
-						className='sf-field-renderer__input'
-						readOnly
-						tabIndex='-1'
-					/>
-				</div>
-
-				{ showState && (
-					<div className={ `${ cls }__col` }>
-						<div className={ `${ cls }__sub-label` }>
-							{ __( 'State / Province', 'subtleforms' ) }
-						</div>
-						<input
-							type='text'
-							placeholder={ __( 'State / Province', 'subtleforms' ) }
-							className='sf-field-renderer__input'
-							readOnly
-							tabIndex='-1'
-						/>
-					</div>
-				) }
+				<SubInput sub={ city } cls={ cls } />
+				{ state.enabled && <SubInput sub={ state } cls={ cls } /> }
 			</div>
 
-			{ /* Postal + Country row — shown when at least one is enabled */ }
-			{ ( showPostal || showCountry ) && (
+			{ /* Postal + Country — shown only when at least one is enabled */ }
+			{ ( postal.enabled || country.enabled ) && (
 				<div className={ `${ cls }__row` }>
-					{ showPostal && (
-						<div className={ `${ cls }__col` }>
-							<div className={ `${ cls }__sub-label` }>
-								{ __( 'Postal Code', 'subtleforms' ) }
-							</div>
-							<input
-								type='text'
-								placeholder={ __( 'Postal Code', 'subtleforms' ) }
-								className='sf-field-renderer__input'
-								readOnly
-								tabIndex='-1'
-							/>
-						</div>
-					) }
-
-					{ showCountry && (
-						<div className={ `${ cls }__col` }>
-							<div className={ `${ cls }__sub-label` }>
-								{ __( 'Country', 'subtleforms' ) }
-							</div>
-							<input
-								type='text'
-								placeholder={ __( 'Country', 'subtleforms' ) }
-								className='sf-field-renderer__input'
-								readOnly
-								tabIndex='-1'
-							/>
-						</div>
-					) }
+					{ postal.enabled  && <SubInput sub={ postal }  cls={ cls } /> }
+					{ country.enabled && <SubInput sub={ country } cls={ cls } /> }
 				</div>
 			) }
 		</div>

@@ -1156,8 +1156,12 @@ final class CoreFields {
 				kind: 'input',
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
-					'enable_middle_name' => false,
-					'enable_suffix'      => false,
+					'fields' => array(
+						'first_name'  => array( 'enabled' => true,  'label' => 'First Name',  'placeholder' => '' ),
+						'last_name'   => array( 'enabled' => true,  'label' => 'Last Name',   'placeholder' => '' ),
+						'middle_name' => array( 'enabled' => false, 'label' => 'Middle Name', 'placeholder' => '' ),
+						'suffix'      => array( 'enabled' => false, 'label' => 'Suffix',      'placeholder' => '' ),
+					),
 				),
 				inspectorControls: array(
 					array(
@@ -1166,14 +1170,14 @@ final class CoreFields {
 						'label' => __( 'Label', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'toggle',
-						'name'  => 'enable_middle_name',
-						'label' => __( 'Include Middle Name', 'subtleforms' ),
-					),
-					array(
-						'type'  => 'toggle',
-						'name'  => 'enable_suffix',
-						'label' => __( 'Include Suffix', 'subtleforms' ),
+						'type'      => 'subfield',
+						'name'      => 'fields',
+						'subfields' => array(
+							array( 'key' => 'first_name',  'label' => __( 'First Name',  'subtleforms' ), 'toggleable' => false ),
+							array( 'key' => 'last_name',   'label' => __( 'Last Name',   'subtleforms' ), 'toggleable' => false ),
+							array( 'key' => 'middle_name', 'label' => __( 'Middle Name', 'subtleforms' ), 'toggleable' => true ),
+							array( 'key' => 'suffix',      'label' => __( 'Suffix',      'subtleforms' ), 'toggleable' => true ),
+						),
 					),
 				),
 				meta: array( 'category' => 'composite' ),
@@ -1190,10 +1194,14 @@ final class CoreFields {
 				kind: 'input',
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
-					'enable_street2' => false,
-					'enable_state'   => true,
-					'enable_postal'  => true,
-					'enable_country' => true,
+					'fields' => array(
+						'street'  => array( 'enabled' => true,  'label' => 'Street Address',        'placeholder' => '' ),
+						'street2' => array( 'enabled' => false, 'label' => 'Street Address Line 2', 'placeholder' => 'Apt, Suite, etc.' ),
+						'city'    => array( 'enabled' => true,  'label' => 'City',                  'placeholder' => '' ),
+						'state'   => array( 'enabled' => true,  'label' => 'State / Province',      'placeholder' => '' ),
+						'postal'  => array( 'enabled' => true,  'label' => 'Postal Code',           'placeholder' => '' ),
+						'country' => array( 'enabled' => true,  'label' => 'Country',               'placeholder' => '' ),
+					),
 				),
 				inspectorControls: array(
 					array(
@@ -1202,24 +1210,16 @@ final class CoreFields {
 						'label' => __( 'Label', 'subtleforms' ),
 					),
 					array(
-						'type'  => 'toggle',
-						'name'  => 'enable_street2',
-						'label' => __( 'Include Street Address Line 2', 'subtleforms' ),
-					),
-					array(
-						'type'  => 'toggle',
-						'name'  => 'enable_state',
-						'label' => __( 'Include State / Province', 'subtleforms' ),
-					),
-					array(
-						'type'  => 'toggle',
-						'name'  => 'enable_postal',
-						'label' => __( 'Include Postal Code', 'subtleforms' ),
-					),
-					array(
-						'type'  => 'toggle',
-						'name'  => 'enable_country',
-						'label' => __( 'Include Country', 'subtleforms' ),
+						'type'      => 'subfield',
+						'name'      => 'fields',
+						'subfields' => array(
+							array( 'key' => 'street',  'label' => __( 'Street Address',        'subtleforms' ), 'toggleable' => false ),
+							array( 'key' => 'street2', 'label' => __( 'Street Address Line 2', 'subtleforms' ), 'toggleable' => true  ),
+							array( 'key' => 'city',    'label' => __( 'City',                  'subtleforms' ), 'toggleable' => false ),
+							array( 'key' => 'state',   'label' => __( 'State / Province',      'subtleforms' ), 'toggleable' => true  ),
+							array( 'key' => 'postal',  'label' => __( 'Postal Code',           'subtleforms' ), 'toggleable' => true  ),
+							array( 'key' => 'country', 'label' => __( 'Country',               'subtleforms' ), 'toggleable' => true  ),
+						),
 					),
 				),
 				meta: array( 'category' => 'composite' ),

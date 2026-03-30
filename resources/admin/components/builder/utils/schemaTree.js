@@ -47,6 +47,17 @@ function extractConfig(field) {
     ...config
   } = field;
 
+  // If 'fields' is a non-array object it is the composite sub-fields config, not a children
+  // array. Restore it into config so it is not silently discarded.
+  if (
+    fieldsArray !== undefined &&
+    fieldsArray !== null &&
+    ! Array.isArray( fieldsArray ) &&
+    typeof fieldsArray === 'object'
+  ) {
+    config.fields = fieldsArray;
+  }
+
   if (!config.label && typeof field.label === 'string') {
     config.label = field.label;
   }
@@ -94,6 +105,28 @@ export function normalizeSchema(schema) {
     const isComposite = COMPOSITE_FIELD_TYPES.has( type );
     const kind = isComposite ? 'input' : rawKind;
     const childFields = isComposite ? [] : rawChildFields;
+
+    // Backward-compat: if this is a composite field loaded from an old schema
+    // that used flat enable_* flags, migrate them to the new `fields` structure.
+    if ( isComposite && ! config.fields ) {
+      if ( type === 'name_group' ) {
+        config.fields = {
+          first_name:  { enabled: true,  label: 'First Name',         placeholder: '' },
+          last_name:   { enabled: true,  label: 'Last Name',          placeholder: '' },
+          middle_name: { enabled: config.enable_middle_name === true, label: 'Middle Name', placeholder: '' },
+          suffix:      { enabled: config.enable_suffix      === true, label: 'Suffix',      placeholder: '' },
+        };
+      } else if ( type === 'address_group' ) {
+        config.fields = {
+          street:   { enabled: true,                              label: 'Street Address',        placeholder: '' },
+          street2:  { enabled: config.enable_street2  === true,  label: 'Street Address Line 2', placeholder: 'Apt, Suite, etc.' },
+          city:     { enabled: true,                              label: 'City',                  placeholder: '' },
+          state:    { enabled: config.enable_state    !== false,  label: 'State / Province',      placeholder: '' },
+          postal:   { enabled: config.enable_postal   !== false,  label: 'Postal Code',           placeholder: '' },
+          country:  { enabled: config.enable_country  !== false,  label: 'Country',               placeholder: '' },
+        };
+      }
+    }
 
     const nodeId = existingId || createNodeId();
 

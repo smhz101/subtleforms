@@ -1403,18 +1403,18 @@
 .sf-composite-field {
 	display: flex;
 	flex-direction: column;
-	gap: 0.5rem;
+	gap: 5px;
 
 	&__row {
 		display: flex;
-		gap: 0.5rem;
+		gap: 6px;
 	}
 
 	&__col {
 		flex: 1;
 		display: flex;
 		flex-direction: column;
-		gap: 0.1875rem;
+		gap: 3px;
 
 		&--narrow {
 			flex: 0 0 140px;

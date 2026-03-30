@@ -1,0 +1,79 @@
+.sf-subfield-ctrl {
+	display: flex;
+	flex-direction: column;
+	// Bleed to panel edges so rows span the full width
+	margin: 0 -16px;
+
+	&__row {
+		border-bottom: 1px solid var(--sf-gray-100);
+		padding: 0 16px;
+		transition: opacity 120ms ease;
+
+		&--off {
+			opacity: 0.55;
+		}
+	}
+
+	&__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 6px;
+		min-height: 38px;
+
+		// Override WP ToggleControl bottom margin so the row stays compressed
+		.components-toggle-control {
+			margin-bottom: 0;
+			flex: 1;
+
+			.components-base-control__label {
+				font-size: 0.8125rem;
+			}
+		}
+	}
+
+	&__fixed-label {
+		flex: 1;
+		font-size: 0.8125rem;
+		font-weight: 500;
+		color: var(--sf-gray-700);
+	}
+
+	&__chevron {
+		flex-shrink: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 20px;
+		height: 20px;
+		border: none;
+		background: none;
+		cursor: pointer;
+		color: var(--sf-gray-400);
+		padding: 0;
+		transition: transform 140ms ease, color 120ms ease;
+
+		&:hover {
+			color: var(--sf-gray-700);
+		}
+
+		&--open {
+			transform: rotate(180deg);
+		}
+	}
+
+	&__body {
+		padding-bottom: 10px;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+
+		.components-base-control {
+			margin-bottom: 4px;
+		}
+
+		.components-text-control__input {
+			font-size: 0.8125rem;
+		}
+	}
+}
