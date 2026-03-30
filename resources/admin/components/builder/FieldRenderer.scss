@@ -243,13 +243,6 @@
 		gap: 0.625rem;
 		transition: all 0.2s ease;
 
-		&::before {
-			content: '🔒';
-			font-size: 1.125rem;
-			opacity: 0.8;
-			filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
-		}
-
 		&:hover {
 			border-color: var(--sf-gray-400);
 			background: linear-gradient(135deg, var(--sf-gray-100) 0%, var(--sf-gray-200) 100%);
@@ -322,11 +315,11 @@
 
 	&__image-icon {
 		margin-bottom: 1rem;
-		font-size: 3rem;
-		opacity: 0.7;
-		filter: grayscale(20%);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--sf-gray-400);
 		transition: all 0.25s ease;
-		display: inline-block;
 	}
 
 	&__image-text {
@@ -382,10 +375,11 @@
 
 	&__file-icon {
 		margin-bottom: 1rem;
-		font-size: 3rem;
-		opacity: 0.7;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--sf-gray-400);
 		transition: all 0.25s ease;
-		display: inline-block;
 	}
 
 	&__file-text {
@@ -477,9 +471,9 @@
 	}
 
 	&__calc-icon {
-		font-size: 1.125rem;
-		line-height: 1;
-		opacity: 0.7;
+		display: flex;
+		align-items: center;
+		color: var(--sf-gray-500);
 	}
 
 	&__calc-title {
@@ -522,9 +516,9 @@
 	}
 
 	&__calc-row-icon {
-		font-size: 0.875rem;
-		line-height: 1;
-		opacity: 0.6;
+		display: flex;
+		align-items: center;
+		color: var(--sf-gray-400);
 	}
 
 	&__calc-value {
@@ -555,9 +549,9 @@
 	}
 
 	&__calc-total-icon {
-		font-size: 1rem;
-		line-height: 1;
-		opacity: 0.7;
+		display: flex;
+		align-items: center;
+		color: var(--sf-gray-600);
 	}
 
 	&__calc-total-value {
@@ -579,10 +573,10 @@
 	}
 
 	&__calc-footer-icon {
-		font-size: 0.875rem;
-		line-height: 1;
+		display: flex;
+		align-items: center;
+		color: var(--sf-gray-400);
 		flex-shrink: 0;
-		opacity: 0.6;
 	}
 
 	&__calc-footer-text {
@@ -618,9 +612,9 @@
 	}
 
 	&__coupon-icon {
-		font-size: 1.125rem;
-		line-height: 1;
-		opacity: 0.7;
+		display: flex;
+		align-items: center;
+		color: var(--sf-gray-500);
 	}
 
 	&__coupon-title {
@@ -657,10 +651,10 @@
 	}
 
 	&__coupon-hint-icon {
-		font-size: 0.875rem;
-		line-height: 1;
+		display: flex;
+		align-items: center;
+		color: var(--sf-gray-400);
 		flex-shrink: 0;
-		opacity: 0.6;
 	}
 
 	&__coupon-hint-text {
@@ -703,9 +697,8 @@
 	}
 
 	&__button-icon {
-		font-size: 0.875rem;
-		font-weight: bold;
-		line-height: 1;
+		display: flex;
+		align-items: center;
 	}
 }
 
@@ -734,9 +727,9 @@
 	}
 
 	&__icon {
-		font-size: 1.5rem;
-		line-height: 1;
-		opacity: 0.7;
+		display: flex;
+		align-items: center;
+		color: var(--sf-gray-600);
 	}
 
 	&__title-group {
@@ -799,10 +792,10 @@
 	}
 
 	&__info-icon {
-		font-size: 0.875rem;
-		line-height: 1;
+		display: flex;
+		align-items: center;
+		color: var(--sf-gray-400);
 		flex-shrink: 0;
-		opacity: 0.6;
 	}
 
 	&__info-text {
@@ -851,9 +844,9 @@
 	}
 
 	&__number-icon {
-		font-size: 1rem;
-		line-height: 1;
-		opacity: 0.6;
+		display: flex;
+		align-items: center;
+		color: var(--sf-gray-500);
 	}
 
 	&__number-text {
@@ -958,9 +951,9 @@
 	}
 
 	&__icon {
-		font-size: 1.5rem;
-		line-height: 1;
-		opacity: 0.7;
+		display: flex;
+		align-items: center;
+		color: var(--sf-gray-600);
 	}
 
 	&__title-group {
@@ -1035,8 +1028,9 @@
 	}
 
 	&__provider-icon {
-		font-size: 0.875rem;
-		line-height: 1;
+		display: flex;
+		align-items: center;
+		color: var(--sf-gray-500);
 	}
 
 	&__footer {
@@ -1055,9 +1049,9 @@
 	}
 
 	&__status-icon {
-		font-size: 0.875rem;
-		line-height: 1;
-		opacity: 0.7;
+		display: flex;
+		align-items: center;
+		color: var(--sf-gray-400);
 	}
 }
 // Country Field
@@ -1275,17 +1269,17 @@
 .sf-field-renderer__date-icon,
 .sf-field-renderer__time-icon,
 .sf-field-renderer__datetime-icon {
-	font-size: 1.25rem;
-	line-height: 1;
-	transition: transform 0.25s ease;
-	filter: grayscale(0.3);
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	color: var(--sf-gray-400);
+	transition: color 0.25s ease;
 }
 
 .sf-field-renderer__date-placeholder:hover .sf-field-renderer__date-icon,
 .sf-field-renderer__time-placeholder:hover .sf-field-renderer__time-icon,
 .sf-field-renderer__datetime-placeholder:hover .sf-field-renderer__datetime-icon {
-	transform: scale(1.15) rotate(-5deg);
-	filter: grayscale(0);
+	color: var(--sf-blue-500);
 }
 
 .sf-field-renderer__date-text,

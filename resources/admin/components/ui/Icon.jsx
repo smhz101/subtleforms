@@ -75,6 +75,10 @@ import {
   Key,
   Monitor,
   Wrench,
+  Tag,
+  Star,
+  Sliders,
+  LayoutGrid,
 } from 'lucide-react';
 
 /**
@@ -180,6 +184,12 @@ const Icon = {
   Navigation,
   Lock,
   DollarSign,
+
+  // Form extras
+  Tag,
+  Star,
+  Sliders,
+  LayoutGrid,
 
   // Aliases for convenience
   Text: Type,

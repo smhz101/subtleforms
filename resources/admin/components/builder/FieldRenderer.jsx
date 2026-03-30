@@ -2,6 +2,7 @@ import { memo, useState, useRef, useCallback, useEffect } from '@wordpress/eleme
 import { __ } from '@wordpress/i18n';
 import { getFieldRenderer } from './canvas/renderers';
 import { getFieldIcon } from '../../utils/iconRegistry';
+import Icon from '../../components/ui/Icon';
 import './FieldRenderer.scss';
 
 // Types that do not accept user input — required indicator suppressed
@@ -262,7 +263,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
 
       {type === 'date' && (
         <div className='sf-field-renderer__date-placeholder'>
-          <span className='sf-field-renderer__date-icon'>📅</span>
+          <span className='sf-field-renderer__date-icon'><Icon.Calendar size={16} /></span>
           <span className='sf-field-renderer__date-text'>
             {placeholder || __('Select a date', 'subtleforms')}
           </span>
@@ -271,7 +272,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
 
       {type === 'time' && (
         <div className='sf-field-renderer__time-placeholder'>
-          <span className='sf-field-renderer__time-icon'>🕐</span>
+          <span className='sf-field-renderer__time-icon'><Icon.Clock size={16} /></span>
           <span className='sf-field-renderer__time-text'>
             {placeholder || __('Select a time', 'subtleforms')}
           </span>
@@ -280,7 +281,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
 
       {type === 'datetime' && (
         <div className='sf-field-renderer__datetime-placeholder'>
-          <span className='sf-field-renderer__datetime-icon'>📅🕐</span>
+          <span className='sf-field-renderer__datetime-icon'><Icon.Calendar size={16} /><Icon.Clock size={16} /></span>
           <span className='sf-field-renderer__datetime-text'>
             {placeholder || __('Select date and time', 'subtleforms')}
           </span>
@@ -296,16 +297,16 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
             <option>
               {placeholder || __('Select a country', 'subtleforms')}
             </option>
-            <option>🇺🇸 United States</option>
-            <option>🇬🇧 United Kingdom</option>
-            <option>🇨🇦 Canada</option>
-            <option>🇦🇺 Australia</option>
-            <option>🇩🇪 Germany</option>
-            <option>🇫🇷 France</option>
-            <option>🇪🇸 Spain</option>
-            <option>🇮🇹 Italy</option>
-            <option>🇯🇵 Japan</option>
-            <option>🇨🇳 China</option>
+            <option>United States</option>
+            <option>United Kingdom</option>
+            <option>Canada</option>
+            <option>Australia</option>
+            <option>Germany</option>
+            <option>France</option>
+            <option>Spain</option>
+            <option>Italy</option>
+            <option>Japan</option>
+            <option>China</option>
             <option>{__('...and 235+ more countries', 'subtleforms')}</option>
           </select>
           <div className='sf-country-field__info'>
@@ -322,19 +323,21 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
 
       {type === 'hidden' && (
         <div className='sf-field-renderer__hidden-field'>
+          <Icon.Lock size={14} />
           {__('Hidden field (not visible to users)', 'subtleforms')}
         </div>
       )}
 
       {type === 'html' && (
         <div className='sf-field-renderer__warning-box'>
-          📝 {__('HTML Content Block', 'subtleforms')}
+          <Icon.Code size={14} />
+          {__('HTML Content Block', 'subtleforms')}
         </div>
       )}
 
       {type === 'image_upload' && (
         <div className='sf-field-renderer__image-placeholder'>
-          <div className='sf-field-renderer__image-icon'>🖼️</div>
+          <div className='sf-field-renderer__image-icon'><Icon.Image size={28} /></div>
           <div className='sf-field-renderer__image-text'>
             {__('Click to upload or drag image here', 'subtleforms')}
           </div>
@@ -343,7 +346,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
 
       {type === 'file_upload' && (
         <div className='sf-field-renderer__file-placeholder'>
-          <div className='sf-field-renderer__file-icon'>📎</div>
+          <div className='sf-field-renderer__file-icon'><Icon.File size={28} /></div>
           <div className='sf-field-renderer__file-text'>
             {__('Click to upload or drag file here', 'subtleforms')}
           </div>
@@ -378,7 +381,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       {type === 'payment_summary' && (
         <div className='sf-field-renderer__calculation-box'>
           <div className='sf-field-renderer__calc-header'>
-            <span className='sf-field-renderer__calc-icon'>📋</span>
+            <span className='sf-field-renderer__calc-icon'><Icon.FileText size={14} /></span>
             <span className='sf-field-renderer__calc-title'>
               {__('Payment Summary', 'subtleforms')}
             </span>
@@ -386,21 +389,21 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           <div className='sf-field-renderer__calc-divider'></div>
           <div className='sf-field-renderer__calc-row'>
             <span>
-              <span className='sf-field-renderer__calc-row-icon'>💵</span>
+              <span className='sf-field-renderer__calc-row-icon'><Icon.DollarSign size={12} /></span>
               {__('Subtotal:', 'subtleforms')}
             </span>
             <span className='sf-field-renderer__calc-value'>$0.00</span>
           </div>
           <div className='sf-field-renderer__calc-row'>
             <span>
-              <span className='sf-field-renderer__calc-row-icon'>🏦</span>
+              <span className='sf-field-renderer__calc-row-icon'><Icon.Database size={12} /></span>
               {__('Tax:', 'subtleforms')}
             </span>
             <span className='sf-field-renderer__calc-value'>$0.00</span>
           </div>
           <div className='sf-field-renderer__calc-row sf-field-renderer__calc-row--discount'>
             <span>
-              <span className='sf-field-renderer__calc-row-icon'>🏷️</span>
+              <span className='sf-field-renderer__calc-row-icon'><Icon.Tag size={12} /></span>
               {__('Discount:', 'subtleforms')}
             </span>
             <span className='sf-field-renderer__calc-value sf-field-renderer__calc-value--discount'>-$0.00</span>
@@ -408,13 +411,13 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           <div className='sf-field-renderer__calc-divider sf-field-renderer__calc-divider--bold'></div>
           <div className='sf-field-renderer__calc-total'>
             <span>
-              <span className='sf-field-renderer__calc-total-icon'>💰</span>
+              <span className='sf-field-renderer__calc-total-icon'><Icon.DollarSign size={14} /></span>
               {__('Total:', 'subtleforms')}
             </span>
             <span className='sf-field-renderer__calc-total-value'>$0.00</span>
           </div>
           <div className='sf-field-renderer__calc-footer'>
-            <span className='sf-field-renderer__calc-footer-icon'>ℹ️</span>
+            <span className='sf-field-renderer__calc-footer-icon'><Icon.HelpCircle size={12} /></span>
             <span className='sf-field-renderer__calc-footer-text'>
               {__('Amount will be calculated automatically', 'subtleforms')}
             </span>
@@ -425,7 +428,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       {type === 'payment_coupon' && (
         <div className='sf-field-renderer__coupon-container'>
           <div className='sf-field-renderer__coupon-header'>
-            <span className='sf-field-renderer__coupon-icon'>🏷️</span>
+            <span className='sf-field-renderer__coupon-icon'><Icon.Tag size={14} /></span>
             <span className='sf-field-renderer__coupon-title'>
               {__('Have a coupon code?', 'subtleforms')}
             </span>
@@ -439,18 +442,17 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
                 readOnly
                 tabIndex='-1'
               />
-              <span className='sf-field-renderer__coupon-badge'>🎉</span>
             </div>
             <button
               type='button'
               className='sf-field-renderer__subscribe-button'
               disabled>
-              <span className='sf-field-renderer__button-icon'>✓</span>
+              <span className='sf-field-renderer__button-icon'><Icon.Check size={12} /></span>
               {__('Apply', 'subtleforms')}
             </button>
           </div>
           <div className='sf-field-renderer__coupon-hint'>
-            <span className='sf-field-renderer__coupon-hint-icon'>💡</span>
+            <span className='sf-field-renderer__coupon-hint-icon'><Icon.Lightbulb size={12} /></span>
             <span className='sf-field-renderer__coupon-hint-text'>
               {__('Enter your discount code to save on your purchase', 'subtleforms')}
             </span>
@@ -467,7 +469,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       {type === 'action_hook' && (
         <div className='sf-action-hook-preview'>
           <div className='sf-action-hook-preview__header'>
-            <span className='sf-action-hook-preview__icon'>⚚️</span>
+            <span className='sf-action-hook-preview__icon'><Icon.Zap size={18} /></span>
             <div className='sf-action-hook-preview__title-group'>
               <div className='sf-action-hook-preview__title'>
                 {__('Action Hook', 'subtleforms')}
@@ -487,7 +489,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
               <span className='sf-action-hook-preview__code-bracket'>)</span>
             </div>
             <div className='sf-action-hook-preview__info'>
-              <span className='sf-action-hook-preview__info-icon'>🔌</span>
+              <span className='sf-action-hook-preview__info-icon'><Icon.Zap size={12} /></span>
               <span className='sf-action-hook-preview__info-text'>
                 {__('Triggers custom WordPress actions during form processing', 'subtleforms')}
               </span>
@@ -500,7 +502,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         <div className='sf-step-preview'>
           <div className='sf-step-preview__header'>
             <div className='sf-step-preview__number'>
-              <span className='sf-step-preview__number-icon'>🗂️</span>
+              <span className='sf-step-preview__number-icon'><Icon.Layers size={14} /></span>
               <span className='sf-step-preview__number-text'>
                 {field.config?.stepNumber || '1'}
               </span>
@@ -536,7 +538,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       {type === 'captcha' && (
         <div className='sf-captcha-preview'>
           <div className='sf-captcha-preview__header'>
-            <div className='sf-captcha-preview__icon'>🛡️</div>
+            <div className='sf-captcha-preview__icon'><Icon.Lock size={20} /></div>
             <div className='sf-captcha-preview__title-group'>
               <div className='sf-captcha-preview__title'>
                 {__('Security Verification', 'subtleforms')}
@@ -559,19 +561,19 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
               <div className='sf-captcha-preview__provider-badge'>
                 {field.config.providerName === 'recaptcha' && (
                   <>
-                    <span className='sf-captcha-preview__provider-icon'>🔐</span>
+                    <span className='sf-captcha-preview__provider-icon'><Icon.Lock size={12} /></span>
                     <span>Google reCAPTCHA</span>
                   </>
                 )}
                 {field.config.providerName === 'hcaptcha' && (
                   <>
-                    <span className='sf-captcha-preview__provider-icon'>✅</span>
+                    <span className='sf-captcha-preview__provider-icon'><Icon.Check size={12} /></span>
                     <span>hCaptcha</span>
                   </>
                 )}
                 {field.config.providerName === 'turnstile' && (
                   <>
-                    <span className='sf-captcha-preview__provider-icon'>☁️</span>
+                    <span className='sf-captcha-preview__provider-icon'><Icon.Globe size={12} /></span>
                     <span>Cloudflare Turnstile</span>
                   </>
                 )}
@@ -581,7 +583,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           
           <div className='sf-captcha-preview__footer'>
             <div className='sf-captcha-preview__status'>
-              <span className='sf-captcha-preview__status-icon'>ℹ️</span>
+              <span className='sf-captcha-preview__status-icon'><Icon.HelpCircle size={12} /></span>
               {__('CAPTCHA will appear here on the live form', 'subtleforms')}
             </div>
           </div>
