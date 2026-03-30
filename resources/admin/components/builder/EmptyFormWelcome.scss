@@ -76,10 +76,10 @@
 	justify-content: center;
 	width: 80px;
 	height: 80px;
-	background: linear-gradient(135deg, $sf-lime-400 0%, $sf-violet-400 100%);
+	background: linear-gradient(135deg, $sf-blue-500 0%, $sf-blue-600 100%);
 	border-radius: $radius-full;
 	margin-bottom: $space-6;
-	box-shadow: $shadow-lg, 0 0 40px rgba(132, 204, 22, 0.2);
+	box-shadow: $shadow-lg, 0 0 40px rgba(59, 130, 246, 0.18);
 
 	svg {
 		width: 40px;
@@ -148,7 +148,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: linear-gradient(135deg, $sf-lime-500 0%, $sf-lime-600 100%);
+	background: linear-gradient(135deg, $sf-blue-500 0%, $sf-blue-600 100%);
 	color: white;
 	border-radius: $radius-full;
 	font-weight: 700;

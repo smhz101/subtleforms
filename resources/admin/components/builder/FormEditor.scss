@@ -236,10 +236,10 @@ $breakpoint-tablet: 768px;
 		cursor: pointer;
 
 		&:hover {
-			background-color: $sf-lime-500;
-			border-color: $sf-lime-600;
+			background-color: $sf-blue-500;
+			border-color: $sf-blue-600;
 			color: white;
-			box-shadow: $shadow-lime;
+			box-shadow: $shadow-md;
 			transform: translateY(-1px);
 		}
 	}
