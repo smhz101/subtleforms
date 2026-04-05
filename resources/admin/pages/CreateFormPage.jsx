@@ -112,7 +112,7 @@ export default function CreateFormPage() {
   };
 
   const handleSelectTemplate = (tpl) => {
-    if (tpl.is_pro && !canUseProTemplates) {
+    if (tpl.is_locked) {
       setSelectedProTemplate(tpl);
       setShowUpgradeModal(true);
       return;
@@ -286,7 +286,7 @@ export default function CreateFormPage() {
 
                       {/* Template cards */}
                       {filteredTemplates.map(tpl => {
-                        const isLocked   = tpl.is_pro && !canUseProTemplates;
+                        const isLocked   = tpl.is_locked === true;
                         const isSelected = selectedTemplate?.id === tpl.id;
                         return (
                           <button

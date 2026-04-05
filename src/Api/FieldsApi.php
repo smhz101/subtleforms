@@ -168,19 +168,19 @@ final class FieldsApi {
 		$templates  = \SubtleForms\Templates\FormTemplates::get_all();
 		$canUsePro  = $this->gate->allows( 'templates.pro' );
 
-		// Mark Pro templates as locked when the current user lacks the capability.
-		// Templates are NOT removed — the UI uses is_locked to show upgrade prompts.
-		if ( ! $canUsePro ) {
-			$templates = array_map(
-				function ( $tpl ) {
-					if ( ! empty( $tpl['is_pro'] ) ) {
-						$tpl['is_locked'] = true;
-					}
-					return $tpl;
-				},
-				$templates
-			);
-		}
+		// Always set is_locked explicitly on every template so the frontend has a
+		// single authoritative source of truth (avoids stale JS capability state).
+		$templates = array_map(
+			function ( $tpl ) use ( $canUsePro ) {
+				if ( ! empty( $tpl['is_pro'] ) ) {
+					$tpl['is_locked'] = ! $canUsePro;
+				} else {
+					$tpl['is_locked'] = false;
+				}
+				return $tpl;
+			},
+			$templates
+		);
 
 		return ApiResponse::success(
 			array(
