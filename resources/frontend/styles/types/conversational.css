@@ -41,7 +41,8 @@
 }
 
 /* ===== Question Container ===== */
-.subtleforms-conversational-question {
+.subtleforms-conversational-question,
+.subtleforms-question-card {
 	animation: slideInUp 0.3s ease-out;
 	min-height: 400px;
 	display: flex;
@@ -74,6 +75,23 @@
 	line-height: 1.6;
 }
 
+/* Question number badge (e.g. "2 / 7") */
+.subtleforms-question-number {
+	font-size: var(--subtleforms-font-size-sm);
+	color: var(--subtleforms-color-text-light);
+	margin-bottom: var(--subtleforms-spacing-md);
+	font-weight: 500;
+}
+
+/* "Press Enter ↵" hint below the nav */
+.subtleforms-hint {
+	margin-top: var(--subtleforms-spacing-sm);
+	font-size: var(--subtleforms-font-size-xs, 0.75rem);
+	color: var(--subtleforms-color-text-light);
+	text-align: center;
+	opacity: 0.7;
+}
+
 /* ===== Field Focus ===== */
 .subtleforms--type-conversational .subtleforms-field {
 	margin-bottom: var(--subtleforms-spacing-lg);
@@ -99,7 +117,8 @@
 }
 
 /* ===== Navigation Buttons ===== */
-.subtleforms--type-conversational .subtleforms-buttons {
+.subtleforms--type-conversational .subtleforms-buttons,
+.subtleforms-conversational-nav {
 	display: flex;
 	gap: var(--subtleforms-spacing-sm);
 	margin-top: auto;
@@ -113,8 +132,44 @@
 	border-radius: var(--subtleforms-radius-md);
 }
 
-.subtleforms--type-conversational .subtleforms-button-next {
+.subtleforms--type-conversational .subtleforms-button-next,
+.subtleforms-button-next {
 	flex: 1;
+}
+
+/* ===== Dot Navigation ===== */
+.subtleforms-dots {
+	display: flex;
+	justify-content: center;
+	gap: 0.5rem;
+	margin-top: var(--subtleforms-spacing-lg);
+}
+
+.subtleforms-dot {
+	width: 0.5rem;
+	height: 0.5rem;
+	border-radius: 9999px;
+	border: none;
+	background: var(--subtleforms-color-border);
+	padding: 0;
+	cursor: pointer;
+	transition: background var(--subtleforms-transition-base),
+		transform var(--subtleforms-transition-base);
+}
+
+.subtleforms-dot.active {
+	background: var(--subtleforms-color-primary);
+	transform: scale(1.4);
+}
+
+.subtleforms-dot.completed {
+	background: var(--subtleforms-color-success);
+}
+
+.subtleforms-dot.pending {
+	background: var(--subtleforms-color-border);
+	cursor: not-allowed;
+	opacity: 0.5;
 }
 
 /* ===== Success State ===== */
@@ -159,21 +214,32 @@
 }
 
 /* ===== Review Step ===== */
-.subtleforms-conversational-review {
+.subtleforms-conversational-review,
+.subtleforms-review-card {
 	animation: slideInUp 0.3s ease-out;
 }
 
-.subtleforms-conversational-review h3 {
+.subtleforms-conversational-review h3,
+.subtleforms-review-card h2 {
 	font-size: 1.5rem;
 	margin-bottom: var(--subtleforms-spacing-lg);
 	color: var(--subtleforms-color-text);
 }
 
+.subtleforms-review-list {
+	border: 1px solid var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-sm);
+	overflow: hidden;
+	margin-bottom: var(--subtleforms-spacing-lg);
+}
+
 .subtleforms-review-item {
 	display: flex;
 	justify-content: space-between;
+	align-items: center;
 	padding: var(--subtleforms-spacing-md);
 	border-bottom: 1px solid var(--subtleforms-color-border);
+	gap: var(--subtleforms-spacing-sm);
 }
 
 .subtleforms-review-item:last-child {
@@ -183,11 +249,30 @@
 .subtleforms-review-label {
 	font-weight: 600;
 	color: var(--subtleforms-color-text-light);
+	flex-shrink: 0;
 }
 
 .subtleforms-review-value {
 	font-weight: 500;
 	color: var(--subtleforms-color-text);
+	flex: 1;
+}
+
+.subtleforms-review-edit {
+	flex-shrink: 0;
+	padding: 0.25rem 0.75rem;
+	font-size: var(--subtleforms-font-size-sm);
+	color: var(--subtleforms-color-primary);
+	background: transparent;
+	border: 1px solid var(--subtleforms-color-primary);
+	border-radius: var(--subtleforms-radius-sm);
+	cursor: pointer;
+	transition: all var(--subtleforms-transition-base);
+}
+
+.subtleforms-review-edit:hover {
+	background: var(--subtleforms-color-primary);
+	color: white;
 }
 
 /* ===== Mobile Responsive ===== */
@@ -203,5 +288,13 @@
 	.subtleforms--type-conversational .subtleforms-button {
 		padding: 0.875rem 1.5rem;
 		font-size: 1rem;
+	}
+
+	.subtleforms-question-card {
+		min-height: 300px;
+	}
+
+	.subtleforms-dots {
+		gap: 0.375rem;
 	}
 }
