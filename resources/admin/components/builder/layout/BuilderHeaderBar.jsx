@@ -149,7 +149,7 @@ export function BuilderActions({
           }>
           {copyState === 'copied' ? (
             <>
-              <span>✓</span>
+              <Icon.Check size={14} />
               {__('Copied!', 'subtleforms')}
             </>
           ) : (

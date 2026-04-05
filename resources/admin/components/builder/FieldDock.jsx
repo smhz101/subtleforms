@@ -253,7 +253,7 @@ export default function FieldDock({
                             })()}
                           </span>
                           {isProLocked && (
-                            <span className='sf-field-dock__pro-lock-overlay'>🔒</span>
+                            <span className='sf-field-dock__pro-lock-overlay'><Icon.Lock size={10} /></span>
                           )}
                         </span>
                         <span className='sf-field-dock__field-label'>
@@ -347,7 +347,7 @@ export default function FieldDock({
                               })()}
                             </span>
                             {isProLocked && (
-                              <span className='sf-field-dock__pro-lock-overlay'>🔒</span>
+                              <span className='sf-field-dock__pro-lock-overlay'><Icon.Lock size={10} /></span>
                             )}
                           </span>
 

@@ -10,6 +10,10 @@ const ROOT_NODE_ID = 'root';
 
 const COLUMN_CONTAINER_SUFFIX = '_column_container';
 
+// Composite field types are single leaf nodes — any saved children from an old
+// group-style version are intentionally discarded when loading the schema.
+const COMPOSITE_FIELD_TYPES = new Set( [ 'name_group', 'address_group' ] );
+
 function isColumnContainerType(type) {
   return typeof type === 'string' && type.endsWith(COLUMN_CONTAINER_SUFFIX);
 }
@@ -32,7 +36,9 @@ function ensureArray(value, length) {
 
 function extractConfig(field) {
   const {
-    fields: childFields,
+    // Accept both 'children' (new canonical key) and 'fields' (legacy key for backward compat)
+    children: childrenArray,
+    fields: fieldsArray,
     columns: columnChildren,
     id,
     type,
@@ -40,6 +46,17 @@ function extractConfig(field) {
     parentId,
     ...config
   } = field;
+
+  // If 'fields' is a non-array object it is the composite sub-fields config, not a children
+  // array. Restore it into config so it is not silently discarded.
+  if (
+    fieldsArray !== undefined &&
+    fieldsArray !== null &&
+    ! Array.isArray( fieldsArray ) &&
+    typeof fieldsArray === 'object'
+  ) {
+    config.fields = fieldsArray;
+  }
 
   if (!config.label && typeof field.label === 'string') {
     config.label = field.label;
@@ -52,7 +69,8 @@ function extractConfig(field) {
   return {
     id: id || field.key || null,
     config,
-    childFields: Array.isArray(childFields) ? childFields : [],
+    // Prefer 'children' (canonical); fall back to 'fields' for schemas saved before this fix
+    childFields: Array.isArray(childrenArray) ? childrenArray : (Array.isArray(fieldsArray) ? fieldsArray : []),
     columnChildren: Array.isArray(columnChildren) ? columnChildren : [],
     type,
     kind: kind || 'input',
@@ -75,11 +93,40 @@ export function normalizeSchema(schema) {
     const {
       id: existingId,
       config,
-      childFields,
+      childFields: rawChildFields,
       columnChildren,
       type,
-      kind,
+      kind: rawKind,
     } = extractConfig(field);
+
+    // Migration guard: composite fields are always leaf nodes.
+    // Discard any children that may have been saved when these types were
+    // erroneously treated as group containers.
+    const isComposite = COMPOSITE_FIELD_TYPES.has( type );
+    const kind = isComposite ? 'input' : rawKind;
+    const childFields = isComposite ? [] : rawChildFields;
+
+    // Backward-compat: if this is a composite field loaded from an old schema
+    // that used flat enable_* flags, migrate them to the new `fields` structure.
+    if ( isComposite && ! config.fields ) {
+      if ( type === 'name_group' ) {
+        config.fields = {
+          first_name:  { enabled: true,  label: 'First Name',         placeholder: '' },
+          last_name:   { enabled: true,  label: 'Last Name',          placeholder: '' },
+          middle_name: { enabled: config.enable_middle_name === true, label: 'Middle Name', placeholder: '' },
+          suffix:      { enabled: config.enable_suffix      === true, label: 'Suffix',      placeholder: '' },
+        };
+      } else if ( type === 'address_group' ) {
+        config.fields = {
+          street:   { enabled: true,                              label: 'Street Address',        placeholder: '' },
+          street2:  { enabled: config.enable_street2  === true,  label: 'Street Address Line 2', placeholder: 'Apt, Suite, etc.' },
+          city:     { enabled: true,                              label: 'City',                  placeholder: '' },
+          state:    { enabled: config.enable_state    !== false,  label: 'State / Province',      placeholder: '' },
+          postal:   { enabled: config.enable_postal   !== false,  label: 'Postal Code',           placeholder: '' },
+          country:  { enabled: config.enable_country  !== false,  label: 'Country',               placeholder: '' },
+        };
+      }
+    }
 
     const nodeId = existingId || createNodeId();
 
@@ -189,7 +236,7 @@ function buildField(nodeId, tree) {
       return columnChildren.map((childId) => buildField(childId, tree)).filter(Boolean);
     });
   } else if (Array.isArray(node.children) && node.children.length) {
-    field.fields = node.children.map((childId) => buildField(childId, tree)).filter(Boolean);
+    field.children = node.children.map((childId) => buildField(childId, tree)).filter(Boolean);
   }
 
   return field;
@@ -257,6 +304,57 @@ export function createNodeFromDefinition(definition, existingKeys = new Set()) {
   }
 
   return node;
+}
+
+const GROUP_DEFAULT_CHILDREN = {
+  name_group: [
+    { label: __( 'First Name', 'subtleforms' ),  placeholder: __( 'First Name', 'subtleforms' ) },
+    { label: __( 'Middle Name', 'subtleforms' ), placeholder: __( 'Middle Name (optional)', 'subtleforms' ) },
+    { label: __( 'Last Name', 'subtleforms' ),   placeholder: __( 'Last Name', 'subtleforms' ) },
+  ],
+  address_group: [
+    { label: __( 'Street Address', 'subtleforms' ),        placeholder: __( 'Street Address', 'subtleforms' ) },
+    { label: __( 'Street Address Line 2', 'subtleforms' ), placeholder: __( 'Apt, Suite, etc.', 'subtleforms' ) },
+    { label: __( 'City', 'subtleforms' ),                  placeholder: __( 'City', 'subtleforms' ) },
+    { label: __( 'State / Province', 'subtleforms' ),      placeholder: __( 'State / Province', 'subtleforms' ) },
+    { label: __( 'Postal Code', 'subtleforms' ),           placeholder: __( 'Postal Code', 'subtleforms' ) },
+    { label: __( 'Country', 'subtleforms' ),               placeholder: __( 'Country', 'subtleforms' ) },
+  ],
+};
+
+/**
+ * Create default child nodes for a group field (name_group, address_group).
+ *
+ * @param {string} groupType  - Field type of the parent group ('name_group' | 'address_group')
+ * @param {string} parentId   - Node id of the parent group (will be corrected by addNodeToTree)
+ * @param {Set}    existingKeys - Mutable set of keys already in use; new keys are added in-place
+ * @returns {Array<Object>} Array of child node objects ready for addNodeToTree
+ */
+export function createGroupDefaultChildren( groupType, parentId, existingKeys ) {
+  const specs = GROUP_DEFAULT_CHILDREN[ groupType ] || [];
+  return specs.map( ( { label, placeholder } ) => {
+    const id  = createNodeId();
+    const key = createFieldKey( 'text', existingKeys );
+    existingKeys.add( key );
+    return {
+      id,
+      type: 'text',
+      kind: 'input',
+      parentId,
+      config: {
+        id,
+        type: 'text',
+        kind: 'input',
+        key,
+        label,
+        placeholder,
+        required:     false,
+        defaultValue: null,
+        visibility:   null,
+        validation:   [],
+      },
+    };
+  } );
 }
 
 export function addNodeToTree(tree, node, { parentId, columnIndex = null, position = null }) {

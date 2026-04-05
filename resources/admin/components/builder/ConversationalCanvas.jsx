@@ -84,7 +84,9 @@ export default function ConversationalCanvas() {
   if (totalFields === 0) {
     return (
       <div className='sf-conversational-canvas__empty'>
-        <div className='sf-conversational-canvas__empty-icon'>💬</div>
+        <div className='sf-conversational-canvas__empty-icon'>
+          <Icon.MessageCircle size={32} />
+        </div>
         <h3 className='sf-conversational-canvas__empty-title'>
           {__('No Questions Yet', 'subtleforms')}
         </h3>

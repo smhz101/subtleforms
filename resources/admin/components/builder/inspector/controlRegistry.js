@@ -11,6 +11,7 @@ import ToggleInspectorControl from './controls/ToggleInspectorControl';
 import SelectInspectorControl from './controls/SelectInspectorControl';
 import TextareaInspectorControl from './controls/TextareaInspectorControl';
 import OptionsInspectorControl from './controls/OptionsInspectorControl';
+import SubfieldInspectorControl from './controls/SubfieldInspectorControl';
 
 /**
  * Registry mapping PHP control type names to React components.
@@ -25,6 +26,7 @@ import OptionsInspectorControl from './controls/OptionsInspectorControl';
  *   select   → dropdown select (requires options: [{value, label}])
  *   radio    → select fallback (renders as dropdown)
  *   options  → add/remove/edit list of choice options
+ *   subfield → composite sub-field config (toggle + label + placeholder per sub-field)
  */
 const CONTROL_REGISTRY = {
 	text: TextInspectorControl,
@@ -36,6 +38,7 @@ const CONTROL_REGISTRY = {
 	select: SelectInspectorControl,
 	radio: SelectInspectorControl,
 	options: OptionsInspectorControl,
+	subfield: SubfieldInspectorControl,
 };
 
 /**

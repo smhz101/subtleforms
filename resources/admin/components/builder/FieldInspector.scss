@@ -27,7 +27,7 @@
 	overflow: auto; // CRITICAL: Inspector owns its vertical scroll
 	/* Custom scrollbar */
 	&::-webkit-scrollbar {
-		width: 8px;
+		width: 4px;
 	}
 	&::-webkit-scrollbar-track {
 		background: transparent;
@@ -74,11 +74,11 @@
 	}
 
 	&__title {
-		font-weight: 700;
+		font-weight: 600;
 		color: $sf-stone-900;
 		font-size: $font-size-xs;
 		text-transform: uppercase;
-		letter-spacing: 0.1em;
+		letter-spacing: 0.06em;
 	}
 
 	&__close-button {
@@ -99,8 +99,7 @@
 	}
 
 	&__empty {
-		padding: $space-8 $space-6;
-		text-align: center;
+			padding: $space-4 $space-3;
 	}
 
 	&__empty-title {
@@ -148,7 +147,7 @@
 
 	&__tab-warning-indicator {
 		display: inline-block;
-		background-color: $sf-lime-500;
+			background-color: $sf-blue-500;
 		border-radius: $radius-full;
 		width: 0.5rem;
 		height: 0.5rem;
@@ -166,14 +165,14 @@
 	}
 
 	&__tab-content {
-		padding: $space-4 $space-3;
-		animation: sf-inspector-tab-in 150ms ease-out;
+			padding: $space-3;
+			animation: sf-inspector-tab-in 150ms ease-out;
 
-		/* Form controls spacing */
-		> * + * {
-			margin-top: $space-4;
+			/* Form controls spacing */
+			> * + * {
+				margin-top: $space-3;
+			}
 		}
-	}
 
 	&__notice-paragraph {
 		margin: 0;
@@ -184,9 +183,8 @@
 	}
 
 	&__options-section {
-		margin-top: $space-5;
-		padding: $space-4;
-		background-color: white;
+			margin-top: $space-4;
+			padding: $space-3;
 		border-radius: $radius-lg;
 		border: 1px solid $sf-stone-200;
 		box-shadow: $shadow-xs;

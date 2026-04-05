@@ -82,6 +82,9 @@ function ControlRenderer( { ctrl, field, onUpdate, isReadOnly } ) {
 	if ( ctrl.type === 'textarea' ) {
 		if ( ctrl.rows !== undefined ) props.rows = ctrl.rows;
 	}
+	if ( ctrl.type === 'subfield' ) {
+		props.subfields = Array.isArray( ctrl.subfields ) ? ctrl.subfields : [];
+	}
 
 	return <ControlComponent { ...props } />;
 }

@@ -93,10 +93,9 @@ final class FieldValidator {
 	private function extractRequiredFields( array $fields, array &$required = array() ): array {
 		foreach ( $fields as $field ) {
 			$type   = $field['type'] ?? '';
-			$config = $field['config'] ?? array();
 
 			// Skip layout and system types — they do not accept user input and cannot be required
-			if ( ! in_array( $type, self::NON_INPUT_TYPES, true ) && ! empty( $config['required'] ) ) {
+			if ( ! in_array( $type, self::NON_INPUT_TYPES, true ) && ! empty( $field['required'] ) ) {
 				$required[] = $field['key'];
 			}
 
@@ -197,8 +196,7 @@ final class FieldValidator {
 			return null;
 		}
 
-		$config    = $field['config'] ?? array();
-		$maxLength = isset( $config['maxLength'] ) ? intval( $config['maxLength'] ) : null;
+		$maxLength = isset( $field['maxLength'] ) ? intval( $field['maxLength'] ) : null;
 
 		if ( $maxLength !== null && $maxLength > 0 && is_string( $value ) && mb_strlen( $value ) > $maxLength ) {
 			return sprintf( 'Must be %d characters or fewer.', $maxLength );
@@ -219,18 +217,17 @@ final class FieldValidator {
 			return null;
 		}
 
-		$config = $field['config'] ?? array();
 		$float  = (float) $value;
 
-		if ( isset( $config['min'] ) && $config['min'] !== null && $config['min'] !== '' ) {
-			$min = (float) $config['min'];
+		if ( isset( $field['min'] ) && $field['min'] !== null && $field['min'] !== '' ) {
+			$min = (float) $field['min'];
 			if ( $float < $min ) {
 				return sprintf( 'Must be at least %s.', $this->formatNumber( $min ) );
 			}
 		}
 
-		if ( isset( $config['max'] ) && $config['max'] !== null && $config['max'] !== '' ) {
-			$max = (float) $config['max'];
+		if ( isset( $field['max'] ) && $field['max'] !== null && $field['max'] !== '' ) {
+			$max = (float) $field['max'];
 			if ( $float > $max ) {
 				return sprintf( 'Cannot exceed %s.', $this->formatNumber( $max ) );
 			}

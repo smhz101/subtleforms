@@ -15,13 +15,12 @@
 	// White surface where fields are rendered
 	&__surface {
 		width: 100%;
-		max-width: 960px;
+		max-width: 640px;
 		background: var(--sf-surface);
-		border-radius: 4px;
-		padding: 1.75rem; // Reduced from 2.5rem for better density
+		border-radius: 6px;
+		padding: 1.5rem;
 		min-height: 600px;
 	}
-
 	// Toolbar above the field list
 	&__toolbar {
 		display: flex;

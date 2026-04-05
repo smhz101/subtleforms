@@ -1,6 +1,7 @@
 import { Button, TabPanel, Notice } from '@wordpress/components';
 import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import Icon from '../ui/Icon';
 import ConditionEditor from './ConditionEditor';
 import { useBuilder } from './context/BuilderContext';
 import { useConfig } from './context/ConfigContext';
@@ -16,7 +17,7 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
 
   const selectedFieldValidationMessages = selectedId
     ? (validationErrors || [])
-        .filter((v) => v.fieldKey === field?.config?.key)
+        .filter((v) => v.fieldKey === field?.key)
         .map((v) => v.message)
     : [];
 
@@ -160,7 +161,7 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
                       />
                       {smartHint && (
                         <div className='sf-field-inspector__smart-hint'>
-                          <span aria-hidden='true'>💡</span>
+                          <Icon.Lightbulb size={14} aria-hidden='true' />
                           <p>{smartHint}</p>
                         </div>
                       )}

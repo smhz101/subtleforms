@@ -14,6 +14,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { useBuilder } from './context/BuilderContext';
 import FieldRenderer from './FieldRenderer';
 import ContainerRenderer from './ContainerRenderer';
+import GroupRenderer from './GroupRenderer';
 import ColumnDropZone from './ColumnDropZone';
 import FieldChrome from './FieldChrome';
 import StepCanvas from './StepCanvas';
@@ -467,6 +468,38 @@ export default function FormBuilder() {
     }
 
     const field = nodeToField(tree, nodeId);
+
+    // Group fields (kind === 'group') are rendered as titled containers with fixed children.
+    // This check must come BEFORE the generic isContainerNode check because group nodes
+    // also have node.children = [] (making Array.isArray(node.children) true).
+    if (node.kind === 'group') {
+      const childIds = node.children || [];
+      const parentColumnIndex = isColumnContainer(tree.nodes[parentId]) ? columnIndex : null;
+      return (
+        <SortableWrapper
+          key={nodeId}
+          nodeId={nodeId}
+          parentId={parentId}
+          columnIndex={parentColumnIndex}
+          position={position}>
+          {({ setNodeRef, style, dragHandleRef, dragHandleListeners }) => (
+            <div ref={setNodeRef} style={style}>
+              <GroupRenderer
+                node={node}
+                field={field}
+                isSelected={selectedId === nodeId}
+                onSelect={() => setSelectedId(nodeId)}
+                onDelete={() => onDelete(nodeId)}
+                dragHandleRef={dragHandleRef}
+                dragHandleListeners={dragHandleListeners}>
+                {childIds.map((childId, i) => renderNode(childId, nodeId, null, i))}
+              </GroupRenderer>
+            </div>
+          )}
+        </SortableWrapper>
+      );
+    }
+
     // Treat both column-containers AND any node that HAS a children array (even empty)
     // as container nodes so they render with drop zones immediately after being added.
     const isContainerNode =

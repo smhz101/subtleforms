@@ -67,6 +67,16 @@ export const FIELD_ICON_MAP = {
   payment_card: Icon.CreditCard,
   payment_product: Icon.ShoppingCart,
   payment_currency: Icon.DollarSign,
+  payment_coupon: Icon.Tag,
+  payment_summary: Icon.FileText,
+  payment_hidden_price: Icon.Lock,
+
+  // Advanced
+  rating: Icon.Star,
+  range_slider: Icon.Sliders,
+  checkbox_grid: Icon.LayoutGrid,
+  action_hook: Icon.Zap,
+  save_resume: Icon.Clipboard,
 };
 
 // ── UI element icons ──────────────────────────────────────────────────────────

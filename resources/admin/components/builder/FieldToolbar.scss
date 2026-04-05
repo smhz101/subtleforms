@@ -5,10 +5,8 @@
 
 .sf-field-toolbar {
 	position: absolute;
-	top: 0;
-	right: 0;
-	margin-top: -1.5rem;
-	margin-right: 0.5rem;
+	top: 6px;
+	right: 6px;
 	display: flex;
 	align-items: center;
 	gap: 0.25rem;
@@ -24,7 +22,7 @@
 
 	&--hidden {
 		opacity: 0;
-		transform: translateY(0.25rem) scale(0.98);
+		transform: translateY(-2px) scale(0.98);
 		pointer-events: none;
 	}
 

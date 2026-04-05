@@ -66,7 +66,7 @@ export default function FieldList({
                 onDuplicate={onDuplicate}
                 onDelete={onDelete}>
                 <FieldList
-                  fields={field.fields || []}
+                  fields={field.children || field.fields || []}
                   parentPath={currentPath}
                   selectedIndex={selectedIndex}
                   hoveredIndex={hoveredIndex}
@@ -82,13 +82,13 @@ export default function FieldList({
                 {/* Add Button Inside Container (at end) */}
                 <div className='sf-field-list__container-add-button'>
                   <InlineAddButton
-                    index={(field.fields || []).length}
+                    index={(field.children || field.fields || []).length}
                     isHovered={true}
                     showFieldPicker={
                       showFieldPicker &&
                       isPathEqual(showFieldPicker.position, [
                         ...currentPath,
-                        (field.fields || []).length,
+                        (field.children || field.fields || []).length,
                       ])
                     }
                     onHover={() => {}}
@@ -96,7 +96,7 @@ export default function FieldList({
                     onClick={() =>
                       onShowPicker([
                         ...currentPath,
-                        (field.fields || []).length,
+                        (field.children || field.fields || []).length,
                       ])
                     }
                     anchorRef={null}

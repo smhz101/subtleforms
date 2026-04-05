@@ -336,6 +336,49 @@ export default function FieldRenderer({
     );
   }
 
+  // Plan A group fields — name_group / address_group with real child nodes.
+  // Each child renders as an individual text input; its onChange writes to
+  // "{parentPath}.{childKey}" so values are stored nested under the parent key:
+  //   values.name_group_abc = { text_1: "John", text_3: "Doe" }
+  // At submit time getIn(values, "name_group_abc") returns the full object,
+  // yielding the required nested payload: { name_group_abc: { text_1: "John" } }.
+  // Old forms without .children fall through to the legacy renderInput switch.
+  if (
+    (field.type === 'name_group' || field.type === 'address_group' || field.kind === 'group') &&
+    Array.isArray(field.children) && field.children.length > 0
+  ) {
+    return (
+      <fieldset className={`subtleforms-field subtleforms-field-${field.type} subtleforms-group-field`}>
+        <legend className='subtleforms-field-label'>
+          {label}
+          {required && (
+            <span className='subtleforms-required' aria-label=', required'>*</span>
+          )}
+        </legend>
+        {field.children.map((child) => {
+          const childKey = child.config?.key || child.key;
+          const childPath = resolvedPath ? `${resolvedPath}.${childKey}` : childKey;
+          return (
+            <FieldRenderer
+              key={childKey}
+              field={child}
+              fieldPath={childPath}
+              values={values}
+              onChange={onChange}
+              errors={errors}
+              hiddenFields={hiddenFields}
+            />
+          );
+        })}
+        {error && (
+          <div className='subtleforms-field-error' role='alert' aria-live='assertive'>
+            {error}
+          </div>
+        )}
+      </fieldset>
+    );
+  }
+
   const value = getIn(values, resolvedPath, '');
 
   // Handle reCAPTCHA v3 separately (invisible, no label/wrapper needed)

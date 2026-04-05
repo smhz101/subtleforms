@@ -26,6 +26,7 @@ import {
   addNodeToTree,
   removeNodeFromParent,
   isColumnContainer,
+  createGroupDefaultChildren,
 } from '../../utils/schemaTree';
 
 const ROOT_NODE_ID = 'root';
@@ -66,11 +67,20 @@ export function insertNode(tree, command) {
   const newNode = createNodeFromDefinition(definition, existingKeys);
 
   // Add to tree immutably
-  const updatedTree = addNodeToTree(tree, newNode, {
+  let updatedTree = addNodeToTree(tree, newNode, {
     parentId: effectiveParentId,
     columnIndex,
     position,
   });
+
+  // For group fields (kind === 'group', acceptsChildren), populate default children
+  if ( definition.kind === 'group' && definition.acceptsChildren ) {
+    const groupChildKeys = collectExistingKeys( updatedTree );
+    const defaultChildren = createGroupDefaultChildren( definition.type, newNode.id, groupChildKeys );
+    defaultChildren.forEach( ( childNode ) => {
+      updatedTree = addNodeToTree( updatedTree, childNode, { parentId: newNode.id } );
+    } );
+  }
 
   // Validate tree integrity after mutation
   if (process.env.NODE_ENV === 'development') {

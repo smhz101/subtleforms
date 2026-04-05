@@ -58,6 +58,12 @@ export function collectLeafInputPaths(fields) {
           leafPaths.push(path);
           console.log('[SubtleForms] Added leaf path:', path);
         }
+        // Leaf fields own their value as a single node — do NOT recurse into children.
+        // This is critical for Plan A group fields (name_group / address_group) which
+        // now have child text nodes; without the continue those child keys would also be
+        // pushed, causing the group key AND individual child keys to both appear in the
+        // payload (flat leakage).
+        continue;
       }
 
       // Support both children and fields properties for backward compatibility
