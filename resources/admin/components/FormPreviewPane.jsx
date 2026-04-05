@@ -27,6 +27,16 @@ export default function FormPreviewPane({ schema, isDirty = false }) {
   const safeStepIndex = Math.min(activeStepIndex, Math.max(0, steps.length - 1));
   const activeStep = steps[safeStepIndex] || null;
 
+  // Conversational: visible fields (exclude hidden)
+  const conversationalFields = isConversational
+    ? schema.fields.filter((f) => f.type !== 'hidden')
+    : [];
+  const safeConvIndex = Math.min(
+    activeStepIndex,
+    Math.max(0, conversationalFields.length - 1)
+  );
+  const activeConvField = conversationalFields[safeConvIndex] || null;
+
   const renderField = (field, index) => {
     const config = field.config || {};
     const label = config.label || field.label || field.key;
@@ -613,21 +623,64 @@ export default function FormPreviewPane({ schema, isDirty = false }) {
         )}
       </div>
 
-      {/* Conversational notice */}
-      {isConversational && (
-        <div className='sf-form-preview-modal__conversational-notice'>
-          <p>
-            {__(
-              'Conversational forms display one question at a time. This preview shows all fields together.',
-              'subtleforms'
-            )}
-          </p>
-        </div>
-      )}
-
       {/* Form Fields */}
       <div className='sf-form-preview-modal__fields'>
-        {isMultiStep && steps.length > 0 ? (
+        {isConversational && conversationalFields.length > 0 ? (
+          <>
+            {/* Progress bar */}
+            <div className='sf-form-preview-conv__progress'>
+              <div
+                className='sf-form-preview-conv__progress-bar'
+                style={{
+                  width: `${
+                    conversationalFields.length > 1
+                      ? Math.round(
+                          ((safeConvIndex + 1) / conversationalFields.length) *
+                            100
+                        )
+                      : 100
+                  }%`,
+                }}
+              />
+            </div>
+            <p className='sf-form-preview-conv__counter'>
+              {safeConvIndex + 1} / {conversationalFields.length}
+            </p>
+
+            {/* Single question */}
+            <div className='sf-form-preview-conv__question'>
+              {activeConvField && renderField(activeConvField, safeConvIndex)}
+            </div>
+
+            {/* Prev / Next */}
+            <div className='sf-form-preview-steps__footer'>
+              <Button
+                isSecondary
+                disabled={safeConvIndex === 0}
+                onClick={() =>
+                  setActiveStepIndex((i) => Math.max(0, i - 1))
+                }>
+                {__('Back', 'subtleforms')}
+              </Button>
+              {safeConvIndex < conversationalFields.length - 1 ? (
+                <Button
+                  isPrimary
+                  onClick={() =>
+                    setActiveStepIndex((i) =>
+                      Math.min(conversationalFields.length - 1, i + 1)
+                    )
+                  }>
+                  {__('Next →', 'subtleforms')}
+                </Button>
+              ) : (
+                <Button isPrimary disabled>
+                  {schema.metadata?.submit_label ||
+                    __('Submit', 'subtleforms')}
+                </Button>
+              )}
+            </div>
+          </>
+        ) : isMultiStep && steps.length > 0 ? (
           <>
             {/* Step tab indicators */}
             <div className='sf-form-preview-steps__nav'>
@@ -714,8 +767,8 @@ export default function FormPreviewPane({ schema, isDirty = false }) {
         )}
       </div>
 
-      {/* Submit Button — only for non-multi-step forms */}
-      {!isMultiStep && schema.fields.length > 0 && (
+      {/* Submit Button — only for regular (non-multi-step, non-conversational) forms */}
+      {!isMultiStep && !isConversational && schema.fields.length > 0 && (
         <div className='sf-form-preview-modal__submit-section'>
           <Button isPrimary disabled>
             {schema.metadata?.submit_label || __('Submit', 'subtleforms')}

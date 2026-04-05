@@ -203,6 +203,39 @@
 	}
 }
 
+// Conversational form one-at-a-time preview
+.sf-form-preview-conv {
+	&__progress {
+		height: 4px;
+		background: var(--sf-gray-200);
+		border-radius: 9999px;
+		margin-bottom: 0.75rem;
+		overflow: hidden;
+	}
+
+	&__progress-bar {
+		height: 100%;
+		background: var(--sf-blue-600);
+		border-radius: 9999px;
+		transition: width 0.3s ease;
+	}
+
+	&__counter {
+		font-size: 0.75rem;
+		color: var(--sf-gray-400);
+		text-align: right;
+		margin-bottom: 1.5rem;
+	}
+
+	&__question {
+		min-height: 6rem;
+
+		.sf-form-preview-field {
+			margin-bottom: 0;
+		}
+	}
+}
+
 .sf-form-preview-field {
 	margin-bottom: 1rem;
 
