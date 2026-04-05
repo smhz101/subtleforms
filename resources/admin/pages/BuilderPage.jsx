@@ -248,6 +248,17 @@ function FormBuilderInner({
     setCurrentFormId(formId ?? null);
   }, [formId]);
 
+  // Sync browser URL with the active formId so a page refresh re-opens the same form.
+  useEffect(() => {
+    if (formId) {
+      const url = new URL(window.location.href);
+      if (url.searchParams.get('form_id') !== String(formId)) {
+        url.searchParams.set('form_id', String(formId));
+        window.history.replaceState(null, '', url.toString());
+      }
+    }
+  }, [formId]);
+
   // ── New-form lifecycle ───────────────────────────────────────────────────
   // Track whether this form was just created via CreateFormModal and has never
   // been manually saved. If the user closes the builder without making any

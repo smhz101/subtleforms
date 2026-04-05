@@ -48,7 +48,18 @@ class FormTemplates {
 		 * @param array $templates Associative array of template definitions.
 		 * @since 1.5.0
 		 */
-		return apply_filters( 'subtleforms/templates', $templates );
+		$templates = apply_filters( 'subtleforms/templates', $templates );
+
+		// Merge Pro stubs for any Pro templates not already present (e.g. when
+		// subtleforms-pro is inactive). Stubs carry no schema/fields — they are
+		// displayed as locked "upgrade" preview cards in the template browser.
+		foreach ( self::get_pro_stubs() as $key => $stub ) {
+			if ( ! isset( $templates[ $key ] ) ) {
+				$templates[ $key ] = $stub;
+			}
+		}
+
+		return $templates;
 	}
 
 	/**
@@ -177,7 +188,7 @@ class FormTemplates {
 					array( 'id' => 'email',   'type' => 'email',    'label' => __( 'Email Address', 'subtleforms' ),'required' => true ),
 					array( 'id' => 'subject', 'type' => 'text',     'label' => __( 'Subject', 'subtleforms' ),      'required' => false ),
 					array( 'id' => 'message', 'type' => 'textarea', 'label' => __( 'Message', 'subtleforms' ),      'required' => true, 'rows' => 4 ),
-					array( 'id' => 'file',    'type' => 'file',     'label' => __( 'Attachment (optional)', 'subtleforms' ), 'required' => false ),
+					array( 'id' => 'file',    'type' => 'file_upload', 'label' => __( 'Attachment (optional)', 'subtleforms' ), 'required' => false ),
 				),
 				'actions' => array(
 					array( 'id' => 'save',  'type' => 'save',  'enabled' => true ),
@@ -503,6 +514,43 @@ class FormTemplates {
 					),
 				),
 			),
+		);
+	}
+
+	/**
+	 * Lightweight Pro template stubs shown as locked upgrade cards when
+	 * subtleforms-pro is not active. No schema or fields are included.
+	 *
+	 * @return array Associative array of stub template definitions.
+	 */
+	private static function get_pro_stubs(): array {
+		return array(
+			// ── Contact ───────────────────────────────────────────────────
+			'advanced_contact'        => array( 'id' => 'advanced_contact',        'name' => __( 'Advanced Contact Form', 'subtleforms' ),          'description' => __( 'Enhanced contact form with department routing and file attachment.', 'subtleforms' ),        'category' => 'contact',      'icon' => 'email-alt',           'is_pro' => true ),
+			'sales_inquiry'           => array( 'id' => 'sales_inquiry',           'name' => __( 'Sales Inquiry', 'subtleforms' ),                   'description' => __( 'Capture qualified sales leads with company size, budget, and timeline.', 'subtleforms' ),    'category' => 'contact',      'icon' => 'chart-line',          'is_pro' => true ),
+			'partnership_request'     => array( 'id' => 'partnership_request',     'name' => __( 'Partnership Request', 'subtleforms' ),             'description' => __( 'Structured inquiry form for potential business partnerships.', 'subtleforms' ),              'category' => 'contact',      'icon' => 'groups',              'is_pro' => true ),
+			'press_inquiry'           => array( 'id' => 'press_inquiry',           'name' => __( 'Press Inquiry', 'subtleforms' ),                   'description' => __( 'Media and press contact form for journalists and publications.', 'subtleforms' ),             'category' => 'contact',      'icon' => 'megaphone',           'is_pro' => true ),
+			// ── Registration ──────────────────────────────────────────────
+			'event_registration'      => array( 'id' => 'event_registration',      'name' => __( 'Event Registration', 'subtleforms' ),              'description' => __( 'Professional event registration with attendee details and ticket selection.', 'subtleforms' ), 'category' => 'registration', 'icon' => 'calendar-alt',        'is_pro' => true ),
+			'webinar_signup'          => array( 'id' => 'webinar_signup',          'name' => __( 'Webinar Signup', 'subtleforms' ),                  'description' => __( 'Register attendees for online events and webinars with session selection.', 'subtleforms' ),  'category' => 'registration', 'icon' => 'video-alt2',          'is_pro' => true ),
+			'membership_application'  => array( 'id' => 'membership_application',  'name' => __( 'Membership Application', 'subtleforms' ),          'description' => __( 'Comprehensive membership application with plan selection and terms.', 'subtleforms' ),        'category' => 'registration', 'icon' => 'id-alt',              'is_pro' => true ),
+			'course_enrollment'       => array( 'id' => 'course_enrollment',       'name' => __( 'Course Enrollment', 'subtleforms' ),               'description' => __( 'Student enrollment form with course selection and prior experience.', 'subtleforms' ),        'category' => 'registration', 'icon' => 'welcome-learn-more',  'is_pro' => true ),
+			'volunteer_signup'        => array( 'id' => 'volunteer_signup',        'name' => __( 'Volunteer Signup', 'subtleforms' ),                'description' => __( 'Recruit volunteers with availability and skills assessment.', 'subtleforms' ),               'category' => 'registration', 'icon' => 'heart',               'is_pro' => true ),
+			'conference_registration' => array( 'id' => 'conference_registration', 'name' => __( 'Conference Registration', 'subtleforms' ),         'description' => __( 'Multi-day conference registration with session and workshop selection.', 'subtleforms' ),    'category' => 'registration', 'icon' => 'building',            'is_pro' => true ),
+			// ── Feedback ──────────────────────────────────────────────────
+			'survey_nps'              => array( 'id' => 'survey_nps',              'name' => __( 'NPS Survey', 'subtleforms' ),                      'description' => __( 'Net Promoter Score survey to measure customer loyalty and satisfaction.', 'subtleforms' ),    'category' => 'feedback',     'icon' => 'star-filled',         'is_pro' => true ),
+			'employee_satisfaction'   => array( 'id' => 'employee_satisfaction',   'name' => __( 'Employee Satisfaction Survey', 'subtleforms' ),    'description' => __( 'Measure internal team morale, engagement, and workplace satisfaction.', 'subtleforms' ),    'category' => 'feedback',     'icon' => 'chart-bar',           'is_pro' => true ),
+			'onboarding_checkin'      => array( 'id' => 'onboarding_checkin',      'name' => __( 'Onboarding Check-in', 'subtleforms' ),             'description' => __( 'New employee onboarding feedback form for HR teams.', 'subtleforms' ),                      'category' => 'feedback',     'icon' => 'welcome-add-page',    'is_pro' => true ),
+			// ── Support ───────────────────────────────────────────────────
+			'support_ticket'          => array( 'id' => 'support_ticket',          'name' => __( 'Support Ticket', 'subtleforms' ),                  'description' => __( 'Professional support ticket form with priority, category, and file attachment.', 'subtleforms' ), 'category' => 'support',   'icon' => 'sos',                 'is_pro' => true ),
+			'feature_request'         => array( 'id' => 'feature_request',         'name' => __( 'Feature Request', 'subtleforms' ),                 'description' => __( 'Structured form for collecting and prioritising product feature ideas.', 'subtleforms' ),    'category' => 'support',      'icon' => 'lightbulb',           'is_pro' => true ),
+			// ── Payment / Booking ─────────────────────────────────────────
+			'payment_form'            => array( 'id' => 'payment_form',            'name' => __( 'Payment Form', 'subtleforms' ),                    'description' => __( 'Secure payment collection with billing details and amount selection.', 'subtleforms' ),      'category' => 'payment',      'icon' => 'money-alt',           'is_pro' => true ),
+			'donation_form'           => array( 'id' => 'donation_form',           'name' => __( 'Donation Form', 'subtleforms' ),                   'description' => __( 'Charitable donation form with custom amount and dedication options.', 'subtleforms' ),       'category' => 'payment',      'icon' => 'heart',               'is_pro' => true ),
+			'booking_form'            => array( 'id' => 'booking_form',            'name' => __( 'Appointment Booking', 'subtleforms' ),             'description' => __( 'Schedule appointments with date/time selection and service type.', 'subtleforms' ),         'category' => 'registration', 'icon' => 'clock',               'is_pro' => true ),
+			// ── HR / Applications ─────────────────────────────────────────
+			'job_application'         => array( 'id' => 'job_application',         'name' => __( 'Job Application', 'subtleforms' ),                 'description' => __( 'Comprehensive job application with resume upload and position selection.', 'subtleforms' ),  'category' => 'registration', 'icon' => 'businessman',         'is_pro' => true ),
+			'vendor_application'      => array( 'id' => 'vendor_application',      'name' => __( 'Vendor Application', 'subtleforms' ),              'description' => __( 'Supplier and vendor onboarding application with compliance details.', 'subtleforms' ),      'category' => 'registration', 'icon' => 'store',               'is_pro' => true ),
 		);
 	}
 }

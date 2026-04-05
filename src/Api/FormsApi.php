@@ -648,6 +648,15 @@ final class FormsApi {
 				$schema['fields'] = array();
 			}
 
+			// Derive missing 'key' from 'id' so SchemaValidator passes for templates
+			// that define fields with 'id' only (e.g. all built-in templates).
+			foreach ( $schema['fields'] as &$_field ) {
+				if ( is_array( $_field ) && ( empty( $_field['key'] ) || ! is_string( $_field['key'] ) ) && ! empty( $_field['id'] ) ) {
+					$_field['key'] = preg_replace( '/[^a-zA-Z0-9_]/', '_', (string) $_field['id'] );
+				}
+			}
+			unset( $_field );
+
 			try {
 				$this->formsRepo->saveSchemaVersion( $id, $schema, true );
 			} catch ( \InvalidArgumentException $e ) {

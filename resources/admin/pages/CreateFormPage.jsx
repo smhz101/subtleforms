@@ -84,6 +84,12 @@ export default function CreateFormPage() {
     return filtered;
   }, [allTemplates, searchQuery, selectedCategory]);
 
+  const categoryCounts = useMemo(() => {
+    const counts = { all: allTemplates.length };
+    allTemplates.forEach(t => { counts[t.category] = (counts[t.category] || 0) + 1; });
+    return counts;
+  }, [allTemplates]);
+
   // ── Template selection handlers ──────────────────────────────────────────────
   const applyTemplateType = (tpl) => {
     const type = tpl.schema?.metadata?.type;
@@ -154,6 +160,9 @@ export default function CreateFormPage() {
       const result = await createFormMutation.mutateAsync({ title: safeTitle, schema: schemaToSend });
       if (result?.id) {
         try { sessionStorage.setItem('sf_new_form_id', String(result.id)); } catch (_) {}
+        const newUrl = new URL(window.location.href);
+        newUrl.searchParams.set('form_id', String(result.id));
+        window.history.replaceState(null, '', newUrl.toString());
         navigate('/forms/' + result.id);
       }
     } catch (error) {
@@ -223,15 +232,19 @@ export default function CreateFormPage() {
               <div className='sf-cfp-tbrowser__layout'>
 
                 <aside className='sf-cfp-tbrowser__sidebar' aria-label={__('Template categories', 'subtleforms')}>
-                  {TEMPLATE_CATEGORIES.map(cat => (
-                    <button
-                      key={cat.id}
-                      type='button'
-                      onClick={() => setSelectedCategory(cat.id)}
-                      className={clsx('sf-cfp-tbrowser__cat-btn', selectedCategory === cat.id && 'is-active')}>
-                      {cat.label}
-                    </button>
-                  ))}
+                  {TEMPLATE_CATEGORIES.map(cat => {
+                    const count = categoryCounts[cat.id] ?? 0;
+                    return (
+                      <button
+                        key={cat.id}
+                        type='button'
+                        onClick={() => setSelectedCategory(cat.id)}
+                        className={clsx('sf-cfp-tbrowser__cat-btn', selectedCategory === cat.id && 'is-active')}>
+                        {cat.label}
+                        {count > 0 && <span className='sf-cfp-tbrowser__cat-count'>{count}</span>}
+                      </button>
+                    );
+                  })}
                 </aside>
 
                 <div className='sf-cfp-tbrowser__grid-wrap'>
