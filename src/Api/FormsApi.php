@@ -577,6 +577,29 @@ final class FormsApi {
 	}
 
 	/**
+	 * Recursively derive missing 'key' from 'id' for all field definitions.
+	 *
+	 * Handles nested fields inside step/section containers for multi-step forms.
+	 *
+	 * @param array $fields Fields array (modified in place via reference).
+	 */
+	private function deriveFieldKeys( array &$fields ): void {
+		foreach ( $fields as &$_field ) {
+			if ( ! is_array( $_field ) ) {
+				continue;
+			}
+			if ( ( empty( $_field['key'] ) || ! is_string( $_field['key'] ) ) && ! empty( $_field['id'] ) ) {
+				$_field['key'] = preg_replace( '/[^a-zA-Z0-9_]/', '_', (string) $_field['id'] );
+			}
+			// Recurse into step/section container nested fields
+			if ( ! empty( $_field['fields'] ) && is_array( $_field['fields'] ) ) {
+				$this->deriveFieldKeys( $_field['fields'] );
+			}
+		}
+		unset( $_field );
+	}
+
+	/**
 	 * Create a new form.
 	 */
 	public function create_form( WP_REST_Request $request ): WP_REST_Response {
@@ -650,12 +673,8 @@ final class FormsApi {
 
 			// Derive missing 'key' from 'id' so SchemaValidator passes for templates
 			// that define fields with 'id' only (e.g. all built-in templates).
-			foreach ( $schema['fields'] as &$_field ) {
-				if ( is_array( $_field ) && ( empty( $_field['key'] ) || ! is_string( $_field['key'] ) ) && ! empty( $_field['id'] ) ) {
-					$_field['key'] = preg_replace( '/[^a-zA-Z0-9_]/', '_', (string) $_field['id'] );
-				}
-			}
-			unset( $_field );
+			// Recurse into step/section container 'fields' arrays for multi-step forms.
+			$this->deriveFieldKeys( $schema['fields'] );
 
 			try {
 				$this->formsRepo->saveSchemaVersion( $id, $schema, true );

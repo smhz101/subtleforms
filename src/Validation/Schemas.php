@@ -289,13 +289,16 @@ class Schemas {
 
 			// FormSchema
 			'FormSchema' => array(
-				'fields'   => 'optional|array|list:FieldDefinition',
-				'actions'  => 'optional|array|list:ActionConfig',
-				'metadata' => 'optional|object|map:FormMetadata',
+				'fields'         => 'optional|array|list:FieldDefinition',
+				'actions'        => 'optional|array|list:ActionConfig',
+				'metadata'       => 'optional|object|map:FormMetadata',
+				'schema_version' => 'optional|int|min:1',
 			),
 
 			// FieldDefinition
 			// Accepts both legacy (name) and builder tree node (key/id/kind) formats.
+			// Also accepts step/section container nodes which carry title, description,
+			// and a nested fields array (handled recursively).
 			// Advanced validation (min, max, pattern, minLength, maxLength) not supported yet (intentionally disabled).
 			'FieldDefinition' => array(
 				'type'         => 'optional|string|max:100',
@@ -304,6 +307,8 @@ class Schemas {
 				'id'           => 'optional|string|max:100',
 				'kind'         => 'optional|string|max:50',
 				'label'        => 'optional|string|max:255',
+				'title'        => 'optional|string|max:255',
+				'description'  => 'optional|string|max:500',
 				'placeholder'  => 'optional|string|max:255',
 				'required'     => 'optional|bool|default:false',
 				'options'      => 'optional|array',
@@ -312,6 +317,8 @@ class Schemas {
 				'config'       => 'optional|object',
 				'children'     => 'optional|array',
 				'columns'      => 'optional|array',
+				// Nested fields for step/section containers (multi-step forms)
+				'fields'       => 'optional|array|list:FieldDefinition',
 			),
 
 			// ActionConfig
@@ -360,11 +367,16 @@ class Schemas {
 
 			// FormMetadata
 			'FormMetadata' => array(
-			'type'        => 'optional|in:regular,contact,newsletter,survey,order,payment,registration,multi-step,sectioned,conversational',
-				'version'     => 'optional|int|min:1',
-				'description' => 'optional|string|max:500',
-				'tags'        => 'optional|array',
-				'payment'     => 'optional|object|map:PaymentConfig',
+				'type'         => 'optional|in:regular,contact,newsletter,survey,order,payment,registration,multi-step,sectioned,conversational',
+				'name'         => 'optional|string|max:100',
+				'title'        => 'optional|string|max:255',
+				'description'  => 'optional|string|max:500',
+				'template'     => 'optional|string|max:100',
+				'version'      => 'optional|int|min:1',
+				'tags'         => 'optional|array',
+				'uses_pro'     => 'optional|bool',
+				'pro_features' => 'optional|array',
+				'payment'      => 'optional|object|map:PaymentConfig',
 			),
 
 			// PaymentConfig (Phase A2-P3: at_least_one for flexible pricing)
