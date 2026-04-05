@@ -447,6 +447,8 @@ function renderInput(
     case 'url':
     case 'number':
     case 'phone':
+    case 'tel':
+    case 'date':
       return (
         <input
           id={inputId}
@@ -920,6 +922,63 @@ function renderInput(
         </div>
       );
 
+    case 'file_upload':
+    case 'image_upload':
+      return (
+        <input
+          id={inputId}
+          type='file'
+          className='subtleforms-input subtleforms-file-input'
+          accept={
+            field.type === 'image_upload'
+              ? 'image/*'
+              : field.config?.allowedExtensions
+              ? field.config.allowedExtensions
+                  .map((ext) => `.${ext}`)
+                  .join(',')
+              : undefined
+          }
+          multiple={field.config?.multiple === true}
+          onChange={(e) => onChange(e.target.files[0] || null)}
+          aria-required={required}
+          aria-invalid={!!error}
+          aria-describedby={error ? `${inputId}-error` : undefined}
+        />
+      );
+
+    case 'rating': {
+      const ratingMax = field.config?.max || 5;
+      const ratingValue = parseInt(value, 10) || 0;
+      return (
+        <div className='subtleforms-rating' role='radiogroup'>
+          {Array.from({ length: ratingMax }, (_, i) => {
+            const star = i + 1;
+            return (
+              <label key={star} className='subtleforms-rating__star'>
+                <input
+                  type='radio'
+                  name={field.config?.key || field.key || inputId}
+                  value={star}
+                  checked={ratingValue === star}
+                  onChange={() => onChange(star)}
+                  className='subtleforms-sr-only'
+                />
+                <span
+                  aria-hidden='true'
+                  style={{
+                    cursor: 'pointer',
+                    fontSize: '1.5em',
+                    color: ratingValue >= star ? '#f59e0b' : '#d1d5db',
+                  }}>
+                  &#9733;
+                </span>
+              </label>
+            );
+          })}
+        </div>
+      );
+    }
+
     default:
       return (
         <div className='subtleforms-unsupported'>
@@ -938,7 +997,10 @@ function getInputType(fieldType) {
     case 'number':
       return 'number';
     case 'phone':
+    case 'tel':
       return 'tel';
+    case 'date':
+      return 'date';
     default:
       return 'text';
   }
