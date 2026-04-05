@@ -594,7 +594,7 @@ export default function useBuilderOrchestrator( {
 		const containerTypes = new Set( [ 'step', 'section', 'column', 'row', 'fieldset' ] );
 		for ( const field of fields ) {
 			if ( containerTypes.has( field.type ) ) {
-				if ( hasLeafFields( field.children ) ) {
+					if ( hasLeafFields( field.children || field.fields ) ) {
 					return true;
 				}
 			} else {

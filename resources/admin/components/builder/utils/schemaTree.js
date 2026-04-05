@@ -195,14 +195,14 @@ export function normalizeSchema(schema) {
       const columns = ensureArray(seedColumns, node.columns?.length || 0);
       columns.forEach((columnFields, idx) => {
         columnFields.forEach((childField) => {
-          const childId = register(childField, nodeId, idx);
-          node.columns[idx].push(childId);
+          // register() internally calls parent.columns[idx].push(nodeId) — no outer push needed.
+          register(childField, nodeId, idx);
         });
       });
     } else if (Array.isArray(childFields) && childFields.length) {
       childFields.forEach((childField) => {
-        const childId = register(childField, nodeId, null);
-        node.children.push(childId);
+        // register() internally calls parent.children.push(nodeId) — no outer push needed.
+        register(childField, nodeId, null);
       });
     }
 
