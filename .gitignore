@@ -69,6 +69,7 @@ temp/
 
 # Internal planning docs (not shipped)
 _plan/
+CODEBASE.md
 
 # Composer
 composer.phar
