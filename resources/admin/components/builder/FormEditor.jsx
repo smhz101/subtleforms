@@ -89,8 +89,9 @@ export default function FormEditor({
   const handleSelectStep = useCallback(
     (stepId) => {
       setSelectedStepId(stepId);
+      setSelectedId(stepId);
     },
-    [setSelectedStepId]
+    [setSelectedStepId, setSelectedId]
   );
 
   return (
