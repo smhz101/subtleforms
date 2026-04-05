@@ -19,8 +19,8 @@ const NON_INPUT_TYPES = new Set([
 // All field types recognized by this renderer — unknown types get legacy fallback
 const KNOWN_TYPES = new Set([
   ...NON_INPUT_TYPES,
-  'text', 'email', 'phone', 'url', 'number', 'textarea', 'checkbox',
-  'radio', 'multiple_choice', 'dropdown', 'date', 'time', 'datetime',
+  'text', 'email', 'phone', 'tel', 'url', 'number', 'textarea', 'checkbox',
+  'radio', 'multiple_choice', 'select', 'dropdown', 'date', 'time', 'datetime',
   'country', 'chained_select', 'password', 'rating', 'range_slider',
   'color_picker', 'signature', 'image_upload', 'file_upload',
   'name_group', 'address_group',
@@ -181,6 +181,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       {(type === 'text' ||
         type === 'email' ||
         type === 'phone' ||
+        type === 'tel' ||
         type === 'url') && (
         <input
           type={type === 'email' ? 'email' : type === 'url' ? 'url' : 'text'}
@@ -263,7 +264,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
-      {type === 'dropdown' && options && (
+      {(type === 'dropdown' || type === 'select') && options && (
         <select
           className={selectClass}
           disabled
