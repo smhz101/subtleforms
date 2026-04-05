@@ -8,7 +8,6 @@
 
 namespace SubtleForms;
 
-use SubtleForms\Licensing\SubscriptionManager;
 use SubtleForms\Support\Capabilities;
 use SubtleForms\Support\FeatureGate;
 use SubtleForms\Support\Logger;
@@ -135,10 +134,9 @@ final class Container {
 	 */
 	public function bootstrap(): void {
 		// Support services
-		$this->singleton( SubscriptionManager::class, fn() => new SubscriptionManager() );
 		$this->singleton(
 			Capabilities::class,
-			fn( $c ) => new Capabilities( array(), $c->get( SubscriptionManager::class ) )
+			fn() => new Capabilities()
 		);
 		$this->singleton( FeatureGate::class, fn( $c ) => new FeatureGate( $c->get( Capabilities::class ) ) );
 		$this->singleton( Logger::class, fn() => new Logger() );
@@ -291,8 +289,7 @@ final class Container {
 			fn( $c ) => new AdminMenu(
 				$c->get( Capabilities::class ),
 				$c->get( FormsRepository::class ),
-				$c->get( SubmissionsRepository::class ),
-				$c->get( SubscriptionManager::class )
+				$c->get( SubmissionsRepository::class )
 			)
 		);
 		$this->singleton(
@@ -305,8 +302,7 @@ final class Container {
 				$c->get( FieldRegistry::class ),
 				$c->get( SchemaCompiler::class ),
 				$c->get( Settings::class ),
-				$c->get( CaptchaManager::class ),
-				$c->get( SubscriptionManager::class )
+				$c->get( CaptchaManager::class )
 			)
 		);
 		// Frontend

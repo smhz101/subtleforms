@@ -12,7 +12,6 @@ use SubtleForms\Support\Capabilities;
 use SubtleForms\Support\Helpers;
 use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Repositories\SubmissionsRepository;
-use SubtleForms\Licensing\SubscriptionManager;
 
 /**
  * Admin menu and interface management.
@@ -35,11 +34,6 @@ class AdminMenu {
 	private $submissionsRepo;
 
 	/**
-	 * @var SubscriptionManager|null
-	 */
-	private $subscriptionManager;
-
-	/**
 	 * @var string
 	 */
 	private $currentPage = '';
@@ -47,13 +41,11 @@ class AdminMenu {
 	public function __construct(
 		Capabilities $caps,
 		?FormsRepository $formsRepo = null,
-		?SubmissionsRepository $submissionsRepo = null,
-		?SubscriptionManager $subscriptionManager = null
+		?SubmissionsRepository $submissionsRepo = null
 	) {
-		$this->caps                = $caps;
-		$this->formsRepo           = $formsRepo ?? new FormsRepository();
-		$this->submissionsRepo     = $submissionsRepo ?? new SubmissionsRepository();
-		$this->subscriptionManager = $subscriptionManager;
+		$this->caps          = $caps;
+		$this->formsRepo     = $formsRepo ?? new FormsRepository();
+		$this->submissionsRepo = $submissionsRepo ?? new SubmissionsRepository();
 
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
@@ -194,14 +186,6 @@ class AdminMenu {
 
 		$this->currentPage = $hook;
 
-		// Load Google Fonts for design system
-		wp_enqueue_style(
-			'subtleforms-fonts',
-			'https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Serif:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap',
-			array(),
-			null
-		);
-
 		// Main admin CSS
 		wp_enqueue_style(
 			'subtleforms-admin',
@@ -259,15 +243,14 @@ class AdminMenu {
 			'before'
 		);
 
-		// Get license data if Pro is active (no API calls, just read from options)
-		$license_data = null;
-		if ( class_exists( \SubtleFormsPro\Licensing\LicenseManager::class ) ) {
-			$licenseManager = \SubtleForms\Plugin::instance()->container()->get( \SubtleFormsPro\Licensing\LicenseManager::class );
-			$license_data   = array(
-				'status' => $licenseManager->getStatus(),
-				'data'   => $licenseManager->getLicenseData(),
-			);
-		}
+		// Get license data — provided by the Pro plugin via filter (no API calls).
+		$license_data = apply_filters( 'subtleforms/license_data', null );
+
+		// Rebuild Capabilities fresh at enqueue time.
+		// AdminMenu is constructed on plugins_loaded BEFORE Pro registers its
+		// subtleforms/capabilities filter, so $this->caps is stale. A fresh
+		// instance picks up all filters that are now in place.
+		$live_caps = new Capabilities();
 
 		// Localize script with data
 		wp_localize_script(
@@ -278,11 +261,15 @@ class AdminMenu {
 				'restUrl'        => rest_url( 'subtleforms/v1' ),
 				'nonce'          => wp_create_nonce( 'subtleforms_admin' ),
 				'restNonce'      => wp_create_nonce( 'wp_rest' ),
-				'capabilities'   => $this->caps->all(),
-				'hasProPlugin'   => defined( 'SUBTLEFORMS_PRO_VERSION' ),
-				'license'        => $license_data, // Legacy: License info from Pro plugin (no API calls)
-				'subscription'   => $this->buildSubscriptionData(), // New: subtleforms.com subscription
-				'extensions'     => $this->buildExtensionsData(),
+				'capabilities'   => $live_caps->all(),
+				'hasProPlugin'   => defined( 'SUBTLEFORMS_PRO_VERSION' ) || sf_is_pro_active(),
+				'license'        => $license_data,
+				'subscription'   => array(
+					'status'    => 'inactive',
+					'plan'      => 'free',
+					'connected' => false,
+				),
+				'extensions'     => $this->buildExtensionsData( $live_caps ),
 				'i18n'           => array(
 					'confirmDelete' => __( 'Are you sure you want to delete this item?', 'subtleforms' ),
 					'error'         => __( 'An error occurred. Please try again.', 'subtleforms' ),
@@ -306,25 +293,6 @@ class AdminMenu {
 	}
 
 	/**
-	 * Build subscription data for JS exposure.
-	 *
-	 * @return array
-	 */
-	private function buildSubscriptionData(): array {
-		if ( $this->subscriptionManager !== null ) {
-			return $this->subscriptionManager->toArray();
-		}
-		return array(
-			'status'    => 'inactive',
-			'plan'      => 'free',
-			'email'     => '',
-			'expiresAt' => null,
-			'isDev'     => false,
-			'connected' => false,
-		);
-	}
-
-	/**
 	 * Build the extensions data array for the front end.
 	 *
 	 * Returns a map of slug => {label, enabled, configured, available} where:
@@ -332,9 +300,9 @@ class AdminMenu {
 	 *   - configured: the required API keys / settings appear to be present
 	 *   - available:  the capability gate allows this extension (Pro licence)
 	 */
-	private function buildExtensionsData(): array {
+	private function buildExtensionsData( ?Capabilities $caps = null ): array {
 		$settings = new \SubtleForms\Support\Settings();
-		$gate     = new \SubtleForms\Support\FeatureGate( $this->caps );
+		$gate     = new \SubtleForms\Support\FeatureGate( $caps ?? $this->caps );
 
 		$extensions = array(
 			array(
