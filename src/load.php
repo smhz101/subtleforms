@@ -15,8 +15,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 if ( file_exists( SUBTLEFORMS_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
 	require_once SUBTLEFORMS_PLUGIN_DIR . 'vendor/autoload.php';
 
-	// Composer will autoload classes, but standalone functions (like the
-	// `SubtleForms\init()` helper) are defined in src/Plugin.php and must
+	// Composer will autoload classes, but standalone functions are not
+	// autoloaded — they must be explicitly required regardless of autoloader.
+	require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/functions.php';
+
+	// `SubtleForms\init()` helper is defined in src/Plugin.php and must
 	// be included explicitly.
 	if ( file_exists( SUBTLEFORMS_PLUGIN_DIR . 'src/Plugin.php' ) ) {
 		require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Plugin.php';
@@ -50,6 +53,7 @@ require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Engine/Actions/EmailAction.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Engine/Actions/WebhookAction.php';
 
 // Support
+require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/functions.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/Logger.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/Capabilities.php';
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/FeatureGate.php';
@@ -65,12 +69,6 @@ require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Validation/Schemas.php';
 
 // Extensions
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Extensions/ExtensionManager.php';
-
-// Validation (Phase A2-P1)
-require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Validation/ValidationException.php';
-require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Validation/Sanitizer.php';
-require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Validation/Rules.php';
-require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Validation/RequestValidator.php';
 
 // Security (Phase A3-P1)
 require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Security/RateLimiter.php';
