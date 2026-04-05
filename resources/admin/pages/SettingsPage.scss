@@ -707,10 +707,22 @@
 
 .sf-license-settings {
 	display: flex;
-	flex-direction: row;
-	flex-wrap: nowrap;
-	justify-content: space-between;
-	gap: $space-6;
+	flex-direction: column;
+	gap: $space-3;
+
+	// Disconnected: show connect card + upgrade card side-by-side
+	&--disconnected {
+		flex-direction: row;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		gap: $space-3;
+	}
+
+	// Connected: single-column
+	&--connected {
+		flex-direction: column;
+		max-width: 560px;
+	}
 }
 
 // Dev mode banner
@@ -765,16 +777,17 @@
 	list-style: none;
 	display: flex;
 	flex-direction: column;
-	gap: $space-2;
+	gap: 6px;
 
 	&__item {
 		display: flex;
 		align-items: center;
-		gap: $space-2;
+		gap: $space-1;
 		font-size: $font-size-sm;
 		color: $sf-stone-700;
+		line-height: 1.4;
 
-		.dashicons {
+		svg, .dashicons {
 			color: $sf-stone-400;
 			flex-shrink: 0;
 		}
@@ -782,8 +795,19 @@
 		&--active {
 			color: $sf-stone-800;
 
-			.dashicons {
+			svg, .dashicons {
 				color: $sf-lime-600;
+			}
+		}
+
+		// Locked item in upgrade preview
+		&--locked {
+			color: $sf-stone-500;
+
+			svg, .dashicons {
+				color: $sf-stone-300;
+				width: 14px;
+				height: 14px;
 			}
 		}
 	}
@@ -857,6 +881,132 @@
 	}
 }
 
+// ── Pro plugin active license panel ─────────────────────────────────────────
+
+.sf-license-status-row {
+	display: flex;
+	align-items: center;
+	gap: $space-1;
+	margin-bottom: $space-3;
+}
+
+.sf-license-activate {
+	display: flex;
+	flex-direction: column;
+	gap: $space-1;
+	max-width: 480px;
+
+	&__label {
+		font-size: $font-size-sm;
+		font-weight: 600;
+		color: $sf-stone-700;
+	}
+
+	&__row {
+		display: flex;
+		gap: $space-1;
+		align-items: center;
+
+		input {
+			flex: 1;
+			letter-spacing: 0.04em;
+		}
+
+		.button {
+			flex-shrink: 0;
+		}
+	}
+
+	.description {
+		font-size: $font-size-xs;
+		color: $sf-stone-500;
+		margin: 0;
+	}
+}
+
+.sf-license-active {
+	display: flex;
+	flex-direction: column;
+	gap: $space-3;
+	max-width: 480px;
+
+	&__meta {
+		display: flex;
+		flex-direction: column;
+		gap: $space-1;
+		padding: $space-2 $space-3;
+		background: $sf-stone-50;
+		border: 1px solid $sf-stone-200;
+		border-radius: $radius-md;
+	}
+
+	&__key {
+		display: flex;
+		align-items: center;
+		gap: $space-1;
+	}
+
+	&__key-label {
+		font-size: $font-size-xs;
+		font-weight: 600;
+		color: $sf-stone-500;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		flex-shrink: 0;
+	}
+
+	&__key-value {
+		font-size: $font-size-sm;
+		color: $sf-stone-700;
+		letter-spacing: 0.04em;
+	}
+
+	&__expiry {
+		margin: 0;
+		font-size: $font-size-xs;
+		color: $sf-stone-500;
+
+		strong {
+			color: $sf-stone-700;
+		}
+	}
+}
+
+.sf-license-features {
+	&__label {
+		margin: 0 0 $space-1;
+		font-size: $font-size-xs;
+		font-weight: 700;
+		text-transform: uppercase;
+		letter-spacing: 0.07em;
+		color: $sf-stone-500;
+	}
+
+	.sf-feature-list__check {
+		color: $sf-lime-600;
+		font-weight: 700;
+		font-size: $font-size-sm;
+		flex-shrink: 0;
+	}
+}
+
+.sf-license-grace-notice {
+	max-width: 480px;
+}
+
+.sf-license-deactivate-btn {
+	align-self: flex-start;
+	color: $sf-stone-500 !important;
+	border-color: $sf-stone-300 !important;
+	font-size: $font-size-xs !important;
+
+	&:hover:not(:disabled) {
+		color: #dc2626 !important;
+		border-color: #fca5a5 !important;
+		background: #fef2f2 !important;
+	}
+}
+
 .sf-license-disconnect-btn {
 	color: #dc2626 !important;
 	border-color: #fca5a5 !important;
@@ -867,39 +1017,46 @@
 	}
 }
 
-// Connect card (disconnected state)
+// ── Disconnected state — connect card ────────────────────────────────────
 .subtleforms-admin {
 	.components-panel__body {
 		.sf-license-connect-card {
 			background: #fff;
+			border: 1px solid $sf-stone-200;
+			border-radius: $radius-lg;
+			padding: $space-4;
+			max-width: 480px;
 
 			&__icon-wrapper {
-				padding: $space-2 $space-1;
+				display: flex;
+				align-items: center;
+				justify-content: center;
+				width: 40px;
+				height: 40px;
+				flex-shrink: 0;
 				background: $sf-blue-900;
-				border-radius: $radius-xl;
+				border-radius: $radius-md;
 			}
 
 			&__header {
 				display: flex;
 				align-items: flex-start;
 				gap: $space-2;
-				margin-bottom: $space-4;
+				margin-bottom: $space-3;
 
 				h3 {
-					margin-bottom: $space-2;
+					margin: 0 0 4px;
 				}
 			}
 
 			&__icon {
-				font-size: 32px;
 				color: $sf-slate-50;
 				flex-shrink: 0;
-				margin-top: 2px;
 			}
 
 			h3 {
 				margin: 0 0 $space-1;
-				font-size: $font-size-lg;
+				font-size: $font-size-base;
 				font-weight: 600;
 				color: $sf-stone-900;
 			}
@@ -907,7 +1064,16 @@
 			p {
 				margin: 0;
 				font-size: $font-size-sm;
-				color: $sf-stone-600;
+				color: $sf-stone-500;
+				line-height: 1.5;
+			}
+
+			&__actions {
+				display: flex;
+				gap: $space-1;
+				margin-top: $space-3;
+				padding-top: $space-3;
+				border-top: 1px solid $sf-stone-100;
 			}
 		}
 	}
@@ -916,7 +1082,24 @@
 .sf-license-form {
 	display: flex;
 	flex-direction: column;
-	gap: $space-4;
+	gap: $space-3;
+	margin: $space-3 0;
+	border: none;
+	padding: 0;
+
+	// Locked / disabled fieldset preview
+	&--locked {
+		background: $sf-stone-50;
+		border: 1px dashed $sf-stone-300;
+		border-radius: $radius-md;
+		padding: $space-3;
+		opacity: 0.65;
+		cursor: not-allowed;
+
+		* {
+			cursor: not-allowed;
+		}
+	}
 
 	&__field {
 		display: flex;
@@ -940,29 +1123,43 @@
 		}
 	}
 
+	&__key-row {
+		display: flex;
+		gap: $space-1;
+		align-items: center;
+
+		input {
+			flex: 1;
+			letter-spacing: 0.05em;
+		}
+
+		.button {
+			flex-shrink: 0;
+		}
+	}
+
 	&__key-input {
 		letter-spacing: 0.05em;
 	}
 }
 
-// Upgrade card (disconnected state, below the form)
+// ── Upgrade card (disconnected state, beside the connect card) ───────────
 .subtleforms-admin {
 	.components-panel__body {
 		.sf-license-upgrade-card {
-			padding: $space-6;
-			background: linear-gradient(135deg, $sf-blue-100, $sf-blue-50);
-			border: 2px solid $sf-blue-200;
-			width: 440px;
+			padding: $space-3 $space-4;
+			background: linear-gradient(150deg, $sf-slate-50 0%, #f0f4ff 100%);
+			border: 1px solid $sf-slate-200;
+			border-radius: $radius-lg;
+			max-width: 340px;
 
 			h3 {
-				margin: 0 0 $space-4;
-				font-size: $font-size-base;
-				font-weight: 600;
-				color: $sf-stone-800;
-			}
-
-			.sf-feature-list {
-				margin-bottom: $space-6;
+				margin: 0 0 $space-2;
+				font-size: $font-size-sm;
+				font-weight: 700;
+				text-transform: uppercase;
+				letter-spacing: 0.07em;
+				color: $sf-slate-500;
 			}
 		}
 	}
