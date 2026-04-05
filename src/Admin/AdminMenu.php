@@ -270,6 +270,7 @@ class AdminMenu {
 					'connected' => false,
 				),
 				'extensions'     => $this->buildExtensionsData( $live_caps ),
+				'isDev'          => defined( 'WP_DEBUG' ) && WP_DEBUG,
 				'i18n'           => array(
 					'confirmDelete' => __( 'Are you sure you want to delete this item?', 'subtleforms' ),
 					'error'         => __( 'An error occurred. Please try again.', 'subtleforms' ),

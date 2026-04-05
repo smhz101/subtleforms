@@ -81,17 +81,69 @@
 		line-height: 1.25rem;
 		font-weight: 600;
 		color: var(--sf-gray-900);
-	}
 
-	.sf-step-header__description {
-		font-size: 0.75rem;
-		line-height: 1rem;
-		color: var(--sf-gray-500);
-		margin-top: 0.25rem;
-	}
+                &--editable {
+                        cursor: text;
+                        border-radius: 3px;
+                        padding: 1px 3px;
+                        margin: -1px -3px;
 
-	.sf-step-header__edit-label {
-		font-size: 0.75rem;
+                        &:hover {
+                                background: rgba(0, 0, 0, 0.05);
+                        }
+                }
+        }
+
+        .sf-step-header__title-input {
+                font-size: 0.875rem;
+                line-height: 1.25rem;
+                font-weight: 600;
+                color: var(--sf-gray-900);
+                border: 1px solid var(--sf-blue-500, #3b82f6);
+                border-radius: 3px;
+                padding: 1px 4px;
+                width: 100%;
+                background: #fff;
+                outline: none;
+                box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+        }
+
+        .sf-step-header__description {
+                font-size: 0.75rem;
+                line-height: 1rem;
+                color: var(--sf-gray-500);
+                margin-top: 0.25rem;
+                min-height: 1rem;
+
+                &--editable {
+                        cursor: text;
+                        border-radius: 3px;
+                        padding: 1px 3px;
+                        margin: -1px -3px;
+
+                        &:hover {
+                                background: rgba(0, 0, 0, 0.05);
+                        }
+                }
+        }
+
+        .sf-step-header__description-placeholder {
+                color: var(--sf-gray-300);
+                font-style: italic;
+        }
+
+        .sf-step-header__desc-input {
+                font-size: 0.75rem;
+                line-height: 1rem;
+                color: var(--sf-gray-500);
+                border: 1px solid var(--sf-blue-500, #3b82f6);
+                border-radius: 3px;
+                padding: 2px 4px;
+                width: 100%;
+                resize: vertical;
+                background: #fff;
+                outline: none;
+                box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 		line-height: 1rem;
 		color: var(--sf-gray-400);
 	}

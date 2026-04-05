@@ -4,6 +4,7 @@
  * Dedicated canvas for rendering a single step's contents in multi-step forms.
  * Provides step-scoped drag & drop, insert zones, and empty states.
  */
+import { useState, useCallback, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useBuilder } from './context/BuilderContext';
 import ColumnDropZone from './ColumnDropZone';
@@ -20,9 +21,15 @@ export default function StepCanvas({
     tree,
     selectedId,
     setSelectedId,
-    actions: { onDelete, onDuplicate, onMove, onRequestInsert },
+    actions: { onDelete, onDuplicate, onMove, onRequestInsert, onUpdate },
     validationErrors,
+    isReadOnly,
   } = useBuilder();
+
+  // Inline editing state: 'title' | 'description' | null
+  const [editingField, setEditingField] = useState(null);
+  const titleInputRef = useRef(null);
+  const descInputRef = useRef(null);
 
   // Build validation errors map
   const validationErrorsByFieldKey = {};
@@ -41,6 +48,39 @@ export default function StepCanvas({
 
   const stepNode = tree.nodes[stepId];
 
+  const startEditing = useCallback(
+    (field, e) => {
+      if (isReadOnly) return;
+      e.stopPropagation();
+      setSelectedId(stepId);
+      setEditingField(field);
+    },
+    [isReadOnly, stepId, setSelectedId]
+  );
+
+  const commitEdit = useCallback(
+    (field, value) => {
+      if (!isReadOnly) {
+        onUpdate(stepId, { [field]: value });
+      }
+      setEditingField(null);
+    },
+    [isReadOnly, stepId, onUpdate]
+  );
+
+  const handleKeyDown = useCallback(
+    (field, value, e) => {
+      if (e.key === 'Enter' && field === 'title') {
+        e.preventDefault();
+        commitEdit(field, value);
+      }
+      if (e.key === 'Escape') {
+        setEditingField(null);
+      }
+    },
+    [commitEdit]
+  );
+
   if (!stepNode) {
     return (
       <div className='sf-step-canvas__not-found'>
@@ -51,7 +91,7 @@ export default function StepCanvas({
 
   const children = stepNode.children || [];
   const stepTitle =
-    stepNode.config?.title || __('Untitled Step', 'subtleforms');
+    stepNode.config?.title || '';
   const stepDescription = stepNode.config?.description || '';
 
   // Render step canvas
@@ -59,7 +99,7 @@ export default function StepCanvas({
     <div
       className='subtleforms-step-canvas'
       data-testid={`step-canvas-${stepNumber}`}>
-      {/* Step Context Header - Clickable to select step */}
+      {/* Step Context Header */}
       <div
         className='sf-step-header'
         onClick={() => setSelectedId(stepId)}
@@ -74,10 +114,49 @@ export default function StepCanvas({
         <div className='sf-step-header__container'>
           <div className='sf-step-header__number'>{stepNumber}</div>
           <div className='sf-step-header__content'>
-            <div className='sf-step-header__title'>{stepTitle}</div>
-            {stepDescription && (
-              <div className='sf-step-header__description'>
-                {stepDescription}
+            {/* Inline-editable title */}
+            {editingField === 'title' ? (
+              <input
+                ref={titleInputRef}
+                className='sf-step-header__title-input'
+                defaultValue={stepTitle}
+                autoFocus
+                onBlur={(e) => commitEdit('title', e.target.value)}
+                onKeyDown={(e) => handleKeyDown('title', e.target.value, e)}
+                onClick={(e) => e.stopPropagation()}
+              />
+            ) : (
+              <div
+                className={`sf-step-header__title${!isReadOnly ? ' sf-step-header__title--editable' : ''}`}
+                onClick={(e) => startEditing('title', e)}
+                title={!isReadOnly ? __('Click to edit step title', 'subtleforms') : undefined}>
+                {stepTitle || __('Untitled Step', 'subtleforms')}
+              </div>
+            )}
+            {/* Inline-editable description */}
+            {editingField === 'description' ? (
+              <textarea
+                ref={descInputRef}
+                className='sf-step-header__desc-input'
+                defaultValue={stepDescription}
+                autoFocus
+                rows={2}
+                onBlur={(e) => commitEdit('description', e.target.value)}
+                onKeyDown={(e) => handleKeyDown('description', e.target.value, e)}
+                onClick={(e) => e.stopPropagation()}
+              />
+            ) : (
+              <div
+                className={`sf-step-header__description${!isReadOnly ? ' sf-step-header__description--editable' : ''}`}
+                onClick={(e) => startEditing('description', e)}
+                title={!isReadOnly ? __('Click to edit step description', 'subtleforms') : undefined}>
+                {stepDescription || (
+                  !isReadOnly && (
+                    <span className='sf-step-header__description-placeholder'>
+                      {__('Add a description…', 'subtleforms')}
+                    </span>
+                  )
+                )}
               </div>
             )}
           </div>

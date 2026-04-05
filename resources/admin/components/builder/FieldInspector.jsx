@@ -125,6 +125,7 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
               </Notice>
             ))}
             <TabPanel
+              key={field?.id ?? 'none'}
               tabs={[
                 { name: 'general', title: __('General', 'subtleforms') },
                 ...( isInputLike ? [
