@@ -115,6 +115,94 @@
 	}
 }
 
+// Multi-step preview navigation
+.sf-form-preview-steps {
+	&__nav {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+		margin-bottom: 1.25rem;
+		padding-bottom: 1rem;
+		border-bottom: 1px solid var(--sf-gray-200);
+	}
+
+	&__step-btn {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+		padding: 0.4rem 0.75rem;
+		border: 1px solid var(--sf-gray-300);
+		border-radius: 9999px;
+		background: var(--sf-gray-50);
+		color: var(--sf-gray-500);
+		font-size: 0.8125rem;
+		cursor: pointer;
+		transition: all 0.15s ease;
+		line-height: 1.4;
+
+		&:hover {
+			border-color: var(--sf-blue-400);
+			color: var(--sf-blue-600);
+		}
+
+		&.is-active {
+			background: var(--sf-blue-600);
+			border-color: var(--sf-blue-600);
+			color: #fff;
+		}
+
+		&.is-complete {
+			background: var(--sf-green-50, #f0fdf4);
+			border-color: var(--sf-green-300, #86efac);
+			color: var(--sf-green-700, #15803d);
+		}
+	}
+
+	&__step-num {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.25rem;
+		height: 1.25rem;
+		border-radius: 9999px;
+		background: currentColor;
+		color: inherit;
+		font-size: 0.6875rem;
+		font-weight: 700;
+
+		// Invert text inside active pill
+		.sf-form-preview-steps__step-btn.is-active & {
+			background: rgba(255, 255, 255, 0.25);
+			color: #fff;
+		}
+	}
+
+	&__step-label {
+		font-weight: 500;
+	}
+
+	&__description {
+		margin-bottom: 1rem;
+		color: var(--sf-gray-600);
+		font-size: 0.875rem;
+		font-style: italic;
+	}
+
+	&__content {
+		min-height: 5rem;
+	}
+
+	&__footer {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 0.75rem;
+		margin-top: 1.25rem;
+		padding-top: 1rem;
+		border-top: 1px solid var(--sf-gray-200);
+	}
+}
+
 .sf-form-preview-field {
 	margin-bottom: 1rem;
 

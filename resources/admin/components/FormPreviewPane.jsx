@@ -1,3 +1,4 @@
+import { useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import './FormPreviewModal.scss';
@@ -12,12 +13,19 @@ import './FormPreviewModal.scss';
  *    embedding inside a tab panel, not as an overlay.
  */
 export default function FormPreviewPane({ schema, isDirty = false }) {
+  const [activeStepIndex, setActiveStepIndex] = useState(0);
+
   if (!schema || !schema.fields) {
     return null;
   }
 
   const formType = schema.metadata?.type || 'regular';
   const isConversational = formType === 'conversational';
+  const isMultiStep = formType === 'multi-step' || formType === 'multistep';
+
+  const steps = isMultiStep ? schema.fields.filter((f) => f.type === 'step') : [];
+  const safeStepIndex = Math.min(activeStepIndex, Math.max(0, steps.length - 1));
+  const activeStep = steps[safeStepIndex] || null;
 
   const renderField = (field, index) => {
     const config = field.config || {};
@@ -619,7 +627,80 @@ export default function FormPreviewPane({ schema, isDirty = false }) {
 
       {/* Form Fields */}
       <div className='sf-form-preview-modal__fields'>
-        {schema.fields.length === 0 ? (
+        {isMultiStep && steps.length > 0 ? (
+          <>
+            {/* Step tab indicators */}
+            <div className='sf-form-preview-steps__nav'>
+              {steps.map((step, i) => (
+                <button
+                  key={step.key || i}
+                  type='button'
+                  className={`sf-form-preview-steps__step-btn${
+                    i === safeStepIndex ? ' is-active' : ''
+                  }${i < safeStepIndex ? ' is-complete' : ''}`}
+                  onClick={() => setActiveStepIndex(i)}>
+                  <span className='sf-form-preview-steps__step-num'>{i + 1}</span>
+                  <span className='sf-form-preview-steps__step-label'>
+                    {step.title ||
+                      step.config?.label ||
+                      __('Step', 'subtleforms') + ' ' + (i + 1)}
+                  </span>
+                </button>
+              ))}
+            </div>
+
+            {/* Active step fields */}
+            <div className='sf-form-preview-steps__content'>
+              {activeStep?.description && (
+                <p className='sf-form-preview-steps__description'>
+                  {activeStep.description}
+                </p>
+              )}
+              {(activeStep?.fields || []).length === 0 ? (
+                <div className='sf-form-preview-modal__empty'>
+                  <p>
+                    {__(
+                      'No fields in this step yet.',
+                      'subtleforms'
+                    )}
+                  </p>
+                </div>
+              ) : (
+                (activeStep?.fields || []).map((field, index) =>
+                  renderField(field, index)
+                )
+              )}
+            </div>
+
+            {/* Step prev/next navigation */}
+            <div className='sf-form-preview-steps__footer'>
+              <Button
+                isSecondary
+                disabled={safeStepIndex === 0}
+                onClick={() =>
+                  setActiveStepIndex((i) => Math.max(0, i - 1))
+                }>
+                {__('Previous', 'subtleforms')}
+              </Button>
+              {safeStepIndex < steps.length - 1 ? (
+                <Button
+                  isPrimary
+                  onClick={() =>
+                    setActiveStepIndex((i) =>
+                      Math.min(steps.length - 1, i + 1)
+                    )
+                  }>
+                  {__('Next', 'subtleforms')}
+                </Button>
+              ) : (
+                <Button isPrimary disabled>
+                  {schema.metadata?.submit_label ||
+                    __('Submit', 'subtleforms')}
+                </Button>
+              )}
+            </div>
+          </>
+        ) : schema.fields.length === 0 ? (
           <div className='sf-form-preview-modal__empty'>
             <p>
               {__(
@@ -633,8 +714,8 @@ export default function FormPreviewPane({ schema, isDirty = false }) {
         )}
       </div>
 
-      {/* Submit Button */}
-      {schema.fields.length > 0 && (
+      {/* Submit Button — only for non-multi-step forms */}
+      {!isMultiStep && schema.fields.length > 0 && (
         <div className='sf-form-preview-modal__submit-section'>
           <Button isPrimary disabled>
             {schema.metadata?.submit_label || __('Submit', 'subtleforms')}
