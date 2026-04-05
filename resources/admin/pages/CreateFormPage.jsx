@@ -484,23 +484,57 @@ export default function CreateFormPage() {
         </div>
       </div>
 
-      {/* Pro upgrade modal */}
+      {/* Pro template preview modal */}
       {showUpgradeModal && selectedProTemplate && (
         <Modal
-          title={__('Unlock Pro Templates', 'subtleforms')}
+          title={selectedProTemplate.name}
           onRequestClose={() => setShowUpgradeModal(false)}
-          className='sf-upgrade-modal'>
-          <UpgradePrompt
-            variant='card'
-            feature={selectedProTemplate.name}
-            benefits={[
-              __('Access all premium templates', 'subtleforms'),
-              __('Advanced form types (multi-step, conversational)', 'subtleforms'),
-              __('Priority support', 'subtleforms'),
-              __('Regular template updates', 'subtleforms'),
-            ]}
-            ctaText={__('View Pro Plans', 'subtleforms')}
-          />
+          className='sf-tpl-preview-modal'>
+          <div className='sf-tpl-preview'>
+            <div className='sf-tpl-preview__header'>
+              <span className='sf-cfp-tcard__badge sf-cfp-tcard__badge--pro'>{__('Pro', 'subtleforms')}</span>
+              {selectedProTemplate.description && (
+                <p className='sf-tpl-preview__desc'>{selectedProTemplate.description}</p>
+              )}
+            </div>
+
+            {/* Field list preview */}
+            {selectedProTemplate.schema?.fields?.length > 0 && (
+              <div className='sf-tpl-preview__fields'>
+                <p className='sf-tpl-preview__fields-label'>
+                  {__('Fields included:', 'subtleforms')}
+                </p>
+                <ul className='sf-tpl-preview__field-list'>
+                  {selectedProTemplate.schema.fields.slice(0, 8).map((f, i) => (
+                    <li key={i} className='sf-tpl-preview__field-item'>
+                      <Icon.Check className='sf-tpl-preview__field-check' aria-hidden='true' />
+                      {f.label}
+                    </li>
+                  ))}
+                  {selectedProTemplate.schema.fields.length > 8 && (
+                    <li className='sf-tpl-preview__field-more'>
+                      {sprintf(
+                        __('+ %d more fields', 'subtleforms'),
+                        selectedProTemplate.schema.fields.length - 8
+                      )}
+                    </li>
+                  )}
+                </ul>
+              </div>
+            )}
+
+            <UpgradePrompt
+              variant='inline'
+              feature={selectedProTemplate.name}
+              benefits={[
+                __('Unlock all 20+ Pro templates instantly', 'subtleforms'),
+                __('Advanced form types (multi-step, conversational)', 'subtleforms'),
+                __('Webhooks, integrations & conditional logic', 'subtleforms'),
+                __('Priority support & regular new templates', 'subtleforms'),
+              ]}
+              ctaText={__('Upgrade to Pro', 'subtleforms')}
+            />
+          </div>
         </Modal>
       )}
 
