@@ -29,7 +29,7 @@ const FieldWrapper = memo(function FieldWrapper({
   const configWarning = useMemo(() => {
     if (!field) return null;
     if (field.required && !field.label?.trim()) return 'No label set';
-    const OPTION_TYPES = ['dropdown', 'radio', 'multiple_choice'];
+    const OPTION_TYPES = ['dropdown', 'select', 'radio', 'multiple_choice'];
     if (OPTION_TYPES.includes(field.type) && (!field.options || field.options.length === 0)) {
       return 'No options configured';
     }

@@ -12,6 +12,7 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
     field.type !== 'radio' &&
     field.type !== 'multiple_choice' &&
     field.type !== 'dropdown' &&
+    field.type !== 'select' &&
     field.type !== 'checkbox'
   ) {
     return null;

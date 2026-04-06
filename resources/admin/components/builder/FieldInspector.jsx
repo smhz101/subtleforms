@@ -45,7 +45,7 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
     if (field.required && !field.label?.trim()) {
       warnings.push(__('This required field has no label — users won\'t know what to fill in.', 'subtleforms'));
     }
-    const OPTION_TYPES = ['dropdown', 'radio', 'multiple_choice'];
+    const OPTION_TYPES = ['dropdown', 'select', 'radio', 'multiple_choice'];
     if (OPTION_TYPES.includes(field.type) && (!field.options || field.options.length === 0)) {
       warnings.push(__('No options configured — users will see an empty list.', 'subtleforms'));
     }
@@ -58,7 +58,7 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
     if (field.type === 'email') return __('Email format is automatically validated on submission.', 'subtleforms');
     if (field.type === 'url') return __('URL format is automatically validated on submission.', 'subtleforms');
     if (field.type === 'number') return __('Set Min / Max in the controls above to restrict this field\'s input range.', 'subtleforms');
-    if (field.type === 'phone') return __('Tip: add a placeholder (e.g. +1 555 000 0000) for better UX.', 'subtleforms');
+    if (field.type === 'phone' || field.type === 'tel') return __('Tip: add a placeholder (e.g. +1 555 000 0000) for better UX.', 'subtleforms');
     return null;
   }, [field]);
 
