@@ -447,6 +447,7 @@ function renderInput(
   required,
   error
 ) {
+  const config = field.config ?? field;
   switch (field.type) {
     case 'text':
     case 'email':
