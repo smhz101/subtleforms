@@ -578,9 +578,13 @@ final class SchemaValidator {
 				return true;
 			}
 
-			if ( isset( $field['fields'] ) && is_array( $field['fields'] ) ) {
-				if ( $this->hasInputFieldRecursive( $field['fields'], $inputFieldTypes ) ) {
-					return true;
+			// 'children' is the canonical key written by the JS serializer (denormalizeTree).
+			// 'fields' is the legacy key kept for backward-compat.
+			foreach ( array( 'children', 'fields' ) as $childKey ) {
+				if ( isset( $field[ $childKey ] ) && is_array( $field[ $childKey ] ) ) {
+					if ( $this->hasInputFieldRecursive( $field[ $childKey ], $inputFieldTypes ) ) {
+						return true;
+					}
 				}
 			}
 		}
