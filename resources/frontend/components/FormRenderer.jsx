@@ -365,7 +365,7 @@ export default function FormRenderer({
     const flattenForValidation = (fields) => {
       let result = [];
       fields.forEach((field) => {
-        if (field.type !== 'step' && field.config?.key) {
+        if (field.type !== 'step' && (field.config?.key || field.key)) {
           result.push(field);
         }
         const childFields = field.children || field.fields;
@@ -501,7 +501,7 @@ export default function FormRenderer({
         const flattenForValidation = (fields) => {
           let result = [];
           fields.forEach((field) => {
-            if (field.type !== 'step' && field.config?.key) {
+            if (field.type !== 'step' && (field.config?.key || field.key)) {
               result.push(field);
             }
             const childFields = field.children || field.fields;

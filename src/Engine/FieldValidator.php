@@ -95,7 +95,8 @@ final class FieldValidator {
 			$type   = $field['type'] ?? '';
 
 			// Skip layout and system types — they do not accept user input and cannot be required
-			if ( ! in_array( $type, self::NON_INPUT_TYPES, true ) && ! empty( $field['required'] ) ) {
+			$isRequired = ! empty( $field['required'] ) || ! empty( $field['config']['required'] );
+			if ( ! in_array( $type, self::NON_INPUT_TYPES, true ) && $isRequired ) {
 				$required[] = $field['key'];
 			}
 

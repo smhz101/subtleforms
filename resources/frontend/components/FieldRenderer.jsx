@@ -505,12 +505,64 @@ function renderInput(
       );
 
     case 'radio':
-    case 'multiple_choice':
-      const options = config.options || [];
+      const radioOptions = config.options || [];
       return (
         <div className='subtleforms-radio-group'>
-          {options.map((option, index) => {
+          {radioOptions.map((option, index) => {
             const optionId = `${inputId}-${index}`;
+            return (
+              <label
+                key={option.value || index}
+                htmlFor={optionId}
+                className='subtleforms-radio-label'>
+                <input
+                  id={optionId}
+                  type='radio'
+                  className='subtleforms-radio'
+                  name={config.key || field.key}
+                  value={option.value}
+                  checked={value === option.value}
+                  onChange={(e) => onChange(e.target.value)}
+                />
+                <span>{option.label}</span>
+              </label>
+            );
+          })}
+        </div>
+      );
+
+    case 'multiple_choice':
+      const mcOptions = config.options || [];
+      const allowMultiple = config.allowMultiple === true;
+      const mcValues = Array.isArray(value) ? value : value ? [value] : [];
+      return (
+        <div className={allowMultiple ? 'subtleforms-checkbox-group' : 'subtleforms-radio-group'}>
+          {mcOptions.map((option, index) => {
+            const optionId = `${inputId}-${index}`;
+            if (allowMultiple) {
+              const isChecked = mcValues.includes(option.value);
+              return (
+                <label
+                  key={option.value || index}
+                  htmlFor={optionId}
+                  className='subtleforms-checkbox-label'>
+                  <input
+                    id={optionId}
+                    type='checkbox'
+                    className='subtleforms-checkbox'
+                    value={option.value}
+                    checked={isChecked}
+                    onChange={() => {
+                      const next = isChecked
+                        ? mcValues.filter((v) => v !== option.value)
+                        : [...mcValues, option.value];
+                      onChange(next);
+                    }}
+                  />
+                  <span>{option.label}</span>
+                </label>
+              );
+            }
             return (
               <label
                 key={option.value || index}
