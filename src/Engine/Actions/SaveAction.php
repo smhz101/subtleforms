@@ -96,10 +96,21 @@ final class SaveAction implements ActionInterface {
 		if ( $updated === false ) {
 			throw new \RuntimeException( 'Failed to persist submission payload in SaveAction.' );
 		}
-	}
 
-	/**
-	 * Sanitize submission payload based on schema field types.
+                // Capture save details for pipeline log enrichment.
+                $context->setMeta(
+                        'step_output_data',
+                        array(
+                                'submission_id' => $submissionId,
+                                'field_count'   => count( $payload ),
+                                'field_keys'    => array_keys( $payload ),
+                                'status_written' => 'saved',
+                        )
+                );
+        }
+
+        /**
+         * Sanitize submission payload based on schema field types.
 	 *
 	 * @param array $schema Form schema.
 	 * @param array $payload Submission payload.

@@ -96,22 +96,39 @@ final class WebhookAction implements ActionInterface {
 
 		// Dispatch asynchronously via WP-Cron
 		$submission_id = $context->getMeta( 'submission_id' );
-		$dispatched    = \SubtleForms\Async\AsyncDispatcher::dispatchWebhook( array(
-			'url'           => $url,
-			'method'        => $method,
-			'headers'       => $headers,
-			'body'          => $body,
-			'timeout'       => 10,
-			'submission_id' => $submission_id,
-		) );
+                $step_id       = $context->getMeta( 'current_step_id', 'webhook' );
+                $dispatched    = \SubtleForms\Async\AsyncDispatcher::dispatchWebhook( array(
+                        'url'           => $url,
+                        'method'        => $method,
+                        'headers'       => $headers,
+                        'body'          => $body,
+                        'timeout'       => 10,
+                        'submission_id' => $submission_id,
+                        'step_id'       => $step_id,
+                ) );
 
-		if ( ! $dispatched ) {
-			$this->fail( $context, 'async_dispatch_failed', array( 'url' => $url ) );
-		}
-	}
+                if ( ! $dispatched ) {
+                        $this->fail( $context, 'async_dispatch_failed', array( 'url' => $url ) );
+                }
 
-	/**
-	 * Record an action failure into context meta.
+                // Capture dispatch details for pipeline log enrichment.
+                $signed = is_array( $signing ) && ! empty( $signing['enabled'] );
+                $context->setMeta(
+                        'step_output_data',
+                        array(
+                                'url'                => $url,
+                                'method'             => $method,
+                                'payload_mode'       => $payload_mode,
+                                'payload_size_bytes' => strlen( (string) $body ),
+                                'signed'             => $signed,
+                                'dispatch_method'    => 'async_cron',
+                                'dispatched'         => $dispatched,
+                        )
+                );
+        }
+
+        /**
+         * Record an action failure into context meta.
 	 */
 	private function fail( SubmissionContext $context, string $reason, array $extra = array() ): void {
 		$fail   = $context->getMeta( 'action_failures', array() );

@@ -131,12 +131,14 @@ final class AsyncDispatcher {
 	 * @return void
 	 */
 	public static function executeEmail( array $job ): void {
-		$retry_count = $job['retry_count'] ?? 0;
+		$retry_count   = $job['retry_count'] ?? 0;
+		$submission_id = isset( $job['submission_id'] ) ? (int) $job['submission_id'] : 0;
+		$step_id       = $job['step_id'] ?? 'email';
 
 		try {
 			self::log( "Executing email job (attempt #{$retry_count})", array(
 				'to'            => $job['to'],
-				'submission_id' => $job['submission_id'] ?? null,
+				'submission_id' => $submission_id ?: null,
 			) );
 
 			$sent = \SubtleForms\Support\Mailer::send(
@@ -153,16 +155,62 @@ final class AsyncDispatcher {
 
 			self::log( 'Email sent successfully', array(
 				'to'            => $job['to'],
-				'submission_id' => $job['submission_id'] ?? null,
+				'submission_id' => $submission_id ?: null,
 			) );
+
+			// Write completion log back to submissions log table.
+			if ( $submission_id > 0 ) {
+				$logs = new \SubtleForms\Repositories\LogsRepository();
+				$logs->create( array(
+					'submission_id' => $submission_id,
+					'level'         => 'info',
+					'message'       => sprintf( 'Step %s: async_completed', $step_id ),
+					'context'       => array(
+						'submission_id' => $submission_id,
+						'step_id'       => $step_id,
+						'action_type'   => 'email',
+						'status'        => 'async_completed',
+						'data'          => array(
+							'to'      => $job['to'],
+							'subject' => $job['subject'],
+							'sent'    => true,
+							'attempt' => $retry_count + 1,
+						),
+						'ts'            => time(),
+					),
+				) );
+			}
 
 		} catch ( \Throwable $e ) {
 			self::log( 'Email execution failed', array(
 				'to'            => $job['to'],
 				'error'         => $e->getMessage(),
 				'retry_count'   => $retry_count,
-				'submission_id' => $job['submission_id'] ?? null,
+				'submission_id' => $submission_id ?: null,
 			) );
+
+			// Write failure log back to submissions log table.
+			if ( $submission_id > 0 ) {
+				$logs = new \SubtleForms\Repositories\LogsRepository();
+				$logs->create( array(
+					'submission_id' => $submission_id,
+					'level'         => 'error',
+					'message'       => sprintf( 'Step %s: async_failed', $step_id ),
+					'context'       => array(
+						'submission_id' => $submission_id,
+						'step_id'       => $step_id,
+						'action_type'   => 'email',
+						'status'        => 'async_failed',
+						'data'          => array(
+							'to'      => $job['to'],
+							'subject' => $job['subject'],
+							'error'   => $e->getMessage(),
+							'attempt' => $retry_count + 1,
+						),
+						'ts'            => time(),
+					),
+				) );
+			}
 
 			// Retry logic: max 3 attempts
 			if ( $retry_count < 3 ) {
@@ -180,12 +228,12 @@ final class AsyncDispatcher {
 
 				self::log( "Email retry scheduled (#{$job['retry_count']} in {$delay}s)", array(
 					'to'            => $job['to'],
-					'submission_id' => $job['submission_id'] ?? null,
+					'submission_id' => $submission_id ?: null,
 				) );
 			} else {
 				self::log( 'Email failed after max retries', array(
 					'to'            => $job['to'],
-					'submission_id' => $job['submission_id'] ?? null,
+					'submission_id' => $submission_id ?: null,
 				) );
 			}
 		}
@@ -198,13 +246,15 @@ final class AsyncDispatcher {
 	 * @return void
 	 */
 	public static function executeWebhook( array $job ): void {
-		$retry_count = $job['retry_count'] ?? 0;
+		$retry_count   = $job['retry_count'] ?? 0;
+		$submission_id = isset( $job['submission_id'] ) ? (int) $job['submission_id'] : 0;
+		$step_id       = $job['step_id'] ?? 'webhook';
 
 		try {
 			self::log( "Executing webhook job (attempt #{$retry_count})", array(
 				'url'           => $job['url'],
 				'method'        => $job['method'] ?? 'POST',
-				'submission_id' => $job['submission_id'] ?? null,
+				'submission_id' => $submission_id ?: null,
 			) );
 
 			$method = strtoupper( $job['method'] ?? 'POST' );
@@ -223,7 +273,9 @@ final class AsyncDispatcher {
 				throw new \RuntimeException( $response->get_error_message() );
 			}
 
-			$code = wp_remote_retrieve_response_code( $response );
+			$code          = wp_remote_retrieve_response_code( $response );
+			$response_body = wp_remote_retrieve_body( $response );
+
 			if ( $code >= 400 ) {
 				throw new \RuntimeException( "HTTP {$code}: " . wp_remote_retrieve_response_message( $response ) );
 			}
@@ -232,16 +284,63 @@ final class AsyncDispatcher {
 				'url'           => $job['url'],
 				'method'        => $method,
 				'status'        => $code,
-				'submission_id' => $job['submission_id'] ?? null,
+				'submission_id' => $submission_id ?: null,
 			) );
+
+			// Write completion log back to submissions log table.
+			if ( $submission_id > 0 ) {
+				$logs = new \SubtleForms\Repositories\LogsRepository();
+				$logs->create( array(
+					'submission_id' => $submission_id,
+					'level'         => 'info',
+					'message'       => sprintf( 'Step %s: async_completed', $step_id ),
+					'context'       => array(
+						'submission_id' => $submission_id,
+						'step_id'       => $step_id,
+						'action_type'   => 'webhook',
+						'status'        => 'async_completed',
+						'data'          => array(
+							'url'           => $job['url'],
+							'method'        => $method,
+							'http_status'   => $code,
+							'response_body' => substr( $response_body, 0, 500 ),
+							'attempt'       => $retry_count + 1,
+						),
+						'ts'            => time(),
+					),
+				) );
+			}
 
 		} catch ( \Throwable $e ) {
 			self::log( 'Webhook execution failed', array(
 				'url'           => $job['url'],
 				'error'         => $e->getMessage(),
 				'retry_count'   => $retry_count,
-				'submission_id' => $job['submission_id'] ?? null,
+				'submission_id' => $submission_id ?: null,
 			) );
+
+			// Write failure log back to submissions log table.
+			if ( $submission_id > 0 ) {
+				$logs = new \SubtleForms\Repositories\LogsRepository();
+				$logs->create( array(
+					'submission_id' => $submission_id,
+					'level'         => 'error',
+					'message'       => sprintf( 'Step %s: async_failed', $step_id ),
+					'context'       => array(
+						'submission_id' => $submission_id,
+						'step_id'       => $step_id,
+						'action_type'   => 'webhook',
+						'status'        => 'async_failed',
+						'data'          => array(
+							'url'     => $job['url'],
+							'method'  => strtoupper( $job['method'] ?? 'POST' ),
+							'error'   => $e->getMessage(),
+							'attempt' => $retry_count + 1,
+						),
+						'ts'            => time(),
+					),
+				) );
+			}
 
 			// Retry logic: max 3 attempts
 			if ( $retry_count < 3 ) {
@@ -259,12 +358,12 @@ final class AsyncDispatcher {
 
 				self::log( "Webhook retry scheduled (#{$job['retry_count']} in {$delay}s)", array(
 					'url'           => $job['url'],
-					'submission_id' => $job['submission_id'] ?? null,
+					'submission_id' => $submission_id ?: null,
 				) );
 			} else {
 				self::log( 'Webhook failed after max retries', array(
 					'url'           => $job['url'],
-					'submission_id' => $job['submission_id'] ?? null,
+					'submission_id' => $submission_id ?: null,
 				) );
 			}
 		}

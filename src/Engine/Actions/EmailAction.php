@@ -125,33 +125,48 @@ final class EmailAction implements ActionInterface {
 
 		// Dispatch email asynchronously - returns immediately
 		$submission_id = $context->getMeta( 'submission_id' );
-		$dispatched = \SubtleForms\Async\AsyncDispatcher::dispatchEmail( array(
-			'to'            => $to,
-			'subject'       => $subject,
-			'body'          => $body,
-			'headers'       => $headers,
-			'submission_id' => $submission_id,
-		) );
+                $step_id       = $context->getMeta( 'current_step_id', 'email' );
+                $dispatched = \SubtleForms\Async\AsyncDispatcher::dispatchEmail( array(
+                        'to'            => $to,
+                        'subject'       => $subject,
+                        'body'          => $body,
+                        'headers'       => $headers,
+                        'submission_id' => $submission_id,
+                        'step_id'       => $step_id,
+                ) );
 
-		if ( ! $dispatched ) {
-			// Failed to schedule (rare - only if cron system broken)
-			$fail   = $context->getMeta( 'action_failures', array() );
-			$fail[] = array(
-				'action' => 'email',
-				'reason' => 'async_dispatch_failed',
-				'to'     => $to,
-			);
-			$context->setMeta( 'action_failures', $fail );
+                if ( ! $dispatched ) {
+                        // Failed to schedule (rare - only if cron system broken)
+                        $fail   = $context->getMeta( 'action_failures', array() );
+                        $fail[] = array(
+                                'action' => 'email',
+                                'reason' => 'async_dispatch_failed',
+                                'to'     => $to,
+                        );
+                        $context->setMeta( 'action_failures', $fail );
 
-			$this->log_debug( $context, 'Email async dispatch failed', array( 'to' => $to ) );
-		} else {
-			// Successfully queued (actual send happens async)
-			$this->log_debug( $context, 'Email queued for async delivery', array( 'to' => $to ) );
-		}
-	}
+                        $this->log_debug( $context, 'Email async dispatch failed', array( 'to' => $to ) );
+                } else {
+                        // Successfully queued (actual send happens async)
+                        $this->log_debug( $context, 'Email queued for async delivery', array( 'to' => $to ) );
+                }
 
-	/**
-	 * Replace {{field}} placeholders with actual values.
+                // Capture dispatch details for pipeline log enrichment.
+                $context->setMeta(
+                        'step_output_data',
+                        array(
+                                'to'               => $to,
+                                'subject'          => $subject,
+                                'body_preview'     => substr( $body, 0, 300 ),
+                                'recipients_count' => count( $valid_recipients ),
+                                'dispatch_method'  => 'async_cron',
+                                'dispatched'       => $dispatched,
+                        )
+                );
+        }
+
+        /**
+         * Replace {{field}} placeholders with actual values.
 	 *
 	 * @param string $template Template string with placeholders.
 	 * @param array  $data     Data array to replace placeholders with.

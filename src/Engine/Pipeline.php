@@ -133,6 +133,14 @@ final class Pipeline {
 
 		$schemaVersion = $ctx->getMeta( 'schema_version' );
 
+		// Capture action-specific output data set by the action's handle() method.
+		$stepData = $ctx->getMeta( 'step_output_data', array() );
+		if ( ! is_array( $stepData ) ) {
+			$stepData = array();
+		}
+		// Clear after reading so it doesn't bleed into the next step.
+		$ctx->setMeta( 'step_output_data', null );
+
 		$evt = new PipelineEvent(
 			$submissionId,
 			is_int( $schemaVersion ) ? $schemaVersion : null,
@@ -140,7 +148,8 @@ final class Pipeline {
 			$step->action()->id(),
 			$status,
 			$error,
-			$ts
+			$ts,
+			$stepData
 		);
 
 		$level = $status === 'succeeded' || $status === 'started' || $status === 'skipped' ? 'info' : 'error';

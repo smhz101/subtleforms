@@ -2,7 +2,6 @@ import { useState, useEffect } from '@wordpress/element';
 import {
   Spinner,
   Notice,
-  TabPanel,
 } from '@wordpress/components';
 import { Button } from '../components/navigation';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +10,166 @@ import AdminShell from '../components/AdminShell';
 import { apiClient } from '../data';
 import Icon from '../components/ui/Icon';
 import './SubmissionDetailPage.scss';
+
+// ─── Pipeline timeline helpers ──────────────────────────────────────────────
+
+const ACTION_META = {
+  save:    { icon: '💾', label: 'Save to Database' },
+  email:   { icon: '✉',  label: 'Send Email' },
+  webhook: { icon: '⚡', label: 'Call Webhook' },
+};
+
+const getActionMeta = ( actionType ) =>
+  ACTION_META[ actionType ] || { icon: '⚙', label: actionType || 'Step' };
+
+/** Group log rows into per-step objects, preserving order of first appearance. */
+const buildTimeline = ( logs ) => {
+  const map = new Map();
+  logs.forEach( ( log ) => {
+    const ctx    = log.context  || {};
+    const stepId = ctx.step_id || '__unknown__';
+    if ( ! map.has( stepId ) ) {
+      map.set( stepId, {
+        stepId,
+        actionType: ctx.action_type || stepId,
+        entries:    [],
+      } );
+    }
+    map.get( stepId ).entries.push( {
+      status:    ctx.status  || '',
+      level:     log.level,
+      data:      ctx.data    || {},
+      error:     ctx.error   || null,
+      createdAt: log.created_at,
+    } );
+  } );
+  return Array.from( map.values() );
+};
+
+/** Derive overall step status from its entries (last non-started + non-async). */
+const stepStatus = ( entries ) => {
+  const main = entries.filter(
+    ( e ) => e.status !== 'started' && ! e.status.startsWith( 'async_' )
+  );
+  return main.length ? main[ main.length - 1 ].status : 'started';
+};
+
+const STATUS_LABEL = {
+  succeeded:       'Succeeded',
+  failed:          'Failed',
+  skipped:         'Skipped',
+  started:         'Started',
+  async_completed: 'Completed',
+  async_failed:    'Failed',
+};
+
+/** A single pipeline step card showing dispatch + async completion. */
+const PipelineStepCard = ( { step } ) => {
+  const [ open, setOpen ] = useState( false );
+  const { icon, label } = getActionMeta( step.actionType );
+  const mainEntries  = step.entries.filter(
+    ( e ) => ! e.status.startsWith( 'async_' ) && e.status !== 'started'
+  );
+  const asyncEntries = step.entries.filter( ( e ) => e.status.startsWith( 'async_' ) );
+  const mainEntry    = mainEntries[ mainEntries.length - 1 ] || step.entries[ 0 ];
+  const status       = stepStatus( step.entries );
+  const hasData      = mainEntry && Object.keys( mainEntry.data ).length > 0;
+  const hasAsync     = asyncEntries.length > 0;
+
+  return (
+    <div className={ `sf-pipe-step sf-pipe-step--${ status }` }>
+      {/* Header row */}
+      <div
+        className={ `sf-pipe-step__head${ hasData || hasAsync ? ' sf-pipe-step__head--clickable' : '' }` }
+        onClick={ () => ( hasData || hasAsync ) && setOpen( ( v ) => ! v ) }
+        role={ hasData || hasAsync ? 'button' : undefined }
+        tabIndex={ hasData || hasAsync ? 0 : undefined }
+        onKeyDown={ ( e ) => e.key === 'Enter' && ( hasData || hasAsync ) && setOpen( ( v ) => ! v ) }
+      >
+        <span className='sf-pipe-step__icon' aria-hidden='true'>{ icon }</span>
+        <span className='sf-pipe-step__label'>{ label }</span>
+        <span className='sf-pipe-step__stepid'>{ step.stepId }</span>
+        <span className={ `sf-pipe-status sf-pipe-status--${ status }` }>
+          { STATUS_LABEL[ status ] || status }
+        </span>
+        { mainEntry && (
+          <span className='sf-pipe-step__time'>{ mainEntry.createdAt }</span>
+        ) }
+        { ( hasData || hasAsync ) && (
+          <span className='sf-pipe-step__toggle' aria-hidden='true'>
+            { open ? '▲' : '▼' }
+          </span>
+        ) }
+      </div>
+
+      {/* Expandable body */}
+      { open && (
+        <div className='sf-pipe-step__body'>
+          { hasData && (
+            <div className='sf-pipe-step__section'>
+              <div className='sf-pipe-step__section-title'>
+                { __( 'Action details', 'subtleforms' ) }
+              </div>
+              <dl className='sf-pipe-data'>
+                { Object.entries( mainEntry.data ).map( ( [ k, v ] ) => (
+                  <div key={ k } className='sf-pipe-data__row'>
+                    <dt className='sf-pipe-data__key'>{ k.replace( /_/g, ' ' ) }</dt>
+                    <dd className='sf-pipe-data__val'>
+                      { Array.isArray( v )
+                        ? v.join( ', ' )
+                        : typeof v === 'boolean'
+                        ? ( v ? 'Yes' : 'No' )
+                        : String( v ) }
+                    </dd>
+                  </div>
+                ) ) }
+              </dl>
+            </div>
+          ) }
+
+          { mainEntry && mainEntry.error && (
+            <div className='sf-pipe-step__section sf-pipe-step__section--error'>
+              <div className='sf-pipe-step__section-title'>{ __( 'Error', 'subtleforms' ) }</div>
+              <p className='sf-pipe-error-msg'>{ mainEntry.error }</p>
+            </div>
+          ) }
+
+          { hasAsync && asyncEntries.map( ( ae, idx ) => (
+            <div key={ idx } className='sf-pipe-step__section sf-pipe-step__section--async'>
+              <div className='sf-pipe-step__section-title sf-pipe-step__section-title--async'>
+                <span aria-hidden='true'>↓</span>
+                &nbsp;{ ae.status === 'async_completed'
+                  ? __( 'Async result', 'subtleforms' )
+                  : __( 'Async failure', 'subtleforms' ) }
+              </div>
+              <dl className='sf-pipe-data'>
+                { Object.entries( ae.data ).map( ( [ k, v ] ) => (
+                  <div key={ k } className='sf-pipe-data__row'>
+                    <dt className='sf-pipe-data__key'>{ k.replace( /_/g, ' ' ) }</dt>
+                    <dd className={ `sf-pipe-data__val${ k === 'http_status' && Number( v ) >= 400 ? ' sf-pipe-data__val--error' : '' }` }>
+                      { Array.isArray( v )
+                        ? v.join( ', ' )
+                        : typeof v === 'boolean'
+                        ? ( v ? 'Yes' : 'No' )
+                        : String( v ) }
+                    </dd>
+                  </div>
+                ) ) }
+                { ae.error && (
+                  <div className='sf-pipe-data__row'>
+                    <dt className='sf-pipe-data__key'>{ __( 'error', 'subtleforms' ) }</dt>
+                    <dd className='sf-pipe-data__val sf-pipe-data__val--error'>{ ae.error }</dd>
+                  </div>
+                ) }
+              </dl>
+              <span className='sf-pipe-step__async-time'>{ ae.createdAt }</span>
+            </div>
+          ) ) }
+        </div>
+      ) }
+    </div>
+  );
+};
 
 /**
  * Recursively render object or array values in a readable format
@@ -161,10 +320,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
         )
       );
 
-  const generalLogs = logs.filter(
-    (log) => !log.context || log.context !== 'api'
-  );
-  const apiLogs = logs.filter((log) => log.context === 'api');
+  const timeline = buildTimeline( logs );
 
   if (loading) return <Spinner />;
   if (error) return <Notice status='error'>{error}</Notice>;
@@ -433,72 +589,27 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
             </div>
           ) }
 
-          {/* ── Execution Logs ── */}
+          {/* ── Pipeline Timeline ── */}
           <div className='subtleforms-card'>
             <div className='sf-card-head'>
               <h2 className='sf-card-title'>
-                { __( 'Execution Logs', 'subtleforms' ) }
+                { __( 'Pipeline', 'subtleforms' ) }
               </h2>
               <span className='sf-card-head__count'>
-                { logs.length }
+                { timeline.length }
               </span>
             </div>
-            <TabPanel
-              tabs={ [
-                {
-                  name: 'general',
-                  title: sprintf(
-                    __( 'General (%d)', 'subtleforms' ),
-                    generalLogs.length
-                  ),
-                },
-                {
-                  name: 'api',
-                  title: sprintf(
-                    __( 'API Calls (%d)', 'subtleforms' ),
-                    apiLogs.length
-                  ),
-                },
-              ] }>
-              { ( tab ) => {
-                const displayLogs =
-                  tab.name === 'general' ? generalLogs : apiLogs;
-                return displayLogs.length > 0 ? (
-                  <div className='sf-log-table-wrap'>
-                    <table className='sf-log-table'>
-                      <thead>
-                        <tr>
-                          <th>{ __( 'Time', 'subtleforms' ) }</th>
-                          <th>{ __( 'Level', 'subtleforms' ) }</th>
-                          <th>{ __( 'Message', 'subtleforms' ) }</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        { displayLogs.map( ( log, idx ) => (
-                          <tr key={ idx }>
-                            <td className='sf-log-table__time'>
-                              { log.created_at }
-                            </td>
-                            <td>
-                              <span className={ `sf-log-level sf-log-level--${ log.level }` }>
-                                { log.level }
-                              </span>
-                            </td>
-                            <td className='sf-log-table__message'>
-                              { log.message }
-                            </td>
-                          </tr>
-                        ) ) }
-                      </tbody>
-                    </table>
-                  </div>
-                ) : (
-                  <p className='sf-logs-empty'>
-                    <em>{ __( 'No logs recorded.', 'subtleforms' ) }</em>
-                  </p>
-                );
-              } }
-            </TabPanel>
+            { timeline.length > 0 ? (
+              <div className='sf-pipeline-timeline'>
+                { timeline.map( ( step ) => (
+                  <PipelineStepCard key={ step.stepId } step={ step } />
+                ) ) }
+              </div>
+            ) : (
+              <p className='sf-logs-empty'>
+                <em>{ __( 'No pipeline activity recorded.', 'subtleforms' ) }</em>
+              </p>
+            ) }
           </div>
 
         </div>{/* /sf-sub-main */}
