@@ -192,7 +192,7 @@ export function useSchemaCommands({
       }
 
       updateTree((currentTree) =>
-        updateNodeConfig(currentTree, nodeId, changes)
+        updateNodeConfig(currentTree, { nodeId, changes })
       );
     },
     [updateTree, isReadOnly]
@@ -309,9 +309,9 @@ export function useSchemaCommands({
       );
 
       if (newNodeId) {
-        return updateNodeConfig(result, newNodeId, {
-          title: `Step ${stepNumber}`,
-          description: '',
+        return updateNodeConfig(result, {
+          nodeId: newNodeId,
+          changes: { title: `Step ${stepNumber}`, description: '' },
         });
       }
 
