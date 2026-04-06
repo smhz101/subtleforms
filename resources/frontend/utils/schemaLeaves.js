@@ -1,18 +1,44 @@
 const INPUT_FIELD_TYPES = new Set([
+  // Basic text inputs
   'text',
   'email',
   'url',
   'number',
   'phone',
+  'tel',
   'textarea',
+  'password',
+  'hidden',
+  // Date / time
+  'date',
+  'time',
+  'datetime',
+  // Choice fields
   'checkbox',
   'radio',
   'multiple_choice',
   'select',
   'dropdown',
-  'hidden',
+  'country',
+  'chained_select',
+  // Media / file
+  'file_upload',
+  'image_upload',
+  // Scale / rating
+  'rating',
+  'range_slider',
+  'net_promoter_score',
+  // Rich inputs
+  'color_picker',
+  'rich_text',
+  'checkbox_grid',
+  // Payment
   'payment_amount',
   'payment_coupon',
+  'payment_hidden_price',
+  // Dynamic
+  'dynamic_field',
+  'post_selection',
   // Composite group fields — store object values at their root key
   'name_group',
   'address_group',
@@ -30,9 +56,6 @@ export function isLeafInputField(field) {
 export function collectLeafInputPaths(fields) {
   const leafPaths = [];
 
-  // Remove detailed console logs for production
-  console.log('[SubtleForms] collectLeafInputPaths called with:', fields?.length, 'fields');
-
   const visit = (nodes) => {
     if (!Array.isArray(nodes)) {
       return;
@@ -43,20 +66,10 @@ export function collectLeafInputPaths(fields) {
         continue;
       }
 
-      // Debug field processing (reduced verbosity)
-      if (isLeafInputField(field)) {
-        console.log(
-          '[SubtleForms] Found input field:',
-          field.type,
-          field?.config?.key || field?.key
-        );
-      }
-
       if (isLeafInputField(field)) {
         const path = field?.config?.key || field?.key;
         if (typeof path === 'string' && path.trim()) {
           leafPaths.push(path);
-          console.log('[SubtleForms] Added leaf path:', path);
         }
         // Leaf fields own their value as a single node — do NOT recurse into children.
         // This is critical for Plan A group fields (name_group / address_group) which
@@ -71,7 +84,6 @@ export function collectLeafInputPaths(fields) {
       const childFields =
         field.children && field.children.length > 0 ? field.children : field.fields;
       if (Array.isArray(childFields) && childFields.length > 0) {
-        console.log('[SubtleForms] Visiting child fields:', childFields.length);
         visit(childFields);
       }
 
@@ -86,7 +98,5 @@ export function collectLeafInputPaths(fields) {
   };
 
   visit(fields);
-
-  console.log('[SubtleForms] Final leaf paths:', leafPaths);
   return leafPaths;
 }
