@@ -29,8 +29,16 @@ const restNonce =
     ? window.subtleformsAdmin.restNonce
     : null;
 
-const ALL_COLUMNS = ['id', 'form_title', 'status', 'browser', 'device', 'created_at', 'actions'];
-const DEFAULT_VISIBLE = ['id', 'form_title', 'status', 'created_at', 'actions'];
+export const ALL_COLUMNS = ['id', 'form_title', 'status', 'browser', 'device', 'created_at', 'actions'];
+export const DEFAULT_VISIBLE = ['id', 'form_title', 'status', 'created_at', 'actions'];
+export const COLUMN_LABELS = {
+  id: __('ID', 'subtleforms'),
+  form_title: __('Form', 'subtleforms'),
+  status: __('Status', 'subtleforms'),
+  browser: __('Browser', 'subtleforms'),
+  device: __('Device', 'subtleforms'),
+  created_at: __('Submitted', 'subtleforms'),
+};
 
 const SubmissionsTable = forwardRef(
   (
@@ -42,6 +50,8 @@ const SubmissionsTable = forwardRef(
       statusFilter = 'all',
       dateRange = 'all',
       fieldValue = '',
+      processingStatus = '',
+      visibleColumns,
     },
     ref
   ) => {
@@ -55,29 +65,8 @@ const SubmissionsTable = forwardRef(
     const [sortDirection, setSortDirection] = useState('desc');
     const [deleteModal, setDeleteModal] = useState(null);
     const [selectedSubmissions, setSelectedSubmissions] = useState([]);
-    const [showColPicker, setShowColPicker] = useState(false);
-    const colPickerRef = useRef(null);
-    const [visibleColumns, setVisibleColumns] = useState(() => {
-      try {
-        const saved = localStorage.getItem('sf_visible_cols');
-        return saved ? JSON.parse(saved) : DEFAULT_VISIBLE;
-      } catch {
-        return DEFAULT_VISIBLE;
-      }
-    });
     const { createSuccessNotice, createErrorNotice } =
       useDispatch(noticesStore);
-
-    // Close column picker when clicking outside
-    useEffect(() => {
-      const handleClickOutside = (e) => {
-        if (colPickerRef.current && !colPickerRef.current.contains(e.target)) {
-          setShowColPicker(false);
-        }
-      };
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
 
     useEffect(() => {
       loadSubmissions();
@@ -87,6 +76,7 @@ const SubmissionsTable = forwardRef(
       searchTerm,
       dateRange,
       fieldValue,
+      processingStatus,
       currentPage,
       perPage,
       sortBy,
@@ -96,7 +86,7 @@ const SubmissionsTable = forwardRef(
     useEffect(() => {
       // Reset to first page when filters change
       setCurrentPage(1);
-    }, [statusFilter, searchTerm, dateRange, fieldValue]);
+    }, [statusFilter, searchTerm, dateRange, fieldValue, processingStatus]);
 
     const getDateRangeParams = (range) => {
       const now = new Date();
@@ -152,6 +142,10 @@ const SubmissionsTable = forwardRef(
 
         if (fieldValue) {
           params.append('field_value', fieldValue);
+        }
+
+        if (processingStatus) {
+          params.append('processing_status', processingStatus);
         }
 
         // Add date range filter
@@ -286,16 +280,41 @@ const SubmissionsTable = forwardRef(
       }
     };
 
-    const handleBulkMarkStatus = async (ids, status) => {
-      setSubmissions((prev) =>
-        prev.map((s) => (ids.includes(s.id) ? { ...s, status } : s))
-      );
+    const handleBulkMarkStatus = async (ids, actionType) => {
+      // Map action type to the correct field update
+      const isReadActions = { read: 1, unread: 0 };
+      const adminStatusActions = ['spam', 'flagged', 'archived'];
+
+      let updatePayload;
+      if (actionType in isReadActions) {
+        updatePayload = { is_read: isReadActions[actionType] };
+        // Optimistic update
+        setSubmissions((prev) =>
+          prev.map((s) =>
+            ids.includes(s.id) ? { ...s, is_read: isReadActions[actionType] } : s
+          )
+        );
+      } else if (adminStatusActions.includes(actionType)) {
+        updatePayload = { status: actionType };
+        setSubmissions((prev) =>
+          prev.map((s) => (ids.includes(s.id) ? { ...s, status: actionType } : s))
+        );
+      } else if (actionType === 'restore') {
+        // Clear admin status override (unflag/unspam) — server sets status to null
+        updatePayload = { status: 'none' };
+        setSubmissions((prev) =>
+          prev.map((s) => (ids.includes(s.id) ? { ...s, status: null } : s))
+        );
+      } else {
+        return;
+      }
+
       setSelectedSubmissions([]);
 
       let successCount = 0;
       for (const id of ids) {
         try {
-          await apiClient.put(`/submissions/${id}`, { status });
+          await apiClient.put(`/submissions/${id}`, updatePayload);
           successCount++;
         } catch (_err) {
           // individual failure counted below
@@ -328,28 +347,13 @@ const SubmissionsTable = forwardRef(
       }
     };
 
-    const toggleColumn = (key) => {
-      setVisibleColumns((prev) => {
-        const next = prev.includes(key)
-          ? prev.filter((c) => c !== key)
-          : [...prev, key];
-        try {
-          localStorage.setItem('sf_visible_cols', JSON.stringify(next));
-        } catch {}
-        return next;
-      });
-    };
-
     const getRowClassName = (submission) => {
-      if (submission.status === 'unread') {
-        return 'sf-submissions-table__row--unread';
-      }
-      if (submission.status === 'spam') {
-        return 'sf-submissions-table__row--spam';
-      }
-      if (submission.status === 'flagged') {
-        return 'sf-submissions-table__row--flagged';
-      }
+      // Priority: spam/flagged > failed > payment_pending > unread
+      if (submission.status === 'spam') return 'sf-submissions-table__row--spam';
+      if (submission.status === 'flagged') return 'sf-submissions-table__row--flagged';
+      if (submission.status === 'failed') return 'sf-submissions-table__row--failed';
+      if (submission.status === 'payment_pending') return 'sf-submissions-table__row--payment-pending';
+      if (parseInt(submission.is_read, 10) === 0) return 'sf-submissions-table__row--unread';
       return '';
     };
 
@@ -443,7 +447,6 @@ const SubmissionsTable = forwardRef(
         key: 'id',
         title: __('ID', 'subtleforms'),
         sortable: true,
-        width: '8%',
         render: (id) => <strong>#{id}</strong>,
       },
       ...(showFormColumn
@@ -451,7 +454,6 @@ const SubmissionsTable = forwardRef(
             {
               key: 'form_title',
               title: __('Form', 'subtleforms'),
-              width: '18%',
               render: (formTitle, submission) =>
                 formTitle || submission.form_id,
             },
@@ -461,33 +463,55 @@ const SubmissionsTable = forwardRef(
         key: 'status',
         title: __('Status', 'subtleforms'),
         sortable: true,
-        width: '10%',
-        render: (status) => {
-          const variantMap = {
-            unread: 'unread',
-            read: 'read',
-            spam: 'spam',
-            flagged: 'flagged',
-            archived: 'read',
+        render: (status, submission) => {
+          // Admin-override statuses
+          if (status === 'spam' || status === 'flagged' || status === 'archived') {
+            const adminVariantMap = { spam: 'spam', flagged: 'flagged', archived: 'read' };
+            const adminLabelMap = {
+              spam: __('Spam', 'subtleforms'),
+              flagged: __('Flagged', 'subtleforms'),
+              archived: __('Archived', 'subtleforms'),
+            };
+            return (
+              <span
+                className={clsx(
+                  'sf-submissions-table__status-badge',
+                  `sf-submissions-table__status-badge--${adminVariantMap[status]}`
+                )}>
+                {adminLabelMap[status]}
+              </span>
+            );
+          }
+
+          // Pipeline statuses — show processing result + unread dot
+          const pipelineVariantMap = {
+            completed: 'completed',
+            failed: 'failed',
+            payment_pending: 'payment-pending',
+            processing: 'processing',
+            saved: 'processing',
           };
-          const labelMap = {
-            unread: __('New', 'subtleforms'),
-            read: __('Read', 'subtleforms'),
-            spam: __('Spam', 'subtleforms'),
-            flagged: __('Flagged', 'subtleforms'),
-            archived: __('Archived', 'subtleforms'),
+          const pipelineLabelMap = {
+            completed: __('Completed', 'subtleforms'),
+            failed: __('Failed', 'subtleforms'),
+            payment_pending: __('Awaiting Payment', 'subtleforms'),
+            processing: __('Processing', 'subtleforms'),
+            saved: __('Saved', 'subtleforms'),
           };
-          const variant = variantMap[status] || 'read';
+          const variant = pipelineVariantMap[status] || 'processing';
+          const isUnread = parseInt(submission.is_read, 10) === 0;
           return (
-            <span
-              className={clsx(
-                'sf-submissions-table__status-badge',
-                `sf-submissions-table__status-badge--${variant}`
-              )}>
-              {status === 'unread' && (
-                <span className='sf-submissions-table__status-badge-indicator'></span>
+            <span className='sf-submissions-table__status-cell'>
+              {isUnread && (
+                <span className='sf-submissions-table__unread-dot' title={__('Unread', 'subtleforms')}></span>
               )}
-              {labelMap[status] || status}
+              <span
+                className={clsx(
+                  'sf-submissions-table__status-badge',
+                  `sf-submissions-table__status-badge--${variant}`
+                )}>
+                {pipelineLabelMap[status] || status}
+              </span>
             </span>
           );
         },
@@ -495,14 +519,12 @@ const SubmissionsTable = forwardRef(
       {
         key: 'browser',
         title: __('Browser', 'subtleforms'),
-        width: '12%',
         render: (_, submission) =>
           getBrowserDevice(submission.user_agent).browser,
       },
       {
         key: 'device',
         title: __('Device', 'subtleforms'),
-        width: '10%',
         render: (_, submission) =>
           getBrowserDevice(submission.user_agent).device,
       },
@@ -521,7 +543,6 @@ const SubmissionsTable = forwardRef(
       {
         key: 'actions',
         title: __('Actions', 'subtleforms'),
-        width: '15%',
         render: (_, submission) => (
           <div className='sf-submissions-table__actions'>
             <Button
@@ -539,7 +560,7 @@ const SubmissionsTable = forwardRef(
                 e.stopPropagation();
                 handleBulkMarkStatus(
                   [submission.id],
-                  submission.status === 'flagged' ? 'unread' : 'flagged'
+                  submission.status === 'flagged' ? 'restore' : 'flagged'
                 );
               }}
               title={
@@ -580,43 +601,8 @@ const SubmissionsTable = forwardRef(
       return <Notice status='error'>{error}</Notice>;
     }
 
-    const columnLabels = {
-      id: __('ID', 'subtleforms'),
-      form_title: __('Form', 'subtleforms'),
-      status: __('Status', 'subtleforms'),
-      browser: __('Browser', 'subtleforms'),
-      device: __('Device', 'subtleforms'),
-      created_at: __('Submitted', 'subtleforms'),
-    };
-
     return (
       <div className='submissions-table'>
-        <div className='sf-submissions-table__toolbar'>
-          <div ref={colPickerRef} className='sf-col-picker'>
-            <button
-              className='sf-col-picker__toggle'
-              onClick={() => setShowColPicker((v) => !v)}
-              title={__('Show/hide columns', 'subtleforms')}>
-              <Icon.Columns size={14} />
-              <span>{__('Columns', 'subtleforms')}</span>
-              <Icon.ChevronDown size={12} />
-            </button>
-            {showColPicker && (
-              <div className='sf-col-picker__dropdown'>
-                {ALL_COLUMNS.filter((k) => k !== 'actions').map((key) => (
-                  <label key={key} className='sf-col-picker__item'>
-                    <input
-                      type='checkbox'
-                      checked={visibleColumns.includes(key)}
-                      onChange={() => toggleColumn(key)}
-                    />
-                    <span>{columnLabels[key] || key}</span>
-                  </label>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
         <DataTable
           columns={columns}
           data={submissions}

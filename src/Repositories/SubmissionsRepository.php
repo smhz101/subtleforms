@@ -174,8 +174,18 @@ final class SubmissionsRepository {
 		}
 
 		if ( isset( $data['status'] ) ) {
-			$update_data['status'] = $data['status'];
-			$format[]              = '%s';
+			if ( $data['status'] === 'none' ) {
+				// 'none' clears admin status override — set to NULL in DB
+				$update_data['status'] = null;
+			} else {
+				$update_data['status'] = $data['status'];
+			}
+			$format[] = '%s';
+		}
+
+		if ( isset( $data['is_read'] ) ) {
+			$update_data['is_read'] = intval( $data['is_read'] );
+			$format[]               = '%d';
 		}
 
 		if ( empty( $update_data ) ) {
@@ -251,6 +261,7 @@ final class SubmissionsRepository {
 		$defaults = array(
 			'form_id'     => null,
 			'status'      => null,
+			'is_read'     => null,
 			'search'      => null,
 			'after'       => null,
 			'field_key'   => null,
@@ -274,6 +285,11 @@ final class SubmissionsRepository {
 		if ( $args['status'] && $args['status'] !== 'all' ) {
 			$where[]  = 'status = %s';
 			$params[] = $args['status'];
+		}
+
+		if ( $args['is_read'] !== null ) {
+			$where[]  = 'is_read = %d';
+			$params[] = intval( $args['is_read'] );
 		}
 
 		if ( $args['search'] ) {
@@ -311,7 +327,7 @@ final class SubmissionsRepository {
 		       // Fetch all columns needed for admin list (including payload/meta)
 		       // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name, orderby and order are whitelisted.
 				       $sql = sprintf(
-					       "SELECT id, form_id, status, created_at, payload, meta, ip_address, user_agent FROM {$this->table} %s ORDER BY %s %s LIMIT %%d OFFSET %%d",
+			       "SELECT id, form_id, status, is_read, created_at, payload, meta, ip_address, user_agent FROM {$this->table} %s ORDER BY %s %s LIMIT %%d OFFSET %%d",
 					       $whereClause,
 					       $orderby,
 					       $order
@@ -343,6 +359,7 @@ final class SubmissionsRepository {
 		$defaults = array(
 			'form_id'     => null,
 			'status'      => null,
+			'is_read'     => null,
 			'search'      => null,
 			'after'       => null,
 			'field_key'   => null,
@@ -362,6 +379,11 @@ final class SubmissionsRepository {
 		if ( $args['status'] && $args['status'] !== 'all' ) {
 			$where[]  = 'status = %s';
 			$params[] = $args['status'];
+		}
+
+		if ( isset( $args['is_read'] ) && $args['is_read'] !== null ) {
+			$where[]  = 'is_read = %d';
+			$params[] = intval( $args['is_read'] );
 		}
 
 		if ( $args['search'] ) {

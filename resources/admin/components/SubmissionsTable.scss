@@ -51,6 +51,24 @@
 		}
 	}
 
+	&__row--failed {
+		background-color: #fff1f1 !important;
+		box-shadow: inset 3px 0 0 #dc2626;
+
+		td {
+			color: var(--sf-slate-800);
+		}
+	}
+
+	&__row--payment-pending {
+		background-color: #fffbeb !important;
+		box-shadow: inset 3px 0 0 #f59e0b;
+
+		td {
+			color: var(--sf-slate-800);
+		}
+	}
+
 	&__status-badge {
 		display: inline-flex;
 		align-items: center;
@@ -81,6 +99,26 @@
 			color: #991b1b;
 		}
 
+		&--completed {
+			background-color: #d1fae5;
+			color: #065f46;
+		}
+
+		&--failed {
+			background-color: #fee2e2;
+			color: #991b1b;
+		}
+
+		&--payment-pending {
+			background-color: #fef3c7;
+			color: #92400e;
+		}
+
+		&--processing {
+			background-color: var(--sf-gray-100);
+			color: var(--sf-gray-600);
+		}
+
 		&-indicator {
 			background-color: var(--sf-surface);
 			border-radius: 9999px;
@@ -88,6 +126,22 @@
 			height: 0.5rem;
 			animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 		}
+	}
+
+	&__status-cell {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.375rem;
+	}
+
+	&__unread-dot {
+		display: inline-block;
+		width: 0.5rem;
+		height: 0.5rem;
+		border-radius: 9999px;
+		background-color: var(--sf-blue-500);
+		flex-shrink: 0;
+		animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
 	}
 
 	&__actions {

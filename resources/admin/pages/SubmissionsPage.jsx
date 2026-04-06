@@ -1,10 +1,10 @@
-import { useState, useRef } from '@wordpress/element';
+import { useState, useRef, useEffect } from '@wordpress/element';
 import { SearchControl, SelectControl } from '@wordpress/components';
 import { Button } from '../components/navigation';
 import { __, sprintf } from '@wordpress/i18n';
 import AdminShell from '../components/AdminShell';
 import TabBar from '../components/TabBar';
-import SubmissionsTable from '../components/SubmissionsTable';
+import SubmissionsTable, { ALL_COLUMNS, DEFAULT_VISIBLE, COLUMN_LABELS } from '../components/SubmissionsTable';
 import useRealTimeUpdates from '../hooks/useRealTimeUpdates';
 import { isProFeature, requirePro } from '../utils/featureGate';
 import { Icon } from '../components/ui';
@@ -23,9 +23,44 @@ export default function SubmissionsPage({ formId }) {
   const [fieldValue, setFieldValue] = useState('');
   const [debouncedFieldValue, setDebouncedFieldValue] = useState('');
   const fieldValueTimerRef = useRef(null);
+  const [processingStatus, setProcessingStatus] = useState('');
   const [showFilters, setShowFilters] = useState(false);
   const [exporting, setExporting] = useState(false);
   const submissionsTableRef = useRef(null);
+
+  // Column visibility — persisted to localStorage (domain-scoped, survives logout)
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sf_visible_cols');
+      return saved ? JSON.parse(saved) : DEFAULT_VISIBLE;
+    } catch {
+      return DEFAULT_VISIBLE;
+    }
+  });
+  const [showColPicker, setShowColPicker] = useState(false);
+  const colPickerRef = useRef(null);
+
+  const toggleColumn = (key) => {
+    setVisibleColumns((prev) => {
+      const next = prev.includes(key) ? prev.filter((c) => c !== key) : [...prev, key];
+      try {
+        localStorage.setItem('sf_visible_cols', JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  };
+
+  // Close column picker on outside click
+  useEffect(() => {
+    if (!showColPicker) return;
+    const handle = (e) => {
+      if (colPickerRef.current && !colPickerRef.current.contains(e.target)) {
+        setShowColPicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, [showColPicker]);
 
   const { data: formsData = [] } = useForms({}, { enabled: !formId });
 
@@ -79,7 +114,7 @@ export default function SubmissionsPage({ formId }) {
     { key: 'all', label: __('All', 'subtleforms') },
     {
       key: 'unread',
-      label: __('Unread', 'subtleforms'),
+      label: __('New', 'subtleforms'),
       count: unreadCount > 0 ? unreadCount : undefined,
     },
     { key: 'read', label: __('Read', 'subtleforms') },
@@ -113,7 +148,8 @@ export default function SubmissionsPage({ formId }) {
     statusFilter !== 'all' ||
     selectedFormId !== 'all' ||
     dateRange !== 'all' ||
-    fieldValue;
+    fieldValue ||
+    processingStatus;
 
   const clearFilters = () => {
     setSearch('');
@@ -122,6 +158,7 @@ export default function SubmissionsPage({ formId }) {
     setDateRange('all');
     setFieldValue('');
     setDebouncedFieldValue('');
+    setProcessingStatus('');
   };
 
   const getExportAfterDate = (range) => {
@@ -204,6 +241,31 @@ export default function SubmissionsPage({ formId }) {
       }
       actionBarRight={
         <div className='sf-submissions-actions'>
+          <div ref={colPickerRef} className='sf-col-picker'>
+            <Button
+              variant='secondary'
+              onClick={() => setShowColPicker((v) => !v)}
+              className='sf-button-height sf-col-picker__toggle'
+              title={__('Show/hide columns', 'subtleforms')}>
+              <Icon.Columns size={14} />
+              <span>{__('Columns', 'subtleforms')}</span>
+              <Icon.ChevronDown size={12} />
+            </Button>
+            {showColPicker && (
+              <div className='sf-col-picker__dropdown'>
+                {ALL_COLUMNS.filter((k) => k !== 'actions').map((key) => (
+                  <label key={key} className='sf-col-picker__item'>
+                    <input
+                      type='checkbox'
+                      checked={visibleColumns.includes(key)}
+                      onChange={() => toggleColumn(key)}
+                    />
+                    <span>{COLUMN_LABELS[key] || key}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
           <Button
             variant='secondary'
             onClick={() => requirePro('submissions.export', exportSubmissions)}
@@ -255,6 +317,20 @@ export default function SubmissionsPage({ formId }) {
             className='sf-filter-control'
             style={{ minWidth: '200px' }}
           />
+          <SelectControl
+            label={__('Result', 'subtleforms')}
+            value={processingStatus}
+            options={[
+              { label: __('All results', 'subtleforms'), value: '' },
+              { label: __('Completed', 'subtleforms'), value: 'completed' },
+              { label: __('Failed', 'subtleforms'), value: 'failed' },
+              { label: __('Awaiting Payment', 'subtleforms'), value: 'payment_pending' },
+              { label: __('Processing', 'subtleforms'), value: 'processing' },
+            ]}
+            onChange={setProcessingStatus}
+            className='sf-filter-control'
+            style={{ minWidth: '180px' }}
+          />
           {hasActiveFilters && (
             <Button
               variant='link'
@@ -267,7 +343,7 @@ export default function SubmissionsPage({ formId }) {
           {showFilters && (
             <div className='sf-filter-field-search'>
               <label className='sf-filter-field-search__label'>
-                {__('Payload contains', 'subtleforms')}
+                {__('Search responses', 'subtleforms')}
               </label>
               <input
                 type='text'
@@ -289,6 +365,8 @@ export default function SubmissionsPage({ formId }) {
         statusFilter={statusFilter}
         dateRange={dateRange}
         fieldValue={debouncedFieldValue}
+        processingStatus={processingStatus}
+        visibleColumns={visibleColumns}
       />
 
 

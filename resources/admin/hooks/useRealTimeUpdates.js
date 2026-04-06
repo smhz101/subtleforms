@@ -55,9 +55,9 @@ export function useRealTimeUpdates(options = {}) {
           onUnreadCountChangeRef.current(newCount, previousCount);
         }
 
-        // If count decreased, it might mean submissions were read
-        // Trigger submissions update to refresh the list
-        if (newCount < previousCount && onSubmissionsUpdateRef.current) {
+        // Refresh submissions list on any count change:
+        // increase = new submission arrived, decrease = submission was read/deleted
+        if (onSubmissionsUpdateRef.current) {
           onSubmissionsUpdateRef.current();
         }
       }
