@@ -416,6 +416,85 @@ final class CoreFields {
 			)
 		);
 
+		// 'select' is the canonical type used by templates (alias of dropdown).
+		// Registers inspector controls so the panel shows label/placeholder settings.
+		$registry->register(
+			new FieldDefinition(
+				type: 'select',
+				label: __( 'Select', 'subtleforms' ),
+				category: 'choices',
+				icon: 'dashicons-arrow-down-alt2',
+				kind: 'input',
+				baseAttributes: array(),
+				fieldSpecificAttributes: array(
+					'placeholder' => 'Select an option',
+					'options'     => array(),
+				),
+				inspectorControls: array(
+					array(
+						'type'  => 'text',
+						'name'  => 'label',
+						'label' => __( 'Label', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'text',
+						'name'  => 'placeholder',
+						'label' => __( 'Placeholder', 'subtleforms' ),
+					),
+				),
+				meta: array( 'category' => 'regular' ),
+			)
+		);
+
+		// 'tel' is the HTML5 input type name for phone fields, used by templates.
+		// Registers inspector controls identical to 'phone'.
+		$registry->register(
+			new FieldDefinition(
+				type: 'tel',
+				label: __( 'Phone', 'subtleforms' ),
+				category: 'basic',
+				icon: 'dashicons-phone',
+				kind: 'input',
+				baseAttributes: array(),
+				fieldSpecificAttributes: array(
+					'placeholder' => '',
+					'format'      => 'international',
+				),
+				inspectorControls: array(
+					array(
+						'type'  => 'text',
+						'name'  => 'label',
+						'label' => __( 'Label', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'text',
+						'name'  => 'placeholder',
+						'label' => __( 'Placeholder', 'subtleforms' ),
+					),
+					array(
+						'type'    => 'select',
+						'name'    => 'format',
+						'label'   => __( 'Format', 'subtleforms' ),
+						'options' => array(
+							array(
+								'value' => 'international',
+								'label' => __( 'International', 'subtleforms' ),
+							),
+							array(
+								'value' => 'us',
+								'label' => __( 'US', 'subtleforms' ),
+							),
+							array(
+								'value' => 'custom',
+								'label' => __( 'Custom', 'subtleforms' ),
+							),
+						),
+					),
+				),
+				meta: array( 'category' => 'regular' ),
+			)
+		);
+
 		// Country Field - with full ISO-3166 country list
 		$registry->register(
 			new FieldDefinition(
