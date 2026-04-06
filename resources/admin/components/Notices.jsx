@@ -1,7 +1,7 @@
 import { useSelect, useDispatch } from '@wordpress/data';
 import { NoticeList, SnackbarList } from '@wordpress/components';
 import { store as noticesStore } from '@wordpress/notices';
-import { createPortal } from '@wordpress/element';
+import { createPortal, useMemo } from '@wordpress/element';
 import './Notices.scss';
 
 export default function Notices() {
@@ -12,6 +12,14 @@ export default function Notices() {
   const snackbarNotices = notices.filter(
     (notice) => notice.type === 'snackbar'
   );
+
+  // Compute left offset to align with the WP content area (accounts for sidebar width).
+  // getBoundingClientRect() on #wpcontent gives the viewport-relative left edge.
+  const snackbarLeft = useMemo(() => {
+    const el = document.getElementById('wpcontent');
+    if (!el) return 20;
+    return el.getBoundingClientRect().left + 20;
+  }, [snackbarNotices.length]);
 
   return (
     <>
@@ -26,25 +34,21 @@ export default function Notices() {
         </div>
       )}
 
-      {/* Snackbars - fixed bottom portal */}
+      {/* Snackbars - fixed bottom-left portal, aligned to WP content area */}
       {snackbarNotices.length > 0 &&
         createPortal(
           <div
             style={{
               position: 'fixed',
               bottom: '24px',
-              left: '50%',
-              transform: 'translateX(-50%)',
+              left: `${snackbarLeft}px`,
               zIndex: 100000,
-              pointerEvents: 'none',
             }}>
-            <div style={{ pointerEvents: 'auto' }}>
-              <SnackbarList
-                className='subtleforms-snackbars'
-                notices={snackbarNotices}
-                onRemove={removeNotice}
-              />
-            </div>
+            <SnackbarList
+              className='subtleforms-snackbars'
+              notices={snackbarNotices}
+              onRemove={removeNotice}
+            />
           </div>,
           document.body
         )}
