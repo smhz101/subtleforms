@@ -79,6 +79,9 @@ import {
   Star,
   Sliders,
   LayoutGrid,
+  ArrowDown,
+  ShieldCheck,
+  Loader2,
 } from 'lucide-react';
 
 /**
@@ -122,6 +125,8 @@ const Icon = {
   More: MoreVertical,
   Loader,
   Loading: Loader,
+  Spinner: Loader2,
+  ArrowDown,
   Square,
 
   // Status & Feedback
@@ -129,6 +134,7 @@ const Icon = {
   AlertCircle,
   HelpCircle,
   Help: HelpCircle,
+  ShieldCheck,
 
   // Content Types
   FileText,

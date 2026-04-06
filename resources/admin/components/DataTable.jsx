@@ -267,7 +267,7 @@ const DataTable = memo(function DataTable({
                       </td>
                     )}
                     {columns.map((column) => (
-                      <td key={column.key}>
+                      <td key={column.key} data-column={column.key}>
                         {column.render
                           ? column.render(row[column.key], row)
                           : row[column.key]}
@@ -301,7 +301,7 @@ const DataTable = memo(function DataTable({
                     </td>
                   )}
                   {columns.map((column) => (
-                    <td key={column.key}>
+                    <td key={column.key} data-column={column.key}>
                       {column.render
                         ? column.render(row[column.key], row)
                         : row[column.key]}

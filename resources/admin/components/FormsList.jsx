@@ -400,7 +400,7 @@ export default function FormsList({
     },
     {
       key: 'actions',
-      title: __('Actions', 'subtleforms'),
+      title: null,
       render: (_, form) => (
         <div className='subtleforms-row-actions'>
           <button

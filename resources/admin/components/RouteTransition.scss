@@ -27,6 +27,7 @@
 .sf-route-transition__spinner-circle {
 	animation: sf-spin 1s linear infinite;
 	transform-origin: center;
+	transform-box: fill-box;
 }
 
 .sf-route-transition__text {

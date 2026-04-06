@@ -197,23 +197,41 @@
 	// Row actions
 	.subtleforms-row-actions {
 		display: flex;
+		align-items: center;
+		justify-content: flex-end;
 		gap: 0.25rem;
 
 		.sf-row-action-btn {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
 			padding: 0.25rem;
+			background: transparent;
+			border: none;
 			border-radius: 0.25rem;
-			transition: background-color 0.2s;
+			cursor: pointer;
+			color: var(--sf-gray-500);
+			line-height: 1;
+			transition: background-color 0.15s, color 0.15s;
 
 			&:hover {
 				background-color: var(--sf-gray-100);
+				color: var(--sf-gray-700);
 			}
 
 			svg {
+				display: block;
 				width: 1rem;
 				height: 1rem;
-				color: var(--sf-gray-600);
 			}
 		}
+	}
+
+	// Actions column cell — no wrap, right-align
+	[data-column="actions"] {
+		white-space: nowrap;
+		text-align: right;
+		width: 1%;
 	}
 
 	// Dropdown menu items

@@ -11,6 +11,7 @@
 import { Component } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Spinner } from '@wordpress/components';
+import Icon from './ui/Icon';
 import './PageErrorBoundary.scss';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -183,11 +184,7 @@ export class PageErrorBoundary extends Component {
 
 						{/* Error Icon */}
 						<div className="sf-page-error-boundary__icon" aria-hidden="true">
-							<svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-								<circle cx="12" cy="12" r="10" strokeWidth="2" />
-								<line x1="12" y1="8" x2="12" y2="12" strokeWidth="2" strokeLinecap="round" />
-								<circle cx="12" cy="16" r="1" fill="currentColor" />
-							</svg>
+							<Icon.AlertCircle size={64} />
 						</div>
 
 						{/* Error Message */}
