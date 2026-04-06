@@ -1,6 +1,7 @@
 import {
   useState,
   useEffect,
+  useRef,
   forwardRef,
   useImperativeHandle,
 } from '@wordpress/element';
@@ -20,12 +21,16 @@ import DataTable from './DataTable';
 import { ConfirmModal } from '../modals';
 import { buildApiUrl } from '../utils/api';
 import { apiClient } from '../data';
+import { Icon } from './ui';
 import './SubmissionsTable.scss';
 
 const restNonce =
   window.subtleformsAdmin && window.subtleformsAdmin.restNonce
     ? window.subtleformsAdmin.restNonce
     : null;
+
+const ALL_COLUMNS = ['id', 'form_title', 'status', 'browser', 'device', 'created_at', 'actions'];
+const DEFAULT_VISIBLE = ['id', 'form_title', 'status', 'created_at', 'actions'];
 
 const SubmissionsTable = forwardRef(
   (
@@ -36,6 +41,7 @@ const SubmissionsTable = forwardRef(
       searchTerm,
       statusFilter = 'all',
       dateRange = 'all',
+      fieldValue = '',
     },
     ref
   ) => {
@@ -49,8 +55,29 @@ const SubmissionsTable = forwardRef(
     const [sortDirection, setSortDirection] = useState('desc');
     const [deleteModal, setDeleteModal] = useState(null);
     const [selectedSubmissions, setSelectedSubmissions] = useState([]);
+    const [showColPicker, setShowColPicker] = useState(false);
+    const colPickerRef = useRef(null);
+    const [visibleColumns, setVisibleColumns] = useState(() => {
+      try {
+        const saved = localStorage.getItem('sf_visible_cols');
+        return saved ? JSON.parse(saved) : DEFAULT_VISIBLE;
+      } catch {
+        return DEFAULT_VISIBLE;
+      }
+    });
     const { createSuccessNotice, createErrorNotice } =
       useDispatch(noticesStore);
+
+    // Close column picker when clicking outside
+    useEffect(() => {
+      const handleClickOutside = (e) => {
+        if (colPickerRef.current && !colPickerRef.current.contains(e.target)) {
+          setShowColPicker(false);
+        }
+      };
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }, []);
 
     useEffect(() => {
       loadSubmissions();
@@ -59,6 +86,7 @@ const SubmissionsTable = forwardRef(
       statusFilter,
       searchTerm,
       dateRange,
+      fieldValue,
       currentPage,
       perPage,
       sortBy,
@@ -68,7 +96,7 @@ const SubmissionsTable = forwardRef(
     useEffect(() => {
       // Reset to first page when filters change
       setCurrentPage(1);
-    }, [statusFilter, searchTerm, dateRange]);
+    }, [statusFilter, searchTerm, dateRange, fieldValue]);
 
     const getDateRangeParams = (range) => {
       const now = new Date();
@@ -120,6 +148,10 @@ const SubmissionsTable = forwardRef(
 
         if (searchTerm) {
           params.append('search', searchTerm);
+        }
+
+        if (fieldValue) {
+          params.append('field_value', fieldValue);
         }
 
         // Add date range filter
@@ -296,9 +328,27 @@ const SubmissionsTable = forwardRef(
       }
     };
 
+    const toggleColumn = (key) => {
+      setVisibleColumns((prev) => {
+        const next = prev.includes(key)
+          ? prev.filter((c) => c !== key)
+          : [...prev, key];
+        try {
+          localStorage.setItem('sf_visible_cols', JSON.stringify(next));
+        } catch {}
+        return next;
+      });
+    };
+
     const getRowClassName = (submission) => {
       if (submission.status === 'unread') {
         return 'sf-submissions-table__row--unread';
+      }
+      if (submission.status === 'spam') {
+        return 'sf-submissions-table__row--spam';
+      }
+      if (submission.status === 'flagged') {
+        return 'sf-submissions-table__row--flagged';
       }
       return '';
     };
@@ -373,8 +423,22 @@ const SubmissionsTable = forwardRef(
       return { browser, device };
     };
 
+    const formatAbsDate = (dateString) => {
+      try {
+        return new Intl.DateTimeFormat(undefined, {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(new Date(dateString));
+      } catch {
+        return dateString;
+      }
+    };
+
     // Define table columns
-    const columns = [
+    const allColumns = [
       {
         key: 'id',
         title: __('ID', 'subtleforms'),
@@ -387,7 +451,7 @@ const SubmissionsTable = forwardRef(
             {
               key: 'form_title',
               title: __('Form', 'subtleforms'),
-              width: '20%',
+              width: '18%',
               render: (formTitle, submission) =>
                 formTitle || submission.form_id,
             },
@@ -398,42 +462,60 @@ const SubmissionsTable = forwardRef(
         title: __('Status', 'subtleforms'),
         sortable: true,
         width: '10%',
-        render: (status) => (
-          <span
-            className={clsx(
-              'sf-submissions-table__status-badge',
-              status === 'unread'
-                ? 'sf-submissions-table__status-badge--unread'
-                : 'sf-submissions-table__status-badge--read'
-            )}>
-            {status === 'unread' && (
-              <span className='sf-submissions-table__status-badge-indicator'></span>
-            )}
-            {status === 'unread'
-              ? __('New', 'subtleforms')
-              : __('Read', 'subtleforms')}
-          </span>
-        ),
+        render: (status) => {
+          const variantMap = {
+            unread: 'unread',
+            read: 'read',
+            spam: 'spam',
+            flagged: 'flagged',
+            archived: 'read',
+          };
+          const labelMap = {
+            unread: __('New', 'subtleforms'),
+            read: __('Read', 'subtleforms'),
+            spam: __('Spam', 'subtleforms'),
+            flagged: __('Flagged', 'subtleforms'),
+            archived: __('Archived', 'subtleforms'),
+          };
+          const variant = variantMap[status] || 'read';
+          return (
+            <span
+              className={clsx(
+                'sf-submissions-table__status-badge',
+                `sf-submissions-table__status-badge--${variant}`
+              )}>
+              {status === 'unread' && (
+                <span className='sf-submissions-table__status-badge-indicator'></span>
+              )}
+              {labelMap[status] || status}
+            </span>
+          );
+        },
       },
       {
-        key: 'user_agent',
+        key: 'browser',
         title: __('Browser', 'subtleforms'),
-        width: '15%',
-        render: (userAgent) => getBrowserDevice(userAgent).browser,
+        width: '12%',
+        render: (_, submission) =>
+          getBrowserDevice(submission.user_agent).browser,
       },
       {
-        key: 'user_agent',
+        key: 'device',
         title: __('Device', 'subtleforms'),
         width: '10%',
-        render: (userAgent) => getBrowserDevice(userAgent).device,
+        render: (_, submission) =>
+          getBrowserDevice(submission.user_agent).device,
       },
       {
         key: 'created_at',
         title: __('Submitted', 'subtleforms'),
         sortable: true,
-        width: '20%',
+        width: '18%',
         render: (createdAt) => (
-          <span title={createdAt}>{getRelativeTime(createdAt)}</span>
+          <span className='sf-sub-time'>
+            <span className='sf-sub-time__rel'>{getRelativeTime(createdAt)}</span>
+            <span className='sf-sub-time__abs'>{formatAbsDate(createdAt)}</span>
+          </span>
         ),
       },
       {
@@ -452,6 +534,27 @@ const SubmissionsTable = forwardRef(
               {__('View', 'subtleforms')}
             </Button>
             <Button
+              isSmall
+              onClick={(e) => {
+                e.stopPropagation();
+                handleBulkMarkStatus(
+                  [submission.id],
+                  submission.status === 'flagged' ? 'unread' : 'flagged'
+                );
+              }}
+              title={
+                submission.status === 'flagged'
+                  ? __('Unflag submission', 'subtleforms')
+                  : __('Flag submission', 'subtleforms')
+              }
+              className={clsx(
+                'sf-submissions-table__flag-btn',
+                submission.status === 'flagged' &&
+                  'sf-submissions-table__flag-btn--active'
+              )}>
+              <Icon.AlertCircle size={13} />
+            </Button>
+            <Button
               isDestructive
               isSmall
               onClick={(e) => {
@@ -465,12 +568,55 @@ const SubmissionsTable = forwardRef(
       },
     ];
 
+    // Filter to visible columns (always show actions)
+    const columns = allColumns.filter(
+      (col) =>
+        col.key === 'actions' ||
+        visibleColumns.includes(col.key) ||
+        (col.key === 'form_title' && showFormColumn && visibleColumns.includes('form_title'))
+    );
+
     if (error) {
       return <Notice status='error'>{error}</Notice>;
     }
 
+    const columnLabels = {
+      id: __('ID', 'subtleforms'),
+      form_title: __('Form', 'subtleforms'),
+      status: __('Status', 'subtleforms'),
+      browser: __('Browser', 'subtleforms'),
+      device: __('Device', 'subtleforms'),
+      created_at: __('Submitted', 'subtleforms'),
+    };
+
     return (
       <div className='submissions-table'>
+        <div className='sf-submissions-table__toolbar'>
+          <div ref={colPickerRef} className='sf-col-picker'>
+            <button
+              className='sf-col-picker__toggle'
+              onClick={() => setShowColPicker((v) => !v)}
+              title={__('Show/hide columns', 'subtleforms')}>
+              <Icon.Columns size={14} />
+              <span>{__('Columns', 'subtleforms')}</span>
+              <Icon.ChevronDown size={12} />
+            </button>
+            {showColPicker && (
+              <div className='sf-col-picker__dropdown'>
+                {ALL_COLUMNS.filter((k) => k !== 'actions').map((key) => (
+                  <label key={key} className='sf-col-picker__item'>
+                    <input
+                      type='checkbox'
+                      checked={visibleColumns.includes(key)}
+                      onChange={() => toggleColumn(key)}
+                    />
+                    <span>{columnLabels[key] || key}</span>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
         <DataTable
           columns={columns}
           data={submissions}
@@ -497,6 +643,14 @@ const SubmissionsTable = forwardRef(
             {
               label: __('Mark as Unread', 'subtleforms'),
               onClick: (ids) => handleBulkMarkStatus(ids, 'unread'),
+            },
+            {
+              label: __('Mark as Spam', 'subtleforms'),
+              onClick: (ids) => handleBulkMarkStatus(ids, 'spam'),
+            },
+            {
+              label: __('Mark as Flagged', 'subtleforms'),
+              onClick: (ids) => handleBulkMarkStatus(ids, 'flagged'),
             },
             {
               label: __('Delete', 'subtleforms'),

@@ -249,13 +249,16 @@ final class SubmissionsRepository {
 		$start = \SubtleForms\Support\QueryInstrumentation::start( __METHOD__ );
 
 		$defaults = array(
-			'form_id' => null,
-			'status'  => null,
-			'search'  => null,
-			'limit'   => 20,
-			'offset'  => 0,
-			'orderby' => 'created_at',
-			'order'   => 'DESC',
+			'form_id'     => null,
+			'status'      => null,
+			'search'      => null,
+			'after'       => null,
+			'field_key'   => null,
+			'field_value' => null,
+			'limit'       => 20,
+			'offset'      => 0,
+			'orderby'     => 'created_at',
+			'order'       => 'DESC',
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -278,6 +281,23 @@ final class SubmissionsRepository {
 			$where[]    = '(id LIKE %s OR payload LIKE %s OR meta LIKE %s)';
 			$params[]   = $searchTerm;
 			$params[]   = $searchTerm;
+			$params[]   = $searchTerm;
+		}
+
+		if ( $args['after'] ) {
+			$where[]  = 'created_at >= %s';
+			$params[] = sanitize_text_field( $args['after'] ) . ' 00:00:00';
+		}
+
+		if ( $args['field_key'] && $args['field_value'] ) {
+			$field_key   = preg_replace( '/[^a-zA-Z0-9_\-]/', '', $args['field_key'] );
+			$field_value = '%' . $wpdb->esc_like( $args['field_value'] ) . '%';
+			// Use LIKE on payload JSON string for broad compatibility
+			$where[]  = 'payload LIKE %s';
+			$params[] = $field_value;
+		} elseif ( $args['field_value'] && ! $args['field_key'] ) {
+			$searchTerm = '%' . $wpdb->esc_like( $args['field_value'] ) . '%';
+			$where[]    = 'payload LIKE %s';
 			$params[]   = $searchTerm;
 		}
 
@@ -321,9 +341,12 @@ final class SubmissionsRepository {
 		global $wpdb;
 
 		$defaults = array(
-			'form_id' => null,
-			'status'  => null,
-			'search'  => null,
+			'form_id'     => null,
+			'status'      => null,
+			'search'      => null,
+			'after'       => null,
+			'field_key'   => null,
+			'field_value' => null,
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -346,6 +369,17 @@ final class SubmissionsRepository {
 			$where[]    = '(id LIKE %s OR payload LIKE %s OR meta LIKE %s)';
 			$params[]   = $searchTerm;
 			$params[]   = $searchTerm;
+			$params[]   = $searchTerm;
+		}
+
+		if ( $args['after'] ) {
+			$where[]  = 'created_at >= %s';
+			$params[] = sanitize_text_field( $args['after'] ) . ' 00:00:00';
+		}
+
+		if ( $args['field_value'] ) {
+			$searchTerm = '%' . $wpdb->esc_like( $args['field_value'] ) . '%';
+			$where[]    = 'payload LIKE %s';
 			$params[]   = $searchTerm;
 		}
 

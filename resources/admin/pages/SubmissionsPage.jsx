@@ -20,6 +20,9 @@ export default function SubmissionsPage({ formId }) {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedFormId, setSelectedFormId] = useState(formId || 'all');
   const [dateRange, setDateRange] = useState('all');
+  const [fieldValue, setFieldValue] = useState('');
+  const [debouncedFieldValue, setDebouncedFieldValue] = useState('');
+  const fieldValueTimerRef = useRef(null);
   const [showFilters, setShowFilters] = useState(false);
   const [exporting, setExporting] = useState(false);
   const submissionsTableRef = useRef(null);
@@ -60,14 +63,28 @@ export default function SubmissionsPage({ formId }) {
     }, 300);
   };
 
+  const handleFieldValueChange = (value) => {
+    setFieldValue(value);
+    clearTimeout(fieldValueTimerRef.current);
+    fieldValueTimerRef.current = setTimeout(() => {
+      setDebouncedFieldValue(value);
+    }, 400);
+  };
+
   const title = formId
     ? __('Form Submissions', 'subtleforms')
     : __('All Submissions', 'subtleforms');
 
   const tabs = [
     { key: 'all', label: __('All', 'subtleforms') },
-    { key: 'unread', label: __('Unread', 'subtleforms') },
+    {
+      key: 'unread',
+      label: __('Unread', 'subtleforms'),
+      count: unreadCount > 0 ? unreadCount : undefined,
+    },
     { key: 'read', label: __('Read', 'subtleforms') },
+    { key: 'spam', label: __('Spam', 'subtleforms') },
+    { key: 'flagged', label: __('Flagged', 'subtleforms') },
   ];
 
   const dateRangeOptions = [
@@ -95,13 +112,40 @@ export default function SubmissionsPage({ formId }) {
     search ||
     statusFilter !== 'all' ||
     selectedFormId !== 'all' ||
-    dateRange !== 'all';
+    dateRange !== 'all' ||
+    fieldValue;
 
   const clearFilters = () => {
     setSearch('');
     setStatusFilter('all');
     setSelectedFormId(formId || 'all');
     setDateRange('all');
+    setFieldValue('');
+    setDebouncedFieldValue('');
+  };
+
+  const getExportAfterDate = (range) => {
+    const now = new Date();
+    switch (range) {
+      case 'today':
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate())
+          .toISOString()
+          .split('T')[0];
+      case '7days':
+        return new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0];
+      case '30days':
+        return new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0];
+      case '3months':
+        return new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000)
+          .toISOString()
+          .split('T')[0];
+      default:
+        return null;
+    }
   };
 
   const exportSubmissions = async () => {
@@ -115,6 +159,7 @@ export default function SubmissionsPage({ formId }) {
           form_id: selectedFormId !== 'all' ? parseInt(selectedFormId) : null,
           status: statusFilter !== 'all' ? statusFilter : null,
           search: search || null,
+          after: getExportAfterDate(dateRange),
         },
       });
 
@@ -219,6 +264,20 @@ export default function SubmissionsPage({ formId }) {
               {__('Clear all filters', 'subtleforms')}
             </Button>
           )}
+          {showFilters && (
+            <div className='sf-filter-field-search'>
+              <label className='sf-filter-field-search__label'>
+                {__('Payload contains', 'subtleforms')}
+              </label>
+              <input
+                type='text'
+                className='sf-filter-field-search__input'
+                value={fieldValue}
+                onChange={(e) => handleFieldValueChange(e.target.value)}
+                placeholder={__('e.g. john@example.com', 'subtleforms')}
+              />
+            </div>
+          )}
         </div>
       )}
 
@@ -229,6 +288,7 @@ export default function SubmissionsPage({ formId }) {
         searchTerm={debouncedSearch}
         statusFilter={statusFilter}
         dateRange={dateRange}
+        fieldValue={debouncedFieldValue}
       />
 
 

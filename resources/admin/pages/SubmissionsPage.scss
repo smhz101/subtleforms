@@ -64,3 +64,39 @@
 	min-height: 0; // CRITICAL: allows flex child to shrink
 	overflow: hidden;
 }
+
+// Field value filter in filter bar
+.sf-filter-field-search {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+
+	&__label {
+		display: block;
+		font-size: 0.75rem;
+		font-weight: 500;
+		color: var(--sf-gray-600);
+		line-height: 1.4;
+	}
+
+	&__input {
+		height: 36px;
+		padding: 0 0.625rem;
+		font-size: 0.875rem;
+		border: 1px solid var(--sf-gray-300);
+		border-radius: 4px;
+		background: var(--sf-surface, #fff);
+		color: var(--sf-gray-900);
+		min-width: 200px;
+
+		&:focus {
+			outline: none;
+			border-color: var(--sf-blue-500);
+			box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15);
+		}
+
+		&::placeholder {
+			color: var(--sf-gray-400);
+		}
+	}
+}
