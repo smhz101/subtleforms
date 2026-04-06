@@ -27,20 +27,20 @@ export default function HelpMenu({
         <MenuGroup>
           {onStartTour && (
             <MenuItem
-              icon={<Icon.Play className='sf-help-menu__menu-icon' />}
+              icon={<Icon.Play size={16} />}
               onClick={onStartTour}>
               {__('Start Tour', 'subtleforms')}
             </MenuItem>
           )}
           {showWizard && onOpenWizard && (
             <MenuItem
-              icon={<Icon.Zap className='sf-help-menu__menu-icon' />}
+              icon={<Icon.Zap size={16} />}
               onClick={onOpenWizard}>
               {__('Quick Start Wizard', 'subtleforms')}
             </MenuItem>
           )}
           <MenuItem
-            icon={<Icon.Book className='sf-help-menu__menu-icon' />}
+              icon={<Icon.Book size={16} />}
             onClick={() => {
               // Placeholder for documentation
               window.open('https://subtleforms.com/docs', '_blank');

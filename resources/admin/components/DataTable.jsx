@@ -2,6 +2,7 @@ import { memo, useRef } from '@wordpress/element';
 import { Button, SelectControl, CheckboxControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import Icon from './ui/Icon';
 import TableSkeleton from './TableSkeleton';
 import './DataTable.scss';
 
@@ -103,13 +104,13 @@ const DataTable = memo(function DataTable({
     if (sortBy !== column.key) {
       return (
         <span className='sf-data-table__sort-indicator sf-data-table__sort-indicator--inactive'>
-          ⬍
+          <Icon.ChevronsUpDown size={12} />
         </span>
       );
     }
     return (
       <span className='sf-data-table__sort-indicator sf-data-table__sort-indicator--active'>
-        {sortDirection === 'asc' ? '↑' : '↓'}
+        {sortDirection === 'asc' ? <Icon.ChevronUp size={12} /> : <Icon.ChevronDown size={12} />}
       </span>
     );
   };

@@ -234,22 +234,6 @@
 		width: 1%;
 	}
 
-	// Dropdown menu items
-	.sf-menu-item {
-		display: flex;
-		align-items: center;
-		gap: 0.5rem;
-
-		&--danger {
-			color: var(--sf-red-600);
-		}
-
-		svg {
-			width: 1rem;
-			height: 1rem;
-		}
-	}
-
 	// Empty state
 	.sf-empty-state {
 		padding: 3rem 0;

@@ -427,50 +427,42 @@ export default function FormsList({
             renderContent={({ onClose }) => (
               <MenuGroup>
                 <MenuItem
+                  icon={<Icon.CheckCircle size={16} />}
                   onClick={(e) => {
                     if (e && e.stopPropagation) e.stopPropagation();
                     setStatusModal(form.id);
                     setStatusValue(form.status);
                     onClose();
                   }}>
-                  <div className='sf-menu-item'>
-                    <Icon.CheckCircle />
-                    {__('Change status', 'subtleforms')}
-                  </div>
+                  {__('Change status', 'subtleforms')}
                 </MenuItem>
                 <MenuItem
+                  icon={<Icon.Copy size={16} />}
                   onClick={(e) => {
                     if (e && e.stopPropagation) e.stopPropagation();
                     handleDuplicate(form.id);
                     onClose();
                   }}>
-                  <div className='sf-menu-item'>
-                    <Icon.Copy />
-                    {__('Duplicate', 'subtleforms')}
-                  </div>
+                  {__('Duplicate', 'subtleforms')}
                 </MenuItem>
                 <MenuItem
+                  icon={<Icon.Eye size={16} />}
                   onClick={(e) => {
                     if (e && e.stopPropagation) e.stopPropagation();
                     window.location.href = `admin.php?page=subtleforms-submissions&form_id=${form.id}`;
                     onClose();
                   }}>
-                  <div className='sf-menu-item'>
-                    <Icon.Eye />
-                    {__('View submissions', 'subtleforms')}
-                  </div>
+                  {__('View submissions', 'subtleforms')}
                 </MenuItem>
                 <MenuItem
+                  icon={<Icon.Delete size={16} />}
                   onClick={(e) => {
                     if (e && e.stopPropagation) e.stopPropagation();
                     setDeleteModal(form.id);
                     onClose();
                   }}
                   isDestructive>
-                  <div className='sf-menu-item sf-menu-item--danger'>
-                    <Icon.Delete />
-                    {__('Delete', 'subtleforms')}
-                  </div>
+                  {__('Delete', 'subtleforms')}
                 </MenuItem>
               </MenuGroup>
             )}

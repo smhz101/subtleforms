@@ -24,6 +24,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronsUpDown,
   Eye,
   HelpCircle,
   Zap,
@@ -117,6 +118,8 @@ const Icon = {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronsUpDown,
+  SortIcon: ChevronsUpDown,
 
   // UI Elements
   Eye,
