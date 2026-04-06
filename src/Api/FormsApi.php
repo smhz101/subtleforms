@@ -853,6 +853,10 @@ final class FormsApi {
 				$field['config']['providerName'] = $provider_name;
 			}
 
+			if ( ! empty( $field['fields'] ) && is_array( $field['fields'] ) ) {
+				$field['fields'] = $this->processCaptchaFields( $field['fields'], $captcha_html );
+			}
+
 			if ( ! empty( $field['children'] ) && is_array( $field['children'] ) ) {
 				$field['children'] = $this->processCaptchaFields( $field['children'], $captcha_html );
 			}

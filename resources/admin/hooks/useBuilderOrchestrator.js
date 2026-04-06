@@ -12,13 +12,13 @@
 import { useState, useRef, useCallback, useEffect } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import {
-  apiPost,
-  apiPut,
-  apiDelete,
-  isValidationError,
-  isRateLimitError,
-  isConflictError,
-  getFieldErrors,
+	apiPost,
+	apiPut,
+	apiDelete,
+	isValidationError,
+	isRateLimitError,
+	isConflictError,
+	getFieldErrors,
 } from '../utils/api';
 import { BUILDER_ACTIONS } from '../hooks/useBuilderReducer';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
@@ -36,7 +36,7 @@ import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
  * @param {Function} opts.forceAutosave      From useDraftAutosave
  * @param {boolean}  opts.hasValidationErrors From useBuilderValidation
  */
-export default function useBuilderOrchestrator( {
+export default function useBuilderOrchestrator({
 	builderState,
 	dispatch,
 	formId,
@@ -46,7 +46,7 @@ export default function useBuilderOrchestrator( {
 	onSaved,
 	navigate,
 	hasValidationErrors,
-} ) {
+}) {
 	const {
 		draftSchema,
 		formTitle: stateFormTitle,
@@ -65,19 +65,19 @@ export default function useBuilderOrchestrator( {
 	} = notices;
 
 	// ── Modal visibility ─────────────────────────────────────────────────
-	const [ showDeleteConfirm, setShowDeleteConfirm ] = useState( false );
-	const [ showPublishConfirm, setShowPublishConfirm ] = useState( false );
-	const [ showDiscardConfirm, setShowDiscardConfirm ] = useState( false );
+	const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+	const [showPublishConfirm, setShowPublishConfirm] = useState(false);
+	const [showDiscardConfirm, setShowDiscardConfirm] = useState(false);
 
 	// ── Refs ─────────────────────────────────────────────────────────────
-	const lastManualSaveRef = useRef( { targetStatus: null } );
-	const autoSaveTimeoutRef = useRef( null );
+	const lastManualSaveRef = useRef({ targetStatus: null });
+	const autoSaveTimeoutRef = useRef(null);
 
 	// ── Cleanup ──────────────────────────────────────────────────────────
 	useEffect(
 		() => () => {
-			if ( autoSaveTimeoutRef.current ) {
-				clearTimeout( autoSaveTimeoutRef.current );
+			if (autoSaveTimeoutRef.current) {
+				clearTimeout(autoSaveTimeoutRef.current);
 			}
 		},
 		[]
@@ -85,65 +85,65 @@ export default function useBuilderOrchestrator( {
 
 	// ── performSave ──────────────────────────────────────────────────────
 	const performSave = useCallback(
-		async ( { auto = false, targetStatus = null } = {} ) => {
-			if ( ! draftSchema ) {
+		async ({ auto = false, targetStatus = null } = {}) => {
+			if (!draftSchema) {
 				return;
 			}
 
-			if ( saving || autoSaving ) {
+			if (saving || autoSaving) {
 				return;
 			}
 
-			if ( autoSaveTimeoutRef.current ) {
-				clearTimeout( autoSaveTimeoutRef.current );
+			if (autoSaveTimeoutRef.current) {
+				clearTimeout(autoSaveTimeoutRef.current);
 				autoSaveTimeoutRef.current = null;
 			}
 
 			const resolvedFormId = currentFormId ?? formId;
-			if ( ! resolvedFormId ) {
-				const message = __( 'Form identifier missing', 'subtleforms' );
+			if (!resolvedFormId) {
+				const message = __('Form identifier missing', 'subtleforms');
 
-				dispatch( {
+				dispatch({
 					type: auto
 						? BUILDER_ACTIONS.AUTOSAVE_ERROR
 						: BUILDER_ACTIONS.PUBLISH_ERROR,
 					payload: { error: message },
-				} );
+				});
 
-				if ( ! auto ) {
-					removeNotice( SUCCESS_NOTICE_ID );
-					createErrorNotice( message, {
+				if (!auto) {
+					removeNotice(SUCCESS_NOTICE_ID);
+					createErrorNotice(message, {
 						id: ERROR_NOTICE_ID,
 						isDismissible: true,
 						type: 'snackbar',
-					} );
+					});
 				}
 				return;
 			}
 
 			// Dispatch start actions
-			if ( auto ) {
-				dispatch( { type: BUILDER_ACTIONS.START_AUTOSAVE } );
-			} else if ( targetStatus === 'published' ) {
-				dispatch( { type: BUILDER_ACTIONS.START_PUBLISH } );
+			if (auto) {
+				dispatch({ type: BUILDER_ACTIONS.START_AUTOSAVE });
+			} else if (targetStatus === 'published') {
+				dispatch({ type: BUILDER_ACTIONS.START_PUBLISH });
 			}
 
-			if ( ! auto ) {
+			if (!auto) {
 				lastManualSaveRef.current = { targetStatus };
 			}
 
 			try {
 				// Enrich schema with Pro markers before save
 				const enrichedSchema =
-					enrichSchemaWithProMarkers( draftSchema );
+					enrichSchemaWithProMarkers(draftSchema);
 
 				// Guarantee metadata.title is always non-empty before persisting.
 				// The server requires it when the form is published; setting it here
 				// prevents a round-trip 422 caused by a title missing from the schema.
-				if ( ! enrichedSchema.metadata ) {
+				if (!enrichedSchema.metadata) {
 					enrichedSchema.metadata = {};
 				}
-				if ( ! enrichedSchema.metadata.title ) {
+				if (!enrichedSchema.metadata.title) {
 					enrichedSchema.metadata.title = stateFormTitle || '';
 				}
 
@@ -151,14 +151,14 @@ export default function useBuilderOrchestrator( {
 					ok,
 					body,
 					status: saveStatus,
-				} = await apiPost( `/forms/${ resolvedFormId }/schema`, {
+				} = await apiPost(`/forms/${resolvedFormId}/schema`, {
 					schema: enrichedSchema,
-					activate: ! auto,
-				} );
+					activate: !auto,
+				});
 
-				if ( ! ok ) {
+				if (!ok) {
 					// HTTP 422 — Validation error
-					if ( isValidationError( { status: saveStatus } ) ) {
+					if (isValidationError({ status: saveStatus })) {
 						// Normalise across two API shapes:
 						//   new: { error: { meta: { fields: [...] } } }
 						//   old: { data: { errors: [...] } }  /  { errors: [...] }
@@ -176,10 +176,10 @@ export default function useBuilderOrchestrator( {
 						const fieldErrs = {}; // kept for compat
 
 						if (
-							! auto &&
+							!auto &&
 							maybeValidationErrors.length > 0
 						) {
-							dispatch( {
+							dispatch({
 								type: BUILDER_ACTIONS.PUBLISH_ERROR,
 								payload: {
 									error: {
@@ -194,11 +194,11 @@ export default function useBuilderOrchestrator( {
 										maybeValidationErrors
 									)
 										? maybeValidationErrors
-										: [ maybeValidationErrors ],
+										: [maybeValidationErrors],
 								},
-							} );
+							});
 
-							removeNotice( SUCCESS_NOTICE_ID );
+							removeNotice(SUCCESS_NOTICE_ID);
 							createErrorNotice(
 								__(
 									'Validation failed. Please fix the highlighted fields.',
@@ -216,13 +216,13 @@ export default function useBuilderOrchestrator( {
 					}
 
 					// HTTP 429 — Rate limit
-					if ( isRateLimitError( { status: saveStatus } ) ) {
+					if (isRateLimitError({ status: saveStatus })) {
 						const retryAfter =
 							body?.data?.retry_after ||
 							body?.retry_after ||
 							60;
 
-						dispatch( {
+						dispatch({
 							type: auto
 								? BUILDER_ACTIONS.AUTOSAVE_ERROR
 								: BUILDER_ACTIONS.PUBLISH_ERROR,
@@ -239,9 +239,9 @@ export default function useBuilderOrchestrator( {
 									retryAfter,
 								},
 							},
-						} );
+						});
 
-						removeNotice( SUCCESS_NOTICE_ID );
+						removeNotice(SUCCESS_NOTICE_ID);
 						createErrorNotice(
 							sprintf(
 								__(
@@ -260,12 +260,12 @@ export default function useBuilderOrchestrator( {
 					}
 
 					// HTTP 409 — Conflict
-					if ( isConflictError( { status: saveStatus } ) ) {
+					if (isConflictError({ status: saveStatus })) {
 						const currentETag = body?.data?.current_etag;
 						const providedIfMatch =
 							body?.data?.provided_if_match;
 
-						dispatch( {
+						dispatch({
 							type: auto
 								? BUILDER_ACTIONS.AUTOSAVE_ERROR
 								: BUILDER_ACTIONS.PUBLISH_ERROR,
@@ -280,9 +280,9 @@ export default function useBuilderOrchestrator( {
 									providedIfMatch,
 								},
 							},
-						} );
+						});
 
-						removeNotice( SUCCESS_NOTICE_ID );
+						removeNotice(SUCCESS_NOTICE_ID);
 						createErrorNotice(
 							__(
 								'Conflict detected. The form was modified elsewhere. Please reload.',
@@ -311,24 +311,24 @@ export default function useBuilderOrchestrator( {
 						body?.error?.message ||
 						body?.message ||
 						body?.data?.message ||
-						__( 'Failed to save form', 'subtleforms' );
-					throw new Error( message );
+						__('Failed to save form', 'subtleforms');
+					throw new Error(message);
 				}
 
 				// Update status if specified
-				if ( targetStatus && targetStatus !== formStatus ) {
+				if (targetStatus && targetStatus !== formStatus) {
 					const {
 						ok: statusOk,
 						body: statusBody,
 						status: statusCode,
-					} = await apiPut( `/forms/${ resolvedFormId }`, {
+					} = await apiPut(`/forms/${resolvedFormId}`, {
 						status: targetStatus,
-					} );
+					});
 
-					if ( ! statusOk ) {
+					if (!statusOk) {
 						// HTTP 422
 						if (
-							isValidationError( { status: statusCode } )
+							isValidationError({ status: statusCode })
 						) {
 							// Normalise across two API shapes:
 							//   new: { error: { meta: { fields: [...] } } }
@@ -350,7 +350,7 @@ export default function useBuilderOrchestrator( {
 								targetStatus === 'published' &&
 								maybeValidationErrors.length > 0
 							) {
-								dispatch( {
+								dispatch({
 									type: BUILDER_ACTIONS.PUBLISH_ERROR,
 									payload: {
 										error: {
@@ -365,11 +365,11 @@ export default function useBuilderOrchestrator( {
 											maybeValidationErrors
 										)
 											? maybeValidationErrors
-											: [ maybeValidationErrors ],
+											: [maybeValidationErrors],
 									},
-								} );
+								});
 
-								removeNotice( SUCCESS_NOTICE_ID );
+								removeNotice(SUCCESS_NOTICE_ID);
 								createErrorNotice(
 									__(
 										'Validation failed. Please fix the highlighted fields.',
@@ -387,14 +387,14 @@ export default function useBuilderOrchestrator( {
 
 						// HTTP 429
 						if (
-							isRateLimitError( { status: statusCode } )
+							isRateLimitError({ status: statusCode })
 						) {
 							const retryAfter =
 								statusBody?.data?.retry_after ||
 								statusBody?.retry_after ||
 								60;
 
-							dispatch( {
+							dispatch({
 								type: BUILDER_ACTIONS.PUBLISH_ERROR,
 								payload: {
 									error: {
@@ -409,9 +409,9 @@ export default function useBuilderOrchestrator( {
 										retryAfter,
 									},
 								},
-							} );
+							});
 
-							removeNotice( SUCCESS_NOTICE_ID );
+							removeNotice(SUCCESS_NOTICE_ID);
 							createErrorNotice(
 								sprintf(
 									__(
@@ -431,14 +431,14 @@ export default function useBuilderOrchestrator( {
 
 						// HTTP 409
 						if (
-							isConflictError( { status: statusCode } )
+							isConflictError({ status: statusCode })
 						) {
 							const currentETag =
 								statusBody?.data?.current_etag;
 							const providedIfMatch =
 								statusBody?.data?.provided_if_match;
 
-							dispatch( {
+							dispatch({
 								type: BUILDER_ACTIONS.PUBLISH_ERROR,
 								payload: {
 									error: {
@@ -451,9 +451,9 @@ export default function useBuilderOrchestrator( {
 										providedIfMatch,
 									},
 								},
-							} );
+							});
 
-							removeNotice( SUCCESS_NOTICE_ID );
+							removeNotice(SUCCESS_NOTICE_ID);
 							createErrorNotice(
 								__(
 									'Conflict detected. Please reload to see latest changes.',
@@ -485,27 +485,27 @@ export default function useBuilderOrchestrator( {
 								'Failed to update form status',
 								'subtleforms'
 							);
-						throw new Error( errorMessage );
+						throw new Error(errorMessage);
 					}
 				}
 
-				setCurrentFormId( resolvedFormId );
+				setCurrentFormId(resolvedFormId);
 
 				// Dispatch success
-				if ( targetStatus === 'published' ) {
-					dispatch( {
+				if (targetStatus === 'published') {
+					dispatch({
 						type: BUILDER_ACTIONS.PUBLISH_SUCCESS,
-					} );
-				} else if ( auto ) {
-					dispatch( {
+					});
+				} else if (auto) {
+					dispatch({
 						type: BUILDER_ACTIONS.AUTOSAVE_SUCCESS,
 						payload: { stillDirty: false },
-					} );
+					});
 				} else {
-					dispatch( {
+					dispatch({
 						type: BUILDER_ACTIONS.AUTOSAVE_SUCCESS,
 						payload: { stillDirty: false },
-					} );
+					});
 				}
 
 				const detail = {
@@ -513,16 +513,16 @@ export default function useBuilderOrchestrator( {
 					version: body?.version ?? null,
 				};
 				window.dispatchEvent(
-					new CustomEvent( 'subtleforms:form-saved', { detail } )
+					new CustomEvent('subtleforms:form-saved', { detail })
 				);
-				onSaved?.( detail );
+				onSaved?.(detail);
 
-				if ( ! auto ) {
-					removeNotice( ERROR_NOTICE_ID );
+				if (!auto) {
+					removeNotice(ERROR_NOTICE_ID);
 					createSuccessNotice(
 						targetStatus === 'published'
-							? __( 'Form published', 'subtleforms' )
-							: __( 'Form saved', 'subtleforms' ),
+							? __('Form published', 'subtleforms')
+							: __('Form saved', 'subtleforms'),
 						{
 							id: SUCCESS_NOTICE_ID,
 							isDismissible: true,
@@ -531,26 +531,26 @@ export default function useBuilderOrchestrator( {
 						}
 					);
 				}
-			} catch ( err ) {
+			} catch (err) {
 				const message =
 					err?.message ||
-					__( 'Failed to save form', 'subtleforms' );
+					__('Failed to save form', 'subtleforms');
 
-				dispatch( {
+				dispatch({
 					type: auto
 						? BUILDER_ACTIONS.AUTOSAVE_ERROR
 						: BUILDER_ACTIONS.PUBLISH_ERROR,
 					payload: { error: message },
-				} );
+				});
 
-				if ( ! auto ) {
-					removeNotice( SUCCESS_NOTICE_ID );
-					createErrorNotice( message, {
+				if (!auto) {
+					removeNotice(SUCCESS_NOTICE_ID);
+					createErrorNotice(message, {
 						id: ERROR_NOTICE_ID,
 						isDismissible: true,
 						type: 'snackbar',
 						actions: [],
-					} );
+					});
 				}
 			}
 		},
@@ -575,26 +575,26 @@ export default function useBuilderOrchestrator( {
 
 	// ── Convenience handlers ─────────────────────────────────────────────
 
-	const handleSave = useCallback( () => {
-		performSave( { auto: false } );
-	}, [ performSave ] );
+	const handleSave = useCallback(() => {
+		performSave({ auto: false });
+	}, [performSave]);
 
-	const handleSaveDraft = useCallback( () => {
-		performSave( { auto: false, targetStatus: 'draft' } );
-	}, [ performSave ] );
+	const handleSaveDraft = useCallback(() => {
+		performSave({ auto: false, targetStatus: 'draft' });
+	}, [performSave]);
 
 	/**
 	 * Bug 3 fix: walk the field tree and return true when at least one
 	 * non-container field exists (regular, multistep, and sectioned forms).
 	 */
-	function hasLeafFields( fields ) {
-		if ( ! Array.isArray( fields ) || fields.length === 0 ) {
+	function hasLeafFields(fields) {
+		if (!Array.isArray(fields) || fields.length === 0) {
 			return false;
 		}
-		const containerTypes = new Set( [ 'step', 'section', 'column', 'row', 'fieldset' ] );
-		for ( const field of fields ) {
-			if ( containerTypes.has( field.type ) ) {
-					if ( hasLeafFields( field.children || field.fields ) ) {
+		const containerTypes = new Set(['step', 'section', 'column', 'row', 'fieldset']);
+		for (const field of fields) {
+			if (containerTypes.has(field.type)) {
+				if (hasLeafFields(field.children || field.fields)) {
 					return true;
 				}
 			} else {
@@ -604,35 +604,35 @@ export default function useBuilderOrchestrator( {
 		return false;
 	}
 
-	const handlePublish = useCallback( () => {
+	const handlePublish = useCallback(() => {
 		// ── Bug 3: client-side pre-publish validation ──────────────────
 		const prePublishErrors = [];
 
 		// Check both the schema metadata title and the UI form title.
 		// They can diverge if the title was changed but not yet committed to the schema.
 		const title = (
-			( draftSchema?.metadata?.title || '' ) ||
-			( stateFormTitle || '' )
+			(draftSchema?.metadata?.title || '') ||
+			(stateFormTitle || '')
 		).trim();
-		if ( ! title ) {
-			prePublishErrors.push( {
+		if (!title) {
+			prePublishErrors.push({
 				path: 'metadata.title',
-				message: __( 'Form title is required.', 'subtleforms' ),
-			} );
+				message: __('Form title is required.', 'subtleforms'),
+			});
 		}
 
-		if ( ! hasLeafFields( draftSchema?.fields ) ) {
-			prePublishErrors.push( {
+		if (!hasLeafFields(draftSchema?.fields)) {
+			prePublishErrors.push({
 				path: 'fields',
 				message: __(
 					'Form must contain at least one field before publishing.',
 					'subtleforms'
 				),
-			} );
+			});
 		}
 
-		if ( prePublishErrors.length > 0 ) {
-			dispatch( {
+		if (prePublishErrors.length > 0) {
+			dispatch({
 				type: BUILDER_ACTIONS.PUBLISH_ERROR,
 				payload: {
 					error: {
@@ -644,10 +644,10 @@ export default function useBuilderOrchestrator( {
 					},
 					validationErrors: prePublishErrors,
 				},
-			} );
-			removeNotice( SUCCESS_NOTICE_ID );
+			});
+			removeNotice(SUCCESS_NOTICE_ID);
 			createErrorNotice(
-				__( 'Cannot publish: Fix validation errors.', 'subtleforms' ),
+				__('Cannot publish: Fix validation errors.', 'subtleforms'),
 				{
 					id: ERROR_NOTICE_ID,
 					isDismissible: true,
@@ -659,8 +659,8 @@ export default function useBuilderOrchestrator( {
 		}
 		// ── end pre-publish validation ──────────────────────────────────
 
-		if ( hasValidationErrors ) {
-			removeNotice( SUCCESS_NOTICE_ID );
+		if (hasValidationErrors) {
+			removeNotice(SUCCESS_NOTICE_ID);
 			createErrorNotice(
 				__(
 					'Fix validation errors before publishing.',
@@ -676,10 +676,10 @@ export default function useBuilderOrchestrator( {
 			return;
 		}
 
-		if ( formStatus === 'draft' ) {
-			setShowPublishConfirm( true );
+		if (formStatus === 'draft') {
+			setShowPublishConfirm(true);
 		} else {
-			performSave( { auto: false, targetStatus: 'published' } );
+			performSave({ auto: false, targetStatus: 'published' });
 		}
 	}, [
 		createErrorNotice,
@@ -692,53 +692,53 @@ export default function useBuilderOrchestrator( {
 		removeNotice,
 		SUCCESS_NOTICE_ID,
 		ERROR_NOTICE_ID,
-	] );
+	]);
 
-	const confirmPublish = useCallback( () => {
-		setShowPublishConfirm( false );
-		performSave( { auto: false, targetStatus: 'published' } );
-	}, [ performSave ] );
+	const confirmPublish = useCallback(() => {
+		setShowPublishConfirm(false);
+		performSave({ auto: false, targetStatus: 'published' });
+	}, [performSave]);
 
-	const handleSaveAndClose = useCallback( async () => {
-		if ( ! isDirty ) {
-			navigate( '/forms' );
+	const handleSaveAndClose = useCallback(async () => {
+		if (!isDirty) {
+			navigate('/forms');
 			return;
 		}
 
 		try {
-			await performSave( { auto: false } );
-			setTimeout( () => {
-				navigate( '/forms' );
-			}, 300 );
-		} catch ( err ) {
+			await performSave({ auto: false });
+			setTimeout(() => {
+				navigate('/forms');
+			}, 300);
+		} catch (err) {
 			// Error already handled in performSave
 		}
-	}, [ isDirty, performSave, navigate ] );
+	}, [isDirty, performSave, navigate]);
 
-	const handleDelete = useCallback( async () => {
-		if ( ! currentFormId ) {
+	const handleDelete = useCallback(async () => {
+		if (!currentFormId) {
 			return;
 		}
 
-		setShowDeleteConfirm( false );
+		setShowDeleteConfirm(false);
 
 		try {
-			const { ok } = await apiDelete( `/forms/${ currentFormId }` );
+			const { ok } = await apiDelete(`/forms/${currentFormId}`);
 
-			if ( ! ok ) {
+			if (!ok) {
 				throw new Error(
-					__( 'Failed to delete form', 'subtleforms' )
+					__('Failed to delete form', 'subtleforms')
 				);
 			}
 
 			// Clear autosave timer
-			if ( autoSaveTimeoutRef.current ) {
-				clearTimeout( autoSaveTimeoutRef.current );
+			if (autoSaveTimeoutRef.current) {
+				clearTimeout(autoSaveTimeoutRef.current);
 				autoSaveTimeoutRef.current = null;
 			}
 
 			createSuccessNotice(
-				__( 'Form deleted', 'subtleforms' ),
+				__('Form deleted', 'subtleforms'),
 				{
 					id: SUCCESS_NOTICE_ID,
 					isDismissible: true,
@@ -746,11 +746,11 @@ export default function useBuilderOrchestrator( {
 				}
 			);
 
-			navigate( '/forms' );
-		} catch ( err ) {
+			navigate('/forms');
+		} catch (err) {
 			createErrorNotice(
 				err?.message ||
-					__( 'Failed to delete form', 'subtleforms' ),
+				__('Failed to delete form', 'subtleforms'),
 				{
 					id: ERROR_NOTICE_ID,
 					isDismissible: true,
@@ -765,44 +765,44 @@ export default function useBuilderOrchestrator( {
 		SUCCESS_NOTICE_ID,
 		ERROR_NOTICE_ID,
 		navigate,
-	] );
+	]);
 
-	const handleDiscard = useCallback( async () => {
-		if ( ! isDirty && currentFormId ) {
+	const handleDiscard = useCallback(async () => {
+		if (!isDirty && currentFormId) {
 			try {
-				await apiDelete( `/forms/${ currentFormId }` );
-			} catch ( err ) {
-				console.error( 'Failed to delete draft form:', err );
+				await apiDelete(`/forms/${currentFormId}`);
+			} catch (err) {
+				console.error('Failed to delete draft form:', err);
 			}
-			navigate( '/forms' );
+			navigate('/forms');
 			return;
 		}
 
-		if ( isDirty ) {
-			setShowDiscardConfirm( true );
+		if (isDirty) {
+			setShowDiscardConfirm(true);
 		} else {
-			navigate( '/forms' );
+			navigate('/forms');
 		}
-	}, [ isDirty, currentFormId, navigate ] );
+	}, [isDirty, currentFormId, navigate]);
 
-	const confirmDiscard = useCallback( async () => {
-		setShowDiscardConfirm( false );
+	const confirmDiscard = useCallback(async () => {
+		setShowDiscardConfirm(false);
 
-		if ( autoSaveTimeoutRef.current ) {
-			clearTimeout( autoSaveTimeoutRef.current );
+		if (autoSaveTimeoutRef.current) {
+			clearTimeout(autoSaveTimeoutRef.current);
 			autoSaveTimeoutRef.current = null;
 		}
 
-		if ( currentFormId && ! isDirty ) {
+		if (currentFormId && !isDirty) {
 			try {
-				await apiDelete( `/forms/${ currentFormId }` );
-			} catch ( err ) {
-				console.error( 'Failed to delete draft form:', err );
+				await apiDelete(`/forms/${currentFormId}`);
+			} catch (err) {
+				console.error('Failed to delete draft form:', err);
 			}
 		}
 
-		navigate( '/forms' );
-	}, [ currentFormId, isDirty, navigate ] );
+		navigate('/forms');
+	}, [currentFormId, isDirty, navigate]);
 
 	// ── Public API ───────────────────────────────────────────────────────
 	return {

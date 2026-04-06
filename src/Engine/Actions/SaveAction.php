@@ -218,6 +218,10 @@ final class SaveAction implements ActionInterface {
 				$map[ $field['key'] ] = $field;
 			}
 
+			if ( ! empty( $field['fields'] ) && is_array( $field['fields'] ) ) {
+				$this->flatten_fields( $field['fields'], $map );
+			}
+
 			if ( ! empty( $field['children'] ) && is_array( $field['children'] ) ) {
 				$this->flatten_fields( $field['children'], $map );
 			}
@@ -263,6 +267,9 @@ final class SaveAction implements ActionInterface {
 			$field['type']  = $field['type'] ?? '';
 			$field['label'] = $field['label'] ?? '';
 
+			if ( ! empty( $field['fields'] ) && is_array( $field['fields'] ) ) {
+				$field['fields'] = $this->normalize_field_list( $field['fields'] );
+			}
 			if ( ! empty( $field['children'] ) && is_array( $field['children'] ) ) {
 				$field['children'] = $this->normalize_field_list( $field['children'] );
 			}

@@ -100,6 +100,11 @@ final class FieldValidator {
 				$required[] = $field['key'];
 			}
 
+			// Process nested fields (step/container types use 'fields' key)
+			if ( ! empty( $field['fields'] ) && is_array( $field['fields'] ) ) {
+				$this->extractRequiredFields( $field['fields'], $required );
+			}
+
 			// Process nested fields
 			if ( ! empty( $field['children'] ) && is_array( $field['children'] ) ) {
 				$this->extractRequiredFields( $field['children'], $required );
@@ -125,6 +130,11 @@ final class FieldValidator {
 		foreach ( $fields as $field ) {
 			if ( ! empty( $field['key'] ) ) {
 				$map[ $field['key'] ] = $field;
+			}
+
+			// Process nested fields (step/container types use 'fields' key)
+			if ( ! empty( $field['fields'] ) && is_array( $field['fields'] ) ) {
+				$this->flattenFields( $field['fields'], $map );
 			}
 
 			// Process nested fields

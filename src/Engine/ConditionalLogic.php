@@ -70,6 +70,10 @@ final class ConditionalLogic {
 			}
 
 			// Process nested fields (containers/steps)
+			if ( ! empty( $field['fields'] ) && is_array( $field['fields'] ) ) {
+				$this->evaluateFieldConditions( $field['fields'], $payload, $result );
+			}
+
 			if ( ! empty( $field['children'] ) && is_array( $field['children'] ) ) {
 				$this->evaluateFieldConditions( $field['children'], $payload, $result );
 			}

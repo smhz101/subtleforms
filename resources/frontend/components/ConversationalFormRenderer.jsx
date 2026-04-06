@@ -8,6 +8,7 @@ import { getFormClassNames } from '../utils/formStyles';
 
 const restUrl =
   window.subtleformsFrontend?.restUrl || '/wp-json/subtleforms/v1';
+const nonce = window.subtleformsFrontend?.nonce || '';
 
 /**
  * ConversationalFormRenderer - Renders form one question at a time
@@ -310,6 +311,14 @@ export default function ConversationalFormRenderer({
       leafPaths.forEach((path) => {
         if (Object.prototype.hasOwnProperty.call(flatValues, path)) {
           payload[path] = flatValues[path];
+        } else {
+          // For array values (e.g. multiple_choice with allowMultiple) flattenToPathMap
+          // expands them to indexed keys (path.0, path.1, …) so the root key won't
+          // appear in flatValues. Fall back to reading the value directly from state.
+          const directValue = getIn(values, path);
+          if (directValue !== undefined) {
+            payload[path] = directValue;
+          }
         }
       });
 

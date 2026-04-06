@@ -12,7 +12,7 @@ const COLUMN_CONTAINER_SUFFIX = '_column_container';
 
 // Composite field types are single leaf nodes — any saved children from an old
 // group-style version are intentionally discarded when loading the schema.
-const COMPOSITE_FIELD_TYPES = new Set( [ 'name_group', 'address_group' ] );
+const COMPOSITE_FIELD_TYPES = new Set(['name_group', 'address_group']);
 
 function isColumnContainerType(type) {
   return typeof type === 'string' && type.endsWith(COLUMN_CONTAINER_SUFFIX);
@@ -52,7 +52,7 @@ function extractConfig(field) {
   if (
     fieldsArray !== undefined &&
     fieldsArray !== null &&
-    ! Array.isArray( fieldsArray ) &&
+    !Array.isArray(fieldsArray) &&
     typeof fieldsArray === 'object'
   ) {
     config.fields = fieldsArray;
@@ -102,28 +102,28 @@ export function normalizeSchema(schema) {
     // Migration guard: composite fields are always leaf nodes.
     // Discard any children that may have been saved when these types were
     // erroneously treated as group containers.
-    const isComposite = COMPOSITE_FIELD_TYPES.has( type );
+    const isComposite = COMPOSITE_FIELD_TYPES.has(type);
     const kind = isComposite ? 'input' : rawKind;
     const childFields = isComposite ? [] : rawChildFields;
 
     // Backward-compat: if this is a composite field loaded from an old schema
     // that used flat enable_* flags, migrate them to the new `fields` structure.
-    if ( isComposite && ! config.fields ) {
-      if ( type === 'name_group' ) {
+    if (isComposite && !config.fields) {
+      if (type === 'name_group') {
         config.fields = {
-          first_name:  { enabled: true,  label: 'First Name',         placeholder: '' },
-          last_name:   { enabled: true,  label: 'Last Name',          placeholder: '' },
+          first_name: { enabled: true, label: 'First Name', placeholder: '' },
+          last_name: { enabled: true, label: 'Last Name', placeholder: '' },
           middle_name: { enabled: config.enable_middle_name === true, label: 'Middle Name', placeholder: '' },
-          suffix:      { enabled: config.enable_suffix      === true, label: 'Suffix',      placeholder: '' },
+          suffix: { enabled: config.enable_suffix === true, label: 'Suffix', placeholder: '' },
         };
-      } else if ( type === 'address_group' ) {
+      } else if (type === 'address_group') {
         config.fields = {
-          street:   { enabled: true,                              label: 'Street Address',        placeholder: '' },
-          street2:  { enabled: config.enable_street2  === true,  label: 'Street Address Line 2', placeholder: 'Apt, Suite, etc.' },
-          city:     { enabled: true,                              label: 'City',                  placeholder: '' },
-          state:    { enabled: config.enable_state    !== false,  label: 'State / Province',      placeholder: '' },
-          postal:   { enabled: config.enable_postal   !== false,  label: 'Postal Code',           placeholder: '' },
-          country:  { enabled: config.enable_country  !== false,  label: 'Country',               placeholder: '' },
+          street: { enabled: true, label: 'Street Address', placeholder: '' },
+          street2: { enabled: config.enable_street2 === true, label: 'Street Address Line 2', placeholder: 'Apt, Suite, etc.' },
+          city: { enabled: true, label: 'City', placeholder: '' },
+          state: { enabled: config.enable_state !== false, label: 'State / Province', placeholder: '' },
+          postal: { enabled: config.enable_postal !== false, label: 'Postal Code', placeholder: '' },
+          country: { enabled: config.enable_country !== false, label: 'Country', placeholder: '' },
         };
       }
     }
@@ -156,8 +156,8 @@ export function normalizeSchema(schema) {
       const seedColumns = columnChildren.length
         ? columnChildren
         : childFields.length
-        ? [childFields]
-        : [];
+          ? [childFields]
+          : [];
       node.columns = ensureArray(seedColumns, columnCount).map(() => []);
     } else if (Array.isArray(childFields) && childFields.length) {
       node.children = [];
@@ -190,8 +190,8 @@ export function normalizeSchema(schema) {
       const seedColumns = columnChildren.length
         ? columnChildren
         : childFields.length
-        ? [childFields]
-        : [];
+          ? [childFields]
+          : [];
       const columns = ensureArray(seedColumns, node.columns?.length || 0);
       columns.forEach((columnFields, idx) => {
         columnFields.forEach((childField) => {
@@ -308,17 +308,17 @@ export function createNodeFromDefinition(definition, existingKeys = new Set()) {
 
 const GROUP_DEFAULT_CHILDREN = {
   name_group: [
-    { label: __( 'First Name', 'subtleforms' ),  placeholder: __( 'First Name', 'subtleforms' ) },
-    { label: __( 'Middle Name', 'subtleforms' ), placeholder: __( 'Middle Name (optional)', 'subtleforms' ) },
-    { label: __( 'Last Name', 'subtleforms' ),   placeholder: __( 'Last Name', 'subtleforms' ) },
+    { label: __('First Name', 'subtleforms'), placeholder: __('First Name', 'subtleforms') },
+    { label: __('Middle Name', 'subtleforms'), placeholder: __('Middle Name (optional)', 'subtleforms') },
+    { label: __('Last Name', 'subtleforms'), placeholder: __('Last Name', 'subtleforms') },
   ],
   address_group: [
-    { label: __( 'Street Address', 'subtleforms' ),        placeholder: __( 'Street Address', 'subtleforms' ) },
-    { label: __( 'Street Address Line 2', 'subtleforms' ), placeholder: __( 'Apt, Suite, etc.', 'subtleforms' ) },
-    { label: __( 'City', 'subtleforms' ),                  placeholder: __( 'City', 'subtleforms' ) },
-    { label: __( 'State / Province', 'subtleforms' ),      placeholder: __( 'State / Province', 'subtleforms' ) },
-    { label: __( 'Postal Code', 'subtleforms' ),           placeholder: __( 'Postal Code', 'subtleforms' ) },
-    { label: __( 'Country', 'subtleforms' ),               placeholder: __( 'Country', 'subtleforms' ) },
+    { label: __('Street Address', 'subtleforms'), placeholder: __('Street Address', 'subtleforms') },
+    { label: __('Street Address Line 2', 'subtleforms'), placeholder: __('Apt, Suite, etc.', 'subtleforms') },
+    { label: __('City', 'subtleforms'), placeholder: __('City', 'subtleforms') },
+    { label: __('State / Province', 'subtleforms'), placeholder: __('State / Province', 'subtleforms') },
+    { label: __('Postal Code', 'subtleforms'), placeholder: __('Postal Code', 'subtleforms') },
+    { label: __('Country', 'subtleforms'), placeholder: __('Country', 'subtleforms') },
   ],
 };
 
@@ -330,12 +330,12 @@ const GROUP_DEFAULT_CHILDREN = {
  * @param {Set}    existingKeys - Mutable set of keys already in use; new keys are added in-place
  * @returns {Array<Object>} Array of child node objects ready for addNodeToTree
  */
-export function createGroupDefaultChildren( groupType, parentId, existingKeys ) {
-  const specs = GROUP_DEFAULT_CHILDREN[ groupType ] || [];
-  return specs.map( ( { label, placeholder } ) => {
-    const id  = createNodeId();
-    const key = createFieldKey( 'text', existingKeys );
-    existingKeys.add( key );
+export function createGroupDefaultChildren(groupType, parentId, existingKeys) {
+  const specs = GROUP_DEFAULT_CHILDREN[groupType] || [];
+  return specs.map(({ label, placeholder }) => {
+    const id = createNodeId();
+    const key = createFieldKey('text', existingKeys);
+    existingKeys.add(key);
     return {
       id,
       type: 'text',
@@ -348,13 +348,13 @@ export function createGroupDefaultChildren( groupType, parentId, existingKeys ) 
         key,
         label,
         placeholder,
-        required:     false,
+        required: false,
         defaultValue: null,
-        visibility:   null,
-        validation:   [],
+        visibility: null,
+        validation: [],
       },
     };
-  } );
+  });
 }
 
 export function addNodeToTree(tree, node, { parentId, columnIndex = null, position = null }) {

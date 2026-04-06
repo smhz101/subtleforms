@@ -170,6 +170,9 @@ final class SchemaCompiler {
 			$field['type']  = $field['type'] ?? '';
 			$field['label'] = $field['label'] ?? '';
 
+			if ( ! empty( $field['fields'] ) && is_array( $field['fields'] ) ) {
+				$field['fields'] = $this->normalizeFieldList( $field['fields'] );
+			}
 			if ( ! empty( $field['children'] ) && is_array( $field['children'] ) ) {
 				$field['children'] = $this->normalizeFieldList( $field['children'] );
 			}
