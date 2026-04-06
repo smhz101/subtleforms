@@ -55,7 +55,11 @@ const SubmissionsTable = forwardRef(
     },
     ref
   ) => {
-    const [submissions, setSubmissions] = useState([]);
+    // Chunked prefetch: buffer accumulates rows; sliced client-side per page.
+    // Each API call fetches CHUNK_PAGES pages at once.
+    const CHUNK_PAGES = 5;
+    const [buffer, setBuffer] = useState([]);
+    const [pagesLoaded, setPagesLoaded] = useState(0);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
     const [totalItems, setTotalItems] = useState(0);
@@ -65,28 +69,27 @@ const SubmissionsTable = forwardRef(
     const [sortDirection, setSortDirection] = useState('desc');
     const [deleteModal, setDeleteModal] = useState(null);
     const [selectedSubmissions, setSelectedSubmissions] = useState([]);
+    const isPrefetchingRef = useRef(false);
     const { createSuccessNotice, createErrorNotice } =
       useDispatch(noticesStore);
 
+    // Fresh load on any filter, sort, or perPage change
     useEffect(() => {
-      loadSubmissions();
-    }, [
-      formId,
-      statusFilter,
-      searchTerm,
-      dateRange,
-      fieldValue,
-      processingStatus,
-      currentPage,
-      perPage,
-      sortBy,
-      sortDirection,
-    ]);
+      loadFresh();
+    }, [formId, statusFilter, searchTerm, dateRange, fieldValue, processingStatus, sortBy, sortDirection, perPage]);
 
+    // Prefetch next batch when user reaches 3rd page of loaded window
     useEffect(() => {
-      // Reset to first page when filters change
-      setCurrentPage(1);
-    }, [statusFilter, searchTerm, dateRange, fieldValue, processingStatus]);
+      if (pagesLoaded === 0) return;
+      const totalPages = Math.ceil(totalItems / perPage);
+      if (
+        currentPage >= pagesLoaded - 2 &&
+        pagesLoaded < totalPages &&
+        !isPrefetchingRef.current
+      ) {
+        prefetchNextChunk();
+      }
+    }, [currentPage, pagesLoaded, totalItems, perPage]);
 
     const getDateRangeParams = (range) => {
       const now = new Date();
@@ -116,80 +119,92 @@ const SubmissionsTable = forwardRef(
       return startDate ? { after: startDate.toISOString().split('T')[0] } : {};
     };
 
-    const loadSubmissions = async () => {
+    const buildFilterParams = () => {
+      const params = new URLSearchParams({
+        orderby: sortBy,
+        order: sortDirection,
+      });
+      if (formId) params.append('form_id', formId);
+      if (statusFilter && statusFilter !== 'all') params.append('status', statusFilter);
+      if (searchTerm) params.append('search', searchTerm);
+      if (fieldValue) params.append('field_value', fieldValue);
+      if (processingStatus) params.append('processing_status', processingStatus);
+      const dateParams = getDateRangeParams(dateRange);
+      if (dateParams.after) params.append('after', dateParams.after);
+      return params;
+    };
+
+    // Fetch one batch: batchIndex 0 → rows 1..(CHUNK_PAGES*perPage), index 1 → next batch, etc.
+    const fetchBatch = async (batchIndex) => {
+      const batchSize = perPage * CHUNK_PAGES;
+      const params = buildFilterParams();
+      params.set('page', (batchIndex + 1).toString());
+      params.set('per_page', batchSize.toString());
+
+      const response = await fetch(buildApiUrl(`/submissions?${params}`), {
+        credentials: 'same-origin',
+        headers: { 'X-WP-Nonce': restNonce },
+      });
+      if (!response.ok) throw new Error('API request failed');
+
+      const data = await response.json();
+      let rows = [];
+      let total = 0;
+
+      if (data && Array.isArray(data.data)) {
+        rows = data.data;
+        total =
+          data.meta && typeof data.meta.total === 'number'
+            ? data.meta.total
+            : parseInt(response.headers.get('X-WP-Total') || '0');
+      } else if (data && data.submissions) {
+        rows = data.submissions;
+        total = data.total || 0;
+      } else if (Array.isArray(data)) {
+        rows = data;
+        total = parseInt(response.headers.get('X-WP-Total') || '0');
+      }
+      return { rows, total };
+    };
+
+    // Full reset + reload from page 1 (fresh filters/sort)
+    const loadFresh = async () => {
       setError(null);
       setLoading(true);
+      setCurrentPage(1);
 
       try {
-        const params = new URLSearchParams({
-          page: currentPage.toString(),
-          per_page: perPage.toString(),
-          orderby: sortBy,
-          order: sortDirection,
-        });
-
-        if (formId) {
-          params.append('form_id', formId);
-        }
-
-        if (statusFilter && statusFilter !== 'all') {
-          params.append('status', statusFilter);
-        }
-
-        if (searchTerm) {
-          params.append('search', searchTerm);
-        }
-
-        if (fieldValue) {
-          params.append('field_value', fieldValue);
-        }
-
-        if (processingStatus) {
-          params.append('processing_status', processingStatus);
-        }
-
-        // Add date range filter
-        const dateParams = getDateRangeParams(dateRange);
-        if (dateParams.after) {
-          params.append('after', dateParams.after);
-        }
-
-        const response = await fetch(buildApiUrl(`/submissions?${params}`), {
-          credentials: 'same-origin',
-          headers: {
-            'X-WP-Nonce': restNonce,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          const total = parseInt(response.headers.get('X-WP-Total') || '0');
-
-          // Patch: Use data.data for submissions array (API returns { data: [...], meta: {...} })
-          if (data && Array.isArray(data.data)) {
-            setSubmissions(data.data);
-            setTotalItems(
-              (data.meta && typeof data.meta.total === 'number') ? data.meta.total : total
-            );
-          } else if (data && data.submissions) {
-            setSubmissions(data.submissions);
-            setTotalItems(data.total || 0);
-          } else if (Array.isArray(data)) {
-            setSubmissions(data);
-            setTotalItems(total);
-          } else {
-            setError(__('Invalid response format', 'subtleforms'));
-          }
-        } else {
-          throw new Error('API request failed');
-        }
+        const { rows, total } = await fetchBatch(0);
+        setBuffer(rows);
+        setPagesLoaded(Math.ceil(rows.length / perPage) || 0);
+        setTotalItems(total);
       } catch (err) {
         setError(__('Failed to load submissions', 'subtleforms'));
-        setSubmissions([]);
+        setBuffer([]);
+        setPagesLoaded(0);
         setTotalItems(0);
       } finally {
         setLoading(false);
+      }
+    };
+
+    // Background prefetch: appends next batch to buffer
+    const prefetchNextChunk = async () => {
+      if (isPrefetchingRef.current) return;
+      isPrefetchingRef.current = true;
+
+      const batchIndex = Math.ceil(pagesLoaded / CHUNK_PAGES);
+      try {
+        const { rows, total } = await fetchBatch(batchIndex);
+        if (rows.length > 0) {
+          setBuffer((prev) => [...prev, ...rows]);
+          setPagesLoaded((prev) => prev + Math.ceil(rows.length / perPage));
+          setTotalItems(total);
+        }
+      } catch (err) {
+        console.warn('SubtleForms: prefetch failed', err);
+      } finally {
+        isPrefetchingRef.current = false;
       }
     };
 
@@ -197,14 +212,14 @@ const SubmissionsTable = forwardRef(
     useImperativeHandle(
       ref,
       () => ({
-        refreshData: loadSubmissions,
+        refreshData: loadFresh,
       }),
-      [loadSubmissions]
+      [loadFresh]
     );
 
     const handleDelete = async (submissionId) => {
       setDeleteModal(null);
-      setSubmissions((prev) => prev.filter((s) => s.id !== submissionId));
+      setBuffer((prev) => prev.filter((s) => s.id !== submissionId));
 
       try {
         await apiClient.delete(`/submissions/${submissionId}`);
@@ -212,7 +227,7 @@ const SubmissionsTable = forwardRef(
           type: 'snackbar',
         });
       } catch (err) {
-        loadSubmissions(); // Revert on failure
+        loadFresh(); // Revert on failure
         createErrorNotice(__('Failed to delete submission', 'subtleforms'), {
           type: 'snackbar',
         });
@@ -237,7 +252,7 @@ const SubmissionsTable = forwardRef(
         return;
       }
 
-      setSubmissions((prev) => prev.filter((s) => !ids.includes(s.id)));
+      setBuffer((prev) => prev.filter((s) => !ids.includes(s.id)));
       setSelectedSubmissions([]);
 
       let successCount = 0;
@@ -276,7 +291,7 @@ const SubmissionsTable = forwardRef(
           })(),
           { type: 'snackbar' }
         );
-        loadSubmissions(); // Reload to sync state
+        loadFresh(); // Reload to sync state
       }
     };
 
@@ -289,20 +304,20 @@ const SubmissionsTable = forwardRef(
       if (actionType in isReadActions) {
         updatePayload = { is_read: isReadActions[actionType] };
         // Optimistic update
-        setSubmissions((prev) =>
+        setBuffer((prev) =>
           prev.map((s) =>
             ids.includes(s.id) ? { ...s, is_read: isReadActions[actionType] } : s
           )
         );
       } else if (adminStatusActions.includes(actionType)) {
         updatePayload = { status: actionType };
-        setSubmissions((prev) =>
+        setBuffer((prev) =>
           prev.map((s) => (ids.includes(s.id) ? { ...s, status: actionType } : s))
         );
       } else if (actionType === 'restore') {
         // Clear admin status override (unflag/unspam) — server sets status to null
         updatePayload = { status: 'none' };
-        setSubmissions((prev) =>
+        setBuffer((prev) =>
           prev.map((s) => (ids.includes(s.id) ? { ...s, status: null } : s))
         );
       } else {
@@ -343,7 +358,7 @@ const SubmissionsTable = forwardRef(
           ),
           { type: 'snackbar' }
         );
-        loadSubmissions(); // Reload to sync state
+        loadFresh(); // Reload to sync state
       }
     };
 
@@ -464,6 +479,25 @@ const SubmissionsTable = forwardRef(
         title: __('Status', 'subtleforms'),
         sortable: true,
         render: (status, submission) => {
+          const isUnread = parseInt(submission.is_read, 10) === 0;
+
+          // Null / legacy 'unread' status — show only the read indicator
+          if (!status || status === 'unread') {
+            return (
+              <span className='sf-submissions-table__status-cell'>
+                {isUnread && (
+                  <span
+                    className='sf-submissions-table__unread-dot'
+                    title={__('Unread', 'subtleforms')}
+                  />
+                )}
+                <span className='sf-submissions-table__status-badge sf-submissions-table__status-badge--processing'>
+                  {'—'}
+                </span>
+              </span>
+            );
+          }
+
           // Admin-override statuses
           if (status === 'spam' || status === 'flagged' || status === 'archived') {
             const adminVariantMap = { spam: 'spam', flagged: 'flagged', archived: 'read' };
@@ -499,7 +533,6 @@ const SubmissionsTable = forwardRef(
             saved: __('Saved', 'subtleforms'),
           };
           const variant = pipelineVariantMap[status] || 'processing';
-          const isUnread = parseInt(submission.is_read, 10) === 0;
           return (
             <span className='sf-submissions-table__status-cell'>
               {isUnread && (
@@ -532,7 +565,6 @@ const SubmissionsTable = forwardRef(
         key: 'created_at',
         title: __('Submitted', 'subtleforms'),
         sortable: true,
-        width: '18%',
         render: (createdAt) => (
           <span className='sf-sub-time'>
             <span className='sf-sub-time__rel'>{getRelativeTime(createdAt)}</span>
@@ -601,11 +633,17 @@ const SubmissionsTable = forwardRef(
       return <Notice status='error'>{error}</Notice>;
     }
 
+    // Slice the buffer for the current page (client-side pagination)
+    const displayedRows = buffer.slice(
+      (currentPage - 1) * perPage,
+      currentPage * perPage
+    );
+
     return (
       <div className='submissions-table'>
         <DataTable
           columns={columns}
-          data={submissions}
+          data={displayedRows}
           totalItems={totalItems}
           currentPage={currentPage}
           perPage={perPage}
