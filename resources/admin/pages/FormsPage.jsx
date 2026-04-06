@@ -1,4 +1,4 @@
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef } from '@wordpress/element';
 import { SearchControl } from '@wordpress/components';
 import { Button } from '../components/navigation';
 import { useNavigate } from 'react-router-dom';
@@ -7,7 +7,7 @@ import { useForms, useCreateForm } from '../data';
 import Icon from '../components/ui/Icon';
 import AdminShell from '../components/AdminShell';
 import TabBar from '../components/TabBar';
-import FormsList from '../components/FormsList';
+import FormsList, { ALL_FORM_COLUMNS, DEFAULT_FORM_VISIBLE, FORM_COLUMN_LABELS } from '../components/FormsList';
 import OnboardingWizard from '../components/OnboardingWizard';
 import HelpMenu from '../components/HelpMenu';
 import { buildApiUrl } from '../utils/api';
@@ -20,6 +20,39 @@ export default function FormsPage() {
   const [showWizard, setShowWizard] = useState(false);
   const [formsCount, setFormsCount] = useState(null);
   const [isDismissed, setIsDismissed] = useState(true);
+
+  // Column visibility — persisted to localStorage
+  const [visibleColumns, setVisibleColumns] = useState(() => {
+    try {
+      const saved = localStorage.getItem('sf_forms_visible_cols');
+      return saved ? JSON.parse(saved) : DEFAULT_FORM_VISIBLE;
+    } catch {
+      return DEFAULT_FORM_VISIBLE;
+    }
+  });
+  const [showColPicker, setShowColPicker] = useState(false);
+  const colPickerRef = useRef(null);
+
+  const toggleColumn = (key) => {
+    setVisibleColumns((prev) => {
+      const next = prev.includes(key)
+        ? prev.filter((k) => k !== key)
+        : [...prev, key];
+      localStorage.setItem('sf_forms_visible_cols', JSON.stringify(next));
+      return next;
+    });
+  };
+
+  useEffect(() => {
+    if (!showColPicker) return;
+    const handleClick = (e) => {
+      if (colPickerRef.current && !colPickerRef.current.contains(e.target)) {
+        setShowColPicker(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showColPicker]);
 
   // Check if we should show the wizard
   useEffect(() => {
@@ -192,14 +225,7 @@ export default function FormsPage() {
               </div>
             ) : (
               <div className='sf-forms-header'>
-                <div className='sf-forms-header__text'>
-                  <h3 className='sf-forms-header__title'>
-                    {__('Build and manage forms', 'subtleforms')}
-                  </h3>
-                  <p className='sf-forms-header__desc'>
-                    {__('Create new forms or optimize existing ones.', 'subtleforms')}
-                  </p>
-                </div>
+                
                 <div className='sf-forms-header__actions'>
                   <HelpMenu
                     onOpenWizard={() => setShowWizard(true)}
@@ -226,13 +252,40 @@ export default function FormsPage() {
           />
         }
         actionBarRight={
-          <SearchControl
-            value={search}
-            onChange={setSearch}
-            placeholder={__('Search forms...', 'subtleforms')}
-          />
+          <div className='sf-submissions-actions'>
+            <div ref={colPickerRef} className='sf-col-picker'>
+              <Button
+                variant='secondary'
+                onClick={() => setShowColPicker((v) => !v)}
+                className='sf-button-height sf-col-picker__toggle'
+                title={__('Show/hide columns', 'subtleforms')}>
+                <Icon.Columns size={14} />
+                <span>{__('Columns', 'subtleforms')}</span>
+                <Icon.ChevronDown size={12} />
+              </Button>
+              {showColPicker && (
+                <div className='sf-col-picker__dropdown'>
+                  {ALL_FORM_COLUMNS.filter((k) => k !== 'actions').map((key) => (
+                    <label key={key} className='sf-col-picker__item'>
+                      <input
+                        type='checkbox'
+                        checked={visibleColumns.includes(key)}
+                        onChange={() => toggleColumn(key)}
+                      />
+                      <span>{FORM_COLUMN_LABELS[key] || key}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+            <SearchControl
+              value={search}
+              onChange={setSearch}
+              placeholder={__('Search forms...', 'subtleforms')}
+            />
+          </div>
         }>
-        <FormsList searchTerm={search} statusFilter={statusFilter} />
+        <FormsList searchTerm={search} statusFilter={statusFilter} visibleColumns={visibleColumns} />
       </AdminShell>
 
       {showWizard && (
