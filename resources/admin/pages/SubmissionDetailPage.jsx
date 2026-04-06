@@ -2,6 +2,7 @@ import { useState, useEffect } from '@wordpress/element';
 import {
   Spinner,
   Notice,
+  TabPanel,
 } from '@wordpress/components';
 import { Button } from '../components/navigation';
 import { useNavigate } from 'react-router-dom';
@@ -14,13 +15,13 @@ import './SubmissionDetailPage.scss';
 // ─── Pipeline timeline helpers ──────────────────────────────────────────────
 
 const ACTION_META = {
-  save:    { icon: '💾', label: 'Save to Database' },
-  email:   { icon: '✉',  label: 'Send Email' },
-  webhook: { icon: '⚡', label: 'Call Webhook' },
+  save:    { iconName: 'Database', label: 'Store Submission' },
+  email:   { iconName: 'Mail',     label: 'Send Email' },
+  webhook: { iconName: 'Zap',      label: 'Call Webhook' },
 };
 
 const getActionMeta = ( actionType ) =>
-  ACTION_META[ actionType ] || { icon: '⚙', label: actionType || 'Step' };
+  ACTION_META[ actionType ] || { iconName: 'Settings', label: actionType || 'Step' };
 
 /** Group log rows into per-step objects, preserving order of first appearance. */
 const buildTimeline = ( logs ) => {
@@ -66,7 +67,8 @@ const STATUS_LABEL = {
 /** A single pipeline step card showing dispatch + async completion. */
 const PipelineStepCard = ( { step } ) => {
   const [ open, setOpen ] = useState( false );
-  const { icon, label } = getActionMeta( step.actionType );
+  const { iconName, label } = getActionMeta( step.actionType );
+  const StepIcon = Icon[ iconName ] || Icon.Settings;
   const mainEntries  = step.entries.filter(
     ( e ) => ! e.status.startsWith( 'async_' ) && e.status !== 'started'
   );
@@ -86,7 +88,7 @@ const PipelineStepCard = ( { step } ) => {
         tabIndex={ hasData || hasAsync ? 0 : undefined }
         onKeyDown={ ( e ) => e.key === 'Enter' && ( hasData || hasAsync ) && setOpen( ( v ) => ! v ) }
       >
-        <span className='sf-pipe-step__icon' aria-hidden='true'>{ icon }</span>
+        <span className='sf-pipe-step__icon' aria-hidden='true'><StepIcon size={ 14 } strokeWidth={ 2 } /></span>
         <span className='sf-pipe-step__label'>{ label }</span>
         <span className='sf-pipe-step__stepid'>{ step.stepId }</span>
         <span className={ `sf-pipe-status sf-pipe-status--${ status }` }>
@@ -321,6 +323,12 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
       );
 
   const timeline = buildTimeline( logs );
+  const generalLogs = logs.filter(
+    ( log ) => ! log.context || typeof log.context !== 'string' || log.context !== 'api'
+  );
+  const apiLogs = logs.filter(
+    ( log ) => typeof log.context === 'string' && log.context === 'api'
+  );
 
   if (loading) return <Spinner />;
   if (error) return <Notice status='error'>{error}</Notice>;
@@ -610,6 +618,69 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                 <em>{ __( 'No pipeline activity recorded.', 'subtleforms' ) }</em>
               </p>
             ) }
+          </div>
+
+          {/* ── Execution Logs ── */}
+          <div className='subtleforms-card'>
+            <div className='sf-card-head'>
+              <h2 className='sf-card-title'>
+                { __( 'Execution Logs', 'subtleforms' ) }
+              </h2>
+              <span className='sf-card-head__count'>
+                { logs.length }
+              </span>
+            </div>
+            <TabPanel
+              tabs={ [
+                {
+                  name: 'general',
+                  title: sprintf(
+                    __( 'General (%d)', 'subtleforms' ),
+                    generalLogs.length
+                  ),
+                },
+                {
+                  name: 'api',
+                  title: sprintf(
+                    __( 'API Calls (%d)', 'subtleforms' ),
+                    apiLogs.length
+                  ),
+                },
+              ] }>
+              { ( tab ) => {
+                const displayLogs = tab.name === 'general' ? generalLogs : apiLogs;
+                return displayLogs.length > 0 ? (
+                  <div className='sf-log-table-wrap'>
+                    <table className='sf-log-table'>
+                      <thead>
+                        <tr>
+                          <th>{ __( 'Time', 'subtleforms' ) }</th>
+                          <th>{ __( 'Level', 'subtleforms' ) }</th>
+                          <th>{ __( 'Message', 'subtleforms' ) }</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        { displayLogs.map( ( log, idx ) => (
+                          <tr key={ idx }>
+                            <td className='sf-log-table__time'>{ log.created_at }</td>
+                            <td>
+                              <span className={ `sf-log-level sf-log-level--${ log.level }` }>
+                                { log.level }
+                              </span>
+                            </td>
+                            <td className='sf-log-table__message'>{ log.message }</td>
+                          </tr>
+                        ) ) }
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className='sf-logs-empty'>
+                    <em>{ __( 'No logs recorded.', 'subtleforms' ) }</em>
+                  </p>
+                );
+              } }
+            </TabPanel>
           </div>
 
         </div>{/* /sf-sub-main */}
