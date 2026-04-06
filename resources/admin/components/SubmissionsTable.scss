@@ -14,8 +14,16 @@
 	// NOTE: DataTable component handles scrolling internally
 
 	&__row--unread {
-		background-color: var(--sf-blue-50);
-		border-left: 4px solid var(--sf-blue-500);
+		// Use blue-100 so it's clearly distinguishable from the generic row hover (blue-50).
+		// box-shadow inset is used instead of border-left because border-left on <tr>
+		// is suppressed by border-collapse: collapse on the table.
+		background-color: var(--sf-blue-100) !important;
+		box-shadow: inset 3px 0 0 var(--sf-blue-500);
+
+		td {
+			font-weight: 600;
+			color: var(--sf-slate-800);
+		}
 	}
 
 	&__status-badge {
