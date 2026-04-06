@@ -262,10 +262,16 @@ export default function FieldRenderer({
   errors,
   hiddenFields,
 }) {
-  const resolvedPath = fieldPath || field.config?.key || field.key;
-  const label = field.config?.label || field.label || resolvedPath;
-  const placeholder = field.config?.placeholder || '';
-  const required = field.config?.required || false;
+  // Normalise: the admin builder wraps properties under field.config, but the API
+  // serves flat schema nodes where properties sit directly on the field object.
+  // Using field.config when present keeps admin-builder usage intact; falling back
+  // to field itself handles the flat API format.
+  const config = field.config ?? field;
+
+  const resolvedPath = fieldPath || config.key || field.key;
+  const label = config.label || field.label || resolvedPath;
+  const placeholder = config.placeholder || '';
+  const required = config.required || false;
   const isHidden = hiddenFields?.has(resolvedPath);
 
   // Accessible input id
@@ -284,9 +290,9 @@ export default function FieldRenderer({
   if (field.type === 'group_container' || field.type === 'repeat_container') {
     return (
       <div className='subtleforms-field subtleforms-field-container'>
-        {field.config?.label && (
+        {config.label && (
           <div className='subtleforms-container-label'>
-            {field.config.label}
+            {config.label}
           </div>
         )}
         {field.children &&
@@ -387,13 +393,13 @@ export default function FieldRenderer({
       field.type === 'recaptcha' ||
       field.type === 'hcaptcha' ||
       field.type === 'turnstile') &&
-    field.config?.captchaHtml?.includes('subtleforms-recaptcha-v3')
+    config.captchaHtml?.includes('subtleforms-recaptcha-v3')
   ) {
     console.log('[SubtleForms] Rendering reCAPTCHA v3 (invisible)');
     return (
       <div
         className='subtleforms-captcha-hidden'
-        dangerouslySetInnerHTML={{ __html: field.config?.captchaHtml || '' }}
+        dangerouslySetInnerHTML={{ __html: config.captchaHtml || '' }}
       />
     );
   }
@@ -492,14 +498,14 @@ function renderInput(
             aria-describedby={error ? `${inputId}-error` : undefined}
           />
           <span>
-            {field.config?.checkboxLabel || __('I agree', 'subtleforms')}
+            {config.checkboxLabel || __('I agree', 'subtleforms')}
           </span>
         </label>
       );
 
     case 'radio':
     case 'multiple_choice':
-      const options = field.config?.options || [];
+      const options = config.options || [];
       return (
         <div className='subtleforms-radio-group'>
           {options.map((option, index) => {
@@ -513,7 +519,7 @@ function renderInput(
                   id={optionId}
                   type='radio'
                   className='subtleforms-radio'
-                  name={field.config?.key || field.key}
+                  name={config.key || field.key}
                   value={option.value}
                   checked={value === option.value}
                   onChange={(e) => onChange(e.target.value)}
@@ -527,7 +533,7 @@ function renderInput(
 
     case 'select':
     case 'dropdown':
-      const selectOptions = field.config?.options || [];
+      const selectOptions = config.options || [];
       return (
         <select
           id={inputId}
@@ -548,9 +554,9 @@ function renderInput(
       );
 
     case 'country':
-      const countryList = field.config?.countryList || [];
-      const outputFormat = field.config?.output_format || 'code';
-      const searchable = field.config?.searchable !== false;
+      const countryList = config.countryList || [];
+      const outputFormat = config.output_format || 'code';
+      const searchable = config.searchable !== false;
       return (
         <select
           id={inputId}
@@ -584,11 +590,11 @@ function renderInput(
       );
 
     case 'payment_amount':
-      const min = field.config?.min || 0;
-      const max = field.config?.max;
-      const step = field.config?.step || 0.01;
-      const currency = field.config?.currency || 'USD';
-      const showSymbol = field.config?.showCurrencySymbol !== false;
+      const min = config.min || 0;
+      const max = config.max;
+      const step = config.step || 0.01;
+      const currency = config.currency || 'USD';
+      const showSymbol = config.showCurrencySymbol !== false;
       const currencySymbol =
         currency === 'USD'
           ? '$'
@@ -626,19 +632,19 @@ function renderInput(
       // This is a read-only display component
       return (
         <div className='subtleforms-payment-summary'>
-          {field.config?.showSubtotal && (
+          {config.showSubtotal && (
             <div className='summary-line'>
               <span>{__('Subtotal:', 'subtleforms')}</span>
               <span>{value?.subtotal || '0.00'}</span>
             </div>
           )}
-          {field.config?.showTax && (
+          {config.showTax && (
             <div className='summary-line'>
               <span>{__('Tax:', 'subtleforms')}</span>
               <span>{value?.tax || '0.00'}</span>
             </div>
           )}
-          {field.config?.showTotal && (
+          {config.showTotal && (
             <div className='summary-line summary-total'>
               <span>{__('Total:', 'subtleforms')}</span>
               <span>{value?.total || '0.00'}</span>
@@ -657,10 +663,10 @@ function renderInput(
             value={value}
             onChange={(e) => onChange(e.target.value)}
             placeholder={
-              field.config?.placeholder ||
+              config.placeholder ||
               __('Enter coupon code', 'subtleforms')
             }
-            maxLength={field.config?.maxLength || 50}
+            maxLength={config.maxLength || 50}
             aria-required={required}
             aria-invalid={!!error}
           />
@@ -673,7 +679,7 @@ function renderInput(
                 window.subtleformsApplyCoupon(value);
               }
             }}>
-            {field.config?.buttonText || __('Apply', 'subtleforms')}
+            {config.buttonText || __('Apply', 'subtleforms')}
           </button>
         </div>
       );
@@ -688,11 +694,11 @@ function renderInput(
     case 'turnstile':
       // CAPTCHA widget - rendered via provider-specific HTML
       // Note: reCAPTCHA v3 is handled earlier to avoid wrapper/label
-      if (field.config?.captchaHtml) {
+      if (config.captchaHtml) {
         console.log('[SubtleForms] CAPTCHA rendering:', {
           type: field.type,
-          provider: field.config.providerName,
-          htmlLength: field.config.captchaHtml.length,
+          provider: config.providerName,
+          htmlLength: config.captchaHtml.length,
         });
       } else {
         console.error(
@@ -703,7 +709,7 @@ function renderInput(
       return (
         <div
           className='subtleforms-captcha-container'
-          dangerouslySetInnerHTML={{ __html: field.config?.captchaHtml || '' }}
+          dangerouslySetInnerHTML={{ __html: config.captchaHtml || '' }}
         />
       );
 
@@ -711,7 +717,7 @@ function renderInput(
       const nameValue = typeof value === 'object' ? value : {};
       return (
         <div className='subtleforms-name-group'>
-          {field.config?.enable_first_name !== false && (
+          {config.enable_first_name !== false && (
             <div className='subtleforms-name-part'>
               <label
                 htmlFor={`${inputId}-first`}
@@ -733,7 +739,7 @@ function renderInput(
               />
             </div>
           )}
-          {field.config?.enable_middle_name && (
+          {config.enable_middle_name && (
             <div className='subtleforms-name-part'>
               <label
                 htmlFor={`${inputId}-middle`}
@@ -753,7 +759,7 @@ function renderInput(
               />
             </div>
           )}
-          {field.config?.enable_last_name !== false && (
+          {config.enable_last_name !== false && (
             <div className='subtleforms-name-part'>
               <label
                 htmlFor={`${inputId}-last`}
@@ -782,7 +788,7 @@ function renderInput(
       const addressValue = typeof value === 'object' ? value : {};
       return (
         <div className='subtleforms-address-group'>
-          {field.config?.enable_street1 !== false && (
+          {config.enable_street1 !== false && (
             <div className='subtleforms-address-part subtleforms-address-part--full'>
               <label
                 htmlFor={`${inputId}-street1`}
@@ -804,7 +810,7 @@ function renderInput(
               />
             </div>
           )}
-          {field.config?.enable_street2 && (
+          {config.enable_street2 && (
             <div className='subtleforms-address-part subtleforms-address-part--full'>
               <label
                 htmlFor={`${inputId}-street2`}
@@ -827,7 +833,7 @@ function renderInput(
               />
             </div>
           )}
-          {field.config?.enable_city !== false && (
+          {config.enable_city !== false && (
             <div className='subtleforms-address-part'>
               <label
                 htmlFor={`${inputId}-city`}
@@ -849,7 +855,7 @@ function renderInput(
               />
             </div>
           )}
-          {field.config?.enable_state !== false && (
+          {config.enable_state !== false && (
             <div className='subtleforms-address-part'>
               <label
                 htmlFor={`${inputId}-state`}
@@ -871,7 +877,7 @@ function renderInput(
               />
             </div>
           )}
-          {field.config?.enable_postal_code !== false && (
+          {config.enable_postal_code !== false && (
             <div className='subtleforms-address-part'>
               <label
                 htmlFor={`${inputId}-postal`}
@@ -893,7 +899,7 @@ function renderInput(
               />
             </div>
           )}
-          {field.config?.enable_country !== false && (
+          {config.enable_country !== false && (
             <div className='subtleforms-address-part'>
               <label
                 htmlFor={`${inputId}-country`}
@@ -932,13 +938,13 @@ function renderInput(
           accept={
             field.type === 'image_upload'
               ? 'image/*'
-              : field.config?.allowedExtensions
-              ? field.config.allowedExtensions
+              : config.allowedExtensions
+              ? config.allowedExtensions
                   .map((ext) => `.${ext}`)
                   .join(',')
               : undefined
           }
-          multiple={field.config?.multiple === true}
+          multiple={config.multiple === true}
           onChange={(e) => onChange(e.target.files[0] || null)}
           aria-required={required}
           aria-invalid={!!error}
@@ -947,7 +953,7 @@ function renderInput(
       );
 
     case 'rating': {
-      const ratingMax = field.config?.max || 5;
+      const ratingMax = config.max || 5;
       const ratingValue = parseInt(value, 10) || 0;
       return (
         <div className='subtleforms-rating' role='radiogroup'>
@@ -957,7 +963,7 @@ function renderInput(
               <label key={star} className='subtleforms-rating__star'>
                 <input
                   type='radio'
-                  name={field.config?.key || field.key || inputId}
+                  name={config.key || field.key || inputId}
                   value={star}
                   checked={ratingValue === star}
                   onChange={() => onChange(star)}
