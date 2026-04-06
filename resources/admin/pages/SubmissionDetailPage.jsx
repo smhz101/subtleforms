@@ -2,9 +2,7 @@ import { useState, useEffect } from '@wordpress/element';
 import {
   Spinner,
   Notice,
-  SelectControl,
   TabPanel,
-  TextareaControl,
 } from '@wordpress/components';
 import { Button } from '../components/navigation';
 import { useNavigate } from 'react-router-dom';
@@ -177,561 +175,467 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
       </Notice>
     );
 
-  // Enhanced actions section with status badge and submission info
+  // ─── computed values ─────────────────────────────────────────────────────
+  const formType   = submission.schema?.metadata?.type || 'regular';
+  const formTypeLabels = {
+    regular:        __( 'Standard',       'subtleforms' ),
+    conversational: __( 'Conversational', 'subtleforms' ),
+    multistep:      __( 'Multi-Step',     'subtleforms' ),
+    payment:        __( 'Payment',        'subtleforms' ),
+  };
+  const formTypeLabel = formTypeLabels[ formType ] || __( 'Standard', 'subtleforms' );
+
+  const parsedBrowser = submission.user_agent
+    ? submission.user_agent.match(
+        /(Chrome|Firefox|Safari|Edge|Opera)\/[\d.]+/
+      )?.[0] || __( 'Unknown', 'subtleforms' )
+    : __( 'N/A', 'subtleforms' );
+
+  const parsedDevice = submission.user_agent
+    ? /Mobile|Android|iPhone|iPad/.test( submission.user_agent )
+      ? __( 'Mobile', 'subtleforms' )
+      : __( 'Desktop', 'subtleforms' )
+    : __( 'N/A', 'subtleforms' );
+
+  const formatAbsDate = ( iso ) => {
+    try {
+      return new Date( iso ).toLocaleDateString( 'en-US', {
+        year: 'numeric', month: 'short', day: 'numeric',
+        hour: '2-digit', minute: '2-digit',
+      } );
+    } catch {
+      return iso;
+    }
+  };
+
+  const formatRelDate = ( iso ) => {
+    try {
+      const diff = Math.floor( ( Date.now() - new Date( iso ).getTime() ) / 1000 );
+      if ( diff < 60 )    return sprintf( __( '%ds ago', 'subtleforms' ), diff );
+      if ( diff < 3600 )  return sprintf( __( '%dm ago', 'subtleforms' ), Math.floor( diff / 60 ) );
+      if ( diff < 86400 ) return sprintf( __( '%dh ago', 'subtleforms' ), Math.floor( diff / 3600 ) );
+      return sprintf( __( '%dd ago', 'subtleforms' ), Math.floor( diff / 86400 ) );
+    } catch {
+      return '';
+    }
+  };
+
+  const absDate = formatAbsDate( submission.created_at );
+  const relDate = formatRelDate( submission.created_at );
+
+  // 'read' status: any status other than 'unread' is treated as read
+  const readStatus = submission.status === 'unread' ? 'unread' : 'read';
+
+  // ─── header actions (lean: just navigation) ──────────────────────────────
   const actions = (
     <>
-      <Button isSecondary onClick={onBack}>
-        ← {__('Back to Submissions', 'subtleforms')}
+      <Button isSecondary onClick={ onBack }>
+        ← { __( 'All Submissions', 'subtleforms' ) }
       </Button>
-      <div className='sf-submission-header-actions'>
-        {/* Status Badge */}
-        <span
-          className={`sf-submission-badge ${
-            submission.status === 'unread'
-              ? 'sf-submission-badge--unread'
-              : 'sf-submission-badge--read'
-          }`}>
-          {submission.status === 'unread' && (
-            <span className='sf-submission-badge__pulse'></span>
-          )}
-          {submission.status === 'unread'
-            ? __('New', 'subtleforms')
-            : __('Read', 'subtleforms')}
-        </span>
-
-        {/* Form Link */}
-        <span className='sf-submission-header__form-link'>
-          {submission.form_title && (
-            <a
-              href={`admin.php?page=subtleforms-forms&form_id=${submission.form_id}`}
-              className='sf-submission-header__link'>
-              {submission.form_title}
-            </a>
-          )}
-        </span>
-
-        {/* Created Date */}
-        <span className='sf-submission-header__date'>
-          {(() => {
-            const date = new Date(submission.created_at);
-            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
-          })()}
-        </span>
-      </div>
-
-      <div
-        className='subtleforms-submission-nav'
-        style={{ display: 'flex', gap: '8px' }}>
+      <div className='sf-sub-nav'>
         <Button
-          disabled={!adjacent.prev}
-          onClick={() => navigate('prev')}
-          isSecondary>
-          {__('← Previous', 'subtleforms')}
+          isSecondary
+          disabled={ ! adjacent.prev }
+          onClick={ () => navigate( 'prev' ) }>
+          ← { __( 'Previous', 'subtleforms' ) }
         </Button>
         <Button
-          disabled={!adjacent.next}
-          onClick={() => navigate('next')}
-          isSecondary>
-          {__('Next →', 'subtleforms')}
+          isSecondary
+          disabled={ ! adjacent.next }
+          onClick={ () => navigate( 'next' ) }>
+          { __( 'Next', 'subtleforms' ) } →
         </Button>
       </div>
     </>
   );
 
+  // ─── render ──────────────────────────────────────────────────────────────
   return (
     <AdminShell
-      title={(() => {
-        /* translators: %1$d: submission id */ return sprintf(
-          __('Submission #%1$d', 'subtleforms'),
-          submission.id
-        );
-      })()}
-      actions={actions}>
-      <div className='sf-dashboard-page__content sf-submission-detail__content'>
-        <div className='subtleforms-card'>
-          <div className='subtleforms-card-header'>
-            <div className='sf-submission-card__header'>
-              <h2 className='sf-submission-card__title'>
-                {__('Submitted Data', 'subtleforms')}
-              </h2>
-              <div className='sf-submission-card__controls'>
-                <label className='sf-submission-card__control-label'>
-                  <input
-                    type='checkbox'
-                    checked={showEmpty}
-                    onChange={(e) => setShowEmpty(e.target.checked)}
-                    className='sf-submission-card__checkbox'
-                  />
-                  {__('Show empty fields', 'subtleforms')}
-                </label>
-                <label className='sf-submission-card__control-label'>
-                  <input
-                    type='checkbox'
-                    checked={showTechnical}
-                    onChange={(e) => setShowTechnical(e.target.checked)}
-                    className='sf-submission-card__checkbox'
-                  />
-                  {__('Show technical fields', 'subtleforms')}
-                </label>
+      title={ sprintf( __( 'Submission #%d', 'subtleforms' ), submission.id ) }
+      actions={ actions }>
+
+      <div className='sf-sub-layout'>
+
+        {/* ═══════════════════ MAIN COLUMN ═══════════════════ */}
+        <div className='sf-sub-main'>
+
+          {/* ── Context Banner ── */}
+          <div className={ `sf-sub-context sf-sub-context--${ formType }` }>
+            <div className='sf-sub-context__left'>
+              <span className={ `sf-type-badge sf-type-badge--${ formType }` }>
+                { formTypeLabel }
+              </span>
+              { submission.form_title ? (
+                <a
+                  href={ `admin.php?page=subtleforms-forms&form_id=${ submission.form_id }` }
+                  className='sf-sub-context__form-link'>
+                  { submission.form_title }
+                  <svg width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' className='sf-sub-context__ext-icon' aria-hidden='true'><path d='M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6'/><polyline points='15 3 21 3 21 9'/><line x1='10' y1='14' x2='21' y2='3'/></svg>
+                </a>
+              ) : (
+                <span className='sf-sub-context__form-id'>
+                  { sprintf( __( 'Form #%d', 'subtleforms' ), submission.form_id ) }
+                </span>
+              ) }
+            </div>
+
+            <div className='sf-sub-context__right'>
+              <button
+                type='button'
+                className={ `sf-status-pill sf-status-pill--${ readStatus }` }
+                onClick={ () =>
+                  handleStatusChange(
+                    readStatus === 'read' ? 'unread' : 'read'
+                  )
+                }
+                disabled={ updating }
+                aria-label={ readStatus === 'read'
+                  ? __( 'Mark as unread', 'subtleforms' )
+                  : __( 'Mark as read', 'subtleforms' ) }>
+                <span className='sf-status-pill__dot' aria-hidden='true' />
+                { readStatus === 'unread'
+                  ? __( 'Unread', 'subtleforms' )
+                  : __( 'Read', 'subtleforms' ) }
+              </button>
+
+              <div className='sf-sub-context__datetime' title={ submission.created_at }>
+                <span className='sf-sub-context__date'>{ absDate }</span>
+                <span className='sf-sub-context__rel'>{ relDate }</span>
               </div>
             </div>
           </div>
-          <div className='subtleforms-card-content'>
-            {Object.keys(filteredPayload).length > 0 ? (
-              <div className='sf-submission-fields'>
-                {Object.entries(filteredPayload).map(([key, value]) => (
-                  <div key={key} className='sf-submission-field'>
-                    <div className='sf-submission-field__content'>
-                      <div className='sf-submission-field__layout'>
-                        <div className='sf-submission-field__label-section'>
-                          <h3 className='sf-submission-field__label'>
-                            {getFieldLabel(key)}
-                          </h3>
-                          {showTechnical && (
-                            <p className='sf-submission-field__tech-name'>
-                              {key}
-                            </p>
-                          )}
-                        </div>
-                        <div className='sf-submission-field__value-section'>
-                          <div className='sf-submission-field__value'>
-                            {value && typeof value === 'object' ? (
-                              // <div className='sf-submission-field__json'>
-                              //   <div className='sf-submission-field__json-label'>
-                              //     {__('JSON Data:', 'subtleforms')}
-                              //   </div>
-                              //   <pre className='sf-submission-field__json-code'>
-                              //     {JSON.stringify(value, null, 2)}
-                              //   </pre>
-                              // </div>
-                              <div className="sf-submission-field__readable">
-                                {renderReadableData(value)}
-                              </div>
-                            ) : (
-                              <div className='sf-submission-field__value-text'>
-                                {value ? (
-                                  <span className='sf-submission-field__value-filled'>
-                                    {String(value)
-                                      .split('\n')
-                                      .map((line, i, arr) => (
-                                        <span key={i}>
-                                          {line}
-                                          {i < arr.length - 1 && <br />}
-                                        </span>
-                                      ))}
+
+          {/* ── Submitted Data Card ── */}
+          <div className='subtleforms-card'>
+            <div className='sf-card-head'>
+              <h2 className='sf-card-title'>{ __( 'Submitted Data', 'subtleforms' ) }</h2>
+              <div className='sf-card-head__controls'>
+                <label className='sf-field-toggle'>
+                  <input
+                    type='checkbox'
+                    checked={ showEmpty }
+                    onChange={ ( e ) => setShowEmpty( e.target.checked ) }
+                  />
+                  { __( 'Show empty fields', 'subtleforms' ) }
+                </label>
+                <label className='sf-field-toggle'>
+                  <input
+                    type='checkbox'
+                    checked={ showTechnical }
+                    onChange={ ( e ) => setShowTechnical( e.target.checked ) }
+                  />
+                  { __( 'Show field keys', 'subtleforms' ) }
+                </label>
+              </div>
+            </div>
+
+            { Object.keys( filteredPayload ).length > 0 ? (
+              <div className='sf-field-list'>
+                { Object.entries( filteredPayload ).map( ( [ key, value ] ) => {
+                  const isEmpty =
+                    value === '' || value === null || value === undefined ||
+                    ( Array.isArray( value ) && value.length === 0 );
+                  return (
+                    <div key={ key } className={ `sf-field-row ${ isEmpty ? 'sf-field-row--empty' : '' }` }>
+                      <div className='sf-field-row__meta'>
+                        <span className='sf-field-row__label'>
+                          { getFieldLabel( key ) }
+                        </span>
+                        { showTechnical && (
+                          <code className='sf-field-row__key'>{ key }</code>
+                        ) }
+                      </div>
+                      <div className='sf-field-row__value'>
+                        { ! isEmpty ? (
+                          typeof value === 'object' ? (
+                            <div className='sf-field-row__object'>
+                              { renderReadableData( value ) }
+                            </div>
+                          ) : (
+                            <span className='sf-field-row__text'>
+                              { String( value )
+                                .split( '\n' )
+                                .map( ( line, i, arr ) => (
+                                  <span key={ i }>
+                                    { line }
+                                    { i < arr.length - 1 && <br /> }
                                   </span>
-                                ) : (
-                                  <span className='sf-submission-field__value-empty'>
-                                    ({__('empty', 'subtleforms')})
-                                  </span>
-                                )}
-                              </div>
-                            )}
-                          </div>
-                        </div>
+                                ) ) }
+                            </span>
+                          )
+                        ) : (
+                          <span className='sf-field-row__empty'>
+                            { __( '(empty)', 'subtleforms' ) }
+                          </span>
+                        ) }
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                } ) }
               </div>
             ) : (
-              <div className='sf-submission-empty'>
-                <div className='sf-submission-empty__icon'>
-                  <Icon.FileText
-                    className='sf-submission-empty__icon-svg'
-                    size={24}
-                    strokeWidth={1.5}
-                  />
+              <div className='sf-empty-state'>
+                <div className='sf-empty-state__icon'>
+                  <Icon.FileText size={ 28 } strokeWidth={ 1.5 } />
                 </div>
-                <h3 className='sf-submission-empty__title'>
-                  {__('No Data Submitted', 'subtleforms')}
+                <h3 className='sf-empty-state__title'>
+                  { __( 'No Data Submitted', 'subtleforms' ) }
                 </h3>
-                <p className='sf-submission-empty__description'>
-                  {__(
+                <p className='sf-empty-state__desc'>
+                  { __(
                     'This submission was recorded but contains no field data.',
                     'subtleforms'
-                  )}
+                  ) }
                 </p>
-                <div className='sf-submission-empty__info'>
-                  <p className='sf-submission-empty__info-title'>
-                    {__('Possible causes:', 'subtleforms')}
-                  </p>
-                  <ul className='sf-submission-empty__info-list'>
-                    <li>
-                      {__(
-                        'Form fields were not properly configured with keys',
-                        'subtleforms'
-                      )}
-                    </li>
-                    <li>
-                      {__(
-                        'JavaScript error prevented data collection',
-                        'subtleforms'
-                      )}
-                    </li>
-                    <li>
-                      {__(
-                        'Multi-step form field paths not correctly collected',
-                        'subtleforms'
-                      )}
-                    </li>
-                    <li>
-                      {__(
-                        'Browser console may show errors during submission',
-                        'subtleforms'
-                      )}
-                    </li>
+                <div className='sf-empty-state__help'>
+                  <p>{ __( 'Possible causes:', 'subtleforms' ) }</p>
+                  <ul>
+                    <li>{ __( 'Form fields not configured with field keys', 'subtleforms' ) }</li>
+                    <li>{ __( 'JavaScript error prevented data collection', 'subtleforms' ) }</li>
+                    <li>{ __( 'Multi-step form field paths not collected', 'subtleforms' ) }</li>
                   </ul>
-                  <p className='sf-submission-empty__info-tip'>
-                    <strong>{__('Debug tip:', 'subtleforms')}</strong>{' '}
-                    {__(
-                      'Check the Execution Logs below for clues.',
-                      'subtleforms'
-                    )}
+                  <p className='sf-empty-state__tip'>
+                    <strong>{ __( 'Debug tip:', 'subtleforms' ) }</strong>{ ' ' }
+                    { __( 'Check Execution Logs below for clues.', 'subtleforms' ) }
                   </p>
                 </div>
               </div>
-            )}
+            ) }
           </div>
-        </div>
 
-        {showTechnical && (
-          <div className='subtleforms-card'>
-            <div className='subtleforms-card-header'>
-              <h2 className='sf-submission-card__title'>
-                {__('Technical Information', 'subtleforms')}
-              </h2>
-            </div>
-            <div className='subtleforms-card-content'>
-              <TabPanel
-                tabs={[
-                  {
-                    name: 'raw',
-                    title: __('Raw Payload', 'subtleforms'),
-                  },
-                  {
-                    name: 'meta',
-                    title: __('Meta Data', 'subtleforms'),
-                  },
-                  {
-                    name: 'schema',
-                    title: __('Form Schema', 'subtleforms'),
-                  },
-                ]}>
-                <div className='sf-submission-tech__tabs'>
-                  <div data-tab='raw'>
-                    <div className='sf-submission-tech__code-block'>
-                      <pre className='sf-submission-tech__code'>
-                        {JSON.stringify(submission.data, null, 2)}
-                      </pre>
-                    </div>
-                  </div>
-                  <div data-tab='meta'>
-                    <div className='sf-submission-tech__grid'>
-                      <div className='sf-submission-tech__section'>
-                        <h4 className='sf-submission-tech__section-title'>
-                          {__('Request Info', 'subtleforms')}
-                        </h4>
-                        <dl className='sf-submission-tech__list'>
-                          <div>
-                            <dt className='sf-submission-tech__label'>
-                              {__('IP Address', 'subtleforms')}
-                            </dt>
-                            <dd className='sf-submission-tech__value'>
-                              {submission.ip_address || __('N/A', 'subtleforms')}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt className='sf-submission-tech__label'>
-                              {__('User Agent', 'subtleforms')}
-                            </dt>
-                            <dd className='sf-submission-tech__value sf-submission-tech__value--break'>
-                              {submission.user_agent || __('N/A', 'subtleforms')}
-                            </dd>
-                          </div>
-                          {/* Referrer is not available in backend, so always show N/A */}
-                          <div>
-                            <dt className='sf-submission-tech__label'>
-                              {__('Referrer', 'subtleforms')}
-                            </dt>
-                            <dd className='sf-submission-tech__value sf-submission-tech__value--break'>
-                              {__('N/A', 'subtleforms')}
-                            </dd>
-                          </div>
-                        </dl>
-                      </div>
-                      <div className='sf-submission-tech__section'>
-                        <h4 className='sf-submission-tech__section-title'>
-                          {__('Database Info', 'subtleforms')}
-                        </h4>
-                        <dl className='sf-submission-tech__list'>
-                          <div>
-                            <dt className='sf-submission-tech__label'>
-                              {__('Submission ID', 'subtleforms')}
-                            </dt>
-                            <dd className='sf-submission-tech__value'>
-                              {submission.id}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt className='sf-submission-tech__label'>
-                              {__('Form ID', 'subtleforms')}
-                            </dt>
-                            <dd className='sf-submission-tech__value'>
-                              {submission.form_id}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt className='sf-submission-tech__label'>
-                              {__('Created', 'subtleforms')}
-                            </dt>
-                            <dd className='sf-submission-tech__value'>
-                              {submission.created_at}
-                            </dd>
-                          </div>
-                          <div>
-                            <dt className='sf-submission-tech__label'>
-                              {__('Status', 'subtleforms')}
-                            </dt>
-                            <dd className='sf-submission-tech__value'>
-                              {submission.status}
-                            </dd>
-                          </div>
-                        </dl>
-                      </div>
-                    </div>
-                  </div>
-                  <div data-tab='schema'>
-                    <div className='sf-submission-tech__section'>
-                      <pre className='sf-submission-tech__code'>
-                        {JSON.stringify(submission.schema || {}, null, 2)}
-                      </pre>
-                    </div>
-                  </div>
+          {/* ── Technical section (shown when toggle is on) ── */}
+          { showTechnical && (
+            <div className='subtleforms-card'>
+              <div className='sf-card-head'>
+                <h2 className='sf-card-title'>
+                  { __( 'Technical Details', 'subtleforms' ) }
+                </h2>
+              </div>
+              <div className='sf-tech-grid'>
+                <div className='sf-tech-section'>
+                  <h4 className='sf-tech-section__title'>
+                    { __( 'Raw Payload', 'subtleforms' ) }
+                  </h4>
+                  <pre className='sf-tech-code'>
+                    { JSON.stringify( submission.payload, null, 2 ) }
+                  </pre>
                 </div>
-              </TabPanel>
+                <div className='sf-tech-section'>
+                  <h4 className='sf-tech-section__title'>
+                    { __( 'Meta', 'subtleforms' ) }
+                  </h4>
+                  <pre className='sf-tech-code'>
+                    { JSON.stringify( meta, null, 2 ) }
+                  </pre>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          ) }
 
-        <div className='subtleforms-card'>
-          <div className='subtleforms-card-header'>
-            <h2 className='sf-submission-card__title'>
-              {__('Submission Notes', 'subtleforms')}
-            </h2>
-          </div>
-          <div className='subtleforms-card-content'>
-            <TextareaControl
-              rows={4}
-              placeholder={__(
-                'Add notes about this submission (not yet implemented)',
-                'subtleforms'
-              )}
-              disabled
-            />
-          </div>
-        </div>
-
-        <div className='subtleforms-card'>
-          <div className='subtleforms-card-header'>
-            <h2 className='sf-submission-card__title'>
-              {__('Execution Logs', 'subtleforms')}
-            </h2>
-          </div>
-          <div className='subtleforms-card-content'>
+          {/* ── Execution Logs ── */}
+          <div className='subtleforms-card'>
+            <div className='sf-card-head'>
+              <h2 className='sf-card-title'>
+                { __( 'Execution Logs', 'subtleforms' ) }
+              </h2>
+              <span className='sf-card-head__count'>
+                { logs.length }
+              </span>
+            </div>
             <TabPanel
-              tabs={[
+              tabs={ [
                 {
                   name: 'general',
                   title: sprintf(
-                    /* translators: %1$d: number of general log entries */
-                    __('General (%1$d)', 'subtleforms'),
+                    __( 'General (%d)', 'subtleforms' ),
                     generalLogs.length
                   ),
                 },
                 {
                   name: 'api',
                   title: sprintf(
-                    /* translators: %1$d: number of API call logs */
-                    __('API Calls (%1$d)', 'subtleforms'),
+                    __( 'API Calls (%d)', 'subtleforms' ),
                     apiLogs.length
                   ),
                 },
-              ]}>
-              {(tab) => {
+              ] }>
+              { ( tab ) => {
                 const displayLogs =
                   tab.name === 'general' ? generalLogs : apiLogs;
                 return displayLogs.length > 0 ? (
-                  <table className='widefat'>
-                    <thead>
-                      <tr>
-                        <th>{__('Time', 'subtleforms')}</th>
-                        <th>{__('Level', 'subtleforms')}</th>
-                        <th>{__('Message', 'subtleforms')}</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {displayLogs.map((log, idx) => (
-                        <tr key={idx}>
-                          <td style={{ whiteSpace: 'nowrap' }}>
-                            {log.created_at}
-                          </td>
-                          <td>
-                            <span
-                              className={`subtleforms-log-level subtleforms-log-level--${log.level}`}>
-                              {log.level}
-                            </span>
-                          </td>
-                          <td>{log.message}</td>
+                  <div className='sf-log-table-wrap'>
+                    <table className='sf-log-table'>
+                      <thead>
+                        <tr>
+                          <th>{ __( 'Time', 'subtleforms' ) }</th>
+                          <th>{ __( 'Level', 'subtleforms' ) }</th>
+                          <th>{ __( 'Message', 'subtleforms' ) }</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        { displayLogs.map( ( log, idx ) => (
+                          <tr key={ idx }>
+                            <td className='sf-log-table__time'>
+                              { log.created_at }
+                            </td>
+                            <td>
+                              <span className={ `sf-log-level sf-log-level--${ log.level }` }>
+                                { log.level }
+                              </span>
+                            </td>
+                            <td className='sf-log-table__message'>
+                              { log.message }
+                            </td>
+                          </tr>
+                        ) ) }
+                      </tbody>
+                    </table>
+                  </div>
                 ) : (
-                  <p>
-                    <em>{__('No logs', 'subtleforms')}</em>
+                  <p className='sf-logs-empty'>
+                    <em>{ __( 'No logs recorded.', 'subtleforms' ) }</em>
                   </p>
                 );
-              }}
+              } }
             </TabPanel>
           </div>
-        </div>
 
-        <div className='subtleforms-submission-sidebar'>
-          <div className='subtleforms-detail-section'>
-            <h3>{__('Submission Info', 'subtleforms')}</h3>
-            <table className='widefat'>
-              <tbody>
-                <tr>
-                  <th>{__('ID', 'subtleforms')}</th>
-                  <td>
-                    <code>{submission.id}</code>
-                  </td>
-                </tr>
-                <tr>
-                  <th>{__('Form', 'subtleforms')}</th>
-                  <td>{submission.form_title || submission.form_id}</td>
-                </tr>
-                <tr>
-                  <th>{__('Status', 'subtleforms')}</th>
-                  <td>
-                    <SelectControl
-                      value={submission.status}
-                      onChange={handleStatusChange}
-                      disabled={updating}
-                      options={[
-                        { label: __('Unread', 'subtleforms'), value: 'unread' },
-                        { label: __('Read', 'subtleforms'), value: 'read' },
-                      ]}
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th>{__('IP Address', 'subtleforms')}</th>
-                  <td>
-                    <code>
-                      {submission.ip_address || __('N/A', 'subtleforms')}
-                    </code>
-                  </td>
-                </tr>
-                <tr>
-                  <th>{__('Browser', 'subtleforms')}</th>
-                  <td style={{ fontSize: '0.9em', wordBreak: 'break-word' }}>
-                    {submission.user_agent
-                      ? (() => {
-                          const ua = submission.user_agent;
-                          const browser =
-                            ua.match(
-                              /(Chrome|Firefox|Safari|Edge|Opera)\/[\d.]+/
-                            )?.[0] || 'Unknown';
-                          return browser;
-                        })()
-                      : __('N/A', 'subtleforms')}
-                  </td>
-                </tr>
-                <tr>
-                  <th>{__('Device', 'subtleforms')}</th>
-                  <td>
-                    {submission.user_agent
-                      ? submission.user_agent.match(
-                          /Mobile|Android|iPhone|iPad/
-                        )
-                        ? __('Mobile', 'subtleforms')
-                        : __('Desktop', 'subtleforms')
-                      : __('N/A', 'subtleforms')}
-                  </td>
-                </tr>
-                <tr>
-                  <th>{__('Source URL', 'subtleforms')}</th>
-                  <td style={{ wordBreak: 'break-all', fontSize: '0.85em' }}>
-                    {meta.source_url ? (
+        </div>{/* /sf-sub-main */}
+
+        {/* ═══════════════════ SIDEBAR ═══════════════════════ */}
+        <aside className='sf-sub-sidebar'>
+          <div className='subtleforms-card sf-sub-sidebar__card'>
+
+            {/* Status control — prominent at top */}
+            <div className='sf-sidebar-status'>
+              <div className='sf-sidebar-status__label'>
+                { __( 'Status', 'subtleforms' ) }
+              </div>
+              <button
+                type='button'
+                className={ `sf-status-pill sf-status-pill--${ readStatus } sf-status-pill--lg` }
+                onClick={ () =>
+                  handleStatusChange(
+                    readStatus === 'read' ? 'unread' : 'read'
+                  )
+                }
+                disabled={ updating }>
+                <span className='sf-status-pill__dot' aria-hidden='true' />
+                { readStatus === 'unread'
+                  ? __( 'Unread — click to mark read', 'subtleforms' )
+                  : __( 'Read — click to mark unread', 'subtleforms' ) }
+              </button>
+            </div>
+
+            <div className='sf-sidebar-divider' />
+
+            {/* Submission section */}
+            <div className='sf-sidebar-section'>
+              <h3 className='sf-sidebar-section__title'>
+                { __( 'Submission', 'subtleforms' ) }
+              </h3>
+              <dl className='sf-detail-list'>
+                <div className='sf-detail-row'>
+                  <dt>{ __( 'ID', 'subtleforms' ) }</dt>
+                  <dd><code>#{submission.id}</code></dd>
+                </div>
+                <div className='sf-detail-row'>
+                  <dt>{ __( 'Submitted', 'subtleforms' ) }</dt>
+                  <dd title={ submission.created_at }>
+                    <span className='sf-detail-date'>{ absDate }</span>
+                    <span className='sf-detail-rel'>{ relDate }</span>
+                  </dd>
+                </div>
+                <div className='sf-detail-row'>
+                  <dt>{ __( 'User', 'subtleforms' ) }</dt>
+                  <dd>
+                    { meta.user_id
+                      ? sprintf( __( 'User #%d', 'subtleforms' ), meta.user_id )
+                      : __( 'Guest', 'subtleforms' ) }
+                  </dd>
+                </div>
+              </dl>
+            </div>
+
+            <div className='sf-sidebar-divider' />
+
+            {/* Form section */}
+            <div className='sf-sidebar-section'>
+              <h3 className='sf-sidebar-section__title'>
+                { __( 'Form', 'subtleforms' ) }
+              </h3>
+              <dl className='sf-detail-list'>
+                <div className='sf-detail-row'>
+                  <dt>{ __( 'Name', 'subtleforms' ) }</dt>
+                  <dd>
+                    { submission.form_title ? (
                       <a
-                        href={meta.source_url}
-                        target='_blank'
-                        rel='noopener noreferrer'>
-                        {meta.source_url}
+                        href={ `admin.php?page=subtleforms-forms&form_id=${ submission.form_id }` }
+                        className='sf-detail-link'>
+                        { submission.form_title }
                       </a>
                     ) : (
-                      __('N/A', 'subtleforms')
-                    )}
-                  </td>
-                </tr>
-                <tr>
-                  <th>{__('User', 'subtleforms')}</th>
-                  <td>
-                    {meta.user_id
-                      ? sprintf(
-                          /* translators: %1$d: user id */ __(
-                            'User #%1$d',
-                            'subtleforms'
-                          ),
-                          meta.user_id
-                        )
-                      : __('Guest', 'subtleforms')}
-                  </td>
-                </tr>
-                <tr>
-                  <th>{__('Submitted', 'subtleforms')}</th>
-                  <td title={submission.created_at}>
-                    {(() => {
-                      const date = new Date(submission.created_at);
-                      const now = new Date();
-                      const diff = Math.floor((now - date) / 1000);
-                      if (diff < 60)
-                        return (() => {
-                          /* translators: %1$d: number of seconds */ return sprintf(
-                            __('%1$d seconds ago', 'subtleforms'),
-                            diff
-                          );
-                        })();
-                      if (diff < 3600)
-                        return (() => {
-                          /* translators: %1$d: number of minutes */ return sprintf(
-                            __('%1$d minutes ago', 'subtleforms'),
-                            Math.floor(diff / 60)
-                          );
-                        })();
-                      if (diff < 86400)
-                        return (() => {
-                          /* translators: %1$d: number of hours ago */ return sprintf(
-                            __('%1$d hours ago', 'subtleforms'),
-                            Math.floor(diff / 3600)
-                          );
-                        })();
-                      return (() => {
-                        /* translators: %1$d: number of days */ return sprintf(
-                          __('%1$d days ago', 'subtleforms'),
-                          Math.floor(diff / 86400)
-                        );
-                      })();
-                    })()}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
+                      sprintf( __( 'Form #%d', 'subtleforms' ), submission.form_id )
+                    ) }
+                  </dd>
+                </div>
+                <div className='sf-detail-row'>
+                  <dt>{ __( 'Type', 'subtleforms' ) }</dt>
+                  <dd>
+                    <span className={ `sf-type-badge sf-type-badge--${ formType } sf-type-badge--sm` }>
+                      { formTypeLabel }
+                    </span>
+                  </dd>
+                </div>
+                <div className='sf-detail-row'>
+                  <dt>{ __( 'Form ID', 'subtleforms' ) }</dt>
+                  <dd><code>#{ submission.form_id }</code></dd>
+                </div>
+              </dl>
+            </div>
+
+            <div className='sf-sidebar-divider' />
+
+            {/* Technical section */}
+            <div className='sf-sidebar-section'>
+              <h3 className='sf-sidebar-section__title'>
+                { __( 'Technical', 'subtleforms' ) }
+              </h3>
+              <dl className='sf-detail-list'>
+                <div className='sf-detail-row'>
+                  <dt>{ __( 'IP Address', 'subtleforms' ) }</dt>
+                  <dd><code>{ submission.ip_address || __( 'N/A', 'subtleforms' ) }</code></dd>
+                </div>
+                <div className='sf-detail-row'>
+                  <dt>{ __( 'Browser', 'subtleforms' ) }</dt>
+                  <dd>{ parsedBrowser }</dd>
+                </div>
+                <div className='sf-detail-row'>
+                  <dt>{ __( 'Device', 'subtleforms' ) }</dt>
+                  <dd>{ parsedDevice }</dd>
+                </div>
+                { meta.source_url && (
+                  <div className='sf-detail-row sf-detail-row--full'>
+                    <dt>{ __( 'Source URL', 'subtleforms' ) }</dt>
+                    <dd>
+                      <a
+                        href={ meta.source_url }
+                        target='_blank'
+                        rel='noopener noreferrer'
+                        className='sf-detail-link sf-detail-link--break'>
+                        { meta.source_url }
+                      </a>
+                    </dd>
+                  </div>
+                ) }
+              </dl>
+            </div>
+
           </div>
-        </div>
-      </div>
+        </aside>
+
+      </div>{/* /sf-sub-layout */}
     </AdminShell>
   );
 }

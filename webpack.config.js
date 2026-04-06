@@ -8,6 +8,7 @@
 
 const defaultConfig = require('@wordpress/scripts/config/webpack.config');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
+const MiniCSSExtractPlugin = require('mini-css-extract-plugin');
 
 // Check if we should run the analyzer
 const shouldAnalyze = process.env.ANALYZE === 'true';
@@ -89,9 +90,14 @@ module.exports = {
 			},
 		},
 	},
-	// Add bundle analyzer plugin if enabled
+	// Add bundle analyzer plugin if enabled, and override MiniCSSExtractPlugin
+	// to use content-hashed chunk filenames so CSS splits get proper cache busting.
 	plugins: [
-		...defaultConfig.plugins,
+		...defaultConfig.plugins.filter((p) => !(p instanceof MiniCSSExtractPlugin)),
+		new MiniCSSExtractPlugin({
+			filename: '[name].css',
+			chunkFilename: '[name].[contenthash:8].css',
+		}),
 		...(shouldAnalyze
 			? [
 					new BundleAnalyzerPlugin({
