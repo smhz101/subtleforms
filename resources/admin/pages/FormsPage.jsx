@@ -225,7 +225,6 @@ export default function FormsPage() {
               </div>
             ) : (
               <div className='sf-forms-header'>
-                
                 <div className='sf-forms-header__actions'>
                   <HelpMenu
                     onOpenWizard={() => setShowWizard(true)}

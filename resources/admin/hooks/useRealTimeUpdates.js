@@ -23,11 +23,11 @@ export function useRealTimeUpdates(options = {}) {
   const [isPolling, setIsPolling] = useState(false);
   const intervalRef = useRef(null);
   const lastUnreadCountRef = useRef(0);
-  
+
   // Store callbacks in refs to prevent dependency changes
   const onUnreadCountChangeRef = useRef(onUnreadCountChange);
   const onSubmissionsUpdateRef = useRef(onSubmissionsUpdate);
-  
+
   // Update refs when callbacks change
   useEffect(() => {
     onUnreadCountChangeRef.current = onUnreadCountChange;

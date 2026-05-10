@@ -151,6 +151,11 @@ final class SubmissionsApi {
 						'type'              => 'string',
 						'sanitize_callback' => 'sanitize_text_field',
 					),
+					'processing_status' => array(
+						'type'              => 'string',
+						'enum'              => array( 'completed', 'failed', 'payment_pending', 'processing' ),
+						'sanitize_callback' => 'sanitize_text_field',
+					),
 				),
 			)
 		);
@@ -312,9 +317,31 @@ final class SubmissionsApi {
 			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
 		}
 
+		// Map tab-based status filter to the correct DB field.
+		// 'unread'/'read' resolve to is_read column; 'spam'/'flagged' use status column.
+		// A separate 'processing_status' param filters by pipeline status (completed/failed/etc).
+		$tab_status  = $request->get_param( 'status' );
+		$proc_status = $request->get_param( 'processing_status' );
+		$status_arg  = null;
+		$is_read_arg = null;
+
+		if ( $tab_status === 'unread' || $tab_status === 'new' ) {
+			$is_read_arg = 0;
+		} elseif ( $tab_status === 'read' ) {
+			$is_read_arg = 1;
+		} elseif ( in_array( $tab_status, array( 'spam', 'flagged' ), true ) ) {
+			$status_arg = $tab_status;
+		}
+
+		// Processing status (filter bar) — only applies when tab is 'all'
+		if ( $proc_status && $status_arg === null && $is_read_arg === null ) {
+			$status_arg = $proc_status;
+		}
+
 		$args = array(
 			'form_id'     => $request->get_param( 'form_id' ),
-			'status'      => $request->get_param( 'status' ),
+			'status'      => $status_arg,
+			'is_read'     => $is_read_arg,
 			'search'      => $request->get_param( 'search' ),
 			'after'       => $request->get_param( 'after' ),
 			'field_key'   => $request->get_param( 'field_key' ),
@@ -369,10 +396,10 @@ final class SubmissionsApi {
 			return ApiResponse::not_found( __( 'Submission not found', 'subtleforms' ) );
 		}
 
-		// Auto-mark as read
-		if ( $submission['status'] === 'unread' ) {
-			$this->submissionsRepo->update( $submission['id'], array( 'status' => 'read' ) );
-			$submission['status'] = 'read';
+		// Auto-mark as read (track via is_read, not status)
+		if ( intval( $submission['is_read'] ?? 0 ) === 0 ) {
+			$this->submissionsRepo->update( $submission['id'], array( 'is_read' => 1 ) );
+			$submission['is_read'] = 1;
 		}
 
 		// Enhance with form info
@@ -433,8 +460,9 @@ final class SubmissionsApi {
 
 		$data = array_filter(
 			array(
-				'status' => $validated['status'] ?? null,
-				'notes'  => $validated['notes'] ?? null,
+				'status'  => $validated['status'] ?? null,
+				'is_read' => isset( $validated['is_read'] ) ? intval( $validated['is_read'] ) : null,
+				'notes'   => $validated['notes'] ?? null,
 			),
 			fn( $value ) => $value !== null
 		);
@@ -513,7 +541,7 @@ final class SubmissionsApi {
 		}
 
 		try {
-			$unreadCount = $this->submissionsRepo->count( array( 'status' => 'unread' ) );
+			$unreadCount = $this->submissionsRepo->count( array( 'is_read' => 0 ) );
 
 			return ApiResponse::success(
 				array(

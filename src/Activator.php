@@ -54,6 +54,7 @@ final class Activator {
 		// Migrate data if needed
 		self::migrate_submissions_table();
 		self::migrate_draft_schema_column();
+		self::migrate_is_read_column();
 
 		// Set default options
 		self::set_default_options();
@@ -101,12 +102,14 @@ final class Activator {
   payload longtext NOT NULL,
   meta longtext,
   status varchar(20) NOT NULL DEFAULT 'pending',
+  is_read tinyint(1) NOT NULL DEFAULT 0,
   ip_address varchar(45),
   user_agent varchar(255),
   created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY  (id),
   KEY form_id (form_id),
   KEY status (status),
+  KEY is_read (is_read),
   KEY created_at (created_at)
 ) {$charset_collate};";
 
@@ -225,6 +228,22 @@ final class Activator {
 		if ( ! empty( $column_exists ) ) {
 			// Copy form_version to schema_version where schema_version is NULL
 			$wpdb->query( "UPDATE {$table_name} SET schema_version = form_version WHERE schema_version IS NULL AND form_version IS NOT NULL" );
+		}
+	}
+
+	/**
+	 * Add is_read column to submissions table (v2.0 — separates admin read tracking from pipeline status).
+	 */
+	private static function migrate_is_read_column(): void {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'subtleforms_submissions';
+
+		$column_exists = $wpdb->get_results( "SHOW COLUMNS FROM {$table_name} LIKE 'is_read'" );
+
+		if ( empty( $column_exists ) ) {
+			$wpdb->query( "ALTER TABLE {$table_name} ADD COLUMN is_read tinyint(1) NOT NULL DEFAULT 0 AFTER status" );
+			$wpdb->query( "ALTER TABLE {$table_name} ADD KEY is_read (is_read)" );
+			Logger::info( 'Added is_read column to submissions table' );
 		}
 	}
 
