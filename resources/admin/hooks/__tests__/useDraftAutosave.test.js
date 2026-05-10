@@ -39,8 +39,8 @@ describe('useDraftAutosave', () => {
     // Should not save immediately
     expect(apiPost).not.toHaveBeenCalled();
 
-    // Fast-forward debounce time (500ms)
-    jest.advanceTimersByTime(500);
+    // Fast-forward debounce time (3000ms matches AUTOSAVE_DEBOUNCE_MS in useDraftAutosave.js)
+    jest.advanceTimersByTime(3000);
 
     expect(mockDispatch).toHaveBeenCalledWith({ type: BUILDER_ACTIONS.START_AUTOSAVE });
     expect(apiPost).toHaveBeenCalledWith('/forms/123/schema', {
@@ -68,7 +68,7 @@ describe('useDraftAutosave', () => {
   it('should handle save success', async () => {
     const { waitForNextUpdate } = renderHook(() => useDraftAutosave(defaultProps));
 
-    jest.advanceTimersByTime(500);
+    jest.advanceTimersByTime(3000);
 
     // Wait for the promise to resolve
     await Promise.resolve();
@@ -84,7 +84,7 @@ describe('useDraftAutosave', () => {
 
     renderHook(() => useDraftAutosave(defaultProps));
 
-    jest.advanceTimersByTime(500);
+    jest.advanceTimersByTime(3000);
     await Promise.resolve();
 
     expect(mockDispatch).toHaveBeenCalledWith({
@@ -98,13 +98,13 @@ describe('useDraftAutosave', () => {
 
     renderHook(() => useDraftAutosave(defaultProps));
 
-    // First attempt
-    jest.advanceTimersByTime(500);
+    // First attempt — debounce is AUTOSAVE_DEBOUNCE_MS = 3000ms
+    jest.advanceTimersByTime(3000);
     await Promise.resolve();
     expect(apiPost).toHaveBeenCalledTimes(1);
 
-    // Retry delay (2000ms)
-    jest.advanceTimersByTime(2000);
+    // Retry delay — AUTOSAVE_RETRY_DELAY_MS * retryCount = 5000 * 1 = 5000ms
+    jest.advanceTimersByTime(5000);
     await Promise.resolve();
     expect(apiPost).toHaveBeenCalledTimes(2);
   });
