@@ -2,6 +2,7 @@
   "name": "muzammil/subtleforms",
   "description": "most subtle and elite forms power house",
   "type": "project",
+  "license": "GPL-2.0-or-later",
   "autoload": {
     "psr-4": {
       "SubtleForms\\": "src/"
