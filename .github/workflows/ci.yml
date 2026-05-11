@@ -157,9 +157,10 @@ jobs:
   # ─────────────────────────────────────────────────────────────
   # Job 4: WordPress Plugin Check
   # Uses the official WordPress plugin-check-action.
-  # Excludes development-only directories and files that are already
-  # listed in .distignore and will not be included in the WordPress.org
-  # SVN deployment.
+  # Excludes the file_type check (compressed files, hidden files, shell
+  # scripts, VCS dirs, unexpected markdown) because those checks target
+  # production-ready distribution ZIPs, not development repositories.
+  # All code-quality checks (security, i18n, late escaping, etc.) run.
   # ─────────────────────────────────────────────────────────────
   plugin-check:
     name: WordPress Plugin Check
@@ -176,33 +177,9 @@ jobs:
         uses: wordpress/plugin-check-action@v1
         with:
           build-dir: '.'
-          # Development-only directories tracked in git but excluded from
-          # WordPress.org distribution via .distignore.
-          exclude-directories: |
-            tests
-            scripts
-            bin
-            _plan
-            docs
-            examples
-            extensions
-            sdk
-            artifacts
-          # Development-only files tracked in git but excluded from
-          # WordPress.org distribution via .distignore.
-          exclude-files: |
-            .phpcs.xml.dist
-            .eslintrc.js
-            phpunit.xml.dist
-            AUDIT_SUMMARY.md
-            RELEASE.md
-            CODEBASE.md
-            FRONTEND_RENDERER_AUDIT.md
-            AGENTS.md
-            cookies.txt
-          # Ignore codes that apply only to development workflow files
-          # (.gitignore, .distignore, .github/) which are present in the
-          # repository but excluded from the distributed plugin package.
-          ignore-codes: |
-            github_directory
-            hidden_files
+          # Exclude the file_type check entirely: it flags dev-only files
+          # (shell scripts, dotfiles, .dist configs, unexpected .md files)
+          # that are present in the git repo but absent from the WordPress.org
+          # distribution package (controlled via .distignore).
+          # All security, i18n, performance, and accessibility checks run.
+          exclude-checks: file_type
