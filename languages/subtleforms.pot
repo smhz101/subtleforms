@@ -9,9 +9,9 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-05-11T01:43:34+00:00\n"
+"POT-Creation-Date: 2026-05-11T01:47:54+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
-"X-Generator: WP-CLI 2.11.0\n"
+"X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
 
 #. Plugin Name of the plugin
@@ -38,6 +38,7 @@ msgstr ""
 
 #. translators: %s: Current PHP version
 #: src/Activator.php:28
+#, php-format
 msgid "SubtleForms requires PHP 7.4 or higher. Your server is running PHP %s"
 msgstr ""
 
@@ -48,6 +49,7 @@ msgstr ""
 
 #. translators: %s: Current WordPress version
 #: src/Activator.php:43
+#, php-format
 msgid "SubtleForms requires WordPress 5.0 or higher. You are running %s"
 msgstr ""
 
@@ -228,6 +230,7 @@ msgstr ""
 
 #. translators: %s: Name of the interface being developed
 #: src/Admin/AdminMenu.php:713
+#, php-format
 msgid "The %s interface is under development."
 msgstr ""
 
@@ -301,6 +304,7 @@ msgstr ""
 
 #. translators: %s: URL to the Permalinks settings page
 #: src/Admin/AdminNotices.php:49
+#, php-format
 msgid "<strong>SubtleForms:</strong> The REST API requires pretty permalinks to be enabled. <a href=\"%s\">Update your permalink settings</a> and choose any option other than \"Plain\"."
 msgstr ""
 
@@ -312,6 +316,7 @@ msgstr ""
 
 #. translators: %s: resource type (e.g. "form", "submission")
 #: src/Api/ApiGuards.php:77
+#, php-format
 msgid "The %s has been modified by another user. Please refresh and try again."
 msgstr ""
 
@@ -377,6 +382,7 @@ msgstr ""
 
 #. translators: %d: number of seconds
 #: src/Api/DashboardApi.php:278
+#, php-format
 msgid "%d second ago"
 msgid_plural "%d seconds ago"
 msgstr[0] ""
@@ -384,6 +390,7 @@ msgstr[1] ""
 
 #. translators: %d: number of minutes
 #: src/Api/DashboardApi.php:282
+#, php-format
 msgid "%d minute ago"
 msgid_plural "%d minutes ago"
 msgstr[0] ""
@@ -391,6 +398,7 @@ msgstr[1] ""
 
 #. translators: %d: number of hours
 #: src/Api/DashboardApi.php:286
+#, php-format
 msgid "%d hour ago"
 msgid_plural "%d hours ago"
 msgstr[0] ""
@@ -398,6 +406,7 @@ msgstr[1] ""
 
 #. translators: %d: number of days
 #: src/Api/DashboardApi.php:290
+#, php-format
 msgid "%d day ago"
 msgid_plural "%d days ago"
 msgstr[0] ""
@@ -2091,11 +2100,13 @@ msgstr ""
 
 #. translators: %d: submission ID
 #: src/Privacy/PrivacyEraser.php:85
+#, php-format
 msgid "Failed to delete submission #%d"
 msgstr ""
 
 #. translators: 1: submission ID, 2: error message
 #: src/Privacy/PrivacyEraser.php:93
+#, php-format
 msgid "Error deleting submission #%1$d: %2$s"
 msgstr ""
 
@@ -2133,6 +2144,7 @@ msgstr ""
 
 #. translators: %d: number of days
 #: src/Privacy/PrivacyManager.php:92
+#, php-format
 msgid "<p>Form submissions are automatically deleted after %d days.</p>"
 msgstr ""
 
@@ -3168,6 +3180,7 @@ msgid "Submission Detail"
 msgstr ""
 
 #: resources/admin/app/AdminApp.jsx:168
+#, js-format
 msgid "Navigated to %s"
 msgstr ""
 
@@ -4179,6 +4192,7 @@ msgstr ""
 
 #. translators: %1$d: number of additional validation issues
 #: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:74
+#, js-format
 msgid "…and %1$d more"
 msgstr ""
 
@@ -4388,11 +4402,13 @@ msgstr ""
 
 #. translators: %d: step number
 #: resources/admin/components/builder/StepNavigator.jsx:71
+#, js-format
 msgid "Step %d"
 msgstr ""
 
 #. translators: %d: step number
 #: resources/admin/components/builder/StepNavigator.jsx:95
+#, js-format
 msgid "Delete step %d"
 msgstr ""
 
@@ -4576,11 +4592,13 @@ msgstr ""
 
 #. translators: %1$d: number of selected items
 #: resources/admin/components/DataTable.jsx:160
+#, js-format
 msgid "%1$d items selected"
 msgstr ""
 
 #. translators: %1$d: starting item number, %2$d: ending item number, %3$d: total items
 #: resources/admin/components/DataTable.jsx:326
+#, js-format
 msgid "Showing %1$d to %2$d of %3$d"
 msgstr ""
 
@@ -4590,6 +4608,7 @@ msgstr ""
 
 #. translators: %1$d: Current page number, %2$d: Total pages
 #: resources/admin/components/DataTable.jsx:362
+#, js-format
 msgid "Page %1$d of %2$d"
 msgstr ""
 
@@ -4793,6 +4812,7 @@ msgstr ""
 
 #. translators: %1$d: unread count, %2$d: total submissions
 #: resources/admin/components/FormsList.jsx:353
+#, js-format
 msgid "%1$d unread, %2$d total entries"
 msgstr ""
 
@@ -4802,6 +4822,7 @@ msgstr ""
 
 #: resources/admin/components/FormsList.jsx:388
 #: resources/admin/components/SubmissionsTable.jsx:420
+#, js-format
 msgid "%1$d hours ago"
 msgstr ""
 
@@ -4829,6 +4850,7 @@ msgstr ""
 
 #. translators: %s: form title
 #: resources/admin/components/FormsList.jsx:502
+#, js-format
 msgid "%1$s (Copy)"
 msgstr ""
 
@@ -4862,26 +4884,31 @@ msgstr ""
 
 #. translators: %1$d: number of forms to delete
 #: resources/admin/components/FormsList.jsx:597
+#, js-format
 msgid "Are you sure you want to delete %1$d forms?"
 msgstr ""
 
 #. translators: %1$d: number of forms deleted
 #: resources/admin/components/FormsList.jsx:621
+#, js-format
 msgid "%1$d forms deleted"
 msgstr ""
 
 #. translators: %1$d: number deleted, %2$d: total requested
 #: resources/admin/components/FormsList.jsx:632
+#, js-format
 msgid "Failed to delete some forms (%1$d/%2$d deleted)"
 msgstr ""
 
 #. translators: %1$d: number of forms updated
 #: resources/admin/components/FormsList.jsx:666
+#, js-format
 msgid "%1$d forms updated"
 msgstr ""
 
 #. translators: %1$d: number updated, %2$d: total requested
 #: resources/admin/components/FormsList.jsx:677
+#, js-format
 msgid "Failed to update some forms (%1$d/%2$d updated)"
 msgstr ""
 
@@ -4927,6 +4954,7 @@ msgstr ""
 
 #. translators: %1$d: number of submissions belonging to this form
 #: resources/admin/components/FormsList.jsx:793
+#, js-format
 msgid "Are you sure you want to delete this form? It has %1$d submissions which will also be permanently deleted."
 msgstr ""
 
@@ -5201,15 +5229,18 @@ msgstr ""
 
 #. translators: %d: retry attempt number
 #: resources/admin/components/PageErrorBoundary.jsx:140
+#, js-format
 msgid "Retrying… (attempt %d of %d)"
 msgstr ""
 
 #: resources/admin/components/PageErrorBoundary.jsx:152
+#, js-format
 msgid "Retrying to load page, attempt %d"
 msgstr ""
 
 #. translators: %s: page name
 #: resources/admin/components/PageErrorBoundary.jsx:180
+#, js-format
 msgid "An error occurred on the %s page."
 msgstr ""
 
@@ -5227,6 +5258,7 @@ msgstr ""
 
 #. translators: %s: page name
 #: resources/admin/components/PageErrorBoundary.jsx:202
+#, js-format
 msgid "We hit an issue loading %s. You can retry or continue working with existing content."
 msgstr ""
 
@@ -6153,39 +6185,47 @@ msgstr ""
 
 #. translators: %1$d: number of submissions to delete
 #: resources/admin/components/SubmissionsTable.jsx:243
+#, js-format
 msgid "Are you sure you want to delete %1$d submissions?"
 msgstr ""
 
 #. translators: %1$d: number of submissions deleted
 #: resources/admin/components/SubmissionsTable.jsx:273
+#, js-format
 msgid "%1$d submissions deleted"
 msgstr ""
 
 #. translators: %1$d: number deleted, %2$d: total requested
 #: resources/admin/components/SubmissionsTable.jsx:284
+#, js-format
 msgid "Failed to delete some submissions (%1$d/%2$d deleted)"
 msgstr ""
 
 #. translators: %1$d: number of submissions updated
 #: resources/admin/components/SubmissionsTable.jsx:343
+#, js-format
 msgid "%1$d submissions updated"
 msgstr ""
 
 #. translators: %1$d: number updated, %2$d: total requested
 #: resources/admin/components/SubmissionsTable.jsx:352
+#, js-format
 msgid "Failed to update some submissions (%1$d/%2$d updated)"
 msgstr ""
 
 #. translators: %1$d: number of seconds
 #: resources/admin/components/SubmissionsTable.jsx:406
+#, js-format
 msgid "%1$d seconds ago"
 msgstr ""
 
 #: resources/admin/components/SubmissionsTable.jsx:412
+#, js-format
 msgid "%1$d minutes ago"
 msgstr ""
 
 #: resources/admin/components/SubmissionsTable.jsx:427
+#, js-format
 msgid "%1$d days ago"
 msgstr ""
 
@@ -6654,6 +6694,7 @@ msgstr ""
 #: resources/admin/pages/BuilderPage.jsx:727
 #: resources/admin/pages/CreateFormPage.jsx:23
 #: resources/admin/pages/CreateFormPage.jsx:25
+#, js-format
 msgid "New Form %1$d"
 msgstr ""
 
@@ -6678,10 +6719,12 @@ msgstr ""
 
 #: resources/admin/hooks/useBuilderOrchestrator.js:232
 #: resources/admin/hooks/useBuilderOrchestrator.js:402
+#, js-format
 msgid "Rate limit exceeded. Please try again in %d seconds."
 msgstr ""
 
 #: resources/admin/hooks/useBuilderOrchestrator.js:247
+#, js-format
 msgid "Too many requests. Please wait %d seconds before trying again."
 msgstr ""
 
@@ -6704,6 +6747,7 @@ msgid "Failed to save form"
 msgstr ""
 
 #: resources/admin/hooks/useBuilderOrchestrator.js:417
+#, js-format
 msgid "Too many requests. Please wait %d seconds."
 msgstr ""
 
@@ -6874,16 +6918,19 @@ msgstr ""
 
 #. translators: %1$d: numeric suffix used to create a unique title
 #: resources/admin/pages/BuilderPage.jsx:326
+#, js-format
 msgid "Untitled Form %1$d"
 msgstr ""
 
 #. translators: %1$s: localized time string (e.g. 12:34 PM)
 #: resources/admin/pages/BuilderPage.jsx:540
+#, js-format
 msgid "Saving… (last saved at %1$s)"
 msgstr ""
 
 #. translators: %1$s: localized time string (e.g. 12:34 PM)
 #: resources/admin/pages/BuilderPage.jsx:549
+#, js-format
 msgid "Last saved at %1$s"
 msgstr ""
 
@@ -6909,6 +6956,7 @@ msgid "Payment"
 msgstr ""
 
 #: resources/admin/pages/CreateFormPage.jsx:196
+#, js-format
 msgid "Step %d of 2"
 msgstr ""
 
@@ -6994,6 +7042,7 @@ msgid "Fields included:"
 msgstr ""
 
 #: resources/admin/pages/CreateFormPage.jsx:530
+#, js-format
 msgid "+ %d more fields"
 msgstr ""
 
@@ -7295,27 +7344,33 @@ msgid "Desktop"
 msgstr ""
 
 #: resources/admin/pages/SubmissionDetailPage.jsx:378
+#, js-format
 msgid "%ds ago"
 msgstr ""
 
 #: resources/admin/pages/SubmissionDetailPage.jsx:379
+#, js-format
 msgid "%dm ago"
 msgstr ""
 
 #: resources/admin/pages/SubmissionDetailPage.jsx:380
+#, js-format
 msgid "%dh ago"
 msgstr ""
 
 #: resources/admin/pages/SubmissionDetailPage.jsx:381
+#, js-format
 msgid "%dd ago"
 msgstr ""
 
 #: resources/admin/pages/SubmissionDetailPage.jsx:419
+#, js-format
 msgid "Submission #%d"
 msgstr ""
 
 #: resources/admin/pages/SubmissionDetailPage.jsx:442
 #: resources/admin/pages/SubmissionDetailPage.jsx:761
+#, js-format
 msgid "Form #%d"
 msgstr ""
 
@@ -7405,10 +7460,12 @@ msgid "Execution Logs"
 msgstr ""
 
 #: resources/admin/pages/SubmissionDetailPage.jsx:638
+#, js-format
 msgid "General (%d)"
 msgstr ""
 
 #: resources/admin/pages/SubmissionDetailPage.jsx:645
+#, js-format
 msgid "API Calls (%d)"
 msgstr ""
 
@@ -7437,6 +7494,7 @@ msgid "User"
 msgstr ""
 
 #: resources/admin/pages/SubmissionDetailPage.jsx:736
+#, js-format
 msgid "User #%d"
 msgstr ""
 
@@ -7478,6 +7536,7 @@ msgstr ""
 
 #. translators: %1$d: form id
 #: resources/admin/pages/SubmissionsPage.jsx:139
+#, js-format
 msgid "Form #%1$d"
 msgstr ""
 
@@ -8896,11 +8955,13 @@ msgstr ""
 
 #. translators: %s: component name
 #: resources/admin/ui/feedback/ComponentErrorBoundary.jsx:77
+#, js-format
 msgid "An error occurred in %s."
 msgstr ""
 
 #. translators: %s: component name
 #: resources/admin/ui/feedback/ComponentErrorBoundary.jsx:89
+#, js-format
 msgid "Sorry, there was a hiccup in %s. Please refresh and try again."
 msgstr ""
 
@@ -9291,6 +9352,7 @@ msgid "Invalid URL."
 msgstr ""
 
 #: resources/frontend/components/FormRenderer.jsx:572
+#, js-format
 msgid "Please fix %d error before submitting."
 msgid_plural "Please fix %d errors before submitting."
 msgstr[0] ""
