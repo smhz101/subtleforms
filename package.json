@@ -44,6 +44,7 @@
     "@wordpress/e2e-test-utils-playwright": "^1.37.0",
     "@wordpress/scripts": "^31.1.0",
     "css-loader": "^7.1.4",
+    "gulp": "^4.0.2",
     "gulp-zip": "^5.1.0",
     "rimraf": "^6.1.2",
     "sass-loader": "^16.0.7",
