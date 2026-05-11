@@ -1,5 +1,5 @@
 # Copyright (C) 2026 Muzammil Hussain
-# This file is distributed under the same license as the SubtleForms plugin.
+# This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
 "Project-Id-Version: SubtleForms 1.8.1\n"
@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-05-11T01:47:54+00:00\n"
+"POT-Creation-Date: 2026-05-11T17:31:25+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -37,71 +37,71 @@ msgid "Muzammil Hussain"
 msgstr ""
 
 #. translators: %s: Current PHP version
-#: src/Activator.php:28
+#: src/Activator.php:29
 #, php-format
 msgid "SubtleForms requires PHP 7.4 or higher. Your server is running PHP %s"
 msgstr ""
 
-#: src/Activator.php:31
-#: src/Activator.php:46
+#: src/Activator.php:32
+#: src/Activator.php:47
 msgid "Plugin Activation Error"
 msgstr ""
 
 #. translators: %s: Current WordPress version
-#: src/Activator.php:43
+#: src/Activator.php:44
 #, php-format
 msgid "SubtleForms requires WordPress 5.0 or higher. You are running %s"
 msgstr ""
 
-#: src/Activator.php:209
+#: src/Activator.php:211
 msgid "Database Creation Error"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:68
+#: src/Admin/AdminMenu.php:72
 #: resources/admin/app/AdminApp.jsx:146
 #: resources/admin/pages/DashboardPage.jsx:53
 msgid "Dashboard"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:79
-#: src/Admin/AdminMenu.php:144
+#: src/Admin/AdminMenu.php:83
+#: src/Admin/AdminMenu.php:148
 #: resources/admin/app/AdminApp.jsx:149
 msgid "Submissions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:101
-#: src/Admin/AdminMenu.php:102
-#: src/Admin/AdminMenu.php:823
-#: src/Admin/AdminMenu.php:849
+#: src/Admin/AdminMenu.php:105
+#: src/Admin/AdminMenu.php:106
+#: src/Admin/AdminMenu.php:832
+#: src/Admin/AdminMenu.php:858
 msgid "Subtle Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:123
-#: src/Admin/AdminMenu.php:124
+#: src/Admin/AdminMenu.php:127
+#: src/Admin/AdminMenu.php:128
 #: resources/admin/pages/DashboardPage.jsx:58
 #: resources/admin/pages/FormsPage.jsx:208
 msgid "All Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:133
+#: src/Admin/AdminMenu.php:137
 msgid "Add New Form"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:134
+#: src/Admin/AdminMenu.php:138
 #: src/Fields/CoreFields.php:1134
 msgid "Add New"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:154
-#: src/Admin/AdminMenu.php:155
+#: src/Admin/AdminMenu.php:158
+#: src/Admin/AdminMenu.php:159
 #: resources/admin/app/AdminApp.jsx:151
 #: resources/admin/pages/ExtensionsPage.jsx:126
 #: resources/admin/pages/SettingsPage.jsx:27
 msgid "Extensions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:164
-#: src/Admin/AdminMenu.php:165
+#: src/Admin/AdminMenu.php:168
+#: src/Admin/AdminMenu.php:169
 #: resources/admin/app/AdminApp.jsx:150
 #: resources/admin/components/builder/FieldInspector.jsx:73
 #: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:95
@@ -112,137 +112,129 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:275
+#: src/Admin/AdminMenu.php:279
 msgid "Are you sure you want to delete this item?"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:276
+#: src/Admin/AdminMenu.php:280
 #: src/Frontend/Shortcode.php:118
 msgid "An error occurred. Please try again."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:277
-#: src/Admin/AdminMenu.php:701
+#: src/Admin/AdminMenu.php:281
+#: src/Admin/AdminMenu.php:710
 msgid "Action completed successfully."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:311
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:17
+#: src/Admin/AdminMenu.php:315
 msgid "Webhooks"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:312
+#: src/Admin/AdminMenu.php:316
 msgid "Send real-time HTTP POST payloads to external URLs on form submissions."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:316
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:19
+#: src/Admin/AdminMenu.php:320
 msgid "Email Marketing"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:317
+#: src/Admin/AdminMenu.php:321
 msgid "Automatically subscribe form submitters to Mailchimp or ConvertKit audiences."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:321
+#: src/Admin/AdminMenu.php:325
 msgid "CRM"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:322
+#: src/Admin/AdminMenu.php:326
 msgid "Create or update contacts in HubSpot from every form submission."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:326
-#: resources/admin/components/settings/extensions/AnalyticsPanel.jsx:12
+#: src/Admin/AdminMenu.php:330
 msgid "Analytics"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:327
+#: src/Admin/AdminMenu.php:331
 msgid "Track form views and submission rates directly in your dashboard."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:331
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:20
+#: src/Admin/AdminMenu.php:335
 msgid "E-commerce"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:332
+#: src/Admin/AdminMenu.php:336
 msgid "Create WooCommerce orders automatically when a form is submitted."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:336
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:18
+#: src/Admin/AdminMenu.php:340
 msgid "PDF Generator"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:337
+#: src/Admin/AdminMenu.php:341
 msgid "Generate PDF documents from submissions and attach them to emails."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:341
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:17
+#: src/Admin/AdminMenu.php:345
 msgid "Multilanguage"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:342
+#: src/Admin/AdminMenu.php:346
 msgid "Register form strings with WPML or Polylang for full translation support."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:346
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:32
+#: src/Admin/AdminMenu.php:350
 #: resources/admin/templates/categories.js:17
 msgid "Payments"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:347
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:34
+#: src/Admin/AdminMenu.php:351
 msgid "Accept Stripe or PayPal payments directly through your forms."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:461
+#: src/Admin/AdminMenu.php:467
 msgid "Security check failed."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:485
-#: src/Admin/AdminMenu.php:498
-#: src/Admin/AdminMenu.php:517
-#: src/Admin/AdminMenu.php:539
-#: src/Admin/AdminMenu.php:564
-#: src/Admin/AdminMenu.php:575
+#: src/Admin/AdminMenu.php:491
+#: src/Admin/AdminMenu.php:504
+#: src/Admin/AdminMenu.php:523
+#: src/Admin/AdminMenu.php:546
+#: src/Admin/AdminMenu.php:572
+#: src/Admin/AdminMenu.php:583
 msgid "You do not have permission to access this page."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:527
-#: src/Admin/AdminMenu.php:630
+#: src/Admin/AdminMenu.php:534
+#: src/Admin/AdminMenu.php:638
 #: src/Frontend/Shortcode.php:51
 msgid "Form not found."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:603
-#: src/Admin/AdminMenu.php:625
-#: src/Admin/AdminMenu.php:658
+#: src/Admin/AdminMenu.php:611
+#: src/Admin/AdminMenu.php:633
+#: src/Admin/AdminMenu.php:666
 msgid "Invalid request."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:709
+#: src/Admin/AdminMenu.php:718
 msgid "Coming Soon"
 msgstr ""
 
 #. translators: %s: Name of the interface being developed
-#: src/Admin/AdminMenu.php:713
+#: src/Admin/AdminMenu.php:722
 #, php-format
 msgid "The %s interface is under development."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:717
+#: src/Admin/AdminMenu.php:726
 msgid "This is a placeholder. Template files will be created in the templates/admin/ directory."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:722
+#: src/Admin/AdminMenu.php:731
 msgid "Your Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:726
+#: src/Admin/AdminMenu.php:735
 #: src/Fields/CoreFields.php:1018
 #: src/Fields/CoreFields.php:1046
 #: src/Fields/CoreFields.php:1215
@@ -250,9 +242,9 @@ msgstr ""
 msgid "Title"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:727
+#: src/Admin/AdminMenu.php:736
 #: src/Api/SubmissionsApi.php:601
-#: src/Privacy/PrivacyExporter.php:96
+#: src/Privacy/PrivacyExporter.php:100
 #: resources/admin/components/FormsList.jsx:31
 #: resources/admin/components/FormsList.jsx:284
 #: resources/admin/components/FormsList.jsx:816
@@ -262,17 +254,17 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:728
+#: src/Admin/AdminMenu.php:737
 msgid "Created"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:729
+#: src/Admin/AdminMenu.php:738
 #: resources/admin/components/builder/ActionsPanel.jsx:428
 #: resources/admin/components/SubmissionsTable.jsx:577
 msgid "Actions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:754
+#: src/Admin/AdminMenu.php:763
 #: resources/admin/components/builder/ContainerWrapper.jsx:77
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:300
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:52
@@ -283,33 +275,33 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:768
+#: src/Admin/AdminMenu.php:777
 #: resources/admin/pages/DashboardPage.jsx:76
 msgid "Total Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:772
+#: src/Admin/AdminMenu.php:781
 msgid "Active Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:776
+#: src/Admin/AdminMenu.php:785
 #: resources/admin/pages/DashboardPage.jsx:83
 msgid "Total Submissions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:826
-#: src/Admin/AdminMenu.php:831
+#: src/Admin/AdminMenu.php:835
+#: src/Admin/AdminMenu.php:840
 msgid "WordPress Admin"
 msgstr ""
 
 #. translators: %s: URL to the Permalinks settings page
-#: src/Admin/AdminNotices.php:49
+#: src/Admin/AdminNotices.php:53
 #, php-format
 msgid "<strong>SubtleForms:</strong> The REST API requires pretty permalinks to be enabled. <a href=\"%s\">Update your permalink settings</a> and choose any option other than \"Plain\"."
 msgstr ""
 
 #: src/Api/ApiGuards.php:43
-#: src/Api/DashboardApi.php:317
+#: src/Api/DashboardApi.php:325
 #: src/Api/SettingsApi.php:129
 msgid "Too many requests. Please try again later."
 msgstr ""
@@ -322,7 +314,7 @@ msgstr ""
 
 #: src/Api/ApiGuards.php:133
 #: src/Api/ApiGuards.php:142
-#: src/Api/DashboardApi.php:346
+#: src/Api/DashboardApi.php:354
 #: src/Api/OnboardingApi.php:254
 #: src/Api/OnboardingApi.php:275
 #: src/Api/SettingsApi.php:279
@@ -333,7 +325,7 @@ msgstr ""
 #: src/Api/ApiGuards.php:174
 #: src/Api/ApiGuards.php:192
 #: src/Api/ApiGuards.php:205
-#: src/Api/DashboardApi.php:337
+#: src/Api/DashboardApi.php:345
 #: src/Api/OnboardingApi.php:245
 #: src/Api/OnboardingApi.php:266
 #: src/Api/SettingsApi.php:270
@@ -372,16 +364,16 @@ msgstr ""
 msgid "Internal server error"
 msgstr ""
 
-#: src/Api/DashboardApi.php:187
+#: src/Api/DashboardApi.php:195
 #: src/Api/SubmissionsApi.php:365
 #: src/Api/SubmissionsApi.php:367
 #: src/Api/SubmissionsApi.php:408
-#: src/Privacy/PrivacyExporter.php:83
+#: src/Privacy/PrivacyExporter.php:87
 msgid "Unknown Form"
 msgstr ""
 
 #. translators: %d: number of seconds
-#: src/Api/DashboardApi.php:278
+#: src/Api/DashboardApi.php:286
 #, php-format
 msgid "%d second ago"
 msgid_plural "%d seconds ago"
@@ -389,7 +381,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of minutes
-#: src/Api/DashboardApi.php:282
+#: src/Api/DashboardApi.php:290
 #, php-format
 msgid "%d minute ago"
 msgid_plural "%d minutes ago"
@@ -397,7 +389,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of hours
-#: src/Api/DashboardApi.php:286
+#: src/Api/DashboardApi.php:294
 #, php-format
 msgid "%d hour ago"
 msgid_plural "%d hours ago"
@@ -405,7 +397,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of days
-#: src/Api/DashboardApi.php:290
+#: src/Api/DashboardApi.php:298
 #, php-format
 msgid "%d day ago"
 msgid_plural "%d days ago"
@@ -423,7 +415,7 @@ msgstr ""
 #: src/Api/FormsApi.php:493
 #: src/Api/FormsApi.php:706
 #: src/Api/FormsApi.php:809
-#: src/Api/PublicSubmitApi.php:151
+#: src/Api/PublicSubmitApi.php:153
 msgid "Form not found"
 msgstr ""
 
@@ -506,39 +498,39 @@ msgstr ""
 msgid "Tour completed"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:132
+#: src/Api/PublicSubmitApi.php:134
 msgid "Thank you."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:143
+#: src/Api/PublicSubmitApi.php:145
 #: src/Support/Captcha/HCaptchaProvider.php:99
 #: src/Support/Captcha/RecaptchaProvider.php:123
 #: src/Support/Captcha/TurnstileProvider.php:99
 msgid "CAPTCHA verification failed."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:178
+#: src/Api/PublicSubmitApi.php:182
 msgid "You have reached the maximum number of submissions for this form."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:189
+#: src/Api/PublicSubmitApi.php:193
 msgid "Failed to load form schema: "
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:207
+#: src/Api/PublicSubmitApi.php:211
 msgid "Failed to create submission record"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:275
-#: src/Api/PublicSubmitApi.php:291
+#: src/Api/PublicSubmitApi.php:279
+#: src/Api/PublicSubmitApi.php:295
 msgid "Form validation failed"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:282
+#: src/Api/PublicSubmitApi.php:286
 msgid "An unexpected error occurred"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:332
+#: src/Api/PublicSubmitApi.php:336
 msgid "Failed to save submission data"
 msgstr ""
 
@@ -595,7 +587,6 @@ msgid "ID"
 msgstr ""
 
 #: src/Api/SubmissionsApi.php:600
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:70
 #: resources/admin/pages/SubmissionDetailPage.jsx:774
 msgid "Form ID"
 msgstr ""
@@ -604,7 +595,7 @@ msgstr ""
 msgid "Submitted At"
 msgstr ""
 
-#: src/Blocks/SubtleFormsBlock.php:73
+#: src/Blocks/SubtleFormsBlock.php:79
 msgid "This form is not available or has been unpublished."
 msgstr ""
 
@@ -612,15 +603,15 @@ msgstr ""
 msgid "Leave this field empty"
 msgstr ""
 
-#: src/Extensions/EcommerceExtension.php:68
+#: src/Extensions/EcommerceExtension.php:72
 msgid "Order created via SubtleForms submission."
 msgstr ""
 
-#: src/Extensions/PaymentsExtension.php:82
+#: src/Extensions/PaymentsExtension.php:86
 msgid "Payment processing requires the SubtleForms Pro plugin."
 msgstr ""
 
-#: src/Extensions/PdfExtension.php:86
+#: src/Extensions/PdfExtension.php:90
 msgid "PDF generation requires a Pro PDF library."
 msgstr ""
 
@@ -1001,6 +992,12 @@ msgstr ""
 #: src/Fields/CoreFields.php:1074
 msgid "Max Items"
 msgstr ""
+
+#: src/Fields/CoreFields.php:1087
+msgid "Column"
+msgid_plural "Columns"
+msgstr[0] ""
+msgstr[1] ""
 
 #: src/Fields/CoreFields.php:1103
 #: src/Fields/CoreFields.php:1158
@@ -2093,78 +2090,78 @@ msgstr ""
 msgid "Thank you! Your submission has been received."
 msgstr ""
 
-#: src/Privacy/PrivacyEraser.php:50
-#: src/Privacy/PrivacyExporter.php:58
+#: src/Privacy/PrivacyEraser.php:54
+#: src/Privacy/PrivacyExporter.php:62
 msgid "SubtleForms Submissions"
 msgstr ""
 
 #. translators: %d: submission ID
-#: src/Privacy/PrivacyEraser.php:85
+#: src/Privacy/PrivacyEraser.php:89
 #, php-format
 msgid "Failed to delete submission #%d"
 msgstr ""
 
 #. translators: 1: submission ID, 2: error message
-#: src/Privacy/PrivacyEraser.php:93
+#: src/Privacy/PrivacyEraser.php:97
 #, php-format
 msgid "Error deleting submission #%1$d: %2$s"
 msgstr ""
 
-#: src/Privacy/PrivacyExporter.php:88
+#: src/Privacy/PrivacyExporter.php:92
 #: resources/admin/components/builder/FormSettings.jsx:157
 #: resources/admin/components/FormsList.jsx:29
 #: resources/admin/components/FormsList.jsx:225
 msgid "Form Name"
 msgstr ""
 
-#: src/Privacy/PrivacyExporter.php:92
+#: src/Privacy/PrivacyExporter.php:96
 msgid "Submission Date"
 msgstr ""
 
-#: src/Privacy/PrivacyExporter.php:122
+#: src/Privacy/PrivacyExporter.php:126
 #: resources/admin/pages/SubmissionsPage.jsx:110
 msgid "Form Submissions"
 msgstr ""
 
-#: src/Privacy/PrivacyManager.php:81
+#: src/Privacy/PrivacyManager.php:86
 msgid "<h2>What personal data we collect and why we collect it</h2>"
 msgstr ""
 
-#: src/Privacy/PrivacyManager.php:83
+#: src/Privacy/PrivacyManager.php:88
 msgid "<h3>Contact Forms</h3>"
 msgstr ""
 
-#: src/Privacy/PrivacyManager.php:85
+#: src/Privacy/PrivacyManager.php:90
 msgid "<p>When you submit a form on this website, we collect the information you provide in the form fields. This may include your name, email address, phone number, and any other information you choose to share.</p>"
 msgstr ""
 
-#: src/Privacy/PrivacyManager.php:87
+#: src/Privacy/PrivacyManager.php:92
 msgid "<h3>How long we retain your data</h3>"
 msgstr ""
 
 #. translators: %d: number of days
-#: src/Privacy/PrivacyManager.php:92
+#: src/Privacy/PrivacyManager.php:97
 #, php-format
 msgid "<p>Form submissions are automatically deleted after %d days.</p>"
 msgstr ""
 
-#: src/Privacy/PrivacyManager.php:96
+#: src/Privacy/PrivacyManager.php:101
 msgid "<p>Form submissions are retained indefinitely unless you request deletion.</p>"
 msgstr ""
 
-#: src/Privacy/PrivacyManager.php:99
+#: src/Privacy/PrivacyManager.php:104
 msgid "<h3>What rights you have over your data</h3>"
 msgstr ""
 
-#: src/Privacy/PrivacyManager.php:101
+#: src/Privacy/PrivacyManager.php:106
 msgid "<p>If you have submitted forms on this site, you can request to receive an exported file of the personal data we hold about you, including any data you have provided to us. You can also request that we erase any personal data we hold about you. This does not include any data we are obliged to keep for administrative, legal, or security purposes.</p>"
 msgstr ""
 
-#: src/Privacy/PrivacyManager.php:103
+#: src/Privacy/PrivacyManager.php:108
 msgid "<h3>Where we send your data</h3>"
 msgstr ""
 
-#: src/Privacy/PrivacyManager.php:105
+#: src/Privacy/PrivacyManager.php:110
 msgid "<p>Form submissions may trigger email notifications which are sent through your web host's mail server or a third-party email service if configured.</p>"
 msgstr ""
 
@@ -2204,7 +2201,7 @@ msgstr ""
 msgid "CAPTCHA verification request failed."
 msgstr ""
 
-#: src/Support/functions.php:65
+#: src/Support/functions.php:68
 #: resources/admin/components/LicenseStatusIndicator.jsx:42
 #: resources/admin/components/settings/ExtensionsSettings.jsx:64
 #: resources/admin/components/ui/UpgradeModal.jsx:155
@@ -3134,35 +3131,35 @@ msgstr ""
 msgid "Three-step quote request for insurance, loans, or financial services — personal info, coverage needs, and confirmation."
 msgstr ""
 
-#: subtleforms.php:25
+#: subtleforms.php:29
 msgid "Direct access not allowed."
 msgstr ""
 
-#: subtleforms.php:116
+#: subtleforms.php:117
 msgid "Cookie nonce is invalid. Please refresh and try again."
 msgstr ""
 
-#: subtleforms.php:133
+#: subtleforms.php:134
 msgid "SubtleForms Data Collection"
 msgstr ""
 
-#: subtleforms.php:134
+#: subtleforms.php:135
 msgid "When you submit a form on this website, SubtleForms collects and stores the following information:"
 msgstr ""
 
-#: subtleforms.php:135
+#: subtleforms.php:136
 msgid "Form field data (as entered by you)"
 msgstr ""
 
-#: subtleforms.php:136
+#: subtleforms.php:137
 msgid "Your IP address (for spam prevention)"
 msgstr ""
 
-#: subtleforms.php:137
+#: subtleforms.php:138
 msgid "Your browser user agent (for spam prevention)"
 msgstr ""
 
-#: subtleforms.php:138
+#: subtleforms.php:139
 msgid "This data is stored according to the configured data retention policy. Contact the site administrator for more information about data retention and deletion."
 msgstr ""
 
@@ -4016,7 +4013,6 @@ msgid "Payment gateway integration will be added in a future update. These setti
 msgstr ""
 
 #: resources/admin/components/builder/FormSettings.jsx:245
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:44
 msgid "Enable Payments"
 msgstr ""
 
@@ -4041,8 +4037,6 @@ msgid "Test mode will not process real payments"
 msgstr ""
 
 #: resources/admin/components/builder/FormSettings.jsx:281
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:59
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:79
 #: resources/admin/templates/pro/payment.js:240
 msgid "Currency"
 msgstr ""
@@ -5465,7 +5459,6 @@ msgid "Choose the Claude model version"
 msgstr ""
 
 #: resources/admin/components/settings/AISettings.jsx:215
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:52
 msgid "API Key"
 msgstr ""
 
@@ -5591,298 +5584,6 @@ msgstr ""
 
 #: resources/admin/components/settings/EmailSettings.jsx:106
 msgid "Email to receive admin notifications (leave empty for WordPress admin email)"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/AnalyticsPanel.jsx:14
-msgid "Track form views and submission counts natively. Stats are stored in WordPress without any third-party service."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/AnalyticsPanel.jsx:24
-msgid "Enable Analytics"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/AnalyticsPanel.jsx:27
-msgid "Track submission counts and exposure rates for each form."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/AnalyticsPanel.jsx:36
-msgid "View Tracking"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/AnalyticsPanel.jsx:39
-msgid "Count each time a form is rendered on the front end (fires the subtleforms/form/viewed hook)."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/AnalyticsPanel.jsx:49
-msgid "Data Retention (days)"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/AnalyticsPanel.jsx:55
-msgid "How long to keep per-form analytics data (1–3650 days)."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:16
-msgid "CRM Integration"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:18
-msgid "Create or update contacts in your CRM automatically when a form is submitted."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:28
-msgid "Enable CRM Integration"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:31
-msgid "Sync form submissions to your CRM as contacts."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:40
-msgid "CRM Provider"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:49
-msgid "API Key / Access Token"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:53
-msgid "Your HubSpot Private App access token."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:60
-msgid "Portal ID"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:63
-msgid "Optional: your HubSpot Hub ID. Found in Account Settings → Account Setup."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/CrmPanel.jsx:73
-msgid "Fields named \"email\", \"name\", \"first_name\", \"last_name\", \"phone\", \"company\", and \"website\" are automatically mapped to the HubSpot contact properties."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:22
-msgid "Automatically create WooCommerce orders when a form is submitted. Requires WooCommerce to be installed and active."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:32
-msgid "Enable E-commerce"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:35
-msgid "Create a WooCommerce order on every form submission."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:44
-msgid "Default Product ID"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:49
-msgid "The WooCommerce product ID to add to orders created from forms."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EcommercePanel.jsx:63
-msgid "Currency for new orders. Defaults to the WooCommerce store currency if left as USD."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:21
-msgid "Automatically subscribe form submitters to your Mailchimp list or ConvertKit sequence."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:31
-msgid "Enable Email Marketing"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:34
-msgid "Subscribe submitters to your email marketing list."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:43
-msgid "Provider"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:58
-msgid "Your Mailchimp API key (ends with -usX)."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:59
-msgid "Your ConvertKit API key."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:69
-msgid "Audience / List ID"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:76
-msgid "The Mailchimp audience ID to subscribe to."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:77
-msgid "The ConvertKit form ID subscribers will be added to."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:86
-msgid "Double Opt-in"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:89
-msgid "Send a confirmation email before adding to the list (recommended)."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:19
-msgid "Register form strings with WPML or Polylang so they can be translated via those plugins' translation interfaces."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:29
-msgid "Enable Multilanguage"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:32
-msgid "Register SubtleForms strings with your translation plugin."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:43
-msgid "Translation Plugin"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:47
-msgid "Which translation plugin to register strings with."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:56
-msgid "Once enabled, form titles, labels, and descriptions will appear in the Translation Editor of your chosen multilanguage plugin."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:11
-msgid "Test / Sandbox"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:12
-msgid "Live"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:47
-msgid "Accept payments through SubtleForms forms."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:56
-msgid "Payment Provider"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:65
-msgid "Mode"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:69
-msgid "Use Test mode for development and Live mode for real transactions."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:91
-msgid "Stripe Publishable Key"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:94
-msgid "Your Stripe publishable key (starts with pk_)."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:101
-msgid "Stripe Secret Key"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:105
-msgid "Your Stripe secret key (starts with sk_). Never share this publicly."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:116
-msgid "PayPal Client ID"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:119
-msgid "Your PayPal REST API Client ID."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:126
-msgid "PayPal Client Secret"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:130
-msgid "Your PayPal REST API Client Secret. Never share this publicly."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:6
-msgid "Default"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:7
-msgid "Minimal"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:8
-msgid "Detailed"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:20
-msgid "Generate a PDF document from each form submission and optionally attach it to the notification email."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:30
-msgid "Enable PDF Generator"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:33
-msgid "Generate a PDF for every new form submission."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:42
-msgid "PDF Template"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:46
-msgid "Layout used when rendering the PDF document."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:53
-msgid "Attach to Notification Email"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/PdfPanel.jsx:56
-msgid "Attach the generated PDF to the admin notification email for each submission."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:19
-msgid "Send real-time HTTP POST payloads to any external URL when a form is submitted."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:31
-msgid "This extension is deprecated."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:44
-msgid "Enable Webhooks (legacy)"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:47
-msgid "This setting no longer controls webhook delivery. Use Form Actions instead."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:56
-msgid "Events (legacy)"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:64
-msgid "Submission Created"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:67
-msgid "No longer used. Retained for reference only."
-msgstr ""
-
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:74
-msgid "Signing Secret (legacy)"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:78
-msgid "No longer used by the extension. Configure signing per-action in the form builder."
 msgstr ""
 
 #: resources/admin/components/settings/ExtensionsSettings.jsx:41
