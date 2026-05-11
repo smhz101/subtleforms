@@ -1,4 +1,5 @@
 <?php
+// phpcs:disable -- PHPUnit bootstrap; not shipped in production plugin.
 /**
  * PHPUnit bootstrap for standalone unit tests.
  *

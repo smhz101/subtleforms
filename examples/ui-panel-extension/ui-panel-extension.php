@@ -1,4 +1,5 @@
 <?php
+// phpcs:disable WordPress.WP.I18n.TextDomainMismatch -- Example extension; uses its own text domain intentionally.
 /**
  * Plugin Name: SubtleForms UI Panel Extension
  * Plugin URI: https://subtleforms.com/extensions/ui-panel

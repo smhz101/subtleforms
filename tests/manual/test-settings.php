@@ -1,7 +1,8 @@
 <?php
+// phpcs:disable -- Dev/test script; not shipped in production plugin.
 /**
  * Quick test script for Settings functionality
- * 
+ *
  * Usage: wp eval-file wp-content/plugins/subtleforms/tests/manual/test-settings.php
  */
 
