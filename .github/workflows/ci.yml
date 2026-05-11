@@ -15,7 +15,6 @@ jobs:
   # Job 1: PHP Quality
   # Matrix: PHP 8.1, 8.2, 8.3 (minimum is 8.1 — codebase uses named
   # arguments and dev deps require doctrine/instantiator ^2 → PHP 8.1+).
-  # NOTE: plugin header says Requires PHP: 7.4 — that needs updating.
   # ─────────────────────────────────────────────────────────────
   php-quality:
     name: PHP ${{ matrix.php }}
@@ -158,8 +157,9 @@ jobs:
   # ─────────────────────────────────────────────────────────────
   # Job 4: WordPress Plugin Check
   # Uses the official WordPress plugin-check-action.
-  # continue-on-error: true until all issues are resolved.
-  # Must pass before WordPress.org submission.
+  # Excludes development-only directories and files that are already
+  # listed in .distignore and will not be included in the WordPress.org
+  # SVN deployment.
   # ─────────────────────────────────────────────────────────────
   plugin-check:
     name: WordPress Plugin Check
@@ -176,11 +176,33 @@ jobs:
         uses: wordpress/plugin-check-action@v1
         with:
           build-dir: '.'
-          # exclude-checks: add check names here if specific checks cause false positives
-          # after first run review. Do not exclude checks that would block WP.org submission.
-        continue-on-error: true
-        # TODO: Remove continue-on-error after:
-        # 1. First CI run completes and output is reviewed
-        # 2. All blocking checks are resolved
-        # 3. readme.txt Stable tag is synced to plugin version (1.8.1)
-        # See RELEASE.md for the full pre-submission checklist.
+          # Development-only directories tracked in git but excluded from
+          # WordPress.org distribution via .distignore.
+          exclude-directories: |
+            tests
+            scripts
+            bin
+            _plan
+            docs
+            examples
+            extensions
+            sdk
+            artifacts
+          # Development-only files tracked in git but excluded from
+          # WordPress.org distribution via .distignore.
+          exclude-files: |
+            .phpcs.xml.dist
+            .eslintrc.js
+            phpunit.xml.dist
+            AUDIT_SUMMARY.md
+            RELEASE.md
+            CODEBASE.md
+            FRONTEND_RENDERER_AUDIT.md
+            AGENTS.md
+            cookies.txt
+          # Ignore codes that apply only to development workflow files
+          # (.gitignore, .distignore, .github/) which are present in the
+          # repository but excluded from the distributed plugin package.
+          ignore-codes: |
+            github_directory
+            hidden_files
