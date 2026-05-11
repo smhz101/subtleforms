@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-05-11T17:31:25+00:00\n"
+"POT-Creation-Date: 2026-05-11T17:34:25+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -127,6 +127,7 @@ msgid "Action completed successfully."
 msgstr ""
 
 #: src/Admin/AdminMenu.php:315
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:17
 msgid "Webhooks"
 msgstr ""
 
@@ -135,6 +136,7 @@ msgid "Send real-time HTTP POST payloads to external URLs on form submissions."
 msgstr ""
 
 #: src/Admin/AdminMenu.php:320
+#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:19
 msgid "Email Marketing"
 msgstr ""
 
@@ -151,6 +153,7 @@ msgid "Create or update contacts in HubSpot from every form submission."
 msgstr ""
 
 #: src/Admin/AdminMenu.php:330
+#: resources/admin/components/settings/extensions/AnalyticsPanel.jsx:12
 msgid "Analytics"
 msgstr ""
 
@@ -159,6 +162,7 @@ msgid "Track form views and submission rates directly in your dashboard."
 msgstr ""
 
 #: src/Admin/AdminMenu.php:335
+#: resources/admin/components/settings/extensions/EcommercePanel.jsx:20
 msgid "E-commerce"
 msgstr ""
 
@@ -167,6 +171,7 @@ msgid "Create WooCommerce orders automatically when a form is submitted."
 msgstr ""
 
 #: src/Admin/AdminMenu.php:340
+#: resources/admin/components/settings/extensions/PdfPanel.jsx:18
 msgid "PDF Generator"
 msgstr ""
 
@@ -175,6 +180,7 @@ msgid "Generate PDF documents from submissions and attach them to emails."
 msgstr ""
 
 #: src/Admin/AdminMenu.php:345
+#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:17
 msgid "Multilanguage"
 msgstr ""
 
@@ -183,11 +189,13 @@ msgid "Register form strings with WPML or Polylang for full translation support.
 msgstr ""
 
 #: src/Admin/AdminMenu.php:350
+#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:32
 #: resources/admin/templates/categories.js:17
 msgid "Payments"
 msgstr ""
 
 #: src/Admin/AdminMenu.php:351
+#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:34
 msgid "Accept Stripe or PayPal payments directly through your forms."
 msgstr ""
 
@@ -587,6 +595,7 @@ msgid "ID"
 msgstr ""
 
 #: src/Api/SubmissionsApi.php:600
+#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:70
 #: resources/admin/pages/SubmissionDetailPage.jsx:774
 msgid "Form ID"
 msgstr ""
@@ -4013,6 +4022,7 @@ msgid "Payment gateway integration will be added in a future update. These setti
 msgstr ""
 
 #: resources/admin/components/builder/FormSettings.jsx:245
+#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:44
 msgid "Enable Payments"
 msgstr ""
 
@@ -4037,6 +4047,8 @@ msgid "Test mode will not process real payments"
 msgstr ""
 
 #: resources/admin/components/builder/FormSettings.jsx:281
+#: resources/admin/components/settings/extensions/EcommercePanel.jsx:59
+#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:79
 #: resources/admin/templates/pro/payment.js:240
 msgid "Currency"
 msgstr ""
@@ -5459,6 +5471,7 @@ msgid "Choose the Claude model version"
 msgstr ""
 
 #: resources/admin/components/settings/AISettings.jsx:215
+#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:52
 msgid "API Key"
 msgstr ""
 
@@ -5584,6 +5597,298 @@ msgstr ""
 
 #: resources/admin/components/settings/EmailSettings.jsx:106
 msgid "Email to receive admin notifications (leave empty for WordPress admin email)"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/AnalyticsPanel.jsx:14
+msgid "Track form views and submission counts natively. Stats are stored in WordPress without any third-party service."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/AnalyticsPanel.jsx:24
+msgid "Enable Analytics"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/AnalyticsPanel.jsx:27
+msgid "Track submission counts and exposure rates for each form."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/AnalyticsPanel.jsx:36
+msgid "View Tracking"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/AnalyticsPanel.jsx:39
+msgid "Count each time a form is rendered on the front end (fires the subtleforms/form/viewed hook)."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/AnalyticsPanel.jsx:49
+msgid "Data Retention (days)"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/AnalyticsPanel.jsx:55
+msgid "How long to keep per-form analytics data (1–3650 days)."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/CrmPanel.jsx:16
+msgid "CRM Integration"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/CrmPanel.jsx:18
+msgid "Create or update contacts in your CRM automatically when a form is submitted."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/CrmPanel.jsx:28
+msgid "Enable CRM Integration"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/CrmPanel.jsx:31
+msgid "Sync form submissions to your CRM as contacts."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/CrmPanel.jsx:40
+msgid "CRM Provider"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/CrmPanel.jsx:49
+msgid "API Key / Access Token"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/CrmPanel.jsx:53
+msgid "Your HubSpot Private App access token."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/CrmPanel.jsx:60
+msgid "Portal ID"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/CrmPanel.jsx:63
+msgid "Optional: your HubSpot Hub ID. Found in Account Settings → Account Setup."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/CrmPanel.jsx:73
+msgid "Fields named \"email\", \"name\", \"first_name\", \"last_name\", \"phone\", \"company\", and \"website\" are automatically mapped to the HubSpot contact properties."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/EcommercePanel.jsx:22
+msgid "Automatically create WooCommerce orders when a form is submitted. Requires WooCommerce to be installed and active."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/EcommercePanel.jsx:32
+msgid "Enable E-commerce"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/EcommercePanel.jsx:35
+msgid "Create a WooCommerce order on every form submission."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/EcommercePanel.jsx:44
+msgid "Default Product ID"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/EcommercePanel.jsx:49
+msgid "The WooCommerce product ID to add to orders created from forms."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/EcommercePanel.jsx:63
+msgid "Currency for new orders. Defaults to the WooCommerce store currency if left as USD."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:21
+msgid "Automatically subscribe form submitters to your Mailchimp list or ConvertKit sequence."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:31
+msgid "Enable Email Marketing"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:34
+msgid "Subscribe submitters to your email marketing list."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:43
+msgid "Provider"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:58
+msgid "Your Mailchimp API key (ends with -usX)."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:59
+msgid "Your ConvertKit API key."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:69
+msgid "Audience / List ID"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:76
+msgid "The Mailchimp audience ID to subscribe to."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:77
+msgid "The ConvertKit form ID subscribers will be added to."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:86
+msgid "Double Opt-in"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:89
+msgid "Send a confirmation email before adding to the list (recommended)."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:19
+msgid "Register form strings with WPML or Polylang so they can be translated via those plugins' translation interfaces."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:29
+msgid "Enable Multilanguage"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:32
+msgid "Register SubtleForms strings with your translation plugin."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:43
+msgid "Translation Plugin"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:47
+msgid "Which translation plugin to register strings with."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:56
+msgid "Once enabled, form titles, labels, and descriptions will appear in the Translation Editor of your chosen multilanguage plugin."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:11
+msgid "Test / Sandbox"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:12
+msgid "Live"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:47
+msgid "Accept payments through SubtleForms forms."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:56
+msgid "Payment Provider"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:65
+msgid "Mode"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:69
+msgid "Use Test mode for development and Live mode for real transactions."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:91
+msgid "Stripe Publishable Key"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:94
+msgid "Your Stripe publishable key (starts with pk_)."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:101
+msgid "Stripe Secret Key"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:105
+msgid "Your Stripe secret key (starts with sk_). Never share this publicly."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:116
+msgid "PayPal Client ID"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:119
+msgid "Your PayPal REST API Client ID."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:126
+msgid "PayPal Client Secret"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PaymentsPanel.jsx:130
+msgid "Your PayPal REST API Client Secret. Never share this publicly."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PdfPanel.jsx:6
+msgid "Default"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PdfPanel.jsx:7
+msgid "Minimal"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PdfPanel.jsx:8
+msgid "Detailed"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PdfPanel.jsx:20
+msgid "Generate a PDF document from each form submission and optionally attach it to the notification email."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PdfPanel.jsx:30
+msgid "Enable PDF Generator"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PdfPanel.jsx:33
+msgid "Generate a PDF for every new form submission."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PdfPanel.jsx:42
+msgid "PDF Template"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PdfPanel.jsx:46
+msgid "Layout used when rendering the PDF document."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PdfPanel.jsx:53
+msgid "Attach to Notification Email"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/PdfPanel.jsx:56
+msgid "Attach the generated PDF to the admin notification email for each submission."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:19
+msgid "Send real-time HTTP POST payloads to any external URL when a form is submitted."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:31
+msgid "This extension is deprecated."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:44
+msgid "Enable Webhooks (legacy)"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:47
+msgid "This setting no longer controls webhook delivery. Use Form Actions instead."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:56
+msgid "Events (legacy)"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:64
+msgid "Submission Created"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:67
+msgid "No longer used. Retained for reference only."
+msgstr ""
+
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:74
+msgid "Signing Secret (legacy)"
+msgstr ""
+
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:78
+msgid "No longer used by the extension. Configure signing per-action in the form builder."
 msgstr ""
 
 #: resources/admin/components/settings/ExtensionsSettings.jsx:41
