@@ -1,4 +1,6 @@
 <?php
+
+
 /**
  * SubtleForms Admin Menu
  *
@@ -7,6 +9,8 @@
  */
 
 namespace SubtleForms\Admin;
+
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 use SubtleForms\Support\Capabilities;
 use SubtleForms\Support\Helpers;
@@ -426,6 +430,7 @@ class AdminMenu {
 			$classes .= ' subtleforms-builder-page';
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Admin page slug; no form data processed; sanitize_key() applied.
 		$page = isset( $_GET['page'] ) ? sanitize_key( Helpers::normalize_string( $_GET['page'] ) ) : '';
 		if ( $page === 'subtleforms-new-form' && strpos( Helpers::normalize_string( $classes ), 'subtleforms-builder-page' ) === false ) {
 			$classes .= ' subtleforms-builder-page';
@@ -442,6 +447,7 @@ class AdminMenu {
 			return;
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Action key read for routing only; nonce verified below before processing.
 		$action = sanitize_key( Helpers::safe_string_get( $_GET, 'action' ) );
 
 		// Only handle SubtleForms-specific admin actions here.
@@ -458,7 +464,7 @@ class AdminMenu {
 		// For our actions, require nonce and validate it.
 		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce is validated, not sanitized.
 		if ( empty( $_GET['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'subtleforms_action' ) ) {
-			wp_die( __( 'Security check failed.', 'subtleforms' ) );
+			wp_die( esc_html__( 'Security check failed.', 'subtleforms' ) );
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified above.
@@ -482,7 +488,7 @@ class AdminMenu {
 	 */
 	public function render_dashboard(): void {
 		if ( ! current_user_can( $this->caps->manage_cap() ) ) {
-			wp_die( __( 'You do not have permission to access this page.', 'subtleforms' ) );
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'subtleforms' ) );
 		}
 
 		$stats = $this->get_dashboard_stats();
@@ -495,7 +501,7 @@ class AdminMenu {
 	 */
 	public function render_forms(): void {
 		if ( ! current_user_can( $this->caps->manage_cap() ) ) {
-			wp_die( __( 'You do not have permission to access this page.', 'subtleforms' ) );
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'subtleforms' ) );
 		}
 
 		$forms = $this->formsRepo->all(
@@ -514,17 +520,18 @@ class AdminMenu {
 	 */
 	public function render_new_form(): void {
 		if ( ! current_user_can( $this->caps->manage_cap() ) ) {
-			wp_die( __( 'You do not have permission to access this page.', 'subtleforms' ) );
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'subtleforms' ) );
 		}
 
 		// Check if editing an existing form
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Admin URL param; nonce verified separately for write actions.
 		$formId = isset( $_GET['form_id'] ) ? intval( $_GET['form_id'] ) : null;
 		$form   = null;
 
 		if ( $formId ) {
 			$form = $this->formsRepo->find( $formId );
 			if ( ! $form ) {
-				wp_die( __( 'Form not found.', 'subtleforms' ) );
+				wp_die( esc_html__( 'Form not found.', 'subtleforms' ) );
 			}
 		}
 
@@ -536,9 +543,10 @@ class AdminMenu {
 	 */
 	public function render_submissions(): void {
 		if ( ! current_user_can( $this->caps->manage_cap() ) ) {
-			wp_die( __( 'You do not have permission to access this page.', 'subtleforms' ) );
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'subtleforms' ) );
 		}
 
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading URL param for filter display, not processing form data.
 		$formId      = isset( $_GET['form_id'] ) ? intval( $_GET['form_id'] ) : null;
 		$submissions = $formId
 			? $this->submissionsRepo->findByForm( $formId, array( 'limit' => 50 ) )
@@ -561,7 +569,7 @@ class AdminMenu {
 	 */
 	public function render_extensions(): void {
 		if ( ! current_user_can( $this->caps->manage_cap() ) ) {
-			wp_die( __( 'You do not have permission to access this page.', 'subtleforms' ) );
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'subtleforms' ) );
 		}
 
 		$this->get_template( 'extensions' );
@@ -572,7 +580,7 @@ class AdminMenu {
 	 */
 	public function render_settings(): void {
 		if ( ! current_user_can( $this->caps->manage_cap() ) ) {
-			wp_die( __( 'You do not have permission to access this page.', 'subtleforms' ) );
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'subtleforms' ) );
 		}
 
 		$this->get_template( 'settings' );
@@ -600,12 +608,12 @@ class AdminMenu {
 	 */
 	private function handle_delete_form( int $id ): void {
 		if ( ! $id || ! current_user_can( $this->caps->manage_cap() ) ) {
-			wp_die( __( 'Invalid request.', 'subtleforms' ) );
+			wp_die( esc_html__( 'Invalid request.', 'subtleforms' ) );
 		}
 
 		$this->formsRepo->delete( $id );
 
-		wp_redirect(
+		wp_safe_redirect(
 			add_query_arg(
 				array(
 					'page'    => 'subtleforms-forms',
@@ -622,12 +630,12 @@ class AdminMenu {
 	 */
 	private function handle_duplicate_form( int $id ): void {
 		if ( ! $id || ! current_user_can( $this->caps->manage_cap() ) ) {
-			wp_die( __( 'Invalid request.', 'subtleforms' ) );
+			wp_die( esc_html__( 'Invalid request.', 'subtleforms' ) );
 		}
 
 		$form = $this->formsRepo->find( $id );
 		if ( ! $form ) {
-			wp_die( __( 'Form not found.', 'subtleforms' ) );
+			wp_die( esc_html__( 'Form not found.', 'subtleforms' ) );
 		}
 
 		$newId = $this->formsRepo->create(
@@ -638,7 +646,7 @@ class AdminMenu {
 			)
 		);
 
-		wp_redirect(
+		wp_safe_redirect(
 			add_query_arg(
 				array(
 					'page'    => 'subtleforms-forms',
@@ -655,12 +663,12 @@ class AdminMenu {
 	 */
 	private function handle_delete_submission( int $id ): void {
 		if ( ! $id || ! current_user_can( $this->caps->manage_cap() ) ) {
-			wp_die( __( 'Invalid request.', 'subtleforms' ) );
+			wp_die( esc_html__( 'Invalid request.', 'subtleforms' ) );
 		}
 
 		$this->submissionsRepo->delete( $id );
 
-		wp_redirect(
+		wp_safe_redirect(
 			add_query_arg(
 				array(
 					'page'    => 'subtleforms-submissions',
@@ -694,8 +702,9 @@ class AdminMenu {
 	private function render_fallback_template( string $name, array $data ): void {
 		?>
 		<div class="wrap subtleforms-admin">
-			<h1><?php echo Helpers::safe_esc_html( ucwords( str_replace( '-', ' ', $name ) ) ); ?></h1>
+			<h1><?php echo esc_html( ucwords( str_replace( '-', ' ', $name ) ) ); ?></h1>
 			
+			<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only checking URL param to display success notice, not processing form data. ?>
 			<?php if ( isset( $_GET['message'] ) ) : ?>
 				<div class="notice notice-success is-dismissible">
 					<p><?php esc_html_e( 'Action completed successfully.', 'subtleforms' ); ?></p>
@@ -710,7 +719,7 @@ class AdminMenu {
 				<p>
 					<?php
 					/* translators: %s: Name of the interface being developed */
-					printf( esc_html__( 'The %s interface is under development.', 'subtleforms' ), '<strong>' . Helpers::safe_esc_html( $name ) . '</strong>' );
+					printf( esc_html__( 'The %s interface is under development.', 'subtleforms' ), '<strong>' . esc_html( $name ) . '</strong>' );
 					?>
 				</p>
 				<p class="description">
@@ -732,13 +741,13 @@ class AdminMenu {
 							<tbody>
 								<?php foreach ( $data['forms'] as $form ) : ?>
 									<tr>
-										<td><strong><?php echo Helpers::safe_esc_html( Helpers::safe_array_get( $form, 'title' ) ); ?></strong></td>
-										<td><?php echo Helpers::safe_esc_html( Helpers::safe_array_get( $form, 'status' ) ); ?></td>
-										<td><?php echo Helpers::safe_esc_html( Helpers::safe_array_get( $form, 'created_at' ) ); ?></td>
+										<td><strong><?php echo esc_html( Helpers::safe_array_get( $form, 'title' ) ); ?></strong></td>
+										<td><?php echo esc_html( Helpers::safe_array_get( $form, 'status' ) ); ?></td>
+										<td><?php echo esc_html( Helpers::safe_array_get( $form, 'created_at' ) ); ?></td>
 										<td>
 											<a href="
 											<?php
-											echo Helpers::safe_esc_url(
+											echo esc_url(
 												wp_nonce_url(
 													add_query_arg(
 														array(
@@ -764,15 +773,15 @@ class AdminMenu {
 					<div class="subtleforms-stats" style="margin-top: 30px;">
 						<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; max-width: 800px; margin: 0 auto;">
 							<div class="subtleforms-stat-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
-								<h3 style="margin: 0 0 10px;"><?php echo Helpers::safe_esc_html( Helpers::safe_array_get( $data, 'total_forms', 0 ) ); ?></h3>
+								<h3 style="margin: 0 0 10px;"><?php echo esc_html( Helpers::safe_array_get( $data, 'total_forms', 0 ) ); ?></h3>
 								<p style="margin: 0; color: #666;"><?php esc_html_e( 'Total Forms', 'subtleforms' ); ?></p>
 							</div>
 							<div class="subtleforms-stat-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
-								<h3 style="margin: 0 0 10px;"><?php echo Helpers::safe_esc_html( Helpers::safe_array_get( $data, 'active_forms', 0 ) ); ?></h3>
+								<h3 style="margin: 0 0 10px;"><?php echo esc_html( Helpers::safe_array_get( $data, 'active_forms', 0 ) ); ?></h3>
 								<p style="margin: 0; color: #666;"><?php esc_html_e( 'Active Forms', 'subtleforms' ); ?></p>
 							</div>
 							<div class="subtleforms-stat-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
-								<h3 style="margin: 0 0 10px;"><?php echo Helpers::safe_esc_html( Helpers::safe_array_get( $data, 'total_submissions', 0 ) ); ?></h3>
+								<h3 style="margin: 0 0 10px;"><?php echo esc_html( Helpers::safe_array_get( $data, 'total_submissions', 0 ) ); ?></h3>
 								<p style="margin: 0; color: #666;"><?php esc_html_e( 'Total Submissions', 'subtleforms' ); ?></p>
 							</div>
 						</div>

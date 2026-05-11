@@ -159,63 +159,63 @@ final class SchemaValidator {
 		$keys = array();
 		foreach ( $schema['fields'] as $i => $field ) {
 			if ( ! is_array( $field ) ) {
-				throw new InvalidArgumentException( "Each field must be an object (index {$i})." );
+				throw new InvalidArgumentException( "Each field must be an object (index {$i})." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
 			if ( empty( $field['type'] ) || ! is_string( $field['type'] ) ) {
-				throw new InvalidArgumentException( "Field at index {$i} must have a string 'type'." );
+				throw new InvalidArgumentException( "Field at index {$i} must have a string 'type'." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
 			if ( ! in_array( $field['type'], $this->allowedFieldTypes, true ) ) {
-				throw new InvalidArgumentException( "Field type '{$field['type']}' at index {$i} is not allowed." );
+				throw new InvalidArgumentException( "Field type '{$field['type']}' at index {$i} is not allowed." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
 			if ( empty( $field['key'] ) || ! is_string( $field['key'] ) ) {
-				throw new InvalidArgumentException( "Field at index {$i} must have a string 'key'." );
+				throw new InvalidArgumentException( "Field at index {$i} must have a string 'key'." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
 			if ( ! preg_match( '/^[a-zA-Z0-9_]+$/', $field['key'] ) ) {
-				throw new InvalidArgumentException( "Field key '{$field['key']}' at index {$i} contains invalid characters." );
+				throw new InvalidArgumentException( "Field key '{$field['key']}' at index {$i} contains invalid characters." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
 			if ( in_array( $field['key'], $keys, true ) ) {
-				throw new InvalidArgumentException( "Duplicate field key '{$field['key']}' at index {$i}." );
+				throw new InvalidArgumentException( "Duplicate field key '{$field['key']}' at index {$i}." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 			$keys[] = $field['key'];
 
 			if ( isset( $field['label'] ) && ! is_string( $field['label'] ) ) {
-				throw new InvalidArgumentException( "Field label for '{$field['key']}' must be a string." );
+				throw new InvalidArgumentException( "Field label for '{$field['key']}' must be a string." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
 			if ( isset( $field['settings'] ) && ! is_array( $field['settings'] ) ) {
-				throw new InvalidArgumentException( "Field settings for '{$field['key']}' must be an object." );
+				throw new InvalidArgumentException( "Field settings for '{$field['key']}' must be an object." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
 			if ( isset( $field['validations'] ) && ! is_array( $field['validations'] ) ) {
-				throw new InvalidArgumentException( "Field validations for '{$field['key']}' must be an object." );
+				throw new InvalidArgumentException( "Field validations for '{$field['key']}' must be an object." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
 			// Validate field-level conditions
 			if ( isset( $field['config']['conditions'] ) && ! is_array( $field['config']['conditions'] ) ) {
-				throw new InvalidArgumentException( "Field conditions for '{$field['key']}' must be an array." );
+				throw new InvalidArgumentException( "Field conditions for '{$field['key']}' must be an array." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
 			if ( isset( $field['config']['conditions'] ) && is_array( $field['config']['conditions'] ) ) {
 				foreach ( $field['config']['conditions'] as $ci => $cond ) {
 					if ( ! is_array( $cond ) ) {
-						throw new InvalidArgumentException( "Condition {$ci} for field '{$field['key']}' must be an object." );
+						throw new InvalidArgumentException( "Condition {$ci} for field '{$field['key']}' must be an object." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 					}
 
 					if ( empty( $cond['sourceField'] ) || ! is_string( $cond['sourceField'] ) ) {
-						throw new InvalidArgumentException( "Condition {$ci} for field '{$field['key']}' must have a string 'sourceField'." );
+						throw new InvalidArgumentException( "Condition {$ci} for field '{$field['key']}' must have a string 'sourceField'." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 					}
 
 					if ( empty( $cond['operator'] ) || ! is_string( $cond['operator'] ) ) {
-						throw new InvalidArgumentException( "Condition {$ci} for field '{$field['key']}' must have a string 'operator'." );
+						throw new InvalidArgumentException( "Condition {$ci} for field '{$field['key']}' must have a string 'operator'." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 					}
 
 					if ( empty( $cond['effect'] ) || ! is_string( $cond['effect'] ) ) {
-						throw new InvalidArgumentException( "Condition {$ci} for field '{$field['key']}' must have a string 'effect'." );
+						throw new InvalidArgumentException( "Condition {$ci} for field '{$field['key']}' must have a string 'effect'." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 					}
 				}
 			}
@@ -229,21 +229,21 @@ final class SchemaValidator {
 
 			foreach ( $schema['logic'] as $i => $rule ) {
 				if ( ! is_array( $rule ) || ! isset( $rule['if'] ) || ! isset( $rule['then'] ) ) {
-					throw new InvalidArgumentException( "Logic rule at index {$i} must contain 'if' and 'then' objects." );
+					throw new InvalidArgumentException( "Logic rule at index {$i} must contain 'if' and 'then' objects." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}
 
 				$cond = $rule['if'];
 				if ( ! is_array( $cond ) || empty( $cond['field'] ) || empty( $cond['operator'] ) || ! array_key_exists( 'value', $cond ) ) {
-					throw new InvalidArgumentException( "Logic.if at index {$i} must contain 'field','operator' and 'value'." );
+					throw new InvalidArgumentException( "Logic.if at index {$i} must contain 'field','operator' and 'value'." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}
 
 				if ( ! is_string( $cond['field'] ) || ! is_string( $cond['operator'] ) ) {
-					throw new InvalidArgumentException( "Logic.if.field and operator must be strings at index {$i}." );
+					throw new InvalidArgumentException( "Logic.if.field and operator must be strings at index {$i}." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}
 
 				$then = $rule['then'];
 				if ( ! is_array( $then ) || empty( $then['action'] ) ) {
-					throw new InvalidArgumentException( "Logic.then at index {$i} must contain an 'action' key." );
+					throw new InvalidArgumentException( "Logic.then at index {$i} must contain an 'action' key." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}
 			}
 		}
@@ -256,19 +256,19 @@ final class SchemaValidator {
 
 			foreach ( $schema['actions'] as $i => $act ) {
 				if ( ! is_array( $act ) || empty( $act['type'] ) || ! is_string( $act['type'] ) ) {
-					throw new InvalidArgumentException( "Action at index {$i} must be an object with string 'type'." );
+					throw new InvalidArgumentException( "Action at index {$i} must be an object with string 'type'." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}
 
 				if ( isset( $act['settings'] ) && ! is_array( $act['settings'] ) ) {
-					throw new InvalidArgumentException( "Action.settings for '{$act['type']}' must be an object." );
+					throw new InvalidArgumentException( "Action.settings for '{$act['type']}' must be an object." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}
 
 				if ( isset( $act['requires'] ) && ! is_array( $act['requires'] ) ) {
-					throw new InvalidArgumentException( "Action.requires for '{$act['type']}' must be an array of capability strings." );
+					throw new InvalidArgumentException( "Action.requires for '{$act['type']}' must be an array of capability strings." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}
 
 				if ( isset( $act['skippable'] ) && ! is_bool( $act['skippable'] ) ) {
-					throw new InvalidArgumentException( "Action.skippable for '{$act['type']}' must be boolean." );
+					throw new InvalidArgumentException( "Action.skippable for '{$act['type']}' must be boolean." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}
 			}
 		}

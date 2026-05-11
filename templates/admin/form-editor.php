@@ -1,7 +1,10 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 /**
  * Admin Form Editor mount point for React app
  */
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template-scoped variable, not a global.
 $form = $data['form'] ?? null;
 
 add_filter('admin_body_class', function ($classes) {

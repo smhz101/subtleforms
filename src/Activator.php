@@ -8,6 +8,7 @@
 
 namespace SubtleForms;
 
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 use SubtleForms\Support\Logger;
 /**
@@ -41,7 +42,7 @@ final class Activator {
 				sprintf(
 					/* translators: %s: Current WordPress version */
 					esc_html__( 'SubtleForms requires WordPress 5.0 or higher. You are running %s', 'subtleforms' ),
-					$wp_version
+					$wp_version // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $wp_version is a trusted WordPress core global.
 				),
 				esc_html__( 'Plugin Activation Error', 'subtleforms' ),
 				array( 'back_link' => true )
@@ -184,6 +185,7 @@ final class Activator {
 
 		$missing_tables = array();
 		foreach ( $tables_to_check as $name => $table_name ) {
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is controlled from $wpdb->prefix.
 			$table_exists = $wpdb->get_var( "SHOW TABLES LIKE '{$table_name}'" );
 			if ( $table_exists !== $table_name ) {
 				$missing_tables[] = $name;
@@ -198,14 +200,14 @@ final class Activator {
 
 			// Log the error
 			Logger::error( 'Activation Error: ' . $error_message );
-			Logger::error( 'dbDelta results: ' . print_r( $results, true ) );
+			Logger::error( 'dbDelta results: ' . print_r( $results, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 
 			// Show admin notice instead of wp_die to allow debugging
 			add_option( 'subtleforms_activation_error', $error_message );
 
 			deactivate_plugins( SUBTLEFORMS_PLUGIN_BASENAME );
 			wp_die(
-				$error_message . '<br><br>Debug info has been logged to your error log.',
+				$error_message . '<br><br>Debug info has been logged to your error log.', // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Internal activation error, not user-supplied.
 				esc_html__( 'Database Creation Error', 'subtleforms' ),
 				array( 'back_link' => true )
 			);
@@ -223,10 +225,12 @@ final class Activator {
 		$table_name = $wpdb->prefix . 'subtleforms_submissions';
 
 		// Check if form_version column exists (it might remain after dbDelta)
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is controlled from $wpdb->prefix.
 		$column_exists = $wpdb->get_results( "SHOW COLUMNS FROM {$table_name} LIKE 'form_version'" );
 
 		if ( ! empty( $column_exists ) ) {
 			// Copy form_version to schema_version where schema_version is NULL
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is controlled from $wpdb->prefix; no user-supplied values.
 			$wpdb->query( "UPDATE {$table_name} SET schema_version = form_version WHERE schema_version IS NULL AND form_version IS NOT NULL" );
 		}
 	}
@@ -238,10 +242,13 @@ final class Activator {
 		global $wpdb;
 		$table_name = $wpdb->prefix . 'subtleforms_submissions';
 
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is controlled from $wpdb->prefix.
 		$column_exists = $wpdb->get_results( "SHOW COLUMNS FROM {$table_name} LIKE 'is_read'" );
 
 		if ( empty( $column_exists ) ) {
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is controlled from $wpdb->prefix; ALTER TABLE cannot use prepare().
 			$wpdb->query( "ALTER TABLE {$table_name} ADD COLUMN is_read tinyint(1) NOT NULL DEFAULT 0 AFTER status" );
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery -- Table name is controlled from $wpdb->prefix; ALTER TABLE cannot use prepare().
 			$wpdb->query( "ALTER TABLE {$table_name} ADD KEY is_read (is_read)" );
 			Logger::info( 'Added is_read column to submissions table' );
 		}
@@ -256,10 +263,12 @@ final class Activator {
 		$table_name = $wpdb->prefix . 'subtleforms_forms';
 
 		// Check if draft_schema column exists
+		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery -- Table name is controlled from $wpdb->prefix.
 		$column_exists = $wpdb->get_results( "SHOW COLUMNS FROM {$table_name} LIKE 'draft_schema'" );
 
 		if ( empty( $column_exists ) ) {
 			// Add draft_schema column
+			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery -- Table name is controlled from $wpdb->prefix; ALTER TABLE cannot use prepare().
 			$wpdb->query( "ALTER TABLE {$table_name} ADD COLUMN draft_schema longtext DEFAULT NULL AFTER config" );
 			Logger::info( 'Added draft_schema column to forms table' );
 		}

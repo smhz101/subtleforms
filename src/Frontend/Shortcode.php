@@ -92,7 +92,7 @@ final class Shortcode {
 					'subtleforms-captcha',
 					$script_url,
 					array(),
-					null,
+					SUBTLEFORMS_VERSION,
 					true
 				);
 				// Add CAPTCHA script as a dependency of frontend script

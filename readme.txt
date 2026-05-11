@@ -1,10 +1,10 @@
 === SubtleForms ===
 Contributors: smhussain
-Tags: forms, contact form, form builder, email, captcha, submissions
+Tags: forms, contact form, form builder, submissions
 Requires at least: 6.0
-Tested up to: 6.7
-Requires PHP: 7.4
-Stable tag: 1.6.10
+Tested up to: 6.9
+Requires PHP: 8.1
+Stable tag: 1.8.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 

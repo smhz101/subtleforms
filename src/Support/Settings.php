@@ -311,7 +311,7 @@ class Settings {
 			// Handle array of allowed values (enum)
 			if ( is_array( $rule ) && isset( $rule[0] ) ) {
 				if ( ! in_array( $value, $rule, true ) ) {
-					throw new \InvalidArgumentException( "Invalid value for {$key}" );
+					throw new \InvalidArgumentException( "Invalid value for {$key}" ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}
 				$validated[ $key ] = $value;
 				continue;
@@ -344,7 +344,7 @@ class Settings {
 
 			case 'integer':
 				if ( ! is_numeric( $value ) ) {
-					throw new \InvalidArgumentException( "{$key} must be an integer" );
+					throw new \InvalidArgumentException( "{$key} must be an integer" ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}
 				return (int) $value;
 
@@ -353,7 +353,7 @@ class Settings {
 
 			case 'email':
 				if ( ! empty( $value ) && ! is_email( $value ) ) {
-					throw new \InvalidArgumentException( "{$key} must be a valid email" );
+					throw new \InvalidArgumentException( "{$key} must be a valid email" ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				}
 				return sanitize_email( $value );
 
@@ -377,16 +377,16 @@ class Settings {
 
 		// Check min value
 		if ( isset( $rules['min'] ) && $validated < $rules['min'] ) {
-			throw new \InvalidArgumentException( "{$key} must be at least {$rules['min']}" );
+			throw new \InvalidArgumentException( "{$key} must be at least {$rules['min']}" ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// Check max value
 		if ( isset( $rules['max'] ) ) {
 			if ( $type === 'string' && strlen( $validated ) > $rules['max'] ) {
-				throw new \InvalidArgumentException( "{$key} must be at most {$rules['max']} characters" );
+				throw new \InvalidArgumentException( "{$key} must be at most {$rules['max']} characters" ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 			if ( $type === 'integer' && $validated > $rules['max'] ) {
-				throw new \InvalidArgumentException( "{$key} must be at most {$rules['max']}" );
+				throw new \InvalidArgumentException( "{$key} must be at most {$rules['max']}" ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 		}
 

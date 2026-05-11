@@ -8,6 +8,8 @@
 
 namespace SubtleForms\Repositories;
 
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+
 use SubtleForms\Support\Helpers;
 
 use SubtleForms\Support\Logger;
@@ -43,9 +45,9 @@ final class FormsRepository {
 	private function ensureTablesExist(): void {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are safe, set in constructor from $wpdb->prefix.
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table names are safe, set in constructor from $wpdb->prefix.
 		$forms_exists   = $wpdb->get_var( "SHOW TABLES LIKE '{$this->table}'" );
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table names are safe, set in constructor from $wpdb->prefix.
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table names are safe, set in constructor from $wpdb->prefix.
 		$schemas_exists = $wpdb->get_var( "SHOW TABLES LIKE '{$this->schemas_table}'" );
 
 		$missing = array();
@@ -62,7 +64,7 @@ final class FormsRepository {
 				implode( ', ', $missing )
 			);
 			Logger::error( 'Repository Error: ' . $error );
-			throw new \RuntimeException( $error );
+			throw new \RuntimeException( $error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 	}
 
@@ -77,11 +79,12 @@ final class FormsRepository {
 		}
 
 		global $wpdb;
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery -- Table name is safe. Direct query needed for dynamic form data.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is safe; direct query needed for dynamic form data.
 		$result = $wpdb->get_row(
 			$wpdb->prepare( "SELECT * FROM {$this->table} WHERE id = %d", $id ),
 			ARRAY_A
 		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( ! $result ) {
 			return null;
@@ -141,7 +144,7 @@ final class FormsRepository {
 		$params[] = intval( $args['limit'] );
 		$params[] = intval( $args['offset'] );
 
-		$results = $wpdb->get_results( $wpdb->prepare( $sql, ...$params ), ARRAY_A );
+		$results = $wpdb->get_results( $wpdb->prepare( $sql, ...$params ), ARRAY_A ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $sql built from safe table name; prepared params used.
 
 		// No JSON decoding needed - config not fetched
 
@@ -175,9 +178,11 @@ final class FormsRepository {
 		$sql = "SELECT COUNT(*) FROM {$this->table}{$where_clause}";
 
 		if ( ! empty( $params ) ) {
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $sql built from whitelisted table name; values are prepared.
 			return (int) $wpdb->get_var( $wpdb->prepare( $sql, ...$params ) );
 		}
 
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- No user-supplied params; table name is controlled.
 		return (int) $wpdb->get_var( $sql );
 	}
 
@@ -203,10 +208,10 @@ final class FormsRepository {
 
 		$placeholders = implode( ', ', array_fill( 0, count( $ids ), '%d' ) );
 
-		// Only fetch id and title for list views
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $sql built from $wpdb->prefix table name; values are prepared.
 		$sql = "SELECT id, title FROM {$this->table} WHERE id IN ($placeholders)";
-
 		$results = $wpdb->get_results( $wpdb->prepare( $sql, ...$ids ), ARRAY_A );
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		// Return as map: form_id => form
 		$map = array();
@@ -256,6 +261,7 @@ final class FormsRepository {
 			);
 		}
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct insert; no caching needed for writes.
 		$wpdb->insert(
 			$this->table,
 			array(
@@ -308,7 +314,7 @@ final class FormsRepository {
 		global $wpdb;
 
 		// Determine next version
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery -- Table name is safe. Direct query needed for versioning.
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is safe. Direct query needed for versioning.
 		$max = (int) $wpdb->get_var( $wpdb->prepare( "SELECT MAX(version) FROM {$this->schemas_table} WHERE form_id = %d", $formId ) );
 
 		if ( $wpdb->last_error ) {
@@ -318,7 +324,7 @@ final class FormsRepository {
 				$wpdb->last_error
 			);
 			Logger::error( '' . $error );
-			throw new \RuntimeException( $error );
+			throw new \RuntimeException( $error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		$next = $max ? $max + 1 : 1;
@@ -351,7 +357,7 @@ final class FormsRepository {
 				$wpdb->last_error ?: 'Unknown database error'
 			);
 			Logger::error( '' . $error );
-			throw new \RuntimeException( $error );
+			throw new \RuntimeException( $error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// If activating, mark others inactive and update forms table
@@ -385,14 +391,17 @@ final class FormsRepository {
 			}
 
 			// Try to get active version first
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe, set in constructor from $wpdb->prefix.
 			$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$this->schemas_table} WHERE form_id = %d AND active = 1 ORDER BY version DESC LIMIT 1", $formId ), ARRAY_A );
 
 			// If no active version, fall back to the latest version
 			if ( ! $row && ! $wpdb->last_error ) {
 				Logger::error( "SubtleForms: No active schema found for form {$formId}, using latest version as fallback" );
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe, set in constructor from $wpdb->prefix.
 				$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$this->schemas_table} WHERE form_id = %d ORDER BY version DESC LIMIT 1", $formId ), ARRAY_A );
 			}
 		} else {
+			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe, set in constructor from $wpdb->prefix.
 			$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$this->schemas_table} WHERE form_id = %d AND version = %d", $formId, $version ), ARRAY_A );
 		}
 
@@ -404,7 +413,7 @@ final class FormsRepository {
 				$wpdb->last_error
 			);
 			Logger::error( '' . $error );
-			throw new \RuntimeException( $error );
+			throw new \RuntimeException( $error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		if ( ! $row ) {
@@ -419,7 +428,7 @@ final class FormsRepository {
 				$row['version'] ?? 'unknown'
 			);
 			Logger::error( '' . $error );
-			throw new \RuntimeException( $error );
+			throw new \RuntimeException( $error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// Decode and validate JSON
@@ -432,7 +441,7 @@ final class FormsRepository {
 				json_last_error_msg()
 			);
 			Logger::error( '' . $error );
-			throw new \RuntimeException( $error );
+			throw new \RuntimeException( $error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// Ensure schema_version exists in decoded schema, default to 1 for legacy schemas
@@ -477,7 +486,7 @@ final class FormsRepository {
 				$wpdb->last_error
 			);
 			Logger::error( '' . $error );
-			throw new \RuntimeException( $error );
+			throw new \RuntimeException( $error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// Set requested version active
@@ -500,10 +509,11 @@ final class FormsRepository {
 				$wpdb->last_error ?: 'Version may not exist'
 			);
 			Logger::error( '' . $error );
-			throw new \RuntimeException( $error );
+			throw new \RuntimeException( $error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// Update forms table config and active_version to keep in sync
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe, set in constructor from $wpdb->prefix.
 		$schemaRow = $wpdb->get_row( $wpdb->prepare( "SELECT schema_data FROM {$this->schemas_table} WHERE form_id = %d AND version = %d", $formId, $version ), ARRAY_A );
 
 		if ( $wpdb->last_error ) {
@@ -514,7 +524,7 @@ final class FormsRepository {
 				$wpdb->last_error
 			);
 			Logger::error( '' . $error );
-			throw new \RuntimeException( $error );
+			throw new \RuntimeException( $error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		if ( $schemaRow ) {
@@ -555,6 +565,7 @@ final class FormsRepository {
 	public function getSchemaVersions( int $formId ): array {
 		global $wpdb;
 
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe, set in constructor from $wpdb->prefix.
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT version, active, created_at FROM {$this->schemas_table} WHERE form_id = %d ORDER BY version DESC", $formId ), ARRAY_A );
 		return array_map(
 			function ( $r ) {

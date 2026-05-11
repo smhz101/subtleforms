@@ -82,18 +82,20 @@ class RequestValidator {
 		$maxBytes = $options['maxBytes'] ?? self::MAX_PAYLOAD_BYTES;
 		$inputSize = strlen( json_encode( $input ) );
 		if ( $inputSize > $maxBytes ) {
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new ValidationException(
 				'Payload too large',
 				array( '__root' => sprintf( 'Maximum payload size is %d bytes', $maxBytes ) ),
 				'payload_too_large'
 			);
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// Validate
 		list( $valid, $sanitized, $errors ) = $this->validateSchema( $input, $schema, '', 0 );
 
 		if ( ! $valid ) {
-			throw ValidationException::withFields( $errors, 'Validation failed' );
+			throw ValidationException::withFields( $errors, 'Validation failed' ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		return $sanitized;

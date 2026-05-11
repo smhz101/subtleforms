@@ -32,7 +32,7 @@ final class ActionRegistry {
 	public function register( ActionInterface $action ): void {
 		$type = $action->id();
 		if ( ! isset( $this->definitions[ $type ] ) ) {
-			throw new InvalidArgumentException( sprintf( 'Cannot register implementation for unknown action type "%s". Register an ActionDefinition first.', $type ) );
+			throw new InvalidArgumentException( sprintf( 'Cannot register implementation for unknown action type "%s". Register an ActionDefinition first.', $type ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		$this->actions[ $type ] = $action;

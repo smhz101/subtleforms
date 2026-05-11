@@ -64,7 +64,7 @@ final class FeatureGate {
 			return;
 		}
 
-		throw new RuntimeException( $message ?: sprintf( 'Capability "%s" is not available.', $capability ) );
+		throw new RuntimeException( $message ?: sprintf( 'Capability "%s" is not available.', $capability ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 	}
 
 	/**

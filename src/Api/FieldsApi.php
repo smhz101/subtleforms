@@ -88,7 +88,7 @@ final class FieldsApi {
 		}
 
 		$grouped = $request->get_param( 'grouped' );
-		Logger::debug( 'get_fields called with grouped=%s by user=%d', var_export( $grouped, true ), get_current_user_id() );
+		Logger::debug( 'get_fields called with grouped=%s by user=%d', var_export( $grouped, true ), get_current_user_id() ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 
 		// Get CAPTCHA enabled states
 		$captchaEnabled   = $this->settings ? (bool) $this->settings->get( 'captcha_enabled', false ) : false;
@@ -151,7 +151,7 @@ final class FieldsApi {
 			);
 		}
 
-		Logger::debug( 'get_fields response: %s', print_r( $fields, true ) );
+		Logger::debug( 'get_fields response: %s', print_r( $fields, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 
 		return ApiResponse::success( $fields );
 	}

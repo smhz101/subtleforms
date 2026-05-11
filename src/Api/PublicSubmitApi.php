@@ -10,6 +10,8 @@
 
 namespace SubtleForms\Api;
 
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+
 use SubtleForms\Support\Helpers;
 use SubtleForms\Support\Logger;
 use SubtleForms\Support\Captcha\CaptchaManager;
@@ -164,6 +166,7 @@ final class PublicSubmitApi {
 			if ( $user_key ) {
 				global $wpdb;
 				$table_name = $wpdb->prefix . 'subtleforms_submissions';
+				// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled.
 				$count      = $wpdb->get_var(
 					$wpdb->prepare(
 						"SELECT COUNT(*) FROM {$table_name} WHERE form_id = %d AND (user_id = %d OR ip_address = %s) AND status != 'spam'",
@@ -172,6 +175,7 @@ final class PublicSubmitApi {
 						$ip ? $ip : ''
 					)
 				);
+				// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 				if ( $count >= $limit ) {
 					return ApiResponse::forbidden(

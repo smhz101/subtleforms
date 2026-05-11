@@ -5,9 +5,13 @@
  * Description: Logic-first, workflow-driven form platform with extension architecture.
  * Version: 1.8.1
  * Author: Muzammil Hussain
- * Requires PHP: 7.4
+ * Requires at least: 6.0
+ * Requires PHP: 8.1
+ * Tested up to: 6.9
  * Text Domain: subtleforms
  * Domain Path: /languages
+ * License: GPL-2.0-or-later
+ * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  */
 
 /**
@@ -56,9 +60,6 @@ register_deactivation_hook(
 add_action(
 	'plugins_loaded',
 	function () {
-		// Load text domain for translations
-		load_plugin_textdomain( 'subtleforms', false, dirname( SUBTLEFORMS_PLUGIN_BASENAME ) . '/languages' );
-
 		// Check for DB schema updates (only runs dbDelta when db_version changes).
 		$db_version = get_option( 'subtleforms_db_version' );
 		if ( $db_version !== SUBTLEFORMS_VERSION ) {

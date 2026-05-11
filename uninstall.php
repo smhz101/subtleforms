@@ -18,6 +18,7 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 global $wpdb;
 
 // ── 1. Drop custom database tables ──────────────────────────────────────────
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Uninstall script scope; not a global.
 $tables = array(
 	$wpdb->prefix . 'subtleforms_forms',
 	$wpdb->prefix . 'subtleforms_submissions',
@@ -26,12 +27,14 @@ $tables = array(
 	$wpdb->prefix . 'subtleforms_license_meta',
 );
 
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Uninstall script scope.
 foreach ( $tables as $table ) {
-	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- DROP TABLE at uninstall; table names from $wpdb->prefix.
 	$wpdb->query( "DROP TABLE IF EXISTS {$table}" );
 }
 
 // ── 2. Delete plugin options ─────────────────────────────────────────────────
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Uninstall script scope; not a global.
 $options = array(
 	'subtleforms_version',
 	'subtleforms_db_version',
@@ -48,6 +51,7 @@ $options = array(
 	'subtleforms_onboarding_dismissed',
 );
 
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Uninstall script scope.
 foreach ( $options as $option ) {
 	delete_option( $option );
 }
@@ -68,18 +72,21 @@ $wpdb->query(
 );
 
 // ── 4. Delete user meta ─────────────────────────────────────────────────────
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Uninstall script scope; not a global.
 $user_meta_keys = array(
 	'subtleforms_onboarding_dismissed',
 	'subtleforms_create_wizard_dismissed',
 	'subtleforms_tour_completed',
 );
 
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Uninstall script scope; not a global.
 foreach ( $user_meta_keys as $meta_key ) {
-	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Intentional meta_key delete at uninstall.
 	$wpdb->delete( $wpdb->usermeta, array( 'meta_key' => $meta_key ) );
 }
 
 // ── 5. Clear scheduled cron events ──────────────────────────────────────────
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Uninstall script scope; not a global.
 $cron_hooks = array(
 	'subtleforms_daily_cleanup',
 	'subtleforms_daily_license_check',
@@ -87,7 +94,9 @@ $cron_hooks = array(
 	'subtleforms_async_webhook',
 );
 
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Uninstall script scope; not a global.
 foreach ( $cron_hooks as $hook ) {
+	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Uninstall script scope; not a global.
 	$timestamp = wp_next_scheduled( $hook );
 	if ( $timestamp ) {
 		wp_unschedule_event( $timestamp, $hook );

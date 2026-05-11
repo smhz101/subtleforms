@@ -1,7 +1,11 @@
 <?php
+
+
 declare(strict_types=1);
 
 namespace SubtleForms\Extensions;
+
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /**
  * CRM Extension

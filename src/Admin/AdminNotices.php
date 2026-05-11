@@ -1,4 +1,6 @@
 <?php
+
+
 /**
  * Admin Notices
  *
@@ -8,6 +10,8 @@
  */
 
 namespace SubtleForms\Admin;
+
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /**
  * Registers and renders admin notices for the SubtleForms plugin.

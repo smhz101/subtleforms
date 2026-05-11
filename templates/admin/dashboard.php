@@ -1,4 +1,6 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 /**
  * Admin Dashboard mount point for React app
  */

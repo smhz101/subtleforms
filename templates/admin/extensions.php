@@ -1,4 +1,6 @@
 <?php
+
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 /**
  * Admin Extensions mount point for React app
  */
