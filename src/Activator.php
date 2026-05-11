@@ -248,7 +248,7 @@ final class Activator {
 		if ( empty( $column_exists ) ) {
 			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is controlled from $wpdb->prefix; ALTER TABLE cannot use prepare().
 			$wpdb->query( "ALTER TABLE {$table_name} ADD COLUMN is_read tinyint(1) NOT NULL DEFAULT 0 AFTER status" );
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery -- Table name is controlled from $wpdb->prefix; ALTER TABLE cannot use prepare().
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Table name is controlled from $wpdb->prefix; ALTER TABLE cannot use prepare().
 			$wpdb->query( "ALTER TABLE {$table_name} ADD KEY is_read (is_read)" );
 			Logger::info( 'Added is_read column to submissions table' );
 		}
@@ -263,12 +263,12 @@ final class Activator {
 		$table_name = $wpdb->prefix . 'subtleforms_forms';
 
 		// Check if draft_schema column exists
-		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery -- Table name is controlled from $wpdb->prefix.
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is controlled from $wpdb->prefix.
 		$column_exists = $wpdb->get_results( "SHOW COLUMNS FROM {$table_name} LIKE 'draft_schema'" );
 
 		if ( empty( $column_exists ) ) {
 			// Add draft_schema column
-			// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery -- Table name is controlled from $wpdb->prefix; ALTER TABLE cannot use prepare().
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Table name is controlled from $wpdb->prefix; ALTER TABLE cannot use prepare().
 			$wpdb->query( "ALTER TABLE {$table_name} ADD COLUMN draft_schema longtext DEFAULT NULL AFTER config" );
 			Logger::info( 'Added draft_schema column to forms table' );
 		}

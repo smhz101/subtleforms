@@ -338,6 +338,7 @@ final class FormsRepository {
 		// ));
 		// }
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct insert; no caching for write operations.
 		$inserted = $wpdb->insert(
 			$this->schemas_table,
 			array(
@@ -391,17 +392,17 @@ final class FormsRepository {
 			}
 
 			// Try to get active version first
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe, set in constructor from $wpdb->prefix.
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is safe, set in constructor from $wpdb->prefix.
 			$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$this->schemas_table} WHERE form_id = %d AND active = 1 ORDER BY version DESC LIMIT 1", $formId ), ARRAY_A );
 
 			// If no active version, fall back to the latest version
 			if ( ! $row && ! $wpdb->last_error ) {
 				Logger::error( "SubtleForms: No active schema found for form {$formId}, using latest version as fallback" );
-				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe, set in constructor from $wpdb->prefix.
+				// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is safe, set in constructor from $wpdb->prefix.
 				$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$this->schemas_table} WHERE form_id = %d ORDER BY version DESC LIMIT 1", $formId ), ARRAY_A );
 			}
 		} else {
-			// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe, set in constructor from $wpdb->prefix.
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is safe, set in constructor from $wpdb->prefix.
 			$row = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$this->schemas_table} WHERE form_id = %d AND version = %d", $formId, $version ), ARRAY_A );
 		}
 
@@ -477,6 +478,7 @@ final class FormsRepository {
 		global $wpdb;
 
 		// Unset other active flags
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update for schema version flag; no caching for writes.
 		$wpdb->update( $this->schemas_table, array( 'active' => 0 ), array( 'form_id' => $formId ), array( '%d' ), array( '%d' ) );
 
 		if ( $wpdb->last_error ) {
@@ -490,6 +492,7 @@ final class FormsRepository {
 		}
 
 		// Set requested version active
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update for schema version activation; no caching for writes.
 		$updated = $wpdb->update(
 			$this->schemas_table,
 			array( 'active' => 1 ),
@@ -513,7 +516,7 @@ final class FormsRepository {
 		}
 
 		// Update forms table config and active_version to keep in sync
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe, set in constructor from $wpdb->prefix.
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is safe, set in constructor from $wpdb->prefix.
 		$schemaRow = $wpdb->get_row( $wpdb->prepare( "SELECT schema_data FROM {$this->schemas_table} WHERE form_id = %d AND version = %d", $formId, $version ), ARRAY_A );
 
 		if ( $wpdb->last_error ) {
@@ -528,6 +531,7 @@ final class FormsRepository {
 		}
 
 		if ( $schemaRow ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update for form sync; no caching for writes.
 			$result = $wpdb->update(
 				$this->table,
 				array(
@@ -565,7 +569,7 @@ final class FormsRepository {
 	public function getSchemaVersions( int $formId ): array {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe, set in constructor from $wpdb->prefix.
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is safe, set in constructor from $wpdb->prefix.
 		$rows = $wpdb->get_results( $wpdb->prepare( "SELECT version, active, created_at FROM {$this->schemas_table} WHERE form_id = %d ORDER BY version DESC", $formId ), ARRAY_A );
 		return array_map(
 			function ( $r ) {
@@ -607,6 +611,7 @@ final class FormsRepository {
 			return false;
 		}
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update; no caching for writes.
 		$result = $wpdb->update(
 			$this->table,
 			$update_data,
@@ -627,6 +632,7 @@ final class FormsRepository {
 	 */
 	public function delete( int $id ): bool {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct delete; no caching for writes.
 		$result = $wpdb->delete( $this->table, array( 'id' => $id ), array( '%d' ) );
 		if ( $result !== false ) {
 			wp_cache_delete( "subtleforms_form_{$id}", 'subtleforms' );
@@ -657,6 +663,7 @@ final class FormsRepository {
 
 		global $wpdb;
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update for draft schema; no caching for writes.
 		$result = $wpdb->update(
 			$this->table,
 			array( 'draft_schema' => wp_json_encode( $schema ) ),
@@ -688,12 +695,14 @@ final class FormsRepository {
 	public function getDraftSchema( int $formId ): ?array {
 		global $wpdb;
 
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is safe; values prepared.
 		$draft = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT draft_schema FROM {$this->table} WHERE id = %d",
 				$formId
 			)
 		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( ! $draft ) {
 			return null;

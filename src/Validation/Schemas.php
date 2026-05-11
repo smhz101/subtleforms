@@ -439,7 +439,7 @@ class Schemas {
 		}
 
 		if ( ! empty( $errors ) ) {
-			throw ValidationException::withFields( $errors, 'Invalid pagination parameters' );
+			throw ValidationException::withFields( $errors, 'Invalid pagination parameters' ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		return array(

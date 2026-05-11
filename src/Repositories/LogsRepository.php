@@ -186,7 +186,7 @@ final class LogsRepository {
 			return (int) $wpdb->get_var( $wpdb->prepare( $sql, ...$params ) );
 		}
 
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared -- No user-supplied params; table name is controlled.
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- No user-supplied params; table name is controlled.
 		return (int) $wpdb->get_var( $sql );
 	}
 }
