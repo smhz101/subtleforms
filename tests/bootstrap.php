@@ -1,6 +1,6 @@
 <?php
 // phpcs:disable -- PHPUnit bootstrap; not shipped in production plugin.
-defined( 'ABSPATH' ) || define( 'ABSPATH', __DIR__ . '/' ); // phpcs:ignore -- CLI bootstrap needs this pattern.
+if ( ! defined( 'ABSPATH' ) ) { exit; } // WP test suite defines ABSPATH via wp-tests-config.
 /**
  * PHPUnit bootstrap file.
  *

@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
 // phpcs:disable -- Dev/maintenance script; not shipped in production plugin.
-defined( 'ABSPATH' ) || define( 'ABSPATH', __DIR__ . '/' ); // CLI script; define ABSPATH if not set.
+if ( ! defined( 'ABSPATH' ) && 'cli' !== PHP_SAPI ) { exit; } // CLI script; block direct web requests.
 /**
  * Script to add phpcs ignore comments for safe table name interpolation
  * across all SubtleForms repositories.

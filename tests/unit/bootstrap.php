@@ -1,6 +1,7 @@
 <?php
 // phpcs:disable -- PHPUnit bootstrap; not shipped in production plugin.
-defined( 'ABSPATH' ) || define( 'ABSPATH', __DIR__ . '/' ); // CLI bootstrap; define ABSPATH if not already set.
+if ( ! defined( 'ABSPATH' ) && 'cli' !== PHP_SAPI ) { exit; } // CLI unit tests run without WP; block web requests.
+defined( 'ABSPATH' ) || define( 'ABSPATH', __DIR__ . '/' );
 /**
  * PHPUnit bootstrap for standalone unit tests.
  *
