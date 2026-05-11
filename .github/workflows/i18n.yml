@@ -29,7 +29,7 @@ jobs:
    - name: Generate POT files
      run: |
       # Generate PHP pot
-      wp i18n make-pot . languages/subtleforms.pot --exclude="node_modules,vendor,____subtleforms.orig____" || true
+      wp i18n make-pot . languages/subtleforms.pot --exclude="node_modules,vendor,____subtleforms.orig____,build" || true
       # Generate JS pot (resources folder)
       wp i18n make-pot resources languages/subtleforms-js.pot --include="resources" || true
 
