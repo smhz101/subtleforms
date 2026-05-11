@@ -1,5 +1,6 @@
 <?php
 // phpcs:disable -- PHPUnit bootstrap; not shipped in production plugin.
+defined( 'ABSPATH' ) || define( 'ABSPATH', __DIR__ . '/' ); // phpcs:ignore -- CLI bootstrap needs this pattern.
 /**
  * PHPUnit bootstrap file.
  *

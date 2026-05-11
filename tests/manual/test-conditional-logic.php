@@ -1,5 +1,6 @@
 <?php
 // phpcs:disable -- Dev/test script; not shipped in production plugin.
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 /**
  * Manual test script for conditional logic.
  * Run: wp eval-file test-conditional-logic.php

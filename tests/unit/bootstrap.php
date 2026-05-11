@@ -1,5 +1,6 @@
 <?php
 // phpcs:disable -- PHPUnit bootstrap; not shipped in production plugin.
+defined( 'ABSPATH' ) || define( 'ABSPATH', __DIR__ . '/' ); // CLI bootstrap; define ABSPATH if not already set.
 /**
  * PHPUnit bootstrap for standalone unit tests.
  *
