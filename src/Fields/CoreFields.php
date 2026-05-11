@@ -1084,7 +1084,7 @@ final class CoreFields {
 			$registry->register(
 				new FieldDefinition(
 					type: "{$columns}_column_container",
-					label: __( "$columns Column" . ( $columns > 1 ? 's' : '' ), 'subtleforms' ),
+					label: _n( 'Column', 'Columns', $columns, 'subtleforms' ),
 					category: 'layout',
 					icon: 'columns',
 					kind: 'structure',

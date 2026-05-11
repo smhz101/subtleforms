@@ -11,6 +11,8 @@
 
 namespace SubtleForms\Validation;
 
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+
 /**
  * Sanitizer class
  *
@@ -226,22 +228,26 @@ class Sanitizer {
 
 		// Check size limit
 		if ( strlen( $json ) > $maxBytes ) {
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new ValidationException(
 				'JSON payload too large',
 				array( '__root' => sprintf( 'Maximum size is %d bytes', $maxBytes ) ),
 				'payload_too_large'
 			);
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// Decode JSON
 		$decoded = json_decode( $json, true );
 
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new ValidationException(
 				'Invalid JSON: ' . json_last_error_msg(),
 				array( '__root' => 'JSON is malformed' ),
 				'invalid_json'
 			);
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// Sanitize decoded array
@@ -268,30 +274,11 @@ class Sanitizer {
 		$str = (string) $value;
 
 		// Strip all HTML tags using WordPress function
-		if ( function_exists( 'wp_strip_all_tags' ) ) {
-			$str = wp_strip_all_tags( $str );
-		} else {
-			// Fallback: use strip_tags
-			$str = strip_tags( $str );
-		}
+		$str = wp_strip_all_tags( $str );
 
 		// Trim whitespace
 		$str = trim( $str );
 
 		return $str;
-	}
-
-	/**
-	 * Strip all HTML tags (WordPress wrapper with fallback)
-	 *
-	 * @param string $text Text to strip
-	 * @return string
-	 */
-	private static function wp_strip_all_tags( string $text ): string {
-		if ( function_exists( 'wp_strip_all_tags' ) ) {
-			return wp_strip_all_tags( $text );
-		}
-
-		return strip_tags( $text );
 	}
 }

@@ -1,4 +1,6 @@
 <?php
+
+
 /**
  * SubtleForms Plugin Main Class
  *
@@ -7,6 +9,8 @@
  */
 
 namespace SubtleForms;
+
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 use SubtleForms\Admin\AdminMenu;
 use SubtleForms\Admin\AdminNotices;
@@ -91,17 +95,6 @@ final class Plugin {
 
 		// Allow other plugins/themes to hook in
 		do_action( 'subtleforms/loaded', $this );
-	}
-
-	/**
-	 * Load plugin text domain.
-	 */
-	public function load_textdomain(): void {
-		load_plugin_textdomain(
-			'subtleforms',
-			false,
-			dirname( plugin_basename( SUBTLEFORMS_PLUGIN_FILE ) ) . '/languages'
-		);
 	}
 
 	/**

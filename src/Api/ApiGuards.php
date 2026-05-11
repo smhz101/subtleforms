@@ -127,7 +127,7 @@ trait ApiGuards {
 		}
 
 		if ( empty( $nonce ) ) {
-			error_log( '[SubtleForms] Invalid nonce detected for REST request' );
+			error_log( '[SubtleForms] Invalid nonce detected for REST request' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			return new \WP_Error(
 				'subtleforms_invalid_nonce',
 				__( 'Security check failed. Please refresh and try again.', 'subtleforms' ),
@@ -136,7 +136,7 @@ trait ApiGuards {
 		}
 
 		if ( ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
-			error_log( '[SubtleForms] Invalid nonce detected for REST request' );
+			error_log( '[SubtleForms] Invalid nonce detected for REST request' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 			return new \WP_Error(
 				'subtleforms_invalid_nonce',
 				__( 'Security check failed. Please refresh and try again.', 'subtleforms' ),

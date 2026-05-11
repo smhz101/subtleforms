@@ -1,4 +1,6 @@
 <?php
+
+
 /**
  * SubtleForms Block Registration
  *
@@ -9,6 +11,8 @@
  */
 
 namespace SubtleForms\Blocks;
+
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /**
  * Registers and manages the SubtleForms Gutenberg block.
@@ -57,12 +61,14 @@ final class SubtleFormsBlock {
 		// Verify form exists and is published (security check)
 		global $wpdb;
 		$table = $wpdb->prefix . 'subtleforms_forms';
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled.
 		$form  = $wpdb->get_row(
 			$wpdb->prepare(
 				"SELECT id, status FROM {$table} WHERE id = %d",
 				$form_id
 			)
 		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		// If form doesn't exist or isn't published, render nothing
 		if ( ! $form || $form->status !== 'published' ) {

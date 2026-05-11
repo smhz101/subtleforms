@@ -58,6 +58,9 @@ playwright-report/
 dist/*.zip
 *.zip
 
+# Playwright / curl test cookies (auth artifacts — never commit)
+cookies.txt
+
 # IDE metadata cache
 .phpstorm.meta.php/
 

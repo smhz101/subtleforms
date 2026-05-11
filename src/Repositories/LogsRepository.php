@@ -8,6 +8,8 @@
 
 namespace SubtleForms\Repositories;
 
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+
 use SubtleForms\Support\Helpers;
 
 /**
@@ -62,6 +64,7 @@ final class LogsRepository {
 		$params[] = intval( $args['limit'] );
 		$params[] = intval( $args['offset'] );
 
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $sql is built from whitelisted table name/orderby and safe params, passed through prepare().
 		$results = $wpdb->get_results( $wpdb->prepare( $sql, ...$params ), ARRAY_A );
 
 		// Decode JSON context
@@ -87,6 +90,7 @@ final class LogsRepository {
 
 		$data = wp_parse_args( $data, $defaults );
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Intentional log insert; no caching needed for write operations.
 		$wpdb->insert(
 			$this->table,
 			array(
@@ -148,6 +152,7 @@ final class LogsRepository {
 	 */
 	public function deleteBySubmission( int $submissionId ): bool {
 		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Intentional direct delete; no caching needed for write.
 		$result = $wpdb->delete( $this->table, array( 'submission_id' => $submissionId ), array( '%d' ) );
 		return $result !== false;
 	}
@@ -177,9 +182,11 @@ final class LogsRepository {
 		$sql = "SELECT COUNT(*) FROM {$this->table}{$where_clause}";
 
 		if ( ! empty( $params ) ) {
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $sql built from whitelisted table name; values are prepared.
 			return (int) $wpdb->get_var( $wpdb->prepare( $sql, ...$params ) );
 		}
 
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- No user-supplied params; table name is controlled.
 		return (int) $wpdb->get_var( $sql );
 	}
 }

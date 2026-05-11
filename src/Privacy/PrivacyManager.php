@@ -1,4 +1,6 @@
 <?php
+
+
 /**
  * SubtleForms Privacy Manager
  *
@@ -9,6 +11,8 @@
  */
 
 namespace SubtleForms\Privacy;
+
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 use SubtleForms\Support\Settings;
 use SubtleForms\Repositories\SubmissionsRepository;
@@ -78,6 +82,7 @@ final class PrivacyManager {
 	private function get_privacy_policy_text() {
 		$retention_days = $this->settings->get( 'data_retention_days', 0 );
 
+		// phpcs:disable WordPress.WP.I18n.NoHtmlWrappedStrings -- Privacy policy template; HTML in translatable strings is intentional for rich text output.
 		$text = __( '<h2>What personal data we collect and why we collect it</h2>', 'subtleforms' );
 
 		$text .= __( '<h3>Contact Forms</h3>', 'subtleforms' );
@@ -103,6 +108,7 @@ final class PrivacyManager {
 		$text .= __( '<h3>Where we send your data</h3>', 'subtleforms' );
 
 		$text .= __( '<p>Form submissions may trigger email notifications which are sent through your web host\'s mail server or a third-party email service if configured.</p>', 'subtleforms' );
+		// phpcs:enable WordPress.WP.I18n.NoHtmlWrappedStrings
 
 		return $text;
 	}

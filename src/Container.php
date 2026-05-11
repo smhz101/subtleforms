@@ -1,4 +1,6 @@
 <?php
+
+
 /**
  * SubtleForms Container
  *
@@ -7,6 +9,8 @@
  */
 
 namespace SubtleForms;
+
+if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 use SubtleForms\Support\Capabilities;
 use SubtleForms\Support\FeatureGate;
@@ -84,7 +88,7 @@ final class Container {
 	 */
 	public function get( string $id ) {
 		if ( ! isset( $this->services[ $id ] ) ) {
-			throw new \RuntimeException( "Service '{$id}' not found in container." );
+			throw new \RuntimeException( "Service '{$id}' not found in container." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// If it's a singleton and already instantiated, return the cached instance

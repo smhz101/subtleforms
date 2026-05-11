@@ -11,6 +11,10 @@
 
 namespace SubtleForms\Examples;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use SubtleForms\Validation\ValidationException;
 use SubtleForms\Validation\Sanitizer;
 use SubtleForms\Validation\Rules;

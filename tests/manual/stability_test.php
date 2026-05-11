@@ -1,4 +1,5 @@
 <?php
+// phpcs:disable -- Dev/test script; not shipped in production plugin.
 /**
  * Stability Test Script for SubtleForms v1.1.34
  */

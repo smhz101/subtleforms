@@ -74,7 +74,7 @@ final class SchemaCompiler {
 
 		foreach ( $actions as $i => $act ) {
 			if ( ! is_array( $act ) || empty( $act['type'] ) || ! is_string( $act['type'] ) ) {
-				throw new InvalidArgumentException( "Action at index {$i} must be an object with string 'type'." );
+				throw new InvalidArgumentException( "Action at index {$i} must be an object with string 'type'." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
 			$type = $act['type'];

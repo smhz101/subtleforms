@@ -65,7 +65,7 @@ final class SaveAction implements ActionInterface {
 
 			if ( ! $validation['valid'] ) {
 				$context->setMeta( 'validation_errors', $validation['errors'] );
-				throw new \RuntimeException( 'Validation failed: ' . implode( ', ', array_values( $validation['errors'] ) ) );
+				throw new \RuntimeException( 'Validation failed: ' . implode( ', ', array_values( $validation['errors'] ) ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 		}
 

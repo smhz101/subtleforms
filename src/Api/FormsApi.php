@@ -626,11 +626,11 @@ final class FormsApi {
 		}
 
 		try {
-			Logger::debug( 'create_form - raw input: %s', print_r( $input, true ) );
+			Logger::debug( 'create_form - raw input: %s', print_r( $input, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			$validator = new RequestValidator( array( 'schemas' => Schemas::all() ) );
 			$validated = $validator->validateOrFail( $input, Schemas::get( Schemas::FORM_CREATE ) );
 		} catch ( ValidationException $e ) {
-			Logger::error( 'create_form - validation failed: %s Fields: %s', $e->getMessage(), print_r( $e->getFields(), true ) );
+			Logger::error( 'create_form - validation failed: %s Fields: %s', $e->getMessage(), print_r( $e->getFields(), true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
 			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
 		}
 

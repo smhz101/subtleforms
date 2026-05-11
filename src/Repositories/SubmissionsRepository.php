@@ -8,6 +8,8 @@
 
 namespace SubtleForms\Repositories;
 
+if ( ! defined( 'ABSPATH' ) ) { exit; }
+
 use SubtleForms\Support\Helpers;
 
 use SubtleForms\Support\Logger;
@@ -31,10 +33,12 @@ final class SubmissionsRepository {
 	 */
 	public function find( int $id ): ?array {
 		global $wpdb;
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled.
 		$result = $wpdb->get_row(
 			$wpdb->prepare( "SELECT * FROM {$this->table} WHERE id = %d", $id ),
 			ARRAY_A
 		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( ! $result ) {
 			return null;
@@ -84,6 +88,7 @@ final class SubmissionsRepository {
 		$params[] = intval( $args['limit'] );
 		$params[] = intval( $args['offset'] );
 
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $sql is built from whitelisted table name and safe params, passed through prepare().
 		$results = $wpdb->get_results( $wpdb->prepare( $sql, ...$params ), ARRAY_A );
 
 		// Decode JSON fields
@@ -115,6 +120,7 @@ final class SubmissionsRepository {
 
 		$data = wp_parse_args( $data, $defaults );
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Intentional direct insert; no caching needed for write operations.
 		$inserted = $wpdb->insert(
 			$this->table,
 			array(
@@ -136,14 +142,14 @@ final class SubmissionsRepository {
 				$wpdb->last_error ?: 'Unknown database error'
 			);
 			Logger::error( '' . $error );
-			throw new \RuntimeException( $error );
+			throw new \RuntimeException( $error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		$submissionId = $wpdb->insert_id;
 		if ( ! $submissionId ) {
 			$error = 'Failed to get submission ID after insert';
 			Logger::error( '' . $error );
-			throw new \RuntimeException( $error );
+			throw new \RuntimeException( $error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// Phase B3: Invalidate count cache for this form
@@ -192,6 +198,7 @@ final class SubmissionsRepository {
 			return false;
 		}
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Intentional direct update; no caching needed for write operations.
 		$result = $wpdb->update(
 			$this->table,
 			$update_data,
@@ -208,7 +215,7 @@ final class SubmissionsRepository {
 				$wpdb->last_error
 			);
 			Logger::error( '' . $error );
-			throw new \RuntimeException( $error );
+			throw new \RuntimeException( $error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// $result can be 0 if no rows were changed (but query succeeded)
@@ -219,7 +226,7 @@ final class SubmissionsRepository {
 				$id
 			);
 			Logger::error( '' . $error );
-			throw new \RuntimeException( $error );
+			throw new \RuntimeException( $error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// Phase B3: Invalidate count cache (fetch submission to get form_id)
@@ -240,6 +247,7 @@ final class SubmissionsRepository {
 		// Phase B3: Get form_id before delete for cache invalidation
 		$submission = $this->find( $id );
 
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct delete; no caching for write operations.
 		$result = $wpdb->delete( $this->table, array( 'id' => $id ), array( '%d' ) );
 
 		// Invalidate count cache
@@ -336,6 +344,7 @@ final class SubmissionsRepository {
 		       $params[] = intval( $args['limit'] );
 		       $params[] = intval( $args['offset'] );
 
+		       // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $sql is built from whitelisted table name/orderby and safe params, passed through prepare().
 		       $results = $wpdb->get_results( $wpdb->prepare( $sql, ...$params ), ARRAY_A );
 
 		       // Decode JSON fields for each result
@@ -409,11 +418,13 @@ final class SubmissionsRepository {
 
 		$sql = "SELECT COUNT(*) FROM {$this->table} {$whereClause}";
 
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $sql built from $wpdb->prefix table name; user-supplied values are prepared or absent.
 		if ( ! empty( $params ) ) {
 			return (int) $wpdb->get_var( $wpdb->prepare( $sql, ...$params ) );
 		}
 
 		return (int) $wpdb->get_var( $sql );
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 	}
 
 	/**
@@ -438,12 +449,14 @@ final class SubmissionsRepository {
 
 		$whereNext = 'WHERE ' . implode( ' AND ', $nextConditions );
 
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $whereNext contains only %d placeholders; table name is from $wpdb->prefix.
 		$next = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT id FROM {$this->table} {$whereNext} ORDER BY id ASC LIMIT 1",
 				...$nextParams
 			)
 		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		// For Prev
 		$prevConditions   = $conditions;
@@ -453,12 +466,14 @@ final class SubmissionsRepository {
 
 		$wherePrev = 'WHERE ' . implode( ' AND ', $prevConditions );
 
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $wherePrev contains only %d placeholders; table name is from $wpdb->prefix.
 		$prev = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT id FROM {$this->table} {$wherePrev} ORDER BY id DESC LIMIT 1",
 				...$prevParams
 			)
 		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		return array(
 			'next' => $next ? intval( $next ) : null,
@@ -477,13 +492,14 @@ final class SubmissionsRepository {
 
 		$cutoff_date = gmdate( 'Y-m-d H:i:s', strtotime( "-{$days} days" ) );
 
-		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery -- Table name is safe.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from $wpdb->prefix; date value is prepared.
 		$deleted = $wpdb->query(
 $wpdb->prepare(
 "DELETE FROM {$this->table} WHERE created_at < %s",
 $cutoff_date
 )
 		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		return $deleted !== false ? (int) $deleted : 0;
 	}
@@ -512,22 +528,25 @@ $cutoff_date
 		global $wpdb;
 		$placeholders = implode( ',', array_fill( 0, count( $form_ids ), '%d' ) );
 
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- Table name from $wpdb->prefix; placeholders are safe.
 		if ( $status ) {
 			$query = $wpdb->prepare(
-				"SELECT form_id, COUNT(*) as count FROM {$this->table} 
-                WHERE form_id IN ({$placeholders}) AND status = %s 
+				"SELECT form_id, COUNT(*) as count FROM {$this->table}
+                WHERE form_id IN ({$placeholders}) AND status = %s
                 GROUP BY form_id",
 				array_merge( $form_ids, array( $status ) )
 			);
 		} else {
 			$query = $wpdb->prepare(
-				"SELECT form_id, COUNT(*) as count FROM {$this->table} 
-                WHERE form_id IN ({$placeholders}) 
+				"SELECT form_id, COUNT(*) as count FROM {$this->table}
+                WHERE form_id IN ({$placeholders})
                 GROUP BY form_id",
 				$form_ids
 			);
 		}
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $query is the output of $wpdb->prepare() above.
 		$results = $wpdb->get_results( $query, ARRAY_A );
 		$counts  = array();
 
@@ -554,6 +573,7 @@ $cutoff_date
 	private function invalidate_count_cache( int $form_id ): void {
 		// Delete all cached counts that include this form
 		global $wpdb;
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $wpdb->options is a core table; value is a static pattern string.
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", '_transient_subtleforms:1.8.2:counts:%' ) );
 	}
 }
