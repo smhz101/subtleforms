@@ -174,8 +174,18 @@ final class SubmissionsRepository {
 		}
 
 		if ( isset( $data['status'] ) ) {
-			$update_data['status'] = $data['status'];
-			$format[]              = '%s';
+			if ( $data['status'] === 'none' ) {
+				// 'none' clears admin status override — set to NULL in DB
+				$update_data['status'] = null;
+			} else {
+				$update_data['status'] = $data['status'];
+			}
+			$format[] = '%s';
+		}
+
+		if ( isset( $data['is_read'] ) ) {
+			$update_data['is_read'] = intval( $data['is_read'] );
+			$format[]               = '%d';
 		}
 
 		if ( empty( $update_data ) ) {
@@ -249,13 +259,17 @@ final class SubmissionsRepository {
 		$start = \SubtleForms\Support\QueryInstrumentation::start( __METHOD__ );
 
 		$defaults = array(
-			'form_id' => null,
-			'status'  => null,
-			'search'  => null,
-			'limit'   => 20,
-			'offset'  => 0,
-			'orderby' => 'created_at',
-			'order'   => 'DESC',
+			'form_id'     => null,
+			'status'      => null,
+			'is_read'     => null,
+			'search'      => null,
+			'after'       => null,
+			'field_key'   => null,
+			'field_value' => null,
+			'limit'       => 20,
+			'offset'      => 0,
+			'orderby'     => 'created_at',
+			'order'       => 'DESC',
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -273,11 +287,33 @@ final class SubmissionsRepository {
 			$params[] = $args['status'];
 		}
 
+		if ( $args['is_read'] !== null ) {
+			$where[]  = 'is_read = %d';
+			$params[] = intval( $args['is_read'] );
+		}
+
 		if ( $args['search'] ) {
 			$searchTerm = '%' . $wpdb->esc_like( $args['search'] ) . '%';
 			$where[]    = '(id LIKE %s OR payload LIKE %s OR meta LIKE %s)';
 			$params[]   = $searchTerm;
 			$params[]   = $searchTerm;
+			$params[]   = $searchTerm;
+		}
+
+		if ( $args['after'] ) {
+			$where[]  = 'created_at >= %s';
+			$params[] = sanitize_text_field( $args['after'] ) . ' 00:00:00';
+		}
+
+		if ( $args['field_key'] && $args['field_value'] ) {
+			$field_key   = preg_replace( '/[^a-zA-Z0-9_\-]/', '', $args['field_key'] );
+			$field_value = '%' . $wpdb->esc_like( $args['field_value'] ) . '%';
+			// Use LIKE on payload JSON string for broad compatibility
+			$where[]  = 'payload LIKE %s';
+			$params[] = $field_value;
+		} elseif ( $args['field_value'] && ! $args['field_key'] ) {
+			$searchTerm = '%' . $wpdb->esc_like( $args['field_value'] ) . '%';
+			$where[]    = 'payload LIKE %s';
 			$params[]   = $searchTerm;
 		}
 
@@ -291,7 +327,7 @@ final class SubmissionsRepository {
 		       // Fetch all columns needed for admin list (including payload/meta)
 		       // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name, orderby and order are whitelisted.
 				       $sql = sprintf(
-					       "SELECT id, form_id, status, created_at, payload, meta, ip_address, user_agent FROM {$this->table} %s ORDER BY %s %s LIMIT %%d OFFSET %%d",
+			       "SELECT id, form_id, status, is_read, created_at, payload, meta, ip_address, user_agent FROM {$this->table} %s ORDER BY %s %s LIMIT %%d OFFSET %%d",
 					       $whereClause,
 					       $orderby,
 					       $order
@@ -321,9 +357,13 @@ final class SubmissionsRepository {
 		global $wpdb;
 
 		$defaults = array(
-			'form_id' => null,
-			'status'  => null,
-			'search'  => null,
+			'form_id'     => null,
+			'status'      => null,
+			'is_read'     => null,
+			'search'      => null,
+			'after'       => null,
+			'field_key'   => null,
+			'field_value' => null,
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -341,11 +381,27 @@ final class SubmissionsRepository {
 			$params[] = $args['status'];
 		}
 
+		if ( isset( $args['is_read'] ) && $args['is_read'] !== null ) {
+			$where[]  = 'is_read = %d';
+			$params[] = intval( $args['is_read'] );
+		}
+
 		if ( $args['search'] ) {
 			$searchTerm = '%' . $wpdb->esc_like( $args['search'] ) . '%';
 			$where[]    = '(id LIKE %s OR payload LIKE %s OR meta LIKE %s)';
 			$params[]   = $searchTerm;
 			$params[]   = $searchTerm;
+			$params[]   = $searchTerm;
+		}
+
+		if ( $args['after'] ) {
+			$where[]  = 'created_at >= %s';
+			$params[] = sanitize_text_field( $args['after'] ) . ' 00:00:00';
+		}
+
+		if ( $args['field_value'] ) {
+			$searchTerm = '%' . $wpdb->esc_like( $args['field_value'] ) . '%';
+			$where[]    = 'payload LIKE %s';
 			$params[]   = $searchTerm;
 		}
 

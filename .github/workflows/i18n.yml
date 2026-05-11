@@ -29,7 +29,7 @@ jobs:
    - name: Generate POT files
      run: |
       # Generate PHP pot
-      wp i18n make-pot . languages/subtleforms.pot --exclude="node_modules,vendor,____subtleforms.orig____" || true
+      wp i18n make-pot . languages/subtleforms.pot --exclude="node_modules,vendor,____subtleforms.orig____,build" || true
       # Generate JS pot (resources folder)
       wp i18n make-pot resources languages/subtleforms-js.pot --include="resources" || true
 
@@ -37,8 +37,13 @@ jobs:
      run: |
       set -euo pipefail
       git fetch --no-tags --depth=1 origin +refs/heads/main:refs/remotes/origin/main || true
-      git diff --exit-code -- languages/subtleforms.pot || (echo "languages/subtleforms.pot is out of date. Run 'wp i18n make-pot .' and commit the updated file." && exit 1)
-      git diff --exit-code -- languages/subtleforms-js.pot || (echo "languages/subtleforms-js.pot is out of date. Run 'wp i18n make-pot resources languages/subtleforms-js.pot' and commit the updated file." && exit 1)
+      # Strip POT-Creation-Date (changes every run) before comparing
+      git show HEAD:languages/subtleforms.pot | grep -v '^"POT-Creation-Date:' > /tmp/pot_committed.pot
+      grep -v '^"POT-Creation-Date:' languages/subtleforms.pot > /tmp/pot_generated.pot
+      diff /tmp/pot_committed.pot /tmp/pot_generated.pot || (echo "languages/subtleforms.pot is out of date. Run 'wp i18n make-pot .' and commit the updated file." && exit 1)
+      git show HEAD:languages/subtleforms-js.pot | grep -v '^"POT-Creation-Date:' > /tmp/pot_js_committed.pot
+      grep -v '^"POT-Creation-Date:' languages/subtleforms-js.pot > /tmp/pot_js_generated.pot
+      diff /tmp/pot_js_committed.pot /tmp/pot_js_generated.pot || (echo "languages/subtleforms-js.pot is out of date. Run 'wp i18n make-pot resources languages/subtleforms-js.pot' and commit the updated file." && exit 1)
 
    - name: Basic lint (spot check untranslated PHP strings)
      run: |

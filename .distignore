@@ -1,0 +1,109 @@
+# .distignore
+#
+# Files and directories excluded from the WordPress.org SVN release.
+# Used by: 10up/action-wordpress-plugin-deploy and manual rsync deploys.
+# Format: one path per line, relative to the plugin root.
+# Does NOT affect the local gulp dist ZIP (controlled by gulpfile.js).
+#
+# Rule of thumb: exclude anything that is not needed to run the plugin on a
+# live WordPress site. When uncertain, leave a comment.
+
+# ── Version control ──────────────────────────────────────────
+.git
+.gitignore
+.gitattributes
+
+# ── CI / CD ───────────────────────────────────────────────────
+.github
+.circleci
+
+# ── Editor / IDE ──────────────────────────────────────────────
+.vscode
+.phpstorm.meta.php
+.DS_Store
+
+# ── Node / JS build tooling ───────────────────────────────────
+node_modules
+package.json
+package-lock.json
+webpack.config.js
+babel.config.js
+.eslintrc.js
+.storybook
+storybook-static
+
+# ── PHP dev tooling ───────────────────────────────────────────
+composer.json
+composer.lock
+.phpcs.xml.dist
+phpunit.xml.dist
+.phpunit.result.cache
+phpunit.xml
+
+# ── Gulp / distribution tooling ───────────────────────────────
+gulpfile.js
+dist
+
+# ── Source files (compiled output in build/ ships instead) ────
+resources
+
+# ── Tests ─────────────────────────────────────────────────────
+tests
+playwright.config.js
+playwright-report
+test-results
+artifacts
+
+# ── Vendor: dev-only packages (keep autoload.php + vendor/composer/) ──
+# composer install --no-dev is run before deploy; these should not exist
+# in a --no-dev install, but list them defensively.
+vendor/bin
+vendor/phpunit
+vendor/sebastian
+vendor/myclabs
+vendor/doctrine
+vendor/nikic
+vendor/phar-io
+vendor/theseer
+vendor/yoast
+
+# ── Internal development docs ────────────────────────────────
+_plan
+CODEBASE.md
+AUDIT_SUMMARY.md
+FRONTEND_RENDERER_AUDIT.md
+AGENTS.md
+README.md
+CONTRIBUTING.md
+RELEASE.md
+
+# ── Scripts (dev utilities, not needed at runtime) ────────────
+scripts
+bin
+
+# ── SDK (JavaScript SDK for external integrations — uncertain) ─
+# The sdk/ directory contains a JS SDK and TypeScript types.
+# It is NOT included in the gulp dist ZIP. Excluded here too unless
+# you intend to ship SDK files with the free plugin.
+sdk
+
+# ── Extensions (scaffolding only, not runtime code yet) ────────
+# extensions/ contains a webhook extension skeleton.
+# Exclude until it ships a working extension.
+extensions
+
+# ── Examples (developer examples, not runtime) ───────────────
+examples
+
+# ── Docs (developer documentation) ──────────────────────────
+# docs/ contains developer-facing documentation.
+# Exclude from the WordPress.org release ZIP.
+# If user-facing documentation is added here later, reconsider.
+docs
+
+# ── Miscellaneous artifacts ───────────────────────────────────
+cookies.txt
+subtleforms-*.zip
+*.zip
+bundle-report.html
+bundle-stats.json

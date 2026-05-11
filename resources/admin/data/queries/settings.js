@@ -50,8 +50,8 @@ export function useLicense(options = {}) {
       // Pro plugin installed: prefer license data when present, fallback to subscription
       const hasLicenseData = license && license.status;
       const status    = hasLicenseData ? license.status : (subscription.connected ? 'active' : 'inactive');
-      const plan      = hasLicenseData ? (license.data?.plan || 'pro') : (subscription.plan || 'free');
-      const expiresAt = hasLicenseData ? (license.data?.expires_at || null) : (subscription.expiresAt || null);
+      const plan      = hasLicenseData ? (license.plan || 'pro') : (subscription.plan || 'free');
+      const expiresAt = hasLicenseData ? (license.expires_at || null) : (subscription.expiresAt || null);
 
       return {
         active: status === 'active' || status === 'valid' || status === 'grace_period',

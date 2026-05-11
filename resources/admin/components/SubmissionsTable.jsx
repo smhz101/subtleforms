@@ -1,6 +1,7 @@
 import {
   useState,
   useEffect,
+  useRef,
   forwardRef,
   useImperativeHandle,
 } from '@wordpress/element';
@@ -20,12 +21,24 @@ import DataTable from './DataTable';
 import { ConfirmModal } from '../modals';
 import { buildApiUrl } from '../utils/api';
 import { apiClient } from '../data';
+import { Icon } from './ui';
 import './SubmissionsTable.scss';
 
 const restNonce =
   window.subtleformsAdmin && window.subtleformsAdmin.restNonce
     ? window.subtleformsAdmin.restNonce
     : null;
+
+export const ALL_COLUMNS = ['id', 'form_title', 'status', 'browser', 'device', 'created_at', 'actions'];
+export const DEFAULT_VISIBLE = ['id', 'form_title', 'status', 'created_at', 'actions'];
+export const COLUMN_LABELS = {
+  id: __('ID', 'subtleforms'),
+  form_title: __('Form', 'subtleforms'),
+  status: __('Status', 'subtleforms'),
+  browser: __('Browser', 'subtleforms'),
+  device: __('Device', 'subtleforms'),
+  created_at: __('Submitted', 'subtleforms'),
+};
 
 const SubmissionsTable = forwardRef(
   (
@@ -36,10 +49,17 @@ const SubmissionsTable = forwardRef(
       searchTerm,
       statusFilter = 'all',
       dateRange = 'all',
+      fieldValue = '',
+      processingStatus = '',
+      visibleColumns,
     },
     ref
   ) => {
-    const [submissions, setSubmissions] = useState([]);
+    // Chunked prefetch: buffer accumulates rows; sliced client-side per page.
+    // Each API call fetches CHUNK_PAGES pages at once.
+    const CHUNK_PAGES = 5;
+    const [buffer, setBuffer] = useState([]);
+    const [pagesLoaded, setPagesLoaded] = useState(0);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(true);
     const [totalItems, setTotalItems] = useState(0);
@@ -49,26 +69,27 @@ const SubmissionsTable = forwardRef(
     const [sortDirection, setSortDirection] = useState('desc');
     const [deleteModal, setDeleteModal] = useState(null);
     const [selectedSubmissions, setSelectedSubmissions] = useState([]);
+    const isPrefetchingRef = useRef(false);
     const { createSuccessNotice, createErrorNotice } =
       useDispatch(noticesStore);
 
+    // Fresh load on any filter, sort, or perPage change
     useEffect(() => {
-      loadSubmissions();
-    }, [
-      formId,
-      statusFilter,
-      searchTerm,
-      dateRange,
-      currentPage,
-      perPage,
-      sortBy,
-      sortDirection,
-    ]);
+      loadFresh();
+    }, [formId, statusFilter, searchTerm, dateRange, fieldValue, processingStatus, sortBy, sortDirection, perPage]);
 
+    // Prefetch next batch when user reaches 3rd page of loaded window
     useEffect(() => {
-      // Reset to first page when filters change
-      setCurrentPage(1);
-    }, [statusFilter, searchTerm, dateRange]);
+      if (pagesLoaded === 0) return;
+      const totalPages = Math.ceil(totalItems / perPage);
+      if (
+        currentPage >= pagesLoaded - 2 &&
+        pagesLoaded < totalPages &&
+        !isPrefetchingRef.current
+      ) {
+        prefetchNextChunk();
+      }
+    }, [currentPage, pagesLoaded, totalItems, perPage]);
 
     const getDateRangeParams = (range) => {
       const now = new Date();
@@ -98,72 +119,92 @@ const SubmissionsTable = forwardRef(
       return startDate ? { after: startDate.toISOString().split('T')[0] } : {};
     };
 
-    const loadSubmissions = async () => {
+    const buildFilterParams = () => {
+      const params = new URLSearchParams({
+        orderby: sortBy,
+        order: sortDirection,
+      });
+      if (formId) params.append('form_id', formId);
+      if (statusFilter && statusFilter !== 'all') params.append('status', statusFilter);
+      if (searchTerm) params.append('search', searchTerm);
+      if (fieldValue) params.append('field_value', fieldValue);
+      if (processingStatus) params.append('processing_status', processingStatus);
+      const dateParams = getDateRangeParams(dateRange);
+      if (dateParams.after) params.append('after', dateParams.after);
+      return params;
+    };
+
+    // Fetch one batch: batchIndex 0 → rows 1..(CHUNK_PAGES*perPage), index 1 → next batch, etc.
+    const fetchBatch = async (batchIndex) => {
+      const batchSize = perPage * CHUNK_PAGES;
+      const params = buildFilterParams();
+      params.set('page', (batchIndex + 1).toString());
+      params.set('per_page', batchSize.toString());
+
+      const response = await fetch(buildApiUrl(`/submissions?${params}`), {
+        credentials: 'same-origin',
+        headers: { 'X-WP-Nonce': restNonce },
+      });
+      if (!response.ok) throw new Error('API request failed');
+
+      const data = await response.json();
+      let rows = [];
+      let total = 0;
+
+      if (data && Array.isArray(data.data)) {
+        rows = data.data;
+        total =
+          data.meta && typeof data.meta.total === 'number'
+            ? data.meta.total
+            : parseInt(response.headers.get('X-WP-Total') || '0');
+      } else if (data && data.submissions) {
+        rows = data.submissions;
+        total = data.total || 0;
+      } else if (Array.isArray(data)) {
+        rows = data;
+        total = parseInt(response.headers.get('X-WP-Total') || '0');
+      }
+      return { rows, total };
+    };
+
+    // Full reset + reload from page 1 (fresh filters/sort)
+    const loadFresh = async () => {
       setError(null);
       setLoading(true);
+      setCurrentPage(1);
 
       try {
-        const params = new URLSearchParams({
-          page: currentPage.toString(),
-          per_page: perPage.toString(),
-          orderby: sortBy,
-          order: sortDirection,
-        });
-
-        if (formId) {
-          params.append('form_id', formId);
-        }
-
-        if (statusFilter && statusFilter !== 'all') {
-          params.append('status', statusFilter);
-        }
-
-        if (searchTerm) {
-          params.append('search', searchTerm);
-        }
-
-        // Add date range filter
-        const dateParams = getDateRangeParams(dateRange);
-        if (dateParams.after) {
-          params.append('after', dateParams.after);
-        }
-
-        const response = await fetch(buildApiUrl(`/submissions?${params}`), {
-          credentials: 'same-origin',
-          headers: {
-            'X-WP-Nonce': restNonce,
-            'Content-Type': 'application/json',
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          const total = parseInt(response.headers.get('X-WP-Total') || '0');
-
-          // Patch: Use data.data for submissions array (API returns { data: [...], meta: {...} })
-          if (data && Array.isArray(data.data)) {
-            setSubmissions(data.data);
-            setTotalItems(
-              (data.meta && typeof data.meta.total === 'number') ? data.meta.total : total
-            );
-          } else if (data && data.submissions) {
-            setSubmissions(data.submissions);
-            setTotalItems(data.total || 0);
-          } else if (Array.isArray(data)) {
-            setSubmissions(data);
-            setTotalItems(total);
-          } else {
-            setError(__('Invalid response format', 'subtleforms'));
-          }
-        } else {
-          throw new Error('API request failed');
-        }
+        const { rows, total } = await fetchBatch(0);
+        setBuffer(rows);
+        setPagesLoaded(Math.ceil(rows.length / perPage) || 0);
+        setTotalItems(total);
       } catch (err) {
         setError(__('Failed to load submissions', 'subtleforms'));
-        setSubmissions([]);
+        setBuffer([]);
+        setPagesLoaded(0);
         setTotalItems(0);
       } finally {
         setLoading(false);
+      }
+    };
+
+    // Background prefetch: appends next batch to buffer
+    const prefetchNextChunk = async () => {
+      if (isPrefetchingRef.current) return;
+      isPrefetchingRef.current = true;
+
+      const batchIndex = Math.ceil(pagesLoaded / CHUNK_PAGES);
+      try {
+        const { rows, total } = await fetchBatch(batchIndex);
+        if (rows.length > 0) {
+          setBuffer((prev) => [...prev, ...rows]);
+          setPagesLoaded((prev) => prev + Math.ceil(rows.length / perPage));
+          setTotalItems(total);
+        }
+      } catch (err) {
+        console.warn('SubtleForms: prefetch failed', err);
+      } finally {
+        isPrefetchingRef.current = false;
       }
     };
 
@@ -171,14 +212,14 @@ const SubmissionsTable = forwardRef(
     useImperativeHandle(
       ref,
       () => ({
-        refreshData: loadSubmissions,
+        refreshData: loadFresh,
       }),
-      [loadSubmissions]
+      [loadFresh]
     );
 
     const handleDelete = async (submissionId) => {
       setDeleteModal(null);
-      setSubmissions((prev) => prev.filter((s) => s.id !== submissionId));
+      setBuffer((prev) => prev.filter((s) => s.id !== submissionId));
 
       try {
         await apiClient.delete(`/submissions/${submissionId}`);
@@ -186,7 +227,7 @@ const SubmissionsTable = forwardRef(
           type: 'snackbar',
         });
       } catch (err) {
-        loadSubmissions(); // Revert on failure
+        loadFresh(); // Revert on failure
         createErrorNotice(__('Failed to delete submission', 'subtleforms'), {
           type: 'snackbar',
         });
@@ -211,7 +252,7 @@ const SubmissionsTable = forwardRef(
         return;
       }
 
-      setSubmissions((prev) => prev.filter((s) => !ids.includes(s.id)));
+      setBuffer((prev) => prev.filter((s) => !ids.includes(s.id)));
       setSelectedSubmissions([]);
 
       let successCount = 0;
@@ -250,20 +291,45 @@ const SubmissionsTable = forwardRef(
           })(),
           { type: 'snackbar' }
         );
-        loadSubmissions(); // Reload to sync state
+        loadFresh(); // Reload to sync state
       }
     };
 
-    const handleBulkMarkStatus = async (ids, status) => {
-      setSubmissions((prev) =>
-        prev.map((s) => (ids.includes(s.id) ? { ...s, status } : s))
-      );
+    const handleBulkMarkStatus = async (ids, actionType) => {
+      // Map action type to the correct field update
+      const isReadActions = { read: 1, unread: 0 };
+      const adminStatusActions = ['spam', 'flagged', 'archived'];
+
+      let updatePayload;
+      if (actionType in isReadActions) {
+        updatePayload = { is_read: isReadActions[actionType] };
+        // Optimistic update
+        setBuffer((prev) =>
+          prev.map((s) =>
+            ids.includes(s.id) ? { ...s, is_read: isReadActions[actionType] } : s
+          )
+        );
+      } else if (adminStatusActions.includes(actionType)) {
+        updatePayload = { status: actionType };
+        setBuffer((prev) =>
+          prev.map((s) => (ids.includes(s.id) ? { ...s, status: actionType } : s))
+        );
+      } else if (actionType === 'restore') {
+        // Clear admin status override (unflag/unspam) — server sets status to null
+        updatePayload = { status: 'none' };
+        setBuffer((prev) =>
+          prev.map((s) => (ids.includes(s.id) ? { ...s, status: null } : s))
+        );
+      } else {
+        return;
+      }
+
       setSelectedSubmissions([]);
 
       let successCount = 0;
       for (const id of ids) {
         try {
-          await apiClient.put(`/submissions/${id}`, { status });
+          await apiClient.put(`/submissions/${id}`, updatePayload);
           successCount++;
         } catch (_err) {
           // individual failure counted below
@@ -292,14 +358,17 @@ const SubmissionsTable = forwardRef(
           ),
           { type: 'snackbar' }
         );
-        loadSubmissions(); // Reload to sync state
+        loadFresh(); // Reload to sync state
       }
     };
 
     const getRowClassName = (submission) => {
-      if (submission.status === 'unread') {
-        return 'sf-submissions-table__row--unread';
-      }
+      // Priority: spam/flagged > failed > payment_pending > unread
+      if (submission.status === 'spam') return 'sf-submissions-table__row--spam';
+      if (submission.status === 'flagged') return 'sf-submissions-table__row--flagged';
+      if (submission.status === 'failed') return 'sf-submissions-table__row--failed';
+      if (submission.status === 'payment_pending') return 'sf-submissions-table__row--payment-pending';
+      if (parseInt(submission.is_read, 10) === 0) return 'sf-submissions-table__row--unread';
       return '';
     };
 
@@ -373,13 +442,26 @@ const SubmissionsTable = forwardRef(
       return { browser, device };
     };
 
+    const formatAbsDate = (dateString) => {
+      try {
+        return new Intl.DateTimeFormat(undefined, {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(new Date(dateString));
+      } catch {
+        return dateString;
+      }
+    };
+
     // Define table columns
-    const columns = [
+    const allColumns = [
       {
         key: 'id',
         title: __('ID', 'subtleforms'),
         sortable: true,
-        width: '8%',
         render: (id) => <strong>#{id}</strong>,
       },
       ...(showFormColumn
@@ -387,7 +469,6 @@ const SubmissionsTable = forwardRef(
             {
               key: 'form_title',
               title: __('Form', 'subtleforms'),
-              width: '20%',
               render: (formTitle, submission) =>
                 formTitle || submission.form_id,
             },
@@ -397,49 +478,103 @@ const SubmissionsTable = forwardRef(
         key: 'status',
         title: __('Status', 'subtleforms'),
         sortable: true,
-        width: '10%',
-        render: (status) => (
-          <span
-            className={clsx(
-              'sf-submissions-table__status-badge',
-              status === 'unread'
-                ? 'sf-submissions-table__status-badge--unread'
-                : 'sf-submissions-table__status-badge--read'
-            )}>
-            {status === 'unread' && (
-              <span className='sf-submissions-table__status-badge-indicator'></span>
-            )}
-            {status === 'unread'
-              ? __('New', 'subtleforms')
-              : __('Read', 'subtleforms')}
-          </span>
-        ),
+        render: (status, submission) => {
+          const isUnread = parseInt(submission.is_read, 10) === 0;
+
+          // Null / legacy 'unread' status — show only the read indicator
+          if (!status || status === 'unread') {
+            return (
+              <span className='sf-submissions-table__status-cell'>
+                {isUnread && (
+                  <span
+                    className='sf-submissions-table__unread-dot'
+                    title={__('Unread', 'subtleforms')}
+                  />
+                )}
+                <span className='sf-submissions-table__status-badge sf-submissions-table__status-badge--processing'>
+                  {'—'}
+                </span>
+              </span>
+            );
+          }
+
+          // Admin-override statuses
+          if (status === 'spam' || status === 'flagged' || status === 'archived') {
+            const adminVariantMap = { spam: 'spam', flagged: 'flagged', archived: 'read' };
+            const adminLabelMap = {
+              spam: __('Spam', 'subtleforms'),
+              flagged: __('Flagged', 'subtleforms'),
+              archived: __('Archived', 'subtleforms'),
+            };
+            return (
+              <span
+                className={clsx(
+                  'sf-submissions-table__status-badge',
+                  `sf-submissions-table__status-badge--${adminVariantMap[status]}`
+                )}>
+                {adminLabelMap[status]}
+              </span>
+            );
+          }
+
+          // Pipeline statuses — show processing result + unread dot
+          const pipelineVariantMap = {
+            completed: 'completed',
+            failed: 'failed',
+            payment_pending: 'payment-pending',
+            processing: 'processing',
+            saved: 'processing',
+          };
+          const pipelineLabelMap = {
+            completed: __('Completed', 'subtleforms'),
+            failed: __('Failed', 'subtleforms'),
+            payment_pending: __('Awaiting Payment', 'subtleforms'),
+            processing: __('Processing', 'subtleforms'),
+            saved: __('Saved', 'subtleforms'),
+          };
+          const variant = pipelineVariantMap[status] || 'processing';
+          return (
+            <span className='sf-submissions-table__status-cell'>
+              {isUnread && (
+                <span className='sf-submissions-table__unread-dot' title={__('Unread', 'subtleforms')}></span>
+              )}
+              <span
+                className={clsx(
+                  'sf-submissions-table__status-badge',
+                  `sf-submissions-table__status-badge--${variant}`
+                )}>
+                {pipelineLabelMap[status] || status}
+              </span>
+            </span>
+          );
+        },
       },
       {
-        key: 'user_agent',
+        key: 'browser',
         title: __('Browser', 'subtleforms'),
-        width: '15%',
-        render: (userAgent) => getBrowserDevice(userAgent).browser,
+        render: (_, submission) =>
+          getBrowserDevice(submission.user_agent).browser,
       },
       {
-        key: 'user_agent',
+        key: 'device',
         title: __('Device', 'subtleforms'),
-        width: '10%',
-        render: (userAgent) => getBrowserDevice(userAgent).device,
+        render: (_, submission) =>
+          getBrowserDevice(submission.user_agent).device,
       },
       {
         key: 'created_at',
         title: __('Submitted', 'subtleforms'),
         sortable: true,
-        width: '20%',
         render: (createdAt) => (
-          <span title={createdAt}>{getRelativeTime(createdAt)}</span>
+          <span className='sf-sub-time'>
+            <span className='sf-sub-time__rel'>{getRelativeTime(createdAt)}</span>
+            <span className='sf-sub-time__abs'>{formatAbsDate(createdAt)}</span>
+          </span>
         ),
       },
       {
         key: 'actions',
         title: __('Actions', 'subtleforms'),
-        width: '15%',
         render: (_, submission) => (
           <div className='sf-submissions-table__actions'>
             <Button
@@ -450,6 +585,27 @@ const SubmissionsTable = forwardRef(
                 handleRowClick(submission);
               }}>
               {__('View', 'subtleforms')}
+            </Button>
+            <Button
+              isSmall
+              onClick={(e) => {
+                e.stopPropagation();
+                handleBulkMarkStatus(
+                  [submission.id],
+                  submission.status === 'flagged' ? 'restore' : 'flagged'
+                );
+              }}
+              title={
+                submission.status === 'flagged'
+                  ? __('Unflag submission', 'subtleforms')
+                  : __('Flag submission', 'subtleforms')
+              }
+              className={clsx(
+                'sf-submissions-table__flag-btn',
+                submission.status === 'flagged' &&
+                  'sf-submissions-table__flag-btn--active'
+              )}>
+              <Icon.AlertCircle size={13} />
             </Button>
             <Button
               isDestructive
@@ -465,15 +621,29 @@ const SubmissionsTable = forwardRef(
       },
     ];
 
+    // Filter to visible columns (always show actions)
+    const columns = allColumns.filter(
+      (col) =>
+        col.key === 'actions' ||
+        visibleColumns.includes(col.key) ||
+        (col.key === 'form_title' && showFormColumn && visibleColumns.includes('form_title'))
+    );
+
     if (error) {
       return <Notice status='error'>{error}</Notice>;
     }
+
+    // Slice the buffer for the current page (client-side pagination)
+    const displayedRows = buffer.slice(
+      (currentPage - 1) * perPage,
+      currentPage * perPage
+    );
 
     return (
       <div className='submissions-table'>
         <DataTable
           columns={columns}
-          data={submissions}
+          data={displayedRows}
           totalItems={totalItems}
           currentPage={currentPage}
           perPage={perPage}
@@ -497,6 +667,14 @@ const SubmissionsTable = forwardRef(
             {
               label: __('Mark as Unread', 'subtleforms'),
               onClick: (ids) => handleBulkMarkStatus(ids, 'unread'),
+            },
+            {
+              label: __('Mark as Spam', 'subtleforms'),
+              onClick: (ids) => handleBulkMarkStatus(ids, 'spam'),
+            },
+            {
+              label: __('Mark as Flagged', 'subtleforms'),
+              onClick: (ids) => handleBulkMarkStatus(ids, 'flagged'),
             },
             {
               label: __('Delete', 'subtleforms'),

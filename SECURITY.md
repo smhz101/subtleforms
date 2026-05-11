@@ -1,227 +1,110 @@
 # Security Policy
 
-## Supported Versions
+## Supported versions
 
-We actively support the following versions of SubtleForms with security updates:
+| Version | Security updates |
+| ------- | ---------------- |
+| 1.8.x   | ✓ Active         |
+| 1.7.x   | ✓ Active         |
+| 1.6.x   | ✗ End of life    |
+| < 1.6   | ✗ End of life    |
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.8.x   | :white_check_mark: |
-| 1.7.x   | :white_check_mark: |
-| 1.6.x   | :x:                |
-| < 1.6   | :x:                |
+## Reporting a vulnerability
 
-## Reporting a Vulnerability
+**DO NOT** report security vulnerabilities through public GitHub issues, pull requests, or the WordPress.org support forum.
 
-We take the security of SubtleForms seriously. If you believe you have found a security vulnerability, please report it to us responsibly.
+### Option 1 — GitHub private disclosure (preferred)
 
-### How to Report
+Use GitHub's built-in private vulnerability reporting:
 
-**DO NOT** report security vulnerabilities through public GitHub issues.
+**[Report a vulnerability →](../../security/advisories/new)**
 
-Instead, please report them via email to:
+This creates a private advisory visible only to maintainers. GitHub's security tooling notifies the team immediately.
 
-**security@subtleforms.com**
+### Option 2 — Email
 
-### What to Include
+Send a report to: **security@subtleforms.com**
 
-Please include the following information in your report:
+Encrypt your report using the PGP key published at [subtleforms.com/security.asc](https://subtleforms.com/security.asc) *(if available)*.
 
-1. **Description:** Clear description of the vulnerability
-2. **Impact:** What an attacker could achieve
-3. **Steps to Reproduce:** Detailed steps to reproduce the issue
-4. **Affected Versions:** Which versions are impacted
-5. **Proof of Concept:** Code or screenshots demonstrating the issue
-6. **Suggested Fix:** If you have ideas for a fix (optional)
+### What to include
 
-### Example Report
+1. **Description** — clear description of the vulnerability
+2. **Impact** — what an attacker could achieve
+3. **Steps to reproduce** — detailed and reproducible
+4. **Affected versions** — which versions are impacted
+5. **Proof of concept** — code or screenshots (no live exploits)
+6. **Suggested fix** — optional, but appreciated
 
-```
-Subject: [SECURITY] XSS Vulnerability in Form Builder
+## Response timeline
 
-Description:
-Cross-site scripting vulnerability in the form name field allows
-arbitrary JavaScript execution in the WordPress admin.
+| Stage | Target |
+|-------|--------|
+| Initial acknowledgement | 48 hours |
+| Severity assessment | 5 business days |
+| Fix development | Depends on severity (see below) |
+| Public disclosure | After patch is released and users have time to update |
 
-Impact:
-An authenticated user with form editing permissions could execute
-JavaScript in the context of other users' browsers.
+## Severity and response targets
 
-Steps to Reproduce:
-1. Create a new form
-2. Set form name to: <script>alert(1)</script>
-3. Save form
-4. Open form list page
-5. JavaScript executes
+| Severity | Examples | Patch target |
+|----------|---------|--------------|
+| **Critical** | RCE, SQL injection with data exfil, auth bypass | 24–72 hours |
+| **High** | Privilege escalation, significant data exposure | 7 days |
+| **Medium** | XSS, CSRF, limited information disclosure | Next minor version (2–4 weeks) |
+| **Low** | Edge-case info leakage, minor hardening | Next major version |
 
-Affected Versions:
-1.8.0 and earlier
-
-Proof of Concept:
-[Screenshot or code sample]
-
-Suggested Fix:
-Escape form name output using esc_html() or wp_kses()
-```
-
-## Response Timeline
-
-We aim to respond to security reports according to the following timeline:
-
-- **Initial Response:** Within 48 hours
-- **Confirmation:** Within 5 business days
-- **Fix Development:** Varies based on severity
-- **Public Disclosure:** After patch is released
-
-## Severity Levels
-
-We classify vulnerabilities using the following severity levels:
-
-### Critical
-
-- **Impact:** Complete system compromise
-- **Examples:** Remote code execution, SQL injection with data access
-- **Response:** Emergency patch within 24-72 hours
-
-### High
-
-- **Impact:** Significant data breach or privilege escalation
-- **Examples:** Authentication bypass, data exposure
-- **Response:** Patch within 7 days
-
-### Medium
-
-- **Impact:** Limited data exposure or functionality compromise
-- **Examples:** XSS, CSRF, information disclosure
-- **Response:** Patch in next minor version (typically 2-4 weeks)
-
-### Low
-
-- **Impact:** Minimal security risk
-- **Examples:** Minor information disclosure, edge case vulnerabilities
-- **Response:** Patch in next major version
-
-## Coordinated Disclosure
+## Coordinated disclosure
 
 We follow a coordinated disclosure policy:
 
-1. **Private Disclosure:** You report the vulnerability privately
-2. **Fix Development:** We develop and test a fix
-3. **Patch Release:** We release a security update
-4. **Public Disclosure:** We publish a security advisory
-5. **Credit:** We credit you in the advisory (if desired)
+1. You report privately.
+2. We confirm, assess severity, and develop a fix.
+3. We release the patched version.
+4. We publish a security advisory crediting you (if desired).
+5. We aim to disclose within 90 days of your report.
 
-### Disclosure Timeline
+If you intend to publish independently, please give us at least 90 days from initial report.
 
-- We aim to patch critical vulnerabilities within 90 days
-- We will work with you to agree on a disclosure date
-- If you plan to publish independently, please give us at least 90 days
+## Security features
 
-## Security Updates
+SubtleForms includes:
 
-Security updates are released as:
+- **Nonce verification** — all REST API and AJAX requests verified
+- **Capability checks** — `manage_options` required for all admin actions
+- **Input sanitization** — deep array and JSON sanitization throughout
+- **Output escaping** — context-aware escaping (`esc_html`, `esc_attr`, `esc_url`, etc.)
+- **SQL injection prevention** — `$wpdb->prepare()` for all dynamic queries
+- **Rate limiting** — IP-based rate limiting on public submission endpoint
+- **Spam protection** — honeypot, timing validation, CAPTCHA support
+- **CSRF protection** — nonce verification on all state-changing endpoints
+- **Direct file access guard** — `ABSPATH` check in all PHP entry points
 
-- **Minor Versions:** For high/critical vulnerabilities (e.g., 1.8.0 → 1.8.1)
-- **Major Versions:** For lower severity issues bundled with other changes
+## Scope
 
-### Applying Updates
+In scope for responsible disclosure:
+- Authentication and authorization bypasses
+- SQL injection
+- Cross-site scripting (XSS) in admin or frontend
+- CSRF on privileged operations
+- Remote code execution
+- Sensitive data exposure (submission data, settings, keys)
+- Privilege escalation
 
-We strongly recommend:
+Out of scope:
+- Spam submissions to public forms (use CAPTCHA and rate limiting settings)
+- Vulnerabilities in WordPress core, themes, or other plugins
+- Denial-of-service attacks
+- Issues requiring physical access to the server
 
-1. **Enable automatic updates** for minor versions
-2. **Subscribe to security notifications** (coming soon)
-3. **Test updates** in a staging environment first
-4. **Keep WordPress core** updated as well
+## Bug bounty
 
-## Security Best Practices
+We do not currently have a formal bug bounty program. We acknowledge responsible disclosures in our release notes and maintain a hall of fame.
 
-### For Users
+## Hall of fame
 
-- Keep SubtleForms updated to the latest version
-- Use strong WordPress admin passwords
-- Limit form editing permissions to trusted users
-- Use HTTPS for your WordPress site
-- Keep WordPress core and other plugins updated
-- Regular backups of your WordPress database
-
-### For Developers
-
-- Review the [Secure Coding Guidelines](docs/secure-coding.md)
-- Sanitize all user input
-- Escape all output
-- Use nonces for form submissions
-- Check user capabilities before actions
-- Validate file uploads carefully
-- Use prepared SQL statements
-- Never trust client-side data
-
-## Known Vulnerabilities
-
-We maintain a public list of disclosed vulnerabilities:
-
-[https://github.com/subtleforms/security-advisories](https://github.com/subtleforms/security-advisories)
-
-### Recent Advisories
-
-None at this time.
-
-## Security Features
-
-SubtleForms includes the following security features:
-
-- **Nonce Verification:** All AJAX requests verified
-- **Capability Checks:** Actions restricted by user permissions
-- **Input Sanitization:** All user input sanitized
-- **Output Escaping:** All output escaped for context
-- **SQL Injection Prevention:** Prepared statements used
-- **File Upload Validation:** File types and sizes checked
-- **CSRF Protection:** Cross-site request forgery prevention
-- **XSS Prevention:** Script injection prevented
-
-## Third-Party Dependencies
-
-SubtleForms uses the following third-party libraries:
-
-- React (MIT License)
-- TanStack Query (MIT License)
-- WordPress APIs (GPLv2)
-
-We monitor these dependencies for security vulnerabilities and update them promptly.
-
-## Bug Bounty Program
-
-We currently do not have a bug bounty program, but we:
-
-- Acknowledge security researchers in our release notes
-- Provide CVE credits when applicable
-- Maintain a hall of fame for responsible disclosures
-
-## Hall of Fame
-
-Thank you to these security researchers for responsible disclosure:
-
-*(No entries yet)*
-
-## Security Audit
-
-SubtleForms has not yet undergone a third-party security audit. If you are interested in sponsoring an audit, please contact us.
-
-## Compliance
-
-SubtleForms is designed with the following compliance considerations:
-
-- **GDPR:** Personal data handling follows privacy regulations
-- **WordPress.org Guidelines:** Complies with plugin repository rules
-- **OWASP Top 10:** Mitigations for common web vulnerabilities
+*(No entries yet — be the first!)*
 
 ## Questions?
 
-For general security questions (non-vulnerabilities), you can:
-
-- Open a GitHub Discussion
-- Email: security@subtleforms.com (for security-related questions only)
-- Review our [Security Documentation](docs/security.md)
-
-For immediate security concerns, always email security@subtleforms.com.
-
-Thank you for helping keep SubtleForms secure!
+For general security questions (non-vulnerability), open a GitHub Discussion. For urgent security concerns, always use email: **security@subtleforms.com**.

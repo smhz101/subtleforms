@@ -133,9 +133,10 @@ final class FormsRepository {
 		$order           = strtoupper( $args['order'] ) === 'ASC' ? 'ASC' : 'DESC';
 
 		// Phase B3: Only fetch needed columns for list views (skip large config JSON).
-		// Extract form_type and template_id from draft_schema JSON without loading the full blob.
+		// Extract form_type and template_id: prefer draft_schema (in-progress edits) then fall back
+		// to config (published schema). draft_schema is NULL until a builder session saves a draft.
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name, orderby and order are whitelisted.
-		$sql = "SELECT id, title, status, created_at, updated_at, JSON_UNQUOTE(JSON_EXTRACT(draft_schema, '$.metadata.type')) AS form_type, JSON_UNQUOTE(JSON_EXTRACT(draft_schema, '$.metadata.template')) AS template_id FROM {$this->table}{$where_clause} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d";
+		$sql = "SELECT id, title, status, created_at, updated_at, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(draft_schema, '$.metadata.type')), JSON_UNQUOTE(JSON_EXTRACT(config, '$.metadata.type'))) AS form_type, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(draft_schema, '$.metadata.template')), JSON_UNQUOTE(JSON_EXTRACT(config, '$.metadata.template'))) AS template_id FROM {$this->table}{$where_clause} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d";
 
 		$params[] = intval( $args['limit'] );
 		$params[] = intval( $args['offset'] );

@@ -82,8 +82,9 @@ class Schemas {
 
 			// Submission Update (admin)
 			self::SUBMISSION_UPDATE => array(
-				'__allow' => array( 'status', 'notes' ),
-				'status'  => 'optional|in:read,unread,archived,spam',
+				'__allow' => array( 'status', 'is_read', 'notes' ),
+				'status'  => 'optional|in:spam,flagged,archived,none',
+				'is_read' => 'optional|bool',
 				'notes'   => 'optional|string|max:500',
 			),
 

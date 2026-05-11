@@ -12,11 +12,7 @@
 	margin-bottom: 1rem;
 }
 
-// Ensure snackbars never inherit full width from parent containers
+// Ensure snackbars are compact and don't overflow the viewport
 .components-snackbar {
-	max-width: 600px !important;
-
-	@media (min-width: 600px) {
-		width: fit-content !important;
-	}
+	max-width: 380px !important;
 }

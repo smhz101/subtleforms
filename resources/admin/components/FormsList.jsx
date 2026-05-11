@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from '@wordpress/element';
+import { useState, useEffect, useRef } from '@wordpress/element';
 import {
   Spinner,
   Button,
@@ -22,6 +22,17 @@ import { PRO_TEMPLATE_IDS } from '../utils/proFeatureDetector';
 import { buildApiUrl } from '../utils/api';
 import { logger, perfMarkers } from '../diagnostics';
 import './FormsList.scss';
+
+export const ALL_FORM_COLUMNS = ['title', 'form_type', 'status', 'id', 'submission_count', 'updated_at', 'actions'];
+export const DEFAULT_FORM_VISIBLE = ['title', 'form_type', 'status', 'id', 'submission_count', 'updated_at', 'actions'];
+export const FORM_COLUMN_LABELS = {
+  title: __('Form Name', 'subtleforms'),
+  form_type: __('Type', 'subtleforms'),
+  status: __('Status', 'subtleforms'),
+  id: __('Shortcode', 'subtleforms'),
+  submission_count: __('Entries', 'subtleforms'),
+  updated_at: __('Last Updated', 'subtleforms'),
+};
 
 const restBase =
   window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
@@ -55,8 +66,13 @@ export default function FormsList({
   onBuild,
   searchTerm,
   statusFilter = 'all',
+  visibleColumns = DEFAULT_FORM_VISIBLE,
 }) {
-  const [forms, setForms] = useState([]);
+  // Chunked prefetch: buffer accumulates rows; sliced client-side per page.
+  // Each API call fetches CHUNK_PAGES pages at once.
+  const CHUNK_PAGES = 5;
+  const [buffer, setBuffer] = useState([]);
+  const [pagesLoaded, setPagesLoaded] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [totalItems, setTotalItems] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
@@ -67,6 +83,7 @@ export default function FormsList({
   const [statusModal, setStatusModal] = useState(null);
   const [statusValue, setStatusValue] = useState('draft');
   const [selectedForms, setSelectedForms] = useState([]);
+  const isPrefetchingRef = useRef(false);
   const { createSuccessNotice, createErrorNotice } = useDispatch(noticesStore);
 
   const handleCopyShortcode = (shortcode) => {
@@ -106,8 +123,100 @@ export default function FormsList({
 
   const handlePerPageChange = (newPerPage) => {
     setPerPage(parseInt(newPerPage));
-    setCurrentPage(1); // Reset to first page
+    setCurrentPage(1);
   };
+
+  const buildFilterParams = () => {
+    const params = new URLSearchParams({
+      orderby: sortBy,
+      order: sortDirection,
+    });
+    if (searchTerm) params.append('search', searchTerm);
+    if (statusFilter && statusFilter !== 'all') params.append('status', statusFilter);
+    return params;
+  };
+
+  // Fetch one batch: batchIndex 0 → rows 1..(CHUNK_PAGES*perPage), index 1 → next batch, etc.
+  const fetchBatch = async (batchIndex) => {
+    const batchSize = perPage * CHUNK_PAGES;
+    const params = buildFilterParams();
+    params.set('page', (batchIndex + 1).toString());
+    params.set('per_page', batchSize.toString());
+
+    const response = await fetch(buildApiUrl(`/forms?${params}`), {
+      credentials: 'same-origin',
+      headers: { 'X-WP-Nonce': restNonce },
+    });
+    if (!response.ok) throw new Error(`API request failed: ${response.status}`);
+
+    const data = await response.json();
+    const rows = Array.isArray(data.data) ? data.data : [];
+    const total =
+      data.meta && typeof data.meta.total === 'number'
+        ? data.meta.total
+        : parseInt(response.headers.get('X-WP-Total') || '0');
+    return { rows, total };
+  };
+
+  // Full reset + reload from page 1 (fresh filters/sort)
+  const loadFresh = async () => {
+    setIsLoading(true);
+    setCurrentPage(1);
+    try {
+      const { rows, total } = await fetchBatch(0);
+      setBuffer(rows);
+      setPagesLoaded(Math.ceil(rows.length / perPage) || 0);
+      setTotalItems(total);
+    } catch (err) {
+      console.error('FormsList fetch error:', err);
+      createErrorNotice(
+        err.message || __('Failed to load forms', 'subtleforms'),
+        { type: 'snackbar' }
+      );
+      setBuffer([]);
+      setPagesLoaded(0);
+      setTotalItems(0);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Background prefetch: appends next batch to buffer
+  const prefetchNextChunk = async () => {
+    if (isPrefetchingRef.current) return;
+    isPrefetchingRef.current = true;
+    const batchIndex = Math.ceil(pagesLoaded / CHUNK_PAGES);
+    try {
+      const { rows, total } = await fetchBatch(batchIndex);
+      if (rows.length > 0) {
+        setBuffer((prev) => [...prev, ...rows]);
+        setPagesLoaded((prev) => prev + Math.ceil(rows.length / perPage));
+        setTotalItems(total);
+      }
+    } catch (err) {
+      console.warn('SubtleForms: forms prefetch failed', err);
+    } finally {
+      isPrefetchingRef.current = false;
+    }
+  };
+
+  // Fresh load on any filter, sort, or perPage change
+  useEffect(() => {
+    loadFresh();
+  }, [statusFilter, searchTerm, sortBy, sortDirection, perPage]);
+
+  // Prefetch next batch when user reaches 3rd page of loaded window
+  useEffect(() => {
+    if (pagesLoaded === 0) return;
+    const totalPages = Math.ceil(totalItems / perPage);
+    if (
+      currentPage >= pagesLoaded - 2 &&
+      pagesLoaded < totalPages &&
+      !isPrefetchingRef.current
+    ) {
+      prefetchNextChunk();
+    }
+  }, [currentPage, pagesLoaded, totalItems, perPage]);
 
   // Define table columns
   const columns = [
@@ -115,7 +224,6 @@ export default function FormsList({
       key: 'title',
       title: __('Form Name', 'subtleforms'),
       sortable: true,
-      width: '25%',
       render: (title, form) => (
         <div className='sf-form-name'>
           <span className='sf-form-name__title'>{title}</span>
@@ -135,7 +243,6 @@ export default function FormsList({
     {
       key: 'form_type',
       title: __('Type', 'subtleforms'),
-      width: '13%',
       render: (_, form) => {
         // form_type is extracted from schema on the server; fall back to metadata.type for
         // any cached/legacy responses, then default to 'regular'.
@@ -176,7 +283,6 @@ export default function FormsList({
       key: 'status',
       title: __('Status', 'subtleforms'),
       sortable: true,
-      width: '12%',
       render: (status) => {
         const statusConfig = {
           draft: {
@@ -210,7 +316,6 @@ export default function FormsList({
     {
       key: 'id',
       title: __('Shortcode', 'subtleforms'),
-      width: '20%',
       render: (id, form) => {
         const shortcode = `[subtleforms id="${id}"]`;
         return (
@@ -231,7 +336,6 @@ export default function FormsList({
     {
       key: 'submission_count',
       title: __('Entries', 'subtleforms'),
-      width: '12%',
       render: (submissionCount, form) => {
         const unreadCount = form.unread_count || 0;
         const hasUnread = unreadCount > 0;
@@ -271,7 +375,6 @@ export default function FormsList({
       key: 'updated_at',
       title: __('Last Updated', 'subtleforms'),
       sortable: true,
-      width: '13%',
       render: (updatedAt) => {
         const date = new Date(updatedAt);
         const now = new Date();
@@ -297,8 +400,7 @@ export default function FormsList({
     },
     {
       key: 'actions',
-      title: __('Actions', 'subtleforms'),
-      width: '10%',
+      title: null,
       render: (_, form) => (
         <div className='subtleforms-row-actions'>
           <button
@@ -325,50 +427,42 @@ export default function FormsList({
             renderContent={({ onClose }) => (
               <MenuGroup>
                 <MenuItem
+                  icon={<Icon.CheckCircle size={16} />}
                   onClick={(e) => {
                     if (e && e.stopPropagation) e.stopPropagation();
                     setStatusModal(form.id);
                     setStatusValue(form.status);
                     onClose();
                   }}>
-                  <div className='sf-menu-item'>
-                    <Icon.CheckCircle />
-                    {__('Change status', 'subtleforms')}
-                  </div>
+                  {__('Change status', 'subtleforms')}
                 </MenuItem>
                 <MenuItem
+                  icon={<Icon.Copy size={16} />}
                   onClick={(e) => {
                     if (e && e.stopPropagation) e.stopPropagation();
                     handleDuplicate(form.id);
                     onClose();
                   }}>
-                  <div className='sf-menu-item'>
-                    <Icon.Copy />
-                    {__('Duplicate', 'subtleforms')}
-                  </div>
+                  {__('Duplicate', 'subtleforms')}
                 </MenuItem>
                 <MenuItem
+                  icon={<Icon.Eye size={16} />}
                   onClick={(e) => {
                     if (e && e.stopPropagation) e.stopPropagation();
                     window.location.href = `admin.php?page=subtleforms-submissions&form_id=${form.id}`;
                     onClose();
                   }}>
-                  <div className='sf-menu-item'>
-                    <Icon.Eye />
-                    {__('View submissions', 'subtleforms')}
-                  </div>
+                  {__('View submissions', 'subtleforms')}
                 </MenuItem>
                 <MenuItem
+                  icon={<Icon.Delete size={16} />}
                   onClick={(e) => {
                     if (e && e.stopPropagation) e.stopPropagation();
                     setDeleteModal(form.id);
                     onClose();
                   }}
                   isDestructive>
-                  <div className='sf-menu-item sf-menu-item--danger'>
-                    <Icon.Delete />
-                    {__('Delete', 'subtleforms')}
-                  </div>
+                  {__('Delete', 'subtleforms')}
                 </MenuItem>
               </MenuGroup>
             )}
@@ -378,99 +472,18 @@ export default function FormsList({
     },
   ];
 
-  const fetchForms = useCallback(async () => {
-    perfMarkers.start('fetch-forms');
-    setIsLoading(true);
-    try {
-      const params = new URLSearchParams({
-        page: currentPage.toString(),
-        per_page: perPage.toString(),
-        orderby: sortBy,
-        order: sortDirection,
-      });
-
-      if (searchTerm) {
-        params.append('search', searchTerm);
-      }
-
-      if (statusFilter && statusFilter !== 'all') {
-        params.append('status', statusFilter);
-      }
-
-      const response = await fetch(buildApiUrl(`/forms?${params}`), {
-        credentials: 'same-origin',
-        headers: {
-          'X-WP-Nonce': restNonce,
-          'Content-Type': 'application/json',
-        },
-      });
-
-      const duration = perfMarkers.end('fetch-forms');
-      logger.slow('fetch-forms', duration, 2000);
-
-      if (response.ok) {
-        const data = await response.json();
-        const total = parseInt(response.headers.get('X-WP-Total') || '0');
-
-        // Patch: Use data.data for forms array (API returns { data: [...], meta: {...} })
-        setForms(Array.isArray(data.data) ? data.data : []);
-        setTotalItems(
-          (data.meta && typeof data.meta.total === 'number') ? data.meta.total : total
-        );
-      } else {
-        const errorText = await response.text();
-        console.error('API Error:', response.status, errorText);
-        logger.error('fetch-forms-failed', new Error(`Status ${response.status}`), {
-          statusFilter,
-          searchTerm,
-        });
-        throw new Error(`API request failed: ${response.status}`);
-      }
-    } catch (err) {
-      console.error('FormsList fetch error:', err);
-      logger.error('fetch-forms-error', err, { statusFilter, searchTerm });
-      createErrorNotice(
-        err.message || __('Failed to load forms', 'subtleforms'),
-        { type: 'snackbar' }
-      );
-      setForms([]);
-      setTotalItems(0);
-    } finally {
-      setIsLoading(false);
-    }
-  }, [
-    currentPage,
-    perPage,
-    sortBy,
-    sortDirection,
-    searchTerm,
-    statusFilter,
-    createErrorNotice,
-  ]);
-
   useEffect(() => {
-    fetchForms();
-  }, [fetchForms]);
-
-  useEffect(() => {
-    // Reset to first page when search or status filter changes
-    if (searchTerm !== undefined || statusFilter !== undefined) {
-      setCurrentPage(1);
-    }
-  }, [searchTerm, statusFilter]);
-
-  useEffect(() => {
-    const handleFormSaved = () => fetchForms();
+    const handleFormSaved = () => loadFresh();
     window.addEventListener('subtleforms:form-saved', handleFormSaved);
     return () =>
       window.removeEventListener('subtleforms:form-saved', handleFormSaved);
-  }, [fetchForms]);
+  }, []);
 
   const handleDuplicate = async (formId) => {
-    const form = forms.find((f) => f.id === formId);
+    const form = buffer.find((f) => f.id === formId);
     if (!form) return;
 
-    setForms((prev) => [
+    setBuffer((prev) => [
       {
         id: `temp-${Date.now()}`,
         title: `${form.title} (Copy)`,
@@ -520,9 +533,9 @@ export default function FormsList({
       createSuccessNotice(__('Form duplicated', 'subtleforms'), {
         type: 'snackbar',
       });
-      fetchForms();
+      loadFresh();
     } else {
-      setForms((prev) => prev.filter((f) => !f._temp));
+      setBuffer((prev) => prev.filter((f) => !f._temp));
       createErrorNotice(__('Failed to duplicate form', 'subtleforms'), {
         type: 'snackbar',
       });
@@ -531,7 +544,7 @@ export default function FormsList({
 
   const handleDelete = async (formId) => {
     setDeleteModal(null);
-    setForms((prev) => prev.filter((f) => f.id !== formId));
+    setBuffer((prev) => prev.filter((f) => f.id !== formId));
 
     const { ok } = await apiRequest(`/forms/${formId}`, { method: 'DELETE' });
 
@@ -543,7 +556,7 @@ export default function FormsList({
       createErrorNotice(__('Failed to delete form', 'subtleforms'), {
         type: 'snackbar',
       });
-      fetchForms();
+      loadFresh();
     }
   };
 
@@ -552,9 +565,9 @@ export default function FormsList({
 
     setStatusModal(null);
     const formId = statusModal;
-    const oldForms = [...forms];
+    const oldBuffer = [...buffer];
 
-    setForms((prev) =>
+    setBuffer((prev) =>
       prev.map((f) => (f.id === formId ? { ...f, status: statusValue } : f))
     );
 
@@ -568,7 +581,7 @@ export default function FormsList({
         type: 'snackbar',
       });
     } else {
-      setForms(oldForms);
+      setBuffer(oldBuffer);
       createErrorNotice(__('Failed to update status', 'subtleforms'), {
         type: 'snackbar',
       });
@@ -590,8 +603,8 @@ export default function FormsList({
       return;
     }
 
-    const oldForms = [...forms];
-    setForms((prev) => prev.filter((f) => !ids.includes(f.id)));
+    const oldBuffer = [...buffer];
+    setBuffer((prev) => prev.filter((f) => !ids.includes(f.id)));
     setSelectedForms([]);
 
     let successCount = 0;
@@ -626,13 +639,13 @@ export default function FormsList({
         })(),
         { type: 'snackbar' }
       );
-      fetchForms(); // Reload to sync state
+      loadFresh(); // Reload to sync state
     }
   };
 
   const handleBulkStatusChange = async (ids, status) => {
-    const oldForms = [...forms];
-    setForms((prev) =>
+    const oldBuffer = [...buffer];
+    setBuffer((prev) =>
       prev.map((f) => (ids.includes(f.id) ? { ...f, status } : f))
     );
     setSelectedForms([]);
@@ -671,13 +684,25 @@ export default function FormsList({
         })(),
         { type: 'snackbar' }
       );
-      fetchForms(); // Reload to sync state
+      loadFresh(); // Reload to sync state
     }
   };
 
+  // Filter allColumns to visible columns (always show actions)
+  const allColumns = columns;
+  const displayColumns = allColumns.filter(
+    (col) => col.key === 'actions' || visibleColumns.includes(col.key)
+  );
+
+  // Slice the buffer for the current page (client-side pagination)
+  const displayedRows = buffer.slice(
+    (currentPage - 1) * perPage,
+    currentPage * perPage
+  );
+
   return (
     <div className='sf-forms-list'>
-      {forms.length > 0 && forms.length <= 3 && (
+      {buffer.length > 0 && buffer.length <= 3 && (
         <ContextualTip 
           id='forms-list-shortcuts' 
           variant='info'
@@ -687,8 +712,8 @@ export default function FormsList({
       )}
       
       <DataTable
-        columns={columns}
-        data={forms}
+        columns={displayColumns}
+        data={displayedRows}
         totalItems={totalItems}
         currentPage={currentPage}
         perPage={perPage}
@@ -760,7 +785,7 @@ export default function FormsList({
         onClose={() => setDeleteModal(null)}
         title={__('Delete Form', 'subtleforms')}
         message={(() => {
-          const form = forms.find((f) => f.id === deleteModal);
+          const form = buffer.find((f) => f.id === deleteModal);
           const count = form?.submission_count || 0;
           return count > 0
             ? sprintf(

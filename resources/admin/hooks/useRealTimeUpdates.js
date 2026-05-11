@@ -23,11 +23,11 @@ export function useRealTimeUpdates(options = {}) {
   const [isPolling, setIsPolling] = useState(false);
   const intervalRef = useRef(null);
   const lastUnreadCountRef = useRef(0);
-  
+
   // Store callbacks in refs to prevent dependency changes
   const onUnreadCountChangeRef = useRef(onUnreadCountChange);
   const onSubmissionsUpdateRef = useRef(onSubmissionsUpdate);
-  
+
   // Update refs when callbacks change
   useEffect(() => {
     onUnreadCountChangeRef.current = onUnreadCountChange;
@@ -55,9 +55,9 @@ export function useRealTimeUpdates(options = {}) {
           onUnreadCountChangeRef.current(newCount, previousCount);
         }
 
-        // If count decreased, it might mean submissions were read
-        // Trigger submissions update to refresh the list
-        if (newCount < previousCount && onSubmissionsUpdateRef.current) {
+        // Refresh submissions list on any count change:
+        // increase = new submission arrived, decrease = submission was read/deleted
+        if (onSubmissionsUpdateRef.current) {
           onSubmissionsUpdateRef.current();
         }
       }

@@ -5,6 +5,7 @@ import {
 } from '@dnd-kit/sortable';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
+import Icon from '../ui/Icon';
 import InsertFieldButton from './InsertFieldButton';
 import './ColumnDropZone.scss';
 
@@ -70,42 +71,20 @@ export default function ColumnDropZone({
       {items.length === 0 && (
         compact ? (
           <div className='sf-column-dropzone__empty sf-column-dropzone__empty--compact'>
-            <svg
+            <Icon.ArrowDown
+              size={18}
               className='sf-column-dropzone__empty-icon'
-              xmlns='http://www.w3.org/2000/svg'
-              width='18'
-              height='18'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='1.5'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              aria-hidden='true'>
-              <path d='M12 5v14M5 12l7 7 7-7'/>
-            </svg>
+              aria-hidden='true'
+            />
             <span>{__('Drop a field here', 'subtleforms')}</span>
           </div>
         ) : (
           <div className='sf-column-dropzone__empty'>
-            <svg
+            <Icon.LayoutGrid
+              size={28}
               className='sf-column-dropzone__empty-icon'
-              xmlns='http://www.w3.org/2000/svg'
-              width='28'
-              height='28'
-              viewBox='0 0 24 24'
-              fill='none'
-              stroke='currentColor'
-              strokeWidth='1.5'
-              strokeLinecap='round'
-              strokeLinejoin='round'
-              aria-hidden='true'>
-              <rect x='3' y='3' width='18' height='4' rx='1'/>
-              <rect x='3' y='10' width='18' height='4' rx='1'/>
-              <rect x='3' y='17' width='11' height='4' rx='1'/>
-              <path d='M18 19l2-2-2-2'/>
-              <path d='M16 17h4'/>
-            </svg>
+              aria-hidden='true'
+            />
             <span>{__('Drag fields here or click \u002b to add', 'subtleforms')}</span>
           </div>
         )

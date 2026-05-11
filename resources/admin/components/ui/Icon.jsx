@@ -24,6 +24,7 @@ import {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronsUpDown,
   Eye,
   HelpCircle,
   Zap,
@@ -79,6 +80,9 @@ import {
   Star,
   Sliders,
   LayoutGrid,
+  ArrowDown,
+  ShieldCheck,
+  Loader2,
 } from 'lucide-react';
 
 /**
@@ -114,6 +118,8 @@ const Icon = {
   ChevronDown,
   ChevronLeft,
   ChevronRight,
+  ChevronsUpDown,
+  SortIcon: ChevronsUpDown,
 
   // UI Elements
   Eye,
@@ -122,6 +128,8 @@ const Icon = {
   More: MoreVertical,
   Loader,
   Loading: Loader,
+  Spinner: Loader2,
+  ArrowDown,
   Square,
 
   // Status & Feedback
@@ -129,6 +137,7 @@ const Icon = {
   AlertCircle,
   HelpCircle,
   Help: HelpCircle,
+  ShieldCheck,
 
   // Content Types
   FileText,

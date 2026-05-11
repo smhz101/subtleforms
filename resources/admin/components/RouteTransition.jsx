@@ -6,6 +6,7 @@
  */
 
 import { __ } from '@wordpress/i18n';
+import Icon from './ui/Icon';
 import './RouteTransition.scss';
 
 export function RouteLoadingFallback() {
@@ -14,19 +15,7 @@ export function RouteLoadingFallback() {
 			<div className="sf-route-transition__container">
 				{/* Animated Logo/Spinner */}
 				<div className="sf-route-transition__spinner">
-					<svg width="48" height="48" viewBox="0 0 24 24" fill="none">
-						<circle
-							cx="12"
-							cy="12"
-							r="10"
-							stroke="currentColor"
-							strokeWidth="2"
-							strokeLinecap="round"
-							strokeDasharray="60"
-							strokeDashoffset="30"
-							className="sf-route-transition__spinner-circle"
-						/>
-					</svg>
+					<Icon.Spinner size={48} className="sf-route-transition__spinner-circle" />
 				</div>
 
 				{/* Loading Text */}

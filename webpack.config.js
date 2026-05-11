@@ -100,14 +100,14 @@ module.exports = {
 		}),
 		...(shouldAnalyze
 			? [
-					new BundleAnalyzerPlugin({
-						analyzerMode: 'static',
-						reportFilename: '../bundle-report.html',
-						openAnalyzer: true,
-						generateStatsFile: true,
-						statsFilename: '../bundle-stats.json',
-					}),
-			  ]
+				new BundleAnalyzerPlugin({
+					analyzerMode: 'static',
+					reportFilename: '../bundle-report.html',
+					openAnalyzer: true,
+					generateStatsFile: true,
+					statsFilename: '../bundle-stats.json',
+				}),
+			]
 			: []),
 	],
 };
