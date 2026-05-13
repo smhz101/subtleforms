@@ -55,6 +55,9 @@ function copyFilesToTemp() {
       'subtleforms.php',
       'license.txt',
       'readme.html',
+      'readme.txt',
+      'uninstall.php',
+      'composer.json',
 
       // Built assets
       'build/**/*',
@@ -65,6 +68,9 @@ function copyFilesToTemp() {
       // Composer autoloader (CRITICAL: required for class autoloading)
       'vendor/autoload.php',
       'vendor/composer/**/*',
+
+      // Translations
+      'languages/**/*',
 
       // Templates and assets
       'templates/**/*',
