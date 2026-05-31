@@ -164,7 +164,7 @@ final class Container {
 
 				// Allow extensions to register custom fields
 				if ( function_exists( 'do_action' ) ) {
-					do_action( 'subtleforms/fields/register', $registry );
+					do_action( 'subtleforms_fields_register', $registry );
 				}
 
 				return $registry;
@@ -185,7 +185,7 @@ final class Container {
 
 				/** Allow extensions to register additional definitions/implementations via action hook */
 				if ( function_exists( 'do_action' ) ) {
-					do_action( 'subtleforms/register_actions', $reg );
+					do_action( 'subtleforms_register_actions', $reg );
 				}
 
 				return $reg;
@@ -243,7 +243,7 @@ final class Container {
 		// can hook in at priority 10 (default) and add its own implementations.
 		// Built-in stubs are added at priority 20 as a fallback.
 		add_action(
-			'subtleforms/register_extensions',
+			'subtleforms_register_extensions',
 			function ( ExtensionManager $mgr ) {
 				$mgr->add( $this->get( WebhooksExtension::class ) );
 				$mgr->add( $this->get( EmailMarketingExtension::class ) );
@@ -257,7 +257,7 @@ final class Container {
 			20 // later priority, so Pro plugin at default (10) can register first
 		);
 
-		// Fire the subtleforms/register_extensions hook inside plugins_loaded so the
+		// Fire the subtleforms_register_extensions hook inside plugins_loaded so the
 		// manager is fully populated before Plugin::init() calls boot() on 'init'.
 		add_action(
 			'plugins_loaded',
@@ -272,7 +272,7 @@ final class Container {
 				 * @since 2.1.0
 				 * @param ExtensionManager $mgr The extension manager instance.
 				 */
-				do_action( 'subtleforms/register_extensions', $mgr );
+				do_action( 'subtleforms_register_extensions', $mgr );
 			},
 			5 // priority 5 = before Plugin::init() runs at default plugins_loaded priority
 		);

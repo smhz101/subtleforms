@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
  * Payments Extension
  *
  * Free-plugin stub. Actual Stripe / PayPal processing is implemented by
- * the Pro plugin via the `subtleforms/extension/payments/create_intent` filter.
+ * the Pro plugin via the `subtleforms_extension_payments_create_intent` filter.
  *
  * No external API calls are made here.
  */
@@ -75,7 +75,7 @@ class PaymentsExtension extends AbstractExtension {
 		 * @param \WP_REST_Request                  $request  Incoming request.
 		 * @param \SubtleForms\Support\Settings     $settings Plugin settings instance.
 		 */
-		$result = apply_filters( 'subtleforms/extension/payments/create_intent', null, $request, $this->settings );
+		$result = apply_filters( 'subtleforms_extension_payments_create_intent', null, $request, $this->settings );
 
 		if ( $result !== null ) {
 			return $result;

@@ -173,7 +173,7 @@ class AdminMenu {
 		);
 
 		// Allow extensions to add their own pages
-		do_action( 'subtleforms/admin_menu', $this->caps );
+		do_action( 'subtleforms_admin_menu', $this->caps );
 	}
 
 	/**
@@ -248,11 +248,11 @@ class AdminMenu {
 		);
 
 		// Get license data — provided by the Pro plugin via filter (no API calls).
-		$license_data = apply_filters( 'subtleforms/license_data', null );
+		$license_data = apply_filters( 'subtleforms_license_data', null );
 
 		// Rebuild Capabilities fresh at enqueue time.
 		// AdminMenu is constructed on plugins_loaded BEFORE Pro registers its
-		// subtleforms/capabilities filter, so $this->caps is stale. A fresh
+		// subtleforms_capabilities filter, so $this->caps is stale. A fresh
 		// instance picks up all filters that are now in place.
 		$live_caps = new Capabilities();
 
@@ -294,7 +294,7 @@ class AdminMenu {
 		);
 
 		// Allow extensions to enqueue their assets
-		do_action( 'subtleforms/admin_enqueue_scripts', $hook );
+		do_action( 'subtleforms_admin_enqueue_scripts', $hook );
 	}
 
 	/**

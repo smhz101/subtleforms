@@ -11,7 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
  * CRM Extension
  *
  * Free-plugin stub. The actual HubSpot integration is implemented by the
- * Pro plugin, which hooks into: `subtleforms/extension/crm/contact`
+ * Pro plugin, which hooks into: `subtleforms_extension_crm_contact`
  *
  * No external API calls are made here.
  */
@@ -30,7 +30,7 @@ class CrmExtension extends AbstractExtension {
 			return;
 		}
 
-		add_action( 'subtleforms/submission/saved', array( $this, 'createContact' ), 10, 2 );
+		add_action( 'subtleforms_submission_saved', array( $this, 'createContact' ), 10, 2 );
 	}
 
 	/**
@@ -49,6 +49,6 @@ class CrmExtension extends AbstractExtension {
 		 * @param array                         $submission Submission data.
 		 * @param \SubtleForms\Support\Settings $settings   Plugin settings instance.
 		 */
-		do_action( 'subtleforms/extension/crm/contact', $form_id, $submission, $this->settings );
+		do_action( 'subtleforms_extension_crm_contact', $form_id, $submission, $this->settings );
 	}
 }

@@ -54,7 +54,7 @@ class MultilanguageExtension extends AbstractExtension {
 		 *   @type string $value  Default (source) value.
 		 * }
 		 */
-		$strings = apply_filters( 'subtleforms/multilanguage/strings', array() );
+		$strings = apply_filters( 'subtleforms_multilanguage_strings', array() );
 
 		foreach ( $strings as $item ) {
 			if ( ! empty( $item['name'] ) && ! empty( $item['value'] ) ) {
@@ -71,7 +71,7 @@ class MultilanguageExtension extends AbstractExtension {
 			return;
 		}
 
-		$strings = apply_filters( 'subtleforms/multilanguage/strings', array() );
+		$strings = apply_filters( 'subtleforms_multilanguage_strings', array() );
 
 		foreach ( $strings as $item ) {
 			if ( ! empty( $item['name'] ) && ! empty( $item['value'] ) ) {

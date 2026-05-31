@@ -94,7 +94,7 @@ final class Plugin {
 		$this->init_async_processing();
 
 		// Allow other plugins/themes to hook in
-		do_action( 'subtleforms/loaded', $this );
+		do_action( 'subtleforms_loaded', $this );
 	}
 
 	/**

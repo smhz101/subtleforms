@@ -32,7 +32,7 @@ class AnalyticsExtension extends AbstractExtension {
 		}
 
 		// Count submissions.
-		add_action( 'subtleforms/submission/saved', array( $this, 'countSubmission' ), 10, 2 );
+		add_action( 'subtleforms_submission_saved', array( $this, 'countSubmission' ), 10, 2 );
 
 		// Register REST endpoint for stats.
 		add_action(
@@ -60,7 +60,7 @@ class AnalyticsExtension extends AbstractExtension {
 		);
 
 		if ( (bool) $this->getSetting( 'view_tracking' ) ) {
-			add_action( 'subtleforms/form/viewed', array( $this, 'countView' ), 10, 1 );
+			add_action( 'subtleforms_form_viewed', array( $this, 'countView' ), 10, 1 );
 		}
 	}
 

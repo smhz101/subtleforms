@@ -1605,6 +1605,6 @@ final class CoreFields {
 		);
 
 		// Allow extensions to register additional fields
-		do_action( 'subtleforms/fields/register', $registry );
+		do_action( 'subtleforms_fields_register', $registry );
 	}
 }

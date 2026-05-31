@@ -34,7 +34,7 @@ class PdfExtension extends AbstractExtension {
 		}
 
 		if ( (bool) $this->getSetting( 'attach_to_email' ) ) {
-			add_filter( 'subtleforms/email/attachments', array( $this, 'attachPdf' ), 10, 2 );
+			add_filter( 'subtleforms_email_attachments', array( $this, 'attachPdf' ), 10, 2 );
 		}
 
 		// Register a REST endpoint to stream a PDF for a given submission.
@@ -106,7 +106,7 @@ class PdfExtension extends AbstractExtension {
 		 * @param array       $submission Submission data.
 		 * @param self        $ext        This extension instance.
 		 */
-		$path = apply_filters( 'subtleforms/pdf/generate', null, $submission, $this );
+		$path = apply_filters( 'subtleforms_pdf_generate', null, $submission, $this );
 
 		return is_string( $path ) && $path ? $path : null;
 	}

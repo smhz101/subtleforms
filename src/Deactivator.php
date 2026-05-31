@@ -27,7 +27,7 @@ final class Deactivator {
 		update_option( 'subtleforms_deactivated_at', time() );
 
 		// Allow extensions to hook into deactivation
-		do_action( 'subtleforms/deactivated' );
+		do_action( 'subtleforms_deactivated' );
 	}
 
 	/**

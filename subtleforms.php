@@ -4,10 +4,12 @@
  * Plugin Name: SubtleForms
  * Description: Logic-first, workflow-driven form platform with extension architecture.
  * Version: 1.8.1
- * Author: Muzammil Hussain
+ * Author: Appstric
+ * Author URI: https://subtleforms.com
+ * Plugin URI: https://subtleforms.com
  * Requires at least: 6.0
  * Requires PHP: 8.1
- * Tested up to: 6.9
+ * Tested up to: 7.0
  * Text Domain: subtleforms
  * Domain Path: /languages
  * License: GPL-2.0-or-later

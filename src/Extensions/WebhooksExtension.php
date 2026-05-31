@@ -37,7 +37,7 @@ class WebhooksExtension extends AbstractExtension {
 			return;
 		}
 
-		add_action( 'subtleforms/submission/saved', array( $this, 'dispatch' ), 10, 2 );
+		add_action( 'subtleforms_submission_saved', array( $this, 'dispatch' ), 10, 2 );
 	}
 
 	/**

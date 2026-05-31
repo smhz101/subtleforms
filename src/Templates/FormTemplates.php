@@ -48,7 +48,7 @@ class FormTemplates {
 		 * @param array $templates Associative array of template definitions.
 		 * @since 1.5.0
 		 */
-		$templates = apply_filters( 'subtleforms/templates', $templates );
+		$templates = apply_filters( 'subtleforms_templates', $templates );
 
 		// Merge Pro stubs for any Pro templates not already present (e.g. when
 		// subtleforms-pro is inactive). Stubs carry no schema/fields — they are

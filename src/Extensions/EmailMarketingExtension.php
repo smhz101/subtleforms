@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
  *
  * Free-plugin stub. The actual Mailchimp / ConvertKit integration is
  * implemented by the Pro plugin, which hooks into:
- *   `subtleforms/extension/email_marketing/subscribe`
+ *   `subtleforms_extension_email_marketing_subscribe`
  *
  * No external API calls are made here.
  */
@@ -31,7 +31,7 @@ class EmailMarketingExtension extends AbstractExtension {
 			return;
 		}
 
-		add_action( 'subtleforms/submission/saved', array( $this, 'subscribe' ), 10, 2 );
+		add_action( 'subtleforms_submission_saved', array( $this, 'subscribe' ), 10, 2 );
 	}
 
 	/**
@@ -50,7 +50,7 @@ class EmailMarketingExtension extends AbstractExtension {
 		 * @param array                         $submission Submission data.
 		 * @param \SubtleForms\Support\Settings $settings   Plugin settings instance.
 		 */
-		do_action( 'subtleforms/extension/email_marketing/subscribe', $form_id, $submission, $this->settings );
+		do_action( 'subtleforms_extension_email_marketing_subscribe', $form_id, $submission, $this->settings );
 	}
 }
 

@@ -29,7 +29,7 @@ final class Capabilities {
 		$this->map = $defaults ?: self::defaults();
 
 		// Pro plugin injects capability upgrades via this filter.
-		$this->map = apply_filters( 'subtleforms/capabilities', $this->map );
+		$this->map = apply_filters( 'subtleforms_capabilities', $this->map );
 	}
 
 		/**
@@ -66,7 +66,7 @@ final class Capabilities {
 			'api.read'                   => true,
 			'api.write'                  => true,
 
-			// Extensions — all disabled in free tier, Pro plugin overrides via subtleforms/capabilities filter
+			// Extensions — all disabled in free tier, Pro plugin overrides via subtleforms_capabilities filter
 			'extensions.webhooks'        => false,
 			'extensions.email_marketing' => false,
 			'extensions.crm'             => false,

@@ -328,7 +328,7 @@ final class PublicSubmitApi {
 					 * @param SubmissionContext  $context         Full submission context.
 					 * @since 1.2.0
 					 */
-					do_action( 'subtleforms/payment/required', $submissionId, $paymentMetadata, $context );
+					do_action( 'subtleforms_payment_required', $submissionId, $paymentMetadata, $context );
 				}
 			} elseif ( ! $finalSubmission || $finalSubmission['status'] === 'processing' ) {
 				Logger::error( 'Submission %d did not reach saved status', $submissionId );
