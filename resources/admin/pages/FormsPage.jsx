@@ -134,11 +134,13 @@ export default function FormsPage() {
       );
 
       const createData = await createResponse.json();
-      if (createData.id) {
+      // API response is wrapped: { data: { id, ... }, meta: {} }
+      const formId = createData.data?.id ?? createData.id;
+      if (formId) {
         // Save schema
         await fetch(
           (window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
-            '/wp-json/subtleforms/v1') + `/forms/${createData.id}/schema`,
+            '/wp-json/subtleforms/v1') + `/forms/${formId}/schema`,
           {
             method: 'POST',
             credentials: 'same-origin',
@@ -185,7 +187,7 @@ export default function FormsPage() {
         }
 
         // Navigate to builder
-        navigate('/forms/' + createData.id);
+        navigate('/forms/' + formId);
       }
     } catch (error) {
       console.error('Failed to create form:', error);
