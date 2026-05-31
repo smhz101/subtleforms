@@ -76,6 +76,7 @@ AGENTS.md
 README.md
 CONTRIBUTING.md
 RELEASE.md
+DESIGN_SYSTEM.md
 
 # ── Scripts (dev utilities, not needed at runtime) ────────────
 scripts

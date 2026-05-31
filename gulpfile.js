@@ -88,6 +88,13 @@ function copyFilesToTemp() {
       '!gulpfile.js',
       '!package*.json',
       '!.*',
+      '!DESIGN_SYSTEM.md',
+      '!AGENTS.md',
+      '!AUDIT_SUMMARY.md',
+      '!FRONTEND_RENDERER_AUDIT.md',
+      '!CONTRIBUTING.md',
+      '!RELEASE.md',
+      '!_plan/**',
 
       // Exclude dev dependencies from vendor
       '!vendor/bin/**',
