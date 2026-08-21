@@ -187,6 +187,19 @@ final class PublicSubmitApi {
 		}
 		$formVersion = $activeSchema['version'] ?? null;
 
+		// Restore rich_text values from the raw request.
+		//
+		// sanitizeArrayDeep() above runs wp_strip_all_tags over every value, which
+		// is the right default but destroys the markup a rich_text field exists to
+		// collect. The schema is only known here, so re-sanitize just those keys
+		// with a narrow allowlist. Anything not declared rich_text in the schema
+		// keeps the strict treatment.
+		$payload = $this->restoreRichTextValues(
+			$payload,
+			$rawInput['data'] ?? array(),
+			$activeSchema['schema'] ?? $activeSchema
+		);
+
 		// Create submission record
 		try {
 			$submissionId = $this->submissionsRepo->create(
@@ -368,6 +381,61 @@ final class PublicSubmitApi {
 	 * @param int|string $value     Value bound to the predicate placeholder.
 	 * @return int Number of matching submissions.
 	 */
+	/**
+	 * Re-apply rich-text sanitization to values whose schema type allows markup.
+	 *
+	 * @param array $payload   Strictly sanitized payload.
+	 * @param array $rawValues Original untouched submitted values.
+	 * @param array $schema    Resolved form schema.
+	 * @return array Payload with rich_text keys restored.
+	 */
+	private function restoreRichTextValues( array $payload, $rawValues, $schema ): array {
+		if ( ! is_array( $rawValues ) || empty( $rawValues ) || ! is_array( $schema ) ) {
+			return $payload;
+		}
+
+		$richKeys = array();
+		self::collectFieldKeysOfType( $schema['fields'] ?? array(), 'rich_text', $richKeys );
+
+		foreach ( $richKeys as $key ) {
+			if ( array_key_exists( $key, $rawValues ) ) {
+				$payload[ $key ] = Sanitizer::sanitizeRichText( $rawValues[ $key ] );
+			}
+		}
+
+		return $payload;
+	}
+
+	/**
+	 * Walk a schema field list, collecting keys of a given type.
+	 *
+	 * @param array  $fields Field list, possibly nested.
+	 * @param string $type   Field type to match.
+	 * @param array  $out    Collected keys, by reference.
+	 */
+	private static function collectFieldKeysOfType( $fields, string $type, array &$out ): void {
+		if ( ! is_array( $fields ) ) {
+			return;
+		}
+
+		foreach ( $fields as $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+
+			if ( ( $field['type'] ?? '' ) === $type && ! empty( $field['key'] ) ) {
+				$out[] = (string) $field['key'];
+			}
+
+			if ( ! empty( $field['fields'] ) ) {
+				self::collectFieldKeysOfType( $field['fields'], $type, $out );
+			}
+			if ( ! empty( $field['children'] ) ) {
+				self::collectFieldKeysOfType( $field['children'], $type, $out );
+			}
+		}
+	}
+
 	private function countSubmissionsBy( int $formId, string $predicate, $value ): int {
 		global $wpdb;
 

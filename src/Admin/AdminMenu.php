@@ -275,6 +275,21 @@ class AdminMenu {
 				),
 				'extensions'     => $this->buildExtensionsData( $live_caps ),
 				'isDev'          => defined( 'WP_DEBUG' ) && WP_DEBUG,
+				// The builder preview renders the real frontend markup inside an
+				// iframe, so it needs the public stylesheet to look like production
+				// rather than approximating it with admin styles.
+				'frontendStyles' => array_values(
+					array_filter(
+						array(
+							file_exists( SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/index.jsx.css' )
+								? SUBTLEFORMS_PLUGIN_URL . 'build/frontend/index.jsx.css'
+								: null,
+							file_exists( SUBTLEFORMS_PLUGIN_DIR . 'assets/css/conversational.css' )
+								? SUBTLEFORMS_PLUGIN_URL . 'assets/css/conversational.css'
+								: null,
+						)
+					)
+				),
 				'i18n'           => array(
 					'confirmDelete' => __( 'Are you sure you want to delete this item?', 'subtleforms' ),
 					'error'         => __( 'An error occurred. Please try again.', 'subtleforms' ),

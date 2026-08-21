@@ -3,6 +3,11 @@
  * 
  * Modular CSS with form-type-aware styling.
  */
+/* Form type-specific styles */
+@import './styles/types/default.css';
+@import './styles/types/steps.css';
+@import './styles/types/conversational.css';
+@import './styles/types/payment.css';
 
 /* Base styles (shared across all form types) */
 @import './styles/base.css';
@@ -204,11 +209,6 @@
 	}
 }
 
-/* Form type-specific styles */
-@import './styles/types/default.css';
-@import './styles/types/steps.css';
-@import './styles/types/conversational.css';
-@import './styles/types/payment.css';
 
 /* ===== Legacy Field Styles (to be refactored) ===== */
 .subtleforms-step.completed {
@@ -481,4 +481,223 @@
 	.subtleforms-button {
 		width: 100%;
 	}
+}
+
+/* ===== Range slider ===== */
+.subtleforms-range {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.subtleforms-range__input {
+	flex: 1;
+}
+
+.subtleforms-range__value {
+	min-width: 3ch;
+	font-variant-numeric: tabular-nums;
+	text-align: right;
+	font-weight: 600;
+}
+
+/* ===== Net promoter score ===== */
+.subtleforms-nps__scale {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
+
+.subtleforms-nps__option {
+	cursor: pointer;
+}
+
+.subtleforms-nps__number {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 2.25rem;
+	height: 2.25rem;
+	border: 1px solid #d1d5db;
+	border-radius: 4px;
+	font-variant-numeric: tabular-nums;
+	transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.subtleforms-nps__option:hover .subtleforms-nps__number {
+	border-color: #6b7280;
+}
+
+/* Keyboard focus lands on the visually hidden radio, so mirror it onto the
+   visible control or the focused option is impossible to see. */
+.subtleforms-nps__option input:focus-visible + .subtleforms-nps__number {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
+}
+
+.subtleforms-nps__number.is-selected {
+	background: #111827;
+	border-color: #111827;
+	color: #fff;
+}
+
+.subtleforms-nps__legend {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 6px;
+	font-size: 0.8125rem;
+	opacity: 0.7;
+}
+
+/* ===== Checkbox grid ===== */
+.subtleforms-checkbox-grid {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.subtleforms-checkbox-grid th,
+.subtleforms-checkbox-grid td {
+	padding: 8px;
+	border-bottom: 1px solid #e5e7eb;
+	text-align: center;
+}
+
+.subtleforms-checkbox-grid th[scope='row'] {
+	text-align: left;
+	font-weight: 500;
+}
+
+/* ===== Colour picker ===== */
+.subtleforms-color {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.subtleforms-color__swatch {
+	width: 44px;
+	height: 38px;
+	padding: 2px;
+	border: 1px solid #d1d5db;
+	border-radius: 4px;
+	background: none;
+	cursor: pointer;
+}
+
+.subtleforms-color__hex {
+	width: 10ch;
+	font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+/* ===== Signature ===== */
+.subtleforms-signature__canvas {
+	width: 100%;
+	height: 160px;
+	border: 1px dashed #9ca3af;
+	border-radius: 4px;
+	background: #fff;
+	touch-action: none;
+	cursor: crosshair;
+}
+
+.subtleforms-signature__actions {
+	display: flex;
+	gap: 12px;
+	margin-top: 8px;
+}
+
+.subtleforms-signature__button {
+	background: none;
+	border: 0;
+	padding: 0;
+	font-size: 0.8125rem;
+	text-decoration: underline;
+	cursor: pointer;
+	color: inherit;
+}
+
+.subtleforms-signature__button[disabled] {
+	opacity: 0.5;
+	cursor: default;
+}
+
+/* ===== Rich text ===== */
+.subtleforms-richtext {
+	border: 1px solid #d1d5db;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.subtleforms-richtext__toolbar {
+	display: flex;
+	gap: 2px;
+	padding: 4px;
+	border-bottom: 1px solid #e5e7eb;
+	background: #f9fafb;
+}
+
+.subtleforms-richtext__button {
+	min-width: 28px;
+	height: 28px;
+	border: 0;
+	border-radius: 3px;
+	background: none;
+	cursor: pointer;
+	font-size: 0.875rem;
+}
+
+.subtleforms-richtext__button:hover {
+	background: #e5e7eb;
+}
+
+.subtleforms-richtext__editor {
+	min-height: 120px;
+	padding: 10px 12px;
+	outline: none;
+}
+
+.subtleforms-richtext__editor:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: -2px;
+}
+
+/* Placeholder for an empty contentEditable, which has no native support. */
+.subtleforms-richtext__editor:empty::before {
+	content: attr(data-placeholder);
+	opacity: 0.55;
+	pointer-events: none;
+}
+
+/* ===== Chained select ===== */
+.subtleforms-chained-select {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.subtleforms-chained-select__label {
+	display: block;
+	margin-bottom: 4px;
+	font-size: 0.8125rem;
+}
+
+/* ===== Section break ===== */
+.subtleforms-section-break {
+	margin: 8px 0;
+}
+
+.subtleforms-section-break__title {
+	margin: 0 0 4px;
+	font-size: 1.125rem;
+}
+
+.subtleforms-section-break__description {
+	margin: 0 0 8px;
+	opacity: 0.75;
+}
+
+.subtleforms-section-break__rule {
+	border: 0;
+	border-top: 1px solid #e5e7eb;
+	margin: 0;
 }
