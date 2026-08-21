@@ -8,17 +8,17 @@
  *   - No layout changes.
  *   - No color tokens — use values from _tokens.scss.
  *   - Do not duplicate rules from _accessibility.scss.
- *   - 150ms cubic-bezier(0.4, 0, 0.2, 1) is the canonical UI transition.
+ *   - var(--sf-duration-fast) cubic-bezier(0.4, 0, 0.2, 1) is the canonical UI transition.
  */
 
 .subtleforms-admin {
   // ── Canonical transition CSS variable ────────────────────────────────────
-  --sf-transition-ui: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --sf-transition-ui: var(--sf-duration-fast) cubic-bezier(0.4, 0, 0.2, 1);
 
   // ── WordPress components-button ───────────────────────────────────────────
   // Unify focus-visible ring across all WP button variants.
   .components-button:focus-visible {
-    outline: 2px solid var(--sf-blue-600, #2563eb) !important;
+    outline: 2px solid var(--sf-blue-600, var(--sf-a-500)) !important;
     outline-offset: 2px !important;
     box-shadow: none !important;
   }
@@ -48,7 +48,7 @@
                 transform var(--sf-transition-ui);
 
     &:hover {
-      background-color: var(--sf-gray-100, #f3f4f6);
+      background-color: var(--sf-gray-100, var(--sf-n-50));
       transform: translateY(-1px);
     }
 
@@ -59,7 +59,7 @@
 
   // ── Settings nav item: focus-visible ─────────────────────────────────────
   .sf-settings-nav-item:focus-visible {
-    outline: 2px solid var(--sf-blue-600, #2563eb);
+    outline: 2px solid var(--sf-blue-600, var(--sf-a-500));
     outline-offset: -2px;
   }
 
@@ -77,7 +77,7 @@
 
       &:focus,
       &:focus-visible {
-        border-color: var(--sf-blue-600, #2563eb);
+        border-color: var(--sf-blue-600, var(--sf-a-500));
         box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
         outline: none;
       }

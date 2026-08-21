@@ -8,9 +8,10 @@
 // Accessibility Foundation - WCAG 2.1 AA Compliance
 @use 'accessibility';
 
-// Variables & Design System
+// Design tokens. _theme emits the :root custom properties; _variables maps the
+// historical $sf-* names onto them.
+@use 'theme';
 @use 'variables' as *;
-@use 'tokens' as *;
 @use 'design-system';
 @use 'interactions';
 

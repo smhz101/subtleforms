@@ -25,7 +25,7 @@
 		margin-right: auto;
 		padding: 3rem;
 		border: 1px solid var(--sf-gray-200);
-		border-radius: 0.5rem;
+		border-radius: var(--sf-radius-md);
 		width: 100%;
 		max-width: 42rem;
 		height: 100%;
@@ -39,7 +39,7 @@
 	}
 
 	&__empty-title {
-		font-size: 1.125rem;
+		font-size: var(--sf-text-lg);
 		line-height: 1.75rem;
 		font-weight: 600;
 		color: var(--sf-gray-900);
@@ -47,7 +47,7 @@
 	}
 
 	&__empty-description {
-		font-size: 0.875rem;
+		font-size: var(--sf-text-base);
 		line-height: 1.25rem;
 		color: var(--sf-gray-500);
 		margin-bottom: 1.5rem;
@@ -68,21 +68,21 @@
 	}
 
 	&__progress-label {
-		font-size: 0.875rem;
+		font-size: var(--sf-text-base);
 		line-height: 1.25rem;
 		font-weight: 500;
 		color: var(--sf-gray-700);
 	}
 
 	&__progress-percent {
-		font-size: 0.75rem;
+		font-size: var(--sf-text-xs);
 		line-height: 1rem;
 		color: var(--sf-gray-500);
 	}
 
 	&__progress-bar {
 		background-color: var(--sf-gray-200);
-		border-radius: 9999px;
+		border-radius: var(--sf-radius-full);
 		width: 100%;
 		height: 0.5rem;
 		overflow: hidden;
@@ -91,7 +91,7 @@
 	&__progress-fill {
 		background-color: var(--sf-blue-600);
 		height: 100%;
-		transition: all 300ms;
+		transition: all var(--sf-duration-slow);
 	}
 
 	// Question card container
@@ -113,7 +113,7 @@
 		margin-right: auto;
 		padding: 2rem;
 		border: 1px solid var(--sf-gray-200);
-		border-radius: 0.5rem;
+		border-radius: var(--sf-radius-md);
 		width: 100%;
 	}
 
@@ -148,8 +148,8 @@
 	&__dot {
 		width: 0.5rem;
 		height: 0.5rem;
-		border-radius: 9999px;
-		transition: all 150ms;
+		border-radius: var(--sf-radius-full);
+		transition: all var(--sf-duration-fast);
 
 		// Active dot
 		&--active {

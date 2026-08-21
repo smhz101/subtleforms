@@ -31,7 +31,7 @@
 
 .sf-sf-template-card {
 	cursor: pointer;
-	transition: all 0.2s ease;
+	transition: all var(--sf-duration-base) ease;
 	border: 2px solid transparent;
 	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 
@@ -68,7 +68,7 @@
 	border-radius: 50%;
 
 	.dashicons {
-		font-size: 32px;
+		font-size: var(--sf-text-xl);
 		width: 32px;
 		height: 32px;
 		color: var(--sf-indigo-600);
@@ -84,14 +84,14 @@
 }
 
 .sf-sf-template-name {
-	font-size: 18px;
+	font-size: var(--sf-text-lg);
 	font-weight: 600;
 	margin: 0 0 8px;
 	color: var(--sf-slate-800);
 }
 
 .sf-sf-template-description {
-	font-size: 14px;
+	font-size: var(--sf-text-base);
 	color: var(--sf-slate-500);
 	margin: 0 0 16px;
 	line-height: 1.5;

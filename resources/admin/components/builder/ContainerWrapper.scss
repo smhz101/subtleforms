@@ -7,8 +7,8 @@
 	position: relative;
 	background-color: var(--sf-surface);
 	margin-bottom: 0.75rem; /* Reduced from 1rem for better density */
-	transition: all 200ms;
-	border-radius: 4px;
+	transition: all var(--sf-duration-base);
+	border-radius: var(--sf-radius-sm);
 
 	&--selected {
 		border: 2px solid var(--sf-blue-500);
@@ -35,7 +35,7 @@
 
 		&-label {
 			font-weight: 600;
-			font-size: 0.75rem;
+			font-size: var(--sf-text-xs);
 		}
 	}
 
@@ -46,8 +46,8 @@
 
 	&__action-button {
 		padding: 0.25rem;
-		border-radius: 0.25rem;
-		transition: background-color 150ms;
+		border-radius: var(--sf-radius-sm);
+		transition: background-color var(--sf-duration-fast);
 
 		&:hover {
 			background-color: var(--sf-gray-200);
@@ -71,7 +71,7 @@
 		padding: 0.5rem 1rem;
 		border-top: 1px dashed var(--sf-gray-300);
 		color: var(--sf-gray-500);
-		font-size: 0.75rem;
+		font-size: var(--sf-text-xs);
 		font-style: italic;
 	}
 

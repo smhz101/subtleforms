@@ -10,9 +10,9 @@
   }
 
   &__card {
-    background: #fff;
+    background: var(--sf-n-0);
     border: 1px solid rgba(107, 114, 128, 0.2);
-    border-radius: 16px;
+    border-radius: var(--sf-radius-lg);
     padding: 24px;
     max-width: 460px;
     margin: 0 auto;
@@ -28,20 +28,20 @@
     height: 56px;
     margin: 0 auto 16px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #ede9fe, #ddd6fe);
-    color: #5b21b6;
+    background: linear-gradient(135deg, var(--sf-n-50), var(--sf-a-100));
+    color: var(--sf-a-700);
   }
 
   &__title {
-    font-size: 1.25rem;
+    font-size: var(--sf-text-lg);
     font-weight: 700;
-    color: #111827;
+    color: var(--sf-n-900);
     text-align: center;
     margin-bottom: 8px;
   }
 
   &__description {
-    color: #4b5563;
+    color: var(--sf-n-600);
     text-align: center;
     margin: 0 0 18px;
   }
@@ -59,16 +59,16 @@
     align-items: center;
     gap: 0.5rem;
     font-size: 0.9rem;
-    color: #374151;
+    color: var(--sf-n-700);
   }
 
   &__benefit-icon {
-    color: #22c55e;
+    color: var(--sf-success);
   }
 
   &__loss {
-    font-size: 0.8rem;
-    color: #9ca3af;
+    font-size: var(--sf-text-sm);
+    color: var(--sf-n-400);
     text-align: center;
     margin: -6px 0 16px;
     font-style: italic;
@@ -83,7 +83,7 @@
 
   &__primary {
     min-width: 190px;
-    border-radius: 10px;
+    border-radius: var(--sf-radius-md);
     font-weight: 700;
   }
 
@@ -91,8 +91,8 @@
     display: inline-flex;
     align-items: center;
     gap: 0.375rem;
-    font-size: 0.8rem;
-    color: #6b7280;
+    font-size: var(--sf-text-sm);
+    color: var(--sf-n-500);
     justify-content: center;
   }
 }

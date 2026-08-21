@@ -15,7 +15,7 @@
 		background-color: var(--sf-surface);
 		padding: 1.5rem;
 		border: 1px solid var(--sf-gray-200);
-		border-radius: 0.5rem;
+		border-radius: var(--sf-radius-md);
 
 		&-content {
 			display: flex;
@@ -39,12 +39,12 @@
 
 	&-subtitle {
 		color: var(--sf-gray-600);
-		font-size: 0.875rem;
+		font-size: var(--sf-text-base);
 	}
 
 	&-count {
 		color: var(--sf-gray-500);
-		font-size: 0.875rem;
+		font-size: var(--sf-text-base);
 	}
 
 	&-fields {
@@ -58,7 +58,7 @@
 		align-items: center;
 		background-color: var(--sf-gray-50);
 		padding: 0.75rem;
-		border-radius: 0.5rem;
+		border-radius: var(--sf-radius-md);
 
 		svg {
 			flex-shrink: 0;
@@ -79,7 +79,7 @@
 
 		&-meta {
 			color: var(--sf-gray-500);
-			font-size: 0.875rem;
+			font-size: var(--sf-text-base);
 		}
 	}
 }
@@ -88,7 +88,7 @@
 	background-color: var(--sf-blue-50);
 	padding: 1.5rem;
 	border: 1px solid var(--sf-blue-200);
-	border-radius: 0.5rem;
+	border-radius: var(--sf-radius-md);
 
 	&-title {
 		margin-bottom: 0.75rem;
@@ -128,12 +128,12 @@
 			align-items: center;
 			margin-bottom: 0.5rem;
 			color: var(--sf-gray-600);
-			font-size: 0.875rem;
+			font-size: var(--sf-text-base);
 		}
 
 		&-bar-container {
 			background-color: var(--sf-gray-200);
-			border-radius: 9999px;
+			border-radius: var(--sf-radius-full);
 			height: 0.5rem;
 			overflow: hidden;
 		}
@@ -141,7 +141,7 @@
 		&-bar {
 			background-color: var(--sf-blue-600);
 			height: 100%;
-			transition: width 0.3s;
+			transition: width var(--sf-duration-slow);
 		}
 	}
 
@@ -169,12 +169,12 @@
 			margin-bottom: 0.5rem;
 			font-weight: 700;
 			color: var(--sf-slate-900);
-			font-size: 1.5rem;
+			font-size: var(--sf-text-xl);
 		}
 
 		&-description {
 			color: var(--wp-gray-50);
-			font-size: 1rem;
+			font-size: var(--sf-text-md);
 		}
 	}
 
@@ -187,7 +187,7 @@
 			align-items: center;
 			background-color: var(--sf-blue-100);
 			margin-bottom: 1rem;
-			border-radius: 9999px;
+			border-radius: var(--sf-radius-full);
 			width: 4rem;
 			height: 4rem;
 
@@ -202,7 +202,7 @@
 			margin-bottom: 0.5rem;
 			font-weight: 700;
 			color: var(--sf-gray-900);
-			font-size: 1.5rem;
+			font-size: var(--sf-text-xl);
 		}
 
 		p {
@@ -215,7 +215,7 @@
 	&__features {
 		background-color: var(--sf-gray-50);
 		padding: 1.5rem;
-		border-radius: 0.5rem;
+		border-radius: var(--sf-radius-md);
 
 		h3 {
 			margin-bottom: 1rem;
@@ -259,7 +259,7 @@
 			margin-bottom: 0.5rem;
 			font-weight: 700;
 			color: var(--sf-gray-900);
-			font-size: 1.5rem;
+			font-size: var(--sf-text-xl);
 		}
 
 		p {
@@ -280,9 +280,9 @@
 	&__option {
 		padding: 1.5rem;
 		border: 2px solid var(--sf-gray-200);
-		border-radius: 0.5rem;
+		border-radius: var(--sf-radius-md);
 		text-align: left;
-		transition: all 0.2s;
+		transition: all var(--sf-duration-base);
 		background-color: var(--sf-surface);
 		cursor: pointer;
 
@@ -306,7 +306,7 @@
 			flex-shrink: 0;
 			justify-content: center;
 			align-items: center;
-			border-radius: 0.5rem;
+			border-radius: var(--sf-radius-md);
 			width: 2.5rem;
 			height: 2.5rem;
 			background-color: var(--sf-gray-100);
@@ -340,7 +340,7 @@
 
 		&-description {
 			color: var(--sf-gray-600);
-			font-size: 0.875rem;
+			font-size: var(--sf-text-base);
 		}
 	}
 
@@ -357,7 +357,7 @@
 			align-items: center;
 			background-color: var(--sf-green-100);
 			margin-bottom: 1rem;
-			border-radius: 9999px;
+			border-radius: var(--sf-radius-full);
 			width: 4rem;
 			height: 4rem;
 
@@ -372,7 +372,7 @@
 			margin-bottom: 0.5rem;
 			font-weight: 700;
 			color: var(--sf-gray-900);
-			font-size: 1.5rem;
+			font-size: var(--sf-text-xl);
 		}
 
 		p {

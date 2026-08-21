@@ -1,313 +1,275 @@
 /**
- * SubtleForms Design System - "Technical Elegance"
+ * Legacy variable bridge.
  *
- * A distinctive aesthetic merging precision with warmth.
- * Avoids generic SaaS patterns while respecting WordPress conventions.
+ * Every historical `$sf-*` name resolves to a token from `_theme.scss`. This is
+ * how thirteen colour families collapse into four roles without editing 74
+ * stylesheets by hand:
+ *
+ *   gray · stone · slate · neutral            → one neutral ramp
+ *   blue · indigo · violet · purple · teal    → one accent ramp
+ *   green · emerald · lime                    → success
+ *   red · coral                               → danger
+ *   amber · orange · yellow                   → warning
+ *
+ * Prefer `var(--sf-*)` directly in new code. These aliases exist so existing
+ * stylesheets keep working, not as an API to build on.
+ *
+ * Note: these hold `var()` references, so they cannot be passed to SCSS colour
+ * functions such as `darken()` or `rgba()`. Use a token with the opacity baked
+ * in instead — `--sf-shadow-*` and `--sf-primary-bg` cover the existing cases.
  */
 
-// ============================================================================
-// COLOR SYSTEM - Warm Earth Tones + Electric Accents
-// ============================================================================
+// ── Neutrals ─────────────────────────────────────────────────────────────────
+$sf-gray-50: var(--sf-n-50);
+$sf-gray-100: var(--sf-n-100);
+$sf-gray-200: var(--sf-n-200);
+$sf-gray-300: var(--sf-n-300);
+$sf-gray-400: var(--sf-n-400);
+$sf-gray-500: var(--sf-n-500);
+$sf-gray-600: var(--sf-n-600);
+$sf-gray-700: var(--sf-n-700);
+$sf-gray-800: var(--sf-n-800);
+$sf-gray-900: var(--sf-n-900);
 
-// Warm Neutrals (Stone palette - primary grays)
-$sf-stone-50: #fafaf9;
-$sf-stone-100: #f5f5f4;
-$sf-stone-200: #e7e5e4;
-$sf-stone-300: #d6d3d1;
-$sf-stone-400: #a8a29e;
-$sf-stone-500: #78716c;
-$sf-stone-600: #57534e;
-$sf-stone-700: #44403c;
-$sf-stone-800: #292524;
-$sf-stone-900: #1c1917;
+$sf-stone-50: var(--sf-n-50);
+$sf-stone-100: var(--sf-n-100);
+$sf-stone-200: var(--sf-n-200);
+$sf-stone-300: var(--sf-n-300);
+$sf-stone-400: var(--sf-n-400);
+$sf-stone-500: var(--sf-n-500);
+$sf-stone-600: var(--sf-n-600);
+$sf-stone-700: var(--sf-n-700);
+$sf-stone-800: var(--sf-n-800);
+$sf-stone-900: var(--sf-n-900);
 
-// Electric Accent - Primary Brand (Lime)
-$sf-lime-50: #f7fee7;   // Very light lime for backgrounds
-$sf-lime-100: #ecfccb;  // Very light lime
-$sf-lime-200: #d9f99d;  // Light lime for borders
-$sf-lime-300: #bef264;  // Soft lime
-$sf-lime-400: #a3e635;
-$sf-lime-500: #84cc16;
-$sf-lime-600: #65a30d;
-$sf-lime-700: #4d7c0f;
-$sf-lime-900: #365314;  // Very dark lime for text
+$sf-slate-50: var(--sf-n-50);
+$sf-slate-100: var(--sf-n-100);
+$sf-slate-200: var(--sf-n-200);
+$sf-slate-300: var(--sf-n-300);
+$sf-slate-400: var(--sf-n-400);
+$sf-slate-500: var(--sf-n-500);
+$sf-slate-600: var(--sf-n-600);
+$sf-slate-700: var(--sf-n-700);
+$sf-slate-800: var(--sf-n-800);
+$sf-slate-900: var(--sf-n-900);
 
-// Semantic Colors
-$sf-coral-400: #fb923c; // warnings
-$sf-coral-500: #f87171; // errors
-$sf-coral-600: #ef4444;
+$sf-neutral-50: var(--sf-n-50);
+$sf-neutral-100: var(--sf-n-100);
+$sf-neutral-200: var(--sf-n-200);
+$sf-neutral-300: var(--sf-n-300);
+$sf-neutral-400: var(--sf-n-400);
+$sf-neutral-500: var(--sf-n-500);
+$sf-neutral-600: var(--sf-n-600);
+$sf-neutral-700: var(--sf-n-700);
+$sf-neutral-800: var(--sf-n-800);
+$sf-neutral-900: var(--sf-n-900);
 
-$sf-amber-500: #f59e0b; // info/saving
-$sf-amber-600: #d97706;
+// ── Accent ───────────────────────────────────────────────────────────────────
+$sf-blue-50: var(--sf-a-50);
+$sf-blue-100: var(--sf-a-100);
+$sf-blue-200: var(--sf-a-200);
+$sf-blue-300: var(--sf-a-300);
+$sf-blue-400: var(--sf-a-400);
+$sf-blue-500: var(--sf-a-500);
+$sf-blue-600: var(--sf-a-600);
+$sf-blue-700: var(--sf-a-700);
+$sf-blue-800: var(--sf-a-800);
+$sf-blue-900: var(--sf-a-800);
 
-$sf-emerald-400: #34d399; // success light
-$sf-emerald-500: #10b981; // success
-$sf-emerald-600: #16a34a;
+$sf-indigo-50: var(--sf-a-50);
+$sf-indigo-100: var(--sf-a-100);
+$sf-indigo-200: var(--sf-a-200);
+$sf-indigo-300: var(--sf-a-300);
+$sf-indigo-400: var(--sf-a-400);
+$sf-indigo-500: var(--sf-a-500);
+$sf-indigo-600: var(--sf-a-600);
+$sf-indigo-700: var(--sf-a-700);
+$sf-indigo-800: var(--sf-a-800);
+$sf-indigo-900: var(--sf-a-800);
 
-// Cool Gray palette (Tailwind gray — used throughout component SCSS)
-$sf-gray-50:  #f9fafb;
-$sf-gray-100: #f3f4f6;
-$sf-gray-200: #e5e7eb;
-$sf-gray-300: #d1d5db;
-$sf-gray-400: #9ca3af;
-$sf-gray-500: #6b7280;
-$sf-gray-600: #4b5563;
-$sf-gray-700: #374151;
-$sf-gray-800: #1f2937;
-$sf-gray-900: #111827;
+$sf-violet-50: var(--sf-a-50);
+$sf-violet-100: var(--sf-a-100);
+$sf-violet-200: var(--sf-a-200);
+$sf-violet-300: var(--sf-a-300);
+$sf-violet-400: var(--sf-a-400);
+$sf-violet-500: var(--sf-a-500);
+$sf-violet-600: var(--sf-a-600);
+$sf-violet-700: var(--sf-a-700);
+$sf-violet-800: var(--sf-a-800);
+$sf-violet-900: var(--sf-a-800);
 
-// Blue palette (Tailwind blue — primary interactive)
-$sf-blue-50:  #eff6ff;
-$sf-blue-100: #dbeafe;
-$sf-blue-200: #bfdbfe;
-$sf-blue-500: #3b82f6;
-$sf-blue-600: #2563eb;
-$sf-blue-700: #1d4ed8;
-$sf-blue-800: #1e40af;
-$sf-blue-900: #1e3a8a;
+$sf-purple-50: var(--sf-a-50);
+$sf-purple-100: var(--sf-a-100);
+$sf-purple-200: var(--sf-a-200);
+$sf-purple-300: var(--sf-a-300);
+$sf-purple-400: var(--sf-a-400);
+$sf-purple-500: var(--sf-a-500);
+$sf-purple-600: var(--sf-a-600);
+$sf-purple-700: var(--sf-a-700);
+$sf-purple-800: var(--sf-a-800);
+$sf-purple-900: var(--sf-a-800);
 
-// Red palette (errors & destructive)
-$sf-red-50:  #fef2f2;
-$sf-red-100: #fee2e2;
-$sf-red-500: #ef4444;
-$sf-red-600: #dc2626;
+$sf-teal-500: var(--sf-a-500);
 
-// Green palette (success states visible in UI)
-$sf-green-50:  #f0fdf4;
-$sf-green-100: #dcfce7;
-$sf-green-500: #22c55e;
-$sf-green-600: #16a34a;
-$sf-green-700: #059669;
+// ── Success ──────────────────────────────────────────────────────────────────
+$sf-green-50: var(--sf-success-bg);
+$sf-green-100: var(--sf-success-border);
+$sf-green-200: var(--sf-success-border);
+$sf-green-300: var(--sf-success-border);
+$sf-green-400: var(--sf-success-border);
+$sf-green-500: var(--sf-success);
+$sf-green-600: var(--sf-success);
+$sf-green-700: var(--sf-success-strong);
+$sf-green-800: var(--sf-success-strong);
+$sf-green-900: var(--sf-success-strong);
 
-// Amber extended
-$sf-amber-50:  #fffbeb;
-$sf-amber-100: #fef3c7;
-$sf-amber-800: #92400e;
+$sf-emerald-50: var(--sf-success-bg);
+$sf-emerald-100: var(--sf-success-border);
+$sf-emerald-200: var(--sf-success-border);
+$sf-emerald-300: var(--sf-success-border);
+$sf-emerald-400: var(--sf-success-border);
+$sf-emerald-500: var(--sf-success);
+$sf-emerald-600: var(--sf-success);
+$sf-emerald-700: var(--sf-success-strong);
+$sf-emerald-800: var(--sf-success-strong);
+$sf-emerald-900: var(--sf-success-strong);
 
-// Purple
-$sf-purple-50: #faf5ff;
-$sf-purple-100: #f3e8ff;
+$sf-lime-50: var(--sf-success-bg);
+$sf-lime-100: var(--sf-success-border);
+$sf-lime-200: var(--sf-success-border);
+$sf-lime-300: var(--sf-success-border);
+$sf-lime-400: var(--sf-success-border);
+$sf-lime-500: var(--sf-success);
+$sf-lime-600: var(--sf-success);
+$sf-lime-700: var(--sf-success-strong);
+$sf-lime-800: var(--sf-success-strong);
+$sf-lime-900: var(--sf-success-strong);
 
-// Indigo (extended)
-$sf-indigo-50:  #eef2ff;
-$sf-indigo-100: #e0e7ff;
-$sf-indigo-200: #c7d2fe;
-$sf-indigo-400: #818cf8;
-$sf-indigo-500: #6366f1;
-$sf-indigo-600: #4f46e5;
-$sf-indigo-700: #4338ca;
-$sf-indigo-800: #3730a3;
-$sf-indigo-900: #312e81;
+// ── Danger ───────────────────────────────────────────────────────────────────
+$sf-red-50: var(--sf-danger-bg);
+$sf-red-100: var(--sf-danger-border);
+$sf-red-200: var(--sf-danger-border);
+$sf-red-300: var(--sf-danger-border);
+$sf-red-400: var(--sf-danger-border);
+$sf-red-500: var(--sf-danger);
+$sf-red-600: var(--sf-danger);
+$sf-red-700: var(--sf-danger-strong);
+$sf-red-800: var(--sf-danger-strong);
+$sf-red-900: var(--sf-danger-strong);
 
-// Purple (extended)
-$sf-purple-200: #e9d5ff;
-$sf-purple-300: #d8b4fe;
-$sf-purple-400: #c084fc;
-$sf-purple-500: #a855f7;
-$sf-purple-600: #9333ea;
-$sf-purple-700: #7e22ce;
-$sf-purple-900: #581c87;
+$sf-coral-50: var(--sf-danger-bg);
+$sf-coral-100: var(--sf-danger-border);
+$sf-coral-200: var(--sf-danger-border);
+$sf-coral-300: var(--sf-danger-border);
+$sf-coral-400: var(--sf-danger-border);
+$sf-coral-500: var(--sf-danger);
+$sf-coral-600: var(--sf-danger);
+$sf-coral-700: var(--sf-danger-strong);
+$sf-coral-800: var(--sf-danger-strong);
+$sf-coral-900: var(--sf-danger-strong);
 
-// Slate palette (dark UIs, code blocks, admin areas)
-$sf-slate-50:  #f8fafc;
-$sf-slate-100: #f1f5f9;
-$sf-slate-200: #e2e8f0;
-$sf-slate-300: #cbd5e1;
-$sf-slate-400: #94a3b8;
-$sf-slate-500: #64748b;
-$sf-slate-600: #475569;
-$sf-slate-700: #334155;
-$sf-slate-800: #1e293b;
-$sf-slate-900: #0f172a;
+// ── Warning ──────────────────────────────────────────────────────────────────
+$sf-amber-50: var(--sf-warning-bg);
+$sf-amber-100: var(--sf-warning-border);
+$sf-amber-200: var(--sf-warning-border);
+$sf-amber-300: var(--sf-warning-border);
+$sf-amber-400: var(--sf-warning-border);
+$sf-amber-500: var(--sf-warning);
+$sf-amber-600: var(--sf-warning);
+$sf-amber-700: var(--sf-warning-strong);
+$sf-amber-800: var(--sf-warning-strong);
+$sf-amber-900: var(--sf-warning-strong);
 
-// Green extended (dark shades for text on light green backgrounds)
-$sf-green-800: #166534;
-$sf-green-900: #14532d;
-$sf-emerald-700: #047857;
-$sf-emerald-800: #065f46;
-$sf-emerald-900: #15803d;
+$sf-orange-50: var(--sf-warning-bg);
+$sf-orange-100: var(--sf-warning-border);
+$sf-orange-200: var(--sf-warning-border);
+$sf-orange-300: var(--sf-warning-border);
+$sf-orange-400: var(--sf-warning-border);
+$sf-orange-500: var(--sf-warning);
+$sf-orange-600: var(--sf-warning);
+$sf-orange-700: var(--sf-warning-strong);
+$sf-orange-800: var(--sf-warning-strong);
+$sf-orange-900: var(--sf-warning-strong);
 
-// Teal
-$sf-teal-500: #14b8a6;
+$sf-yellow-50: var(--sf-warning-bg);
+$sf-yellow-100: var(--sf-warning-border);
+$sf-yellow-200: var(--sf-warning-border);
+$sf-yellow-300: var(--sf-warning-border);
+$sf-yellow-400: var(--sf-warning-border);
+$sf-yellow-500: var(--sf-warning);
+$sf-yellow-600: var(--sf-warning);
+$sf-yellow-700: var(--sf-warning-strong);
+$sf-yellow-800: var(--sf-warning-strong);
+$sf-yellow-900: var(--sf-warning-strong);
 
-// Orange
-$sf-orange-500: #f97316;
-$sf-orange-600: #ea580c;
+// ── Type ─────────────────────────────────────────────────────────────────────
+$sf-font-sans: var(--sf-font-sans);
+$sf-font-mono: var(--sf-font-mono);
+$sf-font-serif: var(--sf-font-sans);
 
-// Yellow
-$sf-yellow-300: #fde047;
-$sf-yellow-400: #facc15;
-$sf-yellow-500: #eab308;
-$sf-yellow-800: #854d0e;
+$font-size-2xs: var(--sf-text-2xs);
+$font-size-xs: var(--sf-text-xs);
+$font-size-sm: var(--sf-text-sm);
+$font-size-base: var(--sf-text-base);
+$font-size-md: var(--sf-text-md);
+$font-size-lg: var(--sf-text-lg);
+$font-size-xl: var(--sf-text-xl);
+$font-size-2xl: var(--sf-text-xl);
 
-// Neutral grays (Tailwind neutral — used in some WP-adjacent UI)
-$sf-neutral-50:  #fafafa;
-$sf-neutral-100: #f5f5f5;
-$sf-neutral-200: #e5e5e5;
-$sf-neutral-300: #d4d4d4;
-$sf-neutral-400: #a3a3a3;
-$sf-neutral-500: #737373;
-$sf-neutral-600: #525252;
-$sf-neutral-700: #404040;
-$sf-neutral-800: #262626;
-$sf-neutral-900: #171717;
+// ── Spacing ──────────────────────────────────────────────────────────────────
+$space-1: var(--sf-space-1);
+$space-2: var(--sf-space-2);
+$space-3: var(--sf-space-3);
+$space-4: var(--sf-space-4);
+$space-5: var(--sf-space-5);
+$space-6: var(--sf-space-6);
+$space-8: var(--sf-space-8);
+$space-10: var(--sf-space-10);
+$space-12: var(--sf-space-12);
 
-// WordPress admin palette
-$wp-blue-500: #2271b1;    // WP primary button
-$wp-blue-600: #135e96;    // WP primary button hover
-$wp-blue-700: #005a87;    // WP primary button active
-$wp-blue-800: #005177;    // Deeper WP blue
-$wp-blue-link: #0073aa;   // Legacy WP link color
-$wp-blue-light: #00a0d2;  // WP menu hover
-$wp-green: #00a32a;       // WP success
-$wp-green-hover: #46b450; // WP success hover alt
-$wp-dark: #1d2327;        // WP admin body bg
-$wp-gray-10: #eef0f0;     // WP notice bg
-$wp-gray-30: #dcdcde;     // WP border
-$wp-gray-40: #c3c4c7;     // WP placeholder
-$wp-gray-50: #8c8f94;     // WP secondary text
-$wp-gray-70: #50575e;     // WP label text
-$wp-gray-100: #1d2327;    // WP heading color
-$wp-orange: #996800;      // WP warning text
-$wp-orange-bg: #fcf3cd;   // WP warning bg
+// ── Radius ───────────────────────────────────────────────────────────────────
+$radius-xs: var(--sf-radius-xs);
+$radius-sm: var(--sf-radius-sm);
+$radius-md: var(--sf-radius-md);
+$radius-lg: var(--sf-radius-lg);
+$radius-xl: var(--sf-radius-lg);
+$radius-full: var(--sf-radius-full);
 
-// AI Brand Colors (Violet)
-$sf-violet-50: #f5f3ff;   // Very light violet for backgrounds
-$sf-violet-100: #ede9fe;  // Light violet
-$sf-violet-200: #ddd6fe;  // Soft violet for borders
-$sf-violet-300: #c4b5fd;  // Medium soft violet
-$sf-violet-400: #a78bfa;
-$sf-violet-500: #8b5cf6;
-$sf-violet-600: #7c3aed;
-$sf-violet-700: #6d28d9;
-$sf-violet-900: #4c1d95;  // Very dark violet for text
+// ── Elevation ────────────────────────────────────────────────────────────────
+$shadow-xs: var(--sf-shadow-xs);
+$shadow-sm: var(--sf-shadow-sm);
+$shadow-md: var(--sf-shadow-md);
+$shadow-lg: var(--sf-shadow-lg);
+$shadow-xl: var(--sf-shadow-lg);
+$shadow-2xl: var(--sf-shadow-lg);
+// Previously a lime-tinted glow from the abandoned palette.
+$shadow-lime: var(--sf-shadow-focus);
+$shadow-focus: var(--sf-shadow-focus);
 
-// WordPress Compatibility (keeping for backward compatibility)
-$wp-admin-primary: $sf-lime-500;
-$wp-admin-gray-50: $sf-stone-50;
-$wp-admin-gray-900: $sf-stone-900;
-$wp-admin-green: $sf-emerald-500;
-$wp-admin-red: $sf-coral-500;
-$wp-admin-orange: $sf-coral-400;
-$wp-admin-yellow: $sf-amber-500;
+// ── Motion ───────────────────────────────────────────────────────────────────
+$transition-fast: var(--sf-transition-fast);
+$transition-base: var(--sf-transition-base);
+$transition-slow: var(--sf-duration-slow) var(--sf-ease);
 
-// ============================================================================
-// TYPOGRAPHY - Distinctive & Memorable Font Stack
-// Avoiding generic choices (Inter, Roboto, Arial) per design guidelines
-// ============================================================================
+// ── Remaining legacy names ───────────────────────────────────────────────────
+// Referenced by older stylesheets; kept so they resolve, mapped to the scale.
+$font-size-3xl: var(--sf-text-xl);
+$transition-slower: var(--sf-duration-slow) var(--sf-ease);
+$shadow-violet: var(--sf-shadow-focus);
 
-// DM Serif Display - Elegant, distinctive headings with character
-$sf-font-serif: 'DM Serif Display', 'IBM Plex Serif', Georgia, serif;
-
-// JetBrains Mono - Technical precision with personality
-$sf-font-mono: 'JetBrains Mono', 'IBM Plex Mono', 'Consolas', monospace;
-
-// Instrument Sans - Modern, clean, unique alternative to Inter
-$sf-font-sans: 'Instrument Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-	'Helvetica Neue', sans-serif;
-
-// Fallback to WordPress default
-$wp-admin-font-family: $sf-font-sans;
-$wp-admin-font-size-base: 14px;
-$wp-admin-font-size-small: 12px;
-$wp-admin-line-height: 1.6;
-
-// Font Sizes (rem-based for scalability)
-$font-size-xs: 0.75rem;    // 12px
-$font-size-sm: 0.875rem;   // 14px
-$font-size-base: 1rem;     // 16px
-$font-size-lg: 1.125rem;   // 18px
-$font-size-xl: 1.25rem;    // 20px
-$font-size-2xl: 1.5rem;    // 24px
-$font-size-3xl: 2rem;      // 32px
-$font-size-4xl: 2.5rem;    // 40px
-
-// ============================================================================
-// SPACING - 8px Base Grid
-// ============================================================================
-
-$space-1: 0.5rem;   // 8px
-$space-2: 1rem;     // 16px
-$space-3: 1.5rem;   // 24px
-$space-4: 2rem;     // 32px
-$space-5: 2.5rem;   // 40px
-$space-6: 3rem;     // 48px
-$space-8: 4rem;     // 64px
-$space-10: 5rem;    // 80px
-$space-12: 6rem;    // 96px
-
-// WordPress compatibility
-$wp-spacing-xs: $space-1;
-$wp-spacing-sm: $space-2;
-$wp-spacing-md: $space-3;
-$wp-spacing-lg: $space-4;
-$wp-spacing-xl: $space-5;
-$wp-spacing-2xl: $space-6;
-
-// ============================================================================
-// BORDERS & RADIUS
-// ============================================================================
-
-$radius-sm: 0.375rem;  // 6px
-$radius-md: 0.5rem;    // 8px
-$radius-lg: 0.75rem;   // 12px
-$radius-xl: 1rem;      // 16px
-$radius-full: 9999px;  // Full circle
-
-// WordPress compatibility
-$wp-border-radius-sm: $radius-sm;
-$wp-border-radius-md: $radius-md;
-$wp-border-radius-lg: $radius-lg;
-
-// ============================================================================
-// SHADOWS - Soft & Layered
-// ============================================================================
-
-$shadow-xs: 0 1px 1px 0 rgba(0, 0, 0, 0.03);
-$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.08), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
-$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
-$shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.08), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-$shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.15);
-
-// Colored shadows for emphasis
-$shadow-lime: 0 0 0 4px rgba(132, 204, 22, 0.12);
-$shadow-violet: 0 4px 12px rgba(139, 92, 246, 0.3);
-
-// WordPress compatibility
-$wp-box-shadow-sm: $shadow-sm;
-$wp-box-shadow-md: $shadow-md;
-$wp-box-shadow-lg: $shadow-lg;
-
-// ============================================================================
-// TRANSITIONS - Precise Timing
-// ============================================================================
-
-$transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-$transition-base: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-$transition-slow: 350ms cubic-bezier(0.4, 0, 0.2, 1);
-$transition-slower: 500ms cubic-bezier(0.4, 0, 0.2, 1);
-
-// ============================================================================
-// Z-INDEX LAYERS
-// ============================================================================
-
-$z-base: 1;
-$z-dropdown: 1000;
-$z-sticky: 1020;
-$z-fixed: 1030;
-$z-modal-overlay: 100000;
-$z-modal: 100001;
-$z-popover: 100002;
-$z-tooltip: 1000000;
-$z-admin-bar: 99999;
-
-// ============================================================================
-// BREAKPOINTS
-// ============================================================================
-
-$breakpoint-sm: 640px;
-$breakpoint-md: 768px;
-$breakpoint-lg: 1024px;
-$breakpoint-xl: 1280px;
-$breakpoint-2xl: 1536px;
+// WordPress palette names, mapped onto our roles.
+$wp-blue-500: var(--sf-a-400);
+$wp-blue-600: var(--sf-a-500);
+$wp-blue-700: var(--sf-a-600);
+$wp-blue-800: var(--sf-a-700);
+$wp-blue-link: var(--sf-a-500);
+$wp-blue-light: var(--sf-a-50);
+$wp-green: var(--sf-success);
+$wp-green-hover: var(--sf-success-strong);
+$wp-orange: var(--sf-warning);
+$wp-orange-bg: var(--sf-warning-bg);
+$wp-dark: var(--sf-n-900);
+$wp-gray-30: var(--sf-n-200);
+$wp-gray-40: var(--sf-n-300);
+$wp-gray-50: var(--sf-n-400);
+$wp-gray-70: var(--sf-n-600);

@@ -8,7 +8,7 @@
   padding: 16px;
   background: linear-gradient(135deg, var(--sf-gray-50) 0%, var(--sf-surface) 100%);
   border: 1px solid var(--wp-gray-30);
-  border-radius: 4px;
+  border-radius: var(--sf-radius-sm);
   
   &--inline {
     align-items: center;
@@ -69,7 +69,7 @@
 
 .sf-upgrade-prompt__title {
   margin: 0 0 8px;
-  font-size: 14px;
+  font-size: var(--sf-text-base);
   font-weight: 600;
   color: var(--wp-dark);
   
@@ -89,7 +89,7 @@
   align-items: flex-start;
   gap: 8px;
   margin-bottom: 6px;
-  font-size: 13px;
+  font-size: var(--sf-text-sm);
   color: var(--wp-gray-70);
   
   &:last-child {

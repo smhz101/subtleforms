@@ -2,7 +2,7 @@
   padding: 20px;
   background: var(--sf-surface);
   border: 1px solid var(--sf-neutral-200);
-  border-radius: 4px;
+  border-radius: var(--sf-radius-sm);
 
   &__table {
     width: 100%;
@@ -35,7 +35,7 @@
     width: 16px;
     height: 16px;
     border: 1px solid var(--sf-gray-300);
-    border-radius: 2px;
+    border-radius: var(--sf-radius-xs);
     background: linear-gradient(
       90deg,
       var(--sf-gray-100) 0%,

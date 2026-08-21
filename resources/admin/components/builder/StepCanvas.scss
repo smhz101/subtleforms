@@ -23,7 +23,7 @@
 	}
 
 	&__empty-title {
-		font-size: 0.875rem;
+		font-size: var(--sf-text-base);
 		line-height: 1.25rem;
 		font-weight: 500;
 		color: var(--sf-gray-500);
@@ -31,7 +31,7 @@
 	}
 
 	&__empty-description {
-		font-size: 0.875rem;
+		font-size: var(--sf-text-base);
 		line-height: 1.25rem;
 		color: var(--sf-gray-400);
 	}
@@ -44,7 +44,7 @@
 		margin-bottom: 1rem; /* Reduced from 1.5rem for better density */
 		padding: 0.625rem 0.875rem; /* Slightly tighter padding */
 		border: 1px solid var(--sf-blue-200);
-		border-radius: 0.5rem;
+		border-radius: var(--sf-radius-md);
 		cursor: pointer;
 
 		&:hover {
@@ -64,12 +64,12 @@
 		justify-content: center;
 		align-items: center;
 		background-color: var(--sf-blue-600);
-		border-radius: 9999px;
+		border-radius: var(--sf-radius-full);
 		width: 2rem;
 		height: 2rem;
 		font-weight: 600;
 		color: var(--sf-surface);
-		font-size: 0.875rem;
+		font-size: var(--sf-text-base);
 	}
 
 	.sf-step-header__content {
@@ -77,14 +77,14 @@
 	}
 
 	.sf-step-header__title {
-		font-size: 0.875rem;
+		font-size: var(--sf-text-base);
 		line-height: 1.25rem;
 		font-weight: 600;
 		color: var(--sf-gray-900);
 
                 &--editable {
                         cursor: text;
-                        border-radius: 3px;
+                        border-radius: var(--sf-radius-xs);
                         padding: 1px 3px;
                         margin: -1px -3px;
 
@@ -95,21 +95,21 @@
         }
 
         .sf-step-header__title-input {
-                font-size: 0.875rem;
+                font-size: var(--sf-text-base);
                 line-height: 1.25rem;
                 font-weight: 600;
                 color: var(--sf-gray-900);
-                border: 1px solid var(--sf-blue-500, #3b82f6);
-                border-radius: 3px;
+                border: 1px solid var(--sf-blue-500, var(--sf-a-400));
+                border-radius: var(--sf-radius-xs);
                 padding: 1px 4px;
                 width: 100%;
-                background: #fff;
+                background: var(--sf-n-0);
                 outline: none;
                 box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
         }
 
         .sf-step-header__description {
-                font-size: 0.75rem;
+                font-size: var(--sf-text-xs);
                 line-height: 1rem;
                 color: var(--sf-gray-500);
                 margin-top: 0.25rem;
@@ -117,7 +117,7 @@
 
                 &--editable {
                         cursor: text;
-                        border-radius: 3px;
+                        border-radius: var(--sf-radius-xs);
                         padding: 1px 3px;
                         margin: -1px -3px;
 
@@ -133,15 +133,15 @@
         }
 
         .sf-step-header__desc-input {
-                font-size: 0.75rem;
+                font-size: var(--sf-text-xs);
                 line-height: 1rem;
                 color: var(--sf-gray-500);
-                border: 1px solid var(--sf-blue-500, #3b82f6);
-                border-radius: 3px;
+                border: 1px solid var(--sf-blue-500, var(--sf-a-400));
+                border-radius: var(--sf-radius-xs);
                 padding: 2px 4px;
                 width: 100%;
                 resize: vertical;
-                background: #fff;
+                background: var(--sf-n-0);
                 outline: none;
                 box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
 		line-height: 1rem;

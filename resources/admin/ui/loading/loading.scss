@@ -12,7 +12,7 @@
   );
   background-size: 200% 100%;
   animation: skeleton-loading 1.5s ease-in-out infinite;
-  border-radius: 4px;
+  border-radius: var(--sf-radius-sm);
 }
 
 @keyframes skeleton-loading {
@@ -31,8 +31,8 @@
 }
 
 .sf-skeleton-card {
-  border: 1px solid var(--sf-gray-200, #e5e7eb);
-  border-radius: 6px;
+  border: 1px solid var(--sf-gray-200, var(--sf-n-100));
+  border-radius: var(--sf-radius-md);
   overflow: hidden;
 
   &__image {
@@ -53,11 +53,11 @@
     display: flex;
     gap: 16px;
     padding: 12px;
-    border-bottom: 1px solid var(--sf-gray-200, #e5e7eb);
+    border-bottom: 1px solid var(--sf-gray-200, var(--sf-n-100));
   }
 
   &__header {
-    background: var(--sf-gray-50, #f9fafb);
+    background: var(--sf-gray-50, var(--sf-n-25));
   }
 }
 
@@ -107,7 +107,7 @@
     width: 100%;
     height: 100%;
     border: 2px solid var(--sf-gray-100);
-    border-top-color: var(--sf-blue-600, #2563eb);
+    border-top-color: var(--sf-blue-600, var(--sf-a-500));
     border-radius: 50%;
     animation: spin 0.6s linear infinite;
   }
@@ -125,8 +125,8 @@
   gap: 8px;
 
   &__text {
-    font-size: 14px;
-    color: var(--sf-gray-500, #6b7280);
+    font-size: var(--sf-text-base);
+    color: var(--sf-gray-500, var(--sf-n-500));
   }
 }
 
@@ -144,30 +144,30 @@
   }
 
   &__title {
-    font-size: 18px;
+    font-size: var(--sf-text-lg);
     font-weight: 600;
-    color: var(--sf-gray-900, #111827);
+    color: var(--sf-gray-900, var(--sf-n-900));
     margin-bottom: 8px;
   }
 
   &__description {
-    font-size: 14px;
-    color: var(--sf-gray-500, #6b7280);
+    font-size: var(--sf-text-base);
+    color: var(--sf-gray-500, var(--sf-n-500));
     line-height: 1.6;
     margin-bottom: 24px;
   }
 
   &__action {
     padding: 10px 24px;
-    background: var(--sf-blue-600, #2563eb);
+    background: var(--sf-blue-600, var(--sf-a-500));
     color: white;
     border: none;
-    border-radius: 6px;
+    border-radius: var(--sf-radius-md);
     cursor: pointer;
-    font-size: 14px;
+    font-size: var(--sf-text-base);
 
     &:hover {
-      background: var(--sf-blue-700, #1d4ed8);
+      background: var(--sf-blue-700, var(--sf-a-600));
     }
   }
 }

@@ -207,7 +207,7 @@ $breakpoint-tablet: 768px;
 		gap: 0.375rem;
 		padding: 0.5rem 0.75rem;
 		border-bottom: 1px solid $sf-gray-200;
-		background: #fff;
+		background: var(--sf-n-0);
 		flex-shrink: 0;
 		transition: background $transition-fast;
 
@@ -234,7 +234,7 @@ $breakpoint-tablet: 768px;
 		border: none;
 		outline: none;
 		background: transparent;
-		font-size: 0.8125rem;
+		font-size: var(--sf-text-sm);
 		color: $sf-gray-900;
 		padding: 0;
 		line-height: 1.5;
@@ -259,7 +259,7 @@ $breakpoint-tablet: 768px;
 		border: none;
 		background: $sf-gray-200;
 		color: $sf-gray-500;
-		font-size: 12px;
+		font-size: var(--sf-text-xs);
 		line-height: 1;
 		cursor: pointer;
 		flex-shrink: 0;
@@ -300,7 +300,7 @@ $breakpoint-tablet: 768px;
 	}
 
 	&__category-label {
-		font-size: 0.6875rem;
+		font-size: var(--sf-text-2xs);
 		font-weight: 700;
 		color: $sf-gray-500;
 		text-transform: uppercase;
@@ -324,7 +324,7 @@ $breakpoint-tablet: 768px;
 		gap: 0.375rem;
 		padding: 0.4375rem 0.5rem;
 		border-radius: $radius-sm;
-		background: #fff;
+		background: var(--sf-n-0);
 		border: 1px solid $sf-gray-200;
 		cursor: pointer;
 		text-align: left;
@@ -374,7 +374,7 @@ $breakpoint-tablet: 768px;
 	}
 
 	&__item-label {
-		font-size: 0.6875rem;
+		font-size: var(--sf-text-2xs);
 		font-weight: 500;
 		color: $sf-gray-700;
 		line-height: 1.2;
@@ -394,7 +394,7 @@ $breakpoint-tablet: 768px;
 	&__empty {
 		padding: 1.5rem 1rem;
 		text-align: center;
-		font-size: 0.8125rem;
+		font-size: var(--sf-text-sm);
 		color: $sf-gray-500;
 		font-family: $sf-font-sans;
 	}

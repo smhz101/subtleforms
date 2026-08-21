@@ -28,7 +28,7 @@
 }
 
 .sf-filter-clear-link {
-	font-size: 0.875rem;
+	font-size: var(--sf-text-base);
 }
 
 .sf-export-btn--locked {
@@ -40,7 +40,7 @@
 	display: inline-flex !important;
 	align-items: center;
 	gap: 5px;
-	transition: all 0.2s ease;
+	transition: all var(--sf-duration-base) ease;
 
 	&:hover {
 		opacity: 1;
@@ -52,7 +52,7 @@
 .sf-export-btn__icon {
 	flex-shrink: 0;
 	pointer-events: none;
-	color: var(--sf-blue-600, #2563eb);
+	color: var(--sf-blue-600, var(--sf-a-500));
 	font-weight: 700;
 }
 
@@ -73,7 +73,7 @@
 
 	&__label {
 		display: block;
-		font-size: 0.75rem;
+		font-size: var(--sf-text-xs);
 		font-weight: 500;
 		color: var(--sf-gray-600);
 		line-height: 1.4;
@@ -82,10 +82,10 @@
 	&__input {
 		height: 36px;
 		padding: 0 0.625rem;
-		font-size: 0.875rem;
+		font-size: var(--sf-text-base);
 		border: 1px solid var(--sf-gray-300);
-		border-radius: 4px;
-		background: var(--sf-surface, #fff);
+		border-radius: var(--sf-radius-sm);
+		background: var(--sf-surface, var(--sf-n-0));
 		color: var(--sf-gray-900);
 		min-width: 200px;
 

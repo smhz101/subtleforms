@@ -19,11 +19,11 @@
     border-radius: $radius-lg;
     background: linear-gradient(135deg, var(--sf-surface) 0%, var(--sf-neutral-50) 100%);
     color: $sf-stone-800;
-    font-size: 13px;
+    font-size: var(--sf-text-sm);
     font-weight: 500;
     line-height: 1.4;
     cursor: pointer;
-    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all var(--sf-duration-slow) cubic-bezier(0.4, 0, 0.2, 1);
     text-align: left;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
     position: relative;
@@ -38,7 +38,7 @@
       bottom: 0;
       background: linear-gradient(135deg, rgba(132, 204, 22, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
       opacity: 0;
-      transition: opacity 0.3s ease;
+      transition: opacity var(--sf-duration-slow) ease;
     }
 
     &:hover {
@@ -124,7 +124,7 @@
   }
 
   &__description {
-    font-size: 11px;
+    font-size: var(--sf-text-2xs);
     color: var(--wp-gray-50);
     line-height: 1.3;
     white-space: nowrap;
@@ -141,7 +141,7 @@
     }
 
     .sf-license-status__label {
-      font-size: 12px;
+      font-size: var(--sf-text-xs);
     }
 
     .sf-license-status__indicator {
@@ -163,7 +163,7 @@
     }
 
     .sf-license-status__label {
-      font-size: 12px;
+      font-size: var(--sf-text-xs);
       font-weight: 400;
     }
   }
