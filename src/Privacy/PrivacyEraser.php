@@ -123,7 +123,7 @@ final class PrivacyEraser {
 		global $wpdb;
 		$table = $wpdb->prefix . 'subtleforms_submissions';
 
-		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled; query is properly prepared.
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled; query is properly prepared.
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
 				"SELECT id, form_id FROM {$table} WHERE payload LIKE %s ORDER BY created_at DESC LIMIT %d OFFSET %d",
@@ -133,7 +133,6 @@ final class PrivacyEraser {
 			),
 			ARRAY_A
 		);
-		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		return $results ?: array();
 	}

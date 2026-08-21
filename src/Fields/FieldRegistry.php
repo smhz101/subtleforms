@@ -29,11 +29,10 @@ final class FieldRegistry {
 	 */
 	public function register( FieldDefinition $definition ): void {
 		if ( isset( $this->fields[ $definition->type ] ) ) {
-			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		throw new InvalidArgumentException(
 				sprintf( 'Field type "%s" is already registered.', $definition->type )
 			);
-		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		$this->fields[ $definition->type ] = $definition;

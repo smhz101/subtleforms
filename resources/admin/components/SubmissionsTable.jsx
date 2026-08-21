@@ -637,7 +637,7 @@ const SubmissionsTable = forwardRef(
     );
 
     return (
-      <div className='submissions-table'>
+      <div className='sf-submissions-table'>
         <DataTable
           columns={columns}
           data={displayedRows}
