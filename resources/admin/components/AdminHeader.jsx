@@ -95,6 +95,7 @@ const AdminHeader = memo(function AdminHeader({
         <input
           ref={titleInputRef}
           type='text'
+          aria-label={__('Form title', 'subtleforms')}
           value={titleValue}
           onChange={(event) => setTitleValue(event.target.value)}
           onBlur={handleTitleSave}

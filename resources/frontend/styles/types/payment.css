@@ -11,7 +11,7 @@
 
 /* ===== Payment Sections ===== */
 .subtleforms-payment-section {
-	background: #fafafa;
+	background: var(--subtleforms-color-bg-subtle);
 	border: 1px solid var(--subtleforms-color-border);
 	border-radius: var(--subtleforms-radius-md);
 	padding: var(--subtleforms-spacing-lg);
@@ -108,7 +108,7 @@
 }
 
 .subtleforms-coupon-apply:hover {
-	background: #000;
+	background: var(--subtleforms-color-text);
 }
 
 /* ===== Security Badges ===== */
@@ -140,7 +140,7 @@
 }
 
 .subtleforms--type-payment .subtleforms-button-submit:hover {
-	background: #218838;
+	background: var(--subtleforms-color-success);
 	box-shadow: 0 6px 16px rgba(40, 167, 69, 0.4);
 	transform: translateY(-1px);
 }

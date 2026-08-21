@@ -348,6 +348,7 @@ export default function SubmissionsPage({ formId }) {
               <input
                 type='text'
                 className='sf-filter-field-search__input'
+                aria-label={__('Filter by field value', 'subtleforms')}
                 value={fieldValue}
                 onChange={(e) => handleFieldValueChange(e.target.value)}
                 placeholder={__('e.g. john@example.com', 'subtleforms')}

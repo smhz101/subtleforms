@@ -37,6 +37,7 @@ export function BuilderTitle({
         <input
           ref={titleInputRef}
           type='text'
+          aria-label={__('Form title', 'subtleforms')}
           value={formTitle}
           onChange={(event) => setFormTitle(event.target.value)}
           onBlur={() => onPersistTitle(formTitle)}

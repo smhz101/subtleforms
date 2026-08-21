@@ -189,6 +189,7 @@ export default function LicenseSettings() {
                                                         <input
                                                                 type="text"
                                                                 className="regular-text sf-license-form__key-input"
+                                                                aria-label={ __( 'License key', 'subtleforms' ) }
                                                                 placeholder="XXXX-XXXX-XXXX-XXXX"
                                                                 disabled
                                                         />

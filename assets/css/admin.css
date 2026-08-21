@@ -94,5 +94,5 @@ body.subtle-forms_page_subtleforms-submission-detail .wrap {
 }
 
 .subtleforms-admin .sf-border-l-blue-500 {
-	border-left-color: #3b82f6;
+	border-left-color: var(--subtleforms-color-primary);
 }
