@@ -116,13 +116,11 @@ button.is-destructive:focus-visible {
  */
 
 /* Gray text - darkened for better contrast */
-.sf-text-gray-600,
-.text-gray-600 {
+.sf-text-gray-600 {
   color: var(--sf-n-600) !important; /* 7.0:1 contrast on white */
 }
 
-.sf-text-gray-500,
-.text-gray-500 {
+.sf-text-gray-500 {
   color: var(--sf-n-500) !important; /* 4.6:1 contrast on white - AA compliant for normal text */
 }
 

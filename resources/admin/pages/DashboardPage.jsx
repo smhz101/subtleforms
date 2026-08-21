@@ -20,30 +20,23 @@ import './DashboardPage.scss';
 export default function Dashboard() {
   const { data, isLoading: loading, error, refetch } = useDashboardStats();
 
-  if (loading) {
+  // Loading and error render inside AdminShell so the header stays put; see
+  // AdminShell for the shared presentation.
+  if (loading || error || !data) {
     return (
-      <div className='subtleforms-dashboard-loading'>
-        <Spinner />
-        <p>{__('Loading dashboard...', 'subtleforms')}</p>
-      </div>
+      <AdminShell
+        title={__('Dashboard', 'subtleforms')}
+        isLoading={loading}
+        loadingLabel={__('Loading dashboard…', 'subtleforms')}
+        error={
+          error
+            ? error?.message ||
+              __('Failed to load dashboard data', 'subtleforms')
+            : null
+        }
+        onRetry={() => refetch()}
+      />
     );
-  }
-
-  if (error) {
-    return (
-      <div className='subtleforms-dashboard-error'>
-        <Notice status='error' isDismissible={false}>
-          {error?.message || __('Failed to load dashboard data', 'subtleforms')}
-        </Notice>
-        <Button variant='primary' onClick={() => refetch()}>
-          {__('Retry', 'subtleforms')}
-        </Button>
-      </div>
-    );
-  }
-
-  if (!data) {
-    return null;
   }
 
   const { stats, recent_submissions, recent_forms, system_health } = data;
@@ -130,7 +123,7 @@ export default function Dashboard() {
                               className={`sf-status-badge sf-status-badge--${submission.status}`}>
                               {submission.status}
                             </span>
-                            <span className='time-ago'>
+                            <span className='sf-time-ago'>
                               {submission.time_ago}
                             </span>
                           </div>
@@ -240,7 +233,7 @@ export default function Dashboard() {
                               {form.submission_count}{' '}
                               {__('submissions', 'subtleforms')}
                             </span>
-                            <span className='time-ago'>{form.time_ago}</span>
+                            <span className='sf-time-ago'>{form.time_ago}</span>
                           </div>
                         </div>
                         <Button

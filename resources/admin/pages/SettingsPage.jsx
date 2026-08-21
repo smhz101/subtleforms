@@ -53,28 +53,22 @@ export default function Settings() {
   // ── Loading state ────────────────────────────────────────────────────
   if (loading) {
     return (
-      <AdminShell title={__('Settings', 'subtleforms')}>
-        <div className='subtleforms-settings-loading'>
-          <Spinner />
-          <p>{__('Loading settings...', 'subtleforms')}</p>
-        </div>
-      </AdminShell>
+      <AdminShell
+        title={__('Settings', 'subtleforms')}
+        isLoading
+        loadingLabel={__('Loading settings…', 'subtleforms')}
+      />
     );
   }
 
   // ── Error / empty state ──────────────────────────────────────────────
   if (!settings) {
     return (
-      <AdminShell title={__('Settings', 'subtleforms')}>
-        <div className='subtleforms-settings-error'>
-          <Notice status='error' isDismissible={false}>
-            {__('Failed to load settings.', 'subtleforms')}
-          </Notice>
-          <Button variant='primary' onClick={loadSettings}>
-            {__('Retry', 'subtleforms')}
-          </Button>
-        </div>
-      </AdminShell>
+      <AdminShell
+        title={__('Settings', 'subtleforms')}
+        error={__('Failed to load settings.', 'subtleforms')}
+        onRetry={loadSettings}
+      />
     );
   }
   const hasPro = isProFeature( 'extensions.webhooks' );

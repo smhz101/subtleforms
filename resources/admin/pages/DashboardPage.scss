@@ -210,7 +210,7 @@ a.subtleforms-stat-card:hover {
 	color: var(--sf-surface);
 }
 
-.time-ago,
+.sf-time-ago,
 .sf-submission-count {
 	color: var(--sf-gray-400);
 }
@@ -321,25 +321,6 @@ a.subtleforms-stat-card:hover {
 	font-size: var(--sf-text-base);
 	font-weight: 500;
 	color: var(--sf-slate-900);
-}
-
-/* Loading & Error States */
-.subtleforms-dashboard-loading,
-.subtleforms-dashboard-error {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	padding: 60px 20px;
-	text-align: center;
-}
-
-.subtleforms-dashboard-loading .components-spinner {
-	margin-bottom: 16px;
-}
-
-.subtleforms-dashboard-error {
-	gap: 16px;
 }
 
 /* Responsive */

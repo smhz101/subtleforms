@@ -10,7 +10,7 @@
 	}
 }
 
-.onboarding-wizard__review {
+.sf-onboarding-wizard__review {
 	&-card {
 		background-color: var(--sf-surface);
 		padding: 1.5rem;
@@ -84,7 +84,7 @@
 	}
 }
 
-.onboarding-wizard__next-steps {
+.sf-onboarding-wizard__next-steps {
 	background-color: var(--sf-blue-50);
 	padding: 1.5rem;
 	border: 1px solid var(--sf-blue-200);
@@ -345,7 +345,7 @@
 	}
 
 	&__summary {
-		// Styles moved to .onboarding-wizard__review-card
+		// Styles moved to .sf-onboarding-wizard__review-card
 	}
 
 	&__finish {
@@ -383,7 +383,7 @@
 	}
 
 	&__next-steps {
-		// Styles moved to .onboarding-wizard__next-steps
+		// Styles moved to .sf-onboarding-wizard__next-steps
 	}
 
 	&__actions {

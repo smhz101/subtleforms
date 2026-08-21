@@ -1,4 +1,5 @@
 import { __ } from '@wordpress/i18n';
+import { Spinner, Notice, Button } from '@wordpress/components';
 import AdminHeader from './AdminHeader';
 import ActionBar from './ActionBar';
 import Notices from './Notices';
@@ -23,11 +24,13 @@ import './AdminShell.scss';
  * - Content Area: Viewport-based height, scrollable
  * - Bottom Bar: Optional pagination
  *
- * Used By:
- * - All Forms page (FormsPage.jsx)
- * - Form Builder page (FormBuilderPage.jsx)
- * - Submissions list page (SubmissionsPage.jsx)
- * - Submission detail page (SubmissionDetailPage.jsx)
+ * Loading, error and empty states are props rather than something each page
+ * builds for itself. Pages used to return their own markup for these, and
+ * several returned it *instead of* the shell — so the header, title and actions
+ * vanished while data loaded and reappeared afterwards. Rendering them here
+ * keeps the chrome still.
+ *
+ * Used by every admin page.
  */
 export default function AdminShell({
   title,
@@ -39,10 +42,51 @@ export default function AdminShell({
   noScroll = false,
   editableTitle = false,
   onTitleChange,
+  isLoading = false,
+  loadingLabel,
+  error = null,
+  onRetry,
+  isEmpty = false,
+  empty = null,
 }) {
   const TOP_BAR_HEIGHT = 48;
   const ACTION_BAR_HEIGHT = actionBarLeft || actionBarRight ? 56 : 0;
   const WP_ADMIN_BAR_HEIGHT = 32;
+
+  const renderBody = () => {
+    if (isLoading) {
+      return (
+        <div className='sf-admin-shell__state' role='status' aria-live='polite'>
+          <Spinner />
+          <p>{loadingLabel || __('Loading…', 'subtleforms')}</p>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div className='sf-admin-shell__state'>
+          <Notice status='error' isDismissible={false}>
+            {typeof error === 'string'
+              ? error
+              : error?.message ||
+                __('Something went wrong loading this page.', 'subtleforms')}
+          </Notice>
+          {onRetry && (
+            <Button variant='primary' onClick={onRetry}>
+              {__('Try again', 'subtleforms')}
+            </Button>
+          )}
+        </div>
+      );
+    }
+
+    if (isEmpty && empty) {
+      return <div className='sf-admin-shell__state'>{empty}</div>;
+    }
+
+    return children;
+  };
 
   return (
     <div className='subtleforms-admin sf-admin-shell'>
@@ -79,7 +123,7 @@ export default function AdminShell({
               className={`sf-admin-shell__content-body ${
                 noScroll ? 'sf-admin-shell__content-body--no-scroll' : ''
               }`}>
-              {children}
+              {renderBody()}
             </div>
           </div>
         </div>
