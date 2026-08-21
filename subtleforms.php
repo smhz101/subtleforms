@@ -7,7 +7,7 @@
  * Author: Muzammil Hussain
  * Requires at least: 6.0
  * Requires PHP: 8.1
- * Tested up to: 6.9
+ * Tested up to: 7.1
  * Text Domain: subtleforms
  * Domain Path: /languages
  * License: GPL-2.0-or-later
