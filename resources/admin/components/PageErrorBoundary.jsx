@@ -11,7 +11,7 @@
 import { Component } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Spinner } from '@wordpress/components';
-import Icon from './ui/Icon';
+import Icon from '../ui/Icon';
 import './PageErrorBoundary.scss';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────

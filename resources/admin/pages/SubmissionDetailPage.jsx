@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { __, sprintf } from '@wordpress/i18n';
 import AdminShell from '../components/AdminShell';
 import { apiClient } from '../data';
-import Icon from '../components/ui/Icon';
+import Icon from '../ui/Icon';
 import './SubmissionDetailPage.scss';
 
 // ─── Pipeline timeline helpers ──────────────────────────────────────────────

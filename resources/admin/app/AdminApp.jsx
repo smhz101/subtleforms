@@ -34,7 +34,7 @@ import { ModalProvider } from '../ui/modals';
 import PageErrorBoundary from '../components/PageErrorBoundary';
 import { RouteLoadingFallback } from '../components/RouteTransition';
 import { CreateFormModal } from '../modals';
-import { UpgradeModal } from '../components/ui';
+import { UpgradeModal } from '../ui';
 
 // ─── Query Client ─────────────────────────────────────────────────────────────
 

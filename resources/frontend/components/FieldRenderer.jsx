@@ -1,5 +1,9 @@
 import { __ } from '@wordpress/i18n';
 import { getIn } from '../utils/valuePaths';
+import { debug } from '../../shared/debug';
+import SignaturePad from './fields/SignaturePad';
+import RichTextInput from './fields/RichTextInput';
+import ChainedSelect from './fields/ChainedSelect';
 
 // ISO 3166-1 Alpha-2 country codes
 const COUNTRIES = [
@@ -286,6 +290,47 @@ export default function FieldRenderer({
     return null;
   }
 
+  // Structural fields carry no value and take no label/error chrome, so they
+  // return before the input wrapper below.
+  if (field.type === 'section_break') {
+    return (
+      <div className='subtleforms-section-break'>
+        {config.title && (
+          <h3 className='subtleforms-section-break__title'>{config.title}</h3>
+        )}
+        {config.description && (
+          <p className='subtleforms-section-break__description'>
+            {config.description}
+          </p>
+        )}
+        <hr className='subtleforms-section-break__rule' />
+      </div>
+    );
+  }
+
+  if (field.type === 'html') {
+    // Content is authored by an administrator in the builder, not by the
+    // visitor, and is sanitized server-side on save.
+    return (
+      <div
+        className='subtleforms-html'
+        dangerouslySetInnerHTML={{ __html: config.content || '' }}
+      />
+    );
+  }
+
+  if (field.type === 'action_hook') {
+    // A server-side extension point. It renders nothing, but must be a known
+    // type so it doesn't fall through to "Field type not supported".
+    return null;
+  }
+
+  if (field.type === 'step') {
+    // Step boundaries are consumed by FormRenderer to slice the form into
+    // pages; they are never drawn inline.
+    return null;
+  }
+
   // Handle container fields
   if (field.type === 'group_container' || field.type === 'repeat_container') {
     return (
@@ -395,7 +440,7 @@ export default function FieldRenderer({
       field.type === 'turnstile') &&
     config.captchaHtml?.includes('subtleforms-recaptcha-v3')
   ) {
-    console.log('[SubtleForms] Rendering reCAPTCHA v3 (invisible)');
+    debug('[SubtleForms] Rendering reCAPTCHA v3 (invisible)');
     return (
       <div
         className='subtleforms-captcha-hidden'
@@ -456,6 +501,9 @@ function renderInput(
     case 'phone':
     case 'tel':
     case 'date':
+    case 'time':
+    case 'datetime':
+    case 'password':
       return (
         <input
           id={inputId}
@@ -748,7 +796,7 @@ function renderInput(
       // CAPTCHA widget - rendered via provider-specific HTML
       // Note: reCAPTCHA v3 is handled earlier to avoid wrapper/label
       if (config.captchaHtml) {
-        console.log('[SubtleForms] CAPTCHA rendering:', {
+        debug('[SubtleForms] CAPTCHA rendering:', {
           type: field.type,
           provider: config.providerName,
           htmlLength: config.captchaHtml.length,
@@ -1038,6 +1086,203 @@ function renderInput(
       );
     }
 
+    case 'range_slider': {
+      const sliderMin = Number(config.min ?? 0);
+      const sliderMax = Number(config.max ?? 100);
+      const sliderStep = Number(config.step ?? 1);
+      const sliderValue =
+        value === '' || value === undefined || value === null
+          ? Math.round((sliderMin + sliderMax) / 2)
+          : Number(value);
+
+      return (
+        <div className='subtleforms-range'>
+          <input
+            id={inputId}
+            type='range'
+            className='subtleforms-range__input'
+            min={sliderMin}
+            max={sliderMax}
+            step={sliderStep}
+            value={sliderValue}
+            onChange={(e) => onChange(Number(e.target.value))}
+            aria-required={required}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${inputId}-error` : undefined}
+          />
+          {/* The number is the only cue for the current value, so it is exposed
+              to assistive tech rather than hidden as decoration. */}
+          <output className='subtleforms-range__value' htmlFor={inputId}>
+            {sliderValue}
+          </output>
+        </div>
+      );
+    }
+
+    case 'net_promoter_score': {
+      const npsValue = value === '' || value === undefined ? null : Number(value);
+      return (
+        <div
+          className='subtleforms-nps'
+          role='radiogroup'
+          aria-required={required}
+          aria-invalid={!!error}
+          aria-describedby={error ? `${inputId}-error` : undefined}>
+          <div className='subtleforms-nps__scale'>
+            {Array.from({ length: 11 }, (_, score) => (
+              <label key={score} className='subtleforms-nps__option'>
+                <input
+                  type='radio'
+                  name={config.key || field.key || inputId}
+                  value={score}
+                  checked={npsValue === score}
+                  onChange={() => onChange(score)}
+                  className='subtleforms-sr-only'
+                />
+                <span
+                  className={
+                    npsValue === score
+                      ? 'subtleforms-nps__number is-selected'
+                      : 'subtleforms-nps__number'
+                  }>
+                  {score}
+                </span>
+              </label>
+            ))}
+          </div>
+          <div className='subtleforms-nps__legend' aria-hidden='true'>
+            <span>{config.minLabel || __('Not at all likely', 'subtleforms')}</span>
+            <span>{config.maxLabel || __('Extremely likely', 'subtleforms')}</span>
+          </div>
+        </div>
+      );
+    }
+
+    case 'checkbox_grid': {
+      const gridRows = Array.isArray(config.rows) ? config.rows : [];
+      const gridCols = Array.isArray(config.columns) ? config.columns : [];
+      const grid = value && typeof value === 'object' ? value : {};
+
+      if (gridRows.length === 0 || gridCols.length === 0) {
+        return null;
+      }
+
+      const cellLabel = (row, col) =>
+        `${row.label ?? row}: ${col.label ?? col}`;
+
+      return (
+        <table className='subtleforms-checkbox-grid'>
+          <thead>
+            <tr>
+              <td />
+              {gridCols.map((col) => (
+                <th key={col.value ?? col} scope='col'>
+                  {col.label ?? col}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {gridRows.map((row) => {
+              const rowKey = row.value ?? row;
+              return (
+                <tr key={rowKey}>
+                  <th scope='row'>{row.label ?? row}</th>
+                  {gridCols.map((col) => {
+                    const colKey = col.value ?? col;
+                    const checked = !!grid[rowKey]?.[colKey];
+                    return (
+                      <td key={colKey}>
+                        <input
+                          type='checkbox'
+                          className='subtleforms-checkbox'
+                          checked={checked}
+                          // Each cell needs its own name for screen readers;
+                          // the row/column headers alone are not announced
+                          // for inputs inside a table cell.
+                          aria-label={cellLabel(row, col)}
+                          onChange={(e) =>
+                            onChange({
+                              ...grid,
+                              [rowKey]: {
+                                ...(grid[rowKey] || {}),
+                                [colKey]: e.target.checked,
+                              },
+                            })
+                          }
+                        />
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      );
+    }
+
+    case 'color_picker':
+      return (
+        <div className='subtleforms-color'>
+          <input
+            id={inputId}
+            type='color'
+            className='subtleforms-color__swatch'
+            value={value || config.default || '#000000'}
+            onChange={(e) => onChange(e.target.value)}
+            aria-required={required}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${inputId}-error` : undefined}
+          />
+          {/* A colour well alone is unusable without colour vision; the hex
+              value is editable so the field can be completed by typing. */}
+          <input
+            type='text'
+            className='subtleforms-color__hex'
+            value={value || config.default || '#000000'}
+            onChange={(e) => onChange(e.target.value)}
+            aria-label={__('Colour hex value', 'subtleforms')}
+            pattern='#[0-9a-fA-F]{6}'
+          />
+        </div>
+      );
+
+    case 'signature':
+      return (
+        <SignaturePad
+          inputId={inputId}
+          value={value}
+          onChange={onChange}
+          required={required}
+          error={error}
+        />
+      );
+
+    case 'rich_text':
+      return (
+        <RichTextInput
+          inputId={inputId}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          required={required}
+          error={error}
+        />
+      );
+
+    case 'chained_select':
+      return (
+        <ChainedSelect
+          inputId={inputId}
+          config={config}
+          value={value}
+          onChange={onChange}
+          required={required}
+          error={error}
+        />
+      );
+
     default:
       return (
         <div className='subtleforms-unsupported'>
@@ -1060,6 +1305,14 @@ function getInputType(fieldType) {
       return 'tel';
     case 'date':
       return 'date';
+    case 'time':
+      return 'time';
+    case 'datetime':
+      // datetime-local is the only widely implemented native control; the
+      // schema's `format` is applied server-side on display.
+      return 'datetime-local';
+    case 'password':
+      return 'password';
     default:
       return 'text';
   }

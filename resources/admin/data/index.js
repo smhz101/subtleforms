@@ -8,7 +8,7 @@
 export { queryKeys } from './queryKeys';
 
 // API Client
-export { apiClient, legacyFetch } from './apiClient';
+export { apiClient } from './apiClient';
 
 // Queries
 export {

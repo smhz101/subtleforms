@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState, useRef } from '@wordpress/element';
 import { Popover } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { getIcon } from './utils/iconMap';
-import Icon from '../ui/Icon';
+import Icon from '../../ui/Icon';
 import FieldDock from './FieldDock';
 import FieldInspector from './FieldInspector';
 import FormBuilder from './FormBuilder';

@@ -138,19 +138,56 @@ final class FormsRepository {
 		// Phase B3: Only fetch needed columns for list views (skip large config JSON).
 		// Extract form_type and template_id: prefer draft_schema (in-progress edits) then fall back
 		// to config (published schema). draft_schema is NULL until a builder session saves a draft.
+		// JSON_EXTRACT / JSON_UNQUOTE need MySQL 5.7+ or MariaDB 10.2+. WordPress still
+		// supports older engines, so fall back to decoding the JSON in PHP there.
+		$supports_json = \SubtleForms\Support\DatabaseFeatures::supportsJson();
+
+		if ( $supports_json ) {
+			$columns = "id, title, status, created_at, updated_at, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(draft_schema, '$.metadata.type')), JSON_UNQUOTE(JSON_EXTRACT(config, '$.metadata.type'))) AS form_type, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(draft_schema, '$.metadata.template')), JSON_UNQUOTE(JSON_EXTRACT(config, '$.metadata.template'))) AS template_id";
+		} else {
+			$columns = 'id, title, status, created_at, updated_at, draft_schema, config';
+		}
+
 		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name, orderby and order are whitelisted.
-		$sql = "SELECT id, title, status, created_at, updated_at, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(draft_schema, '$.metadata.type')), JSON_UNQUOTE(JSON_EXTRACT(config, '$.metadata.type'))) AS form_type, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(draft_schema, '$.metadata.template')), JSON_UNQUOTE(JSON_EXTRACT(config, '$.metadata.template'))) AS template_id FROM {$this->table}{$where_clause} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d";
+		$sql = "SELECT {$columns} FROM {$this->table}{$where_clause} ORDER BY {$orderby} {$order} LIMIT %d OFFSET %d";
 
 		$params[] = intval( $args['limit'] );
 		$params[] = intval( $args['offset'] );
 
 		$results = $wpdb->get_results( $wpdb->prepare( $sql, ...$params ), ARRAY_A ); // phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $sql built from safe table name; prepared params used.
 
-		// No JSON decoding needed - config not fetched
+		if ( ! $supports_json && is_array( $results ) ) {
+			$results = array_map( array( $this, 'extractListMetadata' ), $results );
+		}
 
 		\SubtleForms\Support\QueryInstrumentation::end( $start, __METHOD__, $sql );
 
 		return $results;
+	}
+
+	/**
+	 * Derive form_type and template_id in PHP for engines without JSON functions.
+	 *
+	 * Mirrors the SQL COALESCE above: the in-progress draft wins over the
+	 * published config. The raw JSON columns are dropped so the row shape matches
+	 * the JSON-capable path exactly.
+	 *
+	 * @param array $row Raw database row.
+	 * @return array Row with form_type/template_id resolved.
+	 */
+	private function extractListMetadata( array $row ): array {
+		$draft  = \SubtleForms\Support\Helpers::safe_json_decode( $row['draft_schema'] ?? '', true, array() );
+		$config = \SubtleForms\Support\Helpers::safe_json_decode( $row['config'] ?? '', true, array() );
+
+		$draft_meta  = is_array( $draft ) ? ( $draft['metadata'] ?? array() ) : array();
+		$config_meta = is_array( $config ) ? ( $config['metadata'] ?? array() ) : array();
+
+		$row['form_type']   = $draft_meta['type'] ?? $config_meta['type'] ?? null;
+		$row['template_id'] = $draft_meta['template'] ?? $config_meta['template'] ?? null;
+
+		unset( $row['draft_schema'], $row['config'] );
+
+		return $row;
 	}
 
 	/**
@@ -261,7 +298,7 @@ final class FormsRepository {
 			);
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct insert; no caching needed for writes.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct insert; no caching needed for writes.
 		$wpdb->insert(
 			$this->table,
 			array(
@@ -271,6 +308,7 @@ final class FormsRepository {
 			),
 			array( '%s', '%s', '%s' )
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		return $wpdb->insert_id;
 	}
@@ -338,7 +376,7 @@ final class FormsRepository {
 		// ));
 		// }
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct insert; no caching for write operations.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct insert; no caching for write operations.
 		$inserted = $wpdb->insert(
 			$this->schemas_table,
 			array(
@@ -349,6 +387,7 @@ final class FormsRepository {
 			),
 			array( '%d', '%d', '%s', '%d' )
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( $inserted === false || $wpdb->last_error ) {
 			$error = sprintf(
@@ -492,7 +531,7 @@ final class FormsRepository {
 		}
 
 		// Set requested version active
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update for schema version activation; no caching for writes.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update for schema version activation; no caching for writes.
 		$updated = $wpdb->update(
 			$this->schemas_table,
 			array( 'active' => 1 ),
@@ -503,6 +542,7 @@ final class FormsRepository {
 			array( '%d' ),
 			array( '%d', '%d' )
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( $updated === false || $wpdb->last_error ) {
 			$error = sprintf(
@@ -531,7 +571,7 @@ final class FormsRepository {
 		}
 
 		if ( $schemaRow ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update for form sync; no caching for writes.
+			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update for form sync; no caching for writes.
 			$result = $wpdb->update(
 				$this->table,
 				array(
@@ -542,6 +582,7 @@ final class FormsRepository {
 				array( '%s', '%d' ),
 				array( '%d' )
 			);
+			// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 			if ( $result === false && $wpdb->last_error ) {
 				$error = sprintf(
@@ -611,7 +652,7 @@ final class FormsRepository {
 			return false;
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update; no caching for writes.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update; no caching for writes.
 		$result = $wpdb->update(
 			$this->table,
 			$update_data,
@@ -619,6 +660,7 @@ final class FormsRepository {
 			$format,
 			array( '%d' )
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( $result !== false ) {
 			wp_cache_delete( "subtleforms_form_{$id}", 'subtleforms' );
@@ -663,7 +705,7 @@ final class FormsRepository {
 
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update for draft schema; no caching for writes.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update for draft schema; no caching for writes.
 		$result = $wpdb->update(
 			$this->table,
 			array( 'draft_schema' => wp_json_encode( $schema ) ),
@@ -671,6 +713,7 @@ final class FormsRepository {
 			array( '%s' ),
 			array( '%d' )
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( $result === false ) {
 			Logger::error(

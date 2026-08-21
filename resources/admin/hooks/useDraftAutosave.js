@@ -11,6 +11,7 @@
 import { useEffect, useRef } from '@wordpress/element';
 import { BUILDER_STATES, BUILDER_ACTIONS } from './useBuilderReducer';
 import { apiPost } from '../utils/api';
+import { debug } from '../../shared/debug';
 
 /**
  * Autosave configuration
@@ -185,7 +186,7 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
       // Exponential backoff retry (only for non-rate-limit errors)
       if (retryCountRef.current < MAX_RETRY_ATTEMPTS) {
         const backoffMs = AUTOSAVE_RETRY_DELAY_MS * retryCountRef.current;
-        console.log(
+        debug(
           `[useDraftAutosave] Retrying in ${backoffMs}ms (attempt ${retryCountRef.current + 1}/${MAX_RETRY_ATTEMPTS})`
         );
 

@@ -22,7 +22,7 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		transition: all 0.2s ease;
+		transition: all var(--sf-duration-base) ease;
 
 		/* Subtle hint line - always visible */
 		&::before {
@@ -34,7 +34,7 @@
 			height: 1px;
 			background: var(--sf-gray-200);
 			opacity: 0.5;
-			transition: all 0.2s ease;
+			transition: all var(--sf-duration-base) ease;
 		}
 
 		/* Thick blue line on hover */
@@ -61,7 +61,7 @@
 		cursor: pointer;
 		outline: none;
 		box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-		transition: all 0.2s ease;
+		transition: all var(--sf-duration-base) ease;
 		opacity: 0.6;
 
 		/* Hover state */
@@ -93,7 +93,7 @@
 		justify-content: center;
 		width: 16px;
 		height: 16px;
-		transition: transform 0.2s ease;
+		transition: transform var(--sf-duration-base) ease;
 
 		svg {
 			width: 16px;

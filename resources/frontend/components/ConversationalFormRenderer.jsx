@@ -5,6 +5,8 @@ import { getIn, setIn, flattenToPathMap } from '../utils/valuePaths';
 import { collectLeafInputPaths } from '../utils/schemaLeaves';
 import { warnOnce } from '../utils/warnOnce';
 import { getFormClassNames } from '../utils/formStyles';
+import { debug } from '../../shared/debug';
+import { isEmptyValue } from './FormRenderer';
 
 const restUrl =
   window.subtleformsFrontend?.restUrl || '/wp-json/subtleforms/v1';
@@ -155,7 +157,7 @@ export default function ConversationalFormRenderer({
     });
 
     // Required validation
-    if (isRequired && (!value || value === '')) {
+    if (isRequired && isEmptyValue(value)) {
       setValidationErrors((prev) => ({
         ...prev,
         [fieldKey]: __('This field is required.', 'subtleforms'),
@@ -280,7 +282,7 @@ export default function ConversationalFormRenderer({
       if (recaptchaV3Input && window.grecaptcha && window.grecaptcha.execute) {
         try {
           const siteKey = recaptchaV3Input.getAttribute('data-sitekey');
-          console.log(
+          debug(
             '[SubtleForms] Executing reCAPTCHA v3 with site key:',
             siteKey
           );
@@ -289,7 +291,7 @@ export default function ConversationalFormRenderer({
           const token = await window.grecaptcha.execute(siteKey, {
             action: 'submit',
           });
-          console.log(
+          debug(
             '[SubtleForms] reCAPTCHA v3 token obtained:',
             token ? 'YES' : 'NO'
           );
@@ -328,7 +330,7 @@ export default function ConversationalFormRenderer({
       );
       if (recaptchaResponse && recaptchaResponse.value) {
         payload['g-recaptcha-response'] = recaptchaResponse.value;
-        console.log('[SubtleForms] Including g-recaptcha-response in payload');
+        debug('[SubtleForms] Including g-recaptcha-response in payload');
       }
 
       const hcaptchaResponse = document.querySelector(
@@ -336,7 +338,7 @@ export default function ConversationalFormRenderer({
       );
       if (hcaptchaResponse && hcaptchaResponse.value) {
         payload['h-captcha-response'] = hcaptchaResponse.value;
-        console.log('[SubtleForms] Including h-captcha-response in payload');
+        debug('[SubtleForms] Including h-captcha-response in payload');
       }
 
       const turnstileResponse = document.querySelector(
@@ -344,7 +346,7 @@ export default function ConversationalFormRenderer({
       );
       if (turnstileResponse && turnstileResponse.value) {
         payload['cf-turnstile-response'] = turnstileResponse.value;
-        console.log('[SubtleForms] Including cf-turnstile-response in payload');
+        debug('[SubtleForms] Including cf-turnstile-response in payload');
       }
 
       try {
@@ -471,7 +473,7 @@ export default function ConversationalFormRenderer({
               const value = values[key];
               const label = field.config?.label || field.label || key;
 
-              if (!value || value === '') return null;
+              if (isEmptyValue(value)) return null;
 
               return (
                 <div key={key} className='subtleforms-review-item'>

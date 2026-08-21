@@ -2,7 +2,7 @@ import { memo, useRef } from '@wordpress/element';
 import { Button, SelectControl, CheckboxControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import Icon from './ui/Icon';
+import Icon from '../ui/Icon';
 import TableSkeleton from './TableSkeleton';
 import './DataTable.scss';
 

@@ -7,7 +7,7 @@ import TabBar from '../components/TabBar';
 import SubmissionsTable, { ALL_COLUMNS, DEFAULT_VISIBLE, COLUMN_LABELS } from '../components/SubmissionsTable';
 import useRealTimeUpdates from '../hooks/useRealTimeUpdates';
 import { isProFeature, requirePro } from '../utils/featureGate';
-import { Icon } from '../components/ui';
+import { Icon } from '../ui';
 import apiFetch from '@wordpress/api-fetch';
 import { useForms } from '../data';
 import './SubmissionsPage.scss';
@@ -348,6 +348,7 @@ export default function SubmissionsPage({ formId }) {
               <input
                 type='text'
                 className='sf-filter-field-search__input'
+                aria-label={__('Filter by field value', 'subtleforms')}
                 value={fieldValue}
                 onChange={(e) => handleFieldValueChange(e.target.value)}
                 placeholder={__('e.g. john@example.com', 'subtleforms')}

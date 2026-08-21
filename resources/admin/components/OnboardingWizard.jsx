@@ -2,7 +2,7 @@ import { useState } from '@wordpress/element';
 import { Modal, Button, CheckboxControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
-import Icon from './ui/Icon';
+import Icon from '../ui/Icon';
 import './OnboardingWizard.scss';
 
 const FORM_GOALS = [
@@ -238,9 +238,9 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
     switch (step) {
       case 0:
         return (
-          <div className='onboarding-wizard__content-wrapper'>
-            <div className='onboarding-wizard__welcome'>
-              <div className='onboarding-wizard__welcome-icon'>
+          <div className='sf-onboarding-wizard__content-wrapper'>
+            <div className='sf-onboarding-wizard__welcome'>
+              <div className='sf-onboarding-wizard__welcome-icon'>
                 <Icon.CheckCircle />
               </div>
               <h2>{__('Welcome to SubtleForms', 'subtleforms')}</h2>
@@ -252,16 +252,16 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
               </p>
             </div>
 
-            <div className='onboarding-wizard__features'>
+            <div className='sf-onboarding-wizard__features'>
               <h3>{__('What can you do with SubtleForms?', 'subtleforms')}</h3>
               <ul>
-                <li className='onboarding-wizard__features-item'>
+                <li className='sf-onboarding-wizard__features-item'>
                   <Icon.CheckCircle />
                   <span>
                     {__('Build forms with drag & drop', 'subtleforms')}
                   </span>
                 </li>
-                <li className='onboarding-wizard__features-item'>
+                <li className='sf-onboarding-wizard__features-item'>
                   <Icon.CheckCircle />
                   <span>
                     {__(
@@ -270,7 +270,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                     )}
                   </span>
                 </li>
-                <li className='onboarding-wizard__features-item'>
+                <li className='sf-onboarding-wizard__features-item'>
                   <Icon.CheckCircle />
                   <span>
                     {__(
@@ -279,7 +279,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                     )}
                   </span>
                 </li>
-                <li className='onboarding-wizard__features-item'>
+                <li className='sf-onboarding-wizard__features-item'>
                   <Icon.CheckCircle />
                   <span>
                     {__(
@@ -308,7 +308,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
               </p>
             </div>
 
-            <div className='onboarding-wizard__grid'>
+            <div className='sf-onboarding-wizard__grid'>
               {FORM_GOALS.map((goal) => {
                 const Icon = goal.icon;
                 const isSelected = selectedGoal === goal.id;
@@ -360,7 +360,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
               </p>
             </div>
 
-            <div className='onboarding-wizard__grid'>
+            <div className='sf-onboarding-wizard__grid'>
               {FORM_TYPES.map((type) => {
                 const Icon = type.icon;
                 const isSelected = selectedType === type.id;
@@ -381,7 +381,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                         )}>
                         <Icon />
                       </div>
-                      <div className='onboarding-wizard__option-text'>
+                      <div className='sf-onboarding-wizard__option-text'>
                         <h3
                           className={clsx(
                             'mb-1 font-semibold',
@@ -418,37 +418,37 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
               </p>
             </div>
 
-            <div className='onboarding-wizard__review-card'>
-              <div className='onboarding-wizard__review-card-content'>
-                <div className='onboarding-wizard__review-header'>
+            <div className='sf-onboarding-wizard__review-card'>
+              <div className='sf-onboarding-wizard__review-card-content'>
+                <div className='sf-onboarding-wizard__review-header'>
                   <div>
-                    <div className='onboarding-wizard__review-title'>
+                    <div className='sf-onboarding-wizard__review-title'>
                       {goal?.label || __('Your Form', 'subtleforms')}
                     </div>
-                    <div className='onboarding-wizard__review-subtitle'>
+                    <div className='sf-onboarding-wizard__review-subtitle'>
                       {type?.label || __('Regular', 'subtleforms')}{' '}
                       {__('form', 'subtleforms')}
                     </div>
                   </div>
-                  <div className='onboarding-wizard__review-count'>
+                  <div className='sf-onboarding-wizard__review-count'>
                     {goal?.fields?.length || 0} {__('fields', 'subtleforms')}
                   </div>
                 </div>
 
-                <div className='onboarding-wizard__review-fields'>
+                <div className='sf-onboarding-wizard__review-fields'>
                   {goal?.fields?.map((fieldKey) => {
                     const field = FIELD_DEFINITIONS[fieldKey];
                     if (!field) return null;
                     return (
                       <div
                         key={fieldKey}
-                        className='onboarding-wizard__review-field'>
+                        className='sf-onboarding-wizard__review-field'>
                         <Icon.CheckCircle />
-                        <div className='onboarding-wizard__review-field-info'>
-                          <div className='onboarding-wizard__review-field-name'>
+                        <div className='sf-onboarding-wizard__review-field-info'>
+                          <div className='sf-onboarding-wizard__review-field-name'>
                             {field.config.label}
                           </div>
-                          <div className='onboarding-wizard__review-field-meta'>
+                          <div className='sf-onboarding-wizard__review-field-meta'>
                             {field.type}
                             {field.config.required &&
                               ` • ${__('Required', 'subtleforms')}`}
@@ -467,7 +467,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
         return (
           <div className='sf-onboarding-wizard__step'>
             <div className='sf-onboarding-wizard__step-header'>
-              <div className='onboarding-wizard__finish-icon'>
+              <div className='sf-onboarding-wizard__finish-icon'>
                 <Icon.CheckCircle />
               </div>
               <h2 className='sf-onboarding-wizard__step-title'>
@@ -481,13 +481,13 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
               </p>
             </div>
 
-            <div className='onboarding-wizard__next-steps'>
-              <h3 className='onboarding-wizard__next-steps-title'>
+            <div className='sf-onboarding-wizard__next-steps'>
+              <h3 className='sf-onboarding-wizard__next-steps-title'>
                 {__('Next steps:', 'subtleforms')}
               </h3>
-              <ul className='onboarding-wizard__next-steps-list'>
-                <li className='onboarding-wizard__next-steps-item'>
-                  <span className='onboarding-wizard__next-steps-number'>
+              <ul className='sf-onboarding-wizard__next-steps-list'>
+                <li className='sf-onboarding-wizard__next-steps-item'>
+                  <span className='sf-onboarding-wizard__next-steps-number'>
                     1.
                   </span>
                   <span>
@@ -497,8 +497,8 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                     )}
                   </span>
                 </li>
-                <li className='onboarding-wizard__next-steps-item'>
-                  <span className='onboarding-wizard__next-steps-number'>
+                <li className='sf-onboarding-wizard__next-steps-item'>
+                  <span className='sf-onboarding-wizard__next-steps-number'>
                     2.
                   </span>
                   <span>
@@ -508,16 +508,16 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                     )}
                   </span>
                 </li>
-                <li className='onboarding-wizard__next-steps-item'>
-                  <span className='onboarding-wizard__next-steps-number'>
+                <li className='sf-onboarding-wizard__next-steps-item'>
+                  <span className='sf-onboarding-wizard__next-steps-number'>
                     3.
                   </span>
                   <span>
                     {__('Preview your form to test it out', 'subtleforms')}
                   </span>
                 </li>
-                <li className='onboarding-wizard__next-steps-item'>
-                  <span className='onboarding-wizard__next-steps-number'>
+                <li className='sf-onboarding-wizard__next-steps-item'>
+                  <span className='sf-onboarding-wizard__next-steps-number'>
                     4.
                   </span>
                   <span>
@@ -543,11 +543,11 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
       onRequestClose={handleSkip}
       className='subtleforms-onboarding-wizard'
       style={{ maxWidth: '640px' }}>
-      <div className='onboarding-wizard'>
+      <div className='sf-onboarding-wizard'>
         {/* Progress Indicator */}
         {step > 0 && (
-          <div className='onboarding-wizard__progress'>
-            <div className='onboarding-wizard__progress-header'>
+          <div className='sf-onboarding-wizard__progress'>
+            <div className='sf-onboarding-wizard__progress-header'>
               <span>
                 {__('Step', 'subtleforms')} {step} {__('of', 'subtleforms')}{' '}
                 {totalSteps}
@@ -557,9 +557,9 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                 {__('complete', 'subtleforms')}
               </span>
             </div>
-            <div className='onboarding-wizard__progress-bar-container'>
+            <div className='sf-onboarding-wizard__progress-bar-container'>
               <div
-                className='onboarding-wizard__progress-bar'
+                className='sf-onboarding-wizard__progress-bar'
                 style={{ width: `${(step / totalSteps) * 100}%` }}
               />
             </div>
@@ -567,11 +567,11 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
         )}
 
         {/* Step Content */}
-        <div className='onboarding-wizard__content'>{renderStepContent()}</div>
+        <div className='sf-onboarding-wizard__content'>{renderStepContent()}</div>
 
         {/* Actions */}
-        <div className='onboarding-wizard__actions'>
-          <div className='onboarding-wizard__actions-container'>
+        <div className='sf-onboarding-wizard__actions'>
+          <div className='sf-onboarding-wizard__actions-container'>
             <div>
               {step === 0 && (
                 <CheckboxControl
@@ -581,7 +581,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                 />
               )}
             </div>
-            <div className='onboarding-wizard__actions-buttons'>
+            <div className='sf-onboarding-wizard__actions-buttons'>
               {step > 0 && (
                 <Button isSecondary onClick={handleBack}>
                   {__('Back', 'subtleforms')}

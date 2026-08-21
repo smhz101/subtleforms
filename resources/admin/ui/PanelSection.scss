@@ -12,7 +12,7 @@
     border-bottom: 1px solid var(--sf-neutral-200);
     cursor: pointer;
     text-align: left;
-    transition: all 0.15s ease;
+    transition: all var(--sf-duration-fast) ease;
 
     &:hover {
       color: var(--wp-blue-link);
@@ -33,7 +33,7 @@
   }
 
   &__title {
-    font-size: 13px;
+    font-size: var(--sf-text-sm);
     font-weight: 600;
     color: var(--sf-slate-900);
   }
@@ -42,12 +42,12 @@
     width: 20px;
     height: 20px;
     color: var(--sf-neutral-500);
-    transition: color 0.15s ease;
+    transition: color var(--sf-duration-fast) ease;
   }
 
   &__content {
     padding: 16px 0 8px;
-    animation: slideDown 0.2s ease;
+    animation: slideDown var(--sf-duration-base) ease;
 
     > * + * {
       margin-top: 16px;
@@ -62,7 +62,7 @@
     }
 
     .sf-panel-section__title {
-      font-size: 12px;
+      font-size: var(--sf-text-xs);
       font-weight: 500;
       color: var(--sf-neutral-500);
     }

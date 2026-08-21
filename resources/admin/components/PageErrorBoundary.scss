@@ -35,7 +35,7 @@
 .sf-page-error-boundary__icon {
 	margin: 0 auto var(--space-4);
 	color: var(--sf-coral-500);
-	animation: sf-fade-in 0.3s ease-out;
+	animation: sf-fade-in var(--sf-duration-slow) ease-out;
 
 	svg {
 		display: block;
@@ -53,7 +53,7 @@
 }
 
 .sf-page-error-boundary__message {
-	font-size: 1rem;
+	font-size: var(--sf-text-md);
 	color: var(--sf-stone-600);
 	line-height: 1.6;
 	margin-bottom: var(--space-4);
@@ -70,7 +70,7 @@
 	summary {
 		cursor: pointer;
 		font-weight: 600;
-		font-size: 0.875rem;
+		font-size: var(--sf-text-base);
 		color: var(--sf-stone-700);
 		padding: var(--space-1);
 		user-select: none;
@@ -91,7 +91,7 @@
 
 	code {
 		font-family: var(--font-mono);
-		font-size: 0.75rem;
+		font-size: var(--sf-text-xs);
 		color: var(--sf-lime-400);
 		line-height: 1.5;
 		white-space: pre-wrap;
@@ -115,7 +115,7 @@
 }
 
 .sf-page-error-boundary__support {
-	font-size: 0.875rem;
+	font-size: var(--sf-text-base);
 	color: var(--sf-stone-600);
 
 	a {

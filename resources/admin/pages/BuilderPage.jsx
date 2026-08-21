@@ -12,7 +12,7 @@ import {
 import { Button } from '../components/navigation';
 import { useNavigate, useParams } from 'react-router-dom';
 import { __, sprintf } from '@wordpress/i18n';
-import Icon from '../components/ui/Icon';
+import Icon from '../ui/Icon';
 import AdminShell from '../components/AdminShell';
 import CreateFormWizard from '../components/CreateFormWizard';
 import {
@@ -302,6 +302,9 @@ function FormBuilderInner({
         !hasEverBeenDirtyRef.current &&
         currentFormIdRef.current
       ) {
+        // Deliberately a raw fetch: this fires during page unload and needs
+        // `keepalive` so the browser completes the request after teardown.
+        // buildApiUrl still gives us correct URLs without pretty permalinks.
         const url = buildApiUrl(`/forms/${currentFormIdRef.current}`);
         const nonce = window.subtleformsAdmin?.restNonce || null;
         void fetch(url, {

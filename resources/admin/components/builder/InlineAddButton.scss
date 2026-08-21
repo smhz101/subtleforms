@@ -7,7 +7,7 @@
 	margin: 0.5rem 0;
 	padding: 0.25rem 0;
 	text-align: center;
-	transition: opacity 250ms cubic-bezier(0.4, 0, 0.2, 1);
+	transition: opacity var(--sf-duration-slow) cubic-bezier(0.4, 0, 0.2, 1);
 
 	&--hovered,
 	&--active {
@@ -29,7 +29,7 @@
 		border-radius: 50%;
 		color: var(--sf-gray-500);
 		cursor: pointer;
-		transition: all 200ms cubic-bezier(0.4, 0, 0.2, 1);
+		transition: all var(--sf-duration-base) cubic-bezier(0.4, 0, 0.2, 1);
 		outline: none;
 		width: 32px;
 		height: 32px;
@@ -54,7 +54,7 @@
 
 		svg {
 			flex-shrink: 0;
-			transition: transform 200ms ease-out;
+			transition: transform var(--sf-duration-base) ease-out;
 		}
 
 		&:hover svg {
@@ -63,7 +63,7 @@
 	}
 
 	&__label {
-		font-size: 0.875rem;
+		font-size: var(--sf-text-base);
 		font-weight: 500;
 		white-space: nowrap;
 	}

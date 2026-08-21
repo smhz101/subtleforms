@@ -6,9 +6,9 @@
 .sf-field-wrapper {
 	position: relative;
 	margin-bottom: 0.875rem; /* Tighter spacing for connected feel */
-	transition: all 180ms ease-out; /* Consistent timing */
+	transition: all var(--sf-duration-base) ease-out; /* Consistent timing */
 	cursor: pointer;
-	border-radius: 6px; /* Softer, more modern corners */
+	border-radius: var(--sf-radius-md); /* Softer, more modern corners */
 
 	/* Subtle divider for visual rhythm */
 	&::after {
@@ -59,12 +59,12 @@
 	&__config-warning {
 		display: block;
 		padding: 3px 10px;
-		background: #fef9c3; /* yellow-100 */
-		color: #854d0e; /* yellow-800 */
+		background: var(--sf-warning-border); /* yellow-100 */
+		color: var(--sf-warning); /* yellow-800 */
 		border-radius: 4px 4px 0 0;
-		font-size: 0.6875rem;
+		font-size: var(--sf-text-2xs);
 		font-weight: 500;
 		line-height: 1.5;
-		border-bottom: 1px solid #fde68a; /* yellow-200 */
+		border-bottom: 1px solid var(--sf-warning-border); /* yellow-200 */
 	}
 }

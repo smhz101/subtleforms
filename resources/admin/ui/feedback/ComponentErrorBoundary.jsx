@@ -18,7 +18,7 @@
 
 import { Component } from '@wordpress/element';
 import { __ , sprintf } from '@wordpress/i18n';
-import Icon from '../../components/ui/Icon';
+import Icon from '../Icon';
 import './ComponentErrorBoundary.scss';
 
 export class ComponentErrorBoundary extends Component {

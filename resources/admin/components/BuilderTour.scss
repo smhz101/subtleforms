@@ -18,8 +18,8 @@
 		z-index: 50;
 		pointer-events: none;
 		box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
-		border-radius: 8px;
-		transition: all 0.3s ease-in-out;
+		border-radius: var(--sf-radius-md);
+		transition: all var(--sf-duration-slow) ease-in-out;
 	}
 
 	&__tooltip {
@@ -30,9 +30,9 @@
 			0 20px 25px -5px rgba(0, 0, 0, 0.1),
 			0 10px 10px -5px rgba(0, 0, 0, 0.04);
 		padding: 1.5rem;
-		border-radius: 0.5rem;
+		border-radius: var(--sf-radius-md);
 		max-width: 28rem;
-		transition: opacity 0.3s;
+		transition: opacity var(--sf-duration-slow);
 		opacity: 0;
 
 		&--positioned {
@@ -45,7 +45,7 @@
 		top: 1rem;
 		right: 1rem;
 		color: var(--sf-gray-400);
-		transition: color 0.2s;
+		transition: color var(--sf-duration-base);
 
 		&:hover {
 			color: var(--sf-gray-600);
@@ -65,13 +65,13 @@
 			justify-content: space-between;
 			align-items: center;
 			margin-bottom: 0.5rem;
-			font-size: 0.875rem;
+			font-size: var(--sf-text-base);
 			color: var(--sf-gray-500);
 		}
 
 		&-bar-container {
 			background-color: var(--sf-gray-200);
-			border-radius: 9999px;
+			border-radius: var(--sf-radius-full);
 			height: 0.25rem;
 			overflow: hidden;
 		}
@@ -79,7 +79,7 @@
 		&-bar {
 			background-color: var(--sf-blue-600);
 			height: 100%;
-			transition: width 0.3s;
+			transition: width var(--sf-duration-slow);
 		}
 	}
 
@@ -90,7 +90,7 @@
 			margin-bottom: 0.5rem;
 			font-weight: 600;
 			color: var(--sf-gray-900);
-			font-size: 1.125rem;
+			font-size: var(--sf-text-lg);
 		}
 
 		p {

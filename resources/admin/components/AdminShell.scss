@@ -127,3 +127,22 @@
 		border-top: 1px solid var(--sf-gray-300);
 	}
 }
+
+/* Loading, error and empty states. One presentation for all pages, so the
+   transition into content is identical everywhere. */
+.sf-admin-shell__state {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: var(--sf-space-4);
+	min-height: 240px;
+	padding: var(--sf-space-8) var(--sf-space-4);
+	text-align: center;
+	color: var(--sf-text-secondary);
+}
+
+.sf-admin-shell__state p {
+	margin: 0;
+	font-size: var(--sf-text-base);
+}

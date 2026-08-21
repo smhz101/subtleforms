@@ -12,7 +12,7 @@
    ================================================================ */
 
 body.subtleforms-builder-page {
-	background: #f3f4f5;
+	background: var(--subtleforms-color-bg-subtle);
 }
 
 body.subtleforms-builder-page #wpcontent {
@@ -45,8 +45,8 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	position: sticky;
 	top: 0;
 	z-index: 100;
-	background: #fff;
-	border-bottom: 1px solid #d1d5db;
+	background: var(--subtleforms-color-bg);
+	border-bottom: 1px solid var(--subtleforms-color-border);
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
@@ -72,7 +72,7 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 .subtleforms-admin .subtleforms-builder-title-button {
 	font-size: 16px;
 	font-weight: 600;
-	color: #1e1e1e;
+	color: var(--subtleforms-color-text);
 	background: none;
 	border: none;
 	padding: 4px 8px;
@@ -81,21 +81,21 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 }
 
 .subtleforms-admin .subtleforms-builder-title-button:hover {
-	background: #f0f0f1;
+	background: var(--subtleforms-color-bg-subtle);
 }
 
 .subtleforms-admin .subtleforms-builder-title-input {
 	font-size: 16px;
 	font-weight: 600;
-	color: #1e1e1e;
-	border: 1px solid #8c8f94;
+	color: var(--subtleforms-color-text);
+	border: 1px solid var(--subtleforms-color-text-light);
 	padding: 4px 8px;
 	min-width: 200px;
 }
 
 .subtleforms-admin .subtleforms-builder-title-input:focus {
 	outline: none;
-	border-color: #2271b1;
+	border-color: var(--subtleforms-color-primary-hover);
 	box-shadow: 0 0 0 1px rgba(34, 113, 177, 0.2);
 }
 
@@ -114,21 +114,21 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 
 .subtleforms-admin .subtleforms-save-status-text {
 	font-size: 11px;
-	color: #646970;
+	color: var(--subtleforms-color-text-light);
 	line-height: 1.2;
 }
 
 .subtleforms-admin .subtleforms-save-status-text--success {
-	color: #00a32a;
+	color: var(--subtleforms-color-success);
 }
 
 .subtleforms-admin .subtleforms-save-status-text--error {
-	color: #d63638;
+	color: var(--subtleforms-color-error);
 }
 
 .subtleforms-admin .subtleforms-save-status-time {
 	font-size: 10px;
-	color: #a0a5aa;
+	color: var(--subtleforms-color-text-light);
 }
 
 /* Builder main content area */
@@ -142,8 +142,8 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 /* Field Dock */
 .subtleforms-admin .subtleforms-field-dock {
 	width: 280px;
-	background: #fff;
-	border-right: 1px solid #d1d5db;
+	background: var(--subtleforms-color-bg);
+	border-right: 1px solid var(--subtleforms-color-border);
 	display: flex;
 	flex-direction: column;
 	overflow: hidden;
@@ -152,14 +152,14 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 
 .subtleforms-admin .subtleforms-field-dock__header {
 	padding: 16px;
-	border-bottom: 1px solid #e5e7eb;
+	border-bottom: 1px solid var(--subtleforms-color-bg-subtle);
 	flex-shrink: 0;
 }
 
 .subtleforms-admin .subtleforms-field-dock__title {
 	font-size: 14px;
 	font-weight: 600;
-	color: #1e1e1e;
+	color: var(--subtleforms-color-text);
 	margin: 0;
 }
 
@@ -177,19 +177,19 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	gap: 12px;
 	width: 100%;
 	padding: 12px;
-	background: #fff;
-	border: 1px solid #dcdcde;
+	background: var(--subtleforms-color-bg);
+	border: 1px solid var(--subtleforms-color-border);
 	cursor: grab;
 	transition: all 0.15s ease;
 	margin-bottom: 8px;
 	font-size: 13px;
-	color: #1e1e1e;
+	color: var(--subtleforms-color-text);
 }
 
 .subtleforms-admin .subtleforms-field-dock-button:hover {
-	background: #2271b1 !important;
-	color: #fff !important;
-	border-color: #2271b1 !important;
+	background: var(--subtleforms-color-primary-hover) !important;
+	color: var(--subtleforms-color-bg) !important;
+	border-color: var(--subtleforms-color-primary-hover) !important;
 	transform: translateY(-2px);
 	box-shadow: 0 2px 8px rgba(34, 113, 177, 0.3);
 }
@@ -211,16 +211,16 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 .subtleforms-admin .subtleforms-column-dropzone {
 	min-height: 76px;
 	padding: 12px;
-	background: #f9fafb;
-	border: 1px dashed #d1d5db;
+	background: var(--subtleforms-color-bg-subtle);
+	border: 1px dashed var(--subtleforms-color-border);
 	transition:
 		background-color 0.15s ease,
 		border-color 0.15s ease;
 }
 
 .subtleforms-admin .subtleforms-column-dropzone.is-over {
-	background: #edf4ff;
-	border-color: #2271b1;
+	background: var(--subtleforms-color-bg-subtle);
+	border-color: var(--subtleforms-color-primary-hover);
 }
 
 .subtleforms-admin .subtleforms-column-dropzone .subtleforms-dropzone-item {
@@ -244,7 +244,7 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	align-items: center;
 	gap: 6px;
 	font-size: 12px;
-	color: #3c434a;
+	color: var(--subtleforms-color-text);
 	border: 1px dashed transparent;
 	background: transparent;
 	padding: 4px 8px;
@@ -262,15 +262,15 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 
 .subtleforms-admin .subtleforms-insert-button:hover,
 .subtleforms-admin .subtleforms-insert-button:focus {
-	color: #1d4ed8;
-	border-color: #bcc8ff;
-	background: #eef2ff;
+	color: var(--subtleforms-color-primary-hover);
+	border-color: var(--subtleforms-color-border);
+	background: var(--subtleforms-color-bg-subtle);
 	outline: none;
 }
 
 .subtleforms-admin .subtleforms-dropzone-empty {
 	font-size: 12px;
-	color: #6c7781;
+	color: var(--subtleforms-color-text-light);
 	text-align: center;
 	margin-top: 8px;
 }
@@ -278,9 +278,9 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 /* Field Chrome */
 .subtleforms-admin .subtleforms-field-chrome {
 	position: relative;
-	background: #fff;
+	background: var(--subtleforms-color-bg);
 	transition: border-color 0.15s ease;
-	border: 1px solid #e5e5e5;
+	border: 1px solid var(--subtleforms-color-bg-subtle);
 	margin-bottom: 12px;
 }
 
@@ -289,23 +289,23 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 }
 
 .subtleforms-admin .subtleforms-field-chrome:hover {
-	border-color: #8c8f94;
+	border-color: var(--subtleforms-color-text-light);
 }
 
 .subtleforms-admin .subtleforms-field-chrome.is-hovered {
-	border-color: #8c8f94;
+	border-color: var(--subtleforms-color-text-light);
 }
 
 .subtleforms-admin .subtleforms-field-chrome.is-selected {
-	border-color: #2271b1;
-	background: #f6f7f7;
+	border-color: var(--subtleforms-color-primary-hover);
+	background: var(--subtleforms-color-bg-subtle);
 }
 
 /* Inspector */
 .subtleforms-admin .subtleforms-builder-inspector {
 	width: 328px;
-	background: #fff;
-	border-left: 1px solid #d1d5db;
+	background: var(--subtleforms-color-bg);
+	border-left: 1px solid var(--subtleforms-color-border);
 	position: sticky;
 	top: 24px;
 	max-height: calc(100vh - 140px);
@@ -326,13 +326,13 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	justify-content: space-between;
 	margin-bottom: 16px;
 	padding-bottom: 16px;
-	border-bottom: 1px solid #e5e7eb;
+	border-bottom: 1px solid var(--subtleforms-color-bg-subtle);
 }
 
 .subtleforms-admin .subtleforms-builder-inspector__title {
 	font-size: 15px;
 	font-weight: 600;
-	color: #1e1e1e;
+	color: var(--subtleforms-color-text);
 	margin: 0;
 }
 
@@ -342,8 +342,8 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	align-items: center;
 	gap: 8px;
 	padding: 12px 20px;
-	background: #fff;
-	border-bottom: 1px solid #d1d5db;
+	background: var(--subtleforms-color-bg);
+	border-bottom: 1px solid var(--subtleforms-color-border);
 	overflow-x: auto;
 	flex-shrink: 0;
 }
@@ -353,24 +353,24 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	align-items: center;
 	gap: 8px;
 	padding: 8px 16px;
-	border: 1px solid #d1d5db;
-	background: #f6f7f7;
+	border: 1px solid var(--subtleforms-color-border);
+	background: var(--subtleforms-color-bg-subtle);
 	cursor: pointer;
 	transition: all 0.15s;
 	white-space: nowrap;
 	font-size: 13px;
-	color: #2c3338;
+	color: var(--subtleforms-color-text);
 }
 
 .subtleforms-admin .subtleforms-step-tab:hover {
-	background: #e7e8e9;
-	border-color: #8c8f94;
+	background: var(--subtleforms-color-bg-subtle);
+	border-color: var(--subtleforms-color-text-light);
 }
 
 .subtleforms-admin .subtleforms-step-tab.is-selected {
-	background: #2271b1;
-	color: #fff;
-	border-color: #2271b1;
+	background: var(--subtleforms-color-primary-hover);
+	color: var(--subtleforms-color-bg);
+	border-color: var(--subtleforms-color-primary-hover);
 	font-weight: 600;
 }
 
@@ -402,9 +402,9 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	align-items: center;
 	gap: 6px;
 	padding: 8px 16px;
-	border: 1px dashed #8c8f94;
+	border: 1px dashed var(--subtleforms-color-text-light);
 	background: transparent;
-	color: #2271b1;
+	color: var(--subtleforms-color-primary-hover);
 	cursor: pointer;
 	font-size: 13px;
 	font-weight: 500;
@@ -413,8 +413,8 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 }
 
 .subtleforms-admin .subtleforms-add-step-button:hover {
-	background: #f0f6fc;
-	border-color: #2271b1;
+	background: var(--subtleforms-color-bg-subtle);
+	border-color: var(--subtleforms-color-primary-hover);
 }
 
 /* Create Form Modal Options */
@@ -424,8 +424,8 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	align-items: flex-start;
 	gap: 8px;
 	padding: 16px;
-	border: 1px solid #d1d5db;
-	background: #fff;
+	border: 1px solid var(--subtleforms-color-border);
+	background: var(--subtleforms-color-bg);
 	cursor: pointer;
 	transition:
 		border-color 0.15s ease,
@@ -441,24 +441,24 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 
 .subtleforms-admin .subtleforms-create-form-option:not(:disabled):hover,
 .subtleforms-admin .subtleforms-create-form-option:not(:disabled):focus {
-	border-color: #2271b1;
+	border-color: var(--subtleforms-color-primary-hover);
 	transform: translateY(-1px);
 	outline: none;
 }
 
 .subtleforms-admin .subtleforms-create-form-option__icon {
-	color: #2271b1;
+	color: var(--subtleforms-color-primary-hover);
 }
 
 .subtleforms-admin .subtleforms-create-form-option__title {
 	font-size: 15px;
 	font-weight: 600;
-	color: #1e1e1e;
+	color: var(--subtleforms-color-text);
 }
 
 .subtleforms-admin .subtleforms-create-form-option__description {
 	font-size: 13px;
-	color: #50575e;
+	color: var(--subtleforms-color-text-light);
 	line-height: 1.5;
 }
 
@@ -467,8 +467,8 @@ body.subtleforms-builder-page .wrap.subtleforms-admin {
 	font-weight: 600;
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
-	color: #646970;
-	background: #f0f0f1;
+	color: var(--subtleforms-color-text-light);
+	background: var(--subtleforms-color-bg-subtle);
 	border-radius: 999px;
 	padding: 2px 8px;
 	position: absolute;

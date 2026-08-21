@@ -10,7 +10,7 @@
 	margin: 0 auto;
 	padding: 3rem;
 	min-height: 500px;
-	border-radius: 8px; /* Soft rounded corners */
+	border-radius: var(--sf-radius-md); /* Soft rounded corners */
 	border: 1px solid var(--sf-gray-200); /* Subtle border */
 	box-shadow:
 		0 1px 3px 0 rgba(0, 0, 0, 0.1),
@@ -36,14 +36,14 @@
 .sf-form-canvas__title {
 	margin: 0 0 0.5rem 0;
 	font-weight: 600;
-	font-size: 1.5rem;
+	font-size: var(--sf-text-xl);
 	line-height: 2rem;
 	color: var(--sf-gray-900);
 }
 
 .sf-form-canvas__description {
 	margin: 0;
-	font-size: 0.875rem;
+	font-size: var(--sf-text-base);
 	line-height: 1.25rem;
 	color: var(--sf-gray-600);
 }
@@ -75,7 +75,7 @@
 	align-items: center;
 	justify-content: center;
 	cursor: pointer;
-	transition: all 0.2s ease;
+	transition: all var(--sf-duration-base) ease;
 	box-shadow: 0 4px 12px rgba(79, 156, 249, 0.3);
 
 	&:hover {
@@ -103,7 +103,7 @@
 
 .sf-form-canvas__empty-heading {
 	margin: 0 0 1.25rem 0;
-	font-size: 1.25rem;
+	font-size: var(--sf-text-lg);
 	font-weight: 600;
 	color: var(--sf-gray-900);
 	letter-spacing: -0.01em;
@@ -120,7 +120,7 @@
 .sf-form-canvas__empty-text {
 	margin: 0;
 	margin-top: 30px;
-	font-size: 1rem;
+	font-size: var(--sf-text-md);
 	line-height: 1.5rem;
 	color: var(--sf-blue-500);
 	font-weight: 500;
@@ -135,7 +135,7 @@
 .sf-form-canvas__empty-title {
 	margin: 0 0 0.5rem 0;
 	font-weight: 600;
-	font-size: 1.125rem;
+	font-size: var(--sf-text-lg);
 	line-height: 1.75rem;
 	color: var(--sf-gray-700);
 }

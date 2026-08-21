@@ -10,7 +10,7 @@
 import { useRef } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import Icon from '../../ui/Icon';
+import Icon from '../../../ui/Icon';
 import HelpMenu from '../../HelpMenu';
 import LicenseStatusIndicator from '../../LicenseStatusIndicator';
 import { BUILDER_ACTIONS } from '../../../hooks/useBuilderReducer';
@@ -37,6 +37,7 @@ export function BuilderTitle({
         <input
           ref={titleInputRef}
           type='text'
+          aria-label={__('Form title', 'subtleforms')}
           value={formTitle}
           onChange={(event) => setFormTitle(event.target.value)}
           onBlur={() => onPersistTitle(formTitle)}

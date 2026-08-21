@@ -2,8 +2,8 @@ import { useState, useMemo, useRef, useCallback, useEffect } from '@wordpress/el
 import { Button, Modal } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { getIcon } from './utils/iconMap';
-import Icon from '../ui/Icon';
-import { UpgradePrompt } from '../ui';
+import Icon from '../../ui/Icon';
+import { UpgradePrompt } from '../../ui';
 
 function HighlightMatch({ text, query }) {
   if (!query) return text;

@@ -12,7 +12,7 @@
 
 .sf-route-transition__container {
 	text-align: center;
-	animation: sf-fade-in 0.2s ease-out;
+	animation: sf-fade-in var(--sf-duration-base) ease-out;
 }
 
 .sf-route-transition__spinner {
@@ -32,7 +32,7 @@
 
 .sf-route-transition__text {
 	font-family: var(--font-mono);
-	font-size: 0.875rem;
+	font-size: var(--sf-text-base);
 	color: var(--sf-stone-600);
 	text-transform: uppercase;
 	letter-spacing: 0.05em;

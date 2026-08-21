@@ -1,6 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import Icon from '../components/ui/Icon';
+import Icon from '../ui/Icon';
 import AdminShell from '../components/AdminShell';
 import { requirePro } from '../utils/featureGate';
 import './ExtensionsPage.scss';

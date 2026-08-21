@@ -36,10 +36,10 @@
   background: var(--sf-gray-800);
   color: var(--sf-surface);
   border-radius: 0; /* Flat UI */
-  font-size: 14px;
+  font-size: var(--sf-text-base);
   line-height: 1.5;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  animation: sf-live-slide-in 0.3s ease-out;
+  animation: sf-live-slide-in var(--sf-duration-slow) ease-out;
   z-index: 999999;
   pointer-events: auto;
 }

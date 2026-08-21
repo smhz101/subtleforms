@@ -1,6 +1,6 @@
 import { memo, useState, useRef, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import Icon from './ui/Icon';
+import Icon from '../ui/Icon';
 import './AdminHeader.scss';
 
 /**
@@ -95,6 +95,7 @@ const AdminHeader = memo(function AdminHeader({
         <input
           ref={titleInputRef}
           type='text'
+          aria-label={__('Form title', 'subtleforms')}
           value={titleValue}
           onChange={(event) => setTitleValue(event.target.value)}
           onBlur={handleTitleSave}

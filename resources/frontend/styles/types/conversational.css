@@ -17,7 +17,7 @@
 
 .subtleforms-progress-bar {
 	height: 8px;
-	background: #e0e0e0;
+	background: var(--subtleforms-color-border);
 	border-radius: 4px;
 	overflow: hidden;
 	margin-bottom: var(--subtleforms-spacing-xs);
@@ -28,7 +28,7 @@
 	background: linear-gradient(
 		90deg,
 		var(--subtleforms-color-primary) 0%,
-		#0080ff 100%
+		var(--subtleforms-color-primary-hover) 100%
 	);
 	transition: width var(--subtleforms-transition-base);
 	border-radius: 4px;

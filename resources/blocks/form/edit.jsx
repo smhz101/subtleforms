@@ -9,6 +9,7 @@
 import { __ } from '@wordpress/i18n';
 import { useEffect, useState, useRef } from '@wordpress/element';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import { debug } from '../../shared/debug';
 import {
   PanelBody,
   SelectControl,
@@ -114,7 +115,7 @@ function FormPreview({ formId }) {
       setError(null);
 
       const formData = await fetchFormSchema(formId);
-      console.log('SubtleForms block: Fetched form data:', formData);
+      debug('SubtleForms block: Fetched form data:', formData);
 
       if (!mounted) return;
 
@@ -126,7 +127,7 @@ function FormPreview({ formId }) {
         return;
       }
 
-      console.log('SubtleForms block: Setting schema:', formData.schema);
+      debug('SubtleForms block: Setting schema:', formData.schema);
       setSchema(formData.schema);
       setLoading(false);
     }
@@ -141,7 +142,7 @@ function FormPreview({ formId }) {
   useEffect(() => {
     // Mount the frontend renderer when schema is available
     if (!schema || !containerRef.current) {
-      console.log(
+      debug(
         'SubtleForms block: Cannot mount - schema or container missing',
         {
           hasSchema: !!schema,
@@ -151,7 +152,7 @@ function FormPreview({ formId }) {
       return;
     }
 
-    console.log(
+    debug(
       'SubtleForms block: Mounting form preview with schema:',
       schema
     );
@@ -173,7 +174,7 @@ function FormPreview({ formId }) {
         },
       });
 
-      console.log('SubtleForms block: Form mounted successfully');
+      debug('SubtleForms block: Form mounted successfully');
 
       return () => {
         // Cleanup if renderer provides unmount

@@ -7,10 +7,10 @@
  * - getFieldIcon()  — resolve field type, fallback Icon.Circle
  * - getUIIcon()     — resolve UI key,    fallback Icon.Circle
  *
- * NOTE: Import Icon components only from components/ui/Icon, never lucide-react directly.
+ * NOTE: Import Icon components only from ui/Icon, never lucide-react directly.
  */
 
-import Icon from '../components/ui/Icon';
+import Icon from '../ui/Icon';
 
 // ── Field type icons ──────────────────────────────────────────────────────────
 

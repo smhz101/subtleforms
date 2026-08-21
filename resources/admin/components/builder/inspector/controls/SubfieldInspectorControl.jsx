@@ -1,6 +1,6 @@
 import { useState, memo } from '@wordpress/element';
 import { ToggleControl, TextControl } from '@wordpress/components';
-import Icon from '../../../../components/ui/Icon';
+import Icon from '../../../../ui/Icon';
 import './SubfieldInspectorControl.scss';
 
 /**

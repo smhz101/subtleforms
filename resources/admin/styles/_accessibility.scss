@@ -20,7 +20,7 @@
  * - Flat UI design (no border-radius)
  */
 *:focus-visible {
-  outline: 2px solid #2563eb !important;
+  outline: 2px solid var(--sf-a-500) !important;
   outline-offset: 2px !important;
   box-shadow: none !important; /* Flat UI - no shadows */
 }
@@ -29,7 +29,7 @@
 button:focus-visible,
 .components-button:focus-visible,
 .sf-button:focus-visible {
-  outline: 2px solid #2563eb !important;
+  outline: 2px solid var(--sf-a-500) !important;
   outline-offset: 2px !important;
   box-shadow: none !important;
 }
@@ -40,15 +40,15 @@ textarea:focus-visible,
 select:focus-visible,
 .components-text-control__input:focus-visible,
 .components-textarea-control__input:focus-visible {
-  outline: 2px solid #2563eb !important;
+  outline: 2px solid var(--sf-a-500) !important;
   outline-offset: 0 !important;
-  border-color: #2563eb !important;
+  border-color: var(--sf-a-500) !important;
   box-shadow: none !important;
 }
 
 /* Link focus indicators */
 a:focus-visible {
-  outline: 2px solid #2563eb !important;
+  outline: 2px solid var(--sf-a-500) !important;
   outline-offset: 2px !important;
   text-decoration: underline;
   box-shadow: none !important;
@@ -59,7 +59,7 @@ a:focus-visible {
 .sf-dock-item:focus-visible,
 [role="button"]:focus-visible,
 [role="tab"]:focus-visible {
-  outline: 2px solid #2563eb !important;
+  outline: 2px solid var(--sf-a-500) !important;
   outline-offset: 2px !important;
   box-shadow: none !important;
 }
@@ -67,7 +67,7 @@ a:focus-visible {
 /* Destructive action focus (errors, delete) */
 .is-destructive:focus-visible,
 button.is-destructive:focus-visible {
-  outline: 2px solid #dc2626 !important;
+  outline: 2px solid var(--sf-danger) !important;
   outline-offset: 2px !important;
 }
 
@@ -116,18 +116,16 @@ button.is-destructive:focus-visible {
  */
 
 /* Gray text - darkened for better contrast */
-.sf-text-gray-600,
-.text-gray-600 {
-  color: #4b5563 !important; /* 7.0:1 contrast on white */
+.sf-text-gray-600 {
+  color: var(--sf-n-600) !important; /* 7.0:1 contrast on white */
 }
 
-.sf-text-gray-500,
-.text-gray-500 {
-  color: #6b7280 !important; /* 4.6:1 contrast on white - AA compliant for normal text */
+.sf-text-gray-500 {
+  color: var(--sf-n-500) !important; /* 4.6:1 contrast on white - AA compliant for normal text */
 }
 
 .sf-text-gray-400 {
-  color: #9ca3af !important; /* Use only for large text (18px+) or decorative */
+  color: var(--sf-n-400) !important; /* Use only for large text (18px+) or decorative */
 }
 
 /* Disabled states - increased opacity for better visibility */
@@ -141,23 +139,23 @@ button.is-destructive:focus-visible {
 .sf-error,
 .sf-has-error,
 .components-base-control.has-error {
-  color: #dc2626 !important; /* 5.8:1 contrast on white */
+  color: var(--sf-danger) !important; /* 5.8:1 contrast on white */
 }
 
 /* Success states */
 .sf-success {
-  color: #059669 !important; /* 4.5:1 contrast on white */
+  color: var(--sf-success) !important; /* 4.5:1 contrast on white */
 }
 
 /* Link colors */
 a,
 .sf-link {
-  color: #2563eb; /* 8.3:1 contrast on white */
+  color: var(--sf-a-500); /* 8.3:1 contrast on white */
 }
 
 a:hover,
 .sf-link:hover {
-  color: #1d4ed8 !important; /* 10.3:1 contrast on white */
+  color: var(--sf-a-600) !important; /* 10.3:1 contrast on white */
 }
 
 /* ============================================================================
@@ -226,7 +224,7 @@ a:hover,
   position: absolute;
   top: -40px;
   left: 0;
-  background: #2563eb;
+  background: var(--sf-a-500);
   color: white;
   padding: 8px 16px;
   text-decoration: none;
@@ -297,8 +295,8 @@ a:hover,
  * Ensures aria-describedby works correctly
  */
 .sf-field-error {
-  color: #dc2626;
-  font-size: 14px;
+  color: var(--sf-danger);
+  font-size: var(--sf-text-base);
   margin-top: 4px;
   display: flex;
   align-items: center;
@@ -314,14 +312,14 @@ a:hover,
 input[aria-invalid="true"],
 textarea[aria-invalid="true"],
 select[aria-invalid="true"] {
-  border-color: #dc2626 !important;
+  border-color: var(--sf-danger) !important;
   border-width: 2px !important;
 }
 
 /* Required field indicator */
 .sf-required,
 [aria-required="true"] + .sf-required-indicator {
-  color: #dc2626;
+  color: var(--sf-danger);
   font-weight: bold;
   margin-left: 2px;
 }
@@ -339,7 +337,7 @@ select[aria-invalid="true"] {
 
 /* Modal focus trap - ensure clear boundaries */
 .components-modal__frame:focus-visible {
-  outline: 2px solid #2563eb !important;
+  outline: 2px solid var(--sf-a-500) !important;
   outline-offset: -2px !important;
 }
 
@@ -350,26 +348,26 @@ select[aria-invalid="true"] {
 @media (prefers-color-scheme: dark) {
   /* Adjust focus indicators for dark backgrounds */
   *:focus-visible {
-    outline-color: #60a5fa !important; /* Lighter blue for dark backgrounds */
+    outline-color: var(--sf-a-300) !important; /* Lighter blue for dark backgrounds */
   }
 
   /* Adjust text colors for dark mode */
   .sf-text-gray-600 {
-    color: #9ca3af !important;
+    color: var(--sf-n-400) !important;
   }
 
   .sf-text-gray-500 {
-    color: #6b7280 !important;
+    color: var(--sf-n-500) !important;
   }
 
   /* Error colors for dark mode */
   .sf-error {
-    color: #f87171 !important;
+    color: var(--sf-danger-border) !important;
   }
 
   /* Success colors for dark mode */
   .sf-success {
-    color: #34d399 !important;
+    color: var(--sf-success) !important;
   }
 }
 
@@ -387,7 +385,7 @@ select[aria-invalid="true"] {
   a[href]::after {
     content: " (" attr(href) ")";
     font-size: 0.8em;
-    color: #666;
+    color: var(--sf-n-600);
   }
 
   /* Don't show URLs for internal links */
@@ -407,7 +405,7 @@ select[aria-invalid="true"] {
 }
 
 .sf-focusable:focus-visible {
-  outline: 2px solid #2563eb !important;
+  outline: 2px solid var(--sf-a-500) !important;
   outline-offset: 2px !important;
 }
 

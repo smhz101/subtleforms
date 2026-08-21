@@ -266,6 +266,51 @@ class Sanitizer {
 	 * @param mixed $value Value to sanitize
 	 * @return string
 	 */
+	/**
+	 * Allowed markup for rich_text submission values.
+	 *
+	 * Deliberately narrow. This is the one place a public, unauthenticated
+	 * submission may carry HTML, so the set is limited to inline emphasis, lists
+	 * and links, with no attributes beyond a scheme-checked href. It mirrors the
+	 * frontend editor's allowlist so what the visitor sees is what is stored.
+	 *
+	 * @return array<string, array<string, bool>> wp_kses allowlist.
+	 */
+	public static function richTextAllowedHtml(): array {
+		return array(
+			'b'      => array(),
+			'strong' => array(),
+			'i'      => array(),
+			'em'     => array(),
+			'u'      => array(),
+			'p'      => array(),
+			'br'     => array(),
+			'ul'     => array(),
+			'ol'     => array(),
+			'li'     => array(),
+			'a'      => array(
+				'href' => true,
+				'rel'  => true,
+			),
+		);
+	}
+
+	/**
+	 * Sanitize a rich_text value, preserving the allowlisted markup.
+	 *
+	 * @param mixed $value Raw submitted value.
+	 * @return string Sanitized HTML.
+	 */
+	public static function sanitizeRichText( $value ): string {
+		if ( is_array( $value ) || is_object( $value ) ) {
+			return '';
+		}
+
+		// wp_kses resolves protocols itself, so javascript: and data: hrefs are
+		// dropped rather than merely escaped.
+		return trim( wp_kses( (string) $value, self::richTextAllowedHtml(), array( 'http', 'https', 'mailto' ) ) );
+	}
+
 	public static function sanitizeSubmissionValue( $value ): string {
 		if ( is_array( $value ) || is_object( $value ) ) {
 			return '';

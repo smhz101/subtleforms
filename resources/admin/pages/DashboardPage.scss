@@ -51,14 +51,14 @@
 	padding: 20px;
 	background: var(--sf-surface);
 	border: 1px solid var(--wp-gray-30);
-	border-radius: 4px;
+	border-radius: var(--sf-radius-sm);
 	text-decoration: none;
 	color: inherit;
-	transition: all 0.2s ease;
+	transition: all var(--sf-duration-base) ease;
 }
 
 .subtleforms-stat-card:hover {
-	border-color: var(--sf-blue-600, #2563eb);
+	border-color: var(--sf-blue-600, var(--sf-a-500));
 	box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 	transform: translateY(-2px);
 }
@@ -68,7 +68,7 @@ a.subtleforms-stat-card:hover {
 }
 
 .sf-stat-icon {
-	font-size: 32px;
+	font-size: var(--sf-text-xl);
 	line-height: 1;
 }
 
@@ -77,21 +77,21 @@ a.subtleforms-stat-card:hover {
 }
 
 .sf-stat-value {
-	font-size: 28px;
+	font-size: var(--sf-text-xl);
 	font-weight: 600;
 	line-height: 1.2;
 	color: var(--sf-slate-900);
 }
 
 .sf-stat-title {
-	font-size: 13px;
+	font-size: var(--sf-text-sm);
 	font-weight: 500;
-	color: var(--sf-gray-500, #6b7280);
+	color: var(--sf-gray-500, var(--sf-n-500));
 	margin-top: 4px;
 }
 
 .sf-stat-subtitle {
-	font-size: 12px;
+	font-size: var(--sf-text-xs);
 	color: var(--sf-gray-400);
 	margin-top: 2px;
 }
@@ -117,7 +117,7 @@ a.subtleforms-stat-card:hover {
 
 .subtleforms-dashboard-section .components-card-header h2 {
 	margin: 0;
-	font-size: 16px;
+	font-size: var(--sf-text-md);
 	font-weight: 600;
 }
 
@@ -139,7 +139,7 @@ a.subtleforms-stat-card:hover {
 	align-items: center;
 	padding: 16px 20px;
 	border-bottom: 1px solid var(--sf-gray-100);
-	transition: background-color 0.2s ease;
+	transition: background-color var(--sf-duration-base) ease;
 }
 
 .subtleforms-dashboard-list-item:last-child {
@@ -156,13 +156,13 @@ a.subtleforms-stat-card:hover {
 }
 
 .sf-item-title {
-	font-size: 14px;
+	font-size: var(--sf-text-base);
 	font-weight: 500;
 	margin-bottom: 6px;
 }
 
 .sf-item-title a {
-	color: var(--sf-blue-600, #2563eb);
+	color: var(--sf-blue-600, var(--sf-a-500));
 	text-decoration: none;
 }
 
@@ -175,17 +175,17 @@ a.subtleforms-stat-card:hover {
 	display: flex;
 	align-items: center;
 	gap: 12px;
-	font-size: 13px;
-	color: var(--sf-gray-500, #6b7280);
+	font-size: var(--sf-text-sm);
+	color: var(--sf-gray-500, var(--sf-n-500));
 }
 
 .sf-status-badge {
 	display: inline-block;
 	padding: 2px 8px;
-	font-size: 11px;
+	font-size: var(--sf-text-2xs);
 	font-weight: 500;
 	text-transform: uppercase;
-	border-radius: 3px;
+	border-radius: var(--sf-radius-xs);
 	background-color: var(--sf-gray-100);
 	color: var(--wp-gray-70);
 }
@@ -201,16 +201,16 @@ a.subtleforms-stat-card:hover {
 }
 
 .sf-status-badge.status-unread {
-	background-color: var(--sf-blue-600, #2563eb);
+	background-color: var(--sf-blue-600, var(--sf-a-500));
 	color: var(--sf-surface);
 }
 
 .sf-status-badge.status-read {
-	background-color: var(--sf-gray-100, #f3f4f6);
+	background-color: var(--sf-gray-100, var(--sf-n-50));
 	color: var(--sf-surface);
 }
 
-.time-ago,
+.sf-time-ago,
 .sf-submission-count {
 	color: var(--sf-gray-400);
 }
@@ -227,12 +227,12 @@ a.subtleforms-stat-card:hover {
 
 .subtleforms-dashboard-empty p {
 	margin: 0 0 8px;
-	font-size: 14px;
-	color: var(--sf-gray-600, #4b5563);
+	font-size: var(--sf-text-base);
+	color: var(--sf-gray-600, var(--sf-n-600));
 }
 
 .subtleforms-dashboard-empty .description {
-	font-size: 13px;
+	font-size: var(--sf-text-sm);
 	color: var(--sf-gray-400);
 	margin-bottom: 20px;
 }
@@ -245,7 +245,7 @@ a.subtleforms-stat-card:hover {
 }
 
 .subtleforms-dashboard-footer .components-button {
-	color: var(--sf-blue-600, #2563eb);
+	color: var(--sf-blue-600, var(--sf-a-500));
 	text-decoration: none;
 }
 
@@ -271,7 +271,7 @@ a.subtleforms-stat-card:hover {
 
 .sf-system-header h2 {
 	margin: 0;
-	font-size: 16px;
+	font-size: var(--sf-text-md);
 	font-weight: 600;
 }
 
@@ -280,9 +280,9 @@ a.subtleforms-stat-card:hover {
 	align-items: center;
 	gap: 6px;
 	padding: 4px 12px;
-	font-size: 12px;
+	font-size: var(--sf-text-xs);
 	font-weight: 600;
-	border-radius: 12px;
+	border-radius: var(--sf-radius-lg);
 	text-transform: uppercase;
 }
 
@@ -310,36 +310,17 @@ a.subtleforms-stat-card:hover {
 }
 
 .sf-system-info-item .label {
-	font-size: 12px;
+	font-size: var(--sf-text-xs);
 	font-weight: 500;
-	color: var(--sf-gray-500, #6b7280);
+	color: var(--sf-gray-500, var(--sf-n-500));
 	text-transform: uppercase;
 	letter-spacing: 0.5px;
 }
 
 .sf-system-info-item .value {
-	font-size: 14px;
+	font-size: var(--sf-text-base);
 	font-weight: 500;
 	color: var(--sf-slate-900);
-}
-
-/* Loading & Error States */
-.subtleforms-dashboard-loading,
-.subtleforms-dashboard-error {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	padding: 60px 20px;
-	text-align: center;
-}
-
-.subtleforms-dashboard-loading .components-spinner {
-	margin-bottom: 16px;
-}
-
-.subtleforms-dashboard-error {
-	gap: 16px;
 }
 
 /* Responsive */
@@ -399,7 +380,7 @@ a.subtleforms-stat-card:hover {
 	}
 
 	.stat-value {
-		font-size: 24px;
+		font-size: var(--sf-text-xl);
 	}
 }
 
@@ -467,12 +448,12 @@ a.subtleforms-stat-card:hover {
 
 .sf-label {
 	margin-bottom: 0.25rem;
-	font-size: 0.75rem;
+	font-size: var(--sf-text-xs);
 	color: var(--sf-gray-500);
 }
 
 .sf-value {
-	font-size: 0.875rem;
+	font-size: var(--sf-text-base);
 	font-weight: 500;
 	color: var(--sf-gray-900);
 }
@@ -482,8 +463,8 @@ a.subtleforms-stat-card:hover {
 	align-items: center;
 	gap: 0.375rem;
 	padding: 0.25rem 0.625rem;
-	border-radius: 9999px;
-	font-size: 0.75rem;
+	border-radius: var(--sf-radius-full);
+	font-size: var(--sf-text-xs);
 	font-weight: 500;
 }
 
@@ -503,8 +484,8 @@ a.subtleforms-stat-card:hover {
 	gap: 0.25rem;
 	padding: 0.125rem 0.5rem;
 	border-width: 1px;
-	border-radius: 3px;
-	font-size: 0.75rem;
+	border-radius: var(--sf-radius-xs);
+	font-size: var(--sf-text-xs);
 	font-weight: 500;
 }
 

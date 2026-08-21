@@ -3,6 +3,11 @@
  * 
  * Modular CSS with form-type-aware styling.
  */
+/* Form type-specific styles */
+@import './styles/types/default.css';
+@import './styles/types/steps.css';
+@import './styles/types/conversational.css';
+@import './styles/types/payment.css';
 
 /* Base styles (shared across all form types) */
 @import './styles/base.css';
@@ -33,7 +38,7 @@
 	align-items: flex-start;
 	gap: 1rem;
 	padding: 1.5rem 0;
-	border-bottom: 1px solid #e5e7eb;
+	border-bottom: 1px solid var(--subtleforms-color-bg-subtle);
 	overflow-x: auto;
 }
 
@@ -50,23 +55,23 @@
 /* State-based classes for better integration */
 .sf-step-item.is-active .sf-step-indicator,
 .sf-step-active .sf-step-indicator {
-	border-color: #3b82f6;
-	background: #3b82f6;
+	border-color: var(--subtleforms-color-primary);
+	background: var(--subtleforms-color-primary);
 	color: white;
 	box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
 
 .sf-step-item.is-complete .sf-step-indicator,
 .sf-step-completed .sf-step-indicator {
-	border-color: #10b981;
-	background: #10b981;
+	border-color: var(--subtleforms-color-success);
+	background: var(--subtleforms-color-success);
 	color: white;
 }
 
 .sf-step-item.is-upcoming .sf-step-indicator {
-	border-color: #d1d5db;
-	background: #f9fafb;
-	color: #6b7280;
+	border-color: var(--subtleforms-color-border);
+	background: var(--subtleforms-color-bg-subtle);
+	color: var(--subtleforms-color-text-light);
 }
 
 .sf-step-button {
@@ -100,9 +105,9 @@
 	width: 2.5rem;
 	height: 2.5rem;
 	border-radius: 50%;
-	border: 2px solid #d1d5db;
-	background: #f9fafb;
-	color: #6b7280;
+	border: 2px solid var(--subtleforms-color-border);
+	background: var(--subtleforms-color-bg-subtle);
+	color: var(--subtleforms-color-text-light);
 	font-weight: 600;
 	font-size: 0.875rem;
 	transition: all 0.2s ease;
@@ -130,7 +135,7 @@
 .sf-step-title {
 	font-size: 0.875rem;
 	font-weight: 500;
-	color: #374151;
+	color: var(--subtleforms-color-text);
 	transition: color 0.2s ease;
 	text-align: center;
 	line-height: 1.2;
@@ -138,18 +143,18 @@
 
 .sf-step-active .sf-step-title,
 .sf-step-item.is-active .sf-step-title {
-	color: #3b82f6;
+	color: var(--subtleforms-color-primary);
 	font-weight: 600;
 }
 
 .sf-step-completed .sf-step-title,
 .sf-step-item.is-complete .sf-step-title {
-	color: #10b981;
+	color: var(--subtleforms-color-success);
 }
 
 .sf-step-description {
 	font-size: 0.75rem;
-	color: #6b7280;
+	color: var(--subtleforms-color-text-light);
 	text-align: center;
 	line-height: 1.3;
 }
@@ -160,17 +165,17 @@
 	left: calc(50% + 1.25rem);
 	right: calc(-50% + 1.25rem);
 	height: 2px;
-	background: #e5e7eb;
+	background: var(--subtleforms-color-bg-subtle);
 	z-index: 1;
 }
 
 .sf-step-completed + .sf-step-item .sf-step-connector,
 .sf-step-completed .sf-step-connector {
-	background: #10b981;
+	background: var(--subtleforms-color-success);
 }
 
 .sf-step-clickable .sf-step-button:not(:disabled):hover .sf-step-title {
-	color: #3b82f6;
+	color: var(--subtleforms-color-primary);
 }
 
 @media (max-width: 640px) {
@@ -204,11 +209,6 @@
 	}
 }
 
-/* Form type-specific styles */
-@import './styles/types/default.css';
-@import './styles/types/steps.css';
-@import './styles/types/conversational.css';
-@import './styles/types/payment.css';
 
 /* ===== Legacy Field Styles (to be refactored) ===== */
 .subtleforms-step.completed {
@@ -222,7 +222,7 @@
 	left: 50%;
 	width: 100%;
 	height: 2px;
-	background: #e0e0e0;
+	background: var(--subtleforms-color-border);
 	z-index: -1;
 }
 
@@ -234,8 +234,8 @@
 	width: 32px;
 	height: 32px;
 	border-radius: 50%;
-	background: #e0e0e0;
-	color: #666;
+	background: var(--subtleforms-color-border);
+	color: var(--subtleforms-color-text-light);
 	display: flex;
 	align-items: center;
 	justify-content: center;
@@ -246,23 +246,23 @@
 }
 
 .subtleforms-step.active .subtleforms-step-number {
-	background: #0073aa;
-	color: #fff;
+	background: var(--subtleforms-color-primary-hover);
+	color: var(--subtleforms-color-bg);
 }
 
 .subtleforms-step.completed .subtleforms-step-number {
-	background: #46b450;
-	color: #fff;
+	background: var(--subtleforms-color-success);
+	color: var(--subtleforms-color-bg);
 }
 
 .subtleforms-step-title {
 	font-size: 12px;
-	color: #666;
+	color: var(--subtleforms-color-text-light);
 	text-align: center;
 }
 
 .subtleforms-step.active .subtleforms-step-title {
-	color: #0073aa;
+	color: var(--subtleforms-color-primary-hover);
 	font-weight: 600;
 }
 
@@ -275,11 +275,11 @@
 	font-size: 24px;
 	font-weight: 600;
 	margin-bottom: 8px;
-	color: #333;
+	color: var(--subtleforms-color-text);
 }
 
 .subtleforms-step-description {
-	color: #666;
+	color: var(--subtleforms-color-text-light);
 	margin-bottom: 20px;
 }
 
@@ -292,11 +292,11 @@
 	display: block;
 	font-weight: 500;
 	margin-bottom: 6px;
-	color: #333;
+	color: var(--subtleforms-color-text);
 }
 
 .subtleforms-required {
-	color: #d63638;
+	color: var(--subtleforms-color-error);
 	margin-left: 2px;
 }
 
@@ -305,7 +305,7 @@
 .subtleforms-select {
 	width: 100%;
 	padding: 10px;
-	border: 1px solid #ddd;
+	border: 1px solid var(--subtleforms-color-border);
 	border-radius: 4px;
 	font-size: 14px;
 	font-family: inherit;
@@ -316,8 +316,8 @@
 .subtleforms-textarea:focus,
 .subtleforms-select:focus {
 	outline: none;
-	border-color: #0073aa;
-	box-shadow: 0 0 0 1px #0073aa;
+	border-color: var(--subtleforms-color-primary-hover);
+	box-shadow: 0 0 0 1px var(--subtleforms-color-primary-hover);
 }
 
 .subtleforms-textarea {
@@ -347,14 +347,14 @@
 
 /* Field Errors */
 .subtleforms-field-error {
-	color: #d63638;
+	color: var(--subtleforms-color-error);
 	font-size: 13px;
 	margin-top: 6px;
 }
 
 /* Container Fields */
 .subtleforms-field-container {
-	border: 1px solid #e0e0e0;
+	border: 1px solid var(--subtleforms-color-border);
 	border-radius: 4px;
 	padding: 20px;
 	margin-bottom: 20px;
@@ -363,7 +363,7 @@
 .subtleforms-container-label {
 	font-weight: 600;
 	margin-bottom: 15px;
-	color: #333;
+	color: var(--subtleforms-color-text);
 }
 
 /* Column Layout */
@@ -383,7 +383,7 @@
 	justify-content: space-between;
 	margin-top: 30px;
 	padding-top: 20px;
-	border-top: 1px solid #e0e0e0;
+	border-top: 1px solid var(--subtleforms-color-border);
 }
 
 .subtleforms-button {
@@ -397,23 +397,23 @@
 }
 
 .subtleforms-button-prev {
-	background: #f0f0f0;
-	color: #333;
+	background: var(--subtleforms-color-bg-subtle);
+	color: var(--subtleforms-color-text);
 }
 
 .subtleforms-button-prev:hover {
-	background: #e0e0e0;
+	background: var(--subtleforms-color-border);
 }
 
 .subtleforms-button-next,
 .subtleforms-button-submit {
-	background: #0073aa;
-	color: #fff;
+	background: var(--subtleforms-color-primary-hover);
+	color: var(--subtleforms-color-bg);
 }
 
 .subtleforms-button-next:hover,
 .subtleforms-button-submit:hover {
-	background: #005a87;
+	background: var(--subtleforms-color-primary-hover);
 }
 
 .subtleforms-button:disabled {
@@ -423,11 +423,11 @@
 
 /* Success Message */
 .subtleforms-success {
-	background: #d7f8e0;
-	border: 1px solid #b8e6c4;
+	background: var(--subtleforms-color-bg-subtle);
+	border: 1px solid var(--subtleforms-color-success);
 	border-radius: 4px;
 	padding: 20px;
-	color: #155724;
+	color: var(--subtleforms-color-success);
 	text-align: center;
 }
 
@@ -443,10 +443,10 @@
 /* Unsupported Field */
 .subtleforms-unsupported {
 	padding: 10px;
-	background: #fff3cd;
-	border: 1px solid #ffc107;
+	background: var(--subtleforms-color-bg-subtle);
+	border: 1px solid var(--subtleforms-color-warning);
 	border-radius: 4px;
-	color: #856404;
+	color: var(--subtleforms-color-warning);
 	font-size: 13px;
 }
 
@@ -481,4 +481,223 @@
 	.subtleforms-button {
 		width: 100%;
 	}
+}
+
+/* ===== Range slider ===== */
+.subtleforms-range {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.subtleforms-range__input {
+	flex: 1;
+}
+
+.subtleforms-range__value {
+	min-width: 3ch;
+	font-variant-numeric: tabular-nums;
+	text-align: right;
+	font-weight: 600;
+}
+
+/* ===== Net promoter score ===== */
+.subtleforms-nps__scale {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
+
+.subtleforms-nps__option {
+	cursor: pointer;
+}
+
+.subtleforms-nps__number {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 2.25rem;
+	height: 2.25rem;
+	border: 1px solid var(--subtleforms-color-border);
+	border-radius: 4px;
+	font-variant-numeric: tabular-nums;
+	transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.subtleforms-nps__option:hover .subtleforms-nps__number {
+	border-color: var(--subtleforms-color-text-light);
+}
+
+/* Keyboard focus lands on the visually hidden radio, so mirror it onto the
+   visible control or the focused option is impossible to see. */
+.subtleforms-nps__option input:focus-visible + .subtleforms-nps__number {
+	outline: 2px solid currentColor;
+	outline-offset: 2px;
+}
+
+.subtleforms-nps__number.is-selected {
+	background: var(--subtleforms-color-text);
+	border-color: var(--subtleforms-color-text);
+	color: var(--subtleforms-color-bg);
+}
+
+.subtleforms-nps__legend {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 6px;
+	font-size: 0.8125rem;
+	opacity: 0.7;
+}
+
+/* ===== Checkbox grid ===== */
+.subtleforms-checkbox-grid {
+	border-collapse: collapse;
+	width: 100%;
+}
+
+.subtleforms-checkbox-grid th,
+.subtleforms-checkbox-grid td {
+	padding: 8px;
+	border-bottom: 1px solid var(--subtleforms-color-bg-subtle);
+	text-align: center;
+}
+
+.subtleforms-checkbox-grid th[scope='row'] {
+	text-align: left;
+	font-weight: 500;
+}
+
+/* ===== Colour picker ===== */
+.subtleforms-color {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.subtleforms-color__swatch {
+	width: 44px;
+	height: 38px;
+	padding: 2px;
+	border: 1px solid var(--subtleforms-color-border);
+	border-radius: 4px;
+	background: none;
+	cursor: pointer;
+}
+
+.subtleforms-color__hex {
+	width: 10ch;
+	font-family: ui-monospace, "SF Mono", Menlo, monospace;
+}
+
+/* ===== Signature ===== */
+.subtleforms-signature__canvas {
+	width: 100%;
+	height: 160px;
+	border: 1px dashed var(--subtleforms-color-text-light);
+	border-radius: 4px;
+	background: var(--subtleforms-color-bg);
+	touch-action: none;
+	cursor: crosshair;
+}
+
+.subtleforms-signature__actions {
+	display: flex;
+	gap: 12px;
+	margin-top: 8px;
+}
+
+.subtleforms-signature__button {
+	background: none;
+	border: 0;
+	padding: 0;
+	font-size: 0.8125rem;
+	text-decoration: underline;
+	cursor: pointer;
+	color: inherit;
+}
+
+.subtleforms-signature__button[disabled] {
+	opacity: 0.5;
+	cursor: default;
+}
+
+/* ===== Rich text ===== */
+.subtleforms-richtext {
+	border: 1px solid var(--subtleforms-color-border);
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.subtleforms-richtext__toolbar {
+	display: flex;
+	gap: 2px;
+	padding: 4px;
+	border-bottom: 1px solid var(--subtleforms-color-bg-subtle);
+	background: var(--subtleforms-color-bg-subtle);
+}
+
+.subtleforms-richtext__button {
+	min-width: 28px;
+	height: 28px;
+	border: 0;
+	border-radius: 3px;
+	background: none;
+	cursor: pointer;
+	font-size: 0.875rem;
+}
+
+.subtleforms-richtext__button:hover {
+	background: var(--subtleforms-color-bg-subtle);
+}
+
+.subtleforms-richtext__editor {
+	min-height: 120px;
+	padding: 10px 12px;
+	outline: none;
+}
+
+.subtleforms-richtext__editor:focus-visible {
+	outline: 2px solid currentColor;
+	outline-offset: -2px;
+}
+
+/* Placeholder for an empty contentEditable, which has no native support. */
+.subtleforms-richtext__editor:empty::before {
+	content: attr(data-placeholder);
+	opacity: 0.55;
+	pointer-events: none;
+}
+
+/* ===== Chained select ===== */
+.subtleforms-chained-select {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.subtleforms-chained-select__label {
+	display: block;
+	margin-bottom: 4px;
+	font-size: 0.8125rem;
+}
+
+/* ===== Section break ===== */
+.subtleforms-section-break {
+	margin: 8px 0;
+}
+
+.subtleforms-section-break__title {
+	margin: 0 0 4px;
+	font-size: 1.125rem;
+}
+
+.subtleforms-section-break__description {
+	margin: 0 0 8px;
+	opacity: 0.75;
+}
+
+.subtleforms-section-break__rule {
+	border: 0;
+	border-top: 1px solid var(--subtleforms-color-bg-subtle);
+	margin: 0;
 }

@@ -6,6 +6,7 @@
  */
 
 import { useState, useRef, useEffect, useMemo } from '@wordpress/element';
+import { debug } from '../../../../shared/debug';
 import {
   normalizeSchema,
   denormalizeTree,
@@ -41,7 +42,7 @@ export function useBuilderState(schema, validationErrors, fieldErrors, onChange,
 
     // Log schema version for debugging
     if (process.env.NODE_ENV !== 'production') {
-      console.debug(
+      debug(
         '[SubtleForms] FormEditor initialized with schema version:',
         schemaWithVersion.schema_version
       );
@@ -88,7 +89,7 @@ export function useBuilderState(schema, validationErrors, fieldErrors, onChange,
 
     // Log schema version update
     if (process.env.NODE_ENV !== 'production') {
-      console.debug(
+      debug(
         '[SubtleForms] FormEditor received new schema version:',
         schemaWithVersion.schema_version
       );

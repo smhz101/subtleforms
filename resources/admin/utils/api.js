@@ -1,148 +1,142 @@
-const getRestBase = () =>
-  window.subtleformsAdmin && window.subtleformsAdmin.restUrl
-    ? window.subtleformsAdmin.restUrl.replace(/\/$/, '')
-    : '/wp-json/subtleforms/v1';
+/**
+ * Non-throwing REST helpers.
+ *
+ * This is a thin adapter over the same `@wordpress/api-fetch` transport that
+ * `data/apiClient.js` uses, so the whole admin shares one nonce, one URL
+ * builder and one ETag cache. It exists because two response contracts are
+ * genuinely useful:
+ *
+ *   - `apiClient.*`  throws on error and unwraps the `{ data, meta }` envelope.
+ *     Suited to the react-query layer, which expects rejected promises.
+ *   - `apiGet` and friends (here) never throw and return the *raw* body.
+ *     Suited to the builder and list views, which branch on `ok`/`status` and
+ *     unwrap `.data` themselves.
+ *
+ * Both go through apiFetch, so neither hand-rolls nonce handling and both work
+ * when pretty permalinks are disabled — apiFetch's root-URL middleware rewrites
+ * `?rest_route=…` paths for us.
+ */
+
+import apiFetch from '@wordpress/api-fetch';
+import { storeETag } from '../data/apiClient';
+
+const NAMESPACE = 'subtleforms/v1';
 
 /**
- * Build a REST API URL compatible with both pretty-permalink and fallback
- * (index.php?rest_route=…) modes.
+ * Build an absolute REST URL.
  *
- * When pretty permalinks are DISABLED, WordPress sets restUrl to something
- * like "https://site.com/index.php?rest_route=/subtleforms/v1/".
- * Naively appending "/endpoint?param=1" produces a malformed URL:
- *   …index.php?rest_route=/subtleforms/v1/endpoint?param=1   ← WRONG
- * because the second "?" makes "param=1" part of the rest_route value.
- * The correct form separates query params with "&":
- *   …index.php?rest_route=/subtleforms/v1/endpoint&param=1   ← CORRECT
+ * @deprecated Prefer the request helpers below, which go through apiFetch.
+ * Retained for callers that still need a URL string.
  */
-export const buildApiUrl = (path) => {
-  const base = getRestBase();
-  if (!base.includes('?rest_route=')) {
-    // Pretty permalinks – simple concatenation is fine.
+export const buildApiUrl = ( path ) => {
+  const base =
+    window.subtleformsAdmin?.restUrl?.replace( /\/$/, '' ) ||
+    '/wp-json/subtleforms/v1';
+
+  if ( ! base.includes( '?rest_route=' ) ) {
     return base + path;
   }
-  // Fallback mode – split path at the first '?' and join with '&'.
-  const sepIdx = path.indexOf('?');
-  if (sepIdx === -1) return base + path;
-  return `${base}${path.slice(0, sepIdx)}&${path.slice(sepIdx + 1)}`;
+
+  // Fallback mode: a second "?" would fold the query into the rest_route value.
+  const sepIdx = path.indexOf( '?' );
+  if ( sepIdx === -1 ) {
+    return base + path;
+  }
+  return `${ base }${ path.slice( 0, sepIdx ) }&${ path.slice( sepIdx + 1 ) }`;
 };
 
-const getRestNonce = () =>
-  window.subtleformsAdmin && window.subtleformsAdmin.restNonce
-    ? window.subtleformsAdmin.restNonce
-    : null;
+/** Duck-type a fetch Response so this also works with mocked handlers. */
+const isResponse = ( value ) =>
+  !! value && typeof value.status === 'number' && typeof value.text === 'function';
 
-async function parseJsonResponse(response) {
-  if (!response) {
+/**
+ * Read a Response body as JSON, tolerating empty and non-JSON payloads.
+ */
+async function readBody( response ) {
+  if ( ! response || response.status === 204 ) {
     return null;
   }
-
-  if (response.status === 204) {
+  try {
+    const text = await response.text();
+    if ( ! text ) {
+      return null;
+    }
+    return JSON.parse( text );
+  } catch {
     return null;
   }
+}
 
-  const contentLength = response.headers?.get('Content-Length');
-  if (contentLength === '0') {
-    return null;
-  }
+/**
+ * Perform a request and resolve to a result object instead of throwing.
+ *
+ * @param {string} path      Namespace-relative path, e.g. '/forms?page=2'.
+ * @param {Object} [options] apiFetch options (method, data, headers).
+ * @return {Promise<{ok: boolean, status: number, body: *, headers: ?Headers}>} Result.
+ */
+async function request( path, options = {} ) {
+  const fullPath = `/${ NAMESPACE }${ path }`;
 
-  const text = await response.text();
-  if (!text) {
-    return null;
-  }
+  const settle = async ( response ) => {
+    const headers = response.headers ?? null;
+
+    const etag = headers?.get?.( 'ETag' );
+    if ( etag ) {
+      storeETag( fullPath, etag );
+    }
+
+    return {
+      ok: response.ok,
+      status: response.status,
+      body: await readBody( response ),
+      headers,
+    };
+  };
 
   try {
-    return JSON.parse(text);
-  } catch (err) {
-    console.warn('Failed to parse JSON response', err);
-    return null;
+    // parse:false hands back the raw Response, which is the only way to read
+    // headers. The apiClient middleware deliberately passes these through.
+    const response = await apiFetch( {
+      path: fullPath,
+      parse: false,
+      ...options,
+    } );
+
+    return await settle( response );
+  } catch ( error ) {
+    // apiFetch rejects on any non-2xx, and with parse:false the rejection value
+    // is the raw Response. Callers here branch on status and read validation
+    // messages, retry-after and conflict ETags out of `body`, so the error
+    // response has to be settled the same way a success is.
+    if ( isResponse( error ) ) {
+      return await settle( error );
+    }
+
+    // Network failure, or a middleware rejected before the request went out.
+    return {
+      ok: false,
+      status: error?.status ?? 0,
+      body: error?.data ?? ( error?.message ? { message: error.message } : null ),
+      headers: null,
+    };
   }
 }
 
-export async function apiGet(path) {
-  const response = await fetch(buildApiUrl(path), {
-    credentials: 'same-origin',
-    headers: {
-      'X-WP-Nonce': getRestNonce(),
-      'Content-Type': 'application/json',
-    },
-  });
+export const apiGet = ( path ) => request( path );
 
-  const body = await parseJsonResponse(response);
-  return { ok: response.ok, status: response.status, body };
-}
+export const apiPost = ( path, payload ) =>
+  request( path, { method: 'POST', data: payload } );
 
-export async function apiPost(path, payload) {
-  const response = await fetch(buildApiUrl(path), {
-    method: 'POST',
-    credentials: 'same-origin',
-    headers: {
-      'X-WP-Nonce': getRestNonce(),
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
+export const apiPut = ( path, payload ) =>
+  request( path, { method: 'PUT', data: payload } );
 
-  const body = await parseJsonResponse(response);
-  return { ok: response.ok, status: response.status, body };
-}
+export const apiDelete = ( path ) => request( path, { method: 'DELETE' } );
 
-export async function apiPut(path, payload) {
-  const response = await fetch(buildApiUrl(path), {
-    method: 'PUT',
-    credentials: 'same-origin',
-    headers: {
-      'X-WP-Nonce': getRestNonce(),
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(payload),
-  });
-
-  const body = await parseJsonResponse(response);
-  return { ok: response.ok, status: response.status, body };
-}
-
-export async function apiDelete(path) {
-  const response = await fetch(buildApiUrl(path), {
-    method: 'DELETE',
-    credentials: 'same-origin',
-    headers: {
-      'X-WP-Nonce': getRestNonce(),
-      'Content-Type': 'application/json',
-    },
-  });
-
-  const body = await parseJsonResponse(response);
-  return { ok: response.ok, status: response.status, body };
-}
-
-/**
- * Check if error is a validation error (HTTP 422)
- */
-export const isValidationError = (error) => {
-  return error?.status === 422 || error?.isValidationError === true;
-};
-
-/**
- * Check if error is a rate limit error (HTTP 429)
- */
-export const isRateLimitError = (error) => {
-  return error?.status === 429 || error?.isRateLimited === true;
-};
-
-/**
- * Check if error is a conflict error (HTTP 409)
- */
-export const isConflictError = (error) => {
-  return error?.status === 409 || error?.isConflict === true;
-};
-
-/**
- * Extract field errors from validation error
- */
-export const getFieldErrors = (error) => {
-  if (isValidationError(error)) {
-    return error?.fields || {};
-  }
-  return {};
-};
+// Error predicates live in apiClient; re-exported so callers of either surface
+// can use one set rather than two subtly different copies.
+export {
+  isValidationError,
+  isRateLimitError,
+  isConflictError,
+  getFieldErrors,
+} from '../data/apiClient';

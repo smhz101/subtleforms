@@ -1,0 +1,384 @@
+/**
+ * SubtleForms design tokens.
+ *
+ * The single source of truth for colour, radius, type, elevation and timing.
+ * Everything else in the codebase resolves back to a token defined here, so the
+ * entire product can be re-tinted by editing this one file without touching a
+ * component.
+ *
+ * These are CSS custom properties rather than SCSS variables on purpose: they
+ * can be inspected in devtools, overridden per scope, and changed at runtime.
+ * `_variables.scss` maps the historical `$sf-*` names onto them so older
+ * stylesheets keep working.
+ *
+ * Scales are deliberately short. Every value below earns its place; if a design
+ * needs a sixth shadow or a twenty-first grey, the design is wrong before the
+ * token set is.
+ */
+
+:root {
+  // ── Neutrals ───────────────────────────────────────────────────────────────
+  // One ramp, biased slightly blue so it sits with the accent instead of
+  // fighting it. Replaces the six ramps (gray, stone, slate, neutral, plus two
+  // sets of loose hex literals) that previously ran in parallel.
+  --sf-n-0: #ffffff;
+  --sf-n-25: #fbfbfc;
+  --sf-n-50: #f4f5f7;
+  --sf-n-100: #e9ebef;
+  --sf-n-200: #d8dbe2;
+  --sf-n-300: #b9bec9;
+  --sf-n-400: #8c94a3;
+  --sf-n-500: #6b7382;
+  --sf-n-600: #515869;
+  --sf-n-700: #3b4150;
+  --sf-n-800: #262b37;
+  --sf-n-900: #131417;
+
+  // ── Accent ─────────────────────────────────────────────────────────────────
+  // Indigo-slate: reads as considered next to WordPress chrome without
+  // impersonating its blue, and stays distinct from the semantic colours.
+  --sf-a-50: #eef0fb;
+  --sf-a-100: #dde1f6;
+  --sf-a-200: #c4cbee;
+  --sf-a-300: #a3adde;
+  --sf-a-400: #7683d9;
+  --sf-a-500: #4f5bd5;
+  --sf-a-600: #4048b8;
+  --sf-a-700: #343a95;
+  --sf-a-800: #2a2f75;
+
+  // ── Semantic ───────────────────────────────────────────────────────────────
+  // Exactly one colour per meaning. Five greens previously competed for
+  // "success", which is why no two screens agreed on what success looked like.
+  --sf-success: #1f7a4d;
+  --sf-success-strong: #175c3a;
+  --sf-success-bg: #eaf5ef;
+  --sf-success-border: #c9e4d5;
+
+  --sf-danger: #b3261e;
+  --sf-danger-strong: #8c1c16;
+  --sf-danger-bg: #fbeceb;
+  --sf-danger-border: #f2ccc9;
+
+  --sf-warning: #8a5a00;
+  --sf-warning-strong: #6b4600;
+  --sf-warning-bg: #fdf3e2;
+  --sf-warning-border: #f2ddb4;
+
+  // ── Roles ──────────────────────────────────────────────────────────────────
+  // Components should reach for these, not the ramps above: the role says what
+  // the colour is *for*, which survives a palette change.
+  --sf-bg-page: var(--sf-n-25);
+  --sf-bg-surface: var(--sf-n-0);
+  --sf-bg-subtle: var(--sf-n-50);
+  --sf-bg-muted: var(--sf-n-100);
+
+  --sf-text: var(--sf-n-900);
+  --sf-text-secondary: var(--sf-n-600);
+  --sf-text-muted: var(--sf-n-500);
+  --sf-text-subtle: var(--sf-n-400);
+  --sf-text-on-accent: var(--sf-n-0);
+
+  --sf-border: var(--sf-n-200);
+  --sf-border-strong: var(--sf-n-300);
+  --sf-border-subtle: var(--sf-n-100);
+
+  --sf-primary: var(--sf-a-500);
+  --sf-primary-hover: var(--sf-a-600);
+  --sf-primary-active: var(--sf-a-700);
+  --sf-primary-bg: var(--sf-a-50);
+  --sf-primary-border: var(--sf-a-100);
+
+  --sf-focus-ring: var(--sf-a-500);
+
+  // ── Radius ─────────────────────────────────────────────────────────────────
+  // Five steps, one notation. Previously 20+ values across px, rem, %, SCSS
+  // variables and custom properties, with 8px and 0.5rem both in heavy use.
+  --sf-radius-xs: 2px;
+  --sf-radius-sm: 4px;
+  --sf-radius-md: 8px;
+  --sf-radius-lg: 12px;
+  --sf-radius-full: 999px;
+
+  // ── Spacing ────────────────────────────────────────────────────────────────
+  --sf-space-1: 4px;
+  --sf-space-2: 8px;
+  --sf-space-3: 12px;
+  --sf-space-4: 16px;
+  --sf-space-5: 20px;
+  --sf-space-6: 24px;
+  --sf-space-8: 32px;
+  --sf-space-10: 40px;
+  --sf-space-12: 48px;
+
+  // ── Type ───────────────────────────────────────────────────────────────────
+  // Seven sizes. Both px and rem spellings of the same size were in use
+  // (0.875rem and 14px, 0.75rem and 12px); rem wins so the scale respects the
+  // reader's font size.
+  --sf-text-2xs: 0.6875rem; // 11px
+  --sf-text-xs: 0.75rem; //    12px
+  --sf-text-sm: 0.8125rem; //  13px
+  --sf-text-base: 0.875rem; // 14px — WordPress admin body size
+  --sf-text-md: 1rem; //       16px
+  --sf-text-lg: 1.25rem; //    20px
+  --sf-text-xl: 1.75rem; //    28px
+
+  --sf-leading-tight: 1.25;
+  --sf-leading-normal: 1.5;
+  --sf-leading-relaxed: 1.65;
+
+  --sf-weight-normal: 400;
+  --sf-weight-medium: 500;
+  --sf-weight-semibold: 600;
+
+  --sf-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  --sf-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
+    monospace;
+
+  // ── Elevation ──────────────────────────────────────────────────────────────
+  // Five steps, replacing 111 unique box-shadow declarations. Shadows are neutral
+  // and tinted with the ink colour so they read as depth rather than as grey haze.
+  --sf-shadow-xs: 0 1px 2px rgba(19, 20, 23, 0.06);
+  --sf-shadow-sm: 0 1px 3px rgba(19, 20, 23, 0.08), 0 1px 2px rgba(19, 20, 23, 0.04);
+  --sf-shadow-md: 0 4px 12px rgba(19, 20, 23, 0.08), 0 2px 4px rgba(19, 20, 23, 0.04);
+  --sf-shadow-lg: 0 12px 28px rgba(19, 20, 23, 0.12), 0 4px 8px rgba(19, 20, 23, 0.05);
+  --sf-shadow-focus: 0 0 0 3px rgba(79, 91, 213, 0.28);
+
+  // ── Motion ─────────────────────────────────────────────────────────────────
+  // Three durations, replacing fifteen. One easing curve.
+  --sf-duration-fast: 120ms;
+  --sf-duration-base: 180ms;
+  --sf-duration-slow: 260ms;
+  --sf-ease: cubic-bezier(0.2, 0, 0.2, 1);
+
+  --sf-transition-fast: var(--sf-duration-fast) var(--sf-ease);
+  --sf-transition-base: var(--sf-duration-base) var(--sf-ease);
+}
+
+// Honour the reader's motion preference everywhere, once, rather than per
+// component.
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --sf-duration-fast: 1ms;
+    --sf-duration-base: 1ms;
+    --sf-duration-slow: 1ms;
+  }
+}
+
+// ── Legacy aliases ───────────────────────────────────────────────────────────
+// Older stylesheets reference these names directly. They resolve to the tokens
+// above, which is how the whole admin picks up the palette without every
+// component being edited. Prefer the role tokens in new code.
+:root {
+  --sf-gray-50: var(--sf-n-50);
+  --sf-gray-100: var(--sf-n-100);
+  --sf-gray-200: var(--sf-n-200);
+  --sf-gray-300: var(--sf-n-300);
+  --sf-gray-400: var(--sf-n-400);
+  --sf-gray-500: var(--sf-n-500);
+  --sf-gray-600: var(--sf-n-600);
+  --sf-gray-700: var(--sf-n-700);
+  --sf-gray-800: var(--sf-n-800);
+  --sf-gray-900: var(--sf-n-900);
+  --sf-stone-50: var(--sf-n-50);
+  --sf-stone-100: var(--sf-n-100);
+  --sf-stone-200: var(--sf-n-200);
+  --sf-stone-300: var(--sf-n-300);
+  --sf-stone-400: var(--sf-n-400);
+  --sf-stone-500: var(--sf-n-500);
+  --sf-stone-600: var(--sf-n-600);
+  --sf-stone-700: var(--sf-n-700);
+  --sf-stone-800: var(--sf-n-800);
+  --sf-stone-900: var(--sf-n-900);
+  --sf-slate-50: var(--sf-n-50);
+  --sf-slate-100: var(--sf-n-100);
+  --sf-slate-200: var(--sf-n-200);
+  --sf-slate-300: var(--sf-n-300);
+  --sf-slate-400: var(--sf-n-400);
+  --sf-slate-500: var(--sf-n-500);
+  --sf-slate-600: var(--sf-n-600);
+  --sf-slate-700: var(--sf-n-700);
+  --sf-slate-800: var(--sf-n-800);
+  --sf-slate-900: var(--sf-n-900);
+  --sf-neutral-50: var(--sf-n-50);
+  --sf-neutral-100: var(--sf-n-100);
+  --sf-neutral-200: var(--sf-n-200);
+  --sf-neutral-300: var(--sf-n-300);
+  --sf-neutral-400: var(--sf-n-400);
+  --sf-neutral-500: var(--sf-n-500);
+  --sf-neutral-600: var(--sf-n-600);
+  --sf-neutral-700: var(--sf-n-700);
+  --sf-neutral-800: var(--sf-n-800);
+  --sf-neutral-900: var(--sf-n-900);
+  --sf-blue-50: var(--sf-a-50);
+  --sf-blue-100: var(--sf-a-100);
+  --sf-blue-200: var(--sf-a-200);
+  --sf-blue-300: var(--sf-a-300);
+  --sf-blue-400: var(--sf-a-400);
+  --sf-blue-500: var(--sf-a-500);
+  --sf-blue-600: var(--sf-a-600);
+  --sf-blue-700: var(--sf-a-700);
+  --sf-blue-800: var(--sf-a-800);
+  --sf-blue-900: var(--sf-a-800);
+  --sf-indigo-50: var(--sf-a-50);
+  --sf-indigo-100: var(--sf-a-100);
+  --sf-indigo-200: var(--sf-a-200);
+  --sf-indigo-300: var(--sf-a-300);
+  --sf-indigo-400: var(--sf-a-400);
+  --sf-indigo-500: var(--sf-a-500);
+  --sf-indigo-600: var(--sf-a-600);
+  --sf-indigo-700: var(--sf-a-700);
+  --sf-indigo-800: var(--sf-a-800);
+  --sf-indigo-900: var(--sf-a-800);
+  --sf-violet-50: var(--sf-a-50);
+  --sf-violet-100: var(--sf-a-100);
+  --sf-violet-200: var(--sf-a-200);
+  --sf-violet-300: var(--sf-a-300);
+  --sf-violet-400: var(--sf-a-400);
+  --sf-violet-500: var(--sf-a-500);
+  --sf-violet-600: var(--sf-a-600);
+  --sf-violet-700: var(--sf-a-700);
+  --sf-violet-800: var(--sf-a-800);
+  --sf-violet-900: var(--sf-a-800);
+  --sf-purple-50: var(--sf-a-50);
+  --sf-purple-100: var(--sf-a-100);
+  --sf-purple-200: var(--sf-a-200);
+  --sf-purple-300: var(--sf-a-300);
+  --sf-purple-400: var(--sf-a-400);
+  --sf-purple-500: var(--sf-a-500);
+  --sf-purple-600: var(--sf-a-600);
+  --sf-purple-700: var(--sf-a-700);
+  --sf-purple-800: var(--sf-a-800);
+  --sf-purple-900: var(--sf-a-800);
+  --sf-teal-500: var(--sf-a-500);
+  --sf-green-50: var(--sf-success-bg);
+  --sf-green-100: var(--sf-success-border);
+  --sf-green-200: var(--sf-success-border);
+  --sf-green-300: var(--sf-success-border);
+  --sf-green-400: var(--sf-success-border);
+  --sf-green-500: var(--sf-success);
+  --sf-green-600: var(--sf-success);
+  --sf-green-700: var(--sf-success-strong);
+  --sf-green-800: var(--sf-success-strong);
+  --sf-green-900: var(--sf-success-strong);
+  --sf-emerald-50: var(--sf-success-bg);
+  --sf-emerald-100: var(--sf-success-border);
+  --sf-emerald-200: var(--sf-success-border);
+  --sf-emerald-300: var(--sf-success-border);
+  --sf-emerald-400: var(--sf-success-border);
+  --sf-emerald-500: var(--sf-success);
+  --sf-emerald-600: var(--sf-success);
+  --sf-emerald-700: var(--sf-success-strong);
+  --sf-emerald-800: var(--sf-success-strong);
+  --sf-emerald-900: var(--sf-success-strong);
+  --sf-lime-50: var(--sf-success-bg);
+  --sf-lime-100: var(--sf-success-border);
+  --sf-lime-200: var(--sf-success-border);
+  --sf-lime-300: var(--sf-success-border);
+  --sf-lime-400: var(--sf-success-border);
+  --sf-lime-500: var(--sf-success);
+  --sf-lime-600: var(--sf-success);
+  --sf-lime-700: var(--sf-success-strong);
+  --sf-lime-800: var(--sf-success-strong);
+  --sf-lime-900: var(--sf-success-strong);
+  --sf-red-50: var(--sf-danger-bg);
+  --sf-red-100: var(--sf-danger-border);
+  --sf-red-200: var(--sf-danger-border);
+  --sf-red-300: var(--sf-danger-border);
+  --sf-red-400: var(--sf-danger-border);
+  --sf-red-500: var(--sf-danger);
+  --sf-red-600: var(--sf-danger);
+  --sf-red-700: var(--sf-danger-strong);
+  --sf-red-800: var(--sf-danger-strong);
+  --sf-red-900: var(--sf-danger-strong);
+  --sf-coral-50: var(--sf-danger-bg);
+  --sf-coral-100: var(--sf-danger-border);
+  --sf-coral-200: var(--sf-danger-border);
+  --sf-coral-300: var(--sf-danger-border);
+  --sf-coral-400: var(--sf-danger-border);
+  --sf-coral-500: var(--sf-danger);
+  --sf-coral-600: var(--sf-danger);
+  --sf-coral-700: var(--sf-danger-strong);
+  --sf-coral-800: var(--sf-danger-strong);
+  --sf-coral-900: var(--sf-danger-strong);
+  --sf-amber-50: var(--sf-warning-bg);
+  --sf-amber-100: var(--sf-warning-border);
+  --sf-amber-200: var(--sf-warning-border);
+  --sf-amber-300: var(--sf-warning-border);
+  --sf-amber-400: var(--sf-warning-border);
+  --sf-amber-500: var(--sf-warning);
+  --sf-amber-600: var(--sf-warning);
+  --sf-amber-700: var(--sf-warning-strong);
+  --sf-amber-800: var(--sf-warning-strong);
+  --sf-amber-900: var(--sf-warning-strong);
+  --sf-orange-50: var(--sf-warning-bg);
+  --sf-orange-100: var(--sf-warning-border);
+  --sf-orange-200: var(--sf-warning-border);
+  --sf-orange-300: var(--sf-warning-border);
+  --sf-orange-400: var(--sf-warning-border);
+  --sf-orange-500: var(--sf-warning);
+  --sf-orange-600: var(--sf-warning);
+  --sf-orange-700: var(--sf-warning-strong);
+  --sf-orange-800: var(--sf-warning-strong);
+  --sf-orange-900: var(--sf-warning-strong);
+  --sf-yellow-50: var(--sf-warning-bg);
+  --sf-yellow-100: var(--sf-warning-border);
+  --sf-yellow-200: var(--sf-warning-border);
+  --sf-yellow-300: var(--sf-warning-border);
+  --sf-yellow-400: var(--sf-warning-border);
+  --sf-yellow-500: var(--sf-warning);
+  --sf-yellow-600: var(--sf-warning);
+  --sf-yellow-700: var(--sf-warning-strong);
+  --sf-yellow-800: var(--sf-warning-strong);
+  --sf-yellow-900: var(--sf-warning-strong);
+
+  --sf-surface: var(--sf-bg-surface);
+
+  // WordPress admin palette aliases. Mapped onto our own roles so the plugin
+  // reads as one product rather than borrowing core's chrome colours.
+  --wp-blue-500: var(--sf-a-400);
+  --wp-blue-600: var(--sf-a-500);
+  --wp-blue-700: var(--sf-a-600);
+  --wp-blue-800: var(--sf-a-700);
+  --wp-blue-link: var(--sf-a-500);
+  --wp-blue-light: var(--sf-a-50);
+  --wp-green: var(--sf-success);
+  --wp-green-hover: var(--sf-success-strong);
+  --wp-orange: var(--sf-warning);
+  --wp-orange-bg: var(--sf-warning-bg);
+  --wp-dark: var(--sf-n-900);
+  --wp-gray-30: var(--sf-n-200);
+  --wp-gray-40: var(--sf-n-300);
+  --wp-gray-50: var(--sf-n-400);
+  --wp-gray-70: var(--sf-n-600);
+
+  // Unprefixed legacy scales.
+  --radius-sm: var(--sf-radius-sm);
+  --radius-md: var(--sf-radius-md);
+  --radius-lg: var(--sf-radius-lg);
+  --radius-full: var(--sf-radius-full);
+
+  --space-1: var(--sf-space-1);
+  --space-2: var(--sf-space-2);
+  --space-3: var(--sf-space-3);
+  --space-4: var(--sf-space-4);
+  --space-5: var(--sf-space-5);
+  --space-6: var(--sf-space-6);
+  --space-8: var(--sf-space-8);
+
+  --shadow-sm: var(--sf-shadow-sm);
+  --shadow-md: var(--sf-shadow-md);
+  --shadow-lg: var(--sf-shadow-lg);
+  // Both were accent-tinted glows from the abandoned palettes.
+  --shadow-lime: var(--sf-shadow-focus);
+  --shadow-violet: var(--sf-shadow-focus);
+
+  --transition-fast: var(--sf-transition-fast);
+  --transition-base: var(--sf-transition-base);
+  --transition-slow: var(--sf-duration-slow) var(--sf-ease);
+
+  --font-sans: var(--sf-font-sans);
+  --font-mono: var(--sf-font-mono);
+  --font-serif: var(--sf-font-sans);
+}

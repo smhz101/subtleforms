@@ -43,7 +43,7 @@
 	}
 
 	&__error-text {
-		font-size: 0.75rem;
+		font-size: var(--sf-text-xs);
 		line-height: 1rem;
 		color: var(--sf-red-600);
 	}
@@ -56,14 +56,14 @@
 
 	&__validation-text {
 		margin: 0;
-		font-size: 0.875rem;
+		font-size: var(--sf-text-base);
 	}
 
 	&__validation-list {
 		margin: 0;
 		margin-top: 0.5rem;
 		padding-left: 1.25rem;
-		font-size: 0.875rem;
+		font-size: var(--sf-text-base);
 	}
 
 	// Entries tab content
@@ -78,13 +78,13 @@
 		padding: 2rem 1.5rem;
 		height: 100%;
 		overflow-y: auto;
-		background-color: var(--sf-gray-50, #f9fafb);
+		background-color: var(--sf-gray-50, var(--sf-n-25));
 
 		.sf-form-preview-pane {
 			max-width: 680px;
 			margin: 0 auto;
-			background: #fff;
-			border-radius: 8px;
+			background: var(--sf-n-0);
+			border-radius: var(--sf-radius-md);
 			padding: 2rem;
 			box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 		}

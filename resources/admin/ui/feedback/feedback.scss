@@ -18,11 +18,11 @@
   align-items: flex-start;
   gap: 12px;
   padding: 12px 16px;
-  border-radius: 4px;
+  border-radius: var(--sf-radius-sm);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
   background: white;
   border-left: 4px solid;
-  animation: slideIn 0.3s ease-out;
+  animation: slideIn var(--sf-duration-slow) ease-out;
 }
 
 @keyframes slideIn {
@@ -37,7 +37,7 @@
 }
 
 .sf-notice--success {
-  border-left-color: var(--sf-green-600, #16a34a);
+  border-left-color: var(--sf-green-600, var(--sf-success));
 }
 
 .sf-notice--error {
@@ -49,7 +49,7 @@
 }
 
 .sf-notice--info {
-  border-left-color: var(--sf-blue-500, #3b82f6);
+  border-left-color: var(--sf-blue-500, var(--sf-a-400));
 }
 
 .sf-notice__content {
@@ -58,9 +58,9 @@
 
 .sf-notice__message {
   margin: 0;
-  font-size: 14px;
+  font-size: var(--sf-text-base);
   line-height: 1.5;
-  color: var(--sf-gray-900, #111827);
+  color: var(--sf-gray-900, var(--sf-n-900));
 }
 
 .sf-notice__dismiss {
@@ -70,13 +70,13 @@
   border: none;
   background: none;
   cursor: pointer;
-  font-size: 20px;
+  font-size: var(--sf-text-lg);
   line-height: 1;
-  color: var(--sf-gray-400, #9ca3af);
+  color: var(--sf-gray-400, var(--sf-n-400));
   padding: 0;
 
   &:hover {
-    color: var(--sf-gray-700, #374151);
+    color: var(--sf-gray-700, var(--sf-n-700));
   }
 }
 
@@ -94,14 +94,14 @@
   margin: 0 auto;
 
   h2 {
-    font-size: 24px;
+    font-size: var(--sf-text-xl);
     margin-bottom: 12px;
     color: var(--sf-red-600);
   }
 
   p {
-    font-size: 16px;
-    color: var(--sf-gray-600, #4b5563);
+    font-size: var(--sf-text-md);
+    color: var(--sf-gray-600, var(--sf-n-600));
     margin-bottom: 24px;
   }
 }
@@ -111,7 +111,7 @@
   margin-bottom: 24px;
   padding: 16px;
   background: var(--sf-gray-100);
-  border-radius: 4px;
+  border-radius: var(--sf-radius-sm);
 
   summary {
     cursor: pointer;
@@ -120,7 +120,7 @@
   }
 
   pre {
-    font-size: 12px;
+    font-size: var(--sf-text-xs);
     overflow-x: auto;
     white-space: pre-wrap;
     word-wrap: break-word;
@@ -129,14 +129,14 @@
 
 .sf-error-boundary__reload {
   padding: 10px 24px;
-  background: var(--sf-blue-600, #2563eb);
+  background: var(--sf-blue-600, var(--sf-a-500));
   color: white;
   border: none;
-  border-radius: 6px;
+  border-radius: var(--sf-radius-md);
   cursor: pointer;
-  font-size: 14px;
+  font-size: var(--sf-text-base);
 
   &:hover {
-    background: var(--sf-blue-700, #1d4ed8);
+    background: var(--sf-blue-700, var(--sf-a-600));
   }
 }

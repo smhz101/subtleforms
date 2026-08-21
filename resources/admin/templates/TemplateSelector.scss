@@ -18,9 +18,9 @@
 
 		.components-text-control__input {
 			padding: 0.625rem 0.875rem;
-			font-size: 0.875rem;
+			font-size: var(--sf-text-base);
 			border: 1px solid var(--sf-gray-300);
-			transition: all 0.15s;
+			transition: all var(--sf-duration-fast);
 
 			&:focus {
 				border-color: var(--sf-blue-500);
@@ -51,13 +51,13 @@
 	&__category {
 		padding: 0.5rem 0.75rem;
 		text-align: left;
-		font-size: 0.875rem;
+		font-size: var(--sf-text-base);
 		color: var(--sf-gray-600);
 		background: transparent;
 		border: none;
-		border-radius: 0.375rem;
+		border-radius: var(--sf-radius-md);
 		cursor: pointer;
-		transition: all 0.15s;
+		transition: all var(--sf-duration-fast);
 
 		&:hover {
 			background-color: var(--sf-gray-100);
@@ -106,7 +106,7 @@
 	}
 
 	&__empty-text {
-		font-size: 0.875rem;
+		font-size: var(--sf-text-base);
 		margin: 0;
 	}
 }
@@ -118,9 +118,9 @@
 	padding: 1.25rem;
 	background: var(--sf-surface);
 	border: 1px solid var(--sf-gray-200);
-	border-radius: 0.5rem;
+	border-radius: var(--sf-radius-md);
 	cursor: pointer;
-	transition: all 0.15s;
+	transition: all var(--sf-duration-fast);
 	text-align: left;
 	min-height: 140px;
 
@@ -169,11 +169,11 @@
 	&__badge {
 		display: inline-block;
 		padding: 0.125rem 0.5rem;
-		font-size: 0.6875rem;
+		font-size: var(--sf-text-2xs);
 		font-weight: 600;
 		text-transform: uppercase;
 		letter-spacing: 0.025em;
-		border-radius: 0.25rem;
+		border-radius: var(--sf-radius-sm);
 
 		&--free {
 			background-color: var(--sf-green-100);
@@ -198,14 +198,14 @@
 
 	&__name {
 		margin: 0 0 0.5rem;
-		font-size: 1rem;
+		font-size: var(--sf-text-md);
 		font-weight: 600;
 		color: var(--sf-gray-900);
 	}
 
 	&__description {
 		margin: 0;
-		font-size: 0.8125rem;
+		font-size: var(--sf-text-sm);
 		color: var(--sf-gray-500);
 		line-height: 1.5;
 	}

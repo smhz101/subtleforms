@@ -2,7 +2,7 @@
 Contributors: smhussain
 Tags: forms, contact form, form builder, submissions
 Requires at least: 6.0
-Tested up to: 6.9
+Tested up to: 7.1
 Requires PHP: 8.1
 Stable tag: 1.8.1
 License: GPLv2 or later
@@ -158,6 +158,23 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 7. Conversational form on frontend
 
 == Changelog ==
+
+= 1.8.1 =
+Releases between 1.6.10 and 1.8.1 were not tagged individually, so the changes
+below are recorded as one entry rather than split across versions that cannot
+now be reconstructed accurately.
+
+* Submissions: unread badges, spam and flagged statuses, column visibility, relative timestamps, per-field filtering and date-range export
+* Submissions: chunked prefetch pagination for large lists
+* Submission detail: two-column layout, actions timeline, and pipeline logs enriched with action data
+* Builder: structured group fields as container nodes, with a hierarchy system for nested fields
+* Builder: configurable composite fields, field identity icons, and a rebuilt field picker with search
+* Builder: live preview mode
+* Templates: free templates expanded from 2 to 11 across 5 categories; 13 categories in total with Pro stubs
+* Licensing: capability-based gating replaces the previous LicenseApi and SubscriptionManager
+* Settings: tab routing via URL hash
+* Database: is_read migration for the submissions table
+* Accessibility and onboarding persistence fixes throughout
 
 = 1.6.10 - 2026-01-16 =
 * Security: Added REST API nonce verification for CSRF protection

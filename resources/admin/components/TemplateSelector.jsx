@@ -50,9 +50,9 @@ export default function TemplateSelector({ onSelect, onClose }) {
     <Modal
       title={__('Choose a Template', 'subtleforms')}
       onRequestClose={onClose}
-      className='subtleforms-sf-template-selector-modal'
+      className='sf-template-selector-modal'
       size='large'>
-      <div className='subtleforms-sf-template-selector'>
+      <div className='sf-template-selector'>
         {loading ? (
           <div className='sf-template-selector__loading'>
             <p>{__('Loading templates...', 'subtleforms')}</p>

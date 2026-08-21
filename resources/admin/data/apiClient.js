@@ -19,7 +19,6 @@ import apiFetch from '@wordpress/api-fetch';
 // WordPress apiFetch handles the /wp-json prefix automatically
 // We only need the namespace
 const namespace = 'subtleforms/v1';
-const nonce = window.subtleformsAdmin?.restNonce || '';
 
 /**
  * ETag storage for optimistic locking
@@ -51,89 +50,146 @@ export const clearETag = (path) => {
 };
 
 /**
- * Configure apiFetch defaults
+ * Nonce handling
+ *
+ * WordPress core's `wp-api-fetch` script already registers a nonce middleware
+ * (`wp.apiFetch.nonceMiddleware`) and refreshes it from the heartbeat API, so a
+ * long-lived admin session keeps working. Registering a second middleware here
+ * from a module-scope constant would shadow that with a nonce captured at page
+ * load and never refreshed. We therefore rely on core's, and only install our
+ * own as a fallback when core's is absent (e.g. Storybook, Jest).
  */
-if (nonce) {
-  apiFetch.use(apiFetch.createNonceMiddleware(nonce));
+if ( typeof window !== 'undefined' && ! window.wp?.apiFetch?.nonceMiddleware ) {
+  const fallbackNonce = () => window.subtleformsAdmin?.restNonce || '';
+  apiFetch.use((options, next) => {
+    const value = fallbackNonce();
+    if (!value) {
+      return next(options);
+    }
+    return next({
+      ...options,
+      headers: { 'X-WP-Nonce': value, ...(options.headers || {}) },
+    });
+  });
 }
 
 /**
- * Response normalizer middleware
- * 
- * Unwraps standardized API responses for backward compatibility:
- * - Success: Returns response.data directly
- * - Pagination: Returns response.data with meta.pagination injected
- * - Preserves legacy responses that don't use new format
- * - Extracts and stores ETags for optimistic locking
+ * Unwrap the standardized `{ data, meta }` response envelope.
+ *
+ * Legacy responses that do not use the envelope are passed through untouched.
  */
-apiFetch.use((options, next) => {
-  return next(options).then((response, responseHeaders) => {
-    // Extract ETag from headers if present
-    const etag = responseHeaders?.get?.('ETag') || responseHeaders?.etag;
-    if (etag && options.path) {
-      storeETag(options.path, etag);
-    }
-
-    // If response has { data, meta } shape, unwrap it
-    if (response && typeof response === 'object' && 'data' in response) {
-      const { data, meta } = response;
-      
-      // Inject pagination metadata into result if present
-      if (meta?.pagination) {
-        // If data is array (list endpoints), return enhanced array
-        if (Array.isArray(data)) {
-          return Object.assign(data, { 
-            _meta: meta,
-            _pagination: meta.pagination 
-          });
-        }
-        // If data is object, inject meta
-        return { ...data, _meta: meta, _pagination: meta.pagination };
-      }
-      
-      // Return unwrapped data
-      return data;
-    }
-    
-    // Pass through non-standard responses (legacy)
+const unwrapResponse = (response) => {
+  if (!response || typeof response !== 'object' || !('data' in response)) {
     return response;
-  }).catch((error) => {
-    // Normalize error responses to consistent shape
-    const status = error?.status || error?.data?.status || 0;
-    
-    // Extract error from standardized format
-    const errorData = error?.data?.error || error?.data || {};
-    const errorCode = errorData?.code || error?.code || 'unknown_error';
-    const errorMessage = errorData?.message || error?.message || 'An unknown error occurred';
-    const errorMeta = errorData?.meta || {};
-    
-    // Create enhanced error object
-    const normalizedError = new Error(errorMessage);
-    normalizedError.code = errorCode;
-    normalizedError.meta = errorMeta;
-    normalizedError.status = status;
-    
-    // Attach field-level validation errors if present (HTTP 422)
-    if (status === 422 && errorMeta?.fields) {
-      normalizedError.fields = errorMeta.fields;
-      normalizedError.isValidationError = true;
+  }
+
+  const { data, meta } = response;
+
+  if (meta?.pagination) {
+    if (Array.isArray(data)) {
+      return Object.assign(data, { _meta: meta, _pagination: meta.pagination });
     }
-    
-    // Attach rate limit info if present (HTTP 429)
-    if (status === 429) {
-      normalizedError.retryAfter = errorMeta?.retry_after || 60;
-      normalizedError.isRateLimited = true;
+    return { ...data, _meta: meta, _pagination: meta.pagination };
+  }
+
+  return data;
+};
+
+/**
+ * Turn an error body into a normalized Error with code/meta/status attached.
+ */
+const normalizeError = (body, status) => {
+  const errorData = body?.error || body || {};
+  const errorMeta = errorData?.meta || {};
+
+  const normalizedError = new Error(
+    errorData?.message || 'An unknown error occurred'
+  );
+  normalizedError.code = errorData?.code || 'unknown_error';
+  normalizedError.meta = errorMeta;
+  normalizedError.status = status;
+
+  if (status === 422 && errorMeta?.fields) {
+    normalizedError.fields = errorMeta.fields;
+    normalizedError.isValidationError = true;
+  }
+
+  if (status === 429) {
+    normalizedError.retryAfter = errorMeta?.retry_after || 60;
+    normalizedError.isRateLimited = true;
+  }
+
+  if (status === 409) {
+    normalizedError.currentETag = errorMeta?.current_etag;
+    normalizedError.providedIfMatch = errorMeta?.provided_if_match;
+    normalizedError.isConflict = true;
+  }
+
+  return normalizedError;
+};
+
+/**
+ * Response middleware: capture ETags, unwrap envelopes, normalize errors.
+ *
+ * Response headers are only reachable by asking apiFetch NOT to parse the body
+ * (`parse: false`) and handling the raw `Response` ourselves. A `.then()`
+ * callback receives exactly one argument, so the headers cannot arrive as a
+ * second parameter — reading them that way silently yields `undefined` and
+ * disables optimistic locking entirely.
+ */
+/**
+ * Read a Response body as JSON, tolerating empty and non-JSON payloads.
+ */
+const readBody = async (response) => {
+  if (!response || response.status === 204) {
+    return null;
+  }
+  try {
+    const text = await response.text();
+    if (!text) {
+      return null;
     }
-    
-    // Attach conflict info if present (HTTP 409)
-    if (status === 409) {
-      normalizedError.currentETag = errorMeta?.current_etag;
-      normalizedError.providedIfMatch = errorMeta?.provided_if_match;
-      normalizedError.isConflict = true;
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+};
+
+/** Duck-type a fetch Response so this also works with mocked handlers. */
+const isResponse = (value) =>
+  !!value && typeof value.status === 'number' && typeof value.text === 'function';
+
+apiFetch.use((options, next) => {
+  // Caller explicitly wants the raw Response — don't interfere.
+  if (options.parse === false) {
+    return next(options);
+  }
+
+  return next({ ...options, parse: false }).then(
+    async (response) => {
+      // Not a Response (a middleware short-circuited): fall back to the old path.
+      if (!isResponse(response)) {
+        return unwrapResponse(response);
+      }
+
+      const etag = response.headers?.get?.('ETag');
+      if (etag && options.path) {
+        storeETag(options.path, etag);
+      }
+
+      return unwrapResponse(await readBody(response));
+    },
+    // With parse:false, apiFetch rejects on any non-2xx and hands back the raw
+    // Response rather than a parsed error, so the error body has to be read
+    // here. Without this, callers lose `code`, `meta`, validation fields,
+    // retry-after and conflict ETags — everything normalizeError attaches.
+    async (error) => {
+      if (!isResponse(error)) {
+        throw error;
+      }
+      throw normalizeError(await readBody(error), error.status);
     }
-    
-    throw normalizedError;
-  });
+  );
 });
 
 /**
@@ -242,19 +298,4 @@ export const getFieldErrors = (error) => {
     return error?.fields || error?.meta?.fields || {};
   }
   return {};
-};
-
-/**
- * Legacy fetch wrapper for gradual migration
- * @deprecated Use apiClient methods instead
- */
-export const legacyFetch = (path, options = {}) => {
-  const restUrl = window.subtleformsAdmin?.restUrl || '/wp-json/subtleforms/v1';
-  return fetch(restUrl + path, {
-    headers: {
-      'Content-Type': 'application/json',
-      'X-WP-Nonce': nonce,
-    },
-    ...options,
-  });
 };

@@ -25,7 +25,7 @@
 }
 
 .sf-component-error__message {
-	font-size: 0.875rem;
+	font-size: var(--sf-text-base);
 	color: var(--sf-stone-600, var(--sf-slate-600));
 	line-height: 1.5;
 	margin: 0;

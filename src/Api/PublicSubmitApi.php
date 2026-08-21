@@ -156,32 +156,25 @@ final class PublicSubmitApi {
 		// Check submission limit
 		$settings = get_option( 'subtleforms_settings', array() );
 		if ( ! empty( $settings['submission_limit_enabled'] ) ) {
-			$limit    = isset( $settings['submission_limit'] ) ? (int) $settings['submission_limit'] : 1;
-			$user_key = get_current_user_id();
+			$limit   = isset( $settings['submission_limit'] ) ? (int) $settings['submission_limit'] : 1;
+			$user_id = get_current_user_id();
 
-			if ( ! $user_key && $ip ) {
-				$user_key = 'ip_' . md5( $ip );
+			// Identify the submitter by account when logged in, otherwise by IP.
+			// These must never be OR'd together: user_id is 0 for every guest, so
+			// matching on it would count all guests as a single submitter and lock
+			// the form for everyone once the limit is reached.
+			$count = null;
+
+			if ( $user_id > 0 ) {
+				$count = $this->countSubmissionsBy( $formId, 'user_id = %d', $user_id );
+			} elseif ( $ip !== '' ) {
+				$count = $this->countSubmissionsBy( $formId, 'ip_address = %s', $ip );
 			}
 
-			if ( $user_key ) {
-				global $wpdb;
-				$table_name = $wpdb->prefix . 'subtleforms_submissions';
-				// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled.
-				$count      = $wpdb->get_var(
-					$wpdb->prepare(
-						"SELECT COUNT(*) FROM {$table_name} WHERE form_id = %d AND (user_id = %d OR ip_address = %s) AND status != 'spam'",
-						$formId,
-						is_numeric( $user_key ) ? $user_key : 0,
-						$ip ? $ip : ''
-					)
+			if ( $count !== null && $count >= $limit ) {
+				return ApiResponse::forbidden(
+					__( 'You have reached the maximum number of submissions for this form.', 'subtleforms' )
 				);
-				// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-
-				if ( $count >= $limit ) {
-					return ApiResponse::forbidden(
-						__( 'You have reached the maximum number of submissions for this form.', 'subtleforms' )
-					);
-				}
 			}
 		}
 
@@ -190,9 +183,22 @@ final class PublicSubmitApi {
 			$activeSchema = $this->formsRepo->loadSchemaVersion( $formId );
 		} catch ( \RuntimeException $e ) {
 			Logger::error( 'Submission Error: %s', $e->getMessage() );
-			return ApiResponse::server_error( __( 'Failed to load form schema: ', 'subtleforms' ) . $e->getMessage() );
+			return ApiResponse::server_error( __( 'This form is temporarily unavailable. Please try again later.', 'subtleforms' ) );
 		}
 		$formVersion = $activeSchema['version'] ?? null;
+
+		// Restore rich_text values from the raw request.
+		//
+		// sanitizeArrayDeep() above runs wp_strip_all_tags over every value, which
+		// is the right default but destroys the markup a rich_text field exists to
+		// collect. The schema is only known here, so re-sanitize just those keys
+		// with a narrow allowlist. Anything not declared rich_text in the schema
+		// keeps the strict treatment.
+		$payload = $this->restoreRichTextValues(
+			$payload,
+			$rawInput['data'] ?? array(),
+			$activeSchema['schema'] ?? $activeSchema
+		);
 
 		// Create submission record
 		try {
@@ -265,7 +271,7 @@ final class PublicSubmitApi {
 			} catch ( \InvalidArgumentException $e ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
 				Logger::error( 'Schema compilation failed for form %d: %s', $formId, $e->getMessage() );
-				return ApiResponse::bad_request( $e->getMessage() );
+				return ApiResponse::bad_request( __( 'This form could not be processed. Please contact the site owner.', 'subtleforms' ) );
 			}
 
 			try {
@@ -279,7 +285,7 @@ final class PublicSubmitApi {
 					return ApiResponse::validation_error( __( 'Form validation failed', 'subtleforms' ), $validationErrors );
 				}
 
-				return ApiResponse::server_error( $e->getMessage() );
+				return ApiResponse::server_error( __( 'Your submission could not be completed. Please try again later.', 'subtleforms' ) );
 			} catch ( \Throwable $e ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
 				Logger::error( 'Unexpected error in submission %d: %s', $submissionId, $e->getMessage() );
@@ -363,6 +369,99 @@ final class PublicSubmitApi {
 	/**
 	 * Guard rate limit for request.
 	 */
+	/**
+	 * Count a single submitter's non-spam submissions for a form.
+	 *
+	 * The caller supplies exactly one identity predicate so that logged-in users
+	 * are counted by account and guests by IP. Combining the two would make
+	 * `user_id = 0` match every guest submission on the form.
+	 *
+	 * @param int        $formId    Form ID.
+	 * @param string     $predicate SQL predicate with a single placeholder, e.g. 'user_id = %d'.
+	 * @param int|string $value     Value bound to the predicate placeholder.
+	 * @return int Number of matching submissions.
+	 */
+	/**
+	 * Re-apply rich-text sanitization to values whose schema type allows markup.
+	 *
+	 * @param array $payload   Strictly sanitized payload.
+	 * @param array $rawValues Original untouched submitted values.
+	 * @param array $schema    Resolved form schema.
+	 * @return array Payload with rich_text keys restored.
+	 */
+	private function restoreRichTextValues( array $payload, $rawValues, $schema ): array {
+		if ( ! is_array( $rawValues ) || empty( $rawValues ) || ! is_array( $schema ) ) {
+			return $payload;
+		}
+
+		$richKeys = array();
+		self::collectFieldKeysOfType( $schema['fields'] ?? array(), 'rich_text', $richKeys );
+
+		foreach ( $richKeys as $key ) {
+			if ( array_key_exists( $key, $rawValues ) ) {
+				$payload[ $key ] = Sanitizer::sanitizeRichText( $rawValues[ $key ] );
+			}
+		}
+
+		return $payload;
+	}
+
+	/**
+	 * Walk a schema field list, collecting keys of a given type.
+	 *
+	 * @param array  $fields Field list, possibly nested.
+	 * @param string $type   Field type to match.
+	 * @param array  $out    Collected keys, by reference.
+	 */
+	private static function collectFieldKeysOfType( $fields, string $type, array &$out ): void {
+		if ( ! is_array( $fields ) ) {
+			return;
+		}
+
+		foreach ( $fields as $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+
+			if ( ( $field['type'] ?? '' ) === $type && ! empty( $field['key'] ) ) {
+				$out[] = (string) $field['key'];
+			}
+
+			if ( ! empty( $field['fields'] ) ) {
+				self::collectFieldKeysOfType( $field['fields'], $type, $out );
+			}
+			if ( ! empty( $field['children'] ) ) {
+				self::collectFieldKeysOfType( $field['children'], $type, $out );
+			}
+
+			// Column containers hold a list per column, so this level is an
+			// array of field lists rather than a field list. SchemaCompiler
+			// normalizes the same three shapes; missing this one here meant a
+			// rich_text field inside a column kept the stripped value.
+			if ( ! empty( $field['columns'] ) && is_array( $field['columns'] ) ) {
+				foreach ( $field['columns'] as $column ) {
+					self::collectFieldKeysOfType( $column, $type, $out );
+				}
+			}
+		}
+	}
+
+	private function countSubmissionsBy( int $formId, string $predicate, $value ): int {
+		global $wpdb;
+
+		$table_name = $wpdb->prefix . 'subtleforms_submissions';
+
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from $wpdb->prefix. $predicate is one of two fixed internal strings, each carrying exactly one placeholder, so the sniff's count is short by one; both values are bound by prepare().
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$table_name} WHERE form_id = %d AND {$predicate} AND status != 'spam'",
+				$formId,
+				$value
+			)
+		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+	}
+
 	private function guardRateLimit( WP_REST_Request $request ): ?WP_REST_Response {
 		$userId = get_current_user_id() ?: null;
 		$ip     = isset( $_SERVER['REMOTE_ADDR'] )

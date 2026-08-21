@@ -5,6 +5,7 @@
  */
 
 import { Button, TextControl } from '@wordpress/components';
+import { nanoid } from 'nanoid';
 import { __ } from '@wordpress/i18n';
 
 export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
@@ -24,7 +25,7 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
         {__('Options', 'subtleforms')}
       </label>
       {(field.options || []).map((opt, idx) => (
-        <div key={idx} className='sf-field-inspector__option-row'>
+        <div key={opt.value || `option-${idx}`} className='sf-field-inspector__option-row'>
           <TextControl
             value={opt.label}
             onChange={(v) => {
@@ -57,7 +58,7 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
             ...(field.options || []),
             {
               label: `Option ${(field.options?.length || 0) + 1}`,
-              value: `option_${Date.now()}`,
+              value: `option_${nanoid(8)}`,
             },
           ];
           onUpdate({ options: newOptions });

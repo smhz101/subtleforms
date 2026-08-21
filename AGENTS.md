@@ -82,7 +82,7 @@ Triage checklist:
 ## 8) Recent fixes & context (handy when debugging) 🔍
 - Fixed parse error in `SubmissionsRepository.php`.
 - Fixed UI to read unwrapped `.data` values for lists.
-- `SubmissionsRepository::findAll` amended to include `payload`, `meta`, `ip_address`, `user_agent` and decode payloads.
+- `SubmissionsRepository::findAll` selects `payload`, `meta`, `user_agent` and decodes payloads. It deliberately does **not** select `ip_address`: no list consumer renders or exports it, and shipping visitor IPs to every list response is avoidable data exposure. The submission detail endpoint uses `find()`, which selects the full row, so `ip_address` is still available where it is actually displayed.
 - Submission detail UI now uses `ip_address` and handles missing `referrer`.
 - `create_form` validator expanded; server side now coerces JSON strings for nested fields; schema save separated from create to avoid blocking form creation.
 

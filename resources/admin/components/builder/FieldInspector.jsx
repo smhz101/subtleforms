@@ -1,7 +1,7 @@
 import { Button, TabPanel, Notice } from '@wordpress/components';
 import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import Icon from '../ui/Icon';
+import Icon from '../../ui/Icon';
 import ConditionEditor from './ConditionEditor';
 import { useBuilder } from './context/BuilderContext';
 import { useConfig } from './context/ConfigContext';

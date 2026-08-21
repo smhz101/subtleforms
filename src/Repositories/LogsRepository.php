@@ -90,7 +90,7 @@ final class LogsRepository {
 
 		$data = wp_parse_args( $data, $defaults );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Intentional log insert; no caching needed for write operations.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Intentional log insert; no caching needed for write operations.
 		$wpdb->insert(
 			$this->table,
 			array(
@@ -101,6 +101,7 @@ final class LogsRepository {
 			),
 			array( '%d', '%s', '%s', '%s' )
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		return $wpdb->insert_id;
 	}

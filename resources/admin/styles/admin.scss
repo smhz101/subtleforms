@@ -6,11 +6,12 @@
  */
 
 // Accessibility Foundation - WCAG 2.1 AA Compliance
-@use '../scss/accessibility';
+@use 'accessibility';
 
-// Variables & Design System
+// Design tokens. _theme emits the :root custom properties; _variables maps the
+// historical $sf-* names onto them.
+@use 'theme';
 @use 'variables' as *;
-@use 'tokens' as *;
 @use 'design-system';
 @use 'interactions';
 
@@ -18,9 +19,9 @@
 @use '../ui/feedback/feedback.scss';
 @use '../ui/feedback/ComponentErrorBoundary.scss';
 @use '../ui/loading/loading.scss';
-@use '../components/ui/PanelSection.scss';
-@use '../components/ui/ContextualTip.scss';
-@use '../components/ui/UpgradePrompt.scss';
+@use '../ui/PanelSection.scss';
+@use '../ui/ContextualTip.scss';
+@use '../ui/UpgradePrompt.scss';
 
 // Component Styles
 @use '../components/AdminShell.scss';

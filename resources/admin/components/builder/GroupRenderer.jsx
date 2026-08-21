@@ -1,7 +1,7 @@
 import { memo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
-import Icon from '../ui/Icon';
+import Icon from '../../ui/Icon';
 import { getIcon } from './utils/iconMap';
 import './GroupRenderer.scss';
 
