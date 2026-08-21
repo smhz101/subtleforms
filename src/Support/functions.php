@@ -22,9 +22,10 @@ if ( ! function_exists( 'sf_is_pro_active' ) ) {
 	 *
 	 * @return bool
 	 */
-	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- sf_ is the intentional short prefix for public API functions.
+	// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- sf_ is the intentional short prefix for public API functions.
 	function sf_is_pro_active(): bool {
 		return (bool) apply_filters( 'subtleforms_is_pro_active', false );
+	// phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
 	}
 }
 
@@ -38,9 +39,10 @@ if ( ! function_exists( 'sf_is_feature_enabled' ) ) {
 	 * @param string $feature Feature key, e.g. 'webhooks', 'email_marketing', 'payments'.
 	 * @return bool
 	 */
-	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- sf_ is the intentional short prefix for public API functions.
+	// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- sf_ is the intentional short prefix for public API functions.
 	function sf_is_feature_enabled( string $feature ): bool {
 		return (bool) apply_filters( 'subtleforms_feature_enabled', false, $feature );
+	// phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
 	}
 }
 
@@ -54,9 +56,10 @@ if ( ! function_exists( 'sf_show_upgrade_notice' ) ) {
 	 * @param string $message Human-readable description of the locked feature.
 	 * @return void
 	 */
-	// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- sf_ is the intentional short prefix for public API functions.
+	// phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound -- sf_ is the intentional short prefix for public API functions.
 	function sf_show_upgrade_notice( string $message ): void {
 		$upgrade_url = 'https://subtleforms.com/pricing';
+	// phpcs:enable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedFunctionFound
 
 		printf(
 			'<div class="sf-upgrade-notice">'

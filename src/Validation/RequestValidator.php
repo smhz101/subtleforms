@@ -82,12 +82,13 @@ class RequestValidator {
 		$maxBytes = $options['maxBytes'] ?? self::MAX_PAYLOAD_BYTES;
 		$inputSize = strlen( json_encode( $input ) );
 		if ( $inputSize > $maxBytes ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new ValidationException(
 				'Payload too large',
 				array( '__root' => sprintf( 'Maximum payload size is %d bytes', $maxBytes ) ),
 				'payload_too_large'
 			);
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// Validate

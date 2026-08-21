@@ -433,6 +433,16 @@ final class PublicSubmitApi {
 			if ( ! empty( $field['children'] ) ) {
 				self::collectFieldKeysOfType( $field['children'], $type, $out );
 			}
+
+			// Column containers hold a list per column, so this level is an
+			// array of field lists rather than a field list. SchemaCompiler
+			// normalizes the same three shapes; missing this one here meant a
+			// rich_text field inside a column kept the stripped value.
+			if ( ! empty( $field['columns'] ) && is_array( $field['columns'] ) ) {
+				foreach ( $field['columns'] as $column ) {
+					self::collectFieldKeysOfType( $column, $type, $out );
+				}
+			}
 		}
 	}
 
@@ -441,7 +451,7 @@ final class PublicSubmitApi {
 
 		$table_name = $wpdb->prefix . 'subtleforms_submissions';
 
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from $wpdb->prefix; $predicate is a fixed internal string with one placeholder; the value is bound by prepare().
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from $wpdb->prefix; $predicate is a fixed internal string with one placeholder; the value is bound by prepare().
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT COUNT(*) FROM {$table_name} WHERE form_id = %d AND {$predicate} AND status != 'spam'",
@@ -449,6 +459,7 @@ final class PublicSubmitApi {
 				$value
 			)
 		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 	}
 
 	private function guardRateLimit( WP_REST_Request $request ): ?WP_REST_Response {

@@ -45,15 +45,53 @@ export const buildApiUrl = ( path ) => {
   return `${ base }${ path.slice( 0, sepIdx ) }&${ path.slice( sepIdx + 1 ) }`;
 };
 
+/** Duck-type a fetch Response so this also works with mocked handlers. */
+const isResponse = ( value ) =>
+  !! value && typeof value.status === 'number' && typeof value.text === 'function';
+
+/**
+ * Read a Response body as JSON, tolerating empty and non-JSON payloads.
+ */
+async function readBody( response ) {
+  if ( ! response || response.status === 204 ) {
+    return null;
+  }
+  try {
+    const text = await response.text();
+    if ( ! text ) {
+      return null;
+    }
+    return JSON.parse( text );
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Perform a request and resolve to a result object instead of throwing.
  *
- * @param {string} path             Namespace-relative path, e.g. '/forms?page=2'.
- * @param {Object} [options]        apiFetch options (method, data, headers).
+ * @param {string} path      Namespace-relative path, e.g. '/forms?page=2'.
+ * @param {Object} [options] apiFetch options (method, data, headers).
  * @return {Promise<{ok: boolean, status: number, body: *, headers: ?Headers}>} Result.
  */
 async function request( path, options = {} ) {
   const fullPath = `/${ NAMESPACE }${ path }`;
+
+  const settle = async ( response ) => {
+    const headers = response.headers ?? null;
+
+    const etag = headers?.get?.( 'ETag' );
+    if ( etag ) {
+      storeETag( fullPath, etag );
+    }
+
+    return {
+      ok: response.ok,
+      status: response.status,
+      body: await readBody( response ),
+      headers,
+    };
+  };
 
   try {
     // parse:false hands back the raw Response, which is the only way to read
@@ -64,27 +102,16 @@ async function request( path, options = {} ) {
       ...options,
     } );
 
-    const headers = response?.headers ?? null;
-
-    const etag = headers?.get?.( 'ETag' );
-    if ( etag ) {
-      storeETag( fullPath, etag );
-    }
-
-    let body = null;
-    if ( response.status !== 204 ) {
-      const text = await response.text();
-      if ( text ) {
-        try {
-          body = JSON.parse( text );
-        } catch {
-          body = null;
-        }
-      }
-    }
-
-    return { ok: response.ok, status: response.status, body, headers };
+    return await settle( response );
   } catch ( error ) {
+    // apiFetch rejects on any non-2xx, and with parse:false the rejection value
+    // is the raw Response. Callers here branch on status and read validation
+    // messages, retry-after and conflict ETags out of `body`, so the error
+    // response has to be settled the same way a success is.
+    if ( isResponse( error ) ) {
+      return await settle( error );
+    }
+
     // Network failure, or a middleware rejected before the request went out.
     return {
       ok: false,

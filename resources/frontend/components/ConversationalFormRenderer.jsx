@@ -6,6 +6,7 @@ import { collectLeafInputPaths } from '../utils/schemaLeaves';
 import { warnOnce } from '../utils/warnOnce';
 import { getFormClassNames } from '../utils/formStyles';
 import { debug } from '../../shared/debug';
+import { isEmptyValue } from './FormRenderer';
 
 const restUrl =
   window.subtleformsFrontend?.restUrl || '/wp-json/subtleforms/v1';
@@ -156,7 +157,7 @@ export default function ConversationalFormRenderer({
     });
 
     // Required validation
-    if (isRequired && (!value || value === '')) {
+    if (isRequired && isEmptyValue(value)) {
       setValidationErrors((prev) => ({
         ...prev,
         [fieldKey]: __('This field is required.', 'subtleforms'),
@@ -472,7 +473,7 @@ export default function ConversationalFormRenderer({
               const value = values[key];
               const label = field.config?.label || field.label || key;
 
-              if (!value || value === '') return null;
+              if (isEmptyValue(value)) return null;
 
               return (
                 <div key={key} className='subtleforms-review-item'>

@@ -13,6 +13,23 @@ const restUrl =
   window.subtleformsFrontend?.restUrl || '/wp-json/subtleforms/v1';
 const nonce = window.subtleformsFrontend?.nonce || '';
 
+/**
+ * Whether a submitted value counts as missing.
+ *
+ * Numeric zero is a real answer: a range slider at a minimum of 0, an NPS score
+ * of 0, a number field holding 0. A plain falsy test rejects all three and makes
+ * the lowest option on those fields impossible to submit.
+ *
+ * An unchecked checkbox stays "empty" — a required checkbox means it must be
+ * ticked, so `false` is genuinely missing there.
+ */
+export const isEmptyValue = ( value ) =>
+  value === undefined ||
+  value === null ||
+  value === '' ||
+  value === false ||
+  ( Array.isArray( value ) && value.length === 0 );
+
 export default function FormRenderer({
   formId,
   preloadedSchema = null,
@@ -397,12 +414,12 @@ export default function FormRenderer({
       const value = getIn(values, fieldKey);
       const isRequired = field.config?.required;
 
-      if (isRequired && (!value || value === '')) {
+      if (isRequired && isEmptyValue(value)) {
         errors[fieldKey] = __('This field is required.', 'subtleforms');
       }
 
       // Type validation
-      if (value && value !== '') {
+      if (!isEmptyValue(value)) {
         if (
           field.type === 'email' &&
           !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
@@ -533,12 +550,12 @@ export default function FormRenderer({
           const value = getIn(values, fieldKey);
           const isRequired = field.config?.required;
 
-          if (isRequired && (!value || value === '')) {
+          if (isRequired && isEmptyValue(value)) {
             errors[fieldKey] = __('This field is required.', 'subtleforms');
           }
 
           // Type validation
-          if (value && value !== '') {
+          if (!isEmptyValue(value)) {
             if (
               field.type === 'email' &&
               !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)

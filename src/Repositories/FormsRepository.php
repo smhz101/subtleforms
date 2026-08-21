@@ -79,11 +79,12 @@ final class FormsRepository {
 		}
 
 		global $wpdb;
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is safe; direct query needed for dynamic form data.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is safe; direct query needed for dynamic form data.
 		$result = $wpdb->get_row(
 			$wpdb->prepare( "SELECT * FROM {$this->table} WHERE id = %d", $id ),
 			ARRAY_A
 		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( ! $result ) {
 			return null;
@@ -297,7 +298,7 @@ final class FormsRepository {
 			);
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct insert; no caching needed for writes.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct insert; no caching needed for writes.
 		$wpdb->insert(
 			$this->table,
 			array(
@@ -307,6 +308,7 @@ final class FormsRepository {
 			),
 			array( '%s', '%s', '%s' )
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		return $wpdb->insert_id;
 	}
@@ -374,7 +376,7 @@ final class FormsRepository {
 		// ));
 		// }
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct insert; no caching for write operations.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct insert; no caching for write operations.
 		$inserted = $wpdb->insert(
 			$this->schemas_table,
 			array(
@@ -385,6 +387,7 @@ final class FormsRepository {
 			),
 			array( '%d', '%d', '%s', '%d' )
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( $inserted === false || $wpdb->last_error ) {
 			$error = sprintf(
@@ -528,7 +531,7 @@ final class FormsRepository {
 		}
 
 		// Set requested version active
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update for schema version activation; no caching for writes.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update for schema version activation; no caching for writes.
 		$updated = $wpdb->update(
 			$this->schemas_table,
 			array( 'active' => 1 ),
@@ -539,6 +542,7 @@ final class FormsRepository {
 			array( '%d' ),
 			array( '%d', '%d' )
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( $updated === false || $wpdb->last_error ) {
 			$error = sprintf(
@@ -567,7 +571,7 @@ final class FormsRepository {
 		}
 
 		if ( $schemaRow ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update for form sync; no caching for writes.
+			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update for form sync; no caching for writes.
 			$result = $wpdb->update(
 				$this->table,
 				array(
@@ -578,6 +582,7 @@ final class FormsRepository {
 				array( '%s', '%d' ),
 				array( '%d' )
 			);
+			// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 			if ( $result === false && $wpdb->last_error ) {
 				$error = sprintf(
@@ -647,7 +652,7 @@ final class FormsRepository {
 			return false;
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update; no caching for writes.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update; no caching for writes.
 		$result = $wpdb->update(
 			$this->table,
 			$update_data,
@@ -655,6 +660,7 @@ final class FormsRepository {
 			$format,
 			array( '%d' )
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( $result !== false ) {
 			wp_cache_delete( "subtleforms_form_{$id}", 'subtleforms' );
@@ -699,7 +705,7 @@ final class FormsRepository {
 
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update for draft schema; no caching for writes.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update for draft schema; no caching for writes.
 		$result = $wpdb->update(
 			$this->table,
 			array( 'draft_schema' => wp_json_encode( $schema ) ),
@@ -707,6 +713,7 @@ final class FormsRepository {
 			array( '%s' ),
 			array( '%d' )
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( $result === false ) {
 			Logger::error(
@@ -731,13 +738,14 @@ final class FormsRepository {
 	public function getDraftSchema( int $formId ): ?array {
 		global $wpdb;
 
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is safe; values prepared.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is safe; values prepared.
 		$draft = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT draft_schema FROM {$this->table} WHERE id = %d",
 				$formId
 			)
 		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( ! $draft ) {
 			return null;

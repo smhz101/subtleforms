@@ -33,11 +33,12 @@ final class SubmissionsRepository {
 	 */
 	public function find( int $id ): ?array {
 		global $wpdb;
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled.
 		$result = $wpdb->get_row(
 			$wpdb->prepare( "SELECT * FROM {$this->table} WHERE id = %d", $id ),
 			ARRAY_A
 		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( ! $result ) {
 			return null;
@@ -119,7 +120,7 @@ final class SubmissionsRepository {
 
 		$data = wp_parse_args( $data, $defaults );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Intentional direct insert; no caching needed for write operations.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Intentional direct insert; no caching needed for write operations.
 		$inserted = $wpdb->insert(
 			$this->table,
 			array(
@@ -133,6 +134,7 @@ final class SubmissionsRepository {
 			),
 			array( '%d', '%d', '%s', '%s', '%s', '%s', '%s' )
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( $inserted === false || $wpdb->last_error ) {
 			$error = sprintf(
@@ -197,7 +199,7 @@ final class SubmissionsRepository {
 			return false;
 		}
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Intentional direct update; no caching needed for write operations.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Intentional direct update; no caching needed for write operations.
 		$result = $wpdb->update(
 			$this->table,
 			$update_data,
@@ -205,6 +207,7 @@ final class SubmissionsRepository {
 			$format,
 			array( '%d' )
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		// Check for database errors
 		if ( $wpdb->last_error ) {
@@ -328,13 +331,14 @@ final class SubmissionsRepository {
 		$order           = strtoupper( $args['order'] ) === 'ASC' ? 'ASC' : 'DESC';
 
 		       // Fetch all columns needed for admin list (including payload/meta)
-		       // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name, orderby and order are whitelisted.
-				       $sql = sprintf(
+		       // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name, orderby and order are whitelisted.
+		       $sql = sprintf(
 			       "SELECT id, form_id, status, is_read, created_at, payload, meta, user_agent FROM {$this->table} %s ORDER BY %s %s LIMIT %%d OFFSET %%d",
 					       $whereClause,
 					       $orderby,
 					       $order
 				       );
+		       // phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		       $params[] = intval( $args['limit'] );
 		       $params[] = intval( $args['offset'] );
@@ -482,13 +486,14 @@ final class SubmissionsRepository {
 
 		$whereNext = 'WHERE ' . implode( ' AND ', $nextConditions );
 
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $whereNext contains only %d placeholders; table name is from $wpdb->prefix.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $whereNext contains only %d placeholders; table name is from $wpdb->prefix.
 		$next = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT id FROM {$this->table} {$whereNext} ORDER BY id ASC LIMIT 1",
 				...$nextParams
 			)
 		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		// For Prev
 		$prevConditions   = $conditions;
@@ -498,13 +503,14 @@ final class SubmissionsRepository {
 
 		$wherePrev = 'WHERE ' . implode( ' AND ', $prevConditions );
 
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $wherePrev contains only %d placeholders; table name is from $wpdb->prefix.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $wherePrev contains only %d placeholders; table name is from $wpdb->prefix.
 		$prev = $wpdb->get_var(
 			$wpdb->prepare(
 				"SELECT id FROM {$this->table} {$wherePrev} ORDER BY id DESC LIMIT 1",
 				...$prevParams
 			)
 		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		return array(
 			'next' => $next ? intval( $next ) : null,
@@ -523,13 +529,14 @@ final class SubmissionsRepository {
 
 		$cutoff_date = gmdate( 'Y-m-d H:i:s', strtotime( "-{$days} days" ) );
 
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from $wpdb->prefix; date value is prepared.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from $wpdb->prefix; date value is prepared.
 		$deleted = $wpdb->query(
 $wpdb->prepare(
 "DELETE FROM {$this->table} WHERE created_at < %s",
 $cutoff_date
 )
 		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		return $deleted !== false ? (int) $deleted : 0;
 	}

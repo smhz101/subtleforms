@@ -477,9 +477,10 @@ class AdminMenu {
 		}
 
 		// For our actions, require nonce and validate it.
-		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce is validated, not sanitized.
+		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce is validated, not sanitized.
 		if ( empty( $_GET['_wpnonce'] ) || ! wp_verify_nonce( wp_unslash( $_GET['_wpnonce'] ), 'subtleforms_action' ) ) {
 			wp_die( esc_html__( 'Security check failed.', 'subtleforms' ) );
+		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified above.

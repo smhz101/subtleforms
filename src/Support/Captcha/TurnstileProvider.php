@@ -63,6 +63,7 @@ class TurnstileProvider implements CaptchaProviderInterface {
 			);
 		}
 
+		// phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- Cloudflare's own verification endpoint. Turnstile cannot be verified anywhere else, and this is the service the site owner explicitly opted into by configuring it.
 		$verify_url = 'https://challenges.cloudflare.com/turnstile/v0/siteverify';
 
 		$body = array(
@@ -107,6 +108,7 @@ class TurnstileProvider implements CaptchaProviderInterface {
 	 * @return string
 	 */
 	public function getScriptUrl( $config ) {
+		// phpcs:ignore PluginCheck.CodeAnalysis.Offloading.OffloadedContent -- Cloudflare's own widget script. A CAPTCHA that runs from a local copy provides no protection, so this must be loaded from the provider.
 		return 'https://challenges.cloudflare.com/turnstile/v0/api.js';
 	}
 }

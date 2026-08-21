@@ -228,24 +228,26 @@ class Sanitizer {
 
 		// Check size limit
 		if ( strlen( $json ) > $maxBytes ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new ValidationException(
 				'JSON payload too large',
 				array( '__root' => sprintf( 'Maximum size is %d bytes', $maxBytes ) ),
 				'payload_too_large'
 			);
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// Decode JSON
 		$decoded = json_decode( $json, true );
 
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			throw new ValidationException(
 				'Invalid JSON: ' . json_last_error_msg(),
 				array( '__root' => 'JSON is malformed' ),
 				'invalid_json'
 			);
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// Sanitize decoded array

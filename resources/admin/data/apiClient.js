@@ -137,41 +137,59 @@ const normalizeError = (body, status) => {
  * second parameter — reading them that way silently yields `undefined` and
  * disables optimistic locking entirely.
  */
+/**
+ * Read a Response body as JSON, tolerating empty and non-JSON payloads.
+ */
+const readBody = async (response) => {
+  if (!response || response.status === 204) {
+    return null;
+  }
+  try {
+    const text = await response.text();
+    if (!text) {
+      return null;
+    }
+    return JSON.parse(text);
+  } catch {
+    return null;
+  }
+};
+
+/** Duck-type a fetch Response so this also works with mocked handlers. */
+const isResponse = (value) =>
+  !!value && typeof value.status === 'number' && typeof value.text === 'function';
+
 apiFetch.use((options, next) => {
   // Caller explicitly wants the raw Response — don't interfere.
   if (options.parse === false) {
     return next(options);
   }
 
-  return next({ ...options, parse: false }).then(async (response) => {
-    // Not a Response (a middleware short-circuited): fall back to the old path.
-    if (!response || typeof response.status !== 'number' || !response.headers) {
-      return unwrapResponse(response);
-    }
-
-    const etag = response.headers.get?.('ETag');
-    if (etag && options.path) {
-      storeETag(options.path, etag);
-    }
-
-    let body = null;
-    if (response.status !== 204) {
-      const text = await response.text();
-      if (text) {
-        try {
-          body = JSON.parse(text);
-        } catch {
-          body = null;
-        }
+  return next({ ...options, parse: false }).then(
+    async (response) => {
+      // Not a Response (a middleware short-circuited): fall back to the old path.
+      if (!isResponse(response)) {
+        return unwrapResponse(response);
       }
-    }
 
-    if (!response.ok) {
-      throw normalizeError(body, response.status);
-    }
+      const etag = response.headers?.get?.('ETag');
+      if (etag && options.path) {
+        storeETag(options.path, etag);
+      }
 
-    return unwrapResponse(body);
-  });
+      return unwrapResponse(await readBody(response));
+    },
+    // With parse:false, apiFetch rejects on any non-2xx and hands back the raw
+    // Response rather than a parsed error, so the error body has to be read
+    // here. Without this, callers lose `code`, `meta`, validation fields,
+    // retry-after and conflict ETags — everything normalizeError attaches.
+    async (error) => {
+      if (!isResponse(error)) {
+        throw error;
+      }
+      throw normalizeError(await readBody(error), error.status);
+    }
+  );
 });
 
 /**
