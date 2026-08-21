@@ -1,6 +1,6 @@
 import { Dropdown, Button, MenuGroup, MenuItem } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import Icon from './ui/Icon';
+import Icon from '../ui/Icon';
 import './HelpMenu.scss';
 
 export default function HelpMenu({

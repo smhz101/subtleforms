@@ -6,7 +6,7 @@
  */
 
 // Accessibility Foundation - WCAG 2.1 AA Compliance
-@use '../scss/accessibility';
+@use 'accessibility';
 
 // Variables & Design System
 @use 'variables' as *;
@@ -18,9 +18,9 @@
 @use '../ui/feedback/feedback.scss';
 @use '../ui/feedback/ComponentErrorBoundary.scss';
 @use '../ui/loading/loading.scss';
-@use '../components/ui/PanelSection.scss';
-@use '../components/ui/ContextualTip.scss';
-@use '../components/ui/UpgradePrompt.scss';
+@use '../ui/PanelSection.scss';
+@use '../ui/ContextualTip.scss';
+@use '../ui/UpgradePrompt.scss';
 
 // Component Styles
 @use '../components/AdminShell.scss';

@@ -2,7 +2,7 @@ import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import FieldList from './FieldList';
 import { getIcon } from './utils/iconMap';
-import Icon from '../ui/Icon';
+import Icon from '../../ui/Icon';
 import './FormCanvas.scss';
 
 export default function FormCanvas({

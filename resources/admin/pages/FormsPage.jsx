@@ -4,13 +4,13 @@ import { Button } from '../components/navigation';
 import { useNavigate } from 'react-router-dom';
 import { __ } from '@wordpress/i18n';
 import { useForms, useCreateForm } from '../data';
-import Icon from '../components/ui/Icon';
+import Icon from '../ui/Icon';
 import AdminShell from '../components/AdminShell';
 import TabBar from '../components/TabBar';
 import FormsList, { ALL_FORM_COLUMNS, DEFAULT_FORM_VISIBLE, FORM_COLUMN_LABELS } from '../components/FormsList';
 import OnboardingWizard from '../components/OnboardingWizard';
 import HelpMenu from '../components/HelpMenu';
-import { buildApiUrl } from '../utils/api';
+import { apiGet, apiPost } from '../utils/api';
 import './FormsPage.scss';
 
 export default function FormsPage() {
@@ -59,35 +59,16 @@ export default function FormsPage() {
     const checkOnboarding = async () => {
       try {
         // Check onboarding status
-        const statusResponse = await fetch(
-          (window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
-            '/wp-json/subtleforms/v1') + '/onboarding/status',
-          {
-            credentials: 'same-origin',
-            headers: {
-              'X-WP-Nonce': window.subtleformsAdmin?.restNonce || '',
-            },
-          }
-        );
-        const statusData = await statusResponse.json();
-        setIsDismissed(statusData.dismissed);
+        const { body: statusData } = await apiGet('/onboarding/status');
+        setIsDismissed(statusData?.dismissed);
 
         // Check forms count
-        const formsResponse = await fetch(
-          buildApiUrl('/forms?per_page=1'),
-          {
-            credentials: 'same-origin',
-            headers: {
-              'X-WP-Nonce': window.subtleformsAdmin?.restNonce || '',
-            },
-          }
-        );
-        const formsData = await formsResponse.json();
-        const totalForms = formsData.meta?.total ?? 0;
+        const { body: formsData } = await apiGet('/forms?per_page=1');
+        const totalForms = formsData?.meta?.total ?? 0;
         setFormsCount(totalForms);
 
         // Show wizard if not dismissed and no forms exist
-        if (!statusData.dismissed && totalForms === 0) {
+        if (!statusData?.dismissed && totalForms === 0) {
           setShowWizard(true);
         }
       } catch (error) {
@@ -113,61 +94,26 @@ export default function FormsPage() {
         fields: formData.fields || [],
       };
 
-      const createResponse = await fetch(
-        (window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
-          '/wp-json/subtleforms/v1') + '/forms',
-        {
-          method: 'POST',
-          credentials: 'same-origin',
-          headers: {
-            'X-WP-Nonce': window.subtleformsAdmin?.restNonce || '',
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            title:
-              __('My ', 'subtleforms') +
-              (formData.goal?.charAt(0).toUpperCase() +
-                formData.goal?.slice(1) || __('Form', 'subtleforms')),
-            status: 'draft',
-          }),
-        }
-      );
+      const { body: createData } = await apiPost('/forms', {
+        title:
+          __('My ', 'subtleforms') +
+          (formData.goal?.charAt(0).toUpperCase() + formData.goal?.slice(1) ||
+            __('Form', 'subtleforms')),
+        status: 'draft',
+      });
 
-      const createData = await createResponse.json();
-      if (createData.id) {
+      if (createData?.id) {
         // Save schema
-        await fetch(
-          (window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
-            '/wp-json/subtleforms/v1') + `/forms/${createData.id}/schema`,
-          {
-            method: 'POST',
-            credentials: 'same-origin',
-            headers: {
-              'X-WP-Nonce': window.subtleformsAdmin?.restNonce || '',
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ schema }),
-          }
-        );
+        await apiPost(`/forms/${createData.id}/schema`, { schema });
 
         // Send onboarding test email to admin to validate delivery
         try {
-          const testRes = await fetch(
-            (window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
-              '/wp-json/subtleforms/v1') + '/onboarding/send-test-email',
-            {
-              method: 'POST',
-              credentials: 'same-origin',
-              headers: {
-                'X-WP-Nonce': window.subtleformsAdmin?.restNonce || '',
-                'Content-Type': 'application/json',
-              },
-            }
+          const { body: testData } = await apiPost(
+            '/onboarding/send-test-email'
           );
 
-          try {
-            const testData = await testRes.json();
-            if (testData.success) {
+          {
+            if (testData?.success) {
               alert(
                 __(
                   'A test email has been sent to your admin email.',
@@ -177,8 +123,6 @@ export default function FormsPage() {
             } else {
               console.warn('Test email response:', testData);
             }
-          } catch (e) {
-            // ignore parse errors
           }
         } catch (err) {
           console.warn('Failed to send onboarding test email:', err);

@@ -6,7 +6,7 @@
  */
 
 import { __ } from '@wordpress/i18n';
-import Icon from './ui/Icon';
+import Icon from '../ui/Icon';
 import './RouteTransition.scss';
 
 export function RouteLoadingFallback() {

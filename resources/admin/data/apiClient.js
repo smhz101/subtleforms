@@ -281,18 +281,3 @@ export const getFieldErrors = (error) => {
   }
   return {};
 };
-
-/**
- * Legacy fetch wrapper for gradual migration
- * @deprecated Use apiClient methods instead
- */
-export const legacyFetch = (path, options = {}) => {
-  const restUrl = window.subtleformsAdmin?.restUrl || '/wp-json/subtleforms/v1';
-  return fetch(restUrl + path, {
-    headers: {
-      'Content-Type': 'application/json',
-      'X-WP-Nonce': window.subtleformsAdmin?.restNonce || '',
-    },
-    ...options,
-  });
-};

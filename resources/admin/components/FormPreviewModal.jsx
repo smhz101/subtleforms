@@ -1,6 +1,6 @@
 import { Modal, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import Icon from './ui/Icon';
+import Icon from '../ui/Icon';
 import { getFieldIcon } from '../utils/iconRegistry';
 import './FormPreviewModal.scss';
 

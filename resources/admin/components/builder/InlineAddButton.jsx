@@ -1,7 +1,7 @@
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { getIcon } from './utils/iconMap';
-import Icon from '../ui/Icon';
+import Icon from '../../ui/Icon';
 import './InlineAddButton.scss';
 
 export default function InlineAddButton({

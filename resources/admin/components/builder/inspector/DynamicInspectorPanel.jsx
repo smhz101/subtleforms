@@ -14,7 +14,7 @@ import { Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useConfig } from '../context/ConfigContext';
 import { getControlComponent } from './controlRegistry';
-import { PanelSection } from '../../ui';
+import { PanelSection } from '../../../ui';
 
 import './DynamicInspectorPanel.scss';
 

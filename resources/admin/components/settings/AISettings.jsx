@@ -7,7 +7,7 @@ import {
 	Notice,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import Icon from '../ui/Icon';
+import Icon from '../../ui/Icon';
 import FieldError from './FieldError';
 
 /**

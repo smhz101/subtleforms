@@ -5,7 +5,7 @@
  */
 
 import { __ } from '@wordpress/i18n';
-import Icon from '../ui/Icon';
+import Icon from '../../ui/Icon';
 import './EmptyFormWelcome.scss';
 
 export default function EmptyFormWelcome() {

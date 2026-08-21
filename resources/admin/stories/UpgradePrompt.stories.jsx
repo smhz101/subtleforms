@@ -1,7 +1,7 @@
 /**
  * UpgradePrompt Stories
  */
-import UpgradePrompt from '../components/ui/UpgradePrompt';
+import UpgradePrompt from '../ui/UpgradePrompt';
 
 export default {
   title: 'Components/UpgradePrompt',

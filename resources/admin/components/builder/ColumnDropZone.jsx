@@ -5,7 +5,7 @@ import {
 } from '@dnd-kit/sortable';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
-import Icon from '../ui/Icon';
+import Icon from '../../ui/Icon';
 import InsertFieldButton from './InsertFieldButton';
 import './ColumnDropZone.scss';
 

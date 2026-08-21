@@ -13,13 +13,13 @@ import { __, sprintf } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import clsx from 'clsx';
-import Icon from './ui/Icon';
-import { ContextualTip } from './ui';
+import Icon from '../ui/Icon';
+import { ContextualTip } from '../ui';
 import DataTable from './DataTable';
 import { ConfirmModal } from '../modals';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
 import { PRO_TEMPLATE_IDS } from '../utils/proFeatureDetector';
-import { buildApiUrl } from '../utils/api';
+import { apiGet, apiPost, apiPut, apiDelete } from '../utils/api';
 import { logger, perfMarkers } from '../diagnostics';
 import './FormsList.scss';
 
@@ -34,30 +34,27 @@ export const FORM_COLUMN_LABELS = {
   updated_at: __('Last Updated', 'subtleforms'),
 };
 
-const restBase =
-  window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') ||
-  '/wp-json/subtleforms/v1';
-const restNonce = window.subtleformsAdmin?.restNonce || '';
-
+/**
+ * fetch-style shim over the shared REST helpers.
+ *
+ * Call sites here pass `{ method, body: JSON.stringify(...) }`, so this
+ * translates that to the helper signatures rather than hand-rolling a second
+ * transport with its own nonce handling.
+ */
 function apiRequest(path, options = {}) {
-  return fetch(buildApiUrl(path), {
-    credentials: 'same-origin',
-    headers: {
-      'X-WP-Nonce': restNonce,
-      'Content-Type': 'application/json',
-      ...options.headers,
-    },
-    ...options,
-  }).then(async (response) => {
-    let body = null;
-    try {
-      const text = await response.text();
-      body = text ? JSON.parse(text) : null;
-    } catch (err) {
-      body = null;
-    }
-    return { ok: response.ok, status: response.status, body };
-  });
+  const { method = 'GET', body } = options;
+  const payload = typeof body === 'string' ? JSON.parse(body) : body;
+
+  switch (method.toUpperCase()) {
+    case 'POST':
+      return apiPost(path, payload);
+    case 'PUT':
+      return apiPut(path, payload);
+    case 'DELETE':
+      return apiDelete(path);
+    default:
+      return apiGet(path);
+  }
 }
 
 export default function FormsList({
@@ -143,18 +140,15 @@ export default function FormsList({
     params.set('page', (batchIndex + 1).toString());
     params.set('per_page', batchSize.toString());
 
-    const response = await fetch(buildApiUrl(`/forms?${params}`), {
-      credentials: 'same-origin',
-      headers: { 'X-WP-Nonce': restNonce },
-    });
-    if (!response.ok) throw new Error(`API request failed: ${response.status}`);
+    const { ok, status, body, headers } = await apiGet(`/forms?${params}`);
+    if (!ok) throw new Error(`API request failed: ${status}`);
 
-    const data = await response.json();
+    const data = body || {};
     const rows = Array.isArray(data.data) ? data.data : [];
     const total =
       data.meta && typeof data.meta.total === 'number'
         ? data.meta.total
-        : parseInt(response.headers.get('X-WP-Total') || '0');
+        : parseInt(headers?.get('X-WP-Total') || '0');
     return { rows, total };
   };
 

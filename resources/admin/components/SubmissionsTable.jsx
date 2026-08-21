@@ -19,9 +19,9 @@ import { store as noticesStore } from '@wordpress/notices';
 import clsx from 'clsx';
 import DataTable from './DataTable';
 import { ConfirmModal } from '../modals';
-import { buildApiUrl } from '../utils/api';
+import { apiGet } from '../utils/api';
 import { apiClient } from '../data';
-import { Icon } from './ui';
+import { Icon } from '../ui';
 import './SubmissionsTable.scss';
 
 const restNonce =
@@ -141,13 +141,10 @@ const SubmissionsTable = forwardRef(
       params.set('page', (batchIndex + 1).toString());
       params.set('per_page', batchSize.toString());
 
-      const response = await fetch(buildApiUrl(`/submissions?${params}`), {
-        credentials: 'same-origin',
-        headers: { 'X-WP-Nonce': restNonce },
-      });
-      if (!response.ok) throw new Error('API request failed');
+      const { ok, body, headers } = await apiGet(`/submissions?${params}`);
+      if (!ok) throw new Error('API request failed');
 
-      const data = await response.json();
+      const data = body || {};
       let rows = [];
       let total = 0;
 
@@ -156,13 +153,13 @@ const SubmissionsTable = forwardRef(
         total =
           data.meta && typeof data.meta.total === 'number'
             ? data.meta.total
-            : parseInt(response.headers.get('X-WP-Total') || '0');
+            : parseInt(headers?.get('X-WP-Total') || '0');
       } else if (data && data.submissions) {
         rows = data.submissions;
         total = data.total || 0;
       } else if (Array.isArray(data)) {
         rows = data;
-        total = parseInt(response.headers.get('X-WP-Total') || '0');
+        total = parseInt(headers?.get('X-WP-Total') || '0');
       }
       return { rows, total };
     };

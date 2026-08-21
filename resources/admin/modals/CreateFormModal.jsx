@@ -4,7 +4,7 @@ import { Modal, TextControl, TextareaControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { useCreateForm } from '../data';
 import { useNotice } from '../ui/feedback';
-import Icon from '../components/ui/Icon';
+import Icon from '../ui/Icon';
 import clsx from 'clsx';
 import TemplateSelector from '../templates/TemplateSelector';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';

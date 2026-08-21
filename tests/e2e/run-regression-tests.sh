@@ -4,11 +4,15 @@
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-# Switch to Node 20
-nvm use 20 2>/dev/null || {
-  echo "⚠️  Node 20 not found. Please install it with: nvm install 20"
+# Prefer Node 20 when nvm is available, but don't require it — CI images and
+# system installs already provide a suitable Node.
+nvm use 20 2>/dev/null || echo "ℹ️  nvm not in use; running on the ambient Node."
+
+NODE_MAJOR="$(node -p 'process.versions.node.split(".")[0]' 2>/dev/null || echo 0)"
+if [ "$NODE_MAJOR" -lt 20 ]; then
+  echo "❌ Node 20 or newer is required (found $(node --version 2>/dev/null || echo 'none'))."
   exit 1
-}
+fi
 
 echo "✅ Using Node $(node --version)"
 echo ""

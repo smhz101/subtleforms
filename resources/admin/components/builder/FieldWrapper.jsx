@@ -1,5 +1,5 @@
 import { memo, useMemo } from '@wordpress/element';
-import Icon from '../ui/Icon';
+import Icon from '../../ui/Icon';
 import FieldRenderer from './FieldRenderer';
 import FieldToolbar from './FieldToolbar';
 import clsx from 'clsx';

@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import Icon from '../ui/Icon';
+import Icon from '../../ui/Icon';
 import './FormEditorHeader.scss';
 
 export default function FormEditorHeader({

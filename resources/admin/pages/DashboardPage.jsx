@@ -9,7 +9,7 @@ import {
 import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '../components/navigation';
 import clsx from 'clsx';
-import Icon from '../components/ui/Icon';
+import Icon from '../ui/Icon';
 import AdminShell from '../components/AdminShell';
 import LicenseStatusIndicator from '../components/LicenseStatusIndicator';
 import './DashboardPage.scss';

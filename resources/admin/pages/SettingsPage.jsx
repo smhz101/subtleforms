@@ -10,7 +10,7 @@ import AdvancedSettings from '../components/settings/AdvancedSettings';
 import LicenseSettings from '../components/settings/LicenseSettings';
 import ExtensionsSettings from '../components/settings/ExtensionsSettings';
 import { isProFeature, openUpgradeModal } from '../utils/featureGate';
-import Icon from '../components/ui/Icon';
+import Icon from '../ui/Icon';
 import { getUIIcon } from '../utils/iconRegistry';
 import './SettingsPage.scss';
 

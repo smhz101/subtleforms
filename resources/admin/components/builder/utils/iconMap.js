@@ -1,4 +1,4 @@
-import Icon from '../../ui/Icon';
+import Icon from '../../../ui/Icon';
 import { FIELD_ICON_MAP, UI_ICON_MAP } from '../../../utils/iconRegistry';
 
 /**

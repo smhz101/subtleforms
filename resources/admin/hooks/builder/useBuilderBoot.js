@@ -105,20 +105,10 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
   useEffect(() => {
     const checkTourStatus = async () => {
       try {
-        const response = await fetch(
-          (window.subtleformsAdmin?.restUrl?.replace(/\/$/, '') || '/wp-json/subtleforms/v1') +
-            '/tour/status',
-          {
-            credentials: 'same-origin',
-            headers: {
-              'X-WP-Nonce': window.subtleformsAdmin?.restNonce || '',
-            },
-          }
-        );
-        const data = await response.json();
-        setTourCompleted(data.completed);
+        const { body: data } = await apiGet('/tour/status');
+        setTourCompleted(data?.completed);
         // Auto-show tour once per user when caller opts in (e.g. first-run/new form)
-        if (autoShowTour && !data.completed) {
+        if (autoShowTour && !data?.completed) {
           setTimeout(() => setShowTour(true), 1000);
         }
       } catch (error) {

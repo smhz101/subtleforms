@@ -2,7 +2,7 @@ import { useState, useMemo, useEffect } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useBuilder } from './context/BuilderContext';
-import Icon from '../ui/Icon';
+import Icon from '../../ui/Icon';
 import FieldRenderer from './FieldRenderer';
 import FieldChrome from './FieldChrome';
 import { nodeToField, nodeChildren, getRootNodeId } from './utils/schemaTree';

@@ -1,6 +1,6 @@
 import { useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import Icon from '../ui/Icon';
+import Icon from '../../ui/Icon';
 import './InsertFieldButton.scss';
 
 export default function InsertFieldButton({

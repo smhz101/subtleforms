@@ -89,7 +89,7 @@ import {
  * Exported Icon Library
  *
  * Usage:
- * import Icon from '../components/ui/Icon';
+ * import Icon from './Icon';
  * <Icon.Check size={16} />
  * <Icon.Plus className="sf-text-blue-600" />
  */

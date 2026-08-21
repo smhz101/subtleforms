@@ -2,7 +2,7 @@ import { useState } from '@wordpress/element';
 import { Modal, Button, CheckboxControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
-import Icon from './ui/Icon';
+import Icon from '../ui/Icon';
 import './OnboardingWizard.scss';
 
 const FORM_GOALS = [

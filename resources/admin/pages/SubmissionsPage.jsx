@@ -7,7 +7,7 @@ import TabBar from '../components/TabBar';
 import SubmissionsTable, { ALL_COLUMNS, DEFAULT_VISIBLE, COLUMN_LABELS } from '../components/SubmissionsTable';
 import useRealTimeUpdates from '../hooks/useRealTimeUpdates';
 import { isProFeature, requirePro } from '../utils/featureGate';
-import { Icon } from '../components/ui';
+import { Icon } from '../ui';
 import apiFetch from '@wordpress/api-fetch';
 import { useForms } from '../data';
 import './SubmissionsPage.scss';

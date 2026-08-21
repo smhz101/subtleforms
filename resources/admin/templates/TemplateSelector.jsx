@@ -5,8 +5,8 @@ import { __ } from '@wordpress/i18n';
 import { useTemplates } from '../data';
 import { useAbility } from '../policies';
 import clsx from 'clsx';
-import Icon from '../components/ui/Icon';
-import { UpgradePrompt } from '../components/ui';
+import Icon from '../ui/Icon';
+import { UpgradePrompt } from '../ui';
 import { TEMPLATE_CATEGORIES } from './index';
 
 export default function TemplateSelector({

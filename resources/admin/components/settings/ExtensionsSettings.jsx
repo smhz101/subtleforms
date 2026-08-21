@@ -1,6 +1,6 @@
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import Icon from '../ui/Icon';
+import Icon from '../../ui/Icon';
 import { requirePro } from '../../utils/featureGate';
 import WebhooksPanel from './extensions/WebhooksPanel';
 import EmailMarketingPanel from './extensions/EmailMarketingPanel';
