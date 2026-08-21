@@ -15,6 +15,7 @@ import {
   duplicateNode,
 } from '../schema/commands';
 import { denormalizeTree } from '../utils/schemaTree';
+import { debug } from '../../../../shared/debug';
 
 /**
  * Custom hook for schema command handlers
@@ -89,7 +90,7 @@ export function useSchemaCommands({
         if (newNodeId) {
           if (process.env.NODE_ENV !== 'production') {
             const node = newTree.nodes[newNodeId];
-            console.log('[SubtleForms] Creating field:', {
+            debug('[SubtleForms] Creating field:', {
               fieldType: type,
               fieldId: node.id,
               fieldLabel: node.config?.label,
@@ -133,7 +134,7 @@ export function useSchemaCommands({
       const targetParentId = selectedStepId || rootId;
 
       if (process.env.NODE_ENV !== 'production') {
-        console.log('[SubtleForms] Dock Add:', {
+        debug('[SubtleForms] Dock Add:', {
           fieldType: type,
           selectedStepId: selectedStepId,
           targetParentId: targetParentId,

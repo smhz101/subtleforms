@@ -156,32 +156,25 @@ final class PublicSubmitApi {
 		// Check submission limit
 		$settings = get_option( 'subtleforms_settings', array() );
 		if ( ! empty( $settings['submission_limit_enabled'] ) ) {
-			$limit    = isset( $settings['submission_limit'] ) ? (int) $settings['submission_limit'] : 1;
-			$user_key = get_current_user_id();
+			$limit   = isset( $settings['submission_limit'] ) ? (int) $settings['submission_limit'] : 1;
+			$user_id = get_current_user_id();
 
-			if ( ! $user_key && $ip ) {
-				$user_key = 'ip_' . md5( $ip );
+			// Identify the submitter by account when logged in, otherwise by IP.
+			// These must never be OR'd together: user_id is 0 for every guest, so
+			// matching on it would count all guests as a single submitter and lock
+			// the form for everyone once the limit is reached.
+			$count = null;
+
+			if ( $user_id > 0 ) {
+				$count = $this->countSubmissionsBy( $formId, 'user_id = %d', $user_id );
+			} elseif ( $ip !== '' ) {
+				$count = $this->countSubmissionsBy( $formId, 'ip_address = %s', $ip );
 			}
 
-			if ( $user_key ) {
-				global $wpdb;
-				$table_name = $wpdb->prefix . 'subtleforms_submissions';
-				// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled.
-				$count      = $wpdb->get_var(
-					$wpdb->prepare(
-						"SELECT COUNT(*) FROM {$table_name} WHERE form_id = %d AND (user_id = %d OR ip_address = %s) AND status != 'spam'",
-						$formId,
-						is_numeric( $user_key ) ? $user_key : 0,
-						$ip ? $ip : ''
-					)
+			if ( $count !== null && $count >= $limit ) {
+				return ApiResponse::forbidden(
+					__( 'You have reached the maximum number of submissions for this form.', 'subtleforms' )
 				);
-				// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-
-				if ( $count >= $limit ) {
-					return ApiResponse::forbidden(
-						__( 'You have reached the maximum number of submissions for this form.', 'subtleforms' )
-					);
-				}
 			}
 		}
 
@@ -190,7 +183,7 @@ final class PublicSubmitApi {
 			$activeSchema = $this->formsRepo->loadSchemaVersion( $formId );
 		} catch ( \RuntimeException $e ) {
 			Logger::error( 'Submission Error: %s', $e->getMessage() );
-			return ApiResponse::server_error( __( 'Failed to load form schema: ', 'subtleforms' ) . $e->getMessage() );
+			return ApiResponse::server_error( __( 'This form is temporarily unavailable. Please try again later.', 'subtleforms' ) );
 		}
 		$formVersion = $activeSchema['version'] ?? null;
 
@@ -265,7 +258,7 @@ final class PublicSubmitApi {
 			} catch ( \InvalidArgumentException $e ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
 				Logger::error( 'Schema compilation failed for form %d: %s', $formId, $e->getMessage() );
-				return ApiResponse::bad_request( $e->getMessage() );
+				return ApiResponse::bad_request( __( 'This form could not be processed. Please contact the site owner.', 'subtleforms' ) );
 			}
 
 			try {
@@ -279,7 +272,7 @@ final class PublicSubmitApi {
 					return ApiResponse::validation_error( __( 'Form validation failed', 'subtleforms' ), $validationErrors );
 				}
 
-				return ApiResponse::server_error( $e->getMessage() );
+				return ApiResponse::server_error( __( 'Your submission could not be completed. Please try again later.', 'subtleforms' ) );
 			} catch ( \Throwable $e ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
 				Logger::error( 'Unexpected error in submission %d: %s', $submissionId, $e->getMessage() );
@@ -363,6 +356,33 @@ final class PublicSubmitApi {
 	/**
 	 * Guard rate limit for request.
 	 */
+	/**
+	 * Count a single submitter's non-spam submissions for a form.
+	 *
+	 * The caller supplies exactly one identity predicate so that logged-in users
+	 * are counted by account and guests by IP. Combining the two would make
+	 * `user_id = 0` match every guest submission on the form.
+	 *
+	 * @param int        $formId    Form ID.
+	 * @param string     $predicate SQL predicate with a single placeholder, e.g. 'user_id = %d'.
+	 * @param int|string $value     Value bound to the predicate placeholder.
+	 * @return int Number of matching submissions.
+	 */
+	private function countSubmissionsBy( int $formId, string $predicate, $value ): int {
+		global $wpdb;
+
+		$table_name = $wpdb->prefix . 'subtleforms_submissions';
+
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from $wpdb->prefix; $predicate is a fixed internal string with one placeholder; the value is bound by prepare().
+		return (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$table_name} WHERE form_id = %d AND {$predicate} AND status != 'spam'",
+				$formId,
+				$value
+			)
+		);
+	}
+
 	private function guardRateLimit( WP_REST_Request $request ): ?WP_REST_Response {
 		$userId = get_current_user_id() ?: null;
 		$ip     = isset( $_SERVER['REMOTE_ADDR'] )

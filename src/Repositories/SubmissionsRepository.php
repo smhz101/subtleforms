@@ -314,11 +314,7 @@ final class SubmissionsRepository {
 		}
 
 		if ( $args['field_key'] && $args['field_value'] ) {
-			$field_key   = preg_replace( '/[^a-zA-Z0-9_\-]/', '', $args['field_key'] );
-			$field_value = '%' . $wpdb->esc_like( $args['field_value'] ) . '%';
-			// Use LIKE on payload JSON string for broad compatibility
-			$where[]  = 'payload LIKE %s';
-			$params[] = $field_value;
+			$this->applyFieldFilter( $where, $params, (string) $args['field_key'], (string) $args['field_value'] );
 		} elseif ( $args['field_value'] && ! $args['field_key'] ) {
 			$searchTerm = '%' . $wpdb->esc_like( $args['field_value'] ) . '%';
 			$where[]    = 'payload LIKE %s';
@@ -335,7 +331,7 @@ final class SubmissionsRepository {
 		       // Fetch all columns needed for admin list (including payload/meta)
 		       // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name, orderby and order are whitelisted.
 				       $sql = sprintf(
-			       "SELECT id, form_id, status, is_read, created_at, payload, meta, ip_address, user_agent FROM {$this->table} %s ORDER BY %s %s LIMIT %%d OFFSET %%d",
+			       "SELECT id, form_id, status, is_read, created_at, payload, meta, user_agent FROM {$this->table} %s ORDER BY %s %s LIMIT %%d OFFSET %%d",
 					       $whereClause,
 					       $orderby,
 					       $order
@@ -408,7 +404,9 @@ final class SubmissionsRepository {
 			$params[] = sanitize_text_field( $args['after'] ) . ' 00:00:00';
 		}
 
-		if ( $args['field_value'] ) {
+		if ( $args['field_key'] && $args['field_value'] ) {
+			$this->applyFieldFilter( $where, $params, (string) $args['field_key'], (string) $args['field_value'] );
+		} elseif ( $args['field_value'] ) {
 			$searchTerm = '%' . $wpdb->esc_like( $args['field_value'] ) . '%';
 			$where[]    = 'payload LIKE %s';
 			$params[]   = $searchTerm;
@@ -425,6 +423,42 @@ final class SubmissionsRepository {
 
 		return (int) $wpdb->get_var( $sql );
 		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+	}
+
+	/**
+	 * Scope a payload filter to one field key.
+	 *
+	 * Where the database provides JSON functions the value is compared against
+	 * that key only. On MySQL < 5.7 / MariaDB < 10.2 we fall back to a LIKE
+	 * pattern anchored on the quoted key, which is narrower than searching the
+	 * whole payload even though it cannot match non-string values.
+	 *
+	 * @param array  $where  WHERE fragments, appended by reference.
+	 * @param array  $params Bound parameters, appended by reference.
+	 * @param string $key    Raw field key from the request.
+	 * @param string $value  Raw value to search for.
+	 */
+	private function applyFieldFilter( array &$where, array &$params, string $key, string $value ): void {
+		global $wpdb;
+
+		$field_key = preg_replace( '/[^a-zA-Z0-9_\-]/', '', $key );
+
+		if ( $field_key === '' ) {
+			$where[]  = 'payload LIKE %s';
+			$params[] = '%' . $wpdb->esc_like( $value ) . '%';
+			return;
+		}
+
+		if ( \SubtleForms\Support\DatabaseFeatures::supportsJson() ) {
+			// JSON path is built from the sanitized key, which is [A-Za-z0-9_-] only.
+			$where[]  = "JSON_UNQUOTE( JSON_EXTRACT( payload, '$.\"{$field_key}\"' ) ) LIKE %s";
+			$params[] = '%' . $wpdb->esc_like( $value ) . '%';
+			return;
+		}
+
+		// Fallback: anchor the match on the quoted key so other fields cannot match.
+		$where[]  = 'payload LIKE %s';
+		$params[] = '%' . $wpdb->esc_like( '"' . $field_key . '":"' ) . '%' . $wpdb->esc_like( $value ) . '%';
 	}
 
 	/**
@@ -518,7 +552,7 @@ $cutoff_date
 
 		// Phase B3: Cache dashboard aggregates (60s TTL)
 		sort( $form_ids ); // Consistent key ordering
-		$cache_key = 'subtleforms:1.8.2:counts:' . md5( serialize( $form_ids ) . '|' . $status );
+		$cache_key = 'subtleforms:' . SUBTLEFORMS_VERSION . ':counts:' . md5( serialize( $form_ids ) . '|' . $status );
 		$cached    = get_transient( $cache_key );
 
 		if ( false !== $cached ) {
@@ -574,6 +608,6 @@ $cutoff_date
 		// Delete all cached counts that include this form
 		global $wpdb;
 		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $wpdb->options is a core table; value is a static pattern string.
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", '_transient_subtleforms:1.8.2:counts:%' ) );
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", '_transient_subtleforms:' . SUBTLEFORMS_VERSION . ':counts:%' ) );
 	}
 }

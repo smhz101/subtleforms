@@ -7,6 +7,7 @@ import { getIn, setIn, flattenToPathMap } from '../utils/valuePaths';
 import { collectLeafInputPaths } from '../utils/schemaLeaves';
 import { warnOnce } from '../utils/warnOnce';
 import { getFormClassNames } from '../utils/formStyles';
+import { debug } from '../../shared/debug';
 
 const restUrl =
   window.subtleformsFrontend?.restUrl || '/wp-json/subtleforms/v1';
@@ -222,7 +223,7 @@ export default function FormRenderer({
   const leafPaths = useMemo(() => {
     const paths = collectLeafInputPaths(schema?.fields || []);
 
-    console.log('[SubtleForms] Leaf Paths Calculation:', {
+    debug('[SubtleForms] Leaf Paths Calculation:', {
       schemaFields: schema?.fields,
       schemaFieldsCount: (schema?.fields || []).length,
       hasSteps: hasSteps,
@@ -326,7 +327,7 @@ export default function FormRenderer({
 
       setValues((prev) => {
         const newValues = setIn(prev, path, value);
-        console.log('[SubtleForms] Value Update:', {
+        debug('[SubtleForms] Value Update:', {
           path: path,
           value: value,
           previousValues: prev,
@@ -422,7 +423,7 @@ export default function FormRenderer({
   // IMPORTANT: Step navigation NEVER triggers submission
   // This is intentional to prevent accidental form submission
   const handleNextStep = useCallback(() => {
-    console.log('[SubtleForms] Next Step:', {
+    debug('[SubtleForms] Next Step:', {
       currentStepIndex: currentStepIndex,
       currentValues: values,
       valuesKeys: Object.keys(values),
@@ -443,7 +444,7 @@ export default function FormRenderer({
   }, [currentStepIndex, steps, validateStep, values]);
 
   const handlePrevStep = useCallback(() => {
-    console.log('[SubtleForms] Prev Step:', {
+    debug('[SubtleForms] Prev Step:', {
       currentStepIndex: currentStepIndex,
       currentValues: values,
       valuesKeys: Object.keys(values),
@@ -593,7 +594,7 @@ export default function FormRenderer({
       if (recaptchaV3Input && window.grecaptcha && window.grecaptcha.execute) {
         try {
           const siteKey = recaptchaV3Input.getAttribute('data-sitekey');
-          console.log(
+          debug(
             '[SubtleForms] Executing reCAPTCHA v3 with site key:',
             siteKey
           );
@@ -602,7 +603,7 @@ export default function FormRenderer({
           const token = await window.grecaptcha.execute(siteKey, {
             action: 'submit',
           });
-          console.log(
+          debug(
             '[SubtleForms] reCAPTCHA v3 token obtained:',
             token ? 'YES' : 'NO'
           );
@@ -636,7 +637,7 @@ export default function FormRenderer({
       });
 
       // Debug logging for empty submissions
-      console.log('[SubtleForms] Submission Debug:', {
+      debug('[SubtleForms] Submission Debug:', {
         leafPathsCount: leafPaths.length,
         leafPaths: leafPaths,
         valuesKeys: Object.keys(values),
@@ -671,7 +672,7 @@ export default function FormRenderer({
         );
         if (recaptchaResponse && recaptchaResponse.value) {
           submissionPayload['g-recaptcha-response'] = recaptchaResponse.value;
-          console.log(
+          debug(
             '[SubtleForms] Including g-recaptcha-response in payload'
           );
         }
@@ -681,7 +682,7 @@ export default function FormRenderer({
         );
         if (hcaptchaResponse && hcaptchaResponse.value) {
           submissionPayload['h-captcha-response'] = hcaptchaResponse.value;
-          console.log('[SubtleForms] Including h-captcha-response in payload');
+          debug('[SubtleForms] Including h-captcha-response in payload');
         }
 
         const turnstileResponse = document.querySelector(
@@ -689,7 +690,7 @@ export default function FormRenderer({
         );
         if (turnstileResponse && turnstileResponse.value) {
           submissionPayload['cf-turnstile-response'] = turnstileResponse.value;
-          console.log(
+          debug(
             '[SubtleForms] Including cf-turnstile-response in payload'
           );
         }

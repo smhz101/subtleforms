@@ -1,5 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import { getIn } from '../utils/valuePaths';
+import { debug } from '../../shared/debug';
 
 // ISO 3166-1 Alpha-2 country codes
 const COUNTRIES = [
@@ -395,7 +396,7 @@ export default function FieldRenderer({
       field.type === 'turnstile') &&
     config.captchaHtml?.includes('subtleforms-recaptcha-v3')
   ) {
-    console.log('[SubtleForms] Rendering reCAPTCHA v3 (invisible)');
+    debug('[SubtleForms] Rendering reCAPTCHA v3 (invisible)');
     return (
       <div
         className='subtleforms-captcha-hidden'
@@ -748,7 +749,7 @@ function renderInput(
       // CAPTCHA widget - rendered via provider-specific HTML
       // Note: reCAPTCHA v3 is handled earlier to avoid wrapper/label
       if (config.captchaHtml) {
-        console.log('[SubtleForms] CAPTCHA rendering:', {
+        debug('[SubtleForms] CAPTCHA rendering:', {
           type: field.type,
           provider: config.providerName,
           htmlLength: config.captchaHtml.length,

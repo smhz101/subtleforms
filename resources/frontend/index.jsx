@@ -1,6 +1,7 @@
 import { createRoot } from '@wordpress/element';
 import FormRenderer from './components/FormRenderer';
 import './frontend.css';
+import { debug } from '../shared/debug';
 
 /**
  * Mount a form renderer in a container
@@ -54,19 +55,19 @@ window.SubtleForms = {
 
 // Auto-mount function
 function autoMountForms() {
-  console.log('SubtleForms: Auto-mounting forms...');
+  debug('SubtleForms: Auto-mounting forms...');
 
   // Mount shortcode containers
   const shortcodeContainers = document.querySelectorAll(
     '.subtleforms-form-container'
   );
-  console.log(
+  debug(
     `SubtleForms: Found ${shortcodeContainers.length} shortcode containers`
   );
   shortcodeContainers.forEach((container) => {
     const formId = parseInt(container.dataset.formId, 10);
     if (formId) {
-      console.log(
+      debug(
         `SubtleForms: Mounting form ${formId} in shortcode container`
       );
       mount(container, { formId });
@@ -75,11 +76,11 @@ function autoMountForms() {
 
   // Mount block containers
   const blockContainers = document.querySelectorAll('.subtleforms-block');
-  console.log(`SubtleForms: Found ${blockContainers.length} block containers`);
+  debug(`SubtleForms: Found ${blockContainers.length} block containers`);
   blockContainers.forEach((container) => {
     const formId = parseInt(container.dataset.formId, 10);
     if (formId) {
-      console.log(`SubtleForms: Mounting form ${formId} in block container`);
+      debug(`SubtleForms: Mounting form ${formId} in block container`);
       mount(container, { formId });
     }
   });
@@ -87,7 +88,7 @@ function autoMountForms() {
 
 // Auto-mount forms when DOM is fully ready (frontend only, not in editor)
 // Use 'DOMContentLoaded' to ensure all dependencies (wp-element) are loaded
-console.log(
+debug(
   'SubtleForms: Script loaded, document.readyState:',
   document.readyState
 );
@@ -107,5 +108,5 @@ if (!isBlockEditor) {
     autoMountForms();
   }
 } else {
-  console.log('SubtleForms: Block editor detected, skipping auto-mount');
+  debug('SubtleForms: Block editor detected, skipping auto-mount');
 }
