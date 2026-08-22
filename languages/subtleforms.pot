@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-22T14:39:38+00:00\n"
+"POT-Creation-Date: 2026-08-22T19:33:31+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -253,6 +253,7 @@ msgstr ""
 #: src/Admin/AdminMenu.php:752
 #: src/Api/SubmissionsApi.php:601
 #: src/Privacy/PrivacyExporter.php:100
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:277
 #: resources/admin/components/FormsList.jsx:31
 #: resources/admin/components/FormsList.jsx:278
 #: resources/admin/components/FormsList.jsx:810
@@ -3889,7 +3890,8 @@ msgid "Click any field to configure it"
 msgstr ""
 
 #: resources/admin/components/builder/EmptyFormWelcome.jsx:47
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:254
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:255
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:309
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:66
 msgid "Publish"
 msgstr ""
@@ -4600,42 +4602,53 @@ msgstr ""
 msgid "Redo (Shift+Ctrl/Cmd+Z)"
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:253
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:254
 #: resources/admin/components/FormsList.jsx:824
 msgid "Update"
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:262
-msgid "Return to the forms list"
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:265
+msgid "Update options"
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:263
-msgid "Close"
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:266
+msgid "Publish options"
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:268
-#: resources/admin/components/FormsList.jsx:417
-msgid "More actions"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:276
-msgid "Drafts also save on their own a few seconds after each change."
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:284
-msgid "Save draft now"
-msgstr ""
-
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:292
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:281
 msgid "Takes the form off your site. The draft and its history are kept."
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:300
-msgid "Unpublish"
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:289
+msgid "Switch to draft"
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:312
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:296
+msgid "Fix the validation issues above first."
+msgstr ""
+
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:300
+msgid "Makes this form visible on your site."
+msgstr ""
+
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:317
+msgid "Drafts also save on their own a few seconds after each change."
+msgstr ""
+
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:325
+msgid "Save draft now"
+msgstr ""
+
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:336
 msgid "Delete form"
+msgstr ""
+
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:349
+msgid "Return to the forms list"
+msgstr ""
+
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:350
+msgid "Close"
 msgstr ""
 
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:46
@@ -5125,6 +5138,10 @@ msgstr ""
 #: resources/admin/pages/DashboardPage.jsx:243
 #: resources/frontend/components/ConversationalFormRenderer.jsx:505
 msgid "Edit"
+msgstr ""
+
+#: resources/admin/components/FormsList.jsx:417
+msgid "More actions"
 msgstr ""
 
 #: resources/admin/components/FormsList.jsx:431

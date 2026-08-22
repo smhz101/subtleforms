@@ -9,7 +9,7 @@
 
 import { useRef } from '@wordpress/element';
 import { Button, DropdownMenu, MenuGroup, MenuItem } from '@wordpress/components';
-import { moreVertical } from '@wordpress/icons';
+import { chevronDown } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import Icon from '../../../ui/Icon';
 import HelpMenu from '../../HelpMenu';
@@ -239,20 +239,107 @@ export function BuilderActions({
           showWizard={showWizard}
         />
 
-        {/* One action with an outcome autosave cannot produce: making the
-            current draft the version visitors see. Everything else — saving,
-            closing — either happens on its own or costs nothing, so it does not
-            compete for the primary slot. */}
-        <Button
-          variant='primary'
-          data-tour='publish-button'
-          onClick={onPublish}
-          disabled={busy || hasValidationErrors}
-          className='sf-builder-header-bar__save-button'>
-          {isPublished
-            ? __('Update', 'subtleforms')
-            : __('Publish', 'subtleforms')}
-        </Button>
+        {/* Publishing is the one outcome autosave cannot produce: it makes the
+            current draft the version visitors see. Its opposite — returning the
+            form to a draft — is the same axis, so it hangs off the same control
+            rather than sitting in a generic menu next to Delete. */}
+        <div className='sf-builder-header-bar__publish-group'>
+          <Button
+            variant='primary'
+            data-tour='publish-button'
+            onClick={onPublish}
+            disabled={busy || hasValidationErrors}
+            className='sf-builder-header-bar__publish-button'>
+            {isPublished
+              ? __('Update', 'subtleforms')
+              : __('Publish', 'subtleforms')}
+          </Button>
+
+          <DropdownMenu
+            icon={chevronDown}
+            /* Validation blocks publishing, not the menu: switching to draft
+               and deleting are exactly what you need on a form that cannot
+               publish, so the arrow only follows `busy`. */
+            label={
+              isPublished
+                ? __('Update options', 'subtleforms')
+                : __('Publish options', 'subtleforms')
+            }
+            className='sf-builder-header-bar__publish-menu'
+            toggleProps={{
+              variant: 'primary',
+              disabled: busy,
+              className: 'sf-builder-header-bar__publish-arrow',
+            }}
+            popoverProps={{ placement: 'bottom-end' }}>
+            {({ onClose }) => (
+              <>
+                <MenuGroup label={__('Status', 'subtleforms')}>
+                  {isPublished ? (
+                    <MenuItem
+                      disabled={busy}
+                      info={__(
+                        'Takes the form off your site. The draft and its history are kept.',
+                        'subtleforms'
+                      )}
+                      onClick={() => {
+                        onUnpublish?.();
+                        onClose();
+                      }}>
+                      {__('Switch to draft', 'subtleforms')}
+                    </MenuItem>
+                  ) : (
+                    <MenuItem
+                      disabled={busy || hasValidationErrors}
+                      info={
+                        hasValidationErrors
+                          ? __(
+                              'Fix the validation issues above first.',
+                              'subtleforms'
+                            )
+                          : __(
+                              'Makes this form visible on your site.',
+                              'subtleforms'
+                            )
+                      }
+                      onClick={() => {
+                        onPublish();
+                        onClose();
+                      }}>
+                      {__('Publish', 'subtleforms')}
+                    </MenuItem>
+                  )}
+                </MenuGroup>
+
+                <MenuGroup>
+                  <MenuItem
+                    disabled={!isDirty || busy}
+                    info={__(
+                      'Drafts also save on their own a few seconds after each change.',
+                      'subtleforms'
+                    )}
+                    onClick={() => {
+                      onSaveDraft();
+                      onClose();
+                    }}>
+                    {__('Save draft now', 'subtleforms')}
+                  </MenuItem>
+                </MenuGroup>
+
+                <MenuGroup>
+                  <MenuItem
+                    isDestructive
+                    onClick={() => {
+                      onDelete();
+                      onClose();
+                    }}>
+                    {__('Delete form', 'subtleforms')}
+                  </MenuItem>
+                </MenuGroup>
+              </>
+            )}
+          </DropdownMenu>
+        </div>
 
         <Button
           variant='tertiary'
@@ -262,59 +349,6 @@ export function BuilderActions({
           title={__('Return to the forms list', 'subtleforms')}>
           {__('Close', 'subtleforms')}
         </Button>
-
-        <DropdownMenu
-          icon={moreVertical}
-          label={__('More actions', 'subtleforms')}
-          className='sf-builder-header-bar__more-menu'
-          popoverProps={{ placement: 'bottom-end' }}>
-          {({ onClose }) => (
-            <>
-              <MenuGroup>
-                <MenuItem
-                  disabled={!isDirty || busy}
-                  info={__(
-                    'Drafts also save on their own a few seconds after each change.',
-                    'subtleforms'
-                  )}
-                  onClick={() => {
-                    onSaveDraft();
-                    onClose();
-                  }}>
-                  {__('Save draft now', 'subtleforms')}
-                </MenuItem>
-              </MenuGroup>
-
-              {isPublished && (
-                <MenuGroup>
-                  <MenuItem
-                    disabled={busy}
-                    info={__(
-                      'Takes the form off your site. The draft and its history are kept.',
-                      'subtleforms'
-                    )}
-                    onClick={() => {
-                      onUnpublish?.();
-                      onClose();
-                    }}>
-                    {__('Unpublish', 'subtleforms')}
-                  </MenuItem>
-                </MenuGroup>
-              )}
-
-              <MenuGroup>
-                <MenuItem
-                  isDestructive
-                  onClick={() => {
-                    onDelete();
-                    onClose();
-                  }}>
-                  {__('Delete form', 'subtleforms')}
-                </MenuItem>
-              </MenuGroup>
-            </>
-          )}
-        </DropdownMenu>
       </div>
     </div>
   );

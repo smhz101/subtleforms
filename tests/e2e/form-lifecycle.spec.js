@@ -35,7 +35,7 @@ test.describe('Form Lifecycle', () => {
 
     // 7. Save the draft now, via the header's overflow menu. Drafts also save
     //    on their own, but forcing it here keeps the test deterministic.
-    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('button', { name: 'Publish options' }).click();
     await page.getByRole('menuitem', { name: 'Save draft now' }).click();
 
     // 8. Verify "Draft" status badge
@@ -43,7 +43,9 @@ test.describe('Form Lifecycle', () => {
     await expect(draftBadge).toBeVisible();
 
     // 9. Publish the form
-    const publishBtn = page.getByRole('button', { name: 'Publish' });
+    // `exact` matters now that the split button puts "Publish options" beside
+    // "Publish": a substring match would resolve to both.
+    const publishBtn = page.getByRole('button', { name: 'Publish', exact: true });
     await publishBtn.click();
 
     // 10. Handle Publish Confirmation Modal
