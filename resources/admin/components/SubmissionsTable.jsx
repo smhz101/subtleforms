@@ -51,7 +51,7 @@ const SubmissionsTable = forwardRef(
       dateRange = 'all',
       fieldValue = '',
       processingStatus = '',
-      visibleColumns,
+      visibleColumns = DEFAULT_VISIBLE,
     },
     ref
   ) => {
@@ -618,12 +618,16 @@ const SubmissionsTable = forwardRef(
       },
     ];
 
-    // Filter to visible columns (always show actions)
+    // Filter to visible columns (always show actions).
+    // A default alone isn't enough: an explicit `visibleColumns={undefined}` from
+    // a caller skips the default, and this runs on every render.
+    const visible = Array.isArray(visibleColumns) ? visibleColumns : DEFAULT_VISIBLE;
     const columns = allColumns.filter(
       (col) =>
         col.key === 'actions' ||
-        visibleColumns.includes(col.key) ||
-        (col.key === 'form_title' && showFormColumn && visibleColumns.includes('form_title'))
+        (col.key === 'form_title'
+          ? showFormColumn && visible.includes('form_title')
+          : visible.includes(col.key))
     );
 
     if (error) {

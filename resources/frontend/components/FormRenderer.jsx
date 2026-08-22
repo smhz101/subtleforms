@@ -8,6 +8,10 @@ import { collectLeafInputPaths } from '../utils/schemaLeaves';
 import { warnOnce } from '../utils/warnOnce';
 import { getFormClassNames } from '../utils/formStyles';
 import { debug } from '../../shared/debug';
+import {
+  formAppearanceStyle,
+  formAppearanceClasses,
+} from '../../shared/appearance';
 
 const restUrl =
   window.subtleformsFrontend?.restUrl || '/wp-json/subtleforms/v1';
@@ -813,10 +817,20 @@ export default function FormRenderer({
   const isLastStep = !hasSteps || currentStepIndex === steps.length - 1;
 
   // Generate form type-aware CSS classes
-  const formClassNames = getFormClassNames(schema);
+  const appearance = schema.metadata?.appearance;
+  const formClassNames = [
+    getFormClassNames(schema),
+    formAppearanceClasses(appearance),
+  ]
+    .filter(Boolean)
+    .join(' ');
+
+  // Appearance is applied as custom properties on the root, so every rule in the
+  // public stylesheet picks it up by inheritance and no per-form CSS is emitted.
+  const appearanceStyle = formAppearanceStyle(appearance);
 
   return (
-    <div className={formClassNames}>
+    <div className={formClassNames} style={appearanceStyle}>
       {/* Screen reader live region for submission results and validation announcements */}
       <div
         ref={liveRegionRef}
@@ -868,25 +882,27 @@ export default function FormRenderer({
             </p>
           )}
 
-          {fieldsToRender.map((field) => {
-            const fieldKey = field.config?.key || field.key;
+          <div className='subtleforms-fields'>
+            {fieldsToRender.map((field) => {
+              const fieldKey = field.config?.key || field.key;
 
-            if (hiddenFields.has(fieldKey)) {
-              return null;
-            }
+              if (hiddenFields.has(fieldKey)) {
+                return null;
+              }
 
-            return (
-              <FieldRenderer
-                key={fieldKey}
-                field={field}
-                fieldPath={fieldKey}
-                values={values}
-                onChange={handleChange}
-                errors={validationErrors}
-                hiddenFields={hiddenFields}
-              />
-            );
-          })}
+              return (
+                <FieldRenderer
+                  key={fieldKey}
+                  field={field}
+                  fieldPath={fieldKey}
+                  values={values}
+                  onChange={handleChange}
+                  errors={validationErrors}
+                  hiddenFields={hiddenFields}
+                />
+              );
+            })}
+          </div>
         </div>
 
         <div className='subtleforms-buttons'>

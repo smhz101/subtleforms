@@ -10,6 +10,7 @@ import {
   ValidationPanel,
   DynamicInspectorPanel,
 } from './inspector/panels';
+import FieldAppearancePanel from './appearance/FieldAppearancePanel';
 
 export default function FieldInspector({ field, allFields, isReadOnly = false }) {
   const { setSelectedId, actions, validationErrors, selectedId } = useBuilder();
@@ -145,6 +146,7 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
                   },
                   { name: 'conditions', title: __('Conditions', 'subtleforms') },
                 ] : [] ),
+                { name: 'style', title: __('Style', 'subtleforms') },
               ]}>
               {(tab) => (
                 <div className='sf-field-inspector__tab-content'>
@@ -180,6 +182,13 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
                       conditions={field.conditions || []}
                       availableFields={allFields || []}
                       onChange={(conditions) => handleUpdate({ conditions })}
+                    />
+                  )}
+                  {tab.name === 'style' && (
+                    <FieldAppearancePanel
+                      field={field}
+                      onUpdate={handleUpdate}
+                      isReadOnly={isReadOnly}
                     />
                   )}
                 </div>

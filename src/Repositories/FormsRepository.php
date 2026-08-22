@@ -320,6 +320,75 @@ final class FormsRepository {
 	 * @throws \InvalidArgumentException If schema validation fails
 	 * @throws \RuntimeException If database operation fails
 	 */
+	/**
+	 * Sanitise every appearance object in a schema.
+	 *
+	 * @param array $schema Form schema.
+	 * @return array Schema with appearance values checked.
+	 */
+	private static function sanitizeAppearance( array $schema ): array {
+		if ( isset( $schema['metadata']['appearance'] ) ) {
+			$clean = \SubtleForms\Support\Appearance::sanitizeForm( $schema['metadata']['appearance'] );
+
+			if ( empty( $clean ) ) {
+				unset( $schema['metadata']['appearance'] );
+			} else {
+				$schema['metadata']['appearance'] = $clean;
+			}
+		}
+
+		if ( ! empty( $schema['fields'] ) && is_array( $schema['fields'] ) ) {
+			$schema['fields'] = self::sanitizeFieldAppearance( $schema['fields'] );
+		}
+
+		return $schema;
+	}
+
+	/**
+	 * Walk a field list, sanitising each field's appearance override.
+	 *
+	 * Mirrors the nesting SchemaCompiler normalises: fields, children and the
+	 * per-column lists of a column container.
+	 *
+	 * @param array $fields Field list.
+	 * @return array Field list with appearance values checked.
+	 */
+	private static function sanitizeFieldAppearance( array $fields ): array {
+		foreach ( $fields as &$field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+
+			if ( isset( $field['config']['appearance'] ) ) {
+				$clean = \SubtleForms\Support\Appearance::sanitizeField( $field['config']['appearance'] );
+
+				if ( empty( $clean ) ) {
+					unset( $field['config']['appearance'] );
+				} else {
+					$field['config']['appearance'] = $clean;
+				}
+			}
+
+			foreach ( array( 'fields', 'children' ) as $nested ) {
+				if ( ! empty( $field[ $nested ] ) && is_array( $field[ $nested ] ) ) {
+					$field[ $nested ] = self::sanitizeFieldAppearance( $field[ $nested ] );
+				}
+			}
+
+			if ( ! empty( $field['columns'] ) && is_array( $field['columns'] ) ) {
+				foreach ( $field['columns'] as &$column ) {
+					if ( is_array( $column ) ) {
+						$column = self::sanitizeFieldAppearance( $column );
+					}
+				}
+				unset( $column );
+			}
+		}
+		unset( $field );
+
+		return $fields;
+	}
+
 	public function saveSchemaVersion( int $formId, array $schema, bool $activate = false ): int {
 		// Ensure schema_version exists, default to 1 if not present
 		if ( ! isset( $schema['schema_version'] ) ) {
@@ -340,6 +409,11 @@ final class FormsRepository {
 			$schema['fields'] = array();
 			Logger::debug( 'Injected default empty fields array for form %d in saveSchemaVersion', $formId );
 		}
+
+		// Appearance values are written into CSS custom properties on the rendered
+		// form, so they are checked here — at the point of storage — rather than
+		// escaped at output. Every save path goes through this method.
+		$schema = self::sanitizeAppearance( $schema );
 
 		// Validate schema before saving
 		$validator = new \SubtleForms\Support\SchemaValidator();

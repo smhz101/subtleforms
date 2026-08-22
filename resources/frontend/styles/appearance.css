@@ -1,0 +1,154 @@
+/**
+ * Appearance variants.
+ *
+ * Values (colour, size, radius) travel as custom properties set on the form
+ * root, so they need no CSS here. These rules cover the choices that change
+ * structure rather than a value — input treatment, button treatment, alignment
+ * — plus the per-field layout overrides.
+ *
+ * Every selector is scoped to a variant class so a form that has not chosen a
+ * variant is untouched.
+ */
+
+/* ── Input treatments ─────────────────────────────────────────────────────── */
+
+.subtleforms--input-filled .subtleforms-input,
+.subtleforms--input-filled .subtleforms-textarea,
+.subtleforms--input-filled .subtleforms-select {
+	background-color: var(--subtleforms-color-bg-subtle, #f4f5f7);
+	border-color: transparent;
+}
+
+.subtleforms--input-filled .subtleforms-input:focus,
+.subtleforms--input-filled .subtleforms-textarea:focus,
+.subtleforms--input-filled .subtleforms-select:focus {
+	background-color: var(--subtleforms-color-bg, #fff);
+	border-color: var(--subtleforms-color-border-focus);
+}
+
+.subtleforms--input-underlined .subtleforms-input,
+.subtleforms--input-underlined .subtleforms-textarea,
+.subtleforms--input-underlined .subtleforms-select {
+	border-width: 0 0 var(--subtleforms-border-width, 1px) 0;
+	border-radius: 0;
+	padding-left: 0;
+	padding-right: 0;
+	background-color: transparent;
+}
+
+.subtleforms--input-underlined .subtleforms-input:focus,
+.subtleforms--input-underlined .subtleforms-textarea:focus,
+.subtleforms--input-underlined .subtleforms-select:focus {
+	box-shadow: 0 1px 0 0 var(--subtleforms-color-border-focus);
+}
+
+/* ── Button treatments ────────────────────────────────────────────────────── */
+
+.subtleforms--button-outline .subtleforms-button-next,
+.subtleforms--button-outline .subtleforms-button-submit {
+	background: transparent;
+	color: var(--subtleforms-color-primary);
+	border-color: var(--subtleforms-color-primary);
+}
+
+.subtleforms--button-outline .subtleforms-button-next:hover,
+.subtleforms--button-outline .subtleforms-button-submit:hover {
+	background: var(--subtleforms-color-primary);
+	color: #fff;
+}
+
+.subtleforms--button-ghost .subtleforms-button-next,
+.subtleforms--button-ghost .subtleforms-button-submit {
+	background: transparent;
+	color: var(--subtleforms-color-primary);
+	border-color: transparent;
+	padding-left: 0;
+	padding-right: 0;
+	text-decoration: underline;
+	text-underline-offset: 4px;
+}
+
+.subtleforms--button-ghost .subtleforms-button-next:hover,
+.subtleforms--button-ghost .subtleforms-button-submit:hover {
+	background: transparent;
+	color: var(--subtleforms-color-primary-hover);
+}
+
+/* ── Button alignment ─────────────────────────────────────────────────────── */
+
+/* The default rule is space-between, which only reads correctly with a Previous
+   button present. These make the intent explicit for single-button forms. */
+.subtleforms--buttons-left .subtleforms-buttons {
+	justify-content: flex-start;
+	gap: 12px;
+}
+
+.subtleforms--buttons-center .subtleforms-buttons {
+	justify-content: center;
+	gap: 12px;
+}
+
+.subtleforms--buttons-right .subtleforms-buttons {
+	justify-content: flex-end;
+	gap: 12px;
+}
+
+.subtleforms--buttons-full .subtleforms-buttons {
+	flex-direction: column;
+	gap: 10px;
+}
+
+.subtleforms--buttons-full .subtleforms-button {
+	width: 100%;
+}
+
+/* Keep Previous above Submit in reading order when stacked. */
+.subtleforms--buttons-full .subtleforms-button-prev {
+	order: 2;
+}
+
+/* ── Per-field layout ─────────────────────────────────────────────────────── */
+
+.subtleforms-field--align-left {
+	text-align: left;
+}
+
+.subtleforms-field--align-center {
+	text-align: center;
+}
+
+.subtleforms-field--align-right {
+	text-align: right;
+}
+
+/* Alignment applies to the field's own content, not to text inside its input,
+   which should always read from the start edge. */
+.subtleforms-field--align-center .subtleforms-input,
+.subtleforms-field--align-center .subtleforms-textarea,
+.subtleforms-field--align-right .subtleforms-input,
+.subtleforms-field--align-right .subtleforms-textarea {
+	text-align: left;
+}
+
+/* Visually hide the label while leaving it for screen readers: the field still
+   needs an accessible name even when the design does without a visible one. */
+.subtleforms-field--no-label .subtleforms-field-label {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* Widths collapse to full on narrow viewports — a quarter-width field is not
+   usable on a phone regardless of what the builder chose. */
+@media (max-width: 600px) {
+	.subtleforms-field {
+		flex-basis: 100% !important;
+		max-width: 100% !important;
+	}
+}

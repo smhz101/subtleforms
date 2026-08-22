@@ -1,0 +1,92 @@
+/**
+ * Shared appearance control styling.
+ *
+ * Controls sit in a two-column grid so colour swatches and size fields line up
+ * across groups; anything that needs the full width opts out with a class.
+ */
+
+.sf-appearance-group {
+	& + & {
+		margin-top: var(--sf-space-5);
+	}
+
+	&__title {
+		margin: 0 0 var(--sf-space-3);
+		font-size: var(--sf-text-xs);
+		font-weight: var(--sf-weight-semibold);
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--sf-text-muted);
+	}
+
+	&__controls {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+		gap: var(--sf-space-3) var(--sf-space-4);
+		align-items: start;
+	}
+}
+
+.sf-appearance-control {
+	min-width: 0;
+
+	&--color {
+		display: flex;
+		flex-direction: column;
+		gap: var(--sf-space-1);
+	}
+
+	&__label {
+		font-size: var(--sf-text-xs);
+		font-weight: var(--sf-weight-medium);
+		color: var(--sf-text-secondary);
+	}
+
+	&__color-row {
+		display: flex;
+		align-items: center;
+		gap: var(--sf-space-2);
+	}
+
+	&__swatch {
+		position: relative;
+		width: 28px;
+		height: 28px;
+		padding: 0;
+		border: 1px solid var(--sf-border-strong);
+		border-radius: var(--sf-radius-sm);
+		cursor: pointer;
+		overflow: hidden;
+
+		&:focus-visible {
+			outline: 2px solid var(--sf-focus-ring);
+			outline-offset: 2px;
+		}
+
+		&[disabled] {
+			cursor: default;
+			opacity: 0.5;
+		}
+	}
+
+	/* A diagonal rule reads as "no value set" without implying white. */
+	&__swatch-empty {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(
+			to bottom right,
+			transparent calc(50% - 1px),
+			var(--sf-danger) calc(50% - 1px),
+			var(--sf-danger) calc(50% + 1px),
+			transparent calc(50% + 1px)
+		);
+	}
+
+	&__clear {
+		font-size: var(--sf-text-2xs);
+	}
+
+	&__picker {
+		padding: var(--sf-space-2);
+	}
+}

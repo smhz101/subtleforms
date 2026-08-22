@@ -5,13 +5,13 @@ import {
   ToggleControl,
   Panel,
   PanelBody,
-  PanelRow,
   RadioControl,
   Notice,
   Button,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import ActionsPanel from './ActionsPanel';
+import FormAppearancePanel from './appearance/FormAppearancePanel';
 
 /**
  * FormSettings - Configure form-wide settings including payment options
@@ -147,13 +147,14 @@ export default function FormSettings({
           </div>
         )}
 
-        {/* General Settings */}
+        {/* One Panel, many PanelBody: that is what makes them an accordion.
+            Each body previously had its own Panel, which produced a column of
+            separately-bordered boxes that never collapsed as a group. */}
         <Panel>
           <PanelBody
-            title={__('General Settings', 'subtleforms')}
+            title={__('General', 'subtleforms')}
             initialOpen={true}>
-            <PanelRow>
-              <TextControl
+            <TextControl
                 label={__('Form Name', 'subtleforms')}
                 value={metadata.name || 'form_schema'}
                 onChange={(value) => handleMetadataChange('name', value)}
@@ -162,9 +163,7 @@ export default function FormSettings({
                   'subtleforms'
                 )}
               />
-            </PanelRow>
-            <PanelRow>
-              <TextControl
+            <TextControl
                 label={__('Form Description', 'subtleforms')}
                 value={metadata.description || ''}
                 onChange={(value) => handleMetadataChange('description', value)}
@@ -173,14 +172,20 @@ export default function FormSettings({
                   'subtleforms'
                 )}
               />
-            </PanelRow>
           </PanelBody>
-        </Panel>
 
-        {/* Canvas Layout Settings */}
-        <Panel>
           <PanelBody
-            title={__('Canvas Layout', 'subtleforms')}
+            title={__('Appearance', 'subtleforms')}
+            initialOpen={false}>
+            <FormAppearancePanel
+              schema={schema}
+              onChange={onChange}
+              isReadOnly={isReadOnly}
+            />
+          </PanelBody>
+
+          <PanelBody
+            title={__('Builder canvas', 'subtleforms')}
             initialOpen={false}>
             <RadioControl
               label={__('Canvas Width', 'subtleforms')}
@@ -201,19 +206,17 @@ export default function FormSettings({
               ]}
               onChange={(value) => handleMetadataChange('canvasWidth', value)}
               help={__(
-                'Controls the maximum width of the form canvas in the builder',
+                'Editing width inside the builder only. The published form’s width is set under Appearance.',
                 'subtleforms'
               )}
             />
           </PanelBody>
-        </Panel>
 
-        {/* Payment Settings - Show for payment forms and conversational forms */}
-        {supportsPayment && (
-          <Panel>
+          {/* Payments — only for form types that can collect them. */}
+          {supportsPayment && (
             <PanelBody
-              title={__('Payment Settings', 'subtleforms')}
-              initialOpen={true}>
+              title={__('Payments', 'subtleforms')}
+              initialOpen={false}>
               <div className='sf-form-settings__section'>
                 {isConversationalForm && (
                   <div className='sf-info-box sf-info-box--blue'>
@@ -371,27 +374,10 @@ export default function FormSettings({
                 )}
               </div>
             </PanelBody>
-          </Panel>
-        )}
+          )}
 
-        {/* Non-payment/non-conversational form message */}
-        {!supportsPayment && (
-          <Panel>
-            <PanelBody
-              title={__('Payment Settings', 'subtleforms')}
-              initialOpen={false}>
-              <p className='sf-form-settings__hint'>
-                {__(
-                  'Payment settings are available for "Payment" and "Conversational" form types. Create a payment or conversational form to enable payment collection.',
-                  'subtleforms'
-                )}
-              </p>
-            </PanelBody>
-          </Panel>
-        )}
-
-        {/* Integrations — visible when at least one extension is active */}
-        {(() => {
+          {/* Integrations — visible when at least one extension is active */}
+          {(() => {
           const extensions = window.subtleformsAdmin?.extensions ?? {};
           const activeExts = Object.values(extensions).filter((e) => e.enabled && e.available);
           if (activeExts.length === 0) return null;
@@ -416,7 +402,6 @@ export default function FormSettings({
           };
 
           return (
-            <Panel>
               <PanelBody
                 title={__('Integrations', 'subtleforms')}
                 initialOpen={false}>
@@ -441,7 +426,7 @@ export default function FormSettings({
                     {ext.slug === 'email_marketing' && (
                       <ToggleControl
                         label={__('Subscribe submitters from this form', 'subtleforms')}
-                        checked={!!(integrations.email_marketing || {}).enabled !== false}
+                        checked={(integrations.email_marketing || {}).enabled !== false}
                         onChange={(v) => handleIntegrationChange('email_marketing', 'enabled', v)}
                         help={__(
                           'Turn off to exclude this form\'s submitters from the global email list.',
@@ -454,7 +439,7 @@ export default function FormSettings({
                     {ext.slug === 'crm' && (
                       <ToggleControl
                         label={__('Sync submissions to CRM', 'subtleforms')}
-                        checked={!!(integrations.crm || {}).enabled !== false}
+                        checked={(integrations.crm || {}).enabled !== false}
                         onChange={(v) => handleIntegrationChange('crm', 'enabled', v)}
                       />
                     )}
@@ -463,22 +448,26 @@ export default function FormSettings({
                     {ext.slug === 'analytics' && (
                       <ToggleControl
                         label={__('Track analytics for this form', 'subtleforms')}
-                        checked={!!(integrations.analytics || {}).enabled !== false}
+                        checked={(integrations.analytics || {}).enabled !== false}
                         onChange={(v) => handleIntegrationChange('analytics', 'enabled', v)}
                       />
                     )}
                   </div>
                 ))}
               </PanelBody>
-            </Panel>
           );
-        })()}
+          })()}
 
-        <ActionsPanel
-          schema={schema}
-          onChange={onChange}
-          isReadOnly={isReadOnly}
-        />
+          <PanelBody
+            title={__('Actions', 'subtleforms')}
+            initialOpen={false}>
+            <ActionsPanel
+              schema={schema}
+              onChange={onChange}
+              isReadOnly={isReadOnly}
+            />
+          </PanelBody>
+        </Panel>
       </div>
     </div>
   );

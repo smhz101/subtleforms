@@ -1,0 +1,140 @@
+/**
+ * Form appearance panel.
+ *
+ * Presets first because they are the fast path; the individual controls read as
+ * refinement below them rather than as the primary interface.
+ */
+
+.sf-form-appearance {
+	&__section {
+		& + & {
+			margin-top: var(--sf-space-6);
+			padding-top: var(--sf-space-5);
+			border-top: 1px solid var(--sf-border-subtle);
+		}
+	}
+
+	&__section-head {
+		margin-bottom: var(--sf-space-3);
+	}
+
+	&__section-title {
+		margin: 0;
+		font-size: var(--sf-text-xs);
+		font-weight: var(--sf-weight-semibold);
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--sf-text-muted);
+	}
+
+	&__section-hint {
+		margin: var(--sf-space-1) 0 0;
+		font-size: var(--sf-text-xs);
+		color: var(--sf-text-muted);
+	}
+
+	&__confirm {
+		margin: 0 0 var(--sf-space-3);
+	}
+
+	&__confirm-actions {
+		display: flex;
+		gap: var(--sf-space-2);
+		margin-top: var(--sf-space-2);
+	}
+
+	&__footer {
+		margin-top: var(--sf-space-6);
+		padding-top: var(--sf-space-4);
+		border-top: 1px solid var(--sf-border-subtle);
+	}
+
+	&__footer-hint {
+		margin: var(--sf-space-1) 0 0;
+		font-size: var(--sf-text-2xs);
+		color: var(--sf-text-muted);
+	}
+}
+
+.sf-preset-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+	gap: var(--sf-space-2);
+}
+
+.sf-preset-card {
+	display: flex;
+	flex-direction: column;
+	gap: var(--sf-space-2);
+	padding: var(--sf-space-3);
+	text-align: left;
+	background: var(--sf-bg-surface);
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius-md);
+	cursor: pointer;
+	transition: border-color var(--sf-transition-fast),
+		box-shadow var(--sf-transition-fast);
+
+	&:hover:not([disabled]) {
+		border-color: var(--sf-border-strong);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--sf-focus-ring);
+		outline-offset: 2px;
+	}
+
+	&.is-active {
+		border-color: var(--sf-primary);
+		box-shadow: 0 0 0 1px var(--sf-primary);
+	}
+
+	&[disabled] {
+		cursor: default;
+		opacity: 0.6;
+	}
+
+	&__swatches {
+		display: flex;
+		gap: 3px;
+	}
+
+	&__swatch {
+		width: 100%;
+		height: 22px;
+		border-radius: var(--sf-radius-xs);
+		border: 1px solid rgba(19, 20, 23, 0.08);
+	}
+
+	&__body {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	&__label {
+		display: flex;
+		align-items: center;
+		gap: var(--sf-space-2);
+		font-size: var(--sf-text-sm);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
+	}
+
+	&__badge {
+		padding: 1px 6px;
+		font-size: var(--sf-text-2xs);
+		font-weight: var(--sf-weight-medium);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--sf-text-secondary);
+		background: var(--sf-bg-muted);
+		border-radius: var(--sf-radius-full);
+	}
+
+	&__description {
+		font-size: var(--sf-text-2xs);
+		line-height: var(--sf-leading-normal);
+		color: var(--sf-text-muted);
+	}
+}

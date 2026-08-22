@@ -4,6 +4,10 @@ import { debug } from '../../shared/debug';
 import SignaturePad from './fields/SignaturePad';
 import RichTextInput from './fields/RichTextInput';
 import ChainedSelect from './fields/ChainedSelect';
+import {
+  fieldAppearanceStyle,
+  fieldAppearanceClasses,
+} from '../../shared/appearance';
 
 // ISO 3166-1 Alpha-2 country codes
 const COUNTRIES = [
@@ -449,9 +453,21 @@ export default function FieldRenderer({
     );
   }
 
+  // Per-field overrides redeclare the same custom properties the form set, so
+  // the field's contents inherit them without any field-specific rules.
+  const fieldAppearance = config.appearance;
+
   // Render input fields
   return (
-    <div className={`subtleforms-field subtleforms-field-${field.type}`}>
+    <div
+      className={[
+        'subtleforms-field',
+        `subtleforms-field-${field.type}`,
+        fieldAppearanceClasses(fieldAppearance),
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      style={fieldAppearanceStyle(fieldAppearance)}>
       <label htmlFor={inputId} className='subtleforms-field-label'>
         {label}
         {required && (

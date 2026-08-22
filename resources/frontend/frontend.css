@@ -8,6 +8,7 @@
 @import './styles/types/steps.css';
 @import './styles/types/conversational.css';
 @import './styles/types/payment.css';
+@import './styles/appearance.css';
 
 /* Base styles (shared across all form types) */
 @import './styles/base.css';
@@ -284,13 +285,21 @@
 }
 
 /* Fields */
+.subtleforms-fields {
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--subtleforms-field-gap, 20px);
+}
+
+/* Full width by default: a field only shares a row when it is given a width. */
 .subtleforms-field {
-	margin-bottom: 20px;
+	flex: 1 1 100%;
+	min-width: 0;
 }
 
 .subtleforms-field-label {
 	display: block;
-	font-weight: 500;
+	font-weight: var(--subtleforms-label-weight, 500);
 	margin-bottom: 6px;
 	color: var(--subtleforms-color-text);
 }
@@ -304,12 +313,15 @@
 .subtleforms-textarea,
 .subtleforms-select {
 	width: 100%;
-	padding: 10px;
-	border: 1px solid var(--subtleforms-color-border);
-	border-radius: 4px;
-	font-size: 14px;
+	padding: var(--subtleforms-input-padding-y, 10px) 12px;
+	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-md, 4px);
+	font-size: var(--subtleforms-font-size-base, 1rem);
 	font-family: inherit;
-	transition: border-color 0.2s;
+	color: var(--subtleforms-color-text);
+	background-color: var(--subtleforms-color-bg-subtle, transparent);
+	transition: border-color var(--subtleforms-transition-fast, 0.2s),
+		box-shadow var(--subtleforms-transition-fast, 0.2s);
 }
 
 .subtleforms-input:focus,
@@ -388,12 +400,15 @@
 
 .subtleforms-button {
 	padding: 12px 24px;
-	border: none;
-	border-radius: 4px;
-	font-size: 14px;
+	border: var(--subtleforms-border-width, 1px) solid transparent;
+	border-radius: var(--subtleforms-radius-md, 4px);
+	font-size: var(--subtleforms-font-size-base, 1rem);
 	font-weight: 500;
+	font-family: inherit;
 	cursor: pointer;
-	transition: background-color 0.2s;
+	transition: background-color var(--subtleforms-transition-fast, 0.2s),
+		color var(--subtleforms-transition-fast, 0.2s),
+		border-color var(--subtleforms-transition-fast, 0.2s);
 }
 
 .subtleforms-button-prev {
@@ -407,8 +422,9 @@
 
 .subtleforms-button-next,
 .subtleforms-button-submit {
-	background: var(--subtleforms-color-primary-hover);
-	color: var(--subtleforms-color-bg);
+	background: var(--subtleforms-color-primary);
+	border-color: var(--subtleforms-color-primary);
+	color: #fff;
 }
 
 .subtleforms-button-next:hover,

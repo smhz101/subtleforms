@@ -378,6 +378,22 @@ class Schemas {
 				'uses_pro'     => 'optional|bool',
 				'pro_features' => 'optional|array',
 				'payment'      => 'optional|object|map:PaymentConfig',
+				// Undeclared keys are dropped from the validated output, so anything
+				// the builder writes to metadata has to be listed here or it never
+				// reaches the database. canvasWidth and integrations were written by
+				// the settings tab but never declared, and so never persisted.
+				'canvasWidth'  => 'optional|in:narrow,standard,wide',
+				'integrations' => 'optional|object',
+				'appearance'   => 'optional|object|map:FormAppearance',
+			),
+
+			// FormAppearance — form-wide styling.
+			// Token and variant values are shape-checked here and value-checked by
+			// Support\Appearance, which is where the allowed keys live.
+			'FormAppearance' => array(
+				'preset'   => 'optional|string|max:40',
+				'tokens'   => 'optional|object',
+				'variants' => 'optional|object',
 			),
 
 			// PaymentConfig (Phase A2-P3: at_least_one for flexible pricing)
