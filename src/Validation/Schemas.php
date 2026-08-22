@@ -323,8 +323,17 @@ class Schemas {
 			),
 
 			// ActionConfig
+			//
+			// `type` is shape-checked, not membership-checked. Which action types
+			// exist is a runtime question owned by ActionRegistry, which extensions
+			// add to through the `subtleforms/register_actions` hook — a literal list
+			// here cannot know about those and would reject them on save. The
+			// compiler is the layer that resolves a type, and it already soft-skips
+			// one it cannot resolve so that a deactivated extension or a migration
+			// gap does not break live submissions. Rejecting here instead turns the
+			// same situation into a form that loads but can never be saved again.
 			'ActionConfig' => array(
-				'type'     => 'required|in:email,webhook,save',
+				'type'     => 'required|string|max:50',
 				'id'       => 'optional|string|max:100',
 				'settings' => 'optional|object',
 				'config'   => 'optional|object|map:ActionSpecificConfig',
@@ -402,7 +411,10 @@ class Schemas {
 			// PaymentConfig (Phase A2-P3: at_least_one for flexible pricing)
 			'PaymentConfig' => array(
 				'enabled'     => 'optional|bool|default:false',
-				'currency'    => 'optional|in:USD,EUR,GBP,CAD,AUD|default:USD',
+				// Must list every currency the Payments panel offers. It offered JPY
+				// and INR while this enum did not, so choosing either made the form
+				// unsaveable from that point on.
+				'currency'    => 'optional|in:USD,EUR,GBP,CAD,AUD,JPY,INR|default:USD',
 				'amountType'  => 'optional|in:fixed,field,calculated|default:fixed',
 				'fixedAmount' => 'optional|number|min:0|at_least_one:fixedAmount,amountField',
 				'amountField' => 'optional|string|max:100|at_least_one:fixedAmount,amountField',
