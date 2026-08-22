@@ -5,6 +5,10 @@ import { getIn, setIn, flattenToPathMap } from '../utils/valuePaths';
 import { collectLeafInputPaths } from '../utils/schemaLeaves';
 import { warnOnce } from '../utils/warnOnce';
 import { getFormClassNames } from '../utils/formStyles';
+import {
+  formAppearanceStyle,
+  formAppearanceClasses,
+} from '../../shared/appearance';
 import { debug } from '../../shared/debug';
 import { isEmptyValue } from './FormRenderer';
 
@@ -74,7 +78,17 @@ export default function ConversationalFormRenderer({
   }, [schema]);
 
   // Generate form type-aware CSS classes (early, before any returns)
-  const formClassNames = getFormClassNames(schema);
+  // Conversational forms are rendered by this component rather than by
+  // FormRenderer's main path, so appearance has to be resolved here too or a
+  // preset would apply to every form type except this one.
+  const appearance = schema?.metadata?.appearance;
+  const formClassNames = [
+    getFormClassNames(schema),
+    formAppearanceClasses(appearance),
+  ]
+    .filter(Boolean)
+    .join(' ');
+  const appearanceStyle = formAppearanceStyle(appearance);
 
   // Evaluate conditional logic
   const hiddenFields = useMemo(() => {
@@ -390,7 +404,7 @@ export default function ConversationalFormRenderer({
 
   if (submitSuccess) {
     return (
-      <div className={formClassNames}>
+      <div className={formClassNames} style={appearanceStyle}>
         <div className='subtleforms-conversational-success'>
           <div className='subtleforms-success-icon'>✓</div>
           <h2>{__('Thank you!', 'subtleforms')}</h2>
@@ -407,7 +421,7 @@ export default function ConversationalFormRenderer({
 
   if (totalFields === 0) {
     return (
-      <div className={formClassNames}>
+      <div className={formClassNames} style={appearanceStyle}>
         <div className='subtleforms-empty'>
           <p>{__('This form has no questions.', 'subtleforms')}</p>
         </div>
@@ -444,7 +458,7 @@ export default function ConversationalFormRenderer({
   // Render Review Step
   if (currentStep === 'review') {
     return (
-      <div className={formClassNames}>
+      <div className={formClassNames} style={appearanceStyle}>
         {/* Progress indicator */}
         <div className='subtleforms-progress'>
           <div className='subtleforms-progress-bar'>
@@ -523,7 +537,7 @@ export default function ConversationalFormRenderer({
   // Render Payment Step
   if (currentStep === 'payment') {
     return (
-      <div className={formClassNames}>
+      <div className={formClassNames} style={appearanceStyle}>
         {/* Progress indicator */}
         <div className='subtleforms-progress'>
           <div className='subtleforms-progress-bar'>
@@ -603,7 +617,7 @@ export default function ConversationalFormRenderer({
 
   // Render Questions Step (default)
   return (
-    <div className={formClassNames}>
+    <div className={formClassNames} style={appearanceStyle}>
       {/* Progress Bar */}
       <div className='subtleforms-progress'>
         <div className='subtleforms-progress-bar'>

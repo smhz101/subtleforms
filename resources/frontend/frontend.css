@@ -365,11 +365,16 @@
 }
 
 /* Container Fields */
+/* Group and repeat containers hold their children directly rather than through
+   .subtleforms-fields, so they carry the same gap — otherwise nested fields sit
+   flush against each other now that spacing comes from the container. */
 .subtleforms-field-container {
-	border: 1px solid var(--subtleforms-color-border);
-	border-radius: 4px;
+	display: flex;
+	flex-direction: column;
+	gap: var(--subtleforms-field-gap, 20px);
+	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-md, 4px);
 	padding: 20px;
-	margin-bottom: 20px;
 }
 
 .subtleforms-container-label {
@@ -381,12 +386,17 @@
 /* Column Layout */
 .subtleforms-field-columns {
 	display: flex;
-	gap: 20px;
-	margin-bottom: 20px;
+	gap: var(--subtleforms-field-gap, 20px);
 }
 
+/* Each column is its own stack of fields and needs the gap for the same reason
+   as the group container above. */
 .subtleforms-column {
 	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: var(--subtleforms-field-gap, 20px);
+	min-width: 0;
 }
 
 /* Buttons */

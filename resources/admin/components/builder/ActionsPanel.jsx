@@ -12,8 +12,6 @@ import {
   TextareaControl,
   SelectControl,
   ToggleControl,
-  Panel,
-  PanelBody,
   Notice,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
@@ -422,12 +420,10 @@ export default function ActionsPanel({ schema, onChange, isReadOnly = false }) {
     ]);
   }, [actions, commit, isReadOnly]);
 
+  // Contents only: the caller supplies the accordion row. Returning a Panel here
+  // put a Panel inside a PanelBody and produced two nested rows with the same
+  // title, so opening one revealed another closed row.
   return (
-    <Panel>
-      <PanelBody
-        title={__('Actions', 'subtleforms')}
-        initialOpen={false}>
-
         <div className='sf-actions-panel'>
           {actions.length === 0 && (
             <p className='sf-actions-panel__empty'>
@@ -473,8 +469,6 @@ export default function ActionsPanel({ schema, onChange, isReadOnly = false }) {
             </Button>
           </div>
         </div>
-      </PanelBody>
-    </Panel>
   );
 }
 

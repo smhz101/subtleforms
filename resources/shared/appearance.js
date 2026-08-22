@@ -445,3 +445,18 @@ export function isPresetModified( appearance ) {
 
   return ! ( sameTokens && sameVariants );
 }
+
+/**
+ * Field types that render nothing, so styling them would have no effect.
+ *
+ * `action_hook` is a server-side extension point and `step` is a boundary the
+ * form renderer consumes to slice pages; neither draws an element. Every other
+ * type — including section breaks, HTML blocks and containers — has a wrapper
+ * that carries appearance.
+ *
+ * @param {string} type Field type.
+ * @return {boolean} True when the field can be styled.
+ */
+export function supportsAppearance( type ) {
+  return type !== 'action_hook' && type !== 'step';
+}

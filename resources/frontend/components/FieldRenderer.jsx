@@ -296,9 +296,20 @@ export default function FieldRenderer({
 
   // Structural fields carry no value and take no label/error chrome, so they
   // return before the input wrapper below.
+  // Resolved before the structural branches below, which return early: a section
+  // break or a container is still something you can style, so the value has to
+  // be available to them and not only to the input wrapper further down.
+  const fieldAppearance = config.appearance;
+  const appearanceStyle = fieldAppearanceStyle(fieldAppearance);
+  const appearanceClasses = fieldAppearanceClasses(fieldAppearance);
+
   if (field.type === 'section_break') {
     return (
-      <div className='subtleforms-section-break'>
+      <div
+        className={['subtleforms-section-break', appearanceClasses]
+          .filter(Boolean)
+          .join(' ')}
+        style={appearanceStyle}>
         {config.title && (
           <h3 className='subtleforms-section-break__title'>{config.title}</h3>
         )}
@@ -317,7 +328,8 @@ export default function FieldRenderer({
     // visitor, and is sanitized server-side on save.
     return (
       <div
-        className='subtleforms-html'
+        className={['subtleforms-html', appearanceClasses].filter(Boolean).join(' ')}
+        style={appearanceStyle}
         dangerouslySetInnerHTML={{ __html: config.content || '' }}
       />
     );
@@ -338,7 +350,15 @@ export default function FieldRenderer({
   // Handle container fields
   if (field.type === 'group_container' || field.type === 'repeat_container') {
     return (
-      <div className='subtleforms-field subtleforms-field-container'>
+      <div
+        className={[
+          'subtleforms-field',
+          'subtleforms-field-container',
+          appearanceClasses,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        style={appearanceStyle}>
         {config.label && (
           <div className='subtleforms-container-label'>
             {config.label}
@@ -453,21 +473,17 @@ export default function FieldRenderer({
     );
   }
 
-  // Per-field overrides redeclare the same custom properties the form set, so
-  // the field's contents inherit them without any field-specific rules.
-  const fieldAppearance = config.appearance;
-
   // Render input fields
   return (
     <div
       className={[
         'subtleforms-field',
         `subtleforms-field-${field.type}`,
-        fieldAppearanceClasses(fieldAppearance),
+        appearanceClasses,
       ]
         .filter(Boolean)
         .join(' ')}
-      style={fieldAppearanceStyle(fieldAppearance)}>
+      style={appearanceStyle}>
       <label htmlFor={inputId} className='subtleforms-field-label'>
         {label}
         {required && (

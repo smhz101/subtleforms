@@ -11,6 +11,7 @@ import {
   DynamicInspectorPanel,
 } from './inspector/panels';
 import FieldAppearancePanel from './appearance/FieldAppearancePanel';
+import { supportsAppearance } from '../../../shared/appearance';
 
 export default function FieldInspector({ field, allFields, isReadOnly = false }) {
   const { setSelectedId, actions, validationErrors, selectedId } = useBuilder();
@@ -146,7 +147,11 @@ export default function FieldInspector({ field, allFields, isReadOnly = false })
                   },
                   { name: 'conditions', title: __('Conditions', 'subtleforms') },
                 ] : [] ),
-                { name: 'style', title: __('Style', 'subtleforms') },
+                // Hidden for types that render no element: a saved value that
+                // cannot show up is worse than an absent control.
+                ...( supportsAppearance( field?.type )
+                  ? [ { name: 'style', title: __('Style', 'subtleforms') } ]
+                  : [] ),
               ]}>
               {(tab) => (
                 <div className='sf-field-inspector__tab-content'>

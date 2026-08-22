@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-22T01:18:35+00:00\n"
+"POT-Creation-Date: 2026-08-22T04:54:11+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -102,7 +102,7 @@ msgstr ""
 #: src/Admin/AdminMenu.php:168
 #: src/Admin/AdminMenu.php:169
 #: resources/admin/app/AdminApp.jsx:150
-#: resources/admin/components/builder/FieldInspector.jsx:74
+#: resources/admin/components/builder/FieldInspector.jsx:75
 #: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:95
 #: resources/admin/pages/DashboardPage.jsx:61
 #: resources/admin/pages/SettingsPage.jsx:57
@@ -267,7 +267,6 @@ msgid "Created"
 msgstr ""
 
 #: src/Admin/AdminMenu.php:754
-#: resources/admin/components/builder/ActionsPanel.jsx:428
 #: resources/admin/components/builder/FormSettings.jsx:462
 #: resources/admin/components/SubmissionsTable.jsx:574
 msgid "Actions"
@@ -832,7 +831,7 @@ msgstr ""
 #: src/Fields/CoreFields.php:502
 #: src/Fields/CoreFields.php:1300
 #: resources/admin/components/builder/utils/schemaTree.js:321
-#: resources/frontend/components/FieldRenderer.jsx:1024
+#: resources/frontend/components/FieldRenderer.jsx:1040
 msgid "Country"
 msgstr ""
 
@@ -1066,8 +1065,8 @@ msgstr ""
 #: resources/admin/components/builder/utils/schemaTree.js:311
 #: resources/admin/templates/free/lead.js:19
 #: resources/admin/templates/pro/registration.js:93
-#: resources/frontend/components/FieldRenderer.jsx:842
-#: resources/frontend/components/FieldRenderer.jsx:853
+#: resources/frontend/components/FieldRenderer.jsx:858
+#: resources/frontend/components/FieldRenderer.jsx:869
 msgid "First Name"
 msgstr ""
 
@@ -1075,15 +1074,15 @@ msgstr ""
 #: src/Templates/FormTemplates.php:248
 #: resources/admin/components/builder/utils/schemaTree.js:313
 #: resources/admin/templates/pro/registration.js:99
-#: resources/frontend/components/FieldRenderer.jsx:884
-#: resources/frontend/components/FieldRenderer.jsx:895
+#: resources/frontend/components/FieldRenderer.jsx:900
+#: resources/frontend/components/FieldRenderer.jsx:911
 msgid "Last Name"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1257
 #: resources/admin/components/builder/utils/schemaTree.js:312
-#: resources/frontend/components/FieldRenderer.jsx:864
-#: resources/frontend/components/FieldRenderer.jsx:874
+#: resources/frontend/components/FieldRenderer.jsx:880
+#: resources/frontend/components/FieldRenderer.jsx:890
 msgid "Middle Name"
 msgstr ""
 
@@ -1100,37 +1099,37 @@ msgstr ""
 #: src/Fields/CoreFields.php:1295
 #: resources/admin/components/builder/utils/schemaTree.js:316
 #: resources/admin/templates/pro/registration.js:304
-#: resources/frontend/components/FieldRenderer.jsx:913
-#: resources/frontend/components/FieldRenderer.jsx:924
+#: resources/frontend/components/FieldRenderer.jsx:929
+#: resources/frontend/components/FieldRenderer.jsx:940
 msgid "Street Address"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1296
 #: resources/admin/components/builder/utils/schemaTree.js:317
-#: resources/frontend/components/FieldRenderer.jsx:935
+#: resources/frontend/components/FieldRenderer.jsx:951
 msgid "Street Address Line 2"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1297
 #: resources/admin/components/builder/utils/schemaTree.js:318
 #: resources/admin/templates/pro/registration.js:310
-#: resources/frontend/components/FieldRenderer.jsx:958
-#: resources/frontend/components/FieldRenderer.jsx:969
+#: resources/frontend/components/FieldRenderer.jsx:974
+#: resources/frontend/components/FieldRenderer.jsx:985
 msgid "City"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1298
 #: resources/admin/components/builder/utils/schemaTree.js:319
-#: resources/frontend/components/FieldRenderer.jsx:980
-#: resources/frontend/components/FieldRenderer.jsx:991
+#: resources/frontend/components/FieldRenderer.jsx:996
+#: resources/frontend/components/FieldRenderer.jsx:1007
 msgid "State / Province"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1299
 #: resources/admin/components/builder/utils/schemaTree.js:320
 #: resources/admin/templates/pro/registration.js:322
-#: resources/frontend/components/FieldRenderer.jsx:1002
-#: resources/frontend/components/FieldRenderer.jsx:1013
+#: resources/frontend/components/FieldRenderer.jsx:1018
+#: resources/frontend/components/FieldRenderer.jsx:1029
 msgid "Postal Code"
 msgstr ""
 
@@ -1170,7 +1169,7 @@ msgid "Save & Resume"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1414
-#: resources/admin/components/builder/ActionsPanel.jsx:198
+#: resources/admin/components/builder/ActionsPanel.jsx:196
 #: resources/admin/pages/DashboardPage.jsx:356
 #: resources/admin/pages/DashboardPage.jsx:366
 msgid "Enabled"
@@ -1219,13 +1218,13 @@ msgstr ""
 
 #: src/Fields/CoreFields.php:1543
 #: resources/admin/components/builder/FieldRenderer.jsx:444
-#: resources/frontend/components/FieldRenderer.jsx:784
+#: resources/frontend/components/FieldRenderer.jsx:800
 msgid "Enter coupon code"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1544
 #: resources/admin/components/builder/FieldRenderer.jsx:454
-#: resources/frontend/components/FieldRenderer.jsx:799
+#: resources/frontend/components/FieldRenderer.jsx:815
 msgid "Apply"
 msgstr ""
 
@@ -2160,7 +2159,7 @@ msgid "CAPTCHA provider not found."
 msgstr ""
 
 #: src/Support/Captcha/CaptchaManager.php:309
-#: resources/frontend/components/ConversationalFormRenderer.jsx:304
+#: resources/frontend/components/ConversationalFormRenderer.jsx:318
 #: resources/frontend/components/FormRenderer.jsx:637
 msgid "CAPTCHA verification failed. Please try again."
 msgstr ""
@@ -2239,7 +2238,7 @@ msgstr ""
 
 #: src/Templates/FormTemplates.php:112
 #: src/Templates/FormTemplates.php:189
-#: resources/admin/components/builder/ActionsPanel.jsx:236
+#: resources/admin/components/builder/ActionsPanel.jsx:234
 #: resources/admin/templates/free/contact.js:68
 #: resources/admin/templates/free/contact.js:118
 #: resources/admin/templates/pro/support.js:39
@@ -2249,7 +2248,7 @@ msgstr ""
 #: src/Templates/FormTemplates.php:118
 #: src/Templates/FormTemplates.php:160
 #: src/Templates/FormTemplates.php:190
-#: resources/admin/components/builder/ActionsPanel.jsx:252
+#: resources/admin/components/builder/ActionsPanel.jsx:250
 #: resources/admin/components/OnboardingWizard.jsx:96
 #: resources/admin/pages/SubmissionDetailPage.jsx:659
 #: resources/admin/templates/free/contact.js:30
@@ -3192,77 +3191,77 @@ msgstr ""
 msgid "Try again"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:74
+#: resources/admin/components/builder/ActionsPanel.jsx:72
 msgid "Send data to API (Webhook)"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:75
+#: resources/admin/components/builder/ActionsPanel.jsx:73
 msgid "Send Email Notification"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:79
+#: resources/admin/components/builder/ActionsPanel.jsx:77
 msgid "Send form data to an external API endpoint"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:80
+#: resources/admin/components/builder/ActionsPanel.jsx:78
 msgid "Send an email after form submission"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:90
+#: resources/admin/components/builder/ActionsPanel.jsx:88
 msgid "Full submission data"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:91
+#: resources/admin/components/builder/ActionsPanel.jsx:89
 msgid "Custom data (JSON)"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:107
+#: resources/admin/components/builder/ActionsPanel.jsx:105
 msgid "Custom headers (advanced)"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:121
+#: resources/admin/components/builder/ActionsPanel.jsx:119
 msgid "JSON object of extra HTTP headers. Example: {\"X-Source\": \"subtleforms\"}"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:156
+#: resources/admin/components/builder/ActionsPanel.jsx:154
 msgid "Invalid JSON"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:171
-#: resources/admin/components/builder/ActionsPanel.jsx:172
+#: resources/admin/components/builder/ActionsPanel.jsx:169
+#: resources/admin/components/builder/ActionsPanel.jsx:170
 #: resources/admin/components/builder/FieldToolbar.jsx:86
 msgid "Drag to reorder"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:210
+#: resources/admin/components/builder/ActionsPanel.jsx:208
 msgid "Remove"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:220
+#: resources/admin/components/builder/ActionsPanel.jsx:218
 msgid "To"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:227
+#: resources/admin/components/builder/ActionsPanel.jsx:225
 msgid "You can use {{field_name}} to include form data. e.g. {{email}}"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:231
+#: resources/admin/components/builder/ActionsPanel.jsx:229
 msgid "A recipient email address is required."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:240
+#: resources/admin/components/builder/ActionsPanel.jsx:238
 msgid "New submission from {{name}}"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:243
+#: resources/admin/components/builder/ActionsPanel.jsx:241
 msgid "You can use {{field_name}} to include form data."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:247
+#: resources/admin/components/builder/ActionsPanel.jsx:245
 msgid "A subject line is required."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:256
+#: resources/admin/components/builder/ActionsPanel.jsx:254
 msgid ""
 "Hello,\n"
 "\n"
@@ -3272,59 +3271,59 @@ msgid ""
 "Email: {{email}}"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:259
+#: resources/admin/components/builder/ActionsPanel.jsx:257
 msgid "You can use {{field_name}} to include form data. Leave empty to send all submitted data."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:263
+#: resources/admin/components/builder/ActionsPanel.jsx:261
 msgid "No message set — the full submission data will be sent as JSON."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:276
+#: resources/admin/components/builder/ActionsPanel.jsx:274
 msgid "Webhook URL"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:287
+#: resources/admin/components/builder/ActionsPanel.jsx:285
 msgid "HTTP Method"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:294
+#: resources/admin/components/builder/ActionsPanel.jsx:292
 msgid "Payload Mode"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:306
+#: resources/admin/components/builder/ActionsPanel.jsx:304
 msgid "Custom JSON Payload"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:331
+#: resources/admin/components/builder/ActionsPanel.jsx:329
 msgid "HMAC-SHA256 Signing"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:335
+#: resources/admin/components/builder/ActionsPanel.jsx:333
 msgid "Adds an X-SubtleForms-Signature header so you can verify requests on your server."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:339
+#: resources/admin/components/builder/ActionsPanel.jsx:337
 msgid "Signing Secret"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:343
+#: resources/admin/components/builder/ActionsPanel.jsx:341
 msgid "Your secret key"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:345
+#: resources/admin/components/builder/ActionsPanel.jsx:343
 msgid "Kept server-side; paste the same value into your endpoint to verify the signature."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:434
+#: resources/admin/components/builder/ActionsPanel.jsx:430
 msgid "No actions configured. Add an action to process form submissions."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:466
+#: resources/admin/components/builder/ActionsPanel.jsx:462
 msgid "+ Send Email"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:472
+#: resources/admin/components/builder/ActionsPanel.jsx:468
 msgid "+ Send to API"
 msgstr ""
 
@@ -3697,7 +3696,7 @@ msgstr ""
 #: resources/admin/components/builder/canvas/renderers/ChoiceFieldRenderer.jsx:95
 #: resources/admin/components/builder/FieldRenderer.jsx:273
 #: resources/admin/templates/shared/fields.js:73
-#: resources/frontend/components/FieldRenderer.jsx:663
+#: resources/frontend/components/FieldRenderer.jsx:679
 msgid "Select an option"
 msgstr ""
 
@@ -3832,7 +3831,7 @@ msgstr ""
 
 #: resources/admin/components/builder/ConversationalCanvas.jsx:113
 #: resources/admin/components/builder/ConversationalCanvas.jsx:173
-#: resources/frontend/components/ConversationalFormRenderer.jsx:694
+#: resources/frontend/components/ConversationalFormRenderer.jsx:708
 msgid "Question"
 msgstr ""
 
@@ -3843,7 +3842,7 @@ msgid "of"
 msgstr ""
 
 #: resources/admin/components/builder/ConversationalCanvas.jsx:117
-#: resources/frontend/components/ConversationalFormRenderer.jsx:616
+#: resources/frontend/components/ConversationalFormRenderer.jsx:630
 msgid "Complete"
 msgstr ""
 
@@ -3861,7 +3860,7 @@ msgstr ""
 #: resources/admin/components/OnboardingWizard.jsx:598
 #: resources/admin/pages/CreateFormPage.jsx:351
 #: resources/admin/pages/SubmissionDetailPage.jsx:410
-#: resources/frontend/components/ConversationalFormRenderer.jsx:661
+#: resources/frontend/components/ConversationalFormRenderer.jsx:675
 #: resources/frontend/components/FormRenderer.jsx:924
 msgid "Next"
 msgstr ""
@@ -3983,57 +3982,57 @@ msgstr ""
 msgid "View Pro Plans"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:47
+#: resources/admin/components/builder/FieldInspector.jsx:48
 msgid "This required field has no label — users won't know what to fill in."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:51
+#: resources/admin/components/builder/FieldInspector.jsx:52
 msgid "No options configured — users will see an empty list."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:59
+#: resources/admin/components/builder/FieldInspector.jsx:60
 msgid "Email format is automatically validated on submission."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:60
+#: resources/admin/components/builder/FieldInspector.jsx:61
 msgid "URL format is automatically validated on submission."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:61
+#: resources/admin/components/builder/FieldInspector.jsx:62
 msgid "Set Min / Max in the controls above to restrict this field's input range."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:62
+#: resources/admin/components/builder/FieldInspector.jsx:63
 msgid "Tip: add a placeholder (e.g. +1 555 000 0000) for better UX."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:96
+#: resources/admin/components/builder/FieldInspector.jsx:97
 msgid "Nothing selected"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:99
+#: resources/admin/components/builder/FieldInspector.jsx:100
 msgid "Click a field (or container) in the canvas to edit its settings, validation, and conditions."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:112
+#: resources/admin/components/builder/FieldInspector.jsx:113
 msgid "Read-only mode: Activate your Pro license to edit. Your form continues working—no data loss."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:131
+#: resources/admin/components/builder/FieldInspector.jsx:132
 #: resources/admin/components/builder/FormSettings.jsx:155
 #: resources/admin/pages/SettingsPage.jsx:21
 msgid "General"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:137
+#: resources/admin/components/builder/FieldInspector.jsx:138
 msgid "Validation"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:147
+#: resources/admin/components/builder/FieldInspector.jsx:148
 msgid "Conditions"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:149
+#: resources/admin/components/builder/FieldInspector.jsx:153
 msgid "Style"
 msgstr ""
 
@@ -4055,7 +4054,7 @@ msgid "Select date and time"
 msgstr ""
 
 #: resources/admin/components/builder/FieldRenderer.jsx:317
-#: resources/frontend/components/FieldRenderer.jsx:687
+#: resources/frontend/components/FieldRenderer.jsx:703
 msgid "Select a country"
 msgstr ""
 
@@ -4084,7 +4083,7 @@ msgid "Click to upload or drag file here"
 msgstr ""
 
 #: resources/admin/components/builder/FieldRenderer.jsx:406
-#: resources/frontend/components/FieldRenderer.jsx:754
+#: resources/frontend/components/FieldRenderer.jsx:770
 msgid "Subtotal:"
 msgstr ""
 
@@ -4093,7 +4092,7 @@ msgid "Tax"
 msgstr ""
 
 #: resources/admin/components/builder/FieldRenderer.jsx:415
-#: resources/frontend/components/FieldRenderer.jsx:760
+#: resources/frontend/components/FieldRenderer.jsx:776
 msgid "Tax:"
 msgstr ""
 
@@ -4102,7 +4101,7 @@ msgid "Discount:"
 msgstr ""
 
 #: resources/admin/components/builder/FieldRenderer.jsx:432
-#: resources/frontend/components/FieldRenderer.jsx:766
+#: resources/frontend/components/FieldRenderer.jsx:782
 msgid "Total:"
 msgstr ""
 
@@ -4177,7 +4176,7 @@ msgid "Required"
 msgstr ""
 
 #: resources/admin/components/builder/FieldRenderer.jsx:717
-#: resources/frontend/components/ConversationalFormRenderer.jsx:163
+#: resources/frontend/components/ConversationalFormRenderer.jsx:177
 #: resources/frontend/components/FormRenderer.jsx:422
 #: resources/frontend/components/FormRenderer.jsx:558
 msgid "This field is required."
@@ -4765,7 +4764,7 @@ msgid "Middle Name (optional)"
 msgstr ""
 
 #: resources/admin/components/builder/utils/schemaTree.js:317
-#: resources/frontend/components/FieldRenderer.jsx:948
+#: resources/frontend/components/FieldRenderer.jsx:964
 msgid "Apt, Suite, etc."
 msgstr ""
 
@@ -4840,8 +4839,8 @@ msgstr ""
 #: resources/admin/components/BuilderTour.jsx:322
 #: resources/admin/components/CreateFormWizard.jsx:192
 #: resources/admin/components/OnboardingWizard.jsx:587
-#: resources/frontend/components/ConversationalFormRenderer.jsx:504
-#: resources/frontend/components/ConversationalFormRenderer.jsx:650
+#: resources/frontend/components/ConversationalFormRenderer.jsx:518
+#: resources/frontend/components/ConversationalFormRenderer.jsx:664
 msgid "Back"
 msgstr ""
 
@@ -5072,7 +5071,7 @@ msgstr ""
 
 #: resources/admin/components/FormsList.jsx:406
 #: resources/admin/pages/DashboardPage.jsx:243
-#: resources/frontend/components/ConversationalFormRenderer.jsx:491
+#: resources/frontend/components/ConversationalFormRenderer.jsx:505
 msgid "Edit"
 msgstr ""
 
@@ -6711,7 +6710,7 @@ msgstr ""
 
 #: resources/admin/modals/ConfirmModal.jsx:72
 #: resources/admin/ui/modals/AccessibleModal.jsx:160
-#: resources/frontend/components/ConversationalFormRenderer.jsx:594
+#: resources/frontend/components/ConversationalFormRenderer.jsx:608
 msgid "Processing..."
 msgstr ""
 
@@ -6840,7 +6839,7 @@ msgstr ""
 #: resources/admin/pages/CreateFormPage.jsx:36
 #: resources/admin/pages/SubmissionDetailPage.jsx:348
 #: resources/admin/templates/TemplateSelector.jsx:71
-#: resources/frontend/components/ConversationalFormRenderer.jsx:536
+#: resources/frontend/components/ConversationalFormRenderer.jsx:550
 msgid "Payment"
 msgstr ""
 
@@ -9478,99 +9477,99 @@ msgstr ""
 msgid "Select a published form to embed"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:379
+#: resources/frontend/components/ConversationalFormRenderer.jsx:393
 #: resources/frontend/components/FormRenderer.jsx:749
 msgid "Submission failed."
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:383
+#: resources/frontend/components/ConversationalFormRenderer.jsx:397
 #: resources/frontend/components/FormRenderer.jsx:753
 msgid "Network error. Please try again."
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:396
+#: resources/frontend/components/ConversationalFormRenderer.jsx:410
 #: resources/frontend/components/FormRenderer.jsx:810
 msgid "Thank you!"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:398
+#: resources/frontend/components/ConversationalFormRenderer.jsx:412
 msgid "Your response has been submitted successfully."
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:412
+#: resources/frontend/components/ConversationalFormRenderer.jsx:426
 msgid "This form has no questions."
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:457
+#: resources/frontend/components/ConversationalFormRenderer.jsx:471
 msgid "Review Your Answers"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:463
+#: resources/frontend/components/ConversationalFormRenderer.jsx:477
 msgid "Please review your answers"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:513
+#: resources/frontend/components/ConversationalFormRenderer.jsx:527
 msgid "Continue to Payment"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:514
+#: resources/frontend/components/ConversationalFormRenderer.jsx:528
 #: resources/frontend/components/FormRenderer.jsx:935
 msgid "Submit"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:542
+#: resources/frontend/components/ConversationalFormRenderer.jsx:556
 msgid "Complete Payment"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:552
+#: resources/frontend/components/ConversationalFormRenderer.jsx:566
 msgid "Amount Due:"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:562
+#: resources/frontend/components/ConversationalFormRenderer.jsx:576
 msgid "⚠️ Test Mode: No actual payment will be processed"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:571
+#: resources/frontend/components/ConversationalFormRenderer.jsx:585
 msgid "Payment gateway integration will appear here. For now, click Submit to complete the form."
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:585
+#: resources/frontend/components/ConversationalFormRenderer.jsx:599
 msgid "Back to Review"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:595
+#: resources/frontend/components/ConversationalFormRenderer.jsx:609
 msgid "Complete Submission"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:660
+#: resources/frontend/components/ConversationalFormRenderer.jsx:674
 msgid "Review"
 msgstr ""
 
-#: resources/frontend/components/ConversationalFormRenderer.jsx:668
+#: resources/frontend/components/ConversationalFormRenderer.jsx:682
 msgid "Press Enter ↵"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:566
+#: resources/frontend/components/FieldRenderer.jsx:582
 msgid "I agree"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:1036
+#: resources/frontend/components/FieldRenderer.jsx:1052
 msgid "Select Country"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:1170
+#: resources/frontend/components/FieldRenderer.jsx:1186
 msgid "Not at all likely"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:1171
+#: resources/frontend/components/FieldRenderer.jsx:1187
 msgid "Extremely likely"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:1261
+#: resources/frontend/components/FieldRenderer.jsx:1277
 msgid "Colour hex value"
 msgstr ""
 
-#: resources/frontend/components/FieldRenderer.jsx:1305
+#: resources/frontend/components/FieldRenderer.jsx:1321
 msgid "Field type not supported:"
 msgstr ""
 

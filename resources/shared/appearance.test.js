@@ -1,4 +1,5 @@
 import {
+  supportsAppearance,
   formAppearanceStyle,
   formAppearanceClasses,
   fieldAppearanceStyle,
@@ -156,5 +157,28 @@ describe( 'presets', () => {
 
   it( 'is not modified when no preset is recorded', () => {
     expect( isPresetModified( { tokens: { colorPrimary: '#fff' } } ) ).toBe( false );
+  } );
+} );
+
+describe( 'supportsAppearance', () => {
+  it( 'excludes the types that render no element', () => {
+    // A saved value that cannot show up is worse than an absent control, so the
+    // inspector hides the tab for these rather than accepting dead input.
+    expect( supportsAppearance( 'action_hook' ) ).toBe( false );
+    expect( supportsAppearance( 'step' ) ).toBe( false );
+  } );
+
+  it( 'includes structural types that do render a wrapper', () => {
+    [ 'section_break', 'html', 'group_container', 'repeat_container' ].forEach(
+      ( type ) => {
+        expect( supportsAppearance( type ) ).toBe( true );
+      }
+    );
+  } );
+
+  it( 'includes ordinary input types', () => {
+    [ 'text', 'email', 'select', 'signature' ].forEach( ( type ) => {
+      expect( supportsAppearance( type ) ).toBe( true );
+    } );
   } );
 } );
