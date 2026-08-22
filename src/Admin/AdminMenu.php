@@ -190,11 +190,22 @@ class AdminMenu {
 
 		$this->currentPage = $hook;
 
+		// Base styling for every @wordpress/components primitive this app uses —
+		// Button, Panel, ToggleControl, SelectControl, DropdownMenu, Popover,
+		// Modal, SnackbarList and the rest. `wp-components` is registered as a
+		// script handle AND a separate style handle; depending on the script (as
+		// the bundle below does) pulls in none of the CSS. Without this, every
+		// one of those elements renders with no background, border, spacing or
+		// shadow from WordPress core — only the few `.components-*` rules this
+		// plugin overrides — which is what made the admin look unstyled rather
+		// than merely differently themed.
+		wp_enqueue_style( 'wp-components' );
+
 		// Main admin CSS
 		wp_enqueue_style(
 			'subtleforms-admin',
 			SUBTLEFORMS_PLUGIN_URL . 'assets/css/admin.css',
-			array(),
+			array( 'wp-components' ),
 			SUBTLEFORMS_VERSION
 		);
 

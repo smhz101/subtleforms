@@ -237,6 +237,11 @@
 		font-size: var(--sf-text-base);
 		border-top-right-radius: 0;
 		border-bottom-right-radius: 0;
+		gap: 0.375rem;
+	}
+
+	&__publish-spinner {
+		flex: 0 0 auto;
 	}
 
 	&__publish-menu .sf-builder-header-bar__publish-arrow {

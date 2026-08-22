@@ -250,7 +250,16 @@ export function BuilderActions({
             onClick={onPublish}
             disabled={busy || hasValidationErrors}
             className='sf-builder-header-bar__publish-button'>
-            {isPublished
+            {saving && (
+              <Icon.Spinner
+                size={14}
+                className='sf-spin sf-builder-header-bar__publish-spinner'
+                aria-hidden='true'
+              />
+            )}
+            {saving
+              ? __('Saving…', 'subtleforms')
+              : isPublished
               ? __('Update', 'subtleforms')
               : __('Publish', 'subtleforms')}
           </Button>

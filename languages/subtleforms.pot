@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-08-22T19:33:31+00:00\n"
+"POT-Creation-Date: 2026-08-22T23:20:30+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -70,8 +70,8 @@ msgstr ""
 
 #: src/Admin/AdminMenu.php:105
 #: src/Admin/AdminMenu.php:106
-#: src/Admin/AdminMenu.php:848
-#: src/Admin/AdminMenu.php:874
+#: src/Admin/AdminMenu.php:859
+#: src/Admin/AdminMenu.php:885
 msgid "Subtle Forms"
 msgstr ""
 
@@ -111,138 +111,138 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:294
+#: src/Admin/AdminMenu.php:305
 msgid "Are you sure you want to delete this item?"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:295
+#: src/Admin/AdminMenu.php:306
 #: src/Frontend/FrontendAssets.php:81
 msgid "An error occurred. Please try again."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:296
-#: src/Admin/AdminMenu.php:726
+#: src/Admin/AdminMenu.php:307
+#: src/Admin/AdminMenu.php:737
 msgid "Action completed successfully."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:330
+#: src/Admin/AdminMenu.php:341
 #: resources/admin/components/settings/extensions/WebhooksPanel.jsx:17
 msgid "Webhooks"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:331
+#: src/Admin/AdminMenu.php:342
 msgid "Send real-time HTTP POST payloads to external URLs on form submissions."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:335
+#: src/Admin/AdminMenu.php:346
 #: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:19
 msgid "Email Marketing"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:336
+#: src/Admin/AdminMenu.php:347
 msgid "Automatically subscribe form submitters to Mailchimp or ConvertKit audiences."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:340
+#: src/Admin/AdminMenu.php:351
 msgid "CRM"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:341
+#: src/Admin/AdminMenu.php:352
 msgid "Create or update contacts in HubSpot from every form submission."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:345
+#: src/Admin/AdminMenu.php:356
 #: resources/admin/components/settings/extensions/AnalyticsPanel.jsx:12
 msgid "Analytics"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:346
+#: src/Admin/AdminMenu.php:357
 msgid "Track form views and submission rates directly in your dashboard."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:350
+#: src/Admin/AdminMenu.php:361
 #: resources/admin/components/settings/extensions/EcommercePanel.jsx:20
 msgid "E-commerce"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:351
+#: src/Admin/AdminMenu.php:362
 msgid "Create WooCommerce orders automatically when a form is submitted."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:355
+#: src/Admin/AdminMenu.php:366
 #: resources/admin/components/settings/extensions/PdfPanel.jsx:18
 msgid "PDF Generator"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:356
+#: src/Admin/AdminMenu.php:367
 msgid "Generate PDF documents from submissions and attach them to emails."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:360
+#: src/Admin/AdminMenu.php:371
 #: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:17
 msgid "Multilanguage"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:361
+#: src/Admin/AdminMenu.php:372
 msgid "Register form strings with WPML or Polylang for full translation support."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:365
+#: src/Admin/AdminMenu.php:376
 #: resources/admin/components/builder/FormSettings.jsx:209
 #: resources/admin/components/settings/extensions/PaymentsPanel.jsx:32
 #: resources/admin/templates/categories.js:17
 msgid "Payments"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:366
+#: src/Admin/AdminMenu.php:377
 #: resources/admin/components/settings/extensions/PaymentsPanel.jsx:34
 msgid "Accept Stripe or PayPal payments directly through your forms."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:482
+#: src/Admin/AdminMenu.php:493
 msgid "Security check failed."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:507
-#: src/Admin/AdminMenu.php:520
-#: src/Admin/AdminMenu.php:539
-#: src/Admin/AdminMenu.php:562
-#: src/Admin/AdminMenu.php:588
+#: src/Admin/AdminMenu.php:518
+#: src/Admin/AdminMenu.php:531
+#: src/Admin/AdminMenu.php:550
+#: src/Admin/AdminMenu.php:573
 #: src/Admin/AdminMenu.php:599
+#: src/Admin/AdminMenu.php:610
 msgid "You do not have permission to access this page."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:550
-#: src/Admin/AdminMenu.php:654
+#: src/Admin/AdminMenu.php:561
+#: src/Admin/AdminMenu.php:665
 #: src/Frontend/Shortcode.php:51
 msgid "Form not found."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:627
-#: src/Admin/AdminMenu.php:649
-#: src/Admin/AdminMenu.php:682
+#: src/Admin/AdminMenu.php:638
+#: src/Admin/AdminMenu.php:660
+#: src/Admin/AdminMenu.php:693
 msgid "Invalid request."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:734
+#: src/Admin/AdminMenu.php:745
 msgid "Coming Soon"
 msgstr ""
 
 #. translators: %s: Name of the interface being developed
-#: src/Admin/AdminMenu.php:738
+#: src/Admin/AdminMenu.php:749
 #, php-format
 msgid "The %s interface is under development."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:742
+#: src/Admin/AdminMenu.php:753
 msgid "This is a placeholder. Template files will be created in the templates/admin/ directory."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:747
+#: src/Admin/AdminMenu.php:758
 msgid "Your Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:751
+#: src/Admin/AdminMenu.php:762
 #: src/Fields/CoreFields.php:1018
 #: src/Fields/CoreFields.php:1046
 #: src/Fields/CoreFields.php:1215
@@ -250,10 +250,10 @@ msgstr ""
 msgid "Title"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:752
+#: src/Admin/AdminMenu.php:763
 #: src/Api/SubmissionsApi.php:601
 #: src/Privacy/PrivacyExporter.php:100
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:277
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:286
 #: resources/admin/components/FormsList.jsx:31
 #: resources/admin/components/FormsList.jsx:278
 #: resources/admin/components/FormsList.jsx:810
@@ -263,17 +263,17 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:753
+#: src/Admin/AdminMenu.php:764
 msgid "Created"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:754
+#: src/Admin/AdminMenu.php:765
 #: resources/admin/components/builder/FormSettings.jsx:453
 #: resources/admin/components/SubmissionsTable.jsx:574
 msgid "Actions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:779
+#: src/Admin/AdminMenu.php:790
 #: resources/admin/components/builder/ContainerWrapper.jsx:77
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:52
 #: resources/admin/components/FormsList.jsx:459
@@ -283,22 +283,22 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:793
+#: src/Admin/AdminMenu.php:804
 #: resources/admin/pages/DashboardPage.jsx:69
 msgid "Total Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:797
+#: src/Admin/AdminMenu.php:808
 msgid "Active Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:801
+#: src/Admin/AdminMenu.php:812
 #: resources/admin/pages/DashboardPage.jsx:76
 msgid "Total Submissions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:851
-#: src/Admin/AdminMenu.php:856
+#: src/Admin/AdminMenu.php:862
+#: src/Admin/AdminMenu.php:867
 msgid "WordPress Admin"
 msgstr ""
 
@@ -3890,8 +3890,8 @@ msgid "Click any field to configure it"
 msgstr ""
 
 #: resources/admin/components/builder/EmptyFormWelcome.jsx:47
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:255
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:309
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:264
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:318
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:66
 msgid "Publish"
 msgstr ""
@@ -4602,52 +4602,57 @@ msgstr ""
 msgid "Redo (Shift+Ctrl/Cmd+Z)"
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:254
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:261
+#: resources/admin/pages/BuilderPage.jsx:535
+msgid "Saving…"
+msgstr ""
+
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:263
 #: resources/admin/components/FormsList.jsx:824
 msgid "Update"
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:265
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:274
 msgid "Update options"
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:266
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:275
 msgid "Publish options"
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:281
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:290
 msgid "Takes the form off your site. The draft and its history are kept."
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:289
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:298
 msgid "Switch to draft"
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:296
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:305
 msgid "Fix the validation issues above first."
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:300
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:309
 msgid "Makes this form visible on your site."
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:317
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:326
 msgid "Drafts also save on their own a few seconds after each change."
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:325
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:334
 msgid "Save draft now"
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:336
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:345
 msgid "Delete form"
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:349
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:358
 msgid "Return to the forms list"
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:350
+#: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:359
 msgid "Close"
 msgstr ""
 
@@ -6882,10 +6887,6 @@ msgstr ""
 #: resources/admin/pages/BuilderPage.jsx:330
 #, js-format
 msgid "Untitled Form %1$d"
-msgstr ""
-
-#: resources/admin/pages/BuilderPage.jsx:535
-msgid "Saving…"
 msgstr ""
 
 #. translators: %1$s: localized time string (e.g. 12:34 PM)
