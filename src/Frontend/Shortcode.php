@@ -70,61 +70,6 @@ final class Shortcode {
 	 * Enqueue frontend scripts and styles.
 	 */
 	private function enqueueAssets(): void {
-		static $enqueued = false;
-		if ( $enqueued ) {
-			return;
-		}
-		$enqueued = true;
-
-		$asset_file = SUBTLEFORMS_PLUGIN_DIR . '/build/frontend/frontend.asset.php';
-		$asset      = file_exists( $asset_file ) ? require $asset_file : array(
-			'dependencies' => array(),
-			'version'      => '1.0.0',
-		);
-
-		// Enqueue CAPTCHA provider script FIRST if enabled and configured
-		// This ensures the CAPTCHA API is loaded before our frontend script
-		$dependencies = $asset['dependencies'];
-		if ( $this->captchaManager && $this->captchaManager->isEnabled() && $this->captchaManager->isConfigured() ) {
-			$script_url = $this->captchaManager->getScriptUrl();
-			if ( ! empty( $script_url ) ) {
-				wp_enqueue_script(
-					'subtleforms-captcha',
-					$script_url,
-					array(),
-					SUBTLEFORMS_VERSION,
-					true
-				);
-				// Add CAPTCHA script as a dependency of frontend script
-				$dependencies[] = 'subtleforms-captcha';
-			}
-		}
-
-		wp_enqueue_script(
-			'subtleforms-frontend',
-			SUBTLEFORMS_PLUGIN_URL . 'build/frontend/frontend.js',
-			$dependencies,
-			$asset['version'],
-			true
-		);
-
-		wp_localize_script(
-			'subtleforms-frontend',
-			'subtleformsFrontend',
-			array(
-				'restUrl'        => rest_url( 'subtleforms/v1' ),
-				'nonce'          => wp_create_nonce( 'wp_rest' ),
-				'successMessage' => $this->settings ? $this->settings->get( 'success_message' ) : __( 'Thank you! Your submission has been received.', 'subtleforms' ),
-				'errorMessage'   => $this->settings ? $this->settings->get( 'error_message' ) : __( 'An error occurred. Please try again.', 'subtleforms' ),
-				'redirectUrl'    => $this->settings ? $this->settings->get( 'redirect_after_submit' ) : '',
-			)
-		);
-
-		wp_enqueue_style(
-			'subtleforms-frontend',
-			SUBTLEFORMS_PLUGIN_URL . 'build/frontend/index.jsx.css',
-			array(),
-			$asset['version']
-		);
+		FrontendAssets::enqueue( $this->settings, $this->captchaManager );
 	}
 }

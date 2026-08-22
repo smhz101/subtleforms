@@ -1,4 +1,3 @@
-import { useState, useEffect } from '@wordpress/element';
 import {
   SelectControl,
   TextControl,
@@ -7,11 +6,10 @@ import {
   PanelBody,
   RadioControl,
   Notice,
-  Button,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import ActionsPanel from './ActionsPanel';
-import FormAppearancePanel from './appearance/FormAppearancePanel';
+import './FormSettings.scss';
 
 /**
  * FormSettings - Configure form-wide settings including payment options
@@ -27,6 +25,9 @@ export default function FormSettings({
   const formType = metadata.type || 'regular';
   const isPaymentForm = formType === 'payment';
   const isConversationalForm = formType === 'conversational';
+  // Both spellings reach this component: stored schemas may hold either, and
+  // normalisation happens on save rather than on every read.
+  const isMultiStep = formType === 'multi-step' || formType === 'multistep';
   const supportsPayment = isPaymentForm || isConversationalForm;
 
   // Payment settings
@@ -99,7 +100,7 @@ export default function FormSettings({
   const fieldOptions = amountFieldOptions();
 
   return (
-    <div className='subtleforms-form-settings'>
+    <div className='subtleforms-form-settings sf-form-settings'>
       <div className='sf-form-settings__container'>
         <h2 className='sf-form-settings__title'>
           {__('Form Settings', 'subtleforms')}
@@ -116,14 +117,14 @@ export default function FormSettings({
         {formType !== 'regular' && (
           <div className='sf-form-type-banner' data-form-type={formType}>
             <h3 className='sf-form-type-banner__title'>
-              {formType === 'multistep' && __('Multi-step Form', 'subtleforms')}
+              {isMultiStep && __('Multi-step Form', 'subtleforms')}
               {formType === 'sectioned' && __('Sectioned Form', 'subtleforms')}
               {formType === 'conversational' &&
                 __('Conversational Form', 'subtleforms')}
               {formType === 'payment' && __('Payment Form', 'subtleforms')}
             </h3>
             <p className='sf-form-type-banner__description'>
-              {formType === 'multistep' &&
+              {isMultiStep &&
                 __(
                   'Fields are organized into steps. Users navigate through one step at a time with progress tracking.',
                   'subtleforms'
@@ -175,16 +176,6 @@ export default function FormSettings({
           </PanelBody>
 
           <PanelBody
-            title={__('Appearance', 'subtleforms')}
-            initialOpen={false}>
-            <FormAppearancePanel
-              schema={schema}
-              onChange={onChange}
-              isReadOnly={isReadOnly}
-            />
-          </PanelBody>
-
-          <PanelBody
             title={__('Builder canvas', 'subtleforms')}
             initialOpen={false}>
             <RadioControl
@@ -206,7 +197,7 @@ export default function FormSettings({
               ]}
               onChange={(value) => handleMetadataChange('canvasWidth', value)}
               help={__(
-                'Editing width inside the builder only. The published form’s width is set under Appearance.',
+                'Editing width inside the builder only. The published form’s width is set under Preview.',
                 'subtleforms'
               )}
             />

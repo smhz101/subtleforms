@@ -11,6 +11,7 @@
 import { useEffect, useRef } from '@wordpress/element';
 import { BUILDER_STATES, BUILDER_ACTIONS } from './useBuilderReducer';
 import { apiPost } from '../utils/api';
+import { schemaEquals } from '../utils/schemaEquals';
 import { debug } from '../../shared/debug';
 
 /**
@@ -35,6 +36,10 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
   const timeoutRef = useRef(null);
   const retryCountRef = useRef(0);
   const lastSchemaRef = useRef(null);
+  // The last schema the server accepted. Undo/redo can walk the draft back to
+  // exactly this state, which is dirty by the reducer's reckoning but has
+  // nothing left to send.
+  const savedSchemaRef = useRef(null);
   const latestBuilderStateRef = useRef(builderState);
 
   // Track when we're rate-limited and should pause all save attempts
@@ -47,6 +52,15 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
   }, [builderState]);
 
   const { state, draftSchema, isDirty } = builderState;
+
+  // A clean builder means the draft is what the server holds — true on load,
+  // after a manual save and after a publish. Recording it here means the first
+  // autosave after a load can also be skipped when nothing really changed.
+  useEffect(() => {
+    if (!isDirty && draftSchema) {
+      savedSchemaRef.current = draftSchema;
+    }
+  }, [isDirty, draftSchema]);
 
   useEffect(() => {
     // Don't autosave if disabled
@@ -113,6 +127,25 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
       return;
     }
 
+    // Nothing to save: the draft matches what the server already holds. This
+    // happens when an edit is undone back to the saved state, and when a
+    // control re-emits a value that changed nothing.
+    //
+    // The state machine still walks DIRTY → AUTOSAVING → SAVED, because SAVED
+    // is not reachable from DIRTY directly and because the builder has to stop
+    // reporting unsaved work either way. Only the request is skipped.
+    if (
+      savedSchemaRef.current !== null &&
+      schemaEquals(latest.draftSchema, savedSchemaRef.current)
+    ) {
+      dispatch({ type: BUILDER_ACTIONS.START_AUTOSAVE });
+      dispatch({
+        type: BUILDER_ACTIONS.AUTOSAVE_SUCCESS,
+        payload: { stillDirty: false },
+      });
+      return;
+    }
+
     // Store current schema snapshot for dirty comparison after save
     lastSchemaRef.current = latest.draftSchema;
     saveInFlightRef.current = true;
@@ -162,6 +195,7 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
       // Success - reset counters
       retryCountRef.current = 0;
       rateLimitedUntilRef.current = 0;
+      savedSchemaRef.current = lastSchemaRef.current;
 
       // Check if user made changes during the save
       const currentLatest = latestBuilderStateRef.current;

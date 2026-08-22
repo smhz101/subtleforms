@@ -24,7 +24,6 @@ final class SubtleFormsBlock {
 	 */
 	public static function init(): void {
 		add_action( 'init', array( self::class, 'register_block' ) );
-		add_action( 'enqueue_block_assets', array( self::class, 'enqueue_frontend_assets' ) );
 		add_action( 'enqueue_block_editor_assets', array( self::class, 'enqueue_editor_assets' ) );
 	}
 
@@ -93,6 +92,13 @@ final class SubtleFormsBlock {
 			$classes[] = esc_attr( $attributes['className'] );
 		}
 
+		// The renderer is what turns the placeholder below into a form, so it is
+		// enqueued here rather than from a hook that has to guess where blocks
+		// appear. A block in a template part or a widget area is rendered the
+		// same way as one in post content, and now gets its assets the same way
+		// too.
+		self::enqueue_frontend_assets();
+
 		// Output minimal placeholder markup
 		// Frontend JS will detect this and mount the renderer
 		return sprintf(
@@ -103,49 +109,38 @@ final class SubtleFormsBlock {
 	}
 
 	/**
-	 * Enqueue frontend assets when block is present.
+	 * Enqueue the frontend renderer for a rendered block.
 	 *
-	 * This ensures the frontend renderer is available to hydrate blocks.
+	 * Shared with the shortcode so a form behaves identically however it is
+	 * embedded — same script, same styles, same configured messages.
 	 */
-	public static function enqueue_frontend_assets(): void {
-		// Only enqueue on frontend (not in editor)
+	private static function enqueue_frontend_assets(): void {
 		if ( is_admin() ) {
 			return;
 		}
 
-		// Check if the current post/page contains the subtleforms/form block
-		if ( ! self::has_subtleforms_block() ) {
-			return;
+		$settings = null;
+		$captcha  = null;
+
+		// Settings and CAPTCHA are optional here: without them the bundle still
+		// loads with the built-in messages, which is better than a fatal on a
+		// visitor-facing page if the container is not built yet.
+		try {
+			$container = \SubtleForms\Plugin::instance()->container();
+
+			if ( $container->has( \SubtleForms\Support\Settings::class ) ) {
+				$settings = $container->get( \SubtleForms\Support\Settings::class );
+			}
+
+			if ( $container->has( \SubtleForms\Support\Captcha\CaptchaManager::class ) ) {
+				$captcha = $container->get( \SubtleForms\Support\Captcha\CaptchaManager::class );
+			}
+		} catch ( \Throwable $e ) {
+			$settings = null;
+			$captcha  = null;
 		}
 
-		// Load asset file with proper dependencies
-		$asset_file = include SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/frontend.asset.php';
-
-		// Enqueue the same frontend bundle used by shortcodes
-		wp_enqueue_script(
-			'subtleforms-frontend',
-			SUBTLEFORMS_PLUGIN_URL . 'build/frontend/frontend.js',
-			$asset_file['dependencies'],
-			$asset_file['version'],
-			true
-		);
-
-		wp_enqueue_style(
-			'subtleforms-frontend',
-			SUBTLEFORMS_PLUGIN_URL . 'build/frontend/index.jsx.css',
-			array(),
-			SUBTLEFORMS_VERSION
-		);
-
-		// Pass REST URL and nonce to frontend
-		wp_localize_script(
-			'subtleforms-frontend',
-			'subtleformsFrontend',
-			array(
-				'restUrl' => rest_url( 'subtleforms/v1/' ),
-				'nonce'   => wp_create_nonce( 'wp_rest' ),
-			)
-		);
+		\SubtleForms\Frontend\FrontendAssets::enqueue( $settings, $captcha );
 	}
 
 	/**
@@ -184,23 +179,4 @@ final class SubtleFormsBlock {
 		);
 	}
 
-	/**
-	 * Check if the current post/page contains a subtleforms/form block.
-	 *
-	 * @return bool True if block is present
-	 */
-	private static function has_subtleforms_block(): bool {
-		// Check if we're viewing a singular post
-		if ( ! is_singular() ) {
-			return false;
-		}
-
-		$post = get_post();
-		if ( ! $post ) {
-			return false;
-		}
-
-		// Check if post content contains the block
-		return has_block( 'subtleforms/form', $post );
-	}
 }

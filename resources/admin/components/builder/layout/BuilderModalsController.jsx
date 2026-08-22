@@ -73,11 +73,11 @@ export default function BuilderModalsController({
         onClose={onCloseDiscardConfirm}
         title={__('You have unsaved changes', 'subtleforms')}
         message={__(
-          'Your recent edits have not been saved. Would you like to save your changes before leaving, or discard them?',
+          'Your most recent edits have not reached the server yet. Save them as a draft before leaving, or discard them?',
           'subtleforms'
         )}
         onConfirm={onConfirmSaveDraft}
-        confirmText={__('Save Draft', 'subtleforms')}
+        confirmText={__('Save draft', 'subtleforms')}
         confirmVariant='primary'
         onSecondary={onConfirmDiscard}
         secondaryText={__('Discard Changes', 'subtleforms')}

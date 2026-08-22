@@ -12,7 +12,7 @@ import FormSettings from '../FormSettings';
 import SubmissionsTable from '../../SubmissionsTable';
 import ProDowngradeBanner from '../../ProDowngradeBanner';
 import EmptyFormWelcome from '../EmptyFormWelcome';
-import FormPreviewPane from '../../FormPreviewPane';
+import PreviewWorkspace from '../PreviewWorkspace';
 import { formUsesProFeatures, getProFeaturesUsed } from '../../../utils/proFeatureDetector';
 import './BuilderCanvasArea.scss';
 
@@ -145,9 +145,12 @@ export default function BuilderCanvasArea({
               </div>
             )}
             {tab.name === 'preview' && (
-              <div className='sf-builder-canvas-area__preview-container'>
-                <FormPreviewPane schema={draftSchema} isDirty={isDirty} />
-              </div>
+              <PreviewWorkspace
+                schema={draftSchema}
+                onChange={onSchemaChange}
+                isDirty={isDirty}
+                isReadOnly={isReadOnly}
+              />
             )}
           </>
         )}

@@ -23,6 +23,7 @@ import {
   buildApiUrl,
 } from '../utils/api';
 import { createInitialSchema } from '../utils/initialSchema';
+import { schemaEquals } from '../utils/schemaEquals';
 import useBuilderReducer, {
   BUILDER_ACTIONS,
   BUILDER_STATES,
@@ -135,7 +136,7 @@ function FormBuilderInner({
   const {
     performSave,
     handleSave,
-    handleSaveDraft,
+    handleUnpublish,
     handlePublish,
     confirmPublish,
     handleSaveAndClose,
@@ -348,27 +349,27 @@ function FormBuilderInner({
     }
   }, [draftSchema, formTitle, isEditingTitle]);
 
-  const markDirty = useCallback(() => {
-    if (isHydrating) {
-      return;
-    }
-    dispatch({
-      type: BUILDER_ACTIONS.EDIT_SCHEMA,
-      payload: { schema: draftSchema },
-    });
-  }, [isHydrating, draftSchema, dispatch]);
-
   const handleSchemaChange = useCallback(
     (nextSchema) => {
       if (isHydrating) {
         return;
       }
+
+      // Controls re-emit their current value routinely — a select firing on
+      // re-render, a panel writing back a default it just read. Those produce a
+      // new object that describes the same form, and dispatching them would
+      // mark the builder dirty and autosave a version nobody asked for. Only a
+      // real difference counts as an edit.
+      if (schemaEquals(nextSchema, draftSchema)) {
+        return;
+      }
+
       dispatch({
         type: BUILDER_ACTIONS.EDIT_SCHEMA,
         payload: { schema: nextSchema },
       });
     },
-    [dispatch, isHydrating]
+    [dispatch, isHydrating, draftSchema]
   );
 
   /**
@@ -490,8 +491,22 @@ function FormBuilderInner({
     }
   }, [isDirty, onClose, navigate, setShowDiscardConfirm]);
 
-  // Wrap handleSaveAndClose to delete the form when the user clicks "Save & Close"
-  // on a newly created form they never edited (instead of leaving an orphan draft).
+  /**
+   * Persist the draft right now, without waiting for the autosave debounce.
+   *
+   * This posts through the autosave path, which sends `activate: false` and
+   * leaves the form's status alone. The previous "Save Draft" action set the
+   * status to draft as well, so using it on a live form quietly took the form
+   * off the site.
+   */
+  const handleSaveDraftNow = useCallback(() => {
+    if (typeof forceAutosave === 'function') {
+      forceAutosave();
+    }
+  }, [forceAutosave]);
+
+  // Wrap handleSaveAndClose to delete the form when the user closes a newly
+  // created form they never edited (instead of leaving an orphan draft).
   const handleSaveAndCloseWrapped = useCallback(async () => {
     if (isNewFormRef.current && !isDirty && currentFormId) {
       try {
@@ -639,9 +654,9 @@ function FormBuilderInner({
             dispatch={dispatch}
             isDirty={isDirty}
             hasValidationErrors={hasValidationErrors}
-            draftSchema={draftSchema}
-            onSaveDraft={handleSaveDraft}
+            onSaveDraft={handleSaveDraftNow}
             onPublish={handlePublish}
+            onUnpublish={handleUnpublish}
             onSaveAndClose={handleSaveAndCloseWrapped}
             onDelete={() => setShowDeleteConfirm(true)}
             onStartTour={() => setShowTour(true)}
@@ -676,7 +691,7 @@ function FormBuilderInner({
         onClosePublishConfirm={() => setShowPublishConfirm(false)}
         onConfirmPublish={confirmPublish}
         onCloseDiscardConfirm={() => setShowDiscardConfirm(false)}
-        onConfirmSaveDraft={handleSaveDraft}
+        onConfirmSaveDraft={handleSaveDraftNow}
         onConfirmDiscard={confirmDiscard}
         onCloseTour={handleTourComplete}
         onSkipTour={handleTourSkip}

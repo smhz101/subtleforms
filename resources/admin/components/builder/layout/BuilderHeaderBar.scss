@@ -139,12 +139,48 @@
 		padding: 0.5rem;
 		font-size: var(--sf-text-xs);
 		line-height: 1rem;
+		color: var(--sf-text-secondary);
+
+		&.is-error {
+			color: var(--sf-danger);
+			font-weight: var(--sf-weight-medium);
+		}
+	}
+
+	// The dot repeats the status word in colour, for a glance rather than a read.
+	&__save-dot {
+		width: 8px;
+		height: 8px;
+		border-radius: var(--sf-radius-full);
+		flex: 0 0 auto;
+		background: var(--sf-warning);
+
+		&--saving {
+			background: var(--sf-primary);
+			box-shadow: var(--sf-shadow-focus);
+		}
+
+		&--saved {
+			background: var(--sf-success);
+		}
+
+		&--error {
+			background: var(--sf-danger);
+		}
 	}
 
 	&__right {
 		display: flex;
 		align-items: center;
 		gap: 0.5rem;
+	}
+
+	&__divider {
+		width: 1px;
+		height: 24px;
+		flex: 0 0 auto;
+		margin: 0 var(--sf-space-1);
+		background: var(--sf-border);
 	}
 
 	&__tour-buttons {
@@ -187,5 +223,11 @@
 		height: 2.25rem;
 		font-weight: 500;
 		font-size: var(--sf-text-base);
+	}
+
+	&__more-menu .components-button {
+		height: 2.25rem;
+		min-width: 2.25rem;
+		padding: 0;
 	}
 }

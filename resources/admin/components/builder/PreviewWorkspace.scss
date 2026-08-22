@@ -1,0 +1,136 @@
+/**
+ * PreviewWorkspace — the Preview tab's canvas and styling controls.
+ *
+ * Two panes side by side: the canvas takes the space that is left, the controls
+ * keep a fixed column so the inputs inside them never reflow while the canvas
+ * resizes. Below the breakpoint they stack, canvas above controls, and the
+ * single scroll container moves to the body so the two panes scroll as one page
+ * instead of fighting each other.
+ */
+
+.sf-preview-workspace {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+	background: var(--sf-bg-page);
+
+	&__toolbar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--sf-space-4);
+		flex: 0 0 auto;
+		padding: var(--sf-space-3) var(--sf-space-6);
+		background: var(--sf-bg-surface);
+		border-bottom: 1px solid var(--sf-border);
+	}
+
+	&__viewports {
+		display: inline-flex;
+		padding: 2px;
+		background: var(--sf-bg-subtle);
+		border: 1px solid var(--sf-border);
+		border-radius: var(--sf-radius-md);
+	}
+
+	&__viewport {
+		padding: var(--sf-space-1) var(--sf-space-3);
+		font-size: var(--sf-text-sm);
+		font-weight: var(--sf-weight-medium);
+		color: var(--sf-text-secondary);
+		background: transparent;
+		border: 0;
+		border-radius: var(--sf-radius-sm);
+		cursor: pointer;
+		transition:
+			background var(--sf-transition-fast),
+			color var(--sf-transition-fast);
+
+		&:hover {
+			color: var(--sf-text);
+		}
+
+		&.is-active {
+			color: var(--sf-text);
+			background: var(--sf-bg-surface);
+			box-shadow: var(--sf-shadow-xs);
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--sf-focus-ring);
+			outline-offset: 1px;
+		}
+	}
+
+	&__body {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 22rem;
+		flex: 1 1 auto;
+		min-height: 0;
+
+		&.is-controls-hidden {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+
+	&__canvas {
+		min-width: 0;
+		overflow-y: auto;
+		padding: var(--sf-space-8) var(--sf-space-6);
+	}
+
+	// The stage carries the viewport width, so switching to Mobile narrows the
+	// form rather than scaling it — the same reflow a visitor would get.
+	&__stage {
+		margin: 0 auto;
+		max-width: 680px;
+		background: var(--sf-bg-surface);
+		border: 1px solid var(--sf-border);
+		border-radius: var(--sf-radius-lg);
+		box-shadow: var(--sf-shadow-sm);
+		padding: var(--sf-space-6);
+		transition: max-width var(--sf-transition-base);
+	}
+
+	&__controls {
+		min-width: 0;
+		overflow-y: auto;
+		padding: var(--sf-space-6);
+		background: var(--sf-bg-surface);
+		border-left: 1px solid var(--sf-border);
+	}
+
+	&__controls-title {
+		margin: 0 0 var(--sf-space-1);
+		font-size: var(--sf-text-md);
+		line-height: var(--sf-leading-tight);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
+	}
+
+	&__controls-hint {
+		margin: 0 0 var(--sf-space-5);
+		font-size: var(--sf-text-xs);
+		line-height: var(--sf-leading-normal);
+		color: var(--sf-text-muted);
+	}
+}
+
+@media (max-width: 960px) {
+
+	.sf-preview-workspace__body {
+		display: block;
+		overflow-y: auto;
+	}
+
+	.sf-preview-workspace__canvas,
+	.sf-preview-workspace__controls {
+		overflow: visible;
+	}
+
+	.sf-preview-workspace__controls {
+		border-left: 0;
+		border-bottom: 1px solid var(--sf-border);
+	}
+}

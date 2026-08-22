@@ -1,137 +1,187 @@
 /**
- * FormSettings Component Styles
- * Form configuration panel
+ * FormSettings — the builder's Settings tab.
+ *
+ * The tab is one `<Panel>` of collapsible bodies inside a centred column. The
+ * outer padding and page background come from `.subtleforms-form-settings` in
+ * BuilderCanvasArea.scss; everything here is the column and its contents.
  */
 
-.subtleforms-form-settings {
-	// Root already styled in BuilderCanvasArea.scss
-}
-
 .sf-form-settings {
+
 	&__container {
 		margin: 0 auto;
 		max-width: 48rem;
 	}
 
 	&__title {
+		margin: 0 0 var(--sf-space-6);
 		font-size: var(--sf-text-lg);
-		line-height: 1.75rem;
-		font-weight: 600;
-		color: var(--sf-gray-900);
-		margin-bottom: 1.5rem;
+		line-height: var(--sf-leading-tight);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
 	}
 
 	&__section {
 		display: flex;
 		flex-direction: column;
-		gap: 1rem;
+		gap: var(--sf-space-4);
 	}
 
 	&__hint {
 		font-size: var(--sf-text-base);
-		line-height: 1.25rem;
-		color: var(--sf-gray-500);
+		line-height: var(--sf-leading-normal);
+		color: var(--sf-text-muted);
 	}
 
-	// Form type info banner
-	.sf-form-type-banner {
-		padding: 1rem;
-		margin-bottom: 1.5rem;
-		border-left: 4px solid;
+	// One extension per block, separated rather than boxed: the PanelBody is
+	// already a box, and a box inside a box reads as two unrelated groups.
+	&__integration {
+		padding-bottom: var(--sf-space-4);
 
-		// Color variants using data attributes
-		&[data-form-type='multistep'] {
-			background-color: var(--sf-purple-50);
-			border-color: var(--sf-purple-500);
-
-			.sf-form-type-banner__title {
-				color: var(--sf-purple-900);
-			}
-
-			.sf-form-type-banner__description {
-				color: var(--sf-purple-700);
-			}
+		& + & {
+			padding-top: var(--sf-space-4);
+			border-top: 1px solid var(--sf-border-subtle);
 		}
 
-		&[data-form-type='sectioned'] {
-			background-color: var(--sf-indigo-50);
-			border-color: var(--sf-indigo-500);
-
-			.sf-form-type-banner__title {
-				color: var(--sf-indigo-900);
-			}
-
-			.sf-form-type-banner__description {
-				color: var(--sf-indigo-700);
-			}
-		}
-
-		&[data-form-type='conversational'] {
-			background-color: var(--sf-blue-50);
-			border-color: var(--sf-blue-500);
-
-			.sf-form-type-banner__title {
-				color: var(--sf-blue-900);
-			}
-
-			.sf-form-type-banner__description {
-				color: var(--sf-blue-700);
-			}
-		}
-
-		&[data-form-type='payment'] {
-			background-color: var(--sf-green-50);
-			border-color: var(--sf-green-500);
-
-			.sf-form-type-banner__title {
-				color: var(--sf-green-900);
-			}
-
-			.sf-form-type-banner__description {
-				color: var(--sf-emerald-900);
-			}
+		&:last-child {
+			padding-bottom: 0;
 		}
 	}
 
-	.sf-form-type-banner__title {
+	&__integration-title {
+		margin: 0 0 var(--sf-space-3);
 		font-size: var(--sf-text-base);
-		line-height: 1.25rem;
-		font-weight: 600;
-		margin-bottom: 0.25rem;
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
 	}
 
-	.sf-form-type-banner__description {
-		font-size: var(--sf-text-xs);
-		line-height: 1rem;
+	// The accordion sits on the grey tab background, so it needs its own
+	// surface — otherwise the bodies read as floating text.
+	&__container > .components-panel {
+		background: var(--sf-bg-surface);
+		border: 1px solid var(--sf-border);
+		border-radius: var(--sf-radius-md);
+		box-shadow: var(--sf-shadow-xs);
+		overflow: hidden;
 	}
 
-	.sf-info-box {
-		&__text {
-			font-size: var(--sf-text-base);
-			line-height: 1.25rem;
+	// WordPress spaces stacked controls with a bottom margin that the last one
+	// in a body also carries, which leaves the body looking bottom-heavy.
+	.components-panel__body > .components-base-control:last-child {
+		margin-bottom: 0;
+	}
+}
+
+// ── Form type banner ─────────────────────────────────────────────────────────
+// Colour is keyed off the stored type. Both multi-step spellings appear in
+// saved schemas, so both select the same treatment.
+.sf-form-settings .sf-form-type-banner {
+	padding: var(--sf-space-4);
+	margin-bottom: var(--sf-space-6);
+	border-left: 4px solid;
+	border-radius: 0 var(--sf-radius-sm) var(--sf-radius-sm) 0;
+
+	// Neutral by default; the attribute selectors below are more specific, so a
+	// recognised type overrides this regardless of source order.
+	background-color: var(--sf-bg-subtle);
+	border-color: var(--sf-border-strong);
+
+	&[data-form-type="multistep"],
+	&[data-form-type="multi-step"] {
+		background-color: var(--sf-purple-50);
+		border-color: var(--sf-purple-500);
+
+		.sf-form-type-banner__title {
+			color: var(--sf-purple-900);
 		}
 
-		&--blue {
-			background-color: var(--sf-blue-50);
-			padding: 1rem;
-			border: 1px solid var(--sf-blue-200);
-			border-radius: var(--sf-radius-sm);
+		.sf-form-type-banner__description {
+			color: var(--sf-purple-700);
+		}
+	}
 
-			.sf-info-box__text {
-				color: var(--sf-blue-800);
-			}
+	&[data-form-type="sectioned"] {
+		background-color: var(--sf-indigo-50);
+		border-color: var(--sf-indigo-500);
+
+		.sf-form-type-banner__title {
+			color: var(--sf-indigo-900);
 		}
 
-		&--yellow {
-			background-color: var(--sf-amber-100);
-			margin-top: 1rem;
-			padding: 1rem;
-			border: 1px solid var(--sf-yellow-400);
-			border-radius: var(--sf-radius-sm);
+		.sf-form-type-banner__description {
+			color: var(--sf-indigo-700);
+		}
+	}
 
-			.sf-info-box__text {
-				color: var(--sf-amber-800);
-			}
+	&[data-form-type="conversational"] {
+		background-color: var(--sf-blue-50);
+		border-color: var(--sf-blue-500);
+
+		.sf-form-type-banner__title {
+			color: var(--sf-blue-900);
+		}
+
+		.sf-form-type-banner__description {
+			color: var(--sf-blue-700);
+		}
+	}
+
+	&[data-form-type="payment"] {
+		background-color: var(--sf-green-50);
+		border-color: var(--sf-green-500);
+
+		.sf-form-type-banner__title {
+			color: var(--sf-green-900);
+		}
+
+		.sf-form-type-banner__description {
+			color: var(--sf-emerald-900);
+		}
+	}
+
+}
+
+.sf-form-settings .sf-form-type-banner__title {
+	margin: 0 0 var(--sf-space-1);
+	font-size: var(--sf-text-base);
+	line-height: var(--sf-leading-tight);
+	font-weight: var(--sf-weight-semibold);
+	color: var(--sf-text);
+}
+
+.sf-form-settings .sf-form-type-banner__description {
+	margin: 0;
+	font-size: var(--sf-text-xs);
+	line-height: var(--sf-leading-normal);
+	color: var(--sf-text-secondary);
+}
+
+// ── Inline info boxes ────────────────────────────────────────────────────────
+.sf-form-settings .sf-info-box {
+	padding: var(--sf-space-4);
+	border-radius: var(--sf-radius-sm);
+
+	&__text {
+		margin: 0;
+		font-size: var(--sf-text-base);
+		line-height: var(--sf-leading-normal);
+	}
+
+	&--blue {
+		background-color: var(--sf-blue-50);
+		border: 1px solid var(--sf-blue-200);
+
+		.sf-info-box__text {
+			color: var(--sf-blue-800);
+		}
+	}
+
+	&--yellow {
+		background-color: var(--sf-amber-100);
+		border: 1px solid var(--sf-yellow-400);
+
+		.sf-info-box__text {
+			color: var(--sf-amber-800);
 		}
 	}
 }
@@ -140,51 +190,51 @@
 .sf-actions-panel {
 	display: flex;
 	flex-direction: column;
-	gap: 0.75rem;
+	gap: var(--sf-space-3);
 
 	&__empty {
 		font-size: var(--sf-text-base);
-		color: var(--sf-gray-500);
-		margin-bottom: 0.5rem;
+		color: var(--sf-text-muted);
+		margin-bottom: var(--sf-space-2);
 	}
 
 	&__footer {
-		padding-top: 0.5rem;
+		padding-top: var(--sf-space-2);
 	}
 
 	// Individual action card
 	&__item {
-		border: 1px solid var(--sf-gray-200);
+		border: 1px solid var(--sf-border);
 		border-radius: var(--sf-radius-md);
-		background: var(--sf-gray-50);
+		background: var(--sf-bg-subtle);
 		overflow: hidden;
 
 		&.is-dragging {
-			box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-			background: var(--sf-n-0);
+			box-shadow: var(--sf-shadow-md);
+			background: var(--sf-bg-surface);
 		}
 
 		&-header {
 			display: flex;
 			align-items: center;
-			gap: 0.5rem;
-			padding: 0.5rem 0.75rem;
-			background: var(--sf-n-0);
-			border-bottom: 1px solid var(--sf-gray-200);
+			gap: var(--sf-space-2);
+			padding: var(--sf-space-2) var(--sf-space-3);
+			background: var(--sf-bg-surface);
+			border-bottom: 1px solid var(--sf-border);
 		}
 
 		&-type {
 			font-size: var(--sf-text-sm);
-			font-weight: 600;
+			font-weight: var(--sf-weight-semibold);
 			text-transform: uppercase;
 			letter-spacing: 0.04em;
-			color: var(--sf-gray-700);
+			color: var(--sf-text-secondary);
 		}
 
 		&-summary {
 			flex: 1;
 			font-size: var(--sf-text-sm);
-			color: var(--sf-gray-400);
+			color: var(--sf-text-subtle);
 			overflow: hidden;
 			text-overflow: ellipsis;
 			white-space: nowrap;
@@ -193,12 +243,13 @@
 		&-controls {
 			display: flex;
 			align-items: center;
-			gap: 0.25rem;
+			gap: var(--sf-space-1);
 			margin-left: auto;
 
 			// Shrink the toggle label area
 			.components-toggle-control {
 				margin-bottom: 0;
+
 				.components-base-control__field {
 					margin-bottom: 0;
 				}
@@ -206,10 +257,10 @@
 		}
 
 		&-body {
-			padding: 0.75rem;
+			padding: var(--sf-space-3);
 			display: flex;
 			flex-direction: column;
-			gap: 0.75rem;
+			gap: var(--sf-space-3);
 
 			.components-base-control {
 				margin-bottom: 0;
@@ -232,7 +283,7 @@
 	&__row {
 		display: grid;
 		grid-template-columns: 1fr 1fr;
-		gap: 0.75rem;
+		gap: var(--sf-space-3);
 
 		.components-base-control {
 			margin-bottom: 0;
@@ -241,9 +292,9 @@
 
 	// Signing section
 	&__signing {
-		border-top: 1px solid var(--sf-gray-200);
-		padding-top: 0.75rem;
-		margin-top: 0.25rem;
+		border-top: 1px solid var(--sf-border);
+		padding-top: var(--sf-space-3);
+		margin-top: var(--sf-space-1);
 
 		.components-toggle-control {
 			margin-bottom: 0;
@@ -253,14 +304,14 @@
 	// Drag handle
 	&__drag-handle {
 		cursor: grab;
-		color: var(--sf-gray-400);
+		color: var(--sf-text-subtle);
 		font-size: var(--sf-text-md);
-		padding: 0 0.25rem;
+		padding: 0 var(--sf-space-1);
 		user-select: none;
 		line-height: 1;
 
 		&:hover {
-			color: var(--sf-gray-600);
+			color: var(--sf-text-secondary);
 		}
 
 		&:active {

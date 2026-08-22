@@ -3,7 +3,7 @@
  *
  * Extracts all side-effectful form lifecycle operations from FormBuilderInner:
  * - performSave (draft save, autosave, publish)
- * - handleSave, handleSaveDraft, handlePublish, confirmPublish
+ * - handleSave, handleUnpublish, handlePublish, confirmPublish
  * - handleSaveAndClose, handleDelete
  * - handleDiscard, confirmDiscard
  * - Modal visibility states for delete / publish / discard confirmations
@@ -579,9 +579,55 @@ export default function useBuilderOrchestrator({
 		performSave({ auto: false });
 	}, [performSave]);
 
-	const handleSaveDraft = useCallback(() => {
-		performSave({ auto: false, targetStatus: 'draft' });
-	}, [performSave]);
+	/**
+	 * Take a published form off the site.
+	 *
+	 * Only the form's status changes: the schema, the draft and the undo
+	 * history are all left alone, so re-publishing restores exactly what was
+	 * live. This used to happen as a side effect of "Save Draft", which meant a
+	 * routine save could unpublish a live form without saying so.
+	 */
+	const handleUnpublish = useCallback(async () => {
+		if (!currentFormId || formStatus !== 'published') {
+			return;
+		}
+
+		try {
+			const { ok } = await apiPut(`/forms/${currentFormId}`, {
+				status: 'draft',
+			});
+
+			if (!ok) {
+				throw new Error(__('Failed to unpublish form', 'subtleforms'));
+			}
+
+			dispatch({ type: BUILDER_ACTIONS.UNPUBLISH_SUCCESS });
+
+			removeNotice(ERROR_NOTICE_ID);
+			createSuccessNotice(
+				__(
+					'Form unpublished. It is no longer visible on your site.',
+					'subtleforms'
+				),
+				{ id: SUCCESS_NOTICE_ID, isDismissible: true, type: 'snackbar' }
+			);
+		} catch (err) {
+			removeNotice(SUCCESS_NOTICE_ID);
+			createErrorNotice(
+				err.message || __('Failed to unpublish form', 'subtleforms'),
+				{ id: ERROR_NOTICE_ID, isDismissible: true, type: 'snackbar' }
+			);
+		}
+	}, [
+		currentFormId,
+		formStatus,
+		dispatch,
+		createSuccessNotice,
+		createErrorNotice,
+		removeNotice,
+		SUCCESS_NOTICE_ID,
+		ERROR_NOTICE_ID,
+	]);
 
 	/**
 	 * Bug 3 fix: walk the field tree and return true when at least one
@@ -808,7 +854,7 @@ export default function useBuilderOrchestrator({
 	return {
 		performSave,
 		handleSave,
-		handleSaveDraft,
+		handleUnpublish,
 		handlePublish,
 		confirmPublish,
 		handleSaveAndClose,

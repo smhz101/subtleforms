@@ -352,3 +352,39 @@
 		}
 	}
 }
+
+// ── Shared preview body ──────────────────────────────────────────────────────
+// FormPreviewBody renders in both the modal and the Preview tab's workspace, so
+// its chrome lives here rather than in either host.
+
+.sf-form-preview {
+	display: flex;
+	flex-direction: column;
+	gap: var(--sf-space-3);
+
+	&__notice {
+		margin: 0;
+		padding: var(--sf-space-2) var(--sf-space-3);
+		font-size: var(--sf-text-xs);
+		line-height: var(--sf-leading-normal);
+		color: var(--sf-warning-strong);
+		background: var(--sf-warning-bg);
+		border: 1px solid var(--sf-warning-border);
+		border-radius: var(--sf-radius-sm);
+	}
+
+	// The frame sizes itself to its content, so it needs no height here — only
+	// a guarantee that it fills the width it is given.
+	&__frame {
+		width: 100%;
+		border: 0;
+		display: block;
+	}
+
+	&__empty {
+		padding: var(--sf-space-10) var(--sf-space-6);
+		text-align: center;
+		font-size: var(--sf-text-base);
+		color: var(--sf-text-muted);
+	}
+}

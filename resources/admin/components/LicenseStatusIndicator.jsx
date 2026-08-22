@@ -1,5 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
+import './LicenseStatusIndicator.scss';
 
 /**
  * LicenseStatusIndicator Component (Free — placeholder)

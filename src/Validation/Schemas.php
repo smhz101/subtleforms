@@ -368,7 +368,10 @@ class Schemas {
 
 			// FormMetadata
 			'FormMetadata' => array(
-				'type'         => 'optional|in:regular,contact,newsletter,survey,order,payment,registration,multi-step,sectioned,conversational',
+				// `multistep` is accepted alongside `multi-step` because templates and older
+				// stored schemas use the short spelling. saveSchemaVersion canonicalises it,
+				// so storage stays consistent while neither spelling is rejected outright.
+				'type'         => 'optional|in:regular,contact,newsletter,survey,order,payment,registration,multi-step,multistep,sectioned,conversational',
 				'name'         => 'optional|string|max:100',
 				'title'        => 'optional|string|max:255',
 				'description'  => 'optional|string|max:500',

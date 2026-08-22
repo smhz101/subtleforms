@@ -1,6 +1,7 @@
 import { createRoot } from '@wordpress/element';
 import FormRenderer from './components/FormRenderer';
 import './frontend.css';
+import './styles/frontend.scss';
 import { debug } from '../shared/debug';
 
 /**

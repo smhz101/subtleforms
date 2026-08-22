@@ -236,3 +236,39 @@ describe('FSM Transition Validation', () => {
     });
   });
 });
+
+describe('UNPUBLISH_SUCCESS', () => {
+  test('returns a published form to editing and clears the published status', () => {
+    const state = {
+      ...initialBuilderState,
+      state: BUILDER_STATES.PUBLISHED,
+      formStatus: 'published',
+    };
+
+    const next = builderReducer(state, {
+      type: BUILDER_ACTIONS.UNPUBLISH_SUCCESS,
+    });
+
+    expect(next.state).toBe(BUILDER_STATES.EDITING);
+    expect(next.formStatus).toBe('draft');
+  });
+
+  test('leaves an in-progress edit in DIRTY rather than forcing an illegal move', () => {
+    // DIRTY → EDITING is not a legal transition, and unpublishing is a change
+    // of status, not of editing session.
+    const state = {
+      ...initialBuilderState,
+      state: BUILDER_STATES.DIRTY,
+      isDirty: true,
+      formStatus: 'published',
+    };
+
+    const next = builderReducer(state, {
+      type: BUILDER_ACTIONS.UNPUBLISH_SUCCESS,
+    });
+
+    expect(next.state).toBe(BUILDER_STATES.DIRTY);
+    expect(next.isDirty).toBe(true);
+    expect(next.formStatus).toBe('draft');
+  });
+});

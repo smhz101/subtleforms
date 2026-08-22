@@ -89,6 +89,7 @@ export const BUILDER_ACTIONS = {
   START_PUBLISH: 'START_PUBLISH',
   PUBLISH_SUCCESS: 'PUBLISH_SUCCESS',
   PUBLISH_ERROR: 'PUBLISH_ERROR',
+  UNPUBLISH_SUCCESS: 'UNPUBLISH_SUCCESS',
   OPEN_PREVIEW: 'OPEN_PREVIEW',
   CLOSE_PREVIEW: 'CLOSE_PREVIEW',
   CLOSE_BUILDER: 'CLOSE_BUILDER',
@@ -314,7 +315,8 @@ function builderReducer(state, action) {
       }
 
       // If the schema reference is unchanged, treat this as a "mark dirty" and
-      // avoid polluting history (e.g. markDirty dispatches existing draftSchema).
+      // avoid polluting history — a caller re-dispatching the current schema
+      // wants the dirty flag, not an undo step that restores the same state.
       if (nextSchema === state.draftSchema) {
         return {
           ...state,
@@ -628,6 +630,35 @@ function builderReducer(state, action) {
         lastSaveTime: Date.now(),
         saveError: null,
         validationErrors: [],
+      };
+    }
+
+    // ------------------------------------------------------------------------
+    // UNPUBLISH_SUCCESS
+    //
+    // Taking a form off the site changes its status, not its schema, so the
+    // draft and the history survive and the builder returns to plain editing.
+    // ------------------------------------------------------------------------
+    case BUILDER_ACTIONS.UNPUBLISH_SUCCESS: {
+      // Only a form sitting in PUBLISHED has a state to leave. Unpublishing
+      // with unsaved edits in flight leaves DIRTY alone: the status changed,
+      // the editing session did not.
+      const nextState =
+        state.state === BUILDER_STATES.PUBLISHED
+          ? BUILDER_STATES.EDITING
+          : state.state;
+
+      if (!validateTransition(state.state, nextState, action.type)) {
+        return state;
+      }
+
+      return {
+        ...state,
+        state: nextState,
+        saving: false,
+        publishing: false,
+        formStatus: 'draft',
+        saveError: null,
       };
     }
 

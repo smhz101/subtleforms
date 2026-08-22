@@ -193,7 +193,7 @@ export const multiStepLeadCapture = {
       name: 'form_schema',
       title: __('Multi-Step Lead Capture', 'subtleforms'),
       description: __('Progressive lead capture form', 'subtleforms'),
-      type: 'multistep',
+      type: 'multi-step',
       template: 'multistep-lead-capture',
     },
   },

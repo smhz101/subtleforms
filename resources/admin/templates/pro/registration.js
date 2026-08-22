@@ -74,7 +74,7 @@ export const eventRegistration = {
       name: 'form_schema',
       title: __('Event Registration', 'subtleforms'),
       description: __('Event registration form', 'subtleforms'),
-      type: 'multistep',
+      type: 'multi-step',
       template: 'event-registration',
     },
   },

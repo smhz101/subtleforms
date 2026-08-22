@@ -29,23 +29,23 @@
 .subtleforms-form-settings {
 	height: 100%;
 	overflow-y: auto; // Settings panel scrolls
-	background-color: var(--sf-gray-50);
-	padding: 1.5rem;
+	background-color: var(--sf-bg-page);
+	padding: var(--sf-space-8) var(--sf-space-6);
 }
 
 // Save error banner
 .sf-builder-canvas-area {
 	&__error-banner {
-		background-color: rgb(254 242 242);
-		margin-bottom: 1rem;
-		padding: 0.75rem 1.5rem;
-		border-bottom: 1px solid rgb(234 179 8);
+		background-color: var(--sf-danger-bg);
+		margin-bottom: var(--sf-space-4);
+		padding: var(--sf-space-3) var(--sf-space-6);
+		border-bottom: 1px solid var(--sf-danger-border);
 	}
 
 	&__error-text {
 		font-size: var(--sf-text-xs);
-		line-height: 1rem;
-		color: var(--sf-red-600);
+		line-height: var(--sf-leading-normal);
+		color: var(--sf-danger);
 	}
 
 	// Validation notice container
@@ -71,22 +71,5 @@
 		padding: 1.5rem;
 		height: 100%;
 		overflow-y: auto;
-	}
-
-	// Preview tab content
-	&__preview-container {
-		padding: 2rem 1.5rem;
-		height: 100%;
-		overflow-y: auto;
-		background-color: var(--sf-gray-50, var(--sf-n-25));
-
-		.sf-form-preview-pane {
-			max-width: 680px;
-			margin: 0 auto;
-			background: var(--sf-n-0);
-			border-radius: var(--sf-radius-md);
-			padding: 2rem;
-			box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-		}
 	}
 }

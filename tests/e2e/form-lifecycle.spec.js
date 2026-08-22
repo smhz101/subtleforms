@@ -33,9 +33,10 @@ test.describe('Form Lifecycle', () => {
     // We look for the field wrapper or input.
     await expect(page.locator('.subtleforms-field-chrome')).toHaveCount(1);
 
-    // 7. Save as Draft
-    const saveDraftBtn = page.getByRole('button', { name: 'Save Draft' });
-    await saveDraftBtn.click();
+    // 7. Save the draft now, via the header's overflow menu. Drafts also save
+    //    on their own, but forcing it here keeps the test deterministic.
+    await page.getByRole('button', { name: 'More actions' }).click();
+    await page.getByRole('menuitem', { name: 'Save draft now' }).click();
 
     // 8. Verify "Draft" status badge
     const draftBadge = page.getByText('Draft', { exact: true });

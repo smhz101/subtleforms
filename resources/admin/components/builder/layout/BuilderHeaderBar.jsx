@@ -8,7 +8,8 @@
  */
 
 import { useRef } from '@wordpress/element';
-import { Button } from '@wordpress/components';
+import { Button, DropdownMenu, MenuGroup, MenuItem } from '@wordpress/components';
+import { moreVertical } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import Icon from '../../../ui/Icon';
 import HelpMenu from '../../HelpMenu';
@@ -105,15 +106,17 @@ export function BuilderActions({
   dispatch,
   isDirty,
   hasValidationErrors,
-  draftSchema,
   onSaveDraft,
   onPublish,
+  onUnpublish,
   onSaveAndClose,
   onDelete,
   onStartTour,
   onOpenWizard,
   showWizard,
 }) {
+  const isPublished = formStatus === 'published';
+  const busy = saving || autoSaving;
   return (
     <div className='sf-builder-header-bar__center'>
       {/* Status Badge */}
@@ -161,35 +164,18 @@ export function BuilderActions({
 
       {/* Save Status Indicator */}
       <div
-        className='sf-builder-header-bar__save-status'
+        className={`sf-builder-header-bar__save-status${
+          effectiveStatus === 'error' ? ' is-error' : ''
+        }`}
+        role='status'
         title={statusDescription || undefined}>
         <span
-          style={{
-            width: '8px',
-            height: '8px',
-            borderRadius: '50%',
-            background:
-              autoSaving || effectiveStatus === 'saving'
-                ? '#2271b1'
-                : effectiveStatus === 'saved'
-                ? '#00a32a'
-                : effectiveStatus === 'error'
-                ? '#d63638'
-                : '#f0b849',
-            boxShadow:
-              autoSaving || effectiveStatus === 'saving'
-                ? '0 0 4px rgba(34, 113, 177, 0.5)'
-                : 'none',
-          }}
+          aria-hidden='true'
+          className={`sf-builder-header-bar__save-dot sf-builder-header-bar__save-dot--${
+            autoSaving ? 'saving' : effectiveStatus
+          }`}
         />
-        <span
-          className={
-            effectiveStatus === 'error'
-              ? 'text-red-600 font-medium'
-              : 'text-gray-700'
-          }>
-          {statusLabel}
-        </span>
+        <span>{statusLabel}</span>
       </div>
 
       {/* Error Actions */}
@@ -223,14 +209,7 @@ export function BuilderActions({
         </div>
       )}
 
-      <div
-        style={{
-          width: '1px',
-          height: '24px',
-          background: '#ddd',
-          margin: '0 4px',
-        }}
-      />
+      <div className='sf-builder-header-bar__divider' aria-hidden='true' />
 
       {/* Primary Actions Group */}
       <div className='sf-builder-header-bar__action-buttons'>
@@ -239,7 +218,7 @@ export function BuilderActions({
         <Button
           variant='tertiary'
           onClick={() => dispatch({ type: BUILDER_ACTIONS.UNDO_SCHEMA })}
-          disabled={!canUndo || saving || autoSaving}
+          disabled={!canUndo || busy}
           className='sf-builder-header-bar__undo-button'
           title={__('Undo (Ctrl/Cmd+Z)', 'subtleforms')}>
           <Icon.Undo className='sf-builder-header-bar__undo-icon' />
@@ -248,7 +227,7 @@ export function BuilderActions({
         <Button
           variant='tertiary'
           onClick={() => dispatch({ type: BUILDER_ACTIONS.REDO_SCHEMA })}
-          disabled={!canRedo || saving || autoSaving}
+          disabled={!canRedo || busy}
           className='sf-builder-header-bar__redo-button'
           title={__('Redo (Shift+Ctrl/Cmd+Z)', 'subtleforms')}>
           <Icon.Redo className='sf-builder-header-bar__redo-icon' />
@@ -260,46 +239,82 @@ export function BuilderActions({
           showWizard={showWizard}
         />
 
-        {isDirty && (
-          <Button
-            variant='secondary'
-            onClick={onSaveDraft}
-            disabled={saving || autoSaving}
-            className='sf-builder-header-bar__settings-button'>
-            {saving && !formStatus
-              ? __('Saving…', 'subtleforms')
-              : __('Save Draft', 'subtleforms')}
-          </Button>
-        )}
-
+        {/* One action with an outcome autosave cannot produce: making the
+            current draft the version visitors see. Everything else — saving,
+            closing — either happens on its own or costs nothing, so it does not
+            compete for the primary slot. */}
         <Button
           variant='primary'
           data-tour='publish-button'
           onClick={onPublish}
-          disabled={saving || autoSaving || hasValidationErrors}
+          disabled={busy || hasValidationErrors}
           className='sf-builder-header-bar__save-button'>
-          {formStatus === 'published'
+          {isPublished
             ? __('Update', 'subtleforms')
             : __('Publish', 'subtleforms')}
         </Button>
 
         <Button
-          variant='secondary'
+          variant='tertiary'
           onClick={onSaveAndClose}
-          disabled={saving || autoSaving}
+          disabled={busy}
           className='sf-builder-header-bar__close-button'
-          title={__('Save changes and return to forms list', 'subtleforms')}>
-          {__('Save & Close', 'subtleforms')}
+          title={__('Return to the forms list', 'subtleforms')}>
+          {__('Close', 'subtleforms')}
         </Button>
 
-        <Button
-          variant='secondary'
-          onClick={onDelete}
-          isDestructive
-          className='sf-builder-header-bar__close-button'
-          title={__('Delete this form permanently', 'subtleforms')}>
-          {__('Delete', 'subtleforms')}
-        </Button>
+        <DropdownMenu
+          icon={moreVertical}
+          label={__('More actions', 'subtleforms')}
+          className='sf-builder-header-bar__more-menu'
+          popoverProps={{ placement: 'bottom-end' }}>
+          {({ onClose }) => (
+            <>
+              <MenuGroup>
+                <MenuItem
+                  disabled={!isDirty || busy}
+                  info={__(
+                    'Drafts also save on their own a few seconds after each change.',
+                    'subtleforms'
+                  )}
+                  onClick={() => {
+                    onSaveDraft();
+                    onClose();
+                  }}>
+                  {__('Save draft now', 'subtleforms')}
+                </MenuItem>
+              </MenuGroup>
+
+              {isPublished && (
+                <MenuGroup>
+                  <MenuItem
+                    disabled={busy}
+                    info={__(
+                      'Takes the form off your site. The draft and its history are kept.',
+                      'subtleforms'
+                    )}
+                    onClick={() => {
+                      onUnpublish?.();
+                      onClose();
+                    }}>
+                    {__('Unpublish', 'subtleforms')}
+                  </MenuItem>
+                </MenuGroup>
+              )}
+
+              <MenuGroup>
+                <MenuItem
+                  isDestructive
+                  onClick={() => {
+                    onDelete();
+                    onClose();
+                  }}>
+                  {__('Delete form', 'subtleforms')}
+                </MenuItem>
+              </MenuGroup>
+            </>
+          )}
+        </DropdownMenu>
       </div>
     </div>
   );

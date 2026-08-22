@@ -410,6 +410,14 @@ final class FormsRepository {
 			Logger::debug( 'Injected default empty fields array for form %d in saveSchemaVersion', $formId );
 		}
 
+		// Two spellings of the multi-step type are in circulation: templates and
+		// some builder paths write `multistep`, the schema and renderers expect
+		// `multi-step`. Forms created from those templates could not save at all.
+		// Canonicalise here so storage has one spelling whatever the client sent.
+		if ( isset( $schema['metadata']['type'] ) && $schema['metadata']['type'] === 'multistep' ) {
+			$schema['metadata']['type'] = 'multi-step';
+		}
+
 		// Appearance values are written into CSS custom properties on the rendered
 		// form, so they are checked here — at the point of storage — rather than
 		// escaped at output. Every save path goes through this method.
