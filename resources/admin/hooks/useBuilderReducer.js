@@ -197,6 +197,10 @@ export const initialBuilderState = {
   formId: null,
   formTitle: '',
   formStatus: 'draft', // 'draft' | 'published'
+  // True for a published form whose draft_schema differs from the published
+  // config (i.e. the admin has unpublished edits). Drives the "Published ·
+  // unpublished changes" header label so the builder agrees with listings.
+  hasUnpublishedChanges: false,
 
   // Schema state
   draftSchema: null,
@@ -290,6 +294,7 @@ function builderReducer(state, action) {
         formId: form.id,
         formTitle: form.title || '',
         formStatus: form.status || 'draft',
+        hasUnpublishedChanges: !!(form.has_unpublished_changes),
         draftSchema: schema || [],
         isDirty: false,
         schemaHistoryPast: [],
@@ -626,6 +631,7 @@ function builderReducer(state, action) {
         publishing: false,
         saving: false,
         formStatus: 'published',
+        hasUnpublishedChanges: false,
         isDirty: false,
         lastSaveTime: Date.now(),
         saveError: null,
@@ -658,6 +664,7 @@ function builderReducer(state, action) {
         saving: false,
         publishing: false,
         formStatus: 'draft',
+        hasUnpublishedChanges: false,
         saveError: null,
       };
     }

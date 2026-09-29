@@ -20,6 +20,10 @@ import { ConfirmModal } from '../modals';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
 import { PRO_TEMPLATE_IDS } from '../utils/proFeatureDetector';
 import { apiGet, apiPost, apiPut, apiDelete } from '../utils/api';
+import {
+  getFormTypeBadge,
+  getFormStatusBadge,
+} from '../utils/formMeta';
 import { logger, perfMarkers } from '../diagnostics';
 import './FormsList.scss';
 
@@ -238,31 +242,7 @@ export default function FormsList({
       key: 'form_type',
       title: __('Type', 'subtleforms'),
       render: (_, form) => {
-        // form_type is extracted from schema on the server; fall back to metadata.type for
-        // any cached/legacy responses, then default to 'regular'.
-        const raw = form.form_type || form.metadata?.type || 'regular';
-        // Normalize legacy/alias types to canonical values
-        const formType =
-          raw === 'multistep' || raw === 'sectioned' ? 'multi-step' : raw;
-        const typeConfig = {
-          regular: {
-            classes: 'sf-form-type-badge--regular',
-            label: __('Standard', 'subtleforms'),
-            icon: Icon.FileText,
-          },
-          'multi-step': {
-            classes: 'sf-form-type-badge--multistep',
-            label: __('Multi-step', 'subtleforms'),
-            icon: Icon.Layers,
-          },
-          conversational: {
-            classes: 'sf-form-type-badge--conversational',
-            label: __('Conversational', 'subtleforms'),
-            icon: Icon.MessageCircle,
-          },
-        };
-
-        const config = typeConfig[formType] || typeConfig.regular;
+        const config = getFormTypeBadge(form);
         const IconComponent = config.icon;
 
         return (
@@ -277,28 +257,10 @@ export default function FormsList({
       key: 'status',
       title: __('Status', 'subtleforms'),
       sortable: true,
-      render: (status) => {
-        const statusConfig = {
-          draft: {
-            classes: 'sf-status-badge--draft',
-            label: __('Draft', 'subtleforms'),
-            icon: Icon.Edit,
-          },
-          published: {
-            classes: 'sf-status-badge--published',
-            label: __('Published', 'subtleforms'),
-            icon: Icon.CheckCircle,
-          },
-          archived: {
-            classes: 'sf-status-badge--archived',
-            label: __('Archived', 'subtleforms'),
-            icon: Icon.Package,
-          },
-        };
-
-        const config = statusConfig[status] || statusConfig.draft;
-
+      render: (status, form) => {
+        const config = getFormStatusBadge(form);
         const IconComponent = config.icon;
+
         return (
           <span className={clsx('sf-status-badge', config.classes)}>
             <IconComponent />
@@ -370,9 +332,19 @@ export default function FormsList({
       title: __('Last Updated', 'subtleforms'),
       sortable: true,
       render: (updatedAt) => {
-        const date = new Date(updatedAt);
+        // Server returns updated_at as a naive UTC datetime (e.g.
+        // "2026-09-29 13:00:00"). Without a timezone suffix, JS parses it as
+        // local time, which shifts the instant by the viewer's UTC offset and
+        // is what produced the "5 hours ago" bug for a just-created form.
+        // Normalise to an explicit UTC instant before comparing.
+        const raw = updatedAt ? String( updatedAt ) : '';
+        const iso =
+          raw && ! /[zZ]|[+-]\d{2}:?\d{2}$/.test( raw )
+            ? `${ raw.replace( ' ', 'T' ) }Z`
+            : raw;
+        const date = new Date( iso );
         const now = new Date();
-        const diffInHours = Math.floor((now - date) / (1000 * 60 * 60));
+        const diffInHours = Math.floor( ( now - date ) / ( 1000 * 60 * 60 ) );
 
         let displayText;
         if (diffInHours < 1) displayText = __('Just now', 'subtleforms');

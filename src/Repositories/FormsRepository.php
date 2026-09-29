@@ -143,7 +143,7 @@ final class FormsRepository {
 		$supports_json = \SubtleForms\Support\DatabaseFeatures::supportsJson();
 
 		if ( $supports_json ) {
-			$columns = "id, title, status, created_at, updated_at, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(draft_schema, '$.metadata.type')), JSON_UNQUOTE(JSON_EXTRACT(config, '$.metadata.type'))) AS form_type, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(draft_schema, '$.metadata.template')), JSON_UNQUOTE(JSON_EXTRACT(config, '$.metadata.template'))) AS template_id";
+			$columns = "id, title, status, created_at, updated_at, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(draft_schema, '$.metadata.type')), JSON_UNQUOTE(JSON_EXTRACT(config, '$.metadata.type'))) AS form_type, COALESCE(JSON_UNQUOTE(JSON_EXTRACT(draft_schema, '$.metadata.template')), JSON_UNQUOTE(JSON_EXTRACT(config, '$.metadata.template'))) AS template_id, CASE WHEN draft_schema IS NOT NULL AND draft_schema <> config THEN 1 ELSE 0 END AS has_unpublished_changes";
 		} else {
 			$columns = 'id, title, status, created_at, updated_at, draft_schema, config';
 		}
@@ -176,14 +176,18 @@ final class FormsRepository {
 	 * @return array Row with form_type/template_id resolved.
 	 */
 	private function extractListMetadata( array $row ): array {
-		$draft  = \SubtleForms\Support\Helpers::safe_json_decode( $row['draft_schema'] ?? '', true, array() );
-		$config = \SubtleForms\Support\Helpers::safe_json_decode( $row['config'] ?? '', true, array() );
+		$draft_raw  = is_string( $row['draft_schema'] ?? null ) ? trim( $row['draft_schema'] ) : '';
+		$config_raw = is_string( $row['config'] ?? null ) ? trim( $row['config'] ) : '';
+
+		$draft  = \SubtleForms\Support\Helpers::safe_json_decode( $draft_raw, true, array() );
+		$config = \SubtleForms\Support\Helpers::safe_json_decode( $config_raw, true, array() );
 
 		$draft_meta  = is_array( $draft ) ? ( $draft['metadata'] ?? array() ) : array();
 		$config_meta = is_array( $config ) ? ( $config['metadata'] ?? array() ) : array();
 
-		$row['form_type']   = $draft_meta['type'] ?? $config_meta['type'] ?? null;
-		$row['template_id'] = $draft_meta['template'] ?? $config_meta['template'] ?? null;
+		$row['form_type']              = $draft_meta['type'] ?? $config_meta['type'] ?? null;
+		$row['template_id']            = $draft_meta['template'] ?? $config_meta['template'] ?? null;
+		$row['has_unpublished_changes'] = ( $draft_raw !== '' && $config_raw !== '' && $draft_raw !== $config_raw ) ? 1 : 0;
 
 		unset( $row['draft_schema'], $row['config'] );
 

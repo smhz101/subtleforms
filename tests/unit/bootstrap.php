@@ -87,3 +87,16 @@ if ( ! function_exists( 'wp_kses' ) ) {
 		return (string) $value;
 	}
 }
+
+if ( ! function_exists( 'wp_json_encode' ) ) {
+	/**
+	 * Stub: encode using native json_encode so Support classes that call it
+	 * (e.g. FormMeta) work in the standalone unit test environment.
+	 *
+	 * @param mixed $data Data to encode.
+	 * @return string|false
+	 */
+	function wp_json_encode( $data ) {
+		return json_encode( $data );
+	}
+}

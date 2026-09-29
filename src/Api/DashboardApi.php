@@ -221,13 +221,19 @@ class DashboardApi {
 				// Get submission count for this form
 				$submissionCount = $this->submissionsRepo->count( array( 'form_id' => $form['id'] ) );
 
+				// Single source of truth for type/status/unpublished-changes so
+				// the Dashboard agrees with All Forms and the builder header.
+				$form = \SubtleForms\Support\FormMeta::with_meta( $form );
+
 				return array(
-					'id'               => $form['id'],
-					'title'            => $form['title'],
-					'status'           => $form['status'],
-					'updated_at'       => $form['updated_at'],
-					'time_ago'         => $this->timeAgo( $form['updated_at'] ),
-					'submission_count' => $submissionCount,
+					'id'                      => $form['id'],
+					'title'                   => $form['title'],
+					'type'                    => $form['type'],
+					'status'                  => $form['status'],
+					'has_unpublished_changes' => $form['has_unpublished_changes'],
+					'updated_at'              => $form['updated_at'],
+					'time_ago'                => $this->timeAgo( $form['updated_at'] ),
+					'submission_count'        => $submissionCount,
 				);
 			},
 			$forms

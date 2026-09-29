@@ -12,6 +12,7 @@ import clsx from 'clsx';
 import Icon from '../ui/Icon';
 import AdminShell from '../components/AdminShell';
 import LicenseStatusIndicator from '../components/LicenseStatusIndicator';
+import { getFormTypeBadge, getFormStatusBadge } from '../utils/formMeta';
 import './DashboardPage.scss';
 
 /**
@@ -183,33 +184,9 @@ export default function Dashboard() {
                             </a>
                           </div>
                           <div className='sf-item-meta'>
-                            {/* Form Type Badge */}
+                            {/* Form Type Badge — single source of truth */}
                             {(() => {
-                              const raw = form.metadata?.type || 'regular';
-                              // Normalize legacy/alias types to canonical values
-                              const formType =
-                                raw === 'multistep' || raw === 'sectioned'
-                                  ? 'multi-step'
-                                  : raw;
-                              const typeConfig = {
-                                regular: {
-                                  icon: Icon.FileText,
-                                  label: __('Standard', 'subtleforms'),
-                                  color: 'gray',
-                                },
-                                'multi-step': {
-                                  icon: Icon.Layers,
-                                  label: __('Multi-step', 'subtleforms'),
-                                  color: 'purple',
-                                },
-                                conversational: {
-                                  icon: Icon.MessageCircle,
-                                  label: __('Conversational', 'subtleforms'),
-                                  color: 'blue',
-                                },
-                              };
-                              const config =
-                                typeConfig[formType] || typeConfig.regular;
+                              const config = getFormTypeBadge(form);
                               const IconComponent = config.icon;
                               return (
                                 <span
@@ -225,10 +202,20 @@ export default function Dashboard() {
                                 </span>
                               );
                             })()}
-                            <span
-                              className={`sf-status-badge sf-status-badge--${form.status}`}>
-                              {form.status}
-                            </span>
+                            {(() => {
+                              const config = getFormStatusBadge(form);
+                              const IconComponent = config.icon;
+                              return (
+                                <span
+                                  className={clsx(
+                                    'sf-status-badge',
+                                    config.classes
+                                  )}>
+                                  <IconComponent className='sf-icon-sm' />
+                                  {config.label}
+                                </span>
+                              );
+                            })()}
                             <span className='submission-count'>
                               {form.submission_count}{' '}
                               {__('submissions', 'subtleforms')}

@@ -96,6 +96,21 @@
 		text-transform: uppercase;
 		letter-spacing: 0.04em;
 		color: var(--sf-surface);
+
+		// Single source of truth for builder status. These variants replace
+		// the old Tailwind bg-green-600 / bg-yellow-500 utilities (which had
+		// no Tailwind pipeline backing them) so the badge actually renders.
+		&--published {
+			background-color: var(--sf-green-600, var(--sf-success, #16a34a));
+		}
+
+		&--draft {
+			background-color: var(--sf-yellow-500, var(--sf-warning, #d97706));
+		}
+
+		&--unpublished {
+			background-color: var(--sf-warning, #6b4600);
+		}
 	}
 
 	&__shortcode-button {

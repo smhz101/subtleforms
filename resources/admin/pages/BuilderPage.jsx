@@ -42,6 +42,7 @@ import {
 import BuilderCanvasArea from '../components/builder/layout/BuilderCanvasArea';
 import BuilderModalsController from '../components/builder/layout/BuilderModalsController';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
+import { getFormTypeBadgeConfig } from '../utils/formMeta';
 
 function FormBuilderInner({
   formId,
@@ -65,6 +66,7 @@ function FormBuilderInner({
     saving,
     autoSaving,
     formStatus,
+    hasUnpublishedChanges,
     error,
     saveError,
     autoSaveError,
@@ -280,7 +282,7 @@ function FormBuilderInner({
       if (newId && parseInt(newId, 10) === formId) {
         isNewFormRef.current = true;
       }
-    } catch (_) {}
+    } catch (_) { /* no-op */ }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // intentionally runs once on mount
 
@@ -289,7 +291,7 @@ function FormBuilderInner({
     if (isDirty && !hasEverBeenDirtyRef.current) {
       hasEverBeenDirtyRef.current = true;
       isNewFormRef.current = false;
-      try { sessionStorage.removeItem('sf_new_form_id'); } catch (_) {}
+      try { sessionStorage.removeItem('sf_new_form_id'); } catch (_) { /* no-op */ }
     }
   }, [isDirty]);
 
@@ -317,7 +319,7 @@ function FormBuilderInner({
             'Content-Type': 'application/json',
           },
         }).catch(() => {});
-        try { sessionStorage.removeItem('sf_new_form_id'); } catch (_) {}
+        try { sessionStorage.removeItem('sf_new_form_id'); } catch (_) { /* no-op */ }
       }
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -512,7 +514,7 @@ function FormBuilderInner({
       try {
         await apiDelete(`/forms/${currentFormId}`);
         sessionStorage.removeItem('sf_new_form_id');
-      } catch (_) {}
+      } catch (_) { /* no-op */ }
       isNewFormRef.current = false;
       navigate('/forms');
       return;
@@ -584,33 +586,11 @@ function FormBuilderInner({
   if (loading) return <Spinner />;
   if (error) return <Notice status='error'>{error}</Notice>;
 
-  // Get form type badge config
-  // Normalize legacy types: 'multistep' → 'multi-step', 'sectioned' → 'multi-step', 'payment' → 'regular'
+  // Get form type badge config — single source of truth (shared selector).
+  // The builder shows the draft type (what you're editing), which matches the
+  // listings (they prefer the draft type when a draft exists).
   const rawFormType = draftSchema?.metadata?.type || 'regular';
-  const formType = (() => {
-    if (rawFormType === 'multistep' || rawFormType === 'sectioned') return 'multi-step';
-    if (rawFormType === 'payment') return 'regular';
-    return rawFormType;
-  })();
-  const formTypeBadgeConfig = {
-    regular: {
-      icon: Icon.FileText,
-      label: __('Standard', 'subtleforms'),
-      color: 'gray',
-    },
-    'multi-step': {
-      icon: Icon.Layers,
-      label: __('Multi-step', 'subtleforms'),
-      color: 'purple',
-    },
-    conversational: {
-      icon: Icon.MessageCircle,
-      label: __('Conversational', 'subtleforms'),
-      color: 'blue',
-    },
-  };
-  const formTypeBadge =
-    formTypeBadgeConfig[formType] || formTypeBadgeConfig.regular;
+  const formTypeBadge = getFormTypeBadgeConfig(rawFormType);
   const FormTypeIcon = formTypeBadge.icon;
 
   // Always show the builder canvas — even blank forms should open the editor
@@ -636,6 +616,7 @@ function FormBuilderInner({
         actions={
           <BuilderActions
             formStatus={formStatus}
+            hasUnpublishedChanges={hasUnpublishedChanges}
             shortcode={shortcode}
             copyState={copyState}
             onCopyShortcode={handleCopyShortcode}

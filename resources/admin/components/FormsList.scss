@@ -108,6 +108,18 @@
 			border-color: var(--sf-gray-300);
 		}
 
+		&--unpublished {
+			background-color: var(--sf-warning-bg);
+			color: var(--sf-warning-strong);
+			border-color: var(--sf-warning-border);
+		}
+
+		&--archived {
+			background-color: var(--sf-gray-50);
+			color: var(--sf-gray-600);
+			border-color: var(--sf-gray-300);
+		}
+
 		svg {
 			width: 0.75rem;
 			height: 0.75rem;

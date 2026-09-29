@@ -86,6 +86,7 @@ export function BuilderTitle({
 export function BuilderActions({
   // Status props
   formStatus,
+  hasUnpublishedChanges,
   shortcode,
   copyState,
   onCopyShortcode,
@@ -116,24 +117,36 @@ export function BuilderActions({
   showWizard,
 }) {
   const isPublished = formStatus === 'published';
+  // A published form with unsaved/unpublished draft edits shows "Published ·
+  // unpublished changes" instead of "Draft", so the builder header agrees with
+  // the All Forms and Dashboard listings (single source of truth).
+  const showUnpublishedChanges = isPublished && (hasUnpublishedChanges || isDirty);
   const busy = saving || autoSaving;
+  const statusBadgeClass = showUnpublishedChanges
+    ? 'sf-builder-header-bar__mode-badge--unpublished'
+    : isPublished
+      ? 'sf-builder-header-bar__mode-badge--published'
+      : 'sf-builder-header-bar__mode-badge--draft';
+  const statusBadgeLabel = showUnpublishedChanges
+    ? __('Published · unpublished changes', 'subtleforms')
+    : isPublished
+      ? __('Published', 'subtleforms')
+      : __('Draft', 'subtleforms');
+  const statusBadgeTitle = showUnpublishedChanges
+    ? __('Form is live, but has unpublished draft changes', 'subtleforms')
+    : isPublished
+      ? __('Form is live and visible to users', 'subtleforms')
+      : __('Form is saved but not published', 'subtleforms');
+
   return (
     <div className='sf-builder-header-bar__center'>
-      {/* Status Badge */}
+      {/* Status Badge — single source of truth (shared with listings) */}
       <span
         data-tour='status-badge'
-        className={`sf-builder-header-bar__mode-badge ${
-          formStatus === 'published' ? 'bg-green-600' : 'bg-yellow-500'
-        }`}
+        className={`sf-builder-header-bar__mode-badge ${statusBadgeClass}`}
         style={{ borderRadius: '4px' }}
-        title={
-          formStatus === 'published'
-            ? __('Form is live and visible to users', 'subtleforms')
-            : __('Form is saved but not published', 'subtleforms')
-        }>
-        {formStatus === 'published'
-          ? __('Published', 'subtleforms')
-          : __('Draft', 'subtleforms')}
+        title={statusBadgeTitle}>
+        {statusBadgeLabel}
       </span>
 
       {/* Shortcode Pill */}
