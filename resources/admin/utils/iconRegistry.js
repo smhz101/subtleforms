@@ -15,68 +15,70 @@ import Icon from '../ui/Icon';
 // ── Field type icons ──────────────────────────────────────────────────────────
 
 export const FIELD_ICON_MAP = {
-  // Text inputs
+  // Text inputs — each field gets a distinct glyph.
   text: Icon.Type,
-  email: Icon.Mail,
+  email: Icon.AtSign,
   phone: Icon.Phone,
-  url: Icon.Globe,
+  url: Icon.Link,
   number: Icon.Hash,
   textarea: Icon.AlignLeft,
-  password: Icon.Lock,
+  password: Icon.KeyRound,
 
   // Selection
   checkbox: Icon.CheckSquare,
-  radio: Icon.Circle,
-  multiple_choice: Icon.CheckSquare,
+  consent: Icon.ShieldCheck,
+  radio: Icon.CircleDot,
+  multiple_choice: Icon.ListChecks,
   dropdown: Icon.ChevronDown,
 
   // Date / Time
   date: Icon.Calendar,
   time: Icon.Clock,
-  datetime: Icon.Calendar,
+  datetime: Icon.CalendarClock,
 
   // Location
   country: Icon.Globe,
   address: Icon.MapPin,
 
   // Content / Layout
-  hidden: Icon.Code,
+  hidden: Icon.EyeOff,
   html: Icon.Code,
-  section_break: Icon.List,
+  disclaimer: Icon.Info,
+  section_break: Icon.SeparatorHorizontal,
   image_upload: Icon.Image,
-  file_upload: Icon.File,
+  file_upload: Icon.FileUp,
   step: Icon.Navigation,
 
-  // CAPTCHA (no Shield in Icon.jsx — use Lock)
-  captcha: Icon.Lock,
-  recaptcha: Icon.Lock,
-  hcaptcha: Icon.Lock,
-  turnstile: Icon.Lock,
+  // CAPTCHA — distinct glyphs per provider.
+  captcha: Icon.ShieldCheck,
+  recaptcha: Icon.Bot,
+  hcaptcha: Icon.Shield,
+  turnstile: Icon.RotateCw,
 
   // Composite fields
   name_group: Icon.Users,
-  address_group: Icon.MapPin,
+  address_group: Icon.Building2,
 
   // Containers
   columns: Icon.Columns,
-  column_layout: Icon.Columns,
+  column_layout: Icon.Columns2,
   repeat_container: Icon.Layers,
 
   // Payment
-  payment_amount: Icon.DollarSign,
+  payment_amount: Icon.CircleDollarSign,
   payment_card: Icon.CreditCard,
   payment_product: Icon.ShoppingCart,
-  payment_currency: Icon.DollarSign,
+  payment_currency: Icon.Coins,
   payment_coupon: Icon.Tag,
-  payment_summary: Icon.FileText,
+  payment_summary: Icon.Receipt,
   payment_hidden_price: Icon.Lock,
 
   // Advanced
   rating: Icon.Star,
   range_slider: Icon.Sliders,
   checkbox_grid: Icon.LayoutGrid,
-  action_hook: Icon.Zap,
-  save_resume: Icon.Clipboard,
+  action_hook: Icon.Webhook,
+  save_resume: Icon.Save,
 };
 
 // ── UI element icons ──────────────────────────────────────────────────────────

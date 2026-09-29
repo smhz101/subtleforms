@@ -15,6 +15,7 @@ const INPUT_FIELD_TYPES = new Set([
   'datetime',
   // Choice fields
   'checkbox',
+  'consent',
   'radio',
   'multiple_choice',
   'select',

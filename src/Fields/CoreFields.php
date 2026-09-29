@@ -325,13 +325,72 @@ final class CoreFields {
 				kind: 'input',
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
-					'options' => array(),
+					// A checkbox is a single consent-style checkbox (NOT a
+					// multi-option list — that is `multiple_choice`). The label
+					// next to the box is the consent statement, so canvas, preview,
+					// settings and frontend all read the same `checkboxLabel`.
+					'checkboxLabel' => __( 'I agree', 'subtleforms' ),
 				),
 				inspectorControls: array(
 					array(
 						'type'  => 'text',
 						'name'  => 'label',
 						'label' => __( 'Label', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'text',
+						'name'  => 'checkboxLabel',
+						'label' => __( 'Checkbox label', 'subtleforms' ),
+						'help'  => __( 'Text shown next to the checkbox.', 'subtleforms' ),
+					),
+				),
+				meta: array( 'category' => 'regular' ),
+			)
+		);
+
+		// Consent / GDPR field — a single checkbox with a rich label that can
+		// link to the Privacy Policy, required by default, and recorded as a
+		// consent + timestamp on submission. Distinct from `checkbox` so legal
+		// consent is explicit and auditable.
+		$registry->register(
+			new FieldDefinition(
+				type: 'consent',
+				label: __( 'Consent', 'subtleforms' ),
+				category: 'choices',
+				icon: 'dashicons-privacy',
+				kind: 'input',
+				baseAttributes: array(
+					'required' => true,
+				),
+				fieldSpecificAttributes: array(
+					'checkboxLabel'    => __( 'I agree to the Privacy Policy.', 'subtleforms' ),
+					'privacyPolicyUrl' => self::default_privacy_policy_url(),
+					'linkText'         => __( 'Privacy Policy', 'subtleforms' ),
+				),
+				inspectorControls: array(
+					array(
+						'type'  => 'text',
+						'name'  => 'label',
+						'label' => __( 'Label', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'textarea',
+						'name'  => 'checkboxLabel',
+						'label' => __( 'Consent statement', 'subtleforms' ),
+						'help'  => __( 'Text shown next to the checkbox. Add the link placeholder below to insert a Privacy Policy link.', 'subtleforms' ),
+						'rows'  => 2,
+					),
+					array(
+						'type'  => 'text',
+						'name'  => 'privacyPolicyUrl',
+						'label' => __( 'Privacy Policy URL', 'subtleforms' ),
+						'help'  => __( 'Link target for the consent statement. Defaults to the site Privacy Policy page.', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'text',
+						'name'  => 'linkText',
+						'label' => __( 'Link text', 'subtleforms' ),
+						'help'  => __( 'Text of the Privacy Policy link inside the consent statement.', 'subtleforms' ),
 					),
 				),
 				meta: array( 'category' => 'regular' ),
@@ -999,6 +1058,53 @@ final class CoreFields {
 
 		$registry->register(
 			new FieldDefinition(
+				type: 'disclaimer',
+				label: __( 'Disclaimer', 'subtleforms' ),
+				category: 'layout',
+				icon: 'dashicons-info',
+				kind: 'structure',
+				baseAttributes: array(),
+				fieldSpecificAttributes: array(
+					'content' => '',
+					'variant' => 'info',
+				),
+				inspectorControls: array(),
+				meta: array( 'category' => 'layout' ),
+				layoutControls: array(
+					array(
+						'type'  => 'textarea',
+						'name'  => 'content',
+						'label' => __( 'Disclaimer Text', 'subtleforms' ),
+					),
+					array(
+						'type'    => 'select',
+						'name'    => 'variant',
+						'label'   => __( 'Style', 'subtleforms' ),
+						'options' => array(
+							array(
+								'label' => __( 'Info', 'subtleforms' ),
+								'value' => 'info',
+							),
+							array(
+								'label' => __( 'Warning', 'subtleforms' ),
+								'value' => 'warning',
+							),
+							array(
+								'label' => __( 'Success', 'subtleforms' ),
+								'value' => 'success',
+							),
+							array(
+								'label' => __( 'Neutral', 'subtleforms' ),
+								'value' => 'neutral',
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$registry->register(
+			new FieldDefinition(
 				type: 'section_break',
 				label: __( 'Section Break', 'subtleforms' ),
 				category: 'layout',
@@ -1606,5 +1712,23 @@ final class CoreFields {
 
 		// Allow extensions to register additional fields
 		do_action( 'subtleforms/fields/register', $registry );
+	}
+
+	/**
+	 * Resolve the site's Privacy Policy page URL, if one is set.
+	 *
+	 * WordPress exposes the Privacy Policy page via the `wp_page_for_privacy_policy`
+	 * option. We surface it as the default for the Consent field's link so admins
+	 * get a sensible value without configuration; empty when no page is set.
+	 *
+	 * @return string Privacy Policy URL, or '' if none configured.
+	 */
+	private static function default_privacy_policy_url(): string {
+		$page_id = (int) get_option( 'wp_page_for_privacy_policy', 0 );
+		if ( $page_id <= 0 ) {
+			return '';
+		}
+		$permalink = get_permalink( $page_id );
+		return is_string( $permalink ) ? $permalink : '';
 	}
 }

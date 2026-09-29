@@ -19,7 +19,7 @@ const NON_INPUT_TYPES = new Set([
 // All field types recognized by this renderer — unknown types get legacy fallback
 const KNOWN_TYPES = new Set([
   ...NON_INPUT_TYPES,
-  'text', 'email', 'phone', 'tel', 'url', 'number', 'textarea', 'checkbox',
+  'text', 'email', 'phone', 'tel', 'url', 'number', 'textarea', 'checkbox', 'consent',
   'radio', 'multiple_choice', 'select', 'dropdown', 'date', 'time', 'datetime',
   'country', 'chained_select', 'password', 'rating', 'range_slider',
   'color_picker', 'signature', 'image_upload', 'file_upload',
@@ -213,19 +213,65 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       )}
 
       {type === 'checkbox' && (
-        <div className='sf-field-renderer__options-list'>
-          {(options || [{ label: __('Option', 'subtleforms') }]).map((opt, idx) => (
-            <div key={idx} className='sf-field-renderer__checkbox-wrapper'>
-              <input
-                type='checkbox'
-                className='sf-field-renderer__checkbox'
-                tabIndex='-1'
-              />
-              <span className='sf-field-renderer__checkbox-label'>
-                {opt.label}
-              </span>
-            </div>
-          ))}
+        <div className='sf-field-renderer__checkbox-single'>
+          <input
+            type='checkbox'
+            className='sf-field-renderer__checkbox'
+            tabIndex='-1'
+            readOnly
+          />
+          <span className='sf-field-renderer__checkbox-label'>
+            {field.checkboxLabel || __('I agree', 'subtleforms')}
+          </span>
+        </div>
+      )}
+
+      {type === 'consent' && (
+        <div className='sf-field-renderer__checkbox-single sf-field-renderer__consent'>
+          <input
+            type='checkbox'
+            className='sf-field-renderer__checkbox'
+            tabIndex='-1'
+            readOnly
+          />
+          <span className='sf-field-renderer__checkbox-label'>
+            {(() => {
+              const label = field.checkboxLabel || __('I agree to the Privacy Policy.', 'subtleforms');
+              const url = field.privacyPolicyUrl || '';
+              const linkText = field.linkText || __('Privacy Policy', 'subtleforms');
+              if (!url) return label;
+              if (label.indexOf('{{link}}') !== -1) {
+                const [before, after] = label.split('{{link}}');
+                return (
+                  <>
+                    {before}
+                    <a
+                      href={url}
+                      target='_blank'
+                      rel='noopener noreferrer'
+                      className='sf-field-renderer__consent-link'
+                      onClick={(e) => e.preventDefault()}>
+                      {linkText}
+                    </a>
+                    {after}
+                  </>
+                );
+              }
+              return (
+                <>
+                  {label}{' '}
+                  <a
+                    href={url}
+                    target='_blank'
+                    rel='noopener noreferrer'
+                    className='sf-field-renderer__consent-link'
+                    onClick={(e) => e.preventDefault()}>
+                    {linkText}
+                  </a>
+                </>
+              );
+            })()}
+          </span>
         </div>
       )}
 
@@ -480,7 +526,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
               <span className='sf-action-hook-preview__code-keyword'>do_action</span>
               <span className='sf-action-hook-preview__code-bracket'>(</span>
               <span className='sf-action-hook-preview__code-string'>
-                '{field.hook_name || 'subtleforms_custom_action'}'
+                {`'${field.hook_name || 'subtleforms_custom_action'}'`}
               </span>
               <span className='sf-action-hook-preview__code-bracket'>)</span>
             </div>

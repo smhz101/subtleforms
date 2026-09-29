@@ -304,12 +304,16 @@ final class PublicSubmitApi {
 				return ApiResponse::server_error( $result->error );
 			}
 
-			// Finalize submission status
-			$finalSubmission = $this->submissionsRepo->find( $submissionId );
-			if ( $finalSubmission && $finalSubmission['status'] === 'saved' ) {
-				if ( ! $isPaymentForm ) {
-					$this->submissionsRepo->update( $submissionId, array( 'status' => 'completed' ) );
-				} else {
+		// Finalize submission status
+		$finalSubmission = $this->submissionsRepo->find( $submissionId );
+		if ( $finalSubmission && $finalSubmission['status'] === 'saved' ) {
+			// Record consent timestamps (GDPR audit) into submission meta. Done
+			// for both payment and non-payment forms so consent is always stamped.
+			$this->recordConsents( $submissionId, $finalSubmission, $payload, $activeSchema['schema'] ?? $activeSchema );
+
+			if ( ! $isPaymentForm ) {
+				$this->submissionsRepo->update( $submissionId, array( 'status' => 'completed' ) );
+			} else {
 					if ( $paymentMetadata ) {
 						$currentMeta = $finalSubmission['meta'] ?? array();
 						if ( ! is_array( $currentMeta ) ) {
@@ -404,6 +408,111 @@ final class PublicSubmitApi {
 		}
 
 		return $payload;
+	}
+
+	/**
+	 * Record consent timestamps into submission meta for GDPR auditability.
+	 *
+	 * Walks the schema for `consent` fields, and for each one the submitter
+	 * accepted (truthy value in the payload), stamps a consent record with the
+	 * field key, label, Privacy Policy URL and an ISO-8601 timestamp. Stored
+	 * under `meta.consents` so the payload shape is unchanged but the consent
+	 * is auditable per submission.
+	 *
+	 * @param int   $submissionId Submission ID.
+	 * @param array $submission   Final submission row (for current meta).
+	 * @param array $payload       Submitted values keyed by field key.
+	 * @param array $schema        Resolved form schema.
+	 * @return void
+	 */
+	private function recordConsents( int $submissionId, array $submission, array $payload, $schema ): void {
+		if ( ! is_array( $schema ) ) {
+			return;
+		}
+
+		$consent_fields = array();
+		$this->collectConsentFields( $schema['fields'] ?? array(), $consent_fields );
+
+		if ( empty( $consent_fields ) ) {
+			return;
+		}
+
+		$consents = array();
+		$now_iso  = gmdate( 'c' );
+
+		foreach ( $consent_fields as $field ) {
+			$key = $field['key'] ?? '';
+			if ( '' === $key || ! array_key_exists( $key, $payload ) ) {
+				continue;
+			}
+
+			$value = $payload[ $key ];
+			// A checkbox/consent value is accepted when truthy. Booleans,
+			// "on", "1", and "true" all count; an unchecked box is false/empty.
+			$accepted = is_bool( $value ) ? $value : filter_var( $value, FILTER_VALIDATE_BOOLEAN );
+
+			$consents[] = array(
+				'key'              => $key,
+				'label'            => $field['label'] ?? $field['config']['checkboxLabel'] ?? $key,
+				'accepted'         => $accepted,
+				'timestamp'         => $accepted ? $now_iso : null,
+				'privacyPolicyUrl' => $field['config']['privacyPolicyUrl'] ?? ( $field['privacyPolicyUrl'] ?? '' ),
+			);
+		}
+
+		if ( empty( $consents ) ) {
+			return;
+		}
+
+		$current_meta = $submission['meta'] ?? array();
+		if ( ! is_array( $current_meta ) ) {
+			$current_meta = array();
+		}
+		$current_meta['consents'] = $consents;
+
+		$this->submissionsRepo->update(
+			$submissionId,
+			array( 'meta' => $current_meta )
+		);
+	}
+
+	/**
+	 * Walk a schema field list, collecting `consent` fields with their config.
+	 *
+	 * @param array $fields Field list, possibly nested.
+	 * @param array $out    Collected consent field configs, by reference.
+	 */
+	private function collectConsentFields( $fields, array &$out ): void {
+		if ( ! is_array( $fields ) ) {
+			return;
+		}
+
+		foreach ( $fields as $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+
+			if ( ( $field['type'] ?? '' ) === 'consent' ) {
+				$out[] = array(
+					'key'   => (string) ( $field['key'] ?? $field['config']['key'] ?? '' ),
+					'label' => $field['label'] ?? $field['config']['label'] ?? '',
+					'config' => $field['config'] ?? array(),
+				);
+			}
+
+			// Recurse into nested containers.
+			foreach ( array( 'fields', 'children', 'columns' ) as $child_key ) {
+				if ( ! empty( $field[ $child_key ] ) ) {
+					if ( 'columns' === $child_key && is_array( $field[ $child_key ] ) ) {
+						foreach ( $field[ $child_key ] as $col ) {
+							$this->collectConsentFields( $col, $out );
+						}
+					} else {
+						$this->collectConsentFields( $field[ $child_key ], $out );
+					}
+				}
+			}
+		}
 	}
 
 	/**

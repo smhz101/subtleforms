@@ -9,12 +9,15 @@ import { nanoid } from 'nanoid';
 import { __ } from '@wordpress/i18n';
 
 export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
+  // Options only apply to multi-option choice fields. A `checkbox` is a single
+  // consent-style checkbox (labelled via `checkboxLabel`) and `consent` is the
+  // GDPR variant — neither has an options list, so we render nothing here.
+  // (Showing an empty options editor here was the "0 options" mismatch.)
   if (
     field.type !== 'radio' &&
     field.type !== 'multiple_choice' &&
     field.type !== 'dropdown' &&
-    field.type !== 'select' &&
-    field.type !== 'checkbox'
+    field.type !== 'select'
   ) {
     return null;
   }

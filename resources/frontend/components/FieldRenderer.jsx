@@ -262,6 +262,46 @@ const COUNTRIES = [
   { code: 'ZW', name: 'Zimbabwe' },
 ];
 
+/**
+ * Split a consent statement into text/link parts for rendering.
+ *
+ * Supports a `{{link}}` placeholder (recommended) and a bare Privacy Policy
+ * URL as a fallback. Returns an array of { text, url? } parts so the renderer
+ * can wrap the link in an <a> and keep the rest as plain text.
+ *
+ * @param {string} label    Consent statement text.
+ * @param {string} url      Privacy Policy URL.
+ * @param {string} linkText Link text for the placeholder.
+ * @returns {Array<{text: string, url?: string}>}
+ */
+function renderConsentLabel(label, url, linkText) {
+  if (!label) {
+    return [{ text: linkText, url }];
+  }
+
+  if (label.indexOf('{{link}}') !== -1) {
+    const [before, after] = label.split('{{link}}');
+    const parts = [];
+    if (before) parts.push({ text: before });
+    parts.push({ text: linkText, url });
+    if (after) parts.push({ text: after });
+    return parts;
+  }
+
+  // Fallback: if the URL itself appears in the statement, link it; otherwise
+  // append the link at the end so the consent statement always has one.
+  if (url && label.indexOf(url) !== -1) {
+    const [before, after] = label.split(url);
+    const parts = [];
+    if (before) parts.push({ text: before });
+    parts.push({ text: url, url });
+    if (after) parts.push({ text: after });
+    return parts;
+  }
+
+  return [{ text: label + ' ' }, { text: linkText, url }];
+}
+
 export default function FieldRenderer({
   field,
   fieldPath,
@@ -319,6 +359,32 @@ export default function FieldRenderer({
           </p>
         )}
         <hr className='subtleforms-section-break__rule' />
+      </div>
+    );
+  }
+
+  if (field.type === 'disclaimer') {
+    // A dedicated disclaimer / notice block. Content is authored by an
+    // administrator and sanitized server-side on save.
+    const variant = config.variant || 'info';
+    return (
+      <div
+        className={[
+          'subtleforms-disclaimer',
+          `subtleforms-disclaimer--${variant}`,
+          appearanceClasses,
+        ]
+          .filter(Boolean)
+          .join(' ')}
+        style={appearanceStyle}
+        role='note'>
+        <span className='subtleforms-disclaimer__icon' aria-hidden='true'>
+          {variant === 'warning' ? '⚠' : variant === 'success' ? '✓' : 'ℹ'}
+        </span>
+        <div
+          className='subtleforms-disclaimer__content'
+          dangerouslySetInnerHTML={{ __html: config.content || '' }}
+        />
       </div>
     );
   }
@@ -583,6 +649,49 @@ function renderInput(
           </span>
         </label>
       );
+
+    case 'consent': {
+      // Render the consent statement, substituting the {{link}} placeholder
+      // (or a bare URL) with a real Privacy Policy link when one is configured.
+      const consentLabel = config.checkboxLabel || __('I agree to the Privacy Policy.', 'subtleforms');
+      const policyUrl = config.privacyPolicyUrl || '';
+      const linkText = config.linkText || __('Privacy Policy', 'subtleforms');
+      const hasLink = !!policyUrl;
+      const parts = hasLink
+        ? renderConsentLabel(consentLabel, policyUrl, linkText)
+        : [{ text: consentLabel }];
+
+      return (
+        <label className='subtleforms-checkbox-label subtleforms-consent-label' htmlFor={inputId}>
+          <input
+            id={inputId}
+            type='checkbox'
+            className='subtleforms-checkbox subtleforms-consent-checkbox'
+            checked={!!value}
+            onChange={(e) => onChange(e.target.checked)}
+            aria-required={required}
+            aria-invalid={!!error}
+            aria-describedby={error ? `${inputId}-error` : undefined}
+          />
+          <span>
+            {parts.map((part, i) =>
+              part.url ? (
+                <a
+                  key={i}
+                  href={part.url}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='subtleforms-consent-link'>
+                  {part.text}
+                </a>
+              ) : (
+                <span key={i}>{part.text}</span>
+              )
+            )}
+          </span>
+        </label>
+      );
+    }
 
     case 'radio':
       const radioOptions = config.options || [];

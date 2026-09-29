@@ -15,6 +15,7 @@ final class FieldValidator {
 	private const NON_INPUT_TYPES = array(
 		// Layout structural types
 		'section_break',
+		'disclaimer',
 		'form_step',
 		'repeat_field',
 		'one_column_container',
@@ -57,6 +58,18 @@ final class FieldValidator {
 			$value    = $payload[ $fieldKey ] ?? null;
 			$type     = $fields[ $fieldKey ]['type'] ?? '';
 			$isComposite = in_array( $type, array( 'name_group', 'address_group' ), true );
+
+			// A required checkbox/consent must be ticked: an unchecked box is
+			// `false`, which the generic isEmpty() does not treat as missing.
+			// Without this, a required consent could be bypassed by skipping the
+			// frontend check and submitting `false` directly.
+			if ( in_array( $type, array( 'checkbox', 'consent' ), true ) ) {
+				$accepted = is_bool( $value ) ? $value : filter_var( $value, FILTER_VALIDATE_BOOLEAN );
+				if ( ! $accepted ) {
+					$errors[ $fieldKey ] = sprintf( 'Field "%s" is required.', $fieldKey );
+				}
+				continue;
+			}
 
 			if ( $isComposite ? $this->isCompositeEmpty( $value ) : $this->isEmpty( $value ) ) {
 				$errors[ $fieldKey ] = sprintf( 'Field "%s" is required.', $fieldKey );
