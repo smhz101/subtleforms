@@ -54,7 +54,7 @@ function copyFilesToTemp() {
       // Core plugin files
       'subtleforms.php',
       'license.txt',
-      'readme.html',
+      'readme.txt',
 
       // Built assets
       'build/**/*',
@@ -136,6 +136,44 @@ function cleanTemp(cb) {
   }
 }
 
+/**
+ * Regenerate the Composer autoloader WITHOUT dev dependencies.
+ *
+ * The dist ships the Composer autoloader files but EXCLUDES dev packages
+ * (phpunit, myclabs/deep-copy, etc.). If the autoloader was generated with dev
+ * deps, autoload_real.php require()s deep_copy.php at load time and the
+ * plugin fatal-errors on every request because those files aren't shipped.
+ * This task regenerates the autoloader so it only references production
+ * packages. It is a no-op if composer is unavailable (the autoloader is
+ * assumed to already be no-dev).
+ */
+function dumpAutoloadNoDev(cb) {
+  const { exec } = require('child_process');
+  exec('composer dump-autoload --no-dev 2>&1', (err, stdout, stderr) => {
+    if (err) {
+      console.log('composer not available or dump-autoload failed; assuming vendor autoloader is already no-dev.');
+      console.log(stderr || err.message);
+    } else {
+      console.log(stdout.trim());
+    }
+    cb();
+  });
+}
+
+/**
+ * Restore the dev autoloader after a dist build so local tests still work.
+ */
+function restoreAutoloadDev(cb) {
+  const { exec } = require('child_process');
+  exec('composer dump-autoload 2>&1', (err) => {
+    if (err) {
+      // Non-fatal: local dev can re-run `composer dump-autoload` manually.
+      console.log('Could not restore dev autoloader (non-fatal). Run `composer dump-autoload` to restore.');
+    }
+    cb();
+  });
+}
+
 // Build production assets
 function buildProduction() {
   const { spawn } = require('child_process');
@@ -165,9 +203,9 @@ function buildProduction() {
 
 // Main tasks
 const build = series(buildProduction);
-const packageZip = series(ensureDistDir, cleanDist, copyFilesToTemp, createZip, cleanTemp);
-const dist = series(buildProduction, packageZip);
-const quickZip = series(ensureDistDir, cleanDist, copyFilesToTemp, createZip, cleanTemp);
+const packageZip = series(ensureDistDir, cleanDist, dumpAutoloadNoDev, copyFilesToTemp, createZip, cleanTemp);
+const dist = series(buildProduction, ensureDistDir, cleanDist, dumpAutoloadNoDev, copyFilesToTemp, createZip, cleanTemp, restoreAutoloadDev);
+const quickZip = series(ensureDistDir, cleanDist, dumpAutoloadNoDev, copyFilesToTemp, createZip, cleanTemp);
 
 // Export tasks
 exports.clean = cleanDist;
