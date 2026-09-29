@@ -327,6 +327,8 @@ final class FormsApi {
 			foreach ( $forms as &$form ) {
 				$form['submission_count'] = $total_counts[ $form['id'] ] ?? 0;
 				$form['unread_count']     = $unread_counts[ $form['id'] ] ?? 0;
+				// Single source of truth for type/status/unpublished-changes.
+				$form = \SubtleForms\Support\FormMeta::with_meta( $form );
 			}
 		}
 
@@ -353,6 +355,9 @@ final class FormsApi {
 		if ( ! $form ) {
 			return ApiResponse::not_found( __( 'Form not found', 'subtleforms' ) );
 		}
+
+		// Single source of truth for type/status/unpublished-changes.
+		$form = \SubtleForms\Support\FormMeta::with_meta( $form );
 
 		$etag     = $this->generateETag( $form, 'form' );
 		$response = ApiResponse::success( $form );
@@ -388,7 +393,11 @@ final class FormsApi {
 		$isPublished     = isset( $form['status'] ) && $form['status'] === 'published';
 		$requestsDraft   = $context === 'builder';
 
-		// PUBLIC ACCESS: Only active schema for published forms
+		// PUBLIC ACCESS: Only active schema for published forms.
+		// SECURITY: Never expose the full form row (it contains draft_schema,
+		// config, created_at, updated_at, active_version and status — internal
+		// data the renderer does not need). Return a minimal form object and
+		// a schema stripped to only the fields the frontend renderer uses.
 		if ( ! $isAuthenticated ) {
 			if ( ! $isPublished ) {
 				return ApiResponse::not_found( __( 'Form not available', 'subtleforms' ) );
@@ -410,8 +419,11 @@ final class FormsApi {
 
 			return ApiResponse::success(
 				array(
-					'form'    => $form,
-					'schema'  => $schemaData,
+					'form'    => array(
+						'id'    => (int) $form['id'],
+						'title' => $form['title'] ?? '',
+					),
+					'schema'  => $this->buildPublicSchema( $schemaData ),
 					'version' => $schema['version'] ?? null,
 				)
 			);
@@ -822,6 +834,64 @@ final class FormsApi {
 	// ────────────────────────────────────────────────────────────────────
 	// CAPTCHA helpers
 	// ────────────────────────────────────────────────────────────────────
+
+	/**
+	 * Build a public-safe schema for unauthenticated rendering.
+	 *
+	 * The renderer only needs the field list and a small set of metadata
+	 * keys (type, appearance, title, description, theme toggles, payment
+	 * display settings). It never needs `actions` (which contain webhook
+	 * URLs, email recipients and other integration config) or internal
+	 * metadata such as `integrations`. Stripping these halves the payload
+	 * and prevents leaking unpublished/integration config to the public.
+	 *
+	 * @param array $schema Active published schema.
+	 * @return array Minimal schema for frontend rendering.
+	 */
+	private function buildPublicSchema( array $schema ): array {
+		$public = array(
+			'fields'         => $schema['fields'] ?? array(),
+			'schema_version' => $schema['schema_version'] ?? 1,
+		);
+
+		if ( isset( $schema['metadata'] ) && is_array( $schema['metadata'] ) ) {
+			$allowed_meta = array(
+				'type',
+				'appearance',
+				'payment',
+				'title',
+				'description',
+				'name',
+				'template',
+				'_showTitle',
+				'_showDescription',
+				'_theme',
+			);
+
+			$public['metadata'] = array();
+			foreach ( $allowed_meta as $key ) {
+				if ( array_key_exists( $key, $schema['metadata'] ) ) {
+					$public['metadata'][ $key ] = $schema['metadata'][ $key ];
+				}
+			}
+
+			// Payment display settings the renderer needs (amount, currency,
+			// mode). Never expose gateway secrets (secretKey, publishableKey,
+			// apiKey, provider credentials, etc.) to the public.
+			if ( isset( $public['metadata']['payment'] ) && is_array( $public['metadata']['payment'] ) ) {
+				$payment = $public['metadata']['payment'];
+				$clean   = array();
+				foreach ( array( 'enabled', 'amountType', 'fixedAmount', 'amountField', 'currency', 'mode' ) as $pk ) {
+					if ( array_key_exists( $pk, $payment ) ) {
+						$clean[ $pk ] = $payment[ $pk ];
+					}
+				}
+				$public['metadata']['payment'] = $clean;
+			}
+		}
+
+		return $public;
+	}
 
 	/**
 	 * Inject CAPTCHA HTML into schema fields for frontend rendering.

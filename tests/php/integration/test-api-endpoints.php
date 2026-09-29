@@ -521,4 +521,99 @@ class API_Endpoints_Test extends WP_UnitTestCase {
         $wpdb->delete($wpdb->prefix . 'subtleforms_submissions', ['id' => $submission->id]);
         $this->forms_repo->delete($payment_form_id);
     }
+
+    /**
+     * Public (unauthenticated) schema endpoint must not leak draft_schema,
+     * internal status/timestamps, or action config (webhook URLs, etc.).
+     */
+    public function test_public_schema_endpoint_does_not_leak_draft_or_internal_data() {
+        // Create a published form.
+        $form_id = $this->forms_repo->create([
+            'title'  => 'Public Leak Test',
+            'config' => [],
+            'status' => 'published',
+        ]);
+
+        $schema = [
+            'schema_version' => 1,
+            'metadata' => [
+                'title'       => 'Public Leak Test',
+                'name'        => 'form_schema',
+                'description' => 'A public form',
+                'type'        => 'regular',
+                'appearance'  => ['preset' => 'default'],
+                // Sensitive integration config the public must never see.
+                'integrations' => [
+                    'webhooks' => ['url' => 'https://example.com/secret-webhook'],
+                ],
+            ],
+            'fields' => [
+                [
+                    'key'   => 'email',
+                    'type'  => 'email',
+                    'config' => ['label' => 'Email', 'required' => true],
+                ],
+            ],
+            'actions' => [
+                [
+                    'id'   => 'wh-1',
+                    'type' => 'webhook',
+                    'config' => ['url' => 'https://example.com/secret-webhook'],
+                ],
+            ],
+        ];
+        $this->forms_repo->saveSchemaVersion($form_id, $schema, true);
+
+        // Save an unpublished draft the public must never see.
+        $this->forms_repo->saveDraftSchema($form_id, array_merge($schema, [
+            'metadata' => array_merge($schema['metadata'], ['title' => 'UNPUBLISHED DRAFT TITLE']),
+        ]));
+
+        // Request as an unauthenticated user.
+        wp_set_current_user(0);
+        $req = new WP_REST_Request('GET', '/subtleforms/v1/forms/' . $form_id . '/schema');
+        $res = rest_do_request($req);
+
+        $this->assertEquals(200, $res->get_status());
+        $data = $res->get_data()['data'];
+
+        // Form object must be minimal: id + title only.
+        $this->assertSame(['id', 'title'], array_keys($data['form']));
+        $this->assertSame('Public Leak Test', $data['form']['title']);
+
+        // No internal form fields leaked.
+        $this->assertArrayNotHasKey('draft_schema', $data['form']);
+        $this->assertArrayNotHasKey('config', $data['form']);
+        $this->assertArrayNotHasKey('status', $data['form']);
+        $this->assertArrayNotHasKey('created_at', $data['form']);
+        $this->assertArrayNotHasKey('updated_at', $data['form']);
+        $this->assertArrayNotHasKey('active_version', $data['form']);
+
+        // Schema must not carry actions (integration config).
+        $this->assertArrayNotHasKey('actions', $data['schema']);
+
+        // Metadata must not carry integrations or the unpublished draft title.
+        $this->assertArrayNotHasKey('integrations', $data['schema']['metadata']);
+        $this->assertSame('Public Leak Test', $data['schema']['metadata']['title']);
+
+        // Renderer-required keys are still present.
+        $this->assertArrayHasKey('fields', $data['schema']);
+        $this->assertArrayHasKey('schema_version', $data['schema']);
+        $this->assertSame('regular', $data['schema']['metadata']['type']);
+        $this->assertArrayHasKey('appearance', $data['schema']['metadata']);
+
+        // Cleanup
+        $this->forms_repo->delete($form_id);
+    }
+
+    /**
+     * Draft forms must not be retrievable by unauthenticated users (404).
+     */
+    public function test_public_schema_endpoint_rejects_draft_forms() {
+        // test_form_id is created with status = 'draft' in setUp().
+        wp_set_current_user(0);
+        $req = new WP_REST_Request('GET', '/subtleforms/v1/forms/' . $this->test_form_id . '/schema');
+        $res = rest_do_request($req);
+        $this->assertEquals(404, $res->get_status());
+    }
 }
