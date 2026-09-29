@@ -4,7 +4,7 @@ Tags: forms, contact form, form builder, submissions
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.8.1
+Stable tag: 1.9.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -158,6 +158,30 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 7. Conversational form on frontend
 
 == Changelog ==
+
+= 1.9.2 - 2026-09-29 =
+* Design: Adopted the WordPress Design System — accent now follows the site's admin colour scheme via --wp-admin-theme-color
+* Design: Switched to the WordPress system font stack; removed DM Sans, Satoshi and JetBrains Mono webfont enqueues
+* Design: Neutrals retinted to the WordPress admin grey ramp; flatter radii (4px) and minimal shadows
+* Design: Borders, text and surfaces aligned to native WordPress admin values
+
+= 1.9.1 - 2026-09-29 =
+* Block: New inspector options — show title/description toggles, Form Theme dropdown with live preview, Reset to defaults, Advanced (AJAX, Tab Index, Field Values)
+* Block: Editor preview now matches the frontend (removed divergent editor-only styling; frontend stylesheet drives both)
+* Block: Theme, title/description, AJAX, tab index and prefilled field values now flow through to the frontend render
+* Fix: "Last updated" on the forms list showed ~5h off because naive UTC datetimes were parsed as local time
+* Fix: Search and other admin inputs no longer render in JetBrains Mono (regression from 1.9.0)
+* Fix: Loading spinner re-skinned to the indigo brand and uses the sans font
+* Builder: Appearance sidebar in the Preview tab now uses native Gutenberg PanelBody panels
+* Field: New dedicated Disclaimer field (info/warning/success/neutral variants) with its own icon
+
+= 1.9.0 - 2026-09-29 =
+* UI: New indigo design system (#4F46E5 brand, #A5B4FC accent, #1E1B4B text)
+* UI: DM Sans for headings, Satoshi for body text, JetBrains Mono for code areas
+* UI: Enqueued webfonts (Google Fonts + Fontshare) the WordPress-standard way
+* UI: Re-skinned primary buttons, toggles, focus rings, and card hovers to indigo
+* UX: Every field type now has a unique icon — no repeated icons across fields
+* Compliance: Aligned Stable tag with plugin version (1.9.0)
 
 = 1.8.1 =
 Releases between 1.6.10 and 1.8.1 were not tagged individually, so the changes

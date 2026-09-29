@@ -18,34 +18,36 @@
 
 :root {
   // ── Neutrals ───────────────────────────────────────────────────────────────
-  // One ramp, biased slightly blue so it sits with the accent instead of
-  // fighting it. Replaces the six ramps (gray, stone, slate, neutral, plus two
-  // sets of loose hex literals) that previously ran in parallel.
+  // WordPress admin grey ramp. Matches core's #f0f0f1 canvas, #dcdcde borders
+  // and #1d2327 ink so the plugin reads as part of the host admin rather than
+  // as a separately-branded surface.
   --sf-n-0: #ffffff;
-  --sf-n-25: #fbfbfc;
-  --sf-n-50: #f4f5f7;
-  --sf-n-100: #e9ebef;
-  --sf-n-200: #d8dbe2;
-  --sf-n-300: #b9bec9;
-  --sf-n-400: #8c94a3;
-  --sf-n-500: #6b7382;
-  --sf-n-600: #515869;
-  --sf-n-700: #3b4150;
-  --sf-n-800: #262b37;
-  --sf-n-900: #131417;
+  --sf-n-25: #f6f7f7;
+  --sf-n-50: #f0f0f1;
+  --sf-n-100: #dcdcde;
+  --sf-n-200: #c3c4c7;
+  --sf-n-300: #a7aaad;
+  --sf-n-400: #8c8f94;
+  --sf-n-500: #646970;
+  --sf-n-600: #50575e;
+  --sf-n-700: #3c434a;
+  --sf-n-800: #1d2327;
+  --sf-n-900: #101517;
 
   // ── Accent ─────────────────────────────────────────────────────────────────
-  // Indigo-slate: reads as considered next to WordPress chrome without
-  // impersonating its blue, and stays distinct from the semantic colours.
-  --sf-a-50: #eef0fb;
-  --sf-a-100: #dde1f6;
-  --sf-a-200: #c4cbee;
-  --sf-a-300: #a3adde;
-  --sf-a-400: #7683d9;
-  --sf-a-500: #4f5bd5;
-  --sf-a-600: #4048b8;
-  --sf-a-700: #343a95;
-  --sf-a-800: #2a2f75;
+  // Mapped onto WordPress's admin theme colour variables, so the plugin
+  // follows the site's chosen admin colour scheme (default WP blue #2271b1)
+  // rather than imposing its own brand. WP exposes lighter/darker steps; we
+  // collapse the ramp onto them so every accent surface tracks the theme.
+  --sf-a-50: var(--wp-admin-theme-color-lighter-20, #f0f6fc);
+  --sf-a-100: var(--wp-admin-theme-color-lighter-10, #c4e0ec);
+  --sf-a-200: var(--wp-admin-theme-color-lighter-10, #c4e0ec);
+  --sf-a-300: var(--wp-admin-theme-color-lighter-10, #c4e0ec); // accent
+  --sf-a-400: var(--wp-admin-theme-color, #2271b1);
+  --sf-a-500: var(--wp-admin-theme-color, #2271b1); // brand
+  --sf-a-600: var(--wp-admin-theme-color-darker-10, #135e96);
+  --sf-a-700: var(--wp-admin-theme-color-darker-20, #006a95);
+  --sf-a-800: var(--wp-admin-theme-color-darker-20, #006a95);
 
   // ── Semantic ───────────────────────────────────────────────────────────────
   // Exactly one colour per meaning. Five greens previously competed for
@@ -67,37 +69,45 @@
 
   // ── Roles ──────────────────────────────────────────────────────────────────
   // Components should reach for these, not the ramps above: the role says what
-  // the colour is *for*, which survives a palette change.
-  --sf-bg-page: var(--sf-n-25);
-  --sf-bg-surface: var(--sf-n-0);
+  // the colour is *for*, which survives a palette change. Values track the
+  // WordPress admin palette so the plugin looks native to the host admin.
+  --sf-bg-page: #f0f0f1; // WP admin canvas
+  --sf-bg-surface: #ffffff;
   --sf-bg-subtle: var(--sf-n-50);
   --sf-bg-muted: var(--sf-n-100);
 
-  --sf-text: var(--sf-n-900);
-  --sf-text-secondary: var(--sf-n-600);
-  --sf-text-muted: var(--sf-n-500);
-  --sf-text-subtle: var(--sf-n-400);
-  --sf-text-on-accent: var(--sf-n-0);
+  --sf-text: #1d2327; // WP admin text
+  --sf-text-secondary: #50575e;
+  --sf-text-muted: #646970;
+  --sf-text-subtle: #8c8f94;
+  --sf-text-on-accent: #ffffff; // white on the admin theme colour
 
-  --sf-border: var(--sf-n-200);
-  --sf-border-strong: var(--sf-n-300);
-  --sf-border-subtle: var(--sf-n-100);
+  // Gutenberg-style hairlines: light default, stronger for inputs/cards.
+  --sf-border: #dcdcde; // WP light border
+  --sf-border-strong: #c3c4c7; // WP input/card border
+  --sf-border-subtle: #f0f0f1;
 
-  --sf-primary: var(--sf-a-500);
-  --sf-primary-hover: var(--sf-a-600);
-  --sf-primary-active: var(--sf-a-700);
+  // Brand follows the user's admin colour scheme via --wp-admin-theme-color.
+  --sf-brand: var(--wp-admin-theme-color, #2271b1);
+  --sf-brand-hover: var(--wp-admin-theme-color-darker-10, #135e96);
+  --sf-brand-active: var(--wp-admin-theme-color-darker-20, #006a95);
+  --sf-brand-contrast: #ffffff;
+  --sf-accent: var(--wp-admin-theme-color-lighter-10, #c4e0ec);
+
+  --sf-primary: var(--sf-brand);
+  --sf-primary-hover: var(--sf-brand-hover);
+  --sf-primary-active: var(--sf-brand-active);
   --sf-primary-bg: var(--sf-a-50);
   --sf-primary-border: var(--sf-a-100);
 
-  --sf-focus-ring: var(--sf-a-500);
+  --sf-focus-ring: var(--sf-brand);
 
   // ── Radius ─────────────────────────────────────────────────────────────────
-  // Five steps, one notation. Previously 20+ values across px, rem, %, SCSS
-  // variables and custom properties, with 8px and 0.5rem both in heavy use.
+  // WordPress admin is flat: inputs and cards use 4px, panels are square.
   --sf-radius-xs: 2px;
   --sf-radius-sm: 4px;
-  --sf-radius-md: 8px;
-  --sf-radius-lg: 12px;
+  --sf-radius-md: 4px;
+  --sf-radius-lg: 6px;
   --sf-radius-full: 999px;
 
   // ── Spacing ────────────────────────────────────────────────────────────────
@@ -112,9 +122,15 @@
   --sf-space-12: 48px;
 
   // ── Type ───────────────────────────────────────────────────────────────────
-  // Seven sizes. Both px and rem spellings of the same size were in use
-  // (0.875rem and 14px, 0.75rem and 12px); rem wins so the scale respects the
-  // reader's font size.
+  // WordPress admin uses the system font stack — no webfonts — for a native
+  // feel and zero load cost. Headings use the same stack (WP DS has no separate
+  // heading face). Code uses the system monospace stack.
+  --sf-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  --sf-font-heading: var(--sf-font-sans);
+  --sf-font-mono: "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+
+  // Type sizes — rem so the scale respects the reader's font size.
   --sf-text-2xs: 0.6875rem; // 11px
   --sf-text-xs: 0.75rem; //    12px
   --sf-text-sm: 0.8125rem; //  13px
@@ -131,19 +147,14 @@
   --sf-weight-medium: 500;
   --sf-weight-semibold: 600;
 
-  --sf-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
-    'Helvetica Neue', Arial, sans-serif;
-  --sf-font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas,
-    monospace;
-
   // ── Elevation ──────────────────────────────────────────────────────────────
-  // Five steps, replacing 111 unique box-shadow declarations. Shadows are neutral
-  // and tinted with the ink colour so they read as depth rather than as grey haze.
-  --sf-shadow-xs: 0 1px 2px rgba(19, 20, 23, 0.06);
-  --sf-shadow-sm: 0 1px 3px rgba(19, 20, 23, 0.08), 0 1px 2px rgba(19, 20, 23, 0.04);
-  --sf-shadow-md: 0 4px 12px rgba(19, 20, 23, 0.08), 0 2px 4px rgba(19, 20, 23, 0.04);
-  --sf-shadow-lg: 0 12px 28px rgba(19, 20, 23, 0.12), 0 4px 8px rgba(19, 20, 23, 0.05);
-  --sf-shadow-focus: 0 0 0 3px rgba(79, 91, 213, 0.28);
+  // WordPress admin is mostly flat; shadows are reserved for popovers/modals
+  // and stay very subtle. Neutral, not brand-tinted.
+  --sf-shadow-xs: 0 1px 0 rgba(0, 0, 0, 0.04);
+  --sf-shadow-sm: 0 1px 1px rgba(0, 0, 0, 0.05);
+  --sf-shadow-md: 0 2px 4px rgba(0, 0, 0, 0.06);
+  --sf-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --sf-shadow-focus: 0 0 0 2px var(--wp-admin-theme-color, #2271b1);
 
   // ── Motion ─────────────────────────────────────────────────────────────────
   // Three durations, replacing fifteen. One easing curve.
@@ -381,4 +392,5 @@
   --font-sans: var(--sf-font-sans);
   --font-mono: var(--sf-font-mono);
   --font-serif: var(--sf-font-sans);
+  --font-heading: var(--sf-font-heading);
 }

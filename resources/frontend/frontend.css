@@ -727,3 +727,56 @@
 	border-top: 1px solid var(--subtleforms-color-bg-subtle);
 	margin: 0;
 }
+
+/* Disclaimer / notice block */
+.subtleforms-disclaimer {
+	display: flex;
+	gap: 0.625rem;
+	align-items: flex-start;
+	padding: 0.75rem 1rem;
+	margin: 8px 0;
+	border-radius: var(--subtleforms-radius-md, 8px);
+	border: 1px solid var(--subtleforms-color-border, #d8dbe2);
+	background: var(--subtleforms-color-bg-subtle, #f4f5f7);
+	color: var(--subtleforms-color-text, #131417);
+	font-size: var(--subtleforms-font-size-base, 1rem);
+	line-height: var(--subtleforms-line-height, 1.5);
+}
+
+.subtleforms-disclaimer__icon {
+	flex-shrink: 0;
+	font-size: 1.125rem;
+	line-height: 1.4;
+}
+
+.subtleforms-disclaimer__content {
+	flex: 1;
+	min-width: 0;
+}
+
+.subtleforms-disclaimer__content p {
+	margin: 0 0 0.5rem;
+}
+
+.subtleforms-disclaimer__content p:last-child {
+	margin-bottom: 0;
+}
+
+.subtleforms-disclaimer--info {
+	border-color: var(--subtleforms-color-primary, #4f46e5);
+	background: color-mix(in srgb, var(--subtleforms-color-primary, #4f46e5) 8%, transparent);
+}
+
+.subtleforms-disclaimer--warning {
+	border-color: #b45309;
+	background: #fff7ed;
+}
+
+.subtleforms-disclaimer--success {
+	border-color: var(--subtleforms-color-success, #1f7a4d);
+	background: color-mix(in srgb, var(--subtleforms-color-success, #1f7a4d) 10%, transparent);
+}
+
+.subtleforms-disclaimer--neutral {
+	background: var(--subtleforms-color-bg-subtle, #f4f5f7);
+}

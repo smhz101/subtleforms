@@ -67,15 +67,17 @@ function PlanBadge( { plan } ) {
 }
 
 export default function LicenseSettings() {
+	const admin        = window.subtleformsAdmin || {};
+	const subscription = admin.subscription || {};
+	// Hooks must run before any early return (rules of hooks). Capture the
+	// subscription snapshot once, unconditionally, before the Pro delegation.
+	const [ subData ]  = useState( subscription );
+
 	// If Pro is loaded, delegate to its component — highest authority.
 	if ( window.SubtleFormsPro?.LicenseSettings ) {
 		const ProLicenseSettings = window.SubtleFormsPro.LicenseSettings;
 		return <ProLicenseSettings />;
 	}
-
-	const admin        = window.subtleformsAdmin || {};
-	const subscription = admin.subscription || {};
-	const [ subData ]  = useState( subscription );
 
 	const isConnected = subData.connected || subData.status === 'active' || subData.status === 'grace_period';
 

@@ -99,12 +99,26 @@ final class SubtleFormsBlock {
 		// too.
 		self::enqueue_frontend_assets();
 
-		// Output minimal placeholder markup
-		// Frontend JS will detect this and mount the renderer
+		// Block options are forwarded to the frontend renderer as data
+		// attributes so the form renders with the user's chosen theme, title
+		// visibility, AJAX mode, tab index and prefilled field values.
+		$show_title     = isset( $attributes['showTitle'] ) ? (bool) $attributes['showTitle'] : true;
+		$show_desc      = isset( $attributes['showDescription'] ) ? (bool) $attributes['showDescription'] : true;
+		$theme          = isset( $attributes['theme'] ) ? $attributes['theme'] : 'default';
+		$ajax           = isset( $attributes['ajax'] ) ? (bool) $attributes['ajax'] : false;
+		$tab_index      = isset( $attributes['tabIndex'] ) ? (int) $attributes['tabIndex'] : 0;
+		$field_values   = isset( $attributes['fieldValues'] ) ? (string) $attributes['fieldValues'] : '';
+
 		return sprintf(
-			'<div class="%s" data-form-id="%d"></div>',
+			'<div class="%s" data-form-id="%d" data-show-title="%d" data-show-description="%d" data-theme="%s" data-ajax="%d" data-tabindex="%d" data-field-values="%s"></div>',
 			esc_attr( implode( ' ', $classes ) ),
-			esc_attr( $form_id )
+			esc_attr( $form_id ),
+			$show_title ? 1 : 0,
+			$show_desc ? 1 : 0,
+			esc_attr( $theme ),
+			$ajax ? 1 : 0,
+			$tab_index,
+			esc_attr( $field_values )
 		);
 	}
 

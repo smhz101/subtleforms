@@ -2,7 +2,7 @@
   "$schema": "https://schemas.wp.org/trunk/block.json",
   "apiVersion": 3,
   "name": "subtleforms/form",
-  "version": "1.0.0",
+  "version": "1.9.0",
   "title": "SubtleForms",
   "category": "widgets",
   "description": "Embed a SubtleForms form",
@@ -21,6 +21,30 @@
     },
     "align": {
       "type": "string"
+    },
+    "showTitle": {
+      "type": "boolean",
+      "default": true
+    },
+    "showDescription": {
+      "type": "boolean",
+      "default": true
+    },
+    "theme": {
+      "type": "string",
+      "default": "default"
+    },
+    "ajax": {
+      "type": "boolean",
+      "default": false
+    },
+    "tabIndex": {
+      "type": "number",
+      "default": 0
+    },
+    "fieldValues": {
+      "type": "string",
+      "default": ""
     }
   },
   "example": {

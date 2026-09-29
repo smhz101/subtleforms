@@ -31,7 +31,7 @@
 
     &:hover {
       transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+      box-shadow: 0 4px 12px var(--wp-admin-theme-color, #2271b1);
     }
 
     &:active {
@@ -77,8 +77,8 @@
 
       &:focus,
       &:focus-visible {
-        border-color: var(--sf-blue-600, var(--sf-a-500));
-        box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.12);
+        border-color: var(--wp-admin-theme-color, #2271b1);
+        box-shadow: 0 0 0 2px color-mix(in srgb, var(--wp-admin-theme-color, #2271b1) 25%, transparent);
         outline: none;
       }
     }

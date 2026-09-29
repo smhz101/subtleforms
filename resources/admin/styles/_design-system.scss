@@ -20,6 +20,19 @@
 	font-family: var(--sf-font-sans);
 	color: var(--sf-text);
 	background: var(--sf-bg-page);
+
+	// Headings use the same system stack as the rest of the admin, per the
+	// WordPress design system (no separate heading face).
+	h1, h2, h3, h4, h5, h6 {
+		font-family: var(--sf-font-heading);
+		color: var(--sf-text);
+		font-weight: var(--sf-weight-semibold);
+	}
+
+	// Code / monospace surfaces use the system monospace stack.
+	code, pre, kbd, samp, .sf-font-mono {
+		font-family: var(--sf-font-mono);
+	}
 }
 
 .subtleforms-admin {
@@ -87,15 +100,15 @@
 	}
 }
 
-// Primary Button - Electric Lime
+// Primary Button — Indigo brand
 .sf-btn--primary {
-	background: var(--sf-lime-500);
-	color: var(--sf-stone-900);
+	background: var(--sf-brand);
+	color: var(--sf-brand-contrast);
 	box-shadow: var(--shadow-sm);
 
 	&:hover {
-		background: var(--sf-lime-400);
-		box-shadow: var(--shadow-lime);
+		background: var(--sf-brand-hover);
+		box-shadow: var(--shadow-focus);
 		transform: translateY(-1px);
 	}
 
@@ -263,11 +276,11 @@
 		position: absolute;
 
 		&:focus + .sf-toggle__slider {
-			box-shadow: 0 0 0 3px rgba(132, 204, 22, 0.15);
+			box-shadow: 0 0 0 3px color-mix(in srgb, var(--wp-admin-theme-color, #2271b1) 25%, transparent);
 		}
 
 		&:checked + .sf-toggle__slider {
-			background-color: var(--sf-lime-500);
+			background-color: var(--sf-brand);
 
 			&::before {
 				transform: translateX(20px);
@@ -478,7 +491,7 @@
 
 // Focus visible - accessibility
 .sf-focus-ring:focus-visible {
-	outline: 2px solid var(--sf-lime-500);
+	outline: 2px solid var(--sf-brand);
 	outline-offset: 2px;
 }
 
@@ -513,7 +526,7 @@
 	cursor: pointer;
 
 	&:hover {
-		border-color: var(--sf-lime-500);
+		border-color: var(--sf-brand);
 		box-shadow: var(--shadow-lg);
 		transform: translateY(-2px);
 	}

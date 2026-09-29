@@ -97,33 +97,35 @@ export const Empty = {
   ),
 };
 
+function WithBulkActionsRender() {
+  const [selected, setSelected] = useState([]);
+  return (
+    <div style={{ padding: 24 }}>
+      <DataTable
+        columns={columns}
+        data={sampleData}
+        totalItems={sampleData.length}
+        perPage={10}
+        loading={false}
+        sortBy="created"
+        sortDirection="desc"
+        currentPage={1}
+        onSort={() => {}}
+        onPageChange={() => {}}
+        selectable={true}
+        selectedItems={selected}
+        onSelectionChange={setSelected}
+        bulkActions={[
+          { label: 'Delete Selected', isDestructive: true, onClick: (ids) => alert(`Delete: ${ids.join(', ')}`) },
+          { label: 'Publish Selected', onClick: (ids) => alert(`Publish: ${ids.join(', ')}`) },
+        ]}
+      />
+    </div>
+  );
+}
+
 export const WithBulkActions = {
-  render: () => {
-    const [selected, setSelected] = useState([]);
-    return (
-      <div style={{ padding: 24 }}>
-        <DataTable
-          columns={columns}
-          data={sampleData}
-          totalItems={sampleData.length}
-          perPage={10}
-          loading={false}
-          sortBy="created"
-          sortDirection="desc"
-          currentPage={1}
-          onSort={() => {}}
-          onPageChange={() => {}}
-          selectable={true}
-          selectedItems={selected}
-          onSelectionChange={setSelected}
-          bulkActions={[
-            { label: 'Delete Selected', isDestructive: true, onClick: (ids) => alert(`Delete: ${ids.join(', ')}`) },
-            { label: 'Publish Selected', onClick: (ids) => alert(`Publish: ${ids.join(', ')}`) },
-          ]}
-        />
-      </div>
-    );
-  },
+  render: WithBulkActionsRender,
 };
 
 export const WithRowActions = {

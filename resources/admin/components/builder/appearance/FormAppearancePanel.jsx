@@ -1,5 +1,5 @@
 import { useState } from '@wordpress/element';
-import { Button, SelectControl, Notice } from '@wordpress/components';
+import { Button, SelectControl, Notice, PanelBody } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import {
   FORM_TOKENS,
@@ -158,18 +158,16 @@ export default function FormAppearancePanel( {
 
   return (
     <div className='sf-form-appearance'>
-      <section className='sf-form-appearance__section'>
-        <div className='sf-form-appearance__section-head'>
-          <h4 className='sf-form-appearance__section-title'>
-            { __( 'Style presets', 'subtleforms' ) }
-          </h4>
-          <p className='sf-form-appearance__section-hint'>
-            { __(
-              'Restyle the whole form in one click. Adjust anything afterwards.',
-              'subtleforms'
-            ) }
-          </p>
-        </div>
+      <PanelBody
+        title={ __( 'Style presets', 'subtleforms' ) }
+        initialOpen={ true }
+        className='sf-form-appearance__panel'>
+        <p className='sf-form-appearance__section-hint'>
+          { __(
+            'Restyle the whole form in one click. Adjust anything afterwards.',
+            'subtleforms'
+          ) }
+        </p>
 
         { confirmingPreset && (
           <Notice
@@ -216,14 +214,12 @@ export default function FormAppearancePanel( {
             />
           ) ) }
         </div>
-      </section>
+      </PanelBody>
 
-      <section className='sf-form-appearance__section'>
-        <div className='sf-form-appearance__section-head'>
-          <h4 className='sf-form-appearance__section-title'>
-            { __( 'Layout', 'subtleforms' ) }
-          </h4>
-        </div>
+      <PanelBody
+        title={ __( 'Layout', 'subtleforms' ) }
+        initialOpen={ true }
+        className='sf-form-appearance__panel'>
         <div className='sf-appearance-group__controls'>
           { FORM_VARIANTS.map( ( variant ) => (
             <div className='sf-appearance-control' key={ variant.key }>
@@ -245,19 +241,22 @@ export default function FormAppearancePanel( {
             </div>
           ) ) }
         </div>
-      </section>
+      </PanelBody>
 
       { GROUPS.map( ( group ) => (
-        <section className='sf-form-appearance__section' key={ group.id }>
+        <PanelBody
+          key={ group.id }
+          title={ group.title }
+          initialOpen={ false }
+          className='sf-form-appearance__panel'>
           <AppearanceControls
-            title={ group.title }
             tokens={ FORM_TOKENS.filter( ( t ) => t.group === group.id ) }
             values={ tokens }
             onChange={ setToken }
             disabled={ isReadOnly }
             fontOptions={ fontOptions }
           />
-        </section>
+        </PanelBody>
       ) ) }
 
       { ( hasCustomisation || appearance.preset ) && ! isReadOnly && (

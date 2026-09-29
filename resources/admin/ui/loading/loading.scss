@@ -87,6 +87,7 @@
 // Spinner
 .sf-spinner {
   display: inline-block;
+  font-family: var(--sf-font-sans);
 
   &--small {
     width: 16px;
@@ -106,8 +107,8 @@
   &__circle {
     width: 100%;
     height: 100%;
-    border: 2px solid var(--sf-gray-100);
-    border-top-color: var(--sf-blue-600, var(--sf-a-500));
+    border: 2px solid var(--sf-a-100);
+    border-top-color: var(--sf-brand);
     border-radius: 50%;
     animation: spin 0.6s linear infinite;
   }
@@ -123,10 +124,12 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  font-family: var(--sf-font-sans);
 
   &__text {
     font-size: var(--sf-text-base);
-    color: var(--sf-gray-500, var(--sf-n-500));
+    font-family: var(--sf-font-sans);
+    color: var(--sf-text-secondary);
   }
 }
 
@@ -159,15 +162,16 @@
 
   &__action {
     padding: 10px 24px;
-    background: var(--sf-blue-600, var(--sf-a-500));
-    color: white;
+    background: var(--sf-brand);
+    color: var(--sf-brand-contrast);
     border: none;
     border-radius: var(--sf-radius-md);
     cursor: pointer;
     font-size: var(--sf-text-base);
+    font-family: var(--sf-font-sans);
 
     &:hover {
-      background: var(--sf-blue-700, var(--sf-a-600));
+      background: var(--sf-brand-hover);
     }
   }
 }
