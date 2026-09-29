@@ -120,7 +120,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
       if (result?.id) {
         // Mark this form as "newly created, never manually saved" so the builder
         // can auto-delete it if the user closes without making any edits.
-        try { sessionStorage.setItem('sf_new_form_id', String(result.id)); } catch (_) {}
+        try { sessionStorage.setItem('sf_new_form_id', String(result.id)); } catch (_) { /* no-op */ }
         onFormCreated(result.id);
       }
     } catch (error) {

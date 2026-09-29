@@ -11,6 +11,7 @@ import { debug } from '../../shared/debug';
 import {
   formAppearanceStyle,
   formAppearanceClasses,
+  getPreset,
 } from '../../shared/appearance';
 
 const restUrl =
@@ -39,6 +40,7 @@ export default function FormRenderer({
   preloadedSchema = null,
   preview = false,
   onSubmit: customOnSubmit = null,
+  blockOptions = null,
 }) {
   const [loading, setLoading] = useState(!preloadedSchema);
   const [schema, setSchema] = useState(preloadedSchema);
@@ -87,6 +89,37 @@ export default function FormRenderer({
         setLoading(false);
       });
   }, [formId, preloadedSchema]);
+
+  // Prefill field values from the block's "Field Values" option (one
+  // key=value pair per line). Runs once on mount. This hook MUST stay above
+  // any conditional return — React requires hooks to run in the same order
+  // on every render, and an early `return` here would skip it and trigger
+  // React error #310 ("Rendered more hooks than during the previous render").
+  useEffect(() => {
+    if (!blockOptions?.fieldValues) {
+      return;
+    }
+    const prefilled = {};
+    blockOptions.fieldValues
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean)
+      .forEach((line) => {
+        const eq = line.indexOf('=');
+        if (eq > 0) {
+          const key = line.slice(0, eq).trim();
+          const val = line.slice(eq + 1).trim();
+          if (key) {
+            prefilled[key] = val;
+          }
+        }
+      });
+    if (Object.keys(prefilled).length > 0) {
+      setValues((prev) => ({ ...prefilled, ...prev }));
+    }
+    // Intentionally mount-only: prefill should not wipe user edits on re-render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Extract steps from schema
   // Detect form type from metadata
@@ -816,18 +849,41 @@ export default function FormRenderer({
 
   const isLastStep = !hasSteps || currentStepIndex === steps.length - 1;
 
+  // Block-level options (from the Gutenberg block or shortcode) take
+ // precedence over schema metadata for title/description visibility and for
+  // the theme. This keeps the editor preview and the frontend in sync.
+  const showTitle =
+    blockOptions?.showTitle ?? schema?.metadata?._showTitle ?? true;
+  const showDescription =
+    blockOptions?.showDescription ?? schema?.metadata?._showDescription ?? true;
+
+  const blockAppearance = (() => {
+    const theme = blockOptions?.theme || schema?.metadata?._theme;
+    if (!theme) {
+      return null;
+    }
+    const preset = getPreset(theme) || getPreset('default');
+    return {
+      preset: preset.id,
+      tokens: { ...preset.tokens },
+      variants: { ...preset.variants },
+    };
+  })();
+
+  const effectiveAppearance =
+    blockAppearance || schema.metadata?.appearance;
+
   // Generate form type-aware CSS classes
-  const appearance = schema.metadata?.appearance;
   const formClassNames = [
     getFormClassNames(schema),
-    formAppearanceClasses(appearance),
+    formAppearanceClasses(effectiveAppearance),
   ]
     .filter(Boolean)
     .join(' ');
 
   // Appearance is applied as custom properties on the root, so every rule in the
   // public stylesheet picks it up by inheritance and no per-form CSS is emitted.
-  const appearanceStyle = formAppearanceStyle(appearance);
+  const appearanceStyle = formAppearanceStyle(effectiveAppearance);
 
   return (
     <div className={formClassNames} style={appearanceStyle}>
@@ -842,8 +898,14 @@ export default function FormRenderer({
         {liveMessage}
       </div>
 
-      {schema.metadata?.title && (
+      {showTitle && schema.metadata?.title && (
         <h2 className='subtleforms-form-title'>{schema.metadata.title}</h2>
+      )}
+
+      {showDescription && schema.metadata?.description && (
+        <p className='subtleforms-form-description'>
+          {schema.metadata.description}
+        </p>
       )}
 
       {hasSteps && (
@@ -863,6 +925,7 @@ export default function FormRenderer({
         role='form'
         aria-label={schema.metadata?.title || __('Form', 'subtleforms')}
         noValidate
+        tabIndex={blockOptions?.tabIndex ? blockOptions.tabIndex : undefined}
         onSubmit={handleSubmit}>
         {submitError && (
           <div className='subtleforms-error' role='alert'>

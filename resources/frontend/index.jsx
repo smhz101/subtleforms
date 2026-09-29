@@ -1,5 +1,6 @@
 import { createRoot } from '@wordpress/element';
 import FormRenderer from './components/FormRenderer';
+import FormErrorBoundary from './components/FormErrorBoundary';
 import './frontend.css';
 import './styles/frontend.scss';
 import { debug } from '../shared/debug';
@@ -13,9 +14,12 @@ import { debug } from '../shared/debug';
  * @param {Object} [options.schema] - Pre-loaded schema (optional)
  * @param {boolean} [options.preview] - Preview mode (read-only)
  * @param {Function} [options.onSubmit] - Custom submit handler
+ * @param {Object} [options.blockOptions] - Block-level options (theme,
+ *   showTitle, showDescription, ajax, tabIndex, fieldValues) forwarded from
+ *   the Gutenberg block or shortcode.
  */
 function mount(container, options = {}) {
-  const { formId, schema, preview = false, onSubmit } = options;
+  const { formId, schema, preview = false, onSubmit, blockOptions } = options;
 
   if (!formId) {
     console.error('SubtleForms: formId is required for mount()');
@@ -24,12 +28,15 @@ function mount(container, options = {}) {
 
   const root = createRoot(container);
   root.render(
-    <FormRenderer
-      formId={formId}
-      preloadedSchema={schema}
-      preview={preview}
-      onSubmit={onSubmit}
-    />
+    <FormErrorBoundary>
+      <FormRenderer
+        formId={formId}
+        preloadedSchema={schema}
+        preview={preview}
+        onSubmit={onSubmit}
+        blockOptions={blockOptions}
+      />
+    </FormErrorBoundary>
   );
 
   // Store root reference for cleanup
@@ -82,7 +89,18 @@ function autoMountForms() {
     const formId = parseInt(container.dataset.formId, 10);
     if (formId) {
       debug(`SubtleForms: Mounting form ${formId} in block container`);
-      mount(container, { formId });
+      // Forward block-level options from data attributes so the renderer can
+      // apply the chosen theme, title/description visibility, AJAX mode, tab
+      // index and prefilled field values.
+      const blockOptions = {
+        theme: container.dataset.theme || 'default',
+        showTitle: container.dataset.showTitle !== '0',
+        showDescription: container.dataset.showDescription !== '0',
+        ajax: container.dataset.ajax === '1',
+        tabIndex: parseInt(container.dataset.tabindex, 10) || 0,
+        fieldValues: container.dataset.fieldValues || '',
+      };
+      mount(container, { formId, blockOptions });
     }
   });
 }

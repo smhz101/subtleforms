@@ -209,7 +209,7 @@ export default function FieldDock({
                   <span className='sf-field-dock__no-results-icon'>⊘</span>
                   <p className='sf-field-dock__no-results-text'>
                     {__('No fields match', 'subtleforms')}{' '}
-                    <strong>"{searchQuery}"</strong>
+                    <strong>&quot;{searchQuery}&quot;</strong>
                   </p>
                 </div>
               ) : (

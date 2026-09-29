@@ -11,7 +11,7 @@ function ThrowingComponent({ shouldThrow }) {
   }
   return (
     <div style={{ padding: 16, background: '#f0fdf4', borderRadius: 6, border: '1px solid #86efac' }}>
-      ✅ Component rendered successfully. Toggle "shouldThrow" to simulate an error.
+      ✅ Component rendered successfully. Toggle &quot;shouldThrow&quot; to simulate an error.
     </div>
   );
 }

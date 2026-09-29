@@ -56,9 +56,9 @@ export class ComponentErrorBoundary extends Component {
 		if ( this.props.fallback ) {
 			return typeof this.props.fallback === 'function'
 				? this.props.fallback( {
-						error: this.state.error,
-						retry: this.handleRetry,
-				  } )
+					error: this.state.error,
+					retry: this.handleRetry,
+				} )
 				: this.props.fallback;
 		}
 

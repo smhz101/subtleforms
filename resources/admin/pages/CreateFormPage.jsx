@@ -159,7 +159,7 @@ export default function CreateFormPage() {
     try {
       const result = await createFormMutation.mutateAsync({ title: safeTitle, schema: schemaToSend });
       if (result?.id) {
-        try { sessionStorage.setItem('sf_new_form_id', String(result.id)); } catch (_) {}
+        try { sessionStorage.setItem('sf_new_form_id', String(result.id)); } catch (_) { /* no-op */ }
         const newUrl = new URL(window.location.href);
         newUrl.searchParams.set('form_id', String(result.id));
         window.history.replaceState(null, '', newUrl.toString());

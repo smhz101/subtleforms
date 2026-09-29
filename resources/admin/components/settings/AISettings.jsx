@@ -218,22 +218,22 @@ export default function AISettings( {
 								onChange={ ( value ) =>
 									updateSetting( 'ai_api_key', value )
 								}
-								help={
-									settings.ai_provider === 'openai'
-										? __(
-												'Get your API key from https://platform.openai.com/api-keys',
-												'subtleforms'
-										  )
-										: settings.ai_provider === 'anthropic'
-										? __(
-												'Get your API key from https://console.anthropic.com/',
-												'subtleforms'
-										  )
-										: __(
-												'Enter your custom endpoint API key',
-												'subtleforms'
-										  )
-								}
+							help={
+								settings.ai_provider === 'openai'
+									? __(
+										'Get your API key from https://platform.openai.com/api-keys',
+										'subtleforms'
+									)
+									: settings.ai_provider === 'anthropic'
+									? __(
+										'Get your API key from https://console.anthropic.com/',
+										'subtleforms'
+									)
+									: __(
+										'Enter your custom endpoint API key',
+										'subtleforms'
+									)
+							}
 								placeholder={ __(
 									'sk-...',
 									'subtleforms'
@@ -287,15 +287,15 @@ export default function AISettings( {
 									testingConnection
 								}
 							>
-								{ testingConnection
-									? __(
-											'Testing Connection...',
-											'subtleforms'
-									  )
-									: __(
-											'Test Connection',
-											'subtleforms'
-									  ) }
+							{ testingConnection
+								? __(
+									'Testing Connection...',
+									'subtleforms'
+								)
+								: __(
+									'Test Connection',
+									'subtleforms'
+								) }
 							</Button>
 							{ connectionResult && (
 								<Notice

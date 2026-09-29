@@ -45,7 +45,7 @@ export default function SubmissionsPage({ formId }) {
       const next = prev.includes(key) ? prev.filter((c) => c !== key) : [...prev, key];
       try {
         localStorage.setItem('sf_visible_cols', JSON.stringify(next));
-      } catch {}
+      } catch { /* no-op */ }
       return next;
     });
   };

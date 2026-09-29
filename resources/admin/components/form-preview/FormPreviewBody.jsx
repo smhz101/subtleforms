@@ -1,5 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import FormRenderer from '../../../frontend/components/FormRenderer';
+import FormErrorBoundary from '../../../frontend/components/FormErrorBoundary';
 import PreviewFrame from './PreviewFrame';
 
 /**
@@ -35,7 +36,9 @@ export default function FormPreviewBody( { schema, isDirty = false } ) {
       <PreviewFrame
         className='sf-form-preview__frame'
         title={ __( 'Form preview', 'subtleforms' ) }>
-        <FormRenderer preloadedSchema={ schema } preview />
+        <FormErrorBoundary>
+          <FormRenderer preloadedSchema={ schema } preview />
+        </FormErrorBoundary>
       </PreviewFrame>
     </div>
   );
