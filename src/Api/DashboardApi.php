@@ -303,6 +303,17 @@ class DashboardApi {
 			/* translators: %d: number of days */
 			return sprintf( _n( '%d day ago', '%d days ago', $days, 'subtleforms' ), $days );
 		} else {
+			// Respect the site's WordPress date format (Settings → General)
+			// so the Dashboard agrees with All Forms — one date helper
+			// everywhere (Part B8). Falls back to 'M j, Y' when no format is
+			// configured (e.g. unit tests without WP loaded).
+			$format = function_exists( 'get_option' ) ? get_option( 'date_format' ) : '';
+			if ( $format && function_exists( 'wp_date' ) ) {
+				return wp_date( $format, $timestamp );
+			}
+			if ( $format && function_exists( 'date_i18n' ) ) {
+				return date_i18n( $format, $timestamp );
+			}
 			return gmdate( 'M j, Y', $timestamp );
 		}
 	}

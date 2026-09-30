@@ -24,6 +24,7 @@ import {
   getFormTypeBadge,
   getFormStatusBadge,
 } from '../utils/formMeta';
+import { formatRelativeDate, formatDate, isNewForm } from '../utils/formatDate';
 import { logger, perfMarkers } from '../diagnostics';
 import './FormsList.scss';
 
@@ -230,7 +231,7 @@ export default function FormsList({
               {__('Pro', 'subtleforms')}
             </span>
           )}
-          {form.submission_count === 0 && (
+          {isNewForm(form) && (
             <span className='sf-form-name__new-badge'>
               {__('New', 'subtleforms')}
             </span>
@@ -332,33 +333,12 @@ export default function FormsList({
       title: __('Last Updated', 'subtleforms'),
       sortable: true,
       render: (updatedAt) => {
-        // Server returns updated_at as a naive UTC datetime (e.g.
-        // "2026-09-29 13:00:00"). Without a timezone suffix, JS parses it as
-        // local time, which shifts the instant by the viewer's UTC offset and
-        // is what produced the "5 hours ago" bug for a just-created form.
-        // Normalise to an explicit UTC instant before comparing.
-        const raw = updatedAt ? String( updatedAt ) : '';
-        const iso =
-          raw && ! /[zZ]|[+-]\d{2}:?\d{2}$/.test( raw )
-            ? `${ raw.replace( ' ', 'T' ) }Z`
-            : raw;
-        const date = new Date( iso );
-        const now = new Date();
-        const diffInHours = Math.floor( ( now - date ) / ( 1000 * 60 * 60 ) );
-
-        let displayText;
-        if (diffInHours < 1) displayText = __('Just now', 'subtleforms');
-        else if (diffInHours < 24)
-          /* translators: %1$d: number of hours ago */
-          displayText = sprintf(
-            __('%1$d hours ago', 'subtleforms'),
-            diffInHours
-          );
-        else if (diffInHours < 48) displayText = __('Yesterday', 'subtleforms');
-        else displayText = date.toLocaleDateString();
-
+        // Relative for the last 48h, then the site's WP date format
+        // everywhere (Part B8) — one helper shared with the Dashboard.
+        const displayText = formatRelativeDate(updatedAt);
+        const absolute = formatDate(updatedAt);
         return (
-          <time className='sf-form-date' title={date.toLocaleString()}>
+          <time className='sf-form-date' title={absolute}>
             {displayText}
           </time>
         );
