@@ -164,20 +164,71 @@ final class FormsApi {
 						),
 					),
 				),
-				array(
-					'methods'             => 'DELETE',
-					'callback'            => array( $this, 'delete_form' ),
-					'permission_callback' => array( $this, 'check_write_permission' ),
-					'args'                => array(
-						'id' => array(
-							'type'              => 'integer',
-							'required'          => true,
-							'sanitize_callback' => 'absint',
-						),
+			array(
+				'methods'             => 'DELETE',
+				'callback'            => array( $this, 'delete_form' ),
+				'permission_callback' => array( $this, 'check_write_permission' ),
+				'args'                => array(
+					'id' => array(
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					),
+					// move_to_trash=1 soft-deletes (status='trash'); force=1 hard-deletes.
+					// Default (neither) is a hard delete, preserving the existing
+					// behaviour relied on by the builder's orphan-draft cleanup
+					// (Part B10).
+					'move_to_trash' => array(
+						'type'              => 'boolean',
+						'default'           => false,
+						'sanitize_callback' => function ( $v ) {
+							return (bool) $v;
+						},
+					),
+					'force' => array(
+						'type'              => 'boolean',
+						'default'           => false,
+						'sanitize_callback' => function ( $v ) {
+							return (bool) $v;
+						},
 					),
 				),
-			)
-		);
+			),
+		)
+	);
+
+	// Restore a trashed form (Part B10).
+	register_rest_route(
+		self::NAMESPACE,
+		'/forms/(?P<id>\d+)/restore',
+		array(
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'restore_form' ),
+				'permission_callback' => array( $this, 'check_write_permission' ),
+				'args'                => array(
+					'id' => array(
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					),
+				),
+			),
+		)
+	);
+
+	// Status counts for the All Forms tab bar (Part B10).
+	register_rest_route(
+		self::NAMESPACE,
+		'/forms/counts',
+		array(
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'get_form_counts' ),
+				'permission_callback' => array( $this, 'check_read_permission' ),
+			),
+		)
+	);
 
 		register_rest_route(
 			self::NAMESPACE,
@@ -826,9 +877,60 @@ final class FormsApi {
 			return $conflictResponse;
 		}
 
+		// move_to_trash soft-deletes; force (or default) hard-deletes. The
+		// default stays a hard delete so the builder's orphan-draft cleanup
+		// and existing callers keep working (Part B10).
+		$move_to_trash = (bool) $request->get_param( 'move_to_trash' );
+		if ( $move_to_trash ) {
+			$this->formsRepo->trash( $id );
+			return ApiResponse::success( array( 'success' => true, 'trashed' => true ) );
+		}
+
 		$this->formsRepo->delete( $id );
 
 		return ApiResponse::success( array( 'success' => true ) );
+	}
+
+	/**
+	 * Restore a trashed form.
+	 *
+	 * @param WP_REST_Request $request
+	 * @return WP_REST_Response
+	 */
+	public function restore_form( WP_REST_Request $request ): WP_REST_Response {
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		try {
+			$id = Schemas::validateId( $request->get_param( 'id' ) );
+		} catch ( ValidationException $e ) {
+			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
+		}
+
+		$form = $this->formsRepo->find( $id );
+		if ( ! $form ) {
+			return ApiResponse::not_found( __( 'Form not found', 'subtleforms' ) );
+		}
+
+		if ( ( $form['status'] ?? '' ) !== 'trash' ) {
+			return ApiResponse::validation_error( __( 'Form is not in the Trash', 'subtleforms' ) );
+		}
+
+		$this->formsRepo->restore( $id );
+
+		return ApiResponse::success( array( 'success' => true ) );
+	}
+
+	/**
+	 * Get per-status form counts for the All Forms tab bar.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function get_form_counts(): WP_REST_Response {
+		$counts = $this->formsRepo->count_by_status();
+		return ApiResponse::success( $counts );
 	}
 
 	// ────────────────────────────────────────────────────────────────────

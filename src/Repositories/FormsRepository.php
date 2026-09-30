@@ -119,8 +119,13 @@ final class FormsRepository {
 		$params = array();
 
 		if ( $args['status'] ) {
+			// 'trash' is a real status; any other status filters exactly.
+			// An empty status (the "All" tab) excludes trashed forms so they
+			// don't pollute the active list (Part B10).
 			$where[]  = 'status = %s';
 			$params[] = $args['status'];
+		} else {
+			$where[] = "status <> 'trash'";
 		}
 
 		if ( $args['search'] ) {
@@ -206,6 +211,9 @@ final class FormsRepository {
 		if ( ! empty( $args['status'] ) ) {
 			$where[]  = 'status = %s';
 			$params[] = $args['status'];
+		} else {
+			// "All" excludes trashed forms (Part B10).
+			$where[] = "status <> 'trash'";
 		}
 
 		if ( ! empty( $args['search'] ) ) {
@@ -767,6 +775,94 @@ final class FormsRepository {
 			wp_cache_delete( "subtleforms_schema_{$id}", 'subtleforms' );
 		}
 		return $result !== false;
+	}
+
+	/**
+	 * Move a form to the Trash (soft delete).
+	 *
+	 * Sets status to 'trash'; the row and all schema versions are kept so the
+	 * form can be restored or permanently deleted later (Part B10).
+	 *
+	 * @param int $id Form ID.
+	 * @return bool
+	 */
+	public function trash( int $id ): bool {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Write path; no caching.
+		$result = $wpdb->update(
+			$this->table,
+			array( 'status' => 'trash' ),
+			array( 'id' => $id ),
+			array( '%s' ),
+			array( '%d' )
+		);
+		if ( $result !== false ) {
+			wp_cache_delete( "subtleforms_form_{$id}", 'subtleforms' );
+		}
+		return $result !== false;
+	}
+
+	/**
+	 * Restore a trashed form.
+	 *
+	 * Restores to 'draft' (matching WordPress' post-restore behaviour). A form
+	 * that was published before trashing will need to be re-published to go
+	 * live again — restoring never silently re-publishes (Part B10).
+	 *
+	 * @param int $id Form ID.
+	 * @return bool
+	 */
+	public function restore( int $id ): bool {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Write path; no caching.
+		$result = $wpdb->update(
+			$this->table,
+			array( 'status' => 'draft' ),
+			array( 'id' => $id, 'status' => 'trash' ),
+			array( '%s' ),
+			array( '%d', '%s' )
+		);
+		if ( $result !== false ) {
+			wp_cache_delete( "subtleforms_form_{$id}", 'subtleforms' );
+		}
+		return $result !== false;
+	}
+
+	/**
+	 * Count forms grouped by status, excluding nothing.
+	 *
+	 * Used by the All Forms tab bar to show All / Published / Draft / Trash
+	 * counts (Part B10). "All" here means non-trash.
+	 *
+	 * @return array{all:int,published:int,draft:int,trash:int}
+	 */
+	public function count_by_status(): array {
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Aggregate read; cached below.
+		$rows = $wpdb->get_results(
+			"SELECT status, COUNT(*) AS c FROM {$this->table} GROUP BY status",
+			ARRAY_A
+		);
+
+		$counts = array(
+			'all'       => 0,
+			'published'  => 0,
+			'draft'      => 0,
+			'trash'      => 0,
+		);
+		if ( is_array( $rows ) ) {
+			foreach ( $rows as $row ) {
+				$status = $row['status'] ?? '';
+				$c      = (int) ( $row['c'] ?? 0 );
+				if ( isset( $counts[ $status ] ) ) {
+					$counts[ $status ] = $c;
+				}
+				if ( $status !== 'trash' ) {
+					$counts['all'] += $c;
+				}
+			}
+		}
+		return $counts;
 	}
 
 	/**

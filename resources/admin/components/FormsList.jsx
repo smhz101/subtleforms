@@ -69,6 +69,7 @@ export default function FormsList({
   searchTerm,
   statusFilter = 'all',
   visibleColumns = DEFAULT_FORM_VISIBLE,
+  onFormsChanged,
 }) {
   // Chunked prefetch: buffer accumulates rows; sliced client-side per page.
   // Each API call fetches CHUNK_PAGES pages at once.
@@ -372,44 +373,70 @@ export default function FormsList({
             )}
             renderContent={({ onClose }) => (
               <MenuGroup>
-                <MenuItem
-                  icon={<Icon.CheckCircle size={16} />}
-                  onClick={(e) => {
-                    if (e && e.stopPropagation) e.stopPropagation();
-                    setStatusModal(form.id);
-                    setStatusValue(form.status);
-                    onClose();
-                  }}>
-                  {__('Change status', 'subtleforms')}
-                </MenuItem>
-                <MenuItem
-                  icon={<Icon.Copy size={16} />}
-                  onClick={(e) => {
-                    if (e && e.stopPropagation) e.stopPropagation();
-                    handleDuplicate(form.id);
-                    onClose();
-                  }}>
-                  {__('Duplicate', 'subtleforms')}
-                </MenuItem>
-                <MenuItem
-                  icon={<Icon.Eye size={16} />}
-                  onClick={(e) => {
-                    if (e && e.stopPropagation) e.stopPropagation();
-                    window.location.href = `admin.php?page=subtleforms-submissions&form_id=${form.id}`;
-                    onClose();
-                  }}>
-                  {__('View submissions', 'subtleforms')}
-                </MenuItem>
-                <MenuItem
-                  icon={<Icon.Delete size={16} />}
-                  onClick={(e) => {
-                    if (e && e.stopPropagation) e.stopPropagation();
-                    setDeleteModal(form.id);
-                    onClose();
-                  }}
-                  isDestructive>
-                  {__('Delete', 'subtleforms')}
-                </MenuItem>
+                {form.status === 'trash' ? (
+                  <>
+                    <MenuItem
+                      icon={<Icon.CheckCircle size={16} />}
+                      onClick={(e) => {
+                        if (e && e.stopPropagation) e.stopPropagation();
+                        handleRestore(form.id);
+                        onClose();
+                      }}>
+                      {__('Restore', 'subtleforms')}
+                    </MenuItem>
+                    <MenuItem
+                      icon={<Icon.Delete size={16} />}
+                      onClick={(e) => {
+                        if (e && e.stopPropagation) e.stopPropagation();
+                        setDeleteModal(form.id);
+                        onClose();
+                      }}
+                      isDestructive>
+                      {__('Delete permanently', 'subtleforms')}
+                    </MenuItem>
+                  </>
+                ) : (
+                  <>
+                    <MenuItem
+                      icon={<Icon.CheckCircle size={16} />}
+                      onClick={(e) => {
+                        if (e && e.stopPropagation) e.stopPropagation();
+                        setStatusModal(form.id);
+                        setStatusValue(form.status);
+                        onClose();
+                      }}>
+                      {__('Change status', 'subtleforms')}
+                    </MenuItem>
+                    <MenuItem
+                      icon={<Icon.Copy size={16} />}
+                      onClick={(e) => {
+                        if (e && e.stopPropagation) e.stopPropagation();
+                        handleDuplicate(form.id);
+                        onClose();
+                      }}>
+                      {__('Duplicate', 'subtleforms')}
+                    </MenuItem>
+                    <MenuItem
+                      icon={<Icon.Eye size={16} />}
+                      onClick={(e) => {
+                        if (e && e.stopPropagation) e.stopPropagation();
+                        window.location.href = `admin.php?page=subtleforms-submissions&form_id=${form.id}`;
+                        onClose();
+                      }}>
+                      {__('View submissions', 'subtleforms')}
+                    </MenuItem>
+                    <MenuItem
+                      icon={<Icon.Delete size={16} />}
+                      onClick={(e) => {
+                        if (e && e.stopPropagation) e.stopPropagation();
+                        setDeleteModal(form.id);
+                        onClose();
+                      }}
+                      isDestructive>
+                      {__('Move to Trash', 'subtleforms')}
+                    </MenuItem>
+                  </>
+                )}
               </MenuGroup>
             )}
           />
@@ -492,16 +519,57 @@ export default function FormsList({
     setDeleteModal(null);
     setBuffer((prev) => prev.filter((f) => f.id !== formId));
 
-    const { ok } = await apiRequest(`/forms/${formId}`, { method: 'DELETE' });
+    // Move to Trash (soft delete) so the form can be restored or permanently
+    // deleted from the Trash tab (Part B10).
+    const { ok } = await apiRequest(`/forms/${formId}?move_to_trash=1`, {
+      method: 'DELETE',
+    });
 
     if (ok) {
-      createSuccessNotice(__('Form deleted', 'subtleforms'), {
+      createSuccessNotice(__('Form moved to Trash', 'subtleforms'), {
         type: 'snackbar',
       });
+      onFormsChanged?.();
     } else {
       createErrorNotice(__('Failed to delete form', 'subtleforms'), {
         type: 'snackbar',
       });
+      loadFresh();
+    }
+  };
+
+  const handleRestore = async (formId) => {
+    setBuffer((prev) => prev.filter((f) => f.id !== formId));
+    const { ok } = await apiPost(`/forms/${formId}/restore`);
+    if (ok) {
+      createSuccessNotice(__('Form restored from Trash', 'subtleforms'), {
+        type: 'snackbar',
+      });
+      onFormsChanged?.();
+    } else {
+      createErrorNotice(__('Failed to restore form', 'subtleforms'), {
+        type: 'snackbar',
+      });
+      loadFresh();
+    }
+  };
+
+  const handleDeletePermanently = async (formId) => {
+    setDeleteModal(null);
+    setBuffer((prev) => prev.filter((f) => f.id !== formId));
+    const { ok } = await apiRequest(`/forms/${formId}?force=1`, {
+      method: 'DELETE',
+    });
+    if (ok) {
+      createSuccessNotice(__('Form permanently deleted', 'subtleforms'), {
+        type: 'snackbar',
+      });
+      onFormsChanged?.();
+    } else {
+      createErrorNotice(
+        __('Failed to permanently delete form', 'subtleforms'),
+        { type: 'snackbar' }
+      );
       loadFresh();
     }
   };
@@ -553,11 +621,20 @@ export default function FormsList({
     setBuffer((prev) => prev.filter((f) => !ids.includes(f.id)));
     setSelectedForms([]);
 
+    // In the Trash tab, bulk delete is permanent (force=1). Elsewhere it
+    // moves forms to the Trash (move_to_trash=1) (Part B10).
+    const inTrash = statusFilter === 'trash';
+    const query = inTrash ? '?force=1' : '?move_to_trash=1';
+
     let successCount = 0;
     for (const id of ids) {
-      const { ok } = await apiRequest(`/forms/${id}`, { method: 'DELETE' });
+      const { ok } = await apiRequest(`/forms/${id}${query}`, {
+        method: 'DELETE',
+      });
       if (ok) successCount++;
     }
+
+    onFormsChanged?.();
 
     if (successCount === ids.length) {
       createSuccessNotice(
@@ -729,26 +806,56 @@ export default function FormsList({
       <ConfirmModal
         isOpen={!!deleteModal}
         onClose={() => setDeleteModal(null)}
-        title={__('Delete Form', 'subtleforms')}
+        title={
+          (buffer.find((f) => f.id === deleteModal)?.status === 'trash')
+            ? __('Delete Form Permanently', 'subtleforms')
+            : __('Move Form to Trash', 'subtleforms')
+        }
         message={(() => {
           const form = buffer.find((f) => f.id === deleteModal);
           const count = form?.submission_count || 0;
+          if (form?.status === 'trash') {
+            return count > 0
+              ? sprintf(
+                  /* translators: %1$d: number of submissions belonging to this form */
+                  __(
+                    'Are you sure you want to permanently delete this form? It has %1$d submissions which will also be permanently deleted. This action cannot be undone.',
+                    'subtleforms'
+                  ),
+                  count
+                )
+              : __(
+                  'Are you sure you want to permanently delete this form? This action cannot be undone.',
+                  'subtleforms'
+                );
+          }
           return count > 0
             ? sprintf(
                 /* translators: %1$d: number of submissions belonging to this form */
                 __(
-                  'Are you sure you want to delete this form? It has %1$d submissions which will also be permanently deleted.',
+                  'Move this form to the Trash? It has %1$d submissions, which will be kept with the form and can be restored.',
                   'subtleforms'
                 ),
                 count
               )
             : __(
-                'Are you sure you want to delete this form? This action cannot be undone.',
+                'Move this form to the Trash? You can restore it or delete it permanently from the Trash tab.',
                 'subtleforms'
               );
         })()}
-        onConfirm={() => handleDelete(deleteModal)}
-        confirmText={__('Delete Form', 'subtleforms')}
+        onConfirm={() => {
+          const form = buffer.find((f) => f.id === deleteModal);
+          if (form?.status === 'trash') {
+            handleDeletePermanently(deleteModal);
+          } else {
+            handleDelete(deleteModal);
+          }
+        }}
+        confirmText={
+          (buffer.find((f) => f.id === deleteModal)?.status === 'trash')
+            ? __('Delete Permanently', 'subtleforms')
+            : __('Move to Trash', 'subtleforms')
+        }
         confirmVariant='destructive'
       />
 

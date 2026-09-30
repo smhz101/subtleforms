@@ -20,6 +20,18 @@ export default function FormsPage() {
   const [showWizard, setShowWizard] = useState(false);
   const [formsCount, setFormsCount] = useState(null);
   const [isDismissed, setIsDismissed] = useState(true);
+  // Per-status counts for the tab bar (Part B10).
+  const [statusCounts, setStatusCounts] = useState({});
+
+  const refreshCounts = async () => {
+    try {
+      const { body } = await apiGet('/forms/counts');
+      // apiClient unwraps .data, so body is the counts map directly.
+      setStatusCounts(body || {});
+    } catch (error) {
+      console.error('Failed to load form status counts:', error);
+    }
+  };
 
   // Column visibility — persisted to localStorage
   const [visibleColumns, setVisibleColumns] = useState(() => {
@@ -77,6 +89,7 @@ export default function FormsPage() {
     };
 
     checkOnboarding();
+    refreshCounts();
   }, []);
 
   const handleWizardComplete = async (formData) => {
@@ -141,9 +154,10 @@ export default function FormsPage() {
   };
 
   const tabs = [
-    { key: 'all', label: __('All', 'subtleforms') },
-    { key: 'published', label: __('Published', 'subtleforms') },
-    { key: 'draft', label: __('Draft', 'subtleforms') },
+    { key: 'all', label: __('All', 'subtleforms'), count: statusCounts.all },
+    { key: 'published', label: __('Published', 'subtleforms'), count: statusCounts.published },
+    { key: 'draft', label: __('Draft', 'subtleforms'), count: statusCounts.draft },
+    { key: 'trash', label: __('Trash', 'subtleforms'), count: statusCounts.trash },
   ];
 
   return (
@@ -228,7 +242,7 @@ export default function FormsPage() {
             />
           </div>
         }>
-        <FormsList searchTerm={search} statusFilter={statusFilter} visibleColumns={visibleColumns} />
+        <FormsList searchTerm={search} statusFilter={statusFilter} visibleColumns={visibleColumns} onFormsChanged={refreshCounts} />
       </AdminShell>
 
       {showWizard && (
