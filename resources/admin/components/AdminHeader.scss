@@ -8,9 +8,10 @@
   flex-shrink: 0;
   justify-content: space-between;
   align-items: center;
-  background-color: var(--sf-blue-200); // blue-200
+  // White top bar — no light-blue band (Part C step 2).
+  background-color: var(--sf-bg-surface);
   padding: 0 1.5rem; // px-6
-  border-bottom: 1px solid var(--sf-gray-300); // border-gray-300
+  border-bottom: 1px solid var(--sf-border);
   position: sticky;
   z-index: 100;
 
@@ -28,35 +29,25 @@
 
   &__logo {
     display: inline-flex;
-    justify-content: center;
-    align-items: center;
-    background-color: var(--sf-surface);
-    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-    border: 1px solid var(--sf-gray-200); // border-gray-200
-    border-radius: var(--sf-radius-md); // rounded-md
-    width: 2rem; // w-8
-    height: 2rem; // h-8
-    font-weight: 600;
-    color: var(--sf-gray-800); // text-gray-800
-    font-size: var(--sf-text-xs); // text-xs
+    flex-shrink: 0;
   }
 
   &__title {
     margin: 0;
     font-weight: 600;
-    color: var(--sf-gray-900); // text-gray-900
+    color: var(--sf-text);
     font-size: var(--sf-text-lg); // text-lg
     line-height: 1;
   }
 
   &__title-input {
-    background-color: var(--sf-surface);
+    background-color: var(--sf-bg-surface);
     padding: 0.25rem 0.5rem; // py-1 px-2
-    border: 1px solid var(--sf-blue-600); // border-blue-600
+    border: 1px solid var(--sf-primary-500);
     outline: none;
     min-width: 200px;
     font-weight: 600;
-    color: var(--sf-gray-900); // text-gray-900
+    color: var(--sf-text);
     font-size: var(--sf-text-lg); // text-lg
     line-height: 1;
   }
@@ -67,14 +58,14 @@
     border: none;
     outline: none;
     font-weight: 600;
-    color: var(--sf-gray-900); // text-gray-900
+    color: var(--sf-text);
     font-size: var(--sf-text-lg); // text-lg
     line-height: 1;
     transition: color var(--sf-duration-base);
     cursor: pointer;
 
     &:hover {
-      color: var(--sf-blue-600); // text-blue-600
+      color: var(--sf-primary-600);
     }
   }
 

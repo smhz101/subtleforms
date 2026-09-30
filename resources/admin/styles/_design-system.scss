@@ -276,7 +276,7 @@
 		position: absolute;
 
 		&:focus + .sf-toggle__slider {
-			box-shadow: 0 0 0 3px color-mix(in srgb, var(--wp-admin-theme-color, #2271b1) 25%, transparent);
+			box-shadow: 0 0 0 3px color-mix(in srgb, var(--sf-primary-500) 25%, transparent);
 		}
 
 		&:checked + .sf-toggle__slider {

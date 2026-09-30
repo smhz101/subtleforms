@@ -1,6 +1,6 @@
 import { memo, useState, useRef, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import Icon from '../ui/Icon';
+import Logo from '../ui/Logo';
 import './AdminHeader.scss';
 
 /**
@@ -129,14 +129,11 @@ const AdminHeader = memo(function AdminHeader({
       {/* Left Side: Logo + Title */}
       <div className='sf-admin-header__left'>
         <div className='sf-admin-header__logo-title'>
-          {/* SubtleForms Logo */}
-
-          <div
+          {/* SubtleForms logo mark (real SVG, not an "SF" text box) */}
+          <Logo
             className='sf-admin-header__logo'
-            aria-label={__('SubtleForms', 'subtleforms')}
-            title={__('SubtleForms', 'subtleforms')}>
-            SF
-          </div>
+            size={28}
+          />
 
           {renderTitle()}
         </div>
