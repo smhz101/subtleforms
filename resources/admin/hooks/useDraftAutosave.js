@@ -17,7 +17,7 @@ import { debug } from '../../shared/debug';
 /**
  * Autosave configuration
  */
-const AUTOSAVE_DEBOUNCE_MS = 3000;       // Wait 3s after last change before saving
+const AUTOSAVE_DEBOUNCE_MS = 30000;      // Wait 30s after last change before saving (Part B21)
 const AUTOSAVE_RETRY_DELAY_MS = 5000;    // 5s between retries
 const MAX_RETRY_ATTEMPTS = 2;            // Max 2 retries (not counting the first attempt)
 
@@ -106,6 +106,46 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
       }
     };
   }, [state, draftSchema, isDirty, formId, enabled]);
+
+  // Save on blur and when the tab is hidden: with a 30s debounce, an
+  // in-progress edit could be lost if the user switches away mid-edit, so
+  // flush immediately on window blur and on visibilitychange → hidden
+  // (Part B21). Uses refs so the listener can read the latest state without
+  // re-registering on every keystroke.
+  useEffect(() => {
+    if (!enabled) {
+      return;
+    }
+
+    const flushIfDirty = () => {
+      const latest = latestBuilderStateRef.current;
+      if (
+        latest?.state === BUILDER_STATES.DIRTY &&
+        latest?.isDirty &&
+        !saveInFlightRef.current
+      ) {
+        forceAutosave();
+      }
+    };
+
+    const onBlur = () => flushIfDirty();
+    const onVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        flushIfDirty();
+      }
+    };
+
+    window.addEventListener('blur', onBlur);
+    document.addEventListener('visibilitychange', onVisibility);
+
+    return () => {
+      window.removeEventListener('blur', onBlur);
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
+    // forceAutosave is stable enough (closes over refs); enabled toggles
+    // listener registration.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled]);
 
   /**
    * Perform the actual autosave operation

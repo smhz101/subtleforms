@@ -394,13 +394,44 @@ class Settings {
 	}
 
 	/**
-	 * Get sender email with fallback to admin email
+	 * Get sender email with fallback to the WordPress default sender.
+	 *
+	 * Defaults to wordpress@<site domain>, matching WordPress' own default
+	 * From: address. Using the site domain (rather than the admin's personal
+	 * email) keeps the sender on the same domain as the site, which avoids
+	 * SPF/DMARC rejection and deliverability issues (Part B20).
 	 *
 	 * @return string
 	 */
 	public function getSenderEmail() {
 		$email = $this->get( 'sender_email' );
-		return ! empty( $email ) ? $email : get_option( 'admin_email' );
+		if ( ! empty( $email ) ) {
+			return $email;
+		}
+
+		$domain = $this->get_site_domain();
+		return 'wordpress@' . $domain;
+	}
+
+	/**
+	 * Get the site domain (host without scheme/path), lowercased.
+	 *
+	 * Falls back to the hostname parsed from the WordPress site URL, then to
+	 * the server HTTP_HOST, and finally to 'localhost' for CLI/test contexts.
+	 *
+	 * @return string
+	 */
+	protected function get_site_domain() {
+		$url = home_url();
+		$host = wp_parse_url( $url, PHP_URL_HOST );
+		if ( empty( $host ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.NonceVerification.Recommended -- Read-only fallback.
+			$host = isset( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : '';
+		}
+		if ( empty( $host ) ) {
+			$host = 'localhost';
+		}
+		return strtolower( $host );
 	}
 
 	/**
