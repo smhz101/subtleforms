@@ -119,10 +119,25 @@ final class PublicSubmitApi {
 			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
 		}
 
-		$payload = $validated['data'] ?? array();
-		$payload = is_array( $payload ) ? Sanitizer::sanitizeArrayDeep( $payload ) : array();
+	$payload = $validated['data'] ?? array();
+	$payload = is_array( $payload ) ? Sanitizer::sanitizeArrayDeep( $payload ) : array();
 
-		// Spam protection
+	// Honeypot: a hidden "website_url" field real users never see. If it has
+	// any value, the submitter is a bot — silently drop the submission (return
+	// success without saving) so bots don't learn the field is a trap and retry,
+	// matching the existing SpamProtection pattern (Part B3).
+	$honeypot = isset( $payload['website_url'] ) ? (string) $payload['website_url'] : '';
+	if ( $honeypot !== '' ) {
+		Logger::info( 'Honeypot tripped on form %d — dropping submission', $formId );
+		return ApiResponse::success(
+			array(
+				'success' => true,
+				'message' => __( 'Thank you.', 'subtleforms' ),
+			)
+		);
+	}
+
+	// Spam protection
 		if ( \SubtleForms\Engine\SpamProtection::is_enabled() ) {
 			$tempContext = new SubmissionContext( $formId, $payload );
 			if ( \SubtleForms\Engine\SpamProtection::is_spam( $tempContext ) ) {

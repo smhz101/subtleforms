@@ -1,5 +1,6 @@
 import { __ } from '@wordpress/i18n';
 import { getIn } from '../utils/valuePaths';
+import { getCompositeEmptyParts } from '../utils/fieldValidation';
 import { debug } from '../../shared/debug';
 import SignaturePad from './fields/SignaturePad';
 import RichTextInput from './fields/RichTextInput';
@@ -8,6 +9,21 @@ import {
   fieldAppearanceStyle,
   fieldAppearanceClasses,
 } from '../../shared/appearance';
+
+// HTML autocomplete tokens per field type, so browsers can autofill the form
+// (Part B2). `undefined` means no hint (let the browser decide).
+const AUTOCOMPLETE_TOKENS = {
+  text: 'off',
+  email: 'email',
+  url: 'url',
+  number: 'off',
+  phone: 'tel',
+  tel: 'tel',
+  date: 'bday',
+  time: 'off',
+  datetime: 'bday-time',
+  password: 'new-password',
+};
 
 // ISO 3166-1 Alpha-2 country codes
 const COUNTRIES = [
@@ -477,42 +493,73 @@ export default function FieldRenderer({
     );
   }
 
-  // Plan A group fields — name_group / address_group with real child nodes.
-  // Each child renders as an individual text input; its onChange writes to
-  // "{parentPath}.{childKey}" so values are stored nested under the parent key:
-  //   values.name_group_abc = { text_1: "John", text_3: "Doe" }
-  // At submit time getIn(values, "name_group_abc") returns the full object,
-  // yielding the required nested payload: { name_group_abc: { text_1: "John" } }.
-  // Old forms without .children fall through to the legacy renderInput switch.
+  // Composite group fields — name_group / address_group. They carry an object
+  // value at their root key, so they render as a real <fieldset>/<legend> (not
+  // a <label> pointing at an id that doesn't exist) with the required asterisk
+  // shown ONCE on the legend — never on Name + First + Last (Part B1).
+  //
+  // Two shapes are supported:
+  //  • children: Plan A group with real child text nodes (each rendered as its
+  //    own FieldRenderer; their `required` is false so they show no asterisk).
+  //  • legacy: a single leaf whose renderInput() draws the part inputs and
+  //    writes the whole object back to the parent key.
   if (
-    (field.type === 'name_group' || field.type === 'address_group' || field.kind === 'group') &&
-    Array.isArray(field.children) && field.children.length > 0
+    field.type === 'name_group' ||
+    field.type === 'address_group' ||
+    field.type === 'address' ||
+    field.kind === 'group'
   ) {
+    const hasChildren =
+      Array.isArray(field.children) && field.children.length > 0;
+
     return (
-      <fieldset className={`subtleforms-field subtleforms-field-${field.type} subtleforms-group-field`}>
+      <fieldset
+        className={`subtleforms-field subtleforms-field-${field.type} subtleforms-group-field`}
+        aria-required={required}
+        aria-invalid={!!error}
+      >
         <legend className='subtleforms-field-label'>
           {label}
           {required && (
             <span className='subtleforms-required' aria-label=', required'>*</span>
           )}
         </legend>
-        {field.children.map((child) => {
-          const childKey = child.config?.key || child.key;
-          const childPath = resolvedPath ? `${resolvedPath}.${childKey}` : childKey;
-          return (
-            <FieldRenderer
-              key={childKey}
-              field={child}
-              fieldPath={childPath}
-              values={values}
-              onChange={onChange}
-              errors={errors}
-              hiddenFields={hiddenFields}
-            />
-          );
-        })}
+
+        {hasChildren
+          ? field.children.map((child) => {
+              const childKey = child.config?.key || child.key;
+              const childPath = resolvedPath
+                ? `${resolvedPath}.${childKey}`
+                : childKey;
+              return (
+                <FieldRenderer
+                  key={childKey}
+                  field={child}
+                  fieldPath={childPath}
+                  values={values}
+                  onChange={onChange}
+                  errors={errors}
+                  hiddenFields={hiddenFields}
+                />
+              );
+            })
+          : renderInput(
+              field,
+              getIn(values, resolvedPath, {}),
+              (next) => onChange(resolvedPath, next),
+              placeholder,
+              inputId,
+              required,
+              error
+            )}
+
         {error && (
-          <div className='subtleforms-field-error' role='alert' aria-live='assertive'>
+          <div
+            id={`${inputId}-error`}
+            className='subtleforms-field-error'
+            role='alert'
+            aria-live='assertive'
+          >
             {error}
           </div>
         )}
@@ -613,6 +660,8 @@ function renderInput(
           aria-required={required}
           aria-invalid={!!error}
           aria-describedby={error ? `${inputId}-error` : undefined}
+          name={config.key || field.key || undefined}
+          autoComplete={AUTOCOMPLETE_TOKENS[field.type]}
         />
       );
 
@@ -628,6 +677,7 @@ function renderInput(
           aria-required={required}
           aria-invalid={!!error}
           aria-describedby={error ? `${inputId}-error` : undefined}
+          name={config.key || field.key || undefined}
         />
       );
 
@@ -957,15 +1007,13 @@ function renderInput(
 
     case 'name_group':
       const nameValue = typeof value === 'object' ? value : {};
+      const nameEmpty = new Set(getCompositeEmptyParts(field, nameValue));
       return (
         <div className='subtleforms-name-group'>
           {config.enable_first_name !== false && (
             <div className='subtleforms-name-part'>
-              <label
-                htmlFor={`${inputId}-first`}
-                className='subtleforms-field-label'>
+              <label htmlFor={`${inputId}-first`} className='subtleforms-field-label'>
                 {__('First Name', 'subtleforms')}
-                {required && <span className='subtleforms-required'>*</span>}
               </label>
               <input
                 id={`${inputId}-first`}
@@ -976,16 +1024,15 @@ function renderInput(
                   onChange({ ...nameValue, first_name: e.target.value })
                 }
                 placeholder={__('First Name', 'subtleforms')}
-                aria-required={required}
-                aria-invalid={!!error}
+                aria-invalid={!!error && nameEmpty.has('first_name')}
+                autoComplete='given-name'
+                name={`${config.key || field.key || ''}_first_name`}
               />
             </div>
           )}
           {config.enable_middle_name && (
             <div className='subtleforms-name-part'>
-              <label
-                htmlFor={`${inputId}-middle`}
-                className='subtleforms-field-label'>
+              <label htmlFor={`${inputId}-middle`} className='subtleforms-field-label'>
                 {__('Middle Name', 'subtleforms')}
               </label>
               <input
@@ -997,17 +1044,16 @@ function renderInput(
                   onChange({ ...nameValue, middle_name: e.target.value })
                 }
                 placeholder={__('Middle Name', 'subtleforms')}
-                aria-invalid={!!error}
+                aria-invalid={!!error && nameEmpty.has('middle_name')}
+                autoComplete='additional-name'
+                name={`${config.key || field.key || ''}_middle_name`}
               />
             </div>
           )}
           {config.enable_last_name !== false && (
             <div className='subtleforms-name-part'>
-              <label
-                htmlFor={`${inputId}-last`}
-                className='subtleforms-field-label'>
+              <label htmlFor={`${inputId}-last`} className='subtleforms-field-label'>
                 {__('Last Name', 'subtleforms')}
-                {required && <span className='subtleforms-required'>*</span>}
               </label>
               <input
                 id={`${inputId}-last`}
@@ -1018,8 +1064,9 @@ function renderInput(
                   onChange({ ...nameValue, last_name: e.target.value })
                 }
                 placeholder={__('Last Name', 'subtleforms')}
-                aria-required={required}
-                aria-invalid={!!error}
+                aria-invalid={!!error && nameEmpty.has('last_name')}
+                autoComplete='family-name'
+                name={`${config.key || field.key || ''}_last_name`}
               />
             </div>
           )}
@@ -1032,11 +1079,8 @@ function renderInput(
         <div className='subtleforms-address-group'>
           {config.enable_street1 !== false && (
             <div className='subtleforms-address-part subtleforms-address-part--full'>
-              <label
-                htmlFor={`${inputId}-street1`}
-                className='subtleforms-field-label'>
+              <label htmlFor={`${inputId}-street1`} className='subtleforms-field-label'>
                 {__('Street Address', 'subtleforms')}
-                {required && <span className='subtleforms-required'>*</span>}
               </label>
               <input
                 id={`${inputId}-street1`}
@@ -1047,16 +1091,14 @@ function renderInput(
                   onChange({ ...addressValue, street_address: e.target.value })
                 }
                 placeholder={__('Street Address', 'subtleforms')}
-                aria-required={required}
-                aria-invalid={!!error}
+                autoComplete='address-line1'
+                name={`${config.key || field.key || ''}_street_address`}
               />
             </div>
           )}
           {config.enable_street2 && (
             <div className='subtleforms-address-part subtleforms-address-part--full'>
-              <label
-                htmlFor={`${inputId}-street2`}
-                className='subtleforms-field-label'>
+              <label htmlFor={`${inputId}-street2`} className='subtleforms-field-label'>
                 {__('Street Address Line 2', 'subtleforms')}
               </label>
               <input
@@ -1071,17 +1113,15 @@ function renderInput(
                   })
                 }
                 placeholder={__('Apt, Suite, etc.', 'subtleforms')}
-                aria-invalid={!!error}
+                autoComplete='address-line2'
+                name={`${config.key || field.key || ''}_street_address_2`}
               />
             </div>
           )}
           {config.enable_city !== false && (
             <div className='subtleforms-address-part'>
-              <label
-                htmlFor={`${inputId}-city`}
-                className='subtleforms-field-label'>
+              <label htmlFor={`${inputId}-city`} className='subtleforms-field-label'>
                 {__('City', 'subtleforms')}
-                {required && <span className='subtleforms-required'>*</span>}
               </label>
               <input
                 id={`${inputId}-city`}
@@ -1092,18 +1132,15 @@ function renderInput(
                   onChange({ ...addressValue, city: e.target.value })
                 }
                 placeholder={__('City', 'subtleforms')}
-                aria-required={required}
-                aria-invalid={!!error}
+                autoComplete='address-level2'
+                name={`${config.key || field.key || ''}_city`}
               />
             </div>
           )}
           {config.enable_state !== false && (
             <div className='subtleforms-address-part'>
-              <label
-                htmlFor={`${inputId}-state`}
-                className='subtleforms-field-label'>
+              <label htmlFor={`${inputId}-state`} className='subtleforms-field-label'>
                 {__('State / Province', 'subtleforms')}
-                {required && <span className='subtleforms-required'>*</span>}
               </label>
               <input
                 id={`${inputId}-state`}
@@ -1114,18 +1151,15 @@ function renderInput(
                   onChange({ ...addressValue, state: e.target.value })
                 }
                 placeholder={__('State / Province', 'subtleforms')}
-                aria-required={required}
-                aria-invalid={!!error}
+                autoComplete='address-level1'
+                name={`${config.key || field.key || ''}_state`}
               />
             </div>
           )}
           {config.enable_postal_code !== false && (
             <div className='subtleforms-address-part'>
-              <label
-                htmlFor={`${inputId}-postal`}
-                className='subtleforms-field-label'>
+              <label htmlFor={`${inputId}-postal`} className='subtleforms-field-label'>
                 {__('Postal Code', 'subtleforms')}
-                {required && <span className='subtleforms-required'>*</span>}
               </label>
               <input
                 id={`${inputId}-postal`}
@@ -1136,18 +1170,15 @@ function renderInput(
                   onChange({ ...addressValue, postal_code: e.target.value })
                 }
                 placeholder={__('Postal Code', 'subtleforms')}
-                aria-required={required}
-                aria-invalid={!!error}
+                autoComplete='postal-code'
+                name={`${config.key || field.key || ''}_postal_code`}
               />
             </div>
           )}
           {config.enable_country !== false && (
             <div className='subtleforms-address-part'>
-              <label
-                htmlFor={`${inputId}-country`}
-                className='subtleforms-field-label'>
+              <label htmlFor={`${inputId}-country`} className='subtleforms-field-label'>
                 {__('Country', 'subtleforms')}
-                {required && <span className='subtleforms-required'>*</span>}
               </label>
               <select
                 id={`${inputId}-country`}
@@ -1156,8 +1187,8 @@ function renderInput(
                 onChange={(e) =>
                   onChange({ ...addressValue, country: e.target.value })
                 }
-                aria-required={required}
-                aria-invalid={!!error}>
+                autoComplete='country-name'
+                name={`${config.key || field.key || ''}_country`}>
                 <option value=''>{__('Select Country', 'subtleforms')}</option>
                 {COUNTRIES.map((c) => (
                   <option key={c.code} value={c.code}>

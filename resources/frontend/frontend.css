@@ -362,6 +362,52 @@
 	color: var(--subtleforms-color-error);
 	font-size: 13px;
 	margin-top: 6px;
+	/* Animate the error in so the Submit button doesn't jump down when an
+	   error appears (Part B4). The slot collapses to 0 height when absent. */
+	overflow: hidden;
+	animation: subtleforms-error-in 0.18s ease-out both;
+}
+
+@keyframes subtleforms-error-in {
+	from {
+		opacity: 0;
+		max-height: 0;
+		margin-top: 0;
+	}
+	to {
+		opacity: 1;
+		max-height: 2em;
+		margin-top: 6px;
+	}
+}
+
+/* Preview banner — shown by FormRenderer when running in builder preview mode
+   so it's clear submissions are not persisted (Part A3). */
+.subtleforms-preview-banner {
+	margin-bottom: 16px;
+	padding: 8px 12px;
+	border-radius: var(--subtleforms-radius-md, 4px);
+	background: color-mix(in srgb, var(--subtleforms-color-primary, #4f5bd5) 10%, transparent);
+	border: 1px solid var(--subtleforms-color-primary, #4f5bd5);
+	color: var(--subtleforms-color-text, #131417);
+	font-size: 13px;
+	font-weight: 500;
+}
+
+/* Honeypot — visually hidden but present in the DOM so bots fill it in. It is
+   kept out of the tab order and the accessibility tree (Part B3). */
+.subtleforms-honeypot {
+	position: absolute;
+	left: -9999px;
+	top: auto;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+}
+
+.subtleforms-honeypot input {
+	width: 1px;
+	height: 1px;
 }
 
 /* Container Fields */

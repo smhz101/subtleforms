@@ -44,23 +44,48 @@
 
 /* ── Button treatments ────────────────────────────────────────────────────── */
 
+/* Solid is the default (no class needed), but declare it explicitly so the
+   variant is never accidentally unset and so the focus/active states have a
+   single home. Every variant guarantees readable text (≥ 4.5:1) in default,
+   hover, focus and active states — the Soft preset previously rendered the
+   Submit button as an underlined link that turned into a solid bar with
+   invisible text on focus (Part A3). */
+.subtleforms--button-solid .subtleforms-button-next,
+.subtleforms--button-solid .subtleforms-button-submit {
+	background: var(--subtleforms-color-primary, #4f5bd5);
+	color: #fff;
+	border-color: var(--subtleforms-color-primary, #4f5bd5);
+}
+
+.subtleforms--button-solid .subtleforms-button-next:hover,
+.subtleforms--button-solid .subtleforms-button-submit:hover,
+.subtleforms--button-solid .subtleforms-button-next:active,
+.subtleforms--button-solid .subtleforms-button-submit:active {
+	background: var(--subtleforms-color-primary-hover, #4048b8);
+	color: #fff;
+	border-color: var(--subtleforms-color-primary-hover, #4048b8);
+}
+
 .subtleforms--button-outline .subtleforms-button-next,
 .subtleforms--button-outline .subtleforms-button-submit {
 	background: transparent;
-	color: var(--subtleforms-color-primary);
-	border-color: var(--subtleforms-color-primary);
+	color: var(--subtleforms-color-primary, #4f5bd5);
+	border-color: var(--subtleforms-color-primary, #4f5bd5);
 }
 
 .subtleforms--button-outline .subtleforms-button-next:hover,
-.subtleforms--button-outline .subtleforms-button-submit:hover {
-	background: var(--subtleforms-color-primary);
+.subtleforms--button-outline .subtleforms-button-submit:hover,
+.subtleforms--button-outline .subtleforms-button-next:active,
+.subtleforms--button-outline .subtleforms-button-submit:active {
+	background: var(--subtleforms-color-primary, #4f5bd5);
 	color: #fff;
+	border-color: var(--subtleforms-color-primary, #4f5bd5);
 }
 
 .subtleforms--button-ghost .subtleforms-button-next,
 .subtleforms--button-ghost .subtleforms-button-submit {
 	background: transparent;
-	color: var(--subtleforms-color-primary);
+	color: var(--subtleforms-color-primary, #4f5bd5);
 	border-color: transparent;
 	padding-left: 0;
 	padding-right: 0;
@@ -69,9 +94,20 @@
 }
 
 .subtleforms--button-ghost .subtleforms-button-next:hover,
-.subtleforms--button-ghost .subtleforms-button-submit:hover {
+.subtleforms--button-ghost .subtleforms-button-submit:hover,
+.subtleforms--button-ghost .subtleforms-button-next:active,
+.subtleforms--button-ghost .subtleforms-button-submit:active {
 	background: transparent;
-	color: var(--subtleforms-color-primary-hover);
+	color: var(--subtleforms-color-primary-hover, #4048b8);
+}
+
+/* A visible focus ring for every variant — never a full-width solid bar and
+   never invisible text. Uses the accent colour so it stays legible on both
+   solid and outline buttons. */
+.subtleforms-button-next:focus-visible,
+.subtleforms-button-submit:focus-visible {
+	outline: 2px solid var(--subtleforms-color-primary, #4f5bd5);
+	outline-offset: 2px;
 }
 
 /* ── Button alignment ─────────────────────────────────────────────────────── */

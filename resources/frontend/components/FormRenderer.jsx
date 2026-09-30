@@ -4,7 +4,10 @@ import FieldRenderer from './FieldRenderer';
 import StepNavigation from './StepNavigation';
 import ConversationalFormRenderer from './ConversationalFormRenderer';
 import { getIn, setIn, flattenToPathMap } from '../utils/valuePaths';
-import { collectLeafInputPaths } from '../utils/schemaLeaves';
+import { collectLeafInputPaths, collectContainerKeys } from '../utils/schemaLeaves';
+import {
+  validateFields,
+} from '../utils/fieldValidation';
 import { warnOnce } from '../utils/warnOnce';
 import { getFormClassNames } from '../utils/formStyles';
 import { debug } from '../../shared/debug';
@@ -54,6 +57,10 @@ export default function FormRenderer({
   const [isSubmitIntentional, setIsSubmitIntentional] = useState(false);
   const [liveMessage, setLiveMessage] = useState('');
   const liveRegionRef = useRef(null);
+  // Root of the rendered form, used to scope "focus first invalid input" to
+  // THIS form only — document.querySelector would jump across forms when two
+  // forms share a page (A2/P1-5).
+  const formRootRef = useRef(null);
 
   // Load schema (skip if preloaded)
   useEffect(() => {
@@ -215,64 +222,20 @@ export default function FormRenderer({
     return flatten(schema.fields);
   }, [schema]);
 
-  const containerPaths = useMemo(() => {
-    const paths = new Set();
-    if (!schema?.fields) {
-      return paths;
-    }
-
-    const visit = (nodes) => {
-      if (!Array.isArray(nodes)) {
-        return;
-      }
-
-      nodes.forEach((field) => {
-        if (!field || typeof field !== 'object') {
-          return;
-        }
-
-        const key = field.config?.key || field.key;
-        const childFields = field.children || field.fields;
-        const hasChildren =
-          Array.isArray(childFields) && childFields.length > 0;
-        const hasColumns =
-          Array.isArray(field.columns) && field.columns.length > 0;
-        const isColumnContainer =
-          typeof field.type === 'string' &&
-          field.type.includes('_column_container');
-        const isContainerType =
-          field.type === 'group_container' ||
-          field.type === 'repeat_container' ||
-          field.type === 'step' ||
-          field.type === 'section' ||
-          isColumnContainer;
-
-        if (
-          (hasChildren || hasColumns || isContainerType) &&
-          typeof key === 'string' &&
-          key.trim()
-        ) {
-          paths.add(key);
-        }
-
-        const childFieldsToVisit = field.children || field.fields;
-        if (Array.isArray(childFieldsToVisit)) {
-          visit(childFieldsToVisit);
-        }
-
-        if (Array.isArray(field.columns)) {
-          field.columns.forEach((col) => {
-            if (Array.isArray(col)) {
-              visit(col);
-            }
-          });
-        }
-      });
-    };
-
-    visit(schema.fields);
-    return paths;
-  }, [schema]);
+  // True layout/container types — fields that group other fields but carry no
+  // value of their own. Writes to their key are always ignored.
+  //
+  // Composite INPUT fields (name_group, address_group, address, checkbox_grid,
+  // …) also have children, but they DO carry a value (an object) at their root
+  // key — their renderers call onChange with an object that must be written.
+  // Treating "has children" as "is a container" (the old logic) wrongly added
+  // name_group's key here, so every keystroke into First/Last Name was silently
+  // dropped (the value object was rejected as a "container write"). Only true
+  // layout types belong in this set. See utils/schemaLeaves.js (Part A1).
+  const containerPaths = useMemo(
+    () => collectContainerKeys(schema?.fields || []),
+    [schema]
+  );
 
   const leafPaths = useMemo(() => {
     const paths = collectLeafInputPaths(schema?.fields || []);
@@ -409,7 +372,6 @@ export default function FormRenderer({
 
   // Validate current step
   const validateStep = useCallback(() => {
-    const errors = {};
     const fieldsOnCurrentStep =
       hasSteps && currentStep
         ? (currentStep.children?.length > 0
@@ -417,57 +379,7 @@ export default function FormRenderer({
             : currentStep.fields) || []
         : fieldsToRender;
 
-    const flattenForValidation = (fields) => {
-      let result = [];
-      fields.forEach((field) => {
-        if (field.type !== 'step' && (field.config?.key || field.key)) {
-          result.push(field);
-        }
-        const childFields = field.children || field.fields;
-        if (childFields && Array.isArray(childFields)) {
-          result = result.concat(flattenForValidation(childFields));
-        }
-        if (field.columns && Array.isArray(field.columns)) {
-          field.columns.forEach((col) => {
-            if (Array.isArray(col)) {
-              result = result.concat(flattenForValidation(col));
-            }
-          });
-        }
-      });
-      return result;
-    };
-
-    const fields = flattenForValidation(fieldsOnCurrentStep);
-
-    fields.forEach((field) => {
-      const fieldKey = field.config?.key || field.key;
-
-      // Skip hidden fields
-      if (hiddenFields.has(fieldKey)) {
-        return;
-      }
-
-      const value = getIn(values, fieldKey);
-      const isRequired = field.config?.required;
-
-      if (isRequired && isEmptyValue(value)) {
-        errors[fieldKey] = __('This field is required.', 'subtleforms');
-      }
-
-      // Type validation
-      if (!isEmptyValue(value)) {
-        if (
-          field.type === 'email' &&
-          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-        ) {
-          errors[fieldKey] = __('Invalid email address.', 'subtleforms');
-        }
-        if (field.type === 'url' && !/^https?:\/\/.+/.test(value)) {
-          errors[fieldKey] = __('Invalid URL.', 'subtleforms');
-        }
-      }
-    });
+    const errors = validateFields(fieldsOnCurrentStep, values, hiddenFields);
 
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
@@ -496,6 +408,36 @@ export default function FormRenderer({
     // DEFENSIVE: Explicitly do NOT call handleSubmit here
     // Multi-step forms should only submit when user clicks Submit button
   }, [currentStepIndex, steps, validateStep, values]);
+
+  // Move focus to the first invalid input, scoped to this form's root element
+  // so two forms on one page don't steal focus from each other (A2/P1-5).
+  const focusFirstInvalid = useCallback(() => {
+    requestAnimationFrame(() => {
+      const root = formRootRef.current;
+      if (!root) return;
+      const firstErrorInput = root.querySelector(
+        '[aria-invalid="true"]'
+      );
+      if (firstErrorInput && typeof firstErrorInput.focus === 'function') {
+        firstErrorInput.focus();
+        firstErrorInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+      const errorCount = Object.keys(validationErrors).length;
+      if (errorCount > 0) {
+        setLiveMessage(
+          sprintf(
+            _n(
+              'Please fix %d error before submitting.',
+              'Please fix %d errors before submitting.',
+              errorCount,
+              'subtleforms'
+            ),
+            errorCount
+          )
+        );
+      }
+    });
+  }, [validationErrors]);
 
   const handlePrevStep = useCallback(() => {
     debug('[SubtleForms] Prev Step:', {
@@ -529,9 +471,19 @@ export default function FormRenderer({
         setIsSubmitIntentional(false);
       }
 
-      // In preview mode, prevent submission
+      // In preview mode, run the same validation as the live form (so the
+      // builder Preview shows the same errors a visitor would see) but never
+      // submit. A banner under the form explains that submissions are not
+      // saved. (Part A3.)
       if (preview) {
-        console.warn('SubtleForms: Form submission disabled in preview mode');
+        const fieldsToValidate = hasSteps
+          ? steps.flatMap((step) => step.children || step.fields || [])
+          : schema?.fields || [];
+        const errors = validateFields(fieldsToValidate, values, hiddenFields);
+        setValidationErrors(errors);
+        if (Object.keys(errors).length > 0) {
+          focusFirstInvalid();
+        }
         if (customOnSubmit) {
           customOnSubmit();
         }
@@ -544,97 +496,21 @@ export default function FormRenderer({
           return validateStep(); // For non-step forms, use normal validation
         }
 
-        const errors = {};
+        const allStepFields = steps.flatMap(
+          (step) => step.children || step.fields || []
+        );
 
-        // Get all fields from all steps
-        const allStepFields = [];
-        steps.forEach((step) => {
-          const stepFields = step.children || step.fields || [];
-          allStepFields.push(...stepFields);
-        });
-
-        const flattenForValidation = (fields) => {
-          let result = [];
-          fields.forEach((field) => {
-            if (field.type !== 'step' && (field.config?.key || field.key)) {
-              result.push(field);
-            }
-            const childFields = field.children || field.fields;
-            if (childFields && Array.isArray(childFields)) {
-              result = result.concat(flattenForValidation(childFields));
-            }
-            if (field.columns && Array.isArray(field.columns)) {
-              field.columns.forEach((col) => {
-                if (Array.isArray(col)) {
-                  result = result.concat(flattenForValidation(col));
-                }
-              });
-            }
-          });
-          return result;
-        };
-
-        const allFields = flattenForValidation(allStepFields);
-
-        allFields.forEach((field) => {
-          const fieldKey = field.config?.key || field.key;
-
-          // Skip hidden fields
-          if (hiddenFields.has(fieldKey)) {
-            return;
-          }
-
-          const value = getIn(values, fieldKey);
-          const isRequired = field.config?.required;
-
-          if (isRequired && isEmptyValue(value)) {
-            errors[fieldKey] = __('This field is required.', 'subtleforms');
-          }
-
-          // Type validation
-          if (!isEmptyValue(value)) {
-            if (
-              field.type === 'email' &&
-              !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-            ) {
-              errors[fieldKey] = __('Invalid email address.', 'subtleforms');
-            }
-            if (field.type === 'url' && !/^https?:\/\/.+/.test(value)) {
-              errors[fieldKey] = __('Invalid URL.', 'subtleforms');
-            }
-          }
-        });
+        const errors = validateFields(allStepFields, values, hiddenFields);
 
         setValidationErrors(errors);
         return Object.keys(errors).length === 0;
       };
 
       if (!validateAllSteps()) {
-        // Focus first errored field for keyboard/screen reader users
-        requestAnimationFrame(() => {
-          const firstErrorInput = document.querySelector(
-            '.subtleforms-field [aria-invalid="true"]'
-          );
-          if (firstErrorInput) {
-            firstErrorInput.focus();
-            firstErrorInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }
-          // Announce error count to screen readers
-          const errorCount = Object.keys(validationErrors).length;
-          if (errorCount > 0) {
-            setLiveMessage(
-              sprintf(
-                _n(
-                  'Please fix %d error before submitting.',
-                  'Please fix %d errors before submitting.',
-                  errorCount,
-                  'subtleforms'
-                ),
-                errorCount
-              )
-            );
-          }
-        });
+        // Focus first errored field for keyboard/screen reader users, scoped
+        // to this form's root so two forms on one page never steal focus
+        // from each other (A2/P1-5).
+        focusFirstInvalid();
         return;
       }
 
@@ -712,10 +588,15 @@ export default function FormRenderer({
       });
 
       try {
-        // Add honeypot and time trap fields to payload
+        // Add honeypot and time trap fields to payload. The honeypot input is
+        // rendered in the DOM (Part B3); read its value so a bot that filled
+        // it is rejected server-side.
+        const honeypotInput = formRootRef.current?.querySelector(
+          'input[name="website_url"]'
+        );
         const submissionPayload = {
           ...payload,
-          website_url: '', // Honeypot field (should always be empty)
+          website_url: honeypotInput ? honeypotInput.value : '',
           form_rendered_at:
             window.subtleformsRenderTime || Math.floor(Date.now() / 1000),
         };
@@ -797,6 +678,9 @@ export default function FormRenderer({
       customOnSubmit,
       isSubmitIntentional,
       hasSteps,
+      steps,
+      hiddenFields,
+      focusFirstInvalid,
     ]
   );
 
@@ -886,7 +770,7 @@ export default function FormRenderer({
   const appearanceStyle = formAppearanceStyle(effectiveAppearance);
 
   return (
-    <div className={formClassNames} style={appearanceStyle}>
+    <div ref={formRootRef} className={formClassNames} style={appearanceStyle}>
       {/* Screen reader live region for submission results and validation announcements */}
       <div
         ref={liveRegionRef}
@@ -897,6 +781,12 @@ export default function FormRenderer({
       >
         {liveMessage}
       </div>
+
+      {preview && (
+        <div className='subtleforms-preview-banner' role='status'>
+          {__('Preview mode: submissions are not saved.', 'subtleforms')}
+        </div>
+      )}
 
       {showTitle && schema.metadata?.title && (
         <h2 className='subtleforms-form-title'>{schema.metadata.title}</h2>
@@ -927,6 +817,22 @@ export default function FormRenderer({
         noValidate
         tabIndex={blockOptions?.tabIndex ? blockOptions.tabIndex : undefined}
         onSubmit={handleSubmit}>
+        {/* Honeypot: a visually hidden field real users never see but bots
+            fill in. The server rejects any submission that has a value here
+            (Part B3). It is excluded from tab order and screen readers. */}
+        <div className='subtleforms-honeypot' aria-hidden='true'>
+          <label htmlFor={`subtleforms-honeypot-${formId}`}>
+            {__('Website', 'subtleforms')}
+          </label>
+          <input
+            id={`subtleforms-honeypot-${formId}`}
+            type='text'
+            name='website_url'
+            tabIndex={-1}
+            autoComplete='off'
+            aria-hidden='true'
+          />
+        </div>
         {submitError && (
           <div className='subtleforms-error' role='alert'>
             {submitError}
