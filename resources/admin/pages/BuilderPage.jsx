@@ -100,6 +100,7 @@ function FormBuilderInner({
     tourCompleted,
     setTourCompleted,
     settings,
+    loadForm,
   } = useBuilderBoot({
     formId,
     bootstrap,
@@ -507,6 +508,25 @@ function FormBuilderInner({
     }
   }, [forceAutosave]);
 
+  // Discard local draft changes and revert to the last persisted version,
+  // staying in the builder (Part B17). Re-fetches from the server so the
+  // draft, history, and dirty flag all reset to the saved/published state.
+  const handleDiscardChanges = useCallback(() => {
+    if (!isDirty) {
+      return;
+    }
+    const ok = window.confirm(
+      __(
+        'Discard your unsaved changes and revert to the last saved version?',
+        'subtleforms'
+      )
+    );
+    if (!ok) {
+      return;
+    }
+    loadForm(true);
+  }, [isDirty, loadForm]);
+
   // Wrap handleSaveAndClose to delete the form when the user closes a newly
   // created form they never edited (instead of leaving an orphan draft).
   const handleSaveAndCloseWrapped = useCallback(async () => {
@@ -638,6 +658,7 @@ function FormBuilderInner({
             onSaveDraft={handleSaveDraftNow}
             onPublish={handlePublish}
             onUnpublish={handleUnpublish}
+            onDiscardChanges={handleDiscardChanges}
             onSaveAndClose={handleSaveAndCloseWrapped}
             onDelete={() => setShowDeleteConfirm(true)}
             onStartTour={() => setShowTour(true)}

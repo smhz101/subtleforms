@@ -157,10 +157,19 @@ export default function FormSettings({
             initialOpen={true}>
             <TextControl
                 label={__('Form Name', 'subtleforms')}
+                value={metadata.title || ''}
+                onChange={(value) => handleMetadataChange('title', value)}
+                help={__(
+                  'The name shown to you and your visitors for this form.',
+                  'subtleforms'
+                )}
+              />
+            <TextControl
+                label={__('Internal identifier', 'subtleforms')}
                 value={metadata.name || 'form_schema'}
                 onChange={(value) => handleMetadataChange('name', value)}
                 help={__(
-                  'Internal identifier for this form schema',
+                  'Optional machine identifier for this schema (defaults to “form_schema”). Most forms can leave this as-is.',
                   'subtleforms'
                 )}
               />

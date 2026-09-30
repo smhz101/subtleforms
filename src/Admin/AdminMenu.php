@@ -79,6 +79,26 @@ class AdminMenu {
 	/**
 	 * Get submission menu title with unread count badge.
 	 */
+	/**
+	 * Get the site domain (host without scheme/path), lowercased.
+	 *
+	 * Used by the Settings screen to flag a sender email whose domain does
+	 * not match the site domain (Part B20).
+	 *
+	 * @return string
+	 */
+	private function get_site_domain(): string {
+		$host = wp_parse_url( home_url(), PHP_URL_HOST );
+		if ( empty( $host ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.NonceVerification.Recommended -- Read-only fallback.
+			$host = isset( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : '';
+		}
+		if ( empty( $host ) ) {
+			$host = 'localhost';
+		}
+		return strtolower( $host );
+	}
+
 	private function getSubmissionMenuTitle(): string {
 		$baseTitle = esc_html__( 'Submissions', 'subtleforms' );
 
@@ -316,6 +336,7 @@ class AdminMenu {
 			array(
 				'siteName'   => get_option( 'blogname' ),
 				'adminEmail' => get_option( 'admin_email' ),
+				'siteDomain' => $this->get_site_domain(),
 			)
 		);
 
@@ -951,6 +972,19 @@ class AdminMenu {
 		// Dashboard uses the parent slug, which WordPress highlights as first submenu
 		if ( $page === 'subtleforms' ) {
 			return 'subtleforms';
+		}
+
+		// The builder reuses the "Add New" slug (subtleforms-new-form) for both
+		// creating and editing. When a form_id is present we are editing an
+		// existing form, so highlight "All Forms" (where the user came from)
+		// rather than "Add New" (Part B18).
+		if ( $page === 'subtleforms-new-form' ) {
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only check for admin menu highlighting.
+			$form_id = isset( $_GET['form_id'] ) ? sanitize_key( wp_unslash( $_GET['form_id'] ) ) : '';
+			if ( ! empty( $form_id ) ) {
+				return 'subtleforms-forms';
+			}
+			return 'subtleforms-new-form';
 		}
 
 		// All other pages should highlight themselves

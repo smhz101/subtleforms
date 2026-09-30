@@ -15,6 +15,10 @@ import Icon from '../../../ui/Icon';
 import HelpMenu from '../../HelpMenu';
 import LicenseStatusIndicator from '../../LicenseStatusIndicator';
 import { BUILDER_ACTIONS } from '../../../hooks/useBuilderReducer';
+import {
+  getFormStatusBadgeConfig,
+  FORM_STATUS_PUBLISHED,
+} from '../../../utils/formMeta';
 import './BuilderHeaderBar.scss';
 
 /**
@@ -110,28 +114,30 @@ export function BuilderActions({
   onSaveDraft,
   onPublish,
   onUnpublish,
+  onDiscardChanges,
   onSaveAndClose,
   onDelete,
   onStartTour,
   onOpenWizard,
   showWizard,
 }) {
-  const isPublished = formStatus === 'published';
-  // A published form with unsaved/unpublished draft edits shows "Published ·
-  // unpublished changes" instead of "Draft", so the builder header agrees with
-  // the All Forms and Dashboard listings (single source of truth).
+  const isPublished = formStatus === FORM_STATUS_PUBLISHED;
+  // A published form with unsaved/unpublished draft edits shows
+  // "Published · changes not live" instead of "Draft", using the same status
+  // helper as the All Forms and Dashboard listings — one source of truth
+  // (Part A5).
   const showUnpublishedChanges = isPublished && (hasUnpublishedChanges || isDirty);
+  const statusBadge = getFormStatusBadgeConfig(
+    isPublished ? FORM_STATUS_PUBLISHED : 'draft',
+    showUnpublishedChanges
+  );
   const busy = saving || autoSaving;
   const statusBadgeClass = showUnpublishedChanges
     ? 'sf-builder-header-bar__mode-badge--unpublished'
     : isPublished
       ? 'sf-builder-header-bar__mode-badge--published'
       : 'sf-builder-header-bar__mode-badge--draft';
-  const statusBadgeLabel = showUnpublishedChanges
-    ? __('Published · unpublished changes', 'subtleforms')
-    : isPublished
-      ? __('Published', 'subtleforms')
-      : __('Draft', 'subtleforms');
+  const statusBadgeLabel = statusBadge.label;
   const statusBadgeTitle = showUnpublishedChanges
     ? __('Form is live, but has unpublished draft changes', 'subtleforms')
     : isPublished
@@ -297,43 +303,35 @@ export function BuilderActions({
             {({ onClose }) => (
               <>
                 <MenuGroup label={__('Status', 'subtleforms')}>
-                  {isPublished ? (
-                    <MenuItem
-                      disabled={busy}
-                      info={__(
-                        'Takes the form off your site. The draft and its history are kept.',
-                        'subtleforms'
-                      )}
-                      onClick={() => {
-                        onUnpublish?.();
-                        onClose();
-                      }}>
-                      {__('Switch to draft', 'subtleforms')}
-                    </MenuItem>
-                  ) : (
-                    <MenuItem
-                      disabled={busy || hasValidationErrors}
-                      info={
-                        hasValidationErrors
+                  {/* Publish — always available (disabled when already live,
+                      blocked by validation, or busy). The split-button's main
+                      action is the common path; this covers the rest. */}
+                  <MenuItem
+                    disabled={isPublished || busy || hasValidationErrors}
+                    info={
+                      hasValidationErrors
+                        ? __(
+                            'Fix the validation issues above first.',
+                            'subtleforms'
+                          )
+                        : isPublished
                           ? __(
-                              'Fix the validation issues above first.',
+                              'This form is already live. Use Update to republish changes.',
                               'subtleforms'
                             )
                           : __(
                               'Makes this form visible on your site.',
                               'subtleforms'
                             )
-                      }
-                      onClick={() => {
-                        onPublish();
-                        onClose();
-                      }}>
-                      {__('Publish', 'subtleforms')}
-                    </MenuItem>
-                  )}
-                </MenuGroup>
+                    }
+                    onClick={() => {
+                      onPublish();
+                      onClose();
+                    }}>
+                    {__('Publish', 'subtleforms')}
+                  </MenuItem>
 
-                <MenuGroup>
+                  {/* Save draft now */}
                   <MenuItem
                     disabled={!isDirty || busy}
                     info={__(
@@ -344,7 +342,36 @@ export function BuilderActions({
                       onSaveDraft();
                       onClose();
                     }}>
-                    {__('Save draft now', 'subtleforms')}
+                    {__('Save draft', 'subtleforms')}
+                  </MenuItem>
+
+                  {/* Unpublish — takes a live form off the site (keeps draft) */}
+                  <MenuItem
+                    disabled={!isPublished || busy}
+                    info={__(
+                      'Takes the form off your site. The draft and its history are kept.',
+                      'subtleforms'
+                    )}
+                    onClick={() => {
+                      onUnpublish?.();
+                      onClose();
+                    }}>
+                    {__('Unpublish', 'subtleforms')}
+                  </MenuItem>
+
+                  {/* Discard changes — revert local draft to the last
+                      persisted version without leaving the builder. */}
+                  <MenuItem
+                    disabled={!isDirty || busy}
+                    info={__(
+                      'Reverts unsaved edits to the last saved or published version.',
+                      'subtleforms'
+                    )}
+                    onClick={() => {
+                      onDiscardChanges?.();
+                      onClose();
+                    }}>
+                    {__('Discard changes', 'subtleforms')}
                   </MenuItem>
                 </MenuGroup>
 

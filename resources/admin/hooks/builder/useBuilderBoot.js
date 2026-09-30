@@ -4,7 +4,7 @@
  * Handles form loading, schema hydration, field definitions, and tour status.
  */
 
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useCallback } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { apiGet } from '../../utils/api';
 import { BUILDER_ACTIONS } from '../useBuilderReducer';
@@ -119,100 +119,114 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
     checkTourStatus();
   }, [autoShowTour, formId]);
 
-  // Form/schema loading effect
-  useEffect(() => {
-    if (!formId) {
-      return;
-    }
-
-    if (bootstrap?.form?.id === formId && bootstrap?.schema) {
-      const payload = { ...bootstrap.schema };
-      payload.fields = Array.isArray(payload.fields) ? payload.fields : [];
-      payload.schema_version = payload.schema_version || 1;
-      if (!payload.metadata) payload.metadata = {};
-      if (!payload.metadata.name) payload.metadata.name = 'form_schema';
-      // Normalize legacy/alias form types to canonical values
-      if (payload.metadata.type === 'multistep' || payload.metadata.type === 'sectioned') payload.metadata.type = 'multi-step';
-
-      const title = bootstrap.form?.title || payload.metadata?.title || generateDefaultTitle();
-      payload.metadata.title = title;
-
-      setIsHydrating(true);
-
-      dispatch({
-        type: BUILDER_ACTIONS.LOAD_SUCCESS,
-        payload: {
-          form: {
-            id: formId,
-            title,
-            status: bootstrap.form?.status || 'draft',
-            has_unpublished_changes: !!bootstrap.form?.has_unpublished_changes,
-          },
-          schema: payload,
-        },
-      });
-
-      setTimeout(() => setIsHydrating(false), 0);
-      return;
-    }
-
-    dispatch({ type: BUILDER_ACTIONS.INIT_BUILDER, payload: { formId } });
-    setIsHydrating(true);
-
-    // Load both schema and form metadata
-    Promise.all([
-      apiGet(`/forms/${formId}/schema?context=builder`),
-      apiGet(`/forms/${formId}`),
-    ]).then(([schemaRes, formRes]) => {
-      if (!schemaRes.ok) {
-        dispatch({
-          type: BUILDER_ACTIONS.AUTOSAVE_ERROR,
-          payload: {
-            error: schemaRes.body?.message || __('Failed to load schema', 'subtleforms'),
-          },
-        });
+  // Form/schema loading. Extracted as a callback so "Discard changes" can
+  // re-fetch the last persisted version from the server (forceFetch=true
+  // bypasses the bootstrap cache) and re-apply LOAD_SUCCESS, reverting the
+  // local draft without leaving the builder (Part B17).
+  const loadForm = useCallback(
+    (forceFetch = false) => {
+      if (!formId) {
         return;
       }
 
-      // API wraps responses in { data: ... } — unwrap before extracting the schema
-      const responseBody = schemaRes.body?.data ?? schemaRes.body ?? {};
-      const rawPayload = responseBody?.schema ?? responseBody ?? {};
-      const payload = rawPayload && typeof rawPayload === 'object' ? { ...rawPayload } : {};
+      // Use the bootstrap payload on the initial boot (fast, no network) but
+      // always re-fetch when discarding — the bootstrap copy is stale once the
+      // user has edited the draft.
+      if (!forceFetch && bootstrap?.form?.id === formId && bootstrap?.schema) {
+        const payload = { ...bootstrap.schema };
+        payload.fields = Array.isArray(payload.fields) ? payload.fields : [];
+        payload.schema_version = payload.schema_version || 1;
+        if (!payload.metadata) payload.metadata = {};
+        if (!payload.metadata.name) payload.metadata.name = 'form_schema';
+        // Normalize legacy/alias form types to canonical values
+        if (payload.metadata.type === 'multistep' || payload.metadata.type === 'sectioned') payload.metadata.type = 'multi-step';
 
-      // Ensure fields array exists
-      payload.fields = Array.isArray(payload.fields) ? payload.fields : [];
+        const title = bootstrap.form?.title || payload.metadata?.title || generateDefaultTitle();
+        payload.metadata.title = title;
 
-      // Ensure metadata.name exists (required by backend validator)
-      if (!payload.metadata) payload.metadata = {};
-      if (!payload.metadata.name) payload.metadata.name = 'form_schema';
-      // Normalize legacy/alias form types to canonical values
-      if (payload.metadata.type === 'multistep' || payload.metadata.type === 'sectioned') payload.metadata.type = 'multi-step';
+        setIsHydrating(true);
 
-      // Load title from form metadata if available
-      const loadedTitle = responseBody?.form?.title || payload.metadata?.title;
-      if (loadedTitle) {
-        payload.metadata.title = loadedTitle;
-      } else if (!payload.metadata.title) {
-        payload.metadata.title = generateDefaultTitle();
+        dispatch({
+          type: BUILDER_ACTIONS.LOAD_SUCCESS,
+          payload: {
+            form: {
+              id: formId,
+              title,
+              status: bootstrap.form?.status || 'draft',
+              has_unpublished_changes: !!bootstrap.form?.has_unpublished_changes,
+            },
+            schema: payload,
+          },
+        });
+
+        setTimeout(() => setIsHydrating(false), 0);
+        return;
       }
 
-      dispatch({
-        type: BUILDER_ACTIONS.LOAD_SUCCESS,
-        payload: {
-          form: {
-            id: formId,
-            title: payload.metadata.title,
-            status: formRes.ok && formRes.body ? formRes.body.status || 'draft' : 'draft',
-            has_unpublished_changes: !!(formRes.ok && formRes.body && formRes.body.has_unpublished_changes),
-          },
-          schema: payload,
-        },
-      });
+      dispatch({ type: BUILDER_ACTIONS.INIT_BUILDER, payload: { formId } });
+      setIsHydrating(true);
 
-      // Clear hydrating flag after next render to allow FormEditor to initialize
-      setTimeout(() => setIsHydrating(false), 0);
-    });
-  }, [formId, bootstrap, dispatch]);
+      // Load both schema and form metadata
+      Promise.all([
+        apiGet(`/forms/${formId}/schema?context=builder`),
+        apiGet(`/forms/${formId}`),
+      ]).then(([schemaRes, formRes]) => {
+        if (!schemaRes.ok) {
+          dispatch({
+            type: BUILDER_ACTIONS.AUTOSAVE_ERROR,
+            payload: {
+              error: schemaRes.body?.message || __('Failed to load schema', 'subtleforms'),
+            },
+          });
+          return;
+        }
+
+        // API wraps responses in { data: ... } — unwrap before extracting the schema
+        const responseBody = schemaRes.body?.data ?? schemaRes.body ?? {};
+        const rawPayload = responseBody?.schema ?? responseBody ?? {};
+        const payload = rawPayload && typeof rawPayload === 'object' ? { ...rawPayload } : {};
+
+        // Ensure fields array exists
+        payload.fields = Array.isArray(payload.fields) ? payload.fields : [];
+
+        // Ensure metadata.name exists (required by backend validator)
+        if (!payload.metadata) payload.metadata = {};
+        if (!payload.metadata.name) payload.metadata.name = 'form_schema';
+        // Normalize legacy/alias form types to canonical values
+        if (payload.metadata.type === 'multistep' || payload.metadata.type === 'sectioned') payload.metadata.type = 'multi-step';
+
+        // Load title from form metadata if available
+        const loadedTitle = responseBody?.form?.title || payload.metadata?.title;
+        if (loadedTitle) {
+          payload.metadata.title = loadedTitle;
+        } else if (!payload.metadata.title) {
+          payload.metadata.title = generateDefaultTitle();
+        }
+
+        dispatch({
+          type: BUILDER_ACTIONS.LOAD_SUCCESS,
+          payload: {
+            form: {
+              id: formId,
+              title: payload.metadata.title,
+              status: formRes.ok && formRes.body ? formRes.body.status || 'draft' : 'draft',
+              has_unpublished_changes: !!(formRes.ok && formRes.body && formRes.body.has_unpublished_changes),
+            },
+            schema: payload,
+          },
+        });
+
+        // Clear hydrating flag after next render to allow FormEditor to initialize
+        setTimeout(() => setIsHydrating(false), 0);
+      });
+    },
+    [formId, bootstrap, dispatch]
+  );
+
+  // Form/schema loading effect
+  useEffect(() => {
+    loadForm(false);
+  }, [loadForm]);
 
   return {
     fieldGroups,
@@ -224,5 +238,6 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
     tourCompleted,
     setTourCompleted,
     settings,
+    loadForm,
   };
 }
