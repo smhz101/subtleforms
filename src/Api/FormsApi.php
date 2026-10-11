@@ -474,7 +474,7 @@ final class FormsApi {
 						'id'    => (int) $form['id'],
 						'title' => $form['title'] ?? '',
 					),
-					'schema'  => $this->buildPublicSchema( $schemaData ),
+					'schema'  => self::filterPublicSchema( $this->buildPublicSchema( $schemaData ), (int) $form['id'] ),
 					'version' => $schema['version'] ?? null,
 				)
 			);
@@ -526,6 +526,13 @@ final class FormsApi {
 
 		$schemaData = $schema['schema'] ?? $schema;
 		$schemaData = $this->injectCaptchaHtml( $schemaData );
+
+		// Logged-in visitors viewing the live form get the same rendering
+		// schema as everyone else (translations, plan limits); the builder
+		// keeps the raw one.
+		if ( ! $requestsDraft && is_array( $schemaData ) ) {
+			$schemaData = self::filterPublicSchema( $schemaData, (int) $form['id'] );
+		}
 
 		return ApiResponse::success(
 			array(
@@ -597,6 +604,21 @@ final class FormsApi {
 			$schema['fields'] = array();
 		}
 
+		/**
+		 * Filter a form schema before it is saved (draft or published). Add-ons
+		 * use this to store data they need at render time, such as a snapshot
+		 * of WooCommerce products for the WooCommerce Product field.
+		 *
+		 * @param array $schema   Schema about to be saved.
+		 * @param int   $formId   Form ID.
+		 * @param bool  $activate Whether this save publishes the schema.
+		 * @since 2.1.0
+		 */
+		$filtered = apply_filters( 'subtleforms/forms/schema_before_save', $schema, $formId, (bool) $activate );
+		if ( is_array( $filtered ) ) {
+			$schema = $filtered;
+		}
+
 		// Structured validation for activation
 		if ( $activate ) {
 			$schemaValidator  = new \SubtleForms\Support\SchemaValidator();
@@ -624,6 +646,17 @@ final class FormsApi {
 					Logger::error( 'Failed to load just-saved schema version %d for form %d', $version, $formId );
 					return ApiResponse::server_error( __( 'Schema was saved but could not be loaded back', 'subtleforms' ) );
 				}
+
+				/**
+				 * A schema version was published (made active). Add-ons use
+				 * this to register the form's strings for translation.
+				 *
+				 * @param int   $formId  Form ID.
+				 * @param array $schema  Published schema.
+				 * @param int   $version Version number.
+				 * @since 2.1.0
+				 */
+				do_action( 'subtleforms/forms/schema_published', $formId, $savedSchema['schema'] ?? $schema, $version );
 
 				return ApiResponse::success( array( 'version' => $version, 'active' => true ), 201 );
 			} else {
@@ -972,6 +1005,7 @@ final class FormsApi {
 				'_showTitle',
 				'_showDescription',
 				'_theme',
+				'submitText',
 			);
 
 			$public['metadata'] = array();
@@ -987,7 +1021,7 @@ final class FormsApi {
 			if ( isset( $public['metadata']['payment'] ) && is_array( $public['metadata']['payment'] ) ) {
 				$payment = $public['metadata']['payment'];
 				$clean   = array();
-				foreach ( array( 'enabled', 'amountType', 'fixedAmount', 'amountField', 'currency', 'mode' ) as $pk ) {
+				foreach ( array( 'enabled', 'amountType', 'fixedAmount', 'amountField', 'currency', 'mode', 'processor' ) as $pk ) {
 					if ( array_key_exists( $pk, $payment ) ) {
 						$clean[ $pk ] = $payment[ $pk ];
 					}
@@ -997,6 +1031,27 @@ final class FormsApi {
 		}
 
 		return $public;
+	}
+
+	/**
+	 * Filter the schema the frontend renderer receives.
+	 *
+	 * @param array $schema Rendering schema.
+	 * @param int   $formId Form ID.
+	 * @return array
+	 */
+	public static function filterPublicSchema( array $schema, int $formId ): array {
+		/**
+		 * Filter the schema sent to the browser to render a form (never the
+		 * builder's copy). SubtleForms Pro translates strings here with WPML
+		 * or Polylang.
+		 *
+		 * @param array $schema Rendering schema (fields, metadata).
+		 * @param int   $formId Form ID.
+		 * @since 2.1.0
+		 */
+		$filtered = apply_filters( 'subtleforms/public_schema', $schema, $formId );
+		return is_array( $filtered ) ? $filtered : $schema;
 	}
 
 	/**

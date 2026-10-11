@@ -215,6 +215,17 @@ final class Pricing {
 			}
 		}
 
+		/**
+		 * Order lines before totals are worked out. Add-ons with their own priced
+		 * field types (such as a WooCommerce Product field) add lines here,
+		 * priced on the server. Each line: key, label, qty, unit, amount.
+		 *
+		 * @param array $items   Lines.
+		 * @param mixed $schema  Form schema.
+		 * @param array $payload Submitted values.
+		 */
+		$items = array_values( (array) apply_filters( 'subtleforms/payments/line_items', $items, $schema, $payload ) );
+
 		$subtotal = round( array_sum( array_column( $items, 'amount' ) ), 2 );
 		$discount = $coupon ? CouponsRepository::discountFor( $coupon, $subtotal ) : 0.0;
 		$taxable  = max( 0.0, $subtotal - $discount );

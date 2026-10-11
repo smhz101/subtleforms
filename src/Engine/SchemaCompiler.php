@@ -79,6 +79,11 @@ final class SchemaCompiler {
 
 			$type = $act['type'];
 
+			// An action switched off in the builder does not run (saving always does).
+			if ( $type !== 'save' && array_key_exists( 'enabled', $act ) && ( $act['enabled'] === false || $act['enabled'] === 0 || $act['enabled'] === '0' ) ) {
+				continue;
+			}
+
 			// Resolve definition first — soft-skip unknown types so that Pro
 			// deactivation or schema migration gaps don't break live submissions.
 			$def = $this->registry->getDefinition( $type );

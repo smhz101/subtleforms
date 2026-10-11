@@ -247,3 +247,27 @@
 		border-top: 1px solid var(--sf-border-subtle);
 	}
 }
+
+// WooCommerce coupons note (2.1).
+.sf-pay-woo {
+	display: flex;
+	align-items: flex-start;
+	gap: var(--sf-space-3);
+	padding: var(--sf-space-3) var(--sf-space-4);
+	border: 1px solid var(--sf-info-border);
+	border-radius: var(--sf-radius-md);
+	background: var(--sf-info-bg);
+	font-size: var(--sf-text-sm);
+	color: var(--sf-text-secondary);
+
+	&__icon {
+		display: inline-flex;
+		flex-shrink: 0;
+		margin-top: 1px;
+		color: var(--sf-info);
+
+		svg { fill: none; }
+	}
+
+	p { margin: 0; }
+}

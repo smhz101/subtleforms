@@ -13,7 +13,7 @@ import { useMemo, memo } from '@wordpress/element';
 import { Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useConfig } from '../context/ConfigContext';
-import { getControlComponent } from './controlRegistry';
+import CONTROL_REGISTRY, { getControlComponent } from './controlRegistry';
 import { PanelSection } from '../../../ui';
 
 import './DynamicInspectorPanel.scss';
@@ -84,6 +84,12 @@ function ControlRenderer( { ctrl, field, onUpdate, isReadOnly } ) {
 	}
 	if ( ctrl.type === 'subfield' ) {
 		props.subfields = Array.isArray( ctrl.subfields ) ? ctrl.subfields : [];
+	}
+	// Add-on controls get the full definition and the selected field.
+	if ( ! CONTROL_REGISTRY[ ctrl.type ] ) {
+		props.control = ctrl;
+		props.field = field;
+		props.onUpdate = onUpdate;
 	}
 
 	return <ControlComponent { ...props } />;

@@ -2,6 +2,7 @@ import { __ } from '@wordpress/i18n';
 import { useLocation, useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import Icon from '../ui/Icon';
+import { getBranding } from '../utils/branding';
 
 /**
  * Primary navigation for the SubtleForms frame.
@@ -69,7 +70,7 @@ export default function AppNav() {
   return (
     <nav
       className='sf-appnav'
-      aria-label={__('SubtleForms', 'subtleforms')}>
+      aria-label={getBranding().name}>
       <ul className='sf-appnav__list'>
         {NAV_ITEMS.map((item) => {
           const isActive = item.match(location.pathname);

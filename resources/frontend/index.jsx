@@ -4,6 +4,7 @@ import FormErrorBoundary from './components/FormErrorBoundary';
 import './frontend.css';
 import './styles/frontend.scss';
 import { debug } from '../shared/debug';
+import { observeView } from './utils/viewBeacon';
 
 /**
  * Mount a form renderer in a container
@@ -79,6 +80,7 @@ function autoMountForms() {
         `SubtleForms: Mounting form ${formId} in shortcode container`
       );
       mount(container, { formId });
+      observeView(container, formId, window.subtleformsFrontend || {});
     }
   });
 
@@ -101,6 +103,7 @@ function autoMountForms() {
         fieldValues: container.dataset.fieldValues || '',
       };
       mount(container, { formId, blockOptions });
+      observeView(container, formId, window.subtleformsFrontend || {});
     }
   });
 }

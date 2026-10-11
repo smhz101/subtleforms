@@ -254,6 +254,11 @@ final class SubmissionsRepository {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct delete; no caching for write operations.
 		$result = $wpdb->delete( $this->table, array( 'id' => $id ), array( '%d' ) );
 
+		// Uploaded files go with their entry (2.1).
+		if ( $result && $submission ) {
+			\SubtleForms\Uploads\Uploads::deleteForPayload( $submission['payload'] ?? array() );
+		}
+
 		// Invalidate count cache
 		if ( $result !== false && $submission && isset( $submission['form_id'] ) ) {
 			$this->invalidate_count_cache( $submission['form_id'] );
@@ -530,6 +535,21 @@ final class SubmissionsRepository {
 		global $wpdb;
 
 		$cutoff_date = gmdate( 'Y-m-d H:i:s', strtotime( "-{$days} days" ) );
+
+		// Uploaded files go with their entries (2.1). Only entries that carry
+		// a file record are read.
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from $wpdb->prefix; values are prepared.
+		$with_files = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT payload FROM {$this->table} WHERE created_at < %s AND payload LIKE %s",
+				$cutoff_date,
+				'%' . $wpdb->esc_like( '"size":' ) . '%'
+			)
+		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		foreach ( (array) $with_files as $stored_payload ) {
+			\SubtleForms\Uploads\Uploads::deleteForPayload( (string) $stored_payload );
+		}
 
 		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from $wpdb->prefix; date value is prepared.
 		$deleted = $wpdb->query(

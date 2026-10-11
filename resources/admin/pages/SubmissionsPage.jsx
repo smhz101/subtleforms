@@ -201,9 +201,14 @@ export default function SubmissionsPage({ formId }) {
       });
 
       if (response.success && response.csv) {
-        // Decode base64 CSV
-        const csvData = atob(response.csv);
-        const blob = new Blob([csvData], {
+        // Decode base64 to raw bytes. Passing the atob() string straight to
+        // Blob re-encodes every byte as UTF-8, which garbles accents and the BOM.
+        const binary = atob(response.csv);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], {
           type: 'text/csv;charset=utf-8;',
         });
 

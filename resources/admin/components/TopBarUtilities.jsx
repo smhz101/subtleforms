@@ -7,6 +7,7 @@ import {
 } from '@wordpress/components';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../ui/Icon';
+import { getBranding } from '../utils/branding';
 
 /**
  * Right-hand side of the top bar: plan status and help.
@@ -16,10 +17,11 @@ import Icon from '../ui/Icon';
  * every screen.
  */
 export default function TopBarUtilities() {
+  const branding = getBranding();
   return (
     <div className='sf-topbar-utils'>
-      <PlanChip />
-      <HelpDropdown />
+      {!branding.hideUpgrade && <PlanChip />}
+      {!branding.hideHelp && <HelpDropdown />}
     </div>
   );
 }
@@ -86,6 +88,7 @@ export function PlanChip() {
 
 function HelpDropdown() {
   const version = window.subtleformsAdmin?.version;
+  const { name, hideCredits } = getBranding();
 
   return (
     <Dropdown
@@ -130,11 +133,12 @@ function HelpDropdown() {
               {__("What's new", 'subtleforms')}
             </MenuItem>
           </MenuGroup>
-          {version && (
+          {version && !hideCredits && (
             <div className='sf-help__version'>
               {sprintf(
-                /* translators: %s: plugin version number */
-                __('SubtleForms %s', 'subtleforms'),
+                /* translators: 1: plugin name, 2: version number */
+                __('%1$s %2$s', 'subtleforms'),
+                name,
                 version
               )}
             </div>

@@ -12,6 +12,7 @@ import { Modal, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import Icon from './Icon';
 import UpgradePrompt, { getUpgradeUrl } from './UpgradePrompt';
+import { getBranding } from '../utils/branding';
 import './UpgradeModal.scss';
 
 // ─── Feature copy table ───────────────────────────────────────────────────────
@@ -20,13 +21,37 @@ import './UpgradeModal.scss';
 const FEATURE_COPY = {
   'fields.advanced': {
     title: __( 'Smarter fields with Pro', 'subtleforms' ),
-    description: __( 'Picture Choice, Signature and live Calculations drop into the same builder you already use.', 'subtleforms' ),
+    description: __( 'Picture Choice, Signature, live Calculations and multi-file uploads, in the same builder you already use.', 'subtleforms' ),
     cta: __( 'Unlock Pro fields', 'subtleforms' ),
     lossLine: null,
     benefits: [
       __( 'Picture Choice with image options and multi-select', 'subtleforms' ),
       __( 'Signature pad that works on touch screens', 'subtleforms' ),
       __( 'Calculations with a formula builder, checked again on the server', 'subtleforms' ),
+    ],
+  },
+
+  'logic.conditional.advanced': {
+    title: __( 'Advanced conditional logic', 'subtleforms' ),
+    description: __( 'Build forms that adapt to each answer: richer rules for fields, steps, emails and confirmations.', 'subtleforms' ),
+    cta: __( 'Unlock advanced logic', 'subtleforms' ),
+    lossLine: null,
+    benefits: [
+      __( 'Match all or any rule, and combine groups of rules', 'subtleforms' ),
+      __( 'Starts with, ends with, is one of, between and date rules', 'subtleforms' ),
+      __( 'Skip steps, send emails and pick confirmations based on answers', 'subtleforms' ),
+    ],
+  },
+
+  'branding.white_label': {
+    title: __( 'White label for client sites', 'subtleforms' ),
+    description: __( 'Show your agency’s name and logo in the forms admin and hide SubtleForms links and prompts. Included in the Agency plan.', 'subtleforms' ),
+    cta: __( 'See the Agency plan', 'subtleforms' ),
+    lossLine: null,
+    benefits: [
+      __( 'Your plugin name in the admin menu and header', 'subtleforms' ),
+      __( 'Your logo from the Media Library', 'subtleforms' ),
+      __( 'No SubtleForms help links, credits or upgrade prompts', 'subtleforms' ),
     ],
   },
 
@@ -50,7 +75,7 @@ const FEATURE_COPY = {
     benefits: [
       __( 'Stop copying submissions into spreadsheets by hand', 'subtleforms' ),
       __( 'Analyse your data in Excel, Google Sheets, or any CRM', 'subtleforms' ),
-      __( 'Filter by form, date range, or status before you download', 'subtleforms' ),
+      __( 'Filter by form, status or start date before you download', 'subtleforms' ),
     ],
   },
 
@@ -86,7 +111,7 @@ const FEATURE_COPY = {
     benefits: [
       __( 'Every respondent is automatically added to your email list', 'subtleforms' ),
       __( 'Stop losing potential subscribers to manual imports', 'subtleforms' ),
-      __( 'Trigger welcome sequences the moment someone submits', 'subtleforms' ),
+      __( 'Works with Mailchimp, Brevo and Kit, with tags and consent checks', 'subtleforms' ),
     ],
   },
 
@@ -98,7 +123,7 @@ const FEATURE_COPY = {
     benefits: [
       __( 'Every form fill becomes a CRM contact — no copy-paste', 'subtleforms' ),
       __( 'Stop losing leads between your forms and your sales pipeline', 'subtleforms' ),
-      __( 'Map any form field to CRM properties in minutes', 'subtleforms' ),
+      __( 'HubSpot built in, or any CRM through Zapier or Make', 'subtleforms' ),
     ],
   },
 
@@ -110,7 +135,7 @@ const FEATURE_COPY = {
     benefits: [
       __( 'See exactly which forms convert — and which ones lose people', 'subtleforms' ),
       __( 'Stop guessing and start optimising with real submission data', 'subtleforms' ),
-      __( 'Send form events to Google Analytics and Meta Pixel automatically', 'subtleforms' ),
+      __( 'Views, submissions and conversion rate on the Forms list and Dashboard', 'subtleforms' ),
     ],
   },
 
@@ -127,14 +152,14 @@ const FEATURE_COPY = {
   },
 
   'extensions.pdf': {
-    title: __( 'Generate PDF Receipts & Reports', 'subtleforms' ),
+    title: __( 'PDF Copies of Every Entry', 'subtleforms' ),
     description: __( 'Without this, every receipt, report, or confirmation has to be created manually. That time adds up fast.', 'subtleforms' ),
     cta: __( 'Automate My PDFs', 'subtleforms' ),
     lossLine: __( 'You are creating documents manually that could be generated automatically.', 'subtleforms' ),
     benefits: [
-      __( 'Every submission generates a branded PDF automatically', 'subtleforms' ),
-      __( 'Stop manually creating receipts, reports, and confirmations', 'subtleforms' ),
-      __( 'Respondents receive professional PDFs without any extra work from you', 'subtleforms' ),
+      __( 'Download any entry as a branded PDF with one click', 'subtleforms' ),
+      __( 'Attach the PDF to your notification emails automatically', 'subtleforms' ),
+      __( 'Order summaries included for payment forms', 'subtleforms' ),
     ],
   },
 
@@ -144,7 +169,7 @@ const FEATURE_COPY = {
     cta: __( 'Reach a Global Audience', 'subtleforms' ),
     lossLine: __( 'International visitors are seeing your forms in the wrong language.', 'subtleforms' ),
     benefits: [
-      __( 'Show your forms in each visitor\'s language — automatically', 'subtleforms' ),
+      __( 'Show your forms in each visitor’s language automatically', 'subtleforms' ),
       __( 'Stop losing international visitors to a language barrier', 'subtleforms' ),
       __( 'Works with WPML and Polylang out of the box', 'subtleforms' ),
     ],
@@ -152,13 +177,13 @@ const FEATURE_COPY = {
 
   'extensions.payments': {
     title: __( 'Collect Payments in Your Forms', 'subtleforms' ),
-    description: __( 'Your forms already capture intent. Adding payments converts that intent into revenue — without a separate checkout page.', 'subtleforms' ),
+    description: __( 'Your forms already capture intent. Adding payments converts that intent into revenue, without a separate checkout page.', 'subtleforms' ),
     cta: __( 'Start Collecting Payments', 'subtleforms' ),
     lossLine: __( 'You are leaving revenue on the table with every form submission.', 'subtleforms' ),
     benefits: [
-      __( 'Collect one-time and recurring payments directly inside your forms', 'subtleforms' ),
+      __( 'Collect one-time card payments directly inside your forms', 'subtleforms' ),
       __( 'Stop redirecting buyers away to a separate payment page', 'subtleforms' ),
-      __( 'Stripe and PayPal supported — go live today', 'subtleforms' ),
+      __( 'Stripe cards, Apple Pay and Google Pay, with coupons and order totals', 'subtleforms' ),
     ],
   },
 };
@@ -205,7 +230,8 @@ export default function UpgradeModal() {
     return () => window.removeEventListener( 'sf:upgrade:required', handleUpgradeEvent );
   }, [] );
 
-  if ( ! isOpen ) {
+  // White label sites never see upgrade prompts.
+  if ( ! isOpen || getBranding().hideUpgrade ) {
     return null;
   }
 

@@ -35,6 +35,9 @@ final class EmailAction implements ActionInterface {
 		// Replace {{field}} placeholders with actual values
 		$payload = $context->payload;
 
+		// Uploaded files read as "name (download link)" (2.1).
+		$payload = $this->format_uploads( $payload, (int) $context->getMeta( 'submission_id', 0 ) );
+
 		// Add admin_email placeholder
 		$payload['admin_email'] = get_option( 'admin_email' );
 
@@ -133,6 +136,8 @@ final class EmailAction implements ActionInterface {
                         'headers'       => $headers,
                         'submission_id' => $submission_id,
                         'step_id'       => $step_id,
+                        'form_id'       => $context->formId,
+                        'audience'      => $this->audience( $settings['to'] ?? '' ),
                 ) );
 
                 if ( ! $dispatched ) {
@@ -197,6 +202,54 @@ final class EmailAction implements ActionInterface {
 		}
 
 		return $template;
+	}
+
+	/**
+	 * Who an email action writes to, judged from its unreplaced recipient.
+	 *
+	 * A recipient built from an answer placeholder such as {{email}} goes to the
+	 * person who filled in the form; anything else (a fixed address or
+	 * {{admin_email}}) is a notification for the site owner. Add-ons use this
+	 * to decide what to attach, e.g. an entry PDF only on admin notifications.
+	 *
+	 * @param mixed $rawTo Recipient setting before placeholders are replaced.
+	 * @return string 'admin' or 'submitter'.
+	 */
+	private function audience( $rawTo ): string {
+		if ( ! is_string( $rawTo ) ) {
+			return 'admin';
+		}
+		$fieldTokens = preg_replace( '/\{\{\s*admin_email\s*\}\}/', '', $rawTo );
+		return preg_match( '/\{\{[a-zA-Z0-9_]+\}\}/', (string) $fieldTokens ) ? 'submitter' : 'admin';
+	}
+
+	/**
+	 * Turn uploaded-file answers into readable lines with admin links.
+	 *
+	 * The links open wp-admin, which asks a logged-in admin to confirm the
+	 * download; they never expose the file itself.
+	 *
+	 * @param array $payload      Answers.
+	 * @param int   $submissionId Entry ID.
+	 * @return array
+	 */
+	private function format_uploads( array $payload, int $submissionId ): array {
+		foreach ( $payload as $key => $value ) {
+			if ( ! is_array( $value ) || ! $value ) {
+				continue;
+			}
+			$lines = array();
+			foreach ( $value as $item ) {
+				if ( ! \SubtleForms\Uploads\Uploads::isRecord( $item ) ) {
+					continue 2;
+				}
+				$lines[] = $submissionId > 0
+					? sprintf( '%s (%s)', $item['name'], \SubtleForms\Uploads\Uploads::downloadUrl( $submissionId, $item['id'] ) )
+					: (string) $item['name'];
+			}
+			$payload[ $key ] = implode( "\n", $lines );
+		}
+		return $payload;
 	}
 
 	/**

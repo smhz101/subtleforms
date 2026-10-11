@@ -4,7 +4,7 @@ Tags: forms, contact form, form builder, submissions
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.1.0
+Stable tag: 2.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -57,12 +57,18 @@ SubtleForms is a powerful WordPress form plugin built for developers and site ad
 * Privacy policy content registration
 * GDPR-compliant data export and erasure tools
 
-= Coming Soon =
+= Conditional logic and uploads =
 
-* Payment gateway integrations (Stripe, PayPal)
-* Advanced conditional logic
-* Email notification templates
-* Webhook integrations
+* Show or hide fields when all of their rules match (equals, not equals, contains, empty, not empty, greater or less than)
+* Hidden fields are not validated or saved, in the browser and on the server
+* File and image uploads with allowed types and size limits, stored privately and downloaded by admins only
+
+= SubtleForms Pro (separate add-on) =
+
+* Advanced conditional logic: match any rule, rule groups, more operators, skipped steps, conditional emails and confirmations
+* Several files per upload field with drag and drop
+* Stripe card payments, webhooks with retries, CRM and email marketing, analytics, PDFs and exports
+* Agency plan: white label and WPML or Polylang translation
 
 == Installation ==
 
@@ -158,6 +164,17 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 7. Conversational form on frontend
 
 == Changelog ==
+
+= 2.2.0 - 2026-10-11 =
+* New: File and image uploads work end to end: files upload as soon as they are picked, are checked for type and size, stored under random names in a protected folder, downloaded by admins through a secure link, and deleted with the entry or by data retention
+* New: Conditional logic rebuilt with one rule engine shared by the browser and the server. Hidden fields are no longer validated or stored
+* New: Form analytics: views, submissions and conversion rate per form (reports with Pro)
+* New: Integrations, PDF, WooCommerce and white label settings for SubtleForms Pro
+* Fix: Conditional logic rules saved in the builder were not applied on the live form
+* Fix: Visitors who were not logged in did not get a form's custom confirmation
+* Fix: Integration settings never loaded because extensions booted too late
+* Fix: CSV export used the newest entry's columns only, broke nested values and accented characters, and could carry spreadsheet formulas; all fixed
+* Developer: `subtleforms/submission/completed`, `subtleforms/submit/response`, `subtleforms/public_schema`, `subtleforms/payments/external`, `subtleforms/payments/line_items`, `subtleforms/email/attachments` and `window.SubtleFormsExtend` for add-on field types
 
 = 2.1.0 - 2026-10-11 =
 * New: Payments that add up on the server. Product (price and quantity), Priced Options (radio, cards, dropdown or checkboxes with a price per option), Custom Amount and Fixed Fee fields feed one live order
@@ -283,6 +300,9 @@ now be reconstructed accurately.
 * Feature: Basic spam protection
 
 == Upgrade Notice ==
+
+= 2.2.0 =
+Fixes conditional logic on live forms and makes file uploads work. Update SubtleForms Pro to 2.2.0 as well.
 
 = 2.1.0 =
 Payments with a live order summary and coupons, a builder canvas that shows your styling, and side-by-side field widths. Update SubtleForms Pro to 2.1.0 as well.

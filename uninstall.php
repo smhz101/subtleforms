@@ -25,6 +25,7 @@ $tables = array(
 	$wpdb->prefix . 'subtleforms_form_schemas',
 	$wpdb->prefix . 'subtleforms_logs',
 	$wpdb->prefix . 'subtleforms_license_meta',
+	$wpdb->prefix . 'subtleforms_stats',
 );
 
 // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Uninstall script scope.
@@ -49,6 +50,7 @@ $options = array(
 	'subtleforms_license_data',
 	'subtleforms_license_grace_period',
 	'subtleforms_onboarding_dismissed',
+	'subtleforms_stats_db',
 );
 
 // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Uninstall script scope.
@@ -92,6 +94,7 @@ $cron_hooks = array(
 	'subtleforms_daily_license_check',
 	'subtleforms_async_email',
 	'subtleforms_async_webhook',
+	'subtleforms_uploads_cleanup',
 );
 
 // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Uninstall script scope; not a global.
@@ -103,5 +106,16 @@ foreach ( $cron_hooks as $hook ) {
 	}
 }
 
-// ── 6. Flush rewrite rules ──────────────────────────────────────────────────
+// ── 6. Uploaded files (their entries were dropped above) ────────────────────
+// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Uninstall script scope; not a global.
+$uploads_dir = trailingslashit( wp_upload_dir( null, false )['basedir'] ) . 'subtleforms-uploads';
+if ( is_dir( $uploads_dir ) ) {
+	require_once ABSPATH . 'wp-admin/includes/file.php';
+	if ( WP_Filesystem() ) {
+		global $wp_filesystem;
+		$wp_filesystem->rmdir( $uploads_dir, true );
+	}
+}
+
+// ── 7. Flush rewrite rules ──────────────────────────────────────────────────
 flush_rewrite_rules();

@@ -20,6 +20,16 @@ const ACTION_META = {
   save:    { iconName: 'Database', label: 'Store Submission' },
   email:   { iconName: 'Mail',     label: 'Send Email' },
   webhook: { iconName: 'Zap',      label: 'Call Webhook' },
+  email_marketing: { iconName: 'Mail',     label: 'Email Marketing' },
+  crm:     { iconName: 'Users',    label: 'CRM' },
+  pdf:     { iconName: 'FileText', label: 'Entry PDF' },
+};
+
+/** Entry PDF (SubtleForms Pro). Cookie-authenticated REST link with a nonce. */
+const pdfUrl = ( id ) => {
+  const base = ( window.subtleformsAdmin?.restUrl || '/wp-json/subtleforms/v1' ).replace( /\/$/, '' );
+  const nonce = window.wpApiSettings?.nonce || window.subtleformsAdmin?.restNonce || '';
+  return `${ base }/entries/${ id }/pdf?_wpnonce=${ encodeURIComponent( nonce ) }`;
 };
 
 const getActionMeta = ( actionType ) =>
@@ -213,6 +223,48 @@ const renderReadableData = (data) => {
   // Primitive values
   return <span>{String(data)}</span>;
 };
+
+/**
+ * Whether an answer is a list of uploaded files ({ id, name, size }).
+ */
+function isFileList( value ) {
+  return (
+    Array.isArray( value ) &&
+    value.length > 0 &&
+    value.every( ( v ) => v && typeof v === 'object' && /^[a-f0-9]{32}$/.test( String( v.id || '' ) ) && 'name' in v )
+  );
+}
+
+/**
+ * Download links for uploaded files. Files are served by wp-admin with a
+ * nonce check, never from a public URL.
+ */
+function FileLinks( { files, submissionId } ) {
+  const admin = window.subtleformsAdmin || {};
+  const base = String( admin.ajaxUrl || '/wp-admin/admin-ajax.php' ).replace( /admin-ajax\.php.*$/, 'admin-post.php' );
+  const size = ( n ) => {
+    const b = Number( n ) || 0;
+    if ( b >= 1048576 ) return `${ ( b / 1048576 ).toFixed( 1 ) } MB`;
+    if ( b >= 1024 ) return `${ Math.round( b / 1024 ) } KB`;
+    return `${ b } B`;
+  };
+  return (
+    <ul className='sf-answers__files'>
+      { files.map( ( f ) => {
+        const url = `${ base }?action=subtleforms_file&entry=${ encodeURIComponent( submissionId ) }&file=${ encodeURIComponent( f.id ) }${ admin.fileNonce ? `&_wpnonce=${ encodeURIComponent( admin.fileNonce ) }` : '' }`;
+        return (
+          <li key={ f.id }>
+            <a href={ url }>
+              <Icon.DownloadCloud size={ 14 } aria-hidden='true' />
+              { String( f.name ) }
+            </a>
+            <span className='sf-answers__file-size'>{ size( f.size ) }</span>
+          </li>
+        );
+      } ) }
+    </ul>
+  );
+}
 
 export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
   const routerNavigate = useNavigate();
@@ -424,6 +476,9 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
   const relDate = formatRelDate( submission.created_at );
 
   const isUnread = parseInt( submission.is_read, 10 ) === 0;
+  const canPdf =
+    !! window.subtleformsAdmin?.hasProPlugin &&
+    !! window.subtleformsAdmin?.capabilities?.[ 'extensions.pdf' ];
   const isFlagged = submission.status === 'flagged';
 
   // Who sent it: a name and/or email pulled from the answers.
@@ -450,6 +505,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
     failed: { label: __( 'Failed', 'subtleforms' ), cls: 'sf-pill--danger' },
     processing: { label: __( 'Processing', 'subtleforms' ), cls: 'sf-pill--info' },
     payment_pending: { label: __( 'Awaiting payment', 'subtleforms' ), cls: 'sf-pill--warning' },
+    payment_failed: { label: __( 'Payment failed', 'subtleforms' ), cls: 'sf-pill--danger' },
     spam: { label: __( 'Spam', 'subtleforms' ), cls: 'sf-pill--danger' },
     flagged: { label: __( 'Flagged', 'subtleforms' ), cls: 'sf-pill--warning' },
   };
@@ -478,6 +534,16 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
         />
       </div>
       <div className='sf-sub-toolbar__group' role='group' aria-label={ __( 'Submission actions', 'subtleforms' ) }>
+        { canPdf && (
+          <Button
+            size='compact'
+            icon={ <Icon.FileText size={ 16 } /> }
+            href={ pdfUrl( submission.id ) }
+            target='_blank'
+            rel='noopener noreferrer'>
+            { __( 'PDF', 'subtleforms' ) }
+          </Button>
+        ) }
         <Button
           size='compact'
           icon={ isUnread ? <Icon.Eye size={ 16 } /> : <Icon.EyeOff size={ 16 } /> }
@@ -576,11 +642,13 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                       <dd className='sf-answers__value'>
                         { isEmpty ? (
                           <span className='sf-answers__empty'>{ __( 'No answer', 'subtleforms' ) }</span>
+                        ) : isFileList( value ) ? (
+                          <FileLinks files={ value } submissionId={ submission.id } />
                         ) : Array.isArray( value ) ? (
                           <span className='sf-answers__chips'>
                             { value.map( ( v, i ) => (
                               <span key={ i } className='sf-pill sf-pill--outline'>
-                                { typeof v === 'object' ? JSON.stringify( v ) : String( v ) }
+                                { v && typeof v === 'object' ? ( v.label ? String( v.label ) : JSON.stringify( v ) ) : String( v ) }
                               </span>
                             ) ) }
                           </span>
@@ -691,6 +759,8 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                     free: [ 'sf-pill--success', __( 'Free', 'subtleforms' ) ],
                     authorized: [ 'sf-pill--info', __( 'Authorised', 'subtleforms' ) ],
                     failed: [ 'sf-pill--danger', __( 'Failed', 'subtleforms' ) ],
+                    refunded: [ 'sf-pill--outline', __( 'Refunded', 'subtleforms' ) ],
+                    cancelled: [ 'sf-pill--danger', __( 'Cancelled', 'subtleforms' ) ],
                     pending: [ 'sf-pill--warning', __( 'Payment pending', 'subtleforms' ) ],
                   };
                   const [ cls, label ] = map[ st ] || map.pending;
@@ -725,7 +795,20 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                   <dt className='is-total'>{ __( 'Total', 'subtleforms' ) }</dt>
                   <dd className='is-total'>{ formatMoney( meta.order.total, meta.order.currency ) }</dd>
                 </dl>
-                { meta.payment?.transaction_id && (
+                { meta.woocommerce?.order_id && (
+                  <p className='sf-order-panel__ref sf-order-panel__woo'>
+                    <a href={ meta.woocommerce.edit_url } target='_blank' rel='noopener noreferrer'>
+                      { sprintf(
+                        /* translators: 1: order number, 2: order status */
+                        __( 'WooCommerce order #%1$s (%2$s)', 'subtleforms' ),
+                        meta.woocommerce.number || meta.woocommerce.order_id,
+                        meta.woocommerce.status_label || meta.woocommerce.status || ''
+                      ) }
+                      <Icon.ExternalLink size={ 12 } aria-hidden='true' />
+                    </a>
+                  </p>
+                ) }
+                { meta.payment?.transaction_id && ! meta.woocommerce?.order_id && (
                   <p className='sf-order-panel__ref'>
                     { meta.payment.gateway === 'stripe' ? (
                       <a

@@ -1,12 +1,14 @@
 import { useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
+import { getBranding } from '../utils/branding';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import { useDashboardStats } from '../data';
 import { NavLink } from '../components/navigation';
 import Icon from '../ui/Icon';
 import AdminShell from '../components/AdminShell';
+import FormAnalyticsPanel from '../components/analytics/FormAnalyticsPanel';
 import { getFormTypeBadge, getFormStatusBadge } from '../utils/formMeta';
 import './DashboardPage.scss';
 
@@ -182,6 +184,9 @@ export default function Dashboard() {
         </div>
 
         {/* Activity */}
+        {/* Views, submissions and conversion (2.1, Pro reports) */}
+        <FormAnalyticsPanel forms={recentForms} />
+
         <div className='sf-dash__row'>
           <section className='sf-panel'>
             <header className='sf-panel__header'>
@@ -357,7 +362,7 @@ export default function Dashboard() {
           </header>
           <div className='sf-panel__body'>
             <dl className='sf-health-grid'>
-              <HealthItem label={__('SubtleForms', 'subtleforms')} value={health.plugin_version} />
+              <HealthItem label={getBranding().name} value={health.plugin_version} />
               <HealthItem label={__('WordPress', 'subtleforms')} value={health.wordpress_version} />
               <HealthItem label={__('PHP', 'subtleforms')} value={health.php_version} />
               <HealthItem label={__('Database', 'subtleforms')} value={health.database_version} />

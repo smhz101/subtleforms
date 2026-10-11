@@ -11,6 +11,8 @@ import {
 } from '../../shared/appearance';
 import { debug } from '../../shared/debug';
 import { isEmptyValue } from './FormRenderer';
+import { computeLogicState } from '../../shared/conditions';
+import { FormContext } from './fields/FileUpload';
 
 const restUrl =
   window.subtleformsFrontend?.restUrl || '/wp-json/subtleforms/v1';
@@ -35,6 +37,8 @@ export default function ConversationalFormRenderer({
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  // Confirmation chosen by the server (2.1: conditional confirmations).
+  const [confirmation, setConfirmation] = useState(null);
 
   const leafPaths = useMemo(
     () => collectLeafInputPaths(schema?.fields || []),
@@ -90,57 +94,11 @@ export default function ConversationalFormRenderer({
     .join(' ');
   const appearanceStyle = formAppearanceStyle(appearance);
 
-  // Evaluate conditional logic
-  const hiddenFields = useMemo(() => {
-    const hidden = new Set();
-
-    allFields.forEach((field) => {
-      const conditions = field.config?.conditions || [];
-
-      conditions.forEach((condition) => {
-        const sourceValue = getIn(values, condition.sourceField);
-        let matches = false;
-
-        switch (condition.operator) {
-          case 'equals':
-            matches = String(sourceValue) === String(condition.value);
-            break;
-          case 'not_equals':
-            matches = String(sourceValue) !== String(condition.value);
-            break;
-          case 'empty':
-            matches = !sourceValue || sourceValue === '';
-            break;
-          case 'not_empty':
-            matches = sourceValue && sourceValue !== '';
-            break;
-          case 'contains':
-            if (Array.isArray(sourceValue)) {
-              matches = sourceValue.includes(condition.value);
-            } else {
-              matches = String(sourceValue).includes(String(condition.value));
-            }
-            break;
-          case 'greater_than':
-            matches = parseFloat(sourceValue) > parseFloat(condition.value);
-            break;
-          case 'less_than':
-            matches = parseFloat(sourceValue) < parseFloat(condition.value);
-            break;
-          default:
-            break;
-        }
-
-        if (condition.effect === 'hide' && matches) {
-          hidden.add(field.config?.key || field.key);
-        } else if (condition.effect === 'show' && !matches) {
-          hidden.add(field.config?.key || field.key);
-        }
-      });
-    });
-
-    return hidden;
-  }, [allFields, values]);
+  // Conditional logic: the same evaluator as the server (shared/conditions.js).
+  const hiddenFields = useMemo(
+    () => new Set(computeLogicState(schema || {}, values).hidden_fields),
+    [schema, values]
+  );
 
   // Get visible fields
   const visibleFields = useMemo(() => {
@@ -337,6 +295,10 @@ export default function ConversationalFormRenderer({
           }
         }
       });
+      // Answers to hidden fields are not sent (the server drops them too).
+      hiddenFields.forEach((k) => {
+        delete payload[k];
+      });
 
       // Include CAPTCHA response (v2 or v3)
       const recaptchaResponse = document.querySelector(
@@ -380,6 +342,26 @@ export default function ConversationalFormRenderer({
         const result = await response.json();
 
         if (response.ok && result?.data?.success) {
+          const conf = result.data.confirmation || null;
+          const fill = (text) =>
+            String(text || '').replace(/\{([\w.-]+)\}/g, (m, key) => {
+              const raw = payload[key];
+              if (raw === undefined || raw === null) return '';
+              return Array.isArray(raw) ? raw.join(', ') : String(raw);
+            });
+          if (conf?.type === 'redirect' && conf.redirectUrl && !preview) {
+            window.location.assign(
+              String(conf.redirectUrl).replace(/\{([\w.-]+)\}/g, (m, key) =>
+                encodeURIComponent(payload[key] ?? '')
+              )
+            );
+            return;
+          }
+          setConfirmation(
+            conf && conf.type !== 'redirect'
+              ? { title: fill(conf.title), message: fill(conf.message) }
+              : null
+          );
           setSubmitSuccess(true);
           setValues({});
           setCurrentIndex(0);
@@ -399,7 +381,7 @@ export default function ConversationalFormRenderer({
         setSubmitting(false);
       }
     },
-    [formId, values, leafPaths, preview, customOnSubmit]
+    [formId, values, leafPaths, preview, customOnSubmit, hiddenFields]
   );
 
   if (submitSuccess) {
@@ -407,12 +389,13 @@ export default function ConversationalFormRenderer({
       <div className={formClassNames} style={appearanceStyle}>
         <div className='subtleforms-conversational-success'>
           <div className='subtleforms-success-icon'>✓</div>
-          <h2>{__('Thank you!', 'subtleforms')}</h2>
+          <h2>{confirmation?.title || __('Thank you!', 'subtleforms')}</h2>
           <p>
-            {__(
-              'Your response has been submitted successfully.',
-              'subtleforms'
-            )}
+            {confirmation?.message ||
+              __(
+                'Your response has been submitted successfully.',
+                'subtleforms'
+              )}
           </p>
         </div>
       </div>
@@ -641,15 +624,17 @@ export default function ConversationalFormRenderer({
 
         <div className='subtleforms-field-wrapper'>
           {currentField && (
-            <FieldRenderer
-              field={currentField}
-              fieldPath={fieldKey}
-              values={values}
-              onChange={handleChange}
-              errors={validationErrors}
-              hiddenFields={hiddenFields}
-              autoFocus={true}
-            />
+            <FormContext.Provider value={{ formId, preview }}>
+              <FieldRenderer
+                field={currentField}
+                fieldPath={fieldKey}
+                values={values}
+                onChange={handleChange}
+                errors={validationErrors}
+                hiddenFields={hiddenFields}
+                autoFocus={true}
+              />
+            </FormContext.Provider>
           )}
         </div>
 

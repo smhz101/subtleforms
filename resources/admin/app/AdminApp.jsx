@@ -18,6 +18,7 @@
 
 import { useState, useEffect, Suspense } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import { getBranding } from '../utils/branding';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import {
 	MemoryRouter,
@@ -161,7 +162,7 @@ function getPageNameFromPath(pathname) {
 	if (pathname.startsWith('/submissions/')) {
 		return __('Submission Detail', 'subtleforms');
 	}
-	return map[pathname] || __('SubtleForms', 'subtleforms');
+	return map[pathname] || getBranding().name;
 }
 
 function RouteAnnouncer() {

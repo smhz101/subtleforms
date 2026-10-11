@@ -434,6 +434,42 @@ final class FieldSettings {
 				);
 			}
 
+			// File and image uploads (2.1): what visitors may attach.
+			if ( in_array( $type, array( 'file_upload', 'image_upload' ), true ) ) {
+				if ( ! $has( 'allowedExtensions' ) ) {
+					$add(
+						array(
+							'type'        => 'text',
+							'name'        => 'allowedExtensions',
+							'label'       => __( 'Allowed file types', 'subtleforms' ),
+							'placeholder' => $type === 'image_upload' ? 'jpg, png, webp' : 'pdf, docx, jpg',
+							'help'        => __( 'Extensions separated by commas. Leave empty for the usual document or image types. Scripts and web pages are never accepted.', 'subtleforms' ),
+							'section'     => 'validation',
+						)
+					);
+				}
+				$add(
+					array(
+						'type'    => 'checkbox',
+						'name'    => 'multiple',
+						'label'   => __( 'Allow several files (Pro)', 'subtleforms' ),
+						'help'    => __( 'Visitors can drop or pick several files, with upload progress.', 'subtleforms' ),
+						'section' => 'general',
+					)
+				);
+				$add(
+					array(
+						'type'    => 'number',
+						'name'    => 'maxFiles',
+						'label'   => __( 'Most files (Pro)', 'subtleforms' ),
+						'min'     => 1,
+						'max'     => 20,
+						'help'    => __( 'Used when several files are allowed. Default 5.', 'subtleforms' ),
+						'section' => 'general',
+					)
+				);
+			}
+
 			if ( ! in_array( $type, array( 'calculation', 'payment_summary', 'payment_hidden_price', 'hidden', 'payment_card' ), true ) ) {
 			$add(
 				array(

@@ -16,6 +16,8 @@ import clsx from 'clsx';
 import Icon from '../ui/Icon';
 import { ContextualTip } from '../ui';
 import DataTable from './DataTable';
+import PerformanceCell from './analytics/PerformanceCell';
+import { useAnalyticsSummary } from './analytics/useAnalytics';
 import { ConfirmModal } from '../modals';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
 import { PRO_TEMPLATE_IDS } from '../utils/proFeatureDetector';
@@ -28,14 +30,15 @@ import { formatRelativeDate, formatDate, isNewForm } from '../utils/formatDate';
 import { logger, perfMarkers } from '../diagnostics';
 import './FormsList.scss';
 
-export const ALL_FORM_COLUMNS = ['title', 'form_type', 'status', 'id', 'submission_count', 'updated_at', 'actions'];
-export const DEFAULT_FORM_VISIBLE = ['title', 'form_type', 'status', 'id', 'submission_count', 'updated_at', 'actions'];
+export const ALL_FORM_COLUMNS = ['title', 'form_type', 'status', 'id', 'submission_count', 'performance', 'updated_at', 'actions'];
+export const DEFAULT_FORM_VISIBLE = ['title', 'form_type', 'status', 'id', 'submission_count', 'performance', 'updated_at', 'actions'];
 export const FORM_COLUMN_LABELS = {
   title: __('Form Name', 'subtleforms'),
   form_type: __('Type', 'subtleforms'),
   status: __('Status', 'subtleforms'),
   id: __('Shortcode', 'subtleforms'),
   submission_count: __('Entries', 'subtleforms'),
+  performance: __('Conversion (30 days)', 'subtleforms'),
   updated_at: __('Last Updated', 'subtleforms'),
 };
 
@@ -219,6 +222,10 @@ export default function FormsList({
   }, [currentPage, pagesLoaded, totalItems, perPage]);
 
   // Define table columns
+  // Views, submissions and conversion per form (2.1, Pro reports).
+  const analytics = useAnalyticsSummary(30);
+  const formStats = analytics.data?.forms || {};
+
   const columns = [
     {
       key: 'title',
@@ -326,6 +333,17 @@ export default function FormsList({
           </a>
         );
       },
+    },
+    {
+      key: 'performance',
+      title: __('Conversion (30 days)', 'subtleforms'),
+      render: (_value, form) => (
+        <PerformanceCell
+          stats={formStats[form.id] || formStats[String(form.id)]}
+          locked={analytics.locked}
+          loading={analytics.isLoading}
+        />
+      ),
     },
     {
       key: 'updated_at',

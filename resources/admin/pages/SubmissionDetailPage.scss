@@ -254,6 +254,23 @@
 		grid-template-columns: auto 1fr;
 		gap: 2px 12px;
 	}
+
+	&__files {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+
+		li { display: flex; align-items: center; gap: 8px; margin: 0; }
+		a { display: inline-flex; align-items: center; gap: 6px; }
+	}
+
+	&__file-size {
+		color: var(--sf-text-subtle);
+		font-variant-numeric: tabular-nums;
+	}
 }
 
 .sf-submission-field {

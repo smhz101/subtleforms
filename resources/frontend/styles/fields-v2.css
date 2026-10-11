@@ -633,3 +633,120 @@
 }
 .subtleforms-priced__price--free { font-weight: 500; color: var(--subtleforms-color-text-light); }
 .subtleforms-priced--cards .subtleforms-priced__price--free { font-size: var(--subtleforms-font-size-sm, 0.875rem); }
+
+/* ── File and image uploads (2.1) ─────────────────────────────────────── */
+.subtleforms-upload {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.subtleforms-upload__drop {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+	padding: 22px 16px;
+	border: var(--subtleforms-border-width, 1px) dashed var(--subtleforms-color-border, #c3c4c7);
+	border-radius: var(--subtleforms-radius-md, 4px);
+	background: var(--subtleforms-color-bg, #fff);
+	color: var(--subtleforms-color-text-light, #50575e);
+	font: inherit;
+	cursor: pointer;
+	transition: border-color var(--subtleforms-transition-fast, 0.15s), background-color var(--subtleforms-transition-fast, 0.15s);
+}
+
+.subtleforms-upload__drop:hover,
+.subtleforms-upload__drop:focus-visible,
+.subtleforms-upload.is-dragging .subtleforms-upload__drop {
+	border-color: var(--subtleforms-color-primary, #3858e9);
+	background: color-mix(in srgb, var(--subtleforms-color-primary, #3858e9) 6%, transparent);
+	color: var(--subtleforms-color-text, #1e1e1e);
+	outline: none;
+}
+
+.subtleforms-upload__drop-title {
+	font-weight: 500;
+}
+
+.subtleforms-upload__hint {
+	margin: 0;
+	font-size: 0.8125em;
+	color: var(--subtleforms-color-text-light, #646970);
+}
+
+.subtleforms-upload__list {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.subtleforms-upload__item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 10px;
+	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border, #dcdcde);
+	border-radius: var(--subtleforms-radius-md, 4px);
+	background: var(--subtleforms-color-bg, #fff);
+	font-size: 0.875em;
+}
+
+.subtleforms-upload__name {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.subtleforms-upload__size {
+	flex: none;
+	color: var(--subtleforms-color-text-light, #646970);
+	font-variant-numeric: tabular-nums;
+}
+
+.subtleforms-upload__progress {
+	flex: 0 0 90px;
+	height: 6px;
+	border-radius: 3px;
+	background: color-mix(in srgb, var(--subtleforms-color-primary, #3858e9) 15%, transparent);
+	overflow: hidden;
+}
+
+.subtleforms-upload__progress > span {
+	display: block;
+	height: 100%;
+	background: var(--subtleforms-color-primary, #3858e9);
+	transition: width 0.2s;
+}
+
+.subtleforms-upload__remove {
+	flex: none;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--subtleforms-color-text-light, #646970);
+	font-size: 18px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.subtleforms-upload__remove:hover,
+.subtleforms-upload__remove:focus-visible {
+	background: color-mix(in srgb, currentColor 12%, transparent);
+	color: var(--subtleforms-color-error, #d63638);
+}
+
+.subtleforms-upload__error {
+	margin: 0;
+	font-size: 0.8125em;
+	color: var(--subtleforms-color-error, #d63638);
+}

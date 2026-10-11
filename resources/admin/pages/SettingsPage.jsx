@@ -10,6 +10,9 @@ import AISettings from '../components/settings/AISettings';
 import AdvancedSettings from '../components/settings/AdvancedSettings';
 import LicenseSettings from '../components/settings/LicenseSettings';
 import ExtensionsSettings from '../components/settings/ExtensionsSettings';
+import BrandingSettings from '../components/settings/BrandingSettings';
+import { getBranding } from '../utils/branding';
+import { isProFeature } from '../utils/featureGate';
 import Icon from '../ui/Icon';
 import { getPlanState } from '../data/proCatalog';
 import './SettingsPage.scss';
@@ -72,14 +75,31 @@ const GROUPS = [
         description: __('Account-wide settings for payments, CRM, email marketing and more.', 'subtleforms'),
         pro: true,
       },
+      {
+        name: 'branding',
+        icon: Icon.Palette,
+        title: __('Branding', 'subtleforms'),
+        description: __('Your name and logo in the forms admin, and which SubtleForms links appear.', 'subtleforms'),
+        pro: true,
+        // Restricted with the License screen when white label limits it to one admin.
+        ownerOnly: true,
+      },
     ],
   },
 ];
 
-const ALL_TABS = GROUPS.flatMap((g) => g.tabs);
+// White label can limit the License and Branding screens to one admin.
+const VISIBLE_GROUPS = getBranding().showLicense
+  ? GROUPS
+  : GROUPS.map((g) => ({
+      ...g,
+      tabs: g.tabs.filter((t) => t.name !== 'license' && !t.ownerOnly),
+    }));
+
+const ALL_TABS = VISIBLE_GROUPS.flatMap((g) => g.tabs);
 
 // Tabs with nothing to save (they manage their own state).
-const READ_ONLY_TABS = ['license'];
+const READ_ONLY_TABS = ['license', 'branding'];
 
 export default function Settings() {
   const {
@@ -164,7 +184,7 @@ export default function Settings() {
       }>
       <div className='sf-settings'>
         <nav className='sf-settings__nav' aria-label={__('Settings sections', 'subtleforms')}>
-          {GROUPS.map((group) => (
+          {VISIBLE_GROUPS.map((group) => (
             <div key={group.key} className='sf-settings__nav-group'>
               <p className='sf-settings__nav-heading'>{group.title}</p>
               <ul>
@@ -180,8 +200,12 @@ export default function Settings() {
                         onClick={() => setActiveTab(tab.name)}>
                         <TabIcon size={18} aria-hidden='true' />
                         <span>{tab.title}</span>
-                        {tab.pro && !licensed && (
-                          <span className='sf-settings__nav-pro'>{__('Pro', 'subtleforms')}</span>
+                        {tab.name === 'branding' && !isProFeature('branding.white_label') ? (
+                          <span className='sf-settings__nav-pro'>{__('Agency', 'subtleforms')}</span>
+                        ) : (
+                          tab.pro && !licensed && (
+                            <span className='sf-settings__nav-pro'>{__('Pro', 'subtleforms')}</span>
+                          )
                         )}
                       </button>
                     </li>
@@ -219,6 +243,7 @@ export default function Settings() {
               <EmailSettings settings={settings} updateSetting={updateSetting} fieldErrors={fieldErrors} />
             )}
             {current.name === 'license' && <LicenseSettings />}
+            {current.name === 'branding' && <BrandingSettings />}
             {current.name === 'ai' && (
               <AISettings settings={settings} updateSetting={updateSetting} fieldErrors={fieldErrors} />
             )}

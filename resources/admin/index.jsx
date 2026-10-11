@@ -1,5 +1,7 @@
 import { render } from '@wordpress/element';
 import AdminApp from './app/AdminApp';
+// Add-on registry (window.SubtleFormsExtend) must exist before add-on scripts run.
+import '../shared/extend';
 
 // Import aggregated admin styles
 import './styles/admin.scss';

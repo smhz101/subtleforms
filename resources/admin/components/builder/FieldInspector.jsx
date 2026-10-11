@@ -2,7 +2,8 @@ import { Button, TabPanel, Notice, PanelBody } from '@wordpress/components';
 import { useMemo, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../../ui/Icon';
-import ConditionEditor from './ConditionEditor';
+import LogicEditor, { readLogic, countRules } from './LogicEditor';
+import { isProFeature } from '../../utils/featureGate';
 import { useBuilder } from './context/BuilderContext';
 import { useConfig } from './context/ConfigContext';
 import {
@@ -94,6 +95,21 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
     );
   }
 
+  const isStep = field.type === 'step';
+  const fieldLogic = readLogic(field);
+  const ruleCount = countRules(fieldLogic);
+  const logicTab = {
+    name: 'logic',
+    title: (
+      <span className='sf-field-inspector__tab-label'>
+        {__('Logic', 'subtleforms')}
+        {ruleCount > 0 && (
+          <span className='sf-field-inspector__tab-count'>{ruleCount}</span>
+        )}
+      </span>
+    ),
+  };
+
   const FieldIcon = getIcon(field.type);
   const typeLabel = definition?.label || field.type?.replace(/_/g, ' ');
   const fieldKey = field.key;
@@ -113,20 +129,10 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
               </span>
             ),
           },
-          {
-            name: 'logic',
-            title: (
-              <span className='sf-field-inspector__tab-label'>
-                {__('Logic', 'subtleforms')}
-                {(field.conditions || []).length > 0 && (
-                  <span className='sf-field-inspector__tab-count'>
-                    {(field.conditions || []).length}
-                  </span>
-                )}
-              </span>
-            ),
-          },
+          logicTab,
         ]
+      : isStep
+      ? [logicTab]
       : []),
     ...(supportsAppearance(field.type)
       ? [{ name: 'style', title: __('Style', 'subtleforms') }]
@@ -257,16 +263,25 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
             {tab.name === 'logic' && (
               <div className='sf-field-inspector__pad'>
                 <p className='sf-field-inspector__intro'>
-                  {sprintf(
-                    /* translators: %s: field label */
-                    __('Show, hide or require “%s” based on answers to other fields.', 'subtleforms'),
-                    field.label || typeLabel
-                  )}
+                  {isStep
+                    ? __('Skip this step unless its rules match. Fields in a skipped step are not checked or saved.', 'subtleforms')
+                    : sprintf(
+                        /* translators: %s: field label */
+                        __('Show or hide “%s” based on answers to other fields. Hidden fields are not checked or saved.', 'subtleforms'),
+                        field.label || typeLabel
+                      )}
                 </p>
-                <ConditionEditor
-                  conditions={field.conditions || []}
-                  availableFields={allFields || []}
-                  onChange={(conditions) => handleUpdate({ conditions })}
+                <LogicEditor
+                  logic={fieldLogic}
+                  availableFields={(allFields || []).filter((f) => f.key !== field.key)}
+                  locked={isStep && !isProFeature('logic.conditional.advanced')}
+                  disabled={isReadOnly}
+                  emptyText={
+                    isStep
+                      ? __('This step is always shown.', 'subtleforms')
+                      : undefined
+                  }
+                  onChange={(logic) => handleUpdate({ logic, conditions: [] })}
                 />
               </div>
             )}

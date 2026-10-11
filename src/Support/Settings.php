@@ -68,10 +68,11 @@ class Settings {
 		'ext_webhooks_enabled'              => false,
 		'ext_webhooks_signing_secret'       => '',
 		'ext_webhooks_events'               => array( 'submission.created' ),
+		'ext_webhooks_retries'              => 3,
 
 		// Email Marketing
 		'ext_email_marketing_enabled'       => false,
-		'ext_email_marketing_provider'      => 'mailchimp', // mailchimp|convertkit
+		'ext_email_marketing_provider'      => 'mailchimp', // mailchimp|brevo|convertkit (Kit)
 		'ext_email_marketing_api_key'       => '',
 		'ext_email_marketing_list_id'       => '',
 		'ext_email_marketing_double_optin'  => false,
@@ -81,9 +82,11 @@ class Settings {
 		'ext_crm_provider'                  => 'hubspot',
 		'ext_crm_api_key'                   => '',
 		'ext_crm_portal_id'                 => '',
+		'ext_crm_webhook_url'               => '',
+		'ext_crm_add_note'                  => true,
 
 		// Analytics
-		'ext_analytics_enabled'             => false,
+		'ext_analytics_enabled'             => true,
 		'ext_analytics_view_tracking'       => true,
 		'ext_analytics_retention_days'      => 90,
 
@@ -91,6 +94,9 @@ class Settings {
 		'ext_ecommerce_enabled'             => false,
 		'ext_ecommerce_product_id'          => 0,
 		'ext_ecommerce_currency'            => 'USD',
+		'ext_ecommerce_default_processor'   => 'woocommerce',
+		'ext_ecommerce_empty_cart'          => true,
+		'ext_ecommerce_destination'         => 'checkout',
 
 		// PDF Generation
 		'ext_pdf_enabled'                   => false,
@@ -197,21 +203,27 @@ class Settings {
 		'ext_webhooks_enabled'              => 'boolean',
 		'ext_webhooks_signing_secret'       => array( 'string', 'max' => 200 ),
 		'ext_webhooks_events'               => 'array',
+		'ext_webhooks_retries'              => array( 'integer', 'min' => 0, 'max' => 5 ),
 		'ext_email_marketing_enabled'       => 'boolean',
-		'ext_email_marketing_provider'      => array( 'mailchimp', 'convertkit' ),
+		'ext_email_marketing_provider'      => array( 'mailchimp', 'brevo', 'convertkit' ),
 		'ext_email_marketing_api_key'       => array( 'string', 'max' => 500 ),
 		'ext_email_marketing_list_id'       => array( 'string', 'max' => 200 ),
 		'ext_email_marketing_double_optin'  => 'boolean',
 		'ext_crm_enabled'                   => 'boolean',
-		'ext_crm_provider'                  => array( 'hubspot' ),
+		'ext_crm_provider'                  => array( 'hubspot', 'webhook' ),
 		'ext_crm_api_key'                   => array( 'string', 'max' => 500 ),
 		'ext_crm_portal_id'                 => array( 'string', 'max' => 100 ),
+		'ext_crm_webhook_url'               => array( 'string', 'max' => 2000 ),
+		'ext_crm_add_note'                  => 'boolean',
 		'ext_analytics_enabled'             => 'boolean',
 		'ext_analytics_view_tracking'       => 'boolean',
 		'ext_analytics_retention_days'      => array( 'integer', 'min' => 1, 'max' => 3650 ),
 		'ext_ecommerce_enabled'             => 'boolean',
 		'ext_ecommerce_product_id'          => array( 'integer', 'min' => 0 ),
 		'ext_ecommerce_currency'            => array( 'string', 'max' => 10 ),
+		'ext_ecommerce_default_processor'   => array( 'woocommerce', 'subtleforms' ),
+		'ext_ecommerce_empty_cart'          => 'boolean',
+		'ext_ecommerce_destination'         => array( 'checkout', 'cart' ),
 		'ext_pdf_enabled'                   => 'boolean',
 		'ext_pdf_template'                  => array( 'string', 'max' => 100 ),
 		'ext_pdf_attach_to_email'           => 'boolean',

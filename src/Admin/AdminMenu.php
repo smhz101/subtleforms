@@ -134,9 +134,10 @@ class AdminMenu {
 	 */
 	public function register_menu() {
 		// Main menu page - Dashboard
+		$branding = self::branding();
 		add_menu_page(
-			__( 'Subtle Forms', 'subtleforms' ),
-			__( 'Subtle Forms', 'subtleforms' ),
+			$branding['menuName'],
+			$branding['menuName'],
 			$this->caps->manage_cap(),
 			'subtleforms',
 			array( $this, 'render_dashboard' ),
@@ -315,50 +316,64 @@ class AdminMenu {
 		// instance picks up all filters that are now in place.
 		$live_caps = new Capabilities();
 
-		// Localize script with data
-		wp_localize_script(
-			'subtleforms-admin',
-			'subtleformsAdmin',
-			array(
-				'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
-				'restUrl'        => rest_url( 'subtleforms/v1' ),
-				'nonce'          => wp_create_nonce( 'subtleforms_admin' ),
-				'restNonce'      => wp_create_nonce( 'wp_rest' ),
-				'version'        => SUBTLEFORMS_VERSION,
-				'currency'       => strtoupper( (string) ( ( get_option( 'subtleforms_settings', array() )['ext_payments_currency'] ?? '' ) ?: 'USD' ) ),
-				'unreadCount'    => $this->get_unread_count(),
-				'capabilities'   => $live_caps->all(),
-				'hasProPlugin'   => defined( 'SUBTLEFORMS_PRO_VERSION' ) || sf_is_pro_active(),
-				'license'        => $license_data,
-				'subscription'   => array(
-					'status'    => 'inactive',
-					'plan'      => 'free',
-					'connected' => false,
-				),
-				'extensions'     => $this->buildExtensionsData( $live_caps ),
-				'isDev'          => defined( 'WP_DEBUG' ) && WP_DEBUG,
-				// The builder preview renders the real frontend markup inside an
-				// iframe, so it needs the public stylesheet to look like production
-				// rather than approximating it with admin styles.
-				'frontendStyles' => array_values(
-					array_filter(
-						array(
-							file_exists( SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/index.jsx.css' )
-								? SUBTLEFORMS_PLUGIN_URL . 'build/frontend/index.jsx.css'
-								: null,
-							file_exists( SUBTLEFORMS_PLUGIN_DIR . 'assets/css/conversational.css' )
-								? SUBTLEFORMS_PLUGIN_URL . 'assets/css/conversational.css'
-								: null,
-						)
+		$admin_data = array(
+			'ajaxUrl'        => admin_url( 'admin-ajax.php' ),
+			'restUrl'        => rest_url( 'subtleforms/v1' ),
+			'nonce'          => wp_create_nonce( 'subtleforms_admin' ),
+			'restNonce'      => wp_create_nonce( 'wp_rest' ),
+			'version'        => SUBTLEFORMS_VERSION,
+			'currency'       => strtoupper( (string) ( ( get_option( 'subtleforms_settings', array() )['ext_payments_currency'] ?? '' ) ?: 'USD' ) ),
+			'unreadCount'    => $this->get_unread_count(),
+			'capabilities'   => $live_caps->all(),
+			'hasProPlugin'   => defined( 'SUBTLEFORMS_PRO_VERSION' ) || sf_is_pro_active(),
+			'license'        => $license_data,
+			'subscription'   => array(
+				'status'    => 'inactive',
+				'plan'      => 'free',
+				'connected' => false,
+			),
+			'extensions'     => $this->buildExtensionsData( $live_caps ),
+			'isDev'          => defined( 'WP_DEBUG' ) && WP_DEBUG,
+			// The builder preview renders the real frontend markup inside an
+			// iframe, so it needs the public stylesheet to look like production
+			// rather than approximating it with admin styles.
+			'frontendStyles' => array_values(
+				array_filter(
+					array(
+						file_exists( SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/index.jsx.css' )
+							? SUBTLEFORMS_PLUGIN_URL . 'build/frontend/index.jsx.css'
+							: null,
+						file_exists( SUBTLEFORMS_PLUGIN_DIR . 'assets/css/conversational.css' )
+							? SUBTLEFORMS_PLUGIN_URL . 'assets/css/conversational.css'
+							: null,
 					)
-				),
-				'i18n'           => array(
-					'confirmDelete' => __( 'Are you sure you want to delete this item?', 'subtleforms' ),
-					'error'         => __( 'An error occurred. Please try again.', 'subtleforms' ),
-					'success'       => __( 'Action completed successfully.', 'subtleforms' ),
-				),
-			)
+				)
+			),
+			'i18n'           => array(
+				'confirmDelete' => __( 'Are you sure you want to delete this item?', 'subtleforms' ),
+				'error'         => __( 'An error occurred. Please try again.', 'subtleforms' ),
+				'success'       => __( 'Action completed successfully.', 'subtleforms' ),
+			),
+			// WooCommerce status for the checkout settings (2.1). Null when inactive.
+			'woocommerce'    => self::woocommerceData(),
+			// Nonce for admin download links to uploaded files (2.1).
+			'fileNonce'      => \SubtleForms\Uploads\Uploads::nonce(),
+			// Name, logo and which credits/links to show (white label, 2.1).
+			'branding'       => self::branding(),
 		);
+
+		/**
+		 * Filter the data the admin app receives as `window.subtleformsAdmin`.
+		 * Add-ons add their own keys here.
+		 *
+		 * @param array  $admin_data Data.
+		 * @param string $hook       Admin page hook.
+		 * @since 2.1.0
+		 */
+		$admin_data = (array) apply_filters( 'subtleforms/admin_data', $admin_data, $hook );
+
+		// Localize script with data
+		wp_localize_script( 'subtleforms-admin', 'subtleformsAdmin', $admin_data );
 
 		// Additional data for Settings page
 		wp_localize_script(
@@ -373,6 +388,81 @@ class AdminMenu {
 
 		// Allow extensions to enqueue their assets
 		do_action( 'subtleforms/admin_enqueue_scripts', $hook );
+	}
+
+	/**
+	 * How the admin app presents the plugin: name, logo and which SubtleForms
+	 * credits, help links and upgrade prompts appear.
+	 *
+	 * @return array{name:string,menuName:string,logoUrl:string,hideCredits:bool,hideHelp:bool,hideUpgrade:bool,showLicense:bool}
+	 */
+	public static function branding(): array {
+		static $cache = null;
+		if ( $cache !== null && ! ( defined( 'SUBTLEFORMS_TESTING' ) && SUBTLEFORMS_TESTING ) ) {
+			return $cache;
+		}
+
+		$defaults = array(
+			'name'        => 'SubtleForms',
+			'menuName'    => __( 'Subtle Forms', 'subtleforms' ),
+			'logoUrl'     => '',
+			'hideCredits' => false,
+			'hideHelp'    => false,
+			'hideUpgrade' => false,
+			'showLicense' => true,
+		);
+
+		/**
+		 * Filter the admin branding (white label). SubtleForms Pro's Branding
+		 * settings use this on the Agency plan.
+		 *
+		 * @param array $branding {
+		 *     @type string $name        Product name in the app header and copy.
+		 *     @type string $menuName    wp-admin menu label.
+		 *     @type string $logoUrl     Logo image URL; empty for the default mark.
+		 *     @type bool   $hideCredits Hide SubtleForms credits and links.
+		 *     @type bool   $hideHelp    Hide the Help menu.
+		 *     @type bool   $hideUpgrade Hide upgrade prompts.
+		 *     @type bool   $showLicense Show the License screen to this user.
+		 * }
+		 * @since 2.1.0
+		 */
+		$b = apply_filters( 'subtleforms/admin_branding', $defaults );
+		$b = is_array( $b ) ? array_merge( $defaults, $b ) : $defaults;
+
+		$name  = trim( wp_strip_all_tags( (string) $b['name'] ) );
+		$menu  = trim( wp_strip_all_tags( (string) $b['menuName'] ) );
+		$cache = array(
+			'name'        => $name !== '' ? $name : $defaults['name'],
+			'menuName'    => $menu !== '' ? $menu : ( $name !== '' && $name !== $defaults['name'] ? $name : $defaults['menuName'] ),
+			'logoUrl'     => esc_url_raw( (string) $b['logoUrl'] ),
+			'hideCredits' => (bool) $b['hideCredits'],
+			'hideHelp'    => (bool) $b['hideHelp'],
+			'hideUpgrade' => (bool) $b['hideUpgrade'],
+			'showLicense' => (bool) $b['showLicense'],
+		);
+		return $cache;
+	}
+
+	/**
+	 * WooCommerce details for the admin app, or null when it is not active.
+	 *
+	 * @return array{active:bool,version:string,currency:string,symbol:string,checkoutUrl:string,cartUrl:string,couponsUrl:string}|null
+	 */
+	public static function woocommerceData(): ?array {
+		if ( ! class_exists( 'WooCommerce' ) || ! function_exists( 'get_woocommerce_currency' ) ) {
+			return null;
+		}
+		$currency = get_woocommerce_currency();
+		return array(
+			'active'      => true,
+			'version'     => defined( 'WC_VERSION' ) ? (string) WC_VERSION : '',
+			'currency'    => $currency,
+			'symbol'      => html_entity_decode( (string) get_woocommerce_currency_symbol( $currency ), ENT_QUOTES, 'UTF-8' ),
+			'checkoutUrl' => function_exists( 'wc_get_checkout_url' ) ? wc_get_checkout_url() : '',
+			'cartUrl'     => function_exists( 'wc_get_cart_url' ) ? wc_get_cart_url() : '',
+			'couponsUrl'  => admin_url( 'edit.php?post_type=shop_coupon' ),
+		);
 	}
 
 	/**
@@ -391,32 +481,32 @@ class AdminMenu {
 			array(
 				'slug'        => 'webhooks',
 				'label'       => __( 'Webhooks', 'subtleforms' ),
-				'description' => __( 'Send real-time HTTP POST payloads to external URLs on form submissions.', 'subtleforms' ),
+				'description' => __( 'Send each entry as JSON to any URL, with retries and signed requests.', 'subtleforms' ),
 			),
 			array(
 				'slug'        => 'email_marketing',
 				'label'       => __( 'Email Marketing', 'subtleforms' ),
-				'description' => __( 'Automatically subscribe form submitters to Mailchimp or ConvertKit audiences.', 'subtleforms' ),
+				'description' => __( 'Add people who fill in a form to Mailchimp, Brevo or Kit.', 'subtleforms' ),
 			),
 			array(
 				'slug'        => 'crm',
 				'label'       => __( 'CRM', 'subtleforms' ),
-				'description' => __( 'Create or update contacts in HubSpot from every form submission.', 'subtleforms' ),
+				'description' => __( 'Create or update HubSpot contacts, or send contacts to Zapier or Make.', 'subtleforms' ),
 			),
 			array(
 				'slug'        => 'analytics',
 				'label'       => __( 'Analytics', 'subtleforms' ),
-				'description' => __( 'Track form views and submission rates directly in your dashboard.', 'subtleforms' ),
+				'description' => __( 'Views, submissions and conversion rate for every form.', 'subtleforms' ),
 			),
 			array(
 				'slug'        => 'ecommerce',
-				'label'       => __( 'E-commerce', 'subtleforms' ),
-				'description' => __( 'Create WooCommerce orders automatically when a form is submitted.', 'subtleforms' ),
+				'label'       => __( 'WooCommerce', 'subtleforms' ),
+				'description' => __( 'Take form payments through the WooCommerce checkout and sell WooCommerce products from any form.', 'subtleforms' ),
 			),
 			array(
 				'slug'        => 'pdf',
-				'label'       => __( 'PDF Generator', 'subtleforms' ),
-				'description' => __( 'Generate PDF documents from submissions and attach them to emails.', 'subtleforms' ),
+				'label'       => __( 'Entry PDF', 'subtleforms' ),
+				'description' => __( 'Download any entry as a PDF and attach it to notification emails.', 'subtleforms' ),
 			),
 			array(
 				'slug'        => 'multilanguage',
@@ -438,6 +528,16 @@ class AdminMenu {
 			$sk        = 'ext_' . $slug;
 			$available = $gate->allows( $cap_key );
 			$enabled   = (bool) $settings->get( $sk . '_enabled' );
+			if ( 'ecommerce' === $slug ) {
+				// The WooCommerce integration has no on/off switch: it is on
+				// whenever WooCommerce is active.
+				$enabled = class_exists( 'WooCommerce' );
+			}
+			if ( 'webhooks' === $slug || 'pdf' === $slug ) {
+				// Webhook actions and entry PDF downloads have no master switch
+				// (2.1); their panels only hold defaults.
+				$enabled = true;
+			}
 
 			// Lightweight check: does the extension have its primary credential set?
 			$configured = $this->isExtensionConfigured( $slug, $settings );
@@ -461,8 +561,8 @@ class AdminMenu {
 	private function isExtensionConfigured( string $slug, \SubtleForms\Support\Settings $settings ): bool {
 		$checks = array(
 			'webhooks'       => array(), // no required key — endpoint can be per-form
-			'email_marketing' => array( 'ext_email_marketing_api_key', 'ext_email_marketing_list_id' ),
-			'crm'            => array( 'ext_crm_api_key' ),
+			'email_marketing' => array( 'ext_email_marketing_api_key' ),
+			'crm'            => array( 'webhook' === $settings->get( 'ext_crm_provider' ) ? 'ext_crm_webhook_url' : 'ext_crm_api_key' ),
 			'analytics'      => array(), // no external API needed
 			'ecommerce'      => array(), // depends on WooCommerce products
 			'pdf'            => array(), // no API key needed
@@ -925,7 +1025,7 @@ class AdminMenu {
 			if ( $current_screen && isset( $current_screen->id ) ) {
 				$screen_id = Helpers::normalize_string( $current_screen->id );
 				if ( ! empty( $screen_id ) && strpos( $screen_id, 'subtleforms' ) !== false ) {
-					return __( 'Subtle Forms', 'subtleforms' ) . ' &#8212; WordPress';
+					return self::branding()['menuName'] . ' &#8212; WordPress';
 				}
 			}
 			return __( 'WordPress Admin', 'subtleforms' );

@@ -3,9 +3,9 @@ import { __ } from '@wordpress/i18n';
 import FieldError from '../FieldError';
 
 const TEMPLATES = [
-  { label: __('Default', 'subtleforms'), value: 'default' },
-  { label: __('Minimal', 'subtleforms'), value: 'minimal' },
-  { label: __('Detailed', 'subtleforms'), value: 'detailed' },
+  { label: __('Default: logo, title band and answers', 'subtleforms'), value: 'default' },
+  { label: __('Minimal: plain header, answers only', 'subtleforms'), value: 'minimal' },
+  { label: __('Detailed: adds entry details and consent records', 'subtleforms'), value: 'detailed' },
 ];
 
 /**
@@ -15,10 +15,10 @@ export default function PdfPanel({ settings, updateSetting, fieldErrors = {} }) 
   return (
     <div className='sf-ext-panel'>
       <div className='sf-ext-panel__header'>
-        <h2 className='sf-ext-panel__title'>{__('PDF Generator', 'subtleforms')}</h2>
+        <h2 className='sf-ext-panel__title'>{__('Entry PDF', 'subtleforms')}</h2>
         <p className='sf-ext-panel__description'>
           {__(
-            'Generate a PDF document from each form submission and optionally attach it to the notification email.',
+            'A printable PDF of each entry with your site logo, the form title, the entry number and date, every answer and the order summary for payment forms. Download it from the entry screen or attach it to notification emails.',
             'subtleforms'
           )}
         </p>
@@ -26,42 +26,31 @@ export default function PdfPanel({ settings, updateSetting, fieldErrors = {} }) 
 
       <div className='sf-ext-panel__body'>
         <div className='sf-settings-field'>
-          <ToggleControl
-            label={__('Enable PDF Generator', 'subtleforms')}
-            checked={!!settings.ext_pdf_enabled}
-            onChange={(v) => updateSetting('ext_pdf_enabled', v)}
-            help={__('Generate a PDF for every new form submission.', 'subtleforms')}
+          <SelectControl
+            label={__('Layout', 'subtleforms')}
+            value={settings.ext_pdf_template || 'default'}
+            options={TEMPLATES}
+            onChange={(v) => updateSetting('ext_pdf_template', v)}
+            help={__('Used for downloads and email attachments. The logo comes from Appearance > Customize > Site Identity.', 'subtleforms')}
           />
-          <FieldError errors={fieldErrors.ext_pdf_enabled} />
+          <FieldError errors={fieldErrors.ext_pdf_template} />
         </div>
 
-        {settings.ext_pdf_enabled && (
-          <>
-            <div className='sf-settings-field'>
-              <SelectControl
-                label={__('PDF Template', 'subtleforms')}
-                value={settings.ext_pdf_template || 'default'}
-                options={TEMPLATES}
-                onChange={(v) => updateSetting('ext_pdf_template', v)}
-                help={__('Layout used when rendering the PDF document.', 'subtleforms')}
-              />
-              <FieldError errors={fieldErrors.ext_pdf_template} />
-            </div>
-
-            <div className='sf-settings-field'>
-              <ToggleControl
-                label={__('Attach to Notification Email', 'subtleforms')}
-                checked={!!settings.ext_pdf_attach_to_email}
-                onChange={(v) => updateSetting('ext_pdf_attach_to_email', v)}
-                help={__(
-                  'Attach the generated PDF to the admin notification email for each submission.',
-                  'subtleforms'
-                )}
-              />
-              <FieldError errors={fieldErrors.ext_pdf_attach_to_email} />
-            </div>
-          </>
-        )}
+        <div className='sf-settings-field'>
+          <ToggleControl
+            label={__('Attach the PDF to notification emails', 'subtleforms')}
+            checked={!!settings.ext_pdf_enabled && !!settings.ext_pdf_attach_to_email}
+            onChange={(v) => {
+              updateSetting('ext_pdf_enabled', v);
+              updateSetting('ext_pdf_attach_to_email', v);
+            }}
+            help={__(
+              'Adds the entry PDF to emails sent to you and your team. Emails sent to the person who filled in the form (a recipient like {{email}}) are left as they are. The PDF is created after the visitor\'s submission, so it never slows the form down.',
+              'subtleforms'
+            )}
+          />
+          <FieldError errors={fieldErrors.ext_pdf_attach_to_email} />
+        </div>
       </div>
     </div>
   );

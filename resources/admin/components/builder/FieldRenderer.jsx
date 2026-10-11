@@ -5,6 +5,7 @@ import Icon from '../../ui/Icon';
 import NameFieldRenderer from './NameFieldRenderer';
 import AddressFieldRenderer from './AddressFieldRenderer';
 import { ProductPreview, ChoicePreview, SummaryPreview, CardPreview } from './PaymentPreviews';
+import { getCanvasPreview } from '../../../shared/extend';
 import './FieldRenderer.scss';
 
 // Types that do not accept user input — required indicator suppressed
@@ -506,6 +507,12 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
 
       {type === 'payment_card' && <CardPreview />}
 
+      {/* Canvas previews registered by add-ons (registerCanvasPreview). */}
+      {(() => {
+        const AddonPreview = getCanvasPreview(type);
+        return AddonPreview ? <AddonPreview field={field} /> : null;
+      })()}
+
       {type === 'payment_coupon' && (
         <div className='sf-field-renderer__subscribe-wrapper'>
           <input
@@ -762,7 +769,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       {type === 'address_group' && <AddressFieldRenderer field={field} />}
 
       {/* Unknown / legacy field type — safe fallback, do NOT crash builder */}
-      {!KNOWN_TYPES.has(type) && (
+      {!KNOWN_TYPES.has(type) && !getCanvasPreview(type) && (
         <div className='sf-field-renderer__unknown-field'>
           {__('Unsupported field (legacy)', 'subtleforms')}
         </div>

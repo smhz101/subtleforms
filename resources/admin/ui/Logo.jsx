@@ -11,12 +11,38 @@
  * @param {boolean} props.wordmark  Render the "SubtleForms" wordmark beside it.
  * @param {string}  props.className Extra class names.
  */
+import { getBranding } from '../utils/branding';
+
 export default function Logo({
   size = 28,
   wordmark = false,
   className = '',
   ...rest
 }) {
+  const branding = getBranding();
+
+  // White label: the agency's logo and name replace the mark and wordmark.
+  if (branding.logoUrl || branding.name !== 'SubtleForms') {
+    const custom = branding.logoUrl ? (
+      <img
+        className='sf-logo__image'
+        src={branding.logoUrl}
+        alt={wordmark ? '' : branding.name}
+        style={{ height: size, width: 'auto', maxWidth: size * 4 }}
+      />
+    ) : null;
+    return (
+      <span className={`sf-logo ${wordmark ? 'sf-logo--wordmark' : ''} ${className}`.trim()} {...rest}>
+        {custom}
+        {(wordmark || !custom) && (
+          <span className='sf-logo__word'>
+            <span className='sf-logo__word-strong'>{branding.name}</span>
+          </span>
+        )}
+      </span>
+    );
+  }
+
   const mark = (
     <svg
       className='sf-logo__mark'

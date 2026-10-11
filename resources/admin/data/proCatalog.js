@@ -17,19 +17,19 @@ export const PRO_PILLARS = [
 		key: 'fields',
 		icon: Icon.Calculator,
 		title: __( 'Smarter fields', 'subtleforms' ),
-		text: __( 'Picture Choice, Signature and live Calculations with a formula builder.', 'subtleforms' ),
+		text: __( 'Picture Choice, Signature, live Calculations and multi-file uploads, plus advanced conditional logic.', 'subtleforms' ),
 	},
 	{
 		key: 'payments',
 		icon: Icon.CreditCard,
 		title: __( 'Payments', 'subtleforms' ),
-		text: __( 'Stripe and PayPal checkout, products, coupons and order summaries.', 'subtleforms' ),
+		text: __( 'Stripe card checkout, products, coupons and order summaries.', 'subtleforms' ),
 	},
 	{
 		key: 'automation',
 		icon: Icon.Webhook,
 		title: __( 'Automation', 'subtleforms' ),
-		text: __( 'Webhooks, CRM and email marketing sync, with retries and delays.', 'subtleforms' ),
+		text: __( 'Webhooks with automatic retries, CRM and email marketing sync.', 'subtleforms' ),
 	},
 	{
 		key: 'insights',
@@ -47,7 +47,7 @@ export const EXTENSIONS = {
 	payments: {
 		icon: Icon.CreditCard,
 		group: 'commerce',
-		outcome: __( 'Accept card and PayPal payments inside any form.', 'subtleforms' ),
+		outcome: __( 'Accept card payments with Stripe inside any form.', 'subtleforms' ),
 	},
 	ecommerce: {
 		icon: Icon.ShoppingCart,
@@ -57,12 +57,12 @@ export const EXTENSIONS = {
 	crm: {
 		icon: Icon.Users,
 		group: 'marketing',
-		outcome: __( 'Create or update HubSpot contacts on every entry.', 'subtleforms' ),
+		outcome: __( 'Create or update HubSpot contacts, or send them to Zapier or Make.', 'subtleforms' ),
 	},
 	email_marketing: {
 		icon: Icon.Mail,
 		group: 'marketing',
-		outcome: __( 'Add subscribers to Mailchimp or ConvertKit automatically.', 'subtleforms' ),
+		outcome: __( 'Add subscribers to Mailchimp, Brevo or Kit automatically.', 'subtleforms' ),
 	},
 	webhooks: {
 		icon: Icon.Webhook,
@@ -72,7 +72,7 @@ export const EXTENSIONS = {
 	analytics: {
 		icon: Icon.BarChart2,
 		group: 'insights',
-		outcome: __( 'See views, starts and conversion rate for each form.', 'subtleforms' ),
+		outcome: __( 'See views, submissions and conversion rate for each form.', 'subtleforms' ),
 	},
 	pdf: {
 		icon: Icon.FileText,
@@ -97,13 +97,14 @@ export const EXTENSION_GROUPS = [
  */
 export const PRO_CHECKLIST = [
 	__( 'Picture Choice, Signature and Calculation fields', 'subtleforms' ),
-	__( 'Stripe and PayPal payments', 'subtleforms' ),
-	__( 'Webhooks, CRM and email marketing actions', 'subtleforms' ),
-	__( 'Advanced conditional logic', 'subtleforms' ),
+	__( 'Several files per upload field, with drag and drop', 'subtleforms' ),
+	__( 'Stripe card payments, coupons and order summaries', 'subtleforms' ),
+	__( 'Webhooks with retries, CRM and email marketing actions', 'subtleforms' ),
+	__( 'Advanced conditional logic: any/all rules, skipped steps, conditional emails and confirmations', 'subtleforms' ),
 	__( 'CSV export of submissions', 'subtleforms' ),
 	__( 'PDF generator and analytics', 'subtleforms' ),
-	__( 'Pipeline retries and delayed actions', 'subtleforms' ),
-	__( 'Pro templates and priority support', 'subtleforms' ),
+	__( 'Pro templates', 'subtleforms' ),
+	__( 'White label and WPML or Polylang translation (Agency)', 'subtleforms' ),
 ];
 
 /**

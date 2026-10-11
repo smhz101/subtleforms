@@ -6,6 +6,8 @@
  * only ever used for display.
  */
 
+import { getPricedType, pricedTypes } from './extend';
+
 export const PRICED_TYPES = [
   'payment_product',
   'payment_choice',
@@ -13,6 +15,14 @@ export const PRICED_TYPES = [
   'payment_hidden_price',
   'calculation',
 ];
+
+/**
+ * Whether a field type adds lines to the order, including types that add-ons
+ * register with registerPricedType().
+ */
+export const isPricedType = (type) => PRICED_TYPES.includes(type) || !!getPricedType(type);
+
+export { registerPricedType } from './extend';
 
 const money = (v) => {
   const n = Number(v);
@@ -30,6 +40,9 @@ export function isPricedForm(fields = []) {
   return fields.some((f) => {
     const c = cfg(f);
     if (['payment_product', 'payment_choice', 'payment_amount', 'payment_hidden_price', 'payment_card'].includes(f.type)) {
+      return true;
+    }
+    if (pricedTypes().includes(f.type)) {
       return true;
     }
     return f.type === 'calculation' && !!c.usePrice;
@@ -121,7 +134,24 @@ export function computeQuote(fields = [], values = {}, { coupon = null, hidden =
           taxLabel = c.taxLabel || '';
         }
         break;
-      default:
+      default: {
+        // Add-on priced types (e.g. a WooCommerce Product field).
+        const fn = getPricedType(field.type);
+        if (!fn) break;
+        let lines = [];
+        try {
+          lines = fn(c, value, { currency }) || [];
+        } catch (e) {
+          lines = [];
+        }
+        lines.forEach((line) => {
+          const qty = Math.max(0, parseInt(line.qty, 10) || 0);
+          const unit = money(line.unit);
+          if (qty > 0 && unit > 0) {
+            items.push({ key, label: line.label || label, qty, unit, amount: Math.round(qty * unit * 100) / 100 });
+          }
+        });
+      }
     }
   });
 

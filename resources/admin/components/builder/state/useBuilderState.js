@@ -181,6 +181,8 @@ export function useBuilderState(schema, validationErrors, fieldErrors, onChange,
               key: field.key,
               label: field.label || field.key,
               type: field.type,
+              // Choices let the Logic tab offer a picker for the value.
+              options: Array.isArray(field.options) ? field.options : undefined,
             });
           }
         }

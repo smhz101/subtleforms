@@ -1,3 +1,5 @@
+import { isRegisteredInputType } from '../../shared/extend';
+
 const INPUT_FIELD_TYPES = new Set([
   // Basic text inputs
   'text',
@@ -53,7 +55,8 @@ export function isLeafInputField(field) {
     return false;
   }
 
-  return INPUT_FIELD_TYPES.has(type);
+  // Add-on field types that collect a value (registerFieldType).
+  return INPUT_FIELD_TYPES.has(type) || isRegisteredInputType(type);
 }
 
 export function collectLeafInputPaths(fields) {

@@ -10,6 +10,9 @@ import {
 import { __ } from '@wordpress/i18n';
 import ActionsPanel from './ActionsPanel';
 import { ConfirmationPanel, AvailabilityPanel } from './FormBehaviorPanels';
+import CheckoutPanel from './CheckoutPanel';
+import IntegrationsPanel from './IntegrationsPanel';
+import { isPricedForm, isPricedType } from '../../../shared/pricing';
 import './FormSettings.scss';
 
 /**
@@ -67,6 +70,38 @@ export default function FormSettings({
     };
     onChange(updated);
   };
+
+  // Checkout settings (2.1) merge into whatever payment settings exist,
+  // without the legacy defaults above (they would pin the currency).
+  const handleCheckoutChange = (key, value) => {
+    if (isReadOnly) return;
+    onChange({
+      ...schema,
+      metadata: {
+        ...metadata,
+        payment: {
+          ...(metadata.payment || {}),
+          [key]: value,
+        },
+      },
+    });
+  };
+
+  const flatFields = (() => {
+    const out = [];
+    const walk = (list) =>
+      (Array.isArray(list) ? list : []).forEach((f) => {
+        if (!f || typeof f !== 'object') return;
+        out.push(f);
+        walk(f.children);
+        walk(f.fields);
+        (f.columns || []).forEach((col) => Array.isArray(col) && walk(col));
+      });
+    walk(schema?.fields);
+    return out;
+  })();
+  const pricedFields = flatFields.filter((f) => isPricedType(f.type));
+  const takesMoney = isPricedForm(flatFields) || supportsPayment;
 
   // Get all numeric/text fields for amount selection
   const amountFieldOptions = () => {
@@ -362,87 +397,18 @@ export default function FormSettings({
             </PanelBody>
           )}
 
-          {/* Integrations — visible when at least one extension is active */}
-          {(() => {
-          const extensions = window.subtleformsAdmin?.extensions ?? {};
-          const activeExts = Object.values(extensions).filter((e) => e.enabled && e.available);
-          if (activeExts.length === 0) return null;
+          {/* Checkout — WooCommerce or SubtleForms (2.1). */}
+          {takesMoney && (
+            <CheckoutPanel
+              schema={schema}
+              fields={pricedFields}
+              onPayment={handleCheckoutChange}
+              isReadOnly={isReadOnly}
+            />
+          )}
 
-          const integrations = metadata.integrations || {};
-
-          const handleIntegrationChange = (extSlug, key, value) => {
-            if (isReadOnly) return;
-            onChange({
-              ...schema,
-              metadata: {
-                ...metadata,
-                integrations: {
-                  ...integrations,
-                  [extSlug]: {
-                    ...(integrations[extSlug] || {}),
-                    [key]: value,
-                  },
-                },
-              },
-            });
-          };
-
-          return (
-              <PanelBody
-                title={__('Integrations', 'subtleforms')}
-                initialOpen={false}>
-                {activeExts.map((ext) => (
-                  <div key={ext.slug} className='sf-form-settings__integration'>
-                    <h4 className='sf-form-settings__integration-title'>{ext.label}</h4>
-
-                    {/* Webhooks: per-form endpoint URL override */}
-                    {ext.slug === 'webhooks' && (
-                      <TextControl
-                        label={__('Endpoint URL (this form)', 'subtleforms')}
-                        value={(integrations.webhooks || {}).url || ''}
-                        onChange={(v) => handleIntegrationChange('webhooks', 'url', v)}
-                        help={__(
-                          'Override the global webhook URL for this form only. Leave blank to skip.',
-                          'subtleforms'
-                        )}
-                      />
-                    )}
-
-                    {/* Email Marketing: per-form opt-in override */}
-                    {ext.slug === 'email_marketing' && (
-                      <ToggleControl
-                        label={__('Subscribe submitters from this form', 'subtleforms')}
-                        checked={(integrations.email_marketing || {}).enabled !== false}
-                        onChange={(v) => handleIntegrationChange('email_marketing', 'enabled', v)}
-                        help={__(
-                          'Turn off to exclude this form\'s submitters from the global email list.',
-                          'subtleforms'
-                        )}
-                      />
-                    )}
-
-                    {/* CRM: per-form sync toggle */}
-                    {ext.slug === 'crm' && (
-                      <ToggleControl
-                        label={__('Sync submissions to CRM', 'subtleforms')}
-                        checked={(integrations.crm || {}).enabled !== false}
-                        onChange={(v) => handleIntegrationChange('crm', 'enabled', v)}
-                      />
-                    )}
-
-                    {/* Analytics: per-form tracking toggle */}
-                    {ext.slug === 'analytics' && (
-                      <ToggleControl
-                        label={__('Track analytics for this form', 'subtleforms')}
-                        checked={(integrations.analytics || {}).enabled !== false}
-                        onChange={(v) => handleIntegrationChange('analytics', 'enabled', v)}
-                      />
-                    )}
-                  </div>
-                ))}
-              </PanelBody>
-          );
-          })()}
+          {/* Integrations: email marketing, CRM and analytics per form (2.1). */}
+          <IntegrationsPanel schema={schema} onChange={onChange} isReadOnly={isReadOnly} />
 
           <PanelBody
             title={__('Advanced', 'subtleforms')}

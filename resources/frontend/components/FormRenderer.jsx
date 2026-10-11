@@ -7,14 +7,16 @@ import { getIn, setIn, flattenToPathMap } from '../utils/valuePaths';
 import { collectLeafInputPaths, collectContainerKeys } from '../utils/schemaLeaves';
 import { collectDefaultValues } from '../utils/defaults';
 import { evaluateFormula } from '../utils/formula';
+import { computeLogicState, pickConfirmation } from '../../shared/conditions';
 import {
   validateFields,
 } from '../utils/fieldValidation';
 import { warnOnce } from '../utils/warnOnce';
 import { getFormClassNames } from '../utils/formStyles';
 import { debug } from '../../shared/debug';
-import { computeQuote, isPricedForm, formatMoney, PRICED_TYPES } from '../../shared/pricing';
+import { computeQuote, isPricedForm, formatMoney, isPricedType } from '../../shared/pricing';
 import { PaymentContext } from './fields/Payments';
+import { FormContext } from './fields/FileUpload';
 import {
   formAppearanceStyle,
   formAppearanceClasses,
@@ -318,57 +320,48 @@ export default function FormRenderer({
     return paths;
   }, [schema]);
 
-  // Evaluate conditional logic (show/hide only)
-  const hiddenFields = useMemo(() => {
-    const hidden = new Set();
-
-    allFields.forEach((field) => {
-      const conditions = field.config?.conditions || [];
-
-      conditions.forEach((condition) => {
-        const sourceValue = getIn(values, condition.sourceField);
-        let matches = false;
-
-        switch (condition.operator) {
-          case 'equals':
-            matches = String(sourceValue) === String(condition.value);
-            break;
-          case 'not_equals':
-            matches = String(sourceValue) !== String(condition.value);
-            break;
-          case 'empty':
-            matches = !sourceValue || sourceValue === '';
-            break;
-          case 'not_empty':
-            matches = sourceValue && sourceValue !== '';
-            break;
-          case 'contains':
-            if (Array.isArray(sourceValue)) {
-              matches = sourceValue.includes(condition.value);
-            } else {
-              matches = String(sourceValue).includes(String(condition.value));
-            }
-            break;
-          case 'greater_than':
-            matches = parseFloat(sourceValue) > parseFloat(condition.value);
-            break;
-          case 'less_than':
-            matches = parseFloat(sourceValue) < parseFloat(condition.value);
-            break;
-          default:
-            break;
-        }
-
-        if (condition.effect === 'hide' && matches) {
-          hidden.add(field.config?.key || field.key);
-        } else if (condition.effect === 'show' && !matches) {
-          hidden.add(field.config?.key || field.key);
-        }
-      });
-    });
-
-    return hidden;
-  }, [allFields, values]);
+  // Conditional logic (2.1): one evaluator shared with the server
+  // (shared/conditions.js mirrors src/Engine/ConditionalLogic.php). Fields in
+  // a skipped step count as hidden, and hidden answers never count.
+  const logicState = useMemo(
+    () => computeLogicState(schema || {}, values),
+    [schema, values]
+  );
+  const hiddenFields = useMemo(
+    () => new Set(logicState.hidden_fields),
+    [logicState]
+  );
+  const hiddenSteps = useMemo(
+    () => new Set(logicState.hidden_steps),
+    [logicState]
+  );
+  const stepKeyOf = (step) =>
+    step?.key || step?.config?.key || step?.id || '';
+  const isStepVisible = useCallback(
+    (index) => {
+      const step = steps[index];
+      return !!step && !hiddenSteps.has(stepKeyOf(step));
+    },
+    [steps, hiddenSteps]
+  );
+  const nextVisibleStep = useCallback(
+    (from) => {
+      for (let i = from + 1; i < steps.length; i++) {
+        if (isStepVisible(i)) return i;
+      }
+      return -1;
+    },
+    [steps, isStepVisible]
+  );
+  const prevVisibleStep = useCallback(
+    (from) => {
+      for (let i = from - 1; i >= 0; i--) {
+        if (isStepVisible(i)) return i;
+      }
+      return -1;
+    },
+    [isStepVisible]
+  );
 
   // Handle field change
   const handleChange = useCallback(
@@ -447,15 +440,17 @@ export default function FormRenderer({
       return;
     }
 
-    // Only advance to next step, never submit
-    if (currentStepIndex < steps.length - 1) {
-      setCurrentStepIndex((prev) => prev + 1);
+    // Only advance to next step, never submit. Steps whose conditions fail
+    // are skipped (2.1).
+    const next = nextVisibleStep(currentStepIndex);
+    if (next !== -1) {
+      setCurrentStepIndex(next);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
     // DEFENSIVE: Explicitly do NOT call handleSubmit here
     // Multi-step forms should only submit when user clicks Submit button
-  }, [currentStepIndex, steps, validateStep, values]);
+  }, [currentStepIndex, steps, validateStep, values, nextVisibleStep]);
 
   // Move focus to the first invalid input, scoped to this form's root element
   // so two forms on one page don't steal focus from each other (A2/P1-5).
@@ -494,11 +489,12 @@ export default function FormRenderer({
       valuesKeys: Object.keys(values),
     });
 
-    if (currentStepIndex > 0) {
-      setCurrentStepIndex((prev) => prev - 1);
+    const prev = prevVisibleStep(currentStepIndex);
+    if (prev !== -1) {
+      setCurrentStepIndex(prev);
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-  }, [currentStepIndex, values]);
+  }, [currentStepIndex, values, prevVisibleStep]);
 
   // ── Payments (2.1) ──────────────────────────────────────────────────────
   // One live order for the whole form. Priced fields feed it, the summary and
@@ -517,7 +513,14 @@ export default function FormRenderer({
         : null,
     [isPriced, allFields, values, coupon, hiddenFields, currency]
   );
-  const hasCardField = useMemo(() => allFields.some((f) => f.type === 'payment_card'), [allFields]);
+  // Another checkout (e.g. WooCommerce, set by an add-on) takes the payment
+  // after the form is sent, so the Card field is not used.
+  const externalCheckout =
+    !!schema?.metadata?.payment?.processor && schema.metadata.payment.processor !== 'subtleforms';
+  const hasCardField = useMemo(
+    () => !externalCheckout && allFields.some((f) => f.type === 'payment_card'),
+    [allFields, externalCheckout]
+  );
 
   const applyCoupon = useCallback(
     async (code) => {
@@ -565,13 +568,17 @@ export default function FormRenderer({
               setCouponError('');
             },
             hasCouponField: allFields.some((f) => f.type === 'payment_coupon'),
+            external: externalCheckout,
             registerCard: (handle) => {
               cardRef.current = handle;
             },
           }
         : null,
-    [isPriced, formId, preview, currency, quote, coupon, couponBusy, couponError, applyCoupon, allFields]
+    [isPriced, formId, preview, currency, quote, coupon, couponBusy, couponError, applyCoupon, allFields, externalCheckout]
   );
+
+  // Form details for fields that talk to the server (uploads).
+  const formContext = useMemo(() => ({ formId, preview }), [formId, preview]);
 
   // Handle form submission
   // SUBMISSION GUARD: Only submit when explicitly requested via Submit button
@@ -687,6 +694,12 @@ export default function FormRenderer({
         }
       });
 
+      // Answers to hidden fields (and skipped steps) are not sent; the server
+      // drops them too.
+      hiddenFields.forEach((k) => {
+        delete payload[k];
+      });
+
       // Debug logging for empty submissions
       debug('[SubtleForms] Submission Debug:', {
         leafPathsCount: leafPaths.length,
@@ -755,7 +768,7 @@ export default function FormRenderer({
           // Fields hidden by conditional logic are not part of the order.
           allFields.forEach((f) => {
             const k = (f.config ?? f).key || f.key;
-            if (k && hiddenFields.has(k) && PRICED_TYPES.includes(f.type)) {
+            if (k && hiddenFields.has(k) && isPricedType(f.type)) {
               delete submissionPayload[k];
             }
           });
@@ -807,7 +820,13 @@ export default function FormRenderer({
         }
 
         if (response.ok && result?.data?.success) {
-          const conf = schema?.metadata?.confirmation || {};
+          // The server picks the confirmation (first conditional one that
+          // matches, else the default); the same evaluator runs here as a
+          // fallback for older servers.
+          const conf =
+            result.data.confirmation ||
+            pickConfirmation(schema?.metadata, payload) ||
+            {};
           const merge = (text, encode = false) =>
             String(text || '').replace(/\{([\w.-]+)\}/g, (match, key) => {
               const raw = getIn(values, key) ?? flatValues[key];
@@ -966,7 +985,10 @@ export default function FormRenderer({
     );
   }
 
-  const isLastStep = !hasSteps || currentStepIndex === steps.length - 1;
+  const isLastStep = !hasSteps || nextVisibleStep(currentStepIndex) === -1;
+  const visibleSteps = hasSteps
+    ? steps.filter((_, i) => isStepVisible(i))
+    : [];
 
   // Block-level options (from the Gutenberg block or shortcode) take
  // precedence over schema metadata for title/description visibility and for
@@ -1035,17 +1057,20 @@ export default function FormRenderer({
 
       {hasSteps && (
         <StepNavigation
-          steps={steps}
-          currentStepIndex={currentStepIndex}
+          steps={visibleSteps}
+          currentStepIndex={Math.max(0, visibleSteps.indexOf(currentStep))}
           onStepClick={(index) => {
-            // Allow clicking on completed steps
-            if (index <= currentStepIndex) {
-              setCurrentStepIndex(index);
+            // Allow clicking on completed steps. Indexes are of the visible
+            // steps; map back to the full list.
+            const target = steps.indexOf(visibleSteps[index]);
+            if (target !== -1 && target <= currentStepIndex) {
+              setCurrentStepIndex(target);
             }
           }}
         />
       )}
 
+      <FormContext.Provider value={formContext}>
       <PaymentContext.Provider value={paymentContext}>
       <form
         role='form'
@@ -1111,7 +1136,7 @@ export default function FormRenderer({
         </div>
 
         <div className='subtleforms-buttons'>
-          {hasSteps && currentStepIndex > 0 && (
+          {hasSteps && prevVisibleStep(currentStepIndex) !== -1 && (
             <button
               type='button'
               className='subtleforms-button subtleforms-button-prev'
@@ -1144,12 +1169,15 @@ export default function FormRenderer({
                         __('Pay %s', 'subtleforms'),
                         formatMoney(quote.total, currency)
                       )
+                    : externalCheckout && quote?.items?.length
+                    ? __('Continue to checkout', 'subtleforms')
                     : __('Submit', 'subtleforms'))}
             </button>
           )}
         </div>
       </form>
       </PaymentContext.Provider>
+      </FormContext.Provider>
     </div>
   );
 }

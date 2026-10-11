@@ -334,7 +334,7 @@ export function PaymentCard({ config }) {
   const currency = pay?.currency || 'USD';
 
   useEffect(() => {
-    if (!ready || !ref.current || !window.SubtleFormsPayments || pay?.preview) return undefined;
+    if (!ready || !ref.current || !window.SubtleFormsPayments || pay?.preview || pay?.external) return undefined;
     try {
       handle.current = window.SubtleFormsPayments.mount(ref.current, {
         formId: pay.formId,
@@ -356,6 +356,15 @@ export function PaymentCard({ config }) {
   useEffect(() => {
     handle.current?.update?.({ amount, currency });
   }, [amount, currency]);
+
+  if (pay?.external) {
+    // Payment happens at the store checkout after the form is sent.
+    return (
+      <p className='subtleforms-card__note'>
+        {__('You will pay securely at checkout after sending this form.', 'subtleforms')}
+      </p>
+    );
+  }
 
   if (pay?.preview || !ready) {
     return (

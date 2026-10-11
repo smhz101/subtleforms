@@ -222,8 +222,20 @@ final class FieldValidator {
 				// Individual sub-parts are strings and will be sanitized by SaveAction
 				return null;
 			default:
-				// Unknown field types are ignored for safety
-				return null;
+				/**
+				 * Validate a value for a field type an add-on registered (for
+				 * example the WooCommerce Product field). Return an error
+				 * message, or null when the value is fine. Unknown types are
+				 * otherwise not checked.
+				 *
+				 * @param string|null $error Default null.
+				 * @param string|null $type  Field type.
+				 * @param mixed       $value Submitted value.
+				 * @param array       $field Field definition from the schema.
+				 * @since 2.1.0
+				 */
+				$error = apply_filters( 'subtleforms/fields/validate_value', null, $type, $value, is_array( $field ) ? $field : array() );
+				return is_string( $error ) && '' !== $error ? $error : null;
 		}
 	}
 

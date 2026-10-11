@@ -44,6 +44,7 @@ import BuilderCanvasArea from '../components/builder/layout/BuilderCanvasArea';
 import BuilderModalsController from '../components/builder/layout/BuilderModalsController';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
 import { getFormTypeBadgeConfig } from '../utils/formMeta';
+import { applyPaymentDefaults } from '../utils/paymentDefaults';
 
 function FormBuilderInner({
   formId,
@@ -371,7 +372,9 @@ function FormBuilderInner({
 
       dispatch({
         type: BUILDER_ACTIONS.EDIT_SCHEMA,
-        payload: { schema: nextSchema },
+        // A form that just got its first priced field picks up the site's
+        // default checkout (e.g. WooCommerce), when an add-on provides one.
+        payload: { schema: applyPaymentDefaults(draftSchema, nextSchema) },
       });
     },
     [dispatch, isHydrating, draftSchema]

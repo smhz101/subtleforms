@@ -228,6 +228,20 @@ final class PublicSubmitApi {
 		// tampered total (2.0).
 		$payload = self::applyCalculations( $payload, $activeSchema['schema'] ?? $activeSchema );
 
+		// Conditional logic (2.1): answers to fields the visitor could not see
+		// (hidden fields and skipped steps) are never stored, priced or sent.
+		$schemaForLogic = $activeSchema['schema'] ?? $activeSchema;
+		if ( is_array( $schemaForLogic ) ) {
+			$payload = ( new \SubtleForms\Engine\ConditionalLogic() )->visiblePayload( $schemaForLogic, $payload );
+		}
+
+		// File uploads (2.1): swap upload IDs for the files already stored.
+		$payload = \SubtleForms\Uploads\Uploads::resolvePayload( $formId, $schemaForLogic, $payload );
+		if ( is_wp_error( $payload ) ) {
+			$uploadErrors = $payload->get_error_data();
+			return ApiResponse::validation_error( $payload->get_error_message(), is_array( $uploadErrors ) ? ( $uploadErrors['errors'] ?? array() ) : array() );
+		}
+
 		// Payments (2.1): price the order on the server, check the coupon and
 		// confirm the payment with the gateway before anything is stored.
 		$schemaForPricing = $activeSchema['schema'] ?? $activeSchema;
@@ -377,6 +391,9 @@ final class PublicSubmitApi {
 				return ApiResponse::server_error( __( 'Failed to save submission data', 'subtleforms' ) );
 			}
 
+			// Keep the entry's uploaded files (they were pending until now).
+			\SubtleForms\Uploads\Uploads::claim( $payload );
+
 			$stored = $this->submissionsRepo->find( $submissionId ) ?: array();
 
 			/**
@@ -409,6 +426,9 @@ final class PublicSubmitApi {
 				array(
 					'success'       => true,
 					'submission_id' => $submissionId,
+					// What to show the visitor: the first conditional
+					// confirmation that matches, else the default (2.1).
+					'confirmation'  => self::resolveConfirmation( $formId, $activeSchema['schema'] ?? $activeSchema, $payload ),
 				),
 				$submissionId,
 				$formId,
@@ -428,6 +448,43 @@ final class PublicSubmitApi {
 			),
 			200
 		);
+	}
+
+	/**
+	 * The confirmation for this submission, ready for the browser.
+	 *
+	 * Only display settings are returned (never the conditions themselves).
+	 * Merge tags are filled in by the browser, which has the raw answers.
+	 *
+	 * @param int   $formId  Form ID.
+	 * @param mixed $schema  Active schema.
+	 * @param array $payload Stored (visible) answers.
+	 * @return array|null Null when the form has no confirmation settings.
+	 */
+	private static function resolveConfirmation( int $formId, $schema, array $payload ): ?array {
+		$metadata = is_array( $schema ) && isset( $schema['metadata'] ) && is_array( $schema['metadata'] ) ? $schema['metadata'] : array();
+		$picked   = ( new \SubtleForms\Engine\ConditionalLogic() )->pickConfirmation( $metadata, $payload );
+		if ( ! $picked ) {
+			return null;
+		}
+		$out = array();
+		foreach ( array( 'id', 'type', 'title', 'message', 'redirectUrl', 'allowAnother' ) as $key ) {
+			if ( array_key_exists( $key, $picked ) ) {
+				$out[ $key ] = $picked[ $key ];
+			}
+		}
+
+		/**
+		 * Filter the confirmation shown after a submission (for example to
+		 * translate it).
+		 *
+		 * @param array $out     { type, title, message, redirectUrl, allowAnother }.
+		 * @param int   $formId  Form ID.
+		 * @param array $payload Stored answers.
+		 * @since 2.1.0
+		 */
+		$out = apply_filters( 'subtleforms/submit/confirmation', $out, $formId, $payload );
+		return is_array( $out ) ? $out : null;
 	}
 
 	// ────────────────────────────────────────────────────────────────────
@@ -479,6 +536,10 @@ final class PublicSubmitApi {
 		 * @param int   $formId   Form ID.
 		 */
 		if ( apply_filters( 'subtleforms/payments/external', false, $schema, $formId ) ) {
+			// Hand the visitor's coupon code on (it is removed from the payload
+			// before the entry is stored); the handler validates it itself.
+			$none['external']    = true;
+			$none['coupon_code'] = CouponsRepository::normalizeCode( (string) ( $payload['_coupon'] ?? '' ) );
 			return $none;
 		}
 

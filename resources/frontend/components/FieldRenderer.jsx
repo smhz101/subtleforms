@@ -5,13 +5,16 @@ import { debug } from '../../shared/debug';
 import SignaturePad from './fields/SignaturePad';
 import RichTextInput from './fields/RichTextInput';
 import ChainedSelect from './fields/ChainedSelect';
+import FileUpload from './fields/FileUpload';
 import {
   PaymentSummary,
   PaymentCoupon,
   PaymentProduct,
   PaymentChoice,
   PaymentCard,
+  usePayment,
 } from './fields/Payments';
+import { getFieldType } from '../../shared/extend';
 import {
   fieldAppearanceStyle,
   fieldAppearanceClasses,
@@ -1236,24 +1239,14 @@ function renderInput(
     case 'file_upload':
     case 'image_upload':
       return (
-        <input
-          id={inputId}
-          type='file'
-          className='subtleforms-input subtleforms-file-input'
-          accept={
-            field.type === 'image_upload'
-              ? 'image/*'
-              : config.allowedExtensions
-              ? config.allowedExtensions
-                  .map((ext) => `.${ext}`)
-                  .join(',')
-              : undefined
-          }
-          multiple={config.multiple === true}
-          onChange={(e) => onChange(e.target.files[0] || null)}
-          aria-required={required}
-          aria-invalid={!!error}
-          aria-describedby={error ? `${inputId}-error` : undefined}
+        <FileUpload
+          field={field}
+          config={config}
+          value={value}
+          onChange={onChange}
+          inputId={inputId}
+          error={error}
+          required={required}
         />
       );
 
@@ -1649,13 +1642,38 @@ function renderInput(
         />
       );
 
-    default:
+    default: {
+      // Field types registered by add-ons (SubtleForms Pro).
+      const addon = getFieldType(field.type);
+      if (addon) {
+        return (
+          <AddonField
+            component={addon.component}
+            field={field}
+            config={config}
+            value={value}
+            onChange={onChange}
+            inputId={inputId}
+            error={error}
+            required={required}
+          />
+        );
+      }
       return (
         <div className='subtleforms-unsupported'>
           {__('Field type not supported:', 'subtleforms')} {field.type}
         </div>
       );
+    }
   }
+}
+
+/**
+ * Renders an add-on field with the form's order context.
+ */
+function AddonField({ component: Component, ...props }) {
+  const payment = usePayment();
+  return <Component {...props} payment={payment} formId={payment?.formId} preview={!!payment?.preview} />;
 }
 
 function getInputType(fieldType) {

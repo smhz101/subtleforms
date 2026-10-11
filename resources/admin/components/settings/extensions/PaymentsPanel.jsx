@@ -4,7 +4,6 @@ import FieldError from '../FieldError';
 
 const PROVIDERS = [
   { label: 'Stripe', value: 'stripe' },
-  { label: 'PayPal (coming soon)', value: 'paypal', disabled: true },
 ];
 
 const MODES = [

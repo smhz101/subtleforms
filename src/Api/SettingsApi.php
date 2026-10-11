@@ -439,19 +439,22 @@ class SettingsApi {
 			'ext_webhooks_enabled'              => array( 'type' => 'boolean' ),
 			'ext_webhooks_signing_secret'       => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
 			'ext_webhooks_events'               => array( 'type' => 'array' ),
+			'ext_webhooks_retries'              => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 5 ),
 
 			// Email Marketing
 			'ext_email_marketing_enabled'       => array( 'type' => 'boolean' ),
-			'ext_email_marketing_provider'      => array( 'type' => 'string', 'enum' => array( 'mailchimp', 'convertkit' ), 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_email_marketing_provider'      => array( 'type' => 'string', 'enum' => array( 'mailchimp', 'brevo', 'convertkit' ), 'sanitize_callback' => 'sanitize_text_field' ),
 			'ext_email_marketing_api_key'       => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
 			'ext_email_marketing_list_id'       => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
 			'ext_email_marketing_double_optin'  => array( 'type' => 'boolean' ),
 
 			// CRM
 			'ext_crm_enabled'                   => array( 'type' => 'boolean' ),
-			'ext_crm_provider'                  => array( 'type' => 'string', 'enum' => array( 'hubspot' ), 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_crm_provider'                  => array( 'type' => 'string', 'enum' => array( 'hubspot', 'webhook' ), 'sanitize_callback' => 'sanitize_text_field' ),
 			'ext_crm_api_key'                   => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
 			'ext_crm_portal_id'                 => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_crm_webhook_url'               => array( 'type' => 'string', 'sanitize_callback' => 'esc_url_raw' ),
+			'ext_crm_add_note'                  => array( 'type' => 'boolean' ),
 
 			// Analytics
 			'ext_analytics_enabled'             => array( 'type' => 'boolean' ),
@@ -462,6 +465,9 @@ class SettingsApi {
 			'ext_ecommerce_enabled'             => array( 'type' => 'boolean' ),
 			'ext_ecommerce_product_id'          => array( 'type' => 'integer', 'minimum' => 0 ),
 			'ext_ecommerce_currency'            => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_ecommerce_default_processor'   => array( 'type' => 'string', 'enum' => array( 'woocommerce', 'subtleforms' ) ),
+			'ext_ecommerce_empty_cart'          => array( 'type' => 'boolean' ),
+			'ext_ecommerce_destination'         => array( 'type' => 'string', 'enum' => array( 'checkout', 'cart' ) ),
 
 			// PDF
 			'ext_pdf_enabled'                   => array( 'type' => 'boolean' ),

@@ -142,6 +142,22 @@ final class CouponsRepository {
 	 * @return array|\WP_Error The coupon, or why it cannot be used.
 	 */
 	public static function validate( string $code, int $formId, float $subtotal ) {
+		/**
+		 * Look the code up somewhere else, such as WooCommerce coupons for forms
+		 * that check out through WooCommerce. Return a coupon array (`code`,
+		 * `type` "percent" or "fixed", `amount`) or a WP_Error to answer for
+		 * SubtleForms; return null to use SubtleForms coupons.
+		 *
+		 * @param array|\WP_Error|null $coupon   Default null.
+		 * @param string               $code     Normalised code.
+		 * @param int                  $formId   Form ID.
+		 * @param float                $subtotal Order subtotal.
+		 */
+		$external = apply_filters( 'subtleforms/payments/coupon_lookup', null, $code, $formId, $subtotal );
+		if ( null !== $external ) {
+			return $external;
+		}
+
 		$coupon = self::findByCode( $code );
 		$fail   = static fn( string $msg ) => new \WP_Error( 'subtleforms_coupon_invalid', $msg, array( 'status' => 422 ) );
 

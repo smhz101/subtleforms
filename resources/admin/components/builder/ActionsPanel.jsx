@@ -31,6 +31,8 @@ import {
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import LogicEditor, { collectLogicFields, countRules } from './LogicEditor';
+import { isProFeature } from '../../utils/featureGate';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -123,7 +125,37 @@ function HeadersEditor({ value, onChange, disabled }) {
 
 // ─── SortableActionItem ──────────────────────────────────────────────────────
 
-function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove }) {
+/**
+ * "Only when" conditions on an action (Pro, 2.1). The action is skipped when
+ * its rules do not match; saving the entry always happens.
+ */
+function ActionConditions({ settings, fields, disabled, onChange }) {
+  const advanced = isProFeature('logic.conditional.advanced');
+  const logic = settings.logic && Array.isArray(settings.logic.groups) ? settings.logic : null;
+  const count = countRules(logic);
+
+  return (
+    <details className='sf-actions-panel__conditions' open={count > 0 || undefined}>
+      <summary>
+        {__('Only when…', 'subtleforms')}
+        <span className='sf-actions-panel__conditions-state'>
+          {count > 0 ? __('Conditional', 'subtleforms') : __('Every submission', 'subtleforms')}
+        </span>
+      </summary>
+      <LogicEditor
+        logic={logic}
+        availableFields={fields}
+        showAction={false}
+        locked={!advanced}
+        disabled={disabled}
+        emptyText={__('Runs for every submission. Add a rule to run it only for some answers.', 'subtleforms')}
+        onChange={(next) => onChange(next)}
+      />
+    </details>
+  );
+}
+
+function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fields }) {
   const {
     attributes,
     listeners,
@@ -262,6 +294,13 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove }) {
             </Notice>
           )}
 
+          <ActionConditions
+            settings={s}
+            fields={fields}
+            disabled={isDisabled}
+            onChange={(logic) => patchSettings({ logic })}
+          />
+
         </div>
       )}
 
@@ -345,6 +384,13 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove }) {
             )}
           </div>
 
+          <ActionConditions
+            settings={s}
+            fields={fields}
+            disabled={isDisabled}
+            onChange={(logic) => patchSettings({ logic })}
+          />
+
         </div>
       )}
     </div>
@@ -355,6 +401,7 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove }) {
 
 export default function ActionsPanel({ schema, onChange, isReadOnly = false }) {
   const actions = normalizeActions(schema?.actions);
+  const logicFields = collectLogicFields(schema?.fields || []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -449,6 +496,7 @@ export default function ActionsPanel({ schema, onChange, isReadOnly = false }) {
                   isReadOnly={isReadOnly}
                   onUpdate={handleUpdate}
                   onRemove={handleRemove}
+                  fields={logicFields}
                 />
               ))}
             </SortableContext>

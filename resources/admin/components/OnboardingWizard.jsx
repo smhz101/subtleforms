@@ -1,6 +1,7 @@
 import { useState } from '@wordpress/element';
 import { Modal, Button, CheckboxControl } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
+import { getBranding } from '../utils/branding';
 import clsx from 'clsx';
 import Icon from '../ui/Icon';
 import './OnboardingWizard.scss';
@@ -243,7 +244,13 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
               <div className='sf-onboarding-wizard__welcome-icon'>
                 <Icon.CheckCircle />
               </div>
-              <h2>{__('Welcome to SubtleForms', 'subtleforms')}</h2>
+              <h2>
+                {sprintf(
+                  /* translators: %s: plugin name */
+                  __('Welcome to %s', 'subtleforms'),
+                  getBranding().name
+                )}
+              </h2>
               <p>
                 {__(
                   'Create beautiful, powerful forms in minutes. This wizard will help you build your first form quickly.',
@@ -253,7 +260,13 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
             </div>
 
             <div className='sf-onboarding-wizard__features'>
-              <h3>{__('What can you do with SubtleForms?', 'subtleforms')}</h3>
+              <h3>
+                {sprintf(
+                  /* translators: %s: plugin name */
+                  __('What can you do with %s?', 'subtleforms'),
+                  getBranding().name
+                )}
+              </h3>
               <ul>
                 <li className='sf-onboarding-wizard__features-item'>
                   <Icon.CheckCircle />

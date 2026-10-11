@@ -192,6 +192,18 @@ final class SubmissionsApi {
 						),
 					),
 				),
+				array(
+					'methods'             => 'DELETE',
+					'callback'            => array( $this, 'delete_submission' ),
+					'permission_callback' => array( $this, 'check_write_permission' ),
+					'args'                => array(
+						'id' => array(
+							'type'              => 'integer',
+							'required'          => true,
+							'sanitize_callback' => 'absint',
+						),
+					),
+				),
 			)
 		);
 
@@ -480,6 +492,33 @@ final class SubmissionsApi {
 	}
 
 	/**
+	 * Permanently delete a submission, its logs and its uploaded files.
+	 */
+	public function delete_submission( WP_REST_Request $request ): WP_REST_Response {
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		$id = absint( $request->get_param( 'id' ) );
+		if ( ! $id || ! $this->submissionsRepo->find( $id ) ) {
+			return ApiResponse::not_found( __( 'Submission not found', 'subtleforms' ) );
+		}
+
+		if ( ! $this->submissionsRepo->delete( $id ) ) {
+			return ApiResponse::server_error( __( 'The submission could not be deleted.', 'subtleforms' ) );
+		}
+		( new \SubtleForms\Repositories\LogsRepository() )->deleteBySubmission( $id );
+
+		return ApiResponse::success(
+			array(
+				'deleted' => true,
+				'id'      => $id,
+			)
+		);
+	}
+
+	/**
 	 * Get adjacent submission IDs.
 	 */
 	public function get_adjacent_submissions( WP_REST_Request $request ): WP_REST_Response {
@@ -555,7 +594,11 @@ final class SubmissionsApi {
 	}
 
 	/**
-	 * Export submissions as CSV.
+	 * Export submissions as CSV (Pro capability `submissions.export`).
+	 *
+	 * Columns are the union of every exported entry's answers, so a form whose
+	 * fields changed over time keeps all of its data. When one form is
+	 * exported, its field labels and order are used for the headings.
 	 */
 	public function export_submissions_csv( WP_REST_Request $request ): WP_REST_Response {
 		$rateLimitResponse = $this->guardRateLimit( $request );
@@ -563,10 +606,15 @@ final class SubmissionsApi {
 			return $rateLimitResponse;
 		}
 
+		if ( ! $this->gate->allows( 'submissions.export' ) ) {
+			return ApiResponse::forbidden( __( 'CSV export is part of SubtleForms Pro.', 'subtleforms' ) );
+		}
+
 		$params = $request->get_json_params();
+		$params = is_array( $params ) ? $params : array();
 
 		$args = array(
-			'form_id' => isset( $params['form_id'] ) && $params['form_id'] ? intval( $params['form_id'] ) : null,
+			'form_id' => ! empty( $params['form_id'] ) ? intval( $params['form_id'] ) : null,
 			'status'  => isset( $params['status'] ) ? Helpers::safe_sanitize_text( $params['status'] ) : null,
 			'search'  => isset( $params['search'] ) ? Helpers::safe_sanitize_text( $params['search'] ) : null,
 			'after'   => isset( $params['after'] ) ? Helpers::safe_sanitize_text( $params['after'] ) : null,
@@ -575,7 +623,7 @@ final class SubmissionsApi {
 			'limit'   => 10000,
 		);
 
-		$args = array_filter( $args, fn( $value ) => $value !== null );
+		$args = array_filter( $args, fn( $value ) => $value !== null && $value !== '' );
 
 		$submissions = $this->submissionsRepo->findAll( $args );
 
@@ -588,12 +636,52 @@ final class SubmissionsApi {
 			);
 		}
 
-		// Build CSV
-		$csv_data         = array();
-		$first_submission = $submissions[0];
-		$payload          = is_string( $first_submission['payload'] )
-			? json_decode( $first_submission['payload'], true )
-			: $first_submission['payload'];
+		$skip = array( 'website_url', 'form_rendered_at' );
+
+		// Column order: the form's fields (single-form export), then any other
+		// answer keys in the order they were first seen.
+		$labels = array();
+		if ( ! empty( $args['form_id'] ) ) {
+			try {
+				$active = $this->formsRepo->loadSchemaVersion( (int) $args['form_id'] );
+				$schema = is_array( $active ) ? ( $active['schema'] ?? $active ) : array();
+				foreach ( \SubtleForms\Support\FieldMapper::fields( is_array( $schema ) ? $schema : array() ) as $field ) {
+					$labels[ $field['key'] ] = '' !== $field['label'] ? $field['label'] : $field['key'];
+				}
+			} catch ( \Throwable $e ) {
+				$labels = array();
+			}
+		}
+
+		$rows = array();
+		$keys = array();
+		foreach ( $submissions as $submission ) {
+			$payload = is_string( $submission['payload'] ?? null )
+				? json_decode( $submission['payload'], true )
+				: ( $submission['payload'] ?? array() );
+			$payload = is_array( $payload ) ? $payload : array();
+
+			foreach ( array_keys( $payload ) as $key ) {
+				$key = (string) $key;
+				if ( '' === $key || '_' === $key[0] || in_array( $key, $skip, true ) ) {
+					continue;
+				}
+				$keys[ $key ] = true;
+			}
+			$rows[] = array( $submission, $payload );
+		}
+
+		$ordered = array();
+		foreach ( array_keys( $labels ) as $key ) {
+			if ( isset( $keys[ $key ] ) ) {
+				$ordered[] = $key;
+			}
+		}
+		foreach ( array_keys( $keys ) as $key ) {
+			if ( ! in_array( $key, $ordered, true ) ) {
+				$ordered[] = $key;
+			}
+		}
 
 		$headers = array(
 			__( 'ID', 'subtleforms' ),
@@ -601,58 +689,28 @@ final class SubmissionsApi {
 			__( 'Status', 'subtleforms' ),
 			__( 'Submitted At', 'subtleforms' ),
 		);
-
-		if ( is_array( $payload ) ) {
-			foreach ( array_keys( $payload ) as $field_key ) {
-				if ( in_array( $field_key, array( 'website_url', 'form_rendered_at' ), true ) ) {
-					continue;
-				}
-				$headers[] = ucwords( str_replace( '_', ' ', $field_key ) );
-			}
+		foreach ( $ordered as $key ) {
+			$headers[] = $labels[ $key ] ?? ucwords( str_replace( array( '_', '-' ), ' ', $key ) );
 		}
 
-		$csv_data[] = $headers;
-
-		foreach ( $submissions as $submission ) {
-			$payload = is_string( $submission['payload'] )
-				? json_decode( $submission['payload'], true )
-				: $submission['payload'];
-
+		$csv_data = array( $headers );
+		foreach ( $rows as list( $submission, $payload ) ) {
 			$row = array(
 				$submission['id'],
 				$submission['form_id'],
 				$submission['status'],
 				$submission['created_at'],
 			);
-
-			if ( is_array( $payload ) ) {
-				foreach ( array_keys( $first_submission['payload'] ) as $field_key ) {
-					if ( in_array( $field_key, array( 'website_url', 'form_rendered_at' ), true ) ) {
-						continue;
-					}
-
-					$value = $payload[ $field_key ] ?? '';
-					if ( is_array( $value ) ) {
-						$value = implode( ', ', $value );
-					}
-					$row[] = $value;
-				}
+			foreach ( $ordered as $key ) {
+				$row[] = \SubtleForms\Support\FieldMapper::toText( $payload[ $key ] ?? '' );
 			}
-
 			$csv_data[] = $row;
 		}
 
-		$csv_string = "\xEF\xBB\xBF"; // UTF-8 BOM
+		$csv_string = "\xEF\xBB\xBF"; // UTF-8 BOM so Excel reads accents correctly.
 
 		foreach ( $csv_data as $row ) {
-			$escaped_row = array_map(
-				function ( $value ) {
-					$value = str_replace( '"', '""', $value );
-					return '"' . $value . '"';
-				},
-				$row
-			);
-
+			$escaped_row = array_map( array( $this, 'csv_cell' ), $row );
 			$csv_string .= implode( ',', $escaped_row ) . "\r\n";
 		}
 
@@ -661,9 +719,35 @@ final class SubmissionsApi {
 		return ApiResponse::success(
 			array(
 				'success'  => true,
-				'csv'      => base64_encode( $csv_string ),
+				'csv'      => base64_encode( $csv_string ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Binary-safe transport of the CSV file in JSON.
 				'filename' => $filename,
+				'rows'     => count( $rows ),
 			)
 		);
+	}
+
+	/**
+	 * Quote one CSV cell.
+	 *
+	 * Cells that a spreadsheet would run as a formula (starting with =, @, tab,
+	 * carriage return, or + / - followed by anything other than a number) are
+	 * prefixed with an apostrophe, so an answer cannot inject a formula into
+	 * the admin's spreadsheet.
+	 *
+	 * @param mixed $value Cell value.
+	 * @return string
+	 */
+	public function csv_cell( $value ): string {
+		$value = is_scalar( $value ) ? (string) $value : '';
+		$risky = '' !== $value && in_array( $value[0], array( '=', '+', '-', '@', "\t", "\r" ), true );
+		// Phone numbers and signed amounts ("+44 20 7946 0000", "-12.50") are
+		// not formulas and are kept as typed.
+		if ( $risky && in_array( $value[0], array( '+', '-' ), true ) && preg_match( '/^[+-][0-9\s().\/-]*$/', $value ) ) {
+			$risky = false;
+		}
+		if ( $risky ) {
+			$value = "'" . $value;
+		}
+		return '"' . str_replace( '"', '""', $value ) . '"';
 	}
 }

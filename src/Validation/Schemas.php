@@ -152,6 +152,7 @@ class Schemas {
 					'ext_webhooks_enabled',
 					'ext_webhooks_signing_secret',
 					'ext_webhooks_events',
+					'ext_webhooks_retries',
 					// Extensions — Email Marketing
 					'ext_email_marketing_enabled',
 					'ext_email_marketing_provider',
@@ -163,6 +164,8 @@ class Schemas {
 					'ext_crm_provider',
 					'ext_crm_api_key',
 					'ext_crm_portal_id',
+					'ext_crm_webhook_url',
+					'ext_crm_add_note',
 					// Extensions — Analytics
 					'ext_analytics_enabled',
 					'ext_analytics_view_tracking',
@@ -171,6 +174,9 @@ class Schemas {
 					'ext_ecommerce_enabled',
 					'ext_ecommerce_product_id',
 					'ext_ecommerce_currency',
+					'ext_ecommerce_default_processor',
+					'ext_ecommerce_empty_cart',
+					'ext_ecommerce_destination',
 					// Extensions — PDF
 					'ext_pdf_enabled',
 					'ext_pdf_template',
@@ -240,17 +246,20 @@ class Schemas {
 				'ext_webhooks_enabled'             => 'optional|bool',
 				'ext_webhooks_signing_secret'      => 'optional|string|max:200',
 				'ext_webhooks_events'              => 'optional|array',
+				'ext_webhooks_retries'             => 'optional|int|min:0|max:5',
 				// Extensions — Email Marketing
 				'ext_email_marketing_enabled'      => 'optional|bool',
-				'ext_email_marketing_provider'     => 'optional|in:mailchimp,convertkit',
+				'ext_email_marketing_provider'     => 'optional|in:mailchimp,brevo,convertkit',
 				'ext_email_marketing_api_key'      => 'optional|string|max:500',
 				'ext_email_marketing_list_id'      => 'optional|string|max:200',
 				'ext_email_marketing_double_optin' => 'optional|bool',
 				// Extensions — CRM
 				'ext_crm_enabled'                  => 'optional|bool',
-				'ext_crm_provider'                 => 'optional|in:hubspot',
+				'ext_crm_provider'                 => 'optional|in:hubspot,webhook',
 				'ext_crm_api_key'                  => 'optional|string|max:500',
 				'ext_crm_portal_id'                => 'optional|string|max:100',
+				'ext_crm_webhook_url'              => 'optional|string|max:2000',
+				'ext_crm_add_note'                 => 'optional|bool',
 				// Extensions — Analytics
 				'ext_analytics_enabled'            => 'optional|bool',
 				'ext_analytics_view_tracking'      => 'optional|bool',
@@ -259,6 +268,9 @@ class Schemas {
 				'ext_ecommerce_enabled'            => 'optional|bool',
 				'ext_ecommerce_product_id'         => 'optional|int|min:0',
 				'ext_ecommerce_currency'           => 'optional|string|max:10',
+				'ext_ecommerce_default_processor'  => 'optional|in:woocommerce,subtleforms',
+				'ext_ecommerce_empty_cart'         => 'optional|bool',
+				'ext_ecommerce_destination'        => 'optional|in:checkout,cart',
 				// Extensions — PDF
 				'ext_pdf_enabled'                  => 'optional|bool',
 				'ext_pdf_template'                 => 'optional|string|max:100',
@@ -401,6 +413,8 @@ class Schemas {
 				'appearance'   => 'optional|object|map:FormAppearance',
 				// 2.0: per-form confirmation, submit button and availability rules.
 				'confirmation' => 'optional|object|map:FormConfirmation',
+				// 2.1: conditional confirmations, first match wins (Pro).
+				'confirmations' => 'optional|array|list:FormConditionalConfirmation',
 				'submitText'   => 'optional|string|max:100',
 				'restrictions' => 'optional|object|map:FormRestrictions',
 			),
@@ -412,6 +426,21 @@ class Schemas {
 				'message'      => 'optional|string|max:5000',
 				'redirectUrl'  => 'optional|string|max:2000',
 				'allowAnother' => 'optional|bool',
+			),
+
+			// A confirmation shown only when its rules match (2.1). `logic` is
+			// kept as sent; SubtleForms Pro tidies it on save and the engine
+			// ignores anything it does not understand.
+			'FormConditionalConfirmation' => array(
+				'id'           => 'optional|string|max:40',
+				'label'        => 'optional|string|max:200',
+				'enabled'      => 'optional|bool',
+				'type'         => 'optional|in:message,redirect|default:message',
+				'title'        => 'optional|string|max:200',
+				'message'      => 'optional|string|max:5000',
+				'redirectUrl'  => 'optional|string|max:2000',
+				'allowAnother' => 'optional|bool',
+				'logic'        => 'optional|object',
 			),
 
 			// FormRestrictions — who can submit, and when (2.0).

@@ -415,6 +415,20 @@ export default function PaymentsPage() {
         </section>
       )}
 
+      {window.subtleformsAdmin?.woocommerce && (
+        <div className='sf-pay-woo' role='note'>
+          <span className='sf-pay-woo__icon' aria-hidden='true'>
+            <Icon.Tag size={16} />
+          </span>
+          <p>
+            {__('WooCommerce is active. Forms that check out through WooCommerce use WooCommerce coupons, not the coupons below.', 'subtleforms')}{' '}
+            <a href={window.subtleformsAdmin.woocommerce.couponsUrl}>
+              {__('Manage them in Marketing › Coupons', 'subtleforms')}
+            </a>
+          </p>
+        </div>
+      )}
+
       <section className='sf-panel'>
         <header className='sf-panel__header'>
           <div>
