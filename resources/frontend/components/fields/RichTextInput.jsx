@@ -68,6 +68,8 @@ const sanitizeHtml = ( html ) => {
 
 export default function RichTextInput( {
   inputId,
+  name,
+  describedBy,
   value,
   onChange,
   placeholder,
@@ -123,6 +125,7 @@ export default function RichTextInput( {
 
   return (
     <div className='subtleforms-richtext'>
+      { name && <input type='hidden' name={ name } value={ value || '' } /> }
       <div
         className='subtleforms-richtext__toolbar'
         role='toolbar'
@@ -149,7 +152,8 @@ export default function RichTextInput( {
         aria-multiline='true'
         aria-required={ required }
         aria-invalid={ !! error }
-        aria-describedby={ error ? `${ inputId }-error` : undefined }
+        aria-labelledby={ `${ inputId }-label` }
+        aria-describedby={ describedBy }
         data-placeholder={ placeholder }
         onInput={ handleInput }
         onBlur={ handleInput }

@@ -697,6 +697,7 @@ function FormBuilderInner({
       <BuilderModalsController
         showDeleteConfirm={showDeleteConfirm}
         showPublishConfirm={showPublishConfirm}
+        isPublished={formStatus === 'published'}
         showDiscardConfirm={showDiscardConfirm}
         showTour={showTour}
         showPreview={showPreview}

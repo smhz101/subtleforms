@@ -223,6 +223,13 @@ final class SchemaValidator {
 			}
 		}
 
+		// A single checkbox is one yes/no box; a list of options belongs to
+		// Multiple choice (2.2.1, bug 7).
+		$checkboxErrors = self::checkboxOptionErrors( $schema['fields'], 'fields' );
+		if ( $checkboxErrors ) {
+			throw new InvalidArgumentException( $checkboxErrors[0]['message'] ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
+
 		// Conditional logic (permissive but structured)
 		if ( isset( $schema['logic'] ) ) {
 			if ( ! is_array( $schema['logic'] ) ) {
@@ -443,6 +450,12 @@ final class SchemaValidator {
 			}
 		}
 
+		if ( isset( $schema['fields'] ) && is_array( $schema['fields'] ) ) {
+			foreach ( self::checkboxOptionErrors( $schema['fields'], 'fields' ) as $error ) {
+				$errors[] = $error;
+			}
+		}
+
 		if ( isset( $schema['logic'] ) && ! is_array( $schema['logic'] ) ) {
 			$push( $errors, 'logic', 'Schema.logic must be an array of rules.' );
 		}
@@ -570,6 +583,58 @@ final class SchemaValidator {
 		}
 
 		return $errors;
+	}
+
+	/**
+	 * Single checkboxes that carry a list of options, anywhere in the tree.
+	 *
+	 * @param array  $fields Field list.
+	 * @param string $path   Path of the list, for error messages.
+	 * @return array<int,array{path:string,message:string,fieldKey:string}>
+	 */
+	public static function checkboxOptionErrors( array $fields, string $path ): array {
+		$errors = array();
+		foreach ( $fields as $i => $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+			$here = "{$path}[{$i}]";
+			if ( ( $field['type'] ?? '' ) === 'checkbox' ) {
+				$options = $field['options'] ?? ( $field['config']['options'] ?? null );
+				if ( is_array( $options ) && count( $options ) > 0 ) {
+					$key      = (string) ( $field['key'] ?? ( $field['config']['key'] ?? '' ) );
+					$errors[] = array(
+						'path'     => "{$here}.options",
+						/* translators: %s: field key */
+						'message'  => sprintf( __( 'The single checkbox "%s" has a list of options. Use a Multiple choice field for several options.', 'subtleforms' ), $key ),
+						'fieldKey' => $key,
+					);
+				}
+			}
+			foreach ( array( 'children', 'fields' ) as $childKey ) {
+				if ( isset( $field[ $childKey ] ) && is_array( $field[ $childKey ] ) && self::isList( $field[ $childKey ] ) ) {
+					$errors = array_merge( $errors, self::checkboxOptionErrors( $field[ $childKey ], "{$here}.{$childKey}" ) );
+				}
+			}
+			if ( isset( $field['columns'] ) && is_array( $field['columns'] ) ) {
+				foreach ( $field['columns'] as $c => $column ) {
+					if ( is_array( $column ) && self::isList( $column ) ) {
+						$errors = array_merge( $errors, self::checkboxOptionErrors( $column, "{$here}.columns[{$c}]" ) );
+					}
+				}
+			}
+		}
+		return $errors;
+	}
+
+	/**
+	 * Whether an array is a plain list (0..n-1 keys).
+	 *
+	 * @param array $value Array.
+	 * @return bool
+	 */
+	private static function isList( array $value ): bool {
+		return array_keys( $value ) === range( 0, count( $value ) - 1 ) || array() === $value;
 	}
 
 	private function hasInputFieldRecursive( array $fields, array $inputFieldTypes ): bool {

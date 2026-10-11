@@ -12,6 +12,8 @@ import { __ } from '@wordpress/i18n';
  */
 export default function ChainedSelect( {
   inputId,
+  name,
+  describedBy,
   config,
   value,
   onChange,
@@ -79,15 +81,14 @@ export default function ChainedSelect( {
             ) }
             <select
               id={ levelId }
+              name={ name ? `${ name }[${ depth }]` : undefined }
               className='subtleforms-select'
               value={ selections[ depth ] ?? '' }
               onChange={ ( e ) => handleLevelChange( depth, e.target.value ) }
               disabled={ disabled }
               aria-required={ depth === 0 ? required : undefined }
               aria-invalid={ depth === 0 ? !! error : undefined }
-              aria-describedby={
-                depth === 0 && error ? `${ inputId }-error` : undefined
-              }>
+              aria-describedby={ depth === 0 ? describedBy : undefined }>
               <option value=''>
                 { config.placeholder || __( 'Select…', 'subtleforms' ) }
               </option>

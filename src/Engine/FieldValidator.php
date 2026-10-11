@@ -67,6 +67,25 @@ final class FieldValidator {
 			// frontend check and submitting `false` directly.
 			$requiredMessage = $this->requiredMessage( $fields[ $fieldKey ] ?? array(), $fieldKey );
 
+			// A matrix with no rows or columns is not drawn, so it cannot be
+			// answered and is never required (2.2.1, bug 8).
+			if ( $type === 'checkbox_grid' ) {
+				$rows = $this->attr( $fields[ $fieldKey ] ?? array(), 'rows' );
+				$cols = $this->attr( $fields[ $fieldKey ] ?? array(), 'columns' );
+				if ( empty( $rows ) || empty( $cols ) || ! is_array( $rows ) || ! is_array( $cols ) ) {
+					continue;
+				}
+			}
+
+			// An older single checkbox saved with options is drawn as a
+			// checkbox group and answers with a list (2.2.1, bug 7).
+			if ( $type === 'checkbox' && is_array( $value ) ) {
+				if ( count( array_filter( $value, static fn( $v ) => $v !== '' && $v !== null && $v !== false ) ) === 0 ) {
+					$errors[ $fieldKey ] = $requiredMessage;
+				}
+				continue;
+			}
+
 			if ( in_array( $type, array( 'checkbox', 'consent' ), true ) ) {
 				$accepted = is_bool( $value ) ? $value : filter_var( $value, FILTER_VALIDATE_BOOLEAN );
 				if ( ! $accepted ) {

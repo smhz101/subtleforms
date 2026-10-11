@@ -1998,3 +1998,35 @@ textarea.sf-field-renderer__input {
 	.sf-pay-preview__option-label { font-weight: 600; }
 	.sf-pay-preview__option-price { font-size: 16px; }
 }
+
+// Shown in place of a field that has nothing to display yet (2.2.1).
+.sf-field-renderer__placeholder-note {
+	margin: 4px 0 0;
+	padding: 10px 12px;
+	border: 1px dashed var(--sf-border, #dcdcde);
+	border-radius: var(--sf-radius-sm, 4px);
+	color: var(--sf-text-muted, #646970);
+	font-size: 13px;
+	line-height: 1.4;
+	background: var(--sf-bg-muted, #f6f7f7);
+}
+
+.sf-field-renderer__disclaimer {
+	padding: 10px 12px;
+	border-radius: var(--sf-radius-sm, 4px);
+	background: var(--sf-bg-muted, #f6f7f7);
+	font-size: 13px;
+	line-height: 1.5;
+
+	&--warning {
+		background: #fcf9e8;
+	}
+
+	&--success {
+		background: #edfaef;
+	}
+
+	p {
+		margin: 0;
+	}
+}

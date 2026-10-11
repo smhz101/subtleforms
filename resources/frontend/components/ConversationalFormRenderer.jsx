@@ -13,6 +13,7 @@ import { debug } from '../../shared/debug';
 import { isEmptyValue } from './FormRenderer';
 import { computeLogicState } from '../../shared/conditions';
 import { FormContext } from './fields/FileUpload';
+import { fieldConfig } from '../../shared/fieldConfig';
 
 const restUrl =
   window.subtleformsFrontend?.restUrl || '/wp-json/subtleforms/v1';
@@ -119,7 +120,7 @@ export default function ConversationalFormRenderer({
 
     const fieldKey = currentField.config?.key || currentField.key;
     const value = getIn(values, fieldKey);
-    const isRequired = currentField.config?.required === true;
+    const isRequired = fieldConfig(currentField).required === true;
 
     // Clear previous error
     setValidationErrors((prev) => {
@@ -468,7 +469,7 @@ export default function ConversationalFormRenderer({
             {visibleFields.map((field, index) => {
               const key = field.config?.key || field.key;
               const value = values[key];
-              const label = field.config?.label || field.label || key;
+              const label = fieldConfig(field).label || key;
 
               if (isEmptyValue(value)) return null;
 

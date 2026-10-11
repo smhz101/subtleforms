@@ -13,6 +13,8 @@ import { __ } from '@wordpress/i18n';
  */
 export default function SignaturePad( {
   inputId,
+  name,
+  describedBy,
   value,
   onChange,
   required,
@@ -115,6 +117,7 @@ export default function SignaturePad( {
   if ( typedMode ) {
     return (
       <div className='subtleforms-signature'>
+        { name && <input type='hidden' name={ name } value={ value || '' } /> }
         <input
           id={ inputId }
           type='text'
@@ -128,7 +131,7 @@ export default function SignaturePad( {
           disabled={ disabled }
           aria-required={ required }
           aria-invalid={ !! error }
-          aria-describedby={ error ? `${ inputId }-error` : undefined }
+          aria-describedby={ describedBy }
         />
         <div className='subtleforms-signature__actions'>
           <button
@@ -146,15 +149,20 @@ export default function SignaturePad( {
   }
 
   return (
-    <div className='subtleforms-signature'>
+    <div
+      className='subtleforms-signature'
+      role='group'
+      aria-labelledby={ `${ inputId }-label` }
+      aria-required={ required }
+      aria-invalid={ !! error }
+      aria-describedby={ describedBy }>
+      { name && <input type='hidden' name={ name } value={ value || '' } /> }
       <canvas
         ref={ canvasRef }
         id={ inputId }
         className='subtleforms-signature__canvas'
         role='img'
         aria-label={ __( 'Signature drawing area', 'subtleforms' ) }
-        aria-invalid={ !! error }
-        aria-describedby={ error ? `${ inputId }-error` : undefined }
         onPointerDown={ handlePointerDown }
         onPointerMove={ handlePointerMove }
         onPointerUp={ handlePointerUp }

@@ -5,6 +5,7 @@ import {
   ensureUniqueFieldKey,
   collectExistingKeys,
 } from './idGenerator';
+import { fieldConfig } from '../../../../shared/fieldConfig';
 
 const ROOT_NODE_ID = 'root';
 
@@ -34,7 +35,14 @@ function ensureArray(value, length) {
   return Array.isArray(value) ? value.map((col) => (Array.isArray(col) ? col : [])) : [];
 }
 
-function extractConfig(field) {
+function extractConfig(rawField) {
+  // A node saved with both flat settings and a partial `config` (for example
+  // only { appearance: { width } }) is folded into one flat settings object,
+  // so the builder never round-trips the stray wrapper again (2.2.1, bug 1).
+  const field =
+    rawField && rawField.config && typeof rawField.config === 'object' && !Array.isArray(rawField.config)
+      ? fieldConfig(rawField)
+      : rawField;
   const {
     // Accept both 'children' (new canonical key) and 'fields' (legacy key for backward compat)
     children: childrenArray,
@@ -79,6 +87,8 @@ function extractConfig(field) {
 
 export function normalizeSchema(schema) {
   const nodes = {};
+  // Fields changed while loading, so the builder can tell the user.
+  const conversions = [];
 
   nodes[ROOT_NODE_ID] = {
     id: ROOT_NODE_ID,
@@ -95,9 +105,20 @@ export function normalizeSchema(schema) {
       config,
       childFields: rawChildFields,
       columnChildren,
-      type,
+      type: rawType,
       kind: rawKind,
     } = extractConfig(field);
+
+    // A single checkbox saved with a list of options is really a set of
+    // checkboxes: turn it into Multiple choice (pick any) and say so
+    // (2.2.1, bug 7). The server refuses to publish the old shape.
+    let type = rawType;
+    if (rawType === 'checkbox' && Array.isArray(config.options) && config.options.length > 0) {
+      type = 'multiple_choice';
+      config.allowMultiple = true;
+      delete config.checkboxLabel;
+      conversions.push({ key: config.key, label: config.label || config.key, from: 'checkbox', to: 'multiple_choice' });
+    }
 
     // Migration guard: composite fields are always leaf nodes.
     // Discard any children that may have been saved when these types were
@@ -215,6 +236,7 @@ export function normalizeSchema(schema) {
   return {
     nodes,
     rootId: ROOT_NODE_ID,
+    conversions,
   };
 }
 

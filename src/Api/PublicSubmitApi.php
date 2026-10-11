@@ -268,7 +268,9 @@ final class PublicSubmitApi {
 				array(
 					'form_id'        => $formId,
 					'schema_version' => $formVersion,
-					'payload'        => $payload,
+					// Passwords are reduced before anything is written, so even
+					// an entry that fails validation never holds one as typed.
+					'payload'        => self::storablePayload( $payload, $activeSchema['schema'] ?? $activeSchema ),
 					'status'         => 'processing',
 					'ip_address'     => $ip ?: null,
 					'user_agent'     => isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : null,
@@ -709,6 +711,25 @@ final class PublicSubmitApi {
 	}
 
 	/**
+	 * A copy of the answers that is safe to write to the database.
+	 *
+	 * @param array $payload Answers.
+	 * @param mixed $schema  Form schema.
+	 * @return array
+	 */
+	public static function storablePayload( array $payload, $schema ): array {
+		if ( ! is_array( $schema ) ) {
+			return $payload;
+		}
+		foreach ( \SubtleForms\Support\FieldMapper::fields( $schema ) as $entry ) {
+			if ( \SubtleForms\Support\EntryValues::isSecret( $entry['field'] ) && array_key_exists( $entry['key'], $payload ) ) {
+				$payload[ $entry['key'] ] = \SubtleForms\Support\EntryValues::passwordForStorage( $payload[ $entry['key'] ], $entry['field'] );
+			}
+		}
+		return $payload;
+	}
+
+	/**
 	 * Re-apply rich-text sanitization to values whose schema type allows markup.
 	 *
 	 * @param array $payload   Strictly sanitized payload.
@@ -727,6 +748,17 @@ final class PublicSubmitApi {
 		foreach ( $richKeys as $key ) {
 			if ( array_key_exists( $key, $rawValues ) ) {
 				$payload[ $key ] = Sanitizer::sanitizeRichText( $rawValues[ $key ] );
+			}
+		}
+
+		// Passwords are taken as typed (tag stripping would change them) and
+		// are hashed or reduced to "provided" by the save step; they are never
+		// stored or emailed as typed.
+		$passwordKeys = array();
+		self::collectFieldKeysOfType( $schema['fields'] ?? array(), 'password', $passwordKeys );
+		foreach ( $passwordKeys as $key ) {
+			if ( array_key_exists( $key, $rawValues ) && is_scalar( $rawValues[ $key ] ) ) {
+				$payload[ $key ] = (string) $rawValues[ $key ];
 			}
 		}
 

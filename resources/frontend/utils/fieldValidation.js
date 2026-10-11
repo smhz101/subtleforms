@@ -11,6 +11,7 @@
 
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { getIn } from './valuePaths';
+import { fieldConfig } from '../../shared/fieldConfig';
 
 export const COMPOSITE_FIELD_TYPES = new Set(['name_group', 'address_group', 'address']);
 
@@ -40,6 +41,26 @@ function isBlank(v) {
 }
 
 /**
+ * Whether a field is drawn as something a visitor can answer.
+ *
+ * @param {string} type   Field type.
+ * @param {Object} config Merged field settings.
+ * @return {boolean}
+ */
+export function isAnswerable(type, config = {}) {
+  if (type === 'calculation') return !!String(config.formula || '').trim();
+  if (type === 'checkbox_grid') {
+    return (
+      Array.isArray(config.rows) &&
+      config.rows.length > 0 &&
+      Array.isArray(config.columns) &&
+      config.columns.length > 0
+    );
+  }
+  return true;
+}
+
+/**
  * Validate a single field and return an error string (or undefined).
  *
  * @param {object} field Field node (config or flat shape).
@@ -47,8 +68,13 @@ function isBlank(v) {
  * @return {string|undefined}
  */
 export function validateField(field, value) {
-  const config = field?.config ?? field;
+  const config = fieldConfig(field);
   const type = field?.type;
+  // Fields that are not drawn cannot be answered: a matrix with no rows or
+  // columns, or a calculation with no formula.
+  if (!isAnswerable(type, config)) {
+    return undefined;
+  }
   const required = config?.required === true;
   const requiredMessage =
     (typeof config?.requiredMessage === 'string' && config.requiredMessage.trim()) ||

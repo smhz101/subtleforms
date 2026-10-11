@@ -383,6 +383,18 @@ final class FormsRepository {
 				}
 			}
 
+			// The builder saves flat nodes, so the override usually sits on the
+			// node itself; it gets the same checks.
+			if ( isset( $field['appearance'] ) ) {
+				$clean = is_array( $field['appearance'] ) ? \SubtleForms\Support\Appearance::sanitizeField( $field['appearance'] ) : array();
+
+				if ( empty( $clean ) ) {
+					unset( $field['appearance'] );
+				} else {
+					$field['appearance'] = $clean;
+				}
+			}
+
 			foreach ( array( 'fields', 'children' ) as $nested ) {
 				if ( ! empty( $field[ $nested ] ) && is_array( $field[ $nested ] ) ) {
 					$field[ $nested ] = self::sanitizeFieldAppearance( $field[ $nested ] );

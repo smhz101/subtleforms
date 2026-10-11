@@ -1,4 +1,4 @@
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
 import clsx from 'clsx';
 import { getIcon } from './utils/iconMap';
@@ -22,13 +22,15 @@ export default function FieldToolbar({
   onWidthChange,
 }) {
   const [widthOpen, setWidthOpen] = useState(false);
+  // `label` is the compact glyph on the button; `name` is what screen readers
+  // hear (2.2.1, bug 13).
   const WIDTHS = [
-    { value: '100', label: __('Full', 'subtleforms') },
-    { value: '75', label: '¾' },
-    { value: '66', label: '⅔' },
-    { value: '50', label: '½' },
-    { value: '33', label: '⅓' },
-    { value: '25', label: '¼' },
+    { value: '100', label: __('Full', 'subtleforms'), name: __('Full', 'subtleforms') },
+    { value: '75', label: '¾', name: __('Three quarters', 'subtleforms') },
+    { value: '66', label: '⅔', name: __('Two thirds', 'subtleforms') },
+    { value: '50', label: '½', name: __('Half', 'subtleforms') },
+    { value: '33', label: '⅓', name: __('One third', 'subtleforms') },
+    { value: '25', label: '¼', name: __('One quarter', 'subtleforms') },
   ];
   const currentWidth = WIDTHS.find((w) => w.value === (width || '100')) || WIDTHS[0];
   const { onPointerDown, onMouseDown, onTouchStart, ...handleRest } =
@@ -129,7 +131,16 @@ export default function FieldToolbar({
               className='sf-field-toolbar__button sf-field-toolbar__button--text'
               aria-haspopup='true'
               aria-expanded={widthOpen}
-              title={__('Field width', 'subtleforms')}
+              aria-label={sprintf(
+                /* translators: %s: current field width, e.g. Full or Half */
+                __('Field width: %s', 'subtleforms'),
+                currentWidth.name
+              )}
+              title={sprintf(
+                /* translators: %s: current field width, e.g. Full or Half */
+                __('Field width: %s', 'subtleforms'),
+                currentWidth.name
+              )}
               onMouseDown={stop}
               onPointerDown={stop}
               onClick={(e) => {
@@ -146,6 +157,7 @@ export default function FieldToolbar({
                     type='button'
                     role='menuitemradio'
                     aria-checked={w.value === currentWidth.value}
+                    aria-label={w.name}
                     className={clsx('sf-field-toolbar__width-option', {
                       'is-active': w.value === currentWidth.value,
                     })}

@@ -34,17 +34,33 @@ final class EmailAction implements ActionInterface {
 
 		// Replace {{field}} placeholders with actual values
 		$payload = $context->payload;
+		$schema  = $context->getMeta( 'form_schema' );
+		$schema  = is_array( $schema ) ? $schema : array();
+		$isHtml  = $this->is_html( $settings, $headers );
+
+		// Passwords never go out by email (2.2.1).
+		foreach ( \SubtleForms\Support\EntryValues::secretKeys( $schema ) as $secretKey ) {
+			unset( $payload[ $secretKey ] );
+		}
 
 		// Uploaded files read as "name (download link)" (2.1).
 		$payload = $this->format_uploads( $payload, (int) $context->getMeta( 'submission_id', 0 ) );
 
+		// Answers as text (recipient, subject, plain emails) or escaped HTML
+		// with line breaks kept (HTML email bodies), by field type.
+		$textPayload = $this->format_answers( $payload, $schema, false );
+		$bodyPayload = $isHtml ? $this->format_answers( $payload, $schema, true ) : $textPayload;
+
 		// Add admin_email placeholder
-		$payload['admin_email'] = get_option( 'admin_email' );
+		$textPayload['admin_email'] = get_option( 'admin_email' );
+		$bodyPayload['admin_email'] = $textPayload['admin_email'];
 
 		// Replace placeholders in recipient, subject, and body
-		$to      = $this->replace_placeholders( $to, $payload );
-		$subject = $this->replace_placeholders( $subject, $payload );
-		$body    = $this->replace_placeholders( $body, $payload );
+		$to      = $this->replace_placeholders( $to, $textPayload );
+		$subject = $this->replace_placeholders( $subject, $textPayload );
+		// A subject is one line, whatever the answers merged into it hold.
+		$subject = is_string( $subject ) ? trim( (string) preg_replace( '/[\r\n]+/', ' ', $subject ) ) : $subject;
+		$body    = $this->replace_placeholders( $body, $bodyPayload );
 
 		if ( empty( $to ) || ! is_string( $to ) ) {
 			// Nothing to do; record failure but don't throw to avoid breaking other steps.
@@ -112,7 +128,12 @@ final class EmailAction implements ActionInterface {
 
 		// Add default headers
 		if ( ! $this->has_header( $headers, 'Content-Type' ) ) {
-			$headers[] = 'Content-Type: text/plain; charset=UTF-8';
+			$headers[] = $isHtml ? 'Content-Type: text/html; charset=UTF-8' : 'Content-Type: text/plain; charset=UTF-8';
+		}
+
+		// An HTML email keeps the line breaks typed into the message itself.
+		if ( $isHtml && $body !== '' && ! preg_match( '/<(p|br|div|table|ul|ol|h[1-6])\b/i', $body ) ) {
+			$body = nl2br( $body );
 		}
 
 		// Debug logging before send
@@ -202,6 +223,56 @@ final class EmailAction implements ActionInterface {
 		}
 
 		return $template;
+	}
+
+	/**
+	 * Whether this email is sent as HTML.
+	 *
+	 * @param array $settings Action settings.
+	 * @param mixed $headers  Configured headers.
+	 * @return bool
+	 */
+	private function is_html( array $settings, $headers ): bool {
+		if ( isset( $settings['format'] ) && $settings['format'] === 'html' ) {
+			return true;
+		}
+		foreach ( (array) $headers as $header ) {
+			if ( is_string( $header ) && preg_match( '#^\s*content-type\s*:\s*text/html#i', $header ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Turn stored answers into the text that replaces their placeholders.
+	 *
+	 * Paragraph answers keep their line breaks: as-is in plain text, as <br>
+	 * in HTML (2.2.1, bug 4). Rich text keeps its formatting in HTML and reads
+	 * as plain text otherwise.
+	 *
+	 * @param array $payload Answers.
+	 * @param array $schema  Form schema.
+	 * @param bool  $isHtml  Whether the email is HTML.
+	 * @return array
+	 */
+	private function format_answers( array $payload, array $schema, bool $isHtml ): array {
+		$fields = array();
+		foreach ( \SubtleForms\Support\FieldMapper::fields( $schema ) as $entry ) {
+			$fields[ $entry['key'] ] = $entry['field'];
+		}
+		foreach ( $payload as $key => $value ) {
+			$field = $fields[ $key ] ?? array( 'type' => '' );
+			if ( is_string( $value ) && strpos( $value, "\n" ) !== false && ( $field['type'] ?? '' ) === '' ) {
+				// Already formatted (for example upload lines).
+				$payload[ $key ] = $isHtml ? nl2br( esc_html( $value ) ) : $value;
+				continue;
+			}
+			$payload[ $key ] = $isHtml
+				? \SubtleForms\Support\EntryValues::toHtml( $value, $field )
+				: \SubtleForms\Support\EntryValues::toText( $value, $field );
+		}
+		return $payload;
 	}
 
 	/**

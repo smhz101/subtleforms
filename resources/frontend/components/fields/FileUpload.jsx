@@ -218,6 +218,7 @@ export default function FileUpload({ field, config, value, onChange, inputId, er
       <input
         ref={inputRef}
         id={inputId}
+        name={fieldKey ? (multiple ? `${fieldKey}[]` : fieldKey) : undefined}
         type='file'
         className={multiple ? 'subtleforms-sr-only' : 'subtleforms-input subtleforms-file-input'}
         accept={accept}

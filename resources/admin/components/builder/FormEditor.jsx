@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState, useRef } from '@wordpress/element';
-import { Popover } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { Popover, Notice } from '@wordpress/components';
+import { __, sprintf } from '@wordpress/i18n';
 import { getIcon } from './utils/iconMap';
 import Icon from '../../ui/Icon';
 import FieldDock, { categoryLabel } from './FieldDock';
@@ -150,6 +150,7 @@ export default function FormEditor({
 }) {
   // State management
   const builderState = useBuilderState(schema, validationErrors, fieldErrors, onChange, isReadOnly);
+  const [conversionsDismissed, setConversionsDismissed] = useState(false);
   const {
     tree,
     setTree,
@@ -268,6 +269,22 @@ export default function FormEditor({
                 onAddStep={handleAddStep}
                 onDeleteStep={handleDeleteStep}
               />
+            </div>
+          )}
+
+          {!conversionsDismissed && tree.conversions?.length > 0 && (
+            <div className='sf-form-editor__conversions'>
+              <Notice status='info' onRemove={() => setConversionsDismissed(true)}>
+                {tree.conversions.map((c) => (
+                  <p key={c.key}>
+                    {sprintf(
+                      /* translators: %s: field label */
+                      __('"%s" was a single checkbox with a list of options, so it is now a Multiple choice field where visitors can tick any of them. Publish to update the live form.', 'subtleforms'),
+                      c.label
+                    )}
+                  </p>
+                ))}
+              </Notice>
             </div>
           )}
 

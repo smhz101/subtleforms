@@ -4,71 +4,64 @@ Tags: forms, contact form, form builder, submissions
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.2.0
+Stable tag: 2.2.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
-Logic-first, workflow-driven form platform with visual builder, CAPTCHA support, spam protection, and extensible architecture.
+Form builder for WordPress with a visual editor, conditional logic, file uploads, multi-step and conversational forms, and spam protection built in.
 
 == Description ==
 
-SubtleForms is a powerful WordPress form plugin built for developers and site administrators who need flexible, secure form management with a modern interface.
+SubtleForms is a form builder for WordPress. You build forms on a canvas that looks like the live form, publish them, and read the entries in a clean inbox. Everything below is in the free plugin.
 
-= Key Features =
+= Building forms =
 
-* **Visual Form Builder** - Drag-and-drop interface with real-time preview
-* **Multiple Form Types** - Regular, multi-step, sectioned, and conversational forms
-* **Rich Field Library** - Text, email, number, select, radio, checkbox, file upload, date/time, country selector, and more
-* **Spam Protection** - Honeypot fields, time-based validation, and configurable rate limiting
-* **CAPTCHA Support** - Google reCAPTCHA (v2/v3), hCaptcha, and Cloudflare Turnstile
-* **Submissions Management** - View, search, filter, and export form submissions
-* **REST API** - Complete REST API for programmatic access
-* **Privacy Compliant** - GDPR tools, data retention controls, and privacy policy integration
-* **Extension Ready** - Clean architecture for payment gateways and custom field types
+* Visual builder with a field library, a canvas that shows your styling as you work, and a settings panel with Settings, Validation, Logic and Style tabs
+* Field widths (full, three quarters, two thirds, half, one third, one quarter) to place fields side by side
+* Regular, multi-step and conversational (one question at a time) forms
+* Templates to start from, plus a blank form
+* Appearance presets and a custom mode for colours, fonts, fields, buttons and layout
 
-= Form Types =
+= Fields =
 
-* **Regular Forms** - Standard single-page forms
-* **Multi-Step Forms** - Break long forms into manageable steps with progress tracking
-* **Sectioned Forms** - Organize fields into collapsible sections
-* **Conversational Forms** - Chat-like experience with one question at a time
-
-= Security & Spam Protection =
-
-* Built-in honeypot fields
-* Minimum submission time validation
-* Rate limiting (10 submissions per minute per IP)
-* REST API CSRF protection with WordPress nonces
-* Multiple CAPTCHA provider support
-
-= Developer Features =
-
-* Clean, object-oriented PHP architecture
-* Repository pattern for data access
-* Extensible field registry system
-* Provider-based CAPTCHA integration
-* Filter and action hooks throughout
-* Full REST API with proper authentication
-
-= Privacy & Compliance =
-
-* Data retention controls
-* IP address and user agent logging (for spam prevention)
-* Privacy policy content registration
-* GDPR-compliant data export and erasure tools
-
-= Conditional logic and uploads =
-
-* Show or hide fields when all of their rules match (equals, not equals, contains, empty, not empty, greater or less than)
-* Hidden fields are not validated or saved, in the browser and on the server
+* Text, Paragraph, Email, Number, Phone, Website, Password, Name and Address
+* Dropdown, Radio buttons, Checkboxes, Single checkbox, Toggle, Country, Chained select and Consent
+* Date, Time, Date and time, Rating, Opinion scale, NPS, Slider, Matrix, Colour picker and Rich text
 * File and image uploads with allowed types and size limits, stored privately and downloaded by admins only
+* Hidden fields, HTML blocks, section breaks and disclaimers
 
-= SubtleForms Pro (separate add-on) =
+= Logic and after submit =
 
-* Advanced conditional logic: match any rule, rule groups, more operators, skipped steps, conditional emails and confirmations
-* Several files per upload field with drag and drop
-* Stripe card payments, webhooks with retries, CRM and email marketing, analytics, PDFs and exports
+* Show or hide fields and steps when their rules match (equals, not equals, contains, empty, not empty, greater or less than). Hidden fields are not validated or saved, in the browser and on the server
+* Email notifications and webhooks after each entry
+* A confirmation message with answers merged in, or a redirect
+* Availability rules: logged-in visitors only, open and close dates and an entry limit
+
+= Entries =
+
+* An inbox with tabs, search, filters and a reading pane for each entry
+* Read and unread, flag, and delete
+* Paragraph answers keep their line breaks and rich text answers keep basic formatting
+* Passwords are never stored as typed and never included in emails
+
+= Spam protection and privacy =
+
+* Honeypot and minimum time checks on every form, plus rate limiting
+* Google reCAPTCHA (v2 and v3), hCaptcha and Cloudflare Turnstile
+* Data retention settings and the WordPress personal data export and erase tools
+
+= SubtleForms Pro =
+
+SubtleForms Pro is a separate add-on that extends the free plugin:
+
+* Picture choice, Signature and Calculation fields, and several files per upload field
+* Payments: product and priced option fields, order summary, coupons and Stripe card checkout, or WooCommerce checkout
+* Advanced conditional logic (match any rule, rule groups, more operators, conditional emails and confirmations)
+* CSV export, entry PDFs and form analytics reports
+* Webhooks with retries, CRM and email marketing integrations (Mailchimp, Brevo, Kit, HubSpot, Zapier)
 * Agency plan: white label and WPML or Polylang translation
+
+Forms that use Pro features keep working if a Pro license lapses.
 
 == Installation ==
 
@@ -111,12 +104,12 @@ You can configure one CAPTCHA provider globally in SubtleForms > Settings > Adva
 SubtleForms includes multiple spam prevention layers:
 * Honeypot fields (enabled by default)
 * Minimum submission time validation
-* Rate limiting (10 submissions per minute per IP)
+* Rate limiting
 * Optional CAPTCHA verification (configure in Settings)
 
 = Can I export submissions? =
 
-Yes. Navigate to SubtleForms > Submissions, select the submissions you want to export, and click "Export CSV" from the bulk actions dropdown.
+CSV export is part of SubtleForms Pro. In the free plugin you can read, search, filter and delete entries in SubtleForms > Submissions.
 
 = Is this plugin GDPR compliant? =
 
@@ -164,6 +157,25 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 7. Conversational form on frontend
 
 == Changelog ==
+
+= 2.2.1 - 2026-10-11 =
+* Fix: Setting a field's width no longer drops its required setting, options, placeholder or help text on the live form. Width only changes the layout.
+* Fix: Errors found by the server are shown on each field, which is marked invalid, linked to its message and focused. The message above the form now reads "Please fix the 4 highlighted fields."
+* Fix: The Country field lists every country again. It and the Address field share one country list.
+* Fix: Paragraph answers keep their line breaks in entries and in emails. HTML emails show them as line breaks.
+* Fix: Rich text answers keep paragraphs, line breaks, bold, italic, lists and links.
+* Fix: Passwords are never stored as typed. Entries show "Password provided", a field can opt in to storing a one-way hash, and passwords are left out of emails and CSV exports.
+* Fix: A single checkbox saved with a list of options shows those options. The builder turns it into a Multiple choice field and explains why, and such a checkbox can no longer be published.
+* Fix: New Matrix fields start with two rows and three columns. An empty matrix shows a hint in the builder and is hidden on the live form.
+* Fix: A Calculation field without a formula shows a hint in the builder and is hidden on the live form.
+* Fix: An empty Disclaimer is hidden on the live form and shows a hint in the builder.
+* Fix: Every input has a name, so forms work with browser autofill and password managers.
+* Fix: The builder shows "Published", "Published, changes not live" or "Draft" correctly, and asks "Push your changes live?" before updating a live form.
+* Fix: The field width button has a label for screen readers that follows the chosen width.
+* Fix: Toggle, Opinion scale, Picture choice, Signature and Calculation answers were not sent with the entry. They are now saved.
+* Fix: The spam trap field has a random name and no visible label text, so autofill does not fill it.
+* Fix: Email subjects stay on one line.
+* Readme: Describes what the free plugin does in 2.2 and what SubtleForms Pro adds.
 
 = 2.2.0 - 2026-10-11 =
 * New: File and image uploads work end to end: files upload as soon as they are picked, are checked for type and size, stored under random names in a protected folder, downloaded by admins through a secure link, and deleted with the entry or by data retention
@@ -217,13 +229,13 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 * Fix: Dates are stored in UTC so relative times are correct in every timezone
 
 = 1.9.2 - 2026-09-29 =
-* Design: Adopted the WordPress Design System — accent now follows the site's admin colour scheme via --wp-admin-theme-color
+* Design: Adopted the WordPress Design System: accent now follows the site's admin colour scheme via --wp-admin-theme-color
 * Design: Switched to the WordPress system font stack; removed DM Sans, Satoshi and JetBrains Mono webfont enqueues
 * Design: Neutrals retinted to the WordPress admin grey ramp; flatter radii (4px) and minimal shadows
 * Design: Borders, text and surfaces aligned to native WordPress admin values
 
 = 1.9.1 - 2026-09-29 =
-* Block: New inspector options — show title/description toggles, Form Theme dropdown with live preview, Reset to defaults, Advanced (AJAX, Tab Index, Field Values)
+* Block: New inspector options: show title/description toggles, Form Theme dropdown with live preview, Reset to defaults, Advanced (AJAX, Tab Index, Field Values)
 * Block: Editor preview now matches the frontend (removed divergent editor-only styling; frontend stylesheet drives both)
 * Block: Theme, title/description, AJAX, tab index and prefilled field values now flow through to the frontend render
 * Fix: "Last updated" on the forms list showed ~5h off because naive UTC datetimes were parsed as local time
@@ -237,7 +249,7 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 * UI: DM Sans for headings, Satoshi for body text, JetBrains Mono for code areas
 * UI: Enqueued webfonts (Google Fonts + Fontshare) the WordPress-standard way
 * UI: Re-skinned primary buttons, toggles, focus rings, and card hovers to indigo
-* UX: Every field type now has a unique icon — no repeated icons across fields
+* UX: Every field type now has a unique icon: no repeated icons across fields
 * Compliance: Aligned Stable tag with plugin version (1.9.0)
 
 = 1.8.1 =
@@ -301,6 +313,9 @@ now be reconstructed accurately.
 
 == Upgrade Notice ==
 
+= 2.2.1 =
+Fixes fields that lost their settings when resized, saves Toggle, Opinion scale and other answers that were dropped, and stops storing passwords.
+
 = 2.2.0 =
 Fixes conditional logic on live forms and makes file uploads work. Update SubtleForms Pro to 2.2.0 as well.
 
@@ -334,7 +349,7 @@ Site administrators can configure how long submission data is retained and can m
 == Technical Requirements ==
 
 * WordPress 6.0 or higher
-* PHP 7.4 or higher
+* PHP 8.1 or higher
 * MySQL 5.7 or higher / MariaDB 10.2 or higher
 * Modern browser with JavaScript enabled (for admin interface)
 

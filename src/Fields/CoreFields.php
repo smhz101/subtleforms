@@ -309,6 +309,13 @@ final class CoreFields {
 						'name'  => 'requireConfirmation',
 						'label' => __( 'Require Confirmation', 'subtleforms' ),
 					),
+					array(
+						'type'    => 'checkbox',
+						'name'    => 'storeHash',
+						'label'   => __( 'Store a hash', 'subtleforms' ),
+						'help'    => __( 'Passwords are never stored as typed. By default the entry only records that a password was provided. Turn this on to keep a one-way hash instead. Passwords are never included in emails or exports.', 'subtleforms' ),
+						'section' => 'advanced',
+					),
 				),
 				meta: array( 'category' => 'regular' ),
 			)
@@ -565,7 +572,6 @@ final class CoreFields {
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					'placeholder'        => 'Select a country',
-					'countryList'        => CountryList::getOptions(), // Full ISO-3166 list
 					'default_country'    => '',
 					'preferred_countries' => array(), // ISO codes for countries to show at top
 					'searchable'         => true,
@@ -937,8 +943,9 @@ final class CoreFields {
 				kind: 'input',
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
-					'rows'    => array(),
-					'columns' => array(),
+					// Ships ready to answer, like the builder preview (2.2.1, bug 8).
+					'rows'    => array( __( 'Row 1', 'subtleforms' ), __( 'Row 2', 'subtleforms' ) ),
+					'columns' => array( __( 'Column 1', 'subtleforms' ), __( 'Column 2', 'subtleforms' ), __( 'Column 3', 'subtleforms' ) ),
 				),
 				inspectorControls: array(
 					array(

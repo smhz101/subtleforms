@@ -54,6 +54,7 @@ export default function useBuilderOrchestrator({
 		autoSaving,
 		formStatus,
 		isDirty,
+		hasUnpublishedChanges,
 	} = builderState;
 
 	const {
@@ -722,7 +723,9 @@ export default function useBuilderOrchestrator({
 			return;
 		}
 
-		if (formStatus === 'draft') {
+		// Ask before changing what visitors see: a first publish, or edits to a
+		// form that is already live ("Push your changes live?", 2.2.1 bug 12).
+		if (formStatus === 'draft' || isDirty || hasUnpublishedChanges) {
 			setShowPublishConfirm(true);
 		} else {
 			performSave({ auto: false, targetStatus: 'published' });
@@ -733,6 +736,8 @@ export default function useBuilderOrchestrator({
 		draftSchema,
 		stateFormTitle,
 		formStatus,
+		isDirty,
+		hasUnpublishedChanges,
 		hasValidationErrors,
 		performSave,
 		removeNotice,

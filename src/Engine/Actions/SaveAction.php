@@ -137,6 +137,18 @@ final class SaveAction implements ActionInterface {
 				continue;
 			}
 
+			// Paragraph, rich text and password answers have their own rules
+			// (2.2.1): keep line breaks, keep basic formatting, never store a
+			// password as typed.
+			if ( ! is_array( $value ) && in_array( $type, array( 'textarea', 'rich_text', 'password' ), true ) ) {
+				$sanitized[ $key ] = \SubtleForms\Support\EntryValues::sanitizeScalar( $value, $field );
+				continue;
+			}
+			if ( $type === 'password' ) {
+				$sanitized[ $key ] = '';
+				continue;
+			}
+
 			// Task 2: Normalize composite field payloads (name_group, address_group)
 			if ( $type === 'name_group' || $type === 'address_group' ) {
 				$sanitized[ $key ] = $this->normalize_composite_value( $value );

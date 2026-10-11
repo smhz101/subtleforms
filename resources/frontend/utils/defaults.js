@@ -1,3 +1,4 @@
+import { fieldConfig } from '../../shared/fieldConfig';
 /**
  * Default values for a form's fields.
  *
@@ -54,7 +55,7 @@ export function collectDefaultValues(fields) {
     if (!Array.isArray(nodes)) return;
     nodes.forEach((field) => {
       if (!field || typeof field !== 'object') return;
-      const config = field.config ?? field;
+      const config = fieldConfig(field);
       const key = config.key || field.key;
 
       if (key) {

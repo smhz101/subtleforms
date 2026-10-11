@@ -298,7 +298,7 @@ final class SubmissionsApi {
 			'order'   => strtoupper( $request->get_param( 'order' ) ?? 'DESC' ) === 'ASC' ? 'ASC' : 'DESC',
 		);
 
-		$submissions = $this->submissionsRepo->findAll( $args );
+		$submissions = array_map( array( $this, 'redactSecrets' ), $this->submissionsRepo->findAll( $args ) );
 		$total       = $this->submissionsRepo->count( $args );
 
 		return ApiResponse::paginated(
@@ -364,7 +364,7 @@ final class SubmissionsApi {
 			'order'       => strtoupper( $request->get_param( 'order' ) ?? 'DESC' ) === 'ASC' ? 'ASC' : 'DESC',
 		);
 
-		$submissions = $this->submissionsRepo->findAll( $args );
+		$submissions = array_map( array( $this, 'redactSecrets' ), $this->submissionsRepo->findAll( $args ) );
 		$total       = $this->submissionsRepo->count( $args );
 
 		// Bulk fetch form titles to avoid N+1
@@ -431,6 +431,8 @@ final class SubmissionsApi {
 			$submission['next_id'] = $adjacent['next'];
 			$submission['prev_id'] = $adjacent['prev'];
 		}
+
+		$submission = $this->redactSecrets( $submission );
 
 		$etag     = $this->generateETag( $submission, 'submission' );
 		$response = ApiResponse::success( $submission );
@@ -661,6 +663,11 @@ final class SubmissionsApi {
 				: ( $submission['payload'] ?? array() );
 			$payload = is_array( $payload ) ? $payload : array();
 
+			// Passwords are never exported (2.2.1).
+			foreach ( $this->secretKeysForForm( (int) ( $submission['form_id'] ?? 0 ) ) as $secret ) {
+				unset( $payload[ $secret ] );
+			}
+
 			foreach ( array_keys( $payload ) as $key ) {
 				$key = (string) $key;
 				if ( '' === $key || '_' === $key[0] || in_array( $key, $skip, true ) ) {
@@ -724,6 +731,81 @@ final class SubmissionsApi {
 				'rows'     => count( $rows ),
 			)
 		);
+	}
+
+	/**
+	 * Replace stored password values with a readable label.
+	 *
+	 * A password is never stored as typed; even its hash (when a field opts
+	 * in) is not sent to the browser. The entry shows "Password provided".
+	 *
+	 * @param mixed $submission Submission row.
+	 * @return mixed
+	 */
+	public function redactSecrets( $submission ) {
+		if ( ! is_array( $submission ) ) {
+			return $submission;
+		}
+		$payload = $submission['payload'] ?? null;
+		if ( is_string( $payload ) ) {
+			$payload = json_decode( $payload, true );
+		}
+		if ( ! is_array( $payload ) ) {
+			return $submission;
+		}
+		$keys = $this->secretKeysForForm( (int) ( $submission['form_id'] ?? 0 ) );
+		if ( isset( $submission['schema'] ) && is_array( $submission['schema'] ) ) {
+			$keys = array_merge( $keys, \SubtleForms\Support\EntryValues::secretKeys( $submission['schema'] ) );
+		}
+		$changed = false;
+		foreach ( array_unique( $keys ) as $key ) {
+			if ( array_key_exists( $key, $payload ) ) {
+				$payload[ $key ] = \SubtleForms\Support\EntryValues::passwordLabel( $payload[ $key ] );
+				$changed         = true;
+			}
+		}
+		if ( $changed ) {
+			$submission['payload'] = $payload;
+		}
+		return $submission;
+	}
+
+	/**
+	 * Keys of a form's secret (password) fields, cached per request.
+	 *
+	 * Every schema version is checked, so a password field removed since an
+	 * entry was made is still left out.
+	 *
+	 * @param int $formId Form ID.
+	 * @return string[]
+	 */
+	private function secretKeysForForm( int $formId ): array {
+		static $cache = array();
+		if ( $formId <= 0 ) {
+			return array();
+		}
+		if ( isset( $cache[ $formId ] ) ) {
+			return $cache[ $formId ];
+		}
+		$keys = array();
+		try {
+			$versions = $this->formsRepo->getSchemaVersions( $formId );
+			foreach ( (array) $versions as $version ) {
+				$number = is_array( $version ) ? (int) ( $version['version'] ?? 0 ) : (int) $version;
+				$loaded = $number > 0 ? $this->formsRepo->loadSchemaVersion( $formId, $number ) : null;
+				$schema = is_array( $loaded ) ? ( $loaded['schema'] ?? $loaded ) : array();
+				$keys   = array_merge( $keys, \SubtleForms\Support\EntryValues::secretKeys( is_array( $schema ) ? $schema : array() ) );
+			}
+			if ( ! $keys ) {
+				$loaded = $this->formsRepo->loadSchemaVersion( $formId );
+				$schema = is_array( $loaded ) ? ( $loaded['schema'] ?? $loaded ) : array();
+				$keys   = \SubtleForms\Support\EntryValues::secretKeys( is_array( $schema ) ? $schema : array() );
+			}
+		} catch ( \Throwable $e ) {
+			$keys = array();
+		}
+		$cache[ $formId ] = array_values( array_unique( $keys ) );
+		return $cache[ $formId ];
 	}
 
 	/**

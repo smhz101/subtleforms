@@ -12,8 +12,10 @@ import {
   validateFields,
 } from '../utils/fieldValidation';
 import { warnOnce } from '../utils/warnOnce';
+import { serverFieldErrors, fixFieldsSummary } from '../utils/serverErrors';
 import { getFormClassNames } from '../utils/formStyles';
 import { debug } from '../../shared/debug';
+import { fieldConfig } from '../../shared/fieldConfig';
 import { computeQuote, isPricedForm, formatMoney, isPricedType } from '../../shared/pricing';
 import { PaymentContext } from './fields/Payments';
 import { FormContext } from './fields/FileUpload';
@@ -62,6 +64,9 @@ export default function FormRenderer({
   const [confirmationView, setConfirmationView] = useState(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [validationErrors, setValidationErrors] = useState({});
+  // "Please fix the N highlighted fields." shown above the form while any
+  // field (client or server checked) has an error (bug 2).
+  const [errorSummary, setErrorSummary] = useState('');
   const [isSubmitIntentional, setIsSubmitIntentional] = useState(false);
   const [liveMessage, setLiveMessage] = useState('');
   const liveRegionRef = useRef(null);
@@ -69,6 +74,14 @@ export default function FormRenderer({
   // THIS form only — document.querySelector would jump across forms when two
   // forms share a page (A2/P1-5).
   const formRootRef = useRef(null);
+  // Random per mount: a name like "website" invites autofill (bug 16). The
+  // value is still sent to the server as website_url.
+  const honeypotSuffix = useMemo(
+    () => Math.random().toString(36).slice(2, 10),
+    []
+  );
+  const honeypotName = `sf_hp_${honeypotSuffix}`;
+  const honeypotId = `subtleforms-hp-${formId}-${honeypotSuffix}`;
 
   // Load schema (skip if preloaded)
   useEffect(() => {
@@ -250,7 +263,7 @@ export default function FormRenderer({
   const calculationFields = useMemo(
     () =>
       allFields.filter(
-        (f) => f.type === 'calculation' && (f.config ?? f).formula
+        (f) => f.type === 'calculation' && fieldConfig(f).formula
       ),
     [allFields]
   );
@@ -260,7 +273,7 @@ export default function FormRenderer({
       let next = prev;
       for (let pass = 0; pass < 2; pass++) {
         calculationFields.forEach((f) => {
-          const c = f.config ?? f;
+          const c = fieldConfig(f);
           const key = c.key || f.key;
           const result = evaluateFormula(c.formula, next, c.decimals ?? 2);
           if (next[key] !== result) {
@@ -405,11 +418,45 @@ export default function FormRenderer({
         }
         const next = { ...prev };
         delete next[path];
+        if (Object.keys(next).length === 0) {
+          setErrorSummary('');
+        }
         return next;
       });
     },
     [containerPaths]
   );
+
+  // Move focus to the first invalid input, scoped to this form's root element
+  // so two forms on one page don't steal focus from each other (A2/P1-5).
+  const focusFirstInvalid = useCallback((errorCount = 0) => {
+    if (errorCount > 0) {
+      const summary = fixFieldsSummary(errorCount);
+      setErrorSummary(summary);
+      setLiveMessage(summary);
+    }
+    // Two frames: the error state has to render before aria-invalid exists.
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        const root = formRootRef.current;
+        if (!root) return;
+        const firstErrorInput = root.querySelector(
+          'input[aria-invalid="true"], select[aria-invalid="true"], textarea[aria-invalid="true"], [role="textbox"][aria-invalid="true"], [aria-invalid="true"]'
+        );
+        let target = firstErrorInput;
+        // A radio or checkbox group marks the group; focus its first input.
+        if (target && !/^(INPUT|SELECT|TEXTAREA)$/.test(target.tagName) && target.getAttribute('role') !== 'textbox') {
+          target = target.querySelector('input, select, textarea, [tabindex]') || target;
+        }
+        if (target && typeof target.focus === 'function') {
+          target.focus();
+          if (typeof target.scrollIntoView === 'function') {
+            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          }
+        }
+      })
+    );
+  }, []);
 
   // Validate current step
   const validateStep = useCallback(() => {
@@ -423,8 +470,14 @@ export default function FormRenderer({
     const errors = validateFields(fieldsOnCurrentStep, values, hiddenFields);
 
     setValidationErrors(errors);
-    return Object.keys(errors).length === 0;
-  }, [hasSteps, currentStep, fieldsToRender, hiddenFields, values]);
+    const count = Object.keys(errors).length;
+    if (count > 0) {
+      focusFirstInvalid(count);
+    } else {
+      setErrorSummary('');
+    }
+    return count === 0;
+  }, [hasSteps, currentStep, fieldsToRender, hiddenFields, values, focusFirstInvalid]);
 
   // Handle step navigation
   // IMPORTANT: Step navigation NEVER triggers submission
@@ -452,35 +505,6 @@ export default function FormRenderer({
     // Multi-step forms should only submit when user clicks Submit button
   }, [currentStepIndex, steps, validateStep, values, nextVisibleStep]);
 
-  // Move focus to the first invalid input, scoped to this form's root element
-  // so two forms on one page don't steal focus from each other (A2/P1-5).
-  const focusFirstInvalid = useCallback(() => {
-    requestAnimationFrame(() => {
-      const root = formRootRef.current;
-      if (!root) return;
-      const firstErrorInput = root.querySelector(
-        '[aria-invalid="true"]'
-      );
-      if (firstErrorInput && typeof firstErrorInput.focus === 'function') {
-        firstErrorInput.focus();
-        firstErrorInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-      const errorCount = Object.keys(validationErrors).length;
-      if (errorCount > 0) {
-        setLiveMessage(
-          sprintf(
-            _n(
-              'Please fix %d error before submitting.',
-              'Please fix %d errors before submitting.',
-              errorCount,
-              'subtleforms'
-            ),
-            errorCount
-          )
-        );
-      }
-    });
-  }, [validationErrors]);
 
   const handlePrevStep = useCallback(() => {
     debug('[SubtleForms] Prev Step:', {
@@ -580,6 +604,29 @@ export default function FormRenderer({
   // Form details for fields that talk to the server (uploads).
   const formContext = useMemo(() => ({ formId, preview }), [formId, preview]);
 
+  // On a multi-step form, show the first step that has a field in error.
+  const goToStepWithError = useCallback(
+    (errors) => {
+      if (!hasSteps) return;
+      const keys = new Set(Object.keys(errors || {}));
+      const stepHasError = (nodes) =>
+        (nodes || []).some((n) => {
+          const k = n?.config?.key || n?.key;
+          if (k && keys.has(k)) return true;
+          return (
+            stepHasError(n?.children) ||
+            stepHasError(n?.fields) ||
+            (Array.isArray(n?.columns) && n.columns.some((c) => Array.isArray(c) && stepHasError(c)))
+          );
+        });
+      const index = steps.findIndex((step) => stepHasError(step.children || step.fields));
+      if (index !== -1 && index !== currentStepIndex) {
+        setCurrentStepIndex(index);
+      }
+    },
+    [hasSteps, steps, currentStepIndex]
+  );
+
   // Handle form submission
   // SUBMISSION GUARD: Only submit when explicitly requested via Submit button
   const handleSubmit = useCallback(
@@ -610,7 +657,9 @@ export default function FormRenderer({
         const errors = validateFields(fieldsToValidate, values, hiddenFields);
         setValidationErrors(errors);
         if (Object.keys(errors).length > 0) {
-          focusFirstInvalid();
+          focusFirstInvalid(Object.keys(errors).length);
+        } else {
+          setErrorSummary('');
         }
         if (customOnSubmit) {
           customOnSubmit();
@@ -619,31 +668,24 @@ export default function FormRenderer({
       }
 
       // For submission, validate all required fields across all steps, not just current step
-      const validateAllSteps = () => {
-        if (!hasSteps) {
-          return validateStep(); // For non-step forms, use normal validation
-        }
+      const allFieldsToCheck = hasSteps
+        ? steps.flatMap((step) => step.children || step.fields || [])
+        : fieldsToRender;
+      const clientErrors = validateFields(allFieldsToCheck, values, hiddenFields);
+      setValidationErrors(clientErrors);
 
-        const allStepFields = steps.flatMap(
-          (step) => step.children || step.fields || []
-        );
-
-        const errors = validateFields(allStepFields, values, hiddenFields);
-
-        setValidationErrors(errors);
-        return Object.keys(errors).length === 0;
-      };
-
-      if (!validateAllSteps()) {
+      if (Object.keys(clientErrors).length > 0) {
         // Focus first errored field for keyboard/screen reader users, scoped
         // to this form's root so two forms on one page never steal focus
         // from each other (A2/P1-5).
-        focusFirstInvalid();
+        goToStepWithError(clientErrors);
+        focusFirstInvalid(Object.keys(clientErrors).length);
         return;
       }
 
       setSubmitting(true);
       setSubmitError(null);
+      setErrorSummary('');
 
       // Handle reCAPTCHA v3 if present
       const recaptchaV3Input = document.querySelector(
@@ -726,7 +768,7 @@ export default function FormRenderer({
         // rendered in the DOM (Part B3); read its value so a bot that filled
         // it is rejected server-side.
         const honeypotInput = formRootRef.current?.querySelector(
-          'input[name="website_url"]'
+          'input[data-subtleforms-honeypot]'
         );
         const submissionPayload = {
           ...payload,
@@ -878,14 +920,20 @@ export default function FormRenderer({
             customOnSubmit(result.data);
           }
         } else {
-          // If backend returned structured field errors, store them for per-field display.
-          const errors = result?.data?.errors || result?.error?.meta?.errors || result?.errors;
-          if (errors && typeof errors === 'object') {
-            setValidationErrors(errors);
+          // Field errors from the server (422, meta.fields) go on the fields
+          // themselves, exactly like client-side errors (bug 2).
+          const fieldErrors = serverFieldErrors(result);
+          const count = Object.keys(fieldErrors).length;
+          if (count > 0) {
+            setValidationErrors(fieldErrors);
+            setSubmitError(null);
+            goToStepWithError(fieldErrors);
+            focusFirstInvalid(count);
+          } else {
+            setSubmitError(
+              result?.error?.message || result?.data?.message || __('Submission failed.', 'subtleforms')
+            );
           }
-          setSubmitError(
-            result?.error?.message || result?.data?.message || __('Submission failed.', 'subtleforms')
-          );
         }
       } catch (err) {
         setSubmitError(__('Network error. Please try again.', 'subtleforms'));
@@ -905,6 +953,8 @@ export default function FormRenderer({
       steps,
       hiddenFields,
       focusFirstInvalid,
+      goToStepWithError,
+      fieldsToRender,
       defaultValues,
       schema,
       isPriced,
@@ -1080,23 +1130,32 @@ export default function FormRenderer({
         onSubmit={handleSubmit}>
         {/* Honeypot: a visually hidden field real users never see but bots
             fill in. The server rejects any submission that has a value here
-            (Part B3). It is excluded from tab order and screen readers. */}
+            (Part B3). It is excluded from tab order and screen readers, its
+            name is random per page view so autofill and password managers do
+            not recognise it, and its label is not part of the page text that
+            readers and scrapers pick up (bug 16). */}
         <div className='subtleforms-honeypot' aria-hidden='true'>
-          <label htmlFor={`subtleforms-honeypot-${formId}`}>
-            {__('Website', 'subtleforms')}
+          <label htmlFor={honeypotId}>
+            <span className='subtleforms-sr-only'>
+              {__('Leave this field empty', 'subtleforms')}
+            </span>
           </label>
           <input
-            id={`subtleforms-honeypot-${formId}`}
+            id={honeypotId}
             type='text'
-            name='website_url'
+            name={honeypotName}
+            data-subtleforms-honeypot='1'
             tabIndex={-1}
             autoComplete='off'
+            data-lpignore='true'
+            data-1p-ignore='true'
+            data-form-type='other'
             aria-hidden='true'
           />
         </div>
-        {submitError && (
+        {(submitError || errorSummary) && (
           <div className='subtleforms-error' role='alert'>
-            {submitError}
+            {submitError || errorSummary}
           </div>
         )}
 

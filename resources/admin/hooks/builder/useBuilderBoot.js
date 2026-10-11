@@ -207,14 +207,19 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
           payload.metadata.title = generateDefaultTitle();
         }
 
+        // The form endpoint answers { data: form }; reading status off the
+        // envelope always gave "draft", so a live form opened in the builder
+        // was labelled Draft (2.2.1, bug 12).
+        const formBody = formRes.ok ? formRes.body?.data ?? formRes.body ?? {} : {};
+
         dispatch({
           type: BUILDER_ACTIONS.LOAD_SUCCESS,
           payload: {
             form: {
               id: formId,
               title: payload.metadata.title,
-              status: formRes.ok && formRes.body ? formRes.body.status || 'draft' : 'draft',
-              has_unpublished_changes: !!(formRes.ok && formRes.body && formRes.body.has_unpublished_changes),
+              status: formBody.status || 'draft',
+              has_unpublished_changes: !!formBody.has_unpublished_changes,
             },
             schema: payload,
           },

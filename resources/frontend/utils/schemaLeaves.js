@@ -35,6 +35,14 @@ const INPUT_FIELD_TYPES = new Set([
   'color_picker',
   'rich_text',
   'checkbox_grid',
+  // 2.0 fields. Missing here meant their answers never reached the server:
+  // Toggle and Opinion scale (2.2.1, bug 15) and Picture choice, Signature and
+  // Calculation (bug 14).
+  'toggle',
+  'scale',
+  'picture_choice',
+  'signature',
+  'calculation',
   // Payment
   'payment_amount',
   'payment_product',

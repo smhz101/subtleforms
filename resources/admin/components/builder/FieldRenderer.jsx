@@ -13,7 +13,7 @@ const NON_INPUT_TYPES = new Set([
   'section_break', 'form_step', 'repeat_field', 'html', 'hidden',
   'one_column_container', 'two_column_container', 'three_column_container',
   'four_column_container', 'five_column_container', 'six_column_container',
-  'repeat_container', 'group_container', 'step', 'action_hook',
+  'repeat_container', 'group_container', 'step', 'action_hook', 'disclaimer',
   'payment_summary', 'payment_hidden_price', 'calculation', 'payment_card',
   'recaptcha', 'hcaptcha', 'turnstile',
 ]);
@@ -31,6 +31,11 @@ const KNOWN_TYPES = new Set([
   'rich_text', 'net_promoter_score', 'checkbox_grid',
   'toggle', 'scale', 'picture_choice', 'calculation',
 ]);
+
+/** Whether authored HTML has any visible text. */
+function hasText(html) {
+  return typeof html === 'string' && html.replace(/<[^>]*>/g, '').replace(/&nbsp;|\s/g, '').length > 0;
+}
 
 /**
  * FieldRenderer - Memoized field preview component
@@ -248,14 +253,34 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       )}
 
       {type === 'calculation' && (
-        <div className='sf-field-renderer__calculation'>
-          <span className='sf-field-renderer__calculation-value'>
-            {field.prefix}0.{'0'.repeat(Math.max(0, parseInt(field.decimals ?? 2, 10)))}{field.suffix}
-          </span>
-          <code className='sf-field-renderer__calculation-formula'>
-            {field.formula || __('Add a formula in settings', 'subtleforms')}
-          </code>
-        </div>
+        String(field.formula || '').trim() ? (
+          <div className='sf-field-renderer__calculation'>
+            <span className='sf-field-renderer__calculation-value'>
+              {field.prefix}0{parseInt(field.decimals ?? 2, 10) > 0 ? '.' + '0'.repeat(parseInt(field.decimals ?? 2, 10)) : ''}{field.suffix}
+            </span>
+            <code className='sf-field-renderer__calculation-formula'>{field.formula}</code>
+          </div>
+        ) : (
+          // No formula yet: say what to do instead of showing a fake 0.00. The
+          // field is hidden on the live form until it has one (bug 9).
+          <p className='sf-field-renderer__placeholder-note'>
+            {__('Add a formula in the field settings', 'subtleforms')}
+          </p>
+        )
+      )}
+
+      {type === 'disclaimer' && (
+        hasText(field.content) ? (
+          <div
+            className={`sf-field-renderer__disclaimer sf-field-renderer__disclaimer--${field.variant || 'info'}`}
+            dangerouslySetInnerHTML={{ __html: field.content }}
+          />
+        ) : (
+          // Empty disclaimers are not shown on the live form (bug 10).
+          <p className='sf-field-renderer__placeholder-note'>
+            {__('Add the disclaimer text in the field settings. Empty disclaimers are hidden on the live form.', 'subtleforms')}
+          </p>
+        )
       )}
 
       {type === 'textarea' && (
@@ -736,9 +761,16 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       )}
 
       {/* ── Checkbox Grid ───────────────────────────────────────────────────── */}
-      {type === 'checkbox_grid' && (() => {
-        const gridCols = field.columns?.length ? field.columns : ['Option 1', 'Option 2'];
-        const gridRows = field.rows?.length ? field.rows : ['Row 1', 'Row 2'];
+      {type === 'checkbox_grid' && !(field.columns?.length && field.rows?.length) && (
+        // Nothing to answer yet; the live form hides an empty matrix (bug 8).
+        <p className='sf-field-renderer__placeholder-note'>
+          {__('Add at least one row and one column in the field settings.', 'subtleforms')}
+        </p>
+      )}
+
+      {type === 'checkbox_grid' && field.columns?.length > 0 && field.rows?.length > 0 && (() => {
+        const gridCols = field.columns;
+        const gridRows = field.rows;
         const gridStyle = { '--sf-grid-cols': gridCols.length };
         return (
           <div className='sf-field-renderer__checkbox-grid'>

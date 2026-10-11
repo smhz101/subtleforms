@@ -15,6 +15,8 @@ import {
   usePayment,
 } from './fields/Payments';
 import { getFieldType } from '../../shared/extend';
+import { fieldConfig } from '../../shared/fieldConfig';
+import { COUNTRIES, orderedCountries } from '../../shared/countries';
 import {
   fieldAppearanceStyle,
   fieldAppearanceClasses,
@@ -35,258 +37,6 @@ const AUTOCOMPLETE_TOKENS = {
   password: 'new-password',
 };
 
-// ISO 3166-1 Alpha-2 country codes
-const COUNTRIES = [
-  { code: 'AF', name: 'Afghanistan' },
-  { code: 'AX', name: 'Åland Islands' },
-  { code: 'AL', name: 'Albania' },
-  { code: 'DZ', name: 'Algeria' },
-  { code: 'AS', name: 'American Samoa' },
-  { code: 'AD', name: 'Andorra' },
-  { code: 'AO', name: 'Angola' },
-  { code: 'AI', name: 'Anguilla' },
-  { code: 'AQ', name: 'Antarctica' },
-  { code: 'AG', name: 'Antigua and Barbuda' },
-  { code: 'AR', name: 'Argentina' },
-  { code: 'AM', name: 'Armenia' },
-  { code: 'AW', name: 'Aruba' },
-  { code: 'AU', name: 'Australia' },
-  { code: 'AT', name: 'Austria' },
-  { code: 'AZ', name: 'Azerbaijan' },
-  { code: 'BS', name: 'Bahamas' },
-  { code: 'BH', name: 'Bahrain' },
-  { code: 'BD', name: 'Bangladesh' },
-  { code: 'BB', name: 'Barbados' },
-  { code: 'BY', name: 'Belarus' },
-  { code: 'BE', name: 'Belgium' },
-  { code: 'BZ', name: 'Belize' },
-  { code: 'BJ', name: 'Benin' },
-  { code: 'BM', name: 'Bermuda' },
-  { code: 'BT', name: 'Bhutan' },
-  { code: 'BO', name: 'Bolivia' },
-  { code: 'BQ', name: 'Bonaire, Sint Eustatius and Saba' },
-  { code: 'BA', name: 'Bosnia and Herzegovina' },
-  { code: 'BW', name: 'Botswana' },
-  { code: 'BV', name: 'Bouvet Island' },
-  { code: 'BR', name: 'Brazil' },
-  { code: 'IO', name: 'British Indian Ocean Territory' },
-  { code: 'BN', name: 'Brunei Darussalam' },
-  { code: 'BG', name: 'Bulgaria' },
-  { code: 'BF', name: 'Burkina Faso' },
-  { code: 'BI', name: 'Burundi' },
-  { code: 'CV', name: 'Cabo Verde' },
-  { code: 'KH', name: 'Cambodia' },
-  { code: 'CM', name: 'Cameroon' },
-  { code: 'CA', name: 'Canada' },
-  { code: 'KY', name: 'Cayman Islands' },
-  { code: 'CF', name: 'Central African Republic' },
-  { code: 'TD', name: 'Chad' },
-  { code: 'CL', name: 'Chile' },
-  { code: 'CN', name: 'China' },
-  { code: 'CX', name: 'Christmas Island' },
-  { code: 'CC', name: 'Cocos (Keeling) Islands' },
-  { code: 'CO', name: 'Colombia' },
-  { code: 'KM', name: 'Comoros' },
-  { code: 'CG', name: 'Congo' },
-  { code: 'CD', name: 'Congo, Democratic Republic of the' },
-  { code: 'CK', name: 'Cook Islands' },
-  { code: 'CR', name: 'Costa Rica' },
-  { code: 'CI', name: "Côte d'Ivoire" },
-  { code: 'HR', name: 'Croatia' },
-  { code: 'CU', name: 'Cuba' },
-  { code: 'CW', name: 'Curaçao' },
-  { code: 'CY', name: 'Cyprus' },
-  { code: 'CZ', name: 'Czechia' },
-  { code: 'DK', name: 'Denmark' },
-  { code: 'DJ', name: 'Djibouti' },
-  { code: 'DM', name: 'Dominica' },
-  { code: 'DO', name: 'Dominican Republic' },
-  { code: 'EC', name: 'Ecuador' },
-  { code: 'EG', name: 'Egypt' },
-  { code: 'SV', name: 'El Salvador' },
-  { code: 'GQ', name: 'Equatorial Guinea' },
-  { code: 'ER', name: 'Eritrea' },
-  { code: 'EE', name: 'Estonia' },
-  { code: 'SZ', name: 'Eswatini' },
-  { code: 'ET', name: 'Ethiopia' },
-  { code: 'FK', name: 'Falkland Islands (Malvinas)' },
-  { code: 'FO', name: 'Faroe Islands' },
-  { code: 'FJ', name: 'Fiji' },
-  { code: 'FI', name: 'Finland' },
-  { code: 'FR', name: 'France' },
-  { code: 'GF', name: 'French Guiana' },
-  { code: 'PF', name: 'French Polynesia' },
-  { code: 'TF', name: 'French Southern Territories' },
-  { code: 'GA', name: 'Gabon' },
-  { code: 'GM', name: 'Gambia' },
-  { code: 'GE', name: 'Georgia' },
-  { code: 'DE', name: 'Germany' },
-  { code: 'GH', name: 'Ghana' },
-  { code: 'GI', name: 'Gibraltar' },
-  { code: 'GR', name: 'Greece' },
-  { code: 'GL', name: 'Greenland' },
-  { code: 'GD', name: 'Grenada' },
-  { code: 'GP', name: 'Guadeloupe' },
-  { code: 'GU', name: 'Guam' },
-  { code: 'GT', name: 'Guatemala' },
-  { code: 'GG', name: 'Guernsey' },
-  { code: 'GN', name: 'Guinea' },
-  { code: 'GW', name: 'Guinea-Bissau' },
-  { code: 'GY', name: 'Guyana' },
-  { code: 'HT', name: 'Haiti' },
-  { code: 'HM', name: 'Heard Island and McDonald Islands' },
-  { code: 'VA', name: 'Holy See' },
-  { code: 'HN', name: 'Honduras' },
-  { code: 'HK', name: 'Hong Kong' },
-  { code: 'HU', name: 'Hungary' },
-  { code: 'IS', name: 'Iceland' },
-  { code: 'IN', name: 'India' },
-  { code: 'ID', name: 'Indonesia' },
-  { code: 'IR', name: 'Iran' },
-  { code: 'IQ', name: 'Iraq' },
-  { code: 'IE', name: 'Ireland' },
-  { code: 'IM', name: 'Isle of Man' },
-  { code: 'IL', name: 'Israel' },
-  { code: 'IT', name: 'Italy' },
-  { code: 'JM', name: 'Jamaica' },
-  { code: 'JP', name: 'Japan' },
-  { code: 'JE', name: 'Jersey' },
-  { code: 'JO', name: 'Jordan' },
-  { code: 'KZ', name: 'Kazakhstan' },
-  { code: 'KE', name: 'Kenya' },
-  { code: 'KI', name: 'Kiribati' },
-  { code: 'KP', name: "Korea, Democratic People's Republic of" },
-  { code: 'KR', name: 'Korea, Republic of' },
-  { code: 'KW', name: 'Kuwait' },
-  { code: 'KG', name: 'Kyrgyzstan' },
-  { code: 'LA', name: "Lao People's Democratic Republic" },
-  { code: 'LV', name: 'Latvia' },
-  { code: 'LB', name: 'Lebanon' },
-  { code: 'LS', name: 'Lesotho' },
-  { code: 'LR', name: 'Liberia' },
-  { code: 'LY', name: 'Libya' },
-  { code: 'LI', name: 'Liechtenstein' },
-  { code: 'LT', name: 'Lithuania' },
-  { code: 'LU', name: 'Luxembourg' },
-  { code: 'MO', name: 'Macao' },
-  { code: 'MG', name: 'Madagascar' },
-  { code: 'MW', name: 'Malawi' },
-  { code: 'MY', name: 'Malaysia' },
-  { code: 'MV', name: 'Maldives' },
-  { code: 'ML', name: 'Mali' },
-  { code: 'MT', name: 'Malta' },
-  { code: 'MH', name: 'Marshall Islands' },
-  { code: 'MQ', name: 'Martinique' },
-  { code: 'MR', name: 'Mauritania' },
-  { code: 'MU', name: 'Mauritius' },
-  { code: 'YT', name: 'Mayotte' },
-  { code: 'MX', name: 'Mexico' },
-  { code: 'FM', name: 'Micronesia' },
-  { code: 'MD', name: 'Moldova' },
-  { code: 'MC', name: 'Monaco' },
-  { code: 'MN', name: 'Mongolia' },
-  { code: 'ME', name: 'Montenegro' },
-  { code: 'MS', name: 'Montserrat' },
-  { code: 'MA', name: 'Morocco' },
-  { code: 'MZ', name: 'Mozambique' },
-  { code: 'MM', name: 'Myanmar' },
-  { code: 'NA', name: 'Namibia' },
-  { code: 'NR', name: 'Nauru' },
-  { code: 'NP', name: 'Nepal' },
-  { code: 'NL', name: 'Netherlands' },
-  { code: 'NC', name: 'New Caledonia' },
-  { code: 'NZ', name: 'New Zealand' },
-  { code: 'NI', name: 'Nicaragua' },
-  { code: 'NE', name: 'Niger' },
-  { code: 'NG', name: 'Nigeria' },
-  { code: 'NU', name: 'Niue' },
-  { code: 'NF', name: 'Norfolk Island' },
-  { code: 'MK', name: 'North Macedonia' },
-  { code: 'MP', name: 'Northern Mariana Islands' },
-  { code: 'NO', name: 'Norway' },
-  { code: 'OM', name: 'Oman' },
-  { code: 'PK', name: 'Pakistan' },
-  { code: 'PW', name: 'Palau' },
-  { code: 'PS', name: 'Palestine, State of' },
-  { code: 'PA', name: 'Panama' },
-  { code: 'PG', name: 'Papua New Guinea' },
-  { code: 'PY', name: 'Paraguay' },
-  { code: 'PE', name: 'Peru' },
-  { code: 'PH', name: 'Philippines' },
-  { code: 'PN', name: 'Pitcairn' },
-  { code: 'PL', name: 'Poland' },
-  { code: 'PT', name: 'Portugal' },
-  { code: 'PR', name: 'Puerto Rico' },
-  { code: 'QA', name: 'Qatar' },
-  { code: 'RE', name: 'Réunion' },
-  { code: 'RO', name: 'Romania' },
-  { code: 'RU', name: 'Russian Federation' },
-  { code: 'RW', name: 'Rwanda' },
-  { code: 'BL', name: 'Saint Barthélemy' },
-  { code: 'SH', name: 'Saint Helena, Ascension and Tristan da Cunha' },
-  { code: 'KN', name: 'Saint Kitts and Nevis' },
-  { code: 'LC', name: 'Saint Lucia' },
-  { code: 'MF', name: 'Saint Martin (French part)' },
-  { code: 'PM', name: 'Saint Pierre and Miquelon' },
-  { code: 'VC', name: 'Saint Vincent and the Grenadines' },
-  { code: 'WS', name: 'Samoa' },
-  { code: 'SM', name: 'San Marino' },
-  { code: 'ST', name: 'Sao Tome and Principe' },
-  { code: 'SA', name: 'Saudi Arabia' },
-  { code: 'SN', name: 'Senegal' },
-  { code: 'RS', name: 'Serbia' },
-  { code: 'SC', name: 'Seychelles' },
-  { code: 'SL', name: 'Sierra Leone' },
-  { code: 'SG', name: 'Singapore' },
-  { code: 'SX', name: 'Sint Maarten (Dutch part)' },
-  { code: 'SK', name: 'Slovakia' },
-  { code: 'SI', name: 'Slovenia' },
-  { code: 'SB', name: 'Solomon Islands' },
-  { code: 'SO', name: 'Somalia' },
-  { code: 'ZA', name: 'South Africa' },
-  { code: 'GS', name: 'South Georgia and the South Sandwich Islands' },
-  { code: 'SS', name: 'South Sudan' },
-  { code: 'ES', name: 'Spain' },
-  { code: 'LK', name: 'Sri Lanka' },
-  { code: 'SD', name: 'Sudan' },
-  { code: 'SR', name: 'Suriname' },
-  { code: 'SJ', name: 'Svalbard and Jan Mayen' },
-  { code: 'SE', name: 'Sweden' },
-  { code: 'CH', name: 'Switzerland' },
-  { code: 'SY', name: 'Syrian Arab Republic' },
-  { code: 'TW', name: 'Taiwan' },
-  { code: 'TJ', name: 'Tajikistan' },
-  { code: 'TZ', name: 'Tanzania, United Republic of' },
-  { code: 'TH', name: 'Thailand' },
-  { code: 'TL', name: 'Timor-Leste' },
-  { code: 'TG', name: 'Togo' },
-  { code: 'TK', name: 'Tokelau' },
-  { code: 'TO', name: 'Tonga' },
-  { code: 'TT', name: 'Trinidad and Tobago' },
-  { code: 'TN', name: 'Tunisia' },
-  { code: 'TR', name: 'Turkey' },
-  { code: 'TM', name: 'Turkmenistan' },
-  { code: 'TC', name: 'Turks and Caicos Islands' },
-  { code: 'TV', name: 'Tuvalu' },
-  { code: 'UG', name: 'Uganda' },
-  { code: 'UA', name: 'Ukraine' },
-  { code: 'AE', name: 'United Arab Emirates' },
-  { code: 'GB', name: 'United Kingdom' },
-  { code: 'US', name: 'United States' },
-  { code: 'UM', name: 'United States Minor Outlying Islands' },
-  { code: 'UY', name: 'Uruguay' },
-  { code: 'UZ', name: 'Uzbekistan' },
-  { code: 'VU', name: 'Vanuatu' },
-  { code: 'VE', name: 'Venezuela' },
-  { code: 'VN', name: 'Viet Nam' },
-  { code: 'VG', name: 'Virgin Islands, British' },
-  { code: 'VI', name: 'Virgin Islands, U.S.' },
-  { code: 'WF', name: 'Wallis and Futuna' },
-  { code: 'EH', name: 'Western Sahara' },
-  { code: 'YE', name: 'Yemen' },
-  { code: 'ZM', name: 'Zambia' },
-  { code: 'ZW', name: 'Zimbabwe' },
-];
 
 /**
  * Split a consent statement into text/link parts for rendering.
@@ -336,11 +86,11 @@ export default function FieldRenderer({
   errors,
   hiddenFields,
 }) {
-  // Normalise: the admin builder wraps properties under field.config, but the API
-  // serves flat schema nodes where properties sit directly on the field object.
-  // Using field.config when present keeps admin-builder usage intact; falling back
-  // to field itself handles the flat API format.
-  const config = field.config ?? field;
+  // Normalise: the admin builder wraps properties under field.config, the API
+  // serves flat nodes, and some saved forms carry both (a flat node plus a
+  // partial config holding only appearance). fieldConfig() merges them so a
+  // width never hides required, options, placeholder or help text (bug 1).
+  const config = fieldConfig(field);
 
   const resolvedPath = fieldPath || config.key || field.key;
   const label = config.label || field.label || resolvedPath;
@@ -391,7 +141,11 @@ export default function FieldRenderer({
 
   if (field.type === 'disclaimer') {
     // A dedicated disclaimer / notice block. Content is authored by an
-    // administrator and sanitized server-side on save.
+    // administrator and sanitized server-side on save. An empty disclaimer
+    // would show a lone icon, so it is not drawn at all (bug 10).
+    if (!hasVisibleText(config.content)) {
+      return null;
+    }
     const variant = config.variant || 'info';
     return (
       <div
@@ -425,6 +179,22 @@ export default function FieldRenderer({
         dangerouslySetInnerHTML={{ __html: config.content || '' }}
       />
     );
+  }
+
+  // A calculation with no formula has nothing to show (bug 9).
+  if (field.type === 'calculation' && !String(config.formula || '').trim()) {
+    return null;
+  }
+
+  // A matrix with no rows or no columns has nothing to answer (bug 8).
+  if (
+    field.type === 'checkbox_grid' &&
+    (!Array.isArray(config.rows) ||
+      !config.rows.length ||
+      !Array.isArray(config.columns) ||
+      !config.columns.length)
+  ) {
+    return null;
   }
 
   if (field.type === 'action_hook') {
@@ -610,7 +380,7 @@ export default function FieldRenderer({
         .filter(Boolean)
         .join(' ')}
       style={appearanceStyle}>
-      <label htmlFor={inputId} className='subtleforms-field-label'>
+      <label htmlFor={inputId} id={`${inputId}-label`} className='subtleforms-field-label'>
         {label}
         {required && (
           <span className='subtleforms-required' aria-label={', required'}>*</span>
@@ -658,11 +428,14 @@ function renderInput(
   error,
   values = {}
 ) {
-  const config = field.config ?? field;
+  const config = fieldConfig(field);
   const describedBy =
     [error ? `${inputId}-error` : null, config.description ? `${inputId}-help` : null]
       .filter(Boolean)
       .join(' ') || undefined;
+  // Every input carries the field key as its name, so the form degrades
+  // without JavaScript and autofill/password managers can match it (bug 11).
+  const name = config.key || field.key || undefined;
   const numOrUndef = (v) =>
     v === undefined || v === null || v === '' ? undefined : Number(v);
   const optionLayoutClass = config.optionLayout
@@ -690,11 +463,12 @@ function renderInput(
           value={value ?? ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
+          required={required || undefined}
           aria-required={required}
           aria-invalid={!!error}
           aria-describedby={describedBy}
-          name={config.key || field.key || undefined}
-          autoComplete={AUTOCOMPLETE_TOKENS[field.type]}
+          name={name}
+          autoComplete={config.autocomplete || AUTOCOMPLETE_TOKENS[field.type]}
           readOnly={config.readOnly === true}
           min={isNumeric ? numOrUndef(config.min) : field.type === 'date' ? config.minDate || undefined : undefined}
           max={isNumeric ? numOrUndef(config.max) : field.type === 'date' ? config.maxDate || undefined : undefined}
@@ -728,14 +502,15 @@ function renderInput(
         <textarea
           id={inputId}
           className='subtleforms-textarea'
-          value={value}
+          value={value ?? ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={numOrUndef(config.rows) || 4}
+          required={required || undefined}
           aria-required={required}
           aria-invalid={!!error}
           aria-describedby={describedBy}
-          name={config.key || field.key || undefined}
+          name={name}
           readOnly={config.readOnly === true}
           minLength={numOrUndef(config.minLength)}
           maxLength={numOrUndef(config.maxLength)}
@@ -743,17 +518,33 @@ function renderInput(
       );
 
     case 'checkbox':
+      // A single checkbox saved with a list of options (older forms, imports)
+      // is drawn as the checkbox group it was meant to be, so no answer is
+      // lost. New forms are converted to Multiple choice in the builder (bug 7).
+      if (Array.isArray(config.options) && config.options.length > 0) {
+        return renderCheckboxGroup(config.options, value, onChange, {
+          inputId,
+          name,
+          describedBy,
+          required,
+          error,
+          className: `subtleforms-checkbox-group${optionLayoutClass}`,
+        });
+      }
       return (
         <label className='subtleforms-checkbox-label' htmlFor={inputId}>
           <input
             id={inputId}
             type='checkbox'
             className='subtleforms-checkbox'
+            name={name}
+            value='1'
             checked={!!value}
             onChange={(e) => onChange(e.target.checked)}
+            required={required || undefined}
             aria-required={required}
             aria-invalid={!!error}
-            aria-describedby={error ? `${inputId}-error` : undefined}
+            aria-describedby={describedBy}
           />
           <span>
             {config.checkboxLabel || __('I agree', 'subtleforms')}
@@ -778,11 +569,14 @@ function renderInput(
             id={inputId}
             type='checkbox'
             className='subtleforms-checkbox subtleforms-consent-checkbox'
+            name={name}
+            value='1'
             checked={!!value}
             onChange={(e) => onChange(e.target.checked)}
+            required={required || undefined}
             aria-required={required}
             aria-invalid={!!error}
-            aria-describedby={error ? `${inputId}-error` : undefined}
+            aria-describedby={describedBy}
           />
           <span>
             {parts.map((part, i) =>
@@ -807,7 +601,13 @@ function renderInput(
     case 'radio':
       const radioOptions = config.options || [];
       return (
-        <div className={`subtleforms-radio-group${optionLayoutClass}`} role='radiogroup' aria-describedby={describedBy}>
+        <div
+          className={`subtleforms-radio-group${optionLayoutClass}`}
+          role='radiogroup'
+          aria-labelledby={`${inputId}-label`}
+          aria-required={required}
+          aria-invalid={!!error}
+          aria-describedby={describedBy}>
           {radioOptions.map((option, index) => {
             const optionId = `${inputId}-${index}`;
             return (
@@ -819,10 +619,11 @@ function renderInput(
                   id={optionId}
                   type='radio'
                   className='subtleforms-radio'
-                  name={config.key || field.key}
+                  name={name}
                   value={option.value}
                   checked={value === option.value}
                   onChange={(e) => onChange(e.target.value)}
+                  required={(required && index === 0) || undefined}
                 />
                 <span>{option.label}</span>
               </label>
@@ -834,38 +635,26 @@ function renderInput(
     case 'multiple_choice':
       const mcOptions = config.options || [];
       const allowMultiple = config.allowMultiple === true;
-      const mcValues = Array.isArray(value) ? value : value ? [value] : [];
+      if (allowMultiple) {
+        return renderCheckboxGroup(mcOptions, value, onChange, {
+          inputId,
+          name,
+          describedBy,
+          required,
+          error,
+          className: `subtleforms-checkbox-group${optionLayoutClass}`,
+        });
+      }
       return (
         <div
-          className={`${allowMultiple ? 'subtleforms-checkbox-group' : 'subtleforms-radio-group'}${optionLayoutClass}`}
-          role={allowMultiple ? 'group' : 'radiogroup'}
+          className={`subtleforms-radio-group${optionLayoutClass}`}
+          role='radiogroup'
+          aria-labelledby={`${inputId}-label`}
+          aria-required={required}
+          aria-invalid={!!error}
           aria-describedby={describedBy}>
           {mcOptions.map((option, index) => {
             const optionId = `${inputId}-${index}`;
-            if (allowMultiple) {
-              const isChecked = mcValues.includes(option.value);
-              return (
-                <label
-                  key={option.value || index}
-                  htmlFor={optionId}
-                  className='subtleforms-checkbox-label'>
-                  <input
-                    id={optionId}
-                    type='checkbox'
-                    className='subtleforms-checkbox'
-                    value={option.value}
-                    checked={isChecked}
-                    onChange={() => {
-                      const next = isChecked
-                        ? mcValues.filter((v) => v !== option.value)
-                        : [...mcValues, option.value];
-                      onChange(next);
-                    }}
-                  />
-                  <span>{option.label}</span>
-                </label>
-              );
-            }
             return (
               <label
                 key={option.value || index}
@@ -875,10 +664,11 @@ function renderInput(
                   id={optionId}
                   type='radio'
                   className='subtleforms-radio'
-                  name={config.key || field.key}
+                  name={name}
                   value={option.value}
                   checked={value === option.value}
                   onChange={(e) => onChange(e.target.value)}
+                  required={(required && index === 0) || undefined}
                 />
                 <span>{option.label}</span>
               </label>
@@ -894,10 +684,13 @@ function renderInput(
         <select
           id={inputId}
           className='subtleforms-select'
-          value={value}
+          name={name}
+          value={value ?? ''}
           onChange={(e) => onChange(e.target.value)}
+          required={required || undefined}
           aria-required={required}
-          aria-invalid={!!error}>
+          aria-invalid={!!error}
+          aria-describedby={describedBy}>
           <option value=''>
             {placeholder || __('Select an option', 'subtleforms')}
           </option>
@@ -909,38 +702,45 @@ function renderInput(
         </select>
       );
 
-    case 'country':
-      const countryList = config.countryList || [];
+    case 'country': {
+      // One shared list for this field and the Address field (bug 3). A copy
+      // stored in the field's settings is no longer needed.
       const outputFormat = config.output_format || 'code';
       const searchable = config.searchable !== false;
       return (
         <select
           id={inputId}
           className='subtleforms-select subtleforms-country-select'
-          value={value}
+          name={name}
+          value={value ?? ''}
           onChange={(e) => onChange(e.target.value)}
+          required={required || undefined}
           aria-required={required}
           aria-invalid={!!error}
+          aria-describedby={describedBy}
+          autoComplete='country'
           data-searchable={searchable}>
           <option value=''>
             {placeholder || __('Select a country', 'subtleforms')}
           </option>
-          {countryList.map((country, index) => (
+          {orderedCountries(config.preferred_countries).map((country) => (
             <option
-              key={country.value || index}
-              value={outputFormat === 'code' ? country.value : country.label}>
-              {country.label}
+              key={country.code}
+              value={outputFormat === 'name' ? country.name : country.code}>
+              {country.name}
             </option>
           ))}
         </select>
       );
+    }
 
     case 'hidden':
       return (
         <input
           id={inputId}
           type='hidden'
-          value={value}
+          name={name}
+          value={value ?? ''}
           onChange={(e) => onChange(e.target.value)}
         />
       );
@@ -972,14 +772,17 @@ function renderInput(
             id={inputId}
             type='number'
             className='subtleforms-input'
-            value={value}
+            name={name}
+            value={value ?? ''}
             onChange={(e) => onChange(e.target.value)}
             placeholder={placeholder}
             min={min}
             max={max}
             step={step}
+            required={required || undefined}
             aria-required={required}
             aria-invalid={!!error}
+            aria-describedby={describedBy}
           />
         </div>
       );
@@ -1004,7 +807,7 @@ function renderInput(
           onChange={onChange}
           inputId={inputId}
           error={error}
-          name={config.key || field.key}
+          name={name}
         />
       );
 
@@ -1254,14 +1057,20 @@ function renderInput(
       const ratingMax = config.max || 5;
       const ratingValue = parseInt(value, 10) || 0;
       return (
-        <div className='subtleforms-rating' role='radiogroup'>
+        <div
+          className='subtleforms-rating'
+          role='radiogroup'
+          aria-labelledby={`${inputId}-label`}
+          aria-required={required}
+          aria-invalid={!!error}
+          aria-describedby={describedBy}>
           {Array.from({ length: ratingMax }, (_, i) => {
             const star = i + 1;
             return (
               <label key={star} className='subtleforms-rating__star'>
                 <input
                   type='radio'
-                  name={config.key || field.key || inputId}
+                  name={name || inputId}
                   value={star}
                   checked={ratingValue === star}
                   onChange={() => onChange(star)}
@@ -1298,6 +1107,7 @@ function renderInput(
             id={inputId}
             type='range'
             className='subtleforms-range__input'
+            name={name}
             min={sliderMin}
             max={sliderMax}
             step={sliderStep}
@@ -1322,15 +1132,16 @@ function renderInput(
         <div
           className='subtleforms-nps'
           role='radiogroup'
+          aria-labelledby={`${inputId}-label`}
           aria-required={required}
           aria-invalid={!!error}
-          aria-describedby={error ? `${inputId}-error` : undefined}>
+          aria-describedby={describedBy}>
           <div className='subtleforms-nps__scale'>
             {Array.from({ length: 11 }, (_, score) => (
               <label key={score} className='subtleforms-nps__option'>
                 <input
                   type='radio'
-                  name={config.key || field.key || inputId}
+                  name={name || inputId}
                   value={score}
                   checked={npsValue === score}
                   onChange={() => onChange(score)}
@@ -1368,6 +1179,13 @@ function renderInput(
         `${row.label ?? row}: ${col.label ?? col}`;
 
       return (
+        <div
+          role='group'
+          className='subtleforms-checkbox-grid-wrap'
+          aria-labelledby={`${inputId}-label`}
+          aria-required={required}
+          aria-invalid={!!error}
+          aria-describedby={describedBy}>
         <table className='subtleforms-checkbox-grid'>
           <thead>
             <tr>
@@ -1398,7 +1216,8 @@ function renderInput(
                           <input
                             type='radio'
                             className='subtleforms-radio'
-                            name={`${config.key || field.key}-${rowKey}`}
+                            name={`${name}[${rowKey}]`}
+                            value={colKey}
                             checked={checked}
                             aria-label={cellLabel(row, col)}
                             onChange={() => onChange({ ...grid, [rowKey]: colKey })}
@@ -1411,6 +1230,8 @@ function renderInput(
                         <input
                           type='checkbox'
                           className='subtleforms-checkbox'
+                          name={`${name}[${rowKey}][${colKey}]`}
+                          value='1'
                           checked={checked}
                           // Each cell needs its own name for screen readers;
                           // the row/column headers alone are not announced
@@ -1434,6 +1255,7 @@ function renderInput(
             })}
           </tbody>
         </table>
+        </div>
       );
     }
 
@@ -1448,6 +1270,8 @@ function renderInput(
             type='checkbox'
             role='switch'
             className='subtleforms-toggle__input'
+            name={name}
+            value={onValue}
             checked={isOn}
             onChange={(e) => onChange(e.target.checked ? onValue : offValue)}
             aria-required={required}
@@ -1474,6 +1298,9 @@ function renderInput(
           <div
             className='subtleforms-scale__options'
             role='radiogroup'
+            aria-labelledby={`${inputId}-label`}
+            aria-required={required}
+            aria-invalid={!!error}
             aria-describedby={describedBy}
             style={{ '--subtleforms-scale-count': points.length }}>
             {points.map((point) => {
@@ -1488,7 +1315,7 @@ function renderInput(
                     id={optionId}
                     type='radio'
                     className='subtleforms-scale__input'
-                    name={config.key || field.key}
+                    name={name}
                     value={point}
                     checked={selected}
                     onChange={() => onChange(point)}
@@ -1517,6 +1344,9 @@ function renderInput(
         <div
           className='subtleforms-picture-choice'
           role={multiple ? 'group' : 'radiogroup'}
+          aria-labelledby={`${inputId}-label`}
+          aria-required={required}
+          aria-invalid={!!error}
           aria-describedby={describedBy}
           style={{ '--subtleforms-picture-columns': cols }}>
           {pcOptions.map((option, index) => {
@@ -1530,7 +1360,7 @@ function renderInput(
                 <input
                   id={optionId}
                   type={multiple ? 'checkbox' : 'radio'}
-                  name={config.key || field.key}
+                  name={name}
                   className='subtleforms-picture-choice__input'
                   value={option.value}
                   checked={isChecked}
@@ -1588,6 +1418,7 @@ function renderInput(
             id={inputId}
             type='color'
             className='subtleforms-color__swatch'
+            name={name}
             value={value || config.default || '#000000'}
             onChange={(e) => onChange(e.target.value)}
             aria-required={required}
@@ -1599,6 +1430,7 @@ function renderInput(
           <input
             type='text'
             className='subtleforms-color__hex'
+            name={name ? `${name}_hex` : undefined}
             value={value || config.default || '#000000'}
             onChange={(e) => onChange(e.target.value)}
             aria-label={__('Colour hex value', 'subtleforms')}
@@ -1611,6 +1443,8 @@ function renderInput(
       return (
         <SignaturePad
           inputId={inputId}
+          name={name}
+          describedBy={describedBy}
           value={value}
           onChange={onChange}
           required={required}
@@ -1622,6 +1456,8 @@ function renderInput(
       return (
         <RichTextInput
           inputId={inputId}
+          name={name}
+          describedBy={describedBy}
           value={value}
           onChange={onChange}
           placeholder={placeholder}
@@ -1634,6 +1470,8 @@ function renderInput(
       return (
         <ChainedSelect
           inputId={inputId}
+          name={name}
+          describedBy={describedBy}
           config={config}
           value={value}
           onChange={onChange}
@@ -1666,6 +1504,69 @@ function renderInput(
       );
     }
   }
+}
+
+/**
+ * A group of checkboxes that stores an array of the checked option values.
+ *
+ * @param {Array}    options  Options ({ label, value }).
+ * @param {*}        value    Current value (array, or a single value).
+ * @param {Function} onChange Called with the next array.
+ * @param {Object}   props    inputId, name, describedBy, required, error, className.
+ */
+function renderCheckboxGroup(options, value, onChange, props) {
+  const { inputId, name, describedBy, required, error, className } = props;
+  const current = Array.isArray(value) ? value : value ? [value] : [];
+  return (
+    <div
+      className={className}
+      role='group'
+      aria-labelledby={`${inputId}-label`}
+      aria-required={required}
+      aria-invalid={!!error}
+      aria-describedby={describedBy}>
+      {options.map((option, index) => {
+        const optionId = `${inputId}-${index}`;
+        const isChecked = current.includes(option.value);
+        return (
+          <label key={option.value || index} htmlFor={optionId} className='subtleforms-checkbox-label'>
+            <input
+              id={optionId}
+              type='checkbox'
+              className='subtleforms-checkbox'
+              name={name ? `${name}[]` : undefined}
+              value={option.value}
+              checked={isChecked}
+              onChange={() =>
+                onChange(
+                  isChecked
+                    ? current.filter((v) => v !== option.value)
+                    : [...current, option.value]
+                )
+              }
+            />
+            <span>{option.label}</span>
+          </label>
+        );
+      })}
+    </div>
+  );
+}
+
+/**
+ * Whether authored HTML has any visible text or media.
+ *
+ * @param {string} html Authored content.
+ * @return {boolean}
+ */
+export function hasVisibleText(html) {
+  if (typeof html !== 'string' || !html.trim()) {
+    return false;
+  }
+  if (/<(img|iframe|video|svg|hr)\b/i.test(html)) {
+    return true;
+  }
+  return html.replace(/<[^>]*>/g, '').replace(/&nbsp;|\s/g, '').length > 0;
 }
 
 /**
