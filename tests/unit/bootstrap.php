@@ -70,6 +70,20 @@ if ( ! function_exists( 'wp_strip_all_tags' ) ) {
 	}
 }
 
+if ( ! function_exists( 'get_option' ) ) {
+	function get_option( $name, $default = false ) {
+		return $GLOBALS['sf_test_options'][ $name ] ?? $default;
+	}
+}
+
+if ( ! function_exists( 'wp_kses_post' ) ) {
+	// Rough stand-in: drop script/style blocks and keep simple inline markup.
+	function wp_kses_post( $value ) {
+		$value = preg_replace( '#<(script|style)[^>]*>.*?</\\1>#is', '', (string) $value );
+		return strip_tags( $value, '<b><strong><em><i><a><br><p><ul><ol><li><span>' );
+	}
+}
+
 if ( ! function_exists( 'esc_url_raw' ) ) {
 	function esc_url_raw( $value ) {
 		return (string) $value;

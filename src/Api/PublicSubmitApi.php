@@ -24,6 +24,8 @@ use SubtleForms\Validation\RequestValidator;
 use SubtleForms\Validation\ValidationException;
 use SubtleForms\Validation\Schemas;
 use SubtleForms\Validation\Sanitizer;
+use SubtleForms\Payments\Pricing;
+use SubtleForms\Payments\CouponsRepository;
 use SubtleForms\Security\RateLimiter;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -226,6 +228,26 @@ final class PublicSubmitApi {
 		// tampered total (2.0).
 		$payload = self::applyCalculations( $payload, $activeSchema['schema'] ?? $activeSchema );
 
+		// Payments (2.1): price the order on the server, check the coupon and
+		// confirm the payment with the gateway before anything is stored.
+		$schemaForPricing = $activeSchema['schema'] ?? $activeSchema;
+		$order            = $this->priceOrder( $formId, $schemaForPricing, $payload, $request );
+		if ( $order instanceof WP_REST_Response ) {
+			return $order;
+		}
+		unset( $payload['_coupon'], $payload['_payment'] );
+		$voidPayment = static function () use ( $order ) {
+			if ( ! empty( $order['payment'] ) ) {
+				/**
+				 * The submission failed after the gateway authorised the payment.
+				 * Gateways release the hold here.
+				 *
+				 * @param array $payment Payment details.
+				 */
+				do_action( 'subtleforms/payment/void', $order['payment'] );
+			}
+		};
+
 		// Create submission record
 		try {
 			$submissionId = $this->submissionsRepo->create(
@@ -248,37 +270,9 @@ final class PublicSubmitApi {
 		$context->setMeta( 'submission_id', $submissionId );
 		$context->setMeta( 'schema_version', is_int( $formVersion ) ? $formVersion : null );
 
-		// Detect payment form
-		$isPaymentForm   = false;
-		$paymentMetadata = null;
-		if ( ! empty( $activeSchema['schema']['metadata']['type'] ) &&
-			$activeSchema['schema']['metadata']['type'] === 'payment' ) {
-			$isPaymentForm = true;
-
-			$paymentSettings = $activeSchema['schema']['metadata']['payment'] ?? array();
-
-			$amount = 0;
-			if ( ! empty( $paymentSettings['enabled'] ) ) {
-				if ( ( $paymentSettings['amountType'] ?? 'fixed' ) === 'fixed' ) {
-					$amount = floatval( $paymentSettings['fixedAmount'] ?? 0 );
-				} elseif ( ( $paymentSettings['amountType'] ?? '' ) === 'field' ) {
-					$amountField = $paymentSettings['amountField'] ?? '';
-					if ( ! empty( $amountField ) && isset( $payload[ $amountField ] ) ) {
-						$amount = floatval( $payload[ $amountField ] );
-					}
-				}
-			}
-
-			$paymentMetadata = array(
-				'status'         => 'pending',
-				'amount'         => $amount,
-				'currency'       => $paymentSettings['currency'] ?? 'USD',
-				'mode'           => $paymentSettings['mode'] ?? 'test',
-				'gateway'        => null,
-				'transaction_id' => null,
-				'created_at'     => current_time( 'mysql' ),
-			);
-
+		$isPaymentForm   = ! empty( $order['payment'] );
+		$paymentMetadata = $order['payment'] ?? null;
+		if ( $isPaymentForm ) {
 			$context->setMeta( 'payment_intent', $paymentMetadata );
 			$context->setMeta( 'is_payment_form', true );
 		}
@@ -296,6 +290,7 @@ final class PublicSubmitApi {
 				$steps = $this->compiler->compile( $activeSchema['schema'] );
 			} catch ( \InvalidArgumentException $e ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
+				$voidPayment();
 				Logger::error( 'Schema compilation failed for form %d: %s', $formId, $e->getMessage() );
 				return ApiResponse::bad_request( __( 'This form could not be processed. Please contact the site owner.', 'subtleforms' ) );
 			}
@@ -304,6 +299,7 @@ final class PublicSubmitApi {
 				$result = $this->pipeline->run( $steps, $context, $activeSchema['schema'] );
 			} catch ( \RuntimeException $e ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
+				$voidPayment();
 				Logger::error( 'Pipeline execution failed for submission %d: %s', $submissionId, $e->getMessage() );
 
 				$validationErrors = $context->getMeta( 'validation_errors' );
@@ -314,12 +310,14 @@ final class PublicSubmitApi {
 				return ApiResponse::server_error( __( 'Your submission could not be completed. Please try again later.', 'subtleforms' ) );
 			} catch ( \Throwable $e ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
+				$voidPayment();
 				Logger::error( 'Unexpected error in submission %d: %s', $submissionId, $e->getMessage() );
 				return ApiResponse::server_error( __( 'An unexpected error occurred', 'subtleforms' ) );
 			}
 
 			if ( ! $result->ok ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
+				$voidPayment();
 				Logger::error( 'Pipeline execution failed for submission %d: %s', $submissionId, $result->error );
 
 				$validationErrors = $context->getMeta( 'validation_errors' );
@@ -339,36 +337,43 @@ final class PublicSubmitApi {
 
 			if ( ! $isPaymentForm ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'completed' ) );
-			} else {
-					if ( $paymentMetadata ) {
-						$currentMeta = $finalSubmission['meta'] ?? array();
-						if ( ! is_array( $currentMeta ) ) {
-							$currentMeta = array();
-						}
-						$currentMeta['payment'] = $paymentMetadata;
-
-						$this->submissionsRepo->update(
-							$submissionId,
-							array(
-								'status' => 'payment_pending',
-								'meta'   => $currentMeta,
-							)
-						);
-					}
-
-					/**
-					 * Hook: subtleforms_payment_required
-					 *
-					 * @param int               $submissionId    The submission ID.
-					 * @param array             $paymentMetadata Payment intent data.
-					 * @param SubmissionContext  $context         Full submission context.
-					 * @since 1.2.0
-					 */
-					do_action( 'subtleforms/payment/required', $submissionId, $paymentMetadata, $context );
+				if ( ! empty( $order['quote']['coupon'] ) ) {
+					// A coupon that made the order free still counts as used.
+					$this->finishOrder( $submissionId, $finalSubmission, $order, 'free' );
 				}
+			} else {
+				/**
+				 * Capture an authorised payment now that the submission is safely
+				 * stored. Return the updated payment array, or a WP_Error.
+				 *
+				 * @param array $payment      Payment details.
+				 * @param int   $submissionId Submission ID.
+				 */
+				$captured = apply_filters( 'subtleforms/payment/capture', $paymentMetadata, $submissionId );
+				if ( is_wp_error( $captured ) ) {
+					$order['payment']['status'] = 'failed';
+					$order['payment']['error']  = $captured->get_error_message();
+					$this->finishOrder( $submissionId, $finalSubmission, $order, 'payment_failed' );
+					return ApiResponse::error( 'subtleforms_payment_failed', $captured->get_error_message(), 402 );
+				}
+				$order['payment'] = is_array( $captured ) ? $captured : $paymentMetadata;
+				$status           = in_array( $order['payment']['status'] ?? '', array( 'paid', 'succeeded' ), true ) ? 'completed' : 'payment_pending';
+				$this->finishOrder( $submissionId, $finalSubmission, $order, $status );
+
+				/**
+				 * Hook: a payment form was submitted.
+				 *
+				 * @param int               $submissionId    The submission ID.
+				 * @param array             $paymentMetadata Payment details.
+				 * @param SubmissionContext $context         Full submission context.
+				 * @since 1.2.0
+				 */
+				do_action( 'subtleforms/payment/required', $submissionId, $order['payment'], $context );
+			}
 			} elseif ( ! $finalSubmission || $finalSubmission['status'] === 'processing' ) {
 				Logger::error( 'Submission %d did not reach saved status', $submissionId );
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
+				$voidPayment();
 				return ApiResponse::server_error( __( 'Failed to save submission data', 'subtleforms' ) );
 			}
 
@@ -412,13 +417,145 @@ final class PublicSubmitApi {
 	 * @return int Number of matching submissions.
 	 */
 	/**
+	 * Price the order, check the coupon and confirm the payment.
+	 *
+	 * @param int             $formId  Form ID.
+	 * @param mixed           $schema  Active schema.
+	 * @param array           $payload Sanitized payload with calculations applied.
+	 * @param WP_REST_Request $request Incoming request.
+	 * @return array{quote:?array,coupon:?array,payment:?array}|WP_REST_Response
+	 */
+	private function priceOrder( int $formId, $schema, array $payload, WP_REST_Request $request ) {
+		$none = array(
+			'quote'   => null,
+			'coupon'  => null,
+			'payment' => null,
+		);
+		if ( ! Pricing::isPriced( $schema ) ) {
+			return $none;
+		}
+
+		// The coupon comes from the summary's coupon box or a Coupon field.
+		$code = (string) ( $payload['_coupon'] ?? '' );
+		if ( '' === $code ) {
+			foreach ( Pricing::fields( $schema ) as $f ) {
+				if ( ( $f['type'] ?? '' ) === 'payment_coupon' && ! empty( $f['key'] ) && ! empty( $payload[ $f['key'] ] ) ) {
+					$code = (string) $payload[ $f['key'] ];
+					break;
+				}
+			}
+		}
+		$code = CouponsRepository::normalizeCode( $code );
+
+		$quote  = Pricing::quote( $schema, $payload );
+		$coupon = null;
+		if ( '' !== $code ) {
+			$checked = CouponsRepository::validate( $code, $formId, (float) $quote['subtotal'] );
+			if ( is_wp_error( $checked ) ) {
+				return ApiResponse::error( 'subtleforms_coupon_invalid', $checked->get_error_message(), 422 );
+			}
+			$coupon = $checked;
+			$quote  = Pricing::quote( $schema, $payload, $coupon );
+		}
+
+		$order = array(
+			'quote'   => $quote,
+			'coupon'  => $coupon,
+			'payment' => null,
+		);
+		if ( $quote['total'] <= 0 ) {
+			return $order;
+		}
+
+		$settings = get_option( 'subtleforms_settings', array() );
+		$mode     = is_array( $settings ) ? (string) ( $settings['ext_payments_mode'] ?? 'test' ) : 'test';
+
+		/**
+		 * Confirm the visitor's payment for this order.
+		 *
+		 * Gateways return an array with `status` ("authorized", "paid" or
+		 * "pending"), `gateway` and `transaction_id`, or a WP_Error to reject
+		 * the submission. Returning null means no gateway handled it, and the
+		 * entry is stored as "payment pending" for offline payment.
+		 *
+		 * @param array|\WP_Error|null $result  Default null.
+		 * @param array                $quote   Server-computed order.
+		 * @param array                $payload Submitted values (includes `_payment`).
+		 * @param int                  $formId  Form ID.
+		 * @param mixed                $schema  Active schema.
+		 */
+		$verified = apply_filters( 'subtleforms/payment/verify', null, $quote, $payload, $formId, $schema );
+		if ( is_wp_error( $verified ) ) {
+			return ApiResponse::error( $verified->get_error_code(), $verified->get_error_message(), 402 );
+		}
+
+		$hasCard = false;
+		foreach ( Pricing::fields( $schema ) as $f ) {
+			if ( ( $f['type'] ?? '' ) === 'payment_card' ) {
+				$hasCard = true;
+				break;
+			}
+		}
+		if ( null === $verified && $hasCard ) {
+			return ApiResponse::error( 'subtleforms_payment_unavailable', __( 'Online payment is not available right now. Please contact the site owner.', 'subtleforms' ), 402 );
+		}
+
+		$verified         = is_array( $verified ) ? $verified : array();
+		$order['payment'] = array(
+			'status'         => (string) ( $verified['status'] ?? 'pending' ),
+			'gateway'        => $verified['gateway'] ?? null,
+			'transaction_id' => $verified['transaction_id'] ?? null,
+			'amount'         => $quote['total'],
+			'currency'       => $quote['currency'],
+			'mode'           => $mode,
+			'created_at'     => current_time( 'mysql', true ),
+		);
+		return $order;
+	}
+
+	/**
+	 * Store the order on the submission and count the coupon.
+	 *
+	 * @param int    $submissionId Submission ID.
+	 * @param array  $submission   Stored submission.
+	 * @param array  $order        Result of priceOrder().
+	 * @param string $status       Final submission status.
+	 */
+	private function finishOrder( int $submissionId, array $submission, array $order, string $status ): void {
+		$meta = is_array( $submission['meta'] ?? null ) ? $submission['meta'] : array();
+		if ( ! empty( $order['quote'] ) ) {
+			$meta['order'] = $order['quote'];
+		}
+		if ( ! empty( $order['payment'] ) ) {
+			$meta['payment'] = $order['payment'];
+		} elseif ( 'free' === $status ) {
+			$meta['payment'] = array(
+				'status'   => 'free',
+				'amount'   => 0,
+				'currency' => $order['quote']['currency'] ?? '',
+			);
+			$status          = 'completed';
+		}
+		$this->submissionsRepo->update(
+			$submissionId,
+			array(
+				'status' => $status,
+				'meta'   => $meta,
+			)
+		);
+		if ( ! empty( $order['coupon']['id'] ) && in_array( $status, array( 'completed', 'payment_pending' ), true ) ) {
+			CouponsRepository::recordUse( (int) $order['coupon']['id'] );
+		}
+	}
+
+	/**
 	 * Recompute every Calculation field from the submitted values.
 	 *
 	 * @param array $payload Sanitized payload.
 	 * @param mixed $schema  Active schema.
 	 * @return array
 	 */
-	private static function applyCalculations( array $payload, $schema ): array {
+	public static function applyCalculations( array $payload, $schema ): array {
 		if ( ! is_array( $schema ) || empty( $schema['fields'] ) || ! is_array( $schema['fields'] ) ) {
 			return $payload;
 		}

@@ -51,7 +51,7 @@ class PaymentsExtension extends AbstractExtension {
 					),
 					// Selection of priced items/options from the form schema. The
 					// server resolves these to an amount; the client never states a price.
-					'selection' => array(
+					'data'      => array(
 						'type'     => 'object',
 						'required' => false,
 						'default'  => array(),
@@ -118,16 +118,46 @@ class PaymentsExtension extends AbstractExtension {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function createIntent( \WP_REST_Request $request ) {
+		$formId = absint( $request->get_param( 'form_id' ) );
+		$repo   = new \SubtleForms\Repositories\FormsRepository();
+		$form   = $formId ? $repo->find( $formId ) : null;
+		if ( ! $form ) {
+			return new \WP_Error( 'subtleforms_not_found', __( 'Form not found', 'subtleforms' ), array( 'status' => 404 ) );
+		}
+		$active = $repo->loadSchemaVersion( $formId );
+		$schema = is_array( $active ) ? ( $active['schema'] ?? $active ) : array();
+
+		$data    = $request->get_param( 'data' );
+		$payload = is_array( $data ) ? \SubtleForms\Validation\Sanitizer::sanitizeArrayDeep( $data ) : array();
+		$payload = \SubtleForms\Api\PublicSubmitApi::applyCalculations( $payload, $schema );
+
+		$quote = \SubtleForms\Payments\Pricing::quote( $schema, $payload );
+		$code  = \SubtleForms\Payments\CouponsRepository::normalizeCode( (string) ( $payload['_coupon'] ?? '' ) );
+		if ( '' !== $code ) {
+			$coupon = \SubtleForms\Payments\CouponsRepository::validate( $code, $formId, (float) $quote['subtotal'] );
+			if ( is_wp_error( $coupon ) ) {
+				return $coupon;
+			}
+			$quote = \SubtleForms\Payments\Pricing::quote( $schema, $payload, $coupon );
+		}
+
+		if ( $quote['total'] <= 0 ) {
+			return new \WP_Error( 'subtleforms_nothing_to_pay', __( 'There is nothing to pay for this order.', 'subtleforms' ), array( 'status' => 400 ) );
+		}
+
 		/**
-		 * Filter to handle payment intent creation.
+		 * Create a payment intent with the gateway.
 		 *
-		 * Pro plugin hooks here to implement Stripe / PayPal processing.
+		 * The amount always comes from `$quote`, which the server computed from
+		 * the stored schema. Never trust an amount sent by the browser.
 		 *
-		 * @param \WP_REST_Response|\WP_Error|null $result   Default null (not handled).
-		 * @param \WP_REST_Request                  $request  Incoming request.
-		 * @param \SubtleForms\Support\Settings     $settings Plugin settings instance.
+		 * @param \WP_REST_Response|\WP_Error|array|null $result   Default null (not handled).
+		 * @param \WP_REST_Request                       $request  Incoming request.
+		 * @param \SubtleForms\Support\Settings          $settings Plugin settings instance.
+		 * @param array                                  $quote    Server-computed order.
+		 * @param int                                    $formId   Form ID.
 		 */
-		$result = apply_filters( 'subtleforms/extension/payments/create_intent', null, $request, $this->settings );
+		$result = apply_filters( 'subtleforms/extension/payments/create_intent', null, $request, $this->settings, $quote, $formId );
 
 		if ( $result !== null ) {
 			return $result;

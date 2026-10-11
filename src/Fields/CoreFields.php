@@ -1595,17 +1595,41 @@ final class CoreFields {
 				requiredCapabilities: array( 'actions.payment' ),
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
+					'showItems'    => true,
 					'showSubtotal' => true,
 					'showTax'      => false,
 					'taxRate'      => 0,
+					'taxLabel'     => __( 'Tax', 'subtleforms' ),
 					'showTotal'    => true,
-					'currency'     => 'USD',
+					'showCoupon'   => true,
+					'couponPrompt' => __( 'Have a coupon code?', 'subtleforms' ),
 				),
 				inspectorControls: array(
 					array(
 						'type'  => 'text',
 						'name'  => 'label',
 						'label' => __( 'Label', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'showItems',
+						'label' => __( 'List each item', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'showCoupon',
+						'label' => __( 'Coupon box in the summary', 'subtleforms' ),
+						'help'  => __( 'Lets visitors apply a code right where they see the total. Manage codes in SubtleForms › Payments.', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'text',
+						'name'  => 'couponPrompt',
+						'label' => __( 'Coupon link text', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'text',
+						'name'  => 'taxLabel',
+						'label' => __( 'Tax label', 'subtleforms' ),
 					),
 					array(
 						'type'  => 'checkbox',

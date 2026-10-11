@@ -60,6 +60,10 @@ export function routeToAdminQuery(pathname, search = '') {
 		return { page: 'subtleforms-extensions', params };
 	}
 
+	if (pathname === '/payments') {
+		return { page: 'subtleforms-payments', params };
+	}
+
 	return { page: 'subtleforms', params };
 }
 

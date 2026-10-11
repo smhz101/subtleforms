@@ -39,7 +39,7 @@ final class FieldSettings {
 		'advanced' => array( 'date', 'time', 'datetime', 'rating', 'scale', 'net_promoter_score', 'range_slider', 'checkbox_grid', 'calculation', 'signature', 'color_picker', 'rich_text', 'hidden' ),
 		'media'    => array( 'file_upload', 'image_upload' ),
 		'layout'   => array( 'section_break', 'html', 'disclaimer', 'step', 'group_container', 'two_column_container', 'three_column_container', 'four_column_container', 'repeat_container' ),
-		'payment'  => array( 'payment_amount', 'payment_summary', 'payment_coupon', 'payment_hidden_price' ),
+		'payment'  => array( 'payment_product', 'payment_choice', 'payment_amount', 'payment_summary', 'payment_card', 'payment_coupon', 'payment_hidden_price' ),
 		'system'   => array( 'recaptcha', 'hcaptcha', 'turnstile', 'action_hook' ),
 	);
 
@@ -73,6 +73,9 @@ final class FieldSettings {
 			'address_group'          => __( 'Address', 'subtleforms' ),
 			'net_promoter_score'     => __( 'NPS', 'subtleforms' ),
 			'action_hook'            => __( 'Action Hook', 'subtleforms' ),
+			'payment_amount'         => __( 'Custom Amount', 'subtleforms' ),
+			'payment_summary'        => __( 'Order Summary', 'subtleforms' ),
+			'payment_hidden_price'   => __( 'Fixed Fee', 'subtleforms' ),
 		);
 	}
 
@@ -431,7 +434,7 @@ final class FieldSettings {
 				);
 			}
 
-			if ( ! in_array( $type, array( 'calculation', 'payment_summary', 'payment_hidden_price', 'hidden' ), true ) ) {
+			if ( ! in_array( $type, array( 'calculation', 'payment_summary', 'payment_hidden_price', 'hidden', 'payment_card' ), true ) ) {
 			$add(
 				array(
 					'type'        => 'text',
@@ -528,9 +531,13 @@ final class FieldSettings {
 			'step'               => __( 'Split the form into pages', 'subtleforms' ),
 			'group_container'    => __( 'Group fields together', 'subtleforms' ),
 			'repeat_container'   => __( 'Let visitors add rows', 'subtleforms' ),
-			'payment_amount'     => __( 'Fixed or custom amount', 'subtleforms' ),
+			'payment_product'    => __( 'Item with a price and quantity', 'subtleforms' ),
+			'payment_choice'     => __( 'Options that each have a price', 'subtleforms' ),
+			'payment_card'       => __( 'Secure card and wallet payment', 'subtleforms' ),
+			'payment_hidden_price' => __( 'Fixed fee added to every order', 'subtleforms' ),
+			'payment_amount'     => __( 'Amount the visitor enters', 'subtleforms' ),
 			'payment_summary'    => __( 'Order summary with totals', 'subtleforms' ),
-			'payment_coupon'     => __( 'Discount code', 'subtleforms' ),
+			'payment_coupon'     => __( 'Separate discount code field', 'subtleforms' ),
 			'recaptcha'          => __( 'Google reCAPTCHA', 'subtleforms' ),
 			'hcaptcha'           => __( 'hCaptcha challenge', 'subtleforms' ),
 			'turnstile'          => __( 'Cloudflare Turnstile', 'subtleforms' ),

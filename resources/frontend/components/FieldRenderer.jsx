@@ -6,6 +6,13 @@ import SignaturePad from './fields/SignaturePad';
 import RichTextInput from './fields/RichTextInput';
 import ChainedSelect from './fields/ChainedSelect';
 import {
+  PaymentSummary,
+  PaymentCoupon,
+  PaymentProduct,
+  PaymentChoice,
+  PaymentCard,
+} from './fields/Payments';
+import {
   fieldAppearanceStyle,
   fieldAppearanceClasses,
 } from '../../shared/appearance';
@@ -935,20 +942,21 @@ function renderInput(
         />
       );
 
-    case 'payment_amount':
+    case 'payment_amount': {
       const min = config.min || 0;
       const max = config.max;
       const step = config.step || 0.01;
-      const currency = config.currency || 'USD';
+      const currency = config.currency || window.subtleformsFrontend?.currency || 'USD';
       const showSymbol = config.showCurrencySymbol !== false;
-      const currencySymbol =
-        currency === 'USD'
-          ? '$'
-          : currency === 'EUR'
-          ? '€'
-          : currency === 'GBP'
-          ? '£'
-          : '';
+      let currencySymbol = '';
+      try {
+        currencySymbol =
+          new Intl.NumberFormat(undefined, { style: 'currency', currency })
+            .formatToParts(0)
+            .find((p) => p.type === 'currency')?.value || '';
+      } catch (e) {
+        currencySymbol = currency;
+      }
 
       return (
         <div className='subtleforms-payment-amount'>
@@ -972,63 +980,33 @@ function renderInput(
           />
         </div>
       );
+    }
 
     case 'payment_summary':
-      // Payment summary is typically calculated server-side
-      // This is a read-only display component
-      return (
-        <div className='subtleforms-payment-summary'>
-          {config.showSubtotal && (
-            <div className='summary-line'>
-              <span>{__('Subtotal:', 'subtleforms')}</span>
-              <span>{value?.subtotal || '0.00'}</span>
-            </div>
-          )}
-          {config.showTax && (
-            <div className='summary-line'>
-              <span>{__('Tax:', 'subtleforms')}</span>
-              <span>{value?.tax || '0.00'}</span>
-            </div>
-          )}
-          {config.showTotal && (
-            <div className='summary-line summary-total'>
-              <span>{__('Total:', 'subtleforms')}</span>
-              <span>{value?.total || '0.00'}</span>
-            </div>
-          )}
-        </div>
-      );
+      return <PaymentSummary config={config} />;
 
     case 'payment_coupon':
+      return <PaymentCoupon config={config} />;
+
+    case 'payment_product':
       return (
-        <div className='subtleforms-payment-coupon'>
-          <input
-            id={inputId}
-            type='text'
-            className='subtleforms-input'
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={
-              config.placeholder ||
-              __('Enter coupon code', 'subtleforms')
-            }
-            maxLength={config.maxLength || 50}
-            aria-required={required}
-            aria-invalid={!!error}
-          />
-          <button
-            type='button'
-            className='subtleforms-button subtleforms-coupon-apply'
-            onClick={() => {
-              // Trigger coupon validation
-              if (window.subtleformsApplyCoupon) {
-                window.subtleformsApplyCoupon(value);
-              }
-            }}>
-            {config.buttonText || __('Apply', 'subtleforms')}
-          </button>
-        </div>
+        <PaymentProduct config={config} value={value} onChange={onChange} inputId={inputId} error={error} />
       );
+
+    case 'payment_choice':
+      return (
+        <PaymentChoice
+          config={config}
+          value={value}
+          onChange={onChange}
+          inputId={inputId}
+          error={error}
+          name={config.key || field.key}
+        />
+      );
+
+    case 'payment_card':
+      return <PaymentCard config={config} />;
 
     case 'payment_hidden_price':
       // Hidden pricing field - not rendered

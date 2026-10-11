@@ -13,6 +13,8 @@ import {
 import { warnOnce } from '../utils/warnOnce';
 import { getFormClassNames } from '../utils/formStyles';
 import { debug } from '../../shared/debug';
+import { computeQuote, isPricedForm, formatMoney, PRICED_TYPES } from '../../shared/pricing';
+import { PaymentContext } from './fields/Payments';
 import {
   formAppearanceStyle,
   formAppearanceClasses,
@@ -498,6 +500,79 @@ export default function FormRenderer({
     }
   }, [currentStepIndex, values]);
 
+  // ── Payments (2.1) ──────────────────────────────────────────────────────
+  // One live order for the whole form. Priced fields feed it, the summary and
+  // coupon box read it, and the card field hands its total to the gateway.
+  const isPriced = useMemo(() => isPricedForm(allFields), [allFields]);
+  const currency =
+    schema?.metadata?.payment?.currency || window.subtleformsFrontend?.currency || 'USD';
+  const [coupon, setCoupon] = useState(null);
+  const [couponBusy, setCouponBusy] = useState(false);
+  const [couponError, setCouponError] = useState('');
+  const cardRef = useRef(null);
+  const quote = useMemo(
+    () =>
+      isPriced
+        ? computeQuote(allFields, values, { coupon, hidden: hiddenFields, currency })
+        : null,
+    [isPriced, allFields, values, coupon, hiddenFields, currency]
+  );
+  const hasCardField = useMemo(() => allFields.some((f) => f.type === 'payment_card'), [allFields]);
+
+  const applyCoupon = useCallback(
+    async (code) => {
+      setCouponBusy(true);
+      setCouponError('');
+      try {
+        const res = await fetch(`${restUrl.replace(/\/$/, '')}/payments/coupon`, {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': nonce },
+          body: JSON.stringify({ form_id: formId, code, data: flattenToPathMap(values) }),
+        });
+        const json = await res.json().catch(() => ({}));
+        const found = json?.data?.coupon;
+        if (res.ok && found) {
+          setCoupon(found);
+        } else {
+          setCouponError(
+            json?.error?.message || json?.message || __('This coupon code is not valid.', 'subtleforms')
+          );
+        }
+      } catch (e) {
+        setCouponError(__('The code could not be checked. Please try again.', 'subtleforms'));
+      } finally {
+        setCouponBusy(false);
+      }
+    },
+    [formId, values]
+  );
+
+  const paymentContext = useMemo(
+    () =>
+      isPriced
+        ? {
+            formId,
+            preview,
+            currency,
+            quote,
+            coupon,
+            couponBusy,
+            couponError,
+            applyCoupon,
+            removeCoupon: () => {
+              setCoupon(null);
+              setCouponError('');
+            },
+            hasCouponField: allFields.some((f) => f.type === 'payment_coupon'),
+            registerCard: (handle) => {
+              cardRef.current = handle;
+            },
+          }
+        : null,
+    [isPriced, formId, preview, currency, quote, coupon, couponBusy, couponError, applyCoupon, allFields]
+  );
+
   // Handle form submission
   // SUBMISSION GUARD: Only submit when explicitly requested via Submit button
   const handleSubmit = useCallback(
@@ -676,6 +751,39 @@ export default function FormRenderer({
           );
         }
 
+        if (isPriced) {
+          // Fields hidden by conditional logic are not part of the order.
+          allFields.forEach((f) => {
+            const k = (f.config ?? f).key || f.key;
+            if (k && hiddenFields.has(k) && PRICED_TYPES.includes(f.type)) {
+              delete submissionPayload[k];
+            }
+          });
+          if (coupon) {
+            submissionPayload._coupon = coupon.code;
+          }
+          if (quote && quote.total > 0 && hasCardField) {
+            if (!cardRef.current?.confirm) {
+              setSubmitError(__('Online payment is not available right now.', 'subtleforms'));
+              setSubmitting(false);
+              return;
+            }
+            try {
+              const paid = await cardRef.current.confirm({
+                formId,
+                data: submissionPayload,
+                restUrl: restUrl.replace(/\/$/, ''),
+                nonce,
+              });
+              submissionPayload._payment = paid?.reference || '';
+            } catch (payErr) {
+              setSubmitError(payErr?.message || __('Your payment could not be completed.', 'subtleforms'));
+              setSubmitting(false);
+              return;
+            }
+          }
+        }
+
         const response = await fetch(`${restUrl.replace(/\/$/, '')}/submit`, {
           method: 'POST',
           credentials: 'same-origin',
@@ -736,6 +844,7 @@ export default function FormRenderer({
             allowAnother: !!conf.allowAnother,
           });
           setSubmitSuccess(true);
+          setCoupon(null);
           setValues({ ...defaultValues });
           setCurrentStepIndex(0);
 
@@ -772,6 +881,11 @@ export default function FormRenderer({
       focusFirstInvalid,
       defaultValues,
       schema,
+      isPriced,
+      allFields,
+      coupon,
+      quote,
+      hasCardField,
     ]
   );
 
@@ -925,6 +1039,7 @@ export default function FormRenderer({
         />
       )}
 
+      <PaymentContext.Provider value={paymentContext}>
       <form
         role='form'
         aria-label={schema.metadata?.title || __('Form', 'subtleforms')}
@@ -1015,11 +1130,19 @@ export default function FormRenderer({
               onClick={handleExplicitSubmit}>
               {submitting
                 ? __('Submitting…', 'subtleforms')
-                : schema?.metadata?.submitText?.trim() || __('Submit', 'subtleforms')}
+                : schema?.metadata?.submitText?.trim() ||
+                  (hasCardField && quote?.total > 0
+                    ? sprintf(
+                        /* translators: %s: order total */
+                        __('Pay %s', 'subtleforms'),
+                        formatMoney(quote.total, currency)
+                      )
+                    : __('Submit', 'subtleforms'))}
             </button>
           )}
         </div>
       </form>
+      </PaymentContext.Provider>
     </div>
   );
 }

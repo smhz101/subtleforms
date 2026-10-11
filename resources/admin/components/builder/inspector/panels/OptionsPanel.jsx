@@ -32,7 +32,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import Icon from '../../../../ui/Icon';
 
-export const CHOICE_TYPES = ['radio', 'multiple_choice', 'dropdown', 'select', 'picture_choice'];
+export const CHOICE_TYPES = ['radio', 'multiple_choice', 'dropdown', 'select', 'picture_choice', 'payment_choice'];
 
 const slugify = (text) =>
   String(text || '')
@@ -71,6 +71,7 @@ function OptionRow({
   multiple,
   showValues,
   withImage,
+  withPrice,
   disabled,
   onChange,
   onRemove,
@@ -181,6 +182,29 @@ function OptionRow({
         )}
       </div>
 
+      {withPrice && (
+        <span className='sf-options__price'>
+          <input
+            type='number'
+            min='0'
+            step='0.01'
+            inputMode='decimal'
+            className='sf-options__input sf-options__input--price'
+            value={option.price ?? ''}
+            placeholder='0.00'
+            aria-label={sprintf(
+              /* translators: %d: option number */
+              __('Option %d price', 'subtleforms'),
+              index + 1
+            )}
+            disabled={disabled}
+            onChange={(e) =>
+              onChange({ ...option, price: e.target.value === '' ? '' : Number(e.target.value) })
+            }
+          />
+        </span>
+      )}
+
       <Button
         className='sf-options__remove'
         icon={<Icon.Close size={14} />}
@@ -216,8 +240,11 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
     return null;
   }
 
+  const withPrice = field.type === 'payment_choice';
   const multiple =
-    field.type === 'multiple_choice'
+    field.type === 'payment_choice'
+      ? field.displayAs === 'checkbox'
+      : field.type === 'multiple_choice'
       ? field.allowMultiple !== false
       : field.type === 'picture_choice'
         ? field.allowMultiple === true
@@ -251,7 +278,12 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
   const openBulk = () => {
     setBulkText(
       options
-        .map((o) => (o.value && o.value !== slugify(o.label) ? `${o.label}|${o.value}` : o.label))
+        .map((o) => {
+          const base = o.value && o.value !== slugify(o.label) ? `${o.label}|${o.value}` : o.label;
+          if (!withPrice) return base;
+          const custom = o.value && o.value !== slugify(o.label) ? o.value : '';
+          return `${o.label}|${custom}|${o.price ?? ''}`;
+        })
         .join('\n')
     );
     setBulk(true);
@@ -263,13 +295,15 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
       .map((line) => line.trim())
       .filter(Boolean)
       .map((line) => {
-        const [label, value] = line.split('|').map((p) => p.trim());
+        const [label, value, price] = line.split('|').map((p) => p.trim());
         const existing = options.find((o) => o.label === label);
-        return {
+        const next = {
           ...(existing || {}),
           label,
           value: value || existing?.value || slugify(label),
         };
+        if (withPrice && price !== undefined && price !== '') next.price = Number(price) || 0;
+        return next;
       });
     if (next.length) commit(next);
     setBulk(false);
@@ -299,7 +333,11 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
           <TextareaControl
             __nextHasNoMarginBottom
             label={__('One option per line', 'subtleforms')}
-            help={__('Use Label|value to set a stored value.', 'subtleforms')}
+            help={
+              withPrice
+                ? __('Use Label|value|price, for example Large||12.50.', 'subtleforms')
+                : __('Use Label|value to set a stored value.', 'subtleforms')
+            }
             rows={8}
             value={bulkText}
             onChange={setBulkText}
@@ -332,6 +370,7 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
                   multiple={multiple}
                   showValues={showValues}
                   withImage={withImage}
+                  withPrice={withPrice}
                   disabled={isReadOnly}
                   onMove={move}
                   onChange={(next) => {
@@ -362,7 +401,15 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
               __('Option %d', 'subtleforms'),
               n
             );
-            commit([...options, { label, value: `option_${nanoid(6)}`, ...(withImage ? { image: '' } : {}) }]);
+            commit([
+              ...options,
+              {
+                label,
+                value: `option_${nanoid(6)}`,
+                ...(withImage ? { image: '' } : {}),
+                ...(withPrice ? { price: 0 } : {}),
+              },
+            ]);
           }}>
           {__('Add option', 'subtleforms')}
         </Button>

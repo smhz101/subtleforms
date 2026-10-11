@@ -68,6 +68,7 @@ export const FIELD_ICON_MAP = {
   payment_amount: Icon.CircleDollarSign,
   payment_card: Icon.CreditCard,
   payment_product: Icon.ShoppingCart,
+  payment_choice: Icon.ListChecks || Icon.Tag,
   payment_currency: Icon.Coins,
   payment_coupon: Icon.Tag,
   payment_summary: Icon.Receipt,

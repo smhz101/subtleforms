@@ -185,6 +185,16 @@ class AdminMenu {
 			array( $this, 'render_submissions' )
 		);
 
+		// Payments and coupons (2.1)
+		add_submenu_page(
+			'subtleforms',
+			__( 'Payments', 'subtleforms' ),
+			__( 'Payments', 'subtleforms' ),
+			$this->caps->manage_cap(),
+			'subtleforms-payments',
+			array( $this, 'render_payments' )
+		);
+
 		// Extensions
 		add_submenu_page(
 			'subtleforms',
@@ -315,6 +325,7 @@ class AdminMenu {
 				'nonce'          => wp_create_nonce( 'subtleforms_admin' ),
 				'restNonce'      => wp_create_nonce( 'wp_rest' ),
 				'version'        => SUBTLEFORMS_VERSION,
+				'currency'       => strtoupper( (string) ( ( get_option( 'subtleforms_settings', array() )['ext_payments_currency'] ?? '' ) ?: 'USD' ) ),
 				'unreadCount'    => $this->get_unread_count(),
 				'capabilities'   => $live_caps->all(),
 				'hasProPlugin'   => defined( 'SUBTLEFORMS_PRO_VERSION' ) || sf_is_pro_active(),
@@ -647,6 +658,17 @@ class AdminMenu {
 		}
 
 		$this->get_template( 'extensions' );
+	}
+
+	/**
+	 * Render payments page.
+	 */
+	public function render_payments(): void {
+		if ( ! current_user_can( $this->caps->manage_cap() ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'subtleforms' ) );
+		}
+
+		$this->get_template( 'payments' );
 	}
 
 	/**

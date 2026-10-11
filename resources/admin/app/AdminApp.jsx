@@ -62,6 +62,7 @@ const SubmissionsPage    = lazyWithRetry(() => import(/* webpackChunkName: "page
 const SubmissionDetailPage = lazyWithRetry(() => import(/* webpackChunkName: "page-submission-detail" */ '../pages/SubmissionDetailPage'));
 const BuilderPage        = lazyWithRetry(() => import(/* webpackChunkName: "page-builder" */        '../pages/BuilderPage'));
 const ExtensionsPage     = lazyWithRetry(() => import(/* webpackChunkName: "page-extensions" */     '../pages/ExtensionsPage'));
+const PaymentsPage       = lazyWithRetry(() => import(/* webpackChunkName: "page-payments" */       '../pages/PaymentsPage'));
 const CreateFormPage     = lazyWithRetry(() => import(/* webpackChunkName: "page-create-form" */    '../pages/CreateFormPage'));
 
 // ─── Initial path resolver ────────────────────────────────────────────────────
@@ -95,6 +96,9 @@ function getInitialPath() {
 
 		case 'subtleforms-extensions':
 			return '/extensions';
+
+		case 'subtleforms-payments':
+			return '/payments';
 
 		default:
 			return '/';
@@ -149,6 +153,7 @@ function getPageNameFromPath(pathname) {
 		'/submissions': __('Submissions', 'subtleforms'),
 		'/settings': __('Settings', 'subtleforms'),
 		'/extensions': __('Extensions', 'subtleforms'),
+		'/payments': __('Payments', 'subtleforms'),
 	};
 	if (pathname.startsWith('/forms/') && pathname !== '/forms/new') {
 		return __('Form Builder', 'subtleforms');
@@ -280,6 +285,14 @@ function AppContent() {
 						element={
 							<PageErrorBoundary pageName='Settings'>
 								<SettingsPage />
+							</PageErrorBoundary>
+						}
+					/>
+					<Route
+						path='/payments'
+						element={
+							<PageErrorBoundary pageName='Payments'>
+								<PaymentsPage />
 							</PageErrorBoundary>
 						}
 					/>

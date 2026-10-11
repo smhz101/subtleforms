@@ -37,6 +37,14 @@ export const NAV_ITEMS = [
     count: () => Number(window.subtleformsAdmin?.unreadCount || 0),
   },
   {
+    key: 'payments',
+    path: '/payments',
+    page: 'subtleforms-payments',
+    label: __('Payments', 'subtleforms'),
+    icon: Icon.CreditCard,
+    match: (pathname) => pathname.startsWith('/payments'),
+  },
+  {
     key: 'extensions',
     path: '/extensions',
     page: 'subtleforms-extensions',

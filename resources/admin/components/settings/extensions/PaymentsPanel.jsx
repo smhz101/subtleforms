@@ -4,7 +4,7 @@ import FieldError from '../FieldError';
 
 const PROVIDERS = [
   { label: 'Stripe', value: 'stripe' },
-  { label: 'PayPal', value: 'paypal' },
+  { label: 'PayPal (coming soon)', value: 'paypal', disabled: true },
 ];
 
 const MODES = [
@@ -32,7 +32,7 @@ export default function PaymentsPanel({ settings, updateSetting, fieldErrors = {
         <h2 className='sf-ext-panel__title'>{__('Payments', 'subtleforms')}</h2>
         <p className='sf-ext-panel__description'>
           {__(
-            'Accept Stripe or PayPal payments directly through your forms.',
+            'Take card, Apple Pay and Google Pay payments through Stripe. Products, order totals and coupons work without a gateway too.',
             'subtleforms'
           )}
         </p>

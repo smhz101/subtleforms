@@ -162,6 +162,7 @@ final class Container {
 				$registry = new FieldRegistry();
 				CoreFields::register( $registry );
 				\SubtleForms\Fields\FieldsV2::register( $registry );
+				\SubtleForms\Fields\PaymentFields::register( $registry );
 
 				// Allow extensions to register custom fields
 				if ( function_exists( 'do_action' ) ) {

@@ -234,6 +234,12 @@ final class FieldsV2 {
 						'min'   => 0,
 						'max'   => 6,
 					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'usePrice',
+						'label' => __( 'Charge this amount', 'subtleforms' ),
+						'help'  => __( 'Adds the result to the order total on payment forms.', 'subtleforms' ),
+					),
 				),
 				requiredCapabilities: array( self::PRO_FIELDS_CAP ),
 			)

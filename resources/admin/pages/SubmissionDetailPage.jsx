@@ -11,6 +11,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import AdminShell from '../components/AdminShell';
 import { apiClient } from '../data';
 import Icon from '../ui/Icon';
+import { formatMoney } from '../../shared/pricing';
 import './SubmissionDetailPage.scss';
 
 // ─── Pipeline timeline helpers ──────────────────────────────────────────────
@@ -678,6 +679,70 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
 
         {/* ── Sidebar ── */}
         <aside className='sf-detail__side'>
+          { meta.order && (
+            <section className='sf-panel sf-order-panel'>
+              <header className='sf-panel__header'>
+                <h2 className='sf-panel__title'>{ __( 'Order', 'subtleforms' ) }</h2>
+                { ( () => {
+                  const st = meta.payment?.status || 'pending';
+                  const map = {
+                    paid: [ 'sf-pill--success', __( 'Paid', 'subtleforms' ) ],
+                    succeeded: [ 'sf-pill--success', __( 'Paid', 'subtleforms' ) ],
+                    free: [ 'sf-pill--success', __( 'Free', 'subtleforms' ) ],
+                    authorized: [ 'sf-pill--info', __( 'Authorised', 'subtleforms' ) ],
+                    failed: [ 'sf-pill--danger', __( 'Failed', 'subtleforms' ) ],
+                    pending: [ 'sf-pill--warning', __( 'Payment pending', 'subtleforms' ) ],
+                  };
+                  const [ cls, label ] = map[ st ] || map.pending;
+                  return <span className={ `sf-pill sf-pill--dot ${ cls }` }>{ label }</span>;
+                } )() }
+              </header>
+              <div className='sf-panel__body'>
+                <ul className='sf-order-panel__items'>
+                  { ( meta.order.items || [] ).map( ( item, i ) => (
+                    <li key={ i }>
+                      <span>
+                        { item.label }
+                        { item.qty > 1 && <span className='sf-order-panel__muted'> × { item.qty }</span> }
+                      </span>
+                      <span>{ formatMoney( item.amount, meta.order.currency ) }</span>
+                    </li>
+                  ) ) }
+                </ul>
+                <dl className='sf-order-panel__totals'>
+                  { meta.order.discount > 0 && (
+                    <>
+                      <dt>{ sprintf( __( 'Coupon %s', 'subtleforms' ), meta.order.coupon || '' ) }</dt>
+                      <dd>−{ formatMoney( meta.order.discount, meta.order.currency ) }</dd>
+                    </>
+                  ) }
+                  { meta.order.tax > 0 && (
+                    <>
+                      <dt>{ sprintf( __( 'Tax (%s%%)', 'subtleforms' ), meta.order.tax_rate ) }</dt>
+                      <dd>{ formatMoney( meta.order.tax, meta.order.currency ) }</dd>
+                    </>
+                  ) }
+                  <dt className='is-total'>{ __( 'Total', 'subtleforms' ) }</dt>
+                  <dd className='is-total'>{ formatMoney( meta.order.total, meta.order.currency ) }</dd>
+                </dl>
+                { meta.payment?.transaction_id && (
+                  <p className='sf-order-panel__ref'>
+                    { meta.payment.gateway === 'stripe' ? (
+                      <a
+                        href={ `https://dashboard.stripe.com/${ meta.payment.mode === 'live' ? '' : 'test/' }payments/${ meta.payment.transaction_id }` }
+                        target='_blank'
+                        rel='noopener noreferrer'>
+                        { __( 'View in Stripe', 'subtleforms' ) }
+                        <Icon.ExternalLink size={ 12 } aria-hidden='true' />
+                      </a>
+                    ) : (
+                      <code>{ meta.payment.transaction_id }</code>
+                    ) }
+                  </p>
+                ) }
+              </div>
+            </section>
+          ) }
           <section className='sf-panel'>
             <header className='sf-panel__header'>
               <h2 className='sf-panel__title'>{ __( 'Details', 'subtleforms' ) }</h2>

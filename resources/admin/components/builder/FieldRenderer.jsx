@@ -4,6 +4,7 @@ import { getFieldIcon } from '../../utils/iconRegistry';
 import Icon from '../../ui/Icon';
 import NameFieldRenderer from './NameFieldRenderer';
 import AddressFieldRenderer from './AddressFieldRenderer';
+import { ProductPreview, ChoicePreview, SummaryPreview, CardPreview } from './PaymentPreviews';
 import './FieldRenderer.scss';
 
 // Types that do not accept user input — required indicator suppressed
@@ -12,7 +13,7 @@ const NON_INPUT_TYPES = new Set([
   'one_column_container', 'two_column_container', 'three_column_container',
   'four_column_container', 'five_column_container', 'six_column_container',
   'repeat_container', 'group_container', 'step', 'action_hook',
-  'payment_summary', 'payment_hidden_price', 'calculation',
+  'payment_summary', 'payment_hidden_price', 'calculation', 'payment_card',
   'recaptcha', 'hcaptcha', 'turnstile',
 ]);
 
@@ -24,7 +25,7 @@ const KNOWN_TYPES = new Set([
   'country', 'chained_select', 'password', 'rating', 'range_slider',
   'color_picker', 'signature', 'image_upload', 'file_upload',
   'name_group', 'address_group',
-  'payment_amount', 'payment_coupon',
+  'payment_amount', 'payment_coupon', 'payment_product', 'payment_choice',
   'post_create', 'quiz_score',
   'rich_text', 'net_promoter_score', 'checkbox_grid',
   'toggle', 'scale', 'picture_choice', 'calculation',
@@ -497,45 +498,13 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
-      {type === 'payment_summary' && (
-        <div className='sf-field-renderer__calculation-box'>
-          {field.showSubtotal !== false && (
-            <div className='sf-field-renderer__calc-row'>
-              <span>
-                <span className='sf-field-renderer__calc-row-icon'><Icon.DollarSign size={12} /></span>
-                {__('Subtotal:', 'subtleforms')}
-              </span>
-              <span className='sf-field-renderer__calc-value'>$0.00</span>
-            </div>
-          )}
-          {field.showTax && (
-            <div className='sf-field-renderer__calc-row'>
-              <span>
-                <span className='sf-field-renderer__calc-row-icon'><Icon.Database size={12} /></span>
-                {field.taxRate ? `${__('Tax', 'subtleforms')} (${field.taxRate}%):` : __('Tax:', 'subtleforms')}
-              </span>
-              <span className='sf-field-renderer__calc-value'>$0.00</span>
-            </div>
-          )}
-          <div className='sf-field-renderer__calc-row sf-field-renderer__calc-row--discount'>
-            <span>
-              <span className='sf-field-renderer__calc-row-icon'><Icon.Tag size={12} /></span>
-              {__('Discount:', 'subtleforms')}
-            </span>
-            <span className='sf-field-renderer__calc-value sf-field-renderer__calc-value--discount'>-$0.00</span>
-          </div>
-          <div className='sf-field-renderer__calc-divider'></div>
-          {field.showTotal !== false && (
-            <div className='sf-field-renderer__calc-total'>
-              <span>
-                <span className='sf-field-renderer__calc-total-icon'><Icon.DollarSign size={14} /></span>
-                {__('Total:', 'subtleforms')}
-              </span>
-              <span className='sf-field-renderer__calc-total-value'>$0.00</span>
-            </div>
-          )}
-        </div>
-      )}
+      {type === 'payment_summary' && <SummaryPreview field={field} />}
+
+      {type === 'payment_product' && <ProductPreview field={field} />}
+
+      {type === 'payment_choice' && <ChoicePreview field={field} />}
+
+      {type === 'payment_card' && <CardPreview />}
 
       {type === 'payment_coupon' && (
         <div className='sf-field-renderer__subscribe-wrapper'>

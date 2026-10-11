@@ -35,6 +35,8 @@ const INPUT_FIELD_TYPES = new Set([
   'checkbox_grid',
   // Payment
   'payment_amount',
+  'payment_product',
+  'payment_choice',
   'payment_coupon',
   'payment_hidden_price',
   // Dynamic

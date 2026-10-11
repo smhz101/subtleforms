@@ -80,6 +80,7 @@ final class FrontendAssets {
 				'successMessage' => $settings ? $settings->get( 'success_message' ) : __( 'Thank you! Your submission has been received.', 'subtleforms' ),
 				'errorMessage'   => $settings ? $settings->get( 'error_message' ) : __( 'An error occurred. Please try again.', 'subtleforms' ),
 				'redirectUrl'    => $settings ? $settings->get( 'redirect_after_submit' ) : '',
+				'currency'       => $settings ? strtoupper( (string) ( $settings->get( 'ext_payments_currency' ) ?: 'USD' ) ) : 'USD',
 				// Default-value tokens {user_email} and {user_name} (2.0).
 				'user'           => is_user_logged_in()
 					? array(
@@ -96,5 +97,14 @@ final class FrontendAssets {
 			array(),
 			$asset['version']
 		);
+
+		/**
+		 * Fires after the public form assets are enqueued, so add-ons (such as
+		 * a payment gateway) can load their own scripts alongside.
+		 *
+		 * @param Settings|null $settings Plugin settings.
+		 * @since 2.1.0
+		 */
+		do_action( 'subtleforms/frontend/enqueued', $settings );
 	}
 }
