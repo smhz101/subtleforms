@@ -124,3 +124,50 @@
 		opacity: 0.12;
 	}
 }
+
+// Width picker (2.1): set a field to ½, ⅓… right on the canvas.
+.sf-field-toolbar__width {
+	position: relative;
+	display: inline-flex;
+}
+
+.sf-field-toolbar__button--text.sf-field-toolbar__button {
+	width: auto;
+	min-width: 32px;
+	padding: 0 8px;
+	font-size: 12px;
+	font-weight: var(--sf-weight-semibold);
+	color: var(--sf-text);
+}
+
+.sf-field-toolbar__width-menu {
+	position: absolute;
+	top: calc(100% + 6px);
+	left: 50%;
+	z-index: 30;
+	display: flex;
+	gap: 2px;
+	padding: 4px;
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius-md);
+	background: var(--sf-bg-surface);
+	box-shadow: var(--sf-shadow-md);
+	transform: translateX(-50%);
+}
+
+.sf-field-toolbar__width-option {
+	min-width: 32px;
+	height: 28px;
+	padding: 0 6px;
+	border: 0;
+	border-radius: var(--sf-radius-sm);
+	background: transparent;
+	font-size: 12px;
+	font-weight: var(--sf-weight-medium);
+	color: var(--sf-text-secondary);
+	cursor: pointer;
+
+	&:hover { background: var(--sf-bg-muted); color: var(--sf-text); }
+
+	&.is-active { background: var(--sf-brand); color: #fff; }
+}

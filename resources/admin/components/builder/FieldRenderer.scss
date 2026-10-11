@@ -1726,3 +1726,107 @@ textarea.sf-field-renderer__input {
 	font-size: 12px;
 	color: var(--sf-text-muted);
 }
+
+// ── Styled canvas (2.1) ─────────────────────────────────────────────────────
+// The canvas surface carries the form's Appearance as --subtleforms-* custom
+// properties and each field wrapper carries its own overrides, so these rules
+// make the builder WYSIWYG. Every value falls back to the admin look when the
+// form has no styling.
+.sf-canvas-styled {
+	font-family: var(--subtleforms-font-family, inherit);
+	background-color: var(--subtleforms-color-bg, var(--sf-bg-surface));
+
+	.sf-field-renderer__label,
+	.sf-field-renderer__label--editable {
+		color: var(--subtleforms-label-color, var(--subtleforms-color-text, var(--sf-text)));
+		font-weight: var(--subtleforms-label-weight, var(--sf-weight-medium));
+		font-size: var(--subtleforms-font-size-base, var(--sf-text-sm));
+	}
+
+	.sf-field-renderer__help-text,
+	.sf-field-renderer__description {
+		color: var(--subtleforms-color-text-light, var(--sf-text-muted));
+	}
+
+	input.sf-field-renderer__input,
+	input.sf-field-renderer__input[readonly],
+	textarea.sf-field-renderer__input,
+	textarea.sf-field-renderer__input[readonly],
+	select.sf-field-renderer__select,
+	.sf-field-renderer__textarea[readonly] {
+		border-width: var(--subtleforms-border-width, 1px);
+		border-color: var(--subtleforms-color-border, var(--sf-border-strong));
+		border-radius: var(--subtleforms-radius-md, var(--sf-radius-control));
+		background-color: var(--subtleforms-canvas-input-bg, var(--sf-bg-surface));
+		color: var(--subtleforms-input-text, var(--subtleforms-color-text, var(--sf-text)));
+		font-size: var(--subtleforms-font-size-base, var(--sf-text-sm));
+		font-family: inherit;
+		padding-top: var(--subtleforms-input-padding-y, 8px);
+		padding-bottom: var(--subtleforms-input-padding-y, 8px);
+
+		&::placeholder { color: var(--subtleforms-color-text-light, var(--sf-text-subtle)); }
+	}
+
+	.sf-field-renderer__affix-item,
+	.sf-field-renderer__prefix,
+	.sf-field-renderer__suffix {
+		border-color: var(--subtleforms-color-border, var(--sf-border-strong));
+		background-color: var(--subtleforms-color-bg-subtle, var(--sf-bg-subtle));
+		color: var(--subtleforms-color-text-light, var(--sf-text-muted));
+	}
+
+	.sf-field-renderer__checkbox,
+	.sf-field-renderer__radio,
+	input[type='checkbox'],
+	input[type='radio'],
+	input[type='range'] {
+		accent-color: var(--subtleforms-color-primary, var(--sf-brand));
+	}
+
+	.sf-field-renderer__checkbox-label,
+	.sf-field-renderer__option-label {
+		color: var(--subtleforms-input-text, var(--subtleforms-color-text, var(--sf-text)));
+	}
+}
+
+// Input treatments mirror the public variants.
+.sf-canvas-styled {
+	--subtleforms-canvas-input-bg: var(--subtleforms-color-bg-subtle, var(--sf-bg-surface));
+}
+
+.sf-canvas-styled.subtleforms--input-outlined {
+	--subtleforms-canvas-input-bg: var(--subtleforms-color-bg, var(--sf-bg-surface));
+}
+
+.sf-canvas-styled.subtleforms--input-filled {
+	input.sf-field-renderer__input,
+	textarea.sf-field-renderer__input,
+	select.sf-field-renderer__select {
+		border-color: transparent;
+	}
+}
+
+.sf-canvas-styled.subtleforms--input-underlined {
+	input.sf-field-renderer__input,
+	textarea.sf-field-renderer__input,
+	select.sf-field-renderer__select {
+		border-width: 0 0 var(--subtleforms-border-width, 1px) 0;
+		border-radius: 0;
+		padding-left: 0;
+		background-color: transparent;
+	}
+}
+
+// Field-level alignment and hidden label, shown in the builder.
+.sf-field-chrome__inner.subtleforms-field--align-center { text-align: center; }
+.sf-field-chrome__inner.subtleforms-field--align-right { text-align: right; }
+
+.sf-field-chrome__inner.subtleforms-field--no-label .sf-field-renderer__label {
+	opacity: 0.4;
+	text-decoration: line-through;
+}
+
+.subtleforms-builder-canvas__surface.sf-canvas-styled {
+	background-color: var(--subtleforms-color-bg, var(--sf-bg-surface));
+	color: var(--subtleforms-color-text, var(--sf-text));
+}

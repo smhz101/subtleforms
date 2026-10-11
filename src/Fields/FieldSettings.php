@@ -90,6 +90,10 @@ final class FieldSettings {
 		'one_column_container',    // A single column is the form itself.
 		'five_column_container',   // Too narrow to be usable on most themes.
 		'six_column_container',
+		'two_column_container',    // 2.1: fields have their own width (½, ⅓, ¼…), which
+		'three_column_container',  // lays them out side by side without nesting.
+		'four_column_container',   // Existing forms that use columns keep working.
+		'group_container',
 		'dynamic_field',           // Not rendered on the frontend yet.
 		'post_selection',          // Not rendered on the frontend yet.
 		'save_resume',             // Not rendered on the frontend yet.

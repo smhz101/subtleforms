@@ -1,5 +1,6 @@
 import { memo, useMemo, useCallback, useEffect, useState, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import clsx from 'clsx';
 import {
   DndContext,
   DragOverlay,
@@ -12,6 +13,12 @@ import { useSortable, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 import Icon from '../../ui/Icon';
+import {
+  formAppearanceStyle,
+  formAppearanceClasses,
+  fieldAppearanceStyle,
+  fieldAppearanceClasses,
+} from '../../../shared/appearance';
 import { useBuilder } from './context/BuilderContext';
 import FieldRenderer from './FieldRenderer';
 import ContainerRenderer from './ContainerRenderer';
@@ -122,6 +129,7 @@ const FieldNode = memo(function FieldNode({
   isDragDisabled,
 }) {
   const field = useMemo(() => nodeToField(tree, nodeId), [tree, nodeId]);
+  const { actions: builderActions } = useBuilder();
 
   const validationMessages = useMemo(() => {
     const key = field?.key;
@@ -154,7 +162,26 @@ const FieldNode = memo(function FieldNode({
       }
     },
     onDelete: () => onDelete(nodeId),
-  }), [canMoveUp, canMoveDown, nodeId, parentId, columnIndex, position, onMove, onDuplicate, onDelete]);
+    width: field?.appearance?.width || '',
+    onWidthChange: builderActions?.onUpdate
+      ? (w) => {
+          const next = { ...(field?.appearance || {}) };
+          if (w) next.width = w; else delete next.width;
+          builderActions.onUpdate(nodeId, { appearance: next });
+        }
+      : null,
+  }), [canMoveUp, canMoveDown, nodeId, parentId, columnIndex, position, onMove, onDuplicate, onDelete, field, builderActions]);
+
+  // Colour, type and shape overrides as custom properties; width and spacing
+  // are applied by the drop zone wrapper.
+  const fieldStyleVars = useMemo(() => {
+    const s = fieldAppearanceStyle(field?.appearance);
+    delete s.flexBasis;
+    delete s.maxWidth;
+    delete s.marginTop;
+    delete s.marginBottom;
+    return s;
+  }, [field]);
 
   if (!field) return null;
 
@@ -176,6 +203,8 @@ const FieldNode = memo(function FieldNode({
             }
           }}>
           <FieldChrome
+            appearanceStyle={fieldStyleVars}
+            appearanceClass={fieldAppearanceClasses(field?.appearance)}
             isSelected={selectedId === nodeId}
             isMultiSelected={isMultiSelected}
             onSelect={onSelect}
@@ -209,7 +238,7 @@ const DragGhost = memo(function DragGhost({ tree, nodeId }) {
   );
 });
 
-export default function FormBuilder() {
+export default function FormBuilder({ appearance } = {}) {
   // Get all state from context (including validationErrorsByFieldKey)
   const {
     tree,
@@ -462,6 +491,29 @@ export default function FormBuilder() {
     [onMove]
   );
 
+  // The canvas wears the form's Appearance (colours, type, radius, input and
+  // button styles) so every styling change is visible while building.
+  const canvasStyle = useMemo(() => {
+    const style = formAppearanceStyle(appearance);
+    delete style.maxWidth;
+    return style;
+  }, [appearance]);
+
+  // Field width/spacing live on the wrapper that holds the field and its
+  // insert line, so narrow fields sit side by side like on the page.
+  const getItemStyle = useCallback((itemId) => {
+    const a = tree.nodes[itemId]?.config?.appearance;
+    if (!a) return undefined;
+    const style = {};
+    if (a.width && a.width !== '100') {
+      const pct = Number(a.width);
+      style.flex = `0 0 calc(${pct}% - var(--dropzone-gap) * ${(100 - pct) / 100})`;
+    }
+    if (a.marginTop) style.marginTop = a.marginTop;
+    if (a.marginBottom) style.marginBottom = a.marginBottom;
+    return style;
+  }, [tree]);
+
   const renderNode = (nodeId, parentId, columnIndex, position) => {
     const node = tree.nodes[nodeId];
     if (!node) {
@@ -540,6 +592,7 @@ export default function FormBuilder() {
                     columnIndex={isColumnContainer(node) ? colIndex : null}
                     items={columnChildren}
                     onRequestInsert={onRequestInsert}
+                    getItemStyle={getItemStyle}
                     spacing={spacing}
                     compact
                     renderItem={(childId, childPosition) =>
@@ -588,7 +641,9 @@ export default function FormBuilder() {
 
   return (
     <div className='subtleforms-builder-canvas' onClick={handleCanvasClick}>
-      <div className='subtleforms-builder-canvas__surface'>          <div className='subtleforms-builder-canvas__toolbar'>
+      <div
+        className={clsx('subtleforms-builder-canvas__surface', 'sf-canvas-styled', formAppearanceClasses(appearance))}
+        style={canvasStyle}>          <div className='subtleforms-builder-canvas__toolbar'>
             <button
               type='button'
               className={`sf-preview-toggle${previewValidation ? ' sf-preview-toggle--active' : ''}`}
@@ -610,6 +665,7 @@ export default function FormBuilder() {
               stepNumber={stepNodes.indexOf(selectedStepId) + 1}
               totalSteps={stepNodes.length}
               renderNode={renderNode}
+              getItemStyle={getItemStyle}
             />
           ) : (
             /* Regular form: Show all fields */
@@ -618,6 +674,7 @@ export default function FormBuilder() {
               columnIndex={null}
               items={rootChildren}
               onRequestInsert={onRequestInsert}
+              getItemStyle={getItemStyle}
               spacing={24}
               renderItem={(nodeId, index) =>
                 renderNode(nodeId, rootId, null, index)

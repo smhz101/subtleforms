@@ -19,6 +19,8 @@ const FieldChrome = memo(function FieldChrome({
   dragHandleListeners,
   toolbarActions,
   validationMessages = [],
+  appearanceStyle,
+  appearanceClass,
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -60,7 +62,7 @@ const FieldChrome = memo(function FieldChrome({
       tabIndex='0'
       role='group'
       aria-label={__('Field group. Press Enter to select.', 'subtleforms')}>
-      <div className='sf-field-chrome__inner'>
+      <div className={clsx('sf-field-chrome__inner', appearanceClass)} style={appearanceStyle}>
         {hasValidationMessages && (isSelected || isHovered) && (
           <div className='sf-field-chrome__validation-message'>
             {validationMessages[0]}
@@ -78,6 +80,8 @@ const FieldChrome = memo(function FieldChrome({
         onDelete={toolbarActions?.onDelete}
         canMoveUp={toolbarActions?.canMoveUp}
         canMoveDown={toolbarActions?.canMoveDown}
+        width={toolbarActions?.width}
+        onWidthChange={toolbarActions?.onWidthChange}
       />
     </div>
   );

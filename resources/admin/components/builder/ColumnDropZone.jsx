@@ -1,7 +1,7 @@
 import { useDroppable } from '@dnd-kit/core';
 import {
   SortableContext,
-  verticalListSortingStrategy,
+  rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
@@ -17,6 +17,8 @@ export default function ColumnDropZone({
   renderItem,
   spacing,
   compact = false,
+  getItemStyle,
+  getItemClassName,
 }) {
   const droppableId =
     columnIndex === null
@@ -54,18 +56,23 @@ export default function ColumnDropZone({
       <SortableContext
         id={droppableId}
         items={items}
-        strategy={verticalListSortingStrategy}>
-        {items.map((itemId, index) => (
-          <div key={itemId} className='sf-column-dropzone__item'>
-            {renderItem(itemId, index)}
-            <InsertFieldButton
-              parentId={containerId}
-              columnIndex={columnIndex}
-              position={index + 1}
-              onRequestInsert={onRequestInsert}
-            />
-          </div>
-        ))}
+        strategy={rectSortingStrategy}>
+        <div className='sf-column-dropzone__items'>
+          {items.map((itemId, index) => (
+            <div
+              key={itemId}
+              className={clsx('sf-column-dropzone__item', getItemClassName?.(itemId))}
+              style={getItemStyle?.(itemId)}>
+              {renderItem(itemId, index)}
+              <InsertFieldButton
+                parentId={containerId}
+                columnIndex={columnIndex}
+                position={index + 1}
+                onRequestInsert={onRequestInsert}
+              />
+            </div>
+          ))}
+        </div>
       </SortableContext>
 
       {items.length === 0 && (

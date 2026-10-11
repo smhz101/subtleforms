@@ -1,4 +1,5 @@
 import { __ } from '@wordpress/i18n';
+import { useState } from '@wordpress/element';
 import clsx from 'clsx';
 import { getIcon } from './utils/iconMap';
 import './FieldToolbar.scss';
@@ -17,7 +18,19 @@ export default function FieldToolbar({
   onDelete,
   canMoveUp,
   canMoveDown,
+  width,
+  onWidthChange,
 }) {
+  const [widthOpen, setWidthOpen] = useState(false);
+  const WIDTHS = [
+    { value: '100', label: __('Full', 'subtleforms') },
+    { value: '75', label: '¾' },
+    { value: '66', label: '⅔' },
+    { value: '50', label: '½' },
+    { value: '33', label: '⅓' },
+    { value: '25', label: '¼' },
+  ];
+  const currentWidth = WIDTHS.find((w) => w.value === (width || '100')) || WIDTHS[0];
   const { onPointerDown, onMouseDown, onTouchStart, ...handleRest } =
     dragHandleListeners || {};
 
@@ -105,6 +118,51 @@ export default function FieldToolbar({
         __('Move down', 'subtleforms'),
         canMoveDown ? onMoveDown : null,
         !canMoveDown
+      )}
+
+      {onWidthChange && (
+        <>
+          <div className='sf-field-toolbar__divider' />
+          <div className='sf-field-toolbar__width'>
+            <button
+              type='button'
+              className='sf-field-toolbar__button sf-field-toolbar__button--text'
+              aria-haspopup='true'
+              aria-expanded={widthOpen}
+              title={__('Field width', 'subtleforms')}
+              onMouseDown={stop}
+              onPointerDown={stop}
+              onClick={(e) => {
+                stop(e);
+                setWidthOpen((o) => !o);
+              }}>
+              {currentWidth.label}
+            </button>
+            {widthOpen && (
+              <div className='sf-field-toolbar__width-menu' role='menu'>
+                {WIDTHS.map((w) => (
+                  <button
+                    key={w.value}
+                    type='button'
+                    role='menuitemradio'
+                    aria-checked={w.value === currentWidth.value}
+                    className={clsx('sf-field-toolbar__width-option', {
+                      'is-active': w.value === currentWidth.value,
+                    })}
+                    onMouseDown={stop}
+                    onPointerDown={stop}
+                    onClick={(e) => {
+                      stop(e);
+                      onWidthChange(w.value === '100' ? '' : w.value);
+                      setWidthOpen(false);
+                    }}>
+                    {w.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
       )}
 
       <div className='sf-field-toolbar__divider' />

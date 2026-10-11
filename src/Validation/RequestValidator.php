@@ -295,7 +295,7 @@ class RequestValidator {
 	 */
 	private static function sanitizePassthrough( $value, int $depth ) {
 		if ( is_string( $value ) ) {
-			return function_exists( 'wp_kses_post' ) ? wp_kses_post( $value ) : strip_tags( $value );
+			return wp_kses_post( $value );
 		}
 		if ( is_bool( $value ) || is_int( $value ) || is_float( $value ) || $value === null ) {
 			return $value;

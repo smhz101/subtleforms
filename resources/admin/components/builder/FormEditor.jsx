@@ -299,6 +299,7 @@ export default function FormEditor({
               />
             ) : (
               <FormBuilder
+                appearance={schema?.metadata?.appearance}
                 tree={tree}
                 rootId={rootId}
                 selectedId={selectedId}

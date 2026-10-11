@@ -243,7 +243,7 @@ final class Formula {
 	private function expect( string $op ): void {
 		$t = $this->peek();
 		if ( ! $t || $t[0] !== 'op' || $t[1] !== $op ) {
-			throw new \InvalidArgumentException( 'Expected ' . $op );
+			throw new \InvalidArgumentException( 'Expected ' . esc_html( $op ) );
 		}
 		++$this->pos;
 	}
