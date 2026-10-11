@@ -21,7 +21,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class CouponsRepository {
 
-	const DB_VERSION = '1';
+	// 2: per-customer limits (per_customer column, coupon_uses table).
+	const DB_VERSION = '2';
 	const DB_OPTION  = 'subtleforms_coupons_db';
 
 	/**
@@ -46,6 +47,7 @@ final class CouponsRepository {
   amount decimal(12,2) NOT NULL DEFAULT 0,
   min_total decimal(12,2) NOT NULL DEFAULT 0,
   max_uses int(11) unsigned NOT NULL DEFAULT 0,
+  per_customer int(11) unsigned NOT NULL DEFAULT 0,
   used int(11) unsigned NOT NULL DEFAULT 0,
   form_ids varchar(255) NOT NULL DEFAULT '',
   starts_at datetime NULL DEFAULT NULL,
@@ -55,6 +57,20 @@ final class CouponsRepository {
   updated_at datetime NOT NULL,
   PRIMARY KEY  (id),
   UNIQUE KEY code (code)
+) {$charset};"
+		);
+
+		// Who used which coupon, for per-customer limits. The customer is a
+		// hash of the email address (or the user ID), never the address.
+		dbDelta(
+			"CREATE TABLE {$wpdb->prefix}subtleforms_coupon_uses (
+  id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+  coupon_id bigint(20) unsigned NOT NULL,
+  customer varchar(80) NOT NULL,
+  submission_id bigint(20) unsigned NOT NULL DEFAULT 0,
+  created_at datetime NOT NULL,
+  PRIMARY KEY  (id),
+  KEY coupon_customer (coupon_id,customer)
 ) {$charset};"
 		);
 
@@ -129,11 +145,84 @@ final class CouponsRepository {
 
 	/**
 	 * Count one use. Atomic, and never past max_uses.
+	 *
+	 * @param int    $id           Coupon ID.
+	 * @param string $customer     Customer key from customerKey(), or ''.
+	 * @param int    $submissionId Entry that used it.
 	 */
-	public static function recordUse( int $id ): void {
+	public static function recordUse( int $id, string $customer = '', int $submissionId = 0 ): void {
 		global $wpdb;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		$wpdb->query( $wpdb->prepare( "UPDATE {$wpdb->prefix}subtleforms_coupons SET used = used + 1 WHERE id = %d AND (max_uses = 0 OR used < max_uses)", $id ) );
+		if ( '' !== $customer ) {
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+			$wpdb->insert(
+				$wpdb->prefix . 'subtleforms_coupon_uses',
+				array(
+					'coupon_id'     => $id,
+					'customer'      => substr( $customer, 0, 80 ),
+					'submission_id' => $submissionId,
+					'created_at'    => current_time( 'mysql', true ),
+				)
+			);
+		}
+	}
+
+	/**
+	 * How many times a customer has used a coupon.
+	 *
+	 * @param int    $id       Coupon ID.
+	 * @param string $customer Customer key.
+	 */
+	public static function usesBy( int $id, string $customer ): int {
+		global $wpdb;
+		if ( '' === $customer ) {
+			return 0;
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}subtleforms_coupon_uses WHERE coupon_id = %d AND customer = %s", $id, $customer ) );
+	}
+
+	/**
+	 * Who is ordering, for per-customer limits: the logged-in user, else the
+	 * first email answer in the form. Stored as a hash.
+	 *
+	 * @param mixed $schema  Form schema.
+	 * @param array $payload Submitted values.
+	 */
+	public static function customerKey( $schema, array $payload ): string {
+		$email = '';
+		$walk  = static function ( $nodes ) use ( &$walk, &$email, $payload ) {
+			if ( ! is_array( $nodes ) || '' !== $email ) {
+				return;
+			}
+			foreach ( $nodes as $node ) {
+				if ( ! is_array( $node ) || '' !== $email ) {
+					continue;
+				}
+				if ( array() === $node || array_keys( $node ) === range( 0, count( $node ) - 1 ) ) {
+					$walk( $node ); // A column given as a plain list of fields.
+					continue;
+				}
+				$key = (string) ( $node['key'] ?? ( $node['config']['key'] ?? '' ) );
+				if ( 'email' === ( $node['type'] ?? '' ) && '' !== $key && ! empty( $payload[ $key ] ) && is_string( $payload[ $key ] ) ) {
+					$email = strtolower( trim( $payload[ $key ] ) );
+					return;
+				}
+				foreach ( array( 'children', 'fields', 'columns' ) as $child ) {
+					if ( isset( $node[ $child ] ) && is_array( $node[ $child ] ) ) {
+						$walk( $node[ $child ] );
+					}
+				}
+			}
+		};
+		$walk( is_array( $schema ) ? ( $schema['fields'] ?? array() ) : array() );
+
+		if ( '' !== $email && is_email( $email ) ) {
+			return 'email:' . hash( 'sha256', $email );
+		}
+		$user = get_current_user_id();
+		return $user > 0 ? 'user:' . $user : '';
 	}
 
 	/**
@@ -141,7 +230,7 @@ final class CouponsRepository {
 	 *
 	 * @return array|\WP_Error The coupon, or why it cannot be used.
 	 */
-	public static function validate( string $code, int $formId, float $subtotal ) {
+	public static function validate( string $code, int $formId, float $subtotal, string $customer = '' ) {
 		/**
 		 * Look the code up somewhere else, such as WooCommerce coupons for forms
 		 * that check out through WooCommerce. Return a coupon array (`code`,
@@ -173,6 +262,13 @@ final class CouponsRepository {
 		}
 		if ( $coupon['max_uses'] > 0 && $coupon['used'] >= $coupon['max_uses'] ) {
 			return $fail( __( 'This coupon has reached its usage limit.', 'subtleforms' ) );
+		}
+		if ( $coupon['per_customer'] > 0 && '' !== $customer && self::usesBy( (int) $coupon['id'], $customer ) >= $coupon['per_customer'] ) {
+			return $fail(
+				1 === $coupon['per_customer']
+					? __( 'You have already used this coupon.', 'subtleforms' )
+					: __( 'You have used this coupon as many times as allowed.', 'subtleforms' )
+			);
 		}
 		if ( ! empty( $coupon['form_ids'] ) && ! in_array( $formId, $coupon['form_ids'], true ) ) {
 			return $fail( __( 'This coupon cannot be used on this form.', 'subtleforms' ) );
@@ -214,10 +310,15 @@ final class CouponsRepository {
 	 * Public, safe description of a coupon for the browser.
 	 */
 	public static function publicView( array $coupon ): array {
+		$max = (int) ( $coupon['max_uses'] ?? 0 );
 		return array(
-			'code'   => $coupon['code'],
-			'type'   => $coupon['type'],
-			'amount' => $coupon['amount'],
+			'code'         => $coupon['code'],
+			'type'         => $coupon['type'],
+			'amount'       => $coupon['amount'],
+			// Shown in the Order Summary (2.2.1). Null means no limit.
+			'remaining'    => $max > 0 ? max( 0, $max - (int) ( $coupon['used'] ?? 0 ) ) : null,
+			'expires_at'   => ! empty( $coupon['expires_at'] ) ? gmdate( 'c', (int) strtotime( $coupon['expires_at'] . ' UTC' ) ) : null,
+			'per_customer' => (int) ( $coupon['per_customer'] ?? 0 ),
 		);
 	}
 
@@ -243,6 +344,7 @@ final class CouponsRepository {
 			'amount'      => Pricing::money( $data['amount'] ?? 0 ),
 			'min_total'   => Pricing::money( $data['min_total'] ?? 0 ),
 			'max_uses'    => max( 0, (int) ( $data['max_uses'] ?? 0 ) ),
+			'per_customer' => max( 0, (int) ( $data['per_customer'] ?? 0 ) ),
 			'form_ids'    => implode( ',', $forms ),
 			'starts_at'   => $date( $data['starts_at'] ?? '' ),
 			'expires_at'  => $date( $data['expires_at'] ?? '' ),
@@ -259,6 +361,7 @@ final class CouponsRepository {
 			'amount'      => (float) $row['amount'],
 			'min_total'   => (float) $row['min_total'],
 			'max_uses'    => (int) $row['max_uses'],
+			'per_customer' => (int) ( $row['per_customer'] ?? 0 ),
 			'used'        => (int) $row['used'],
 			'form_ids'    => array_values( array_filter( array_map( 'intval', explode( ',', (string) $row['form_ids'] ) ) ) ),
 			'starts_at'   => $row['starts_at'] ?: null,

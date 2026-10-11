@@ -147,6 +147,8 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
   const [global, setGlobal] = useState(null);
   const [lists, setLists] = useState(null);
   const [hubspotProps, setHubspotProps] = useState(null);
+  // Provider contact fields for the mapping rows (SubtleForms Pro 2.3.0).
+  const [emFields, setEmFields] = useState(null);
 
   const needsSettings = shown.includes('email_marketing') || shown.includes('crm');
   useEffect(() => {
@@ -281,9 +283,12 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
                 )}
                 <ConnectionTest
                   path='/integrations/email-marketing/test'
-                  label={__('Load lists', 'subtleforms')}
-                  getBody={() => ({})}
-                  onSuccess={(res) => setLists(Array.isArray(res.lists) ? res.lists : [])}
+                  label={__('Load lists and fields', 'subtleforms')}
+                  getBody={() => ({ list_id: em.list_id || '' })}
+                  onSuccess={(res) => {
+                    setLists(Array.isArray(res.lists) ? res.lists : []);
+                    setEmFields(Array.isArray(res.fields) && res.fields.length ? res.fields : null);
+                  }}
                   disabled={isReadOnly}
                 />
               </div>
@@ -310,8 +315,21 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
                 fieldOptions={fieldOptions}
                 targetKey='target'
                 targetLabel={TARGET_LABEL[emProvider] || TARGET_LABEL.mailchimp}
+                targetOptions={emFields ? emFields.map((f) => ({ label: `${f.label} (${f.id})`, value: f.id })) : null}
                 disabled={isReadOnly}
               />
+
+              <div className='sf-map__test'>
+                <ConnectionTest
+                  path='/integrations/email-marketing/test-contact'
+                  label={__('Send test contact', 'subtleforms')}
+                  getBody={() => ({ config: em, fields: schema?.fields || [], form_title: metadata.title || metadata.name || '' })}
+                  disabled={isReadOnly}
+                />
+                <p className='sf-map__hint'>
+                  {__('Sends a sample contact with your email address through this mapping, so you can check every field arrives.', 'subtleforms')}
+                </p>
+              </div>
             </div>
           )}
         </div>
@@ -377,6 +395,18 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
                   disabled={isReadOnly}
                 />
               )}
+
+              <div className='sf-map__test'>
+                <ConnectionTest
+                  path='/integrations/crm/test-contact'
+                  label={__('Send test contact', 'subtleforms')}
+                  getBody={() => ({ config: crm, fields: schema?.fields || [], form_title: metadata.title || metadata.name || '' })}
+                  disabled={isReadOnly}
+                />
+                <p className='sf-map__hint'>
+                  {__('Sends a sample contact with your email address through this mapping.', 'subtleforms')}
+                </p>
+              </div>
             </div>
           )}
         </div>

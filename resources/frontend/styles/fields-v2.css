@@ -534,6 +534,13 @@
 .subtleforms-summary__totals dd { margin: 0; }
 .subtleforms-summary__totals dd { font-variant-numeric: tabular-nums; }
 .subtleforms-summary__row--discount { color: #00804a; }
+.subtleforms-summary__coupon-meta {
+	display: block;
+	margin: 2px 0 0;
+	font-weight: 400;
+	font-size: var(--subtleforms-font-size-xs, 0.75rem);
+	color: var(--subtleforms-color-text-muted, #6b7280);
+}
 .subtleforms-summary__row--total {
 	margin-top: 6px;
 	padding-top: 10px;

@@ -145,6 +145,12 @@ export default function CrmPanel({ settings, updateSetting, fieldErrors = {} }) 
             </div>
           </>
         )}
+
+        {/* SubtleForms Pro: Zapier app connection, API key and Zaps (2.3.0). */}
+        {window.SubtleFormsPro?.ZapierPanel && (() => {
+          const ZapierPanel = window.SubtleFormsPro.ZapierPanel;
+          return <ZapierPanel />;
+        })()}
       </div>
     </div>
   );

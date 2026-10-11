@@ -832,7 +832,14 @@ export default function FormRenderer({
               });
               submissionPayload._payment = paid?.reference || '';
             } catch (payErr) {
-              setSubmitError(payErr?.message || __('Your payment could not be completed.', 'subtleforms'));
+              if (payErr?.inline) {
+                // A decline or incomplete card: the Card field shows the
+                // reason next to the card, and every other answer stays.
+                setSubmitError(null);
+                cardRef.current?.focus?.();
+              } else {
+                setSubmitError(payErr?.message || __('Your payment could not be completed.', 'subtleforms'));
+              }
               setSubmitting(false);
               return;
             }

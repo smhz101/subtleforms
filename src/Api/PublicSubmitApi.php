@@ -278,6 +278,8 @@ final class PublicSubmitApi {
 			);
 		} catch ( \RuntimeException $e ) {
 			Logger::error( 'Failed to create submission record: %s', $e->getMessage() );
+			// The entry was not saved: release an authorised payment.
+			$voidPayment();
 			return ApiResponse::server_error( __( 'Failed to create submission record', 'subtleforms' ) );
 		}
 
@@ -391,6 +393,10 @@ final class PublicSubmitApi {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
 				$voidPayment();
 				return ApiResponse::server_error( __( 'Failed to save submission data', 'subtleforms' ) );
+			} elseif ( $isPaymentForm ) {
+				// Stored with another status (for example spam): the payment
+				// is never captured, so release the hold now.
+				$voidPayment();
 			}
 
 			// Keep the entry's uploaded files (they were pending until now).
@@ -557,10 +563,11 @@ final class PublicSubmitApi {
 		}
 		$code = CouponsRepository::normalizeCode( $code );
 
-		$quote  = Pricing::quote( $schema, $payload );
-		$coupon = null;
+		$quote    = Pricing::quote( $schema, $payload );
+		$coupon   = null;
+		$customer = CouponsRepository::customerKey( $schema, $payload );
 		if ( '' !== $code ) {
-			$checked = CouponsRepository::validate( $code, $formId, (float) $quote['subtotal'] );
+			$checked = CouponsRepository::validate( $code, $formId, (float) $quote['subtotal'], $customer );
 			if ( is_wp_error( $checked ) ) {
 				return ApiResponse::error( 'subtleforms_coupon_invalid', $checked->get_error_message(), 422 );
 			}
@@ -569,9 +576,10 @@ final class PublicSubmitApi {
 		}
 
 		$order = array(
-			'quote'   => $quote,
-			'coupon'  => $coupon,
-			'payment' => null,
+			'quote'    => $quote,
+			'coupon'   => $coupon,
+			'payment'  => null,
+			'customer' => $customer,
 		);
 		if ( $quote['total'] <= 0 ) {
 			return $order;
@@ -654,7 +662,7 @@ final class PublicSubmitApi {
 			)
 		);
 		if ( ! empty( $order['coupon']['id'] ) && in_array( $status, array( 'completed', 'payment_pending' ), true ) ) {
-			CouponsRepository::recordUse( (int) $order['coupon']['id'] );
+			CouponsRepository::recordUse( (int) $order['coupon']['id'], (string) ( $order['customer'] ?? '' ), $submissionId );
 		}
 	}
 

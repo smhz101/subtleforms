@@ -233,7 +233,7 @@ final class PaymentsApi {
 		}
 
 		$base   = Pricing::quote( $schema, $payload );
-		$coupon = '' !== $code ? CouponsRepository::validate( $code, $formId, (float) $base['subtotal'] ) : null;
+		$coupon = '' !== $code ? CouponsRepository::validate( $code, $formId, (float) $base['subtotal'], CouponsRepository::customerKey( $schema, $payload ) ) : null;
 		$quote  = is_array( $coupon ) ? Pricing::quote( $schema, $payload, $coupon ) : $base;
 
 		return array(

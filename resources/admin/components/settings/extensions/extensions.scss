@@ -102,6 +102,14 @@
 		color: var(--sf-text-muted);
 	}
 
+	&__test {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		padding-top: 12px;
+		border-top: 1px dashed var(--sf-border-subtle);
+	}
+
 	&__notice {
 		margin: 0;
 		padding: 10px 12px;

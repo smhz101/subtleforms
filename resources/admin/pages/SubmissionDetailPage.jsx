@@ -867,6 +867,11 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
             </TabPanel>
           </section>
 
+          {/* SubtleForms Pro: integration log with request and response, retry (2.3.0). */}
+          { window.SubtleFormsPro?.EntryIntegrations && ( () => {
+            const EntryIntegrations = window.SubtleFormsPro.EntryIntegrations;
+            return <EntryIntegrations submissionId={ submission.id } />;
+          } )() }
         </div>
 
         {/* ── Sidebar ── */}

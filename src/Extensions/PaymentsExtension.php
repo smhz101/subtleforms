@@ -134,7 +134,7 @@ class PaymentsExtension extends AbstractExtension {
 		$quote = \SubtleForms\Payments\Pricing::quote( $schema, $payload );
 		$code  = \SubtleForms\Payments\CouponsRepository::normalizeCode( (string) ( $payload['_coupon'] ?? '' ) );
 		if ( '' !== $code ) {
-			$coupon = \SubtleForms\Payments\CouponsRepository::validate( $code, $formId, (float) $quote['subtotal'] );
+			$coupon = \SubtleForms\Payments\CouponsRepository::validate( $code, $formId, (float) $quote['subtotal'], \SubtleForms\Payments\CouponsRepository::customerKey( $schema, $payload ) );
 			if ( is_wp_error( $coupon ) ) {
 				return $coupon;
 			}

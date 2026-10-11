@@ -6,7 +6,7 @@
  * the total to the gateway. The server recomputes the order on submit.
  */
 import { createContext, useContext, useEffect, useRef, useState } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { formatMoney } from '../../../shared/pricing';
 
 export const PaymentContext = createContext(null);
@@ -237,6 +237,47 @@ export function PaymentCoupon({ config }) {
   return <CouponBox placeholder={config.placeholder} buttonText={config.buttonText} />;
 }
 
+/* ── Coupon limits (2.2.1) ──────────────────────────────────────────────── */
+
+/**
+ * "3 uses left · Expires 31 December 2026 · 1 per customer".
+ */
+export function couponMeta(coupon) {
+  if (!coupon) return '';
+  const parts = [];
+  if (coupon.remaining !== null && coupon.remaining !== undefined) {
+    parts.push(
+      sprintf(
+        /* translators: %d: number of uses left */
+        _n('%d use left', '%d uses left', coupon.remaining, 'subtleforms'),
+        coupon.remaining
+      )
+    );
+  }
+  if (coupon.expires_at) {
+    const d = new Date(coupon.expires_at);
+    if (!Number.isNaN(d.getTime())) {
+      parts.push(
+        sprintf(
+          /* translators: %s: date */
+          __('Expires %s', 'subtleforms'),
+          d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })
+        )
+      );
+    }
+  }
+  if (coupon.per_customer > 0) {
+    parts.push(
+      sprintf(
+        /* translators: %d: uses allowed per customer */
+        _n('%d use per customer', '%d uses per customer', coupon.per_customer, 'subtleforms'),
+        coupon.per_customer
+      )
+    );
+  }
+  return parts.join(' · ');
+}
+
 /* ── Order summary ───────────────────────────────────────────────────────── */
 
 export function PaymentSummary({ config }) {
@@ -280,6 +321,9 @@ export function PaymentSummary({ config }) {
                 /* translators: %s: coupon code */
                 __('Discount (%s)', 'subtleforms'),
                 coupon?.code || ''
+              )}
+              {couponMeta(coupon) && (
+                <span className='subtleforms-summary__coupon-meta'>{couponMeta(coupon)}</span>
               )}
             </dt>
             <dd>−{formatMoney(quote.discount, currency)}</dd>

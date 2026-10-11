@@ -7,7 +7,7 @@ import {
 } from '@wordpress/components';
 import { useNavigate } from 'react-router-dom';
 import Icon from '../ui/Icon';
-import { getBranding } from '../utils/branding';
+import { getBranding, supportUrl } from '../utils/branding';
 
 /**
  * Right-hand side of the top bar: plan status and help.
@@ -21,7 +21,7 @@ export default function TopBarUtilities() {
   return (
     <div className='sf-topbar-utils'>
       {!branding.hideUpgrade && <PlanChip />}
-      {!branding.hideHelp && <HelpDropdown />}
+      {(!branding.hideHelp || !!branding.supportUrl) && <HelpDropdown />}
     </div>
   );
 }
@@ -108,30 +108,34 @@ function HelpDropdown() {
       renderContent={() => (
         <>
           <MenuGroup>
-            <MenuItem
-              icon={<Icon.Book size={18} />}
-              iconPosition='left'
-              href='https://subtleforms.com/docs'
-              target='_blank'
-              rel='noopener noreferrer'>
-              {__('Documentation', 'subtleforms')}
-            </MenuItem>
+            {!hideCredits && (
+              <MenuItem
+                icon={<Icon.Book size={18} />}
+                iconPosition='left'
+                href='https://subtleforms.com/docs'
+                target='_blank'
+                rel='noopener noreferrer'>
+                {__('Documentation', 'subtleforms')}
+              </MenuItem>
+            )}
             <MenuItem
               icon={<Icon.MessageCircle size={18} />}
               iconPosition='left'
-              href='https://subtleforms.com/support'
+              href={supportUrl()}
               target='_blank'
               rel='noopener noreferrer'>
               {__('Get support', 'subtleforms')}
             </MenuItem>
-            <MenuItem
-              icon={<Icon.Sparkles size={18} />}
-              iconPosition='left'
-              href='https://subtleforms.com/changelog'
-              target='_blank'
-              rel='noopener noreferrer'>
-              {__("What's new", 'subtleforms')}
-            </MenuItem>
+            {!hideCredits && (
+              <MenuItem
+                icon={<Icon.Sparkles size={18} />}
+                iconPosition='left'
+                href='https://subtleforms.com/changelog'
+                target='_blank'
+                rel='noopener noreferrer'>
+                {__("What's new", 'subtleforms')}
+              </MenuItem>
+            )}
           </MenuGroup>
           {version && !hideCredits && (
             <div className='sf-help__version'>

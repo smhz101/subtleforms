@@ -394,7 +394,7 @@ class AdminMenu {
 	 * How the admin app presents the plugin: name, logo and which SubtleForms
 	 * credits, help links and upgrade prompts appear.
 	 *
-	 * @return array{name:string,menuName:string,logoUrl:string,hideCredits:bool,hideHelp:bool,hideUpgrade:bool,showLicense:bool}
+	 * @return array{name:string,menuName:string,logoUrl:string,hideCredits:bool,hideHelp:bool,hideUpgrade:bool,showLicense:bool,supportUrl:string}
 	 */
 	public static function branding(): array {
 		static $cache = null;
@@ -410,6 +410,7 @@ class AdminMenu {
 			'hideHelp'    => false,
 			'hideUpgrade' => false,
 			'showLicense' => true,
+			'supportUrl'  => '',
 		);
 
 		/**
@@ -424,6 +425,7 @@ class AdminMenu {
 		 *     @type bool   $hideHelp    Hide the Help menu.
 		 *     @type bool   $hideUpgrade Hide upgrade prompts.
 		 *     @type bool   $showLicense Show the License screen to this user.
+		 *     @type string $supportUrl  Where "Get support" links to; empty for SubtleForms (2.3.0).
 		 * }
 		 * @since 2.1.0
 		 */
@@ -440,6 +442,7 @@ class AdminMenu {
 			'hideHelp'    => (bool) $b['hideHelp'],
 			'hideUpgrade' => (bool) $b['hideUpgrade'],
 			'showLicense' => (bool) $b['showLicense'],
+			'supportUrl'  => esc_url_raw( (string) $b['supportUrl'], array( 'http', 'https', 'mailto' ) ),
 		);
 		return $cache;
 	}

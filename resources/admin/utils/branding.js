@@ -12,7 +12,16 @@ const DEFAULTS = {
   hideHelp: false,
   hideUpgrade: false,
   showLicense: true,
+  // Custom "Get support" link (white label, 2.3.0).
+  supportUrl: '',
 };
+
+const SUPPORT_URL = 'https://subtleforms.com/support';
+
+/** Where "Get support" links go: the white-label support URL, or SubtleForms. */
+export function supportUrl() {
+  return getBranding().supportUrl || SUPPORT_URL;
+}
 
 export function getBranding() {
   const b = window.subtleformsAdmin?.branding;

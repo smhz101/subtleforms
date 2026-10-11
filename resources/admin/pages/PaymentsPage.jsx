@@ -6,7 +6,7 @@
  * when a visitor applies one and again when the form is submitted.
  */
 import { useEffect, useMemo, useState, useCallback } from '@wordpress/element';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import {
   Button,
@@ -41,6 +41,7 @@ const EMPTY = {
   amount: '',
   min_total: '',
   max_uses: '',
+  per_customer: '',
   form_ids: [],
   starts_at: '',
   expires_at: '',
@@ -78,6 +79,7 @@ function CouponModal({ coupon, forms, currency, onClose, onSaved }) {
           amount: String(coupon.amount ?? ''),
           min_total: coupon.min_total ? String(coupon.min_total) : '',
           max_uses: coupon.max_uses ? String(coupon.max_uses) : '',
+          per_customer: coupon.per_customer ? String(coupon.per_customer) : '',
           starts_at: dateOnly(coupon.starts_at),
           expires_at: dateOnly(coupon.expires_at),
         }
@@ -226,6 +228,17 @@ function CouponModal({ coupon, forms, currency, onClose, onSaved }) {
           label={__('Expires', 'subtleforms')}
           value={draft.expires_at}
           onChange={(v) => set({ expires_at: v })}
+        />
+        <TextControl
+          __nextHasNoMarginBottom
+          __next40pxDefaultSize
+          type='number'
+          min={0}
+          label={__('Uses per customer', 'subtleforms')}
+          placeholder={__('Unlimited', 'subtleforms')}
+          value={draft.per_customer}
+          onChange={(v) => set({ per_customer: v })}
+          help={__('Customers are told apart by the email they enter, or their account when logged in.', 'subtleforms')}
         />
       </div>
 
@@ -395,6 +408,13 @@ export default function PaymentsPage() {
         </div>
       </div>
 
+      {/* SubtleForms Pro: WooCommerce Stripe account, Apple Pay and Google Pay
+          domain, license warnings (2.2.1). */}
+      {window.SubtleFormsPro?.PaymentsSetup && (() => {
+        const ProSetup = window.SubtleFormsPro.PaymentsSetup;
+        return <ProSetup overview={overview} onChange={load} />;
+      })()}
+
       {!ready && (
         <section className='sf-panel sf-pay-setup'>
           <div className='sf-pay-setup__text'>
@@ -495,6 +515,15 @@ export default function PaymentsPage() {
                       <td className='sf-pay-num'>
                         {c.used}
                         <span className='sf-pay-muted'> / {c.max_uses > 0 ? c.max_uses : '∞'}</span>
+                        {c.per_customer > 0 && (
+                          <span className='sf-pay-muted sf-pay-muted--block'>
+                            {sprintf(
+                              /* translators: %d: uses allowed per customer */
+                              _n('%d per customer', '%d per customer', c.per_customer, 'subtleforms'),
+                              c.per_customer
+                            )}
+                          </span>
+                        )}
                       </td>
                       <td className='sf-pay-dates'>
                         {c.starts_at || c.expires_at

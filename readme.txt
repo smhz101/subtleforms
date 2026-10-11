@@ -161,6 +161,7 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 == Changelog ==
 
 = 2.3.0 - 2026-10-11 =
+* New: Screens for SubtleForms Pro 2.3.0: an integration log with Retry on each entry, a webhook delivery log, "Send test contact" in the form integrations and a custom support link for white label.
 * New: Email merge tags. An "Insert tag" menu in the email settings adds {all_fields}, {field:key}, {form_title}, {entry_id}, {site_name}, {admin_email} and {date} at the cursor. Single and double braces both work, so {{all_fields}} and forms made before 2.3 keep working. The help menu explains every tag.
 * New: Emails can be sent as HTML, with line breaks kept and {all_fields} drawn as a table. An empty message now sends every answer instead of raw data.
 * New: Newsletter template with one email field and the button on the same row, an inline field layout for any form, and a Dark surface appearance preset for footers and hero sections. Previews show dark-surface forms on a dark background.
@@ -177,6 +178,10 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 * Developer: A Tests workflow runs PHPUnit, Jest and the Playwright and axe browser tests against WordPress (wp-env) on every push.
 
 = 2.2.1 - 2026-10-11 =
+* Fix: If a card payment was authorised but the entry could not be saved (database error, spam check, CAPTCHA or validation), the hold on the card is now released.
+* Fix: Card declines are shown next to the card field and every other answer stays in the form.
+* New: Coupons can be limited per customer, and the Order Summary shows how many uses are left and when the coupon expires.
+* New: The Payments screen has room for SubtleForms Pro to offer "Use my WooCommerce Stripe account".
 * Fix: Setting a field's width no longer drops its required setting, options, placeholder or help text on the live form. Width only changes the layout.
 * Fix: Errors found by the server are shown on each field, which is marked invalid, linked to its message and focused. The message above the form now reads "Please fix the 4 highlighted fields."
 * Fix: The Country field lists every country again. It and the Address field share one country list.
