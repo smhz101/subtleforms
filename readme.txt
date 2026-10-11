@@ -4,7 +4,7 @@ Tags: forms, contact form, form builder, submissions
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.0.0
+Stable tag: 2.1.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -159,6 +159,18 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 
 == Changelog ==
 
+= 2.1.0 - 2026-10-11 =
+* New: Payments that add up on the server. Product (price and quantity), Priced Options (radio, cards, dropdown or checkboxes with a price per option), Custom Amount and Fixed Fee fields feed one live order
+* New: Order Summary lists every item with subtotal, discount, tax and total as visitors fill the form, with a coupon box right under the total
+* New: Coupons. SubtleForms › Payments manages percentage or fixed discounts with minimum order, usage limits, start and end dates and per-form rules. Codes are checked when applied and again on submit, and a use is counted only when the order goes through
+* New: Card Payment field for gateways (Stripe in SubtleForms Pro). Entries keep the full order and payment status, shown in an Order panel on the entry
+* New: Calculation fields can be charged ("Charge this amount")
+* New: Payments screen with gateway status, setup guide and the coupon manager
+* New: The builder canvas is now what you see is what you get: form and field styling (colours, radius, input style, label position, spacing) shows on the canvas as you change it
+* New: Field widths (Full, 3/4, 2/3, 1/2, 1/3, 1/4) from the field toolbar place fields side by side, replacing column containers in the field library. Forms that already use columns keep working
+* Developer: `subtleforms/payments/quote`, `subtleforms/payments/validate_coupon`, `subtleforms/payment/verify`, `subtleforms/payment/capture`, `subtleforms/payment/void`, `subtleforms/payments/gateways` and `subtleforms/frontend/enqueued`
+* Fix: Plugin Check findings (escaped exception message, sanitising kept field settings with wp_kses_post, annotated counts query)
+
 = 2.0.0 - 2026-10-11 =
 * Redesign: New admin built on the WordPress 7.1 admin look: dark frame, white stage, top navigation, admin colour scheme accent and WordPress components throughout
 * Redesign: Dashboard with KPI strip, 14-day submissions chart, quick actions and system status
@@ -271,6 +283,9 @@ now be reconstructed accurately.
 * Feature: Basic spam protection
 
 == Upgrade Notice ==
+
+= 2.1.0 =
+Payments with a live order summary and coupons, a builder canvas that shows your styling, and side-by-side field widths. Update SubtleForms Pro to 2.1.0 as well.
 
 = 2.0.0 =
 A complete redesign of the admin and builder, new fields and form settings, and a fix that keeps all field settings on save. If you use SubtleForms Pro, update it to 2.0.0 as well.
