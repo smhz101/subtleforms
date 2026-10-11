@@ -99,13 +99,13 @@ const FEATURE_COPY = {
     benefits: [
       __( 'Every submission instantly reaches Zapier, Make, or your own endpoint', 'subtleforms' ),
       __( 'Stop manually moving data between your tools', 'subtleforms' ),
-      __( 'Build automations in minutes — no code required', 'subtleforms' ),
+      __( 'Build automations in minutes, no code required', 'subtleforms' ),
     ],
   },
 
   'extensions.email_marketing': {
     title: __( 'Grow Your Email List', 'subtleforms' ),
-    description: __( 'Every form respondent is a potential subscriber. Without this, they complete the form and leave — nothing captured.', 'subtleforms' ),
+    description: __( 'Every form respondent is a potential subscriber. Without this, they complete the form and leave, nothing captured.', 'subtleforms' ),
     cta: __( 'Grow My Email List', 'subtleforms' ),
     lossLine: __( 'You are missing a subscriber with every form submission.', 'subtleforms' ),
     benefits: [
@@ -117,11 +117,11 @@ const FEATURE_COPY = {
 
   'extensions.crm': {
     title: __( 'Sync Leads to Your CRM', 'subtleforms' ),
-    description: __( 'Without CRM sync, every lead sits in your submissions list — unseen by your sales team until someone copies it across.', 'subtleforms' ),
+    description: __( 'Without CRM sync, every lead sits in your submissions list, unseen by your sales team until someone copies it across.', 'subtleforms' ),
     cta: __( 'Start Syncing Leads', 'subtleforms' ),
     lossLine: __( 'Leads from your forms are not reaching your CRM.', 'subtleforms' ),
     benefits: [
-      __( 'Every form fill becomes a CRM contact — no copy-paste', 'subtleforms' ),
+      __( 'Every form fill becomes a CRM contact, no copy-paste', 'subtleforms' ),
       __( 'Stop losing leads between your forms and your sales pipeline', 'subtleforms' ),
       __( 'HubSpot built in, or any CRM through Zapier or Make', 'subtleforms' ),
     ],
@@ -133,7 +133,7 @@ const FEATURE_COPY = {
     cta: __( 'Track My Conversions', 'subtleforms' ),
     lossLine: __( 'You have no visibility into which forms are actually converting.', 'subtleforms' ),
     benefits: [
-      __( 'See exactly which forms convert — and which ones lose people', 'subtleforms' ),
+      __( 'See exactly which forms convert, and which ones lose people', 'subtleforms' ),
       __( 'Stop guessing and start optimising with real submission data', 'subtleforms' ),
       __( 'Views, submissions and conversion rate on the Forms list and Dashboard', 'subtleforms' ),
     ],
@@ -141,11 +141,11 @@ const FEATURE_COPY = {
 
   'extensions.ecommerce': {
     title: __( 'Sell with Your Forms', 'subtleforms' ),
-    description: __( 'Every time a buyer reaches your form and leaves without buying, that sale is gone. Convert them here — when intent is highest.', 'subtleforms' ),
+    description: __( 'Every time a buyer reaches your form and leaves without buying, that sale is gone. Convert them here, when intent is highest.', 'subtleforms' ),
     cta: __( 'Start Selling with Forms', 'subtleforms' ),
     lossLine: __( 'You are sending buyers away to checkout instead of converting them here.', 'subtleforms' ),
     benefits: [
-      __( 'Accept orders directly inside your forms — no separate shop needed', 'subtleforms' ),
+      __( 'Accept orders directly inside your forms, no separate shop needed', 'subtleforms' ),
       __( 'Add product selections, quantities, and checkout in minutes', 'subtleforms' ),
       __( 'Stop losing buyers to a separate, clunky checkout flow', 'subtleforms' ),
     ],
@@ -205,7 +205,7 @@ function getFeatureCopy( featureKey, context = {} ) {
     lossLine: null,
     benefits: [
       __( 'Stop using tools that don\'t connect to your forms', 'subtleforms' ),
-      __( 'Everything you need — in the same place you build forms', 'subtleforms' ),
+      __( 'Everything you need, in the same place you build forms', 'subtleforms' ),
       __( 'Unlock all Pro extensions and capabilities immediately', 'subtleforms' ),
     ],
   };

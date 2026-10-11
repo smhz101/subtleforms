@@ -1,4 +1,4 @@
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 
 export default function StepNavigation({
   steps,
@@ -14,8 +14,7 @@ export default function StepNavigation({
       <div className='sf-step-navigation-wrapper subtleforms-step-nav'>
         <nav
           className='sf-step-navigation'
-          role='tablist'
-          aria-label='Form steps'>
+          aria-label={__('Form steps', 'subtleforms')}>
           {steps.map((step, index) => {
             const isActive = index === currentStepIndex;
             const isCompleted = index < currentStepIndex;
@@ -39,12 +38,26 @@ export default function StepNavigation({
                   onClick={() => isClickable && onStepClick(index)}
                   disabled={!isClickable}
                   aria-current={isActive ? 'step' : undefined}
-                  aria-label={`${stepTitle}${
-                    isCompleted ? ' (completed)' : isActive ? ' (current)' : ''
-                  }`}>
+                  aria-label={
+                    isCompleted
+                      ? sprintf(
+                          /* translators: %s: step title */
+                          __('%s (completed)', 'subtleforms'),
+                          stepTitle
+                        )
+                      : isActive
+                      ? sprintf(
+                          /* translators: %s: step title */
+                          __('%s (current)', 'subtleforms'),
+                          stepTitle
+                        )
+                      : stepTitle
+                  }>
                   <div className='sf-step-indicator'>
                     {isCompleted ? (
                       <svg
+                        aria-hidden='true'
+                        focusable='false'
                         className='sf-step-check'
                         viewBox='0 0 20 20'
                         fill='currentColor'>

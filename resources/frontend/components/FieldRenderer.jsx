@@ -1,9 +1,8 @@
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { getIn } from '../utils/valuePaths';
 import { getCompositeEmptyParts } from '../utils/fieldValidation';
 import { debug } from '../../shared/debug';
-import SignaturePad from './fields/SignaturePad';
-import RichTextInput from './fields/RichTextInput';
+import { lazy, Suspense } from '@wordpress/element';
 import ChainedSelect from './fields/ChainedSelect';
 import FileUpload from './fields/FileUpload';
 import {
@@ -17,6 +16,24 @@ import {
 import { getFieldType } from '../../shared/extend';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { COUNTRIES, orderedCountries } from '../../shared/countries';
+
+// The signature pad and rich text editor are only downloaded on pages whose
+// form has those fields (2.3.0). Every other form skips that code.
+const SignaturePad = lazy(() =>
+  import(/* webpackChunkName: "field-signature" */ './fields/SignaturePad')
+);
+const RichTextInput = lazy(() =>
+  import(/* webpackChunkName: "field-rich-text" */ './fields/RichTextInput')
+);
+
+/** Placeholder while a lazily loaded field downloads. */
+function FieldLoading() {
+  return (
+    <div className='subtleforms-field-loading' aria-busy='true'>
+      {__('Loading…', 'subtleforms')}
+    </div>
+  );
+}
 import {
   fieldAppearanceStyle,
   fieldAppearanceClasses,
@@ -31,9 +48,10 @@ const AUTOCOMPLETE_TOKENS = {
   number: 'off',
   phone: 'tel',
   tel: 'tel',
-  date: 'bday',
+  // Not every date is a birthday, so dates get no autocomplete hint.
+  date: undefined,
   time: 'off',
-  datetime: 'bday-time',
+  datetime: undefined,
   password: 'new-password',
 };
 
@@ -295,7 +313,6 @@ export default function FieldRenderer({
     return (
       <fieldset
         className={`subtleforms-field subtleforms-field-${field.type} subtleforms-group-field`}
-        aria-required={required}
         aria-invalid={!!error}
       >
         <legend className='subtleforms-field-label'>
@@ -1072,6 +1089,12 @@ function renderInput(
                   type='radio'
                   name={name || inputId}
                   value={star}
+                  aria-label={sprintf(
+                    /* translators: 1: chosen rating, 2: highest rating */
+                    __('%1$d of %2$d', 'subtleforms'),
+                    star,
+                    ratingMax
+                  )}
                   checked={ratingValue === star}
                   onChange={() => onChange(star)}
                   className='subtleforms-sr-only'
@@ -1183,7 +1206,6 @@ function renderInput(
           role='group'
           className='subtleforms-checkbox-grid-wrap'
           aria-labelledby={`${inputId}-label`}
-          aria-required={required}
           aria-invalid={!!error}
           aria-describedby={describedBy}>
         <table className='subtleforms-checkbox-grid'>
@@ -1345,7 +1367,7 @@ function renderInput(
           className='subtleforms-picture-choice'
           role={multiple ? 'group' : 'radiogroup'}
           aria-labelledby={`${inputId}-label`}
-          aria-required={required}
+          aria-required={multiple ? undefined : required}
           aria-invalid={!!error}
           aria-describedby={describedBy}
           style={{ '--subtleforms-picture-columns': cols }}>
@@ -1441,6 +1463,7 @@ function renderInput(
 
     case 'signature':
       return (
+        <Suspense fallback={<FieldLoading />}>
         <SignaturePad
           inputId={inputId}
           name={name}
@@ -1450,10 +1473,12 @@ function renderInput(
           required={required}
           error={error}
         />
+        </Suspense>
       );
 
     case 'rich_text':
       return (
+        <Suspense fallback={<FieldLoading />}>
         <RichTextInput
           inputId={inputId}
           name={name}
@@ -1464,6 +1489,7 @@ function renderInput(
           required={required}
           error={error}
         />
+        </Suspense>
       );
 
     case 'chained_select':
@@ -1522,7 +1548,6 @@ function renderCheckboxGroup(options, value, onChange, props) {
       className={className}
       role='group'
       aria-labelledby={`${inputId}-label`}
-      aria-required={required}
       aria-invalid={!!error}
       aria-describedby={describedBy}>
       {options.map((option, index) => {

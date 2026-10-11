@@ -145,7 +145,7 @@ export default function FormSettings({
         {/* Read-only Notice */}
         {isReadOnly && (
           <Notice status='info' isDismissible={false}>
-            <p>{__('Settings are read-only: Activate your Pro license to edit. Your form continues working—no data loss.', 'subtleforms')}</p>
+            <p>{__('Settings are read-only: Activate your Pro license to edit. Your form continues working. No data loss.', 'subtleforms')}</p>
           </Notice>
         )}
 

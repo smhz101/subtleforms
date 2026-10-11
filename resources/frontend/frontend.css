@@ -483,7 +483,7 @@
 .subtleforms-button-submit {
 	background: var(--subtleforms-color-primary);
 	border-color: var(--subtleforms-color-primary);
-	color: #fff;
+	color: var(--subtleforms-button-text, #fff);
 }
 
 .subtleforms-button-next:hover,
@@ -832,4 +832,14 @@
 
 .subtleforms-disclaimer--neutral {
 	background: var(--subtleforms-color-bg-subtle, #f4f5f7);
+}
+
+/* A field whose code is still downloading (2.3.0). */
+.subtleforms-field-loading {
+	min-height: 44px;
+	padding: 12px;
+	border: 1px dashed var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-md, 6px);
+	color: var(--subtleforms-color-text-light);
+	font-size: 0.875em;
 }

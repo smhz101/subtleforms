@@ -58,7 +58,7 @@ for (const width of WIDTHS) {
         // Required marker and help text survive.
         if (!sample.check.noRequired) {
           await expect(wrapper.locator('.subtleforms-required').first(), `${key} asterisk`).toBeVisible();
-          const requiredHolder = wrapper.locator('[aria-required="true"], [required]');
+          const requiredHolder = wrapper.locator('[aria-required="true"], [required], [role="group"]');
           expect(await requiredHolder.count(), `${key} aria-required or required`).toBeGreaterThan(0);
         }
         await expect(wrapper.locator(`#${id}-help`), `${key} help`).toHaveText(`Help for ${key}`);

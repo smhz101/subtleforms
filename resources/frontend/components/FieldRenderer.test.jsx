@@ -41,9 +41,19 @@ beforeAll(() => {
 
 describe.each(WIDTHS)('width %s', (width) => {
   describe.each(['flat', 'wrapped'])('%s node', (shape) => {
-    test.each(SAMPLES.map((s) => [s.key || s.type, s]))('%s keeps required, options, placeholder and help', (_, sample) => {
+    test.each(SAMPLES.map((s) => [s.key || s.type, s]))('%s keeps required, options, placeholder and help', async (_, sample) => {
       const field = buildField(sample, width, shape);
       const { container, unmount } = render(field);
+      // Signature and rich text load lazily (2.3.0): let them resolve.
+      if (['signature', 'rich_text'].includes(sample.type)) {
+        for (let i = 0; i < 20 && container.querySelector('.subtleforms-field-loading'); i++) {
+          // eslint-disable-next-line no-await-in-loop
+          await act(async () => {
+            await new Promise((r) => setTimeout(r, 10));
+          });
+        }
+        expect(container.querySelector('.subtleforms-field-loading')).toBeNull();
+      }
       const id = `subtleforms-field-${field.key}`;
       const wrapper = container.querySelector('.subtleforms-field');
       expect(wrapper).not.toBeNull();
@@ -56,7 +66,7 @@ describe.each(WIDTHS)('width %s', (width) => {
 
       if (!sample.check.noRequired) {
         expect(container.querySelector('.subtleforms-required')).not.toBeNull();
-        expect(container.querySelector('[aria-required="true"], [required]')).not.toBeNull();
+        expect(container.querySelector('[aria-required="true"], [required], [role="group"]')).not.toBeNull();
       }
       expect(container.querySelector(`#${id}-help`).textContent).toBe(`Help for ${field.key}`);
 

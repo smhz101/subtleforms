@@ -51,16 +51,27 @@ final class EmailAction implements ActionInterface {
 		$textPayload = $this->format_answers( $payload, $schema, false );
 		$bodyPayload = $isHtml ? $this->format_answers( $payload, $schema, true ) : $textPayload;
 
-		// Add admin_email placeholder
-		$textPayload['admin_email'] = get_option( 'admin_email' );
-		$bodyPayload['admin_email'] = $textPayload['admin_email'];
+		// Merge tags (2.3): {all_fields}, {field:key}, {form_title},
+		// {entry_id}, {site_name}, {admin_email}, {date}, in single or double
+		// braces. A message left empty sends every answer.
+		$mergeContext = array(
+			'fields'     => \SubtleForms\Support\FieldMapper::fields( $schema ),
+			'form_title' => (string) ( $schema['metadata']['title'] ?? '' ),
+			'entry_id'   => (int) $context->getMeta( 'submission_id', 0 ),
+		);
+		if ( ! is_string( $body ) || trim( $body ) === '' ) {
+			$body = '{all_fields}';
+		}
 
-		// Replace placeholders in recipient, subject, and body
-		$to      = $this->replace_placeholders( $to, $textPayload );
-		$subject = $this->replace_placeholders( $subject, $textPayload );
+		$to      = is_string( $to ) ? \SubtleForms\Support\MergeTags::render( $to, array( 'answers' => $textPayload ) + $mergeContext, false ) : $to;
+		$subject = is_string( $subject ) ? \SubtleForms\Support\MergeTags::render( $subject, array( 'answers' => $textPayload ) + $mergeContext, false ) : $subject;
 		// A subject is one line, whatever the answers merged into it hold.
 		$subject = is_string( $subject ) ? trim( (string) preg_replace( '/[\r\n]+/', ' ', $subject ) ) : $subject;
-		$body    = $this->replace_placeholders( $body, $bodyPayload );
+		// An HTML email keeps the line breaks typed into the message itself.
+		if ( $isHtml && ! preg_match( '/<(p|br|div|table|ul|ol|h[1-6])\b/i', (string) $body ) ) {
+			$body = nl2br( (string) $body );
+		}
+		$body    = \SubtleForms\Support\MergeTags::render( (string) $body, array( 'answers' => $bodyPayload ) + $mergeContext, $isHtml );
 
 		if ( empty( $to ) || ! is_string( $to ) ) {
 			// Nothing to do; record failure but don't throw to avoid breaking other steps.
@@ -108,9 +119,9 @@ final class EmailAction implements ActionInterface {
 
 		$to = implode( ', ', $valid_recipients );
 
-		// Deterministic content: use payload JSON if body not provided
-		if ( $body === '' ) {
-			$body = wp_json_encode( $context->payload );
+		// Nothing answered at all: say so rather than send a blank email.
+		if ( trim( wp_strip_all_tags( $body ) ) === '' ) {
+			$body = __( 'A new entry was submitted with no answers.', 'subtleforms' );
 		}
 
 		// Ensure headers is array
@@ -131,10 +142,6 @@ final class EmailAction implements ActionInterface {
 			$headers[] = $isHtml ? 'Content-Type: text/html; charset=UTF-8' : 'Content-Type: text/plain; charset=UTF-8';
 		}
 
-		// An HTML email keeps the line breaks typed into the message itself.
-		if ( $isHtml && $body !== '' && ! preg_match( '/<(p|br|div|table|ul|ol|h[1-6])\b/i', $body ) ) {
-			$body = nl2br( $body );
-		}
 
 		// Debug logging before send
 		$this->log_debug(
@@ -190,40 +197,6 @@ final class EmailAction implements ActionInterface {
                         )
                 );
         }
-
-        /**
-         * Replace {{field}} placeholders with actual values.
-	 *
-	 * @param string $template Template string with placeholders.
-	 * @param array  $data     Data array to replace placeholders with.
-	 * @return string Template with placeholders replaced.
-	 */
-	private function replace_placeholders( $template, $data ) {
-		if ( ! is_string( $template ) ) {
-			return $template;
-		}
-
-		// Find all {{field}} patterns
-		preg_match_all( '/\{\{([a-zA-Z0-9_]+)\}\}/', $template, $matches );
-
-		if ( empty( $matches[1] ) ) {
-			return $template;
-		}
-
-		// Replace each placeholder
-		foreach ( $matches[1] as $field ) {
-			$value = $data[ $field ] ?? '';
-
-			// Handle arrays (checkboxes, multi-select)
-			if ( is_array( $value ) ) {
-				$value = implode( ', ', $value );
-			}
-
-			$template = str_replace( '{{' . $field . '}}', $value, $template );
-		}
-
-		return $template;
-	}
 
 	/**
 	 * Whether this email is sent as HTML.
@@ -290,8 +263,8 @@ final class EmailAction implements ActionInterface {
 		if ( ! is_string( $rawTo ) ) {
 			return 'admin';
 		}
-		$fieldTokens = preg_replace( '/\{\{\s*admin_email\s*\}\}/', '', $rawTo );
-		return preg_match( '/\{\{[a-zA-Z0-9_]+\}\}/', (string) $fieldTokens ) ? 'submitter' : 'admin';
+		$fieldTokens = preg_replace( '/\{\{?\s*(admin_email|site_name|form_title|entry_id|date)\s*\}?\}/', '', $rawTo );
+		return preg_match( '/\{\{?\s*(field:)?[a-zA-Z0-9_]+\s*\}?\}/', (string) $fieldTokens ) ? 'submitter' : 'admin';
 	}
 
 	/**

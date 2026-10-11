@@ -1,6 +1,6 @@
 import { memo, useRef } from '@wordpress/element';
 import { Button, SelectControl, CheckboxControl } from '@wordpress/components';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import Icon from '../ui/Icon';
 import TableSkeleton from './TableSkeleton';
@@ -165,7 +165,7 @@ const DataTable = memo(function DataTable({
             {(() => {
               return sprintf(
                 /* translators: %1$d: number of selected items */
-                __('%1$d items selected', 'subtleforms'),
+                _n('%1$d item selected', '%1$d items selected', selectedItems.length, 'subtleforms'),
                 selectedItems.length
               );
             })()}
@@ -203,6 +203,7 @@ const DataTable = memo(function DataTable({
                     checked={allSelected}
                     indeterminate={someSelected}
                     onChange={handleSelectAll}
+                    aria-label={__('Select all', 'subtleforms')}
                   />
                 </th>
               )}
@@ -273,6 +274,11 @@ const DataTable = memo(function DataTable({
                         <CheckboxControl
                           checked={selectedItems.includes(row.id)}
                           onChange={(checked) => handleSelectRow(row.id, checked)}
+                          aria-label={sprintf(
+                            /* translators: %s: row number */
+                            __('Select row %s', 'subtleforms'),
+                            row.id
+                          )}
                         />
                       </td>
                     )}
@@ -307,6 +313,11 @@ const DataTable = memo(function DataTable({
                       <CheckboxControl
                         checked={selectedItems.includes(row.id)}
                         onChange={(checked) => handleSelectRow(row.id, checked)}
+                        aria-label={sprintf(
+                          /* translators: %s: row number */
+                          __('Select row %s', 'subtleforms'),
+                          row.id
+                        )}
                       />
                     </td>
                   )}

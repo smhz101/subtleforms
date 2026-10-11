@@ -255,6 +255,75 @@ final class SubmissionsApi {
 			)
 		);
 
+		// 2.3.0: bulk actions, notes and resending notifications.
+		register_rest_route(
+			self::NAMESPACE,
+			'/submissions/bulk',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'bulk_submissions' ),
+				'permission_callback' => array( $this, 'check_write_permission' ),
+				'args'                => array(
+					'ids'    => array(
+						'type'     => 'array',
+						'required' => true,
+						'items'    => array( 'type' => 'integer' ),
+					),
+					'action' => array(
+						'type'     => 'string',
+						'required' => true,
+						'enum'     => array( 'read', 'unread', 'star', 'unstar', 'spam', 'flagged', 'restore', 'delete' ),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/submissions/(?P<id>\d+)/notes',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'add_note' ),
+				'permission_callback' => array( $this, 'check_write_permission' ),
+				'args'                => array(
+					'id'   => array(
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+					),
+					'text' => array(
+						'type'     => 'string',
+						'required' => true,
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/submissions/(?P<id>\d+)/notes/(?P<note_id>[a-zA-Z0-9-]+)',
+			array(
+				'methods'             => 'DELETE',
+				'callback'            => array( $this, 'delete_note' ),
+				'permission_callback' => array( $this, 'check_write_permission' ),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/submissions/(?P<id>\d+)/resend',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'resend_notifications' ),
+				'permission_callback' => array( $this, 'check_write_permission' ),
+				'args'                => array(
+					'id' => array(
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+					),
+				),
+			)
+		);
+
 		register_rest_route(
 			self::NAMESPACE,
 			'/submissions/export',
@@ -344,9 +413,10 @@ final class SubmissionsApi {
 		} elseif ( in_array( $tab_status, array( 'spam', 'flagged' ), true ) ) {
 			$status_arg = $tab_status;
 		}
+		$starred_arg = $tab_status === 'starred' ? 1 : null;
 
 		// Processing status (filter bar) — only applies when tab is 'all'
-		if ( $proc_status && $status_arg === null && $is_read_arg === null ) {
+		if ( $proc_status && $status_arg === null && $is_read_arg === null && $tab_status !== 'starred' ) {
 			$status_arg = $proc_status;
 		}
 
@@ -354,6 +424,7 @@ final class SubmissionsApi {
 			'form_id'     => $request->get_param( 'form_id' ),
 			'status'      => $status_arg,
 			'is_read'     => $is_read_arg,
+			'starred'     => $starred_arg,
 			'search'      => $request->get_param( 'search' ),
 			'after'       => $request->get_param( 'after' ),
 			'field_key'   => $request->get_param( 'field_key' ),
@@ -433,6 +504,9 @@ final class SubmissionsApi {
 		}
 
 		$submission = $this->redactSecrets( $submission );
+		if ( isset( $submission['meta']['notes'] ) && is_array( $submission['meta']['notes'] ) ) {
+			$submission['meta']['notes'] = array_map( array( self::class, 'presentNote' ), $submission['meta']['notes'] );
+		}
 
 		$etag     = $this->generateETag( $submission, 'submission' );
 		$response = ApiResponse::success( $submission );
@@ -476,6 +550,7 @@ final class SubmissionsApi {
 			array(
 				'status'  => $validated['status'] ?? null,
 				'is_read' => isset( $validated['is_read'] ) ? intval( $validated['is_read'] ) : null,
+				'starred' => isset( $validated['starred'] ) ? (bool) $validated['starred'] : null,
 				'notes'   => $validated['notes'] ?? null,
 			),
 			fn( $value ) => $value !== null
@@ -491,6 +566,184 @@ final class SubmissionsApi {
 		$etag              = $this->generateETag( $updatedSubmission, 'submission' );
 		$response          = ApiResponse::success( array( 'success' => true, 'submission' => $updatedSubmission ) );
 		return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
+	}
+
+	/**
+	 * Apply one action to several entries (2.3.0).
+	 */
+	public function bulk_submissions( WP_REST_Request $request ): WP_REST_Response {
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		$ids    = array_values( array_unique( array_filter( array_map( 'absint', (array) $request->get_param( 'ids' ) ) ) ) );
+		$action = (string) $request->get_param( 'action' );
+		if ( ! $ids ) {
+			return ApiResponse::bad_request( __( 'Select at least one entry.', 'subtleforms' ) );
+		}
+		if ( count( $ids ) > 500 ) {
+			return ApiResponse::bad_request( __( 'Select 500 entries or fewer at a time.', 'subtleforms' ) );
+		}
+
+		$changes = array(
+			'read'    => array( 'is_read' => 1 ),
+			'unread'  => array( 'is_read' => 0 ),
+			'star'    => array( 'starred' => true ),
+			'unstar'  => array( 'starred' => false ),
+			'spam'    => array( 'status' => 'spam' ),
+			'flagged' => array( 'status' => 'flagged' ),
+			'restore' => array( 'status' => 'none' ),
+		);
+
+		$done = array();
+		foreach ( $ids as $id ) {
+			if ( ! $this->submissionsRepo->find( $id ) ) {
+				continue;
+			}
+			try {
+				if ( $action === 'delete' ) {
+					if ( $this->submissionsRepo->delete( $id ) ) {
+						( new \SubtleForms\Repositories\LogsRepository() )->deleteBySubmission( $id );
+						$done[] = $id;
+					}
+				} elseif ( isset( $changes[ $action ] ) ) {
+					$this->submissionsRepo->update( $id, $changes[ $action ] );
+					$done[] = $id;
+				}
+			} catch ( \RuntimeException $e ) {
+				continue;
+			}
+		}
+
+		return ApiResponse::success(
+			array(
+				'action'  => $action,
+				'updated' => $done,
+				'count'   => count( $done ),
+			)
+		);
+	}
+
+	/**
+	 * Add a private note to an entry (2.3.0).
+	 */
+	public function add_note( WP_REST_Request $request ): WP_REST_Response {
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		$id   = absint( $request->get_param( 'id' ) );
+		$text = sanitize_textarea_field( (string) $request->get_param( 'text' ) );
+		if ( trim( $text ) === '' ) {
+			return ApiResponse::validation_error( __( 'Write a note first.', 'subtleforms' ), array( 'text' => __( 'Write a note first.', 'subtleforms' ) ) );
+		}
+		if ( mb_strlen( $text ) > 5000 ) {
+			$text = mb_substr( $text, 0, 5000 );
+		}
+
+		$note = $this->submissionsRepo->addNote( $id, $text, get_current_user_id() );
+		if ( ! $note ) {
+			return ApiResponse::not_found( __( 'Submission not found', 'subtleforms' ) );
+		}
+
+		return ApiResponse::success( self::presentNote( $note ), 201 );
+	}
+
+	/**
+	 * Remove a note from an entry.
+	 */
+	public function delete_note( WP_REST_Request $request ): WP_REST_Response {
+		$id     = absint( $request->get_param( 'id' ) );
+		$noteId = preg_replace( '/[^a-zA-Z0-9-]/', '', (string) $request->get_param( 'note_id' ) );
+		if ( ! $this->submissionsRepo->deleteNote( $id, (string) $noteId ) ) {
+			return ApiResponse::not_found( __( 'Note not found', 'subtleforms' ) );
+		}
+		return ApiResponse::success( array( 'deleted' => true ) );
+	}
+
+	/**
+	 * A note with its author's name, for the entry screen.
+	 *
+	 * @param array $note Stored note.
+	 * @return array
+	 */
+	public static function presentNote( array $note ): array {
+		$user                  = ! empty( $note['author'] ) ? get_userdata( (int) $note['author'] ) : null;
+		$note['author_name']   = $user ? $user->display_name : __( 'Unknown user', 'subtleforms' );
+		$note['author_avatar'] = $user ? get_avatar_url( $user->ID, array( 'size' => 48 ) ) : '';
+		return $note;
+	}
+
+	/**
+	 * Send an entry's email notifications again (2.3.0).
+	 *
+	 * Runs the form's enabled email actions with the stored answers. "Only
+	 * when" conditions still apply. Passwords are not stored, so they are
+	 * never in the resent emails either.
+	 */
+	public function resend_notifications( WP_REST_Request $request ): WP_REST_Response {
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		$id         = absint( $request->get_param( 'id' ) );
+		$submission = $this->submissionsRepo->find( $id );
+		if ( ! $submission ) {
+			return ApiResponse::not_found( __( 'Submission not found', 'subtleforms' ) );
+		}
+
+		try {
+			$loaded = $this->formsRepo->loadSchemaVersion( (int) $submission['form_id'], isset( $submission['schema_version'] ) ? (int) $submission['schema_version'] : null );
+		} catch ( \RuntimeException $e ) {
+			$loaded = null;
+		}
+		if ( ! $loaded ) {
+			try {
+				$loaded = $this->formsRepo->loadSchemaVersion( (int) $submission['form_id'] );
+			} catch ( \RuntimeException $e ) {
+				$loaded = null;
+			}
+		}
+		$schema = is_array( $loaded ) ? ( $loaded['schema'] ?? $loaded ) : null;
+		if ( ! is_array( $schema ) ) {
+			return ApiResponse::not_found( __( 'This entry’s form could not be loaded.', 'subtleforms' ) );
+		}
+
+		$plugin   = \SubtleForms\Plugin::instance();
+		$compiler = $plugin->get( \SubtleForms\Engine\SchemaCompiler::class );
+		$pipeline = $plugin->get( \SubtleForms\Engine\Pipeline::class );
+
+		$steps = array_values(
+			array_filter(
+				$compiler->compile( $schema ),
+				static fn( $step ) => $step->action()->id() === 'email'
+			)
+		);
+		if ( ! $steps ) {
+			return ApiResponse::bad_request( __( 'This form has no email notifications to send.', 'subtleforms' ) );
+		}
+
+		$payload = is_array( $submission['payload'] ?? null ) ? $submission['payload'] : array();
+		$context = new \SubtleForms\Engine\SubmissionContext( (int) $submission['form_id'], $payload );
+		$context->setMeta( 'submission_id', $id );
+		$context->setMeta( 'schema_version', isset( $submission['schema_version'] ) ? (int) $submission['schema_version'] : null );
+		$context->setMeta( 'form_schema', $schema );
+		$context->setMeta( 'resent', true );
+
+		$result = $pipeline->run( $steps, $context, $schema );
+		if ( ! $result->ok ) {
+			return ApiResponse::server_error( __( 'The notifications could not be sent.', 'subtleforms' ) );
+		}
+
+		return ApiResponse::success(
+			array(
+				'sent'  => true,
+				'count' => count( $steps ),
+			)
+		);
 	}
 
 	/**
@@ -620,6 +873,8 @@ final class SubmissionsApi {
 			'status'  => isset( $params['status'] ) ? Helpers::safe_sanitize_text( $params['status'] ) : null,
 			'search'  => isset( $params['search'] ) ? Helpers::safe_sanitize_text( $params['search'] ) : null,
 			'after'   => isset( $params['after'] ) ? Helpers::safe_sanitize_text( $params['after'] ) : null,
+			// Export selected (2.3.0).
+			'ids'     => isset( $params['ids'] ) && is_array( $params['ids'] ) ? array_map( 'absint', $params['ids'] ) : null,
 			'orderby' => 'created_at',
 			'order'   => 'DESC',
 			'limit'   => 10000,

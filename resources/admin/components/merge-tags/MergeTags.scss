@@ -1,0 +1,57 @@
+.sf-merge-tags-help {
+	max-width: 640px;
+	font-size: 13px;
+	line-height: 1.5;
+	color: var(--sf-text, #1e1e1e);
+
+	p {
+		margin: 0 0 12px;
+	}
+
+	&__table {
+		width: 100%;
+		border-collapse: collapse;
+		margin-bottom: 12px;
+
+		th,
+		td {
+			text-align: left;
+			vertical-align: top;
+			padding: 8px 10px;
+			border-bottom: 1px solid var(--sf-border, #e0e0e0);
+		}
+
+		th {
+			font-weight: 600;
+			color: var(--sf-text-muted, #757575);
+		}
+
+		code {
+			white-space: nowrap;
+			font-size: 12px;
+		}
+	}
+
+	&__note {
+		color: var(--sf-text-muted, #757575);
+	}
+}
+
+.sf-merge-tag-field {
+	position: relative;
+
+	&__bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		margin-bottom: 4px;
+	}
+
+	&__label {
+		font-size: 11px;
+		font-weight: 500;
+		text-transform: uppercase;
+		line-height: 1.4;
+	}
+}

@@ -154,7 +154,7 @@ function DynamicInspectorPanel( {
 				className="sf-dynamic-inspector__empty"
 			>
 				{ isLayout
-					? __( 'Layout field — configure via canvas', 'subtleforms' )
+					? __( 'Layout field: configure via canvas', 'subtleforms' )
 					: __( 'No configurable settings for this field type.', 'subtleforms' ) }
 			</Notice>
 		);

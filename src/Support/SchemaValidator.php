@@ -490,26 +490,7 @@ final class SchemaValidator {
 		}
 
 		// Check for at least one input field (not just containers/layout)
-		$inputFieldTypes = array(
-			'text',
-			'email',
-			'textarea',
-			'number',
-			'phone',
-			'url',
-			'password',
-			'checkbox',
-			'consent',
-			'radio',
-			'multiple_choice',
-			'dropdown',
-			'select',
-			'date',
-			'time',
-			'datetime',
-			'file_upload',
-			'image_upload',
-		);
+		$inputFieldTypes = null; // Every field that takes an answer counts (2.3.0).
 
 		$hasInputField = $this->hasInputFieldRecursive( $schema['fields'], $inputFieldTypes );
 
@@ -549,26 +530,7 @@ final class SchemaValidator {
 			$push( $errors, 'metadata.title', 'Cannot publish: Form must have a title.' );
 		}
 
-		$inputFieldTypes = array(
-			'text',
-			'email',
-			'textarea',
-			'number',
-			'phone',
-			'url',
-			'password',
-			'checkbox',
-			'consent',
-			'radio',
-			'multiple_choice',
-			'dropdown',
-			'select',
-			'date',
-			'time',
-			'datetime',
-			'file_upload',
-			'image_upload',
-		);
+		$inputFieldTypes = null; // Every field that takes an answer counts (2.3.0).
 
 		if ( isset( $schema['fields'] ) && is_array( $schema['fields'] ) && count( $schema['fields'] ) > 0 ) {
 			$hasInputField = $this->hasInputFieldRecursive( $schema['fields'], $inputFieldTypes );
@@ -637,13 +599,31 @@ final class SchemaValidator {
 		return array_keys( $value ) === range( 0, count( $value ) - 1 ) || array() === $value;
 	}
 
-	private function hasInputFieldRecursive( array $fields, array $inputFieldTypes ): bool {
+	/**
+	 * Field types that hold no answer.
+	 */
+	private const LAYOUT_TYPES = array( 'html', 'section_break', 'disclaimer', 'step', 'form_step', 'repeat_field', 'recaptcha', 'hcaptcha', 'turnstile', 'captcha', 'action_hook', 'save_resume', 'payment_summary', 'payment_card', 'payment_hidden_price', 'hidden' );
+
+	/**
+	 * Whether a field type takes an answer from the visitor.
+	 *
+	 * Before 2.3 only a short list of basic types counted, so a form made
+	 * only of, say, a Signature or Rich text field could not be published.
+	 *
+	 * @param string $type Field type.
+	 * @return bool
+	 */
+	public static function takesAnswer( string $type ): bool {
+		return $type !== '' && ! in_array( $type, self::LAYOUT_TYPES, true ) && substr( $type, -10 ) !== '_container';
+	}
+
+	private function hasInputFieldRecursive( array $fields, ?array $inputFieldTypes = null ): bool {
 		foreach ( $fields as $field ) {
 			if ( ! is_array( $field ) ) {
 				continue;
 			}
 
-			if ( isset( $field['type'] ) && in_array( $field['type'], $inputFieldTypes, true ) ) {
+			if ( isset( $field['type'] ) && is_string( $field['type'] ) && self::takesAnswer( $field['type'] ) ) {
 				return true;
 			}
 
@@ -652,6 +632,14 @@ final class SchemaValidator {
 			foreach ( array( 'children', 'fields' ) as $childKey ) {
 				if ( isset( $field[ $childKey ] ) && is_array( $field[ $childKey ] ) ) {
 					if ( $this->hasInputFieldRecursive( $field[ $childKey ], $inputFieldTypes ) ) {
+						return true;
+					}
+				}
+			}
+
+			if ( isset( $field['columns'] ) && is_array( $field['columns'] ) && substr( (string) ( $field['type'] ?? '' ), -10 ) === '_container' ) {
+				foreach ( $field['columns'] as $column ) {
+					if ( is_array( $column ) && $this->hasInputFieldRecursive( $column, $inputFieldTypes ) ) {
 						return true;
 					}
 				}

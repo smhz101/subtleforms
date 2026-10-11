@@ -82,9 +82,10 @@ class Schemas {
 
 			// Submission Update (admin)
 			self::SUBMISSION_UPDATE => array(
-				'__allow' => array( 'status', 'is_read', 'notes' ),
+				'__allow' => array( 'status', 'is_read', 'notes', 'starred' ),
 				'status'  => 'optional|in:spam,flagged,archived,none',
 				'is_read' => 'optional|bool',
+				'starred' => 'optional|bool',
 				'notes'   => 'optional|string|max:500',
 			),
 
@@ -417,6 +418,9 @@ class Schemas {
 				'confirmations' => 'optional|array|list:FormConditionalConfirmation',
 				'submitText'   => 'optional|string|max:100',
 				'restrictions' => 'optional|object|map:FormRestrictions',
+				// 2.3: templates such as Newsletter hide the form title.
+				'_showTitle'       => 'optional|bool',
+				'_showDescription' => 'optional|bool',
 			),
 
 			// FormConfirmation — what visitors see after submitting (2.0).

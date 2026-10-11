@@ -207,7 +207,12 @@ export default function CreateFormPage() {
           description,
           type: chosen.schema.metadata?.type || 'regular',
           template: chosen.id,
+          // Templates can bring a look and button text (Newsletter, 2.3.0).
+          ...(chosen.schema.metadata?.appearance ? { appearance: chosen.schema.metadata.appearance } : {}),
+          ...(chosen.schema.metadata?.submitText ? { submitText: chosen.schema.metadata.submitText } : {}),
+          ...(chosen.schema.metadata?._showTitle === false ? { _showTitle: false } : {}),
         },
+        ...(Array.isArray(chosen.schema.actions) ? { actions: chosen.schema.actions } : {}),
       });
     } else {
       const formType =

@@ -56,6 +56,7 @@ final class Activator {
 		self::migrate_submissions_table();
 		self::migrate_draft_schema_column();
 		self::migrate_is_read_column();
+		self::migrate_starred_column();
 
 		// Set default options
 		self::set_default_options();
@@ -104,6 +105,7 @@ final class Activator {
   meta longtext,
   status varchar(20) NOT NULL DEFAULT 'pending',
   is_read tinyint(1) NOT NULL DEFAULT 0,
+  starred tinyint(1) NOT NULL DEFAULT 0,
   ip_address varchar(45),
   user_agent varchar(255),
   created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -111,6 +113,7 @@ final class Activator {
   KEY form_id (form_id),
   KEY status (status),
   KEY is_read (is_read),
+  KEY starred (starred),
   KEY created_at (created_at)
 ) {$charset_collate};";
 
@@ -251,6 +254,25 @@ final class Activator {
 			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Table name is controlled from $wpdb->prefix; ALTER TABLE cannot use prepare().
 			$wpdb->query( "ALTER TABLE {$table_name} ADD KEY is_read (is_read)" );
 			Logger::info( 'Added is_read column to submissions table' );
+		}
+	}
+
+	/**
+	 * Add the starred column to the submissions table (2.3.0).
+	 */
+	private static function migrate_starred_column(): void {
+		global $wpdb;
+		$table_name = $wpdb->prefix . 'subtleforms_submissions';
+
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is controlled from $wpdb->prefix.
+		$column_exists = $wpdb->get_results( "SHOW COLUMNS FROM {$table_name} LIKE 'starred'" );
+
+		if ( empty( $column_exists ) ) {
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Table name is controlled from $wpdb->prefix; ALTER TABLE cannot use prepare().
+			$wpdb->query( "ALTER TABLE {$table_name} ADD COLUMN starred tinyint(1) NOT NULL DEFAULT 0" );
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Table name is controlled from $wpdb->prefix; ALTER TABLE cannot use prepare().
+			$wpdb->query( "ALTER TABLE {$table_name} ADD KEY starred (starred)" );
+			Logger::info( 'Added starred column to submissions table' );
 		}
 	}
 

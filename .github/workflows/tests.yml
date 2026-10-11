@@ -1,0 +1,103 @@
+name: Tests
+
+# Unit tests (PHPUnit + Jest) and real-browser tests against WordPress
+# (Playwright, including the axe-core accessibility checks of every field
+# type). Runs on every push and pull request.
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit:
+    name: Unit tests (PHPUnit and Jest)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+          tools: composer:v2
+
+      - run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: PHPUnit
+        run: vendor/bin/phpunit --testsuite unit --no-coverage
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci --legacy-peer-deps
+
+      - name: Jest
+        run: npm test
+
+  browser:
+    name: Browser and accessibility tests (WordPress + Playwright + axe)
+    runs-on: ubuntu-latest
+    needs: unit
+    timeout-minutes: 40
+    env:
+      SF_BASE_URL: http://localhost:8888
+      SF_ADMIN_USER: admin
+      SF_ADMIN_PASS: password
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+          tools: composer:v2
+
+      - run: composer install --no-interaction --prefer-dist --no-progress
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - run: npm ci --legacy-peer-deps
+
+      - name: Build assets
+        run: npm run build:all
+
+      - name: Start WordPress (wp-env)
+        run: |
+          npx --yes @wordpress/env@10 start
+          npx --yes @wordpress/env@10 run cli wp rewrite structure '/%postname%/' --hard
+          npx --yes @wordpress/env@10 run cli wp plugin list
+
+      - name: PHPUnit inside WordPress
+        run: |
+          npx --yes @wordpress/env@10 run cli --env-cwd=wp-content/plugins/subtleforms \
+            bash -c 'WP_LOAD=/var/www/html/wp-load.php WP_HOST=localhost:8888 php vendor/bin/phpunit -c phpunit-wp.xml.dist'
+
+      - name: Install Playwright Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Playwright (browser tests and axe)
+        run: npx playwright test -c playwright.browser.config.js
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/browser
+            test-results
+          retention-days: 14
+
+      - name: Stop WordPress
+        if: always()
+        run: npx --yes @wordpress/env@10 stop

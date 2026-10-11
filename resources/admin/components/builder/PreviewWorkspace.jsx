@@ -3,6 +3,7 @@ import { Button, Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import FormPreviewBody from '../form-preview/FormPreviewBody';
 import FormAppearancePanel from './appearance/FormAppearancePanel';
+import { appearanceBackdrop } from '../../../shared/appearance';
 import './PreviewWorkspace.scss';
 
 /**
@@ -70,9 +71,13 @@ export default function PreviewWorkspace( {
         <div className='sf-preview-workspace__canvas'>
           <div
             className='sf-preview-workspace__stage'
-            style={
-              active.width ? { maxWidth: `${ active.width }px` } : undefined
-            }>
+            style={ {
+              ...( active.width ? { maxWidth: `${ active.width }px` } : {} ),
+              // A form made for a dark footer is previewed on one (2.3.0).
+              ...( appearanceBackdrop( schema?.metadata?.appearance )
+                ? { background: appearanceBackdrop( schema?.metadata?.appearance ), padding: '24px', borderRadius: '8px' }
+                : {} ),
+            } }>
             <FormPreviewBody schema={ schema } isDirty={ isDirty } />
           </div>
         </div>

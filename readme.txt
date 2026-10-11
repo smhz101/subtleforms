@@ -4,7 +4,7 @@ Tags: forms, contact form, form builder, submissions
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.2.1
+Stable tag: 2.3.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -19,8 +19,9 @@ SubtleForms is a form builder for WordPress. You build forms on a canvas that lo
 * Visual builder with a field library, a canvas that shows your styling as you work, and a settings panel with Settings, Validation, Logic and Style tabs
 * Field widths (full, three quarters, two thirds, half, one third, one quarter) to place fields side by side
 * Regular, multi-step and conversational (one question at a time) forms
-* Templates to start from, plus a blank form
-* Appearance presets and a custom mode for colours, fonts, fields, buttons and layout
+* Templates to start from, including an email-only Newsletter form, plus a blank form
+* Appearance presets (including Dark surface for footers and heroes) and a custom mode for colours, fonts, fields, buttons and layout
+* An inline layout that puts fields and the button on one row
 
 = Fields =
 
@@ -33,14 +34,15 @@ SubtleForms is a form builder for WordPress. You build forms on a canvas that lo
 = Logic and after submit =
 
 * Show or hide fields and steps when their rules match (equals, not equals, contains, empty, not empty, greater or less than). Hidden fields are not validated or saved, in the browser and on the server
-* Email notifications and webhooks after each entry
+* Email notifications and webhooks after each entry, with merge tags such as {all_fields}, {field:email}, {form_title} and {entry_id} and an optional HTML format
 * A confirmation message with answers merged in, or a redirect
 * Availability rules: logged-in visitors only, open and close dates and an entry limit
 
 = Entries =
 
 * An inbox with tabs, search, filters and a reading pane for each entry
-* Read and unread, flag, and delete
+* Read and unread, star, flag and delete, one at a time or in bulk
+* Private notes on each entry, and a button to send its notifications again
 * Paragraph answers keep their line breaks and rich text answers keep basic formatting
 * Passwords are never stored as typed and never included in emails
 
@@ -157,6 +159,22 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 7. Conversational form on frontend
 
 == Changelog ==
+
+= 2.3.0 - 2026-10-11 =
+* New: Email merge tags. An "Insert tag" menu in the email settings adds {all_fields}, {field:key}, {form_title}, {entry_id}, {site_name}, {admin_email} and {date} at the cursor. Single and double braces both work, so {{all_fields}} and forms made before 2.3 keep working. The help menu explains every tag.
+* New: Emails can be sent as HTML, with line breaks kept and {all_fields} drawn as a table. An empty message now sends every answer instead of raw data.
+* New: Newsletter template with one email field and the button on the same row, an inline field layout for any form, and a Dark surface appearance preset for footers and hero sections. Previews show dark-surface forms on a dark background.
+* New: Entries can be starred, with a Starred tab. Bulk actions for read, unread, star, spam, flag, delete and export selected use one request, and bulk delete asks first.
+* New: Private notes on each entry, with author and date.
+* New: Resend notifications from an entry, using the answers as they were saved.
+* Performance: The signature pad and rich text editor are downloaded only on pages whose form has those fields. Pages without a form load nothing from SubtleForms.
+* Accessibility: Every field type passes automated axe checks (WCAG 2.1 AA) before and after a failed submit, on desktop and phone widths. Rating stars, matrix rows and choice groups now have proper names, step navigation no longer claims to be a tab list, and dates no longer suggest a birthday autofill.
+* Fix: Label colour, input text colour, focus ring, button text colour and button radius from the Appearance panel were dropped on save. They are now kept.
+* Fix: Button text colour now applies to every button style.
+* Fix: A form whose only fields were, for example, a Signature or Rich text field could not be published. Any field that takes an answer now counts, including fields inside columns.
+* Fix: Template descriptions and some admin text used long dashes; they read as plain sentences now.
+* Developer: New REST routes POST /submissions/bulk, POST and DELETE /submissions/{id}/notes and POST /submissions/{id}/resend. Export accepts a list of entry IDs.
+* Developer: A Tests workflow runs PHPUnit, Jest and the Playwright and axe browser tests against WordPress (wp-env) on every push.
 
 = 2.2.1 - 2026-10-11 =
 * Fix: Setting a field's width no longer drops its required setting, options, placeholder or help text on the live form. Width only changes the layout.
@@ -312,6 +330,9 @@ now be reconstructed accurately.
 * Feature: Basic spam protection
 
 == Upgrade Notice ==
+
+= 2.3.0 =
+Email merge tags with an Insert tag menu, a Newsletter template with an inline layout, starred entries, notes, bulk actions and resend. Adds a starred column to the entries table.
 
 = 2.2.1 =
 Fixes fields that lost their settings when resized, saves Toggle, Opinion scale and other answers that were dropped, and stops storing passwords.

@@ -137,3 +137,39 @@ test('new matrix fields come with two rows and three columns (bug 8)', async () 
   expect(attrs.rows).toHaveLength(2);
   expect(attrs.columns).toHaveLength(3);
 });
+
+test('email merge tags: Insert tag menu and help (2.3.0 feature 18)', async ({ page }) => {
+  const form = await publishForm(client, {
+    title: 'Merge tag menu',
+    fields: [
+      { id: 'n', key: 'name', type: 'text', label: 'Name' },
+      { id: 'p', key: 'pw', type: 'password', label: 'Password' },
+    ],
+    actions: [{ type: 'email', settings: { to: '{admin_email}', subject: 'New entry', message: 'Hello ' } }],
+  });
+  created.push(form);
+
+  await loginPage(page);
+  await openBuilder(page, form.id);
+  await page.locator('#sf-builder-view-settings').click();
+  await page.getByText('Notifications & actions').first().click().catch(() => {});
+
+  const action = page.locator('.sf-actions-panel__item--email').first();
+  const message = action.getByLabel('Message', { exact: true });
+  await message.scrollIntoViewIfNeeded();
+  await page.getByRole('button', { name: 'Insert tag into Message' }).click();
+  // Passwords are never offered.
+  await expect(page.getByRole('menuitem', { name: /Password/ })).toHaveCount(0);
+  await page.getByRole('menuitem', { name: /All fields/ }).click();
+  await expect(message).toHaveValue('Hello {all_fields}');
+
+  await page.getByRole('button', { name: 'Insert tag into Subject' }).click();
+  await page.getByRole('menuitem', { name: /^Name/ }).click();
+  await expect(action.getByLabel('Subject', { exact: true })).toHaveValue(/\{field:name\}/);
+
+  await page.getByRole('button', { name: 'About merge tags' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Email merge tags' });
+  await expect(dialog).toContainText('{entry_id}');
+  await expect(dialog).toContainText('{field:key}');
+  await expect(dialog).toContainText('Double braces work too');
+});

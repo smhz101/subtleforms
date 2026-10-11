@@ -18,6 +18,7 @@ import {
   formAppearanceClasses,
   fieldAppearanceStyle,
   fieldAppearanceClasses,
+  appearanceBackdrop,
 } from '../../../shared/appearance';
 import { useBuilder } from './context/BuilderContext';
 import FieldRenderer from './FieldRenderer';
@@ -496,6 +497,10 @@ export default function FormBuilder({ appearance } = {}) {
   const canvasStyle = useMemo(() => {
     const style = formAppearanceStyle(appearance);
     delete style.maxWidth;
+    const backdrop = appearanceBackdrop(appearance);
+    if (backdrop) {
+      style.background = backdrop;
+    }
     return style;
   }, [appearance]);
 

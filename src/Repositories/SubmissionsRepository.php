@@ -197,6 +197,11 @@ final class SubmissionsRepository {
 			$format[]               = '%d';
 		}
 
+		if ( isset( $data['starred'] ) ) {
+			$update_data['starred'] = $data['starred'] ? 1 : 0;
+			$format[]               = '%d';
+		}
+
 		if ( empty( $update_data ) ) {
 			return false;
 		}
@@ -283,6 +288,8 @@ final class SubmissionsRepository {
 			'after'       => null,
 			'field_key'   => null,
 			'field_value' => null,
+			'starred'     => null,
+			'ids'         => null,
 			'limit'       => 20,
 			'offset'      => 0,
 			'orderby'     => 'created_at',
@@ -322,6 +329,8 @@ final class SubmissionsRepository {
 			$params[] = sanitize_text_field( $args['after'] ) . ' 00:00:00';
 		}
 
+		$this->applyStarAndIds( $where, $params, $args );
+
 		if ( $args['field_key'] && $args['field_value'] ) {
 			$this->applyFieldFilter( $where, $params, (string) $args['field_key'], (string) $args['field_value'] );
 		} elseif ( $args['field_value'] && ! $args['field_key'] ) {
@@ -340,7 +349,7 @@ final class SubmissionsRepository {
 		       // Fetch all columns needed for admin list (including payload/meta)
 		       // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name, orderby and order are whitelisted.
 		       $sql = sprintf(
-			       "SELECT id, form_id, status, is_read, created_at, payload, meta, user_agent FROM {$this->table} %s ORDER BY %s %s LIMIT %%d OFFSET %%d",
+			       "SELECT id, form_id, status, is_read, starred, created_at, payload, meta, user_agent FROM {$this->table} %s ORDER BY %s %s LIMIT %%d OFFSET %%d",
 					       $whereClause,
 					       $orderby,
 					       $order
@@ -379,6 +388,8 @@ final class SubmissionsRepository {
 			'after'       => null,
 			'field_key'   => null,
 			'field_value' => null,
+			'starred'     => null,
+			'ids'         => null,
 		);
 
 		$args = wp_parse_args( $args, $defaults );
@@ -414,6 +425,8 @@ final class SubmissionsRepository {
 			$params[] = sanitize_text_field( $args['after'] ) . ' 00:00:00';
 		}
 
+		$this->applyStarAndIds( $where, $params, $args );
+
 		if ( $args['field_key'] && $args['field_value'] ) {
 			$this->applyFieldFilter( $where, $params, (string) $args['field_key'], (string) $args['field_value'] );
 		} elseif ( $args['field_value'] ) {
@@ -433,6 +446,81 @@ final class SubmissionsRepository {
 
 		return (int) $wpdb->get_var( $sql );
 		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+	}
+
+	/**
+	 * Starred filter and an explicit list of IDs (2.3.0).
+	 *
+	 * @param array $where  WHERE fragments, appended by reference.
+	 * @param array $params Bound parameters, appended by reference.
+	 * @param array $args   Query arguments.
+	 */
+	private function applyStarAndIds( array &$where, array &$params, array $args ): void {
+		if ( $args['starred'] !== null && $args['starred'] !== '' ) {
+			$where[]  = 'starred = %d';
+			$params[] = $args['starred'] ? 1 : 0;
+		}
+		if ( is_array( $args['ids'] ) ) {
+			$ids = array_values( array_unique( array_filter( array_map( 'absint', $args['ids'] ) ) ) );
+			if ( ! $ids ) {
+				$where[] = '1 = 0';
+				return;
+			}
+			$where[] = 'id IN (' . implode( ',', array_fill( 0, count( $ids ), '%d' ) ) . ')';
+			foreach ( $ids as $id ) {
+				$params[] = $id;
+			}
+		}
+	}
+
+	/**
+	 * Add a note to an entry (2.3.0). Notes live in the entry's meta.
+	 *
+	 * @param int    $id     Entry ID.
+	 * @param string $text   Note text.
+	 * @param int    $userId Author.
+	 * @return array|null The note, or null when the entry does not exist.
+	 */
+	public function addNote( int $id, string $text, int $userId ): ?array {
+		$submission = $this->find( $id );
+		if ( ! $submission ) {
+			return null;
+		}
+		$meta  = is_array( $submission['meta'] ?? null ) ? $submission['meta'] : array();
+		$notes = isset( $meta['notes'] ) && is_array( $meta['notes'] ) ? $meta['notes'] : array();
+		$note  = array(
+			'id'         => wp_generate_uuid4(),
+			'text'       => $text,
+			'author'     => $userId,
+			'created_at' => gmdate( 'c' ),
+		);
+		$notes[]       = $note;
+		$meta['notes'] = $notes;
+		$this->update( $id, array( 'meta' => $meta ) );
+		return $note;
+	}
+
+	/**
+	 * Remove a note from an entry.
+	 *
+	 * @param int    $id     Entry ID.
+	 * @param string $noteId Note ID.
+	 * @return bool Whether a note was removed.
+	 */
+	public function deleteNote( int $id, string $noteId ): bool {
+		$submission = $this->find( $id );
+		if ( ! $submission ) {
+			return false;
+		}
+		$meta  = is_array( $submission['meta'] ?? null ) ? $submission['meta'] : array();
+		$notes = isset( $meta['notes'] ) && is_array( $meta['notes'] ) ? $meta['notes'] : array();
+		$kept  = array_values( array_filter( $notes, static fn( $n ) => ( $n['id'] ?? '' ) !== $noteId ) );
+		if ( count( $kept ) === count( $notes ) ) {
+			return false;
+		}
+		$meta['notes'] = $kept;
+		$this->update( $id, array( 'meta' => $meta ) );
+		return true;
 	}
 
 	/**

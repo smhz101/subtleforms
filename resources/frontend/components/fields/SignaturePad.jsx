@@ -153,7 +153,6 @@ export default function SignaturePad( {
       className='subtleforms-signature'
       role='group'
       aria-labelledby={ `${ inputId }-label` }
-      aria-required={ required }
       aria-invalid={ !! error }
       aria-describedby={ describedBy }>
       { name && <input type='hidden' name={ name } value={ value || '' } /> }

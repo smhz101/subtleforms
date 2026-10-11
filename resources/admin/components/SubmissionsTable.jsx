@@ -13,7 +13,7 @@ import {
   SearchControl,
   Modal,
 } from '@wordpress/components';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import clsx from 'clsx';
@@ -22,6 +22,8 @@ import { ConfirmModal } from '../modals';
 import { apiGet } from '../utils/api';
 import { apiClient } from '../data';
 import { Icon } from '../ui';
+import { requirePro } from '../utils/featureGate';
+import { downloadCsv } from '../utils/csvDownload';
 import './SubmissionsTable.scss';
 
 const restNonce =
@@ -69,6 +71,7 @@ const SubmissionsTable = forwardRef(
     const [sortDirection, setSortDirection] = useState('desc');
     const [deleteModal, setDeleteModal] = useState(null);
     const [selectedSubmissions, setSelectedSubmissions] = useState([]);
+    const [bulkDelete, setBulkDelete] = useState(null);
     const isPrefetchingRef = useRef(false);
     const { createSuccessNotice, createErrorNotice } =
       useDispatch(noticesStore);
@@ -231,133 +234,86 @@ const SubmissionsTable = forwardRef(
       }
     };
 
-    const handleBulkDelete = async (ids) => {
-      if (
-        !window.confirm(
-          (() => {
-            return sprintf(
-              /* translators: %1$d: number of submissions to delete */
-              __(
-                'Are you sure you want to delete %1$d submissions?',
-                'subtleforms'
-              ),
-              ids.length
-            );
-          })()
-        )
-      ) {
-        return;
-      }
+    // One request for any number of entries (2.3.0).
+    const runBulk = async (ids, action) => {
+      const res = await apiClient.post('/submissions/bulk', { ids, action });
+      return Array.isArray(res?.updated) ? res.updated.length : 0;
+    };
 
-      setBuffer((prev) => prev.filter((s) => !ids.includes(s.id)));
-      setSelectedSubmissions([]);
-
-      let successCount = 0;
-      for (const id of ids) {
-        try {
-          await apiClient.delete(`/submissions/${id}`);
-          successCount++;
-        } catch (_err) {
-          // individual failure counted below
-        }
-      }
-
-      if (successCount === ids.length) {
+    const notifyBulk = (done, total, verb) => {
+      if (done === total) {
         createSuccessNotice(
-          (() => {
-            return sprintf(
-              /* translators: %1$d: number of submissions deleted */
-              __('%1$d submissions deleted', 'subtleforms'),
-              successCount
-            );
-          })(),
+          sprintf(
+            /* translators: %1$d: number of entries, %2$s: what happened, e.g. "updated" */
+            _n('%1$d entry %2$s', '%1$d entries %2$s', done, 'subtleforms'),
+            done,
+            verb
+          ),
           { type: 'snackbar' }
         );
       } else {
         createErrorNotice(
-          (() => {
-            return sprintf(
-              /* translators: %1$d: number deleted, %2$d: total requested */
-              __(
-                'Failed to delete some submissions (%1$d/%2$d deleted)',
-                'subtleforms'
-              ),
-              successCount,
-              ids.length
-            );
-          })(),
+          sprintf(
+            /* translators: %1$d: number done, %2$d: total requested */
+            __('Some entries could not be changed (%1$d of %2$d done)', 'subtleforms'),
+            done,
+            total
+          ),
           { type: 'snackbar' }
         );
-        loadFresh(); // Reload to sync state
+        loadFresh();
+      }
+    };
+
+    const handleBulkDelete = (ids) => setBulkDelete(ids);
+
+    const confirmBulkDelete = async () => {
+      const ids = bulkDelete || [];
+      setBulkDelete(null);
+      setBuffer((prev) => prev.filter((s) => !ids.includes(s.id)));
+      setSelectedSubmissions([]);
+      try {
+        notifyBulk(await runBulk(ids, 'delete'), ids.length, __('deleted', 'subtleforms'));
+      } catch (_err) {
+        notifyBulk(0, ids.length, '');
       }
     };
 
     const handleBulkMarkStatus = async (ids, actionType) => {
-      // Map action type to the correct field update
-      const isReadActions = { read: 1, unread: 0 };
-      const adminStatusActions = ['spam', 'flagged', 'archived'];
-
-      let updatePayload;
-      if (actionType in isReadActions) {
-        updatePayload = { is_read: isReadActions[actionType] };
-        // Optimistic update
-        setBuffer((prev) =>
-          prev.map((s) =>
-            ids.includes(s.id) ? { ...s, is_read: isReadActions[actionType] } : s
-          )
-        );
-      } else if (adminStatusActions.includes(actionType)) {
-        updatePayload = { status: actionType };
-        setBuffer((prev) =>
-          prev.map((s) => (ids.includes(s.id) ? { ...s, status: actionType } : s))
-        );
-      } else if (actionType === 'restore') {
-        // Clear admin status override (unflag/unspam) — server sets status to null
-        updatePayload = { status: 'none' };
-        setBuffer((prev) =>
-          prev.map((s) => (ids.includes(s.id) ? { ...s, status: null } : s))
-        );
-      } else {
+      const patch = {
+        read: { is_read: 1 },
+        unread: { is_read: 0 },
+        star: { starred: 1 },
+        unstar: { starred: 0 },
+        spam: { status: 'spam' },
+        flagged: { status: 'flagged' },
+        restore: { status: null },
+      }[actionType];
+      if (!patch) {
         return;
       }
-
+      // Optimistic update
+      setBuffer((prev) => prev.map((s) => (ids.includes(s.id) ? { ...s, ...patch } : s)));
       setSelectedSubmissions([]);
-
-      let successCount = 0;
-      for (const id of ids) {
-        try {
-          await apiClient.put(`/submissions/${id}`, updatePayload);
-          successCount++;
-        } catch (_err) {
-          // individual failure counted below
-        }
-      }
-
-      if (successCount === ids.length) {
-        createSuccessNotice(
-          sprintf(
-            /* translators: %1$d: number of submissions updated */
-            __('%1$d submissions updated', 'subtleforms'),
-            successCount
-          ),
-          { type: 'snackbar' }
-        );
-      } else {
-        createErrorNotice(
-          sprintf(
-            /* translators: %1$d: number updated, %2$d: total requested */
-            __(
-              'Failed to update some submissions (%1$d/%2$d updated)',
-              'subtleforms'
-            ),
-            successCount,
-            ids.length
-          ),
-          { type: 'snackbar' }
-        );
-        loadFresh(); // Reload to sync state
+      try {
+        notifyBulk(await runBulk(ids, actionType), ids.length, __('updated', 'subtleforms'));
+      } catch (_err) {
+        notifyBulk(0, ids.length, '');
       }
     };
+
+    // Export the selected entries (CSV export is part of SubtleForms Pro).
+    const handleExportSelected = (ids) =>
+      requirePro('submissions.export', async () => {
+        try {
+          const res = await apiClient.post('/submissions/export', { ids });
+          if (!downloadCsv(res)) {
+            createErrorNotice(res?.message || __('Nothing to export', 'subtleforms'), { type: 'snackbar' });
+          }
+        } catch (err) {
+          createErrorNotice(__('Failed to export submissions', 'subtleforms'), { type: 'snackbar' });
+        }
+      });
 
     const getRowClassName = (submission) => {
       // Priority: spam/flagged > failed > payment_pending > unread
@@ -606,6 +562,28 @@ const SubmissionsTable = forwardRef(
             />
             <Button
               size='compact'
+              icon={<Icon.Star size={16} fill={parseInt(submission.starred, 10) === 1 ? 'currentColor' : 'none'} />}
+              label={
+                parseInt(submission.starred, 10) === 1
+                  ? __('Remove star', 'subtleforms')
+                  : __('Star', 'subtleforms')
+              }
+              showTooltip
+              isPressed={parseInt(submission.starred, 10) === 1}
+              className={clsx(
+                'sf-submissions-table__star-btn',
+                parseInt(submission.starred, 10) === 1 && 'sf-submissions-table__star-btn--active'
+              )}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleBulkMarkStatus(
+                  [submission.id],
+                  parseInt(submission.starred, 10) === 1 ? 'unstar' : 'star'
+                );
+              }}
+            />
+            <Button
+              size='compact'
               icon={<Icon.AlertCircle size={16} />}
               label={
                 submission.status === 'flagged'
@@ -708,6 +686,18 @@ const SubmissionsTable = forwardRef(
               onClick: (ids) => handleBulkMarkStatus(ids, 'unread'),
             },
             {
+              label: __('Star', 'subtleforms'),
+              onClick: (ids) => handleBulkMarkStatus(ids, 'star'),
+            },
+            {
+              label: __('Remove star', 'subtleforms'),
+              onClick: (ids) => handleBulkMarkStatus(ids, 'unstar'),
+            },
+            {
+              label: __('Export selected (CSV)', 'subtleforms'),
+              onClick: handleExportSelected,
+            },
+            {
               label: __('Mark as Spam', 'subtleforms'),
               onClick: (ids) => handleBulkMarkStatus(ids, 'spam'),
             },
@@ -721,6 +711,24 @@ const SubmissionsTable = forwardRef(
               isDestructive: true,
             },
           ]}
+        />
+        <ConfirmModal
+          isOpen={!!bulkDelete}
+          onClose={() => setBulkDelete(null)}
+          title={__('Delete entries', 'subtleforms')}
+          message={sprintf(
+            /* translators: %d: number of entries */
+            _n(
+              'Delete %d entry permanently? Its uploaded files are deleted too. This cannot be undone.',
+              'Delete %d entries permanently? Their uploaded files are deleted too. This cannot be undone.',
+              bulkDelete?.length || 0,
+              'subtleforms'
+            ),
+            bulkDelete?.length || 0
+          )}
+          onConfirm={confirmBulkDelete}
+          confirmText={__('Delete', 'subtleforms')}
+          confirmVariant='destructive'
         />
         <ConfirmModal
           isOpen={!!deleteModal}

@@ -185,3 +185,16 @@ describe( 'supportsAppearance', () => {
     } );
   } );
 } );
+
+describe('2.3.0 inline layout and dark surface', () => {
+  const { formAppearanceClasses, getPreset } = require('./appearance');
+  test('inline layout adds its class', () => {
+    expect(formAppearanceClasses({ variants: { layout: 'inline' } })).toContain('subtleforms--layout-inline');
+    expect(formAppearanceClasses({ variants: { layout: 'stacked' } })).not.toContain('layout-inline');
+  });
+  test('dark surface preset exists and drops the card', () => {
+    const preset = getPreset('dark-surface');
+    expect(preset.tokens.colorBackground).toBe('transparent');
+    expect(formAppearanceClasses({ preset: 'dark-surface', variants: {} })).toContain('subtleforms--preset-dark-surface');
+  });
+});

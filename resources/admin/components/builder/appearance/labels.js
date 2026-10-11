@@ -43,6 +43,7 @@ export const VARIANT_LABELS = {
   button: __( 'Button style', 'subtleforms' ),
   buttonAlign: __( 'Button alignment', 'subtleforms' ),
   width: __( 'Form width', 'subtleforms' ),
+  layout: __( 'Field layout', 'subtleforms' ),
 };
 
 export const OPTION_LABELS = {
@@ -61,6 +62,10 @@ export const OPTION_LABELS = {
   center: __( 'Centre', 'subtleforms' ),
   right: __( 'Right', 'subtleforms' ),
   full: __( 'Full width', 'subtleforms' ),
+
+  // Field layout
+  stacked: __( 'Stacked', 'subtleforms' ),
+  inline: __( 'Inline', 'subtleforms' ),
 
   // Widths
   narrow: __( 'Narrow', 'subtleforms' ),
@@ -118,6 +123,10 @@ export const PRESET_LABELS = {
   bold: {
     label: __( 'Bold', 'subtleforms' ),
     description: __( 'High-contrast accent and heavy labels. Built to convert.', 'subtleforms' ),
+  },
+  'dark-surface': {
+    label: __( 'Dark surface', 'subtleforms' ),
+    description: __( 'Sits on a dark footer or hero without a card of its own.', 'subtleforms' ),
   },
 };
 

@@ -95,6 +95,14 @@ export const FORM_VARIANTS = [
     ],
   },
   {
+    key: 'layout',
+    label: 'Field layout',
+    options: [
+      { label: 'Stacked', value: 'stacked' },
+      { label: 'Inline', value: 'inline' },
+    ],
+  },
+  {
     key: 'width',
     label: 'Form width',
     options: [
@@ -343,6 +351,34 @@ export const FORM_PRESETS = [
     },
     variants: { input: 'outlined', button: 'solid', buttonAlign: 'full', width: 'standard' },
   },
+  {
+    id: 'dark-surface',
+    label: 'Dark surface',
+    description: 'Sits on a dark footer or hero without a card of its own.',
+    swatch: ['#ffffff', '#f4f5f7', '#1b1d24'],
+    // What the form is expected to sit on; previews draw it behind the form.
+    backdrop: '#1b1d24',
+    tokens: {
+      colorPrimary: '#ffffff',
+      colorPrimaryHover: '#dfe3ea',
+      colorButtonText: '#111318',
+      colorText: '#f4f5f7',
+      colorLabel: '#f4f5f7',
+      colorTextLight: '#b8bfcc',
+      colorBackground: 'transparent',
+      colorSurface: 'rgba(255, 255, 255, 0.08)',
+      colorInputText: '#ffffff',
+      colorBorder: 'rgba(255, 255, 255, 0.28)',
+      colorFocus: '#ffffff',
+      colorError: '#ffb4a8',
+      radius: '8px',
+      borderWidth: '1px',
+      fieldGap: '14px',
+      inputPaddingY: '11px',
+      labelWeight: '500',
+    },
+    variants: { input: 'outlined', button: 'solid', buttonAlign: 'left', width: 'full' },
+  },
 ];
 
 export const FONT_STACKS = [
@@ -472,6 +508,13 @@ export function formAppearanceClasses( appearance ) {
   if ( v.buttonAlign ) {
     classes.push( `subtleforms--buttons-${ v.buttonAlign }` );
   }
+  // Presets that change the form's chrome, not only its colours.
+  if ( appearance?.preset === 'dark-surface' ) {
+    classes.push( 'subtleforms--preset-dark-surface' );
+  }
+  if ( v.layout === 'inline' ) {
+    classes.push( 'subtleforms--layout-inline' );
+  }
 
   return classes.join( ' ' );
 }
@@ -586,4 +629,19 @@ export function isPresetModified( appearance ) {
  */
 export function supportsAppearance( type ) {
   return type !== 'action_hook' && type !== 'step';
+}
+
+/**
+ * The page colour a form's preset expects to sit on, for previews.
+ *
+ * @param {Object} appearance metadata.appearance
+ * @return {string} A colour, or '' when the form brings its own background.
+ */
+export function appearanceBackdrop( appearance ) {
+  const preset = appearance?.preset ? getPreset( appearance.preset ) : null;
+  const bg = appearance?.tokens?.colorBackground;
+  if ( preset?.backdrop && ( ! bg || bg === 'transparent' ) ) {
+    return preset.backdrop;
+  }
+  return '';
 }

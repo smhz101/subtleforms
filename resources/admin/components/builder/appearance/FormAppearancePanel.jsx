@@ -57,7 +57,7 @@ const CUSTOM_GROUPS = [
   {
     id: 'layout',
     title: __( 'Layout', 'subtleforms' ),
-    variants: [ 'width' ],
+    variants: [ 'layout', 'width' ],
     keys: [ 'fieldGap' ],
   },
 ];
@@ -91,7 +91,7 @@ function PresetMock( { preset } ) {
   return (
     <span
       className='sf-preset-mock'
-      style={ { background: bg, fontFamily: preset.tokens.fontFamily || undefined } }
+      style={ { background: bg === 'transparent' && preset.backdrop ? preset.backdrop : bg, fontFamily: preset.tokens.fontFamily || undefined } }
       aria-hidden='true'>
       <span className='sf-preset-mock__label' style={ { background: label } } />
       <span className='sf-preset-mock__input' style={ inputStyle } />

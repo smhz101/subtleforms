@@ -119,6 +119,7 @@ export default function SubmissionsPage({ formId }) {
     },
     { key: 'read', label: __('Read', 'subtleforms') },
     { key: 'spam', label: __('Spam', 'subtleforms') },
+    { key: 'starred', label: __('Starred', 'subtleforms') },
     { key: 'flagged', label: __('Flagged', 'subtleforms') },
   ];
 

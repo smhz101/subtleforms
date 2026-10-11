@@ -4,10 +4,11 @@ import {
   TabPanel,
   Button,
   ToggleControl,
+  TextareaControl,
   __experimentalConfirmDialog as ConfirmDialog,
 } from '@wordpress/components';
 import { useNavigate } from 'react-router-dom';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import AdminShell from '../components/AdminShell';
 import { apiClient } from '../data';
 import Icon from '../ui/Icon';
@@ -342,6 +343,76 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
     }
   };
 
+  // Star (2.3.0).
+  const handleStarToggle = async () => {
+    if (!submission) return;
+    const next = parseInt(submission.starred, 10) === 1 ? 0 : 1;
+    setUpdating(true);
+    try {
+      await apiClient.put(`/submissions/${submission.id}`, { starred: !!next });
+      setSubmission({ ...submission, starred: next });
+    } catch (err) {
+      setError(__('Failed to update status', 'subtleforms'));
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  // Resend notifications (2.3.0).
+  const [resend, setResend] = useState({ busy: false, message: '', status: '' });
+  const [confirmResend, setConfirmResend] = useState(false);
+  const handleResend = async () => {
+    setConfirmResend(false);
+    setResend({ busy: true, message: '', status: '' });
+    try {
+      const res = await apiClient.post(`/submissions/${submission.id}/resend`, {});
+      setResend({
+        busy: false,
+        status: 'success',
+        message: sprintf(
+          /* translators: %d: number of email notifications */
+          _n('%d notification queued again.', '%d notifications queued again.', res?.count || 1, 'subtleforms'),
+          res?.count || 1
+        ),
+      });
+      loadSubmission();
+    } catch (err) {
+      setResend({
+        busy: false,
+        status: 'error',
+        message: err?.message || __('The notifications could not be sent.', 'subtleforms'),
+      });
+    }
+  };
+
+  // Notes (2.3.0).
+  const [noteText, setNoteText] = useState('');
+  const [noteBusy, setNoteBusy] = useState(false);
+  const addNote = async () => {
+    const text = noteText.trim();
+    if (!text) return;
+    setNoteBusy(true);
+    try {
+      const note = await apiClient.post(`/submissions/${submission.id}/notes`, { text });
+      const notes = [...(submission.meta?.notes || []), note];
+      setSubmission({ ...submission, meta: { ...(submission.meta || {}), notes } });
+      setNoteText('');
+    } catch (err) {
+      setError(__('The note could not be saved.', 'subtleforms'));
+    } finally {
+      setNoteBusy(false);
+    }
+  };
+  const removeNote = async (noteId) => {
+    try {
+      await apiClient.delete(`/submissions/${submission.id}/notes/${noteId}`);
+      const notes = (submission.meta?.notes || []).filter((n) => n.id !== noteId);
+      setSubmission({ ...submission, meta: { ...(submission.meta || {}), notes } });
+    } catch (err) {
+      setError(__('The note could not be deleted.', 'subtleforms'));
+    }
+  };
+
   const [confirmDelete, setConfirmDelete] = useState(false);
   const handleDelete = async () => {
     setConfirmDelete(false);
@@ -480,6 +551,21 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
     !! window.subtleformsAdmin?.hasProPlugin &&
     !! window.subtleformsAdmin?.capabilities?.[ 'extensions.pdf' ];
   const isFlagged = submission.status === 'flagged';
+  const isStarred = parseInt( submission.starred, 10 ) === 1;
+  const notes = Array.isArray( meta.notes ) ? meta.notes : [];
+
+  // Field types, so answers can be shown the way they were typed.
+  const fieldTypes = {};
+  ( function collect( list ) {
+    ( list || [] ).forEach( ( f ) => {
+      if ( ! f || typeof f !== 'object' ) return;
+      const k = f.config?.key || f.key;
+      if ( k ) fieldTypes[ k ] = f.type;
+      collect( f.children );
+      collect( Array.isArray( f.fields ) ? f.fields : null );
+      ( f.columns || [] ).forEach( ( c ) => Array.isArray( c ) && collect( c ) );
+    } );
+  } )( submission.schema?.fields );
 
   // Who sent it: a name and/or email pulled from the answers.
   const flatValue = ( v ) => {
@@ -553,6 +639,22 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
         </Button>
         <Button
           size='compact'
+          icon={ <Icon.Star size={ 16 } fill={ isStarred ? 'currentColor' : 'none' } /> }
+          isPressed={ isStarred }
+          disabled={ updating }
+          onClick={ handleStarToggle }>
+          { isStarred ? __( 'Starred', 'subtleforms' ) : __( 'Star', 'subtleforms' ) }
+        </Button>
+        <Button
+          size='compact'
+          icon={ <Icon.Mail size={ 16 } /> }
+          disabled={ updating || resend.busy }
+          isBusy={ resend.busy }
+          onClick={ () => setConfirmResend( true ) }>
+          { __( 'Resend notifications', 'subtleforms' ) }
+        </Button>
+        <Button
+          size='compact'
           icon={ <Icon.AlertCircle size={ 16 } /> }
           isPressed={ isFlagged }
           disabled={ updating }
@@ -591,6 +693,24 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
         relDate
       ) }
       actions={ actions }>
+
+      { confirmResend && (
+        <ConfirmDialog
+          onConfirm={ handleResend }
+          onCancel={ () => setConfirmResend( false ) }
+          confirmButtonText={ __( 'Resend', 'subtleforms' ) }>
+          { __( 'Send this entry’s email notifications again, with the answers as they were saved? Passwords are never included.', 'subtleforms' ) }
+        </ConfirmDialog>
+      ) }
+
+      { resend.message && (
+        <Notice
+          status={ resend.status === 'error' ? 'error' : 'success' }
+          onRemove={ () => setResend( { busy: false, message: '', status: '' } ) }
+          className='sf-detail__notice'>
+          { resend.message }
+        </Notice>
+      ) }
 
       { confirmDelete && (
         <ConfirmDialog
@@ -660,8 +780,11 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                           <a href={ String( value ) } target='_blank' rel='noopener noreferrer'>
                             { String( value ) }
                           </a>
+                        ) : fieldTypes[ key ] === 'rich_text' ? (
+                          // Stored through a small tag allow-list on the server.
+                          <span className='sf-answers__text sf-answers__text--rich' dangerouslySetInnerHTML={ { __html: String( value ) } } />
                         ) : (
-                          <span className='sf-answers__text'>{ String( value ) }</span>
+                          <span className={ `sf-answers__text${ fieldTypes[ key ] === 'textarea' ? ' sf-answers__text--multiline' : '' }` }>{ String( value ) }</span>
                         ) }
                       </dd>
                     </div>
@@ -743,10 +866,61 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
               } }
             </TabPanel>
           </section>
+
         </div>
 
         {/* ── Sidebar ── */}
         <aside className='sf-detail__side'>
+          <section className='sf-panel sf-notes-panel' aria-labelledby='sf-notes-title'>
+            <header className='sf-panel__header'>
+              <h2 className='sf-panel__title' id='sf-notes-title'>
+                { __( 'Notes', 'subtleforms' ) }
+                { notes.length > 0 && <span className='sf-panel__count'>{ notes.length }</span> }
+              </h2>
+            </header>
+            <div className='sf-panel__body'>
+              { notes.length > 0 ? (
+                <ul className='sf-notes'>
+                  { notes.map( ( note ) => (
+                    <li key={ note.id } className='sf-notes__item'>
+                      <div className='sf-notes__meta'>
+                        <strong>{ note.author_name || __( 'Unknown user', 'subtleforms' ) }</strong>
+                        <span>{ formatAbsDate( note.created_at ) }</span>
+                        <Button
+                          size='small'
+                          isDestructive
+                          variant='tertiary'
+                          icon={ <Icon.Trash size={ 14 } /> }
+                          label={ __( 'Delete note', 'subtleforms' ) }
+                          onClick={ () => removeNote( note.id ) }
+                        />
+                      </div>
+                      <p className='sf-notes__text'>{ note.text }</p>
+                    </li>
+                  ) ) }
+                </ul>
+              ) : (
+                <p className='sf-notes__empty'>{ __( 'Private notes for your team. Visitors never see them.', 'subtleforms' ) }</p>
+              ) }
+              <TextareaControl
+                __nextHasNoMarginBottom
+                label={ __( 'Add a note', 'subtleforms' ) }
+                value={ noteText }
+                rows={ 3 }
+                onChange={ setNoteText }
+              />
+              <Button
+                variant='secondary'
+                size='compact'
+                className='sf-notes__add'
+                isBusy={ noteBusy }
+                disabled={ noteBusy || ! noteText.trim() }
+                onClick={ addNote }>
+                { __( 'Add note', 'subtleforms' ) }
+              </Button>
+            </div>
+          </section>
+
           { meta.order && (
             <section className='sf-panel sf-order-panel'>
               <header className='sf-panel__header'>

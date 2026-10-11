@@ -107,3 +107,8 @@ subtleforms-*.zip
 *.zip
 bundle-report.html
 bundle-stats.json
+
+# ── Test setup (2.3.0) ───────────────────────────────────────
+.wp-env.json
+playwright.browser.config.js
+phpunit-wp.xml.dist
