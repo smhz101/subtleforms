@@ -1,75 +1,147 @@
 /**
- * BuilderCanvasArea Component Styles
- * Layout wrapper for builder tabs (Build, Settings, Entries)
+ * Builder views: Build, Settings, Entries, Preview.
  */
 
-.subtleforms-builder-tabs-content {
-	height: 100%;
+.sf-builder-view {
+	flex: 1 1 auto;
 	display: flex;
 	flex-direction: column;
-	min-height: 0; // CRITICAL: allows component to shrink
+	min-height: 0;
+	height: 100%;
+	overflow: hidden;
 
-	// Tab panel container
-	> div[role='tabpanel'] {
-		flex: 1;
-		min-height: 0; // CRITICAL: allows tab content to shrink
-		height: 100%;
-		overflow: hidden; // Child components manage scroll
+	> * {
+		flex: 1 1 auto;
+		min-height: 0;
+	}
+
+	&--entries {
+		overflow-y: auto;
 	}
 }
 
-// Builder canvas inherits from admin-builder.css
-// Ensure it properly sizes within tab panel
 .subtleforms-builder-canvas {
 	height: 100%;
 	min-height: 0;
 }
 
-// Form Settings tab
 .subtleforms-form-settings {
 	height: 100%;
-	overflow-y: auto; // Settings panel scrolls
-	background-color: var(--sf-bg-page);
+	overflow-y: auto;
+	background-color: var(--sf-bg-subtle);
 	padding: var(--sf-space-8) var(--sf-space-6);
 }
 
-// Save error banner
 .sf-builder-canvas-area {
 	&__error-banner {
-		background-color: var(--sf-danger-bg);
-		margin-bottom: var(--sf-space-4);
-		padding: var(--sf-space-3) var(--sf-space-6);
+		flex: 0 0 auto;
+		padding: 10px 24px;
 		border-bottom: 1px solid var(--sf-danger-border);
+		background-color: var(--sf-danger-bg);
 	}
 
 	&__error-text {
-		font-size: var(--sf-text-xs);
-		line-height: var(--sf-leading-normal);
+		font-size: var(--sf-text-sm);
 		color: var(--sf-danger);
 	}
 
-	// Validation notice container
 	&__validation-notice {
-		margin-bottom: 1rem;
-		padding: 0 1.5rem;
+		flex: 0 0 auto;
+		padding: 12px 24px 0;
+
+		.components-notice {
+			margin: 0;
+		}
 	}
 
 	&__validation-text {
 		margin: 0;
-		font-size: var(--sf-text-base);
+		font-weight: var(--sf-weight-medium);
 	}
 
 	&__validation-list {
-		margin: 0;
-		margin-top: 0.5rem;
-		padding-left: 1.25rem;
-		font-size: var(--sf-text-base);
+		margin: 6px 0 0;
+		padding-left: 18px;
+		list-style: disc;
 	}
 
-	// Entries tab content
 	&__entries-container {
-		padding: 1.5rem;
 		height: 100%;
 		overflow-y: auto;
+		background: var(--sf-bg-page);
+
+		> .components-notice {
+			margin: 24px;
+		}
 	}
+}
+
+// ── View switcher (centre of the builder bar) ────────────────────────────────
+.sf-view-switcher {
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+	padding: 3px;
+	border-radius: var(--sf-radius-md);
+	background: var(--sf-bg-muted);
+
+	&__item {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		height: 28px;
+		padding: 0 12px;
+		border: 0;
+		border-radius: var(--sf-radius-sm);
+		background: transparent;
+		font-size: var(--sf-text-sm);
+		font-weight: var(--sf-weight-medium);
+		color: var(--sf-text-muted);
+		cursor: pointer;
+		transition:
+			background-color var(--sf-transition-fast),
+			color var(--sf-transition-fast),
+			box-shadow var(--sf-transition-fast);
+
+		svg {
+			fill: none;
+		}
+
+		&:hover {
+			color: var(--sf-text);
+		}
+
+		&:focus-visible {
+			outline: none;
+			box-shadow: var(--sf-shadow-focus);
+		}
+
+		&.is-active {
+			background: var(--sf-bg-surface);
+			color: var(--sf-text);
+			box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.04);
+
+			svg {
+				color: var(--sf-brand);
+			}
+		}
+	}
+
+	@media (max-width: 1280px) {
+		&__item span {
+			display: none;
+		}
+
+		&__item {
+			padding: 0 8px;
+		}
+	}
+}
+
+// Entries view has no app top bar above it, so the table header sticks to 0.
+.sf-builder-canvas-area__entries-container {
+	padding-top: 8px;
+
+	.sf-data-table thead th,
+	.sf-data-table .sf-data-table__bulk-actions { top: 0; }
 }

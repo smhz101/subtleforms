@@ -1,47 +1,44 @@
 /**
- * InsertFieldButton Component Styles
- * Minimal inserter with hover line effect
+ * In-between inserter: a quiet line that turns into the brand colour with a
+ * "+" button when you point at the gap between two fields.
  */
 
 .sf-insert-field-button {
 	&__wrapper {
-		width: 100%;
+		position: relative;
 		display: flex;
 		justify-content: center;
-		margin: 0;
-		padding: 0.25rem 0;
-		position: relative;
-    margin-top: -13px;
+		width: 100%;
+		height: 12px;
+		margin: -6px 0 -2px;
+		z-index: 4;
 	}
 
 	&__line {
 		position: relative;
-		width: 100%;
-		height: 2px;
-		background: transparent;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		transition: all var(--sf-duration-base) ease;
+		width: 100%;
+		height: 12px;
 
-		/* Subtle hint line - always visible */
 		&::before {
 			content: '';
 			position: absolute;
 			left: 0;
 			right: 0;
-			top: 0;
-			height: 1px;
-			background: var(--sf-gray-200);
-			opacity: 0.5;
-			transition: all var(--sf-duration-base) ease;
+			top: 50%;
+			height: 2px;
+			border-radius: 1px;
+			background: var(--sf-brand);
+			opacity: 0;
+			transform: translateY(-50%) scaleX(0.6);
+			transition: opacity var(--sf-transition-fast), transform var(--sf-transition-base);
 		}
 
-		/* Thick blue line on hover */
 		&:hover::before {
-			height: 3px;
-			background: var(--sf-blue-500);
 			opacity: 1;
+			transform: translateY(-50%) scaleX(1);
 		}
 	}
 
@@ -51,57 +48,43 @@
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
-		width: 32px;
-		height: 32px;
+		width: 24px;
+		height: 24px;
 		padding: 0;
-		background: var(--sf-surface);
-		border: 1.5px solid var(--sf-gray-200);
-		border-radius: 50%;
-		color: var(--sf-gray-500);
+		border: 0;
+		border-radius: var(--sf-radius-xs);
+		background: #1e1e1e;
+		color: #fff;
 		cursor: pointer;
-		outline: none;
-		box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
-		transition: all var(--sf-duration-base) ease;
-		opacity: 0.6;
+		opacity: 0;
+		transform: scale(0.8);
+		transition: opacity var(--sf-transition-fast), transform var(--sf-transition-fast), background-color var(--sf-transition-fast);
 
-		/* Hover state */
-		&:hover {
-			opacity: 1;
-			background: var(--sf-blue-500);
-			border-color: var(--sf-blue-500);
-			color: var(--sf-surface);
-			box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
-			transform: scale(1.1);
-		}
-
-		/* Active state */
-		&:active {
-			transform: scale(1.05);
-			box-shadow: 0 2px 4px 0 rgba(59, 130, 246, 0.2);
-		}
-
-		/* Focus state */
+		.sf-insert-field-button__line:hover &,
 		&:focus-visible {
-			outline: 2px solid var(--sf-blue-500);
-			outline-offset: 2px;
+			opacity: 1;
+			transform: scale(1);
+		}
+
+		&:hover {
+			background: var(--sf-brand);
+		}
+
+		&:focus-visible {
+			outline: none;
+			box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--sf-brand);
 		}
 	}
 
 	&__icon {
 		display: inline-flex;
-		align-items: center;
-		justify-content: center;
 		width: 16px;
 		height: 16px;
-		transition: transform var(--sf-duration-base) ease;
 
 		svg {
 			width: 16px;
 			height: 16px;
-		}
-
-		.sf-insert-field-button__button:hover & {
-			transform: rotate(90deg);
+			fill: none;
 		}
 	}
 }

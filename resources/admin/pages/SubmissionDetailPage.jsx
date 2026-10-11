@@ -1,10 +1,11 @@
 import { useState, useEffect } from '@wordpress/element';
 import {
-  Spinner,
   Notice,
   TabPanel,
+  Button,
+  ToggleControl,
+  __experimentalConfirmDialog as ConfirmDialog,
 } from '@wordpress/components';
-import { Button } from '../components/navigation';
 import { useNavigate } from 'react-router-dom';
 import { __, sprintf } from '@wordpress/i18n';
 import AdminShell from '../components/AdminShell';
@@ -273,6 +274,34 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
     }
   };
 
+  // Read state lives in is_read; status is the pipeline result.
+  const handleReadToggle = async () => {
+    if (!submission) return;
+    const nextRead = parseInt(submission.is_read, 10) === 1 ? 0 : 1;
+    setUpdating(true);
+    try {
+      await apiClient.put(`/submissions/${submission.id}`, { is_read: nextRead });
+      setSubmission({ ...submission, is_read: nextRead });
+    } catch (err) {
+      setError(__('Failed to update status', 'subtleforms'));
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const handleDelete = async () => {
+    setConfirmDelete(false);
+    setUpdating(true);
+    try {
+      await apiClient.delete(`/submissions/${submission.id}`);
+      onBack();
+    } catch (err) {
+      setError(__('Failed to delete submission', 'subtleforms'));
+      setUpdating(false);
+    }
+  };
+
   const getFieldLabel = (key) => {
     if (!submission?.schema?.fields) return key;
 
@@ -303,14 +332,22 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
     }
   };
 
-  if (loading) return <Spinner />;
-  if (error) return <Notice status='error'>{error}</Notice>;
-  if (!submission)
+  if (loading || error || !submission) {
     return (
-      <Notice status='warning'>
-        {__('Submission not found', 'subtleforms')}
-      </Notice>
+      <AdminShell
+        title={__('Submission', 'subtleforms')}
+        isLoading={loading}
+        loadingLabel={__('Loading submission…', 'subtleforms')}
+        error={!loading ? error || __('Submission not found', 'subtleforms') : null}
+        onRetry={loadSubmission}
+        actions={
+          <Button variant='secondary' icon={<Icon.ArrowLeft size={16} />} onClick={onBack}>
+            {__('All submissions', 'subtleforms')}
+          </Button>
+        }
+      />
     );
+  }
 
   const payload = submission.payload || {};
   const meta = submission.meta || {};
@@ -329,15 +366,6 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
   const apiLogs = logs.filter(
     ( log ) => typeof log.context === 'string' && log.context === 'api'
   );
-
-  if (loading) return <Spinner />;
-  if (error) return <Notice status='error'>{error}</Notice>;
-  if (!submission)
-    return (
-      <Notice status='warning'>
-        {__('Submission not found', 'subtleforms')}
-      </Notice>
-    );
 
   // ─── computed values ─────────────────────────────────────────────────────
   const formType   = submission.schema?.metadata?.type || 'regular';
@@ -361,9 +389,15 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
       : __( 'Desktop', 'subtleforms' )
     : __( 'N/A', 'subtleforms' );
 
+  // Stored timestamps are UTC without a zone suffix.
+  const toDate = ( value ) => {
+    const raw = String( value || '' );
+    return new Date( raw && ! /[zZ]|[+-]\d{2}:?\d{2}$/.test( raw ) ? `${ raw.replace( ' ', 'T' ) }Z` : raw );
+  };
+
   const formatAbsDate = ( iso ) => {
     try {
-      return new Date( iso ).toLocaleDateString( 'en-US', {
+      return toDate( iso ).toLocaleDateString( undefined, {
         year: 'numeric', month: 'short', day: 'numeric',
         hour: '2-digit', minute: '2-digit',
       } );
@@ -374,7 +408,8 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
 
   const formatRelDate = ( iso ) => {
     try {
-      const diff = Math.floor( ( Date.now() - new Date( iso ).getTime() ) / 1000 );
+      const diff = Math.max( 0, Math.floor( ( Date.now() - toDate( iso ).getTime() ) / 1000 ) );
+      if ( diff < 60 )    return __( 'just now', 'subtleforms' );
       if ( diff < 60 )    return sprintf( __( '%ds ago', 'subtleforms' ), diff );
       if ( diff < 3600 )  return sprintf( __( '%dm ago', 'subtleforms' ), Math.floor( diff / 60 ) );
       if ( diff < 86400 ) return sprintf( __( '%dh ago', 'subtleforms' ), Math.floor( diff / 3600 ) );
@@ -387,267 +422,228 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
   const absDate = formatAbsDate( submission.created_at );
   const relDate = formatRelDate( submission.created_at );
 
-  // 'read' status: any status other than 'unread' is treated as read
-  const readStatus = submission.status === 'unread' ? 'unread' : 'read';
+  const isUnread = parseInt( submission.is_read, 10 ) === 0;
+  const isFlagged = submission.status === 'flagged';
 
-  // ─── header actions (lean: just navigation) ──────────────────────────────
+  // Who sent it: a name and/or email pulled from the answers.
+  const flatValue = ( v ) => {
+    if ( v && typeof v === 'object' && ( v.first_name || v.last_name ) ) {
+      return [ v.first_name, v.last_name ].filter( Boolean ).join( ' ' );
+    }
+    return typeof v === 'string' ? v : '';
+  };
+  const entries = Object.entries( payload );
+  const findBy = ( re ) => {
+    const hit = entries.find( ( [ k, v ] ) => re.test( k ) && flatValue( v ).trim() );
+    return hit ? flatValue( hit[ 1 ] ).trim() : '';
+  };
+  const senderEmail = findBy( /e-?mail/i );
+  const senderName = findBy( /^(full_?)?name$|name_group|your_name|first_name/i );
+  const heading =
+    senderName ||
+    senderEmail ||
+    sprintf( __( 'Submission #%d', 'subtleforms' ), submission.id );
+
+  const PIPELINE = {
+    completed: { label: __( 'Completed', 'subtleforms' ), cls: 'sf-pill--success' },
+    failed: { label: __( 'Failed', 'subtleforms' ), cls: 'sf-pill--danger' },
+    processing: { label: __( 'Processing', 'subtleforms' ), cls: 'sf-pill--info' },
+    payment_pending: { label: __( 'Awaiting payment', 'subtleforms' ), cls: 'sf-pill--warning' },
+    spam: { label: __( 'Spam', 'subtleforms' ), cls: 'sf-pill--danger' },
+    flagged: { label: __( 'Flagged', 'subtleforms' ), cls: 'sf-pill--warning' },
+  };
+  const pipeline = PIPELINE[ submission.status ] || { label: __( 'Received', 'subtleforms' ), cls: '' };
+
   const actions = (
-    <>
-      <Button isSecondary onClick={ onBack }>
-        ← { __( 'All Submissions', 'subtleforms' ) }
-      </Button>
-      <div className='sf-sub-nav'>
+    <div className='sf-sub-toolbar'>
+      <div className='sf-sub-toolbar__group' role='group' aria-label={ __( 'Browse submissions', 'subtleforms' ) }>
         <Button
-          isSecondary
-          disabled={ ! adjacent.prev }
-          onClick={ () => navigate( 'prev' ) }>
-          ← { __( 'Previous', 'subtleforms' ) }
-        </Button>
+          size='compact'
+          icon={ <Icon.ChevronLeft size={ 16 } /> }
+          label={ __( 'Newer submission', 'subtleforms' ) }
+          showTooltip
+          disabled={ ! adjacent?.prev }
+          accessibleWhenDisabled
+          onClick={ () => navigate( 'prev' ) }
+        />
         <Button
-          isSecondary
-          disabled={ ! adjacent.next }
-          onClick={ () => navigate( 'next' ) }>
-          { __( 'Next', 'subtleforms' ) } →
-        </Button>
+          size='compact'
+          icon={ <Icon.ChevronRight size={ 16 } /> }
+          label={ __( 'Older submission', 'subtleforms' ) }
+          showTooltip
+          disabled={ ! adjacent?.next }
+          accessibleWhenDisabled
+          onClick={ () => navigate( 'next' ) }
+        />
       </div>
-    </>
+      <div className='sf-sub-toolbar__group' role='group' aria-label={ __( 'Submission actions', 'subtleforms' ) }>
+        <Button
+          size='compact'
+          icon={ isUnread ? <Icon.Eye size={ 16 } /> : <Icon.EyeOff size={ 16 } /> }
+          onClick={ handleReadToggle }
+          disabled={ updating }>
+          { isUnread ? __( 'Mark read', 'subtleforms' ) : __( 'Mark unread', 'subtleforms' ) }
+        </Button>
+        <Button
+          size='compact'
+          icon={ <Icon.AlertCircle size={ 16 } /> }
+          isPressed={ isFlagged }
+          disabled={ updating }
+          onClick={ () => handleStatusChange( isFlagged ? 'completed' : 'flagged' ) }>
+          { isFlagged ? __( 'Flagged', 'subtleforms' ) : __( 'Flag', 'subtleforms' ) }
+        </Button>
+        <Button
+          size='compact'
+          isDestructive
+          icon={ <Icon.Trash size={ 16 } /> }
+          label={ __( 'Delete submission', 'subtleforms' ) }
+          showTooltip
+          disabled={ updating }
+          onClick={ () => setConfirmDelete( true ) }
+        />
+      </div>
+    </div>
   );
+
+  const answers = Object.entries( filteredPayload );
 
   // ─── render ──────────────────────────────────────────────────────────────
   return (
     <AdminShell
-      title={ sprintf( __( 'Submission #%d', 'subtleforms' ), submission.id ) }
+      eyebrow={
+        <button type='button' className='sf-breadcrumb' onClick={ onBack }>
+          <Icon.ArrowLeft size={ 14 } aria-hidden='true' />
+          { submission.form_title || __( 'Submissions', 'subtleforms' ) }
+        </button>
+      }
+      title={ heading }
+      description={ sprintf(
+        /* translators: 1: absolute date, 2: relative time */
+        __( 'Received %1$s · %2$s', 'subtleforms' ),
+        absDate,
+        relDate
+      ) }
       actions={ actions }>
 
-      <div className='sf-sub-layout'>
+      { confirmDelete && (
+        <ConfirmDialog
+          onConfirm={ handleDelete }
+          onCancel={ () => setConfirmDelete( false ) }
+          confirmButtonText={ __( 'Delete', 'subtleforms' ) }>
+          { __( 'Delete this submission permanently? This cannot be undone.', 'subtleforms' ) }
+        </ConfirmDialog>
+      ) }
 
-        {/* ═══════════════════ MAIN COLUMN ═══════════════════ */}
-        <div className='sf-sub-main'>
+      <div className='sf-detail'>
+        <div className='sf-detail__main'>
 
-          {/* ── Context Banner ── */}
-          <div className={ `sf-sub-context sf-sub-context--${ formType }` }>
-            <div className='sf-sub-context__left'>
-              <span className={ `sf-type-badge sf-type-badge--${ formType }` }>
-                { formTypeLabel }
-              </span>
-              { submission.form_title ? (
-                <a
-                  href={ `admin.php?page=subtleforms-forms&form_id=${ submission.form_id }` }
-                  className='sf-sub-context__form-link'>
-                  { submission.form_title }
-                  <Icon.ExternalLink size={12} className='sf-sub-context__ext-icon' aria-hidden='true' />
-                </a>
-              ) : (
-                <span className='sf-sub-context__form-id'>
-                  { sprintf( __( 'Form #%d', 'subtleforms' ), submission.form_id ) }
-                </span>
-              ) }
-            </div>
-
-            <div className='sf-sub-context__right'>
-              <button
-                type='button'
-                className={ `sf-status-pill sf-status-pill--${ readStatus }` }
-                onClick={ () =>
-                  handleStatusChange(
-                    readStatus === 'read' ? 'unread' : 'read'
-                  )
-                }
-                disabled={ updating }
-                aria-label={ readStatus === 'read'
-                  ? __( 'Mark as unread', 'subtleforms' )
-                  : __( 'Mark as read', 'subtleforms' ) }>
-                <span className='sf-status-pill__dot' aria-hidden='true' />
-                { readStatus === 'unread'
-                  ? __( 'Unread', 'subtleforms' )
-                  : __( 'Read', 'subtleforms' ) }
-              </button>
-
-              <div className='sf-sub-context__datetime' title={ submission.created_at }>
-                <span className='sf-sub-context__date'>{ absDate }</span>
-                <span className='sf-sub-context__rel'>{ relDate }</span>
+          {/* ── Answers ── */}
+          <section className='sf-panel'>
+            <header className='sf-panel__header'>
+              <h2 className='sf-panel__title'>
+                { __( 'Answers', 'subtleforms' ) }
+                <span className='sf-panel__count'>{ answers.length }</span>
+              </h2>
+              <div className='sf-detail__toggles'>
+                <ToggleControl
+                  __nextHasNoMarginBottom
+                  label={ __( 'Empty fields', 'subtleforms' ) }
+                  checked={ showEmpty }
+                  onChange={ setShowEmpty }
+                />
+                <ToggleControl
+                  __nextHasNoMarginBottom
+                  label={ __( 'Field keys', 'subtleforms' ) }
+                  checked={ showTechnical }
+                  onChange={ setShowTechnical }
+                />
               </div>
-            </div>
-          </div>
+            </header>
 
-          {/* ── Submitted Data Card ── */}
-          <div className='subtleforms-card'>
-            <div className='sf-card-head'>
-              <h2 className='sf-card-title'>{ __( 'Submitted Data', 'subtleforms' ) }</h2>
-              <div className='sf-card-head__controls'>
-                <label className='sf-field-toggle'>
-                  <input
-                    type='checkbox'
-                    checked={ showEmpty }
-                    onChange={ ( e ) => setShowEmpty( e.target.checked ) }
-                  />
-                  { __( 'Show empty fields', 'subtleforms' ) }
-                </label>
-                <label className='sf-field-toggle'>
-                  <input
-                    type='checkbox'
-                    checked={ showTechnical }
-                    onChange={ ( e ) => setShowTechnical( e.target.checked ) }
-                  />
-                  { __( 'Show field keys', 'subtleforms' ) }
-                </label>
-              </div>
-            </div>
-
-            { Object.keys( filteredPayload ).length > 0 ? (
-              <div className='sf-field-list'>
-                { Object.entries( filteredPayload ).map( ( [ key, value ] ) => {
+            { answers.length > 0 ? (
+              <dl className='sf-answers'>
+                { answers.map( ( [ key, value ] ) => {
                   const isEmpty =
                     value === '' || value === null || value === undefined ||
                     ( Array.isArray( value ) && value.length === 0 );
                   return (
-                    <div key={ key } className={ `sf-field-row ${ isEmpty ? 'sf-field-row--empty' : '' }` }>
-                      <div className='sf-field-row__meta'>
-                        <span className='sf-field-row__label'>
-                          { getFieldLabel( key ) }
-                        </span>
-                        { showTechnical && (
-                          <code className='sf-field-row__key'>{ key }</code>
-                        ) }
-                      </div>
-                      <div className='sf-field-row__value'>
-                        { ! isEmpty ? (
-                          typeof value === 'object' ? (
-                            <div className='sf-field-row__object'>
-                              { renderReadableData( value ) }
-                            </div>
-                          ) : (
-                            <span className='sf-field-row__text'>
-                              { String( value )
-                                .split( '\n' )
-                                .map( ( line, i, arr ) => (
-                                  <span key={ i }>
-                                    { line }
-                                    { i < arr.length - 1 && <br /> }
-                                  </span>
-                                ) ) }
-                            </span>
-                          )
-                        ) : (
-                          <span className='sf-field-row__empty'>
-                            { __( '(empty)', 'subtleforms' ) }
+                    <div key={ key } className={ `sf-answers__row${ isEmpty ? ' is-empty' : '' }` }>
+                      <dt className='sf-answers__label'>
+                        { getFieldLabel( key ) }
+                        { showTechnical && <code className='sf-answers__key'>{ key }</code> }
+                      </dt>
+                      <dd className='sf-answers__value'>
+                        { isEmpty ? (
+                          <span className='sf-answers__empty'>{ __( 'No answer', 'subtleforms' ) }</span>
+                        ) : Array.isArray( value ) ? (
+                          <span className='sf-answers__chips'>
+                            { value.map( ( v, i ) => (
+                              <span key={ i } className='sf-pill sf-pill--outline'>
+                                { typeof v === 'object' ? JSON.stringify( v ) : String( v ) }
+                              </span>
+                            ) ) }
                           </span>
+                        ) : typeof value === 'object' ? (
+                          <div className='sf-answers__object'>{ renderReadableData( value ) }</div>
+                        ) : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test( String( value ) ) ? (
+                          <a href={ `mailto:${ value }` }>{ String( value ) }</a>
+                        ) : /^https?:\/\//.test( String( value ) ) ? (
+                          <a href={ String( value ) } target='_blank' rel='noopener noreferrer'>
+                            { String( value ) }
+                          </a>
+                        ) : (
+                          <span className='sf-answers__text'>{ String( value ) }</span>
                         ) }
-                      </div>
+                      </dd>
                     </div>
                   );
                 } ) }
-              </div>
+              </dl>
             ) : (
-              <div className='sf-empty-state'>
-                <div className='sf-empty-state__icon'>
-                  <Icon.FileText size={ 28 } strokeWidth={ 1.5 } />
-                </div>
-                <h3 className='sf-empty-state__title'>
-                  { __( 'No Data Submitted', 'subtleforms' ) }
-                </h3>
-                <p className='sf-empty-state__desc'>
-                  { __(
-                    'This submission was recorded but contains no field data.',
-                    'subtleforms'
-                  ) }
+              <div className='sf-empty'>
+                <span className='sf-empty__icon'><Icon.FileText size={ 20 } /></span>
+                <p className='sf-empty__title'>{ __( 'No answers recorded', 'subtleforms' ) }</p>
+                <p className='sf-empty__text'>
+                  { __( 'The entry was saved without field data. The activity log below usually explains why.', 'subtleforms' ) }
                 </p>
-                <div className='sf-empty-state__help'>
-                  <p>{ __( 'Possible causes:', 'subtleforms' ) }</p>
-                  <ul>
-                    <li>{ __( 'Form fields not configured with field keys', 'subtleforms' ) }</li>
-                    <li>{ __( 'JavaScript error prevented data collection', 'subtleforms' ) }</li>
-                    <li>{ __( 'Multi-step form field paths not collected', 'subtleforms' ) }</li>
-                  </ul>
-                  <p className='sf-empty-state__tip'>
-                    <strong>{ __( 'Debug tip:', 'subtleforms' ) }</strong>{ ' ' }
-                    { __( 'Check Execution Logs below for clues.', 'subtleforms' ) }
-                  </p>
-                </div>
               </div>
             ) }
-          </div>
 
-          {/* ── Technical section (shown when toggle is on) ── */}
-          { showTechnical && (
-            <div className='subtleforms-card'>
-              <div className='sf-card-head'>
-                <h2 className='sf-card-title'>
-                  { __( 'Technical Details', 'subtleforms' ) }
-                </h2>
-              </div>
-              <div className='sf-tech-grid'>
-                <div className='sf-tech-section'>
-                  <h4 className='sf-tech-section__title'>
-                    { __( 'Raw Payload', 'subtleforms' ) }
-                  </h4>
-                  <pre className='sf-tech-code'>
-                    { JSON.stringify( submission.payload, null, 2 ) }
-                  </pre>
-                </div>
-                <div className='sf-tech-section'>
-                  <h4 className='sf-tech-section__title'>
-                    { __( 'Meta', 'subtleforms' ) }
-                  </h4>
-                  <pre className='sf-tech-code'>
-                    { JSON.stringify( meta, null, 2 ) }
-                  </pre>
-                </div>
-              </div>
-            </div>
-          ) }
-
-          {/* ── Pipeline Timeline ── */}
-          <div className='subtleforms-card'>
-            <div className='sf-card-head'>
-              <h2 className='sf-card-title'>
-                { __( 'Pipeline', 'subtleforms' ) }
-              </h2>
-              <span className='sf-card-head__count'>
-                { timeline.length }
-              </span>
-            </div>
-            { timeline.length > 0 ? (
-              <div className='sf-pipeline-timeline'>
-                { timeline.map( ( step ) => (
-                  <PipelineStepCard key={ step.stepId } step={ step } />
-                ) ) }
-              </div>
-            ) : (
-              <p className='sf-logs-empty'>
-                <em>{ __( 'No pipeline activity recorded.', 'subtleforms' ) }</em>
-              </p>
+            { showTechnical && (
+              <details className='sf-detail__raw'>
+                <summary>{ __( 'Raw payload and meta (JSON)', 'subtleforms' ) }</summary>
+                <pre>{ JSON.stringify( { payload: submission.payload, meta }, null, 2 ) }</pre>
+              </details>
             ) }
-          </div>
+          </section>
 
-          {/* ── Execution Logs ── */}
-          <div className='subtleforms-card'>
-            <div className='sf-card-head'>
-              <h2 className='sf-card-title'>
-                { __( 'Execution Logs', 'subtleforms' ) }
+          {/* ── Activity ── */}
+          <section className='sf-panel'>
+            <header className='sf-panel__header'>
+              <h2 className='sf-panel__title'>
+                { __( 'What happened next', 'subtleforms' ) }
               </h2>
-              <span className='sf-card-head__count'>
-                { logs.length }
-              </span>
-            </div>
+              <span className={ `sf-pill sf-pill--dot ${ pipeline.cls }` }>{ pipeline.label }</span>
+            </header>
             <TabPanel
+              className='sf-detail__tabs'
               tabs={ [
-                {
-                  name: 'general',
-                  title: sprintf(
-                    __( 'General (%d)', 'subtleforms' ),
-                    generalLogs.length
-                  ),
-                },
-                {
-                  name: 'api',
-                  title: sprintf(
-                    __( 'API Calls (%d)', 'subtleforms' ),
-                    apiLogs.length
-                  ),
-                },
+                { name: 'pipeline', title: sprintf( __( 'Actions (%d)', 'subtleforms' ), timeline.length ) },
+                { name: 'general', title: sprintf( __( 'Log (%d)', 'subtleforms' ), generalLogs.length ) },
+                { name: 'api', title: sprintf( __( 'API calls (%d)', 'subtleforms' ), apiLogs.length ) },
               ] }>
               { ( tab ) => {
+                if ( tab.name === 'pipeline' ) {
+                  return timeline.length > 0 ? (
+                    <div className='sf-pipeline-timeline'>
+                      { timeline.map( ( step ) => (
+                        <PipelineStepCard key={ step.stepId } step={ step } />
+                      ) ) }
+                    </div>
+                  ) : (
+                    <p className='sf-logs-empty'>{ __( 'No actions ran for this entry.', 'subtleforms' ) }</p>
+                  );
+                }
                 const displayLogs = tab.name === 'general' ? generalLogs : apiLogs;
                 return displayLogs.length > 0 ? (
                   <div className='sf-log-table-wrap'>
@@ -664,9 +660,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                           <tr key={ idx }>
                             <td className='sf-log-table__time'>{ log.created_at }</td>
                             <td>
-                              <span className={ `sf-log-level sf-log-level--${ log.level }` }>
-                                { log.level }
-                              </span>
+                              <span className={ `sf-log-level sf-log-level--${ log.level }` }>{ log.level }</span>
                             </td>
                             <td className='sf-log-table__message'>{ log.message }</td>
                           </tr>
@@ -675,149 +669,76 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                     </table>
                   </div>
                 ) : (
-                  <p className='sf-logs-empty'>
-                    <em>{ __( 'No logs recorded.', 'subtleforms' ) }</em>
-                  </p>
+                  <p className='sf-logs-empty'>{ __( 'Nothing logged.', 'subtleforms' ) }</p>
                 );
               } }
             </TabPanel>
-          </div>
+          </section>
+        </div>
 
-        </div>{/* /sf-sub-main */}
-
-        {/* ═══════════════════ SIDEBAR ═══════════════════════ */}
-        <aside className='sf-sub-sidebar'>
-          <div className='subtleforms-card sf-sub-sidebar__card'>
-
-            {/* Status control — prominent at top */}
-            <div className='sf-sidebar-status'>
-              <div className='sf-sidebar-status__label'>
-                { __( 'Status', 'subtleforms' ) }
-              </div>
-              <button
-                type='button'
-                className={ `sf-status-pill sf-status-pill--${ readStatus } sf-status-pill--lg` }
-                onClick={ () =>
-                  handleStatusChange(
-                    readStatus === 'read' ? 'unread' : 'read'
-                  )
-                }
-                disabled={ updating }>
-                <span className='sf-status-pill__dot' aria-hidden='true' />
-                { readStatus === 'unread'
-                  ? __( 'Unread — click to mark read', 'subtleforms' )
-                  : __( 'Read — click to mark unread', 'subtleforms' ) }
-              </button>
-            </div>
-
-            <div className='sf-sidebar-divider' />
-
-            {/* Submission section */}
-            <div className='sf-sidebar-section'>
-              <h3 className='sf-sidebar-section__title'>
-                { __( 'Submission', 'subtleforms' ) }
-              </h3>
-              <dl className='sf-detail-list'>
-                <div className='sf-detail-row'>
-                  <dt>{ __( 'ID', 'subtleforms' ) }</dt>
-                  <dd><code>#{submission.id}</code></dd>
-                </div>
-                <div className='sf-detail-row'>
-                  <dt>{ __( 'Submitted', 'subtleforms' ) }</dt>
-                  <dd title={ submission.created_at }>
-                    <span className='sf-detail-date'>{ absDate }</span>
-                    <span className='sf-detail-rel'>{ relDate }</span>
-                  </dd>
-                </div>
-                <div className='sf-detail-row'>
-                  <dt>{ __( 'User', 'subtleforms' ) }</dt>
-                  <dd>
-                    { meta.user_id
-                      ? sprintf( __( 'User #%d', 'subtleforms' ), meta.user_id )
-                      : __( 'Guest', 'subtleforms' ) }
-                  </dd>
-                </div>
+        {/* ── Sidebar ── */}
+        <aside className='sf-detail__side'>
+          <section className='sf-panel'>
+            <header className='sf-panel__header'>
+              <h2 className='sf-panel__title'>{ __( 'Details', 'subtleforms' ) }</h2>
+              { isUnread && <span className='sf-pill sf-pill--brand'>{ __( 'Unread', 'subtleforms' ) }</span> }
+            </header>
+            <div className='sf-panel__body'>
+              <dl className='sf-kv'>
+                <dt>{ __( 'Entry', 'subtleforms' ) }</dt>
+                <dd><code>#{ submission.id }</code></dd>
+                <dt>{ __( 'Received', 'subtleforms' ) }</dt>
+                <dd title={ submission.created_at }>{ absDate }</dd>
+                <dt>{ __( 'Submitted by', 'subtleforms' ) }</dt>
+                <dd>
+                  { meta.user_id
+                    ? sprintf( __( 'User #%d', 'subtleforms' ), meta.user_id )
+                    : __( 'Guest', 'subtleforms' ) }
+                </dd>
+                <dt>{ __( 'Form', 'subtleforms' ) }</dt>
+                <dd>
+                  <a
+                    href={ `admin.php?page=subtleforms-new-form&form_id=${ submission.form_id }` }
+                    onClick={ ( e ) => {
+                      e.preventDefault();
+                      routerNavigate( `/forms/${ submission.form_id }` );
+                    } }>
+                    { submission.form_title || sprintf( __( 'Form #%d', 'subtleforms' ), submission.form_id ) }
+                  </a>
+                </dd>
+                <dt>{ __( 'Form type', 'subtleforms' ) }</dt>
+                <dd>{ formTypeLabel }</dd>
               </dl>
             </div>
+          </section>
 
-            <div className='sf-sidebar-divider' />
-
-            {/* Form section */}
-            <div className='sf-sidebar-section'>
-              <h3 className='sf-sidebar-section__title'>
-                { __( 'Form', 'subtleforms' ) }
-              </h3>
-              <dl className='sf-detail-list'>
-                <div className='sf-detail-row'>
-                  <dt>{ __( 'Name', 'subtleforms' ) }</dt>
-                  <dd>
-                    { submission.form_title ? (
-                      <a
-                        href={ `admin.php?page=subtleforms-forms&form_id=${ submission.form_id }` }
-                        className='sf-detail-link'>
-                        { submission.form_title }
-                      </a>
-                    ) : (
-                      sprintf( __( 'Form #%d', 'subtleforms' ), submission.form_id )
-                    ) }
-                  </dd>
-                </div>
-                <div className='sf-detail-row'>
-                  <dt>{ __( 'Type', 'subtleforms' ) }</dt>
-                  <dd>
-                    <span className={ `sf-type-badge sf-type-badge--${ formType } sf-type-badge--sm` }>
-                      { formTypeLabel }
-                    </span>
-                  </dd>
-                </div>
-                <div className='sf-detail-row'>
-                  <dt>{ __( 'Form ID', 'subtleforms' ) }</dt>
-                  <dd><code>#{ submission.form_id }</code></dd>
-                </div>
-              </dl>
-            </div>
-
-            <div className='sf-sidebar-divider' />
-
-            {/* Technical section */}
-            <div className='sf-sidebar-section'>
-              <h3 className='sf-sidebar-section__title'>
-                { __( 'Technical', 'subtleforms' ) }
-              </h3>
-              <dl className='sf-detail-list'>
-                <div className='sf-detail-row'>
-                  <dt>{ __( 'IP Address', 'subtleforms' ) }</dt>
-                  <dd><code>{ submission.ip_address || __( 'N/A', 'subtleforms' ) }</code></dd>
-                </div>
-                <div className='sf-detail-row'>
-                  <dt>{ __( 'Browser', 'subtleforms' ) }</dt>
-                  <dd>{ parsedBrowser }</dd>
-                </div>
-                <div className='sf-detail-row'>
-                  <dt>{ __( 'Device', 'subtleforms' ) }</dt>
-                  <dd>{ parsedDevice }</dd>
-                </div>
+          <section className='sf-panel'>
+            <header className='sf-panel__header'>
+              <h2 className='sf-panel__title'>{ __( 'Visitor', 'subtleforms' ) }</h2>
+            </header>
+            <div className='sf-panel__body'>
+              <dl className='sf-kv'>
+                <dt>{ __( 'IP address', 'subtleforms' ) }</dt>
+                <dd><code>{ submission.ip_address || __( 'Not stored', 'subtleforms' ) }</code></dd>
+                <dt>{ __( 'Browser', 'subtleforms' ) }</dt>
+                <dd>{ parsedBrowser }</dd>
+                <dt>{ __( 'Device', 'subtleforms' ) }</dt>
+                <dd>{ parsedDevice }</dd>
                 { meta.source_url && (
-                  <div className='sf-detail-row sf-detail-row--full'>
-                    <dt>{ __( 'Source URL', 'subtleforms' ) }</dt>
+                  <>
+                    <dt>{ __( 'Page', 'subtleforms' ) }</dt>
                     <dd>
-                      <a
-                        href={ meta.source_url }
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        className='sf-detail-link sf-detail-link--break'>
-                        { meta.source_url }
+                      <a href={ meta.source_url } target='_blank' rel='noopener noreferrer'>
+                        { meta.source_url.replace( /^https?:\/\//, '' ) }
                       </a>
                     </dd>
-                  </div>
+                  </>
                 ) }
               </dl>
             </div>
-
-          </div>
+          </section>
         </aside>
-
-      </div>{/* /sf-sub-layout */}
+      </div>
     </AdminShell>
   );
 }

@@ -393,15 +393,18 @@ const SubmissionsTable = forwardRef(
       setCurrentPage(1);
     };
 
+    // Stored timestamps are UTC without a zone suffix; parse them as UTC so
+    // relative times match the dashboard in every browser timezone.
+    const parseUtc = (value) => {
+      const raw = String(value || '');
+      return new Date(raw && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(raw) ? `${raw.replace(' ', 'T')}Z` : raw);
+    };
+
     const getRelativeTime = (dateString) => {
-      const date = new Date(dateString);
+      const date = parseUtc(dateString);
       const now = new Date();
-      const diff = Math.floor((now - date) / 1000);
-      if (diff < 60)
-        return (() => {
-          /* translators: %1$d: number of seconds */
-          return sprintf(__('%1$d seconds ago', 'subtleforms'), diff);
-        })();
+      const diff = Math.max(0, Math.floor((now - date) / 1000));
+      if (diff < 60) return __('Just now', 'subtleforms');
       if (diff < 3600)
         return (() => {
           /* translators: %1$d: number of minutes */
@@ -447,27 +450,102 @@ const SubmissionsTable = forwardRef(
           year: 'numeric',
           hour: '2-digit',
           minute: '2-digit',
-        }).format(new Date(dateString));
+        }).format(parseUtc(dateString));
       } catch {
         return dateString;
       }
+    };
+
+    // Pull a human summary out of the payload: a name and an email when the
+    // form collects them, otherwise the first short answers.
+    const summarize = (submission) => {
+      const payload =
+        submission.payload && typeof submission.payload === 'object'
+          ? submission.payload
+          : {};
+      const entries = Object.entries(payload);
+      const flat = (v) => {
+        if (v === null || v === undefined) return '';
+        if (typeof v === 'object') {
+          if (v.first_name || v.last_name) {
+            return [v.first_name, v.last_name].filter(Boolean).join(' ');
+          }
+          return '';
+        }
+        return String(v);
+      };
+      const byKey = (re) => {
+        const hit = entries.find(([k, v]) => re.test(k) && flat(v).trim());
+        return hit ? flat(hit[1]).trim() : '';
+      };
+      const email = byKey(/e-?mail/i);
+      const name =
+        byKey(/^(full_?)?name$|name_group|your_name|first_name/i) ||
+        entries.map(([, v]) => flat(v)).find(
+          (v) => v && !v.includes('@') && v.length <= 60
+        ) ||
+        '';
+      return { name, email };
+    };
+
+    const STATUS = {
+      completed: { label: __('Completed', 'subtleforms'), cls: 'sf-pill--success' },
+      saved: { label: __('Saved', 'subtleforms'), cls: '' },
+      processing: { label: __('Processing', 'subtleforms'), cls: 'sf-pill--info' },
+      failed: { label: __('Failed', 'subtleforms'), cls: 'sf-pill--danger' },
+      payment_pending: { label: __('Awaiting payment', 'subtleforms'), cls: 'sf-pill--warning' },
+      spam: { label: __('Spam', 'subtleforms'), cls: 'sf-pill--danger' },
+      flagged: { label: __('Flagged', 'subtleforms'), cls: 'sf-pill--warning' },
+      archived: { label: __('Archived', 'subtleforms'), cls: '' },
     };
 
     // Define table columns
     const allColumns = [
       {
         key: 'id',
-        title: __('ID', 'subtleforms'),
+        title: __('Submission', 'subtleforms'),
         sortable: true,
-        render: (id) => <strong>#{id}</strong>,
+        render: (id, submission) => {
+          const isUnread = parseInt(submission.is_read, 10) === 0;
+          const { name, email } = summarize(submission);
+          return (
+            <span
+              className={clsx('sf-sub-entry', { 'is-unread': isUnread })}>
+              <span className='sf-sub-entry__dot' aria-hidden='true' />
+              <span className='sf-sub-entry__avatar' aria-hidden='true'>
+                {(name || email || '#').trim().charAt(0).toUpperCase()}
+              </span>
+              <span className='sf-sub-entry__text'>
+                <span className='sf-sub-entry__name'>
+                  {name || email || sprintf(
+                    /* translators: %d: submission id */
+                    __('Submission #%d', 'subtleforms'),
+                    id
+                  )}
+                  {isUnread && (
+                    <span className='screen-reader-text'>
+                      {' '}
+                      {__('(unread)', 'subtleforms')}
+                    </span>
+                  )}
+                </span>
+                <span className='sf-sub-entry__meta'>
+                  {email && name ? <span>{email}</span> : null}
+                  <span className='sf-sub-entry__id'>#{id}</span>
+                </span>
+              </span>
+            </span>
+          );
+        },
       },
       ...(showFormColumn
         ? [
             {
               key: 'form_title',
               title: __('Form', 'subtleforms'),
-              render: (formTitle, submission) =>
-                formTitle || submission.form_id,
+              render: (formTitle, submission) => (
+                <span className='sf-sub-form'>{formTitle || `#${submission.form_id}`}</span>
+              ),
             },
           ]
         : []),
@@ -475,73 +553,14 @@ const SubmissionsTable = forwardRef(
         key: 'status',
         title: __('Status', 'subtleforms'),
         sortable: true,
-        render: (status, submission) => {
-          const isUnread = parseInt(submission.is_read, 10) === 0;
-
-          // Null / legacy 'unread' status — show only the read indicator
-          if (!status || status === 'unread') {
-            return (
-              <span className='sf-submissions-table__status-cell'>
-                {isUnread && (
-                  <span
-                    className='sf-submissions-table__unread-dot'
-                    title={__('Unread', 'subtleforms')}
-                  />
-                )}
-                <span className='sf-submissions-table__status-badge sf-submissions-table__status-badge--processing'>
-                  {'—'}
-                </span>
-              </span>
-            );
-          }
-
-          // Admin-override statuses
-          if (status === 'spam' || status === 'flagged' || status === 'archived') {
-            const adminVariantMap = { spam: 'spam', flagged: 'flagged', archived: 'read' };
-            const adminLabelMap = {
-              spam: __('Spam', 'subtleforms'),
-              flagged: __('Flagged', 'subtleforms'),
-              archived: __('Archived', 'subtleforms'),
-            };
-            return (
-              <span
-                className={clsx(
-                  'sf-submissions-table__status-badge',
-                  `sf-submissions-table__status-badge--${adminVariantMap[status]}`
-                )}>
-                {adminLabelMap[status]}
-              </span>
-            );
-          }
-
-          // Pipeline statuses — show processing result + unread dot
-          const pipelineVariantMap = {
-            completed: 'completed',
-            failed: 'failed',
-            payment_pending: 'payment-pending',
-            processing: 'processing',
-            saved: 'processing',
+        render: (status) => {
+          const config = STATUS[status] || {
+            label: __('Received', 'subtleforms'),
+            cls: '',
           };
-          const pipelineLabelMap = {
-            completed: __('Completed', 'subtleforms'),
-            failed: __('Failed', 'subtleforms'),
-            payment_pending: __('Awaiting Payment', 'subtleforms'),
-            processing: __('Processing', 'subtleforms'),
-            saved: __('Saved', 'subtleforms'),
-          };
-          const variant = pipelineVariantMap[status] || 'processing';
           return (
-            <span className='sf-submissions-table__status-cell'>
-              {isUnread && (
-                <span className='sf-submissions-table__unread-dot' title={__('Unread', 'subtleforms')}></span>
-              )}
-              <span
-                className={clsx(
-                  'sf-submissions-table__status-badge',
-                  `sf-submissions-table__status-badge--${variant}`
-                )}>
-                {pipelineLabelMap[status] || status}
-              </span>
+            <span className={clsx('sf-pill', 'sf-pill--dot', config.cls)}>
+              {config.label}
             </span>
           );
         },
@@ -549,42 +568,56 @@ const SubmissionsTable = forwardRef(
       {
         key: 'browser',
         title: __('Browser', 'subtleforms'),
-        render: (_, submission) =>
-          getBrowserDevice(submission.user_agent).browser,
+        render: (_, submission) => (
+          <span className='sf-sub-muted'>{getBrowserDevice(submission.user_agent).browser}</span>
+        ),
       },
       {
         key: 'device',
         title: __('Device', 'subtleforms'),
-        render: (_, submission) =>
-          getBrowserDevice(submission.user_agent).device,
+        render: (_, submission) => (
+          <span className='sf-sub-muted'>{getBrowserDevice(submission.user_agent).device}</span>
+        ),
       },
       {
         key: 'created_at',
-        title: __('Submitted', 'subtleforms'),
+        title: __('Received', 'subtleforms'),
         sortable: true,
         render: (createdAt) => (
-          <span className='sf-sub-time'>
-            <span className='sf-sub-time__rel'>{getRelativeTime(createdAt)}</span>
-            <span className='sf-sub-time__abs'>{formatAbsDate(createdAt)}</span>
-          </span>
+          <time className='sf-sub-time' title={formatAbsDate(createdAt)} dateTime={createdAt}>
+            {getRelativeTime(createdAt)}
+          </time>
         ),
       },
       {
         key: 'actions',
-        title: __('Actions', 'subtleforms'),
+        title: null,
         render: (_, submission) => (
-          <div className='sf-submissions-table__actions'>
+          <div className='subtleforms-row-actions sf-submissions-table__actions'>
             <Button
-              isSecondary
-              isSmall
+              size='compact'
+              icon={<Icon.Eye size={16} />}
+              label={__('Open', 'subtleforms')}
+              showTooltip
               onClick={(e) => {
                 e.stopPropagation();
                 handleRowClick(submission);
-              }}>
-              {__('View', 'subtleforms')}
-            </Button>
+              }}
+            />
             <Button
-              isSmall
+              size='compact'
+              icon={<Icon.AlertCircle size={16} />}
+              label={
+                submission.status === 'flagged'
+                  ? __('Remove flag', 'subtleforms')
+                  : __('Flag for follow-up', 'subtleforms')
+              }
+              showTooltip
+              isPressed={submission.status === 'flagged'}
+              className={clsx(
+                'sf-submissions-table__flag-btn',
+                submission.status === 'flagged' && 'sf-submissions-table__flag-btn--active'
+              )}
               onClick={(e) => {
                 e.stopPropagation();
                 handleBulkMarkStatus(
@@ -592,27 +625,18 @@ const SubmissionsTable = forwardRef(
                   submission.status === 'flagged' ? 'restore' : 'flagged'
                 );
               }}
-              title={
-                submission.status === 'flagged'
-                  ? __('Unflag submission', 'subtleforms')
-                  : __('Flag submission', 'subtleforms')
-              }
-              className={clsx(
-                'sf-submissions-table__flag-btn',
-                submission.status === 'flagged' &&
-                  'sf-submissions-table__flag-btn--active'
-              )}>
-              <Icon.AlertCircle size={13} />
-            </Button>
+            />
             <Button
+              size='compact'
               isDestructive
-              isSmall
+              icon={<Icon.Trash size={16} />}
+              label={__('Delete', 'subtleforms')}
+              showTooltip
               onClick={(e) => {
                 e.stopPropagation();
                 setDeleteModal(submission.id);
-              }}>
-              {__('Delete', 'subtleforms')}
-            </Button>
+              }}
+            />
           </div>
         ),
       },
@@ -654,7 +678,21 @@ const SubmissionsTable = forwardRef(
           onPageChange={handlePageChange}
           onPerPageChange={handlePerPageChange}
           loading={loading}
-          emptyMessage={__('No submissions found.', 'subtleforms')}
+          emptyMessage={
+            <div className='sf-empty'>
+              <span className='sf-empty__icon'>
+                <Icon.Inbox size={20} />
+              </span>
+              <p className='sf-empty__title'>
+                {formId ? __('No entries yet', 'subtleforms') : __('No submissions here', 'subtleforms')}
+              </p>
+              <p className='sf-empty__text'>
+                {formId
+                  ? __('Publish the form and add it to a page with the SubtleForms block or its shortcode. Entries appear here as they arrive.', 'subtleforms')
+                  : __('Entries show up the moment a visitor sends one of your forms. Try another tab or clear the filters.', 'subtleforms')}
+              </p>
+            </div>
+          }
           onRowClick={handleRowClick}
           rowClassName={getRowClassName}
           selectable={true}

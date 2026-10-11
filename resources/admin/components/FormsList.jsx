@@ -263,9 +263,9 @@ export default function FormsList({
         const config = getFormStatusBadge(form);
         const IconComponent = config.icon;
 
+        void IconComponent;
         return (
           <span className={clsx('sf-status-badge', config.classes)}>
-            <IconComponent />
             {config.label}
           </span>
         );
@@ -286,7 +286,7 @@ export default function FormsList({
             }}
             title={__('Click to copy', 'subtleforms')}>
             <code>{shortcode}</code>
-            <Icon.Copy />
+            <Icon.Copy size={13} />
           </button>
         );
       },
@@ -313,17 +313,15 @@ export default function FormsList({
                 submissionCount
               );
             })()}>
-            {hasUnread && <span className='sf-entries-display__pulse'></span>}
-            {hasUnread ? (
-              <>
-                <span className='sf-entries-display__unread'>
-                  {unreadCount}
-                </span>
-                <span className='sf-entries-display__separator'>/</span>
-                <span>{submissionCount}</span>
-              </>
-            ) : (
-              <span>{submissionCount}</span>
+            <span className='sf-entries-display__total'>{submissionCount}</span>
+            {hasUnread && (
+              <span className='sf-entries-display__new'>
+                {sprintf(
+                  /* translators: %d: number of unread entries */
+                  __('%d new', 'subtleforms'),
+                  unreadCount
+                )}
+              </span>
             )}
           </a>
         );
@@ -357,7 +355,7 @@ export default function FormsList({
             }}
             className='sf-row-action-btn'
             title={__('Edit', 'subtleforms')}>
-            <Icon.Edit />
+            <Icon.Edit size={16} />
           </button>
           <Dropdown
             renderToggle={({ onToggle }) => (
@@ -368,7 +366,7 @@ export default function FormsList({
                 }}
                 className='sf-row-action-btn'
                 title={__('More actions', 'subtleforms')}>
-                <Icon.MoreVertical />
+                <Icon.MoreVertical size={16} />
               </button>
             )}
             renderContent={({ onClose }) => (
@@ -730,7 +728,7 @@ export default function FormsList({
           id='forms-list-shortcuts' 
           variant='info'
           dismissible>
-          {__('💡 Tip: Click on any form row to edit, or use the menu (⋮) for quick actions like duplicate, export, or delete.', 'subtleforms')}
+          {__('Tip: click any row to open the builder, or use the ⋮ menu to duplicate, export or delete.', 'subtleforms')}
         </ContextualTip>
       )}
       
@@ -765,38 +763,34 @@ export default function FormsList({
           },
         ]}
         emptyMessage={
-          <div className='sf-empty-state'>
-            <div className='sf-empty-state__emoji'>📋</div>
-            <h3 className='sf-empty-state__title'>
+          <div className='sf-empty'>
+            <span className='sf-empty__icon'>
+              {searchTerm ? <Icon.Search size={20} /> : <Icon.FileText size={20} />}
+            </span>
+            <h3 className='sf-empty__title'>
               {searchTerm
-                ? __('No forms found', 'subtleforms')
+                ? __('No forms match your search', 'subtleforms')
                 : __('Create your first form', 'subtleforms')}
             </h3>
-            <p className='sf-empty-state__description'>
+            <p className='sf-empty__text'>
               {searchTerm
-                ? __('Try adjusting your search terms', 'subtleforms')
+                ? __('Try a different name, or clear the search.', 'subtleforms')
                 : __(
-                    'Build beautiful forms with our drag-and-drop builder',
+                    'Start from a template or a blank canvas. You can switch layouts any time.',
                     'subtleforms'
                   )}
             </p>
             {!searchTerm && (
-              <>
+              <div className='sf-empty__actions'>
                 <Button
-                  isPrimary
+                  variant='primary'
+                  icon={<Icon.Plus size={16} />}
                   onClick={() =>
                     (window.location.href = 'admin.php?page=subtleforms-new-form')
                   }>
-                  <Icon.Add />
-                  {__('New Form', 'subtleforms')}
+                  {__('New form', 'subtleforms')}
                 </Button>
-                <ContextualTip 
-                  id='first-form-tip' 
-                  variant='info'
-                  dismissible>
-                  {__('💡 Start with a template or build from scratch. You can always switch between them.', 'subtleforms')}
-                </ContextualTip>
-              </>
+              </div>
             )}
           </div>
         }

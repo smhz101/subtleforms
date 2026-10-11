@@ -80,27 +80,6 @@ export default function AISettings( {
 	return (
 		<div className="sf-ai-settings">
 			<div className="sf-ai-card">
-				<div className="sf-license-connect-card__header">
-					<div className="sf-ai-card__header">
-						<div className="sf-ai-card__header-icon">
-							<Icon.Layers size={24} />
-						</div>
-						<div className="sf-ai-card__header-text">
-							<h3>
-								{ __(
-									'AI-Powered Features',
-									'subtleforms'
-								) }
-							</h3>
-							<p>
-								{ __(
-									'Configure AI providers and agents to enhance your forms with intelligent automation',
-									'subtleforms'
-								) }
-							</p>
-						</div>
-					</div>
-				</div>
 				<div>
 					<div className="sf-settings-section">
 						{/* Provider Selection */ }

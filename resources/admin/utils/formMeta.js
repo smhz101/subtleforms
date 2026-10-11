@@ -141,7 +141,7 @@ export function getFormStatusBadgeConfig(status, unpublishedChanges = false) {
 
   if (canonical === FORM_STATUS_PUBLISHED && unpublishedChanges) {
     return {
-      label: __('Published · unpublished changes', 'subtleforms'),
+      label: __('Published · changes not live', 'subtleforms'),
       icon: Icon.Edit,
       classes: 'sf-status-badge--unpublished',
       color: 'yellow',

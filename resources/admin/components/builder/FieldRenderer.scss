@@ -1465,3 +1465,264 @@
 		}
 	}
 }
+
+/* ==========================================================================
+   2.0 — canvas fields look like the published form
+   ========================================================================== */
+
+.sf-field-renderer {
+	&__header {
+		gap: 6px;
+		margin-bottom: 6px;
+	}
+
+	&__icon {
+		color: var(--sf-text-subtle);
+
+		svg {
+			fill: none;
+		}
+	}
+
+	&__label {
+		font-size: var(--sf-text-sm);
+		font-weight: var(--sf-weight-medium);
+		color: var(--sf-text);
+		letter-spacing: 0;
+	}
+
+	&__label--editable:hover {
+		background: var(--sf-primary-50);
+		outline: 1px dashed var(--sf-primary-300);
+	}
+
+	&__label-input {
+		border: 1px solid var(--sf-brand);
+		border-radius: var(--sf-radius-control);
+		box-shadow: 0 0 0 1px var(--sf-brand);
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text);
+	}
+
+	&__required-mark {
+		color: var(--sf-danger);
+		font-weight: var(--sf-weight-semibold);
+	}
+
+	&__help-text {
+		margin: 6px 0 0;
+		font-size: var(--sf-text-xs);
+		color: var(--sf-text-muted);
+	}
+
+	&__required-hint {
+		display: none;
+	}
+}
+
+// Beat core's input[readonly] grey fill so canvas inputs look real.
+input.sf-field-renderer__input,
+input.sf-field-renderer__input[readonly],
+textarea.sf-field-renderer__input,
+textarea.sf-field-renderer__input[readonly],
+select.sf-field-renderer__select,
+.sf-field-renderer__textarea[readonly] {
+	min-height: 40px;
+	padding: 8px 12px;
+	border: 1px solid var(--sf-border-strong);
+	border-radius: var(--sf-radius-control);
+	background-color: var(--sf-bg-surface);
+	color: var(--sf-text);
+	font-size: var(--sf-text-sm);
+	box-shadow: none;
+
+	&::placeholder {
+		color: var(--sf-text-subtle);
+	}
+
+	&:hover {
+		border-color: var(--sf-border-strong);
+	}
+}
+
+textarea.sf-field-renderer__input {
+	min-height: 96px;
+}
+
+// Prefix / suffix
+.sf-field-renderer__affix {
+	display: flex;
+	align-items: stretch;
+
+	.sf-field-renderer__input {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+}
+
+.sf-field-renderer__affix-part {
+	display: inline-flex;
+	align-items: center;
+	padding: 0 12px;
+	border: 1px solid var(--sf-border-strong);
+	background: var(--sf-bg-muted);
+	color: var(--sf-text-muted);
+	font-size: var(--sf-text-sm);
+
+	&:first-child {
+		border-right: 0;
+		border-radius: var(--sf-radius-control) 0 0 var(--sf-radius-control);
+	}
+
+	&:last-child {
+		border-left: 0;
+		border-radius: 0 var(--sf-radius-control) var(--sf-radius-control) 0;
+	}
+}
+
+// Option layouts
+.sf-field-renderer__options-list.sf-field-renderer__options-list--inline,
+.sf-field-renderer__options-list.sf-field-renderer__options-list--buttons {
+	display: flex;
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 8px 20px;
+
+	.sf-field-renderer__checkbox-wrapper {
+		width: auto;
+		flex: 0 0 auto;
+	}
+}
+
+.sf-field-renderer__options-list.sf-field-renderer__options-list--buttons {
+	gap: 8px;
+
+	.sf-field-renderer__checkbox-wrapper {
+		padding: 6px 14px;
+		border: 1px solid var(--sf-border-strong);
+		border-radius: var(--sf-radius-control);
+
+		input {
+			display: none;
+		}
+	}
+}
+
+.sf-field-renderer__options-list.sf-field-renderer__options-list--columns-2,
+.sf-field-renderer__options-list.sf-field-renderer__options-list--columns-3 {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	column-gap: 20px;
+}
+
+.sf-field-renderer__options-list.sf-field-renderer__options-list--columns-3 {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+// Toggle
+.sf-field-renderer__toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	font-size: var(--sf-text-sm);
+}
+
+.sf-field-renderer__toggle-track {
+	position: relative;
+	width: 36px;
+	height: 20px;
+	border-radius: 999px;
+	background: var(--sf-brand);
+}
+
+.sf-field-renderer__toggle-thumb {
+	position: absolute;
+	top: 3px;
+	right: 3px;
+	width: 14px;
+	height: 14px;
+	border-radius: 50%;
+	background: #fff;
+}
+
+// Opinion scale
+.sf-field-renderer__scale-row {
+	display: grid;
+	grid-template-columns: repeat(var(--sf-scale-count, 5), minmax(0, 1fr));
+	gap: 6px;
+}
+
+.sf-field-renderer__scale-point {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 40px;
+	border: 1px solid var(--sf-border-strong);
+	border-radius: var(--sf-radius-control);
+	font-size: var(--sf-text-sm);
+	font-weight: var(--sf-weight-medium);
+	font-variant-numeric: tabular-nums;
+}
+
+// Picture choice
+.sf-field-renderer__pictures {
+	display: grid;
+	grid-template-columns: repeat(var(--sf-picture-cols, 3), minmax(0, 1fr));
+	gap: 10px;
+}
+
+.sf-field-renderer__picture {
+	overflow: hidden;
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius-lg);
+	font-size: var(--sf-text-sm);
+	font-weight: var(--sf-weight-medium);
+	text-align: center;
+
+	> span {
+		display: block;
+		padding: 8px;
+	}
+}
+
+.sf-field-renderer__picture-media {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	aspect-ratio: 4 / 3;
+	background: var(--sf-bg-muted);
+	color: var(--sf-text-subtle);
+
+	img {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
+
+	svg {
+		fill: none;
+	}
+}
+
+// Calculation
+.sf-field-renderer__calculation {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 12px 14px;
+	border: 1px dashed var(--sf-border-strong);
+	border-radius: var(--sf-radius-control);
+	background: var(--sf-bg-subtle);
+}
+
+.sf-field-renderer__calculation-value {
+	font-size: 20px;
+	font-weight: var(--sf-weight-semibold);
+	font-variant-numeric: tabular-nums;
+}
+
+.sf-field-renderer__calculation-formula {
+	align-self: flex-start;
+	font-size: 12px;
+	color: var(--sf-text-muted);
+}

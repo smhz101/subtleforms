@@ -81,6 +81,9 @@ final class Capabilities {
 
 			// Submissions
 			'submissions.export'         => false,
+
+			// Advanced field types: Picture Choice, Signature, Calculation (2.0)
+			'fields.advanced'            => false,
 		);
 	}
 

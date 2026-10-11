@@ -6,78 +6,95 @@ import {
   RangeControl,
   __experimentalUnitControl as UnitControl,
 } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { tokenLabel, optionLabel } from './labels';
 import './AppearanceControls.scss';
 
 /**
- * Renders one control per token definition.
+ * One control per token definition, shared by the form and field panels so a
+ * colour or size behaves the same in both places.
  *
- * Shared by the form panel and the field inspector so a colour behaves the same
- * in both places, and adding a token to the contract adds it to both surfaces
- * without further work.
+ * Every control shows what it currently resolves to. An unset control is not
+ * blank: it shows the inherited value (from the preset, the form, or the
+ * plugin default) in a muted style, so the user always sees the real result.
  */
 
-/**
- * A colour swatch that opens a picker, with a control to clear back to inherited.
- */
-function ColorToken( { label, value, placeholder, onChange, disabled } ) {
+const SWATCHES = [
+  '#131417', '#3c434a', '#ffffff', '#f4f5f7',
+  '#3858e9', '#4f5bd5', '#0f766e', '#008a20',
+  '#e5484d', '#d63638', '#f0b849', '#8a3b12',
+];
+
+function ColorToken( { label, value, inherited, onChange, disabled, inheritLabel } ) {
+  const shown = value || inherited || '';
   return (
-    <div className='sf-appearance-control sf-appearance-control--color'>
-      <span className='sf-appearance-control__label'>{ label }</span>
-      <div className='sf-appearance-control__color-row'>
-        <Dropdown
-          className='sf-appearance-control__swatch-wrap'
-          contentClassName='sf-appearance-control__popover'
-          popoverProps={ { placement: 'left-start', offset: 12 } }
-          renderToggle={ ( { isOpen, onToggle } ) => (
-            <button
-              type='button'
-              className='sf-appearance-control__swatch'
-              aria-expanded={ isOpen }
-              aria-label={
-                value
-                  ? /* translators: %s: control name */ `${ label }: ${ value }`
-                  : `${ label }: ${ __( 'inherited', 'subtleforms' ) }`
-              }
-              disabled={ disabled }
-              onClick={ onToggle }
-              style={ {
-                // No value means inherited; show the effective colour faintly
-                // rather than an empty box that reads as "white".
-                background: value || placeholder || 'transparent',
-              } }>
-              { ! value && <span className='sf-appearance-control__swatch-empty' /> }
-            </button>
-          ) }
-          renderContent={ () => (
-            <div className='sf-appearance-control__picker'>
-              <ColorPicker
-                color={ value || placeholder || '#000000' }
-                onChange={ onChange }
-                enableAlpha={ false }
+    <Dropdown
+      className='sf-color-token'
+      contentClassName='sf-color-token__popover'
+      popoverProps={ { placement: 'left-start', offset: 12 } }
+      renderToggle={ ( { isOpen, onToggle } ) => (
+        <button
+          type='button'
+          className={ `sf-color-token__toggle${ value ? ' is-set' : '' }` }
+          aria-expanded={ isOpen }
+          disabled={ disabled }
+          onClick={ onToggle }
+          aria-label={ sprintf(
+            /* translators: 1: control name, 2: colour value */
+            __( '%1$s: %2$s', 'subtleforms' ),
+            label,
+            value || inheritLabel
+          ) }>
+          <span className='sf-color-token__chip' style={ { background: shown || 'transparent' } }>
+            { ! shown && <span className='sf-color-token__none' /> }
+          </span>
+          <span className='sf-color-token__text'>
+            <span className='sf-color-token__label'>{ label }</span>
+            <span className='sf-color-token__value'>
+              { value ? value.toUpperCase() : inheritLabel }
+            </span>
+          </span>
+        </button>
+      ) }
+      renderContent={ ( { onClose } ) => (
+        <div className='sf-color-token__picker'>
+          <div className='sf-color-token__swatches'>
+            { SWATCHES.map( ( c ) => (
+              <button
+                key={ c }
+                type='button'
+                className={ `sf-color-token__swatch${ c === value ? ' is-active' : '' }` }
+                style={ { background: c } }
+                aria-label={ c }
+                onClick={ () => onChange( c ) }
               />
-            </div>
-          ) }
-        />
-        { value && ! disabled && (
-          <Button
-            variant='tertiary'
-            size='small'
-            onClick={ () => onChange( '' ) }
-            className='sf-appearance-control__clear'>
-            { __( 'Reset', 'subtleforms' ) }
-          </Button>
-        ) }
-      </div>
-    </div>
+            ) ) }
+          </div>
+          <ColorPicker color={ shown || '#000000' } onChange={ onChange } enableAlpha={ false } />
+          <div className='sf-color-token__actions'>
+            <Button
+              variant='tertiary'
+              size='small'
+              disabled={ ! value }
+              onClick={ () => {
+                onChange( '' );
+                onClose();
+              } }>
+              { inheritLabel === __( 'Form', 'subtleforms' )
+                ? __( 'Use form colour', 'subtleforms' )
+                : __( 'Use default', 'subtleforms' ) }
+            </Button>
+            <Button variant='secondary' size='small' onClick={ onClose }>
+              { __( 'Done', 'subtleforms' ) }
+            </Button>
+          </div>
+        </div>
+      ) }
+    />
   );
 }
 
-/**
- * Render the control matching a token's declared type.
- */
-function TokenControl( { token, value, onChange, disabled } ) {
+function TokenControl( { token, value, inherited, onChange, disabled, inheritLabel } ) {
   const label = tokenLabel( token.key, token.label );
 
   if ( token.type === 'color' ) {
@@ -85,8 +102,10 @@ function TokenControl( { token, value, onChange, disabled } ) {
       <ColorToken
         label={ label }
         value={ value }
+        inherited={ inherited }
         onChange={ onChange }
         disabled={ disabled }
+        inheritLabel={ inheritLabel }
       />
     );
   }
@@ -97,15 +116,11 @@ function TokenControl( { token, value, onChange, disabled } ) {
         <UnitControl
           label={ label }
           value={ value ?? '' }
-          units={ ( token.units || [ 'px' ] ).map( ( u ) => ( {
-            value: u,
-            label: u,
-            default: 0,
-          } ) ) }
+          units={ ( token.units || [ 'px' ] ).map( ( u ) => ( { value: u, label: u, default: 0 } ) ) }
           min={ token.min }
           max={ token.max }
           disabled={ disabled }
-          placeholder={ __( 'Auto', 'subtleforms' ) }
+          placeholder={ inherited || __( 'Auto', 'subtleforms' ) }
           onChange={ ( next ) => onChange( next ?? '' ) }
           __next40pxDefaultSize
         />
@@ -124,9 +139,7 @@ function TokenControl( { token, value, onChange, disabled } ) {
           step={ token.step || 1 }
           disabled={ disabled }
           allowReset
-          onChange={ ( next ) =>
-            onChange( next === undefined ? '' : String( next ) )
-          }
+          onChange={ ( next ) => onChange( next === undefined ? '' : String( next ) ) }
           __next40pxDefaultSize
           __nextHasNoMarginBottom
         />
@@ -141,11 +154,10 @@ function TokenControl( { token, value, onChange, disabled } ) {
           label={ label }
           value={ value ?? '' }
           options={ [
-            { label: __( 'Inherit', 'subtleforms' ), value: '' },
-            ...( token.options || [] ).map( ( o ) => ( {
-              ...o,
-              label: optionLabel( o.value, o.label ),
-            } ) ),
+            { label: inheritLabel, value: '' },
+            ...( token.options || [] )
+              .filter( ( o ) => o.value !== '' )
+              .map( ( o ) => ( { ...o, label: optionLabel( o.value, o.label ) } ) ),
           ] }
           disabled={ disabled }
           onChange={ onChange }
@@ -160,38 +172,40 @@ function TokenControl( { token, value, onChange, disabled } ) {
 }
 
 /**
- * A titled group of token controls.
- *
  * @param {Object}   props
- * @param {string}   props.title      Group heading.
- * @param {Array}    props.tokens     Token definitions in this group.
- * @param {Object}   props.values     Current values keyed by token key.
- * @param {Function} props.onChange   Called with (key, value).
- * @param {boolean}  props.disabled   Read-only mode.
- * @param {Array}    [props.extra]    Extra controls appended to the group.
+ * @param {string}   [props.title]        Optional heading.
+ * @param {Array}    props.tokens         Token definitions.
+ * @param {Object}   props.values         Current values by key.
+ * @param {Object}   [props.placeholders] Inherited values by key, shown when unset.
+ * @param {Function} props.onChange       Called with (key, value).
+ * @param {boolean}  [props.disabled]
+ * @param {Array}    [props.fontOptions]
+ * @param {string}   [props.layout]       'stack' or 'swatches' (colour grid).
+ * @param {string}   [props.inheritLabel] Word for "inherited" (Default / Form).
  */
 export default function AppearanceControls( {
   title,
   tokens,
   values = {},
+  placeholders = {},
   onChange,
   disabled = false,
   fontOptions,
+  layout = 'stack',
+  inheritLabel = __( 'Default', 'subtleforms' ),
 } ) {
   return (
-    <div className='sf-appearance-group'>
+    <div className={ `sf-appearance-group sf-appearance-group--${ layout }` }>
       { title && <h4 className='sf-appearance-group__title'>{ title }</h4> }
       <div className='sf-appearance-group__controls'>
         { tokens.map( ( token ) => (
           <TokenControl
             key={ token.key }
-            token={
-              token.type === 'font' && fontOptions
-                ? { ...token, options: fontOptions }
-                : token
-            }
+            token={ token.type === 'font' && fontOptions ? { ...token, options: fontOptions } : token }
             value={ values[ token.key ] }
+            inherited={ placeholders[ token.key ] }
             disabled={ disabled }
+            inheritLabel={ inheritLabel }
             onChange={ ( next ) => onChange( token.key, next ) }
           />
         ) ) }
@@ -199,3 +213,4 @@ export default function AppearanceControls( {
     </div>
   );
 }
+

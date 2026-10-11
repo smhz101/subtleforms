@@ -1,140 +1,197 @@
 /**
- * Form appearance panel.
- *
- * Presets first because they are the fast path; the individual controls read as
- * refinement below them rather than as the primary interface.
+ * Form appearance — preset gallery with live mock-ups, and a Custom mode with
+ * every token grouped into collapsible sections.
  */
 
 .sf-form-appearance {
-	&__section {
-		& + & {
-			margin-top: var(--sf-space-6);
-			padding-top: var(--sf-space-5);
-			border-top: 1px solid var(--sf-border-subtle);
-		}
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+
+	&__presets,
+	&__custom {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
 	}
 
-	&__section-head {
-		margin-bottom: var(--sf-space-3);
-	}
-
-	&__section-title {
-		margin: 0;
-		font-size: var(--sf-text-xs);
-		font-weight: var(--sf-weight-semibold);
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		color: var(--sf-text-muted);
-	}
-
-	&__section-hint {
-		margin: var(--sf-space-1) 0 0;
-		font-size: var(--sf-text-xs);
-		color: var(--sf-text-muted);
-	}
-
-	&__confirm {
-		margin: 0 0 var(--sf-space-3);
-	}
+	&__confirm.components-notice { margin: 0; }
 
 	&__confirm-actions {
 		display: flex;
-		gap: var(--sf-space-2);
-		margin-top: var(--sf-space-2);
+		gap: 8px;
+		margin-top: 8px;
+	}
+
+	&__to-custom {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+		width: 100%;
+		padding: 12px 14px;
+		border: 1px dashed var(--sf-border-strong);
+		border-radius: var(--sf-radius-md);
+		background: transparent;
+		text-align: start;
+		font-size: 12px;
+		color: var(--sf-text-muted);
+		cursor: pointer;
+
+		strong {
+			display: block;
+			margin-bottom: 2px;
+			font-size: var(--sf-text-sm);
+			color: var(--sf-text);
+		}
+
+		&:hover {
+			border-color: var(--sf-brand);
+			color: var(--sf-text-secondary);
+		}
+	}
+
+	&__base {
+		margin: 0;
+		font-size: 12px;
+		color: var(--sf-text-muted);
+	}
+
+	// Sections sit flush inside the sidebar, like the block inspector.
+	&__panel.components-panel__body {
+		margin: 0 -24px;
+		border-top: 1px solid var(--sf-border-subtle);
+		border-bottom: 0;
+
+		> .components-panel__body-title .components-panel__body-toggle {
+			padding: 14px 24px;
+			font-size: var(--sf-text-sm);
+			font-weight: var(--sf-weight-semibold);
+		}
+
+		&.is-opened {
+			padding: 0 24px 20px;
+
+			> .components-panel__body-title { margin: 0 -24px 4px; }
+		}
+
+		.components-toggle-group-control { margin-bottom: 0; }
+	}
+
+	&__variant { margin-bottom: 16px !important; }
+
+	&__panel .components-base-control__label,
+	&__panel .components-input-control__label.components-input-control__label,
+	&__variant .components-base-control__label {
+		font-size: 12px;
+		font-weight: var(--sf-weight-medium);
+		text-transform: none;
+		color: var(--sf-text);
 	}
 
 	&__footer {
-		margin-top: var(--sf-space-6);
-		padding-top: var(--sf-space-4);
+		display: flex;
+		justify-content: space-between;
+		gap: 8px;
+		padding-top: 12px;
 		border-top: 1px solid var(--sf-border-subtle);
 	}
-
-	&__footer-hint {
-		margin: var(--sf-space-1) 0 0;
-		font-size: var(--sf-text-2xs);
-		color: var(--sf-text-muted);
-	}
 }
 
-.sf-preset-grid {
+// ── Preset gallery ──────────────────────────────────────────────────────────
+.sf-preset-gallery {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-	gap: var(--sf-space-2);
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px;
 }
 
-.sf-preset-card {
+.sf-preset-tile {
 	display: flex;
 	flex-direction: column;
-	gap: var(--sf-space-2);
-	padding: var(--sf-space-3);
-	text-align: left;
-	background: var(--sf-bg-surface);
-	border: 1px solid var(--sf-border);
-	border-radius: var(--sf-radius-md);
+	gap: 6px;
+	min-width: 0;
+	padding: 0;
+	border: 0;
+	background: transparent;
+	text-align: start;
 	cursor: pointer;
-	transition: border-color var(--sf-transition-fast),
-		box-shadow var(--sf-transition-fast);
 
-	&:hover:not([disabled]) {
-		border-color: var(--sf-border-strong);
-	}
-
-	&:focus-visible {
-		outline: 2px solid var(--sf-focus-ring);
-		outline-offset: 2px;
-	}
-
-	&.is-active {
-		border-color: var(--sf-primary);
-		box-shadow: 0 0 0 1px var(--sf-primary);
-	}
-
-	&[disabled] {
-		cursor: default;
-		opacity: 0.6;
-	}
-
-	&__swatches {
-		display: flex;
-		gap: 3px;
-	}
-
-	&__swatch {
-		width: 100%;
-		height: 22px;
-		border-radius: var(--sf-radius-xs);
-		border: 1px solid rgba(19, 20, 23, 0.08);
-	}
-
-	&__body {
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-	}
-
-	&__label {
+	&__name {
 		display: flex;
 		align-items: center;
-		gap: var(--sf-space-2);
-		font-size: var(--sf-text-sm);
-		font-weight: var(--sf-weight-semibold);
+		gap: 6px;
+		padding: 0 2px;
+		font-size: 12px;
+		font-weight: var(--sf-weight-medium);
 		color: var(--sf-text);
 	}
 
 	&__badge {
-		padding: 1px 6px;
-		font-size: var(--sf-text-2xs);
-		font-weight: var(--sf-weight-medium);
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		color: var(--sf-text-secondary);
-		background: var(--sf-bg-muted);
+		display: inline-flex;
+		align-items: center;
+		height: 16px;
+		padding: 0 6px;
 		border-radius: var(--sf-radius-full);
+		background: var(--sf-warning-bg);
+		font-size: 10px;
+		font-weight: var(--sf-weight-medium);
+		color: var(--sf-text-secondary);
 	}
 
-	&__description {
-		font-size: var(--sf-text-2xs);
-		line-height: var(--sf-leading-normal);
-		color: var(--sf-text-muted);
+	.sf-preset-mock {
+		box-shadow: inset 0 0 0 1px var(--sf-border);
+		transition: box-shadow var(--sf-duration-fast) var(--sf-ease);
+	}
+
+	&:hover .sf-preset-mock { box-shadow: inset 0 0 0 1px var(--sf-text-subtle); }
+
+	&.is-active .sf-preset-mock {
+		box-shadow: inset 0 0 0 1px var(--sf-border), 0 0 0 2px var(--sf-brand);
+	}
+
+	&:focus-visible {
+		outline: none;
+
+		.sf-preset-mock { box-shadow: var(--sf-shadow-focus); }
+	}
+
+	&:disabled { cursor: default; opacity: 0.7; }
+}
+
+// A tiny form drawn with the preset's own values.
+.sf-preset-mock {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	height: 112px;
+	padding: 12px;
+	overflow: hidden;
+	border-radius: var(--sf-radius-md);
+
+	&__label {
+		width: 46%;
+		height: 4px;
+		border-radius: 2px;
+		opacity: 0.85;
+
+		&--short { width: 30%; margin-top: 3px; }
+	}
+
+	&__input {
+		height: 16px;
+		border-style: solid;
+		box-sizing: border-box;
+	}
+
+	&__button {
+		width: 42%;
+		height: 15px;
+		margin-top: auto;
+		border: 1.5px solid;
+		box-sizing: border-box;
+
+		&--center { align-self: center; }
+		&--right { align-self: flex-end; }
+		&--full { width: 100%; }
 	}
 }

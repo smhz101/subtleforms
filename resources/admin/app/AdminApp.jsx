@@ -19,7 +19,6 @@
 import { useState, useEffect, Suspense } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Panel, PanelBody } from '@wordpress/components';
 import {
 	MemoryRouter,
 	Routes,
@@ -35,6 +34,7 @@ import PageErrorBoundary from '../components/PageErrorBoundary';
 import { RouteLoadingFallback } from '../components/RouteTransition';
 import { CreateFormModal } from '../modals';
 import { UpgradeModal } from '../ui';
+import useWpAdminSync from './useWpAdminSync';
 
 // ─── Query Client ─────────────────────────────────────────────────────────────
 
@@ -185,7 +185,9 @@ function RouteAnnouncer() {
 
 function AppContent() {
 	const navigate  = useNavigate();
-	const location  = useLocation();
+
+	// Keep the URL, admin submenu and tab title in step with the router.
+	useWpAdminSync(getPageNameFromPath);
 
 	// Modal kept intact but no longer triggered by /forms/new (now a full page)
 	const [showCreateModal, setShowCreateModal] = useState(false);
@@ -230,71 +232,67 @@ function AppContent() {
 	}
 
 	return (
-		<div>
+		<>
 			<RouteAnnouncer />
-			<Panel className='hello-body'>
-				<PanelBody>
-					<Suspense fallback={<RouteLoadingFallback />}>
-						<Routes>
-							<Route
-								path='/'
-								element={
-									<PageErrorBoundary pageName='Dashboard'>
-										<DashboardPage />
-									</PageErrorBoundary>
-								}
-							/>
-							<Route
-								path='/forms'
-								element={
-									<PageErrorBoundary pageName='Forms'>
-										<FormsPage />
-									</PageErrorBoundary>
-								}
-							/>
-							{/* /forms/new — full-page creation experience */}
-							<Route
-								path='/forms/new'
-								element={
-									<PageErrorBoundary pageName='Create Form'>
-										<CreateFormPage />
-									</PageErrorBoundary>
-								}
-							/>
-							{/* /forms/:formId — existing form */}
-							<Route
-								path='/forms/:formId'
-								element={
-									<PageErrorBoundary pageName='Form Builder'>
-										<BuilderPage onFormSaved={handleFormSaved} />
-									</PageErrorBoundary>
-								}
-							/>
-							<Route path='/submissions' element={<SubmissionsRoute />} />
-							<Route
-								path='/submissions/:submissionId'
-								element={<SubmissionDetailRoute />}
-							/>
-							<Route
-								path='/settings'
-								element={
-									<PageErrorBoundary pageName='Settings'>
-										<SettingsPage />
-									</PageErrorBoundary>
-								}
-							/>
-							<Route
-								path='/extensions'
-								element={
-									<PageErrorBoundary pageName='Extensions'>
-										<ExtensionsPage />
-									</PageErrorBoundary>
-								}
-							/>
-						</Routes>
-					</Suspense>
-				</PanelBody>
-			</Panel>
+			<Suspense fallback={<RouteLoadingFallback />}>
+				<Routes>
+					<Route
+						path='/'
+						element={
+							<PageErrorBoundary pageName='Dashboard'>
+								<DashboardPage />
+							</PageErrorBoundary>
+						}
+					/>
+					<Route
+						path='/forms'
+						element={
+							<PageErrorBoundary pageName='Forms'>
+								<FormsPage />
+							</PageErrorBoundary>
+						}
+					/>
+					{/* /forms/new — full-page creation experience */}
+					<Route
+						path='/forms/new'
+						element={
+							<PageErrorBoundary pageName='Create Form'>
+								<CreateFormPage />
+							</PageErrorBoundary>
+						}
+					/>
+					{/* /forms/:formId — existing form */}
+					<Route
+						path='/forms/:formId'
+						element={
+							<PageErrorBoundary pageName='Form Builder'>
+								<BuilderPage onFormSaved={handleFormSaved} />
+							</PageErrorBoundary>
+						}
+					/>
+					<Route path='/submissions' element={<SubmissionsRoute />} />
+					<Route
+						path='/submissions/:submissionId'
+						element={<SubmissionDetailRoute />}
+					/>
+					<Route
+						path='/settings'
+						element={
+							<PageErrorBoundary pageName='Settings'>
+								<SettingsPage />
+							</PageErrorBoundary>
+						}
+					/>
+					<Route
+						path='/extensions'
+						element={
+							<PageErrorBoundary pageName='Extensions'>
+								<ExtensionsPage />
+							</PageErrorBoundary>
+						}
+					/>
+				</Routes>
+			</Suspense>
 
 			<CreateFormModal
 				isOpen={showCreateModal}
@@ -302,7 +300,7 @@ function AppContent() {
 				onFormCreated={handleFormCreated}
 			/>
 			<UpgradeModal />
-		</div>
+		</>
 	);
 }
 

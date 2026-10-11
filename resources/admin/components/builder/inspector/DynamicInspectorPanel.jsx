@@ -96,7 +96,13 @@ function ControlRenderer( { ctrl, field, onUpdate, isReadOnly } ) {
  * @param {Function} props.onUpdate   - Callback: (changes: Object) => void
  * @param {boolean}  props.isReadOnly - Whether editing is disabled
  */
-function DynamicInspectorPanel( { field, onUpdate, isReadOnly = false } ) {
+function DynamicInspectorPanel( {
+	field,
+	onUpdate,
+	isReadOnly = false,
+	sections = null,
+	showEmpty = true,
+} ) {
 	const { fieldDefinitions } = useConfig();
 
 	const isLayout = useMemo( () => {
@@ -106,9 +112,24 @@ function DynamicInspectorPanel( { field, onUpdate, isReadOnly = false } ) {
 
 	const controls = useMemo( () => {
 		const def = fieldDefinitions?.[ field?.type ];
-		const source = isLayout ? def?.layoutControls : def?.inspectorControls;
-		return Array.isArray( source ) ? source : [];
-	}, [ fieldDefinitions, field?.type, isLayout ] );
+		const layout = Array.isArray( def?.layoutControls ) ? def.layoutControls : [];
+		const inspector = Array.isArray( def?.inspectorControls ) ? def.inspectorControls : [];
+		// Layout types declare their own controls in layoutControls; the 2.0
+		// settings model adds shared ones (CSS class) to inspectorControls.
+		const merged = isLayout ? [ ...layout, ...inspector ] : inspector;
+		const seen = new Set();
+		return merged
+			.filter( ( ctrl ) => {
+				const name = ctrl?.key ?? ctrl?.name;
+				if ( ! name || seen.has( name ) ) return false;
+				seen.add( name );
+				return true;
+			} )
+			.map( ( ctrl ) => ( { ...ctrl, section: ctrl.section || 'general' } ) )
+			.filter( ( ctrl ) => ! sections || sections.includes( ctrl.section ) )
+			// Sections become panels in the inspector, not inline headings.
+			.map( ( { section, ...ctrl } ) => ctrl ); // eslint-disable-line no-unused-vars
+	}, [ fieldDefinitions, field?.type, isLayout, sections ] );
 
 	const groups = useMemo( () => groupControls( controls ), [ controls ] );
 
@@ -117,6 +138,9 @@ function DynamicInspectorPanel( { field, onUpdate, isReadOnly = false } ) {
 	}
 
 	if ( controls.length === 0 ) {
+		if ( ! showEmpty ) {
+			return null;
+		}
 		return (
 			<Notice
 				status="info"

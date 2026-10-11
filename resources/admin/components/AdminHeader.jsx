@@ -1,150 +1,175 @@
 import { memo, useState, useRef, useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { Tooltip } from '@wordpress/components';
+import { useNavigate } from 'react-router-dom';
 import Logo from '../ui/Logo';
+import Icon from '../ui/Icon';
+import AppNav from './AppNav';
+import TopBarUtilities from './TopBarUtilities';
 import './AdminHeader.scss';
 
 /**
- * AdminHeader - Sticky Header Component
+ * AdminHeader — the top bar of the SubtleForms frame.
  *
- * Single reusable header for all SubtleForms admin pages.
+ * Two variants share one 56px bar so the frame never jumps between screens:
  *
- * Features:
- * - Fixed height (60px) across all pages
- * - Flat design (no shadow, no rounded corners)
- * - Never scrolls away (sticky positioning)
- * - Context-aware action buttons
- * - Editable title support
- * - Memoized to prevent unnecessary re-renders
+ * - `app`    Brand, in-app navigation and global utilities (help, plan).
+ *            Page titles and page actions live in the page header below it.
+ * - `editor` A focused bar for the form builder: back to Forms, the editable
+ *            title and the builder's own actions. No global navigation, the
+ *            same way the block editor hides the admin chrome.
  *
- * @param {Object} props
- * @param {string|React.ReactNode} props.title - Page title (string or React element)
- * @param {React.ReactNode} props.actions - Action buttons (context-aware per page)
- * @param {boolean} props.editableTitle - Whether title should be editable (default: false)
- * @param {Function} props.onTitleChange - Callback when title is changed (required if editableTitle=true)
+ * @param {Object}               props
+ * @param {'app'|'editor'}       props.variant
+ * @param {string|React.ReactNode} props.title         Editor variant only.
+ * @param {React.ReactNode}      props.actions          Editor variant only.
+ * @param {boolean}              props.editableTitle    Editor variant only.
+ * @param {Function}             props.onTitleChange    Editor variant only.
+ * @param {string}               props.backTo           Route for the back button.
  */
 const AdminHeader = memo(function AdminHeader({
+  variant = 'app',
   title,
   actions,
   editableTitle = false,
   onTitleChange,
+  backTo = '/forms',
+  onBack,
+  centerSlot,
 }) {
-  const HEADER_HEIGHT = 60;
-  const WP_ADMIN_BAR_HEIGHT = 32;
+  if (variant === 'editor') {
+    return (
+      <EditorBar
+        title={title}
+        actions={actions}
+        centerSlot={centerSlot}
+        editableTitle={editableTitle}
+        onTitleChange={onTitleChange}
+        backTo={backTo}
+        onBack={onBack}
+      />
+    );
+  }
 
-  const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [titleValue, setTitleValue] = useState('');
-  const titleInputRef = useRef(null);
+  return (
+    <header className='sf-topbar' role='banner'>
+      <div className='sf-topbar__brand'>
+        <Logo size={28} wordmark />
+      </div>
+      <AppNav />
+      <div className='sf-topbar__end'>
+        <TopBarUtilities />
+      </div>
+    </header>
+  );
+});
 
-  // Initialize title value for editable mode
+/**
+ * Builder top bar.
+ */
+function EditorBar({ title, actions, centerSlot, editableTitle, onTitleChange, backTo, onBack }) {
+  const navigate = useNavigate();
+
+  return (
+    <header className='sf-topbar sf-topbar--editor' role='banner'>
+      <div className='sf-topbar__start'>
+        <Tooltip text={__('Back to forms', 'subtleforms')}>
+          <button
+            type='button'
+            className='sf-topbar__back'
+            onClick={() => (onBack ? onBack() : navigate(backTo))}
+            aria-label={__('Back to forms', 'subtleforms')}>
+            <Logo size={32} />
+            <span className='sf-topbar__back-arrow' aria-hidden='true'>
+              <Icon.ArrowLeft size={18} />
+            </span>
+          </button>
+        </Tooltip>
+        <div className='sf-topbar__title'>
+          <EditableTitle
+            title={title}
+            editableTitle={editableTitle}
+            onTitleChange={onTitleChange}
+          />
+        </div>
+      </div>
+      {centerSlot && <div className='sf-topbar__center'>{centerSlot}</div>}
+      {actions && <div className='sf-topbar__actions'>{actions}</div>}
+    </header>
+  );
+}
+
+/**
+ * Title that can be a plain string, an editable string, or a custom element.
+ */
+function EditableTitle({ title, editableTitle, onTitleChange }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [value, setValue] = useState('');
+  const inputRef = useRef(null);
+
   useEffect(() => {
     if (editableTitle && typeof title === 'string') {
-      setTitleValue(title);
+      setValue(title);
     }
   }, [title, editableTitle]);
 
-  // Focus input when editing starts
   useEffect(() => {
-    if (isEditingTitle && titleInputRef.current) {
-      titleInputRef.current.focus();
-      titleInputRef.current.select();
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
     }
-  }, [isEditingTitle]);
+  }, [isEditing]);
 
-  const handleTitleSave = () => {
-    if (onTitleChange && titleValue.trim()) {
-      onTitleChange(titleValue.trim());
+  if (typeof title !== 'string') {
+    return title || null;
+  }
+
+  if (!editableTitle) {
+    return <h1 className='sf-topbar__heading'>{title}</h1>;
+  }
+
+  const save = () => {
+    if (onTitleChange && value.trim()) {
+      onTitleChange(value.trim());
     }
-    setIsEditingTitle(false);
+    setIsEditing(false);
   };
 
-  const handleTitleCancel = () => {
-    setTitleValue(typeof title === 'string' ? title : '');
-    setIsEditingTitle(false);
-  };
-
-  const handleKeyDown = (event) => {
-    if (event.key === 'Enter') {
-      event.preventDefault();
-      handleTitleSave();
-    }
-    if (event.key === 'Escape') {
-      event.preventDefault();
-      handleTitleCancel();
-    }
-  };
-
-  // Render title element based on type and editable state
-  const renderTitle = () => {
-    // If title is a React element, render it directly
-    if (typeof title !== 'string') {
-      return title;
-    }
-
-    // If not editable, render as static text
-    if (!editableTitle) {
-      return (
-        <h1 className='sf-admin-header__title'>
-          {title}
-        </h1>
-      );
-    }
-
-    // Editable title mode
-    if (isEditingTitle) {
-      return (
-        <input
-          ref={titleInputRef}
-          type='text'
-          aria-label={__('Form title', 'subtleforms')}
-          value={titleValue}
-          onChange={(event) => setTitleValue(event.target.value)}
-          onBlur={handleTitleSave}
-          onKeyDown={handleKeyDown}
-          className='sf-admin-header__title-input'
-          placeholder={__('Enter title...', 'subtleforms')}
-        />
-      );
-    }
-
+  if (isEditing) {
     return (
-      <button
-        type='button'
-        onClick={() => setIsEditingTitle(true)}
-        className='sf-admin-header__title-button'
-        title={__('Click to edit title', 'subtleforms')}>
-        {title || __('Untitled', 'subtleforms')}
-      </button>
+      <input
+        ref={inputRef}
+        type='text'
+        aria-label={__('Form title', 'subtleforms')}
+        value={value}
+        onChange={(event) => setValue(event.target.value)}
+        onBlur={save}
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
+            event.preventDefault();
+            save();
+          }
+          if (event.key === 'Escape') {
+            event.preventDefault();
+            setValue(title);
+            setIsEditing(false);
+          }
+        }}
+        className='sf-topbar__title-input'
+        placeholder={__('Enter title…', 'subtleforms')}
+      />
     );
-  };
+  }
 
   return (
-    <div
-      className='sf-admin-header'
-      style={{
-        height: `${HEADER_HEIGHT}px`,
-        position: 'sticky',
-        // top: `${WP_ADMIN_BAR_HEIGHT}px`,
-        zIndex: 100,
-      }}>
-      {/* Left Side: Logo + Title */}
-      <div className='sf-admin-header__left'>
-        <div className='sf-admin-header__logo-title'>
-          {/* SubtleForms logo mark (real SVG, not an "SF" text box) */}
-          <Logo
-            className='sf-admin-header__logo'
-            size={28}
-          />
-
-          {renderTitle()}
-        </div>
-      </div>
-
-      {/* Right Side: Action Buttons (Context-Aware) */}
-      {actions && (
-        <div className='sf-admin-header__actions'>{actions}</div>
-      )}
-    </div>
+    <button
+      type='button'
+      onClick={() => setIsEditing(true)}
+      className='sf-topbar__title-button'
+      title={__('Rename', 'subtleforms')}>
+      {title || __('Untitled', 'subtleforms')}
+    </button>
   );
-});
+}
 
 export default AdminHeader;

@@ -4,7 +4,7 @@ Tags: forms, contact form, form builder, submissions
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 1.9.2
+Stable tag: 2.0.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -159,6 +159,34 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 
 == Changelog ==
 
+= 2.0.0 - 2026-10-11 =
+* Redesign: New admin built on the WordPress 7.1 admin look: dark frame, white stage, top navigation, admin colour scheme accent and WordPress components throughout
+* Redesign: Dashboard with KPI strip, 14-day submissions chart, quick actions and system status
+* Redesign: Forms and Submissions lists rebuilt as data views with tabs, column picker, filters and row actions; submissions lead with the sender, not an ID
+* Redesign: Submission detail as a reading pane with answers, activity tabs, previous/next, read/unread, flag and delete
+* Redesign: New form screen is now a template library with wireframe previews and a one-step naming dialog
+* Redesign: Settings use grouped navigation, setting cards and a floating save bar (Ctrl/Cmd+S saves)
+* Redesign: Extensions page is now a Pro hub grouped by job, with clear locked, off, needs-setup and active states
+* Builder: Gutenberg-style three-panel editor with field library, canvas and tabbed inspector (Settings, Validation, Logic, Style)
+* Builder: Choices editor with drag to reorder, default selection, value column, bulk edit and image options
+* Builder: Form settings gain After submit (message with merge tags or redirect, submit button text) and Availability (logged-in only, open and close dates, entry limit)
+* Fields: New Toggle and Opinion Scale fields; Pro adds Picture Choice, Signature and Calculation (formula builder, recalculated on the server)
+* Fields: New settings on existing fields: help text, default value tokens, prefix and suffix, min and max length, pattern, choice limits, option layouts, custom required message, admin label, read-only and CSS class
+* Fields: Field library reorganised and renamed; rarely used and duplicate field types hidden from the library (existing forms keep working)
+* Fix: Field settings not declared in the validator (conditions, min/max, formulas and more) were dropped on save; they are now kept and sanitised
+* Fix: Publishing could replace the latest changes with an older autosave draft
+* Fix: Unread counts used a status value that submissions never have; counts now use the read flag
+* Fix: Marking a submission unread overwrote its processing status
+* Fix: Field library never showed Pro lock badges
+* Pro: Locked features now explain themselves in one consistent dialog and light up in place once a license is active
+* Appearance: Nine style presets drawn as live mini previews, plus a Custom mode for every colour, font, field, button and layout setting
+* Appearance: New tokens for label colour, input text, focus ring, button text and button radius
+* Appearance: Field Style tab with a live sample, visual width picker and colour chips that show the inherited value
+* Fix: The builder preview did not update when appearance or fields changed
+* Fix: Admin hover colours leaked into the WordPress menu and button labels
+* Fix: Modal titles were invisible when the computer used dark mode
+* Fix: Dates are stored in UTC so relative times are correct in every timezone
+
 = 1.9.2 - 2026-09-29 =
 * Design: Adopted the WordPress Design System — accent now follows the site's admin colour scheme via --wp-admin-theme-color
 * Design: Switched to the WordPress system font stack; removed DM Sans, Satoshi and JetBrains Mono webfont enqueues
@@ -243,6 +271,9 @@ now be reconstructed accurately.
 * Feature: Basic spam protection
 
 == Upgrade Notice ==
+
+= 2.0.0 =
+A complete redesign of the admin and builder, new fields and form settings, and a fix that keeps all field settings on save. If you use SubtleForms Pro, update it to 2.0.0 as well.
 
 = 1.6.10 =
 Critical security update. Adds CSRF protection and rate limiting. Update immediately.

@@ -1,39 +1,38 @@
 import { __ } from '@wordpress/i18n';
 import { Spinner, Notice, Button } from '@wordpress/components';
+import clsx from 'clsx';
 import AdminHeader from './AdminHeader';
 import ActionBar from './ActionBar';
 import Notices from './Notices';
 import './AdminShell.scss';
 
 /**
- * Canonical Admin Shell Layout
+ * AdminShell — the SubtleForms frame.
  *
- * MANDATORY: All SubtleForms admin pages must use this component for consistent UX.
+ * Every admin screen renders inside this component. It reproduces the layout
+ * WordPress 7 uses for its own app screens (Fonts, Site Editor): a white stage
+ * with rounded corners floating in the dark admin chrome, a fixed top bar, and
+ * one scroll container for the page.
  *
- * Features:
- * - Full-width layout (overrides WordPress .wrap spacing)
- * - Sticky top header with logo, title, and contextual actions
- * - Optional sticky action bar for filters/search
- * - Fixed viewport height with internal scrolling (not body scroll)
- * - Consistent spacing and typography across all admin pages
- * - Editable title support
+ *   ┌ stage ──────────────────────────────────────────────┐
+ *   │ top bar   logo · navigation · plan · help           │
+ *   ├─────────────────────────────────────────────────────┤
+ *   │ page header   title / description        actions    │  ← scrolls
+ *   │ toolbar       tabs · filters        search (sticky) │
+ *   │ body                                                │
+ *   └─────────────────────────────────────────────────────┘
  *
- * Structure:
- * - Top Bar (sticky 48px): Logo, page title, actions (via AdminHeader component)
- * - Action Bar (sticky 56px): Filters, tabs, search (via ActionBar component)
- * - Content Area: Viewport-based height, scrollable
- * - Bottom Bar: Optional pagination
+ * The `editor` variant swaps the navigation for a focused builder bar and hands
+ * scrolling to the builder's own panels.
  *
  * Loading, error and empty states are props rather than something each page
- * builds for itself. Pages used to return their own markup for these, and
- * several returned it *instead of* the shell — so the header, title and actions
- * vanished while data loaded and reappeared afterwards. Rendering them here
- * keeps the chrome still.
- *
- * Used by every admin page.
+ * builds for itself, so the chrome never disappears while data loads.
  */
 export default function AdminShell({
+  variant = 'app',
   title,
+  description,
+  eyebrow,
   actions,
   actionBarLeft,
   actionBarRight,
@@ -42,6 +41,10 @@ export default function AdminShell({
   noScroll = false,
   editableTitle = false,
   onTitleChange,
+  backTo,
+  onBack,
+  centerSlot,
+  width = 'full',
   isLoading = false,
   loadingLabel,
   error = null,
@@ -49,14 +52,14 @@ export default function AdminShell({
   isEmpty = false,
   empty = null,
 }) {
-  const TOP_BAR_HEIGHT = 48;
-  const ACTION_BAR_HEIGHT = actionBarLeft || actionBarRight ? 56 : 0;
-  const WP_ADMIN_BAR_HEIGHT = 32;
+  const isEditor = variant === 'editor';
+  const hasToolbar = !!(actionBarLeft || actionBarRight);
+  const hasPageHeader = !isEditor && !!(title || actions || description);
 
   const renderBody = () => {
     if (isLoading) {
       return (
-        <div className='sf-admin-shell__state' role='status' aria-live='polite'>
+        <div className='sf-app__state' role='status' aria-live='polite'>
           <Spinner />
           <p>{loadingLabel || __('Loading…', 'subtleforms')}</p>
         </div>
@@ -65,7 +68,7 @@ export default function AdminShell({
 
     if (error) {
       return (
-        <div className='sf-admin-shell__state'>
+        <div className='sf-app__state'>
           <Notice status='error' isDismissible={false}>
             {typeof error === 'string'
               ? error
@@ -82,56 +85,77 @@ export default function AdminShell({
     }
 
     if (isEmpty && empty) {
-      return <div className='sf-admin-shell__state'>{empty}</div>;
+      return <div className='sf-app__state'>{empty}</div>;
     }
 
     return children;
   };
 
   return (
-    <div className='subtleforms-admin sf-admin-shell'>
-      <div className='sf-admin-shell__container'>
-        {/* TOP BAR - Sticky Header Component */}
+    <div
+      className={clsx('subtleforms-admin', 'sf-app', `sf-app--${variant}`, {
+        'sf-app--fixed': noScroll,
+      })}>
+      <div className='sf-app__stage'>
         <AdminHeader
-          title={title}
-          actions={actions}
+          variant={isEditor ? 'editor' : 'app'}
+          title={isEditor ? title : undefined}
+          actions={isEditor ? actions : undefined}
           editableTitle={editableTitle}
           onTitleChange={onTitleChange}
+          backTo={backTo}
+          onBack={onBack}
+          centerSlot={isEditor ? centerSlot : undefined}
         />
 
-        {/* ACTION BAR - Sticky ActionBar Component */}
-        {(actionBarLeft || actionBarRight) && (
-          <div
-            className='sf-admin-shell__action-bar-wrapper'
-            style={{
-              position: 'sticky',
-              top: `${WP_ADMIN_BAR_HEIGHT}px`,
-              zIndex: 99,
-            }}>
-            <ActionBar left={actionBarLeft} right={actionBarRight} />
-          </div>
-        )}
-
-        {/* CONTENT AREA - Scrollable */}
-        <div className='sf-admin-shell__content'>
-          <div
-            className={`sf-admin-shell__content-inner ${
-              noScroll ? 'sf-admin-shell__content-inner--no-scroll' : ''
-            }`}>
-            <Notices />
+        <main
+          className={clsx('sf-app__main', { 'is-fixed': noScroll })}
+          id='sf-main'
+          tabIndex={-1}>
+          {hasPageHeader && (
             <div
-              className={`sf-admin-shell__content-body ${
-                noScroll ? 'sf-admin-shell__content-body--no-scroll' : ''
-              }`}>
-              {renderBody()}
+              className={clsx('sf-page-header', {
+                'sf-page-header--narrow': width === 'narrow',
+                'has-toolbar': hasToolbar,
+              })}>
+              <div className='sf-page-header__main'>
+                {eyebrow && (
+                  <div className='sf-page-header__eyebrow'>{eyebrow}</div>
+                )}
+                {title &&
+                  (typeof title === 'string' ? (
+                    <h1 className='sf-page-header__title'>{title}</h1>
+                  ) : (
+                    <div className='sf-page-header__title'>{title}</div>
+                  ))}
+                {description && (
+                  <p className='sf-page-header__description'>{description}</p>
+                )}
+              </div>
+              {actions && (
+                <div className='sf-page-header__actions'>{actions}</div>
+              )}
             </div>
-          </div>
-        </div>
+          )}
 
-        {/* BOTTOM BAR - Pagination */}
-        {pagination && (
-          <div className='sf-admin-shell__pagination'>{pagination}</div>
-        )}
+          {hasToolbar && (
+            <div className='sf-app__toolbar'>
+              <ActionBar left={actionBarLeft} right={actionBarRight} />
+            </div>
+          )}
+
+          <Notices />
+
+          <div
+            className={clsx('sf-app__body', {
+              'is-fixed': noScroll,
+              'sf-app__body--narrow': width === 'narrow',
+            })}>
+            {renderBody()}
+          </div>
+        </main>
+
+        {pagination && <footer className='sf-app__footer'>{pagination}</footer>}
       </div>
     </div>
   );

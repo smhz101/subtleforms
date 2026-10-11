@@ -17,10 +17,11 @@ export default function HelpMenu({
         <Button
           onClick={onToggle}
           aria-expanded={isOpen}
-          variant='primary'
-          icon={<Icon.HelpCircle className='sf-help-menu__icon' />}
+          variant='tertiary'
+          icon={<Icon.HelpCircle size={18} className='sf-help-menu__icon' />}
           className='sf-help-menu__button'
-          title={__('Help & Documentation', 'subtleforms')}
+          label={__('Help & tour', 'subtleforms')}
+          showTooltip
         />
       )}
       renderContent={() => (

@@ -80,6 +80,13 @@ final class FrontendAssets {
 				'successMessage' => $settings ? $settings->get( 'success_message' ) : __( 'Thank you! Your submission has been received.', 'subtleforms' ),
 				'errorMessage'   => $settings ? $settings->get( 'error_message' ) : __( 'An error occurred. Please try again.', 'subtleforms' ),
 				'redirectUrl'    => $settings ? $settings->get( 'redirect_after_submit' ) : '',
+				// Default-value tokens {user_email} and {user_name} (2.0).
+				'user'           => is_user_logged_in()
+					? array(
+						'email' => wp_get_current_user()->user_email,
+						'name'  => wp_get_current_user()->display_name,
+					)
+					: null,
 			)
 		);
 

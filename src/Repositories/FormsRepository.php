@@ -316,9 +316,11 @@ final class FormsRepository {
 			array(
 				'title'  => Helpers::safe_sanitize_text( Helpers::safe_string_get( $data, 'title' ) ),
 				'config' => wp_json_encode( $data['config'] ),
-				'status' => $data['status'],
+				'status'     => $data['status'],
+				'created_at' => current_time( 'mysql', true ),
+				'updated_at' => current_time( 'mysql', true ),
 			),
-			array( '%s', '%s', '%s' )
+			array( '%s', '%s', '%s', '%s', '%s' )
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
@@ -478,8 +480,9 @@ final class FormsRepository {
 				'version'     => $next,
 				'schema_data' => wp_json_encode( $schema ),
 				'active'      => $activate ? 1 : 0,
+				'created_at'  => current_time( 'mysql', true ),
 			),
-			array( '%d', '%d', '%s', '%d' )
+			array( '%d', '%d', '%s', '%d', '%s' )
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
@@ -745,6 +748,10 @@ final class FormsRepository {
 		if ( empty( $update_data ) ) {
 			return false;
 		}
+
+		// UTC, like created_at (the column default follows the MySQL server zone).
+		$update_data['updated_at'] = current_time( 'mysql', true );
+		$format[]                  = '%s';
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update; no caching for writes.
 		$result = $wpdb->update(

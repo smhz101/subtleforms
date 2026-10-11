@@ -593,6 +593,9 @@ export default function FieldRenderer({
         'subtleforms-field',
         `subtleforms-field-${field.type}`,
         appearanceClasses,
+        config.cssClass,
+        config.readOnly ? 'subtleforms-field--readonly' : '',
+        error ? 'subtleforms-field--has-error' : '',
       ]
         .filter(Boolean)
         .join(' ')}
@@ -611,7 +614,14 @@ export default function FieldRenderer({
         placeholder,
         inputId,
         required,
-        error
+        error,
+        values
+      )}
+
+      {config.description && (
+        <p id={`${inputId}-help`} className='subtleforms-field-help'>
+          {config.description}
+        </p>
       )}
 
       {error && (
@@ -635,9 +645,19 @@ function renderInput(
   placeholder,
   inputId,
   required,
-  error
+  error,
+  values = {}
 ) {
   const config = field.config ?? field;
+  const describedBy =
+    [error ? `${inputId}-error` : null, config.description ? `${inputId}-help` : null]
+      .filter(Boolean)
+      .join(' ') || undefined;
+  const numOrUndef = (v) =>
+    v === undefined || v === null || v === '' ? undefined : Number(v);
+  const optionLayoutClass = config.optionLayout
+    ? ` subtleforms-options--${config.optionLayout}`
+    : '';
   switch (field.type) {
     case 'text':
     case 'email':
@@ -649,21 +669,49 @@ function renderInput(
     case 'time':
     case 'datetime':
     case 'password':
-      return (
+    {
+      const isNumeric = field.type === 'number';
+      const isLength = ['text', 'email', 'url', 'phone', 'tel', 'password'].includes(field.type);
+      const input = (
         <input
           id={inputId}
           type={getInputType(field.type)}
           className='subtleforms-input'
-          value={value}
+          value={value ?? ''}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           aria-required={required}
           aria-invalid={!!error}
-          aria-describedby={error ? `${inputId}-error` : undefined}
+          aria-describedby={describedBy}
           name={config.key || field.key || undefined}
           autoComplete={AUTOCOMPLETE_TOKENS[field.type]}
+          readOnly={config.readOnly === true}
+          min={isNumeric ? numOrUndef(config.min) : field.type === 'date' ? config.minDate || undefined : undefined}
+          max={isNumeric ? numOrUndef(config.max) : field.type === 'date' ? config.maxDate || undefined : undefined}
+          step={isNumeric ? numOrUndef(config.step) : undefined}
+          minLength={isLength ? numOrUndef(config.minLength) : undefined}
+          maxLength={isLength ? numOrUndef(config.maxLength) : undefined}
         />
       );
+      if (!config.prefix && !config.suffix) {
+        return input;
+      }
+      return (
+        <div className='subtleforms-input-affix'>
+          {config.prefix && (
+            <span className='subtleforms-input-affix__prefix' aria-hidden='true'>
+              {config.prefix}
+            </span>
+          )}
+          {input}
+          {config.suffix && (
+            <span className='subtleforms-input-affix__suffix' aria-hidden='true'>
+              {config.suffix}
+            </span>
+          )}
+        </div>
+      );
+    }
 
     case 'textarea':
       return (
@@ -673,11 +721,14 @@ function renderInput(
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
-          rows={4}
+          rows={numOrUndef(config.rows) || 4}
           aria-required={required}
           aria-invalid={!!error}
-          aria-describedby={error ? `${inputId}-error` : undefined}
+          aria-describedby={describedBy}
           name={config.key || field.key || undefined}
+          readOnly={config.readOnly === true}
+          minLength={numOrUndef(config.minLength)}
+          maxLength={numOrUndef(config.maxLength)}
         />
       );
 
@@ -746,7 +797,7 @@ function renderInput(
     case 'radio':
       const radioOptions = config.options || [];
       return (
-        <div className='subtleforms-radio-group'>
+        <div className={`subtleforms-radio-group${optionLayoutClass}`} role='radiogroup' aria-describedby={describedBy}>
           {radioOptions.map((option, index) => {
             const optionId = `${inputId}-${index}`;
             return (
@@ -775,7 +826,10 @@ function renderInput(
       const allowMultiple = config.allowMultiple === true;
       const mcValues = Array.isArray(value) ? value : value ? [value] : [];
       return (
-        <div className={allowMultiple ? 'subtleforms-checkbox-group' : 'subtleforms-radio-group'}>
+        <div
+          className={`${allowMultiple ? 'subtleforms-checkbox-group' : 'subtleforms-radio-group'}${optionLayoutClass}`}
+          role={allowMultiple ? 'group' : 'radiogroup'}
+          aria-describedby={describedBy}>
           {mcOptions.map((option, index) => {
             const optionId = `${inputId}-${index}`;
             if (allowMultiple) {
@@ -1362,7 +1416,25 @@ function renderInput(
                   <th scope='row'>{row.label ?? row}</th>
                   {gridCols.map((col) => {
                     const colKey = col.value ?? col;
-                    const checked = !!grid[rowKey]?.[colKey];
+                    // Older forms have no flag and keep their original checkbox grid.
+                    const single = config.multiplePerRow === false;
+                    const checked = single
+                      ? grid[rowKey] === colKey
+                      : !!grid[rowKey]?.[colKey];
+                    if (single) {
+                      return (
+                        <td key={colKey}>
+                          <input
+                            type='radio'
+                            className='subtleforms-radio'
+                            name={`${config.key || field.key}-${rowKey}`}
+                            checked={checked}
+                            aria-label={cellLabel(row, col)}
+                            onChange={() => onChange({ ...grid, [rowKey]: colKey })}
+                          />
+                        </td>
+                      );
+                    }
                     return (
                       <td key={colKey}>
                         <input
@@ -1391,6 +1463,150 @@ function renderInput(
             })}
           </tbody>
         </table>
+      );
+    }
+
+    case 'toggle': {
+      const onValue = config.onValue ?? 'yes';
+      const offValue = config.offValue ?? 'no';
+      const isOn = value === true || value === onValue;
+      return (
+        <label className='subtleforms-toggle' htmlFor={inputId}>
+          <input
+            id={inputId}
+            type='checkbox'
+            role='switch'
+            className='subtleforms-toggle__input'
+            checked={isOn}
+            onChange={(e) => onChange(e.target.checked ? onValue : offValue)}
+            aria-required={required}
+            aria-invalid={!!error}
+            aria-describedby={describedBy}
+          />
+          <span className='subtleforms-toggle__track' aria-hidden='true'>
+            <span className='subtleforms-toggle__thumb' />
+          </span>
+          {config.toggleLabel && (
+            <span className='subtleforms-toggle__text'>{config.toggleLabel}</span>
+          )}
+        </label>
+      );
+    }
+
+    case 'scale': {
+      const min = parseInt(config.scaleMin ?? 1, 10);
+      const max = Math.max(min + 1, Math.min(10, parseInt(config.scaleMax ?? 5, 10)));
+      const points = [];
+      for (let i = min; i <= max; i++) points.push(i);
+      return (
+        <div className='subtleforms-scale'>
+          <div
+            className='subtleforms-scale__options'
+            role='radiogroup'
+            aria-describedby={describedBy}
+            style={{ '--subtleforms-scale-count': points.length }}>
+            {points.map((point) => {
+              const optionId = `${inputId}-${point}`;
+              const selected = String(value) === String(point);
+              return (
+                <label
+                  key={point}
+                  htmlFor={optionId}
+                  className={`subtleforms-scale__option${selected ? ' is-selected' : ''}`}>
+                  <input
+                    id={optionId}
+                    type='radio'
+                    className='subtleforms-scale__input'
+                    name={config.key || field.key}
+                    value={point}
+                    checked={selected}
+                    onChange={() => onChange(point)}
+                  />
+                  <span>{point}</span>
+                </label>
+              );
+            })}
+          </div>
+          {(config.minLabel || config.maxLabel) && (
+            <div className='subtleforms-scale__labels' aria-hidden='true'>
+              <span>{config.minLabel}</span>
+              <span>{config.maxLabel}</span>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    case 'picture_choice': {
+      const pcOptions = config.options || [];
+      const multiple = config.allowMultiple === true;
+      const selected = Array.isArray(value) ? value : value ? [value] : [];
+      const cols = parseInt(config.pictureColumns || 3, 10);
+      return (
+        <div
+          className='subtleforms-picture-choice'
+          role={multiple ? 'group' : 'radiogroup'}
+          aria-describedby={describedBy}
+          style={{ '--subtleforms-picture-columns': cols }}>
+          {pcOptions.map((option, index) => {
+            const optionId = `${inputId}-${index}`;
+            const isChecked = selected.includes(option.value);
+            return (
+              <label
+                key={option.value || index}
+                htmlFor={optionId}
+                className={`subtleforms-picture-choice__option${isChecked ? ' is-selected' : ''}`}>
+                <input
+                  id={optionId}
+                  type={multiple ? 'checkbox' : 'radio'}
+                  name={config.key || field.key}
+                  className='subtleforms-picture-choice__input'
+                  value={option.value}
+                  checked={isChecked}
+                  onChange={() => {
+                    if (multiple) {
+                      onChange(
+                        isChecked
+                          ? selected.filter((v) => v !== option.value)
+                          : [...selected, option.value]
+                      );
+                    } else {
+                      onChange(option.value);
+                    }
+                  }}
+                />
+                <span className='subtleforms-picture-choice__media'>
+                  {option.image ? (
+                    <img src={option.image} alt='' loading='lazy' />
+                  ) : (
+                    <span className='subtleforms-picture-choice__placeholder' aria-hidden='true' />
+                  )}
+                </span>
+                <span className='subtleforms-picture-choice__label'>{option.label}</span>
+              </label>
+            );
+          })}
+        </div>
+      );
+    }
+
+    case 'calculation': {
+      const decimals = parseInt(config.decimals ?? 2, 10);
+      const num = typeof value === 'number' ? value : parseFloat(value) || 0;
+      const formatted = num.toLocaleString(undefined, {
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals,
+      });
+      return (
+        <output
+          id={inputId}
+          className='subtleforms-calculation'
+          aria-live='polite'
+          aria-describedby={describedBy}>
+          {config.prefix && <span className='subtleforms-calculation__affix'>{config.prefix}</span>}
+          <span className='subtleforms-calculation__value'>{formatted}</span>
+          {config.suffix && <span className='subtleforms-calculation__affix'>{config.suffix}</span>}
+        </output>
       );
     }
 

@@ -1,76 +1,55 @@
+/**
+ * Field chrome — selection and hover affordances around each field on the
+ * canvas. Fields look like the real form until you point at them: a hairline
+ * outline on hover, a 1.5px brand outline when selected (block editor style).
+ */
+
 .sf-field-chrome {
-        position: relative;
-        margin-bottom: 0.375rem;
-        transition:
-                border-color var(--sf-duration-fast) cubic-bezier(0.4, 0, 0.2, 1),
-                box-shadow var(--sf-duration-fast) cubic-bezier(0.4, 0, 0.2, 1),
-                background-color var(--sf-duration-fast) cubic-bezier(0.4, 0, 0.2, 1),
-                transform var(--sf-duration-base) cubic-bezier(0.34, 1.56, 0.64, 1);
-        border-radius: var(--sf-radius-md);
-        cursor: pointer;
-        border: 1px solid var(--sf-gray-300);
-        background-color: var(--sf-surface);
-        box-shadow: none;
+	position: relative;
+	margin: 0 -12px 4px;
+	border-radius: var(--sf-radius-md);
+	background: transparent;
+	cursor: pointer;
+	outline: 1px solid transparent;
+	outline-offset: 0;
+	transition:
+		outline-color var(--sf-transition-fast),
+		background-color var(--sf-transition-fast);
 
-        &:focus {
-                outline: none;
-        }
+	&:focus {
+		outline: 1px solid transparent;
+	}
 
-        // Visible focus ring for keyboard navigation — accessibility
-        &:focus-visible {
-                outline: 2px solid var(--wp-blue-500, var(--sf-a-500));
-                outline-offset: 3px;
-        }
+	&:focus-visible {
+		outline: 2px solid var(--sf-brand);
+	}
 
-        &.is-hovered:not(.is-selected) {
-                background-color: var(--sf-gray-50);
-                border-color: var(--sf-gray-400);
-                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-                transform: translateY(-1px);
-        }
+	&.is-hovered:not(.is-selected) {
+		outline: 1px solid var(--sf-border);
+		background: var(--sf-bg-subtle);
+	}
 
-        &.is-selected {
-                border-color: var(--sf-lime-500);
-                box-shadow: 0 0 0 1px var(--sf-lime-500), 0 2px 6px rgba(0, 0, 0, 0.06);
-                background-color: var(--sf-n-0);
-                animation: sf-field-select-flash 0.45s cubic-bezier(0.4, 0, 0.2, 1) 1;
-        }
+	&.is-selected {
+		outline: 1.5px solid var(--sf-brand);
+		background: var(--sf-bg-surface);
+	}
 
-        // Lighter treatment for nodes in the multi-select set (not the primary active node)
-        &.is-multi-selected {
-                border-color: var(--sf-lime-400);
-                box-shadow: 0 0 0 1px rgba(132, 204, 22, 0.3);
-                background-color: rgba(132, 204, 22, 0.03);
-        }
+	&.is-multi-selected {
+		outline: 1px dashed var(--sf-brand);
+		background: var(--sf-primary-50);
+	}
 
-        &--validation-error {
-                border-left: 4px solid var(--sf-red-600);
-        }
+	&--validation-error {
+		box-shadow: inset 3px 0 0 var(--sf-danger);
+	}
 
-        &__inner {
-                padding: 0.75rem;
-        }
+	&__inner {
+		padding: 12px;
+	}
 
-        &__validation-message {
-                margin-bottom: 0.5rem;
-                color: var(--sf-red-600);
-                font-size: var(--sf-text-xs);
-        }
-}
-
-// Entry animation: soft scale-in glow that settles to steady-state lime border + shadow
-@keyframes sf-field-select-flash {
-        0% {
-                transform: scale(1.012);
-                background-color: rgba(132, 204, 22, 0.07);
-                box-shadow: 0 0 0 3px rgba(132, 204, 22, 0.25);
-        }
-        55% {
-                transform: scale(1.003);
-        }
-        100% {
-                transform: scale(1);
-                background-color: var(--sf-n-0);
-                box-shadow: 0 0 0 1px var(--sf-lime-500), 0 2px 6px rgba(0, 0, 0, 0.06);
-        }
+	&__validation-message {
+		margin-bottom: 8px;
+		font-size: var(--sf-text-xs);
+		color: var(--sf-danger);
+	}
 }

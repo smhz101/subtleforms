@@ -319,3 +319,92 @@
 		}
 	}
 }
+
+// ── 2.0 ─────────────────────────────────────────────────────────────────────
+// Settings read like core's document settings: one card of collapsible
+// sections, sentence-case labels, even spacing, neutral form-type note.
+.sf-form-settings {
+	&__container { max-width: 720px; }
+
+	&__title {
+		margin-bottom: 16px;
+		font-size: var(--sf-text-md);
+	}
+
+	&__intro {
+		margin: 0 0 16px;
+		font-size: 12px;
+		color: var(--sf-text-muted);
+	}
+
+	&__row {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 12px;
+
+		@media (max-width: 600px) { grid-template-columns: 1fr; }
+	}
+
+	&__container > .components-panel {
+		border-radius: var(--sf-radius-lg);
+		box-shadow: none;
+	}
+
+	.components-panel__body {
+		> .components-panel__body-title .components-panel__body-toggle {
+			padding: 18px 20px;
+			font-size: var(--sf-text-sm);
+			font-weight: var(--sf-weight-semibold);
+		}
+
+		&.is-opened { padding: 0 20px 20px; }
+
+		&.is-opened > .components-panel__body-title { margin: 0 -20px; }
+
+		.components-base-control,
+		.components-toggle-group-control,
+		.sf-form-settings__row {
+			margin-bottom: 16px;
+		}
+
+		.components-base-control__label,
+		.components-input-control__label.components-input-control__label,
+		.components-toggle-group-control .components-base-control__label {
+			font-size: var(--sf-text-sm);
+			font-weight: var(--sf-weight-medium);
+			text-transform: none;
+			color: var(--sf-text);
+		}
+
+		.components-base-control__help {
+			font-size: 12px;
+			color: var(--sf-text-muted);
+		}
+	}
+}
+
+.sf-form-settings .sf-form-type-banner {
+	&,
+	&[data-form-type] {
+		margin-bottom: 16px;
+		padding: 12px 16px;
+		border: 1px solid var(--sf-border);
+		border-radius: var(--sf-radius-md);
+		background: var(--sf-bg-surface);
+	}
+
+	&[data-form-type] .sf-form-type-banner__title,
+	.sf-form-type-banner__title {
+		margin: 0 0 2px;
+		font-size: var(--sf-text-sm);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
+	}
+
+	&[data-form-type] .sf-form-type-banner__description,
+	.sf-form-type-banner__description {
+		margin: 0;
+		font-size: 12px;
+		color: var(--sf-text-muted);
+	}
+}

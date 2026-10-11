@@ -1,71 +1,20 @@
 /**
- * AdminShell Component Styles
+ * The SubtleForms frame.
  *
- * SCROLL CONTRACT:
- * - html/body: overflow hidden ONLY on SubtleForms pages
- * - AdminShell: Single vertical scroll container per page
- * - Nested panels (Dock/Inspector): Scroll internally
- * - NO page may manage its own body scrolling
+ * Mirrors the layout of WordPress 7's own app screens: dark admin chrome, a
+ * white "stage" inset 8px from the right and bottom edges with 12px corners,
+ * a fixed top bar, and a single scroll container for page content.
+ *
+ * SCROLL CONTRACT
+ * - The document never scrolls on SubtleForms screens.
+ * - `.sf-app__main` is the one scroll container per page.
+ * - With `noScroll` (`.is-fixed`), the page manages its own panels (builder).
  */
 
-// CRITICAL: Scope overflow:hidden to ONLY SubtleForms pages (prevent WP admin bleeding)
-.subtleforms-admin-page,
-.subtle-forms_page_subtleforms-settings,
-.subtle-forms_page_subtleforms-extensions,
-.subtle-forms_page_subtleforms-forms,
-.subtle-forms_page_subtleforms-submissions,
-.toplevel_page_subtleforms {
-	html,
-	body {
-		overflow: hidden !important;
-	}
-}
+// ── Host page ────────────────────────────────────────────────────────────────
+// Body classes come from PHP (`subtleforms-admin-page`) so these rules apply
+// before React mounts; `subtleforms-admin-scope` is the JS fallback.
 
-// Remove default WordPress page wrapper styling
-.subtleforms-admin-page,
-.subtle-forms_page_subtleforms-settings,
-.subtle-forms_page_subtleforms-extensions {
-	.wrap {
-		margin: 0 !important;
-		padding: 0 !important;
-	}
-
-	#wpbody-content {
-		padding-bottom: 0 !important;
-		overflow: hidden !important;
-	}
-
-	#wpcontent {
-		padding: 0 !important;
-		overflow: hidden !important;
-	}
-}
-
-// .subtleforms-admin-page {
-// 	div#subtleforms-admin-app {
-// 		height: 100%;
-// 		overflow: hidden;
-		
-// 		div {
-// 			div.components-panel {
-// 				div.components-panel__body {
-// 					padding: 0;
-// 				}
-// 			}
-// 		}
-// 	}
-// }
-
-#subtleforms-admin-app {
-	height: 100%;
-	overflow: hidden;
-
-	div > div > div.components-panel__body.is-opened {
-		padding: 0 !important;
-	}
-}
-
-// Handle Admin Bar Height
 :root {
 	--wp-admin--admin-bar--height: 32px;
 }
@@ -76,73 +25,251 @@
 	}
 }
 
-// Admin Shell Component
-.sf-admin-shell {
-	&__container {
+body.subtleforms-admin-page,
+body.subtleforms-admin-scope {
+	background: var(--sf-bg-frame);
+	overflow: hidden;
+
+	#wpwrap,
+	#wpcontent,
+	#wpbody {
+		background: var(--sf-bg-frame);
+	}
+
+	#wpcontent {
+		padding-inline-start: 0;
+	}
+
+	#wpbody-content {
 		display: flex;
 		flex-direction: column;
-		background-color: var(--sf-surface);
 		height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
-		overflow: hidden; // CRITICAL: Prevent shell itself from scrolling
-	}
+		height: calc(100dvh - var(--wp-admin--admin-bar--height, 32px));
+		padding-bottom: 0;
+		float: none;
+		overflow: hidden;
 
-	&__action-bar-wrapper {
-		flex-shrink: 0;
-		background-color: var(--sf-surface);
-	}
-
-	&__content {
-		flex: 1;
-		min-height: 0; // CRITICAL: allows flex child to shrink below content size
-		overflow: hidden; // CRITICAL: Shell content area should not scroll
-
-		&-inner {
-			height: 100%;
-			display: flex;
-			flex-direction: column;
-			overflow-y: auto; // CRITICAL: Default single scroll container
-
-			&--no-scroll {
-				overflow: hidden; // CRITICAL: When noScroll={true}, child components manage scroll
-			}
+		> * {
+			flex-shrink: 0;
 		}
 
-		&-body {
-			flex: 1;
-			min-height: 0; // CRITICAL: allows content body to shrink
+		> .wrap.subtleforms-admin,
+		> .wrap:has(#subtleforms-admin-app) {
+			flex: 1 1 auto;
+			min-height: 0;
+			margin: 0;
+			padding: 0;
+			background: transparent;
+		}
 
-			&--no-scroll {
-				overflow: hidden; // CRITICAL: Child components manage their own scroll
-				display: flex;
-				flex-direction: column;
-				height: 100%;
-			}
+		// Core and third-party admin notices sit above the stage, on the frame.
+		> .notice,
+		> div.error,
+		> div.updated {
+			margin: 8px 8px 0 0;
+			border-radius: var(--sf-radius-lg);
+		}
+
+		> .clear {
+			display: none;
 		}
 	}
 
-	&__pagination {
-		flex-shrink: 0;
-		background-color: var(--sf-surface);
-		padding: 0.75rem 1.5rem;
-		border-top: 1px solid var(--sf-gray-300);
+	#wpfooter {
+		display: none;
+	}
+
+	// The submenu arrow points at the stage, which is white.
+	#adminmenu a.wp-has-current-submenu::after,
+	#adminmenu > li.current > a.current::after {
+		border-inline-end-color: #fff;
 	}
 }
 
-/* Loading, error and empty states. One presentation for all pages, so the
-   transition into content is identical everywhere. */
-.sf-admin-shell__state {
+#subtleforms-admin-app {
+	height: 100%;
+	min-height: 0;
+}
+
+// ── App ──────────────────────────────────────────────────────────────────────
+
+.sf-app {
+	box-sizing: border-box;
+	height: 100%;
+	padding: 0 8px 8px 0;
+	background: var(--sf-bg-frame);
+
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+
+	@media (max-width: 782px) {
+		padding: 0;
+	}
+}
+
+.sf-app__stage {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+	overflow: hidden;
+	background: var(--sf-bg-page);
+	border-radius: var(--sf-radius-xl);
+	color: var(--sf-text);
+
+	@media (max-width: 782px) {
+		border-radius: 0;
+	}
+}
+
+.sf-app__main {
+	position: relative;
+	flex: 1 1 auto;
+	min-height: 0;
+	display: flex;
+	flex-direction: column;
+	overflow-x: hidden;
+	overflow-y: auto;
+	overscroll-behavior: contain;
+	scroll-padding-top: 64px;
+
+	&:focus {
+		outline: none;
+	}
+
+	&.is-fixed {
+		overflow: hidden;
+	}
+}
+
+.sf-app__body {
+	flex: 1 0 auto;
+	min-width: 0;
+
+	&.is-fixed {
+		flex: 1 1 auto;
+		min-height: 0;
+		display: flex;
+		flex-direction: column;
+		overflow: hidden;
+	}
+
+	&--narrow {
+		width: 100%;
+		max-width: var(--sf-content-max);
+		margin-inline: auto;
+	}
+}
+
+.sf-app__footer {
+	flex-shrink: 0;
+	padding: 12px var(--sf-gutter);
+	border-top: 1px solid var(--sf-border-subtle);
+	background: var(--sf-bg-surface);
+}
+
+// ── Page header ──────────────────────────────────────────────────────────────
+
+.sf-page-header {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	justify-content: space-between;
+	gap: 16px 24px;
+	padding: 28px var(--sf-gutter) 24px;
+
+	&.has-toolbar {
+		padding-bottom: 16px;
+	}
+
+	&__main {
+		min-width: 0;
+		flex: 1 1 320px;
+	}
+
+	&__eyebrow {
+		margin-bottom: 6px;
+		font-size: var(--sf-text-xs);
+		color: var(--sf-text-muted);
+	}
+
+	&__title {
+		margin: 0;
+		padding: 0;
+		font-family: var(--sf-font-heading);
+		font-size: var(--sf-text-lg);
+		font-weight: var(--sf-weight-semibold);
+		line-height: 1.3;
+		letter-spacing: -0.01em;
+		color: var(--sf-text);
+	}
+
+	&__description {
+		margin: 6px 0 0;
+		max-width: 72ch;
+		font-size: var(--sf-text-sm);
+		line-height: var(--sf-leading-normal);
+		color: var(--sf-text-muted);
+	}
+
+	&__actions {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px;
+		flex-shrink: 0;
+
+		> div {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: center;
+			gap: 8px;
+		}
+	}
+
+	@media (max-width: 782px) {
+		padding: 20px 16px 16px;
+		align-items: flex-start;
+	}
+}
+
+// ── Toolbar ──────────────────────────────────────────────────────────────────
+// Tabs, filters and search. Sticks to the top of the scroll container so
+// filters stay in reach on long lists.
+
+.sf-app__toolbar {
+	position: sticky;
+	top: 0;
+	z-index: 20;
+	flex-shrink: 0;
+	background: var(--sf-bg-page);
+}
+
+// ── States ───────────────────────────────────────────────────────────────────
+
+.sf-app__state {
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
-	gap: var(--sf-space-4);
-	min-height: 240px;
-	padding: var(--sf-space-8) var(--sf-space-4);
+	gap: 16px;
+	min-height: 320px;
+	padding: 48px 16px;
 	text-align: center;
-	color: var(--sf-text-secondary);
-}
+	color: var(--sf-text-muted);
 
-.sf-admin-shell__state p {
-	margin: 0;
-	font-size: var(--sf-text-base);
+	p {
+		margin: 0;
+		font-size: var(--sf-text-sm);
+	}
+
+	.components-notice {
+		max-width: 560px;
+		margin: 0;
+		text-align: start;
+	}
 }

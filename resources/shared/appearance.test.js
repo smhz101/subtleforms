@@ -74,8 +74,11 @@ describe( 'fieldAppearanceStyle', () => {
   } );
 
   it( 'redeclares the form-level properties so contents inherit the override', () => {
-    const style = fieldAppearanceStyle( { colorText: '#123456' } );
-    expect( style[ '--subtleforms-color-text' ] ).toBe( '#123456' );
+    // 2.0: a field's "Text" colour is the input text; labels have their own token.
+    const style = fieldAppearanceStyle( { colorText: '#123456', colorLabel: '#654321', colorBorder: '#111111' } );
+    expect( style[ '--subtleforms-input-text' ] ).toBe( '#123456' );
+    expect( style[ '--subtleforms-label-color' ] ).toBe( '#654321' );
+    expect( style[ '--subtleforms-color-border' ] ).toBe( '#111111' );
   } );
 
   it( 'leaves a full-width field to the default flex basis', () => {

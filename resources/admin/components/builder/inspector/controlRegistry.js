@@ -12,6 +12,8 @@ import SelectInspectorControl from './controls/SelectInspectorControl';
 import TextareaInspectorControl from './controls/TextareaInspectorControl';
 import OptionsInspectorControl from './controls/OptionsInspectorControl';
 import SubfieldInspectorControl from './controls/SubfieldInspectorControl';
+import LinesInspectorControl from './controls/LinesInspectorControl';
+import FormulaInspectorControl from './controls/FormulaInspectorControl';
 
 /**
  * Registry mapping PHP control type names to React components.
@@ -39,6 +41,8 @@ const CONTROL_REGISTRY = {
 	radio: SelectInspectorControl,
 	options: OptionsInspectorControl,
 	subfield: SubfieldInspectorControl,
+	lines: LinesInspectorControl,
+	formula: FormulaInspectorControl,
 };
 
 /**

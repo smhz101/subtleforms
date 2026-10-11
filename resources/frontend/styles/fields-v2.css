@@ -1,0 +1,405 @@
+/**
+ * SubtleForms 2.0 field styles: help text, prefix/suffix, option layouts,
+ * toggle, opinion scale, picture choice and calculation.
+ *
+ * Everything reads the form's --subtleforms-* tokens so the Design tab and
+ * presets restyle these the same way they restyle every other field.
+ */
+
+/* ── Help text ─────────────────────────────────────────────────────────── */
+.subtleforms-field-help {
+	margin: 6px 0 0;
+	font-size: var(--subtleforms-font-size-sm, 0.875rem);
+	line-height: 1.45;
+	color: var(--subtleforms-color-text-light, #6b7280);
+}
+
+/* ── Read-only ─────────────────────────────────────────────────────────── */
+.subtleforms-field--readonly .subtleforms-input,
+.subtleforms-field--readonly .subtleforms-textarea {
+	background: color-mix(in srgb, var(--subtleforms-color-border, #d1d5db) 25%, transparent);
+	cursor: default;
+}
+
+/* ── Prefix / suffix ───────────────────────────────────────────────────── */
+.subtleforms-input-affix {
+	display: flex;
+	align-items: stretch;
+	width: 100%;
+}
+
+.subtleforms-input-affix .subtleforms-input {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.subtleforms-input-affix__prefix,
+.subtleforms-input-affix__suffix {
+	display: inline-flex;
+	align-items: center;
+	padding: 0 12px;
+	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
+	background: color-mix(in srgb, var(--subtleforms-color-border, #d1d5db) 30%, transparent);
+	color: var(--subtleforms-color-text-light, #6b7280);
+	font-size: var(--subtleforms-font-size-sm, 0.875rem);
+	white-space: nowrap;
+}
+
+.subtleforms-input-affix__prefix {
+	border-right: 0;
+	border-radius: var(--subtleforms-radius-md, 4px) 0 0 var(--subtleforms-radius-md, 4px);
+}
+
+.subtleforms-input-affix__suffix {
+	border-left: 0;
+	border-radius: 0 var(--subtleforms-radius-md, 4px) var(--subtleforms-radius-md, 4px) 0;
+}
+
+.subtleforms-input-affix__prefix + .subtleforms-input {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+.subtleforms-input-affix .subtleforms-input:has(+ .subtleforms-input-affix__suffix) {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+/* ── Option layouts ────────────────────────────────────────────────────── */
+.subtleforms-checkbox-group {
+	display: flex;
+	flex-direction: column;
+}
+
+.subtleforms-radio-group.subtleforms-options--inline,
+.subtleforms-checkbox-group.subtleforms-options--inline {
+	flex-direction: row;
+	flex-wrap: wrap;
+	column-gap: 20px;
+}
+
+.subtleforms-options--columns-2,
+.subtleforms-options--columns-3 {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	column-gap: 20px;
+}
+
+.subtleforms-options--columns-3 {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.subtleforms-radio-group.subtleforms-options--buttons,
+.subtleforms-checkbox-group.subtleforms-options--buttons {
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.subtleforms-options--buttons .subtleforms-radio-label,
+.subtleforms-options--buttons .subtleforms-checkbox-label {
+	position: relative;
+	margin: 0;
+	padding: 9px 16px;
+	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-md, 4px);
+	background: var(--subtleforms-color-bg, #fff);
+	transition: border-color var(--subtleforms-transition-fast, 0.15s), background-color var(--subtleforms-transition-fast, 0.15s);
+}
+
+.subtleforms-options--buttons input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.subtleforms-options--buttons label:has(input:checked) {
+	border-color: var(--subtleforms-color-primary);
+	background: color-mix(in srgb, var(--subtleforms-color-primary, #3858e9) 10%, transparent);
+	color: var(--subtleforms-color-text);
+}
+
+.subtleforms-options--buttons label:has(input:focus-visible) {
+	box-shadow: 0 0 0 2px var(--subtleforms-color-primary);
+}
+
+@media (max-width: 600px) {
+	.subtleforms-options--columns-2,
+	.subtleforms-options--columns-3 {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/* ── Toggle ────────────────────────────────────────────────────────────── */
+.subtleforms-toggle {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	cursor: pointer;
+}
+
+.subtleforms-toggle__input {
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+}
+
+.subtleforms-toggle__track {
+	position: relative;
+	flex-shrink: 0;
+	width: 40px;
+	height: 22px;
+	border-radius: 999px;
+	background: var(--subtleforms-color-border-strong, #9ca3af);
+	transition: background-color var(--subtleforms-transition-fast, 0.15s);
+}
+
+.subtleforms-toggle__thumb {
+	position: absolute;
+	top: 3px;
+	left: 3px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+	transition: transform var(--subtleforms-transition-fast, 0.15s);
+}
+
+.subtleforms-toggle__input:checked + .subtleforms-toggle__track {
+	background: var(--subtleforms-color-primary);
+}
+
+.subtleforms-toggle__input:checked + .subtleforms-toggle__track .subtleforms-toggle__thumb {
+	transform: translateX(18px);
+}
+
+.subtleforms-toggle__input:focus-visible + .subtleforms-toggle__track {
+	box-shadow: 0 0 0 2px var(--subtleforms-color-bg, #fff), 0 0 0 4px var(--subtleforms-color-primary);
+}
+
+/* ── Opinion scale ─────────────────────────────────────────────────────── */
+.subtleforms-scale__options {
+	display: grid;
+	grid-template-columns: repeat(var(--subtleforms-scale-count, 5), minmax(0, 1fr));
+	gap: 6px;
+}
+
+.subtleforms-scale__option {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 44px;
+	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-md, 4px);
+	background: var(--subtleforms-color-bg, #fff);
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+	cursor: pointer;
+	transition: border-color var(--subtleforms-transition-fast, 0.15s), background-color var(--subtleforms-transition-fast, 0.15s), color var(--subtleforms-transition-fast, 0.15s);
+}
+
+.subtleforms-scale__option:hover {
+	border-color: var(--subtleforms-color-primary);
+}
+
+.subtleforms-scale__option.is-selected {
+	border-color: var(--subtleforms-color-primary);
+	background: var(--subtleforms-color-primary);
+	color: #fff;
+}
+
+.subtleforms-scale__input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.subtleforms-scale__option:has(.subtleforms-scale__input:focus-visible) {
+	box-shadow: 0 0 0 2px var(--subtleforms-color-primary);
+}
+
+.subtleforms-scale__labels {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 6px;
+	font-size: var(--subtleforms-font-size-sm, 0.875rem);
+	color: var(--subtleforms-color-text-light, #6b7280);
+}
+
+/* ── Picture choice ────────────────────────────────────────────────────── */
+.subtleforms-picture-choice {
+	display: grid;
+	grid-template-columns: repeat(var(--subtleforms-picture-columns, 3), minmax(0, 1fr));
+	gap: 12px;
+}
+
+@media (max-width: 600px) {
+	.subtleforms-picture-choice {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+.subtleforms-picture-choice__option {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-lg, 8px);
+	background: var(--subtleforms-color-bg, #fff);
+	cursor: pointer;
+	transition: border-color var(--subtleforms-transition-fast, 0.15s), box-shadow var(--subtleforms-transition-fast, 0.15s);
+}
+
+.subtleforms-picture-choice__option:hover {
+	border-color: var(--subtleforms-color-border-strong, #9ca3af);
+}
+
+.subtleforms-picture-choice__option.is-selected {
+	border-color: var(--subtleforms-color-primary);
+	box-shadow: 0 0 0 1px var(--subtleforms-color-primary);
+}
+
+.subtleforms-picture-choice__option:has(input:focus-visible) {
+	box-shadow: 0 0 0 2px var(--subtleforms-color-primary);
+}
+
+.subtleforms-picture-choice__input {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 1;
+	accent-color: var(--subtleforms-color-primary);
+}
+
+.subtleforms-picture-choice__media {
+	display: block;
+	aspect-ratio: 4 / 3;
+	background: color-mix(in srgb, var(--subtleforms-color-border, #d1d5db) 30%, transparent);
+}
+
+.subtleforms-picture-choice__media img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.subtleforms-picture-choice__placeholder {
+	display: block;
+	width: 100%;
+	height: 100%;
+	background:
+		linear-gradient(135deg, transparent 48%, var(--subtleforms-color-border, #d1d5db) 49%, var(--subtleforms-color-border, #d1d5db) 51%, transparent 52%);
+}
+
+.subtleforms-picture-choice__label {
+	padding: 10px 12px;
+	font-weight: 500;
+	text-align: center;
+}
+
+/* ── Calculation ───────────────────────────────────────────────────────── */
+.subtleforms-calculation {
+	display: flex;
+	align-items: baseline;
+	gap: 4px;
+	padding: 10px 14px;
+	border: var(--subtleforms-border-width, 1px) dashed var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-md, 4px);
+	background: var(--subtleforms-color-bg-subtle, transparent);
+	font-size: var(--subtleforms-font-size-lg, 1.25rem);
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+
+.subtleforms-calculation__affix {
+	font-size: var(--subtleforms-font-size-base, 1rem);
+	font-weight: 500;
+	color: var(--subtleforms-color-text-light, #6b7280);
+}
+
+/* ── Error state ───────────────────────────────────────────────────────── */
+.subtleforms-field--has-error .subtleforms-input,
+.subtleforms-field--has-error .subtleforms-textarea,
+.subtleforms-field--has-error .subtleforms-select {
+	border-color: var(--subtleforms-color-error);
+}
+
+/* ===== Confirmation (2.0) ===== */
+.subtleforms-success {
+	padding: 32px 24px;
+	border: 1px solid var(--subtleforms-color-border, #e0e0e0);
+	background: var(--subtleforms-color-background, #fff);
+	color: var(--subtleforms-color-text, #1e1e1e);
+	text-align: center;
+}
+
+.subtleforms-success-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	margin-bottom: 12px;
+	border-radius: 50%;
+	background: #e6f4ea;
+	color: #00a32a;
+}
+
+.subtleforms-success-message h3 {
+	margin: 0 0 6px;
+	font-size: 1.25rem;
+	line-height: 1.3;
+}
+
+.subtleforms-success-message p {
+	max-width: 46ch;
+	margin: 0 auto 8px;
+	color: var(--subtleforms-color-text-light, #50575e);
+}
+
+.subtleforms-success-again {
+	margin-top: 12px;
+}
+
+/* ===== Unavailable form (2.0) ===== */
+.subtleforms-unavailable {
+	padding: 20px 24px;
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+	background: #f6f7f7;
+	color: #1e1e1e;
+	font-size: 15px;
+}
+
+.subtleforms-unavailable p {
+	margin: 0;
+}
+
+/* ===== Appearance tokens added in 2.0 ===== */
+/* Focus follows the accent unless a form sets its own focus colour. */
+.subtleforms {
+	--subtleforms-color-border-focus: var(--subtleforms-color-primary);
+}
+
+.subtleforms .subtleforms-field-label {
+	color: var(--subtleforms-label-color, var(--subtleforms-color-text));
+}
+
+.subtleforms .subtleforms-input,
+.subtleforms .subtleforms-textarea,
+.subtleforms .subtleforms-select {
+	color: var(--subtleforms-input-text, var(--subtleforms-color-text));
+	font-family: inherit;
+}
+
+.subtleforms .subtleforms-button {
+	border-radius: var(--subtleforms-button-radius, var(--subtleforms-radius-sm));
+}
+
+

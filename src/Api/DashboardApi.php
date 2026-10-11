@@ -85,6 +85,7 @@ class DashboardApi {
 				'stats'              => $this->getStats(),
 				'recent_submissions' => $this->getRecentSubmissions(),
 				'recent_forms'       => $this->getRecentForms(),
+				'trend'              => $this->getSubmissionTrend( 14 ),
 				'system_health'      => $this->getSystemHealth(),
 			);
 
@@ -101,7 +102,7 @@ class DashboardApi {
 	 */
 	private function getStats() {
 		// v1.7.0: Cache dashboard stats for 5 minutes to reduce DB load
-		$cache_key = 'subtleforms_dashboard_stats';
+		$cache_key = 'subtleforms_dashboard_stats_v2';
 		$cached    = get_transient( $cache_key );
 
 		if ( false !== $cached && is_array( $cached ) ) {
@@ -155,12 +156,62 @@ class DashboardApi {
 			'submissions_today'        => $submissionsToday,
 			'submissions_this_week'    => $submissionsThisWeek,
 			'avg_submissions_per_form' => $avgSubmissionsPerForm,
+			'unread_submissions'       => $this->submissionsRepo->count( array( 'is_read' => 0 ) ),
 		);
 
-		// Cache for 5 minutes
-		set_transient( $cache_key, $stats, 5 * MINUTE_IN_SECONDS );
+		// Short cache: the dashboard refetches every minute, and nothing
+		// invalidates this key on new submissions.
+		set_transient( $cache_key, $stats, MINUTE_IN_SECONDS );
 
 		return $stats;
+	}
+
+	/**
+	 * Daily submission counts for the last N days, oldest first.
+	 *
+	 * Days without submissions are included with a count of 0 so the chart
+	 * always has one bar per day.
+	 *
+	 * @param int $days Number of days, including today.
+	 * @return array<int, array{date: string, count: int}>
+	 */
+	private function getSubmissionTrend( int $days = 14 ): array {
+		global $wpdb;
+		$days             = max( 1, min( 90, $days ) );
+		$submissionsTable = $wpdb->prefix . 'subtleforms_submissions';
+		$start            = gmdate( 'Y-m-d 00:00:00', strtotime( '-' . ( $days - 1 ) . ' days' ) );
+
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled.
+		$rows = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT DATE(created_at) AS day, COUNT(*) AS c FROM {$submissionsTable} WHERE created_at >= %s GROUP BY DATE(created_at)",
+				$start
+			),
+			ARRAY_A
+		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		$counts = array();
+		for ( $i = $days - 1; $i >= 0; $i-- ) {
+			$counts[ gmdate( 'Y-m-d', strtotime( '-' . $i . ' days' ) ) ] = 0;
+		}
+
+		foreach ( (array) $rows as $row ) {
+			$day = substr( (string) ( $row['day'] ?? '' ), 0, 10 );
+			if ( isset( $counts[ $day ] ) ) {
+				$counts[ $day ] += (int) ( $row['c'] ?? 0 );
+			}
+		}
+
+		$trend = array();
+		foreach ( $counts as $date => $count ) {
+			$trend[] = array(
+				'date'  => $date,
+				'count' => $count,
+			);
+		}
+
+		return $trend;
 	}
 
 	/**
@@ -176,7 +227,7 @@ class DashboardApi {
 		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table names are $wpdb->prefix controlled.
 		$results = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT s.id, s.form_id, s.status, s.created_at, f.title as form_title
+				"SELECT s.id, s.form_id, s.status, s.is_read, s.created_at, f.title as form_title
              FROM {$submissionsTable} s
              LEFT JOIN {$formsTable} f ON s.form_id = f.id
              ORDER BY s.created_at DESC
@@ -194,6 +245,7 @@ class DashboardApi {
 					'form_id'    => (int) $row['form_id'],
 					'form_title' => $row['form_title'] ?? __( 'Unknown Form', 'subtleforms' ),
 					'status'     => $row['status'],
+					'is_read'    => ! empty( $row['is_read'] ),
 					'created_at' => $row['created_at'],
 					'time_ago'   => $this->timeAgo( $row['created_at'] ),
 				);
@@ -285,7 +337,9 @@ class DashboardApi {
 	 */
 	private function timeAgo( $datetime ) {
 		$timestamp = strtotime( $datetime );
-		$diff      = time() - $timestamp;
+		// Rows written before 2.0 may hold server-local times; never show a
+		// negative age for them.
+		$diff      = max( 0, time() - $timestamp );
 
 		if ( $diff < 60 ) {
 			/* translators: %d: number of seconds */
@@ -382,5 +436,6 @@ class DashboardApi {
 	 */
 	public static function clearStatsCache() {
 		delete_transient( 'subtleforms_dashboard_stats' );
+		delete_transient( 'subtleforms_dashboard_stats_v2' );
 	}
 }

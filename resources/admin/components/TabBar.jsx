@@ -8,13 +8,16 @@ import './TabBar.scss';
  */
 export default function TabBar({ tabs, activeTab, onTabChange }) {
   return (
-    <div className='sf-tab-bar'>
+    <div className='sf-tab-bar' role='tablist'>
       {tabs.map((tab) => {
         const isActive = activeTab === tab.key;
 
         return (
           <button
             key={tab.key}
+            type='button'
+            role='tab'
+            aria-selected={isActive}
             onClick={() => onTabChange(tab.key)}
             className={clsx(
               'sf-tab-bar__tab',
@@ -22,7 +25,7 @@ export default function TabBar({ tabs, activeTab, onTabChange }) {
             )}>
             <span className='sf-tab-bar__label'>{tab.label}</span>
 
-            {tab.count !== undefined && (
+            {tab.count !== undefined && tab.count !== null && (
               <span
                 className={clsx(
                   'sf-tab-bar__count',
@@ -30,7 +33,7 @@ export default function TabBar({ tabs, activeTab, onTabChange }) {
                     ? 'sf-tab-bar__count--active'
                     : 'sf-tab-bar__count--inactive'
                 )}>
-                ({tab.count})
+                {tab.count}
               </span>
             )}
 

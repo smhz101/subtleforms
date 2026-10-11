@@ -202,6 +202,13 @@ final class PublicSubmitApi {
 		}
 		$formVersion = $activeSchema['version'] ?? null;
 
+		// Login, schedule and entry-limit rules (2.0). Checked here as well as
+		// at render time so they cannot be bypassed by posting directly.
+		$blocked = \SubtleForms\Engine\FormRestrictions::blockedReason( $formId, $activeSchema['schema'] ?? $activeSchema );
+		if ( $blocked !== null ) {
+			return ApiResponse::forbidden( $blocked );
+		}
+
 		// Restore rich_text values from the raw request.
 		//
 		// sanitizeArrayDeep() above runs wp_strip_all_tags over every value, which
@@ -214,6 +221,10 @@ final class PublicSubmitApi {
 			$rawInput['data'] ?? array(),
 			$activeSchema['schema'] ?? $activeSchema
 		);
+
+		// Recompute Calculation fields server-side so a visitor cannot post a
+		// tampered total (2.0).
+		$payload = self::applyCalculations( $payload, $activeSchema['schema'] ?? $activeSchema );
 
 		// Create submission record
 		try {
@@ -400,6 +411,58 @@ final class PublicSubmitApi {
 	 * @param int|string $value     Value bound to the predicate placeholder.
 	 * @return int Number of matching submissions.
 	 */
+	/**
+	 * Recompute every Calculation field from the submitted values.
+	 *
+	 * @param array $payload Sanitized payload.
+	 * @param mixed $schema  Active schema.
+	 * @return array
+	 */
+	private static function applyCalculations( array $payload, $schema ): array {
+		if ( ! is_array( $schema ) || empty( $schema['fields'] ) || ! is_array( $schema['fields'] ) ) {
+			return $payload;
+		}
+
+		$calcs = array();
+		$walk  = static function ( array $fields ) use ( &$walk, &$calcs ) {
+			foreach ( $fields as $field ) {
+				if ( ! is_array( $field ) ) {
+					continue;
+				}
+				$config = isset( $field['config'] ) && is_array( $field['config'] ) ? array_merge( $field, $field['config'] ) : $field;
+				if ( ( $field['type'] ?? '' ) === 'calculation' && ! empty( $config['key'] ) && ! empty( $config['formula'] ) ) {
+					$calcs[] = $config;
+				}
+				foreach ( array( 'fields', 'children' ) as $nested ) {
+					if ( ! empty( $field[ $nested ] ) && is_array( $field[ $nested ] ) ) {
+						$walk( $field[ $nested ] );
+					}
+				}
+				if ( ! empty( $field['columns'] ) && is_array( $field['columns'] ) ) {
+					foreach ( $field['columns'] as $column ) {
+						if ( is_array( $column ) ) {
+							$walk( $column );
+						}
+					}
+				}
+			}
+		};
+		$walk( $schema['fields'] );
+
+		// Two passes let one calculation reference another.
+		for ( $pass = 0; $pass < 2; $pass++ ) {
+			foreach ( $calcs as $calc ) {
+				$payload[ $calc['key'] ] = \SubtleForms\Engine\Formula::evaluate(
+					(string) $calc['formula'],
+					$payload,
+					isset( $calc['decimals'] ) ? (int) $calc['decimals'] : 2
+				);
+			}
+		}
+
+		return $payload;
+	}
+
 	/**
 	 * Re-apply rich-text sanitization to values whose schema type allows markup.
 	 *

@@ -302,6 +302,7 @@ class Schemas {
 			// and a nested fields array (handled recursively).
 			// Advanced validation (min, max, pattern, minLength, maxLength) not supported yet (intentionally disabled).
 			'FieldDefinition' => array(
+				'__passthrough' => true,
 				'type'         => 'optional|string|max:100',
 				'name'         => 'optional|string|max:100',
 				'key'          => 'optional|string|max:100',
@@ -377,6 +378,7 @@ class Schemas {
 
 			// FormMetadata
 			'FormMetadata' => array(
+				'__passthrough' => true,
 				// `multistep` is accepted alongside `multi-step` because templates and older
 				// stored schemas use the short spelling. saveSchemaVersion canonicalises it,
 				// so storage stays consistent while neither spelling is rejected outright.
@@ -397,6 +399,31 @@ class Schemas {
 				'canvasWidth'  => 'optional|in:narrow,standard,wide',
 				'integrations' => 'optional|object',
 				'appearance'   => 'optional|object|map:FormAppearance',
+				// 2.0: per-form confirmation, submit button and availability rules.
+				'confirmation' => 'optional|object|map:FormConfirmation',
+				'submitText'   => 'optional|string|max:100',
+				'restrictions' => 'optional|object|map:FormRestrictions',
+			),
+
+			// FormConfirmation — what visitors see after submitting (2.0).
+			'FormConfirmation' => array(
+				'type'         => 'optional|in:message,redirect|default:message',
+				'title'        => 'optional|string|max:200',
+				'message'      => 'optional|string|max:5000',
+				'redirectUrl'  => 'optional|string|max:2000',
+				'allowAnother' => 'optional|bool',
+			),
+
+			// FormRestrictions — who can submit, and when (2.0).
+			'FormRestrictions' => array(
+				'requireLogin'   => 'optional|bool',
+				'loginMessage'   => 'optional|string|max:500',
+				'openAt'         => 'optional|string|max:20',
+				'notOpenMessage' => 'optional|string|max:500',
+				'closeAt'        => 'optional|string|max:20',
+				'closedMessage'  => 'optional|string|max:500',
+				'entryLimit'     => 'optional|int|min:0',
+				'limitMessage'   => 'optional|string|max:500',
 			),
 
 			// FormAppearance — form-wide styling.

@@ -615,6 +615,10 @@ final class FormsApi {
 		try {
 			if ( $activate ) {
 				$version     = $this->formsRepo->saveSchemaVersion( $formId, $schema, true );
+				// Keep the draft in step with what was just activated. Publishing
+				// promotes the draft, so a draft older than this save (the last
+				// autosave) would otherwise replace these changes a moment later.
+				$this->formsRepo->saveDraftSchema( $formId, $schema );
 				$savedSchema = $this->formsRepo->loadSchemaVersion( $formId, $version );
 				if ( ! $savedSchema ) {
 					Logger::error( 'Failed to load just-saved schema version %d for form %d', $version, $formId );

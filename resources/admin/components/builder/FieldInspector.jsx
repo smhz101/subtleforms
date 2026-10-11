@@ -1,6 +1,6 @@
-import { Button, TabPanel, Notice } from '@wordpress/components';
-import { useMemo } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { Button, TabPanel, Notice, PanelBody } from '@wordpress/components';
+import { useMemo, useState } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../../ui/Icon';
 import ConditionEditor from './ConditionEditor';
 import { useBuilder } from './context/BuilderContext';
@@ -10,198 +10,305 @@ import {
   ValidationPanel,
   DynamicInspectorPanel,
 } from './inspector/panels';
+import { CHOICE_TYPES } from './inspector/panels/OptionsPanel';
 import FieldAppearancePanel from './appearance/FieldAppearancePanel';
 import { supportsAppearance } from '../../../shared/appearance';
+import { getIcon } from './utils/iconMap';
 
-export default function FieldInspector({ field, allFields, isReadOnly = false }) {
+/**
+ * Field inspector — the right panel of the builder.
+ *
+ * Header: what the field is and its key (copyable, used in formulas, emails
+ * and webhooks), with duplicate and delete. Body: four tabs — Settings,
+ * Validation, Logic and Style — each made of collapsible panels like the
+ * block editor's sidebar.
+ */
+export default function FieldInspector({ field, allFields, formAppearance, isReadOnly = false }) {
   const { setSelectedId, actions, validationErrors, selectedId } = useBuilder();
   const { fieldDefinitions } = useConfig();
+  const [copied, setCopied] = useState(false);
 
-  const selectedFieldValidationMessages = selectedId
+  const definition = fieldDefinitions?.[field?.type];
+  const fieldCategory = definition?.meta?.category;
+  const isInputLike =
+    !fieldCategory || fieldCategory === 'regular' || fieldCategory === 'composite';
+
+  const validationMessages = selectedId
     ? (validationErrors || [])
         .filter((v) => v.fieldKey === field?.key)
         .map((v) => v.message)
     : [];
-
-  const hasValidationMessages =
-    Array.isArray(selectedFieldValidationMessages) &&
-    selectedFieldValidationMessages.length > 0;
 
   const handleUpdate = (changes) => {
     if (!selectedId || isReadOnly) return;
     actions.onUpdate(selectedId, changes);
   };
 
-  const handleClose = () => {
-    setSelectedId(null);
-  };
-
-  // Derive meta category from PHP field definitions for tab gating.
-  const fieldCategory = fieldDefinitions?.[ field?.type ]?.meta?.category;
-  const isInputLike = !fieldCategory || fieldCategory === 'regular' || fieldCategory === 'composite';
-
-  // Detect config problems that should be surfaced to the builder
   const fieldWarnings = useMemo(() => {
     if (!field) return [];
     const warnings = [];
     if (field.required && !field.label?.trim()) {
-      warnings.push(__('This required field has no label — users won\'t know what to fill in.', 'subtleforms'));
+      warnings.push(
+        __('This required field has no label, so visitors won’t know what to enter.', 'subtleforms')
+      );
     }
-    const OPTION_TYPES = ['dropdown', 'select', 'radio', 'multiple_choice'];
-    if (OPTION_TYPES.includes(field.type) && (!field.options || field.options.length === 0)) {
-      warnings.push(__('No options configured — users will see an empty list.', 'subtleforms'));
+    if (CHOICE_TYPES.includes(field.type) && (!field.options || field.options.length === 0)) {
+      warnings.push(__('Add at least one option.', 'subtleforms'));
+    }
+    if (field.type === 'calculation' && !field.formula?.trim()) {
+      warnings.push(__('Add a formula to show a result.', 'subtleforms'));
     }
     return warnings;
   }, [field]);
 
-  // Type-specific smart hints shown in the General tab
-  const smartHint = useMemo(() => {
-    if (!field) return null;
-    if (field.type === 'email') return __('Email format is automatically validated on submission.', 'subtleforms');
-    if (field.type === 'url') return __('URL format is automatically validated on submission.', 'subtleforms');
-    if (field.type === 'number') return __('Set Min / Max in the controls above to restrict this field\'s input range.', 'subtleforms');
-    if (field.type === 'phone' || field.type === 'tel') return __('Tip: add a placeholder (e.g. +1 555 000 0000) for better UX.', 'subtleforms');
-    return null;
-  }, [field]);
+  if (!field) {
+    return (
+      <div className='sf-field-inspector'>
+        <div className='sf-field-inspector__empty'>
+          <span className='sf-field-inspector__empty-icon' aria-hidden='true'>
+            <Icon.Sliders size={20} />
+          </span>
+          <p className='sf-field-inspector__empty-title'>
+            {__('No field selected', 'subtleforms')}
+          </p>
+          <p className='sf-field-inspector__empty-text'>
+            {__(
+              'Select a field on the canvas to edit its label, options, validation and logic.',
+              'subtleforms'
+            )}
+          </p>
+          <ul className='sf-field-inspector__shortcuts'>
+            <li>
+              <kbd>/</kbd> {__('Search fields', 'subtleforms')}
+            </li>
+            <li>
+              <kbd>Ctrl</kbd>
+              <kbd>Z</kbd> {__('Undo', 'subtleforms')}
+            </li>
+            <li>
+              <kbd>Del</kbd> {__('Delete selected field', 'subtleforms')}
+            </li>
+          </ul>
+        </div>
+      </div>
+    );
+  }
+
+  const FieldIcon = getIcon(field.type);
+  const typeLabel = definition?.label || field.type?.replace(/_/g, ' ');
+  const fieldKey = field.key;
+
+  const tabs = [
+    { name: 'settings', title: __('Settings', 'subtleforms') },
+    ...(isInputLike
+      ? [
+          {
+            name: 'validation',
+            title: (
+              <span className='sf-field-inspector__tab-label'>
+                {__('Validation', 'subtleforms')}
+                {validationMessages.length > 0 && (
+                  <span className='sf-field-inspector__tab-dot' aria-hidden='true' />
+                )}
+              </span>
+            ),
+          },
+          {
+            name: 'logic',
+            title: (
+              <span className='sf-field-inspector__tab-label'>
+                {__('Logic', 'subtleforms')}
+                {(field.conditions || []).length > 0 && (
+                  <span className='sf-field-inspector__tab-count'>
+                    {(field.conditions || []).length}
+                  </span>
+                )}
+              </span>
+            ),
+          },
+        ]
+      : []),
+    ...(supportsAppearance(field.type)
+      ? [{ name: 'style', title: __('Style', 'subtleforms') }]
+      : []),
+  ];
 
   return (
     <div className='sf-field-inspector'>
-      {/* Header */}
       <div className='sf-field-inspector__header'>
+        <span className='sf-field-inspector__type-icon' aria-hidden='true'>
+          <FieldIcon size={20} />
+        </span>
         <div className='sf-field-inspector__header-info'>
-          <strong className='sf-field-inspector__title'>
-            {field
-              ? field.label || field.name || field.type
-              : __('Settings', 'subtleforms')}
-          </strong>
-          {field && (
-            <span className='sf-field-inspector__field-type'>
-              {field.type?.replace(/_/g, ' ')}
-            </span>
+          <strong className='sf-field-inspector__title'>{typeLabel}</strong>
+          {fieldKey && (
+            <button
+              type='button'
+              className='sf-field-inspector__key'
+              title={__('Copy field key', 'subtleforms')}
+              onClick={() => {
+                window.navigator?.clipboard?.writeText(`{${fieldKey}}`).then(() => {
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 1500);
+                });
+              }}>
+              {copied ? (
+                <>
+                  <Icon.Check size={12} /> {__('Copied', 'subtleforms')}
+                </>
+              ) : (
+                <>
+                  <code>{fieldKey}</code>
+                  <Icon.Copy size={12} />
+                </>
+              )}
+            </button>
           )}
         </div>
-        <Button
-          isSmall
-          onClick={handleClose}
-          disabled={!field}
-          className='sf-field-inspector__close-button'>
-          ×
-        </Button>
+        <div className='sf-field-inspector__header-actions'>
+          <Button
+            size='compact'
+            icon={<Icon.Copy size={16} />}
+            label={__('Duplicate', 'subtleforms')}
+            showTooltip
+            disabled={isReadOnly}
+            onClick={() => actions.onDuplicate?.(selectedId)}
+          />
+          <Button
+            size='compact'
+            isDestructive
+            icon={<Icon.Trash size={16} />}
+            label={__('Delete', 'subtleforms')}
+            showTooltip
+            disabled={isReadOnly}
+            onClick={() => actions.onDelete?.(selectedId)}
+          />
+          <Button
+            size='compact'
+            icon={<Icon.Close size={16} />}
+            label={__('Close settings', 'subtleforms')}
+            showTooltip
+            onClick={() => setSelectedId(null)}
+          />
+        </div>
       </div>
 
-      {/* Content */}
-      <div className='sf-field-inspector__content'>
-        {!field && (
-          <div className='sf-field-inspector__empty'>
-            <p className='sf-field-inspector__empty-paragraph'>
-              {__('Nothing selected', 'subtleforms')}
-            </p>
-            <p className='sf-field-inspector__empty-subtext'>
-              {__(
-                'Click a field (or container) in the canvas to edit its settings, validation, and conditions.',
-                'subtleforms'
-              )}
-            </p>
+      {(isReadOnly || validationMessages.length > 0 || fieldWarnings.length > 0) && (
+        <div className='sf-field-inspector__notices'>
+          {isReadOnly && (
+            <Notice status='info' isDismissible={false}>
+              {__('Read-only: this form uses Pro features. Activate your license to edit it. The live form keeps working.', 'subtleforms')}
+            </Notice>
+          )}
+          {validationMessages.slice(0, 1).map((m, i) => (
+            <Notice key={`v${i}`} status='warning' isDismissible={false}>
+              {m}
+            </Notice>
+          ))}
+          {fieldWarnings.map((warning, i) => (
+            <Notice key={`w${i}`} status='warning' isDismissible={false}>
+              {warning}
+            </Notice>
+          ))}
+        </div>
+      )}
+
+      <TabPanel
+        key={field.id ?? 'none'}
+        className='sf-field-inspector__tabs'
+        tabs={tabs}>
+        {(tab) => (
+          <div className='sf-field-inspector__tab-content'>
+            {tab.name === 'settings' && (
+              <>
+                <PanelBody title={__('General', 'subtleforms')} initialOpen>
+                  <DynamicInspectorPanel
+                    field={field}
+                    onUpdate={handleUpdate}
+                    isReadOnly={isReadOnly}
+                    sections={['general']}
+                  />
+                </PanelBody>
+                {CHOICE_TYPES.includes(field.type) && (
+                  <PanelBody title={__('Choices', 'subtleforms')} initialOpen>
+                    <OptionsPanel
+                      field={field}
+                      onUpdate={handleUpdate}
+                      isReadOnly={isReadOnly}
+                    />
+                  </PanelBody>
+                )}
+                <AdvancedPanel
+                  field={field}
+                  onUpdate={handleUpdate}
+                  isReadOnly={isReadOnly}
+                />
+              </>
+            )}
+            {tab.name === 'validation' && (
+              <div className='sf-field-inspector__pad'>
+                <ValidationPanel
+                  field={field}
+                  onUpdate={handleUpdate}
+                  isReadOnly={isReadOnly}
+                />
+              </div>
+            )}
+            {tab.name === 'logic' && (
+              <div className='sf-field-inspector__pad'>
+                <p className='sf-field-inspector__intro'>
+                  {sprintf(
+                    /* translators: %s: field label */
+                    __('Show, hide or require “%s” based on answers to other fields.', 'subtleforms'),
+                    field.label || typeLabel
+                  )}
+                </p>
+                <ConditionEditor
+                  conditions={field.conditions || []}
+                  availableFields={allFields || []}
+                  onChange={(conditions) => handleUpdate({ conditions })}
+                />
+              </div>
+            )}
+            {tab.name === 'style' && (
+              <div className='sf-field-inspector__pad sf-field-inspector__pad--style'>
+                <FieldAppearancePanel
+                  field={field}
+                  onUpdate={handleUpdate}
+                  formAppearance={formAppearance}
+                  isReadOnly={isReadOnly}
+                />
+              </div>
+            )}
           </div>
         )}
-
-        {field && (
-          <>
-            {isReadOnly && (
-              <Notice status='info' isDismissible={false}>
-                <p className='sf-field-inspector__notice-paragraph'>
-                  {__('Read-only mode: Activate your Pro license to edit. Your form continues working—no data loss.', 'subtleforms')}
-                </p>
-              </Notice>
-            )}
-            {hasValidationMessages && (
-              <Notice status='warning' isDismissible={false}>
-                <p className='sf-field-inspector__notice-paragraph'>
-                  {selectedFieldValidationMessages[0]}
-                </p>
-              </Notice>
-            )}
-            {fieldWarnings.map((warning, i) => (
-              <Notice key={i} status='warning' isDismissible={false}>
-                <p className='sf-field-inspector__notice-paragraph'>{warning}</p>
-              </Notice>
-            ))}
-            <TabPanel
-              key={field?.id ?? 'none'}
-              tabs={[
-                { name: 'general', title: __('General', 'subtleforms') },
-                ...( isInputLike ? [
-                  {
-                    name: 'validation',
-                    title: (
-                      <span className='sf-field-inspector__tab-label'>
-                        {__('Validation', 'subtleforms')}
-                        {hasValidationMessages && (
-                          <span
-                            className='sf-field-inspector__tab-warning-indicator'
-                            aria-hidden='true'
-                          />
-                        )}
-                      </span>
-                    ),
-                  },
-                  { name: 'conditions', title: __('Conditions', 'subtleforms') },
-                ] : [] ),
-                // Hidden for types that render no element: a saved value that
-                // cannot show up is worse than an absent control.
-                ...( supportsAppearance( field?.type )
-                  ? [ { name: 'style', title: __('Style', 'subtleforms') } ]
-                  : [] ),
-              ]}>
-              {(tab) => (
-                <div className='sf-field-inspector__tab-content'>
-                  {tab.name === 'general' && (
-                    <>
-                      <DynamicInspectorPanel
-                        field={field}
-                        onUpdate={handleUpdate}
-                        isReadOnly={isReadOnly}
-                      />
-                      <OptionsPanel
-                        field={field}
-                        onUpdate={handleUpdate}
-                        isReadOnly={isReadOnly}
-                      />
-                      {smartHint && (
-                        <div className='sf-field-inspector__smart-hint'>
-                          <Icon.Lightbulb size={14} aria-hidden='true' />
-                          <p>{smartHint}</p>
-                        </div>
-                      )}
-                    </>
-                  )}
-                  {tab.name === 'validation' && (
-                    <ValidationPanel
-                      field={field}
-                      onUpdate={handleUpdate}
-                      isReadOnly={isReadOnly}
-                    />
-                  )}
-                  {tab.name === 'conditions' && (
-                    <ConditionEditor
-                      conditions={field.conditions || []}
-                      availableFields={allFields || []}
-                      onChange={(conditions) => handleUpdate({ conditions })}
-                    />
-                  )}
-                  {tab.name === 'style' && (
-                    <FieldAppearancePanel
-                      field={field}
-                      onUpdate={handleUpdate}
-                      isReadOnly={isReadOnly}
-                    />
-                  )}
-                </div>
-              )}
-            </TabPanel>
-          </>
-        )}
-      </div>
+      </TabPanel>
     </div>
+  );
+}
+
+/**
+ * Advanced panel — only rendered when the field type has advanced settings.
+ */
+function AdvancedPanel({ field, onUpdate, isReadOnly }) {
+  const { fieldDefinitions } = useConfig();
+  const def = fieldDefinitions?.[field.type];
+  const all = [
+    ...(Array.isArray(def?.inspectorControls) ? def.inspectorControls : []),
+    ...(Array.isArray(def?.layoutControls) ? def.layoutControls : []),
+  ];
+  if (!all.some((c) => c?.section === 'advanced')) {
+    return null;
+  }
+  return (
+    <PanelBody title={__('Advanced', 'subtleforms')} initialOpen={false}>
+      <DynamicInspectorPanel
+        field={field}
+        onUpdate={onUpdate}
+        isReadOnly={isReadOnly}
+        sections={['advanced']}
+        showEmpty={false}
+      />
+    </PanelBody>
   );
 }

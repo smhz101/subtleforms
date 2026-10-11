@@ -429,7 +429,7 @@ final class CoreFields {
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					'options'       => array(),
-					'allowMultiple' => false,
+					'allowMultiple' => true,
 				),
 				inspectorControls: array(
 					array(

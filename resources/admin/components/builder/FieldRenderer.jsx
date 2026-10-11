@@ -12,7 +12,7 @@ const NON_INPUT_TYPES = new Set([
   'one_column_container', 'two_column_container', 'three_column_container',
   'four_column_container', 'five_column_container', 'six_column_container',
   'repeat_container', 'group_container', 'step', 'action_hook',
-  'payment_summary', 'payment_hidden_price',
+  'payment_summary', 'payment_hidden_price', 'calculation',
   'recaptcha', 'hcaptcha', 'turnstile',
 ]);
 
@@ -26,6 +26,8 @@ const KNOWN_TYPES = new Set([
   'name_group', 'address_group',
   'payment_amount', 'payment_coupon',
   'post_create', 'quiz_score',
+  'rich_text', 'net_promoter_score', 'checkbox_grid',
+  'toggle', 'scale', 'picture_choice', 'calculation',
 ]);
 
 /**
@@ -182,24 +184,76 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         type === 'email' ||
         type === 'phone' ||
         type === 'tel' ||
-        type === 'url') && (
-        <input
-          type={type === 'email' ? 'email' : type === 'url' ? 'url' : 'text'}
-          placeholder={placeholder || ''}
-          className={inputClass}
-          readOnly
-          tabIndex='-1'
-        />
+        type === 'url' ||
+        type === 'number') && (
+        <div className={field.prefix || field.suffix ? 'sf-field-renderer__affix' : undefined}>
+          {field.prefix && <span className='sf-field-renderer__affix-part'>{field.prefix}</span>}
+          <input
+            type={type === 'email' ? 'email' : type === 'url' ? 'url' : type === 'number' ? 'number' : 'text'}
+            placeholder={placeholder || ''}
+            className={inputClass}
+            readOnly
+            tabIndex='-1'
+          />
+          {field.suffix && <span className='sf-field-renderer__affix-part'>{field.suffix}</span>}
+        </div>
       )}
 
-      {type === 'number' && (
-        <input
-          type='number'
-          placeholder={placeholder || ''}
-          className={inputClass}
-          readOnly
-          tabIndex='-1'
-        />
+      {type === 'toggle' && (
+        <div className='sf-field-renderer__toggle'>
+          <span className='sf-field-renderer__toggle-track' aria-hidden='true'>
+            <span className='sf-field-renderer__toggle-thumb' />
+          </span>
+          <span>{field.toggleLabel || __('Yes', 'subtleforms')}</span>
+        </div>
+      )}
+
+      {type === 'scale' && (() => {
+        const min = parseInt(field.scaleMin ?? 1, 10);
+        const max = Math.max(min + 1, Math.min(10, parseInt(field.scaleMax ?? 5, 10)));
+        const points = [];
+        for (let i = min; i <= max; i++) points.push(i);
+        return (
+          <div className='sf-field-renderer__scale'>
+            <div className='sf-field-renderer__scale-row' style={{ '--sf-scale-count': points.length }}>
+              {points.map((p) => (
+                <span key={p} className='sf-field-renderer__scale-point'>{p}</span>
+              ))}
+            </div>
+            {(field.minLabel || field.maxLabel) && (
+              <div className='sf-field-renderer__nps-labels'>
+                <span>{field.minLabel}</span>
+                <span>{field.maxLabel}</span>
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
+      {type === 'picture_choice' && (
+        <div
+          className='sf-field-renderer__pictures'
+          style={{ '--sf-picture-cols': parseInt(field.pictureColumns || 3, 10) }}>
+          {(options || []).map((opt, i) => (
+            <div key={opt.value || i} className='sf-field-renderer__picture'>
+              <div className='sf-field-renderer__picture-media'>
+                {opt.image ? <img src={opt.image} alt='' /> : <Icon.Image size={20} />}
+              </div>
+              <span>{opt.label}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {type === 'calculation' && (
+        <div className='sf-field-renderer__calculation'>
+          <span className='sf-field-renderer__calculation-value'>
+            {field.prefix}0.{'0'.repeat(Math.max(0, parseInt(field.decimals ?? 2, 10)))}{field.suffix}
+          </span>
+          <code className='sf-field-renderer__calculation-formula'>
+            {field.formula || __('Add a formula in settings', 'subtleforms')}
+          </code>
+        </div>
       )}
 
       {type === 'textarea' && (
@@ -276,7 +330,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       )}
 
       {type === 'radio' && options && (
-        <div className='sf-field-renderer__options-list'>
+        <div className={`sf-field-renderer__options-list sf-field-renderer__options-list--${field.optionLayout || 'stacked'}`}>
           {options.map((opt, idx) => (
             <div key={idx} className='sf-field-renderer__checkbox-wrapper'>
               <input
@@ -294,11 +348,11 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       )}
 
       {type === 'multiple_choice' && options && (
-        <div className='sf-field-renderer__options-list'>
+        <div className={`sf-field-renderer__options-list sf-field-renderer__options-list--${field.optionLayout || 'stacked'}`}>
           {options.map((opt, idx) => (
             <div key={idx} className='sf-field-renderer__checkbox-wrapper'>
               <input
-                type='checkbox'
+                type={field.allowMultiple === false ? 'radio' : 'checkbox'}
                 className='sf-field-renderer__checkbox'
                 tabIndex='-1'
               />
@@ -715,15 +769,15 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
             <div className='sf-field-renderer__checkbox-grid-header' style={gridStyle}>
               <span />
               {gridCols.map((col, i) => (
-                <span key={i} className='sf-field-renderer__checkbox-grid-col'>{col}</span>
+                <span key={i} className='sf-field-renderer__checkbox-grid-col'>{col?.label ?? col}</span>
               ))}
             </div>
             {gridRows.map((row, i) => (
               <div key={i} className='sf-field-renderer__checkbox-grid-row' style={gridStyle}>
-                <span className='sf-field-renderer__checkbox-grid-row-label'>{row}</span>
+                <span className='sf-field-renderer__checkbox-grid-row-label'>{row?.label ?? row}</span>
                 {gridCols.map((_, j) => (
                   <span key={j} className='sf-field-renderer__checkbox-grid-cell'>
-                    <input type='checkbox' className='sf-field-renderer__checkbox' readOnly tabIndex='-1' />
+                    <input type={field.multiplePerRow === false ? 'radio' : 'checkbox'} className='sf-field-renderer__checkbox' readOnly tabIndex='-1' />
                   </span>
                 ))}
               </div>

@@ -9,6 +9,7 @@ import {
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import ActionsPanel from './ActionsPanel';
+import { ConfirmationPanel, AvailabilityPanel } from './FormBehaviorPanels';
 import './FormSettings.scss';
 
 /**
@@ -156,7 +157,7 @@ export default function FormSettings({
             title={__('General', 'subtleforms')}
             initialOpen={true}>
             <TextControl
-                label={__('Form Name', 'subtleforms')}
+                label={__('Form name', 'subtleforms')}
                 value={metadata.title || ''}
                 onChange={(value) => handleMetadataChange('title', value)}
                 help={__(
@@ -165,52 +166,37 @@ export default function FormSettings({
                 )}
               />
             <TextControl
-                label={__('Internal identifier', 'subtleforms')}
-                value={metadata.name || 'form_schema'}
-                onChange={(value) => handleMetadataChange('name', value)}
-                help={__(
-                  'Optional machine identifier for this schema (defaults to “form_schema”). Most forms can leave this as-is.',
-                  'subtleforms'
-                )}
-              />
-            <TextControl
-                label={__('Form Description', 'subtleforms')}
+                label={__('Description', 'subtleforms')}
                 value={metadata.description || ''}
                 onChange={(value) => handleMetadataChange('description', value)}
                 help={__(
-                  'Optional description for documentation purposes',
+                  'Shown under the title when the block or shortcode displays it.',
                   'subtleforms'
                 )}
               />
           </PanelBody>
 
+          <ConfirmationPanel
+            schema={schema}
+            onMetadata={handleMetadataChange}
+            isReadOnly={isReadOnly}
+          />
+
           <PanelBody
-            title={__('Builder canvas', 'subtleforms')}
+            title={__('Notifications & actions', 'subtleforms')}
             initialOpen={false}>
-            <RadioControl
-              label={__('Canvas Width', 'subtleforms')}
-              selected={metadata.canvasWidth || 'standard'}
-              options={[
-                {
-                  label: __('Narrow (640px)', 'subtleforms'),
-                  value: 'narrow',
-                },
-                {
-                  label: __('Standard (768px)', 'subtleforms'),
-                  value: 'standard',
-                },
-                {
-                  label: __('Wide (1024px)', 'subtleforms'),
-                  value: 'wide',
-                },
-              ]}
-              onChange={(value) => handleMetadataChange('canvasWidth', value)}
-              help={__(
-                'Editing width inside the builder only. The published form’s width is set under Preview.',
-                'subtleforms'
-              )}
+            <ActionsPanel
+              schema={schema}
+              onChange={onChange}
+              isReadOnly={isReadOnly}
             />
           </PanelBody>
+
+          <AvailabilityPanel
+            schema={schema}
+            onMetadata={handleMetadataChange}
+            isReadOnly={isReadOnly}
+          />
 
           {/* Payments — only for form types that can collect them. */}
           {supportsPayment && (
@@ -459,14 +445,42 @@ export default function FormSettings({
           })()}
 
           <PanelBody
-            title={__('Actions', 'subtleforms')}
+            title={__('Advanced', 'subtleforms')}
             initialOpen={false}>
-            <ActionsPanel
-              schema={schema}
-              onChange={onChange}
-              isReadOnly={isReadOnly}
+            <RadioControl
+              label={__('Builder canvas width', 'subtleforms')}
+              selected={metadata.canvasWidth || 'standard'}
+              options={[
+                {
+                  label: __('Narrow (640px)', 'subtleforms'),
+                  value: 'narrow',
+                },
+                {
+                  label: __('Standard (768px)', 'subtleforms'),
+                  value: 'standard',
+                },
+                {
+                  label: __('Wide (1024px)', 'subtleforms'),
+                  value: 'wide',
+                },
+              ]}
+              onChange={(value) => handleMetadataChange('canvasWidth', value)}
+              help={__(
+                'Editing width inside the builder only. The published form’s width is set under Preview.',
+                'subtleforms'
+              )}
+            />
+            <TextControl
+              label={__('Internal identifier', 'subtleforms')}
+              value={metadata.name || 'form_schema'}
+              onChange={(value) => handleMetadataChange('name', value)}
+              help={__(
+                'Machine name used in exports and developer hooks. Most forms can leave this as it is.',
+                'subtleforms'
+              )}
             />
           </PanelBody>
+
         </Panel>
       </div>
     </div>

@@ -79,10 +79,9 @@ export default function FormsPage() {
         const totalForms = formsData?.meta?.total ?? 0;
         setFormsCount(totalForms);
 
-        // Show wizard if not dismissed and no forms exist
-        if (!statusData?.dismissed && totalForms === 0) {
-          setShowWizard(true);
-        }
+        // 2.0: first-run users land on the empty state, which opens the
+        // template library. The old setup wizard stays available but no
+        // longer interrupts on load.
       } catch (error) {
         console.error('Failed to check onboarding status:', error);
       }
@@ -163,43 +162,26 @@ export default function FormsPage() {
   return (
     <>
       <AdminShell
-        title={__('All Forms', 'subtleforms')}
+        title={__('Forms', 'subtleforms')}
+        description={__(
+          'Build, publish and manage every form on your site.',
+          'subtleforms'
+        )}
         actions={
-          <div className='sf-forms-actions'>
-            {formsCount === 0 ? (
-              <div className='sf-first-run-cta'>
-                <h3 className='sf-first-run-cta__title'>
-                  {__('Create your first form', 'subtleforms')}
-                </h3>
-                <p className='sf-first-run-cta__desc'>
-                  {__(
-                    'Let us help you get started — create a contact form in seconds.',
-                    'subtleforms'
-                  )}
-                </p>
-                <Button isPrimary onClick={() => setShowWizard(true)}>
-                  {__('Create your first form', 'subtleforms')}
-                </Button>
-              </div>
-            ) : (
-              <div className='sf-forms-header'>
-                <div className='sf-forms-header__actions'>
-                  <HelpMenu
-                    onOpenWizard={() => setShowWizard(true)}
-                    showWizard={true}
-                  />
-                  <Button
-                    isPrimary
-                    onClick={() => {
-                      navigate('/forms/new');
-                    }}>
-                    <Icon.Add className='sf-icon-button' />
-                    {__('New Form', 'subtleforms')}
-                  </Button>
-                </div>
-              </div>
-            )}
-          </div>
+          <>
+            <HelpMenu
+              onOpenWizard={() => setShowWizard(true)}
+              showWizard={true}
+            />
+            <Button
+              variant='primary'
+              icon={<Icon.Plus size={16} />}
+              onClick={() => {
+                navigate('/forms/new');
+              }}>
+              {__('New form', 'subtleforms')}
+            </Button>
+          </>
         }
         actionBarLeft={
           <TabBar
@@ -216,9 +198,9 @@ export default function FormsPage() {
                 onClick={() => setShowColPicker((v) => !v)}
                 className='sf-button-height sf-col-picker__toggle'
                 title={__('Show/hide columns', 'subtleforms')}>
-                <Icon.Columns size={14} />
-                <span>{__('Columns', 'subtleforms')}</span>
-                <Icon.ChevronDown size={12} />
+                <Icon.Columns size={16} />
+                <span>{__('View', 'subtleforms')}</span>
+                <Icon.ChevronDown size={14} />
               </Button>
               {showColPicker && (
                 <div className='sf-col-picker__dropdown'>
@@ -238,7 +220,9 @@ export default function FormsPage() {
             <SearchControl
               value={search}
               onChange={setSearch}
-              placeholder={__('Search forms...', 'subtleforms')}
+              placeholder={__('Search forms', 'subtleforms')}
+              __nextHasNoMarginBottom
+              size='compact'
             />
           </div>
         }>

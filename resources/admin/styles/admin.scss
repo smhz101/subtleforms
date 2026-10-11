@@ -72,3 +72,6 @@
 
 // Builder Layout Styles
 @use '../components/builder/layout/BuilderCanvasArea.scss';
+
+// Shared primitives — last, so shared surfaces are settled in one place.
+@use 'components';

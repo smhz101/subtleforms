@@ -99,11 +99,24 @@ class AdminMenu {
 		return strtolower( $host );
 	}
 
+	/**
+	 * Number of unread submissions, for the navigation badge.
+	 *
+	 * @return int
+	 */
+	private function get_unread_count(): int {
+		try {
+			return (int) $this->submissionsRepo->count( array( 'is_read' => 0 ) );
+		} catch ( \Exception $e ) {
+			return 0;
+		}
+	}
+
 	private function getSubmissionMenuTitle(): string {
 		$baseTitle = esc_html__( 'Submissions', 'subtleforms' );
 
 		try {
-			$unreadCount = $this->submissionsRepo->count( array( 'status' => 'unread' ) );
+			$unreadCount = $this->submissionsRepo->count( array( 'is_read' => 0 ) );
 
 			if ( $unreadCount > 0 ) {
 				$badge = sprintf( '<span class="awaiting-mod count-%d"><span class="pending-count">%d</span></span>', $unreadCount, $unreadCount );
@@ -238,6 +251,11 @@ class AdminMenu {
 		);
 
 		if ( $this->is_builder_screen( $hook ) ) {
+			// Media Library for Picture Choice images (2.0).
+			if ( function_exists( 'wp_enqueue_media' ) ) {
+				wp_enqueue_media();
+			}
+
 			wp_enqueue_style(
 				'subtleforms-admin-builder',
 				SUBTLEFORMS_PLUGIN_URL . 'assets/css/admin-builder.css',
@@ -296,6 +314,8 @@ class AdminMenu {
 				'restUrl'        => rest_url( 'subtleforms/v1' ),
 				'nonce'          => wp_create_nonce( 'subtleforms_admin' ),
 				'restNonce'      => wp_create_nonce( 'wp_rest' ),
+				'version'        => SUBTLEFORMS_VERSION,
+				'unreadCount'    => $this->get_unread_count(),
 				'capabilities'   => $live_caps->all(),
 				'hasProPlugin'   => defined( 'SUBTLEFORMS_PRO_VERSION' ) || sf_is_pro_active(),
 				'license'        => $license_data,
@@ -479,6 +499,12 @@ class AdminMenu {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Admin page slug; no form data processed; sanitize_key() applied.
 		$page = isset( $_GET['page'] ) ? sanitize_key( Helpers::normalize_string( $_GET['page'] ) ) : '';
+
+		// Every SubtleForms screen renders inside the app frame. The class is
+		// printed server-side so the frame layout applies before React mounts.
+		if ( $page === 'subtleforms' || strpos( $page, 'subtleforms-' ) === 0 ) {
+			$classes .= ' subtleforms-admin-page subtleforms-admin-scope';
+		}
 		if ( $page === 'subtleforms-new-form' && strpos( Helpers::normalize_string( $classes ), 'subtleforms-builder-page' ) === false ) {
 			$classes .= ' subtleforms-builder-page';
 		}

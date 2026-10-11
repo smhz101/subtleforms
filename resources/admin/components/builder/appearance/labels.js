@@ -19,6 +19,11 @@ export const TOKEN_LABELS = {
   colorSurface: __( 'Field background', 'subtleforms' ),
   colorBorder: __( 'Border', 'subtleforms' ),
   colorError: __( 'Error', 'subtleforms' ),
+  colorLabel: __( 'Labels', 'subtleforms' ),
+  colorInputText: __( 'Input text', 'subtleforms' ),
+  colorFocus: __( 'Focus ring', 'subtleforms' ),
+  colorButtonText: __( 'Button text', 'subtleforms' ),
+  buttonRadius: __( 'Button radius', 'subtleforms' ),
 
   // Typography
   fontFamily: __( 'Font', 'subtleforms' ),
@@ -66,6 +71,7 @@ export const OPTION_LABELS = {
   400: __( 'Regular', 'subtleforms' ),
   500: __( 'Medium', 'subtleforms' ),
   600: __( 'Semibold', 'subtleforms' ),
+  700: __( 'Bold', 'subtleforms' ),
 
   // Field widths
   100: __( 'Full', 'subtleforms' ),
@@ -101,10 +107,23 @@ export const PRESET_LABELS = {
     label: __( 'Compact', 'subtleforms' ),
     description: __( 'Small type and tight rows. Suits long forms.', 'subtleforms' ),
   },
+  rounded: {
+    label: __( 'Rounded', 'subtleforms' ),
+    description: __( 'Pill buttons and soft rounded fields. Friendly and modern.', 'subtleforms' ),
+  },
+  classic: {
+    label: __( 'Classic', 'subtleforms' ),
+    description: __( 'Serif type on warm paper. Suits editorial and service sites.', 'subtleforms' ),
+  },
+  bold: {
+    label: __( 'Bold', 'subtleforms' ),
+    description: __( 'High-contrast accent and heavy labels. Built to convert.', 'subtleforms' ),
+  },
 };
 
 export const FONT_LABELS = {
   '': __( 'System', 'subtleforms' ),
+  "Georgia, 'Iowan Old Style', 'Times New Roman', serif": __( 'Serif', 'subtleforms' ),
   inherit: __( 'Inherit from theme', 'subtleforms' ),
 };
 

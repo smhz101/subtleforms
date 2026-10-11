@@ -13,6 +13,9 @@
 /* Base styles (shared across all form types) */
 @import './styles/base.css';
 
+/* 2.0 field types and settings */
+@import './styles/fields-v2.css';
+
 /* Base Form Wrapper */
 .subtleforms-form {
 	display: block;
@@ -493,23 +496,27 @@
 	cursor: not-allowed;
 }
 
-/* Success Message */
+/* Success Message — neutral card with a green check (2.0) */
 .subtleforms-success {
-	background: var(--subtleforms-color-bg-subtle);
-	border: 1px solid var(--subtleforms-color-success);
-	border-radius: 4px;
-	padding: 20px;
-	color: var(--subtleforms-color-success);
+	background: var(--subtleforms-color-bg, #fff);
+	border: 1px solid var(--subtleforms-color-border, #e0e0e0);
+	border-radius: 8px;
+	padding: 32px 24px;
+	color: var(--subtleforms-color-text, #1e1e1e);
 	text-align: center;
 }
 
 .subtleforms-success h3 {
-	margin: 0 0 10px 0;
-	font-size: 18px;
+	margin: 0 0 6px 0;
+	font-size: 20px;
+	line-height: 1.3;
+	color: inherit;
 }
 
 .subtleforms-success p {
-	margin: 0;
+	margin: 0 auto 6px;
+	max-width: 46ch;
+	color: var(--subtleforms-color-text-muted, #50575e);
 }
 
 /* Unsupported Field */

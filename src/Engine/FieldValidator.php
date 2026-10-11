@@ -29,6 +29,8 @@ final class FieldValidator {
 		'step',
 		// System / non-input types
 		'hidden',
+		'html',
+		'calculation',
 	);
 
 	/**
@@ -63,16 +65,26 @@ final class FieldValidator {
 			// `false`, which the generic isEmpty() does not treat as missing.
 			// Without this, a required consent could be bypassed by skipping the
 			// frontend check and submitting `false` directly.
+			$requiredMessage = $this->requiredMessage( $fields[ $fieldKey ] ?? array(), $fieldKey );
+
 			if ( in_array( $type, array( 'checkbox', 'consent' ), true ) ) {
 				$accepted = is_bool( $value ) ? $value : filter_var( $value, FILTER_VALIDATE_BOOLEAN );
 				if ( ! $accepted ) {
-					$errors[ $fieldKey ] = sprintf( 'Field "%s" is required.', $fieldKey );
+					$errors[ $fieldKey ] = $requiredMessage;
+				}
+				continue;
+			}
+
+			if ( $type === 'toggle' ) {
+				$onValue = (string) ( $this->attr( $fields[ $fieldKey ] ?? array(), 'onValue' ) ?? 'yes' );
+				if ( $value !== true && (string) $value !== $onValue ) {
+					$errors[ $fieldKey ] = $requiredMessage;
 				}
 				continue;
 			}
 
 			if ( $isComposite ? $this->isCompositeEmpty( $value ) : $this->isEmpty( $value ) ) {
-				$errors[ $fieldKey ] = sprintf( 'Field "%s" is required.', $fieldKey );
+				$errors[ $fieldKey ] = $requiredMessage;
 			}
 		}
 
@@ -188,9 +200,16 @@ final class FieldValidator {
 				}
 				return $this->validateNumberRange( $value, $field );
 			case 'text':
+				$error = $this->validateTextLength( $value, $field );
+				return $error ?: $this->validatePattern( $value, $field );
 			case 'textarea':
 			case 'password':
 				return $this->validateTextLength( $value, $field );
+			case 'multiple_choice':
+			case 'picture_choice':
+				return $this->validateChoiceCount( $value, $field );
+			case 'scale':
+				return $this->validateScale( $value, $field );
 			case 'phone':
 				return $this->validatePhone( $value );
 			case 'payment_amount':
@@ -220,10 +239,19 @@ final class FieldValidator {
 			return null;
 		}
 
-		$maxLength = isset( $field['maxLength'] ) ? intval( $field['maxLength'] ) : null;
+		$maxLength = $this->attr( $field, 'maxLength' );
+		$maxLength = ( $maxLength !== null && $maxLength !== '' ) ? intval( $maxLength ) : null;
+		$minLength = $this->attr( $field, 'minLength' );
+		$minLength = ( $minLength !== null && $minLength !== '' ) ? intval( $minLength ) : null;
 
 		if ( $maxLength !== null && $maxLength > 0 && is_string( $value ) && mb_strlen( $value ) > $maxLength ) {
-			return sprintf( 'Must be %d characters or fewer.', $maxLength );
+			/* translators: %d: maximum number of characters */
+			return sprintf( __( 'Must be %d characters or fewer.', 'subtleforms' ), $maxLength );
+		}
+
+		if ( $minLength !== null && $minLength > 0 && is_string( $value ) && mb_strlen( $value ) < $minLength ) {
+			/* translators: %d: minimum number of characters */
+			return sprintf( __( 'Must be at least %d characters.', 'subtleforms' ), $minLength );
 		}
 
 		return null;
@@ -355,6 +383,111 @@ final class FieldValidator {
 			return 'Invalid phone number.';
 		}
 
+		return null;
+	}
+
+	/**
+	 * Read a field attribute from the flat shape or its config.
+	 *
+	 * @param array  $field Field.
+	 * @param string $name  Attribute.
+	 * @return mixed
+	 */
+	private function attr( array $field, string $name ) {
+		if ( isset( $field['config'] ) && is_array( $field['config'] ) && array_key_exists( $name, $field['config'] ) ) {
+			return $field['config'][ $name ];
+		}
+		return $field[ $name ] ?? null;
+	}
+
+	/**
+	 * Human required-field message: the field's own message, else its label.
+	 *
+	 * @param array  $field Field.
+	 * @param string $key   Field key.
+	 * @return string
+	 */
+	private function requiredMessage( array $field, string $key ): string {
+		$custom = $this->attr( $field, 'requiredMessage' );
+		if ( is_string( $custom ) && trim( $custom ) !== '' ) {
+			return trim( $custom );
+		}
+		$label = $this->attr( $field, 'label' );
+		if ( is_string( $label ) && trim( $label ) !== '' ) {
+			/* translators: %s: field label */
+			return sprintf( __( '%s is required.', 'subtleforms' ), wp_strip_all_tags( $label ) );
+		}
+		/* translators: %s: field key */
+		return sprintf( __( 'Field "%s" is required.', 'subtleforms' ), $key );
+	}
+
+	/**
+	 * Validate a text value against the field's regular expression.
+	 *
+	 * @param mixed $value Value.
+	 * @param array $field Field.
+	 * @return string|null
+	 */
+	private function validatePattern( $value, array $field ) {
+		$pattern = $this->attr( $field, 'pattern' );
+		if ( $this->isEmpty( $value ) || ! is_string( $pattern ) || $pattern === '' || ! is_string( $value ) ) {
+			return null;
+		}
+		$regex = '/' . str_replace( '/', '\/', $pattern ) . '/u';
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- an invalid admin regex must not break submissions.
+		$match = @preg_match( $regex, $value );
+		if ( $match === 0 ) {
+			$message = $this->attr( $field, 'patternMessage' );
+			return ( is_string( $message ) && $message !== '' ) ? $message : __( 'Please match the requested format.', 'subtleforms' );
+		}
+		return null;
+	}
+
+	/**
+	 * Enforce minimum/maximum selections on multi-choice fields.
+	 *
+	 * @param mixed $value Value.
+	 * @param array $field Field.
+	 * @return string|null
+	 */
+	private function validateChoiceCount( $value, array $field ) {
+		if ( $this->isEmpty( $value ) ) {
+			return null;
+		}
+		$count = is_array( $value ) ? count( array_filter( $value, static fn( $v ) => $v !== '' && $v !== null && $v !== false ) ) : 1;
+		$min   = (int) ( $this->attr( $field, 'minChoices' ) ?? 0 );
+		$max   = (int) ( $this->attr( $field, 'maxChoices' ) ?? 0 );
+		if ( $min > 0 && $count < $min ) {
+			/* translators: %d: minimum number of selections */
+			return sprintf( _n( 'Select at least %d option.', 'Select at least %d options.', $min, 'subtleforms' ), $min );
+		}
+		if ( $max > 0 && $count > $max ) {
+			/* translators: %d: maximum number of selections */
+			return sprintf( _n( 'Select no more than %d option.', 'Select no more than %d options.', $max, 'subtleforms' ), $max );
+		}
+		return null;
+	}
+
+	/**
+	 * Opinion scale values must fall inside the configured range.
+	 *
+	 * @param mixed $value Value.
+	 * @param array $field Field.
+	 * @return string|null
+	 */
+	private function validateScale( $value, array $field ) {
+		if ( $this->isEmpty( $value ) ) {
+			return null;
+		}
+		if ( ! is_numeric( $value ) ) {
+			return __( 'Please choose a value on the scale.', 'subtleforms' );
+		}
+		$min = (int) ( $this->attr( $field, 'scaleMin' ) ?? 1 );
+		$max = (int) ( $this->attr( $field, 'scaleMax' ) ?? 5 );
+		$v   = (int) $value;
+		if ( $v < $min || $v > $max ) {
+			return __( 'Please choose a value on the scale.', 'subtleforms' );
+		}
 		return null;
 	}
 

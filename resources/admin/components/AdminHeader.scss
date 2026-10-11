@@ -1,77 +1,391 @@
 /**
- * AdminHeader Component Styles
- * Co-located with AdminHeader.jsx
+ * Top bar, app navigation, plan chip and help menu.
  */
 
-.sf-admin-header {
-  display: flex;
-  flex-shrink: 0;
-  justify-content: space-between;
-  align-items: center;
-  // White top bar — no light-blue band (Part C step 2).
-  background-color: var(--sf-bg-surface);
-  padding: 0 1.5rem; // px-6
-  border-bottom: 1px solid var(--sf-border);
-  position: sticky;
-  z-index: 100;
+// ── Logo ─────────────────────────────────────────────────────────────────────
 
-  &__left {
-    display: flex;
-    align-items: center;
-    gap: 1rem; // gap-4
-  }
+.sf-logo {
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	flex-shrink: 0;
+	line-height: 1;
 
-  &__logo-title {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem; // gap-3
-  }
+	&__mark {
+		display: block;
+		flex-shrink: 0;
+	}
 
-  &__logo {
-    display: inline-flex;
-    flex-shrink: 0;
-  }
+	&__word {
+		font-size: 15px;
+		font-weight: 500;
+		letter-spacing: -0.01em;
+		color: var(--sf-text);
+		white-space: nowrap;
+	}
 
-  &__title {
-    margin: 0;
-    font-weight: 600;
-    color: var(--sf-text);
-    font-size: var(--sf-text-lg); // text-lg
-    line-height: 1;
-  }
+	&__word-strong {
+		font-weight: 700;
+	}
+}
 
-  &__title-input {
-    background-color: var(--sf-bg-surface);
-    padding: 0.25rem 0.5rem; // py-1 px-2
-    border: 1px solid var(--sf-primary-500);
-    outline: none;
-    min-width: 200px;
-    font-weight: 600;
-    color: var(--sf-text);
-    font-size: var(--sf-text-lg); // text-lg
-    line-height: 1;
-  }
+// ── Top bar ──────────────────────────────────────────────────────────────────
 
-  &__title-button {
-    background-color: transparent;
-    padding: 0.25rem 0.5rem; // py-1 px-2
-    border: none;
-    outline: none;
-    font-weight: 600;
-    color: var(--sf-text);
-    font-size: var(--sf-text-lg); // text-lg
-    line-height: 1;
-    transition: color var(--sf-duration-base);
-    cursor: pointer;
+.sf-topbar {
+	position: relative;
+	z-index: 30;
+	display: flex;
+	align-items: center;
+	gap: 24px;
+	flex-shrink: 0;
+	height: var(--sf-topbar-height);
+	padding: 0 16px 0 20px;
+	background: var(--sf-bg-surface);
+	border-bottom: 1px solid var(--sf-border-subtle);
 
-    &:hover {
-      color: var(--sf-primary-600);
-    }
-  }
+	&__brand {
+		display: flex;
+		align-items: center;
+		padding-inline-end: 8px;
+	}
 
-  &__actions {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem; // gap-2
-  }
+	&__end {
+		display: flex;
+		align-items: center;
+		margin-inline-start: auto;
+	}
+
+	@media (max-width: 960px) {
+		gap: 12px;
+
+		.sf-logo__word {
+			display: none;
+		}
+	}
+}
+
+// ── App navigation ───────────────────────────────────────────────────────────
+
+.sf-appnav {
+	min-width: 0;
+	overflow-x: auto;
+	scrollbar-width: none;
+
+	&::-webkit-scrollbar {
+		display: none;
+	}
+
+	&__list {
+		display: flex;
+		align-items: center;
+		gap: 2px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	&__item {
+		margin: 0;
+	}
+
+	&__link {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		height: 32px;
+		padding: 0 10px;
+		border-radius: var(--sf-radius-sm);
+		font-size: var(--sf-text-sm);
+		font-weight: var(--sf-weight-medium);
+		line-height: 1;
+		color: var(--sf-text-secondary);
+		text-decoration: none;
+		white-space: nowrap;
+		transition:
+			background-color var(--sf-transition-fast),
+			color var(--sf-transition-fast);
+
+		&:hover {
+			background: var(--sf-bg-muted);
+			color: var(--sf-text);
+		}
+
+		&:focus {
+			box-shadow: none;
+			outline: none;
+		}
+
+		&:focus-visible {
+			box-shadow: var(--sf-shadow-focus);
+		}
+
+		&.is-active {
+			background: var(--sf-bg-muted);
+			color: var(--sf-text);
+
+			.sf-appnav__icon {
+				color: var(--sf-brand);
+			}
+		}
+	}
+
+	&__icon {
+		flex-shrink: 0;
+		color: var(--sf-text-muted);
+		transition: color var(--sf-transition-fast);
+	}
+
+	&__count {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 18px;
+		height: 18px;
+		padding: 0 5px;
+		border-radius: var(--sf-radius-full);
+		background: var(--sf-brand);
+		color: var(--sf-brand-contrast);
+		font-size: 11px;
+		font-weight: var(--sf-weight-semibold);
+		font-variant-numeric: tabular-nums;
+	}
+
+	@media (max-width: 1100px) {
+		&__label {
+			// Keep the active label so the current section is always named.
+			.sf-appnav__link:not(.is-active) & {
+				display: none;
+			}
+		}
+	}
+}
+
+// ── Utilities: plan chip + help ──────────────────────────────────────────────
+
+.sf-topbar-utils {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.sf-plan-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	height: 28px;
+	padding: 0 12px;
+	border: 1px solid transparent;
+	border-radius: var(--sf-radius-full);
+	font-size: var(--sf-text-xs);
+	font-weight: var(--sf-weight-medium);
+	line-height: 1;
+	text-decoration: none;
+	white-space: nowrap;
+	transition:
+		background-color var(--sf-transition-fast),
+		border-color var(--sf-transition-fast),
+		color var(--sf-transition-fast);
+
+	&:focus {
+		outline: none;
+		box-shadow: var(--sf-shadow-focus);
+	}
+
+	&--upgrade {
+		background: var(--sf-primary-50);
+		border-color: var(--sf-primary-200);
+		color: var(--sf-primary-700);
+
+		&:hover {
+			background: var(--sf-primary-100);
+			color: var(--sf-primary-800);
+		}
+	}
+
+	&--pending {
+		background: var(--sf-warning-bg);
+		border-color: var(--sf-warning-border);
+		color: var(--sf-warning-strong);
+
+		&:hover {
+			color: var(--sf-warning-strong);
+			border-color: var(--sf-warning);
+		}
+	}
+
+	&--active {
+		background: #1e1e1e;
+		color: #fff;
+
+		svg {
+			color: #f0c33c;
+		}
+	}
+}
+
+.sf-topbar-icon-button.components-button {
+	width: 32px;
+	min-width: 32px;
+	height: 32px;
+	padding: 0;
+	justify-content: center;
+	border-radius: var(--sf-radius-sm);
+	color: var(--sf-text-secondary);
+
+	&:hover:not(:disabled) {
+		background: var(--sf-bg-muted);
+		color: var(--sf-text);
+	}
+
+	&[aria-expanded='true'] {
+		background: var(--sf-bg-muted);
+		color: var(--sf-text);
+	}
+}
+
+.sf-help__popover .components-popover__content {
+	min-width: 240px;
+	overflow: hidden;
+	padding: 8px;
+	border-radius: var(--sf-radius-lg);
+}
+
+.sf-help__version {
+	margin: 4px 0 0;
+	padding: 10px 8px 2px;
+	border-top: 1px solid var(--sf-border-subtle);
+	font-size: var(--sf-text-xs);
+	color: var(--sf-text-muted);
+}
+
+// ── Editor bar (builder) ─────────────────────────────────────────────────────
+
+.sf-topbar--editor {
+	gap: 16px;
+	height: 64px;
+	padding: 0 16px 0 0;
+
+	.sf-topbar__start {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+		min-width: 0;
+		flex: 1 1 auto;
+	}
+
+	.sf-topbar__title {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		min-width: 0;
+	}
+
+	.sf-topbar__actions {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 8px;
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+
+	.sf-topbar__center {
+		display: flex;
+		justify-content: center;
+		flex: 0 0 auto;
+	}
+}
+
+.sf-topbar__back {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 64px;
+	height: 64px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-right: 1px solid var(--sf-border-subtle);
+	background: var(--sf-bg-surface);
+	cursor: pointer;
+
+	.sf-logo__mark {
+		transition: opacity var(--sf-transition-fast);
+	}
+
+	&-arrow {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: #fff;
+		opacity: 0;
+		pointer-events: none;
+		transition: opacity var(--sf-transition-fast);
+
+		&::before {
+			content: '';
+			position: absolute;
+			width: 32px;
+			height: 32px;
+			border-radius: 8px;
+			background: var(--sf-brand);
+		}
+
+		svg {
+			position: relative;
+		}
+	}
+
+	&:hover &-arrow,
+	&:focus-visible &-arrow {
+		opacity: 1;
+	}
+
+	&:focus {
+		outline: none;
+	}
+
+	&:focus-visible {
+		box-shadow: inset var(--sf-shadow-focus);
+	}
+}
+
+.sf-topbar__heading {
+	margin: 0;
+	font-size: var(--sf-text-md);
+	font-weight: var(--sf-weight-semibold);
+	color: var(--sf-text);
+}
+
+.sf-topbar__title-input {
+	min-width: 220px;
+	height: 32px;
+	padding: 0 8px;
+	border: 1px solid var(--sf-brand);
+	border-radius: var(--sf-radius-control);
+	font-size: var(--sf-text-md);
+	font-weight: var(--sf-weight-semibold);
+	color: var(--sf-text);
+	box-shadow: 0 0 0 1px var(--sf-brand);
+	outline: none;
+}
+
+.sf-topbar__title-button {
+	height: 32px;
+	padding: 0 8px;
+	border: 0;
+	border-radius: var(--sf-radius-sm);
+	background: transparent;
+	font-size: var(--sf-text-md);
+	font-weight: var(--sf-weight-semibold);
+	color: var(--sf-text);
+	cursor: text;
+
+	&:hover {
+		background: var(--sf-bg-muted);
+	}
 }

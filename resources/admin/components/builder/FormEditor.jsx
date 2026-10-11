@@ -3,7 +3,7 @@ import { Popover } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { getIcon } from './utils/iconMap';
 import Icon from '../../ui/Icon';
-import FieldDock from './FieldDock';
+import FieldDock, { categoryLabel } from './FieldDock';
 import FieldInspector from './FieldInspector';
 import FormBuilder from './FormBuilder';
 import ConversationalCanvas from './ConversationalCanvas';
@@ -111,7 +111,7 @@ function FieldPickerPopover({ fieldGroups, context, onInsert }) {
           groupedFields &&
           Object.entries(groupedFields).map(([cat, fields]) => (
             <div key={cat} className='sf-field-picker-popover__category'>
-              <div className='sf-field-picker-popover__category-label'>{cat}</div>
+              <div className='sf-field-picker-popover__category-label'>{categoryLabel(cat)}</div>
               <div className='sf-field-picker-popover__grid'>
                 {fields.map((f) => {
                   const FieldIcon = getIcon(f.type);
@@ -243,7 +243,9 @@ export default function FormEditor({
       <div
         className={`sf-form-editor ${
           isDockCollapsed ? 'sf-form-editor--dock-collapsed' : ''
-        } ${isReadOnly ? 'sf-form-editor--read-only' : ''}`}>
+        } ${isReadOnly ? 'sf-form-editor--read-only' : ''} ${
+          selectedField ? 'has-selection' : ''
+        }`}>
         {/* Field Library (Left Sidebar) - Hidden in read-only mode */}
         {!isReadOnly && (
         <div className='sf-form-editor__dock' data-tour='fields-panel'>
@@ -313,10 +315,11 @@ export default function FormEditor({
 
         {/* Field Inspector (Right Sidebar) */}
         <div className='sf-form-editor__inspector' data-tour='field-inspector'>
-          <FieldInspector 
-            field={selectedField} 
-            allFields={allFields} 
-            isReadOnly={isReadOnly} 
+          <FieldInspector
+            field={selectedField}
+            allFields={allFields}
+            formAppearance={schema?.metadata?.appearance}
+            isReadOnly={isReadOnly}
           />
         </div>
 

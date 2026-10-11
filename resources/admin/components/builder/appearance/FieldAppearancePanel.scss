@@ -1,34 +1,143 @@
 /**
- * Per-field style overrides in the inspector.
+ * Field Style tab — live sample on top, then Layout, Colours and Text & shape
+ * as collapsible sections matching the Settings tab.
  */
 
+.sf-field-inspector__pad--style {
+	padding: 0;
+}
+
 .sf-field-appearance {
-	&__intro {
-		margin: 0 0 var(--sf-space-4);
-		font-size: var(--sf-text-xs);
+	display: flex;
+	flex-direction: column;
+
+	&__sample {
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--sf-border-subtle);
+		background:
+			linear-gradient(45deg, var(--sf-bg-subtle) 25%, transparent 25%, transparent 75%, var(--sf-bg-subtle) 75%) 0 0 / 12px 12px,
+			linear-gradient(45deg, var(--sf-bg-subtle) 25%, transparent 25%, transparent 75%, var(--sf-bg-subtle) 75%) 6px 6px / 12px 12px,
+			var(--sf-bg-surface);
+	}
+
+	&__frame {
+		border-radius: var(--sf-radius-md);
+		box-shadow: 0 0 0 1px var(--sf-border-subtle);
+	}
+
+	&__status {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		padding: 10px 16px;
+		border-bottom: 1px solid var(--sf-border-subtle);
+		font-size: 12px;
 		color: var(--sf-text-muted);
 	}
 
-	&__section {
-		& + & {
-			margin-top: var(--sf-space-5);
-			padding-top: var(--sf-space-4);
-			border-top: 1px solid var(--sf-border-subtle);
+	&__panel.components-panel__body {
+		border-top: 0;
+		border-bottom: 1px solid var(--sf-border-subtle);
+
+		> .components-panel__body-title .components-panel__body-toggle {
+			padding: 14px 16px;
+			font-size: var(--sf-text-sm);
+			font-weight: var(--sf-weight-semibold);
+		}
+
+		&.is-opened {
+			padding: 0 16px 16px;
+
+			> .components-panel__body-title { margin: 0 -16px 4px; }
+		}
+
+		.components-toggle-group-control,
+		.components-toggle-control { margin-bottom: 16px; }
+
+		.components-base-control__label,
+		.components-input-control__label.components-input-control__label {
+			font-size: 12px;
+			font-weight: var(--sf-weight-medium);
+			text-transform: none;
+			color: var(--sf-text);
 		}
 	}
 
-	&__title {
-		margin: 0 0 var(--sf-space-3);
-		font-size: var(--sf-text-xs);
-		font-weight: var(--sf-weight-semibold);
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
+	&__label {
+		margin: 0 0 8px;
+		font-size: 12px;
+		font-weight: var(--sf-weight-medium);
+		color: var(--sf-text);
+	}
+
+	&__help {
+		margin: 6px 0 16px;
+		font-size: 12px;
 		color: var(--sf-text-muted);
 	}
 
-	&__footer {
-		margin-top: var(--sf-space-5);
-		padding-top: var(--sf-space-4);
-		border-top: 1px solid var(--sf-border-subtle);
+	&__stack {
+		display: flex;
+		flex-direction: column;
+	}
+
+}
+
+// ── Width picker ────────────────────────────────────────────────────────────
+.sf-width-picker {
+	display: grid;
+	grid-template-columns: repeat(7, minmax(0, 1fr));
+	gap: 4px;
+
+	&__option {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 4px;
+		padding: 6px 2px 4px;
+		border: 1px solid var(--sf-border);
+		border-radius: var(--sf-radius-sm);
+		background: var(--sf-bg-surface);
+		cursor: pointer;
+
+		&:hover:not(:disabled) { border-color: var(--sf-text-subtle); }
+
+		&.is-active {
+			border-color: var(--sf-brand);
+			box-shadow: inset 0 0 0 1px var(--sf-brand);
+		}
+
+		&:focus-visible {
+			outline: none;
+			box-shadow: var(--sf-shadow-focus);
+		}
+	}
+
+	&__track {
+		display: block;
+		width: 100%;
+		height: 8px;
+		padding: 0 3px;
+		box-sizing: border-box;
+	}
+
+	&__fill {
+		display: block;
+		height: 8px;
+		border-radius: 2px;
+		background: var(--sf-text-subtle);
+
+		&.is-auto {
+			background: repeating-linear-gradient(90deg, var(--sf-text-subtle) 0 3px, transparent 3px 5px);
+		}
+	}
+
+	&__option.is-active &__fill { background: var(--sf-brand); }
+
+	&__label {
+		font-size: 11px;
+		line-height: 1;
+		color: var(--sf-text-secondary);
 	}
 }

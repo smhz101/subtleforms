@@ -39,6 +39,7 @@ import {
   BuilderTitle,
   BuilderActions,
 } from '../components/builder/layout/BuilderHeaderBar';
+import BuilderViewSwitcher from '../components/builder/layout/BuilderViewSwitcher';
 import BuilderCanvasArea from '../components/builder/layout/BuilderCanvasArea';
 import BuilderModalsController from '../components/builder/layout/BuilderModalsController';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
@@ -132,6 +133,7 @@ function FormBuilderInner({
     stateFormId || formId || null
   );
   const [showPreview, setShowPreview] = useState(false);
+  const [builderView, setBuilderView] = useState('build');
   const titleInputRef = useRef(null);
   const copyTimeoutRef = useRef(null);
 
@@ -621,6 +623,12 @@ function FormBuilderInner({
   return (
     <>
       <AdminShell
+        variant='editor'
+        backTo='/forms'
+        onBack={handleSaveAndCloseWrapped}
+        centerSlot={
+          <BuilderViewSwitcher value={builderView} onChange={setBuilderView} />
+        }
         title={
           <BuilderTitle
             formTitle={formTitle}
@@ -668,6 +676,7 @@ function FormBuilderInner({
         }
         noScroll={true}>
         <BuilderCanvasArea
+          view={builderView}
           saveError={saveError}
           validationErrors={validationErrors}
           fieldErrors={fieldErrors}

@@ -91,6 +91,10 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
               icon: field.icon || 'text',
               kind: field.kind || 'input',
               enabled: field.enabled !== false, // Pass through enabled status from API
+              category: field.category || category,
+              meta: field.meta || {},
+              is_pro: field.is_pro === true,
+              is_pro_locked: field.is_pro_locked === true,
             };
           });
         });

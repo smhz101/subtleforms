@@ -161,11 +161,15 @@ final class Container {
 			function () {
 				$registry = new FieldRegistry();
 				CoreFields::register( $registry );
+				\SubtleForms\Fields\FieldsV2::register( $registry );
 
 				// Allow extensions to register custom fields
 				if ( function_exists( 'do_action' ) ) {
 					do_action( 'subtleforms/fields/register', $registry );
 				}
+
+				// Settings model, labels and library order (2.0).
+				\SubtleForms\Fields\FieldSettings::decorateAll( $registry );
 
 				return $registry;
 			}

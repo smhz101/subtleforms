@@ -131,8 +131,10 @@ final class SubmissionsRepository {
 				'status'         => Helpers::safe_array_get( $data, 'status', 'unread' ),
 				'ip_address'     => Helpers::safe_array_get( $data, 'ip_address', '' ),
 				'user_agent'     => Helpers::safe_array_get( $data, 'user_agent', '' ),
+				// Stored in UTC so every reader can convert to the viewer's time.
+				'created_at'     => current_time( 'mysql', true ),
 			),
-			array( '%d', '%d', '%s', '%s', '%s', '%s', '%s' )
+			array( '%d', '%d', '%s', '%s', '%s', '%s', '%s', '%s' )
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 

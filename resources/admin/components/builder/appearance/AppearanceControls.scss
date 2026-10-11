@@ -1,92 +1,143 @@
 /**
- * Shared appearance control styling.
- *
- * Controls sit in a two-column grid so colour swatches and size fields line up
- * across groups; anything that needs the full width opts out with a class.
+ * Appearance controls — shared by the form Appearance panel and the field
+ * Style tab.
  */
 
 .sf-appearance-group {
-	& + & {
-		margin-top: var(--sf-space-5);
-	}
-
 	&__title {
-		margin: 0 0 var(--sf-space-3);
-		font-size: var(--sf-text-xs);
-		font-weight: var(--sf-weight-semibold);
+		margin: 0 0 12px;
+		font-size: 11px;
+		font-weight: var(--sf-weight-medium);
 		text-transform: uppercase;
-		letter-spacing: 0.06em;
+		letter-spacing: 0.04em;
 		color: var(--sf-text-muted);
 	}
 
 	&__controls {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	// Colours read best as a two-column grid of chips.
+	&--swatches &__controls {
 		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-		gap: var(--sf-space-3) var(--sf-space-4);
-		align-items: start;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 6px;
 	}
 }
 
 .sf-appearance-control {
+	.components-base-control { margin-bottom: 0; }
+}
+
+// ── Colour chip ─────────────────────────────────────────────────────────────
+.sf-color-token {
+	display: block;
 	min-width: 0;
 
-	&--color {
+	&__toggle {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		width: 100%;
+		min-width: 0;
+		padding: 6px 8px;
+		border: 1px solid var(--sf-border);
+		border-radius: var(--sf-radius-md);
+		background: var(--sf-bg-surface);
+		text-align: start;
+		cursor: pointer;
+		transition: border-color var(--sf-duration-fast) var(--sf-ease);
+
+		&:hover:not(:disabled) { border-color: var(--sf-text-subtle); }
+
+		&:focus-visible {
+			outline: none;
+			box-shadow: var(--sf-shadow-focus);
+		}
+
+		&:disabled { cursor: default; opacity: 0.6; }
+	}
+
+	&__chip {
+		position: relative;
+		flex-shrink: 0;
+		width: 24px;
+		height: 24px;
+		overflow: hidden;
+		border-radius: 50%;
+		box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
+	}
+
+	&__none {
+		position: absolute;
+		inset: 0;
+		background: linear-gradient(135deg, transparent 46%, var(--sf-danger) 46%, var(--sf-danger) 54%, transparent 54%);
+	}
+
+	&__text {
 		display: flex;
 		flex-direction: column;
-		gap: var(--sf-space-1);
+		min-width: 0;
+		line-height: 1.25;
 	}
 
 	&__label {
-		font-size: var(--sf-text-xs);
+		overflow: hidden;
+		font-size: 12px;
 		font-weight: var(--sf-weight-medium);
-		color: var(--sf-text-secondary);
+		color: var(--sf-text);
+		text-overflow: ellipsis;
+		white-space: nowrap;
 	}
 
-	&__color-row {
+	&__value {
+		font-family: var(--sf-font-mono);
+		font-size: 10px;
+		color: var(--sf-text-subtle);
+		text-transform: none;
+	}
+
+	&__toggle.is-set &__value { color: var(--sf-text-secondary); }
+
+	&__picker {
 		display: flex;
-		align-items: center;
-		gap: var(--sf-space-2);
+		flex-direction: column;
+		gap: 12px;
+		width: 232px;
+		padding: 12px;
+	}
+
+	&__swatches {
+		display: grid;
+		grid-template-columns: repeat(6, 1fr);
+		gap: 6px;
 	}
 
 	&__swatch {
-		position: relative;
-		width: 28px;
-		height: 28px;
+		width: 100%;
+		aspect-ratio: 1;
 		padding: 0;
-		border: 1px solid var(--sf-border-strong);
-		border-radius: var(--sf-radius-sm);
+		border: 0;
+		border-radius: 50%;
+		box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
 		cursor: pointer;
-		overflow: hidden;
 
-		&:focus-visible {
-			outline: 2px solid var(--sf-focus-ring);
-			outline-offset: 2px;
-		}
-
-		&[disabled] {
-			cursor: default;
-			opacity: 0.5;
-		}
+		&.is-active { box-shadow: 0 0 0 2px var(--sf-bg-surface), 0 0 0 4px var(--sf-brand); }
 	}
 
-	/* A diagonal rule reads as "no value set" without implying white. */
-	&__swatch-empty {
-		position: absolute;
-		inset: 0;
-		background: linear-gradient(
-			to bottom right,
-			transparent calc(50% - 1px),
-			var(--sf-danger) calc(50% - 1px),
-			var(--sf-danger) calc(50% + 1px),
-			transparent calc(50% + 1px)
-		);
-	}
+	&__picker .components-color-picker,
+	&__picker > div:not([class]) { width: 100%; }
 
-	&__clear {
-		font-size: var(--sf-text-2xs);
+	&__actions {
+		display: flex;
+		justify-content: space-between;
+		gap: 8px;
 	}
+}
 
-	&__picker {
-		padding: var(--sf-space-2);
-	}
+.sf-color-token__popover .components-popover__content {
+	padding: 0;
+	border-radius: var(--sf-radius-lg);
 }

@@ -11,6 +11,7 @@ import {
 import { useSortable, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
+import Icon from '../../ui/Icon';
 import { useBuilder } from './context/BuilderContext';
 import FieldRenderer from './FieldRenderer';
 import ContainerRenderer from './ContainerRenderer';
@@ -591,8 +592,11 @@ export default function FormBuilder() {
             <button
               type='button'
               className={`sf-preview-toggle${previewValidation ? ' sf-preview-toggle--active' : ''}`}
+              aria-pressed={previewValidation}
+              title={__('Show how required and format errors look to visitors', 'subtleforms')}
               onClick={(e) => { e.stopPropagation(); setPreviewValidation((v) => !v); }}>
-              {previewValidation ? __('Exit Preview', 'subtleforms') : __('Preview Errors', 'subtleforms')}
+              <Icon.ShieldCheck size={14} aria-hidden='true' />
+              {previewValidation ? __('Hide validation', 'subtleforms') : __('Test validation', 'subtleforms')}
             </button>
           </div>        <DndContext
           sensors={sensors}

@@ -1,9 +1,34 @@
-import { useState, useMemo, useRef, useCallback, useEffect } from '@wordpress/element';
-import { Button, Modal } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import {
+  useState,
+  useMemo,
+  useRef,
+  useCallback,
+  useEffect,
+} from '@wordpress/element';
+import { Button } from '@wordpress/components';
+import { __, sprintf } from '@wordpress/i18n';
+import clsx from 'clsx';
 import { getIcon } from './utils/iconMap';
 import Icon from '../../ui/Icon';
-import { UpgradePrompt } from '../../ui';
+import { openUpgradeModal } from '../../utils/featureGate';
+
+/**
+ * Library section names. Keys are the PHP categories.
+ */
+const CATEGORY_LABELS = {
+  basic: __('Basic', 'subtleforms'),
+  choices: __('Choices', 'subtleforms'),
+  advanced: __('Advanced', 'subtleforms'),
+  media: __('Uploads', 'subtleforms'),
+  layout: __('Layout', 'subtleforms'),
+  payment: __('Payments', 'subtleforms'),
+  system: __('Spam protection', 'subtleforms'),
+  special: __('Special', 'subtleforms'),
+  structure: __('Structure', 'subtleforms'),
+};
+
+export const categoryLabel = (key) =>
+  CATEGORY_LABELS[key] || key.charAt(0).toUpperCase() + key.slice(1);
 
 function HighlightMatch({ text, query }) {
   if (!query) return text;
@@ -12,7 +37,7 @@ function HighlightMatch({ text, query }) {
   return (
     <>
       {text.slice(0, idx)}
-      <mark className='sf-field-dock__search-highlight'>
+      <mark className='sf-inserter__highlight'>
         {text.slice(idx, idx + query.length)}
       </mark>
       {text.slice(idx + query.length)}
@@ -21,44 +46,38 @@ function HighlightMatch({ text, query }) {
 }
 
 /**
- * FieldDock
- * UI polish only: spacing, depth, motion, affordances.
+ * Field library — the left panel of the builder.
+ *
+ * Click (or Enter) adds a field after the current selection. Pro fields are
+ * shown in place with a lock; choosing one explains what Pro unlocks rather
+ * than hiding the capability.
  */
-export default function FieldDock({
-  fieldGroups,
-  onAddField,
-  onCollapsedChange,
-}) {
+export default function FieldDock({ fieldGroups, onAddField, onCollapsedChange }) {
   const [collapsed, setCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const searchInputRef = useRef(null);
-  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
-  const [lockedFieldLabel, setLockedFieldLabel] = useState('');
-
-  const handleToggleCollapsed = () => {
-    const newCollapsed = !collapsed;
-    setCollapsed(newCollapsed);
-    if (onCollapsedChange) {
-      onCollapsedChange(newCollapsed);
-    }
-  };
   const [collapsedGroups, setCollapsedGroups] = useState({});
-
-  // Timer ref for deduplicating single-click and double-click.
-  // A double-click fires: click → click → dblclick.
-  // onClick queues the add behind a short delay; onDoubleClick cancels the
-  // pending timer and fires once immediately — so both paths produce exactly 1 field.
+  const searchInputRef = useRef(null);
   const clickTimerRef = useRef(null);
+  const collapsedRef = useRef(collapsed);
 
+  useEffect(() => {
+    collapsedRef.current = collapsed;
+  }, [collapsed]);
+
+  const setCollapsedState = (next) => {
+    setCollapsed(next);
+    onCollapsedChange?.(next);
+  };
+
+  // A double-click fires click → click → dblclick. Queue the click behind a
+  // short delay and let the double-click cancel it, so both add one field.
   const handleFieldClick = useCallback(
     (type) => {
-      if (clickTimerRef.current) {
-        clearTimeout(clickTimerRef.current);
-      }
+      if (clickTimerRef.current) clearTimeout(clickTimerRef.current);
       clickTimerRef.current = setTimeout(() => {
         clickTimerRef.current = null;
         onAddField(type);
-        setSearchQuery(''); // reset search after field is added
+        setSearchQuery('');
       }, 200);
     },
     [onAddField]
@@ -71,63 +90,113 @@ export default function FieldDock({
         clickTimerRef.current = null;
       }
       onAddField(type);
-      setSearchQuery(''); // reset search after field is added
+      setSearchQuery('');
     },
     [onAddField]
   );
 
-  // Stable ref so the event handler never needs to re-register on collapsed changes
-  const collapsedRef = useRef(collapsed);
-  useEffect(() => { collapsedRef.current = collapsed; }, [collapsed]);
-
-  // "/" quick-add shortcut dispatched from the canvas keyboard handler
+  // "/" quick-add shortcut from the canvas keyboard handler.
   useEffect(() => {
     const handleQuickAdd = () => {
       if (collapsedRef.current) {
         setCollapsed(false);
+        onCollapsedChange?.(false);
       }
-      requestAnimationFrame(() => {
-        searchInputRef.current?.focus();
-      });
+      requestAnimationFrame(() => searchInputRef.current?.focus());
     };
     window.addEventListener('sf:builder:quick-add', handleQuickAdd);
     return () => window.removeEventListener('sf:builder:quick-add', handleQuickAdd);
-  }, []); // stable — all referenced values are refs or stable setters
+  }, [onCollapsedChange]);
 
-  const toggleGroup = (category) => {
-    setCollapsedGroups((prev) => ({
-      ...prev,
-      [category]: !prev[category],
-    }));
-  };
-
-  // Flat list of all fields matching the live search query (null = no search active)
   const searchResults = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
     if (!q || !fieldGroups) return null;
     const matches = [];
     Object.values(fieldGroups).forEach((fields) =>
       fields.forEach((f) => {
-        if (
-          f.label.toLowerCase().includes(q) ||
-          f.type.toLowerCase().includes(q)
-        ) {
-          matches.push(f);
-        }
+        const haystack = `${f.label} ${f.type} ${f.meta?.description || ''}`.toLowerCase();
+        if (haystack.includes(q)) matches.push(f);
       })
     );
     return matches;
   }, [searchQuery, fieldGroups]);
 
+  const renderTile = (f) => {
+    const isDisabled = f.enabled === false;
+    const isProLocked = f.is_pro_locked === true;
+    const FieldIcon = getIcon(f.type);
+    const description = f.meta?.description || '';
+
+    let title = description ? `${f.label} — ${description}` : f.label;
+    if (isDisabled) {
+      title = __('Turn this provider on in Settings → Advanced to use it.', 'subtleforms');
+    } else if (isProLocked) {
+      title = sprintf(
+        /* translators: %s: field name */
+        __('%s is part of SubtleForms Pro', 'subtleforms'),
+        f.label
+      );
+    }
+
+    return (
+      <button
+        key={f.type}
+        type='button'
+        className={clsx('sf-inserter__item', {
+          'is-disabled': isDisabled,
+          'is-locked': isProLocked,
+        })}
+        disabled={isDisabled}
+        title={title}
+        onClick={() => {
+          if (isDisabled) return;
+          if (isProLocked) {
+            openUpgradeModal(f.category === 'payment' ? 'actions.payment' : 'fields.advanced', {
+              label: f.label,
+            });
+            return;
+          }
+          handleFieldClick(f.type);
+        }}
+        onDoubleClick={() => {
+          if (isDisabled || isProLocked) return;
+          handleFieldDoubleClick(f.type);
+        }}>
+        <span className='sf-inserter__item-icon' aria-hidden='true'>
+          <FieldIcon size={20} />
+        </span>
+        <span className='sf-inserter__item-label'>
+          <HighlightMatch text={f.label} query={searchQuery} />
+        </span>
+        {isProLocked && (
+          <span className='sf-inserter__item-pro'>{__('Pro', 'subtleforms')}</span>
+        )}
+      </button>
+    );
+  };
+
+  if (collapsed) {
+    return (
+      <div className='sf-inserter sf-inserter--collapsed'>
+        <Button
+          className='sf-inserter__expand'
+          icon={<Icon.Plus size={20} />}
+          label={__('Show field library', 'subtleforms')}
+          showTooltip
+          tooltipPosition='middle right'
+          onClick={() => setCollapsedState(false)}
+        />
+      </div>
+    );
+  }
+
   if (!fieldGroups || Object.keys(fieldGroups).length === 0) {
     return (
-      <div
-        className='sf-field-dock sf-field-dock--loading'
-        style={{ width: collapsed ? '48px' : '320px' }}>
-        <div className='sf-field-dock__loading-message'>
-          <p className='sf-field-dock__loading-text'>
-            {__('Loading fields...', 'subtleforms')}
-          </p>
+      <div className='sf-inserter sf-inserter--loading'>
+        <div className='sf-inserter__loading'>
+          {Array.from({ length: 8 }).map((_, i) => (
+            <span key={i} className='sf-inserter__skeleton' />
+          ))}
         </div>
       </div>
     );
@@ -135,44 +204,25 @@ export default function FieldDock({
 
   return (
     <>
-    <div
-      className='sf-field-dock'
-      style={{ width: collapsed ? '48px' : '320px' }}>
-      {/* Header */}
-      <div
-        className={`sf-field-dock__header${
-          !collapsed ? ' sf-field-dock__header--with-search' : ''
-        }`}>
-        {!collapsed && (
-          <h3 className='sf-field-dock__title'>
-            {__('Fields', 'subtleforms')}
-          </h3>
-        )}
+      <div className='sf-inserter'>
+        <div className='sf-inserter__header'>
+          <h2 className='sf-inserter__title'>{__('Add field', 'subtleforms')}</h2>
+          <Button
+            className='sf-inserter__collapse'
+            icon={<Icon.ChevronLeft size={18} />}
+            label={__('Hide field library', 'subtleforms')}
+            showTooltip
+            onClick={() => setCollapsedState(true)}
+          />
+        </div>
 
-        <Button
-          isSmall
-          onClick={handleToggleCollapsed}
-          className='sf-field-dock__toggle-button'
-          title={
-            collapsed
-              ? __('Expand', 'subtleforms')
-              : __('Collapse', 'subtleforms')
-          }>
-          {collapsed ? '→' : '←'}
-        </Button>
-      </div>
-
-      {/* Search bar */}
-      {!collapsed && (
-        <div className='sf-field-dock__search'>
-          <span className='sf-field-dock__search-icon' aria-hidden='true'>
-            <Icon.Search size={16} />
-          </span>
+        <div className='sf-inserter__search'>
+          <Icon.Search size={16} className='sf-inserter__search-icon' aria-hidden='true' />
           <input
             ref={searchInputRef}
-            type='text'
-            className='sf-field-dock__search-input'
-            placeholder={__('Search fields…', 'subtleforms')}
+            type='search'
+            className='sf-inserter__search-input'
+            placeholder={__('Search fields', 'subtleforms')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             onKeyDown={(e) => {
@@ -180,212 +230,76 @@ export default function FieldDock({
                 setSearchQuery('');
                 e.currentTarget.blur();
               }
+              if (e.key === 'Enter' && searchResults?.length === 1) {
+                const only = searchResults[0];
+                if (only.enabled !== false && !only.is_pro_locked) {
+                  onAddField(only.type);
+                  setSearchQuery('');
+                }
+              }
             }}
             aria-label={__('Search fields', 'subtleforms')}
           />
-          {searchQuery && (
-            <button
-              type='button'
-              className='sf-field-dock__search-clear'
-              onClick={() => {
-                setSearchQuery('');
-                searchInputRef.current?.focus();
-              }}
-              aria-label={__('Clear search', 'subtleforms')}>
-              ×
-            </button>
-          )}
+          <kbd className='sf-inserter__search-kbd' aria-hidden='true'>/</kbd>
         </div>
-      )}
 
-      {/* Content */}
-      {!collapsed && (
-        <div className='sf-field-dock__content'>
-          {/* ── Search results view ── */}
-          {searchResults !== null && (
-            <>
-              {searchResults.length === 0 ? (
-                <div className='sf-field-dock__no-results'>
-                  <span className='sf-field-dock__no-results-icon'>⊘</span>
-                  <p className='sf-field-dock__no-results-text'>
-                    {__('No fields match', 'subtleforms')}{' '}
-                    <strong>&quot;{searchQuery}&quot;</strong>
-                  </p>
-                </div>
-              ) : (
-                <div className='sf-field-dock__fields-grid sf-field-dock__fields-grid--search'>
-                  {searchResults.map((f) => {
-                    const isDisabled = f.enabled === false;
-                    const isProLocked = f.is_pro_locked === true;
-                    return (
-                      <button
-                        key={f.type}
-                        type='button'
-                        onClick={() => {
-                          if (isDisabled) return;
-                          if (isProLocked) {
-                            setLockedFieldLabel(f.label);
-                            setShowUpgradeModal(true);
-                            return;
-                          }
-                          handleFieldClick(f.type);
-                        }}
-                        onDoubleClick={() => {
-                          if (isDisabled || isProLocked) return;
-                          handleFieldDoubleClick(f.type);
-                        }}
-                        disabled={isDisabled}
-                        className={`sf-field-dock__field-button ${
-                          isDisabled ? 'sf-field-dock__field-button--disabled' : ''
-                        }${isProLocked ? ' sf-field-dock__field-button--pro-locked' : ''}`}
-                        title={
-                          isDisabled
-                            ? __('Enable this CAPTCHA provider in Settings to use it', 'subtleforms')
-                            : isProLocked
-                            ? `${f.label} — Pro feature. Click to unlock`
-                            : f.label
-                        }>
-                        <span className='sf-field-dock__field-icon-wrapper'>
-                          <span className='sf-field-dock__field-icon'>
-                            {(() => {
-                              const IconComponent = getIcon(f.type);
-                              return <IconComponent size={20} />;
-                            })()}
-                          </span>
-                          {isProLocked && (
-                            <span className='sf-field-dock__pro-lock-overlay'><Icon.Lock size={10} /></span>
-                          )}
-                        </span>
-                        <span className='sf-field-dock__field-label'>
-                          <HighlightMatch text={f.label} query={searchQuery} />
-                          {isProLocked && (
-                            <span className='sf-field-dock__pro-label'>{__('Pro', 'subtleforms')}</span>
-                          )}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </>
-          )}
-
-          {/* ── Normal grouped view ── */}
-          {searchResults === null && Object.entries(fieldGroups).map(([category, categoryFields]) => {
-            const isCollapsed = collapsedGroups[category];
-
-            return (
-              <div key={category} className='sf-field-dock__category'>
-                {/* Category */}
-                <button
-                  type='button'
-                  onClick={() => toggleGroup(category)}
-                  className={`sf-field-dock__category-header ${
-                    isCollapsed
-                      ? 'sf-field-dock__category-header--collapsed'
-                      : ''
-                  }`}>
-                  <span className='sf-field-dock__category-name'>
-                    {category}
-                  </span>
-
-                  <span
-                    className={`sf-field-dock__category-icon ${
-                      isCollapsed
-                        ? 'sf-field-dock__category-icon--collapsed'
-                        : 'sf-field-dock__category-icon--expanded'
-                    }`}>
-                    ▼
-                  </span>
-                </button>
-
-                {/* Fields */}
-                {!isCollapsed && (
-                  <div className='sf-field-dock__fields-grid'>
-                    {categoryFields.map((f) => {
-                      const isDisabled = f.enabled === false;
-                      const isProLocked = f.is_pro_locked === true;
-
-                      return (
-                        <button
-                          key={f.type}
-                          type='button'
-                          onClick={() => {
-                            if (isDisabled) return;
-                            if (isProLocked) {
-                              setLockedFieldLabel(f.label);
-                              setShowUpgradeModal(true);
-                              return;
-                            }
-                            handleFieldClick(f.type);
-                          }}
-                          onDoubleClick={() => {
-                            if (isDisabled || isProLocked) return;
-                            handleFieldDoubleClick(f.type);
-                          }}
-                          disabled={isDisabled}
-                          className={`sf-field-dock__field-button ${
-                            isDisabled
-                              ? 'sf-field-dock__field-button--disabled'
-                              : ''
-                          }${isProLocked ? ' sf-field-dock__field-button--pro-locked' : ''}`}
-                          title={
-                            isDisabled
-                              ? __(
-                                  'Enable this CAPTCHA provider in Settings to use it',
-                                  'subtleforms'
-                                )
-                              : isProLocked
-                              ? `${f.label} — Pro feature. Click to unlock`
-                              : f.label
-                          }>
-                          <span className='sf-field-dock__field-icon-wrapper'>
-                            <span className='sf-field-dock__field-icon'>
-                              {(() => {
-                                const IconComponent = getIcon(f.type);
-                                return <IconComponent size={20} />;
-                              })()}
-                            </span>
-                            {isProLocked && (
-                              <span className='sf-field-dock__pro-lock-overlay'><Icon.Lock size={10} /></span>
-                            )}
-                          </span>
-
-                          <span className='sf-field-dock__field-label'>
-                            {f.label}
-                            {isProLocked && (
-                              <span className='sf-field-dock__pro-label'>{__('Pro', 'subtleforms')}</span>
-                            )}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
+        <div className='sf-inserter__content'>
+          {searchResults !== null ? (
+            searchResults.length === 0 ? (
+              <div className='sf-inserter__empty'>
+                <Icon.Search size={20} aria-hidden='true' />
+                <p>
+                  {sprintf(
+                    /* translators: %s: search query */
+                    __('No fields match “%s”.', 'subtleforms'),
+                    searchQuery
+                  )}
+                </p>
               </div>
-            );
-          })}
+            ) : (
+              <section className='sf-inserter__section'>
+                <h3 className='sf-inserter__section-title'>
+                  {__('Results', 'subtleforms')}
+                </h3>
+                <div className='sf-inserter__grid'>{searchResults.map(renderTile)}</div>
+              </section>
+            )
+          ) : (
+            Object.entries(fieldGroups).map(([category, fields]) => {
+              const isGroupCollapsed = !!collapsedGroups[category];
+              return (
+                <section key={category} className='sf-inserter__section'>
+                  <button
+                    type='button'
+                    className='sf-inserter__section-toggle'
+                    aria-expanded={!isGroupCollapsed}
+                    onClick={() =>
+                      setCollapsedGroups((prev) => ({
+                        ...prev,
+                        [category]: !prev[category],
+                      }))
+                    }>
+                    <span className='sf-inserter__section-title'>
+                      {categoryLabel(category)}
+                    </span>
+                    <Icon.ChevronDown
+                      size={16}
+                      className={clsx('sf-inserter__section-chevron', {
+                        'is-collapsed': isGroupCollapsed,
+                      })}
+                      aria-hidden='true'
+                    />
+                  </button>
+                  {!isGroupCollapsed && (
+                    <div className='sf-inserter__grid'>{fields.map(renderTile)}</div>
+                  )}
+                </section>
+              );
+            })
+          )}
         </div>
-      )}
-    </div>
+      </div>
 
-    {showUpgradeModal && (
-      <Modal
-        title={__('Pro Feature', 'subtleforms')}
-        onRequestClose={() => setShowUpgradeModal(false)}
-        className='sf-upgrade-modal'>
-        <UpgradePrompt
-          variant='card'
-          feature={lockedFieldLabel}
-          benefits={[
-            __('Collect payments directly in your forms', 'subtleforms'),
-            __('Add pricing, coupons, and totals', 'subtleforms'),
-            __('Unlock advanced form capabilities', 'subtleforms'),
-          ]}
-          ctaText={__('View Pro Plans', 'subtleforms')}
-        />
-      </Modal>
-    )}
     </>
   );
 }

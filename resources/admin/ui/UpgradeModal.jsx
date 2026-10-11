@@ -18,6 +18,30 @@ import './UpgradeModal.scss';
 // Keys should match the capability / context keys used when calling requirePro().
 
 const FEATURE_COPY = {
+  'fields.advanced': {
+    title: __( 'Smarter fields with Pro', 'subtleforms' ),
+    description: __( 'Picture Choice, Signature and live Calculations drop into the same builder you already use.', 'subtleforms' ),
+    cta: __( 'Unlock Pro fields', 'subtleforms' ),
+    lossLine: null,
+    benefits: [
+      __( 'Picture Choice with image options and multi-select', 'subtleforms' ),
+      __( 'Signature pad that works on touch screens', 'subtleforms' ),
+      __( 'Calculations with a formula builder, checked again on the server', 'subtleforms' ),
+    ],
+  },
+
+  'templates.pro': {
+    title: __( 'Pro templates', 'subtleforms' ),
+    description: __( 'Start from proven layouts for registrations, orders, applications and support, then make them yours.', 'subtleforms' ),
+    cta: __( 'Unlock all templates', 'subtleforms' ),
+    lossLine: null,
+    benefits: [
+      __( 'Multi-step, conversational and payment-ready layouts', 'subtleforms' ),
+      __( 'Every field and setting stays fully editable', 'subtleforms' ),
+      __( 'New templates added with updates', 'subtleforms' ),
+    ],
+  },
+
   'submissions.export': {
     title: __( 'Export Your Submissions', 'subtleforms' ),
     description: __( 'Your submissions are collecting dust inside SubtleForms. Export them to see the data, spot patterns, and put it to work.', 'subtleforms' ),
@@ -186,6 +210,7 @@ export default function UpgradeModal() {
   }
 
   const copy = getFeatureCopy( featureKey, context );
+  const hasProPlugin = !! window.subtleformsAdmin?.hasProPlugin;
 
   const outcomeList = copy.benefits.slice(0, 3).map((item, index) => {
     // convert feature-style text to outcome-style, keep simple fallback
@@ -206,9 +231,10 @@ export default function UpgradeModal() {
       className='sf-upgrade-modal'
       onRequestClose={() => setIsOpen(false)}>
       <div className='sf-upgrade-modal__card'>
-        <div className='sf-upgrade-modal__hero'>
-          <Icon.Sparkles size={24} />
-        </div>
+        <span className='sf-upgrade-modal__hero'>
+          <Icon.Crown size={14} aria-hidden='true' />
+          { __( 'SubtleForms Pro', 'subtleforms' ) }
+        </span>
         <h2 className='sf-upgrade-modal__title'>{copy.title || __('Unlock Premium Features', 'subtleforms')}</h2>
         <p className='sf-upgrade-modal__description'>
           {copy.description || __('Upgrade to SubtleForms Pro for a premium workflow experience.', 'subtleforms')}
@@ -228,18 +254,29 @@ export default function UpgradeModal() {
         )}
 
         <div className='sf-upgrade-modal__actions'>
-          <Button variant='primary' onClick={handleUpgrade} className='sf-upgrade-modal__primary'>
-            {copy.cta || __('Upgrade to Pro', 'subtleforms')}
-          </Button>
+          { hasProPlugin ? (
+            <Button
+              variant='primary'
+              className='sf-upgrade-modal__primary'
+              href='admin.php?page=subtleforms-settings#tab=license'
+              onClick={ () => setIsOpen( false ) }>
+              { __( 'Activate your license', 'subtleforms' ) }
+            </Button>
+          ) : (
+            <Button variant='primary' onClick={ handleUpgrade } className='sf-upgrade-modal__primary'>
+              { copy.cta || __( 'Upgrade to Pro', 'subtleforms' ) }
+            </Button>
+          ) }
 
           <Button variant='tertiary' onClick={() => setIsOpen(false)}>
-            {__('Continue with Free', 'subtleforms')}
+            {__('Not now', 'subtleforms')}
           </Button>
         </div>
 
         <p className='sf-upgrade-modal__urgency'>
-          <Icon.Users size={13} />
-          {__('Used by teams to streamline workflows', 'subtleforms')}
+          { hasProPlugin
+            ? __( 'SubtleForms Pro is installed. It switches on as soon as your key is active.', 'subtleforms' )
+            : __( 'Pro is an add-on. Your forms and entries stay exactly as they are.', 'subtleforms' ) }
         </p>
       </div>
     </Modal>

@@ -1,88 +1,103 @@
 /**
- * TabBar Component Styles
- * Co-located with TabBar.jsx
+ * TabBar — status tabs for list screens (All / Published / Draft / Trash).
+ * Matches the WordPress Tabs component: neutral labels, a brand underline on
+ * the selected tab, counts in a soft pill.
  */
 
 .sf-tab-bar {
-  display: flex;
-  margin-bottom: -1px;
+	display: flex;
+	align-items: stretch;
+	gap: 4px;
+	margin-bottom: -1px;
+	overflow-x: auto;
+	scrollbar-width: none;
 
-  &__tab {
-    position: relative;
-    padding: 1.1rem 1.5rem; // py-1.5 px-2.5
-    font-size: var(--sf-text-base);
-    font-weight: 500;
-    border-bottom: 2px solid transparent;
-    transition: all var(--sf-duration-base) ease-out;
-    background-color: transparent;
-    border-left: none;
-    border-right: none;
-    border-top: none;
-    cursor: pointer;
+	&::-webkit-scrollbar {
+		display: none;
+	}
 
-    &:focus {
-      outline: none;
-    }
+	&__tab {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		height: 56px;
+		margin: 0;
+		padding: 0 12px;
+		border: 0;
+		background: transparent;
+		font-size: var(--sf-text-sm);
+		font-weight: var(--sf-weight-medium);
+		line-height: 1;
+		white-space: nowrap;
+		cursor: pointer;
+		transition: color var(--sf-transition-fast);
 
-    &:focus-visible {
-      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
-    }
+		&::after {
+			content: '';
+			position: absolute;
+			inset-inline: 12px;
+			bottom: 0;
+			height: 2px;
+			border-radius: 2px 2px 0 0;
+			background: var(--sf-brand);
+			transform: scaleX(0);
+			transition: transform var(--sf-transition-base);
+		}
 
-    &--active {
-      border-bottom-color: var(--sf-blue-600); // blue-600
-      color: var(--sf-blue-600);
-      background-color: var(--sf-blue-50); // blue-50
-    }
+		&:focus {
+			outline: none;
+			box-shadow: none;
+		}
 
-    &--inactive {
-      color: var(--sf-gray-600); // gray-600
+		&:focus-visible {
+			box-shadow: inset var(--sf-shadow-focus);
+			border-radius: var(--sf-radius-sm);
+		}
 
-      &:hover {
-        color: var(--sf-gray-900); // gray-900
-        border-bottom-color: var(--sf-gray-300); // gray-300
-        background-color: var(--sf-gray-50); // gray-50
-      }
-    }
-  }
+		&--active {
+			color: var(--sf-text);
 
-  &__label {
-    position: relative;
-    z-index: 10;
-  }
+			&::after {
+				transform: scaleX(1);
+			}
+		}
 
-  &__count {
-    margin-left: 0.5rem;
-    font-size: var(--sf-text-xs);
-    transition: color var(--sf-duration-base);
-  }
+		&--inactive {
+			color: var(--sf-text-muted);
 
-  &__count--active {
-    color: var(--sf-gray-600); // gray-600
-  }
+			&:hover {
+				color: var(--sf-text);
+			}
+		}
+	}
 
-  &__count--inactive {
-    color: var(--sf-gray-400); // gray-400
-  }
+	&__label {
+		position: relative;
+	}
 
-  .sf-tab-bar__tab:hover &__count--inactive {
-    color: var(--sf-gray-600); // gray-600
-  }
+	&__count {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		min-width: 20px;
+		height: 20px;
+		padding: 0 6px;
+		border-radius: var(--sf-radius-full);
+		background: var(--sf-bg-muted);
+		font-size: 11px;
+		font-weight: var(--sf-weight-medium);
+		font-variant-numeric: tabular-nums;
+		color: var(--sf-text-muted);
+	}
 
-  &__hover-line {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background-color: var(--sf-blue-500); // blue-500
-    transform: scaleX(0);
-    transform-origin: left;
-    transition: transform var(--sf-duration-base);
-    pointer-events: none;
-  }
+	&__count--active {
+		background: var(--sf-primary-100);
+		color: var(--sf-primary-700);
+	}
 
-  .sf-tab-bar__tab:hover &__hover-line {
-    transform: scaleX(1);
-    margin-bottom: -2px;
-  }
+	// Kept for markup compatibility; the underline now lives on ::after.
+	&__hover-line {
+		display: none;
+	}
 }

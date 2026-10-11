@@ -5,6 +5,8 @@ import StepNavigation from './StepNavigation';
 import ConversationalFormRenderer from './ConversationalFormRenderer';
 import { getIn, setIn, flattenToPathMap } from '../utils/valuePaths';
 import { collectLeafInputPaths, collectContainerKeys } from '../utils/schemaLeaves';
+import { collectDefaultValues } from '../utils/defaults';
+import { evaluateFormula } from '../utils/formula';
 import {
   validateFields,
 } from '../utils/fieldValidation';
@@ -52,6 +54,8 @@ export default function FormRenderer({
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
+  // What the visitor sees after submitting (2.0 per-form confirmation).
+  const [confirmationView, setConfirmationView] = useState(null);
   const [currentStepIndex, setCurrentStepIndex] = useState(0);
   const [validationErrors, setValidationErrors] = useState({});
   const [isSubmitIntentional, setIsSubmitIntentional] = useState(false);
@@ -70,6 +74,9 @@ export default function FormRenderer({
     }
 
     if (preloadedSchema) {
+      // Keep the builder preview live: the schema prop changes on every edit
+      // (appearance, fields, settings), and useState only read it once.
+      setSchema(preloadedSchema);
       setLoading(false);
       return;
     }
@@ -221,6 +228,45 @@ export default function FormRenderer({
 
     return flatten(schema.fields);
   }, [schema]);
+
+  // Default values (2.0): applied once the schema is known, never over
+  // anything the visitor or a prefill has already set.
+  const defaultValues = useMemo(
+    () => collectDefaultValues(schema?.fields || []),
+    [schema]
+  );
+  useEffect(() => {
+    if (Object.keys(defaultValues).length > 0) {
+      setValues((prev) => ({ ...defaultValues, ...prev }));
+    }
+  }, [defaultValues]);
+
+  // Calculation fields (2.0): recomputed whenever an input changes. The
+  // server recomputes on submit, so this is display only.
+  const calculationFields = useMemo(
+    () =>
+      allFields.filter(
+        (f) => f.type === 'calculation' && (f.config ?? f).formula
+      ),
+    [allFields]
+  );
+  useEffect(() => {
+    if (calculationFields.length === 0) return;
+    setValues((prev) => {
+      let next = prev;
+      for (let pass = 0; pass < 2; pass++) {
+        calculationFields.forEach((f) => {
+          const c = f.config ?? f;
+          const key = c.key || f.key;
+          const result = evaluateFormula(c.formula, next, c.decimals ?? 2);
+          if (next[key] !== result) {
+            next = { ...next, [key]: result };
+          }
+        });
+      }
+      return next;
+    });
+  }, [values, calculationFields]);
 
   // True layout/container types — fields that group other fields but carry no
   // value of their own. Writes to their key are always ignored.
@@ -646,8 +692,51 @@ export default function FormRenderer({
         const result = await response.json();
 
         if (response.ok && result?.data?.success) {
+          const conf = schema?.metadata?.confirmation || {};
+          const merge = (text, encode = false) =>
+            String(text || '').replace(/\{([\w.-]+)\}/g, (match, key) => {
+              const raw = getIn(values, key) ?? flatValues[key];
+              if (raw === undefined || raw === null) return '';
+              const str = Array.isArray(raw)
+                ? raw.join(', ')
+                : typeof raw === 'object'
+                ? Object.values(raw).filter(Boolean).join(' ')
+                : String(raw);
+              return encode ? encodeURIComponent(str) : str;
+            });
+          const globalRedirect = window.subtleformsFrontend?.redirectUrl || '';
+          const redirectTo =
+            conf.type === 'redirect' && conf.redirectUrl
+              ? merge(conf.redirectUrl, true)
+              : !conf.type && globalRedirect
+              ? globalRedirect
+              : '';
+
+          if (redirectTo && !preview) {
+            if (customOnSubmit) {
+              customOnSubmit(result.data);
+            }
+            window.location.assign(redirectTo);
+            return;
+          }
+
+          setConfirmationView({
+            title: conf.type === 'message' ? merge(conf.title) : '',
+            message:
+              conf.type === 'message' && conf.message
+                ? merge(conf.message)
+                : redirectTo
+                ? sprintf(
+                    /* translators: %s: URL */
+                    __('Visitors will be sent to %s.', 'subtleforms'),
+                    redirectTo
+                  )
+                : window.subtleformsFrontend?.successMessage ||
+                  __('Thank you! Your submission has been received.', 'subtleforms'),
+            allowAnother: !!conf.allowAnother,
+          });
           setSubmitSuccess(true);
-          setValues({});
+          setValues({ ...defaultValues });
           setCurrentStepIndex(0);
 
           if (customOnSubmit) {
@@ -681,6 +770,8 @@ export default function FormRenderer({
       steps,
       hiddenFields,
       focusFirstInvalid,
+      defaultValues,
+      schema,
     ]
   );
 
@@ -716,16 +807,39 @@ export default function FormRenderer({
   }
 
   if (submitSuccess) {
+    const view = confirmationView || {
+      title: '',
+      message: __('Thank you! Your submission has been received.', 'subtleforms'),
+    };
     return (
       <div className='subtleforms-success'>
         <div
           role='status'
           aria-live='polite'
           aria-atomic='true'
-          className='subtleforms-success-message'
-        >
-          <h3>{__('Thank you!', 'subtleforms')}</h3>
-          <p>{__('Your form has been submitted successfully.', 'subtleforms')}</p>
+          className='subtleforms-success-message'>
+          <span className='subtleforms-success-icon' aria-hidden='true'>
+            <svg width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2.5' strokeLinecap='round' strokeLinejoin='round'>
+              <path d='M20 6 9 17l-5-5' />
+            </svg>
+          </span>
+          {view.title && <h3>{view.title}</h3>}
+          {String(view.message)
+            .split(/\n{2,}/)
+            .map((para, i) => (
+              <p key={i}>{para}</p>
+            ))}
+          {view.allowAnother && (
+            <button
+              type='button'
+              className='subtleforms-button subtleforms-button-secondary subtleforms-success-again'
+              onClick={() => {
+                setSubmitSuccess(false);
+                setConfirmationView(null);
+              }}>
+              {__('Submit another response', 'subtleforms')}
+            </button>
+          )}
         </div>
       </div>
     );
@@ -900,8 +1014,8 @@ export default function FormRenderer({
               disabled={submitting}
               onClick={handleExplicitSubmit}>
               {submitting
-                ? __('Submitting...', 'subtleforms')
-                : __('Submit', 'subtleforms')}
+                ? __('Submitting…', 'subtleforms')
+                : schema?.metadata?.submitText?.trim() || __('Submit', 'subtleforms')}
             </button>
           )}
         </div>
