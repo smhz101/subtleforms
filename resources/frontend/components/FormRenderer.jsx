@@ -799,6 +799,13 @@ export default function FormRenderer({
 
         const result = await response.json();
 
+        if (response.ok && result?.data?.success && result.data.redirect && !preview) {
+          // An add-on (e.g. WooCommerce checkout) takes the visitor onward.
+          if (customOnSubmit) customOnSubmit(result.data);
+          window.location.assign(result.data.redirect);
+          return;
+        }
+
         if (response.ok && result?.data?.success) {
           const conf = schema?.metadata?.confirmation || {};
           const merge = (text, encode = false) =>

@@ -377,12 +377,45 @@ final class PublicSubmitApi {
 				return ApiResponse::server_error( __( 'Failed to save submission data', 'subtleforms' ) );
 			}
 
-			return ApiResponse::success(
+			$stored = $this->submissionsRepo->find( $submissionId ) ?: array();
+
+			/**
+			 * A submission was stored and its pipeline finished. Integrations
+			 * (email marketing, CRM, PDF, WooCommerce) hook here.
+			 *
+			 * @param int   $submissionId Submission ID.
+			 * @param int   $formId       Form ID.
+			 * @param array $payload      Sanitised values.
+			 * @param array $submission   Stored submission row (status, meta).
+			 * @param array $schema       Active form schema.
+			 * @since 2.1.0
+			 */
+			do_action( 'subtleforms/submission/completed', $submissionId, $formId, $payload, $stored, $activeSchema['schema'] ?? $activeSchema );
+
+			/** Legacy extension hook: ( form id, submission row with payload ). */
+			do_action( 'subtleforms/submission/saved', $formId, array_merge( $stored, array( 'payload' => $payload ) ) );
+
+			/**
+			 * Filter the JSON returned to the browser after a successful submit.
+			 * Add `redirect` to send the visitor somewhere (e.g. a checkout).
+			 *
+			 * @param array $response     { success, submission_id }.
+			 * @param int   $submissionId Submission ID.
+			 * @param int   $formId       Form ID.
+			 * @param array $order        Priced order (quote, coupon, payment) or empty.
+			 */
+			$response = apply_filters(
+				'subtleforms/submit/response',
 				array(
 					'success'       => true,
 					'submission_id' => $submissionId,
-				)
+				),
+				$submissionId,
+				$formId,
+				is_array( $order ) ? $order : array()
 			);
+
+			return ApiResponse::success( $response );
 		}
 
 		// No schema configured; mark completed
@@ -432,6 +465,20 @@ final class PublicSubmitApi {
 			'payment' => null,
 		);
 		if ( ! Pricing::isPriced( $schema ) ) {
+			return $none;
+		}
+
+		/**
+		 * Whether another system takes this form's payment (for example the
+		 * WooCommerce checkout in SubtleForms Pro). When true, SubtleForms does
+		 * not price, verify or charge; the handler finishes the order on
+		 * `subtleforms/submission/completed`.
+		 *
+		 * @param bool  $external Default false.
+		 * @param mixed $schema   Active schema.
+		 * @param int   $formId   Form ID.
+		 */
+		if ( apply_filters( 'subtleforms/payments/external', false, $schema, $formId ) ) {
 			return $none;
 		}
 

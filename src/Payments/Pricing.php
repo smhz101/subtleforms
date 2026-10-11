@@ -84,7 +84,15 @@ final class Pricing {
 			}
 		}
 		$legacy = is_array( $schema ) ? ( $schema['metadata']['payment'] ?? array() ) : array();
-		return ! empty( $legacy['enabled'] );
+
+		/**
+		 * Whether a form takes money. Add-ons with their own priced field
+		 * types (such as a WooCommerce Product field) return true here.
+		 *
+		 * @param bool  $priced Default result.
+		 * @param mixed $schema Form schema.
+		 */
+		return (bool) apply_filters( 'subtleforms/payments/is_priced', ! empty( $legacy['enabled'] ), $schema );
 	}
 
 	/**
