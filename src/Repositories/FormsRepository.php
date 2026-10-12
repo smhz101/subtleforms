@@ -807,12 +807,23 @@ final class FormsRepository {
 	 */
 	public function trash( int $id ): bool {
 		global $wpdb;
+		$form = $this->find( $id );
+		if ( ! $form ) {
+			return false;
+		}
+		if ( ( $form['status'] ?? '' ) === 'trash' ) {
+			return true;
+		}
+		// Remember the status so Restore can return to it (2.3.1).
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Write path; no caching.
 		$result = $wpdb->update(
 			$this->table,
-			array( 'status' => 'trash' ),
+			array(
+				'status'       => 'trash',
+				'trashed_from' => (string) ( $form['status'] ?? 'draft' ),
+			),
 			array( 'id' => $id ),
-			array( '%s' ),
+			array( '%s', '%s' ),
 			array( '%d' )
 		);
 		if ( $result !== false ) {
@@ -822,29 +833,37 @@ final class FormsRepository {
 	}
 
 	/**
-	 * Restore a trashed form.
+	 * Restore a trashed form to the status it had before (2.3.1).
 	 *
-	 * Restores to 'draft' (matching WordPress' post-restore behaviour). A form
-	 * that was published before trashing will need to be re-published to go
-	 * live again — restoring never silently re-publishes (Part B10).
+	 * Forms trashed by older versions have no recorded status and come back
+	 * as drafts, so restoring never publishes a form by surprise.
 	 *
 	 * @param int $id Form ID.
-	 * @return bool
+	 * @return string|false The restored status, or false.
 	 */
-	public function restore( int $id ): bool {
+	public function restore( int $id ) {
 		global $wpdb;
+		$form = $this->find( $id );
+		if ( ! $form || ( $form['status'] ?? '' ) !== 'trash' ) {
+			return false;
+		}
+		$previous = (string) ( $form['trashed_from'] ?? '' );
+		$status   = in_array( $previous, array( 'draft', 'published', 'archived' ), true ) ? $previous : 'draft';
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Write path; no caching.
 		$result = $wpdb->update(
 			$this->table,
-			array( 'status' => 'draft' ),
+			array(
+				'status'       => $status,
+				'trashed_from' => null,
+			),
 			array( 'id' => $id, 'status' => 'trash' ),
-			array( '%s' ),
+			array( '%s', '%s' ),
 			array( '%d', '%s' )
 		);
 		if ( $result !== false ) {
 			wp_cache_delete( "subtleforms_form_{$id}", 'subtleforms' );
 		}
-		return $result !== false;
+		return $result !== false ? $status : false;
 	}
 
 	/**

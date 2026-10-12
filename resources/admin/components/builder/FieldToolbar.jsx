@@ -1,5 +1,6 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { useState } from '@wordpress/element';
+import { DropdownMenu, MenuGroup, MenuItem } from '@wordpress/components';
 import clsx from 'clsx';
 import { getIcon } from './utils/iconMap';
 import './FieldToolbar.scss';
@@ -20,6 +21,8 @@ export default function FieldToolbar({
   canMoveDown,
   width,
   onWidthChange,
+  moveTargets = [],
+  onMoveTo,
 }) {
   const [widthOpen, setWidthOpen] = useState(false);
   // `label` is the compact glyph on the button; `name` is what screen readers
@@ -37,6 +40,7 @@ export default function FieldToolbar({
     dragHandleListeners || {};
 
   const stop = (e) => e.stopPropagation();
+  const MoveToIcon = getIcon('move-to');
 
   const createHandler = (callback) => (event) => {
     stop(event);
@@ -120,6 +124,33 @@ export default function FieldToolbar({
         __('Move down', 'subtleforms'),
         canMoveDown ? onMoveDown : null,
         !canMoveDown
+      )}
+
+      {onMoveTo && moveTargets.length > 0 && (
+        <span onMouseDown={stop} onPointerDown={stop} className='sf-field-toolbar__move-to'>
+          <DropdownMenu
+            icon={<MoveToIcon size={16} />}
+            label={__('Move to', 'subtleforms')}
+            toggleProps={{ className: 'sf-field-toolbar__button sf-field-toolbar__button--default', size: 'small' }}
+            popoverProps={{ placement: 'bottom-start' }}>
+            {({ onClose }) => (
+              <MenuGroup label={__('Move field into', 'subtleforms')}>
+                {moveTargets.map((target) => (
+                  <MenuItem
+                    key={`${target.parentId}-${target.columnIndex ?? 'x'}`}
+                    style={{ paddingInlineStart: `${12 + target.depth * 12}px` }}
+                    onClick={(event) => {
+                      event?.stopPropagation?.();
+                      onMoveTo({ parentId: target.parentId, columnIndex: target.columnIndex });
+                      onClose();
+                    }}>
+                    {target.label}
+                  </MenuItem>
+                ))}
+              </MenuGroup>
+            )}
+          </DropdownMenu>
+        </span>
       )}
 
       {onWidthChange && (

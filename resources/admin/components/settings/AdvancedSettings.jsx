@@ -435,6 +435,21 @@ export default function AdvancedSettings( {
 					) }
 				/>
 				<FieldError errors={ fieldErrors.data_retention_days } />
+				<TextControl
+					label={ __( 'Empty the entries Trash after (days)', 'subtleforms' ) }
+					type="number"
+					value={ String( settings.entries_trash_days ?? 30 ) }
+					onChange={ ( value ) =>
+						updateSetting( 'entries_trash_days', parseInt( value ) )
+					}
+					min="1"
+					max="365"
+					help={ __(
+						'Deleted entries stay in the Trash for this many days and can be restored. After that they are deleted permanently, with their uploaded files.',
+						'subtleforms'
+					) }
+				/>
+				<FieldError errors={ fieldErrors.entries_trash_days } />
 				<p className="sf-section-description">
 					{ __(
 						'Note: Submissions can also be exported or erased via WordPress Privacy Tools (Tools → Export/Erase Personal Data).',

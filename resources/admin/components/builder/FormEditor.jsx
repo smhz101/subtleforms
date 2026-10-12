@@ -1,6 +1,6 @@
-import { useCallback, useMemo, useState, useRef } from '@wordpress/element';
+import { useCallback, useEffect, useMemo, useState, useRef } from '@wordpress/element';
 import { Popover, Notice } from '@wordpress/components';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { getIcon } from './utils/iconMap';
 import Icon from '../../ui/Icon';
 import FieldDock, { categoryLabel } from './FieldDock';
@@ -9,6 +9,7 @@ import FormBuilder from './FormBuilder';
 import ConversationalCanvas from './ConversationalCanvas';
 import StepNavigator from './StepNavigator';
 import { BuilderProvider } from './context/BuilderProvider';
+import BuilderDnd from './dnd/BuilderDnd';
 import { useBuilderState, useSchemaCommands, useInsertPicker } from './state';
 import './FormEditor.scss';
 
@@ -184,6 +185,7 @@ export default function FormEditor({
     setTree,
     setSelectedId,
     selectedStepId,
+    setSelectedStepId,
     rootId,
     definitionMap,
     isReadOnly,
@@ -199,7 +201,39 @@ export default function FormEditor({
     handleDuplicate,
     handleAddStep,
     handleDeleteStep,
+    handleMoveToStep,
   } = commands;
+  const [repairsDismissed, setRepairsDismissed] = useState(false);
+
+  // A repaired multi-step form (fields moved into the first step on load) is
+  // marked as changed so autosave, Save draft and Publish keep the repair.
+  const [repairCount, setRepairCount] = useState(0);
+  const repairPushesRef = useRef(0);
+  const updateTreeRef = useRef(updateTree);
+  updateTreeRef.current = updateTree;
+  useEffect(() => {
+    if (tree.repairs?.orphansMoved > 0 && !isReadOnly) {
+      setRepairCount(tree.repairs.orphansMoved);
+      setRepairsDismissed(false);
+      repairPushesRef.current = 3;
+    }
+  }, [tree, isReadOnly]);
+  // The builder ignores changes while it is still loading the form, so the
+  // repaired schema is offered again whenever the change handler is renewed
+  // (a few times at most; identical schemas are ignored upstream).
+  useEffect(() => {
+    if (repairPushesRef.current <= 0) {
+      return undefined;
+    }
+    const timer = setTimeout(() => {
+      repairPushesRef.current -= 1;
+      updateTreeRef.current((current) => {
+        const { repairs, ...rest } = current;
+        return rest;
+      });
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [onChange, repairCount]);
 
   // Insert picker state
   const insertPickerState = useInsertPicker();
@@ -240,7 +274,13 @@ export default function FormEditor({
       onMove={handleMove}
       onDuplicate={handleDuplicate}
       onRequestInsert={handleRequestInsert}
+      onMoveToStep={handleMoveToStep}
       isReadOnly={isReadOnly}>
+      <BuilderDnd
+        tree={tree}
+        onInsert={handleInsert}
+        onMove={handleMove}
+        onMoveToStep={handleMoveToStep}>
       <div
         className={`sf-form-editor ${
           isDockCollapsed ? 'sf-form-editor--dock-collapsed' : ''
@@ -284,6 +324,25 @@ export default function FormEditor({
                     )}
                   </p>
                 ))}
+              </Notice>
+            </div>
+          )}
+
+          {!repairsDismissed && repairCount > 0 && (
+            <div className='sf-form-editor__conversions'>
+              <Notice status='warning' onRemove={() => setRepairsDismissed(true)}>
+                <p>
+                  {sprintf(
+                    /* translators: %d: number of fields */
+                    _n(
+                      '%d field was outside every step, so it was moved into the first step. Save or publish to keep this.',
+                      '%d fields were outside every step, so they were moved into the first step. Save or publish to keep this.',
+                      repairCount,
+                      'subtleforms'
+                    ),
+                    repairCount
+                  )}
+                </p>
               </Notice>
             </div>
           )}
@@ -357,6 +416,7 @@ export default function FormEditor({
           </Popover>
         )}
       </div>
+      </BuilderDnd>
     </BuilderProvider>
   );
 }

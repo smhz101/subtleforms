@@ -1,6 +1,30 @@
 import { Button } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
+import { useDroppable } from '@dnd-kit/core';
+import clsx from 'clsx';
+import { useDropTarget, STEP_TAB_PREFIX } from './dnd/BuilderDnd';
 import './StepNavigator.scss';
+
+/**
+ * A step tab is also a drop target: drop a field on it to move the field to
+ * the end of that step (2.3.1).
+ */
+function StepTab({ stepId, children }) {
+  const { setNodeRef } = useDroppable({
+    id: `${STEP_TAB_PREFIX}${stepId}`,
+    data: { kind: 'steptab', stepId },
+  });
+  const target = useDropTarget();
+  return (
+    <div
+      ref={setNodeRef}
+      className={clsx('sf-step-navigator__step-item', {
+        'is-drop-target': target?.stepId === stepId,
+      })}>
+      {children}
+    </div>
+  );
+}
 
 export default function StepNavigator({
   steps,
@@ -57,7 +81,7 @@ export default function StepNavigator({
               step.config?.title || step.title || __('Untitled', 'subtleforms');
 
             return (
-              <div key={step.id} className='sf-step-navigator__step-item'>
+              <StepTab key={step.id} stepId={step.id}>
                 <button
                   type='button'
                   onClick={() => onSelectStep(step.id)}
@@ -110,7 +134,7 @@ export default function StepNavigator({
                     </svg>
                   </button>
                 )}
-              </div>
+              </StepTab>
             );
           })}
         </div>

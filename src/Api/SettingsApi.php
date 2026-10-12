@@ -432,6 +432,11 @@ class SettingsApi {
 				'minimum' => 0,
 				'maximum' => 3650,
 			),
+			'entries_trash_days'         => array(
+				'type'    => 'integer',
+				'minimum' => 1,
+				'maximum' => 365,
+			),
 
 			// ── Extensions ────────────────────────────────────────────────────
 

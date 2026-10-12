@@ -221,14 +221,40 @@ function getCompositeRequiredError(type, value) {
 export function validateFields(fields, values, hiddenFields) {
   const errors = {};
 
-  const visit = (nodes) => {
+  // `prefix` is set inside a Repeater group: `items.0.` (2.3.1). Each group's
+  // children are checked on their own and report under their group path.
+  const visit = (nodes, prefix = '') => {
     if (!Array.isArray(nodes)) return;
     nodes.forEach((field) => {
       if (!field || typeof field !== 'object') return;
       if (field.type === 'step') return;
 
-      const key = field.config?.key || field.key;
+      const rawKey = field.config?.key || field.key;
+      const key = rawKey ? `${prefix}${rawKey}` : rawKey;
       if (key && hiddenFields && hiddenFields.has(key)) return;
+
+      const children =
+        field.children && field.children.length > 0
+          ? field.children
+          : field.fields;
+
+      if (field.type === 'repeat_container') {
+        if (!key) return;
+        const { min, max } = repeaterLimits(field);
+        const stored = getIn(values, key);
+        const count = Math.max(Array.isArray(stored) ? stored.length : 0, min);
+        if (Array.isArray(stored) && stored.length > max) {
+          errors[key] = sprintf(
+            /* translators: %d: maximum number of entries */
+            _n('Add no more than %d entry.', 'Add no more than %d entries.', max, 'subtleforms'),
+            max
+          );
+        }
+        for (let i = 0; i < count; i++) {
+          visit(children, `${key}.${i}.`);
+        }
+        return;
+      }
 
       if (key) {
         const value = getIn(values, key);
@@ -236,15 +262,11 @@ export function validateFields(fields, values, hiddenFields) {
         if (err) errors[key] = err;
       }
 
-      const children =
-        field.children && field.children.length > 0
-          ? field.children
-          : field.fields;
-      if (Array.isArray(children)) visit(children);
+      if (Array.isArray(children)) visit(children, prefix);
 
       if (Array.isArray(field.columns)) {
         field.columns.forEach((col) => {
-          if (Array.isArray(col)) visit(col);
+          if (Array.isArray(col)) visit(col, prefix);
         });
       }
     });
@@ -252,6 +274,20 @@ export function validateFields(fields, values, hiddenFields) {
 
   visit(fields);
   return errors;
+}
+
+/**
+ * Minimum and maximum groups of a Repeater (defaults 1 and 5, as the
+ * server: src/Support/Repeater.php).
+ */
+export function repeaterLimits(field) {
+  const cfg = { ...(field?.config || {}), ...(field || {}) };
+  const rawMin = parseInt(cfg.min, 10);
+  const rawMax = parseInt(cfg.max, 10);
+  const min = Number.isFinite(rawMin) ? Math.max(0, rawMin) : 1;
+  let max = Number.isFinite(rawMax) && rawMax > 0 ? rawMax : 5;
+  max = Math.min(100, Math.max(max, min, 1));
+  return { min, max };
 }
 
 /**

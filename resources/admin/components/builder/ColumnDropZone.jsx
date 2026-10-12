@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import Icon from '../../ui/Icon';
 import InsertFieldButton from './InsertFieldButton';
+import { useDropTarget } from './dnd/BuilderDnd';
 import './ColumnDropZone.scss';
 
 export default function ColumnDropZone({
@@ -25,14 +26,23 @@ export default function ColumnDropZone({
       ? `${containerId}-root`
       : `${containerId}-col-${columnIndex}`;
 
-  const { setNodeRef, isOver } = useDroppable({
+  const { setNodeRef } = useDroppable({
     id: droppableId,
     data: {
+      kind: 'zone',
       parentId: containerId,
       columnIndex,
       position: items.length,
     },
   });
+
+  // Highlight the zone that will receive the drop, whether the pointer is
+  // over the zone itself or over one of its fields.
+  const target = useDropTarget();
+  const isOver =
+    !!target &&
+    target.parentId === containerId &&
+    (target.columnIndex ?? null) === (columnIndex ?? null);
 
   const gap = parseInt(spacing, 10) || 16;
   const padding = `${Math.max(8, Math.round(gap / 2))}px`;
@@ -41,6 +51,7 @@ export default function ColumnDropZone({
     <div
       ref={setNodeRef}
       className={clsx('sf-column-dropzone', { 'is-over': isOver })}
+      data-dropzone={droppableId}
       style={{
         '--dropzone-padding': padding,
         '--dropzone-gap': `${gap}px`,

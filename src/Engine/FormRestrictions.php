@@ -126,6 +126,6 @@ final class FormRestrictions {
 		global $wpdb;
 		$table = $wpdb->prefix . 'subtleforms_submissions';
 		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from $wpdb->prefix; the count must be live.
-		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE form_id = %d AND status != 'spam'", $formId ) );
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE form_id = %d AND status != 'spam' AND status != 'trash'", $formId ) );
 	}
 }

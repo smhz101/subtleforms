@@ -20,6 +20,7 @@ import {
   Edit2,
   Edit3,
   Move,
+  CornerDownRight,
   ChevronUp,
   ChevronDown,
   ChevronLeft,
@@ -135,6 +136,7 @@ import {
  * <Icon.Plus className="sf-text-blue-600" />
  */
 const Icon = {
+  CornerDownRight,
   // Actions
   Check,
   Close: X,

@@ -3,7 +3,7 @@ import { __, sprintf, _n } from '@wordpress/i18n';
 import FieldRenderer from './FieldRenderer';
 import StepNavigation from './StepNavigation';
 import ConversationalFormRenderer from './ConversationalFormRenderer';
-import { getIn, setIn, flattenToPathMap } from '../utils/valuePaths';
+import { getIn, setIn, deleteIn, flattenToPathMap } from '../utils/valuePaths';
 import { collectLeafInputPaths, collectContainerKeys } from '../utils/schemaLeaves';
 import { collectDefaultValues } from '../utils/defaults';
 import { evaluateFormula } from '../utils/formula';
@@ -608,7 +608,10 @@ export default function FormRenderer({
   const goToStepWithError = useCallback(
     (errors) => {
       if (!hasSteps) return;
-      const keys = new Set(Object.keys(errors || {}));
+      // Errors inside a Repeater group (`items.0.qty`) belong to `items`.
+      const keys = new Set(
+        Object.keys(errors || {}).flatMap((k) => [k, k.split('.')[0]])
+      );
       const stepHasError = (nodes) =>
         (nodes || []).some((n) => {
           const k = n?.config?.key || n?.key;
@@ -738,9 +741,19 @@ export default function FormRenderer({
 
       // Answers to hidden fields (and skipped steps) are not sent; the server
       // drops them too.
+      let visiblePayload = payload;
       hiddenFields.forEach((k) => {
-        delete payload[k];
+        if (Object.prototype.hasOwnProperty.call(visiblePayload, k)) {
+          delete visiblePayload[k];
+        } else if (k.indexOf('.') !== -1) {
+          // A hidden field inside a Repeater group (`items.1.qty`).
+          visiblePayload = deleteIn(visiblePayload, k);
+        }
       });
+      if (visiblePayload !== payload) {
+        Object.keys(payload).forEach((k) => delete payload[k]);
+        Object.assign(payload, visiblePayload);
+      }
 
       // Debug logging for empty submissions
       debug('[SubtleForms] Submission Debug:', {

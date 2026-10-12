@@ -1,15 +1,8 @@
 import { memo, useMemo, useCallback, useEffect, useState, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
-import {
-  DndContext,
-  DragOverlay,
-  PointerSensor,
-  KeyboardSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
-import { useSortable, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import { useDndMonitor } from '@dnd-kit/core';
+import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
 import Icon from '../../ui/Icon';
@@ -33,6 +26,7 @@ import {
   nodeChildren,
   getRootNodeId,
 } from './utils/schemaTree';
+import { moveTargets } from './dnd/resolveDrop';
 import './FormBuilder.scss';
 
 /**
@@ -76,6 +70,7 @@ function SortableWrapper({
   } = useSortable({
     id: nodeId,
     data: {
+      kind: 'node',
       parentId,
       columnIndex,
       position,
@@ -130,7 +125,7 @@ const FieldNode = memo(function FieldNode({
   isDragDisabled,
 }) {
   const field = useMemo(() => nodeToField(tree, nodeId), [tree, nodeId]);
-  const { actions: builderActions } = useBuilder();
+  const { actions: builderActions, fieldDefinitions } = useBuilder();
 
   const validationMessages = useMemo(() => {
     const key = field?.key;
@@ -163,6 +158,16 @@ const FieldNode = memo(function FieldNode({
       }
     },
     onDelete: () => onDelete(nodeId),
+    // Keyboard-friendly alternative to dragging into and out of containers.
+    moveTargets: moveTargets(tree, nodeId, {
+      top: __('Top level', 'subtleforms'),
+      /* translators: %d: column number */
+      column: __('column %d', 'subtleforms'),
+      ...Object.fromEntries(
+        Object.entries(fieldDefinitions || {}).map(([type, def]) => [type, def?.label || type])
+      ),
+    }),
+    onMoveTo: (destination) => onMove(nodeId, { ...destination, position: null }),
     width: field?.appearance?.width || '',
     onWidthChange: builderActions?.onUpdate
       ? (w) => {
@@ -171,7 +176,7 @@ const FieldNode = memo(function FieldNode({
           builderActions.onUpdate(nodeId, { appearance: next });
         }
       : null,
-  }), [canMoveUp, canMoveDown, nodeId, parentId, columnIndex, position, onMove, onDuplicate, onDelete, field, builderActions]);
+  }), [canMoveUp, canMoveDown, nodeId, parentId, columnIndex, position, onMove, onDuplicate, onDelete, field, builderActions, tree, fieldDefinitions]);
 
   // Colour, type and shape overrides as custom properties; width and spacing
   // are applied by the drop zone wrapper.
@@ -225,20 +230,6 @@ const FieldNode = memo(function FieldNode({
   );
 });
 
-/**
- * DragGhost — lightweight overlay card shown while dragging a field.
- */
-const DragGhost = memo(function DragGhost({ tree, nodeId }) {
-  const node = tree.nodes[nodeId];
-  if (!node) return null;
-  const label = node.config?.label || node.config?.title || node.type || '';
-  return (
-    <div className='sf-drag-ghost'>
-      <span className='sf-drag-ghost__label'>{label}</span>
-    </div>
-  );
-});
-
 export default function FormBuilder({ appearance } = {}) {
   // Get all state from context (including validationErrorsByFieldKey)
   const {
@@ -257,9 +248,6 @@ export default function FormBuilder({ appearance } = {}) {
   const [selectedIds, setSelectedIds] = useState([]);
   const selectedIdsRef = useRef([]);
   useEffect(() => { selectedIdsRef.current = selectedIds; }, [selectedIds]);
-
-  // Drag overlay: tracks which node is actively being dragged
-  const [activeNodeId, setActiveNodeId] = useState(null);
 
   // O(1) Set lookup — avoids O(n) .includes() per FieldNode in renderNode (Task 7: memo perf)
   const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
@@ -428,15 +416,6 @@ export default function FormBuilder({ appearance } = {}) {
     [setSelectedId]
   );
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 6 },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
   // Detect if this is a multi-step form
   const rootChildren = useMemo(() => {
     return nodeChildren(tree, rootId);
@@ -454,43 +433,11 @@ export default function FormBuilder({ appearance } = {}) {
     return tree.nodes[selectedStepId];
   }, [isMultiStepForm, selectedStepId, tree]);
 
-  const handleDragStart = useCallback(({ active }) => {
-    setActiveNodeId(active.id);
-    setSelectedIds([]); // clear multi-select when drag begins
-  }, []);
-
-  const handleDragEnd = useCallback(
-    ({ active, over }) => {
-      setActiveNodeId(null);
-      if (!over) return;
-
-      const activeData = active.data.current;
-      const overData = over.data.current;
-      if (!activeData || !overData) return;
-
-      if (activeData.parentId !== overData.parentId) {
-        if (process.env.NODE_ENV !== 'production') {
-          console.warn('[SubtleForms] Cannot move field between sections (cross-parent drag blocked)');
-        }
-        return;
-      }
-
-      if (
-        active.id === over.id &&
-        activeData.columnIndex === overData.columnIndex &&
-        activeData.position === overData.position
-      ) {
-        return;
-      }
-
-      onMove(active.id, {
-        parentId: activeData.parentId,
-        columnIndex: overData.columnIndex,
-        position: overData.position,
-      });
-    },
-    [onMove]
-  );
+  // Drags are handled by the builder-wide drag context (dnd/BuilderDnd);
+  // starting one clears the multi-selection.
+  useDndMonitor({
+    onDragStart: () => setSelectedIds([]),
+  });
 
   // The canvas wears the form's Appearance (colours, type, radius, input and
   // button styles) so every styling change is visible while building.
@@ -658,12 +605,7 @@ export default function FormBuilder({ appearance } = {}) {
               <Icon.ShieldCheck size={14} aria-hidden='true' />
               {previewValidation ? __('Hide validation', 'subtleforms') : __('Test validation', 'subtleforms')}
             </button>
-          </div>        <DndContext
-          sensors={sensors}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          autoScroll={{ threshold: { x: 0.2, y: 0.2 }, acceleration: 25, interval: 5 }}>
-          {isMultiStepForm && activeStep ? (
+          </div>          {isMultiStepForm && activeStep ? (
             /* Multi-step form: Show step-scoped canvas */
             <StepCanvas
               stepId={selectedStepId}
@@ -686,10 +628,6 @@ export default function FormBuilder({ appearance } = {}) {
               }
             />
           )}
-          <DragOverlay dropAnimation={null}>
-            {activeNodeId ? <DragGhost tree={tree} nodeId={activeNodeId} /> : null}
-          </DragOverlay>
-        </DndContext>
       </div>
     </div>
   );

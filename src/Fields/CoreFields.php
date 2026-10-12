@@ -185,7 +185,7 @@ final class CoreFields {
 					array(
 						'type'  => 'number',
 						'name'  => 'step',
-						'label' => __( 'Step', 'subtleforms' ),
+						'label' => __( 'Step size', 'subtleforms' ),
 					),
 				),
 				meta: array( 'category' => 'regular' ),
@@ -860,7 +860,7 @@ final class CoreFields {
 					array(
 						'type'  => 'number',
 						'name'  => 'step',
-						'label' => __( 'Step', 'subtleforms' ),
+						'label' => __( 'Step size', 'subtleforms' ),
 					),
 				),
 				meta: array( 'category' => 'regular' ),
@@ -1577,7 +1577,7 @@ final class CoreFields {
 					array(
 						'type'    => 'number',
 						'name'    => 'step',
-						'label'   => __( 'Step', 'subtleforms' ),
+						'label'   => __( 'Step size', 'subtleforms' ),
 						'step'    => 0.01,
 						'default' => 0.01,
 					),

@@ -671,3 +671,43 @@ $pipe-status-colors: (
 		align-self: flex-start;
 	}
 }
+
+// Repeater answers (2.3.1): one row per group.
+.sf-answers__repeater {
+	overflow-x: auto;
+	max-width: 100%;
+}
+
+.sf-answers__repeater-table {
+	border-collapse: collapse;
+	width: 100%;
+	font-size: 13px;
+
+	th,
+	td {
+		padding: 6px 10px;
+		border: 1px solid var(--sf-gray-200, #dcdcde);
+		text-align: left;
+		vertical-align: top;
+		// The answer cell breaks anywhere; table cells keep whole words and
+		// the wrapper scrolls sideways instead.
+		overflow-wrap: normal;
+		word-break: normal;
+		min-width: 6em;
+	}
+
+	thead th {
+		background: var(--sf-gray-50, #f6f7f7);
+		font-weight: 600;
+	}
+
+	th:first-child {
+		width: 32px;
+		min-width: 0;
+	}
+
+	tbody th {
+		color: var(--sf-gray-600, #50575e);
+		font-weight: 500;
+	}
+}

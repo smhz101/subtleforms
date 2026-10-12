@@ -463,12 +463,13 @@ final class ConditionalLogic {
 	 * @param bool                $parentHidden
 	 * @param array               $state
 	 */
-	private function walk( array $nodes, array $values, bool $parentHidden, array &$state ): void {
+	private function walk( array $nodes, array $values, bool $parentHidden, array &$state, string $prefix = '' ): void {
 		foreach ( $nodes as $node ) {
 			if ( ! is_array( $node ) || self::isList( $node ) ) {
 				continue;
 			}
-			$key    = self::nodeKey( $node );
+			$rawKey = self::nodeKey( $node );
+			$key    = ( null !== $rawKey && '' !== $prefix ) ? $prefix . $rawKey : $rawKey;
 			$hidden = $parentHidden;
 
 			foreach ( self::nodeLogics( $node ) as $l ) {
@@ -490,10 +491,42 @@ final class ConditionalLogic {
 				}
 			}
 
+			// Repeater (2.3.1): each group's children are evaluated with that
+			// group's answers first, and reported as `items.0.qty`.
+			if ( ( $node['type'] ?? '' ) === 'repeat_container' && null !== $rawKey ) {
+				foreach ( self::repeaterGroups( self::readValue( $values, $rawKey ) ) as $index => $group ) {
+					foreach ( self::childLists( $node ) as $list ) {
+						$this->walk( $list, array_merge( $values, $group ), $hidden, $state, $key . '.' . $index . '.' );
+					}
+				}
+				continue;
+			}
+
 			foreach ( self::childLists( $node ) as $list ) {
-				$this->walk( $list, $values, $hidden, $state );
+				$this->walk( $list, $values, $hidden, $state, $prefix );
 			}
 		}
+	}
+
+	/**
+	 * The groups of a Repeater answer (at least one).
+	 *
+	 * @param mixed $value List of groups, or an indexed map from a form post.
+	 * @return array<int,array<string,mixed>>
+	 */
+	public static function repeaterGroups( $value ): array {
+		$groups = array();
+		if ( is_array( $value ) ) {
+			$keys = array_keys( $value );
+			$keys = array_values( array_filter( $keys, static function ( $k ) {
+				return is_int( $k ) || ( is_string( $k ) && ctype_digit( $k ) );
+			} ) );
+			sort( $keys, SORT_NUMERIC );
+			foreach ( $keys as $k ) {
+				$groups[] = is_array( $value[ $k ] ) ? $value[ $k ] : array();
+			}
+		}
+		return $groups ? $groups : array( array() );
 	}
 
 	/**
@@ -601,7 +634,33 @@ final class ConditionalLogic {
 	 */
 	private static function withoutKeys( array $values, array $keys ): array {
 		foreach ( $keys as $k ) {
-			unset( $values[ $k ] );
+			if ( array_key_exists( $k, $values ) || false === strpos( (string) $k, '.' ) ) {
+				unset( $values[ $k ] );
+				continue;
+			}
+			$values = self::withoutPath( $values, explode( '.', (string) $k ) );
+		}
+		return $values;
+	}
+
+	/**
+	 * Remove a nested answer such as `items.1.qty`.
+	 *
+	 * @param array<string|int,mixed> $values
+	 * @param string[]                $parts
+	 * @return array<string|int,mixed>
+	 */
+	private static function withoutPath( array $values, array $parts ): array {
+		$head = array_shift( $parts );
+		if ( null === $head || ! array_key_exists( $head, $values ) ) {
+			return $values;
+		}
+		if ( ! $parts ) {
+			unset( $values[ $head ] );
+			return $values;
+		}
+		if ( is_array( $values[ $head ] ) ) {
+			$values[ $head ] = self::withoutPath( $values[ $head ], $parts );
 		}
 		return $values;
 	}

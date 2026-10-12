@@ -55,3 +55,136 @@
 		grid-column: 1 / -1;
 	}
 }
+
+// ── Repeater (2.3.1) ─────────────────────────────────────────────────────
+.subtleforms-repeater {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+
+	&__groups {
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	&__group {
+		margin: 0;
+		padding: 12px 16px 16px;
+		border: 1px solid var(--subtleforms-color-border, #d0d5dd);
+		border-radius: var(--subtleforms-radius-md, 8px);
+		background: var(--subtleforms-color-bg, transparent);
+		min-width: 0;
+
+		&:focus-visible {
+			outline: 2px solid var(--subtleforms-color-primary, #4f5bd5);
+			outline-offset: 2px;
+		}
+	}
+
+	&__group-header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		margin-bottom: 8px;
+	}
+
+	&__legend {
+		float: left;
+		padding: 0;
+		font-weight: 600;
+		font-size: 0.95em;
+		color: var(--subtleforms-color-text, inherit);
+	}
+
+	&__fields {
+		clear: both;
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--subtleforms-field-gap, 16px);
+
+		> * {
+			flex: 1 1 100%;
+			min-width: 0;
+		}
+	}
+
+	&__remove,
+	&__add {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		min-height: 36px;
+		padding: 6px 12px;
+		font: inherit;
+		font-size: 0.9em;
+		line-height: 1.2;
+		border-radius: var(--subtleforms-radius-md, 6px);
+		cursor: pointer;
+	}
+
+	&__remove {
+		border: 1px solid transparent;
+		background: transparent;
+		color: var(--subtleforms-color-error, #b42318);
+
+		&:hover {
+			background: rgba(180, 35, 24, 0.06);
+		}
+	}
+
+	&__add {
+		align-self: flex-start;
+		border: 1px dashed var(--subtleforms-color-primary, #4f5bd5);
+		background: transparent;
+		color: var(--subtleforms-color-primary, #4f5bd5);
+
+		&:hover {
+			background: rgba(34, 113, 177, 0.06);
+		}
+	}
+
+	&__remove:focus-visible,
+	&__add:focus-visible {
+		outline: 2px solid var(--subtleforms-color-primary, #4f5bd5);
+		outline-offset: 2px;
+	}
+
+	&__footer {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 12px;
+	}
+
+	&__count {
+		font-size: 0.85em;
+		color: var(--subtleforms-color-text-light, #667085);
+	}
+
+	// Phones: full-width buttons, comfortable touch targets.
+	@media (max-width: 480px) {
+		&__group {
+			padding: 10px 12px 12px;
+		}
+
+		&__add {
+			align-self: stretch;
+			justify-content: center;
+			min-height: 44px;
+		}
+
+		&__remove {
+			min-height: 44px;
+		}
+
+		&__remove-text {
+			position: absolute;
+			width: 1px;
+			height: 1px;
+			overflow: hidden;
+			clip: rect(0 0 0 0);
+		}
+	}
+}

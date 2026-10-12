@@ -22,6 +22,7 @@ import {
 } from '../utils/api';
 import { BUILDER_ACTIONS } from '../hooks/useBuilderReducer';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
+import { describeSaveError } from '../utils/saveErrors';
 
 /**
  * @param {Object}   opts
@@ -308,12 +309,8 @@ export default function useBuilderOrchestrator({
 						return;
 					}
 
-					const message =
-						body?.error?.message ||
-						body?.message ||
-						body?.data?.message ||
-						__('Failed to save form', 'subtleforms');
-					throw new Error(message);
+					// Name the setting that stopped the save (QA-03).
+					throw new Error(describeSaveError(body, saveStatus));
 				}
 
 				// Update status if specified

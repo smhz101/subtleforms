@@ -614,3 +614,10 @@
 		font-family: var(--sf-font-mono);
 	}
 }
+
+// Step setting (2.3.1): sits above the field's general settings.
+.sf-field-inspector__step-setting {
+	margin-bottom: 16px;
+	padding-bottom: 16px;
+	border-bottom: 1px solid var(--sf-gray-100, #f0f0f1);
+}

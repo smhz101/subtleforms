@@ -13,6 +13,7 @@ import { BUILDER_STATES, BUILDER_ACTIONS } from './useBuilderReducer';
 import { apiPost } from '../utils/api';
 import { schemaEquals } from '../utils/schemaEquals';
 import { debug } from '../../shared/debug';
+import { describeSaveError } from '../utils/saveErrors';
 
 /**
  * Autosave configuration
@@ -228,8 +229,8 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
       }
 
       if (!ok) {
-        const message = body?.message || body?.data?.message || 'Failed to autosave';
-        throw new Error(message);
+        // Say which setting stopped the save (QA-03).
+        throw new Error(describeSaveError(body, status));
       }
 
       // Success - reset counters

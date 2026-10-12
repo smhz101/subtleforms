@@ -77,13 +77,11 @@ test('bulk star, mark read, export selected and delete', async ({ page }) => {
   await page.getByRole('button', { name: 'Mark as Read' }).click();
   await expect.poll(async () => (await entries(client, form.id)).filter((e) => Number(e.is_read) === 1).length).toBe(3);
 
-  // Bulk delete asks first.
+  // Bulk delete moves the entry to the Trash (2.3.1); it leaves the list.
   await page.reload();
   await expect(rows).toHaveCount(3, { timeout: 20000 });
   await page.getByRole('checkbox', { name: /Select row/ }).nth(2).check();
-  await page.locator('.sf-data-table__bulk-actions').getByRole('button', { name: 'Delete' }).click();
-  await expect(page.getByText('Delete 1 entry permanently?')).toBeVisible();
-  await page.getByRole('dialog').getByRole('button', { name: 'Delete', exact: true }).click();
+  await page.locator('.sf-data-table__bulk-actions').getByRole('button', { name: 'Move to Trash' }).click();
   await expect.poll(async () => (await entries(client, form.id)).length).toBe(2);
 });
 

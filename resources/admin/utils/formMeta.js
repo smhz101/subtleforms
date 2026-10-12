@@ -21,6 +21,7 @@ export const FORM_TYPE_CONVERSATIONAL = 'conversational';
 export const FORM_STATUS_DRAFT = 'draft';
 export const FORM_STATUS_PUBLISHED = 'published';
 export const FORM_STATUS_ARCHIVED = 'archived';
+export const FORM_STATUS_TRASH = 'trash';
 
 /**
  * Normalise a raw type string to a canonical value.
@@ -55,6 +56,7 @@ export function normalizeFormStatus(raw) {
   const v = raw.toLowerCase();
   if (v === FORM_STATUS_PUBLISHED) return FORM_STATUS_PUBLISHED;
   if (v === FORM_STATUS_ARCHIVED) return FORM_STATUS_ARCHIVED;
+  if (v === FORM_STATUS_TRASH) return FORM_STATUS_TRASH;
   return FORM_STATUS_DRAFT;
 }
 
@@ -138,6 +140,15 @@ export function getFormTypeBadgeConfig(type) {
  */
 export function getFormStatusBadgeConfig(status, unpublishedChanges = false) {
   const canonical = normalizeFormStatus(status);
+
+  if (canonical === FORM_STATUS_TRASH) {
+    return {
+      label: __('Trashed', 'subtleforms'),
+      icon: Icon.Trash,
+      classes: 'sf-status-badge--trash',
+      color: 'gray',
+    };
+  }
 
   if (canonical === FORM_STATUS_PUBLISHED && unpublishedChanges) {
     return {

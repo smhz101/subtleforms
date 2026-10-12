@@ -49,8 +49,26 @@ function normalizeActions(raw) {
     id:       a.id      ?? uid(),
     type:     a.type    ?? 'webhook',
     enabled:  a.enabled !== undefined ? a.enabled : true,
-    settings: a.settings ?? {},
+    // Templates store email settings under `config` (2.3.1): show them.
+    settings: a.settings ?? (a.config && typeof a.config === 'object' ? a.config : {}),
   }));
+}
+
+/**
+ * What an action still needs before it can run (2.3.1, QA-02). An
+ * incomplete action never blocks saving; it shows "Needs setup".
+ *
+ * @return {string[]} Missing setting names.
+ */
+export function missingActionSettings(action) {
+  const s = action?.settings || {};
+  if (action?.type === 'email') {
+    return ['to', 'subject'].filter((k) => !String(s[k] || '').trim());
+  }
+  if (action?.type === 'webhook') {
+    return String(s.url || '').trim() ? [] : ['url'];
+  }
+  return [];
 }
 
 /** Default settings shape for a new webhook action */
@@ -213,6 +231,9 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
   const s         = action.settings ?? {};
   const signing   = s.signing ?? {};
   const isDisabled = isReadOnly || !action.enabled;
+  const missing    = missingActionSettings(action);
+  // Field warnings only matter while the action is switched on.
+  const showWarnings = action.enabled && missing.length > 0;
 
   /** Merge a patch into settings */
   const patchSettings = (patch) => onUpdate(index, { settings: { ...s, ...patch } });
@@ -251,6 +272,11 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
               {s.url
                 ? `Webhook → ${s.url.replace(/^https?:\/\//, '').split('/')[0].slice(0, 40)}`
                 : ACTION_DESCRIPTIONS.webhook}
+            </span>
+          )}
+          {missing.length > 0 && (
+            <span className='sf-actions-panel__needs-setup'>
+              {__('Needs setup', 'subtleforms')}
             </span>
           )}
           {action.type === 'email' && (
@@ -308,7 +334,7 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
               />
             )}
           />
-          {!s.to && (
+          {showWarnings && !s.to && (
             <Notice status='warning' isDismissible={false} className='sf-actions-panel__field-notice'>
               {__('A recipient email address is required.', 'subtleforms')}
             </Notice>
@@ -336,7 +362,7 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
               />
             )}
           />
-          {!s.subject && (
+          {showWarnings && !s.subject && (
             <Notice status='warning' isDismissible={false} className='sf-actions-panel__field-notice'>
               {__('A subject line is required.', 'subtleforms')}
             </Notice>

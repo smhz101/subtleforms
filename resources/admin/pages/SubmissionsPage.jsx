@@ -121,6 +121,7 @@ export default function SubmissionsPage({ formId }) {
     { key: 'spam', label: __('Spam', 'subtleforms') },
     { key: 'starred', label: __('Starred', 'subtleforms') },
     { key: 'flagged', label: __('Flagged', 'subtleforms') },
+    { key: 'trash', label: __('Trash', 'subtleforms') },
   ];
 
   const dateRangeOptions = [

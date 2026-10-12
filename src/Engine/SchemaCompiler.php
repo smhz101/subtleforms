@@ -120,7 +120,10 @@ final class SchemaCompiler {
 
 			$skippable = isset( $act['skippable'] ) ? (bool) $act['skippable'] : false;
 
-			$settings = isset( $act['settings'] ) && is_array( $act['settings'] ) ? $act['settings'] : array();
+			// Templates store their settings under `config` (2.3.1).
+			$settings = isset( $act['settings'] ) && is_array( $act['settings'] )
+				? $act['settings']
+				: ( isset( $act['config'] ) && is_array( $act['config'] ) ? $act['config'] : array() );
 
 			// Note: actionImpl acts as a prototype; pass instance settings to the step.
 			$steps[] = new PipelineStep( $stepId, $actionImpl, $requires, $skippable, $settings );

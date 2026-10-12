@@ -62,10 +62,13 @@ export function createInitialSchema({
         id:       uid(),
         type:     'email',
         enabled:  true,
+        // Ready to use: the site admin gets every answer (QA-02). The
+        // message stays empty, which sends {all_fields}.
         settings: {
-          to:      '',
-          subject: '',
+          to:      '{admin_email}',
+          subject: __('New entry: {form_title}', 'subtleforms'),
           message: '',
+          format:  'html',
         },
       },
     ],

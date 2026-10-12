@@ -15,6 +15,10 @@ const COLUMN_CONTAINER_SUFFIX = '_column_container';
 // group-style version are intentionally discarded when loading the schema.
 const COMPOSITE_FIELD_TYPES = new Set(['name_group', 'address_group']);
 
+// Containers keep a children list even when saved empty, so an empty Step,
+// Repeater or Group still renders with its drop zone (2.3.1).
+const CHILD_CONTAINER_TYPES = new Set(['step', 'repeat_container', 'group_container']);
+
 function isColumnContainerType(type) {
   return typeof type === 'string' && type.endsWith(COLUMN_CONTAINER_SUFFIX);
 }
@@ -180,7 +184,7 @@ export function normalizeSchema(schema) {
           ? [childFields]
           : [];
       node.columns = ensureArray(seedColumns, columnCount).map(() => []);
-    } else if (Array.isArray(childFields) && childFields.length) {
+    } else if ((Array.isArray(childFields) && childFields.length) || CHILD_CONTAINER_TYPES.has(type)) {
       node.children = [];
     }
 

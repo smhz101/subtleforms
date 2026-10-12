@@ -1,3 +1,5 @@
+import { useDraggable } from '@dnd-kit/core';
+import { LIBRARY_PREFIX } from './dnd/BuilderDnd';
 import {
   useState,
   useMemo,
@@ -52,6 +54,30 @@ function HighlightMatch({ text, query }) {
  * shown in place with a lock; choosing one explains what Pro unlocks rather
  * than hiding the capability.
  */
+/**
+ * A library tile can be clicked (adds the field to the current step or the
+ * end of the form) or dragged onto the canvas, into a container or onto a
+ * step tab (2.3.1). Only the pointer starts a drag, so Enter and Space keep
+ * adding the field.
+ */
+function LibraryTile({ type, label, draggable, children, ...buttonProps }) {
+  const { setNodeRef, listeners } = useDraggable({
+    id: `${LIBRARY_PREFIX}${type}`,
+    data: { kind: 'library', fieldType: type, label },
+    disabled: !draggable,
+  });
+  return (
+    <button
+      type='button'
+      ref={setNodeRef}
+      {...buttonProps}
+      onPointerDown={draggable ? listeners?.onPointerDown : undefined}
+      data-field-type={type}>
+      {children}
+    </button>
+  );
+}
+
 export default function FieldDock({ fieldGroups, onAddField, onCollapsedChange }) {
   const [collapsed, setCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -139,9 +165,11 @@ export default function FieldDock({ fieldGroups, onAddField, onCollapsedChange }
     }
 
     return (
-      <button
+      <LibraryTile
         key={f.type}
-        type='button'
+        type={f.type}
+        label={f.label}
+        draggable={!isDisabled && !isProLocked}
         className={clsx('sf-inserter__item', {
           'is-disabled': isDisabled,
           'is-locked': isProLocked,
@@ -171,7 +199,7 @@ export default function FieldDock({ fieldGroups, onAddField, onCollapsedChange }
         {isProLocked && (
           <span className='sf-inserter__item-pro'>{__('Pro', 'subtleforms')}</span>
         )}
-      </button>
+      </LibraryTile>
     );
   };
 

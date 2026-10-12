@@ -110,10 +110,22 @@ module.exports = { adminApi, publishForm, entries, cleanup, waitForForm, BASE };
 
 /** Log the browser page in as the admin. */
 async function loginPage(page) {
-  await page.goto('/wp-login.php');
-  await page.fill('#user_login', USER);
-  await page.fill('#user_pass', PASS);
-  await Promise.all([page.waitForNavigation(), page.click('#wp-submit')]);
+  // The local PHP server occasionally stalls one request; a login that does
+  // not land within 45 seconds is tried once more.
+  for (let attempt = 0; attempt < 2; attempt++) {
+    await page.goto('/wp-login.php');
+    await page.fill('#user_login', USER);
+    await page.fill('#user_pass', PASS);
+    try {
+      await Promise.all([
+        page.waitForURL(/\/wp-admin\//, { timeout: 45000 }),
+        page.click('#wp-submit'),
+      ]);
+      return;
+    } catch (e) {
+      if (attempt === 1) throw e;
+    }
+  }
 }
 
 /** Open a form in the builder and wait for the canvas. */

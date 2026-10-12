@@ -339,15 +339,19 @@ function evaluateOnce(fields, values, opts) {
     if (key && !list.includes(key)) list.push(key);
   };
 
-  const walk = (nodes, parentHidden) => {
+  // `scope` holds the answers rules read and the key prefix of a Repeater
+  // group: inside group i of Repeater `items`, a child `qty` is reported as
+  // `items.i.qty` and its rules read that group's answers first (2.3.1).
+  const walk = (nodes, parentHidden, scope) => {
     if (!Array.isArray(nodes)) return;
     nodes.forEach((node) => {
       if (!isPlainObject(node)) return;
-      const key = nodeKey(node);
+      const rawKey = nodeKey(node);
+      const key = rawKey && scope.prefix ? `${scope.prefix}${rawKey}` : rawKey;
       let hidden = parentHidden;
 
       nodeLogics(node).forEach((l) => {
-        const passes = logicPasses(l, values, opts);
+        const passes = logicPasses(l, scope.values, opts);
         if ((l.action === 'show' && !passes) || (l.action === 'hide' && passes)) {
           hidden = true;
         } else if (l.action === 'require' && passes) {
@@ -360,12 +364,44 @@ function evaluateOnce(fields, values, opts) {
       if (hidden) {
         add(node.type === 'step' ? state.hiddenSteps : state.hidden, key);
       }
-      childLists(node).forEach((list) => walk(list, hidden));
+
+      if (node.type === 'repeat_container' && rawKey) {
+        const groups = repeaterGroups(readValue(scope.values, rawKey));
+        groups.forEach((group, index) => {
+          const groupScope = {
+            values: { ...scope.values, ...group },
+            prefix: `${key}.${index}.`,
+          };
+          childLists(node).forEach((list) => walk(list, hidden, groupScope));
+        });
+        return;
+      }
+      childLists(node).forEach((list) => walk(list, hidden, scope));
     });
   };
 
-  walk(fields, false);
+  walk(fields, false, { values, prefix: '' });
   return state;
+}
+
+/**
+ * The groups of a Repeater answer: a list of objects (at least one, so the
+ * first group's rules are known before anything is typed).
+ */
+export function repeaterGroups(value) {
+  if (Array.isArray(value)) {
+    const groups = value.map((g) => (isPlainObject(g) ? g : {}));
+    return groups.length ? groups : [{}];
+  }
+  if (isPlainObject(value)) {
+    // Indexed object { 0: {...}, 1: {...} } from a form post.
+    const groups = Object.keys(value)
+      .filter((k) => /^\d+$/.test(k))
+      .sort((a, b) => Number(a) - Number(b))
+      .map((k) => (isPlainObject(value[k]) ? value[k] : {}));
+    return groups.length ? groups : [{}];
+  }
+  return [{}];
 }
 
 function applyGlobalRules(rules, values, state, opts) {
@@ -402,11 +438,30 @@ function applyGlobalRules(rules, values, state, opts) {
 }
 
 function withoutKeys(values, keys) {
-  const out = { ...values };
+  let out = { ...values };
   keys.forEach((k) => {
-    delete out[k];
+    if (Object.prototype.hasOwnProperty.call(out, k) || k.indexOf('.') === -1) {
+      delete out[k];
+      return;
+    }
+    out = withoutPath(out, k.split('.'));
   });
   return out;
+}
+
+// Remove a nested answer such as `items.1.qty` without touching the input.
+function withoutPath(obj, parts) {
+  if (obj === null || typeof obj !== 'object') return obj;
+  const [head, ...rest] = parts;
+  if (!(head in obj)) return obj;
+  const copy = Array.isArray(obj) ? [...obj] : { ...obj };
+  if (!rest.length) {
+    if (Array.isArray(copy)) copy[head] = undefined;
+    else delete copy[head];
+    return copy;
+  }
+  copy[head] = withoutPath(copy[head], rest);
+  return copy;
 }
 
 /**

@@ -45,27 +45,33 @@ export function getIn(obj, path, defaultValue = undefined) {
 
 function setInObject(obj, segments, value) {
   const [head, ...tail] = segments;
-  const safeObj = obj && typeof obj === 'object' ? obj : {};
+  const isIndex = /^\d+$/.test(head || '');
+  // Repeater groups live in arrays (`items.0.qty`): keep them arrays.
+  const safeObj =
+    obj && typeof obj === 'object' ? obj : isIndex ? [] : {};
 
   if (!head) {
     return safeObj;
   }
 
+  const clone = Array.isArray(safeObj) ? [...safeObj] : { ...safeObj };
+
   if (tail.length === 0) {
     // Only clone at the leaf.
-    return {
-      ...safeObj,
-      [head]: value,
-    };
+    clone[head] = value;
+    return clone;
   }
 
-  const nextChild = setInObject(safeObj[head], tail, value);
+  const nextIsIndex = /^\d+$/.test(tail[0]);
+  const child = safeObj[head];
+  clone[head] = setInObject(
+    child && typeof child === 'object' ? child : nextIsIndex ? [] : {},
+    tail,
+    value
+  );
 
   // Only clone objects along the updated path.
-  return {
-    ...safeObj,
-    [head]: nextChild,
-  };
+  return clone;
 }
 
 export function setIn(obj, path, value) {
@@ -109,4 +115,23 @@ export function flattenToPathMap(values) {
 
   walk(values, '');
   return out;
+}
+
+/**
+ * Remove the value at a dotted path (`items.1.qty`) without mutating the
+ * input. Missing paths return the input unchanged.
+ */
+export function deleteIn(obj, path) {
+  const segments = toPathSegments(path);
+  if (!segments.length || !obj || typeof obj !== 'object') return obj;
+  const [head, ...tail] = segments;
+  if (!(head in obj)) return obj;
+  const clone = Array.isArray(obj) ? [...obj] : { ...obj };
+  if (!tail.length) {
+    if (Array.isArray(clone)) clone[head] = undefined;
+    else delete clone[head];
+    return clone;
+  }
+  clone[head] = deleteIn(obj[head], tail);
+  return clone;
 }

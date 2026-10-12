@@ -45,6 +45,9 @@ final class Stats {
 	public static function register(): void {
 		add_action( 'init', array( __CLASS__, 'maybeInstall' ), 5 );
 		add_action( 'subtleforms/submission/completed', array( __CLASS__, 'onSubmission' ), 5, 2 );
+		// Entries in the Trash do not count (2.3.1).
+		add_action( 'subtleforms/submission/trashed', array( __CLASS__, 'onTrashed' ), 10, 2 );
+		add_action( 'subtleforms/submission/untrashed', array( __CLASS__, 'onUntrashed' ), 10, 3 );
 		add_action( self::PRUNE_HOOK, array( __CLASS__, 'prune' ) );
 		add_action( 'rest_api_init', array( __CLASS__, 'registerRoutes' ) );
 
@@ -146,6 +149,58 @@ final class Stats {
 			return;
 		}
 		self::increment( (int) $formId, 'submissions' );
+	}
+
+	/**
+	 * Statuses of entries that were counted as submissions.
+	 */
+	const COUNTED_STATUSES = array( 'completed', 'saved', 'unread', 'read', 'flagged', 'payment_pending' );
+
+	/**
+	 * Take a trashed entry out of its day's submission count.
+	 *
+	 * @param int   $id         Entry ID.
+	 * @param array $submission Entry row before it was trashed.
+	 */
+	public static function onTrashed( $id, $submission ): void {
+		if ( is_array( $submission ) && in_array( (string) ( $submission['status'] ?? '' ), self::COUNTED_STATUSES, true ) ) {
+			self::adjustSubmissions( (int) ( $submission['form_id'] ?? 0 ), (string) ( $submission['created_at'] ?? '' ), -1 );
+		}
+	}
+
+	/**
+	 * Count a restored entry again.
+	 *
+	 * @param int    $id         Entry ID.
+	 * @param string $status     Restored status.
+	 * @param array  $submission Entry row while it was in the Trash.
+	 */
+	public static function onUntrashed( $id, $status, $submission ): void {
+		if ( is_array( $submission ) && in_array( (string) $status, self::COUNTED_STATUSES, true ) ) {
+			self::adjustSubmissions( (int) ( $submission['form_id'] ?? 0 ), (string) ( $submission['created_at'] ?? '' ), 1 );
+		}
+	}
+
+	/**
+	 * Change the submission count of the day an entry was sent.
+	 *
+	 * @param int    $formId    Form ID.
+	 * @param string $createdAt Entry time (UTC, Y-m-d H:i:s).
+	 * @param int    $delta     +1 or -1.
+	 */
+	public static function adjustSubmissions( int $formId, string $createdAt, int $delta ): void {
+		if ( $formId <= 0 || 0 === $delta ) {
+			return;
+		}
+		$day = '' !== $createdAt ? substr( $createdAt, 0, 10 ) : gmdate( 'Y-m-d' );
+		if ( $delta > 0 ) {
+			self::increment( $formId, 'submissions', $day );
+			return;
+		}
+		global $wpdb;
+		$table = self::table();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Fixed table name; prepared values; counters must not be cached.
+		$wpdb->query( $wpdb->prepare( "UPDATE {$table} SET submissions = submissions - 1 WHERE form_id = %d AND day = %s AND submissions > 0", $formId, $day ) );
 	}
 
 	/**

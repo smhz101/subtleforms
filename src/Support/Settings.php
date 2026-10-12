@@ -61,6 +61,7 @@ class Settings {
 
 		// Privacy & GDPR
 		'data_retention_days'        => 0, // 0 = keep forever
+		'entries_trash_days'         => 30, // Days an entry stays in the Trash (2.3.1).
 
 		// ── Extensions ───────────────────────────────────────────────────────
 
@@ -197,6 +198,11 @@ class Settings {
 			'integer',
 			'min' => 0,
 			'max' => 3650,
+		),
+		'entries_trash_days'         => array(
+			'integer',
+			'min' => 1,
+			'max' => 365,
 		),
 
 		// Extensions

@@ -43,6 +43,12 @@ if ( ! function_exists( '__' ) ) {
 	}
 }
 
+if ( ! function_exists( '_n' ) ) {
+	function _n( string $single, string $plural, $number, string $domain = 'default' ): string {
+		return 1 === (int) $number ? $single : $plural;
+	}
+}
+
 if ( ! function_exists( 'esc_html' ) ) {
 	function esc_html( string $text ): string {
 		return htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' );

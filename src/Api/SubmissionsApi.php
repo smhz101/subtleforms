@@ -197,11 +197,34 @@ final class SubmissionsApi {
 					'callback'            => array( $this, 'delete_submission' ),
 					'permission_callback' => array( $this, 'check_write_permission' ),
 					'args'                => array(
-						'id' => array(
+						'id'    => array(
 							'type'              => 'integer',
 							'required'          => true,
 							'sanitize_callback' => 'absint',
 						),
+						// 2.3.1: entries go to the Trash; force=1 deletes for good.
+						'force' => array(
+							'type'    => 'boolean',
+							'default' => false,
+						),
+					),
+				),
+			)
+		);
+
+		// Restore an entry from the Trash (2.3.1).
+		register_rest_route(
+			self::NAMESPACE,
+			'/submissions/(?P<id>\d+)/restore',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'restore_submission' ),
+				'permission_callback' => array( $this, 'check_write_permission' ),
+				'args'                => array(
+					'id' => array(
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
 					),
 				),
 			)
@@ -272,7 +295,7 @@ final class SubmissionsApi {
 					'action' => array(
 						'type'     => 'string',
 						'required' => true,
-						'enum'     => array( 'read', 'unread', 'star', 'unstar', 'spam', 'flagged', 'restore', 'delete' ),
+						'enum'     => array( 'read', 'unread', 'star', 'unstar', 'spam', 'flagged', 'restore', 'trash', 'untrash', 'delete' ),
 					),
 				),
 			)
@@ -410,7 +433,7 @@ final class SubmissionsApi {
 			$is_read_arg = 0;
 		} elseif ( $tab_status === 'read' ) {
 			$is_read_arg = 1;
-		} elseif ( in_array( $tab_status, array( 'spam', 'flagged' ), true ) ) {
+		} elseif ( in_array( $tab_status, array( 'spam', 'flagged', 'trash' ), true ) ) {
 			$status_arg = $tab_status;
 		}
 		$starred_arg = $tab_status === 'starred' ? 1 : null;
@@ -559,6 +582,10 @@ final class SubmissionsApi {
 		if ( empty( $data ) ) {
 			return ApiResponse::bad_request( __( 'No valid changes provided', 'subtleforms' ) );
 		}
+		// An entry in the Trash only leaves it through Restore (2.3.1).
+		if ( isset( $data['status'] ) && ( $submission['status'] ?? '' ) === SubmissionsRepository::TRASH ) {
+			return ApiResponse::validation_error( __( 'Restore this entry from the Trash first.', 'subtleforms' ) );
+		}
 
 		$this->submissionsRepo->update( $id, $data );
 
@@ -598,11 +625,24 @@ final class SubmissionsApi {
 
 		$done = array();
 		foreach ( $ids as $id ) {
-			if ( ! $this->submissionsRepo->find( $id ) ) {
+			$row = $this->submissionsRepo->find( $id );
+			if ( ! $row ) {
 				continue;
 			}
+			$inTrash = ( $row['status'] ?? '' ) === SubmissionsRepository::TRASH;
 			try {
-				if ( $action === 'delete' ) {
+				if ( $action === 'trash' ) {
+					if ( $this->submissionsRepo->trash( $id ) ) {
+						$done[] = $id;
+					}
+				} elseif ( $action === 'untrash' ) {
+					if ( $inTrash && false !== $this->submissionsRepo->untrash( $id ) ) {
+						$done[] = $id;
+					}
+				} elseif ( $inTrash && $action !== 'delete' ) {
+					// Entries in the Trash are only restored or deleted.
+					continue;
+				} elseif ( $action === 'delete' ) {
 					if ( $this->submissionsRepo->delete( $id ) ) {
 						( new \SubtleForms\Repositories\LogsRepository() )->deleteBySubmission( $id );
 						$done[] = $id;
@@ -694,6 +734,10 @@ final class SubmissionsApi {
 		if ( ! $submission ) {
 			return ApiResponse::not_found( __( 'Submission not found', 'subtleforms' ) );
 		}
+		// Entries in the Trash send nothing (2.3.1).
+		if ( ( $submission['status'] ?? '' ) === SubmissionsRepository::TRASH ) {
+			return ApiResponse::validation_error( __( 'Restore this entry from the Trash before resending its notifications.', 'subtleforms' ) );
+		}
 
 		try {
 			$loaded = $this->formsRepo->loadSchemaVersion( (int) $submission['form_id'], isset( $submission['schema_version'] ) ? (int) $submission['schema_version'] : null );
@@ -760,6 +804,20 @@ final class SubmissionsApi {
 			return ApiResponse::not_found( __( 'Submission not found', 'subtleforms' ) );
 		}
 
+		// Without force the entry goes to the Trash, where it can be restored
+		// for the retention period (2.3.1).
+		if ( ! rest_sanitize_boolean( $request->get_param( 'force' ) ) ) {
+			if ( ! $this->submissionsRepo->trash( $id ) ) {
+				return ApiResponse::server_error( __( 'The submission could not be moved to the Trash.', 'subtleforms' ) );
+			}
+			return ApiResponse::success(
+				array(
+					'trashed' => true,
+					'id'      => $id,
+				)
+			);
+		}
+
 		if ( ! $this->submissionsRepo->delete( $id ) ) {
 			return ApiResponse::server_error( __( 'The submission could not be deleted.', 'subtleforms' ) );
 		}
@@ -769,6 +827,36 @@ final class SubmissionsApi {
 			array(
 				'deleted' => true,
 				'id'      => $id,
+			)
+		);
+	}
+
+	/**
+	 * Restore an entry from the Trash to its previous status (2.3.1).
+	 */
+	public function restore_submission( WP_REST_Request $request ): WP_REST_Response {
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		$id  = absint( $request->get_param( 'id' ) );
+		$row = $id ? $this->submissionsRepo->find( $id ) : null;
+		if ( ! $row ) {
+			return ApiResponse::not_found( __( 'Submission not found', 'subtleforms' ) );
+		}
+		if ( ( $row['status'] ?? '' ) !== SubmissionsRepository::TRASH ) {
+			return ApiResponse::validation_error( __( 'This entry is not in the Trash.', 'subtleforms' ) );
+		}
+		$status = $this->submissionsRepo->untrash( $id );
+		if ( false === $status ) {
+			return ApiResponse::server_error( __( 'The entry could not be restored. Please try again.', 'subtleforms' ) );
+		}
+		return ApiResponse::success(
+			array(
+				'restored' => true,
+				'id'       => $id,
+				'status'   => $status,
 			)
 		);
 	}
@@ -881,6 +969,10 @@ final class SubmissionsApi {
 		);
 
 		$args = array_filter( $args, fn( $value ) => $value !== null && $value !== '' );
+		// Entries in the Trash are never exported (2.3.1).
+		if ( ( $args['status'] ?? '' ) === SubmissionsRepository::TRASH ) {
+			unset( $args['status'] );
+		}
 
 		$submissions = $this->submissionsRepo->findAll( $args );
 
@@ -897,13 +989,17 @@ final class SubmissionsApi {
 
 		// Column order: the form's fields (single-form export), then any other
 		// answer keys in the order they were first seen.
-		$labels = array();
+		$labels    = array();
+		$repeaters = array();
 		if ( ! empty( $args['form_id'] ) ) {
 			try {
 				$active = $this->formsRepo->loadSchemaVersion( (int) $args['form_id'] );
 				$schema = is_array( $active ) ? ( $active['schema'] ?? $active ) : array();
 				foreach ( \SubtleForms\Support\FieldMapper::fields( is_array( $schema ) ? $schema : array() ) as $field ) {
 					$labels[ $field['key'] ] = '' !== $field['label'] ? $field['label'] : $field['key'];
+					if ( \SubtleForms\Support\Repeater::TYPE === $field['type'] ) {
+						$repeaters[ $field['key'] ] = $field['field'];
+					}
 				}
 			} catch ( \Throwable $e ) {
 				$labels = array();
@@ -951,8 +1047,17 @@ final class SubmissionsApi {
 			__( 'Status', 'subtleforms' ),
 			__( 'Submitted At', 'subtleforms' ),
 		);
+		// A Repeater gets one column per child; each group is one line of
+		// the cell, in the same order in every column (2.3.1).
 		foreach ( $ordered as $key ) {
-			$headers[] = $labels[ $key ] ?? ucwords( str_replace( array( '_', '-' ), ' ', $key ) );
+			$label = $labels[ $key ] ?? ucwords( str_replace( array( '_', '-' ), ' ', $key ) );
+			if ( isset( $repeaters[ $key ] ) ) {
+				foreach ( \SubtleForms\Support\Repeater::childFields( $repeaters[ $key ] ) as $child ) {
+					$headers[] = $label . ': ' . ( '' !== $child['label'] ? $child['label'] : $child['key'] );
+				}
+				continue;
+			}
+			$headers[] = $label;
 		}
 
 		$csv_data = array( $headers );
@@ -964,7 +1069,17 @@ final class SubmissionsApi {
 				$submission['created_at'],
 			);
 			foreach ( $ordered as $key ) {
-				$row[] = \SubtleForms\Support\FieldMapper::toText( $payload[ $key ] ?? '' );
+				if ( isset( $repeaters[ $key ] ) ) {
+					foreach ( \SubtleForms\Support\Repeater::csvCells( $payload[ $key ] ?? array(), $repeaters[ $key ] ) as $cell ) {
+						$row[] = $cell;
+					}
+					continue;
+				}
+				$value = $payload[ $key ] ?? '';
+				// Exports of several forms: groups read as numbered lines.
+				$row[] = \SubtleForms\Support\Repeater::looksLikeGroups( $value )
+					? $this->groupsText( $value )
+					: \SubtleForms\Support\FieldMapper::toText( $value );
 			}
 			$csv_data[] = $row;
 		}
@@ -1061,6 +1176,28 @@ final class SubmissionsApi {
 		}
 		$cache[ $formId ] = array_values( array_unique( $keys ) );
 		return $cache[ $formId ];
+	}
+
+	/**
+	 * Repeater groups as numbered lines when the form's schema is not at
+	 * hand (an export across forms): "1. ticker: AAPL; shares: 8".
+	 *
+	 * @param array $groups Groups.
+	 * @return string
+	 */
+	private function groupsText( array $groups ): string {
+		$lines = array();
+		foreach ( array_values( $groups ) as $n => $group ) {
+			$parts = array();
+			foreach ( (array) $group as $k => $v ) {
+				$text = \SubtleForms\Support\FieldMapper::toText( $v );
+				if ( '' !== $text ) {
+					$parts[] = $k . ': ' . $text;
+				}
+			}
+			$lines[] = ( $n + 1 ) . '. ' . implode( '; ', $parts );
+		}
+		return implode( "\n", $lines );
 	}
 
 	/**

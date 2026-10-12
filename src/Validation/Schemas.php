@@ -469,15 +469,20 @@ class Schemas {
 			),
 
 			// PaymentConfig (Phase A2-P3: at_least_one for flexible pricing)
+			// Open (2.3.1): add-ons store more here (the checkout `processor`,
+			// `billing` mapping), and forms priced by Product or Priced option
+			// fields have no fixed amount or amount field. Requiring one made
+			// every autosave of such a form fail (QA-03, form 11).
 			'PaymentConfig' => array(
+				'__passthrough' => true,
 				'enabled'     => 'optional|bool|default:false',
 				// Must list every currency the Payments panel offers. It offered JPY
 				// and INR while this enum did not, so choosing either made the form
 				// unsaveable from that point on.
 				'currency'    => 'optional|in:USD,EUR,GBP,CAD,AUD,JPY,INR|default:USD',
 				'amountType'  => 'optional|in:fixed,field,calculated|default:fixed',
-				'fixedAmount' => 'optional|number|min:0|at_least_one:fixedAmount,amountField',
-				'amountField' => 'optional|string|max:100|at_least_one:fixedAmount,amountField',
+				'fixedAmount' => 'optional|number|min:0',
+				'amountField' => 'optional|string|max:100',
 				'mode'        => 'optional|in:test,live|default:test',
 			),
 		);

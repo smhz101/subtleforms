@@ -27,7 +27,7 @@ export default function FormsPage() {
     try {
       const { body } = await apiGet('/forms/counts');
       // apiClient unwraps .data, so body is the counts map directly.
-      setStatusCounts(body || {});
+      setStatusCounts(body?.data && typeof body.data === 'object' ? body.data : body || {});
     } catch (error) {
       console.error('Failed to load form status counts:', error);
     }

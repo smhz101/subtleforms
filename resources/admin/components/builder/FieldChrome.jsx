@@ -37,11 +37,23 @@ const FieldChrome = memo(function FieldChrome({
   const hasValidationMessages =
     Array.isArray(validationMessages) && validationMessages.length > 0;
 
+  // Only this field's own group handles Enter/Space, and the event stops
+  // here: a field inside a Repeater, Group or column selects itself, not its
+  // container (QA-10).
   const handleKeyDown = (e) => {
+    if (e.target !== e.currentTarget) {
+      return;
+    }
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
+      e.stopPropagation();
       onSelect();
     }
+  };
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    onSelect();
   };
 
   return (
@@ -53,7 +65,7 @@ const FieldChrome = memo(function FieldChrome({
         'is-hovered': isHovered,
         'sf-field-chrome--validation-error': hasValidationMessages,
       })}
-      onClick={onSelect}
+      onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onFocus={() => setIsFocused(true)}
@@ -82,6 +94,8 @@ const FieldChrome = memo(function FieldChrome({
         canMoveDown={toolbarActions?.canMoveDown}
         width={toolbarActions?.width}
         onWidthChange={toolbarActions?.onWidthChange}
+        moveTargets={toolbarActions?.moveTargets}
+        onMoveTo={toolbarActions?.onMoveTo}
       />
     </div>
   );

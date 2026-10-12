@@ -41,6 +41,7 @@ export function BuilderProvider({
 	onMove,
 	onDuplicate,
 	onRequestInsert,
+	onMoveToStep,
 	isReadOnly = false,
 }) {
 	// Tree context - changes on schema mutations
@@ -85,9 +86,10 @@ export function BuilderProvider({
 				onMove,
 				onDuplicate,
 				onRequestInsert,
+				onMoveToStep,
 			},
 		}),
-		[onInsert, onDelete, onUpdate, onMove, onDuplicate, onRequestInsert]
+		[onInsert, onDelete, onUpdate, onMove, onDuplicate, onRequestInsert, onMoveToStep]
 	);
 
 	// Config context - rarely changes

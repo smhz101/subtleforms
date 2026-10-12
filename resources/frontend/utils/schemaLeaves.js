@@ -55,6 +55,9 @@ const INPUT_FIELD_TYPES = new Set([
   // Composite group fields — store object values at their root key
   'name_group',
   'address_group',
+  // Repeater (2.3.1): a list of groups at its own key; its children are
+  // answered inside each group, never at the top level.
+  'repeat_container',
 ]);
 
 export function isLeafInputField(field) {
@@ -120,6 +123,8 @@ export function collectLeafInputPaths(fields) {
  * value of their own. Writes to their key are always ignored by the change
  * handler.
  *
+ * A Repeater is not a container here: it owns its groups (a list) at its key.
+ *
  * Composite INPUT fields (name_group, address_group, address, checkbox_grid)
  * also have children, but they DO carry a value (an object) at their root key,
  * so they must NOT be treated as containers. Treating "has children" as "is a
@@ -140,7 +145,6 @@ export function isLayoutContainerField(field) {
   }
   return (
     type === 'group_container' ||
-    type === 'repeat_container' ||
     type === 'step' ||
     type === 'form_step' ||
     type === 'section' ||

@@ -23,6 +23,21 @@ final class SubmissionsRepository {
 	 */
 	private $table;
 
+	/**
+	 * Status of an entry in the Trash (2.3.1).
+	 */
+	public const TRASH = 'trash';
+
+	/**
+	 * SQL condition that leaves trashed entries out. `status` may be NULL.
+	 */
+	public const NOT_TRASHED = "( status IS NULL OR status <> 'trash' )";
+
+	/**
+	 * Default number of days an entry stays in the Trash.
+	 */
+	public const TRASH_DAYS = 30;
+
 	public function __construct() {
 		global $wpdb;
 		$this->table = $wpdb->prefix . 'subtleforms_submissions';
@@ -73,6 +88,9 @@ final class SubmissionsRepository {
 		if ( $args['status'] ) {
 			$where[]  = 'status = %s';
 			$params[] = $args['status'];
+		}
+		if ( $args['status'] !== self::TRASH ) {
+			$where[] = self::NOT_TRASHED;
 		}
 
 		$where_clause = 'WHERE ' . implode( ' AND ', $where );
@@ -273,6 +291,118 @@ final class SubmissionsRepository {
 	}
 
 	/**
+	 * Move an entry to the Trash (2.3.1). Its previous status and the time
+	 * are kept so Restore can return it and the Trash can be emptied later.
+	 *
+	 * @param int $id Entry ID.
+	 * @return bool
+	 */
+	public function trash( int $id ): bool {
+		global $wpdb;
+		$submission = $this->find( $id );
+		if ( ! $submission ) {
+			return false;
+		}
+		if ( ( $submission['status'] ?? '' ) === self::TRASH ) {
+			return true;
+		}
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Write path.
+		$result = $wpdb->update(
+			$this->table,
+			array(
+				'status'       => self::TRASH,
+				'trashed_from' => isset( $submission['status'] ) ? (string) $submission['status'] : '',
+				'trashed_at'   => current_time( 'mysql', true ),
+			),
+			array( 'id' => $id ),
+			array( '%s', '%s', '%s' ),
+			array( '%d' )
+		);
+		if ( false === $result ) {
+			return false;
+		}
+		$this->invalidate_count_cache( (int) $submission['form_id'] );
+		/**
+		 * Fires when an entry is moved to the Trash.
+		 *
+		 * @param int   $id         Entry ID.
+		 * @param array $submission Entry row before it was trashed.
+		 * @since 2.3.1
+		 */
+		do_action( 'subtleforms/submission/trashed', $id, $submission );
+		return true;
+	}
+
+	/**
+	 * Restore an entry from the Trash to its previous status (2.3.1).
+	 *
+	 * @param int $id Entry ID.
+	 * @return string|false The restored status, or false.
+	 */
+	public function untrash( int $id ) {
+		global $wpdb;
+		$submission = $this->find( $id );
+		if ( ! $submission || ( $submission['status'] ?? '' ) !== self::TRASH ) {
+			return false;
+		}
+		$previous = (string) ( $submission['trashed_from'] ?? '' );
+		$status   = ( '' === $previous || self::TRASH === $previous ) ? 'completed' : $previous;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Write path.
+		$result = $wpdb->update(
+			$this->table,
+			array(
+				'status'       => $status,
+				'trashed_from' => null,
+				'trashed_at'   => null,
+			),
+			array( 'id' => $id ),
+			array( '%s', '%s', '%s' ),
+			array( '%d' )
+		);
+		if ( false === $result ) {
+			return false;
+		}
+		$this->invalidate_count_cache( (int) $submission['form_id'] );
+		/**
+		 * Fires when an entry is restored from the Trash.
+		 *
+		 * @param int    $id     Entry ID.
+		 * @param string $status Restored status.
+		 * @param array  $submission Entry row while it was in the Trash.
+		 * @since 2.3.1
+		 */
+		do_action( 'subtleforms/submission/untrashed', $id, $status, $submission );
+		return $status;
+	}
+
+	/**
+	 * Permanently delete entries that have been in the Trash longer than
+	 * $days days, with their files and logs (daily cron, 2.3.1).
+	 *
+	 * @param int $days Days in the Trash.
+	 * @return int Entries deleted.
+	 */
+	public function emptyTrash( int $days = self::TRASH_DAYS ): int {
+		global $wpdb;
+		$cutoff = gmdate( 'Y-m-d H:i:s', time() - max( 0, $days ) * DAY_IN_SECONDS );
+		// An entry that reached the Trash without a time (status changed by
+		// another route) starts its Trash period now instead of being deleted.
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from $wpdb->prefix; values are prepared.
+		$wpdb->query( $wpdb->prepare( "UPDATE {$this->table} SET trashed_at = %s WHERE status = %s AND trashed_at IS NULL", current_time( 'mysql', true ), self::TRASH ) );
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from $wpdb->prefix; values are prepared.
+		$ids = $wpdb->get_col( $wpdb->prepare( "SELECT id FROM {$this->table} WHERE status = %s AND trashed_at <= %s LIMIT 1000", self::TRASH, $cutoff ) );
+		$deleted = 0;
+		$logs    = new LogsRepository();
+		foreach ( (array) $ids as $id ) {
+			if ( $this->delete( (int) $id ) ) {
+				$logs->deleteBySubmission( (int) $id );
+				++$deleted;
+			}
+		}
+		return $deleted;
+	}
+
+	/**
 	 * Get submissions with advanced filtering (v0.9.4).
 	 */
 	public function findAll( array $args = array() ): array {
@@ -309,6 +439,10 @@ final class SubmissionsRepository {
 		if ( $args['status'] && $args['status'] !== 'all' ) {
 			$where[]  = 'status = %s';
 			$params[] = $args['status'];
+		}
+		// Entries in the Trash only show in the Trash (2.3.1).
+		if ( $args['status'] !== self::TRASH ) {
+			$where[] = self::NOT_TRASHED;
 		}
 
 		if ( $args['is_read'] !== null ) {
@@ -405,6 +539,10 @@ final class SubmissionsRepository {
 		if ( $args['status'] && $args['status'] !== 'all' ) {
 			$where[]  = 'status = %s';
 			$params[] = $args['status'];
+		}
+		// Entries in the Trash only show in the Trash (2.3.1).
+		if ( $args['status'] !== self::TRASH ) {
+			$where[] = self::NOT_TRASHED;
 		}
 
 		if ( isset( $args['is_read'] ) && $args['is_read'] !== null ) {
@@ -565,7 +703,7 @@ final class SubmissionsRepository {
 	public function getAdjacentIds( int $currentId, ?int $formId = null ): array {
 		global $wpdb;
 
-		$conditions = array();
+		$conditions = array( self::NOT_TRASHED );
 		$params     = array();
 
 		if ( $formId ) {
@@ -679,14 +817,14 @@ $cutoff_date
 		if ( $status ) {
 			$query = $wpdb->prepare(
 				"SELECT form_id, COUNT(*) as count FROM {$this->table}
-                WHERE form_id IN ({$placeholders}) AND status = %s
+                WHERE form_id IN ({$placeholders}) AND status = %s AND ( status IS NULL OR status <> 'trash' )
                 GROUP BY form_id",
 				array_merge( $form_ids, array( $status ) )
 			);
 		} else {
 			$query = $wpdb->prepare(
 				"SELECT form_id, COUNT(*) as count FROM {$this->table}
-                WHERE form_id IN ({$placeholders})
+                WHERE form_id IN ({$placeholders}) AND ( status IS NULL OR status <> 'trash' )
                 GROUP BY form_id",
 				$form_ids
 			);

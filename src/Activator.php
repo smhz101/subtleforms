@@ -57,6 +57,7 @@ final class Activator {
 		self::migrate_draft_schema_column();
 		self::migrate_is_read_column();
 		self::migrate_starred_column();
+		self::migrate_trash_columns();
 
 		// Set default options
 		self::set_default_options();
@@ -89,6 +90,7 @@ final class Activator {
   draft_schema longtext DEFAULT NULL,
   active_version int unsigned DEFAULT NULL,
   status varchar(20) NOT NULL DEFAULT 'draft',
+  trashed_from varchar(20) DEFAULT NULL,
   created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY  (id),
@@ -106,6 +108,8 @@ final class Activator {
   status varchar(20) NOT NULL DEFAULT 'pending',
   is_read tinyint(1) NOT NULL DEFAULT 0,
   starred tinyint(1) NOT NULL DEFAULT 0,
+  trashed_from varchar(20) DEFAULT NULL,
+  trashed_at datetime DEFAULT NULL,
   ip_address varchar(45),
   user_agent varchar(255),
   created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -114,6 +118,7 @@ final class Activator {
   KEY status (status),
   KEY is_read (is_read),
   KEY starred (starred),
+  KEY trashed_at (trashed_at),
   KEY created_at (created_at)
 ) {$charset_collate};";
 
@@ -273,6 +278,33 @@ final class Activator {
 			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Table name is controlled from $wpdb->prefix; ALTER TABLE cannot use prepare().
 			$wpdb->query( "ALTER TABLE {$table_name} ADD KEY starred (starred)" );
 			Logger::info( 'Added starred column to submissions table' );
+		}
+	}
+
+	/**
+	 * Trash columns (2.3.1).
+	 *
+	 * - forms.trashed_from: the status a form had before it was trashed, so
+	 *   Restore returns it to that status.
+	 * - submissions.trashed_from / trashed_at: entries in the Trash keep their
+	 *   previous status and the time they were trashed, for Restore and for
+	 *   emptying the Trash after the retention period.
+	 */
+	private static function migrate_trash_columns(): void {
+		global $wpdb;
+		$columns = array(
+			array( $wpdb->prefix . 'subtleforms_forms', 'trashed_from', 'varchar(20) DEFAULT NULL' ),
+			array( $wpdb->prefix . 'subtleforms_submissions', 'trashed_from', 'varchar(20) DEFAULT NULL' ),
+			array( $wpdb->prefix . 'subtleforms_submissions', 'trashed_at', 'datetime DEFAULT NULL' ),
+		);
+		foreach ( $columns as list( $table, $column, $definition ) ) {
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table and column names are fixed strings.
+			$exists = $wpdb->get_results( "SHOW COLUMNS FROM {$table} LIKE '{$column}'" );
+			if ( empty( $exists ) ) {
+				// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Fixed table/column names; ALTER TABLE cannot use prepare().
+				$wpdb->query( "ALTER TABLE {$table} ADD COLUMN {$column} {$definition}" );
+				Logger::info( 'Added %s column to %s', $column, $table );
+			}
 		}
 	}
 

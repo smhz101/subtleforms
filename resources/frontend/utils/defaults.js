@@ -1,3 +1,4 @@
+import { repeaterLimits } from './fieldValidation';
 import { fieldConfig } from '../../shared/fieldConfig';
 /**
  * Default values for a form's fields.
@@ -57,6 +58,19 @@ export function collectDefaultValues(fields) {
       if (!field || typeof field !== 'object') return;
       const config = fieldConfig(field);
       const key = config.key || field.key;
+
+      // A Repeater starts with its minimum number of groups, each holding
+      // its children's defaults (2.3.1).
+      if (field.type === 'repeat_container') {
+        if (key) {
+          const { min } = repeaterLimits(field);
+          const groupDefaults = collectDefaultValues(
+            Array.isArray(field.children) && field.children.length ? field.children : field.fields || []
+          );
+          out[key] = Array.from({ length: Math.max(min, 1) }, () => ({ ...groupDefaults }));
+        }
+        return;
+      }
 
       if (key) {
         const raw = config.defaultValue;

@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import {
   insertNode,
   deleteNode,
@@ -15,6 +15,8 @@ import {
   duplicateNode,
 } from '../schema/commands';
 import { denormalizeTree } from '../utils/schemaTree';
+import { insertPageBreak, moveNodeToStep, getStepIdOf } from '../schema/commands/steps';
+import { canDropInto } from '../dnd/resolveDrop';
 import { debug } from '../../../../shared/debug';
 
 /**
@@ -39,6 +41,7 @@ export function useSchemaCommands({
   setTree,
   setSelectedId,
   selectedStepId,
+  setSelectedStepId,
   rootId,
   definitionMap,
   isReadOnly,
@@ -58,19 +61,22 @@ export function useSchemaCommands({
         return;
       }
 
-      // Guardrail: Prevent nesting steps inside steps
-      if (type === 'step' && context.parentId) {
-        const parentNode = tree.nodes[context.parentId];
-        if (parentNode?.type === 'step') {
-          // eslint-disable-next-line no-alert
-          alert(
-            __(
-              'Cannot add a step inside another step. Steps can only be added at the root level.',
-              'subtleforms'
-            )
-          );
-          return;
+      // A Page Break splits the form (or the step) at the insertion point in
+      // one undoable edit, so no field is left outside a step (QA-08).
+      if (type === 'step') {
+        // Computed from the current tree (not inside the state updater) so
+        // the new step can be selected right away.
+        const result = insertPageBreak(tree, {
+          definition,
+          parentId: context?.parentId || rootId,
+          position: context?.position ?? null,
+        });
+        updateTree(() => result.tree);
+        if (result.selectStepId) {
+          setSelectedStepId?.(result.selectStepId);
+          setSelectedId(result.selectStepId);
         }
+        return;
       }
 
       // Use command layer for insertion
@@ -106,7 +112,7 @@ export function useSchemaCommands({
         return newTree;
       });
     },
-    [definitionMap, updateTree, tree, selectedStepId, isReadOnly, setSelectedId]
+    [definitionMap, updateTree, tree, rootId, selectedStepId, isReadOnly, setSelectedId, setSelectedStepId]
   );
 
   const handleDockAdd = useCallback(
@@ -212,11 +218,9 @@ export function useSchemaCommands({
           return currentTree;
         }
 
-        // Guardrail: Prevent moving fields across steps
-        if (node.parentId !== destination.parentId) {
-          console.warn(
-            '[SubtleForms] Moving fields between different parents (steps) is not supported'
-          );
+        // Containers accept drops into their drop zone; a node never moves
+        // into itself, a step never nests and fixed groups keep their parts.
+        if (!canDropInto(currentTree, { nodeId, parentId: destination.parentId || rootId })) {
           return currentTree;
         }
 
@@ -284,41 +288,36 @@ export function useSchemaCommands({
   );
 
   const handleAddStep = useCallback(() => {
-    const definition = definitionMap['step'];
-    if (!definition) {
-      console.warn('Step field definition not found');
-      return;
-    }
+    handleInsert('step', { parentId: rootId, columnIndex: null, position: null });
+  }, [handleInsert, rootId]);
 
-    const rootNode = tree.nodes[rootId];
-    const steps = (rootNode?.children || [])
-      .map((id) => tree.nodes[id])
-      .filter((node) => node && node.type === 'step');
-    const stepNumber = steps.length + 1;
-
-    updateTree((currentTree) => {
-      const result = insertNode(currentTree, {
-        definition,
-        parentId: rootId,
-        columnIndex: null,
-        position: null,
-      });
-
-      // Find the newly inserted node
-      const newNodeId = Object.keys(result.nodes).find(
-        (id) => !currentTree.nodes[id]
-      );
-
-      if (newNodeId) {
-        return updateNodeConfig(result, {
-          nodeId: newNodeId,
-          changes: { title: `Step ${stepNumber}`, description: '' },
-        });
+  /**
+   * Move a field to the end of another step, switch the canvas to that step
+   * and keep the field selected (owner request, 2.3.1). One undoable edit.
+   */
+  const handleMoveToStep = useCallback(
+    (nodeId, stepId) => {
+      if (isReadOnly) {
+        return;
       }
-
-      return result;
-    });
-  }, [definitionMap, tree, updateTree, rootId]);
+      const node = tree.nodes[nodeId];
+      if (!node || !tree.nodes[stepId] || getStepIdOf(tree, nodeId) === stepId) {
+        return;
+      }
+      updateTree((currentTree) => {
+        const current = currentTree.nodes[nodeId];
+        if (!current) return currentTree;
+        if (currentTree.nodes[current.parentId]?.type === 'step') {
+          return moveNodeToStep(currentTree, { nodeId, stepId });
+        }
+        // A field inside a container leaves the container for the new step.
+        return moveNode(currentTree, { nodeId, parentId: stepId, columnIndex: null, position: null });
+      });
+      setSelectedStepId?.(stepId);
+      setSelectedId(nodeId);
+    },
+    [isReadOnly, tree, updateTree, setSelectedStepId, setSelectedId]
+  );
 
   const handleDeleteStep = useCallback(
     (stepId) => {
@@ -328,6 +327,27 @@ export function useSchemaCommands({
         .filter((node) => node && node.type === 'step');
 
       if (steps.length <= 1) return;
+
+      // A step with fields takes them with it: ask first.
+      const count = (tree.nodes[stepId]?.children || []).length;
+      if (
+        count > 0 &&
+        // eslint-disable-next-line no-alert
+        !window.confirm(
+          sprintf(
+            /* translators: %d: number of fields */
+            _n(
+              'Delete this step and the %d field in it? You can undo this.',
+              'Delete this step and the %d fields in it? You can undo this.',
+              count,
+              'subtleforms'
+            ),
+            count
+          )
+        )
+      ) {
+        return;
+      }
 
       updateTree((currentTree) => deleteNode(currentTree, { nodeId: stepId }));
     },
@@ -343,5 +363,6 @@ export function useSchemaCommands({
     handleDuplicate,
     handleAddStep,
     handleDeleteStep,
+    handleMoveToStep,
   };
 }

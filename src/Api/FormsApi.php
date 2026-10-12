@@ -10,6 +10,8 @@
 
 namespace SubtleForms\Api;
 
+use SubtleForms\Support\SchemaRepair;
+
 use SubtleForms\Support\Helpers;
 use SubtleForms\Support\Logger;
 use SubtleForms\Support\FeatureGate;
@@ -205,6 +207,26 @@ final class FormsApi {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( $this, 'restore_form' ),
+				'permission_callback' => array( $this, 'check_write_permission' ),
+				'args'                => array(
+					'id' => array(
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					),
+				),
+			),
+		)
+	);
+
+	// Duplicate a form on the server in one step (2.3.1, QA-12).
+	register_rest_route(
+		self::NAMESPACE,
+		'/forms/(?P<id>\d+)/duplicate',
+		array(
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'duplicate_form' ),
 				'permission_callback' => array( $this, 'check_write_permission' ),
 				'args'                => array(
 					'id' => array(
@@ -466,6 +488,7 @@ final class FormsApi {
 			}
 
 			$schemaData = $schema['schema'] ?? $schema;
+			$schemaData = is_array( $schemaData ) ? SchemaRepair::repair( $schemaData, (int) $form['id'] ) : $schemaData;
 			$schemaData = $this->injectCaptchaHtml( $schemaData );
 
 			return ApiResponse::success(
@@ -531,6 +554,7 @@ final class FormsApi {
 		// schema as everyone else (translations, plan limits); the builder
 		// keeps the raw one.
 		if ( ! $requestsDraft && is_array( $schemaData ) ) {
+			$schemaData = SchemaRepair::repair( $schemaData, (int) $form['id'] );
 			$schemaData = self::filterPublicSchema( $schemaData, (int) $form['id'] );
 		}
 
@@ -955,9 +979,122 @@ final class FormsApi {
 			return ApiResponse::validation_error( __( 'Form is not in the Trash', 'subtleforms' ) );
 		}
 
-		$this->formsRepo->restore( $id );
+		$restored = $this->formsRepo->restore( $id );
+		if ( false === $restored ) {
+			return ApiResponse::server_error( __( 'The form could not be restored. Please try again.', 'subtleforms' ) );
+		}
 
-		return ApiResponse::success( array( 'success' => true ) );
+		return ApiResponse::success(
+			array(
+				'success' => true,
+				'status'  => $restored,
+			)
+		);
+	}
+
+	/**
+	 * Duplicate a form (QA-12).
+	 *
+	 * The copy gets a new ID, the title "<title> (copy)", Draft status and
+	 * the source's current draft (or live) schema, repaired if it has fields
+	 * outside every step. Entries are never copied. When anything fails the
+	 * half-made copy is removed and the real reason is returned.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response
+	 */
+	public function duplicate_form( WP_REST_Request $request ): WP_REST_Response {
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		try {
+			$id = Schemas::validateId( $request->get_param( 'id' ) );
+		} catch ( ValidationException $e ) {
+			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
+		}
+
+		$form = $this->formsRepo->find( $id );
+		if ( ! $form ) {
+			return ApiResponse::not_found( __( 'Form not found', 'subtleforms' ) );
+		}
+		if ( ( $form['status'] ?? '' ) === 'trash' ) {
+			return ApiResponse::validation_error( __( 'Restore this form from the Trash before copying it.', 'subtleforms' ) );
+		}
+
+		try {
+			$schema = $this->formsRepo->getDraftSchema( $id );
+			if ( ! is_array( $schema ) || empty( $schema ) ) {
+				$active = $this->formsRepo->loadSchemaVersion( $id );
+				$schema = is_array( $active ) ? ( $active['schema'] ?? $active ) : array();
+			}
+		} catch ( \Throwable $e ) {
+			Logger::error( 'Duplicate form %d: could not read the schema: %s', $id, $e->getMessage() );
+			return ApiResponse::server_error(
+				/* translators: %s: error message */
+				sprintf( __( 'The form could not be copied because its fields could not be read: %s', 'subtleforms' ), $e->getMessage() )
+			);
+		}
+
+		$schema = is_array( $schema ) ? $schema : array();
+		if ( ! isset( $schema['fields'] ) || ! is_array( $schema['fields'] ) ) {
+			$schema['fields'] = array();
+		}
+		$schema = SchemaRepair::repair( $schema, $id );
+
+		/* translators: %s: title of the form being copied */
+		$title = sprintf( __( '%s (copy)', 'subtleforms' ), (string) ( $form['title'] ?? '' ) );
+		if ( ! isset( $schema['metadata'] ) || ! is_array( $schema['metadata'] ) ) {
+			$schema['metadata'] = array();
+		}
+		$schema['metadata']['title'] = $title;
+		if ( empty( $schema['metadata']['name'] ) ) {
+			$schema['metadata']['name'] = $title;
+		}
+		$schema['schema_version'] = $schema['schema_version'] ?? 1;
+
+		$newId = $this->formsRepo->create(
+			array(
+				'title'  => $title,
+				'config' => array(),
+				'status' => 'draft',
+				'schema' => $schema,
+			)
+		);
+		if ( $newId <= 0 ) {
+			return ApiResponse::server_error( __( 'The copy could not be created in the database. Please try again.', 'subtleforms' ) );
+		}
+
+		try {
+			$this->formsRepo->saveDraftSchema( $newId, $schema );
+		} catch ( \Throwable $e ) {
+			// Roll back: never leave an empty copy behind.
+			$this->formsRepo->delete( $newId );
+			Logger::error( 'Duplicate form %d failed: %s', $id, $e->getMessage() );
+			return ApiResponse::validation_error(
+				/* translators: %s: error message */
+				sprintf( __( 'The form could not be copied: %s', 'subtleforms' ), $e->getMessage() )
+			);
+		}
+
+		/**
+		 * Fires after a form is duplicated.
+		 *
+		 * @param int $newId  New form ID.
+		 * @param int $id     Source form ID.
+		 * @since 2.3.1
+		 */
+		do_action( 'subtleforms/form/duplicated', $newId, $id );
+
+		return ApiResponse::success(
+			array(
+				'id'     => $newId,
+				'title'  => $title,
+				'status' => 'draft',
+			),
+			201
+		);
 	}
 
 	/**

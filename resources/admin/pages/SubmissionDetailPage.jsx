@@ -226,6 +226,43 @@ const renderReadableData = (data) => {
 };
 
 /**
+ * Repeater answer (2.3.1): one row per group, one column per child field.
+ */
+function RepeaterTable( { node, groups } ) {
+  const children = ( Array.isArray( node?.children ) && node.children.length ? node.children : node?.fields || [] )
+    .filter( ( c ) => c && ( c.config?.key || c.key ) );
+  const columns = children.length
+    ? children.map( ( c ) => ( { key: c.config?.key || c.key, label: c.config?.label || c.label || c.config?.key || c.key } ) )
+    : Array.from( new Set( groups.flatMap( ( g ) => Object.keys( g || {} ) ) ) ).map( ( k ) => ( { key: k, label: k } ) );
+  const cell = ( v ) => {
+    if ( v === undefined || v === null || v === '' ) return '';
+    if ( Array.isArray( v ) ) return v.map( ( x ) => ( x && typeof x === 'object' ? x.label || JSON.stringify( x ) : String( x ) ) ).join( ', ' );
+    if ( typeof v === 'object' ) return Object.values( v ).filter( Boolean ).join( ' ' );
+    return String( v );
+  };
+  return (
+    <div className='sf-answers__repeater'>
+      <table className='sf-answers__repeater-table'>
+        <thead>
+          <tr>
+            <th scope='col'>#</th>
+            { columns.map( ( c ) => <th key={ c.key } scope='col'>{ c.label }</th> ) }
+          </tr>
+        </thead>
+        <tbody>
+          { groups.map( ( g, i ) => (
+            <tr key={ i }>
+              <th scope='row'>{ i + 1 }</th>
+              { columns.map( ( c ) => <td key={ c.key }>{ cell( g?.[ c.key ] ) }</td> ) }
+            </tr>
+          ) ) }
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/**
  * Whether an answer is a list of uploaded files ({ id, name, size }).
  */
 function isFileList( value ) {
@@ -414,16 +451,29 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
   };
 
   const [confirmDelete, setConfirmDelete] = useState(false);
+  // In the Trash the entry is deleted for good; otherwise it moves to the
+  // Trash, where it can be restored (2.3.1).
+  const isTrashed = submission?.status === 'trash';
   const handleDelete = async () => {
     setConfirmDelete(false);
     setUpdating(true);
     try {
-      await apiClient.delete(`/submissions/${submission.id}`);
+      await apiClient.delete(`/submissions/${submission.id}${isTrashed ? '?force=1' : ''}`);
       onBack();
     } catch (err) {
       setError(__('Failed to delete submission', 'subtleforms'));
       setUpdating(false);
     }
+  };
+  const handleRestore = async () => {
+    setUpdating(true);
+    try {
+      const res = await apiClient.post(`/submissions/${submission.id}/restore`, {});
+      setSubmission((prev) => ({ ...prev, status: res?.status || 'completed' }));
+    } catch (err) {
+      setError(__('The entry could not be restored. Please try again.', 'subtleforms'));
+    }
+    setUpdating(false);
   };
 
   const getFieldLabel = (key) => {
@@ -556,11 +606,17 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
 
   // Field types, so answers can be shown the way they were typed.
   const fieldTypes = {};
+  const repeaterNodes = {};
   ( function collect( list ) {
     ( list || [] ).forEach( ( f ) => {
       if ( ! f || typeof f !== 'object' ) return;
       const k = f.config?.key || f.key;
       if ( k ) fieldTypes[ k ] = f.type;
+      // A Repeater's children are answered inside its groups.
+      if ( f.type === 'repeat_container' ) {
+        if ( k ) repeaterNodes[ k ] = f;
+        return;
+      }
       collect( f.children );
       collect( Array.isArray( f.fields ) ? f.fields : null );
       ( f.columns || [] ).forEach( ( c ) => Array.isArray( c ) && collect( c ) );
@@ -594,6 +650,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
     payment_failed: { label: __( 'Payment failed', 'subtleforms' ), cls: 'sf-pill--danger' },
     spam: { label: __( 'Spam', 'subtleforms' ), cls: 'sf-pill--danger' },
     flagged: { label: __( 'Flagged', 'subtleforms' ), cls: 'sf-pill--warning' },
+    trash: { label: __( 'Trashed', 'subtleforms' ), cls: 'sf-pill--danger' },
   };
   const pipeline = PIPELINE[ submission.status ] || { label: __( 'Received', 'subtleforms' ), cls: '' };
 
@@ -645,30 +702,44 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
           onClick={ handleStarToggle }>
           { isStarred ? __( 'Starred', 'subtleforms' ) : __( 'Star', 'subtleforms' ) }
         </Button>
-        <Button
-          size='compact'
-          icon={ <Icon.Mail size={ 16 } /> }
-          disabled={ updating || resend.busy }
-          isBusy={ resend.busy }
-          onClick={ () => setConfirmResend( true ) }>
-          { __( 'Resend notifications', 'subtleforms' ) }
-        </Button>
-        <Button
-          size='compact'
-          icon={ <Icon.AlertCircle size={ 16 } /> }
-          isPressed={ isFlagged }
-          disabled={ updating }
-          onClick={ () => handleStatusChange( isFlagged ? 'completed' : 'flagged' ) }>
-          { isFlagged ? __( 'Flagged', 'subtleforms' ) : __( 'Flag', 'subtleforms' ) }
-        </Button>
+        { ! isTrashed && (
+          <Button
+            size='compact'
+            icon={ <Icon.Mail size={ 16 } /> }
+            disabled={ updating || resend.busy }
+            isBusy={ resend.busy }
+            onClick={ () => setConfirmResend( true ) }>
+            { __( 'Resend notifications', 'subtleforms' ) }
+          </Button>
+        ) }
+        { ! isTrashed && (
+          <Button
+            size='compact'
+            icon={ <Icon.AlertCircle size={ 16 } /> }
+            isPressed={ isFlagged }
+            disabled={ updating }
+            onClick={ () => handleStatusChange( isFlagged ? 'completed' : 'flagged' ) }>
+            { isFlagged ? __( 'Flagged', 'subtleforms' ) : __( 'Flag', 'subtleforms' ) }
+          </Button>
+        ) }
+        { isTrashed && (
+          <Button
+            size='compact'
+            variant='secondary'
+            icon={ <Icon.Undo size={ 16 } /> }
+            disabled={ updating }
+            onClick={ handleRestore }>
+            { __( 'Restore', 'subtleforms' ) }
+          </Button>
+        ) }
         <Button
           size='compact'
           isDestructive
           icon={ <Icon.Trash size={ 16 } /> }
-          label={ __( 'Delete submission', 'subtleforms' ) }
+          label={ isTrashed ? __( 'Delete permanently', 'subtleforms' ) : __( 'Move to Trash', 'subtleforms' ) }
           showTooltip
           disabled={ updating }
-          onClick={ () => setConfirmDelete( true ) }
+          onClick={ () => ( isTrashed ? setConfirmDelete( true ) : handleDelete() ) }
         />
       </div>
     </div>
@@ -716,8 +787,8 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
         <ConfirmDialog
           onConfirm={ handleDelete }
           onCancel={ () => setConfirmDelete( false ) }
-          confirmButtonText={ __( 'Delete', 'subtleforms' ) }>
-          { __( 'Delete this submission permanently? This cannot be undone.', 'subtleforms' ) }
+          confirmButtonText={ __( 'Delete permanently', 'subtleforms' ) }>
+          { __( 'Delete this entry permanently? Its uploaded files are deleted too. This cannot be undone.', 'subtleforms' ) }
         </ConfirmDialog>
       ) }
 
@@ -762,6 +833,8 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                       <dd className='sf-answers__value'>
                         { isEmpty ? (
                           <span className='sf-answers__empty'>{ __( 'No answer', 'subtleforms' ) }</span>
+                        ) : repeaterNodes[ key ] && Array.isArray( value ) ? (
+                          <RepeaterTable node={ repeaterNodes[ key ] } groups={ value } />
                         ) : isFileList( value ) ? (
                           <FileLinks files={ value } submissionId={ submission.id } />
                         ) : Array.isArray( value ) ? (

@@ -114,6 +114,11 @@
 			color: var(--sf-text-secondary);
 		}
 
+		&--trash {
+			background: var(--sf-danger-bg, #fcf0f1);
+			color: var(--sf-danger, #b32d2e);
+		}
+
 		svg {
 			display: none;
 		}

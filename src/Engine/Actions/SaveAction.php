@@ -61,7 +61,15 @@ final class SaveAction implements ActionInterface {
 				)
 			);
 
-			$validation = $this->validator->validate( $schema, $context->payload, $conditionalState );
+			// Repeater groups are checked one by one: each group's children
+			// are validated under keys like `companies.0.ticker` (2.3.1).
+			$expanded   = \SubtleForms\Support\Repeater::expandForValidation( $schema, $context->payload );
+			$validation = $this->validator->validate( $expanded['schema'], $expanded['payload'], $conditionalState );
+			$countErrors = \SubtleForms\Support\Repeater::countErrors( $schema, $context->payload, (array) ( $conditionalState['hidden_fields'] ?? array() ) );
+			if ( $countErrors ) {
+				$validation['errors'] = array_merge( $validation['errors'], $countErrors );
+				$validation['valid']  = false;
+			}
 
 			if ( ! $validation['valid'] ) {
 				$context->setMeta( 'validation_errors', $validation['errors'] );
@@ -130,6 +138,18 @@ final class SaveAction implements ActionInterface {
 			}
 
 			$type   = $field['type'] ?? '';
+
+			// Repeater: a list of groups, each cleaned with the children's rules.
+			if ( $type === \SubtleForms\Support\Repeater::TYPE ) {
+				$sanitized[ $key ] = \SubtleForms\Support\Repeater::clean(
+					$field,
+					$value,
+					function ( array $childSchema, array $group ): array {
+						return $this->sanitize_payload( $childSchema, $group );
+					}
+				);
+				continue;
+			}
 
 			// Task 5: Normalize null — stored as null
 			if ( is_null( $value ) ) {
@@ -239,6 +259,12 @@ final class SaveAction implements ActionInterface {
 			}
 			if ( ! empty( $field['key'] ) ) {
 				$map[ $field['key'] ] = $field;
+			}
+
+			// Repeater children are answered inside the groups, never at the
+			// top level of the entry.
+			if ( ( $field['type'] ?? '' ) === \SubtleForms\Support\Repeater::TYPE ) {
+				continue;
 			}
 
 			if ( ! empty( $field['fields'] ) && is_array( $field['fields'] ) ) {

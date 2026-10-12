@@ -126,7 +126,7 @@ class DashboardApi {
 		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled.
 		$submissionsToday = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$submissionsTable} WHERE created_at >= %s",
+				"SELECT COUNT(*) FROM {$submissionsTable} WHERE created_at >= %s AND ( status IS NULL OR status <> 'trash' )",
 				$todayStart
 			)
 		);
@@ -137,7 +137,7 @@ class DashboardApi {
 		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled.
 		$submissionsThisWeek = (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$submissionsTable} WHERE created_at >= %s",
+				"SELECT COUNT(*) FROM {$submissionsTable} WHERE created_at >= %s AND ( status IS NULL OR status <> 'trash' )",
 				$weekStart
 			)
 		);
@@ -184,7 +184,7 @@ class DashboardApi {
 		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled.
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT DATE(created_at) AS day, COUNT(*) AS c FROM {$submissionsTable} WHERE created_at >= %s GROUP BY DATE(created_at)",
+				"SELECT DATE(created_at) AS day, COUNT(*) AS c FROM {$submissionsTable} WHERE created_at >= %s AND ( status IS NULL OR status <> 'trash' ) GROUP BY DATE(created_at)",
 				$start
 			),
 			ARRAY_A
@@ -230,6 +230,7 @@ class DashboardApi {
 				"SELECT s.id, s.form_id, s.status, s.is_read, s.created_at, f.title as form_title
              FROM {$submissionsTable} s
              LEFT JOIN {$formsTable} f ON s.form_id = f.id
+             WHERE ( s.status IS NULL OR s.status <> 'trash' )
              ORDER BY s.created_at DESC
              LIMIT %d",
 				10

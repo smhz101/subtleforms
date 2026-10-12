@@ -1,4 +1,4 @@
-import { Button, TabPanel, Notice, PanelBody } from '@wordpress/components';
+import { Button, TabPanel, Notice, PanelBody, SelectControl } from '@wordpress/components';
 import { useMemo, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../../ui/Icon';
@@ -15,6 +15,44 @@ import { CHOICE_TYPES } from './inspector/panels/OptionsPanel';
 import FieldAppearancePanel from './appearance/FieldAppearancePanel';
 import { supportsAppearance } from '../../../shared/appearance';
 import { getIcon } from './utils/iconMap';
+import { stepOptions, getStepIdOf } from './schema/commands/steps';
+
+/**
+ * "Step" setting for fields of a multi-step form (2.3.1): moving a field to
+ * another step keeps its key, settings, logic and payment links, puts it at
+ * the end of that step and switches the canvas there.
+ */
+function StepSetting({ tree, nodeId, onMoveToStep, isReadOnly }) {
+  const options = stepOptions(tree);
+  const node = tree.nodes[nodeId];
+  if (!node || node.type === 'step' || options.length === 0) {
+    return null;
+  }
+  const currentStep = getStepIdOf(tree, nodeId);
+  const nested = node.parentId && tree.nodes[node.parentId]?.type !== 'step';
+  return (
+    <div className='sf-field-inspector__step-setting'>
+      <SelectControl
+        __nextHasNoMarginBottom
+        __next40pxDefaultSize
+        label={__('Step', 'subtleforms')}
+        value={currentStep || ''}
+        options={options}
+        disabled={isReadOnly || !onMoveToStep}
+        help={
+          nested
+            ? __('Moving it takes the field out of its container and puts it at the end of the chosen step.', 'subtleforms')
+            : __('Moves the field to the end of the chosen step.', 'subtleforms')
+        }
+        onChange={(stepId) => {
+          if (stepId && stepId !== currentStep) {
+            onMoveToStep(nodeId, stepId);
+          }
+        }}
+      />
+    </div>
+  );
+}
 
 /**
  * Field inspector — the right panel of the builder.
@@ -25,7 +63,7 @@ import { getIcon } from './utils/iconMap';
  * block editor's sidebar.
  */
 export default function FieldInspector({ field, allFields, formAppearance, isReadOnly = false }) {
-  const { setSelectedId, actions, validationErrors, selectedId } = useBuilder();
+  const { setSelectedId, actions, validationErrors, selectedId, tree } = useBuilder();
   const { fieldDefinitions } = useConfig();
   const [copied, setCopied] = useState(false);
 
@@ -228,6 +266,12 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
             {tab.name === 'settings' && (
               <>
                 <PanelBody title={__('General', 'subtleforms')} initialOpen>
+                  <StepSetting
+                    tree={tree}
+                    nodeId={selectedId}
+                    onMoveToStep={actions.onMoveToStep}
+                    isReadOnly={isReadOnly}
+                  />
                   <DynamicInspectorPanel
                     field={field}
                     onUpdate={handleUpdate}

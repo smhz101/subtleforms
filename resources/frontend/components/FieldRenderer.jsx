@@ -5,6 +5,7 @@ import { debug } from '../../shared/debug';
 import { lazy, Suspense } from '@wordpress/element';
 import ChainedSelect from './fields/ChainedSelect';
 import FileUpload from './fields/FileUpload';
+import RepeaterField from './fields/RepeaterField';
 import {
   PaymentSummary,
   PaymentCoupon,
@@ -103,6 +104,10 @@ export default function FieldRenderer({
   onChange,
   errors,
   hiddenFields,
+  // Inside a Repeater group (2.3.1): the value path prefix (`items.0.`) and
+  // the input name prefix (`items[0]`).
+  pathPrefix = '',
+  namePrefix = '',
 }) {
   // Normalise: the admin builder wraps properties under field.config, the API
   // serves flat nodes, and some saved forms carry both (a flat node plus a
@@ -110,7 +115,11 @@ export default function FieldRenderer({
   // width never hides required, options, placeholder or help text (bug 1).
   const config = fieldConfig(field);
 
-  const resolvedPath = fieldPath || config.key || field.key;
+  const ownKey = config.key || field.key;
+  const resolvedPath = fieldPath || (ownKey ? `${pathPrefix}${ownKey}` : ownKey);
+  // Input name: the field key, or `items[0][qty]` inside a Repeater group.
+  const inputName = ownKey ? (namePrefix ? `${namePrefix}[${ownKey}]` : ownKey) : undefined;
+  const nested = { pathPrefix, namePrefix };
   const label = config.label || field.label || resolvedPath;
   const placeholder = config.placeholder || '';
   const required = config.required || false;
@@ -227,8 +236,38 @@ export default function FieldRenderer({
     return null;
   }
 
+  // Repeater: visitors add and remove whole groups (2.3.1, QA-09).
+  if (field.type === 'repeat_container') {
+    return (
+      <RepeaterField
+        field={field}
+        config={config}
+        path={resolvedPath}
+        namePrefix={inputName}
+        label={label}
+        values={values}
+        onChange={onChange}
+        errors={errors}
+        appearanceClasses={appearanceClasses}
+        appearanceStyle={appearanceStyle}
+        renderChild={(child, { pathPrefix: childPrefix, namePrefix: childNamePrefix, key }) => (
+          <FieldRenderer
+            key={key}
+            field={child}
+            values={values}
+            onChange={onChange}
+            errors={errors}
+            hiddenFields={hiddenFields}
+            pathPrefix={childPrefix}
+            namePrefix={childNamePrefix}
+          />
+        )}
+      />
+    );
+  }
+
   // Handle container fields
-  if (field.type === 'group_container' || field.type === 'repeat_container') {
+  if (field.type === 'group_container') {
     return (
       <div
         className={[
@@ -250,10 +289,10 @@ export default function FieldRenderer({
               key={child.config?.key || child.key}
               field={child}
               onChange={onChange}
-              fieldPath={child.config?.key || child.key}
               values={values}
               errors={errors}
               hiddenFields={hiddenFields}
+              {...nested}
             />
           ))}
       </div>
@@ -279,10 +318,10 @@ export default function FieldRenderer({
                   key={child.config?.key || child.key}
                   field={child}
                   onChange={onChange}
-                  fieldPath={child.config?.key || child.key}
                   values={values}
                   errors={errors}
                   hiddenFields={hiddenFields}
+                  {...nested}
                 />
               ))}
           </div>
@@ -412,7 +451,8 @@ export default function FieldRenderer({
         inputId,
         required,
         error,
-        values
+        values,
+        inputName
       )}
 
       {config.description && (
@@ -443,7 +483,8 @@ function renderInput(
   inputId,
   required,
   error,
-  values = {}
+  values = {},
+  inputName = undefined
 ) {
   const config = fieldConfig(field);
   const describedBy =
@@ -452,7 +493,7 @@ function renderInput(
       .join(' ') || undefined;
   // Every input carries the field key as its name, so the form degrades
   // without JavaScript and autofill/password managers can match it (bug 11).
-  const name = config.key || field.key || undefined;
+  const name = inputName || config.key || field.key || undefined;
   const numOrUndef = (v) =>
     v === undefined || v === null || v === '' ? undefined : Number(v);
   const optionLayoutClass = config.optionLayout

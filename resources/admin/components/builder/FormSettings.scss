@@ -451,3 +451,18 @@
 		font-size: 12px;
 	}
 }
+
+// An action that is missing a required setting (2.3.1).
+.sf-actions-panel__needs-setup {
+	display: inline-flex;
+	align-items: center;
+	margin-inline-start: 8px;
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: var(--sf-warning-bg, #fcf9e8);
+	color: var(--sf-warning, #8a6100);
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 18px;
+	vertical-align: middle;
+}

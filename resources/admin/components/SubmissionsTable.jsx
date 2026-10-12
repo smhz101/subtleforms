@@ -217,13 +217,61 @@ const SubmissionsTable = forwardRef(
       [loadFresh]
     );
 
+    const inTrash = statusFilter === 'trash';
+
+    // Restore entries from the Trash to their previous status (2.3.1).
+    const restoreEntries = async (ids) => {
+      setBuffer((prev) => prev.filter((s) => !ids.includes(s.id)));
+      setSelectedSubmissions([]);
+      try {
+        const done = await runBulk(ids, 'untrash');
+        notifyBulk(done, ids.length, __('restored', 'subtleforms'));
+      } catch (_err) {
+        notifyBulk(0, ids.length, '');
+      }
+    };
+
+    // Deleting moves entries to the Trash; the snackbar offers Undo (2.3.1).
+    const trashEntries = async (ids) => {
+      setBuffer((prev) => prev.filter((s) => !ids.includes(s.id)));
+      setSelectedSubmissions([]);
+      try {
+        const done = await runBulk(ids, 'trash');
+        if (done === ids.length) {
+          createSuccessNotice(
+            sprintf(
+              /* translators: %d: number of entries */
+              _n('%d entry moved to the Trash', '%d entries moved to the Trash', done, 'subtleforms'),
+              done
+            ),
+            {
+              type: 'snackbar',
+              actions: [
+                {
+                  label: __('Undo', 'subtleforms'),
+                  onClick: async () => {
+                    await runBulk(ids, 'untrash');
+                    loadFresh();
+                  },
+                },
+              ],
+            }
+          );
+        } else {
+          notifyBulk(done, ids.length, '');
+        }
+      } catch (_err) {
+        notifyBulk(0, ids.length, '');
+      }
+    };
+
     const handleDelete = async (submissionId) => {
       setDeleteModal(null);
       setBuffer((prev) => prev.filter((s) => s.id !== submissionId));
 
       try {
-        await apiClient.delete(`/submissions/${submissionId}`);
-        createSuccessNotice(__('Submission deleted', 'subtleforms'), {
+        await apiClient.delete(`/submissions/${submissionId}?force=1`);
+        createSuccessNotice(__('Entry deleted permanently', 'subtleforms'), {
           type: 'snackbar',
         });
       } catch (err) {
@@ -273,7 +321,7 @@ const SubmissionsTable = forwardRef(
       setBuffer((prev) => prev.filter((s) => !ids.includes(s.id)));
       setSelectedSubmissions([]);
       try {
-        notifyBulk(await runBulk(ids, 'delete'), ids.length, __('deleted', 'subtleforms'));
+        notifyBulk(await runBulk(ids, 'delete'), ids.length, __('deleted permanently', 'subtleforms'));
       } catch (_err) {
         notifyBulk(0, ids.length, '');
       }
@@ -452,6 +500,7 @@ const SubmissionsTable = forwardRef(
       payment_pending: { label: __('Awaiting payment', 'subtleforms'), cls: 'sf-pill--warning' },
       spam: { label: __('Spam', 'subtleforms'), cls: 'sf-pill--danger' },
       flagged: { label: __('Flagged', 'subtleforms'), cls: 'sf-pill--warning' },
+      trash: { label: __('Trashed', 'subtleforms'), cls: 'sf-pill--danger' },
       archived: { label: __('Archived', 'subtleforms'), cls: '' },
     };
 
@@ -604,17 +653,44 @@ const SubmissionsTable = forwardRef(
                 );
               }}
             />
-            <Button
-              size='compact'
-              isDestructive
-              icon={<Icon.Trash size={16} />}
-              label={__('Delete', 'subtleforms')}
-              showTooltip
-              onClick={(e) => {
-                e.stopPropagation();
-                setDeleteModal(submission.id);
-              }}
-            />
+            {submission.status === 'trash' ? (
+              <>
+                <Button
+                  size='compact'
+                  icon={<Icon.Undo size={16} />}
+                  label={__('Restore', 'subtleforms')}
+                  showTooltip
+                  className='sf-submissions-table__restore-btn'
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    restoreEntries([submission.id]);
+                  }}
+                />
+                <Button
+                  size='compact'
+                  isDestructive
+                  icon={<Icon.Trash size={16} />}
+                  label={__('Delete permanently', 'subtleforms')}
+                  showTooltip
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteModal(submission.id);
+                  }}
+                />
+              </>
+            ) : (
+              <Button
+                size='compact'
+                isDestructive
+                icon={<Icon.Trash size={16} />}
+                label={__('Move to Trash', 'subtleforms')}
+                showTooltip
+                onClick={(e) => {
+                  e.stopPropagation();
+                  trashEntries([submission.id]);
+                }}
+              />
+            )}
           </div>
         ),
       },
@@ -676,46 +752,60 @@ const SubmissionsTable = forwardRef(
           selectable={true}
           selectedItems={selectedSubmissions}
           onSelectionChange={setSelectedSubmissions}
-          bulkActions={[
-            {
-              label: __('Mark as Read', 'subtleforms'),
-              onClick: (ids) => handleBulkMarkStatus(ids, 'read'),
-            },
-            {
-              label: __('Mark as Unread', 'subtleforms'),
-              onClick: (ids) => handleBulkMarkStatus(ids, 'unread'),
-            },
-            {
-              label: __('Star', 'subtleforms'),
-              onClick: (ids) => handleBulkMarkStatus(ids, 'star'),
-            },
-            {
-              label: __('Remove star', 'subtleforms'),
-              onClick: (ids) => handleBulkMarkStatus(ids, 'unstar'),
-            },
-            {
-              label: __('Export selected (CSV)', 'subtleforms'),
-              onClick: handleExportSelected,
-            },
-            {
-              label: __('Mark as Spam', 'subtleforms'),
-              onClick: (ids) => handleBulkMarkStatus(ids, 'spam'),
-            },
-            {
-              label: __('Mark as Flagged', 'subtleforms'),
-              onClick: (ids) => handleBulkMarkStatus(ids, 'flagged'),
-            },
-            {
-              label: __('Delete', 'subtleforms'),
-              onClick: handleBulkDelete,
-              isDestructive: true,
-            },
-          ]}
+          bulkActions={
+            inTrash
+              ? [
+                  {
+                    label: __('Restore', 'subtleforms'),
+                    onClick: restoreEntries,
+                  },
+                  {
+                    label: __('Delete permanently', 'subtleforms'),
+                    onClick: handleBulkDelete,
+                    isDestructive: true,
+                  },
+                ]
+              : [
+                  {
+                    label: __('Mark as Read', 'subtleforms'),
+                    onClick: (ids) => handleBulkMarkStatus(ids, 'read'),
+                  },
+                  {
+                    label: __('Mark as Unread', 'subtleforms'),
+                    onClick: (ids) => handleBulkMarkStatus(ids, 'unread'),
+                  },
+                  {
+                    label: __('Star', 'subtleforms'),
+                    onClick: (ids) => handleBulkMarkStatus(ids, 'star'),
+                  },
+                  {
+                    label: __('Remove star', 'subtleforms'),
+                    onClick: (ids) => handleBulkMarkStatus(ids, 'unstar'),
+                  },
+                  {
+                    label: __('Export selected (CSV)', 'subtleforms'),
+                    onClick: handleExportSelected,
+                  },
+                  {
+                    label: __('Mark as Spam', 'subtleforms'),
+                    onClick: (ids) => handleBulkMarkStatus(ids, 'spam'),
+                  },
+                  {
+                    label: __('Mark as Flagged', 'subtleforms'),
+                    onClick: (ids) => handleBulkMarkStatus(ids, 'flagged'),
+                  },
+                  {
+                    label: __('Move to Trash', 'subtleforms'),
+                    onClick: trashEntries,
+                    isDestructive: true,
+                  },
+                ]
+          }
         />
         <ConfirmModal
           isOpen={!!bulkDelete}
           onClose={() => setBulkDelete(null)}
-          title={__('Delete entries', 'subtleforms')}
+          title={__('Delete entries permanently', 'subtleforms')}
           message={sprintf(
             /* translators: %d: number of entries */
             _n(
@@ -727,19 +817,19 @@ const SubmissionsTable = forwardRef(
             bulkDelete?.length || 0
           )}
           onConfirm={confirmBulkDelete}
-          confirmText={__('Delete', 'subtleforms')}
+          confirmText={__('Delete permanently', 'subtleforms')}
           confirmVariant='destructive'
         />
         <ConfirmModal
           isOpen={!!deleteModal}
           onClose={() => setDeleteModal(null)}
-          title={__('Delete Submission', 'subtleforms')}
+          title={__('Delete entry permanently', 'subtleforms')}
           message={__(
-            'Are you sure you want to delete this submission? This action cannot be undone.',
+            'Delete this entry permanently? Its uploaded files are deleted too. This cannot be undone.',
             'subtleforms'
           )}
           onConfirm={() => handleDelete(deleteModal)}
-          confirmText={__('Delete Submission', 'subtleforms')}
+          confirmText={__('Delete permanently', 'subtleforms')}
           confirmVariant='destructive'
         />
       </div>

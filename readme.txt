@@ -4,7 +4,7 @@ Tags: forms, contact form, form builder, submissions
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.3.0
+Stable tag: 2.3.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -111,7 +111,7 @@ SubtleForms includes multiple spam prevention layers:
 
 = Can I export submissions? =
 
-CSV export is part of SubtleForms Pro. In the free plugin you can read, search, filter and delete entries in SubtleForms > Submissions.
+CSV export is part of SubtleForms Pro. In the free plugin you can read, search, filter and delete entries in SubtleForms > Submissions. Deleted entries go to the Trash for 30 days (configurable) before they are removed. In CSV exports a Repeater has one column per child field and each group is one line inside the cell, in the same order in every column.
 
 = Is this plugin GDPR compliant? =
 
@@ -159,6 +159,25 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 7. Conversational form on frontend
 
 == Changelog ==
+
+= 2.3.1 - 2026-10-12 =
+* Fix: Adding a Page Break to a form hid every existing field behind a new empty step. A Page Break now splits the form where it is placed: the fields above it become step 1 and the fields below it the next step. Added at the very top, the existing fields stay in step 1 and the break starts an empty step 2 after them. Undo and Redo reverse the whole change in one step.
+* Fix: Forms saved by older versions with fields outside every step are repaired when they are opened in the builder and when the live form loads. Those fields move into the first step with their order, keys, settings and conditions kept, and the builder says so until you save.
+* New: Every field of a multi-step form has a Step setting in its General settings. Choosing another step moves the field to the end of that step, keeps its key, settings, conditions and payment links, switches the canvas to that step and keeps the field selected. You can also drag a field onto a step tab.
+* Fix: Repeaters now work for visitors. Add and Remove buttons use your button label and respect the minimum and maximum number of groups. Each group has its own inputs, names (for example companies[0][ticker]), required checks, errors and conditions, focus moves to the new group or the next one after a removal, and the buttons have clear names for screen readers. This works on the live form, in the builder Preview and in the block editor preview, and on phones.
+* Fix: The server checks every Repeater group on its own and stores the answer as a list of groups. Entries show the groups as a table, emails list them under {all_fields} (a table in HTML emails), and the PDF data used by SubtleForms Pro includes each group.
+* Change: CSV export gives a Repeater one column per child field, named "Repeater label: Child label". Each group is one line inside the cell, in the same order in every column of that Repeater, so line 2 of every column belongs to group 2. Exports that mix several forms write each group as a numbered line such as "1. ticker: AAPL; shares: 8".
+* Fix: Fields could not be dragged into a Repeater, Group or columns because pressing anywhere on the container started dragging the container. Containers now accept drops into their drop zone, only the container handle drags the container, the zone that will take the drop is highlighted (also inside nested containers), and fields can be dragged in and out of containers and from the field library. The new Move to menu on each field toolbar does the same from the keyboard.
+* Fix: Clicking a field inside a Repeater, Group or columns, or pressing Enter on it, opened the container's settings. It now opens the field's own Settings, Validation, Logic and Style, and the container is still selected from its header.
+* Fix: The Trash tab of All Forms showed trashed forms as Draft with the normal actions. They now show as Trashed with only Restore and Delete permanently (which asks first), in the row menu and as bulk actions. Restore returns a form to the status it had before, and tab counts refresh. A trashed form does not show or accept entries.
+* Fix: Duplicating a form failed for multi-step forms with an empty step. Duplicate now runs on the server in one request for any form, including multi-step, Repeater and payment forms. The copy gets a new ID, Draft status and the title with " (copy)", no entries are copied, and a failure shows the actual reason and leaves no half-made copy.
+* Fix: A new blank form starts with a working admin notification sent to {admin_email} with the subject "New entry: {form_title}". An email action without a recipient or subject shows "Needs setup", its warnings only show while it is switched on, and it never blocks saving.
+* Fix: A payment form priced by Product or Priced option fields failed every autosave with "Unsaved changes" and "Retry autosave", because saving required a fixed amount or an amount field and dropped the checkout settings. Such forms now save, and a failed save names the setting at fault.
+* Fix: Save and validation notices of a form are cleared when you leave the form, and no longer follow you to other screens.
+* New: Entries Trash. Deleting an entry, alone or in bulk, moves it to a new Trash tab where it can be restored to its previous status or deleted permanently. The Trash is emptied automatically after 30 days by the daily cleanup; change the number of days under Settings > Advanced. Entries in the Trash are left out of counts, limits, exports, analytics and the dashboard, and cannot be resent.
+* Change: The Number, Slider and Payment Amount fields call their increment setting "Step size", so it is not confused with form steps.
+* Developer: New REST routes POST /forms/{id}/duplicate and POST /submissions/{id}/restore. DELETE /submissions/{id} moves the entry to the Trash unless force=1 is passed. New actions subtleforms/form/duplicated, subtleforms/submission/trashed, subtleforms/submission/untrashed and subtleforms/schema/repaired_orphans. FieldMapper::answers() rows for a Repeater carry a "groups" list for renderers that draw a table.
+* Database: Adds a trashed_from column to the forms table and trashed_from and trashed_at columns to the entries table. They are added automatically when the plugin updates; no data is changed.
 
 = 2.3.0 - 2026-10-11 =
 * New: Screens for SubtleForms Pro 2.3.0: an integration log with Retry on each entry, a webhook delivery log, "Send test contact" in the form integrations and a custom support link for white label.
@@ -335,6 +354,9 @@ now be reconstructed accurately.
 * Feature: Basic spam protection
 
 == Upgrade Notice ==
+
+= 2.3.1 =
+Fixes Page Break hiding fields, makes Repeaters work for visitors, fixes dragging into containers, nested field settings, the forms Trash and duplication, and adds an entries Trash. Adds trash columns to the forms and entries tables.
 
 = 2.3.0 =
 Email merge tags with an Insert tag menu, a Newsletter template with an inline layout, starred entries, notes, bulk actions and resend. Adds a starred column to the entries table.

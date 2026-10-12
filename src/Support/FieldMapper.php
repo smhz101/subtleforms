@@ -90,6 +90,20 @@ final class FieldMapper {
 			$type = (string) ( $node['type'] ?? '' );
 			$key  = (string) ( $node['key'] ?? ( $node['config']['key'] ?? ( $node['name'] ?? '' ) ) );
 
+			// A Repeater is one answer (a list of groups) under its own key;
+			// its children are answered inside each group (2.3.1).
+			if ( Repeater::TYPE === $type ) {
+				if ( '' !== $key ) {
+					$out[] = array(
+						'key'   => $key,
+						'label' => (string) ( $node['label'] ?? ( $node['config']['label'] ?? $key ) ),
+						'type'  => $type,
+						'field' => $node,
+					);
+				}
+				continue;
+			}
+
 			$isLayout = in_array( $type, self::LAYOUT_TYPES, true ) || '_container' === substr( $type, -10 );
 			if ( '' !== $key && '' !== $type && ! $isLayout ) {
 				$out[] = array(
@@ -440,6 +454,21 @@ final class FieldMapper {
 				continue;
 			}
 			$seen[ $key ] = true;
+			if ( Repeater::TYPE === $field['type'] ) {
+				// One numbered line per group; `groups` carries the cells for
+				// renderers that draw a table (the Pro PDF, 2.3.1).
+				$text = Repeater::toText( $payload[ $key ], $field['field'] );
+				if ( $skipEmpty && '' === $text ) {
+					continue;
+				}
+				$rows[] = array(
+					'key'    => $key,
+					'label'  => '' !== $field['label'] ? $field['label'] : $key,
+					'value'  => $text,
+					'groups' => Repeater::rows( $payload[ $key ], $field['field'] ),
+				);
+				continue;
+			}
 			$text         = 'consent' === $field['type']
 				? ( self::isChecked( $payload[ $key ], $field['field'] ) ? __( 'Yes', 'subtleforms' ) : __( 'No', 'subtleforms' ) )
 				: self::toText( self::optionLabels( $payload[ $key ], $field['field'] ) );
