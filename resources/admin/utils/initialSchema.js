@@ -12,15 +12,6 @@ function createKey(value) {
   return base || 'field';
 }
 
-function createHtmlBlock({ key, label, html = '' } = {}) {
-  return {
-    type: 'html',
-    key,
-    label,
-    html,
-  };
-}
-
 function createStep({ key, title, description = '', fields = [] }) {
   return {
     type: 'step',
@@ -35,6 +26,7 @@ export function createInitialSchema({
   title,
   description = '',
   formType = 'regular',
+  // eslint-disable-next-line no-unused-vars -- kept for callers; every start is blank now.
   startingPoint = 'blank',
 } = {}) {
   const resolvedType =
@@ -74,27 +66,11 @@ export function createInitialSchema({
     ],
   };
 
-  const mode = startingPoint === 'minimal' ? 'minimal' : 'blank';
-
-  // Conversational forms
+  // Conversational forms start empty: the builder shows "Add your first
+  // question" (2.3.2). The intro block used before stored its text under a
+  // key nothing read, so it looked locked and could not be edited.
   if (resolvedType === 'conversational') {
-    const intro = createHtmlBlock({
-      key: createKey('intro'),
-      label: __('Intro', 'subtleforms'),
-      html: __(
-        'Welcome! This is the start of your conversational form. Edit this block or remove it.',
-        'subtleforms'
-      ),
-    });
-
-    if (mode === 'blank') {
-      // Conversational: just the intro block, no pre-populated questions
-      base.fields = [intro];
-      return base;
-    }
-
-    // Minimal: also just the intro block
-    base.fields = [intro];
+    base.fields = [];
     return base;
   }
 

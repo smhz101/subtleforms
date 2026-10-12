@@ -11,6 +11,8 @@ import StepNavigator from './StepNavigator';
 import { BuilderProvider } from './context/BuilderProvider';
 import BuilderDnd from './dnd/BuilderDnd';
 import { useBuilderState, useSchemaCommands, useInsertPicker } from './state';
+import { questionIds } from '../../../shared/conversational';
+import { formFieldDefaults } from '../../../shared/fieldDisplay';
 import './FormEditor.scss';
 
 function FieldPickerPopover({ fieldGroups, context, onInsert }) {
@@ -178,6 +180,11 @@ export default function FormEditor({
     [fieldDefinitions]
   );
 
+  const fieldDefaults = useMemo(
+    () => formFieldDefaults(schema?.metadata),
+    [schema?.metadata?.labelVisibility, schema?.metadata?.descriptionPlacement, schema?.metadata?.requiredMessage, schema?.metadata?.validationMessage] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
   // Command handlers
   const commands = useSchemaCommands({
     tree,
@@ -204,6 +211,50 @@ export default function FormEditor({
     handleMoveToStep,
   } = commands;
   const [repairsDismissed, setRepairsDismissed] = useState(false);
+
+  // Conversational forms (2.3.2): the current question, or an empty question
+  // slot, shared by the canvas and the field panel.
+  const [convCursor, setConvCursor] = useState({ index: 0, empty: false });
+
+  // Clicking a field in the panel fills an empty question; otherwise it adds
+  // a new question right after the current one.
+  const handleConversationalAdd = useCallback(
+    (type) => {
+      if (type === 'step') {
+        return; // Page Breaks do not apply: every question is its own screen.
+      }
+      const ids = questionIds(tree, rootId);
+      let at;
+      if (!ids.length) {
+        at = 0;
+      } else if (convCursor.empty) {
+        at = Math.min(convCursor.index, ids.length);
+      } else {
+        at = Math.min(convCursor.index + 1, ids.length);
+      }
+      let context = { parentId: rootId, columnIndex: null, position: null };
+      if (at < ids.length) {
+        const node = tree.nodes[ids[at]];
+        const parent = node && tree.nodes[node.parentId];
+        if (parent) {
+          context = { parentId: parent.id, columnIndex: null, position: (parent.children || []).indexOf(node.id) };
+        }
+      }
+      handleInsert(type, context);
+      setConvCursor({ index: at, empty: false });
+    },
+    [tree, rootId, convCursor, handleInsert]
+  );
+
+  // Page Break does not exist in a conversational form.
+  const dockFieldGroups = useMemo(() => {
+    if (!isConversational || !fieldGroups) return fieldGroups;
+    const out = {};
+    Object.entries(fieldGroups).forEach(([cat, list]) => {
+      out[cat] = (list || []).filter((f) => f.type !== 'step');
+    });
+    return out;
+  }, [fieldGroups, isConversational]);
 
   // A repaired multi-step form (fields moved into the first step on load) is
   // marked as changed so autosave, Save draft and Publish keep the repair.
@@ -268,6 +319,7 @@ export default function FormEditor({
       validationErrorsByFieldKey={validationErrorsByFieldKey}
       fieldDefinitions={definitionMap}
       formType={formType}
+      fieldDefaults={fieldDefaults}
       onInsert={handleInsert}
       onDelete={handleDelete}
       onUpdate={handleUpdate}
@@ -291,8 +343,8 @@ export default function FormEditor({
         {!isReadOnly && (
         <div className='sf-form-editor__dock' data-tour='fields-panel'>
           <FieldDock
-            fieldGroups={fieldGroups}
-            onAddField={handleDockAdd}
+            fieldGroups={dockFieldGroups}
+            onAddField={isConversational ? handleConversationalAdd : handleDockAdd}
             onCollapsedChange={setIsDockCollapsed}
           />
         </div>
@@ -347,7 +399,7 @@ export default function FormEditor({
             </div>
           )}
 
-          {!selectedField && allFields.length > 0 && (
+          {!selectedField && allFields.length > 0 && !isConversational && (
             <div className='sf-form-editor__canvas-tip'>
               <div className='sf-form-editor__canvas-tip-text'>
                 {__(
@@ -364,15 +416,7 @@ export default function FormEditor({
             {renderCanvas ? (
               renderCanvas()
             ) : isConversational ? (
-              <ConversationalCanvas
-                tree={tree}
-                rootId={rootId}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
-                onDelete={handleDelete}
-                onDuplicate={handleDuplicate}
-                onRequestInsert={handleRequestInsert}
-              />
+              <ConversationalCanvas cursor={convCursor} setCursor={setConvCursor} />
             ) : (
               <FormBuilder
                 appearance={schema?.metadata?.appearance}
@@ -409,7 +453,7 @@ export default function FormEditor({
             resize={false}
             focusOnMount>
             <FieldPickerPopover
-              fieldGroups={fieldGroups}
+              fieldGroups={dockFieldGroups}
               context={insertPicker.context}
               onInsert={handleInsertWithClose}
             />

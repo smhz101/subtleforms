@@ -1,3 +1,5 @@
+import { adminLabel } from '../../shared/fieldDisplay';
+import { structuralType } from '../../shared/formType';
 import { useState, useEffect } from '@wordpress/element';
 import {
   Notice,
@@ -232,7 +234,7 @@ function RepeaterTable( { node, groups } ) {
   const children = ( Array.isArray( node?.children ) && node.children.length ? node.children : node?.fields || [] )
     .filter( ( c ) => c && ( c.config?.key || c.key ) );
   const columns = children.length
-    ? children.map( ( c ) => ( { key: c.config?.key || c.key, label: c.config?.label || c.label || c.config?.key || c.key } ) )
+    ? children.map( ( c ) => ( { key: c.config?.key || c.key, label: adminLabel( c ) } ) )
     : Array.from( new Set( groups.flatMap( ( g ) => Object.keys( g || {} ) ) ) ).map( ( k ) => ( { key: k, label: k } ) );
   const cell = ( v ) => {
     if ( v === undefined || v === null || v === '' ) return '';
@@ -484,7 +486,8 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
       for (const field of fields) {
         const fieldKey = field?.config?.key || field?.key;
         if (fieldKey === key) {
-          return field?.config?.label || field?.label || key;
+          // The admin label names the field in entries (2.3.2).
+          return adminLabel(field) || key;
         }
         // Check children and fields properties
         const childFields = field?.children || field?.fields;
@@ -542,11 +545,12 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
   );
 
   // ─── computed values ─────────────────────────────────────────────────────
-  const formType   = submission.schema?.metadata?.type || 'regular';
+  // The structure decides between Standard and Multi-step (2.3.2).
+  const formType   = structuralType( submission.schema || {} ) || 'regular';
   const formTypeLabels = {
     regular:        __( 'Standard',       'subtleforms' ),
     conversational: __( 'Conversational', 'subtleforms' ),
-    multistep:      __( 'Multi-Step',     'subtleforms' ),
+    'multi-step':   __( 'Multi-step',     'subtleforms' ),
     payment:        __( 'Payment',        'subtleforms' ),
   };
   const formTypeLabel = formTypeLabels[ formType ] || __( 'Standard', 'subtleforms' );

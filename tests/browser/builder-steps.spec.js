@@ -140,7 +140,7 @@ test('Undo and Redo reverse the conversion completely, then save and reload', as
   await addPageBreakAt(page, 2);
   await expect(stepTabs(page)).toHaveCount(2);
 
-  const undo = page.getByRole('button', { name: 'Undo', exact: true });
+  const undo = page.locator('.sf-builder-header-bar__undo-button');
   const redo = page.getByRole('button', { name: 'Redo', exact: true });
   await undo.click();
   await expect(stepTabs(page)).toHaveCount(0);
@@ -227,7 +227,7 @@ test('Step setting moves a field to another step and keeps it selected; undoable
   await saveDraft(page);
   expect(stepKeys(await draftFields(form.id))).toEqual([['c1', 'c3'], ['p1', 'c2']]);
 
-  await page.getByRole('button', { name: 'Undo', exact: true }).click();
+  await page.locator('.sf-builder-header-bar__undo-button').click();
   await openStep(page, 0);
   await expect(canvasFields(page)).toHaveCount(3);
 });

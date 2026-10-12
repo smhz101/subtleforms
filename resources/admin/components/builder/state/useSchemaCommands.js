@@ -15,7 +15,7 @@ import {
   duplicateNode,
 } from '../schema/commands';
 import { denormalizeTree } from '../utils/schemaTree';
-import { insertPageBreak, moveNodeToStep, getStepIdOf } from '../schema/commands/steps';
+import { insertPageBreak, moveNodeToStep, getStepIdOf, removeStep } from '../schema/commands/steps';
 import { canDropInto } from '../dnd/resolveDrop';
 import { debug } from '../../../../shared/debug';
 
@@ -76,6 +76,39 @@ export function useSchemaCommands({
           setSelectedStepId?.(result.selectStepId);
           setSelectedId(result.selectStepId);
         }
+        return;
+      }
+
+      // Replace a field with another type in one undoable edit (2.3.2): the
+      // new field takes its place and keeps the label, help text, required
+      // setting, messages and logic.
+      if (context?.replaceId) {
+        updateTree((currentTree) => {
+          const old = currentTree.nodes[context.replaceId];
+          const parent = old && currentTree.nodes[old.parentId];
+          if (!old || !parent) return currentTree;
+          const position = (parent.children || []).indexOf(old.id);
+          let next = insertNode(currentTree, {
+            definition,
+            parentId: parent.id,
+            columnIndex: null,
+            position: position < 0 ? null : position,
+          });
+          const newId = Object.keys(next.nodes).find(
+            (id) => !currentTree.nodes[id] && next.nodes[id].parentId === parent.id
+          );
+          if (!newId) return currentTree;
+          const carry = {};
+          ['label', 'description', 'required', 'requiredMessage', 'validationMessage', 'adminLabel', 'labelVisibility', 'descriptionPlacement', 'logic', 'appearance'].forEach((k) => {
+            if (old.config?.[k] !== undefined && old.config?.[k] !== '') carry[k] = old.config[k];
+          });
+          if (Object.keys(carry).length) {
+            next = updateNodeConfig(next, { nodeId: newId, changes: carry });
+          }
+          next = deleteNode(next, { nodeId: old.id });
+          setSelectedId(newId);
+          return next;
+        });
         return;
       }
 
@@ -166,23 +199,12 @@ export function useSchemaCommands({
 
       const node = tree.nodes[nodeId];
 
-      // Guardrail: Prevent deleting the last step in a multi-step form
+      // A step is a Page Break boundary: removing the last one keeps the
+      // remaining fields and makes the form Standard again (2.3.2).
       if (node?.type === 'step') {
-        const rootNode = tree.nodes[rootId];
-        const stepCount = (rootNode?.children || []).filter(
-          (id) => tree.nodes[id]?.type === 'step'
-        ).length;
-
-        if (stepCount <= 1) {
-          // eslint-disable-next-line no-alert
-          alert(
-            __(
-              'Cannot delete the last step. Multi-step forms require at least one step.',
-              'subtleforms'
-            )
-          );
-          return;
-        }
+        updateTree((currentTree) => removeStep(currentTree, nodeId).tree);
+        setSelectedId((prev) => (prev === nodeId ? null : prev));
+        return;
       }
 
       updateTree((currentTree) => deleteNode(currentTree, { nodeId }));
@@ -326,11 +348,13 @@ export function useSchemaCommands({
         .map((id) => tree.nodes[id])
         .filter((node) => node && node.type === 'step');
 
-      if (steps.length <= 1) return;
+      if (!steps.length) return;
 
-      // A step with fields takes them with it: ask first.
+      // A step with fields takes them with it: ask first. The only step
+      // always keeps its fields (they go back to the page).
       const count = (tree.nodes[stepId]?.children || []).length;
       if (
+        steps.length > 1 &&
         count > 0 &&
         // eslint-disable-next-line no-alert
         !window.confirm(
@@ -349,7 +373,7 @@ export function useSchemaCommands({
         return;
       }
 
-      updateTree((currentTree) => deleteNode(currentTree, { nodeId: stepId }));
+      updateTree((currentTree) => removeStep(currentTree, stepId).tree);
     },
     [tree, updateTree, rootId]
   );

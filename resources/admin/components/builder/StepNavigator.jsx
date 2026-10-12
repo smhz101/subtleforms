@@ -109,17 +109,29 @@ export default function StepNavigator({
                   </span>
                 </button>
 
-                {steps.length > 1 && (
+                {steps.length > 0 && (
                   <button
                     type='button'
                     onClick={() => onDeleteStep(step.id)}
                     className='sf-step-navigator__delete-button'
-                    title={(() => {
-                      /* translators: %d: step number */ return sprintf(
-                        __('Delete step %d', 'subtleforms'),
-                        index + 1
-                      );
-                    })()}>
+                    aria-label={
+                      steps.length === 1
+                        ? __('Remove the step and keep its fields on one page', 'subtleforms')
+                        : sprintf(
+                            /* translators: %d: step number */
+                            __('Delete step %d', 'subtleforms'),
+                            index + 1
+                          )
+                    }
+                    title={
+                      steps.length === 1
+                        ? __('Remove the step and keep its fields on one page', 'subtleforms')
+                        : sprintf(
+                            /* translators: %d: step number */
+                            __('Delete step %d', 'subtleforms'),
+                            index + 1
+                          )
+                    }>
                     <svg
                       className='sf-step-navigator__delete-icon'
                       fill='none'

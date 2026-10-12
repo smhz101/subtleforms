@@ -137,6 +137,21 @@ final class FieldSettings {
 	const TEXT_LIKE = array( 'text', 'email', 'number', 'phone', 'tel', 'url', 'textarea' );
 
 	/**
+	 * Inputs that are never drawn for the visitor or never fail a check: no
+	 * label options, help text or messages (2.3.2).
+	 *
+	 * @var array<int, string>
+	 */
+	const NO_MESSAGES = array( 'calculation', 'payment_summary', 'payment_hidden_price', 'hidden', 'payment_card' );
+
+	/**
+	 * Containers whose label and help text are shown above their fields.
+	 *
+	 * @var array<int, string>
+	 */
+	const CONTAINERS = array( 'repeat_container', 'group_container' );
+
+	/**
 	 * Types that accept a simple default value.
 	 *
 	 * @var array<int, string>
@@ -265,16 +280,21 @@ final class FieldSettings {
 				);
 			}
 
-			$add(
-				array(
-					'type'    => 'textarea',
-					'name'    => 'description',
-					'label'   => __( 'Help text', 'subtleforms' ),
-					'help'    => __( 'Shown under the field to guide the visitor.', 'subtleforms' ),
-					'rows'    => 2,
-					'section' => 'general',
-				)
-			);
+			if ( 'hidden' !== $type ) {
+				$add(
+					array(
+						'type'    => 'textarea',
+						'name'    => 'description',
+						'label'   => __( 'Help text', 'subtleforms' ),
+						'help'    => __( 'Shown under the field to guide the visitor.', 'subtleforms' ),
+						'rows'    => 2,
+						'section' => 'general',
+					)
+				);
+			}
+			if ( ! in_array( $type, self::NO_MESSAGES, true ) ) {
+				self::addDisplayControls( $add );
+			}
 
 			if ( in_array( $type, self::DEFAULTABLE, true ) && ! $has( 'defaultValue' ) ) {
 				$add(
@@ -364,14 +384,6 @@ final class FieldSettings {
 						'label'       => __( 'Pattern (regular expression)', 'subtleforms' ),
 						'placeholder' => '^[A-Z]{2}[0-9]{4}$',
 						'section'     => 'validation',
-					)
-				);
-				$add(
-					array(
-						'type'    => 'text',
-						'name'    => 'patternMessage',
-						'label'   => __( 'Message when the pattern does not match', 'subtleforms' ),
-						'section' => 'validation',
 					)
 				);
 			}
@@ -470,16 +482,27 @@ final class FieldSettings {
 				);
 			}
 
-			if ( ! in_array( $type, array( 'calculation', 'payment_summary', 'payment_hidden_price', 'hidden', 'payment_card' ), true ) ) {
-			$add(
-				array(
-					'type'        => 'text',
-					'name'        => 'requiredMessage',
-					'label'       => __( 'Message when left empty', 'subtleforms' ),
-					'placeholder' => __( 'This field is required.', 'subtleforms' ),
-					'section'     => 'validation',
-				)
-			);
+			// Every input that can be required or checked has both messages,
+			// used in the browser and by the server (2.3.2).
+			if ( ! in_array( $type, self::NO_MESSAGES, true ) ) {
+				$add(
+					array(
+						'type'        => 'text',
+						'name'        => 'requiredMessage',
+						'label'       => __( 'Message when left empty', 'subtleforms' ),
+						'placeholder' => __( 'This field is required.', 'subtleforms' ),
+						'section'     => 'validation',
+					)
+				);
+				$add(
+					array(
+						'type'    => 'text',
+						'name'    => 'validationMessage',
+						'label'   => __( 'Custom validation message', 'subtleforms' ),
+						'help'    => __( 'Shown when the answer is not valid, for example a wrong email address, a number out of range or text that does not match the pattern. Leave empty for the standard message.', 'subtleforms' ),
+						'section' => 'validation',
+					)
+				);
 			}
 
 			// Advanced.
@@ -488,7 +511,7 @@ final class FieldSettings {
 					'type'    => 'text',
 					'name'    => 'adminLabel',
 					'label'   => __( 'Admin label', 'subtleforms' ),
-					'help'    => __( 'Used in submissions, exports and emails instead of the public label.', 'subtleforms' ),
+					'help'    => __( 'Used in entries, emails, exports and integrations instead of the public label.', 'subtleforms' ),
 					'section' => 'advanced',
 				)
 			);
@@ -505,7 +528,64 @@ final class FieldSettings {
 			}
 		}
 
-		if ( $isInput || in_array( $type, array( 'html', 'section_break', 'disclaimer', 'group_container' ), true ) ) {
+		// Containers (2.3.2): label, help text and label visibility first, then
+		// their own settings (Repeater limits, button label, spacing).
+		$isColumns = '_column_container' === substr( $type, -17 );
+		if ( in_array( $type, self::CONTAINERS, true ) || $isColumns ) {
+			$layout = is_array( $definition->layoutControls ) ? $definition->layoutControls : array();
+			// The label control comes first; a definition that has one keeps it.
+			$labelControl = array(
+				'type'    => 'text',
+				'name'    => 'label',
+				'label'   => __( 'Label', 'subtleforms' ),
+				'section' => 'general',
+			);
+			foreach ( $layout as $i => $control ) {
+				if ( is_array( $control ) && ( $control['name'] ?? '' ) === 'label' ) {
+					$labelControl = $control;
+					unset( $layout[ $i ] );
+				}
+			}
+			$first = array( $labelControl );
+			$first[] = array(
+				'type'    => 'textarea',
+				'name'    => 'description',
+				'label'   => __( 'Help text', 'subtleforms' ),
+				'help'    => __( 'Shown under the label, above the fields.', 'subtleforms' ),
+				'rows'    => 2,
+				'section' => 'general',
+			);
+			$first[] = self::labelVisibilityControl();
+			$definition->layoutControls = array_values( array_merge( $first, $layout ) );
+
+			if ( 'repeat_container' === $type && ! $has( 'adminLabel' ) ) {
+				$add(
+					array(
+						'type'    => 'text',
+						'name'    => 'adminLabel',
+						'label'   => __( 'Admin label', 'subtleforms' ),
+						'help'    => __( 'Used in entries, emails, exports and integrations instead of the public label.', 'subtleforms' ),
+						'section' => 'advanced',
+					)
+				);
+			}
+		}
+
+		// Hidden fields have no visible label, but their answer is listed in
+		// entries and emails: the admin label names it there (2.3.2).
+		if ( 'hidden' === $type && ! $has( 'adminLabel' ) ) {
+			$add(
+				array(
+					'type'    => 'text',
+					'name'    => 'adminLabel',
+					'label'   => __( 'Admin label', 'subtleforms' ),
+					'help'    => __( 'Used in entries, emails, exports and integrations.', 'subtleforms' ),
+					'section' => 'advanced',
+				)
+			);
+		}
+
+		if ( $isInput || in_array( $type, array( 'html', 'section_break', 'disclaimer', 'group_container', 'repeat_container' ), true ) || $isColumns ) {
 			$add(
 				array(
 					'type'        => 'text',
@@ -518,6 +598,56 @@ final class FieldSettings {
 		}
 
 		$definition->inspectorControls = array_values( $controls );
+	}
+
+	/**
+	 * Field Label Visibility control (2.3.2). A hidden label stays in the page
+	 * for screen readers; it is only hidden visually.
+	 *
+	 * @return array
+	 */
+	public static function labelVisibilityControl(): array {
+		return array(
+			'type'    => 'select',
+			'name'    => 'labelVisibility',
+			'label'   => __( 'Field label visibility', 'subtleforms' ),
+			'options' => array(
+				array( 'value' => '', 'label' => __( 'Form default', 'subtleforms' ) ),
+				array( 'value' => 'visible', 'label' => __( 'Visible (top aligned)', 'subtleforms' ) ),
+				array( 'value' => 'hidden', 'label' => __( 'Hidden (kept for screen readers)', 'subtleforms' ) ),
+			),
+			'section' => 'general',
+		);
+	}
+
+	/**
+	 * Description Placement control (2.3.2).
+	 *
+	 * @return array
+	 */
+	public static function descriptionPlacementControl(): array {
+		return array(
+			'type'    => 'select',
+			'name'    => 'descriptionPlacement',
+			'label'   => __( 'Help text placement', 'subtleforms' ),
+			'options' => array(
+				array( 'value' => '', 'label' => __( 'Form default', 'subtleforms' ) ),
+				array( 'value' => 'below', 'label' => __( 'Below input', 'subtleforms' ) ),
+				array( 'value' => 'above', 'label' => __( 'Above input', 'subtleforms' ) ),
+			),
+			'section' => 'general',
+		);
+	}
+
+	/**
+	 * Add the label visibility and help text placement controls.
+	 *
+	 * @param callable $add Adds one control.
+	 * @return void
+	 */
+	private static function addDisplayControls( callable $add ): void {
+		$add( self::labelVisibilityControl() );
+		$add( self::descriptionPlacementControl() );
 	}
 
 	/**

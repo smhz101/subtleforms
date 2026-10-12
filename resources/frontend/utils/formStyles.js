@@ -5,6 +5,8 @@
  * This is read-only - no schema migrations required.
  */
 
+import { structuralType, TYPE_MULTI_STEP } from '../../shared/formType';
+
 /**
  * Supported form types and their style mappings
  */
@@ -25,15 +27,15 @@ export const FORM_TYPES = {
  * @returns {string} Form type identifier
  */
 export function getFormType(schema) {
-  if (!schema?.metadata?.type) {
-    return FORM_TYPES.DEFAULT;
-  }
+  // A Standard form with Page Breaks renders as Multi-step, and a Multi-step
+  // form without one as Standard (2.3.2): the structure decides.
+  const type = structuralType(schema || {});
 
-  const type = schema.metadata.type.toLowerCase();
-
-  // Normalize variants
-  if (type === 'multistep' || type === 'multi-step') {
+  if (type === TYPE_MULTI_STEP) {
     return FORM_TYPES.STEPS;
+  }
+  if (!type || type === 'regular') {
+    return FORM_TYPES.DEFAULT;
   }
 
   // Map known types

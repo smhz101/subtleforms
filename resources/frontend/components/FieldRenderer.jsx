@@ -2,9 +2,9 @@ import { __, sprintf } from '@wordpress/i18n';
 import { getIn } from '../utils/valuePaths';
 import { getCompositeEmptyParts } from '../utils/fieldValidation';
 import { debug } from '../../shared/debug';
-import { lazy, Suspense } from '@wordpress/element';
+import { lazy, Suspense, useContext } from '@wordpress/element';
 import ChainedSelect from './fields/ChainedSelect';
-import FileUpload from './fields/FileUpload';
+import FileUpload, { FormContext } from './fields/FileUpload';
 import RepeaterField from './fields/RepeaterField';
 import {
   PaymentSummary,
@@ -16,6 +16,7 @@ import {
 } from './fields/Payments';
 import { getFieldType } from '../../shared/extend';
 import { fieldConfig } from '../../shared/fieldConfig';
+import { fieldDisplay } from '../../shared/fieldDisplay';
 import { COUNTRIES, orderedCountries } from '../../shared/countries';
 
 // The signature pad and rich text editor are only downloaded on pages whose
@@ -114,6 +115,9 @@ export default function FieldRenderer({
   // partial config holding only appearance). fieldConfig() merges them so a
   // width never hides required, options, placeholder or help text (bug 1).
   const config = fieldConfig(field);
+  // Label visibility and help text placement, with the form's defaults (2.3.2).
+  const { fieldDefaults } = useContext(FormContext) || {};
+  const display = fieldDisplay(field, fieldDefaults);
 
   const ownKey = config.key || field.key;
   const resolvedPath = fieldPath || (ownKey ? `${pathPrefix}${ownKey}` : ownKey);
@@ -144,7 +148,14 @@ export default function FieldRenderer({
   // be available to them and not only to the input wrapper further down.
   const fieldAppearance = config.appearance;
   const appearanceStyle = fieldAppearanceStyle(fieldAppearance);
-  const appearanceClasses = fieldAppearanceClasses(fieldAppearance);
+  // A hidden label is hidden visually only (screen readers still read it).
+  const appearanceClasses = [
+    fieldAppearanceClasses(fieldAppearance),
+    display.labelHidden && !fieldAppearance?.hideLabel ? 'subtleforms-field--no-label' : '',
+    display.descriptionAbove ? 'subtleforms-field--help-above' : '',
+  ]
+    .filter(Boolean)
+    .join(' ');
 
   if (field.type === 'section_break') {
     return (
@@ -278,9 +289,16 @@ export default function FieldRenderer({
           .filter(Boolean)
           .join(' ')}
         style={appearanceStyle}>
-        {config.label && (
-          <div className='subtleforms-container-label'>
-            {config.label}
+        {(config.label || config.description) && (
+          <div className='subtleforms-container-header'>
+            {config.label && (
+              <div className='subtleforms-container-label subtleforms-field-label'>
+                {config.label}
+              </div>
+            )}
+            {config.description && (
+              <p className='subtleforms-field-help subtleforms-container-help'>{config.description}</p>
+            )}
           </div>
         )}
         {field.children &&
@@ -307,7 +325,7 @@ export default function FieldRenderer({
     );
     const columns = field.columns || [];
 
-    return (
+    const columnsBody = (
       <div
         className={`subtleforms-field subtleforms-field-columns subtleforms-columns-${columnCount}`}>
         {columns.map((columnFields, colIndex) => (
@@ -326,6 +344,27 @@ export default function FieldRenderer({
               ))}
           </div>
         ))}
+      </div>
+    );
+    // Columns have no label of their own unless one is set (2.3.2).
+    if (!config.label && !config.description) {
+      return columnsBody;
+    }
+    return (
+      <div
+        className={['subtleforms-field', 'subtleforms-field-container', 'subtleforms-field-columns-group', appearanceClasses]
+          .filter(Boolean)
+          .join(' ')}
+        style={appearanceStyle}>
+        <div className='subtleforms-container-header'>
+          {config.label && (
+            <div className='subtleforms-container-label subtleforms-field-label'>{config.label}</div>
+          )}
+          {config.description && (
+            <p className='subtleforms-field-help subtleforms-container-help'>{config.description}</p>
+          )}
+        </div>
+        {columnsBody}
       </div>
     );
   }
@@ -351,8 +390,11 @@ export default function FieldRenderer({
 
     return (
       <fieldset
-        className={`subtleforms-field subtleforms-field-${field.type} subtleforms-group-field`}
+        className={[`subtleforms-field subtleforms-field-${field.type} subtleforms-group-field`, appearanceClasses]
+          .filter(Boolean)
+          .join(' ')}
         aria-invalid={!!error}
+        aria-describedby={config.description ? `${inputId}-help` : undefined}
       >
         <legend className='subtleforms-field-label'>
           {label}
@@ -360,6 +402,9 @@ export default function FieldRenderer({
             <span className='subtleforms-required' aria-label=', required'>*</span>
           )}
         </legend>
+        {config.description && display.descriptionAbove && (
+          <p id={`${inputId}-help`} className='subtleforms-field-help'>{config.description}</p>
+        )}
 
         {hasChildren
           ? field.children.map((child) => {
@@ -388,6 +433,10 @@ export default function FieldRenderer({
               required,
               error
             )}
+
+        {config.description && !display.descriptionAbove && (
+          <p id={`${inputId}-help`} className='subtleforms-field-help'>{config.description}</p>
+        )}
 
         {error && (
           <div
@@ -443,6 +492,12 @@ export default function FieldRenderer({
         )}
       </label>
 
+      {config.description && display.descriptionAbove && (
+        <p id={`${inputId}-help`} className='subtleforms-field-help subtleforms-field-help--above'>
+          {config.description}
+        </p>
+      )}
+
       {renderInput(
         field,
         value,
@@ -455,7 +510,7 @@ export default function FieldRenderer({
         inputName
       )}
 
-      {config.description && (
+      {config.description && !display.descriptionAbove && (
         <p id={`${inputId}-help`} className='subtleforms-field-help'>
           {config.description}
         </p>

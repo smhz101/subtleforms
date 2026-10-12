@@ -800,10 +800,25 @@ final class FormsApi {
 			// Recurse into step/section container 'fields' arrays for multi-step forms.
 			$this->deriveFieldKeys( $schema['fields'] );
 
+			// A single checkbox with a list of options becomes Multiple choice,
+			// as the builder does when it opens such a field (2.3.2). Templates
+			// from add-ons may still use the old shape.
+			list( $schema['fields'] ) = \SubtleForms\Support\SchemaRepair::checkboxListsToMultipleChoice( $schema['fields'] );
+
 			try {
 				$this->formsRepo->saveSchemaVersion( $id, $schema, true );
 			} catch ( \InvalidArgumentException $e ) {
+				// Never leave an empty form behind (2.3.2): the form is removed
+				// and the reason is returned so the screen can show it.
 				Logger::error( 'Failed to save initial schema for form %d: %s', $id, $e->getMessage() );
+				$this->formsRepo->delete( $id );
+				return ApiResponse::validation_error(
+					sprintf(
+						/* translators: %s: reason the form could not be created */
+						__( 'The form could not be created: %s', 'subtleforms' ),
+						$e->getMessage()
+					)
+				);
 			}
 		}
 
@@ -1143,6 +1158,11 @@ final class FormsApi {
 				'_showDescription',
 				'_theme',
 				'submitText',
+				// Field defaults (2.3.2).
+				'labelVisibility',
+				'descriptionPlacement',
+				'requiredMessage',
+				'validationMessage',
 			);
 
 			$public['metadata'] = array();

@@ -123,6 +123,7 @@ export const UI_ICON_MAP = {
   more: Icon.MoreVertical,
   move: Icon.Move,
   'move-to': Icon.CornerDownRight,
+  replace: Icon.Replace,
   drag: Icon.Move,
   up: Icon.Up,
   down: Icon.Down,

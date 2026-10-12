@@ -69,8 +69,14 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
 
   const definition = fieldDefinitions?.[field?.type];
   const fieldCategory = definition?.meta?.category;
+  // Content blocks (HTML, Notice, Section Heading) and hidden values take no
+  // answer from the visitor: no Validation tab (2.3.2).
+  const isContentBlock = ['html', 'section_break', 'disclaimer'].includes(field?.type);
   const isInputLike =
-    !fieldCategory || fieldCategory === 'regular' || fieldCategory === 'composite';
+    (!fieldCategory || fieldCategory === 'regular' || fieldCategory === 'composite') &&
+    !isContentBlock &&
+    field?.type !== 'hidden' &&
+    definition?.kind !== 'structure';
 
   const validationMessages = selectedId
     ? (validationErrors || [])
@@ -169,7 +175,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
           },
           logicTab,
         ]
-      : isStep
+      : isStep || isContentBlock
       ? [logicTab]
       : []),
     ...(supportsAppearance(field.type)

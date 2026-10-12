@@ -9,6 +9,7 @@ import Icon from '../ui/Icon';
 import AdminShell from '../components/AdminShell';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
 import { createInitialSchema } from '../utils/initialSchema';
+import { schemaFromTemplate } from '../utils/templateSchema';
 import { TEMPLATE_CATEGORIES } from '../templates';
 import { requirePro } from '../utils/featureGate';
 import './CreateFormPage.scss';
@@ -199,21 +200,8 @@ export default function CreateFormPage() {
     let schema;
 
     if (chosen.id !== 'blank' && chosen.schema) {
-      schema = enrichSchemaWithProMarkers({
-        fields: chosen.schema.fields || [],
-        metadata: {
-          name: 'form_schema',
-          title: safeTitle,
-          description,
-          type: chosen.schema.metadata?.type || 'regular',
-          template: chosen.id,
-          // Templates can bring a look and button text (Newsletter, 2.3.0).
-          ...(chosen.schema.metadata?.appearance ? { appearance: chosen.schema.metadata.appearance } : {}),
-          ...(chosen.schema.metadata?.submitText ? { submitText: chosen.schema.metadata.submitText } : {}),
-          ...(chosen.schema.metadata?._showTitle === false ? { _showTitle: false } : {}),
-        },
-        ...(Array.isArray(chosen.schema.actions) ? { actions: chosen.schema.actions } : {}),
-      });
+      // Every part of the template: fields, settings, notifications, type.
+      schema = schemaFromTemplate(chosen, { title: safeTitle, description });
     } else {
       const formType =
         structure === 'conversational' ? 'conversational' : structure === 'multi-step' ? 'multi-step' : 'regular';

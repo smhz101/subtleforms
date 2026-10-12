@@ -58,6 +58,7 @@ final class Activator {
 		self::migrate_is_read_column();
 		self::migrate_starred_column();
 		self::migrate_trash_columns();
+		self::migrate_form_types();
 
 		// Set default options
 		self::set_default_options();
@@ -279,6 +280,74 @@ final class Activator {
 			$wpdb->query( "ALTER TABLE {$table_name} ADD KEY starred (starred)" );
 			Logger::info( 'Added starred column to submissions table' );
 		}
+	}
+
+	/**
+	 * Form types follow the structure (2.3.2).
+	 *
+	 * Before 2.3.2 adding a Page Break to a Standard form kept the type
+	 * "Standard" everywhere (builder, All Forms, dashboard). Every stored
+	 * schema (draft, published config and the active version) gets the type
+	 * its structure gives: Multi-step when it has a Page Break, Standard when
+	 * a Multi-step form has none. Conversational forms are not touched.
+	 * Safe to run more than once.
+	 *
+	 * @return int Number of stored schemas changed.
+	 */
+	public static function migrate_form_types(): int {
+		global $wpdb;
+		$forms   = $wpdb->prefix . 'subtleforms_forms';
+		$schemas = $wpdb->prefix . 'subtleforms_form_schemas';
+		$changed = 0;
+
+		$sync = static function ( $json ) {
+			if ( ! is_string( $json ) || '' === $json ) {
+				return null;
+			}
+			$schema = json_decode( $json, true );
+			if ( ! is_array( $schema ) || ! isset( $schema['fields'] ) ) {
+				return null;
+			}
+			list( $schema, $didChange ) = \SubtleForms\Support\SchemaRepair::syncType( $schema );
+			return $didChange ? wp_json_encode( $schema ) : null;
+		};
+
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Fixed table name; one-time upgrade.
+		$rows = $wpdb->get_results( "SELECT id, config, draft_schema FROM {$forms}", ARRAY_A );
+		foreach ( (array) $rows as $row ) {
+			$update = array();
+			$config = $sync( $row['config'] ?? null );
+			if ( null !== $config ) {
+				$update['config'] = $config;
+			}
+			$draft = $sync( $row['draft_schema'] ?? null );
+			if ( null !== $draft ) {
+				$update['draft_schema'] = $draft;
+			}
+			if ( $update ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One-time upgrade.
+				$wpdb->update( $forms, $update, array( 'id' => (int) $row['id'] ) );
+				wp_cache_delete( 'subtleforms_form_' . (int) $row['id'], 'subtleforms' );
+				$changed += count( $update );
+			}
+		}
+
+		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Fixed table name; one-time upgrade.
+		$active = $wpdb->get_results( "SELECT id, form_id, schema_data FROM {$schemas} WHERE active = 1", ARRAY_A );
+		foreach ( (array) $active as $row ) {
+			$data = $sync( $row['schema_data'] ?? null );
+			if ( null !== $data ) {
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- One-time upgrade.
+				$wpdb->update( $schemas, array( 'schema_data' => $data ), array( 'id' => (int) $row['id'] ) );
+				wp_cache_delete( 'subtleforms_schema_' . (int) $row['form_id'], 'subtleforms' );
+				++$changed;
+			}
+		}
+
+		if ( $changed ) {
+			Logger::info( 'Form types: %d stored schema(s) now follow their structure.', $changed );
+		}
+		return $changed;
 	}
 
 	/**

@@ -8,6 +8,7 @@ import Icon from '../ui/Icon';
 import clsx from 'clsx';
 import TemplateSelector from '../templates/TemplateSelector';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
+import { schemaFromTemplate } from '../utils/templateSchema';
 import { createInitialSchema } from '../utils/initialSchema';
 
 import './CreateFormModal.scss';
@@ -66,7 +67,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
     const safeTitle = title.trim() || generateDefaultTitle();
     let schemaToSend;
     // Map UI selection to canonical schema type
-    let schemaType = formType === 'conversational'
+    const schemaType = formType === 'conversational'
       ? 'conversational'
       : isMultiStep
       ? 'multi-step'
@@ -76,18 +77,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
     if (template === 'preset' && selectedTemplateId) {
       const templateData = selectedTemplateId;
       if (templateData && templateData.schema) {
-        const fields = templateData.schema.fields || [];
-        schemaType = templateData.schema.metadata?.type || 'regular';
-        schemaToSend = enrichSchemaWithProMarkers({
-          fields,
-          metadata: {
-            name: 'form_schema',
-            title: safeTitle,
-            description: description,
-            type: schemaType,
-            template: templateData.id,
-          },
-        });
+        schemaToSend = schemaFromTemplate(templateData, { title: safeTitle, description });
       }
     }
 

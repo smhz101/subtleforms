@@ -16,6 +16,116 @@ namespace SubtleForms\Support;
 final class SchemaRepair {
 
 	/**
+	 * Form types whose structure decides between Standard and Multi-step.
+	 * Conversational (and any add-on type) keeps the type it was given.
+	 *
+	 * @var array<int,string>
+	 */
+	const STRUCTURAL_TYPES = array( '', 'regular', 'standard', 'multi-step', 'multistep', 'multi_step', 'sectioned', 'steps' );
+
+	/**
+	 * Turn single checkboxes that carry a list of options into Multiple
+	 * choice fields (pick any), anywhere in the tree.
+	 *
+	 * The builder does the same when it loads such a field (2.2.1), but a
+	 * schema sent straight to the server (a template, an import, an add-on)
+	 * was refused by SchemaValidator, which left an empty form behind (2.3.2).
+	 *
+	 * @param array $fields Field list.
+	 * @return array{0: array, 1: int} The list and the number of fields converted.
+	 */
+	public static function checkboxListsToMultipleChoice( array $fields ): array {
+		$count = 0;
+		foreach ( $fields as $i => $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+			if ( ( $field['type'] ?? '' ) === 'checkbox' ) {
+				$options = $field['options'] ?? ( $field['config']['options'] ?? null );
+				if ( is_array( $options ) && count( $options ) > 0 ) {
+					$field['type']          = 'multiple_choice';
+					$field['allowMultiple'] = true;
+					unset( $field['checkboxLabel'] );
+					if ( isset( $field['config'] ) && is_array( $field['config'] ) ) {
+						$field['config']['type'] = 'multiple_choice';
+						unset( $field['config']['checkboxLabel'] );
+					}
+					++$count;
+				}
+			}
+			foreach ( array( 'children', 'fields' ) as $childKey ) {
+				if ( isset( $field[ $childKey ] ) && is_array( $field[ $childKey ] ) ) {
+					list( $field[ $childKey ], $n ) = self::checkboxListsToMultipleChoice( $field[ $childKey ] );
+					$count                         += $n;
+				}
+			}
+			if ( isset( $field['columns'] ) && is_array( $field['columns'] ) ) {
+				foreach ( $field['columns'] as $c => $column ) {
+					if ( is_array( $column ) ) {
+						list( $field['columns'][ $c ], $n ) = self::checkboxListsToMultipleChoice( $column );
+						$count                             += $n;
+					}
+				}
+			}
+			$fields[ $i ] = $field;
+		}
+		return array( $fields, $count );
+	}
+
+	/**
+	 * Whether a field list has a Page Break (step) at root level.
+	 *
+	 * @param mixed $fields Field list.
+	 * @return bool
+	 */
+	public static function hasSteps( $fields ): bool {
+		if ( ! is_array( $fields ) ) {
+			return false;
+		}
+		foreach ( $fields as $field ) {
+			if ( is_array( $field ) && in_array( $field['type'] ?? '', array( 'step', 'form_step' ), true ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * The form type its structure gives (2.3.2): a Standard form with a Page
+	 * Break is Multi-step, a Multi-step form without one is Standard.
+	 * Conversational and other types are returned unchanged.
+	 *
+	 * @param array $schema Schema with `metadata.type` and `fields`.
+	 * @return string
+	 */
+	public static function structuralType( array $schema ): string {
+		$raw = isset( $schema['metadata']['type'] ) && is_string( $schema['metadata']['type'] ) ? $schema['metadata']['type'] : '';
+		if ( ! in_array( strtolower( $raw ), self::STRUCTURAL_TYPES, true ) ) {
+			return $raw;
+		}
+		return self::hasSteps( $schema['fields'] ?? array() ) ? FormMeta::TYPE_MULTI_STEP : FormMeta::TYPE_STANDARD;
+	}
+
+	/**
+	 * Set `metadata.type` from the structure (see structuralType()).
+	 *
+	 * @param array $schema Schema.
+	 * @return array{0: array, 1: bool} The schema and whether the type changed.
+	 */
+	public static function syncType( array $schema ): array {
+		$type    = self::structuralType( $schema );
+		$current = $schema['metadata']['type'] ?? null;
+		if ( $type === $current || ( '' === $type && null === $current ) ) {
+			return array( $schema, false );
+		}
+		if ( ! isset( $schema['metadata'] ) || ! is_array( $schema['metadata'] ) ) {
+			$schema['metadata'] = array();
+		}
+		$schema['metadata']['type'] = $type;
+		return array( $schema, true );
+	}
+
+	/**
 	 * Move root-level fields of a multi-step form into its first step.
 	 *
 	 * Builds before 2.3.1 added a Page Break as an empty step after the

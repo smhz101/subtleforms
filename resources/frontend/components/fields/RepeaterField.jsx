@@ -145,12 +145,14 @@ export default function RepeaterField({
       role='group'
       aria-labelledby={`${baseId}-label`}
       data-repeater={path}>
-      <div id={`${baseId}-label`} className='subtleforms-field-label subtleforms-repeater__label'>
-        {label}
+      <div className='subtleforms-container-header'>
+        <div id={`${baseId}-label`} className='subtleforms-field-label subtleforms-repeater__label'>
+          {label}
+        </div>
+        {config.description && (
+          <p className='subtleforms-field-help subtleforms-container-help'>{config.description}</p>
+        )}
       </div>
-      {config.description && (
-        <p className='subtleforms-field-help'>{config.description}</p>
-      )}
 
       <div className='subtleforms-repeater__groups'>
         {groups.map((_, index) => {

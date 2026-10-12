@@ -14,6 +14,8 @@ import {
 import { warnOnce } from '../utils/warnOnce';
 import { serverFieldErrors, fixFieldsSummary } from '../utils/serverErrors';
 import { getFormClassNames } from '../utils/formStyles';
+import { structuralType } from '../../shared/formType';
+import { formFieldDefaults } from '../../shared/fieldDisplay';
 import { debug } from '../../shared/debug';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { computeQuote, isPricedForm, formatMoney, isPricedType } from '../../shared/pricing';
@@ -154,15 +156,14 @@ export default function FormRenderer({
 
   // Extract steps from schema
   // Detect form type from metadata
-  const formType = useMemo(
-    () => schema?.metadata?.type || 'regular',
-    [schema?.metadata?.type]
-  );
+  // The structure decides between Standard and Multi-step (2.3.2).
+  const formType = useMemo(() => structuralType(schema || {}), [schema]);
 
-  const isMultistep =
-    formType === 'multistep' ||
-    formType === 'multi-step' ||
-    formType === 'steps';
+  // Form-level defaults for label visibility, help text placement and
+  // messages (2.3.2).
+  const fieldDefaults = useMemo(() => formFieldDefaults(schema?.metadata), [schema?.metadata]);
+
+  const isMultistep = formType === 'multi-step';
   const isConversational = formType === 'conversational';
 
   const steps = useMemo(() => {
@@ -467,7 +468,7 @@ export default function FormRenderer({
             : currentStep.fields) || []
         : fieldsToRender;
 
-    const errors = validateFields(fieldsOnCurrentStep, values, hiddenFields);
+    const errors = validateFields(fieldsOnCurrentStep, values, hiddenFields, fieldDefaults);
 
     setValidationErrors(errors);
     const count = Object.keys(errors).length;
@@ -477,7 +478,7 @@ export default function FormRenderer({
       setErrorSummary('');
     }
     return count === 0;
-  }, [hasSteps, currentStep, fieldsToRender, hiddenFields, values, focusFirstInvalid]);
+  }, [hasSteps, currentStep, fieldsToRender, hiddenFields, values, focusFirstInvalid, fieldDefaults]);
 
   // Handle step navigation
   // IMPORTANT: Step navigation NEVER triggers submission
@@ -602,7 +603,10 @@ export default function FormRenderer({
   );
 
   // Form details for fields that talk to the server (uploads).
-  const formContext = useMemo(() => ({ formId, preview }), [formId, preview]);
+  const formContext = useMemo(
+    () => ({ formId, preview, fieldDefaults }),
+    [formId, preview, fieldDefaults]
+  );
 
   // On a multi-step form, show the first step that has a field in error.
   const goToStepWithError = useCallback(
@@ -657,7 +661,7 @@ export default function FormRenderer({
         const fieldsToValidate = hasSteps
           ? steps.flatMap((step) => step.children || step.fields || [])
           : schema?.fields || [];
-        const errors = validateFields(fieldsToValidate, values, hiddenFields);
+        const errors = validateFields(fieldsToValidate, values, hiddenFields, fieldDefaults);
         setValidationErrors(errors);
         if (Object.keys(errors).length > 0) {
           focusFirstInvalid(Object.keys(errors).length);
@@ -674,7 +678,7 @@ export default function FormRenderer({
       const allFieldsToCheck = hasSteps
         ? steps.flatMap((step) => step.children || step.fields || [])
         : fieldsToRender;
-      const clientErrors = validateFields(allFieldsToCheck, values, hiddenFields);
+      const clientErrors = validateFields(allFieldsToCheck, values, hiddenFields, fieldDefaults);
       setValidationErrors(clientErrors);
 
       if (Object.keys(clientErrors).length > 0) {

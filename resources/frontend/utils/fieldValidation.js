@@ -67,7 +67,29 @@ export function isAnswerable(type, config = {}) {
  * @param {*}      value The value stored at the field's key.
  * @return {string|undefined}
  */
-export function validateField(field, value) {
+export function validateField(field, value, defaults = {}) {
+  const error = checkField(field, value, defaults);
+  if (!error || error.required) {
+    return error ? error.message : undefined;
+  }
+  // The field's own Custom validation message replaces every format, range
+  // and pattern message (2.3.2), then the form default.
+  const config = fieldConfig(field);
+  const custom =
+    (typeof config.validationMessage === 'string' && config.validationMessage.trim()) ||
+    (typeof defaults.validationMessage === 'string' && defaults.validationMessage.trim()) ||
+    '';
+  return custom || error.message;
+}
+
+/** Required error, or a format error, as { message, required }. */
+function checkField(field, value, defaults) {
+  const err = rawValidateField(field, value, defaults);
+  if (!err) return undefined;
+  return typeof err === 'object' ? err : { message: err, required: false };
+}
+
+function rawValidateField(field, value, defaults = {}) {
   const config = fieldConfig(field);
   const type = field?.type;
   // Fields that are not drawn cannot be answered: a matrix with no rows or
@@ -76,14 +98,16 @@ export function validateField(field, value) {
     return undefined;
   }
   const required = config?.required === true;
-  const requiredMessage =
+  const requiredText =
     (typeof config?.requiredMessage === 'string' && config.requiredMessage.trim()) ||
+    (typeof defaults?.requiredMessage === 'string' && defaults.requiredMessage.trim()) ||
     __('This field is required.', 'subtleforms');
+  const requiredMessage = { message: requiredText, required: true };
 
   if (required) {
     if (isCompositeField(field)) {
       const err = getCompositeRequiredError(type, value);
-      if (err) return err;
+      if (err) return { message: err, required: true };
     } else if (type === 'toggle') {
       const onValue = config.onValue ?? 'yes';
       if (value !== true && value !== onValue) return requiredMessage;
@@ -125,7 +149,8 @@ export function validateField(field, value) {
     if (type === 'text' && config.pattern) {
       try {
         if (!new RegExp(config.pattern, 'u').test(value)) {
-          return config.patternMessage || __('Please match the requested format.', 'subtleforms');
+          // validationMessage (2.3.2) replaces patternMessage; older forms keep theirs.
+          return config.validationMessage || config.patternMessage || __('Please match the requested format.', 'subtleforms');
         }
       } catch (e) {
         // An invalid admin regex must never block a visitor.
@@ -218,7 +243,7 @@ function getCompositeRequiredError(type, value) {
  * @param {Set}      hiddenFields Keys to skip.
  * @return {Object} Errors keyed by field key.
  */
-export function validateFields(fields, values, hiddenFields) {
+export function validateFields(fields, values, hiddenFields, defaults = {}) {
   const errors = {};
 
   // `prefix` is set inside a Repeater group: `items.0.` (2.3.1). Each group's
@@ -258,7 +283,7 @@ export function validateFields(fields, values, hiddenFields) {
 
       if (key) {
         const value = getIn(values, key);
-        const err = validateField(field, value);
+        const err = validateField(field, value, defaults);
         if (err) errors[key] = err;
       }
 

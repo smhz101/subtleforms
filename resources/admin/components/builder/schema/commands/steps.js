@@ -16,6 +16,9 @@
  *   keeping their order, keys and settings.
  * - moveNodeToStep(): moves a top-level field of one step to the end of
  *   another step.
+ * - unwrapSingleStep() / removeStep(): removing the last Page Break (a form
+ *   left with one step) puts that step's fields back at root level in order,
+ *   so the form is Standard again (2.3.2).
  *
  * Every function returns a new tree and never mutates its input, so the
  * builder applies each one as a single undoable edit.
@@ -24,6 +27,7 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { createNodeFromDefinition } from '../../utils/schemaTree';
 import { collectExistingKeys } from '../../utils/idGenerator';
+import { deleteNode } from './index';
 
 const ROOT_NODE_ID = 'root';
 
@@ -279,4 +283,57 @@ export function stepOptions(tree) {
           sprintf(__('Step %1$d: %2$s', 'subtleforms'), index + 1, title),
     };
   });
+}
+
+/**
+ * A form with exactly one step has no Page Break left: its fields go back to
+ * root level, in order, and the step goes away (2.3.2).
+ *
+ * @return {{tree: Object, unwrapped: boolean}}
+ */
+export function unwrapSingleStep(tree) {
+  const stepIds = getStepIds(tree);
+  if (stepIds.length !== 1) {
+    return { tree, unwrapped: false };
+  }
+  const rootId = tree.rootId || ROOT_NODE_ID;
+  const root = rootOf(tree);
+  const stepId = stepIds[0];
+  const step = tree.nodes[stepId];
+  const children = step.children || [];
+  const nodes = { ...tree.nodes };
+  const rootChildren = [];
+  (root.children || []).forEach((id) => {
+    if (id === stepId) {
+      rootChildren.push(...children);
+    } else {
+      rootChildren.push(id);
+    }
+  });
+  children.forEach((id) => {
+    nodes[id] = { ...nodes[id], parentId: rootId };
+  });
+  delete nodes[stepId];
+  nodes[rootId] = { ...root, children: rootChildren };
+  return { tree: { ...tree, nodes }, unwrapped: true };
+}
+
+/**
+ * Remove a step. With more than two steps the step (and what is in it) is
+ * deleted. Removing one of the last two steps, or the only step, removes the
+ * last Page Break: the remaining fields go back to root level and the form is
+ * Standard again. The only step keeps its fields.
+ *
+ * @return {{tree: Object, unwrapped: boolean}}
+ */
+export function removeStep(tree, stepId) {
+  const stepIds = getStepIds(tree);
+  if (!stepIds.includes(stepId)) {
+    return { tree, unwrapped: false };
+  }
+  if (stepIds.length === 1) {
+    return unwrapSingleStep(tree);
+  }
+  const next = deleteNode(tree, { nodeId: stepId });
+  return unwrapSingleStep(next);
 }

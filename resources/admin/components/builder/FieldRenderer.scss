@@ -1821,9 +1821,52 @@ textarea.sf-field-renderer__input {
 .sf-field-chrome__inner.subtleforms-field--align-center { text-align: center; }
 .sf-field-chrome__inner.subtleforms-field--align-right { text-align: right; }
 
-.sf-field-chrome__inner.subtleforms-field--no-label .sf-field-renderer__label {
-	opacity: 0.4;
-	text-decoration: line-through;
+// A hidden label (2.3.2) is hidden on the canvas as on the live form; a
+// small badge says so, without taking the label's space.
+.sf-field-renderer__header.is-label-hidden {
+	position: relative;
+	height: 0;
+	margin: 0;
+	overflow: visible;
+
+	> .sf-field-renderer__icon,
+	> .sf-field-renderer__label {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+	}
+}
+
+.sf-field-renderer__label-hidden-badge {
+	position: absolute;
+	top: -18px;
+	left: 0;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 1px 6px;
+	border-radius: 999px;
+	background: var(--sf-gray-100, #f0f0f0);
+	color: var(--sf-gray-600, #50575e);
+	font-size: 11px;
+	line-height: 16px;
+	white-space: nowrap;
+	opacity: 0;
+	transition: opacity var(--sf-duration-fast, 0.1s);
+	pointer-events: none;
+}
+
+.sf-field-chrome:hover .sf-field-renderer__label-hidden-badge,
+.sf-field-chrome.is-selected .sf-field-renderer__label-hidden-badge,
+.sf-field-chrome:focus-within .sf-field-renderer__label-hidden-badge {
+	opacity: 1;
+}
+
+.sf-field-renderer__help-text--above {
+	margin: 0 0 6px;
 }
 
 .subtleforms-builder-canvas__surface.sf-canvas-styled {
@@ -2029,4 +2072,14 @@ textarea.sf-field-renderer__input {
 	p {
 		margin: 0;
 	}
+}
+
+// Custom HTML as visitors see it (2.3.2).
+.sf-field-renderer__html {
+	color: var(--subtleforms-color-text, var(--sf-text));
+	line-height: 1.5;
+
+	> :first-child { margin-top: 0; }
+	> :last-child { margin-bottom: 0; }
+	img { max-width: 100%; height: auto; }
 }

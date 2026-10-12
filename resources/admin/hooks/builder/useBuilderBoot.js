@@ -98,6 +98,21 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
             };
           });
         });
+        // Types hidden from the library (Group, Columns, Dropdown aliases...)
+        // still need their definition, or a form that uses them shows no
+        // settings for them in the inspector (2.3.2).
+        try {
+          const all = await apiGet('/fields');
+          const list = all.ok ? all.body?.data || all.body || {} : {};
+          (Array.isArray(list) ? list : Object.values(list)).forEach((field) => {
+            if (field && field.type && !definitions[field.type]) {
+              definitions[field.type] = field;
+            }
+          });
+        } catch (e) {
+          // The library still works; hidden types just show fewer settings.
+        }
+
         setFieldGroups(groups);
         setFieldDefinitions(definitions);
         setLoadingFields(false);

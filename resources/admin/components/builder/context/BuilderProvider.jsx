@@ -35,6 +35,7 @@ export function BuilderProvider({
 	validationErrorsByFieldKey = {},
 	fieldDefinitions = {},
 	formType = 'regular',
+	fieldDefaults = null,
 	onInsert,
 	onDelete,
 	onUpdate,
@@ -98,8 +99,10 @@ export function BuilderProvider({
 			fieldDefinitions,
 			formType,
 			isReadOnly,
+			// Form-level label visibility and help text placement (2.3.2).
+			fieldDefaults,
 		}),
-		[fieldDefinitions, formType, isReadOnly]
+		[fieldDefinitions, formType, isReadOnly, fieldDefaults]
 	);
 
 	return (

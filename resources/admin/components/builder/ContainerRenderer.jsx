@@ -2,6 +2,9 @@ import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import Icon from '../../ui/Icon';
 import { getIcon } from './utils/iconMap';
+import { useContext } from '@wordpress/element';
+import { ConfigContext } from './context/ConfigContext';
+import { fieldDisplay } from '../../../shared/fieldDisplay';
 import './ContainerRenderer.scss';
 
 /**
@@ -35,6 +38,8 @@ export default function ContainerRenderer({
           ? __('Columns', 'subtleforms')
           : __('Group', 'subtleforms'));
   const gap = parseInt(spacing, 10) || 16;
+  const builderConfig = useContext(ConfigContext);
+  const labelHidden = !isStep && fieldDisplay(node.config || {}, builderConfig?.fieldDefaults || {}).labelHidden;
 
   const { onPointerDown, onMouseDown, onTouchStart, ...handleRest } =
     dragHandleListeners || {};
@@ -97,8 +102,16 @@ export default function ContainerRenderer({
           )}
           <NodeIcon size={18} aria-hidden='true' />
           <div className='sf-container-renderer__header-title'>
-            <strong>{title}</strong>
-            {isStep && node.config?.description && (
+            <strong>
+              {title}
+              {labelHidden && (
+                <span className='sf-container-renderer__hidden-tag'>
+                  <Icon.EyeOff size={12} aria-hidden='true' />
+                  {__('Label hidden', 'subtleforms')}
+                </span>
+              )}
+            </strong>
+            {node.config?.description && (
               <span className='sf-container-renderer__description'>{node.config.description}</span>
             )}
             {isRepeater && (

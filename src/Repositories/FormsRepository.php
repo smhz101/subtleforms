@@ -444,6 +444,9 @@ final class FormsRepository {
 			$schema['metadata']['type'] = 'multi-step';
 		}
 
+		// The type follows the structure (2.3.2), whatever the client sent.
+		list( $schema ) = \SubtleForms\Support\SchemaRepair::syncType( $schema );
+
 		// Appearance values are written into CSS custom properties on the rendered
 		// form, so they are checked here — at the point of storage — rather than
 		// escaped at output. Every save path goes through this method.
@@ -916,6 +919,10 @@ final class FormsRepository {
 	 * @throws \InvalidArgumentException If schema validation fails
 	 */
 	public function saveDraftSchema( int $formId, array $schema ): bool {
+		// The type follows the structure: a Page Break makes a Standard form
+		// Multi-step and removing the last one makes it Standard again (2.3.2).
+		list( $schema ) = \SubtleForms\Support\SchemaRepair::syncType( $schema );
+
 		// Validate schema before saving
 		$validator = new \SubtleForms\Support\SchemaValidator();
 		try {

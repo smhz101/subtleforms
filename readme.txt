@@ -4,7 +4,7 @@ Tags: forms, contact form, form builder, submissions
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.3.1
+Stable tag: 2.3.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -159,6 +159,23 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 7. Conversational form on frontend
 
 == Changelog ==
+
+= 2.3.2 - 2026-10-13 =
+* Fix: Creating a form from some templates opened an empty form, for example Volunteer Signup, Event Registration and Vendor Application in SubtleForms Pro. Those templates used a single checkbox with a list of options, which the server refused, and the refusal was not reported. Such a checkbox is now saved as a Checkboxes (Multiple choice) field, every template creates its full form with its fields, settings, notifications and type, and a form that cannot be created shows the reason and leaves no empty form behind.
+* Fix: The form type follows the form. Adding the first Page Break to a Standard form makes it Multi-step, and removing the last one makes it Standard again with every field kept. The builder badge, the Settings tab, All Forms, the dashboard, the entry details and the live form all show the same type, and a message with Undo tells you when the type changes. Forms saved by older versions are corrected when the plugin updates.
+* New: A Form type setting on the Settings tab. Changing a Standard form to Multi-step puts every field in a first step. Changing a Multi-step form to Standard or Conversational removes the steps and keeps every field in order, after you confirm.
+* Fix: A new conversational form now starts with "Add your first question" instead of a block that could not be edited or removed. Every question, a welcome screen too, can be edited, replaced with another field, moved earlier or later, duplicated and deleted. Clicking a field in the panel fills an empty question, and otherwise adds a new question right after the one you are on. Add question makes an empty question where you are.
+* Fix: The live conversational form asks the same questions in the same order as the builder shows, says "Question 2 of 5", treats a Group or Repeater as one question and checks each question with the same rules and messages as other forms.
+* Fix: The label and help text of a Repeater, Group and Columns can now be edited in their settings. They are saved and show in the builder and on the live form, with the container's own settings such as the Repeater button label and limits.
+* New: Every field has a Field label visibility setting. Visible shows the label above the field. Hidden hides it from view but keeps it for screen readers, so the field still has a name. This replaces the Hide label option of the Style tab, and fields that used it keep their hidden label.
+* New: Every field with help text has a Help text placement setting, below or above the input, on the builder canvas and on the live form.
+* New: Every input field has a Custom validation message, shown when an answer is filled in but not valid, for example a wrong email address, a number out of range or text that does not match the pattern. It replaces the pattern message of text fields. Every input field also has the message for when it is left empty, and the server uses both messages too.
+* New: Field defaults on the Settings tab set the label visibility, help text placement and both messages for every field that does not set its own.
+* Fix: The Admin label of a field is now used everywhere it should be: entries, notification emails ({all_fields}), CSV export, the PDF and data sent to integrations, webhooks and Zapier. Hidden fields and Repeaters have an Admin label too.
+* Fix: Group and Columns fields, which are no longer in the field library, showed no settings in the builder. Their settings are back.
+* Fix: Custom HTML fields show their content on the builder canvas instead of a placeholder.
+* Developer: New helpers SchemaRepair::checkboxListsToMultipleChoice(), SchemaRepair::syncType() and FieldMapper::adminLabel(). FieldMapper::fields() rows carry the admin label as "label" and the public label as "public_label". Form metadata accepts labelVisibility, descriptionPlacement, requiredMessage and validationMessage.
+* Database: When the plugin updates, the type stored with each form is set from its structure (Multi-step when it has a Page Break, Standard when it has none). Conversational forms are not changed. No tables or columns are added.
 
 = 2.3.1 - 2026-10-12 =
 * Fix: Adding a Page Break to a form hid every existing field behind a new empty step. A Page Break now splits the form where it is placed: the fields above it become step 1 and the fields below it the next step. Added at the very top, the existing fields stay in step 1 and the break starts an empty step 2 after them. Undo and Redo reverse the whole change in one step.
@@ -354,6 +371,9 @@ now be reconstructed accurately.
 * Feature: Basic spam protection
 
 == Upgrade Notice ==
+
+= 2.3.2 =
+Every template creates its full form, the form type follows its Page Breaks, a better conversational builder, editable container labels, and label visibility, help text placement, validation messages and admin labels for every field. Stored form types are corrected on update.
 
 = 2.3.1 =
 Fixes Page Break hiding fields, makes Repeaters work for visitors, fixes dragging into containers, nested field settings, the forms Trash and duplication, and adds an entries Trash. Adds trash columns to the forms and entries tables.

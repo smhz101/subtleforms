@@ -27,6 +27,13 @@
 		gap: var(--sf-space-4);
 	}
 
+	&__intro {
+		margin: 0 0 var(--sf-space-4);
+		font-size: var(--sf-text-base);
+		line-height: var(--sf-leading-normal);
+		color: var(--sf-text-muted);
+	}
+
 	&__hint {
 		font-size: var(--sf-text-base);
 		line-height: var(--sf-leading-normal);
@@ -465,4 +472,13 @@
 	font-weight: 600;
 	line-height: 18px;
 	vertical-align: middle;
+}
+
+// Form type selector and field defaults (2.3.2): space between controls.
+.sf-form-type-control {
+	margin-bottom: var(--sf-space-4);
+}
+
+.sf-form-settings .components-panel__body .components-base-control + .components-base-control {
+	margin-top: var(--sf-space-4);
 }

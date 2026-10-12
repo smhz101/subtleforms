@@ -236,7 +236,8 @@
 
 /* Visually hide the label while leaving it for screen readers: the field still
    needs an accessible name even when the design does without a visible one. */
-.subtleforms-field--no-label .subtleforms-field-label {
+.subtleforms-field--no-label > .subtleforms-field-label,
+.subtleforms-field--no-label > legend.subtleforms-field-label {
 	position: absolute;
 	width: 1px;
 	height: 1px;

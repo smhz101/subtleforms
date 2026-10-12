@@ -1,6 +1,5 @@
 import {
   Button,
-  ToggleControl,
   PanelBody,
   __experimentalToggleGroupControl as ToggleGroupControl,
   __experimentalToggleGroupControlOption as ToggleGroupControlOption,
@@ -185,14 +184,11 @@ export default function FieldAppearancePanel( { field, onUpdate, formAppearance,
           </ToggleGroupControl>
         </div>
 
-        <ToggleControl
-          __nextHasNoMarginBottom
-          label={ __( 'Hide label', 'subtleforms' ) }
-          help={ __( 'Screen readers still announce it.', 'subtleforms' ) }
-          checked={ !! appearance.hideLabel }
-          disabled={ isReadOnly }
-          onChange={ ( v ) => setValue( 'hideLabel', v ) }
-        />
+        { /* 2.3.2: hiding the label is the Field label visibility setting
+             on the Settings tab (one setting, also used by the form default). */ }
+        <p className='sf-field-appearance__note'>
+          { __( 'To hide the label, use Field label visibility on the Settings tab.', 'subtleforms' ) }
+        </p>
       </PanelBody>
 
       <PanelBody title={ __( 'Colours', 'subtleforms' ) } initialOpen className='sf-field-appearance__panel'>

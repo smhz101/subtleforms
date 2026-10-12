@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import FieldRenderer from './FieldRenderer';
 import { getIn, setIn, flattenToPathMap } from '../utils/valuePaths';
 import { collectLeafInputPaths } from '../utils/schemaLeaves';
@@ -14,6 +14,9 @@ import { isEmptyValue } from './FormRenderer';
 import { computeLogicState } from '../../shared/conditions';
 import { FormContext } from './fields/FileUpload';
 import { fieldConfig } from '../../shared/fieldConfig';
+import { questionFields } from '../../shared/conversational';
+import { formFieldDefaults } from '../../shared/fieldDisplay';
+import { validateFields } from '../utils/fieldValidation';
 
 const restUrl =
   window.subtleformsFrontend?.restUrl || '/wp-json/subtleforms/v1';
@@ -54,33 +57,10 @@ export default function ConversationalFormRenderer({
 
   const paymentSettings = schema?.metadata?.payment || {};
 
-  // Flatten all fields for rendering
-  const allFields = useMemo(() => {
-    if (!schema?.fields) return [];
-
-    const flatten = (fields) => {
-      let result = [];
-      fields.forEach((field) => {
-        // Skip container types in conversational mode
-        if (field.type !== 'step' && field.type !== 'section') {
-          result.push(field);
-        }
-        if (field.children && Array.isArray(field.children)) {
-          result = result.concat(flatten(field.children));
-        }
-        if (field.columns && Array.isArray(field.columns)) {
-          field.columns.forEach((col) => {
-            if (Array.isArray(col)) {
-              result = result.concat(flatten(col));
-            }
-          });
-        }
-      });
-      return result;
-    };
-
-    return flatten(schema.fields);
-  }, [schema]);
+  // The questions: the same list the builder shows (2.3.2). A Group or
+  // Repeater is one question with its fields inside it.
+  const allFields = useMemo(() => questionFields(schema?.fields || []), [schema]);
+  const fieldDefaults = useMemo(() => formFieldDefaults(schema?.metadata), [schema?.metadata]);
 
   // Generate form type-aware CSS classes (early, before any returns)
   // Conversational forms are rendered by this component rather than by
@@ -114,32 +94,22 @@ export default function ConversationalFormRenderer({
   const progressPercent =
     totalFields > 0 ? ((currentIndex + 1) / totalFields) * 100 : 0;
 
-  // Validate current field
+  // Validate the current question with the same rules as the other form
+  // types (2.3.2): its own required and validation messages, and every field
+  // inside a Group or Repeater question.
   const validateCurrentField = useCallback(() => {
     if (!currentField) return true;
-
+    const errors = validateFields([currentField], values, hiddenFields, fieldDefaults);
     const fieldKey = currentField.config?.key || currentField.key;
-    const value = getIn(values, fieldKey);
-    const isRequired = fieldConfig(currentField).required === true;
-
-    // Clear previous error
     setValidationErrors((prev) => {
       const next = { ...prev };
-      delete next[fieldKey];
-      return next;
+      Object.keys(next).forEach((k) => {
+        if (k === fieldKey || (fieldKey && k.startsWith(`${fieldKey}.`))) delete next[k];
+      });
+      return { ...next, ...errors };
     });
-
-    // Required validation
-    if (isRequired && isEmptyValue(value)) {
-      setValidationErrors((prev) => ({
-        ...prev,
-        [fieldKey]: __('This field is required.', 'subtleforms'),
-      }));
-      return false;
-    }
-
-    return true;
-  }, [currentField, values]);
+    return Object.keys(errors).length === 0;
+  }, [currentField, values, hiddenFields, fieldDefaults]);
 
   // Handle field change
   const handleChange = useCallback((path, value) => {
@@ -617,15 +587,20 @@ export default function ConversationalFormRenderer({
 
       {/* Question Card */}
       <div className='subtleforms-question-card'>
-        <div className='subtleforms-question-number'>
-          {currentIndex + 1} / {totalFields}
+        <div className='subtleforms-question-number' aria-live='polite'>
+          {sprintf(
+            /* translators: 1: question number, 2: number of questions */
+            __('Question %1$d of %2$d', 'subtleforms'),
+            currentIndex + 1,
+            totalFields
+          )}
         </div>
 
         {submitError && <div className='subtleforms-error'>{submitError}</div>}
 
         <div className='subtleforms-field-wrapper'>
           {currentField && (
-            <FormContext.Provider value={{ formId, preview }}>
+            <FormContext.Provider value={{ formId, preview, fieldDefaults }}>
               <FieldRenderer
                 field={currentField}
                 fieldPath={fieldKey}

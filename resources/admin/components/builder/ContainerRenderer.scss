@@ -121,3 +121,18 @@
 		background: var(--sf-gray-25, #f9fafb);
 	}
 }
+
+// "Label hidden" next to a container title (2.3.2).
+.sf-container-renderer__hidden-tag {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	margin-left: 8px;
+	padding: 1px 6px;
+	border-radius: 999px;
+	background: var(--sf-gray-100, #f0f0f0);
+	color: var(--sf-gray-600, #50575e);
+	font-size: 11px;
+	font-weight: 400;
+	vertical-align: middle;
+}

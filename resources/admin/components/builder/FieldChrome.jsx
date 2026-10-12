@@ -96,6 +96,9 @@ const FieldChrome = memo(function FieldChrome({
         onWidthChange={toolbarActions?.onWidthChange}
         moveTargets={toolbarActions?.moveTargets}
         onMoveTo={toolbarActions?.onMoveTo}
+        onReplace={toolbarActions?.onReplace}
+        moveUpLabel={toolbarActions?.moveUpLabel}
+        moveDownLabel={toolbarActions?.moveDownLabel}
       />
     </div>
   );

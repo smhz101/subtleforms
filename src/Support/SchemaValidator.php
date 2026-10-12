@@ -52,6 +52,7 @@ final class SchemaValidator {
 		'textarea',
 		'number',
 		'phone',
+		'tel',
 		'url',
 		'password',
 		'checkbox',

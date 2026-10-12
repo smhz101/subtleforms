@@ -45,6 +45,12 @@ import BuilderModalsController from '../components/builder/layout/BuilderModalsC
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
 import { getFormTypeBadgeConfig } from '../utils/formMeta';
 import { applyPaymentDefaults } from '../utils/paymentDefaults';
+import {
+  structuralType,
+  withStructuralType,
+  TYPE_STANDARD,
+  TYPE_MULTI_STEP,
+} from '../../shared/formType';
 
 function FormBuilderInner({
   formId,
@@ -366,7 +372,11 @@ function FormBuilderInner({
       // new object that describes the same form, and dispatching them would
       // mark the builder dirty and autosave a version nobody asked for. Only a
       // real difference counts as an edit.
-      if (schemaEquals(nextSchema, draftSchema)) {
+      // The type follows the structure (2.3.2): the first Page Break makes a
+      // Standard form Multi-step, removing the last one makes it Standard.
+      const typedSchema = withStructuralType(nextSchema);
+
+      if (schemaEquals(typedSchema, draftSchema)) {
         return;
       }
 
@@ -374,10 +384,43 @@ function FormBuilderInner({
         type: BUILDER_ACTIONS.EDIT_SCHEMA,
         // A form that just got its first priced field picks up the site's
         // default checkout (e.g. WooCommerce), when an add-on provides one.
-        payload: { schema: applyPaymentDefaults(draftSchema, nextSchema) },
+        payload: { schema: applyPaymentDefaults(draftSchema, typedSchema) },
       });
+
+      const before = structuralType(draftSchema || {});
+      const after = typedSchema?.metadata?.type;
+      if (before === TYPE_STANDARD && after === TYPE_MULTI_STEP) {
+        createSuccessNotice(
+          __('This form is now Multi-step: it has a Page Break.', 'subtleforms'),
+          {
+            type: 'snackbar',
+            id: 'subtleforms-form-type',
+            actions: [
+              {
+                label: __('Undo', 'subtleforms'),
+                onClick: () => dispatch({ type: BUILDER_ACTIONS.UNDO_SCHEMA }),
+              },
+            ],
+          }
+        );
+      } else if (before === TYPE_MULTI_STEP && after === TYPE_STANDARD) {
+        createSuccessNotice(
+          __('This form is now Standard: it has no Page Breaks left. Every field is kept.', 'subtleforms'),
+          {
+            type: 'snackbar',
+            id: 'subtleforms-form-type',
+            explicitDismiss: true,
+            actions: [
+              {
+                label: __('Undo', 'subtleforms'),
+                onClick: () => dispatch({ type: BUILDER_ACTIONS.UNDO_SCHEMA }),
+              },
+            ],
+          }
+        );
+      }
     },
-    [dispatch, isHydrating, draftSchema]
+    [dispatch, isHydrating, draftSchema, createSuccessNotice]
   );
 
   /**
@@ -614,7 +657,9 @@ function FormBuilderInner({
   // Get form type badge config — single source of truth (shared selector).
   // The builder shows the draft type (what you're editing), which matches the
   // listings (they prefer the draft type when a draft exists).
-  const rawFormType = draftSchema?.metadata?.type || 'regular';
+  // A form saved before 2.3.2 may still say Standard while it has Page
+  // Breaks: the structure decides.
+  const rawFormType = structuralType(draftSchema || {});
   const formTypeBadge = getFormTypeBadgeConfig(rawFormType);
   const FormTypeIcon = formTypeBadge.icon;
 

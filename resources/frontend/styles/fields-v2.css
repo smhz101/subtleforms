@@ -14,6 +14,38 @@
 	color: var(--subtleforms-color-text-light, #6b7280);
 }
 
+/* Help text above the input (2.3.2): sits between the label and the input. */
+.subtleforms-field-help--above {
+	margin: 0 0 6px;
+}
+
+/* Container label and help text (Repeater, Group, Columns; 2.3.2): one
+   block, so the container's field gap comes once, after it. */
+.subtleforms-container-header {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.subtleforms-container-header > .subtleforms-field-label,
+.subtleforms-container-header > .subtleforms-container-label,
+.subtleforms-container-header > .subtleforms-container-help {
+	margin: 0;
+}
+
+/* A hidden container label is hidden visually only. */
+.subtleforms-field--no-label > .subtleforms-container-header > .subtleforms-field-label {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
 /* ── Read-only ─────────────────────────────────────────────────────────── */
 .subtleforms-field--readonly .subtleforms-input,
 .subtleforms-field--readonly .subtleforms-textarea {

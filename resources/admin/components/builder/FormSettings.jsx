@@ -6,8 +6,22 @@ import {
   PanelBody,
   RadioControl,
   Notice,
+  __experimentalToggleGroupControl as ToggleGroupControl,
+  __experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { useState } from '@wordpress/element';
+import { __, _n, sprintf } from '@wordpress/i18n';
+import ConfirmModal from '../../modals/ConfirmModal';
+import {
+  structuralType,
+  hasSteps,
+  wrapFieldsInStep,
+  flattenSteps,
+  TYPE_STANDARD,
+  TYPE_MULTI_STEP,
+  TYPE_CONVERSATIONAL,
+} from '../../../shared/formType';
+import { createNodeId, createFieldKey } from './utils/idGenerator';
 import ActionsPanel from './ActionsPanel';
 import { ConfirmationPanel, AvailabilityPanel } from './FormBehaviorPanels';
 import CheckoutPanel from './CheckoutPanel';
@@ -26,7 +40,8 @@ export default function FormSettings({
   isReadOnly = false 
 }) {
   const metadata = schema?.metadata || {};
-  const formType = metadata.type || 'regular';
+  // The structure decides between Standard and Multi-step (2.3.2).
+  const formType = structuralType(schema || {}) || 'regular';
   const isPaymentForm = formType === 'payment';
   const isConversationalForm = formType === 'conversational';
   // Both spellings reach this component: stored schemas may hold either, and
@@ -191,6 +206,7 @@ export default function FormSettings({
           <PanelBody
             title={__('General', 'subtleforms')}
             initialOpen={true}>
+            <FormTypeControl schema={schema} onChange={onChange} isReadOnly={isReadOnly} />
             <TextControl
                 label={__('Form name', 'subtleforms')}
                 value={metadata.title || ''}
@@ -209,6 +225,56 @@ export default function FormSettings({
                   'subtleforms'
                 )}
               />
+          </PanelBody>
+
+          <PanelBody
+            title={__('Field defaults', 'subtleforms')}
+            initialOpen={false}>
+            <p className='sf-form-settings__intro'>
+              {__('Used by every field that does not set its own. Each field can change these in its settings.', 'subtleforms')}
+            </p>
+            <SelectControl
+              __nextHasNoMarginBottom
+              __next40pxDefaultSize
+              label={__('Field label visibility', 'subtleforms')}
+              value={metadata.labelVisibility === 'hidden' ? 'hidden' : 'visible'}
+              options={[
+                { value: 'visible', label: __('Visible (top aligned)', 'subtleforms') },
+                { value: 'hidden', label: __('Hidden (kept for screen readers)', 'subtleforms') },
+              ]}
+              disabled={isReadOnly}
+              onChange={(v) => handleMetadataChange('labelVisibility', v)}
+            />
+            <SelectControl
+              __nextHasNoMarginBottom
+              __next40pxDefaultSize
+              label={__('Help text placement', 'subtleforms')}
+              value={metadata.descriptionPlacement === 'above' ? 'above' : 'below'}
+              options={[
+                { value: 'below', label: __('Below input', 'subtleforms') },
+                { value: 'above', label: __('Above input', 'subtleforms') },
+              ]}
+              disabled={isReadOnly}
+              onChange={(v) => handleMetadataChange('descriptionPlacement', v)}
+            />
+            <TextControl
+              __nextHasNoMarginBottom
+              __next40pxDefaultSize
+              label={__('Message when a required field is left empty', 'subtleforms')}
+              placeholder={__('This field is required.', 'subtleforms')}
+              value={metadata.requiredMessage || ''}
+              disabled={isReadOnly}
+              onChange={(v) => handleMetadataChange('requiredMessage', v)}
+            />
+            <TextControl
+              __nextHasNoMarginBottom
+              __next40pxDefaultSize
+              label={__('Message when an answer is not valid', 'subtleforms')}
+              help={__('Leave empty for the standard message of each field type.', 'subtleforms')}
+              value={metadata.validationMessage || ''}
+              disabled={isReadOnly}
+              onChange={(v) => handleMetadataChange('validationMessage', v)}
+            />
           </PanelBody>
 
           <ConfirmationPanel
@@ -449,6 +515,127 @@ export default function FormSettings({
 
         </Panel>
       </div>
+    </div>
+  );
+}
+
+
+/** Every key used in a field tree. */
+function collectKeys(fields, keys = new Set()) {
+  (Array.isArray(fields) ? fields : []).forEach((f) => {
+    if (!f || typeof f !== 'object') return;
+    if (f.key) keys.add(f.key);
+    collectKeys(f.children, keys);
+    collectKeys(f.fields, keys);
+    (Array.isArray(f.columns) ? f.columns : []).forEach((col) => collectKeys(col, keys));
+  });
+  return keys;
+}
+
+/** Number of fields inside the steps of a field list. */
+function countStepFields(fields) {
+  return flattenSteps(fields).length;
+}
+
+/**
+ * Form type selector (2.3.2).
+ *
+ * Standard to Multi-step puts every field in a first step. Multi-step to
+ * Standard (or Conversational) removes the steps and keeps every field in
+ * order, after a confirmation. Every change is one undoable edit.
+ */
+export function FormTypeControl({ schema, onChange, isReadOnly = false }) {
+  const [pending, setPending] = useState(null);
+  // Remounts the selector after a cancelled change so it shows the real type.
+  const [resetCount, setResetCount] = useState(0);
+  const type = structuralType(schema || {});
+  const fields = Array.isArray(schema?.fields) ? schema.fields : [];
+
+  if (![TYPE_STANDARD, TYPE_MULTI_STEP, TYPE_CONVERSATIONAL].includes(type)) {
+    return null;
+  }
+
+  const apply = (next) => {
+    let nextFields = fields;
+    if (next === TYPE_MULTI_STEP) {
+      nextFields = wrapFieldsInStep(fields, {
+        id: createNodeId(),
+        key: createFieldKey('step', collectKeys(fields)),
+        kind: 'structure',
+        title: __('Step 1', 'subtleforms'),
+        description: '',
+      });
+    } else if (hasSteps(fields)) {
+      nextFields = flattenSteps(fields);
+    }
+    onChange({
+      ...schema,
+      fields: nextFields,
+      metadata: { ...(schema?.metadata || {}), type: next },
+    });
+  };
+
+  const request = (next) => {
+    if (isReadOnly || next === type) return;
+    if (type === TYPE_MULTI_STEP && hasSteps(fields)) {
+      setPending(next);
+      return;
+    }
+    apply(next);
+  };
+
+  const stepCount = fields.filter((f) => f && (f.type === 'step' || f.type === 'form_step')).length;
+  const fieldCount = countStepFields(fields);
+  const help = {
+    [TYPE_STANDARD]: __('All fields on one page. Adding a Page Break makes the form Multi-step.', 'subtleforms'),
+    [TYPE_MULTI_STEP]: __('Fields are split into steps by Page Breaks. Removing the last Page Break makes the form Standard.', 'subtleforms'),
+    [TYPE_CONVERSATIONAL]: __('One question at a time, full screen.', 'subtleforms'),
+  }[type];
+
+  return (
+    <div className='sf-form-type-control'>
+      <ToggleGroupControl
+        key={`${type}-${resetCount}`}
+        __nextHasNoMarginBottom
+        __next40pxDefaultSize
+        isBlock
+        label={__('Form type', 'subtleforms')}
+        help={help}
+        value={type}
+        onChange={(v) => v && request(v)}>
+        <ToggleGroupControlOption value={TYPE_STANDARD} label={__('Standard', 'subtleforms')} disabled={isReadOnly} />
+        <ToggleGroupControlOption value={TYPE_MULTI_STEP} label={__('Multi-step', 'subtleforms')} disabled={isReadOnly} />
+        <ToggleGroupControlOption value={TYPE_CONVERSATIONAL} label={__('Conversational', 'subtleforms')} disabled={isReadOnly} />
+      </ToggleGroupControl>
+      <ConfirmModal
+        isOpen={!!pending}
+        onClose={() => {
+          setPending(null);
+          setResetCount((c) => c + 1);
+        }}
+        title={
+          pending === TYPE_CONVERSATIONAL
+            ? __('Change to Conversational?', 'subtleforms')
+            : __('Change to Standard?', 'subtleforms')
+        }
+        message={sprintf(
+          /* translators: 1: number of steps, 2: number of fields */
+          _n(
+            'The %1$d step is removed. All %2$d fields stay, in the same order. You can undo this.',
+            'The %1$d steps are removed. All %2$d fields stay, in the same order. You can undo this.',
+            stepCount,
+            'subtleforms'
+          ),
+          stepCount,
+          fieldCount
+        )}
+        confirmText={__('Remove steps', 'subtleforms')}
+        onConfirm={() => {
+          const next = pending;
+          setPending(null);
+          apply(next);
+        }}
+      />
     </div>
   );
 }

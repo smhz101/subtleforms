@@ -125,6 +125,7 @@ import {
   Pilcrow,
   Heading,
   TextCursorInput,
+  Replace as ReplaceIcon,
 } from 'lucide-react';
 
 /**
@@ -149,6 +150,7 @@ const Icon = {
   Edit2,
   Edit3,
   Move,
+  Replace: ReplaceIcon,
   Undo: Undo2,
   Redo: Redo2,
 

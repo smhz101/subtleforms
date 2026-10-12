@@ -76,6 +76,26 @@ final class FieldMapper {
 	}
 
 	/**
+	 * The name of a field in entries, emails, exports and integrations: its
+	 * Admin label when set, else its label, else its key (2.3.2).
+	 *
+	 * @param array  $node Field node (flat or wrapped in `config`).
+	 * @param string $key  Field key.
+	 * @return string
+	 */
+	public static function adminLabel( array $node, string $key = '' ): string {
+		$admin = $node['adminLabel'] ?? ( $node['config']['adminLabel'] ?? '' );
+		if ( is_string( $admin ) && '' !== trim( $admin ) ) {
+			return trim( $admin );
+		}
+		$label = $node['label'] ?? ( $node['config']['label'] ?? '' );
+		if ( is_string( $label ) && '' !== trim( $label ) ) {
+			return $label;
+		}
+		return '' !== $key ? $key : (string) ( $node['key'] ?? ( $node['config']['key'] ?? '' ) );
+	}
+
+	/**
 	 * Recursive walker for fields().
 	 *
 	 * @param array $list Field list.
@@ -95,10 +115,11 @@ final class FieldMapper {
 			if ( Repeater::TYPE === $type ) {
 				if ( '' !== $key ) {
 					$out[] = array(
-						'key'   => $key,
-						'label' => (string) ( $node['label'] ?? ( $node['config']['label'] ?? $key ) ),
-						'type'  => $type,
-						'field' => $node,
+						'key'          => $key,
+						'label'        => self::adminLabel( $node, $key ),
+						'public_label' => (string) ( $node['label'] ?? ( $node['config']['label'] ?? $key ) ),
+						'type'         => $type,
+						'field'        => $node,
 					);
 				}
 				continue;
@@ -107,10 +128,13 @@ final class FieldMapper {
 			$isLayout = in_array( $type, self::LAYOUT_TYPES, true ) || '_container' === substr( $type, -10 );
 			if ( '' !== $key && '' !== $type && ! $isLayout ) {
 				$out[] = array(
-					'key'   => $key,
-					'label' => (string) ( $node['label'] ?? ( $node['config']['label'] ?? $key ) ),
-					'type'  => $type,
-					'field' => $node,
+					'key'          => $key,
+					// Entries, emails, exports and integrations use the admin
+					// label when one is set (2.3.2).
+					'label'        => self::adminLabel( $node, $key ),
+					'public_label' => (string) ( $node['label'] ?? ( $node['config']['label'] ?? $key ) ),
+					'type'         => $type,
+					'field'        => $node,
 				);
 			}
 

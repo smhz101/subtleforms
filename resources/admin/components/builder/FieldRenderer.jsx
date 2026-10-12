@@ -1,4 +1,4 @@
-import { memo, useState, useRef, useCallback, useEffect } from '@wordpress/element';
+import { memo, useState, useRef, useCallback, useEffect, useContext } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { getFieldIcon } from '../../utils/iconRegistry';
 import Icon from '../../ui/Icon';
@@ -6,6 +6,8 @@ import NameFieldRenderer from './NameFieldRenderer';
 import AddressFieldRenderer from './AddressFieldRenderer';
 import { ProductPreview, ChoicePreview, SummaryPreview, CardPreview } from './PaymentPreviews';
 import { getCanvasPreview } from '../../../shared/extend';
+import { fieldDisplay } from '../../../shared/fieldDisplay';
+import { ConfigContext } from './context/ConfigContext';
 import './FieldRenderer.scss';
 
 // Types that do not accept user input — required indicator suppressed
@@ -121,6 +123,11 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
     setTouched(true);
   }, [previewMode]);
 
+  // Label visibility and help text placement, with the form's defaults: the
+  // canvas shows them as the live form does (2.3.2).
+  const builderConfig = useContext(ConfigContext);
+  const display = fieldDisplay(field, builderConfig?.fieldDefaults || {});
+
   // ── Early return AFTER all hooks ────────────────────────────────────────────
   // Guard against null/undefined field or missing type — do NOT crash builder
   if (!field || !field.type) {
@@ -170,7 +177,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           onClick={(e) => e.stopPropagation()}
         />
       ) : (
-        <div className='sf-field-renderer__header'>
+        <div className={`sf-field-renderer__header${display.labelHidden && !NON_INPUT_TYPES.has(type) ? ' is-label-hidden' : ''}`}>
           <span className='sf-field-renderer__icon'>
             <FieldIcon size={14} />
           </span>
@@ -183,7 +190,18 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
               <span className='sf-field-renderer__required-mark'>*</span>
             )}
           </label>
+          {display.labelHidden && !NON_INPUT_TYPES.has(type) && (
+            <span className='sf-field-renderer__label-hidden-badge'>
+              <Icon.EyeOff size={12} aria-hidden='true' />
+              {__('Label hidden', 'subtleforms')}
+            </span>
+          )}
         </div>
+      )}
+
+      {/* Help text above the input (2.3.2) */}
+      {field.description && !NON_INPUT_TYPES.has(type) && display.descriptionAbove && (
+        <p className='sf-field-renderer__help-text sf-field-renderer__help-text--above'>{field.description}</p>
       )}
 
       {/* Render appropriate input based on type */}
@@ -475,10 +493,19 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       )}
 
       {type === 'html' && (
-        <div className='sf-field-renderer__warning-box'>
-          <Icon.Code size={14} />
-          {__('HTML Content Block', 'subtleforms')}
-        </div>
+        // The content as visitors see it (2.3.2), not a locked-looking
+        // placeholder. Same trust level as the Notice field above: authored by
+        // the admin and sanitized on save.
+        hasText(field.content) || /<(img|hr|iframe|video)\b/i.test(field.content || '') ? (
+          <div
+            className='sf-field-renderer__html'
+            dangerouslySetInnerHTML={{ __html: field.content }}
+          />
+        ) : (
+          <p className='sf-field-renderer__placeholder-note'>
+            {__('Add HTML content in the field settings.', 'subtleforms')}
+          </p>
+        )
       )}
 
       {type === 'image_upload' && (
@@ -808,7 +835,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       )}
 
       {/* ── Help text — shown for input fields only ─────────────────────────── */}
-      {field.description && !NON_INPUT_TYPES.has(type) && (
+      {field.description && !NON_INPUT_TYPES.has(type) && !display.descriptionAbove && (
         <p className='sf-field-renderer__help-text'>{field.description}</p>
       )}
 

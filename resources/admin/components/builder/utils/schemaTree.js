@@ -124,6 +124,23 @@ export function normalizeSchema(schema) {
       conversions.push({ key: config.key, label: config.label || config.key, from: 'checkbox', to: 'multiple_choice' });
     }
 
+    // 2.3.2: one setting for each of these. The Style tab "Hide label"
+    // becomes Field label visibility, and the text pattern message becomes
+    // the Custom validation message every field has.
+    if (config.appearance && config.appearance.hideLabel) {
+      if (!config.labelVisibility) {
+        config.labelVisibility = 'hidden';
+      }
+      const { hideLabel: _drop, ...restAppearance } = config.appearance; // eslint-disable-line no-unused-vars
+      config.appearance = restAppearance;
+    }
+    if (config.patternMessage && !config.validationMessage) {
+      config.validationMessage = config.patternMessage;
+    }
+    if (config.patternMessage !== undefined) {
+      delete config.patternMessage;
+    }
+
     // Migration guard: composite fields are always leaf nodes.
     // Discard any children that may have been saved when these types were
     // erroneously treated as group containers.

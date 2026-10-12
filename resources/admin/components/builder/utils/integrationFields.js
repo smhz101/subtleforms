@@ -6,6 +6,7 @@
  * first and last name parts as `key.first_name` / `key.last_name`.
  */
 
+import { adminLabel } from '../../../../shared/fieldDisplay';
 import { __, sprintf } from '@wordpress/i18n';
 
 const LAYOUT_TYPES = new Set([
@@ -50,7 +51,8 @@ export function flattenFields(fields) {
       const type = node.type || '';
       const key = node.key || node.config?.key || node.name || '';
       if (key && type && !isLayout(type)) {
-        out.push({ key, label: node.label || node.config?.label || key, type, field: node });
+        // The admin label names the field in integrations and merge tags (2.3.2).
+        out.push({ key, label: adminLabel(node) || key, type, field: node });
       }
       if (Array.isArray(node.fields)) walk(node.fields);
       if (Array.isArray(node.children)) walk(node.children);

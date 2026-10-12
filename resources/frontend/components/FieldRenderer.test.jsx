@@ -168,3 +168,73 @@ describe('2.2.1 field fixes', () => {
     unmount();
   });
 });
+
+describe('2.3.2: label visibility, help text placement and container labels', () => {
+  const { FormContext } = require('./fields/FileUpload');
+
+  function renderWith(field, fieldDefaults) {
+    const container = document.createElement('div');
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    act(() => {
+      root.render(
+        <FormContext.Provider value={{ formId: 1, preview: false, fieldDefaults }}>
+          <FieldRenderer field={field} values={{}} onChange={() => {}} errors={{}} />
+        </FormContext.Provider>
+      );
+    });
+    return { container, unmount: () => { act(() => root.unmount()); container.remove(); } };
+  }
+
+  test('a hidden label stays in the page and still names the input', () => {
+    const { container, unmount } = renderWith({ key: 'name', type: 'text', label: 'Name', labelVisibility: 'hidden' });
+    const wrapper = container.querySelector('.subtleforms-field');
+    expect(wrapper.className).toContain('subtleforms-field--no-label');
+    const label = container.querySelector('label.subtleforms-field-label');
+    expect(label.textContent).toBe('Name');
+    expect(label.getAttribute('for')).toBe(container.querySelector('input').id);
+    unmount();
+  });
+
+  test('help text above the input, and the form default applies', () => {
+    const { container, unmount } = renderWith(
+      { key: 'e', type: 'email', label: 'Email', description: 'We reply here' },
+      { labelVisibility: 'visible', descriptionPlacement: 'above' }
+    );
+    const help = container.querySelector('.subtleforms-field-help');
+    const input = container.querySelector('input');
+    expect(help.textContent).toBe('We reply here');
+    expect(help.compareDocumentPosition(input) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(input.getAttribute('aria-describedby')).toContain(help.id);
+    unmount();
+  });
+
+  test('a field setting wins over the form default', () => {
+    const { container, unmount } = renderWith(
+      { key: 'a', type: 'text', label: 'A', labelVisibility: 'visible', descriptionPlacement: 'below', description: 'Help' },
+      { labelVisibility: 'hidden', descriptionPlacement: 'above' }
+    );
+    expect(container.querySelector('.subtleforms-field').className).not.toContain('subtleforms-field--no-label');
+    const help = container.querySelector('.subtleforms-field-help');
+    expect(container.querySelector('input').compareDocumentPosition(help) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    unmount();
+  });
+
+  test('Group and Columns show their label and help text', () => {
+    const group = renderWith({
+      key: 'g', type: 'group_container', label: 'Where you live', description: 'Your home city.',
+      children: [{ key: 'city', type: 'text', label: 'City' }],
+    });
+    expect(group.container.querySelector('.subtleforms-container-label').textContent).toBe('Where you live');
+    expect(group.container.querySelector('.subtleforms-container-help').textContent).toBe('Your home city.');
+    group.unmount();
+
+    const cols = renderWith({
+      key: 'c', type: 'two_column_container', label: 'Your name', description: 'As on your passport.',
+      columns: [[{ key: 'first', type: 'text', label: 'First' }], [{ key: 'last', type: 'text', label: 'Last' }]],
+    });
+    expect(cols.container.querySelector('.subtleforms-container-label').textContent).toBe('Your name');
+    expect(cols.container.querySelectorAll('input')).toHaveLength(2);
+    cols.unmount();
+  });
+});

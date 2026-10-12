@@ -23,6 +23,9 @@ export default function FieldToolbar({
   onWidthChange,
   moveTargets = [],
   onMoveTo,
+  onReplace,
+  moveUpLabel,
+  moveDownLabel,
 }) {
   const [widthOpen, setWidthOpen] = useState(false);
   // `label` is the compact glyph on the button; `name` is what screen readers
@@ -44,7 +47,8 @@ export default function FieldToolbar({
 
   const createHandler = (callback) => (event) => {
     stop(event);
-    callback?.();
+    // The element is passed on so an action can anchor a popover to it.
+    callback?.(event?.currentTarget);
   };
 
   const renderButton = (
@@ -84,7 +88,8 @@ export default function FieldToolbar({
         'sf-field-toolbar--visible': visible,
         'sf-field-toolbar--hidden': !visible,
       })}>
-      {/* Drag Handle */}
+      {/* Drag Handle (not in the one-question-at-a-time canvas) */}
+      {(dragHandleRef || dragHandleListeners) && (<>
       <button
         type='button'
         ref={dragHandleRef}
@@ -112,16 +117,17 @@ export default function FieldToolbar({
       </button>
 
       <div className='sf-field-toolbar__divider' />
+      </>)}
 
       {renderButton(
         'arrow-up-alt2',
-        __('Move up', 'subtleforms'),
+        moveUpLabel || __('Move up', 'subtleforms'),
         canMoveUp ? onMoveUp : null,
         !canMoveUp
       )}
       {renderButton(
         'arrow-down-alt2',
-        __('Move down', 'subtleforms'),
+        moveDownLabel || __('Move down', 'subtleforms'),
         canMoveDown ? onMoveDown : null,
         !canMoveDown
       )}
@@ -205,6 +211,13 @@ export default function FieldToolbar({
               </div>
             )}
           </div>
+        </>
+      )}
+
+      {onReplace && (
+        <>
+          <div className='sf-field-toolbar__divider' />
+          {renderButton('replace', __('Replace with another field', 'subtleforms'), onReplace, false)}
         </>
       )}
 

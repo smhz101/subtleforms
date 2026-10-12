@@ -9,6 +9,16 @@ namespace SubtleForms\Engine;
 final class FieldValidator {
 
 	/**
+	 * Form-level default messages for the current validate() call.
+	 *
+	 * @var array{requiredMessage: string, validationMessage: string}
+	 */
+	private $defaultMessages = array(
+		'requiredMessage'   => '',
+		'validationMessage' => '',
+	);
+
+	/**
 	 * Field types that are structural or system-level and cannot be marked as required.
 	 * These types do not accept or submit user input.
 	 */
@@ -54,6 +64,13 @@ final class FieldValidator {
 
 		// Flatten fields map (needed for both required check and type validation)
 		$fields = $this->flattenFields( $schema['fields'] ?? array() );
+
+		// Form-level default messages (2.3.2): used when a field has none.
+		$metadata             = isset( $schema['metadata'] ) && is_array( $schema['metadata'] ) ? $schema['metadata'] : array();
+		$this->defaultMessages = array(
+			'requiredMessage'   => isset( $metadata['requiredMessage'] ) && is_string( $metadata['requiredMessage'] ) ? trim( $metadata['requiredMessage'] ) : '',
+			'validationMessage' => isset( $metadata['validationMessage'] ) && is_string( $metadata['validationMessage'] ) ? trim( $metadata['validationMessage'] ) : '',
+		);
 
 		// Validate required fields
 		foreach ( $requiredFields as $fieldKey ) {
@@ -121,7 +138,9 @@ final class FieldValidator {
 
 			$typeError = $this->validateFieldType( $field, $value );
 			if ( $typeError ) {
-				$errors[ $key ] = $typeError;
+				// The field's Custom validation message replaces the standard
+				// format, range and pattern messages (2.3.2).
+				$errors[ $key ] = $this->validationMessage( $field ) ?? $typeError;
 			}
 		}
 
@@ -443,6 +462,9 @@ final class FieldValidator {
 		if ( is_string( $custom ) && trim( $custom ) !== '' ) {
 			return trim( $custom );
 		}
+		if ( '' !== $this->defaultMessages['requiredMessage'] ) {
+			return $this->defaultMessages['requiredMessage'];
+		}
 		$label = $this->attr( $field, 'label' );
 		if ( is_string( $label ) && trim( $label ) !== '' ) {
 			/* translators: %s: field label */
@@ -450,6 +472,23 @@ final class FieldValidator {
 		}
 		/* translators: %s: field key */
 		return sprintf( __( 'Field "%s" is required.', 'subtleforms' ), $key );
+	}
+
+	/**
+	 * The field's Custom validation message, else the form's (2.3.2).
+	 *
+	 * @param array $field Field.
+	 * @return string|null Null when neither is set.
+	 */
+	private function validationMessage( array $field ): ?string {
+		$custom = $this->attr( $field, 'validationMessage' );
+		if ( is_string( $custom ) && trim( $custom ) !== '' ) {
+			return wp_strip_all_tags( trim( $custom ) );
+		}
+		if ( '' !== $this->defaultMessages['validationMessage'] ) {
+			return wp_strip_all_tags( $this->defaultMessages['validationMessage'] );
+		}
+		return null;
 	}
 
 	/**

@@ -12,6 +12,17 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase {
 	/** @var int[] */
 	protected $formIds = array();
 
+	/**
+	 * Every test starts with fresh rate limits: the suite makes more REST
+	 * calls in a minute than one visitor or admin could (2.3.2).
+	 */
+	protected function setUp(): void {
+		parent::setUp();
+		global $wpdb;
+		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '%transient%subtleforms_rl_%'" );
+		wp_cache_flush();
+	}
+
 	protected function tearDown(): void {
 		global $wpdb;
 		foreach ( $this->formIds as $id ) {

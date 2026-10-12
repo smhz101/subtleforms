@@ -421,6 +421,11 @@ class Schemas {
 				// 2.3: templates such as Newsletter hide the form title.
 				'_showTitle'       => 'optional|bool',
 				'_showDescription' => 'optional|bool',
+				// 2.3.2: defaults for fields that do not set their own.
+				'labelVisibility'      => 'optional|in:visible,hidden',
+				'descriptionPlacement' => 'optional|in:below,above',
+				'requiredMessage'      => 'optional|string|max:500',
+				'validationMessage'    => 'optional|string|max:500',
 			),
 
 			// FormConfirmation — what visitors see after submitting (2.0).
