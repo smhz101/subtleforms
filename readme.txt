@@ -163,6 +163,8 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 = 2.3.3 - 2026-10-14 =
 * Fix: A drawn signature shows as the signature image in the entry details and in a Repeater table instead of a long line of code. HTML notification emails show the signature as an embedded image that mail apps display, plain text emails say "Signed", and CSV exports write "Signed" instead of the image code. The PDF already showed the image and is unchanged.
 * Fix: One submit stores one entry. Pressing Enter on the focused Submit button of a conversational form, or double clicking Submit, could send the form twice and store the entry twice.
+* Fix: The entries list no longer shows an entry twice or puts back a change you just made, such as a star or a move to the Trash, when a background refresh or an earlier request finishes late.
+* Fix: With no AI provider saved yet, the AI settings show the OpenAI help and model choices that match the OpenAI provider shown in the menu, not the custom endpoint help.
 * Fix: Conversational forms submit again. The live form sent its answers to a wrong address and nothing was saved.
 * Fix: Form shadows are removed on the live form, the preview and the builder canvas, and the canvas background is white.
 * Fix: The preview device buttons show the selected size again. The preview stage is full width and the form inside is 960px, 768px or 380px wide. Submitting the preview saves an entry, runs the form's actions like a live submission and works for draft forms when you are signed in as an administrator.
