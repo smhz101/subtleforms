@@ -10,13 +10,14 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 /**
  * PDF Extension
  *
- * Generates a simple HTML→text PDF-like document from a form submission
- * and optionally attaches it to the notification email.
+ * Owns the "Attach to notification email" setting. The PDF itself is
+ * rendered by SubtleForms Pro, which answers the `subtleforms/pdf/generate`
+ * filter with the path of a file it wrote, and also provides the entry PDF
+ * download on the entry screen.
  *
- * Note: A real PDF library (e.g. TCPDF, mPDF) would be integrated via
- * Composer in a full Pro build. This implementation uses WordPress's
- * built-in page-rendering facilities and provides the integration hooks
- * that a Pro PDF library would plug into.
+ * Attachments are added inside the background email job (see
+ * AsyncDispatcher::executeEmail), so rendering a PDF never delays the
+ * visitor's submission.
  */
 class PdfExtension extends AbstractExtension {
 
@@ -36,78 +37,41 @@ class PdfExtension extends AbstractExtension {
 		if ( (bool) $this->getSetting( 'attach_to_email' ) ) {
 			add_filter( 'subtleforms/email/attachments', array( $this, 'attachPdf' ), 10, 2 );
 		}
-
-		// Register a REST endpoint to stream a PDF for a given submission.
-		add_action(
-			'rest_api_init',
-			function () {
-				register_rest_route(
-					'subtleforms/v1',
-					'/pdf/(?P<submission_id>\d+)',
-					array(
-						'methods'             => 'GET',
-						'callback'            => array( $this, 'streamPdf' ),
-						'permission_callback' => function () {
-							return current_user_can( 'edit_posts' );
-						},
-						'args'                => array(
-							'submission_id' => array(
-								'type'              => 'integer',
-								'required'          => true,
-								'sanitize_callback' => 'absint',
-							),
-						),
-					)
-				);
-			}
-		);
 	}
 
 	/**
-	 * Attach a generated PDF to the email attachments array.
+	 * Attach the entry PDF to admin notification emails.
 	 *
-	 * @param array $attachments Existing attachments.
-	 * @param array $submission  Submission data.
+	 * @param array $attachments Existing attachment paths.
+	 * @param array $job         Email job: submission_id, form_id, audience.
 	 * @return array
 	 */
-	public function attachPdf( array $attachments, array $submission ): array {
-		$path = $this->generatePdfFile( $submission );
-		if ( $path ) {
+	public function attachPdf( $attachments, $job = array() ): array {
+		$attachments = is_array( $attachments ) ? $attachments : array();
+		$job         = is_array( $job ) ? $job : array();
+
+		$submission_id = (int) ( $job['submission_id'] ?? 0 );
+		if ( $submission_id <= 0 || 'admin' !== ( $job['audience'] ?? 'admin' ) ) {
+			return $attachments;
+		}
+
+		/**
+		 * Render the entry PDF for an email attachment.
+		 *
+		 * Return the absolute path of a PDF file, or null when no renderer is
+		 * available. SubtleForms Pro implements this.
+		 *
+		 * @param string|null $path          Null by default.
+		 * @param int         $submission_id Entry ID.
+		 * @param array       $job           Email job.
+		 * @since 2.1.0
+		 */
+		$path = apply_filters( 'subtleforms/pdf/generate', null, $submission_id, $job );
+
+		if ( is_string( $path ) && '' !== $path && file_exists( $path ) ) {
 			$attachments[] = $path;
 		}
+
 		return $attachments;
-	}
-
-	/**
-	 * Stream a PDF for admin download.
-	 *
-	 * @param \WP_REST_Request $request
-	 */
-	public function streamPdf( \WP_REST_Request $request ): \WP_REST_Response {
-		// Real implementation would fetch the submission and render a PDF.
-		// This stub indicates the integration point for a Pro PDF library.
-		return new \WP_REST_Response(
-			array( 'message' => __( 'PDF generation requires a Pro PDF library.', 'subtleforms' ) ),
-			501
-		);
-	}
-
-	/**
-	 * Generate a temporary PDF file and return its path.
-	 *
-	 * @param array $submission
-	 * @return string|null Absolute path to the temp file, or null on failure.
-	 */
-	private function generatePdfFile( array $submission ): ?string {
-		/**
-		 * Allow Pro or third-party code to supply a real file path.
-		 *
-		 * @param string|null $path       Return a non-null string to short-circuit default behaviour.
-		 * @param array       $submission Submission data.
-		 * @param self        $ext        This extension instance.
-		 */
-		$path = apply_filters( 'subtleforms/pdf/generate', null, $submission, $this );
-
-		return is_string( $path ) && $path ? $path : null;
 	}
 }

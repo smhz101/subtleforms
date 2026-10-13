@@ -8,10 +8,21 @@ namespace SubtleForms\Extensions;
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /**
- * E-commerce Extension
+ * WooCommerce extension (settings shell).
  *
- * Creates a WooCommerce order when a form is submitted.
- * Requires WooCommerce to be installed and active; silently skips otherwise.
+ * When WooCommerce is active, a site has one checkout: payment forms can send
+ * the order to the WooCommerce cart and checkout, and the WooCommerce Product
+ * field sells store products from any form. Both are SubtleForms Pro features
+ * (capability `integrations.woocommerce`); Pro does the work, using the
+ * `ext_ecommerce_*` settings saved from this extension's settings panel:
+ *
+ * - ext_ecommerce_default_processor  "woocommerce" or "subtleforms" for new payment forms
+ * - ext_ecommerce_empty_cart         empty the visitor's cart before adding the form's items
+ * - ext_ecommerce_destination        send visitors to the "checkout" or the "cart"
+ *
+ * Before 2.1 this extension created one WooCommerce order per submission
+ * for a fixed product ID. That is replaced by the checkout integration, so
+ * nothing is registered here.
  */
 class EcommerceExtension extends AbstractExtension {
 
@@ -20,66 +31,17 @@ class EcommerceExtension extends AbstractExtension {
 	}
 
 	public function label(): string {
-		return 'E-commerce';
+		return 'WooCommerce';
 	}
 
 	public function register(): void {
-		if ( ! $this->isEnabled() ) {
-			return;
-		}
-
-		if ( ! class_exists( 'WooCommerce' ) ) {
-			return;
-		}
-
-		add_action( 'subtleforms/submission/saved', array( $this, 'createOrder' ), 10, 2 );
+		// Settings only. See the class comment.
 	}
 
 	/**
-	 * Create a WooCommerce order from the form submission.
-	 *
-	 * @param int   $form_id    Form ID.
-	 * @param array $submission Submission data array.
+	 * Whether WooCommerce is installed and active.
 	 */
-	public function createOrder( int $form_id, array $submission ): void {
-		$product_id = (int) $this->getSetting( 'product_id' );
-		$currency   = (string) $this->getSetting( 'currency' );
-
-		if ( ! $product_id ) {
-			return;
-		}
-
-		$product = wc_get_product( $product_id );
-		if ( ! $product ) {
-			return;
-		}
-
-		$order = wc_create_order();
-		if ( is_wp_error( $order ) ) {
-			return;
-		}
-
-		$order->add_product( $product, 1 );
-
-		// Attach billing email from submission if available.
-		$email = $this->extractEmail( $submission );
-		if ( $email ) {
-			$order->set_billing_email( $email );
-		}
-
-		$order->set_currency( $currency ?: get_woocommerce_currency() );
-		$order->calculate_totals();
-		$order->update_status( 'pending', __( 'Order created via SubtleForms submission.', 'subtleforms' ) );
-	}
-
-	private function extractEmail( array $submission ): string {
-		if ( ! empty( $submission['data'] ) && is_array( $submission['data'] ) ) {
-			foreach ( $submission['data'] as $value ) {
-				if ( is_string( $value ) && is_email( $value ) ) {
-					return $value;
-				}
-			}
-		}
-		return '';
+	public static function wooActive(): bool {
+		return class_exists( 'WooCommerce' );
 	}
 }

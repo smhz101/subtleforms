@@ -1,0 +1,138 @@
+// Shared pieces of the Settings > Extensions panels and the form builder's
+// Integrations section (2.1).
+
+.sf-conn-test {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 12px;
+
+	.components-button .components-spinner {
+		margin: 0 6px 0 0;
+	}
+
+	&__result {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		margin: 0;
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-secondary);
+
+		svg {
+			flex-shrink: 0;
+			fill: none;
+		}
+
+		&--ok svg { color: var(--sf-success); }
+
+		&--error {
+			color: var(--sf-danger, #cc1818);
+		}
+	}
+}
+
+.sf-ext-inline {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: start;
+	gap: 12px;
+
+	// Line the trailing control up with the input, not with its help text.
+	> :last-child:not(:first-child) {
+		margin-top: 26px;
+	}
+
+	@media (max-width: 600px) {
+		grid-template-columns: 1fr;
+	}
+}
+
+// ── Field mapping (form builder > Integrations) ────────────────────────────
+.sf-map {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+
+	&__grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+		gap: 12px;
+	}
+
+	&__rows {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	&__row {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) 16px minmax(0, 1fr) 32px;
+		align-items: start;
+		gap: 8px;
+
+		> .components-button { margin-top: 4px; }
+
+		.components-base-control,
+		.components-base-control__field {
+			margin-bottom: 0;
+		}
+	}
+
+	&__arrow {
+		margin-top: 10px;
+		color: var(--sf-text-subtle);
+		text-align: center;
+	}
+
+	&__heading {
+		margin: 4px 0 0;
+		font-size: 12px;
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text-secondary);
+	}
+
+	&__hint {
+		margin: 0;
+		font-size: 12px;
+		color: var(--sf-text-muted);
+	}
+
+	&__test {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		padding-top: 12px;
+		border-top: 1px dashed var(--sf-border-subtle);
+	}
+
+	&__notice {
+		margin: 0;
+		padding: 10px 12px;
+		border-radius: var(--sf-radius-md);
+		background: var(--sf-bg-subtle);
+		font-size: 12px;
+		color: var(--sf-text-secondary);
+
+		a { color: inherit; }
+	}
+}
+
+.sf-form-settings__integration .sf-map + .components-base-control,
+.sf-form-settings__integration .sf-conn-test + .components-base-control {
+	margin-top: 16px;
+}
+
+.sf-form-settings__integration > .components-base-control + .sf-map {
+	margin-top: 12px;
+}
+
+.sf-form-settings__integration + .sf-form-settings__integration {
+	margin-top: 20px;
+	padding-top: 20px;
+	border-top: 1px solid var(--sf-border-subtle);
+}

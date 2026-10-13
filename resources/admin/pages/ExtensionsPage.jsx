@@ -1,182 +1,226 @@
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
+import { useNavigate } from 'react-router-dom';
 import Icon from '../ui/Icon';
 import AdminShell from '../components/AdminShell';
 import { requirePro } from '../utils/featureGate';
+import {
+  PRO_URL,
+  PRO_PILLARS,
+  EXTENSIONS,
+  EXTENSION_GROUPS,
+  getPlanState,
+} from '../data/proCatalog';
 import './ExtensionsPage.scss';
 
-// Map extension slugs to icon components + accent colours
-const EXT_META = {
-  webhooks:        { icon: Icon.Zap,          color: 'yellow' },
-  email_marketing: { icon: Icon.Mail,         color: 'purple' },
-  crm:             { icon: Icon.Users,        color: 'green'  },
-  analytics:       { icon: Icon.BarChart2,    color: 'orange' },
-  ecommerce:       { icon: Icon.ShoppingCart, color: 'red'    },
-  pdf:             { icon: Icon.FileText,     color: 'indigo' },
-  multilanguage:   { icon: Icon.Globe,        color: 'teal'   },
-  payments:        { icon: Icon.CreditCard,   color: 'blue'   },
-};
-
-// Per-extension outcome lines — shown below the card title
-const EXT_SUBDESC = {
-  webhooks:        __( 'Send data anywhere, the instant a form is submitted', 'subtleforms' ),
-  email_marketing: __( 'Grow your email list automatically', 'subtleforms' ),
-  crm:             __( 'Turn every form submission into a sales pipeline lead', 'subtleforms' ),
-  analytics:       __( 'Track which forms actually convert', 'subtleforms' ),
-  ecommerce:       __( 'Sell products and take orders directly in your forms', 'subtleforms' ),
-  pdf:             __( 'Generate professional PDFs from every submission', 'subtleforms' ),
-  multilanguage:   __( 'Reach users in their own language', 'subtleforms' ),
-  payments:        __( 'Accept payments directly from your forms', 'subtleforms' ),
-};
-
-// Ordered display list
-const EXT_ORDER = [
-  'webhooks', 'email_marketing', 'crm', 'analytics',
-  'ecommerce', 'pdf', 'multilanguage', 'payments',
-];
-
 /**
- * Status badge for each extension card.
+ * Status pill for an extension row.
  */
-function StatusBadge({ ext }) {
+function StatusPill({ ext }) {
   if (!ext.available) {
-    return <span className='sf-ext-badge sf-ext-badge--pro'>{__('Pro', 'subtleforms')}</span>;
+    return (
+      <span className='sf-pill sf-pill--outline sf-ext-row__pro'>
+        <Icon.Lock size={12} aria-hidden='true' />
+        {__('Pro', 'subtleforms')}
+      </span>
+    );
   }
   if (ext.enabled && ext.configured) {
-    return <span className='sf-ext-badge sf-ext-badge--active'>{__('Active', 'subtleforms')}</span>;
+    return <span className='sf-pill sf-pill--dot sf-pill--success'>{__('Active', 'subtleforms')}</span>;
   }
   if (ext.enabled) {
-    return <span className='sf-ext-badge sf-ext-badge--setup'>{__('Needs Setup', 'subtleforms')}</span>;
+    return <span className='sf-pill sf-pill--dot sf-pill--warning'>{__('Needs setup', 'subtleforms')}</span>;
   }
-  return <span className='sf-ext-badge sf-ext-badge--inactive'>{__('Inactive', 'subtleforms')}</span>;
+  return <span className='sf-pill sf-pill--dot'>{__('Off', 'subtleforms')}</span>;
 }
 
 /**
- * Single extension card.
+ * One extension as a list row: what it is, what it does, one action.
  */
-function ExtensionCard({ ext }) {
-  const meta    = EXT_META[ext.slug] ?? { icon: Icon.Zap, color: 'gray' };
-  const IconCmp = meta.icon;
-
-  // Navigate to Settings > Extensions tab with the correct slug pre-selected
-  const settingsUrl = `${window.location.pathname}?page=subtleforms-settings&tab=extensions&ext=${ext.slug}`;
+function ExtensionRow({ ext, onOpen }) {
+  const meta = EXTENSIONS[ext.slug] || { icon: Icon.Puzzle };
+  const RowIcon = meta.icon;
+  const locked = !ext.available;
 
   return (
-    <div className={`sf-ext-card sf-ext-card--${ext.available ? 'available' : 'locked'}`}>
-      <div className='sf-ext-card__body'>
-        {/* Header */}
-        <div className='sf-ext-card__head'>
-          <div className={`sf-ext-card__icon sf-ext-card__icon--${meta.color}`}>
-            <IconCmp className='sf-ext-card__icon-svg' />
-          </div>
-          <StatusBadge ext={ext} />
+    <li className={`sf-ext-row ${locked ? 'is-locked' : ''} ${ext.enabled && !locked ? 'is-on' : ''}`}>
+      <span className='sf-ext-row__icon' aria-hidden='true'>
+        <RowIcon size={20} />
+      </span>
+      <div className='sf-ext-row__text'>
+        <div className='sf-ext-row__title'>
+          <h3>{ext.label}</h3>
+          <StatusPill ext={ext} />
         </div>
-
-        {/* Info */}
-        <h3 className='sf-ext-card__title'>{ext.label}</h3>
-        <p className='sf-ext-card__subdesc'>{EXT_SUBDESC[ext.slug] || ''}</p>
-        <p className='sf-ext-card__desc'>{ext.description}</p>
+        <p>{meta.outcome || ext.description}</p>
       </div>
-
-      {/* Footer action */}
-      <div className='sf-ext-card__footer'>
-        {ext.available ? (
+      <div className='sf-ext-row__action'>
+        {locked ? (
           <Button
-            variant='secondary'
-            className='sf-ext-card__btn'
-            href={settingsUrl}>
-            {ext.enabled
-              ? __('Configure', 'subtleforms')
-              : __('Set Up', 'subtleforms')}
+            variant='tertiary'
+            size='compact'
+            onClick={() => requirePro(`extensions.${ext.slug}`, () => {}, { label: ext.label })}>
+            {__('Unlock', 'subtleforms')}
           </Button>
         ) : (
-          <Button
-            variant='secondary'
-            className='sf-ext-card__btn sf-ext-card__btn--unlock'
-            onClick={() => requirePro(
-              `extensions.${ext.slug}`,
-              () => {},
-              { label: ext.label }
-            )}>
-            <Icon.Lock size={13} />
-            {__('Unlock', 'subtleforms')}
+          <Button variant='secondary' size='compact' onClick={() => onOpen(ext.slug)}>
+            {ext.enabled ? __('Configure', 'subtleforms') : __('Set up', 'subtleforms')}
           </Button>
         )}
       </div>
-    </div>
+    </li>
   );
 }
 
 /**
- * Extensions Page — shows real-time extension status from the backend.
+ * Pro introduction, shown in place of an ad banner: what you get, in four
+ * plain sentences, and one way to get it.
+ */
+function ProHero({ hasProPlugin, onActivate }) {
+  return (
+    <section className='sf-pro-hero' aria-labelledby='sf-pro-hero-title'>
+      <div className='sf-pro-hero__intro'>
+        <span className='sf-pro-hero__eyebrow'>
+          <Icon.Crown size={14} aria-hidden='true' />
+          {__('SubtleForms Pro', 'subtleforms')}
+        </span>
+        <h2 id='sf-pro-hero-title' className='sf-pro-hero__title'>
+          {__('Turn forms into payments, leads and reports.', 'subtleforms')}
+        </h2>
+        <p className='sf-pro-hero__text'>
+          {__(
+            'Pro plugs into the forms you already have. Nothing to rebuild: locked fields and actions light up the moment your license is active.',
+            'subtleforms'
+          )}
+        </p>
+        <div className='sf-pro-hero__actions'>
+          {hasProPlugin ? (
+            <Button variant='primary' onClick={onActivate}>
+              {__('Activate your license', 'subtleforms')}
+            </Button>
+          ) : (
+            <Button variant='primary' href={PRO_URL} target='_blank' rel='noreferrer'>
+              {__('Get SubtleForms Pro', 'subtleforms')}
+              <Icon.ArrowUpRight size={16} aria-hidden='true' />
+            </Button>
+          )}
+          <Button variant='tertiary' href={`${PRO_URL}#compare`} target='_blank' rel='noreferrer'>
+            {__('Compare plans', 'subtleforms')}
+          </Button>
+        </div>
+      </div>
+      <ul className='sf-pro-hero__pillars'>
+        {PRO_PILLARS.map(({ key, icon: PillarIcon, title, text }) => (
+          <li key={key} className='sf-pro-hero__pillar'>
+            <span className='sf-pro-hero__pillar-icon' aria-hidden='true'>
+              <PillarIcon size={18} />
+            </span>
+            <strong>{title}</strong>
+            <span>{text}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+}
+
+/**
+ * Extensions — the Pro hub. Every extension is listed whether or not it is
+ * unlocked, so free users see exactly what Pro adds and Pro users get one
+ * place to switch things on.
  */
 export default function ExtensionsPage() {
-  const rawExtensions = window.subtleformsAdmin?.extensions ?? {};
-  const hasProPlugin  = !!window.subtleformsAdmin?.hasProPlugin;
+  const navigate = useNavigate();
+  const raw = window.subtleformsAdmin?.extensions ?? {};
+  const { hasProPlugin, licensed, plan } = getPlanState();
 
-  // Build ordered list
-  const extensions = EXT_ORDER
-    .filter((slug) => rawExtensions[slug])
-    .map((slug) => rawExtensions[slug]);
+  const all = Object.values(raw);
+  const activeCount = all.filter((e) => e.available && e.enabled).length;
+  const unlockedCount = all.filter((e) => e.available).length;
 
-  const activeCount = extensions.filter((e) => e.enabled && e.available).length;
+  const openSettings = (slug) => {
+    window.location.hash = slug ? `tab=extensions&ext=${slug}` : 'tab=extensions';
+    navigate('/settings');
+  };
+  const openLicense = () => {
+    window.location.hash = 'tab=license';
+    navigate('/settings');
+  };
+
+  const grouped = EXTENSION_GROUPS.map((group) => ({
+    ...group,
+    items: all.filter((ext) => (EXTENSIONS[ext.slug]?.group || 'insights') === group.key),
+  })).filter((g) => g.items.length > 0);
+
+  const description = licensed
+    ? sprintf(
+        /* translators: 1: active count, 2: total count */
+        __('%1$d of %2$d extensions are switched on.', 'subtleforms'),
+        activeCount,
+        all.length
+      )
+    : __('Connect your forms to payments, marketing tools and reporting.', 'subtleforms');
 
   return (
     <AdminShell
       title={__('Extensions', 'subtleforms')}
+      description={description}
       actions={
-        <Button
-          variant='secondary'
-          href='https://subtleforms.com/extensions'
-          target='_blank'>
-          <Icon.ExternalLink className='sf-button-icon' />
-          {__('Browse All Extensions', 'subtleforms')}
-        </Button>
+        licensed ? (
+          <Button variant='secondary' onClick={openLicense}>
+            <Icon.Crown size={16} aria-hidden='true' />
+            {sprintf(
+              /* translators: %s: plan name */
+              __('%s license', 'subtleforms'),
+              plan.charAt(0).toUpperCase() + plan.slice(1)
+            )}
+          </Button>
+        ) : null
       }>
-      <div className='sf-extensions-page__content'>
+      <div className='sf-extensions'>
+        {!licensed && <ProHero hasProPlugin={hasProPlugin} onActivate={openLicense} />}
 
-        {/* Summary bar */}
-        <div className='sf-ext-summary'>
-          <div className='sf-ext-summary__stat'>
-            <span className='sf-ext-summary__num'>{extensions.length}</span>
-            <span className='sf-ext-summary__label'>{__('Available', 'subtleforms')}</span>
-          </div>
-          <div className='sf-ext-summary__divider' />
-          <div className='sf-ext-summary__stat'>
-            <span className={`sf-ext-summary__num ${activeCount > 0 ? 'sf-ext-summary__num--active' : ''}`}>
-              {activeCount}
+        {all.length === 0 ? (
+          <div className='sf-empty'>
+            <span className='sf-empty__icon' aria-hidden='true'>
+              <Icon.Puzzle size={20} />
             </span>
-            <span className='sf-ext-summary__label'>{__('Active', 'subtleforms')}</span>
+            <p className='sf-empty__title'>{__('No extensions found', 'subtleforms')}</p>
+            <p className='sf-empty__text'>
+              {__('Reinstall SubtleForms if this keeps happening.', 'subtleforms')}
+            </p>
           </div>
-          {!hasProPlugin && (
-            <>
-              <div className='sf-ext-summary__divider' />
-              <a
-                href='https://subtleforms.com/pro'
-                target='_blank'
-                rel='noreferrer'
-                className='sf-ext-summary__upgrade'>
-                <Icon.Zap className='sf-ext-summary__upgrade-icon' />
-                {__('Unlock all extensions with Pro', 'subtleforms')}
-              </a>
-            </>
-          )}
-        </div>
+        ) : (
+          grouped.map((group) => (
+            <section key={group.key} className='sf-ext-group'>
+              <header className='sf-ext-group__header'>
+                <h2 className='sf-ext-group__title'>{group.title}</h2>
+                <span className='sf-ext-group__count'>
+                  {sprintf(
+                    /* translators: %d: number of extensions */
+                    __('%d extensions', 'subtleforms'),
+                    group.items.length
+                  )}
+                </span>
+              </header>
+              <ul className='sf-ext-list'>
+                {group.items.map((ext) => (
+                  <ExtensionRow key={ext.slug} ext={ext} onOpen={openSettings} />
+                ))}
+              </ul>
+            </section>
+          ))
+        )}
 
-        {/* Extensions Grid */}
-        <div className='sf-ext-grid'>
-          {extensions.length > 0 ? (
-            extensions.map((ext) => <ExtensionCard key={ext.slug} ext={ext} />)
-          ) : (
-            <div className='sf-ext-empty'>
-              <Icon.Package style={{ width: 28, height: 28, color: 'var(--sf-gray-300, #d1d5db)', marginBottom: 8 }} />
-              <p>{__('No extensions found. Please check your installation.', 'subtleforms')}</p>
-            </div>
-          )}
-        </div>
-
+        {licensed && unlockedCount < all.length && (
+          <p className='sf-extensions__footnote'>
+            {__('Some extensions need a higher plan.', 'subtleforms')}{' '}
+            <a href={`${PRO_URL}#compare`} target='_blank' rel='noreferrer'>
+              {__('Compare plans', 'subtleforms')}
+            </a>
+          </p>
+        )}
       </div>
     </AdminShell>
   );
 }
-
