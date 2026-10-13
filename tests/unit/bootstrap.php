@@ -43,6 +43,12 @@ if ( ! function_exists( '__' ) ) {
 	}
 }
 
+if ( ! function_exists( '_n' ) ) {
+	function _n( string $single, string $plural, $number, string $domain = 'default' ): string {
+		return 1 === (int) $number ? $single : $plural;
+	}
+}
+
 if ( ! function_exists( 'esc_html' ) ) {
 	function esc_html( string $text ): string {
 		return htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' );
@@ -67,6 +73,20 @@ if ( ! function_exists( 'sanitize_text_field' ) ) {
 if ( ! function_exists( 'wp_strip_all_tags' ) ) {
 	function wp_strip_all_tags( $value ) {
 		return strip_tags( (string) $value );
+	}
+}
+
+if ( ! function_exists( 'get_option' ) ) {
+	function get_option( $name, $default = false ) {
+		return $GLOBALS['sf_test_options'][ $name ] ?? $default;
+	}
+}
+
+if ( ! function_exists( 'wp_kses_post' ) ) {
+	// Rough stand-in: drop script/style blocks and keep simple inline markup.
+	function wp_kses_post( $value ) {
+		$value = preg_replace( '#<(script|style)[^>]*>.*?</\\1>#is', '', (string) $value );
+		return strip_tags( $value, '<b><strong><em><i><a><br><p><ul><ol><li><span>' );
 	}
 }
 
