@@ -15,6 +15,7 @@ export default function StepCanvas({
   stepNumber,
   totalSteps,
   renderNode,
+  getItemStyle,
 }) {
   // Get state from context
   const {
@@ -174,6 +175,7 @@ export default function StepCanvas({
           columnIndex={null}
           items={children}
           onRequestInsert={onRequestInsert}
+          getItemStyle={getItemStyle}
           spacing={24}
           renderItem={(nodeId, index) =>
             renderNode(nodeId, stepId, null, index)
