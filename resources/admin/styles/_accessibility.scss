@@ -1,4 +1,11 @@
 /**
+ * Accessibility helpers, scoped to the SubtleForms app and its portals so
+ * nothing here restyles the WordPress admin menu, admin bar or core screens.
+ * (2.0: these rules used to be global, which turned hovered admin-menu links
+ * and button labels the same colour as their background.)
+ */
+:where(.subtleforms-admin, .components-modal__frame, .components-popover) {
+/**
  * Accessibility Stylesheet
  *
  * WCAG 2.1 Level AA compliant styles for:
@@ -148,14 +155,14 @@ button.is-destructive:focus-visible {
 }
 
 /* Link colors */
-a,
+a:not([class]),
 .sf-link {
-  color: var(--sf-a-500); /* 8.3:1 contrast on white */
+  color: var(--sf-brand);
 }
 
-a:hover,
+a:not([class]):hover,
 .sf-link:hover {
-  color: var(--sf-a-600) !important; /* 10.3:1 contrast on white */
+  color: var(--sf-primary-700);
 }
 
 /* ============================================================================
@@ -341,35 +348,8 @@ select[aria-invalid="true"] {
   outline-offset: -2px !important;
 }
 
-/* ============================================================================
-   DARK MODE SUPPORT (Optional)
-   ============================================================================ */
+/* Dark mode: the WordPress admin has no OS dark mode, so neither do we. */
 
-@media (prefers-color-scheme: dark) {
-  /* Adjust focus indicators for dark backgrounds */
-  *:focus-visible {
-    outline-color: var(--sf-a-300) !important; /* Lighter blue for dark backgrounds */
-  }
-
-  /* Adjust text colors for dark mode */
-  .sf-text-gray-600 {
-    color: var(--sf-n-400) !important;
-  }
-
-  .sf-text-gray-500 {
-    color: var(--sf-n-500) !important;
-  }
-
-  /* Error colors for dark mode */
-  .sf-error {
-    color: var(--sf-danger-border) !important;
-  }
-
-  /* Success colors for dark mode */
-  .sf-success {
-    color: var(--sf-success) !important;
-  }
-}
 
 /* ============================================================================
    PRINT ACCESSIBILITY
@@ -417,4 +397,6 @@ select[aria-invalid="true"] {
 /* Keyboard only visible (hide from mouse users) */
 .sf-keyboard-only:not(:focus):not(:focus-within) {
   display: none;
+}
+
 }

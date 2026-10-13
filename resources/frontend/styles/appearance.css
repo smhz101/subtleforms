@@ -53,7 +53,7 @@
 .subtleforms--button-solid .subtleforms-button-next,
 .subtleforms--button-solid .subtleforms-button-submit {
 	background: var(--subtleforms-color-primary, #4f5bd5);
-	color: #fff;
+	color: var(--subtleforms-button-text, #fff);
 	border-color: var(--subtleforms-color-primary, #4f5bd5);
 }
 
@@ -62,7 +62,7 @@
 .subtleforms--button-solid .subtleforms-button-next:active,
 .subtleforms--button-solid .subtleforms-button-submit:active {
 	background: var(--subtleforms-color-primary-hover, #4048b8);
-	color: #fff;
+	color: var(--subtleforms-button-text, #fff);
 	border-color: var(--subtleforms-color-primary-hover, #4048b8);
 }
 
@@ -78,7 +78,7 @@
 .subtleforms--button-outline .subtleforms-button-next:active,
 .subtleforms--button-outline .subtleforms-button-submit:active {
 	background: var(--subtleforms-color-primary, #4f5bd5);
-	color: #fff;
+	color: var(--subtleforms-button-text, #fff);
 	border-color: var(--subtleforms-color-primary, #4f5bd5);
 }
 
@@ -143,6 +143,74 @@
 	order: 2;
 }
 
+/* ── Inline layout (2.3.0) ───────────────────────────────────────────────────
+   Fields and the submit button share one row, for a newsletter sign-up in a
+   footer or hero. Wraps onto two rows on narrow screens. */
+
+.subtleforms--layout-inline form {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: flex-end;
+	gap: var(--subtleforms-field-gap, 12px);
+}
+
+.subtleforms--layout-inline .subtleforms-step-content {
+	flex: 1 1 240px;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+}
+
+.subtleforms--layout-inline .subtleforms-fields,
+.subtleforms--layout-inline .subtleforms-field {
+	margin-bottom: 0;
+}
+
+.subtleforms--layout-inline .subtleforms-fields {
+	flex-wrap: nowrap;
+}
+
+.subtleforms--layout-inline .subtleforms-field {
+	flex: 1 1 0;
+}
+
+.subtleforms--layout-inline .subtleforms-buttons {
+	flex: 0 0 auto;
+	margin: 0;
+	padding: 0;
+	border: 0;
+}
+
+/* Messages and errors take the full row above or below. */
+.subtleforms--layout-inline form > .subtleforms-error,
+.subtleforms--layout-inline form > .subtleforms-preview-banner {
+	flex: 1 1 100%;
+}
+
+@media (max-width: 480px) {
+	.subtleforms--layout-inline .subtleforms-fields {
+		flex-wrap: wrap;
+	}
+
+	.subtleforms--layout-inline .subtleforms-field {
+		flex-basis: 100%;
+	}
+
+	.subtleforms--layout-inline .subtleforms-buttons,
+	.subtleforms--layout-inline .subtleforms-button {
+		flex: 1 1 100%;
+		width: 100%;
+	}
+}
+
+/* A form on a dark footer or hero: no card of its own. */
+.subtleforms.subtleforms--preset-dark-surface {
+	background: transparent;
+	box-shadow: none;
+	padding-left: 0;
+	padding-right: 0;
+}
+
 /* ── Per-field layout ─────────────────────────────────────────────────────── */
 
 .subtleforms-field--align-left {
@@ -168,7 +236,8 @@
 
 /* Visually hide the label while leaving it for screen readers: the field still
    needs an accessible name even when the design does without a visible one. */
-.subtleforms-field--no-label .subtleforms-field-label {
+.subtleforms-field--no-label > .subtleforms-field-label,
+.subtleforms-field--no-label > legend.subtleforms-field-label {
 	position: absolute;
 	width: 1px;
 	height: 1px;

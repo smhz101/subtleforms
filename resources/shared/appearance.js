@@ -44,6 +44,10 @@ export const FORM_TOKENS = [
   { key: 'colorSurface', cssVar: '--subtleforms-color-bg-subtle', type: 'color', group: 'color', label: 'Field background' },
   { key: 'colorBorder', cssVar: '--subtleforms-color-border', type: 'color', group: 'color', label: 'Border' },
   { key: 'colorError', cssVar: '--subtleforms-color-error', type: 'color', group: 'color', label: 'Error' },
+  { key: 'colorLabel', cssVar: '--subtleforms-label-color', type: 'color', group: 'color', label: 'Labels' },
+  { key: 'colorInputText', cssVar: '--subtleforms-input-text', type: 'color', group: 'color', label: 'Input text' },
+  { key: 'colorFocus', cssVar: '--subtleforms-color-border-focus', type: 'color', group: 'color', label: 'Focus ring' },
+  { key: 'colorButtonText', cssVar: '--subtleforms-button-text', type: 'color', group: 'button', label: 'Button text' },
 
   // Typography
   { key: 'fontFamily', cssVar: '--subtleforms-font-family', type: 'font', group: 'type', label: 'Font' },
@@ -57,6 +61,7 @@ export const FORM_TOKENS = [
   { key: 'borderWidth', cssVar: '--subtleforms-border-width', type: 'size', group: 'shape', label: 'Border width', units: ['px'], min: 0, max: 4 },
   { key: 'fieldGap', cssVar: '--subtleforms-field-gap', type: 'size', group: 'shape', label: 'Space between fields', units: ['px', 'rem'], min: 0, max: 64 },
   { key: 'inputPaddingY', cssVar: '--subtleforms-input-padding-y', type: 'size', group: 'shape', label: 'Input height', units: ['px'], min: 4, max: 28 },
+  { key: 'buttonRadius', cssVar: '--subtleforms-button-radius', type: 'size', group: 'button', label: 'Button radius', units: ['px'], min: 0, max: 999 },
 ];
 
 /** Variants are classes rather than properties — they change structure, not values. */
@@ -90,6 +95,14 @@ export const FORM_VARIANTS = [
     ],
   },
   {
+    key: 'layout',
+    label: 'Field layout',
+    options: [
+      { label: 'Stacked', value: 'stacked' },
+      { label: 'Inline', value: 'inline' },
+    ],
+  },
+  {
     key: 'width',
     label: 'Form width',
     options: [
@@ -110,11 +123,16 @@ export const FORM_VARIANTS = [
  * the custom property on itself and everything inside inherits the new value.
  */
 export const FIELD_TOKENS = [
-  { key: 'colorText', cssVar: '--subtleforms-color-text', type: 'color', group: 'color', label: 'Text' },
-  { key: 'colorBorder', cssVar: '--subtleforms-color-border', type: 'color', group: 'color', label: 'Border' },
+  { key: 'colorLabel', cssVar: '--subtleforms-label-color', type: 'color', group: 'color', label: 'Label' },
+  { key: 'colorText', cssVar: '--subtleforms-input-text', type: 'color', group: 'color', label: 'Input text' },
   { key: 'colorSurface', cssVar: '--subtleforms-color-bg-subtle', type: 'color', group: 'color', label: 'Field background' },
+  { key: 'colorBorder', cssVar: '--subtleforms-color-border', type: 'color', group: 'color', label: 'Border' },
+  { key: 'colorPrimary', cssVar: '--subtleforms-color-primary', type: 'color', group: 'color', label: 'Accent' },
   { key: 'fontSize', cssVar: '--subtleforms-font-size-base', type: 'size', group: 'type', label: 'Font size', units: ['px', 'rem'], min: 10, max: 32 },
+  { key: 'labelWeight', cssVar: '--subtleforms-label-weight', type: 'select', group: 'type', label: 'Label weight',
+    options: [ { label: 'Regular', value: '400' }, { label: 'Medium', value: '500' }, { label: 'Semibold', value: '600' }, { label: 'Bold', value: '700' } ] },
   { key: 'radius', cssVar: '--subtleforms-radius-md', type: 'size', group: 'shape', label: 'Corner radius', units: ['px'], min: 0, max: 32 },
+  { key: 'borderWidth', cssVar: '--subtleforms-border-width', type: 'size', group: 'shape', label: 'Border width', units: ['px'], min: 0, max: 4 },
 ];
 
 /** Layout controls that are inline styles rather than custom properties. */
@@ -262,6 +280,105 @@ export const FORM_PRESETS = [
     },
     variants: { input: 'outlined', button: 'solid', buttonAlign: 'left', width: 'standard' },
   },
+  {
+    id: 'rounded',
+    label: 'Rounded',
+    description: 'Pill buttons and soft rounded fields. Friendly and modern.',
+    swatch: ['#0f766e', '#f0f7f6', '#ffffff'],
+    tokens: {
+      colorPrimary: '#0f766e',
+      colorPrimaryHover: '#0b5e58',
+      colorText: '#14211f',
+      colorTextLight: '#5b6b68',
+      colorBackground: '#ffffff',
+      colorSurface: '#f0f7f6',
+      colorBorder: '#d5e4e1',
+      colorFocus: '#0f766e',
+      radius: '22px',
+      buttonRadius: '999px',
+      borderWidth: '1px',
+      fieldGap: '18px',
+      inputPaddingY: '12px',
+      labelWeight: '500',
+    },
+    variants: { input: 'filled', button: 'solid', buttonAlign: 'left', width: 'standard' },
+  },
+  {
+    id: 'classic',
+    label: 'Classic',
+    description: 'Serif type on warm paper. Suits editorial and service sites.',
+    swatch: ['#8a3b12', '#2b2118', '#fbf8f3'],
+    tokens: {
+      colorPrimary: '#8a3b12',
+      colorPrimaryHover: '#6e2f0e',
+      colorText: '#2b2118',
+      colorTextLight: '#6f6255',
+      colorBackground: '#fbf8f3',
+      colorSurface: '#ffffff',
+      colorBorder: '#d9cfc2',
+      colorFocus: '#8a3b12',
+      fontFamily: "Georgia, 'Iowan Old Style', 'Times New Roman', serif",
+      fontSize: '1.0625rem',
+      radius: '2px',
+      buttonRadius: '2px',
+      borderWidth: '1px',
+      fieldGap: '22px',
+      inputPaddingY: '11px',
+      labelWeight: '600',
+    },
+    variants: { input: 'outlined', button: 'solid', buttonAlign: 'left', width: 'standard' },
+  },
+  {
+    id: 'bold',
+    label: 'Bold',
+    description: 'High-contrast accent and heavy labels. Built to convert.',
+    swatch: ['#e5484d', '#111111', '#fff7f5'],
+    tokens: {
+      colorPrimary: '#e5484d',
+      colorPrimaryHover: '#c93a3f',
+      colorText: '#111111',
+      colorTextLight: '#5f5f5f',
+      colorBackground: '#fff7f5',
+      colorSurface: '#ffffff',
+      colorBorder: '#111111',
+      colorFocus: '#e5484d',
+      radius: '10px',
+      buttonRadius: '10px',
+      borderWidth: '2px',
+      fieldGap: '18px',
+      inputPaddingY: '12px',
+      labelWeight: '700',
+    },
+    variants: { input: 'outlined', button: 'solid', buttonAlign: 'full', width: 'standard' },
+  },
+  {
+    id: 'dark-surface',
+    label: 'Dark surface',
+    description: 'Sits on a dark footer or hero without a card of its own.',
+    swatch: ['#ffffff', '#f4f5f7', '#1b1d24'],
+    // What the form is expected to sit on; previews draw it behind the form.
+    backdrop: '#1b1d24',
+    tokens: {
+      colorPrimary: '#ffffff',
+      colorPrimaryHover: '#dfe3ea',
+      colorButtonText: '#111318',
+      colorText: '#f4f5f7',
+      colorLabel: '#f4f5f7',
+      colorTextLight: '#b8bfcc',
+      colorBackground: 'transparent',
+      colorSurface: 'rgba(255, 255, 255, 0.08)',
+      colorInputText: '#ffffff',
+      colorBorder: 'rgba(255, 255, 255, 0.28)',
+      colorFocus: '#ffffff',
+      colorError: '#ffb4a8',
+      radius: '8px',
+      borderWidth: '1px',
+      fieldGap: '14px',
+      inputPaddingY: '11px',
+      labelWeight: '500',
+    },
+    variants: { input: 'outlined', button: 'solid', buttonAlign: 'left', width: 'full' },
+  },
 ];
 
 export const FONT_STACKS = [
@@ -269,6 +386,8 @@ export const FONT_STACKS = [
   { label: 'Sans serif', value: "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" },
   { label: 'Serif', value: "Georgia, 'Iowan Old Style', 'Times New Roman', serif" },
   { label: 'Monospace', value: "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace" },
+  { label: 'Rounded', value: "ui-rounded, 'SF Pro Rounded', 'Nunito', 'Quicksand', sans-serif" },
+  { label: 'Humanist', value: "'Seravek', 'Gill Sans Nova', Ubuntu, Calibri, 'DejaVu Sans', source-sans-pro, sans-serif" },
   { label: 'Inherit from theme', value: 'inherit' },
 ];
 
@@ -278,6 +397,50 @@ export const FORM_WIDTHS = {
   wide: '52rem',
   full: '100%',
 };
+
+/**
+ * Plugin defaults, mirrored from the public stylesheet. Used by the builder to
+ * show what an unset control currently resolves to.
+ */
+export const TOKEN_DEFAULTS = {
+  colorPrimary: '#4f5bd5',
+  colorPrimaryHover: '#4048b8',
+  colorText: '#131417',
+  colorTextLight: '#6b7382',
+  colorBackground: '#ffffff',
+  colorSurface: '#f4f5f7',
+  colorBorder: '#d8dbe2',
+  colorError: '#b3261e',
+  colorButtonText: '#ffffff',
+  radius: '8px',
+  buttonRadius: '4px',
+  borderWidth: '1px',
+};
+
+/**
+ * The value a token resolves to for a form: its own value, then the
+ * built-in default. Labels and input text fall back to the text colour.
+ *
+ * @param {Object} appearance metadata.appearance
+ * @param {string} key        Token key.
+ * @return {string} Resolved value or ''.
+ */
+export function resolvedToken( appearance, key ) {
+  const tokens = appearance?.tokens || {};
+  if ( isSet( tokens[ key ] ) ) {
+    return String( tokens[ key ] );
+  }
+  if ( key === 'colorLabel' || key === 'colorInputText' ) {
+    return resolvedToken( appearance, 'colorText' );
+  }
+  if ( key === 'colorFocus' ) {
+    return resolvedToken( appearance, 'colorPrimary' );
+  }
+  if ( key === 'buttonRadius' ) {
+    return resolvedToken( appearance, 'radius' );
+  }
+  return TOKEN_DEFAULTS[ key ] || '';
+}
 
 /* ------------------------------------------------------------------ *
  * Rendering
@@ -344,6 +507,13 @@ export function formAppearanceClasses( appearance ) {
   }
   if ( v.buttonAlign ) {
     classes.push( `subtleforms--buttons-${ v.buttonAlign }` );
+  }
+  // Presets that change the form's chrome, not only its colours.
+  if ( appearance?.preset === 'dark-surface' ) {
+    classes.push( 'subtleforms--preset-dark-surface' );
+  }
+  if ( v.layout === 'inline' ) {
+    classes.push( 'subtleforms--layout-inline' );
   }
 
   return classes.join( ' ' );
@@ -459,4 +629,19 @@ export function isPresetModified( appearance ) {
  */
 export function supportsAppearance( type ) {
   return type !== 'action_hook' && type !== 'step';
+}
+
+/**
+ * The page colour a form's preset expects to sit on, for previews.
+ *
+ * @param {Object} appearance metadata.appearance
+ * @return {string} A colour, or '' when the form brings its own background.
+ */
+export function appearanceBackdrop( appearance ) {
+  const preset = appearance?.preset ? getPreset( appearance.preset ) : null;
+  const bg = appearance?.tokens?.colorBackground;
+  if ( preset?.backdrop && ( ! bg || bg === 'transparent' ) ) {
+    return preset.backdrop;
+  }
+  return '';
 }
