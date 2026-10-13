@@ -99,3 +99,29 @@ describe('applyPaymentDefaults with composite fields', () => {
     expect(applyPaymentDefaults(prev, next, { processor: 'woocommerce' }).metadata.payment.processor).toBe('woocommerce');
   });
 });
+
+describe('charged formula failures', () => {
+  const charged = (formula) => [
+    { type: 'calculation', config: { key: 'due', label: 'Due', usePrice: true, formula } },
+  ];
+
+  it('does not turn a failed charged formula into a free or payable line', () => {
+    const q = computeQuote(charged('1/0'), { due: 0 });
+    expect(q.formulaError).toBe(true);
+    expect(q.items).toEqual([]);
+    expect(q.items.some((item) => item.amount >= 0)).toBe(false);
+  });
+
+  it('does not charge a tampered amount when the formula fails', () => {
+    const q = computeQuote(charged('{qty} / {price}'), { qty: 1, price: 0, due: 25 });
+    expect(q.formulaError).toBe(true);
+    expect(q.items).toEqual([]);
+  });
+
+  it('keeps a real zero off the order without flagging a failure', () => {
+    const q = computeQuote(charged('0+0'), { due: 40 });
+    expect(q.formulaError).toBe(false);
+    expect(q.items).toEqual([]);
+    expect(q.total).toBe(0);
+  });
+});
