@@ -256,24 +256,68 @@ class DashboardApi {
 	}
 
 	/**
-	 * Get recently edited forms
+	 * Rows fetched per query while collecting forms for the performance selector.
+	 *
+	 * This is a page size, not a cap. Collection continues until a short page.
+	 */
+	public const PERFORMANCE_FORM_BATCH = 100;
+
+	/**
+	 * Every accessible non-trashed form, most recently updated first.
+	 *
+	 * FormsRepository::all() excludes trash when status is omitted, so the
+	 * performance selector can reach older forms. The dashboard recent list
+	 * still reads the front of this same order.
+	 *
+	 * @param callable $fetch function( array $args ): array Page from the forms repository.
+	 * @return array
+	 */
+	public static function collectPerformanceForms( callable $fetch ): array {
+		$forms  = array();
+		$offset = 0;
+		$batch  = self::PERFORMANCE_FORM_BATCH;
+
+		do {
+			$page = $fetch(
+				array(
+					'limit'   => $batch,
+					'offset'  => $offset,
+					'orderby' => 'updated_at',
+					'order'   => 'DESC',
+				)
+			);
+
+			if ( ! is_array( $page ) || array() === $page ) {
+				break;
+			}
+
+			foreach ( $page as $form ) {
+				$forms[] = $form;
+			}
+
+			$offset += count( $page );
+		} while ( self::PERFORMANCE_FORM_BATCH === count( $page ) );
+
+		return $forms;
+	}
+
+	/**
+	 * Forms for the dashboard recent list and the performance selector.
 	 *
 	 * @return array
 	 */
 	private function getRecentForms() {
-		$forms = $this->formsRepo->all(
-			array(
-				'limit'   => 10,
-				'orderby' => 'updated_at',
-				'order'   => 'DESC',
-			)
+		$forms = self::collectPerformanceForms(
+			function ( array $args ) {
+				return $this->formsRepo->all( $args );
+			}
 		);
 
-		return array_map(
-			function ( $form ) {
-				// Get submission count for this form
-				$submissionCount = $this->submissionsRepo->count( array( 'form_id' => $form['id'] ) );
+		$ids    = array_map( 'intval', array_column( $forms, 'id' ) );
+		$counts = $this->submissionsRepo->get_counts_by_forms( $ids );
 
+		return array_map(
+			function ( $form ) use ( $counts ) {
 				// Single source of truth for type/status/unpublished-changes so
 				// the Dashboard agrees with All Forms and the builder header.
 				$form = \SubtleForms\Support\FormMeta::with_meta( $form );
@@ -286,7 +330,7 @@ class DashboardApi {
 					'has_unpublished_changes' => $form['has_unpublished_changes'],
 					'updated_at'              => $form['updated_at'],
 					'time_ago'                => $this->timeAgo( $form['updated_at'] ),
-					'submission_count'        => $submissionCount,
+					'submission_count'        => $counts[ (int) $form['id'] ] ?? 0,
 				);
 			},
 			$forms

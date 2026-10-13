@@ -1,5 +1,5 @@
 import { useState } from '@wordpress/element';
-import { Button, SelectControl, Spinner } from '@wordpress/components';
+import { Button, SelectControl, Spinner, TextControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import Icon from '../../ui/Icon';
@@ -127,13 +127,43 @@ export function ViewsChart({ data = [] }) {
 }
 
 /**
+ * Options for the form performance selector.
+ *
+ * Every form passed in is listed. There is no cap at the ten most recent.
+ *
+ * @param {Array}  forms Rows with id and title.
+ * @param {string} query Optional title or id filter so older forms stay reachable.
+ * @return {Array<{ label: string, value: string }>}
+ */
+export function performanceFormOptions(forms, query = '') {
+  const list = Array.isArray(forms) ? forms : [];
+  const needle = String(query || '').trim().toLowerCase();
+  const matched = needle
+    ? list.filter((form) => {
+        const title = String(form.title || '').toLowerCase();
+        return title.includes(needle) || String(form.id).includes(needle);
+      })
+    : list;
+
+  return [
+    { label: __('All forms', 'subtleforms'), value: '0' },
+    ...matched.map((form) => ({
+      /* translators: %d: form ID */
+      label: form.title || sprintf(__('Form #%d', 'subtleforms'), form.id),
+      value: String(form.id),
+    })),
+  ];
+}
+
+/**
  * Dashboard panel: 30-day views, submissions and conversion, all forms or one.
  *
  * @param {Object} props
- * @param {Array}  props.forms Forms for the selector ({ id, title }).
+ * @param {Array}  props.forms Every accessible non-trashed form ({ id, title }).
  */
 export default function FormAnalyticsPanel({ forms = [] }) {
   const [formId, setFormId] = useState(0);
+  const [formQuery, setFormQuery] = useState('');
   const { data, isLoading, error, locked } = useAnalyticsSeries(formId, ANALYTICS_DAYS);
 
   const series = locked ? sampleSeries(ANALYTICS_DAYS) : data?.series || [];
@@ -161,22 +191,24 @@ export default function FormAnalyticsPanel({ forms = [] }) {
           </p>
         </div>
         {!locked && forms.length > 0 && (
-          <SelectControl
-            className='sf-analytics-panel__select'
-            label={__('Form', 'subtleforms')}
-            hideLabelFromVision
-            value={String(formId)}
-            options={[
-              { label: __('All forms', 'subtleforms'), value: '0' },
-              ...forms.map((f) => ({
-                /* translators: %d: form ID */
-                label: f.title || sprintf(__('Form #%d', 'subtleforms'), f.id),
-                value: String(f.id),
-              })),
-            ]}
-            onChange={(v) => setFormId(Number(v))}
-            __nextHasNoMarginBottom
-          />
+          <div className='sf-analytics-panel__select'>
+            <TextControl
+              label={__('Find a form', 'subtleforms')}
+              hideLabelFromVision
+              value={formQuery}
+              placeholder={__('Find a form', 'subtleforms')}
+              onChange={setFormQuery}
+              __nextHasNoMarginBottom
+            />
+            <SelectControl
+              label={__('Form', 'subtleforms')}
+              hideLabelFromVision
+              value={String(formId)}
+              options={performanceFormOptions(forms, formQuery)}
+              onChange={(v) => setFormId(Number(v))}
+              __nextHasNoMarginBottom
+            />
+          </div>
         )}
       </header>
 

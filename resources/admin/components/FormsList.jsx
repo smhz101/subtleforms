@@ -28,6 +28,7 @@ import {
 import { formatRelativeDate, formatDate, isNewForm } from '../utils/formatDate';
 import { logger, perfMarkers } from '../diagnostics';
 import './FormsList.scss';
+import { formsEmptyState } from './formsEmptyState';
 
 export const ALL_FORM_COLUMNS = ['title', 'form_type', 'status', 'id', 'submission_count', 'performance', 'updated_at', 'actions'];
 export const DEFAULT_FORM_VISIBLE = ['title', 'form_type', 'status', 'id', 'submission_count', 'performance', 'updated_at', 'actions'];
@@ -773,6 +774,8 @@ export default function FormsList({
     currentPage * perPage
   );
 
+  const emptyState = formsEmptyState(searchTerm, statusFilter);
+
   return (
     <div className='sf-forms-list'>
       {buffer.length > 0 && buffer.length <= 3 && (
@@ -833,20 +836,9 @@ export default function FormsList({
             <span className='sf-empty__icon'>
               {searchTerm ? <Icon.Search size={20} /> : <Icon.FileText size={20} />}
             </span>
-            <h3 className='sf-empty__title'>
-              {searchTerm
-                ? __('No forms match your search', 'subtleforms')
-                : __('Create your first form', 'subtleforms')}
-            </h3>
-            <p className='sf-empty__text'>
-              {searchTerm
-                ? __('Try a different name, or clear the search.', 'subtleforms')
-                : __(
-                    'Start from a template or a blank canvas. You can switch layouts any time.',
-                    'subtleforms'
-                  )}
-            </p>
-            {!searchTerm && (
+            <h3 className='sf-empty__title'>{emptyState.title}</h3>
+            <p className='sf-empty__text'>{emptyState.text}</p>
+            {emptyState.showCreate && (
               <div className='sf-empty__actions'>
                 <Button
                   variant='primary'
