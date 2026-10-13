@@ -55,6 +55,9 @@ function copyFilesToTemp() {
       'subtleforms.php',
       'license.txt',
       'readme.txt',
+      'uninstall.php',
+      'composer.json',
+      'languages/**/*',
 
       // Built assets
       'build/**/*',

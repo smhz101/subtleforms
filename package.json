@@ -1,6 +1,6 @@
 {
   "name": "subtleforms-admin",
-  "version": "1.10.0",
+  "version": "2.3.2",
   "private": true,
   "engines": {
     "node": ">=20.0.0"
@@ -25,16 +25,19 @@
     "dist:zip": "gulp zip",
     "dist:clean": "gulp clean",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build -o storybook-static"
+    "build-storybook": "storybook build -o storybook-static",
+    "test:browser": "playwright test -c playwright.browser.config.js"
   },
   "jest": {
     "testEnvironment": "jsdom",
     "testPathIgnorePatterns": [
       "/node_modules/",
-      "/tests/e2e/"
+      "/tests/e2e/",
+      "/tests/browser/"
     ]
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.13.0",
     "@playwright/test": "^1.57.0",
     "@storybook/addon-a11y": "^8.6.14",
     "@storybook/addon-essentials": "^8.6.14",
