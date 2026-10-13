@@ -167,4 +167,46 @@
 			background-color: var(--sf-gray-300);
 		}
 	}
+
+	// Empty question slot (2.3.2)
+	&__slot {
+		padding: 1.5rem;
+		border: 1px dashed var(--sf-gray-300);
+		border-radius: var(--sf-radius-md);
+		text-align: center;
+	}
+
+	&__slot-title {
+		margin: 0 0 0.25rem;
+		font-weight: 600;
+		color: var(--sf-gray-900);
+	}
+
+	&__slot-text {
+		margin: 0 0 1rem;
+		color: var(--sf-gray-500);
+	}
+
+	&__slot-actions {
+		display: flex;
+		justify-content: center;
+		gap: 0.5rem;
+	}
+
+	&__nav-end {
+		display: flex;
+		align-items: center;
+		gap: 0.5rem;
+	}
+
+	&__dot {
+		border: 0;
+		padding: 0;
+		cursor: pointer;
+	}
+
+	// The question toolbar sits inside the card.
+	&__card .sf-field-chrome {
+		margin: 0;
+	}
 }
