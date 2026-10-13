@@ -7,6 +7,10 @@ import AddressFieldRenderer from './AddressFieldRenderer';
 import { ProductPreview, ChoicePreview, SummaryPreview, CardPreview } from './PaymentPreviews';
 import { getCanvasPreview } from '../../../shared/extend';
 import { fieldDisplay } from '../../../shared/fieldDisplay';
+import { fieldConfig } from '../../../shared/fieldConfig';
+import { orderedCountries, preferredCountryCodes, COUNTRIES } from '../../../shared/countries';
+import { toggleInitialValue, toggleIsOn } from '../../../shared/toggleState';
+import ChainedSelect from '../../../frontend/components/fields/ChainedSelect';
 import { ConfigContext } from './context/ConfigContext';
 import './FieldRenderer.scss';
 
@@ -45,7 +49,7 @@ function hasText(html) {
  * Wrapped in memo() to prevent unnecessary re-renders during drag operations.
  * Only re-renders when field prop changes.
  */
-const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, onLabelChange }) {
+const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, onLabelChange, interactive = false }) {
   // Null-safe destructure — required before hooks so all hooks run unconditionally
   const { type, label, required, placeholder, options, subFields } = field || {};
 
@@ -56,6 +60,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
   // ── Inline label editing state — ALL hooks before any early return ──────────
   const [isEditingLabel, setIsEditingLabel] = useState(false);
   const [editLabelValue, setEditLabelValue] = useState('');
+  const [chainedSelections, setChainedSelections] = useState([]);
   const labelInputRef = useRef(null);
 
   useEffect(() => {
@@ -224,14 +229,18 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
-      {type === 'toggle' && (
-        <div className='sf-field-renderer__toggle'>
-          <span className='sf-field-renderer__toggle-track' aria-hidden='true'>
-            <span className='sf-field-renderer__toggle-thumb' />
-          </span>
-          <span>{field.toggleLabel || __('Yes', 'subtleforms')}</span>
-        </div>
-      )}
+      {type === 'toggle' && (() => {
+        const cfg = fieldConfig(field);
+        const on = toggleIsOn(toggleInitialValue(cfg), cfg);
+        return (
+          <div className='sf-field-renderer__toggle'>
+            <span className={`sf-field-renderer__toggle-track${on ? ' is-on' : ''}`} aria-hidden='true'>
+              <span className='sf-field-renderer__toggle-thumb' />
+            </span>
+            <span>{field.toggleLabel || __('Yes', 'subtleforms')}</span>
+          </div>
+        );
+      })()}
 
       {type === 'scale' && (() => {
         const min = parseInt(field.scaleMin ?? 1, 10);
@@ -409,7 +418,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
-      {(type === 'dropdown' || type === 'select') && options && (
+      {(type === 'dropdown' || type === 'select') && (
         <select
           className={selectClass}
           disabled
@@ -417,7 +426,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           <option>
             {placeholder || __('Select an option', 'subtleforms')}
           </option>
-          {options.map((opt, idx) => (
+          {(fieldConfig(field).options || options || []).map((opt, idx) => (
             <option key={idx} value={opt.value}>
               {opt.label}
             </option>
@@ -452,38 +461,35 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
-      {type === 'country' && (
-        <div className='sf-country-field'>
-          <select
-            className={selectClass}
-            disabled
-            tabIndex='-1'>
-            <option>
-              {placeholder || __('Select a country', 'subtleforms')}
-            </option>
-            <option>United States</option>
-            <option>United Kingdom</option>
-            <option>Canada</option>
-            <option>Australia</option>
-            <option>Germany</option>
-            <option>France</option>
-            <option>Spain</option>
-            <option>Italy</option>
-            <option>Japan</option>
-            <option>China</option>
-            <option>{__('...and 235+ more countries', 'subtleforms')}</option>
-          </select>
-          <div className='sf-country-field__info'>
-            {(() => { const CountryIcon = getFieldIcon('country'); return <CountryIcon size={16} />; })()}
-            <span className='sf-country-field__text'>
-              {__(
-                'Full ISO-3166 country list available on frontend',
-                'subtleforms'
-              )}
-            </span>
+      {type === 'country' && (() => {
+        const cfg = fieldConfig(field);
+        const outputFormat = cfg.output_format || 'code';
+        const countries = orderedCountries(preferredCountryCodes(cfg.preferred_countries));
+        const raw = cfg.default_country || '';
+        const matched = COUNTRIES.find((country) => country.code === String(raw).toUpperCase());
+        const selected = outputFormat === 'name' ? (matched ? matched.name : raw) : raw;
+        return (
+          <div className='sf-country-field'>
+            <select
+              className={selectClass}
+              disabled={!interactive}
+              tabIndex={interactive ? undefined : '-1'}
+              value={selected}
+              onChange={() => {}}>
+              <option value=''>
+                {placeholder || __('Select a country', 'subtleforms')}
+              </option>
+              {countries.map((country) => (
+                <option
+                  key={country.code}
+                  value={outputFormat === 'name' ? country.name : country.code}>
+                  {country.name}
+                </option>
+              ))}
+            </select>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {type === 'hidden' && (
         <div className='sf-field-renderer__hidden-field'>
@@ -671,17 +677,13 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
 
       {/* ── Chained Select ──────────────────────────────────────────────────── */}
       {type === 'chained_select' && (
-        <div className='sf-field-renderer__chained-select'>
-          <select className={selectClass} disabled tabIndex='-1'>
-            <option>{placeholder || __('Select category…', 'subtleforms')}</option>
-          </select>
-          <select className={selectClass} disabled tabIndex='-1'>
-            <option>{__('Select subcategory…', 'subtleforms')}</option>
-          </select>
-          <div className='sf-field-renderer__field-hint'>
-            {__('Options load based on parent selection', 'subtleforms')}
-          </div>
-        </div>
+        <ChainedSelect
+          config={fieldConfig(field)}
+          value={chainedSelections}
+          onChange={setChainedSelections}
+          selectClassName={selectClass}
+          disabled={!interactive}
+        />
       )}
 
       {/* ── Color Picker ────────────────────────────────────────────────────── */}

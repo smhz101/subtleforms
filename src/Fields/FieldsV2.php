@@ -46,9 +46,10 @@ final class FieldsV2 {
 				icon: 'dashicons-controls-play',
 				kind: 'input',
 				fieldSpecificAttributes: array(
-					'toggleLabel' => __( 'Yes', 'subtleforms' ),
-					'onValue'     => 'yes',
-					'offValue'    => 'no',
+					'toggleLabel'  => __( 'Yes', 'subtleforms' ),
+					'onValue'      => 'yes',
+					'offValue'     => 'no',
+					'defaultState' => 'off',
 				),
 				inspectorControls: array(
 					array(
@@ -60,6 +61,16 @@ final class FieldsV2 {
 						'type'  => 'text',
 						'name'  => 'toggleLabel',
 						'label' => __( 'Text beside the switch', 'subtleforms' ),
+					),
+					array(
+						'type'    => 'select',
+						'name'    => 'defaultState',
+						'label'   => __( 'Default state', 'subtleforms' ),
+						'section' => 'appearance',
+						'options' => array(
+							array( 'value' => 'off', 'label' => __( 'Disabled', 'subtleforms' ) ),
+							array( 'value' => 'on', 'label' => __( 'Enabled', 'subtleforms' ) ),
+						),
 					),
 					array(
 						'type'    => 'text',

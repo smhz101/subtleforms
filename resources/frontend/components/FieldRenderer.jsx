@@ -18,7 +18,8 @@ import {
 import { getFieldType } from '../../shared/extend';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { fieldDisplay } from '../../shared/fieldDisplay';
-import { COUNTRIES, orderedCountries } from '../../shared/countries';
+import { COUNTRIES, orderedCountries, preferredCountryCodes } from '../../shared/countries';
+import { toggleIsOn } from '../../shared/toggleState';
 
 // The signature pad and rich text editor are only downloaded on pages whose
 // form has those fields (2.3.0). Every other form skips that code.
@@ -384,9 +385,10 @@ export default function FieldRenderer({
   }
 
   // Composite group fields — name_group / address_group. They carry an object
-  // value at their root key, so they render as a real <fieldset>/<legend> (not
-  // a <label> pointing at an id that doesn't exist) with the required asterisk
-  // shown ONCE on the legend — never on Name + First + Last (Part B1).
+  // value at their root key, so they render as a div role="group" labelled by
+  // the field label (not a fieldset/legend, and not a <label> pointing at an
+  // id that doesn't exist) with the required asterisk shown ONCE on that
+  // label — never on Name + First + Last (Part B1).
   //
   // Two shapes are supported:
   //  • children: Plan A group with real child text nodes (each rendered as its
@@ -403,19 +405,21 @@ export default function FieldRenderer({
       Array.isArray(field.children) && field.children.length > 0;
 
     return (
-      <fieldset
+      <div
+        role='group'
         className={[`subtleforms-field subtleforms-field-${field.type} subtleforms-group-field`, appearanceClasses]
           .filter(Boolean)
           .join(' ')}
         aria-invalid={!!error}
+        aria-labelledby={`${inputId}-label`}
         aria-describedby={config.description ? `${inputId}-help` : undefined}
       >
-        <legend className='subtleforms-field-label'>
+        <label id={`${inputId}-label`} className='subtleforms-field-label'>
           {label}
           {required && (
             <span className='subtleforms-required' aria-label=', required'>*</span>
           )}
-        </legend>
+        </label>
         {config.description && display.descriptionAbove && (
           <p id={`${inputId}-help`} className='subtleforms-field-help'>{config.description}</p>
         )}
@@ -462,7 +466,7 @@ export default function FieldRenderer({
             {error}
           </div>
         )}
-      </fieldset>
+      </div>
     );
   }
 
@@ -834,12 +838,18 @@ function renderInput(
       // stored in the field's settings is no longer needed.
       const outputFormat = config.output_format || 'code';
       const searchable = config.searchable !== false;
+      const countries = orderedCountries(preferredCountryCodes(config.preferred_countries));
+      const stored = value === undefined || value === null || value === ''
+        ? (config.default_country || '')
+        : value;
+      const matched = COUNTRIES.find((country) => country.code === String(stored).toUpperCase());
+      const selected = outputFormat === 'name' ? (matched ? matched.name : stored) : stored;
       return (
         <select
           id={inputId}
           className='subtleforms-select subtleforms-country-select'
           name={name}
-          value={value ?? ''}
+          value={selected ?? ''}
           onChange={(e) => onChange(e.target.value)}
           required={required || undefined}
           aria-required={required}
@@ -850,7 +860,7 @@ function renderInput(
           <option value=''>
             {placeholder || __('Select a country', 'subtleforms')}
           </option>
-          {orderedCountries(config.preferred_countries).map((country) => (
+          {countries.map((country) => (
             <option
               key={country.code}
               value={outputFormat === 'name' ? country.name : country.code}>
@@ -1394,7 +1404,6 @@ function renderInput(
     case 'toggle': {
       const onValue = config.onValue ?? 'yes';
       const offValue = config.offValue ?? 'no';
-      const isOn = value === true || value === onValue;
       return (
         <label className='subtleforms-toggle' htmlFor={inputId}>
           <input
@@ -1404,7 +1413,7 @@ function renderInput(
             className='subtleforms-toggle__input'
             name={name}
             value={onValue}
-            checked={isOn}
+            checked={toggleIsOn(value, config)}
             onChange={(e) => onChange(e.target.checked ? onValue : offValue)}
             aria-required={required}
             aria-invalid={!!error}

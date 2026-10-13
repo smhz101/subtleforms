@@ -589,6 +589,20 @@ final class CoreFields {
 						'label' => __( 'Placeholder', 'subtleforms' ),
 					),
 					array(
+						'type'    => 'select',
+						'name'    => 'default_country',
+						'label'   => __( 'Default country', 'subtleforms' ),
+						'section' => 'appearance',
+						'options' => self::countryControlOptions(),
+					),
+					array(
+						'type'    => 'lines',
+						'name'    => 'preferred_countries',
+						'label'   => __( 'Preferred countries', 'subtleforms' ),
+						'help'    => __( 'ISO codes shown first, one per line. Example: US', 'subtleforms' ),
+						'section' => 'appearance',
+					),
+					array(
 						'type'  => 'select',
 						'name'  => 'output_format',
 						'label' => __( 'Output Format', 'subtleforms' ),
@@ -617,12 +631,20 @@ final class CoreFields {
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					'source' => 'csv', // or 'manual'
+					'levels' => array(),
 				),
 				inspectorControls: array(
 					array(
 						'type'  => 'text',
 						'name'  => 'label',
 						'label' => __( 'Label', 'subtleforms' ),
+					),
+					array(
+						'type'    => 'chained_levels',
+						'name'    => 'levels',
+						'label'   => __( 'Levels', 'subtleforms' ),
+						'section' => 'appearance',
+						'help'    => __( 'Each level is one dropdown. Changing a choice clears the ones below it.', 'subtleforms' ),
 					),
 					array(
 						'type'    => 'select',
@@ -1743,6 +1765,27 @@ final class CoreFields {
 
 		// Allow extensions to register additional fields
 		do_action( 'subtleforms/fields/register', $registry );
+	}
+
+	/**
+	 * Options for the country field's default-country select.
+	 *
+	 * @return array<int, array{value: string, label: string}>
+	 */
+	private static function countryControlOptions(): array {
+		$options = array(
+			array(
+				'value' => '',
+				'label' => __( 'No default', 'subtleforms' ),
+			),
+		);
+		foreach ( CountryList::getAll() as $code => $name ) {
+			$options[] = array(
+				'value' => $code,
+				'label' => $name,
+			);
+		}
+		return $options;
 	}
 
 	/**

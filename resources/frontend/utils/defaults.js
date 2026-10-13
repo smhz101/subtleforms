@@ -1,5 +1,6 @@
 import { repeaterLimits } from './fieldValidation';
 import { fieldConfig } from '../../shared/fieldConfig';
+import { toggleInitialValue } from '../../shared/toggleState';
 /**
  * Default values for a form's fields.
  *
@@ -97,6 +98,8 @@ export function collectDefaultValues(fields) {
         // Seed before required checks so an untouched slider submits the
         // number it already shows.
         out[key] = rangeSliderSeed(config);
+      } else if (key && field.type === 'toggle') {
+        out[key] = toggleInitialValue(config);
       } else if (key) {
         const raw = config.defaultValue;
         if (raw !== undefined && raw !== null && raw !== '') {
@@ -109,8 +112,8 @@ export function collectDefaultValues(fields) {
           } else {
             out[key] = resolved;
           }
-        } else if (field.type === 'toggle') {
-          out[key] = config.offValue ?? 'no';
+        } else if (field.type === 'country' && config.default_country) {
+          out[key] = config.default_country;
         } else if (field.type === 'hidden' && config.value) {
           out[key] = resolveTokens(config.value);
         }

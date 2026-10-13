@@ -158,6 +158,51 @@ describe('2.2.1 field fixes', () => {
     unmount();
   });
 
+  test('name and address groups are labelled groups, not legends', () => {
+    for (const field of [
+      { key: 'name', type: 'name_group', label: 'Name', required: true },
+      { key: 'addr', type: 'address_group', label: 'Address', required: true },
+      { key: 'address', type: 'address', label: 'Address', required: true },
+    ]) {
+      const { container, unmount } = render(field);
+      expect(container.querySelector('legend')).toBeNull();
+      const group = container.querySelector('[role="group"]');
+      const label = container.querySelector('.subtleforms-field-label');
+      expect(group).not.toBeNull();
+      expect(group.getAttribute('aria-labelledby')).toBe(label.id);
+      expect(container.querySelector('.subtleforms-required')).not.toBeNull();
+      unmount();
+    }
+  });
+
+  test('a toggle is unchecked for off-like values and checked for yes', () => {
+    let view = render({ key: 't', type: 'toggle', label: 'Toggle' });
+    expect(view.container.querySelector('input[type="checkbox"]').checked).toBe(false);
+    view.unmount();
+    for (const value of [0, '0', 'off', 'no']) {
+      view = render({ key: 't', type: 'toggle', label: 'Toggle' }, { values: { t: value } });
+      expect(view.container.querySelector('input[type="checkbox"]').checked).toBe(false);
+      view.unmount();
+    }
+    view = render({ key: 't', type: 'toggle', label: 'Toggle' }, { values: { t: 'yes' } });
+    expect(view.container.querySelector('input[type="checkbox"]').checked).toBe(true);
+    view.unmount();
+  });
+
+  test('a chained select renders a dropdown for each level', () => {
+    const { container, unmount } = render({
+      key: 'place',
+      type: 'chained_select',
+      label: 'Place',
+      levels: [
+        { label: 'Country', options: [{ label: 'United States', value: 'us' }] },
+        { label: 'State', options: [{ label: 'California', value: 'ca' }] },
+      ],
+    });
+    expect(container.querySelectorAll('select').length).toBeGreaterThan(1);
+    unmount();
+  });
+
   test('a server error is shown on the field and described (bug 2)', () => {
     const field = { key: 'email', type: 'email', label: 'Email', required: true };
     const { container, unmount } = render(field, { errors: { email: 'Invalid email address.' } });

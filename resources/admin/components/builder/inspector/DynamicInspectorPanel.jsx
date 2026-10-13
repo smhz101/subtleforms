@@ -131,7 +131,11 @@ function DynamicInspectorPanel( {
 				seen.add( name );
 				return true;
 			} )
-			.map( ( ctrl ) => ( { ...ctrl, section: ctrl.section || 'general' } ) )
+			.map( ( ctrl ) => {
+				const controlName = ctrl?.name ?? ctrl?.key;
+				const fallback = controlName === 'label' || controlName === 'description' ? 'general' : 'appearance';
+				return { ...ctrl, section: ctrl.section || fallback };
+			} )
 			.filter( ( ctrl ) => ! sections || sections.includes( ctrl.section ) )
 			// Sections become panels in the inspector, not inline headings.
 			.map( ( { section, ...ctrl } ) => ctrl ); // eslint-disable-line no-unused-vars
