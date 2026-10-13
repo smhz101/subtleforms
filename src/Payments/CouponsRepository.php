@@ -111,6 +111,16 @@ final class CouponsRepository {
 	 */
 	public static function save( array $data, int $id = 0 ) {
 		global $wpdb;
+		foreach (
+			array(
+				'max_uses'     => __( 'Total uses cannot be negative.', 'subtleforms' ),
+				'per_customer' => __( 'Uses per customer cannot be negative.', 'subtleforms' ),
+			) as $field => $message
+		) {
+			if ( isset( $data[ $field ] ) && is_numeric( $data[ $field ] ) && (float) $data[ $field ] < 0 ) {
+				return new \WP_Error( 'subtleforms_coupon_uses', $message, array( 'status' => 400 ) );
+			}
+		}
 		$row = self::clean( $data );
 		if ( '' === $row['code'] ) {
 			return new \WP_Error( 'subtleforms_coupon_code', __( 'Enter a coupon code.', 'subtleforms' ), array( 'status' => 400 ) );
