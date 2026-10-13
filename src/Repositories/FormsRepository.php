@@ -316,9 +316,11 @@ final class FormsRepository {
 			array(
 				'title'  => Helpers::safe_sanitize_text( Helpers::safe_string_get( $data, 'title' ) ),
 				'config' => wp_json_encode( $data['config'] ),
-				'status' => $data['status'],
+				'status'     => $data['status'],
+				'created_at' => current_time( 'mysql', true ),
+				'updated_at' => current_time( 'mysql', true ),
 			),
-			array( '%s', '%s', '%s' )
+			array( '%s', '%s', '%s', '%s', '%s' )
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
@@ -381,6 +383,18 @@ final class FormsRepository {
 				}
 			}
 
+			// The builder saves flat nodes, so the override usually sits on the
+			// node itself; it gets the same checks.
+			if ( isset( $field['appearance'] ) ) {
+				$clean = is_array( $field['appearance'] ) ? \SubtleForms\Support\Appearance::sanitizeField( $field['appearance'] ) : array();
+
+				if ( empty( $clean ) ) {
+					unset( $field['appearance'] );
+				} else {
+					$field['appearance'] = $clean;
+				}
+			}
+
 			foreach ( array( 'fields', 'children' ) as $nested ) {
 				if ( ! empty( $field[ $nested ] ) && is_array( $field[ $nested ] ) ) {
 					$field[ $nested ] = self::sanitizeFieldAppearance( $field[ $nested ] );
@@ -430,6 +444,9 @@ final class FormsRepository {
 			$schema['metadata']['type'] = 'multi-step';
 		}
 
+		// The type follows the structure (2.3.2), whatever the client sent.
+		list( $schema ) = \SubtleForms\Support\SchemaRepair::syncType( $schema );
+
 		// Appearance values are written into CSS custom properties on the rendered
 		// form, so they are checked here — at the point of storage — rather than
 		// escaped at output. Every save path goes through this method.
@@ -478,8 +495,9 @@ final class FormsRepository {
 				'version'     => $next,
 				'schema_data' => wp_json_encode( $schema ),
 				'active'      => $activate ? 1 : 0,
+				'created_at'  => current_time( 'mysql', true ),
 			),
-			array( '%d', '%d', '%s', '%d' )
+			array( '%d', '%d', '%s', '%d', '%s' )
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
@@ -746,6 +764,10 @@ final class FormsRepository {
 			return false;
 		}
 
+		// UTC, like created_at (the column default follows the MySQL server zone).
+		$update_data['updated_at'] = current_time( 'mysql', true );
+		$format[]                  = '%s';
+
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct update; no caching for writes.
 		$result = $wpdb->update(
 			$this->table,
@@ -788,12 +810,23 @@ final class FormsRepository {
 	 */
 	public function trash( int $id ): bool {
 		global $wpdb;
+		$form = $this->find( $id );
+		if ( ! $form ) {
+			return false;
+		}
+		if ( ( $form['status'] ?? '' ) === 'trash' ) {
+			return true;
+		}
+		// Remember the status so Restore can return to it (2.3.1).
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Write path; no caching.
 		$result = $wpdb->update(
 			$this->table,
-			array( 'status' => 'trash' ),
+			array(
+				'status'       => 'trash',
+				'trashed_from' => (string) ( $form['status'] ?? 'draft' ),
+			),
 			array( 'id' => $id ),
-			array( '%s' ),
+			array( '%s', '%s' ),
 			array( '%d' )
 		);
 		if ( $result !== false ) {
@@ -803,29 +836,37 @@ final class FormsRepository {
 	}
 
 	/**
-	 * Restore a trashed form.
+	 * Restore a trashed form to the status it had before (2.3.1).
 	 *
-	 * Restores to 'draft' (matching WordPress' post-restore behaviour). A form
-	 * that was published before trashing will need to be re-published to go
-	 * live again — restoring never silently re-publishes (Part B10).
+	 * Forms trashed by older versions have no recorded status and come back
+	 * as drafts, so restoring never publishes a form by surprise.
 	 *
 	 * @param int $id Form ID.
-	 * @return bool
+	 * @return string|false The restored status, or false.
 	 */
-	public function restore( int $id ): bool {
+	public function restore( int $id ) {
 		global $wpdb;
+		$form = $this->find( $id );
+		if ( ! $form || ( $form['status'] ?? '' ) !== 'trash' ) {
+			return false;
+		}
+		$previous = (string) ( $form['trashed_from'] ?? '' );
+		$status   = in_array( $previous, array( 'draft', 'published', 'archived' ), true ) ? $previous : 'draft';
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Write path; no caching.
 		$result = $wpdb->update(
 			$this->table,
-			array( 'status' => 'draft' ),
+			array(
+				'status'       => $status,
+				'trashed_from' => null,
+			),
 			array( 'id' => $id, 'status' => 'trash' ),
-			array( '%s' ),
+			array( '%s', '%s' ),
 			array( '%d', '%s' )
 		);
 		if ( $result !== false ) {
 			wp_cache_delete( "subtleforms_form_{$id}", 'subtleforms' );
 		}
-		return $result !== false;
+		return $result !== false ? $status : false;
 	}
 
 	/**
@@ -838,11 +879,12 @@ final class FormsRepository {
 	 */
 	public function count_by_status(): array {
 		global $wpdb;
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Aggregate read; cached below.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Aggregate read with no user input; the table name comes from $wpdb->prefix.
 		$rows = $wpdb->get_results(
 			"SELECT status, COUNT(*) AS c FROM {$this->table} GROUP BY status",
 			ARRAY_A
 		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, PluginCheck.Security.DirectDB.UnescapedDBParameter
 
 		$counts = array(
 			'all'       => 0,
@@ -877,6 +919,10 @@ final class FormsRepository {
 	 * @throws \InvalidArgumentException If schema validation fails
 	 */
 	public function saveDraftSchema( int $formId, array $schema ): bool {
+		// The type follows the structure: a Page Break makes a Standard form
+		// Multi-step and removing the last one makes it Standard again (2.3.2).
+		list( $schema ) = \SubtleForms\Support\SchemaRepair::syncType( $schema );
+
 		// Validate schema before saving
 		$validator = new \SubtleForms\Support\SchemaValidator();
 		try {
