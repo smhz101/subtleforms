@@ -52,6 +52,7 @@ final class SchemaValidator {
 		'textarea',
 		'number',
 		'phone',
+		'tel',
 		'url',
 		'password',
 		'checkbox',
@@ -221,6 +222,13 @@ final class SchemaValidator {
 					}
 				}
 			}
+		}
+
+		// A single checkbox is one yes/no box; a list of options belongs to
+		// Multiple choice (2.2.1, bug 7).
+		$checkboxErrors = self::checkboxOptionErrors( $schema['fields'], 'fields' );
+		if ( $checkboxErrors ) {
+			throw new InvalidArgumentException( $checkboxErrors[0]['message'] ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 		}
 
 		// Conditional logic (permissive but structured)
@@ -443,6 +451,12 @@ final class SchemaValidator {
 			}
 		}
 
+		if ( isset( $schema['fields'] ) && is_array( $schema['fields'] ) ) {
+			foreach ( self::checkboxOptionErrors( $schema['fields'], 'fields' ) as $error ) {
+				$errors[] = $error;
+			}
+		}
+
 		if ( isset( $schema['logic'] ) && ! is_array( $schema['logic'] ) ) {
 			$push( $errors, 'logic', 'Schema.logic must be an array of rules.' );
 		}
@@ -477,26 +491,7 @@ final class SchemaValidator {
 		}
 
 		// Check for at least one input field (not just containers/layout)
-		$inputFieldTypes = array(
-			'text',
-			'email',
-			'textarea',
-			'number',
-			'phone',
-			'url',
-			'password',
-			'checkbox',
-			'consent',
-			'radio',
-			'multiple_choice',
-			'dropdown',
-			'select',
-			'date',
-			'time',
-			'datetime',
-			'file_upload',
-			'image_upload',
-		);
+		$inputFieldTypes = null; // Every field that takes an answer counts (2.3.0).
 
 		$hasInputField = $this->hasInputFieldRecursive( $schema['fields'], $inputFieldTypes );
 
@@ -536,26 +531,7 @@ final class SchemaValidator {
 			$push( $errors, 'metadata.title', 'Cannot publish: Form must have a title.' );
 		}
 
-		$inputFieldTypes = array(
-			'text',
-			'email',
-			'textarea',
-			'number',
-			'phone',
-			'url',
-			'password',
-			'checkbox',
-			'consent',
-			'radio',
-			'multiple_choice',
-			'dropdown',
-			'select',
-			'date',
-			'time',
-			'datetime',
-			'file_upload',
-			'image_upload',
-		);
+		$inputFieldTypes = null; // Every field that takes an answer counts (2.3.0).
 
 		if ( isset( $schema['fields'] ) && is_array( $schema['fields'] ) && count( $schema['fields'] ) > 0 ) {
 			$hasInputField = $this->hasInputFieldRecursive( $schema['fields'], $inputFieldTypes );
@@ -572,13 +548,83 @@ final class SchemaValidator {
 		return $errors;
 	}
 
-	private function hasInputFieldRecursive( array $fields, array $inputFieldTypes ): bool {
+	/**
+	 * Single checkboxes that carry a list of options, anywhere in the tree.
+	 *
+	 * @param array  $fields Field list.
+	 * @param string $path   Path of the list, for error messages.
+	 * @return array<int,array{path:string,message:string,fieldKey:string}>
+	 */
+	public static function checkboxOptionErrors( array $fields, string $path ): array {
+		$errors = array();
+		foreach ( $fields as $i => $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+			$here = "{$path}[{$i}]";
+			if ( ( $field['type'] ?? '' ) === 'checkbox' ) {
+				$options = $field['options'] ?? ( $field['config']['options'] ?? null );
+				if ( is_array( $options ) && count( $options ) > 0 ) {
+					$key      = (string) ( $field['key'] ?? ( $field['config']['key'] ?? '' ) );
+					$errors[] = array(
+						'path'     => "{$here}.options",
+						/* translators: %s: field key */
+						'message'  => sprintf( __( 'The single checkbox "%s" has a list of options. Use a Multiple choice field for several options.', 'subtleforms' ), $key ),
+						'fieldKey' => $key,
+					);
+				}
+			}
+			foreach ( array( 'children', 'fields' ) as $childKey ) {
+				if ( isset( $field[ $childKey ] ) && is_array( $field[ $childKey ] ) && self::isList( $field[ $childKey ] ) ) {
+					$errors = array_merge( $errors, self::checkboxOptionErrors( $field[ $childKey ], "{$here}.{$childKey}" ) );
+				}
+			}
+			if ( isset( $field['columns'] ) && is_array( $field['columns'] ) ) {
+				foreach ( $field['columns'] as $c => $column ) {
+					if ( is_array( $column ) && self::isList( $column ) ) {
+						$errors = array_merge( $errors, self::checkboxOptionErrors( $column, "{$here}.columns[{$c}]" ) );
+					}
+				}
+			}
+		}
+		return $errors;
+	}
+
+	/**
+	 * Whether an array is a plain list (0..n-1 keys).
+	 *
+	 * @param array $value Array.
+	 * @return bool
+	 */
+	private static function isList( array $value ): bool {
+		return array_keys( $value ) === range( 0, count( $value ) - 1 ) || array() === $value;
+	}
+
+	/**
+	 * Field types that hold no answer.
+	 */
+	private const LAYOUT_TYPES = array( 'html', 'section_break', 'disclaimer', 'step', 'form_step', 'repeat_field', 'recaptcha', 'hcaptcha', 'turnstile', 'captcha', 'action_hook', 'save_resume', 'payment_summary', 'payment_card', 'payment_hidden_price', 'hidden' );
+
+	/**
+	 * Whether a field type takes an answer from the visitor.
+	 *
+	 * Before 2.3 only a short list of basic types counted, so a form made
+	 * only of, say, a Signature or Rich text field could not be published.
+	 *
+	 * @param string $type Field type.
+	 * @return bool
+	 */
+	public static function takesAnswer( string $type ): bool {
+		return $type !== '' && ! in_array( $type, self::LAYOUT_TYPES, true ) && substr( $type, -10 ) !== '_container';
+	}
+
+	private function hasInputFieldRecursive( array $fields, ?array $inputFieldTypes = null ): bool {
 		foreach ( $fields as $field ) {
 			if ( ! is_array( $field ) ) {
 				continue;
 			}
 
-			if ( isset( $field['type'] ) && in_array( $field['type'], $inputFieldTypes, true ) ) {
+			if ( isset( $field['type'] ) && is_string( $field['type'] ) && self::takesAnswer( $field['type'] ) ) {
 				return true;
 			}
 
@@ -587,6 +633,14 @@ final class SchemaValidator {
 			foreach ( array( 'children', 'fields' ) as $childKey ) {
 				if ( isset( $field[ $childKey ] ) && is_array( $field[ $childKey ] ) ) {
 					if ( $this->hasInputFieldRecursive( $field[ $childKey ], $inputFieldTypes ) ) {
+						return true;
+					}
+				}
+			}
+
+			if ( isset( $field['columns'] ) && is_array( $field['columns'] ) && substr( (string) ( $field['type'] ?? '' ), -10 ) === '_container' ) {
+				foreach ( $field['columns'] as $column ) {
+					if ( is_array( $column ) && $this->hasInputFieldRecursive( $column, $inputFieldTypes ) ) {
 						return true;
 					}
 				}

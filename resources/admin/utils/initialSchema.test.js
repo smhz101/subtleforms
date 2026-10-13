@@ -32,18 +32,17 @@ describe('createInitialSchema', () => {
     expect(schema.fields[0].fields).toHaveLength(0);
   });
 
-  it('creates a conversational minimal schema with questions', () => {
-    const schema = createInitialSchema({
-      title: 'Test',
-      description: '',
-      formType: 'conversational',
-      startingPoint: 'minimal',
+  it('creates a conversational schema with no questions yet (2.3.2)', () => {
+    ['minimal', 'blank'].forEach((startingPoint) => {
+      const schema = createInitialSchema({
+        title: 'Test',
+        description: '',
+        formType: 'conversational',
+        startingPoint,
+      });
+      expect(schema.metadata.type).toBe('conversational');
+      // The builder shows "Add your first question"; nothing is locked.
+      expect(schema.fields).toEqual([]);
     });
-
-    expect(schema.metadata.type).toBe('conversational');
-    expect(schema.fields.length).toBeGreaterThan(0);
-    // Minimal conversational starts with the intro HTML block only
-    expect(schema.fields[0]?.type).toBe('html');
-    expect(schema.fields[0]?.key).toBeTruthy();
   });
 });

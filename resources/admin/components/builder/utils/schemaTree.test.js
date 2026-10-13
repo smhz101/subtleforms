@@ -30,13 +30,16 @@ describe('schemaTree', () => {
 
       expect(fieldNode.type).toBe('text');
       expect(fieldNode.parentId).toBe('root');
+      // A nested `config` is folded into the node's settings (2.2.1): a
+      // wrapper left in place hid required/options from the live renderer.
       expect(fieldNode.config).toEqual(
         expect.objectContaining({
-          config: { required: true },
+          required: true,
           label: 'Name',
           id: 'field_1',
         })
       );
+      expect(fieldNode.config.config).toBeUndefined();
 
       expect(result.nodes.root.children).toContain('field_1');
     });
