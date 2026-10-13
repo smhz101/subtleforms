@@ -1,160 +1,166 @@
+/**
+ * Builder top bar: title, form type, status, shortcode, save state, actions.
+ * Rendered inside the editor variant of the frame's top bar (64px).
+ */
+
 .sf-builder-header-bar {
 	&__left {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
+		gap: 8px;
+		min-width: 0;
 	}
 
 	&__title-input {
-		background-color: var(--sf-surface);
-		padding: 0.25rem 0.5rem;
-		border: 1px solid var(--wp-blue-500);
+		min-width: 220px;
+		height: 32px;
+		padding: 0 8px;
+		border: 1px solid var(--sf-brand);
+		border-radius: var(--sf-radius-control);
+		background: var(--sf-bg-surface);
+		box-shadow: 0 0 0 1px var(--sf-brand);
 		outline: none;
-		min-width: 200px;
-		font-weight: 600;
 		font-size: var(--sf-text-md);
-		line-height: 1.5rem;
-		color: var(--sf-gray-900);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
 	}
 
 	&__title-button {
-		background-color: transparent;
-		padding: 0.25rem 0.5rem;
-		border: none;
-		outline: none;
-		font-weight: 600;
+		min-width: 120px;
+		max-width: 28ch;
+		height: 32px;
+		padding: 0 8px;
+		overflow: hidden;
+		border: 0;
+		border-radius: var(--sf-radius-sm);
+		background: transparent;
 		font-size: var(--sf-text-md);
-		line-height: 1.5rem;
-		color: var(--sf-gray-900);
-		cursor: pointer;
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+		cursor: text;
+		transition: background-color var(--sf-transition-fast);
 
 		&:hover {
-			color: var(--wp-blue-500);
+			background: var(--sf-bg-muted);
+		}
+
+		&:focus-visible {
+			outline: none;
+			box-shadow: var(--sf-shadow-focus);
 		}
 	}
 
+	// Form type: a quiet outline chip next to the title.
 	&__form-type-badge {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.375rem;
-		padding: 0.25rem 0.625rem;
+		gap: 6px;
+		height: 24px;
+		padding: 0 8px;
+		border: 1px solid var(--sf-border);
+		border-radius: var(--sf-radius-full);
+		background: var(--sf-bg-surface);
 		font-size: var(--sf-text-xs);
-		line-height: 1rem;
-		font-weight: 500;
-		border: 1px solid;
-		border-radius: var(--sf-radius-sm);
+		font-weight: var(--sf-weight-medium);
+		line-height: 1;
+		color: var(--sf-text-muted);
+		white-space: nowrap;
 
-		&--gray {
-			background-color: var(--sf-gray-50);
-			color: var(--sf-gray-700);
-			border-color: var(--sf-gray-200);
-		}
-
-		&--purple {
-			background-color: var(--sf-purple-50);
-			color: var(--sf-violet-600);
-			border-color: var(--sf-purple-200);
-		}
-
-		&--indigo {
-			background-color: var(--sf-indigo-50);
-			color: var(--sf-indigo-600);
-			border-color: var(--sf-indigo-200);
-		}
-
+		&--purple,
+		&--indigo,
 		&--blue {
-			background-color: var(--sf-blue-50);
-			color: var(--sf-blue-700);
-			border-color: var(--sf-blue-200);
+			color: var(--sf-primary-700);
+			border-color: var(--sf-primary-200);
+			background: var(--sf-primary-50);
 		}
 
 		&--green {
-			background-color: var(--sf-green-50);
-			color: var(--sf-green-600);
-			border-color: var(--sf-green-100);
+			color: var(--sf-success);
+			border-color: var(--sf-success-border);
+			background: var(--sf-success-bg);
 		}
 	}
 
 	&__form-type-icon {
-		width: 0.75rem;
-		height: 0.75rem;
+		width: 12px;
+		height: 12px;
 	}
 
 	&__center {
 		display: flex;
 		align-items: center;
-		gap: 0.75rem;
+		gap: 8px;
 	}
 
+	// Status: soft pill with a dot, same language as list badges.
 	&__mode-badge {
 		display: inline-flex;
 		align-items: center;
-		padding: 0.375rem 0.75rem;
+		gap: 6px;
+		height: 24px;
+		padding: 0 10px;
+		border-radius: var(--sf-radius-full);
 		font-size: var(--sf-text-xs);
-		line-height: 1rem;
-		font-weight: 600;
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		color: var(--sf-surface);
+		font-weight: var(--sf-weight-medium);
+		line-height: 1;
+		white-space: nowrap;
 
-		// Single source of truth for builder status. These variants replace
-		// the old Tailwind bg-green-600 / bg-yellow-500 utilities (which had
-		// no Tailwind pipeline backing them) so the badge actually renders.
 		&--published {
-			background-color: var(--sf-green-600, var(--sf-success, #16a34a));
+			background: var(--sf-success-bg);
+			color: var(--sf-success);
 		}
 
 		&--draft {
-			background-color: var(--sf-yellow-500, var(--sf-warning, #d97706));
+			background: var(--sf-bg-muted);
+			color: var(--sf-text-secondary);
 		}
 
 		&--unpublished {
-			background-color: var(--sf-warning, #6b4600);
+			background: var(--sf-warning-bg);
+			color: var(--sf-warning);
 		}
 	}
 
-	&__shortcode-button {
-		display: inline-flex;
-		align-items: center;
-		gap: 0.375rem;
-		padding: 0.375rem 0.75rem;
-		font-size: var(--sf-text-xs);
-		line-height: 1rem;
-		font-weight: 500;
-		font-family: ui-monospace, monospace;
-		cursor: pointer;
-		outline: none;
-		transition: all var(--sf-duration-fast);
-		border-radius: var(--sf-radius-sm);
-		background-color: var(--sf-gray-50);
-		color: var(--sf-gray-700);
-		border: 1px solid var(--sf-gray-300);
+	&__mode-dot {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: currentColor;
+	}
 
-		&:hover {
-			border-color: var(--sf-blue-500);
-			background-color: var(--sf-blue-50);
+	&__shortcode-button.components-button {
+		width: 32px;
+		min-width: 32px;
+		height: 32px;
+		padding: 0;
+		justify-content: center;
+		color: var(--sf-text-secondary);
+
+		svg {
+			fill: none;
 		}
 
-		&--copied {
-			background-color: var(--sf-green-50);
-			color: var(--sf-green-600);
-			border-color: var(--sf-green-600);
+		&:hover:not(:disabled) {
+			background: var(--sf-bg-muted);
+			color: var(--sf-text);
+		}
 
-			&:hover {
-				border-color: var(--sf-green-600);
-				background-color: var(--sf-green-50);
-			}
+		&--copied,
+		&--copied:hover:not(:disabled) {
+			color: var(--sf-success);
 		}
 	}
 
 	&__save-status {
-		display: flex;
+		display: inline-flex;
 		align-items: center;
-		gap: 0.5rem;
-		padding: 0.5rem;
+		gap: 6px;
+		padding: 0 4px;
 		font-size: var(--sf-text-xs);
-		line-height: 1rem;
-		color: var(--sf-text-secondary);
+		color: var(--sf-text-muted);
+		white-space: nowrap;
 
 		&.is-error {
 			color: var(--sf-danger);
@@ -162,17 +168,16 @@
 		}
 	}
 
-	// The dot repeats the status word in colour, for a glance rather than a read.
 	&__save-dot {
-		width: 8px;
-		height: 8px;
+		width: 6px;
+		height: 6px;
 		border-radius: var(--sf-radius-full);
 		flex: 0 0 auto;
 		background: var(--sf-warning);
 
 		&--saving {
-			background: var(--sf-primary);
-			box-shadow: var(--sf-shadow-focus);
+			background: var(--sf-brand);
+			animation: sf-pulse 1.2s ease-in-out infinite;
 		}
 
 		&--saved {
@@ -187,98 +192,112 @@
 	&__right {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 8px;
 	}
 
 	&__divider {
 		width: 1px;
 		height: 24px;
 		flex: 0 0 auto;
-		margin: 0 var(--sf-space-1);
+		margin: 0 4px;
 		background: var(--sf-border);
 	}
 
 	&__tour-buttons {
 		display: flex;
 		align-items: center;
-		gap: 0.25rem;
+		gap: 4px;
 	}
 
-	&__tour-button {
-		height: 1.75rem;
+	&__tour-button.components-button {
+		height: 28px;
 	}
 
 	&__action-buttons {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 4px;
 	}
 
-	&__undo-button,
-	&__redo-button {
-		padding: 0 0.75rem;
-		height: 2.25rem;
-		font-weight: 500;
-		font-size: var(--sf-text-base);
+	&__icon-button.components-button {
+		width: 32px;
+		min-width: 32px;
+		height: 32px;
+		padding: 0;
+		justify-content: center;
+		color: var(--sf-text-secondary);
+
+		&:hover:not(:disabled):not([aria-disabled='true']) {
+			background: var(--sf-bg-muted);
+			color: var(--sf-text);
+		}
 	}
 
 	&__undo-icon,
 	&__redo-icon {
 		fill: none;
-		margin-right: 0.5rem;
-		width: 1rem;
-		height: 1rem;
 	}
 
-	&__close-button {
-		padding: 0 1rem;
-		height: 2.25rem;
-		font-weight: 500;
-		font-size: var(--sf-text-base);
+	&__close-button.components-button {
+		height: 32px;
+		padding: 0 12px;
+		margin-inline-start: 4px;
+		font-weight: var(--sf-weight-medium);
 	}
 
-	// Split button: one control, two targets. The seam is a translucent rule
-	// rather than a gap, so the pair reads as a single primary action with its
-	// own options instead of two buttons that happen to touch.
+	// Split button. The seam is a translucent rule, so the pair reads as one
+	// primary action with its own options.
 	&__publish-group {
 		display: inline-flex;
 		align-items: stretch;
+		margin-inline-start: 4px;
 	}
 
-	&__publish-button {
-		height: 2.25rem;
-		padding: 0 1rem;
-		font-weight: 500;
-		font-size: var(--sf-text-base);
-		border-top-right-radius: 0;
-		border-bottom-right-radius: 0;
-		gap: 0.375rem;
+	&__publish-button.components-button {
+		height: 32px;
+		padding: 0 14px;
+		gap: 6px;
+		border-start-end-radius: 0;
+		border-end-end-radius: 0;
+		font-weight: var(--sf-weight-medium);
 	}
 
 	&__publish-spinner {
 		flex: 0 0 auto;
 	}
 
-	&__publish-menu .sf-builder-header-bar__publish-arrow {
-		height: 2.25rem;
-		min-width: 2rem;
-		padding: 0 var(--sf-space-1);
-		border-top-left-radius: 0;
-		border-bottom-left-radius: 0;
-		box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.28);
+	&__publish-menu .sf-builder-header-bar__publish-arrow.components-button {
+		height: 32px;
+		min-width: 28px;
+		width: 28px;
+		padding: 0;
+		justify-content: center;
+		border-start-start-radius: 0;
+		border-end-start-radius: 0;
+		box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.3);
 
-		// The seam would otherwise disappear into the disabled fill.
 		&:disabled,
 		&[aria-disabled='true'] {
 			box-shadow: inset 1px 0 0 rgba(255, 255, 255, 0.18);
 		}
 	}
 
-	// A focus ring on either half has to sit above the other, or the shared
-	// edge clips it.
 	&__publish-button:focus-visible,
 	&__publish-menu .sf-builder-header-bar__publish-arrow:focus-visible {
 		position: relative;
 		z-index: 1;
+	}
+
+	@media (max-width: 1280px) {
+		&__divider {
+			display: none;
+		}
+	}
+
+	@media (max-width: 1100px) {
+		&__form-type-badge,
+		&__save-status span:last-child {
+			display: none;
+		}
 	}
 }

@@ -35,12 +35,14 @@ export function BuilderProvider({
 	validationErrorsByFieldKey = {},
 	fieldDefinitions = {},
 	formType = 'regular',
+	fieldDefaults = null,
 	onInsert,
 	onDelete,
 	onUpdate,
 	onMove,
 	onDuplicate,
 	onRequestInsert,
+	onMoveToStep,
 	isReadOnly = false,
 }) {
 	// Tree context - changes on schema mutations
@@ -85,9 +87,10 @@ export function BuilderProvider({
 				onMove,
 				onDuplicate,
 				onRequestInsert,
+				onMoveToStep,
 			},
 		}),
-		[onInsert, onDelete, onUpdate, onMove, onDuplicate, onRequestInsert]
+		[onInsert, onDelete, onUpdate, onMove, onDuplicate, onRequestInsert, onMoveToStep]
 	);
 
 	// Config context - rarely changes
@@ -96,8 +99,10 @@ export function BuilderProvider({
 			fieldDefinitions,
 			formType,
 			isReadOnly,
+			// Form-level label visibility and help text placement (2.3.2).
+			fieldDefaults,
 		}),
-		[fieldDefinitions, formType, isReadOnly]
+		[fieldDefinitions, formType, isReadOnly, fieldDefaults]
 	);
 
 	return (

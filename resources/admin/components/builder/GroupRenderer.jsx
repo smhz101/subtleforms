@@ -53,6 +53,10 @@ const GroupRenderer = memo( function GroupRenderer( {
         onSelect();
       } }
       onKeyDown={ ( e ) => {
+        // Keys from a part inside the group belong to that part (QA-10).
+        if ( e.target !== e.currentTarget ) {
+          return;
+        }
         if ( e.key === 'Enter' || e.key === ' ' ) {
           e.preventDefault();
           e.stopPropagation();
@@ -91,7 +95,7 @@ const GroupRenderer = memo( function GroupRenderer( {
             e.stopPropagation();
             onDelete();
           } }>
-          <Icon.Trash2 size={ 14 } />
+          <Icon.Trash size={ 14 } />
         </button>
       </div>
       {/* Children */}

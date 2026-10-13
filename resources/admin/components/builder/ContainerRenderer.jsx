@@ -1,7 +1,20 @@
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
+import clsx from 'clsx';
 import Icon from '../../ui/Icon';
 import { getIcon } from './utils/iconMap';
+import { useContext } from '@wordpress/element';
+import { ConfigContext } from './context/ConfigContext';
+import { fieldDisplay } from '../../../shared/fieldDisplay';
+import './ContainerRenderer.scss';
 
+/**
+ * Canvas chrome for a container (Repeater, Group, Columns).
+ *
+ * The header selects the container; only the handle drags it, so pressing
+ * anywhere else (including its drop zone) never starts a container drag.
+ * Children handle their own clicks and keys, so selecting a child never
+ * selects the container (QA-10).
+ */
 export default function ContainerRenderer({
   node,
   columns,
@@ -15,106 +28,100 @@ export default function ContainerRenderer({
 }) {
   const isColumnLayout = columns.length > 1;
   const isStep = node.type === 'step';
+  const isRepeater = node.type === 'repeat_container';
   const title = isStep
     ? node.config?.title || __('Step', 'subtleforms')
-    : node.config?.label || __('Container', 'subtleforms');
+    : node.config?.label ||
+      (isRepeater
+        ? __('Repeater', 'subtleforms')
+        : isColumnLayout
+          ? __('Columns', 'subtleforms')
+          : __('Group', 'subtleforms'));
   const gap = parseInt(spacing, 10) || 16;
+  const builderConfig = useContext(ConfigContext);
+  const labelHidden = !isStep && fieldDisplay(node.config || {}, builderConfig?.fieldDefaults || {}).labelHidden;
 
   const { onPointerDown, onMouseDown, onTouchStart, ...handleRest } =
     dragHandleListeners || {};
 
-  const handlePointerDown = (event) => {
+  const stopThen = (fn) => (event) => {
     event.stopPropagation();
-    if (typeof onPointerDown === 'function') {
-      onPointerDown(event);
+    if (typeof fn === 'function') {
+      fn(event);
     }
   };
 
-  const handleMouseDown = (event) => {
-    event.stopPropagation();
-    if (typeof onMouseDown === 'function') {
-      onMouseDown(event);
-    }
-  };
-
-  const handleTouchStart = (event) => {
-    event.stopPropagation();
-    if (typeof onTouchStart === 'function') {
-      onTouchStart(event);
-    }
-  };
+  const NodeIcon = getIcon(node.type);
+  const min = parseInt(node.config?.min, 10);
+  const max = parseInt(node.config?.max, 10);
 
   return (
     <div
+      className={clsx('sf-container-renderer', {
+        'is-selected': isSelected,
+        'is-step': isStep,
+        'is-repeater': isRepeater,
+      })}
+      data-node-id={node.id}
       tabIndex={0}
-      role='button'
+      role='group'
+      aria-label={sprintf(
+        /* translators: %s: container name */
+        __('%s container. Press Enter to select.', 'subtleforms'),
+        title
+      )}
       onClick={(e) => {
         e.stopPropagation();
         onSelect();
       }}
       onKeyDown={(e) => {
+        if (e.target !== e.currentTarget) {
+          return;
+        }
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
           e.stopPropagation();
           onSelect();
         }
-      }}
-      style={{
-        border: isSelected ? '2px solid #2271b1' : '1px solid #dcdcde',
-        borderRadius: '8px',
-        background: isStep ? '#f9fafb' : '#fff',
-        marginBottom: '18px',
-        boxShadow: isSelected ? '0 4px 14px rgba(0,0,0,0.1)' : 'none',
       }}>
-      <div
-        style={{
-          padding: '12px 16px',
-          background: isStep ? '#e8eef5' : '#f0f0f1',
-          borderBottom: '1px solid #dcdcde',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div className='sf-container-renderer__header'>
+        <div className='sf-container-renderer__header-left'>
           {dragHandleRef && !isStep && (
             <button
               type='button'
               ref={dragHandleRef}
               {...handleRest}
-              onPointerDown={handlePointerDown}
-              onMouseDown={handleMouseDown}
-              onTouchStart={handleTouchStart}
+              onPointerDown={stopThen(onPointerDown)}
+              onMouseDown={stopThen(onMouseDown)}
+              onTouchStart={stopThen(onTouchStart)}
               onClick={(event) => event.stopPropagation()}
               aria-label={__('Drag container', 'subtleforms')}
-              style={{
-                width: '28px',
-                height: '28px',
-                borderRadius: '4px',
-                border: '1px solid transparent',
-                background: 'transparent',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'grab',
-                color: '#111827',
-              }}>
+              className='sf-container-renderer__handle'>
               <Icon.Move size={16} />
             </button>
           )}
-          {(() => {
-            const NodeIcon = getIcon(node.type);
-            return <NodeIcon size={20} />;
-          })()}
-          <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <strong style={{ fontSize: '13px' }}>{title}</strong>
-            {isStep && node.config?.description && (
-              <span
-                style={{
-                  fontSize: '11px',
-                  color: '#6b7280',
-                  marginTop: '2px',
-                }}>
-                {node.config.description}
+          <NodeIcon size={18} aria-hidden='true' />
+          <div className='sf-container-renderer__header-title'>
+            <strong>
+              {title}
+              {labelHidden && (
+                <span className='sf-container-renderer__hidden-tag'>
+                  <Icon.EyeOff size={12} aria-hidden='true' />
+                  {__('Label hidden', 'subtleforms')}
+                </span>
+              )}
+            </strong>
+            {node.config?.description && (
+              <span className='sf-container-renderer__description'>{node.config.description}</span>
+            )}
+            {isRepeater && (
+              <span className='sf-container-renderer__meta'>
+                {sprintf(
+                  /* translators: 1: minimum groups, 2: maximum groups */
+                  __('Visitors add %1$d to %2$d groups', 'subtleforms'),
+                  Number.isFinite(min) ? min : 1,
+                  Number.isFinite(max) ? max : 5
+                )}
               </span>
             )}
           </div>
@@ -122,41 +129,39 @@ export default function ContainerRenderer({
         {!isStep && (
           <button
             type='button'
+            className='sf-container-renderer__delete'
+            aria-label={__('Delete container', 'subtleforms')}
             onClick={(e) => {
               e.stopPropagation();
               onDelete();
-            }}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              color: '#d63638',
-              cursor: 'pointer',
-              fontWeight: 600,
             }}>
-            ×
+            <Icon.Trash size={14} />
           </button>
         )}
       </div>
 
-      <div
-        style={{
-          padding: '16px',
-          background: isStep ? '#fafbfc' : '#fafafa',
-        }}>
+      <div className='sf-container-renderer__body'>
         <div
-          style={{
-            display: isColumnLayout ? 'grid' : 'block',
-            gap: isColumnLayout ? `${gap}px` : undefined,
-            gridTemplateColumns: isColumnLayout
-              ? `repeat(${columns.length}, minmax(0, 1fr))`
-              : undefined,
-          }}>
+          className={clsx('sf-container-renderer__columns', { 'is-grid': isColumnLayout })}
+          style={
+            isColumnLayout
+              ? { gap: `${gap}px`, gridTemplateColumns: `repeat(${columns.length}, minmax(0, 1fr))` }
+              : undefined
+          }>
           {columns.map((columnItems, index) => (
-            <div key={`${node.id}-col-${index}`}>
+            <div key={`${node.id}-col-${index}`} className='sf-container-renderer__column'>
               {renderColumn(columnItems, index)}
             </div>
           ))}
         </div>
+        {isRepeater && (
+          <div className='sf-container-renderer__repeat-preview' aria-hidden='true'>
+            <span className='sf-container-renderer__repeat-button'>
+              <Icon.Plus size={14} />
+              {node.config?.buttonLabel || __('Add another', 'subtleforms')}
+            </span>
+          </div>
+        )}
       </div>
     </div>
   );

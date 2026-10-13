@@ -20,8 +20,21 @@
 		border-radius: var(--sf-radius-md);
 	}
 
+	// Items wrap so fields narrower than full width sit side by side, exactly
+	// as they will on the page.
+	&__items {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		column-gap: var(--dropzone-gap);
+		row-gap: var(--dropzone-gap);
+
+		&:empty { display: none; }
+	}
+
 	&__item {
-		// Individual sortable item wrapper
+		flex: 1 1 100%;
+		min-width: 0;
 	}
 
 	// Empty state — clean, breathable, non-intrusive

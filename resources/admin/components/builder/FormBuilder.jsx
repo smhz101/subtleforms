@@ -1,16 +1,18 @@
 import { memo, useMemo, useCallback, useEffect, useState, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import {
-  DndContext,
-  DragOverlay,
-  PointerSensor,
-  KeyboardSensor,
-  useSensor,
-  useSensors,
-} from '@dnd-kit/core';
-import { useSortable, sortableKeyboardCoordinates } from '@dnd-kit/sortable';
+import clsx from 'clsx';
+import { useDndMonitor } from '@dnd-kit/core';
+import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 
+import Icon from '../../ui/Icon';
+import {
+  formAppearanceStyle,
+  formAppearanceClasses,
+  fieldAppearanceStyle,
+  fieldAppearanceClasses,
+  appearanceBackdrop,
+} from '../../../shared/appearance';
 import { useBuilder } from './context/BuilderContext';
 import FieldRenderer from './FieldRenderer';
 import ContainerRenderer from './ContainerRenderer';
@@ -24,6 +26,7 @@ import {
   nodeChildren,
   getRootNodeId,
 } from './utils/schemaTree';
+import { moveTargets } from './dnd/resolveDrop';
 import './FormBuilder.scss';
 
 /**
@@ -67,6 +70,7 @@ function SortableWrapper({
   } = useSortable({
     id: nodeId,
     data: {
+      kind: 'node',
       parentId,
       columnIndex,
       position,
@@ -121,6 +125,7 @@ const FieldNode = memo(function FieldNode({
   isDragDisabled,
 }) {
   const field = useMemo(() => nodeToField(tree, nodeId), [tree, nodeId]);
+  const { actions: builderActions, fieldDefinitions } = useBuilder();
 
   const validationMessages = useMemo(() => {
     const key = field?.key;
@@ -153,7 +158,36 @@ const FieldNode = memo(function FieldNode({
       }
     },
     onDelete: () => onDelete(nodeId),
-  }), [canMoveUp, canMoveDown, nodeId, parentId, columnIndex, position, onMove, onDuplicate, onDelete]);
+    // Keyboard-friendly alternative to dragging into and out of containers.
+    moveTargets: moveTargets(tree, nodeId, {
+      top: __('Top level', 'subtleforms'),
+      /* translators: %d: column number */
+      column: __('column %d', 'subtleforms'),
+      ...Object.fromEntries(
+        Object.entries(fieldDefinitions || {}).map(([type, def]) => [type, def?.label || type])
+      ),
+    }),
+    onMoveTo: (destination) => onMove(nodeId, { ...destination, position: null }),
+    width: field?.appearance?.width || '',
+    onWidthChange: builderActions?.onUpdate
+      ? (w) => {
+          const next = { ...(field?.appearance || {}) };
+          if (w) next.width = w; else delete next.width;
+          builderActions.onUpdate(nodeId, { appearance: next });
+        }
+      : null,
+  }), [canMoveUp, canMoveDown, nodeId, parentId, columnIndex, position, onMove, onDuplicate, onDelete, field, builderActions, tree, fieldDefinitions]);
+
+  // Colour, type and shape overrides as custom properties; width and spacing
+  // are applied by the drop zone wrapper.
+  const fieldStyleVars = useMemo(() => {
+    const s = fieldAppearanceStyle(field?.appearance);
+    delete s.flexBasis;
+    delete s.maxWidth;
+    delete s.marginTop;
+    delete s.marginBottom;
+    return s;
+  }, [field]);
 
   if (!field) return null;
 
@@ -175,6 +209,8 @@ const FieldNode = memo(function FieldNode({
             }
           }}>
           <FieldChrome
+            appearanceStyle={fieldStyleVars}
+            appearanceClass={fieldAppearanceClasses(field?.appearance)}
             isSelected={selectedId === nodeId}
             isMultiSelected={isMultiSelected}
             onSelect={onSelect}
@@ -194,21 +230,7 @@ const FieldNode = memo(function FieldNode({
   );
 });
 
-/**
- * DragGhost — lightweight overlay card shown while dragging a field.
- */
-const DragGhost = memo(function DragGhost({ tree, nodeId }) {
-  const node = tree.nodes[nodeId];
-  if (!node) return null;
-  const label = node.config?.label || node.config?.title || node.type || '';
-  return (
-    <div className='sf-drag-ghost'>
-      <span className='sf-drag-ghost__label'>{label}</span>
-    </div>
-  );
-});
-
-export default function FormBuilder() {
+export default function FormBuilder({ appearance } = {}) {
   // Get all state from context (including validationErrorsByFieldKey)
   const {
     tree,
@@ -226,9 +248,6 @@ export default function FormBuilder() {
   const [selectedIds, setSelectedIds] = useState([]);
   const selectedIdsRef = useRef([]);
   useEffect(() => { selectedIdsRef.current = selectedIds; }, [selectedIds]);
-
-  // Drag overlay: tracks which node is actively being dragged
-  const [activeNodeId, setActiveNodeId] = useState(null);
 
   // O(1) Set lookup — avoids O(n) .includes() per FieldNode in renderNode (Task 7: memo perf)
   const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
@@ -397,15 +416,6 @@ export default function FormBuilder() {
     [setSelectedId]
   );
 
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: { distance: 6 },
-    }),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
   // Detect if this is a multi-step form
   const rootChildren = useMemo(() => {
     return nodeChildren(tree, rootId);
@@ -423,43 +433,38 @@ export default function FormBuilder() {
     return tree.nodes[selectedStepId];
   }, [isMultiStepForm, selectedStepId, tree]);
 
-  const handleDragStart = useCallback(({ active }) => {
-    setActiveNodeId(active.id);
-    setSelectedIds([]); // clear multi-select when drag begins
-  }, []);
+  // Drags are handled by the builder-wide drag context (dnd/BuilderDnd);
+  // starting one clears the multi-selection.
+  useDndMonitor({
+    onDragStart: () => setSelectedIds([]),
+  });
 
-  const handleDragEnd = useCallback(
-    ({ active, over }) => {
-      setActiveNodeId(null);
-      if (!over) return;
+  // The canvas wears the form's Appearance (colours, type, radius, input and
+  // button styles) so every styling change is visible while building.
+  const canvasStyle = useMemo(() => {
+    const style = formAppearanceStyle(appearance);
+    delete style.maxWidth;
+    const backdrop = appearanceBackdrop(appearance);
+    if (backdrop) {
+      style.background = backdrop;
+    }
+    return style;
+  }, [appearance]);
 
-      const activeData = active.data.current;
-      const overData = over.data.current;
-      if (!activeData || !overData) return;
-
-      if (activeData.parentId !== overData.parentId) {
-        if (process.env.NODE_ENV !== 'production') {
-          console.warn('[SubtleForms] Cannot move field between sections (cross-parent drag blocked)');
-        }
-        return;
-      }
-
-      if (
-        active.id === over.id &&
-        activeData.columnIndex === overData.columnIndex &&
-        activeData.position === overData.position
-      ) {
-        return;
-      }
-
-      onMove(active.id, {
-        parentId: activeData.parentId,
-        columnIndex: overData.columnIndex,
-        position: overData.position,
-      });
-    },
-    [onMove]
-  );
+  // Field width/spacing live on the wrapper that holds the field and its
+  // insert line, so narrow fields sit side by side like on the page.
+  const getItemStyle = useCallback((itemId) => {
+    const a = tree.nodes[itemId]?.config?.appearance;
+    if (!a) return undefined;
+    const style = {};
+    if (a.width && a.width !== '100') {
+      const pct = Number(a.width);
+      style.flex = `0 0 calc(${pct}% - var(--dropzone-gap) * ${(100 - pct) / 100})`;
+    }
+    if (a.marginTop) style.marginTop = a.marginTop;
+    if (a.marginBottom) style.marginBottom = a.marginBottom;
+    return style;
+  }, [tree]);
 
   const renderNode = (nodeId, parentId, columnIndex, position) => {
     const node = tree.nodes[nodeId];
@@ -539,6 +544,7 @@ export default function FormBuilder() {
                     columnIndex={isColumnContainer(node) ? colIndex : null}
                     items={columnChildren}
                     onRequestInsert={onRequestInsert}
+                    getItemStyle={getItemStyle}
                     spacing={spacing}
                     compact
                     renderItem={(childId, childPosition) =>
@@ -587,25 +593,26 @@ export default function FormBuilder() {
 
   return (
     <div className='subtleforms-builder-canvas' onClick={handleCanvasClick}>
-      <div className='subtleforms-builder-canvas__surface'>          <div className='subtleforms-builder-canvas__toolbar'>
+      <div
+        className={clsx('subtleforms-builder-canvas__surface', 'sf-canvas-styled', formAppearanceClasses(appearance))}
+        style={canvasStyle}>          <div className='subtleforms-builder-canvas__toolbar'>
             <button
               type='button'
               className={`sf-preview-toggle${previewValidation ? ' sf-preview-toggle--active' : ''}`}
+              aria-pressed={previewValidation}
+              title={__('Show how required and format errors look to visitors', 'subtleforms')}
               onClick={(e) => { e.stopPropagation(); setPreviewValidation((v) => !v); }}>
-              {previewValidation ? __('Exit Preview', 'subtleforms') : __('Preview Errors', 'subtleforms')}
+              <Icon.ShieldCheck size={14} aria-hidden='true' />
+              {previewValidation ? __('Hide validation', 'subtleforms') : __('Test validation', 'subtleforms')}
             </button>
-          </div>        <DndContext
-          sensors={sensors}
-          onDragStart={handleDragStart}
-          onDragEnd={handleDragEnd}
-          autoScroll={{ threshold: { x: 0.2, y: 0.2 }, acceleration: 25, interval: 5 }}>
-          {isMultiStepForm && activeStep ? (
+          </div>          {isMultiStepForm && activeStep ? (
             /* Multi-step form: Show step-scoped canvas */
             <StepCanvas
               stepId={selectedStepId}
               stepNumber={stepNodes.indexOf(selectedStepId) + 1}
               totalSteps={stepNodes.length}
               renderNode={renderNode}
+              getItemStyle={getItemStyle}
             />
           ) : (
             /* Regular form: Show all fields */
@@ -614,16 +621,13 @@ export default function FormBuilder() {
               columnIndex={null}
               items={rootChildren}
               onRequestInsert={onRequestInsert}
+              getItemStyle={getItemStyle}
               spacing={24}
               renderItem={(nodeId, index) =>
                 renderNode(nodeId, rootId, null, index)
               }
             />
           )}
-          <DragOverlay dropAnimation={null}>
-            {activeNodeId ? <DragGhost tree={tree} nodeId={activeNodeId} /> : null}
-          </DragOverlay>
-        </DndContext>
       </div>
     </div>
   );

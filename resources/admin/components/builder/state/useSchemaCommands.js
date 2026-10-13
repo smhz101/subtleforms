@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import {
   insertNode,
   deleteNode,
@@ -15,6 +15,8 @@ import {
   duplicateNode,
 } from '../schema/commands';
 import { denormalizeTree } from '../utils/schemaTree';
+import { insertPageBreak, moveNodeToStep, getStepIdOf, removeStep } from '../schema/commands/steps';
+import { canDropInto } from '../dnd/resolveDrop';
 import { debug } from '../../../../shared/debug';
 
 /**
@@ -39,6 +41,7 @@ export function useSchemaCommands({
   setTree,
   setSelectedId,
   selectedStepId,
+  setSelectedStepId,
   rootId,
   definitionMap,
   isReadOnly,
@@ -58,19 +61,55 @@ export function useSchemaCommands({
         return;
       }
 
-      // Guardrail: Prevent nesting steps inside steps
-      if (type === 'step' && context.parentId) {
-        const parentNode = tree.nodes[context.parentId];
-        if (parentNode?.type === 'step') {
-          // eslint-disable-next-line no-alert
-          alert(
-            __(
-              'Cannot add a step inside another step. Steps can only be added at the root level.',
-              'subtleforms'
-            )
-          );
-          return;
+      // A Page Break splits the form (or the step) at the insertion point in
+      // one undoable edit, so no field is left outside a step (QA-08).
+      if (type === 'step') {
+        // Computed from the current tree (not inside the state updater) so
+        // the new step can be selected right away.
+        const result = insertPageBreak(tree, {
+          definition,
+          parentId: context?.parentId || rootId,
+          position: context?.position ?? null,
+        });
+        updateTree(() => result.tree);
+        if (result.selectStepId) {
+          setSelectedStepId?.(result.selectStepId);
+          setSelectedId(result.selectStepId);
         }
+        return;
+      }
+
+      // Replace a field with another type in one undoable edit (2.3.2): the
+      // new field takes its place and keeps the label, help text, required
+      // setting, messages and logic.
+      if (context?.replaceId) {
+        updateTree((currentTree) => {
+          const old = currentTree.nodes[context.replaceId];
+          const parent = old && currentTree.nodes[old.parentId];
+          if (!old || !parent) return currentTree;
+          const position = (parent.children || []).indexOf(old.id);
+          let next = insertNode(currentTree, {
+            definition,
+            parentId: parent.id,
+            columnIndex: null,
+            position: position < 0 ? null : position,
+          });
+          const newId = Object.keys(next.nodes).find(
+            (id) => !currentTree.nodes[id] && next.nodes[id].parentId === parent.id
+          );
+          if (!newId) return currentTree;
+          const carry = {};
+          ['label', 'description', 'required', 'requiredMessage', 'validationMessage', 'adminLabel', 'labelVisibility', 'descriptionPlacement', 'logic', 'appearance'].forEach((k) => {
+            if (old.config?.[k] !== undefined && old.config?.[k] !== '') carry[k] = old.config[k];
+          });
+          if (Object.keys(carry).length) {
+            next = updateNodeConfig(next, { nodeId: newId, changes: carry });
+          }
+          next = deleteNode(next, { nodeId: old.id });
+          setSelectedId(newId);
+          return next;
+        });
+        return;
       }
 
       // Use command layer for insertion
@@ -106,7 +145,7 @@ export function useSchemaCommands({
         return newTree;
       });
     },
-    [definitionMap, updateTree, tree, selectedStepId, isReadOnly, setSelectedId]
+    [definitionMap, updateTree, tree, rootId, selectedStepId, isReadOnly, setSelectedId, setSelectedStepId]
   );
 
   const handleDockAdd = useCallback(
@@ -160,23 +199,12 @@ export function useSchemaCommands({
 
       const node = tree.nodes[nodeId];
 
-      // Guardrail: Prevent deleting the last step in a multi-step form
+      // A step is a Page Break boundary: removing the last one keeps the
+      // remaining fields and makes the form Standard again (2.3.2).
       if (node?.type === 'step') {
-        const rootNode = tree.nodes[rootId];
-        const stepCount = (rootNode?.children || []).filter(
-          (id) => tree.nodes[id]?.type === 'step'
-        ).length;
-
-        if (stepCount <= 1) {
-          // eslint-disable-next-line no-alert
-          alert(
-            __(
-              'Cannot delete the last step. Multi-step forms require at least one step.',
-              'subtleforms'
-            )
-          );
-          return;
-        }
+        updateTree((currentTree) => removeStep(currentTree, nodeId).tree);
+        setSelectedId((prev) => (prev === nodeId ? null : prev));
+        return;
       }
 
       updateTree((currentTree) => deleteNode(currentTree, { nodeId }));
@@ -212,11 +240,9 @@ export function useSchemaCommands({
           return currentTree;
         }
 
-        // Guardrail: Prevent moving fields across steps
-        if (node.parentId !== destination.parentId) {
-          console.warn(
-            '[SubtleForms] Moving fields between different parents (steps) is not supported'
-          );
+        // Containers accept drops into their drop zone; a node never moves
+        // into itself, a step never nests and fixed groups keep their parts.
+        if (!canDropInto(currentTree, { nodeId, parentId: destination.parentId || rootId })) {
           return currentTree;
         }
 
@@ -284,41 +310,36 @@ export function useSchemaCommands({
   );
 
   const handleAddStep = useCallback(() => {
-    const definition = definitionMap['step'];
-    if (!definition) {
-      console.warn('Step field definition not found');
-      return;
-    }
+    handleInsert('step', { parentId: rootId, columnIndex: null, position: null });
+  }, [handleInsert, rootId]);
 
-    const rootNode = tree.nodes[rootId];
-    const steps = (rootNode?.children || [])
-      .map((id) => tree.nodes[id])
-      .filter((node) => node && node.type === 'step');
-    const stepNumber = steps.length + 1;
-
-    updateTree((currentTree) => {
-      const result = insertNode(currentTree, {
-        definition,
-        parentId: rootId,
-        columnIndex: null,
-        position: null,
-      });
-
-      // Find the newly inserted node
-      const newNodeId = Object.keys(result.nodes).find(
-        (id) => !currentTree.nodes[id]
-      );
-
-      if (newNodeId) {
-        return updateNodeConfig(result, {
-          nodeId: newNodeId,
-          changes: { title: `Step ${stepNumber}`, description: '' },
-        });
+  /**
+   * Move a field to the end of another step, switch the canvas to that step
+   * and keep the field selected (owner request, 2.3.1). One undoable edit.
+   */
+  const handleMoveToStep = useCallback(
+    (nodeId, stepId) => {
+      if (isReadOnly) {
+        return;
       }
-
-      return result;
-    });
-  }, [definitionMap, tree, updateTree, rootId]);
+      const node = tree.nodes[nodeId];
+      if (!node || !tree.nodes[stepId] || getStepIdOf(tree, nodeId) === stepId) {
+        return;
+      }
+      updateTree((currentTree) => {
+        const current = currentTree.nodes[nodeId];
+        if (!current) return currentTree;
+        if (currentTree.nodes[current.parentId]?.type === 'step') {
+          return moveNodeToStep(currentTree, { nodeId, stepId });
+        }
+        // A field inside a container leaves the container for the new step.
+        return moveNode(currentTree, { nodeId, parentId: stepId, columnIndex: null, position: null });
+      });
+      setSelectedStepId?.(stepId);
+      setSelectedId(nodeId);
+    },
+    [isReadOnly, tree, updateTree, setSelectedStepId, setSelectedId]
+  );
 
   const handleDeleteStep = useCallback(
     (stepId) => {
@@ -327,9 +348,32 @@ export function useSchemaCommands({
         .map((id) => tree.nodes[id])
         .filter((node) => node && node.type === 'step');
 
-      if (steps.length <= 1) return;
+      if (!steps.length) return;
 
-      updateTree((currentTree) => deleteNode(currentTree, { nodeId: stepId }));
+      // A step with fields takes them with it: ask first. The only step
+      // always keeps its fields (they go back to the page).
+      const count = (tree.nodes[stepId]?.children || []).length;
+      if (
+        steps.length > 1 &&
+        count > 0 &&
+        // eslint-disable-next-line no-alert
+        !window.confirm(
+          sprintf(
+            /* translators: %d: number of fields */
+            _n(
+              'Delete this step and the %d field in it? You can undo this.',
+              'Delete this step and the %d fields in it? You can undo this.',
+              count,
+              'subtleforms'
+            ),
+            count
+          )
+        )
+      ) {
+        return;
+      }
+
+      updateTree((currentTree) => removeStep(currentTree, stepId).tree);
     },
     [tree, updateTree, rootId]
   );
@@ -343,5 +387,6 @@ export function useSchemaCommands({
     handleDuplicate,
     handleAddStep,
     handleDeleteStep,
+    handleMoveToStep,
   };
 }

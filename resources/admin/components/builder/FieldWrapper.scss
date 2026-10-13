@@ -12,6 +12,7 @@
 
 	/* Subtle divider for visual rhythm */
 	&::after {
+		display: none;
 		content: '';
 		position: absolute;
 		bottom: -0.4375rem; /* Half of margin-bottom */
@@ -35,24 +36,21 @@
 
 	/* Default state - clean and minimal */
 	&--default {
-		background-color: var(--sf-surface);
-		border: 1px solid var(--sf-gray-200); /* Lighter, softer border */
-		box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.04); /* Very subtle depth */
+		background-color: transparent;
+		border: 1px solid transparent;
 	}
 
 	/* Hover state - subtle emphasis */
 	&--hovered:not(&--selected) {
-		background-color: var(--sf-neutral-50);
-		border: 1px solid var(--sf-gray-300); /* Slightly stronger border */
-		box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.06); /* More prominent shadow */
-		transform: translateY(-1px); /* Subtle lift */
+		background-color: var(--sf-bg-subtle);
+		border: 1px solid var(--sf-border);
 	}
 
 	/* Selected state - WordPress blue with glow */
 	&--selected {
-		background-color: var(--sf-surface);
-		border: 2px solid var(--wp-blue-500); /* WordPress blue */
-		box-shadow: 0 0 0 3px rgba(34, 113, 177, 0.1); /* Blue glow */
+		background-color: var(--sf-bg-surface);
+		border: 1px solid var(--sf-brand);
+		box-shadow: 0 0 0 0.5px var(--sf-brand);
 	}
 
 	// Warning badge shown when field has a config problem

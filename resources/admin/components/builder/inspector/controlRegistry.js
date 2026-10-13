@@ -12,6 +12,9 @@ import SelectInspectorControl from './controls/SelectInspectorControl';
 import TextareaInspectorControl from './controls/TextareaInspectorControl';
 import OptionsInspectorControl from './controls/OptionsInspectorControl';
 import SubfieldInspectorControl from './controls/SubfieldInspectorControl';
+import LinesInspectorControl from './controls/LinesInspectorControl';
+import FormulaInspectorControl from './controls/FormulaInspectorControl';
+import { getInspectorControl } from '../../../../shared/extend';
 
 /**
  * Registry mapping PHP control type names to React components.
@@ -39,6 +42,8 @@ const CONTROL_REGISTRY = {
 	radio: SelectInspectorControl,
 	options: OptionsInspectorControl,
 	subfield: SubfieldInspectorControl,
+	lines: LinesInspectorControl,
+	formula: FormulaInspectorControl,
 };
 
 /**
@@ -49,7 +54,8 @@ const CONTROL_REGISTRY = {
  * @returns {React.ComponentType}
  */
 export function getControlComponent( type ) {
-	return CONTROL_REGISTRY[ type ] ?? TextInspectorControl;
+	// Controls registered by add-ons (registerInspectorControl) come first.
+	return getInspectorControl( type ) ?? CONTROL_REGISTRY[ type ] ?? TextInspectorControl;
 }
 
 export default CONTROL_REGISTRY;

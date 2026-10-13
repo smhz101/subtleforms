@@ -1,51 +1,42 @@
 /**
- * ValidationPanel.jsx
- * 
- * Validation settings: required field checkbox
+ * Validation tab: required + every rule the field type supports
+ * (length, range, pattern, selections, custom messages).
  */
 
-import { CheckboxControl } from '@wordpress/components';
+import { ToggleControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import DynamicInspectorPanel from '../DynamicInspectorPanel';
 import './ValidationPanel.scss';
+
+const NO_REQUIRED = new Set(['calculation', 'hidden', 'payment_summary', 'payment_hidden_price', 'html']);
 
 export default function ValidationPanel({ field, onUpdate, isReadOnly }) {
   return (
     <div className='sf-validation-panel'>
+      {!NO_REQUIRED.has(field.type) && (
+        <div className='sf-validation-panel__required'>
+          <ToggleControl
+            __nextHasNoMarginBottom
+            label={__('Required', 'subtleforms')}
+            help={
+              field.required
+                ? __('Visitors must answer before the form can be sent.', 'subtleforms')
+                : __('Visitors can leave this empty.', 'subtleforms')
+            }
+            checked={!!field.required}
+            onChange={(checked) => onUpdate({ required: checked })}
+            disabled={isReadOnly}
+          />
+        </div>
+      )}
 
-      {/* Required */}
-      <div className='sf-validation-panel__section'>
-        <p className='sf-validation-panel__section-label'>
-          {__('Required', 'subtleforms')}
-        </p>
-        <CheckboxControl
-          label={__('This field is required', 'subtleforms')}
-          checked={!!field.required}
-          onChange={(checked) => onUpdate({ required: checked })}
-          disabled={isReadOnly}
-          help={__("The form won't submit unless this field is filled in.", 'subtleforms')}
-        />
-      </div>
-
-      {/* Validation Rules */}
-      <div className='sf-validation-panel__section'>
-        <p className='sf-validation-panel__section-label'>
-          {__('Validation Rules', 'subtleforms')}
-        </p>
-        <p className='sf-validation-panel__note'>
-          {__('Rules like Min, Max, and Max Length are configured in the General tab.', 'subtleforms')}
-        </p>
-      </div>
-
-      {/* Error Messages */}
-      <div className='sf-validation-panel__section sf-validation-panel__section--muted'>
-        <p className='sf-validation-panel__section-label'>
-          {__('Error Messages', 'subtleforms')}
-        </p>
-        <p className='sf-validation-panel__note'>
-          {__('Custom error messages will be configurable in a future update.', 'subtleforms')}
-        </p>
-      </div>
-
+      <DynamicInspectorPanel
+        field={field}
+        onUpdate={onUpdate}
+        isReadOnly={isReadOnly}
+        sections={['validation']}
+        showEmpty={false}
+      />
     </div>
   );
 }
