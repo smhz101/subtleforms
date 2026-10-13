@@ -149,6 +149,7 @@ class Schemas {
 					'time_trap_min_seconds',
 					// Privacy & GDPR
 					'data_retention_days',
+					'entries_trash_days',
 					// Extensions — Webhooks
 					'ext_webhooks_enabled',
 					'ext_webhooks_signing_secret',
@@ -243,6 +244,7 @@ class Schemas {
 				'time_trap_min_seconds'        => 'optional|int|min:1|max:60',
 				// Privacy & GDPR
 				'data_retention_days'          => 'optional|int|min:0|max:3650',
+				'entries_trash_days'           => 'optional|int|min:1|max:365',
 				// Extensions — Webhooks
 				'ext_webhooks_enabled'             => 'optional|bool',
 				'ext_webhooks_signing_secret'      => 'optional|string|max:200',

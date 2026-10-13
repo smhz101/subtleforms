@@ -290,6 +290,24 @@ class SettingsApi {
 	 * @return array
 	 */
 	private function getUpdateArgs() {
+		// Empty sender/admin emails are valid (defaults are blank). format:email
+		// rejects "" before updateSettings runs, so a real edit never saves.
+		$validateOptionalEmail = static function ( $value ) {
+			if ( null === $value || ( is_string( $value ) && '' === trim( $value ) ) ) {
+				return true;
+			}
+
+			if ( is_string( $value ) && is_email( $value ) ) {
+				return true;
+			}
+
+			return new \WP_Error(
+				'rest_invalid_param',
+				__( 'Email address must be valid or left empty', 'subtleforms' ),
+				array( 'status' => 400 )
+			);
+		};
+
 		return array(
 			'default_form_status'        => array(
 				'type'              => 'string',
@@ -370,13 +388,13 @@ class SettingsApi {
 			),
 			'sender_email'               => array(
 				'type'              => 'string',
-				'format'            => 'email',
 				'sanitize_callback' => 'sanitize_email',
+				'validate_callback' => $validateOptionalEmail,
 			),
 			'admin_email'                => array(
 				'type'              => 'string',
-				'format'            => 'email',
 				'sanitize_callback' => 'sanitize_email',
+				'validate_callback' => $validateOptionalEmail,
 			),
 			'debug_mode'                 => array(
 				'type' => 'boolean',
