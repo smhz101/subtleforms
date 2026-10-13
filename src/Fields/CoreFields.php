@@ -185,7 +185,7 @@ final class CoreFields {
 					array(
 						'type'  => 'number',
 						'name'  => 'step',
-						'label' => __( 'Step', 'subtleforms' ),
+						'label' => __( 'Step size', 'subtleforms' ),
 					),
 				),
 				meta: array( 'category' => 'regular' ),
@@ -309,6 +309,13 @@ final class CoreFields {
 						'name'  => 'requireConfirmation',
 						'label' => __( 'Require Confirmation', 'subtleforms' ),
 					),
+					array(
+						'type'    => 'checkbox',
+						'name'    => 'storeHash',
+						'label'   => __( 'Store a hash', 'subtleforms' ),
+						'help'    => __( 'Passwords are never stored as typed. By default the entry only records that a password was provided. Turn this on to keep a one-way hash instead. Passwords are never included in emails or exports.', 'subtleforms' ),
+						'section' => 'advanced',
+					),
 				),
 				meta: array( 'category' => 'regular' ),
 			)
@@ -429,7 +436,7 @@ final class CoreFields {
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					'options'       => array(),
-					'allowMultiple' => false,
+					'allowMultiple' => true,
 				),
 				inspectorControls: array(
 					array(
@@ -565,7 +572,6 @@ final class CoreFields {
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					'placeholder'        => 'Select a country',
-					'countryList'        => CountryList::getOptions(), // Full ISO-3166 list
 					'default_country'    => '',
 					'preferred_countries' => array(), // ISO codes for countries to show at top
 					'searchable'         => true,
@@ -854,7 +860,7 @@ final class CoreFields {
 					array(
 						'type'  => 'number',
 						'name'  => 'step',
-						'label' => __( 'Step', 'subtleforms' ),
+						'label' => __( 'Step size', 'subtleforms' ),
 					),
 				),
 				meta: array( 'category' => 'regular' ),
@@ -937,8 +943,9 @@ final class CoreFields {
 				kind: 'input',
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
-					'rows'    => array(),
-					'columns' => array(),
+					// Ships ready to answer, like the builder preview (2.2.1, bug 8).
+					'rows'    => array( __( 'Row 1', 'subtleforms' ), __( 'Row 2', 'subtleforms' ) ),
+					'columns' => array( __( 'Column 1', 'subtleforms' ), __( 'Column 2', 'subtleforms' ), __( 'Column 3', 'subtleforms' ) ),
 				),
 				inspectorControls: array(
 					array(
@@ -1570,7 +1577,7 @@ final class CoreFields {
 					array(
 						'type'    => 'number',
 						'name'    => 'step',
-						'label'   => __( 'Step', 'subtleforms' ),
+						'label'   => __( 'Step size', 'subtleforms' ),
 						'step'    => 0.01,
 						'default' => 0.01,
 					),
@@ -1595,17 +1602,41 @@ final class CoreFields {
 				requiredCapabilities: array( 'actions.payment' ),
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
+					'showItems'    => true,
 					'showSubtotal' => true,
 					'showTax'      => false,
 					'taxRate'      => 0,
+					'taxLabel'     => __( 'Tax', 'subtleforms' ),
 					'showTotal'    => true,
-					'currency'     => 'USD',
+					'showCoupon'   => true,
+					'couponPrompt' => __( 'Have a coupon code?', 'subtleforms' ),
 				),
 				inspectorControls: array(
 					array(
 						'type'  => 'text',
 						'name'  => 'label',
 						'label' => __( 'Label', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'showItems',
+						'label' => __( 'List each item', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'checkbox',
+						'name'  => 'showCoupon',
+						'label' => __( 'Coupon box in the summary', 'subtleforms' ),
+						'help'  => __( 'Lets visitors apply a code right where they see the total. Manage codes in SubtleForms › Payments.', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'text',
+						'name'  => 'couponPrompt',
+						'label' => __( 'Coupon link text', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'text',
+						'name'  => 'taxLabel',
+						'label' => __( 'Tax label', 'subtleforms' ),
 					),
 					array(
 						'type'  => 'checkbox',
