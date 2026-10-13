@@ -27,7 +27,8 @@ export const PRO_TEMPLATE_IDS = [
  * These fields require Pro license to use
  */
 const PRO_FIELD_TYPES = [
-  'file_upload',
+  // File and Image Upload are free fields; several files per field is the
+  // Pro part, and the server enforces it.
   'signature',
   // Add more as Pro fields are introduced
 ];

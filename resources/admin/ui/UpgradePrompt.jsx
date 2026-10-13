@@ -23,6 +23,7 @@
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import Icon from './Icon';
+import { getBranding } from '../utils/branding';
 import './UpgradePrompt.scss';
 
 export function getUpgradeUrl(feature = '') {
@@ -40,6 +41,10 @@ export default function UpgradePrompt({
   ctaText,
   onUpgrade,
 }) {
+  // White label: no upgrade messages for clients (2.3.0).
+  if (getBranding().hideUpgrade) {
+    return null;
+  }
   const defaultCtaText = __('Upgrade to Pro', 'subtleforms');
   
   const handleUpgrade = () => {
