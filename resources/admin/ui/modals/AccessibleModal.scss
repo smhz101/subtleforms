@@ -151,15 +151,5 @@
   }
 }
 
-/* Dark mode support (if needed) */
-@media (prefers-color-scheme: dark) {
-  .sf-modal__description {
-    background: var(--sf-gray-800);
-    color: var(--sf-gray-200);
-    border-left-color: var(--sf-blue-500);
-  }
+/* Dark mode: the WordPress admin has no OS dark mode, so neither do we. */
 
-  .components-modal__header-heading {
-    color: var(--sf-gray-50) !important;
-  }
-}

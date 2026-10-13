@@ -16,10 +16,12 @@
  *   /extensions             → Extensions
  */
 
-import { useState, useEffect, Suspense } from '@wordpress/element';
+import { useState, useEffect, useRef, Suspense } from '@wordpress/element';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { store as noticesStore } from '@wordpress/notices';
 import { __, sprintf } from '@wordpress/i18n';
+import { getBranding } from '../utils/branding';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { Panel, PanelBody } from '@wordpress/components';
 import {
 	MemoryRouter,
 	Routes,
@@ -35,6 +37,7 @@ import PageErrorBoundary from '../components/PageErrorBoundary';
 import { RouteLoadingFallback } from '../components/RouteTransition';
 import { CreateFormModal } from '../modals';
 import { UpgradeModal } from '../ui';
+import useWpAdminSync from './useWpAdminSync';
 
 // ─── Query Client ─────────────────────────────────────────────────────────────
 
@@ -62,6 +65,7 @@ const SubmissionsPage    = lazyWithRetry(() => import(/* webpackChunkName: "page
 const SubmissionDetailPage = lazyWithRetry(() => import(/* webpackChunkName: "page-submission-detail" */ '../pages/SubmissionDetailPage'));
 const BuilderPage        = lazyWithRetry(() => import(/* webpackChunkName: "page-builder" */        '../pages/BuilderPage'));
 const ExtensionsPage     = lazyWithRetry(() => import(/* webpackChunkName: "page-extensions" */     '../pages/ExtensionsPage'));
+const PaymentsPage       = lazyWithRetry(() => import(/* webpackChunkName: "page-payments" */       '../pages/PaymentsPage'));
 const CreateFormPage     = lazyWithRetry(() => import(/* webpackChunkName: "page-create-form" */    '../pages/CreateFormPage'));
 
 // ─── Initial path resolver ────────────────────────────────────────────────────
@@ -95,6 +99,9 @@ function getInitialPath() {
 
 		case 'subtleforms-extensions':
 			return '/extensions';
+
+		case 'subtleforms-payments':
+			return '/payments';
 
 		default:
 			return '/';
@@ -149,6 +156,7 @@ function getPageNameFromPath(pathname) {
 		'/submissions': __('Submissions', 'subtleforms'),
 		'/settings': __('Settings', 'subtleforms'),
 		'/extensions': __('Extensions', 'subtleforms'),
+		'/payments': __('Payments', 'subtleforms'),
 	};
 	if (pathname.startsWith('/forms/') && pathname !== '/forms/new') {
 		return __('Form Builder', 'subtleforms');
@@ -156,7 +164,7 @@ function getPageNameFromPath(pathname) {
 	if (pathname.startsWith('/submissions/')) {
 		return __('Submission Detail', 'subtleforms');
 	}
-	return map[pathname] || __('SubtleForms', 'subtleforms');
+	return map[pathname] || getBranding().name;
 }
 
 function RouteAnnouncer() {
@@ -181,11 +189,44 @@ function RouteAnnouncer() {
 	);
 }
 
+/**
+ * Form-scoped notices (save errors and validation messages of the form being
+ * edited, ids starting with "subtleforms-form-") belong to that form: they
+ * are cleared when the user leaves the form's route (2.3.1, QA-03).
+ */
+export function isFormScopedNotice(notice) {
+	return typeof notice?.id === 'string' && notice.id.indexOf('subtleforms-form-') === 0;
+}
+
+function FormNoticeCleaner() {
+	const location = useLocation();
+	const notices = useSelect((select) => select(noticesStore).getNotices(), []);
+	const { removeNotice } = useDispatch(noticesStore);
+	const previous = useRef(location.pathname);
+	useEffect(() => {
+		if (previous.current === location.pathname) return;
+		previous.current = location.pathname;
+		notices.filter(isFormScopedNotice).forEach((n) => removeNotice(n.id));
+		// Messages the previous screen spoke to screen readers stay in the
+		// live regions until the next one; they no longer apply.
+		document
+			.querySelectorAll('#a11y-speak-polite, #a11y-speak-assertive')
+			.forEach((region) => {
+				region.textContent = '';
+			});
+		// Only route changes clear notices.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [location.pathname]);
+	return null;
+}
+
 // ─── App content (inside router context) ─────────────────────────────────────
 
 function AppContent() {
 	const navigate  = useNavigate();
-	const location  = useLocation();
+
+	// Keep the URL, admin submenu and tab title in step with the router.
+	useWpAdminSync(getPageNameFromPath);
 
 	// Modal kept intact but no longer triggered by /forms/new (now a full page)
 	const [showCreateModal, setShowCreateModal] = useState(false);
@@ -230,71 +271,76 @@ function AppContent() {
 	}
 
 	return (
-		<div>
+		<>
 			<RouteAnnouncer />
-			<Panel className='hello-body'>
-				<PanelBody>
-					<Suspense fallback={<RouteLoadingFallback />}>
-						<Routes>
-							<Route
-								path='/'
-								element={
-									<PageErrorBoundary pageName='Dashboard'>
-										<DashboardPage />
-									</PageErrorBoundary>
-								}
-							/>
-							<Route
-								path='/forms'
-								element={
-									<PageErrorBoundary pageName='Forms'>
-										<FormsPage />
-									</PageErrorBoundary>
-								}
-							/>
-							{/* /forms/new — full-page creation experience */}
-							<Route
-								path='/forms/new'
-								element={
-									<PageErrorBoundary pageName='Create Form'>
-										<CreateFormPage />
-									</PageErrorBoundary>
-								}
-							/>
-							{/* /forms/:formId — existing form */}
-							<Route
-								path='/forms/:formId'
-								element={
-									<PageErrorBoundary pageName='Form Builder'>
-										<BuilderPage onFormSaved={handleFormSaved} />
-									</PageErrorBoundary>
-								}
-							/>
-							<Route path='/submissions' element={<SubmissionsRoute />} />
-							<Route
-								path='/submissions/:submissionId'
-								element={<SubmissionDetailRoute />}
-							/>
-							<Route
-								path='/settings'
-								element={
-									<PageErrorBoundary pageName='Settings'>
-										<SettingsPage />
-									</PageErrorBoundary>
-								}
-							/>
-							<Route
-								path='/extensions'
-								element={
-									<PageErrorBoundary pageName='Extensions'>
-										<ExtensionsPage />
-									</PageErrorBoundary>
-								}
-							/>
-						</Routes>
-					</Suspense>
-				</PanelBody>
-			</Panel>
+			<FormNoticeCleaner />
+			<Suspense fallback={<RouteLoadingFallback />}>
+				<Routes>
+					<Route
+						path='/'
+						element={
+							<PageErrorBoundary pageName='Dashboard'>
+								<DashboardPage />
+							</PageErrorBoundary>
+						}
+					/>
+					<Route
+						path='/forms'
+						element={
+							<PageErrorBoundary pageName='Forms'>
+								<FormsPage />
+							</PageErrorBoundary>
+						}
+					/>
+					{/* /forms/new — full-page creation experience */}
+					<Route
+						path='/forms/new'
+						element={
+							<PageErrorBoundary pageName='Create Form'>
+								<CreateFormPage />
+							</PageErrorBoundary>
+						}
+					/>
+					{/* /forms/:formId — existing form */}
+					<Route
+						path='/forms/:formId'
+						element={
+							<PageErrorBoundary pageName='Form Builder'>
+								<BuilderPage onFormSaved={handleFormSaved} />
+							</PageErrorBoundary>
+						}
+					/>
+					<Route path='/submissions' element={<SubmissionsRoute />} />
+					<Route
+						path='/submissions/:submissionId'
+						element={<SubmissionDetailRoute />}
+					/>
+					<Route
+						path='/settings'
+						element={
+							<PageErrorBoundary pageName='Settings'>
+								<SettingsPage />
+							</PageErrorBoundary>
+						}
+					/>
+					<Route
+						path='/payments'
+						element={
+							<PageErrorBoundary pageName='Payments'>
+								<PaymentsPage />
+							</PageErrorBoundary>
+						}
+					/>
+					<Route
+						path='/extensions'
+						element={
+							<PageErrorBoundary pageName='Extensions'>
+								<ExtensionsPage />
+							</PageErrorBoundary>
+						}
+					/>
+				</Routes>
+			</Suspense>
 
 			<CreateFormModal
 				isOpen={showCreateModal}
@@ -302,7 +348,7 @@ function AppContent() {
 				onFormCreated={handleFormCreated}
 			/>
 			<UpgradeModal />
-		</div>
+		</>
 	);
 }
 

@@ -12,6 +12,7 @@ import { Component } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Spinner } from '@wordpress/components';
 import Icon from '../ui/Icon';
+import { supportUrl } from '../utils/branding';
 import './PageErrorBoundary.scss';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -249,7 +250,7 @@ export class PageErrorBoundary extends Component {
 						<p className="sf-page-error-boundary__support">
 							{ __( 'If this problem persists, ', 'subtleforms' ) }
 							<a
-								href="https://subtleforms.com/support"
+								href={ supportUrl() }
 								target="_blank"
 								rel="noopener noreferrer"
 							>
