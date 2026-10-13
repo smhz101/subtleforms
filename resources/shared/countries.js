@@ -259,6 +259,14 @@ export const COUNTRIES = [
   { code: 'ZW', name: 'Zimbabwe' },
 ];
 
+export function preferredCountryCodes(value) {
+  const raw = Array.isArray(value) ? value : (typeof value === 'string' ? value.split(/[\n,]+/) : []);
+  return raw
+    .flatMap((item) => String(item ?? '').split(/[\s,]+/))
+    .map((code) => code.trim())
+    .filter(Boolean);
+}
+
 /**
  * Countries in display order, with preferred codes first.
  *

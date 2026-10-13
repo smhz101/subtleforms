@@ -39,6 +39,14 @@ function ensureArray(value, length) {
   return Array.isArray(value) ? value.map((col) => (Array.isArray(col) ? col : [])) : [];
 }
 
+// Layout containers store `columns` as arrays of child fields (or field
+// objects). A matrix stores the same key as a list of label strings.
+function isLayoutColumnList(columns) {
+  return Array.isArray(columns) && columns.some(
+    (entry) => Array.isArray(entry) || (entry !== null && typeof entry === 'object')
+  );
+}
+
 function extractConfig(rawField) {
   // A node saved with both flat settings and a partial `config` (for example
   // only { appearance: { width } }) is folded into one flat settings object,
@@ -51,13 +59,22 @@ function extractConfig(rawField) {
     // Accept both 'children' (new canonical key) and 'fields' (legacy key for backward compat)
     children: childrenArray,
     fields: fieldsArray,
-    columns: columnChildren,
+    columns: rawColumns,
     id,
     type,
     kind,
     parentId,
     ...config
   } = field;
+
+  // String (or numeric) columns stay on the field. Only real layout
+  // columns — child-field arrays or field objects — are tree children.
+  let columnChildren = [];
+  if (isLayoutColumnList(rawColumns)) {
+    columnChildren = rawColumns;
+  } else if (rawColumns !== undefined) {
+    config.columns = rawColumns;
+  }
 
   // If 'fields' is a non-array object it is the composite sub-fields config, not a children
   // array. Restore it into config so it is not silently discarded.

@@ -1,5 +1,6 @@
 import { repeaterLimits } from './fieldValidation';
 import { fieldConfig } from '../../shared/fieldConfig';
+import { toggleInitialValue } from '../../shared/toggleState';
 /**
  * Default values for a form's fields.
  *
@@ -44,6 +45,27 @@ function resolveTokens(raw) {
 }
 
 /**
+ * Starting value for a range slider: its configured default, otherwise the
+ * midpoint the input shows before anyone touches it. Numeric zero is kept.
+ *
+ * @param {Object} config Merged field settings.
+ * @return {number}
+ */
+export function rangeSliderSeed(config = {}) {
+  const sliderMin = Number(config.min ?? 0);
+  const sliderMax = Number(config.max ?? 100);
+  const midpoint = Math.round((sliderMin + sliderMax) / 2);
+  const fallback = Number.isFinite(midpoint) ? midpoint : 0;
+  const raw = config.defaultValue;
+  if (raw === undefined || raw === null || raw === '') {
+    return fallback;
+  }
+  const resolved = typeof raw === 'string' ? resolveTokens(raw) : raw;
+  const n = Number(resolved);
+  return Number.isFinite(n) ? n : fallback;
+}
+
+/**
  * Walk the field tree and collect initial values.
  *
  * @param {Array} fields Field nodes.
@@ -72,7 +94,13 @@ export function collectDefaultValues(fields) {
         return;
       }
 
-      if (key) {
+      if (key && field.type === 'range_slider') {
+        // Seed before required checks so an untouched slider submits the
+        // number it already shows.
+        out[key] = rangeSliderSeed(config);
+      } else if (key && field.type === 'toggle') {
+        out[key] = toggleInitialValue(config);
+      } else if (key) {
         const raw = config.defaultValue;
         if (raw !== undefined && raw !== null && raw !== '') {
           const resolved = resolveTokens(raw);
@@ -84,8 +112,8 @@ export function collectDefaultValues(fields) {
           } else {
             out[key] = resolved;
           }
-        } else if (field.type === 'toggle') {
-          out[key] = config.offValue ?? 'no';
+        } else if (field.type === 'country' && config.default_country) {
+          out[key] = config.default_country;
         } else if (field.type === 'hidden' && config.value) {
           out[key] = resolveTokens(config.value);
         }

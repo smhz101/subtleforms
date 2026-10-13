@@ -40,6 +40,50 @@ function isBlank(v) {
   return v === undefined || v === null || v === '';
 }
 
+function matrixRowKey(row) {
+  if (row && typeof row === 'object') {
+    if (row.value !== undefined && row.value !== null && row.value !== '') return row.value;
+    if (row.label !== undefined && row.label !== null && row.label !== '') return row.label;
+    return '';
+  }
+  return row;
+}
+
+function matrixRowLabel(row) {
+  if (row && typeof row === 'object') {
+    if (row.label !== undefined && row.label !== null && row.label !== '') return String(row.label);
+    if (row.value !== undefined && row.value !== null && row.value !== '') return String(row.value);
+    return '';
+  }
+  return String(row);
+}
+
+/** A row is answered by a column key, or by at least one checked cell. */
+function matrixRowAnswered(answer) {
+  if (typeof answer === 'number') return Number.isFinite(answer);
+  if (typeof answer === 'string') return answer.trim() !== '';
+  if (answer && typeof answer === 'object') {
+    return Object.values(answer).some((cell) => cell === true || cell === 1 || cell === '1');
+  }
+  return false;
+}
+
+/** Label of the first row with no answer, or null when every row is filled. */
+function firstUnansweredMatrixRow(rows, value) {
+  if (!Array.isArray(rows) || rows.length === 0) return null;
+  const grid = value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  for (const row of rows) {
+    if (!matrixRowAnswered(grid[matrixRowKey(row)])) {
+      return matrixRowLabel(row);
+    }
+  }
+  return null;
+}
+
+function isIsoDate(value) {
+  return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
 /**
  * Whether a field is drawn as something a visitor can answer.
  *
@@ -111,6 +155,19 @@ function rawValidateField(field, value, defaults = {}) {
     } else if (type === 'toggle') {
       const onValue = config.onValue ?? 'yes';
       if (value !== true && value !== onValue) return requiredMessage;
+    } else if (type === 'checkbox_grid') {
+      // Required means every row, not a single filled cell.
+      const missing = firstUnansweredMatrixRow(config.rows, value);
+      if (missing) {
+        return {
+          message: sprintf(
+            /* translators: %s: matrix row label */
+            __('Please answer the "%s" row.', 'subtleforms'),
+            missing
+          ),
+          required: true,
+        };
+      }
     } else if (isEmptyValue(value)) {
       return requiredMessage;
     }
@@ -170,6 +227,45 @@ function rawValidateField(field, value, defaults = {}) {
     if (max !== null && n > max) {
       /* translators: %s: maximum value */
       return sprintf(__('Must be no more than %s.', 'subtleforms'), max);
+    }
+    const step = num(config.step);
+    if (step !== null && Number.isFinite(step) && step > 0) {
+      const base = min !== null && Number.isFinite(min) ? min : 0;
+      const quot = (n - base) / step;
+      if (Math.abs(quot - Math.round(quot)) > 1e-8) {
+        return sprintf(
+          /* translators: %s: step increment */
+          __('Must match the step of %s.', 'subtleforms'),
+          step
+        );
+      }
+    }
+  }
+
+  if (type === 'date' && isIsoDate(value)) {
+    const minDate = config.minDate;
+    const maxDate = config.maxDate;
+    if (isIsoDate(minDate) && value < minDate) {
+      return sprintf(
+        /* translators: %s: earliest allowed date */
+        __('Date must be on or after %s.', 'subtleforms'),
+        minDate
+      );
+    }
+    if (isIsoDate(maxDate) && value > maxDate) {
+      return sprintf(
+        /* translators: %s: latest allowed date */
+        __('Date must be on or before %s.', 'subtleforms'),
+        maxDate
+      );
+    }
+  }
+
+  // Same character rule as FieldValidator::validatePhone. Preview never
+  // reaches the server, so letters must fail here too.
+  if ((type === 'phone' || type === 'tel') && typeof value === 'string') {
+    if (!/^[\d\s\-\+\(\)]+$/.test(value)) {
+      return __('Invalid phone number.', 'subtleforms');
     }
   }
 

@@ -1,6 +1,7 @@
 import { memo, useMemo } from '@wordpress/element';
 import Icon from '../../ui/Icon';
 import FieldRenderer from './FieldRenderer';
+import { fieldConfig } from '../../../shared/fieldConfig';
 import FieldToolbar from './FieldToolbar';
 import clsx from 'clsx';
 import './FieldWrapper.scss';
@@ -30,7 +31,8 @@ const FieldWrapper = memo(function FieldWrapper({
     if (!field) return null;
     if (field.required && !field.label?.trim()) return 'No label set';
     const OPTION_TYPES = ['dropdown', 'select', 'radio', 'multiple_choice'];
-    if (OPTION_TYPES.includes(field.type) && (!field.options || field.options.length === 0)) {
+    const optionList = fieldConfig(field).options;
+    if (OPTION_TYPES.includes(field.type) && (!optionList || optionList.length === 0)) {
       return 'No options configured';
     }
     return null;
@@ -51,7 +53,7 @@ const FieldWrapper = memo(function FieldWrapper({
           <Icon.AlertCircle size={12} /> {configWarning}
         </span>
       )}
-      <FieldRenderer field={field} />
+      <FieldRenderer field={field} interactive={isSelected} />
 
       {isSelected && (
         <FieldToolbar

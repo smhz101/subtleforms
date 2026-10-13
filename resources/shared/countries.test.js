@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import { COUNTRIES, orderedCountries } from './countries';
+import { COUNTRIES, orderedCountries, preferredCountryCodes } from './countries';
 
 describe('one country list (2.2.1 bug 3)', () => {
   test('the browser list has the same codes as the server list', () => {
@@ -22,5 +22,8 @@ describe('one country list (2.2.1 bug 3)', () => {
     expect(list[1].code).toBe('GB');
     expect(list.filter((c) => c.code === 'PK')).toHaveLength(1);
     expect(list).toHaveLength(COUNTRIES.length);
+    const parsed = orderedCountries(preferredCountryCodes('pk, GB'));
+    expect(parsed[0].code).toBe('PK');
+    expect(parsed[1].code).toBe('GB');
   });
 });
