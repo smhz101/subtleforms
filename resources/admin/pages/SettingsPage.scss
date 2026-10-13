@@ -1,1379 +1,838 @@
-@use '../styles/variables' as *;
-
 /**
- * Settings Page Styles
- * Using AdminShell - no custom page layout needed
- *
- * LAYOUT CONTRACT:
- * - Settings wrapped in AdminShell (scrolls automatically)
- * - Two-column layout: Vertical sidebar (240px) + Content area (flex: 1)
- * - Save/Discard buttons in AdminShell header (sticky)
- * - Sidebar navigation fixed, content scrolls with AdminShell
+ * Settings — core Site Settings pattern: grouped navigation on the left, a
+ * titled section on the right, controls in cards with one row per setting,
+ * and a save bar that appears only when something changed.
  */
 
-.sf-settings-container {
-	max-width: 1200px;
-	margin: 0 auto 0 0;
-}
+.sf-settings {
+	display: grid;
+	grid-template-columns: 220px minmax(0, 1fr);
+	align-items: start;
+	gap: 40px;
+	padding: 0 var(--sf-gutter) 96px;
 
-.sf-settings-notice {
-	margin-bottom: 1.5rem;
-}
-
-/* Two-Column Layout: Sidebar + Content */
-.sf-settings-layout {
-	display: flex;
-	gap: 1rem;
-	align-items: flex-start;
-}
-
-/* Vertical Sidebar Navigation */
-.sf-settings-sidebar {
-	flex-shrink: 0;
-	width: 240px;
-	padding: $space-4 $space-2;
-}
-
-.sf-settings-nav {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-	display: flex;
-	flex-direction: column;
-	gap: 0.25rem;
-}
-
-.sf-settings-nav-item {
-	display: flex;
-	align-items: center;
-	gap: 0.75rem;
-	width: 100%;
-	padding: 0.75rem 1rem;
-	border: none;
-	background: transparent;
-	color: var(--sf-gray-500);
-	font-size: var(--sf-text-base);
-	font-weight: 500;
-	text-align: left;
-	border-radius: var(--sf-radius-md);
-	cursor: pointer;
-	transition: background-color var(--sf-duration-fast) cubic-bezier(0.4, 0, 0.2, 1),
-	           color var(--sf-duration-fast) cubic-bezier(0.4, 0, 0.2, 1);
-
-	.dashicons {
-		font-size: var(--sf-text-lg);
-		width: 18px;
-		height: 18px;
-		color: var(--sf-gray-400);
-		transition: color var(--sf-duration-base) ease-out;
+	@media (max-width: 900px) {
+		grid-template-columns: 1fr;
+		gap: 16px;
 	}
 
-	&:hover:not(&--active) {
-		background-color: var(--sf-gray-100);
-		color: var(--sf-gray-700);
+	// ── Navigation ──────────────────────────────────────────────────────────
+	&__nav {
+		position: sticky;
+		top: 16px;
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
 
-		.dashicons {
-			color: var(--sf-gray-500);
+		ul {
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
+			margin: 0;
+			padding: 0;
+			list-style: none;
+		}
+
+		li { margin: 0; }
+
+		@media (max-width: 900px) {
+			position: static;
+			flex-direction: row;
+			gap: 4px;
+			overflow-x: auto;
+			padding-bottom: 8px;
+			border-bottom: 1px solid var(--sf-border);
+
+			ul { flex-direction: row; }
 		}
 	}
 
-	&--active {
-		background-color: var(--sf-blue-50);
-		color: var(--sf-blue-600);
-		font-weight: 600;
+	&__nav-heading {
+		margin: 0 0 6px;
+		padding: 0 12px;
+		font-size: 11px;
+		font-weight: var(--sf-weight-medium);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--sf-text-muted);
 
-		.dashicons {
-			color: var(--sf-blue-600);
+		@media (max-width: 900px) { display: none; }
+	}
+
+	&__nav-item {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		width: 100%;
+		height: 36px;
+		padding: 0 12px;
+		border: 0;
+		border-radius: var(--sf-radius-control);
+		background: transparent;
+		font-size: var(--sf-text-sm);
+		font-weight: var(--sf-weight-medium);
+		color: var(--sf-text-secondary);
+		text-align: start;
+		white-space: nowrap;
+		cursor: pointer;
+		transition: background var(--sf-duration-fast) var(--sf-ease), color var(--sf-duration-fast) var(--sf-ease);
+
+		svg {
+			flex-shrink: 0;
+			fill: none;
+			color: var(--sf-text-muted);
+		}
+
+		&:hover {
+			background: var(--sf-bg-muted);
+			color: var(--sf-text);
+		}
+
+		&.is-active {
+			background: var(--sf-bg-muted);
+			color: var(--sf-text);
+
+			svg { color: var(--sf-brand); }
+		}
+
+		&:focus-visible {
+			outline: none;
+			box-shadow: var(--sf-shadow-focus);
 		}
 	}
 
-	&__lock {
-		margin-left: auto;
-		color: var(--sf-gray-400);
-		flex-shrink: 0;
-		opacity: 0.7;
+	&__nav-pro {
+		margin-inline-start: auto;
+		padding: 1px 6px;
+		border-radius: var(--sf-radius-full);
+		background: #1e1e1e;
+		color: #fff;
+		font-size: 10px;
+		font-weight: var(--sf-weight-semibold);
+	}
+
+	// ── Content ─────────────────────────────────────────────────────────────
+	&__content {
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+		min-width: 0;
+		max-width: 760px;
+	}
+
+	&__panel--extensions { max-width: none; }
+
+	&__content:has(.sf-settings__panel--extensions) { max-width: 1040px; }
+
+	&__header { padding-top: 4px; }
+
+	&__title {
+		margin: 0;
+		font-size: var(--sf-text-md);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
+	}
+
+	&__description {
+		margin: 4px 0 0;
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-muted);
+	}
+
+	&__notice.components-notice { margin: 0; }
+
+	&__panel {
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
 	}
 }
 
-/* Content Area */
-.sf-settings-content {
-	flex: 1;
-	min-width: 0;
-	padding: $space-4 $space-4 $space-4 $space-2;
-}
-
+// ── Setting rows (shared by all tabs) ───────────────────────────────────────
+// Every tab renders `.sf-settings-section > div` per setting. Present those as
+// a single card with hairline dividers, like core's settings cards.
 .sf-settings-section {
 	display: flex;
 	flex-direction: column;
-	gap: 1rem;
-}
+	overflow: hidden;
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius-lg);
+	background: var(--sf-bg-surface);
 
-/* Card Styles */
-.sf-settings-content .components-card {
-	margin: 0;
-	box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-	border: 1px solid var(--sf-gray-200);
-	border-radius: var(--sf-radius-md);
-}
+	> div,
+	> .sf-settings-field {
+		padding: 20px 24px;
+		border-bottom: 1px solid var(--sf-border-subtle);
 
-.sf-settings-content .components-card-body {
-	padding: 1.5rem;
-}
+		&:last-child { border-bottom: 0; }
 
-.sf-settings-content .components-base-control {
-	margin-bottom: 1.25rem;
-}
-
-.sf-settings-content .components-base-control:last-child {
-	margin-bottom: 0;
-}
-
-.subtleforms-settings-danger-zone {
-	margin-top: 2rem;
-	padding-top: 1.5rem;
-	border-top: 1px solid var(--sf-gray-200);
-}
-
-.subtleforms-settings-danger-zone h3 {
-	margin: 0 0 0.5rem;
-	font-size: var(--sf-text-base);
-	font-weight: 600;
-	color: var(--sf-red-600);
-}
-
-.subtleforms-settings-danger-zone p {
-	margin: 0 0 1rem;
-	font-size: var(--sf-text-sm);
-	color: var(--sf-gray-500);
-}
-
-/* Responsive */
-@media (max-width: 782px) {
-	.sf-settings-container {
-		padding: 1rem;
+		&:empty { display: none; }
 	}
 
-	.sf-settings-layout {
-		flex-direction: column;
-		gap: 1.5rem;
-	}
+	.components-base-control { margin-bottom: 0; }
 
-	.sf-settings-sidebar {
-		width: 100%;
+	> div > .components-base-control + .components-base-control,
+	> div > * + .components-base-control,
+	> div > .components-base-control + * {
+		margin-top: 16px;
 	}
+}
 
-	.sf-settings-nav {
-		flex-direction: row;
-		flex-wrap: wrap;
-		gap: 0.5rem;
-	}
+.sf-settings-field {
+	.components-base-control { margin-bottom: 0; }
+}
 
-	.sf-settings-nav-item {
-		flex: 1;
-		min-width: calc(50% - 0.25rem);
-		justify-content: center;
-		padding: 0.5rem 0.75rem;
+// Sentence-case labels at 13px, like core settings screens.
+.sf-settings,
+.sf-ext-settings {
+	.components-base-control__label,
+	.components-input-control__label.components-input-control__label,
+	.components-base-control .components-input-control__label {
+		margin-bottom: 8px;
 		font-size: var(--sf-text-sm);
-
-		.dashicons {
-			font-size: var(--sf-text-md);
-			width: 16px;
-			height: 16px;
-		}
-
-		.sf-settings-nav-item__label {
-			display: none;
-		}
-	}
-}
-
-@media (min-width: 783px) and (max-width: 1024px) {
-	.sf-settings-sidebar {
-		width: 200px;
+		font-weight: var(--sf-weight-medium);
+		text-transform: none;
+		letter-spacing: 0;
+		color: var(--sf-text);
 	}
 
-	.sf-settings-nav-item {
-		padding: 0.75rem 1rem;
-		font-size: var(--sf-text-sm);
-		gap: 0.75rem;
-
-		.dashicons {
-			font-size: var(--sf-text-md);
-			width: 16px;
-			height: 16px;
-		}
+	.components-base-control__help,
+	p.description {
+		margin-top: 8px;
+		font-size: 12px;
+		line-height: 1.5;
+		color: var(--sf-text-muted);
 	}
-}
 
-/* Field Error Styles */
-.subtleforms-field-error {
-	margin-top: 0.25rem;
-}
-
-.sf-error-text {
-	font-size: var(--sf-text-base);
-	color: var(--sf-red-600);
-	display: block;
 }
 
 .sf-section-title {
-	font-size: var(--sf-text-md);
-	font-weight: 600;
-	color: var(--sf-gray-900);
-	margin: 1.5rem 0 0.75rem;
+	margin: 0 0 4px;
+	font-size: var(--sf-text-sm);
+	font-weight: var(--sf-weight-semibold);
+	color: var(--sf-text);
+}
 
-	&:first-child {
-		margin-top: 0;
-	}
+.sf-subsection-title {
+	margin: 20px 0 12px;
+	padding-top: 16px;
+	border-top: 1px solid var(--sf-border-subtle);
+	font-size: 12px;
+	font-weight: var(--sf-weight-semibold);
+	text-transform: uppercase;
+	letter-spacing: 0.04em;
+	color: var(--sf-text-muted);
 }
 
 .sf-section-description {
-	font-size: var(--sf-text-sm);
-	color: var(--sf-gray-500);
-	margin-top: 0.5rem;
-	line-height: 1.5;
+	margin: 0 0 16px;
+	font-size: 12px;
+	color: var(--sf-text-muted);
 }
 
-/* AI Configuration Styles - Violet Branding */
-
-.sf-ai-settings {
-	.sf-ai-card {		
-		.components-card__header {
-			background: linear-gradient(135deg, $sf-violet-50, $sf-violet-100);
-			border-bottom: 1px solid $sf-violet-200;
-			padding: $space-6;
-		}
-	}
-
-	.sf-ai-card__header {
-		display: flex;
-		align-items: flex-start;
-		gap: $space-4;
-	}
-
-	.sf-ai-card__header-icon {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 3rem;
-		height: 3rem;
-		border-radius: $radius-lg;
-		background: linear-gradient(135deg, $sf-violet-500, $sf-violet-600);
-		color: white;
-		box-shadow: $shadow-lg;
-		flex-shrink: 0;
-
-		svg {
-			width: 1.5rem;
-			height: 1.5rem;
-		}
-	}
-
-	.sf-ai-card__header-text {
-		flex: 1;
-
-		h3 {
-			margin: 0 0 $space-2 0;
-			font-size: $font-size-lg;
-			color: $sf-violet-900;
-			font-weight: 700;
-		}
-
-		p {
-			margin: 0;
-			font-size: $font-size-sm;
-			color: $sf-violet-700;
-			line-height: 1.5;
-		}
-	}
-
-	// Test Connection Section
-	.sf-ai-test-connection {
-		display: flex;
-		flex-direction: column;
-		gap: $space-3;
-		padding: $space-4;
-		background-color: $sf-stone-50;
-		border: 1px solid $sf-stone-200;
-		border-radius: $radius-lg;
-
-		.sf-ai-test-result {
-			margin: 0;
-		}
-	}
-
-	// AI Agents Section
-	.sf-ai-agents-section {
-		margin-top: $space-6;
-		padding-top: $space-6;
-		border-top: 2px solid $sf-violet-100;
-	}
-
-	.sf-ai-agents-grid {
-		display: grid;
-		grid-template-columns: repeat(1, minmax(0, 1fr));
-		gap: $space-4;
-		margin-top: $space-4;
-
-		@media (min-width: 768px) {
-			grid-template-columns: repeat(2, minmax(0, 1fr));
-		}
-	}
-
-	.sf-ai-agent-card {
-		background: white;
-		border: 2px solid $sf-violet-100;
-		border-radius: $radius-lg;
-		padding: $space-4;
-		transition: all $transition-base;
-
-		&:hover {
-			border-color: $sf-violet-300;
-			box-shadow: 0 4px 12px -2px rgba(139, 92, 246, 0.15);
-			transform: translateY(-2px);
-		}
-	}
-
-	.sf-ai-agent-card__header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		margin-bottom: $space-3;
-
-		.components-base-control {
-			margin-bottom: 0;
-		}
-
-		.components-base-control__field {
-			margin-bottom: 0;
-		}
-	}
-
-	.sf-ai-agent-card__icon {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		width: 2.5rem;
-		height: 2.5rem;
-		border-radius: $radius-md;
-		transition: all $transition-base;
-
-		svg {
-			width: 1.25rem;
-			height: 1.25rem;
-		}
-
-		&--spam {
-			background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(16, 185, 129, 0.2));
-			color: var(--sf-emerald-500);
-		}
-
-		&--workflow {
-			background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(59, 130, 246, 0.2));
-			color: var(--sf-blue-500);
-		}
-
-		&--assist {
-			background: linear-gradient(135deg, rgba(249, 115, 22, 0.1), rgba(249, 115, 22, 0.2));
-			color: var(--sf-orange-500);
-		}
-
-		&--routing {
-			background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(139, 92, 246, 0.2));
-			color: $sf-violet-600;
-		}
-	}
-
-	.sf-ai-agent-card__description {
-		font-size: $font-size-sm;
-		color: $sf-stone-600;
-		line-height: 1.5;
-		margin: 0;
-	}
-
-	// Cost Estimator
-	.sf-ai-cost-estimator {
-		margin-top: $space-6;
-		padding: $space-5;
-		background: linear-gradient(135deg, $sf-violet-50, white);
-		border: 2px solid $sf-violet-200;
-		border-radius: $radius-lg;
-	}
-
-	.sf-ai-cost-estimator__header {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: $space-4;
-		margin-bottom: $space-2;
-
-		.sf-section-title {
-			margin: 0;
-			color: $sf-violet-900;
-		}
-	}
-
-	.sf-ai-cost-estimator__amount {
-		font-size: $font-size-3xl;
-		font-weight: 700;
-		color: $sf-violet-600;
-		letter-spacing: -0.02em;
-		text-shadow: 0 2px 4px rgba(139, 92, 246, 0.1);
-	}
-}
-
-/* ========================================================================
-   License Settings
-   ======================================================================== */
-
-.sf-license-loading {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	justify-content: center;
-	padding: $space-12;
-	color: $sf-stone-500;
-
-	p {
-		margin-top: $space-4;
-		font-size: $font-size-base;
-	}
-}
-
-/* License Card */
-.sf-license-card {
-	border: 2px solid $sf-lime-200;
-	box-shadow: $shadow-lg, $shadow-lime;
-
-	.components-card__header {
-		border-bottom: 1px solid $sf-stone-200;
-		padding: $space-5 $space-6;
-
-		h2 {
-			margin: 0;
-			font-size: $font-size-xl;
-			font-weight: 600;
-			color: $sf-stone-900;
-		}
-	}
-
-	.components-card__body {
-		padding: $space-6;
-	}
-}
-
-.sf-license-status {
-	text-decoration: none;
-	// display: flex;
-	// flex-direction: column;
-	// gap: $space-3;
-	// margin-bottom: $space-6;
-	// padding: $space-4;
-	// background-color: $sf-stone-50;
-	// border-radius: $radius-md;
-}
-
-.sf-license-status__row {
+.sf-settings-section__test-email {
 	display: flex;
 	align-items: center;
-	gap: $space-3;
+	gap: 8px;
+	margin-top: 12px;
 }
 
-.sf-license-status__label {
-	// font-weight: 600;
-	font-size: $font-size-sm;
-	color: $sf-stone-600;
-	// text-transform: uppercase;
-	letter-spacing: 0.05em;
-	min-width: 100px;
+.sf-settings-section__test-email-result { margin-top: 12px; }
+
+.subtleforms-field-error,
+.sf-error-text {
+	margin: 6px 0 0;
+	font-size: 12px;
+	color: var(--sf-danger);
 }
 
-.sf-license-status__value {
-	font-size: $font-size-base;
-	color: $sf-stone-900;
-}
-
-.sf-license-status__days {
-	font-size: $font-size-sm;
-	color: $sf-stone-500;
-}
-
-.sf-license-warnings {
-	margin-top: $space-4;
-
-	.components-notice {
-		margin-bottom: $space-2;
-	}
-}
-
-.sf-license-input {
-	margin-bottom: $space-6;
-
-	.components-base-control__label {
-		font-weight: 600;
-		font-size: $font-size-sm;
-		color: $sf-stone-700;
-		margin-bottom: $space-2;
-	}
-
-	.components-text-control__input {
-		font-size: $font-size-base;
-		padding: $space-3;
-		border: 2px solid $sf-stone-200;
-		border-radius: $radius-md;
-		transition: border-color $transition-base, box-shadow $transition-base;
-
-		&:focus {
-			border-color: $sf-lime-500;
-			box-shadow: 0 0 0 3px rgba(132, 204, 22, 0.1);
-		}
-
-		&:disabled {
-			background-color: $sf-stone-100;
-			cursor: not-allowed;
-		}
-	}
-}
-
-.sf-license-actions {
-	display: flex;
-	gap: $space-3;
-	margin-bottom: $space-4;
-}
-
-.sf-license-get {
-	margin-top: $space-4;
-	padding-top: $space-4;
-	border-top: 1px solid $sf-stone-200;
-	font-size: $font-size-sm;
-	color: $sf-stone-600;
-
-	a {
-		color: $sf-lime-600;
-		font-weight: 600;
-		text-decoration: none;
-		transition: color $transition-fast;
-
-		&:hover {
-			color: $sf-lime-700;
-			text-decoration: underline;
-		}
-	}
-}
-
-/* Features Card */
-.sf-license-features {
-	box-shadow: $shadow-md;
-
-	.components-card__header {
-		border-bottom: 1px solid $sf-stone-200;
-		padding: $space-5 $space-6;
-
-		h2 {
-			margin: 0;
-			font-size: $font-size-xl;
-			font-weight: 600;
-			color: $sf-stone-900;
-		}
-	}
-
-	.components-card__body {
-		padding: $space-6;
-	}
-}
-
-.sf-features-grid {
+// Danger zone — a separated card with a red heading, not a red box.
+.subtleforms-settings-danger-zone {
 	display: grid;
-	grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-	gap: $space-4;
-	margin-bottom: $space-6;
-}
+	grid-template-columns: minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 4px 24px;
+	margin-top: 20px;
+	padding: 20px 24px !important;
+	border: 1px solid var(--sf-border) !important;
+	border-radius: var(--sf-radius-lg);
+	background: var(--sf-bg-surface);
 
-.sf-feature-item {
-	display: flex;
-	flex-direction: column;
-	gap: $space-2;
-	padding: $space-4;
-	background-color: $sf-stone-50;
-	border: 2px solid $sf-stone-200;
-	border-radius: $radius-md;
-	transition: all $transition-base;
-
-	&--available {
-		background: linear-gradient(135deg, $sf-lime-50, white);
-		border-color: $sf-lime-300;
+	h3 {
+		grid-column: 1;
+		margin: 0;
+		font-size: var(--sf-text-sm);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-danger);
 	}
-
-	&:not(&--available):hover {
-		border-color: $sf-stone-300;
-		box-shadow: $shadow-sm;
-	}
-}
-
-.sf-feature-item__icon {
-	font-size: $font-size-3xl;
-	line-height: 1;
-	margin-bottom: $space-1;
-}
-
-.sf-feature-item__title {
-	display: flex;
-	align-items: center;
-	gap: $space-2;
-	margin: 0;
-	font-size: $font-size-base;
-	font-weight: 600;
-	color: $sf-stone-900;
-}
-
-.sf-feature-item__check {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 20px;
-	height: 20px;
-	background-color: $sf-lime-500;
-	color: white;
-	border-radius: 50%;
-	font-size: $font-size-xs;
-	font-weight: 700;
-}
-
-.sf-feature-item__lock {
-	display: inline-flex;
-	align-items: center;
-	justify-content: center;
-	width: 20px;
-	height: 20px;
-	font-size: $font-size-xs;
-	opacity: 0.5;
-}
-
-.sf-feature-item__description {
-	margin: 0;
-	font-size: $font-size-sm;
-	color: $sf-stone-600;
-	line-height: 1.5;
-}
-
-.sf-features-cta {
-	text-align: center;
-	padding: $space-8;
-	background: linear-gradient(135deg, $sf-lime-50, white);
-	border: 2px solid $sf-lime-200;
-	border-radius: $radius-lg;
 
 	p {
-		margin: 0 0 $space-4 0;
-		font-size: $font-size-base;
-		color: $sf-stone-700;
+		grid-column: 1;
+		margin: 0;
+		font-size: 12px;
+		color: var(--sf-text-muted);
 	}
 
 	.components-button {
-		background-color: $sf-lime-500;
-		border: none;
-		color: white;
-		font-weight: 600;
-		padding: $space-3 $space-6;
-		box-shadow: $shadow-md, $shadow-lime;
-		transition: all $transition-base;
-
-		&:hover:not(:disabled) {
-			background-color: $sf-lime-600;
-			transform: translateY(-1px);
-			box-shadow: $shadow-lg, $shadow-lime;
-		}
+		grid-column: 2;
+		grid-row: 1 / span 2;
 	}
 }
-// ── License Settings — new subscription UI ────────────────────────────────
 
-.sf-license-settings {
+// Advanced tab puts the danger zone inside the card; lift it out visually.
+.sf-settings-section > .subtleforms-settings-danger-zone {
+	margin: 0;
+	border: 0 !important;
+	border-top: 1px solid var(--sf-border) !important;
+	border-radius: 0;
+	background: var(--sf-bg-subtle);
+}
+
+// ── AI tab ──────────────────────────────────────────────────────────────────
+.sf-ai-settings,
+.sf-ai-card {
 	display: flex;
 	flex-direction: column;
-	gap: $space-3;
-
-	// Disconnected: show connect card + upgrade card side-by-side
-	&--disconnected {
-		flex-direction: row;
-		flex-wrap: wrap;
-		align-items: flex-start;
-		gap: $space-3;
-	}
-
-	// Connected: single-column
-	&--connected {
-		flex-direction: column;
-		max-width: 560px;
-	}
+	gap: 20px;
 }
 
-// Dev mode banner
-.sf-license-dev-banner {
+.sf-ai-test-connection {
 	display: flex;
-	align-items: flex-start;
-	gap: $space-4;
-	padding: $space-5 $space-6;
-	background: linear-gradient(135deg, var(--sf-warning-bg), var(--sf-n-50));
-	border: 2px solid var(--sf-warning);
-	border-radius: $radius-lg;
+	align-items: center;
+	gap: 8px;
+	margin-top: 12px;
+}
+
+.sf-ai-test-result.components-notice { margin: 12px 0 0; }
+
+.sf-ai-agents-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 12px;
+
+	@media (max-width: 720px) { grid-template-columns: 1fr; }
+}
+
+.sf-ai-agent-card {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 16px;
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius-md);
+
+	&__header {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+
+		.components-toggle-control { margin: 0; }
+
+		.components-toggle-control label {
+			font-weight: var(--sf-weight-medium);
+		}
+	}
 
 	&__icon {
-		font-size: var(--sf-text-xl);
-		color: var(--sf-warning);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 		flex-shrink: 0;
-		margin-top: 2px;
+		width: 32px;
+		height: 32px;
+		border-radius: var(--sf-radius-md);
+		background: var(--sf-bg-muted);
+		color: var(--sf-text-secondary);
+
+		svg { fill: none; width: 16px; height: 16px; }
 	}
 
-	&__body {
-		strong {
-			display: block;
-			font-size: $font-size-base;
-			font-weight: 700;
-			color: var(--sf-warning);
-			margin-bottom: $space-1;
-		}
-
-		p {
-			margin: 0;
-			font-size: $font-size-sm;
-			color: var(--sf-warning);
-			line-height: 1.6;
-		}
+	&__description {
+		margin: 0;
+		font-size: 12px;
+		color: var(--sf-text-muted);
 	}
 }
 
-// Generic section with heading
-.sf-license-section {
-	h3 {
-		margin: 0 0 $space-3;
-		font-size: $font-size-base;
-		font-weight: 600;
-		color: $sf-stone-800;
+.sf-ai-cost-estimator {
+	&__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 12px;
+	}
+
+	&__amount {
+		font-size: var(--sf-text-md);
+		font-weight: var(--sf-weight-semibold);
+		font-variant-numeric: tabular-nums;
+		color: var(--sf-text);
 	}
 }
 
-// Feature list (shared by all modes)
-.sf-feature-list {
-	margin: 0;
-	padding: 0;
-	list-style: none;
-	display: flex;
-	flex-direction: column;
-	gap: 6px;
+// ── Integrations tab ────────────────────────────────────────────────────────
+.sf-ext-settings {
+	display: grid;
+	grid-template-columns: 220px minmax(0, 1fr);
+	overflow: hidden;
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius-lg);
+	background: var(--sf-bg-surface);
+
+	@media (max-width: 900px) { grid-template-columns: 1fr; }
+
+	&__sidebar {
+		padding: 8px;
+		border-inline-end: 1px solid var(--sf-border-subtle);
+		background: var(--sf-bg-subtle);
+
+		@media (max-width: 900px) {
+			border-inline-end: 0;
+			border-bottom: 1px solid var(--sf-border-subtle);
+		}
+	}
+
+	&__list {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+
+		li { margin: 0; }
+	}
 
 	&__item {
 		display: flex;
 		align-items: center;
-		gap: $space-1;
-		font-size: $font-size-sm;
-		color: $sf-stone-700;
-		line-height: 1.4;
+		justify-content: space-between;
+		gap: 8px;
+		width: 100%;
+		height: 36px;
+		padding: 0 10px;
+		border: 0;
+		border-radius: var(--sf-radius-control);
+		background: transparent;
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-secondary);
+		text-align: start;
+		cursor: pointer;
 
-		svg, .dashicons {
-			color: $sf-stone-400;
-			flex-shrink: 0;
+		&:hover {
+			background: var(--sf-bg-muted);
+			color: var(--sf-text);
 		}
 
 		&--active {
-			color: $sf-stone-800;
-
-			svg, .dashicons {
-				color: $sf-lime-600;
-			}
+			background: var(--sf-bg-surface);
+			box-shadow: 0 0 0 1px var(--sf-border);
+			color: var(--sf-text);
+			font-weight: var(--sf-weight-medium);
 		}
 
-		// Locked item in upgrade preview
-		&--locked {
-			color: $sf-stone-500;
-
-			svg, .dashicons {
-				color: $sf-stone-300;
-				width: 14px;
-				height: 14px;
-			}
+		&:focus-visible {
+			outline: none;
+			box-shadow: var(--sf-shadow-focus);
 		}
+	}
+
+	&__content { min-width: 0; }
+
+	&__panel-wrap { position: relative; }
+
+	&__fields {
+		min-width: 0;
+		margin: 0;
+		padding: 0;
+		border: 0;
+
+		&:disabled { opacity: 0.6; }
 	}
 }
 
-// Notices (success / error)
-.sf-license-notice {
-	padding: $space-3 $space-4;
-	border-radius: $radius-md;
-	font-size: $font-size-sm;
-	font-weight: 500;
+.sf-ext-status {
+	flex-shrink: 0;
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+	background: var(--sf-gray-300, #ccc);
 
-	&--success {
-		background: var(--sf-n-50);
-		border: 1px solid var(--sf-success-border);
-		color: var(--sf-success-strong);
-	}
+	&--active { background: var(--sf-success); }
+	&--warning { background: var(--sf-warning); }
 
-	&--error {
-		background: var(--sf-n-50);
-		border: 1px solid var(--sf-danger-border);
-		color: var(--sf-danger-strong);
+	&--locked {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: auto;
+		height: auto;
+		background: transparent;
+		color: var(--sf-text-subtle);
+
+		svg { fill: none; }
 	}
 }
 
-// Account card (connected state)
-.sf-license-account-card {
-	padding: $space-6;
-	background: var(--sf-n-0);
-	border: 2px solid $sf-lime-300;
-	border-radius: $radius-lg;
-	box-shadow: $shadow-md, $shadow-lime;
+.sf-ext-panel {
+	display: flex;
+	flex-direction: column;
 
 	&__header {
-		display: flex;
-		align-items: flex-start;
-		gap: $space-4;
-		margin-bottom: $space-4;
+		padding: 20px 24px;
+		border-bottom: 1px solid var(--sf-border-subtle);
 	}
+
+	&__title {
+		margin: 0;
+		font-size: var(--sf-text-md);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
+	}
+
+	&__description {
+		margin: 4px 0 0;
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-muted);
+	}
+
+	&__deprecation-notice.components-notice { margin: 16px 24px 0; }
+
+	&__body {
+		display: flex;
+		flex-direction: column;
+
+		> .sf-settings-field,
+		> div {
+			padding: 20px 24px;
+			border-bottom: 1px solid var(--sf-border-subtle);
+
+			&:last-child { border-bottom: 0; }
+		}
+
+		&--muted { opacity: 0.7; }
+	}
+
+	&__info {
+		display: flex;
+		gap: 8px;
+		margin: 16px 24px 0;
+		padding: 12px 16px;
+		border-radius: var(--sf-radius-md);
+		background: var(--sf-bg-subtle);
+	}
+
+	&__info-text {
+		margin: 0;
+		font-size: 12px;
+		color: var(--sf-text-secondary);
+	}
+}
+
+.sf-ext-pro-overlay {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	margin: 16px 24px 0;
+	padding: 12px 12px 12px 16px;
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius-md);
+	background: var(--sf-bg-subtle);
 
 	&__icon {
-		font-size: var(--sf-text-xl);
-		color: $sf-lime-600;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 		flex-shrink: 0;
-		margin-top: 2px;
+		width: 32px;
+		height: 32px;
+		border-radius: 50%;
+		background: #1e1e1e;
+		color: #fff;
+
+		svg { fill: none; }
 	}
 
-	&__email {
-		margin: 0 0 $space-2;
-		font-size: $font-size-base;
-		font-weight: 600;
-		color: $sf-stone-900;
+	&__inner { flex: 1 1 auto; min-width: 0; }
+
+	&__title {
+		margin: 0;
+		font-size: var(--sf-text-sm);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
 	}
 
-	&__badges {
+	&__desc {
+		margin: 2px 0 0;
+		font-size: 12px;
+		color: var(--sf-text-muted);
+	}
+
+	&__cta { flex-shrink: 0; }
+}
+
+// ── License ─────────────────────────────────────────────────────────────────
+.sf-license {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.sf-panel.sf-plan-card { flex-direction: row; }
+
+.sf-plan-card {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	flex-wrap: wrap;
+	gap: 20px;
+	padding: 24px;
+
+	&__main {
 		display: flex;
-		gap: $space-2;
-		flex-wrap: wrap;
+		align-items: flex-start;
+		gap: 16px;
+		flex: 1 1 360px;
+		min-width: 0;
 	}
 
-	&__expiry {
-		margin: 0 0 $space-4;
-		font-size: $font-size-sm;
-		color: $sf-stone-600;
+	&__badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		min-width: 48px;
+		height: 48px;
+		padding: 0 10px;
+		border-radius: var(--sf-radius-md);
+		background: var(--sf-bg-muted);
+		font-size: 13px;
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
+
+		&--pro {
+			background: #1e1e1e;
+			color: #fff;
+
+			svg { fill: none; color: #f0c33c; }
+		}
+	}
+
+	&__title {
+		margin: 0;
+		font-size: var(--sf-text-md);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
+	}
+
+	&__text {
+		margin: 4px 0 0;
+		max-width: 56ch;
+		font-size: var(--sf-text-sm);
+		line-height: 1.55;
+		color: var(--sf-text-muted);
 	}
 
 	&__actions {
 		display: flex;
-		gap: $space-3;
 		flex-wrap: wrap;
+		gap: 8px;
+
+		.components-button svg { fill: none; }
 	}
 }
 
-// ── Pro plugin active license panel ─────────────────────────────────────────
+.sf-pillars {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 20px 24px;
+	margin-bottom: 24px;
+	padding-bottom: 24px;
+	border-bottom: 1px solid var(--sf-border-subtle);
 
-.sf-license-status-row {
-	display: flex;
-	align-items: center;
-	gap: $space-1;
-	margin-bottom: $space-3;
-}
+	@media (max-width: 600px) { grid-template-columns: 1fr; }
 
-.sf-license-activate {
-	display: flex;
-	flex-direction: column;
-	gap: $space-1;
-	max-width: 480px;
-
-	&__label {
-		font-size: $font-size-sm;
-		font-weight: 600;
-		color: $sf-stone-700;
-	}
-
-	&__row {
-		display: flex;
-		gap: $space-1;
-		align-items: center;
-
-		input {
-			flex: 1;
-			letter-spacing: 0.04em;
-		}
-
-		.button {
-			flex-shrink: 0;
-		}
-	}
-
-	.description {
-		font-size: $font-size-xs;
-		color: $sf-stone-500;
-		margin: 0;
-	}
-}
-
-.sf-license-active {
-	display: flex;
-	flex-direction: column;
-	gap: $space-3;
-	max-width: 480px;
-
-	&__meta {
-		display: flex;
-		flex-direction: column;
-		gap: $space-1;
-		padding: $space-2 $space-3;
-		background: $sf-stone-50;
-		border: 1px solid $sf-stone-200;
-		border-radius: $radius-md;
-	}
-
-	&__key {
-		display: flex;
-		align-items: center;
-		gap: $space-1;
-	}
-
-	&__key-label {
-		font-size: $font-size-xs;
-		font-weight: 600;
-		color: $sf-stone-500;
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		flex-shrink: 0;
-	}
-
-	&__key-value {
-		font-size: $font-size-sm;
-		color: $sf-stone-700;
-		letter-spacing: 0.04em;
-	}
-
-	&__expiry {
-		margin: 0;
-		font-size: $font-size-xs;
-		color: $sf-stone-500;
+	&__item {
+		display: grid;
+		grid-template-columns: auto 1fr;
+		gap: 2px 12px;
 
 		strong {
-			color: $sf-stone-700;
+			grid-column: 2;
+			font-size: var(--sf-text-sm);
+			font-weight: var(--sf-weight-semibold);
+			color: var(--sf-text);
 		}
-	}
-}
 
-.sf-license-features {
-	&__label {
-		margin: 0 0 $space-1;
-		font-size: $font-size-xs;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.07em;
-		color: $sf-stone-500;
-	}
-
-	.sf-feature-list__check {
-		color: $sf-lime-600;
-		font-weight: 700;
-		font-size: $font-size-sm;
-		flex-shrink: 0;
-	}
-}
-
-.sf-license-grace-notice {
-	max-width: 480px;
-}
-
-.sf-license-deactivate-btn {
-	align-self: flex-start;
-	color: $sf-stone-500 !important;
-	border-color: $sf-stone-300 !important;
-	font-size: $font-size-xs !important;
-
-	&:hover:not(:disabled) {
-		color: var(--sf-danger) !important;
-		border-color: var(--sf-danger-border) !important;
-		background: var(--sf-n-50) !important;
-	}
-}
-
-.sf-license-disconnect-btn {
-	color: var(--sf-danger) !important;
-	border-color: var(--sf-danger-border) !important;
-
-	&:hover:not(:disabled) {
-		background: var(--sf-n-50) !important;
-		border-color: var(--sf-danger) !important;
-	}
-}
-
-// ── Disconnected state — connect card ────────────────────────────────────
-.subtleforms-admin {
-	.components-panel__body {
-		.sf-license-connect-card {
-			background: var(--sf-n-0);
-			border: 1px solid $sf-stone-200;
-			border-radius: $radius-lg;
-			padding: $space-4;
-			max-width: 480px;
-
-			&__icon-wrapper {
-				display: flex;
-				align-items: center;
-				justify-content: center;
-				width: 40px;
-				height: 40px;
-				flex-shrink: 0;
-				background: $sf-blue-900;
-				border-radius: $radius-md;
-			}
-
-			&__header {
-				display: flex;
-				align-items: flex-start;
-				gap: $space-2;
-				margin-bottom: $space-3;
-
-				h3 {
-					margin: 0 0 4px;
-				}
-			}
-
-			&__icon {
-				color: $sf-slate-50;
-				flex-shrink: 0;
-			}
-
-			h3 {
-				margin: 0 0 $space-1;
-				font-size: $font-size-base;
-				font-weight: 600;
-				color: $sf-stone-900;
-			}
-
-			p {
-				margin: 0;
-				font-size: $font-size-sm;
-				color: $sf-stone-500;
-				line-height: 1.5;
-			}
-
-			&__actions {
-				display: flex;
-				gap: $space-1;
-				margin-top: $space-3;
-				padding-top: $space-3;
-				border-top: 1px solid $sf-stone-100;
-			}
-		}
-	}
-}
-
-.sf-license-form {
-	display: flex;
-	flex-direction: column;
-	gap: $space-3;
-	margin: $space-3 0;
-	border: none;
-	padding: 0;
-
-	// Locked / disabled fieldset preview
-	&--locked {
-		background: $sf-stone-50;
-		border: 1px dashed $sf-stone-300;
-		border-radius: $radius-md;
-		padding: $space-3;
-		opacity: 0.65;
-		cursor: not-allowed;
-
-		* {
-			cursor: not-allowed;
+		span:last-child {
+			grid-column: 2;
+			font-size: 12px;
+			line-height: 1.5;
+			color: var(--sf-text-muted);
 		}
 	}
 
-	&__field {
-		display: flex;
-		flex-direction: column;
-		gap: $space-1;
-
-		label {
-			font-size: $font-size-sm;
-			font-weight: 600;
-			color: $sf-stone-700;
-		}
-
-		input {
-			width: 100%;
-		}
-
-		.description {
-			margin: 0;
-			font-size: $font-size-xs;
-			color: $sf-stone-500;
-		}
-	}
-
-	&__key-row {
-		display: flex;
-		gap: $space-1;
+	&__icon {
+		grid-row: 1 / span 2;
+		display: inline-flex;
 		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border-radius: var(--sf-radius-md);
+		background: var(--sf-primary-50);
+		color: var(--sf-brand);
 
-		input {
-			flex: 1;
-			letter-spacing: 0.05em;
-		}
-
-		.button {
-			flex-shrink: 0;
-		}
-	}
-
-	&__key-input {
-		letter-spacing: 0.05em;
+		svg { fill: none; }
 	}
 }
 
-// ── Upgrade card (disconnected state, beside the connect card) ───────────
-.subtleforms-admin {
-	.components-panel__body {
-		.sf-license-upgrade-card {
-			padding: $space-3 $space-4;
-			background: linear-gradient(150deg, $sf-slate-50 0%, var(--sf-n-50) 100%);
-			border: 1px solid $sf-slate-200;
-			border-radius: $radius-lg;
-			max-width: 340px;
+.sf-checklist {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 10px 24px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
 
-			h3 {
-				margin: 0 0 $space-2;
-				font-size: $font-size-sm;
-				font-weight: 700;
-				text-transform: uppercase;
-				letter-spacing: 0.07em;
-				color: $sf-slate-500;
+	@media (max-width: 600px) { grid-template-columns: 1fr; }
+
+	li {
+		display: flex;
+		align-items: flex-start;
+		gap: 8px;
+		margin: 0;
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-secondary);
+
+		svg {
+			flex-shrink: 0;
+			margin-top: 2px;
+			fill: none;
+			color: var(--sf-text-subtle);
+		}
+	}
+
+	&.is-included li svg { color: var(--sf-success); }
+}
+
+.sf-license-key {
+	display: flex;
+	gap: 8px;
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+
+	&__input[type='text'] {
+		flex: 1 1 auto;
+		max-width: 420px;
+		height: 40px;
+		padding: 0 12px;
+		border: 1px solid var(--sf-border-strong);
+		border-radius: var(--sf-radius-control);
+		font-family: var(--sf-font-mono);
+		font-size: 13px;
+		letter-spacing: 0.04em;
+
+		&:focus {
+			border-color: var(--sf-brand);
+			box-shadow: 0 0 0 1px var(--sf-brand);
+			outline: none;
+		}
+
+		&:disabled {
+			background: var(--sf-bg-subtle);
+			color: var(--sf-text-muted);
+		}
+	}
+
+	.components-button { height: 40px; }
+
+	&__meta {
+		margin: 12px 0 0;
+		font-size: 12px;
+		color: var(--sf-text-muted);
+	}
+}
+
+// ── Save bar ────────────────────────────────────────────────────────────────
+.sf-savebar {
+	position: sticky;
+	bottom: 16px;
+	z-index: 20;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	width: min(560px, calc(100% - 2 * var(--sf-gutter)));
+	margin: -72px auto 16px;
+	padding: 8px 8px 8px 16px;
+	border-radius: var(--sf-radius-lg);
+	background: #1e1e1e;
+	color: #fff;
+	box-shadow: var(--sf-shadow-lg);
+	animation: sf-slide-in-fade var(--sf-duration-base) var(--sf-ease) both;
+
+	&__text {
+		display: inline-flex;
+		align-items: center;
+		gap: 8px;
+		font-size: var(--sf-text-sm);
+	}
+
+	&__dot {
+		width: 8px;
+		height: 8px;
+		border-radius: 50%;
+		background: #f0c33c;
+	}
+
+	&__actions {
+		display: flex;
+		gap: 4px;
+
+		.components-button.is-tertiary {
+			color: #fff;
+
+			&:hover:not(:disabled) {
+				background: rgba(255, 255, 255, 0.12);
+				color: #fff;
 			}
 		}
 	}
 }
 
-// Status & plan badges
-.sf-badge {
+.sf-license-key__value {
 	display: inline-flex;
 	align-items: center;
-	padding: 2px $space-2;
-	font-size: $font-size-xs;
-	font-weight: 600;
-	border-radius: var(--sf-radius-full);
-	text-transform: uppercase;
-	letter-spacing: 0.06em;
-
-	&--active  { background: var(--sf-n-100); color: var(--sf-success-strong); }
-	&--warning { background: var(--sf-warning-border); color: var(--sf-warning); }
-	&--danger  { background: var(--sf-n-100); color: var(--sf-danger-strong); }
-	&--neutral { background: $sf-stone-100; color: $sf-stone-600; }
+	height: 40px;
+	padding: 0 12px;
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius-control);
+	background: var(--sf-bg-subtle);
+	font-family: var(--sf-font-mono);
+	font-size: 13px;
+	letter-spacing: 0.04em;
+	color: var(--sf-text-secondary);
 }
 
-.sf-plan-badge {
-	display: inline-flex;
+.sf-license-key { align-items: center; }
+
+.sf-license-loading {
+	display: flex;
 	align-items: center;
-	padding: 2px $space-3;
-	font-size: $font-size-xs;
-	font-weight: 700;
-	border-radius: var(--sf-radius-full);
-	text-transform: uppercase;
-	letter-spacing: 0.06em;
+	gap: 8px;
+	padding: 24px;
+	font-size: var(--sf-text-sm);
+	color: var(--sf-text-muted);
 
-	&--free    { background: $sf-stone-100; color: $sf-stone-600; }
-	&--starter { background: var(--sf-n-100); color: var(--sf-a-800); }
-	&--pro     { background: linear-gradient(90deg, $sf-lime-100, $sf-lime-200); color: $sf-lime-900; border: 1px solid $sf-lime-300; }
-	&--agency  { background: linear-gradient(90deg, var(--sf-n-25), var(--sf-n-50)); color: var(--sf-a-600); border: 1px solid var(--sf-a-100); }
+	.components-spinner { margin: 0; }
 }
 
-// ── Extensions Settings (within Settings page) ────────────────────────────
-
-.sf-ext-settings {
-  display: flex;
-  gap: 1.5rem;
-  align-items: flex-start;
-
-  &__sidebar {
-    flex-shrink: 0;
-    width: 200px;
-    background: var(--sf-surface);
-    border: 1px solid var(--sf-gray-200);
-    border-radius: var(--sf-radius-md);
-    padding: 0.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
-  }
-
-  &__list {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  &__item {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    width: 100%;
-    padding: 0.5rem 0.75rem;
-    border: none;
-    background: transparent;
-    border-radius: var(--sf-radius-md);
-    cursor: pointer;
-    font-size: var(--sf-text-sm);
-    color: var(--sf-gray-700);
-    text-align: left;
-    transition: background var(--sf-duration-fast) ease;
-
-    &:hover {
-      background: var(--sf-gray-100);
-    }
-
-    &--active {
-      background: var(--sf-gray-100);
-      color: var(--sf-gray-900);
-      font-weight: 600;
-    }
-  }
-
-  &__item-label {
-    flex: 1;
-  }
-
-  &__content {
-    flex: 1;
-    min-width: 0;
-  }
-
-  &__panel-wrap {
-    position: relative;
-  }
+.sf-plan-card__title .sf-pill {
+	margin-inline-start: 6px;
+	vertical-align: 2px;
 }
 
-// ── Extension status dots (sidebar)  ──────────────────────────────────────
-
-.sf-ext-status {
-  display: inline-block;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  margin-left: 0.375rem;
-
-  &--active   { background: var(--sf-success); }
-  &--warning  { background: var(--sf-warning); }
-  &--inactive { background: var(--sf-gray-300); }
-  &--locked   {
-    background: transparent;
-    width: auto;
-    height: auto;
-    font-size: var(--sf-text-2xs);
-    line-height: 1;
-  }
-}
-
-// ── Extension Panel ────────────────────────────────────────────────────────
-
-.sf-ext-panel {
-  &__header {
-    margin-bottom: 1.5rem;
-  }
-
-  &__title {
-    font-size: 1.0625rem;
-    font-weight: 600;
-    color: var(--sf-gray-900);
-    margin: 0 0 0.375rem;
-  }
-
-  &__description {
-    font-size: var(--sf-text-sm);
-    line-height: 1.6;
-    color: var(--sf-gray-500);
-    margin: 0;
-  }
-
-  &__body {
-    display: flex;
-    flex-direction: column;
-    gap: 1.25rem;
-  }
-
-  &__info {
-    background: var(--sf-gray-50);
-    border: 1px solid var(--sf-gray-200);
-    border-radius: var(--sf-radius-md);
-    padding: 0.75rem 1rem;
-  }
-
-  &__info-text {
-    font-size: var(--sf-text-sm);
-    line-height: 1.6;
-    color: var(--sf-gray-500);
-    margin: 0;
-  }
-}
-
-.sf-settings-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-// ── Pro-lock overlay (inside settings panel) ──────────────────────────────
-
-.sf-ext-pro-overlay {
-  position: absolute;
-  inset: -0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(248, 250, 252, 0.95);
-  border-radius: var(--sf-radius-md);
-  z-index: 10;
-  border: 1px solid var(--sf-gray-200);
-
-  &__inner {
-    text-align: center;
-    padding: 1.5rem;
-    max-width: 260px;
-  }
-
-  &__icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin: 0 auto 0.75rem;
-    color: var(--sf-gray-400);
-  }
-
-  &__title {
-    font-size: var(--sf-text-md);
-    font-weight: 600;
-    color: var(--sf-gray-900);
-    margin: 0 0 0.375rem;
-  }
-
-  &__desc {
-    font-size: var(--sf-text-sm);
-    color: var(--sf-gray-500);
-    margin: 0 0 1rem;
-    max-width: 240px;
-  }
-
-  &__cta {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.5rem 1.25rem;
-    background: $sf-lime-500;
-    color: white;
-    border: none;
-    border-radius: var(--sf-radius-md);
-    font-size: var(--sf-text-base);
-    font-weight: 600;
-    cursor: pointer;
-    text-decoration: none;
-    transition: background var(--sf-duration-fast) ease;
-
-    &:hover {
-      background: $sf-lime-600;
-      color: white;
-    }
-  }
-}
+.sf-license .components-notice { margin: 0; }
