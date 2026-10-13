@@ -82,16 +82,33 @@ final class Plugin {
 		add_action(
 			'init',
 			function () {
-				$this->container->get( ExtensionManager::class )->boot();
+				$manager = $this->container->get( ExtensionManager::class );
+
+				// The container is built inside plugins_loaded (priority 10), so
+				// its plugins_loaded@5 callback that fills the manager has
+				// already been missed. Fire the registration hook here instead,
+				// once, before booting.
+				if ( ! did_action( 'subtleforms/register_extensions' ) ) {
+					/** This action is documented in src/Container.php */
+					do_action( 'subtleforms/register_extensions', $manager );
+				}
+
+				$manager->boot();
 			},
 			20
 		);
+
+		// File and image uploads: endpoint, admin downloads, clean-up (2.1).
+		\SubtleForms\Uploads\Uploads::register();
 
 		// Initialize privacy features
 		$this->init_privacy();
 
 		// Initialize async processing (Phase B2)
 		$this->init_async_processing();
+
+		// Form view and submission counters (2.1).
+		\SubtleForms\Analytics\Stats::register();
 
 		// Allow other plugins/themes to hook in
 		do_action( 'subtleforms/loaded', $this );

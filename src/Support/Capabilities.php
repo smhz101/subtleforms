@@ -76,11 +76,20 @@ final class Capabilities {
 			'extensions.multilanguage'   => false,
 			'extensions.payments'        => false,
 
+			// WooCommerce checkout for payment forms and the WooCommerce Product field (2.1, Pro).
+			'integrations.woocommerce'   => false,
+
 			// Templates (existing Pro feature key)
 			'templates.pro'              => false,
 
 			// Submissions
 			'submissions.export'         => false,
+
+			// Advanced field types: Picture Choice, Signature, Calculation (2.0)
+			'fields.advanced'            => false,
+
+			// White label: custom name, logo and hidden credits in wp-admin (2.1, Agency).
+			'branding.white_label'       => false,
 		);
 	}
 

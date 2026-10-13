@@ -98,8 +98,9 @@ final class LogsRepository {
 				'level'         => $data['level'],
 				'message'       => $data['message'],
 				'context'       => wp_json_encode( $data['context'] ),
+				'created_at'    => current_time( 'mysql', true ),
 			),
-			array( '%d', '%s', '%s', '%s' )
+			array( '%d', '%s', '%s', '%s', '%s' )
 		);
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
