@@ -192,6 +192,41 @@ final class SubmissionsApi {
 						),
 					),
 				),
+				array(
+					'methods'             => 'DELETE',
+					'callback'            => array( $this, 'delete_submission' ),
+					'permission_callback' => array( $this, 'check_write_permission' ),
+					'args'                => array(
+						'id'    => array(
+							'type'              => 'integer',
+							'required'          => true,
+							'sanitize_callback' => 'absint',
+						),
+						// 2.3.1: entries go to the Trash; force=1 deletes for good.
+						'force' => array(
+							'type'    => 'boolean',
+							'default' => false,
+						),
+					),
+				),
+			)
+		);
+
+		// Restore an entry from the Trash (2.3.1).
+		register_rest_route(
+			self::NAMESPACE,
+			'/submissions/(?P<id>\d+)/restore',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'restore_submission' ),
+				'permission_callback' => array( $this, 'check_write_permission' ),
+				'args'                => array(
+					'id' => array(
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					),
+				),
 			)
 		);
 
@@ -243,6 +278,75 @@ final class SubmissionsApi {
 			)
 		);
 
+		// 2.3.0: bulk actions, notes and resending notifications.
+		register_rest_route(
+			self::NAMESPACE,
+			'/submissions/bulk',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'bulk_submissions' ),
+				'permission_callback' => array( $this, 'check_write_permission' ),
+				'args'                => array(
+					'ids'    => array(
+						'type'     => 'array',
+						'required' => true,
+						'items'    => array( 'type' => 'integer' ),
+					),
+					'action' => array(
+						'type'     => 'string',
+						'required' => true,
+						'enum'     => array( 'read', 'unread', 'star', 'unstar', 'spam', 'flagged', 'restore', 'trash', 'untrash', 'delete' ),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/submissions/(?P<id>\d+)/notes',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'add_note' ),
+				'permission_callback' => array( $this, 'check_write_permission' ),
+				'args'                => array(
+					'id'   => array(
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+					),
+					'text' => array(
+						'type'     => 'string',
+						'required' => true,
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/submissions/(?P<id>\d+)/notes/(?P<note_id>[a-zA-Z0-9-]+)',
+			array(
+				'methods'             => 'DELETE',
+				'callback'            => array( $this, 'delete_note' ),
+				'permission_callback' => array( $this, 'check_write_permission' ),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/submissions/(?P<id>\d+)/resend',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'resend_notifications' ),
+				'permission_callback' => array( $this, 'check_write_permission' ),
+				'args'                => array(
+					'id' => array(
+						'type'              => 'integer',
+						'sanitize_callback' => 'absint',
+					),
+				),
+			)
+		);
+
 		register_rest_route(
 			self::NAMESPACE,
 			'/submissions/export',
@@ -286,7 +390,7 @@ final class SubmissionsApi {
 			'order'   => strtoupper( $request->get_param( 'order' ) ?? 'DESC' ) === 'ASC' ? 'ASC' : 'DESC',
 		);
 
-		$submissions = $this->submissionsRepo->findAll( $args );
+		$submissions = array_map( array( $this, 'redactSecrets' ), $this->submissionsRepo->findAll( $args ) );
 		$total       = $this->submissionsRepo->count( $args );
 
 		return ApiResponse::paginated(
@@ -329,12 +433,13 @@ final class SubmissionsApi {
 			$is_read_arg = 0;
 		} elseif ( $tab_status === 'read' ) {
 			$is_read_arg = 1;
-		} elseif ( in_array( $tab_status, array( 'spam', 'flagged' ), true ) ) {
+		} elseif ( in_array( $tab_status, array( 'spam', 'flagged', 'trash' ), true ) ) {
 			$status_arg = $tab_status;
 		}
+		$starred_arg = $tab_status === 'starred' ? 1 : null;
 
 		// Processing status (filter bar) — only applies when tab is 'all'
-		if ( $proc_status && $status_arg === null && $is_read_arg === null ) {
+		if ( $proc_status && $status_arg === null && $is_read_arg === null && $tab_status !== 'starred' ) {
 			$status_arg = $proc_status;
 		}
 
@@ -342,6 +447,7 @@ final class SubmissionsApi {
 			'form_id'     => $request->get_param( 'form_id' ),
 			'status'      => $status_arg,
 			'is_read'     => $is_read_arg,
+			'starred'     => $starred_arg,
 			'search'      => $request->get_param( 'search' ),
 			'after'       => $request->get_param( 'after' ),
 			'field_key'   => $request->get_param( 'field_key' ),
@@ -352,7 +458,7 @@ final class SubmissionsApi {
 			'order'       => strtoupper( $request->get_param( 'order' ) ?? 'DESC' ) === 'ASC' ? 'ASC' : 'DESC',
 		);
 
-		$submissions = $this->submissionsRepo->findAll( $args );
+		$submissions = array_map( array( $this, 'redactSecrets' ), $this->submissionsRepo->findAll( $args ) );
 		$total       = $this->submissionsRepo->count( $args );
 
 		// Bulk fetch form titles to avoid N+1
@@ -420,6 +526,11 @@ final class SubmissionsApi {
 			$submission['prev_id'] = $adjacent['prev'];
 		}
 
+		$submission = $this->redactSecrets( $submission );
+		if ( isset( $submission['meta']['notes'] ) && is_array( $submission['meta']['notes'] ) ) {
+			$submission['meta']['notes'] = array_map( array( self::class, 'presentNote' ), $submission['meta']['notes'] );
+		}
+
 		$etag     = $this->generateETag( $submission, 'submission' );
 		$response = ApiResponse::success( $submission );
 		return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
@@ -462,6 +573,7 @@ final class SubmissionsApi {
 			array(
 				'status'  => $validated['status'] ?? null,
 				'is_read' => isset( $validated['is_read'] ) ? intval( $validated['is_read'] ) : null,
+				'starred' => isset( $validated['starred'] ) ? (bool) $validated['starred'] : null,
 				'notes'   => $validated['notes'] ?? null,
 			),
 			fn( $value ) => $value !== null
@@ -470,6 +582,10 @@ final class SubmissionsApi {
 		if ( empty( $data ) ) {
 			return ApiResponse::bad_request( __( 'No valid changes provided', 'subtleforms' ) );
 		}
+		// An entry in the Trash only leaves it through Restore (2.3.1).
+		if ( isset( $data['status'] ) && ( $submission['status'] ?? '' ) === SubmissionsRepository::TRASH ) {
+			return ApiResponse::validation_error( __( 'Restore this entry from the Trash first.', 'subtleforms' ) );
+		}
 
 		$this->submissionsRepo->update( $id, $data );
 
@@ -477,6 +593,272 @@ final class SubmissionsApi {
 		$etag              = $this->generateETag( $updatedSubmission, 'submission' );
 		$response          = ApiResponse::success( array( 'success' => true, 'submission' => $updatedSubmission ) );
 		return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
+	}
+
+	/**
+	 * Apply one action to several entries (2.3.0).
+	 */
+	public function bulk_submissions( WP_REST_Request $request ): WP_REST_Response {
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		$ids    = array_values( array_unique( array_filter( array_map( 'absint', (array) $request->get_param( 'ids' ) ) ) ) );
+		$action = (string) $request->get_param( 'action' );
+		if ( ! $ids ) {
+			return ApiResponse::bad_request( __( 'Select at least one entry.', 'subtleforms' ) );
+		}
+		if ( count( $ids ) > 500 ) {
+			return ApiResponse::bad_request( __( 'Select 500 entries or fewer at a time.', 'subtleforms' ) );
+		}
+
+		$changes = array(
+			'read'    => array( 'is_read' => 1 ),
+			'unread'  => array( 'is_read' => 0 ),
+			'star'    => array( 'starred' => true ),
+			'unstar'  => array( 'starred' => false ),
+			'spam'    => array( 'status' => 'spam' ),
+			'flagged' => array( 'status' => 'flagged' ),
+			'restore' => array( 'status' => 'none' ),
+		);
+
+		$done = array();
+		foreach ( $ids as $id ) {
+			$row = $this->submissionsRepo->find( $id );
+			if ( ! $row ) {
+				continue;
+			}
+			$inTrash = ( $row['status'] ?? '' ) === SubmissionsRepository::TRASH;
+			try {
+				if ( $action === 'trash' ) {
+					if ( $this->submissionsRepo->trash( $id ) ) {
+						$done[] = $id;
+					}
+				} elseif ( $action === 'untrash' ) {
+					if ( $inTrash && false !== $this->submissionsRepo->untrash( $id ) ) {
+						$done[] = $id;
+					}
+				} elseif ( $inTrash && $action !== 'delete' ) {
+					// Entries in the Trash are only restored or deleted.
+					continue;
+				} elseif ( $action === 'delete' ) {
+					if ( $this->submissionsRepo->delete( $id ) ) {
+						( new \SubtleForms\Repositories\LogsRepository() )->deleteBySubmission( $id );
+						$done[] = $id;
+					}
+				} elseif ( isset( $changes[ $action ] ) ) {
+					$this->submissionsRepo->update( $id, $changes[ $action ] );
+					$done[] = $id;
+				}
+			} catch ( \RuntimeException $e ) {
+				continue;
+			}
+		}
+
+		return ApiResponse::success(
+			array(
+				'action'  => $action,
+				'updated' => $done,
+				'count'   => count( $done ),
+			)
+		);
+	}
+
+	/**
+	 * Add a private note to an entry (2.3.0).
+	 */
+	public function add_note( WP_REST_Request $request ): WP_REST_Response {
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		$id   = absint( $request->get_param( 'id' ) );
+		$text = sanitize_textarea_field( (string) $request->get_param( 'text' ) );
+		if ( trim( $text ) === '' ) {
+			return ApiResponse::validation_error( __( 'Write a note first.', 'subtleforms' ), array( 'text' => __( 'Write a note first.', 'subtleforms' ) ) );
+		}
+		if ( mb_strlen( $text ) > 5000 ) {
+			$text = mb_substr( $text, 0, 5000 );
+		}
+
+		$note = $this->submissionsRepo->addNote( $id, $text, get_current_user_id() );
+		if ( ! $note ) {
+			return ApiResponse::not_found( __( 'Submission not found', 'subtleforms' ) );
+		}
+
+		return ApiResponse::success( self::presentNote( $note ), 201 );
+	}
+
+	/**
+	 * Remove a note from an entry.
+	 */
+	public function delete_note( WP_REST_Request $request ): WP_REST_Response {
+		$id     = absint( $request->get_param( 'id' ) );
+		$noteId = preg_replace( '/[^a-zA-Z0-9-]/', '', (string) $request->get_param( 'note_id' ) );
+		if ( ! $this->submissionsRepo->deleteNote( $id, (string) $noteId ) ) {
+			return ApiResponse::not_found( __( 'Note not found', 'subtleforms' ) );
+		}
+		return ApiResponse::success( array( 'deleted' => true ) );
+	}
+
+	/**
+	 * A note with its author's name, for the entry screen.
+	 *
+	 * @param array $note Stored note.
+	 * @return array
+	 */
+	public static function presentNote( array $note ): array {
+		$user                  = ! empty( $note['author'] ) ? get_userdata( (int) $note['author'] ) : null;
+		$note['author_name']   = $user ? $user->display_name : __( 'Unknown user', 'subtleforms' );
+		$note['author_avatar'] = $user ? get_avatar_url( $user->ID, array( 'size' => 48 ) ) : '';
+		return $note;
+	}
+
+	/**
+	 * Send an entry's email notifications again (2.3.0).
+	 *
+	 * Runs the form's enabled email actions with the stored answers. "Only
+	 * when" conditions still apply. Passwords are not stored, so they are
+	 * never in the resent emails either.
+	 */
+	public function resend_notifications( WP_REST_Request $request ): WP_REST_Response {
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		$id         = absint( $request->get_param( 'id' ) );
+		$submission = $this->submissionsRepo->find( $id );
+		if ( ! $submission ) {
+			return ApiResponse::not_found( __( 'Submission not found', 'subtleforms' ) );
+		}
+		// Entries in the Trash send nothing (2.3.1).
+		if ( ( $submission['status'] ?? '' ) === SubmissionsRepository::TRASH ) {
+			return ApiResponse::validation_error( __( 'Restore this entry from the Trash before resending its notifications.', 'subtleforms' ) );
+		}
+
+		try {
+			$loaded = $this->formsRepo->loadSchemaVersion( (int) $submission['form_id'], isset( $submission['schema_version'] ) ? (int) $submission['schema_version'] : null );
+		} catch ( \RuntimeException $e ) {
+			$loaded = null;
+		}
+		if ( ! $loaded ) {
+			try {
+				$loaded = $this->formsRepo->loadSchemaVersion( (int) $submission['form_id'] );
+			} catch ( \RuntimeException $e ) {
+				$loaded = null;
+			}
+		}
+		$schema = is_array( $loaded ) ? ( $loaded['schema'] ?? $loaded ) : null;
+		if ( ! is_array( $schema ) ) {
+			return ApiResponse::not_found( __( 'This entry’s form could not be loaded.', 'subtleforms' ) );
+		}
+
+		$plugin   = \SubtleForms\Plugin::instance();
+		$compiler = $plugin->get( \SubtleForms\Engine\SchemaCompiler::class );
+		$pipeline = $plugin->get( \SubtleForms\Engine\Pipeline::class );
+
+		$steps = array_values(
+			array_filter(
+				$compiler->compile( $schema ),
+				static fn( $step ) => $step->action()->id() === 'email'
+			)
+		);
+		if ( ! $steps ) {
+			return ApiResponse::bad_request( __( 'This form has no email notifications to send.', 'subtleforms' ) );
+		}
+
+		$payload = is_array( $submission['payload'] ?? null ) ? $submission['payload'] : array();
+		$context = new \SubtleForms\Engine\SubmissionContext( (int) $submission['form_id'], $payload );
+		$context->setMeta( 'submission_id', $id );
+		$context->setMeta( 'schema_version', isset( $submission['schema_version'] ) ? (int) $submission['schema_version'] : null );
+		$context->setMeta( 'form_schema', $schema );
+		$context->setMeta( 'resent', true );
+
+		$result = $pipeline->run( $steps, $context, $schema );
+		if ( ! $result->ok ) {
+			return ApiResponse::server_error( __( 'The notifications could not be sent.', 'subtleforms' ) );
+		}
+
+		return ApiResponse::success(
+			array(
+				'sent'  => true,
+				'count' => count( $steps ),
+			)
+		);
+	}
+
+	/**
+	 * Permanently delete a submission, its logs and its uploaded files.
+	 */
+	public function delete_submission( WP_REST_Request $request ): WP_REST_Response {
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		$id = absint( $request->get_param( 'id' ) );
+		if ( ! $id || ! $this->submissionsRepo->find( $id ) ) {
+			return ApiResponse::not_found( __( 'Submission not found', 'subtleforms' ) );
+		}
+
+		// Without force the entry goes to the Trash, where it can be restored
+		// for the retention period (2.3.1).
+		if ( ! rest_sanitize_boolean( $request->get_param( 'force' ) ) ) {
+			if ( ! $this->submissionsRepo->trash( $id ) ) {
+				return ApiResponse::server_error( __( 'The submission could not be moved to the Trash.', 'subtleforms' ) );
+			}
+			return ApiResponse::success(
+				array(
+					'trashed' => true,
+					'id'      => $id,
+				)
+			);
+		}
+
+		if ( ! $this->submissionsRepo->delete( $id ) ) {
+			return ApiResponse::server_error( __( 'The submission could not be deleted.', 'subtleforms' ) );
+		}
+		( new \SubtleForms\Repositories\LogsRepository() )->deleteBySubmission( $id );
+
+		return ApiResponse::success(
+			array(
+				'deleted' => true,
+				'id'      => $id,
+			)
+		);
+	}
+
+	/**
+	 * Restore an entry from the Trash to its previous status (2.3.1).
+	 */
+	public function restore_submission( WP_REST_Request $request ): WP_REST_Response {
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		$id  = absint( $request->get_param( 'id' ) );
+		$row = $id ? $this->submissionsRepo->find( $id ) : null;
+		if ( ! $row ) {
+			return ApiResponse::not_found( __( 'Submission not found', 'subtleforms' ) );
+		}
+		if ( ( $row['status'] ?? '' ) !== SubmissionsRepository::TRASH ) {
+			return ApiResponse::validation_error( __( 'This entry is not in the Trash.', 'subtleforms' ) );
+		}
+		$status = $this->submissionsRepo->untrash( $id );
+		if ( false === $status ) {
+			return ApiResponse::server_error( __( 'The entry could not be restored. Please try again.', 'subtleforms' ) );
+		}
+		return ApiResponse::success(
+			array(
+				'restored' => true,
+				'id'       => $id,
+				'status'   => $status,
+			)
+		);
 	}
 
 	/**
@@ -555,7 +937,11 @@ final class SubmissionsApi {
 	}
 
 	/**
-	 * Export submissions as CSV.
+	 * Export submissions as CSV (Pro capability `submissions.export`).
+	 *
+	 * Columns are the union of every exported entry's answers, so a form whose
+	 * fields changed over time keeps all of its data. When one form is
+	 * exported, its field labels and order are used for the headings.
 	 */
 	public function export_submissions_csv( WP_REST_Request $request ): WP_REST_Response {
 		$rateLimitResponse = $this->guardRateLimit( $request );
@@ -563,19 +949,30 @@ final class SubmissionsApi {
 			return $rateLimitResponse;
 		}
 
+		if ( ! $this->gate->allows( 'submissions.export' ) ) {
+			return ApiResponse::forbidden( __( 'CSV export is part of SubtleForms Pro.', 'subtleforms' ) );
+		}
+
 		$params = $request->get_json_params();
+		$params = is_array( $params ) ? $params : array();
 
 		$args = array(
-			'form_id' => isset( $params['form_id'] ) && $params['form_id'] ? intval( $params['form_id'] ) : null,
+			'form_id' => ! empty( $params['form_id'] ) ? intval( $params['form_id'] ) : null,
 			'status'  => isset( $params['status'] ) ? Helpers::safe_sanitize_text( $params['status'] ) : null,
 			'search'  => isset( $params['search'] ) ? Helpers::safe_sanitize_text( $params['search'] ) : null,
 			'after'   => isset( $params['after'] ) ? Helpers::safe_sanitize_text( $params['after'] ) : null,
+			// Export selected (2.3.0).
+			'ids'     => isset( $params['ids'] ) && is_array( $params['ids'] ) ? array_map( 'absint', $params['ids'] ) : null,
 			'orderby' => 'created_at',
 			'order'   => 'DESC',
 			'limit'   => 10000,
 		);
 
-		$args = array_filter( $args, fn( $value ) => $value !== null );
+		$args = array_filter( $args, fn( $value ) => $value !== null && $value !== '' );
+		// Entries in the Trash are never exported (2.3.1).
+		if ( ( $args['status'] ?? '' ) === SubmissionsRepository::TRASH ) {
+			unset( $args['status'] );
+		}
 
 		$submissions = $this->submissionsRepo->findAll( $args );
 
@@ -588,12 +985,61 @@ final class SubmissionsApi {
 			);
 		}
 
-		// Build CSV
-		$csv_data         = array();
-		$first_submission = $submissions[0];
-		$payload          = is_string( $first_submission['payload'] )
-			? json_decode( $first_submission['payload'], true )
-			: $first_submission['payload'];
+		$skip = array( 'website_url', 'form_rendered_at' );
+
+		// Column order: the form's fields (single-form export), then any other
+		// answer keys in the order they were first seen.
+		$labels    = array();
+		$repeaters = array();
+		if ( ! empty( $args['form_id'] ) ) {
+			try {
+				$active = $this->formsRepo->loadSchemaVersion( (int) $args['form_id'] );
+				$schema = is_array( $active ) ? ( $active['schema'] ?? $active ) : array();
+				foreach ( \SubtleForms\Support\FieldMapper::fields( is_array( $schema ) ? $schema : array() ) as $field ) {
+					$labels[ $field['key'] ] = '' !== $field['label'] ? $field['label'] : $field['key'];
+					if ( \SubtleForms\Support\Repeater::TYPE === $field['type'] ) {
+						$repeaters[ $field['key'] ] = $field['field'];
+					}
+				}
+			} catch ( \Throwable $e ) {
+				$labels = array();
+			}
+		}
+
+		$rows = array();
+		$keys = array();
+		foreach ( $submissions as $submission ) {
+			$payload = is_string( $submission['payload'] ?? null )
+				? json_decode( $submission['payload'], true )
+				: ( $submission['payload'] ?? array() );
+			$payload = is_array( $payload ) ? $payload : array();
+
+			// Passwords are never exported (2.2.1).
+			foreach ( $this->secretKeysForForm( (int) ( $submission['form_id'] ?? 0 ) ) as $secret ) {
+				unset( $payload[ $secret ] );
+			}
+
+			foreach ( array_keys( $payload ) as $key ) {
+				$key = (string) $key;
+				if ( '' === $key || '_' === $key[0] || in_array( $key, $skip, true ) ) {
+					continue;
+				}
+				$keys[ $key ] = true;
+			}
+			$rows[] = array( $submission, $payload );
+		}
+
+		$ordered = array();
+		foreach ( array_keys( $labels ) as $key ) {
+			if ( isset( $keys[ $key ] ) ) {
+				$ordered[] = $key;
+			}
+		}
+		foreach ( array_keys( $keys ) as $key ) {
+			if ( ! in_array( $key, $ordered, true ) ) {
+				$ordered[] = $key;
+			}
+		}
 
 		$headers = array(
 			__( 'ID', 'subtleforms' ),
@@ -601,58 +1047,47 @@ final class SubmissionsApi {
 			__( 'Status', 'subtleforms' ),
 			__( 'Submitted At', 'subtleforms' ),
 		);
-
-		if ( is_array( $payload ) ) {
-			foreach ( array_keys( $payload ) as $field_key ) {
-				if ( in_array( $field_key, array( 'website_url', 'form_rendered_at' ), true ) ) {
-					continue;
+		// A Repeater gets one column per child; each group is one line of
+		// the cell, in the same order in every column (2.3.1).
+		foreach ( $ordered as $key ) {
+			$label = $labels[ $key ] ?? ucwords( str_replace( array( '_', '-' ), ' ', $key ) );
+			if ( isset( $repeaters[ $key ] ) ) {
+				foreach ( \SubtleForms\Support\Repeater::childFields( $repeaters[ $key ] ) as $child ) {
+					$headers[] = $label . ': ' . ( '' !== $child['label'] ? $child['label'] : $child['key'] );
 				}
-				$headers[] = ucwords( str_replace( '_', ' ', $field_key ) );
+				continue;
 			}
+			$headers[] = $label;
 		}
 
-		$csv_data[] = $headers;
-
-		foreach ( $submissions as $submission ) {
-			$payload = is_string( $submission['payload'] )
-				? json_decode( $submission['payload'], true )
-				: $submission['payload'];
-
+		$csv_data = array( $headers );
+		foreach ( $rows as list( $submission, $payload ) ) {
 			$row = array(
 				$submission['id'],
 				$submission['form_id'],
 				$submission['status'],
 				$submission['created_at'],
 			);
-
-			if ( is_array( $payload ) ) {
-				foreach ( array_keys( $first_submission['payload'] ) as $field_key ) {
-					if ( in_array( $field_key, array( 'website_url', 'form_rendered_at' ), true ) ) {
-						continue;
+			foreach ( $ordered as $key ) {
+				if ( isset( $repeaters[ $key ] ) ) {
+					foreach ( \SubtleForms\Support\Repeater::csvCells( $payload[ $key ] ?? array(), $repeaters[ $key ] ) as $cell ) {
+						$row[] = $cell;
 					}
-
-					$value = $payload[ $field_key ] ?? '';
-					if ( is_array( $value ) ) {
-						$value = implode( ', ', $value );
-					}
-					$row[] = $value;
+					continue;
 				}
+				$value = $payload[ $key ] ?? '';
+				// Exports of several forms: groups read as numbered lines.
+				$row[] = \SubtleForms\Support\Repeater::looksLikeGroups( $value )
+					? $this->groupsText( $value )
+					: \SubtleForms\Support\FieldMapper::toText( $value );
 			}
-
 			$csv_data[] = $row;
 		}
 
-		$csv_string = "\xEF\xBB\xBF"; // UTF-8 BOM
+		$csv_string = "\xEF\xBB\xBF"; // UTF-8 BOM so Excel reads accents correctly.
 
 		foreach ( $csv_data as $row ) {
-			$escaped_row = array_map(
-				function ( $value ) {
-					$value = str_replace( '"', '""', $value );
-					return '"' . $value . '"';
-				},
-				$row
-			);
-
+			$escaped_row = array_map( array( $this, 'csv_cell' ), $row );
 			$csv_string .= implode( ',', $escaped_row ) . "\r\n";
 		}
 
@@ -661,9 +1096,132 @@ final class SubmissionsApi {
 		return ApiResponse::success(
 			array(
 				'success'  => true,
-				'csv'      => base64_encode( $csv_string ),
+				'csv'      => base64_encode( $csv_string ), // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode -- Binary-safe transport of the CSV file in JSON.
 				'filename' => $filename,
+				'rows'     => count( $rows ),
 			)
 		);
+	}
+
+	/**
+	 * Replace stored password values with a readable label.
+	 *
+	 * A password is never stored as typed; even its hash (when a field opts
+	 * in) is not sent to the browser. The entry shows "Password provided".
+	 *
+	 * @param mixed $submission Submission row.
+	 * @return mixed
+	 */
+	public function redactSecrets( $submission ) {
+		if ( ! is_array( $submission ) ) {
+			return $submission;
+		}
+		$payload = $submission['payload'] ?? null;
+		if ( is_string( $payload ) ) {
+			$payload = json_decode( $payload, true );
+		}
+		if ( ! is_array( $payload ) ) {
+			return $submission;
+		}
+		$keys = $this->secretKeysForForm( (int) ( $submission['form_id'] ?? 0 ) );
+		if ( isset( $submission['schema'] ) && is_array( $submission['schema'] ) ) {
+			$keys = array_merge( $keys, \SubtleForms\Support\EntryValues::secretKeys( $submission['schema'] ) );
+		}
+		$changed = false;
+		foreach ( array_unique( $keys ) as $key ) {
+			if ( array_key_exists( $key, $payload ) ) {
+				$payload[ $key ] = \SubtleForms\Support\EntryValues::passwordLabel( $payload[ $key ] );
+				$changed         = true;
+			}
+		}
+		if ( $changed ) {
+			$submission['payload'] = $payload;
+		}
+		return $submission;
+	}
+
+	/**
+	 * Keys of a form's secret (password) fields, cached per request.
+	 *
+	 * Every schema version is checked, so a password field removed since an
+	 * entry was made is still left out.
+	 *
+	 * @param int $formId Form ID.
+	 * @return string[]
+	 */
+	private function secretKeysForForm( int $formId ): array {
+		static $cache = array();
+		if ( $formId <= 0 ) {
+			return array();
+		}
+		if ( isset( $cache[ $formId ] ) ) {
+			return $cache[ $formId ];
+		}
+		$keys = array();
+		try {
+			$versions = $this->formsRepo->getSchemaVersions( $formId );
+			foreach ( (array) $versions as $version ) {
+				$number = is_array( $version ) ? (int) ( $version['version'] ?? 0 ) : (int) $version;
+				$loaded = $number > 0 ? $this->formsRepo->loadSchemaVersion( $formId, $number ) : null;
+				$schema = is_array( $loaded ) ? ( $loaded['schema'] ?? $loaded ) : array();
+				$keys   = array_merge( $keys, \SubtleForms\Support\EntryValues::secretKeys( is_array( $schema ) ? $schema : array() ) );
+			}
+			if ( ! $keys ) {
+				$loaded = $this->formsRepo->loadSchemaVersion( $formId );
+				$schema = is_array( $loaded ) ? ( $loaded['schema'] ?? $loaded ) : array();
+				$keys   = \SubtleForms\Support\EntryValues::secretKeys( is_array( $schema ) ? $schema : array() );
+			}
+		} catch ( \Throwable $e ) {
+			$keys = array();
+		}
+		$cache[ $formId ] = array_values( array_unique( $keys ) );
+		return $cache[ $formId ];
+	}
+
+	/**
+	 * Repeater groups as numbered lines when the form's schema is not at
+	 * hand (an export across forms): "1. ticker: AAPL; shares: 8".
+	 *
+	 * @param array $groups Groups.
+	 * @return string
+	 */
+	private function groupsText( array $groups ): string {
+		$lines = array();
+		foreach ( array_values( $groups ) as $n => $group ) {
+			$parts = array();
+			foreach ( (array) $group as $k => $v ) {
+				$text = \SubtleForms\Support\FieldMapper::toText( $v );
+				if ( '' !== $text ) {
+					$parts[] = $k . ': ' . $text;
+				}
+			}
+			$lines[] = ( $n + 1 ) . '. ' . implode( '; ', $parts );
+		}
+		return implode( "\n", $lines );
+	}
+
+	/**
+	 * Quote one CSV cell.
+	 *
+	 * Cells that a spreadsheet would run as a formula (starting with =, @, tab,
+	 * carriage return, or + / - followed by anything other than a number) are
+	 * prefixed with an apostrophe, so an answer cannot inject a formula into
+	 * the admin's spreadsheet.
+	 *
+	 * @param mixed $value Cell value.
+	 * @return string
+	 */
+	public function csv_cell( $value ): string {
+		$value = is_scalar( $value ) ? (string) $value : '';
+		$risky = '' !== $value && in_array( $value[0], array( '=', '+', '-', '@', "\t", "\r" ), true );
+		// Phone numbers and signed amounts ("+44 20 7946 0000", "-12.50") are
+		// not formulas and are kept as typed.
+		if ( $risky && in_array( $value[0], array( '+', '-' ), true ) && preg_match( '/^[+-][0-9\s().\/-]*$/', $value ) ) {
+			$risky = false;
+		}
+		if ( $risky ) {
+			$value = "'" . $value;
+		}
+		return '"' . str_replace( '"', '""', $value ) . '"';
 	}
 }

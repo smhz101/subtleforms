@@ -107,8 +107,8 @@ export default function SubmissionsPage({ formId }) {
   };
 
   const title = formId
-    ? __('Form Submissions', 'subtleforms')
-    : __('All Submissions', 'subtleforms');
+    ? __('Form submissions', 'subtleforms')
+    : __('Submissions', 'subtleforms');
 
   const tabs = [
     { key: 'all', label: __('All', 'subtleforms') },
@@ -119,7 +119,9 @@ export default function SubmissionsPage({ formId }) {
     },
     { key: 'read', label: __('Read', 'subtleforms') },
     { key: 'spam', label: __('Spam', 'subtleforms') },
+    { key: 'starred', label: __('Starred', 'subtleforms') },
     { key: 'flagged', label: __('Flagged', 'subtleforms') },
+    { key: 'trash', label: __('Trash', 'subtleforms') },
   ];
 
   const dateRangeOptions = [
@@ -201,9 +203,14 @@ export default function SubmissionsPage({ formId }) {
       });
 
       if (response.success && response.csv) {
-        // Decode base64 CSV
-        const csvData = atob(response.csv);
-        const blob = new Blob([csvData], {
+        // Decode base64 to raw bytes. Passing the atob() string straight to
+        // Blob re-encodes every byte as UTF-8, which garbles accents and the BOM.
+        const binary = atob(response.csv);
+        const bytes = new Uint8Array(binary.length);
+        for (let i = 0; i < binary.length; i++) {
+          bytes[i] = binary.charCodeAt(i);
+        }
+        const blob = new Blob([bytes], {
           type: 'text/csv;charset=utf-8;',
         });
 
@@ -232,6 +239,25 @@ export default function SubmissionsPage({ formId }) {
   return (
     <AdminShell
       title={title}
+      description={__(
+        'Every entry from every form. Open one to read it, reply, or see what happened after it was sent.',
+        'subtleforms'
+      )}
+      actions={
+        <Button
+          variant='secondary'
+          onClick={() => requirePro('submissions.export', exportSubmissions)}
+          disabled={exporting}
+          icon={!canExport && !exporting ? <Icon.Lock size={14} /> : <Icon.DownloadCloud size={16} />}
+          className={!canExport && !exporting ? 'sf-export-btn--locked' : undefined}>
+          {exporting
+            ? __('Exporting…', 'subtleforms')
+            : __('Export CSV', 'subtleforms')}
+          {!canExport && !exporting && (
+            <span className='sf-pro-tag'>{__('Pro', 'subtleforms')}</span>
+          )}
+        </Button>
+      }
       actionBarLeft={
         <TabBar
           tabs={tabs}
@@ -247,9 +273,9 @@ export default function SubmissionsPage({ formId }) {
               onClick={() => setShowColPicker((v) => !v)}
               className='sf-button-height sf-col-picker__toggle'
               title={__('Show/hide columns', 'subtleforms')}>
-              <Icon.Columns size={14} />
-              <span>{__('Columns', 'subtleforms')}</span>
-              <Icon.ChevronDown size={12} />
+              <Icon.Columns size={16} />
+              <span>{__('View', 'subtleforms')}</span>
+              <Icon.ChevronDown size={14} />
             </Button>
             {showColPicker && (
               <div className='sf-col-picker__dropdown'>
@@ -266,35 +292,22 @@ export default function SubmissionsPage({ formId }) {
               </div>
             )}
           </div>
-          <Button
-            variant='secondary'
-            onClick={() => requirePro('submissions.export', exportSubmissions)}
-            disabled={exporting}
-            title={!canExport && !exporting ? __('Export all submissions to CSV instantly', 'subtleforms') : undefined}
-            className={`sf-button-height${!canExport && !exporting ? ' sf-export-btn--locked' : ''}`}>
-            {exporting ? (
-              __('Exporting...', 'subtleforms')
-            ) : !canExport ? (
-              <>
-                <Icon.Lock size={13} className='sf-export-btn__icon' />
-                {__('Export CSV (Pro)', 'subtleforms')}
-              </>
-            ) : __('Export CSV', 'subtleforms')}
-          </Button>
           {!formId && (
             <Button
-              variant={showFilters ? 'primary' : 'secondary'}
-              onClick={() => setShowFilters(!showFilters)}
-              className='sf-button-height'>
-              {showFilters
-                ? __('Hide Filters', 'subtleforms')
-                : __('Filters', 'subtleforms')}
+              variant='secondary'
+              isPressed={showFilters}
+              icon={<Icon.Sliders size={16} />}
+              onClick={() => setShowFilters(!showFilters)}>
+              {__('Filters', 'subtleforms')}
+              {hasActiveFilters && <span className='sf-filter-dot' aria-hidden='true' />}
             </Button>
           )}
           <SearchControl
             value={search}
             onChange={handleSearchChange}
-            placeholder={__('Search submissions...', 'subtleforms')}
+            placeholder={__('Search submissions', 'subtleforms')}
+            __nextHasNoMarginBottom
+            size='compact'
           />
         </div>
       }>

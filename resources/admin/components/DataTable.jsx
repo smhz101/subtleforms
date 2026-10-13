@@ -1,6 +1,6 @@
 import { memo, useRef } from '@wordpress/element';
 import { Button, SelectControl, CheckboxControl } from '@wordpress/components';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import Icon from '../ui/Icon';
 import TableSkeleton from './TableSkeleton';
@@ -136,8 +136,16 @@ const DataTable = memo(function DataTable({
     return (
       <div className='sf-data-table__empty'>
         <div className='sf-data-table__empty-content'>
-          <div className='sf-data-table__empty-content-icon'>📝</div>
-          <p>{emptyMessage}</p>
+          {typeof emptyMessage === 'string' ? (
+            <>
+              <span className='sf-data-table__empty-content-icon'>
+                <Icon.FileText size={20} />
+              </span>
+              <p>{emptyMessage}</p>
+            </>
+          ) : (
+            emptyMessage
+          )}
         </div>
       </div>
     );
@@ -149,7 +157,7 @@ const DataTable = memo(function DataTable({
     data.some((item) => selectedItems.includes(item.id)) && !allSelected;
 
   return (
-    <div className='data-table'>
+    <div className='sf-data-table'>
       {/* Bulk Actions Bar */}
       {selectable && selectedItems.length > 0 && (
         <div className='sf-data-table__bulk-actions'>
@@ -157,7 +165,7 @@ const DataTable = memo(function DataTable({
             {(() => {
               return sprintf(
                 /* translators: %1$d: number of selected items */
-                __('%1$d items selected', 'subtleforms'),
+                _n('%1$d item selected', '%1$d items selected', selectedItems.length, 'subtleforms'),
                 selectedItems.length
               );
             })()}
@@ -166,9 +174,9 @@ const DataTable = memo(function DataTable({
             {bulkActions.map((action, index) => (
               <Button
                 key={index}
-                isSmall
+                size='compact'
                 isDestructive={action.isDestructive}
-                isSecondary={!action.isDestructive}
+                variant={action.isDestructive ? 'tertiary' : 'secondary'}
                 onClick={() => action.onClick(selectedItems)}>
                 {action.label}
               </Button>
@@ -190,11 +198,12 @@ const DataTable = memo(function DataTable({
           <thead className='sf-data-table__header'>
             <tr>
               {selectable && (
-                <th className='sf-data-table__header-cell'>
+                <th className='sf-data-table__header-cell sf-data-table__check-cell'>
                   <CheckboxControl
                     checked={allSelected}
                     indeterminate={someSelected}
                     onChange={handleSelectAll}
+                    aria-label={__('Select all', 'subtleforms')}
                   />
                 </th>
               )}
@@ -211,9 +220,10 @@ const DataTable = memo(function DataTable({
                   <th
                     key={column.key}
                     scope='col'
-                    className={`${
-                      column.sortable ? 'sf-data-table__header-th--sortable' : ''
-                    }`}
+                    className={`sf-data-table__th ${
+                      column.sortable ? 'sf-data-table__th--sortable' : ''
+                    } ${sortBy === column.key ? 'is-sorted' : ''}`}
+                    data-column={column.key}
                     style={{ width: column.width || 'auto' }}
                     aria-sort={ariaSortValue}
                     onClick={() => handleHeaderClick(column)}>
@@ -241,7 +251,7 @@ const DataTable = memo(function DataTable({
                   <tr
                     key={row.id || virtualRow.index}
                     className={`
-                      group transition-all duration-150
+                      sf-data-table__row
                       ${
                         selectedItems.includes(row.id)
                           ? 'sf-data-table__row--selected'
@@ -260,10 +270,15 @@ const DataTable = memo(function DataTable({
                     }}
                     onClick={() => onRowClick && onRowClick(row)}>
                     {selectable && (
-                      <td onClick={(e) => e.stopPropagation()}>
+                      <td className='sf-data-table__check-cell' onClick={(e) => e.stopPropagation()}>
                         <CheckboxControl
                           checked={selectedItems.includes(row.id)}
                           onChange={(checked) => handleSelectRow(row.id, checked)}
+                          aria-label={sprintf(
+                            /* translators: %s: row number */
+                            __('Select row %s', 'subtleforms'),
+                            row.id
+                          )}
                         />
                       </td>
                     )}
@@ -283,7 +298,7 @@ const DataTable = memo(function DataTable({
                 <tr
                   key={row.id || index}
                   className={`
-                    group transition-all duration-150
+                    sf-data-table__row
                     ${
                       selectedItems.includes(row.id)
                         ? 'sf-data-table__row--selected'
@@ -294,10 +309,15 @@ const DataTable = memo(function DataTable({
                   `}
                   onClick={() => onRowClick && onRowClick(row)}>
                   {selectable && (
-                    <td onClick={(e) => e.stopPropagation()}>
+                    <td className='sf-data-table__check-cell' onClick={(e) => e.stopPropagation()}>
                       <CheckboxControl
                         checked={selectedItems.includes(row.id)}
                         onChange={(checked) => handleSelectRow(row.id, checked)}
+                        aria-label={sprintf(
+                          /* translators: %s: row number */
+                          __('Select row %s', 'subtleforms'),
+                          row.id
+                        )}
                       />
                     </td>
                   )}
@@ -323,7 +343,7 @@ const DataTable = memo(function DataTable({
               {(() => {
                 return sprintf(
                   /* translators: %1$d: starting item number, %2$d: ending item number, %3$d: total items */
-                  __('Showing %1$d to %2$d of %3$d', 'subtleforms'),
+                  __('%1$d–%2$d of %3$d', 'subtleforms'),
                   (currentPage - 1) * perPage + 1,
                   Math.min(currentPage * perPage, totalItems),
                   totalItems
@@ -332,8 +352,11 @@ const DataTable = memo(function DataTable({
             </span>
 
             <div className='sf-data-table__pagination-info-controls'>
-              <label>{__('Per page:', 'subtleforms')}</label>
+              <label>{__('Rows per page', 'subtleforms')}</label>
               <SelectControl
+                __nextHasNoMarginBottom
+                __next40pxDefaultSize={false}
+                size='compact'
                 value={perPage.toString()}
                 onChange={(value) => onPerPageChange(parseInt(value))}
                 options={[
@@ -349,11 +372,14 @@ const DataTable = memo(function DataTable({
           <div className='sf-data-table__pagination-buttons'>
             <Button
               disabled={currentPage === 1}
+              accessibleWhenDisabled
               onClick={() => onPageChange(currentPage - 1)}
-              isSecondary
-              size='small'>
-              {__('Previous', 'subtleforms')}
-            </Button>
+              variant='tertiary'
+              size='compact'
+              className='sf-data-table__page-button'
+              icon={<Icon.ChevronLeft size={16} />}
+              label={__('Previous page', 'subtleforms')}
+            />
 
             <span className='sf-data-table__pagination-page-indicator'>
               {(() => {
@@ -368,11 +394,14 @@ const DataTable = memo(function DataTable({
 
             <Button
               disabled={currentPage === totalPages}
+              accessibleWhenDisabled
               onClick={() => onPageChange(currentPage + 1)}
-              isSecondary
-              size='small'>
-              {__('Next', 'subtleforms')}
-            </Button>
+              variant='tertiary'
+              size='compact'
+              className='sf-data-table__page-button'
+              icon={<Icon.ChevronRight size={16} />}
+              label={__('Next page', 'subtleforms')}
+            />
           </div>
         </div>
       )}
