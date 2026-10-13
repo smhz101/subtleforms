@@ -1,0 +1,188 @@
+/**
+ * LogicEditor — conditional logic rules (2.1).
+ */
+.sf-logic-editor {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+
+	&__lock {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 8px 10px;
+		border: 1px solid var(--sf-border, #dcdcde);
+		border-radius: var(--sf-radius-md, 4px);
+		background: var(--sf-bg-subtle, #f6f7f7);
+		font-size: 12px;
+	}
+
+	&__lock-icon {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		background: #1e1e1e;
+		color: #fff;
+		flex: none;
+
+		svg { fill: none; }
+	}
+
+	&__lock-text { flex: 1 1 auto; color: var(--sf-text-secondary, #50575e); }
+
+	&.is-locked &__group,
+	&.is-locked &__action,
+	&.is-locked &__footer { opacity: 0.6; }
+
+	&__empty {
+		margin: 0;
+		font-size: 12px;
+		color: var(--sf-text-muted, #757575);
+	}
+
+	&__group {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding: 10px;
+		border: 1px solid var(--sf-border, #dcdcde);
+		border-radius: var(--sf-radius-md, 4px);
+		background: var(--sf-bg, #fff);
+	}
+
+	&__group-head {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+	}
+
+	&__match { flex: 1 1 auto; }
+
+	&__or {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin: 2px 0 8px;
+		font-size: 11px;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--sf-text-muted, #757575);
+
+		&::before,
+		&::after {
+			content: '';
+			flex: 1 1 auto;
+			height: 1px;
+			background: var(--sf-border, #dcdcde);
+		}
+	}
+
+	&__rule {
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+		padding: 8px;
+		border-radius: var(--sf-radius-sm, 2px);
+		background: var(--sf-bg-subtle, #f6f7f7);
+	}
+
+	&__rule-row {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+
+		> :first-child { flex: 1 1 auto; min-width: 0; }
+	}
+
+	&__remove { flex: none; }
+
+	&__between {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+		align-items: center;
+		gap: 6px;
+		font-size: 12px;
+		color: var(--sf-text-muted, #757575);
+	}
+
+	&__add-rule { align-self: flex-start; font-size: 12px; }
+
+	&__footer { display: flex; gap: 8px; }
+}
+
+// "Only when…" on an email or webhook action.
+.sf-actions-panel__conditions {
+	margin-top: 8px;
+	padding-top: 10px;
+	border-top: 1px solid var(--sf-border-subtle, #f0f0f1);
+
+	> summary {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		margin-bottom: 8px;
+		font-size: 13px;
+		font-weight: 500;
+		cursor: pointer;
+		list-style: none;
+
+		&::-webkit-details-marker { display: none; }
+		&::after { content: '▾'; color: var(--sf-text-muted, #757575); }
+	}
+
+	&:not([open]) > summary { margin-bottom: 0; }
+	&:not([open]) > summary::after { content: '▸'; }
+}
+
+.sf-actions-panel__conditions-state {
+	margin-left: auto;
+	font-size: 12px;
+	font-weight: 400;
+	color: var(--sf-text-muted, #757575);
+}
+
+// Conditional confirmations list (After submit panel).
+.sf-confirmations {
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+	margin-top: 4px;
+
+	&__intro {
+		margin: 0;
+		font-size: 12px;
+		color: var(--sf-text-muted, #757575);
+	}
+
+	&__item {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding: 10px;
+		border: 1px solid var(--sf-border, #dcdcde);
+		border-radius: var(--sf-radius-md, 4px);
+		background: var(--sf-bg, #fff);
+	}
+
+	&__head {
+		display: flex;
+		align-items: center;
+		gap: 6px;
+
+		> :first-child { flex: 1 1 auto; min-width: 0; }
+	}
+
+	&__label {
+		font-size: 11px;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--sf-text-muted, #757575);
+	}
+}
