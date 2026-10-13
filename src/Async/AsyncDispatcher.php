@@ -50,6 +50,9 @@ final class AsyncDispatcher {
 			'headers'       => $payload['headers'] ?? array(),
 			'attachments'   => $payload['attachments'] ?? array(),
 			'submission_id' => $payload['submission_id'] ?? null,
+			'step_id'       => $payload['step_id'] ?? 'email',
+			'form_id'       => isset( $payload['form_id'] ) ? (int) $payload['form_id'] : 0,
+			'audience'      => $payload['audience'] ?? 'admin',
 			'retry_count'   => $payload['retry_count'] ?? 0,
 		);
 
@@ -101,6 +104,7 @@ final class AsyncDispatcher {
 			'body'          => $payload['body'] ?? '',
 			'timeout'       => $payload['timeout'] ?? 10,
 			'submission_id' => $payload['submission_id'] ?? null,
+			'step_id'       => $payload['step_id'] ?? 'webhook',
 			'retry_count'   => $payload['retry_count'] ?? 0,
 		);
 
@@ -141,13 +145,48 @@ final class AsyncDispatcher {
 				'submission_id' => $submission_id ?: null,
 			) );
 
-			$sent = \SubtleForms\Support\Mailer::send(
-				$job['to'],
-				$job['subject'],
-				$job['body'],
-				$job['headers'] ?? array(),
-				$job['attachments'] ?? array()
-			);
+			$attachments = is_array( $job['attachments'] ?? null ) ? $job['attachments'] : array();
+
+			/**
+			 * Filter the files attached to a SubtleForms email.
+			 *
+			 * Runs in the background job, after the visitor's request has
+			 * finished, so generating a file here (such as an entry PDF) does
+			 * not slow the submission down. Return absolute file paths.
+			 *
+			 * @param string[] $attachments Absolute paths.
+			 * @param array    $job {
+			 *     @type string $to            Recipient(s).
+			 *     @type int    $submission_id Entry ID (0 when unknown).
+			 *     @type int    $form_id       Form ID (0 when unknown).
+			 *     @type string $audience      'admin' or 'submitter'.
+			 *     @type string $step_id       Pipeline step ID.
+			 * }
+			 * @since 2.1.0
+			 */
+			$filtered    = apply_filters( 'subtleforms/email/attachments', $attachments, $job );
+			$attachments = is_array( $filtered ) ? array_values( array_filter( $filtered, 'is_string' ) ) : $attachments;
+
+			try {
+				$sent = \SubtleForms\Support\Mailer::send(
+					$job['to'],
+					$job['subject'],
+					$job['body'],
+					$job['headers'] ?? array(),
+					$attachments
+				);
+			} finally {
+				/**
+				 * Fires after a SubtleForms email was handed to wp_mail, whether
+				 * or not it was accepted. Add-ons delete temporary attachments
+				 * here.
+				 *
+				 * @param array    $job         Email job (see subtleforms/email/attachments).
+				 * @param string[] $attachments Files that were attached.
+				 * @since 2.1.0
+				 */
+				do_action( 'subtleforms/email/after_send', $job, $attachments );
+			}
 
 			if ( ! $sent ) {
 				throw new \RuntimeException( 'wp_mail returned false' );
