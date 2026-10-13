@@ -85,13 +85,20 @@ final class FieldValidator {
 			$requiredMessage = $this->requiredMessage( $fields[ $fieldKey ] ?? array(), $fieldKey );
 
 			// A matrix with no rows or columns is not drawn, so it cannot be
-			// answered and is never required (2.2.1, bug 8).
+			// answered and is never required (2.2.1, bug 8). A drawn matrix is
+			// required only when every row has an answer.
 			if ( $type === 'checkbox_grid' ) {
 				$rows = $this->attr( $fields[ $fieldKey ] ?? array(), 'rows' );
 				$cols = $this->attr( $fields[ $fieldKey ] ?? array(), 'columns' );
 				if ( empty( $rows ) || empty( $cols ) || ! is_array( $rows ) || ! is_array( $cols ) ) {
 					continue;
 				}
+				$missing = $this->firstUnansweredMatrixRow( $rows, $value );
+				if ( null !== $missing ) {
+					/* translators: %s: matrix row label */
+					$errors[ $fieldKey ] = sprintf( __( 'Please answer the "%s" row.', 'subtleforms' ), $missing );
+				}
+				continue;
 			}
 
 			// An older single checkbox saved with options is drawn as a
@@ -248,6 +255,8 @@ final class FieldValidator {
 				return $this->validateChoiceCount( $value, $field );
 			case 'scale':
 				return $this->validateScale( $value, $field );
+			case 'date':
+				return $this->validateDateBounds( $value, $field );
 			case 'phone':
 				return $this->validatePhone( $value );
 			case 'payment_amount':
@@ -308,7 +317,9 @@ final class FieldValidator {
 	}
 
 	/**
-	 * Validate number field min/max range constraints.
+	 * Validate number field min, max, and step constraints.
+	 *
+	 * Step uses the same base as the number input: min when it is set, otherwise 0.
 	 *
 	 * @param mixed $value
 	 * @param array $field
@@ -319,31 +330,33 @@ final class FieldValidator {
 			return null;
 		}
 
-		$float  = (float) $value;
+		$float = (float) $value;
+		$min   = $this->attr( $field, 'min' );
+		$max   = $this->attr( $field, 'max' );
 
-		if ( isset( $field['min'] ) && $field['min'] !== null && $field['min'] !== '' ) {
-			$min = (float) $field['min'];
-			if ( $float < $min ) {
-				return sprintf( 'Must be at least %s.', $this->formatNumber( $min ) );
-			}
+		if ( $min !== null && $min !== '' && is_numeric( $min ) && $float < (float) $min ) {
+			return sprintf( 'Must be at least %s.', $this->formatNumber( (float) $min ) );
 		}
 
-		if ( isset( $field['max'] ) && $field['max'] !== null && $field['max'] !== '' ) {
-			$max = (float) $field['max'];
-			if ( $float > $max ) {
-				return sprintf( 'Cannot exceed %s.', $this->formatNumber( $max ) );
+		if ( $max !== null && $max !== '' && is_numeric( $max ) && $float > (float) $max ) {
+			return sprintf( 'Cannot exceed %s.', $this->formatNumber( (float) $max ) );
+		}
+
+		$step = $this->attr( $field, 'step' );
+		if ( $step !== null && $step !== '' && is_numeric( $step ) ) {
+			$step_value = (float) $step;
+			if ( $step_value > 0 ) {
+				$base = ( $min !== null && $min !== '' && is_numeric( $min ) ) ? (float) $min : 0.0;
+				$quot = ( $float - $base ) / $step_value;
+				if ( abs( $quot - round( $quot ) ) > 1.0e-8 ) {
+					/* translators: %s: step increment */
+					return sprintf( __( 'Must match the step of %s.', 'subtleforms' ), $this->formatNumber( $step_value ) );
+				}
 			}
 		}
 
 		return null;
 	}
-
-	/**
-	 * Format a number for display in error messages — strip unnecessary trailing zeros.
-	 *
-	 * @param float $number
-	 * @return string
-	 */
 	private function formatNumber( float $number ): string {
 		$formatted = number_format( $number, 2, '.', '' );
 		return rtrim( rtrim( $formatted, '0' ), '.' );
@@ -434,6 +447,113 @@ final class FieldValidator {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Reject a date outside the field's min and max.
+	 *
+	 * HTML min/max do not run: the form uses noValidate.
+	 *
+	 * @param mixed $value Submitted value.
+	 * @param array $field Field.
+	 * @return string|null
+	 */
+	private function validateDateBounds( $value, array $field ) {
+		if ( $this->isEmpty( $value ) || ! is_string( $value ) || ! preg_match( '/^\d{4}-\d{2}-\d{2}$/', $value ) ) {
+			return null;
+		}
+
+		$min = $this->attr( $field, 'minDate' );
+		$max = $this->attr( $field, 'maxDate' );
+
+		if ( is_string( $min ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $min ) && $value < $min ) {
+			/* translators: %s: earliest allowed date */
+			return sprintf( __( 'Date must be on or after %s.', 'subtleforms' ), $min );
+		}
+
+		if ( is_string( $max ) && preg_match( '/^\d{4}-\d{2}-\d{2}$/', $max ) && $value > $max ) {
+			/* translators: %s: latest allowed date */
+			return sprintf( __( 'Date must be on or before %s.', 'subtleforms' ), $max );
+		}
+
+		return null;
+	}
+
+	/**
+	 * Label of the first matrix row with no answer.
+	 *
+	 * @param array $rows  Configured rows.
+	 * @param mixed $value Submitted grid.
+	 * @return string|null
+	 */
+	private function firstUnansweredMatrixRow( array $rows, $value ): ?string {
+		$grid = is_array( $value ) ? $value : array();
+		foreach ( $rows as $row ) {
+			$key    = $this->matrixRowKey( $row );
+			$answer = ( '' !== $key && array_key_exists( $key, $grid ) ) ? $grid[ $key ] : null;
+			if ( ! $this->matrixRowAnswered( $answer ) ) {
+				return $this->matrixRowLabel( $row );
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * @param mixed $row Row definition.
+	 * @return string
+	 */
+	private function matrixRowKey( $row ): string {
+		if ( is_array( $row ) ) {
+			if ( isset( $row['value'] ) && $row['value'] !== '' && $row['value'] !== null ) {
+				return (string) $row['value'];
+			}
+			if ( isset( $row['label'] ) && $row['label'] !== '' && $row['label'] !== null ) {
+				return (string) $row['label'];
+			}
+			return '';
+		}
+		return (string) $row;
+	}
+
+	/**
+	 * @param mixed $row Row definition.
+	 * @return string
+	 */
+	private function matrixRowLabel( $row ): string {
+		if ( is_array( $row ) ) {
+			if ( isset( $row['label'] ) && $row['label'] !== '' && $row['label'] !== null ) {
+				return (string) $row['label'];
+			}
+			if ( isset( $row['value'] ) && $row['value'] !== '' && $row['value'] !== null ) {
+				return (string) $row['value'];
+			}
+			return '';
+		}
+		return (string) $row;
+	}
+
+	/**
+	 * A row is answered by a column key, or by at least one checked cell.
+	 *
+	 * @param mixed $answer Row value.
+	 * @return bool
+	 */
+	private function matrixRowAnswered( $answer ): bool {
+		if ( is_string( $answer ) ) {
+			return trim( $answer ) !== '';
+		}
+		if ( is_int( $answer ) || is_float( $answer ) ) {
+			return true;
+		}
+		if ( ! is_array( $answer ) ) {
+			return false;
+		}
+		foreach ( $answer as $cell ) {
+			if ( true === $cell || 1 === $cell || '1' === $cell ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**

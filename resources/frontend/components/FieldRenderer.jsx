@@ -1,8 +1,9 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { getIn } from '../utils/valuePaths';
 import { getCompositeEmptyParts } from '../utils/fieldValidation';
+import { rangeSliderSeed } from '../utils/defaults';
 import { debug } from '../../shared/debug';
-import { lazy, Suspense, useContext } from '@wordpress/element';
+import { lazy, Suspense, useContext, useEffect } from '@wordpress/element';
 import ChainedSelect from './fields/ChainedSelect';
 import FileUpload, { FormContext } from './fields/FileUpload';
 import RepeaterField from './fields/RepeaterField';
@@ -136,6 +137,19 @@ export default function FieldRenderer({
   )}`;
 
   const error = errors?.[resolvedPath];
+
+  // An untouched slider shows a number before the visitor moves it. Write that
+  // number into the form so a required slider submits what it already displays.
+  useEffect(() => {
+    if (field?.type !== 'range_slider' || !resolvedPath || isHidden || typeof onChange !== 'function') {
+      return;
+    }
+    const current = getIn(values, resolvedPath, '');
+    if (current !== '' && current !== undefined && current !== null) {
+      return;
+    }
+    onChange(resolvedPath, rangeSliderSeed(config));
+  }, [field, resolvedPath, isHidden, values, onChange, config]);
 
   if (isHidden) {
     return null;
@@ -1217,7 +1231,7 @@ function renderInput(
       const sliderStep = Number(config.step ?? 1);
       const sliderValue =
         value === '' || value === undefined || value === null
-          ? Math.round((sliderMin + sliderMax) / 2)
+          ? rangeSliderSeed(config)
           : Number(value);
 
       return (
