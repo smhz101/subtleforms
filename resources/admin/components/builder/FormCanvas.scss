@@ -1,20 +1,17 @@
 .sf-form-canvas {
 	flex: 1;
-	background-color: var(--sf-gray-50); /* Lighter, more neutral background */
+	background-color: #ffffff; /* Lighter, more neutral background */
 	padding: 2rem;
 	overflow: auto;
 }
 
 .sf-form-canvas__inner {
-	background-color: var(--sf-surface);
+	background-color: #ffffff;
 	margin: 0 auto;
 	padding: 3rem;
 	min-height: 500px;
 	border-radius: var(--sf-radius-md); /* Soft rounded corners */
 	border: 1px solid var(--sf-gray-200); /* Subtle border */
-	box-shadow:
-		0 1px 3px 0 rgba(0, 0, 0, 0.1),
-		0 1px 2px 0 rgba(0, 0, 0, 0.06); /* Soft elevation */
 }
 
 .sf-form-canvas__inner--narrow {

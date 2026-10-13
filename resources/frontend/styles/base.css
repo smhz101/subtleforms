@@ -73,8 +73,9 @@
 	line-height: var(--subtleforms-line-height);
 	color: var(--subtleforms-color-text);
 	background: var(--subtleforms-color-bg);
-	border-radius: var(--subtleforms-radius-md);
-	box-shadow: var(--subtleforms-shadow-md);
+	border: 0;
+	border-radius: 0;
+	box-shadow: none;
 	padding: var(--subtleforms-spacing-lg);
 	box-sizing: border-box;
 }

@@ -1,0 +1,52 @@
+/**
+ * ConditionEditor Component Styles
+ * Conditional logic rule builder
+ */
+
+.sf-condition-editor {
+	margin-top: 1rem;
+
+	&__header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 0.75rem;
+	}
+
+	&__label {
+		font-size: var(--sf-text-xs);
+		line-height: 1rem;
+		font-weight: 600;
+		color: var(--sf-gray-900);
+	}
+
+	&__empty {
+		font-size: var(--sf-text-xs);
+		line-height: 1rem;
+		font-style: italic;
+		color: var(--sf-gray-500);
+		margin: 0.5rem 0;
+	}
+
+	&__rule {
+		background-color: var(--sf-gray-50);
+		margin-bottom: 0.75rem;
+		padding: 0.75rem;
+		border: 1px solid var(--sf-gray-300);
+	}
+
+	&__rule-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 0.5rem;
+	}
+
+	&__rule-number {
+		font-size: var(--sf-text-2xs);
+		line-height: 1rem;
+		font-weight: 600;
+		color: var(--sf-gray-500);
+		text-transform: uppercase;
+	}
+}

@@ -138,7 +138,7 @@ final class MergeTags {
 			if ( is_array( $value ) ) {
 				$value = implode( ', ', array_map( 'strval', array_filter( $value, 'is_scalar' ) ) );
 			}
-			if ( trim( wp_strip_all_tags( (string) $value ) ) === '' ) {
+			if ( trim( wp_strip_all_tags( (string) $value ) ) === '' && false === stripos( (string) $value, '<img' ) ) {
 				continue;
 			}
 			$rows[] = array( (string) ( $entry['label'] ?? '' ) !== '' ? (string) $entry['label'] : $key, (string) $value );

@@ -35,6 +35,7 @@ export default function BuilderModalsController({
   // Preview
   showPreview,
   draftSchema,
+  formId = null,
   isDirty,
   onClosePreview,
 }) {
@@ -102,6 +103,7 @@ export default function BuilderModalsController({
       {showPreview && (
         <FormPreviewModal
           schema={draftSchema}
+          formId={formId}
           isDirty={isDirty}
           onClose={onClosePreview}
         />

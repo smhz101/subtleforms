@@ -235,9 +235,15 @@ final class FieldSettings {
 			if ( ! is_array( $control ) || isset( $control['section'] ) ) {
 				continue;
 			}
-			$name               = $control['name'] ?? '';
-			$isConfigRange      = in_array( $type, array( 'rating', 'range_slider', 'scale' ), true ) && in_array( $name, array( 'min', 'max' ), true );
-			$control['section'] = ( in_array( $name, self::VALIDATION_CONTROLS, true ) && ! $isConfigRange ) ? 'validation' : 'general';
+			$name          = $control['name'] ?? '';
+			$isConfigRange = in_array( $type, array( 'rating', 'range_slider', 'scale' ), true ) && in_array( $name, array( 'min', 'max' ), true );
+			if ( in_array( $name, self::VALIDATION_CONTROLS, true ) && ! $isConfigRange ) {
+				$control['section'] = 'validation';
+			} elseif ( 'label' === $name || 'description' === $name ) {
+				$control['section'] = 'general';
+			} else {
+				$control['section'] = 'appearance';
+			}
 			if ( $type === 'rating' && $name === 'max' ) {
 				$control['label'] = __( 'Number of stars', 'subtleforms' );
 			}
@@ -275,7 +281,7 @@ final class FieldSettings {
 						'type'    => 'text',
 						'name'    => 'placeholder',
 						'label'   => __( 'Placeholder', 'subtleforms' ),
-						'section' => 'general',
+						'section' => 'appearance',
 					)
 				);
 			}
@@ -303,7 +309,7 @@ final class FieldSettings {
 						'name'    => 'defaultValue',
 						'label'   => __( 'Default value', 'subtleforms' ),
 						'help'    => __( 'Prefilled when the form loads. Supports {user_email}, {user_name}, {date} and {get:param}.', 'subtleforms' ),
-						'section' => 'general',
+						'section' => 'appearance',
 					)
 				);
 			}
@@ -317,7 +323,7 @@ final class FieldSettings {
 							'name'        => 'prefix',
 							'label'       => __( 'Prefix', 'subtleforms' ),
 							'placeholder' => '$',
-							'section'     => 'general',
+							'section'     => 'appearance',
 						)
 					);
 				}
@@ -328,7 +334,7 @@ final class FieldSettings {
 							'name'        => 'suffix',
 							'label'       => __( 'Suffix', 'subtleforms' ),
 							'placeholder' => 'kg',
-							'section'     => 'general',
+							'section'     => 'appearance',
 						)
 					);
 				}
@@ -348,7 +354,7 @@ final class FieldSettings {
 							array( 'value' => 'columns-3', 'label' => __( 'Three columns', 'subtleforms' ) ),
 							array( 'value' => 'buttons', 'label' => __( 'Buttons', 'subtleforms' ) ),
 						),
-						'section' => 'general',
+						'section' => 'appearance',
 					)
 				);
 			}
@@ -421,7 +427,7 @@ final class FieldSettings {
 							'name'    => 'rows',
 							'label'   => __( 'Rows', 'subtleforms' ),
 							'help'    => __( 'One per line. These are the questions.', 'subtleforms' ),
-							'section' => 'general',
+							'section' => 'appearance',
 						)
 					);
 				}
@@ -432,7 +438,7 @@ final class FieldSettings {
 							'name'    => 'columns',
 							'label'   => __( 'Columns', 'subtleforms' ),
 							'help'    => __( 'One per line. These are the answers.', 'subtleforms' ),
-							'section' => 'general',
+							'section' => 'appearance',
 						)
 					);
 				}
@@ -441,7 +447,7 @@ final class FieldSettings {
 						'type'    => 'checkbox',
 						'name'    => 'multiplePerRow',
 						'label'   => __( 'Allow several answers per row', 'subtleforms' ),
-						'section' => 'general',
+						'section' => 'appearance',
 					)
 				);
 			}
@@ -466,7 +472,7 @@ final class FieldSettings {
 						'name'    => 'multiple',
 						'label'   => __( 'Allow several files (Pro)', 'subtleforms' ),
 						'help'    => __( 'Visitors can drop or pick several files, with upload progress.', 'subtleforms' ),
-						'section' => 'general',
+						'section' => 'appearance',
 					)
 				);
 				$add(
@@ -477,7 +483,7 @@ final class FieldSettings {
 						'min'     => 1,
 						'max'     => 20,
 						'help'    => __( 'Used when several files are allowed. Default 5.', 'subtleforms' ),
-						'section' => 'general',
+						'section' => 'appearance',
 					)
 				);
 			}
@@ -546,6 +552,17 @@ final class FieldSettings {
 					unset( $layout[ $i ] );
 				}
 			}
+			if ( is_array( $labelControl ) && ! isset( $labelControl['section'] ) ) {
+				$labelControl['section'] = 'general';
+			}
+			foreach ( $layout as &$layout_control ) {
+				if ( ! is_array( $layout_control ) || isset( $layout_control['section'] ) ) {
+					continue;
+				}
+				$layout_name = $layout_control['name'] ?? '';
+				$layout_control['section'] = ( 'label' === $layout_name || 'description' === $layout_name ) ? 'general' : 'appearance';
+			}
+			unset( $layout_control );
 			$first = array( $labelControl );
 			$first[] = array(
 				'type'    => 'textarea',
@@ -616,7 +633,7 @@ final class FieldSettings {
 				array( 'value' => 'visible', 'label' => __( 'Visible (top aligned)', 'subtleforms' ) ),
 				array( 'value' => 'hidden', 'label' => __( 'Hidden (kept for screen readers)', 'subtleforms' ) ),
 			),
-			'section' => 'general',
+			'section' => 'appearance',
 		);
 	}
 
@@ -635,7 +652,7 @@ final class FieldSettings {
 				array( 'value' => 'below', 'label' => __( 'Below input', 'subtleforms' ) ),
 				array( 'value' => 'above', 'label' => __( 'Above input', 'subtleforms' ) ),
 			),
-			'section' => 'general',
+			'section' => 'appearance',
 		);
 	}
 

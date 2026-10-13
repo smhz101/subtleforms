@@ -168,8 +168,14 @@ final class Release232Test extends TestCase {
 			foreach ( array( 'label', 'description', 'labelVisibility', 'descriptionPlacement', 'requiredMessage', 'validationMessage', 'adminLabel' ) as $name ) {
 				$this->assertArrayHasKey( $name, $c, "{$type} has {$name}" );
 			}
-			$this->assertSame( 'general', $c['labelVisibility']['section'] );
-			$this->assertSame( 'general', $c['descriptionPlacement']['section'] );
+			$this->assertSame( 'appearance', $c['labelVisibility']['section'] );
+			$this->assertSame( 'appearance', $c['descriptionPlacement']['section'] );
+			if ( isset( $c['label'] ) ) {
+				$this->assertSame( 'general', $c['label']['section'] );
+			}
+			if ( isset( $c['description'] ) ) {
+				$this->assertSame( 'general', $c['description']['section'] );
+			}
 			$this->assertSame( 'validation', $c['validationMessage']['section'] );
 			$this->assertSame( 'advanced', $c['adminLabel']['section'] );
 			$this->assertSame( array( '', 'visible', 'hidden' ), array_column( $c['labelVisibility']['options'], 'value' ) );

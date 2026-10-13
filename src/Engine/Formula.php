@@ -5,7 +5,9 @@
  * Formulas reference other fields by key in braces: `{quantity} * {price}`.
  * Only numbers, + - * / %, brackets and a small set of functions are allowed.
  * There is no eval(): the expression is tokenised and evaluated with a
- * recursive-descent parser, so anything outside the grammar yields 0.
+ * recursive-descent parser. Division by zero, a missing field reference,
+ * and any other non-finite result are failures (null), not zero. A formula
+ * that really equals zero still returns 0.
  *
  * The same grammar is implemented in resources/frontend/utils/formula.js; the
  * server recomputes every calculation on submit so a visitor cannot post a
@@ -26,6 +28,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 final class Formula {
 
+	/**
+	 * Payload marker for a calculation that failed. Never a numeric zero.
+	 */
+	public const ERROR = '__formula_error__';
+
 	/** @var array<int, array{0:string,1:string}> */
 	private array $tokens = array();
 
@@ -37,16 +44,25 @@ final class Formula {
 	 * @param string               $formula  Formula text.
 	 * @param array<string, mixed> $values   Values keyed by field key.
 	 * @param int                  $decimals Decimal places to round to.
-	 * @return float
+	 * @return float|null Null when the formula cannot be evaluated.
 	 */
-	public static function evaluate( string $formula, array $values, int $decimals = 2 ): float {
-		$expr = preg_replace_callback(
-			'/\{([a-zA-Z0-9_\-.]+)\}/',
-			static function ( $m ) use ( $values ) {
-				return (string) self::toNumber( self::lookup( $values, $m[1] ) );
+	public static function evaluate( string $formula, array $values, int $decimals = 2 ): ?float {
+		$failed = false;
+		$expr   = preg_replace_callback(
+			'/{([a-zA-Z0-9_\-.]+)}/',
+			static function ( $m ) use ( $values, &$failed ) {
+				$resolved = self::resolve( $values, $m[1] );
+				if ( null === $resolved || self::ERROR === $resolved || ( is_float( $resolved ) && ! is_finite( $resolved ) ) ) {
+					$failed = true;
+					return '0';
+				}
+				return (string) self::toNumber( $resolved );
 			},
 			$formula
 		);
+		if ( $failed ) {
+			return null;
+		}
 
 		$parser = new self();
 		try {
@@ -54,34 +70,37 @@ final class Formula {
 			$parser->pos    = 0;
 			$result         = $parser->parseExpression();
 			if ( $parser->pos !== count( $parser->tokens ) ) {
-				return 0.0;
+				return null;
 			}
 		} catch ( \Throwable $e ) {
-			return 0.0;
+			return null;
 		}
 
 		if ( ! is_finite( $result ) ) {
-			return 0.0;
+			return null;
 		}
 
 		return round( $result, max( 0, min( 6, $decimals ) ) );
 	}
 
 	/**
-	 * Resolve a dotted key in the values array.
+	 * Resolve a field reference. Null means the reference is missing.
 	 *
 	 * @param array  $values Values.
 	 * @param string $key    Key, optionally dotted.
-	 * @return mixed
+	 * @return mixed|null
 	 */
-	private static function lookup( array $values, string $key ) {
+	private static function resolve( array $values, string $key ) {
 		if ( array_key_exists( $key, $values ) ) {
 			return $values[ $key ];
+		}
+		if ( false === strpos( $key, '.' ) ) {
+			return null;
 		}
 		$cursor = $values;
 		foreach ( explode( '.', $key ) as $part ) {
 			if ( ! is_array( $cursor ) || ! array_key_exists( $part, $cursor ) ) {
-				return 0;
+				return null;
 			}
 			$cursor = $cursor[ $part ];
 		}
@@ -177,10 +196,12 @@ final class Formula {
 			$rhs = $this->parseUnary();
 			if ( $t[1] === '*' ) {
 				$value *= $rhs;
+			} elseif ( 0.0 == $rhs ) {
+				throw new \InvalidArgumentException( 'Division by zero' );
 			} elseif ( $t[1] === '/' ) {
-				$value = $rhs == 0.0 ? 0.0 : $value / $rhs;
+				$value = $value / $rhs;
 			} else {
-				$value = $rhs == 0.0 ? 0.0 : fmod( $value, $rhs );
+				$value = fmod( $value, $rhs );
 			}
 		}
 		return $value;

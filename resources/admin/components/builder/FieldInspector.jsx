@@ -285,6 +285,11 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
                     sections={['general']}
                   />
                 </PanelBody>
+                <AppearancePanel
+                  field={field}
+                  onUpdate={handleUpdate}
+                  isReadOnly={isReadOnly}
+                />
                 {CHOICE_TYPES.includes(field.type) && (
                   <PanelBody title={__('Choices', 'subtleforms')} initialOpen>
                     <OptionsPanel
@@ -349,6 +354,32 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
         )}
       </TabPanel>
     </div>
+  );
+}
+
+/**
+ * Appearance panel — only rendered when the field type has appearance settings.
+ */
+function AppearancePanel({ field, onUpdate, isReadOnly }) {
+  const { fieldDefinitions } = useConfig();
+  const def = fieldDefinitions?.[field.type];
+  const all = [
+    ...(Array.isArray(def?.inspectorControls) ? def.inspectorControls : []),
+    ...(Array.isArray(def?.layoutControls) ? def.layoutControls : []),
+  ];
+  if (!all.some((c) => c?.section === 'appearance')) {
+    return null;
+  }
+  return (
+    <PanelBody title={__('Appearance', 'subtleforms')} initialOpen={false}>
+      <DynamicInspectorPanel
+        field={field}
+        onUpdate={onUpdate}
+        isReadOnly={isReadOnly}
+        sections={['appearance']}
+        showEmpty={false}
+      />
+    </PanelBody>
   );
 }
 

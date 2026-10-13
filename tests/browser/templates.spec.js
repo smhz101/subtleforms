@@ -44,7 +44,7 @@ test.afterAll(async () => {
 });
 
 test('every template creates the full form in the builder and on the site', async ({ page, browser }) => {
-  test.setTimeout(45 * 60 * 1000);
+  test.setTimeout(Number(process.env.SF_TEMPLATES_TIMEOUT_MIN || 45) * 60 * 1000);
   const res = await client.call('GET', '/templates');
   const all = Object.values(res.body.data.templates);
   const usable = all.filter((t) => !t.is_locked && t.schema && Array.isArray(t.schema.fields));

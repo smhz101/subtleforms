@@ -126,6 +126,7 @@ export default function BuilderCanvasArea({
             {view === 'preview' && (
               <PreviewWorkspace
                 schema={draftSchema}
+                formId={currentFormId}
                 onChange={onSchemaChange}
                 isDirty={isDirty}
                 isReadOnly={isReadOnly}

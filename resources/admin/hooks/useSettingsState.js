@@ -130,8 +130,9 @@ export default function useSettingsState() {
 
 			const settingsToSave = {
 				...settings,
-				autosave_interval:
-					parseInt( settings.autosave_interval, 10 ) || 3,
+				// Keep 0 (and any other out-of-range number). `|| 3` turned 0 into
+				// the default and reported a successful save.
+				autosave_interval: parseInt( settings.autosave_interval, 10 ),
 				submission_limit:
 					parseInt( settings.submission_limit, 10 ) || 1,
 			};

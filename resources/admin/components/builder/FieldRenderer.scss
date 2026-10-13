@@ -1632,17 +1632,25 @@ textarea.sf-field-renderer__input {
 	width: 36px;
 	height: 20px;
 	border-radius: 999px;
-	background: var(--sf-brand);
+	background: var(--sf-bg-muted);
 }
 
 .sf-field-renderer__toggle-thumb {
 	position: absolute;
 	top: 3px;
-	right: 3px;
+	left: 3px;
 	width: 14px;
 	height: 14px;
 	border-radius: 50%;
 	background: #fff;
+}
+
+.sf-field-renderer__toggle-track.is-on {
+	background: var(--sf-brand);
+}
+
+.sf-field-renderer__toggle-track.is-on .sf-field-renderer__toggle-thumb {
+	transform: translateX(16px);
 }
 
 // Opinion scale
@@ -1870,7 +1878,7 @@ textarea.sf-field-renderer__input {
 }
 
 .subtleforms-builder-canvas__surface.sf-canvas-styled {
-	background-color: var(--subtleforms-color-bg, var(--sf-bg-surface));
+	background-color: #ffffff;
 	color: var(--subtleforms-color-text, var(--sf-text));
 }
 

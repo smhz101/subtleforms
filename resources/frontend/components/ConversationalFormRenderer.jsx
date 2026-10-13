@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
+import { useState, useEffect, useCallback, useMemo, useRef } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import FieldRenderer from './FieldRenderer';
 import { getIn, setIn, flattenToPathMap } from '../utils/valuePaths';
@@ -19,8 +19,13 @@ import { formFieldDefaults } from '../../shared/fieldDisplay';
 import { validateFields } from '../utils/fieldValidation';
 
 const restUrl =
-  window.subtleformsFrontend?.restUrl || '/wp-json/subtleforms/v1';
-const nonce = window.subtleformsFrontend?.nonce || '';
+  window.subtleformsFrontend?.restUrl ||
+  window.subtleformsAdmin?.restUrl ||
+  '/wp-json/subtleforms/v1';
+const nonce =
+  window.subtleformsFrontend?.nonce ||
+  window.subtleformsAdmin?.restNonce ||
+  '';
 
 /**
  * ConversationalFormRenderer - Renders form one question at a time
@@ -131,6 +136,12 @@ export default function ConversationalFormRenderer({
     });
   }, []);
 
+  // The latest submit, and a lock so one entry is sent per submit even when
+  // Enter on the focused Submit button fires both the click and the
+  // keyboard shortcut (2.3.3).
+  const submitRef = useRef(() => {});
+  const submitLockRef = useRef(false);
+
   // Handle next
   const handleNext = useCallback(() => {
     if (currentStep === 'questions') {
@@ -149,11 +160,11 @@ export default function ConversationalFormRenderer({
       if (paymentEnabled) {
         setCurrentStep('payment');
       } else {
-        handleSubmit();
+        submitRef.current();
       }
     } else if (currentStep === 'payment') {
       // Submit from payment step
-      handleSubmit();
+      submitRef.current();
     }
   }, [
     currentStep,
@@ -202,16 +213,14 @@ export default function ConversationalFormRenderer({
   }, [currentField, currentStep, currentIndex, totalFields, handleNext]);
 
   // Handle submit
-  const handleSubmit = useCallback(
+  const handleSubmitOnce = useCallback(
     async (e) => {
       e?.preventDefault();
 
-      // In preview mode, prevent submission
-      if (preview) {
-        console.warn('SubtleForms: Form submission disabled in preview mode');
-        if (customOnSubmit) {
-          customOnSubmit();
-        }
+      if (preview && !Number(formId)) {
+        setSubmitError(
+          __('Save the form first, then submit the preview.', 'subtleforms')
+        );
         return;
       }
 
@@ -297,7 +306,7 @@ export default function ConversationalFormRenderer({
       }
 
       try {
-        const response = await fetch(`${restUrl}submit`, {
+        const response = await fetch(`${restUrl.replace(/\/$/, '')}/submit`, {
           method: 'POST',
           credentials: 'same-origin',
           headers: {
@@ -354,6 +363,23 @@ export default function ConversationalFormRenderer({
     },
     [formId, values, leafPaths, preview, customOnSubmit, hiddenFields]
   );
+
+  const handleSubmit = useCallback(
+    async (e) => {
+      e?.preventDefault?.();
+      if (submitLockRef.current) {
+        return;
+      }
+      submitLockRef.current = true;
+      try {
+        await handleSubmitOnce(e);
+      } finally {
+        submitLockRef.current = false;
+      }
+    },
+    [handleSubmitOnce]
+  );
+  submitRef.current = handleSubmit;
 
   if (submitSuccess) {
     return (

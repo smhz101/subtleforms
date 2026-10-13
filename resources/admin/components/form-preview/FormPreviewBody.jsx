@@ -12,9 +12,10 @@ import PreviewFrame from './PreviewFrame';
  * will for a visitor, because it is the same code — not a second implementation
  * kept in sync by hand.
  *
- * `preview` makes FormRenderer refuse to submit, so nothing reaches the API.
+ * Submit uses the same public endpoint as the shortcode. The form id is
+ * required; FormRenderer tells the user to save first when the form has none.
  */
-export default function FormPreviewBody( { schema, isDirty = false } ) {
+export default function FormPreviewBody( { schema, formId = null, isDirty = false } ) {
   if ( ! schema || ! schema.fields ) {
     return (
       <div className='sf-form-preview__empty'>
@@ -37,7 +38,7 @@ export default function FormPreviewBody( { schema, isDirty = false } ) {
         className='sf-form-preview__frame'
         title={ __( 'Form preview', 'subtleforms' ) }>
         <FormErrorBoundary>
-          <FormRenderer preloadedSchema={ schema } preview />
+          <FormRenderer preloadedSchema={ schema } formId={ formId } preview />
         </FormErrorBoundary>
       </PreviewFrame>
     </div>

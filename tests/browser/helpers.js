@@ -157,3 +157,15 @@ async function useBundleOverride(page) {
 }
 
 module.exports.useBundleOverride = useBundleOverride;
+
+/**
+ * Open a collapsed inspector panel (for example Appearance, 2.3.3) if needed.
+ */
+async function openPanel(page, title) {
+  const toggle = page.locator('.sf-field-inspector .components-panel__body-toggle', { hasText: title }).first();
+  if ((await toggle.count()) && (await toggle.getAttribute('aria-expanded')) === 'false') {
+    await toggle.click();
+  }
+}
+
+module.exports.openPanel = openPanel;

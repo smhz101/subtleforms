@@ -164,9 +164,11 @@ final class PublicSubmitApi {
 			}
 		}
 
-		// Verify form exists
-		$form = $this->formsRepo->find( $formId );
-		if ( ! $form || ( $form['status'] ?? '' ) !== 'published' ) {
+		// Verify form exists. Guests only reach published forms. A logged-in
+		// admin (the builder preview) may store an entry on a draft.
+		$form    = $this->formsRepo->find( $formId );
+		$isAdmin = is_user_logged_in() && current_user_can( 'manage_options' );
+		if ( ! $form || ( ( $form['status'] ?? '' ) !== 'published' && ! $isAdmin ) ) {
 			return ApiResponse::not_found( __( 'Form not found', 'subtleforms' ) );
 		}
 
@@ -533,6 +535,15 @@ final class PublicSubmitApi {
 			return $none;
 		}
 
+		$priced = Pricing::quote( $schema, $payload );
+		if ( ! empty( $priced['formula_error'] ) ) {
+			return ApiResponse::error(
+				'subtleforms_formula_invalid',
+				__( 'This total could not be calculated, so the payment was not taken.', 'subtleforms' ),
+				422
+			);
+		}
+
 		/**
 		 * Whether another system takes this form's payment (for example the
 		 * WooCommerce checkout in SubtleForms Pro). When true, SubtleForms does
@@ -707,11 +718,12 @@ final class PublicSubmitApi {
 		// Two passes let one calculation reference another.
 		for ( $pass = 0; $pass < 2; $pass++ ) {
 			foreach ( $calcs as $calc ) {
-				$payload[ $calc['key'] ] = \SubtleForms\Engine\Formula::evaluate(
+				$result                      = \SubtleForms\Engine\Formula::evaluate(
 					(string) $calc['formula'],
 					$payload,
 					isset( $calc['decimals'] ) ? (int) $calc['decimals'] : 2
 				);
+				$payload[ $calc['key'] ] = null === $result ? \SubtleForms\Engine\Formula::ERROR : $result;
 			}
 		}
 
@@ -732,6 +744,11 @@ final class PublicSubmitApi {
 		foreach ( \SubtleForms\Support\FieldMapper::fields( $schema ) as $entry ) {
 			if ( \SubtleForms\Support\EntryValues::isSecret( $entry['field'] ) && array_key_exists( $entry['key'], $payload ) ) {
 				$payload[ $entry['key'] ] = \SubtleForms\Support\EntryValues::passwordForStorage( $payload[ $entry['key'] ], $entry['field'] );
+			}
+		}
+		foreach ( $payload as $key => $value ) {
+			if ( \SubtleForms\Engine\Formula::ERROR === $value ) {
+				$payload[ $key ] = null;
 			}
 		}
 		return $payload;

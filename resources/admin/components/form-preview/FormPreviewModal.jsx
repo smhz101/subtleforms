@@ -15,7 +15,7 @@ import '../FormPreviewModal.scss';
  *
  * Always previews the draft schema passed in, never the published one.
  */
-export default function FormPreviewModal( { schema, onClose, isDirty = false } ) {
+export default function FormPreviewModal( { schema, formId = null, onClose, isDirty = false } ) {
   if ( ! schema || ! schema.fields ) {
     return null;
   }
@@ -39,7 +39,7 @@ export default function FormPreviewModal( { schema, onClose, isDirty = false } )
       aria-labelledby='form-preview-title'>
       <div className='sf-form-preview-modal__container'>
         <FormPreviewHeader metadata={ schema.metadata } isDirty={ isDirty } />
-        <FormPreviewBody schema={ schema } />
+        <FormPreviewBody schema={ schema } formId={ formId } />
       </div>
     </Modal>
   );
