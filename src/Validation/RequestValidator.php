@@ -261,8 +261,56 @@ class RequestValidator {
 			$errors = array_merge( $errors, $crossFieldErrors );
 		}
 
+		// Open schemas keep keys they do not declare (2.0). Field definitions and
+		// form metadata are extended by field types, extensions and Pro, so a
+		// closed list silently dropped settings such as conditions, min/max,
+		// prefixes and formulas on every save. Declared keys are still
+		// validated above; undeclared ones are sanitised and kept.
+		if ( ! empty( $schema['__passthrough'] ) ) {
+			foreach ( $input as $key => $value ) {
+				if ( ! is_string( $key ) || strpos( $key, '__' ) === 0 || array_key_exists( $key, $schema ) || array_key_exists( $key, $sanitized ) ) {
+					continue;
+				}
+				if ( ! preg_match( '/^[A-Za-z0-9_\-]{1,100}$/', $key ) ) {
+					continue;
+				}
+				$sanitized[ $key ] = self::sanitizePassthrough( $value, $depth );
+			}
+		}
+
 		$isValid = empty( $errors );
 		return array( $isValid, $sanitized, $errors );
+	}
+
+	/**
+	 * Sanitise an undeclared value kept by an open schema.
+	 *
+	 * Strings go through wp_kses_post (these schemas are only accepted from
+	 * users who can manage forms, and Custom HTML fields need markup); scalars
+	 * are kept as-is; arrays recurse with a depth limit.
+	 *
+	 * @param mixed $value Raw value.
+	 * @param int   $depth Current depth.
+	 * @return mixed
+	 */
+	private static function sanitizePassthrough( $value, int $depth ) {
+		if ( is_string( $value ) ) {
+			return wp_kses_post( $value );
+		}
+		if ( is_bool( $value ) || is_int( $value ) || is_float( $value ) || $value === null ) {
+			return $value;
+		}
+		if ( is_array( $value ) ) {
+			if ( $depth >= self::MAX_DEPTH ) {
+				return array();
+			}
+			$out = array();
+			foreach ( $value as $k => $v ) {
+				$out[ $k ] = self::sanitizePassthrough( $v, $depth + 1 );
+			}
+			return $out;
+		}
+		return null;
 	}
 
 	/**

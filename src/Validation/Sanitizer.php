@@ -270,8 +270,9 @@ class Sanitizer {
 	 * Allowed markup for rich_text submission values.
 	 *
 	 * Deliberately narrow. This is the one place a public, unauthenticated
-	 * submission may carry HTML, so the set is limited to inline emphasis, lists
-	 * and links, with no attributes beyond a scheme-checked href. It mirrors the
+	 * submission may carry HTML, so the set is limited to paragraphs, line
+	 * breaks, bold and italic, lists and links, with no attributes beyond a
+	 * scheme-checked href. It mirrors the
 	 * frontend editor's allowlist so what the visitor sees is what is stored.
 	 *
 	 * @return array<string, array<string, bool>> wp_kses allowlist.
@@ -282,7 +283,6 @@ class Sanitizer {
 			'strong' => array(),
 			'i'      => array(),
 			'em'     => array(),
-			'u'      => array(),
 			'p'      => array(),
 			'br'     => array(),
 			'ul'     => array(),
@@ -290,7 +290,6 @@ class Sanitizer {
 			'li'     => array(),
 			'a'      => array(
 				'href' => true,
-				'rel'  => true,
 			),
 		);
 	}
