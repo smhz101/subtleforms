@@ -6,6 +6,7 @@
  * only ever used for display.
  */
 
+import { evaluateFormula, FORMULA_ERROR } from '../frontend/utils/formula';
 import { getPricedType, pricedTypes } from './extend';
 
 export const PRICED_TYPES = [
@@ -70,13 +71,25 @@ export function computeQuote(fields = [], values = {}, { coupon = null, hidden =
   const items = [];
   let taxRate = 0;
   let taxLabel = '';
+  let formulaError = false;
+  const working = { ...values };
+  const calcs = fields.filter((field) => field.type === 'calculation' && cfg(field).formula);
+  for (let pass = 0; pass < 2; pass++) {
+    calcs.forEach((field) => {
+      const c = cfg(field);
+      const key = c.key || field.key || '';
+      if (!key) return;
+      const result = evaluateFormula(c.formula, working, c.decimals ?? 2);
+      working[key] = result === null ? FORMULA_ERROR : result;
+    });
+  }
 
   fields.forEach((field) => {
     const c = cfg(field);
     const key = c.key || field.key || '';
     if (hidden && key && hidden.has(key)) return;
     const label = c.label || key;
-    const value = key ? values[key] : undefined;
+    const value = key ? working[key] : undefined;
 
     switch (field.type) {
       case 'payment_product': {
@@ -124,6 +137,10 @@ export function computeQuote(fields = [], values = {}, { coupon = null, hidden =
       }
       case 'calculation': {
         if (!c.usePrice) break;
+        if (value === FORMULA_ERROR) {
+          formulaError = true;
+          break;
+        }
         const amount = money(value);
         if (amount > 0) items.push({ key, label, qty: 1, unit: amount, amount });
         break;
@@ -161,7 +178,7 @@ export function computeQuote(fields = [], values = {}, { coupon = null, hidden =
   const tax = Math.round(taxable * taxRate) / 100;
   const total = Math.round((taxable + tax) * 100) / 100;
 
-  return { currency, items, subtotal, discount, coupon: coupon?.code || null, taxRate, taxLabel, tax, total };
+  return { currency, items, subtotal, discount, coupon: coupon?.code || null, taxRate, taxLabel, tax, total, formulaError };
 }
 
 /**

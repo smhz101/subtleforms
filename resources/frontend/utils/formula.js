@@ -3,11 +3,25 @@
  *
  * Mirrors src/Engine/Formula.php exactly: field keys in braces, numbers,
  * + - * / %, brackets, and round/floor/ceil/abs/min/max. No eval — the
- * expression is tokenised and parsed by recursive descent, and anything
- * outside the grammar evaluates to 0. The server recomputes on submit.
+ * expression is tokenised and parsed by recursive descent. Division by zero,
+ * a missing field reference, and any other non-finite result are failures
+ * (null), not zero. A formula that really equals zero still returns 0.
+ * The server recomputes on submit.
  */
 
 import { getIn } from './valuePaths';
+
+/** Marker stored while a later formula reads a calculation that failed. */
+export const FORMULA_ERROR = '__formula_error__';
+
+function readRef(values, key) {
+  const source = values && typeof values === 'object' ? values : {};
+  if (Object.prototype.hasOwnProperty.call(source, key)) {
+    return source[key];
+  }
+  if (!key.includes('.')) return FORMULA_ERROR;
+  return getIn(source, key, FORMULA_ERROR);
+}
 
 function toNumber(value) {
   if (typeof value === 'boolean') return value ? 1 : 0;
@@ -79,8 +93,9 @@ function parse(tokens) {
       pos++;
       const rhs = unary();
       if (t[1] === '*') v *= rhs;
-      else if (t[1] === '/') v = rhs === 0 ? 0 : v / rhs;
-      else v = rhs === 0 ? 0 : v % rhs;
+      else if (rhs === 0) throw new Error('Division by zero');
+      else if (t[1] === '/') v /= rhs;
+      else v %= rhs;
     }
     return v;
   }
@@ -150,21 +165,28 @@ function parse(tokens) {
  * @param {string} formula  Formula text, e.g. "{qty} * {price}".
  * @param {Object} values   Current form values.
  * @param {number} decimals Decimal places.
- * @return {number}
+ * @return {number|null} Null when the formula cannot be evaluated.
  */
 export function evaluateFormula(formula, values, decimals = 2) {
   if (!formula || typeof formula !== 'string') return 0;
-  const expr = formula.replace(/\{([a-zA-Z0-9_\-.]+)\}/g, (_, key) =>
-    String(toNumber(getIn(values, key, values?.[key])))
-  );
+  let failed = false;
+  const expr = formula.replace(/\{([a-zA-Z0-9_\-.]+)\}/g, (_, key) => {
+    const raw = readRef(values, key);
+    if (raw === FORMULA_ERROR || (typeof raw === 'number' && !Number.isFinite(raw))) {
+      failed = true;
+      return '0';
+    }
+    return String(toNumber(raw));
+  });
+  if (failed) return null;
   try {
     const result = parse(tokenize(expr));
-    if (!Number.isFinite(result)) return 0;
+    if (!Number.isFinite(result)) return null;
     const d = Math.max(0, Math.min(6, parseInt(decimals, 10) || 0));
     const f = 10 ** d;
     return Math.round(result * f) / f;
   } catch (e) {
-    return 0;
+    return null;
   }
 }
 

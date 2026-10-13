@@ -21,6 +21,8 @@ declare(strict_types=1);
 
 namespace SubtleForms\Payments;
 
+use SubtleForms\Engine\Formula;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -116,17 +118,36 @@ final class Pricing {
 	 * @param mixed      $schema  Form schema.
 	 * @param array      $payload Submitted values (calculations already applied).
 	 * @param array|null $coupon  A validated coupon row, or null.
-	 * @return array{currency:string,items:array,subtotal:float,discount:float,coupon:?string,tax_rate:float,tax:float,total:float}
+	 * @return array{currency:string,items:array,subtotal:float,discount:float,coupon:?string,tax_rate:float,tax:float,total:float,formula_error:bool}
 	 */
 	public static function quote( $schema, array $payload, ?array $coupon = null ): array {
 		$items   = array();
 		$taxRate = 0.0;
 
+		$formulaError = false;
+		$priced       = $payload;
+		$calcs        = array();
+		foreach ( self::fields( $schema ) as $candidate ) {
+			if ( ( $candidate['type'] ?? '' ) === 'calculation' && ! empty( $candidate['key'] ) && ! empty( $candidate['formula'] ) ) {
+				$calcs[] = $candidate;
+			}
+		}
+		for ( $pass = 0; $pass < 2; $pass++ ) {
+			foreach ( $calcs as $calc ) {
+				$result = Formula::evaluate(
+					(string) $calc['formula'],
+					$priced,
+					isset( $calc['decimals'] ) ? (int) $calc['decimals'] : 2
+				);
+				$priced[ (string) $calc['key'] ] = null === $result ? Formula::ERROR : $result;
+			}
+		}
+
 		foreach ( self::fields( $schema ) as $f ) {
 			$type  = (string) ( $f['type'] ?? '' );
 			$key   = (string) ( $f['key'] ?? '' );
 			$label = wp_strip_all_tags( (string) ( $f['label'] ?? $key ) );
-			$value = '' !== $key && array_key_exists( $key, $payload ) ? $payload[ $key ] : null;
+			$value = '' !== $key && array_key_exists( $key, $priced ) ? $priced[ $key ] : null;
 
 			switch ( $type ) {
 				case 'payment_product':
@@ -185,6 +206,13 @@ final class Pricing {
 
 				case 'calculation':
 					if ( ! empty( $f['usePrice'] ) ) {
+						if ( '' === $key || ! array_key_exists( $key, $payload ) ) {
+							break;
+						}
+						if ( Formula::ERROR === $value ) {
+							$formulaError = true;
+							break;
+						}
 						$amount = self::money( is_numeric( $value ) ? $value : 0 );
 						if ( $amount > 0 ) {
 							$items[] = self::item( $key, $label, 1, $amount );
@@ -241,6 +269,7 @@ final class Pricing {
 			'tax_rate' => $taxRate,
 			'tax'      => $tax,
 			'total'    => $total,
+			'formula_error' => $formulaError,
 		);
 
 		/**

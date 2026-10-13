@@ -6,6 +6,7 @@
 namespace SubtleForms\Tests\Unit;
 
 use PHPUnit\Framework\TestCase;
+use SubtleForms\Engine\Formula;
 use SubtleForms\Payments\Pricing;
 use SubtleForms\Payments\CouponsRepository;
 
@@ -60,5 +61,58 @@ final class PricingTest extends TestCase {
 	public function test_minor_units(): void {
 		$this->assertSame( 1999, Pricing::toMinor( 19.99, 'usd' ) );
 		$this->assertSame( 500, Pricing::toMinor( 500, 'JPY' ) );
+	}
+
+	public function test_charged_formula_failure_is_not_a_silent_line(): void {
+		$schema = array(
+			'fields' => array(
+				array(
+					'type'     => 'calculation',
+					'key'      => 'due',
+					'label'    => 'Due',
+					'usePrice' => true,
+					'formula'  => '1/0',
+				),
+			),
+		);
+		$q = Pricing::quote( $schema, array( 'due' => 0 ) );
+		$this->assertTrue( $q['formula_error'] );
+		$this->assertSame( array(), $q['items'] );
+		$this->assertNull( Formula::evaluate( '1/0', array() ) );
+	}
+
+	public function test_charged_missing_reference_is_not_a_silent_line(): void {
+		$schema = array(
+			'fields' => array(
+				array(
+					'type'     => 'calculation',
+					'key'      => 'due',
+					'label'    => 'Due',
+					'usePrice' => true,
+					'formula'  => '{qty} / {price}',
+				),
+			),
+		);
+		$q = Pricing::quote( $schema, array( 'qty' => 1, 'due' => 25 ) );
+		$this->assertTrue( $q['formula_error'] );
+		$this->assertSame( array(), $q['items'] );
+	}
+
+	public function test_charged_explicit_zero_is_not_a_failure(): void {
+		$schema = array(
+			'fields' => array(
+				array(
+					'type'     => 'calculation',
+					'key'      => 'due',
+					'label'    => 'Due',
+					'usePrice' => true,
+					'formula'  => '0+0',
+				),
+			),
+		);
+		$q = Pricing::quote( $schema, array( 'due' => 40 ) );
+		$this->assertFalse( $q['formula_error'] );
+		$this->assertSame( array(), $q['items'] );
+		$this->assertSame( 0.0, $q['total'] );
 	}
 }

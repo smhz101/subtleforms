@@ -68,6 +68,25 @@ function couponState(c) {
   return { label: __('Active', 'subtleforms'), tone: 'success' };
 }
 
+function couponRangeError(draft) {
+  if (draft.amount !== '' && draft.amount != null) {
+    const amount = Number(draft.amount);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      return __('Enter a discount greater than zero.', 'subtleforms');
+    }
+    if (draft.type === 'percent' && amount > 100) {
+      return __('A percentage discount cannot be more than 100.', 'subtleforms');
+    }
+  }
+  if (draft.max_uses !== '' && draft.max_uses != null && Number(draft.max_uses) < 0) {
+    return __('Total uses cannot be negative.', 'subtleforms');
+  }
+  if (draft.per_customer !== '' && draft.per_customer != null && Number(draft.per_customer) < 0) {
+    return __('Uses per customer cannot be negative.', 'subtleforms');
+  }
+  return '';
+}
+
 /* ── Coupon editor ──────────────────────────────────────────────────────── */
 
 function CouponModal({ coupon, forms, currency, onClose, onSaved }) {
@@ -87,12 +106,17 @@ function CouponModal({ coupon, forms, currency, onClose, onSaved }) {
   );
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const rangeError = couponRangeError(draft);
   const set = (patch) => setDraft((d) => ({ ...d, ...patch }));
 
   const titleById = useMemo(() => Object.fromEntries(forms.map((f) => [f.id, f.title])), [forms]);
   const idByTitle = useMemo(() => Object.fromEntries(forms.map((f) => [f.title, f.id])), [forms]);
 
   const save = async () => {
+    if (rangeError) {
+      setError(rangeError);
+      return;
+    }
     setSaving(true);
     setError('');
     try {
@@ -131,9 +155,9 @@ function CouponModal({ coupon, forms, currency, onClose, onSaved }) {
       onRequestClose={onClose}
       className='sf-coupon-modal'
       size='medium'>
-      {error && (
+      {(rangeError || error) && (
         <Notice status='error' isDismissible={false} className='sf-coupon-modal__error'>
-          {error}
+          {rangeError || error}
         </Notice>
       )}
 
@@ -167,7 +191,8 @@ function CouponModal({ coupon, forms, currency, onClose, onSaved }) {
           __nextHasNoMarginBottom
           __next40pxDefaultSize
           type='number'
-          min={0}
+          min={draft.type === 'percent' ? 1 : 0}
+          max={draft.type === 'percent' ? 100 : undefined}
           step={draft.type === 'percent' ? 1 : 0.01}
           label={draft.type === 'percent' ? __('Percent off', 'subtleforms') : sprintf(
             /* translators: %s: currency code */
@@ -272,7 +297,7 @@ function CouponModal({ coupon, forms, currency, onClose, onSaved }) {
         <Button variant='tertiary' onClick={onClose}>
           {__('Cancel', 'subtleforms')}
         </Button>
-        <Button variant='primary' isBusy={saving} disabled={saving || !draft.code || !draft.amount} onClick={save}>
+        <Button variant='primary' isBusy={saving} disabled={saving || !draft.code || !draft.amount || Boolean(rangeError)} onClick={save}>
           {coupon ? __('Save coupon', 'subtleforms') : __('Create coupon', 'subtleforms')}
         </Button>
       </div>
