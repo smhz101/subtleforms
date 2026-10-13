@@ -19,8 +19,13 @@ import { formFieldDefaults } from '../../shared/fieldDisplay';
 import { validateFields } from '../utils/fieldValidation';
 
 const restUrl =
-  window.subtleformsFrontend?.restUrl || '/wp-json/subtleforms/v1';
-const nonce = window.subtleformsFrontend?.nonce || '';
+  window.subtleformsFrontend?.restUrl ||
+  window.subtleformsAdmin?.restUrl ||
+  '/wp-json/subtleforms/v1';
+const nonce =
+  window.subtleformsFrontend?.nonce ||
+  window.subtleformsAdmin?.restNonce ||
+  '';
 
 /**
  * ConversationalFormRenderer - Renders form one question at a time
@@ -206,12 +211,10 @@ export default function ConversationalFormRenderer({
     async (e) => {
       e?.preventDefault();
 
-      // In preview mode, prevent submission
-      if (preview) {
-        console.warn('SubtleForms: Form submission disabled in preview mode');
-        if (customOnSubmit) {
-          customOnSubmit();
-        }
+      if (preview && !Number(formId)) {
+        setSubmitError(
+          __('Save the form first, then submit the preview.', 'subtleforms')
+        );
         return;
       }
 
@@ -297,7 +300,7 @@ export default function ConversationalFormRenderer({
       }
 
       try {
-        const response = await fetch(`${restUrl}submit`, {
+        const response = await fetch(`${restUrl.replace(/\/$/, '')}/submit`, {
           method: 'POST',
           credentials: 'same-origin',
           headers: {

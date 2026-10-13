@@ -53,8 +53,7 @@
 
 		&.is-active {
 			color: var(--sf-text);
-			background: var(--sf-bg-surface);
-			box-shadow: var(--sf-shadow-xs);
+			background: var(--sf-bg-muted);
 		}
 
 		&:focus-visible {
@@ -80,16 +79,22 @@
 		padding: var(--sf-space-8) var(--sf-space-6);
 	}
 
-	// The stage carries the viewport width, so switching to Mobile narrows the
-	// form rather than scaling it — the same reflow a visitor would get.
+	// Full-bleed canvas. Device width is on the form column, not this stage.
 	&__stage {
-		margin: 0 auto;
-		max-width: 680px;
-		background: var(--sf-bg-surface);
-		border: 1px solid var(--sf-border);
-		border-radius: var(--sf-radius-lg);
-		padding: var(--sf-space-6);
-		transition: max-width var(--sf-transition-base);
+		width: 100%;
+		max-width: none;
+		margin: 0;
+		background: transparent;
+		border: 0;
+		border-radius: 0;
+		box-shadow: none;
+		padding: 0;
+	}
+
+	&__form {
+		width: 100%;
+		margin-right: auto;
+		margin-left: auto;
 	}
 
 	&__controls {

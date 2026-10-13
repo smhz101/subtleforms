@@ -28,8 +28,13 @@ import {
 } from '../../shared/appearance';
 
 const restUrl =
-  window.subtleformsFrontend?.restUrl || '/wp-json/subtleforms/v1';
-const nonce = window.subtleformsFrontend?.nonce || '';
+  window.subtleformsFrontend?.restUrl ||
+  window.subtleformsAdmin?.restUrl ||
+  '/wp-json/subtleforms/v1';
+const nonce =
+  window.subtleformsFrontend?.nonce ||
+  window.subtleformsAdmin?.restNonce ||
+  '';
 
 /**
  * Whether a submitted value counts as missing.
@@ -653,27 +658,6 @@ export default function FormRenderer({
         setIsSubmitIntentional(false);
       }
 
-      // In preview mode, run the same validation as the live form (so the
-      // builder Preview shows the same errors a visitor would see) but never
-      // submit. A banner under the form explains that submissions are not
-      // saved. (Part A3.)
-      if (preview) {
-        const fieldsToValidate = hasSteps
-          ? steps.flatMap((step) => step.children || step.fields || [])
-          : schema?.fields || [];
-        const errors = validateFields(fieldsToValidate, values, hiddenFields, fieldDefaults);
-        setValidationErrors(errors);
-        if (Object.keys(errors).length > 0) {
-          focusFirstInvalid(Object.keys(errors).length);
-        } else {
-          setErrorSummary('');
-        }
-        if (customOnSubmit) {
-          customOnSubmit();
-        }
-        return;
-      }
-
       // For submission, validate all required fields across all steps, not just current step
       const allFieldsToCheck = hasSteps
         ? steps.flatMap((step) => step.children || step.fields || [])
@@ -687,6 +671,15 @@ export default function FormRenderer({
         // from each other (A2/P1-5).
         goToStepWithError(clientErrors);
         focusFirstInvalid(Object.keys(clientErrors).length);
+        return;
+      }
+
+      // Preview uses this same submit. A form that has never been saved has
+      // no id, so there is nothing to attach the entry to.
+      if (preview && !Number(formId)) {
+        setSubmitError(
+          __('Save the form first, then submit the preview.', 'subtleforms')
+        );
         return;
       }
 
@@ -1112,12 +1105,6 @@ export default function FormRenderer({
       >
         {liveMessage}
       </div>
-
-      {preview && (
-        <div className='subtleforms-preview-banner' role='status'>
-          {__('Preview mode: submissions are not saved.', 'subtleforms')}
-        </div>
-      )}
 
       {showTitle && schema.metadata?.title && (
         <h2 className='subtleforms-form-title'>{schema.metadata.title}</h2>

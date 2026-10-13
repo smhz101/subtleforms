@@ -182,8 +182,7 @@
 }
 
 /* Messages and errors take the full row above or below. */
-.subtleforms--layout-inline form > .subtleforms-error,
-.subtleforms--layout-inline form > .subtleforms-preview-banner {
+.subtleforms--layout-inline form > .subtleforms-error {
 	flex: 1 1 100%;
 }
 

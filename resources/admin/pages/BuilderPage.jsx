@@ -760,6 +760,7 @@ function FormBuilderInner({
           setShowPreview(false);
         }}
         draftSchema={draftSchema}
+        formId={currentFormId}
         isDirty={isDirty}
       />
     </>
