@@ -42,7 +42,7 @@ resources/admin/
 ├── components/            # Reusable UI components
 │   ├── builder/           # Form builder components
 │   │   ├── ColumnDropZone.jsx
-│   │   ├── ConditionEditor.jsx
+│   │   ├── LogicEditor.jsx
 │   │   ├── ContainerRenderer.jsx
 │   │   ├── ContainerWrapper.jsx
 │   │   ├── ConversationalCanvas.jsx
