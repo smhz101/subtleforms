@@ -5,7 +5,14 @@
 .sf-path__svg { width: 100%; height: auto; display: block; overflow: visible; }
 .sf-path--divider .sf-path__svg, .sf-path--stop .sf-path__svg, .sf-path--steps .sf-path__svg { aspect-ratio: 1000 / 120; }
 .sf-path--hero .sf-path__svg { aspect-ratio: 1000 / 780; height: auto; }
-.sf-path__line { fill: none; stroke: var(--sf-path-color); stroke-width: 2; stroke-linecap: round; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 0; }
+.sf-path { --sf-sw: 2; --sf-r: 5; --sf-dr: 6; }
+.sf-path--hero { --sf-sw: 3; --sf-r: 6; --sf-dr: 7; }
+@media (max-width: 1023px) { .sf-path { --sf-sw: 3; --sf-r: 7; --sf-dr: 9; } }
+@media (max-width: 599px) { .sf-path { --sf-sw: 5; --sf-r: 10; --sf-dr: 12; } }
+/* No vector-effect here on purpose: Chrome scales pathLength-normalised dashes wrongly with non-scaling strokes. */
+.sf-path__line { fill: none; stroke: var(--sf-path-color); stroke-width: var(--sf-sw); stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 0; }
+.sf-path__node, .sf-path__end { r: var(--sf-r); }
+.sf-path__dot { r: var(--sf-dr); }
 .sf-path__node, .sf-path__end { fill: var(--sf-path-color); }
 .sf-path__end { opacity: .45; }
 .sf-path__dot { fill: var(--sf-path-color); filter: drop-shadow(0 0 6px var(--sf-path-glow)); offset-rotate: 0deg; offset-distance: 100%; }

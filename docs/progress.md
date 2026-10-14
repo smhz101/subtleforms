@@ -11,8 +11,10 @@ Last updated: 2026-10-14 (session 1)
 - Home hero pattern built from core blocks + block styles.
 - Hero backdrop images generated in Magnific (200 credits). Cannot be downloaded here; CSS atmosphere used meanwhile.
 
-## In progress
-- Hero gate: screenshots at desktop and mobile from the local install.
+## Hero gate (waiting for the owner)
+- Hero built and verified on the local WordPress at 360, 768, 1024, 1440 and 1920 px. Editor opens the Home page with zero block validation errors, zero "Attempt Recovery", zero Custom HTML blocks.
+- Screenshots are in the session (hero-1440, hero-360, hero-1024, editor-home). Nothing is on staging yet because staging is unreachable from this environment.
+- Build stops here until the owner approves or redirects.
 
 ## Next (after hero approval)
 - Remaining Home sections as patterns: problem, how it works, product moment, tiers, agency band, comparison teaser, FAQ, final CTA (synced).
