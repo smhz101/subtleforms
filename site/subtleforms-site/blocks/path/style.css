@@ -1,0 +1,20 @@
+.sf-path { position: relative; line-height: 0; --sf-path-color: var(--wp--preset--color--lime); --sf-path-glow: rgba(200,255,61,.55); }
+.sf-path.has-mint-path { --sf-path-color: var(--wp--preset--color--mint); --sf-path-glow: rgba(127,231,196,.5); }
+.sf-path.has-forest-path { --sf-path-color: var(--wp--preset--color--forest); --sf-path-glow: rgba(47,93,80,.35); }
+.sf-path.has-sand-path { --sf-path-color: var(--wp--preset--color--sand); --sf-path-glow: rgba(232,225,210,.4); }
+.sf-path__svg { width: 100%; height: auto; display: block; overflow: visible; }
+.sf-path--divider .sf-path__svg, .sf-path--stop .sf-path__svg, .sf-path--steps .sf-path__svg { aspect-ratio: 1000 / 120; }
+.sf-path--hero .sf-path__svg { aspect-ratio: 1000 / 780; height: auto; }
+.sf-path__line { fill: none; stroke: var(--sf-path-color); stroke-width: 2; stroke-linecap: round; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 0; }
+.sf-path__node, .sf-path__end { fill: var(--sf-path-color); }
+.sf-path__end { opacity: .45; }
+.sf-path__dot { fill: var(--sf-path-color); filter: drop-shadow(0 0 6px var(--sf-path-glow)); offset-rotate: 0deg; offset-distance: 100%; }
+.sf-path.is-animated .sf-path__line { animation: sf-draw 1200ms var(--wp--custom--motion--ease--standard, ease) both; animation-delay: calc(var(--sf-i) * 120ms); }
+.sf-path.is-animated .sf-path__dot { animation: sf-travel var(--sf-path-speed, 2.4s) var(--wp--custom--motion--ease--path, ease-in-out) infinite; animation-delay: calc(900ms + var(--sf-i) * 700ms); }
+.sf-path.is-animated.is-reversed .sf-path__dot { animation-direction: reverse; }
+@keyframes sf-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes sf-travel { 0% { offset-distance: 0%; opacity: 0; } 8% { opacity: 1; } 88% { opacity: 1; } 100% { offset-distance: 100%; opacity: 0; } }
+@media (prefers-reduced-motion: reduce) {
+	.sf-path .sf-path__line, .sf-path .sf-path__dot { animation: none !important; }
+	.sf-path .sf-path__dot { offset-distance: 100%; opacity: 1; }
+}

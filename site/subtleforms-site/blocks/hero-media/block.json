@@ -1,0 +1,26 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "subtleforms/hero-media",
+  "title": "Hero media (poster + loop)",
+  "category": "media",
+  "icon": "format-video",
+  "description": "A background layer with a poster image and an optional muted video loop. Visitors who prefer reduced motion get the poster only. Without a poster it renders the brand atmosphere in CSS.",
+  "keywords": [ "video", "poster", "hero", "background" ],
+  "textdomain": "subtleforms-site",
+  "attributes": {
+    "posterId": { "type": "number", "default": 0 },
+    "posterUrl": { "type": "string", "default": "" },
+    "posterAlt": { "type": "string", "default": "" },
+    "mp4Url": { "type": "string", "default": "" },
+    "webmUrl": { "type": "string", "default": "" },
+    "decorative": { "type": "boolean", "default": true },
+    "dim": { "type": "number", "default": 40 },
+    "grain": { "type": "boolean", "default": true }
+  },
+  "supports": { "html": false, "customClassName": true },
+  "editorScript": "file:./editor.js",
+  "style": "file:./style.css",
+  "viewScriptModule": "file:./view.js",
+  "render": "file:./render.php"
+}

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/theme.json",
+  "version": 3,
+  "title": "Moss section",
+  "slug": "section-moss",
+  "blockTypes": [ "core/group", "core/columns", "core/column", "core/cover" ],
+  "styles": {
+    "color": { "background": "var(--wp--preset--color--moss)", "text": "var(--wp--preset--color--cream)" },
+    "elements": {
+      "heading": { "color": { "text": "var(--wp--preset--color--cream)" } },
+      "link": { "color": { "text": "var(--wp--preset--color--mint)" }, ":hover": { "color": { "text": "var(--wp--preset--color--cream)" } } },
+      "button": {
+        "color": { "background": "var(--wp--preset--color--lime)", "text": "var(--wp--preset--color--ink)" },
+        ":hover": { "color": { "background": "#D4FF5C", "text": "var(--wp--preset--color--ink)" } }
+      },
+      "caption": { "color": { "text": "var(--wp--preset--color--fog)" } }
+    }
+  }
+}

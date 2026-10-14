@@ -1,0 +1,28 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "subtleforms/path",
+  "title": "Throughline",
+  "category": "design",
+  "icon": "chart-line",
+  "description": "The SubtleForms signature line: it leaves the submit button and keeps going. Choose a shape, colour, speed and direction.",
+  "keywords": [ "path", "line", "motif", "subtleforms" ],
+  "textdomain": "subtleforms-site",
+  "attributes": {
+    "preset": { "type": "string", "default": "divider", "enum": [ "hero", "divider", "stop", "steps" ] },
+    "color": { "type": "string", "default": "lime", "enum": [ "lime", "mint", "forest", "sand" ] },
+    "speed": { "type": "number", "default": 2.4 },
+    "reverse": { "type": "boolean", "default": false },
+    "animate": { "type": "boolean", "default": true },
+    "label": { "type": "string", "default": "" }
+  },
+  "supports": {
+    "html": false,
+    "align": [ "wide", "full" ],
+    "spacing": { "margin": true },
+    "customClassName": true
+  },
+  "editorScript": "file:./editor.js",
+  "style": "file:./style.css",
+  "render": "file:./render.php"
+}
