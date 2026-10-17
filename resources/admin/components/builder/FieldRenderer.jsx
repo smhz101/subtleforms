@@ -429,21 +429,44 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
-      {(type === 'dropdown' || type === 'select') && (
-        <select
-          className={selectClass}
-          disabled
-          tabIndex='-1'>
-          <option>
-            {placeholder || __('Select an option', 'subtleforms')}
-          </option>
-          {(fieldConfig(field).options || options || []).map((opt, idx) => (
-            <option key={idx} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-      )}
+      {(type === 'dropdown' || type === 'select') && (() => {
+        const choiceOptions = (fieldConfig(field).options || options || [])
+          .map((opt) => (
+            opt && typeof opt === 'object'
+              ? { label: opt.label || opt.value || '', value: opt.value ?? opt.label ?? '' }
+              : { label: String(opt ?? ''), value: String(opt ?? '') }
+          ))
+          .filter((opt) => opt.label || opt.value);
+        return (
+          <div className='sf-field-renderer__menu'>
+            <select
+              className={selectClass}
+              defaultValue=''
+              onMouseDown={(event) => event.stopPropagation()}
+              onClick={(event) => event.stopPropagation()}>
+              <option value=''>
+                {placeholder || __('Select an option', 'subtleforms')}
+              </option>
+              {choiceOptions.map((opt, idx) => (
+                <option key={`${opt.value}-${idx}`} value={opt.value}>
+                  {opt.label || opt.value}
+                </option>
+              ))}
+            </select>
+            {choiceOptions.length > 0 ? (
+              <ul className='sf-field-renderer__choice-preview' aria-label={__('Choices', 'subtleforms')}>
+                {choiceOptions.map((opt, idx) => (
+                  <li key={`${opt.value}-${idx}`}>{opt.label || opt.value}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className='sf-field-renderer__choice-empty'>
+                {__('Add choices in the field settings to show them here.', 'subtleforms')}
+              </p>
+            )}
+          </div>
+        );
+      })()}
 
       {type === 'date' && (
         <div className='sf-field-renderer__date-placeholder'>

@@ -2215,3 +2215,35 @@ textarea.sf-field-renderer__input {
 .sf-field-renderer .subtleforms-phone * {
 	pointer-events: auto;
 }
+
+select.sf-field-renderer__select {
+	pointer-events: auto;
+}
+
+.sf-field-renderer__choice-empty {
+	margin: 8px 0 0;
+	color: var(--sf-text-muted);
+	font-size: var(--sf-text-xs);
+}
+
+.sf-field-renderer__choice-preview {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	max-height: 168px;
+	margin: 8px 0 0;
+	padding: 4px;
+	overflow: auto;
+	list-style: none;
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius-control);
+	background: var(--sf-bg-subtle);
+}
+
+.sf-field-renderer__choice-preview li {
+	padding: 4px 8px;
+	border-radius: var(--sf-radius-sm);
+	color: var(--sf-text);
+	font-size: var(--sf-text-sm);
+}
+
