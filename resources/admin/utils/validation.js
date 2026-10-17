@@ -27,11 +27,11 @@ export const settingsSchema = Joi.object({
     .max(60)
     .required()
     .messages({
-      'number.base': __('Autosave interval must be a number', 'subtleforms'),
-      'number.integer': __('Autosave interval must be a whole number', 'subtleforms'),
-      'number.min': __('Autosave interval must be at least 1 second', 'subtleforms'),
-      'number.max': __('Autosave interval cannot exceed 60 seconds', 'subtleforms'),
-      'any.required': __('Autosave interval is required', 'subtleforms'),
+      'number.base': __('Autosave Interval must be a number', 'subtleforms'),
+      'number.integer': __('Autosave Interval must be a whole number', 'subtleforms'),
+      'number.min': __('Autosave Interval must be at least 1 second', 'subtleforms'),
+      'number.max': __('Autosave Interval cannot exceed 60 seconds', 'subtleforms'),
+      'any.required': __('Autosave Interval is required', 'subtleforms'),
     }),
 
   delete_behavior: Joi.string()
