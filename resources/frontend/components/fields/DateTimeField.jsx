@@ -14,7 +14,6 @@ import {
 } from '../../../shared/dateTime';
 import { CalendarIcon, ChevronIcon, ClockIcon } from './PickerIcons';
 import { useMenu } from './useMenu';
-import './Picker.scss';
 
 function weekdayLabels() {
   const sunday = new Date(2024, 0, 7);

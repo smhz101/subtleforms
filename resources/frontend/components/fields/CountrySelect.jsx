@@ -4,7 +4,6 @@ import { orderedCountries, preferredCountryCodes } from '../../../shared/countri
 import { flagEmoji } from '../../../shared/phone';
 import { ChevronIcon } from './PickerIcons';
 import { useMenu } from './useMenu';
-import './Picker.scss';
 
 function matches(country, query) {
   const needle = query.trim().toLowerCase();
@@ -133,7 +132,33 @@ export default function CountrySelect({
         </span>
         <ChevronIcon />
       </button>
-      {name ? <input type='hidden' name={name} value={stored ?? ''} autoComplete='country' /> : null}
+      <select
+        className='subtleforms-picker__fallback'
+        name={name}
+        required={required || undefined}
+        value={stored ?? ''}
+        autoComplete='country'
+        tabIndex={-1}
+        aria-hidden='true'
+        onChange={(event) => {
+          const country = countries.find((item) => (
+            (outputFormat === 'name' ? item.name : item.code) === event.target.value
+          ));
+          if (country) {
+            choose(country);
+          } else if (onChange) {
+            onChange('');
+          } else {
+            setLocalValue('');
+          }
+        }}>
+        <option value=''>{prompt}</option>
+        {countries.map((country) => (
+          <option key={country.code} value={outputFormat === 'name' ? country.name : country.code}>
+            {country.name}
+          </option>
+        ))}
+      </select>
       {open && !locked && (
         <div className='subtleforms-picker__menu' role='listbox' aria-labelledby={inputId}>
           {searchable && (

@@ -2,7 +2,6 @@ import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { ChevronIcon } from './PickerIcons';
 import { useMenu } from './useMenu';
-import './Picker.scss';
 
 function normalizeOptions(options) {
   return (Array.isArray(options) ? options : [])
@@ -123,7 +122,30 @@ export default function ChoiceSelect({
         </span>
         <ChevronIcon />
       </button>
-      {name ? <input type='hidden' name={name} value={stored ?? ''} /> : null}
+      <select
+        className='subtleforms-picker__fallback'
+        name={name}
+        required={required || undefined}
+        value={stored ?? ''}
+        tabIndex={-1}
+        aria-hidden='true'
+        onChange={(event) => {
+          const option = choices.find((item) => String(item.value) === event.target.value);
+          if (option) {
+            choose(option);
+          } else if (onChange) {
+            onChange('');
+          } else {
+            setLocalValue('');
+          }
+        }}>
+        <option value=''>{prompt}</option>
+        {choices.map((option, index) => (
+          <option key={`${option.value}-${index}`} value={option.value}>
+            {option.label || option.value}
+          </option>
+        ))}
+      </select>
       {open && !locked && (
         <div className='subtleforms-picker__menu' role='listbox' ref={listRef} aria-labelledby={inputId}>
           {choices.length === 0 ? (

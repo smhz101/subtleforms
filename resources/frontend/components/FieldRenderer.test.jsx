@@ -74,22 +74,30 @@ describe.each(WIDTHS)('width %s', (width) => {
       if (sample.check.native) {
         expect(control.required).toBe(true);
       }
+      if (sample.check.picker) {
+        expect(control.tagName).toBe('BUTTON');
+        expect(control.getAttribute('aria-required')).toBe('true');
+      }
       if (sample.check.placeholder) {
         if (control.tagName === 'SELECT') {
           expect(control.options[0].textContent).toBe(sample.extra.placeholder);
+        } else if (control.tagName === 'BUTTON') {
+          expect(control.textContent).toContain(sample.extra.placeholder);
         } else {
           expect(control.getAttribute('placeholder')).toBe(sample.extra.placeholder);
         }
       }
       if (sample.check.options) {
-        if (control && control.tagName === 'SELECT') {
-          expect(control.options).toHaveLength(sample.check.options + 1);
+        const select = control && control.tagName === 'SELECT' ? control : wrapper.querySelector('select');
+        if (select) {
+          expect(select.options).toHaveLength(sample.check.options + 1);
         } else {
           expect(wrapper.querySelectorAll('input[type="radio"], input[type="checkbox"]')).toHaveLength(sample.check.options);
         }
       }
       if (sample.check.countries) {
-        expect(control.options.length).toBeGreaterThan(240);
+        const select = control && control.tagName === 'SELECT' ? control : wrapper.querySelector('select');
+        expect(select.options.length).toBeGreaterThan(240);
       }
 
       // Every control is named (bug 11).
