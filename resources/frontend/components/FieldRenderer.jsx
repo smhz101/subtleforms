@@ -6,6 +6,9 @@ import { debug } from '../../shared/debug';
 import { lazy, Suspense, useContext, useEffect } from '@wordpress/element';
 import ChainedSelect from './fields/ChainedSelect';
 import PhoneField from './fields/PhoneField';
+import ChoiceSelect from './fields/ChoiceSelect';
+import CountrySelect from './fields/CountrySelect';
+import DateTimeField from './fields/DateTimeField';
 import FileUpload, { FormContext } from './fields/FileUpload';
 import RepeaterField from './fields/RepeaterField';
 import {
@@ -19,7 +22,6 @@ import {
 import { getFieldType } from '../../shared/extend';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { fieldDisplay } from '../../shared/fieldDisplay';
-import { COUNTRIES, orderedCountries, preferredCountryCodes } from '../../shared/countries';
 import { toggleIsOn } from '../../shared/toggleState';
 
 // The signature pad and rich text editor are only downloaded on pages whose
@@ -600,9 +602,6 @@ function renderInput(
       }
       // Fall through to the plain text-like input when the country picker is off.
     }
-    case 'date':
-    case 'time':
-    case 'datetime':
     case 'password':
     {
       const isNumeric = field.type === 'number';
@@ -648,6 +647,27 @@ function renderInput(
         </div>
       );
     }
+
+    case 'date':
+    case 'time':
+    case 'datetime':
+      return (
+        <DateTimeField
+          mode={field.type}
+          inputId={inputId}
+          name={name}
+          value={value ?? ''}
+          onChange={onChange}
+          placeholder={placeholder}
+          format={config.format}
+          min={config.minDate}
+          max={config.maxDate}
+          required={required}
+          readOnly={config.readOnly === true}
+          describedBy={describedBy}
+          invalid={!!error}
+        />
+      );
 
     case 'textarea':
       return (
@@ -831,64 +851,40 @@ function renderInput(
 
     case 'select':
     case 'dropdown':
-      const selectOptions = config.options || [];
       return (
-        <select
-          id={inputId}
-          className='subtleforms-select'
+        <ChoiceSelect
+          inputId={inputId}
           name={name}
           value={value ?? ''}
-          onChange={(e) => onChange(e.target.value)}
-          required={required || undefined}
-          aria-required={required}
-          aria-invalid={!!error}
-          aria-describedby={describedBy}>
-          <option value=''>
-            {placeholder || __('Select an option', 'subtleforms')}
-          </option>
-          {selectOptions.map((option, index) => (
-            <option key={option.value || index} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
+          onChange={onChange}
+          options={config.options || []}
+          placeholder={placeholder}
+          required={required}
+          describedBy={describedBy}
+          invalid={!!error}
+          readOnly={config.readOnly === true}
+        />
       );
 
     case 'country': {
-      // One shared list for this field and the Address field (bug 3). A copy
-      // stored in the field's settings is no longer needed.
-      const outputFormat = config.output_format || 'code';
-      const searchable = config.searchable !== false;
-      const countries = orderedCountries(preferredCountryCodes(config.preferred_countries));
       const stored = value === undefined || value === null || value === ''
         ? (config.default_country || '')
         : value;
-      const matched = COUNTRIES.find((country) => country.code === String(stored).toUpperCase());
-      const selected = outputFormat === 'name' ? (matched ? matched.name : stored) : stored;
       return (
-        <select
-          id={inputId}
-          className='subtleforms-select subtleforms-country-select'
+        <CountrySelect
+          inputId={inputId}
           name={name}
-          value={selected ?? ''}
-          onChange={(e) => onChange(e.target.value)}
-          required={required || undefined}
-          aria-required={required}
-          aria-invalid={!!error}
-          aria-describedby={describedBy}
-          autoComplete='country'
-          data-searchable={searchable}>
-          <option value=''>
-            {placeholder || __('Select a country', 'subtleforms')}
-          </option>
-          {countries.map((country) => (
-            <option
-              key={country.code}
-              value={outputFormat === 'name' ? country.name : country.code}>
-              {country.name}
-            </option>
-          ))}
-        </select>
+          value={stored}
+          onChange={onChange}
+          preferredCountries={config.preferred_countries}
+          outputFormat={config.output_format || 'code'}
+          searchable={config.searchable !== false}
+          placeholder={placeholder}
+          required={required}
+          describedBy={describedBy}
+          invalid={!!error}
+          readOnly={config.readOnly === true}
+        />
       );
     }
 
@@ -1176,22 +1172,13 @@ function renderInput(
               <label htmlFor={`${inputId}-country`} className='subtleforms-field-label'>
                 {__('Country', 'subtleforms')}
               </label>
-              <select
-                id={`${inputId}-country`}
-                className='subtleforms-select'
+              <CountrySelect
+                inputId={`${inputId}-country`}
+                name={`${config.key || field.key || ''}_country`}
                 value={addressValue.country || ''}
-                onChange={(e) =>
-                  onChange({ ...addressValue, country: e.target.value })
-                }
-                autoComplete='country-name'
-                name={`${config.key || field.key || ''}_country`}>
-                <option value=''>{__('Select Country', 'subtleforms')}</option>
-                {COUNTRIES.map((c) => (
-                  <option key={c.code} value={c.code}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
+                onChange={(next) => onChange({ ...addressValue, country: next })}
+                placeholder={__('Select Country', 'subtleforms')}
+              />
             </div>
           )}
         </div>

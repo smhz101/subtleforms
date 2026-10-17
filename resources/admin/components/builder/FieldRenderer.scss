@@ -2247,3 +2247,13 @@ select.sf-field-renderer__select {
 	font-size: var(--sf-text-sm);
 }
 
+
+.sf-field-renderer .subtleforms-picker__trigger {
+	min-height: 0;
+	padding: 0.5rem 0.75rem;
+	border: 1px solid var(--sf-gray-300);
+	border-radius: var(--sf-radius-md);
+	background: var(--sf-surface);
+	color: var(--sf-gray-800);
+	font-size: var(--sf-text-base);
+}

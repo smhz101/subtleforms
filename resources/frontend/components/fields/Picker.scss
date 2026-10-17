@@ -1,0 +1,310 @@
+// Shared menu controls for dropdown, country, date, time and date-time.
+.subtleforms-picker {
+	position: relative;
+	width: 100%;
+}
+
+.subtleforms-picker__trigger {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	width: 100%;
+	min-height: 42px;
+	padding: 10px 12px;
+	border: 1px solid var(--subtleforms-color-border, var(--sf-gray-300, #d8dbe2));
+	border-radius: var(--subtleforms-radius-md, var(--sf-radius-md, 8px));
+	background: var(--subtleforms-color-bg, var(--sf-surface, #fff));
+	color: var(--subtleforms-color-text, var(--sf-gray-800, #1e1e1e));
+	font: inherit;
+	font-size: var(--subtleforms-font-size-base, var(--sf-text-base, 1rem));
+	line-height: 1.4;
+	text-align: start;
+	cursor: pointer;
+
+	&:disabled {
+		cursor: default;
+		opacity: 0.72;
+	}
+
+	&:focus-visible {
+		outline: none;
+		border-color: var(--subtleforms-color-primary, var(--sf-blue-500, #4f5bd5));
+		box-shadow: var(--subtleforms-shadow-focus, 0 0 0 3px rgba(79, 91, 213, 0.28));
+	}
+}
+
+.subtleforms-picker.is-invalid .subtleforms-picker__trigger {
+	border-color: var(--subtleforms-color-error, #b3261e);
+}
+
+.subtleforms-picker.is-preview,
+.subtleforms-picker.is-preview * {
+	pointer-events: none;
+}
+
+.subtleforms-picker__value,
+.subtleforms-picker__placeholder {
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	min-width: 0;
+}
+
+.subtleforms-picker__placeholder {
+	color: var(--subtleforms-color-text-light, var(--sf-gray-400, #8c8f94));
+}
+
+.subtleforms-picker__glyph {
+	flex: 0 0 auto;
+	color: var(--subtleforms-color-text-light, var(--sf-gray-400, #8c8f94));
+}
+
+.subtleforms-picker__icons {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.subtleforms-picker__flag {
+	font-size: 16px;
+	line-height: 1;
+}
+
+.subtleforms-picker__menu {
+	position: absolute;
+	z-index: 40;
+	top: calc(100% + 4px);
+	left: 0;
+	right: 0;
+	padding: 6px;
+	border: 1px solid var(--subtleforms-color-border, var(--sf-border, #d8dbe2));
+	border-radius: var(--subtleforms-radius-md, 8px);
+	background: var(--subtleforms-color-bg, #fff);
+	box-shadow: var(--subtleforms-shadow-md, 0 8px 24px rgba(19, 20, 23, 0.12));
+}
+
+.subtleforms-picker__search {
+	width: 100%;
+	margin: 0 0 6px;
+	padding: 8px 10px;
+	border: 1px solid var(--subtleforms-color-border, #d8dbe2);
+	border-radius: 6px;
+	background: var(--subtleforms-color-bg-subtle, #f4f5f7);
+	font: inherit;
+	font-size: 14px;
+
+	&:focus {
+		outline: none;
+		border-color: var(--subtleforms-color-primary, #4f5bd5);
+	}
+}
+
+.subtleforms-picker__list {
+	max-height: 240px;
+	overflow: auto;
+}
+
+.subtleforms-picker__option,
+.subtleforms-picker__tick,
+.subtleforms-picker__day,
+.subtleforms-picker__nav,
+.subtleforms-picker__text-button {
+	border: 0;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+}
+
+.subtleforms-picker__option {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	padding: 8px 10px;
+	border-radius: 6px;
+	text-align: start;
+
+	&[data-active='true'],
+	&:hover {
+		background: var(--subtleforms-color-bg-subtle, var(--sf-bg-muted, #f4f5f7));
+	}
+
+	&[aria-selected='true'] {
+		background: color-mix(in srgb, var(--subtleforms-color-primary, #4f5bd5) 12%, white);
+	}
+}
+
+.subtleforms-picker__option-label {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.subtleforms-picker__meta {
+	color: var(--subtleforms-color-text-light, #6b7382);
+	font-size: 12px;
+	font-variant-numeric: tabular-nums;
+}
+
+.subtleforms-picker__divider {
+	display: block;
+	height: 1px;
+	margin: 4px 8px;
+	background: var(--subtleforms-color-border, #d8dbe2);
+}
+
+.subtleforms-picker__empty {
+	margin: 0;
+	padding: 10px;
+	color: var(--subtleforms-color-text-light, #6b7382);
+	font-size: 13px;
+}
+
+.subtleforms-picker__menu--calendar {
+	right: auto;
+	width: max-content;
+	max-width: min(100vw - 32px, 460px);
+	padding: 12px;
+}
+
+.subtleforms-picker__panel {
+	display: flex;
+	gap: 12px;
+}
+
+.subtleforms-picker__calendar {
+	width: 252px;
+}
+
+.subtleforms-picker__calendar-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	margin-bottom: 8px;
+}
+
+.subtleforms-picker__month {
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.subtleforms-picker__nav {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border-radius: 6px;
+
+	svg { transform: rotate(90deg); }
+
+	&--next svg { transform: rotate(-90deg); }
+
+	&:hover { background: var(--subtleforms-color-bg-subtle, #f4f5f7); }
+}
+
+.subtleforms-picker__weekdays,
+.subtleforms-picker__days {
+	display: grid;
+	grid-template-columns: repeat(7, 1fr);
+	gap: 2px;
+}
+
+.subtleforms-picker__weekdays {
+	margin-bottom: 4px;
+	color: var(--subtleforms-color-text-light, #6b7382);
+	font-size: 11px;
+	text-align: center;
+}
+
+.subtleforms-picker__day {
+	height: 32px;
+	border-radius: 6px;
+	font-size: 13px;
+
+	&.is-outside { color: var(--subtleforms-color-text-light, #8c8f94); }
+
+	&.is-selected,
+	&[aria-pressed='true'] {
+		background: var(--subtleforms-color-primary, #4f5bd5);
+		color: #fff;
+	}
+
+	&:hover:not(:disabled):not(.is-selected) {
+		background: var(--subtleforms-color-bg-subtle, #f4f5f7);
+	}
+
+	&:disabled {
+		cursor: default;
+		opacity: 0.35;
+	}
+}
+
+.subtleforms-picker__time {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.subtleforms-picker__columns {
+	display: flex;
+	gap: 4px;
+	height: 220px;
+}
+
+.subtleforms-picker__column {
+	width: 52px;
+	overflow: auto;
+	border: 1px solid var(--subtleforms-color-border, #d8dbe2);
+	border-radius: 6px;
+}
+
+.subtleforms-picker__tick {
+	display: block;
+	width: 100%;
+	padding: 6px 0;
+	font-size: 13px;
+	font-variant-numeric: tabular-nums;
+	text-align: center;
+
+	&.is-selected {
+		background: color-mix(in srgb, var(--subtleforms-color-primary, #4f5bd5) 14%, white);
+		font-weight: 600;
+	}
+
+	&:hover { background: var(--subtleforms-color-bg-subtle, #f4f5f7); }
+}
+
+.subtleforms-picker__meridiem {
+	display: flex;
+	gap: 4px;
+
+	.subtleforms-picker__tick {
+		border: 1px solid var(--subtleforms-color-border, #d8dbe2);
+		border-radius: 6px;
+	}
+}
+
+.subtleforms-picker__footer {
+	display: flex;
+	justify-content: space-between;
+	gap: 8px;
+	margin-top: 8px;
+	padding-top: 8px;
+	border-top: 1px solid var(--subtleforms-color-border, #e6e8ee);
+}
+
+.subtleforms-picker__text-button {
+	padding: 4px 2px;
+	color: var(--subtleforms-color-primary, #4f5bd5);
+	font-size: 13px;
+	font-weight: 600;
+
+	&:hover { text-decoration: underline; }
+}
+
+@media (max-width: 520px) {
+	.subtleforms-picker__panel { flex-direction: column; }
+	.subtleforms-picker__menu--calendar { width: 100%; }
+}
