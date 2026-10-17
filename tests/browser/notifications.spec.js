@@ -61,7 +61,7 @@ test('a new blank form starts with a ready admin notification (QA-02)', async ({
   await expect(page.locator('.sf-actions-panel__field-notice', { hasText: 'A subject line is required.' })).toHaveCount(0);
   await expect(page.locator('.sf-actions-panel__field-notice', { hasText: 'A recipient email address is required.' })).toHaveCount(0);
   await expect(panel.locator('.sf-actions-panel__needs-setup')).toHaveCount(0);
-  await page.screenshot({ path: '/home/claude/shots/free231/qa02-new-form-notification.png' });
+  await page.screenshot({ path: 'test-results/shots/free231/qa02-new-form-notification.png' });
 });
 
 test('an incomplete action shows Needs setup, warnings only while on, and never blocks saving (QA-02/03)', async ({ page }) => {
@@ -81,7 +81,7 @@ test('an incomplete action shows Needs setup, warnings only while on, and never 
   await expect(item.locator('.sf-actions-panel__needs-setup')).toBeVisible();
   await saveDraft(page);
   await expect(saveStatus(page)).toHaveText('Saved', { timeout: 20000 });
-  await page.screenshot({ path: '/home/claude/shots/free231/qa03-needs-setup.png' });
+  await page.screenshot({ path: 'test-results/shots/free231/qa03-needs-setup.png' });
 
   // Fixing it clears the badge.
   await item.getByRole('checkbox', { name: 'Enabled' }).check();

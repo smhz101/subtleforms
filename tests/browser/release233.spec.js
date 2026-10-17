@@ -39,7 +39,7 @@ test('a signature answer shows as an image in the entry, not as its code', async
   await expect(img).toBeVisible({ timeout: 20000 });
   await expect(img).toHaveAttribute('alt', 'Signature');
   await expect(page.locator('.sf-answers')).not.toContainText('base64');
-  await page.screenshot({ path: '/home/claude/shots/free233/signature-entry.png' });
+  await page.screenshot({ path: 'test-results/shots/free233/signature-entry.png' });
 });
 
 test('Enter on the focused Submit of a conversational form stores one entry', async ({ page }) => {

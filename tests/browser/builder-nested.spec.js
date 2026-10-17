@@ -165,9 +165,9 @@ for (const container of CONTAINERS) {
     await page.locator('.sf-container-renderer__header', { hasText: container.field.label || 'Column' }).first().click();
     await expect(inspectorKey(page)).toHaveText(container.field.key);
     if (container.name === 'Repeater') {
-      await page.screenshot({ path: '/home/claude/shots/free231/qa10-repeater-parent.png' });
+      await page.screenshot({ path: 'test-results/shots/free231/qa10-repeater-parent.png' });
       await childChrome.click();
-      await page.screenshot({ path: '/home/claude/shots/free231/qa10-repeater-child-inspector.png' });
+      await page.screenshot({ path: 'test-results/shots/free231/qa10-repeater-child-inspector.png' });
     }
   });
 }
@@ -217,7 +217,7 @@ test('drag from the library into a Repeater, and a canvas field into and out of 
   await page.mouse.move(from.x + 30, from.y + 10, { steps: 4 });
   await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 20 });
   await expect(repZone).toHaveClass(/is-over/);
-  await page.screenshot({ path: '/home/claude/shots/free231/qa09-drop-highlight.png' });
+  await page.screenshot({ path: 'test-results/shots/free231/qa09-drop-highlight.png' });
   await page.mouse.up();
   await expect(repZone.locator('.sf-field-chrome')).toHaveCount(1);
 
@@ -286,7 +286,7 @@ test('drops into a Group, a column and a nested Group highlight only the zone th
   await page.mouse.move(to.x + to.width / 2, to.y + to.height / 2, { steps: 20 });
   await expect(innerZone).toHaveClass(/is-over/);
   await expect(outerZone).not.toHaveClass(/is-over/);
-  await page.screenshot({ path: '/home/claude/shots/free231/qa09-nested-drop-highlight.png' });
+  await page.screenshot({ path: 'test-results/shots/free231/qa09-nested-drop-highlight.png' });
   await page.mouse.up();
   await expect(innerZone.locator('.sf-field-chrome')).toHaveCount(1);
 

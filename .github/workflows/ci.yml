@@ -195,3 +195,7 @@ jobs:
           # distribution package (controlled via .distignore).
           # All security, i18n, performance, and accessibility checks run.
           exclude-checks: file_type
+          # tests/ is not in the distribution (.distignore). Its bootstraps
+          # run outside WordPress, so the direct-access guard cannot exit
+          # there without breaking PHPUnit.
+          exclude-directories: tests
