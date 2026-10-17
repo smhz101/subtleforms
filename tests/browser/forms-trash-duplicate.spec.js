@@ -38,24 +38,18 @@ const row = (page, title) => page.locator('tr', { hasText: title });
 
 async function openForms(page, tab) {
   const url = '/wp-admin/admin.php?page=subtleforms-forms';
-  for (let attempt = 0; attempt < 2; attempt++) {
+  await page.goto(url, { waitUntil: 'domcontentloaded' });
+  if (/wp-login\.php/.test(page.url())) {
+    await loginPage(page);
     await page.goto(url, { waitUntil: 'domcontentloaded' });
-    if (/wp-login\.php/.test(page.url())) {
-      await loginPage(page);
-      continue;
-    }
-    try {
-      await page.waitForSelector('.sf-data-table__table', { timeout: 20000 });
-      break;
-    } catch (error) {
-      if (attempt === 1) {
-        throw error;
-      }
-    }
   }
+  // An empty list renders no table, only the empty state. The tab bar is
+  // what shows the page is ready.
+  await page.getByRole('tab', { name: /^All/ }).waitFor({ timeout: 30000 });
   if (tab) {
     await page.getByRole('tab', { name: new RegExp(`^${tab}`) }).click();
   }
+  await page.locator('.sf-data-table__table, .sf-data-table__empty').first().waitFor({ timeout: 30000 });
 }
 
 test('trashing, the Trash tab, restore and permanent delete (QA-11)', async ({ page, playwright }) => {
