@@ -4,7 +4,7 @@ Tags: forms, contact form, form builder, submissions
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.3.4
+Stable tag: 2.3.5
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -159,6 +159,11 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 7. Conversational form on frontend
 
 == Changelog ==
+
+= 2.3.5 - 2026-10-18 =
+* New: Appearance can inherit the active theme. The preset and the custom controls use the theme's type, colours and content width, and a custom value still overrides the theme.
+* Change: Preview names Desktop, Tablet and Mobile, with the same icons as the fields. Widths come from the theme when it sets them, otherwise 1280, 768 and 390, and each size stays distinct.
+* Fix: Inline layout wraps fields instead of crushing them onto one row. A single email and button still sit on one row on a wide screen and stack on a phone.
 
 = 2.3.4 - 2026-10-17 =
 * Change: Form settings use vertical tabs across the full width, with each area on its own panel. Notifications is its own tab.
@@ -395,6 +400,9 @@ now be reconstructed accurately.
 * Feature: Basic spam protection
 
 == Upgrade Notice ==
+
+= 2.3.5 =
+Appearance can inherit the theme, preview sizes follow the theme, and inline layout no longer crushes the form.
 
 = 2.3.4 =
 Form settings use vertical tabs, and country, dropdown, date and time fields use the new pickers. Phone countries and flags, chained choices and the builder canvas are fixed.
