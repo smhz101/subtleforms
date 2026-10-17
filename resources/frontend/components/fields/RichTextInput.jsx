@@ -83,7 +83,10 @@ export default function RichTextInput( {
   // is looking at — assigning innerHTML on every render collapses the caret.
   useEffect( () => {
     const el = editorRef.current;
-    if ( el && el.innerHTML !== ( value || '' ) ) {
+    // The caret-exit marker is a zero-width space. It is stripped before the
+    // value is stored, so it must not count as a change or the caret jumps.
+    const visible = ( html ) => ( html || '' ).replace( /\u200b/g, '' );
+    if ( el && visible( el.innerHTML ) !== visible( value || '' ) ) {
       el.innerHTML = value || '';
     }
   }, [ value ] );

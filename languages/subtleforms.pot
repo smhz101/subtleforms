@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-17T10:39:38+00:00\n"
+"POT-Creation-Date: 2026-10-17T10:45:20+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -5467,7 +5467,7 @@ msgstr ""
 
 #: resources/admin/components/builder/appearance/labels.js:79
 #: resources/admin/components/builder/appearance/labels.js:124
-#: resources/frontend/components/fields/RichTextInput.jsx:151
+#: resources/frontend/components/fields/RichTextInput.jsx:154
 msgid "Bold"
 msgstr ""
 
@@ -13994,19 +13994,19 @@ msgstr ""
 msgid "Maximum of %d reached"
 msgstr ""
 
-#: resources/frontend/components/fields/RichTextInput.jsx:152
+#: resources/frontend/components/fields/RichTextInput.jsx:155
 msgid "Italic"
 msgstr ""
 
-#: resources/frontend/components/fields/RichTextInput.jsx:155
+#: resources/frontend/components/fields/RichTextInput.jsx:158
 msgid "Bulleted list"
 msgstr ""
 
-#: resources/frontend/components/fields/RichTextInput.jsx:160
+#: resources/frontend/components/fields/RichTextInput.jsx:163
 msgid "Numbered list"
 msgstr ""
 
-#: resources/frontend/components/fields/RichTextInput.jsx:171
+#: resources/frontend/components/fields/RichTextInput.jsx:174
 msgid "Text formatting"
 msgstr ""
 
