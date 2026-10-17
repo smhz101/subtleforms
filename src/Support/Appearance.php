@@ -146,6 +146,12 @@ final class Appearance {
 			$clean['hideLabel'] = true;
 		}
 
+		// False is the meaningful value: flags are shown unless this is off.
+		// sanitizeTokens() drops booleans, so keep it explicitly.
+		if ( array_key_exists( 'showFlags', $appearance ) ) {
+			$clean['showFlags'] = (bool) $appearance['showFlags'];
+		}
+
 		return $clean;
 	}
 

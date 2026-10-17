@@ -20,8 +20,17 @@ function slugify(text) {
 	return slug || `choice_${nanoid(6)}`;
 }
 
-function newChoice(label, parent) {
-	const choice = { label, value: slugify(label) };
+function uniqueChoice(options, parent) {
+	const used = new Set((options || []).map((option) => String(option?.value ?? '')));
+	let index = (options || []).length + 1;
+	let label = `${__('Choice', 'subtleforms')} ${index}`;
+	let value = slugify(label);
+	while (used.has(value)) {
+		index += 1;
+		label = `${__('Choice', 'subtleforms')} ${index}`;
+		value = slugify(label);
+	}
+	const choice = { label, value };
 	if (parent) {
 		choice.parent = parent;
 	}
@@ -84,7 +93,7 @@ const ChainedLevelsControl = memo(function ChainedLevelsControl({
 			...level,
 			options: [
 				...options,
-				newChoice(`${__('Choice', 'subtleforms')} ${options.length + 1}`, levelIndex > 0 ? parent : undefined),
+				uniqueChoice(options, levelIndex > 0 ? parent : undefined),
 			],
 		});
 	}

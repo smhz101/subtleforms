@@ -4,6 +4,7 @@ import {
   filterPhoneCountries,
   flagEmoji,
   joinPhoneValue,
+  phoneCountry,
   splitPhoneValue,
 } from '../../../shared/phone';
 
@@ -46,7 +47,16 @@ export default function PhoneField({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
-  const country = parsed.country;
+  // The stored value is only "+{dial} {digits}". An empty number round-trips
+  // to the default country, and countries that share a dial code (US and
+  // Canada are both +1) cannot be told apart from that string. Remember the
+  // ISO code the visitor actually picked.
+  const [pickedCode, setPickedCode] = useState('');
+  const picked = phoneCountry(pickedCode);
+  const country =
+    picked && (!parsed.national || picked.dial === parsed.country?.dial)
+      ? picked
+      : parsed.country;
   const national = parsed.national;
   const matches = useMemo(() => filterPhoneCountries(query), [query]);
 
@@ -71,6 +81,7 @@ export default function PhoneField({
   const choose = (nextCountry) => {
     setOpen(false);
     setQuery('');
+    setPickedCode(nextCountry?.code || '');
     emit(joinPhoneValue(nextCountry, national));
   };
 
@@ -179,7 +190,10 @@ export default function PhoneField({
         aria-describedby={describedBy}
         disabled={disabled || undefined}
         readOnly={readOnly || undefined}
-        onChange={(event) => emit(joinPhoneValue(country, event.target.value))}
+        onChange={(event) => {
+          setPickedCode(country?.code || '');
+          emit(joinPhoneValue(country, event.target.value));
+        }}
       />
     </div>
   );
