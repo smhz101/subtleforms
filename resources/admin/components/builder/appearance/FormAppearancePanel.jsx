@@ -90,7 +90,7 @@ function PresetMock( { preset } ) {
 
   return (
     <span
-      className='sf-preset-mock'
+      className={ `sf-preset-mock${ preset.id === 'theme' ? ' sf-preset-mock--theme' : '' }` }
       style={ { background: bg === 'transparent' && preset.backdrop ? preset.backdrop : bg, fontFamily: preset.tokens.fontFamily || undefined } }
       aria-hidden='true'>
       <span className='sf-preset-mock__label' style={ { background: label } } />
@@ -264,6 +264,15 @@ export default function FormAppearancePanel( { schema, onChange, isReadOnly = fa
             ) }{ ' ' }
             { modified && <span className='sf-preset-tile__badge'>{ __( 'edited', 'subtleforms' ) }</span> }
           </p>
+          { ! isReadOnly && (
+            <Button
+              variant='secondary'
+              className='sf-form-appearance__inherit'
+              disabled={ appearance.preset === 'theme' && ! modified }
+              onClick={ () => applyPreset( getPreset( 'theme' ) ) }>
+              { __( 'Inherit from theme', 'subtleforms' ) }
+            </Button>
+          ) }
 
           { CUSTOM_GROUPS.map( ( group, index ) => (
             <PanelBody key={ group.id } title={ group.title } initialOpen={ index === 0 } className='sf-form-appearance__panel'>
@@ -293,6 +302,7 @@ export default function FormAppearancePanel( { schema, onChange, isReadOnly = fa
                 disabled={ isReadOnly }
                 fontOptions={ fontOptions }
                 layout={ group.id === 'colours' ? 'swatches' : 'stack' }
+                inheritLabel={ appearance.preset === 'theme' ? __( 'Theme', 'subtleforms' ) : __( 'Default', 'subtleforms' ) }
               />
             </PanelBody>
           ) ) }

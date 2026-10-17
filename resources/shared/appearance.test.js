@@ -6,6 +6,7 @@ import {
   fieldAppearanceClasses,
   isPresetModified,
   getPreset,
+  previewBreakpoints,
   FORM_PRESETS,
 } from './appearance';
 
@@ -40,6 +41,9 @@ describe( 'formAppearanceStyle', () => {
   it( 'translates the width variant to a max width', () => {
     expect( formAppearanceStyle( { variants: { width: 'narrow' } } ).maxWidth ).toBe( '30rem' );
     expect( formAppearanceStyle( { variants: { width: 'full' } } ).maxWidth ).toBe( '100%' );
+    expect( formAppearanceStyle( { variants: { width: 'theme' } } ).maxWidth ).toBe(
+      'var(--wp--style--global--content-size, 40rem)'
+    );
   } );
 
   it( 'ignores an unknown width', () => {
@@ -198,3 +202,24 @@ describe('2.3.0 inline layout and dark surface', () => {
     expect(formAppearanceClasses({ preset: 'dark-surface', variants: {} })).toContain('subtleforms--preset-dark-surface');
   });
 });
+
+describe( 'previewBreakpoints', () => {
+  it( 'uses standard sizes when the theme does not name any', () => {
+    expect( previewBreakpoints() ).toEqual( { desktop: 1280, tablet: 768, mobile: 390 } );
+  } );
+
+  it( 'reads theme layout sizes and keeps desktop wider than tablet', () => {
+    expect( previewBreakpoints( {
+      layout: { wideSize: '1100px', contentSize: '680px' },
+    } ) ).toEqual( { desktop: 1100, tablet: 680, mobile: 390 } );
+
+    expect( previewBreakpoints( {
+      custom: { breakpoints: { desktop: '900px', tablet: '900px', mobile: '400px' } },
+    } ).desktop ).toBeGreaterThan( 900 );
+  } );
+
+  it( 'offers an inherit-from-theme preset', () => {
+    expect( getPreset( 'theme' ).variants.width ).toBe( 'theme' );
+    expect( formAppearanceClasses( { preset: 'theme' } ) ).toContain( 'subtleforms--inherit-theme' );
+  } );
+} );

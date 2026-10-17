@@ -202,6 +202,28 @@
 	}
 }
 
+/* Colours, type and the content width come from the active theme. A custom
+   token still wins because it is set on the form itself. */
+.subtleforms.subtleforms--inherit-theme {
+	color: var(--wp--preset--color--foreground, inherit);
+	font-family: var(--wp--preset--font-family--body, inherit);
+	font-size: var(--wp--preset--font-size--medium, inherit);
+	background: transparent;
+	box-shadow: none;
+	--subtleforms-color-text: var(--wp--preset--color--foreground, inherit);
+	--subtleforms-label-color: var(--wp--preset--color--foreground, inherit);
+	--subtleforms-input-text: var(--wp--preset--color--foreground, inherit);
+	--subtleforms-color-text-light: var(--wp--preset--color--secondary, inherit);
+	--subtleforms-color-primary: var(--wp--preset--color--primary, var(--wp--preset--color--contrast, currentColor));
+	--subtleforms-color-primary-hover: var(--wp--preset--color--primary, var(--wp--preset--color--contrast, currentColor));
+	--subtleforms-color-bg: transparent;
+	--subtleforms-color-bg-subtle: transparent;
+	--subtleforms-color-border: var(--wp--preset--color--border, currentColor);
+	--subtleforms-color-border-focus: var(--wp--preset--color--primary, var(--wp--preset--color--contrast, currentColor));
+	--subtleforms-font-family: var(--wp--preset--font-family--body, inherit);
+	--subtleforms-font-size-base: var(--wp--preset--font-size--medium, inherit);
+}
+
 /* A form on a dark footer or hero: no card of its own. */
 .subtleforms.subtleforms--preset-dark-surface {
 	background: transparent;
