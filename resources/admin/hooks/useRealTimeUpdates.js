@@ -22,7 +22,7 @@ export function useRealTimeUpdates(options = {}) {
   const [lastUpdate, setLastUpdate] = useState(null);
   const [isPolling, setIsPolling] = useState(false);
   const intervalRef = useRef(null);
-  const lastUnreadCountRef = useRef(0);
+  const lastUnreadCountRef = useRef(null);
 
   // Store callbacks in refs to prevent dependency changes
   const onUnreadCountChangeRef = useRef(onUnreadCountChange);
@@ -45,6 +45,13 @@ export function useRealTimeUpdates(options = {}) {
 
       setUnreadCount(newCount);
       setLastUpdate(new Date(data.timestamp || Date.now()));
+
+      // The first answer only sets the baseline: the list has just loaded
+      // itself, and a second load could undo a change made meanwhile (2.3.3).
+      if (lastUnreadCountRef.current === null) {
+        lastUnreadCountRef.current = newCount;
+        return;
+      }
 
       // Trigger callback if count changed
       if (newCount !== lastUnreadCountRef.current) {
