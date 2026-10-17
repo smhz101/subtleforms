@@ -1,243 +1,137 @@
 /**
- * License / Subscription Settings Component
+ * License settings.
  *
- * Three modes:
- *  1. Dev mode  — SUBTLEFORMS_DEV_LICENSE is true in wp-config.php.
- *  2. Connected — active subscription from subtleforms.com.
- *  3. Disconnected — connection form (email + license key).
+ * When SubtleForms Pro is active it supplies its own component (license key
+ * activation, plan details). Without Pro this screen explains the plan the
+ * site is on and what Pro adds, using the same panels so the two read as one
+ * product.
  *
  * @package SubtleForms
- * @since   2.1.0
  */
 
-import { useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { Button } from '@wordpress/components';
+import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../../ui/Icon';
+import { PRO_URL, ACCOUNT_URL, PRO_CHECKLIST, PRO_PILLARS } from '../../data/proCatalog';
 
-const PLAN_LABELS = {
-	free:    __( 'Free', 'subtleforms' ),
-	starter: __( 'Starter', 'subtleforms' ),
-	pro:     __( 'Pro', 'subtleforms' ),
-	agency:  __( 'Agency', 'subtleforms' ),
-};
-
-const PLAN_FEATURES = {
-	starter: [
-		__( 'Webhooks extension', 'subtleforms' ),
-		__( 'Email Marketing extension', 'subtleforms' ),
-		__( 'Analytics extension', 'subtleforms' ),
-		__( 'Pro templates', 'subtleforms' ),
-		__( 'Advanced conditional logic', 'subtleforms' ),
-	],
-	pro: [
-		__( 'All Starter features', 'subtleforms' ),
-		__( 'CRM extension', 'subtleforms' ),
-		__( 'E-commerce extension', 'subtleforms' ),
-		__( 'PDF Generator extension', 'subtleforms' ),
-		__( 'Multilanguage extension', 'subtleforms' ),
-		__( 'Payments extension', 'subtleforms' ),
-		__( 'Pipeline retry & delay', 'subtleforms' ),
-		__( 'Priority support', 'subtleforms' ),
-	],
-	agency: [
-		__( 'All Pro features', 'subtleforms' ),
-		__( 'Custom extensions API', 'subtleforms' ),
-		__( 'Unlimited sites', 'subtleforms' ),
-	],
-};
-
-function StatusBadge( { status } ) {
-	const map = {
-		active:       { label: __( 'Active', 'subtleforms' ),       cls: 'sf-badge--active' },
-		grace_period: { label: __( 'Grace Period', 'subtleforms' ),  cls: 'sf-badge--warning' },
-		expired:      { label: __( 'Expired', 'subtleforms' ),       cls: 'sf-badge--danger' },
-		invalid:      { label: __( 'Invalid', 'subtleforms' ),       cls: 'sf-badge--danger' },
-		inactive:     { label: __( 'Inactive', 'subtleforms' ),      cls: 'sf-badge--neutral' },
-	};
-	const { label, cls } = map[ status ] || map.inactive;
-	return <span className={ `sf-badge ${ cls }` }>{ label }</span>;
-}
-
-function PlanBadge( { plan } ) {
+/**
+ * Checklist of what Pro includes.
+ *
+ * @param {Object}  props
+ * @param {boolean} props.included Whether the features are already unlocked.
+ */
+export function ProChecklist( { included = false } ) {
 	return (
-		<span className={ `sf-plan-badge sf-plan-badge--${ plan }` }>
-			{ PLAN_LABELS[ plan ] || plan }
-		</span>
+		<ul className={ `sf-checklist ${ included ? 'is-included' : '' }` }>
+			{ PRO_CHECKLIST.map( ( item ) => (
+				<li key={ item }>
+					<Icon.Check size={ 16 } aria-hidden="true" />
+					{ item }
+				</li>
+			) ) }
+		</ul>
 	);
 }
 
 export default function LicenseSettings() {
-	const admin        = window.subtleformsAdmin || {};
-	const subscription = admin.subscription || {};
-	// Hooks must run before any early return (rules of hooks). Capture the
-	// subscription snapshot once, unconditionally, before the Pro delegation.
-	const [ subData ]  = useState( subscription );
+	const admin = window.subtleformsAdmin || {};
 
-	// If Pro is loaded, delegate to its component — highest authority.
+	// Pro owns this screen when it is loaded.
 	if ( window.SubtleFormsPro?.LicenseSettings ) {
 		const ProLicenseSettings = window.SubtleFormsPro.LicenseSettings;
 		return <ProLicenseSettings />;
 	}
 
-	const isConnected = subData.connected || subData.status === 'active' || subData.status === 'grace_period';
+	const version = admin.version || '';
 
-	// ── Dev mode ─────────────────────────────────────────────────────────────
-	if ( subData.isDev ) {
-		return (
-			<div className="sf-license-settings sf-license-settings--dev">
-				<div className="sf-license-dev-banner">
-					<Icon.Wrench size={20} className="sf-license-dev-banner__icon" />
-					<div className="sf-license-dev-banner__body">
-						<strong>{ __( 'Development Mode Active', 'subtleforms' ) }</strong>
-						<p>
-							{ __( 'SUBTLEFORMS_DEV_LICENSE is enabled in wp-config.php. All Pro features and extensions are unlocked locally. This setting must be removed in production.', 'subtleforms' ) }
+	return (
+		<div className="sf-license">
+			<section className="sf-panel sf-plan-card">
+				<div className="sf-plan-card__main">
+					<span className="sf-plan-card__badge">{ __( 'Free', 'subtleforms' ) }</span>
+					<div>
+						<h3 className="sf-plan-card__title">
+							{ __( 'You’re on SubtleForms Free', 'subtleforms' ) }
+						</h3>
+						<p className="sf-plan-card__text">
+							{ __(
+								'Unlimited forms and submissions, the full builder, conditional logic and email notifications. No limits, no expiry.',
+								'subtleforms'
+							) }
 						</p>
 					</div>
 				</div>
-
-				<div className="sf-license-section">
-					<h3>{ __( 'Pro Features Unlocked', 'subtleforms' ) }</h3>
-					<ul className="sf-feature-list">
-						{ PLAN_FEATURES.pro.map( ( f ) => (
-							<li key={ f } className="sf-feature-list__item sf-feature-list__item--active">
-							<Icon.CheckCircle size={16} />
-							{ f }
-						</li>
-					) ) }
-					{ PLAN_FEATURES.agency.filter( ( f ) => ! PLAN_FEATURES.pro.includes( f ) ).map( ( f ) => (
-						<li key={ f } className="sf-feature-list__item sf-feature-list__item--active">
-							<Icon.CheckCircle size={16} />
-								{ f }
-							</li>
-						) ) }
-					</ul>
+				<div className="sf-plan-card__actions">
+					<Button variant="primary" href={ PRO_URL } target="_blank" rel="noreferrer">
+						{ __( 'Get SubtleForms Pro', 'subtleforms' ) }
+						<Icon.ArrowUpRight size={ 16 } aria-hidden="true" />
+					</Button>
+					<Button variant="tertiary" href={ ACCOUNT_URL } target="_blank" rel="noreferrer">
+						{ __( 'I already have a license', 'subtleforms' ) }
+					</Button>
 				</div>
-			</div>
-		);
-	}
+			</section>
 
-	// ── Connected ─────────────────────────────────────────────────────────────
-	if ( isConnected ) {
-		const features = PLAN_FEATURES[ subData.plan ] || PLAN_FEATURES.pro;
-
-		return (
-			<div className="sf-license-settings sf-license-settings--connected">
-				<div className="sf-license-account-card">
-					<div className="sf-license-account-card__header">
-					<Icon.Users size={20} className="sf-license-account-card__icon" />
-						<div>
-							<p className="sf-license-account-card__email">{ subData.email }</p>
-							<div className="sf-license-account-card__badges">
-								<StatusBadge status={ subData.status } />
-								<PlanBadge plan={ subData.plan } />
-							</div>
-						</div>
+			<section className="sf-panel">
+				<header className="sf-panel__header">
+					<div>
+						<h3 className="sf-panel__title">{ __( 'What Pro adds', 'subtleforms' ) }</h3>
+						<p className="sf-panel__subtitle">
+							{ __( 'Pro is an add-on plugin. Your forms stay exactly as they are; new fields and actions appear in the builder.', 'subtleforms' ) }
+						</p>
 					</div>
+				</header>
+				<div className="sf-panel__body">
+					<div className="sf-pillars">
+						{ PRO_PILLARS.map( ( { key, icon: PillarIcon, title, text } ) => (
+							<div key={ key } className="sf-pillars__item">
+								<span className="sf-pillars__icon" aria-hidden="true">
+									<PillarIcon size={ 18 } />
+								</span>
+								<strong>{ title }</strong>
+								<span>{ text }</span>
+							</div>
+						) ) }
+					</div>
+					<ProChecklist />
+				</div>
+			</section>
 
-					{ subData.expiresAt && (
-						<p className="sf-license-account-card__expiry">
-							{ __( 'Renews / expires:', 'subtleforms' ) }{ ' ' }
-							<strong>{ new Date( subData.expiresAt ).toLocaleDateString() }</strong>
+			<section className="sf-panel">
+				<header className="sf-panel__header">
+					<div>
+						<h3 className="sf-panel__title">{ __( 'License key', 'subtleforms' ) }</h3>
+						<p className="sf-panel__subtitle">
+							{ __( 'Install and activate the SubtleForms Pro plugin, then enter your key here.', 'subtleforms' ) }
+						</p>
+					</div>
+				</header>
+				<div className="sf-panel__body">
+					<fieldset className="sf-license-key" disabled>
+						<label htmlFor="sf-license-key-preview" className="screen-reader-text">
+							{ __( 'License key', 'subtleforms' ) }
+						</label>
+						<input
+							id="sf-license-key-preview"
+							type="text"
+							className="sf-license-key__input"
+							placeholder="XXXX-XXXX-XXXX-XXXX"
+						/>
+						<Button variant="secondary" disabled accessibleWhenDisabled>
+							{ __( 'Activate', 'subtleforms' ) }
+						</Button>
+					</fieldset>
+					{ version && (
+						<p className="sf-license-key__meta">
+							{ sprintf(
+								/* translators: %s: plugin version */
+								__( 'SubtleForms %s', 'subtleforms' ),
+								version
+							) }
 						</p>
 					) }
-
-					<div className="sf-license-account-card__actions">
-						<a
-							href="https://subtleforms.com/account"
-							target="_blank"
-							rel="noopener noreferrer"
-							className="button"
-						>
-							{ __( 'Manage Account', 'subtleforms' ) }
-						</a>
-					</div>
 				</div>
-
-				<div className="sf-license-section">
-					<h3>{ __( 'Included in your plan', 'subtleforms' ) }</h3>
-					<ul className="sf-feature-list">
-						{ features.map( ( f ) => (
-							<li key={ f } className="sf-feature-list__item sf-feature-list__item--active">
-							<Icon.CheckCircle size={16} />
-								{ f }
-							</li>
-						) ) }
-					</ul>
-				</div>
-			</div>
-		);
-	}
-
-// ── Pro not installed — locked preview ────────────────────────────────────
-        return (
-                <div className="sf-license-settings sf-license-settings--disconnected">
-
-                        <div className="sf-license-connect-card">
-                                <div className="sf-license-connect-card__header">
-                                        <div className="sf-license-connect-card__icon-wrapper">
-                                                <Icon.Lock size={20} className="sf-license-connect-card__icon" />
-                                        </div>
-                                        <div>
-                                                <h3>{ __( 'SubtleForms Pro', 'subtleforms' ) }</h3>
-                                                <p>{ __( 'Install and activate the SubtleForms Pro plugin to enter your license key and unlock all Pro features.', 'subtleforms' ) }</p>
-                                        </div>
-                                </div>
-
-                                { /* Disabled preview of the activation form */ }
-                                <fieldset className="sf-license-form sf-license-form--locked" disabled>
-                                        <div className="sf-license-form__field">
-                                                <label>{ __( 'License Key', 'subtleforms' ) }</label>
-                                                <div className="sf-license-form__key-row">
-                                                        <input
-                                                                type="text"
-                                                                className="regular-text sf-license-form__key-input"
-                                                                aria-label={ __( 'License key', 'subtleforms' ) }
-                                                                placeholder="XXXX-XXXX-XXXX-XXXX"
-                                                                disabled
-                                                        />
-                                                        <button type="button" className="button button-primary" disabled>
-                                                                { __( 'Activate', 'subtleforms' ) }
-                                                        </button>
-                                                </div>
-                                                <p className="description">
-                                                        { __( 'SubtleForms Pro must be installed and active to use this feature.', 'subtleforms' ) }
-                                                </p>
-                                        </div>
-                                </fieldset>
-
-                                <div className="sf-license-connect-card__actions">
-                                        <a
-                                                href="https://subtleforms.com/pro"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="button button-primary"
-                                        >
-                                                { __( 'Get SubtleForms Pro →', 'subtleforms' ) }
-                                        </a>
-                                        <a
-                                                href="https://subtleforms.com/account"
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="button"
-                                        >
-                                                { __( 'My Account', 'subtleforms' ) }
-                                        </a>
-                                </div>
-                        </div>
-
-                        <div className="sf-license-upgrade-card">
-                                <h3>{ __( 'What you unlock with Pro', 'subtleforms' ) }</h3>
-                                <ul className="sf-feature-list">
-                                        { [ ...PLAN_FEATURES.starter, ...PLAN_FEATURES.pro.filter( ( f ) => ! PLAN_FEATURES.starter.includes( f ) ) ].map( ( f ) => (
-                                                <li key={ f } className="sf-feature-list__item sf-feature-list__item--locked">
-                                                        <Icon.Lock size={14} />
-                                                        { f }
-                                                </li>
-                                        ) ) }
-                                </ul>
-                        </div>
-
+			</section>
 		</div>
 	);
 }
-

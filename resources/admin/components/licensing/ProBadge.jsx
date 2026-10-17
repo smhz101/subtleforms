@@ -8,6 +8,7 @@
  */
 
 import { __ } from '@wordpress/i18n';
+import { getBranding } from '../../utils/branding';
 import './ProBadge.scss';
 
 /**
@@ -26,6 +27,10 @@ export default function ProBadge({
 	variant = 'default',
 	className = '',
 }) {
+	// White label: no plan badges for clients (2.3.0).
+	if ( getBranding().hideUpgrade ) {
+		return null;
+	}
 	const classes = [
 		'sf-pro-badge',
 		`sf-pro-badge--${variant}`,
