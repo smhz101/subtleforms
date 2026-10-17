@@ -39,6 +39,21 @@ export default function PreviewFrame( { children, title, className } ) {
     doc.write( '<!doctype html><html><head><meta charset="utf-8"></head><body></body></html>' );
     doc.close();
 
+    const themeHref = window.subtleformsAdmin?.themeStylesheet;
+    if ( themeHref ) {
+      const theme = doc.createElement( 'link' );
+      theme.rel = 'stylesheet';
+      theme.href = themeHref;
+      doc.head.appendChild( theme );
+    }
+
+    const themeCss = window.subtleformsAdmin?.themeGlobalCss;
+    if ( themeCss ) {
+      const globals = doc.createElement( 'style' );
+      globals.textContent = themeCss;
+      doc.head.appendChild( globals );
+    }
+
     const styles = window.subtleformsAdmin?.frontendStyles ?? [];
     styles.forEach( ( href ) => {
       const link = doc.createElement( 'link' );
@@ -47,11 +62,11 @@ export default function PreviewFrame( { children, title, className } ) {
       doc.head.appendChild( link );
     } );
 
-    // Inherit the admin's font so the preview doesn't jump to Times.
+    // Theme type wins when the theme publishes it. Otherwise stay off Times.
     const base = doc.createElement( 'style' );
     base.textContent =
       'html,body{margin:0;padding:16px;background:transparent;' +
-      'font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;}';
+      'font-family:var(--wp--preset--font-family--body,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif);}';
     doc.head.appendChild( base );
 
     const container = doc.createElement( 'div' );

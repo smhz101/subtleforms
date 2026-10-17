@@ -35,6 +35,9 @@
 	}
 
 	&__viewport {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--sf-space-2);
 		padding: var(--sf-space-1) var(--sf-space-3);
 		font-size: var(--sf-text-sm);
 		font-weight: var(--sf-weight-medium);
@@ -75,15 +78,17 @@
 
 	&__canvas {
 		min-width: 0;
-		overflow-y: auto;
+		overflow: auto;
 		padding: var(--sf-space-8) var(--sf-space-6);
 	}
 
-	// Full-bleed canvas. Device width is on the form column, not this stage.
+	// The device keeps its real width. When that is wider than the pane, the
+	// pane scrolls instead of shrinking desktop down to the tablet width.
 	&__stage {
-		width: 100%;
+		width: max-content;
+		min-width: 100%;
 		max-width: none;
-		margin: 0;
+		margin: 0 auto;
 		background: transparent;
 		border: 0;
 		border-radius: 0;
@@ -92,7 +97,8 @@
 	}
 
 	&__form {
-		width: 100%;
+		width: auto;
+		max-width: none;
 		margin-right: auto;
 		margin-left: auto;
 	}

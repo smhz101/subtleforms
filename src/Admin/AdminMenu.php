@@ -379,6 +379,11 @@ class AdminMenu {
 			'fileNonce'      => \SubtleForms\Uploads\Uploads::nonce(),
 			// Name, logo and which credits/links to show (white label, 2.1).
 			'branding'       => self::branding(),
+			// Preview device widths and the active theme's styles, so "inherit
+			// from theme" and desktop/tablet/mobile match the site (2.3.5).
+			'previewBreakpoints' => \SubtleForms\Support\Appearance::previewBreakpoints( self::themeJsonSettings() ),
+			'themeStylesheet'    => get_stylesheet_uri(),
+			'themeGlobalCss'     => function_exists( 'wp_get_global_stylesheet' ) ? wp_get_global_stylesheet() : '',
 		);
 
 		/**
@@ -407,6 +412,25 @@ class AdminMenu {
 
 		// Allow extensions to enqueue their assets
 		do_action( 'subtleforms/admin_enqueue_scripts', $hook );
+	}
+
+	/**
+	 * theme.json settings for the active theme, or an empty array.
+	 *
+	 * @return array
+	 */
+	private static function themeJsonSettings(): array {
+		if ( ! class_exists( '\WP_Theme_JSON_Resolver' ) ) {
+			return array();
+		}
+
+		$data = \WP_Theme_JSON_Resolver::get_merged_data( 'theme' );
+		if ( ! is_object( $data ) || ! method_exists( $data, 'get_settings' ) ) {
+			return array();
+		}
+
+		$settings = $data->get_settings();
+		return is_array( $settings ) ? $settings : array();
 	}
 
 	/**
