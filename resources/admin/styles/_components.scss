@@ -1,0 +1,397 @@
+/**
+ * Component layer — v2.
+ *
+ * Shared primitives that every page composes: panels, pills, stat tiles,
+ * key/value lists, empty states, and the WordPress component overrides that
+ * make core Cards, Notices and Buttons sit naturally in the frame.
+ *
+ * Loaded after page styles so it can settle shared surfaces in one place.
+ */
+
+// ── Core component tuning ────────────────────────────────────────────────────
+
+.subtleforms-admin {
+  // Cards: hairline, 8px corners, no shadow — the WordPress 7 dashboard card.
+  .components-card {
+    border-radius: var(--sf-radius-lg);
+    box-shadow: 0 0 0 1px var(--sf-border);
+    background: var(--sf-bg-surface);
+    overflow: hidden;
+
+    > .components-card__header,
+    .components-card__header {
+      min-height: 56px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--sf-border-subtle);
+      box-shadow: none;
+
+      h2,
+      h3 {
+        margin: 0;
+        font-size: var(--sf-text-md);
+        font-weight: var(--sf-weight-semibold);
+        line-height: 1.4;
+        color: var(--sf-text);
+      }
+    }
+
+    .components-card__body {
+      padding: 20px;
+    }
+
+    .components-card__footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--sf-border-subtle);
+      box-shadow: none;
+    }
+  }
+
+  // Panels inside our surfaces drop their own outer border.
+  .components-panel {
+    border-radius: var(--sf-radius-lg);
+    border-color: var(--sf-border);
+  }
+
+  .components-panel__body > .components-panel__body-title {
+    font-weight: var(--sf-weight-semibold);
+  }
+
+  // Notices: soft surface instead of the thick left bar.
+  .components-notice {
+    margin: 0 0 16px;
+    padding: 10px 14px;
+    border-left-width: 0;
+    border-radius: var(--sf-radius-sm);
+    box-shadow: inset 0 0 0 1px var(--sf-info-border);
+    background: var(--sf-info-bg);
+    color: var(--sf-text);
+
+    &.is-success {
+      box-shadow: inset 0 0 0 1px var(--sf-success-border);
+      background: var(--sf-success-bg);
+    }
+
+    &.is-warning {
+      box-shadow: inset 0 0 0 1px var(--sf-warning-border);
+      background: var(--sf-warning-bg);
+    }
+
+    &.is-error {
+      box-shadow: inset 0 0 0 1px var(--sf-danger-border);
+      background: var(--sf-danger-bg);
+    }
+
+    .components-notice__content {
+      margin: 0 16px 0 0;
+      line-height: var(--sf-leading-normal);
+    }
+  }
+
+  // Page-level buttons use the compact 32px control height of core list
+  // screens (DataViews), so titles, tabs and actions share one rhythm.
+  .sf-page-header__actions,
+  .sf-action-bar,
+  .sf-app__toolbar {
+    .components-button:not(.is-link):not(.sf-topbar-icon-button) {
+      height: 32px;
+      min-height: 32px;
+      padding-top: 0;
+      padding-bottom: 0;
+      font-size: var(--sf-text-sm);
+      font-weight: var(--sf-weight-medium);
+
+      &.has-icon:not(.has-text) {
+        width: 32px;
+        min-width: 32px;
+        padding: 0;
+        justify-content: center;
+      }
+
+      svg {
+        flex-shrink: 0;
+      }
+    }
+
+    .components-button.is-secondary {
+      border-color: var(--sf-border-strong);
+      box-shadow: none;
+      color: var(--sf-text);
+
+      &.is-pressed {
+        border-color: var(--sf-text);
+        background: var(--sf-bg-muted);
+      }
+
+      &:hover:not(:disabled) {
+        border-color: var(--sf-text);
+        box-shadow: none;
+        background: var(--sf-bg-surface);
+        color: var(--sf-text);
+      }
+    }
+  }
+
+}
+
+// Zero-specificity defaults: anything with its own class wins.
+:where(.subtleforms-admin) :where(a:not([class])) {
+  color: var(--sf-brand);
+
+  &:hover {
+    color: var(--sf-brand-hover);
+  }
+}
+
+:where(.subtleforms-admin) :where(code, kbd) {
+  padding: 2px 6px;
+  border-radius: var(--sf-radius-sm);
+  background: var(--sf-bg-muted);
+  font-family: var(--sf-font-mono);
+  font-size: 0.92em;
+}
+
+// Portals (modals, popovers, menus) render into <body>.
+body.subtleforms-admin-scope {
+  .components-modal__frame {
+    border-radius: var(--sf-radius-xl);
+  }
+
+  .components-modal__header {
+    border-bottom: 1px solid var(--sf-border-subtle);
+  }
+
+  .components-popover:not(.is-unstyled) .components-popover__content {
+    border-radius: var(--sf-radius-lg);
+    box-shadow: var(--sf-shadow-lg);
+    outline: 1px solid var(--sf-border);
+  }
+
+  .components-menu-item__button,
+  .components-menu-item__button.components-button {
+    border-radius: var(--sf-radius-sm);
+  }
+}
+
+// ── Panel ────────────────────────────────────────────────────────────────────
+// A titled surface. The workhorse of dashboard and detail screens.
+
+.sf-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--sf-bg-surface);
+  border: 1px solid var(--sf-border);
+  border-radius: var(--sf-radius-lg);
+  overflow: hidden;
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 56px;
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--sf-border-subtle);
+  }
+
+  &__title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: var(--sf-text-md);
+    font-weight: var(--sf-weight-semibold);
+    line-height: 1.4;
+    color: var(--sf-text);
+  }
+
+  &__subtitle {
+    margin: 2px 0 0;
+    font-size: var(--sf-text-xs);
+    color: var(--sf-text-muted);
+  }
+
+  &__body {
+    flex: 1 1 auto;
+    padding: 20px;
+
+    &--flush {
+      padding: 0;
+    }
+  }
+
+  &__footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 20px;
+    border-top: 1px solid var(--sf-border-subtle);
+    background: var(--sf-bg-subtle);
+  }
+}
+
+// ── Pills ────────────────────────────────────────────────────────────────────
+// Status in one shape everywhere: soft fill, optional dot, sentence case.
+
+.sf-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 22px;
+  padding: 0 8px;
+  border-radius: var(--sf-radius-full);
+  background: var(--sf-bg-muted);
+  color: var(--sf-text-secondary);
+  font-size: var(--sf-text-xs);
+  font-weight: var(--sf-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
+
+  svg {
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+  }
+
+  &--dot::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    flex-shrink: 0;
+  }
+
+  &--success {
+    background: var(--sf-success-bg);
+    color: var(--sf-success);
+  }
+
+  &--warning {
+    background: var(--sf-warning-bg);
+    color: var(--sf-warning);
+  }
+
+  &--danger {
+    background: var(--sf-danger-bg);
+    color: var(--sf-danger);
+  }
+
+  &--info {
+    background: var(--sf-info-bg);
+    color: var(--sf-info);
+  }
+
+  &--brand {
+    background: var(--sf-primary-50);
+    color: var(--sf-primary-700);
+  }
+
+  &--outline {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--sf-border);
+    color: var(--sf-text-muted);
+  }
+}
+
+// ── Key / value list ─────────────────────────────────────────────────────────
+
+.sf-kv {
+  display: grid;
+  grid-template-columns: minmax(96px, max-content) 1fr;
+  gap: 10px 16px;
+  margin: 0;
+
+  dt {
+    font-size: var(--sf-text-xs);
+    color: var(--sf-text-muted);
+    line-height: 20px;
+  }
+
+  dd {
+    margin: 0;
+    min-width: 0;
+    font-size: var(--sf-text-sm);
+    color: var(--sf-text);
+    line-height: 20px;
+    overflow-wrap: anywhere;
+  }
+}
+
+// ── Overline ─────────────────────────────────────────────────────────────────
+
+.sf-overline {
+  margin: 0;
+  font-size: var(--sf-text-2xs);
+  font-weight: var(--sf-weight-medium);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--sf-text-muted);
+}
+
+// ── Empty state ──────────────────────────────────────────────────────────────
+
+.sf-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 48px 24px;
+  text-align: center;
+
+  &__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    margin-bottom: 8px;
+    border-radius: var(--sf-radius-lg);
+    background: var(--sf-bg-muted);
+    color: var(--sf-text-muted);
+  }
+
+  &__title {
+    margin: 0;
+    font-size: var(--sf-text-md);
+    font-weight: var(--sf-weight-semibold);
+    color: var(--sf-text);
+  }
+
+  &__text {
+    margin: 0;
+    max-width: 44ch;
+    font-size: var(--sf-text-sm);
+    color: var(--sf-text-muted);
+  }
+
+  &__actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+  }
+}
+
+// ── Icon sizing inside core buttons ──────────────────────────────────────────
+// <Button icon={<Icon.X size={16} />}> is cloned by core with size 24, which
+// overrides the size we asked for. Normalise here: 16px next to a label,
+// 20px on icon-only buttons, 16px on compact/small icon-only buttons.
+// :where() keeps specificity at zero so component styles still win.
+:where(.subtleforms-admin-scope, .subtleforms-admin) {
+  :where(.components-button.has-text) > svg.lucide {
+    width: 16px;
+    height: 16px;
+  }
+
+  :where(.components-button.has-icon:not(.has-text)) > svg.lucide {
+    width: 20px;
+    height: 20px;
+  }
+
+  :where(.components-button.has-icon.is-compact:not(.has-text), .components-button.has-icon.is-small:not(.has-text)) > svg.lucide {
+    width: 16px;
+    height: 16px;
+  }
+}

@@ -1,130 +1,130 @@
 /**
- * SubtleForms design tokens.
+ * SubtleForms design tokens — v2 ("Frame").
  *
- * The single source of truth for colour, radius, type, elevation and timing.
- * Everything else in the codebase resolves back to a token defined here, so the
- * entire product can be re-tinted by editing this one file without touching a
- * component.
+ * The single source of truth for colour, radius, type, elevation and timing in
+ * the admin. Values follow the WordPress Design System (`--wpds-*`) that ships
+ * with WordPress 7, and every role token reads the core token first, so the
+ * plugin keeps in step with core when WordPress adjusts its palette:
  *
- * These are CSS custom properties rather than SCSS variables on purpose: they
- * can be inspected in devtools, overridden per scope, and changed at runtime.
- * `_variables.scss` maps the historical `$sf-*` names onto them so older
- * stylesheets keep working.
+ *   --sf-border: var(--wpds-color-stroke-surface-neutral, #dbdbdb)
  *
- * Scales are deliberately short. Every value below earns its place; if a design
- * needs a sixth shadow or a twenty-first grey, the design is wrong before the
- * token set is.
+ * Brand follows the user's admin colour scheme (`--wp-admin-theme-color`), the
+ * same way core screens do. Pick "Default" and SubtleForms is WordPress blue;
+ * pick "Ectoplasm" and it turns purple. Set `--sf-brand-override` on
+ * `body.subtleforms-admin-scope` to pin a fixed brand colour instead.
+ *
+ * Tokens are declared on :root AND on the two admin scopes. Declaring them on
+ * the scopes matters: custom properties resolve where they are declared, and
+ * WordPress sets the admin theme colour on <body>, not on <html>.
  */
 
-:root {
+:root,
+.subtleforms-admin,
+body.subtleforms-admin-scope {
   // ── Neutrals ───────────────────────────────────────────────────────────────
-  // WordPress admin grey ramp. Matches core's #f0f0f1 canvas, #dcdcde borders
-  // and #1d2327 ink so the plugin reads as part of the host admin rather than
-  // as a separately-branded surface.
+  // WordPress 7 grey ramp (#1e1e1e ink, #757575 muted, #dbdbdb strokes).
   --sf-n-0: #ffffff;
-  --sf-n-25: #f6f7f7;
-  --sf-n-50: #f0f0f1;
-  --sf-n-100: #dcdcde;
-  --sf-n-200: #c3c4c7;
-  --sf-n-300: #a7aaad;
-  --sf-n-400: #8c8f94;
-  --sf-n-500: #646970;
-  --sf-n-600: #50575e;
-  --sf-n-700: #3c434a;
-  --sf-n-800: #1d2327;
-  --sf-n-900: #101517;
+  --sf-n-25: #fcfcfc;
+  --sf-n-50: #f6f6f6;
+  --sf-n-100: #e6e6e6;
+  --sf-n-200: #dbdbdb;
+  --sf-n-300: #c4c4c4;
+  --sf-n-400: #949494;
+  --sf-n-500: #757575;
+  --sf-n-600: #5e5e5e;
+  --sf-n-700: #3c3c3c;
+  --sf-n-800: #1e1e1e;
+  --sf-n-900: #111111;
 
-  // ── Accent ─────────────────────────────────────────────────────────────────
-  // SubtleForms brand ramp (indigo/violet). The primary colour defaults to
-  // --sf-primary-500 (#5B5BD6); white-on-primary contrast is 5.37:1, passing
-  // WCAG AA for normal text and UI components. The whole ramp is exposed as
-  // overridable CSS variables so a per-form "primary colour" (Design tab) can
-  // re-tint a single frontend form by writing these vars inline on
-  // .subtleforms-form. (Part C step 1)
-  --sf-primary-50: #ececf6;
-  --sf-primary-100: #dedef0;
-  --sf-primary-200: #c2c2e5;
-  --sf-primary-300: #a6a6d9;
-  --sf-primary-400: #8a8acd;
-  --sf-primary-500: #5b5bd6;
-  --sf-primary-600: #4a4abf;
-  --sf-primary-700: #3a3aa0;
-  --sf-primary-800: #2e2e7a;
-  --sf-primary-900: #23235f;
+  // ── Brand ──────────────────────────────────────────────────────────────────
+  // One colour, derived ramp. color-mix keeps every step in sync with whatever
+  // admin colour scheme is active.
+  --sf-brand: var(--sf-brand-override, var(--wp-admin-theme-color, #3858e9));
+  --sf-primary-500: var(--sf-brand);
+  --sf-primary-50: color-mix(in srgb, var(--sf-primary-500) 6%, #ffffff);
+  --sf-primary-100: color-mix(in srgb, var(--sf-primary-500) 12%, #ffffff);
+  --sf-primary-200: color-mix(in srgb, var(--sf-primary-500) 24%, #ffffff);
+  --sf-primary-300: color-mix(in srgb, var(--sf-primary-500) 45%, #ffffff);
+  --sf-primary-400: color-mix(in srgb, var(--sf-primary-500) 72%, #ffffff);
+  --sf-primary-600: color-mix(in srgb, var(--sf-primary-500) 88%, #000000);
+  --sf-primary-700: color-mix(in srgb, var(--sf-primary-500) 76%, #000000);
+  --sf-primary-800: color-mix(in srgb, var(--sf-primary-500) 60%, #000000);
+  --sf-primary-900: color-mix(in srgb, var(--sf-primary-500) 45%, #000000);
 
-  // Legacy accent ramp aliases now track the SubtleForms primary ramp, so the
-  // whole admin picks up the brand colour without each component being edited.
+  // Legacy accent ramp tracks the brand ramp.
   --sf-a-50: var(--sf-primary-50);
   --sf-a-100: var(--sf-primary-100);
   --sf-a-200: var(--sf-primary-200);
-  --sf-a-300: var(--sf-primary-300); // accent
+  --sf-a-300: var(--sf-primary-300);
   --sf-a-400: var(--sf-primary-400);
-  --sf-a-500: var(--sf-primary-500); // brand
+  --sf-a-500: var(--sf-primary-500);
   --sf-a-600: var(--sf-primary-600);
   --sf-a-700: var(--sf-primary-700);
   --sf-a-800: var(--sf-primary-800);
 
   // ── Semantic ───────────────────────────────────────────────────────────────
-  // Exactly one colour per meaning. Five greens previously competed for
-  // "success", which is why no two screens agreed on what success looked like.
-  --sf-success: #1f7a4d;
-  --sf-success-strong: #175c3a;
-  --sf-success-bg: #eaf5ef;
-  --sf-success-border: #c9e4d5;
+  // WordPress 7 status palette. One colour per meaning.
+  --sf-success: var(--wpds-color-foreground-content-success-weak, #008030);
+  --sf-success-strong: #005c22;
+  --sf-success-bg: var(--wpds-color-background-surface-success-weak, #ebffed);
+  --sf-success-border: var(--wpds-color-stroke-surface-success, #94d29e);
 
-  --sf-danger: #b3261e;
-  --sf-danger-strong: #8c1c16;
-  --sf-danger-bg: #fbeceb;
-  --sf-danger-border: #f2ccc9;
+  --sf-danger: var(--wpds-color-foreground-content-error-weak, #cc1818);
+  --sf-danger-strong: #9d0000;
+  --sf-danger-bg: var(--wpds-color-background-surface-error-weak, #fff6f5);
+  --sf-danger-border: var(--wpds-color-stroke-surface-error, #dab1aa);
 
-  --sf-warning: #8a5a00;
-  --sf-warning-strong: #6b4600;
-  --sf-warning-bg: #fdf3e2;
-  --sf-warning-border: #f2ddb4;
+  --sf-warning: var(--wpds-color-foreground-content-warning-weak, #926300);
+  --sf-warning-strong: #6b4800;
+  --sf-warning-bg: var(--wpds-color-background-surface-warning-weak, #fff7e1);
+  --sf-warning-border: var(--wpds-color-stroke-surface-warning, #e1bc7c);
+
+  --sf-info: var(--wpds-color-foreground-content-info-weak, #006bd7);
+  --sf-info-bg: var(--wpds-color-background-surface-info-weak, #f3f9ff);
+  --sf-info-border: var(--wpds-color-stroke-surface-info, #a9c6e7);
 
   // ── Roles ──────────────────────────────────────────────────────────────────
-  // Components should reach for these, not the ramps above: the role says what
-  // the colour is *for*, which survives a palette change. Values track the
-  // WordPress admin palette so the plugin looks native to the host admin.
-  --sf-bg-page: #f0f0f1; // WP admin canvas
-  --sf-bg-surface: #ffffff;
-  --sf-bg-subtle: var(--sf-n-50);
-  --sf-bg-muted: var(--sf-n-100);
+  // Components reach for these, not the ramps: the role says what the colour
+  // is *for*, which survives a palette change.
+  --sf-bg-frame: #1e1e1e; // dark chrome around the stage, as in core screens
+  --sf-bg-page: #ffffff; // the stage
+  --sf-bg-surface: var(--wpds-color-background-surface-neutral-strong, #ffffff);
+  --sf-bg-subtle: var(--wpds-color-background-surface-neutral, #fcfcfc);
+  --sf-bg-muted: var(--wpds-color-background-surface-neutral-weak, #f4f4f4);
+  --sf-bg-hover: #f7f7f7;
+  --sf-bg-selected: var(--wpds-color-background-surface-brand, #ecf0fa);
 
-  --sf-text: #1d2327; // WP admin text
-  --sf-text-secondary: #50575e;
-  --sf-text-muted: #646970;
-  --sf-text-subtle: #8c8f94;
-  --sf-text-on-accent: #ffffff; // white on the admin theme colour
+  --sf-text: var(--wpds-color-foreground-content-neutral, #1e1e1e);
+  --sf-text-secondary: #3c3c3c;
+  --sf-text-muted: var(--wpds-color-foreground-content-neutral-weak, #707070);
+  --sf-text-subtle: #949494;
+  --sf-text-on-accent: #ffffff;
 
-  // Gutenberg-style hairlines: light default, stronger for inputs/cards.
-  --sf-border: #dcdcde; // WP light border
-  --sf-border-strong: #c3c4c7; // WP input/card border
-  --sf-border-subtle: #f0f0f1;
+  --sf-border: var(--wpds-color-stroke-surface-neutral, #dbdbdb);
+  --sf-border-strong: var(--wpds-color-stroke-interactive-neutral, #8d8d8d);
+  --sf-border-subtle: var(--wpds-color-stroke-surface-neutral-weak, #f0f0f0);
 
-  // Brand follows the SubtleForms primary ramp, NOT --wp-admin-theme-color.
-  // A per-form primary colour (Design tab) overrides --sf-primary-500 inline
-  // on .subtleforms-form; everything else resolves to these tokens (Part C).
-  --sf-brand: var(--sf-primary-500);
-  --sf-brand-hover: var(--sf-primary-600);
-  --sf-brand-active: var(--sf-primary-700);
+  --sf-brand-hover: var(--wp-admin-theme-color-darker-10, var(--sf-primary-600));
+  --sf-brand-active: var(--wp-admin-theme-color-darker-20, var(--sf-primary-700));
   --sf-brand-contrast: #ffffff;
   --sf-accent: var(--sf-primary-100);
 
-  --sf-primary: var(--sf-primary-500);
-  --sf-primary-hover: var(--sf-primary-600);
-  --sf-primary-active: var(--sf-primary-700);
+  --sf-primary: var(--sf-brand);
+  --sf-primary-hover: var(--sf-brand-hover);
+  --sf-primary-active: var(--sf-brand-active);
   --sf-primary-bg: var(--sf-primary-50);
-  --sf-primary-border: var(--sf-primary-100);
+  --sf-primary-border: var(--sf-primary-200);
 
-  --sf-focus-ring: var(--sf-primary-500);
+  --sf-focus-ring: var(--sf-brand);
 
   // ── Radius ─────────────────────────────────────────────────────────────────
-  // WordPress admin is flat: inputs and cards use 4px, panels are square.
-  --sf-radius-xs: 2px;
-  --sf-radius-sm: 4px;
-  --sf-radius-md: 4px;
-  --sf-radius-lg: 6px;
+  // Controls are 2px (core inputs/buttons), cards 8px, the stage 12px.
+  --sf-radius-xs: var(--wpds-border-radius-sm, 2px);
+  --sf-radius-sm: var(--wpds-border-radius-md, 4px);
+  --sf-radius-md: 6px;
+  --sf-radius-lg: var(--wpds-border-radius-lg, 8px);
+  --sf-radius-xl: var(--wpds-border-radius-xl, 12px);
+  --sf-radius-control: 2px;
   --sf-radius-full: 999px;
 
   // ── Spacing ────────────────────────────────────────────────────────────────
@@ -138,23 +138,28 @@
   --sf-space-10: 40px;
   --sf-space-12: 48px;
 
+  // Layout rhythm shared by the shell and every page.
+  --sf-gutter: 32px;
+  --sf-topbar-height: 56px;
+  --sf-control-height: 40px;
+  --sf-control-height-compact: 32px;
+  --sf-content-max: 1360px;
+
   // ── Type ───────────────────────────────────────────────────────────────────
-  // WordPress admin uses the system font stack — no webfonts — for a native
-  // feel and zero load cost. Headings use the same stack (WP DS has no separate
-  // heading face). Code uses the system monospace stack.
+  // System stack, like core. No webfonts.
   --sf-font-sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
-  --sf-font-heading: var(--sf-font-sans);
-  --sf-font-mono: "SFMono-Regular", Menlo, Consolas, "Liberation Mono", monospace;
+  --sf-font-heading: var(--wpds-typography-font-family-heading, var(--sf-font-sans));
+  --sf-font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas,
+    "Liberation Mono", monospace;
 
-  // Type sizes — rem so the scale respects the reader's font size.
-  --sf-text-2xs: 0.6875rem; // 11px
-  --sf-text-xs: 0.75rem; //    12px
-  --sf-text-sm: 0.8125rem; //  13px
-  --sf-text-base: 0.875rem; // 14px — WordPress admin body size
-  --sf-text-md: 1rem; //       16px
-  --sf-text-lg: 1.25rem; //    20px
-  --sf-text-xl: 1.75rem; //    28px
+  --sf-text-2xs: 0.6875rem; // 11px — overlines
+  --sf-text-xs: 0.75rem; //    12px — meta
+  --sf-text-sm: 0.8125rem; //  13px — admin body
+  --sf-text-base: 0.8125rem; // 13px — admin body (core uses 13px)
+  --sf-text-md: 0.9375rem; //  15px — card titles
+  --sf-text-lg: 1.25rem; //    20px — page titles
+  --sf-text-xl: 1.75rem; //    28px — numbers
 
   --sf-leading-tight: 1.25;
   --sf-leading-normal: 1.5;
@@ -165,29 +170,28 @@
   --sf-weight-semibold: 600;
 
   // ── Elevation ──────────────────────────────────────────────────────────────
-  // WordPress admin is mostly flat; shadows are reserved for popovers/modals
-  // and stay very subtle. Neutral, not brand-tinted.
-  --sf-shadow-xs: 0 1px 0 rgba(0, 0, 0, 0.04);
-  --sf-shadow-sm: 0 1px 1px rgba(0, 0, 0, 0.05);
-  --sf-shadow-md: 0 2px 4px rgba(0, 0, 0, 0.06);
-  --sf-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.08);
-  --sf-shadow-focus: 0 0 0 2px var(--sf-primary-500);
+  // Flat surfaces with hairlines; shadows only for things that float.
+  --sf-shadow-xs: 0 1px 0 rgba(0, 0, 0, 0.03);
+  --sf-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --sf-shadow-md: 0 2px 6px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --sf-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.1), 0 2px 6px rgba(0, 0, 0, 0.05);
+  --sf-shadow-focus: 0 0 0 var(--wp-admin-border-width-focus, 2px) var(--sf-brand);
 
   // ── Motion ─────────────────────────────────────────────────────────────────
-  // Three durations, replacing fifteen. One easing curve.
-  --sf-duration-fast: 120ms;
-  --sf-duration-base: 180ms;
-  --sf-duration-slow: 260ms;
-  --sf-ease: cubic-bezier(0.2, 0, 0.2, 1);
+  --sf-duration-fast: 100ms;
+  --sf-duration-base: 200ms;
+  --sf-duration-slow: 300ms;
+  --sf-ease: cubic-bezier(0.4, 0, 0.2, 1);
 
   --sf-transition-fast: var(--sf-duration-fast) var(--sf-ease);
   --sf-transition-base: var(--sf-duration-base) var(--sf-ease);
 }
 
-// Honour the reader's motion preference everywhere, once, rather than per
-// component.
+// Honour the reader's motion preference everywhere, once.
 @media (prefers-reduced-motion: reduce) {
-  :root {
+  :root,
+  .subtleforms-admin,
+  body.subtleforms-admin-scope {
     --sf-duration-fast: 1ms;
     --sf-duration-base: 1ms;
     --sf-duration-slow: 1ms;
@@ -198,7 +202,9 @@
 // Older stylesheets reference these names directly. They resolve to the tokens
 // above, which is how the whole admin picks up the palette without every
 // component being edited. Prefer the role tokens in new code.
-:root {
+:root,
+.subtleforms-admin,
+body.subtleforms-admin-scope {
   --sf-gray-50: var(--sf-n-50);
   --sf-gray-100: var(--sf-n-100);
   --sf-gray-200: var(--sf-n-200);
@@ -413,46 +419,20 @@
 }
 
 // ── Scopes ──────────────────────────────────────────────────────────────────
-// Part C: all SubtleForms styles are scoped under .subtleforms-admin (admin) or
-// .subtleforms-form (frontend). The tokens above stay on :root as defaults so
-// nothing breaks during the migration; these blocks add scope-specific
-// overrides.
 
-// Admin scope.
-// 1. Make core @wordpress/components (Modal, Popover, Notice, DatePicker, …)
-//    pick up the SubtleForms primary WITHOUT forking them: they read
-//    --wp-admin-theme-color and its lighter/darker steps, so we alias those to
-//    our primary ramp inside the admin scope only. Outside the SubtleForms
-//    admin the host admin's own theme colour is untouched.
-// 2. Pin the admin font to the system font stack (NOT Inter) — the host
-//    admin's native feel, zero webfont cost.
-//
-// Two selectors carry the override:
-//  - .subtleforms-admin covers the in-page app container.
-//  - body.subtleforms-admin-scope covers @wordpress/components portals, which
-//    render into document.body (Modals/Popovers/Notices) and so inherit from
-//    <body>, not from the app container. The app shell adds this class to
-//    <body> when a SubtleForms admin page mounts (Part C step 2).
-.subtleforms-admin,
-body.subtleforms-admin-scope {
-  --wp-admin-theme-color: var(--sf-primary-500);
-  --wp-admin-theme-color-darker-10: var(--sf-primary-600);
-  --wp-admin-theme-color-darker-20: var(--sf-primary-700);
-  --wp-admin-theme-color-lighter-10: var(--sf-primary-100);
-  --wp-admin-theme-color-lighter-20: var(--sf-primary-50);
-}
-
+// Admin scope. The brand already follows --wp-admin-theme-color, so core
+// @wordpress/components (Modal, Popover, Notice…) and SubtleForms agree without
+// either overriding the other.
 .subtleforms-admin {
   font-family: var(--sf-font-sans);
+  font-size: var(--sf-text-sm);
+  line-height: var(--sf-leading-normal);
+  color: var(--sf-text);
+  -webkit-font-smoothing: antialiased;
 }
 
-// Frontend form scope.
-// 1. Forms inherit the site's font (font-family: inherit), NOT the admin
-//    system stack. "font" is a Design-tab option; per-form overrides land as
-//    inline CSS variables on this same selector.
-// 2. The per-form primary colour (Design tab) overrides --sf-primary-500
-//    here; every other primary step and the derived role tokens resolve
-//    through it, so a single inline var re-tints the whole form.
+// Frontend form scope (used by the admin preview). Forms inherit the site's
+// font and carry their own primary colour from the Design tab.
 .subtleforms-form {
   --sf-primary-500: var(--sf-form-primary, #5b5bd6);
   font-family: inherit;

@@ -39,6 +39,12 @@ final class Appearance {
 		'colorSurface',
 		'colorBorder',
 		'colorError',
+		// 2.0 tokens the builder writes; without them here they were dropped
+		// on save (fixed in 2.3.0).
+		'colorLabel',
+		'colorInputText',
+		'colorFocus',
+		'colorButtonText',
 	);
 
 	/**
@@ -52,6 +58,7 @@ final class Appearance {
 		'inputPaddingY',
 		'marginTop',
 		'marginBottom',
+		'buttonRadius',
 	);
 
 	/**
@@ -63,7 +70,7 @@ final class Appearance {
 	 * Token keys restricted to a fixed set of values.
 	 */
 	private const ENUM_TOKENS = array(
-		'labelWeight' => array( '400', '500', '600' ),
+		'labelWeight' => array( '400', '500', '600', '700' ),
 		'width'       => array( '100', '75', '66', '50', '33', '25' ),
 		'align'       => array( 'left', 'center', 'right' ),
 	);
@@ -83,6 +90,7 @@ final class Appearance {
 		'button'      => array( 'solid', 'outline', 'ghost' ),
 		'buttonAlign' => array( 'left', 'center', 'right', 'full' ),
 		'width'       => array( 'narrow', 'standard', 'wide', 'full' ),
+		'layout'      => array( 'stacked', 'inline' ),
 	);
 
 	/**
