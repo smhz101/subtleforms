@@ -50,9 +50,14 @@ export default function PhoneField({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
-  const country = parsed.national
-    ? parsed.country
-    : phoneCountry(pickedCode) || parsed.country;
+  const picked = phoneCountry(pickedCode);
+  // Countries that share a dial code (US and Canada are both +1) cannot be
+  // told apart from the stored "+{dial} {digits}" string. Prefer the country
+  // the visitor picked whenever the dial code still matches.
+  const country =
+    picked && (!parsed.national || picked.dial === parsed.country?.dial)
+      ? picked
+      : parsed.country;
   const national = parsed.national;
   const matches = useMemo(() => filterPhoneCountries(query), [query]);
 

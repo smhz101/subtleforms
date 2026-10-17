@@ -63,7 +63,7 @@ test('single and bulk trash, Trash tab, restore and delete permanently', async (
   const adaRow = rows(page).filter({ hasText: 'Ada' });
   await expect(adaRow.getByRole('button', { name: 'Restore' })).toBeVisible();
   await expect(adaRow.getByRole('button', { name: 'Delete permanently' })).toBeVisible();
-  await page.screenshot({ path: '/home/claude/shots/free231/entries-trash-tab.png' });
+  await page.screenshot({ path: 'test-results/shots/free231/entries-trash-tab.png' });
 
   // Restore one: it returns with its previous status.
   await adaRow.getByRole('button', { name: 'Restore' }).click();

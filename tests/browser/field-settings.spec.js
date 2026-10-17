@@ -13,7 +13,7 @@ const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
 const { adminApi, cleanup, loginPage, openBuilder, openPanel, entries, BASE } = require('./helpers');
 
-const SHOTS = '/home/claude/shots/free232';
+const SHOTS = 'test-results/shots/free232';
 let client;
 const created = [];
 

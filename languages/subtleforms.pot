@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-17T02:58:25+00:00\n"
+"POT-Creation-Date: 2026-10-17T09:35:57+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -1037,7 +1037,7 @@ msgid "Phone"
 msgstr ""
 
 #: src/Fields/CoreFields.php:224
-#: resources/frontend/components/fields/PhoneField.jsx:143
+#: resources/frontend/components/fields/PhoneField.jsx:148
 msgid "Country code"
 msgstr ""
 
@@ -3030,7 +3030,7 @@ msgid "Numbers with optional limits"
 msgstr ""
 
 #: src/Fields/FieldSettings.php:682
-#: resources/frontend/components/fields/PhoneField.jsx:182
+#: resources/frontend/components/fields/PhoneField.jsx:187
 msgid "Phone number"
 msgstr ""
 
@@ -13794,7 +13794,7 @@ msgid "Search countries"
 msgstr ""
 
 #: resources/frontend/components/fields/CountrySelect.jsx:198
-#: resources/frontend/components/fields/PhoneField.jsx:147
+#: resources/frontend/components/fields/PhoneField.jsx:152
 msgid "No countries match that search."
 msgstr ""
 
@@ -13965,8 +13965,8 @@ msgstr ""
 msgid "Payments are encrypted and processed securely."
 msgstr ""
 
-#: resources/frontend/components/fields/PhoneField.jsx:134
-#: resources/frontend/components/fields/PhoneField.jsx:135
+#: resources/frontend/components/fields/PhoneField.jsx:139
+#: resources/frontend/components/fields/PhoneField.jsx:140
 msgid "Search country or code"
 msgstr ""
 

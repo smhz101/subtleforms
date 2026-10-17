@@ -84,7 +84,7 @@ test('visitors add and remove groups within min and max, with focus and names (l
   // The maximum is reached: no Add button.
   await expect(add).toHaveCount(0);
   await expect(page.locator('.subtleforms-repeater__count')).toHaveText('Maximum of 3 reached');
-  await page.screenshot({ path: '/home/claude/shots/free231/qa09-repeater-max.png', fullPage: true });
+  await page.screenshot({ path: 'test-results/shots/free231/qa09-repeater-max.png', fullPage: true });
 
   // Remove the middle group: the last group's answers move up intact.
   await page.getByRole('button', { name: 'Remove Companies 2' }).click();
@@ -158,7 +158,7 @@ test('mobile layout and accessibility', async ({ page }) => {
   expect(box.height).toBeGreaterThanOrEqual(44);
   const docWidth = await page.evaluate(() => document.documentElement.scrollWidth);
   expect(docWidth).toBeLessThanOrEqual(375);
-  await page.screenshot({ path: '/home/claude/shots/free231/qa09-repeater-mobile.png', fullPage: true });
+  await page.screenshot({ path: 'test-results/shots/free231/qa09-repeater-mobile.png', fullPage: true });
   const results = await new AxeBuilder({ page }).include('.subtleforms-repeater').analyze();
   expect(results.violations.map((v) => v.id)).toEqual([]);
 });
@@ -173,7 +173,7 @@ test('builder Preview shows the runtime', async ({ page }) => {
   await expect(frame.getByRole('button', { name: 'Add another company' })).toBeVisible({ timeout: 20000 });
   await frame.getByRole('button', { name: 'Add another company' }).click();
   await expect(frame.locator('.subtleforms-repeater__group')).toHaveCount(2);
-  await page.screenshot({ path: '/home/claude/shots/free231/qa09-builder-preview.png' });
+  await page.screenshot({ path: 'test-results/shots/free231/qa09-builder-preview.png' });
 });
 
 test('entry detail shows a table and the CSV has one column per child', async ({ page, playwright }) => {
@@ -204,7 +204,7 @@ test('entry detail shows a table and the CSV has one column per child', async ({
   await expect(table.locator('thead th')).toHaveText(['#', 'Ticker', 'Company name', 'Number of shares', 'Purchase date', 'Which exchange?']);
   await expect(table.locator('tbody tr')).toHaveCount(2);
   await expect(table.locator('tbody tr').nth(1)).toContainText('MSFT');
-  await page.screenshot({ path: '/home/claude/shots/free231/qa09-entry-detail.png', fullPage: true });
+  await page.screenshot({ path: 'test-results/shots/free231/qa09-entry-detail.png', fullPage: true });
 
   const csv = await client.call('POST', '/submissions/export', { form_id: form.id });
   // CSV export needs a Pro plan; the local test site has one.
@@ -241,7 +241,7 @@ test('block editor preview shows the Repeater with its Add button', async ({ pag
     const add = canvas.locator('.subtleforms-block-preview .subtleforms-repeater__add');
     await expect(add).toBeVisible({ timeout: 45000 });
     await expect(add).toContainText('Add another company');
-    await page.screenshot({ path: '/home/claude/shots/free231/qa09-block-preview.png' });
+    await page.screenshot({ path: 'test-results/shots/free231/qa09-block-preview.png' });
   } finally {
     await client.call('DELETE', `/wp/v2/posts/${postId}?force=true`);
   }

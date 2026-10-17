@@ -11,7 +11,7 @@
 const { test, expect } = require('@playwright/test');
 const { adminApi, cleanup, loginPage, openBuilder, BASE } = require('./helpers');
 
-const SHOTS = '/home/claude/shots/free232';
+const SHOTS = 'test-results/shots/free232';
 let client;
 const created = [];
 

@@ -8,10 +8,12 @@
  * Each spec seeds its own forms through the REST API, so no fixtures need to
  * exist beforehand.
  */
+const path = require('path');
 const { defineConfig, devices } = require('@playwright/test');
 
 module.exports = defineConfig({
   testDir: './tests/browser',
+  globalSetup: path.join(__dirname, 'tests/browser/global-setup.js'),
   timeout: 120000,
   expect: { timeout: 10000 },
   fullyParallel: false,

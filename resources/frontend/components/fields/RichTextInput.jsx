@@ -135,6 +135,7 @@ export default function RichTextInput( {
             key={ command }
             type='button'
             className='subtleforms-richtext__button'
+            onMouseDown={ ( event ) => event.preventDefault() }
             onClick={ () => exec( command ) }
             disabled={ disabled }
             aria-label={ label }

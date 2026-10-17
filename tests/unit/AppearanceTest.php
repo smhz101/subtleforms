@@ -180,6 +180,17 @@ final class AppearanceTest extends TestCase {
 		$this->assertArrayNotHasKey( 'width', $clean );
 	}
 
+	public function test_field_show_flags_is_kept_when_turned_off(): void {
+		$off = Appearance::sanitizeField( array( 'showFlags' => false ) );
+		$this->assertArrayHasKey( 'showFlags', $off );
+		$this->assertFalse( $off['showFlags'] );
+
+		$on = Appearance::sanitizeField( array( 'showFlags' => true ) );
+		$this->assertTrue( $on['showFlags'] );
+
+		$this->assertArrayNotHasKey( 'showFlags', Appearance::sanitizeField( array() ) );
+	}
+
 	public function test_field_hide_label_is_normalised_to_a_boolean(): void {
 		$this->assertTrue( Appearance::sanitizeField( array( 'hideLabel' => '1' ) )['hideLabel'] );
 		$this->assertArrayNotHasKey(
