@@ -1,16 +1,16 @@
 /**
  * FormSettings — the builder's Settings tab.
  *
- * The tab is one `<Panel>` of collapsible bodies inside a centred column. The
- * outer padding and page background come from `.subtleforms-form-settings` in
- * BuilderCanvasArea.scss; everything here is the column and its contents.
+ * Vertical sections, the same idea as the plugin Settings page. The outer
+ * padding and page background come from `.subtleforms-form-settings` in
+ * BuilderCanvasArea.scss.
  */
 
 .sf-form-settings {
 
 	&__container {
-		margin: 0 auto;
-		max-width: 1080px;
+		margin: 0;
+		max-width: none;
 	}
 
 	&__layout {
@@ -126,7 +126,7 @@
 		flex-direction: column;
 		gap: 16px;
 		min-width: 0;
-		max-width: 760px;
+		max-width: 1080px;
 	}
 
 	&__header { padding-top: 4px; }
@@ -154,7 +154,7 @@
 	&__card {
 		display: flex;
 		flex-direction: column;
-		overflow: hidden;
+		overflow: visible;
 		border: 1px solid var(--sf-border);
 		border-radius: var(--sf-radius-lg);
 		background: var(--sf-bg-surface);
@@ -166,6 +166,23 @@
 
 			&:last-child { border-bottom: 0; }
 			&:empty { display: none; }
+		}
+
+		// Radio groups are fieldsets. A legend is painted on the top border, so
+		// the card's padding never shows above the label and overflow clips it.
+		> fieldset {
+			padding: 0 20px 16px;
+			margin: 0;
+			border: 0;
+			min-inline-size: 0;
+
+			> legend {
+				display: table;
+				float: none;
+				width: auto;
+				margin: 0 0 8px;
+				padding: 16px 0 0;
+			}
 		}
 
 		.components-base-control { margin-bottom: 0; }
