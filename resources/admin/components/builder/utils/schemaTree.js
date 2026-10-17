@@ -5,6 +5,7 @@ import {
   ensureUniqueFieldKey,
   collectExistingKeys,
 } from './idGenerator';
+import { fieldConfig } from '../../../../shared/fieldConfig';
 
 const ROOT_NODE_ID = 'root';
 
@@ -13,6 +14,10 @@ const COLUMN_CONTAINER_SUFFIX = '_column_container';
 // Composite field types are single leaf nodes — any saved children from an old
 // group-style version are intentionally discarded when loading the schema.
 const COMPOSITE_FIELD_TYPES = new Set(['name_group', 'address_group']);
+
+// Containers keep a children list even when saved empty, so an empty Step,
+// Repeater or Group still renders with its drop zone (2.3.1).
+const CHILD_CONTAINER_TYPES = new Set(['step', 'repeat_container', 'group_container']);
 
 function isColumnContainerType(type) {
   return typeof type === 'string' && type.endsWith(COLUMN_CONTAINER_SUFFIX);
@@ -34,18 +39,42 @@ function ensureArray(value, length) {
   return Array.isArray(value) ? value.map((col) => (Array.isArray(col) ? col : [])) : [];
 }
 
-function extractConfig(field) {
+// Layout containers store `columns` as arrays of child fields (or field
+// objects). A matrix stores the same key as a list of label strings.
+function isLayoutColumnList(columns) {
+  return Array.isArray(columns) && columns.some(
+    (entry) => Array.isArray(entry) || (entry !== null && typeof entry === 'object')
+  );
+}
+
+function extractConfig(rawField) {
+  // A node saved with both flat settings and a partial `config` (for example
+  // only { appearance: { width } }) is folded into one flat settings object,
+  // so the builder never round-trips the stray wrapper again (2.2.1, bug 1).
+  const field =
+    rawField && rawField.config && typeof rawField.config === 'object' && !Array.isArray(rawField.config)
+      ? fieldConfig(rawField)
+      : rawField;
   const {
     // Accept both 'children' (new canonical key) and 'fields' (legacy key for backward compat)
     children: childrenArray,
     fields: fieldsArray,
-    columns: columnChildren,
+    columns: rawColumns,
     id,
     type,
     kind,
     parentId,
     ...config
   } = field;
+
+  // String (or numeric) columns stay on the field. Only real layout
+  // columns — child-field arrays or field objects — are tree children.
+  let columnChildren = [];
+  if (isLayoutColumnList(rawColumns)) {
+    columnChildren = rawColumns;
+  } else if (rawColumns !== undefined) {
+    config.columns = rawColumns;
+  }
 
   // If 'fields' is a non-array object it is the composite sub-fields config, not a children
   // array. Restore it into config so it is not silently discarded.
@@ -79,6 +108,8 @@ function extractConfig(field) {
 
 export function normalizeSchema(schema) {
   const nodes = {};
+  // Fields changed while loading, so the builder can tell the user.
+  const conversions = [];
 
   nodes[ROOT_NODE_ID] = {
     id: ROOT_NODE_ID,
@@ -95,9 +126,37 @@ export function normalizeSchema(schema) {
       config,
       childFields: rawChildFields,
       columnChildren,
-      type,
+      type: rawType,
       kind: rawKind,
     } = extractConfig(field);
+
+    // A single checkbox saved with a list of options is really a set of
+    // checkboxes: turn it into Multiple choice (pick any) and say so
+    // (2.2.1, bug 7). The server refuses to publish the old shape.
+    let type = rawType;
+    if (rawType === 'checkbox' && Array.isArray(config.options) && config.options.length > 0) {
+      type = 'multiple_choice';
+      config.allowMultiple = true;
+      delete config.checkboxLabel;
+      conversions.push({ key: config.key, label: config.label || config.key, from: 'checkbox', to: 'multiple_choice' });
+    }
+
+    // 2.3.2: one setting for each of these. The Style tab "Hide label"
+    // becomes Field label visibility, and the text pattern message becomes
+    // the Custom validation message every field has.
+    if (config.appearance && config.appearance.hideLabel) {
+      if (!config.labelVisibility) {
+        config.labelVisibility = 'hidden';
+      }
+      const { hideLabel: _drop, ...restAppearance } = config.appearance; // eslint-disable-line no-unused-vars
+      config.appearance = restAppearance;
+    }
+    if (config.patternMessage && !config.validationMessage) {
+      config.validationMessage = config.patternMessage;
+    }
+    if (config.patternMessage !== undefined) {
+      delete config.patternMessage;
+    }
 
     // Migration guard: composite fields are always leaf nodes.
     // Discard any children that may have been saved when these types were
@@ -159,7 +218,7 @@ export function normalizeSchema(schema) {
           ? [childFields]
           : [];
       node.columns = ensureArray(seedColumns, columnCount).map(() => []);
-    } else if (Array.isArray(childFields) && childFields.length) {
+    } else if ((Array.isArray(childFields) && childFields.length) || CHILD_CONTAINER_TYPES.has(type)) {
       node.children = [];
     }
 
@@ -215,6 +274,7 @@ export function normalizeSchema(schema) {
   return {
     nodes,
     rootId: ROOT_NODE_ID,
+    conversions,
   };
 }
 
