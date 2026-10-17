@@ -52,6 +52,7 @@ class AdminMenu {
 		$this->submissionsRepo = $submissionsRepo ?? new SubmissionsRepository();
 
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
+		add_action( 'admin_head', array( $this, 'menu_icon_styles' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_init', array( $this, 'handle_actions' ) );
 		add_filter( 'admin_body_class', array( $this, 'filter_admin_body_class' ) );
@@ -132,14 +133,19 @@ class AdminMenu {
 	/**
 	 * Menu mark, the same tile used in the admin header.
 	 *
-	 * A data-URI SVG keeps the ink tile and white glyph. Dashicons cannot.
-	 *
 	 * @return string
 	 */
 	private static function menu_icon(): string {
-		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#1e1e1e"/><rect x="8" y="8.5" width="16" height="3" rx="1.5" fill="#fff"/><rect x="8" y="14.5" width="10" height="3" rx="1.5" fill="#fff"/><rect x="8" y="20.5" width="6" height="3" rx="1.5" fill="#fff"/><path d="M18.6 21.6l2.3 2.3 4.3-4.6" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+		// A file URL is drawn as an <img>. A data-URI SVG is painted as a flat
+		// admin-menu shape, which turns this mark into a white square.
+		return SUBTLEFORMS_PLUGIN_URL . 'assets/menu-icon.svg';
+	}
 
-		return 'data:image/svg+xml;base64,' . base64_encode( $svg );
+	/**
+	 * Keep the menu mark at the header size. Core fades and pads image icons.
+	 */
+	public function menu_icon_styles(): void {
+		echo '<style id="subtleforms-menu-icon">#adminmenu #toplevel_page_subtleforms .wp-menu-image img{width:20px;height:20px;padding:7px 0 0;opacity:1;object-fit:contain;}</style>';
 	}
 
 	/**
