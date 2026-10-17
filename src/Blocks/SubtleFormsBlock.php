@@ -81,6 +81,13 @@ final class SubtleFormsBlock {
 			return '';
 		}
 
+		// Login, schedule and entry-limit rules (2.0).
+		$blocked = \SubtleForms\Engine\FormRestrictions::blockedReason( (int) $form_id, \SubtleForms\Engine\FormRestrictions::activeSchema( (int) $form_id ) );
+		if ( $blocked !== null ) {
+			self::enqueue_frontend_assets();
+			return \SubtleForms\Engine\FormRestrictions::render( $blocked );
+		}
+
 		// Build CSS classes
 		$classes = array( 'subtleforms-block' );
 

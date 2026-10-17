@@ -290,7 +290,7 @@ export default function Edit({ attributes, setAttributes }) {
 
 	// Build form options for select control
 	const formOptions = [
-	{ label: __('— Select a form —', 'subtleforms'), value: 0 },
+	{ label: __('Select a form', 'subtleforms'), value: 0 },
 	...forms.map((form) => ({
 		label: form.title,
 		value: form.id,
