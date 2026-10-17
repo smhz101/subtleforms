@@ -10,7 +10,7 @@
  * - Picture Choice adds an image per option, picked from the Media Library.
  */
 
-import { useState, useMemo } from '@wordpress/element';
+import { useState, useMemo, useRef } from '@wordpress/element';
 import { Button, ToggleControl, TextareaControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { nanoid } from 'nanoid';
@@ -227,14 +227,16 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
   );
 
-  const options = useMemo(
-    () =>
-      (Array.isArray(field?.options) ? field.options : []).map((opt, i) => ({
-        ...opt,
-        _sid: `${opt.value ?? 'opt'}-${i}`,
-      })),
-    [field?.options]
-  );
+  // Row identity must not follow the stored value. Typing a label rewrites
+  // that value (until it is customised), and a value-based key remounts the
+  // input after every letter.
+  const rowIds = useRef([]);
+  const options = useMemo(() => {
+    const list = Array.isArray(field?.options) ? field.options : [];
+    const ids = list.map((_, i) => rowIds.current[i] || `opt_${nanoid(8)}`);
+    rowIds.current = ids;
+    return list.map((opt, i) => ({ ...opt, _sid: ids[i] }));
+  }, [field?.options]);
 
   if (!field || !CHOICE_TYPES.includes(field.type)) {
     return null;
