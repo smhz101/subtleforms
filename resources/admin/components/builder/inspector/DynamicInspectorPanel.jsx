@@ -13,7 +13,7 @@ import { useMemo, memo } from '@wordpress/element';
 import { Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useConfig } from '../context/ConfigContext';
-import { getControlComponent } from './controlRegistry';
+import CONTROL_REGISTRY, { getControlComponent } from './controlRegistry';
 import { PanelSection } from '../../../ui';
 
 import './DynamicInspectorPanel.scss';
@@ -85,6 +85,12 @@ function ControlRenderer( { ctrl, field, onUpdate, isReadOnly } ) {
 	if ( ctrl.type === 'subfield' ) {
 		props.subfields = Array.isArray( ctrl.subfields ) ? ctrl.subfields : [];
 	}
+	// Add-on controls get the full definition and the selected field.
+	if ( ! CONTROL_REGISTRY[ ctrl.type ] ) {
+		props.control = ctrl;
+		props.field = field;
+		props.onUpdate = onUpdate;
+	}
 
 	return <ControlComponent { ...props } />;
 }
@@ -96,7 +102,13 @@ function ControlRenderer( { ctrl, field, onUpdate, isReadOnly } ) {
  * @param {Function} props.onUpdate   - Callback: (changes: Object) => void
  * @param {boolean}  props.isReadOnly - Whether editing is disabled
  */
-function DynamicInspectorPanel( { field, onUpdate, isReadOnly = false } ) {
+function DynamicInspectorPanel( {
+	field,
+	onUpdate,
+	isReadOnly = false,
+	sections = null,
+	showEmpty = true,
+} ) {
 	const { fieldDefinitions } = useConfig();
 
 	const isLayout = useMemo( () => {
@@ -106,9 +118,28 @@ function DynamicInspectorPanel( { field, onUpdate, isReadOnly = false } ) {
 
 	const controls = useMemo( () => {
 		const def = fieldDefinitions?.[ field?.type ];
-		const source = isLayout ? def?.layoutControls : def?.inspectorControls;
-		return Array.isArray( source ) ? source : [];
-	}, [ fieldDefinitions, field?.type, isLayout ] );
+		const layout = Array.isArray( def?.layoutControls ) ? def.layoutControls : [];
+		const inspector = Array.isArray( def?.inspectorControls ) ? def.inspectorControls : [];
+		// Layout types declare their own controls in layoutControls; the 2.0
+		// settings model adds shared ones (CSS class) to inspectorControls.
+		const merged = isLayout ? [ ...layout, ...inspector ] : inspector;
+		const seen = new Set();
+		return merged
+			.filter( ( ctrl ) => {
+				const name = ctrl?.key ?? ctrl?.name;
+				if ( ! name || seen.has( name ) ) return false;
+				seen.add( name );
+				return true;
+			} )
+			.map( ( ctrl ) => {
+				const controlName = ctrl?.name ?? ctrl?.key;
+				const fallback = controlName === 'label' || controlName === 'description' ? 'general' : 'appearance';
+				return { ...ctrl, section: ctrl.section || fallback };
+			} )
+			.filter( ( ctrl ) => ! sections || sections.includes( ctrl.section ) )
+			// Sections become panels in the inspector, not inline headings.
+			.map( ( { section, ...ctrl } ) => ctrl ); // eslint-disable-line no-unused-vars
+	}, [ fieldDefinitions, field?.type, isLayout, sections ] );
 
 	const groups = useMemo( () => groupControls( controls ), [ controls ] );
 
@@ -117,6 +148,9 @@ function DynamicInspectorPanel( { field, onUpdate, isReadOnly = false } ) {
 	}
 
 	if ( controls.length === 0 ) {
+		if ( ! showEmpty ) {
+			return null;
+		}
 		return (
 			<Notice
 				status="info"
@@ -124,7 +158,7 @@ function DynamicInspectorPanel( { field, onUpdate, isReadOnly = false } ) {
 				className="sf-dynamic-inspector__empty"
 			>
 				{ isLayout
-					? __( 'Layout field — configure via canvas', 'subtleforms' )
+					? __( 'Layout field: configure via canvas', 'subtleforms' )
 					: __( 'No configurable settings for this field type.', 'subtleforms' ) }
 			</Notice>
 		);

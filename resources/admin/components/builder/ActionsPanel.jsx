@@ -5,7 +5,7 @@
  * Supports: webhook, email
  */
 
-import { useCallback } from '@wordpress/element';
+import { useCallback, useRef, useId } from '@wordpress/element';
 import {
   Button,
   TextControl,
@@ -31,6 +31,11 @@ import {
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import LogicEditor, { collectLogicFields, countRules } from './LogicEditor';
+import { isProFeature } from '../../utils/featureGate';
+import MergeTagMenu from '../merge-tags/MergeTagMenu';
+import MergeTagsHelpLink from '../merge-tags/MergeTagsHelp';
+import { insertAt } from '../merge-tags/mergeTags';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -44,8 +49,26 @@ function normalizeActions(raw) {
     id:       a.id      ?? uid(),
     type:     a.type    ?? 'webhook',
     enabled:  a.enabled !== undefined ? a.enabled : true,
-    settings: a.settings ?? {},
+    // Templates store email settings under `config` (2.3.1): show them.
+    settings: a.settings ?? (a.config && typeof a.config === 'object' ? a.config : {}),
   }));
+}
+
+/**
+ * What an action still needs before it can run (2.3.1, QA-02). An
+ * incomplete action never blocks saving; it shows "Needs setup".
+ *
+ * @return {string[]} Missing setting names.
+ */
+export function missingActionSettings(action) {
+  const s = action?.settings || {};
+  if (action?.type === 'email') {
+    return ['to', 'subject'].filter((k) => !String(s[k] || '').trim());
+  }
+  if (action?.type === 'webhook') {
+    return String(s.url || '').trim() ? [] : ['url'];
+  }
+  return [];
 }
 
 /** Default settings shape for a new webhook action */
@@ -55,17 +78,20 @@ const DEFAULT_WEBHOOK_SETTINGS = {
   headers:        {},
   payload_mode:   'full',
   custom_payload: '',
+  // Signed by default; SubtleForms Pro creates a secret for each webhook
+  // when the form is saved (2.3.0).
   signing: {
-    enabled: false,
+    enabled: true,
     secret:  '',
   },
 };
 
 /** Default settings shape for a new email action */
 const DEFAULT_EMAIL_SETTINGS = {
-  to:      '',
-  subject: '',
+  to:      '{admin_email}',
+  subject: __('New entry: {form_title}', 'subtleforms'),
   message: '',
+  format:  'html',
 };
 
 const ACTION_LABELS = {
@@ -88,6 +114,39 @@ const PAYLOAD_MODE_OPTIONS = [
   { label: __('Full submission data', 'subtleforms'), value: 'full'   },
   { label: __('Custom data (JSON)',    'subtleforms'), value: 'custom' },
 ];
+
+// ─── MergeTagField ──────────────────────────────────────────────────────────
+
+/**
+ * A setting with its own label and an "Insert tag" menu that puts a merge
+ * tag at the cursor (2.3.0).
+ */
+function MergeTagField({ label, fields, value, onChange, disabled, allowAll = true, render }) {
+  const ref = useRef(null);
+  const labelId = `sf-merge-tag-label-${useId()}`;
+  const insert = (tag) => {
+    const el = ref.current;
+    const start = el && typeof el.selectionStart === 'number' && document.activeElement === el ? el.selectionStart : null;
+    const end = el && typeof el.selectionEnd === 'number' && document.activeElement === el ? el.selectionEnd : null;
+    const next = insertAt(value, tag, start, end);
+    onChange(next.value);
+    window.requestAnimationFrame(() => {
+      if (el && typeof el.setSelectionRange === 'function') {
+        el.focus();
+        el.setSelectionRange(next.caret, next.caret);
+      }
+    });
+  };
+  return (
+    <div className='sf-merge-tag-field'>
+      <div className='sf-merge-tag-field__bar'>
+        <span id={labelId} className='sf-merge-tag-field__label'>{label}</span>
+        <MergeTagMenu fields={fields} onInsert={insert} disabled={disabled} allowAll={allowAll} target={label} />
+      </div>
+      {render(ref, labelId)}
+    </div>
+  );
+}
 
 // ─── HeadersEditor ──────────────────────────────────────────────────────────
 
@@ -123,7 +182,37 @@ function HeadersEditor({ value, onChange, disabled }) {
 
 // ─── SortableActionItem ──────────────────────────────────────────────────────
 
-function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove }) {
+/**
+ * "Only when" conditions on an action (Pro, 2.1). The action is skipped when
+ * its rules do not match; saving the entry always happens.
+ */
+function ActionConditions({ settings, fields, disabled, onChange }) {
+  const advanced = isProFeature('logic.conditional.advanced');
+  const logic = settings.logic && Array.isArray(settings.logic.groups) ? settings.logic : null;
+  const count = countRules(logic);
+
+  return (
+    <details className='sf-actions-panel__conditions' open={count > 0 || undefined}>
+      <summary>
+        {__('Only when…', 'subtleforms')}
+        <span className='sf-actions-panel__conditions-state'>
+          {count > 0 ? __('Conditional', 'subtleforms') : __('Every submission', 'subtleforms')}
+        </span>
+      </summary>
+      <LogicEditor
+        logic={logic}
+        availableFields={fields}
+        showAction={false}
+        locked={!advanced}
+        disabled={disabled}
+        emptyText={__('Runs for every submission. Add a rule to run it only for some answers.', 'subtleforms')}
+        onChange={(next) => onChange(next)}
+      />
+    </details>
+  );
+}
+
+function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fields }) {
   const {
     attributes,
     listeners,
@@ -142,6 +231,9 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove }) {
   const s         = action.settings ?? {};
   const signing   = s.signing ?? {};
   const isDisabled = isReadOnly || !action.enabled;
+  const missing    = missingActionSettings(action);
+  // Field warnings only matter while the action is switched on.
+  const showWarnings = action.enabled && missing.length > 0;
 
   /** Merge a patch into settings */
   const patchSettings = (patch) => onUpdate(index, { settings: { ...s, ...patch } });
@@ -182,6 +274,11 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove }) {
                 : ACTION_DESCRIPTIONS.webhook}
             </span>
           )}
+          {missing.length > 0 && (
+            <span className='sf-actions-panel__needs-setup'>
+              {__('Needs setup', 'subtleforms')}
+            </span>
+          )}
           {action.type === 'email' && (
             <span className='sf-actions-panel__item-summary'>
               {s.to
@@ -214,53 +311,102 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove }) {
       {action.type === 'email' && (
         <div className='sf-actions-panel__item-body'>
 
-          <TextControl
+          <MergeTagField
             label={__('To', 'subtleforms')}
-            type='email'
+            fields={fields}
+            allowAll={false}
+            disabled={isDisabled}
             value={s.to || ''}
             onChange={(v) => patchSettings({ to: v })}
-            placeholder='recipient@example.com'
-            disabled={isDisabled}
-            className={!s.to ? 'sf-field--empty' : ''}
-            help={__('You can use {{field_name}} to include form data. e.g. {{email}}', 'subtleforms')}
+            render={(ref, labelId) => (
+              <TextControl
+                ref={ref}
+                aria-labelledby={labelId}
+                hideLabelFromVision
+                label={__('To', 'subtleforms')}
+                type='text'
+                value={s.to || ''}
+                onChange={(v) => patchSettings({ to: v })}
+                placeholder='recipient@example.com'
+                disabled={isDisabled}
+                className={!s.to ? 'sf-field--empty' : ''}
+                help={__('An address, several separated by commas, or a field tag such as {field:email}.', 'subtleforms')}
+              />
+            )}
           />
-          {!s.to && (
+          {showWarnings && !s.to && (
             <Notice status='warning' isDismissible={false} className='sf-actions-panel__field-notice'>
               {__('A recipient email address is required.', 'subtleforms')}
             </Notice>
           )}
 
-          <TextControl
+          <MergeTagField
             label={__('Subject', 'subtleforms')}
-            type='text'
+            fields={fields}
+            allowAll={false}
+            disabled={isDisabled}
             value={s.subject || ''}
             onChange={(v) => patchSettings({ subject: v })}
-            placeholder={__('New submission from {{name}}', 'subtleforms')}
-            disabled={isDisabled}
-            className={!s.subject ? 'sf-field--empty' : ''}
-            help={__('You can use {{field_name}} to include form data.', 'subtleforms')}
+            render={(ref, labelId) => (
+              <TextControl
+                ref={ref}
+                aria-labelledby={labelId}
+                hideLabelFromVision
+                label={__('Subject', 'subtleforms')}
+                type='text'
+                value={s.subject || ''}
+                onChange={(v) => patchSettings({ subject: v })}
+                placeholder={__('New entry from {field:name}', 'subtleforms')}
+                disabled={isDisabled}
+                className={!s.subject ? 'sf-field--empty' : ''}
+              />
+            )}
           />
-          {!s.subject && (
+          {showWarnings && !s.subject && (
             <Notice status='warning' isDismissible={false} className='sf-actions-panel__field-notice'>
               {__('A subject line is required.', 'subtleforms')}
             </Notice>
           )}
 
-          <TextareaControl
+          <MergeTagField
             label={__('Message', 'subtleforms')}
-            value={s.message || ''}
-            rows={6}
-            onChange={(v) => patchSettings({ message: v })}
-            placeholder={__('Hello,\n\nYou received a new submission:\n\nName: {{name}}\nEmail: {{email}}', 'subtleforms')}
+            fields={fields}
             disabled={isDisabled}
-            className={!s.message ? 'sf-field--empty' : ''}
-            help={__('You can use {{field_name}} to include form data. Leave empty to send all submitted data.', 'subtleforms')}
+            value={s.message || ''}
+            onChange={(v) => patchSettings({ message: v })}
+            render={(ref, labelId) => (
+              <TextareaControl
+                ref={ref}
+                aria-labelledby={labelId}
+                hideLabelFromVision
+                label={__('Message', 'subtleforms')}
+                value={s.message || ''}
+                rows={6}
+                onChange={(v) => patchSettings({ message: v })}
+                placeholder={__('Hello,\n\nYou received a new entry on {form_title}:\n\n{all_fields}', 'subtleforms')}
+                disabled={isDisabled}
+              />
+            )}
           />
-          {!s.message && (
-            <Notice status='info' isDismissible={false} className='sf-actions-panel__field-notice'>
-              {__('No message set — the full submission data will be sent as JSON.', 'subtleforms')}
-            </Notice>
-          )}
+          <p className='sf-actions-panel__hint'>
+            {__('Leave the message empty to send every answer ({all_fields}).', 'subtleforms')}{' '}
+            <MergeTagsHelpLink />
+          </p>
+
+          <ToggleControl
+            label={__('Send as HTML', 'subtleforms')}
+            help={__('Formats the email with line breaks, rich text and a table for {all_fields}. Off sends plain text.', 'subtleforms')}
+            checked={s.format === 'html'}
+            onChange={(v) => patchSettings({ format: v ? 'html' : 'text' })}
+            disabled={isDisabled}
+          />
+
+          <ActionConditions
+            settings={s}
+            fields={fields}
+            disabled={isDisabled}
+            onChange={(logic) => patchSettings({ logic })}
+          />
 
         </div>
       )}
@@ -338,12 +484,19 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove }) {
                 type='text'
                 value={signing.secret || ''}
                 onChange={(v) => patchSigning({ secret: v })}
-                placeholder={__('Your secret key', 'subtleforms')}
+                placeholder={__('Created when you save the form', 'subtleforms')}
                 disabled={isDisabled}
                 help={__('Kept server-side; paste the same value into your endpoint to verify the signature.', 'subtleforms')}
               />
             )}
           </div>
+
+          <ActionConditions
+            settings={s}
+            fields={fields}
+            disabled={isDisabled}
+            onChange={(logic) => patchSettings({ logic })}
+          />
 
         </div>
       )}
@@ -355,6 +508,7 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove }) {
 
 export default function ActionsPanel({ schema, onChange, isReadOnly = false }) {
   const actions = normalizeActions(schema?.actions);
+  const logicFields = collectLogicFields(schema?.fields || []);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -449,6 +603,7 @@ export default function ActionsPanel({ schema, onChange, isReadOnly = false }) {
                   isReadOnly={isReadOnly}
                   onUpdate={handleUpdate}
                   onRemove={handleRemove}
+                  fields={logicFields}
                 />
               ))}
             </SortableContext>

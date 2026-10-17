@@ -17,6 +17,7 @@ export default function BuilderModalsController({
 
   // Publish modal
   showPublishConfirm,
+  isPublished = false,
   onClosePublishConfirm,
   onConfirmPublish,
 
@@ -34,6 +35,7 @@ export default function BuilderModalsController({
   // Preview
   showPreview,
   draftSchema,
+  formId = null,
   isDirty,
   onClosePreview,
 }) {
@@ -57,13 +59,23 @@ export default function BuilderModalsController({
       <ConfirmModal
         isOpen={showPublishConfirm}
         onClose={onClosePublishConfirm}
-        title={__('Publish Form', 'subtleforms')}
-        message={__(
-          'Publishing this form will make it visible on the frontend. Are you ready to publish?',
-          'subtleforms'
-        )}
+        title={
+          isPublished
+            ? __('Update live form', 'subtleforms')
+            : __('Publish Form', 'subtleforms')
+        }
+        message={
+          // A live form is already visible; the question is whether to push
+          // the edits (2.2.1, bug 12).
+          isPublished
+            ? __('Push your changes live?', 'subtleforms')
+            : __(
+                'Publishing this form will make it visible on the frontend. Are you ready to publish?',
+                'subtleforms'
+              )
+        }
         onConfirm={onConfirmPublish}
-        confirmText={__('Publish', 'subtleforms')}
+        confirmText={isPublished ? __('Update', 'subtleforms') : __('Publish', 'subtleforms')}
         confirmVariant='primary'
       />
 
@@ -91,6 +103,7 @@ export default function BuilderModalsController({
       {showPreview && (
         <FormPreviewModal
           schema={draftSchema}
+          formId={formId}
           isDirty={isDirty}
           onClose={onClosePreview}
         />

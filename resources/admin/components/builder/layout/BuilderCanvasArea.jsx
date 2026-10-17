@@ -5,7 +5,7 @@
  */
 
 import { useMemo } from '@wordpress/element';
-import { TabPanel, Notice } from '@wordpress/components';
+import { Notice } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import FormEditor from '../FormEditor';
 import FormSettings from '../FormSettings';
@@ -17,6 +17,7 @@ import { formUsesProFeatures, getProFeaturesUsed } from '../../../utils/proFeatu
 import './BuilderCanvasArea.scss';
 
 export default function BuilderCanvasArea({
+  view = 'build',
   draftSchema,
   fieldGroups,
   fieldDefinitions,
@@ -82,34 +83,12 @@ export default function BuilderCanvasArea({
         </div>
       )}
 
-      <TabPanel
-        className='subtleforms-builder-tabs-content'
-        activeClass='is-active'
-        tabs={[
-          {
-            name: 'build',
-            title: __('Build', 'subtleforms'),
-          },
-          {
-            name: 'settings',
-            title: __('Settings', 'subtleforms'),
-          },
-          {
-            name: 'entries',
-            title: __('Entries', 'subtleforms'),
-            className: 'data-tour-submissions-tab',
-          },
-          {
-            name: 'preview',
-            title: __('Preview', 'subtleforms'),
-          },
-        ]}>
-        {(tab) => (
+      <div className={`sf-builder-view sf-builder-view--${view}`} role='tabpanel' aria-labelledby={`sf-builder-view-${view}`}>
           <>
-            {tab.name === 'build' && showWelcome && (
+            {view === 'build' && showWelcome && (
               <EmptyFormWelcome />
             )}
-            {tab.name === 'build' && !showWelcome && (
+            {view === 'build' && !showWelcome && (
               <FormEditor
                 schema={draftSchema}
                 fieldGroups={fieldGroups}
@@ -120,7 +99,7 @@ export default function BuilderCanvasArea({
                 isReadOnly={isReadOnly}
               />
             )}
-            {tab.name === 'settings' && (
+            {view === 'settings' && (
               <FormSettings
                 schema={draftSchema}
                 validationErrors={validationErrors}
@@ -129,7 +108,7 @@ export default function BuilderCanvasArea({
                 isReadOnly={isReadOnly}
               />
             )}
-            {tab.name === 'entries' && currentFormId && (
+            {view === 'entries' && currentFormId && (
               <div className='sf-builder-canvas-area__entries-container'>
                 <SubmissionsTable
                   formId={currentFormId}
@@ -137,24 +116,24 @@ export default function BuilderCanvasArea({
                 />
               </div>
             )}
-            {tab.name === 'entries' && !currentFormId && (
+            {view === 'entries' && !currentFormId && (
               <div className='sf-builder-canvas-area__entries-container'>
                 <Notice status='info'>
                   {__('Save the form first to view entries', 'subtleforms')}
                 </Notice>
               </div>
             )}
-            {tab.name === 'preview' && (
+            {view === 'preview' && (
               <PreviewWorkspace
                 schema={draftSchema}
+                formId={currentFormId}
                 onChange={onSchemaChange}
                 isDirty={isDirty}
                 isReadOnly={isReadOnly}
               />
             )}
           </>
-        )}
-      </TabPanel>
+      </div>
     </>
   );
 }

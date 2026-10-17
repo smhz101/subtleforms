@@ -91,9 +91,28 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
               icon: field.icon || 'text',
               kind: field.kind || 'input',
               enabled: field.enabled !== false, // Pass through enabled status from API
+              category: field.category || category,
+              meta: field.meta || {},
+              is_pro: field.is_pro === true,
+              is_pro_locked: field.is_pro_locked === true,
             };
           });
         });
+        // Types hidden from the library (Group, Columns, Dropdown aliases...)
+        // still need their definition, or a form that uses them shows no
+        // settings for them in the inspector (2.3.2).
+        try {
+          const all = await apiGet('/fields');
+          const list = all.ok ? all.body?.data || all.body || {} : {};
+          (Array.isArray(list) ? list : Object.values(list)).forEach((field) => {
+            if (field && field.type && !definitions[field.type]) {
+              definitions[field.type] = field;
+            }
+          });
+        } catch (e) {
+          // The library still works; hidden types just show fewer settings.
+        }
+
         setFieldGroups(groups);
         setFieldDefinitions(definitions);
         setLoadingFields(false);
@@ -203,14 +222,19 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
           payload.metadata.title = generateDefaultTitle();
         }
 
+        // The form endpoint answers { data: form }; reading status off the
+        // envelope always gave "draft", so a live form opened in the builder
+        // was labelled Draft (2.2.1, bug 12).
+        const formBody = formRes.ok ? formRes.body?.data ?? formRes.body ?? {} : {};
+
         dispatch({
           type: BUILDER_ACTIONS.LOAD_SUCCESS,
           payload: {
             form: {
               id: formId,
               title: payload.metadata.title,
-              status: formRes.ok && formRes.body ? formRes.body.status || 'draft' : 'draft',
-              has_unpublished_changes: !!(formRes.ok && formRes.body && formRes.body.has_unpublished_changes),
+              status: formBody.status || 'draft',
+              has_unpublished_changes: !!formBody.has_unpublished_changes,
             },
             schema: payload,
           },

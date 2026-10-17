@@ -1,12 +1,13 @@
 import { useDroppable } from '@dnd-kit/core';
 import {
   SortableContext,
-  verticalListSortingStrategy,
+  rectSortingStrategy,
 } from '@dnd-kit/sortable';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import Icon from '../../ui/Icon';
 import InsertFieldButton from './InsertFieldButton';
+import { useDropTarget } from './dnd/BuilderDnd';
 import './ColumnDropZone.scss';
 
 export default function ColumnDropZone({
@@ -17,20 +18,31 @@ export default function ColumnDropZone({
   renderItem,
   spacing,
   compact = false,
+  getItemStyle,
+  getItemClassName,
 }) {
   const droppableId =
     columnIndex === null
       ? `${containerId}-root`
       : `${containerId}-col-${columnIndex}`;
 
-  const { setNodeRef, isOver } = useDroppable({
+  const { setNodeRef } = useDroppable({
     id: droppableId,
     data: {
+      kind: 'zone',
       parentId: containerId,
       columnIndex,
       position: items.length,
     },
   });
+
+  // Highlight the zone that will receive the drop, whether the pointer is
+  // over the zone itself or over one of its fields.
+  const target = useDropTarget();
+  const isOver =
+    !!target &&
+    target.parentId === containerId &&
+    (target.columnIndex ?? null) === (columnIndex ?? null);
 
   const gap = parseInt(spacing, 10) || 16;
   const padding = `${Math.max(8, Math.round(gap / 2))}px`;
@@ -39,6 +51,7 @@ export default function ColumnDropZone({
     <div
       ref={setNodeRef}
       className={clsx('sf-column-dropzone', { 'is-over': isOver })}
+      data-dropzone={droppableId}
       style={{
         '--dropzone-padding': padding,
         '--dropzone-gap': `${gap}px`,
@@ -54,18 +67,23 @@ export default function ColumnDropZone({
       <SortableContext
         id={droppableId}
         items={items}
-        strategy={verticalListSortingStrategy}>
-        {items.map((itemId, index) => (
-          <div key={itemId} className='sf-column-dropzone__item'>
-            {renderItem(itemId, index)}
-            <InsertFieldButton
-              parentId={containerId}
-              columnIndex={columnIndex}
-              position={index + 1}
-              onRequestInsert={onRequestInsert}
-            />
-          </div>
-        ))}
+        strategy={rectSortingStrategy}>
+        <div className='sf-column-dropzone__items'>
+          {items.map((itemId, index) => (
+            <div
+              key={itemId}
+              className={clsx('sf-column-dropzone__item', getItemClassName?.(itemId))}
+              style={getItemStyle?.(itemId)}>
+              {renderItem(itemId, index)}
+              <InsertFieldButton
+                parentId={containerId}
+                columnIndex={columnIndex}
+                position={index + 1}
+                onRequestInsert={onRequestInsert}
+              />
+            </div>
+          ))}
+        </div>
       </SortableContext>
 
       {items.length === 0 && (

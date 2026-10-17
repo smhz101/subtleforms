@@ -19,6 +19,8 @@ const FieldChrome = memo(function FieldChrome({
   dragHandleListeners,
   toolbarActions,
   validationMessages = [],
+  appearanceStyle,
+  appearanceClass,
 }) {
   const [isHovered, setIsHovered] = useState(false);
   const [isFocused, setIsFocused] = useState(false);
@@ -35,11 +37,23 @@ const FieldChrome = memo(function FieldChrome({
   const hasValidationMessages =
     Array.isArray(validationMessages) && validationMessages.length > 0;
 
+  // Only this field's own group handles Enter/Space, and the event stops
+  // here: a field inside a Repeater, Group or column selects itself, not its
+  // container (QA-10).
   const handleKeyDown = (e) => {
+    if (e.target !== e.currentTarget) {
+      return;
+    }
     if (e.key === 'Enter' || e.key === ' ') {
       e.preventDefault();
+      e.stopPropagation();
       onSelect();
     }
+  };
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    onSelect();
   };
 
   return (
@@ -51,7 +65,7 @@ const FieldChrome = memo(function FieldChrome({
         'is-hovered': isHovered,
         'sf-field-chrome--validation-error': hasValidationMessages,
       })}
-      onClick={onSelect}
+      onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onFocus={() => setIsFocused(true)}
@@ -60,7 +74,7 @@ const FieldChrome = memo(function FieldChrome({
       tabIndex='0'
       role='group'
       aria-label={__('Field group. Press Enter to select.', 'subtleforms')}>
-      <div className='sf-field-chrome__inner'>
+      <div className={clsx('sf-field-chrome__inner', appearanceClass)} style={appearanceStyle}>
         {hasValidationMessages && (isSelected || isHovered) && (
           <div className='sf-field-chrome__validation-message'>
             {validationMessages[0]}
@@ -78,6 +92,13 @@ const FieldChrome = memo(function FieldChrome({
         onDelete={toolbarActions?.onDelete}
         canMoveUp={toolbarActions?.canMoveUp}
         canMoveDown={toolbarActions?.canMoveDown}
+        width={toolbarActions?.width}
+        onWidthChange={toolbarActions?.onWidthChange}
+        moveTargets={toolbarActions?.moveTargets}
+        onMoveTo={toolbarActions?.onMoveTo}
+        onReplace={toolbarActions?.onReplace}
+        moveUpLabel={toolbarActions?.moveUpLabel}
+        moveDownLabel={toolbarActions?.moveDownLabel}
       />
     </div>
   );

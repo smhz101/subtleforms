@@ -10,10 +10,9 @@
 import { useRef } from '@wordpress/element';
 import { Button, DropdownMenu, MenuGroup, MenuItem } from '@wordpress/components';
 import { chevronDown } from '@wordpress/icons';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../../../ui/Icon';
 import HelpMenu from '../../HelpMenu';
-import LicenseStatusIndicator from '../../LicenseStatusIndicator';
 import { BUILDER_ACTIONS } from '../../../hooks/useBuilderReducer';
 import {
   getFormStatusBadgeConfig,
@@ -63,12 +62,7 @@ export function BuilderTitle({
           type='button'
           onClick={() => setIsEditingTitle(true)}
           className='sf-builder-header-bar__title-button'
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = '#2271b1';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = '#1e1e1e';
-          }}>
+          title={__('Rename form', 'subtleforms')}>
           {formTitle || __('Untitled Form', 'subtleforms')}
         </button>
       )}
@@ -150,35 +144,31 @@ export function BuilderActions({
       <span
         data-tour='status-badge'
         className={`sf-builder-header-bar__mode-badge ${statusBadgeClass}`}
-        style={{ borderRadius: '4px' }}
         title={statusBadgeTitle}>
+        <span className='sf-builder-header-bar__mode-dot' aria-hidden='true' />
         {statusBadgeLabel}
       </span>
 
-      {/* Shortcode Pill */}
+      {/* Shortcode — compact copy button; the full shortcode is in the tooltip */}
       {shortcode && (
-        <button
-          type='button'
+        <Button
+          size='compact'
           onClick={() => onCopyShortcode(shortcode)}
-          className={`sf-builder-header-bar__shortcode-button ${
-            copyState === 'copied'
-              ? 'sf-builder-header-bar__shortcode-button--copied'
-              : ''
+          className={`sf-builder-header-bar__shortcode-button${
+            copyState === 'copied' ? ' sf-builder-header-bar__shortcode-button--copied' : ''
           }`}
-          title={
+          icon={copyState === 'copied' ? <Icon.Check size={16} /> : <Icon.Code size={16} />}
+          label={
             copyState === 'copied'
-              ? __('Copied to clipboard!', 'subtleforms')
-              : __('Click to copy shortcode', 'subtleforms')
-          }>
-          {copyState === 'copied' ? (
-            <>
-              <Icon.Check size={14} />
-              {__('Copied!', 'subtleforms')}
-            </>
-          ) : (
-            shortcode
-          )}
-        </button>
+              ? __('Shortcode copied', 'subtleforms')
+              : sprintf(
+                  /* translators: %s: form shortcode */
+                  __('Copy shortcode %s', 'subtleforms'),
+                  shortcode
+                )
+          }
+          showTooltip
+        />
       )}
 
       {/* Save Status Indicator */}
@@ -232,25 +222,29 @@ export function BuilderActions({
 
       {/* Primary Actions Group */}
       <div className='sf-builder-header-bar__action-buttons'>
-        <LicenseStatusIndicator variant="inline" showDescription={false} />
-        
         <Button
           variant='tertiary'
           onClick={() => dispatch({ type: BUILDER_ACTIONS.UNDO_SCHEMA })}
           disabled={!canUndo || busy}
-          className='sf-builder-header-bar__undo-button'
-          title={__('Undo (Ctrl/Cmd+Z)', 'subtleforms')}>
-          <Icon.Undo className='sf-builder-header-bar__undo-icon' />
-        </Button>
+          accessibleWhenDisabled
+          className='sf-builder-header-bar__icon-button sf-builder-header-bar__undo-button'
+          label={__('Undo', 'subtleforms')}
+          shortcut={__('Ctrl/Cmd+Z', 'subtleforms')}
+          showTooltip
+          icon={<Icon.Undo size={18} className='sf-builder-header-bar__undo-icon' />}
+        />
 
         <Button
           variant='tertiary'
           onClick={() => dispatch({ type: BUILDER_ACTIONS.REDO_SCHEMA })}
           disabled={!canRedo || busy}
-          className='sf-builder-header-bar__redo-button'
-          title={__('Redo (Shift+Ctrl/Cmd+Z)', 'subtleforms')}>
-          <Icon.Redo className='sf-builder-header-bar__redo-icon' />
-        </Button>
+          accessibleWhenDisabled
+          className='sf-builder-header-bar__icon-button sf-builder-header-bar__redo-button'
+          label={__('Redo', 'subtleforms')}
+          shortcut={__('Shift+Ctrl/Cmd+Z', 'subtleforms')}
+          showTooltip
+          icon={<Icon.Redo size={18} className='sf-builder-header-bar__redo-icon' />}
+        />
 
         <HelpMenu
           onStartTour={onStartTour}
@@ -390,14 +384,6 @@ export function BuilderActions({
           </DropdownMenu>
         </div>
 
-        <Button
-          variant='tertiary'
-          onClick={onSaveAndClose}
-          disabled={busy}
-          className='sf-builder-header-bar__close-button'
-          title={__('Return to the forms list', 'subtleforms')}>
-          {__('Close', 'subtleforms')}
-        </Button>
       </div>
     </div>
   );

@@ -3,6 +3,7 @@ import { Button, Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import FormPreviewBody from '../form-preview/FormPreviewBody';
 import FormAppearancePanel from './appearance/FormAppearancePanel';
+import { appearanceBackdrop } from '../../../shared/appearance';
 import './PreviewWorkspace.scss';
 
 /**
@@ -16,13 +17,14 @@ import './PreviewWorkspace.scss';
  */
 
 const VIEWPORTS = [
-  { id: 'desktop', label: __( 'Desktop', 'subtleforms' ), width: null },
+  { id: 'desktop', label: __( 'Desktop', 'subtleforms' ), width: 960 },
   { id: 'tablet', label: __( 'Tablet', 'subtleforms' ), width: 768 },
   { id: 'mobile', label: __( 'Mobile', 'subtleforms' ), width: 380 },
 ];
 
 export default function PreviewWorkspace( {
   schema,
+  formId = null,
   onChange,
   isDirty = false,
   isReadOnly = false,
@@ -68,12 +70,22 @@ export default function PreviewWorkspace( {
           showControls ? '' : ' is-controls-hidden'
         }` }>
         <div className='sf-preview-workspace__canvas'>
-          <div
-            className='sf-preview-workspace__stage'
-            style={
-              active.width ? { maxWidth: `${ active.width }px` } : undefined
-            }>
-            <FormPreviewBody schema={ schema } isDirty={ isDirty } />
+          <div className='sf-preview-workspace__stage'>
+            <div
+              className='sf-preview-workspace__form'
+              style={ {
+                maxWidth: `${ active.width }px`,
+                // A form made for a dark footer is previewed on one (2.3.0).
+                ...( appearanceBackdrop( schema?.metadata?.appearance )
+                  ? { background: appearanceBackdrop( schema?.metadata?.appearance ), padding: '24px' }
+                  : {} ),
+              } }>
+              <FormPreviewBody
+                schema={ schema }
+                formId={ formId }
+                isDirty={ isDirty }
+              />
+            </div>
           </div>
         </div>
 

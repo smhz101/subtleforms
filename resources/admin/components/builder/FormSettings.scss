@@ -27,6 +27,13 @@
 		gap: var(--sf-space-4);
 	}
 
+	&__intro {
+		margin: 0 0 var(--sf-space-4);
+		font-size: var(--sf-text-base);
+		line-height: var(--sf-leading-normal);
+		color: var(--sf-text-muted);
+	}
+
 	&__hint {
 		font-size: var(--sf-text-base);
 		line-height: var(--sf-leading-normal);
@@ -318,4 +325,160 @@
 			cursor: grabbing;
 		}
 	}
+}
+
+// ── 2.0 ─────────────────────────────────────────────────────────────────────
+// Settings read like core's document settings: one card of collapsible
+// sections, sentence-case labels, even spacing, neutral form-type note.
+.sf-form-settings {
+	&__container { max-width: 720px; }
+
+	&__title {
+		margin-bottom: 16px;
+		font-size: var(--sf-text-md);
+	}
+
+	&__intro {
+		margin: 0 0 16px;
+		font-size: 12px;
+		color: var(--sf-text-muted);
+	}
+
+	&__row {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 12px;
+
+		@media (max-width: 600px) { grid-template-columns: 1fr; }
+	}
+
+	&__container > .components-panel {
+		border-radius: var(--sf-radius-lg);
+		box-shadow: none;
+	}
+
+	.components-panel__body {
+		> .components-panel__body-title .components-panel__body-toggle {
+			padding: 18px 20px;
+			font-size: var(--sf-text-sm);
+			font-weight: var(--sf-weight-semibold);
+		}
+
+		&.is-opened { padding: 0 20px 20px; }
+
+		&.is-opened > .components-panel__body-title { margin: 0 -20px; }
+
+		.components-base-control,
+		.components-toggle-group-control,
+		.sf-form-settings__row {
+			margin-bottom: 16px;
+		}
+
+		.components-base-control__label,
+		.components-input-control__label.components-input-control__label,
+		.components-toggle-group-control .components-base-control__label {
+			font-size: var(--sf-text-sm);
+			font-weight: var(--sf-weight-medium);
+			text-transform: none;
+			color: var(--sf-text);
+		}
+
+		.components-base-control__help {
+			font-size: 12px;
+			color: var(--sf-text-muted);
+		}
+	}
+}
+
+.sf-form-settings .sf-form-type-banner {
+	&,
+	&[data-form-type] {
+		margin-bottom: 16px;
+		padding: 12px 16px;
+		border: 1px solid var(--sf-border);
+		border-radius: var(--sf-radius-md);
+		background: var(--sf-bg-surface);
+	}
+
+	&[data-form-type] .sf-form-type-banner__title,
+	.sf-form-type-banner__title {
+		margin: 0 0 2px;
+		font-size: var(--sf-text-sm);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
+	}
+
+	&[data-form-type] .sf-form-type-banner__description,
+	.sf-form-type-banner__description {
+		margin: 0;
+		font-size: 12px;
+		color: var(--sf-text-muted);
+	}
+}
+
+// ── Checkout (2.1) ───────────────────────────────────────────────────────────
+.sf-checkout-panel {
+	&__upgrade {
+		display: flex;
+		align-items: center;
+		gap: var(--sf-space-2);
+		padding: var(--sf-space-3) var(--sf-space-4);
+		border: 1px solid var(--sf-border);
+		border-radius: var(--sf-radius-md);
+		background: var(--sf-bg-subtle);
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-secondary);
+
+		svg { flex-shrink: 0; fill: none; }
+		span { flex: 1 1 auto; }
+	}
+
+	&__billing {
+		padding-top: var(--sf-space-4);
+		border-top: 1px solid var(--sf-border-subtle);
+
+		.sf-form-settings__hint { margin: 0 0 var(--sf-space-3); }
+	}
+
+	&__grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+		gap: var(--sf-space-4);
+	}
+}
+
+// Email action: hint under the message (2.3.0).
+.sf-actions-panel__hint {
+	margin: -4px 0 12px;
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--sf-text-muted, #757575);
+
+	.components-button.is-link {
+		font-size: 12px;
+	}
+}
+
+// An action that is missing a required setting (2.3.1).
+.sf-actions-panel__needs-setup {
+	display: inline-flex;
+	align-items: center;
+	margin-inline-start: 8px;
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: var(--sf-warning-bg, #fcf9e8);
+	color: var(--sf-warning, #8a6100);
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 18px;
+	vertical-align: middle;
+}
+
+// Form type selector and field defaults (2.3.2): space between controls.
+.sf-form-type-control {
+	margin-bottom: var(--sf-space-4);
+}
+
+.sf-form-settings .components-panel__body .components-base-control + .components-base-control {
+	margin-top: var(--sf-space-4);
 }

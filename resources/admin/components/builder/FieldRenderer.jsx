@@ -1,9 +1,17 @@
-import { memo, useState, useRef, useCallback, useEffect } from '@wordpress/element';
+import { memo, useState, useRef, useCallback, useEffect, useContext } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { getFieldIcon } from '../../utils/iconRegistry';
 import Icon from '../../ui/Icon';
 import NameFieldRenderer from './NameFieldRenderer';
 import AddressFieldRenderer from './AddressFieldRenderer';
+import { ProductPreview, ChoicePreview, SummaryPreview, CardPreview } from './PaymentPreviews';
+import { getCanvasPreview } from '../../../shared/extend';
+import { fieldDisplay } from '../../../shared/fieldDisplay';
+import { fieldConfig } from '../../../shared/fieldConfig';
+import { orderedCountries, preferredCountryCodes, COUNTRIES } from '../../../shared/countries';
+import { toggleInitialValue, toggleIsOn } from '../../../shared/toggleState';
+import ChainedSelect from '../../../frontend/components/fields/ChainedSelect';
+import { ConfigContext } from './context/ConfigContext';
 import './FieldRenderer.scss';
 
 // Types that do not accept user input — required indicator suppressed
@@ -11,8 +19,8 @@ const NON_INPUT_TYPES = new Set([
   'section_break', 'form_step', 'repeat_field', 'html', 'hidden',
   'one_column_container', 'two_column_container', 'three_column_container',
   'four_column_container', 'five_column_container', 'six_column_container',
-  'repeat_container', 'group_container', 'step', 'action_hook',
-  'payment_summary', 'payment_hidden_price',
+  'repeat_container', 'group_container', 'step', 'action_hook', 'disclaimer',
+  'payment_summary', 'payment_hidden_price', 'calculation', 'payment_card',
   'recaptcha', 'hcaptcha', 'turnstile',
 ]);
 
@@ -24,9 +32,16 @@ const KNOWN_TYPES = new Set([
   'country', 'chained_select', 'password', 'rating', 'range_slider',
   'color_picker', 'signature', 'image_upload', 'file_upload',
   'name_group', 'address_group',
-  'payment_amount', 'payment_coupon',
+  'payment_amount', 'payment_coupon', 'payment_product', 'payment_choice',
   'post_create', 'quiz_score',
+  'rich_text', 'net_promoter_score', 'checkbox_grid',
+  'toggle', 'scale', 'picture_choice', 'calculation',
 ]);
+
+/** Whether authored HTML has any visible text. */
+function hasText(html) {
+  return typeof html === 'string' && html.replace(/<[^>]*>/g, '').replace(/&nbsp;|\s/g, '').length > 0;
+}
 
 /**
  * FieldRenderer - Memoized field preview component
@@ -34,7 +49,7 @@ const KNOWN_TYPES = new Set([
  * Wrapped in memo() to prevent unnecessary re-renders during drag operations.
  * Only re-renders when field prop changes.
  */
-const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, onLabelChange }) {
+const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, onLabelChange, interactive = false }) {
   // Null-safe destructure — required before hooks so all hooks run unconditionally
   const { type, label, required, placeholder, options, subFields } = field || {};
 
@@ -45,6 +60,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
   // ── Inline label editing state — ALL hooks before any early return ──────────
   const [isEditingLabel, setIsEditingLabel] = useState(false);
   const [editLabelValue, setEditLabelValue] = useState('');
+  const [chainedSelections, setChainedSelections] = useState([]);
   const labelInputRef = useRef(null);
 
   useEffect(() => {
@@ -112,6 +128,11 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
     setTouched(true);
   }, [previewMode]);
 
+  // Label visibility and help text placement, with the form's defaults: the
+  // canvas shows them as the live form does (2.3.2).
+  const builderConfig = useContext(ConfigContext);
+  const display = fieldDisplay(field, builderConfig?.fieldDefaults || {});
+
   // ── Early return AFTER all hooks ────────────────────────────────────────────
   // Guard against null/undefined field or missing type — do NOT crash builder
   if (!field || !field.type) {
@@ -161,7 +182,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           onClick={(e) => e.stopPropagation()}
         />
       ) : (
-        <div className='sf-field-renderer__header'>
+        <div className={`sf-field-renderer__header${display.labelHidden && !NON_INPUT_TYPES.has(type) ? ' is-label-hidden' : ''}`}>
           <span className='sf-field-renderer__icon'>
             <FieldIcon size={14} />
           </span>
@@ -174,7 +195,18 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
               <span className='sf-field-renderer__required-mark'>*</span>
             )}
           </label>
+          {display.labelHidden && !NON_INPUT_TYPES.has(type) && (
+            <span className='sf-field-renderer__label-hidden-badge'>
+              <Icon.EyeOff size={12} aria-hidden='true' />
+              {__('Label hidden', 'subtleforms')}
+            </span>
+          )}
         </div>
+      )}
+
+      {/* Help text above the input (2.3.2) */}
+      {field.description && !NON_INPUT_TYPES.has(type) && display.descriptionAbove && (
+        <p className='sf-field-renderer__help-text sf-field-renderer__help-text--above'>{field.description}</p>
       )}
 
       {/* Render appropriate input based on type */}
@@ -182,24 +214,100 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         type === 'email' ||
         type === 'phone' ||
         type === 'tel' ||
-        type === 'url') && (
-        <input
-          type={type === 'email' ? 'email' : type === 'url' ? 'url' : 'text'}
-          placeholder={placeholder || ''}
-          className={inputClass}
-          readOnly
-          tabIndex='-1'
-        />
+        type === 'url' ||
+        type === 'number') && (
+        <div className={field.prefix || field.suffix ? 'sf-field-renderer__affix' : undefined}>
+          {field.prefix && <span className='sf-field-renderer__affix-part'>{field.prefix}</span>}
+          <input
+            type={type === 'email' ? 'email' : type === 'url' ? 'url' : type === 'number' ? 'number' : 'text'}
+            placeholder={placeholder || ''}
+            className={inputClass}
+            readOnly
+            tabIndex='-1'
+          />
+          {field.suffix && <span className='sf-field-renderer__affix-part'>{field.suffix}</span>}
+        </div>
       )}
 
-      {type === 'number' && (
-        <input
-          type='number'
-          placeholder={placeholder || ''}
-          className={inputClass}
-          readOnly
-          tabIndex='-1'
-        />
+      {type === 'toggle' && (() => {
+        const cfg = fieldConfig(field);
+        const on = toggleIsOn(toggleInitialValue(cfg), cfg);
+        return (
+          <div className='sf-field-renderer__toggle'>
+            <span className={`sf-field-renderer__toggle-track${on ? ' is-on' : ''}`} aria-hidden='true'>
+              <span className='sf-field-renderer__toggle-thumb' />
+            </span>
+            <span>{field.toggleLabel || __('Yes', 'subtleforms')}</span>
+          </div>
+        );
+      })()}
+
+      {type === 'scale' && (() => {
+        const min = parseInt(field.scaleMin ?? 1, 10);
+        const max = Math.max(min + 1, Math.min(10, parseInt(field.scaleMax ?? 5, 10)));
+        const points = [];
+        for (let i = min; i <= max; i++) points.push(i);
+        return (
+          <div className='sf-field-renderer__scale'>
+            <div className='sf-field-renderer__scale-row' style={{ '--sf-scale-count': points.length }}>
+              {points.map((p) => (
+                <span key={p} className='sf-field-renderer__scale-point'>{p}</span>
+              ))}
+            </div>
+            {(field.minLabel || field.maxLabel) && (
+              <div className='sf-field-renderer__nps-labels'>
+                <span>{field.minLabel}</span>
+                <span>{field.maxLabel}</span>
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
+      {type === 'picture_choice' && (
+        <div
+          className='sf-field-renderer__pictures'
+          style={{ '--sf-picture-cols': parseInt(field.pictureColumns || 3, 10) }}>
+          {(options || []).map((opt, i) => (
+            <div key={opt.value || i} className='sf-field-renderer__picture'>
+              <div className='sf-field-renderer__picture-media'>
+                {opt.image ? <img src={opt.image} alt='' /> : <Icon.Image size={20} />}
+              </div>
+              <span>{opt.label}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {type === 'calculation' && (
+        String(field.formula || '').trim() ? (
+          <div className='sf-field-renderer__calculation'>
+            <span className='sf-field-renderer__calculation-value'>
+              {field.prefix}0{parseInt(field.decimals ?? 2, 10) > 0 ? '.' + '0'.repeat(parseInt(field.decimals ?? 2, 10)) : ''}{field.suffix}
+            </span>
+            <code className='sf-field-renderer__calculation-formula'>{field.formula}</code>
+          </div>
+        ) : (
+          // No formula yet: say what to do instead of showing a fake 0.00. The
+          // field is hidden on the live form until it has one (bug 9).
+          <p className='sf-field-renderer__placeholder-note'>
+            {__('Add a formula in the field settings', 'subtleforms')}
+          </p>
+        )
+      )}
+
+      {type === 'disclaimer' && (
+        hasText(field.content) ? (
+          <div
+            className={`sf-field-renderer__disclaimer sf-field-renderer__disclaimer--${field.variant || 'info'}`}
+            dangerouslySetInnerHTML={{ __html: field.content }}
+          />
+        ) : (
+          // Empty disclaimers are not shown on the live form (bug 10).
+          <p className='sf-field-renderer__placeholder-note'>
+            {__('Add the disclaimer text in the field settings. Empty disclaimers are hidden on the live form.', 'subtleforms')}
+          </p>
+        )
       )}
 
       {type === 'textarea' && (
@@ -276,7 +384,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       )}
 
       {type === 'radio' && options && (
-        <div className='sf-field-renderer__options-list'>
+        <div className={`sf-field-renderer__options-list sf-field-renderer__options-list--${field.optionLayout || 'stacked'}`}>
           {options.map((opt, idx) => (
             <div key={idx} className='sf-field-renderer__checkbox-wrapper'>
               <input
@@ -294,11 +402,11 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       )}
 
       {type === 'multiple_choice' && options && (
-        <div className='sf-field-renderer__options-list'>
+        <div className={`sf-field-renderer__options-list sf-field-renderer__options-list--${field.optionLayout || 'stacked'}`}>
           {options.map((opt, idx) => (
             <div key={idx} className='sf-field-renderer__checkbox-wrapper'>
               <input
-                type='checkbox'
+                type={field.allowMultiple === false ? 'radio' : 'checkbox'}
                 className='sf-field-renderer__checkbox'
                 tabIndex='-1'
               />
@@ -310,7 +418,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
-      {(type === 'dropdown' || type === 'select') && options && (
+      {(type === 'dropdown' || type === 'select') && (
         <select
           className={selectClass}
           disabled
@@ -318,7 +426,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           <option>
             {placeholder || __('Select an option', 'subtleforms')}
           </option>
-          {options.map((opt, idx) => (
+          {(fieldConfig(field).options || options || []).map((opt, idx) => (
             <option key={idx} value={opt.value}>
               {opt.label}
             </option>
@@ -353,38 +461,35 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
-      {type === 'country' && (
-        <div className='sf-country-field'>
-          <select
-            className={selectClass}
-            disabled
-            tabIndex='-1'>
-            <option>
-              {placeholder || __('Select a country', 'subtleforms')}
-            </option>
-            <option>United States</option>
-            <option>United Kingdom</option>
-            <option>Canada</option>
-            <option>Australia</option>
-            <option>Germany</option>
-            <option>France</option>
-            <option>Spain</option>
-            <option>Italy</option>
-            <option>Japan</option>
-            <option>China</option>
-            <option>{__('...and 235+ more countries', 'subtleforms')}</option>
-          </select>
-          <div className='sf-country-field__info'>
-            {(() => { const CountryIcon = getFieldIcon('country'); return <CountryIcon size={16} />; })()}
-            <span className='sf-country-field__text'>
-              {__(
-                'Full ISO-3166 country list available on frontend',
-                'subtleforms'
-              )}
-            </span>
+      {type === 'country' && (() => {
+        const cfg = fieldConfig(field);
+        const outputFormat = cfg.output_format || 'code';
+        const countries = orderedCountries(preferredCountryCodes(cfg.preferred_countries));
+        const raw = cfg.default_country || '';
+        const matched = COUNTRIES.find((country) => country.code === String(raw).toUpperCase());
+        const selected = outputFormat === 'name' ? (matched ? matched.name : raw) : raw;
+        return (
+          <div className='sf-country-field'>
+            <select
+              className={selectClass}
+              disabled={!interactive}
+              tabIndex={interactive ? undefined : '-1'}
+              value={selected}
+              onChange={() => {}}>
+              <option value=''>
+                {placeholder || __('Select a country', 'subtleforms')}
+              </option>
+              {countries.map((country) => (
+                <option
+                  key={country.code}
+                  value={outputFormat === 'name' ? country.name : country.code}>
+                  {country.name}
+                </option>
+              ))}
+            </select>
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {type === 'hidden' && (
         <div className='sf-field-renderer__hidden-field'>
@@ -394,10 +499,19 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       )}
 
       {type === 'html' && (
-        <div className='sf-field-renderer__warning-box'>
-          <Icon.Code size={14} />
-          {__('HTML Content Block', 'subtleforms')}
-        </div>
+        // The content as visitors see it (2.3.2), not a locked-looking
+        // placeholder. Same trust level as the Notice field above: authored by
+        // the admin and sanitized on save.
+        hasText(field.content) || /<(img|hr|iframe|video)\b/i.test(field.content || '') ? (
+          <div
+            className='sf-field-renderer__html'
+            dangerouslySetInnerHTML={{ __html: field.content }}
+          />
+        ) : (
+          <p className='sf-field-renderer__placeholder-note'>
+            {__('Add HTML content in the field settings.', 'subtleforms')}
+          </p>
+        )
       )}
 
       {type === 'image_upload' && (
@@ -443,45 +557,19 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
-      {type === 'payment_summary' && (
-        <div className='sf-field-renderer__calculation-box'>
-          {field.showSubtotal !== false && (
-            <div className='sf-field-renderer__calc-row'>
-              <span>
-                <span className='sf-field-renderer__calc-row-icon'><Icon.DollarSign size={12} /></span>
-                {__('Subtotal:', 'subtleforms')}
-              </span>
-              <span className='sf-field-renderer__calc-value'>$0.00</span>
-            </div>
-          )}
-          {field.showTax && (
-            <div className='sf-field-renderer__calc-row'>
-              <span>
-                <span className='sf-field-renderer__calc-row-icon'><Icon.Database size={12} /></span>
-                {field.taxRate ? `${__('Tax', 'subtleforms')} (${field.taxRate}%):` : __('Tax:', 'subtleforms')}
-              </span>
-              <span className='sf-field-renderer__calc-value'>$0.00</span>
-            </div>
-          )}
-          <div className='sf-field-renderer__calc-row sf-field-renderer__calc-row--discount'>
-            <span>
-              <span className='sf-field-renderer__calc-row-icon'><Icon.Tag size={12} /></span>
-              {__('Discount:', 'subtleforms')}
-            </span>
-            <span className='sf-field-renderer__calc-value sf-field-renderer__calc-value--discount'>-$0.00</span>
-          </div>
-          <div className='sf-field-renderer__calc-divider'></div>
-          {field.showTotal !== false && (
-            <div className='sf-field-renderer__calc-total'>
-              <span>
-                <span className='sf-field-renderer__calc-total-icon'><Icon.DollarSign size={14} /></span>
-                {__('Total:', 'subtleforms')}
-              </span>
-              <span className='sf-field-renderer__calc-total-value'>$0.00</span>
-            </div>
-          )}
-        </div>
-      )}
+      {type === 'payment_summary' && <SummaryPreview field={field} />}
+
+      {type === 'payment_product' && <ProductPreview field={field} />}
+
+      {type === 'payment_choice' && <ChoicePreview field={field} />}
+
+      {type === 'payment_card' && <CardPreview />}
+
+      {/* Canvas previews registered by add-ons (registerCanvasPreview). */}
+      {(() => {
+        const AddonPreview = getCanvasPreview(type);
+        return AddonPreview ? <AddonPreview field={field} /> : null;
+      })()}
 
       {type === 'payment_coupon' && (
         <div className='sf-field-renderer__subscribe-wrapper'>
@@ -589,17 +677,13 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
 
       {/* ── Chained Select ──────────────────────────────────────────────────── */}
       {type === 'chained_select' && (
-        <div className='sf-field-renderer__chained-select'>
-          <select className={selectClass} disabled tabIndex='-1'>
-            <option>{placeholder || __('Select category…', 'subtleforms')}</option>
-          </select>
-          <select className={selectClass} disabled tabIndex='-1'>
-            <option>{__('Select subcategory…', 'subtleforms')}</option>
-          </select>
-          <div className='sf-field-renderer__field-hint'>
-            {__('Options load based on parent selection', 'subtleforms')}
-          </div>
-        </div>
+        <ChainedSelect
+          config={fieldConfig(field)}
+          value={chainedSelections}
+          onChange={setChainedSelections}
+          selectClassName={selectClass}
+          disabled={!interactive}
+        />
       )}
 
       {/* ── Color Picker ────────────────────────────────────────────────────── */}
@@ -706,24 +790,31 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       )}
 
       {/* ── Checkbox Grid ───────────────────────────────────────────────────── */}
-      {type === 'checkbox_grid' && (() => {
-        const gridCols = field.columns?.length ? field.columns : ['Option 1', 'Option 2'];
-        const gridRows = field.rows?.length ? field.rows : ['Row 1', 'Row 2'];
+      {type === 'checkbox_grid' && !(field.columns?.length && field.rows?.length) && (
+        // Nothing to answer yet; the live form hides an empty matrix (bug 8).
+        <p className='sf-field-renderer__placeholder-note'>
+          {__('Add at least one row and one column in the field settings.', 'subtleforms')}
+        </p>
+      )}
+
+      {type === 'checkbox_grid' && field.columns?.length > 0 && field.rows?.length > 0 && (() => {
+        const gridCols = field.columns;
+        const gridRows = field.rows;
         const gridStyle = { '--sf-grid-cols': gridCols.length };
         return (
           <div className='sf-field-renderer__checkbox-grid'>
             <div className='sf-field-renderer__checkbox-grid-header' style={gridStyle}>
               <span />
               {gridCols.map((col, i) => (
-                <span key={i} className='sf-field-renderer__checkbox-grid-col'>{col}</span>
+                <span key={i} className='sf-field-renderer__checkbox-grid-col'>{col?.label ?? col}</span>
               ))}
             </div>
             {gridRows.map((row, i) => (
               <div key={i} className='sf-field-renderer__checkbox-grid-row' style={gridStyle}>
-                <span className='sf-field-renderer__checkbox-grid-row-label'>{row}</span>
+                <span className='sf-field-renderer__checkbox-grid-row-label'>{row?.label ?? row}</span>
                 {gridCols.map((_, j) => (
                   <span key={j} className='sf-field-renderer__checkbox-grid-cell'>
-                    <input type='checkbox' className='sf-field-renderer__checkbox' readOnly tabIndex='-1' />
+                    <input type={field.multiplePerRow === false ? 'radio' : 'checkbox'} className='sf-field-renderer__checkbox' readOnly tabIndex='-1' />
                   </span>
                 ))}
               </div>
@@ -739,14 +830,14 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       {type === 'address_group' && <AddressFieldRenderer field={field} />}
 
       {/* Unknown / legacy field type — safe fallback, do NOT crash builder */}
-      {!KNOWN_TYPES.has(type) && (
+      {!KNOWN_TYPES.has(type) && !getCanvasPreview(type) && (
         <div className='sf-field-renderer__unknown-field'>
           {__('Unsupported field (legacy)', 'subtleforms')}
         </div>
       )}
 
       {/* ── Help text — shown for input fields only ─────────────────────────── */}
-      {field.description && !NON_INPUT_TYPES.has(type) && (
+      {field.description && !NON_INPUT_TYPES.has(type) && !display.descriptionAbove && (
         <p className='sf-field-renderer__help-text'>{field.description}</p>
       )}
 

@@ -13,6 +13,26 @@ import {
   getRootNodeId,
   nodeToField,
 } from '../utils/schemaTree';
+import { repairOrphanedFields } from '../schema/commands/steps';
+
+/**
+ * Build the builder tree for a schema. A multi-step form saved with fields
+ * outside every step (older builds left them at root level after a Page
+ * Break) gets those fields moved into the first step; `tree.repairs` tells
+ * the builder so it can say so (QA-08).
+ */
+export function loadTree(schema) {
+  const normalized = normalizeSchema(schema);
+  const { tree, moved } = repairOrphanedFields(normalized);
+  if (!moved.length) {
+    return normalized;
+  }
+  if (typeof console !== 'undefined') {
+    // eslint-disable-next-line no-console
+    console.info(`[SubtleForms] Moved ${moved.length} field(s) that were outside every step into the first step.`);
+  }
+  return { ...tree, repairs: { orphansMoved: moved.length } };
+}
 
 /**
  * Custom hook for managing builder state
@@ -32,7 +52,7 @@ export function useBuilderState(schema, validationErrors, fieldErrors, onChange,
   const [tree, setTree] = useState(() => {
     // Initialize with empty tree if schema is null/undefined
     if (!schema) {
-      return normalizeSchema({ schema_version: 1, fields: [] });
+      return loadTree({ schema_version: 1, fields: [] });
     }
     // Ensure schema_version exists, default to 1
     const schemaWithVersion = {
@@ -48,7 +68,7 @@ export function useBuilderState(schema, validationErrors, fieldErrors, onChange,
       );
     }
 
-    return normalizeSchema(schemaWithVersion);
+    return loadTree(schemaWithVersion);
   });
 
   const [selectedId, setSelectedId] = useState(null);
@@ -95,7 +115,7 @@ export function useBuilderState(schema, validationErrors, fieldErrors, onChange,
       );
     }
 
-    const newTree = normalizeSchema(schemaWithVersion);
+    const newTree = loadTree(schemaWithVersion);
     setTree(newTree);
 
     // Preserve selection if the node still exists
@@ -181,6 +201,8 @@ export function useBuilderState(schema, validationErrors, fieldErrors, onChange,
               key: field.key,
               label: field.label || field.key,
               type: field.type,
+              // Choices let the Logic tab offer a picker for the value.
+              options: Array.isArray(field.options) ? field.options : undefined,
             });
           }
         }
@@ -200,12 +222,17 @@ export function useBuilderState(schema, validationErrors, fieldErrors, onChange,
       .filter((node) => node && node.type === 'step');
   }, [tree, rootId]);
 
-  // Set initial step if none selected
+  // Keep the selected step valid: pick the first step when none is selected,
+  // and drop a selection that no longer exists (after Undo of a Page Break).
   useEffect(() => {
+    if (selectedStepId && !tree.nodes[selectedStepId]) {
+      setSelectedStepId(steps.length > 0 ? steps[0].id : null);
+      return;
+    }
     if (!selectedStepId && steps.length > 0) {
       setSelectedStepId(steps[0].id);
     }
-  }, [selectedStepId, steps]);
+  }, [selectedStepId, steps, tree]);
 
   // Update tree helper - calls onChange and persists to schema
   const updateTree = (updater) => {

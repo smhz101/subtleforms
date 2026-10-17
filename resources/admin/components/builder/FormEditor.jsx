@@ -1,15 +1,18 @@
-import { useCallback, useMemo, useState, useRef } from '@wordpress/element';
-import { Popover } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { useCallback, useEffect, useMemo, useState, useRef } from '@wordpress/element';
+import { Popover, Notice } from '@wordpress/components';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { getIcon } from './utils/iconMap';
 import Icon from '../../ui/Icon';
-import FieldDock from './FieldDock';
+import FieldDock, { categoryLabel } from './FieldDock';
 import FieldInspector from './FieldInspector';
 import FormBuilder from './FormBuilder';
 import ConversationalCanvas from './ConversationalCanvas';
 import StepNavigator from './StepNavigator';
 import { BuilderProvider } from './context/BuilderProvider';
+import BuilderDnd from './dnd/BuilderDnd';
 import { useBuilderState, useSchemaCommands, useInsertPicker } from './state';
+import { questionIds } from '../../../shared/conversational';
+import { formFieldDefaults } from '../../../shared/fieldDisplay';
 import './FormEditor.scss';
 
 function FieldPickerPopover({ fieldGroups, context, onInsert }) {
@@ -111,7 +114,7 @@ function FieldPickerPopover({ fieldGroups, context, onInsert }) {
           groupedFields &&
           Object.entries(groupedFields).map(([cat, fields]) => (
             <div key={cat} className='sf-field-picker-popover__category'>
-              <div className='sf-field-picker-popover__category-label'>{cat}</div>
+              <div className='sf-field-picker-popover__category-label'>{categoryLabel(cat)}</div>
               <div className='sf-field-picker-popover__grid'>
                 {fields.map((f) => {
                   const FieldIcon = getIcon(f.type);
@@ -150,6 +153,7 @@ export default function FormEditor({
 }) {
   // State management
   const builderState = useBuilderState(schema, validationErrors, fieldErrors, onChange, isReadOnly);
+  const [conversionsDismissed, setConversionsDismissed] = useState(false);
   const {
     tree,
     setTree,
@@ -176,6 +180,11 @@ export default function FormEditor({
     [fieldDefinitions]
   );
 
+  const fieldDefaults = useMemo(
+    () => formFieldDefaults(schema?.metadata),
+    [schema?.metadata?.labelVisibility, schema?.metadata?.descriptionPlacement, schema?.metadata?.requiredMessage, schema?.metadata?.validationMessage] // eslint-disable-line react-hooks/exhaustive-deps
+  );
+
   // Command handlers
   const commands = useSchemaCommands({
     tree,
@@ -183,6 +192,7 @@ export default function FormEditor({
     setTree,
     setSelectedId,
     selectedStepId,
+    setSelectedStepId,
     rootId,
     definitionMap,
     isReadOnly,
@@ -198,7 +208,83 @@ export default function FormEditor({
     handleDuplicate,
     handleAddStep,
     handleDeleteStep,
+    handleMoveToStep,
   } = commands;
+  const [repairsDismissed, setRepairsDismissed] = useState(false);
+
+  // Conversational forms (2.3.2): the current question, or an empty question
+  // slot, shared by the canvas and the field panel.
+  const [convCursor, setConvCursor] = useState({ index: 0, empty: false });
+
+  // Clicking a field in the panel fills an empty question; otherwise it adds
+  // a new question right after the current one.
+  const handleConversationalAdd = useCallback(
+    (type) => {
+      if (type === 'step') {
+        return; // Page Breaks do not apply: every question is its own screen.
+      }
+      const ids = questionIds(tree, rootId);
+      let at;
+      if (!ids.length) {
+        at = 0;
+      } else if (convCursor.empty) {
+        at = Math.min(convCursor.index, ids.length);
+      } else {
+        at = Math.min(convCursor.index + 1, ids.length);
+      }
+      let context = { parentId: rootId, columnIndex: null, position: null };
+      if (at < ids.length) {
+        const node = tree.nodes[ids[at]];
+        const parent = node && tree.nodes[node.parentId];
+        if (parent) {
+          context = { parentId: parent.id, columnIndex: null, position: (parent.children || []).indexOf(node.id) };
+        }
+      }
+      handleInsert(type, context);
+      setConvCursor({ index: at, empty: false });
+    },
+    [tree, rootId, convCursor, handleInsert]
+  );
+
+  // Page Break does not exist in a conversational form.
+  const dockFieldGroups = useMemo(() => {
+    if (!isConversational || !fieldGroups) return fieldGroups;
+    const out = {};
+    Object.entries(fieldGroups).forEach(([cat, list]) => {
+      out[cat] = (list || []).filter((f) => f.type !== 'step');
+    });
+    return out;
+  }, [fieldGroups, isConversational]);
+
+  // A repaired multi-step form (fields moved into the first step on load) is
+  // marked as changed so autosave, Save draft and Publish keep the repair.
+  const [repairCount, setRepairCount] = useState(0);
+  const repairPushesRef = useRef(0);
+  const updateTreeRef = useRef(updateTree);
+  updateTreeRef.current = updateTree;
+  useEffect(() => {
+    if (tree.repairs?.orphansMoved > 0 && !isReadOnly) {
+      setRepairCount(tree.repairs.orphansMoved);
+      setRepairsDismissed(false);
+      repairPushesRef.current = 3;
+    }
+  }, [tree, isReadOnly]);
+  // The builder ignores changes while it is still loading the form, so the
+  // repaired schema is offered again whenever the change handler is renewed
+  // (a few times at most; identical schemas are ignored upstream).
+  useEffect(() => {
+    if (repairPushesRef.current <= 0) {
+      return undefined;
+    }
+    const timer = setTimeout(() => {
+      repairPushesRef.current -= 1;
+      updateTreeRef.current((current) => {
+        const { repairs, ...rest } = current;
+        return rest;
+      });
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [onChange, repairCount]);
 
   // Insert picker state
   const insertPickerState = useInsertPicker();
@@ -233,23 +319,32 @@ export default function FormEditor({
       validationErrorsByFieldKey={validationErrorsByFieldKey}
       fieldDefinitions={definitionMap}
       formType={formType}
+      fieldDefaults={fieldDefaults}
       onInsert={handleInsert}
       onDelete={handleDelete}
       onUpdate={handleUpdate}
       onMove={handleMove}
       onDuplicate={handleDuplicate}
       onRequestInsert={handleRequestInsert}
+      onMoveToStep={handleMoveToStep}
       isReadOnly={isReadOnly}>
+      <BuilderDnd
+        tree={tree}
+        onInsert={handleInsert}
+        onMove={handleMove}
+        onMoveToStep={handleMoveToStep}>
       <div
         className={`sf-form-editor ${
           isDockCollapsed ? 'sf-form-editor--dock-collapsed' : ''
-        } ${isReadOnly ? 'sf-form-editor--read-only' : ''}`}>
+        } ${isReadOnly ? 'sf-form-editor--read-only' : ''} ${
+          selectedField ? 'has-selection' : ''
+        }`}>
         {/* Field Library (Left Sidebar) - Hidden in read-only mode */}
         {!isReadOnly && (
         <div className='sf-form-editor__dock' data-tour='fields-panel'>
           <FieldDock
-            fieldGroups={fieldGroups}
-            onAddField={handleDockAdd}
+            fieldGroups={dockFieldGroups}
+            onAddField={isConversational ? handleConversationalAdd : handleDockAdd}
             onCollapsedChange={setIsDockCollapsed}
           />
         </div>
@@ -269,7 +364,42 @@ export default function FormEditor({
             </div>
           )}
 
-          {!selectedField && allFields.length > 0 && (
+          {!conversionsDismissed && tree.conversions?.length > 0 && (
+            <div className='sf-form-editor__conversions'>
+              <Notice status='info' onRemove={() => setConversionsDismissed(true)}>
+                {tree.conversions.map((c) => (
+                  <p key={c.key}>
+                    {sprintf(
+                      /* translators: %s: field label */
+                      __('"%s" was a single checkbox with a list of options, so it is now a Multiple choice field where visitors can tick any of them. Publish to update the live form.', 'subtleforms'),
+                      c.label
+                    )}
+                  </p>
+                ))}
+              </Notice>
+            </div>
+          )}
+
+          {!repairsDismissed && repairCount > 0 && (
+            <div className='sf-form-editor__conversions'>
+              <Notice status='warning' onRemove={() => setRepairsDismissed(true)}>
+                <p>
+                  {sprintf(
+                    /* translators: %d: number of fields */
+                    _n(
+                      '%d field was outside every step, so it was moved into the first step. Save or publish to keep this.',
+                      '%d fields were outside every step, so they were moved into the first step. Save or publish to keep this.',
+                      repairCount,
+                      'subtleforms'
+                    ),
+                    repairCount
+                  )}
+                </p>
+              </Notice>
+            </div>
+          )}
+
+          {!selectedField && allFields.length > 0 && !isConversational && (
             <div className='sf-form-editor__canvas-tip'>
               <div className='sf-form-editor__canvas-tip-text'>
                 {__(
@@ -286,17 +416,10 @@ export default function FormEditor({
             {renderCanvas ? (
               renderCanvas()
             ) : isConversational ? (
-              <ConversationalCanvas
-                tree={tree}
-                rootId={rootId}
-                selectedId={selectedId}
-                onSelect={setSelectedId}
-                onDelete={handleDelete}
-                onDuplicate={handleDuplicate}
-                onRequestInsert={handleRequestInsert}
-              />
+              <ConversationalCanvas cursor={convCursor} setCursor={setConvCursor} />
             ) : (
               <FormBuilder
+                appearance={schema?.metadata?.appearance}
                 tree={tree}
                 rootId={rootId}
                 selectedId={selectedId}
@@ -313,10 +436,11 @@ export default function FormEditor({
 
         {/* Field Inspector (Right Sidebar) */}
         <div className='sf-form-editor__inspector' data-tour='field-inspector'>
-          <FieldInspector 
-            field={selectedField} 
-            allFields={allFields} 
-            isReadOnly={isReadOnly} 
+          <FieldInspector
+            field={selectedField}
+            allFields={allFields}
+            formAppearance={schema?.metadata?.appearance}
+            isReadOnly={isReadOnly}
           />
         </div>
 
@@ -329,13 +453,14 @@ export default function FormEditor({
             resize={false}
             focusOnMount>
             <FieldPickerPopover
-              fieldGroups={fieldGroups}
+              fieldGroups={dockFieldGroups}
               context={insertPicker.context}
               onInsert={handleInsertWithClose}
             />
           </Popover>
         )}
       </div>
+      </BuilderDnd>
     </BuilderProvider>
   );
 }

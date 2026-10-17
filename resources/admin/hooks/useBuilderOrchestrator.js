@@ -22,6 +22,7 @@ import {
 } from '../utils/api';
 import { BUILDER_ACTIONS } from '../hooks/useBuilderReducer';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
+import { describeSaveError } from '../utils/saveErrors';
 
 /**
  * @param {Object}   opts
@@ -54,6 +55,7 @@ export default function useBuilderOrchestrator({
 		autoSaving,
 		formStatus,
 		isDirty,
+		hasUnpublishedChanges,
 	} = builderState;
 
 	const {
@@ -307,12 +309,8 @@ export default function useBuilderOrchestrator({
 						return;
 					}
 
-					const message =
-						body?.error?.message ||
-						body?.message ||
-						body?.data?.message ||
-						__('Failed to save form', 'subtleforms');
-					throw new Error(message);
+					// Name the setting that stopped the save (QA-03).
+					throw new Error(describeSaveError(body, saveStatus));
 				}
 
 				// Update status if specified
@@ -722,7 +720,9 @@ export default function useBuilderOrchestrator({
 			return;
 		}
 
-		if (formStatus === 'draft') {
+		// Ask before changing what visitors see: a first publish, or edits to a
+		// form that is already live ("Push your changes live?", 2.2.1 bug 12).
+		if (formStatus === 'draft' || isDirty || hasUnpublishedChanges) {
 			setShowPublishConfirm(true);
 		} else {
 			performSave({ auto: false, targetStatus: 'published' });
@@ -733,6 +733,8 @@ export default function useBuilderOrchestrator({
 		draftSchema,
 		stateFormTitle,
 		formStatus,
+		isDirty,
+		hasUnpublishedChanges,
 		hasValidationErrors,
 		performSave,
 		removeNotice,
