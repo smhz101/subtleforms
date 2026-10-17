@@ -202,8 +202,10 @@ final class CoreFields {
 				kind: 'input',
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
-					'placeholder' => '',
-					'format'      => 'international',
+					'placeholder'        => '',
+					'format'             => 'international',
+					'enableCountryCode'  => false,
+					'defaultCountry'     => 'US',
 				),
 				inspectorControls: array(
 					array(
@@ -215,6 +217,21 @@ final class CoreFields {
 						'type'  => 'text',
 						'name'  => 'placeholder',
 						'label' => __( 'Placeholder', 'subtleforms' ),
+					),
+					array(
+						'type'    => 'checkbox',
+						'name'    => 'enableCountryCode',
+						'label'   => __( 'Country code', 'subtleforms' ),
+						'help'    => __( 'Add a searchable country list with dial codes in front of the number.', 'subtleforms' ),
+						'section' => 'general',
+					),
+					array(
+						'type'        => 'text',
+						'name'        => 'defaultCountry',
+						'label'       => __( 'Default country', 'subtleforms' ),
+						'placeholder' => 'US',
+						'help'        => __( 'Two-letter country code used when the country picker is on, for example US, GB or PK.', 'subtleforms' ),
+						'section'     => 'general',
 					),
 					array(
 						'type'    => 'select',

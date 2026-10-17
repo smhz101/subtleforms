@@ -1,6 +1,7 @@
 import {
   Button,
   PanelBody,
+  ToggleControl,
   __experimentalToggleGroupControl as ToggleGroupControl,
   __experimentalToggleGroupControlOption as ToggleGroupControlOption,
   __experimentalToggleGroupControlOptionIcon as ToggleGroupControlOptionIcon,
@@ -140,6 +141,18 @@ export default function FieldAppearancePanel( { field, onUpdate, formAppearance,
           </Button>
         ) }
       </div>
+
+      {(field?.type === 'phone' || field?.type === 'tel') && field?.enableCountryCode && (
+        <PanelBody title={ __( 'Phone', 'subtleforms' ) } initialOpen className='sf-field-appearance__panel'>
+          <ToggleControl
+            label={ __( 'Show flags', 'subtleforms' ) }
+            help={ __( 'Show or hide the flag beside each country in the dial-code list.', 'subtleforms' ) }
+            checked={ appearance.showFlags !== false }
+            disabled={ isReadOnly }
+            onChange={ (on) => onUpdate( { appearance: { ...appearance, showFlags: on } } ) }
+          />
+        </PanelBody>
+      )}
 
       <PanelBody title={ __( 'Layout', 'subtleforms' ) } initialOpen className='sf-field-appearance__panel'>
         <p className='sf-field-appearance__label'>{ __( 'Width', 'subtleforms' ) }</p>

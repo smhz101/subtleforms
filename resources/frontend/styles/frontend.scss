@@ -188,3 +188,123 @@
 		}
 	}
 }
+
+/* Phone field: country-code picker beside the number. */
+.subtleforms-phone {
+	display: flex;
+	align-items: stretch;
+	gap: 8px;
+	position: relative;
+	width: 100%;
+}
+
+.subtleforms-phone__code {
+	position: relative;
+	flex: 0 0 auto;
+}
+
+.subtleforms-phone__trigger {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	height: 100%;
+	min-height: 40px;
+	padding: 0 10px;
+	border: 1px solid var(--subtleforms-color-border, var(--sf-border-strong, #c3c4c7));
+	border-radius: var(--subtleforms-radius-md, 4px);
+	background: var(--subtleforms-color-bg, #fff);
+	color: inherit;
+	font: inherit;
+	cursor: pointer;
+}
+
+.subtleforms-phone__trigger:disabled {
+	cursor: default;
+	opacity: 0.7;
+}
+
+.subtleforms-phone__flag {
+	font-size: 18px;
+	line-height: 1;
+}
+
+.subtleforms-phone__caret {
+	width: 0;
+	height: 0;
+	border-left: 4px solid transparent;
+	border-right: 4px solid transparent;
+	border-top: 5px solid currentColor;
+	opacity: 0.7;
+}
+
+.subtleforms-phone__input {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.subtleforms-phone__menu {
+	position: absolute;
+	z-index: 30;
+	top: calc(100% + 4px);
+	left: 0;
+	width: min(280px, 70vw);
+	padding: 8px;
+	border: 1px solid var(--subtleforms-color-border, #c3c4c7);
+	border-radius: 6px;
+	background: #fff;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.subtleforms-phone__search {
+	width: 100%;
+	margin: 0 0 8px;
+	padding: 6px 8px;
+	border: 1px solid #c3c4c7;
+	border-radius: 4px;
+	font: inherit;
+}
+
+.subtleforms-phone__list {
+	max-height: 220px;
+	margin: 0;
+	padding: 0;
+	overflow: auto;
+	list-style: none;
+}
+
+.subtleforms-phone__option {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	width: 100%;
+	padding: 6px 8px;
+	border: 0;
+	border-radius: 4px;
+	background: transparent;
+	color: inherit;
+	font: inherit;
+	text-align: left;
+	cursor: pointer;
+}
+
+.subtleforms-phone__option.is-active,
+.subtleforms-phone__option[aria-selected='true'] {
+	background: #f0f6fc;
+}
+
+.subtleforms-phone__name {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.subtleforms-phone__option-dial,
+.subtleforms-phone__empty {
+	color: #646970;
+	font-variant-numeric: tabular-nums;
+}
+
+.subtleforms-phone__empty {
+	padding: 8px;
+	font-size: 13px;
+}
+

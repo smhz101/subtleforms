@@ -39,6 +39,7 @@ function FieldLoading() {
   );
 }
 import {
+import PhoneField from './fields/PhoneField';
   fieldAppearanceStyle,
   fieldAppearanceClasses,
 } from '../../shared/appearance';
@@ -578,7 +579,27 @@ function renderInput(
     case 'url':
     case 'number':
     case 'phone':
-    case 'tel':
+    case 'tel': {
+      if (config.enableCountryCode) {
+        const appearance = config.appearance && typeof config.appearance === 'object' ? config.appearance : {};
+        return (
+          <PhoneField
+            inputId={inputId}
+            name={name}
+            describedBy={describedBy}
+            config={config}
+            value={value ?? ''}
+            onChange={onChange}
+            placeholder={placeholder}
+            required={required}
+            error={error}
+            readOnly={config.readOnly === true}
+            showFlags={appearance.showFlags !== false}
+          />
+        );
+      }
+      // Fall through to the plain text-like input when the country picker is off.
+    }
     case 'date':
     case 'time':
     case 'datetime':

@@ -11,6 +11,7 @@ import { fieldConfig } from '../../../shared/fieldConfig';
 import { orderedCountries, preferredCountryCodes, COUNTRIES } from '../../../shared/countries';
 import { toggleInitialValue, toggleIsOn } from '../../../shared/toggleState';
 import ChainedSelect from '../../../frontend/components/fields/ChainedSelect';
+import PhoneField from '../../../frontend/components/fields/PhoneField';
 import { ConfigContext } from './context/ConfigContext';
 import './FieldRenderer.scss';
 
@@ -210,10 +211,20 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       )}
 
       {/* Render appropriate input based on type */}
+      {(type === 'phone' || type === 'tel') && fieldConfig(field).enableCountryCode && (
+        <PhoneField
+          config={fieldConfig(field)}
+          value=""
+          showFlags={(fieldConfig(field).appearance || {}).showFlags !== false}
+          disabled={!interactive}
+          inputClassName={inputClass}
+          placeholder={placeholder}
+        />
+      )}
+
       {(type === 'text' ||
         type === 'email' ||
-        type === 'phone' ||
-        type === 'tel' ||
+        ((type === 'phone' || type === 'tel') && !fieldConfig(field).enableCountryCode) ||
         type === 'url' ||
         type === 'number') && (
         <div className={field.prefix || field.suffix ? 'sf-field-renderer__affix' : undefined}>
