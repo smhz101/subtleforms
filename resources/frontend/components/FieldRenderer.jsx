@@ -5,6 +5,7 @@ import { rangeSliderSeed } from '../utils/defaults';
 import { debug } from '../../shared/debug';
 import { lazy, Suspense, useContext, useEffect } from '@wordpress/element';
 import ChainedSelect from './fields/ChainedSelect';
+import PhoneField from './fields/PhoneField';
 import FileUpload, { FormContext } from './fields/FileUpload';
 import RepeaterField from './fields/RepeaterField';
 import {
@@ -39,7 +40,6 @@ function FieldLoading() {
   );
 }
 import {
-import PhoneField from './fields/PhoneField';
   fieldAppearanceStyle,
   fieldAppearanceClasses,
 } from '../../shared/appearance';
