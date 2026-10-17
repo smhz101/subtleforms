@@ -126,7 +126,6 @@
 		flex-direction: column;
 		gap: 16px;
 		min-width: 0;
-		max-width: 1080px;
 	}
 
 	&__header { padding-top: 4px; }
@@ -409,10 +408,20 @@
 		&-header {
 			display: flex;
 			align-items: center;
-			gap: var(--sf-space-2);
+			gap: var(--sf-space-3);
+			min-width: 0;
 			padding: var(--sf-space-2) var(--sf-space-3);
 			background: var(--sf-bg-surface);
 			border-bottom: 1px solid var(--sf-border);
+		}
+
+		&-label {
+			display: flex;
+			flex: 1 1 auto;
+			flex-wrap: wrap;
+			align-items: baseline;
+			gap: 2px 12px;
+			min-width: 0;
 		}
 
 		&-type {
@@ -424,7 +433,8 @@
 		}
 
 		&-summary {
-			flex: 1;
+			flex: 1 1 10rem;
+			min-width: 0;
 			font-size: var(--sf-text-sm);
 			color: var(--sf-text-subtle);
 			overflow: hidden;
@@ -434,8 +444,9 @@
 
 		&-controls {
 			display: flex;
+			flex: 0 0 auto;
 			align-items: center;
-			gap: var(--sf-space-1);
+			gap: var(--sf-space-2);
 			margin-left: auto;
 
 			// Shrink the toggle label area
@@ -516,8 +527,6 @@
 // Settings read like core's document settings: one card of collapsible
 // sections, sentence-case labels, even spacing, neutral form-type note.
 .sf-form-settings {
-	&__container { max-width: 720px; }
-
 	&__title {
 		margin-bottom: 16px;
 		font-size: var(--sf-text-md);
