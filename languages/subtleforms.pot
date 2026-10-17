@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-17T09:35:57+00:00\n"
+"POT-Creation-Date: 2026-10-17T10:30:54+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -3304,7 +3304,7 @@ msgstr ""
 
 #: src/Fields/FieldsV2.php:195
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:140
-#: resources/frontend/components/fields/DateTimeField.jsx:301
+#: resources/frontend/components/fields/DateTimeField.jsx:313
 #: resources/frontend/components/fields/SignaturePad.jsx:177
 msgid "Clear"
 msgstr ""
@@ -4837,7 +4837,7 @@ msgstr ""
 #: resources/admin/pages/DashboardPage.jsx:99
 #: resources/admin/pages/DashboardPage.jsx:551
 #: resources/admin/pages/SubmissionsPage.jsx:129
-#: resources/frontend/components/fields/DateTimeField.jsx:291
+#: resources/frontend/components/fields/DateTimeField.jsx:303
 msgid "Today"
 msgstr ""
 
@@ -5467,7 +5467,7 @@ msgstr ""
 
 #: resources/admin/components/builder/appearance/labels.js:79
 #: resources/admin/components/builder/appearance/labels.js:124
-#: resources/frontend/components/fields/RichTextInput.jsx:112
+#: resources/frontend/components/fields/RichTextInput.jsx:151
 msgid "Bold"
 msgstr ""
 
@@ -13775,12 +13775,12 @@ msgstr ""
 msgid "Select…"
 msgstr ""
 
-#: resources/frontend/components/fields/ChoiceSelect.jsx:167
-#: resources/frontend/components/fields/CountrySelect.jsx:194
+#: resources/frontend/components/fields/ChoiceSelect.jsx:165
+#: resources/frontend/components/fields/CountrySelect.jsx:192
 msgid "Clear selection"
 msgstr ""
 
-#: resources/frontend/components/fields/ChoiceSelect.jsx:172
+#: resources/frontend/components/fields/ChoiceSelect.jsx:170
 msgid "No choices yet."
 msgstr ""
 
@@ -13788,12 +13788,12 @@ msgstr ""
 msgid "Select a country"
 msgstr ""
 
-#: resources/frontend/components/fields/CountrySelect.jsx:180
-#: resources/frontend/components/fields/CountrySelect.jsx:181
+#: resources/frontend/components/fields/CountrySelect.jsx:178
+#: resources/frontend/components/fields/CountrySelect.jsx:179
 msgid "Search countries"
 msgstr ""
 
-#: resources/frontend/components/fields/CountrySelect.jsx:198
+#: resources/frontend/components/fields/CountrySelect.jsx:196
 #: resources/frontend/components/fields/PhoneField.jsx:152
 msgid "No countries match that search."
 msgstr ""
@@ -13810,19 +13810,19 @@ msgstr ""
 msgid "Select a date"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:202
+#: resources/frontend/components/fields/DateTimeField.jsx:214
 msgid "Previous month"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:206
+#: resources/frontend/components/fields/DateTimeField.jsx:218
 msgid "Next month"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:240
+#: resources/frontend/components/fields/DateTimeField.jsx:252
 msgid "Hour"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:251
+#: resources/frontend/components/fields/DateTimeField.jsx:263
 msgid "Minute"
 msgstr ""
 
@@ -13994,19 +13994,19 @@ msgstr ""
 msgid "Maximum of %d reached"
 msgstr ""
 
-#: resources/frontend/components/fields/RichTextInput.jsx:113
+#: resources/frontend/components/fields/RichTextInput.jsx:152
 msgid "Italic"
 msgstr ""
 
-#: resources/frontend/components/fields/RichTextInput.jsx:116
+#: resources/frontend/components/fields/RichTextInput.jsx:155
 msgid "Bulleted list"
 msgstr ""
 
-#: resources/frontend/components/fields/RichTextInput.jsx:121
+#: resources/frontend/components/fields/RichTextInput.jsx:160
 msgid "Numbered list"
 msgstr ""
 
-#: resources/frontend/components/fields/RichTextInput.jsx:132
+#: resources/frontend/components/fields/RichTextInput.jsx:171
 msgid "Text formatting"
 msgstr ""
 

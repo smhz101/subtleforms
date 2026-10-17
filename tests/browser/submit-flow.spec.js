@@ -60,7 +60,7 @@ test('server validation errors are shown on each field (bug 2)', async ({ page }
   await waitForForm(page);
   await page.fill('#subtleforms-field-first_name', 'Ada');
   await page.fill('#subtleforms-field-email', 'ada@example.com');
-  await page.selectOption('#subtleforms-field-topic', 'sales');
+  await page.locator('#subtleforms-field-topic').locator('xpath=ancestor::*[contains(@class,"subtleforms-picker")][1]//select').selectOption('sales');
   await page.fill('#subtleforms-field-message', 'Hello');
   await waitOutTimeTrap(page);
 

@@ -171,8 +171,6 @@ export default function DateTimeField({
         className='subtleforms-picker__trigger'
         aria-haspopup='dialog'
         aria-expanded={open}
-        aria-required={required || undefined}
-        aria-invalid={invalid || undefined}
         aria-describedby={describedBy}
         disabled={disabled || readOnly}
         tabIndex={preview ? -1 : 0}
@@ -192,7 +190,21 @@ export default function DateTimeField({
           {mode !== 'date' && <ClockIcon />}
         </span>
       </button>
-      {name ? <input type='hidden' name={name} value={stored ?? ''} /> : null}
+      {name ? (
+        <input
+          type='hidden'
+          name={name}
+          value={stored ?? ''}
+          onChange={(event) => {
+            const next = event.target.value;
+            if (onChange) {
+              onChange(next);
+            } else {
+              setLocalValue(next);
+            }
+          }}
+        />
+      ) : null}
       {open && !locked && (
         <div className='subtleforms-picker__menu subtleforms-picker__menu--calendar' role='dialog' aria-label={prompt}>
           <div className='subtleforms-picker__panel'>

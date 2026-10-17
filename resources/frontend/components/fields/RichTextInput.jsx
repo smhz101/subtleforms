@@ -63,7 +63,7 @@ const sanitizeHtml = ( html ) => {
   };
 
   walk( doc.body );
-  return doc.body.innerHTML;
+  return doc.body.innerHTML.replace( /\u200b/g, '' );
 };
 
 export default function RichTextInput( {
@@ -124,9 +124,16 @@ export default function RichTextInput( {
         const end = document.createRange();
         end.selectNodeContents( wrapper );
         end.collapse( false );
-        if ( range.compareBoundaryPoints( Range.END_TO_END, end ) === 0 ) {
+        const rest = range.cloneRange();
+        rest.selectNodeContents( wrapper );
+        rest.setStart( range.endContainer, range.endOffset );
+        if ( rest.toString().replace( /\u200b/g, '' ) === '' ) {
+          // A text node after the tag keeps the next character outside it.
+          // The zero-width space is removed before the value is stored.
+          const marker = document.createTextNode( '\u200b' );
+          wrapper.after( marker );
           const after = document.createRange();
-          after.setStartAfter( wrapper );
+          after.setStart( marker, marker.textContent.length );
           after.collapse( true );
           selection.removeAllRanges();
           selection.addRange( after );

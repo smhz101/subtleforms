@@ -126,8 +126,6 @@ export default function CountrySelect({
         className='subtleforms-picker__trigger'
         aria-haspopup='listbox'
         aria-expanded={open}
-        aria-required={required || undefined}
-        aria-invalid={invalid || undefined}
         aria-describedby={describedBy}
         disabled={disabled || readOnly}
         tabIndex={preview ? -1 : 0}

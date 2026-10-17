@@ -152,7 +152,7 @@ test('email merge tags: Insert tag menu and help (2.3.0 feature 18)', async ({ p
   await loginPage(page);
   await openBuilder(page, form.id);
   await page.locator('#sf-builder-view-settings').click();
-  await page.getByText('Notifications & actions').first().click().catch(() => {});
+  await page.getByRole('button', { name: 'Notifications', exact: true }).click();
 
   const action = page.locator('.sf-actions-panel__item--email').first();
   const message = action.getByLabel('Message', { exact: true });
