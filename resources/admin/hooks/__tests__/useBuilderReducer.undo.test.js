@@ -114,6 +114,28 @@ describe('useBuilderReducer Undo/Redo Edge Cases', () => {
       expect(nextState.schemaHistoryPast[0]).toEqual(startSchema);
     });
 
+    it('undoes a batch that has not been committed yet', () => {
+      const startSchema = createSchema('start');
+      const pendingSchema = createSchema('pending');
+      const state = {
+        ...initialBuilderState,
+        state: BUILDER_STATES.DIRTY,
+        draftSchema: pendingSchema,
+        historyBatchStartSchema: startSchema,
+        historyBatchPendingSchema: pendingSchema,
+        schemaHistoryPast: [],
+        schemaHistoryFuture: [],
+      };
+
+      const undone = builderReducer(state, { type: BUILDER_ACTIONS.UNDO_SCHEMA });
+      expect(undone.draftSchema).toEqual(startSchema);
+      expect(undone.historyBatchStartSchema).toBeNull();
+      expect(undone.schemaHistoryFuture[0]).toEqual(pendingSchema);
+
+      const redone = builderReducer(undone, { type: BUILDER_ACTIONS.REDO_SCHEMA });
+      expect(redone.draftSchema).toEqual(pendingSchema);
+    });
+
     it('should not commit if no batch is pending', () => {
       const state = {
         ...initialBuilderState,

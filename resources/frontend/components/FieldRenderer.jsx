@@ -5,6 +5,7 @@ import { rangeSliderSeed } from '../utils/defaults';
 import { debug } from '../../shared/debug';
 import { lazy, Suspense, useContext, useEffect } from '@wordpress/element';
 import ChainedSelect from './fields/ChainedSelect';
+import PhoneField from './fields/PhoneField';
 import FileUpload, { FormContext } from './fields/FileUpload';
 import RepeaterField from './fields/RepeaterField';
 import {
@@ -578,7 +579,27 @@ function renderInput(
     case 'url':
     case 'number':
     case 'phone':
-    case 'tel':
+    case 'tel': {
+      if (config.enableCountryCode) {
+        const appearance = config.appearance && typeof config.appearance === 'object' ? config.appearance : {};
+        return (
+          <PhoneField
+            inputId={inputId}
+            name={name}
+            describedBy={describedBy}
+            config={config}
+            value={value ?? ''}
+            onChange={onChange}
+            placeholder={placeholder}
+            required={required}
+            error={error}
+            readOnly={config.readOnly === true}
+            showFlags={appearance.showFlags !== false}
+          />
+        );
+      }
+      // Fall through to the plain text-like input when the country picker is off.
+    }
     case 'date':
     case 'time':
     case 'datetime':

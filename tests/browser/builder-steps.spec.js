@@ -90,7 +90,7 @@ test('Page Break at the end keeps every field in step 1 (dock)', async ({ page }
   await expect(canvasFields(page)).toHaveCount(5);
   await openStep(page, 1);
   await expect(canvasFields(page)).toHaveCount(0);
-  await page.screenshot({ path: '/home/claude/shots/free231/qa08-page-break-end.png' });
+  await page.screenshot({ path: 'test-results/shots/free231/qa08-page-break-end.png' });
 
   await saveDraft(page);
   const fields = await draftFields(form.id);
@@ -192,7 +192,7 @@ test('a saved form with orphaned root fields (form 9 shape) is repaired in the b
   await expect(stepTabs(page)).toHaveCount(1);
   await expect(canvasFields(page)).toHaveCount(3);
   await expect(page.locator('.sf-form-editor__conversions')).toContainText('outside every step');
-  await page.screenshot({ path: '/home/claude/shots/free231/qa08-orphan-repair.png' });
+  await page.screenshot({ path: 'test-results/shots/free231/qa08-orphan-repair.png' });
   // The repair counts as a change, so it can be saved.
   await expect(page.locator('.sf-builder-header-bar__save-status')).toHaveText('Unsaved changes');
   await saveDraft(page);
@@ -222,7 +222,7 @@ test('Step setting moves a field to another step and keeps it selected; undoable
   await expect(canvasFields(page)).toHaveCount(2);
   await expect(canvasFields(page).nth(1)).toHaveClass(/is-selected/);
   await expect(page.getByLabel('Step', { exact: true })).toHaveValue('s2');
-  await page.screenshot({ path: '/home/claude/shots/free231/qa08-step-setting.png' });
+  await page.screenshot({ path: 'test-results/shots/free231/qa08-step-setting.png' });
 
   await saveDraft(page);
   expect(stepKeys(await draftFields(form.id))).toEqual([['c1', 'c3'], ['p1', 'c2']]);

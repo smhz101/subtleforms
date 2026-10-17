@@ -63,7 +63,7 @@ const sanitizeHtml = ( html ) => {
   };
 
   walk( doc.body );
-  return doc.body.innerHTML;
+  return doc.body.innerHTML.replace( /\u200b/g, '' );
 };
 
 export default function RichTextInput( {
@@ -83,7 +83,10 @@ export default function RichTextInput( {
   // is looking at — assigning innerHTML on every render collapses the caret.
   useEffect( () => {
     const el = editorRef.current;
-    if ( el && el.innerHTML !== ( value || '' ) ) {
+    // The caret-exit marker is a zero-width space. It is stripped before the
+    // value is stored, so it must not count as a change or the caret jumps.
+    const visible = ( html ) => ( html || '' ).replace( /\u200b/g, '' );
+    if ( el && visible( el.innerHTML ) !== visible( value || '' ) ) {
       el.innerHTML = value || '';
     }
   }, [ value ] );
@@ -103,7 +106,44 @@ export default function RichTextInput( {
   }, [] );
 
   const exec = ( command ) => {
-    editorRef.current?.focus();
+    const editor = editorRef.current;
+    if ( ! editor ) {
+      return;
+    }
+    editor.focus();
+
+    // Turning bold or italic off at the end of a run. execCommand nests a
+    // second <b> there instead of leaving the tag, so the following text
+    // stays bold. Move the caret out of the tag instead.
+    const inline = command === 'bold' ? 'b, strong' : command === 'italic' ? 'i, em' : null;
+    const selection = window.getSelection();
+    if ( inline && selection && selection.rangeCount ) {
+      const range = selection.getRangeAt( 0 );
+      const anchor = range.startContainer.nodeType === Node.ELEMENT_NODE
+        ? range.startContainer
+        : range.startContainer.parentElement;
+      const wrapper = anchor?.closest?.( inline );
+      if ( wrapper && editor.contains( wrapper ) && range.collapsed ) {
+        const end = document.createRange();
+        end.selectNodeContents( wrapper );
+        end.collapse( false );
+        const rest = range.cloneRange();
+        rest.selectNodeContents( wrapper );
+        rest.setStart( range.endContainer, range.endOffset );
+        if ( rest.toString().replace( /\u200b/g, '' ) === '' ) {
+          const marker = document.createTextNode( '\u200b' );
+          wrapper.after( marker );
+          const after = document.createRange();
+          after.setStart( marker, marker.textContent.length );
+          after.collapse( true );
+          selection.removeAllRanges();
+          selection.addRange( after );
+          handleInput();
+          return;
+        }
+      }
+    }
+
     document.execCommand( command, false, null );
     handleInput();
   };
@@ -135,6 +175,7 @@ export default function RichTextInput( {
             key={ command }
             type='button'
             className='subtleforms-richtext__button'
+            onMouseDown={ ( event ) => event.preventDefault() }
             onClick={ () => exec( command ) }
             disabled={ disabled }
             aria-label={ label }

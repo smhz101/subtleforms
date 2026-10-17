@@ -11,6 +11,7 @@ import { fieldConfig } from '../../../shared/fieldConfig';
 import { orderedCountries, preferredCountryCodes, COUNTRIES } from '../../../shared/countries';
 import { toggleInitialValue, toggleIsOn } from '../../../shared/toggleState';
 import ChainedSelect from '../../../frontend/components/fields/ChainedSelect';
+import PhoneField from '../../../frontend/components/fields/PhoneField';
 import { ConfigContext } from './context/ConfigContext';
 import './FieldRenderer.scss';
 
@@ -210,10 +211,20 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       )}
 
       {/* Render appropriate input based on type */}
+      {(type === 'phone' || type === 'tel') && fieldConfig(field).enableCountryCode && (
+        <PhoneField
+          config={fieldConfig(field)}
+          value=""
+          showFlags={(fieldConfig(field).appearance || {}).showFlags !== false}
+          disabled={!interactive}
+          inputClassName={inputClass}
+          placeholder={placeholder}
+        />
+      )}
+
       {(type === 'text' ||
         type === 'email' ||
-        type === 'phone' ||
-        type === 'tel' ||
+        ((type === 'phone' || type === 'tel') && !fieldConfig(field).enableCountryCode) ||
         type === 'url' ||
         type === 'number') && (
         <div className={field.prefix || field.suffix ? 'sf-field-renderer__affix' : undefined}>
@@ -418,21 +429,44 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
-      {(type === 'dropdown' || type === 'select') && (
-        <select
-          className={selectClass}
-          disabled
-          tabIndex='-1'>
-          <option>
-            {placeholder || __('Select an option', 'subtleforms')}
-          </option>
-          {(fieldConfig(field).options || options || []).map((opt, idx) => (
-            <option key={idx} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
-      )}
+      {(type === 'dropdown' || type === 'select') && (() => {
+        const choiceOptions = (fieldConfig(field).options || options || [])
+          .map((opt) => (
+            opt && typeof opt === 'object'
+              ? { label: opt.label || opt.value || '', value: opt.value ?? opt.label ?? '' }
+              : { label: String(opt ?? ''), value: String(opt ?? '') }
+          ))
+          .filter((opt) => opt.label || opt.value);
+        return (
+          <div className='sf-field-renderer__menu'>
+            <select
+              className={selectClass}
+              defaultValue=''
+              onMouseDown={(event) => event.stopPropagation()}
+              onClick={(event) => event.stopPropagation()}>
+              <option value=''>
+                {placeholder || __('Select an option', 'subtleforms')}
+              </option>
+              {choiceOptions.map((opt, idx) => (
+                <option key={`${opt.value}-${idx}`} value={opt.value}>
+                  {opt.label || opt.value}
+                </option>
+              ))}
+            </select>
+            {choiceOptions.length > 0 ? (
+              <ul className='sf-field-renderer__choice-preview' aria-label={__('Choices', 'subtleforms')}>
+                {choiceOptions.map((opt, idx) => (
+                  <li key={`${opt.value}-${idx}`}>{opt.label || opt.value}</li>
+                ))}
+              </ul>
+            ) : (
+              <p className='sf-field-renderer__choice-empty'>
+                {__('Add choices in the field settings to show them here.', 'subtleforms')}
+              </p>
+            )}
+          </div>
+        );
+      })()}
 
       {type === 'date' && (
         <div className='sf-field-renderer__date-placeholder'>
@@ -472,10 +506,9 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           <div className='sf-country-field'>
             <select
               className={selectClass}
-              disabled={!interactive}
-              tabIndex={interactive ? undefined : '-1'}
-              value={selected}
-              onChange={() => {}}>
+              defaultValue={selected}
+              onMouseDown={(event) => event.stopPropagation()}
+              onClick={(event) => event.stopPropagation()}>
               <option value=''>
                 {placeholder || __('Select a country', 'subtleforms')}
               </option>
@@ -487,6 +520,11 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
                 </option>
               ))}
             </select>
+            <ul className='sf-field-renderer__choice-preview' aria-label={__('Countries', 'subtleforms')}>
+              {countries.map((country) => (
+                <li key={country.code}>{country.name}</li>
+              ))}
+            </ul>
           </div>
         );
       })()}

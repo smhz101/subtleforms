@@ -37,11 +37,19 @@ async function draftForm(title, fields) {
 const row = (page, title) => page.locator('tr', { hasText: title });
 
 async function openForms(page, tab) {
-  await page.goto('/wp-admin/admin.php?page=subtleforms-forms');
-  await page.waitForSelector('.sf-data-table__table', { timeout: 30000 });
+  const url = '/wp-admin/admin.php?page=subtleforms-forms';
+  await page.goto(url, { waitUntil: 'domcontentloaded' });
+  if (/wp-login\.php/.test(page.url())) {
+    await loginPage(page);
+    await page.goto(url, { waitUntil: 'domcontentloaded' });
+  }
+  // An empty list renders no table, only the empty state. The tab bar is
+  // what shows the page is ready.
+  await page.getByRole('tab', { name: /^All/ }).waitFor({ timeout: 30000 });
   if (tab) {
     await page.getByRole('tab', { name: new RegExp(`^${tab}`) }).click();
   }
+  await page.locator('.sf-data-table__table, .sf-data-table__empty').first().waitFor({ timeout: 30000 });
 }
 
 test('trashing, the Trash tab, restore and permanent delete (QA-11)', async ({ page, playwright }) => {
@@ -82,7 +90,7 @@ test('trashing, the Trash tab, restore and permanent delete (QA-11)', async ({ p
   await liveRow.getByTitle('More actions').click();
   const menu = page.locator('.components-dropdown__content');
   await expect(menu.getByRole('menuitem')).toHaveText(['Restore', 'Delete permanently']);
-  await page.screenshot({ path: '/home/claude/shots/free231/qa11-trash-tab.png' });
+  await page.screenshot({ path: 'test-results/shots/free231/qa11-trash-tab.png' });
   await page.keyboard.press('Escape');
 
   // Bulk restore: each returns to its previous status.
@@ -125,7 +133,7 @@ test('duplicating the form 9 shape and other forms (QA-12)', async ({ page }) =>
   const copyRow = row(page, `QA form 9 ${stamp} (copy)`);
   await expect(copyRow).toHaveCount(1);
   await expect(copyRow.locator('.sf-status-badge')).toHaveText('Draft');
-  await page.screenshot({ path: '/home/claude/shots/free231/qa12-duplicated.png' });
+  await page.screenshot({ path: 'test-results/shots/free231/qa12-duplicated.png' });
 
   const forms = (await client.call('GET', '/forms?per_page=100&search=' + encodeURIComponent(`QA form 9 ${stamp} (copy)`))).body.data;
   const list = Array.isArray(forms) ? forms : forms.items || [];
