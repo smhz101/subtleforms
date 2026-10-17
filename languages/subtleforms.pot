@@ -137,8 +137,8 @@ msgstr ""
 msgid "Action completed successfully."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:407
-#: src/Admin/AdminMenu.php:1057
+#: src/Admin/AdminMenu.php:420
+#: src/Admin/AdminMenu.php:1070
 msgid "SubtleForms"
 msgstr ""
 
