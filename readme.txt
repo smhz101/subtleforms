@@ -4,7 +4,7 @@ Tags: forms, contact form, form builder, submissions
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.3.3
+Stable tag: 2.3.4
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -159,6 +159,13 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 7. Conversational form on frontend
 
 == Changelog ==
+
+= 2.3.4 - 2026-10-17 =
+* Change: Form settings use vertical tabs across the full width, with each area on its own panel. Notifications is its own tab.
+* New: Country, dropdown, date, time and date-time fields use a custom picker. Stored dates and times stay in the same format, and an optional choice can be cleared.
+* Fix: The phone field keeps the country a visitor picks, including before any digits are entered and when two countries share a dial code such as +1. Turning flags off is saved with the form.
+* Fix: A new chained choice skips values already used on that dropdown, so removing one and adding another does not reuse an identifier.
+* Fix: The builder canvas shows dropdown choices and the country list. Undo still restores a form after the last page break is removed, and the WordPress menu reads SubtleForms.
 
 = 2.3.3 - 2026-10-14 =
 * Fix: A drawn signature shows as the signature image in the entry details and in a Repeater table instead of a long line of code. HTML notification emails show the signature as an embedded image that mail apps display, plain text emails say "Signed", and CSV exports write "Signed" instead of the image code. The PDF already showed the image and is unchanged.
@@ -388,6 +395,9 @@ now be reconstructed accurately.
 * Feature: Basic spam protection
 
 == Upgrade Notice ==
+
+= 2.3.4 =
+Form settings use vertical tabs, and country, dropdown, date and time fields use the new pickers. Phone countries and flags, chained choices and the builder canvas are fixed.
 
 = 2.3.3 =
 Signatures show as images in entries and emails, one submit stores one entry, conversational forms submit again, and field checks, preview, settings, coupons and dashboard fixes.
