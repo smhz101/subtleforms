@@ -39,13 +39,16 @@ export default function PreviewFrame( { children, title, className } ) {
     doc.write( '<!doctype html><html><head><meta charset="utf-8"></head><body></body></html>' );
     doc.close();
 
-    const themeHref = window.subtleformsAdmin?.themeStylesheet;
-    if ( themeHref ) {
+    const themeHrefs = window.subtleformsAdmin?.themeStylesheets ?? [];
+    themeHrefs.forEach( ( href ) => {
+      if ( ! href ) {
+        return;
+      }
       const theme = doc.createElement( 'link' );
       theme.rel = 'stylesheet';
-      theme.href = themeHref;
+      theme.href = href;
       doc.head.appendChild( theme );
-    }
+    } );
 
     const themeCss = window.subtleformsAdmin?.themeGlobalCss;
     if ( themeCss ) {
