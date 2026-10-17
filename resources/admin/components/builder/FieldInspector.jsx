@@ -140,6 +140,9 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
   }
 
   const isStep = field.type === 'step';
+  // Repeater is a layout container, so it is not "input-like", but visitors
+  // still need to show or hide the whole block from another answer.
+  const isRepeater = field.type === 'repeat_container';
   const fieldLogic = readLogic(field);
   const ruleCount = countRules(fieldLogic);
   const logicTab = {
@@ -175,7 +178,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
           },
           logicTab,
         ]
-      : isStep || isContentBlock
+      : isStep || isContentBlock || isRepeater
       ? [logicTab]
       : []),
     ...(supportsAppearance(field.type)
@@ -320,6 +323,8 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
                 <p className='sf-field-inspector__intro'>
                   {isStep
                     ? __('Skip this step unless its rules match. Fields in a skipped step are not checked or saved.', 'subtleforms')
+                    : isRepeater
+                    ? __('Show or hide this repeater based on answers to other fields. A hidden repeater, including every row inside it, is not checked or saved.', 'subtleforms')
                     : sprintf(
                         /* translators: %s: field label */
                         __('Show or hide “%s” based on answers to other fields. Hidden fields are not checked or saved.', 'subtleforms'),
