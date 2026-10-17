@@ -31,6 +31,15 @@ class FormMetaTest extends TestCase {
 		$this->assertSame( FormMeta::STATUS_DRAFT, FormMeta::normalize_status( 'something-else' ) );
 	}
 
+	/**
+	 * QA-11: a trashed form was reported as Draft, so the Trash tab offered
+	 * draft actions instead of Restore and Delete permanently.
+	 */
+	public function test_trashed_forms_stay_trashed() {
+		$this->assertSame( 'trash', FormMeta::normalize_status( 'trash' ) );
+		$this->assertSame( 'trash', FormMeta::status( array( 'status' => 'trash' ) ) );
+	}
+
 	public function test_type_prefers_form_type_then_metadata_then_config() {
 		$this->assertSame( FormMeta::TYPE_CONVERSATIONAL, FormMeta::type( array( 'form_type' => 'conversational' ) ) );
 		$this->assertSame( FormMeta::TYPE_MULTI_STEP, FormMeta::type( array( 'metadata' => array( 'type' => 'multistep' ) ) ) );

@@ -32,6 +32,7 @@ final class FormMeta {
 	const STATUS_DRAFT     = 'draft';
 	const STATUS_PUBLISHED = 'published';
 	const STATUS_ARCHIVED  = 'archived';
+	const STATUS_TRASH     = 'trash';
 
 	/**
 	 * Normalise a raw form type to a canonical value.
@@ -80,6 +81,11 @@ final class FormMeta {
 		}
 		if ( $raw === self::STATUS_ARCHIVED ) {
 			return self::STATUS_ARCHIVED;
+		}
+		// A trashed form stays "trash" so lists show it as Trashed and offer
+		// Restore and Delete permanently (QA-11).
+		if ( $raw === self::STATUS_TRASH ) {
+			return self::STATUS_TRASH;
 		}
 
 		return self::STATUS_DRAFT;
