@@ -621,3 +621,92 @@
 	padding-bottom: 16px;
 	border-bottom: 1px solid var(--sf-gray-100, #f0f0f1);
 }
+
+
+// Chained select dropdown editor. Reuses the choices row so it matches
+// Dropdown, Radio and Checkbox settings.
+.sf-chained {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+
+	&__intro,
+	&__empty,
+	&__hint {
+		margin: 0;
+		font-size: var(--sf-text-xs);
+		line-height: 1.45;
+		color: var(--sf-text-muted);
+	}
+
+	&__level {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding: 10px;
+		border: 1px solid var(--sf-border);
+		border-radius: var(--sf-radius-md);
+		background: var(--sf-bg-subtle);
+	}
+
+	&__level-head {
+		display: flex;
+		align-items: flex-end;
+		gap: 8px;
+	}
+
+	&__step {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		width: 24px;
+		height: 32px;
+		border-radius: var(--sf-radius-sm);
+		background: var(--sf-bg-surface);
+		color: var(--sf-text);
+		font-size: var(--sf-text-xs);
+		font-weight: 600;
+	}
+
+	&__name {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+
+	&__name-label {
+		font-size: var(--sf-text-xs);
+		font-weight: 600;
+		color: var(--sf-text);
+	}
+
+	&__inputs {
+		flex-wrap: wrap;
+	}
+
+	&__parent {
+		flex: 1 1 120px;
+		height: 32px;
+		min-height: 32px;
+		margin: 0;
+		padding: 0 8px;
+		border: 1px solid var(--sf-border);
+		border-radius: var(--sf-radius-control);
+		background: var(--sf-bg-surface);
+		font-size: var(--sf-text-sm);
+	}
+
+	&__actions {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+	}
+
+	&__row {
+		align-items: flex-start;
+	}
+}

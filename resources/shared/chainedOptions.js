@@ -15,7 +15,17 @@ export function chainedSelectLevels(config, selections = []) {
 
   const optionsForLevel = (depth) => {
     if (levels) {
-      return Array.isArray(levels[depth]?.options) ? levels[depth].options : [];
+      const options = Array.isArray(levels[depth]?.options) ? levels[depth].options : [];
+      // A later dropdown is chained when its choices name a parent choice.
+      // Older fields with no parent links keep showing every choice.
+      if (depth === 0 || !options.some((opt) => opt && opt.parent)) {
+        return options;
+      }
+      const parent = selected[depth - 1];
+      if (parent === undefined || parent === null || parent === '') {
+        return [];
+      }
+      return options.filter((opt) => String(opt?.parent) === String(parent));
     }
 
     let nodes = Array.isArray(cfg.options) ? cfg.options : [];

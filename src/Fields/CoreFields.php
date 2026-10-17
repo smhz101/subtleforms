@@ -642,9 +642,9 @@ final class CoreFields {
 					array(
 						'type'    => 'chained_levels',
 						'name'    => 'levels',
-						'label'   => __( 'Levels', 'subtleforms' ),
-						'section' => 'appearance',
-						'help'    => __( 'Each level is one dropdown. Changing a choice clears the ones below it.', 'subtleforms' ),
+						'label'   => __( 'Dropdowns', 'subtleforms' ),
+						'section' => 'choices',
+						'help'    => __( 'Each dropdown appears after the one above it. A choice in a later dropdown is only offered when the visitor picks its parent.', 'subtleforms' ),
 					),
 					array(
 						'type'    => 'select',
