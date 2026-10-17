@@ -28,6 +28,7 @@ class FormTemplates {
 			'contact_with_file'    => self::contact_with_file(),
 			// ── Lead generation ─────────────────────────────────────────────
 			'lead_capture'         => self::lead_capture_form(),
+			'newsletter'           => self::newsletter(),
 			'newsletter_signup'    => self::newsletter_signup(),
 			'ebook_download'       => self::ebook_download(),
 			// ── Feedback ────────────────────────────────────────────────────
@@ -146,7 +147,7 @@ class FormTemplates {
 		return array(
 			'id'          => 'simple_contact',
 			'name'        => __( 'Simple Contact', 'subtleforms' ),
-			'description' => __( 'Minimal contact form — just name, email, and message. Perfect for sidebars and footers.', 'subtleforms' ),
+			'description' => __( 'Minimal contact form: just name, email, and message. Perfect for sidebars and footers.', 'subtleforms' ),
 			'category'    => 'contact',
 			'icon'        => 'email',
 			'schema'      => array(
@@ -175,7 +176,7 @@ class FormTemplates {
 		return array(
 			'id'          => 'contact_with_file',
 			'name'        => __( 'Contact + Attachment', 'subtleforms' ),
-			'description' => __( 'Contact form that lets visitors attach a file — handy for design briefs, CVs, or support docs.', 'subtleforms' ),
+			'description' => __( 'Contact form that lets visitors attach a file: handy for design briefs, CVs, or support docs.', 'subtleforms' ),
 			'category'    => 'contact',
 			'icon'        => 'email',
 			'schema'      => array(
@@ -202,11 +203,65 @@ class FormTemplates {
 		);
 	}
 
+	/**
+	 * Newsletter (2.3.0): one email field and a button on one row, for a
+	 * footer or a hero. Uses the inline layout.
+	 *
+	 * @return array
+	 */
+	private static function newsletter() {
+		return array(
+			'id'          => 'newsletter',
+			'name'        => __( 'Newsletter', 'subtleforms' ),
+			'description' => __( 'Email only, with the button on the same row. Made for footers and hero sections.', 'subtleforms' ),
+			'category'    => 'lead',
+			'icon'        => 'email',
+			'schema'      => array(
+				'metadata' => array(
+					'title'      => __( 'Newsletter', 'subtleforms' ),
+					'name'       => 'newsletter',
+					'type'       => 'regular',
+					'submitText' => __( 'Subscribe', 'subtleforms' ),
+					'_showTitle' => false,
+					'appearance' => array(
+						'preset'   => 'default',
+						'variants' => array(
+							'layout' => 'inline',
+							'width'  => 'standard',
+						),
+					),
+				),
+				'fields'   => array(
+					array(
+						'id'          => 'email',
+						'type'        => 'email',
+						'label'       => __( 'Email address', 'subtleforms' ),
+						'placeholder' => __( 'you@example.com', 'subtleforms' ),
+						'required'    => true,
+						'appearance'  => array( 'hideLabel' => true ),
+					),
+				),
+				'actions'  => array(
+					array(
+						'id'       => 'email',
+						'type'     => 'email',
+						'enabled'  => true,
+						'settings' => array(
+							'to'      => '{admin_email}',
+							'subject' => __( 'New subscriber: {field:email}', 'subtleforms' ),
+							'message' => __( 'A new subscriber joined from {form_title}: {field:email}', 'subtleforms' ),
+						),
+					),
+				),
+			),
+		);
+	}
+
 	private static function newsletter_signup() {
 		return array(
 			'id'          => 'newsletter_signup',
 			'name'        => __( 'Newsletter Sign-Up', 'subtleforms' ),
-			'description' => __( 'Ultra-light sign-up — just first name and email, with consent checkbox.', 'subtleforms' ),
+			'description' => __( 'Ultra-light sign-up: just first name and email, with consent checkbox.', 'subtleforms' ),
 			'category'    => 'lead',
 			'icon'        => 'rss',
 			'schema'      => array(
@@ -224,7 +279,7 @@ class FormTemplates {
 					array( 'id' => 'email', 'type' => 'email', 'enabled' => true, 'config' => array(
 						'to'      => '{{admin_email}}',
 						'subject' => __( 'New Newsletter Subscriber: {{first_name}}', 'subtleforms' ),
-						'message' => __( "New subscriber:\n\n{{first_name}} — {{email}}", 'subtleforms' ),
+						'message' => __( "New subscriber:\n\n{{first_name}}, {{email}}", 'subtleforms' ),
 					) ),
 				),
 			),
@@ -235,7 +290,7 @@ class FormTemplates {
 		return array(
 			'id'          => 'ebook_download',
 			'name'        => __( 'Free Resource Download', 'subtleforms' ),
-			'description' => __( 'Gated content form — collect name and email before granting access to a guide or ebook.', 'subtleforms' ),
+			'description' => __( 'Gated content form: collect name and email before granting access to a guide or ebook.', 'subtleforms' ),
 			'category'    => 'lead',
 			'icon'        => 'media-document',
 			'schema'      => array(
@@ -278,7 +333,7 @@ class FormTemplates {
 					array( 'id' => 'use_case', 'type' => 'textarea', 'label' => __( 'How are you using our product?', 'subtleforms' ), 'required' => false, 'rows' => 3 ),
 					array( 'id' => 'likes',    'type' => 'textarea', 'label' => __( 'What do you like most?', 'subtleforms' ), 'required' => false, 'rows' => 3 ),
 					array( 'id' => 'improve',  'type' => 'textarea', 'label' => __( 'What could we improve?', 'subtleforms' ), 'required' => false, 'rows' => 3 ),
-					array( 'id' => 'email',    'type' => 'email',    'label' => __( 'Your email (optional — for follow-up)', 'subtleforms' ), 'required' => false ),
+					array( 'id' => 'email',    'type' => 'email',    'label' => __( 'Your email (optional, for follow-up)', 'subtleforms' ), 'required' => false ),
 				),
 				'actions' => array(
 					array( 'id' => 'save',  'type' => 'save',  'enabled' => true ),
@@ -296,7 +351,7 @@ class FormTemplates {
 		return array(
 			'id'          => 'website_feedback',
 			'name'        => __( 'Website Feedback', 'subtleforms' ),
-			'description' => __( 'Quick feedback on your website — usability, design, and suggestions.', 'subtleforms' ),
+			'description' => __( 'Quick feedback on your website: usability, design, and suggestions.', 'subtleforms' ),
 			'category'    => 'feedback',
 			'icon'        => 'admin-site',
 			'schema'      => array(
@@ -377,7 +432,7 @@ class FormTemplates {
 		return array(
 			'id'          => 'rsvp',
 			'name'        => __( 'RSVP', 'subtleforms' ),
-			'description' => __( 'Event RSVP — yes / no, guest count, and dietary requirements.', 'subtleforms' ),
+			'description' => __( 'Event RSVP: yes / no, guest count, and dietary requirements.', 'subtleforms' ),
 			'category'    => 'registration',
 			'icon'        => 'calendar-alt',
 			'schema'      => array(
@@ -437,10 +492,10 @@ class FormTemplates {
 						'label'   => __( 'Severity', 'subtleforms' ),
 						'required'=> true,
 						'options' => array(
-							array( 'label' => __( 'Critical — app is unusable', 'subtleforms' ), 'value' => 'critical' ),
-							array( 'label' => __( 'High — major feature broken', 'subtleforms' ), 'value' => 'high' ),
-							array( 'label' => __( 'Medium — partial functionality affected', 'subtleforms' ), 'value' => 'medium' ),
-							array( 'label' => __( 'Low — minor inconvenience', 'subtleforms' ), 'value' => 'low' ),
+							array( 'label' => __( 'Critical: app is unusable', 'subtleforms' ), 'value' => 'critical' ),
+							array( 'label' => __( 'High: major feature broken', 'subtleforms' ), 'value' => 'high' ),
+							array( 'label' => __( 'Medium: partial functionality affected', 'subtleforms' ), 'value' => 'medium' ),
+							array( 'label' => __( 'Low: minor inconvenience', 'subtleforms' ), 'value' => 'low' ),
 						),
 					),
 					array( 'id' => 'browser',  'type' => 'text',  'label' => __( 'Browser & OS', 'subtleforms' ),       'required' => false ),
@@ -581,11 +636,11 @@ class FormTemplates {
                         'grant_application' => array( 'id' => 'grant_application', 'name' => __( 'Grant Application', 'subtleforms' ), 'description' => __( 'Four-step grant or funding application covering organisation, project, budget, and supporting information.', 'subtleforms' ), 'category' => 'legal', 'icon' => 'awards', 'is_pro' => true, 'schema' => array( 'metadata' => array( 'type' => 'multi-step' ) ) ),
                         // ── Conversational / Quizzes ──────────────────────────────────
                         'product_fit_quiz'   => array( 'id' => 'product_fit_quiz',   'name' => __( 'Product Fit Quiz', 'subtleforms' ),         'description' => __( 'Interactive conversational quiz that qualifies leads by matching them to the right plan or product.', 'subtleforms' ),          'category' => 'lead',    'icon' => 'star-filled',   'is_pro' => true, 'schema' => array( 'metadata' => array( 'type' => 'conversational' ) ) ),
-                        'work_style_quiz'    => array( 'id' => 'work_style_quiz',    'name' => __( 'Work Style Quiz', 'subtleforms' ),          'description' => __( 'Personality-style quiz that reveals how someone works best — great for team-building and HR insights.', 'subtleforms' ),         'category' => 'survey',  'icon' => 'lightbulb',     'is_pro' => true, 'schema' => array( 'metadata' => array( 'type' => 'conversational' ) ) ),
+                        'work_style_quiz'    => array( 'id' => 'work_style_quiz',    'name' => __( 'Work Style Quiz', 'subtleforms' ),          'description' => __( 'Personality-style quiz that reveals how someone works best: great for team-building and HR insights.', 'subtleforms' ),         'category' => 'survey',  'icon' => 'lightbulb',     'is_pro' => true, 'schema' => array( 'metadata' => array( 'type' => 'conversational' ) ) ),
                         'coaching_discovery' => array( 'id' => 'coaching_discovery', 'name' => __( 'Coaching Discovery Quiz', 'subtleforms' ),  'description' => __( 'Conversational intake questionnaire to qualify coaching or consulting prospects before a discovery call.', 'subtleforms' ),   'category' => 'lead',    'icon' => 'format-chat',   'is_pro' => true, 'schema' => array( 'metadata' => array( 'type' => 'conversational' ) ) ),
                         // ── Multi-Step ────────────────────────────────────────────────
-                        'product_demo_request' => array( 'id' => 'product_demo_request', 'name' => __( 'Product Demo Request', 'subtleforms' ),    'description' => __( 'Three-step form to qualify and book a product demo — contact details, project needs, and preferred schedule.', 'subtleforms' ), 'category' => 'lead',      'icon' => 'desktop',     'is_pro' => true, 'schema' => array( 'metadata' => array( 'type' => 'multi-step' ) ) ),
-                        'financial_quote'      => array( 'id' => 'financial_quote',      'name' => __( 'Financial Quote Request', 'subtleforms' ), 'description' => __( 'Three-step quote request for insurance, loans, or financial services — personal info, coverage needs, and confirmation.', 'subtleforms' ), 'category' => 'ecommerce', 'icon' => 'chart-line',  'is_pro' => true, 'schema' => array( 'metadata' => array( 'type' => 'multi-step' ) ) ),
+                        'product_demo_request' => array( 'id' => 'product_demo_request', 'name' => __( 'Product Demo Request', 'subtleforms' ),    'description' => __( 'Three-step form to qualify and book a product demo: contact details, project needs, and preferred schedule.', 'subtleforms' ), 'category' => 'lead',      'icon' => 'desktop',     'is_pro' => true, 'schema' => array( 'metadata' => array( 'type' => 'multi-step' ) ) ),
+                        'financial_quote'      => array( 'id' => 'financial_quote',      'name' => __( 'Financial Quote Request', 'subtleforms' ), 'description' => __( 'Three-step quote request for insurance, loans, or financial services: personal info, coverage needs, and confirmation.', 'subtleforms' ), 'category' => 'ecommerce', 'icon' => 'chart-line',  'is_pro' => true, 'schema' => array( 'metadata' => array( 'type' => 'multi-step' ) ) ),
 		);
 	}
 }
