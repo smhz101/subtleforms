@@ -115,5 +115,5 @@ test('notes and resend notifications on an entry', async ({ page }) => {
   // Resend asks first, then confirms.
   await page.getByRole('button', { name: 'Resend notifications' }).click();
   await page.getByRole('button', { name: 'Resend', exact: true }).click();
-  await expect(page.getByText('1 notification queued again.')).toBeVisible();
+  await expect(page.locator('#sf-main .components-notice__content', { hasText: '1 notification queued again.' })).toBeVisible();
 });

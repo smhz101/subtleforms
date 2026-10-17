@@ -103,7 +103,39 @@ export default function RichTextInput( {
   }, [] );
 
   const exec = ( command ) => {
-    editorRef.current?.focus();
+    const editor = editorRef.current;
+    if ( ! editor ) {
+      return;
+    }
+    editor.focus();
+
+    // Turning bold or italic off at the end of a run. execCommand nests a
+    // second <b> there instead of leaving the tag, so the following text
+    // stays bold. Move the caret out of the tag instead.
+    const inline = command === 'bold' ? 'b, strong' : command === 'italic' ? 'i, em' : null;
+    const selection = window.getSelection();
+    if ( inline && selection && selection.rangeCount ) {
+      const range = selection.getRangeAt( 0 );
+      const anchor = range.startContainer.nodeType === Node.ELEMENT_NODE
+        ? range.startContainer
+        : range.startContainer.parentElement;
+      const wrapper = anchor?.closest?.( inline );
+      if ( wrapper && editor.contains( wrapper ) && range.collapsed ) {
+        const end = document.createRange();
+        end.selectNodeContents( wrapper );
+        end.collapse( false );
+        if ( range.compareBoundaryPoints( Range.END_TO_END, end ) === 0 ) {
+          const after = document.createRange();
+          after.setStartAfter( wrapper );
+          after.collapse( true );
+          selection.removeAllRanges();
+          selection.addRange( after );
+          handleInput();
+          return;
+        }
+      }
+    }
+
     document.execCommand( command, false, null );
     handleInput();
   };

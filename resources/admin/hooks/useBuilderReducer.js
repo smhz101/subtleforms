@@ -431,13 +431,32 @@ function builderReducer(state, action) {
     // ------------------------------------------------------------------------
     case BUILDER_ACTIONS.UNDO_SCHEMA: {
       const past = Array.isArray(state.schemaHistoryPast) ? state.schemaHistoryPast : [];
-
-      if (past.length === 0) {
+      const nextState = BUILDER_STATES.DIRTY;
+      if (!validateTransition(state.state, nextState, action.type)) {
         return state;
       }
 
-      const nextState = BUILDER_STATES.DIRTY;
-      if (!validateTransition(state.state, nextState, action.type)) {
+      // A delete or drag updates the canvas immediately but does not enter
+      // history until the batch window closes. Undo has to reverse that
+      // in-progress edit, or the click does nothing for the first 300ms.
+      if (state.historyBatchStartSchema) {
+        const future = Array.isArray(state.schemaHistoryFuture) ? state.schemaHistoryFuture : [];
+        const nextFuture = state.draftSchema ? [state.draftSchema, ...future] : future;
+        return {
+          ...state,
+          state: nextState,
+          draftSchema: state.historyBatchStartSchema,
+          isDirty: true,
+          schemaHistoryFuture: nextFuture,
+          validationErrors: [],
+          autoSaveError: null,
+          historyBatchTimer: null,
+          historyBatchPendingSchema: null,
+          historyBatchStartSchema: null,
+        };
+      }
+
+      if (past.length === 0) {
         return state;
       }
 

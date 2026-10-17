@@ -111,6 +111,15 @@
 	margin-bottom: var(--subtleforms-spacing-md);
 }
 
+/* Field errors have their own element. Give them the error colour explicitly
+   so a theme colour or a light token cannot fail contrast on a white page. */
+.subtleforms-field-error {
+	color: var(--subtleforms-color-error, #b3261e);
+	font-size: var(--subtleforms-font-size-sm);
+	line-height: 1.4;
+	margin-top: 0.25rem;
+}
+
 /* ===== Success State ===== */
 .subtleforms-success {
 	background: #d4edda;
