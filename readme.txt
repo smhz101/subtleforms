@@ -4,7 +4,7 @@ Tags: forms, contact form, form builder, submissions
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.3.2
+Stable tag: 2.3.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -159,6 +159,23 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 7. Conversational form on frontend
 
 == Changelog ==
+
+= 2.3.3 - 2026-10-14 =
+* Fix: A drawn signature shows as the signature image in the entry details and in a Repeater table instead of a long line of code. HTML notification emails show the signature as an embedded image that mail apps display, plain text emails say "Signed", and CSV exports write "Signed" instead of the image code. The PDF already showed the image and is unchanged.
+* Fix: One submit stores one entry. Pressing Enter on the focused Submit button of a conversational form, or double clicking Submit, could send the form twice and store the entry twice.
+* Fix: The entries list no longer shows an entry twice or puts back a change you just made, such as a star or a move to the Trash, when a background refresh or an earlier request finishes late.
+* Fix: With no AI provider saved yet, the AI settings show the OpenAI help and model choices that match the OpenAI provider shown in the menu, not the custom endpoint help.
+* Fix: Conversational forms submit again. The live form sent its answers to a wrong address and nothing was saved.
+* Fix: Form shadows are removed on the live form, the preview and the builder canvas, and the canvas background is white.
+* Fix: The preview device buttons show the selected size again. The preview stage is full width and the form inside is 960px, 768px or 380px wide. Submitting the preview saves an entry, runs the form's actions like a live submission and works for draft forms when you are signed in as an administrator.
+* Fix: Matrix rows and columns stay in place after leaving Preview.
+* Fix: Date limits, the number step, the phone format, the slider default and required matrix rows are checked in the browser and on the server.
+* Change: Field settings are ordered General (label and help text), Appearance, then Advanced.
+* Fix: Name and address no longer use a legend. Country, Dropdown and Chained Select show their configured options. Toggle has an enabled or disabled default and starts disabled.
+* Fix: Saving settings keeps a valid autosave interval and names the setting when a value is out of range. Sender and admin email addresses may be left empty.
+* Fix: A charged calculation that cannot be worked out is refused instead of becoming a free order.
+* Fix: Coupon percentages above 100 and negative usage limits are refused in the editor and on the server.
+* Fix: An empty Trash has its own message, and the dashboard form selector lists every form instead of the 10 most recently updated.
 
 = 2.3.2 - 2026-10-13 =
 * Fix: Creating a form from some templates opened an empty form, for example Volunteer Signup, Event Registration and Vendor Application in SubtleForms Pro. Those templates used a single checkbox with a list of options, which the server refused, and the refusal was not reported. Such a checkbox is now saved as a Checkboxes (Multiple choice) field, every template creates its full form with its fields, settings, notifications and type, and a form that cannot be created shows the reason and leaves no empty form behind.
@@ -371,6 +388,9 @@ now be reconstructed accurately.
 * Feature: Basic spam protection
 
 == Upgrade Notice ==
+
+= 2.3.3 =
+Signatures show as images in entries and emails, one submit stores one entry, conversational forms submit again, and field checks, preview, settings, coupons and dashboard fixes.
 
 = 2.3.2 =
 Every template creates its full form, the form type follows its Page Breaks, a better conversational builder, editable container labels, and label visibility, help text placement, validation messages and admin labels for every field. Stored form types are corrected on update.

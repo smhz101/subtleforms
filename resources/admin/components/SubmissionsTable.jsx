@@ -42,6 +42,17 @@ export const COLUMN_LABELS = {
   created_at: __('Submitted', 'subtleforms'),
 };
 
+/** Rows with each entry once, first occurrence kept. */
+function uniqueRows(rows) {
+  const seen = new Set();
+  return (Array.isArray(rows) ? rows : []).filter((row) => {
+    const id = String(row?.id ?? '');
+    if (!id || seen.has(id)) return !id;
+    seen.add(id);
+    return true;
+  });
+}
+
 const SubmissionsTable = forwardRef(
   (
     {
@@ -73,6 +84,10 @@ const SubmissionsTable = forwardRef(
     const [selectedSubmissions, setSelectedSubmissions] = useState([]);
     const [bulkDelete, setBulkDelete] = useState(null);
     const isPrefetchingRef = useRef(false);
+    // Each fresh load starts a new generation; answers from an older one
+    // (another tab, filter or a slower request) are ignored so rows are
+    // never shown twice or put back after a change (2.3.3).
+    const generationRef = useRef(0);
     const { createSuccessNotice, createErrorNotice } =
       useDispatch(noticesStore);
 
@@ -172,19 +187,22 @@ const SubmissionsTable = forwardRef(
       setError(null);
       setLoading(true);
       setCurrentPage(1);
+      const generation = ++generationRef.current;
 
       try {
         const { rows, total } = await fetchBatch(0);
-        setBuffer(rows);
+        if (generation !== generationRef.current) return;
+        setBuffer(uniqueRows(rows));
         setPagesLoaded(Math.ceil(rows.length / perPage) || 0);
         setTotalItems(total);
       } catch (err) {
+        if (generation !== generationRef.current) return;
         setError(__('Failed to load submissions', 'subtleforms'));
         setBuffer([]);
         setPagesLoaded(0);
         setTotalItems(0);
       } finally {
-        setLoading(false);
+        if (generation === generationRef.current) setLoading(false);
       }
     };
 
@@ -194,10 +212,12 @@ const SubmissionsTable = forwardRef(
       isPrefetchingRef.current = true;
 
       const batchIndex = Math.ceil(pagesLoaded / CHUNK_PAGES);
+      const generation = generationRef.current;
       try {
         const { rows, total } = await fetchBatch(batchIndex);
+        if (generation !== generationRef.current) return;
         if (rows.length > 0) {
-          setBuffer((prev) => [...prev, ...rows]);
+          setBuffer((prev) => uniqueRows([...prev, ...rows]));
           setPagesLoaded((prev) => prev + Math.ceil(rows.length / perPage));
           setTotalItems(total);
         }

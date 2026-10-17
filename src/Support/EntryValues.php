@@ -159,6 +159,9 @@ final class EntryValues {
 	 */
 	public static function toText( $value, array $field ): string {
 		$type = (string) ( $field['type'] ?? '' );
+		if ( self::isSignatureImage( $value ) ) {
+			return __( 'Signed (the signature image is in the entry)', 'subtleforms' );
+		}
 		if ( $type === 'password' ) {
 			return self::passwordLabel( $value );
 		}
@@ -184,6 +187,9 @@ final class EntryValues {
 	 */
 	public static function toHtml( $value, array $field ): string {
 		$type = (string) ( $field['type'] ?? '' );
+		if ( self::isSignatureImage( $value ) ) {
+			return '<img src="' . esc_attr( (string) $value ) . '" alt="' . esc_attr__( 'Signature', 'subtleforms' ) . '" width="240" style="max-width:240px;height:auto;border:1px solid #e5e7eb;background:#fff;" />';
+		}
 		if ( $type === 'rich_text' && is_string( $value ) ) {
 			return Sanitizer::sanitizeRichText( $value );
 		}
@@ -191,5 +197,15 @@ final class EntryValues {
 			return Repeater::toHtml( $value, $field );
 		}
 		return nl2br( esc_html( self::toText( $value, $field ) ) );
+	}
+
+	/**
+	 * Whether a stored answer is a drawn signature (a PNG or JPEG data URI).
+	 *
+	 * @param mixed $value Stored value.
+	 * @return bool
+	 */
+	public static function isSignatureImage( $value ): bool {
+		return is_string( $value ) && 1 === preg_match( '#^data:image/(png|jpeg);base64,[A-Za-z0-9+/=]+$#', $value );
 	}
 }

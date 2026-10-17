@@ -641,7 +641,7 @@ export default function FormRenderer({
 
   // Handle form submission
   // SUBMISSION GUARD: Only submit when explicitly requested via Submit button
-  const handleSubmit = useCallback(
+  const handleSubmitOnce = useCallback(
     async (e) => {
       e.preventDefault();
 
@@ -980,6 +980,25 @@ export default function FormRenderer({
       quote,
       hasCardField,
     ]
+  );
+
+  // One entry per submit: a double click, or Enter plus a click, while the
+  // first request is still running does not send a second one (2.3.3).
+  const submitLockRef = useRef(false);
+  const handleSubmit = useCallback(
+    async (e) => {
+      if (submitLockRef.current) {
+        e?.preventDefault?.();
+        return;
+      }
+      submitLockRef.current = true;
+      try {
+        await handleSubmitOnce(e);
+      } finally {
+        submitLockRef.current = false;
+      }
+    },
+    [handleSubmitOnce]
   );
 
   // Handle explicit submit button click

@@ -11,7 +11,7 @@
  */
 const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
-const { adminApi, cleanup, loginPage, openBuilder, entries, BASE } = require('./helpers');
+const { adminApi, cleanup, loginPage, openBuilder, openPanel, entries, BASE } = require('./helpers');
 
 const SHOTS = '/home/claude/shots/free232';
 let client;
@@ -71,6 +71,7 @@ test('label visibility, help text placement, messages and admin label: builder, 
 
   // Name: hidden label.
   await chrome(page, 0).click();
+  await openPanel(page, 'Appearance');
   await inspector(page).getByLabel('Field label visibility').selectOption('hidden');
   await expect(chrome(page, 0).locator('.sf-field-renderer__header')).toHaveClass(/is-label-hidden/);
   await expect(chrome(page, 0).locator('.sf-field-renderer__label-hidden-badge')).toBeVisible();
@@ -78,6 +79,7 @@ test('label visibility, help text placement, messages and admin label: builder, 
   // Email: help text above, messages, admin label.
   await chrome(page, 1).click();
   await inspector(page).getByLabel('Help text', { exact: true }).fill('We only use it to reply.');
+  await openPanel(page, 'Appearance');
   await inspector(page).getByLabel('Help text placement').selectOption('above');
   const emailChrome = chrome(page, 1);
   await expect(emailChrome.locator('.sf-field-renderer__help-text--above')).toHaveText('We only use it to reply.');
@@ -149,6 +151,7 @@ test('label visibility, help text placement, messages and admin label: builder, 
   expect(axe.violations.map((v) => v.id)).toEqual([]);
 
   await visitor.getByRole('textbox', { name: /Email/ }).fill('ada@example.com');
+  await visitor.waitForTimeout(3500); // past the 3 second minimum fill time
   await live.getByRole('button', { name: /Submit/ }).click();
   await expect(visitor.locator('.subtleforms-success, .subtleforms-confirmation, [role="status"]').first()).toBeVisible({ timeout: 20000 });
   await ctx.close();

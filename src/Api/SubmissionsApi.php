@@ -1077,6 +1077,11 @@ final class SubmissionsApi {
 				}
 				$value = $payload[ $key ] ?? '';
 				// Exports of several forms: groups read as numbered lines.
+				// A drawn signature is an image; the cell says it was signed (2.3.3).
+				if ( \SubtleForms\Support\EntryValues::isSignatureImage( $value ) ) {
+					$row[] = __( 'Signed', 'subtleforms' );
+					continue;
+				}
 				$row[] = \SubtleForms\Support\Repeater::looksLikeGroups( $value )
 					? $this->groupsText( $value )
 					: \SubtleForms\Support\FieldMapper::toText( $value );

@@ -238,6 +238,7 @@ function RepeaterTable( { node, groups } ) {
     : Array.from( new Set( groups.flatMap( ( g ) => Object.keys( g || {} ) ) ) ).map( ( k ) => ( { key: k, label: k } ) );
   const cell = ( v ) => {
     if ( v === undefined || v === null || v === '' ) return '';
+    if ( isSignatureImage( v ) ) return <img className='sf-answers__signature' src={ v } alt={ __( 'Signature', 'subtleforms' ) } />;
     if ( Array.isArray( v ) ) return v.map( ( x ) => ( x && typeof x === 'object' ? x.label || JSON.stringify( x ) : String( x ) ) ).join( ', ' );
     if ( typeof v === 'object' ) return Object.values( v ).filter( Boolean ).join( ' ' );
     return String( v );
@@ -262,6 +263,14 @@ function RepeaterTable( { node, groups } ) {
       </table>
     </div>
   );
+}
+
+/**
+ * Whether an answer is a drawn signature (a PNG or JPEG data URI). Only this
+ * exact shape is ever used as an image source (2.3.3).
+ */
+export function isSignatureImage( value ) {
+  return typeof value === 'string' && /^data:image\/(png|jpeg);base64,[A-Za-z0-9+/=]+$/.test( value );
 }
 
 /**
@@ -839,6 +848,8 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
                           <span className='sf-answers__empty'>{ __( 'No answer', 'subtleforms' ) }</span>
                         ) : repeaterNodes[ key ] && Array.isArray( value ) ? (
                           <RepeaterTable node={ repeaterNodes[ key ] } groups={ value } />
+                        ) : isSignatureImage( value ) ? (
+                          <img className='sf-answers__signature' src={ value } alt={ __( 'Signature', 'subtleforms' ) } />
                         ) : isFileList( value ) ? (
                           <FileLinks files={ value } submissionId={ submission.id } />
                         ) : Array.isArray( value ) ? (
