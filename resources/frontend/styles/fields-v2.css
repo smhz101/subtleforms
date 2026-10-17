@@ -1,0 +1,791 @@
+/**
+ * SubtleForms 2.0 field styles: help text, prefix/suffix, option layouts,
+ * toggle, opinion scale, picture choice and calculation.
+ *
+ * Everything reads the form's --subtleforms-* tokens so the Design tab and
+ * presets restyle these the same way they restyle every other field.
+ */
+
+/* ── Help text ─────────────────────────────────────────────────────────── */
+.subtleforms-field-help {
+	margin: 6px 0 0;
+	font-size: var(--subtleforms-font-size-sm, 0.875rem);
+	line-height: 1.45;
+	color: var(--subtleforms-color-text-light, #6b7280);
+}
+
+/* Help text above the input (2.3.2): sits between the label and the input. */
+.subtleforms-field-help--above {
+	margin: 0 0 6px;
+}
+
+/* Container label and help text (Repeater, Group, Columns; 2.3.2): one
+   block, so the container's field gap comes once, after it. */
+.subtleforms-container-header {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+}
+
+.subtleforms-container-header > .subtleforms-field-label,
+.subtleforms-container-header > .subtleforms-container-label,
+.subtleforms-container-header > .subtleforms-container-help {
+	margin: 0;
+}
+
+/* A hidden container label is hidden visually only. */
+.subtleforms-field--no-label > .subtleforms-container-header > .subtleforms-field-label {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	padding: 0;
+	margin: -1px;
+	overflow: hidden;
+	clip: rect(0, 0, 0, 0);
+	white-space: nowrap;
+	border: 0;
+}
+
+/* ── Read-only ─────────────────────────────────────────────────────────── */
+.subtleforms-field--readonly .subtleforms-input,
+.subtleforms-field--readonly .subtleforms-textarea {
+	background: color-mix(in srgb, var(--subtleforms-color-border, #d1d5db) 25%, transparent);
+	cursor: default;
+}
+
+/* ── Prefix / suffix ───────────────────────────────────────────────────── */
+.subtleforms-input-affix {
+	display: flex;
+	align-items: stretch;
+	width: 100%;
+}
+
+.subtleforms-input-affix .subtleforms-input {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.subtleforms-input-affix__prefix,
+.subtleforms-input-affix__suffix {
+	display: inline-flex;
+	align-items: center;
+	padding: 0 12px;
+	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
+	background: color-mix(in srgb, var(--subtleforms-color-border, #d1d5db) 30%, transparent);
+	color: var(--subtleforms-color-text-light, #6b7280);
+	font-size: var(--subtleforms-font-size-sm, 0.875rem);
+	white-space: nowrap;
+}
+
+.subtleforms-input-affix__prefix {
+	border-right: 0;
+	border-radius: var(--subtleforms-radius-md, 4px) 0 0 var(--subtleforms-radius-md, 4px);
+}
+
+.subtleforms-input-affix__suffix {
+	border-left: 0;
+	border-radius: 0 var(--subtleforms-radius-md, 4px) var(--subtleforms-radius-md, 4px) 0;
+}
+
+.subtleforms-input-affix__prefix + .subtleforms-input {
+	border-top-left-radius: 0;
+	border-bottom-left-radius: 0;
+}
+
+.subtleforms-input-affix .subtleforms-input:has(+ .subtleforms-input-affix__suffix) {
+	border-top-right-radius: 0;
+	border-bottom-right-radius: 0;
+}
+
+/* ── Option layouts ────────────────────────────────────────────────────── */
+.subtleforms-checkbox-group {
+	display: flex;
+	flex-direction: column;
+}
+
+.subtleforms-radio-group.subtleforms-options--inline,
+.subtleforms-checkbox-group.subtleforms-options--inline {
+	flex-direction: row;
+	flex-wrap: wrap;
+	column-gap: 20px;
+}
+
+.subtleforms-options--columns-2,
+.subtleforms-options--columns-3 {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	column-gap: 20px;
+}
+
+.subtleforms-options--columns-3 {
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.subtleforms-radio-group.subtleforms-options--buttons,
+.subtleforms-checkbox-group.subtleforms-options--buttons {
+	flex-direction: row;
+	flex-wrap: wrap;
+	gap: 8px;
+}
+
+.subtleforms-options--buttons .subtleforms-radio-label,
+.subtleforms-options--buttons .subtleforms-checkbox-label {
+	position: relative;
+	margin: 0;
+	padding: 9px 16px;
+	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-md, 4px);
+	background: var(--subtleforms-color-bg, #fff);
+	transition: border-color var(--subtleforms-transition-fast, 0.15s), background-color var(--subtleforms-transition-fast, 0.15s);
+}
+
+.subtleforms-options--buttons input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.subtleforms-options--buttons label:has(input:checked) {
+	border-color: var(--subtleforms-color-primary);
+	background: color-mix(in srgb, var(--subtleforms-color-primary, #3858e9) 10%, transparent);
+	color: var(--subtleforms-color-text);
+}
+
+.subtleforms-options--buttons label:has(input:focus-visible) {
+	box-shadow: 0 0 0 2px var(--subtleforms-color-primary);
+}
+
+@media (max-width: 600px) {
+	.subtleforms-options--columns-2,
+	.subtleforms-options--columns-3 {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+/* ── Toggle ────────────────────────────────────────────────────────────── */
+.subtleforms-toggle {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+	gap: 10px;
+	cursor: pointer;
+}
+
+.subtleforms-toggle__input {
+	position: absolute;
+	opacity: 0;
+	width: 1px;
+	height: 1px;
+}
+
+.subtleforms-toggle__track {
+	position: relative;
+	flex-shrink: 0;
+	width: 40px;
+	height: 22px;
+	border-radius: 999px;
+	background: var(--subtleforms-color-border-strong, #9ca3af);
+	transition: background-color var(--subtleforms-transition-fast, 0.15s);
+}
+
+.subtleforms-toggle__thumb {
+	position: absolute;
+	top: 3px;
+	left: 3px;
+	width: 16px;
+	height: 16px;
+	border-radius: 50%;
+	background: #fff;
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+	transition: transform var(--subtleforms-transition-fast, 0.15s);
+}
+
+.subtleforms-toggle__input:checked + .subtleforms-toggle__track {
+	background: var(--subtleforms-color-primary);
+}
+
+.subtleforms-toggle__input:checked + .subtleforms-toggle__track .subtleforms-toggle__thumb {
+	transform: translateX(18px);
+}
+
+.subtleforms-toggle__input:focus-visible + .subtleforms-toggle__track {
+	box-shadow: 0 0 0 2px var(--subtleforms-color-bg, #fff), 0 0 0 4px var(--subtleforms-color-primary);
+}
+
+/* ── Opinion scale ─────────────────────────────────────────────────────── */
+.subtleforms-scale__options {
+	display: grid;
+	grid-template-columns: repeat(var(--subtleforms-scale-count, 5), minmax(0, 1fr));
+	gap: 6px;
+}
+
+.subtleforms-scale__option {
+	position: relative;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 44px;
+	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-md, 4px);
+	background: var(--subtleforms-color-bg, #fff);
+	font-weight: 500;
+	font-variant-numeric: tabular-nums;
+	cursor: pointer;
+	transition: border-color var(--subtleforms-transition-fast, 0.15s), background-color var(--subtleforms-transition-fast, 0.15s), color var(--subtleforms-transition-fast, 0.15s);
+}
+
+.subtleforms-scale__option:hover {
+	border-color: var(--subtleforms-color-primary);
+}
+
+.subtleforms-scale__option.is-selected {
+	border-color: var(--subtleforms-color-primary);
+	background: var(--subtleforms-color-primary);
+	color: #fff;
+}
+
+.subtleforms-scale__input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+}
+
+.subtleforms-scale__option:has(.subtleforms-scale__input:focus-visible) {
+	box-shadow: 0 0 0 2px var(--subtleforms-color-primary);
+}
+
+.subtleforms-scale__labels {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 6px;
+	font-size: var(--subtleforms-font-size-sm, 0.875rem);
+	color: var(--subtleforms-color-text-light, #6b7280);
+}
+
+/* ── Picture choice ────────────────────────────────────────────────────── */
+.subtleforms-picture-choice {
+	display: grid;
+	grid-template-columns: repeat(var(--subtleforms-picture-columns, 3), minmax(0, 1fr));
+	gap: 12px;
+}
+
+@media (max-width: 600px) {
+	.subtleforms-picture-choice {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+.subtleforms-picture-choice__option {
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	overflow: hidden;
+	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-lg, 8px);
+	background: var(--subtleforms-color-bg, #fff);
+	cursor: pointer;
+	transition: border-color var(--subtleforms-transition-fast, 0.15s), box-shadow var(--subtleforms-transition-fast, 0.15s);
+}
+
+.subtleforms-picture-choice__option:hover {
+	border-color: var(--subtleforms-color-border-strong, #9ca3af);
+}
+
+.subtleforms-picture-choice__option.is-selected {
+	border-color: var(--subtleforms-color-primary);
+	box-shadow: 0 0 0 1px var(--subtleforms-color-primary);
+}
+
+.subtleforms-picture-choice__option:has(input:focus-visible) {
+	box-shadow: 0 0 0 2px var(--subtleforms-color-primary);
+}
+
+.subtleforms-picture-choice__input {
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	z-index: 1;
+	accent-color: var(--subtleforms-color-primary);
+}
+
+.subtleforms-picture-choice__media {
+	display: block;
+	aspect-ratio: 4 / 3;
+	background: color-mix(in srgb, var(--subtleforms-color-border, #d1d5db) 30%, transparent);
+}
+
+.subtleforms-picture-choice__media img {
+	display: block;
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+}
+
+.subtleforms-picture-choice__placeholder {
+	display: block;
+	width: 100%;
+	height: 100%;
+	background:
+		linear-gradient(135deg, transparent 48%, var(--subtleforms-color-border, #d1d5db) 49%, var(--subtleforms-color-border, #d1d5db) 51%, transparent 52%);
+}
+
+.subtleforms-picture-choice__label {
+	padding: 10px 12px;
+	font-weight: 500;
+	text-align: center;
+}
+
+/* ── Calculation ───────────────────────────────────────────────────────── */
+.subtleforms-calculation {
+	display: flex;
+	align-items: baseline;
+	gap: 4px;
+	padding: 10px 14px;
+	border: var(--subtleforms-border-width, 1px) dashed var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-md, 4px);
+	background: var(--subtleforms-color-bg-subtle, transparent);
+	font-size: var(--subtleforms-font-size-lg, 1.25rem);
+	font-weight: 600;
+	font-variant-numeric: tabular-nums;
+}
+
+.subtleforms-calculation__affix {
+	font-size: var(--subtleforms-font-size-base, 1rem);
+	font-weight: 500;
+	color: var(--subtleforms-color-text-light, #6b7280);
+}
+
+/* ── Error state ───────────────────────────────────────────────────────── */
+.subtleforms-field--has-error .subtleforms-input,
+.subtleforms-field--has-error .subtleforms-textarea,
+.subtleforms-field--has-error .subtleforms-select {
+	border-color: var(--subtleforms-color-error);
+}
+
+/* ===== Confirmation (2.0) ===== */
+.subtleforms-success {
+	padding: 32px 24px;
+	border: 1px solid var(--subtleforms-color-border, #e0e0e0);
+	background: var(--subtleforms-color-background, #fff);
+	color: var(--subtleforms-color-text, #1e1e1e);
+	text-align: center;
+}
+
+.subtleforms-success-icon {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 44px;
+	height: 44px;
+	margin-bottom: 12px;
+	border-radius: 50%;
+	background: #e6f4ea;
+	color: #00a32a;
+}
+
+.subtleforms-success-message h3 {
+	margin: 0 0 6px;
+	font-size: 1.25rem;
+	line-height: 1.3;
+}
+
+.subtleforms-success-message p {
+	max-width: 46ch;
+	margin: 0 auto 8px;
+	color: var(--subtleforms-color-text-light, #50575e);
+}
+
+.subtleforms-success-again {
+	margin-top: 12px;
+}
+
+/* ===== Unavailable form (2.0) ===== */
+.subtleforms-unavailable {
+	padding: 20px 24px;
+	border: 1px solid #e0e0e0;
+	border-radius: 8px;
+	background: #f6f7f7;
+	color: #1e1e1e;
+	font-size: 15px;
+}
+
+.subtleforms-unavailable p {
+	margin: 0;
+}
+
+/* ===== Appearance tokens added in 2.0 ===== */
+/* Focus follows the accent unless a form sets its own focus colour. */
+.subtleforms {
+	--subtleforms-color-border-focus: var(--subtleforms-color-primary);
+}
+
+.subtleforms .subtleforms-field-label {
+	color: var(--subtleforms-label-color, var(--subtleforms-color-text));
+}
+
+.subtleforms .subtleforms-input,
+.subtleforms .subtleforms-textarea,
+.subtleforms .subtleforms-select {
+	color: var(--subtleforms-input-text, var(--subtleforms-color-text));
+	font-family: inherit;
+}
+
+.subtleforms .subtleforms-button {
+	border-radius: var(--subtleforms-button-radius, var(--subtleforms-radius-sm));
+}
+
+
+
+/* ══ Payments (2.1) ═══════════════════════════════════════════════════════
+   Product, priced options, order summary with inline coupon, card element.
+   Everything reads the form's appearance tokens, so presets restyle it. */
+
+.subtleforms-price {
+	font-variant-numeric: tabular-nums;
+	font-weight: 600;
+	color: var(--subtleforms-color-text);
+}
+
+/* Product */
+.subtleforms-product {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 12px 14px;
+	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-md);
+	background: var(--subtleforms-color-bg);
+}
+.subtleforms-product__info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.subtleforms-product__name { font-size: var(--subtleforms-font-size-sm); color: var(--subtleforms-color-text-light); }
+
+.subtleforms-qty {
+	display: inline-flex;
+	align-items: stretch;
+	flex-shrink: 0;
+	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-md);
+	overflow: hidden;
+}
+.subtleforms-qty__btn {
+	width: 36px;
+	border: 0;
+	background: var(--subtleforms-color-bg-subtle, #f6f7f7);
+	color: var(--subtleforms-color-text);
+	font-size: 18px;
+	line-height: 1;
+	cursor: pointer;
+}
+.subtleforms-qty__btn:hover:not(:disabled) { background: var(--subtleforms-color-border); }
+.subtleforms-qty__btn:disabled { opacity: 0.4; cursor: default; }
+.subtleforms .subtleforms-qty__input,
+.subtleforms-qty__input.subtleforms-input {
+	width: 56px;
+	min-height: 36px;
+	padding: 0 4px;
+	border: 0;
+	border-radius: 0;
+	text-align: center;
+	-moz-appearance: textfield;
+}
+.subtleforms-qty__input::-webkit-outer-spin-button,
+.subtleforms-qty__input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+
+/* Priced options */
+.subtleforms-priced { display: flex; flex-direction: column; gap: 8px; }
+.subtleforms-priced__option {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 11px 14px;
+	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-md);
+	background: var(--subtleforms-color-bg);
+	cursor: pointer;
+	transition: border-color var(--subtleforms-transition-fast, 0.15s), box-shadow var(--subtleforms-transition-fast, 0.15s);
+}
+.subtleforms-priced__option:hover { border-color: var(--subtleforms-color-border-strong, var(--subtleforms-color-primary)); }
+.subtleforms-priced__option.is-selected {
+	border-color: var(--subtleforms-color-primary);
+	box-shadow: 0 0 0 1px var(--subtleforms-color-primary);
+}
+.subtleforms-priced__option input { margin: 0; accent-color: var(--subtleforms-color-primary); }
+.subtleforms-priced__label { flex: 1; color: var(--subtleforms-color-text); }
+.subtleforms-priced__price { font-weight: 600; font-variant-numeric: tabular-nums; color: var(--subtleforms-color-text); }
+
+.subtleforms-priced--cards {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+}
+.subtleforms-priced--cards .subtleforms-priced__option {
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 6px;
+	padding: 16px;
+	position: relative;
+}
+.subtleforms-priced--cards .subtleforms-priced__option input {
+	position: absolute;
+	inset-block-start: 14px;
+	inset-inline-end: 14px;
+}
+.subtleforms-priced--cards .subtleforms-priced__label { font-weight: 600; }
+.subtleforms-priced--cards .subtleforms-priced__price { font-size: var(--subtleforms-font-size-lg, 1.25rem); }
+
+/* Order summary */
+.subtleforms-summary {
+	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-lg, 10px);
+	background: var(--subtleforms-color-bg-subtle, #f6f7f7);
+	overflow: hidden;
+}
+.subtleforms-summary__items {
+	list-style: none;
+	margin: 0;
+	padding: 14px 16px 6px;
+}
+.subtleforms-summary__item,
+.subtleforms-summary__row {
+	display: flex;
+	justify-content: space-between;
+	gap: 16px;
+	padding: 5px 0;
+	font-size: var(--subtleforms-font-size-sm, 0.875rem);
+	color: var(--subtleforms-color-text);
+}
+.subtleforms-summary__qty,
+.subtleforms-summary__empty { color: var(--subtleforms-color-text-light); }
+.subtleforms-summary__empty { padding: 4px 0; font-size: var(--subtleforms-font-size-sm, 0.875rem); }
+.subtleforms-summary__totals {
+	margin: 0;
+	padding: 8px 16px 12px;
+	border-top: 1px dashed var(--subtleforms-color-border);
+}
+.subtleforms-summary__totals dt,
+.subtleforms-summary__totals dd { margin: 0; }
+.subtleforms-summary__totals dd { font-variant-numeric: tabular-nums; }
+.subtleforms-summary__row--discount { color: #00804a; }
+.subtleforms-summary__coupon-meta {
+	display: block;
+	margin: 2px 0 0;
+	font-weight: 400;
+	font-size: var(--subtleforms-font-size-xs, 0.75rem);
+	color: var(--subtleforms-color-text-muted, #6b7280);
+}
+.subtleforms-summary__row--total {
+	margin-top: 6px;
+	padding-top: 10px;
+	border-top: 1px solid var(--subtleforms-color-border);
+	font-size: var(--subtleforms-font-size-base, 1rem);
+	font-weight: 700;
+}
+.subtleforms-summary__row--total .subtleforms-price { font-size: var(--subtleforms-font-size-lg, 1.25rem); font-weight: 700; }
+.subtleforms-summary__coupon {
+	padding: 12px 16px 14px;
+	border-top: 1px solid var(--subtleforms-color-border);
+	background: var(--subtleforms-color-bg);
+}
+.subtleforms-summary__coupon-toggle {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--subtleforms-color-primary);
+	font: inherit;
+	font-size: var(--subtleforms-font-size-sm, 0.875rem);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	cursor: pointer;
+}
+
+/* Coupon box */
+.subtleforms-coupon__row { display: flex; gap: 8px; }
+.subtleforms-coupon__input { flex: 1; min-width: 0; text-transform: uppercase; letter-spacing: 0.04em; }
+.subtleforms-coupon__apply { flex-shrink: 0; }
+.subtleforms-coupon__error {
+	margin: 6px 0 0;
+	font-size: var(--subtleforms-font-size-sm, 0.875rem);
+	color: var(--subtleforms-color-error, #d63638);
+}
+.subtleforms-coupon.is-applied {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+.subtleforms-coupon__chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	padding: 5px 10px;
+	border-radius: 999px;
+	background: #e6f4ea;
+	color: #00663b;
+	font-size: var(--subtleforms-font-size-sm, 0.875rem);
+}
+.subtleforms-coupon__remove {
+	padding: 0;
+	border: 0;
+	background: none;
+	color: var(--subtleforms-color-text-light);
+	font: inherit;
+	font-size: var(--subtleforms-font-size-sm, 0.875rem);
+	text-decoration: underline;
+	cursor: pointer;
+}
+
+/* Card */
+.subtleforms-card__element {
+	padding: 12px;
+	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-md);
+	background: var(--subtleforms-color-bg);
+}
+.subtleforms-card__error { margin: 6px 0 0; font-size: var(--subtleforms-font-size-sm, 0.875rem); color: var(--subtleforms-color-error, #d63638); }
+.subtleforms-card__secure {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+	margin: 8px 0 0;
+	font-size: 12px;
+	color: var(--subtleforms-color-text-light);
+}
+.subtleforms-card__mock {
+	display: grid;
+	grid-template-columns: 1fr 90px 70px;
+	gap: 8px;
+}
+.subtleforms-card__mock span {
+	padding: 11px 12px;
+	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
+	border-radius: var(--subtleforms-radius-md);
+	background: var(--subtleforms-color-bg);
+	font-size: var(--subtleforms-font-size-sm, 0.875rem);
+	color: var(--subtleforms-color-text-light);
+}
+.subtleforms-card__note { margin: 8px 0 0; font-size: 12px; color: var(--subtleforms-color-text-light); }
+
+@media (max-width: 480px) {
+	.subtleforms-product { flex-wrap: wrap; }
+	.subtleforms-card__mock { grid-template-columns: 1fr 1fr; }
+	.subtleforms-card__mock span:first-child { grid-column: 1 / -1; }
+}
+.subtleforms-priced__price--free { font-weight: 500; color: var(--subtleforms-color-text-light); }
+.subtleforms-priced--cards .subtleforms-priced__price--free { font-size: var(--subtleforms-font-size-sm, 0.875rem); }
+
+/* ── File and image uploads (2.1) ─────────────────────────────────────── */
+.subtleforms-upload {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.subtleforms-upload__drop {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	gap: 6px;
+	width: 100%;
+	padding: 22px 16px;
+	border: var(--subtleforms-border-width, 1px) dashed var(--subtleforms-color-border, #c3c4c7);
+	border-radius: var(--subtleforms-radius-md, 4px);
+	background: var(--subtleforms-color-bg, #fff);
+	color: var(--subtleforms-color-text-light, #50575e);
+	font: inherit;
+	cursor: pointer;
+	transition: border-color var(--subtleforms-transition-fast, 0.15s), background-color var(--subtleforms-transition-fast, 0.15s);
+}
+
+.subtleforms-upload__drop:hover,
+.subtleforms-upload__drop:focus-visible,
+.subtleforms-upload.is-dragging .subtleforms-upload__drop {
+	border-color: var(--subtleforms-color-primary, #3858e9);
+	background: color-mix(in srgb, var(--subtleforms-color-primary, #3858e9) 6%, transparent);
+	color: var(--subtleforms-color-text, #1e1e1e);
+	outline: none;
+}
+
+.subtleforms-upload__drop-title {
+	font-weight: 500;
+}
+
+.subtleforms-upload__hint {
+	margin: 0;
+	font-size: 0.8125em;
+	color: var(--subtleforms-color-text-light, #646970);
+}
+
+.subtleforms-upload__list {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.subtleforms-upload__item {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	padding: 8px 10px;
+	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border, #dcdcde);
+	border-radius: var(--subtleforms-radius-md, 4px);
+	background: var(--subtleforms-color-bg, #fff);
+	font-size: 0.875em;
+}
+
+.subtleforms-upload__name {
+	flex: 1 1 auto;
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.subtleforms-upload__size {
+	flex: none;
+	color: var(--subtleforms-color-text-light, #646970);
+	font-variant-numeric: tabular-nums;
+}
+
+.subtleforms-upload__progress {
+	flex: 0 0 90px;
+	height: 6px;
+	border-radius: 3px;
+	background: color-mix(in srgb, var(--subtleforms-color-primary, #3858e9) 15%, transparent);
+	overflow: hidden;
+}
+
+.subtleforms-upload__progress > span {
+	display: block;
+	height: 100%;
+	background: var(--subtleforms-color-primary, #3858e9);
+	transition: width 0.2s;
+}
+
+.subtleforms-upload__remove {
+	flex: none;
+	width: 24px;
+	height: 24px;
+	padding: 0;
+	border: 0;
+	border-radius: 50%;
+	background: transparent;
+	color: var(--subtleforms-color-text-light, #646970);
+	font-size: 18px;
+	line-height: 1;
+	cursor: pointer;
+}
+
+.subtleforms-upload__remove:hover,
+.subtleforms-upload__remove:focus-visible {
+	background: color-mix(in srgb, currentColor 12%, transparent);
+	color: var(--subtleforms-color-error, #d63638);
+}
+
+.subtleforms-upload__error {
+	margin: 0;
+	font-size: 0.8125em;
+	color: var(--subtleforms-color-error, #d63638);
+}

@@ -79,6 +79,20 @@ final class FieldRegistry {
 			$grouped[ $category ][] = $field;
 		}
 
+		// Library order: categories by their first field, fields by meta.order.
+		foreach ( $grouped as &$list ) {
+			usort(
+				$list,
+				static fn( $a, $b ) => ( $a->meta['order'] ?? 10000 ) <=> ( $b->meta['order'] ?? 10000 )
+			);
+		}
+		unset( $list );
+
+		uasort(
+			$grouped,
+			static fn( $a, $b ) => ( $a[0]->meta['order'] ?? 10000 ) <=> ( $b[0]->meta['order'] ?? 10000 )
+		);
+
 		return $grouped;
 	}
 
