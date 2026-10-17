@@ -467,11 +467,12 @@ export function previewBreakpoints( settings = {} ) {
     tablet: found.tablet || standard.tablet,
     mobile: found.mobile || standard.mobile,
   };
-  if ( widths.desktop <= widths.tablet ) {
-    widths.desktop = Math.max( widths.tablet + 240, standard.desktop );
-  }
+  // Tablet first. Raising it afterwards can put it above desktop.
   if ( widths.tablet <= widths.mobile ) {
     widths.tablet = Math.max( widths.mobile + 200, standard.tablet );
+  }
+  if ( widths.desktop <= widths.tablet ) {
+    widths.desktop = Math.max( widths.tablet + 240, standard.desktop );
   }
   return widths;
 }

@@ -258,5 +258,20 @@ final class AppearanceTest extends TestCase {
 		$this->assertSame( 1440, $named['desktop'] );
 		$this->assertSame( 834, $named['tablet'] );
 		$this->assertSame( 390, $named['mobile'] );
+
+		// Mobile above tablet must not leave desktop narrower than tablet.
+		$ordered = Appearance::previewBreakpoints(
+			array(
+				'custom' => array(
+					'breakpoints' => array(
+						'desktop' => '1000px',
+						'tablet'  => '800px',
+						'mobile'  => '900px',
+					),
+				),
+			)
+		);
+		$this->assertGreaterThan( $ordered['tablet'], $ordered['desktop'] );
+		$this->assertGreaterThan( $ordered['mobile'], $ordered['tablet'] );
 	}
 }

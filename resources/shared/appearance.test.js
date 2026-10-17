@@ -216,6 +216,12 @@ describe( 'previewBreakpoints', () => {
     expect( previewBreakpoints( {
       custom: { breakpoints: { desktop: '900px', tablet: '900px', mobile: '400px' } },
     } ).desktop ).toBeGreaterThan( 900 );
+
+    const raised = previewBreakpoints( {
+      custom: { breakpoints: { desktop: '1000px', tablet: '800px', mobile: '900px' } },
+    } );
+    expect( raised.desktop ).toBeGreaterThan( raised.tablet );
+    expect( raised.tablet ).toBeGreaterThan( raised.mobile );
   } );
 
   it( 'offers an inherit-from-theme preset', () => {
