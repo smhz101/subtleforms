@@ -2,22 +2,22 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: SubtleForms 2.3.3\n"
+"Project-Id-Version: SubtleForms 2.3.4\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/subtleforms\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-17T11:22:06+00:00\n"
+"POT-Creation-Date: 2026-10-17T23:38:33+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
 
 #. Plugin Name of the plugin
 #: subtleforms.php
-#: src/Admin/AdminMenu.php:426
-#: src/Admin/AdminMenu.php:1076
+#: src/Admin/AdminMenu.php:450
+#: src/Admin/AdminMenu.php:1100
 #: resources/admin/components/builder/CheckoutPanel.jsx:83
 #: resources/blocks/form/edit.jsx:238
 #: resources/blocks/form/edit.jsx:403
@@ -94,7 +94,7 @@ msgstr ""
 
 #: src/Admin/AdminMenu.php:211
 #: src/Admin/AdminMenu.php:212
-#: src/Admin/AdminMenu.php:540
+#: src/Admin/AdminMenu.php:564
 #: resources/admin/app/AdminApp.jsx:159
 #: resources/admin/components/AppNav.jsx:44
 #: resources/admin/components/builder/FieldDock.jsx:26
@@ -137,39 +137,39 @@ msgid "An error occurred. Please try again."
 msgstr ""
 
 #: src/Admin/AdminMenu.php:374
-#: src/Admin/AdminMenu.php:928
+#: src/Admin/AdminMenu.php:952
 msgid "Action completed successfully."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:505
+#: src/Admin/AdminMenu.php:529
 #: resources/admin/components/settings/extensions/WebhooksPanel.jsx:46
 msgid "Webhooks"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:506
+#: src/Admin/AdminMenu.php:530
 msgid "Send each entry as JSON to any URL, with retries and signed requests."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:510
+#: src/Admin/AdminMenu.php:534
 #: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:70
 msgid "Email Marketing"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:511
+#: src/Admin/AdminMenu.php:535
 msgid "Add people who fill in a form to Mailchimp, Brevo or Kit."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:515
+#: src/Admin/AdminMenu.php:539
 #: resources/admin/components/builder/IntegrationsPanel.jsx:344
 #: resources/admin/components/settings/extensions/CrmPanel.jsx:21
 msgid "CRM"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:516
+#: src/Admin/AdminMenu.php:540
 msgid "Create or update HubSpot contacts, or send contacts to Zapier or Make."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:520
+#: src/Admin/AdminMenu.php:544
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:259
 #: resources/admin/components/analytics/PerformanceCell.jsx:24
 #: resources/admin/components/builder/IntegrationsPanel.jsx:421
@@ -177,94 +177,94 @@ msgstr ""
 msgid "Analytics"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:521
+#: src/Admin/AdminMenu.php:545
 msgid "Views, submissions and conversion rate for every form."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:525
+#: src/Admin/AdminMenu.php:549
 #: resources/admin/components/settings/extensions/EcommercePanel.jsx:22
 msgid "WooCommerce"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:526
+#: src/Admin/AdminMenu.php:550
 msgid "Take form payments through the WooCommerce checkout and sell WooCommerce products from any form."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:530
+#: src/Admin/AdminMenu.php:554
 #: resources/admin/components/settings/extensions/PdfPanel.jsx:18
 msgid "Entry PDF"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:531
+#: src/Admin/AdminMenu.php:555
 msgid "Download any entry as a PDF and attach it to notification emails."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:535
+#: src/Admin/AdminMenu.php:559
 #: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:64
 msgid "Multilanguage"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:536
+#: src/Admin/AdminMenu.php:560
 msgid "Register form strings with WPML or Polylang for full translation support."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:541
+#: src/Admin/AdminMenu.php:565
 msgid "Accept Stripe or PayPal payments directly through your forms."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:673
+#: src/Admin/AdminMenu.php:697
 msgid "Security check failed."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:698
-#: src/Admin/AdminMenu.php:711
-#: src/Admin/AdminMenu.php:730
-#: src/Admin/AdminMenu.php:753
-#: src/Admin/AdminMenu.php:779
-#: src/Admin/AdminMenu.php:790
-#: src/Admin/AdminMenu.php:801
+#: src/Admin/AdminMenu.php:722
+#: src/Admin/AdminMenu.php:735
+#: src/Admin/AdminMenu.php:754
+#: src/Admin/AdminMenu.php:777
+#: src/Admin/AdminMenu.php:803
+#: src/Admin/AdminMenu.php:814
+#: src/Admin/AdminMenu.php:825
 msgid "You do not have permission to access this page."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:741
-#: src/Admin/AdminMenu.php:856
+#: src/Admin/AdminMenu.php:765
+#: src/Admin/AdminMenu.php:880
 #: src/Frontend/Shortcode.php:51
 msgid "Form not found."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:829
-#: src/Admin/AdminMenu.php:851
-#: src/Admin/AdminMenu.php:884
+#: src/Admin/AdminMenu.php:853
+#: src/Admin/AdminMenu.php:875
+#: src/Admin/AdminMenu.php:908
 #: src/Api/AnalyticsApi.php:130
 msgid "Invalid request."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:936
+#: src/Admin/AdminMenu.php:960
 msgid "Coming Soon"
 msgstr ""
 
 #. translators: %s: Name of the interface being developed
-#: src/Admin/AdminMenu.php:940
+#: src/Admin/AdminMenu.php:964
 #, php-format
 msgid "The %s interface is under development."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:944
+#: src/Admin/AdminMenu.php:968
 msgid "This is a placeholder. Template files will be created in the templates/admin/ directory."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:949
+#: src/Admin/AdminMenu.php:973
 msgid "Your Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:953
+#: src/Admin/AdminMenu.php:977
 #: src/Fields/CoreFields.php:1170
 #: src/Fields/CoreFields.php:1198
 #: src/Fields/CoreFields.php:1367
 msgid "Title"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:954
+#: src/Admin/AdminMenu.php:978
 #: src/Api/SubmissionsApi.php:1047
 #: src/Privacy/PrivacyExporter.php:100
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:299
@@ -277,16 +277,16 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:955
+#: src/Admin/AdminMenu.php:979
 msgid "Created"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:956
+#: src/Admin/AdminMenu.php:980
 #: resources/admin/pages/PaymentsPage.jsx:509
 msgid "Actions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:981
+#: src/Admin/AdminMenu.php:1005
 #: resources/admin/components/builder/ContainerWrapper.jsx:77
 #: resources/admin/components/builder/FieldInspector.jsx:235
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:54
@@ -294,20 +294,20 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:995
+#: src/Admin/AdminMenu.php:1019
 msgid "Total Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:999
+#: src/Admin/AdminMenu.php:1023
 msgid "Active Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1003
+#: src/Admin/AdminMenu.php:1027
 msgid "Total Submissions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1053
-#: src/Admin/AdminMenu.php:1058
+#: src/Admin/AdminMenu.php:1077
+#: src/Admin/AdminMenu.php:1082
 msgid "WordPress Admin"
 msgstr ""
 
@@ -2849,7 +2849,7 @@ msgid "Stacked"
 msgstr ""
 
 #: src/Fields/FieldSettings.php:352
-#: resources/admin/components/builder/appearance/labels.js:68
+#: resources/admin/components/builder/appearance/labels.js:69
 msgid "Inline"
 msgstr ""
 
@@ -3379,7 +3379,7 @@ msgid "Basic"
 msgstr ""
 
 #: src/Fields/PaymentFields.php:107
-#: resources/admin/components/builder/appearance/labels.js:72
+#: resources/admin/components/builder/appearance/labels.js:74
 #: resources/admin/components/builder/FormSettings.jsx:576
 #: resources/admin/modals/CreateFormModal.jsx:145
 #: resources/admin/pages/SubmissionDetailPage.jsx:560
@@ -5129,14 +5129,28 @@ msgid "Use form colour"
 msgstr ""
 
 #: resources/admin/components/builder/appearance/AppearanceControls.jsx:85
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:305
+msgid "Theme"
+msgstr ""
+
+#: resources/admin/components/builder/appearance/AppearanceControls.jsx:86
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:273
+#: resources/admin/components/builder/appearance/labels.js:68
+#: resources/admin/components/builder/appearance/labels.js:70
+#: resources/admin/components/builder/appearance/labels.js:134
+#: resources/admin/components/builder/appearance/labels.js:142
+msgid "Inherit from theme"
+msgstr ""
+
+#: resources/admin/components/builder/appearance/AppearanceControls.jsx:87
 msgid "Use default"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/AppearanceControls.jsx:88
+#: resources/admin/components/builder/appearance/AppearanceControls.jsx:90
 msgid "Done"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/AppearanceControls.jsx:123
+#: resources/admin/components/builder/appearance/AppearanceControls.jsx:125
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:54
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:73
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:171
@@ -5145,8 +5159,9 @@ msgstr ""
 msgid "Auto"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/AppearanceControls.jsx:195
-#: resources/admin/components/builder/appearance/labels.js:92
+#: resources/admin/components/builder/appearance/AppearanceControls.jsx:197
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:305
+#: resources/admin/components/builder/appearance/labels.js:94
 msgid "Default"
 msgstr ""
 
@@ -5182,7 +5197,7 @@ msgid "Right"
 msgstr ""
 
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:51
-#: resources/admin/components/builder/appearance/labels.js:82
+#: resources/admin/components/builder/appearance/labels.js:84
 #: resources/admin/components/builder/FieldToolbar.jsx:34
 msgid "Full"
 msgstr ""
@@ -5303,12 +5318,12 @@ msgid "Starting from %s."
 msgstr ""
 
 #. translators: %s: preset name
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:305
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:315
 #, js-format
 msgid "Revert to %s"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:310
+#: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:320
 msgid "Reset all"
 msgstr ""
 
@@ -5441,143 +5456,143 @@ msgstr ""
 msgid "Full width"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:71
+#: resources/admin/components/builder/appearance/labels.js:73
 msgid "Narrow"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:73
+#: resources/admin/components/builder/appearance/labels.js:75
 msgid "Wide"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:76
+#: resources/admin/components/builder/appearance/labels.js:78
 #: resources/admin/components/OnboardingWizard.jsx:50
 #: resources/admin/components/OnboardingWizard.jsx:442
 #: resources/admin/templates/TemplateSelector.jsx:74
 msgid "Regular"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:77
+#: resources/admin/components/builder/appearance/labels.js:79
 #: resources/admin/templates/pro/support.js:32
 msgid "Medium"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:78
+#: resources/admin/components/builder/appearance/labels.js:80
 msgid "Semibold"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:79
-#: resources/admin/components/builder/appearance/labels.js:124
+#: resources/admin/components/builder/appearance/labels.js:81
+#: resources/admin/components/builder/appearance/labels.js:126
 #: resources/frontend/components/fields/RichTextInput.jsx:154
 msgid "Bold"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:83
+#: resources/admin/components/builder/appearance/labels.js:85
 #: resources/admin/components/builder/FieldToolbar.jsx:35
 msgid "Three quarters"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:84
+#: resources/admin/components/builder/appearance/labels.js:86
 #: resources/admin/components/builder/FieldToolbar.jsx:36
 msgid "Two thirds"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:85
+#: resources/admin/components/builder/appearance/labels.js:87
 #: resources/admin/components/builder/FieldToolbar.jsx:37
 msgid "Half"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:86
+#: resources/admin/components/builder/appearance/labels.js:88
 #: resources/admin/components/builder/FieldToolbar.jsx:38
 msgid "One third"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:87
+#: resources/admin/components/builder/appearance/labels.js:89
 #: resources/admin/components/builder/FieldToolbar.jsx:39
 msgid "One quarter"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:93
+#: resources/admin/components/builder/appearance/labels.js:95
 msgid "Inherits the plugin defaults. Neutral and unopinionated."
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:96
+#: resources/admin/components/builder/appearance/labels.js:98
 msgid "Minimal"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:97
+#: resources/admin/components/builder/appearance/labels.js:99
 msgid "Underlined inputs, generous spacing, no chrome."
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:100
+#: resources/admin/components/builder/appearance/labels.js:102
 msgid "Soft"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:101
+#: resources/admin/components/builder/appearance/labels.js:103
 msgid "Filled fields, rounded corners, gentle contrast."
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:104
+#: resources/admin/components/builder/appearance/labels.js:106
 msgid "Bordered"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:105
+#: resources/admin/components/builder/appearance/labels.js:107
 msgid "Strong outlines and tight spacing. Reads as a form."
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:108
+#: resources/admin/components/builder/appearance/labels.js:110
 msgid "Dark"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:109
+#: resources/admin/components/builder/appearance/labels.js:111
 msgid "For dark page backgrounds. Light text on deep ink."
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:112
+#: resources/admin/components/builder/appearance/labels.js:114
 msgid "Compact"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:113
+#: resources/admin/components/builder/appearance/labels.js:115
 msgid "Small type and tight rows. Suits long forms."
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:116
+#: resources/admin/components/builder/appearance/labels.js:118
 msgid "Rounded"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:117
+#: resources/admin/components/builder/appearance/labels.js:119
 msgid "Pill buttons and soft rounded fields. Friendly and modern."
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:120
+#: resources/admin/components/builder/appearance/labels.js:122
 msgid "Classic"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:121
+#: resources/admin/components/builder/appearance/labels.js:123
 msgid "Serif type on warm paper. Suits editorial and service sites."
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:125
+#: resources/admin/components/builder/appearance/labels.js:127
 msgid "High-contrast accent and heavy labels. Built to convert."
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:128
+#: resources/admin/components/builder/appearance/labels.js:130
 msgid "Dark surface"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:129
+#: resources/admin/components/builder/appearance/labels.js:131
 msgid "Sits on a dark footer or hero without a card of its own."
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:134
+#: resources/admin/components/builder/appearance/labels.js:135
+msgid "Uses the active theme's type, colours and content width."
+msgstr ""
+
+#: resources/admin/components/builder/appearance/labels.js:140
 msgid "System"
 msgstr ""
 
-#: resources/admin/components/builder/appearance/labels.js:135
+#: resources/admin/components/builder/appearance/labels.js:141
 msgid "Serif"
-msgstr ""
-
-#: resources/admin/components/builder/appearance/labels.js:136
-msgid "Inherit from theme"
 msgstr ""
 
 #: resources/admin/components/builder/canvas/renderers/ChoiceFieldRenderer.jsx:95
@@ -6084,7 +6099,7 @@ msgid "This step is always shown."
 msgstr ""
 
 #: resources/admin/components/builder/FieldInspector.jsx:389
-#: resources/admin/components/builder/PreviewWorkspace.jsx:97
+#: resources/admin/components/builder/PreviewWorkspace.jsx:122
 msgid "Appearance"
 msgstr ""
 
@@ -7511,41 +7526,47 @@ msgstr ""
 msgid "CVC"
 msgstr ""
 
-#: resources/admin/components/builder/PreviewWorkspace.jsx:20
+#: resources/admin/components/builder/PreviewWorkspace.jsx:35
 #: resources/admin/pages/SubmissionDetailPage.jsx:576
 msgid "Desktop"
 msgstr ""
 
-#: resources/admin/components/builder/PreviewWorkspace.jsx:21
+#: resources/admin/components/builder/PreviewWorkspace.jsx:36
 msgid "Tablet"
 msgstr ""
 
-#: resources/admin/components/builder/PreviewWorkspace.jsx:22
+#: resources/admin/components/builder/PreviewWorkspace.jsx:37
 #: resources/admin/pages/SubmissionDetailPage.jsx:575
 msgid "Mobile"
 msgstr ""
 
-#: resources/admin/components/builder/PreviewWorkspace.jsx:43
+#: resources/admin/components/builder/PreviewWorkspace.jsx:58
 msgid "Preview width"
 msgstr ""
 
-#: resources/admin/components/builder/PreviewWorkspace.jsx:63
+#. translators: 1: device name, 2: width in pixels
+#: resources/admin/components/builder/PreviewWorkspace.jsx:71
+#, js-format
+msgid "%1$s, %2$d pixels"
+msgstr ""
+
+#: resources/admin/components/builder/PreviewWorkspace.jsx:88
 msgid "Hide styling"
 msgstr ""
 
-#: resources/admin/components/builder/PreviewWorkspace.jsx:64
+#: resources/admin/components/builder/PreviewWorkspace.jsx:89
 msgid "Show styling"
 msgstr ""
 
-#: resources/admin/components/builder/PreviewWorkspace.jsx:95
+#: resources/admin/components/builder/PreviewWorkspace.jsx:120
 msgid "Form styling"
 msgstr ""
 
-#: resources/admin/components/builder/PreviewWorkspace.jsx:100
+#: resources/admin/components/builder/PreviewWorkspace.jsx:125
 msgid "Changes show in the canvas immediately. Publish to put them on your site."
 msgstr ""
 
-#: resources/admin/components/builder/PreviewWorkspace.jsx:109
+#: resources/admin/components/builder/PreviewWorkspace.jsx:134
 msgid "Styling is read-only: activate your Pro licence to edit. The form keeps working either way."
 msgstr ""
 
@@ -7896,7 +7917,7 @@ msgid "Previewing unsaved changes. Publish to make them live."
 msgstr ""
 
 #: resources/admin/components/form-preview/FormPreviewBody.jsx:39
-#: resources/admin/components/form-preview/PreviewFrame.jsx:97
+#: resources/admin/components/form-preview/PreviewFrame.jsx:112
 msgid "Form preview"
 msgstr ""
 
