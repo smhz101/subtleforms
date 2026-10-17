@@ -76,6 +76,16 @@ export default function CountrySelect({
     listRef.current?.querySelector('[data-active="true"]')?.scrollIntoView({ block: 'nearest' });
   }, [open, active, visible]);
 
+  const clear = () => {
+    if (onChange) {
+      onChange('');
+    } else {
+      setLocalValue('');
+    }
+    setOpen(false);
+    setQuery('');
+  };
+
   const choose = (country) => {
     const next = outputFormat === 'name' ? country.name : country.code;
     if (onChange) {
@@ -174,6 +184,16 @@ export default function CountrySelect({
             />
           )}
           <div className='subtleforms-picker__list' ref={listRef}>
+            {!required && selected && (
+              <button
+                type='button'
+                role='option'
+                className='subtleforms-picker__option'
+                aria-selected={false}
+                onClick={clear}>
+                <span className='subtleforms-picker__option-label'>{__('Clear selection', 'subtleforms')}</span>
+              </button>
+            )}
             {visible.length === 0 ? (
               <p className='subtleforms-picker__empty'>{__('No countries match that search.', 'subtleforms')}</p>
             ) : visible.map((country, index) => (

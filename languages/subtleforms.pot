@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-17T02:51:32+00:00\n"
+"POT-Creation-Date: 2026-10-17T02:58:25+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -1037,7 +1037,7 @@ msgid "Phone"
 msgstr ""
 
 #: src/Fields/CoreFields.php:224
-#: resources/frontend/components/fields/PhoneField.jsx:136
+#: resources/frontend/components/fields/PhoneField.jsx:143
 msgid "Country code"
 msgstr ""
 
@@ -1179,7 +1179,7 @@ msgstr ""
 
 #: src/Fields/CoreFields.php:585
 #: src/Fields/CoreFields.php:1452
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:135
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:144
 #: resources/admin/components/builder/utils/schemaTree.js:381
 #: resources/frontend/components/FieldRenderer.jsx:1173
 msgid "Country"
@@ -3030,7 +3030,7 @@ msgid "Numbers with optional limits"
 msgstr ""
 
 #: src/Fields/FieldSettings.php:682
-#: resources/frontend/components/fields/PhoneField.jsx:175
+#: resources/frontend/components/fields/PhoneField.jsx:182
 msgid "Phone number"
 msgstr ""
 
@@ -5583,7 +5583,7 @@ msgstr ""
 #: resources/admin/components/builder/canvas/renderers/ChoiceFieldRenderer.jsx:95
 #: resources/admin/components/builder/PaymentPreviews.jsx:42
 #: resources/admin/templates/shared/fields.js:73
-#: resources/frontend/components/fields/ChoiceSelect.jsx:92
+#: resources/frontend/components/fields/ChoiceSelect.jsx:101
 #: resources/frontend/components/fields/Payments.jsx:103
 msgid "Select an option"
 msgstr ""
@@ -6768,64 +6768,65 @@ msgstr ""
 msgid "Insert Field"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:87
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:26
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:30
 msgid "Choice"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:103
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:112
 msgid "Add one block per dropdown, in the order visitors see them. The first dropdown is always shown. Each choice in a later dropdown belongs to one choice above it, so visitors only see what matches the answer they already picked."
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:111
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:120
 msgid "No dropdowns yet. Start with the first question, for example Country or Make."
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:127
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:136
 msgid "First dropdown label"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:128
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:137
 msgid "Next dropdown label"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:135
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:144
 msgid "State"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:143
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:152
 msgid "Add choices to the dropdown above before linking this one."
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:157
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:158
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:166
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:167
 msgid "Choice label"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:166
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:175
 msgid "Shown when the previous answer is"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:170
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:179
 msgid "Shown when…"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:183
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:192
 msgid "Remove choice"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:200
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:209
 msgid "Add choice"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:209
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:218
 msgid "Remove dropdown"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:218
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:227
 msgid "Add the first dropdown"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:219
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:228
 msgid "Add the next dropdown"
 msgstr ""
 
@@ -13774,21 +13775,26 @@ msgstr ""
 msgid "Select…"
 msgstr ""
 
-#: resources/frontend/components/fields/ChoiceSelect.jsx:153
+#: resources/frontend/components/fields/ChoiceSelect.jsx:167
+#: resources/frontend/components/fields/CountrySelect.jsx:194
+msgid "Clear selection"
+msgstr ""
+
+#: resources/frontend/components/fields/ChoiceSelect.jsx:172
 msgid "No choices yet."
 msgstr ""
 
-#: resources/frontend/components/fields/CountrySelect.jsx:102
+#: resources/frontend/components/fields/CountrySelect.jsx:112
 msgid "Select a country"
 msgstr ""
 
-#: resources/frontend/components/fields/CountrySelect.jsx:170
-#: resources/frontend/components/fields/CountrySelect.jsx:171
+#: resources/frontend/components/fields/CountrySelect.jsx:180
+#: resources/frontend/components/fields/CountrySelect.jsx:181
 msgid "Search countries"
 msgstr ""
 
-#: resources/frontend/components/fields/CountrySelect.jsx:178
-#: resources/frontend/components/fields/PhoneField.jsx:140
+#: resources/frontend/components/fields/CountrySelect.jsx:198
+#: resources/frontend/components/fields/PhoneField.jsx:147
 msgid "No countries match that search."
 msgstr ""
 
@@ -13959,8 +13965,8 @@ msgstr ""
 msgid "Payments are encrypted and processed securely."
 msgstr ""
 
-#: resources/frontend/components/fields/PhoneField.jsx:127
-#: resources/frontend/components/fields/PhoneField.jsx:128
+#: resources/frontend/components/fields/PhoneField.jsx:134
+#: resources/frontend/components/fields/PhoneField.jsx:135
 msgid "Search country or code"
 msgstr ""
 

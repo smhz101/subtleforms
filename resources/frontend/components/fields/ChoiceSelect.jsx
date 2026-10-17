@@ -57,6 +57,15 @@ export default function ChoiceSelect({
     item?.scrollIntoView({ block: 'nearest' });
   }, [open, active]);
 
+  const clear = () => {
+    if (onChange) {
+      onChange('');
+    } else {
+      setLocalValue('');
+    }
+    setOpen(false);
+  };
+
   const choose = (option) => {
     const next = option.value;
     if (onChange) {
@@ -148,6 +157,16 @@ export default function ChoiceSelect({
       </select>
       {open && !locked && (
         <div className='subtleforms-picker__menu' role='listbox' ref={listRef} aria-labelledby={inputId}>
+          {!required && String(stored ?? '') !== '' && (
+            <button
+              type='button'
+              role='option'
+              className='subtleforms-picker__option'
+              aria-selected={false}
+              onClick={clear}>
+              <span className='subtleforms-picker__option-label'>{__('Clear selection', 'subtleforms')}</span>
+            </button>
+          )}
           {choices.length === 0 ? (
             <p className='subtleforms-picker__empty'>
               {emptyLabel || __('No choices yet.', 'subtleforms')}

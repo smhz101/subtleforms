@@ -4,6 +4,7 @@ import {
   filterPhoneCountries,
   flagEmoji,
   joinPhoneValue,
+  phoneCountry,
   splitPhoneValue,
 } from '../../../shared/phone';
 
@@ -36,6 +37,9 @@ export default function PhoneField({
     () => splitPhoneValue(stored, preferred),
     [stored, preferred]
   );
+  // An empty number serializes to '', which parses back to the default
+  // country. Remember the visitor's choice so it survives that round trip.
+  const [pickedCode, setPickedCode] = useState('');
   const emit = (next) => {
     if (onChange) {
       onChange(next);
@@ -46,7 +50,9 @@ export default function PhoneField({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
-  const country = parsed.country;
+  const country = parsed.national
+    ? parsed.country
+    : phoneCountry(pickedCode) || parsed.country;
   const national = parsed.national;
   const matches = useMemo(() => filterPhoneCountries(query), [query]);
 
@@ -71,6 +77,7 @@ export default function PhoneField({
   const choose = (nextCountry) => {
     setOpen(false);
     setQuery('');
+    setPickedCode(nextCountry?.code || '');
     emit(joinPhoneValue(nextCountry, national));
   };
 
@@ -179,7 +186,10 @@ export default function PhoneField({
         aria-describedby={describedBy}
         disabled={disabled || undefined}
         readOnly={readOnly || undefined}
-        onChange={(event) => emit(joinPhoneValue(country, event.target.value))}
+        onChange={(event) => {
+          setPickedCode(country?.code || '');
+          emit(joinPhoneValue(country, event.target.value));
+        }}
       />
     </div>
   );
