@@ -139,7 +139,7 @@ msgstr ""
 
 #: src/Admin/AdminMenu.php:407
 #: src/Admin/AdminMenu.php:1057
-msgid "Subtle Forms"
+msgid "SubtleForms"
 msgstr ""
 
 #: src/Admin/AdminMenu.php:486

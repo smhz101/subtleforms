@@ -6,7 +6,7 @@
  */
 const DEFAULTS = {
   name: 'SubtleForms',
-  menuName: 'Subtle Forms',
+  menuName: 'SubtleForms',
   logoUrl: '',
   hideCredits: false,
   hideHelp: false,

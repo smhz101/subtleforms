@@ -130,6 +130,19 @@ class AdminMenu {
 	}
 
 	/**
+	 * Menu mark, the same tile used in the admin header.
+	 *
+	 * A data-URI SVG keeps the ink tile and white glyph. Dashicons cannot.
+	 *
+	 * @return string
+	 */
+	private static function menu_icon(): string {
+		$svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#1e1e1e"/><rect x="8" y="8.5" width="16" height="3" rx="1.5" fill="#fff"/><rect x="8" y="14.5" width="10" height="3" rx="1.5" fill="#fff"/><rect x="8" y="20.5" width="6" height="3" rx="1.5" fill="#fff"/><path d="M18.6 21.6l2.3 2.3 4.3-4.6" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+
+		return 'data:image/svg+xml;base64,' . base64_encode( $svg );
+	}
+
+	/**
 	 * Register admin menu pages.
 	 */
 	public function register_menu() {
@@ -141,7 +154,7 @@ class AdminMenu {
 			$this->caps->manage_cap(),
 			'subtleforms',
 			array( $this, 'render_dashboard' ),
-			'dashicons-feedback',
+			self::menu_icon(),
 			56
 		);
 
@@ -404,7 +417,7 @@ class AdminMenu {
 
 		$defaults = array(
 			'name'        => 'SubtleForms',
-			'menuName'    => __( 'Subtle Forms', 'subtleforms' ),
+			'menuName'    => __( 'SubtleForms', 'subtleforms' ),
 			'logoUrl'     => '',
 			'hideCredits' => false,
 			'hideHelp'    => false,
@@ -1054,7 +1067,7 @@ class AdminMenu {
 			if ( $current_screen && isset( $current_screen->id ) ) {
 				$screen_id = Helpers::normalize_string( $current_screen->id );
 				if ( ! empty( $screen_id ) && strpos( $screen_id, 'subtleforms' ) !== false ) {
-					$title = __( 'Subtle Forms', 'subtleforms' );
+					$title = __( 'SubtleForms', 'subtleforms' );
 				} else {
 					$title = '';
 				}
