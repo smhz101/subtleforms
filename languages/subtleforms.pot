@@ -9,15 +9,15 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-17T23:39:21+00:00\n"
+"POT-Creation-Date: 2026-10-17T23:46:53+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
 
 #. Plugin Name of the plugin
 #: subtleforms.php
-#: src/Admin/AdminMenu.php:450
-#: src/Admin/AdminMenu.php:1100
+#: src/Admin/AdminMenu.php:552
+#: src/Admin/AdminMenu.php:1202
 #: resources/admin/components/builder/CheckoutPanel.jsx:83
 #: resources/blocks/form/edit.jsx:238
 #: resources/blocks/form/edit.jsx:403
@@ -94,7 +94,7 @@ msgstr ""
 
 #: src/Admin/AdminMenu.php:211
 #: src/Admin/AdminMenu.php:212
-#: src/Admin/AdminMenu.php:564
+#: src/Admin/AdminMenu.php:666
 #: resources/admin/app/AdminApp.jsx:159
 #: resources/admin/components/AppNav.jsx:44
 #: resources/admin/components/builder/FieldDock.jsx:26
@@ -137,39 +137,39 @@ msgid "An error occurred. Please try again."
 msgstr ""
 
 #: src/Admin/AdminMenu.php:374
-#: src/Admin/AdminMenu.php:952
+#: src/Admin/AdminMenu.php:1054
 msgid "Action completed successfully."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:529
+#: src/Admin/AdminMenu.php:631
 #: resources/admin/components/settings/extensions/WebhooksPanel.jsx:46
 msgid "Webhooks"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:530
+#: src/Admin/AdminMenu.php:632
 msgid "Send each entry as JSON to any URL, with retries and signed requests."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:534
+#: src/Admin/AdminMenu.php:636
 #: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:70
 msgid "Email Marketing"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:535
+#: src/Admin/AdminMenu.php:637
 msgid "Add people who fill in a form to Mailchimp, Brevo or Kit."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:539
+#: src/Admin/AdminMenu.php:641
 #: resources/admin/components/builder/IntegrationsPanel.jsx:344
 #: resources/admin/components/settings/extensions/CrmPanel.jsx:21
 msgid "CRM"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:540
+#: src/Admin/AdminMenu.php:642
 msgid "Create or update HubSpot contacts, or send contacts to Zapier or Make."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:544
+#: src/Admin/AdminMenu.php:646
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:259
 #: resources/admin/components/analytics/PerformanceCell.jsx:24
 #: resources/admin/components/builder/IntegrationsPanel.jsx:421
@@ -177,94 +177,94 @@ msgstr ""
 msgid "Analytics"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:545
+#: src/Admin/AdminMenu.php:647
 msgid "Views, submissions and conversion rate for every form."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:549
+#: src/Admin/AdminMenu.php:651
 #: resources/admin/components/settings/extensions/EcommercePanel.jsx:22
 msgid "WooCommerce"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:550
+#: src/Admin/AdminMenu.php:652
 msgid "Take form payments through the WooCommerce checkout and sell WooCommerce products from any form."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:554
+#: src/Admin/AdminMenu.php:656
 #: resources/admin/components/settings/extensions/PdfPanel.jsx:18
 msgid "Entry PDF"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:555
+#: src/Admin/AdminMenu.php:657
 msgid "Download any entry as a PDF and attach it to notification emails."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:559
+#: src/Admin/AdminMenu.php:661
 #: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:64
 msgid "Multilanguage"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:560
+#: src/Admin/AdminMenu.php:662
 msgid "Register form strings with WPML or Polylang for full translation support."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:565
+#: src/Admin/AdminMenu.php:667
 msgid "Accept Stripe or PayPal payments directly through your forms."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:697
+#: src/Admin/AdminMenu.php:799
 msgid "Security check failed."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:722
-#: src/Admin/AdminMenu.php:735
-#: src/Admin/AdminMenu.php:754
-#: src/Admin/AdminMenu.php:777
-#: src/Admin/AdminMenu.php:803
-#: src/Admin/AdminMenu.php:814
-#: src/Admin/AdminMenu.php:825
+#: src/Admin/AdminMenu.php:824
+#: src/Admin/AdminMenu.php:837
+#: src/Admin/AdminMenu.php:856
+#: src/Admin/AdminMenu.php:879
+#: src/Admin/AdminMenu.php:905
+#: src/Admin/AdminMenu.php:916
+#: src/Admin/AdminMenu.php:927
 msgid "You do not have permission to access this page."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:765
-#: src/Admin/AdminMenu.php:880
+#: src/Admin/AdminMenu.php:867
+#: src/Admin/AdminMenu.php:982
 #: src/Frontend/Shortcode.php:51
 msgid "Form not found."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:853
-#: src/Admin/AdminMenu.php:875
-#: src/Admin/AdminMenu.php:908
+#: src/Admin/AdminMenu.php:955
+#: src/Admin/AdminMenu.php:977
+#: src/Admin/AdminMenu.php:1010
 #: src/Api/AnalyticsApi.php:130
 msgid "Invalid request."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:960
+#: src/Admin/AdminMenu.php:1062
 msgid "Coming Soon"
 msgstr ""
 
 #. translators: %s: Name of the interface being developed
-#: src/Admin/AdminMenu.php:964
+#: src/Admin/AdminMenu.php:1066
 #, php-format
 msgid "The %s interface is under development."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:968
+#: src/Admin/AdminMenu.php:1070
 msgid "This is a placeholder. Template files will be created in the templates/admin/ directory."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:973
+#: src/Admin/AdminMenu.php:1075
 msgid "Your Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:977
+#: src/Admin/AdminMenu.php:1079
 #: src/Fields/CoreFields.php:1170
 #: src/Fields/CoreFields.php:1198
 #: src/Fields/CoreFields.php:1367
 msgid "Title"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:978
+#: src/Admin/AdminMenu.php:1080
 #: src/Api/SubmissionsApi.php:1047
 #: src/Privacy/PrivacyExporter.php:100
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:299
@@ -277,16 +277,16 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:979
+#: src/Admin/AdminMenu.php:1081
 msgid "Created"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:980
+#: src/Admin/AdminMenu.php:1082
 #: resources/admin/pages/PaymentsPage.jsx:509
 msgid "Actions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1005
+#: src/Admin/AdminMenu.php:1107
 #: resources/admin/components/builder/ContainerWrapper.jsx:77
 #: resources/admin/components/builder/FieldInspector.jsx:235
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:54
@@ -294,20 +294,20 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1019
+#: src/Admin/AdminMenu.php:1121
 msgid "Total Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1023
+#: src/Admin/AdminMenu.php:1125
 msgid "Active Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1027
+#: src/Admin/AdminMenu.php:1129
 msgid "Total Submissions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1077
-#: src/Admin/AdminMenu.php:1082
+#: src/Admin/AdminMenu.php:1179
+#: src/Admin/AdminMenu.php:1184
 msgid "WordPress Admin"
 msgstr ""
 
@@ -7917,7 +7917,7 @@ msgid "Previewing unsaved changes. Publish to make them live."
 msgstr ""
 
 #: resources/admin/components/form-preview/FormPreviewBody.jsx:39
-#: resources/admin/components/form-preview/PreviewFrame.jsx:112
+#: resources/admin/components/form-preview/PreviewFrame.jsx:115
 msgid "Form preview"
 msgstr ""
 
