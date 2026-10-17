@@ -2,55 +2,13 @@
  * SubtleForms Admin Styles
  * 
  * Core admin styles scoped to prevent WordPress conflicts.
- * Most layout/UI now handled by Tailwind in tailwind.css
  * 
  * @package SubtleForms
- * @version 1.1.32
+ * @version 2.0.0
  */
 
-/* ================================================================
-   GLOBAL PAGE CONTROL - Viewport-based layout
-   ================================================================ */
-
-body.toplevel_page_subtleforms,
-body.subtle-forms_page_subtleforms-forms,
-body.subtle-forms_page_subtleforms-submissions,
-body.subtle-forms_page_subtleforms-new-form,
-body.subtle-forms_page_subtleforms-submission-detail {
-	overflow: hidden !important;
-	height: 100vh !important;
-}
-
-body.toplevel_page_subtleforms #wpcontent,
-body.subtle-forms_page_subtleforms-forms #wpcontent,
-body.subtle-forms_page_subtleforms-submissions #wpcontent,
-body.subtle-forms_page_subtleforms-new-form #wpcontent,
-body.subtle-forms_page_subtleforms-submission-detail #wpcontent {
-	padding-left: 0 !important;
-	height: 100vh !important;
-	overflow: hidden !important;
-}
-
-body.toplevel_page_subtleforms #wpbody-content,
-body.subtle-forms_page_subtleforms-forms #wpbody-content,
-body.subtle-forms_page_subtleforms-submissions #wpbody-content,
-body.subtle-forms_page_subtleforms-new-form #wpbody-content,
-body.subtle-forms_page_subtleforms-submission-detail #wpbody-content {
-	padding-bottom: 0 !important;
-	height: 100% !important;
-	overflow: hidden !important;
-}
-
-body.toplevel_page_subtleforms .wrap,
-body.subtle-forms_page_subtleforms-forms .wrap,
-body.subtle-forms_page_subtleforms-submissions .wrap,
-body.subtle-forms_page_subtleforms-new-form .wrap,
-body.subtle-forms_page_subtleforms-submission-detail .wrap {
-	margin: 0 !important;
-	padding: 0 !important;
-	height: 100% !important;
-	overflow: hidden !important;
-}
+/* Page-level layout (frame, scroll contract) lives in the compiled admin
+   stylesheet: build/admin/index.jsx.css → components/AdminShell.scss. */
 
 /* ================================================================
    SCOPED ADMIN STYLES - All under .subtleforms-admin

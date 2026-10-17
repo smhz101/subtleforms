@@ -1,6 +1,9 @@
 import { Dropdown, Button, MenuGroup, MenuItem } from '@wordpress/components';
+import { useState } from '@wordpress/element';
+import { MergeTagsModal } from './merge-tags/MergeTagsHelp';
 import { __ } from '@wordpress/i18n';
 import Icon from '../ui/Icon';
+import { getBranding } from '../utils/branding';
 import './HelpMenu.scss';
 
 export default function HelpMenu({
@@ -8,7 +11,9 @@ export default function HelpMenu({
   onOpenWizard,
   showWizard = false,
 }) {
+  const [showTags, setShowTags] = useState(false);
   return (
+    <>
     <Dropdown
       className='subtleforms-help-menu'
       contentClassName='subtleforms-help-menu__content'
@@ -17,13 +22,14 @@ export default function HelpMenu({
         <Button
           onClick={onToggle}
           aria-expanded={isOpen}
-          variant='primary'
-          icon={<Icon.HelpCircle className='sf-help-menu__icon' />}
+          variant='tertiary'
+          icon={<Icon.HelpCircle size={18} className='sf-help-menu__icon' />}
           className='sf-help-menu__button'
-          title={__('Help & Documentation', 'subtleforms')}
+          label={__('Help & tour', 'subtleforms')}
+          showTooltip
         />
       )}
-      renderContent={() => (
+      renderContent={({ onClose }) => (
         <MenuGroup>
           {onStartTour && (
             <MenuItem
@@ -40,15 +46,27 @@ export default function HelpMenu({
             </MenuItem>
           )}
           <MenuItem
-              icon={<Icon.Book size={16} />}
+            icon={<Icon.Mail size={16} />}
             onClick={() => {
-              // Placeholder for documentation
-              window.open('https://subtleforms.com/docs', '_blank');
+              onClose();
+              setShowTags(true);
             }}>
-            {__('View Documentation', 'subtleforms')}
+            {__('Email merge tags', 'subtleforms')}
           </MenuItem>
+          {/* White label hides SubtleForms documentation links (2.3.0). */}
+          {!getBranding().hideCredits && (
+            <MenuItem
+              icon={<Icon.Book size={16} />}
+              onClick={() => {
+                window.open('https://subtleforms.com/docs', '_blank');
+              }}>
+              {__('View Documentation', 'subtleforms')}
+            </MenuItem>
+          )}
         </MenuGroup>
       )}
     />
+    {showTags && <MergeTagsModal onClose={() => setShowTags(false)} />}
+    </>
   );
 }

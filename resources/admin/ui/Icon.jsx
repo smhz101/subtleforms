@@ -20,6 +20,7 @@ import {
   Edit2,
   Edit3,
   Move,
+  CornerDownRight,
   ChevronUp,
   ChevronDown,
   ChevronLeft,
@@ -103,6 +104,28 @@ import {
   ArrowDown,
   ShieldCheck,
   Loader2,
+  LayoutDashboard,
+  Inbox,
+  Puzzle,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUpRight,
+  Activity,
+  Crown,
+  ToggleRight,
+  Gauge,
+  Images,
+  PenLine,
+  Calculator,
+  Palette,
+  ListTree,
+  Group,
+  Columns3,
+  Columns4,
+  Pilcrow,
+  Heading,
+  TextCursorInput,
+  Replace as ReplaceIcon,
 } from 'lucide-react';
 
 /**
@@ -114,6 +137,7 @@ import {
  * <Icon.Plus className="sf-text-blue-600" />
  */
 const Icon = {
+  CornerDownRight,
   // Actions
   Check,
   Close: X,
@@ -126,6 +150,7 @@ const Icon = {
   Edit2,
   Edit3,
   Move,
+  Replace: ReplaceIcon,
   Undo: Undo2,
   Redo: Redo2,
 
@@ -239,6 +264,29 @@ const Icon = {
   Star,
   Sliders,
   LayoutGrid,
+
+  // App frame
+  LayoutDashboard,
+  Inbox,
+  Puzzle,
+  ArrowLeft,
+  ArrowRight,
+  ArrowUpRight,
+  Activity,
+  Crown,
+  ToggleRight,
+  Gauge,
+  Images,
+  PenLine,
+  Calculator,
+  Palette,
+  ListTree,
+  Group,
+  Columns3,
+  Columns4,
+  Pilcrow,
+  Heading,
+  TextCursorInput,
 
   // Aliases for convenience
   Text: Type,

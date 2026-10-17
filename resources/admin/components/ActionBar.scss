@@ -1,27 +1,58 @@
 /**
- * ActionBar Component Styles
- * Co-located with ActionBar.jsx
+ * ActionBar — tabs and filters on the left, search and view options on the
+ * right. Sits under the page header and sticks while the list scrolls.
  */
 
 .sf-action-bar {
-  display: flex;
-  flex-shrink: 0;
-  justify-content: space-between;
-  align-items: center;
-  background-color: var(--sf-gray-50);
-  padding: 0 1.5rem;
-  border-bottom: 1px solid var(--sf-gray-300);
-  height: 3.5rem; // 56px
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px 16px;
+	min-height: 56px;
+	padding: 0 var(--sf-gutter);
+	background: var(--sf-bg-page);
+	border-bottom: 1px solid var(--sf-border);
 
-  &__left {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
+	&__left {
+		display: flex;
+		align-items: stretch;
+		align-self: stretch;
+		gap: 16px;
+		min-width: 0;
+	}
 
-  &__right {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-  }
+	&__right {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 8px;
+		padding-block: 8px;
+
+		> div {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+		}
+	}
+
+	// Search fields in the bar follow the compact 32px control height.
+	.components-search-control {
+		min-width: 240px;
+
+		input[type='search'].components-search-control__input,
+		.components-input-control__input {
+			height: 32px;
+			min-height: 32px;
+		}
+	}
+
+	@media (max-width: 782px) {
+		padding: 0 16px;
+
+		.components-search-control {
+			min-width: 0;
+			width: 100%;
+		}
+	}
 }
