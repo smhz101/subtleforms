@@ -192,10 +192,14 @@ export default function DateTimeField({
       </button>
       {name ? (
         <input
-          type='hidden'
+          type='text'
+          className='subtleforms-picker__fallback'
           name={name}
           value={stored ?? ''}
           required={required || undefined}
+          tabIndex={-1}
+          aria-hidden='true'
+          autoComplete='off'
           onChange={(event) => {
             const next = event.target.value;
             if (onChange) {

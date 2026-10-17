@@ -81,7 +81,11 @@ test('server validation errors are shown on each field (bug 2)', async ({ page }
 
   for (const key of ['first_name', 'email', 'topic', 'message']) {
     const control = page.locator(`#subtleforms-field-${key}`);
-    await expect(control).toHaveAttribute('aria-invalid', 'true');
+    const tag = await control.evaluate((el) => el.tagName);
+    // aria-invalid is not allowed on a button. The error is still named from the control.
+    if (tag !== 'BUTTON') {
+      await expect(control).toHaveAttribute('aria-invalid', 'true');
+    }
     await expect(control).toHaveAttribute('aria-describedby', new RegExp(`subtleforms-field-${key}-error`));
     await expect(page.locator(`#subtleforms-field-${key}-error`)).not.toBeEmpty();
   }

@@ -83,7 +83,7 @@ for (const width of WIDTHS) {
         if (sample.check.options) {
           if (['select', 'dropdown'].includes(sample.type)) {
             // Plus the placeholder option.
-            const options = page.locator(`#${id}`).locator('xpath=ancestor-or-self::*[self::select or contains(@class,"subtleforms-picker")][1]').locator('option');
+            const options = page.locator('.subtleforms-picker').filter({ has: page.locator(`#${id}`) }).locator('select option');
             await expect(options, `${key} options`).toHaveCount(sample.check.options + 1);
           } else {
             await expect(
@@ -95,7 +95,7 @@ for (const width of WIDTHS) {
 
         if (sample.check.countries) {
           // 249 ISO countries plus the placeholder (bug 3).
-          const countries = page.locator(`#${id}`).locator('xpath=ancestor-or-self::*[self::select or contains(@class,"subtleforms-picker")][1]').locator('option');
+          const countries = page.locator('.subtleforms-picker').filter({ has: page.locator(`#${id}`) }).locator('select option');
           expect(await countries.count(), `${key} countries`).toBeGreaterThan(240);
           await expect(countries.locator('[value="PK"]')).toHaveText('Pakistan');
         }
