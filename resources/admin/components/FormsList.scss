@@ -1,281 +1,275 @@
 /**
- * FormsList Component Styles
- * Layout: Uses DataTable internally, must fit in page scroll container
+ * FormsList — cells for the All Forms table.
  */
 
 .sf-forms-list {
 	display: flex;
 	flex-direction: column;
-	height: 100%;
-	min-height: 0; // CRITICAL: allows component to shrink in flex parent
-	// NOTE: DataTable component handles scrolling internally
+	min-height: 0;
 
-	// Form name cell
+	> .sf-contextual-tip,
+	> .components-notice {
+		margin: 16px var(--sf-gutter) 0;
+	}
+
+	// ── Name ─────────────────────────────────────────────────────────────────
 	.sf-form-name {
 		display: flex;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 8px;
+		min-width: 0;
 
 		&__title {
-			font-weight: 600;
-			color: var(--sf-gray-900);
-			font-size: var(--sf-text-md);
-			transition: color var(--sf-duration-base);
+			overflow: hidden;
+			font-size: var(--sf-text-sm);
+			font-weight: var(--sf-weight-semibold);
+			color: var(--sf-text);
+			text-overflow: ellipsis;
+			white-space: nowrap;
+			transition: color var(--sf-transition-fast);
+		}
+
+		&__new-badge,
+		&__pro-badge {
+			display: inline-flex;
+			align-items: center;
+			height: 18px;
+			padding: 0 6px;
+			border-radius: var(--sf-radius-full);
+			font-size: 11px;
+			font-weight: var(--sf-weight-medium);
+			line-height: 1;
+			white-space: nowrap;
 		}
 
 		&__new-badge {
-			background-color: var(--sf-gray-50);
-			padding: 0.125rem 0.375rem;
-			border: 1px solid var(--sf-gray-200);
-			color: var(--sf-gray-400);
-			font-size: var(--sf-text-xs);
+			background: var(--sf-primary-50);
+			color: var(--sf-primary-700);
 		}
 
 		&__pro-badge {
-			background-color: var(--sf-violet-50, var(--sf-n-25));
-			padding: 0.125rem 0.375rem;
-			border: 1px solid var(--sf-violet-200, var(--sf-a-100));
-			color: var(--sf-violet-600, var(--sf-a-500));
-			font-size: 0.625rem;
-			font-weight: 600;
-			text-transform: uppercase;
-			letter-spacing: 0.04em;
-			border-radius: var(--sf-radius-sm);
+			background: #1e1e1e;
+			color: #fff;
 		}
 	}
 
-	// Form type badge
+	// ── Type: icon + text, no box ────────────────────────────────────────────
 	.sf-form-type-badge {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.25rem;
-		padding: 0.25rem 0.625rem;
-		border: 1px solid;
-		border-radius: var(--sf-radius-sm);
-		font-size: var(--sf-text-xs);
-		font-weight: 500;
-
-		&--regular {
-			background-color: var(--sf-gray-50);
-			color: var(--sf-gray-700);
-			border-color: var(--sf-gray-200);
-		}
-
-		&--multistep {
-			background-color: var(--sf-purple-50);
-			color: var(--sf-violet-600);
-			border-color: var(--sf-purple-200);
-		}
-
-		&--sectioned {
-			background-color: var(--sf-indigo-50);
-			color: var(--sf-indigo-600);
-			border-color: var(--sf-indigo-200);
-		}
-
-		&--conversational {
-			background-color: var(--sf-blue-50);
-			color: var(--sf-blue-600);
-			border-color: var(--sf-blue-200);
-		}
+		gap: 6px;
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-secondary);
+		white-space: nowrap;
 
 		svg {
-			width: 0.75rem;
-			height: 0.75rem;
+			width: 14px;
+			height: 14px;
+			color: var(--sf-text-muted);
+		}
+
+		&--multistep svg,
+		&--sectioned svg,
+		&--conversational svg {
+			color: var(--sf-brand);
 		}
 	}
 
-	// Status badge
+	// ── Status pill ──────────────────────────────────────────────────────────
 	.sf-status-badge {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.25rem;
-		padding: 0.25rem 0.625rem;
-		border: 1px solid;
-		border-radius: var(--sf-radius-sm);
+		gap: 6px;
+		height: 22px;
+		padding: 0 8px;
+		border-radius: var(--sf-radius-full);
+		background: var(--sf-bg-muted);
 		font-size: var(--sf-text-xs);
-		font-weight: 500;
+		font-weight: var(--sf-weight-medium);
+		line-height: 1;
+		color: var(--sf-text-secondary);
+		white-space: nowrap;
 
-		&--published {
-			background-color: var(--sf-green-50);
-			color: var(--sf-green-800);
-			border-color: var(--sf-green-100);
+		&::before {
+			content: '';
+			width: 6px;
+			height: 6px;
+			border-radius: 50%;
+			background: currentColor;
 		}
 
-		&--draft {
-			background-color: var(--sf-gray-50);
-			color: var(--sf-gray-600);
-			border-color: var(--sf-gray-300);
+		&--published {
+			background: var(--sf-success-bg);
+			color: var(--sf-success);
 		}
 
 		&--unpublished {
-			background-color: var(--sf-warning-bg);
-			color: var(--sf-warning-strong);
-			border-color: var(--sf-warning-border);
+			background: var(--sf-warning-bg);
+			color: var(--sf-warning);
 		}
 
+		&--draft,
 		&--archived {
-			background-color: var(--sf-gray-50);
-			color: var(--sf-gray-600);
-			border-color: var(--sf-gray-300);
+			background: var(--sf-bg-muted);
+			color: var(--sf-text-secondary);
+		}
+
+		&--trash {
+			background: var(--sf-danger-bg, #fcf0f1);
+			color: var(--sf-danger, #b32d2e);
 		}
 
 		svg {
-			width: 0.75rem;
-			height: 0.75rem;
+			display: none;
 		}
 	}
 
-	// Shortcode button
+	// ── Shortcode ────────────────────────────────────────────────────────────
 	.sf-shortcode-btn {
-		display: flex;
+		display: inline-flex;
 		align-items: center;
-		gap: 0.5rem;
-		background-color: var(--sf-gray-100);
-		padding: 0.25rem 0.5rem;
+		gap: 6px;
+		height: 26px;
+		padding: 0 8px;
+		border: 1px solid transparent;
 		border-radius: var(--sf-radius-sm);
-		font-size: var(--sf-text-xs);
-		transition: background-color var(--sf-duration-base);
-		border: 1px solid var(--sf-gray-300);
-
-		&:hover {
-			background-color: var(--sf-gray-200);
-		}
+		background: var(--sf-bg-muted);
+		cursor: pointer;
+		transition:
+			border-color var(--sf-transition-fast),
+			background-color var(--sf-transition-fast);
 
 		code {
-			font-family: 'SFMono-Regular', Consolas, 'Liberation Mono', Menlo, monospace;
-			color: var(--sf-gray-600);
+			padding: 0;
+			background: transparent;
+			font-family: var(--sf-font-mono);
+			font-size: 12px;
+			color: var(--sf-text-secondary);
 		}
 
 		svg {
 			flex-shrink: 0;
-			width: 0.75rem;
-			height: 0.75rem;
-			color: var(--sf-gray-400);
+			color: var(--sf-text-subtle);
+			opacity: 0;
+			transition: opacity var(--sf-transition-fast);
 		}
 
-		&:hover code {
-			color: var(--sf-gray-900);
+		&:hover,
+		&:focus-visible {
+			border-color: var(--sf-border);
+			background: var(--sf-bg-surface);
+			outline: none;
+
+			code {
+				color: var(--sf-text);
+			}
+
+			svg {
+				opacity: 1;
+				color: var(--sf-text);
+			}
 		}
 
-		&:hover svg {
-			color: var(--sf-gray-600);
+		&:focus-visible {
+			box-shadow: var(--sf-shadow-focus);
 		}
 	}
 
-	// Entries display
+	tr:hover .sf-shortcode-btn svg {
+		opacity: 1;
+	}
+
+	// ── Entries ──────────────────────────────────────────────────────────────
 	.sf-entries-display {
 		display: inline-flex;
 		align-items: center;
-		gap: 0.25rem;
-		padding: 0.125rem 0.5rem;
-		border-radius: var(--sf-radius-full);
-		font-size: var(--sf-text-base);
+		gap: 8px;
+		font-size: var(--sf-text-sm);
+		font-variant-numeric: tabular-nums;
+		color: var(--sf-text);
+		text-decoration: none;
 
-		&--unread {
-			background-color: var(--sf-blue-50);
-			color: var(--sf-blue-800);
-			border: 1px solid var(--sf-blue-200);
+		&__total {
+			min-width: 2ch;
+		}
+
+		&__new {
+			display: inline-flex;
+			align-items: center;
+			height: 20px;
+			padding: 0 7px;
+			border-radius: var(--sf-radius-full);
+			background: var(--sf-brand);
+			color: #fff;
+			font-size: 11px;
+			font-weight: var(--sf-weight-semibold);
 		}
 
 		&--read {
-			background-color: var(--sf-gray-50);
-			color: var(--sf-gray-500);
-			border: 1px solid var(--sf-gray-200);
+			color: var(--sf-text-muted);
 		}
 
-		.sf-entries-display__pulse {
-			background-color: var(--sf-blue-500);
-			width: 0.5rem;
-			height: 0.5rem;
-			animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-		}
-
-		.sf-entries-display__unread {
-			font-weight: 600;
-		}
-
-		.sf-entries-display__separator {
-			color: var(--sf-gray-400);
+		&:hover .sf-entries-display__total {
+			color: var(--sf-brand);
+			text-decoration: underline;
 		}
 	}
 
-	// Date display
+	// ── Date ─────────────────────────────────────────────────────────────────
 	.sf-form-date {
-		color: var(--sf-gray-600);
-		font-size: var(--sf-text-base);
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-muted);
+		white-space: nowrap;
 	}
 
-	// Row actions
+	// ── Row actions ──────────────────────────────────────────────────────────
 	.subtleforms-row-actions {
 		display: flex;
 		align-items: center;
 		justify-content: flex-end;
-		gap: 0.25rem;
+		gap: 2px;
 
 		.sf-row-action-btn {
 			display: inline-flex;
 			align-items: center;
 			justify-content: center;
-			padding: 0.25rem;
-			background: transparent;
-			border: none;
+			width: 32px;
+			height: 32px;
+			padding: 0;
+			border: 0;
 			border-radius: var(--sf-radius-sm);
+			background: transparent;
+			color: var(--sf-text-secondary);
 			cursor: pointer;
-			color: var(--sf-gray-500);
-			line-height: 1;
-			transition: background-color var(--sf-duration-fast), color var(--sf-duration-fast);
+			transition:
+				background-color var(--sf-transition-fast),
+				color var(--sf-transition-fast);
 
 			&:hover {
-				background-color: var(--sf-gray-100);
-				color: var(--sf-gray-700);
+				background: var(--sf-bg-muted);
+				color: var(--sf-text);
+			}
+
+			&:focus-visible {
+				outline: none;
+				box-shadow: var(--sf-shadow-focus);
 			}
 
 			svg {
 				display: block;
-				width: 1rem;
-				height: 1rem;
+				fill: none;
 			}
 		}
 	}
 
-	// Actions column cell — no wrap, right-align
-	[data-column="actions"] {
-		white-space: nowrap;
-		text-align: right;
+	[data-column='actions'] {
 		width: 1%;
+		text-align: end;
+		white-space: nowrap;
 	}
 
-	// Empty state
-	.sf-empty-state {
-		padding: 3rem 0;
-		text-align: center;
-
-		&__emoji {
-			margin-bottom: 1rem;
-			font-size: 3.75rem;
-		}
-
-		&__title {
-			margin-bottom: 0.5rem;
-			font-weight: 600;
-			color: var(--sf-gray-900);
-			font-size: var(--sf-text-lg);
-		}
-
-		&__description {
-			margin-bottom: 1.5rem;
-			color: var(--sf-gray-600);
-			font-size: var(--sf-text-base);
-		}
-	}
-
-	// New form button icon
-	.components-button svg {
-		display: inline;
-		margin-right: 0.5rem;
-		width: 1rem;
-		height: 1rem;
+	tr:hover .sf-form-name__title {
+		color: var(--sf-brand);
 	}
 }
 
@@ -285,31 +279,7 @@
 		display: flex;
 		justify-content: flex-end;
 		align-items: center;
-		gap: 0.75rem;
-		margin-top: 1.5rem;
-
-		button {
-			padding: 0 1rem;
-			height: 2.25rem;
-			font-size: var(--sf-text-base);
-		}
-	}
-}
-
-// Row hover effects
-.sf-forms-list tr:hover {
-	.sf-form-name__title {
-		color: var(--sf-blue-600);
-	}
-}
-
-// Animations
-@keyframes pulse {
-	0%,
-	100% {
-		opacity: 1;
-	}
-	50% {
-		opacity: 0.5;
+		gap: 8px;
+		margin-top: 24px;
 	}
 }
