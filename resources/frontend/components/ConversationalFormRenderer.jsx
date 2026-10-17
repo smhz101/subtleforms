@@ -1,5 +1,5 @@
-import { useState, useEffect, useCallback, useMemo } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { useState, useEffect, useCallback, useMemo, useRef } from '@wordpress/element';
+import { __, sprintf } from '@wordpress/i18n';
 import FieldRenderer from './FieldRenderer';
 import { getIn, setIn, flattenToPathMap } from '../utils/valuePaths';
 import { collectLeafInputPaths } from '../utils/schemaLeaves';
@@ -11,10 +11,21 @@ import {
 } from '../../shared/appearance';
 import { debug } from '../../shared/debug';
 import { isEmptyValue } from './FormRenderer';
+import { computeLogicState } from '../../shared/conditions';
+import { FormContext } from './fields/FileUpload';
+import { fieldConfig } from '../../shared/fieldConfig';
+import { questionFields } from '../../shared/conversational';
+import { formFieldDefaults } from '../../shared/fieldDisplay';
+import { validateFields } from '../utils/fieldValidation';
 
 const restUrl =
-  window.subtleformsFrontend?.restUrl || '/wp-json/subtleforms/v1';
-const nonce = window.subtleformsFrontend?.nonce || '';
+  window.subtleformsFrontend?.restUrl ||
+  window.subtleformsAdmin?.restUrl ||
+  '/wp-json/subtleforms/v1';
+const nonce =
+  window.subtleformsFrontend?.nonce ||
+  window.subtleformsAdmin?.restNonce ||
+  '';
 
 /**
  * ConversationalFormRenderer - Renders form one question at a time
@@ -35,6 +46,8 @@ export default function ConversationalFormRenderer({
   const [submitting, setSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState(null);
+  // Confirmation chosen by the server (2.1: conditional confirmations).
+  const [confirmation, setConfirmation] = useState(null);
 
   const leafPaths = useMemo(
     () => collectLeafInputPaths(schema?.fields || []),
@@ -49,33 +62,10 @@ export default function ConversationalFormRenderer({
 
   const paymentSettings = schema?.metadata?.payment || {};
 
-  // Flatten all fields for rendering
-  const allFields = useMemo(() => {
-    if (!schema?.fields) return [];
-
-    const flatten = (fields) => {
-      let result = [];
-      fields.forEach((field) => {
-        // Skip container types in conversational mode
-        if (field.type !== 'step' && field.type !== 'section') {
-          result.push(field);
-        }
-        if (field.children && Array.isArray(field.children)) {
-          result = result.concat(flatten(field.children));
-        }
-        if (field.columns && Array.isArray(field.columns)) {
-          field.columns.forEach((col) => {
-            if (Array.isArray(col)) {
-              result = result.concat(flatten(col));
-            }
-          });
-        }
-      });
-      return result;
-    };
-
-    return flatten(schema.fields);
-  }, [schema]);
+  // The questions: the same list the builder shows (2.3.2). A Group or
+  // Repeater is one question with its fields inside it.
+  const allFields = useMemo(() => questionFields(schema?.fields || []), [schema]);
+  const fieldDefaults = useMemo(() => formFieldDefaults(schema?.metadata), [schema?.metadata]);
 
   // Generate form type-aware CSS classes (early, before any returns)
   // Conversational forms are rendered by this component rather than by
@@ -90,57 +80,11 @@ export default function ConversationalFormRenderer({
     .join(' ');
   const appearanceStyle = formAppearanceStyle(appearance);
 
-  // Evaluate conditional logic
-  const hiddenFields = useMemo(() => {
-    const hidden = new Set();
-
-    allFields.forEach((field) => {
-      const conditions = field.config?.conditions || [];
-
-      conditions.forEach((condition) => {
-        const sourceValue = getIn(values, condition.sourceField);
-        let matches = false;
-
-        switch (condition.operator) {
-          case 'equals':
-            matches = String(sourceValue) === String(condition.value);
-            break;
-          case 'not_equals':
-            matches = String(sourceValue) !== String(condition.value);
-            break;
-          case 'empty':
-            matches = !sourceValue || sourceValue === '';
-            break;
-          case 'not_empty':
-            matches = sourceValue && sourceValue !== '';
-            break;
-          case 'contains':
-            if (Array.isArray(sourceValue)) {
-              matches = sourceValue.includes(condition.value);
-            } else {
-              matches = String(sourceValue).includes(String(condition.value));
-            }
-            break;
-          case 'greater_than':
-            matches = parseFloat(sourceValue) > parseFloat(condition.value);
-            break;
-          case 'less_than':
-            matches = parseFloat(sourceValue) < parseFloat(condition.value);
-            break;
-          default:
-            break;
-        }
-
-        if (condition.effect === 'hide' && matches) {
-          hidden.add(field.config?.key || field.key);
-        } else if (condition.effect === 'show' && !matches) {
-          hidden.add(field.config?.key || field.key);
-        }
-      });
-    });
-
-    return hidden;
-  }, [allFields, values]);
+  // Conditional logic: the same evaluator as the server (shared/conditions.js).
+  const hiddenFields = useMemo(
+    () => new Set(computeLogicState(schema || {}, values).hidden_fields),
+    [schema, values]
+  );
 
   // Get visible fields
   const visibleFields = useMemo(() => {
@@ -155,32 +99,22 @@ export default function ConversationalFormRenderer({
   const progressPercent =
     totalFields > 0 ? ((currentIndex + 1) / totalFields) * 100 : 0;
 
-  // Validate current field
+  // Validate the current question with the same rules as the other form
+  // types (2.3.2): its own required and validation messages, and every field
+  // inside a Group or Repeater question.
   const validateCurrentField = useCallback(() => {
     if (!currentField) return true;
-
+    const errors = validateFields([currentField], values, hiddenFields, fieldDefaults);
     const fieldKey = currentField.config?.key || currentField.key;
-    const value = getIn(values, fieldKey);
-    const isRequired = currentField.config?.required === true;
-
-    // Clear previous error
     setValidationErrors((prev) => {
       const next = { ...prev };
-      delete next[fieldKey];
-      return next;
+      Object.keys(next).forEach((k) => {
+        if (k === fieldKey || (fieldKey && k.startsWith(`${fieldKey}.`))) delete next[k];
+      });
+      return { ...next, ...errors };
     });
-
-    // Required validation
-    if (isRequired && isEmptyValue(value)) {
-      setValidationErrors((prev) => ({
-        ...prev,
-        [fieldKey]: __('This field is required.', 'subtleforms'),
-      }));
-      return false;
-    }
-
-    return true;
-  }, [currentField, values]);
+    return Object.keys(errors).length === 0;
+  }, [currentField, values, hiddenFields, fieldDefaults]);
 
   // Handle field change
   const handleChange = useCallback((path, value) => {
@@ -202,6 +136,12 @@ export default function ConversationalFormRenderer({
     });
   }, []);
 
+  // The latest submit, and a lock so one entry is sent per submit even when
+  // Enter on the focused Submit button fires both the click and the
+  // keyboard shortcut (2.3.3).
+  const submitRef = useRef(() => {});
+  const submitLockRef = useRef(false);
+
   // Handle next
   const handleNext = useCallback(() => {
     if (currentStep === 'questions') {
@@ -220,11 +160,11 @@ export default function ConversationalFormRenderer({
       if (paymentEnabled) {
         setCurrentStep('payment');
       } else {
-        handleSubmit();
+        submitRef.current();
       }
     } else if (currentStep === 'payment') {
       // Submit from payment step
-      handleSubmit();
+      submitRef.current();
     }
   }, [
     currentStep,
@@ -273,16 +213,14 @@ export default function ConversationalFormRenderer({
   }, [currentField, currentStep, currentIndex, totalFields, handleNext]);
 
   // Handle submit
-  const handleSubmit = useCallback(
+  const handleSubmitOnce = useCallback(
     async (e) => {
       e?.preventDefault();
 
-      // In preview mode, prevent submission
-      if (preview) {
-        console.warn('SubtleForms: Form submission disabled in preview mode');
-        if (customOnSubmit) {
-          customOnSubmit();
-        }
+      if (preview && !Number(formId)) {
+        setSubmitError(
+          __('Save the form first, then submit the preview.', 'subtleforms')
+        );
         return;
       }
 
@@ -337,6 +275,10 @@ export default function ConversationalFormRenderer({
           }
         }
       });
+      // Answers to hidden fields are not sent (the server drops them too).
+      hiddenFields.forEach((k) => {
+        delete payload[k];
+      });
 
       // Include CAPTCHA response (v2 or v3)
       const recaptchaResponse = document.querySelector(
@@ -364,7 +306,7 @@ export default function ConversationalFormRenderer({
       }
 
       try {
-        const response = await fetch(`${restUrl}submit`, {
+        const response = await fetch(`${restUrl.replace(/\/$/, '')}/submit`, {
           method: 'POST',
           credentials: 'same-origin',
           headers: {
@@ -380,6 +322,26 @@ export default function ConversationalFormRenderer({
         const result = await response.json();
 
         if (response.ok && result?.data?.success) {
+          const conf = result.data.confirmation || null;
+          const fill = (text) =>
+            String(text || '').replace(/\{([\w.-]+)\}/g, (m, key) => {
+              const raw = payload[key];
+              if (raw === undefined || raw === null) return '';
+              return Array.isArray(raw) ? raw.join(', ') : String(raw);
+            });
+          if (conf?.type === 'redirect' && conf.redirectUrl && !preview) {
+            window.location.assign(
+              String(conf.redirectUrl).replace(/\{([\w.-]+)\}/g, (m, key) =>
+                encodeURIComponent(payload[key] ?? '')
+              )
+            );
+            return;
+          }
+          setConfirmation(
+            conf && conf.type !== 'redirect'
+              ? { title: fill(conf.title), message: fill(conf.message) }
+              : null
+          );
           setSubmitSuccess(true);
           setValues({});
           setCurrentIndex(0);
@@ -399,20 +361,38 @@ export default function ConversationalFormRenderer({
         setSubmitting(false);
       }
     },
-    [formId, values, leafPaths, preview, customOnSubmit]
+    [formId, values, leafPaths, preview, customOnSubmit, hiddenFields]
   );
+
+  const handleSubmit = useCallback(
+    async (e) => {
+      e?.preventDefault?.();
+      if (submitLockRef.current) {
+        return;
+      }
+      submitLockRef.current = true;
+      try {
+        await handleSubmitOnce(e);
+      } finally {
+        submitLockRef.current = false;
+      }
+    },
+    [handleSubmitOnce]
+  );
+  submitRef.current = handleSubmit;
 
   if (submitSuccess) {
     return (
       <div className={formClassNames} style={appearanceStyle}>
         <div className='subtleforms-conversational-success'>
           <div className='subtleforms-success-icon'>✓</div>
-          <h2>{__('Thank you!', 'subtleforms')}</h2>
+          <h2>{confirmation?.title || __('Thank you!', 'subtleforms')}</h2>
           <p>
-            {__(
-              'Your response has been submitted successfully.',
-              'subtleforms'
-            )}
+            {confirmation?.message ||
+              __(
+                'Your response has been submitted successfully.',
+                'subtleforms'
+              )}
           </p>
         </div>
       </div>
@@ -485,7 +465,7 @@ export default function ConversationalFormRenderer({
             {visibleFields.map((field, index) => {
               const key = field.config?.key || field.key;
               const value = values[key];
-              const label = field.config?.label || field.label || key;
+              const label = fieldConfig(field).label || key;
 
               if (isEmptyValue(value)) return null;
 
@@ -633,23 +613,30 @@ export default function ConversationalFormRenderer({
 
       {/* Question Card */}
       <div className='subtleforms-question-card'>
-        <div className='subtleforms-question-number'>
-          {currentIndex + 1} / {totalFields}
+        <div className='subtleforms-question-number' aria-live='polite'>
+          {sprintf(
+            /* translators: 1: question number, 2: number of questions */
+            __('Question %1$d of %2$d', 'subtleforms'),
+            currentIndex + 1,
+            totalFields
+          )}
         </div>
 
         {submitError && <div className='subtleforms-error'>{submitError}</div>}
 
         <div className='subtleforms-field-wrapper'>
           {currentField && (
-            <FieldRenderer
-              field={currentField}
-              fieldPath={fieldKey}
-              values={values}
-              onChange={handleChange}
-              errors={validationErrors}
-              hiddenFields={hiddenFields}
-              autoFocus={true}
-            />
+            <FormContext.Provider value={{ formId, preview, fieldDefaults }}>
+              <FieldRenderer
+                field={currentField}
+                fieldPath={fieldKey}
+                values={values}
+                onChange={handleChange}
+                errors={validationErrors}
+                hiddenFields={hiddenFields}
+                autoFocus={true}
+              />
+            </FormContext.Provider>
           )}
         </div>
 

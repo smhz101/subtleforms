@@ -131,7 +131,7 @@
 .subtleforms-button-next,
 .subtleforms-button-submit {
 	background: var(--subtleforms-color-primary);
-	color: var(--subtleforms-color-bg);
+	color: var(--subtleforms-button-text, #fff);
 }
 
 .subtleforms-button-next:hover:not(:disabled),
