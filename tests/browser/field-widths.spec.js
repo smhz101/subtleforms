@@ -97,7 +97,7 @@ for (const width of WIDTHS) {
           // 249 ISO countries plus the placeholder (bug 3).
           const countries = page.locator('.subtleforms-picker').filter({ has: page.locator(`#${id}`) }).locator('select option');
           expect(await countries.count(), `${key} countries`).toBeGreaterThan(240);
-          await expect(countries.locator('[value="PK"]')).toHaveText('Pakistan');
+          await expect(page.locator('.subtleforms-picker').filter({ has: page.locator(`#${id}`) }).locator('select option[value="PK"]')).toHaveText('Pakistan');
         }
 
         // Every control has a stable name (bug 11).
