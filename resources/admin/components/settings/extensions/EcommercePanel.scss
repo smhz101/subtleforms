@@ -1,0 +1,49 @@
+.sf-woo-panel {
+	&__status {
+		display: flex;
+		align-items: flex-start;
+		gap: var(--sf-space-3);
+	}
+
+	&__badge {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		width: 28px;
+		height: 28px;
+		border-radius: 50%;
+		background: var(--sf-warning-bg);
+		color: var(--sf-warning);
+		font-weight: var(--sf-weight-semibold);
+		font-size: 13px;
+
+		&.is-active {
+			background: var(--sf-success-bg);
+			color: var(--sf-success);
+		}
+	}
+
+	&__status-text {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		font-size: var(--sf-text-sm);
+
+		strong { color: var(--sf-text); }
+		span { color: var(--sf-text-muted); }
+	}
+
+	&__notes {
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-muted);
+
+		ul {
+			margin: 0 0 var(--sf-space-3);
+			padding-left: 18px;
+			list-style: disc;
+		}
+
+		li { margin: 0 0 var(--sf-space-1); }
+	}
+}
