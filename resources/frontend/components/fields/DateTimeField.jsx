@@ -195,6 +195,7 @@ export default function DateTimeField({
           type='hidden'
           name={name}
           value={stored ?? ''}
+          required={required || undefined}
           onChange={(event) => {
             const next = event.target.value;
             if (onChange) {

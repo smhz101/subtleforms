@@ -76,7 +76,8 @@ describe.each(WIDTHS)('width %s', (width) => {
       }
       if (sample.check.picker) {
         expect(control.tagName).toBe('BUTTON');
-        expect(control.getAttribute('aria-required')).toBe('true');
+        // aria-required is not allowed on a button. The fallback control carries required.
+        expect(wrapper.querySelector('select[required], input[required]')).not.toBeNull();
       }
       if (sample.check.placeholder) {
         if (control.tagName === 'SELECT') {
