@@ -131,6 +131,8 @@ export default function RichTextInput( {
         rest.selectNodeContents( wrapper );
         rest.setStart( range.endContainer, range.endOffset );
         if ( rest.toString().replace( /\u200b/g, '' ) === '' ) {
+          // A text node after the tag keeps the next character outside it.
+          // The zero-width space is removed before the value is stored.
           const marker = document.createTextNode( '\u200b' );
           wrapper.after( marker );
           const after = document.createRange();

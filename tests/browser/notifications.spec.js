@@ -34,7 +34,7 @@ async function draftForm(title, schemaExtra) {
 
 async function openActions(page) {
   await page.locator('#sf-builder-view-settings').click();
-  await page.getByRole('button', { name: 'Notifications & actions' }).click();
+  await page.getByRole('button', { name: 'Notifications', exact: true }).click();
 }
 
 const saveStatus = (page) => page.locator('.sf-builder-header-bar__save-status');

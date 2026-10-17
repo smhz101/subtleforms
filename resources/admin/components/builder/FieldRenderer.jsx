@@ -8,10 +8,12 @@ import { ProductPreview, ChoicePreview, SummaryPreview, CardPreview } from './Pa
 import { getCanvasPreview } from '../../../shared/extend';
 import { fieldDisplay } from '../../../shared/fieldDisplay';
 import { fieldConfig } from '../../../shared/fieldConfig';
-import { orderedCountries, preferredCountryCodes, COUNTRIES } from '../../../shared/countries';
 import { toggleInitialValue, toggleIsOn } from '../../../shared/toggleState';
 import ChainedSelect from '../../../frontend/components/fields/ChainedSelect';
 import PhoneField from '../../../frontend/components/fields/PhoneField';
+import ChoiceSelect from '../../../frontend/components/fields/ChoiceSelect';
+import CountrySelect from '../../../frontend/components/fields/CountrySelect';
+import DateTimeField from '../../../frontend/components/fields/DateTimeField';
 import { ConfigContext } from './context/ConfigContext';
 import './FieldRenderer.scss';
 
@@ -429,105 +431,36 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
-      {(type === 'dropdown' || type === 'select') && (() => {
-        const choiceOptions = (fieldConfig(field).options || options || [])
-          .map((opt) => (
-            opt && typeof opt === 'object'
-              ? { label: opt.label || opt.value || '', value: opt.value ?? opt.label ?? '' }
-              : { label: String(opt ?? ''), value: String(opt ?? '') }
-          ))
-          .filter((opt) => opt.label || opt.value);
-        return (
-          <div className='sf-field-renderer__menu'>
-            <select
-              className={selectClass}
-              defaultValue=''
-              onMouseDown={(event) => event.stopPropagation()}
-              onClick={(event) => event.stopPropagation()}>
-              <option value=''>
-                {placeholder || __('Select an option', 'subtleforms')}
-              </option>
-              {choiceOptions.map((opt, idx) => (
-                <option key={`${opt.value}-${idx}`} value={opt.value}>
-                  {opt.label || opt.value}
-                </option>
-              ))}
-            </select>
-            {choiceOptions.length > 0 ? (
-              <ul className='sf-field-renderer__choice-preview' aria-label={__('Choices', 'subtleforms')}>
-                {choiceOptions.map((opt, idx) => (
-                  <li key={`${opt.value}-${idx}`}>{opt.label || opt.value}</li>
-                ))}
-              </ul>
-            ) : (
-              <p className='sf-field-renderer__choice-empty'>
-                {__('Add choices in the field settings to show them here.', 'subtleforms')}
-              </p>
-            )}
-          </div>
-        );
-      })()}
-
-      {type === 'date' && (
-        <div className='sf-field-renderer__date-placeholder'>
-          <span className='sf-field-renderer__date-icon'><Icon.Calendar size={16} /></span>
-          <span className='sf-field-renderer__date-text'>
-            {placeholder || __('Select a date', 'subtleforms')}
-          </span>
-        </div>
+      {(type === 'dropdown' || type === 'select') && (
+        <ChoiceSelect
+          options={fieldConfig(field).options || options || []}
+          placeholder={placeholder}
+          preview={!interactive}
+          emptyLabel={__('Add choices in the field settings to show them here.', 'subtleforms')}
+        />
       )}
 
-      {type === 'time' && (
-        <div className='sf-field-renderer__time-placeholder'>
-          <span className='sf-field-renderer__time-icon'><Icon.Clock size={16} /></span>
-          <span className='sf-field-renderer__time-text'>
-            {placeholder || __('Select a time', 'subtleforms')}
-          </span>
-        </div>
+      {(type === 'date' || type === 'time' || type === 'datetime') && (
+        <DateTimeField
+          mode={type}
+          placeholder={placeholder}
+          format={fieldConfig(field).format}
+          min={fieldConfig(field).minDate}
+          max={fieldConfig(field).maxDate}
+          preview={!interactive}
+        />
       )}
 
-      {type === 'datetime' && (
-        <div className='sf-field-renderer__datetime-placeholder'>
-          <span className='sf-field-renderer__datetime-icon'><Icon.Calendar size={16} /><Icon.Clock size={16} /></span>
-          <span className='sf-field-renderer__datetime-text'>
-            {placeholder || __('Select date and time', 'subtleforms')}
-          </span>
-        </div>
+      {type === 'country' && (
+        <CountrySelect
+          value={fieldConfig(field).default_country || ''}
+          preferredCountries={fieldConfig(field).preferred_countries}
+          outputFormat={fieldConfig(field).output_format || 'code'}
+          searchable={fieldConfig(field).searchable !== false}
+          placeholder={placeholder}
+          preview={!interactive}
+        />
       )}
-
-      {type === 'country' && (() => {
-        const cfg = fieldConfig(field);
-        const outputFormat = cfg.output_format || 'code';
-        const countries = orderedCountries(preferredCountryCodes(cfg.preferred_countries));
-        const raw = cfg.default_country || '';
-        const matched = COUNTRIES.find((country) => country.code === String(raw).toUpperCase());
-        const selected = outputFormat === 'name' ? (matched ? matched.name : raw) : raw;
-        return (
-          <div className='sf-country-field'>
-            <select
-              className={selectClass}
-              defaultValue={selected}
-              onMouseDown={(event) => event.stopPropagation()}
-              onClick={(event) => event.stopPropagation()}>
-              <option value=''>
-                {placeholder || __('Select a country', 'subtleforms')}
-              </option>
-              {countries.map((country) => (
-                <option
-                  key={country.code}
-                  value={outputFormat === 'name' ? country.name : country.code}>
-                  {country.name}
-                </option>
-              ))}
-            </select>
-            <ul className='sf-field-renderer__choice-preview' aria-label={__('Countries', 'subtleforms')}>
-              {countries.map((country) => (
-                <li key={country.code}>{country.name}</li>
-              ))}
-            </ul>
-          </div>
-        );
-      })()}
 
       {type === 'hidden' && (
         <div className='sf-field-renderer__hidden-field'>

@@ -73,6 +73,8 @@ for (const width of WIDTHS) {
           const tag = await control.evaluate((el) => el.tagName);
           if (tag === 'SELECT') {
             await expect(control.locator('option').first(), `${key} placeholder`).toHaveText(sample.extra.placeholder);
+          } else if (tag === 'BUTTON') {
+            await expect(control, `${key} placeholder`).toContainText(sample.extra.placeholder);
           } else {
             await expect(control, `${key} placeholder`).toHaveAttribute('placeholder', sample.extra.placeholder);
           }
@@ -81,7 +83,8 @@ for (const width of WIDTHS) {
         if (sample.check.options) {
           if (['select', 'dropdown'].includes(sample.type)) {
             // Plus the placeholder option.
-            await expect(page.locator(`#${id} option`), `${key} options`).toHaveCount(sample.check.options + 1);
+            const options = page.locator('.subtleforms-picker').filter({ has: page.locator(`#${id}`) }).locator('select option');
+            await expect(options, `${key} options`).toHaveCount(sample.check.options + 1);
           } else {
             await expect(
               wrapper.locator('input[type="radio"], input[type="checkbox"]'),
@@ -92,8 +95,9 @@ for (const width of WIDTHS) {
 
         if (sample.check.countries) {
           // 249 ISO countries plus the placeholder (bug 3).
-          expect(await page.locator(`#${id} option`).count(), `${key} countries`).toBeGreaterThan(240);
-          await expect(page.locator(`#${id} option[value="PK"]`)).toHaveText('Pakistan');
+          const countries = page.locator('.subtleforms-picker').filter({ has: page.locator(`#${id}`) }).locator('select option');
+          expect(await countries.count(), `${key} countries`).toBeGreaterThan(240);
+          await expect(page.locator('.subtleforms-picker').filter({ has: page.locator(`#${id}`) }).locator('select option[value="PK"]')).toHaveText('Pakistan');
         }
 
         // Every control has a stable name (bug 11).

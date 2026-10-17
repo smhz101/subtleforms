@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from '@wordpress/element';
 import {
-  PanelBody,
   SelectControl,
   TextControl,
   ToggleControl,
@@ -170,7 +169,11 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
   const consentOptions = useMemo(() => consentFieldOptions(schema?.fields), [schema?.fields]);
 
   if (shown.length === 0 && !legacyWebhookUrl) {
-    return null;
+    return (
+      <p className='sf-form-settings__intro'>
+        {__('No integrations are available yet. Connect one under the plugin’s Settings, then come back to attach it to this form.', 'subtleforms')}
+      </p>
+    );
   }
 
   const patch = (slug, values) => {
@@ -212,7 +215,7 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
     : null;
 
   return (
-    <PanelBody title={__('Integrations', 'subtleforms')} initialOpen={false}>
+    <>
       {/* Email marketing */}
       {shown.includes('email_marketing') && (
         <div className='sf-form-settings__integration'>
@@ -441,6 +444,6 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
           />
         </div>
       )}
-    </PanelBody>
+    </>
   );
 }

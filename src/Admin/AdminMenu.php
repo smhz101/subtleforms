@@ -52,6 +52,7 @@ class AdminMenu {
 		$this->submissionsRepo = $submissionsRepo ?? new SubmissionsRepository();
 
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
+		add_action( 'admin_head', array( $this, 'menu_icon_styles' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_init', array( $this, 'handle_actions' ) );
 		add_filter( 'admin_body_class', array( $this, 'filter_admin_body_class' ) );
@@ -130,6 +131,24 @@ class AdminMenu {
 	}
 
 	/**
+	 * Menu mark, the same tile used in the admin header.
+	 *
+	 * @return string
+	 */
+	private static function menu_icon(): string {
+		// A file URL is drawn as an <img>. A data-URI SVG is painted as a flat
+		// admin-menu shape, which turns this mark into a white square.
+		return SUBTLEFORMS_PLUGIN_URL . 'assets/menu-icon.svg';
+	}
+
+	/**
+	 * Keep the menu mark at the header size. Core fades and pads image icons.
+	 */
+	public function menu_icon_styles(): void {
+		echo '<style id="subtleforms-menu-icon">#adminmenu #toplevel_page_subtleforms .wp-menu-image img{width:20px;height:20px;padding:7px 0 0;opacity:1;object-fit:contain;}</style>';
+	}
+
+	/**
 	 * Register admin menu pages.
 	 */
 	public function register_menu() {
@@ -141,7 +160,7 @@ class AdminMenu {
 			$this->caps->manage_cap(),
 			'subtleforms',
 			array( $this, 'render_dashboard' ),
-			'dashicons-feedback',
+			self::menu_icon(),
 			56
 		);
 
@@ -404,7 +423,7 @@ class AdminMenu {
 
 		$defaults = array(
 			'name'        => 'SubtleForms',
-			'menuName'    => __( 'Subtle Forms', 'subtleforms' ),
+			'menuName'    => __( 'SubtleForms', 'subtleforms' ),
 			'logoUrl'     => '',
 			'hideCredits' => false,
 			'hideHelp'    => false,
@@ -1054,7 +1073,7 @@ class AdminMenu {
 			if ( $current_screen && isset( $current_screen->id ) ) {
 				$screen_id = Helpers::normalize_string( $current_screen->id );
 				if ( ! empty( $screen_id ) && strpos( $screen_id, 'subtleforms' ) !== false ) {
-					$title = __( 'Subtle Forms', 'subtleforms' );
+					$title = __( 'SubtleForms', 'subtleforms' );
 				} else {
 					$title = '';
 				}

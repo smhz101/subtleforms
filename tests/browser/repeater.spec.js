@@ -66,7 +66,7 @@ test('visitors add and remove groups within min and max, with focus and names (l
   await input(page, 0, 'ticker').fill('AAPL');
   await input(page, 0, 'company').fill('Apple');
   await input(page, 0, 'shares').fill('8');
-  await input(page, 0, 'purchase_date').fill('2024-02-29');
+  await input(page, 0, 'purchase_date').fill('2024-02-29', { force: true });
 
   await add.click();
   await expect(page.locator('.subtleforms-repeater__group')).toHaveCount(2);

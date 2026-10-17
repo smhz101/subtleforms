@@ -5,7 +5,6 @@
  */
 import {
   Button,
-  PanelBody,
   TextControl,
   TextareaControl,
   ToggleControl,
@@ -43,7 +42,7 @@ export function ConfirmationPanel({ schema, onMetadata, isReadOnly }) {
   const keys = collectKeys(schema?.fields || []).slice(0, 6);
 
   return (
-    <PanelBody title={__('After submit', 'subtleforms')} initialOpen>
+    <>
       <ToggleGroupControl
         __nextHasNoMarginBottom
         __next40pxDefaultSize
@@ -121,7 +120,7 @@ export function ConfirmationPanel({ schema, onMetadata, isReadOnly }) {
         onChange={(v) => !isReadOnly && onMetadata('submitText', v)}
         disabled={isReadOnly}
       />
-    </PanelBody>
+    </>
   );
 }
 
@@ -272,20 +271,8 @@ export function AvailabilityPanel({ schema, onMetadata, isReadOnly }) {
     if (value === '' || value === null || value === undefined) delete next[key];
     onMetadata('restrictions', next);
   };
-  const active = [r.requireLogin, r.openAt, r.closeAt, r.entryLimit].filter(Boolean).length;
-
   return (
-    <PanelBody
-      title={
-        active
-          ? sprintf(
-              /* translators: %d: number of active rules */
-              __('Availability (%d on)', 'subtleforms'),
-              active
-            )
-          : __('Availability', 'subtleforms')
-      }
-      initialOpen={false}>
+    <>
       <p className='sf-form-settings__intro'>
         {__('Limit who can submit and when. Visitors see your message instead of the form.', 'subtleforms')}
       </p>
@@ -364,6 +351,6 @@ export function AvailabilityPanel({ schema, onMetadata, isReadOnly }) {
           disabled={isReadOnly}
         />
       )}
-    </PanelBody>
+    </>
   );
 }

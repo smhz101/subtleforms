@@ -20,6 +20,7 @@ const OPTIONS = [
  *   placeholder: the control shows the placeholder (attribute or first option)
  *   options:     how many choices are drawn
  *   native:      a native control carries the HTML required attribute
+ *   picker:      a button control exposes aria-required; choices live in a fallback list
  */
 const SAMPLES = [
   { type: 'text', extra: { placeholder: 'Type here' }, check: { placeholder: true, native: true } },
@@ -29,17 +30,17 @@ const SAMPLES = [
   { type: 'phone', extra: { placeholder: '+1 555' }, check: { placeholder: true, native: true } },
   { type: 'password', extra: { placeholder: 'Secret' }, check: { placeholder: true, native: true } },
   { type: 'textarea', extra: { placeholder: 'Tell us more' }, check: { placeholder: true, native: true } },
-  { type: 'date', extra: {}, check: { native: true } },
-  { type: 'time', extra: {}, check: { native: true } },
-  { type: 'datetime', extra: {}, check: { native: true } },
-  { type: 'select', extra: { placeholder: 'Choose one', options: OPTIONS }, check: { placeholder: true, options: 4, native: true } },
-  { type: 'dropdown', extra: { placeholder: 'Choose one', options: OPTIONS }, check: { placeholder: true, options: 4, native: true } },
+  { type: 'date', extra: {}, check: { picker: true } },
+  { type: 'time', extra: {}, check: { picker: true } },
+  { type: 'datetime', extra: {}, check: { picker: true } },
+  { type: 'select', extra: { placeholder: 'Choose one', options: OPTIONS }, check: { placeholder: true, options: 4, picker: true } },
+  { type: 'dropdown', extra: { placeholder: 'Choose one', options: OPTIONS }, check: { placeholder: true, options: 4, picker: true } },
   { type: 'radio', extra: { options: OPTIONS }, check: { options: 4 } },
   { type: 'multiple_choice', extra: { options: OPTIONS }, check: { options: 4 } },
   { type: 'multiple_choice', key: 'multiple_choice_many', extra: { options: OPTIONS, allowMultiple: true }, check: { options: 4 } },
   { type: 'checkbox', extra: { checkboxLabel: 'I agree' }, check: { native: true } },
   { type: 'consent', extra: { checkboxLabel: 'I accept the terms' }, check: { native: true } },
-  { type: 'country', extra: { placeholder: 'Pick a country' }, check: { placeholder: true, countries: true, native: true } },
+  { type: 'country', extra: { placeholder: 'Pick a country' }, check: { placeholder: true, countries: true, picker: true } },
   { type: 'rating', extra: { max: 5 }, check: { options: 5 } },
   { type: 'range_slider', extra: { min: 0, max: 10 }, check: {} },
   { type: 'net_promoter_score', extra: {}, check: { options: 11 } },

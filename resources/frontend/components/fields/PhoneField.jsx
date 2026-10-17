@@ -37,6 +37,9 @@ export default function PhoneField({
     () => splitPhoneValue(stored, preferred),
     [stored, preferred]
   );
+  // An empty number serializes to '', which parses back to the default
+  // country. Remember the visitor's choice so it survives that round trip.
+  const [pickedCode, setPickedCode] = useState('');
   const emit = (next) => {
     if (onChange) {
       onChange(next);
@@ -47,12 +50,10 @@ export default function PhoneField({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [active, setActive] = useState(0);
-  // The stored value is only "+{dial} {digits}". An empty number round-trips
-  // to the default country, and countries that share a dial code (US and
-  // Canada are both +1) cannot be told apart from that string. Remember the
-  // ISO code the visitor actually picked.
-  const [pickedCode, setPickedCode] = useState('');
   const picked = phoneCountry(pickedCode);
+  // Countries that share a dial code (US and Canada are both +1) cannot be
+  // told apart from the stored "+{dial} {digits}" string. Prefer the country
+  // the visitor picked whenever the dial code still matches.
   const country =
     picked && (!parsed.national || picked.dial === parsed.country?.dial)
       ? picked

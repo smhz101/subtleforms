@@ -9,7 +9,7 @@
  * The WooCommerce checkout is a Pro feature (`integrations.woocommerce`);
  * without it the choice is shown locked with an upgrade prompt.
  */
-import { PanelBody, RadioControl, SelectControl, Button } from '@wordpress/components';
+import { RadioControl, SelectControl, Button } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { isProFeature, openUpgradeModal } from '../../utils/featureGate';
 import Icon from '../../ui/Icon';
@@ -68,7 +68,7 @@ export default function CheckoutPanel({ schema, fields: pricedFields = [], onPay
   const setBilling = (id, value) => onPayment('billing', { ...billing, [id]: value });
 
   return (
-    <PanelBody title={__('Checkout', 'subtleforms')} initialOpen={true}>
+    <>
       <div className='sf-form-settings__section sf-checkout-panel'>
         <RadioControl
           label={__('Take payments through', 'subtleforms')}
@@ -156,6 +156,6 @@ export default function CheckoutPanel({ schema, fields: pricedFields = [], onPay
           </>
         )}
       </div>
-    </PanelBody>
+    </>
   );
 }
