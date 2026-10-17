@@ -38,7 +38,13 @@ const EXTENSION_ORDER = [
  * Extension status dot
  */
 function StatusDot({ enabled, configured, available }) {
-  if (!available) return <span className='sf-ext-status sf-ext-status--locked' title={__('Pro feature', 'subtleforms')}>🔒</span>;
+  if (!available) {
+    return (
+      <span className='sf-ext-status sf-ext-status--locked' title={__('Pro feature', 'subtleforms')}>
+        <Icon.Lock size={12} aria-hidden='true' />
+      </span>
+    );
+  }
   if (enabled && configured) return <span className='sf-ext-status sf-ext-status--active' title={__('Active', 'subtleforms')} />;
   if (enabled) return <span className='sf-ext-status sf-ext-status--warning' title={__('Enabled – needs configuration', 'subtleforms')} />;
   return <span className='sf-ext-status sf-ext-status--inactive' title={__('Disabled', 'subtleforms')} />;
@@ -51,19 +57,23 @@ function StatusDot({ enabled, configured, available }) {
 function ProLockOverlay({ slug, label }) {
   return (
     <div className='sf-ext-pro-overlay'>
+      <span className='sf-ext-pro-overlay__icon' aria-hidden='true'>
+        <Icon.Lock size={16} />
+      </span>
       <div className='sf-ext-pro-overlay__inner'>
-        <Icon.Lock size={24} className='sf-ext-pro-overlay__icon' />
-        <h3 className='sf-ext-pro-overlay__title'>{__('Pro feature', 'subtleforms')}</h3>
-        <p className='sf-ext-pro-overlay__desc'>
-          {__('Upgrade your plan to configure this extension.', 'subtleforms')}
+        <p className='sf-ext-pro-overlay__title'>
+          {__('Included with SubtleForms Pro', 'subtleforms')}
         </p>
-        <button
-          type='button'
-          className='sf-ext-pro-overlay__cta'
-          onClick={() => requirePro( `extensions.${slug}`, () => {}, { label } )}>
-          {__('Upgrade to Pro', 'subtleforms')}
-        </button>
+        <p className='sf-ext-pro-overlay__desc'>
+          {__('You can look around. Settings unlock as soon as your license is active.', 'subtleforms')}
+        </p>
       </div>
+      <button
+        type='button'
+        className='components-button is-primary is-compact sf-ext-pro-overlay__cta'
+        onClick={() => requirePro( `extensions.${slug}`, () => {}, { label } )}>
+        {__('Unlock', 'subtleforms')}
+      </button>
     </div>
   );
 }
@@ -78,7 +88,11 @@ function ProLockOverlay({ slug, label }) {
  */
 export default function ExtensionsSettings({ settings, updateSetting, fieldErrors = {} }) {
   const extensions = window.subtleformsAdmin?.extensions ?? {};
-  const firstSlug = EXTENSION_ORDER.find((s) => extensions[s]) ?? EXTENSION_ORDER[0];
+  const hashSlug = (window.location.hash.match(/[#&]ext=([\w-]+)/) || [])[1];
+  const firstSlug =
+    (hashSlug && extensions[hashSlug] ? hashSlug : null) ??
+    EXTENSION_ORDER.find((s) => extensions[s]) ??
+    EXTENSION_ORDER[0];
   const [activeSlug, setActiveSlug] = useState(firstSlug);
 
   const ActivePanel = EXTENSION_PANELS[activeSlug] ?? null;
@@ -99,7 +113,13 @@ export default function ExtensionsSettings({ settings, updateSetting, fieldError
                   className={`sf-ext-settings__item ${
                     activeSlug === slug ? 'sf-ext-settings__item--active' : ''
                   }`}
-                  onClick={() => setActiveSlug(slug)}>
+                  aria-current={activeSlug === slug ? 'true' : undefined}
+                  onClick={() => {
+                    setActiveSlug(slug);
+                    const params = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+                    params.set('ext', slug);
+                    window.history.replaceState(null, '', `#${params.toString()}`);
+                  }}>
                   <span className='sf-ext-settings__item-label'>{ext.label}</span>
                   <StatusDot
                     enabled={ext.enabled}
@@ -118,11 +138,13 @@ export default function ExtensionsSettings({ settings, updateSetting, fieldError
         {ActivePanel && (
           <div className='sf-ext-settings__panel-wrap'>
             {!activeExt.available && <ProLockOverlay slug={activeSlug} label={activeExt.label} />}
+            <fieldset className='sf-ext-settings__fields' disabled={!activeExt.available}>
             <ActivePanel
               settings={settings}
               updateSetting={updateSetting}
               fieldErrors={fieldErrors}
             />
+            </fieldset>
           </div>
         )}
       </div>

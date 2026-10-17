@@ -290,6 +290,24 @@ class SettingsApi {
 	 * @return array
 	 */
 	private function getUpdateArgs() {
+		// Empty sender/admin emails are valid (defaults are blank). format:email
+		// rejects "" before updateSettings runs, so a real edit never saves.
+		$validateOptionalEmail = static function ( $value ) {
+			if ( null === $value || ( is_string( $value ) && '' === trim( $value ) ) ) {
+				return true;
+			}
+
+			if ( is_string( $value ) && is_email( $value ) ) {
+				return true;
+			}
+
+			return new \WP_Error(
+				'rest_invalid_param',
+				__( 'Email address must be valid or left empty', 'subtleforms' ),
+				array( 'status' => 400 )
+			);
+		};
+
 		return array(
 			'default_form_status'        => array(
 				'type'              => 'string',
@@ -370,13 +388,13 @@ class SettingsApi {
 			),
 			'sender_email'               => array(
 				'type'              => 'string',
-				'format'            => 'email',
 				'sanitize_callback' => 'sanitize_email',
+				'validate_callback' => $validateOptionalEmail,
 			),
 			'admin_email'                => array(
 				'type'              => 'string',
-				'format'            => 'email',
 				'sanitize_callback' => 'sanitize_email',
+				'validate_callback' => $validateOptionalEmail,
 			),
 			'debug_mode'                 => array(
 				'type' => 'boolean',
@@ -432,6 +450,11 @@ class SettingsApi {
 				'minimum' => 0,
 				'maximum' => 3650,
 			),
+			'entries_trash_days'         => array(
+				'type'    => 'integer',
+				'minimum' => 1,
+				'maximum' => 365,
+			),
 
 			// ── Extensions ────────────────────────────────────────────────────
 
@@ -439,19 +462,22 @@ class SettingsApi {
 			'ext_webhooks_enabled'              => array( 'type' => 'boolean' ),
 			'ext_webhooks_signing_secret'       => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
 			'ext_webhooks_events'               => array( 'type' => 'array' ),
+			'ext_webhooks_retries'              => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 5 ),
 
 			// Email Marketing
 			'ext_email_marketing_enabled'       => array( 'type' => 'boolean' ),
-			'ext_email_marketing_provider'      => array( 'type' => 'string', 'enum' => array( 'mailchimp', 'convertkit' ), 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_email_marketing_provider'      => array( 'type' => 'string', 'enum' => array( 'mailchimp', 'brevo', 'convertkit' ), 'sanitize_callback' => 'sanitize_text_field' ),
 			'ext_email_marketing_api_key'       => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
 			'ext_email_marketing_list_id'       => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
 			'ext_email_marketing_double_optin'  => array( 'type' => 'boolean' ),
 
 			// CRM
 			'ext_crm_enabled'                   => array( 'type' => 'boolean' ),
-			'ext_crm_provider'                  => array( 'type' => 'string', 'enum' => array( 'hubspot' ), 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_crm_provider'                  => array( 'type' => 'string', 'enum' => array( 'hubspot', 'webhook' ), 'sanitize_callback' => 'sanitize_text_field' ),
 			'ext_crm_api_key'                   => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
 			'ext_crm_portal_id'                 => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_crm_webhook_url'               => array( 'type' => 'string', 'sanitize_callback' => 'esc_url_raw' ),
+			'ext_crm_add_note'                  => array( 'type' => 'boolean' ),
 
 			// Analytics
 			'ext_analytics_enabled'             => array( 'type' => 'boolean' ),
@@ -462,6 +488,9 @@ class SettingsApi {
 			'ext_ecommerce_enabled'             => array( 'type' => 'boolean' ),
 			'ext_ecommerce_product_id'          => array( 'type' => 'integer', 'minimum' => 0 ),
 			'ext_ecommerce_currency'            => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_ecommerce_default_processor'   => array( 'type' => 'string', 'enum' => array( 'woocommerce', 'subtleforms' ) ),
+			'ext_ecommerce_empty_cart'          => array( 'type' => 'boolean' ),
+			'ext_ecommerce_destination'         => array( 'type' => 'string', 'enum' => array( 'checkout', 'cart' ) ),
 
 			// PDF
 			'ext_pdf_enabled'                   => array( 'type' => 'boolean' ),

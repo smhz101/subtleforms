@@ -77,30 +77,12 @@ export default function AISettings( {
 		return `$${ monthlyCost.toFixed( 2 ) }`;
 	};
 
+	// An unsaved provider is OpenAI, the first choice in the menu (QA-01).
+	const activeProvider = settings.ai_provider || 'openai';
+
 	return (
 		<div className="sf-ai-settings">
 			<div className="sf-ai-card">
-				<div className="sf-license-connect-card__header">
-					<div className="sf-ai-card__header">
-						<div className="sf-ai-card__header-icon">
-							<Icon.Layers size={24} />
-						</div>
-						<div className="sf-ai-card__header-text">
-							<h3>
-								{ __(
-									'AI-Powered Features',
-									'subtleforms'
-								) }
-							</h3>
-							<p>
-								{ __(
-									'Configure AI providers and agents to enhance your forms with intelligent automation',
-									'subtleforms'
-								) }
-							</p>
-						</div>
-					</div>
-				</div>
 				<div>
 					<div className="sf-settings-section">
 						{/* Provider Selection */ }
@@ -137,7 +119,7 @@ export default function AISettings( {
 						</div>
 
 						{/* Model Selection - OpenAI */ }
-						{ settings.ai_provider === 'openai' && (
+						{ activeProvider === 'openai' && (
 							<div>
 								<SelectControl
 									label={ __( 'Model', 'subtleforms' ) }
@@ -173,7 +155,7 @@ export default function AISettings( {
 						) }
 
 						{/* Model Selection - Anthropic */ }
-						{ settings.ai_provider === 'anthropic' && (
+						{ activeProvider === 'anthropic' && (
 							<div>
 								<SelectControl
 									label={ __( 'Model', 'subtleforms' ) }
@@ -219,12 +201,12 @@ export default function AISettings( {
 									updateSetting( 'ai_api_key', value )
 								}
 							help={
-								settings.ai_provider === 'openai'
+								activeProvider === 'openai'
 									? __(
 										'Get your API key from https://platform.openai.com/api-keys',
 										'subtleforms'
 									)
-									: settings.ai_provider === 'anthropic'
+									: activeProvider === 'anthropic'
 									? __(
 										'Get your API key from https://console.anthropic.com/',
 										'subtleforms'
@@ -245,7 +227,7 @@ export default function AISettings( {
 						</div>
 
 						{/* Custom Endpoint */ }
-						{ settings.ai_provider === 'custom' && (
+						{ activeProvider === 'custom' && (
 							<div>
 								<TextControl
 									label={ __(

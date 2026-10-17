@@ -33,6 +33,7 @@ function normalizeSettings( data ) {
 		ext_email_marketing_enabled: Boolean( data.ext_email_marketing_enabled ),
 		ext_email_marketing_double_optin: Boolean( data.ext_email_marketing_double_optin ),
 		ext_crm_enabled: Boolean( data.ext_crm_enabled ),
+		ext_crm_add_note: data.ext_crm_add_note === undefined ? true : Boolean( data.ext_crm_add_note ),
 		ext_analytics_enabled: Boolean( data.ext_analytics_enabled ),
 		ext_analytics_view_tracking: Boolean( data.ext_analytics_view_tracking ),
 		ext_ecommerce_enabled: Boolean( data.ext_ecommerce_enabled ),
@@ -129,8 +130,9 @@ export default function useSettingsState() {
 
 			const settingsToSave = {
 				...settings,
-				autosave_interval:
-					parseInt( settings.autosave_interval, 10 ) || 3,
+				// Keep 0 (and any other out-of-range number). `|| 3` turned 0 into
+				// the default and reported a successful save.
+				autosave_interval: parseInt( settings.autosave_interval, 10 ),
 				submission_limit:
 					parseInt( settings.submission_limit, 10 ) || 1,
 			};
