@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+	Integration tests that run inside a real WordPress install with
+	SubtleForms active (the local test site, or wp-env in CI).
+
+	WP_LOAD=/path/to/wp-load.php vendor/bin/phpunit -c phpunit-wp.xml.dist
+-->
+<phpunit
+	bootstrap="tests/wp/bootstrap.php"
+	backupGlobals="false"
+	colors="true"
+	>
+	<testsuites>
+		<testsuite name="wp">
+			<directory suffix="Test.php">./tests/wp/</directory>
+		</testsuite>
+	</testsuites>
+</phpunit>
