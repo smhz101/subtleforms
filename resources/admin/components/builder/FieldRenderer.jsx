@@ -506,10 +506,9 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           <div className='sf-country-field'>
             <select
               className={selectClass}
-              disabled={!interactive}
-              tabIndex={interactive ? undefined : '-1'}
-              value={selected}
-              onChange={() => {}}>
+              defaultValue={selected}
+              onMouseDown={(event) => event.stopPropagation()}
+              onClick={(event) => event.stopPropagation()}>
               <option value=''>
                 {placeholder || __('Select a country', 'subtleforms')}
               </option>
@@ -521,6 +520,11 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
                 </option>
               ))}
             </select>
+            <ul className='sf-field-renderer__choice-preview' aria-label={__('Countries', 'subtleforms')}>
+              {countries.map((country) => (
+                <li key={country.code}>{country.name}</li>
+              ))}
+            </ul>
           </div>
         );
       })()}
