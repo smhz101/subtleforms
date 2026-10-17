@@ -34,14 +34,44 @@ final class EmailAction implements ActionInterface {
 
 		// Replace {{field}} placeholders with actual values
 		$payload = $context->payload;
+		$schema  = $context->getMeta( 'form_schema' );
+		$schema  = is_array( $schema ) ? $schema : array();
+		$isHtml  = $this->is_html( $settings, $headers );
 
-		// Add admin_email placeholder
-		$payload['admin_email'] = get_option( 'admin_email' );
+		// Passwords never go out by email (2.2.1).
+		foreach ( \SubtleForms\Support\EntryValues::secretKeys( $schema ) as $secretKey ) {
+			unset( $payload[ $secretKey ] );
+		}
 
-		// Replace placeholders in recipient, subject, and body
-		$to      = $this->replace_placeholders( $to, $payload );
-		$subject = $this->replace_placeholders( $subject, $payload );
-		$body    = $this->replace_placeholders( $body, $payload );
+		// Uploaded files read as "name (download link)" (2.1).
+		$payload = $this->format_uploads( $payload, (int) $context->getMeta( 'submission_id', 0 ) );
+
+		// Answers as text (recipient, subject, plain emails) or escaped HTML
+		// with line breaks kept (HTML email bodies), by field type.
+		$textPayload = $this->format_answers( $payload, $schema, false );
+		$bodyPayload = $isHtml ? $this->format_answers( $payload, $schema, true ) : $textPayload;
+
+		// Merge tags (2.3): {all_fields}, {field:key}, {form_title},
+		// {entry_id}, {site_name}, {admin_email}, {date}, in single or double
+		// braces. A message left empty sends every answer.
+		$mergeContext = array(
+			'fields'     => \SubtleForms\Support\FieldMapper::fields( $schema ),
+			'form_title' => (string) ( $schema['metadata']['title'] ?? '' ),
+			'entry_id'   => (int) $context->getMeta( 'submission_id', 0 ),
+		);
+		if ( ! is_string( $body ) || trim( $body ) === '' ) {
+			$body = '{all_fields}';
+		}
+
+		$to      = is_string( $to ) ? \SubtleForms\Support\MergeTags::render( $to, array( 'answers' => $textPayload ) + $mergeContext, false ) : $to;
+		$subject = is_string( $subject ) ? \SubtleForms\Support\MergeTags::render( $subject, array( 'answers' => $textPayload ) + $mergeContext, false ) : $subject;
+		// A subject is one line, whatever the answers merged into it hold.
+		$subject = is_string( $subject ) ? trim( (string) preg_replace( '/[\r\n]+/', ' ', $subject ) ) : $subject;
+		// An HTML email keeps the line breaks typed into the message itself.
+		if ( $isHtml && ! preg_match( '/<(p|br|div|table|ul|ol|h[1-6])\b/i', (string) $body ) ) {
+			$body = nl2br( (string) $body );
+		}
+		$body    = \SubtleForms\Support\MergeTags::render( (string) $body, array( 'answers' => $bodyPayload ) + $mergeContext, $isHtml );
 
 		if ( empty( $to ) || ! is_string( $to ) ) {
 			// Nothing to do; record failure but don't throw to avoid breaking other steps.
@@ -89,9 +119,9 @@ final class EmailAction implements ActionInterface {
 
 		$to = implode( ', ', $valid_recipients );
 
-		// Deterministic content: use payload JSON if body not provided
-		if ( $body === '' ) {
-			$body = wp_json_encode( $context->payload );
+		// Nothing answered at all: say so rather than send a blank email.
+		if ( trim( wp_strip_all_tags( $body ) ) === '' ) {
+			$body = __( 'A new entry was submitted with no answers.', 'subtleforms' );
 		}
 
 		// Ensure headers is array
@@ -109,8 +139,9 @@ final class EmailAction implements ActionInterface {
 
 		// Add default headers
 		if ( ! $this->has_header( $headers, 'Content-Type' ) ) {
-			$headers[] = 'Content-Type: text/plain; charset=UTF-8';
+			$headers[] = $isHtml ? 'Content-Type: text/html; charset=UTF-8' : 'Content-Type: text/plain; charset=UTF-8';
 		}
+
 
 		// Debug logging before send
 		$this->log_debug(
@@ -133,6 +164,8 @@ final class EmailAction implements ActionInterface {
                         'headers'       => $headers,
                         'submission_id' => $submission_id,
                         'step_id'       => $step_id,
+                        'form_id'       => $context->formId,
+                        'audience'      => $this->audience( $settings['to'] ?? '' ),
                 ) );
 
                 if ( ! $dispatched ) {
@@ -165,38 +198,102 @@ final class EmailAction implements ActionInterface {
                 );
         }
 
-        /**
-         * Replace {{field}} placeholders with actual values.
+	/**
+	 * Whether this email is sent as HTML.
 	 *
-	 * @param string $template Template string with placeholders.
-	 * @param array  $data     Data array to replace placeholders with.
-	 * @return string Template with placeholders replaced.
+	 * @param array $settings Action settings.
+	 * @param mixed $headers  Configured headers.
+	 * @return bool
 	 */
-	private function replace_placeholders( $template, $data ) {
-		if ( ! is_string( $template ) ) {
-			return $template;
+	private function is_html( array $settings, $headers ): bool {
+		if ( isset( $settings['format'] ) && $settings['format'] === 'html' ) {
+			return true;
 		}
-
-		// Find all {{field}} patterns
-		preg_match_all( '/\{\{([a-zA-Z0-9_]+)\}\}/', $template, $matches );
-
-		if ( empty( $matches[1] ) ) {
-			return $template;
-		}
-
-		// Replace each placeholder
-		foreach ( $matches[1] as $field ) {
-			$value = $data[ $field ] ?? '';
-
-			// Handle arrays (checkboxes, multi-select)
-			if ( is_array( $value ) ) {
-				$value = implode( ', ', $value );
+		foreach ( (array) $headers as $header ) {
+			if ( is_string( $header ) && preg_match( '#^\s*content-type\s*:\s*text/html#i', $header ) ) {
+				return true;
 			}
-
-			$template = str_replace( '{{' . $field . '}}', $value, $template );
 		}
+		return false;
+	}
 
-		return $template;
+	/**
+	 * Turn stored answers into the text that replaces their placeholders.
+	 *
+	 * Paragraph answers keep their line breaks: as-is in plain text, as <br>
+	 * in HTML (2.2.1, bug 4). Rich text keeps its formatting in HTML and reads
+	 * as plain text otherwise.
+	 *
+	 * @param array $payload Answers.
+	 * @param array $schema  Form schema.
+	 * @param bool  $isHtml  Whether the email is HTML.
+	 * @return array
+	 */
+	private function format_answers( array $payload, array $schema, bool $isHtml ): array {
+		$fields = array();
+		foreach ( \SubtleForms\Support\FieldMapper::fields( $schema ) as $entry ) {
+			$fields[ $entry['key'] ] = $entry['field'];
+		}
+		foreach ( $payload as $key => $value ) {
+			$field = $fields[ $key ] ?? array( 'type' => '' );
+			if ( is_string( $value ) && strpos( $value, "\n" ) !== false && ( $field['type'] ?? '' ) === '' ) {
+				// Already formatted (for example upload lines).
+				$payload[ $key ] = $isHtml ? nl2br( esc_html( $value ) ) : $value;
+				continue;
+			}
+			$payload[ $key ] = $isHtml
+				? \SubtleForms\Support\EntryValues::toHtml( $value, $field )
+				: \SubtleForms\Support\EntryValues::toText( $value, $field );
+		}
+		return $payload;
+	}
+
+	/**
+	 * Who an email action writes to, judged from its unreplaced recipient.
+	 *
+	 * A recipient built from an answer placeholder such as {{email}} goes to the
+	 * person who filled in the form; anything else (a fixed address or
+	 * {{admin_email}}) is a notification for the site owner. Add-ons use this
+	 * to decide what to attach, e.g. an entry PDF only on admin notifications.
+	 *
+	 * @param mixed $rawTo Recipient setting before placeholders are replaced.
+	 * @return string 'admin' or 'submitter'.
+	 */
+	private function audience( $rawTo ): string {
+		if ( ! is_string( $rawTo ) ) {
+			return 'admin';
+		}
+		$fieldTokens = preg_replace( '/\{\{?\s*(admin_email|site_name|form_title|entry_id|date)\s*\}?\}/', '', $rawTo );
+		return preg_match( '/\{\{?\s*(field:)?[a-zA-Z0-9_]+\s*\}?\}/', (string) $fieldTokens ) ? 'submitter' : 'admin';
+	}
+
+	/**
+	 * Turn uploaded-file answers into readable lines with admin links.
+	 *
+	 * The links open wp-admin, which asks a logged-in admin to confirm the
+	 * download; they never expose the file itself.
+	 *
+	 * @param array $payload      Answers.
+	 * @param int   $submissionId Entry ID.
+	 * @return array
+	 */
+	private function format_uploads( array $payload, int $submissionId ): array {
+		foreach ( $payload as $key => $value ) {
+			if ( ! is_array( $value ) || ! $value ) {
+				continue;
+			}
+			$lines = array();
+			foreach ( $value as $item ) {
+				if ( ! \SubtleForms\Uploads\Uploads::isRecord( $item ) ) {
+					continue 2;
+				}
+				$lines[] = $submissionId > 0
+					? sprintf( '%s (%s)', $item['name'], \SubtleForms\Uploads\Uploads::downloadUrl( $submissionId, $item['id'] ) )
+					: (string) $item['name'];
+			}
+			$payload[ $key ] = implode( "\n", $lines );
+		}
+		return $payload;
 	}
 
 	/**
