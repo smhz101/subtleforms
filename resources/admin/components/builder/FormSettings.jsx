@@ -2,8 +2,6 @@ import {
   SelectControl,
   TextControl,
   ToggleControl,
-  Panel,
-  PanelBody,
   RadioControl,
   Notice,
   __experimentalToggleGroupControl as ToggleGroupControl,
@@ -27,6 +25,7 @@ import { ConfirmationPanel, AvailabilityPanel } from './FormBehaviorPanels';
 import CheckoutPanel from './CheckoutPanel';
 import IntegrationsPanel from './IntegrationsPanel';
 import { isPricedForm, isPricedType } from '../../../shared/pricing';
+import Icon from '../../ui/Icon';
 import './FormSettings.scss';
 
 /**
@@ -150,6 +149,59 @@ export default function FormSettings({
 
   const fieldOptions = amountFieldOptions();
 
+  const restrictions = metadata.restrictions || {};
+  const availabilityOn = [restrictions.requireLogin, restrictions.openAt, restrictions.closeAt, restrictions.entryLimit].filter(Boolean).length;
+
+  const sections = [
+    {
+      key: 'form',
+      title: __('Form', 'subtleforms'),
+      items: [
+        { id: 'general', title: __('General', 'subtleforms'), description: __('Name, description and how the form is presented.', 'subtleforms'), icon: Icon.FileText },
+        { id: 'fields', title: __('Field defaults', 'subtleforms'), description: __('Defaults for every field that does not set its own.', 'subtleforms'), icon: Icon.Sliders },
+      ],
+    },
+    {
+      key: 'responses',
+      title: __('Responses', 'subtleforms'),
+      items: [
+        { id: 'confirmation', title: __('Confirmation', 'subtleforms'), description: __('What visitors see after they submit, and the submit button.', 'subtleforms'), icon: Icon.CheckCircle },
+        { id: 'notifications', title: __('Notifications', 'subtleforms'), description: __('Emails and API calls that run when an entry arrives.', 'subtleforms'), icon: Icon.Mail },
+        {
+          id: 'availability',
+          title: __('Availability', 'subtleforms'),
+          description: __('Who can submit, and when the form stops accepting entries.', 'subtleforms'),
+          icon: Icon.Clock,
+          badge: availabilityOn ? String(availabilityOn) : '',
+        },
+      ],
+    },
+    {
+      key: 'connections',
+      title: __('Connections', 'subtleforms'),
+      items: [
+        (supportsPayment || takesMoney) && {
+          id: 'payments',
+          title: __('Payments', 'subtleforms'),
+          description: __('How this form charges, and where the visitor checks out.', 'subtleforms'),
+          icon: Icon.CreditCard,
+        },
+        { id: 'integrations', title: __('Integrations', 'subtleforms'), description: __('Send entries to email marketing, a CRM, analytics or a webhook.', 'subtleforms'), icon: Icon.Webhook },
+      ].filter(Boolean),
+    },
+    {
+      key: 'advanced',
+      title: __('Advanced', 'subtleforms'),
+      items: [
+        { id: 'advanced', title: __('Advanced', 'subtleforms'), description: __('Builder width and the internal name used by developers.', 'subtleforms'), icon: Icon.Settings },
+      ],
+    },
+  ];
+
+  const available = sections.flatMap((group) => group.items);
+  const [activeSection, setActiveSection] = useState('general');
+  const current = available.find((item) => item.id === activeSection) || available[0];
+
   return (
     <div className='subtleforms-form-settings sf-form-settings'>
       <div className='sf-form-settings__container'>
@@ -157,363 +209,281 @@ export default function FormSettings({
           {__('Form Settings', 'subtleforms')}
         </h2>
 
-        {/* Read-only Notice */}
         {isReadOnly && (
           <Notice status='info' isDismissible={false}>
             <p>{__('Settings are read-only: Activate your Pro license to edit. Your form continues working. No data loss.', 'subtleforms')}</p>
           </Notice>
         )}
 
-        {/* Form Type Info Banner */}
-        {formType !== 'regular' && (
-          <div className='sf-form-type-banner' data-form-type={formType}>
-            <h3 className='sf-form-type-banner__title'>
-              {isMultiStep && __('Multi-step Form', 'subtleforms')}
-              {formType === 'sectioned' && __('Sectioned Form', 'subtleforms')}
-              {formType === 'conversational' &&
-                __('Conversational Form', 'subtleforms')}
-              {formType === 'payment' && __('Payment Form', 'subtleforms')}
-            </h3>
-            <p className='sf-form-type-banner__description'>
-              {isMultiStep &&
-                __(
-                  'Fields are organized into steps. Users navigate through one step at a time with progress tracking.',
-                  'subtleforms'
-                )}
-              {formType === 'sectioned' &&
-                __(
-                  'Fields are grouped into collapsible sections. All sections are visible on a single page.',
-                  'subtleforms'
-                )}
-              {formType === 'conversational' &&
-                __(
-                  'Questions are presented one at a time. After completing all questions, users review answers before submitting.',
-                  'subtleforms'
-                )}
-              {formType === 'payment' &&
-                __(
-                  'This form collects payment information. Configure payment settings below to enable transactions.',
-                  'subtleforms'
-                )}
-            </p>
-          </div>
-        )}
+        <div className='sf-form-settings__layout'>
+          <nav className='sf-form-settings__nav' aria-label={__('Form settings sections', 'subtleforms')}>
+            {sections.map((group) => (
+              <div key={group.key} className='sf-form-settings__nav-group'>
+                <p className='sf-form-settings__nav-heading'>{group.title}</p>
+                <ul>
+                  {group.items.map((item) => {
+                    const ItemIcon = item.icon;
+                    const isActive = current.id === item.id;
+                    return (
+                      <li key={item.id}>
+                        <button
+                          type='button'
+                          className={`sf-form-settings__nav-item${isActive ? ' is-active' : ''}`}
+                          aria-current={isActive ? 'page' : undefined}
+                          onClick={() => setActiveSection(item.id)}>
+                          <ItemIcon size={18} aria-hidden='true' />
+                          <span>{item.title}</span>
+                          {item.badge ? <span className='sf-form-settings__nav-badge'>{item.badge}</span> : null}
+                        </button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
+            ))}
+          </nav>
 
-        {/* One Panel, many PanelBody: that is what makes them an accordion.
-            Each body previously had its own Panel, which produced a column of
-            separately-bordered boxes that never collapsed as a group. */}
-        <Panel>
-          <PanelBody
-            title={__('General', 'subtleforms')}
-            initialOpen={true}>
-            <FormTypeControl schema={schema} onChange={onChange} isReadOnly={isReadOnly} />
-            <TextControl
-                label={__('Form name', 'subtleforms')}
-                value={metadata.title || ''}
-                onChange={(value) => handleMetadataChange('title', value)}
-                help={__(
-                  'The name shown to you and your visitors for this form.',
-                  'subtleforms'
-                )}
-              />
-            <TextControl
-                label={__('Description', 'subtleforms')}
-                value={metadata.description || ''}
-                onChange={(value) => handleMetadataChange('description', value)}
-                help={__(
-                  'Shown under the title when the block or shortcode displays it.',
-                  'subtleforms'
-                )}
-              />
-          </PanelBody>
+          <div className='sf-form-settings__content'>
+            <header className='sf-form-settings__header'>
+              <h3 className='sf-form-settings__section-title'>{current.title}</h3>
+              <p className='sf-form-settings__description'>{current.description}</p>
+            </header>
 
-          <PanelBody
-            title={__('Field defaults', 'subtleforms')}
-            initialOpen={false}>
-            <p className='sf-form-settings__intro'>
-              {__('Used by every field that does not set its own. Each field can change these in its settings.', 'subtleforms')}
-            </p>
-            <SelectControl
-              __nextHasNoMarginBottom
-              __next40pxDefaultSize
-              label={__('Field label visibility', 'subtleforms')}
-              value={metadata.labelVisibility === 'hidden' ? 'hidden' : 'visible'}
-              options={[
-                { value: 'visible', label: __('Visible (top aligned)', 'subtleforms') },
-                { value: 'hidden', label: __('Hidden (kept for screen readers)', 'subtleforms') },
-              ]}
-              disabled={isReadOnly}
-              onChange={(v) => handleMetadataChange('labelVisibility', v)}
-            />
-            <SelectControl
-              __nextHasNoMarginBottom
-              __next40pxDefaultSize
-              label={__('Help text placement', 'subtleforms')}
-              value={metadata.descriptionPlacement === 'above' ? 'above' : 'below'}
-              options={[
-                { value: 'below', label: __('Below input', 'subtleforms') },
-                { value: 'above', label: __('Above input', 'subtleforms') },
-              ]}
-              disabled={isReadOnly}
-              onChange={(v) => handleMetadataChange('descriptionPlacement', v)}
-            />
-            <TextControl
-              __nextHasNoMarginBottom
-              __next40pxDefaultSize
-              label={__('Message when a required field is left empty', 'subtleforms')}
-              placeholder={__('This field is required.', 'subtleforms')}
-              value={metadata.requiredMessage || ''}
-              disabled={isReadOnly}
-              onChange={(v) => handleMetadataChange('requiredMessage', v)}
-            />
-            <TextControl
-              __nextHasNoMarginBottom
-              __next40pxDefaultSize
-              label={__('Message when an answer is not valid', 'subtleforms')}
-              help={__('Leave empty for the standard message of each field type.', 'subtleforms')}
-              value={metadata.validationMessage || ''}
-              disabled={isReadOnly}
-              onChange={(v) => handleMetadataChange('validationMessage', v)}
-            />
-          </PanelBody>
-
-          <ConfirmationPanel
-            schema={schema}
-            onMetadata={handleMetadataChange}
-            isReadOnly={isReadOnly}
-          />
-
-          <PanelBody
-            title={__('Notifications & actions', 'subtleforms')}
-            initialOpen={false}>
-            <ActionsPanel
-              schema={schema}
-              onChange={onChange}
-              isReadOnly={isReadOnly}
-            />
-          </PanelBody>
-
-          <AvailabilityPanel
-            schema={schema}
-            onMetadata={handleMetadataChange}
-            isReadOnly={isReadOnly}
-          />
-
-          {/* Payments — only for form types that can collect them. */}
-          {supportsPayment && (
-            <PanelBody
-              title={__('Payments', 'subtleforms')}
-              initialOpen={false}>
-              <div className='sf-form-settings__section'>
-                {isConversationalForm && (
-                  <div className='sf-info-box sf-info-box--blue'>
-                    <p className='sf-info-box__text'>
-                      <strong>
-                        {__('Conversational Payment:', 'subtleforms')}
-                      </strong>{' '}
-                      {__(
-                        'When enabled, users will answer questions, review their answers, and then complete payment before submission.',
-                        'subtleforms'
-                      )}
+            {current.id === 'general' && (
+              <div className='sf-form-settings__card'>
+                {formType !== 'regular' && formType !== 'standard' && (
+                  <div className='sf-form-type-banner' data-form-type={formType}>
+                    <h3 className='sf-form-type-banner__title'>
+                      {isMultiStep && __('Multi-step Form', 'subtleforms')}
+                      {formType === 'sectioned' && __('Sectioned Form', 'subtleforms')}
+                      {formType === 'conversational' && __('Conversational Form', 'subtleforms')}
+                      {formType === 'payment' && __('Payment Form', 'subtleforms')}
+                    </h3>
+                    <p className='sf-form-type-banner__description'>
+                      {isMultiStep && __('Fields are organized into steps. Users navigate through one step at a time with progress tracking.', 'subtleforms')}
+                      {formType === 'sectioned' && __('Fields are grouped into collapsible sections. All sections are visible on a single page.', 'subtleforms')}
+                      {formType === 'conversational' && __('Questions are presented one at a time. After completing all questions, users review answers before submitting.', 'subtleforms')}
+                      {formType === 'payment' && __('This form collects payment information. Configure payment settings in Payments.', 'subtleforms')}
                     </p>
                   </div>
                 )}
-
-                {isPaymentForm && (
-                  <div className='sf-info-box sf-info-box--blue'>
-                    <p className='sf-info-box__text'>
-                      <strong>{__('Note:', 'subtleforms')}</strong>{' '}
-                      {__(
-                        'Payment gateway integration will be added in a future update. These settings prepare your form for payment processing.',
-                        'subtleforms'
-                      )}
-                    </p>
-                  </div>
-                )}
-
-                <ToggleControl
-                  label={__('Enable Payments', 'subtleforms')}
-                  checked={paymentSettings.enabled}
-                  onChange={(value) =>
-                    handlePaymentSettingChange('enabled', value)
-                  }
-                  help={__(
-                    'Require payment for form submission',
-                    'subtleforms'
-                  )}
+                <FormTypeControl schema={schema} onChange={onChange} isReadOnly={isReadOnly} />
+                <TextControl
+                  label={__('Form name', 'subtleforms')}
+                  value={metadata.title || ''}
+                  onChange={(value) => handleMetadataChange('title', value)}
+                  help={__('The name shown to you and your visitors for this form.', 'subtleforms')}
+                  disabled={isReadOnly}
                 />
+                <TextControl
+                  label={__('Description', 'subtleforms')}
+                  value={metadata.description || ''}
+                  onChange={(value) => handleMetadataChange('description', value)}
+                  help={__('Shown under the title when the block or shortcode displays it.', 'subtleforms')}
+                  disabled={isReadOnly}
+                />
+              </div>
+            )}
 
-                {paymentSettings.enabled && (
-                  <>
-                    <RadioControl
-                      label={__('Payment Mode', 'subtleforms')}
-                      selected={paymentSettings.mode}
-                      options={[
-                        {
-                          label: __('Test Mode', 'subtleforms'),
-                          value: 'test',
-                        },
-                        {
-                          label: __('Live Mode', 'subtleforms'),
-                          value: 'live',
-                        },
-                      ]}
-                      onChange={(value) =>
-                        handlePaymentSettingChange('mode', value)
-                      }
-                      help={__(
-                        'Test mode will not process real payments',
-                        'subtleforms'
-                      )}
-                    />
+            {current.id === 'fields' && (
+              <div className='sf-form-settings__card'>
+                <SelectControl
+                  __nextHasNoMarginBottom
+                  __next40pxDefaultSize
+                  label={__('Field label visibility', 'subtleforms')}
+                  value={metadata.labelVisibility === 'hidden' ? 'hidden' : 'visible'}
+                  options={[
+                    { value: 'visible', label: __('Visible (top aligned)', 'subtleforms') },
+                    { value: 'hidden', label: __('Hidden (kept for screen readers)', 'subtleforms') },
+                  ]}
+                  disabled={isReadOnly}
+                  onChange={(v) => handleMetadataChange('labelVisibility', v)}
+                />
+                <SelectControl
+                  __nextHasNoMarginBottom
+                  __next40pxDefaultSize
+                  label={__('Help text placement', 'subtleforms')}
+                  value={metadata.descriptionPlacement === 'above' ? 'above' : 'below'}
+                  options={[
+                    { value: 'below', label: __('Below input', 'subtleforms') },
+                    { value: 'above', label: __('Above input', 'subtleforms') },
+                  ]}
+                  disabled={isReadOnly}
+                  onChange={(v) => handleMetadataChange('descriptionPlacement', v)}
+                />
+                <TextControl
+                  __nextHasNoMarginBottom
+                  __next40pxDefaultSize
+                  label={__('Message when a required field is left empty', 'subtleforms')}
+                  placeholder={__('This field is required.', 'subtleforms')}
+                  value={metadata.requiredMessage || ''}
+                  disabled={isReadOnly}
+                  onChange={(v) => handleMetadataChange('requiredMessage', v)}
+                />
+                <TextControl
+                  __nextHasNoMarginBottom
+                  __next40pxDefaultSize
+                  label={__('Message when an answer is not valid', 'subtleforms')}
+                  help={__('Leave empty for the standard message of each field type.', 'subtleforms')}
+                  value={metadata.validationMessage || ''}
+                  disabled={isReadOnly}
+                  onChange={(v) => handleMetadataChange('validationMessage', v)}
+                />
+              </div>
+            )}
 
-                    <SelectControl
-                      label={__('Currency', 'subtleforms')}
-                      value={paymentSettings.currency}
-                      options={[
-                        { label: 'USD - US Dollar', value: 'USD' },
-                        { label: 'EUR - Euro', value: 'EUR' },
-                        { label: 'GBP - British Pound', value: 'GBP' },
-                        { label: 'CAD - Canadian Dollar', value: 'CAD' },
-                        { label: 'AUD - Australian Dollar', value: 'AUD' },
-                        { label: 'JPY - Japanese Yen', value: 'JPY' },
-                        { label: 'INR - Indian Rupee', value: 'INR' },
-                      ]}
-                      onChange={(value) =>
-                        handlePaymentSettingChange('currency', value)
-                      }
-                      help={__(
-                        'Currency for payment transactions',
-                        'subtleforms'
-                      )}
-                    />
+            {current.id === 'confirmation' && (
+              <div className='sf-form-settings__card'>
+                <ConfirmationPanel schema={schema} onMetadata={handleMetadataChange} isReadOnly={isReadOnly} />
+              </div>
+            )}
 
-                    <RadioControl
-                      label={__('Amount Type', 'subtleforms')}
-                      selected={paymentSettings.amountType}
-                      options={[
-                        {
-                          label: __('Fixed Amount', 'subtleforms'),
-                          value: 'fixed',
-                        },
-                        {
-                          label: __('From Field', 'subtleforms'),
-                          value: 'field',
-                        },
-                      ]}
-                      onChange={(value) =>
-                        handlePaymentSettingChange('amountType', value)
-                      }
-                      help={__(
-                        'Set a fixed amount or use a field value',
-                        'subtleforms'
-                      )}
-                    />
+            {current.id === 'notifications' && (
+              <div className='sf-form-settings__card sf-form-settings__card--stack'>
+                <ActionsPanel schema={schema} onChange={onChange} isReadOnly={isReadOnly} />
+              </div>
+            )}
 
-                    {paymentSettings.amountType === 'fixed' && (
-                      <TextControl
-                        label={__('Fixed Amount', 'subtleforms')}
-                        type='number'
-                        step='0.01'
-                        min='0'
-                        value={paymentSettings.fixedAmount}
-                        onChange={(value) =>
-                          handlePaymentSettingChange('fixedAmount', value)
-                        }
-                        help={__(
-                          'The amount to charge (e.g., 29.99)',
-                          'subtleforms'
-                        )}
-                      />
+            {current.id === 'availability' && (
+              <div className='sf-form-settings__card'>
+                <AvailabilityPanel schema={schema} onMetadata={handleMetadataChange} isReadOnly={isReadOnly} />
+              </div>
+            )}
+
+            {current.id === 'payments' && (
+              <div className='sf-form-settings__stack'>
+                {supportsPayment && (
+                  <div className='sf-form-settings__card'>
+                    {isConversationalForm && (
+                      <div className='sf-info-box sf-info-box--blue'>
+                        <p className='sf-info-box__text'>
+                          <strong>{__('Conversational Payment:', 'subtleforms')}</strong>{' '}
+                          {__('When enabled, users will answer questions, review their answers, and then complete payment before submission.', 'subtleforms')}
+                        </p>
+                      </div>
                     )}
-
-                    {paymentSettings.amountType === 'field' && (
-                      <SelectControl
-                        label={__('Amount Field', 'subtleforms')}
-                        value={paymentSettings.amountField}
-                        options={[
-                          {
-                            label: __('Select a field...', 'subtleforms'),
-                            value: '',
-                          },
-                          ...fieldOptions,
-                        ]}
-                        onChange={(value) =>
-                          handlePaymentSettingChange('amountField', value)
-                        }
-                        help={__(
-                          'Field that contains the payment amount',
-                          'subtleforms'
-                        )}
-                      />
+                    {isPaymentForm && (
+                      <div className='sf-info-box sf-info-box--blue'>
+                        <p className='sf-info-box__text'>
+                          <strong>{__('Note:', 'subtleforms')}</strong>{' '}
+                          {__('Payment gateway integration will be added in a future update. These settings prepare your form for payment processing.', 'subtleforms')}
+                        </p>
+                      </div>
                     )}
-
-                    <div className='sf-info-box sf-info-box--yellow'>
-                      <p className='sf-info-box__text'>
-                        <strong>{__('Extension Point:', 'subtleforms')}</strong>{' '}
-                        {__(
-                          'Payment gateway settings will appear here when payment extensions are installed.',
-                          'subtleforms'
+                    <ToggleControl
+                      label={__('Enable Payments', 'subtleforms')}
+                      checked={paymentSettings.enabled}
+                      onChange={(value) => handlePaymentSettingChange('enabled', value)}
+                      help={__('Require payment for form submission', 'subtleforms')}
+                      disabled={isReadOnly}
+                    />
+                    {paymentSettings.enabled && (
+                      <>
+                        <RadioControl
+                          label={__('Payment Mode', 'subtleforms')}
+                          selected={paymentSettings.mode}
+                          options={[
+                            { label: __('Test Mode', 'subtleforms'), value: 'test' },
+                            { label: __('Live Mode', 'subtleforms'), value: 'live' },
+                          ]}
+                          onChange={(value) => handlePaymentSettingChange('mode', value)}
+                          help={__('Test mode will not process real payments', 'subtleforms')}
+                        />
+                        <SelectControl
+                          label={__('Currency', 'subtleforms')}
+                          value={paymentSettings.currency}
+                          options={[
+                            { label: 'USD - US Dollar', value: 'USD' },
+                            { label: 'EUR - Euro', value: 'EUR' },
+                            { label: 'GBP - British Pound', value: 'GBP' },
+                            { label: 'CAD - Canadian Dollar', value: 'CAD' },
+                            { label: 'AUD - Australian Dollar', value: 'AUD' },
+                            { label: 'JPY - Japanese Yen', value: 'JPY' },
+                            { label: 'INR - Indian Rupee', value: 'INR' },
+                          ]}
+                          onChange={(value) => handlePaymentSettingChange('currency', value)}
+                          help={__('Currency for payment transactions', 'subtleforms')}
+                        />
+                        <RadioControl
+                          label={__('Amount Type', 'subtleforms')}
+                          selected={paymentSettings.amountType}
+                          options={[
+                            { label: __('Fixed Amount', 'subtleforms'), value: 'fixed' },
+                            { label: __('From Field', 'subtleforms'), value: 'field' },
+                          ]}
+                          onChange={(value) => handlePaymentSettingChange('amountType', value)}
+                          help={__('Set a fixed amount or use a field value', 'subtleforms')}
+                        />
+                        {paymentSettings.amountType === 'fixed' && (
+                          <TextControl
+                            label={__('Fixed Amount', 'subtleforms')}
+                            type='number'
+                            step='0.01'
+                            min='0'
+                            value={paymentSettings.fixedAmount}
+                            onChange={(value) => handlePaymentSettingChange('fixedAmount', value)}
+                            help={__('The amount to charge (e.g., 29.99)', 'subtleforms')}
+                          />
                         )}
-                      </p>
-                    </div>
-                  </>
+                        {paymentSettings.amountType === 'field' && (
+                          <SelectControl
+                            label={__('Amount Field', 'subtleforms')}
+                            value={paymentSettings.amountField}
+                            options={[
+                              { label: __('Select a field...', 'subtleforms'), value: '' },
+                              ...fieldOptions,
+                            ]}
+                            onChange={(value) => handlePaymentSettingChange('amountField', value)}
+                            help={__('Field that contains the payment amount', 'subtleforms')}
+                          />
+                        )}
+                      </>
+                    )}
+                  </div>
+                )}
+                {takesMoney && !!window.subtleformsAdmin?.woocommerce && (
+                  <div className='sf-form-settings__card sf-form-settings__card--stack'>
+                    <CheckoutPanel
+                      schema={schema}
+                      fields={pricedFields}
+                      onPayment={handleCheckoutChange}
+                      isReadOnly={isReadOnly}
+                    />
+                  </div>
                 )}
               </div>
-            </PanelBody>
-          )}
+            )}
 
-          {/* Checkout — WooCommerce or SubtleForms (2.1). */}
-          {takesMoney && (
-            <CheckoutPanel
-              schema={schema}
-              fields={pricedFields}
-              onPayment={handleCheckoutChange}
-              isReadOnly={isReadOnly}
-            />
-          )}
+            {current.id === 'integrations' && (
+              <div className='sf-form-settings__card sf-form-settings__card--stack'>
+                <IntegrationsPanel schema={schema} onChange={onChange} isReadOnly={isReadOnly} />
+              </div>
+            )}
 
-          {/* Integrations: email marketing, CRM and analytics per form (2.1). */}
-          <IntegrationsPanel schema={schema} onChange={onChange} isReadOnly={isReadOnly} />
-
-          <PanelBody
-            title={__('Advanced', 'subtleforms')}
-            initialOpen={false}>
-            <RadioControl
-              label={__('Builder canvas width', 'subtleforms')}
-              selected={metadata.canvasWidth || 'standard'}
-              options={[
-                {
-                  label: __('Narrow (640px)', 'subtleforms'),
-                  value: 'narrow',
-                },
-                {
-                  label: __('Standard (768px)', 'subtleforms'),
-                  value: 'standard',
-                },
-                {
-                  label: __('Wide (1024px)', 'subtleforms'),
-                  value: 'wide',
-                },
-              ]}
-              onChange={(value) => handleMetadataChange('canvasWidth', value)}
-              help={__(
-                'Editing width inside the builder only. The published form’s width is set under Preview.',
-                'subtleforms'
-              )}
-            />
-            <TextControl
-              label={__('Internal identifier', 'subtleforms')}
-              value={metadata.name || 'form_schema'}
-              onChange={(value) => handleMetadataChange('name', value)}
-              help={__(
-                'Machine name used in exports and developer hooks. Most forms can leave this as it is.',
-                'subtleforms'
-              )}
-            />
-          </PanelBody>
-
-        </Panel>
+            {current.id === 'advanced' && (
+              <div className='sf-form-settings__card'>
+                <RadioControl
+                  label={__('Builder canvas width', 'subtleforms')}
+                  selected={metadata.canvasWidth || 'standard'}
+                  options={[
+                    { label: __('Narrow (640px)', 'subtleforms'), value: 'narrow' },
+                    { label: __('Standard (768px)', 'subtleforms'), value: 'standard' },
+                    { label: __('Wide (1024px)', 'subtleforms'), value: 'wide' },
+                  ]}
+                  onChange={(value) => handleMetadataChange('canvasWidth', value)}
+                  help={__('Editing width inside the builder only. The published form’s width is set under Preview.', 'subtleforms')}
+                />
+                <TextControl
+                  label={__('Internal identifier', 'subtleforms')}
+                  value={metadata.name || 'form_schema'}
+                  onChange={(value) => handleMetadataChange('name', value)}
+                  help={__('Machine name used in exports and developer hooks. Most forms can leave this as it is.', 'subtleforms')}
+                  disabled={isReadOnly}
+                />
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
