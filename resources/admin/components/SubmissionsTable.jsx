@@ -13,7 +13,7 @@ import {
   SearchControl,
   Modal,
 } from '@wordpress/components';
-import { __, sprintf } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import clsx from 'clsx';
@@ -22,6 +22,8 @@ import { ConfirmModal } from '../modals';
 import { apiGet } from '../utils/api';
 import { apiClient } from '../data';
 import { Icon } from '../ui';
+import { requirePro } from '../utils/featureGate';
+import { downloadCsv } from '../utils/csvDownload';
 import './SubmissionsTable.scss';
 
 const restNonce =
@@ -39,6 +41,17 @@ export const COLUMN_LABELS = {
   device: __('Device', 'subtleforms'),
   created_at: __('Submitted', 'subtleforms'),
 };
+
+/** Rows with each entry once, first occurrence kept. */
+function uniqueRows(rows) {
+  const seen = new Set();
+  return (Array.isArray(rows) ? rows : []).filter((row) => {
+    const id = String(row?.id ?? '');
+    if (!id || seen.has(id)) return !id;
+    seen.add(id);
+    return true;
+  });
+}
 
 const SubmissionsTable = forwardRef(
   (
@@ -69,7 +82,12 @@ const SubmissionsTable = forwardRef(
     const [sortDirection, setSortDirection] = useState('desc');
     const [deleteModal, setDeleteModal] = useState(null);
     const [selectedSubmissions, setSelectedSubmissions] = useState([]);
+    const [bulkDelete, setBulkDelete] = useState(null);
     const isPrefetchingRef = useRef(false);
+    // Each fresh load starts a new generation; answers from an older one
+    // (another tab, filter or a slower request) are ignored so rows are
+    // never shown twice or put back after a change (2.3.3).
+    const generationRef = useRef(0);
     const { createSuccessNotice, createErrorNotice } =
       useDispatch(noticesStore);
 
@@ -169,19 +187,22 @@ const SubmissionsTable = forwardRef(
       setError(null);
       setLoading(true);
       setCurrentPage(1);
+      const generation = ++generationRef.current;
 
       try {
         const { rows, total } = await fetchBatch(0);
-        setBuffer(rows);
+        if (generation !== generationRef.current) return;
+        setBuffer(uniqueRows(rows));
         setPagesLoaded(Math.ceil(rows.length / perPage) || 0);
         setTotalItems(total);
       } catch (err) {
+        if (generation !== generationRef.current) return;
         setError(__('Failed to load submissions', 'subtleforms'));
         setBuffer([]);
         setPagesLoaded(0);
         setTotalItems(0);
       } finally {
-        setLoading(false);
+        if (generation === generationRef.current) setLoading(false);
       }
     };
 
@@ -191,10 +212,12 @@ const SubmissionsTable = forwardRef(
       isPrefetchingRef.current = true;
 
       const batchIndex = Math.ceil(pagesLoaded / CHUNK_PAGES);
+      const generation = generationRef.current;
       try {
         const { rows, total } = await fetchBatch(batchIndex);
+        if (generation !== generationRef.current) return;
         if (rows.length > 0) {
-          setBuffer((prev) => [...prev, ...rows]);
+          setBuffer((prev) => uniqueRows([...prev, ...rows]));
           setPagesLoaded((prev) => prev + Math.ceil(rows.length / perPage));
           setTotalItems(total);
         }
@@ -214,13 +237,61 @@ const SubmissionsTable = forwardRef(
       [loadFresh]
     );
 
+    const inTrash = statusFilter === 'trash';
+
+    // Restore entries from the Trash to their previous status (2.3.1).
+    const restoreEntries = async (ids) => {
+      setBuffer((prev) => prev.filter((s) => !ids.includes(s.id)));
+      setSelectedSubmissions([]);
+      try {
+        const done = await runBulk(ids, 'untrash');
+        notifyBulk(done, ids.length, __('restored', 'subtleforms'));
+      } catch (_err) {
+        notifyBulk(0, ids.length, '');
+      }
+    };
+
+    // Deleting moves entries to the Trash; the snackbar offers Undo (2.3.1).
+    const trashEntries = async (ids) => {
+      setBuffer((prev) => prev.filter((s) => !ids.includes(s.id)));
+      setSelectedSubmissions([]);
+      try {
+        const done = await runBulk(ids, 'trash');
+        if (done === ids.length) {
+          createSuccessNotice(
+            sprintf(
+              /* translators: %d: number of entries */
+              _n('%d entry moved to the Trash', '%d entries moved to the Trash', done, 'subtleforms'),
+              done
+            ),
+            {
+              type: 'snackbar',
+              actions: [
+                {
+                  label: __('Undo', 'subtleforms'),
+                  onClick: async () => {
+                    await runBulk(ids, 'untrash');
+                    loadFresh();
+                  },
+                },
+              ],
+            }
+          );
+        } else {
+          notifyBulk(done, ids.length, '');
+        }
+      } catch (_err) {
+        notifyBulk(0, ids.length, '');
+      }
+    };
+
     const handleDelete = async (submissionId) => {
       setDeleteModal(null);
       setBuffer((prev) => prev.filter((s) => s.id !== submissionId));
 
       try {
-        await apiClient.delete(`/submissions/${submissionId}`);
-        createSuccessNotice(__('Submission deleted', 'subtleforms'), {
+        await apiClient.delete(`/submissions/${submissionId}?force=1`);
+        createSuccessNotice(__('Entry deleted permanently', 'subtleforms'), {
           type: 'snackbar',
         });
       } catch (err) {
@@ -231,133 +302,86 @@ const SubmissionsTable = forwardRef(
       }
     };
 
-    const handleBulkDelete = async (ids) => {
-      if (
-        !window.confirm(
-          (() => {
-            return sprintf(
-              /* translators: %1$d: number of submissions to delete */
-              __(
-                'Are you sure you want to delete %1$d submissions?',
-                'subtleforms'
-              ),
-              ids.length
-            );
-          })()
-        )
-      ) {
-        return;
-      }
+    // One request for any number of entries (2.3.0).
+    const runBulk = async (ids, action) => {
+      const res = await apiClient.post('/submissions/bulk', { ids, action });
+      return Array.isArray(res?.updated) ? res.updated.length : 0;
+    };
 
-      setBuffer((prev) => prev.filter((s) => !ids.includes(s.id)));
-      setSelectedSubmissions([]);
-
-      let successCount = 0;
-      for (const id of ids) {
-        try {
-          await apiClient.delete(`/submissions/${id}`);
-          successCount++;
-        } catch (_err) {
-          // individual failure counted below
-        }
-      }
-
-      if (successCount === ids.length) {
+    const notifyBulk = (done, total, verb) => {
+      if (done === total) {
         createSuccessNotice(
-          (() => {
-            return sprintf(
-              /* translators: %1$d: number of submissions deleted */
-              __('%1$d submissions deleted', 'subtleforms'),
-              successCount
-            );
-          })(),
+          sprintf(
+            /* translators: %1$d: number of entries, %2$s: what happened, e.g. "updated" */
+            _n('%1$d entry %2$s', '%1$d entries %2$s', done, 'subtleforms'),
+            done,
+            verb
+          ),
           { type: 'snackbar' }
         );
       } else {
         createErrorNotice(
-          (() => {
-            return sprintf(
-              /* translators: %1$d: number deleted, %2$d: total requested */
-              __(
-                'Failed to delete some submissions (%1$d/%2$d deleted)',
-                'subtleforms'
-              ),
-              successCount,
-              ids.length
-            );
-          })(),
+          sprintf(
+            /* translators: %1$d: number done, %2$d: total requested */
+            __('Some entries could not be changed (%1$d of %2$d done)', 'subtleforms'),
+            done,
+            total
+          ),
           { type: 'snackbar' }
         );
-        loadFresh(); // Reload to sync state
+        loadFresh();
+      }
+    };
+
+    const handleBulkDelete = (ids) => setBulkDelete(ids);
+
+    const confirmBulkDelete = async () => {
+      const ids = bulkDelete || [];
+      setBulkDelete(null);
+      setBuffer((prev) => prev.filter((s) => !ids.includes(s.id)));
+      setSelectedSubmissions([]);
+      try {
+        notifyBulk(await runBulk(ids, 'delete'), ids.length, __('deleted permanently', 'subtleforms'));
+      } catch (_err) {
+        notifyBulk(0, ids.length, '');
       }
     };
 
     const handleBulkMarkStatus = async (ids, actionType) => {
-      // Map action type to the correct field update
-      const isReadActions = { read: 1, unread: 0 };
-      const adminStatusActions = ['spam', 'flagged', 'archived'];
-
-      let updatePayload;
-      if (actionType in isReadActions) {
-        updatePayload = { is_read: isReadActions[actionType] };
-        // Optimistic update
-        setBuffer((prev) =>
-          prev.map((s) =>
-            ids.includes(s.id) ? { ...s, is_read: isReadActions[actionType] } : s
-          )
-        );
-      } else if (adminStatusActions.includes(actionType)) {
-        updatePayload = { status: actionType };
-        setBuffer((prev) =>
-          prev.map((s) => (ids.includes(s.id) ? { ...s, status: actionType } : s))
-        );
-      } else if (actionType === 'restore') {
-        // Clear admin status override (unflag/unspam) — server sets status to null
-        updatePayload = { status: 'none' };
-        setBuffer((prev) =>
-          prev.map((s) => (ids.includes(s.id) ? { ...s, status: null } : s))
-        );
-      } else {
+      const patch = {
+        read: { is_read: 1 },
+        unread: { is_read: 0 },
+        star: { starred: 1 },
+        unstar: { starred: 0 },
+        spam: { status: 'spam' },
+        flagged: { status: 'flagged' },
+        restore: { status: null },
+      }[actionType];
+      if (!patch) {
         return;
       }
-
+      // Optimistic update
+      setBuffer((prev) => prev.map((s) => (ids.includes(s.id) ? { ...s, ...patch } : s)));
       setSelectedSubmissions([]);
-
-      let successCount = 0;
-      for (const id of ids) {
-        try {
-          await apiClient.put(`/submissions/${id}`, updatePayload);
-          successCount++;
-        } catch (_err) {
-          // individual failure counted below
-        }
-      }
-
-      if (successCount === ids.length) {
-        createSuccessNotice(
-          sprintf(
-            /* translators: %1$d: number of submissions updated */
-            __('%1$d submissions updated', 'subtleforms'),
-            successCount
-          ),
-          { type: 'snackbar' }
-        );
-      } else {
-        createErrorNotice(
-          sprintf(
-            /* translators: %1$d: number updated, %2$d: total requested */
-            __(
-              'Failed to update some submissions (%1$d/%2$d updated)',
-              'subtleforms'
-            ),
-            successCount,
-            ids.length
-          ),
-          { type: 'snackbar' }
-        );
-        loadFresh(); // Reload to sync state
+      try {
+        notifyBulk(await runBulk(ids, actionType), ids.length, __('updated', 'subtleforms'));
+      } catch (_err) {
+        notifyBulk(0, ids.length, '');
       }
     };
+
+    // Export the selected entries (CSV export is part of SubtleForms Pro).
+    const handleExportSelected = (ids) =>
+      requirePro('submissions.export', async () => {
+        try {
+          const res = await apiClient.post('/submissions/export', { ids });
+          if (!downloadCsv(res)) {
+            createErrorNotice(res?.message || __('Nothing to export', 'subtleforms'), { type: 'snackbar' });
+          }
+        } catch (err) {
+          createErrorNotice(__('Failed to export submissions', 'subtleforms'), { type: 'snackbar' });
+        }
+      });
 
     const getRowClassName = (submission) => {
       // Priority: spam/flagged > failed > payment_pending > unread
@@ -393,15 +417,18 @@ const SubmissionsTable = forwardRef(
       setCurrentPage(1);
     };
 
+    // Stored timestamps are UTC without a zone suffix; parse them as UTC so
+    // relative times match the dashboard in every browser timezone.
+    const parseUtc = (value) => {
+      const raw = String(value || '');
+      return new Date(raw && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(raw) ? `${raw.replace(' ', 'T')}Z` : raw);
+    };
+
     const getRelativeTime = (dateString) => {
-      const date = new Date(dateString);
+      const date = parseUtc(dateString);
       const now = new Date();
-      const diff = Math.floor((now - date) / 1000);
-      if (diff < 60)
-        return (() => {
-          /* translators: %1$d: number of seconds */
-          return sprintf(__('%1$d seconds ago', 'subtleforms'), diff);
-        })();
+      const diff = Math.max(0, Math.floor((now - date) / 1000));
+      if (diff < 60) return __('Just now', 'subtleforms');
       if (diff < 3600)
         return (() => {
           /* translators: %1$d: number of minutes */
@@ -447,27 +474,103 @@ const SubmissionsTable = forwardRef(
           year: 'numeric',
           hour: '2-digit',
           minute: '2-digit',
-        }).format(new Date(dateString));
+        }).format(parseUtc(dateString));
       } catch {
         return dateString;
       }
+    };
+
+    // Pull a human summary out of the payload: a name and an email when the
+    // form collects them, otherwise the first short answers.
+    const summarize = (submission) => {
+      const payload =
+        submission.payload && typeof submission.payload === 'object'
+          ? submission.payload
+          : {};
+      const entries = Object.entries(payload);
+      const flat = (v) => {
+        if (v === null || v === undefined) return '';
+        if (typeof v === 'object') {
+          if (v.first_name || v.last_name) {
+            return [v.first_name, v.last_name].filter(Boolean).join(' ');
+          }
+          return '';
+        }
+        return String(v);
+      };
+      const byKey = (re) => {
+        const hit = entries.find(([k, v]) => re.test(k) && flat(v).trim());
+        return hit ? flat(hit[1]).trim() : '';
+      };
+      const email = byKey(/e-?mail/i);
+      const name =
+        byKey(/^(full_?)?name$|name_group|your_name|first_name/i) ||
+        entries.map(([, v]) => flat(v)).find(
+          (v) => v && !v.includes('@') && v.length <= 60
+        ) ||
+        '';
+      return { name, email };
+    };
+
+    const STATUS = {
+      completed: { label: __('Completed', 'subtleforms'), cls: 'sf-pill--success' },
+      saved: { label: __('Saved', 'subtleforms'), cls: '' },
+      processing: { label: __('Processing', 'subtleforms'), cls: 'sf-pill--info' },
+      failed: { label: __('Failed', 'subtleforms'), cls: 'sf-pill--danger' },
+      payment_pending: { label: __('Awaiting payment', 'subtleforms'), cls: 'sf-pill--warning' },
+      spam: { label: __('Spam', 'subtleforms'), cls: 'sf-pill--danger' },
+      flagged: { label: __('Flagged', 'subtleforms'), cls: 'sf-pill--warning' },
+      trash: { label: __('Trashed', 'subtleforms'), cls: 'sf-pill--danger' },
+      archived: { label: __('Archived', 'subtleforms'), cls: '' },
     };
 
     // Define table columns
     const allColumns = [
       {
         key: 'id',
-        title: __('ID', 'subtleforms'),
+        title: __('Submission', 'subtleforms'),
         sortable: true,
-        render: (id) => <strong>#{id}</strong>,
+        render: (id, submission) => {
+          const isUnread = parseInt(submission.is_read, 10) === 0;
+          const { name, email } = summarize(submission);
+          return (
+            <span
+              className={clsx('sf-sub-entry', { 'is-unread': isUnread })}>
+              <span className='sf-sub-entry__dot' aria-hidden='true' />
+              <span className='sf-sub-entry__avatar' aria-hidden='true'>
+                {(name || email || '#').trim().charAt(0).toUpperCase()}
+              </span>
+              <span className='sf-sub-entry__text'>
+                <span className='sf-sub-entry__name'>
+                  {name || email || sprintf(
+                    /* translators: %d: submission id */
+                    __('Submission #%d', 'subtleforms'),
+                    id
+                  )}
+                  {isUnread && (
+                    <span className='screen-reader-text'>
+                      {' '}
+                      {__('(unread)', 'subtleforms')}
+                    </span>
+                  )}
+                </span>
+                <span className='sf-sub-entry__meta'>
+                  {email && name ? <span>{email}</span> : null}
+                  <span className='sf-sub-entry__id'>#{id}</span>
+                </span>
+              </span>
+            </span>
+          );
+        },
       },
       ...(showFormColumn
         ? [
             {
               key: 'form_title',
               title: __('Form', 'subtleforms'),
-              render: (formTitle, submission) =>
-                formTitle || submission.form_id,
+              render: (formTitle, submission) => (
+                <span className='sf-sub-form'>{formTitle || `#${submission.form_id}`}</span>
+              ),
             },
           ]
         : []),
@@ -475,73 +578,14 @@ const SubmissionsTable = forwardRef(
         key: 'status',
         title: __('Status', 'subtleforms'),
         sortable: true,
-        render: (status, submission) => {
-          const isUnread = parseInt(submission.is_read, 10) === 0;
-
-          // Null / legacy 'unread' status — show only the read indicator
-          if (!status || status === 'unread') {
-            return (
-              <span className='sf-submissions-table__status-cell'>
-                {isUnread && (
-                  <span
-                    className='sf-submissions-table__unread-dot'
-                    title={__('Unread', 'subtleforms')}
-                  />
-                )}
-                <span className='sf-submissions-table__status-badge sf-submissions-table__status-badge--processing'>
-                  {'—'}
-                </span>
-              </span>
-            );
-          }
-
-          // Admin-override statuses
-          if (status === 'spam' || status === 'flagged' || status === 'archived') {
-            const adminVariantMap = { spam: 'spam', flagged: 'flagged', archived: 'read' };
-            const adminLabelMap = {
-              spam: __('Spam', 'subtleforms'),
-              flagged: __('Flagged', 'subtleforms'),
-              archived: __('Archived', 'subtleforms'),
-            };
-            return (
-              <span
-                className={clsx(
-                  'sf-submissions-table__status-badge',
-                  `sf-submissions-table__status-badge--${adminVariantMap[status]}`
-                )}>
-                {adminLabelMap[status]}
-              </span>
-            );
-          }
-
-          // Pipeline statuses — show processing result + unread dot
-          const pipelineVariantMap = {
-            completed: 'completed',
-            failed: 'failed',
-            payment_pending: 'payment-pending',
-            processing: 'processing',
-            saved: 'processing',
+        render: (status) => {
+          const config = STATUS[status] || {
+            label: __('Received', 'subtleforms'),
+            cls: '',
           };
-          const pipelineLabelMap = {
-            completed: __('Completed', 'subtleforms'),
-            failed: __('Failed', 'subtleforms'),
-            payment_pending: __('Awaiting Payment', 'subtleforms'),
-            processing: __('Processing', 'subtleforms'),
-            saved: __('Saved', 'subtleforms'),
-          };
-          const variant = pipelineVariantMap[status] || 'processing';
           return (
-            <span className='sf-submissions-table__status-cell'>
-              {isUnread && (
-                <span className='sf-submissions-table__unread-dot' title={__('Unread', 'subtleforms')}></span>
-              )}
-              <span
-                className={clsx(
-                  'sf-submissions-table__status-badge',
-                  `sf-submissions-table__status-badge--${variant}`
-                )}>
-                {pipelineLabelMap[status] || status}
-              </span>
+            <span className={clsx('sf-pill', 'sf-pill--dot', config.cls)}>
+              {config.label}
             </span>
           );
         },
@@ -549,42 +593,78 @@ const SubmissionsTable = forwardRef(
       {
         key: 'browser',
         title: __('Browser', 'subtleforms'),
-        render: (_, submission) =>
-          getBrowserDevice(submission.user_agent).browser,
+        render: (_, submission) => (
+          <span className='sf-sub-muted'>{getBrowserDevice(submission.user_agent).browser}</span>
+        ),
       },
       {
         key: 'device',
         title: __('Device', 'subtleforms'),
-        render: (_, submission) =>
-          getBrowserDevice(submission.user_agent).device,
+        render: (_, submission) => (
+          <span className='sf-sub-muted'>{getBrowserDevice(submission.user_agent).device}</span>
+        ),
       },
       {
         key: 'created_at',
-        title: __('Submitted', 'subtleforms'),
+        title: __('Received', 'subtleforms'),
         sortable: true,
         render: (createdAt) => (
-          <span className='sf-sub-time'>
-            <span className='sf-sub-time__rel'>{getRelativeTime(createdAt)}</span>
-            <span className='sf-sub-time__abs'>{formatAbsDate(createdAt)}</span>
-          </span>
+          <time className='sf-sub-time' title={formatAbsDate(createdAt)} dateTime={createdAt}>
+            {getRelativeTime(createdAt)}
+          </time>
         ),
       },
       {
         key: 'actions',
-        title: __('Actions', 'subtleforms'),
+        title: null,
         render: (_, submission) => (
-          <div className='sf-submissions-table__actions'>
+          <div className='subtleforms-row-actions sf-submissions-table__actions'>
             <Button
-              isSecondary
-              isSmall
+              size='compact'
+              icon={<Icon.Eye size={16} />}
+              label={__('Open', 'subtleforms')}
+              showTooltip
               onClick={(e) => {
                 e.stopPropagation();
                 handleRowClick(submission);
-              }}>
-              {__('View', 'subtleforms')}
-            </Button>
+              }}
+            />
             <Button
-              isSmall
+              size='compact'
+              icon={<Icon.Star size={16} fill={parseInt(submission.starred, 10) === 1 ? 'currentColor' : 'none'} />}
+              label={
+                parseInt(submission.starred, 10) === 1
+                  ? __('Remove star', 'subtleforms')
+                  : __('Star', 'subtleforms')
+              }
+              showTooltip
+              isPressed={parseInt(submission.starred, 10) === 1}
+              className={clsx(
+                'sf-submissions-table__star-btn',
+                parseInt(submission.starred, 10) === 1 && 'sf-submissions-table__star-btn--active'
+              )}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleBulkMarkStatus(
+                  [submission.id],
+                  parseInt(submission.starred, 10) === 1 ? 'unstar' : 'star'
+                );
+              }}
+            />
+            <Button
+              size='compact'
+              icon={<Icon.AlertCircle size={16} />}
+              label={
+                submission.status === 'flagged'
+                  ? __('Remove flag', 'subtleforms')
+                  : __('Flag for follow-up', 'subtleforms')
+              }
+              showTooltip
+              isPressed={submission.status === 'flagged'}
+              className={clsx(
+                'sf-submissions-table__flag-btn',
+                submission.status === 'flagged' && 'sf-submissions-table__flag-btn--active'
+              )}
               onClick={(e) => {
                 e.stopPropagation();
                 handleBulkMarkStatus(
@@ -592,27 +672,45 @@ const SubmissionsTable = forwardRef(
                   submission.status === 'flagged' ? 'restore' : 'flagged'
                 );
               }}
-              title={
-                submission.status === 'flagged'
-                  ? __('Unflag submission', 'subtleforms')
-                  : __('Flag submission', 'subtleforms')
-              }
-              className={clsx(
-                'sf-submissions-table__flag-btn',
-                submission.status === 'flagged' &&
-                  'sf-submissions-table__flag-btn--active'
-              )}>
-              <Icon.AlertCircle size={13} />
-            </Button>
-            <Button
-              isDestructive
-              isSmall
-              onClick={(e) => {
-                e.stopPropagation();
-                setDeleteModal(submission.id);
-              }}>
-              {__('Delete', 'subtleforms')}
-            </Button>
+            />
+            {submission.status === 'trash' ? (
+              <>
+                <Button
+                  size='compact'
+                  icon={<Icon.Undo size={16} />}
+                  label={__('Restore', 'subtleforms')}
+                  showTooltip
+                  className='sf-submissions-table__restore-btn'
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    restoreEntries([submission.id]);
+                  }}
+                />
+                <Button
+                  size='compact'
+                  isDestructive
+                  icon={<Icon.Trash size={16} />}
+                  label={__('Delete permanently', 'subtleforms')}
+                  showTooltip
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setDeleteModal(submission.id);
+                  }}
+                />
+              </>
+            ) : (
+              <Button
+                size='compact'
+                isDestructive
+                icon={<Icon.Trash size={16} />}
+                label={__('Move to Trash', 'subtleforms')}
+                showTooltip
+                onClick={(e) => {
+                  e.stopPropagation();
+                  trashEntries([submission.id]);
+                }}
+              />
+            )}
           </div>
         ),
       },
@@ -654,46 +752,104 @@ const SubmissionsTable = forwardRef(
           onPageChange={handlePageChange}
           onPerPageChange={handlePerPageChange}
           loading={loading}
-          emptyMessage={__('No submissions found.', 'subtleforms')}
+          emptyMessage={
+            <div className='sf-empty'>
+              <span className='sf-empty__icon'>
+                <Icon.Inbox size={20} />
+              </span>
+              <p className='sf-empty__title'>
+                {formId ? __('No entries yet', 'subtleforms') : __('No submissions here', 'subtleforms')}
+              </p>
+              <p className='sf-empty__text'>
+                {formId
+                  ? __('Publish the form and add it to a page with the SubtleForms block or its shortcode. Entries appear here as they arrive.', 'subtleforms')
+                  : __('Entries show up the moment a visitor sends one of your forms. Try another tab or clear the filters.', 'subtleforms')}
+              </p>
+            </div>
+          }
           onRowClick={handleRowClick}
           rowClassName={getRowClassName}
           selectable={true}
           selectedItems={selectedSubmissions}
           onSelectionChange={setSelectedSubmissions}
-          bulkActions={[
-            {
-              label: __('Mark as Read', 'subtleforms'),
-              onClick: (ids) => handleBulkMarkStatus(ids, 'read'),
-            },
-            {
-              label: __('Mark as Unread', 'subtleforms'),
-              onClick: (ids) => handleBulkMarkStatus(ids, 'unread'),
-            },
-            {
-              label: __('Mark as Spam', 'subtleforms'),
-              onClick: (ids) => handleBulkMarkStatus(ids, 'spam'),
-            },
-            {
-              label: __('Mark as Flagged', 'subtleforms'),
-              onClick: (ids) => handleBulkMarkStatus(ids, 'flagged'),
-            },
-            {
-              label: __('Delete', 'subtleforms'),
-              onClick: handleBulkDelete,
-              isDestructive: true,
-            },
-          ]}
+          bulkActions={
+            inTrash
+              ? [
+                  {
+                    label: __('Restore', 'subtleforms'),
+                    onClick: restoreEntries,
+                  },
+                  {
+                    label: __('Delete permanently', 'subtleforms'),
+                    onClick: handleBulkDelete,
+                    isDestructive: true,
+                  },
+                ]
+              : [
+                  {
+                    label: __('Mark as Read', 'subtleforms'),
+                    onClick: (ids) => handleBulkMarkStatus(ids, 'read'),
+                  },
+                  {
+                    label: __('Mark as Unread', 'subtleforms'),
+                    onClick: (ids) => handleBulkMarkStatus(ids, 'unread'),
+                  },
+                  {
+                    label: __('Star', 'subtleforms'),
+                    onClick: (ids) => handleBulkMarkStatus(ids, 'star'),
+                  },
+                  {
+                    label: __('Remove star', 'subtleforms'),
+                    onClick: (ids) => handleBulkMarkStatus(ids, 'unstar'),
+                  },
+                  {
+                    label: __('Export selected (CSV)', 'subtleforms'),
+                    onClick: handleExportSelected,
+                  },
+                  {
+                    label: __('Mark as Spam', 'subtleforms'),
+                    onClick: (ids) => handleBulkMarkStatus(ids, 'spam'),
+                  },
+                  {
+                    label: __('Mark as Flagged', 'subtleforms'),
+                    onClick: (ids) => handleBulkMarkStatus(ids, 'flagged'),
+                  },
+                  {
+                    label: __('Move to Trash', 'subtleforms'),
+                    onClick: trashEntries,
+                    isDestructive: true,
+                  },
+                ]
+          }
+        />
+        <ConfirmModal
+          isOpen={!!bulkDelete}
+          onClose={() => setBulkDelete(null)}
+          title={__('Delete entries permanently', 'subtleforms')}
+          message={sprintf(
+            /* translators: %d: number of entries */
+            _n(
+              'Delete %d entry permanently? Its uploaded files are deleted too. This cannot be undone.',
+              'Delete %d entries permanently? Their uploaded files are deleted too. This cannot be undone.',
+              bulkDelete?.length || 0,
+              'subtleforms'
+            ),
+            bulkDelete?.length || 0
+          )}
+          onConfirm={confirmBulkDelete}
+          confirmText={__('Delete permanently', 'subtleforms')}
+          confirmVariant='destructive'
         />
         <ConfirmModal
           isOpen={!!deleteModal}
           onClose={() => setDeleteModal(null)}
-          title={__('Delete Submission', 'subtleforms')}
+          title={__('Delete entry permanently', 'subtleforms')}
           message={__(
-            'Are you sure you want to delete this submission? This action cannot be undone.',
+            'Delete this entry permanently? Its uploaded files are deleted too. This cannot be undone.',
             'subtleforms'
           )}
           onConfirm={() => handleDelete(deleteModal)}
-          confirmText={__('Delete Submission', 'subtleforms')}
+          confirmText={__('Delete permanently', 'subtleforms')}
           confirmVariant='destructive'
         />
       </div>
