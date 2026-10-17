@@ -56,6 +56,13 @@ final class Shortcode {
 			return '<p class="subtleforms-error">' . esc_html__( 'This form is not published yet.', 'subtleforms' ) . '</p>';
 		}
 
+		// Login, schedule and entry-limit rules (2.0).
+		$blocked = \SubtleForms\Engine\FormRestrictions::blockedReason( $formId, \SubtleForms\Engine\FormRestrictions::activeSchema( $formId ) );
+		if ( $blocked !== null ) {
+			$this->enqueueAssets();
+			return \SubtleForms\Engine\FormRestrictions::render( $blocked );
+		}
+
 		// Enqueue frontend assets
 		$this->enqueueAssets();
 

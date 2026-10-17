@@ -50,5 +50,11 @@ final class Deactivator {
 		if ( $timestamp ) {
 			wp_unschedule_event( $timestamp, 'subtleforms_daily_license_check' );
 		}
+
+		// Clear analytics retention cron (2.1).
+		wp_clear_scheduled_hook( 'subtleforms_stats_prune' );
+
+		// Clear the clean-up of uploads that were never submitted (2.1).
+		wp_clear_scheduled_hook( 'subtleforms_uploads_cleanup' );
 	}
 }

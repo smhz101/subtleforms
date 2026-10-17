@@ -117,6 +117,14 @@ final class PrivacyManager {
 	 * Cleanup old submissions based on retention settings.
 	 */
 	public function cleanup_old_submissions() {
+		// Entries in the Trash are deleted for good after the Trash period
+		// (2.3.1, default 30 days).
+		$trash_days = max( 1, (int) $this->settings->get( 'entries_trash_days', \SubtleForms\Repositories\SubmissionsRepository::TRASH_DAYS ) );
+		$emptied    = $this->submissionsRepo->emptyTrash( $trash_days );
+		if ( $emptied > 0 ) {
+			Logger::info( 'Emptied %d entries from the Trash after %d days', $emptied, $trash_days );
+		}
+
 		$retention_days = (int) $this->settings->get( 'data_retention_days', 0 );
 
 		// If retention is 0, keep forever
