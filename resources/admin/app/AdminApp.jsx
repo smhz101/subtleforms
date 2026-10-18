@@ -90,6 +90,17 @@ function getInitialPath() {
 			return formId ? `/forms/${formId}` : '/forms/new';
 
 		case 'subtleforms-submissions': {
+			const pane = window.subtleformsAdmin?.submissionsView?.reading_pane ?? 'right';
+			const params = new URLSearchParams();
+			if (formId) {
+				params.set('form_id', formId);
+			}
+			// A split inbox stays on the list and opens the entry in the pane.
+			// No split keeps the full entry page.
+			if (subId && pane !== 'off') {
+				params.set('submission_id', subId);
+				return `/submissions?${params.toString()}`;
+			}
 			if (subId) {
 				return `/submissions/${subId}${formId ? `?form_id=${formId}` : ''}`;
 			}

@@ -724,3 +724,70 @@ $pipe-status-colors: (
   border-radius: 6px;
   background: #fff;
 }
+
+// Entry body when it is shown in the submissions reading pane.
+.sf-inbox-entry {
+	display: flex;
+	flex-direction: column;
+	height: 100%;
+	min-height: 0;
+	background: var(--sf-bg-page);
+
+	&__bar {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: 12px 16px;
+		flex-shrink: 0;
+		padding: 16px 20px;
+		border-bottom: 1px solid var(--sf-border);
+	}
+
+	&__heading {
+		min-width: 0;
+
+		h2 {
+			margin: 0;
+			font-size: var(--sf-text-lg);
+			font-weight: var(--sf-weight-semibold);
+			line-height: 1.3;
+		}
+
+		p {
+			margin: 4px 0 0;
+			font-size: var(--sf-text-sm);
+			color: var(--sf-text-muted);
+		}
+	}
+
+	&__body {
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow: auto;
+		padding-top: 16px;
+	}
+
+	&--state {
+		align-items: center;
+		justify-content: center;
+		gap: 12px;
+		padding: 24px;
+		color: var(--sf-text-muted);
+		text-align: center;
+
+		p {
+			margin: 0;
+		}
+	}
+
+	.sf-sub-toolbar {
+		flex-wrap: wrap;
+		justify-content: flex-end;
+	}
+
+	// The pane is narrower than the full entry page, so the side column stacks.
+	.sf-detail {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}

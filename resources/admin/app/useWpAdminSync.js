@@ -40,6 +40,10 @@ export function routeToAdminQuery(pathname, search = '') {
 		if (formId) {
 			params.form_id = formId;
 		}
+		const submissionId = query.get('submission_id');
+		if (submissionId) {
+			params.submission_id = submissionId;
+		}
 		return { page: 'subtleforms-submissions', params };
 	}
 

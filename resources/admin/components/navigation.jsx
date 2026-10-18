@@ -27,6 +27,13 @@ function wpPageToPath(page, params = {}) {
     case 'subtleforms-submissions': {
       const subId  = params.submission_id;
       const formId = params.form_id;
+      const pane = window.subtleformsAdmin?.submissionsView?.reading_pane ?? 'right';
+      if (subId && pane !== 'off') {
+        const query = new URLSearchParams();
+        if (formId) query.set('form_id', formId);
+        query.set('submission_id', subId);
+        return `/submissions?${query.toString()}`;
+      }
       if (subId) return `/submissions/${subId}${formId ? `?form_id=${formId}` : ''}`;
       return formId ? `/submissions?form_id=${formId}` : '/submissions';
     }

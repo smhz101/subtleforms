@@ -1,6 +1,6 @@
 import { adminLabel } from '../../shared/fieldDisplay';
 import { structuralType } from '../../shared/formType';
-import { useState, useEffect } from '@wordpress/element';
+import { useState, useEffect, useRef } from '@wordpress/element';
 import {
   Notice,
   TabPanel,
@@ -315,7 +315,7 @@ function FileLinks( { files, submissionId } ) {
   );
 }
 
-export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
+export default function SubmissionDetailPage({ submissionId, onBack, formId, embedded = false, onBrowse = null }) {
   const routerNavigate = useNavigate();
   const [submission, setSubmission] = useState(null);
   const [logs, setLogs] = useState([]);
@@ -325,25 +325,39 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
   const [showEmpty, setShowEmpty] = useState(false);
   const [showTechnical, setShowTechnical] = useState(false);
   const [updating, setUpdating] = useState(false);
+  const requestRef = useRef(0);
 
   useEffect(() => {
     loadSubmission();
   }, [submissionId]);
 
   const loadSubmission = async () => {
-    setLoading(true);
+    const requestId = ++requestRef.current;
+    // Keep the previous entry on screen while the next one loads, so the
+    // pane does not collapse to a spinner between Previous and Next.
+    // A different entry must not keep showing the previous person's answers.
+    if (!submission || String(submission.id) !== String(submissionId)) {
+      setLoading(true);
+    }
     setError(null);
+    setConfirmResend(false);
+    setConfirmDelete(false);
 
     try {
       const [subData, logsData, adjData] = await Promise.all([
         apiClient.get(`/submissions/${submissionId}`),
         apiClient.get(`/submissions/${submissionId}/logs`),
-        apiClient.get(
-          `/submissions/${submissionId}/adjacent${
-            formId ? `?form_id=${formId}` : ''
-          }`
-        ),
+        onBrowse
+          ? Promise.resolve(null)
+          : apiClient.get(
+              `/submissions/${submissionId}/adjacent${
+                formId ? `?form_id=${formId}` : ''
+              }`
+            ),
       ]);
+      if (requestId !== requestRef.current) {
+        return;
+      }
 
       // ApiResponse wraps payloads in { data: ... } for consistency. Unwrap if present.
       setSubmission(subData && subData.data ? subData.data : subData);
@@ -356,9 +370,14 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
       );
       setAdjacent(adjData && adjData.data ? adjData.data : adjData);
     } catch (err) {
+      if (requestId !== requestRef.current) {
+        return;
+      }
       setError(__('Failed to load submission', 'subtleforms'));
     } finally {
-      setLoading(false);
+      if (requestId === requestRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -512,13 +531,42 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
   };
 
   const navigate = (direction) => {
+    if (onBrowse) {
+      if (direction === 'next') {
+        onBrowse.onNext();
+      } else {
+        onBrowse.onPrev();
+      }
+      return;
+    }
     const targetId = direction === 'next' ? adjacent.next : adjacent.prev;
     if (targetId) {
       routerNavigate(`/submissions/${targetId}${formId ? `?form_id=${formId}` : ''}`);
     }
   };
+  const canPrev = onBrowse ? onBrowse.hasPrev : !!adjacent?.prev;
+  const canNext = onBrowse ? onBrowse.hasNext : !!adjacent?.next;
 
   if (loading || error || !submission) {
+    if (embedded) {
+      return (
+        <div className='sf-inbox-entry sf-inbox-entry--state' role='status'>
+          <p>
+            {loading
+              ? __('Loading submission…', 'subtleforms')
+              : error || __('Submission not found', 'subtleforms')}
+          </p>
+          {!loading && (
+            <Button variant='secondary' onClick={loadSubmission}>
+              {__('Try again', 'subtleforms')}
+            </Button>
+          )}
+          <Button variant='tertiary' onClick={onBack}>
+            {__('Close', 'subtleforms')}
+          </Button>
+        </div>
+      );
+    }
     return (
       <AdminShell
         title={__('Submission', 'subtleforms')}
@@ -670,12 +718,21 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
   const actions = (
     <div className='sf-sub-toolbar'>
       <div className='sf-sub-toolbar__group' role='group' aria-label={ __( 'Browse submissions', 'subtleforms' ) }>
+        { embedded && (
+          <Button
+            size='compact'
+            icon={ <Icon.Close size={ 16 } /> }
+            label={ __( 'Close', 'subtleforms' ) }
+            showTooltip
+            onClick={ onBack }
+          />
+        ) }
         <Button
           size='compact'
           icon={ <Icon.ChevronLeft size={ 16 } /> }
           label={ __( 'Newer submission', 'subtleforms' ) }
           showTooltip
-          disabled={ ! adjacent?.prev }
+          disabled={ ! canPrev }
           accessibleWhenDisabled
           onClick={ () => navigate( 'prev' ) }
         />
@@ -684,7 +741,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
           icon={ <Icon.ChevronRight size={ 16 } /> }
           label={ __( 'Older submission', 'subtleforms' ) }
           showTooltip
-          disabled={ ! adjacent?.next }
+          disabled={ ! canNext }
           accessibleWhenDisabled
           onClick={ () => navigate( 'next' ) }
         />
@@ -761,22 +818,8 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
   const answers = Object.entries( filteredPayload );
 
   // ─── render ──────────────────────────────────────────────────────────────
-  return (
-    <AdminShell
-      eyebrow={
-        <button type='button' className='sf-breadcrumb' onClick={ onBack }>
-          <Icon.ArrowLeft size={ 14 } aria-hidden='true' />
-          { submission.form_title || __( 'Submissions', 'subtleforms' ) }
-        </button>
-      }
-      title={ heading }
-      description={ sprintf(
-        /* translators: 1: absolute date, 2: relative time */
-        __( 'Received %1$s · %2$s', 'subtleforms' ),
-        absDate,
-        relDate
-      ) }
-      actions={ actions }>
+  const entry = (
+    <>
 
       { confirmResend && (
         <ConfirmDialog
@@ -1154,6 +1197,48 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId }) {
           </section>
         </aside>
       </div>
+    </>
+  );
+
+  if (embedded) {
+    return (
+      <div className='sf-inbox-entry'>
+        <header className='sf-inbox-entry__bar'>
+          <div className='sf-inbox-entry__heading'>
+            <h2>{ heading }</h2>
+            <p>
+              { sprintf(
+                /* translators: 1: absolute date, 2: relative time */
+                __( 'Received %1$s · %2$s', 'subtleforms' ),
+                absDate,
+                relDate
+              ) }
+            </p>
+          </div>
+          { actions }
+        </header>
+        <div className='sf-inbox-entry__body'>{ entry }</div>
+      </div>
+    );
+  }
+
+  return (
+    <AdminShell
+      eyebrow={
+        <button type='button' className='sf-breadcrumb' onClick={ onBack }>
+          <Icon.ArrowLeft size={ 14 } aria-hidden='true' />
+          { submission.form_title || __( 'Submissions', 'subtleforms' ) }
+        </button>
+      }
+      title={ heading }
+      description={ sprintf(
+        /* translators: 1: absolute date, 2: relative time */
+        __( 'Received %1$s · %2$s', 'subtleforms' ),
+        absDate,
+        relDate
+      ) }
+      actions={ actions }>
+      { entry }
     </AdminShell>
   );
 }
