@@ -602,6 +602,16 @@ final class FieldSettings {
 			);
 		}
 
+		if ( 'hidden' === $type ) {
+			foreach ( $controls as &$control ) {
+				if ( ! is_array( $control ) || ( $control['name'] ?? '' ) !== 'label' || ! empty( $control['help'] ) ) {
+					continue;
+				}
+				$control['help'] = __( 'Names this field in the builder. Visitors never see it.', 'subtleforms' );
+			}
+			unset( $control );
+		}
+
 		if ( $isInput || in_array( $type, array( 'html', 'section_break', 'disclaimer', 'group_container', 'repeat_container' ), true ) || $isColumns ) {
 			$add(
 				array(
@@ -705,7 +715,7 @@ final class FieldSettings {
 			'signature'          => __( 'Draw a signature', 'subtleforms' ),
 			'color_picker'       => __( 'Pick a colour', 'subtleforms' ),
 			'rich_text'          => __( 'Formatted text editor', 'subtleforms' ),
-			'hidden'             => __( 'Invisible value sent with the form', 'subtleforms' ),
+			'hidden'             => __( 'A value visitors never see, for tracking', 'subtleforms' ),
 			'file_upload'        => __( 'Upload documents', 'subtleforms' ),
 			'image_upload'       => __( 'Upload images', 'subtleforms' ),
 			'section_break'      => __( 'Heading and intro text', 'subtleforms' ),

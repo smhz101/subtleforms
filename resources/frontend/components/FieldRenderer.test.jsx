@@ -221,6 +221,20 @@ describe('2.2.1 field fixes', () => {
     expect(container.querySelector('#subtleforms-field-email-error').textContent).toBe('Invalid email address.');
     unmount();
   });
+
+  test('a hidden field sends its value without showing a label', () => {
+    const { container, unmount } = render(
+      { key: 'utm_source', type: 'hidden', label: 'Source', value: 'newsletter' },
+      { values: { utm_source: 'newsletter' } }
+    );
+    const input = container.querySelector('input[type="hidden"]');
+    expect(input).not.toBeNull();
+    expect(input.name).toBe('utm_source');
+    expect(input.value).toBe('newsletter');
+    expect(container.querySelector('.subtleforms-field-label')).toBeNull();
+    expect(container.textContent).not.toContain('Source');
+    unmount();
+  });
 });
 
 describe('2.3.2: label visibility, help text placement and container labels', () => {

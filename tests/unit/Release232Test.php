@@ -199,6 +199,21 @@ final class Release232Test extends TestCase {
 		}
 	}
 
+	public function test_hidden_field_is_in_the_library_for_tracking(): void {
+		$def = self::registry()->get( 'hidden' );
+		$this->assertFalse( $def->paletteHidden );
+		$this->assertSame( 'advanced', $def->category );
+		$types = array_map(
+			static fn( $field ) => $field->type,
+			self::registry()->byCategory()['advanced']
+		);
+		$this->assertContains( 'hidden', $types );
+		$value = self::controls( 'hidden' )['value'];
+		$this->assertSame( 'general', $value['section'] );
+		$this->assertStringContainsString( '{get:param}', $value['help'] );
+		$this->assertStringContainsString( 'Visitors never see it', self::controls( 'hidden' )['label']['help'] );
+	}
+
 	private function validate( array $schema, array $payload ): array {
 		return ( new FieldValidator() )->validate( $schema, $payload, array( 'hidden_fields' => array(), 'required_fields' => array() ) )['errors'];
 	}

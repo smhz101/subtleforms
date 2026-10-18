@@ -2,6 +2,7 @@
  * Canvas chrome for Repeater, Group and Columns containers (2.3.1).
  */
 .sf-container-renderer {
+	position: relative;
 	border: 1px solid var(--sf-gray-200, #dcdcde);
 	border-radius: var(--sf-radius-md, 8px);
 	background: var(--sf-white, #fff);
@@ -14,8 +15,13 @@
 	}
 
 	&.is-selected {
+		z-index: 4;
 		border-color: var(--sf-primary, #2271b1);
 		box-shadow: 0 0 0 1px var(--sf-primary, #2271b1), 0 4px 14px rgba(0, 0, 0, 0.08);
+	}
+
+	&:hover {
+		z-index: 4;
 	}
 
 	&__header {
