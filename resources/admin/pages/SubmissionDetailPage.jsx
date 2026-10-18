@@ -315,7 +315,7 @@ function FileLinks( { files, submissionId } ) {
   );
 }
 
-export default function SubmissionDetailPage({ submissionId, onBack, formId, embedded = false, onBrowse = null }) {
+export default function SubmissionDetailPage({ submissionId, onBack, formId, embedded = false, onBrowse = null, onEntryChanged = null }) {
   const routerNavigate = useNavigate();
   const [submission, setSubmission] = useState(null);
   const [logs, setLogs] = useState([]);
@@ -489,6 +489,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
     setUpdating(true);
     try {
       await apiClient.delete(`/submissions/${submission.id}${isTrashed ? '?force=1' : ''}`);
+      onEntryChanged?.();
       onBack();
     } catch (err) {
       setError(__('Failed to delete submission', 'subtleforms'));

@@ -612,6 +612,7 @@ export default function SubmissionsPage({ formId }) {
                   submissionId={openId}
                   formId={selectedFormId !== 'all' ? parseInt(selectedFormId, 10) : formId}
                   onBack={closePane}
+                  onEntryChanged={() => submissionsTableRef.current?.removeEntry?.(openId)}
                   onBrowse={{
                     hasPrev: neighbors.hasPrev,
                     hasNext: neighbors.hasNext,
