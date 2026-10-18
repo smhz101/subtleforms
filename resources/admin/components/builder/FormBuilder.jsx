@@ -51,6 +51,57 @@ function getNodeLocation(tree, nodeId) {
   return null;
 }
 
+function containerToolbarActions({
+  tree,
+  node,
+  nodeId,
+  parentId,
+  columnIndex,
+  position,
+  onMove,
+  onDelete,
+  onDuplicate,
+  onUpdate,
+  fieldDefinitions,
+}) {
+  const siblings = nodeChildren(tree, parentId, columnIndex);
+  const canMoveUp = position > 0;
+  const canMoveDown = position < siblings.length - 1;
+  return {
+    canMoveUp,
+    canMoveDown,
+    onMoveUp: canMoveUp
+      ? () => onMove(nodeId, { parentId, columnIndex, position: position - 1 })
+      : null,
+    onMoveDown: canMoveDown
+      ? () => onMove(nodeId, { parentId, columnIndex, position: position + 1 })
+      : null,
+    onDuplicate: () => onDuplicate(nodeId, { parentId, columnIndex, position: position + 1 }),
+    onDelete: () => onDelete(nodeId),
+    moveTargets: moveTargets(tree, nodeId, {
+      top: __('Top level', 'subtleforms'),
+      /* translators: %d: column number */
+      column: __('column %d', 'subtleforms'),
+      ...Object.fromEntries(
+        Object.entries(fieldDefinitions || {}).map(([type, def]) => [type, def?.label || type])
+      ),
+    }),
+    onMoveTo: (destination) => onMove(nodeId, { ...destination, position: null }),
+    width: node.config?.appearance?.width || '',
+    onWidthChange: typeof onUpdate === 'function'
+      ? (w) => {
+          const next = { ...(node.config?.appearance || {}) };
+          if (w) {
+            next.width = w;
+          } else {
+            delete next.width;
+          }
+          onUpdate(nodeId, { appearance: next });
+        }
+      : null,
+  };
+}
+
 function SortableWrapper({
   nodeId,
   parentId,
@@ -237,6 +288,7 @@ export default function FormBuilder({ appearance } = {}) {
     selectedId,
     selectedStepId,
     setSelectedId,
+    fieldDefinitions,
     actions: { onMove, onDelete, onDuplicate, onRequestInsert, onUpdate },
     validationErrors,
     validationErrorsByFieldKey: validationErrorsByFieldKeyFromContext,
@@ -537,6 +589,23 @@ export default function FormBuilder({ appearance } = {}) {
                 spacing={spacing}
                 dragHandleRef={dragHandleRef}
                 dragHandleListeners={dragHandleListeners}
+                toolbarActions={
+                  node.type === 'step'
+                    ? null
+                    : containerToolbarActions({
+                        tree,
+                        node,
+                        nodeId,
+                        parentId,
+                        columnIndex: parentColumnIndex,
+                        position,
+                        onMove,
+                        onDelete,
+                        onDuplicate,
+                        onUpdate,
+                        fieldDefinitions,
+                      })
+                }
                 renderColumn={(columnChildren, colIndex) => (
                   <ColumnDropZone
                     key={`${nodeId}-${colIndex}`}
