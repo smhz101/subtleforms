@@ -121,3 +121,30 @@
 		}
 	}
 }
+
+// Theme and block styles often restyle every button. These selectors win
+// inside the preview iframe and on the public form.
+.subtleforms-chained-select.is-buttons button.subtleforms-chained-select__choice,
+.subtleforms-chained-select.is-columns button.subtleforms-chained-select__choice {
+	appearance: none;
+	box-sizing: border-box;
+	box-shadow: none;
+	height: auto;
+	min-height: 0;
+	max-width: 100%;
+	letter-spacing: normal;
+	text-decoration: none;
+	text-shadow: none;
+	text-transform: none;
+}
+
+.subtleforms-chained-select.is-buttons button.subtleforms-chained-select__choice {
+	display: inline-flex;
+	width: auto;
+}
+
+.subtleforms-chained-select.is-columns button.subtleforms-chained-select__choice {
+	display: flex;
+	width: 100%;
+	border-radius: 0;
+}

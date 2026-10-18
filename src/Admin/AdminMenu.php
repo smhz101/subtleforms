@@ -381,7 +381,11 @@ class AdminMenu {
 				array_filter(
 					array(
 						file_exists( SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/index.jsx.css' )
-							? SUBTLEFORMS_PLUGIN_URL . 'build/frontend/index.jsx.css'
+							? add_query_arg(
+								'ver',
+								(string) filemtime( SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/index.jsx.css' ),
+								SUBTLEFORMS_PLUGIN_URL . 'build/frontend/index.jsx.css'
+							)
 							: null,
 						file_exists( SUBTLEFORMS_PLUGIN_DIR . 'assets/css/conversational.css' )
 							? SUBTLEFORMS_PLUGIN_URL . 'assets/css/conversational.css'
