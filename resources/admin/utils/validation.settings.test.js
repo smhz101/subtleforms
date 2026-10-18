@@ -54,4 +54,12 @@ describe('settings save validation', () => {
     );
     expect(isValid).toBe(true);
   });
+
+  test('rejects an unknown reading pane', () => {
+    const { isValid, errors } = validateSettings(
+      validSettings({ submissions_reading_pane: 'left' })
+    );
+    expect(isValid).toBe(false);
+    expect(errors.submissions_reading_pane.join(' ')).toMatch(/Reading pane/);
+  });
 });

@@ -96,3 +96,235 @@
 		}
 	}
 }
+
+// ── Display options (gear) ───────────────────────────────────────────────────
+.sf-sub-gear {
+	position: relative;
+
+	&__toggle.components-button svg {
+		fill: none;
+	}
+
+	&__panel {
+		position: absolute;
+		top: calc(100% + 6px);
+		inset-inline-end: 0;
+		z-index: 40;
+		width: 280px;
+		padding: 16px;
+		border-radius: var(--sf-radius-lg);
+		background: var(--sf-bg-surface);
+		box-shadow: 0 0 0 1px var(--sf-border), var(--sf-shadow-lg);
+		text-align: start;
+	}
+
+	&__label {
+		margin: 14px 0 8px;
+		font-size: 11px;
+		font-weight: var(--sf-weight-medium);
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--sf-text-muted);
+
+		&:first-child {
+			margin-top: 0;
+		}
+	}
+
+	&__choices {
+		display: flex;
+		padding: 2px;
+		border-radius: var(--sf-radius-md);
+		background: var(--sf-bg-muted);
+	}
+
+	&__choice {
+		flex: 1 1 0;
+		margin: 0;
+		padding: 6px 4px;
+		border: 0;
+		border-radius: var(--sf-radius-sm);
+		background: transparent;
+		color: var(--sf-text-secondary);
+		font-size: 12px;
+		line-height: 1.2;
+		cursor: pointer;
+
+		&.is-selected {
+			background: var(--sf-bg-surface);
+			color: var(--sf-text);
+			font-weight: var(--sf-weight-semibold);
+			box-shadow: var(--sf-shadow-sm);
+		}
+
+		&:disabled {
+			cursor: default;
+		}
+	}
+
+	&__radios {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+
+	&__radio {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin: 0;
+		padding: 6px 4px;
+		border-radius: var(--sf-radius-sm);
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text);
+		cursor: pointer;
+
+		&:hover {
+			background: var(--sf-bg-muted);
+		}
+
+		input {
+			margin: 0;
+		}
+	}
+
+	&__reset.components-button {
+		height: auto;
+		margin-top: 8px;
+		padding: 0;
+	}
+
+	&__note,
+	&__error {
+		margin: 10px 0 0;
+		font-size: 12px;
+		line-height: 1.4;
+		color: var(--sf-text-muted);
+	}
+
+	&__error {
+		color: var(--sf-danger);
+	}
+}
+
+// ── Reading pane ─────────────────────────────────────────────────────────────
+// The pane slides once, when it opens. Changing entries does not restart it.
+.sf-inbox {
+	min-width: 0;
+
+	&--off {
+		display: block;
+	}
+
+	&--right,
+	&--below {
+		position: relative;
+		display: flex;
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow: hidden;
+	}
+
+	&__list {
+		min-width: 0;
+		min-height: 0;
+	}
+
+	&--right &__list,
+	&--below &__list {
+		flex: 1 1 auto;
+		overflow: auto;
+	}
+
+	&__pane {
+		min-width: 0;
+		min-height: 0;
+		background: var(--sf-bg-page);
+	}
+
+	&--right &__pane {
+		flex: 0 0 0%;
+		max-width: 0;
+		overflow: hidden;
+		opacity: 0;
+		transform: translateX(32px);
+		transition: flex-basis 0.28s ease, max-width 0.28s ease, transform 0.28s ease, opacity 0.2s ease;
+	}
+
+	&--right.is-open &__list {
+		flex: 1 1 42%;
+		max-width: 560px;
+	}
+
+	&--right.is-open &__pane {
+		flex: 1 1 58%;
+		max-width: none;
+		overflow: hidden;
+		opacity: 1;
+		transform: none;
+		border-inline-start: 1px solid var(--sf-border);
+	}
+
+	&--below {
+		flex-direction: column;
+	}
+
+	&--below &__pane {
+		flex: 0 0 0%;
+		max-height: 0;
+		overflow: hidden;
+		opacity: 0;
+		transform: translateY(16px);
+		transition: flex-basis 0.28s ease, max-height 0.28s ease, transform 0.28s ease, opacity 0.2s ease;
+	}
+
+	&--below.is-open &__list {
+		flex: 0 0 42%;
+	}
+
+	&--below.is-open &__pane {
+		flex: 1 1 auto;
+		max-height: none;
+		overflow: hidden;
+		opacity: 1;
+		transform: none;
+		border-top: 1px solid var(--sf-border);
+	}
+}
+
+// A narrow screen cannot hold a side-by-side list, so the pane covers it.
+@media (max-width: 900px) {
+	.sf-inbox--right.is-open {
+		.sf-inbox__list {
+			flex: 1 1 auto;
+			max-width: none;
+		}
+
+		.sf-inbox__pane {
+			position: absolute;
+			inset: 0;
+			z-index: 30;
+			flex: none;
+			width: 100%;
+			max-width: none;
+			background: var(--sf-bg-page);
+		}
+	}
+}
+
+html[dir='rtl'] .sf-inbox--right .sf-inbox__pane {
+	transform: translateX(-32px);
+}
+
+html[dir='rtl'] .sf-inbox--right.is-open .sf-inbox__pane {
+	transform: none;
+}
+
+.sf-inbox-entry--state {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-height: 160px;
+	padding: 24px;
+	color: var(--sf-text-muted);
+}

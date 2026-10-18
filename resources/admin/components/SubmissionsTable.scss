@@ -202,3 +202,74 @@
 		}
 	}
 }
+
+// The open entry, distinct from a checkbox selection.
+.sf-submissions-table tr.sf-submissions-table__row--reading,
+.sf-submissions-table tr.sf-submissions-table__row--reading:hover {
+	background: var(--sf-bg-selected);
+	box-shadow: inset 3px 0 0 var(--sf-brand);
+}
+
+// Density changes padding and type size only. Columns stay on the View menu.
+.sf-submissions-table--comfortable {
+	.sf-data-table__body td {
+		height: 72px;
+		padding-top: 14px;
+		padding-bottom: 14px;
+		font-size: 15px;
+	}
+
+	.sf-sub-entry__avatar {
+		width: 40px;
+		height: 40px;
+		font-size: 15px;
+	}
+
+	.sf-sub-entry__name,
+	.sf-sub-form,
+	.sf-sub-muted,
+	.sf-sub-time {
+		font-size: 15px;
+	}
+}
+
+.sf-submissions-table--compact {
+	.sf-data-table__body td {
+		height: 40px;
+		padding-top: 4px;
+		padding-bottom: 4px;
+		font-size: 12px;
+	}
+
+	.sf-sub-entry {
+		gap: 8px;
+	}
+
+	.sf-sub-entry__avatar {
+		width: 24px;
+		height: 24px;
+		font-size: 11px;
+	}
+
+	.sf-sub-entry__name,
+	.sf-sub-form,
+	.sf-sub-muted,
+	.sf-sub-time,
+	.sf-sub-entry__meta {
+		font-size: 12px;
+	}
+
+	.sf-submissions-table__actions .components-button {
+		width: 28px;
+		min-width: 28px;
+		height: 28px;
+	}
+}
+
+// Inside the split inbox the list is its own scroller, so the header sticks to it.
+.sf-inbox__list {
+	.sf-data-table__header th,
+	.sf-data-table__bulk-actions {
+		top: 0;
+	}
+}

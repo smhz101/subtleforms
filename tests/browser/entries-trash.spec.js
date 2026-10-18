@@ -93,13 +93,16 @@ test('the entry screen moves an entry to the Trash and restores it', async ({ pa
   const [entry] = await entries(client, form.id);
   await loginPage(page);
   await page.goto(`/wp-admin/admin.php?page=subtleforms-submissions&submission_id=${entry.id}&form_id=${form.id}`);
-  await page.getByRole('button', { name: 'Move to Trash' }).click();
+  // The list stays on screen beside the entry, so the row's trash button is
+  // there too. Use the one in the reading pane.
+  const pane = page.locator('.sf-inbox-entry');
+  await pane.getByRole('button', { name: 'Move to Trash' }).click();
   await expect(rows(page).first()).toBeVisible({ timeout: 30000 });
   const stored = await client.call('GET', `/submissions/${entry.id}`);
   expect((stored.body.data || stored.body).status).toBe('trash');
 
   await page.goto(`/wp-admin/admin.php?page=subtleforms-submissions&submission_id=${entry.id}&form_id=${form.id}`);
-  await expect(page.locator('.sf-pill', { hasText: 'Trashed' })).toBeVisible({ timeout: 30000 });
-  await page.getByRole('button', { name: 'Restore' }).click();
-  await expect(page.locator('.sf-pill', { hasText: 'Trashed' })).toHaveCount(0);
+  await expect(pane.locator('.sf-pill', { hasText: 'Trashed' })).toBeVisible({ timeout: 30000 });
+  await pane.getByRole('button', { name: 'Restore' }).click();
+  await expect(pane.locator('.sf-pill', { hasText: 'Trashed' })).toHaveCount(0);
 });

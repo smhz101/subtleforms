@@ -42,6 +42,18 @@ export const settingsSchema = Joi.object({
       'any.required': __('Delete behavior is required', 'subtleforms'),
     }),
 
+  submissions_density: Joi.string()
+    .valid('comfortable', 'default', 'compact')
+    .messages({
+      'any.only': __('List density must be comfortable, default, or compact', 'subtleforms'),
+    }),
+
+  submissions_reading_pane: Joi.string()
+    .valid('right', 'below', 'off')
+    .messages({
+      'any.only': __('Reading pane must be right of inbox, below inbox, or no split', 'subtleforms'),
+    }),
+
   // Frontend Settings
   success_message: Joi.string()
     .max(500)

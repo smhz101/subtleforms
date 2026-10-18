@@ -17,6 +17,28 @@ import { validateSettings, validateField } from '../utils/validation';
 /**
  * Normalize boolean fields coming from the REST API.
  */
+
+/**
+ * Settings → General is the inbox default for admins who have not chosen
+ * their own. Keep the value the submissions page reads on its next visit.
+ *
+ * @param {Object} saved Settings just stored.
+ */
+function publishInboxDefaults( saved ) {
+	const admin = window.subtleformsAdmin;
+	if ( ! admin || ! saved?.submissions_density || ! saved?.submissions_reading_pane ) {
+		return;
+	}
+	const site = {
+		density: saved.submissions_density,
+		reading_pane: saved.submissions_reading_pane,
+	};
+	const current = admin.submissionsView || {};
+	admin.submissionsView = current.personal
+		? { ...current, site }
+		: { ...site, personal: false, site };
+}
+
 function normalizeSettings( data ) {
 	return {
 		...data,
@@ -169,6 +191,7 @@ export default function useSettingsState() {
 				} );
 				setHasChanges( false );
 				setSettings( normalizeSettings( response.data ) );
+				publishInboxDefaults( response.data );
 			}
 		} catch ( error ) {
 			console.error( 'Failed to save settings:', error );
@@ -220,6 +243,7 @@ export default function useSettingsState() {
 						),
 				} );
 				setSettings( normalizeSettings( response.data ) );
+				publishInboxDefaults( response.data );
 				setHasChanges( false );
 			}
 		} catch ( error ) {

@@ -65,6 +65,9 @@ const SubmissionsTable = forwardRef(
       fieldValue = '',
       processingStatus = '',
       visibleColumns = DEFAULT_VISIBLE,
+      readingId = null,
+      density = 'default',
+      onNeighbors = null,
     },
     ref
   ) => {
@@ -84,6 +87,17 @@ const SubmissionsTable = forwardRef(
     const [selectedSubmissions, setSelectedSubmissions] = useState([]);
     const [bulkDelete, setBulkDelete] = useState(null);
     const isPrefetchingRef = useRef(false);
+    const prefetchPromiseRef = useRef(null);
+    const stepRef = useRef(async () => ({ id: null }));
+    const prefetchRef = useRef(async () => []);
+    const bufferRef = useRef([]);
+    const totalRef = useRef(0);
+    const perPageRef = useRef(perPage);
+    const pagesLoadedRef = useRef(0);
+    bufferRef.current = buffer;
+    totalRef.current = totalItems;
+    perPageRef.current = perPage;
+    pagesLoadedRef.current = pagesLoaded;
     // Each fresh load starts a new generation; answers from an older one
     // (another tab, filter or a slower request) are ignored so rows are
     // never shown twice or put back after a change (2.3.3).
@@ -206,36 +220,141 @@ const SubmissionsTable = forwardRef(
       }
     };
 
-    // Background prefetch: appends next batch to buffer
-    const prefetchNextChunk = async () => {
-      if (isPrefetchingRef.current) return;
-      isPrefetchingRef.current = true;
-
-      const batchIndex = Math.ceil(pagesLoaded / CHUNK_PAGES);
-      const generation = generationRef.current;
-      try {
-        const { rows, total } = await fetchBatch(batchIndex);
-        if (generation !== generationRef.current) return;
-        if (rows.length > 0) {
-          setBuffer((prev) => uniqueRows([...prev, ...rows]));
-          setPagesLoaded((prev) => prev + Math.ceil(rows.length / perPage));
-          setTotalItems(total);
-        }
-      } catch (err) {
-        console.warn('SubtleForms: prefetch failed', err);
-      } finally {
-        isPrefetchingRef.current = false;
+    // Background prefetch: appends next batch to buffer.
+    // Returns the buffer after the fetch so Previous/Next can cross a page
+    // that has not been loaded yet. Concurrent callers share one request.
+    const prefetchNextChunk = () => {
+      if (prefetchPromiseRef.current) {
+        return prefetchPromiseRef.current;
       }
+      if (bufferRef.current.length >= totalRef.current) {
+        return Promise.resolve(bufferRef.current);
+      }
+
+      isPrefetchingRef.current = true;
+      const batchIndex = Math.ceil(pagesLoadedRef.current / CHUNK_PAGES);
+      const generation = generationRef.current;
+      const pending = (async () => {
+        try {
+          const { rows, total } = await fetchBatch(batchIndex);
+          if (generation !== generationRef.current) {
+            return bufferRef.current;
+          }
+          if (rows.length > 0) {
+            const next = uniqueRows([...bufferRef.current, ...rows]);
+            bufferRef.current = next;
+            pagesLoadedRef.current += Math.ceil(rows.length / perPageRef.current);
+            totalRef.current = total;
+            setBuffer(next);
+            setPagesLoaded(pagesLoadedRef.current);
+            setTotalItems(total);
+          }
+          return bufferRef.current;
+        } catch (err) {
+          console.warn('SubtleForms: prefetch failed', err);
+          return bufferRef.current;
+        } finally {
+          isPrefetchingRef.current = false;
+          prefetchPromiseRef.current = null;
+        }
+      })();
+      prefetchPromiseRef.current = pending;
+      return pending;
     };
 
-    // Expose refresh method via ref for real-time updates
+    // Move to the previous or next entry in the filtered list, loading the
+    // next batch and turning the page when the neighbour is not on screen.
+    const stepEntry = async (id, direction) => {
+      let rows = bufferRef.current;
+      const index = rows.findIndex((row) => String(row.id) === String(id));
+      if (index < 0) {
+        return { id: null };
+      }
+      let target = index + (direction === 'next' ? 1 : -1);
+      if (target >= rows.length && direction === 'next' && rows.length < totalRef.current) {
+        rows = await prefetchNextChunk();
+        target = index + 1;
+      }
+      if (target < 0 || target >= rows.length) {
+        return { id: null };
+      }
+      setCurrentPage(Math.floor(target / perPageRef.current) + 1);
+      return { id: rows[target].id };
+    };
+
+    stepRef.current = stepEntry;
+    prefetchRef.current = prefetchNextChunk;
+
+    const removeEntry = (id) => {
+      const next = bufferRef.current.filter((row) => String(row.id) !== String(id));
+      if (next.length === bufferRef.current.length) {
+        return;
+      }
+      bufferRef.current = next;
+      totalRef.current = Math.max(0, totalRef.current - 1);
+      setBuffer(next);
+      setTotalItems(totalRef.current);
+    };
+
+    // Expose refresh method via ref for real-time updates.
+    // step goes through a ref so the handle does not change on every render.
     useImperativeHandle(
       ref,
       () => ({
         refreshData: loadFresh,
+        step: (id, direction) => stepRef.current(id, direction),
+        removeEntry: (id) => removeEntry(id),
       }),
       [loadFresh]
     );
+
+    // Tell the page whether the open entry has a neighbour in this list.
+    useEffect(() => {
+      if (!onNeighbors) {
+        return;
+      }
+      const index = readingId
+        ? buffer.findIndex((row) => String(row.id) === String(readingId))
+        : -1;
+      onNeighbors({
+        hasPrev: index > 0,
+        hasNext: index >= 0 && (index < buffer.length - 1 || buffer.length < totalItems),
+      });
+    }, [buffer, readingId, totalItems, onNeighbors]);
+
+    // The first time an entry opens, show the page that contains its row.
+    // Later page changes are the admin's, so this does not pull them back.
+    const revealedRef = useRef(null);
+    useEffect(() => {
+      if (!readingId) {
+        revealedRef.current = null;
+        return;
+      }
+      if (String(revealedRef.current) === String(readingId)) {
+        return;
+      }
+      const index = buffer.findIndex((row) => String(row.id) === String(readingId));
+      if (index < 0) {
+        return;
+      }
+      revealedRef.current = readingId;
+      setCurrentPage(Math.floor(index / perPage) + 1);
+    }, [readingId, buffer, perPage]);
+
+    // A direct link can point past the first loaded batch. Keep fetching
+    // until that row is in the list, so it can be highlighted and browsed.
+    useEffect(() => {
+      if (!readingId || loading || totalItems === 0) {
+        return;
+      }
+      if (buffer.some((row) => String(row.id) === String(readingId))) {
+        return;
+      }
+      if (buffer.length >= totalItems) {
+        return;
+      }
+      prefetchRef.current();
+    }, [readingId, buffer, totalItems, loading]);
 
     const inTrash = statusFilter === 'trash';
 
@@ -384,13 +503,17 @@ const SubmissionsTable = forwardRef(
       });
 
     const getRowClassName = (submission) => {
+      const classes = [];
+      if (readingId && String(submission.id) === String(readingId)) {
+        classes.push('sf-submissions-table__row--reading');
+      }
       // Priority: spam/flagged > failed > payment_pending > unread
-      if (submission.status === 'spam') return 'sf-submissions-table__row--spam';
-      if (submission.status === 'flagged') return 'sf-submissions-table__row--flagged';
-      if (submission.status === 'failed') return 'sf-submissions-table__row--failed';
-      if (submission.status === 'payment_pending') return 'sf-submissions-table__row--payment-pending';
-      if (parseInt(submission.is_read, 10) === 0) return 'sf-submissions-table__row--unread';
-      return '';
+      if (submission.status === 'spam') classes.push('sf-submissions-table__row--spam');
+      else if (submission.status === 'flagged') classes.push('sf-submissions-table__row--flagged');
+      else if (submission.status === 'failed') classes.push('sf-submissions-table__row--failed');
+      else if (submission.status === 'payment_pending') classes.push('sf-submissions-table__row--payment-pending');
+      else if (parseInt(submission.is_read, 10) === 0) classes.push('sf-submissions-table__row--unread');
+      return classes.join(' ');
     };
 
     const handleRowClick = (submission) => {
@@ -739,7 +862,9 @@ const SubmissionsTable = forwardRef(
     );
 
     return (
-      <div className='sf-submissions-table'>
+      <div className={`sf-submissions-table${
+        density === 'comfortable' || density === 'compact' ? ` sf-submissions-table--${density}` : ''
+      }`}>
         <DataTable
           columns={columns}
           data={displayedRows}

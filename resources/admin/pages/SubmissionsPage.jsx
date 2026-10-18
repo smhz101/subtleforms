@@ -1,5 +1,6 @@
-import { useState, useRef, useEffect } from '@wordpress/element';
+import { useState, useRef, useEffect, useCallback, Suspense } from '@wordpress/element';
 import { SearchControl, SelectControl } from '@wordpress/components';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/navigation';
 import { __, sprintf } from '@wordpress/i18n';
 import AdminShell from '../components/AdminShell';
@@ -9,8 +10,25 @@ import useRealTimeUpdates from '../hooks/useRealTimeUpdates';
 import { isProFeature, requirePro } from '../utils/featureGate';
 import { Icon } from '../ui';
 import apiFetch from '@wordpress/api-fetch';
+import { apiPost } from '../utils/api';
 import { useForms } from '../data';
+import lazyWithRetry from '../utils/lazyWithRetry';
 import './SubmissionsPage.scss';
+
+const SubmissionDetailPage = lazyWithRetry(
+  () => import(/* webpackChunkName: "page-submission-detail" */ './SubmissionDetailPage')
+);
+
+function readInboxView() {
+  const view = window.subtleformsAdmin?.submissionsView || {};
+  const site = view.site || { density: 'default', reading_pane: 'right' };
+  return {
+    density: view.density || site.density || 'default',
+    reading_pane: view.reading_pane || site.reading_pane || 'right',
+    personal: !!view.personal,
+    site,
+  };
+}
 
 export default function SubmissionsPage({ formId }) {
   const canExport = isProFeature('submissions.export');
@@ -39,6 +57,27 @@ export default function SubmissionsPage({ formId }) {
   });
   const [showColPicker, setShowColPicker] = useState(false);
   const colPickerRef = useRef(null);
+  const gearRef = useRef(null);
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [view, setView] = useState(readInboxView);
+  const [gearOpen, setGearOpen] = useState(false);
+  const [gearError, setGearError] = useState('');
+  const [gearSaving, setGearSaving] = useState(false);
+  const split = view.reading_pane !== 'off';
+  const [openId, setOpenId] = useState(() => {
+    if (readInboxView().reading_pane === 'off') {
+      return null;
+    }
+    const id = parseInt(searchParams.get('submission_id') || '', 10);
+    return id > 0 ? id : null;
+  });
+  const [neighbors, setNeighbors] = useState({ hasPrev: false, hasNext: false });
+  const onNeighbors = useCallback((next) => {
+    setNeighbors((prev) =>
+      prev.hasPrev === next.hasPrev && prev.hasNext === next.hasNext ? prev : next
+    );
+  }, []);
 
   const toggleColumn = (key) => {
     setVisibleColumns((prev) => {
@@ -61,6 +100,91 @@ export default function SubmissionsPage({ formId }) {
     document.addEventListener('mousedown', handle);
     return () => document.removeEventListener('mousedown', handle);
   }, [showColPicker]);
+
+  useEffect(() => {
+    if (!gearOpen) return;
+    const handle = (e) => {
+      if (gearRef.current && !gearRef.current.contains(e.target)) {
+        setGearOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handle);
+    return () => document.removeEventListener('mousedown', handle);
+  }, [gearOpen]);
+
+  const rememberView = (saved) => {
+    const next = {
+      density: saved?.density || 'default',
+      reading_pane: saved?.reading_pane || 'right',
+      personal: !!saved?.personal,
+      site: saved?.site || view.site,
+    };
+    setView(next);
+    if (window.subtleformsAdmin) {
+      window.subtleformsAdmin.submissionsView = next;
+    }
+    if (next.reading_pane === 'off' && openId) {
+      const formQuery = searchParams.get('form_id');
+      navigate(`/submissions/${openId}${formQuery ? `?form_id=${formQuery}` : ''}`);
+    }
+  };
+
+  const saveView = async (patch) => {
+    const previous = view;
+    const choice = {
+      density: patch.density || view.density,
+      reading_pane: patch.reading_pane || view.reading_pane,
+    };
+    const leaving = choice.reading_pane === 'off' && openId;
+    if (!leaving) {
+      setView({ ...view, ...choice, personal: true });
+    }
+    setGearSaving(true);
+    setGearError('');
+    const { ok, body } = await apiPost('/settings/inbox-view', choice);
+    setGearSaving(false);
+    if (!ok) {
+      if (!leaving) {
+        setView(previous);
+      }
+      setGearError(body?.error?.message || __('The display options could not be saved.', 'subtleforms'));
+      return;
+    }
+    rememberView(body?.data);
+  };
+
+  const useSiteDefault = async () => {
+    setGearSaving(true);
+    setGearError('');
+    const { ok, body } = await apiPost('/settings/inbox-view', { reset: true });
+    setGearSaving(false);
+    if (!ok) {
+      setGearError(body?.error?.message || __('The display options could not be saved.', 'subtleforms'));
+      return;
+    }
+    rememberView(body?.data);
+  };
+
+  const selectEntry = (id) => {
+    setOpenId(id);
+    const next = new URLSearchParams(searchParams);
+    next.set('submission_id', String(id));
+    setSearchParams(next, { replace: true });
+  };
+
+  const closePane = () => {
+    setOpenId(null);
+    const next = new URLSearchParams(searchParams);
+    next.delete('submission_id');
+    setSearchParams(next, { replace: true });
+  };
+
+  const browseEntry = async (direction) => {
+    const result = await submissionsTableRef.current?.step?.(openId, direction);
+    if (result?.id) {
+      selectEntry(result.id);
+    }
+  };
 
   const { data: formsData = [] } = useForms({}, { enabled: !formId });
 
@@ -243,20 +367,96 @@ export default function SubmissionsPage({ formId }) {
         'Every entry from every form. Open one to read it, reply, or see what happened after it was sent.',
         'subtleforms'
       )}
+      noScroll={split}
       actions={
-        <Button
-          variant='secondary'
-          onClick={() => requirePro('submissions.export', exportSubmissions)}
-          disabled={exporting}
-          icon={!canExport && !exporting ? <Icon.Lock size={14} /> : <Icon.DownloadCloud size={16} />}
-          className={!canExport && !exporting ? 'sf-export-btn--locked' : undefined}>
-          {exporting
-            ? __('Exporting…', 'subtleforms')
-            : __('Export CSV', 'subtleforms')}
-          {!canExport && !exporting && (
-            <span className='sf-pro-tag'>{__('Pro', 'subtleforms')}</span>
-          )}
-        </Button>
+        <>
+          <Button
+            variant='secondary'
+            onClick={() => requirePro('submissions.export', exportSubmissions)}
+            disabled={exporting}
+            icon={!canExport && !exporting ? <Icon.Lock size={14} /> : <Icon.DownloadCloud size={16} />}
+            className={!canExport && !exporting ? 'sf-export-btn--locked' : undefined}>
+            {exporting
+              ? __('Exporting…', 'subtleforms')
+              : __('Export CSV', 'subtleforms')}
+            {!canExport && !exporting && (
+              <span className='sf-pro-tag'>{__('Pro', 'subtleforms')}</span>
+            )}
+          </Button>
+          <div className='sf-sub-gear' ref={gearRef}>
+            <Button
+              variant='secondary'
+              className='sf-sub-gear__toggle'
+              icon={<Icon.Settings size={16} />}
+              label={__('Display options', 'subtleforms')}
+              showTooltip
+              aria-expanded={gearOpen}
+              onClick={() => setGearOpen((open) => !open)}
+            />
+            {gearOpen && (
+              <div className='sf-sub-gear__panel'>
+                <p className='sf-sub-gear__label' id='sf-density-label'>
+                  {__('Density', 'subtleforms')}
+                </p>
+                <div className='sf-sub-gear__choices' role='radiogroup' aria-labelledby='sf-density-label'>
+                  {[
+                    ['comfortable', __('Comfortable', 'subtleforms')],
+                    ['default', __('Default', 'subtleforms')],
+                    ['compact', __('Compact', 'subtleforms')],
+                  ].map(([value, label]) => (
+                    <button
+                      key={value}
+                      type='button'
+                      role='radio'
+                      aria-checked={view.density === value}
+                      className={`sf-sub-gear__choice${view.density === value ? ' is-selected' : ''}`}
+                      disabled={gearSaving}
+                      onClick={() => saveView({ density: value })}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+                <p className='sf-sub-gear__label' id='sf-pane-label'>
+                  {__('Reading pane', 'subtleforms')}
+                </p>
+                <div className='sf-sub-gear__radios' role='radiogroup' aria-labelledby='sf-pane-label'>
+                  {[
+                    ['right', __('Right of inbox', 'subtleforms')],
+                    ['below', __('Below inbox', 'subtleforms')],
+                    ['off', __('No split', 'subtleforms')],
+                  ].map(([value, label]) => (
+                    <label key={value} className='sf-sub-gear__radio'>
+                      <input
+                        type='radio'
+                        name='sf-reading-pane'
+                        value={value}
+                        checked={view.reading_pane === value}
+                        disabled={gearSaving}
+                        onChange={() => saveView({ reading_pane: value })}
+                      />
+                      <span>{label}</span>
+                    </label>
+                  ))}
+                </div>
+                {view.personal && (
+                  <Button
+                    variant='link'
+                    className='sf-sub-gear__reset'
+                    disabled={gearSaving}
+                    onClick={useSiteDefault}>
+                    {__('Use site default', 'subtleforms')}
+                  </Button>
+                )}
+                <p className='sf-sub-gear__note'>
+                  {view.personal
+                    ? __('Saved for your account. Site defaults are in Settings → General.', 'subtleforms')
+                    : __('Using the site default. A choice here is saved for your account.', 'subtleforms')}
+                </p>
+                {gearError && <p className='sf-sub-gear__error'>{gearError}</p>}
+              </div>
+            )}
+          </div>
+        </>
       }
       actionBarLeft={
         <TabBar
@@ -371,17 +571,60 @@ export default function SubmissionsPage({ formId }) {
         </div>
       )}
 
-      <SubmissionsTable
-        ref={submissionsTableRef}
-        formId={selectedFormId !== 'all' ? parseInt(selectedFormId) : formId}
-        showFormColumn={!formId && selectedFormId === 'all'}
-        searchTerm={debouncedSearch}
-        statusFilter={statusFilter}
-        dateRange={dateRange}
-        fieldValue={debouncedFieldValue}
-        processingStatus={processingStatus}
-        visibleColumns={visibleColumns}
-      />
+      <div className={`sf-inbox sf-inbox--${view.reading_pane}${openId ? ' is-open' : ''}`}>
+        <div className='sf-inbox__list'>
+          <SubmissionsTable
+            ref={submissionsTableRef}
+            formId={selectedFormId !== 'all' ? parseInt(selectedFormId) : formId}
+            showFormColumn={!formId && selectedFormId === 'all'}
+            searchTerm={debouncedSearch}
+            statusFilter={statusFilter}
+            dateRange={dateRange}
+            fieldValue={debouncedFieldValue}
+            processingStatus={processingStatus}
+            visibleColumns={visibleColumns}
+            density={view.density}
+            readingId={split ? openId : null}
+            onNeighbors={split ? onNeighbors : null}
+            onRowClick={(submission) => {
+              if (!split) {
+                const formQuery = searchParams.get('form_id');
+                navigate(
+                  `/submissions/${submission.id}${formQuery ? `?form_id=${formQuery}` : ''}`
+                );
+                return;
+              }
+              selectEntry(submission.id);
+            }}
+          />
+        </div>
+        {split && (
+          <aside className='sf-inbox__pane' aria-hidden={!openId}>
+            {openId ? (
+              <Suspense
+                fallback={
+                  <div className='sf-inbox-entry sf-inbox-entry--state' role='status'>
+                    {__('Loading submission…', 'subtleforms')}
+                  </div>
+                }>
+                <SubmissionDetailPage
+                  embedded
+                  submissionId={openId}
+                  formId={selectedFormId !== 'all' ? parseInt(selectedFormId, 10) : formId}
+                  onBack={closePane}
+                  onEntryChanged={() => submissionsTableRef.current?.removeEntry?.(openId)}
+                  onBrowse={{
+                    hasPrev: neighbors.hasPrev,
+                    hasNext: neighbors.hasNext,
+                    onPrev: () => browseEntry('prev'),
+                    onNext: () => browseEntry('next'),
+                  }}
+                />
+              </Suspense>
+            ) : null}
+          </aside>
+        )}
+      </div>
 
 
     </AdminShell>
