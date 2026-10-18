@@ -45,6 +45,15 @@ final class TransferService {
 	public function exportForms( array $ids ): array {
 		$ids = array_values( array_filter( array_map( 'intval', $ids ) ) );
 		if ( ! $ids ) {
+			if ( $this->forms->count() > TransferPackage::MAX_FORMS ) {
+				return array(
+					'error' => sprintf(
+						/* translators: %d: maximum number of forms */
+						__( 'Export up to %d forms at a time. Select the ones you want.', 'subtleforms' ),
+						TransferPackage::MAX_FORMS
+					),
+				);
+			}
 			$rows = $this->forms->all(
 				array(
 					'limit'   => TransferPackage::MAX_FORMS,
@@ -53,8 +62,15 @@ final class TransferService {
 				)
 			);
 			$ids = array_map( 'intval', array_column( (array) $rows, 'id' ) );
+		} elseif ( count( $ids ) > TransferPackage::MAX_FORMS ) {
+			return array(
+				'error' => sprintf(
+					/* translators: %d: maximum number of forms */
+					__( 'Export up to %d forms at a time. Select the ones you want.', 'subtleforms' ),
+					TransferPackage::MAX_FORMS
+				),
+			);
 		}
-		$ids   = array_slice( $ids, 0, TransferPackage::MAX_FORMS );
 		$forms = array();
 		foreach ( $ids as $id ) {
 			$form = $this->forms->find( $id );
@@ -200,17 +216,19 @@ final class TransferService {
 		if ( ! is_array( $form ) ) {
 			return TransferPackage::submissions( array( 'id' => $formId, 'title' => '' ), array() );
 		}
-		$secrets = array();
-		try {
-			$loaded  = $this->forms->loadSchemaVersion( $formId );
-			$schema  = is_array( $loaded ) ? ( $loaded['schema'] ?? array() ) : array();
-			$secrets = EntryValues::secretKeys( is_array( $schema ) ? $schema : array() );
-		} catch ( \Throwable $e ) {
-			$secrets = array();
+		if ( $this->submissions->count( array( 'form_id' => $formId ) ) > TransferPackage::MAX_SUBMISSIONS ) {
+			return array(
+				'error' => sprintf(
+					/* translators: %d: maximum number of submissions */
+					__( 'This form has more than %d submissions, so nothing was exported.', 'subtleforms' ),
+					TransferPackage::MAX_SUBMISSIONS
+				),
+			);
 		}
-		$rows   = array();
-		$offset = 0;
-		while ( count( $rows ) < TransferPackage::MAX_SUBMISSIONS ) {
+		$secrets = $this->secretKeysByVersion( $formId );
+		$rows    = array();
+		$offset  = 0;
+		while ( count( $rows ) <= TransferPackage::MAX_SUBMISSIONS ) {
 			$batch = $this->submissions->findByForm(
 				$formId,
 				array(
@@ -225,19 +243,29 @@ final class TransferService {
 			}
 			foreach ( $batch as $row ) {
 				$payload = is_array( $row['payload'] ?? null ) ? $row['payload'] : array();
+				$version = (int) ( $row['schema_version'] ?? 0 );
+				$keys    = $secrets[ $version ] ?? $secrets[0];
 				$rows[]  = array(
-					'status'     => TransferPackage::status( (string) ( $row['status'] ?? 'unread' ) ),
+					'status'     => (string) ( $row['status'] ?? 'unread' ),
+					'is_read'    => empty( $row['is_read'] ) ? 0 : 1,
+					'starred'    => empty( $row['starred'] ) ? 0 : 1,
 					'created_at' => (string) ( $row['created_at'] ?? '' ),
-					'payload'    => TransferPackage::withoutSecrets( $payload, $secrets ),
+					'payload'    => TransferPackage::withoutSecrets( $payload, $keys ),
 				);
-				if ( count( $rows ) >= TransferPackage::MAX_SUBMISSIONS ) {
-					break;
-				}
 			}
 			$offset += 200;
 			if ( count( $batch ) < 200 ) {
 				break;
 			}
+		}
+		if ( count( $rows ) > TransferPackage::MAX_SUBMISSIONS ) {
+			return array(
+				'error' => sprintf(
+					/* translators: %d: maximum number of submissions */
+					__( 'This form has more than %d submissions, so nothing was exported.', 'subtleforms' ),
+					TransferPackage::MAX_SUBMISSIONS
+				),
+			);
 		}
 		return TransferPackage::submissions(
 			array(
@@ -283,10 +311,19 @@ final class TransferService {
 			} catch ( \Throwable $e ) {
 				continue;
 			}
+			if ( ! empty( $row['is_read'] ) || ! empty( $row['starred'] ) ) {
+				$this->submissions->update(
+					$id,
+					array(
+						'is_read' => empty( $row['is_read'] ) ? 0 : 1,
+						'starred' => empty( $row['starred'] ) ? 0 : 1,
+					)
+				);
+			}
 			if ( $row['created_at'] !== '' ) {
 				$this->submissions->setCreatedAt( $id, $row['created_at'] );
 			}
-			if ( in_array( $row['status'], array( 'unread', 'read', 'completed', 'saved', 'flagged' ), true ) ) {
+			if ( in_array( $row['status'], \SubtleForms\Analytics\Stats::COUNTED_STATUSES, true ) ) {
 				$day = $row['created_at'] !== '' ? substr( $row['created_at'], 0, 10 ) : '';
 				try {
 					Stats::increment( $formId, 'submissions', $day );
@@ -300,5 +337,42 @@ final class TransferService {
 			'imported' => $imported,
 			'error'    => '',
 		);
+	}
+
+	/**
+	 * Password field keys for each schema version. Key 0 is every version combined.
+	 *
+	 * @param int $formId Form id.
+	 * @return array<int, string[]>
+	 */
+	private function secretKeysByVersion( int $formId ): array {
+		$by    = array();
+		$union = array();
+		try {
+			$versions = $this->forms->getSchemaVersions( $formId );
+		} catch ( \Throwable $e ) {
+			$versions = array();
+		}
+		if ( ! $versions ) {
+			$versions = array( array( 'version' => 0 ) );
+		}
+		foreach ( $versions as $version ) {
+			$number = (int) ( $version['version'] ?? 0 );
+			try {
+				$loaded = $number > 0
+					? $this->forms->loadSchemaVersion( $formId, $number )
+					: $this->forms->loadSchemaVersion( $formId );
+			} catch ( \Throwable $e ) {
+				continue;
+			}
+			$schema = is_array( $loaded ) ? ( $loaded['schema'] ?? array() ) : array();
+			$keys   = EntryValues::secretKeys( is_array( $schema ) ? $schema : array() );
+			if ( $number > 0 ) {
+				$by[ $number ] = $keys;
+			}
+			$union = array_merge( $union, $keys );
+		}
+		$by[0] = array_values( array_unique( $union ) );
+		return $by;
 	}
 }

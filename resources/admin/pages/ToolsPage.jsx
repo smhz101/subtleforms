@@ -239,7 +239,7 @@ function Transfer( { forms, busy, setBusy, tell } ) {
             </li>
           ) ) }
         </ul>
-        <p className='sf-tools__hint'>{ __( 'Leave them all unticked to export every form.', 'subtleforms' ) }</p>
+        <p className='sf-tools__hint'>{ __( 'Leave them all unticked to export every form. More than 100 must be exported in groups.', 'subtleforms' ) }</p>
         <div className='sf-tools__actions'>
           <Button variant='primary' disabled={ busy } onClick={ exportForms }>{ __( 'Export forms', 'subtleforms' ) }</Button>
           <label className='sf-tools__file'>
@@ -256,7 +256,7 @@ function Transfer( { forms, busy, setBusy, tell } ) {
       </section>
       <section>
         <h2>{ __( 'Submissions', 'subtleforms' ) }</h2>
-        <p>{ __( 'JSON import and export move entries between SubtleForms sites. Passwords are left out. CSV export is part of Pro.', 'subtleforms' ) }</p>
+        <p>{ __( 'JSON import and export move entries between SubtleForms sites. Passwords are left out, and read and starred state is kept. A form with more than 2,000 submissions is not exported in part. CSV export is part of Pro.', 'subtleforms' ) }</p>
         <SelectControl
           label={ __( 'Form', 'subtleforms' ) }
           value={ target }

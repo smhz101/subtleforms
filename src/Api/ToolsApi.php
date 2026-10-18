@@ -147,9 +147,13 @@ final class ToolsApi {
 	 * @return WP_REST_Response
 	 */
 	public function exportForms( WP_REST_Request $request ): WP_REST_Response {
-		$raw = (string) $request->get_param( 'ids' );
-		$ids = $raw === '' ? array() : array_map( 'intval', explode( ',', $raw ) );
-		return ApiResponse::success( $this->transfer->exportForms( $ids ) );
+		$raw     = (string) $request->get_param( 'ids' );
+		$ids     = $raw === '' ? array() : array_map( 'intval', explode( ',', $raw ) );
+		$package = $this->transfer->exportForms( $ids );
+		if ( isset( $package['error'] ) ) {
+			return ApiResponse::validation_error( $package['error'] );
+		}
+		return ApiResponse::success( $package );
 	}
 
 	/**
@@ -177,7 +181,11 @@ final class ToolsApi {
 		if ( $formId <= 0 ) {
 			return ApiResponse::validation_error( __( 'Choose a form to export.', 'subtleforms' ) );
 		}
-		return ApiResponse::success( $this->transfer->exportSubmissions( $formId ) );
+		$package = $this->transfer->exportSubmissions( $formId );
+		if ( isset( $package['error'] ) ) {
+			return ApiResponse::validation_error( $package['error'] );
+		}
+		return ApiResponse::success( $package );
 	}
 
 	/**

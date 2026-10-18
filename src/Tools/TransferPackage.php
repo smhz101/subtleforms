@@ -150,8 +150,14 @@ final class TransferPackage {
 			if ( ! is_array( $row ) || ! is_array( $row['payload'] ?? null ) ) {
 				continue;
 			}
+			$raw_status = (string) ( $row['status'] ?? 'unread' );
+			if ( 'trash' === $raw_status ) {
+				continue;
+			}
 			$clean[] = array(
-				'status'     => self::status( (string) ( $row['status'] ?? 'unread' ) ),
+				'status'     => self::status( $raw_status ),
+				'is_read'    => empty( $row['is_read'] ) ? 0 : 1,
+				'starred'    => empty( $row['starred'] ) ? 0 : 1,
 				'created_at' => self::timestamp( (string) ( $row['created_at'] ?? '' ) ),
 				'payload'    => $row['payload'],
 			);
@@ -205,7 +211,7 @@ final class TransferPackage {
 	 * @return string
 	 */
 	public static function status( string $status ): string {
-		$allowed = array( 'unread', 'read', 'completed', 'saved', 'flagged', 'payment_pending' );
+		$allowed = array( 'unread', 'read', 'completed', 'saved', 'flagged', 'payment_pending', 'spam', 'failed', 'processing' );
 		return in_array( $status, $allowed, true ) ? $status : 'unread';
 	}
 

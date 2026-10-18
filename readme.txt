@@ -54,7 +54,7 @@ SubtleForms is a form builder for WordPress. You build forms on a canvas that lo
 
 = Tools and reports =
 
-* Export and import SubtleForms forms and submissions as JSON. Passwords are left out
+* Export and import SubtleForms forms and submissions as JSON, up to 100 forms and 2,000 submissions at a time. Passwords are left out, and read or starred state is kept
 * Import a Gravity Forms or Fluent Forms export. New forms are drafts, and payments, quizzes and add-ons are skipped
 * Activity, webhook and API logs
 * Submission totals and a chart of the last 7 days. Views, conversion and the per-form report are part of SubtleForms Pro

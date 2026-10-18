@@ -145,4 +145,43 @@ final class FormMigrationTest extends TestCase {
 		$this->assertSame( array(), $read['forms'] );
 		$this->assertNotSame( '', $read['error'] );
 	}
+
+	public function test_submission_package_keeps_inbox_state_and_skips_trash(): void {
+		$package = TransferPackage::submissions(
+			array( 'id' => 4, 'title' => 'Join' ),
+			array(
+				array(
+					'status'     => 'spam',
+					'is_read'    => 1,
+					'starred'    => 1,
+					'created_at' => '2026-10-01 12:00:00',
+					'payload'    => array( 'email' => 'a@b.co' ),
+				),
+				array(
+					'status'     => 'processing',
+					'created_at' => '2026-10-02 12:00:00',
+					'payload'    => array( 'email' => 'b@b.co' ),
+				),
+				array(
+					'status'     => 'trash',
+					'created_at' => '2026-10-03 12:00:00',
+					'payload'    => array( 'email' => 'c@b.co' ),
+				),
+				array(
+					'status'     => 'made-up',
+					'created_at' => '2026-10-04 12:00:00',
+					'payload'    => array( 'email' => 'd@b.co' ),
+				),
+			)
+		);
+		$read = TransferPackage::readSubmissions( $package );
+		$this->assertSame( '', $read['error'] );
+		$this->assertCount( 3, $read['submissions'] );
+		$this->assertSame( 'spam', $read['submissions'][0]['status'] );
+		$this->assertSame( 1, $read['submissions'][0]['is_read'] );
+		$this->assertSame( 1, $read['submissions'][0]['starred'] );
+		$this->assertSame( 'processing', $read['submissions'][1]['status'] );
+		$this->assertSame( 0, $read['submissions'][1]['starred'] );
+		$this->assertSame( 'unread', $read['submissions'][2]['status'] );
+	}
 }
