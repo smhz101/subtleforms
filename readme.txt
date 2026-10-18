@@ -4,7 +4,7 @@ Tags: forms, contact form, form builder, submissions
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.3.5
+Stable tag: 2.3.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -51,6 +51,13 @@ SubtleForms is a form builder for WordPress. You build forms on a canvas that lo
 * Honeypot and minimum time checks on every form, plus rate limiting
 * Google reCAPTCHA (v2 and v3), hCaptcha and Cloudflare Turnstile
 * Data retention settings and the WordPress personal data export and erase tools
+
+= Tools and reports =
+
+* Export and import SubtleForms forms and submissions as JSON. Passwords are left out
+* Import a Gravity Forms or Fluent Forms export. New forms are drafts, and payments, quizzes and add-ons are skipped
+* Activity, webhook and API logs
+* Submission totals and a chart of the last 7 days. Views, conversion and the per-form report are part of SubtleForms Pro
 
 = SubtleForms Pro =
 
@@ -111,7 +118,7 @@ SubtleForms includes multiple spam prevention layers:
 
 = Can I export submissions? =
 
-CSV export is part of SubtleForms Pro. In the free plugin you can read, search, filter and delete entries in SubtleForms > Submissions. Deleted entries go to the Trash for 30 days (configurable) before they are removed. In CSV exports a Repeater has one column per child field and each group is one line inside the cell, in the same order in every column.
+CSV export is part of SubtleForms Pro. JSON export and import of forms and submissions is free, under SubtleForms > Tools. In the free plugin you can also read, search, filter and delete entries in SubtleForms > Submissions. Deleted entries go to the Trash for 30 days (configurable) before they are removed. In CSV exports a Repeater has one column per child field and each group is one line inside the cell, in the same order in every column.
 
 = Is this plugin GDPR compliant? =
 
@@ -159,6 +166,11 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 7. Conversational form on frontend
 
 == Changelog ==
+
+= 2.3.6 - 2026-10-18 =
+* New: Tools exports and imports SubtleForms forms and submissions as JSON, and imports Gravity Forms and Fluent Forms exports as drafts. Payments, quizzes and add-ons are skipped and listed.
+* New: Tools shows activity logs, webhook calls and a 30-day log of SubtleForms REST calls. Request and response bodies are not stored in the API log.
+* New: Reports shows how many forms, submissions and unread entries you have, and submissions for the last 7 days. Views and conversion stay in SubtleForms Pro.
 
 = 2.3.5 - 2026-10-18 =
 * New: Appearance can inherit the active theme. The preset and the custom controls use the theme's type, colours and content width, and a custom value still overrides the theme.
@@ -400,6 +412,9 @@ now be reconstructed accurately.
 * Feature: Basic spam protection
 
 == Upgrade Notice ==
+
+= 2.3.6 =
+Tools can move forms and submissions as JSON and import Gravity Forms or Fluent Forms. Reports shows submission totals. Views and conversion stay in Pro.
 
 = 2.3.5 =
 Appearance can inherit the theme, preview sizes follow the theme, and inline layout no longer crushes the form.
