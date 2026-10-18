@@ -734,6 +734,32 @@
 	border: 1px solid var(--sf-border);
 	border-radius: var(--sf-radius-md);
 	background: var(--sf-bg-subtle);
+
+	&.is-current {
+		border-color: var(--sf-primary, #2271b1);
+		background: var(--sf-bg-surface);
+	}
+}
+
+.sf-chained-modal__step {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex-shrink: 0;
+	width: 22px;
+	height: 22px;
+	border-radius: var(--sf-radius-sm);
+	background: var(--sf-bg-surface);
+	color: var(--sf-text);
+	font-size: var(--sf-text-xs);
+	font-weight: 600;
+}
+
+.sf-chained-modal__when {
+	margin: 0;
+	font-size: var(--sf-text-xs);
+	line-height: 1.4;
+	color: var(--sf-text-muted);
 }
 
 .sf-chained-modal__column-head,

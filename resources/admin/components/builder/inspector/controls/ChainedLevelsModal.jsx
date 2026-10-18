@@ -60,18 +60,23 @@ function choiceByValue(level, value) {
  * see, and the next column only lists choices for the selected parent.
  */
 export default function ChainedLevelsModal({ levels, onChange, onClose, disabled }) {
-	const [path, setPath] = useState(() => firstPath(levels));
+	const initialPath = firstPath(levels);
+	const [path, setPath] = useState(initialPath);
+	const [activeDepth, setActiveDepth] = useState(Math.max(0, initialPath.length - 1));
 	const [paste, setPaste] = useState('');
 	const shown = activePath(levels, path);
-	const focusDepth = Math.min(shown.length, Math.max(levels.length - 1, 0));
+	const columnDepth = Math.min(activeDepth, Math.max(levels.length - 1, 0));
 
 	const commit = (next, nextPath) => {
+		const resolved = nextPath || firstPath(next);
 		onChange(next);
-		setPath(nextPath || firstPath(next));
+		setPath(resolved);
+		setActiveDepth(resolved.length ? Math.min(resolved.length, next.length) - 1 : 0);
 	};
 
 	const select = (depth, value) => {
 		setPath([...shown.slice(0, depth), value]);
+		setActiveDepth(Math.min(depth + 1, Math.max(levels.length - 1, 0)));
 	};
 
 	const help = (() => {
@@ -81,14 +86,14 @@ export default function ChainedLevelsModal({ levels, onChange, onClose, disabled
 				'subtleforms'
 			);
 		}
-		if (focusDepth === 0) {
+		if (columnDepth === 0) {
 			return __(
 				'These choices are always shown. The next dropdown only lists choices that belong to the one selected here.',
 				'subtleforms'
 			);
 		}
-		const parentLevel = levels[focusDepth - 1];
-		const parent = choiceByValue(parentLevel, shown[focusDepth - 1]);
+		const parentLevel = levels[columnDepth - 1];
+		const parent = choiceByValue(parentLevel, shown[columnDepth - 1]);
 		if (!parent) {
 			return sprintf(
 				/* translators: %s: previous dropdown name, e.g. Country */
@@ -124,8 +129,27 @@ export default function ChainedLevelsModal({ levels, onChange, onClose, disabled
 							const parentReady = depth === 0 || Boolean(parentValue);
 							const options = choicesForParent(levels, depth, parentValue);
 							const selected = shown[depth];
+							const parentChoice = depth === 0 ? null : choiceByValue(levels[depth - 1], parentValue);
+							const caption =
+								depth === 0
+									? __('Always shown', 'subtleforms')
+									: parentChoice
+										? sprintf(
+												/* translators: %s: selected choice in the previous dropdown */
+												__('Shown when %s is selected', 'subtleforms'),
+												parentChoice.label || parentChoice.value
+											)
+										: sprintf(
+												/* translators: %s: previous dropdown name */
+												__('Choose a %s first', 'subtleforms'),
+												levels[depth - 1]?.label || __('previous answer', 'subtleforms')
+											);
 							return (
-								<section key={depth} className="sf-chained-modal__column">
+								<section
+									key={depth}
+									className={clsx('sf-chained-modal__column', {
+										'is-current': depth === columnDepth,
+									})}>
 									<header className="sf-chained-modal__column-head">
 										<span className="sf-chained-modal__step">{depth + 1}</span>
 										<label className="sf-chained-modal__name">
@@ -143,17 +167,20 @@ export default function ChainedLevelsModal({ levels, onChange, onClose, disabled
 															? __('State', 'subtleforms')
 															: __('City', 'subtleforms')
 												}
+												onFocus={() => setActiveDepth(depth)}
 												onChange={(event) => onChange(setLevelLabel(levels, depth, event.target.value))}
 											/>
 										</label>
 									</header>
+									<p className="sf-chained-modal__when">{caption}</p>
 									<ul className="sf-chained-modal__choices">
 										{options.map((option) => (
 											<li
 												key={option.value}
 												className={clsx('sf-chained-modal__choice', {
 													'is-selected': option.value === selected,
-												})}>
+												})}
+												onClick={() => select(depth, option.value)}>
 												<input
 													type="text"
 													value={option.label}
@@ -169,12 +196,13 @@ export default function ChainedLevelsModal({ levels, onChange, onClose, disabled
 													label={__('Remove choice', 'subtleforms')}
 													size="small"
 													disabled={disabled}
-													onClick={() =>
-													commit(
-														removeChoice(levels, depth, option.value),
-														shown[depth] === option.value ? shown.slice(0, depth) : shown
-													)
-												}
+													onClick={(event) => {
+														event.stopPropagation();
+														commit(
+															removeChoice(levels, depth, option.value),
+															shown[depth] === option.value ? shown.slice(0, depth) : shown
+														);
+													}}
 												/>
 											</li>
 										))}
@@ -267,7 +295,7 @@ export default function ChainedLevelsModal({ levels, onChange, onClose, disabled
 								setPaste('');
 							}
 						}}>
-						{__('Replace dropdowns with this list', 'subtleforms')}
+						{__('Replace dropdowns', 'subtleforms')}
 					</Button>
 				</aside>
 			</div>
