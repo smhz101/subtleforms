@@ -623,36 +623,35 @@
 }
 
 
-// Chained select dropdown editor. Reuses the choices row so it matches
-// Dropdown, Radio and Checkbox settings.
+// Chained select. The inspector keeps a short summary. The lists are
+// edited in a modal, one column per dropdown.
 .sf-chained {
 	display: flex;
 	flex-direction: column;
 	gap: 12px;
 
 	&__intro,
-	&__empty,
-	&__hint {
+	&__empty {
 		margin: 0;
 		font-size: var(--sf-text-xs);
 		line-height: 1.45;
 		color: var(--sf-text-muted);
 	}
 
-	&__level {
+	&__summary {
+		margin: 0;
+		padding: 0;
+		list-style: none;
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
-		padding: 10px;
-		border: 1px solid var(--sf-border);
-		border-radius: var(--sf-radius-md);
-		background: var(--sf-bg-subtle);
-	}
+		gap: 6px;
 
-	&__level-head {
-		display: flex;
-		align-items: flex-end;
-		gap: 8px;
+		li {
+			display: flex;
+			align-items: center;
+			gap: 8px;
+			min-width: 0;
+		}
 	}
 
 	&__step {
@@ -660,53 +659,166 @@
 		align-items: center;
 		justify-content: center;
 		flex-shrink: 0;
-		width: 24px;
-		height: 32px;
+		width: 22px;
+		height: 22px;
 		border-radius: var(--sf-radius-sm);
-		background: var(--sf-bg-surface);
+		background: var(--sf-bg-subtle);
 		color: var(--sf-text);
 		font-size: var(--sf-text-xs);
 		font-weight: 600;
 	}
 
-	&__name {
-		display: flex;
-		flex-direction: column;
-		gap: 4px;
+	&__summary-name {
 		flex: 1 1 auto;
 		min-width: 0;
-	}
-
-	&__name-label {
-		font-size: var(--sf-text-xs);
-		font-weight: 600;
-		color: var(--sf-text);
-	}
-
-	&__inputs {
-		flex-wrap: wrap;
-	}
-
-	&__parent {
-		flex: 1 1 120px;
-		height: 32px;
-		min-height: 32px;
-		margin: 0;
-		padding: 0 8px;
-		border: 1px solid var(--sf-border);
-		border-radius: var(--sf-radius-control);
-		background: var(--sf-bg-surface);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
 		font-size: var(--sf-text-sm);
+		font-weight: 600;
 	}
 
-	&__actions {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		gap: 8px;
+	&__summary-count,
+	&__count {
+		flex-shrink: 0;
+		font-size: var(--sf-text-xs);
+		color: var(--sf-text-muted);
 	}
 
-	&__row {
-		align-items: flex-start;
+	&__count {
+		margin: 0;
 	}
+}
+
+.sf-chained-modal.components-modal__frame.has-size-large {
+	width: min(1080px, calc(100vw - 32px));
+	max-width: min(1080px, calc(100vw - 32px));
+	max-height: calc(100vh - 64px);
+}
+
+.sf-chained-modal__body {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 280px;
+	gap: 20px;
+	align-items: start;
+
+	@media (max-width: 782px) {
+		grid-template-columns: 1fr;
+	}
+}
+
+.sf-chained-modal__lead,
+.sf-chained-modal__help p,
+.sf-chained-modal__empty {
+	margin: 0;
+	font-size: var(--sf-text-sm);
+	line-height: 1.5;
+	color: var(--sf-text-muted);
+}
+
+.sf-chained-modal__columns {
+	display: flex;
+	gap: 12px;
+	margin-top: 12px;
+	overflow-x: auto;
+	padding-bottom: 4px;
+}
+
+.sf-chained-modal__column {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	flex: 1 0 220px;
+	min-height: 360px;
+	padding: 12px;
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius-md);
+	background: var(--sf-bg-subtle);
+}
+
+.sf-chained-modal__column-head,
+.sf-chained-modal__choice {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+
+.sf-chained-modal__name,
+.sf-chained-modal__choice input,
+.sf-chained-modal__paste {
+	width: 100%;
+	margin: 0;
+	padding: 6px 8px;
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius-control);
+	background: var(--sf-bg-surface);
+	color: var(--sf-text);
+	font-size: var(--sf-text-sm);
+}
+
+.sf-chained-modal__name {
+	min-width: 0;
+}
+
+.sf-chained-modal__choices {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	flex: 1 1 auto;
+}
+
+.sf-chained-modal__choice {
+	padding: 4px;
+	border-radius: var(--sf-radius-sm);
+
+	&.is-selected {
+		background: var(--sf-primary-50, #f0f6fc);
+		outline: 1px solid var(--sf-primary, #2271b1);
+	}
+
+	input {
+		min-width: 0;
+	}
+}
+
+.sf-chained-modal__column-foot {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.sf-chained-modal__add-level {
+	align-self: stretch;
+	flex: 0 0 160px;
+	min-height: 120px;
+	white-space: normal;
+}
+
+.sf-chained-modal__help {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 14px;
+	border-radius: var(--sf-radius-md);
+	background: var(--sf-bg-subtle);
+
+	h3 {
+		margin: 8px 0 0;
+		font-size: var(--sf-text-sm);
+		font-weight: 600;
+
+		&:first-child {
+			margin-top: 0;
+		}
+	}
+}
+
+.sf-chained-modal__paste {
+	min-height: 180px;
+	resize: vertical;
+	font-family: inherit;
 }
