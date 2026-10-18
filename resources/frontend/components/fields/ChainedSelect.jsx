@@ -63,6 +63,37 @@ export default function ChainedSelect( {
     onChange( nextChainedSelections( activeSelections, depth, newValue ) );
   };
 
+  const moveChoice = ( event, depth, choiceOptions, index ) => {
+    const previous = event.key === 'ArrowUp' || event.key === 'ArrowLeft';
+    const following = event.key === 'ArrowDown' || event.key === 'ArrowRight';
+    if ( ! previous && ! following && event.key !== 'Home' && event.key !== 'End' ) {
+      return;
+    }
+    event.preventDefault();
+    if ( disabled || choiceOptions.length === 0 ) {
+      return;
+    }
+    let target = index;
+    if ( event.key === 'Home' ) {
+      target = 0;
+    } else if ( event.key === 'End' ) {
+      target = choiceOptions.length - 1;
+    } else if ( previous ) {
+      target = ( index - 1 + choiceOptions.length ) % choiceOptions.length;
+    } else {
+      target = ( index + 1 ) % choiceOptions.length;
+    }
+    const choice = choiceOptions[ target ];
+    if ( ! choice ) {
+      return;
+    }
+    handleLevelChange( depth, choice.value );
+    const focusId = `${ depth === 0 ? inputId : `${ inputId }-${ depth }` }-${ target }`;
+    window.requestAnimationFrame( () => {
+      document.getElementById( focusId )?.focus();
+    } );
+  };
+
   if ( rows.length === 0 ) {
     return (
       <p className='subtleforms-chained-select__empty'>
@@ -122,23 +153,31 @@ export default function ChainedSelect( {
             <div
               className='subtleforms-chained-select__choices'
               role='radiogroup'
+              aria-orientation={ presentation === 'columns' ? 'vertical' : 'horizontal' }
               aria-labelledby={ `${ levelId }-label` }
               aria-required={ depth === 0 ? required : undefined }
               aria-invalid={ depth === 0 ? !! error : undefined }
               aria-describedby={ depth === 0 ? describedBy : undefined }
               aria-disabled={ presentation === 'columns' && options.length === 0 ? true : undefined }>
-              { options.map( ( opt ) => {
+              { options.map( ( opt, index ) => {
                 const isSelected = String( selected ) === String( opt.value );
+                const groupHasSelection = options.some(
+                  ( choice ) => String( selected ) === String( choice.value )
+                );
                 return (
                   <button
                     key={ opt.value }
+                    id={ `${ levelId }-${ index }` }
                     type='button'
+                    role='radio'
                     className={ clsx( 'subtleforms-chained-select__choice', {
                       'is-selected': isSelected,
                     } ) }
-                    aria-pressed={ isSelected }
+                    aria-checked={ isSelected }
+                    tabIndex={ isSelected || ( ! groupHasSelection && index === 0 ) ? 0 : -1 }
                     disabled={ disabled }
-                    onClick={ () => handleLevelChange( depth, opt.value ) }>
+                    onClick={ () => handleLevelChange( depth, opt.value ) }
+                    onKeyDown={ ( event ) => moveChoice( event, depth, options, index ) }>
                     <span>{ opt.label || opt.value }</span>
                   </button>
                 );

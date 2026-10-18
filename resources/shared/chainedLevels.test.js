@@ -40,6 +40,15 @@ describe('chained dropdown editing', () => {
     expect(choicesForParent(sample, 0, '').map((option) => option.value)).toEqual(['usa', 'pakistan']);
   });
 
+  test('a dropdown with no parent links keeps every choice', () => {
+    const legacy = [
+      { label: 'Group', options: [{ label: 'One', value: 'one' }] },
+      { label: 'Item', options: [{ label: 'Two', value: 'two' }, { label: 'Three', value: 'three' }] },
+    ];
+    expect(choicesForParent(legacy, 1, '').map((option) => option.value)).toEqual(['two', 'three']);
+    expect(choicesForParent(legacy, 1, 'one').map((option) => option.value)).toEqual(['two', 'three']);
+  });
+
   test('removing a parent removes the choices that depended on it', () => {
     const next = removeChoice(sample, 0, 'pakistan');
     expect(next[0].options.map((option) => option.value)).toEqual(['usa']);

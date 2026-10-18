@@ -237,6 +237,8 @@ describe('2.2.1 field fixes', () => {
     };
     const buttons = render(field);
     expect(buttons.container.querySelector('select')).toBeNull();
+    expect(buttons.container.querySelector('[role="radio"]')).not.toBeNull();
+    expect(buttons.container.querySelector('[aria-pressed]')).toBeNull();
     expect(buttons.container.textContent).toContain('Pakistan');
     expect(buttons.container.textContent).not.toContain('Punjab');
     buttons.unmount();

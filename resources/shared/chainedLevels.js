@@ -76,6 +76,11 @@ export function choicesForParent(levels, depth, parentValue) {
   if (depth <= 0) {
     return options;
   }
+  // Older lists never stored a parent. Keep every choice visible, matching the
+  // form, until the author links this dropdown to the one before it.
+  if (!options.some((option) => option && option.parent)) {
+    return options;
+  }
   if (parentValue == null || parentValue === '') {
     return [];
   }
