@@ -4,6 +4,10 @@ import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../../ui/Icon';
 import LogicEditor, { readLogic, countRules } from './LogicEditor';
 import ChainedLevelsControl from './inspector/controls/ChainedLevelsControl';
+import ChainedDisplayControl from './inspector/controls/ChainedDisplayControl';
+import ChainedSourceControl from './inspector/controls/ChainedSourceControl';
+import ChainedCsvControl from './inspector/controls/ChainedCsvControl';
+import { chainedUsesCsv } from '../../../shared/chainedLevels';
 import { isProFeature } from '../../utils/featureGate';
 import { useBuilder } from './context/BuilderContext';
 import { useConfig } from './context/ConfigContext';
@@ -305,11 +309,30 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
                 )}
                 {field.type === 'chained_select' && (
                   <PanelBody title={__('Dropdowns', 'subtleforms')} initialOpen>
-                    <ChainedLevelsControl
-                      value={field.levels}
-                      onChange={(levels) => handleUpdate({ levels })}
+                    <ChainedDisplayControl
+                      value={field.presentation}
+                      onChange={(presentation) => handleUpdate({ presentation })}
                       disabled={isReadOnly}
                     />
+                    <ChainedSourceControl
+                      field={field}
+                      onChange={handleUpdate}
+                      disabled={isReadOnly}
+                    />
+                    {chainedUsesCsv(field) ? (
+                      <ChainedCsvControl
+                        levels={field.levels}
+                        fileName={field.csvFileName}
+                        onChange={handleUpdate}
+                        disabled={isReadOnly}
+                      />
+                    ) : (
+                      <ChainedLevelsControl
+                        value={field.levels}
+                        onChange={(levels) => handleUpdate({ levels })}
+                        disabled={isReadOnly}
+                      />
+                    )}
                   </PanelBody>
                 )}
                 <AdvancedPanel

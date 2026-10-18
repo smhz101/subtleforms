@@ -4,7 +4,7 @@ Tags: forms, contact form, form builder, submissions
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.3.7
+Stable tag: 2.3.8
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -166,6 +166,11 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 7. Conversational form on frontend
 
 == Changelog ==
+
+= 2.3.8 - 2026-10-19 =
+* New: Dependent dropdowns open in a column editor. Each column is one dropdown, and choosing an item shows only what belongs to it.
+* New: On the form, a chained field can be dropdowns, buttons, or columns. Columns show every list at once. The first choice is selected, and a list with nothing for that choice stays empty.
+* New: Chained choices can be typed in, or replaced from a CSV file. An example file is there to download, and the current lists can be downloaded too.
 
 = 2.3.7 - 2026-10-18 =
 * New: The submissions list can open an entry beside or below the inbox. Previous and Next follow the current tab, search and filters, and the address keeps the open entry.
@@ -419,6 +424,9 @@ now be reconstructed accurately.
 * Feature: Basic spam protection
 
 == Upgrade Notice ==
+
+= 2.3.8 =
+Dependent dropdowns are edited as columns. On the form they can be dropdowns, buttons, or columns, and the lists can be typed in or loaded from a CSV file.
 
 = 2.3.7 =
 Submissions can open in a reading pane, with comfortable, default or compact rows. Each admin can keep their own choice. Hidden is in the field library for tracking values visitors do not see. Repeater has the field toolbar. A consent label can be longer than 255 characters.

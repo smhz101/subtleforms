@@ -2,22 +2,22 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: SubtleForms 2.3.7\n"
+"Project-Id-Version: SubtleForms 2.3.8\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/subtleforms\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-18T18:51:20+00:00\n"
+"POT-Creation-Date: 2026-10-18T21:16:40+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
 
 #. Plugin Name of the plugin
 #: subtleforms.php
-#: src/Admin/AdminMenu.php:575
-#: src/Admin/AdminMenu.php:1242
+#: src/Admin/AdminMenu.php:579
+#: src/Admin/AdminMenu.php:1246
 #: resources/admin/components/builder/CheckoutPanel.jsx:83
 #: resources/blocks/form/edit.jsx:238
 #: resources/blocks/form/edit.jsx:403
@@ -92,7 +92,7 @@ msgid "Add New Form"
 msgstr ""
 
 #: src/Admin/AdminMenu.php:192
-#: src/Fields/CoreFields.php:1287
+#: src/Fields/CoreFields.php:1274
 msgid "Add New"
 msgstr ""
 
@@ -116,7 +116,7 @@ msgstr ""
 
 #: src/Admin/AdminMenu.php:232
 #: src/Admin/AdminMenu.php:233
-#: src/Admin/AdminMenu.php:689
+#: src/Admin/AdminMenu.php:693
 #: resources/admin/app/AdminApp.jsx:178
 #: resources/admin/components/AppNav.jsx:60
 #: resources/admin/components/builder/FieldDock.jsx:26
@@ -141,7 +141,7 @@ msgstr ""
 #: src/Admin/AdminMenu.php:253
 #: resources/admin/app/AdminApp.jsx:176
 #: resources/admin/components/AppNav.jsx:76
-#: resources/admin/components/builder/FieldInspector.jsx:166
+#: resources/admin/components/builder/FieldInspector.jsx:170
 #: resources/admin/components/builder/layout/BuilderViewSwitcher.jsx:11
 #: resources/admin/pages/SettingsPage.jsx:150
 #: resources/admin/pages/SettingsPage.jsx:160
@@ -149,51 +149,51 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:393
+#: src/Admin/AdminMenu.php:397
 msgid "Are you sure you want to delete this item?"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:394
+#: src/Admin/AdminMenu.php:398
 #: src/Frontend/FrontendAssets.php:81
 msgid "An error occurred. Please try again."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:395
-#: src/Admin/AdminMenu.php:1094
+#: src/Admin/AdminMenu.php:399
+#: src/Admin/AdminMenu.php:1098
 msgid "Action completed successfully."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:654
+#: src/Admin/AdminMenu.php:658
 #: resources/admin/components/settings/extensions/WebhooksPanel.jsx:46
 #: resources/admin/pages/ToolsPage.jsx:16
 #: resources/admin/pages/ToolsPage.jsx:468
 msgid "Webhooks"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:655
+#: src/Admin/AdminMenu.php:659
 msgid "Send each entry as JSON to any URL, with retries and signed requests."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:659
+#: src/Admin/AdminMenu.php:663
 #: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:70
 msgid "Email Marketing"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:660
+#: src/Admin/AdminMenu.php:664
 msgid "Add people who fill in a form to Mailchimp, Brevo or Kit."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:664
+#: src/Admin/AdminMenu.php:668
 #: resources/admin/components/builder/IntegrationsPanel.jsx:344
 #: resources/admin/components/settings/extensions/CrmPanel.jsx:21
 msgid "CRM"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:665
+#: src/Admin/AdminMenu.php:669
 msgid "Create or update HubSpot contacts, or send contacts to Zapier or Make."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:669
+#: src/Admin/AdminMenu.php:673
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:259
 #: resources/admin/components/analytics/PerformanceCell.jsx:24
 #: resources/admin/components/builder/IntegrationsPanel.jsx:421
@@ -201,96 +201,96 @@ msgstr ""
 msgid "Analytics"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:670
+#: src/Admin/AdminMenu.php:674
 msgid "Views, submissions and conversion rate for every form."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:674
+#: src/Admin/AdminMenu.php:678
 #: resources/admin/components/settings/extensions/EcommercePanel.jsx:22
 msgid "WooCommerce"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:675
+#: src/Admin/AdminMenu.php:679
 msgid "Take form payments through the WooCommerce checkout and sell WooCommerce products from any form."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:679
+#: src/Admin/AdminMenu.php:683
 #: resources/admin/components/settings/extensions/PdfPanel.jsx:18
 msgid "Entry PDF"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:680
+#: src/Admin/AdminMenu.php:684
 msgid "Download any entry as a PDF and attach it to notification emails."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:684
+#: src/Admin/AdminMenu.php:688
 #: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:64
 msgid "Multilanguage"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:685
+#: src/Admin/AdminMenu.php:689
 msgid "Register form strings with WPML or Polylang for full translation support."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:690
+#: src/Admin/AdminMenu.php:694
 msgid "Accept Stripe or PayPal payments directly through your forms."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:822
+#: src/Admin/AdminMenu.php:826
 msgid "Security check failed."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:847
-#: src/Admin/AdminMenu.php:860
-#: src/Admin/AdminMenu.php:879
-#: src/Admin/AdminMenu.php:902
-#: src/Admin/AdminMenu.php:928
-#: src/Admin/AdminMenu.php:939
-#: src/Admin/AdminMenu.php:949
-#: src/Admin/AdminMenu.php:956
-#: src/Admin/AdminMenu.php:967
+#: src/Admin/AdminMenu.php:851
+#: src/Admin/AdminMenu.php:864
+#: src/Admin/AdminMenu.php:883
+#: src/Admin/AdminMenu.php:906
+#: src/Admin/AdminMenu.php:932
+#: src/Admin/AdminMenu.php:943
+#: src/Admin/AdminMenu.php:953
+#: src/Admin/AdminMenu.php:960
+#: src/Admin/AdminMenu.php:971
 msgid "You do not have permission to access this page."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:890
-#: src/Admin/AdminMenu.php:1022
+#: src/Admin/AdminMenu.php:894
+#: src/Admin/AdminMenu.php:1026
 #: src/Frontend/Shortcode.php:51
 msgid "Form not found."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:995
-#: src/Admin/AdminMenu.php:1017
-#: src/Admin/AdminMenu.php:1050
+#: src/Admin/AdminMenu.php:999
+#: src/Admin/AdminMenu.php:1021
+#: src/Admin/AdminMenu.php:1054
 #: src/Api/AnalyticsApi.php:130
 msgid "Invalid request."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1102
+#: src/Admin/AdminMenu.php:1106
 msgid "Coming Soon"
 msgstr ""
 
 #. translators: %s: Name of the interface being developed
-#: src/Admin/AdminMenu.php:1106
+#: src/Admin/AdminMenu.php:1110
 #, php-format
 msgid "The %s interface is under development."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1110
+#: src/Admin/AdminMenu.php:1114
 msgid "This is a placeholder. Template files will be created in the templates/admin/ directory."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1115
+#: src/Admin/AdminMenu.php:1119
 msgid "Your Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1119
-#: src/Fields/CoreFields.php:1171
-#: src/Fields/CoreFields.php:1199
-#: src/Fields/CoreFields.php:1368
+#: src/Admin/AdminMenu.php:1123
+#: src/Fields/CoreFields.php:1158
+#: src/Fields/CoreFields.php:1186
+#: src/Fields/CoreFields.php:1355
 msgid "Title"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1120
+#: src/Admin/AdminMenu.php:1124
 #: src/Api/SubmissionsApi.php:1047
 #: src/Privacy/PrivacyExporter.php:100
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:299
@@ -304,37 +304,37 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1121
+#: src/Admin/AdminMenu.php:1125
 msgid "Created"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1122
+#: src/Admin/AdminMenu.php:1126
 #: resources/admin/pages/PaymentsPage.jsx:509
 msgid "Actions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1147
+#: src/Admin/AdminMenu.php:1151
 #: resources/admin/components/builder/ContainerWrapper.jsx:77
-#: resources/admin/components/builder/FieldInspector.jsx:235
+#: resources/admin/components/builder/FieldInspector.jsx:239
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:54
 #: resources/admin/pages/PaymentsPage.jsx:576
 msgid "Delete"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1161
+#: src/Admin/AdminMenu.php:1165
 msgid "Total Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1165
+#: src/Admin/AdminMenu.php:1169
 msgid "Active Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1169
+#: src/Admin/AdminMenu.php:1173
 msgid "Total Submissions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1219
-#: src/Admin/AdminMenu.php:1224
+#: src/Admin/AdminMenu.php:1223
+#: src/Admin/AdminMenu.php:1228
 msgid "WordPress Admin"
 msgstr ""
 
@@ -965,28 +965,28 @@ msgstr ""
 #: src/Fields/CoreFields.php:520
 #: src/Fields/CoreFields.php:550
 #: src/Fields/CoreFields.php:601
-#: src/Fields/CoreFields.php:657
-#: src/Fields/CoreFields.php:705
-#: src/Fields/CoreFields.php:742
-#: src/Fields/CoreFields.php:769
-#: src/Fields/CoreFields.php:799
-#: src/Fields/CoreFields.php:827
-#: src/Fields/CoreFields.php:856
-#: src/Fields/CoreFields.php:887
-#: src/Fields/CoreFields.php:924
-#: src/Fields/CoreFields.php:949
-#: src/Fields/CoreFields.php:969
-#: src/Fields/CoreFields.php:993
-#: src/Fields/CoreFields.php:1015
-#: src/Fields/CoreFields.php:1042
-#: src/Fields/CoreFields.php:1222
-#: src/Fields/CoreFields.php:1336
-#: src/Fields/CoreFields.php:1402
-#: src/Fields/CoreFields.php:1442
-#: src/Fields/CoreFields.php:1598
-#: src/Fields/CoreFields.php:1658
-#: src/Fields/CoreFields.php:1728
-#: src/Fields/CoreFields.php:1764
+#: src/Fields/CoreFields.php:659
+#: src/Fields/CoreFields.php:692
+#: src/Fields/CoreFields.php:729
+#: src/Fields/CoreFields.php:756
+#: src/Fields/CoreFields.php:786
+#: src/Fields/CoreFields.php:814
+#: src/Fields/CoreFields.php:843
+#: src/Fields/CoreFields.php:874
+#: src/Fields/CoreFields.php:911
+#: src/Fields/CoreFields.php:936
+#: src/Fields/CoreFields.php:956
+#: src/Fields/CoreFields.php:980
+#: src/Fields/CoreFields.php:1002
+#: src/Fields/CoreFields.php:1029
+#: src/Fields/CoreFields.php:1209
+#: src/Fields/CoreFields.php:1323
+#: src/Fields/CoreFields.php:1389
+#: src/Fields/CoreFields.php:1429
+#: src/Fields/CoreFields.php:1585
+#: src/Fields/CoreFields.php:1645
+#: src/Fields/CoreFields.php:1715
+#: src/Fields/CoreFields.php:1751
 #: src/Fields/FieldSettings.php:271
 #: src/Fields/FieldSettings.php:546
 #: src/Fields/FieldsV2.php:58
@@ -1012,8 +1012,8 @@ msgstr ""
 #: src/Fields/CoreFields.php:525
 #: src/Fields/CoreFields.php:555
 #: src/Fields/CoreFields.php:606
-#: src/Fields/CoreFields.php:1603
-#: src/Fields/CoreFields.php:1733
+#: src/Fields/CoreFields.php:1590
+#: src/Fields/CoreFields.php:1720
 #: src/Fields/FieldSettings.php:283
 #: resources/admin/utils/saveErrors.js:25
 msgid "Placeholder"
@@ -1077,8 +1077,8 @@ msgid "Maximum Value"
 msgstr ""
 
 #: src/Fields/CoreFields.php:188
-#: src/Fields/CoreFields.php:902
-#: src/Fields/CoreFields.php:1620
+#: src/Fields/CoreFields.php:889
+#: src/Fields/CoreFields.php:1607
 msgid "Step size"
 msgstr ""
 
@@ -1232,8 +1232,7 @@ msgid "Select"
 msgstr ""
 
 #: src/Fields/CoreFields.php:585
-#: src/Fields/CoreFields.php:1453
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:144
+#: src/Fields/CoreFields.php:1440
 #: resources/admin/components/builder/utils/schemaTree.js:381
 #: resources/frontend/components/FieldRenderer.jsx:1186
 msgid "Country"
@@ -1267,167 +1266,156 @@ msgstr ""
 msgid "Chained Select"
 msgstr ""
 
-#: src/Fields/CoreFields.php:662
-#: resources/admin/components/builder/FieldInspector.jsx:307
+#: src/Fields/CoreFields.php:664
+#: resources/admin/components/builder/FieldInspector.jsx:311
+#: resources/admin/components/builder/inspector/controls/ChainedDisplayControl.jsx:8
 msgid "Dropdowns"
 msgstr ""
 
-#: src/Fields/CoreFields.php:664
+#: src/Fields/CoreFields.php:666
 msgid "Each dropdown appears after the one above it. A choice in a later dropdown is only offered when the visitor picks its parent."
 msgstr ""
 
-#: src/Fields/CoreFields.php:669
-msgid "Source"
-msgstr ""
-
-#: src/Fields/CoreFields.php:673
-msgid "Manual"
-msgstr ""
-
-#: src/Fields/CoreFields.php:677
-msgid "CSV"
-msgstr ""
-
-#: src/Fields/CoreFields.php:691
+#: src/Fields/CoreFields.php:678
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:110
 #: resources/admin/components/merge-tags/mergeTags.js:13
 #: resources/admin/pages/DashboardPage.jsx:557
 msgid "Date"
 msgstr ""
 
-#: src/Fields/CoreFields.php:710
+#: src/Fields/CoreFields.php:697
 msgid "Date Format"
 msgstr ""
 
-#: src/Fields/CoreFields.php:715
+#: src/Fields/CoreFields.php:702
 msgid "Min Date"
 msgstr ""
 
-#: src/Fields/CoreFields.php:720
+#: src/Fields/CoreFields.php:707
 msgid "Max Date"
 msgstr ""
 
-#: src/Fields/CoreFields.php:730
+#: src/Fields/CoreFields.php:717
 #: resources/admin/pages/SubmissionDetailPage.jsx:977
 #: resources/admin/pages/ToolsPage.jsx:578
 msgid "Time"
 msgstr ""
 
-#: src/Fields/CoreFields.php:747
+#: src/Fields/CoreFields.php:734
 msgid "Time Format"
 msgstr ""
 
-#: src/Fields/CoreFields.php:757
+#: src/Fields/CoreFields.php:744
 msgid "Date & Time"
 msgstr ""
 
-#: src/Fields/CoreFields.php:774
+#: src/Fields/CoreFields.php:761
 msgid "DateTime Format"
 msgstr ""
 
-#: src/Fields/CoreFields.php:786
+#: src/Fields/CoreFields.php:773
 msgid "Image Upload"
 msgstr ""
 
-#: src/Fields/CoreFields.php:804
-#: src/Fields/CoreFields.php:832
+#: src/Fields/CoreFields.php:791
+#: src/Fields/CoreFields.php:819
 msgid "Max Size (bytes)"
 msgstr ""
 
-#: src/Fields/CoreFields.php:814
+#: src/Fields/CoreFields.php:801
 msgid "File Upload"
 msgstr ""
 
-#: src/Fields/CoreFields.php:844
+#: src/Fields/CoreFields.php:831
 #: resources/admin/components/OnboardingWizard.jsx:125
 msgid "Rating"
 msgstr ""
 
-#: src/Fields/CoreFields.php:861
+#: src/Fields/CoreFields.php:848
 msgid "Max Rating"
 msgstr ""
 
-#: src/Fields/CoreFields.php:873
+#: src/Fields/CoreFields.php:860
 msgid "Range Slider"
 msgstr ""
 
-#: src/Fields/CoreFields.php:892
+#: src/Fields/CoreFields.php:879
 msgid "Minimum"
 msgstr ""
 
-#: src/Fields/CoreFields.php:897
+#: src/Fields/CoreFields.php:884
 msgid "Maximum"
 msgstr ""
 
-#: src/Fields/CoreFields.php:912
+#: src/Fields/CoreFields.php:899
 msgid "Color Picker"
 msgstr ""
 
-#: src/Fields/CoreFields.php:929
+#: src/Fields/CoreFields.php:916
 msgid "Default Color"
 msgstr ""
 
-#: src/Fields/CoreFields.php:939
+#: src/Fields/CoreFields.php:926
 msgid "Rich Text Input"
 msgstr ""
 
-#: src/Fields/CoreFields.php:959
+#: src/Fields/CoreFields.php:946
 msgid "Net Promoter Score"
 msgstr ""
 
-#: src/Fields/CoreFields.php:979
+#: src/Fields/CoreFields.php:966
 msgid "Checkbox Grid"
 msgstr ""
 
-#: src/Fields/CoreFields.php:986
+#: src/Fields/CoreFields.php:973
 msgid "Row 1"
 msgstr ""
 
-#: src/Fields/CoreFields.php:986
+#: src/Fields/CoreFields.php:973
 msgid "Row 2"
 msgstr ""
 
-#: src/Fields/CoreFields.php:987
+#: src/Fields/CoreFields.php:974
 msgid "Column 1"
 msgstr ""
 
-#: src/Fields/CoreFields.php:987
+#: src/Fields/CoreFields.php:974
 msgid "Column 2"
 msgstr ""
 
-#: src/Fields/CoreFields.php:987
+#: src/Fields/CoreFields.php:974
 msgid "Column 3"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1003
+#: src/Fields/CoreFields.php:990
 msgid "Dynamic Field"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1020
+#: src/Fields/CoreFields.php:1007
 msgid "Data Source"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1030
+#: src/Fields/CoreFields.php:1017
 msgid "Post Selection"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1047
+#: src/Fields/CoreFields.php:1034
 msgid "Post Type"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1057
+#: src/Fields/CoreFields.php:1044
 msgid "HTML"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1069
+#: src/Fields/CoreFields.php:1056
 msgid "HTML Content"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1079
+#: src/Fields/CoreFields.php:1066
 msgid "Hidden"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1091
+#: src/Fields/CoreFields.php:1078
 #: resources/admin/components/builder/ConditionEditor.jsx:108
 #: resources/admin/components/builder/inspector/panels/OptionsPanel.jsx:171
 #: resources/admin/components/builder/LogicEditor.jsx:317
@@ -1436,121 +1424,122 @@ msgstr ""
 msgid "Value"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1092
+#: src/Fields/CoreFields.php:1079
 msgid "Sent with the entry to notifications and integrations. Visitors never see it. Supports {user_email}, {user_name}, {date} and {get:param}."
 msgstr ""
 
-#: src/Fields/CoreFields.php:1109
+#: src/Fields/CoreFields.php:1096
 msgid "Disclaimer"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1124
+#: src/Fields/CoreFields.php:1111
 msgid "Disclaimer Text"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1129
-#: resources/admin/components/builder/FieldInspector.jsx:186
+#: src/Fields/CoreFields.php:1116
+#: resources/admin/components/builder/FieldInspector.jsx:190
 msgid "Style"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1132
+#: src/Fields/CoreFields.php:1119
 #: resources/admin/pages/ToolsPage.jsx:478
 msgid "Info"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1136
+#: src/Fields/CoreFields.php:1123
 #: resources/admin/pages/ToolsPage.jsx:479
 msgid "Warning"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1140
+#: src/Fields/CoreFields.php:1127
 msgid "Success"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1144
+#: src/Fields/CoreFields.php:1131
 #: resources/admin/templates/free/feedback.js:36
 msgid "Neutral"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1156
+#: src/Fields/CoreFields.php:1143
 #: resources/admin/components/builder/FieldRenderer.jsx:161
 msgid "Section Break"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1176
-#: src/Fields/CoreFields.php:1373
-#: src/Fields/CoreFields.php:1776
+#: src/Fields/CoreFields.php:1163
+#: src/Fields/CoreFields.php:1360
+#: src/Fields/CoreFields.php:1763
 #: resources/admin/components/builder/FormSettings.jsx:279
 #: resources/admin/modals/CreateFormModal.jsx:298
 #: resources/admin/pages/PaymentsPage.jsx:210
 msgid "Description"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1185
+#: src/Fields/CoreFields.php:1172
 msgid "Form Step"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1208
+#: src/Fields/CoreFields.php:1195
 msgid "Repeat Field"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1227
+#: src/Fields/CoreFields.php:1214
 msgid "Max Items"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1240
+#: src/Fields/CoreFields.php:1227
 msgid "Column"
 msgid_plural "Columns"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Fields/CoreFields.php:1256
-#: src/Fields/CoreFields.php:1311
-#: src/Fields/CoreFields.php:1341
+#: src/Fields/CoreFields.php:1243
+#: src/Fields/CoreFields.php:1298
+#: src/Fields/CoreFields.php:1328
 msgid "Spacing (px)"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1278
+#: src/Fields/CoreFields.php:1265
 #: resources/admin/components/builder/ContainerWrapper.jsx:48
 msgid "Repeat Container"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1296
+#: src/Fields/CoreFields.php:1283
 msgid "Min Repeats"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1301
+#: src/Fields/CoreFields.php:1288
 msgid "Max Repeats"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1306
+#: src/Fields/CoreFields.php:1293
 msgid "Button Label"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1320
-#: src/Fields/CoreFields.php:1327
+#: src/Fields/CoreFields.php:1307
+#: src/Fields/CoreFields.php:1314
 #: src/Fields/FieldSettings.php:67
 #: resources/admin/components/builder/ContainerRenderer.jsx:44
 #: resources/admin/components/builder/GroupRenderer.jsx:25
 msgid "Group"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1352
-#: src/Fields/CoreFields.php:1359
+#: src/Fields/CoreFields.php:1339
+#: src/Fields/CoreFields.php:1346
 #: resources/admin/components/builder/ContainerRenderer.jsx:38
-#: resources/admin/components/builder/FieldInspector.jsx:39
+#: resources/admin/components/builder/FieldInspector.jsx:43
 #: resources/admin/components/builder/FieldRenderer.jsx:612
 #: resources/admin/components/OnboardingWizard.jsx:565
 #: resources/frontend/components/StepNavigation.jsx:25
 msgid "Step"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1385
+#: src/Fields/CoreFields.php:1372
 #: src/Fields/FieldSettings.php:72
 #: src/Templates/FormTemplates.php:101
 #: src/Templates/FormTemplates.php:159
 #: resources/admin/components/builder/CheckoutPanel.jsx:19
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:177
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:168
 #: resources/admin/components/OnboardingWizard.jsx:79
 #: resources/admin/templates/free/contact.js:18
 #: resources/admin/templates/free/contact.js:106
@@ -1558,7 +1547,7 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1408
+#: src/Fields/CoreFields.php:1395
 #: src/Templates/FormTemplates.php:273
 #: src/Templates/FormTemplates.php:302
 #: src/Templates/FormTemplates.php:536
@@ -1570,7 +1559,7 @@ msgstr ""
 msgid "First Name"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1409
+#: src/Fields/CoreFields.php:1396
 #: src/Templates/FormTemplates.php:303
 #: resources/admin/components/builder/utils/schemaTree.js:373
 #: resources/admin/templates/pro/registration.js:99
@@ -1579,19 +1568,19 @@ msgstr ""
 msgid "Last Name"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1410
+#: src/Fields/CoreFields.php:1397
 #: resources/admin/components/builder/utils/schemaTree.js:372
 #: resources/frontend/components/FieldRenderer.jsx:1041
 #: resources/frontend/components/FieldRenderer.jsx:1051
 msgid "Middle Name"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1411
+#: src/Fields/CoreFields.php:1398
 #: src/Fields/FieldSettings.php:335
 msgid "Suffix"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1423
+#: src/Fields/CoreFields.php:1410
 #: src/Fields/FieldSettings.php:73
 #: resources/admin/components/builder/CheckoutPanel.jsx:23
 #: resources/admin/templates/pro/contact.js:37
@@ -1599,7 +1588,7 @@ msgstr ""
 msgid "Address"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1448
+#: src/Fields/CoreFields.php:1435
 #: resources/admin/components/builder/utils/schemaTree.js:376
 #: resources/admin/templates/pro/registration.js:304
 #: resources/frontend/components/FieldRenderer.jsx:1088
@@ -1607,13 +1596,13 @@ msgstr ""
 msgid "Street Address"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1449
+#: src/Fields/CoreFields.php:1436
 #: resources/admin/components/builder/utils/schemaTree.js:377
 #: resources/frontend/components/FieldRenderer.jsx:1107
 msgid "Street Address Line 2"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1450
+#: src/Fields/CoreFields.php:1437
 #: resources/admin/components/builder/utils/schemaTree.js:378
 #: resources/admin/templates/pro/registration.js:310
 #: resources/frontend/components/FieldRenderer.jsx:1129
@@ -1621,14 +1610,14 @@ msgstr ""
 msgid "City"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1451
+#: src/Fields/CoreFields.php:1438
 #: resources/admin/components/builder/utils/schemaTree.js:379
 #: resources/frontend/components/FieldRenderer.jsx:1148
 #: resources/frontend/components/FieldRenderer.jsx:1158
 msgid "State / Province"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1452
+#: src/Fields/CoreFields.php:1439
 #: resources/admin/components/builder/utils/schemaTree.js:380
 #: resources/admin/templates/pro/registration.js:322
 #: resources/frontend/components/FieldRenderer.jsx:1167
@@ -1636,155 +1625,155 @@ msgstr ""
 msgid "Postal Code"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1466
+#: src/Fields/CoreFields.php:1453
 msgid "reCaptcha"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1478
-#: src/Fields/CoreFields.php:1500
-#: src/Fields/CoreFields.php:1522
+#: src/Fields/CoreFields.php:1465
+#: src/Fields/CoreFields.php:1487
+#: src/Fields/CoreFields.php:1509
 #: resources/admin/components/settings/AdvancedSettings.jsx:181
 #: resources/admin/components/settings/AdvancedSettings.jsx:268
 #: resources/admin/components/settings/AdvancedSettings.jsx:358
 msgid "Site Key"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1488
+#: src/Fields/CoreFields.php:1475
 #: resources/admin/components/settings/AdvancedSettings.jsx:236
 msgid "hCaptcha"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1510
+#: src/Fields/CoreFields.php:1497
 msgid "Turnstile"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1532
+#: src/Fields/CoreFields.php:1519
 #: src/Fields/FieldSettings.php:75
 #: resources/admin/components/builder/FieldRenderer.jsx:584
 msgid "Action Hook"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1544
+#: src/Fields/CoreFields.php:1531
 msgid "Hook Name"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1555
+#: src/Fields/CoreFields.php:1542
 msgid "Save & Resume"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1567
+#: src/Fields/CoreFields.php:1554
 #: src/Fields/FieldsV2.php:72
 #: resources/admin/components/builder/ActionsPanel.jsx:293
 msgid "Enabled"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1580
+#: src/Fields/CoreFields.php:1567
 #: resources/admin/templates/pro/payment.js:47
 msgid "Payment Amount"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1608
+#: src/Fields/CoreFields.php:1595
 msgid "Minimum Amount"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1614
+#: src/Fields/CoreFields.php:1601
 msgid "Maximum Amount"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1627
+#: src/Fields/CoreFields.php:1614
 msgid "Show Currency Symbol"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1638
+#: src/Fields/CoreFields.php:1625
 msgid "Payment Summary"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1649
+#: src/Fields/CoreFields.php:1636
 #: resources/admin/components/builder/PaymentPreviews.jsx:102
 #: resources/frontend/components/fields/Payments.jsx:334
 msgid "Tax"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1652
+#: src/Fields/CoreFields.php:1639
 #: resources/admin/components/builder/PaymentPreviews.jsx:115
 #: resources/frontend/components/fields/Payments.jsx:352
 msgid "Have a coupon code?"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1663
+#: src/Fields/CoreFields.php:1650
 msgid "List each item"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1668
+#: src/Fields/CoreFields.php:1655
 msgid "Coupon box in the summary"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1669
+#: src/Fields/CoreFields.php:1656
 msgid "Lets visitors apply a code right where they see the total. Manage codes in SubtleForms › Payments."
 msgstr ""
 
-#: src/Fields/CoreFields.php:1674
+#: src/Fields/CoreFields.php:1661
 msgid "Coupon link text"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1679
+#: src/Fields/CoreFields.php:1666
 msgid "Tax label"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1684
+#: src/Fields/CoreFields.php:1671
 msgid "Show Subtotal"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1689
+#: src/Fields/CoreFields.php:1676
 msgid "Show Tax"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1694
+#: src/Fields/CoreFields.php:1681
 msgid "Tax Rate (%)"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1702
+#: src/Fields/CoreFields.php:1689
 msgid "Show Total"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1713
+#: src/Fields/CoreFields.php:1700
 msgid "Coupon Code"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1720
+#: src/Fields/CoreFields.php:1707
 #: resources/admin/components/builder/FieldRenderer.jsx:557
 msgid "Enter coupon code"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1721
+#: src/Fields/CoreFields.php:1708
 #: resources/admin/components/builder/FieldRenderer.jsx:567
 #: resources/admin/components/builder/inspector/panels/OptionsPanel.jsx:348
 #: resources/frontend/components/fields/Payments.jsx:224
 msgid "Apply"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1738
+#: src/Fields/CoreFields.php:1725
 msgid "Button Text"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1749
+#: src/Fields/CoreFields.php:1736
 msgid "Hidden Price"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1765
+#: src/Fields/CoreFields.php:1752
 msgid "Internal label for reference"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1770
+#: src/Fields/CoreFields.php:1757
 #: resources/admin/components/OnboardingWizard.jsx:150
 msgid "Amount"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1777
+#: src/Fields/CoreFields.php:1764
 msgid "Optional description for debugging"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1797
+#: src/Fields/CoreFields.php:1784
 msgid "No default"
 msgstr ""
 
@@ -2924,6 +2913,7 @@ msgstr ""
 
 #: src/Fields/FieldSettings.php:355
 #: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:53
+#: resources/admin/components/builder/inspector/controls/ChainedDisplayControl.jsx:13
 msgid "Buttons"
 msgstr ""
 
@@ -2954,6 +2944,7 @@ msgstr ""
 #: src/Fields/FieldSettings.php:439
 #: src/Fields/FieldsV2.php:173
 #: resources/admin/components/builder/ContainerRenderer.jsx:43
+#: resources/admin/components/builder/inspector/controls/ChainedDisplayControl.jsx:18
 msgid "Columns"
 msgstr ""
 
@@ -3144,6 +3135,7 @@ msgid "Searchable country list"
 msgstr ""
 
 #: src/Fields/FieldSettings.php:704
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:122
 msgid "Dependent dropdowns"
 msgstr ""
 
@@ -6006,7 +5998,7 @@ msgid "Move Down"
 msgstr ""
 
 #: resources/admin/components/builder/ContainerWrapper.jsx:71
-#: resources/admin/components/builder/FieldInspector.jsx:226
+#: resources/admin/components/builder/FieldInspector.jsx:230
 #: resources/admin/components/FormsList.jsx:433
 msgid "Duplicate"
 msgstr ""
@@ -6140,12 +6132,12 @@ msgid "Field group. Press Enter to select."
 msgstr ""
 
 #: resources/admin/components/builder/FieldDock.jsx:22
-#: resources/admin/components/builder/FieldInspector.jsx:298
+#: resources/admin/components/builder/FieldInspector.jsx:302
 msgid "Choices"
 msgstr ""
 
 #: resources/admin/components/builder/FieldDock.jsx:23
-#: resources/admin/components/builder/FieldInspector.jsx:415
+#: resources/admin/components/builder/FieldInspector.jsx:438
 #: resources/admin/components/builder/FormSettings.jsx:194
 #: resources/admin/components/builder/FormSettings.jsx:196
 #: resources/blocks/form/edit.jsx:362
@@ -6193,7 +6185,7 @@ msgstr ""
 
 #: resources/admin/components/builder/FieldDock.jsx:253
 #: resources/admin/components/builder/FieldDock.jsx:269
-#: resources/admin/components/builder/FieldInspector.jsx:128
+#: resources/admin/components/builder/FieldInspector.jsx:132
 #: resources/admin/components/builder/FormEditor.jsx:70
 msgid "Search fields"
 msgstr ""
@@ -6208,35 +6200,35 @@ msgstr ""
 msgid "Results"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:45
+#: resources/admin/components/builder/FieldInspector.jsx:49
 msgid "Moving it takes the field out of its container and puts it at the end of the chosen step."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:46
+#: resources/admin/components/builder/FieldInspector.jsx:50
 msgid "Moves the field to the end of the chosen step."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:98
+#: resources/admin/components/builder/FieldInspector.jsx:102
 msgid "This required field has no label, so visitors won’t know what to enter."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:102
+#: resources/admin/components/builder/FieldInspector.jsx:106
 msgid "Add at least one option."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:105
+#: resources/admin/components/builder/FieldInspector.jsx:109
 msgid "Add a formula to show a result."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:118
+#: resources/admin/components/builder/FieldInspector.jsx:122
 msgid "No field selected"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:121
+#: resources/admin/components/builder/FieldInspector.jsx:125
 msgid "Select a field on the canvas to edit its label, options, validation and logic."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:132
+#: resources/admin/components/builder/FieldInspector.jsx:136
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:231
 #: resources/admin/components/SubmissionsTable.jsx:390
 #: resources/admin/pages/BuilderPage.jsx:400
@@ -6244,60 +6236,60 @@ msgstr ""
 msgid "Undo"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:135
+#: resources/admin/components/builder/FieldInspector.jsx:139
 msgid "Delete selected field"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:153
+#: resources/admin/components/builder/FieldInspector.jsx:157
 #: resources/admin/utils/saveErrors.js:14
 msgid "Logic"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:173
+#: resources/admin/components/builder/FieldInspector.jsx:177
 msgid "Validation"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:202
+#: resources/admin/components/builder/FieldInspector.jsx:206
 msgid "Copy field key"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:211
+#: resources/admin/components/builder/FieldInspector.jsx:215
 msgid "Copied"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:243
+#: resources/admin/components/builder/FieldInspector.jsx:247
 msgid "Close settings"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:254
+#: resources/admin/components/builder/FieldInspector.jsx:258
 msgid "Read-only: this form uses Pro features. Activate your license to edit it. The live form keeps working."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:278
+#: resources/admin/components/builder/FieldInspector.jsx:282
 #: resources/admin/components/builder/FormSettings.jsx:160
 #: resources/admin/pages/SettingsPage.jsx:32
 msgid "General"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:335
+#: resources/admin/components/builder/FieldInspector.jsx:358
 msgid "Skip this step unless its rules match. Fields in a skipped step are not checked or saved."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:337
+#: resources/admin/components/builder/FieldInspector.jsx:360
 msgid "Show or hide this repeater based on answers to other fields. A hidden repeater, including every row inside it, is not checked or saved."
 msgstr ""
 
 #. translators: %s: field label
-#: resources/admin/components/builder/FieldInspector.jsx:340
+#: resources/admin/components/builder/FieldInspector.jsx:363
 #, js-format
 msgid "Show or hide “%s” based on answers to other fields. Hidden fields are not checked or saved."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:351
+#: resources/admin/components/builder/FieldInspector.jsx:374
 msgid "This step is always shown."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:389
+#: resources/admin/components/builder/FieldInspector.jsx:412
 #: resources/admin/components/builder/PreviewWorkspace.jsx:122
 msgid "Appearance"
 msgstr ""
@@ -6990,66 +6982,226 @@ msgstr ""
 msgid "Insert Field"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:26
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:30
+#: resources/admin/components/builder/inspector/controls/ChainedCsvControl.jsx:40
+msgid "This file needs a header row and at least one row of choices."
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedCsvControl.jsx:52
+msgid "The first row names the dropdowns. Each row after it is one path: a cell belongs to the cell on its left. The words can be anything."
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedCsvControl.jsx:63
+msgid "Download an example"
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedCsvControl.jsx:71
+msgid "Download these dropdowns"
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedCsvControl.jsx:77
+msgid "Choose a CSV file"
+msgstr ""
+
+#. translators: %s: uploaded file name
+#: resources/admin/components/builder/inspector/controls/ChainedCsvControl.jsx:94
+#, js-format
+msgid "Using %s"
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedDisplayControl.jsx:9
+msgid "Each step is a menu. The next menu lists only the choices for the previous answer."
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedDisplayControl.jsx:14
+msgid "Each step is a row of choices. The next row appears after one is selected."
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedDisplayControl.jsx:19
+msgid "Every list is shown. The first choice is selected, and each next list shows only what belongs to the choice before it. A list with nothing to show stays empty."
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedDisplayControl.jsx:33
+#: resources/admin/components/builder/inspector/controls/ChainedDisplayControl.jsx:34
+msgid "On the form"
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:23
+msgid "Visitors pick from one dropdown, then the next. Each list only shows choices that belong to the answer they already picked."
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:31
+msgid "No dropdowns yet. Add the first list, then the lists that depend on it."
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:39
+msgid "Untitled dropdown"
+msgstr ""
+
+#. translators: %d: number of choices in one dropdown
+#. translators: %d: number of choices
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:44
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:65
+#, js-format
+msgid "%d choice"
+msgid_plural "%d choices"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: 1: dropdown count, 2: choice count
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:57
+#, js-format
+msgid "%1$s, %2$s"
+msgstr ""
+
+#. translators: %d: number of dropdowns
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:60
+#, js-format
+msgid "%d dropdown"
+msgid_plural "%d dropdowns"
+msgstr[0] ""
+msgstr[1] ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:73
+msgid "Set up dropdowns"
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:73
+msgid "Edit dropdowns"
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:20
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:199
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:200
 msgid "Choice"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:112
-msgid "Add one block per dropdown, in the order visitors see them. The first dropdown is always shown. Each choice in a later dropdown belongs to one choice above it, so visitors only see what matches the answer they already picked."
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:21
+msgid "A choice under the line above"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:120
-msgid "No dropdowns yet. Start with the first question, for example Country or Make."
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:22
+msgid "A choice under that"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:136
-msgid "First dropdown label"
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:23
+msgid "Another choice"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:137
-msgid "Next dropdown label"
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:24
+msgid "Its own next choice"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:144
-msgid "State"
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:90
+msgid "Add a dropdown, then another after it. Visitors answer them in that order."
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:152
-msgid "Add choices to the dropdown above before linking this one."
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:96
+msgid "These choices are always shown. The next list appears only after one of them is selected."
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:166
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:167
-msgid "Choice label"
+#. translators: %s: previous dropdown name
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:106
+#, js-format
+msgid "Choose a %s first. This list only shows choices for that answer."
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:175
-msgid "Shown when the previous answer is"
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:107
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:231
+msgid "previous answer"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:179
-msgid "Shown when…"
+#. translators: 1: previous dropdown name, 2: selected choice
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:112
+#, js-format
+msgid "These choices appear when %1$s is %2$s."
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:192
-msgid "Remove choice"
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:113
+msgid "the previous answer"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:209
-msgid "Add choice"
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:129
+msgid "Each column is one dropdown. Select a choice to edit only what belongs to it."
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:218
-msgid "Remove dropdown"
-msgstr ""
-
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:227
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:142
 msgid "Add the first dropdown"
 msgstr ""
 
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsControl.jsx:228
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:162
+msgid "Dropdown name"
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:179
+msgid "Remove this and later dropdowns"
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:180
+msgid "Remove dropdown"
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:213
+msgid "Remove choice"
+msgstr ""
+
+#. translators: %s: previous dropdown name
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:230
+#, js-format
+msgid "Choose a %s first."
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:237
+#: resources/frontend/components/fields/ChoiceSelect.jsx:170
+msgid "No choices yet."
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:255
+msgid "Add choice"
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:265
 msgid "Add the next dropdown"
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:272
+msgid "How this works"
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:275
+msgid "The words can be anything. Changing an earlier answer clears the answers after it."
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:280
+msgid "Paste a list"
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:282
+msgid "One choice per line. Indent with two spaces or a tab to nest it. This replaces the choices and keeps the names."
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:306
+msgid "Replace dropdowns"
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedSourceControl.jsx:11
+msgid "Choices come from a spreadsheet. Download the example, then upload a file in that shape."
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedSourceControl.jsx:15
+msgid "Type the dropdowns here. Each list appears after the one before it."
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedSourceControl.jsx:25
+#: resources/admin/components/builder/inspector/controls/ChainedSourceControl.jsx:26
+msgid "Source"
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedSourceControl.jsx:33
+msgid "Manual"
+msgstr ""
+
+#: resources/admin/components/builder/inspector/controls/ChainedSourceControl.jsx:41
+msgid "CSV"
 msgstr ""
 
 #: resources/admin/components/builder/inspector/controls/FormulaInspectorControl.jsx:82
@@ -14319,25 +14471,21 @@ msgstr ""
 msgid "Field type not supported:"
 msgstr ""
 
-#: resources/frontend/components/fields/ChainedSelect.jsx:36
+#: resources/frontend/components/fields/ChainedSelect.jsx:100
 msgid "Options are added in the field settings."
 msgstr ""
 
-#: resources/frontend/components/fields/ChainedSelect.jsx:46
+#: resources/frontend/components/fields/ChainedSelect.jsx:110
 msgid "Selection"
 msgstr ""
 
-#: resources/frontend/components/fields/ChainedSelect.jsx:68
+#: resources/frontend/components/fields/ChainedSelect.jsx:132
 msgid "Select…"
 msgstr ""
 
 #: resources/frontend/components/fields/ChoiceSelect.jsx:165
 #: resources/frontend/components/fields/CountrySelect.jsx:192
 msgid "Clear selection"
-msgstr ""
-
-#: resources/frontend/components/fields/ChoiceSelect.jsx:170
-msgid "No choices yet."
 msgstr ""
 
 #: resources/frontend/components/fields/CountrySelect.jsx:112
