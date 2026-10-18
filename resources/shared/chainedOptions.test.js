@@ -1,4 +1,4 @@
-import { chainedSelectLevels, nextChainedSelections } from './chainedOptions';
+import { chainedPresentation, chainedSelectLevels, nextChainedSelections } from './chainedOptions';
 
 describe('chained select options', () => {
   test('two levels with options produce more than one row', () => {
@@ -47,4 +47,11 @@ describe('chained select options', () => {
     }, []);
     expect(rows).toHaveLength(1);
   });
+});
+
+test('an unknown presentation stays dropdowns', () => {
+  expect(chainedPresentation({ presentation: 'buttons' })).toBe('buttons');
+  expect(chainedPresentation({ presentation: 'columns' })).toBe('columns');
+  expect(chainedPresentation({})).toBe('dropdowns');
+  expect(chainedPresentation({ presentation: 'map' })).toBe('dropdowns');
 });

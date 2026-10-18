@@ -1,4 +1,5 @@
 @use '../../../frontend/components/fields/Picker';
+@use '../../../frontend/components/fields/ChainedSelect';
 
 .sf-field-renderer {
 	&__header {

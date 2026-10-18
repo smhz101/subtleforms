@@ -1,0 +1,123 @@
+// Dependent choices. Dropdowns stack. Buttons are a wrapping row of choices.
+// Columns place each list beside the one before it.
+
+.subtleforms-chained-select {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	min-width: 0;
+
+	&__label {
+		display: block;
+		margin-bottom: 4px;
+		color: var(--subtleforms-label-color, var(--subtleforms-color-text-light, #646970));
+		font-size: 0.8125rem;
+		font-weight: var(--subtleforms-label-weight, 600);
+	}
+
+	&__empty {
+		margin: 0;
+		color: var(--subtleforms-color-text-light, #646970);
+		font-size: 0.875rem;
+	}
+
+	&__choice {
+		margin: 0;
+		padding: 6px 12px;
+		border: 1px solid var(--subtleforms-color-border, #d8dbe2);
+		border-radius: 999px;
+		background: var(--subtleforms-color-bg, #fff);
+		color: var(--subtleforms-color-text, #1d2327);
+		font: inherit;
+		font-size: 0.875rem;
+		line-height: 1.4;
+		text-align: left;
+		cursor: pointer;
+
+		&:disabled {
+			cursor: default;
+			opacity: 0.6;
+		}
+
+		&:focus-visible {
+			outline: 2px solid var(--subtleforms-color-border-focus, var(--subtleforms-color-primary, #4f46e5));
+			outline-offset: 1px;
+		}
+	}
+}
+
+.subtleforms-chained-select.is-buttons {
+	.subtleforms-chained-select__choices {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	.subtleforms-chained-select__choice.is-selected {
+		border-color: var(--subtleforms-color-primary, #4f46e5);
+		background: var(--subtleforms-color-primary, #4f46e5);
+		color: var(--subtleforms-button-text, #fff);
+	}
+}
+
+.subtleforms-chained-select.is-columns {
+	flex-direction: row;
+	gap: 0;
+	align-items: stretch;
+	overflow: hidden;
+	border: 1px solid var(--subtleforms-color-border, #d8dbe2);
+	border-radius: var(--subtleforms-radius-md, 8px);
+	background: var(--subtleforms-color-bg, #fff);
+
+	.subtleforms-chained-select__level {
+		display: flex;
+		flex-direction: column;
+		flex: 1 1 0;
+		min-width: 0;
+		border-right: 1px solid var(--subtleforms-color-border, #d8dbe2);
+
+		&:last-child {
+			border-right: 0;
+		}
+	}
+
+	.subtleforms-chained-select__label {
+		margin: 0;
+		padding: 8px 12px;
+		border-bottom: 1px solid var(--subtleforms-color-border, #d8dbe2);
+		background: var(--subtleforms-color-bg-subtle, #f4f5f7);
+	}
+
+	.subtleforms-chained-select__choices {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+	}
+
+	.subtleforms-chained-select__choice {
+		width: 100%;
+		padding: 8px 12px;
+		border: 0;
+		border-radius: 0;
+		background: transparent;
+
+		&.is-selected {
+			background: color-mix(in srgb, var(--subtleforms-color-primary, #4f46e5) 12%, transparent);
+			color: var(--subtleforms-color-primary, #4f46e5);
+			font-weight: 600;
+		}
+	}
+
+	@media (max-width: 640px) {
+		flex-direction: column;
+
+		.subtleforms-chained-select__level {
+			border-right: 0;
+			border-bottom: 1px solid var(--subtleforms-color-border, #d8dbe2);
+
+			&:last-child {
+				border-bottom: 0;
+			}
+		}
+	}
+}

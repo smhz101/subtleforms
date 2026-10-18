@@ -732,19 +732,6 @@
 	pointer-events: none;
 }
 
-/* ===== Chained select ===== */
-.subtleforms-chained-select {
-	display: flex;
-	flex-direction: column;
-	gap: 8px;
-}
-
-.subtleforms-chained-select__label {
-	display: block;
-	margin-bottom: 4px;
-	font-size: 0.8125rem;
-}
-
 /* ===== Section break ===== */
 .subtleforms-section-break {
 	margin: 8px 0;

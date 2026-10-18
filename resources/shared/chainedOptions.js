@@ -72,3 +72,14 @@ export function nextChainedSelections(selections, depth, newValue) {
   next[depth] = newValue;
   return next.filter((v) => v !== '');
 }
+
+/**
+ * How dependent choices are drawn. Unknown values stay dropdowns.
+ *
+ * @param {Object} config Field settings.
+ * @return {'dropdowns'|'buttons'|'columns'}
+ */
+export function chainedPresentation(config) {
+  const value = config && typeof config === 'object' ? config.presentation : undefined;
+  return value === 'buttons' || value === 'columns' ? value : 'dropdowns';
+}

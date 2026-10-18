@@ -649,6 +649,8 @@ final class CoreFields {
 				fieldSpecificAttributes: array(
 					'source' => 'csv', // or 'manual'
 					'levels' => array(),
+					// dropdowns, buttons, or columns. The public field reads this.
+					'presentation' => 'dropdowns',
 				),
 				inspectorControls: array(
 					array(

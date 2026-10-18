@@ -212,6 +212,46 @@ describe('2.2.1 field fixes', () => {
     unmount();
   });
 
+  test('buttons and columns render choices instead of menus', () => {
+    const field = {
+      key: 'place',
+      type: 'chained_select',
+      label: 'Place',
+      presentation: 'buttons',
+      levels: [
+        {
+          label: 'Country',
+          options: [
+            { label: 'Pakistan', value: 'pakistan' },
+            { label: 'USA', value: 'usa' },
+          ],
+        },
+        {
+          label: 'State',
+          options: [
+            { label: 'Punjab', value: 'punjab', parent: 'pakistan' },
+            { label: 'California', value: 'california', parent: 'usa' },
+          ],
+        },
+      ],
+    };
+    const buttons = render(field);
+    expect(buttons.container.querySelector('select')).toBeNull();
+    expect(buttons.container.textContent).toContain('Pakistan');
+    expect(buttons.container.textContent).not.toContain('Punjab');
+    buttons.unmount();
+
+    const chosen = render(field, { values: { place: ['pakistan'] } });
+    expect(chosen.container.textContent).toContain('Punjab');
+    expect(chosen.container.textContent).not.toContain('California');
+    chosen.unmount();
+
+    const columns = render({ ...field, presentation: 'columns' }, { values: { place: ['pakistan'] } });
+    expect(columns.container.querySelector('.is-columns')).not.toBeNull();
+    expect(columns.container.textContent).toContain('Punjab');
+    columns.unmount();
+  });
+
   test('a server error is shown on the field and described (bug 2)', () => {
     const field = { key: 'email', type: 'email', label: 'Email', required: true };
     const { container, unmount } = render(field, { errors: { email: 'Invalid email address.' } });

@@ -4,6 +4,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../../ui/Icon';
 import LogicEditor, { readLogic, countRules } from './LogicEditor';
 import ChainedLevelsControl from './inspector/controls/ChainedLevelsControl';
+import ChainedDisplayControl from './inspector/controls/ChainedDisplayControl';
 import { isProFeature } from '../../utils/featureGate';
 import { useBuilder } from './context/BuilderContext';
 import { useConfig } from './context/ConfigContext';
@@ -305,6 +306,11 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
                 )}
                 {field.type === 'chained_select' && (
                   <PanelBody title={__('Dropdowns', 'subtleforms')} initialOpen>
+                    <ChainedDisplayControl
+                      value={field.presentation}
+                      onChange={(presentation) => handleUpdate({ presentation })}
+                      disabled={isReadOnly}
+                    />
                     <ChainedLevelsControl
                       value={field.levels}
                       onChange={(levels) => handleUpdate({ levels })}
