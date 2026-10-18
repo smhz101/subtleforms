@@ -1,18 +1,20 @@
-import { useEffect, useState } from '@wordpress/element';
-import { Button, Notice, SelectControl, Spinner } from '@wordpress/components';
+import { useEffect, useMemo, useState } from '@wordpress/element';
+import { Button, Notice, SearchControl, SelectControl, Spinner } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
+import clsx from 'clsx';
 import AdminShell from '../components/AdminShell';
+import Icon from '../ui/Icon';
 import { apiGet, apiPost } from '../utils/api';
 import { isProFeature, requirePro } from '../utils/featureGate';
 import './ToolsPage.scss';
 
 const SECTIONS = [
-  { id: 'transfer', label: __( 'Transfer', 'subtleforms' ) },
-  { id: 'migrate', label: __( 'Migrate', 'subtleforms' ) },
-  { id: 'activity', label: __( 'Activity', 'subtleforms' ) },
-  { id: 'webhooks', label: __( 'Webhooks', 'subtleforms' ) },
-  { id: 'api', label: __( 'API', 'subtleforms' ) },
+  { id: 'transfer', label: __( 'Transfer', 'subtleforms' ), icon: Icon.Package, description: __( 'Move SubtleForms forms and submissions between sites.', 'subtleforms' ) },
+  { id: 'migrate', label: __( 'Migrate', 'subtleforms' ), icon: Icon.FileUp, description: __( 'Bring a form across from Gravity Forms or Fluent Forms.', 'subtleforms' ) },
+  { id: 'activity', label: __( 'Activity', 'subtleforms' ), icon: Icon.Activity, description: __( 'What happened after each entry was sent.', 'subtleforms' ) },
+  { id: 'webhooks', label: __( 'Webhooks', 'subtleforms' ), icon: Icon.Webhook, description: __( 'Calls this site made to another address.', 'subtleforms' ) },
+  { id: 'api', label: __( 'API', 'subtleforms' ), icon: Icon.Code, description: __( 'SubtleForms REST calls from the last 30 days.', 'subtleforms' ) },
 ];
 
 function downloadJson( filename, data ) {
@@ -36,11 +38,20 @@ function messageFrom( result ) {
     || __( 'That did not work. Check the file and try again.', 'subtleforms' );
 }
 
+function formTitle( form ) {
+  return form.title || sprintf(
+    /* translators: %d: form id */
+    __( 'Form #%d', 'subtleforms' ),
+    form.id
+  );
+}
+
 export default function ToolsPage() {
   const [ section, setSection ] = useState( 'transfer' );
   const [ forms, setForms ] = useState( [] );
   const [ notice, setNotice ] = useState( null );
   const [ busy, setBusy ] = useState( false );
+  const current = SECTIONS.find( ( item ) => item.id === section ) || SECTIONS[ 0 ];
 
   useEffect( () => {
     let cancelled = false;
@@ -60,31 +71,43 @@ export default function ToolsPage() {
     <AdminShell
       title={ __( 'Tools', 'subtleforms' ) }
       description={ __( 'Move forms and entries, bring a form across from another plugin, and read what the site has been doing.', 'subtleforms' ) }>
-      { notice && (
-        <Notice status={ notice.status } onRemove={ () => setNotice( null ) } isDismissible>
-          { notice.content }
-        </Notice>
-      ) }
-      <div className='sf-tools__tabs' role='tablist'>
-        { SECTIONS.map( ( item ) => (
-          <Button
-            key={ item.id }
-            variant={ section === item.id ? 'primary' : 'secondary' }
-            onClick={ () => setSection( item.id ) }
-            aria-selected={ section === item.id }>
-            { item.label }
-          </Button>
-        ) ) }
+      <div className='sf-tools'>
+        <nav className='sf-tools__nav' aria-label={ __( 'Tools', 'subtleforms' ) }>
+          <ul>
+            { SECTIONS.map( ( item ) => {
+              const ItemIcon = item.icon;
+              return (
+                <li key={ item.id }>
+                  <button
+                    type='button'
+                    className={ clsx( 'sf-tools__nav-item', { 'is-active': section === item.id } ) }
+                    aria-current={ section === item.id ? 'page' : undefined }
+                    onClick={ () => setSection( item.id ) }>
+                    <ItemIcon size={ 16 } aria-hidden='true' />
+                    { item.label }
+                  </button>
+                </li>
+              );
+            } ) }
+          </ul>
+        </nav>
+        <div className='sf-tools__main'>
+          { notice && (
+            <Notice status={ notice.status } onRemove={ () => setNotice( null ) } isDismissible>
+              { notice.content }
+            </Notice>
+          ) }
+          { section === 'transfer' && (
+            <Transfer forms={ forms } busy={ busy } setBusy={ setBusy } tell={ tell } />
+          ) }
+          { section === 'migrate' && (
+            <Migrate busy={ busy } setBusy={ setBusy } tell={ tell } description={ current.description } />
+          ) }
+          { section === 'activity' && <LogList kind='activity' forms={ forms } description={ current.description } /> }
+          { section === 'webhooks' && <LogList kind='webhook' forms={ forms } description={ current.description } /> }
+          { section === 'api' && <ApiList description={ current.description } /> }
+        </div>
       </div>
-      { section === 'transfer' && (
-        <Transfer forms={ forms } busy={ busy } setBusy={ setBusy } tell={ tell } />
-      ) }
-      { section === 'migrate' && (
-        <Migrate busy={ busy } setBusy={ setBusy } tell={ tell } />
-      ) }
-      { section === 'activity' && <LogList kind='activity' forms={ forms } /> }
-      { section === 'webhooks' && <LogList kind='webhook' forms={ forms } /> }
-      { section === 'api' && <ApiList /> }
     </AdminShell>
   );
 }
@@ -92,7 +115,15 @@ export default function ToolsPage() {
 function Transfer( { forms, busy, setBusy, tell } ) {
   const [ selected, setSelected ] = useState( [] );
   const [ target, setTarget ] = useState( '' );
+  const [ query, setQuery ] = useState( '' );
   const canExport = isProFeature( 'submissions.export' );
+  const visible = useMemo( () => {
+    const needle = query.trim().toLowerCase();
+    if ( ! needle ) {
+      return forms;
+    }
+    return forms.filter( ( form ) => formTitle( form ).toLowerCase().includes( needle ) );
+  }, [ forms, query ] );
 
   const toggle = ( id ) => {
     setSelected( ( current ) => (
@@ -102,8 +133,8 @@ function Transfer( { forms, busy, setBusy, tell } ) {
 
   const exportForms = async () => {
     setBusy( true );
-    const query = selected.length ? `?ids=${ selected.join( ',' ) }` : '';
-    const result = await apiGet( `/tools/forms/export${ query }` );
+    const ids = selected.length ? `?ids=${ selected.join( ',' ) }` : '';
+    const result = await apiGet( `/tools/forms/export${ ids }` );
     setBusy( false );
     if ( ! result.ok ) {
       tell( 'error', messageFrom( result ) );
@@ -221,76 +252,102 @@ function Transfer( { forms, busy, setBusy, tell } ) {
   };
 
   return (
-    <div className='sf-tools__panel'>
-      <section>
-        <h2>{ __( 'Forms', 'subtleforms' ) }</h2>
-        <p>{ __( 'Export is SubtleForms JSON. Import creates new forms and keeps published or draft.', 'subtleforms' ) }</p>
-        <ul className='sf-tools__checks'>
-          { forms.map( ( form ) => (
-            <li key={ form.id }>
-              <label>
-                <input
-                  type='checkbox'
-                  checked={ selected.includes( Number( form.id ) ) }
-                  onChange={ () => toggle( Number( form.id ) ) }
-                />
-                { form.title || sprintf( __( 'Form #%d', 'subtleforms' ), form.id ) }
-              </label>
-            </li>
-          ) ) }
-        </ul>
-        <p className='sf-tools__hint'>{ __( 'Leave them all unticked to export every form. More than 100 must be exported in groups.', 'subtleforms' ) }</p>
-        <div className='sf-tools__actions'>
+    <>
+      <section className='sf-panel'>
+        <header className='sf-panel__header'>
+          <div>
+            <h2 className='sf-panel__title'>{ __( 'Forms', 'subtleforms' ) }</h2>
+            <p className='sf-panel__subtitle'>{ __( 'Export is SubtleForms JSON. Import creates new forms and keeps published or draft.', 'subtleforms' ) }</p>
+          </div>
+          <SearchControl
+            value={ query }
+            onChange={ setQuery }
+            placeholder={ __( 'Find a form', 'subtleforms' ) }
+            __nextHasNoMarginBottom
+            size='compact'
+          />
+        </header>
+        <div className='sf-panel__body'>
+          { visible.length === 0 ? (
+            <p className='sf-tools__empty'>{ __( 'Nothing here yet.', 'subtleforms' ) }</p>
+          ) : (
+            <ul className='sf-tools__checks'>
+              { visible.map( ( form ) => (
+                <li key={ form.id }>
+                  <label>
+                    <input
+                      type='checkbox'
+                      checked={ selected.includes( Number( form.id ) ) }
+                      onChange={ () => toggle( Number( form.id ) ) }
+                    />
+                    <span>{ formTitle( form ) }</span>
+                  </label>
+                </li>
+              ) ) }
+            </ul>
+          ) }
+          <p className='sf-tools__hint'>{ __( 'Leave them all unticked to export every form. More than 100 must be exported in groups.', 'subtleforms' ) }</p>
+        </div>
+        <footer className='sf-panel__footer'>
           <Button variant='primary' disabled={ busy } onClick={ exportForms }>{ __( 'Export forms', 'subtleforms' ) }</Button>
-          <label className='sf-tools__file'>
-            <Button variant='secondary' disabled={ busy }>{ __( 'Import forms', 'subtleforms' ) }</Button>
-            <input type='file' accept='application/json,.json' disabled={ busy } onChange={ ( event ) => {
-              const file = event.target.files?.[ 0 ];
-              event.target.value = '';
-              if ( file ) {
-                importForms( file );
-              }
-            } } />
-          </label>
-        </div>
+          <FileButton label={ __( 'Import forms', 'subtleforms' ) } busy={ busy } onFile={ importForms } />
+        </footer>
       </section>
-      <section>
-        <h2>{ __( 'Submissions', 'subtleforms' ) }</h2>
-        <p>{ __( 'JSON import and export move entries between SubtleForms sites. Passwords are left out, and read and starred state is kept. A form with more than 2,000 submissions is not exported in part. CSV export is part of Pro.', 'subtleforms' ) }</p>
-        <SelectControl
-          label={ __( 'Form', 'subtleforms' ) }
-          value={ target }
-          options={ [
-            { label: __( 'Choose a form', 'subtleforms' ), value: '' },
-            ...forms.map( ( form ) => ( {
-              label: form.title || sprintf( __( 'Form #%d', 'subtleforms' ), form.id ),
-              value: String( form.id ),
-            } ) ),
-          ] }
-          onChange={ setTarget }
-        />
-        <div className='sf-tools__actions'>
+
+      <section className='sf-panel'>
+        <header className='sf-panel__header'>
+          <div>
+            <h2 className='sf-panel__title'>{ __( 'Submissions', 'subtleforms' ) }</h2>
+            <p className='sf-panel__subtitle'>{ __( 'JSON import and export move entries between SubtleForms sites. Passwords are left out, and read and starred state is kept. A form with more than 2,000 submissions is not exported in part. CSV export is part of Pro.', 'subtleforms' ) }</p>
+          </div>
+        </header>
+        <div className='sf-panel__body'>
+          <SelectControl
+            label={ __( 'Form', 'subtleforms' ) }
+            value={ target }
+            options={ [
+              { label: __( 'Choose a form', 'subtleforms' ), value: '' },
+              ...forms.map( ( form ) => ( { label: formTitle( form ), value: String( form.id ) } ) ),
+            ] }
+            onChange={ setTarget }
+            __nextHasNoMarginBottom
+            className='sf-tools__select'
+          />
+        </div>
+        <footer className='sf-panel__footer'>
           <Button variant='primary' disabled={ busy } onClick={ exportEntries }>{ __( 'Export submissions', 'subtleforms' ) }</Button>
-          <label className='sf-tools__file'>
-            <Button variant='secondary' disabled={ busy }>{ __( 'Import submissions', 'subtleforms' ) }</Button>
-            <input type='file' accept='application/json,.json' disabled={ busy } onChange={ ( event ) => {
-              const file = event.target.files?.[ 0 ];
-              event.target.value = '';
-              if ( file ) {
-                importEntries( file );
-              }
-            } } />
-          </label>
-          <Button variant='secondary' disabled={ busy } onClick={ exportCsv }>
-            { canExport ? __( 'Export CSV', 'subtleforms' ) : __( 'Export CSV (Pro)', 'subtleforms' ) }
+          <FileButton label={ __( 'Import submissions', 'subtleforms' ) } busy={ busy } onFile={ importEntries } />
+          <Button variant='secondary' disabled={ busy } onClick={ exportCsv } icon={ ! canExport ? <Icon.Lock size={ 14 } /> : undefined }>
+            { __( 'Export CSV', 'subtleforms' ) }
+            { ! canExport && <span className='sf-pro-tag'>{ __( 'Pro', 'subtleforms' ) }</span> }
           </Button>
-        </div>
+        </footer>
       </section>
-    </div>
+    </>
   );
 }
 
-function Migrate( { busy, setBusy, tell } ) {
+function FileButton( { label, busy, onFile } ) {
+  return (
+    <label className='sf-tools__file'>
+      <Button variant='secondary' disabled={ busy }>{ label }</Button>
+      <input
+        type='file'
+        accept='application/json,.json'
+        disabled={ busy }
+        onChange={ ( event ) => {
+          const file = event.target.files?.[ 0 ];
+          event.target.value = '';
+          if ( file ) {
+            onFile( file );
+          }
+        } }
+      />
+    </label>
+  );
+}
+
+function Migrate( { busy, setBusy, tell, description } ) {
   const [ preview, setPreview ] = useState( null );
   const [ fileJson, setFileJson ] = useState( null );
 
@@ -334,21 +391,16 @@ function Migrate( { busy, setBusy, tell } ) {
   };
 
   return (
-    <div className='sf-tools__panel'>
-      <h2>{ __( 'Gravity Forms and Fluent Forms', 'subtleforms' ) }</h2>
-      <p>{ __( 'Upload the JSON export. You will see what will be created, and what is left out, before anything is saved. New forms are drafts.', 'subtleforms' ) }</p>
-      <label className='sf-tools__file'>
-        <Button variant='secondary' disabled={ busy }>{ __( 'Choose export file', 'subtleforms' ) }</Button>
-        <input type='file' accept='application/json,.json' disabled={ busy } onChange={ ( event ) => {
-          const file = event.target.files?.[ 0 ];
-          event.target.value = '';
-          if ( file ) {
-            onFile( file );
-          }
-        } } />
-      </label>
-      { preview && (
-        <>
+    <section className='sf-panel'>
+      <header className='sf-panel__header'>
+        <div>
+          <h2 className='sf-panel__title'>{ __( 'Gravity Forms and Fluent Forms', 'subtleforms' ) }</h2>
+          <p className='sf-panel__subtitle'>{ description }</p>
+        </div>
+      </header>
+      <div className='sf-panel__body'>
+        <p>{ __( 'Upload the JSON export. You will see what will be created, and what is left out, before anything is saved. New forms are drafts.', 'subtleforms' ) }</p>
+        { preview && (
           <ul className='sf-tools__preview'>
             { preview.forms.map( ( form, index ) => (
               <li key={ `${ form.title }-${ index }` }>
@@ -366,14 +418,19 @@ function Migrate( { busy, setBusy, tell } ) {
               </li>
             ) ) }
           </ul>
+        ) }
+      </div>
+      <footer className='sf-panel__footer'>
+        <FileButton label={ __( 'Choose export file', 'subtleforms' ) } busy={ busy } onFile={ onFile } />
+        { preview && (
           <Button variant='primary' disabled={ busy } onClick={ run }>{ __( 'Create draft forms', 'subtleforms' ) }</Button>
-        </>
-      ) }
-    </div>
+        ) }
+      </footer>
+    </section>
   );
 }
 
-function LogList( { kind, forms } ) {
+function LogList( { kind, forms, description } ) {
   const [ page, setPage ] = useState( 1 );
   const [ level, setLevel ] = useState( '' );
   const [ formId, setFormId ] = useState( '' );
@@ -405,74 +462,79 @@ function LogList( { kind, forms } ) {
   const pages = Math.max( 1, Math.ceil( ( data?.total || 0 ) / 20 ) );
 
   return (
-    <div className='sf-tools__panel'>
-      <div className='sf-tools__filters'>
-        <SelectControl
-          label={ __( 'Level', 'subtleforms' ) }
-          value={ level }
-          options={ [
-            { label: __( 'Any level', 'subtleforms' ), value: '' },
-            { label: __( 'Info', 'subtleforms' ), value: 'info' },
-            { label: __( 'Warning', 'subtleforms' ), value: 'warning' },
-            { label: __( 'Error', 'subtleforms' ), value: 'error' },
-          ] }
-          onChange={ ( value ) => { setPage( 1 ); setLevel( value ); } }
-        />
-        <SelectControl
-          label={ __( 'Form', 'subtleforms' ) }
-          value={ formId }
-          options={ [
-            { label: __( 'Any form', 'subtleforms' ), value: '' },
-            ...forms.map( ( form ) => ( { label: form.title || String( form.id ), value: String( form.id ) } ) ),
-          ] }
-          onChange={ ( value ) => { setPage( 1 ); setFormId( value ); } }
-        />
+    <section className='sf-panel'>
+      <header className='sf-panel__header'>
+        <div>
+          <h2 className='sf-panel__title'>{ kind === 'webhook' ? __( 'Webhooks', 'subtleforms' ) : __( 'Activity', 'subtleforms' ) }</h2>
+          <p className='sf-panel__subtitle'>{ description }</p>
+        </div>
+        <div className='sf-tools__filters'>
+          <SelectControl
+            label={ __( 'Level', 'subtleforms' ) }
+            hideLabelFromVision
+            value={ level }
+            options={ [
+              { label: __( 'Any level', 'subtleforms' ), value: '' },
+              { label: __( 'Info', 'subtleforms' ), value: 'info' },
+              { label: __( 'Warning', 'subtleforms' ), value: 'warning' },
+              { label: __( 'Error', 'subtleforms' ), value: 'error' },
+            ] }
+            onChange={ ( value ) => { setPage( 1 ); setLevel( value ); } }
+            __nextHasNoMarginBottom
+          />
+          <SelectControl
+            label={ __( 'Form', 'subtleforms' ) }
+            hideLabelFromVision
+            value={ formId }
+            options={ [
+              { label: __( 'Any form', 'subtleforms' ), value: '' },
+              ...forms.map( ( form ) => ( { label: formTitle( form ), value: String( form.id ) } ) ),
+            ] }
+            onChange={ ( value ) => { setPage( 1 ); setFormId( value ); } }
+            __nextHasNoMarginBottom
+          />
+        </div>
+      </header>
+      <div className='sf-panel__body sf-panel__body--flush'>
+        { loading ? <div className='sf-tools__loading'><Spinner /></div> : (
+          <div className='sf-tools__table-wrap'>
+            <table className='sf-tools__table'>
+              <thead>
+                <tr>
+                  <th>{ __( 'When', 'subtleforms' ) }</th>
+                  <th>{ __( 'Level', 'subtleforms' ) }</th>
+                  <th>{ __( 'Form', 'subtleforms' ) }</th>
+                  <th>{ __( 'What happened', 'subtleforms' ) }</th>
+                </tr>
+              </thead>
+              <tbody>
+                { rows.length === 0 && (
+                  <tr><td colSpan='4'>{ __( 'Nothing here yet.', 'subtleforms' ) }</td></tr>
+                ) }
+                { rows.map( ( row ) => (
+                  <tr key={ row.id }>
+                    <td className='sf-tools__when'>{ row.created_at }</td>
+                    <td><span className={ clsx( 'sf-pill', 'sf-pill--dot', row.level === 'error' ? 'sf-pill--danger' : row.level === 'warning' ? 'sf-pill--warning' : 'sf-pill--info' ) }>{ row.level }</span></td>
+                    <td>{ row.form_title || ( row.form_id ? `#${ row.form_id }` : '—' ) }</td>
+                    <td>
+                      { row.message }
+                      { row.url && <div className='sf-tools__meta'>{ row.method } { row.url }{ row.http_status ? ` · ${ row.http_status }` : '' }</div> }
+                      { row.error && <div className='sf-tools__meta'>{ row.error }</div> }
+                      { row.response && <div className='sf-tools__meta'>{ row.response }</div> }
+                    </td>
+                  </tr>
+                ) ) }
+              </tbody>
+            </table>
+          </div>
+        ) }
       </div>
-      { loading ? <Spinner /> : (
-        <table className='sf-tools__table'>
-          <thead>
-            <tr>
-              <th>{ __( 'When', 'subtleforms' ) }</th>
-              <th>{ __( 'Level', 'subtleforms' ) }</th>
-              <th>{ __( 'Form', 'subtleforms' ) }</th>
-              <th>{ __( 'What happened', 'subtleforms' ) }</th>
-            </tr>
-          </thead>
-          <tbody>
-            { rows.length === 0 && (
-              <tr><td colSpan='4'>{ __( 'Nothing here yet.', 'subtleforms' ) }</td></tr>
-            ) }
-            { rows.map( ( row ) => (
-              <tr key={ row.id }>
-                <td>{ row.created_at }</td>
-                <td>{ row.level }</td>
-                <td>{ row.form_title || ( row.form_id ? `#${ row.form_id }` : '—' ) }</td>
-                <td>
-                  { row.message }
-                  { row.url && <div className='sf-tools__meta'>{ row.method } { row.url }{ row.http_status ? ` · ${ row.http_status }` : '' }</div> }
-                  { row.error && <div className='sf-tools__meta'>{ row.error }</div> }
-                  { row.response && <div className='sf-tools__meta'>{ row.response }</div> }
-                </td>
-              </tr>
-            ) ) }
-          </tbody>
-        </table>
-      ) }
-      <div className='sf-tools__pager'>
-        <Button variant='secondary' disabled={ page <= 1 } onClick={ () => setPage( ( n ) => n - 1 ) }>{ __( 'Previous', 'subtleforms' ) }</Button>
-        <span>{ sprintf(
-          /* translators: 1: current page, 2: page count */
-          __( 'Page %1$d of %2$d', 'subtleforms' ),
-          page,
-          pages
-        ) }</span>
-        <Button variant='secondary' disabled={ page >= pages } onClick={ () => setPage( ( n ) => n + 1 ) }>{ __( 'Next', 'subtleforms' ) }</Button>
-      </div>
-    </div>
+      <Pager page={ page } pages={ pages } setPage={ setPage } />
+    </section>
   );
 }
 
-function ApiList() {
+function ApiList( { description } ) {
   const [ page, setPage ] = useState( 1 );
   const [ data, setData ] = useState( null );
   const [ loading, setLoading ] = useState( true );
@@ -495,47 +557,62 @@ function ApiList() {
   const pages = Math.max( 1, Math.ceil( ( data?.total || 0 ) / 20 ) );
 
   return (
-    <div className='sf-tools__panel'>
-      <p>{ __( 'SubtleForms REST calls from the last 30 days. The address and the result are stored. The request itself is not.', 'subtleforms' ) }</p>
-      { loading ? <Spinner /> : (
-        <table className='sf-tools__table'>
-          <thead>
-            <tr>
-              <th>{ __( 'When', 'subtleforms' ) }</th>
-              <th>{ __( 'Method', 'subtleforms' ) }</th>
-              <th>{ __( 'Route', 'subtleforms' ) }</th>
-              <th>{ __( 'Status', 'subtleforms' ) }</th>
-              <th>{ __( 'User', 'subtleforms' ) }</th>
-              <th>{ __( 'Time', 'subtleforms' ) }</th>
-            </tr>
-          </thead>
-          <tbody>
-            { rows.length === 0 && (
-              <tr><td colSpan='6'>{ __( 'Nothing here yet.', 'subtleforms' ) }</td></tr>
-            ) }
-            { rows.map( ( row ) => (
-              <tr key={ row.id }>
-                <td>{ row.created_at }</td>
-                <td>{ row.method }</td>
-                <td>{ row.route }</td>
-                <td>{ row.status }</td>
-                <td>{ row.user_id ? `#${ row.user_id }` : '—' }</td>
-                <td>{ row.duration_ms } ms</td>
-              </tr>
-            ) ) }
-          </tbody>
-        </table>
-      ) }
-      <div className='sf-tools__pager'>
-        <Button variant='secondary' disabled={ page <= 1 } onClick={ () => setPage( ( n ) => n - 1 ) }>{ __( 'Previous', 'subtleforms' ) }</Button>
-        <span>{ sprintf(
-          /* translators: 1: current page, 2: page count */
-          __( 'Page %1$d of %2$d', 'subtleforms' ),
-          page,
-          pages
-        ) }</span>
-        <Button variant='secondary' disabled={ page >= pages } onClick={ () => setPage( ( n ) => n + 1 ) }>{ __( 'Next', 'subtleforms' ) }</Button>
+    <section className='sf-panel'>
+      <header className='sf-panel__header'>
+        <div>
+          <h2 className='sf-panel__title'>{ __( 'API', 'subtleforms' ) }</h2>
+          <p className='sf-panel__subtitle'>{ description } { __( 'The address and the result are stored. The request itself is not.', 'subtleforms' ) }</p>
+        </div>
+      </header>
+      <div className='sf-panel__body sf-panel__body--flush'>
+        { loading ? <div className='sf-tools__loading'><Spinner /></div> : (
+          <div className='sf-tools__table-wrap'>
+            <table className='sf-tools__table'>
+              <thead>
+                <tr>
+                  <th>{ __( 'When', 'subtleforms' ) }</th>
+                  <th>{ __( 'Method', 'subtleforms' ) }</th>
+                  <th>{ __( 'Route', 'subtleforms' ) }</th>
+                  <th>{ __( 'Status', 'subtleforms' ) }</th>
+                  <th>{ __( 'User', 'subtleforms' ) }</th>
+                  <th>{ __( 'Time', 'subtleforms' ) }</th>
+                </tr>
+              </thead>
+              <tbody>
+                { rows.length === 0 && (
+                  <tr><td colSpan='6'>{ __( 'Nothing here yet.', 'subtleforms' ) }</td></tr>
+                ) }
+                { rows.map( ( row ) => (
+                  <tr key={ row.id }>
+                    <td className='sf-tools__when'>{ row.created_at }</td>
+                    <td>{ row.method }</td>
+                    <td>{ row.route }</td>
+                    <td>{ row.status }</td>
+                    <td>{ row.user_id ? `#${ row.user_id }` : '—' }</td>
+                    <td>{ row.duration_ms } ms</td>
+                  </tr>
+                ) ) }
+              </tbody>
+            </table>
+          </div>
+        ) }
       </div>
-    </div>
+      <Pager page={ page } pages={ pages } setPage={ setPage } />
+    </section>
+  );
+}
+
+function Pager( { page, pages, setPage } ) {
+  return (
+    <footer className='sf-panel__footer'>
+      <Button variant='secondary' disabled={ page <= 1 } onClick={ () => setPage( ( n ) => n - 1 ) }>{ __( 'Previous', 'subtleforms' ) }</Button>
+      <span className='sf-tools__page'>{ sprintf(
+        /* translators: 1: current page, 2: page count */
+        __( 'Page %1$d of %2$d', 'subtleforms' ),
+        page,
+        pages
+      ) }</span>
+      <Button variant='secondary' disabled={ page >= pages } onClick={ () => setPage( ( n ) => n + 1 ) }>{ __( 'Next', 'subtleforms' ) }</Button>
+    </footer>
   );
 }
