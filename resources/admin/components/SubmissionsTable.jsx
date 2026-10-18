@@ -89,6 +89,7 @@ const SubmissionsTable = forwardRef(
     const isPrefetchingRef = useRef(false);
     const prefetchPromiseRef = useRef(null);
     const stepRef = useRef(async () => ({ id: null }));
+    const prefetchRef = useRef(async () => []);
     const bufferRef = useRef([]);
     const totalRef = useRef(0);
     const perPageRef = useRef(perPage);
@@ -282,6 +283,18 @@ const SubmissionsTable = forwardRef(
     };
 
     stepRef.current = stepEntry;
+    prefetchRef.current = prefetchNextChunk;
+
+    const removeEntry = (id) => {
+      const next = bufferRef.current.filter((row) => String(row.id) !== String(id));
+      if (next.length === bufferRef.current.length) {
+        return;
+      }
+      bufferRef.current = next;
+      totalRef.current = Math.max(0, totalRef.current - 1);
+      setBuffer(next);
+      setTotalItems(totalRef.current);
+    };
 
     // Expose refresh method via ref for real-time updates.
     // step goes through a ref so the handle does not change on every render.
@@ -290,6 +303,7 @@ const SubmissionsTable = forwardRef(
       () => ({
         refreshData: loadFresh,
         step: (id, direction) => stepRef.current(id, direction),
+        removeEntry: (id) => removeEntry(id),
       }),
       [loadFresh]
     );
@@ -326,6 +340,21 @@ const SubmissionsTable = forwardRef(
       revealedRef.current = readingId;
       setCurrentPage(Math.floor(index / perPage) + 1);
     }, [readingId, buffer, perPage]);
+
+    // A direct link can point past the first loaded batch. Keep fetching
+    // until that row is in the list, so it can be highlighted and browsed.
+    useEffect(() => {
+      if (!readingId || loading || totalItems === 0) {
+        return;
+      }
+      if (buffer.some((row) => String(row.id) === String(readingId))) {
+        return;
+      }
+      if (buffer.length >= totalItems) {
+        return;
+      }
+      prefetchRef.current();
+    }, [readingId, buffer, totalItems, loading]);
 
     const inTrash = statusFilter === 'trash';
 
