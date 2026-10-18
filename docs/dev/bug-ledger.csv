@@ -239,13 +239,13 @@ PRO-05,P2,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),"Submit an entry wit
 PRO-07,P2,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),"Send an entry to Mailchimp or a webhook, then permanently delete the entry (or uninstall Pro)"
 PRO-08,P3,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),"Activate a Starter license, open Settings > Integrations > Email Marketing, CRM or Multilanguage"
 PRO-15,P3,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),Uninstall Pro
+PRO-24,P3,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),"Agency white label with ""Only I can see License and Branding"", log in as another admin"
 PRO-25,P3,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),Click Disconnect on Settings > License
 PRO-26,P3,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),Create a form (POST /forms) whose logic references a missing field
 PRO-28,P3,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),Server without .htaccess support (nginx): PDF email attachment written to uploads/subtleforms-pdf-tmp/{form}-entry-{id}.pdf
 PRO-29,P3,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),"WP_DEBUG on, any license check"
 PRO-30,P3,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),Integrations panel on the Agency screenshot
 PRO2-05,P3,Pro 2.4.1,P241-4,Cursor,new in 2.3.8,pro-server.md (2.3.8),"Agency, Multilanguage on, form with a Chained Select"
-PRO-24,P3,Pro 2.6.0,P260-1,Claude,Still open,pro.md (2.3.3),"Agency white label with ""Only I can see License and Branding"", log in as another admin"
 LS-01,P1,Server 1.7.0,S170-1,Claude,Still open,license-server.md (2.3.3),1. A guest buys a license as victim@x (no account). 2. Any other signed-in customer opens My Account > Account details and changes the email to victim@x (no password or confirmation needed). 3. Open My Account > Licenses
 LS-02,P1,Server 1.7.0,S170-1,Claude,Still open,license-server.md (2.3.3),"Signed out, buy Starter with cheque, admin completes the order, click Download Pro in the email or on the thank-you page."
 LS-03,P2,Server 1.7.0,S170-1,Claude,Still open,license-server.md (2.3.3),"Upgrade Starter to Pro (order 6415, $50), complete, then refund it in full. Separately renew (order 6422, $79), complete, refund."
