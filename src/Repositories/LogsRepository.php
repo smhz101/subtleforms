@@ -191,4 +191,83 @@ final class LogsRepository {
 		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- No user-supplied params; table name is controlled.
 		return (int) $wpdb->get_var( $sql );
 	}
+
+	/**
+	 * A page of logs, newest first.
+	 *
+	 * Webhook rows are the ones whose context records action_type webhook.
+	 *
+	 * @param array $args page, per_page, level, form_id, webhook.
+	 * @return array{rows: array, total: int}
+	 */
+	public function search( array $args = array() ): array {
+		global $wpdb;
+		$logs        = $this->table;
+		$submissions = $wpdb->prefix . 'subtleforms_submissions';
+		$forms       = $wpdb->prefix . 'subtleforms_forms';
+		$page        = max( 1, (int) ( $args['page'] ?? 1 ) );
+		$per_page    = max( 1, min( 50, (int) ( $args['per_page'] ?? 20 ) ) );
+		$level   = (string) ( $args['level'] ?? '' );
+		$level   = in_array( $level, array( 'info', 'warning', 'error' ), true ) ? $level : '';
+		$form_id = (int) ( $args['form_id'] ?? 0 );
+		$like    = ! empty( $args['webhook'] ) ? '%"action_type":"webhook"%' : '';
+		$offset  = ( $page - 1 ) * $per_page;
+		$from    = "{$logs} l LEFT JOIN {$submissions} s ON s.id = l.submission_id LEFT JOIN {$forms} f ON f.id = s.form_id";
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table names are fixed. Every value is a placeholder.
+		$total = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$from} WHERE (%s = '' OR l.level = %s) AND (%d = 0 OR s.form_id = %d) AND (%s = '' OR l.context LIKE %s)",
+				$level,
+				$level,
+				$form_id,
+				$form_id,
+				$like,
+				$like
+			)
+		);
+		$rows  = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT l.id, l.submission_id, l.level, l.message, l.context, l.created_at, s.form_id, f.title AS form_title FROM {$from} WHERE (%s = '' OR l.level = %s) AND (%d = 0 OR s.form_id = %d) AND (%s = '' OR l.context LIKE %s) ORDER BY l.id DESC LIMIT %d OFFSET %d",
+				$level,
+				$level,
+				$form_id,
+				$form_id,
+				$like,
+				$like,
+				$per_page,
+				$offset
+			),
+			ARRAY_A
+		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		$clean = array();
+		foreach ( (array) $rows as $row ) {
+			$context = json_decode( (string) ( $row['context'] ?? '' ), true );
+			$data    = is_array( $context ) && is_array( $context['data'] ?? null ) ? $context['data'] : array();
+			$body    = (string) ( $data['response_body'] ?? '' );
+			if ( strlen( $body ) > 180 ) {
+				$body = substr( $body, 0, 180 );
+			}
+			$clean[] = array(
+				'id'            => (int) $row['id'],
+				'submission_id' => (int) $row['submission_id'],
+				'form_id'       => (int) ( $row['form_id'] ?? 0 ),
+				'form_title'    => (string) ( $row['form_title'] ?? '' ),
+				'level'         => (string) $row['level'],
+				'message'       => (string) $row['message'],
+				'created_at'    => (string) $row['created_at'],
+				'url'           => (string) ( $data['url'] ?? '' ),
+				'method'        => (string) ( $data['method'] ?? '' ),
+				'http_status'   => isset( $data['http_status'] ) ? (int) $data['http_status'] : null,
+				'error'         => (string) ( $data['error'] ?? '' ),
+				'response'      => $body,
+			);
+		}
+		return array(
+			'rows'  => $clean,
+			'total' => $total,
+		);
+	}
+
 }

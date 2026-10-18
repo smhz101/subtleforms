@@ -181,6 +181,8 @@ final class Activator {
 		$results['submissions'] = dbDelta( $submissions_sql );
 		$results['schemas']     = dbDelta( $schemas_sql );
 		$results['logs']        = dbDelta( $logs_sql );
+		\SubtleForms\Tools\ApiLog::install();
+		update_option( 'subtleforms_api_log_table', '1', false );
 		$results['license']     = dbDelta( $license_sql );
 
 		// Verify tables were created

@@ -861,4 +861,29 @@ $cutoff_date
 		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $wpdb->options is a core table; value is a static pattern string.
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", '_transient_subtleforms:' . SUBTLEFORMS_VERSION . ':counts:%' ) );
 	}
+
+	/**
+	 * Keep the original time when an entry is imported.
+	 *
+	 * @param int    $id Submission id.
+	 * @param string $createdAt UTC Y-m-d H:i:s.
+	 * @return bool
+	 */
+	public function setCreatedAt( int $id, string $createdAt ): bool {
+		if ( ! preg_match( '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $createdAt ) ) {
+			return false;
+		}
+		global $wpdb;
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		$updated = $wpdb->update(
+			$this->table,
+			array( 'created_at' => $createdAt ),
+			array( 'id' => $id ),
+			array( '%s' ),
+			array( '%d' )
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		return false !== $updated;
+	}
+
 }

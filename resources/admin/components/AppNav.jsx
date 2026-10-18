@@ -38,6 +38,22 @@ export const NAV_ITEMS = [
     count: () => Number(window.subtleformsAdmin?.unreadCount || 0),
   },
   {
+    key: 'tools',
+    path: '/tools',
+    page: 'subtleforms-tools',
+    label: __('Tools', 'subtleforms'),
+    icon: Icon.Wrench,
+    match: (pathname) => pathname.startsWith('/tools'),
+  },
+  {
+    key: 'reports',
+    path: '/reports',
+    page: 'subtleforms-reports',
+    label: __('Reports', 'subtleforms'),
+    icon: Icon.BarChart2,
+    match: (pathname) => pathname.startsWith('/reports'),
+  },
+  {
     key: 'payments',
     path: '/payments',
     page: 'subtleforms-payments',

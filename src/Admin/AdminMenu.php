@@ -205,6 +205,26 @@ class AdminMenu {
 			array( $this, 'render_submissions' )
 		);
 
+		// Tools: transfer, migration and logs.
+		add_submenu_page(
+			'subtleforms',
+			__( 'Tools', 'subtleforms' ),
+			__( 'Tools', 'subtleforms' ),
+			$this->caps->manage_cap(),
+			'subtleforms-tools',
+			array( $this, 'render_tools' )
+		);
+
+		// Reports. Views and conversion stay behind Pro.
+		add_submenu_page(
+			'subtleforms',
+			__( 'Reports', 'subtleforms' ),
+			__( 'Reports', 'subtleforms' ),
+			$this->caps->manage_cap(),
+			'subtleforms-reports',
+			array( $this, 'render_reports' )
+		);
+
 		// Payments and coupons (2.1)
 		add_submenu_page(
 			'subtleforms',
@@ -911,6 +931,23 @@ class AdminMenu {
 	/**
 	 * Render payments page.
 	 */
+	public function render_tools(): void {
+		if ( ! current_user_can( $this->caps->manage_cap() ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'subtleforms' ) );
+		}
+		$this->get_template( 'tools' );
+	}
+
+	/**
+	 * Render reports page.
+	 */
+	public function render_reports(): void {
+		if ( ! current_user_can( $this->caps->manage_cap() ) ) {
+			wp_die( esc_html__( 'You do not have permission to access this page.', 'subtleforms' ) );
+		}
+		$this->get_template( 'reports' );
+	}
+
 	public function render_payments(): void {
 		if ( ! current_user_can( $this->caps->manage_cap() ) ) {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'subtleforms' ) );
