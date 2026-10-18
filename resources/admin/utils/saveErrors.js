@@ -15,6 +15,21 @@ const AREAS = [
 ];
 
 function areaOf(path) {
+  // "Fields: Maximum length is 255 characters" does not say which setting.
+  // Name the one that failed (the label, the help text, the placeholder).
+  if (/^schema\.fields/.test(path)) {
+    const leaf = path.split('.').pop();
+    const names = {
+      label: () => __('Field label', 'subtleforms'),
+      description: () => __('Field help text', 'subtleforms'),
+      placeholder: () => __('Placeholder', 'subtleforms'),
+      title: () => __('Field title', 'subtleforms'),
+    };
+    if (names[leaf]) {
+      return names[leaf]();
+    }
+    return __('Fields', 'subtleforms');
+  }
   const hit = AREAS.find(([re]) => re.test(path));
   return hit ? hit[1]() : '';
 }

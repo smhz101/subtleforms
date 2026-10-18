@@ -203,4 +203,43 @@ final class FormSchemaSaveTest extends TestCase {
 		$this->assertSame( '#4f5bd5', $metadata['appearance']['tokens']['colorPrimary'] );
 		$this->assertSame( 'filled', $metadata['appearance']['variants']['input'] );
 	}
+
+	/**
+	 * A consent line is the label visitors read. A paragraph must save.
+	 */
+	public function test_a_consent_label_can_be_a_paragraph(): void {
+		$label = str_repeat( 'Protect your investments. ', 16 );
+		$this->assertGreaterThan( 255, strlen( $label ) );
+
+		list( $ok, $why ) = $this->save(
+			array(
+				'fields' => array(
+					array(
+						'type'  => 'consent',
+						'key'   => 'enroll',
+						'label' => $label,
+					),
+				),
+			)
+		);
+
+		$this->assertTrue( $ok, $why );
+	}
+
+	public function test_a_field_label_still_has_a_limit(): void {
+		list( $ok, $why ) = $this->save(
+			array(
+				'fields' => array(
+					array(
+						'type'  => 'text',
+						'key'   => 'name',
+						'label' => str_repeat( 'a', 2001 ),
+					),
+				),
+			)
+		);
+
+		$this->assertFalse( $ok );
+		$this->assertStringContainsString( 'Maximum length is 2000', $why );
+	}
 }

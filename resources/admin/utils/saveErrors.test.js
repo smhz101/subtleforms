@@ -6,6 +6,10 @@ describe('describeSaveError (QA-03)', () => {
     expect(describeSaveError(body, 422)).toBe('Payment settings: Choose an amount.');
     expect(describeSaveError({ error: { meta: { fields: { 'schema.actions.0.settings.to': 'Bad address' } } } })).toBe('Notifications & actions: Bad address');
   });
+  it('names the field setting that is too long', () => {
+    const body = { error: { meta: { fields: { 'schema.fields[6].label': 'Maximum length is 2000 characters' } } } };
+    expect(describeSaveError(body, 422)).toBe('Field label: Maximum length is 2000 characters');
+  });
   it('falls back to the server message, then a plain sentence', () => {
     expect(describeSaveError({ error: { message: 'Form not found' } })).toBe('Form not found');
     expect(describeSaveError(null, 0)).toMatch(/connection/);
