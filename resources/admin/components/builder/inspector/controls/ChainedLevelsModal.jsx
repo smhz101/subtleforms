@@ -1,4 +1,4 @@
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { Button, Modal } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
@@ -54,22 +54,30 @@ function choiceByValue(level, value) {
 }
 
 /**
- * Wide editor for dependent dropdowns. Columns follow the order visitors
- * see, and the next column only lists choices for the selected parent.
+ * Dependent dropdowns as adjacent lists. Selecting a choice reveals only
+ * the next list that belongs to it.
  */
 export default function ChainedLevelsModal({ levels, onChange, onClose, disabled }) {
-	const initialPath = firstPath(levels);
-	const [path, setPath] = useState(initialPath);
-	const [activeDepth, setActiveDepth] = useState(Math.max(0, initialPath.length - 1));
+	const [path, setPath] = useState(() => firstPath(levels));
+	const [activeDepth, setActiveDepth] = useState(0);
 	const [paste, setPaste] = useState('');
 	const shown = activePath(levels, path);
 	const columnDepth = Math.min(activeDepth, Math.max(levels.length - 1, 0));
+
+	useEffect(() => {
+		if (path.length === 0) {
+			const next = firstPath(levels);
+			if (next.length) {
+				setPath(next);
+			}
+		}
+	}, [levels, path.length]);
 
 	const commit = (next, nextPath) => {
 		const resolved = nextPath || firstPath(next);
 		onChange(next);
 		setPath(resolved);
-		setActiveDepth(resolved.length ? Math.min(resolved.length, next.length) - 1 : 0);
+		setActiveDepth(resolved.length ? Math.min(activeDepth, next.length - 1) : 0);
 	};
 
 	const select = (depth, value) => {
@@ -80,13 +88,13 @@ export default function ChainedLevelsModal({ levels, onChange, onClose, disabled
 	const help = (() => {
 		if (levels.length === 0) {
 			return __(
-				'Add the first dropdown, then the ones that come after it. Or paste a list. Visitors answer them in that order.',
+				'Add a dropdown, then another after it. Visitors answer them in that order.',
 				'subtleforms'
 			);
 		}
 		if (columnDepth === 0) {
 			return __(
-				'These choices are always shown. Whatever you add in the next dropdown appears only after one of these is selected.',
+				'These choices are always shown. The next list appears only after one of them is selected.',
 				'subtleforms'
 			);
 		}
@@ -107,6 +115,8 @@ export default function ChainedLevelsModal({ levels, onChange, onClose, disabled
 		);
 	})();
 
+	const addNext = () => commit(addLevel(levels), shown);
+
 	return (
 		<Modal
 			title={__('Dependent dropdowns', 'subtleforms')}
@@ -117,55 +127,33 @@ export default function ChainedLevelsModal({ levels, onChange, onClose, disabled
 				<div className="sf-chained-modal__main">
 					<p className="sf-chained-modal__lead">
 						{__(
-							'Each column is one dropdown, in the order visitors see them. Select a choice to edit only what belongs to it. Add as many dropdowns as this form needs.',
+							'Each column is one dropdown. Select a choice to edit only what belongs to it.',
 							'subtleforms'
 						)}
 					</p>
-					<div className="sf-chained-modal__path">
-						{shown.length ? (
-							<ol>
-								{shown.map((value, depth) => {
-									const choice = choiceByValue(levels[depth], value);
-									return (
-										<li key={`${depth}-${value}`}>
-											{levels[depth]?.label ? (
-												<span className="sf-chained-modal__path-name">{levels[depth].label}</span>
-											) : null}
-											<span>{choice?.label || choice?.value}</span>
-										</li>
-									);
-								})}
-							</ol>
-						) : (
-							<p>{__('Select a choice to open the next dropdown.', 'subtleforms')}</p>
+					<div className="sf-chained-modal__board">
+						{levels.length === 0 && (
+							<div className="sf-chained-modal__start">
+								<Button
+									variant="link"
+									icon={<Icon.Plus size={16} />}
+									disabled={disabled}
+									onClick={addNext}>
+									{__('Add the first dropdown', 'subtleforms')}
+								</Button>
+							</div>
 						)}
-					</div>
-					<div className="sf-chained-modal__columns">
 						{levels.map((level, depth) => {
 							const parentValue = depth === 0 ? '' : shown[depth - 1];
 							const parentReady = depth === 0 || Boolean(parentValue);
 							const options = choicesForParent(levels, depth, parentValue);
 							const selected = shown[depth];
-							const parentChoice = depth === 0 ? null : choiceByValue(levels[depth - 1], parentValue);
-							const caption =
-								depth === 0
-									? __('Always shown', 'subtleforms')
-									: parentChoice
-										? sprintf(
-												/* translators: %s: selected choice in the previous dropdown */
-												__('Shown when %s is selected', 'subtleforms'),
-												parentChoice.label || parentChoice.value
-											)
-										: sprintf(
-												/* translators: %s: previous dropdown name */
-												__('Choose a %s first', 'subtleforms'),
-												levels[depth - 1]?.label || __('previous answer', 'subtleforms')
-											);
 							return (
 								<section
 									key={depth}
 									className={clsx('sf-chained-modal__column', {
 										'is-current': depth === columnDepth,
+										'is-waiting': !parentReady,
 									})}>
 									<header className="sf-chained-modal__column-head">
 										<span className="sf-chained-modal__step">{depth + 1}</span>
@@ -177,13 +165,14 @@ export default function ChainedLevelsModal({ levels, onChange, onClose, disabled
 												type="text"
 												value={level.label || ''}
 												disabled={disabled}
-												placeholder={__('Name this dropdown', 'subtleforms')}
+												placeholder={__('Name', 'subtleforms')}
 												onFocus={() => setActiveDepth(depth)}
 												onChange={(event) => onChange(setLevelLabel(levels, depth, event.target.value))}
 											/>
 										</label>
 										{!disabled && (
 											<Button
+												className="sf-chained-modal__remove-level"
 												icon={<Icon.Trash size={14} />}
 												label={
 													depth < levels.length - 1
@@ -191,16 +180,14 @@ export default function ChainedLevelsModal({ levels, onChange, onClose, disabled
 														: __('Remove dropdown', 'subtleforms')
 												}
 												size="small"
-												isDestructive
 												onClick={() => commit(removeLevel(levels, depth))}
 											/>
 										)}
 									</header>
-									<p className="sf-chained-modal__when">{caption}</p>
-									<ul className="sf-chained-modal__choices">
+									<div className="sf-chained-modal__list">
 										{options.map((option) => (
-											<li
-												key={option.value}
+											<div
+												key={option.value || option.label}
 												className={clsx('sf-chained-modal__choice', {
 													'is-selected': option.value === selected,
 												})}
@@ -217,12 +204,11 @@ export default function ChainedLevelsModal({ levels, onChange, onClose, disabled
 													}
 												/>
 												{option.value === selected && depth < levels.length - 1 && (
-													<span className="sf-chained-modal__next" aria-hidden="true">
-														<Icon.Right size={14} />
-													</span>
+													<Icon.Right className="sf-chained-modal__next" size={14} aria-hidden="true" />
 												)}
 												{!disabled && (
 													<Button
+														className="sf-chained-modal__remove-choice"
 														icon={<Icon.Close size={14} />}
 														label={__('Remove choice', 'subtleforms')}
 														size="small"
@@ -235,79 +221,79 @@ export default function ChainedLevelsModal({ levels, onChange, onClose, disabled
 														}}
 													/>
 												)}
-											</li>
+											</div>
 										))}
-									</ul>
-									{!parentReady && (
-										<p className="sf-chained-modal__empty">
-											{sprintf(
-												/* translators: %s: previous dropdown name */
-												__('Choose a %s to see choices here.', 'subtleforms'),
-												levels[depth - 1]?.label || __('previous answer', 'subtleforms')
-											)}
-										</p>
-									)}
-									{parentReady && options.length === 0 && (
-										<p className="sf-chained-modal__empty">
-											{depth === 0
-												? __('Add the choices visitors see first.', 'subtleforms')
-												: __('Add a choice for the selected answer.', 'subtleforms')}
-										</p>
-									)}
-									<footer className="sf-chained-modal__column-foot">
+										{!parentReady && (
+											<p className="sf-chained-modal__empty">
+												{sprintf(
+													/* translators: %s: previous dropdown name */
+													__('Choose a %s first.', 'subtleforms'),
+													levels[depth - 1]?.label || __('previous answer', 'subtleforms')
+												)}
+											</p>
+										)}
+										{parentReady && options.length === 0 && (
+											<p className="sf-chained-modal__empty">
+												{__('No choices yet.', 'subtleforms')}
+											</p>
+										)}
+									</div>
+									{parentReady && !disabled && (
 										<Button
-											variant="secondary"
-											size="small"
-											disabled={disabled || !parentReady}
+											className="sf-chained-modal__add-choice"
+											variant="link"
+											icon={<Icon.Plus size={14} />}
 											onClick={() => {
 												const before = levels[depth]?.options?.length || 0;
 												const next = addChoice(levels, depth, depth > 0 ? parentValue : undefined);
 												const added = next[depth].options[before];
-												commit(next, [...shown.slice(0, depth), added?.value].filter(Boolean));
+												commit(
+													next,
+													added ? [...shown.slice(0, depth), added.value] : shown.slice(0, depth)
+												);
 											}}>
 											{__('Add choice', 'subtleforms')}
 										</Button>
-									</footer>
+									)}
 								</section>
 							);
 						})}
+						{levels.length > 0 && !disabled && (
+							<Button
+								className="sf-chained-modal__add-column"
+								icon={<Icon.Plus size={16} />}
+								label={__('Add the next dropdown', 'subtleforms')}
+								onClick={addNext}
+							/>
+						)}
 					</div>
-					<Button
-						className="sf-chained-modal__add-level"
-						variant="secondary"
-						icon={<Icon.Plus size={16} />}
-						disabled={disabled}
-						onClick={() => commit(addLevel(levels), shown)}>
-						{levels.length === 0
-							? __('Add the first dropdown', 'subtleforms')
-							: __('Add the next dropdown', 'subtleforms')}
-					</Button>
 				</div>
 				<aside className="sf-chained-modal__help">
 					<h3>{__('How this works', 'subtleforms')}</h3>
 					<p>{help}</p>
 					<p>
 						{__(
-							'The choices can be anything. A later choice appears only after the one it belongs to, and changing an earlier answer clears the answers after it.',
+							'The words can be anything. Changing an earlier answer clears the answers after it.',
 							'subtleforms'
 						)}
 					</p>
 					<h3>{__('Paste a list', 'subtleforms')}</h3>
 					<p>
 						{__(
-							'One choice per line. Indent a line with two spaces, or a tab, to put it under the choice above. Use your own words. This replaces the choices and keeps the dropdown names.',
+							'One choice per line. Indent with two spaces or a tab to nest it. This replaces the choices and keeps the names.',
 							'subtleforms'
 						)}
 					</p>
 					<textarea
 						className="sf-chained-modal__paste"
-						rows={12}
+						rows={5}
 						value={paste}
 						disabled={disabled}
 						placeholder={pastePlaceholder()}
 						onChange={(event) => setPaste(event.target.value)}
 					/>
 					<Button
+						className="sf-chained-modal__replace"
 						variant="primary"
 						disabled={disabled || !paste.trim()}
 						onClick={() => {
