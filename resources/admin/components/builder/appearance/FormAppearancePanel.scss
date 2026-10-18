@@ -195,3 +195,14 @@
 		&--full { width: 100%; }
 	}
 }
+
+.sf-preset-mock--theme {
+	background:
+		linear-gradient(135deg, transparent 46%, var(--sf-border) 46%, var(--sf-border) 54%, transparent 54%),
+		var(--sf-bg-subtle);
+	border: 1px dashed var(--sf-border-strong, var(--sf-border));
+}
+
+.sf-form-appearance__inherit {
+	margin: 0 0 var(--sf-space-4);
+}

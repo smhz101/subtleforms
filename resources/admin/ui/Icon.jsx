@@ -96,6 +96,8 @@ import {
   Settings,
   Key,
   Monitor,
+  Tablet,
+  Smartphone,
   Wrench,
   Tag,
   Star,
@@ -222,6 +224,9 @@ const Icon = {
   Settings,
   Key,
   Monitor,
+  Tablet,
+  Smartphone,
+  Desktop: Monitor,
   Wrench,
 
   // Form Field Types

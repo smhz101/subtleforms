@@ -82,7 +82,9 @@ function ColorToken( { label, value, inherited, onChange, disabled, inheritLabel
               } }>
               { inheritLabel === __( 'Form', 'subtleforms' )
                 ? __( 'Use form colour', 'subtleforms' )
-                : __( 'Use default', 'subtleforms' ) }
+                : inheritLabel === __( 'Theme', 'subtleforms' )
+                  ? __( 'Inherit from theme', 'subtleforms' )
+                  : __( 'Use default', 'subtleforms' ) }
             </Button>
             <Button variant='secondary' size='small' onClick={ onClose }>
               { __( 'Done', 'subtleforms' ) }

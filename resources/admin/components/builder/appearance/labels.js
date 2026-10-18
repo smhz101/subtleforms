@@ -65,7 +65,9 @@ export const OPTION_LABELS = {
 
   // Field layout
   stacked: __( 'Stacked', 'subtleforms' ),
+  inherit: __( 'Inherit from theme', 'subtleforms' ),
   inline: __( 'Inline', 'subtleforms' ),
+  theme: __( 'Inherit from theme', 'subtleforms' ),
 
   // Widths
   narrow: __( 'Narrow', 'subtleforms' ),
@@ -127,6 +129,10 @@ export const PRESET_LABELS = {
   'dark-surface': {
     label: __( 'Dark surface', 'subtleforms' ),
     description: __( 'Sits on a dark footer or hero without a card of its own.', 'subtleforms' ),
+  },
+  theme: {
+    label: __( 'Inherit from theme', 'subtleforms' ),
+    description: __( 'Uses the active theme\'s type, colours and content width.', 'subtleforms' ),
   },
 };
 

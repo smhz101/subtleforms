@@ -1,9 +1,10 @@
 import { useState } from '@wordpress/element';
 import { Button, Notice } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import FormPreviewBody from '../form-preview/FormPreviewBody';
 import FormAppearancePanel from './appearance/FormAppearancePanel';
-import { appearanceBackdrop } from '../../../shared/appearance';
+import { appearanceBackdrop, previewBreakpoints } from '../../../shared/appearance';
+import Icon from '../../ui/Icon';
 import './PreviewWorkspace.scss';
 
 /**
@@ -16,10 +17,24 @@ import './PreviewWorkspace.scss';
  * result redraws beside it in the same frame.
  */
 
+function viewportWidths() {
+  const fromAdmin = window.subtleformsAdmin?.previewBreakpoints;
+  if ( fromAdmin && fromAdmin.desktop && fromAdmin.tablet && fromAdmin.mobile ) {
+    return {
+      desktop: Number( fromAdmin.desktop ),
+      tablet: Number( fromAdmin.tablet ),
+      mobile: Number( fromAdmin.mobile ),
+    };
+  }
+  return previewBreakpoints();
+}
+
+const widths = viewportWidths();
+
 const VIEWPORTS = [
-  { id: 'desktop', label: __( 'Desktop', 'subtleforms' ), width: 960 },
-  { id: 'tablet', label: __( 'Tablet', 'subtleforms' ), width: 768 },
-  { id: 'mobile', label: __( 'Mobile', 'subtleforms' ), width: 380 },
+  { id: 'desktop', label: __( 'Desktop', 'subtleforms' ), icon: Icon.Desktop, width: widths.desktop },
+  { id: 'tablet', label: __( 'Tablet', 'subtleforms' ), icon: Icon.Tablet, width: widths.tablet },
+  { id: 'mobile', label: __( 'Mobile', 'subtleforms' ), icon: Icon.Smartphone, width: widths.mobile },
 ];
 
 export default function PreviewWorkspace( {
@@ -41,7 +56,9 @@ export default function PreviewWorkspace( {
           className='sf-preview-workspace__viewports'
           role='group'
           aria-label={ __( 'Preview width', 'subtleforms' ) }>
-          { VIEWPORTS.map( ( option ) => (
+          { VIEWPORTS.map( ( option ) => {
+            const ViewportIcon = option.icon;
+            return (
             <button
               key={ option.id }
               type='button'
@@ -49,10 +66,18 @@ export default function PreviewWorkspace( {
                 option.id === viewport ? ' is-active' : ''
               }` }
               aria-pressed={ option.id === viewport }
+              title={ sprintf(
+                /* translators: 1: device name, 2: width in pixels */
+                __( '%1$s, %2$d pixels', 'subtleforms' ),
+                option.label,
+                option.width
+              ) }
               onClick={ () => setViewport( option.id ) }>
-              { option.label }
+              <ViewportIcon size={ 16 } aria-hidden='true' />
+              <span>{ option.label }</span>
             </button>
-          ) ) }
+            );
+          } ) }
         </div>
 
         <Button
@@ -74,7 +99,7 @@ export default function PreviewWorkspace( {
             <div
               className='sf-preview-workspace__form'
               style={ {
-                maxWidth: `${ active.width }px`,
+                width: `${ active.width }px`,
                 // A form made for a dark footer is previewed on one (2.3.0).
                 ...( appearanceBackdrop( schema?.metadata?.appearance )
                   ? { background: appearanceBackdrop( schema?.metadata?.appearance ), padding: '24px' }

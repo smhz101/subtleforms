@@ -98,6 +98,7 @@ export const FORM_VARIANTS = [
     key: 'layout',
     label: 'Field layout',
     options: [
+      { label: 'Inherit from theme', value: 'inherit' },
       { label: 'Stacked', value: 'stacked' },
       { label: 'Inline', value: 'inline' },
     ],
@@ -106,6 +107,7 @@ export const FORM_VARIANTS = [
     key: 'width',
     label: 'Form width',
     options: [
+      { label: 'Inherit from theme', value: 'theme' },
       { label: 'Narrow', value: 'narrow' },
       { label: 'Standard', value: 'standard' },
       { label: 'Wide', value: 'wide' },
@@ -164,6 +166,14 @@ export const FIELD_LAYOUT = {
  * value behind from the previous choice.
  */
 export const FORM_PRESETS = [
+  {
+    id: 'theme',
+    label: 'Inherit from theme',
+    description: 'Uses the active theme\'s type, colours and content width. Nothing here overrides the theme unless you set it.',
+    swatch: ['currentColor', 'transparent', 'transparent'],
+    tokens: { fontFamily: 'inherit', colorBackground: 'transparent' },
+    variants: { input: 'outlined', button: 'solid', buttonAlign: 'left', layout: 'inherit', width: 'theme' },
+  },
   {
     id: 'default',
     label: 'Default',
@@ -396,7 +406,76 @@ export const FORM_WIDTHS = {
   standard: '40rem',
   wide: '52rem',
   full: '100%',
+  // The theme's own content column, when it publishes one.
+  theme: 'var(--wp--style--global--content-size, 40rem)',
 };
+
+/**
+ * Preview widths. A theme can name these in theme.json under
+ * settings.custom.breakpoints (or breakpoint), in pixels. Wide and content
+ * sizes fill in desktop and tablet when those names are absent. Anything
+ * still missing uses a standard width, and the three stay in order so
+ * desktop is never the same size as tablet.
+ *
+ * @param {Object} settings theme.json settings.
+ * @return {{desktop: number, tablet: number, mobile: number}} Widths in px.
+ */
+export function previewBreakpoints( settings = {} ) {
+  const standard = { desktop: 1280, tablet: 768, mobile: 390 };
+  const custom = settings.custom || {};
+  const layout = settings.layout || {};
+  const px = ( value ) => {
+    if ( typeof value === 'number' && Number.isFinite( value ) ) {
+      return Math.round( value );
+    }
+    const match = typeof value === 'string' ? value.trim().match( /^(\d+(?:\.\d+)?)px$/ ) : null;
+    return match ? Math.round( Number( match[ 1 ] ) ) : null;
+  };
+  const usable = ( value ) => {
+    const n = px( value );
+    return n !== null && n >= 280 && n <= 2400 ? n : null;
+  };
+  const found = {};
+  [ custom.breakpoint, custom.breakpoints ].forEach( ( bag ) => {
+    if ( ! bag || typeof bag !== 'object' ) {
+      return;
+    }
+    [ 'desktop', 'tablet', 'mobile' ].forEach( ( name ) => {
+      if ( found[ name ] ) {
+        return;
+      }
+      const n = usable( bag[ name ] );
+      if ( n ) {
+        found[ name ] = n;
+      }
+    } );
+  } );
+  if ( ! found.desktop ) {
+    const wide = usable( layout.wideSize );
+    if ( wide ) {
+      found.desktop = wide;
+    }
+  }
+  if ( ! found.tablet ) {
+    const content = usable( layout.contentSize );
+    if ( content ) {
+      found.tablet = content;
+    }
+  }
+  const widths = {
+    desktop: found.desktop || standard.desktop,
+    tablet: found.tablet || standard.tablet,
+    mobile: found.mobile || standard.mobile,
+  };
+  // Tablet first. Raising it afterwards can put it above desktop.
+  if ( widths.tablet <= widths.mobile ) {
+    widths.tablet = Math.max( widths.mobile + 200, standard.tablet );
+  }
+  if ( widths.desktop <= widths.tablet ) {
+    widths.desktop = Math.max( widths.tablet + 240, standard.desktop );
+  }
+  return widths;
+}
 
 /**
  * Plugin defaults, mirrored from the public stylesheet. Used by the builder to
@@ -511,6 +590,9 @@ export function formAppearanceClasses( appearance ) {
   // Presets that change the form's chrome, not only its colours.
   if ( appearance?.preset === 'dark-surface' ) {
     classes.push( 'subtleforms--preset-dark-surface' );
+  }
+  if ( appearance?.preset === 'theme' ) {
+    classes.push( 'subtleforms--inherit-theme' );
   }
   if ( v.layout === 'inline' ) {
     classes.push( 'subtleforms--layout-inline' );

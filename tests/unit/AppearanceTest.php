@@ -198,4 +198,80 @@ final class AppearanceTest extends TestCase {
 			Appearance::sanitizeField( array( 'hideLabel' => false ) )
 		);
 	}
+
+	public function test_theme_layout_and_width_are_kept(): void {
+		$clean = Appearance::sanitizeForm(
+			array(
+				'preset'   => 'theme',
+				'variants' => array(
+					'layout' => 'inherit',
+					'width'  => 'theme',
+				),
+			)
+		);
+
+		$this->assertSame( 'theme', $clean['preset'] );
+		$this->assertSame( 'inherit', $clean['variants']['layout'] );
+		$this->assertSame( 'theme', $clean['variants']['width'] );
+	}
+
+	public function test_preview_breakpoints_use_standards_when_the_theme_says_nothing(): void {
+		$this->assertSame(
+			array(
+				'desktop' => 1280,
+				'tablet'  => 768,
+				'mobile'  => 390,
+			),
+			Appearance::previewBreakpoints( array() )
+		);
+	}
+
+	public function test_preview_breakpoints_inherit_theme_sizes_and_stay_distinct(): void {
+		$this->assertSame(
+			array(
+				'desktop' => 1200,
+				'tablet'  => 720,
+				'mobile'  => 390,
+			),
+			Appearance::previewBreakpoints(
+				array(
+					'layout' => array(
+						'wideSize'    => '1200px',
+						'contentSize' => '720px',
+					),
+				)
+			)
+		);
+
+		$named = Appearance::previewBreakpoints(
+			array(
+				'custom' => array(
+					'breakpoints' => array(
+						'desktop' => '1440px',
+						'tablet'  => '834px',
+						'mobile'  => '390px',
+					),
+				),
+				'layout' => array( 'wideSize' => '1200px' ),
+			)
+		);
+		$this->assertSame( 1440, $named['desktop'] );
+		$this->assertSame( 834, $named['tablet'] );
+		$this->assertSame( 390, $named['mobile'] );
+
+		// Mobile above tablet must not leave desktop narrower than tablet.
+		$ordered = Appearance::previewBreakpoints(
+			array(
+				'custom' => array(
+					'breakpoints' => array(
+						'desktop' => '1000px',
+						'tablet'  => '800px',
+						'mobile'  => '900px',
+					),
+				),
+			)
+		);
+		$this->assertGreaterThan( $ordered['tablet'], $ordered['desktop'] );
+		$this->assertGreaterThan( $ordered['mobile'], $ordered['tablet'] );
+	}
 }

@@ -89,8 +89,8 @@ final class Appearance {
 		'input'       => array( 'outlined', 'filled', 'underlined' ),
 		'button'      => array( 'solid', 'outline', 'ghost' ),
 		'buttonAlign' => array( 'left', 'center', 'right', 'full' ),
-		'width'       => array( 'narrow', 'standard', 'wide', 'full' ),
-		'layout'      => array( 'stacked', 'inline' ),
+		'width'       => array( 'narrow', 'standard', 'wide', 'full', 'theme' ),
+		'layout'      => array( 'stacked', 'inline', 'inherit' ),
 	);
 
 	/**
@@ -290,4 +290,89 @@ final class Appearance {
 
 		return null;
 	}
+
+	/**
+	 * Preview widths for desktop, tablet and mobile.
+	 *
+	 * A theme may name them, in pixels, under settings.custom.breakpoints
+	 * (or breakpoint) in theme.json. settings.layout.wideSize fills in
+	 * desktop and contentSize fills in tablet when those names are absent.
+	 * Missing sizes use 1280, 768 and 390, and the three stay in order.
+	 *
+	 * @param array $settings theme.json settings.
+	 * @return array{desktop: int, tablet: int, mobile: int}
+	 */
+	public static function previewBreakpoints( array $settings = array() ): array {
+		$standard = array(
+			'desktop' => 1280,
+			'tablet'  => 768,
+			'mobile'  => 390,
+		);
+		$custom   = isset( $settings['custom'] ) && is_array( $settings['custom'] ) ? $settings['custom'] : array();
+		$layout   = isset( $settings['layout'] ) && is_array( $settings['layout'] ) ? $settings['layout'] : array();
+		$found    = array();
+
+		foreach ( array( 'breakpoint', 'breakpoints' ) as $key ) {
+			if ( empty( $custom[ $key ] ) || ! is_array( $custom[ $key ] ) ) {
+				continue;
+			}
+			foreach ( array( 'desktop', 'tablet', 'mobile' ) as $name ) {
+				if ( isset( $found[ $name ] ) || ! isset( $custom[ $key ][ $name ] ) ) {
+					continue;
+				}
+				$px = self::previewPx( $custom[ $key ][ $name ] );
+				if ( null !== $px ) {
+					$found[ $name ] = $px;
+				}
+			}
+		}
+
+		if ( ! isset( $found['desktop'] ) && isset( $layout['wideSize'] ) ) {
+			$wide = self::previewPx( $layout['wideSize'] );
+			if ( null !== $wide ) {
+				$found['desktop'] = $wide;
+			}
+		}
+		if ( ! isset( $found['tablet'] ) && isset( $layout['contentSize'] ) ) {
+			$content = self::previewPx( $layout['contentSize'] );
+			if ( null !== $content ) {
+				$found['tablet'] = $content;
+			}
+		}
+
+		$widths = array(
+			'desktop' => $found['desktop'] ?? $standard['desktop'],
+			'tablet'  => $found['tablet'] ?? $standard['tablet'],
+			'mobile'  => $found['mobile'] ?? $standard['mobile'],
+		);
+
+		// Tablet first. Raising it afterwards can put it above desktop.
+		if ( $widths['tablet'] <= $widths['mobile'] ) {
+			$widths['tablet'] = max( $widths['mobile'] + 200, $standard['tablet'] );
+		}
+		if ( $widths['desktop'] <= $widths['tablet'] ) {
+			$widths['desktop'] = max( $widths['tablet'] + 240, $standard['desktop'] );
+		}
+
+		return $widths;
+	}
+
+	/**
+	 * A pixel length from a theme.json size, or null.
+	 *
+	 * @param mixed $value Raw size.
+	 * @return int|null
+	 */
+	private static function previewPx( $value ): ?int {
+		if ( is_int( $value ) || is_float( $value ) ) {
+			$px = (int) round( (float) $value );
+		} elseif ( is_string( $value ) && preg_match( '/^(\d+(?:\.\d+)?)px$/', trim( $value ), $match ) ) {
+			$px = (int) round( (float) $match[1] );
+		} else {
+			return null;
+		}
+
+		return ( $px >= 280 && $px <= 2400 ) ? $px : null;
+	}
+
 }

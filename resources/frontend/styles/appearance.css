@@ -144,8 +144,9 @@
 }
 
 /* ── Inline layout (2.3.0) ───────────────────────────────────────────────────
-   Fields and the submit button share one row, for a newsletter sign-up in a
-   footer or hero. Wraps onto two rows on narrow screens. */
+   Fields and the submit button share rows. Simple fields wrap instead of
+   being crushed onto one line; tall fields take the whole row. The button
+   stays at the end of the last row. Narrow screens stack. */
 
 .subtleforms--layout-inline form {
 	display: flex;
@@ -154,52 +155,88 @@
 	gap: var(--subtleforms-field-gap, 12px);
 }
 
-.subtleforms--layout-inline .subtleforms-step-content {
-	flex: 1 1 240px;
-	min-width: 0;
-	margin: 0;
-	padding: 0;
+.subtleforms--layout-inline .subtleforms-honeypot {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
 }
 
-.subtleforms--layout-inline .subtleforms-fields,
+.subtleforms--layout-inline .subtleforms-error,
+.subtleforms--layout-inline .subtleforms-step-title-main,
+.subtleforms--layout-inline .subtleforms-step-description {
+	flex: 1 1 100%;
+	margin-top: 0;
+}
+
+.subtleforms--layout-inline .subtleforms-step-content,
+.subtleforms--layout-inline .subtleforms-fields {
+	display: contents;
+}
+
 .subtleforms--layout-inline .subtleforms-field {
+	flex: 1 1 14rem;
+	min-width: min(100%, 10rem);
+	max-width: 100%;
 	margin-bottom: 0;
 }
 
-.subtleforms--layout-inline .subtleforms-fields {
-	flex-wrap: nowrap;
-}
-
-.subtleforms--layout-inline .subtleforms-field {
-	flex: 1 1 0;
+/* These are too tall to sit beside an input. */
+.subtleforms--layout-inline .subtleforms-field-textarea,
+.subtleforms--layout-inline .subtleforms-field-rich_text,
+.subtleforms--layout-inline .subtleforms-field-file,
+.subtleforms--layout-inline .subtleforms-field-image,
+.subtleforms--layout-inline .subtleforms-field-matrix,
+.subtleforms--layout-inline .subtleforms-field-address,
+.subtleforms--layout-inline .subtleforms-field-name,
+.subtleforms--layout-inline .subtleforms-field-repeater,
+.subtleforms--layout-inline .subtleforms-field-group,
+.subtleforms--layout-inline .subtleforms-field-columns,
+.subtleforms--layout-inline .subtleforms-field-html,
+.subtleforms--layout-inline .subtleforms-field-section,
+.subtleforms--layout-inline .subtleforms-field-signature,
+.subtleforms--layout-inline .subtleforms-field-container,
+.subtleforms--layout-inline .subtleforms-field-disclaimer {
+	flex-basis: 100%;
 }
 
 .subtleforms--layout-inline .subtleforms-buttons {
 	flex: 0 0 auto;
+	align-self: flex-end;
 	margin: 0;
 	padding: 0;
 	border: 0;
 }
 
-/* Messages and errors take the full row above or below. */
-.subtleforms--layout-inline form > .subtleforms-error {
-	flex: 1 1 100%;
-}
-
 @media (max-width: 480px) {
-	.subtleforms--layout-inline .subtleforms-fields {
-		flex-wrap: wrap;
-	}
-
-	.subtleforms--layout-inline .subtleforms-field {
-		flex-basis: 100%;
-	}
-
+	.subtleforms--layout-inline .subtleforms-field,
 	.subtleforms--layout-inline .subtleforms-buttons,
 	.subtleforms--layout-inline .subtleforms-button {
 		flex: 1 1 100%;
 		width: 100%;
 	}
+}
+
+/* Colours, type and the content width come from the active theme. A custom
+   token still wins because it is set on the form itself. */
+.subtleforms.subtleforms--inherit-theme {
+	color: var(--wp--preset--color--foreground, inherit);
+	font-family: var(--wp--preset--font-family--body, inherit);
+	font-size: var(--wp--preset--font-size--medium, inherit);
+	background: transparent;
+	box-shadow: none;
+	--subtleforms-color-text: var(--wp--preset--color--foreground, inherit);
+	--subtleforms-label-color: var(--wp--preset--color--foreground, inherit);
+	--subtleforms-input-text: var(--wp--preset--color--foreground, inherit);
+	--subtleforms-color-text-light: var(--wp--preset--color--secondary, inherit);
+	--subtleforms-color-primary: var(--wp--preset--color--primary, var(--wp--preset--color--contrast, currentColor));
+	--subtleforms-color-primary-hover: var(--wp--preset--color--primary, var(--wp--preset--color--contrast, currentColor));
+	--subtleforms-color-bg: transparent;
+	--subtleforms-color-bg-subtle: transparent;
+	--subtleforms-color-border: var(--wp--preset--color--border, currentColor);
+	--subtleforms-color-border-focus: var(--wp--preset--color--primary, var(--wp--preset--color--contrast, currentColor));
+	--subtleforms-font-family: var(--wp--preset--font-family--body, inherit);
+	--subtleforms-font-size-base: var(--wp--preset--font-size--medium, inherit);
 }
 
 /* A form on a dark footer or hero: no card of its own. */
