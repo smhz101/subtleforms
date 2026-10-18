@@ -2,22 +2,22 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: SubtleForms 2.3.5\n"
+"Project-Id-Version: SubtleForms 2.3.6\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/subtleforms\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-17T23:46:53+00:00\n"
+"POT-Creation-Date: 2026-10-18T12:14:43+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
 
 #. Plugin Name of the plugin
 #: subtleforms.php
-#: src/Admin/AdminMenu.php:552
-#: src/Admin/AdminMenu.php:1202
+#: src/Admin/AdminMenu.php:572
+#: src/Admin/AdminMenu.php:1239
 #: resources/admin/components/builder/CheckoutPanel.jsx:83
 #: resources/blocks/form/edit.jsx:238
 #: resources/blocks/form/edit.jsx:403
@@ -51,12 +51,12 @@ msgstr ""
 msgid "SubtleForms requires WordPress 5.0 or higher. You are running %s"
 msgstr ""
 
-#: src/Activator.php:220
+#: src/Activator.php:222
 msgid "Database Creation Error"
 msgstr ""
 
 #: src/Admin/AdminMenu.php:73
-#: resources/admin/app/AdminApp.jsx:153
+#: resources/admin/app/AdminApp.jsx:161
 #: resources/admin/components/AppNav.jsx:19
 #: resources/admin/pages/DashboardPage.jsx:36
 #: resources/admin/pages/DashboardPage.jsx:65
@@ -65,7 +65,7 @@ msgstr ""
 
 #: src/Admin/AdminMenu.php:117
 #: src/Admin/AdminMenu.php:201
-#: resources/admin/app/AdminApp.jsx:156
+#: resources/admin/app/AdminApp.jsx:164
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:35
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:112
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:222
@@ -73,8 +73,11 @@ msgstr ""
 #: resources/admin/pages/DashboardPage.jsx:74
 #: resources/admin/pages/DashboardPage.jsx:120
 #: resources/admin/pages/DashboardPage.jsx:558
+#: resources/admin/pages/ReportsPage.jsx:64
+#: resources/admin/pages/ReportsPage.jsx:99
 #: resources/admin/pages/SubmissionDetailPage.jsx:769
 #: resources/admin/pages/SubmissionsPage.jsx:111
+#: resources/admin/pages/ToolsPage.jsx:258
 msgid "Submissions"
 msgstr ""
 
@@ -94,9 +97,26 @@ msgstr ""
 
 #: src/Admin/AdminMenu.php:211
 #: src/Admin/AdminMenu.php:212
-#: src/Admin/AdminMenu.php:666
-#: resources/admin/app/AdminApp.jsx:159
+#: resources/admin/app/AdminApp.jsx:168
 #: resources/admin/components/AppNav.jsx:44
+#: resources/admin/pages/ToolsPage.jsx:61
+msgid "Tools"
+msgstr ""
+
+#: src/Admin/AdminMenu.php:221
+#: src/Admin/AdminMenu.php:222
+#: resources/admin/app/AdminApp.jsx:169
+#: resources/admin/components/AppNav.jsx:52
+#: resources/admin/pages/ReportsPage.jsx:52
+#: resources/admin/pages/ReportsPage.jsx:123
+msgid "Reports"
+msgstr ""
+
+#: src/Admin/AdminMenu.php:231
+#: src/Admin/AdminMenu.php:232
+#: src/Admin/AdminMenu.php:686
+#: resources/admin/app/AdminApp.jsx:167
+#: resources/admin/components/AppNav.jsx:60
 #: resources/admin/components/builder/FieldDock.jsx:26
 #: resources/admin/components/builder/FormSettings.jsx:185
 #: resources/admin/components/settings/extensions/PaymentsPanel.jsx:31
@@ -106,19 +126,19 @@ msgstr ""
 msgid "Payments"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:221
-#: src/Admin/AdminMenu.php:222
-#: resources/admin/app/AdminApp.jsx:158
-#: resources/admin/components/AppNav.jsx:52
+#: src/Admin/AdminMenu.php:241
+#: src/Admin/AdminMenu.php:242
+#: resources/admin/app/AdminApp.jsx:166
+#: resources/admin/components/AppNav.jsx:68
 #: resources/admin/pages/DashboardPage.jsx:177
 #: resources/admin/pages/ExtensionsPage.jsx:166
 msgid "Extensions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:231
-#: src/Admin/AdminMenu.php:232
-#: resources/admin/app/AdminApp.jsx:157
-#: resources/admin/components/AppNav.jsx:60
+#: src/Admin/AdminMenu.php:251
+#: src/Admin/AdminMenu.php:252
+#: resources/admin/app/AdminApp.jsx:165
+#: resources/admin/components/AppNav.jsx:76
 #: resources/admin/components/builder/FieldInspector.jsx:166
 #: resources/admin/components/builder/layout/BuilderViewSwitcher.jsx:11
 #: resources/admin/pages/SettingsPage.jsx:150
@@ -127,49 +147,50 @@ msgstr ""
 msgid "Settings"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:372
+#: src/Admin/AdminMenu.php:392
 msgid "Are you sure you want to delete this item?"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:373
+#: src/Admin/AdminMenu.php:393
 #: src/Frontend/FrontendAssets.php:81
 msgid "An error occurred. Please try again."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:374
-#: src/Admin/AdminMenu.php:1054
+#: src/Admin/AdminMenu.php:394
+#: src/Admin/AdminMenu.php:1091
 msgid "Action completed successfully."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:631
+#: src/Admin/AdminMenu.php:651
 #: resources/admin/components/settings/extensions/WebhooksPanel.jsx:46
+#: resources/admin/pages/ToolsPage.jsx:14
 msgid "Webhooks"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:632
+#: src/Admin/AdminMenu.php:652
 msgid "Send each entry as JSON to any URL, with retries and signed requests."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:636
+#: src/Admin/AdminMenu.php:656
 #: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:70
 msgid "Email Marketing"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:637
+#: src/Admin/AdminMenu.php:657
 msgid "Add people who fill in a form to Mailchimp, Brevo or Kit."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:641
+#: src/Admin/AdminMenu.php:661
 #: resources/admin/components/builder/IntegrationsPanel.jsx:344
 #: resources/admin/components/settings/extensions/CrmPanel.jsx:21
 msgid "CRM"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:642
+#: src/Admin/AdminMenu.php:662
 msgid "Create or update HubSpot contacts, or send contacts to Zapier or Make."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:646
+#: src/Admin/AdminMenu.php:666
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:259
 #: resources/admin/components/analytics/PerformanceCell.jsx:24
 #: resources/admin/components/builder/IntegrationsPanel.jsx:421
@@ -177,94 +198,96 @@ msgstr ""
 msgid "Analytics"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:647
+#: src/Admin/AdminMenu.php:667
 msgid "Views, submissions and conversion rate for every form."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:651
+#: src/Admin/AdminMenu.php:671
 #: resources/admin/components/settings/extensions/EcommercePanel.jsx:22
 msgid "WooCommerce"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:652
+#: src/Admin/AdminMenu.php:672
 msgid "Take form payments through the WooCommerce checkout and sell WooCommerce products from any form."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:656
+#: src/Admin/AdminMenu.php:676
 #: resources/admin/components/settings/extensions/PdfPanel.jsx:18
 msgid "Entry PDF"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:657
+#: src/Admin/AdminMenu.php:677
 msgid "Download any entry as a PDF and attach it to notification emails."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:661
+#: src/Admin/AdminMenu.php:681
 #: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:64
 msgid "Multilanguage"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:662
+#: src/Admin/AdminMenu.php:682
 msgid "Register form strings with WPML or Polylang for full translation support."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:667
+#: src/Admin/AdminMenu.php:687
 msgid "Accept Stripe or PayPal payments directly through your forms."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:799
+#: src/Admin/AdminMenu.php:819
 msgid "Security check failed."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:824
-#: src/Admin/AdminMenu.php:837
-#: src/Admin/AdminMenu.php:856
-#: src/Admin/AdminMenu.php:879
-#: src/Admin/AdminMenu.php:905
-#: src/Admin/AdminMenu.php:916
-#: src/Admin/AdminMenu.php:927
+#: src/Admin/AdminMenu.php:844
+#: src/Admin/AdminMenu.php:857
+#: src/Admin/AdminMenu.php:876
+#: src/Admin/AdminMenu.php:899
+#: src/Admin/AdminMenu.php:925
+#: src/Admin/AdminMenu.php:936
+#: src/Admin/AdminMenu.php:946
+#: src/Admin/AdminMenu.php:953
+#: src/Admin/AdminMenu.php:964
 msgid "You do not have permission to access this page."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:867
-#: src/Admin/AdminMenu.php:982
+#: src/Admin/AdminMenu.php:887
+#: src/Admin/AdminMenu.php:1019
 #: src/Frontend/Shortcode.php:51
 msgid "Form not found."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:955
-#: src/Admin/AdminMenu.php:977
-#: src/Admin/AdminMenu.php:1010
+#: src/Admin/AdminMenu.php:992
+#: src/Admin/AdminMenu.php:1014
+#: src/Admin/AdminMenu.php:1047
 #: src/Api/AnalyticsApi.php:130
 msgid "Invalid request."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1062
+#: src/Admin/AdminMenu.php:1099
 msgid "Coming Soon"
 msgstr ""
 
 #. translators: %s: Name of the interface being developed
-#: src/Admin/AdminMenu.php:1066
+#: src/Admin/AdminMenu.php:1103
 #, php-format
 msgid "The %s interface is under development."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1070
+#: src/Admin/AdminMenu.php:1107
 msgid "This is a placeholder. Template files will be created in the templates/admin/ directory."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1075
+#: src/Admin/AdminMenu.php:1112
 msgid "Your Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1079
+#: src/Admin/AdminMenu.php:1116
 #: src/Fields/CoreFields.php:1170
 #: src/Fields/CoreFields.php:1198
 #: src/Fields/CoreFields.php:1367
 msgid "Title"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1080
+#: src/Admin/AdminMenu.php:1117
 #: src/Api/SubmissionsApi.php:1047
 #: src/Privacy/PrivacyExporter.php:100
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:299
@@ -274,19 +297,20 @@ msgstr ""
 #: resources/admin/components/SubmissionsTable.jsx:39
 #: resources/admin/components/SubmissionsTable.jsx:579
 #: resources/admin/pages/PaymentsPage.jsx:508
+#: resources/admin/pages/ToolsPage.jsx:507
 msgid "Status"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1081
+#: src/Admin/AdminMenu.php:1118
 msgid "Created"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1082
+#: src/Admin/AdminMenu.php:1119
 #: resources/admin/pages/PaymentsPage.jsx:509
 msgid "Actions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1107
+#: src/Admin/AdminMenu.php:1144
 #: resources/admin/components/builder/ContainerWrapper.jsx:77
 #: resources/admin/components/builder/FieldInspector.jsx:235
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:54
@@ -294,20 +318,20 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1121
+#: src/Admin/AdminMenu.php:1158
 msgid "Total Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1125
+#: src/Admin/AdminMenu.php:1162
 msgid "Active Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1129
+#: src/Admin/AdminMenu.php:1166
 msgid "Total Submissions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1179
-#: src/Admin/AdminMenu.php:1184
+#: src/Admin/AdminMenu.php:1216
+#: src/Admin/AdminMenu.php:1221
 msgid "WordPress Admin"
 msgstr ""
 
@@ -765,6 +789,26 @@ msgstr ""
 
 #: src/Api/SubmissionsApi.php:1082
 msgid "Signed"
+msgstr ""
+
+#: src/Api/ToolsApi.php:162
+#: src/Api/ToolsApi.php:193
+#: src/Api/ToolsApi.php:287
+msgid "The file could not be read."
+msgstr ""
+
+#: src/Api/ToolsApi.php:178
+#: resources/admin/pages/ToolsPage.jsx:146
+msgid "Choose a form to export."
+msgstr ""
+
+#: src/Api/ToolsApi.php:214
+#: src/Api/ToolsApi.php:235
+msgid "This file is not a Gravity Forms or Fluent Forms export."
+msgstr ""
+
+#: src/Api/ToolsApi.php:291
+msgid "Choose Gravity Forms or Fluent Forms."
 msgstr ""
 
 #: src/Blocks/SubtleFormsBlock.php:78
@@ -1255,6 +1299,7 @@ msgstr ""
 
 #: src/Fields/CoreFields.php:730
 #: resources/admin/pages/SubmissionDetailPage.jsx:933
+#: resources/admin/pages/ToolsPage.jsx:509
 msgid "Time"
 msgstr ""
 
@@ -1395,10 +1440,12 @@ msgid "Style"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1131
+#: resources/admin/pages/ToolsPage.jsx:415
 msgid "Info"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1135
+#: resources/admin/pages/ToolsPage.jsx:416
 msgid "Warning"
 msgstr ""
 
@@ -4615,6 +4662,101 @@ msgstr ""
 msgid "Three-step quote request for insurance, loans, or financial services: personal info, coverage needs, and confirmation."
 msgstr ""
 
+#: src/Tools/FormMigration.php:90
+msgid "No forms of that kind were found in the file."
+msgstr ""
+
+#. translators: %d: maximum number of forms
+#: src/Tools/FormMigration.php:98
+#: src/Tools/TransferPackage.php:86
+#, php-format
+msgid "Import up to %d forms at a time."
+msgstr ""
+
+#. translators: 1: field label, 2: original field type
+#: src/Tools/FormMigration.php:259
+#, php-format
+msgid "%1$s (%2$s) was left out. Payments, quizzes and post fields are not imported."
+msgstr ""
+
+#. translators: %s: field label
+#: src/Tools/FormMigration.php:268
+#: src/Tools/FormMigration.php:345
+#, php-format
+msgid "%s was imported as one text field."
+msgstr ""
+
+#. translators: 1: field label, 2: original field type
+#: src/Tools/FormMigration.php:289
+#: src/Tools/FormMigration.php:363
+#, php-format
+msgid "%1$s (%2$s) was kept as a note."
+msgstr ""
+
+#. translators: 1: field label, 2: original field type
+#: src/Tools/FormMigration.php:296
+#: src/Tools/FormMigration.php:370
+#, php-format
+msgid "%1$s was a %2$s field and was not converted."
+msgstr ""
+
+#. translators: 1: field label, 2: original field type
+#: src/Tools/FormMigration.php:336
+#, php-format
+msgid "%1$s (%2$s) was left out. Payments and quizzes are not imported."
+msgstr ""
+
+#: src/Tools/FormMigration.php:464
+#: src/Tools/FormMigration.php:527
+msgid "New entry"
+msgstr ""
+
+#: src/Tools/TransferPackage.php:71
+msgid "This file is not a SubtleForms forms export."
+msgstr ""
+
+#: src/Tools/TransferPackage.php:78
+msgid "The export does not contain any forms."
+msgstr ""
+
+#: src/Tools/TransferPackage.php:109
+msgid "None of the forms in this file could be read."
+msgstr ""
+
+#: src/Tools/TransferPackage.php:128
+msgid "This file is not a SubtleForms submissions export."
+msgstr ""
+
+#: src/Tools/TransferPackage.php:135
+msgid "The export does not contain any submissions."
+msgstr ""
+
+#. translators: %d: maximum number of submissions
+#: src/Tools/TransferPackage.php:143
+#, php-format
+msgid "Import up to %d submissions at a time."
+msgstr ""
+
+#: src/Tools/TransferPackage.php:162
+msgid "None of the submissions in this file could be read."
+msgstr ""
+
+#: src/Tools/TransferPackage.php:198
+msgid "Imported form"
+msgstr ""
+
+#. translators: %s: form titles
+#: src/Tools/TransferService.php:127
+#: src/Tools/TransferService.php:185
+#, php-format
+msgid "These forms could not be imported: %s"
+msgstr ""
+
+#: src/Tools/TransferService.php:263
+#: resources/admin/pages/ToolsPage.jsx:162
+msgid "Choose a form to import into."
+msgstr ""
+
 #: src/Uploads/Uploads.php:137
 msgid "Too many uploads. Please wait a few minutes and try again."
 msgstr ""
@@ -4744,23 +4886,25 @@ msgstr ""
 msgid "This data is stored according to the configured data retention policy. Contact the site administrator for more information about data retention and deletion."
 msgstr ""
 
-#: resources/admin/app/AdminApp.jsx:154
+#: resources/admin/app/AdminApp.jsx:162
 #: resources/admin/components/AppNav.jsx:27
 #: resources/admin/pages/FormsPage.jsx:165
+#: resources/admin/pages/ReportsPage.jsx:60
 #: resources/admin/pages/SettingsPage.jsx:27
+#: resources/admin/pages/ToolsPage.jsx:226
 msgid "Forms"
 msgstr ""
 
-#: resources/admin/app/AdminApp.jsx:155
-#: resources/admin/app/AdminApp.jsx:162
+#: resources/admin/app/AdminApp.jsx:163
+#: resources/admin/app/AdminApp.jsx:172
 msgid "Form Builder"
 msgstr ""
 
-#: resources/admin/app/AdminApp.jsx:165
+#: resources/admin/app/AdminApp.jsx:175
 msgid "Submission Detail"
 msgstr ""
 
-#: resources/admin/app/AdminApp.jsx:176
+#: resources/admin/app/AdminApp.jsx:186
 #, js-format
 msgid "Navigated to %s"
 msgstr ""
@@ -4806,6 +4950,7 @@ msgstr ""
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:34
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:111
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:218
+#: resources/admin/pages/ReportsPage.jsx:98
 msgid "Views"
 msgstr ""
 
@@ -4854,7 +4999,10 @@ msgstr ""
 
 #. translators: %d: form ID
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:152
+#: resources/admin/pages/ReportsPage.jsx:47
 #: resources/admin/pages/SubmissionDetailPage.jsx:1121
+#: resources/admin/pages/ToolsPage.jsx:237
+#: resources/admin/pages/ToolsPage.jsx:266
 #, js-format
 msgid "Form #%d"
 msgstr ""
@@ -4882,13 +5030,18 @@ msgstr ""
 #: resources/admin/components/SubmissionsTable.jsx:38
 #: resources/admin/components/SubmissionsTable.jsx:570
 #: resources/admin/pages/FormsPage.jsx:113
+#: resources/admin/pages/ReportsPage.jsx:97
 #: resources/admin/pages/SubmissionDetailPage.jsx:1113
 #: resources/admin/pages/SubmissionsPage.jsx:318
+#: resources/admin/pages/ToolsPage.jsx:261
+#: resources/admin/pages/ToolsPage.jsx:422
+#: resources/admin/pages/ToolsPage.jsx:437
 #: resources/frontend/components/FormRenderer.jsx:1157
 msgid "Form"
 msgstr ""
 
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:226
+#: resources/admin/pages/ReportsPage.jsx:100
 msgid "Conversion"
 msgstr ""
 
@@ -4941,7 +5094,7 @@ msgstr ""
 msgid "%1$s views · %2$s sent"
 msgstr ""
 
-#: resources/admin/components/AppNav.jsx:109
+#: resources/admin/components/AppNav.jsx:125
 msgid "unread"
 msgstr ""
 
@@ -5353,6 +5506,7 @@ msgstr ""
 
 #: resources/admin/components/builder/appearance/labels.js:21
 #: resources/admin/pages/SubmissionDetailPage.jsx:149
+#: resources/admin/pages/ToolsPage.jsx:417
 msgid "Error"
 msgstr ""
 
@@ -5874,6 +6028,8 @@ msgid "Cancel"
 msgstr ""
 
 #: resources/admin/components/builder/ConversationalCanvas.jsx:239
+#: resources/admin/pages/ToolsPage.jsx:462
+#: resources/admin/pages/ToolsPage.jsx:530
 #: resources/frontend/components/FormRenderer.jsx:1233
 msgid "Previous"
 msgstr ""
@@ -5892,6 +6048,8 @@ msgstr ""
 #: resources/admin/components/BuilderTour.jsx:335
 #: resources/admin/components/CreateFormWizard.jsx:52
 #: resources/admin/components/OnboardingWizard.jsx:611
+#: resources/admin/pages/ToolsPage.jsx:469
+#: resources/admin/pages/ToolsPage.jsx:537
 #: resources/frontend/components/ConversationalFormRenderer.jsx:662
 #: resources/frontend/components/FormRenderer.jsx:1243
 msgid "Next"
@@ -7886,7 +8044,10 @@ msgid "Previous page"
 msgstr ""
 
 #. translators: %1$d: Current page number, %2$d: Total pages
+#. translators: 1: current page, 2: page count
 #: resources/admin/components/DataTable.jsx:388
+#: resources/admin/pages/ToolsPage.jsx:465
+#: resources/admin/pages/ToolsPage.jsx:533
 #, js-format
 msgid "Page %1$d of %2$d"
 msgstr ""
@@ -9529,6 +9690,7 @@ msgid "Sends a sample entry to this URL and shows the response. Nothing is saved
 msgstr ""
 
 #: resources/admin/components/settings/extensions/WebhooksPanel.jsx:104
+#: resources/admin/pages/ToolsPage.jsx:505
 msgid "Method"
 msgstr ""
 
@@ -10517,6 +10679,7 @@ msgid "No published forms yet"
 msgstr ""
 
 #: resources/admin/pages/DashboardPage.jsx:88
+#: resources/admin/pages/ReportsPage.jsx:68
 #: resources/admin/pages/SubmissionDetailPage.jsx:1099
 msgid "Unread"
 msgstr ""
@@ -11079,6 +11242,34 @@ msgstr ""
 msgid "Always"
 msgstr ""
 
+#: resources/admin/pages/ReportsPage.jsx:31
+msgid "Reports could not be loaded."
+msgstr ""
+
+#: resources/admin/pages/ReportsPage.jsx:53
+msgid "How many people send a form. Views and conversion are part of Pro."
+msgstr ""
+
+#: resources/admin/pages/ReportsPage.jsx:73
+msgid "Submissions, last 7 days"
+msgstr ""
+
+#: resources/admin/pages/ReportsPage.jsx:91
+msgid "Each form, last 30 days"
+msgstr ""
+
+#: resources/admin/pages/ReportsPage.jsx:113
+msgid "No views yet."
+msgstr ""
+
+#: resources/admin/pages/ReportsPage.jsx:120
+msgid "Sample data. Views are already being counted."
+msgstr ""
+
+#: resources/admin/pages/ReportsPage.jsx:124
+msgid "Unlock reports"
+msgstr ""
+
 #: resources/admin/pages/SettingsPage.jsx:33
 msgid "Defaults for new forms, autosave and deleting."
 msgstr ""
@@ -11347,6 +11538,8 @@ msgid "No actions ran for this entry."
 msgstr ""
 
 #: resources/admin/pages/SubmissionDetailPage.jsx:934
+#: resources/admin/pages/ToolsPage.jsx:411
+#: resources/admin/pages/ToolsPage.jsx:436
 msgid "Level"
 msgstr ""
 
@@ -11487,6 +11680,7 @@ msgid "Exporting…"
 msgstr ""
 
 #: resources/admin/pages/SubmissionsPage.jsx:255
+#: resources/admin/pages/ToolsPage.jsx:285
 msgid "Export CSV"
 msgstr ""
 
@@ -11528,6 +11722,175 @@ msgstr ""
 
 #: resources/admin/pages/SubmissionsPage.jsx:367
 msgid "e.g. john@example.com"
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:11
+msgid "Transfer"
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:12
+msgid "Migrate"
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:13
+msgid "Activity"
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:15
+msgid "API"
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:36
+msgid "That did not work. Check the file and try again."
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:62
+msgid "Move forms and entries, bring a form across from another plugin, and read what the site has been doing."
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:113
+msgid "Forms exported."
+msgstr ""
+
+#. translators: 1: number of forms, 2: reason
+#: resources/admin/pages/ToolsPage.jsx:127
+#, js-format
+msgid "%1$d forms imported. %2$s"
+msgstr ""
+
+#. translators: %d: number of forms
+#: resources/admin/pages/ToolsPage.jsx:134
+#, js-format
+msgid "%d forms imported."
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:139
+#: resources/admin/pages/ToolsPage.jsx:187
+#: resources/admin/pages/ToolsPage.jsx:310
+msgid "That file is not JSON."
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:157
+msgid "Submissions exported."
+msgstr ""
+
+#. translators: 1: number of submissions, 2: reason
+#: resources/admin/pages/ToolsPage.jsx:175
+#, js-format
+msgid "%1$d submissions imported. %2$s"
+msgstr ""
+
+#. translators: %d: number of submissions
+#: resources/admin/pages/ToolsPage.jsx:182
+#, js-format
+msgid "%d submissions imported."
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:214
+#: resources/admin/pages/ToolsPage.jsx:217
+msgid "CSV export failed."
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:220
+msgid "CSV export"
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:227
+msgid "Export is SubtleForms JSON. Import creates new forms and keeps published or draft."
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:242
+msgid "Leave them all unticked to export every form."
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:244
+msgid "Export forms"
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:246
+msgid "Import forms"
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:259
+msgid "JSON import and export move entries between SubtleForms sites. Passwords are left out. CSV export is part of Pro."
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:264
+msgid "Choose a form"
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:273
+msgid "Export submissions"
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:275
+msgid "Import submissions"
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:285
+msgid "Export CSV (Pro)"
+msgstr ""
+
+#. translators: %d: number of forms
+#: resources/admin/pages/ToolsPage.jsx:329
+#, js-format
+msgid "%d draft forms created. Open Forms to review them."
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:338
+msgid "Gravity Forms and Fluent Forms"
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:339
+msgid "Upload the JSON export. You will see what will be created, and what is left out, before anything is saved. New forms are drafts."
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:341
+msgid "Choose export file"
+msgstr ""
+
+#. translators: %d: number of fields
+#: resources/admin/pages/ToolsPage.jsx:358
+#, js-format
+msgid "%d fields"
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:369
+msgid "Create draft forms"
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:414
+msgid "Any level"
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:425
+msgid "Any form"
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:435
+#: resources/admin/pages/ToolsPage.jsx:504
+msgid "When"
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:438
+msgid "What happened"
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:443
+#: resources/admin/pages/ToolsPage.jsx:514
+msgid "Nothing here yet."
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:499
+msgid "SubtleForms REST calls from the last 30 days. The address and the result are stored. The request itself is not."
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:506
+msgid "Route"
+msgstr ""
+
+#: resources/admin/pages/ToolsPage.jsx:508
+msgid "User"
 msgstr ""
 
 #: resources/admin/templates/categories.js:8
