@@ -16,6 +16,7 @@ import { FormContext } from './fields/FileUpload';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { questionFields } from '../../shared/conversational';
 import { formFieldDefaults } from '../../shared/fieldDisplay';
+import { collectDefaultValues } from '../utils/defaults';
 import { validateFields } from '../utils/fieldValidation';
 
 const restUrl =
@@ -64,7 +65,24 @@ export default function ConversationalFormRenderer({
 
   // The questions: the same list the builder shows (2.3.2). A Group or
   // Repeater is one question with its fields inside it.
-  const allFields = useMemo(() => questionFields(schema?.fields || []), [schema]);
+  // Hidden tracking fields are not questions. Their values are still submitted.
+  const trackingFields = useMemo(
+    () => questionFields(schema?.fields || []).filter((field) => field?.type === 'hidden'),
+    [schema]
+  );
+  const allFields = useMemo(
+    () => questionFields(schema?.fields || []).filter((field) => field?.type !== 'hidden'),
+    [schema]
+  );
+  const defaultValues = useMemo(
+    () => collectDefaultValues(schema?.fields || []),
+    [schema]
+  );
+  useEffect(() => {
+    if (Object.keys(defaultValues).length > 0) {
+      setValues((prev) => ({ ...defaultValues, ...prev }));
+    }
+  }, [defaultValues]);
   const fieldDefaults = useMemo(() => formFieldDefaults(schema?.metadata), [schema?.metadata]);
 
   // Generate form type-aware CSS classes (early, before any returns)
@@ -399,9 +417,26 @@ export default function ConversationalFormRenderer({
     );
   }
 
+  const trackingInputs = trackingFields.map((field) => {
+    const key = field.config?.key || field.key;
+    if (!key) {
+      return null;
+    }
+    return (
+      <input
+        key={key}
+        type='hidden'
+        name={key}
+        value={getIn(values, key, '') ?? ''}
+        readOnly
+      />
+    );
+  });
+
   if (totalFields === 0) {
     return (
       <div className={formClassNames} style={appearanceStyle}>
+        {trackingInputs}
         <div className='subtleforms-empty'>
           <p>{__('This form has no questions.', 'subtleforms')}</p>
         </div>
@@ -598,6 +633,7 @@ export default function ConversationalFormRenderer({
   // Render Questions Step (default)
   return (
     <div className={formClassNames} style={appearanceStyle}>
+      {trackingInputs}
       {/* Progress Bar */}
       <div className='subtleforms-progress'>
         <div className='subtleforms-progress-bar'>
