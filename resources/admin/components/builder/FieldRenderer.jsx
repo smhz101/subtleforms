@@ -1,5 +1,5 @@
 import { memo, useState, useRef, useCallback, useEffect, useContext } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { getFieldIcon } from '../../utils/iconRegistry';
 import Icon from '../../ui/Icon';
 import NameFieldRenderer from './NameFieldRenderer';
@@ -464,8 +464,16 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
 
       {type === 'hidden' && (
         <div className='sf-field-renderer__hidden-field'>
-          <Icon.Lock size={14} />
-          {__('Hidden field (not visible to users)', 'subtleforms')}
+          <Icon.EyeOff size={14} />
+          <span>
+            {fieldConfig(field).value
+              ? sprintf(
+                  /* translators: %s: value sent with the entry */
+                  __('Sends "%s". Visitors do not see this.', 'subtleforms'),
+                  fieldConfig(field).value
+                )
+              : __('Hidden value. Visitors do not see this.', 'subtleforms')}
+          </span>
         </div>
       )}
 

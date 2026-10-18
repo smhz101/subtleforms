@@ -475,6 +475,19 @@ export default function FieldRenderer({
 
   const value = getIn(values, resolvedPath, '');
 
+  // A tracking field: visitors never see a label or a box, only the value
+  // that is sent with the entry.
+  if (field.type === 'hidden') {
+    return (
+      <input
+        id={inputId}
+        type='hidden'
+        name={inputName || ownKey}
+        value={value ?? ''}
+      />
+    );
+  }
+
   // Handle reCAPTCHA v3 separately (invisible, no label/wrapper needed)
   if (
     (field.type === 'captcha' ||

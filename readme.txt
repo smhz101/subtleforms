@@ -170,6 +170,9 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 = 2.3.7 - 2026-10-18 =
 * New: The submissions list can open an entry beside or below the inbox. Previous and Next follow the current tab, search and filters, and the address keeps the open entry.
 * New: List density can be comfortable, default or compact. The gear on Submissions saves that choice for the current admin. Settings → General sets the default for everyone else.
+* New: Hidden is in the field library. Visitors never see it. The value is stored with the entry and sent to notifications and integrations, and it can use {user_email}, {user_name}, {date} and {get:param}.
+* New: Repeater, Group and Columns use the same field toolbar as other fields: move up or down, move into a container, width, duplicate and delete.
+* Fix: A field label can be a short paragraph. A consent line longer than 255 characters now saves. The limit is 2,000 characters, and a save error names the field label when it is too long.
 
 = 2.3.6 - 2026-10-18 =
 * New: Tools exports and imports SubtleForms forms and submissions as JSON, and imports Gravity Forms and Fluent Forms exports as drafts. Payments, quizzes and add-ons are skipped and listed.
@@ -418,7 +421,7 @@ now be reconstructed accurately.
 == Upgrade Notice ==
 
 = 2.3.7 =
-Submissions can open in a reading pane, with comfortable, default or compact rows. Each admin can keep their own choice.
+Submissions can open in a reading pane, with comfortable, default or compact rows. Each admin can keep their own choice. Hidden is in the field library for tracking values visitors do not see. Repeater has the field toolbar. A consent label can be longer than 255 characters.
 
 = 2.3.6 =
 Tools can move forms and submissions as JSON and import Gravity Forms or Fluent Forms. Reports shows submission totals. Views and conversion stay in Pro.

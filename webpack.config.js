@@ -57,6 +57,13 @@ module.exports = {
 			return rule;
 		}),
 	},
+	// Webpack's default 244 KiB hint counts the RTL stylesheet as a second
+	// entry asset, and the form builder is one admin-only chunk.
+	performance: {
+		...defaultConfig.performance,
+		maxAssetSize: 512 * 1024,
+		maxEntrypointSize: 800 * 1024,
+	},
 	optimization: {
 		...defaultConfig.optimization,
 		splitChunks: {

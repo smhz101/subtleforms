@@ -1086,13 +1086,14 @@ final class CoreFields {
 				),
 				inspectorControls: array(
 					array(
-						'type'  => 'text',
-						'name'  => 'value',
-						'label' => __( 'Value', 'subtleforms' ),
+						'type'    => 'text',
+						'name'    => 'value',
+						'label'   => __( 'Value', 'subtleforms' ),
+						'help'    => __( 'Sent with the entry to notifications and integrations. Visitors never see it. Supports {user_email}, {user_name}, {date} and {get:param}.', 'subtleforms' ),
+						'section' => 'general',
 					),
 				),
 				meta: array( 'category' => 'system' ),
-				paletteHidden: true,
 			)
 		);
 

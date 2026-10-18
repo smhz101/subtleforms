@@ -2,9 +2,10 @@ import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import Icon from '../../ui/Icon';
 import { getIcon } from './utils/iconMap';
-import { useContext } from '@wordpress/element';
+import { useContext, useState } from '@wordpress/element';
 import { ConfigContext } from './context/ConfigContext';
 import { fieldDisplay } from '../../../shared/fieldDisplay';
+import FieldToolbar from './FieldToolbar';
 import './ContainerRenderer.scss';
 
 /**
@@ -25,10 +26,14 @@ export default function ContainerRenderer({
   spacing,
   dragHandleRef,
   dragHandleListeners,
+  toolbarActions = null,
 }) {
   const isColumnLayout = columns.length > 1;
   const isStep = node.type === 'step';
   const isRepeater = node.type === 'repeat_container';
+  const [isHovered, setIsHovered] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const showToolbar = !isStep && !!toolbarActions && (isSelected || isHovered || isFocused);
   const title = isStep
     ? node.config?.title || __('Step', 'subtleforms')
     : node.config?.label ||
@@ -70,6 +75,10 @@ export default function ContainerRenderer({
         __('%s container. Press Enter to select.', 'subtleforms'),
         title
       )}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
       onClick={(e) => {
         e.stopPropagation();
         onSelect();
@@ -126,7 +135,7 @@ export default function ContainerRenderer({
             )}
           </div>
         </div>
-        {!isStep && (
+        {!isStep && !toolbarActions && (
           <button
             type='button'
             className='sf-container-renderer__delete'
@@ -139,6 +148,21 @@ export default function ContainerRenderer({
           </button>
         )}
       </div>
+      {showToolbar && (
+        <FieldToolbar
+          visible
+          onMoveUp={toolbarActions.onMoveUp}
+          onMoveDown={toolbarActions.onMoveDown}
+          onDuplicate={toolbarActions.onDuplicate}
+          onDelete={toolbarActions.onDelete}
+          canMoveUp={toolbarActions.canMoveUp}
+          canMoveDown={toolbarActions.canMoveDown}
+          width={toolbarActions.width}
+          onWidthChange={toolbarActions.onWidthChange}
+          moveTargets={toolbarActions.moveTargets}
+          onMoveTo={toolbarActions.onMoveTo}
+        />
+      )}
 
       <div className='sf-container-renderer__body'>
         <div

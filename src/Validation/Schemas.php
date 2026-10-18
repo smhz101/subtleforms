@@ -327,7 +327,8 @@ class Schemas {
 				'key'          => 'optional|string|max:100',
 				'id'           => 'optional|string|max:100',
 				'kind'         => 'optional|string|max:50',
-				'label'        => 'optional|string|max:255',
+				// Consent and checkbox copy is often a short paragraph, not a title.
+				'label'        => 'optional|string|max:2000',
 				'title'        => 'optional|string|max:255',
 				'description'  => 'optional|string|max:500',
 				'placeholder'  => 'optional|string|max:255',
