@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-18T12:14:43+00:00\n"
+"POT-Creation-Date: 2026-10-18T12:32:23+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -791,23 +791,23 @@ msgstr ""
 msgid "Signed"
 msgstr ""
 
-#: src/Api/ToolsApi.php:162
-#: src/Api/ToolsApi.php:193
-#: src/Api/ToolsApi.php:287
+#: src/Api/ToolsApi.php:166
+#: src/Api/ToolsApi.php:201
+#: src/Api/ToolsApi.php:295
 msgid "The file could not be read."
 msgstr ""
 
-#: src/Api/ToolsApi.php:178
+#: src/Api/ToolsApi.php:182
 #: resources/admin/pages/ToolsPage.jsx:146
 msgid "Choose a form to export."
 msgstr ""
 
-#: src/Api/ToolsApi.php:214
-#: src/Api/ToolsApi.php:235
+#: src/Api/ToolsApi.php:222
+#: src/Api/ToolsApi.php:243
 msgid "This file is not a Gravity Forms or Fluent Forms export."
 msgstr ""
 
-#: src/Api/ToolsApi.php:291
+#: src/Api/ToolsApi.php:299
 msgid "Choose Gravity Forms or Fluent Forms."
 msgstr ""
 
@@ -4737,22 +4737,36 @@ msgstr ""
 msgid "Import up to %d submissions at a time."
 msgstr ""
 
-#: src/Tools/TransferPackage.php:162
+#: src/Tools/TransferPackage.php:168
 msgid "None of the submissions in this file could be read."
 msgstr ""
 
-#: src/Tools/TransferPackage.php:198
+#: src/Tools/TransferPackage.php:204
 msgid "Imported form"
 msgstr ""
 
+#. translators: %d: maximum number of forms
+#: src/Tools/TransferService.php:52
+#: src/Tools/TransferService.php:69
+#, php-format
+msgid "Export up to %d forms at a time. Select the ones you want."
+msgstr ""
+
 #. translators: %s: form titles
-#: src/Tools/TransferService.php:127
-#: src/Tools/TransferService.php:185
+#: src/Tools/TransferService.php:143
+#: src/Tools/TransferService.php:201
 #, php-format
 msgid "These forms could not be imported: %s"
 msgstr ""
 
-#: src/Tools/TransferService.php:263
+#. translators: %d: maximum number of submissions
+#: src/Tools/TransferService.php:223
+#: src/Tools/TransferService.php:265
+#, php-format
+msgid "This form has more than %d submissions, so nothing was exported."
+msgstr ""
+
+#: src/Tools/TransferService.php:291
 #: resources/admin/pages/ToolsPage.jsx:162
 msgid "Choose a form to import into."
 msgstr ""
@@ -11800,7 +11814,7 @@ msgid "Export is SubtleForms JSON. Import creates new forms and keeps published 
 msgstr ""
 
 #: resources/admin/pages/ToolsPage.jsx:242
-msgid "Leave them all unticked to export every form."
+msgid "Leave them all unticked to export every form. More than 100 must be exported in groups."
 msgstr ""
 
 #: resources/admin/pages/ToolsPage.jsx:244
@@ -11812,7 +11826,7 @@ msgid "Import forms"
 msgstr ""
 
 #: resources/admin/pages/ToolsPage.jsx:259
-msgid "JSON import and export move entries between SubtleForms sites. Passwords are left out. CSV export is part of Pro."
+msgid "JSON import and export move entries between SubtleForms sites. Passwords are left out, and read and starred state is kept. A form with more than 2,000 submissions is not exported in part. CSV export is part of Pro."
 msgstr ""
 
 #: resources/admin/pages/ToolsPage.jsx:264
