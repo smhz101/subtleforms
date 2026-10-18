@@ -647,7 +647,7 @@ final class CoreFields {
 				kind: 'dynamic',
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
-					'source' => 'csv', // or 'manual'
+					'source' => 'manual',
 					'levels' => array(),
 					// dropdowns, buttons, or columns. The public field reads this.
 					'presentation' => 'dropdowns',
@@ -664,21 +664,6 @@ final class CoreFields {
 						'label'   => __( 'Dropdowns', 'subtleforms' ),
 						'section' => 'choices',
 						'help'    => __( 'Each dropdown appears after the one above it. A choice in a later dropdown is only offered when the visitor picks its parent.', 'subtleforms' ),
-					),
-					array(
-						'type'    => 'select',
-						'name'    => 'source',
-						'label'   => __( 'Source', 'subtleforms' ),
-						'options' => array(
-							array(
-								'value' => 'manual',
-								'label' => __( 'Manual', 'subtleforms' ),
-							),
-							array(
-								'value' => 'csv',
-								'label' => __( 'CSV', 'subtleforms' ),
-							),
-						),
 					),
 				),
 				meta: array( 'category' => 'regular' ),

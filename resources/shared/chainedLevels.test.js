@@ -1,7 +1,11 @@
 import {
   addChoice,
+  CHAINED_EXAMPLE_CSV,
+  chainedUsesCsv,
   choicesForParent,
+  levelsFromCsv,
   levelsFromIndented,
+  levelsToCsv,
   removeChoice,
 } from './chainedLevels';
 
@@ -66,4 +70,43 @@ describe('chained dropdown editing', () => {
     const values = levels[1].options.map((option) => option.value);
     expect(new Set(values).size).toBe(2);
   });
+});
+
+test('a csv file becomes dependent dropdowns', () => {
+  const levels = levelsFromCsv(CHAINED_EXAMPLE_CSV);
+  expect(levels.map((level) => level.label)).toEqual([
+    'First dropdown',
+    'Second dropdown',
+    'Third dropdown',
+  ]);
+  const small = levels[2].options.find((option) => option.label === 'Small' && option.parent);
+  const one = levels[1].options.find((option) => option.value === small.parent);
+  expect(one.label).toBe('One');
+  expect(one.parent).toBe('alpha');
+  const again = levelsFromCsv(levelsToCsv(levels));
+  expect(again[2].options.map((option) => option.label).sort()).toEqual(
+    levels[2].options.map((option) => option.label).sort()
+  );
+});
+
+test('an empty csv does not wipe dropdowns', () => {
+  expect(levelsFromCsv('First dropdown\n')).toBeNull();
+  expect(levelsFromCsv('')).toBeNull();
+});
+
+test('typed lists stay editable when an old field still says csv', () => {
+  expect(
+    chainedUsesCsv({
+      source: 'csv',
+      levels: [{ label: 'Group', options: [{ label: 'One', value: 'one' }] }],
+    })
+  ).toBe(false);
+  expect(chainedUsesCsv({ source: 'csv', sourceChosen: true, levels: [] })).toBe(true);
+  expect(chainedUsesCsv({ source: 'manual', sourceChosen: true })).toBe(false);
+});
+
+test('csv cells can contain commas', () => {
+  const levels = levelsFromCsv('Group,Choice\n"A, B",One\n');
+  expect(levels[0].options[0].label).toBe('A, B');
+  expect(levels[1].options[0].parent).toBe('a_b');
 });
