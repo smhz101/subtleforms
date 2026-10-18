@@ -107,6 +107,8 @@ class Schemas {
 					'autosave_enabled',
 					'autosave_interval',
 					'delete_behavior',
+					'submissions_density',
+					'submissions_reading_pane',
 					// Frontend
 					'success_message',
 					'error_message',
@@ -202,6 +204,8 @@ class Schemas {
 				'autosave_enabled'             => 'optional|bool',
 				'autosave_interval'            => 'optional|int|min:1|max:60',
 				'delete_behavior'              => 'optional|in:soft,hard',
+				'submissions_density'          => 'optional|in:comfortable,default,compact',
+				'submissions_reading_pane'     => 'optional|in:right,below,off',
 				// Frontend
 				'success_message'              => 'optional|string|max:500',
 				'error_message'                => 'optional|string|max:500',

@@ -13,6 +13,7 @@ namespace SubtleForms\Admin;
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 use SubtleForms\Support\Capabilities;
+use SubtleForms\Support\Settings;
 use SubtleForms\Support\Helpers;
 use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Repositories\SubmissionsRepository;
@@ -404,6 +405,8 @@ class AdminMenu {
 			'previewBreakpoints' => \SubtleForms\Support\Appearance::previewBreakpoints( self::themeJsonSettings() ),
 			'themeStylesheets'   => self::themeStylesheets(),
 			'themeGlobalCss'     => function_exists( 'wp_get_global_stylesheet' ) ? wp_get_global_stylesheet() : '',
+			// Submissions inbox. A personal choice wins; otherwise these are the site defaults.
+			'submissionsView'    => ( new Settings() )->resolvedInboxView( get_current_user_id() ),
 		);
 
 		/**

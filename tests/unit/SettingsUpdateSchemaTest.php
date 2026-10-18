@@ -108,4 +108,26 @@ final class SettingsUpdateSchemaTest extends TestCase {
 			$this->assertTrue( $args[ $key ]['validate_callback']( '', null, $key ) );
 		}
 	}
+
+	public function test_inbox_view_choices_are_accepted(): void {
+		$sanitized = $this->update(
+			array(
+				'submissions_density'      => 'compact',
+				'submissions_reading_pane' => 'below',
+			)
+		);
+
+		$this->assertSame( 'compact', $sanitized['submissions_density'] );
+		$this->assertSame( 'below', $sanitized['submissions_reading_pane'] );
+	}
+
+	public function test_inbox_view_rejects_an_unknown_pane(): void {
+		try {
+			$this->update( array( 'submissions_reading_pane' => 'left' ) );
+			$this->fail( 'Expected ValidationException' );
+		} catch ( ValidationException $e ) {
+			$this->assertArrayHasKey( 'submissions_reading_pane', $e->getFields() );
+		}
+	}
 }
+

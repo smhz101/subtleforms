@@ -15,6 +15,22 @@ class Settings {
 	const OPTION_NAME = 'subtleforms_settings';
 
 	/**
+	 * User meta key for one admin's submissions inbox choices.
+	 */
+	const INBOX_META = 'subtleforms_submissions_view';
+
+	/**
+	 * Allowed list densities.
+	 */
+	const INBOX_DENSITY = array( 'comfortable', 'default', 'compact' );
+
+	/**
+	 * Allowed reading panes. Right of the list is the site default.
+	 */
+	const INBOX_PANE = array( 'right', 'below', 'off' );
+
+
+	/**
 	 * Default settings
 	 */
 	const DEFAULTS = array(
@@ -23,6 +39,8 @@ class Settings {
 		'autosave_enabled'           => true,
 		'autosave_interval'          => 3,
 		'delete_behavior'            => 'soft',
+		'submissions_density'        => 'default',
+		'submissions_reading_pane'   => 'right',
 
 		// Frontend
 		'success_message'            => 'Thank you! Your submission has been received.',
@@ -131,6 +149,8 @@ class Settings {
 			'max' => 60,
 		),
 		'delete_behavior'            => array( 'soft', 'hard' ),
+		'submissions_density'        => array( 'comfortable', 'default', 'compact' ),
+		'submissions_reading_pane'   => array( 'right', 'below', 'off' ),
 		'success_message'            => array(
 			'string',
 			'max' => 500,
@@ -470,5 +490,50 @@ class Settings {
 	public function getAdminEmail() {
 		$email = $this->get( 'admin_email' );
 		return ! empty( $email ) ? $email : get_option( 'admin_email' );
+	}
+
+	/**
+	 * Keep a submissions-inbox choice inside its allowed set.
+	 *
+	 * @param string $key   density|reading_pane.
+	 * @param mixed  $value Raw value.
+	 * @return string
+	 */
+	public static function inboxChoice( $key, $value ) {
+		$allowed  = 'density' === $key ? self::INBOX_DENSITY : self::INBOX_PANE;
+		$fallback = 'density' === $key ? 'default' : 'right';
+
+		return is_string( $value ) && in_array( $value, $allowed, true ) ? $value : $fallback;
+	}
+
+	/**
+	 * The inbox an admin should see.
+	 *
+	 * A saved user-meta choice wins. Otherwise the site settings apply.
+	 *
+	 * @param int $user_id Admin user id.
+	 * @return array{density: string, reading_pane: string, personal: bool, site: array}
+	 */
+	public function resolvedInboxView( $user_id ) {
+		$site = array(
+			'density'       => self::inboxChoice( 'density', $this->get( 'submissions_density' ) ),
+			'reading_pane'  => self::inboxChoice( 'reading_pane', $this->get( 'submissions_reading_pane' ) ),
+		);
+
+		$stored   = $user_id > 0 ? get_user_meta( (int) $user_id, self::INBOX_META, true ) : array();
+		$personal = is_array( $stored ) && isset( $stored['density'], $stored['reading_pane'] );
+		$view     = $personal
+			? array(
+				'density'      => self::inboxChoice( 'density', $stored['density'] ),
+				'reading_pane' => self::inboxChoice( 'reading_pane', $stored['reading_pane'] ),
+			)
+			: $site;
+
+		return array(
+			'density'      => $view['density'],
+			'reading_pane' => $view['reading_pane'],
+			'personal'     => $personal,
+			'site'         => $site,
+		);
 	}
 }

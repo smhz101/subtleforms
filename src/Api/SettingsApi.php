@@ -65,6 +65,29 @@ class SettingsApi {
 				'permission_callback' => array( $this, 'checkPermissions' ),
 			)
 		);
+
+		register_rest_route(
+			'subtleforms/v1',
+			'/settings/inbox-view',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'updateInboxView' ),
+				'permission_callback' => array( $this, 'checkPermissions' ),
+				'args'                => array(
+					'reset'         => array(
+						'type' => 'boolean',
+					),
+					'density'       => array(
+						'type' => 'string',
+						'enum' => Settings::INBOX_DENSITY,
+					),
+					'reading_pane'  => array(
+						'type' => 'string',
+						'enum' => Settings::INBOX_PANE,
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -223,6 +246,41 @@ class SettingsApi {
 	}
 
 	/**
+	 * Save or clear the current admin's submissions inbox choices.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response
+	 */
+	public function updateInboxView( WP_REST_Request $request ) {
+		$user_id = get_current_user_id();
+		if ( ! $user_id ) {
+			return ApiResponse::forbidden( __( 'You are not allowed to perform this action.', 'subtleforms' ) );
+		}
+
+		if ( rest_sanitize_boolean( $request->get_param( 'reset' ) ) ) {
+			delete_user_meta( $user_id, Settings::INBOX_META );
+			return ApiResponse::success( $this->settings->resolvedInboxView( $user_id ) );
+		}
+
+		$density = $request->get_param( 'density' );
+		$pane    = $request->get_param( 'reading_pane' );
+		if ( ! in_array( $density, Settings::INBOX_DENSITY, true ) || ! in_array( $pane, Settings::INBOX_PANE, true ) ) {
+			return ApiResponse::bad_request( __( 'Choose a density and a reading pane.', 'subtleforms' ) );
+		}
+
+		update_user_meta(
+			$user_id,
+			Settings::INBOX_META,
+			array(
+				'density'      => $density,
+				'reading_pane' => $pane,
+			)
+		);
+
+		return ApiResponse::success( $this->settings->resolvedInboxView( $user_id ) );
+	}
+
+	/**
 	 * Guard If-Match for optimistic locking (Phase A3-P2)
 	 *
 	 * @param WP_REST_Request $request         Request object.
@@ -335,6 +393,16 @@ class SettingsApi {
 			'delete_behavior'            => array(
 				'type'              => 'string',
 				'enum'              => array( 'soft', 'hard' ),
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'submissions_density'        => array(
+				'type'              => 'string',
+				'enum'              => Settings::INBOX_DENSITY,
+				'sanitize_callback' => 'sanitize_text_field',
+			),
+			'submissions_reading_pane'   => array(
+				'type'              => 'string',
+				'enum'              => Settings::INBOX_PANE,
 				'sanitize_callback' => 'sanitize_text_field',
 			),
 			'success_message'            => array(
