@@ -28,7 +28,7 @@ const ChainedLevelsControl = memo(function ChainedLevelsControl({
 
 			{levels.length === 0 ? (
 				<p className="sf-chained__empty">
-					{__('No dropdowns yet. Start with the first question, for example Country.', 'subtleforms')}
+					{__('No dropdowns yet. Add the first list, then the lists that depend on it.', 'subtleforms')}
 				</p>
 			) : (
 				<ul className="sf-chained__summary">

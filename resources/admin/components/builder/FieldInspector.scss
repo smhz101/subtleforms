@@ -708,6 +708,7 @@
 }
 
 .sf-chained-modal__lead,
+.sf-chained-modal__path,
 .sf-chained-modal__help p,
 .sf-chained-modal__empty {
 	margin: 0;
@@ -716,10 +717,17 @@
 	color: var(--sf-text-muted);
 }
 
+.sf-chained-modal__path {
+	margin-top: 8px;
+	font-size: var(--sf-text-xs);
+	color: var(--sf-text);
+}
+
 .sf-chained-modal__columns {
 	display: flex;
 	gap: 12px;
-	margin-top: 12px;
+	align-items: stretch;
+	margin-top: 14px;
 	overflow-x: auto;
 	padding-bottom: 4px;
 }
@@ -728,8 +736,9 @@
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
-	flex: 1 0 220px;
-	min-height: 360px;
+	flex: 1 0 240px;
+	min-height: 340px;
+	max-height: 520px;
 	padding: 12px;
 	border: 1px solid var(--sf-border);
 	border-radius: var(--sf-radius-md);
@@ -737,6 +746,7 @@
 
 	&.is-current {
 		border-color: var(--sf-primary, #2271b1);
+		box-shadow: inset 0 0 0 1px var(--sf-primary, #2271b1);
 		background: var(--sf-bg-surface);
 	}
 }
@@ -755,8 +765,14 @@
 	font-weight: 600;
 }
 
+.sf-chained-modal__column.is-current .sf-chained-modal__step {
+	background: var(--sf-primary-50, #f0f6fc);
+	color: var(--sf-primary, #2271b1);
+}
+
 .sf-chained-modal__when {
 	margin: 0;
+	min-height: 2.8em;
 	font-size: var(--sf-text-xs);
 	line-height: 1.4;
 	color: var(--sf-text-muted);
@@ -774,7 +790,7 @@
 .sf-chained-modal__paste {
 	width: 100%;
 	margin: 0;
-	padding: 6px 8px;
+	padding: 7px 8px;
 	border: 1px solid var(--sf-border);
 	border-radius: var(--sf-radius-control);
 	background: var(--sf-bg-surface);
@@ -792,43 +808,87 @@
 	list-style: none;
 	display: flex;
 	flex-direction: column;
-	gap: 6px;
+	gap: 4px;
 	flex: 1 1 auto;
+	min-height: 96px;
+	overflow: auto;
 }
 
 .sf-chained-modal__choice {
-	padding: 4px;
+	padding: 2px;
 	border-radius: var(--sf-radius-sm);
 
 	&.is-selected {
 		background: var(--sf-primary-50, #f0f6fc);
-		outline: 1px solid var(--sf-primary, #2271b1);
 	}
 
 	input {
 		min-width: 0;
+		border-color: transparent;
+		background: transparent;
+
+		&:focus {
+			border-color: var(--sf-border);
+			background: var(--sf-bg-surface);
+		}
 	}
+
+	.components-button {
+		opacity: 0;
+	}
+
+	&:hover .components-button,
+	&:focus-within .components-button {
+		opacity: 1;
+	}
+}
+
+.sf-chained-modal__next {
+	display: inline-flex;
+	flex-shrink: 0;
+	color: var(--sf-primary, #2271b1);
+}
+
+.sf-chained-modal__empty {
+	padding: 12px 4px;
+	text-align: center;
+	font-size: var(--sf-text-xs);
 }
 
 .sf-chained-modal__column-foot {
 	display: flex;
-	align-items: center;
-	justify-content: space-between;
-	gap: 8px;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 2px;
+	margin-top: auto;
+
+	.components-button.is-link {
+		align-self: flex-start;
+		height: auto;
+		padding: 2px 0;
+		font-size: var(--sf-text-xs);
+	}
 }
 
-.sf-chained-modal__add-level {
+.sf-chained-modal__add-level.components-button {
 	align-self: stretch;
-	flex: 0 0 160px;
-	min-height: 120px;
+	flex: 0 0 168px;
+	height: auto;
+	min-height: 180px;
 	white-space: normal;
+	border: 1px dashed var(--sf-border);
+	background: transparent;
+	justify-content: center;
 }
 
 .sf-chained-modal__help {
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
+	position: sticky;
+	top: 0;
 	padding: 14px;
+	border: 1px solid var(--sf-border);
 	border-radius: var(--sf-radius-md);
 	background: var(--sf-bg-subtle);
 
@@ -844,7 +904,8 @@
 }
 
 .sf-chained-modal__paste {
-	min-height: 180px;
+	min-height: 148px;
 	resize: vertical;
 	font-family: inherit;
+	line-height: 1.45;
 }
