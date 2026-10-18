@@ -191,4 +191,83 @@ final class LogsRepository {
 		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- No user-supplied params; table name is controlled.
 		return (int) $wpdb->get_var( $sql );
 	}
+
+	/**
+	 * A page of logs, newest first.
+	 *
+	 * Webhook rows are the ones whose context records action_type webhook.
+	 *
+	 * @param array $args page, per_page, level, form_id, webhook.
+	 * @return array{rows: array, total: int}
+	 */
+	public function search( array $args = array() ): array {
+		global $wpdb;
+		$logs        = $this->table;
+		$submissions = $wpdb->prefix . 'subtleforms_submissions';
+		$forms       = $wpdb->prefix . 'subtleforms_forms';
+		$page        = max( 1, (int) ( $args['page'] ?? 1 ) );
+		$per_page    = max( 1, min( 50, (int) ( $args['per_page'] ?? 20 ) ) );
+		$where       = array( '1=1' );
+		$params      = array();
+
+		$level = (string) ( $args['level'] ?? '' );
+		if ( in_array( $level, array( 'info', 'warning', 'error' ), true ) ) {
+			$where[]  = 'l.level = %s';
+			$params[] = $level;
+		}
+		if ( ! empty( $args['form_id'] ) ) {
+			$where[]  = 's.form_id = %d';
+			$params[] = (int) $args['form_id'];
+		}
+		if ( ! empty( $args['webhook'] ) ) {
+			$where[]  = 'l.context LIKE %s';
+			$params[] = '%"action_type":"webhook"%';
+		}
+
+		$clause = implode( ' AND ', $where );
+		$from   = "{$logs} l LEFT JOIN {$submissions} s ON s.id = l.submission_id LEFT JOIN {$forms} f ON f.id = s.form_id";
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table names are fixed. Values are prepared.
+		$count_sql = "SELECT COUNT(*) FROM {$from} WHERE {$clause}";
+		$total     = (int) ( $params ? $wpdb->get_var( $wpdb->prepare( $count_sql, ...$params ) ) : $wpdb->get_var( $count_sql ) );
+		$list      = $params;
+		$list[]    = $per_page;
+		$list[]    = ( $page - 1 ) * $per_page;
+		$rows      = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT l.id, l.submission_id, l.level, l.message, l.context, l.created_at, s.form_id, f.title AS form_title FROM {$from} WHERE {$clause} ORDER BY l.id DESC LIMIT %d OFFSET %d",
+				...$list
+			),
+			ARRAY_A
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+
+		$clean = array();
+		foreach ( (array) $rows as $row ) {
+			$context = json_decode( (string) ( $row['context'] ?? '' ), true );
+			$data    = is_array( $context ) && is_array( $context['data'] ?? null ) ? $context['data'] : array();
+			$body    = (string) ( $data['response_body'] ?? '' );
+			if ( strlen( $body ) > 180 ) {
+				$body = substr( $body, 0, 180 );
+			}
+			$clean[] = array(
+				'id'            => (int) $row['id'],
+				'submission_id' => (int) $row['submission_id'],
+				'form_id'       => (int) ( $row['form_id'] ?? 0 ),
+				'form_title'    => (string) ( $row['form_title'] ?? '' ),
+				'level'         => (string) $row['level'],
+				'message'       => (string) $row['message'],
+				'created_at'    => (string) $row['created_at'],
+				'url'           => (string) ( $data['url'] ?? '' ),
+				'method'        => (string) ( $data['method'] ?? '' ),
+				'http_status'   => isset( $data['http_status'] ) ? (int) $data['http_status'] : null,
+				'error'         => (string) ( $data['error'] ?? '' ),
+				'response'      => $body,
+			);
+		}
+		return array(
+			'rows'  => $clean,
+			'total' => $total,
+		);
+	}
+
 }
