@@ -1,4 +1,9 @@
-import { chainedPresentation, chainedSelectLevels, nextChainedSelections } from './chainedOptions';
+import {
+  chainedPresentation,
+  chainedSelectLevels,
+  defaultChainedColumnSelections,
+  nextChainedSelections,
+} from './chainedOptions';
 
 describe('chained select options', () => {
   test('two levels with options produce more than one row', () => {
@@ -54,4 +59,27 @@ test('an unknown presentation stays dropdowns', () => {
   expect(chainedPresentation({ presentation: 'columns' })).toBe('columns');
   expect(chainedPresentation({})).toBe('dropdowns');
   expect(chainedPresentation({ presentation: 'map' })).toBe('dropdowns');
+});
+
+test('columns keep every list, including one with nothing to show', () => {
+  const config = {
+    levels: [
+      { label: 'Group', options: [{ label: 'Alpha', value: 'alpha' }, { label: 'Beta', value: 'beta' }] },
+      {
+        label: 'Item',
+        options: [
+          { label: 'One', value: 'one', parent: 'alpha' },
+          { label: 'Two', value: 'two', parent: 'beta' },
+        ],
+      },
+      { label: 'Detail', options: [{ label: 'Small', value: 'small', parent: 'one' }] },
+    ],
+  };
+  const selections = defaultChainedColumnSelections(config, []);
+  expect(selections).toEqual(['alpha']);
+  const rows = chainedSelectLevels(config, selections, { includeEmpty: true });
+  expect(rows).toHaveLength(3);
+  expect(rows[1].options.map((opt) => opt.value)).toEqual(['one']);
+  expect(rows[2].options).toEqual([]);
+  expect(defaultChainedColumnSelections(config, ['beta'])).toEqual(['beta']);
 });

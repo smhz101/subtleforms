@@ -250,6 +250,21 @@ describe('2.2.1 field fixes', () => {
     expect(columns.container.querySelector('.is-columns')).not.toBeNull();
     expect(columns.container.textContent).toContain('Punjab');
     columns.unmount();
+
+    const open = render({
+      ...field,
+      presentation: 'columns',
+      levels: [
+        ...field.levels,
+        { label: 'City', options: [{ label: 'Lahore', value: 'lahore', parent: 'punjab' }] },
+      ],
+    });
+    expect(open.container.textContent).toContain('Punjab');
+    expect(open.container.textContent).not.toContain('California');
+    expect(open.container.textContent).not.toContain('Lahore');
+    expect(open.container.querySelectorAll('.subtleforms-chained-select__level')).toHaveLength(3);
+    expect(open.container.querySelector('.is-inactive')).not.toBeNull();
+    open.unmount();
   });
 
   test('a server error is shown on the field and described (bug 2)', () => {

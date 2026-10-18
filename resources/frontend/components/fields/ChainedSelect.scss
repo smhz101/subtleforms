@@ -79,6 +79,19 @@
 		&:last-child {
 			border-right: 0;
 		}
+
+		&.is-inactive {
+			background: var(--subtleforms-color-bg-subtle, #f6f7f7);
+
+			.subtleforms-chained-select__label {
+				color: var(--subtleforms-color-text-light, #646970);
+			}
+
+			.subtleforms-chained-select__choices {
+				min-height: 72px;
+				pointer-events: none;
+			}
+		}
 	}
 
 	.subtleforms-chained-select__label {
@@ -107,6 +120,7 @@
 			font-weight: 600;
 		}
 	}
+
 
 	@media (max-width: 640px) {
 		flex-direction: column;

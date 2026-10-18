@@ -16,7 +16,7 @@ const OPTIONS = [
 	{
 		value: 'columns',
 		label: __('Columns', 'subtleforms'),
-		help: __('The lists sit side by side. Selecting a choice opens the next list.', 'subtleforms'),
+		help: __('Every list is shown. The first choice is selected, and each next list shows only what belongs to the choice before it. A list with nothing to show stays empty.', 'subtleforms'),
 	},
 ];
 

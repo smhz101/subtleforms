@@ -1,6 +1,12 @@
+import { useEffect, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
-import { chainedPresentation, chainedSelectLevels, nextChainedSelections } from '../../../shared/chainedOptions';
+import {
+  chainedPresentation,
+  chainedSelectLevels,
+  defaultChainedColumnSelections,
+  nextChainedSelections,
+} from '../../../shared/chainedOptions';
 
 /**
  * Dependent choices, where each level narrows the next.
@@ -21,11 +27,40 @@ export default function ChainedSelect( {
   selectClassName = 'subtleforms-select',
 } ) {
   const selections = Array.isArray( value ) ? value : [];
-  const rows = chainedSelectLevels( config, selections );
   const presentation = chainedPresentation( config );
+  const activeSelections = presentation === 'columns'
+    ? defaultChainedColumnSelections( config, selections )
+    : selections;
+  const rows = chainedSelectLevels( config, activeSelections, {
+    includeEmpty: presentation === 'columns',
+  } );
+  const seeded = useRef( '' );
+
+  useEffect( () => {
+    if ( presentation !== 'columns' || disabled ) {
+      return;
+    }
+    const current = Array.isArray( value ) ? value : [];
+    const next = defaultChainedColumnSelections( config, current );
+    if ( ! next.length || next[ 0 ] === undefined || String( next[ 0 ] ) === '' ) {
+      return;
+    }
+    if (
+      current.length === next.length &&
+      current.every( ( item, index ) => String( item ) === String( next[ index ] ) )
+    ) {
+      return;
+    }
+    const key = next.map( ( item ) => String( item ) ).join( '\u0001' );
+    if ( seeded.current === key ) {
+      return;
+    }
+    seeded.current = key;
+    onChange( next );
+  }, [ presentation, disabled, config, value, onChange ] );
 
   const handleLevelChange = ( depth, newValue ) => {
-    onChange( nextChainedSelections( selections, depth, newValue ) );
+    onChange( nextChainedSelections( activeSelections, depth, newValue ) );
   };
 
   if ( rows.length === 0 ) {
@@ -42,7 +77,7 @@ export default function ChainedSelect( {
         const { depth, options } = row;
         const levelId = depth === 0 ? inputId : `${ inputId }-${ depth }`;
         const levelLabel = row.label || __( 'Selection', 'subtleforms' );
-        const selected = selections[ depth ] ?? '';
+        const selected = activeSelections[ depth ] ?? '';
 
         if ( presentation === 'dropdowns' ) {
           return (
@@ -76,7 +111,11 @@ export default function ChainedSelect( {
         }
 
         return (
-          <div key={ levelId } className='subtleforms-chained-select__level'>
+          <div
+            key={ levelId }
+            className={ clsx( 'subtleforms-chained-select__level', {
+              'is-inactive': presentation === 'columns' && options.length === 0,
+            } ) }>
             <div className='subtleforms-chained-select__label' id={ `${ levelId }-label` }>
               { levelLabel }
             </div>
@@ -86,7 +125,8 @@ export default function ChainedSelect( {
               aria-labelledby={ `${ levelId }-label` }
               aria-required={ depth === 0 ? required : undefined }
               aria-invalid={ depth === 0 ? !! error : undefined }
-              aria-describedby={ depth === 0 ? describedBy : undefined }>
+              aria-describedby={ depth === 0 ? describedBy : undefined }
+              aria-disabled={ presentation === 'columns' && options.length === 0 ? true : undefined }>
               { options.map( ( opt ) => {
                 const isSelected = String( selected ) === String( opt.value );
                 return (

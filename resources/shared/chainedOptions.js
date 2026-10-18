@@ -8,7 +8,7 @@
  * @param {Array} [selections] Current choices, one per depth.
  * @return {Array<{depth: number, label: string, options: Array}>}
  */
-export function chainedSelectLevels(config, selections = []) {
+export function chainedSelectLevels(config, selections = [], settings = {}) {
   const cfg = config && typeof config === 'object' ? config : {};
   const selected = Array.isArray(selections) ? selections : [];
   const levels = Array.isArray(cfg.levels) ? cfg.levels : null;
@@ -44,19 +44,40 @@ export function chainedSelectLevels(config, selections = []) {
         return optionsForLevel(i + 1).length > 0 ? depth + 1 : depth;
       }, 1);
 
+  const includeEmpty = settings.includeEmpty === true && Array.isArray(levels);
   const rows = [];
   for (let depth = 0; depth < levelCount; depth++) {
-    const options = optionsForLevel(depth);
-    if (!Array.isArray(options) || options.length === 0) {
+    const levelOptions = optionsForLevel(depth);
+    const list = Array.isArray(levelOptions) ? levelOptions : [];
+    if (list.length === 0 && !includeEmpty) {
       continue;
     }
     rows.push({
       depth,
       label: levels?.[depth]?.label || '',
-      options,
+      options: list,
     });
   }
   return rows;
+}
+
+/**
+ * Columns show every list at once. With nothing chosen yet, the first choice
+ * in the first list is the parent the other lists follow.
+ *
+ * @param {Object} config Field settings.
+ * @param {Array} [selections] Current choices.
+ * @return {Array}
+ */
+export function defaultChainedColumnSelections(config, selections = []) {
+  const selected = Array.isArray(selections) ? selections : [];
+  if (selected[0] !== undefined && selected[0] !== null && String(selected[0]) !== '') {
+    return selected;
+  }
+  const first = Array.isArray(config?.levels?.[0]?.options)
+    ? config.levels[0].options.find((opt) => opt && opt.value !== undefined && String(opt.value) !== '')
+    : null;
+  return first ? [first.value] : selected;
 }
 
 /**
