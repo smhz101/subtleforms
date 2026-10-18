@@ -66,6 +66,8 @@ const SubmissionDetailPage = lazyWithRetry(() => import(/* webpackChunkName: "pa
 const BuilderPage        = lazyWithRetry(() => import(/* webpackChunkName: "page-builder" */        '../pages/BuilderPage'));
 const ExtensionsPage     = lazyWithRetry(() => import(/* webpackChunkName: "page-extensions" */     '../pages/ExtensionsPage'));
 const PaymentsPage       = lazyWithRetry(() => import(/* webpackChunkName: "page-payments" */       '../pages/PaymentsPage'));
+const ToolsPage          = lazyWithRetry(() => import(/* webpackChunkName: "page-tools" */          '../pages/ToolsPage'));
+const ReportsPage        = lazyWithRetry(() => import(/* webpackChunkName: "page-reports" */        '../pages/ReportsPage'));
 const CreateFormPage     = lazyWithRetry(() => import(/* webpackChunkName: "page-create-form" */    '../pages/CreateFormPage'));
 
 // ─── Initial path resolver ────────────────────────────────────────────────────
@@ -102,6 +104,12 @@ function getInitialPath() {
 
 		case 'subtleforms-payments':
 			return '/payments';
+
+		case 'subtleforms-tools':
+			return '/tools';
+
+		case 'subtleforms-reports':
+			return '/reports';
 
 		default:
 			return '/';
@@ -157,6 +165,8 @@ function getPageNameFromPath(pathname) {
 		'/settings': __('Settings', 'subtleforms'),
 		'/extensions': __('Extensions', 'subtleforms'),
 		'/payments': __('Payments', 'subtleforms'),
+		'/tools': __('Tools', 'subtleforms'),
+		'/reports': __('Reports', 'subtleforms'),
 	};
 	if (pathname.startsWith('/forms/') && pathname !== '/forms/new') {
 		return __('Form Builder', 'subtleforms');
@@ -320,6 +330,22 @@ function AppContent() {
 						element={
 							<PageErrorBoundary pageName='Settings'>
 								<SettingsPage />
+							</PageErrorBoundary>
+						}
+					/>
+					<Route
+						path='/tools'
+						element={
+							<PageErrorBoundary pageName='Tools'>
+								<ToolsPage />
+							</PageErrorBoundary>
+						}
+					/>
+					<Route
+						path='/reports'
+						element={
+							<PageErrorBoundary pageName='Reports'>
+								<ReportsPage />
 							</PageErrorBoundary>
 						}
 					/>

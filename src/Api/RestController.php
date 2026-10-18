@@ -149,5 +149,13 @@ final class RestController {
 
 		$onboardingApi = new OnboardingApi();
 		$onboardingApi->registerRoutes();
+
+		$toolsApi = new ToolsApi( $this->formsRepo, $this->submissionsRepo, $this->gate );
+		$toolsApi->registerRoutes();
+
+		$reportsApi = new ReportsApi( $this->formsRepo, $this->submissionsRepo, $this->gate );
+		$reportsApi->registerRoutes();
+
+		\SubtleForms\Tools\ApiLog::register();
 	}
 }
