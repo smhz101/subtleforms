@@ -112,3 +112,8 @@ bundle-stats.json
 .wp-env.json
 playwright.browser.config.js
 phpunit-wp.xml.dist
+
+# Development notes and AI rules
+docs
+.cursor
+_plan
