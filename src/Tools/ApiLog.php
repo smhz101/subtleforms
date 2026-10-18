@@ -143,24 +143,27 @@ final class ApiLog {
 		$table    = self::table();
 		$page     = max( 1, (int) ( $args['page'] ?? 1 ) );
 		$per_page = max( 1, min( 50, (int) ( $args['per_page'] ?? 20 ) ) );
-		$where    = array( '1=1' );
-		$params   = array();
-		if ( isset( $args['status'] ) && $args['status'] !== '' && $args['status'] !== null ) {
-			$where[]  = 'status = %d';
-			$params[] = (int) $args['status'];
-		}
-		$clause = implode( ' AND ', $where );
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Table name is fixed. Values are prepared.
-		$count_sql = "SELECT COUNT(*) FROM {$table} WHERE {$clause}";
-		$total     = (int) ( $params ? $wpdb->get_var( $wpdb->prepare( $count_sql, ...$params ) ) : $wpdb->get_var( $count_sql ) );
-		$list      = $params;
-		$list[]    = $per_page;
-		$list[]    = ( $page - 1 ) * $per_page;
-		$rows      = $wpdb->get_results(
-			$wpdb->prepare( "SELECT id, method, route, status, user_id, duration_ms, created_at FROM {$table} WHERE {$clause} ORDER BY id DESC LIMIT %d OFFSET %d", ...$list ),
+		$status = ( isset( $args['status'] ) && $args['status'] !== '' && $args['status'] !== null ) ? (int) $args['status'] : -1;
+		$offset = ( $page - 1 ) * $per_page;
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is fixed. Every value is a placeholder.
+		$total = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$table} WHERE (%d = -1 OR status = %d)",
+				$status,
+				$status
+			)
+		);
+		$rows  = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT id, method, route, status, user_id, duration_ms, created_at FROM {$table} WHERE (%d = -1 OR status = %d) ORDER BY id DESC LIMIT %d OFFSET %d",
+				$status,
+				$status,
+				$per_page,
+				$offset
+			),
 			ARRAY_A
 		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 		return array(
 			'rows'  => is_array( $rows ) ? $rows : array(),
 			'total' => $total,
