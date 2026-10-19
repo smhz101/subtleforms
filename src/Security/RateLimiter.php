@@ -117,7 +117,8 @@ class RateLimiter
         $isAuthenticatedAdmin = is_user_logged_in() && current_user_can('manage_options');
         
         // PUBLIC SUBMIT ENDPOINTS (strictest)
-        if (preg_match('#^/forms/[^/]+/submit$#', $route) && $method === 'POST') {
+        // The live form posts to /submit (FF-28); /forms/{id}/submit is the older route.
+        if (preg_match('#^(/submit|/forms/[^/]+/submit)/?$#', $route) && $method === 'POST') {
             return array('limit' => 10, 'window' => 60);
         }
         

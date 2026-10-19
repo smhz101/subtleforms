@@ -497,8 +497,10 @@ final class FormsApi {
 						'id'    => (int) $form['id'],
 						'title' => $form['title'] ?? '',
 					),
-					'schema'  => self::filterPublicSchema( $this->buildPublicSchema( $schemaData ), (int) $form['id'] ),
-					'version' => $schema['version'] ?? null,
+					'schema'     => self::filterPublicSchema( $this->buildPublicSchema( $schemaData ), (int) $form['id'] ),
+					'version'    => $schema['version'] ?? null,
+					// Server-signed load time for the spam time trap (FF-11, FF-12).
+					'spam_token' => \SubtleForms\Engine\SpamProtection::issue_token( (int) $form['id'] ),
 				)
 			);
 		}

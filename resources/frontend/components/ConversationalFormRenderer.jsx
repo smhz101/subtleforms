@@ -19,14 +19,7 @@ import { formFieldDefaults } from '../../shared/fieldDisplay';
 import { collectDefaultValues } from '../utils/defaults';
 import { validateFields } from '../utils/fieldValidation';
 
-const restUrl =
-  window.subtleformsFrontend?.restUrl ||
-  window.subtleformsAdmin?.restUrl ||
-  '/wp-json/subtleforms/v1';
-const nonce =
-  window.subtleformsFrontend?.nonce ||
-  window.subtleformsAdmin?.restNonce ||
-  '';
+import { restFetch } from '../utils/restFetch';
 
 /**
  * ConversationalFormRenderer - Renders form one question at a time
@@ -39,6 +32,7 @@ export default function ConversationalFormRenderer({
   formId,
   preview = false,
   onSubmit: customOnSubmit = null,
+  spamToken = '',
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentStep, setCurrentStep] = useState('questions'); // 'questions', 'review', 'payment'
@@ -324,17 +318,9 @@ export default function ConversationalFormRenderer({
       }
 
       try {
-        const response = await fetch(`${restUrl.replace(/\/$/, '')}/submit`, {
+        const response = await restFetch('/submit', {
           method: 'POST',
-          credentials: 'same-origin',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-WP-Nonce': nonce,
-          },
-          body: JSON.stringify({
-            form_id: formId,
-            data: payload,
-          }),
+          body: { form_id: formId, data: { ...payload, form_rendered_at: spamToken } },
         });
 
         const result = await response.json();
@@ -379,7 +365,7 @@ export default function ConversationalFormRenderer({
         setSubmitting(false);
       }
     },
-    [formId, values, leafPaths, preview, customOnSubmit, hiddenFields]
+    [formId, values, leafPaths, preview, customOnSubmit, hiddenFields, spamToken]
   );
 
   const handleSubmit = useCallback(

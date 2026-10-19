@@ -3,7 +3,7 @@
  * and export selected.
  */
 const { test, expect } = require('@playwright/test');
-const { adminApi, publishForm, cleanup, entries, loginPage } = require('./helpers');
+const { adminApi, publishForm, cleanup, entries, loginPage, spamToken } = require('./helpers');
 
 let client;
 let form;
@@ -11,7 +11,7 @@ let form;
 /** Send an entry as a visitor would. */
 async function submitEntry(api, formId, data) {
   const res = await api.post('/wp-json/subtleforms/v1/submit', {
-    data: { form_id: formId, data: { ...data, form_rendered_at: Math.floor(Date.now() / 1000) - 60 } },
+    data: { form_id: formId, data: { ...data, form_rendered_at: await spamToken(api, formId) } },
   });
   expect(res.status(), await res.text()).toBe(200);
 }

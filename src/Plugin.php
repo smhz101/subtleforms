@@ -101,6 +101,7 @@ final class Plugin {
 		// File and image uploads: endpoint, admin downloads, clean-up (2.1).
 		\SubtleForms\Uploads\Uploads::register();
 		\SubtleForms\Fields\AddonFieldTypes::register();
+		\SubtleForms\Security\PublicRoutes::register();
 
 		// Initialize privacy features
 		$this->init_privacy();

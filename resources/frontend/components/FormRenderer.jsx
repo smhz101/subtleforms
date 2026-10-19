@@ -26,14 +26,7 @@ import {
   getPreset,
 } from '../../shared/appearance';
 
-const restUrl =
-  window.subtleformsFrontend?.restUrl ||
-  window.subtleformsAdmin?.restUrl ||
-  '/wp-json/subtleforms/v1';
-const nonce =
-  window.subtleformsFrontend?.nonce ||
-  window.subtleformsAdmin?.restNonce ||
-  '';
+import { restFetch, restUrl, restNonce } from '../utils/restFetch';
 
 /**
  * Whether a submitted value counts as missing.
@@ -61,6 +54,8 @@ export default function FormRenderer({
 }) {
   const [loading, setLoading] = useState(!preloadedSchema);
   const [schema, setSchema] = useState(preloadedSchema);
+  // Server-signed load time for the spam time trap (FF-11, FF-12).
+  const [spamToken, setSpamToken] = useState('');
   const [error, setError] = useState(null);
   const [values, setValues] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -91,11 +86,6 @@ export default function FormRenderer({
 
   // Load schema (skip if preloaded)
   useEffect(() => {
-    // Set render time for spam protection time trap
-    if (!window.subtleformsRenderTime) {
-      window.subtleformsRenderTime = Math.floor(Date.now() / 1000);
-    }
-
     if (preloadedSchema) {
       // Keep the builder preview live: the schema prop changes on every edit
       // (appearance, fields, settings), and useState only read it once.
@@ -104,16 +94,12 @@ export default function FormRenderer({
       return;
     }
 
-    fetch(`${restUrl.replace(/\/$/, '')}/forms/${formId}/schema`, {
-      credentials: 'same-origin',
-      headers: {
-        'X-WP-Nonce': nonce,
-      },
-    })
+    restFetch(`/forms/${formId}/schema`)
       .then((res) => res.json())
       .then((data) => {
         // API wraps responses in { data: ... }, but fall back to root-level schema for compatibility
         const schemaPayload = data?.data?.schema ?? data?.schema ?? null;
+        setSpamToken(data?.data?.spam_token || '');
         if (schemaPayload) {
           setSchema(schemaPayload);
         } else {
@@ -536,11 +522,9 @@ export default function FormRenderer({
       setCouponBusy(true);
       setCouponError('');
       try {
-        const res = await fetch(`${restUrl.replace(/\/$/, '')}/payments/coupon`, {
+        const res = await restFetch('/payments/coupon', {
           method: 'POST',
-          credentials: 'same-origin',
-          headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': nonce },
-          body: JSON.stringify({ form_id: formId, code, data: flattenToPathMap(values) }),
+          body: { form_id: formId, code, data: flattenToPathMap(values) },
         });
         const json = await res.json().catch(() => ({}));
         const found = json?.data?.coupon;
@@ -762,8 +746,7 @@ export default function FormRenderer({
         const submissionPayload = {
           ...payload,
           website_url: honeypotInput ? honeypotInput.value : '',
-          form_rendered_at:
-            window.subtleformsRenderTime || Math.floor(Date.now() / 1000),
+          form_rendered_at: spamToken,
         };
 
         // Include CAPTCHA response (v2 or v3)
@@ -816,8 +799,8 @@ export default function FormRenderer({
               const paid = await cardRef.current.confirm({
                 formId,
                 data: submissionPayload,
-                restUrl: restUrl.replace(/\/$/, ''),
-                nonce,
+                restUrl,
+                nonce: restNonce(),
               });
               submissionPayload._payment = paid?.reference || '';
             } catch (payErr) {
@@ -835,17 +818,9 @@ export default function FormRenderer({
           }
         }
 
-        const response = await fetch(`${restUrl.replace(/\/$/, '')}/submit`, {
+        const response = await restFetch('/submit', {
           method: 'POST',
-          credentials: 'same-origin',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-WP-Nonce': nonce,
-          },
-          body: JSON.stringify({
-            form_id: formId,
-            data: submissionPayload,
-          }),
+          body: { form_id: formId, data: submissionPayload },
         });
 
         const result = await response.json();
@@ -958,6 +933,7 @@ export default function FormRenderer({
       coupon,
       quote,
       hasCardField,
+      spamToken,
     ]
   );
 
@@ -1007,6 +983,7 @@ export default function FormRenderer({
         formId={formId}
         preview={preview}
         onSubmit={customOnSubmit}
+        spamToken={spamToken}
       />
     );
   }

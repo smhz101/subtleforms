@@ -92,6 +92,27 @@ final class AddonFieldTypes {
 	}
 
 	/**
+	 * Drop answers to fields whose add-on is not active: the live form does
+	 * not show them, so a value can only come from a crafted request.
+	 *
+	 * @param array $payload Submitted values.
+	 * @param mixed $schema  Form schema.
+	 * @return array
+	 */
+	public static function dropMissingAnswers( array $payload, $schema ): array {
+		$missing = self::missing();
+		if ( ! $missing || ! is_array( $schema ) ) {
+			return $payload;
+		}
+		foreach ( \SubtleForms\Payments\Pricing::fields( $schema ) as $field ) {
+			if ( in_array( (string) ( $field['type'] ?? '' ), $missing, true ) && ! empty( $field['key'] ) ) {
+				unset( $payload[ (string) $field['key'] ] );
+			}
+		}
+		return $payload;
+	}
+
+	/**
 	 * Remove nodes of the given types, at any depth.
 	 *
 	 * @param array    $nodes Field nodes.

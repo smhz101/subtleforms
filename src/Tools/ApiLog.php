@@ -111,6 +111,10 @@ final class ApiLog {
 		$id      = spl_object_id( $request );
 		$started = self::$started[ $id ] ?? null;
 		unset( self::$started[ $id ] );
+
+		if ( ! self::shouldLog( $result, $status, get_current_user_id() ) || ! self::underRateLimit() ) {
+			return $result;
+		}
 		$ms = is_float( $started ) ? (int) round( ( microtime( true ) - $started ) * 1000 ) : 0;
 
 		global $wpdb;
@@ -170,19 +174,63 @@ final class ApiLog {
 		);
 	}
 
+	/** Most rows the log keeps. */
+	const MAX_ROWS = 5000;
+
+	/** Most rows written per minute, so a flood of requests cannot fill the table. */
+	const MAX_PER_MINUTE = 120;
+
 	/**
-	 * Delete rows older than the retention window, at most once a day.
+	 * Whether a call is worth a row (FF2-08).
+	 *
+	 * Requests for routes that do not exist are not logged. Visitor traffic
+	 * (submits, view counts, uploads) is only logged when the server failed.
+	 *
+	 * @param mixed $result  Response or error.
+	 * @param int   $status  HTTP status.
+	 * @param int   $user_id Current user.
+	 */
+	public static function shouldLog( $result, int $status, int $user_id ): bool {
+		if ( $result instanceof \WP_Error && 'rest_no_route' === $result->get_error_code() ) {
+			return false;
+		}
+		if ( 0 === $user_id && $status < 500 ) {
+			return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Count this write against the per-minute limit.
+	 */
+	private static function underRateLimit(): bool {
+		$key   = 'subtleforms_api_log_rate_' . gmdate( 'YmdHi' );
+		$count = (int) get_transient( $key );
+		if ( $count >= self::MAX_PER_MINUTE ) {
+			return false;
+		}
+		set_transient( $key, $count + 1, 2 * MINUTE_IN_SECONDS );
+		return true;
+	}
+
+	/**
+	 * Delete rows older than the retention window and keep at most MAX_ROWS,
+	 * at most once an hour.
 	 */
 	private static function prune(): void {
 		if ( get_transient( 'subtleforms_api_log_pruned' ) ) {
 			return;
 		}
-		set_transient( 'subtleforms_api_log_pruned', 1, DAY_IN_SECONDS );
+		set_transient( 'subtleforms_api_log_pruned', 1, HOUR_IN_SECONDS );
 		global $wpdb;
 		$table = self::table();
 		$cut   = gmdate( 'Y-m-d H:i:s', time() - ( self::RETENTION_DAYS * DAY_IN_SECONDS ) );
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE created_at < %s", $cut ) );
+		$keep_from = (int) $wpdb->get_var( $wpdb->prepare( "SELECT id FROM {$table} ORDER BY id DESC LIMIT 1 OFFSET %d", self::MAX_ROWS - 1 ) );
+		if ( $keep_from > 0 ) {
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE id < %d", $keep_from ) );
+		}
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
 	}
 

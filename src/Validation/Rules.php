@@ -174,6 +174,11 @@ class Rules {
 	private static function applyRule( string $ruleName, $value, $param, string $path, callable $schemaResolver, array $allInput = array(), $originalValue = null ): array {
 		switch ( $ruleName ) {
 			case 'string':
+				// A number is fine where text is expected (for example a
+				// numeric ID stored as a number); it is kept as text.
+				if ( is_int( $value ) || is_float( $value ) ) {
+					$value = (string) $value;
+				}
 				if ( ! is_string( $value ) ) {
 					return array( false, $value, 'Must be a string' );
 				}
@@ -226,10 +231,13 @@ class Rules {
 					return array( false, $value, 'max rule requires parameter' );
 				}
 				$max = (int) $param;
-				if ( is_string( $value ) && mb_strlen( $value ) > $max ) {
-					return array( false, $value, sprintf( 'Maximum length is %d characters', $max ) );
-				}
-				if ( is_numeric( $value ) && $value > $max ) {
+				// Text is limited by length, numbers by value. A numeric string
+				// (such as a HubSpot Portal ID) is text.
+				if ( is_string( $value ) ) {
+					if ( mb_strlen( $value ) > $max ) {
+						return array( false, $value, sprintf( 'Maximum length is %d characters', $max ) );
+					}
+				} elseif ( is_numeric( $value ) && $value > $max ) {
 					return array( false, $value, sprintf( 'Maximum value is %d', $max ) );
 				}
 				return array( true, $value, null );
@@ -239,10 +247,11 @@ class Rules {
 					return array( false, $value, 'min rule requires parameter' );
 				}
 				$min = (int) $param;
-				if ( is_string( $value ) && mb_strlen( $value ) < $min ) {
-					return array( false, $value, sprintf( 'Minimum length is %d characters', $min ) );
-				}
-				if ( is_numeric( $value ) && $value < $min ) {
+				if ( is_string( $value ) ) {
+					if ( mb_strlen( $value ) < $min ) {
+						return array( false, $value, sprintf( 'Minimum length is %d characters', $min ) );
+					}
+				} elseif ( is_numeric( $value ) && $value < $min ) {
 					return array( false, $value, sprintf( 'Minimum value is %d', $min ) );
 				}
 				return array( true, $value, null );
