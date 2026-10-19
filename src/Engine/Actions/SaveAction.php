@@ -201,7 +201,7 @@ final class SaveAction implements ActionInterface {
 
 			switch ( $type ) {
 				case 'email':
-					$sanitized[ $key ] = sanitize_email( sanitize_text_field( (string) $value ) );
+					$sanitized[ $key ] = $this->sanitize_email_value( (string) $value, $field );
 					break;
 				case 'url':
 					$sanitized[ $key ] = esc_url_raw( sanitize_text_field( (string) $value ) );
@@ -222,6 +222,34 @@ final class SaveAction implements ActionInterface {
 		}
 
 		return $sanitized;
+	}
+
+	/**
+	 * Clean an email answer. A field that allows several addresses keeps each
+	 * one (FB-05). With RFC validation off an address such as user@localhost
+	 * is kept as typed, since sanitize_email() would empty it (FB-06).
+	 *
+	 * @param string $value Answer.
+	 * @param array  $field Field definition.
+	 * @return string
+	 */
+	private function sanitize_email_value( string $value, array $field ): string {
+		$setting  = static function ( string $name ) use ( $field ) {
+			$config = is_array( $field['config'] ?? null ) ? $field['config'] : array();
+			return array_key_exists( $name, $config ) && null !== $config[ $name ] && '' !== $config[ $name ] ? $config[ $name ] : ( $field[ $name ] ?? null );
+		};
+		$multiple = true === $setting( 'allowMultiple' );
+		$strict   = ! in_array( $setting( 'rfcValidation' ), array( false, 0, '0', 'false' ), true );
+		$parts    = $multiple ? preg_split( '/[,;]/', $value ) : array( $value );
+		$clean    = array();
+		foreach ( $parts as $part ) {
+			$part = sanitize_text_field( (string) $part );
+			$part = $strict ? sanitize_email( $part ) : (string) preg_replace( '/\s+/', '', $part );
+			if ( '' !== $part ) {
+				$clean[] = $part;
+			}
+		}
+		return implode( ', ', $clean );
 	}
 
 	/**

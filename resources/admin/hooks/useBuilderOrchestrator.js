@@ -310,7 +310,7 @@ export default function useBuilderOrchestrator({
 					}
 
 					// Name the setting that stopped the save (QA-03).
-					throw new Error(describeSaveError(body, saveStatus));
+					throw new Error(describeSaveError(body, saveStatus, enrichedSchema));
 				}
 
 				// Update status if specified

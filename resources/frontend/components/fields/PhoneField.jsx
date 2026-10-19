@@ -4,6 +4,7 @@ import {
   filterPhoneCountries,
   flagEmoji,
   joinPhoneValue,
+  looksInternational,
   phoneCountry,
   splitPhoneValue,
 } from '../../../shared/phone';
@@ -192,8 +193,19 @@ export default function PhoneField({
         disabled={disabled || undefined}
         readOnly={readOnly || undefined}
         onChange={(event) => {
+          const typed = event.target.value;
+          // A pasted or typed international number ("+44 20 7946 0958")
+          // brings its own country (FLD2-07).
+          if (looksInternational(typed)) {
+            const next = splitPhoneValue(typed, country?.code);
+            if (next.country) {
+              setPickedCode(next.country.code);
+              emit(joinPhoneValue(next.country, next.national));
+              return;
+            }
+          }
           setPickedCode(country?.code || '');
-          emit(joinPhoneValue(country, event.target.value));
+          emit(joinPhoneValue(country, typed));
         }}
       />
     </div>

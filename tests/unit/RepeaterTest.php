@@ -78,9 +78,16 @@ final class RepeaterTest extends TestCase {
 		$this->assertArrayNotHasKey( 'ticker', $errors );
 	}
 
-	public function test_the_minimum_groups_are_required_even_when_nothing_is_posted(): void {
+	public function test_fewer_groups_than_the_minimum_is_one_error_on_the_repeater(): void {
+		// FA-23: "Add at least 2 entries.", not errors for the fields of the
+		// groups that were never sent.
+		$schema                       = $this->schema();
+		$schema['fields'][1]['min']   = 2;
+		$errors                       = $this->validate( $schema, array( 'companies' => array( array( 'ticker' => 'AAPL' ) ) ) );
+		$this->assertSame( array( 'companies' => 'Add at least 2 entries.' ), $errors );
+
 		$errors = $this->validate( $this->schema(), array() );
-		$this->assertArrayHasKey( 'companies.0.ticker', $errors );
+		$this->assertSame( array( 'companies' => 'Add at least 1 entry.' ), $errors );
 	}
 
 	public function test_more_groups_than_the_maximum_is_an_error(): void {

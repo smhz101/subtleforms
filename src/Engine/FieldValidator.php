@@ -50,6 +50,71 @@ final class FieldValidator {
 	);
 
 	/**
+	 * Types that answer with one value, never a list (FB-23).
+	 */
+	private const SINGLE_VALUE_TYPES = array(
+		'text',
+		'email',
+		'url',
+		'number',
+		'phone',
+		'tel',
+		'password',
+		'textarea',
+		'rich_text',
+		'date',
+		'time',
+		'datetime',
+		'radio',
+		'select',
+		'dropdown',
+		'country',
+		'color_picker',
+		'rating',
+		'net_promoter_score',
+		'range_slider',
+		'scale',
+		'toggle',
+		'consent',
+		'hidden',
+		'signature',
+		'payment_amount',
+		'payment_product',
+		'payment_coupon',
+	);
+
+	/**
+	 * Types whose input honours Read-only on the live form (FB-07).
+	 */
+	private const READ_ONLY_TYPES = array(
+		'text',
+		'email',
+		'url',
+		'number',
+		'phone',
+		'tel',
+		'password',
+		'textarea',
+		'date',
+		'time',
+		'datetime',
+		'select',
+		'dropdown',
+		'country',
+	);
+
+	/**
+	 * Payment fields that show the order but take no answer (PAY2-04).
+	 */
+	private const DISPLAY_ONLY_TYPES = array( 'payment_summary', 'payment_hidden_price' );
+
+	/**
+	 * Calling codes whose national numbers keep their leading 0 (Italy, San
+	 * Marino and the Vatican).
+	 */
+	private const KEEPS_TRUNK_ZERO = array( '39', '378' );
+
+	/**
 	 * Validate submission payload against schema fields.
 	 *
 	 * @param array<string,mixed> $schema
@@ -141,6 +206,16 @@ final class FieldValidator {
 				continue;
 			}
 
+			// Rich text with no visible text, such as "<p><br></p>", is empty
+			// (FA-17). A phone number that is only a calling code is empty too.
+			if ( $type === 'rich_text' || $type === 'phone' || $type === 'tel' ) {
+				$blank = $type === 'rich_text' ? self::richTextIsBlank( $value ) : self::phoneIsBlank( $value );
+				if ( $blank ) {
+					$errors[ $fieldKey ] = $requiredMessage;
+				}
+				continue;
+			}
+
 			// Name and Address demand every part they draw except the optional
 			// ones, the same rule as the browser (FB-10).
 			if ( $isComposite ? array() !== CompositeParts::missing( $type, $fields[ $fieldKey ] ?? array(), $value ) : $this->isEmpty( $value ) ) {
@@ -172,6 +247,118 @@ final class FieldValidator {
 			'valid'  => empty( $errors ),
 			'errors' => $errors,
 		);
+	}
+
+	/**
+	 * Put submitted answers in the shape the form stores, before they are
+	 * checked: the same steps the browser takes.
+	 *
+	 * - Display-only payment fields (Order Summary, Fixed Fee) take no answer;
+	 *   a posted value for them is dropped (PAY2-04).
+	 * - A Hidden field's value is worked out here, so {date}, {user_email}
+	 *   and {user_name} are filled in without JavaScript (FLD2-16). A value
+	 *   that reads the page address ({get:param}) keeps what the browser sent.
+	 * - A website typed without https:// gets it (FB-15).
+	 * - Several email addresses are stored as "a@example.com, b@example.com" (FB-05).
+	 * - A phone number with a calling code is stored as "+44 7946095800",
+	 *   without the trunk 0 (FLD2-07).
+	 *
+	 * Repeater groups are prepared with their child fields.
+	 *
+	 * @param mixed $schema  Form schema.
+	 * @param array $payload Submitted values.
+	 * @return array
+	 */
+	public static function prepare( $schema, array $payload ): array {
+		$fields = is_array( $schema ) && isset( $schema['fields'] ) && is_array( $schema['fields'] ) ? $schema['fields'] : array();
+		foreach ( self::answerFields( $fields ) as $key => $field ) {
+			$type = (string) ( $field['type'] ?? '' );
+			if ( in_array( $type, self::DISPLAY_ONLY_TYPES, true ) ) {
+				unset( $payload[ $key ] );
+				continue;
+			}
+			if ( 'hidden' === $type ) {
+				$raw = self::attr( $field, 'defaultValue' );
+				if ( null === $raw || '' === $raw ) {
+					$raw = self::attr( $field, 'value' );
+				}
+				if ( is_scalar( $raw ) && '' !== (string) $raw ) {
+					$resolved = self::resolveTokens( (string) $raw );
+					if ( null !== $resolved ) {
+						$payload[ $key ] = $resolved;
+					}
+				}
+				continue;
+			}
+			if ( ! array_key_exists( $key, $payload ) ) {
+				continue;
+			}
+			$value = $payload[ $key ];
+			if ( \SubtleForms\Support\Repeater::TYPE === $type ) {
+				if ( is_array( $value ) ) {
+					$child = array( 'fields' => \SubtleForms\Support\Repeater::children( $field ) );
+					$groups = array();
+					foreach ( \SubtleForms\Support\Repeater::groups( $value ) as $group ) {
+						$groups[] = self::prepare( $child, $group );
+					}
+					$payload[ $key ] = $groups;
+				}
+				continue;
+			}
+			if ( ! is_string( $value ) ) {
+				continue;
+			}
+			switch ( $type ) {
+				case 'url':
+					$payload[ $key ] = self::normalizeUrl( $value );
+					break;
+				case 'email':
+					$payload[ $key ] = true === self::attr( $field, 'allowMultiple' ) ? implode( ', ', self::emailList( $value ) ) : trim( $value );
+					break;
+				case 'phone':
+				case 'tel':
+					$payload[ $key ] = self::normalizePhone( $value );
+					break;
+			}
+		}
+		return $payload;
+	}
+
+	/**
+	 * Fields by key, without looking inside Repeaters (their children answer
+	 * inside each group).
+	 *
+	 * @param array $fields Field nodes.
+	 * @param array $map    Collected fields.
+	 * @return array<string,array>
+	 */
+	private static function answerFields( array $fields, array &$map = array() ): array {
+		foreach ( $fields as $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+			$key = (string) ( $field['key'] ?? ( is_array( $field['config'] ?? null ) ? ( $field['config']['key'] ?? '' ) : '' ) );
+			if ( '' !== $key ) {
+				$map[ $key ] = $field;
+			}
+			if ( \SubtleForms\Support\Repeater::TYPE === ( $field['type'] ?? '' ) ) {
+				continue;
+			}
+			foreach ( array( 'fields', 'children' ) as $nested ) {
+				if ( ! empty( $field[ $nested ] ) && is_array( $field[ $nested ] ) ) {
+					self::answerFields( $field[ $nested ], $map );
+				}
+			}
+			if ( ! empty( $field['columns'] ) && is_array( $field['columns'] ) ) {
+				foreach ( $field['columns'] as $column ) {
+					if ( is_array( $column ) ) {
+						$list = isset( $column['fields'] ) && is_array( $column['fields'] ) ? $column['fields'] : ( isset( $column['children'] ) && is_array( $column['children'] ) ? $column['children'] : $column );
+						self::answerFields( $list, $map );
+					}
+				}
+			}
+		}
+		return $map;
 	}
 
 	/**
@@ -280,16 +467,31 @@ final class FieldValidator {
 	}
 
 	/**
+	 * Check one submitted value against its field: the same rules the browser
+	 * applies, so a crafted request cannot store what the form would refuse.
+	 *
 	 * @param array $field
 	 * @param mixed $value
 	 * @return string|null
 	 */
 	private function validateFieldType( $field, $value ) {
-		$type = isset( $field['type'] ) ? $field['type'] : null;
+		$type  = isset( $field['type'] ) ? $field['type'] : null;
+		$field = is_array( $field ) ? $field : array();
+
+		// A field that answers with one value never takes a list (FB-23).
+		if ( is_array( $value ) && $this->expectsSingleValue( (string) $type, $field ) ) {
+			return __( 'Please enter a single value.', 'subtleforms' );
+		}
+
+		// Read-only fields keep the value the form gave them (FB-07).
+		$readOnly = $this->validateReadOnly( $field, $value );
+		if ( null !== $readOnly ) {
+			return $readOnly;
+		}
 
 		switch ( $type ) {
 			case 'email':
-				return $this->validateEmail( $value );
+				return $this->validateEmail( $value, $field );
 			case 'url':
 				return $this->validateUrl( $value );
 			case 'number':
@@ -306,38 +508,602 @@ final class FieldValidator {
 				return $this->validateTextLength( $value, $field );
 			case 'multiple_choice':
 			case 'picture_choice':
-				return $this->validateChoiceCount( $value, $field );
+				$error = $this->validateChoices( $value, $field, true === $this->attr( $field, 'allowMultiple' ) );
+				return $error ?: $this->validateChoiceCount( $value, $field );
+			case 'radio':
+			case 'select':
+			case 'dropdown':
+				return $this->validateChoices( $value, $field, false );
+			case 'checkbox':
+				// An older single checkbox saved with options is a checkbox group.
+				$options = $this->attr( $field, 'options' );
+				if ( is_array( $options ) && array() !== $options ) {
+					return $this->validateChoices( $value, $field, true );
+				}
+				return $this->validateTick( $value );
+			case 'consent':
+				return $this->validateTick( $value );
+			case 'toggle':
+				return $this->validateToggle( $value, $field );
+			case 'country':
+				return $this->validateCountry( $value );
+			case 'chained_select':
+				return $this->validateChained( $value, $field );
 			case 'scale':
 				return $this->validateScale( $value, $field );
 			case 'date':
-				return $this->validateDateBounds( $value, $field );
+				return $this->validateDate( $value, $field );
+			case 'time':
+				return $this->validateTime( $value );
+			case 'datetime':
+				return $this->validateDateTime( $value, $field );
+			case 'rating':
+				return $this->validateRating( $value, $field );
+			case 'net_promoter_score':
+				return $this->validateNps( $value );
+			case 'range_slider':
+				return $this->validateSlider( $value, $field );
+			case 'checkbox_grid':
+				return $this->validateMatrix( $value, $field );
+			case 'color_picker':
+				return $this->validateColour( $value );
 			case 'phone':
+			case 'tel':
 				return $this->validatePhone( $value );
 			case 'payment_amount':
 				return $this->validatePaymentAmount( $value, $field );
 			case 'payment_coupon':
 				return $this->validatePaymentCoupon( $value, $field );
+			case 'payment_product':
+				return $this->validatePaymentQuantity( $value, $field );
+			case 'payment_choice':
+				return $this->validateChoices( $value, $field, 'checkbox' === (string) ( $this->attr( $field, 'displayAs' ) ?? 'radio' ) );
 			case 'name_group':
 			case 'address_group':
 				// Grouped fields submit as arrays/objects - no specific validation needed
 				// Individual sub-parts are strings and will be sanitized by SaveAction
 				return null;
+			case 'signature':
+				// The Signature field (SubtleForms Pro) answers with a drawn
+				// PNG or JPEG. Anything else is not a signature (FA-01).
+				if ( ! $this->isEmpty( $value ) && ! \SubtleForms\Support\EntryValues::isSignatureImage( $value ) ) {
+					return __( 'The signature could not be read. Please sign again.', 'subtleforms' );
+				}
+				return $this->addonError( $type, $value, $field );
 			default:
-				/**
-				 * Validate a value for a field type an add-on registered (for
-				 * example the WooCommerce Product field). Return an error
-				 * message, or null when the value is fine. Unknown types are
-				 * otherwise not checked.
-				 *
-				 * @param string|null $error Default null.
-				 * @param string|null $type  Field type.
-				 * @param mixed       $value Submitted value.
-				 * @param array       $field Field definition from the schema.
-				 * @since 2.1.0
-				 */
-				$error = apply_filters( 'subtleforms/fields/validate_value', null, $type, $value, is_array( $field ) ? $field : array() );
-				return is_string( $error ) && '' !== $error ? $error : null;
+				return $this->addonError( $type, $value, $field );
 		}
+	}
+
+	/**
+	 * Error from an add-on for its own field type, or null.
+	 *
+	 * @param string|null $type  Field type.
+	 * @param mixed       $value Submitted value.
+	 * @param array       $field Field definition.
+	 * @return string|null
+	 */
+	private function addonError( $type, $value, array $field ) {
+		/**
+		 * Validate a value for a field type an add-on registered (for
+		 * example the WooCommerce Product field). Return an error
+		 * message, or null when the value is fine. Unknown types are
+		 * otherwise not checked.
+		 *
+		 * @param string|null $error Default null.
+		 * @param string|null $type  Field type.
+		 * @param mixed       $value Submitted value.
+		 * @param array       $field Field definition from the schema.
+		 * @since 2.1.0
+		 */
+		$error = apply_filters( 'subtleforms/fields/validate_value', null, $type, $value, $field );
+		return is_string( $error ) && '' !== $error ? $error : null;
+	}
+
+	/**
+	 * Whether a field answers with one value.
+	 *
+	 * @param string $type  Field type.
+	 * @param array  $field Field.
+	 */
+	private function expectsSingleValue( string $type, array $field ): bool {
+		if ( 'checkbox' === $type ) {
+			$options = $this->attr( $field, 'options' );
+			return ! ( is_array( $options ) && array() !== $options );
+		}
+		return in_array( $type, self::SINGLE_VALUE_TYPES, true );
+	}
+
+	/**
+	 * A read-only field must keep the value the form filled in (FB-07, FA-01).
+	 *
+	 * The browser does not let a visitor change it, so another value can only
+	 * come from a crafted request. A default that reads the page address
+	 * ({get:param}) cannot be known here and is not checked.
+	 *
+	 * @param array $field Field.
+	 * @param mixed $value Submitted value.
+	 * @return string|null
+	 */
+	private function validateReadOnly( array $field, $value ) {
+		$flag = $this->attr( $field, 'readOnly' );
+		if ( true !== $flag && 1 !== $flag && '1' !== $flag && 'true' !== $flag ) {
+			return null;
+		}
+		$type = (string) ( $field['type'] ?? '' );
+		if ( ! in_array( $type, self::READ_ONLY_TYPES, true ) || $this->isEmpty( $value ) || ! is_scalar( $value ) ) {
+			return null;
+		}
+		$expected = self::readOnlyValues( $field );
+		if ( null === $expected ) {
+			return null;
+		}
+		$given = self::comparable( $type, $value );
+		foreach ( $expected as $candidate ) {
+			$want = self::comparable( $type, $candidate );
+			if ( $want === $given ) {
+				return null;
+			}
+			// With a country picker the dial code is added in front of the
+			// default number.
+			if ( ( 'phone' === $type || 'tel' === $type ) && '' !== $want && str_ends_with( $given, ltrim( $want, '0' ) ) ) {
+				return null;
+			}
+		}
+		return __( 'This field cannot be changed.', 'subtleforms' );
+	}
+
+	/**
+	 * Values a read-only field may hold: its default, with tokens resolved.
+	 *
+	 * @param array $field Field.
+	 * @return string[]|null Null when the default cannot be worked out here.
+	 */
+	private static function readOnlyValues( array $field ): ?array {
+		$raw = self::attr( $field, 'defaultValue' );
+		if ( ( null === $raw || '' === $raw ) && 'country' === ( $field['type'] ?? '' ) ) {
+			$raw = self::attr( $field, 'default_country' );
+		}
+		if ( null === $raw || '' === $raw ) {
+			return array( '' );
+		}
+		if ( ! is_scalar( $raw ) ) {
+			return null;
+		}
+		$raw = (string) $raw;
+		if ( false === strpos( $raw, '{' ) ) {
+			return array( $raw );
+		}
+		// {date} is the visitor's local date, which can be a day either side
+		// of the site's date.
+		$out = array();
+		foreach ( array( 0, -1, 1 ) as $offset ) {
+			$resolved = self::resolveTokens( $raw, $offset );
+			if ( null === $resolved ) {
+				return null;
+			}
+			$out[] = $resolved;
+		}
+		return array_values( array_unique( $out ) );
+	}
+
+	/**
+	 * A value in a form that can be compared with a default.
+	 *
+	 * @param string $type  Field type.
+	 * @param mixed  $value Value.
+	 */
+	private static function comparable( string $type, $value ): string {
+		$text = trim( (string) $value );
+		if ( 'number' === $type && is_numeric( $text ) ) {
+			return (string) (float) $text;
+		}
+		if ( 'phone' === $type || 'tel' === $type ) {
+			return (string) preg_replace( '/\D/', '', $text );
+		}
+		if ( 'country' === $type ) {
+			return strtoupper( $text );
+		}
+		return $text;
+	}
+
+	/**
+	 * Resolve the default value tokens the server knows: {date},
+	 * {user_email} and {user_name}. Mirrors resolveTokens() in
+	 * resources/frontend/utils/defaults.js.
+	 *
+	 * @param string $raw       Text with tokens.
+	 * @param int    $dayOffset Days added to {date}.
+	 * @return string|null Null when the text reads the page address ({get:param}).
+	 */
+	private static function resolveTokens( string $raw, int $dayOffset = 0 ): ?string {
+		if ( false === strpos( $raw, '{' ) ) {
+			return $raw;
+		}
+		$unknown = false;
+		$out     = preg_replace_callback(
+			'/\{([a-z_]+)(?::([^}]+))?\}/i',
+			static function ( $match ) use ( &$unknown, $dayOffset ) {
+				switch ( strtolower( $match[1] ) ) {
+					case 'date':
+						$time = time() + $dayOffset * 86400;
+						return function_exists( 'wp_date' ) ? (string) wp_date( 'Y-m-d', $time ) : gmdate( 'Y-m-d', $time );
+					case 'user_email':
+						$user = function_exists( 'wp_get_current_user' ) ? wp_get_current_user() : null;
+						return $user && ! empty( $user->ID ) ? (string) $user->user_email : '';
+					case 'user_name':
+						$user = function_exists( 'wp_get_current_user' ) ? wp_get_current_user() : null;
+						return $user && ! empty( $user->ID ) ? (string) $user->display_name : '';
+					case 'get':
+						$unknown = true;
+						return '';
+					default:
+						return $match[0];
+				}
+			},
+			$raw
+		);
+		return $unknown ? null : (string) $out;
+	}
+
+	/**
+	 * Values offered by a field's choices.
+	 *
+	 * @param array $field Field.
+	 * @return string[]
+	 */
+	private function optionValues( array $field ): array {
+		$options = $this->attr( $field, 'options' );
+		$out     = array();
+		if ( ! is_array( $options ) ) {
+			return $out;
+		}
+		foreach ( $options as $option ) {
+			if ( is_array( $option ) ) {
+				$value = $option['value'] ?? null;
+				if ( null === $value || '' === $value ) {
+					$value = $option['label'] ?? null;
+				}
+			} else {
+				$value = $option;
+			}
+			if ( is_scalar( $value ) && '' !== (string) $value ) {
+				$out[] = (string) $value;
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Every answer must be one of the field's choices (FB-11, PAY-07), and a
+	 * pick-one field takes one answer (PAY-08).
+	 *
+	 * @param mixed $value    Value.
+	 * @param array $field    Field.
+	 * @param bool  $multiple Whether several choices may be picked.
+	 * @return string|null
+	 */
+	private function validateChoices( $value, array $field, bool $multiple ) {
+		if ( $this->isEmpty( $value ) ) {
+			return null;
+		}
+		$values = array_values( array_filter( is_array( $value ) ? $value : array( $value ), static fn( $v ) => $v !== '' && $v !== null && $v !== false ) );
+		if ( ! $multiple && count( $values ) > 1 ) {
+			return __( 'Please choose only one option.', 'subtleforms' );
+		}
+		$allowed = $this->optionValues( $field );
+		// A field with no choices of its own (filled by an add-on) is not checked.
+		if ( array() === $allowed ) {
+			return null;
+		}
+		foreach ( $values as $v ) {
+			if ( ! is_scalar( $v ) || ! in_array( (string) $v, $allowed, true ) ) {
+				return self::notAnOption();
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * The message for an answer that is not one of the choices.
+	 */
+	private static function notAnOption(): string {
+		return __( 'Please choose one of the options shown.', 'subtleforms' );
+	}
+
+	/**
+	 * A single checkbox or consent box is ticked or not (FB-11).
+	 *
+	 * @param mixed $value Value.
+	 * @return string|null
+	 */
+	private function validateTick( $value ) {
+		if ( is_bool( $value ) || null === $value || 0 === $value || 1 === $value ) {
+			return null;
+		}
+		if ( is_string( $value ) && in_array( strtolower( trim( $value ) ), array( '', '0', '1', 'true', 'false' ), true ) ) {
+			return null;
+		}
+		return self::notAnOption();
+	}
+
+	/**
+	 * A toggle is on or off, as its settings name them (FB-11).
+	 *
+	 * @param mixed $value Value.
+	 * @param array $field Field.
+	 * @return string|null
+	 */
+	private function validateToggle( $value, array $field ) {
+		if ( null === $this->validateTick( $value ) ) {
+			return null;
+		}
+		$on  = (string) ( $this->attr( $field, 'onValue' ) ?? 'yes' );
+		$off = (string) ( $this->attr( $field, 'offValue' ) ?? 'no' );
+		if ( is_scalar( $value ) && in_array( (string) $value, array( $on, $off ), true ) ) {
+			return null;
+		}
+		return self::notAnOption();
+	}
+
+	/**
+	 * A country is a code or a name from the country list (FB-11).
+	 *
+	 * @param mixed $value Value.
+	 * @return string|null
+	 */
+	private function validateCountry( $value ) {
+		if ( $this->isEmpty( $value ) ) {
+			return null;
+		}
+		if ( ! is_scalar( $value ) ) {
+			return self::notAnOption();
+		}
+		$text  = trim( (string) $value );
+		$names = \SubtleForms\Fields\CountryList::getAll();
+		if ( isset( $names[ strtoupper( $text ) ] ) || in_array( $text, $names, true ) || in_array( $text, \SubtleForms\Fields\CountryList::englishNames(), true ) ) {
+			return null;
+		}
+		return self::notAnOption();
+	}
+
+	/**
+	 * Every level of a chained dropdown must be one of the choices that level
+	 * offers for the answers before it (FB-11).
+	 *
+	 * @param mixed $value Value, one answer per level.
+	 * @param array $field Field.
+	 * @return string|null
+	 */
+	private function validateChained( $value, array $field ) {
+		if ( $this->isEmpty( $value ) ) {
+			return null;
+		}
+		$selected = is_array( $value ) ? array_values( $value ) : array( $value );
+		foreach ( $selected as $depth => $answer ) {
+			if ( null === $answer || '' === $answer ) {
+				continue;
+			}
+			if ( ! is_scalar( $answer ) ) {
+				return self::notAnOption();
+			}
+			$found = false;
+			foreach ( $this->chainedOptions( $field, $selected, (int) $depth ) as $opt ) {
+				if ( is_array( $opt ) && (string) ( $opt['value'] ?? '' ) === (string) $answer ) {
+					$found = true;
+					break;
+				}
+			}
+			if ( ! $found ) {
+				return self::notAnOption();
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * A date is a real calendar day, YYYY-MM-DD.
+	 *
+	 * @param mixed $value Value.
+	 */
+	private static function isIsoDate( $value ): bool {
+		if ( ! is_string( $value ) || ! preg_match( '/^(\d{4})-(\d{2})-(\d{2})$/', $value, $m ) ) {
+			return false;
+		}
+		return checkdate( (int) $m[2], (int) $m[3], (int) $m[1] );
+	}
+
+	/**
+	 * A time is HH:MM on the 24-hour clock, seconds optional.
+	 *
+	 * @param mixed $value Value.
+	 */
+	private static function isClockTime( $value ): bool {
+		return is_string( $value ) && 1 === preg_match( '/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/', $value );
+	}
+
+	/**
+	 * @param mixed $value Value.
+	 * @param array $field Field.
+	 * @return string|null
+	 */
+	private function validateDate( $value, array $field ) {
+		if ( $this->isEmpty( $value ) ) {
+			return null;
+		}
+		if ( ! self::isIsoDate( $value ) ) {
+			return __( 'Please enter a valid date.', 'subtleforms' );
+		}
+		return $this->validateDateBounds( $value, $field );
+	}
+
+	/**
+	 * @param mixed $value Value.
+	 * @return string|null
+	 */
+	private function validateTime( $value ) {
+		if ( $this->isEmpty( $value ) ) {
+			return null;
+		}
+		return self::isClockTime( $value ) ? null : __( 'Please enter a valid time.', 'subtleforms' );
+	}
+
+	/**
+	 * A date and time is YYYY-MM-DDTHH:MM; the time may be left out.
+	 *
+	 * @param mixed $value Value.
+	 * @param array $field Field.
+	 * @return string|null
+	 */
+	private function validateDateTime( $value, array $field ) {
+		if ( $this->isEmpty( $value ) ) {
+			return null;
+		}
+		$parts = is_string( $value ) ? preg_split( '/[T ]/', $value, 2 ) : array();
+		$date  = $parts[0] ?? '';
+		$time  = $parts[1] ?? null;
+		if ( ! self::isIsoDate( $date ) || ( null !== $time && ! self::isClockTime( $time ) ) ) {
+			return __( 'Please enter a valid date and time.', 'subtleforms' );
+		}
+		return $this->validateDateBounds( $date, $field );
+	}
+
+	/**
+	 * A whole number, or null.
+	 *
+	 * @param mixed $value Value.
+	 */
+	private static function wholeNumber( $value ): ?int {
+		if ( is_int( $value ) ) {
+			return $value;
+		}
+		if ( ( is_string( $value ) || is_float( $value ) ) && is_numeric( $value ) && (float) $value === floor( (float) $value ) ) {
+			return (int) $value;
+		}
+		return null;
+	}
+
+	/**
+	 * A star rating is a whole number from 1 to the number of stars.
+	 *
+	 * @param mixed $value Value.
+	 * @param array $field Field.
+	 * @return string|null
+	 */
+	private function validateRating( $value, array $field ) {
+		if ( $this->isEmpty( $value ) ) {
+			return null;
+		}
+		$max   = (int) ( $this->attr( $field, 'max' ) ?: 5 );
+		$max   = $max > 0 ? $max : 5;
+		$stars = self::wholeNumber( $value );
+		if ( null === $stars || $stars < 1 || $stars > $max ) {
+			/* translators: %d: number of stars */
+			return sprintf( __( 'Please choose a rating from 1 to %d.', 'subtleforms' ), $max );
+		}
+		return null;
+	}
+
+	/**
+	 * A Net Promoter Score is a whole number from 0 to 10.
+	 *
+	 * @param mixed $value Value.
+	 * @return string|null
+	 */
+	private function validateNps( $value ) {
+		if ( $this->isEmpty( $value ) ) {
+			return null;
+		}
+		$score = self::wholeNumber( $value );
+		if ( null === $score || $score < 0 || $score > 10 ) {
+			return __( 'Please choose a score from 0 to 10.', 'subtleforms' );
+		}
+		return null;
+	}
+
+	/**
+	 * A slider value lies between its minimum and maximum, on its step.
+	 *
+	 * @param mixed $value Value.
+	 * @param array $field Field.
+	 * @return string|null
+	 */
+	private function validateSlider( $value, array $field ) {
+		$error = $this->validateNumber( $value );
+		if ( $error ) {
+			return $error;
+		}
+		$min  = $this->attr( $field, 'min' );
+		$max  = $this->attr( $field, 'max' );
+		$step = $this->attr( $field, 'step' );
+		return $this->validateNumberRange(
+			$value,
+			array(
+				'min'  => is_numeric( $min ) ? $min : 0,
+				'max'  => is_numeric( $max ) ? $max : 100,
+				'step' => is_numeric( $step ) ? $step : 1,
+			)
+		);
+	}
+
+	/**
+	 * Matrix answers name its rows and columns (FA-01).
+	 *
+	 * @param mixed $value Value: row => column, or row => { column: ticked }.
+	 * @param array $field Field.
+	 * @return string|null
+	 */
+	private function validateMatrix( $value, array $field ) {
+		if ( $this->isEmpty( $value ) ) {
+			return null;
+		}
+		$rows = $this->attr( $field, 'rows' );
+		$cols = $this->attr( $field, 'columns' );
+		if ( ! is_array( $value ) || ! is_array( $rows ) || ! is_array( $cols ) ) {
+			return self::notAnOption();
+		}
+		$rowKeys = array_map( array( $this, 'matrixRowKey' ), $rows );
+		$colKeys = array_map( array( $this, 'matrixRowKey' ), $cols );
+		$single  = false === $this->attr( $field, 'multiplePerRow' );
+		foreach ( $value as $row => $answer ) {
+			if ( ! in_array( (string) $row, $rowKeys, true ) ) {
+				return self::notAnOption();
+			}
+			if ( null === $answer || '' === $answer ) {
+				continue;
+			}
+			if ( is_scalar( $answer ) ) {
+				if ( ! in_array( (string) $answer, $colKeys, true ) ) {
+					return self::notAnOption();
+				}
+				continue;
+			}
+			if ( $single || ! is_array( $answer ) ) {
+				return self::notAnOption();
+			}
+			foreach ( $answer as $col => $cell ) {
+				if ( ! in_array( (string) $col, $colKeys, true ) || null !== $this->validateTick( $cell ) ) {
+					return self::notAnOption();
+				}
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * A colour is a hex value such as #336699 (FA-01).
+	 *
+	 * @param mixed $value Value.
+	 * @return string|null
+	 */
+	private function validateColour( $value ) {
+		if ( $this->isEmpty( $value ) ) {
+			return null;
+		}
+		if ( ! is_string( $value ) || ! preg_match( '/^#([0-9a-f]{3}|[0-9a-f]{6})$/i', trim( $value ) ) ) {
+			return __( 'Please enter a colour as a hex value, such as #336699.', 'subtleforms' );
+		}
+		return null;
 	}
 
 	/**
@@ -389,11 +1155,13 @@ final class FieldValidator {
 		$max   = $this->attr( $field, 'max' );
 
 		if ( $min !== null && $min !== '' && is_numeric( $min ) && $float < (float) $min ) {
-			return sprintf( 'Must be at least %s.', $this->formatNumber( (float) $min ) );
+			/* translators: %s: minimum value */
+			return sprintf( __( 'Must be at least %s.', 'subtleforms' ), $this->formatNumber( (float) $min ) );
 		}
 
 		if ( $max !== null && $max !== '' && is_numeric( $max ) && $float > (float) $max ) {
-			return sprintf( 'Cannot exceed %s.', $this->formatNumber( (float) $max ) );
+			/* translators: %s: maximum value */
+			return sprintf( __( 'Must be no more than %s.', 'subtleforms' ), $this->formatNumber( (float) $max ) );
 		}
 
 		$step = $this->attr( $field, 'step' );
@@ -417,22 +1185,69 @@ final class FieldValidator {
 	}
 
 	/**
-	 * @param mixed $value
+	 * Email addresses in a value: one, or a comma separated list when the
+	 * field allows several.
+	 *
+	 * @param string $value Value.
+	 * @return string[]
+	 */
+	private static function emailList( string $value ): array {
+		return array_values( array_filter( array_map( 'trim', preg_split( '/[,;]/', $value ) ), static fn( $v ) => '' !== $v ) );
+	}
+
+	/**
+	 * Check an email address, or each address when the field allows several
+	 * (FB-05). With RFC validation off the check only needs a name, an @ and
+	 * a domain, so an address such as user@localhost passes (FB-06).
+	 *
+	 * @param mixed $value Value.
+	 * @param array $field Field.
 	 * @return string|null
 	 */
-	private function validateEmail( $value ) {
+	private function validateEmail( $value, array $field = array() ) {
 		if ( $this->isEmpty( $value ) ) {
 			return null;
 		}
 
-		if ( ! is_string( $value ) || ! filter_var( $value, FILTER_VALIDATE_EMAIL ) ) {
-			return 'Invalid email address.';
+		$invalid = __( 'Invalid email address.', 'subtleforms' );
+		if ( ! is_string( $value ) ) {
+			return $invalid;
+		}
+		$list   = true === $this->attr( $field, 'allowMultiple' ) ? self::emailList( $value ) : array( trim( $value ) );
+		$strict = ! in_array( $this->attr( $field, 'rfcValidation' ), array( false, 0, '0', 'false' ), true );
+		if ( array() === $list ) {
+			return $invalid;
+		}
+		foreach ( $list as $address ) {
+			$ok = $strict ? false !== filter_var( $address, FILTER_VALIDATE_EMAIL ) : 1 === preg_match( '/^[^\s@,;]+@[^\s@,;]+$/', $address );
+			if ( ! $ok ) {
+				return $invalid;
+			}
 		}
 
 		return null;
 	}
 
 	/**
+	 * A website address with https:// in front when the visitor typed only
+	 * the domain (FB-15). Anything else is returned as it was.
+	 *
+	 * @param string $value Value.
+	 */
+	public static function normalizeUrl( string $value ): string {
+		$value = trim( $value );
+		if ( '' === $value || false !== strpos( $value, '://' ) ) {
+			return $value;
+		}
+		if ( preg_match( '#^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+(:\d+)?([/?\#]\S*)?$#i', $value ) ) {
+			return 'https://' . $value;
+		}
+		return $value;
+	}
+
+	/**
+	 * A website is an http or https address, the browser's rule (FB-15).
+	 *
 	 * @param mixed $value
 	 * @return string|null
 	 */
@@ -441,8 +1256,9 @@ final class FieldValidator {
 			return null;
 		}
 
-		if ( ! is_string( $value ) || ! filter_var( $value, FILTER_VALIDATE_URL ) ) {
-			return 'Invalid URL.';
+		$url = is_string( $value ) ? self::normalizeUrl( $value ) : '';
+		if ( ! preg_match( '#^https?://\S+$#i', $url ) || ! filter_var( $url, FILTER_VALIDATE_URL ) ) {
+			return __( 'Invalid URL.', 'subtleforms' );
 		}
 
 		return null;
@@ -458,31 +1274,103 @@ final class FieldValidator {
 		}
 
 		if ( ! is_numeric( $value ) ) {
-			return 'Must be a valid number.';
+			return __( 'Please enter a number.', 'subtleforms' );
 		}
 
 		$float = (float) $value;
 		if ( is_infinite( $float ) || is_nan( $float ) ) {
-			return 'Must be a valid finite number.';
+			return __( 'Please enter a number.', 'subtleforms' );
 		}
 
 		return null;
 	}
 
 	/**
+	 * The calling code at the start of an international number, the longest
+	 * one that matches.
+	 *
+	 * @param string $digits Digits after the "+".
+	 * @return string|null
+	 */
+	private static function dialCodeOf( string $digits ): ?string {
+		$codes = array_unique( array_values( \SubtleForms\Fields\CountryList::dialCodes() ) );
+		usort( $codes, static fn( $a, $b ) => strlen( $b ) <=> strlen( $a ) );
+		foreach ( $codes as $code ) {
+			if ( str_starts_with( $digits, $code ) ) {
+				return $code;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * An international number as "+{code} {digits}", the shape the phone
+	 * field stores, with the trunk 0 dropped (FLD2-07). A number that is
+	 * only a calling code becomes empty. Other values are returned as they were.
+	 *
+	 * @param string $value Value.
+	 */
+	public static function normalizePhone( string $value ): string {
+		$value = trim( $value );
+		if ( ! str_starts_with( $value, '+' ) || ! preg_match( '/^[\d\s\-\+\(\)]+$/', $value ) ) {
+			return $value;
+		}
+		$digits = (string) preg_replace( '/\D/', '', $value );
+		$dial   = self::dialCodeOf( $digits );
+		if ( null === $dial ) {
+			return $value;
+		}
+		$national = substr( $digits, strlen( $dial ) );
+		if ( '' === $national ) {
+			return '';
+		}
+		if ( ! in_array( $dial, self::KEEPS_TRUNK_ZERO, true ) ) {
+			$national = (string) preg_replace( '/^0/', '', $national );
+		}
+		return '+' . $dial . ' ' . $national;
+	}
+
+	/**
+	 * Whether a phone answer holds no number: empty, or a calling code only.
+	 *
+	 * @param mixed $value Value.
+	 */
+	private static function phoneIsBlank( $value ): bool {
+		if ( null === $value || ( is_string( $value ) && '' === trim( $value ) ) || ( is_array( $value ) && array() === $value ) ) {
+			return true;
+		}
+		return is_string( $value ) && str_starts_with( trim( $value ), '+' ) && '' === self::normalizePhone( $value );
+	}
+
+	/**
+	 * A phone number: digits, spaces, dashes, brackets and "+". An
+	 * international number needs a real calling code and a number of the
+	 * right length: 10 digits for +1, otherwise 4 or more and at most 15 in
+	 * all (E.164) (FLD2-07).
+	 *
 	 * @param mixed $value
 	 * @return string|null
 	 */
 	private function validatePhone( $value ) {
-		if ( $this->isEmpty( $value ) ) {
+		if ( self::phoneIsBlank( $value ) ) {
 			return null;
 		}
 
+		$invalid = __( 'Invalid phone number.', 'subtleforms' );
 		if ( ! is_string( $value ) || ! preg_match( '/^[\d\s\-\+\(\)]+$/', $value ) ) {
-			return 'Invalid phone number.';
+			return $invalid;
 		}
-
-		return null;
+		if ( ! str_starts_with( trim( $value ), '+' ) ) {
+			return null;
+		}
+		$digits = (string) preg_replace( '/\D/', '', $value );
+		$dial   = self::dialCodeOf( $digits );
+		if ( null === $dial ) {
+			return $invalid;
+		}
+		$national = strlen( $digits ) - strlen( $dial );
+		$ok       = '1' === $dial ? 10 === $national : ( $national >= 4 && strlen( $digits ) <= 15 );
+		return $ok ? null : $invalid;
 	}
 
 	/**
@@ -599,11 +1487,19 @@ final class FieldValidator {
 	 * @param string $name  Attribute.
 	 * @return mixed
 	 */
-	private function attr( array $field, string $name ) {
+	private static function attr( array $field, string $name ) {
+		// The browser's rule (fieldConfig.js): the config value wins unless it
+		// is blank and the flat one is not. The builder stores some settings
+		// flat, such as a Custom Amount's minimum and maximum (PAY-05).
+		$flat = $field[ $name ] ?? null;
 		if ( isset( $field['config'] ) && is_array( $field['config'] ) && array_key_exists( $name, $field['config'] ) ) {
-			return $field['config'][ $name ];
+			$nested = $field['config'][ $name ];
+			if ( ( null === $nested || '' === $nested ) && null !== $flat && '' !== $flat ) {
+				return $flat;
+			}
+			return $nested;
 		}
-		return $field[ $name ] ?? null;
+		return $flat;
 	}
 
 	/**
@@ -728,42 +1624,11 @@ final class FieldValidator {
 	 * @return int|null Depth, or null when every level is answered.
 	 */
 	private function chainedMissingLevel( array $field, $value ): ?int {
-		$selected = is_array( $value ) ? array_values( $value ) : ( is_scalar( $value ) && '' !== (string) $value ? array( (string) $value ) : array() );
-		$levels   = $this->attr( $field, 'levels' );
-		$levels   = is_array( $levels ) && array() !== $levels ? array_values( $levels ) : null;
-
-		$optionsFor = function ( int $depth ) use ( $levels, $field, $selected ): array {
-			if ( null !== $levels ) {
-				$options = isset( $levels[ $depth ]['options'] ) && is_array( $levels[ $depth ]['options'] ) ? $levels[ $depth ]['options'] : array();
-				$linked  = false;
-				foreach ( $options as $opt ) {
-					if ( is_array( $opt ) && isset( $opt['parent'] ) && '' !== (string) $opt['parent'] ) {
-						$linked = true;
-						break;
-					}
-				}
-				if ( 0 === $depth || ! $linked ) {
-					return $options;
-				}
-				$parent = $selected[ $depth - 1 ] ?? '';
-				if ( ! is_scalar( $parent ) || '' === (string) $parent ) {
-					return array();
-				}
-				return array_values( array_filter( $options, static fn( $o ) => is_array( $o ) && (string) ( $o['parent'] ?? '' ) === (string) $parent ) );
-			}
-			$nodes = $this->attr( $field, 'options' );
-			$nodes = is_array( $nodes ) ? $nodes : array();
-			for ( $i = 0; $i < $depth; $i++ ) {
-				$chosen = null;
-				foreach ( $nodes as $node ) {
-					if ( is_array( $node ) && isset( $selected[ $i ] ) && is_scalar( $selected[ $i ] ) && (string) ( $node['value'] ?? '' ) === (string) $selected[ $i ] ) {
-						$chosen = $node;
-						break;
-					}
-				}
-				$nodes = is_array( $chosen['children'] ?? null ) ? $chosen['children'] : array();
-			}
-			return $nodes;
+		$selected   = is_array( $value ) ? array_values( $value ) : ( is_scalar( $value ) && '' !== (string) $value ? array( (string) $value ) : array() );
+		$levels     = $this->attr( $field, 'levels' );
+		$levels     = is_array( $levels ) && array() !== $levels ? array_values( $levels ) : null;
+		$optionsFor = function ( int $depth ) use ( $field, $selected ): array {
+			return $this->chainedOptions( $field, $selected, $depth );
 		};
 
 		if ( null !== $levels ) {
@@ -800,6 +1665,71 @@ final class FieldValidator {
 	}
 
 	/**
+	 * Choices a level of a chained field offers for the answers before it.
+	 * Mirrors resources/shared/chainedOptions.js.
+	 *
+	 * @param array $field    Field.
+	 * @param array $selected Answers, one per level.
+	 * @param int   $depth    Level.
+	 * @return array
+	 */
+	private function chainedOptions( array $field, array $selected, int $depth ): array {
+		$levels = $this->attr( $field, 'levels' );
+		$levels = is_array( $levels ) && array() !== $levels ? array_values( $levels ) : null;
+		if ( null !== $levels ) {
+			$options = isset( $levels[ $depth ]['options'] ) && is_array( $levels[ $depth ]['options'] ) ? $levels[ $depth ]['options'] : array();
+			$linked  = false;
+			foreach ( $options as $opt ) {
+				if ( is_array( $opt ) && isset( $opt['parent'] ) && '' !== (string) $opt['parent'] ) {
+					$linked = true;
+					break;
+				}
+			}
+			if ( 0 === $depth || ! $linked ) {
+				return $options;
+			}
+			$parent = $selected[ $depth - 1 ] ?? '';
+			if ( ! is_scalar( $parent ) || '' === (string) $parent ) {
+				return array();
+			}
+			return array_values( array_filter( $options, static fn( $o ) => is_array( $o ) && (string) ( $o['parent'] ?? '' ) === (string) $parent ) );
+		}
+		$nodes = $this->attr( $field, 'options' );
+		$nodes = is_array( $nodes ) ? $nodes : array();
+		for ( $i = 0; $i < $depth; $i++ ) {
+			$chosen = null;
+			foreach ( $nodes as $node ) {
+				if ( is_array( $node ) && isset( $selected[ $i ] ) && is_scalar( $selected[ $i ] ) && (string) ( $node['value'] ?? '' ) === (string) $selected[ $i ] ) {
+					$chosen = $node;
+					break;
+				}
+			}
+			$nodes = is_array( $chosen['children'] ?? null ) ? $chosen['children'] : array();
+		}
+		return $nodes;
+	}
+
+	/**
+	 * Whether rich text has nothing a reader would see, such as
+	 * "<p><br></p>" (FA-17). Same rule as hasVisibleText() in the browser.
+	 *
+	 * @param mixed $value Value.
+	 */
+	private static function richTextIsBlank( $value ): bool {
+		if ( null === $value || ( is_array( $value ) && array() === $value ) ) {
+			return true;
+		}
+		if ( ! is_string( $value ) ) {
+			return false;
+		}
+		if ( preg_match( '/<(img|iframe|video|svg|hr)\b/i', $value ) ) {
+			return false;
+		}
+		$text = (string) preg_replace( '/<[^>]*>/', '', $value );
+		return '' === (string) preg_replace( '/&nbsp;|\s|\x{00A0}/u', '', $text );
+	}
+
+	/**
 	 * @param mixed $value
 	 * @return bool
 	 */
@@ -820,7 +1750,8 @@ final class FieldValidator {
 	}
 
 	/**
-	 * Validate payment amount field.
+	 * A Custom Amount lies between the field's minimum and maximum (PAY-05).
+	 * Same messages as the browser.
 	 *
 	 * @param mixed $value
 	 * @param array $field
@@ -836,29 +1767,54 @@ final class FieldValidator {
 		}
 
 		$amount = floatval( $value );
-		$config = $field['config'] ?? array();
+		$field  = is_array( $field ) ? $field : array();
 
-		// Must be positive
 		if ( $amount < 0 ) {
 			return __( 'The amount cannot be negative.', 'subtleforms' );
 		}
 
-		// Check minimum
-		$min = isset( $config['min'] ) ? floatval( $config['min'] ) : 0;
-		if ( $amount < $min ) {
+		$min = $this->attr( $field, 'min' );
+		if ( is_numeric( $min ) && $amount < (float) $min ) {
 			/* translators: %s: smallest amount allowed */
-			return sprintf( __( 'The amount must be at least %s.', 'subtleforms' ), $this->formatNumber( $min ) );
+			return sprintf( __( 'The amount must be at least %s.', 'subtleforms' ), $this->formatNumber( (float) $min ) );
 		}
 
-		// Check maximum
-		if ( isset( $config['max'] ) ) {
-			$max = floatval( $config['max'] );
-			if ( $amount > $max ) {
-				/* translators: %s: largest amount allowed */
-				return sprintf( __( 'The amount cannot be more than %s.', 'subtleforms' ), $this->formatNumber( $max ) );
-			}
+		$max = $this->attr( $field, 'max' );
+		if ( is_numeric( $max ) && (float) $max > 0 && $amount > (float) $max ) {
+			/* translators: %s: largest amount allowed */
+			return sprintf( __( 'The amount cannot be more than %s.', 'subtleforms' ), $this->formatNumber( (float) $max ) );
 		}
 
+		return null;
+	}
+
+	/**
+	 * A Product quantity is a whole number within the field's minimum and
+	 * maximum (PAY-06). The order is never priced with a quantity other than
+	 * the one stored.
+	 *
+	 * @param mixed $value Value.
+	 * @param array $field Field.
+	 * @return string|null
+	 */
+	private function validatePaymentQuantity( $value, array $field ) {
+		if ( $this->isEmpty( $value ) || empty( $this->attr( $field, 'allowQuantity' ) ) ) {
+			return null;
+		}
+		$qty = self::wholeNumber( $value );
+		if ( null === $qty || $qty < 0 ) {
+			return __( 'Please enter a whole number for the quantity.', 'subtleforms' );
+		}
+		$min = max( 0, (int) ( $this->attr( $field, 'minQuantity' ) ?? 0 ) );
+		$max = (int) ( $this->attr( $field, 'maxQuantity' ) ?? 0 );
+		if ( $qty < $min ) {
+			/* translators: %d: smallest quantity */
+			return sprintf( __( 'The quantity must be at least %d.', 'subtleforms' ), $min );
+		}
+		if ( $max > 0 && $qty > $max ) {
+			/* translators: %d: largest quantity */
+			return sprintf( __( 'The quantity can be at most %d.', 'subtleforms' ), $max );
+		}
 		return null;
 	}
 
@@ -878,8 +1834,8 @@ final class FieldValidator {
 			return __( 'Enter the coupon code as text.', 'subtleforms' );
 		}
 
-		$config    = $field['config'] ?? array();
-		$maxLength = isset( $config['maxLength'] ) ? intval( $config['maxLength'] ) : 50;
+		$maxLength = $this->attr( is_array( $field ) ? $field : array(), 'maxLength' );
+		$maxLength = is_numeric( $maxLength ) ? intval( $maxLength ) : 50;
 		$value     = trim( $value );
 
 		if ( strlen( $value ) > $maxLength ) {

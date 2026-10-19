@@ -230,7 +230,7 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
 
       if (!ok) {
         // Say which setting stopped the save (QA-03).
-        throw new Error(describeSaveError(body, status));
+        throw new Error(describeSaveError(body, status, latest.draftSchema));
       }
 
       // Success - reset counters

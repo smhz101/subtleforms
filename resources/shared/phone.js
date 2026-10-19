@@ -309,10 +309,50 @@ export function filterPhoneCountries(query) {
 }
 
 /**
+ * Canadian area codes. US and Canada share +1, so the area code tells them
+ * apart when a stored "+1 ..." number is read back (FLD2-07).
+ */
+const CANADA_AREA_CODES = new Set([
+  '204', '226', '236', '249', '250', '257', '263', '289', '306', '343', '354',
+  '365', '367', '368', '382', '387', '403', '416', '418', '428', '431', '437',
+  '438', '450', '460', '468', '474', '506', '514', '519', '548', '579', '581',
+  '584', '587', '604', '613', '639', '647', '672', '683', '705', '709', '742',
+  '753', '778', '780', '782', '807', '819', '825', '867', '873', '879', '902',
+  '905', '942',
+]);
+
+/**
+ * The country a shared calling code means when nothing else says (+44 is the
+ * United Kingdom, not Guernsey).
+ */
+const MAIN_COUNTRY = {
+  1: 'US', 7: 'RU', 39: 'IT', 44: 'GB', 47: 'NO', 61: 'AU', 64: 'NZ', 212: 'MA',
+  262: 'RE', 290: 'SH', 358: 'FI', 500: 'FK', 590: 'GP', 599: 'CW',
+};
+
+/** Calling codes whose national numbers keep their leading 0 (Italy, San Marino). */
+const KEEPS_TRUNK_ZERO = new Set(['39', '378']);
+
+/**
+ * The national number without the trunk 0 that is dialled only inside the
+ * country ("07700 900123" in the UK is +44 7700 900123).
+ *
+ * @param {{dial?: string}|null} country
+ * @param {string} digits
+ * @return {string}
+ */
+function dropTrunkZero(country, digits) {
+  if (!country?.dial || KEEPS_TRUNK_ZERO.has(country.dial)) {
+    return digits;
+  }
+  return digits.replace(/^0/, '');
+}
+
+/**
  * Split a stored phone string into the selected country and the national number.
  * The longest matching dial code wins, so +1 does not swallow +1242-style codes
  * that this list does not use; shared codes (+1) keep the saved country when
- * `preferredCode` matches that dial.
+ * `preferredCode` matches that dial, and a Canadian area code reads as Canada.
  *
  * @param {string} value
  * @param {string} [preferredCode]
@@ -326,15 +366,27 @@ export function splitPhoneValue(value, preferredCode = 'US') {
     return { country: preferred, national: '' };
   }
 
-  const compact = raw.replace(/[^\d+]/g, '');
+  const compact = raw.replace(/[^\d+]/g, '').replace(/^00/, '+');
   if (compact.startsWith('+')) {
     const numeric = compact.slice(1);
     const matches = countries
       .filter((country) => numeric.startsWith(country.dial))
       .sort((a, b) => b.dial.length - a.dial.length);
-    const match = matches.find((country) => country.code === preferred?.code) || matches[0];
+    const longest = matches[0]?.dial;
+    let match =
+      matches.find((country) => country.code === preferred?.code) ||
+      matches.find((country) => country.dial === longest && MAIN_COUNTRY[longest] === country.code) ||
+      matches[0];
+    if (match && match.dial === '1') {
+      const area = numeric.slice(1, 4);
+      if (CANADA_AREA_CODES.has(area)) {
+        match = phoneCountry('CA');
+      } else if (match.code === 'CA') {
+        match = phoneCountry('US');
+      }
+    }
     if (match) {
-      return { country: match, national: numeric.slice(match.dial.length) };
+      return { country: match, national: dropTrunkZero(match, numeric.slice(match.dial.length)) };
     }
   }
 
@@ -342,7 +394,8 @@ export function splitPhoneValue(value, preferredCode = 'US') {
 }
 
 /**
- * Value stored on the submission: dial code plus the digits the visitor typed.
+ * Value stored on the submission: dial code plus the digits the visitor
+ * typed, without the trunk 0 (FLD2-07).
  *
  * @param {{dial?: string}|null} country
  * @param {string} national
@@ -356,5 +409,41 @@ export function joinPhoneValue(country, national) {
   if (!country?.dial) {
     return digits;
   }
-  return `+${country.dial} ${digits}`;
+  const local = dropTrunkZero(country, digits);
+  return local ? `+${country.dial} ${local}` : '';
+}
+
+/**
+ * Whether what the visitor typed or pasted is a full international number
+ * ("+44 20 7946 0958" or "0044 ..."), so the country should follow it.
+ *
+ * @param {string} text
+ * @return {boolean}
+ */
+export function looksInternational(text) {
+  return /^\s*(\+|00)/.test(String(text ?? ''));
+}
+
+/**
+ * Whether an international phone answer is a real number: a known calling
+ * code, 10 digits after +1, otherwise 4 or more and at most 15 digits in all
+ * (E.164). The server applies the same rule (FieldValidator::validatePhone).
+ *
+ * @param {string} value
+ * @return {boolean}
+ */
+export function isValidInternational(value) {
+  const raw = String(value ?? '').trim();
+  if (!raw.startsWith('+')) {
+    return true;
+  }
+  const digits = raw.replace(/\D/g, '');
+  const dial = Object.values(DIAL_CODES)
+    .filter((code) => digits.startsWith(code))
+    .sort((a, b) => b.length - a.length)[0];
+  if (!dial) {
+    return false;
+  }
+  const national = digits.length - dial.length;
+  return dial === '1' ? national === 10 : national >= 4 && digits.length <= 15;
 }

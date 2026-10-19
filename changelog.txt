@@ -5,7 +5,6 @@ This file keeps the full release history. readme.txt lists only the latest versi
 == Changelog ==
 
 = 2.4.0 - 2026-10-20 =
-<<<<<<< HEAD
 * New: A payment form has its own currency setting under Settings, Payments. It follows the site currency until you pick one.
 * New: More currencies for payments, including JPY, KRW, INR, PKR, AED, SAR, SGD, HKD, CHF, NZD, SEK, NOK, DKK, PLN, MXN, BRL and ZAR.
 * Fix: Saving a form's Payments settings no longer fixes the form to US dollars, so the site currency applies.
@@ -22,7 +21,6 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: An order below the smallest card charge for its currency gets a clear message before and at payment.
 * Fix: Submissions exported and imported in Tools keep their order, coupon, totals, payment status, gateway and transaction ID, and a failed payment stays failed.
 * Fix: Priced options shown as a dropdown use the same picker as other dropdowns, with a name and required state.
-=======
 * Change: An entry refers to the form version it was sent with instead of storing a full copy of the form, about 1 KB, in its meta. Entry lists no longer carry a form copy. A background job removes the copies older entries hold, a few hundred entries at a time. An older entry whose form version cannot be found keeps its copy, so it stays readable.
 * Fix: One formatter turns answers into text for the entry view, emails, CSV exports, PDF data and integrations, so they all read the same.
 * Fix: Dropdown, radio, checkbox, picture and priced option answers show their labels. Single checkbox, consent and toggle answers read Yes or No everywhere, including the PDF.
@@ -33,7 +31,17 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: CSV exports list uploaded files by name with an admin download link instead of the stored file record.
 * Fix: A field with a very long label and no admin label is named by its label shortened to 60 characters in emails, CSV headers, entries, PDFs and the required message.
 * Fix: The submissions list names the sender by a name or email answer, or shows Anonymous. A product quantity or a choice is never shown as the sender.
->>>>>>> origin/pkg/F240-2
+* Fix: The server checks every answer the way the form does. A choice must be one the field offers; dates, times, ratings, scores, sliders, matrix answers, colours and signatures must be real values; a field that takes one value refuses a list; and a read-only field keeps its value.
+* Fix: Server error messages use the same words as the form and can be translated.
+* Fix: An email field that allows several addresses accepts them separated by commas and stores each one. With RFC validation off, an address such as user@localhost is accepted.
+* Fix: A website can be typed without https://, which is added. Only http and https addresses are accepted, in the form and on the server.
+* Fix: Pasting an international phone number picks its country, the leading 0 of a national number is dropped, and the server checks the calling code and the length. A +1 number with a Canadian area code shows Canada.
+* Fix: A Custom amount outside its minimum or maximum, a Product quantity above its maximum and a Priced option that is not offered are refused, instead of being charged a different amount. A pick-one Priced options field charges one option.
+* Fix: A required Rich text field with no text in it is refused.
+* Fix: A Repeater with fewer entries than its minimum shows one message, such as "Add at least 2 entries.", instead of errors for fields that were never shown.
+* Fix: Hidden field values, including {date}, {user_email} and {user_name}, are worked out on the server, so they are stored when a form is sent without JavaScript.
+* Fix: Values sent for an Order summary or Fixed fee field are not stored, so they no longer appear as columns in CSV exports.
+* Fix: A builder save that fails names the field as well as the setting, a numeric label, placeholder or default value saves, and long labels wrap on the canvas.
 
 = 2.3.9 - 2026-10-19 =
 * Change: Nothing in SubtleForms is switched off without a license. CSV export, Reports (views, submissions and conversion), full conditional logic (any rule, groups, every operator, conditional emails, webhooks and confirmations), Picture choice, several files per upload field, payment fields (Product, Priced options, Custom amount, Fixed fee, Order summary, Coupon), coupons, and the Webhooks and Analytics settings all work in the free plugin.
