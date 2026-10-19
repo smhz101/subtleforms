@@ -22,6 +22,7 @@
 	width: 100%;
 }
 
+/*! inherit: keep-start (step indicator: a widget with no native control) */
 /* Multi-step Form Container */
 .subtleforms--multistep {
 	position: relative;
@@ -270,6 +271,8 @@
 	font-weight: 600;
 }
 
+/*! inherit: keep-end */
+
 /* Step Content */
 .subtleforms-step-content {
 	margin-bottom: 30px;
@@ -301,9 +304,13 @@
 }
 
 .subtleforms-field-label {
+	/*! inherit: keep */
 	display: block;
-	font-weight: var(--subtleforms-label-weight, 500);
 	margin-bottom: 6px;
+}
+
+.subtleforms-field-label {
+	font-weight: var(--subtleforms-label-weight, 500);
 	color: var(--subtleforms-color-text);
 }
 
@@ -343,6 +350,7 @@
 /* Checkbox and Radio */
 .subtleforms-checkbox-label,
 .subtleforms-radio-label {
+	/*! inherit: keep */
 	display: flex;
 	align-items: center;
 	cursor: pointer;
@@ -351,6 +359,7 @@
 
 .subtleforms-checkbox,
 .subtleforms-radio {
+	/*! inherit: keep */
 	margin-right: 8px;
 	cursor: pointer;
 }
@@ -362,6 +371,7 @@
 
 /* Field Errors */
 .subtleforms-field-error {
+	/*! inherit: keep */
 	color: var(--subtleforms-color-error);
 	font-size: 13px;
 	margin-top: 6px;
@@ -382,6 +392,7 @@
 	}
 }
 
+/*! inherit: keep-start (honeypot must stay hidden) */
 /* Honeypot, visually hidden but present in the DOM so bots fill it in. It is
    kept out of the tab order and the accessibility tree (Part B3). */
 .subtleforms-honeypot {
@@ -397,6 +408,8 @@
 	width: 1px;
 	height: 1px;
 }
+
+/*! inherit: keep-end */
 
 /* Container Fields */
 /* Group and repeat containers hold their children directly rather than through
@@ -481,6 +494,7 @@
 	cursor: not-allowed;
 }
 
+/*! inherit: keep-start (submission result and unsupported field notices) */
 /* Success Message, neutral card with a green check (2.0) */
 .subtleforms-success {
 	background: var(--subtleforms-color-bg, #fff);
@@ -513,6 +527,8 @@
 	color: var(--subtleforms-color-warning);
 	font-size: 13px;
 }
+
+/*! inherit: keep-end */
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -557,6 +573,7 @@
 	font-weight: 600;
 }
 
+/*! inherit: keep-start (score buttons: no native control) */
 /* ===== Net promoter score ===== */
 .subtleforms-nps__scale {
 	display: flex;
@@ -605,6 +622,8 @@
 	opacity: 0.7;
 }
 
+/*! inherit: keep-end */
+
 /* ===== Checkbox grid ===== */
 .subtleforms-checkbox-grid {
 	border-collapse: collapse;
@@ -623,6 +642,7 @@
 	font-weight: 500;
 }
 
+/*! inherit: keep-start (colour swatch, signature pad and rich text editor: no native control) */
 /* ===== Colour picker ===== */
 .subtleforms-color {
 	display: flex;
@@ -724,6 +744,8 @@
 	pointer-events: none;
 }
 
+/*! inherit: keep-end */
+
 /* ===== Section break ===== */
 .subtleforms-section-break,
 .subtleforms-html {
@@ -752,6 +774,7 @@
 	margin: 0;
 }
 
+/*! inherit: keep-start (notice blocks and loading placeholders) */
 /* Disclaimer / notice block */
 .subtleforms-disclaimer {
 	display: flex;
@@ -814,6 +837,8 @@
 	color: var(--subtleforms-color-text-light);
 	font-size: 0.875em;
 }
+
+/*! inherit: keep-end */
 
 /* A block form uses the same width as a shortcode form: the content column. */
 .subtleforms-block.subtleforms-form-container,

@@ -1,3 +1,4 @@
+/*! inherit: keep-start (custom menu or one-question layout: no native control for a theme to style) */
 /**
  * SubtleForms - Conversational Form Type Styles
  * 
@@ -314,3 +315,5 @@
 		gap: 0.375rem;
 	}
 }
+
+/*! inherit: keep-end */

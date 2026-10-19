@@ -217,9 +217,20 @@
 	}
 }
 
-/* Colours, type and the content width come from the active theme. A custom
-   token still wins because it is set on the form itself. */
+/* Inherit from theme (2.4.1): the plugin adds no colours, borders, fonts,
+   sizes, padding or margins to a theme form. Only layout, the spacing between
+   fields and the widgets that have no native control stay; the build removes
+   the rest for `.subtleforms--inherit-theme` (bin/postcss/inherit-theme-scope.js).
+   The width comes from the theme's content column. */
 .subtleforms.subtleforms--inherit-theme {
+	width: 100%;
+	max-width: 100%;
+}
+
+/* "Inherit from theme" with changes (2.4.1): the plugin styles the form from
+   the theme's colours, type and content width, and a changed token wins
+   because it is set on the form itself. */
+.subtleforms.subtleforms--theme-tuned {
 	color: var(--wp--preset--color--foreground, inherit);
 	font-family: var(--subtleforms-font-family, var(--wp--preset--font-family--body, inherit));
 	font-size: var(--wp--preset--font-size--medium, inherit);
@@ -231,8 +242,10 @@
 	--subtleforms-label-color: var(--wp--preset--color--foreground, inherit);
 	--subtleforms-input-text: var(--wp--preset--color--foreground, inherit);
 	--subtleforms-color-text-light: var(--wp--preset--color--secondary, inherit);
-	--subtleforms-color-primary: var(--wp--preset--color--primary, var(--wp--preset--color--accent, var(--wp--elements--button--color--background, var(--button--color-background, var(--global--color-primary, currentColor)))));
-	--subtleforms-color-primary-hover: var(--wp--preset--color--primary, var(--wp--preset--color--accent, var(--wp--elements--button--color--background, var(--button--color-background, var(--global--color-primary, currentColor)))));
+	/* The accent ends in a dark neutral, not currentColor: currentColor would
+	   resolve on the button to its own white text (2.4.1). */
+	--subtleforms-color-primary: var(--wp--preset--color--primary, var(--wp--preset--color--accent, var(--wp--elements--button--color--background, var(--button--color-background, var(--global--color-primary, #1e1e1e)))));
+	--subtleforms-color-primary-hover: var(--wp--preset--color--primary, var(--wp--preset--color--accent, var(--wp--elements--button--color--background, var(--button--color-background, var(--global--color-primary, #1e1e1e)))));
 	--subtleforms-color-bg: transparent;
 	--subtleforms-color-bg-subtle: transparent;
 	--subtleforms-color-border: var(--wp--preset--color--border, currentColor);
@@ -242,8 +255,8 @@
 	--subtleforms-radius-button: var(--wp--elements--button--border--radius, var(--wp--preset--border-radius--button, var(--button--border-radius, 4px)));
 }
 
-.subtleforms.subtleforms--inherit-theme .subtleforms-button-next,
-.subtleforms.subtleforms--inherit-theme .subtleforms-button-submit {
+.subtleforms.subtleforms--theme-tuned .subtleforms-button-next,
+.subtleforms.subtleforms--theme-tuned .subtleforms-button-submit {
 	border-radius: var(--subtleforms-radius-button, 4px);
 }
 
@@ -290,6 +303,7 @@
    needs an accessible name even when the design does without a visible one. */
 .subtleforms-field--no-label > .subtleforms-field-label,
 .subtleforms-field--no-label > legend.subtleforms-field-label {
+	/*! inherit: keep */
 	position: absolute;
 	width: 1px;
 	height: 1px;

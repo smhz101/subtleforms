@@ -1,3 +1,4 @@
+/*! inherit: keep-start (custom menu or one-question layout: no native control for a theme to style) */
 // Shared menu controls for dropdown, country, date, time and date-time.
 .subtleforms-picker {
 	position: relative;
@@ -320,3 +321,5 @@
 	white-space: nowrap;
 	border: 0;
 }
+
+/*! inherit: keep-end */

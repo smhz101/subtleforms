@@ -246,12 +246,29 @@ final class Release2404Test extends TestCase {
 	}
 
 	public function test_theme_appearance_prefers_the_theme_button(): void {
-		$css   = (string) file_get_contents( dirname( __DIR__, 2 ) . '/resources/frontend/styles/appearance.css' );
+		$css = (string) file_get_contents( dirname( __DIR__, 2 ) . '/resources/frontend/styles/appearance.css' );
+
+		// 2.4.1: an untouched theme form adds no look of its own. Its buttons
+		// carry the theme's button class and its block only sets the width.
 		$start = strpos( $css, '.subtleforms.subtleforms--inherit-theme' );
-		$block = substr( $css, (int) $start, 1600 );
+		$block = substr( $css, (int) $start, (int) strpos( $css, '}', (int) $start ) - (int) $start );
+		$this->assertStringContainsString( 'width: 100%', $block );
+		foreach ( array( 'color', 'background', 'font', 'border', 'padding' ) as $look ) {
+			$this->assertStringNotContainsString( $look, $block, $look );
+		}
+		$js = (string) file_get_contents( dirname( __DIR__, 2 ) . '/resources/shared/appearance.js' );
+		$this->assertStringContainsString( "isPureTheme( appearance ) ? 'wp-element-button'", $js );
+		$renderer = (string) file_get_contents( dirname( __DIR__, 2 ) . '/resources/frontend/components/FormRenderer.jsx' );
+		$this->assertStringContainsString( 'buttonThemeClass(effectiveAppearance)', $renderer );
+
+		// A theme form with changes keeps the 2.4.0 behaviour: the theme's button
+		// colour and radius, never the contrast colour, and a visible button.
+		$start = strpos( $css, '.subtleforms.subtleforms--theme-tuned' );
+		$block = substr( $css, (int) $start, 2000 );
 		$this->assertStringContainsString( '--wp--elements--button--color--background', $block );
 		$this->assertStringContainsString( '--subtleforms-radius-button', $block );
 		$this->assertStringNotContainsString( '--wp--preset--color--contrast', $block );
+		$this->assertStringNotContainsString( 'global--color-primary, currentColor', $block );
 		$this->assertStringContainsString( 'width: 100%', $block );
 	}
 }

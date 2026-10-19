@@ -105,6 +105,7 @@
 
 /* ===== Error State ===== */
 .subtleforms-error {
+	/*! inherit: keep */
 	background: #f8d7da;
 	border: 1px solid #f5c6cb;
 	border-radius: var(--subtleforms-radius-sm);
@@ -116,6 +117,7 @@
 /* Field errors have their own element. Give them the error colour explicitly
    so a theme colour or a light token cannot fail contrast on a white page. */
 .subtleforms-field-error {
+	/*! inherit: keep */
 	color: var(--subtleforms-color-error, #b3261e);
 	font-size: var(--subtleforms-font-size-sm);
 	line-height: 1.4;
@@ -124,6 +126,7 @@
 
 /* ===== Success State ===== */
 .subtleforms-success {
+	/*! inherit: keep */
 	background: #d4edda;
 	border: 1px solid #c3e6cb;
 	border-radius: var(--subtleforms-radius-sm);
