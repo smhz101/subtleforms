@@ -793,7 +793,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
             icon={ <Icon.AlertCircle size={ 16 } /> }
             isPressed={ isFlagged }
             disabled={ updating }
-            onClick={ () => handleStatusChange( isFlagged ? 'completed' : 'flagged' ) }>
+            onClick={ () => handleStatusChange( nextReviewStatus( isFlagged ) ) }>
             { isFlagged ? __( 'Flagged', 'subtleforms' ) : __( 'Flag', 'subtleforms' ) }
           </Button>
         ) }

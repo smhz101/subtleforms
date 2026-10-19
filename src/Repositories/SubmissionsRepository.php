@@ -201,11 +201,20 @@ final class SubmissionsRepository {
 		}
 
 		if ( isset( $data['status'] ) ) {
-			if ( $data['status'] === 'none' ) {
+			$current = $this->find( $id );
+			$meta    = array();
+			if ( is_array( $current ) && is_array( $current['meta'] ?? null ) ) {
+				$meta = $current['meta'];
+			}
+			$resolved = self::reviewStatus( (string) ( $current['status'] ?? '' ), (string) $data['status'], $meta );
+			if ( is_array( $resolved['meta'] ) ) {
+				$data['meta'] = $resolved['meta'];
+			}
+			if ( $resolved['status'] === 'none' ) {
 				// 'none' clears admin status override, set to NULL in DB
 				$update_data['status'] = null;
 			} else {
-				$update_data['status'] = $data['status'];
+				$update_data['status'] = $resolved['status'];
 			}
 			$format[] = '%s';
 		}
@@ -822,7 +831,8 @@ $cutoff_date
 
 		// Phase B3: Cache dashboard aggregates (60s TTL)
 		sort( $form_ids ); // Consistent key ordering
-		$cache_key = 'subtleforms:' . SUBTLEFORMS_VERSION . ':counts:' . md5( serialize( $form_ids ) . '|' . $status );
+		$generation = (int) get_option( 'subtleforms_counts_generation', 1 );
+		$cache_key  = self::countsCacheKey( $form_ids, $status, $generation );
 		$cached    = get_transient( $cache_key );
 
 		if ( false !== $cached ) {
@@ -875,10 +885,64 @@ $cutoff_date
 	 * Invalidate count cache for a specific form (v1.8.2 - Phase B3).
 	 */
 	private function invalidate_count_cache( int $form_id ): void {
-		// Delete all cached counts that include this form
-		global $wpdb;
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $wpdb->options is a core table; value is a static pattern string.
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", '_transient_subtleforms:' . SUBTLEFORMS_VERSION . ':counts:%' ) );
+		// Bump a generation so the next read misses. A LIKE delete scanned
+		// wp_options on every submission (FF-29). Old keys expire in a minute.
+		$next = (int) get_option( 'subtleforms_counts_generation', 1 ) + 1;
+		update_option( 'subtleforms_counts_generation', $next, false );
+	}
+
+	/**
+	 * Keep a pipeline status (payment_pending, failed) when an entry is flagged
+	 * or marked spam, and put it back on Restore.
+	 *
+	 * @param string $current Current status.
+	 * @param string $next Requested status.
+	 * @param array  $meta Submission meta.
+	 * @return array{status: string, meta: array|null}
+	 */
+	public static function reviewStatus( string $current, string $next, array $meta ): array {
+		$review = array( 'spam', 'flagged', 'archived' );
+		if ( in_array( $next, $review, true ) ) {
+			if ( '' !== $current && 'trash' !== $current && 'none' !== $current && ! in_array( $current, $review, true ) ) {
+				$meta['pipeline_status'] = $current;
+			}
+			return array(
+				'status' => $next,
+				'meta'   => $meta,
+			);
+		}
+		if ( 'none' === $next ) {
+			$saved = isset( $meta['pipeline_status'] ) ? (string) $meta['pipeline_status'] : '';
+			unset( $meta['pipeline_status'] );
+			if ( '' !== $saved ) {
+				return array(
+					'status' => $saved,
+					'meta'   => $meta,
+				);
+			}
+			return array(
+				'status' => 'none',
+				'meta'   => $meta,
+			);
+		}
+		return array(
+			'status' => $next,
+			'meta'   => null,
+		);
+	}
+
+	/**
+	 * Cache key for dashboard submission counts. The generation changes when
+	 * any entry is written, so a stale count is never reused.
+	 *
+	 * @param array      $formIds Form ids.
+	 * @param mixed      $status Status filter.
+	 * @param int        $generation Cache generation.
+	 * @return string
+	 */
+	public static function countsCacheKey( array $formIds, $status, int $generation ): string {
+		sort( $formIds );
+		return 'subtleforms:' . SUBTLEFORMS_VERSION . ':counts:' . $generation . ':' . md5( serialize( $formIds ) . '|' . $status );
 	}
 
 	/**
