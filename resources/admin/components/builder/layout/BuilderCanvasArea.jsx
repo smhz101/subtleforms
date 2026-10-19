@@ -14,6 +14,7 @@ import ProDowngradeBanner from '../../ProDowngradeBanner';
 import EmptyFormWelcome from '../EmptyFormWelcome';
 import PreviewWorkspace from '../PreviewWorkspace';
 import { getMissingAddonFields } from '../../../utils/proFeatureDetector';
+import { offlinePaymentNote } from '../../../utils/paymentNotes';
 import './BuilderCanvasArea.scss';
 
 export default function BuilderCanvasArea({
@@ -32,9 +33,20 @@ export default function BuilderCanvasArea({
 }) {
   // Fields from an add-on that is not active (the form stays editable).
   const missingAddonFields = useMemo(() => getMissingAddonFields(draftSchema), [draftSchema]);
+  // A priced form without a Card Payment field saves entries as "Payment
+  // pending" (PAY-03); say so while the form is being built.
+  const paymentNote = useMemo(() => offlinePaymentNote(draftSchema), [draftSchema]);
   return (
     <>
       <ProDowngradeBanner featuresUsed={missingAddonFields} />
+
+      {paymentNote && view === 'build' && (
+        <div className='sf-builder-canvas-area__validation-notice'>
+          <Notice status='info' isDismissible={false}>
+            {paymentNote}
+          </Notice>
+        </div>
+      )}
 
       {saveError && (
         <div className='sf-builder-canvas-area__error-banner'>
