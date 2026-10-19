@@ -130,6 +130,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 == Changelog ==
 
 = 2.4.0 - 2026-10-20 =
+<<<<<<< HEAD
 * New: Each payment form can pick its own currency, and more currencies are available, including JPY, INR, PKR and AED.
 * Fix: Forms follow the site currency unless you pick one, the Custom amount field shows the right symbol, and yen totals are whole yen.
 * Fix: Coupons give the same total at payment and on submit, and coupon dates are checked.
@@ -137,6 +138,13 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: Product settings are under General, priced options are not shown selected on the canvas, and dropdown priced options use the standard picker.
 * Fix: Failed payments show as Payment failed, payment messages can be translated, and Pro asks admins to connect Stripe when no gateway is set up.
 * Fix: Tools export and import keep each entry's order and payment details.
+=======
+* Change: Entries refer to the form version they were sent with instead of keeping a full copy of the form. Older entries are cleaned up in the background and stay readable.
+* Fix: Entries, emails, CSV exports, PDFs and integrations show option labels, Yes or No, matrix rows with their columns, dependent dropdown labels, dates and times in the field format, and product lines with prices.
+* Fix: CSV exports list uploaded files by name with a download link.
+* Fix: A very long field label is shortened in emails, exports, entries and the required message. The admin label is used when it is set.
+* Fix: The submissions list names the sender by a name or email answer, or shows Anonymous, never a quantity or a choice.
+>>>>>>> origin/pkg/F240-2
 
 = 2.3.9 - 2026-10-19 =
 * Change: Everything in SubtleForms works without a license: CSV export, reports, full conditional logic, Picture choice, several files per upload field, payment fields and coupons, and the Webhooks and Analytics settings.

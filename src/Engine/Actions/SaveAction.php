@@ -84,7 +84,9 @@ final class SaveAction implements ActionInterface {
 
 		// Persist payload/meta snapshot. Sanitize user-submitted values before storing.
 		$payload = $context->payload;
-		$meta    = $context->meta;
+		// The entry references its schema by version (the schema_version
+		// column) instead of keeping a full copy in its meta (FF-30).
+		$meta    = \SubtleForms\Support\EntrySchema::stripCopy( $context->meta );
 
 		if ( is_array( $schema ) ) {
 			$payload = $this->sanitize_payload( $schema, $payload );
