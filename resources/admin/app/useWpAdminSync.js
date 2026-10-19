@@ -8,8 +8,9 @@
  * Using `history.replaceState` keeps the back button behaving like core.
  */
 
-import { useEffect } from '@wordpress/element';
-import { useLocation } from 'react-router-dom';
+import { useEffect, useRef } from '@wordpress/element';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { adminUrlToRoute, historyMode } from './adminHistory';
 
 /**
  * Map an in-app route to the wp-admin query it corresponds to.
@@ -36,22 +37,25 @@ export function routeToAdminQuery(pathname, search = '') {
 		return { page: 'subtleforms-new-form', params: { form_id: formMatch[1] } };
 	}
 
-	if (pathname === '/submissions') {
+	if (pathname === '/submissions' || pathname.match(/^\/submissions\/\d+$/)) {
+		const subMatch = pathname.match(/^\/submissions\/(\d+)$/);
+		if (subMatch) {
+			params.submission_id = subMatch[1];
+		}
 		if (formId) {
 			params.form_id = formId;
 		}
 		const submissionId = query.get('submission_id');
-		if (submissionId) {
+		if (!subMatch && submissionId) {
 			params.submission_id = submissionId;
 		}
-		return { page: 'subtleforms-submissions', params };
-	}
-
-	const subMatch = pathname.match(/^\/submissions\/(\d+)$/);
-	if (subMatch) {
-		params.submission_id = subMatch[1];
-		if (formId) {
-			params.form_id = formId;
+		const tab = query.get('tab');
+		const search = query.get('search');
+		if (tab && tab !== 'all') {
+			params.tab = tab;
+		}
+		if (search) {
+			params.search = search;
 		}
 		return { page: 'subtleforms-submissions', params };
 	}
@@ -129,11 +133,35 @@ function syncTitle(label) {
 /**
  * @param {Function} getLabel Maps a pathname to a human-readable screen name.
  */
+
+/**
+ * Opening an entry adds a history entry so Back returns to the list.
+ * Other URL updates replace the current one.
+ *
+ * @param {{page?: string, submission_id?: string}|null} previous Previous query.
+ * @param {{page?: string, submission_id?: string}} next Next query.
+ * @return {'push'|'replace'}
+ */
 export default function useWpAdminSync(getLabel) {
 	const location = useLocation();
+	const navigate = useNavigate();
+	const previous = useRef(null);
+
+	useEffect(() => {
+		const onPop = () => {
+			const path = adminUrlToRoute(window.location.href);
+			if (path) {
+				navigate(path, { replace: true });
+			}
+		};
+		window.addEventListener('popstate', onPop);
+		return () => window.removeEventListener('popstate', onPop);
+	}, [navigate]);
 
 	useEffect(() => {
 		const { page, params } = routeToAdminQuery(location.pathname, location.search);
+		const mode = historyMode(previous.current, { page, submission_id: params.submission_id || '' });
+		previous.current = { page, submission_id: params.submission_id || '' };
 
 		try {
 			const url = new URL(window.location.href);
@@ -143,7 +171,7 @@ export default function useWpAdminSync(getLabel) {
 			Object.entries(params).forEach(([key, value]) => next.set(key, value));
 			const nextUrl = `${url.pathname}?${next.toString()}${url.hash}`;
 			if (nextUrl !== `${url.pathname}${url.search}${url.hash}`) {
-				window.history.replaceState(window.history.state, '', nextUrl);
+				window.history[mode === 'push' ? 'pushState' : 'replaceState'](window.history.state, '', nextUrl);
 			}
 		} catch (e) {
 			// URL sync is a convenience; never break navigation over it.

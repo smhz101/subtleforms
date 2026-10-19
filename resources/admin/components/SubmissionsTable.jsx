@@ -1,4 +1,6 @@
 import { submissionStatus } from '../utils/submissionStatus';
+import { loadUntilFound } from '../utils/loadUntil';
+import { markRowRead } from '../utils/markRowRead';
 import {
   useState,
   useEffect,
@@ -21,7 +23,8 @@ import clsx from 'clsx';
 import DataTable from './DataTable';
 import { ConfirmModal } from '../modals';
 import { apiGet } from '../utils/api';
-import { apiClient } from '../data';
+import { apiClient, useSettings } from '../data';
+import { deletesPermanently } from '../utils/deleteBehavior';
 import { Icon } from '../ui';
 import { downloadCsv } from '../utils/csvDownload';
 import { entrySender } from '../utils/entrySender';
@@ -69,6 +72,7 @@ const SubmissionsTable = forwardRef(
       readingId = null,
       density = 'default',
       onNeighbors = null,
+      onMarkedRead = null,
     },
     ref
   ) => {
@@ -87,6 +91,8 @@ const SubmissionsTable = forwardRef(
     const [deleteModal, setDeleteModal] = useState(null);
     const [selectedSubmissions, setSelectedSubmissions] = useState([]);
     const [bulkDelete, setBulkDelete] = useState(null);
+    const { data: siteSettings } = useSettings();
+    const hardDelete = deletesPermanently(siteSettings?.delete_behavior, false);
     const isPrefetchingRef = useRef(false);
     const prefetchPromiseRef = useRef(null);
     const stepRef = useRef(async () => ({ id: null }));
@@ -269,8 +275,12 @@ const SubmissionsTable = forwardRef(
         return { id: null };
       }
       let target = index + (direction === 'next' ? 1 : -1);
-      if (target >= rows.length && direction === 'next' && rows.length < totalRef.current) {
+      while (target >= rows.length && direction === 'next' && rows.length < totalRef.current) {
+        const before = rows.length;
         rows = await prefetchNextChunk();
+        if (!rows || rows.length <= before) {
+          break;
+        }
         target = index + 1;
       }
       if (target < 0 || target >= rows.length) {
@@ -343,16 +353,36 @@ const SubmissionsTable = forwardRef(
     // until that row is in the list, so it can be highlighted and browsed.
     useEffect(() => {
       if (!readingId || loading || totalItems === 0) {
+        return undefined;
+      }
+      let cancelled = false;
+      loadUntilFound({
+        readingId,
+        getRows: () => bufferRef.current,
+        getTotal: () => totalRef.current,
+        prefetch: () => prefetchRef.current(),
+      }).then(() => {
+        if (!cancelled) {
+          setBuffer(bufferRef.current.slice());
+        }
+      });
+      return () => {
+        cancelled = true;
+      };
+    }, [readingId, loading, totalItems]);
+
+    useEffect(() => {
+      if (!readingId) {
         return;
       }
-      if (buffer.some((row) => String(row.id) === String(readingId))) {
+      const marked = markRowRead(bufferRef.current, readingId);
+      if (!marked.changed) {
         return;
       }
-      if (buffer.length >= totalItems) {
-        return;
-      }
-      prefetchRef.current();
-    }, [readingId, buffer, totalItems, loading]);
+      bufferRef.current = marked.rows;
+      setBuffer(marked.rows);
+      onMarkedRead?.(readingId);
+    }, [readingId, onMarkedRead]);
 
     const inTrash = statusFilter === 'trash';
 
@@ -777,11 +807,15 @@ const SubmissionsTable = forwardRef(
                 size='compact'
                 isDestructive
                 icon={<Icon.Trash size={16} />}
-                label={__('Move to Trash', 'subtleforms')}
+                label={hardDelete ? __('Delete permanently', 'subtleforms') : __('Move to Trash', 'subtleforms')}
                 showTooltip
                 onClick={(e) => {
                   e.stopPropagation();
-                  trashEntries([submission.id]);
+                  if (hardDelete) {
+                    setDeleteModal(submission.id);
+                  } else {
+                    trashEntries([submission.id]);
+                  }
                 }}
               />
             )}
@@ -906,8 +940,8 @@ const SubmissionsTable = forwardRef(
                     onClick: (ids) => handleBulkMarkStatus(ids, 'flagged'),
                   },
                   {
-                    label: __('Move to Trash', 'subtleforms'),
-                    onClick: trashEntries,
+                    label: hardDelete ? __('Delete permanently', 'subtleforms') : __('Move to Trash', 'subtleforms'),
+                    onClick: hardDelete ? handleBulkDelete : trashEntries,
                     isDestructive: true,
                   },
                 ]
