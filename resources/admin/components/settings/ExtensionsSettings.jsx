@@ -42,7 +42,7 @@ function StatusDot({ enabled, configured }) {
 }
 
 /**
- * ExtensionsSettings — two-panel layout for the Settings > Extensions tab.
+ * ExtensionsSettings, two-panel layout for the Settings > Extensions tab.
  *
  * @param {Object}   props
  * @param {Object}   props.settings      - Full settings object from useSettingsState

@@ -2,10 +2,10 @@
  * SubtleForms Icon Registry
  *
  * Single source of truth for all icon resolutions.
- * - FIELD_ICON_MAP  — field type  → Icon component
- * - UI_ICON_MAP     — UI key      → Icon component
- * - getFieldIcon()  — resolve field type, fallback Icon.Circle
- * - getUIIcon()     — resolve UI key,    fallback Icon.Circle
+ * - FIELD_ICON_MAP , field type  → Icon component
+ * - UI_ICON_MAP    , UI key      → Icon component
+ * - getFieldIcon() , resolve field type, fallback Icon.Circle
+ * - getUIIcon()    , resolve UI key,    fallback Icon.Circle
  *
  * NOTE: Import Icon components only from ui/Icon, never lucide-react directly.
  */
@@ -15,7 +15,7 @@ import Icon from '../ui/Icon';
 // ── Field type icons ──────────────────────────────────────────────────────────
 
 export const FIELD_ICON_MAP = {
-  // Text inputs — each field gets a distinct glyph.
+  // Text inputs, each field gets a distinct glyph.
   text: Icon.Type,
   email: Icon.AtSign,
   phone: Icon.Phone,
@@ -49,7 +49,7 @@ export const FIELD_ICON_MAP = {
   file_upload: Icon.FileUp,
   step: Icon.Navigation,
 
-  // CAPTCHA — distinct glyphs per provider.
+  // CAPTCHA, distinct glyphs per provider.
   captcha: Icon.ShieldCheck,
   recaptcha: Icon.Bot,
   hcaptcha: Icon.Shield,

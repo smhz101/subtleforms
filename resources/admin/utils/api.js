@@ -13,7 +13,7 @@
  *     unwrap `.data` themselves.
  *
  * Both go through apiFetch, so neither hand-rolls nonce handling and both work
- * when pretty permalinks are disabled — apiFetch's root-URL middleware rewrites
+ * when pretty permalinks are disabled, apiFetch's root-URL middleware rewrites
  * `?rest_route=…` paths for us.
  */
 

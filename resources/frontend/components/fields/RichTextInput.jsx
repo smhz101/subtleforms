@@ -7,7 +7,7 @@ import { __ } from '@wordpress/i18n';
  * Submits HTML restricted to the same small tag set the server allows for
  * rich_text fields (bold, italic, lists, links, paragraphs, line breaks).
  * Anything outside that set is stripped on save, so the toolbar deliberately
- * offers only what survives — a formatting control that silently loses its
+ * offers only what survives, a formatting control that silently loses its
  * effect is worse than no control.
  *
  * `document.execCommand` is formally deprecated but remains the only API
@@ -80,7 +80,7 @@ export default function RichTextInput( {
   const editorRef = useRef( null );
 
   // Only write into the DOM when the incoming value diverges from what the user
-  // is looking at — assigning innerHTML on every render collapses the caret.
+  // is looking at, assigning innerHTML on every render collapses the caret.
   useEffect( () => {
     const el = editorRef.current;
     // The caret-exit marker is a zero-width space. It is stripped before the

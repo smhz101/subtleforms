@@ -519,7 +519,7 @@ function LogList( { kind, forms, description } ) {
                   <tr key={ row.id }>
                     <td className='sf-tools__when'>{ row.created_at }</td>
                     <td><span className={ clsx( 'sf-pill', 'sf-pill--dot', row.level === 'error' ? 'sf-pill--danger' : row.level === 'warning' ? 'sf-pill--warning' : 'sf-pill--info' ) }>{ row.level }</span></td>
-                    <td>{ row.form_title || ( row.form_id ? `#${ row.form_id }` : '—' ) }</td>
+                    <td>{ row.form_title || ( row.form_id ? `#${ row.form_id }` : '-' ) }</td>
                     <td>
                       { row.message }
                       { row.url && <div className='sf-tools__meta'>{ row.method } { row.url }{ row.http_status ? ` · ${ row.http_status }` : '' }</div> }
@@ -592,7 +592,7 @@ function ApiList( { description } ) {
                     <td>{ row.method }</td>
                     <td>{ row.route }</td>
                     <td>{ row.status }</td>
-                    <td>{ row.user_id ? `#${ row.user_id }` : '—' }</td>
+                    <td>{ row.user_id ? `#${ row.user_id }` : '-' }</td>
                     <td>{ row.duration_ms } ms</td>
                   </tr>
                 ) ) }

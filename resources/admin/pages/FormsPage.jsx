@@ -35,7 +35,7 @@ export default function FormsPage() {
     }
   };
 
-  // Column visibility — persisted to localStorage
+  // Column visibility, persisted to localStorage
   const [visibleColumns, setVisibleColumns] = useState(() => {
     try {
       const saved = localStorage.getItem('sf_forms_visible_cols');

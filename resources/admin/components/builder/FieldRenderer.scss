@@ -1409,7 +1409,7 @@
 }
 
 // ── Composite Fields (Name, Address) ─────────────────────────────────────────
-// No background, border or padding — composite fields must look like
+// No background, border or padding, composite fields must look like
 // native inputs grouped under a single top-level label.
 .sf-composite-field {
 	display: flex;
@@ -1425,7 +1425,7 @@
 		gap: 6px;
 	}
 
-	// Individual column in a row — no flex needed, grid handles sizing.
+	// Individual column in a row, no flex needed, grid handles sizing.
 	// --narrow constrains optional single items (e.g. Suffix) to a max
 	// width so they don't stretch across the full canvas.
 	&__col {
@@ -1439,7 +1439,7 @@
 		}
 	}
 
-	// Sub-field label sits flush under the main label — keep it clearly
+	// Sub-field label sits flush under the main label, keep it clearly
 	// subordinate: smaller, lighter, no bold weight.
 	&__sub-label {
 		font-size: var(--sf-text-2xs); // 11px
@@ -1450,14 +1450,14 @@
 	}
 
 	// Sub-inputs: remove depth, soften border, disable all interaction states.
-	// These are static previews — they must not look like interactive elements.
+	// These are static previews, they must not look like interactive elements.
 	.sf-field-renderer__input {
 		padding-top: 0.375rem;
 		padding-bottom: 0.375rem;
 		border-color: var(--sf-gray-200);
 		box-shadow: none;
 
-		// Never show hover or focus chrome — pointer-events are already off
+		// Never show hover or focus chrome, pointer-events are already off
 		// on these inputs, but belt-and-suspenders at the CSS layer too.
 		&:hover,
 		&:focus,
@@ -1470,7 +1470,7 @@
 }
 
 /* ==========================================================================
-   2.0 — canvas fields look like the published form
+   2.0, canvas fields look like the published form
    ========================================================================== */
 
 .sf-field-renderer {

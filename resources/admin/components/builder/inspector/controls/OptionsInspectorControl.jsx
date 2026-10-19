@@ -7,10 +7,10 @@ import { __ } from '@wordpress/i18n';
  * Renders an add/remove/edit list of { label, value } option objects.
  *
  * Props (standard control interface):
- *   value    — array of { label, value } objects
- *   onChange — called with the updated array
- *   label    — section heading
- *   disabled — read-only mode
+ *   value   , array of { label, value } objects
+ *   onChange, called with the updated array
+ *   label   , section heading
+ *   disabled, read-only mode
  */
 const OptionsInspectorControl = memo( function OptionsInspectorControl( {
 	value,

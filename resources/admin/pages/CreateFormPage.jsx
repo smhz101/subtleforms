@@ -64,7 +64,7 @@ const CHOICE = ['radio', 'multiple_choice', 'checkbox', 'checkboxes', 'consent',
 const TALL = ['textarea', 'rich_text', 'signature', 'file', 'file_upload'];
 
 /**
- * A wireframe of the template's first fields — shows the shape of a form at
+ * A wireframe of the template's first fields, shows the shape of a form at
  * a glance without rendering it.
  */
 function Wireframe({ fields }) {

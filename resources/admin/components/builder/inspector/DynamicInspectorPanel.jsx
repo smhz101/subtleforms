@@ -2,7 +2,7 @@
  * DynamicInspectorPanel.jsx
  *
  * Renders inspector controls driven by the field definition's `inspectorControls`
- * array from PHP `FieldDefinition::toArray()`. No hardcoded fields — all controls
+ * array from PHP `FieldDefinition::toArray()`. No hardcoded fields, all controls
  * are declared on the PHP side and rendered generically here.
  *
  * Supports optional grouping: if a control has a `section` string property,

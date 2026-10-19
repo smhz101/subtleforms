@@ -7,7 +7,7 @@ import Notices from './Notices';
 import './AdminShell.scss';
 
 /**
- * AdminShell — the SubtleForms frame.
+ * AdminShell, the SubtleForms frame.
  *
  * Every admin screen renders inside this component. It reproduces the layout
  * WordPress 7 uses for its own app screens (Fonts, Site Editor): a white stage

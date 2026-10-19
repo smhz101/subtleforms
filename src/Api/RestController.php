@@ -32,7 +32,7 @@ use SubtleForms\Fields\FieldRegistry;
  * REST API router for SubtleForms.
  *
  * Instantiates domain API controllers and registers their routes.
- * No request handling happens here — each controller owns its endpoints.
+ * No request handling happens here, each controller owns its endpoints.
  */
 final class RestController {
 
@@ -61,7 +61,7 @@ final class RestController {
 	private $captchaManager;
 
 	/**
-	 * Constructor — same signature as pre-1.9.0 for backward compatibility.
+	 * Constructor, same signature as pre-1.9.0 for backward compatibility.
 	 *
 	 * @param Pipeline              $pipeline        Submission pipeline.
 	 * @param FormsRepository       $formsRepo       Forms repository.

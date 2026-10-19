@@ -91,7 +91,7 @@ final class FieldDefinition {
 	public $requiredCapabilities;
 
 	/**
-	 * @var array Field meta information — routing and categorisation
+	 * @var array Field meta information, routing and categorisation
 	 * ['category' => 'regular|composite|layout|system']
 	 */
 	public $meta;

@@ -1,5 +1,5 @@
 /**
- * Component layer — v2.
+ * Component layer, v2.
  *
  * Shared primitives that every page composes: panels, pills, stat tiles,
  * key/value lists, empty states, and the WordPress component overrides that
@@ -11,7 +11,7 @@
 // ── Core component tuning ────────────────────────────────────────────────────
 
 .subtleforms-admin {
-  // Cards: hairline, 8px corners, no shadow — the WordPress 7 dashboard card.
+  // Cards: hairline, 8px corners, no shadow, the WordPress 7 dashboard card.
   .components-card {
     border-radius: var(--sf-radius-lg);
     box-shadow: 0 0 0 1px var(--sf-border);

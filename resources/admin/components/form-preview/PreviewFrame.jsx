@@ -9,7 +9,7 @@ import { __ } from '@wordpress/i18n';
 /**
  * Renders children inside an iframe using the public form stylesheet.
  *
- * The builder preview exists to answer one question — what will a visitor see?
+ * The builder preview exists to answer one question, what will a visitor see?
  * Rendering the real frontend components in the admin document cannot answer
  * that honestly: the admin stylesheet is loaded, the public one is not, and the
  * two share a `subtleforms-` class prefix, so rules collide in both directions.

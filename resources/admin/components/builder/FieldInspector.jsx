@@ -60,11 +60,11 @@ function StepSetting({ tree, nodeId, onMoveToStep, isReadOnly }) {
 }
 
 /**
- * Field inspector — the right panel of the builder.
+ * Field inspector, the right panel of the builder.
  *
  * Header: what the field is and its key (copyable, used in formulas, emails
- * and webhooks), with duplicate and delete. Body: four tabs — Settings,
- * Validation, Logic and Style — each made of collapsible panels like the
+ * and webhooks), with duplicate and delete. Body: four tabs, Settings,
+ * Validation, Logic and Style, each made of collapsible panels like the
  * block editor's sidebar.
  */
 export default function FieldInspector({ field, allFields, formAppearance, isReadOnly = false }) {
@@ -389,7 +389,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
 }
 
 /**
- * Appearance panel — only rendered when the field type has appearance settings.
+ * Appearance panel, only rendered when the field type has appearance settings.
  */
 function AppearancePanel({ field, onUpdate, isReadOnly }) {
   const { fieldDefinitions } = useConfig();
@@ -411,7 +411,7 @@ function AppearancePanel({ field, onUpdate, isReadOnly }) {
 }
 
 /**
- * Advanced panel — only rendered when the field type has advanced settings.
+ * Advanced panel, only rendered when the field type has advanced settings.
  */
 function AdvancedPanel({ field, onUpdate, isReadOnly }) {
   const { fieldDefinitions } = useConfig();

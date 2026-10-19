@@ -16,7 +16,7 @@ if ( file_exists( SUBTLEFORMS_PLUGIN_DIR . 'vendor/autoload.php' ) ) {
 	require_once SUBTLEFORMS_PLUGIN_DIR . 'vendor/autoload.php';
 
 	// Composer will autoload classes, but standalone functions are not
-	// autoloaded — they must be explicitly required regardless of autoloader.
+	// autoloaded, they must be explicitly required regardless of autoloader.
 	require_once SUBTLEFORMS_PLUGIN_DIR . 'src/Support/functions.php';
 
 	// `SubtleForms\init()` helper is defined in src/Plugin.php and must

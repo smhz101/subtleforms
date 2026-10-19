@@ -1,5 +1,5 @@
 /**
- * Feature Gate — Centralized Pro gating system.
+ * Feature Gate, Centralized Pro gating system.
  *
  * Provides an imperative API for use inside event handlers where React hooks
  * cannot be called. Reads capabilities synchronously from the server-injected
@@ -9,7 +9,7 @@
  *   // Check synchronously
  *   if (isProFeature('submissions.export')) { ... }
  *
- *   // Gate an action — runs it if allowed, opens upgrade modal if not
+ *   // Gate an action, runs it if allowed, opens upgrade modal if not
  *   requirePro('submissions.export', () => exportCSV());
  *
  *   // Open the modal directly with context

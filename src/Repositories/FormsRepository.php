@@ -135,7 +135,7 @@ final class FormsRepository {
 
 		$where_clause = empty( $where ) ? '' : ' WHERE ' . implode( ' AND ', $where );
 
-		// Validate orderby (whitelist — safe to interpolate)
+		// Validate orderby (whitelist, safe to interpolate)
 		$allowed_orderby = array( 'id', 'title', 'status', 'created_at', 'updated_at' );
 		$orderby         = in_array( $args['orderby'], $allowed_orderby, true ) ? $args['orderby'] : 'created_at';
 		$order           = strtoupper( $args['order'] ) === 'ASC' ? 'ASC' : 'DESC';
@@ -448,7 +448,7 @@ final class FormsRepository {
 		list( $schema ) = \SubtleForms\Support\SchemaRepair::syncType( $schema );
 
 		// Appearance values are written into CSS custom properties on the rendered
-		// form, so they are checked here — at the point of storage — rather than
+		// form, so they are checked here, at the point of storage, rather than
 		// escaped at output. Every save path goes through this method.
 		$schema = self::sanitizeAppearance( $schema );
 

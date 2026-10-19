@@ -158,7 +158,7 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
       }
 
       // Use the bootstrap payload on the initial boot (fast, no network) but
-      // always re-fetch when discarding — the bootstrap copy is stale once the
+      // always re-fetch when discarding, the bootstrap copy is stale once the
       // user has edited the draft.
       if (!forceFetch && bootstrap?.form?.id === formId && bootstrap?.schema) {
         const payload = { ...bootstrap.schema };
@@ -213,7 +213,7 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
           return;
         }
 
-        // API wraps responses in { data: ... } — unwrap before extracting the schema
+        // API wraps responses in { data: ... }, unwrap before extracting the schema
         const responseBody = schemaRes.body?.data ?? schemaRes.body ?? {};
         const rawPayload = responseBody?.schema ?? responseBody ?? {};
         const payload = rawPayload && typeof rawPayload === 'object' ? { ...rawPayload } : {};

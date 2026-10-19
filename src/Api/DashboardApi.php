@@ -404,7 +404,7 @@ class DashboardApi {
 			return sprintf( _n( '%d day ago', '%d days ago', $days, 'subtleforms' ), $days );
 		} else {
 			// Respect the site's WordPress date format (Settings → General)
-			// so the Dashboard agrees with All Forms — one date helper
+			// so the Dashboard agrees with All Forms, one date helper
 			// everywhere (Part B8). Falls back to 'M j, Y' when no format is
 			// configured (e.g. unit tests without WP loaded).
 			$format = function_exists( 'get_option' ) ? get_option( 'date_format' ) : '';

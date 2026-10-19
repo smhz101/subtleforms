@@ -74,7 +74,7 @@ const CreateFormPage     = lazyWithRetry(() => import(/* webpackChunkName: "page
 
 /**
  * Map WordPress admin URL params to a MemoryRouter initial entry path.
- * Called once at startup — not reactive.
+ * Called once at startup, not reactive.
  */
 function getInitialPath() {
 	const url        = new URL(window.location.href);
@@ -129,7 +129,7 @@ function getInitialPath() {
 
 // ─── Route wrapper components ─────────────────────────────────────────────────
 
-/** Submissions list — reads optional ?form_id query param */
+/** Submissions list, reads optional ?form_id query param */
 function SubmissionsRoute() {
 	const [searchParams] = useSearchParams();
 	const formId = searchParams.get('form_id')
@@ -142,7 +142,7 @@ function SubmissionsRoute() {
 	);
 }
 
-/** Submission detail — reads :submissionId param + optional ?form_id */
+/** Submission detail, reads :submissionId param + optional ?form_id */
 function SubmissionDetailRoute() {
 	const { submissionId } = useParams();
 	const [searchParams]   = useSearchParams();
@@ -313,7 +313,7 @@ function AppContent() {
 							</PageErrorBoundary>
 						}
 					/>
-					{/* /forms/new — full-page creation experience */}
+					{/* /forms/new, full-page creation experience */}
 					<Route
 						path='/forms/new'
 						element={
@@ -322,7 +322,7 @@ function AppContent() {
 							</PageErrorBoundary>
 						}
 					/>
-					{/* /forms/:formId — existing form */}
+					{/* /forms/:formId, existing form */}
 					<Route
 						path='/forms/:formId'
 						element={

@@ -2,7 +2,7 @@
 
 // phpcs:disable -- Unit test file; not shipped in production plugin.
 /**
- * FieldValidator unit tests — consent/checkbox required validation.
+ * FieldValidator unit tests, consent/checkbox required validation.
  *
  * @package SubtleForms\Tests\Unit
  */
@@ -41,13 +41,13 @@ final class FieldValidatorTest extends TestCase {
 			),
 		);
 
-		// Unchecked (false) — must be rejected even though the generic
+		// Unchecked (false), must be rejected even though the generic
 		// isEmpty() does not treat false as missing.
 		$result = $this->validate( $schema, array( 'consent' => false ) );
 		$this->assertFalse( $result['valid'] );
 		$this->assertArrayHasKey( 'consent', $result['errors'] );
 
-		// Checked (true) — valid.
+		// Checked (true), valid.
 		$result = $this->validate( $schema, array( 'consent' => true ) );
 		$this->assertTrue( $result['valid'] );
 	}

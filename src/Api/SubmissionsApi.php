@@ -443,7 +443,7 @@ final class SubmissionsApi {
 		}
 		$starred_arg = $tab_status === 'starred' ? 1 : null;
 
-		// Processing status (filter bar) — only applies when tab is 'all'
+		// Processing status (filter bar), only applies when tab is 'all'
 		if ( $proc_status && $status_arg === null && $is_read_arg === null && $tab_status !== 'starred' ) {
 			$status_arg = $proc_status;
 		}

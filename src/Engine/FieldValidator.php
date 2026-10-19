@@ -218,7 +218,7 @@ final class FieldValidator {
 		foreach ( $fields as $field ) {
 			$type   = $field['type'] ?? '';
 
-			// Skip layout and system types — they do not accept user input and cannot be required
+			// Skip layout and system types, they do not accept user input and cannot be required
 			$isRequired = ! empty( $field['required'] ) || ! empty( $field['config']['required'] );
 			if ( $isRequired && $this->acceptsInput( (string) $type ) ) {
 				$required[] = $field['key'];

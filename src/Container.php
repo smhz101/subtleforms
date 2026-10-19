@@ -123,7 +123,7 @@ final class Container {
 	}
 
 	/**
-	 * Reset the entire container — clears all services, singletons, and instances.
+	 * Reset the entire container, clears all services, singletons, and instances.
 	 *
 	 * Intended for test teardown to avoid state leaking between tests.
 	 */

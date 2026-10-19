@@ -53,7 +53,7 @@ final class LogsRepository {
 
 		$where_clause = 'WHERE ' . implode( ' AND ', $where );
 
-		// Validate orderby (whitelist — safe to interpolate)
+		// Validate orderby (whitelist, safe to interpolate)
 		$allowed_orderby = array( 'id', 'submission_id', 'level', 'created_at' );
 		$orderby         = in_array( $args['orderby'], $allowed_orderby, true ) ? $args['orderby'] : 'created_at';
 		$order           = strtoupper( $args['order'] ) === 'ASC' ? 'ASC' : 'DESC';

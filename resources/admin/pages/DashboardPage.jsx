@@ -16,7 +16,7 @@ import { chartColumnProps } from '../utils/chartA11y';
 const formatNumber = (value) => Number(value || 0).toLocaleString();
 
 /**
- * Dashboard — what is happening across every form, at a glance.
+ * Dashboard, what is happening across every form, at a glance.
  */
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -455,7 +455,7 @@ function HealthItem({ label, value }) {
   return (
     <div className='sf-health-grid__item'>
       <dt>{label}</dt>
-      <dd>{value || '—'}</dd>
+      <dd>{value || '-'}</dd>
     </div>
   );
 }

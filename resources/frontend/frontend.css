@@ -382,7 +382,7 @@
 	}
 }
 
-/* Honeypot — visually hidden but present in the DOM so bots fill it in. It is
+/* Honeypot, visually hidden but present in the DOM so bots fill it in. It is
    kept out of the tab order and the accessibility tree (Part B3). */
 .subtleforms-honeypot {
 	position: absolute;
@@ -400,7 +400,7 @@
 
 /* Container Fields */
 /* Group and repeat containers hold their children directly rather than through
-   .subtleforms-fields, so they carry the same gap — otherwise nested fields sit
+   .subtleforms-fields, so they carry the same gap, otherwise nested fields sit
    flush against each other now that spacing comes from the container. */
 .subtleforms-field-container {
 	display: flex;
@@ -481,7 +481,7 @@
 	cursor: not-allowed;
 }
 
-/* Success Message — neutral card with a green check (2.0) */
+/* Success Message, neutral card with a green check (2.0) */
 .subtleforms-success {
 	background: var(--subtleforms-color-bg, #fff);
 	border: 1px solid var(--subtleforms-color-border, #e0e0e0);

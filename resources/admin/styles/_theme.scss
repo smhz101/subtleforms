@@ -1,5 +1,5 @@
 /**
- * SubtleForms design tokens — v2 ("Frame").
+ * SubtleForms design tokens, v2 ("Frame").
  *
  * The single source of truth for colour, radius, type, elevation and timing in
  * the admin. Values follow the WordPress Design System (`--wpds-*`) that ships
@@ -153,13 +153,13 @@ body.subtleforms-admin-scope {
   --sf-font-mono: ui-monospace, "SFMono-Regular", Menlo, Consolas,
     "Liberation Mono", monospace;
 
-  --sf-text-2xs: 0.6875rem; // 11px — overlines
-  --sf-text-xs: 0.75rem; //    12px — meta
-  --sf-text-sm: 0.8125rem; //  13px — admin body
-  --sf-text-base: 0.8125rem; // 13px — admin body (core uses 13px)
-  --sf-text-md: 0.9375rem; //  15px — card titles
-  --sf-text-lg: 1.25rem; //    20px — page titles
-  --sf-text-xl: 1.75rem; //    28px — numbers
+  --sf-text-2xs: 0.6875rem; // 11px, overlines
+  --sf-text-xs: 0.75rem; //    12px, meta
+  --sf-text-sm: 0.8125rem; //  13px, admin body
+  --sf-text-base: 0.8125rem; // 13px, admin body (core uses 13px)
+  --sf-text-md: 0.9375rem; //  15px, card titles
+  --sf-text-lg: 1.25rem; //    20px, page titles
+  --sf-text-xl: 1.75rem; //    28px, numbers
 
   --sf-leading-tight: 1.25;
   --sf-leading-normal: 1.5;

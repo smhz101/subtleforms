@@ -286,7 +286,7 @@ export function validateField(field, value) {
   try {
     fieldSchema = settingsSchema.extract(field);
   } catch {
-    // Field not in schema — skip client-side validation
+    // Field not in schema, skip client-side validation
     return { isValid: true, error: null };
   }
   if (!fieldSchema) {

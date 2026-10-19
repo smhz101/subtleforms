@@ -4,7 +4,7 @@
  * The frontend form stylesheet is enqueued in the editor (see
  * SubtleFormsBlock::enqueue_editor_assets), so the preview already gets the
  * real form styling. This file only adds the minimal editor-only chrome around
- * the preview — a subtle frame and a small "Preview" badge — without
+ * the preview, a subtle frame and a small "Preview" badge, without
  * overriding any form colours, so the block canvas matches the frontend.
  */
 
@@ -19,7 +19,7 @@
 	border-radius: 0;
 }
 
-/* Small, non-intrusive preview badge — editor only, outside the form flow. */
+/* Small, non-intrusive preview badge, editor only, outside the form flow. */
 .subtleforms-block-preview::after {
 	content: attr(data-preview-label);
 	display: block;

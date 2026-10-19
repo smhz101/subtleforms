@@ -54,7 +54,8 @@ async function draft(id) {
 const badge = (page) => page.locator('.sf-builder-header-bar__form-type-badge');
 const stepTabs = (page) => page.locator('.sf-step-navigator__step-button');
 const canvasFields = (page) => page.locator('.subtleforms-step-canvas .sf-field-chrome, .subtleforms-builder-canvas .sf-field-chrome');
-const snackbar = (page) => page.locator('.components-snackbar');
+// Other notices (for example "Field added") can show at the same time.
+const snackbar = (page) => page.locator('.components-snackbar', { hasText: /now (Multi-step|Standard|Conversational)/ }).last();
 
 async function saveDraft(page) {
   await page.locator('.sf-builder-header-bar__publish-arrow').click();

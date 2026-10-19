@@ -95,7 +95,7 @@ final class SubmissionsRepository {
 
 		$where_clause = 'WHERE ' . implode( ' AND ', $where );
 
-		// Validate orderby (whitelist — safe to interpolate)
+		// Validate orderby (whitelist, safe to interpolate)
 		$allowed_orderby = array( 'id', 'form_id', 'status', 'created_at' );
 		$orderby         = in_array( $args['orderby'], $allowed_orderby, true ) ? $args['orderby'] : 'created_at';
 		$order           = strtoupper( $args['order'] ) === 'ASC' ? 'ASC' : 'DESC';
@@ -202,7 +202,7 @@ final class SubmissionsRepository {
 
 		if ( isset( $data['status'] ) ) {
 			if ( $data['status'] === 'none' ) {
-				// 'none' clears admin status override — set to NULL in DB
+				// 'none' clears admin status override, set to NULL in DB
 				$update_data['status'] = null;
 			} else {
 				$update_data['status'] = $data['status'];
@@ -483,7 +483,7 @@ final class SubmissionsRepository {
 
 		$whereClause = ! empty( $where ) ? 'WHERE ' . implode( ' AND ', $where ) : '';
 
-		// Validate orderby (whitelist — safe to interpolate)
+		// Validate orderby (whitelist, safe to interpolate)
 		$allowed_orderby = array( 'id', 'form_id', 'status', 'created_at' );
 		$orderby         = in_array( $args['orderby'], $allowed_orderby, true ) ? $args['orderby'] : 'created_at';
 		$order           = strtoupper( $args['order'] ) === 'ASC' ? 'ASC' : 'DESC';

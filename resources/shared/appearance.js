@@ -20,7 +20,7 @@
  *   }
  *
  * Everything is optional. An absent value falls through to the form, and an
- * absent form value falls through to the stylesheet default — so a form with no
+ * absent form value falls through to the stylesheet default, so a form with no
  * appearance object renders exactly as it did before this existed.
  */
 
@@ -64,7 +64,7 @@ export const FORM_TOKENS = [
   { key: 'buttonRadius', cssVar: '--subtleforms-button-radius', type: 'size', group: 'button', label: 'Button radius', units: ['px'], min: 0, max: 999 },
 ];
 
-/** Variants are classes rather than properties — they change structure, not values. */
+/** Variants are classes rather than properties, they change structure, not values. */
 export const FORM_VARIANTS = [
   {
     key: 'input',
@@ -707,7 +707,7 @@ export function isPresetModified( appearance ) {
  *
  * `action_hook` is a server-side extension point and `step` is a boundary the
  * form renderer consumes to slice pages; neither draws an element. Every other
- * type — including section breaks, HTML blocks and containers — has a wrapper
+ * type, including section breaks, HTML blocks and containers, has a wrapper
  * that carries appearance.
  *
  * @param {string} type Field type.

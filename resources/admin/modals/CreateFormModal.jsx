@@ -82,7 +82,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
     }
 
     if (!schemaToSend) {
-      // Blank form — use createInitialSchema for canonical, correct field init
+      // Blank form, use createInitialSchema for canonical, correct field init
       const schema = createInitialSchema({
         title: safeTitle,
         description: description,

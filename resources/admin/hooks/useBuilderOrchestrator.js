@@ -1,5 +1,5 @@
 /**
- * useBuilderOrchestrator — Save / Publish / Delete API orchestration
+ * useBuilderOrchestrator, Save / Publish / Delete API orchestration
  *
  * Extracts all side-effectful form lifecycle operations from FormBuilderInner:
  * - performSave (draft save, autosave, publish)
@@ -159,7 +159,7 @@ export default function useBuilderOrchestrator({
 				});
 
 				if (!ok) {
-					// HTTP 422 — Validation error
+					// HTTP 422, Validation error
 					if (isValidationError({ status: saveStatus })) {
 						// Normalise across two API shapes:
 						//   new: { error: { meta: { fields: [...] } } }
@@ -217,7 +217,7 @@ export default function useBuilderOrchestrator({
 						}
 					}
 
-					// HTTP 429 — Rate limit
+					// HTTP 429, Rate limit
 					if (isRateLimitError({ status: saveStatus })) {
 						const retryAfter =
 							body?.data?.retry_after ||
@@ -261,7 +261,7 @@ export default function useBuilderOrchestrator({
 						return;
 					}
 
-					// HTTP 409 — Conflict
+					// HTTP 409, Conflict
 					if (isConflictError({ status: saveStatus })) {
 						const currentETag = body?.data?.current_etag;
 						const providedIfMatch =

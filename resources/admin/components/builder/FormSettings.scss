@@ -1,5 +1,5 @@
 /**
- * FormSettings — the builder's Settings tab.
+ * FormSettings, the builder's Settings tab.
  *
  * Vertical sections, the same idea as the plugin Settings page. The outer
  * padding and page background come from `.subtleforms-form-settings` in
@@ -247,7 +247,7 @@
 	}
 
 	// The accordion sits on the grey tab background, so it needs its own
-	// surface — otherwise the bodies read as floating text.
+	// surface, otherwise the bodies read as floating text.
 	&__container > .components-panel {
 		background: var(--sf-bg-surface);
 		border: 1px solid var(--sf-border);

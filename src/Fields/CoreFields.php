@@ -355,7 +355,7 @@ final class CoreFields {
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					// A checkbox is a single consent-style checkbox (NOT a
-					// multi-option list — that is `multiple_choice`). The label
+					// multi-option list, that is `multiple_choice`). The label
 					// next to the box is the consent statement, so canvas, preview,
 					// settings and frontend all read the same `checkboxLabel`.
 					'checkboxLabel' => __( 'I agree', 'subtleforms' ),
@@ -377,7 +377,7 @@ final class CoreFields {
 			)
 		);
 
-		// Consent / GDPR field — a single checkbox with a rich label that can
+		// Consent / GDPR field, a single checkbox with a rich label that can
 		// link to the Privacy Policy, required by default, and recorded as a
 		// consent + timestamp on submission. Distinct from `checkbox` so legal
 		// consent is explicit and auditable.

@@ -343,7 +343,7 @@ function builderReducer(state, action) {
       }
 
       // If the schema reference is unchanged, treat this as a "mark dirty" and
-      // avoid polluting history — a caller re-dispatching the current schema
+      // avoid polluting history, a caller re-dispatching the current schema
       // wants the dirty flag, not an undo step that restores the same state.
       if (nextSchema === state.draftSchema) {
         return {

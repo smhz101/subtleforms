@@ -1,5 +1,5 @@
 /**
- * LogicEditor — conditional logic rules for a field, step, email or
+ * LogicEditor, conditional logic rules for a field, step, email or
  * confirmation (2.1).
  *
  * Writes the shared logic shape evaluated by shared/conditions.js in the

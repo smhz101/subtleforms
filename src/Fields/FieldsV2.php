@@ -29,7 +29,7 @@ final class FieldsV2 {
 	 */
 	public static function register( FieldRegistry $registry ): void {
 
-		// Toggle — a yes/no switch. Stores true/false.
+		// Toggle, a yes/no switch. Stores true/false.
 		self::add(
 			$registry,
 			new FieldDefinition(
@@ -81,7 +81,7 @@ final class FieldsV2 {
 			)
 		);
 
-		// Opinion scale — a row of numbered buttons with end labels.
+		// Opinion scale, a row of numbered buttons with end labels.
 		self::add(
 			$registry,
 			new FieldDefinition(

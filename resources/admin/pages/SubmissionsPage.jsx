@@ -44,7 +44,7 @@ export default function SubmissionsPage({ formId }) {
   const [exporting, setExporting] = useState(false);
   const submissionsTableRef = useRef(null);
 
-  // Column visibility — persisted to localStorage (domain-scoped, survives logout)
+  // Column visibility, persisted to localStorage (domain-scoped, survives logout)
   const [visibleColumns, setVisibleColumns] = useState(() => {
     try {
       const saved = localStorage.getItem('sf_visible_cols');

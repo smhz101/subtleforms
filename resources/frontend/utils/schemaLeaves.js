@@ -51,7 +51,7 @@ const INPUT_FIELD_TYPES = new Set([
   // Dynamic
   'dynamic_field',
   'post_selection',
-  // Composite group fields — store object values at their root key
+  // Composite group fields, store object values at their root key
   'name_group',
   'address_group',
   // Repeater (2.3.1): a list of groups at its own key; its children are
@@ -87,7 +87,7 @@ export function collectLeafInputPaths(fields) {
         if (typeof path === 'string' && path.trim()) {
           leafPaths.push(path);
         }
-        // Leaf fields own their value as a single node — do NOT recurse into children.
+        // Leaf fields own their value as a single node, do NOT recurse into children.
         // This is critical for Plan A group fields (name_group / address_group) which
         // now have child text nodes; without the continue those child keys would also be
         // pushed, causing the group key AND individual child keys to both appear in the
@@ -118,7 +118,7 @@ export function collectLeafInputPaths(fields) {
 }
 
 /**
- * True layout/container types — fields that group other fields but carry no
+ * True layout/container types, fields that group other fields but carry no
  * value of their own. Writes to their key are always ignored by the change
  * handler.
  *

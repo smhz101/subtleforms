@@ -129,7 +129,7 @@ export class PageErrorBoundary extends Component {
 	// ── Render ───────────────────────────────────────────────────────────
 
 	render() {
-		// Retrying a chunk load — show a spinner
+		// Retrying a chunk load, show a spinner
 		if ( this.state.isRetrying ) {
 			return (
 				<div className="sf-page-error-boundary sf-page-error-boundary--retrying">

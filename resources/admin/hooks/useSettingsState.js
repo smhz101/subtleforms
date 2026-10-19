@@ -1,5 +1,5 @@
 /**
- * useSettingsState — Settings data management hook
+ * useSettingsState, Settings data management hook
  *
  * Extracts all settings state management logic from SettingsPage:
  * - Fetch settings on mount

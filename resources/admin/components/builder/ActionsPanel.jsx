@@ -1,5 +1,5 @@
 /**
- * ActionsPanel — Form-level pipeline action editor
+ * ActionsPanel, Form-level pipeline action editor
  *
  * Renders a list of schema.actions[] with add/remove/reorder support.
  * Supports: webhook, email
@@ -422,7 +422,7 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
             disabled={isDisabled}
           />
 
-          {/* Method + Payload mode — side by side */}
+          {/* Method + Payload mode, side by side */}
           <div className='sf-actions-panel__row'>
             <SelectControl
               label={__('HTTP Method', 'subtleforms')}

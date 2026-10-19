@@ -1,5 +1,5 @@
 /**
- * UpgradeModal — Global event-driven Pro upgrade modal.
+ * UpgradeModal, Global event-driven Pro upgrade modal.
  *
  * Mount once in AppContent. Listens for 'sf:upgrade:required' custom DOM events
  * dispatched by featureGate.js#openUpgradeModal / #requirePro.

@@ -393,11 +393,11 @@ export default function FieldRenderer({
     );
   }
 
-  // Composite group fields — name_group / address_group. They carry an object
+  // Composite group fields, name_group / address_group. They carry an object
   // value at their root key, so they render as a div role="group" labelled by
   // the field label (not a fieldset/legend, and not a <label> pointing at an
   // id that doesn't exist) with the required asterisk shown ONCE on that
-  // label — never on Name + First + Last (Part B1).
+  // label, never on Name + First + Last (Part B1).
   //
   // Two shapes are supported:
   //  • children: Plan A group with real child text nodes (each rendered as its

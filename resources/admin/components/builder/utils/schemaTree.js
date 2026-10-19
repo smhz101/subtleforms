@@ -12,7 +12,7 @@ const ROOT_NODE_ID = 'root';
 
 const COLUMN_CONTAINER_SUFFIX = '_column_container';
 
-// Composite field types are single leaf nodes — any saved children from an old
+// Composite field types are single leaf nodes, any saved children from an old
 // group-style version are intentionally discarded when loading the schema.
 const COMPOSITE_FIELD_TYPES = new Set(['name_group', 'address_group']);
 
@@ -69,7 +69,7 @@ function extractConfig(rawField) {
   } = field;
 
   // String (or numeric) columns stay on the field. Only real layout
-  // columns — child-field arrays or field objects — are tree children.
+  // columns, child-field arrays or field objects, are tree children.
   let columnChildren = [];
   if (isLayoutColumnList(rawColumns)) {
     columnChildren = rawColumns;
@@ -267,13 +267,13 @@ export function normalizeSchema(schema) {
       const columns = ensureArray(seedColumns, node.columns?.length || 0);
       columns.forEach((columnFields, idx) => {
         columnFields.forEach((childField) => {
-          // register() internally calls parent.columns[idx].push(nodeId) — no outer push needed.
+          // register() internally calls parent.columns[idx].push(nodeId), no outer push needed.
           register(childField, nodeId, idx);
         });
       });
     } else if (Array.isArray(childFields) && childFields.length) {
       childFields.forEach((childField) => {
-        // register() internally calls parent.children.push(nodeId) — no outer push needed.
+        // register() internally calls parent.children.push(nodeId), no outer push needed.
         register(childField, nodeId, null);
       });
     }

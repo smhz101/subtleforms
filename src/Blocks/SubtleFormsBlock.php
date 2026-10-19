@@ -155,7 +155,7 @@ final class SubtleFormsBlock {
 	 * Enqueue the frontend renderer for a rendered block.
 	 *
 	 * Shared with the shortcode so a form behaves identically however it is
-	 * embedded — same script, same styles, same configured messages.
+	 * embedded, same script, same styles, same configured messages.
 	 */
 	private static function enqueue_frontend_assets(): void {
 		if ( is_admin() ) {

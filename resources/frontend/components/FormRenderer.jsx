@@ -36,7 +36,7 @@ import { restFetch, restUrl, restNonce } from '../utils/restFetch';
  * of 0, a number field holding 0. A plain falsy test rejects all three and makes
  * the lowest option on those fields impossible to submit.
  *
- * An unchecked checkbox stays "empty" — a required checkbox means it must be
+ * An unchecked checkbox stays "empty", a required checkbox means it must be
  * ticked, so `false` is genuinely missing there.
  */
 export const isEmptyValue = ( value ) =>
@@ -73,7 +73,7 @@ export default function FormRenderer({
   const [liveMessage, setLiveMessage] = useState('');
   const liveRegionRef = useRef(null);
   // Root of the rendered form, used to scope "focus first invalid input" to
-  // THIS form only — document.querySelector would jump across forms when two
+  // THIS form only, document.querySelector would jump across forms when two
   // forms share a page (A2/P1-5).
   const formRootRef = useRef(null);
   // Random per mount: a name like "website" invites autofill (bug 16). The
@@ -116,7 +116,7 @@ export default function FormRenderer({
 
   // Prefill field values from the block's "Field Values" option (one
   // key=value pair per line). Runs once on mount. This hook MUST stay above
-  // any conditional return — React requires hooks to run in the same order
+  // any conditional return, React requires hooks to run in the same order
   // on every render, and an early `return` here would skip it and trigger
   // React error #310 ("Rendered more hooks than during the previous render").
   useEffect(() => {
@@ -259,12 +259,12 @@ export default function FormRenderer({
     setValues((prev) => computeValues(allFields, prev));
   }, [values, allFields]);
 
-  // True layout/container types — fields that group other fields but carry no
+  // True layout/container types, fields that group other fields but carry no
   // value of their own. Writes to their key are always ignored.
   //
   // Composite INPUT fields (name_group, address_group, address, checkbox_grid,
   // …) also have children, but they DO carry a value (an object) at their root
-  // key — their renderers call onChange with an object that must be written.
+  // key, their renderers call onChange with an object that must be written.
   // Treating "has children" as "is a container" (the old logic) wrongly added
   // name_group's key here, so every keystroke into First/Last Name was silently
   // dropped (the value object was rejected as a "container write"). Only true

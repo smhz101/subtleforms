@@ -18,7 +18,7 @@ import DateTimeField from '../../../frontend/components/fields/DateTimeField';
 import { ConfigContext } from './context/ConfigContext';
 import './FieldRenderer.scss';
 
-// Types that do not accept user input — required indicator suppressed
+// Types that do not accept user input, required indicator suppressed
 const NON_INPUT_TYPES = new Set([
   'section_break', 'form_step', 'repeat_field', 'html', 'hidden',
   'one_column_container', 'two_column_container', 'three_column_container',
@@ -28,7 +28,7 @@ const NON_INPUT_TYPES = new Set([
   'recaptcha', 'hcaptcha', 'turnstile',
 ]);
 
-// All field types recognized by this renderer — unknown types get legacy fallback
+// All field types recognized by this renderer, unknown types get legacy fallback
 const KNOWN_TYPES = new Set([
   ...NON_INPUT_TYPES,
   'text', 'email', 'phone', 'tel', 'url', 'number', 'textarea', 'checkbox', 'consent',
@@ -54,14 +54,14 @@ function hasText(html) {
  * Only re-renders when field prop changes.
  */
 const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, onLabelChange, interactive = false }) {
-  // Null-safe destructure — required before hooks so all hooks run unconditionally
+  // Null-safe destructure, required before hooks so all hooks run unconditionally
   const { type, label, required, placeholder, options, subFields } = field || {};
 
   const labelClass = 'sf-field-renderer__label';
   const inputClass = 'sf-field-renderer__input';
   const selectClass = 'sf-field-renderer__select';
 
-  // ── Inline label editing state — ALL hooks before any early return ──────────
+  // ── Inline label editing state, ALL hooks before any early return ──────────
   const [isEditingLabel, setIsEditingLabel] = useState(false);
   const [editLabelValue, setEditLabelValue] = useState('');
   const [chainedSelections, setChainedSelections] = useState([]);
@@ -82,7 +82,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
 
   const handleLabelClick = useCallback((e) => {
     if (!onLabelChange) return;
-    // Do NOT stopPropagation — let the click bubble to FieldChrome so the field
+    // Do NOT stopPropagation, let the click bubble to FieldChrome so the field
     // gets selected (inspector opens) before / alongside entering edit mode.
     setEditLabelValue(label || field?.name || '');
     setIsEditingLabel(true);
@@ -121,7 +121,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       return;
     }
     if (previewModeOnMount.current) {
-      // Field was added while preview was already active — grace period.
+      // Field was added while preview was already active, grace period.
       const t = setTimeout(() => {
         setTouched(true);
         previewModeOnMount.current = false;
@@ -140,7 +140,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
   const addonMissing = (window.subtleformsAdmin?.missingFieldTypes || []).includes(type);
 
   // ── Early return AFTER all hooks ────────────────────────────────────────────
-  // Guard against null/undefined field or missing type — do NOT crash builder
+  // Guard against null/undefined field or missing type, do NOT crash builder
   if (!field || !field.type) {
     return null;
   }
@@ -175,7 +175,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       previewMode && showRequired && touched ? 'sf-field-renderer--preview-error' : null,
       isCompositeType ? 'sf-field-renderer--composite' : null,
     ].filter(Boolean).join(' ') || undefined}>
-      {/* Label — inline editable when onLabelChange is provided */}
+      {/* Label, inline editable when onLabelChange is provided */}
       {isEditingLabel ? (
         <input
           ref={labelInputRef}
@@ -498,7 +498,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
-      {/* Legacy address field detected — deprecated and ignored */}
+      {/* Legacy address field detected, deprecated and ignored */}
 
       {/* Payment fields */}
       {type === 'payment_amount' && (
@@ -788,14 +788,14 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       {/* ── Address (composite) ─────────────────────────────────────────────── */}
       {type === 'address_group' && <AddressFieldRenderer field={field} />}
 
-      {/* Unknown / legacy field type — safe fallback, do NOT crash builder */}
+      {/* Unknown / legacy field type, safe fallback, do NOT crash builder */}
       {!KNOWN_TYPES.has(type) && !getCanvasPreview(type) && (
         <div className='sf-field-renderer__unknown-field'>
           {__('Unsupported field (legacy)', 'subtleforms')}
         </div>
       )}
 
-      {/* ── Help text — shown for input fields only ─────────────────────────── */}
+      {/* ── Help text, shown for input fields only ─────────────────────────── */}
       {field.description && !NON_INPUT_TYPES.has(type) && !display.descriptionAbove && (
         <p className='sf-field-renderer__help-text'>{field.description}</p>
       )}

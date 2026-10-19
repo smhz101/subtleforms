@@ -4,7 +4,7 @@
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 
-# Prefer Node 20 when nvm is available, but don't require it — CI images and
+# Prefer Node 20 when nvm is available, but don't require it, CI images and
 # system installs already provide a suitable Node.
 nvm use 20 2>/dev/null || echo "ℹ️  nvm not in use; running on the ambient Node."
 

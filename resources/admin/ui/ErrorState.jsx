@@ -1,5 +1,5 @@
 /**
- * ErrorState — Reusable error and empty-state component.
+ * ErrorState, Reusable error and empty-state component.
  *
  * @param {Object}   props
  * @param {'network_error'|'permission_error'|'empty_state'} [props.variant='network_error']

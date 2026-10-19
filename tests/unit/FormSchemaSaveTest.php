@@ -4,8 +4,8 @@
  * Regression tests for the form-schema save contract.
  *
  * Every test here covers the same failure: the validator carried a frozen list
- * of allowed values that something else — the builder UI, a form template, the
- * action registry — had already moved past. The result each time was a form
+ * of allowed values that something else, the builder UI, a form template, the
+ * action registry, had already moved past. The result each time was a form
  * that loads and edits but returns 422 on every save, permanently, with no way
  * to fix it from the admin.
  *
@@ -99,7 +99,7 @@ final class FormSchemaSaveTest extends TestCase {
 	/**
 	 * Action types are a runtime set: ActionRegistry owns them and extensions
 	 * add to it. The compiler already soft-skips a type it cannot resolve, so
-	 * refusing the save is the harsher and less useful of the two behaviours —
+	 * refusing the save is the harsher and less useful of the two behaviours -
 	 * it strands the whole form over one inert action.
 	 *
 	 * @dataProvider actionTypes

@@ -5,7 +5,7 @@ import { __ } from '@wordpress/i18n';
  *
  * The contract in `shared/appearance.js` is imported by the public bundle too,
  * so it carries plain English strings and no i18n dependency. Translation
- * happens here, where every string is a literal and therefore extractable —
+ * happens here, where every string is a literal and therefore extractable -
  * `__( variable )` produces no POT entry and silently ships untranslated.
  */
 

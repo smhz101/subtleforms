@@ -342,7 +342,7 @@ export default function FormsList({
       sortable: true,
       render: (updatedAt) => {
         // Relative for the last 48h, then the site's WP date format
-        // everywhere (Part B8) — one helper shared with the Dashboard.
+        // everywhere (Part B8), one helper shared with the Dashboard.
         const displayText = formatRelativeDate(updatedAt);
         const absolute = formatDate(updatedAt);
         return (

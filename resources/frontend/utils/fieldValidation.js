@@ -1,10 +1,10 @@
 /**
- * Frontend field validation — shared by the live form and the builder preview.
+ * Frontend field validation, shared by the live form and the builder preview.
  *
  * The builder preview must behave exactly like the frontend (see Part A3),
  * so the rules live here once and both surfaces call them. Composite fields
  * (name_group / address_group) carry an object value at their root key, so a
- * plain "is the value empty" check passes even when every part is blank —
+ * plain "is the value empty" check passes even when every part is blank -
  * this module understands their shape and reports a group-level error when any
  * required part is missing.
  */

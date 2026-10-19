@@ -148,7 +148,7 @@ function FormBuilderInner({
   const titleInputRef = useRef(null);
   const copyTimeoutRef = useRef(null);
 
-  // Orchestrator — save / publish / delete / discard + modal states
+  // Orchestrator, save / publish / delete / discard + modal states
   const {
     performSave,
     handleSave,
@@ -182,7 +182,7 @@ function FormBuilderInner({
     },
     onSaved,
     navigate,
-    hasValidationErrors: false, // placeholder — replaced after useBuilderValidation
+    hasValidationErrors: false, // placeholder, replaced after useBuilderValidation
   });
 
   // Legacy status mapping for UI components
@@ -371,7 +371,7 @@ function FormBuilderInner({
         return;
       }
 
-      // Controls re-emit their current value routinely — a select firing on
+      // Controls re-emit their current value routinely, a select firing on
       // re-render, a panel writing back a default it just read. Those produce a
       // new object that describes the same form, and dispatching them would
       // mark the builder dirty and autosave a version nobody asked for. Only a
@@ -708,7 +708,7 @@ function FormBuilderInner({
     );
   }
 
-  // Get form type badge config — single source of truth (shared selector).
+  // Get form type badge config, single source of truth (shared selector).
   // The builder shows the draft type (what you're editing), which matches the
   // listings (they prefer the draft type when a draft exists).
   // A form saved before 2.3.2 may still say Standard while it has Page
@@ -717,7 +717,7 @@ function FormBuilderInner({
   const formTypeBadge = getFormTypeBadgeConfig(rawFormType);
   const FormTypeIcon = formTypeBadge.icon;
 
-  // Always show the builder canvas — even blank forms should open the editor
+  // Always show the builder canvas, even blank forms should open the editor
   // so users can immediately add fields. The welcome screen was blocking builder
   // access for regular and payment form types with empty fields arrays.
   const showWelcomeScreen = false;
@@ -857,7 +857,7 @@ export default function FormBuilderPage(props) {
         next
       );
     } catch ( _e ) {
-      // localStorage unavailable (private browsing etc.) — fall back to timestamp
+      // localStorage unavailable (private browsing etc.), fall back to timestamp
       return sprintf( __( 'New Form %1$d', 'subtleforms' ), Date.now() % 10000 );
     }
   }, []);

@@ -124,7 +124,7 @@ function ProHero({ hasProPlugin, onActivate }) {
 }
 
 /**
- * Extensions — the Pro hub. Every extension is listed whether or not it is
+ * Extensions, the Pro hub. Every extension is listed whether or not it is
  * unlocked, so free users see exactly what Pro adds and Pro users get one
  * place to switch things on.
  */

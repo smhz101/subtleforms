@@ -30,7 +30,7 @@ export default function EmailSettings( {
 		? `wordpress@${ siteDomain }`
 		: 'wordpress@example.com';
 
-	// Warn when the sender email is on a different domain than the site —
+	// Warn when the sender email is on a different domain than the site -
 	// that trips SPF/DMARC and is a common cause of missing notifications
 	// (Part B20). Empty sender is fine: it resolves to wordpress@<site>.
 	const senderEmail = ( settings.sender_email || '' ).trim().toLowerCase();

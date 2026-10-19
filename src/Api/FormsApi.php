@@ -305,7 +305,7 @@ final class FormsApi {
 	 * Permission check for the public schema GET endpoint.
 	 *
 	 * Authenticated admins are always allowed. Unauthenticated users may
-	 * only access schemas for published forms — we reject early with a
+	 * only access schemas for published forms, we reject early with a
 	 * 404 so the handler code is never executed for invalid requests.
 	 *
 	 * @param WP_REST_Request $request REST request.
@@ -473,7 +473,7 @@ final class FormsApi {
 
 		// PUBLIC ACCESS: Only active schema for published forms.
 		// SECURITY: Never expose the full form row (it contains draft_schema,
-		// config, created_at, updated_at, active_version and status — internal
+		// config, created_at, updated_at, active_version and status, internal
 		// data the renderer does not need). Return a minimal form object and
 		// a schema stripped to only the fields the frontend renderer uses.
 		if ( ! $isAuthenticated ) {

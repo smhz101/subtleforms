@@ -2,7 +2,7 @@
  * AddressFieldRenderer
  *
  * Builder canvas preview for the address_group composite field.
- * Reads sub-field config from field.fields — label, placeholder and
+ * Reads sub-field config from field.fields, label, placeholder and
  * enabled state are all driven by stored config with seeded defaults.
  * All inputs are read-only: this is a layout preview, not a live form.
  */
@@ -59,7 +59,7 @@ export default function AddressFieldRenderer( { field } ) {
 				<SubInput sub={ street } cls={ cls } />
 			</div>
 
-			{ /* Street 2 — optional */ }
+			{ /* Street 2, optional */ }
 			{ street2.enabled && (
 				<div className={ `${ cls }__row` }>
 					<SubInput sub={ street2 } cls={ cls } />
@@ -72,7 +72,7 @@ export default function AddressFieldRenderer( { field } ) {
 				{ state.enabled && <SubInput sub={ state } cls={ cls } /> }
 			</div>
 
-			{ /* Postal + Country — shown only when at least one is enabled */ }
+			{ /* Postal + Country, shown only when at least one is enabled */ }
 			{ ( postal.enabled || country.enabled ) && (
 				<div className={ `${ cls }__row` }>
 					{ postal.enabled  && <SubInput sub={ postal }  cls={ cls } /> }

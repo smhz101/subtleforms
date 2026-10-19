@@ -6,7 +6,7 @@ import { getIcon } from './utils/iconMap';
 import './GroupRenderer.scss';
 
 /**
- * GroupRenderer — Chrome wrapper for group field nodes (name_group, address_group).
+ * GroupRenderer, Chrome wrapper for group field nodes (name_group, address_group).
  *
  * Renders a titled container that holds fixed child fields. The group node itself is
  * drag-sortable in the form canvas (handled by SortableWrapper in FormBuilder). Children

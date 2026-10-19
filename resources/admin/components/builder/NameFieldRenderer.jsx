@@ -2,7 +2,7 @@
  * NameFieldRenderer
  *
  * Builder canvas preview for the name_group composite field.
- * Reads sub-field config from field.fields — label, placeholder, and
+ * Reads sub-field config from field.fields, label, placeholder, and
  * enabled state are all driven by stored config with seeded defaults.
  * All inputs are read-only: this is a layout preview, not a live form.
  */

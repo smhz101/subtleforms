@@ -3,7 +3,7 @@ import clsx from 'clsx';
 import './LicenseStatusIndicator.scss';
 
 /**
- * LicenseStatusIndicator Component (Free — placeholder)
+ * LicenseStatusIndicator Component (Free, placeholder)
  *
  * When SubtleForms Pro is installed this component is replaced by the
  * Pro version via the global `window.SubtleFormsPro` slot.  In the free

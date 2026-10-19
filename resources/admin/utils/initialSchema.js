@@ -74,7 +74,7 @@ export function createInitialSchema({
     return base;
   }
 
-  // Multi-step and sectioned forms — start with one empty step
+  // Multi-step and sectioned forms, start with one empty step
   if (resolvedType === 'multi-step' || resolvedType === 'sectioned') {
     const stepTitle =
       resolvedType === 'sectioned' ? __('Section 1', 'subtleforms') : __('Step 1', 'subtleforms');
@@ -90,7 +90,7 @@ export function createInitialSchema({
     return base;
   }
 
-  // Regular forms — always start with an empty canvas
+  // Regular forms, always start with an empty canvas
   // Users build their form from scratch using the field panel.
   return base;
 }

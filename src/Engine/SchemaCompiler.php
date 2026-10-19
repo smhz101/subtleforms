@@ -89,23 +89,23 @@ final class SchemaCompiler {
 				continue;
 			}
 
-			// Resolve definition first — soft-skip unknown types so that Pro
+			// Resolve definition first, soft-skip unknown types so that Pro
 			// deactivation or schema migration gaps don't break live submissions.
 			$def = $this->registry->getDefinition( $type );
 			if ( $def === null ) {
 				Logger::warning(
-					"SchemaCompiler: Unknown action type '%s' at index %d — skipping. Activate the required plugin or remove this action from the schema.",
+					"SchemaCompiler: Unknown action type '%s' at index %d, skipping. Activate the required plugin or remove this action from the schema.",
 					$type,
 					$i
 				);
 				continue;
 			}
 
-			// Resolve implementation — same soft-skip if definition exists but class is missing.
+			// Resolve implementation, same soft-skip if definition exists but class is missing.
 			$actionImpl = $this->registry->getImplementation( $type );
 			if ( $actionImpl === null ) {
 				Logger::warning(
-					"SchemaCompiler: No implementation for action type '%s' at index %d — skipping.",
+					"SchemaCompiler: No implementation for action type '%s' at index %d, skipping.",
 					$type,
 					$i
 				);

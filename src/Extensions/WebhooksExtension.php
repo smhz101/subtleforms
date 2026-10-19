@@ -8,7 +8,7 @@ namespace SubtleForms\Extensions;
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 /**
- * Webhooks Extension (DEPRECATED — kept for backward compatibility only)
+ * Webhooks Extension (DEPRECATED, kept for backward compatibility only)
  *
  * This extension has been superseded by the per-form Action System
  * (schema.actions[].type === 'webhook').  It no longer sends HTTP requests.
@@ -18,7 +18,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
  * PublicSubmitApi which injects a virtual webhook action into the pipeline
  * when no schema-level webhook action is already present.
  *
- * @deprecated since 1.9.0 — use Form Actions → Webhook instead.
+ * @deprecated since 1.9.0, use Form Actions → Webhook instead.
  * @see \SubtleForms\Engine\Actions\WebhookAction
  * @see \SubtleForms\Api\PublicSubmitApi::injectLegacyWebhookAction()
  */

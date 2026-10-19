@@ -9,7 +9,7 @@ import TopBarUtilities from './TopBarUtilities';
 import './AdminHeader.scss';
 
 /**
- * AdminHeader — the top bar of the SubtleForms frame.
+ * AdminHeader, the top bar of the SubtleForms frame.
  *
  * Two variants share one 56px bar so the frame never jumps between screens:
  *

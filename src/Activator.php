@@ -249,7 +249,7 @@ final class Activator {
 	}
 
 	/**
-	 * Add is_read column to submissions table (v2.0 — separates admin read tracking from pipeline status).
+	 * Add is_read column to submissions table (v2.0, separates admin read tracking from pipeline status).
 	 */
 	private static function migrate_is_read_column(): void {
 		global $wpdb;

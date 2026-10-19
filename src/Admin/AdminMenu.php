@@ -279,14 +279,14 @@ class AdminMenu {
 
 		$this->currentPage = $hook;
 
-		// Base styling for every @wordpress/components primitive this app uses —
+		// Base styling for every @wordpress/components primitive this app uses -
 		// Button, Panel, ToggleControl, SelectControl, DropdownMenu, Popover,
 		// Modal, SnackbarList and the rest. `wp-components` is registered as a
 		// script handle AND a separate style handle; depending on the script (as
 		// the bundle below does) pulls in none of the CSS. Without this, every
 		// one of those elements renders with no background, border, spacing or
-		// shadow from WordPress core — only the few `.components-*` rules this
-		// plugin overrides — which is what made the admin look unstyled rather
+		// shadow from WordPress core, only the few `.components-*` rules this
+		// plugin overrides, which is what made the admin look unstyled rather
 		// than merely differently themed.
 		wp_enqueue_style( 'wp-components' );
 
@@ -357,7 +357,7 @@ class AdminMenu {
 			'before'
 		);
 
-		// Get license data — provided by the Pro plugin via filter (no API calls).
+		// Get license data, provided by the Pro plugin via filter (no API calls).
 		$license_data = apply_filters( 'subtleforms/license_data', null );
 
 		// Rebuild Capabilities fresh at enqueue time.
@@ -667,7 +667,7 @@ class AdminMenu {
 	 */
 	private function isExtensionConfigured( string $slug, \SubtleForms\Support\Settings $settings ): bool {
 		$checks = array(
-			'webhooks'       => array(), // no required key — endpoint can be per-form
+			'webhooks'       => array(), // no required key, endpoint can be per-form
 			'email_marketing' => array( 'ext_email_marketing_api_key' ),
 			'crm'            => array( 'webhook' === $settings->get( 'ext_crm_provider' ) ? 'ext_crm_webhook_url' : 'ext_crm_api_key' ),
 			'analytics'      => array(), // no external API needed
