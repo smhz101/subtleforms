@@ -234,6 +234,11 @@ final class PublicSubmitApi {
 		// visitor cannot post a tampered total.
 		$payload = self::applyComputedValues( $payload, $activeSchema['schema'] ?? $activeSchema );
 
+		// Answers in the shape the form stores: Hidden field values worked
+		// out on the server, display-only payment fields dropped, websites,
+		// email lists and phone numbers tidied (FLD2-16, PAY2-04, FB-15).
+		$payload = \SubtleForms\Engine\FieldValidator::prepare( $activeSchema['schema'] ?? $activeSchema, $payload );
+
 		// Fields from an add-on that is not active are not on the live form.
 		$payload = \SubtleForms\Fields\AddonFieldTypes::dropMissingAnswers( $payload, $activeSchema['schema'] ?? $activeSchema );
 
