@@ -108,4 +108,17 @@ describe('useDraftAutosave', () => {
     await Promise.resolve();
     expect(apiPost).toHaveBeenCalledTimes(2);
   });
+  it('uses the settings interval instead of 30 seconds', () => {
+    renderHook(() => useDraftAutosave({ ...defaultProps, intervalSeconds: 3 }));
+    jest.advanceTimersByTime(2999);
+    expect(apiPost).not.toHaveBeenCalled();
+    jest.advanceTimersByTime(1);
+    expect(apiPost).toHaveBeenCalled();
+  });
+
+  it('does not autosave when autosave is off', () => {
+    renderHook(() => useDraftAutosave({ ...defaultProps, enabled: false }));
+    jest.advanceTimersByTime(30000);
+    expect(apiPost).not.toHaveBeenCalled();
+  });
 });

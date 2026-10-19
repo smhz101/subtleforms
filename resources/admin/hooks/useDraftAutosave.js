@@ -33,7 +33,7 @@ const MAX_RETRY_ATTEMPTS = 2;            // Max 2 retries (not counting the firs
  *
  * @returns {Object} Autosave status and control functions
  */
-export function useDraftAutosave({ builderState, dispatch, formId, enabled = true }) {
+export function useDraftAutosave({ builderState, dispatch, formId, enabled = true, intervalSeconds = null }) {
   const timeoutRef = useRef(null);
   const retryCountRef = useRef(0);
   const lastSchemaRef = useRef(null);
@@ -92,9 +92,13 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
     // Debounce autosave - delay is extended if we're currently rate-limited
     const now = Date.now();
     const rateLimitedFor = rateLimitedUntilRef.current - now;
+    const savedSeconds = Number(intervalSeconds);
+    const configured = Number.isFinite(savedSeconds) && savedSeconds > 0
+      ? savedSeconds * 1000
+      : AUTOSAVE_DEBOUNCE_MS;
     const delay = rateLimitedFor > 0
       ? rateLimitedFor + 500  // Wait until rate limit clears + small buffer
-      : AUTOSAVE_DEBOUNCE_MS;
+      : configured;
 
     timeoutRef.current = setTimeout(() => {
       performAutosave();
@@ -106,7 +110,7 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
         timeoutRef.current = null;
       }
     };
-  }, [state, draftSchema, isDirty, formId, enabled]);
+  }, [state, draftSchema, isDirty, formId, enabled, intervalSeconds]);
 
   // Save on blur and when the tab is hidden: with a 30s debounce, an
   // in-progress edit could be lost if the user switches away mid-edit, so

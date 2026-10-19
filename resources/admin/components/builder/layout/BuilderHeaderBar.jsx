@@ -329,7 +329,7 @@ export function BuilderActions({
                   <MenuItem
                     disabled={!isDirty || busy}
                     info={__(
-                      'Drafts also save on their own a few seconds after each change.',
+                      'Drafts also save on their own after you pause, using the interval in Settings. Turn autosave off there to stop it.',
                       'subtleforms'
                     )}
                     onClick={() => {
