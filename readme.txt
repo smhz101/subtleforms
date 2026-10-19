@@ -167,6 +167,27 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 
 == Changelog ==
 
+= 2.3.9 - 2026-10-19 =
+* Fix: The builder header keeps the title, status, and Preview tabs from covering each other.
+* Fix: Preview scales the form to the space it has, so a desktop width is not cut off.
+* Fix: Choice questions in a conversational form are a vertical list.
+* Fix: The coupon field stays wide enough to type in, and Apply moves under it on a narrow screen.
+* Fix: When forms, entries, or the builder fail to load, you see an error with Retry instead of an empty list.
+* Fix: The builder shows a placeholder while a form loads, instead of a blank screen.
+* Fix: Dark, Dark surface, and Bold presets keep readable text and buttons on their own background.
+* Fix: The focus ring on form status tabs stays visible.
+* Fix: Quick Start creates the form and closes the help menu.
+* Fix: Saving a published form shows that the changes are not live yet.
+* Fix: A failed save says your changes are kept in this tab, with Retry, and that note clears when the save works.
+* Fix: Update on a published form no longer asks you to confirm. The first Publish still does.
+* Fix: Last 7 days is the same count on the dashboard and on Reports.
+* Fix: Deleting a field says Field deleted, with Undo.
+* Fix: Form types use the names Standard, Multi-step, and Conversational.
+* Fix: Form name help says the same thing when you create a form and in its settings.
+* Fix: Charts have a text summary, and Rows per page has a name.
+* Fix: Muted text is dark enough to read, including the Press Enter hint.
+* Fix: A hidden field toolbar is not in the tab order, and canvas fields have names.
+
 = 2.3.8 - 2026-10-19 =
 * New: Dependent dropdowns open in a column editor. Each column is one dropdown, and choosing an item shows only what belongs to it.
 * New: On the form, a chained field can be dropdowns, buttons, or columns. Columns show every list at once. The first choice is selected, and a list with nothing for that choice stays empty.
@@ -424,6 +445,9 @@ now be reconstructed accurately.
 * Feature: Basic spam protection
 
 == Upgrade Notice ==
+
+= 2.3.9 =
+The builder header, preview, presets, and load errors are easier to use. Quick Start creates the form. Last 7 days matches on the dashboard and Reports.
 
 = 2.3.8 =
 Dependent dropdowns are edited as columns. On the form they can be dropdowns, buttons, or columns, and the lists can be typed in or loaded from a CSV file.
