@@ -78,16 +78,15 @@
 
 	&__canvas {
 		min-width: 0;
-		overflow: auto;
+		overflow-x: hidden;
+		overflow-y: auto;
 		padding: var(--sf-space-8) var(--sf-space-6);
 	}
 
-	// The device keeps its real width. When that is wider than the pane, the
-	// pane scrolls instead of shrinking desktop down to the tablet width.
+	// The form is laid out at the device width, then scaled to the pane.
 	&__stage {
-		width: max-content;
-		min-width: 100%;
-		max-width: none;
+		width: 100%;
+		min-width: 0;
 		margin: 0 auto;
 		background: transparent;
 		border: 0;
