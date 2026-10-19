@@ -72,6 +72,15 @@ final class SubtleFormsBlock {
 	 * @param string $content Block inner content (empty for this block)
 	 * @return string Rendered block HTML
 	 */
+	/**
+	 * Classes shared with the shortcode so both use the same width.
+	 *
+	 * @return string[]
+	 */
+	public static function wrapperClasses(): array {
+		return array( 'subtleforms-block', 'subtleforms-form-container' );
+	}
+
 	public static function render_block( array $attributes, string $content = '' ): string {
 		$form_id = $attributes['formId'] ?? 0;
 
@@ -106,12 +115,12 @@ final class SubtleFormsBlock {
 		// Login, schedule and entry-limit rules (2.0).
 		$blocked = \SubtleForms\Engine\FormRestrictions::blockedReason( (int) $form_id, \SubtleForms\Engine\FormRestrictions::activeSchema( (int) $form_id ) );
 		if ( $blocked !== null ) {
-			self::enqueue_frontend_assets();
+			self::enqueue_frontend_assets( (int) $form_id );
 			return \SubtleForms\Engine\FormRestrictions::render( $blocked );
 		}
 
 		// Build CSS classes
-		$classes = array( 'subtleforms-block' );
+		$classes = self::wrapperClasses();
 
 		if ( ! empty( $attributes['align'] ) ) {
 			$classes[] = 'align' . esc_attr( $attributes['align'] );
@@ -126,7 +135,7 @@ final class SubtleFormsBlock {
 		// appear. A block in a template part or a widget area is rendered the
 		// same way as one in post content, and now gets its assets the same way
 		// too.
-		self::enqueue_frontend_assets();
+		self::enqueue_frontend_assets( (int) $form_id );
 
 		// Block options are forwarded to the frontend renderer as data
 		// attributes so the form renders with the user's chosen theme, title
@@ -138,8 +147,12 @@ final class SubtleFormsBlock {
 		$tab_index      = isset( $attributes['tabIndex'] ) ? (int) $attributes['tabIndex'] : 0;
 		$field_values   = isset( $attributes['fieldValues'] ) ? (string) $attributes['fieldValues'] : '';
 
+		// A post of this form without AJAX just returned here: hand its outcome
+		// to the renderer (2.4.0).
+		$classic = $ajax ? null : \SubtleForms\Api\ClassicResult::forForm( (int) $form_id );
+
 		return sprintf(
-			'<div class="%s" data-form-id="%d" data-show-title="%d" data-show-description="%d" data-theme="%s" data-ajax="%d" data-tabindex="%d" data-field-values="%s"></div>',
+			'<div class="%s" data-form-id="%d" data-show-title="%d" data-show-description="%d" data-theme="%s" data-ajax="%d" data-tabindex="%d" data-field-values="%s"%s></div>',
 			esc_attr( implode( ' ', $classes ) ),
 			esc_attr( $form_id ),
 			$show_title ? 1 : 0,
@@ -147,7 +160,8 @@ final class SubtleFormsBlock {
 			esc_attr( $theme ),
 			$ajax ? 1 : 0,
 			$tab_index,
-			esc_attr( $field_values )
+			esc_attr( $field_values ),
+			null === $classic ? '' : ' data-classic-result="' . esc_attr( (string) wp_json_encode( $classic ) ) . '"'
 		);
 	}
 
@@ -157,7 +171,7 @@ final class SubtleFormsBlock {
 	 * Shared with the shortcode so a form behaves identically however it is
 	 * embedded, same script, same styles, same configured messages.
 	 */
-	private static function enqueue_frontend_assets(): void {
+	private static function enqueue_frontend_assets( int $formId = 0 ): void {
 		if ( is_admin() ) {
 			return;
 		}
@@ -183,7 +197,20 @@ final class SubtleFormsBlock {
 			$captcha  = null;
 		}
 
-		\SubtleForms\Frontend\FrontendAssets::enqueue( $settings, $captcha );
+		$providers = array();
+		if ( $formId > 0 ) {
+			$schema = \SubtleForms\Engine\FormRestrictions::activeSchema( $formId );
+			if ( is_array( $schema ) ) {
+				foreach ( \SubtleForms\Support\Captcha\FieldCaptcha::fields( $schema ) as $field ) {
+					$provider = \SubtleForms\Support\Captcha\FieldCaptcha::provider( $field );
+					if ( '' !== $provider ) {
+						$providers[] = $provider;
+					}
+				}
+			}
+		}
+
+		\SubtleForms\Frontend\FrontendAssets::enqueue( $settings, $captcha, $providers );
 	}
 
 	/**

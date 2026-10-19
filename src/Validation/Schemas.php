@@ -96,12 +96,13 @@ class Schemas {
 
 			// Public Submit Payload
 			self::PUBLIC_SUBMIT => array(
-				'__allow'          => array( 'form_id', 'data', 'meta', 'website_url', 'form_rendered_at' ),
+				'__allow'          => array( 'form_id', 'data', 'meta', 'website_url', 'form_rendered_at', 'preview' ),
 				'form_id'          => 'optional|int',
 				'data'             => 'required|object',
 				'meta'             => 'optional|object',
 				'website_url'      => 'optional|string', // Honeypot
 				'form_rendered_at' => 'optional|string', // Time trap
+				'preview'          => 'optional|bool',
 			),
 
 			// Settings Update
@@ -495,10 +496,10 @@ class Schemas {
 			'PaymentConfig' => array(
 				'__passthrough' => true,
 				'enabled'     => 'optional|bool|default:false',
-				// Must list every currency the Payments panel offers. It offered JPY
-				// and INR while this enum did not, so choosing either made the form
-				// unsaveable from that point on.
-				'currency'    => 'optional|in:USD,EUR,GBP,CAD,AUD,JPY,INR|default:USD',
+				// The list the Payments panels offer (Payments\Currencies). No
+				// default: a form without a currency follows the site currency
+				// (PAY2-02); a default pinned every saved form to USD.
+				'currency'    => 'optional|in:' . implode( ',', \SubtleForms\Payments\Currencies::codes() ),
 				'amountType'  => 'optional|in:fixed,field,calculated|default:fixed',
 				'fixedAmount' => 'optional|number|min:0',
 				'amountField' => 'optional|string|max:100',

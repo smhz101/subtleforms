@@ -23,6 +23,9 @@ final class TransferPackage {
 	public const MAX_FORMS       = 100;
 	public const MAX_SUBMISSIONS = 2000;
 
+	/** Entry meta that travels with a submission: the order and its payment. */
+	public const PAYMENT_META = array( 'order', 'payment' );
+
 	/**
 	 * A forms package.
 	 *
@@ -155,11 +158,13 @@ final class TransferPackage {
 				continue;
 			}
 			$clean[] = array(
+				'entry_id'   => absint( $row['entry_id'] ?? 0 ),
 				'status'     => self::status( $raw_status ),
 				'is_read'    => empty( $row['is_read'] ) ? 0 : 1,
 				'starred'    => empty( $row['starred'] ) ? 0 : 1,
 				'created_at' => self::timestamp( (string) ( $row['created_at'] ?? '' ) ),
 				'payload'    => $row['payload'],
+				'meta'       => self::paymentMeta( $row ),
 			);
 		}
 		if ( ! $clean ) {
@@ -172,6 +177,52 @@ final class TransferPackage {
 			'submissions' => $clean,
 			'error'       => '',
 		);
+	}
+
+	/**
+	 * The order and payment record of an exported entry, cleaned for storage
+	 * (PAY2-01): order lines, coupon and totals, and the payment status,
+	 * gateway, transaction ID, amount, currency and mode.
+	 *
+	 * @param array $row Exported row (or a stored entry's meta).
+	 * @return array{order?: array, payment?: array}
+	 */
+	public static function paymentMeta( array $row ): array {
+		$out = array();
+		foreach ( self::PAYMENT_META as $key ) {
+			if ( isset( $row[ $key ] ) && is_array( $row[ $key ] ) && $row[ $key ] ) {
+				$out[ $key ] = self::cleanRecord( $row[ $key ], 0 );
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Clean a stored record: text is sanitised, numbers and booleans kept,
+	 * nesting limited.
+	 *
+	 * @param array $record Raw record.
+	 * @param int   $depth  Current depth.
+	 * @return array
+	 */
+	private static function cleanRecord( array $record, int $depth ): array {
+		$out = array();
+		foreach ( $record as $key => $value ) {
+			$key = is_int( $key ) ? $key : sanitize_key( (string) $key );
+			if ( '' === $key ) {
+				continue;
+			}
+			if ( is_array( $value ) ) {
+				if ( $depth < 4 ) {
+					$out[ $key ] = self::cleanRecord( $value, $depth + 1 );
+				}
+			} elseif ( is_int( $value ) || is_float( $value ) || is_bool( $value ) || null === $value ) {
+				$out[ $key ] = $value;
+			} elseif ( is_scalar( $value ) ) {
+				$out[ $key ] = sanitize_text_field( (string) $value );
+			}
+		}
+		return $out;
 	}
 
 	/**
@@ -211,7 +262,7 @@ final class TransferPackage {
 	 * @return string
 	 */
 	public static function status( string $status ): string {
-		$allowed = array( 'unread', 'read', 'completed', 'saved', 'flagged', 'payment_pending', 'spam', 'failed', 'processing' );
+		$allowed = array( 'unread', 'read', 'completed', 'saved', 'flagged', 'payment_pending', 'payment_failed', 'spam', 'failed', 'processing', 'archived' );
 		return in_array( $status, $allowed, true ) ? $status : 'unread';
 	}
 

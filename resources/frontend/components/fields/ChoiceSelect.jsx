@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
+import { typeaheadIndex } from '../../../shared/pickerKeyboard';
 import { __ } from '@wordpress/i18n';
 import { ChevronIcon } from './PickerIcons';
 import { useMenu } from './useMenu';
@@ -34,6 +35,8 @@ export default function ChoiceSelect({
 }) {
   const { rootRef, open, setOpen } = useMenu();
   const listRef = useRef(null);
+  const triggerRef = useRef(null);
+  const typed = useRef('');
   const choices = useMemo(() => normalizeOptions(options), [options]);
   const [localValue, setLocalValue] = useState(value ?? '');
   const stored = onChange ? value : localValue;
@@ -74,6 +77,7 @@ export default function ChoiceSelect({
       setLocalValue(next);
     }
     setOpen(false);
+    triggerRef.current?.focus();
   };
 
   const onKeyDown = (event) => {
@@ -95,6 +99,24 @@ export default function ChoiceSelect({
       } else if (choices[active]) {
         choose(choices[active]);
       }
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      setOpen(false);
+      triggerRef.current?.focus();
+    } else if (event.key.length === 1 && /\S/.test(event.key)) {
+      event.preventDefault();
+      if (!open) {
+        setOpen(true);
+      }
+      typed.current = `${typed.current}${event.key}`.slice(-8);
+      const index = typeaheadIndex(choices.map((option) => option.label || option.value), typed.current, active - 1);
+      if (index >= 0) {
+        setActive(index);
+      }
+      window.clearTimeout(typed.timer);
+      typed.timer = window.setTimeout(() => {
+        typed.current = '';
+      }, 500);
     }
   };
 
@@ -113,8 +135,13 @@ export default function ChoiceSelect({
         type='button'
         id={inputId}
         className='subtleforms-picker__trigger'
+        ref={triggerRef}
+        role='combobox'
         aria-haspopup='listbox'
         aria-expanded={open}
+        aria-controls={open ? `${inputId || 'choice'}-list` : undefined}
+        aria-activedescendant={open ? `${inputId || 'choice'}-opt-${active}` : undefined}
+        aria-invalid={invalid ? 'true' : undefined}
         aria-describedby={describedBy}
         disabled={disabled || readOnly}
         tabIndex={preview ? -1 : 0}
@@ -154,7 +181,7 @@ export default function ChoiceSelect({
         ))}
       </select>
       {open && !locked && (
-        <div className='subtleforms-picker__menu' role='listbox' ref={listRef} aria-labelledby={inputId}>
+        <div id={`${inputId || 'choice'}-list`} className='subtleforms-picker__menu' role='listbox' ref={listRef} aria-labelledby={inputId}>
           {!required && String(stored ?? '') !== '' && (
             <button
               type='button'
@@ -175,6 +202,8 @@ export default function ChoiceSelect({
               type='button'
               role='option'
               className='subtleforms-picker__option'
+              id={`${inputId || 'choice'}-opt-${index}`}
+              tabIndex={-1}
               aria-selected={String(option.value) === String(stored ?? '')}
               data-active={index === active ? 'true' : 'false'}
               onMouseEnter={() => setActive(index)}

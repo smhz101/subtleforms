@@ -95,6 +95,14 @@ function getInitialPath() {
 			if (formId) {
 				params.set('form_id', formId);
 			}
+			const tab = url.searchParams.get('tab');
+			const search = url.searchParams.get('search');
+			if (tab && tab !== 'all') {
+				params.set('tab', tab);
+			}
+			if (search) {
+				params.set('search', search);
+			}
 			// A split inbox stays on the list and opens the entry in the pane.
 			// No split keeps the full entry page.
 			if (subId && pane !== 'off') {
@@ -102,9 +110,11 @@ function getInitialPath() {
 				return `/submissions?${params.toString()}`;
 			}
 			if (subId) {
-				return `/submissions/${subId}${formId ? `?form_id=${formId}` : ''}`;
+				const query = params.toString();
+				return `/submissions/${subId}${query ? `?${query}` : ''}`;
 			}
-			return formId ? `/submissions?form_id=${formId}` : '/submissions';
+			const query = params.toString();
+			return query ? `/submissions?${query}` : '/submissions';
 		}
 
 		case 'subtleforms-settings':

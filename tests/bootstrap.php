@@ -1,8 +1,11 @@
 <?php
 // phpcs:disable -- PHPUnit bootstrap; not shipped in production plugin.
-if ( ! defined( 'ABSPATH' ) ) { exit; } // WP test suite defines ABSPATH via wp-tests-config.
 /**
  * PHPUnit bootstrap file.
+ *
+ * Do not exit on missing ABSPATH here: the WordPress test suite defines it when
+ * includes/bootstrap.php loads wp-tests-config.php. Guarding early would stop
+ * integration tests before WordPress is available.
  *
  * @package Subtleforms
  */

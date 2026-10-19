@@ -21,6 +21,8 @@ import PerformanceCell from './analytics/PerformanceCell';
 import { useAnalyticsSummary } from './analytics/useAnalytics';
 import { ConfirmModal } from '../modals';
 import { apiGet, apiPost, apiPut, apiDelete } from '../utils/api';
+import { deletesPermanently } from '../utils/deleteBehavior';
+import { useSettings } from '../data';
 import {
   getFormTypeBadge,
   getFormStatusBadge,
@@ -29,6 +31,7 @@ import { formatRelativeDate, formatDate, isNewForm } from '../utils/formatDate';
 import { logger, perfMarkers } from '../diagnostics';
 import './FormsList.scss';
 import { formsEmptyState } from './formsEmptyState';
+import { keepRowsAfterFailedLoad, listQueryKey } from '../utils/failedLoad';
 
 export const ALL_FORM_COLUMNS = ['title', 'form_type', 'status', 'id', 'submission_count', 'performance', 'updated_at', 'actions'];
 export const DEFAULT_FORM_VISIBLE = ['title', 'form_type', 'status', 'id', 'submission_count', 'performance', 'updated_at', 'actions'];
@@ -79,6 +82,8 @@ export default function FormsList({
   const CHUNK_PAGES = 5;
   const [buffer, setBuffer] = useState([]);
   const [loadError, setLoadError] = useState('');
+  const loadedQueryRef = useRef('');
+  const loadGenerationRef = useRef(0);
   const [pagesLoaded, setPagesLoaded] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [totalItems, setTotalItems] = useState(0);
@@ -92,6 +97,8 @@ export default function FormsList({
   const [selectedForms, setSelectedForms] = useState([]);
   const isPrefetchingRef = useRef(false);
   const { createSuccessNotice, createErrorNotice } = useDispatch(noticesStore);
+  const { data: siteSettings } = useSettings();
+  const hardDelete = siteSettings?.delete_behavior === 'hard';
 
   const handleCopyShortcode = (shortcode) => {
     if (navigator.clipboard?.writeText) {
@@ -164,20 +171,31 @@ export default function FormsList({
 
   // Full reset + reload from page 1 (fresh filters/sort)
   const loadFresh = async () => {
+    const requestQuery = listQueryKey([statusFilter, searchTerm, sortBy, sortDirection, perPage]);
+    const generation = ++loadGenerationRef.current;
     setIsLoading(true);
     setCurrentPage(1);
     try {
       const { rows, total } = await fetchBatch(0);
+      if (generation !== loadGenerationRef.current) return;
+      loadedQueryRef.current = requestQuery;
       setLoadError('');
       setBuffer(rows);
       setPagesLoaded(Math.ceil(rows.length / perPage) || 0);
       setTotalItems(total);
     } catch (err) {
+      if (generation !== loadGenerationRef.current) return;
       console.error('FormsList fetch error:', err);
-      // Keep rows already on screen. A failed first load is an error, not an empty list.
+      // Keep rows only for the same tab, search, and sort. A failed switch
+      // to Trash must not leave the Published forms on screen.
       setLoadError(__('Forms could not be loaded.', 'subtleforms'));
+      if (!keepRowsAfterFailedLoad(loadedQueryRef.current, requestQuery)) {
+        setBuffer([]);
+        setPagesLoaded(0);
+        setTotalItems(0);
+      }
     } finally {
-      setIsLoading(false);
+      if (generation === loadGenerationRef.current) setIsLoading(false);
     }
   };
 
@@ -628,7 +646,7 @@ export default function FormsList({
   };
 
   const handleBulkDelete = async (ids) => {
-    const permanent = statusFilter === 'trash';
+    const permanent = deletesPermanently(hardDelete ? 'hard' : 'soft', statusFilter === 'trash');
     if (
       !window.confirm(
         permanent
@@ -663,7 +681,7 @@ export default function FormsList({
 
     // In the Trash tab, bulk delete is permanent (force=1). Elsewhere it
     // moves forms to the Trash (move_to_trash=1) (Part B10).
-    const inTrash = statusFilter === 'trash';
+    const inTrash = permanent;
     const query = inTrash ? '?force=1' : '?move_to_trash=1';
 
     let successCount = 0;
@@ -870,14 +888,14 @@ export default function FormsList({
         isOpen={!!deleteModal}
         onClose={() => setDeleteModal(null)}
         title={
-          (buffer.find((f) => f.id === deleteModal)?.status === 'trash')
+          deletesPermanently(hardDelete ? 'hard' : 'soft', buffer.find((f) => f.id === deleteModal)?.status === 'trash')
             ? __('Delete form permanently', 'subtleforms')
             : __('Move Form to Trash', 'subtleforms')
         }
         message={(() => {
           const form = buffer.find((f) => f.id === deleteModal);
           const count = form?.submission_count || 0;
-          if (form?.status === 'trash') {
+          if (deletesPermanently(hardDelete ? 'hard' : 'soft', form?.status === 'trash')) {
             return count > 0
               ? sprintf(
                   /* translators: %1$d: number of submissions belonging to this form */
@@ -908,14 +926,14 @@ export default function FormsList({
         })()}
         onConfirm={() => {
           const form = buffer.find((f) => f.id === deleteModal);
-          if (form?.status === 'trash') {
+          if (deletesPermanently(hardDelete ? 'hard' : 'soft', form?.status === 'trash')) {
             handleDeletePermanently(deleteModal);
           } else {
             handleDelete(deleteModal);
           }
         }}
         confirmText={
-          (buffer.find((f) => f.id === deleteModal)?.status === 'trash')
+          deletesPermanently(hardDelete ? 'hard' : 'soft', buffer.find((f) => f.id === deleteModal)?.status === 'trash')
             ? __('Delete permanently', 'subtleforms')
             : __('Move to Trash', 'subtleforms')
         }

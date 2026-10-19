@@ -395,7 +395,7 @@ final class SubmissionsApi {
 			'order'   => strtoupper( $request->get_param( 'order' ) ?? 'DESC' ) === 'ASC' ? 'ASC' : 'DESC',
 		);
 
-		$submissions = array_map( array( $this, 'redactSecrets' ), $this->submissionsRepo->findAll( $args ) );
+		$submissions = array_map( array( $this, 'listItem' ), $this->submissionsRepo->findAll( $args ) );
 		$total       = $this->submissionsRepo->count( $args );
 
 		return ApiResponse::paginated(
@@ -463,7 +463,7 @@ final class SubmissionsApi {
 			'order'       => strtoupper( $request->get_param( 'order' ) ?? 'DESC' ) === 'ASC' ? 'ASC' : 'DESC',
 		);
 
-		$submissions = array_map( array( $this, 'redactSecrets' ), $this->submissionsRepo->findAll( $args ) );
+		$submissions = array_map( array( $this, 'listItem' ), $this->submissionsRepo->findAll( $args ) );
 		$total       = $this->submissionsRepo->count( $args );
 
 		// Bulk fetch form titles to avoid N+1
@@ -518,13 +518,9 @@ final class SubmissionsApi {
 			$form                     = $this->formsRepo->find( $submission['form_id'] );
 			$submission['form_title'] = $form['title'] ?? __( 'Unknown Form', 'subtleforms' );
 
-			try {
-				$schemaVersion        = $submission['schema_version'] ?? null;
-				$schema               = $this->formsRepo->loadSchemaVersion( $submission['form_id'], $schemaVersion );
-				$submission['schema'] = $schema['schema'] ?? null;
-			} catch ( \RuntimeException $e ) {
-				$submission['schema'] = null;
-			}
+			// The schema version the entry was made with; older entries
+			// may still carry a copy of it (FF-30).
+			$submission['schema'] = \SubtleForms\Support\EntrySchema::forEntry( $submission, $this->formsRepo );
 
 			$adjacent              = $this->submissionsRepo->getAdjacentIds( $submission['id'], $submission['form_id'] );
 			$submission['next_id'] = $adjacent['next'];
@@ -532,6 +528,20 @@ final class SubmissionsApi {
 		}
 
 		$submission = $this->redactSecrets( $submission );
+		if ( is_array( $submission['meta'] ?? null ) ) {
+			$submission['meta'] = \SubtleForms\Support\EntrySchema::stripCopy( $submission['meta'] );
+		}
+		// Answers as the entry screen shows them, from the same formatter as
+		// emails, CSV, PDF and integrations (2.4.0).
+		$submission['display'] = \SubtleForms\Support\AnswerFormatter::display(
+			is_array( $submission['schema'] ?? null ) ? $submission['schema'] : array(),
+			is_array( $submission['payload'] ?? null ) ? $submission['payload'] : array(),
+			\SubtleForms\Support\AnswerFormatter::entryContext(
+				is_array( $submission['schema'] ?? null ) ? $submission['schema'] : array(),
+				$submission,
+				array( 'submission_id' => (int) $submission['id'] )
+			)
+		);
 		if ( isset( $submission['meta']['notes'] ) && is_array( $submission['meta']['notes'] ) ) {
 			$submission['meta']['notes'] = array_map( array( self::class, 'presentNote' ), $submission['meta']['notes'] );
 		}
@@ -637,7 +647,14 @@ final class SubmissionsApi {
 			$inTrash = ( $row['status'] ?? '' ) === SubmissionsRepository::TRASH;
 			try {
 				if ( $action === 'trash' ) {
-					if ( $this->submissionsRepo->trash( $id ) ) {
+					$settings = get_option( 'subtleforms_settings', array() );
+					$behavior = is_array( $settings ) ? (string) ( $settings['delete_behavior'] ?? 'soft' ) : 'soft';
+					if ( \SubtleForms\Support\Settings::deletionMode( $behavior, false ) === 'delete' ) {
+						if ( $this->submissionsRepo->delete( $id ) ) {
+							( new \SubtleForms\Repositories\LogsRepository() )->deleteBySubmission( $id );
+							$done[] = $id;
+						}
+					} elseif ( $this->submissionsRepo->trash( $id ) ) {
 						$done[] = $id;
 					}
 				} elseif ( $action === 'untrash' ) {
@@ -744,19 +761,9 @@ final class SubmissionsApi {
 			return ApiResponse::validation_error( __( 'Restore this entry from the Trash before resending its notifications.', 'subtleforms' ) );
 		}
 
-		try {
-			$loaded = $this->formsRepo->loadSchemaVersion( (int) $submission['form_id'], isset( $submission['schema_version'] ) ? (int) $submission['schema_version'] : null );
-		} catch ( \RuntimeException $e ) {
-			$loaded = null;
-		}
-		if ( ! $loaded ) {
-			try {
-				$loaded = $this->formsRepo->loadSchemaVersion( (int) $submission['form_id'] );
-			} catch ( \RuntimeException $e ) {
-				$loaded = null;
-			}
-		}
-		$schema = is_array( $loaded ) ? ( $loaded['schema'] ?? $loaded ) : null;
+		// The entry's own schema version, else the copy an older entry
+		// carries, else the active schema (FF-30).
+		$schema = \SubtleForms\Support\EntrySchema::forEntry( $submission, $this->formsRepo );
 		if ( ! is_array( $schema ) ) {
 			return ApiResponse::not_found( __( 'This entry’s form could not be loaded.', 'subtleforms' ) );
 		}
@@ -781,18 +788,16 @@ final class SubmissionsApi {
 		$context->setMeta( 'schema_version', isset( $submission['schema_version'] ) ? (int) $submission['schema_version'] : null );
 		$context->setMeta( 'form_schema', $schema );
 		$context->setMeta( 'resent', true );
+		$context->setMeta( 'order_currency', \SubtleForms\Support\AnswerFormatter::entryCurrency( $submission ) );
 
 		$result = $pipeline->run( $steps, $context, $schema );
-		if ( ! $result->ok ) {
+		$failures = $context->getMeta( 'action_failures', array() );
+		$summary  = self::resendResult( (bool) $result->ok, count( $steps ), is_array( $failures ) ? $failures : array() );
+		if ( ! $summary['sent'] ) {
 			return ApiResponse::server_error( __( 'The notifications could not be sent.', 'subtleforms' ) );
 		}
 
-		return ApiResponse::success(
-			array(
-				'sent'  => true,
-				'count' => count( $steps ),
-			)
-		);
+		return ApiResponse::success( $summary );
 	}
 
 	/**
@@ -809,9 +814,14 @@ final class SubmissionsApi {
 			return ApiResponse::not_found( __( 'Submission not found', 'subtleforms' ) );
 		}
 
-		// Without force the entry goes to the Trash, where it can be restored
-		// for the retention period (2.3.1).
-		if ( ! rest_sanitize_boolean( $request->get_param( 'force' ) ) ) {
+		$row = $this->submissionsRepo->find( $id );
+		$alreadyTrashed = is_array( $row ) && ( $row['status'] ?? '' ) === SubmissionsRepository::TRASH;
+		$settings = get_option( 'subtleforms_settings', array() );
+		$behavior = is_array( $settings ) ? (string) ( $settings['delete_behavior'] ?? 'soft' ) : 'soft';
+		// The setting decides. An entry already in the Trash is deleted for good.
+		// force still deletes from the Trash tab.
+		$forced = rest_sanitize_boolean( $request->get_param( 'force' ) ) && $alreadyTrashed;
+		if ( \SubtleForms\Support\Settings::deletionMode( $behavior, $alreadyTrashed || $forced ) === 'trash' ) {
 			if ( ! $this->submissionsRepo->trash( $id ) ) {
 				return ApiResponse::server_error( __( 'The submission could not be moved to the Trash.', 'subtleforms' ) );
 			}
@@ -921,14 +931,51 @@ final class SubmissionsApi {
 	/**
 	 * Get unread submissions count.
 	 */
-	public function get_unread_count( WP_REST_Request $request ): WP_REST_Response {
+		/**
+	 * Unread count filters. A form filter counts only that form.
+	 *
+	 * @param mixed $formId Form id, or empty for every form.
+	 * @return array
+	 */
+	public static function unreadCountArgs( $formId ): array {
+		$args   = array( 'is_read' => 0 );
+		$formId = (int) $formId;
+		if ( $formId > 0 ) {
+			$args['form_id'] = $formId;
+		}
+		return $args;
+	}
+
+	/**
+	 * What Resend should tell the browser. A dispatch that cron refused is not sent.
+	 *
+	 * @param bool  $ok Pipeline finished.
+	 * @param int   $steps Email steps that were run.
+	 * @param array $failures action_failures from the context.
+	 * @return array{sent: bool, count: int}
+	 */
+	public static function resendResult( bool $ok, int $steps, array $failures ): array {
+		$failed = 0;
+		foreach ( $failures as $failure ) {
+			if ( is_array( $failure ) && ( $failure['reason'] ?? '' ) === 'async_dispatch_failed' && ( $failure['action'] ?? '' ) === 'email' ) {
+				++$failed;
+			}
+		}
+		$queued = max( 0, $steps - $failed );
+		return array(
+			'sent'  => $ok && $failed < $steps && $queued > 0,
+			'count' => $queued,
+		);
+	}
+
+public function get_unread_count( WP_REST_Request $request ): WP_REST_Response {
 		$rateLimitResponse = $this->guardRateLimit( $request );
 		if ( $rateLimitResponse ) {
 			return $rateLimitResponse;
 		}
 
 		try {
-			$unreadCount = $this->submissionsRepo->count( array( 'is_read' => 0 ) );
+			$unreadCount = $this->submissionsRepo->count( self::unreadCountArgs( $request->get_param( 'form_id' ) ) );
 
 			return ApiResponse::success(
 				array(
@@ -1062,6 +1109,7 @@ final class SubmissionsApi {
 		}
 
 		$csv_data = array( $headers );
+		$fieldMaps = array();
 		foreach ( $rows as list( $submission, $payload ) ) {
 			$row = array(
 				$submission['id'],
@@ -1069,23 +1117,50 @@ final class SubmissionsApi {
 				$submission['status'],
 				$submission['created_at'],
 			);
+			// Each entry is read with the schema version it was made with,
+			// through the one answer formatter: labels, Yes/No, matrix rows,
+			// dates in the field format, file names with links (2.4.0). A
+			// drawn signature reads "Signed" (2.3.3).
+			$schema  = \SubtleForms\Support\EntrySchema::forEntry( $submission, $this->formsRepo ) ?? array();
+			$mapKey  = (int) $submission['form_id'] . ':' . ( $submission['schema_version'] ?? ( 'legacy-entry-' . $submission['id'] ) );
+			if ( ! isset( $fieldMaps[ $mapKey ] ) ) {
+				$fieldMaps[ $mapKey ] = array();
+				foreach ( \SubtleForms\Support\FieldMapper::fields( $schema ) as $field ) {
+					$fieldMaps[ $mapKey ][ $field['key'] ] = $field['field'];
+				}
+			}
+			$fields  = $fieldMaps[ $mapKey ];
+			$display = \SubtleForms\Support\AnswerFormatter::entryContext(
+				$schema,
+				$submission,
+				array(
+					'submission_id' => (int) $submission['id'],
+					'links'         => true,
+					'signature'     => 'short',
+				)
+			);
 			foreach ( $ordered as $key ) {
 				if ( isset( $repeaters[ $key ] ) ) {
-					foreach ( \SubtleForms\Support\Repeater::csvCells( $payload[ $key ] ?? array(), $repeaters[ $key ] ) as $cell ) {
-						$row[] = $cell;
+					// Format with the entry's own version of the Repeater, then
+					// fill the columns of the current version in header order:
+					// a child added or removed since leaves its cell empty
+					// instead of shifting the others.
+					$cells = \SubtleForms\Support\Repeater::csvCells( $payload[ $key ] ?? array(), $fields[ $key ] ?? $repeaters[ $key ], $display );
+					foreach ( \SubtleForms\Support\Repeater::childFields( $repeaters[ $key ] ) as $child ) {
+						$row[] = $cells[ $child['key'] ] ?? '';
 					}
 					continue;
 				}
 				$value = $payload[ $key ] ?? '';
-				// Exports of several forms: groups read as numbered lines.
-				// A drawn signature is an image; the cell says it was signed (2.3.3).
-				if ( \SubtleForms\Support\EntryValues::isSignatureImage( $value ) ) {
-					$row[] = __( 'Signed', 'subtleforms' );
+				if ( isset( $fields[ $key ] ) ) {
+					$row[] = \SubtleForms\Support\AnswerFormatter::text( $value, $fields[ $key ], $display );
 					continue;
 				}
-				$row[] = \SubtleForms\Support\Repeater::looksLikeGroups( $value )
+				// Not in the schema (exports of several forms, or a field since
+				// removed): groups read as numbered lines.
+				$row[] = \SubtleForms\Support\Repeater::looksLikeGroups( $value ) && null === \SubtleForms\Support\AnswerFormatter::items( $value, array(), $display )
 					? $this->groupsText( $value )
-					: \SubtleForms\Support\FieldMapper::toText( $value );
+					: \SubtleForms\Support\AnswerFormatter::text( $value, array(), $display );
 			}
 			$csv_data[] = $row;
 		}
@@ -1107,6 +1182,21 @@ final class SubmissionsApi {
 				'rows'     => count( $rows ),
 			)
 		);
+	}
+
+	/**
+	 * One entry in a list response: secrets redacted, and no schema copy
+	 * from an entry saved before 2.4.0 (FF-30).
+	 *
+	 * @param mixed $submission Submission row.
+	 * @return mixed
+	 */
+	public function listItem( $submission ) {
+		$submission = $this->redactSecrets( $submission );
+		if ( is_array( $submission ) && is_array( $submission['meta'] ?? null ) ) {
+			$submission['meta'] = \SubtleForms\Support\EntrySchema::stripCopy( $submission['meta'] );
+		}
+		return $submission;
 	}
 
 	/**

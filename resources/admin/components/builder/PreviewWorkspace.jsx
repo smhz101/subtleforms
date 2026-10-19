@@ -4,7 +4,7 @@ import { __, sprintf } from '@wordpress/i18n';
 import FormPreviewBody from '../form-preview/FormPreviewBody';
 import FormAppearancePanel from './appearance/FormAppearancePanel';
 import { appearanceBackdrop, previewBreakpoints } from '../../../shared/appearance';
-import { previewScale } from '../../../shared/previewScale';
+import { previewFrame, previewScale } from '../../../shared/previewScale';
 import Icon from '../../ui/Icon';
 import './PreviewWorkspace.scss';
 
@@ -53,6 +53,7 @@ export default function PreviewWorkspace( {
   const formRef = useRef( null );
 
   const active = VIEWPORTS.find( ( v ) => v.id === viewport ) || VIEWPORTS[ 0 ];
+  const frame = previewFrame( active.width, scale );
 
   useEffect( () => {
     const canvas = canvasRef.current;
@@ -122,14 +123,17 @@ export default function PreviewWorkspace( {
         <div className='sf-preview-workspace__canvas' ref={ canvasRef }>
           <div
             className='sf-preview-workspace__stage'
-            style={ stageHeight ? { height: `${ stageHeight }px` } : undefined }>
+            style={ {
+              width: `${ frame.stageWidth }px`,
+              ...( stageHeight ? { height: `${ stageHeight }px` } : {} ),
+            } }>
             <div
               ref={ formRef }
               className='sf-preview-workspace__form'
               style={ {
                 width: `${ active.width }px`,
                 transform: `scale(${ scale })`,
-                transformOrigin: 'top center',
+                transformOrigin: frame.origin,
                 // A form made for a dark footer is previewed on one (2.3.0).
                 ...( appearanceBackdrop( schema?.metadata?.appearance )
                   ? { background: appearanceBackdrop( schema?.metadata?.appearance ), padding: '24px' }

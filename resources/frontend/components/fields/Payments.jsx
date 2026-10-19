@@ -8,6 +8,8 @@
 import { createContext, useContext, useEffect, useRef, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { formatMoney } from '../../../shared/pricing';
+import { currencySymbol, currencyDecimals, currencyMinimum } from '../../../shared/currencies';
+import ChoiceSelect from './ChoiceSelect';
 
 export const PaymentContext = createContext(null);
 
@@ -74,9 +76,45 @@ export function PaymentProduct({ config, value, onChange, inputId, error }) {
   );
 }
 
+/* ── Custom amount ─────────────────────────────────────────────────────── */
+
+/**
+ * An amount the visitor types. The symbol is the form's currency, the one the
+ * summary shows and the order is charged in (PAY-09). A `currency` stored on
+ * the field by older builds is ignored: no control ever set it.
+ */
+export function PaymentAmount({ config, value, onChange, inputId, name, placeholder, required, error, describedBy }) {
+  const pay = usePayment();
+  const currency = pay?.currency || window.subtleformsFrontend?.currency || 'USD';
+  const showSymbol = config.showCurrencySymbol !== false;
+  const symbol = showSymbol ? currencySymbol(currency) : '';
+
+  return (
+    <div className='subtleforms-payment-amount'>
+      {symbol && <span className='subtleforms-currency-symbol'>{symbol}</span>}
+      <input
+        id={inputId}
+        type='number'
+        className='subtleforms-input'
+        name={name}
+        value={value ?? ''}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        min={config.min || 0}
+        max={config.max}
+        step={currencyDecimals(currency) === 0 ? 1 : config.step || 0.01}
+        required={required || undefined}
+        aria-required={required}
+        aria-invalid={!!error}
+        aria-describedby={describedBy}
+      />
+    </div>
+  );
+}
+
 /* ── Priced options ─────────────────────────────────────────────────────── */
 
-export function PaymentChoice({ config, value, onChange, inputId, error, name }) {
+export function PaymentChoice({ config, value, onChange, inputId, error, name, required = false, describedBy, placeholder }) {
   const pay = usePayment();
   const currency = pay?.currency || 'USD';
   const options = Array.isArray(config.options) ? config.options : [];
@@ -93,20 +131,23 @@ export function PaymentChoice({ config, value, onChange, inputId, error, name })
   const priceText = (o) => (showPrice && Number(o.price) > 0 ? formatMoney(o.price, currency) : '');
 
   if (mode === 'dropdown') {
+    // The same picker as every other dropdown, with a name and required
+    // state for the browser and assistive tech (PAY2-03).
     return (
-      <select
-        id={inputId}
-        className='subtleforms-select'
+      <ChoiceSelect
+        inputId={inputId}
+        name={name || inputId}
         value={selected}
-        aria-invalid={!!error}
-        onChange={(e) => onChange(e.target.value)}>
-        <option value=''>{__('Select an option', 'subtleforms')}</option>
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {priceText(o) ? `${o.label} (${priceText(o)})` : o.label}
-          </option>
-        ))}
-      </select>
+        onChange={onChange}
+        options={options.map((o) => ({
+          value: o.value,
+          label: priceText(o) ? `${o.label} (${priceText(o)})` : o.label,
+        }))}
+        placeholder={placeholder}
+        required={required}
+        describedBy={describedBy}
+        invalid={!!error}
+      />
     );
   }
 
@@ -114,6 +155,8 @@ export function PaymentChoice({ config, value, onChange, inputId, error, name })
     <div
       className={`subtleforms-priced subtleforms-priced--${mode}`}
       role={multiple ? 'group' : 'radiogroup'}
+      aria-required={!multiple && required ? true : undefined}
+      aria-describedby={describedBy}
       aria-invalid={!!error}>
       {options.map((o, i) => {
         const checked = multiple ? selected.includes(o.value) : selected === o.value;
@@ -125,6 +168,7 @@ export function PaymentChoice({ config, value, onChange, inputId, error, name })
               name={name || inputId}
               value={o.value}
               checked={checked}
+              required={(!multiple && required && i === 0) || undefined}
               onChange={(e) => {
                 if (!multiple) {
                   onChange(o.value);
@@ -376,6 +420,9 @@ export function PaymentCard({ config }) {
 
   const amount = pay?.quote?.total || 0;
   const currency = pay?.currency || 'USD';
+  // Gateways refuse very small charges; the server checks this too (PAY-26).
+  const minimum = currencyMinimum(currency);
+  const tooSmall = amount > 0 && minimum > 0 && amount < minimum;
 
   useEffect(() => {
     if (!ready || !ref.current || !window.SubtleFormsPayments || pay?.preview || pay?.external) return undefined;
@@ -430,6 +477,15 @@ export function PaymentCard({ config }) {
   return (
     <div className='subtleforms-card'>
       <div ref={ref} className='subtleforms-card__element' />
+      {tooSmall && (
+        <p className='subtleforms-card__error subtleforms-card__minimum' role='status'>
+          {sprintf(
+            /* translators: %s: smallest amount, for example $0.50 */
+            __('Card payments need an order of at least %s.', 'subtleforms'),
+            formatMoney(minimum, currency)
+          )}
+        </p>
+      )}
       {error && (
         <p className='subtleforms-card__error' role='alert'>
           {error}

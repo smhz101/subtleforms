@@ -5,6 +5,7 @@ import StepNavigation from './StepNavigation';
 import ConversationalFormRenderer from './ConversationalFormRenderer';
 import { getIn, setIn, deleteIn, flattenToPathMap } from '../utils/valuePaths';
 import { collectLeafInputPaths, collectContainerKeys } from '../utils/schemaLeaves';
+import { columnFields, flattenSchemaFields } from '../utils/columnFields';
 import { collectDefaultValues } from '../utils/defaults';
 import { computeValues } from '../../shared/extend';
 import { computeLogicState, pickConfirmation } from '../../shared/conditions';
@@ -28,6 +29,9 @@ import {
 } from '../../shared/appearance';
 
 import { restFetch, restUrl, restNonce } from '../utils/restFetch';
+import { fillConfirmation } from '../../shared/confirmationTags';
+import { classicFieldInputs } from '../utils/classicFields';
+import { classicOutcome, forgetClassicToken } from '../utils/classicResult';
 
 /**
  * Whether a submitted value counts as missing.
@@ -215,29 +219,7 @@ export default function FormRenderer({
   const allFields = useMemo(() => {
     if (!schema?.fields) return [];
 
-    const flatten = (fields) => {
-      let result = [];
-      fields.forEach((field) => {
-        if (field.type !== 'step') {
-          result.push(field);
-        }
-        // Support both children and fields properties
-        const childFields = field.children || field.fields;
-        if (childFields && Array.isArray(childFields)) {
-          result = result.concat(flatten(childFields));
-        }
-        if (field.columns && Array.isArray(field.columns)) {
-          field.columns.forEach((col) => {
-            if (Array.isArray(col)) {
-              result = result.concat(flatten(col));
-            }
-          });
-        }
-      });
-      return result;
-    };
-
-    return flatten(schema.fields);
+    return flattenSchemaFields(schema.fields);
   }, [schema]);
 
   // Default values (2.0): applied once the schema is known, never over
@@ -594,7 +576,7 @@ export default function FormRenderer({
           return (
             stepHasError(n?.children) ||
             stepHasError(n?.fields) ||
-            (Array.isArray(n?.columns) && n.columns.some((c) => Array.isArray(c) && stepHasError(c)))
+            (Array.isArray(n?.columns) && n.columns.some((c) => stepHasError(columnFields(c))))
           );
         });
       const index = steps.findIndex((step) => stepHasError(step.children || step.fields));
@@ -821,9 +803,32 @@ export default function FormRenderer({
           }
         }
 
+        if (blockOptions && blockOptions.ajax === false && !preview) {
+          const classic = document.createElement('form');
+          classic.method = 'post';
+          classic.action = window.location.href;
+          const add = (name, value) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value == null ? '' : String(value);
+            classic.appendChild(input);
+          };
+          add('subtleforms_classic', '1');
+          add('subtleforms_form_id', String(formId));
+          classicFieldInputs(submissionPayload).forEach(([name, value]) => add(name, value));
+          document.body.appendChild(classic);
+          classic.submit();
+          return;
+        }
+
         const response = await restFetch('/submit', {
           method: 'POST',
-          body: { form_id: formId, data: submissionPayload },
+          body: {
+            form_id: formId,
+            data: submissionPayload,
+            ...(preview ? { preview: true } : {}),
+          },
         });
 
         const result = await response.json();
@@ -844,15 +849,11 @@ export default function FormRenderer({
             pickConfirmation(schema?.metadata, payload) ||
             {};
           const merge = (text, encode = false) =>
-            String(text || '').replace(/\{([\w.-]+)\}/g, (match, key) => {
-              const raw = getIn(values, key) ?? flatValues[key];
-              if (raw === undefined || raw === null) return '';
-              const str = Array.isArray(raw)
-                ? raw.join(', ')
-                : typeof raw === 'object'
-                ? Object.values(raw).filter(Boolean).join(' ')
-                : String(raw);
-              return encode ? encodeURIComponent(str) : str;
+            fillConfirmation(text, {
+              values: { ...flatValues, ...(typeof values === 'object' && values ? values : {}) },
+              formTitle: schema?.metadata?.title || '',
+              entryId: result?.data?.submission_id || '',
+              encode,
             });
           const globalRedirect = window.subtleformsFrontend?.redirectUrl || '';
           const redirectTo =
@@ -965,6 +966,54 @@ export default function FormRenderer({
     setIsSubmitIntentional(true);
     // Form onSubmit will be triggered naturally by button type="submit"
   }, []);
+
+  // A post of this form without AJAX came back to this page (2.4.0): show the
+  // confirmation, or the server's errors with the visitor's answers. Runs once,
+  // after the schema is loaded.
+  const classicHandledRef = useRef(false);
+  useEffect(() => {
+    if (classicHandledRef.current || !schema || !blockOptions?.classicResult) {
+      return;
+    }
+    const outcome = classicOutcome(blockOptions.classicResult);
+    classicHandledRef.current = true;
+    forgetClassicToken();
+    if (!outcome) {
+      return;
+    }
+    if (outcome.ok) {
+      const conf = outcome.confirmation || {};
+      const merge = (text) =>
+        fillConfirmation(text, {
+          values: { ...flattenToPathMap(outcome.values), ...outcome.values },
+          formTitle: schema?.metadata?.title || '',
+          entryId: outcome.submissionId || '',
+          encode: false,
+        });
+      setConfirmationView({
+        title: conf.type === 'message' ? merge(conf.title) : '',
+        message:
+          conf.type === 'message' && conf.message
+            ? merge(conf.message)
+            : window.subtleformsFrontend?.successMessage ||
+              __('Thank you! Your submission has been received.', 'subtleforms'),
+        allowAnother: !!conf.allowAnother,
+      });
+      setSubmitSuccess(true);
+      return;
+    }
+    setValues((prev) => ({ ...prev, ...outcome.values }));
+    const count = Object.keys(outcome.fieldErrors).length;
+    if (count > 0) {
+      setValidationErrors(outcome.fieldErrors);
+      setSubmitError(null);
+      goToStepWithError(outcome.fieldErrors);
+      focusFirstInvalid(count);
+    } else {
+      setSubmitError(outcome.message);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schema]);
 
   if (loading) {
     return (

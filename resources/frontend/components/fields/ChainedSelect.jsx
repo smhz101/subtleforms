@@ -90,7 +90,7 @@ export default function ChainedSelect( {
         if ( presentation === 'dropdowns' ) {
           return (
             <div key={ levelId } className='subtleforms-chained-select__level'>
-              { depth > 0 && (
+              { ( row.label || depth > 0 ) && (
                 <label className='subtleforms-chained-select__label' htmlFor={ levelId }>
                   { levelLabel }
                 </label>

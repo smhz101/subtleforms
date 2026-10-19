@@ -200,6 +200,27 @@ final class LogsRepository {
 	 * @param array $args page, per_page, level, form_id, webhook.
 	 * @return array{rows: array, total: int}
 	 */
+		/**
+	 * A webhook that was only queued is not a successful call.
+	 *
+	 * @param array  $context Log context.
+	 * @param string $message Stored message.
+	 * @return string
+	 */
+	public static function webhookMessage( array $context, string $message ): string {
+		if ( ( $context['action_type'] ?? '' ) !== 'webhook' ) {
+			return $message;
+		}
+		$data = is_array( $context['data'] ?? null ) ? $context['data'] : array();
+		if ( ! empty( $data['http_status'] ) || ! empty( $data['error'] ) ) {
+			return $message;
+		}
+		if ( ! empty( $data['dispatched'] ) ) {
+			return __( 'Queued', 'subtleforms' );
+		}
+		return $message;
+	}
+
 	public function search( array $args = array() ): array {
 		global $wpdb;
 		$logs        = $this->table;
@@ -255,7 +276,7 @@ final class LogsRepository {
 				'form_id'       => (int) ( $row['form_id'] ?? 0 ),
 				'form_title'    => (string) ( $row['form_title'] ?? '' ),
 				'level'         => (string) $row['level'],
-				'message'       => (string) $row['message'],
+				'message'       => self::webhookMessage( is_array( $context ) ? $context : array(), (string) $row['message'] ),
 				'created_at'    => (string) $row['created_at'],
 				'url'           => (string) ( $data['url'] ?? '' ),
 				'method'        => (string) ( $data['method'] ?? '' ),

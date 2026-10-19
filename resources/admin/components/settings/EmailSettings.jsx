@@ -95,7 +95,7 @@ export default function EmailSettings( {
 						updateSetting( 'admin_notification_enabled', value )
 					}
 					help={ __(
-						'Send email to admin on new submissions',
+						'Turns admin notification emails on or off for every form. Each form still has its own email action.',
 						'subtleforms'
 					) }
 				/>
@@ -115,7 +115,7 @@ export default function EmailSettings( {
 						updateSetting( 'user_confirmation_enabled', value )
 					}
 					help={ __(
-						'Send confirmation email to users after submission',
+						'Turns the confirmation email on or off for every form. It stays off until you turn this on.',
 						'subtleforms'
 					) }
 				/>

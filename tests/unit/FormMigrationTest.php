@@ -145,6 +145,222 @@ final class FormMigrationTest extends TestCase {
 		$this->assertSame( 'read', $read['submissions'][0]['status'] );
 	}
 
+	public function test_fluent_metas_and_one_notification_are_imported(): void {
+		$payload = array(
+			'forms' => array(
+				array(
+					'title'       => 'Metas',
+					'form_fields' => array( 'fields' => array() ),
+					'metas'       => array(
+						array(
+							'meta_key' => 'notifications',
+							'value'    => wp_json_encode(
+								array(
+									array(
+										'sendTo'  => array( 'email' => 'owner@example.com' ),
+										'subject' => 'Hello {inputs.email}',
+										'message' => 'Hi',
+									),
+								)
+							),
+						),
+						array(
+							'meta_key' => 'formSettings',
+							'value'    => wp_json_encode(
+								array(
+									'confirmation' => array( 'messageToShow' => 'Saved' ),
+								)
+							),
+						),
+					),
+				),
+			),
+		);
+		$built = FormMigration::schemas( 'fluent', $payload );
+		$schema = $built['forms'][0]['schema'];
+		$this->assertSame( 'owner@example.com', $schema['actions'][0]['settings']['to'] );
+		$this->assertSame( 'Hello {field:email}', $schema['actions'][0]['settings']['subject'] );
+		$this->assertSame( 'Saved', $schema['metadata']['confirmation']['message'] );
+		$this->assertStringContainsString( 'Imported 1 email notification', implode( ' ', $built['forms'][0]['notes'] ) );
+
+		$single = array(
+			'forms' => array(
+				array(
+					'title'         => 'Old',
+					'form_fields'   => array( 'fields' => array() ),
+					'notifications' => array(
+						'sendTo'      => array( 'email' => 'one@example.com' ),
+						'subject'     => 'Only one',
+						'message'     => 'Body',
+						'conditionals' => array( 'status' => true ),
+					),
+				),
+			),
+		);
+		$old = FormMigration::schemas( 'fluent', $single );
+		$this->assertCount( 1, $old['forms'][0]['schema']['actions'] );
+		$this->assertSame( 'one@example.com', $old['forms'][0]['schema']['actions'][0]['settings']['to'] );
+		$this->assertSame( 'Only one', $old['forms'][0]['schema']['actions'][0]['settings']['subject'] );
+	}
+
+	public function test_fluent_container_step_hidden_and_name_are_real_fields(): void {
+		$payload = array(
+			'forms' => array(
+				array(
+					'title'       => 'Layout',
+					'form_fields' => array(
+						'fields' => array(
+							array(
+								'element' => 'container',
+								'columns' => array(
+									array(
+										'fields' => array(
+											array(
+												'element'    => 'input_text',
+												'attributes' => array( 'name' => 'company' ),
+												'settings'   => array( 'label' => 'Company' ),
+											),
+										),
+									),
+									array(
+										'fields' => array(
+											array(
+												'element'    => 'input_text',
+												'attributes' => array( 'name' => 'job' ),
+												'settings'   => array( 'label' => 'Job title' ),
+											),
+										),
+									),
+								),
+							),
+							array(
+								'element'  => 'form_step',
+								'settings' => array( 'title' => 'Details' ),
+							),
+							array(
+								'element'    => 'input_hidden',
+								'attributes' => array( 'name' => 'source', 'value' => 'ad' ),
+								'settings'   => array( 'value' => 'ad' ),
+							),
+							array(
+								'element'    => 'input_name',
+								'attributes' => array( 'name' => 'names' ),
+								'settings'   => array(
+									'label'              => '',
+									'admin_field_label'  => 'Name',
+									'validation_rules'   => array( 'required' => array( 'value' => true ) ),
+								),
+							),
+							array(
+								'element'  => 'custom_payment_amount',
+								'settings' => array( 'label' => 'Amount' ),
+							),
+							array(
+								'element'  => 'payment_summary_component',
+								'settings' => array( 'label' => 'Summary' ),
+							),
+						),
+					),
+				),
+			),
+		);
+		$built   = FormMigration::schemas( 'fluent', $payload );
+		$schema  = $built['forms'][0]['schema'];
+		$types   = array_column( $schema['fields'], 'type' );
+		$this->assertSame( array( 'text', 'text', 'form_step', 'hidden', 'text' ), $types );
+		$this->assertSame( 'Company', $schema['fields'][0]['label'] );
+		$this->assertSame( 'Job title', $schema['fields'][1]['label'] );
+		$this->assertSame( 'ad', $schema['fields'][3]['value'] );
+		$this->assertSame( 'Name', $schema['fields'][4]['label'] );
+		$this->assertTrue( $schema['fields'][4]['required'] );
+		$this->assertNotSame( 'names', $schema['fields'][4]['key'] );
+		$this->assertSame( 'multi-step', $schema['metadata']['type'] );
+		$notes = implode( ' ', $built['forms'][0]['notes'] );
+		$this->assertStringContainsString( 'left out', $notes );
+		$this->assertStringNotContainsString( 'was a container field', $notes );
+		foreach ( $schema['fields'] as $field ) {
+			$this->assertNotSame( 'html', $field['type'] );
+		}
+		( new SchemaValidator() )->validate( $schema );
+	}
+
+	public function test_gravity_pages_logic_tags_and_payments(): void {
+		$payload = array(
+			array(
+				'title'  => 'Apply',
+				'fields' => array(
+					array( 'id' => 1, 'type' => 'text', 'label' => 'Full name', 'adminLabel' => '' ),
+					array( 'id' => 2, 'type' => 'page', 'label' => 'Next' ),
+					array(
+						'id'               => 3,
+						'type'             => 'select',
+						'label'            => 'Plan',
+						'choices'          => array( array( 'text' => 'Pro', 'value' => 'pro' ) ),
+						'conditionalLogic' => array(
+							'enabled'    => true,
+							'actionType' => 'show',
+							'logicType'  => 'all',
+							'rules'      => array(
+								array( 'fieldId' => '1', 'operator' => 'is', 'value' => 'Ada' ),
+							),
+						),
+					),
+					array(
+						'id'            => 4,
+						'type'          => 'consent',
+						'label'         => 'Agree',
+						'checkboxLabel' => 'I agree to the terms',
+					),
+					array(
+						'id'      => 5,
+						'type'    => 'multiselect',
+						'label'   => 'Topics',
+						'choices' => array( array( 'text' => 'News', 'value' => 'news' ) ),
+					),
+					array( 'id' => 6, 'type' => 'stripe_creditcard', 'label' => 'Card' ),
+					array( 'id' => 7, 'type' => 'paypal', 'label' => 'PayPal' ),
+				),
+				'notifications' => array(
+					'n' => array(
+						'toType'  => 'field',
+						'to'      => '1',
+						'subject' => 'Hi {Name (First):1.3}',
+						'message' => 'From {Full name:1}',
+					),
+				),
+				'confirmations' => array(
+					'c' => array(
+						'isDefault' => true,
+						'type'      => 'page',
+						'pageId'    => 42,
+						'url'       => '',
+					),
+				),
+			),
+		);
+		$built  = FormMigration::schemas( 'gravity', $payload );
+		$schema = $built['forms'][0]['schema'];
+		$this->assertSame( 'full_name', $schema['fields'][0]['key'] );
+		$this->assertSame( 'form_step', $schema['fields'][1]['type'] );
+		$this->assertSame( 'multi-step', $schema['metadata']['type'] );
+		$this->assertSame( 'equals', $schema['fields'][2]['logic']['groups'][0]['rules'][0]['operator'] );
+		$this->assertSame( 'full_name', $schema['fields'][2]['logic']['groups'][0]['rules'][0]['field'] );
+		$this->assertSame( 'I agree to the terms', $schema['fields'][3]['checkboxLabel'] );
+		$this->assertSame( 'multiple_choice', $schema['fields'][4]['type'] );
+		$this->assertTrue( $schema['fields'][4]['allowMultiple'] );
+		$this->assertSame( '{field:full_name}', $schema['actions'][0]['settings']['to'] );
+		$this->assertSame( 'Hi {field:full_name}', $schema['actions'][0]['settings']['subject'] );
+		$this->assertSame( 'From {field:full_name}', $schema['actions'][0]['settings']['message'] );
+		$this->assertSame( '/?page_id=42', $schema['metadata']['confirmation']['redirectUrl'] );
+		$notes = implode( ' ', $built['forms'][0]['notes'] );
+		$this->assertStringContainsString( 'left out', $notes );
+		$this->assertStringContainsString( 'WordPress page 42', $notes );
+		foreach ( $schema['fields'] as $field ) {
+			$this->assertNotContains( $field['type'], array( 'html' ) );
+		}
+		( new SchemaValidator() )->validate( $schema );
+	}
+
 	public function test_a_forms_package_rejects_the_wrong_kind(): void {
 		$read = TransferPackage::readForms( array( 'subtleforms' => 1, 'kind' => 'submissions' ) );
 		$this->assertSame( array(), $read['forms'] );

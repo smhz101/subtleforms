@@ -1,3 +1,4 @@
+import { sameCheckValue } from './logicFields';
 /**
  * Conditional logic: one evaluator for the builder, the frontend renderer and
  * (mirrored line for line) the server in src/Engine/ConditionalLogic.php.
@@ -105,6 +106,14 @@ function textEquals(a, b) {
   return norm(a) === norm(b);
 }
 
+function isEmptyForField(value, field) {
+  if (field && field.type === 'toggle') {
+    const off = field.offValue || field.config?.offValue || 'no';
+    return isEmptyValue(value) || textEquals(value, off);
+  }
+  return isEmptyValue(value);
+}
+
 export function isEmptyValue(value) {
   if (value === null || value === undefined || value === false) return true;
   if (typeof value === 'string') return value.trim() === '';
@@ -151,8 +160,14 @@ export function evaluateCondition(value, operator, compare, compare2, opts = {})
 
   switch (operator) {
     case 'equals':
+      if (opts.field && (opts.field.type === 'checkbox' || opts.field.type === 'consent')) {
+        return sameCheckValue(value, c);
+      }
       return items.some((x) => textEquals(x, c));
     case 'not_equals':
+      if (opts.field && (opts.field.type === 'checkbox' || opts.field.type === 'consent')) {
+        return !sameCheckValue(value, c);
+      }
       return !items.some((x) => textEquals(x, c));
     case 'contains':
     case 'not_contains': {
@@ -174,9 +189,9 @@ export function evaluateCondition(value, operator, compare, compare2, opts = {})
       return needle !== '' && items.some((x) => norm(x).endsWith(needle));
     }
     case 'empty':
-      return isEmptyValue(value);
+      return isEmptyForField(value, opts.field);
     case 'not_empty':
-      return !isEmptyValue(value);
+      return !isEmptyForField(value, opts.field);
     case 'greater_than':
       return isNumeric(c) && items.some((x) => isNumeric(x) && parseFloat(x) > parseFloat(c));
     case 'less_than':
@@ -274,7 +289,10 @@ export function logicPasses(logic, values, opts = {}) {
   if (!l) return true;
   return l.groups.some((g) => {
     const test = (r) =>
-      evaluateCondition(readValue(values, r.field), r.operator, r.value, r.value2, opts);
+      evaluateCondition(readValue(values, r.field), r.operator, r.value, r.value2, {
+        ...opts,
+        field: opts.fieldsByKey ? opts.fieldsByKey[r.field] : undefined,
+      });
     return g.match === 'any' ? g.rules.some(test) : g.rules.every(test);
   });
 }
@@ -333,7 +351,23 @@ function childLists(node) {
   return lists;
 }
 
+function indexLogicFields(nodes, out) {
+  if (!Array.isArray(nodes)) return out;
+  nodes.forEach((node) => {
+    if (!node || typeof node !== 'object') return;
+    const key = node.key || node.config?.key;
+    if (key) {
+      out[key] = { ...node, ...(node.config && typeof node.config === 'object' ? node.config : {}) };
+    }
+    indexLogicFields(node.children, out);
+    indexLogicFields(node.fields, out);
+  });
+  return out;
+}
+
 function evaluateOnce(fields, values, opts) {
+  const fieldsByKey = indexLogicFields(fields, {});
+  const withFields = { ...opts, fieldsByKey };
   const state = { hidden: [], required: [], disabled: [], hiddenSteps: [] };
   const add = (list, key) => {
     if (key && !list.includes(key)) list.push(key);
@@ -351,7 +385,7 @@ function evaluateOnce(fields, values, opts) {
       let hidden = parentHidden;
 
       nodeLogics(node).forEach((l) => {
-        const passes = logicPasses(l, scope.values, opts);
+        const passes = logicPasses(l, scope.values, withFields);
         if ((l.action === 'show' && !passes) || (l.action === 'hide' && passes)) {
           hidden = true;
         } else if (l.action === 'require' && passes) {

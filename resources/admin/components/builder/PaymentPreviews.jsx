@@ -5,19 +5,22 @@
  * default values, so the totals you see while building are the totals a
  * visitor starts with.
  */
-import { useMemo } from '@wordpress/element';
+import { useContext, useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { useBuilder } from './context/BuilderContext';
 import { computeQuote, formatMoney } from '../../../shared/pricing';
+import { ConfigContext } from './context/ConfigContext';
 
-const currency = () => window.subtleformsAdmin?.currency || 'USD';
+// The form's own currency, else the site currency, as on the live form.
+const useCurrency = () => useContext(ConfigContext)?.currency || window.subtleformsAdmin?.currency || 'USD';
 
 export function ProductPreview({ field }) {
+  const currency = useCurrency();
   return (
     <div className='sf-pay-preview sf-pay-preview--product'>
       <div className='sf-pay-preview__product-info'>
         {field.productName && <span className='sf-pay-preview__muted'>{field.productName}</span>}
-        <strong>{formatMoney(field.price, currency())}</strong>
+        <strong>{formatMoney(field.price, currency)}</strong>
       </div>
       {field.allowQuantity !== false && (
         <span className='sf-pay-preview__qty' aria-hidden='true'>
@@ -34,7 +37,13 @@ export function ChoicePreview({ field }) {
   const options = Array.isArray(field.options) ? field.options : [];
   const mode = field.displayAs || 'radio';
   const showPrice = field.showPrice !== false;
-  const def = String(field.defaultValue || '').split(',');
+  const currency = useCurrency();
+  // Only real default values select an option: an empty default must not
+  // match options without a value (PAY-19).
+  const def = String(field.defaultValue ?? '')
+    .split(',')
+    .map((v) => v.trim())
+    .filter(Boolean);
 
   if (mode === 'dropdown') {
     return (
@@ -47,11 +56,11 @@ export function ChoicePreview({ field }) {
   return (
     <div className={`sf-pay-preview sf-pay-preview--choice is-${mode}`}>
       {options.map((o, i) => (
-        <span key={o.value || i} className={`sf-pay-preview__option${def.includes(o.value) ? ' is-selected' : ''}`}>
+        <span key={o.value || i} className={`sf-pay-preview__option${def.includes(String(o.value ?? '')) ? ' is-selected' : ''}`}>
           <span className={`sf-pay-preview__mark${mode === 'checkbox' ? ' is-square' : ''}`} aria-hidden='true' />
           <span className='sf-pay-preview__option-label'>{o.label}</span>
           {showPrice && Number(o.price) > 0 && (
-            <strong className='sf-pay-preview__option-price'>{formatMoney(o.price, currency())}</strong>
+            <strong className='sf-pay-preview__option-price'>{formatMoney(o.price, currency)}</strong>
           )}
         </span>
       ))}
@@ -61,6 +70,7 @@ export function ChoicePreview({ field }) {
 
 export function SummaryPreview({ field }) {
   const { tree } = useBuilder();
+  const currency = useCurrency();
   const quote = useMemo(() => {
     const nodes = tree?.nodes ? Object.values(tree.nodes) : [];
     const fields = nodes
@@ -72,8 +82,8 @@ export function SummaryPreview({ field }) {
     });
     // Use this summary's own (unsaved) settings for tax.
     const withSelf = fields.filter((f) => f.type !== 'payment_summary').concat([{ ...field, type: 'payment_summary' }]);
-    return computeQuote(withSelf, values, { currency: currency() });
-  }, [tree, field]);
+    return computeQuote(withSelf, values, { currency });
+  }, [tree, field, currency]);
 
   return (
     <div className='sf-pay-preview sf-pay-preview--summary'>

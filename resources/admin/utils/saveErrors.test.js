@@ -17,4 +17,38 @@ describe('describeSaveError (QA-03)', () => {
     expect(describeSaveError(null, 'abort')).toBe('Your changes are kept in this tab.');
     expect(describeSaveError({ message: 'Could not get a valid response from the server.' })).toBe('Your changes are kept in this tab.');
   });
+
+  // FLD2-11: say which field, not only which setting.
+  it('names the field whose setting stopped the save', () => {
+    const schema = {
+      fields: [
+        { id: 'a', key: 'name', type: 'text', label: 'Your name' },
+        { id: 's', type: 'step', fields: [{ id: 'b', key: 'year', type: 'number', config: { label: 'x'.repeat(2001) } }] },
+      ],
+    };
+    const long = { error: { meta: { fields: { 'schema.fields[1].fields[0].label': 'Maximum length is 2000 characters' } } } };
+    expect(describeSaveError(long, 422, schema)).toBe(
+      `Field label in "${'x'.repeat(40)}...": Maximum length is 2000 characters`
+    );
+    const placeholder = { error: { meta: { fields: { 'schema.fields[0].placeholder': 'Maximum length is 255 characters' } } } };
+    expect(describeSaveError(placeholder, 422, schema)).toBe('Placeholder in "Your name": Maximum length is 255 characters');
+    // Without the schema the setting alone is named, as before.
+    expect(describeSaveError(placeholder, 422)).toBe('Placeholder: Maximum length is 255 characters');
+  });
+});
+
+describe('describeSaveError with schema validation lists (2.4.0, #37)', () => {
+  test('a list of { path, message } shows the message, not [object Object]', () => {
+    const text = describeSaveError(
+      {
+        error: {
+          message: 'Schema validation failed',
+          meta: { fields: [{ path: 'fields.c2', message: 'A form can have only one reCAPTCHA field.' }] },
+        },
+      },
+      422,
+      { fields: [] }
+    );
+    expect(text).toBe('A form can have only one reCAPTCHA field.');
+  });
 });

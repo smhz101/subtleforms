@@ -1,3 +1,6 @@
+import { submissionStatus } from '../utils/submissionStatus';
+import { loadUntilFound } from '../utils/loadUntil';
+import { markRowRead } from '../utils/markRowRead';
 import {
   useState,
   useEffect,
@@ -20,9 +23,12 @@ import clsx from 'clsx';
 import DataTable from './DataTable';
 import { ConfirmModal } from '../modals';
 import { apiGet } from '../utils/api';
-import { apiClient } from '../data';
+import { apiClient, useSettings } from '../data';
+import { deletesPermanently } from '../utils/deleteBehavior';
 import { Icon } from '../ui';
+import { keepRowsAfterFailedLoad, listQueryKey } from '../utils/failedLoad';
 import { downloadCsv } from '../utils/csvDownload';
+import { entrySender } from '../utils/entrySender';
 import './SubmissionsTable.scss';
 
 const restNonce =
@@ -67,6 +73,7 @@ const SubmissionsTable = forwardRef(
       readingId = null,
       density = 'default',
       onNeighbors = null,
+      onMarkedRead = null,
     },
     ref
   ) => {
@@ -85,6 +92,8 @@ const SubmissionsTable = forwardRef(
     const [deleteModal, setDeleteModal] = useState(null);
     const [selectedSubmissions, setSelectedSubmissions] = useState([]);
     const [bulkDelete, setBulkDelete] = useState(null);
+    const { data: siteSettings } = useSettings();
+    const hardDelete = deletesPermanently(siteSettings?.delete_behavior, false);
     const isPrefetchingRef = useRef(false);
     const prefetchPromiseRef = useRef(null);
     const stepRef = useRef(async () => ({ id: null }));
@@ -101,6 +110,7 @@ const SubmissionsTable = forwardRef(
     // (another tab, filter or a slower request) are ignored so rows are
     // never shown twice or put back after a change (2.3.3).
     const generationRef = useRef(0);
+    const loadedQueryRef = useRef('');
     const { createSuccessNotice, createErrorNotice } =
       useDispatch(noticesStore);
 
@@ -197,6 +207,9 @@ const SubmissionsTable = forwardRef(
 
     // Full reset + reload from page 1 (fresh filters/sort)
     const loadFresh = async () => {
+      const requestQuery = listQueryKey([
+        formId, statusFilter, searchTerm, dateRange, fieldValue, processingStatus, sortBy, sortDirection, perPage,
+      ]);
       setError(null);
       setLoading(true);
       setCurrentPage(1);
@@ -205,12 +218,18 @@ const SubmissionsTable = forwardRef(
       try {
         const { rows, total } = await fetchBatch(0);
         if (generation !== generationRef.current) return;
+        loadedQueryRef.current = requestQuery;
         setBuffer(uniqueRows(rows));
         setPagesLoaded(Math.ceil(rows.length / perPage) || 0);
         setTotalItems(total);
       } catch (err) {
         if (generation !== generationRef.current) return;
         setError(__('Entries could not be loaded.', 'subtleforms'));
+        if (!keepRowsAfterFailedLoad(loadedQueryRef.current, requestQuery)) {
+          setBuffer([]);
+          setPagesLoaded(0);
+          setTotalItems(0);
+        }
       } finally {
         if (generation === generationRef.current) setLoading(false);
       }
@@ -267,8 +286,12 @@ const SubmissionsTable = forwardRef(
         return { id: null };
       }
       let target = index + (direction === 'next' ? 1 : -1);
-      if (target >= rows.length && direction === 'next' && rows.length < totalRef.current) {
+      while (target >= rows.length && direction === 'next' && rows.length < totalRef.current) {
+        const before = rows.length;
         rows = await prefetchNextChunk();
+        if (!rows || rows.length <= before) {
+          break;
+        }
         target = index + 1;
       }
       if (target < 0 || target >= rows.length) {
@@ -341,16 +364,36 @@ const SubmissionsTable = forwardRef(
     // until that row is in the list, so it can be highlighted and browsed.
     useEffect(() => {
       if (!readingId || loading || totalItems === 0) {
+        return undefined;
+      }
+      let cancelled = false;
+      loadUntilFound({
+        readingId,
+        getRows: () => bufferRef.current,
+        getTotal: () => totalRef.current,
+        prefetch: () => prefetchRef.current(),
+      }).then(() => {
+        if (!cancelled) {
+          setBuffer(bufferRef.current.slice());
+        }
+      });
+      return () => {
+        cancelled = true;
+      };
+    }, [readingId, loading, totalItems]);
+
+    useEffect(() => {
+      if (!readingId) {
         return;
       }
-      if (buffer.some((row) => String(row.id) === String(readingId))) {
+      const marked = markRowRead(bufferRef.current, readingId);
+      if (!marked.changed) {
         return;
       }
-      if (buffer.length >= totalItems) {
-        return;
-      }
-      prefetchRef.current();
-    }, [readingId, buffer, totalItems, loading]);
+      bufferRef.current = marked.rows;
+      setBuffer(marked.rows);
+      onMarkedRead?.(readingId);
+    }, [readingId, onMarkedRead]);
 
     const inTrash = statusFilter === 'trash';
 
@@ -505,7 +548,7 @@ const SubmissionsTable = forwardRef(
       // Priority: spam/flagged > failed > payment_pending > unread
       if (submission.status === 'spam') classes.push('sf-submissions-table__row--spam');
       else if (submission.status === 'flagged') classes.push('sf-submissions-table__row--flagged');
-      else if (submission.status === 'failed') classes.push('sf-submissions-table__row--failed');
+      else if (submission.status === 'failed' || submission.status === 'payment_failed') classes.push('sf-submissions-table__row--failed');
       else if (submission.status === 'payment_pending') classes.push('sf-submissions-table__row--payment-pending');
       else if (parseInt(submission.is_read, 10) === 0) classes.push('sf-submissions-table__row--unread');
       return classes.join(' ');
@@ -598,49 +641,10 @@ const SubmissionsTable = forwardRef(
       }
     };
 
-    // Pull a human summary out of the payload: a name and an email when the
-    // form collects them, otherwise the first short answers.
-    const summarize = (submission) => {
-      const payload =
-        submission.payload && typeof submission.payload === 'object'
-          ? submission.payload
-          : {};
-      const entries = Object.entries(payload);
-      const flat = (v) => {
-        if (v === null || v === undefined) return '';
-        if (typeof v === 'object') {
-          if (v.first_name || v.last_name) {
-            return [v.first_name, v.last_name].filter(Boolean).join(' ');
-          }
-          return '';
-        }
-        return String(v);
-      };
-      const byKey = (re) => {
-        const hit = entries.find(([k, v]) => re.test(k) && flat(v).trim());
-        return hit ? flat(hit[1]).trim() : '';
-      };
-      const email = byKey(/e-?mail/i);
-      const name =
-        byKey(/^(full_?)?name$|name_group|your_name|first_name/i) ||
-        entries.map(([, v]) => flat(v)).find(
-          (v) => v && !v.includes('@') && v.length <= 60
-        ) ||
-        '';
-      return { name, email };
-    };
+    // Who sent it: a name answer, else an email answer, else Anonymous.
+    // Other answers are never used as the sender (PAY2-06).
+    const summarize = (submission) => entrySender(submission.payload);
 
-    const STATUS = {
-      completed: { label: __('Completed', 'subtleforms'), cls: 'sf-pill--success' },
-      saved: { label: __('Saved', 'subtleforms'), cls: '' },
-      processing: { label: __('Processing', 'subtleforms'), cls: 'sf-pill--info' },
-      failed: { label: __('Failed', 'subtleforms'), cls: 'sf-pill--danger' },
-      payment_pending: { label: __('Awaiting payment', 'subtleforms'), cls: 'sf-pill--warning' },
-      spam: { label: __('Spam', 'subtleforms'), cls: 'sf-pill--danger' },
-      flagged: { label: __('Flagged', 'subtleforms'), cls: 'sf-pill--warning' },
-      trash: { label: __('Trashed', 'subtleforms'), cls: 'sf-pill--danger' },
-      archived: { label: __('Archived', 'subtleforms'), cls: '' },
-    };
 
     // Define table columns
     const allColumns = [
@@ -656,15 +660,11 @@ const SubmissionsTable = forwardRef(
               className={clsx('sf-sub-entry', { 'is-unread': isUnread })}>
               <span className='sf-sub-entry__dot' aria-hidden='true' />
               <span className='sf-sub-entry__avatar' aria-hidden='true'>
-                {(name || email || '#').trim().charAt(0).toUpperCase()}
+                {(name || email || __('Anonymous', 'subtleforms')).trim().charAt(0).toUpperCase()}
               </span>
               <span className='sf-sub-entry__text'>
                 <span className='sf-sub-entry__name'>
-                  {name || email || sprintf(
-                    /* translators: %d: submission id */
-                    __('Submission #%d', 'subtleforms'),
-                    id
-                  )}
+                  {name || email || __('Anonymous', 'subtleforms')}
                   {isUnread && (
                     <span className='screen-reader-text'>
                       {' '}
@@ -697,10 +697,7 @@ const SubmissionsTable = forwardRef(
         title: __('Status', 'subtleforms'),
         sortable: true,
         render: (status) => {
-          const config = STATUS[status] || {
-            label: __('Received', 'subtleforms'),
-            cls: '',
-          };
+          const config = submissionStatus(status);
           return (
             <span className={clsx('sf-pill', 'sf-pill--dot', config.cls)}>
               {config.label}
@@ -821,11 +818,15 @@ const SubmissionsTable = forwardRef(
                 size='compact'
                 isDestructive
                 icon={<Icon.Trash size={16} />}
-                label={__('Move to Trash', 'subtleforms')}
+                label={hardDelete ? __('Delete permanently', 'subtleforms') : __('Move to Trash', 'subtleforms')}
                 showTooltip
                 onClick={(e) => {
                   e.stopPropagation();
-                  trashEntries([submission.id]);
+                  if (hardDelete) {
+                    setDeleteModal(submission.id);
+                  } else {
+                    trashEntries([submission.id]);
+                  }
                 }}
               />
             )}
@@ -950,8 +951,8 @@ const SubmissionsTable = forwardRef(
                     onClick: (ids) => handleBulkMarkStatus(ids, 'flagged'),
                   },
                   {
-                    label: __('Move to Trash', 'subtleforms'),
-                    onClick: trashEntries,
+                    label: hardDelete ? __('Delete permanently', 'subtleforms') : __('Move to Trash', 'subtleforms'),
+                    onClick: hardDelete ? handleBulkDelete : trashEntries,
                     isDestructive: true,
                   },
                 ]

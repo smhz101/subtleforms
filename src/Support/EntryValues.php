@@ -152,27 +152,15 @@ final class EntryValues {
 
 	/**
 	 * Format a stored answer as plain text for display, keeping line breaks.
+	 * Uses the one answer formatter (2.4.0).
 	 *
-	 * @param mixed $value Stored value.
-	 * @param array $field Field node.
+	 * @param mixed $value   Stored value.
+	 * @param array $field   Field node.
+	 * @param array $context Display context, see AnswerFormatter::text().
 	 * @return string
 	 */
-	public static function toText( $value, array $field ): string {
-		$type = (string) ( $field['type'] ?? '' );
-		if ( self::isSignatureImage( $value ) ) {
-			return __( 'Signed (the signature image is in the entry)', 'subtleforms' );
-		}
-		if ( $type === 'password' ) {
-			return self::passwordLabel( $value );
-		}
-		if ( $type === Repeater::TYPE ) {
-			return Repeater::toText( $value, $field );
-		}
-		if ( $type === 'rich_text' && is_string( $value ) ) {
-			$text = preg_replace( '#<\s*(br|/p|/li)\s*/?>#i', "\n", $value );
-			return trim( html_entity_decode( wp_strip_all_tags( (string) $text ), ENT_QUOTES, 'UTF-8' ) );
-		}
-		return FieldMapper::toText( $value );
+	public static function toText( $value, array $field, array $context = array() ): string {
+		return AnswerFormatter::text( $value, $field, $context );
 	}
 
 	/**
@@ -181,22 +169,13 @@ final class EntryValues {
 	 * Line breaks become <br>, rich text keeps its allowed tags, everything
 	 * else is escaped.
 	 *
-	 * @param mixed $value Stored value.
-	 * @param array $field Field node.
+	 * @param mixed $value   Stored value.
+	 * @param array $field   Field node.
+	 * @param array $context Display context, see AnswerFormatter::text().
 	 * @return string
 	 */
-	public static function toHtml( $value, array $field ): string {
-		$type = (string) ( $field['type'] ?? '' );
-		if ( self::isSignatureImage( $value ) ) {
-			return '<img src="' . esc_attr( (string) $value ) . '" alt="' . esc_attr__( 'Signature', 'subtleforms' ) . '" width="240" style="max-width:240px;height:auto;border:1px solid #e5e7eb;background:#fff;" />';
-		}
-		if ( $type === 'rich_text' && is_string( $value ) ) {
-			return Sanitizer::sanitizeRichText( $value );
-		}
-		if ( $type === Repeater::TYPE ) {
-			return Repeater::toHtml( $value, $field );
-		}
-		return nl2br( esc_html( self::toText( $value, $field ) ) );
+	public static function toHtml( $value, array $field, array $context = array() ): string {
+		return AnswerFormatter::html( $value, $field, $context );
 	}
 
 	/**

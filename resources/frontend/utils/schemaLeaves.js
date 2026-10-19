@@ -1,4 +1,5 @@
 import { isRegisteredInputType } from '../../shared/extend';
+import { columnFields } from './columnFields';
 
 const INPUT_FIELD_TYPES = new Set([
   // Basic text inputs
@@ -105,9 +106,7 @@ export function collectLeafInputPaths(fields) {
 
       if (Array.isArray(field.columns)) {
         for (const col of field.columns) {
-          if (Array.isArray(col)) {
-            visit(col);
-          }
+          visit(columnFields(col));
         }
       }
     }
@@ -195,9 +194,7 @@ export function collectContainerKeys(fields) {
 
       if (Array.isArray(field.columns)) {
         for (const col of field.columns) {
-          if (Array.isArray(col)) {
-            visit(col);
-          }
+          visit(columnFields(col));
         }
       }
     }

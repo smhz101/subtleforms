@@ -8,6 +8,7 @@
 
 import { getPricedType, chargesMoney } from './extend';
 import { computeLogicState, nodeLogics, logicPasses, visibleValues } from './conditions';
+import { currencyDecimals, roundMoney } from './currencies';
 
 export const PRICED_TYPES = [
   'payment_product',
@@ -24,9 +25,10 @@ export const isPricedType = (type) => PRICED_TYPES.includes(type) || !!getPriced
 
 export { registerPricedType } from './extend';
 
-const money = (v) => {
+// Prices round to what the currency can charge: whole yen, cents (PAY-12).
+const money = (v, currency = 'USD') => {
   const n = Number(v);
-  return Number.isFinite(n) && n > 0 ? Math.round(n * 100) / 100 : 0;
+  return Number.isFinite(n) && n > 0 ? roundMoney(n, currency) : 0;
 };
 
 const cfg = (f) => ({ ...f, ...(f?.config || {}) });
@@ -97,11 +99,11 @@ export function hiddenPricing(schema, values = {}) {
 /**
  * Discount a coupon gives on a subtotal.
  */
-export function couponDiscount(coupon, subtotal) {
+export function couponDiscount(coupon, subtotal, currency = 'USD') {
   if (!coupon) return 0;
   const amount = Number(coupon.amount) || 0;
   const off = coupon.type === 'percent' ? (subtotal * amount) / 100 : amount;
-  return Math.round(Math.min(subtotal, Math.max(0, off)) * 100) / 100;
+  return roundMoney(Math.round(Math.min(subtotal, Math.max(0, off)) * 100) / 100, currency);
 }
 
 /**
@@ -131,7 +133,7 @@ export function computeQuote(fields = [], values = {}, { coupon = null, schema =
 
     switch (field.type) {
       case 'payment_product': {
-        const price = money(c.price);
+        const price = money(c.price, currency);
         let qty;
         if (c.allowQuantity) {
           qty = parseInt(value, 10) || 0;
@@ -143,7 +145,7 @@ export function computeQuote(fields = [], values = {}, { coupon = null, schema =
           qty = 1;
         }
         if (qty > 0 && price > 0) {
-          items.push({ key, label: c.productName || label, qty, unit: price, amount: Math.round(qty * price * 100) / 100 });
+          items.push({ key, label: c.productName || label, qty, unit: price, amount: roundMoney(qty * price, currency) });
         }
         break;
       }
@@ -155,7 +157,7 @@ export function computeQuote(fields = [], values = {}, { coupon = null, schema =
           : String(value).split(',').map((s) => s.trim());
         (c.options || []).forEach((opt) => {
           if (!selected.includes(String(opt.value))) return;
-          const price = money(opt.price);
+          const price = money(opt.price, currency);
           if (price > 0) {
             items.push({ key, label: `${label}: ${opt.label}`, qty: 1, unit: price, amount: price });
           }
@@ -163,14 +165,14 @@ export function computeQuote(fields = [], values = {}, { coupon = null, schema =
         break;
       }
       case 'payment_amount': {
-        let amount = money(value);
-        if (amount > 0 && c.min !== undefined && c.min !== '' && c.min !== null) amount = Math.max(Number(c.min), amount);
-        if (Number(c.max) > 0) amount = Math.min(Number(c.max), amount);
+        let amount = money(value, currency);
+        if (amount > 0 && c.min !== undefined && c.min !== '' && c.min !== null) amount = Math.max(money(c.min, currency), amount);
+        if (Number(c.max) > 0) amount = Math.min(money(c.max, currency), amount);
         if (amount > 0) items.push({ key, label, qty: 1, unit: amount, amount });
         break;
       }
       case 'payment_hidden_price': {
-        const amount = money(c.amount);
+        const amount = money(c.amount, currency);
         if (amount > 0) items.push({ key, label: c.description || label, qty: 1, unit: amount, amount });
         break;
       }
@@ -197,20 +199,20 @@ export function computeQuote(fields = [], values = {}, { coupon = null, schema =
         }
         (Array.isArray(lines) ? lines : []).forEach((line) => {
           const qty = Math.max(0, parseInt(line.qty, 10) || 0);
-          const unit = money(line.unit);
+          const unit = money(line.unit, currency);
           if (qty > 0 && unit > 0) {
-            items.push({ key, label: line.label || label, qty, unit, amount: Math.round(qty * unit * 100) / 100 });
+            items.push({ key, label: line.label || label, qty, unit, amount: roundMoney(qty * unit, currency) });
           }
         });
       }
     }
   });
 
-  const subtotal = Math.round(items.reduce((s, i) => s + i.amount, 0) * 100) / 100;
-  const discount = couponDiscount(coupon, subtotal);
+  const subtotal = roundMoney(items.reduce((s, i) => s + i.amount, 0), currency);
+  const discount = couponDiscount(coupon, subtotal, currency);
   const taxable = Math.max(0, subtotal - discount);
-  const tax = Math.round(taxable * taxRate) / 100;
-  const total = Math.round((taxable + tax) * 100) / 100;
+  const tax = roundMoney((taxable * taxRate) / 100, currency);
+  const total = roundMoney(taxable + tax, currency);
 
   return { currency, items, subtotal, discount, coupon: coupon?.code || null, taxRate, taxLabel, tax, total, formulaError };
 }
@@ -219,9 +221,15 @@ export function computeQuote(fields = [], values = {}, { coupon = null, schema =
  * Format an amount in a currency for the visitor's locale.
  */
 export function formatMoney(amount, currency = 'USD') {
+  const digits = currencyDecimals(currency);
   try {
-    return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(Number(amount) || 0);
+    return new Intl.NumberFormat(undefined, {
+      style: 'currency',
+      currency,
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    }).format(Number(amount) || 0);
   } catch (e) {
-    return `${currency} ${(Number(amount) || 0).toFixed(2)}`;
+    return `${currency} ${(Number(amount) || 0).toFixed(digits)}`;
   }
 }

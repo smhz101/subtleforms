@@ -733,6 +733,13 @@
 }
 
 /* ===== Section break ===== */
+.subtleforms-section-break,
+.subtleforms-html {
+	flex: 1 1 100%;
+	width: 100%;
+	min-width: 0;
+}
+
 .subtleforms-section-break {
 	margin: 8px 0;
 }
@@ -814,4 +821,11 @@
 	border-radius: var(--subtleforms-radius-md, 6px);
 	color: var(--subtleforms-color-text-light);
 	font-size: 0.875em;
+}
+
+/* A block form uses the same width as a shortcode form: the content column. */
+.subtleforms-block.subtleforms-form-container,
+.wp-block-subtleforms-form {
+	width: 100%;
+	max-width: none;
 }

@@ -55,6 +55,7 @@ final class SaveAction implements ActionInterface {
 			// Task 1: Normalize field schema shape, ensure id, type, label, config on every node
 			$schema = $this->normalize_schema_fields( $schema );
 			$context->setMeta( 'form_schema', $schema );
+			$context->payload = \SubtleForms\Fields\ImplicitDefaults::apply( $schema, $context->payload );
 
 			$conditionalState = $context->getMeta(
 				'conditional_state',
@@ -84,7 +85,12 @@ final class SaveAction implements ActionInterface {
 
 		// Persist payload/meta snapshot. Sanitize user-submitted values before storing.
 		$payload = $context->payload;
-		$meta    = $context->meta;
+		// The entry references its schema by version (the schema_version
+		// column) instead of keeping a full copy in its meta (FF-30).
+		$meta    = \SubtleForms\Support\EntrySchema::stripCopy( $context->meta );
+		// The answers as typed are only for conditional logic in this
+		// request. They are not sanitized for storage and are never saved.
+		unset( $meta['logic_payload'] );
 
 		if ( is_array( $schema ) ) {
 			$payload = $this->sanitize_payload( $schema, $payload );
@@ -199,7 +205,7 @@ final class SaveAction implements ActionInterface {
 
 			switch ( $type ) {
 				case 'email':
-					$sanitized[ $key ] = sanitize_email( sanitize_text_field( (string) $value ) );
+					$sanitized[ $key ] = $this->sanitize_email_value( (string) $value, $field );
 					break;
 				case 'url':
 					$sanitized[ $key ] = esc_url_raw( sanitize_text_field( (string) $value ) );
@@ -220,6 +226,34 @@ final class SaveAction implements ActionInterface {
 		}
 
 		return $sanitized;
+	}
+
+	/**
+	 * Clean an email answer. A field that allows several addresses keeps each
+	 * one (FB-05). With RFC validation off an address such as user@localhost
+	 * is kept as typed, since sanitize_email() would empty it (FB-06).
+	 *
+	 * @param string $value Answer.
+	 * @param array  $field Field definition.
+	 * @return string
+	 */
+	private function sanitize_email_value( string $value, array $field ): string {
+		$setting  = static function ( string $name ) use ( $field ) {
+			$config = is_array( $field['config'] ?? null ) ? $field['config'] : array();
+			return array_key_exists( $name, $config ) && null !== $config[ $name ] && '' !== $config[ $name ] ? $config[ $name ] : ( $field[ $name ] ?? null );
+		};
+		$multiple = true === $setting( 'allowMultiple' );
+		$strict   = ! in_array( $setting( 'rfcValidation' ), array( false, 0, '0', 'false' ), true );
+		$parts    = $multiple ? preg_split( '/[,;]/', $value ) : array( $value );
+		$clean    = array();
+		foreach ( $parts as $part ) {
+			$part = sanitize_text_field( (string) $part );
+			$part = $strict ? sanitize_email( $part ) : (string) preg_replace( '/\s+/', '', $part );
+			if ( '' !== $part ) {
+				$clean[] = $part;
+			}
+		}
+		return implode( ', ', $clean );
 	}
 
 	/**

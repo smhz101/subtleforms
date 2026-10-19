@@ -58,7 +58,9 @@ final class Pipeline {
 				$this->compiler->evaluateConditions( $schema, $ctx );
 			}
 
-			$logic = new ConditionalLogic();
+			$logic       = new ConditionalLogic();
+			$logicValues = $ctx->getMeta( 'logic_payload' );
+			$logicValues = is_array( $logicValues ) ? $logicValues : $ctx->payload;
 
 			foreach ( $steps as $step ) {
 				$ts = time();
@@ -70,7 +72,7 @@ final class Pipeline {
 					$step->action()->id() !== 'save'
 					&& is_array( $stepSettings )
 					&& ConditionalLogic::hasLogic( $stepSettings['logic'] ?? null )
-					&& ! $logic->logicPasses( $stepSettings['logic'], $ctx->payload )
+					&& ! $logic->logicPasses( $stepSettings['logic'], $logicValues )
 				) {
 					$this->logEvent( $ctx, $step, 'skipped', 'conditions_not_met', $ts );
 					continue;

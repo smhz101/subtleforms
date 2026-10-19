@@ -1,6 +1,7 @@
 import { ToggleControl, TextControl, SelectControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import FieldError from '../FieldError';
+import { currencyOptions } from '../../../../shared/currencies';
 
 const PROVIDERS = [
   { label: 'Stripe', value: 'stripe' },
@@ -11,13 +12,8 @@ const MODES = [
   { label: __('Live', 'subtleforms'), value: 'live' },
 ];
 
-const CURRENCIES = [
-  { label: 'USD', value: 'USD' },
-  { label: 'EUR', value: 'EUR' },
-  { label: 'GBP', value: 'GBP' },
-  { label: 'CAD', value: 'CAD' },
-  { label: 'AUD', value: 'AUD' },
-];
+// One list with the form setting and the server (Payments\Currencies).
+const CURRENCIES = currencyOptions();
 
 /**
  * Payments Extension Settings Panel

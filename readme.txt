@@ -4,7 +4,7 @@ Tags: form builder, contact form, forms, multi-step form, file upload
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.3.9
+Stable tag: 2.4.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -129,6 +129,80 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 
 == Changelog ==
 
+= 2.4.0 - 2026-10-20 =
+* New: Each payment form can pick its own currency, and more currencies are available, including JPY, INR, PKR and AED.
+* Fix: Forms follow the site currency unless you pick one, the Custom amount field shows the right symbol, and yen totals are whole yen.
+* Fix: Product and priced option answers in entries, emails and exports show whole units for every currency without cents, such as KRW, not only for JPY.
+* Fix: Entries, CSV exports and resent emails show prices in the currency the entry was charged in, so changing the site or form currency later does not relabel older entries.
+* Fix: Coupons give the same total at payment and on submit, and coupon dates are checked.
+* Fix: Draft forms are not priced for visitors, and small orders below the card minimum get a clear message.
+* Fix: Product settings are under General, priced options are not shown selected on the canvas, and dropdown priced options use the standard picker.
+* Fix: Failed payments show as Payment failed, payment messages can be translated, and Pro asks admins to connect Stripe when no gateway is set up.
+* Fix: Tools export and import keep each entry's order and payment details.
+* Change: Entries refer to the form version they were sent with instead of keeping a full copy of the form. Older entries are cleaned up in the background and stay readable.
+* Fix: Entries, emails, CSV exports, PDFs and integrations show option labels, Yes or No, matrix rows with their columns, dependent dropdown labels (also in the Webhook action's full payload), dates and times in the field format, and product lines with prices.
+* Fix: CSV exports list uploaded files by name with a download link.
+* Fix: A very long field label is shortened in emails, exports, entries and the required message. The admin label is used when it is set.
+* Fix: The submissions list names the sender by a name or email answer, or shows Anonymous, never a quantity or a choice.
+* Fix: The server checks every answer the way the form does: choices, dates, times, ratings, sliders, matrix answers, colours, signatures and read-only fields. Its messages match the form and can be translated.
+* Fix: Email fields accept several addresses when allowed, and user@localhost when RFC validation is off. A website typed without https:// gets it.
+* Fix: Pasted international phone numbers pick their country, the leading 0 is dropped, and the server checks the calling code and length.
+* Fix: Custom amount limits, Product quantity limits and Priced options are enforced instead of charging a different amount.
+* Fix: A required Rich text field with no text is refused, and a Repeater below its minimum shows one message.
+* Fix: Hidden field values are worked out on the server, and Order summary and Fixed fee fields store nothing.
+* Fix: A failed builder save names the field, and numeric labels, placeholders and default values save.
+* Fix: The admin and confirmation email switches apply to every form, and the saved sender is used when an email has no From address.
+* Fix: Submitting the form preview does not send email or webhooks, does not count toward the entry limit, and is only available to an administrator.
+* Fix: A form block that is not using AJAX submits with a normal page load.
+* Fix: A form block that is not using AJAX shows the errors and keeps the answers when a submission is refused, shows the confirmation message once it is accepted, and follows a redirect confirmation only after a successful submission.
+* Fix: A form block that is not using AJAX follows a confirmation redirect to another site, as the AJAX form does, instead of sending visitors to the home page.
+* Fix: Confirmation messages and redirects fill merge tags.
+* Fix: A custom webhook body fills merge tags.
+* Fix: Resend says when the email was not queued, and sending it again still sends.
+* Fix: Removing a flag or spam label restores the entry status, including a payment status.
+* Fix: Delete follows the Trash or Hard setting for forms and entries.
+* Fix: The New count follows the form you are viewing, and opening an entry marks it read in the list.
+* Fix: Dashboard counts refresh when an entry is saved.
+* Fix: Dashboard and reports count from midnight in the site timezone.
+* Fix: Autosave uses the interval in Settings, and turning it off stops it.
+* Fix: A link to an entry loads that entry even when it is past the first page. The list keeps its tab and search, and Back returns to the list.
+* Fix: Confirmation rows use the same spacing as the rest of the builder.
+* Fix: A form in a block is the same width as the same form in a shortcode.
+* Fix: A theme-styled form uses the theme button, the theme font and the width of the content column, and the builder preview loads the theme fonts.
+* Fix: Publishing a form no longer looks unpublished when the only difference is the order of appearance settings.
+* Fix: Gravity Forms and Fluent Forms imports keep pages, hidden fields, names and conditional logic, and leave payment, quiz and post fields out.
+* Fix: On Tools, choosing a file is one keyboard stop, notices clear when you change section, and forms with the same title show their number and status.
+* Fix: Importing entries warns when a file is from another form and skips entries that are already there. The transfer screen says notes, the IP address, the browser, files, logs and unpublished drafts are not in the file.
+* Fix: Importing the same entries file again skips entries that were flagged, marked as spam, restored, read or starred since, and two different entries with the same answers at the same time are both imported.
+* Fix: A webhook that is still waiting says Queued.
+* Fix: A color field saves the color it shows, including its default.
+* Fix: Each CAPTCHA field uses its own provider and keys, and the form says when a check is not set up.
+* Fix: A form has one CAPTCHA field per provider. Publishing a second reCAPTCHA, hCaptcha or Turnstile field is refused with a message, and the visitor's token is checked once.
+* Fix: When publishing is refused because of a field, the builder shows the reason instead of [object Object].
+* Fix: Password fields can show a strength meter and ask for the password again.
+* Fix: A US phone number is grouped as it is typed, and a short number is rejected.
+* Fix: Dropdown, radio and multiple choice start with choices, and the canvas shows the default choice.
+* Fix: Choice groups are not tied to a missing control, prefix and suffix text is named for screen readers, and a consent link uses the words already in the sentence.
+* Fix: A section heading and custom HTML each take a full row, and column layouts use a real column count.
+* Fix: Hidden and color fields no longer repeat the admin label or the default value.
+* Fix: Net Promoter Score has a low and a high label, and a Calculation field has a prefix and a suffix.
+* Fix: An Action Hook field runs when the form is shown and when it is submitted.
+* Fix: Logic for a checkbox, toggle or country offers the real values, and an off toggle counts as empty.
+* Fix: The second dependent dropdown lists only the choices that belong to the first answer, and the first dropdown keeps its label.
+* Fix: Replacing dependent dropdowns from a file asks first, and a semicolon file imports as separate columns.
+* Fix: Dropdown, country, phone and date fields work from the keyboard. The calendar can jump to a month and year, and country buttons show a letter code.
+* Fix: The first invalid dropdown, country, date or phone control receives focus.
+* Fix: Fields inside a column saved as an object with its own fields list are shown, checked and sent, so a product there is not charged unseen.
+* Fix: Deleting a field inside a step or container shows the Field deleted notice with Undo.
+* Fix: If the forms list fails to load after you change tab, search or sort, the old rows are cleared instead of shown under the new tab.
+* Fix: If the entries list fails to load after you change tab, search, date or form, the old entries are cleared instead of shown under the new filters.
+* Fix: A desktop preview wider than the builder canvas is scaled from its top left corner and stays whole and centred.
+* Fix: The Payment Form template's product is a fixed product with no quantity box in the builder or on the form, and it is charged once.
+* Fix: The Donation Form template's Custom Amount is required, with a minimum of 1, so a donation form cannot be sent without a donation.
+* Fix: Templates lose only card number, expiry and CVV inputs. A field that just mentions a card, such as a gift card message, is kept.
+* Fix: A payment template that already has Priced options or a Custom Amount gets no extra fixed product, and a multi-step template gets its payment fields inside its steps.
+* Fix: Conditional logic on the server reads a website as it was typed, so a rule for example.com still shows, stores and charges the fields it controls.
+* Fix: The form checks a Product quantity before sending, with the same whole number, minimum and maximum rules as the server.
 = 2.3.9 - 2026-10-19 =
 * Change: Everything in SubtleForms works without a license: CSV export, reports, full conditional logic, Picture choice, several files per upload field, payment fields and coupons, and the Webhooks and Analytics settings.
 * Change: Signature and Calculation fields and card payments are part of SubtleForms Pro 2.4.0. Forms that use them keep them; the live form leaves them out until Pro is active.
@@ -157,6 +231,9 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 The full history is in changelog.txt in the plugin folder.
 
 == Upgrade Notice ==
+
+= 2.4.0 =
+Field options, CAPTCHA keys, dependent dropdowns and keyboard use of dropdowns, country, phone and date fields.
 
 = 2.3.9 =
 Free plugin and SubtleForms Pro split cleanly: everything in this plugin works without a license. Requires WordPress 6.6. Update SubtleForms Pro to 2.4.0 at the same time.

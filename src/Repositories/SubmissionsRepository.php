@@ -195,19 +195,16 @@ final class SubmissionsRepository {
 			$format[]               = '%s';
 		}
 
-		if ( isset( $data['meta'] ) ) {
-			$update_data['meta'] = wp_json_encode( $data['meta'] );
-			$format[]            = '%s';
-		}
-
-		if ( isset( $data['status'] ) ) {
-			if ( $data['status'] === 'none' ) {
-				// 'none' clears admin status override, set to NULL in DB
-				$update_data['status'] = null;
-			} else {
-				$update_data['status'] = $data['status'];
+		$current = isset( $data['status'] ) ? $this->find( $id ) : null;
+		$columns = self::statusColumns( $data, is_array( $current ) ? $current : array() );
+		foreach ( $columns as $column => $value ) {
+			if ( 'meta' === $column ) {
+				$update_data['meta'] = wp_json_encode( $value );
+				$format[]            = '%s';
+				continue;
 			}
-			$format[] = '%s';
+			$update_data[ $column ] = $value;
+			$format[]               = 'status' === $column ? '%s' : '%s';
 		}
 
 		if ( isset( $data['is_read'] ) ) {
@@ -491,7 +488,7 @@ final class SubmissionsRepository {
 		       // Fetch all columns needed for admin list (including payload/meta)
 		       // phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name, orderby and order are whitelisted.
 		       $sql = sprintf(
-			       "SELECT id, form_id, status, is_read, starred, created_at, payload, meta, user_agent FROM {$this->table} %s ORDER BY %s %s LIMIT %%d OFFSET %%d",
+			       "SELECT id, form_id, schema_version, status, is_read, starred, created_at, payload, meta, user_agent FROM {$this->table} %s ORDER BY %s %s LIMIT %%d OFFSET %%d",
 					       $whereClause,
 					       $orderby,
 					       $order
@@ -822,7 +819,8 @@ $cutoff_date
 
 		// Phase B3: Cache dashboard aggregates (60s TTL)
 		sort( $form_ids ); // Consistent key ordering
-		$cache_key = 'subtleforms:' . SUBTLEFORMS_VERSION . ':counts:' . md5( serialize( $form_ids ) . '|' . $status );
+		$generation = (int) get_option( 'subtleforms_counts_generation', 1 );
+		$cache_key  = self::countsCacheKey( $form_ids, $status, $generation );
 		$cached    = get_transient( $cache_key );
 
 		if ( false !== $cached ) {
@@ -875,10 +873,92 @@ $cutoff_date
 	 * Invalidate count cache for a specific form (v1.8.2 - Phase B3).
 	 */
 	private function invalidate_count_cache( int $form_id ): void {
-		// Delete all cached counts that include this form
-		global $wpdb;
-		// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $wpdb->options is a core table; value is a static pattern string.
-		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", '_transient_subtleforms:' . SUBTLEFORMS_VERSION . ':counts:%' ) );
+		// Bump a generation so the next read misses. A LIKE delete scanned
+		// wp_options on every submission (FF-29). Old keys expire in a minute.
+		$next = (int) get_option( 'subtleforms_counts_generation', 1 ) + 1;
+		update_option( 'subtleforms_counts_generation', $next, false );
+	}
+
+	/**
+	 * Keep a pipeline status (payment_pending, failed) when an entry is flagged
+	 * or marked spam, and put it back on Restore.
+	 *
+	 * @param string $current Current status.
+	 * @param string $next Requested status.
+	 * @param array  $meta Submission meta.
+	 * @return array{status: string, meta: array|null}
+	 */
+	/**
+	 * Columns to write when an entry is updated. Flagging stores the previous
+	 * status in meta, and that meta has to be part of the same write.
+	 *
+	 * @param array $data Requested changes.
+	 * @param array $current Stored row.
+	 * @return array
+	 */
+	public static function statusColumns( array $data, array $current ): array {
+		$columns = array();
+		if ( isset( $data['meta'] ) && is_array( $data['meta'] ) ) {
+			$columns['meta'] = $data['meta'];
+		}
+		if ( ! isset( $data['status'] ) ) {
+			return $columns;
+		}
+		$meta = is_array( $current['meta'] ?? null ) ? $current['meta'] : array();
+		if ( isset( $columns['meta'] ) ) {
+			$meta = array_merge( $meta, $columns['meta'] );
+		}
+		$resolved = self::reviewStatus( (string) ( $current['status'] ?? '' ), (string) $data['status'], $meta );
+		if ( is_array( $resolved['meta'] ) ) {
+			$columns['meta'] = $resolved['meta'];
+		}
+		$columns['status'] = 'none' === $resolved['status'] ? null : $resolved['status'];
+		return $columns;
+	}
+
+	public static function reviewStatus( string $current, string $next, array $meta ): array {
+		$review = array( 'spam', 'flagged', 'archived' );
+		if ( in_array( $next, $review, true ) ) {
+			if ( '' !== $current && 'trash' !== $current && 'none' !== $current && ! in_array( $current, $review, true ) ) {
+				$meta['pipeline_status'] = $current;
+			}
+			return array(
+				'status' => $next,
+				'meta'   => $meta,
+			);
+		}
+		if ( 'none' === $next ) {
+			$saved = isset( $meta['pipeline_status'] ) ? (string) $meta['pipeline_status'] : '';
+			unset( $meta['pipeline_status'] );
+			if ( '' !== $saved ) {
+				return array(
+					'status' => $saved,
+					'meta'   => $meta,
+				);
+			}
+			return array(
+				'status' => 'none',
+				'meta'   => $meta,
+			);
+		}
+		return array(
+			'status' => $next,
+			'meta'   => null,
+		);
+	}
+
+	/**
+	 * Cache key for dashboard submission counts. The generation changes when
+	 * any entry is written, so a stale count is never reused.
+	 *
+	 * @param array      $formIds Form ids.
+	 * @param mixed      $status Status filter.
+	 * @param int        $generation Cache generation.
+	 * @return string
+	 */
+	public static function countsCacheKey( array $formIds, $status, int $generation ): string {
+		sort( $formIds );
+		return 'subtleforms:' . SUBTLEFORMS_VERSION . ':counts:' . $generation . ':' . md5( serialize( $formIds ) . '|' . $status );
 	}
 
 	/**

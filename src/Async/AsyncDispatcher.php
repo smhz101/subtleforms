@@ -39,7 +39,16 @@ final class AsyncDispatcher {
 	 * }
 	 * @return bool True if job scheduled, false otherwise
 	 */
-	public static function dispatchEmail( array $payload ): bool {
+		/**
+	 * An id that makes two otherwise identical cron jobs different.
+	 *
+	 * @return string
+	 */
+	public static function dispatchId(): string {
+		return uniqid( 'sf', true );
+	}
+
+public static function dispatchEmail( array $payload ): bool {
 		// Validate required fields
 		if ( empty( $payload['to'] ) || empty( $payload['subject'] ) ) {
 			self::log( 'Email dispatch failed: missing required fields', $payload );
@@ -58,6 +67,8 @@ final class AsyncDispatcher {
 			'form_id'       => isset( $payload['form_id'] ) ? (int) $payload['form_id'] : 0,
 			'audience'      => $payload['audience'] ?? 'admin',
 			'retry_count'   => $payload['retry_count'] ?? 0,
+			// A fresh id so a second send within ten minutes is not dropped as a duplicate cron event.
+			'dispatch_id'   => self::dispatchId(),
 		);
 
 		// Schedule for immediate execution (0 delay)
@@ -110,6 +121,7 @@ final class AsyncDispatcher {
 			'submission_id' => $payload['submission_id'] ?? null,
 			'step_id'       => $payload['step_id'] ?? 'webhook',
 			'retry_count'   => $payload['retry_count'] ?? 0,
+			'dispatch_id'   => self::dispatchId(),
 		);
 
 		// Schedule for immediate execution (0 delay)

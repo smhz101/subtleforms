@@ -9,6 +9,8 @@ import { ProductPreview, ChoicePreview, SummaryPreview, CardPreview } from './Pa
 import { getCanvasPreview } from '../../../shared/extend';
 import { fieldDisplay } from '../../../shared/fieldDisplay';
 import { fieldConfig } from '../../../shared/fieldConfig';
+import { choiceShowsDefault } from '../../../shared/canvasDefaults';
+import { consentParts } from '../../../shared/consentLabel';
 import { toggleInitialValue, toggleIsOn } from '../../../shared/toggleState';
 import ChainedSelect from '../../../frontend/components/fields/ChainedSelect';
 import PhoneField from '../../../frontend/components/fields/PhoneField';
@@ -16,6 +18,7 @@ import ChoiceSelect from '../../../frontend/components/fields/ChoiceSelect';
 import CountrySelect from '../../../frontend/components/fields/CountrySelect';
 import DateTimeField from '../../../frontend/components/fields/DateTimeField';
 import { ConfigContext } from './context/ConfigContext';
+import { currencySymbol } from '../../../shared/currencies';
 import './FieldRenderer.scss';
 
 // Types that do not accept user input, required indicator suppressed
@@ -136,6 +139,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
   // canvas shows them as the live form does (2.3.2).
   const builderConfig = useContext(ConfigContext);
   const display = fieldDisplay(field, builderConfig?.fieldDefaults || {});
+  const formCurrency = builderConfig?.currency || '';
   // Add-on field types no active plugin provides right now.
   const addonMissing = (window.subtleformsAdmin?.missingFieldTypes || []).includes(type);
 
@@ -343,42 +347,23 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
             readOnly
           />
           <span className='sf-field-renderer__checkbox-label'>
-            {(() => {
-              const label = field.checkboxLabel || __('I agree to the Privacy Policy.', 'subtleforms');
-              const url = field.privacyPolicyUrl || '';
-              const linkText = field.linkText || __('Privacy Policy', 'subtleforms');
-              if (!url) return label;
-              if (label.indexOf('{{link}}') !== -1) {
-                const [before, after] = label.split('{{link}}');
-                return (
-                  <>
-                    {before}
-                    <a
-                      href={url}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='sf-field-renderer__consent-link'
-                      onClick={(e) => e.preventDefault()}>
-                      {linkText}
-                    </a>
-                    {after}
-                  </>
-                );
-              }
-              return (
-                <>
-                  {label}{' '}
-                  <a
-                    href={url}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='sf-field-renderer__consent-link'
-                    onClick={(e) => e.preventDefault()}>
-                    {linkText}
-                  </a>
-                </>
-              );
-            })()}
+            {consentParts(
+              field.checkboxLabel || __('I agree to the Privacy Policy.', 'subtleforms'),
+              field.privacyPolicyUrl || '',
+              field.linkText || __('Privacy Policy', 'subtleforms')
+            ).map((part, index) => (
+              part.url ? (
+                <a
+                  key={index}
+                  href={part.url}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='sf-field-renderer__consent-link'
+                  onClick={(e) => e.preventDefault()}>
+                  {part.text}
+                </a>
+              ) : <span key={index}>{part.text}</span>
+            ))}
           </span>
         </div>
       )}
@@ -421,6 +406,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       {(type === 'dropdown' || type === 'select') && (
         <ChoiceSelect
           options={fieldConfig(field).options || options || []}
+          value={(fieldConfig(field).options || options || []).find((opt) => choiceShowsDefault(fieldConfig(field).defaultValue, opt.value))?.value || ''}
           placeholder={placeholder}
           preview={!interactive}
           emptyLabel={__('Add choices in the field settings to show them here.', 'subtleforms')}
@@ -503,15 +489,10 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       {/* Payment fields */}
       {type === 'payment_amount' && (
         <div className='sf-field-renderer__rating-wrapper'>
-          {field.showCurrencySymbol !== false && field.currency && (
+          {field.showCurrencySymbol !== false && (
             <span className='sf-field-renderer__rating-text'>
-              {field.currency === 'USD'
-                ? '$'
-                : field.currency === 'EUR'
-                ? '€'
-                : field.currency === 'GBP'
-                ? '£'
-                : field.currency}
+              {/* The form charges in the site or form currency, never a per-field one (PAY-09). */}
+              {currencySymbol(formCurrency || window.subtleformsAdmin?.currency || 'USD')}
             </span>
           )}
           <input
@@ -642,7 +623,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           <div className='sf-captcha-preview__footer'>
             <div className='sf-captcha-preview__status'>
               <span className='sf-captcha-preview__status-icon'><Icon.HelpCircle size={12} /></span>
-              {__('CAPTCHA will appear here on the live form', 'subtleforms')}
+              {fieldConfig(field).site_key && fieldConfig(field).secret_key ? __('CAPTCHA will appear here on the live form', 'subtleforms') : __('Add a site key and a secret key, or this check will not run.', 'subtleforms')}
             </div>
           </div>
         </div>

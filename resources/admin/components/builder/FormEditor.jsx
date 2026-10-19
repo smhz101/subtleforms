@@ -320,6 +320,7 @@ export default function FormEditor({
       fieldDefinitions={definitionMap}
       formType={formType}
       fieldDefaults={fieldDefaults}
+      currency={schema?.metadata?.payment?.currency || ''}
       onInsert={handleInsert}
       onDelete={handleDelete}
       onUpdate={handleUpdate}

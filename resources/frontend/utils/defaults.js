@@ -1,4 +1,5 @@
 import { repeaterLimits } from './fieldValidation';
+import { columnFields } from './columnFields';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { toggleInitialValue } from '../../shared/toggleState';
 /**
@@ -116,6 +117,8 @@ export function collectDefaultValues(fields) {
           out[key] = config.default_country;
         } else if (field.type === 'hidden' && config.value) {
           out[key] = resolveTokens(config.value);
+        } else if (field.type === 'color_picker' && (config.default || config.defaultValue)) {
+          out[key] = config.default || config.defaultValue;
         }
       }
 
@@ -125,7 +128,7 @@ export function collectDefaultValues(fields) {
           : field.fields;
       visit(children);
       if (Array.isArray(field.columns)) {
-        field.columns.forEach((col) => visit(col));
+        field.columns.forEach((col) => visit(columnFields(col)));
       }
     });
   };

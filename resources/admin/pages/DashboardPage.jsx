@@ -1,4 +1,5 @@
 import { useState } from '@wordpress/element';
+import { submissionStatus } from '../utils/submissionStatus';
 import { Button } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { getBranding } from '../utils/branding';
@@ -99,7 +100,7 @@ export default function Dashboard() {
           <Kpi
             label={__('Today', 'subtleforms')}
             value={stats.submissions_today}
-            meta={__('Since midnight (UTC)', 'subtleforms')}
+            meta={__('Since midnight', 'subtleforms')}
           />
           <Kpi
             label={__('Last 7 days', 'subtleforms')}
@@ -439,15 +440,7 @@ function QuickAction({ icon: ActionIcon, title, text, to, hash }) {
 }
 
 function SubmissionStatus({ status }) {
-  const map = {
-    completed: { label: __('Completed', 'subtleforms'), cls: 'sf-pill--success' },
-    processing: { label: __('Processing', 'subtleforms'), cls: 'sf-pill--info' },
-    failed: { label: __('Failed', 'subtleforms'), cls: 'sf-pill--danger' },
-    payment_pending: { label: __('Awaiting payment', 'subtleforms'), cls: 'sf-pill--warning' },
-    spam: { label: __('Spam', 'subtleforms'), cls: 'sf-pill--danger' },
-    flagged: { label: __('Flagged', 'subtleforms'), cls: 'sf-pill--warning' },
-  };
-  const config = map[status] || { label: __('Received', 'subtleforms'), cls: '' };
+  const config = submissionStatus(status);
   return <span className={clsx('sf-pill', 'sf-pill--dot', config.cls)}>{config.label}</span>;
 }
 

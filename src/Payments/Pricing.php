@@ -63,7 +63,14 @@ final class Pricing {
 				}
 				if ( ! empty( $field['columns'] ) && is_array( $field['columns'] ) ) {
 					foreach ( $field['columns'] as $column ) {
-						if ( is_array( $column ) ) {
+						if ( ! is_array( $column ) ) {
+							continue;
+						}
+						if ( isset( $column['fields'] ) && is_array( $column['fields'] ) ) {
+							$walk( $column['fields'] );
+						} elseif ( isset( $column['children'] ) && is_array( $column['children'] ) ) {
+							$walk( $column['children'] );
+						} else {
 							$walk( $column );
 						}
 					}
@@ -81,20 +88,23 @@ final class Pricing {
 	 * container it sits in. Keyless nodes are judged by their own show and
 	 * hide rules.
 	 *
-	 * @param mixed $schema  Form schema.
-	 * @param array $payload Submitted values.
+	 * @param mixed      $schema      Form schema.
+	 * @param array      $payload     Submitted values.
+	 * @param array|null $logicValues Answers as typed, for conditional logic.
+	 *                                Defaults to $payload.
 	 * @return array<int, array>
 	 */
-	public static function visibleFields( $schema, array $payload ): array {
+	public static function visibleFields( $schema, array $payload, ?array $logicValues = null ): array {
 		$out = array();
 		if ( ! is_array( $schema ) || empty( $schema['fields'] ) || ! is_array( $schema['fields'] ) ) {
 			return $out;
 		}
-		$logic  = new ConditionalLogic();
-		$state  = $logic->evaluate( $schema, $payload );
-		$hidden = array_flip( array_map( 'strval', array_merge( $state['hidden_fields'], $state['hidden_steps'] ) ) );
+		$logicValues = $logicValues ?? $payload;
+		$logic       = new ConditionalLogic();
+		$state       = $logic->evaluate( $schema, $logicValues );
+		$hidden      = array_flip( array_map( 'strval', array_merge( $state['hidden_fields'], $state['hidden_steps'] ) ) );
 		// Rules on keyless nodes read the answers that count, like the evaluator.
-		$values = $logic->visiblePayload( $schema, $payload );
+		$values = $logic->visiblePayload( $schema, $logicValues );
 
 		$walk = static function ( array $fields, bool $parentHidden ) use ( &$walk, &$out, $hidden, $logic, $values ) {
 			foreach ( $fields as $field ) {
@@ -170,9 +180,9 @@ final class Pricing {
 	 * @param mixed $schema Form schema.
 	 */
 	public static function currency( $schema ): string {
-		$form = is_array( $schema ) ? (string) ( $schema['metadata']['payment']['currency'] ?? '' ) : '';
-		if ( '' !== $form ) {
-			return strtoupper( $form );
+		$form = is_array( $schema ) ? strtoupper( trim( (string) ( $schema['metadata']['payment']['currency'] ?? '' ) ) ) : '';
+		if ( '' !== $form && Currencies::isSupported( $form ) ) {
+			return $form;
 		}
 		$settings = get_option( 'subtleforms_settings', array() );
 		$site     = is_array( $settings ) ? (string) ( $settings['ext_payments_currency'] ?? '' ) : '';
@@ -185,16 +195,21 @@ final class Pricing {
 	 * @param mixed      $schema  Form schema.
 	 * @param array      $payload Submitted values (calculations already applied).
 	 * @param array|null $coupon  A validated coupon row, or null.
+	 * @param array|null $logicValues Answers as typed, for conditional logic.
+	 *                                Defaults to $payload.
 	 * @return array{currency:string,items:array,subtotal:float,discount:float,coupon:?string,tax_rate:float,tax:float,total:float,formula_error:bool}
 	 */
-	public static function quote( $schema, array $payload, ?array $coupon = null ): array {
-		$items   = array();
-		$taxRate = 0.0;
+	public static function quote( $schema, array $payload, ?array $coupon = null, ?array $logicValues = null ): array {
+		$items    = array();
+		$taxRate  = 0.0;
+		// Prices round to what the currency can charge: whole yen, cents (PAY-12).
+		$currency = self::currency( $schema );
+		$money    = static fn( $v ) => self::money( $v, $currency );
 
 		$priced  = $payload;
 
 		// Visibility comes from conditional logic, never from which keys were sent.
-		foreach ( self::visibleFields( $schema, $payload ) as $f ) {
+		foreach ( self::visibleFields( $schema, $payload, $logicValues ) as $f ) {
 			$type  = (string) ( $f['type'] ?? '' );
 			$key   = (string) ( $f['key'] ?? '' );
 			$label = wp_strip_all_tags( (string) ( $f['label'] ?? $key ) );
@@ -202,7 +217,7 @@ final class Pricing {
 
 			switch ( $type ) {
 				case 'payment_product':
-					$price = self::money( $f['price'] ?? 0 );
+					$price = $money( $f['price'] ?? 0 );
 					if ( ! empty( $f['allowQuantity'] ) ) {
 						$qty = (int) ( is_numeric( $value ) ? $value : 0 );
 						$min = max( 0, (int) ( $f['minQuantity'] ?? 0 ) );
@@ -217,41 +232,48 @@ final class Pricing {
 						$qty = 1;
 					}
 					if ( $qty > 0 && $price > 0 ) {
-						$items[] = self::item( $key, (string) ( $f['productName'] ?? '' ) ?: $label, $qty, $price );
+						$items[] = self::item( $key, (string) ( $f['productName'] ?? '' ) ?: $label, $qty, $price, $currency );
 					}
 					break;
 
 				case 'payment_choice':
-					$selected = is_array( $value ) ? $value : ( null === $value || '' === $value ? array() : explode( ',', (string) $value ) );
-					$selected = array_map( 'strval', array_map( 'trim', $selected ) );
+					if ( 'checkbox' === (string) ( $f['displayAs'] ?? 'radio' ) ) {
+						$selected = is_array( $value ) ? $value : ( null === $value || '' === $value ? array() : explode( ',', (string) $value ) );
+					} else {
+						// Radio, cards and dropdown pick one option: only the
+						// first answer is ever priced (PAY-08).
+						$first    = is_array( $value ) ? reset( $value ) : $value;
+						$selected = null === $first || false === $first || '' === $first || ! is_scalar( $first ) ? array() : array( $first );
+					}
+					$selected = array_map( 'strval', array_map( 'trim', array_filter( $selected, 'is_scalar' ) ) );
 					foreach ( (array) ( $f['options'] ?? array() ) as $opt ) {
 						if ( ! is_array( $opt ) || ! in_array( (string) ( $opt['value'] ?? '' ), $selected, true ) ) {
 							continue;
 						}
-						$price = self::money( $opt['price'] ?? 0 );
+						$price = $money( $opt['price'] ?? 0 );
 						if ( $price > 0 ) {
-							$items[] = self::item( $key, $label . ': ' . wp_strip_all_tags( (string) ( $opt['label'] ?? '' ) ), 1, $price );
+							$items[] = self::item( $key, $label . ': ' . wp_strip_all_tags( (string) ( $opt['label'] ?? '' ) ), 1, $price, $currency );
 						}
 					}
 					break;
 
 				case 'payment_amount':
-					$amount = self::money( is_numeric( $value ) ? $value : 0 );
+					$amount = $money( is_numeric( $value ) ? $value : 0 );
 					if ( isset( $f['min'] ) && is_numeric( $f['min'] ) && $amount > 0 ) {
-						$amount = max( (float) $f['min'], $amount );
+						$amount = max( $money( $f['min'] ), $amount );
 					}
 					if ( isset( $f['max'] ) && is_numeric( $f['max'] ) && (float) $f['max'] > 0 ) {
-						$amount = min( (float) $f['max'], $amount );
+						$amount = min( $money( $f['max'] ), $amount );
 					}
 					if ( $amount > 0 ) {
-						$items[] = self::item( $key, $label, 1, $amount );
+						$items[] = self::item( $key, $label, 1, $amount, $currency );
 					}
 					break;
 
 				case 'payment_hidden_price':
-					$amount = self::money( $f['amount'] ?? 0 );
+					$amount = $money( $f['amount'] ?? 0 );
 					if ( $amount > 0 ) {
-						$items[] = self::item( $key, (string) ( $f['description'] ?? '' ) ?: $label, 1, $amount );
+						$items[] = self::item( $key, (string) ( $f['description'] ?? '' ) ?: $label, 1, $amount, $currency );
 					}
 					break;
 
@@ -269,12 +291,12 @@ final class Pricing {
 			$amount = 0.0;
 			if ( 'field' === ( $legacy['amountType'] ?? 'fixed' ) ) {
 				$k      = (string) ( $legacy['amountField'] ?? '' );
-				$amount = self::money( isset( $payload[ $k ] ) && is_numeric( $payload[ $k ] ) ? $payload[ $k ] : 0 );
+				$amount = $money( isset( $payload[ $k ] ) && is_numeric( $payload[ $k ] ) ? $payload[ $k ] : 0 );
 			} else {
-				$amount = self::money( $legacy['fixedAmount'] ?? 0 );
+				$amount = $money( $legacy['fixedAmount'] ?? 0 );
 			}
 			if ( $amount > 0 ) {
-				$items[] = self::item( 'payment', __( 'Payment', 'subtleforms' ), 1, $amount );
+				$items[] = self::item( 'payment', __( 'Payment', 'subtleforms' ), 1, $amount, $currency );
 			}
 		}
 
@@ -289,14 +311,14 @@ final class Pricing {
 		 */
 		$items = array_values( (array) apply_filters( 'subtleforms/payments/line_items', $items, $schema, $payload ) );
 
-		$subtotal = round( array_sum( array_column( $items, 'amount' ) ), 2 );
-		$discount = $coupon ? CouponsRepository::discountFor( $coupon, $subtotal ) : 0.0;
+		$subtotal = Currencies::round( array_sum( array_column( $items, 'amount' ) ), $currency );
+		$discount = $coupon ? Currencies::round( CouponsRepository::discountFor( $coupon, $subtotal ), $currency ) : 0.0;
 		$taxable  = max( 0.0, $subtotal - $discount );
-		$tax      = round( $taxable * $taxRate / 100, 2 );
-		$total    = round( $taxable + $tax, 2 );
+		$tax      = Currencies::round( $taxable * $taxRate / 100, $currency );
+		$total    = Currencies::round( $taxable + $tax, $currency );
 
 		$quote = array(
-			'currency' => self::currency( $schema ),
+			'currency' => $currency,
 			'items'    => $items,
 			'subtotal' => $subtotal,
 			'discount' => $discount,
@@ -323,27 +345,30 @@ final class Pricing {
 	 * An amount in the currency's smallest unit, as gateways expect.
 	 */
 	public static function toMinor( float $amount, string $currency ): int {
-		return in_array( strtoupper( $currency ), self::ZERO_DECIMAL, true )
-			? (int) round( $amount )
-			: (int) round( $amount * 100 );
+		return Currencies::toMinor( $amount, $currency );
 	}
 
 	/**
-	 * Normalise a price to a non-negative float with two decimals.
+	 * Normalise a price to a non-negative float, rounded to the currency's
+	 * decimals (two when no currency is given).
 	 *
-	 * @param mixed $value Raw value.
+	 * @param mixed  $value    Raw value.
+	 * @param string $currency Currency code, or '' for two decimals.
 	 */
-	public static function money( $value ): float {
-		return is_numeric( $value ) ? max( 0.0, round( (float) $value, 2 ) ) : 0.0;
+	public static function money( $value, string $currency = '' ): float {
+		if ( ! is_numeric( $value ) ) {
+			return 0.0;
+		}
+		return max( 0.0, '' === $currency ? round( (float) $value, 2 ) : Currencies::round( $value, $currency ) );
 	}
 
-	private static function item( string $key, string $label, int $qty, float $unit ): array {
+	private static function item( string $key, string $label, int $qty, float $unit, string $currency = '' ): array {
 		return array(
 			'key'    => $key,
 			'label'  => $label,
 			'qty'    => $qty,
 			'unit'   => $unit,
-			'amount' => round( $qty * $unit, 2 ),
+			'amount' => '' === $currency ? round( $qty * $unit, 2 ) : Currencies::round( $qty * $unit, $currency ),
 		);
 	}
 }
