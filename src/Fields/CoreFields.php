@@ -1757,7 +1757,7 @@ final class CoreFields {
 						'type'  => 'text',
 						'name'  => 'description',
 						'label' => __( 'Description', 'subtleforms' ),
-						'help'  => __( 'Optional description for debugging', 'subtleforms' ),
+						'help'  => __( 'Name of the line in the order summary and receipt. Not shown on the form.', 'subtleforms' ),
 					),
 				),
 				meta: array( 'category' => 'system' ),

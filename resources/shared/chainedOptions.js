@@ -62,8 +62,36 @@ export function chainedSelectLevels(config, selections = [], settings = {}) {
 }
 
 /**
+ * The first level a required chained field still needs: a level that offers
+ * choices for the answers so far but has no valid answer. Every level with
+ * choices must be answered, not only the first (FLD2-10). Mirrors
+ * FieldValidator::chainedMissingLevel() on the server.
+ *
+ * @param {Object} config     Field settings.
+ * @param {Array}  selections Answer, one choice per level.
+ * @return {number} Depth of the first unanswered level, or -1.
+ */
+export function firstUnansweredChainedLevel(config, selections) {
+  const selected = Array.isArray(selections) ? selections : [];
+  const rows = chainedSelectLevels(config, selected);
+  for (const row of rows) {
+    const answer = selected[row.depth];
+    const valid =
+      answer !== undefined &&
+      answer !== null &&
+      String(answer) !== '' &&
+      row.options.some((opt) => String(opt?.value) === String(answer));
+    if (!valid) {
+      return row.depth;
+    }
+  }
+  return -1;
+}
+
+/**
  * Columns show every list at once. With nothing chosen yet, the first choice
- * in the first list is the parent the other lists follow.
+ * in the first list is the parent the other lists follow. This is only what
+ * is shown: it is never written into the answer (FLD2-09).
  *
  * @param {Object} config Field settings.
  * @param {Array} [selections] Current choices.

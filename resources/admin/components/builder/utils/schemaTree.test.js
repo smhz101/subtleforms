@@ -65,3 +65,27 @@ describe('schemaTree', () => {
     });
   });
 });
+
+describe('FB-01: Name part settings saved as a list get their keys back', () => {
+  it('turns the list into a map keyed by part', () => {
+    const result = normalizeSchema({
+      fields: [
+        {
+          id: 'nm',
+          key: 'nm',
+          type: 'name_group',
+          fields: [
+            { label: 'First Name', enabled: true },
+            { label: 'Last Name', enabled: true },
+            { label: 'Middle Name', enabled: true },
+            { label: 'Suffix', enabled: true },
+          ],
+        },
+      ],
+    });
+    const parts = result.nodes.nm.config.fields;
+    expect(Array.isArray(parts)).toBe(false);
+    expect(parts.middle_name.enabled).toBe(true);
+    expect(parts.suffix.enabled).toBe(true);
+  });
+});

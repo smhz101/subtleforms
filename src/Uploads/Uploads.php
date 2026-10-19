@@ -344,53 +344,201 @@ final class Uploads {
 	/**
 	 * Swap upload IDs in a payload for the pending file records.
 	 *
+	 * Upload fields inside a Repeater are resolved in every group (FA-03).
+	 * A file record anywhere else in the payload was not made here, so it is
+	 * dropped: a forged record can never point an entry at another entry's
+	 * file.
+	 *
 	 * @param int   $formId  Form ID.
 	 * @param mixed $schema  Active schema.
 	 * @param array $payload Payload keyed by field key.
 	 * @return array|WP_Error Payload, or an error keyed to the field.
 	 */
 	public static function resolvePayload( int $formId, $schema, array $payload ) {
-		$fields = self::uploadFields( is_array( $schema ) ? ( $schema['fields'] ?? array() ) : array() );
-		$errors = array();
+		$nodes    = is_array( $schema ) ? ( $schema['fields'] ?? array() ) : array();
+		$errors   = array();
+		$resolved = array();
+		$skip     = array();
 
-		foreach ( $fields as $key => $field ) {
+		foreach ( self::uploadFields( $nodes, true ) as $key => $field ) {
 			if ( ! array_key_exists( $key, $payload ) ) {
 				continue;
 			}
-			$ids = self::idsFrom( $payload[ $key ] );
-			if ( ! $ids ) {
-				$payload[ $key ] = array();
+			$skip[ $key ] = true;
+			$value        = self::resolveValue( $formId, (string) $key, $field, $payload[ $key ], $error );
+			if ( null === $value ) {
+				$errors[ $key ] = $error;
 				continue;
 			}
-			if ( count( $ids ) > self::maxFiles( $field ) ) {
-				$errors[ $key ] = sprintf(
-					/* translators: %d: number of files */
-					_n( 'You can attach up to %d file.', 'You can attach up to %d files.', self::maxFiles( $field ), 'subtleforms' ),
-					self::maxFiles( $field )
-				);
+			$payload[ $key ] = $value;
+			$resolved        = array_merge( $resolved, array_column( $value, 'id' ) );
+		}
+
+		foreach ( self::repeaters( $nodes ) as $rkey => $children ) {
+			if ( ! array_key_exists( $rkey, $payload ) || ! is_array( $payload[ $rkey ] ) ) {
 				continue;
 			}
-			$records = array();
-			foreach ( $ids as $id ) {
-				$pending = get_transient( self::TRANSIENT . $id );
-				if ( ! is_array( $pending ) || (int) ( $pending['form_id'] ?? 0 ) !== $formId || ( $pending['field'] ?? '' ) !== $key || ! is_file( self::path( self::PENDING, $id ) ) ) {
-					$errors[ $key ] = __( 'An attached file has expired. Please attach it again.', 'subtleforms' );
-					continue 2;
+			$skip[ $rkey ] = true;
+			$groups        = $payload[ $rkey ];
+			foreach ( $groups as $index => $group ) {
+				if ( ! is_array( $group ) ) {
+					continue;
 				}
-				$records[] = array(
-					'id'   => $id,
-					'name' => (string) $pending['name'],
-					'size' => (int) $pending['size'],
-					'type' => (string) $pending['type'],
-				);
+				foreach ( $children as $ckey => $field ) {
+					if ( ! array_key_exists( $ckey, $group ) ) {
+						continue;
+					}
+					$value = self::resolveValue( $formId, (string) $ckey, $field, $group[ $ckey ], $error );
+					if ( null === $value ) {
+						$errors[ $rkey . '.' . $index . '.' . $ckey ] = $error;
+						continue;
+					}
+					$group[ $ckey ] = $value;
+					$resolved       = array_merge( $resolved, array_column( $value, 'id' ) );
+				}
+				// Anything else in the group that looks like a file record
+				// was not uploaded through this form.
+				foreach ( $group as $ckey => $v ) {
+					if ( ! isset( $children[ $ckey ] ) ) {
+						$group[ $ckey ] = self::withoutRecords( $v );
+					}
+				}
+				$groups[ $index ] = $group;
 			}
-			$payload[ $key ] = $records;
+			$payload[ $rkey ] = $groups;
+		}
+
+		foreach ( $payload as $key => $value ) {
+			if ( ! isset( $skip[ $key ] ) ) {
+				$payload[ $key ] = self::withoutRecords( $value );
+			}
 		}
 
 		if ( $errors ) {
 			return new WP_Error( 'subtleforms_upload_invalid', __( 'Please check the attached files.', 'subtleforms' ), array( 'errors' => $errors ) );
 		}
 		return $payload;
+	}
+
+	/**
+	 * The pending file records for one upload answer.
+	 *
+	 * @param int         $formId Form ID.
+	 * @param string      $key    Field key the files were uploaded to.
+	 * @param array       $field  Upload field.
+	 * @param mixed       $value  Submitted IDs.
+	 * @param string|null $error  Set to the message when the answer is refused.
+	 * @return array|null Records, or null when refused.
+	 */
+	private static function resolveValue( int $formId, string $key, array $field, $value, ?string &$error = null ): ?array {
+		$error = null;
+		$ids   = self::idsFrom( $value );
+		if ( ! $ids ) {
+			return array();
+		}
+		if ( count( $ids ) > self::maxFiles( $field ) ) {
+			$error = sprintf(
+				/* translators: %d: number of files */
+				_n( 'You can attach up to %d file.', 'You can attach up to %d files.', self::maxFiles( $field ), 'subtleforms' ),
+				self::maxFiles( $field )
+			);
+			return null;
+		}
+		$records = array();
+		foreach ( $ids as $id ) {
+			$pending = get_transient( self::TRANSIENT . $id );
+			if ( ! is_array( $pending ) || (int) ( $pending['form_id'] ?? 0 ) !== $formId || ( $pending['field'] ?? '' ) !== $key || ! is_file( self::path( self::PENDING, $id ) ) ) {
+				$error = __( 'An attached file has expired. Please attach it again.', 'subtleforms' );
+				return null;
+			}
+			$records[] = array(
+				'id'   => $id,
+				'name' => (string) $pending['name'],
+				'size' => (int) $pending['size'],
+				'type' => (string) $pending['type'],
+			);
+		}
+		return $records;
+	}
+
+	/**
+	 * A value with every file record taken out.
+	 *
+	 * @param mixed $value Value.
+	 * @return mixed
+	 */
+	private static function withoutRecords( $value, int $depth = 0 ) {
+		if ( ! is_array( $value ) || $depth > 8 ) {
+			return $value;
+		}
+		if ( self::isRecord( $value ) ) {
+			return null;
+		}
+		$isList = array_is_list( $value );
+		foreach ( $value as $k => $v ) {
+			if ( self::isRecord( $v ) ) {
+				unset( $value[ $k ] );
+				continue;
+			}
+			$value[ $k ] = self::withoutRecords( $v, $depth + 1 );
+		}
+		return $isList ? array_values( $value ) : $value;
+	}
+
+	/**
+	 * Repeaters in a field tree with their upload fields, by Repeater key.
+	 *
+	 * @param mixed $nodes Field nodes.
+	 * @return array<string,array<string,array>>
+	 */
+	private static function repeaters( $nodes ): array {
+		$out = array();
+		if ( ! is_array( $nodes ) ) {
+			return $out;
+		}
+		foreach ( $nodes as $node ) {
+			if ( ! is_array( $node ) ) {
+				continue;
+			}
+			$key = $node['key'] ?? ( $node['config']['key'] ?? null );
+			if ( 'repeat_container' === ( $node['type'] ?? '' ) && is_string( $key ) && '' !== $key ) {
+				$children = array();
+				foreach ( array( 'children', 'fields' ) as $k ) {
+					if ( isset( $node[ $k ] ) && is_array( $node[ $k ] ) ) {
+						$children += self::uploadFields( $node[ $k ] );
+					}
+				}
+				$out[ $key ] = $children;
+				continue;
+			}
+			foreach ( self::childLists( $node ) as $list ) {
+				$out += self::repeaters( $list );
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Child field lists of a node: children, fields and columns.
+	 *
+	 * @param array $node Node.
+	 * @return array<int,array>
+	 */
+	private static function childLists( array $node ): array {
+		$lists = array();
+		foreach ( array( 'children', 'fields' ) as $k ) {
+			if ( isset( $node[ $k ] ) && is_array( $node[ $k ] ) ) {
+				$lists[] = $node[ $k ];
+			}
+		}
+		if ( isset( $node['columns'] ) && is_array( $node['columns'] ) ) {
+			foreach ( $node['columns'] as $col ) {
+				if ( is_array( $col ) ) {
+					$lists[] = isset( $col['fields'] ) || isset( $col['children'] ) ? ( $col['fields'] ?? $col['children'] ) : $col;
+				}
+			}
+		}
+		return $lists;
 	}
 
 	/**
@@ -438,20 +586,30 @@ final class Uploads {
 	}
 
 	/**
-	 * File records found anywhere in a payload.
+	 * File records found anywhere in a payload, including Repeater groups.
 	 *
 	 * @param array $payload Payload.
 	 * @return array<int,array{id:string,name:string,size:int,type:string}>
 	 */
 	public static function recordsIn( array $payload ): array {
-		$out = array();
-		foreach ( $payload as $value ) {
-			if ( ! is_array( $value ) ) {
-				continue;
+		$out  = array();
+		$walk = static function ( $value, int $depth ) use ( &$walk, &$out ) {
+			if ( ! is_array( $value ) || $depth > 8 ) {
+				return;
 			}
+			if ( self::isRecord( $value ) ) {
+				$out[] = $value;
+				return;
+			}
+			// Repeater groups (FA-03) hold upload answers one level down.
 			foreach ( $value as $item ) {
-				if ( self::isRecord( $item ) ) {
-					$out[] = $item;
+				$walk( $item, $depth + 1 );
+			}
+		};
+		foreach ( $payload as $value ) {
+			if ( is_array( $value ) ) {
+				foreach ( $value as $item ) {
+					$walk( $item, 0 );
 				}
 			}
 		}
@@ -608,10 +766,11 @@ final class Uploads {
 	/**
 	 * Upload fields in a field tree, keyed by field key.
 	 *
-	 * @param mixed $nodes Field nodes.
+	 * @param mixed $nodes            Field nodes.
+	 * @param bool  $outsideRepeaters Leave out fields inside a Repeater.
 	 * @return array<string,array>
 	 */
-	public static function uploadFields( $nodes ): array {
+	public static function uploadFields( $nodes, bool $outsideRepeaters = false ): array {
 		$out = array();
 		if ( ! is_array( $nodes ) ) {
 			return $out;
@@ -624,17 +783,12 @@ final class Uploads {
 			if ( is_string( $key ) && $key !== '' && in_array( $node['type'] ?? '', self::FIELD_TYPES, true ) ) {
 				$out[ $key ] = $node;
 			}
-			foreach ( array( 'children', 'fields' ) as $k ) {
-				if ( isset( $node[ $k ] ) && is_array( $node[ $k ] ) ) {
-					$out += self::uploadFields( $node[ $k ] );
-				}
+			// A Repeater's upload fields answer inside its groups.
+			if ( $outsideRepeaters && 'repeat_container' === ( $node['type'] ?? '' ) ) {
+				continue;
 			}
-			if ( isset( $node['columns'] ) && is_array( $node['columns'] ) ) {
-				foreach ( $node['columns'] as $col ) {
-					if ( is_array( $col ) ) {
-						$out += self::uploadFields( isset( $col['fields'] ) || isset( $col['children'] ) ? ( $col['fields'] ?? $col['children'] ) : $col );
-					}
-				}
+			foreach ( self::childLists( $node ) as $list ) {
+				$out += self::uploadFields( $list, $outsideRepeaters );
 			}
 		}
 		return $out;

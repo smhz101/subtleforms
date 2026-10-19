@@ -230,7 +230,7 @@ const renderReadableData = (data) => {
 /**
  * Repeater answer (2.3.1): one row per group, one column per child field.
  */
-function RepeaterTable( { node, groups } ) {
+export function RepeaterTable( { node, groups, submissionId } ) {
   const children = ( Array.isArray( node?.children ) && node.children.length ? node.children : node?.fields || [] )
     .filter( ( c ) => c && ( c.config?.key || c.key ) );
   const columns = children.length
@@ -239,6 +239,8 @@ function RepeaterTable( { node, groups } ) {
   const cell = ( v ) => {
     if ( v === undefined || v === null || v === '' ) return '';
     if ( isSignatureImage( v ) ) return <img className='sf-answers__signature' src={ v } alt={ __( 'Signature', 'subtleforms' ) } />;
+    // Files uploaded in a group get download links like any other upload (FA-03).
+    if ( isFileList( v ) ) return <FileLinks files={ v } submissionId={ submissionId } />;
     if ( Array.isArray( v ) ) return v.map( ( x ) => ( x && typeof x === 'object' ? x.label || JSON.stringify( x ) : String( x ) ) ).join( ', ' );
     if ( typeof v === 'object' ) return Object.values( v ).filter( Boolean ).join( ' ' );
     return String( v );
@@ -891,7 +893,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
                         { isEmpty ? (
                           <span className='sf-answers__empty'>{ __( 'No answer', 'subtleforms' ) }</span>
                         ) : repeaterNodes[ key ] && Array.isArray( value ) ? (
-                          <RepeaterTable node={ repeaterNodes[ key ] } groups={ value } />
+                          <RepeaterTable node={ repeaterNodes[ key ] } groups={ value } submissionId={ submission.id } />
                         ) : isSignatureImage( value ) ? (
                           <img className='sf-answers__signature' src={ value } alt={ __( 'Signature', 'subtleforms' ) } />
                         ) : isFileList( value ) ? (

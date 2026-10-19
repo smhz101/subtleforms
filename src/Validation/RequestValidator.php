@@ -216,6 +216,14 @@ class RequestValidator {
 						$errors[ $path ] = 'Must be an array';
 						continue;
 					}
+					// In an open schema a keyed map under a list rule is a
+					// settings map, not a list: Name and Address keep their
+					// sub-field settings by part (`first_name`, `street2`)
+					// in `fields` (FB-01). Re-indexing it lost every key.
+					if ( ! empty( $schema['__passthrough'] ) && ! array_is_list( $value ) ) {
+						$sanitized[ $field ] = self::sanitizePassthrough( $value, $depth );
+						continue;
+					}
 					$sanitizedList = array();
 					foreach ( $value as $index => $item ) {
 						if ( ! is_array( $item ) ) {

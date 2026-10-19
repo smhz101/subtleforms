@@ -17,6 +17,7 @@ import { getFormClassNames } from '../utils/formStyles';
 import { structuralType } from '../../shared/formType';
 import { formFieldDefaults } from '../../shared/fieldDisplay';
 import { debug } from '../../shared/debug';
+import { fieldConfig } from '../../shared/fieldConfig';
 import { computeQuote, isPricedForm, formatMoney, isPricedType } from '../../shared/pricing';
 import { PaymentContext } from './fields/Payments';
 import { FormContext } from './fields/FileUpload';
@@ -190,6 +191,8 @@ export default function FormRenderer({
 
   const hasSteps = steps.length > 0;
   const currentStep = hasSteps ? steps[currentStepIndex] : null;
+  // Steps are saved flat or with settings under `config` (FA-21).
+  const currentStepConfig = fieldConfig(currentStep);
 
   // Get fields to render
   const fieldsToRender = useMemo(() => {
@@ -504,9 +507,9 @@ export default function FormRenderer({
   const quote = useMemo(
     () =>
       isPriced
-        ? computeQuote(allFields, values, { coupon, hidden: hiddenFields, currency })
+        ? computeQuote(allFields, values, { coupon, schema, hidden: hiddenFields, currency })
         : null,
-    [isPriced, allFields, values, coupon, hiddenFields, currency]
+    [isPriced, allFields, values, coupon, schema, hiddenFields, currency]
   );
   // Another checkout (e.g. WooCommerce, set by an add-on) takes the payment
   // after the form is sent, so the Card field is not used.
@@ -1146,14 +1149,14 @@ export default function FormRenderer({
         )}
 
         <div className='subtleforms-step-content'>
-          {currentStep?.config?.label && (
+          {currentStepConfig.label && (
             <h3 className='subtleforms-step-title-main'>
-              {currentStep.config.label}
+              {currentStepConfig.label}
             </h3>
           )}
-          {currentStep?.config?.description && (
+          {currentStepConfig.description && (
             <p className='subtleforms-step-description'>
-              {currentStep.config.description}
+              {currentStepConfig.description}
             </p>
           )}
 
