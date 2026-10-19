@@ -164,7 +164,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
   const fieldKey = field.key;
 
   const tabs = [
-    { name: 'settings', title: __('Settings', 'subtleforms') },
+    { name: 'settings', title: __('Field', 'subtleforms') },
     ...(isInputLike
       ? [
           {
@@ -398,7 +398,7 @@ function AppearancePanel({ field, onUpdate, isReadOnly }) {
     return null;
   }
   return (
-    <PanelBody title={__('Appearance', 'subtleforms')} initialOpen={false}>
+    <PanelBody title={__('Display', 'subtleforms')} initialOpen={false}>
       <DynamicInspectorPanel
         field={field}
         onUpdate={onUpdate}

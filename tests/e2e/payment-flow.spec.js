@@ -54,7 +54,7 @@ test.describe('Payment Form Flow', () => {
     await paymentButton.click();
 
     // 2. Configure payment settings
-    await page.getByRole('tab', { name: 'Settings' }).click();
+    await page.getByRole('tab', { name: 'Field' }).click();
     await expect(page.getByText('Payment Settings')).toBeVisible();
 
     // Enable payment
@@ -193,7 +193,7 @@ test.describe('Payment Form Flow', () => {
     await paymentButton.click();
 
     // 2. Configure payment settings in conversational form
-    await page.getByRole('tab', { name: 'Settings' }).click();
+    await page.getByRole('tab', { name: 'Field' }).click();
 
     // Verify conversational payment info is shown
     await expect(page.getByText('Conversational Payment')).toBeVisible();
