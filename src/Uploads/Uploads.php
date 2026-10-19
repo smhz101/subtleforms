@@ -630,6 +630,30 @@ final class Uploads {
 	}
 
 	/**
+	 * Whether a value is a list of upload records.
+	 *
+	 * A list of records is also a list of associative arrays, which is the
+	 * shape Repeater::looksLikeGroups() accepts. Callers that format both
+	 * uploads and repeater groups must check this first.
+	 *
+	 * @param mixed $value Answer value.
+	 */
+	public static function isList( $value ): bool {
+		if ( ! is_array( $value ) || array() === $value ) {
+			return false;
+		}
+		if ( array_keys( $value ) !== range( 0, count( $value ) - 1 ) ) {
+			return false;
+		}
+		foreach ( $value as $item ) {
+			if ( ! self::isRecord( $item ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
 	 * Admin download URL for a stored file. Without a nonce it opens a
 	 * confirmation page; pass $withNonce for links shown in wp-admin.
 	 */

@@ -282,8 +282,14 @@ final class EmailAction implements ActionInterface {
 			if ( ! is_array( $value ) || ! $value ) {
 				continue;
 			}
+			// A file answer is a list of records. That list also looks like
+			// repeater groups, so recognize the upload before walking groups.
 			// Repeater groups hold upload answers one level down (FA-03).
-			if ( 0 === $depth && \SubtleForms\Support\Repeater::looksLikeGroups( $value ) ) {
+			if (
+				0 === $depth
+				&& ! \SubtleForms\Uploads\Uploads::isList( $value )
+				&& \SubtleForms\Support\Repeater::looksLikeGroups( $value )
+			) {
 				foreach ( $value as $index => $group ) {
 					$value[ $index ] = $this->format_uploads( $group, $submissionId, $depth + 1 );
 				}

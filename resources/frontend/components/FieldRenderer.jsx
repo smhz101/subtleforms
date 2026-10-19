@@ -1,5 +1,6 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { getIn } from '../utils/valuePaths';
+import { columnFields } from '../utils/columnFields';
 import { getCompositeEmptyParts } from '../utils/fieldValidation';
 import { compositeParts, partValue } from '../../shared/compositeParts';
 import { rangeSliderSeed } from '../utils/defaults';
@@ -352,10 +353,9 @@ export default function FieldRenderer({
     const columnsBody = (
       <div
         className={`subtleforms-field subtleforms-field-columns subtleforms-columns-${columnCount}`}>
-        {columns.map((columnFields, colIndex) => (
+        {columns.map((column, colIndex) => (
           <div key={colIndex} className='subtleforms-column'>
-            {Array.isArray(columnFields) &&
-              columnFields.map((child) => (
+            {columnFields(column).map((child) => (
                 <FieldRenderer
                   key={child.config?.key || child.key}
                   field={child}
