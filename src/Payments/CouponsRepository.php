@@ -312,6 +312,32 @@ final class CouponsRepository {
 		return round( min( $subtotal, max( 0.0, $off ) ), 2 );
 	}
 
+	/**
+	 * The coupon code a visitor entered: the summary's coupon box (`_coupon`),
+	 * else the first Coupon field with a value. Quote, intent and submit all
+	 * read it here, so they always price the same order (PAY-13).
+	 *
+	 * @param mixed $schema  Form schema.
+	 * @param array $payload Submitted values.
+	 */
+	public static function codeFrom( $schema, array $payload ): string {
+		$code = self::normalizeCode( is_scalar( $payload['_coupon'] ?? null ) ? (string) $payload['_coupon'] : '' );
+		if ( '' !== $code ) {
+			return $code;
+		}
+		foreach ( Pricing::fields( $schema ) as $f ) {
+			$key = (string) ( $f['key'] ?? '' );
+			if ( ( $f['type'] ?? '' ) !== 'payment_coupon' || '' === $key || ! is_scalar( $payload[ $key ] ?? null ) ) {
+				continue;
+			}
+			$code = self::normalizeCode( (string) $payload[ $key ] );
+			if ( '' !== $code ) {
+				return $code;
+			}
+		}
+		return '';
+	}
+
 	public static function normalizeCode( string $code ): string {
 		return strtoupper( substr( preg_replace( '/[^A-Za-z0-9_-]/', '', trim( $code ) ), 0, 64 ) );
 	}

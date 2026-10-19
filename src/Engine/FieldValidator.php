@@ -872,19 +872,21 @@ final class FieldValidator {
 		}
 
 		if ( ! is_string( $value ) ) {
-			return 'Coupon code must be a string.';
+			return __( 'Enter the coupon code as text.', 'subtleforms' );
 		}
 
 		$config    = $field['config'] ?? array();
 		$maxLength = isset( $config['maxLength'] ) ? intval( $config['maxLength'] ) : 50;
 
 		if ( strlen( $value ) > $maxLength ) {
-			return sprintf( 'Coupon code cannot exceed %d characters.', $maxLength );
+			/* translators: %d: maximum number of characters */
+			return sprintf( __( 'Coupon code cannot be longer than %d characters.', 'subtleforms' ), $maxLength );
 		}
 
-		// Basic sanitization check - alphanumeric and common special chars only
-		if ( ! preg_match( '/^[a-zA-Z0-9\-_]+$/', $value ) ) {
-			return 'Coupon code contains invalid characters.';
+		// Letters, numbers, hyphens and underscores. Spaces are allowed: the
+		// code is read without them, as the summary's coupon box does (PAY-13).
+		if ( ! preg_match( '/^[a-zA-Z0-9\-_ ]+$/', $value ) ) {
+			return __( 'Coupon codes use only letters, numbers, hyphens and underscores.', 'subtleforms' );
 		}
 
 		return null;

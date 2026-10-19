@@ -603,21 +603,12 @@ final class PublicSubmitApi {
 			// Hand the visitor's coupon code on (it is removed from the payload
 			// before the entry is stored); the handler validates it itself.
 			$none['external']    = true;
-			$none['coupon_code'] = CouponsRepository::normalizeCode( (string) ( $payload['_coupon'] ?? '' ) );
+			$none['coupon_code'] = CouponsRepository::codeFrom( $schema, $payload );
 			return $none;
 		}
 
 		// The coupon comes from the summary's coupon box or a Coupon field.
-		$code = (string) ( $payload['_coupon'] ?? '' );
-		if ( '' === $code ) {
-			foreach ( Pricing::fields( $schema ) as $f ) {
-				if ( ( $f['type'] ?? '' ) === 'payment_coupon' && ! empty( $f['key'] ) && ! empty( $payload[ $f['key'] ] ) ) {
-					$code = (string) $payload[ $f['key'] ];
-					break;
-				}
-			}
-		}
-		$code = CouponsRepository::normalizeCode( $code );
+		$code = CouponsRepository::codeFrom( $schema, $payload );
 
 		$quote    = Pricing::quote( $schema, $payload );
 		$coupon   = null;

@@ -229,7 +229,7 @@ final class PaymentsApi {
 		$payload = PublicSubmitApi::applyComputedValues( $payload, $schema );
 
 		if ( null === $code ) {
-			$code = CouponsRepository::normalizeCode( (string) ( $payload['_coupon'] ?? '' ) );
+			$code = CouponsRepository::codeFrom( $schema, $payload );
 		}
 
 		$base   = Pricing::quote( $schema, $payload );
