@@ -8,7 +8,6 @@ import ChainedDisplayControl from './inspector/controls/ChainedDisplayControl';
 import ChainedSourceControl from './inspector/controls/ChainedSourceControl';
 import ChainedCsvControl from './inspector/controls/ChainedCsvControl';
 import { chainedUsesCsv } from '../../../shared/chainedLevels';
-import { isProFeature } from '../../utils/featureGate';
 import { useBuilder } from './context/BuilderContext';
 import { useConfig } from './context/ConfigContext';
 import {
@@ -104,9 +103,6 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
     }
     if (CHOICE_TYPES.includes(field.type) && (!field.options || field.options.length === 0)) {
       warnings.push(__('Add at least one option.', 'subtleforms'));
-    }
-    if (field.type === 'calculation' && !field.formula?.trim()) {
-      warnings.push(__('Add a formula to show a result.', 'subtleforms'));
     }
     return warnings;
   }, [field]);
@@ -251,13 +247,8 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
         </div>
       </div>
 
-      {(isReadOnly || validationMessages.length > 0 || fieldWarnings.length > 0) && (
+      {(validationMessages.length > 0 || fieldWarnings.length > 0) && (
         <div className='sf-field-inspector__notices'>
-          {isReadOnly && (
-            <Notice status='info' isDismissible={false}>
-              {__('Read-only: this form uses Pro features. Activate your license to edit it. The live form keeps working.', 'subtleforms')}
-            </Notice>
-          )}
           {validationMessages.slice(0, 1).map((m, i) => (
             <Notice key={`v${i}`} status='warning' isDismissible={false}>
               {m}
@@ -367,7 +358,6 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
                 <LogicEditor
                   logic={fieldLogic}
                   availableFields={(allFields || []).filter((f) => f.key !== field.key)}
-                  locked={isStep && !isProFeature('logic.conditional.advanced')}
                   disabled={isReadOnly}
                   emptyText={
                     isStep

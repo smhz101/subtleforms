@@ -1,6 +1,4 @@
 import { __, sprintf } from '@wordpress/i18n';
-import Icon from '../../ui/Icon';
-import { requirePro } from '../../utils/featureGate';
 import { formatRate } from './useAnalytics';
 import './analytics.scss';
 
@@ -10,26 +8,9 @@ import './analytics.scss';
  *
  * @param {Object}  props
  * @param {Object}  props.stats  { views, submissions, conversion } or undefined.
- * @param {boolean} props.locked Analytics not in the plan.
  * @param {boolean} props.loading Summary still loading.
  */
-export default function PerformanceCell({ stats, locked, loading }) {
-  if (locked) {
-    return (
-      <button
-        type='button'
-        className='sf-perf sf-perf--locked'
-        onClick={(e) => {
-          e.stopPropagation();
-          requirePro('extensions.analytics', () => {}, { label: __('Analytics', 'subtleforms') });
-        }}
-        title={__('Views and conversion rate are part of SubtleForms Pro', 'subtleforms')}>
-        <Icon.Lock size={12} aria-hidden='true' />
-        {__('Pro', 'subtleforms')}
-      </button>
-    );
-  }
-
+export default function PerformanceCell({ stats, loading }) {
   if (loading) {
     return <span className='sf-perf'>…</span>;
   }

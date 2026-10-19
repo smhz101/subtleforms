@@ -100,28 +100,28 @@ describe('applyPaymentDefaults with composite fields', () => {
   });
 });
 
-describe('charged formula failures', () => {
-  const charged = (formula) => [
-    { type: 'calculation', config: { key: 'due', label: 'Due', usePrice: true, formula } },
-  ];
-
-  it('does not turn a failed charged formula into a free or payable line', () => {
-    const q = computeQuote(charged('1/0'), { due: 0 });
-    expect(q.formulaError).toBe(true);
-    expect(q.items).toEqual([]);
-    expect(q.items.some((item) => item.amount >= 0)).toBe(false);
+describe('add-on priced types (2.3.9)', () => {
+  registerPricedType('qa_calc', (config, value) => (value === 'ERR' ? { error: true } : [{ label: config.label, qty: 1, unit: value }]), {
+    isPriced: (config) => !!config.usePrice,
   });
 
-  it('does not charge a tampered amount when the formula fails', () => {
-    const q = computeQuote(charged('{qty} / {price}'), { qty: 1, price: 0, due: 25 });
-    expect(q.formulaError).toBe(true);
+  it('charges only fields the add-on says are priced', () => {
+    expect(isPricedForm([{ type: 'qa_calc', config: { usePrice: false } }])).toBe(false);
+    expect(isPricedForm([{ type: 'qa_calc', config: { usePrice: true } }])).toBe(true);
+    const q = computeQuote([{ type: 'qa_calc', config: { key: 'due', label: 'Due', usePrice: false } }], { due: 25 });
     expect(q.items).toEqual([]);
   });
 
-  it('keeps a real zero off the order without flagging a failure', () => {
-    const q = computeQuote(charged('0+0'), { due: 40 });
-    expect(q.formulaError).toBe(false);
+  it('flags an amount the add-on cannot work out and charges nothing for it', () => {
+    const q = computeQuote([{ type: 'qa_calc', config: { key: 'due', label: 'Due', usePrice: true } }], { due: 'ERR' });
+    expect(q.formulaError).toBe(true);
     expect(q.items).toEqual([]);
-    expect(q.total).toBe(0);
+  });
+
+  it('a stored Calculation field without SubtleForms Pro adds nothing', () => {
+    const fields = [{ type: 'calculation', config: { key: 'due', usePrice: true, formula: '2*5' } }];
+    expect(isPricedForm(fields)).toBe(false);
+    expect(computeQuote(fields, { due: 10 }).items).toEqual([]);
   });
 });
+

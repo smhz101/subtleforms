@@ -7,7 +7,6 @@ import AdminShell from '../components/AdminShell';
 import TabBar from '../components/TabBar';
 import SubmissionsTable, { ALL_COLUMNS, DEFAULT_VISIBLE, COLUMN_LABELS } from '../components/SubmissionsTable';
 import useRealTimeUpdates from '../hooks/useRealTimeUpdates';
-import { isProFeature, requirePro } from '../utils/featureGate';
 import { Icon } from '../ui';
 import apiFetch from '@wordpress/api-fetch';
 import { apiPost } from '../utils/api';
@@ -31,7 +30,6 @@ function readInboxView() {
 }
 
 export default function SubmissionsPage({ formId }) {
-  const canExport = isProFeature('submissions.export');
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const searchTimerRef = useRef(null);
@@ -372,16 +370,12 @@ export default function SubmissionsPage({ formId }) {
         <>
           <Button
             variant='secondary'
-            onClick={() => requirePro('submissions.export', exportSubmissions)}
+            onClick={exportSubmissions}
             disabled={exporting}
-            icon={!canExport && !exporting ? <Icon.Lock size={14} /> : <Icon.DownloadCloud size={16} />}
-            className={!canExport && !exporting ? 'sf-export-btn--locked' : undefined}>
+            icon={<Icon.DownloadCloud size={16} />}>
             {exporting
               ? __('Exporting…', 'subtleforms')
               : __('Export CSV', 'subtleforms')}
-            {!canExport && !exporting && (
-              <span className='sf-pro-tag'>{__('Pro', 'subtleforms')}</span>
-            )}
           </Button>
           <div className='sf-sub-gear' ref={gearRef}>
             <Button

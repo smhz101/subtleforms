@@ -66,10 +66,11 @@ final class CapabilitiesTest extends TestCase {
 		$this->assertTrue( $caps->allows( 'actions.webhook' ) );
 	}
 
-	public function test_freemium_defaults_block_pro_features(): void {
+	public function test_pro_keys_are_not_in_the_free_defaults(): void {
+		// Pro adds its own keys; a missing key reads as false.
 		$caps = new Capabilities();
 		$this->assertFalse( $caps->allows( 'actions.payment' ) );
-		$this->assertFalse( $caps->allows( 'extensions.custom' ) );
-		$this->assertFalse( $caps->allows( 'pipeline.retry' ) );
+		$this->assertFalse( $caps->allows( 'fields.advanced' ) );
+		$this->assertArrayNotHasKey( 'templates.pro', Capabilities::defaults() );
 	}
 }

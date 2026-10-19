@@ -148,7 +148,7 @@ export default function Dashboard() {
                 <QuickAction
                   icon={Icon.Plus}
                   title={__('Create a form', 'subtleforms')}
-                  text={__('Start blank or from 50+ templates', 'subtleforms')}
+                  text={__('Start blank or from a template', 'subtleforms')}
                   to='/forms/new'
                 />
                 <QuickAction

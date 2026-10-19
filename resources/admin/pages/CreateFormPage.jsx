@@ -12,6 +12,9 @@ import { createInitialSchema } from '../utils/initialSchema';
 import { schemaFromTemplate } from '../utils/templateSchema';
 import { TEMPLATE_CATEGORIES } from '../templates';
 import { requirePro } from '../utils/featureGate';
+
+/** Templates SubtleForms Pro adds. */
+const PRO_TEMPLATE_COUNT = 47;
 import './CreateFormPage.scss';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -233,6 +236,12 @@ export default function CreateFormPage() {
   }, [chosen, title, description, structure, createFormMutation, navigate, showError]);
 
   const categories = TEMPLATE_CATEGORIES.filter((c) => c.id === 'all' || counts[c.id]);
+  // Without SubtleForms Pro, one card says how many more templates Pro adds.
+  const showProTemplatesCard =
+    category === 'all' &&
+    !query.trim() &&
+    !window.subtleformsAdmin?.hasProPlugin &&
+    !templates.some((t) => t.is_pro);
 
   return (
     <AdminShell
@@ -334,6 +343,27 @@ export default function CreateFormPage() {
                   </button>
                 );
               })}
+
+              {showProTemplatesCard && (
+                <a
+                  className='sf-tpl sf-tpl--more'
+                  href='https://subtleforms.com/templates/'
+                  target='_blank'
+                  rel='noopener noreferrer'>
+                  <span className='sf-tpl__meta'>
+                    <span className='sf-tpl__name'>
+                      {sprintf(
+                        /* translators: %d: number of templates */
+                        __('%d more templates in SubtleForms Pro', 'subtleforms'),
+                        PRO_TEMPLATE_COUNT
+                      )}
+                    </span>
+                    <span className='sf-tpl__desc'>
+                      {__('Event registration, job applications, payments and more. Opens subtleforms.com.', 'subtleforms')}
+                    </span>
+                  </span>
+                </a>
+              )}
 
               {visible.length === 0 && (
                 <div className='sf-empty sf-tpl-grid__empty'>

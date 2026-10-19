@@ -113,54 +113,6 @@
 		font-size: var(--sf-text-sm);
 		color: var(--sf-text-muted);
 	}
-
-	&.is-locked &__chart,
-	&.is-locked &__totals dd {
-		filter: blur(3px) grayscale(0.4);
-		opacity: 0.6;
-		pointer-events: none;
-		user-select: none;
-	}
-
-	&__lock {
-		display: flex;
-		align-items: center;
-		gap: 12px;
-		margin-top: 16px;
-		padding: 12px 12px 12px 16px;
-		border: 1px solid var(--sf-border);
-		border-radius: var(--sf-radius-md);
-		background: var(--sf-bg-surface);
-
-		> div { flex: 1 1 auto; min-width: 0; }
-	}
-
-	&__lock-icon {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		flex-shrink: 0;
-		width: 32px;
-		height: 32px;
-		border-radius: 50%;
-		background: #1e1e1e;
-		color: #fff;
-
-		svg { fill: none; }
-	}
-
-	&__lock-title {
-		margin: 0;
-		font-size: var(--sf-text-sm);
-		font-weight: var(--sf-weight-semibold);
-		color: var(--sf-text);
-	}
-
-	&__lock-text {
-		margin: 2px 0 0;
-		font-size: 12px;
-		color: var(--sf-text-muted);
-	}
 }
 
 // Forms list: "Performance" cell.
@@ -197,18 +149,4 @@
 		}
 	}
 
-	&--locked {
-		flex-direction: row;
-		align-items: center;
-		gap: 4px;
-		padding: 0;
-		border: 0;
-		background: none;
-		color: var(--sf-text-muted);
-		cursor: pointer;
-
-		svg { fill: none; }
-
-		&:hover { color: var(--sf-text); }
-	}
 }

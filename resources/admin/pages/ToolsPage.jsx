@@ -6,7 +6,7 @@ import clsx from 'clsx';
 import AdminShell from '../components/AdminShell';
 import Icon from '../ui/Icon';
 import { apiGet, apiPost } from '../utils/api';
-import { isProFeature, requirePro } from '../utils/featureGate';
+import { getBranding } from '../utils/branding';
 import './ToolsPage.scss';
 
 const SECTIONS = [
@@ -116,7 +116,6 @@ function Transfer( { forms, busy, setBusy, tell } ) {
   const [ selected, setSelected ] = useState( [] );
   const [ target, setTarget ] = useState( '' );
   const [ query, setQuery ] = useState( '' );
-  const canExport = isProFeature( 'submissions.export' );
   const visible = useMemo( () => {
     const needle = query.trim().toLowerCase();
     if ( ! needle ) {
@@ -220,35 +219,33 @@ function Transfer( { forms, busy, setBusy, tell } ) {
     setBusy( false );
   };
 
-  const exportCsv = () => {
-    requirePro( 'submissions.export', async () => {
-      setBusy( true );
-      try {
-        const response = await apiFetch( {
-          path: '/subtleforms/v1/submissions/export',
-          method: 'POST',
-          data: { form_id: target ? Number( target ) : null },
-        } );
-        if ( response?.success && response.csv ) {
-          const binary = atob( response.csv );
-          const bytes = new Uint8Array( binary.length );
-          for ( let i = 0; i < binary.length; i++ ) {
-            bytes[ i ] = binary.charCodeAt( i );
-          }
-          const url = URL.createObjectURL( new Blob( [ bytes ], { type: 'text/csv;charset=utf-8;' } ) );
-          const link = document.createElement( 'a' );
-          link.href = url;
-          link.download = response.filename || 'submissions.csv';
-          link.click();
-          URL.revokeObjectURL( url );
-        } else {
-          tell( 'error', response?.message || __( 'CSV export failed.', 'subtleforms' ) );
+  const exportCsv = async () => {
+    setBusy( true );
+    try {
+      const response = await apiFetch( {
+        path: '/subtleforms/v1/submissions/export',
+        method: 'POST',
+        data: { form_id: target ? Number( target ) : null },
+      } );
+      if ( response?.success && response.csv ) {
+        const binary = atob( response.csv );
+        const bytes = new Uint8Array( binary.length );
+        for ( let i = 0; i < binary.length; i++ ) {
+          bytes[ i ] = binary.charCodeAt( i );
         }
-      } catch {
-        tell( 'error', __( 'CSV export failed.', 'subtleforms' ) );
+        const url = URL.createObjectURL( new Blob( [ bytes ], { type: 'text/csv;charset=utf-8;' } ) );
+        const link = document.createElement( 'a' );
+        link.href = url;
+        link.download = response.filename || 'submissions.csv';
+        link.click();
+        URL.revokeObjectURL( url );
+      } else {
+        tell( 'error', response?.message || __( 'CSV export failed.', 'subtleforms' ) );
       }
-      setBusy( false );
-    }, { label: __( 'CSV export', 'subtleforms' ) } );
+    } catch {
+      tell( 'error', __( 'CSV export failed.', 'subtleforms' ) );
+    }
+    setBusy( false );
   };
 
   return (
@@ -257,7 +254,11 @@ function Transfer( { forms, busy, setBusy, tell } ) {
         <header className='sf-panel__header'>
           <div>
             <h2 className='sf-panel__title'>{ __( 'Forms', 'subtleforms' ) }</h2>
-            <p className='sf-panel__subtitle'>{ __( 'Export is SubtleForms JSON. Import creates new forms and keeps published or draft.', 'subtleforms' ) }</p>
+            <p className='sf-panel__subtitle'>{ sprintf(
+              /* translators: %s: plugin name */
+              __( 'Forms are exported as %s JSON. Import creates new forms and keeps them published or draft.', 'subtleforms' ),
+              getBranding().name
+            ) }</p>
           </div>
           <SearchControl
             value={ query }
@@ -298,7 +299,11 @@ function Transfer( { forms, busy, setBusy, tell } ) {
         <header className='sf-panel__header'>
           <div>
             <h2 className='sf-panel__title'>{ __( 'Submissions', 'subtleforms' ) }</h2>
-            <p className='sf-panel__subtitle'>{ __( 'JSON import and export move entries between SubtleForms sites. Passwords are left out, and read and starred state is kept. A form with more than 2,000 submissions is not exported in part. CSV export is part of Pro.', 'subtleforms' ) }</p>
+            <p className='sf-panel__subtitle'>{ sprintf(
+              /* translators: %s: plugin name */
+              __( 'JSON import and export move entries between %s sites. Passwords are left out, and read and starred state is kept. A form with more than 2,000 submissions is not exported in part. Export CSV makes a spreadsheet file.', 'subtleforms' ),
+              getBranding().name
+            ) }</p>
           </div>
         </header>
         <div className='sf-panel__body'>
@@ -317,9 +322,8 @@ function Transfer( { forms, busy, setBusy, tell } ) {
         <footer className='sf-panel__footer'>
           <Button variant='primary' disabled={ busy } onClick={ exportEntries }>{ __( 'Export submissions', 'subtleforms' ) }</Button>
           <FileButton label={ __( 'Import submissions', 'subtleforms' ) } busy={ busy } onFile={ importEntries } />
-          <Button variant='secondary' disabled={ busy } onClick={ exportCsv } icon={ ! canExport ? <Icon.Lock size={ 14 } /> : undefined }>
+          <Button variant='secondary' disabled={ busy } onClick={ exportCsv }>
             { __( 'Export CSV', 'subtleforms' ) }
-            { ! canExport && <span className='sf-pro-tag'>{ __( 'Pro', 'subtleforms' ) }</span> }
           </Button>
         </footer>
       </section>

@@ -50,10 +50,8 @@ const SAMPLES = [
   { type: 'picture_choice', extra: { options: OPTIONS }, check: { options: 4 } },
   { type: 'color_picker', extra: {}, check: {} },
   { type: 'rich_text', extra: { placeholder: 'Format me' }, check: {} },
-  { type: 'signature', extra: {}, check: {} },
   { type: 'file_upload', extra: {}, check: {} },
   { type: 'chained_select', extra: { options: [{ label: 'Fruit', value: 'fruit', children: [{ label: 'Apple', value: 'apple' }] }] }, check: {} },
-  { type: 'calculation', extra: { formula: '1 + 1', required: false }, check: { noRequired: true } },
 ];
 
 const WIDTHS = ['100', '75', '66', '50', '33', '25'];

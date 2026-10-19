@@ -381,13 +381,13 @@ final class AsyncDispatcher {
 				) );
 			}
 
-			// Retry logic: max 3 attempts
-			if ( $retry_count < 3 ) {
+			// Retries: Settings > Integrations > Webhooks (0 to 5, default 3).
+			if ( $retry_count < self::webhookRetries() ) {
 				$job['retry_count'] = $retry_count + 1;
-				
-				// Schedule retry with exponential backoff: 2min, 5min, 10min
-				$delays = array( 120, 300, 600 );
-				$delay = $delays[ $retry_count ] ?? 600;
+
+				// Growing gaps: 1 min, 5 min, 25 min, 2 hours, 10 hours.
+				$delays = array( 60, 300, 1500, 7200, 36000 );
+				$delay  = $delays[ $retry_count ] ?? 36000;
 				
 				wp_schedule_single_event(
 					time() + $delay,
@@ -418,5 +418,18 @@ final class AsyncDispatcher {
 	private static function log( string $message, array $context = array() ): void {
 		$context_str = empty( $context ) ? '' : ' | ' . wp_json_encode( $context );
 		Logger::error( "[SubtleForms Async] {$message}{$context_str}" );
+	}
+
+	/**
+	 * How many times a failed webhook is tried again.
+	 *
+	 * @return int 0 to 5.
+	 */
+	public static function webhookRetries(): int {
+		$settings = get_option( 'subtleforms_settings', array() );
+		$value    = is_array( $settings ) && isset( $settings['ext_webhooks_retries'] ) && is_numeric( $settings['ext_webhooks_retries'] )
+			? (int) $settings['ext_webhooks_retries']
+			: 3;
+		return max( 0, min( 5, $value ) );
 	}
 }

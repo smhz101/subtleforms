@@ -470,7 +470,7 @@ final class FieldSettings {
 					array(
 						'type'    => 'checkbox',
 						'name'    => 'multiple',
-						'label'   => __( 'Allow several files (Pro)', 'subtleforms' ),
+						'label'   => __( 'Allow several files', 'subtleforms' ),
 						'help'    => __( 'Visitors can drop or pick several files, with upload progress.', 'subtleforms' ),
 						'section' => 'appearance',
 					)
@@ -479,7 +479,7 @@ final class FieldSettings {
 					array(
 						'type'    => 'number',
 						'name'    => 'maxFiles',
-						'label'   => __( 'Most files (Pro)', 'subtleforms' ),
+						'label'   => __( 'Most files', 'subtleforms' ),
 						'min'     => 1,
 						'max'     => 20,
 						'help'    => __( 'Used when several files are allowed. Default 5.', 'subtleforms' ),

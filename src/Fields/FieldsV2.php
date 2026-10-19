@@ -2,11 +2,9 @@
 /**
  * SubtleForms 2.0 field additions.
  *
- * Fields that close the gap with the form builders people compare us to:
- * a toggle, an opinion scale, picture choices, signature and calculations.
- * Free fields are registered for everyone. Pro fields are registered for
- * everyone too, with `requiredCapabilities`, so the builder can show them as
- * locked previews until SubtleForms Pro unlocks them.
+ * A toggle, an opinion scale and picture choices. Signature and Calculation
+ * fields are registered by SubtleForms Pro through the
+ * `subtleforms/fields/register` action (see docs/hooks.md).
  *
  * @package SubtleForms\Fields
  * @since   2.0.0
@@ -22,11 +20,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Registers the 2.0 field types.
  */
 final class FieldsV2 {
-
-	/**
-	 * Capability that unlocks the advanced (Pro) field types.
-	 */
-	const PRO_FIELDS_CAP = 'fields.advanced';
 
 	/**
 	 * Register the new field types.
@@ -139,7 +132,7 @@ final class FieldsV2 {
 			)
 		);
 
-		// Picture choice — options with images (Pro).
+		// Picture choice: options with images.
 		self::add(
 			$registry,
 			new FieldDefinition(
@@ -178,81 +171,6 @@ final class FieldsV2 {
 						),
 					),
 				),
-				requiredCapabilities: array( self::PRO_FIELDS_CAP ),
-			)
-		);
-
-		// Signature — draw-to-sign pad (Pro). The renderer already supports it.
-		self::add(
-			$registry,
-			new FieldDefinition(
-				type: 'signature',
-				label: __( 'Signature', 'subtleforms' ),
-				category: 'advanced',
-				icon: 'dashicons-edit',
-				kind: 'input',
-				fieldSpecificAttributes: array(
-					'clearLabel' => __( 'Clear', 'subtleforms' ),
-				),
-				inspectorControls: array(
-					array(
-						'type'  => 'text',
-						'name'  => 'label',
-						'label' => __( 'Label', 'subtleforms' ),
-					),
-					array(
-						'type'  => 'text',
-						'name'  => 'clearLabel',
-						'label' => __( 'Clear button text', 'subtleforms' ),
-					),
-				),
-				requiredCapabilities: array( self::PRO_FIELDS_CAP ),
-			)
-		);
-
-		// Calculation — a read-only result computed from other fields (Pro).
-		self::add(
-			$registry,
-			new FieldDefinition(
-				type: 'calculation',
-				label: __( 'Calculation', 'subtleforms' ),
-				category: 'advanced',
-				icon: 'dashicons-calculator',
-				kind: 'input',
-				fieldSpecificAttributes: array(
-					'formula'  => '',
-					'decimals' => 2,
-					'prefix'   => '',
-					'suffix'   => '',
-				),
-				inspectorControls: array(
-					array(
-						'type'  => 'text',
-						'name'  => 'label',
-						'label' => __( 'Label', 'subtleforms' ),
-					),
-					array(
-						'type'        => 'formula',
-						'name'        => 'formula',
-						'label'       => __( 'Formula', 'subtleforms' ),
-						'help'        => __( 'Use field keys in braces, for example {quantity} * {price}. Supports + − × ÷, brackets, round(), min(), max().', 'subtleforms' ),
-						'placeholder' => '{quantity} * {price}',
-					),
-					array(
-						'type'  => 'number',
-						'name'  => 'decimals',
-						'label' => __( 'Decimal places', 'subtleforms' ),
-						'min'   => 0,
-						'max'   => 6,
-					),
-					array(
-						'type'  => 'checkbox',
-						'name'  => 'usePrice',
-						'label' => __( 'Charge this amount', 'subtleforms' ),
-						'help'  => __( 'Adds the result to the order total on payment forms.', 'subtleforms' ),
-					),
-				),
-				requiredCapabilities: array( self::PRO_FIELDS_CAP ),
 			)
 		);
 	}

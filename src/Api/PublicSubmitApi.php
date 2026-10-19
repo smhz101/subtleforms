@@ -226,9 +226,9 @@ final class PublicSubmitApi {
 			$activeSchema['schema'] ?? $activeSchema
 		);
 
-		// Recompute Calculation fields server-side so a visitor cannot post a
-		// tampered total (2.0).
-		$payload = self::applyCalculations( $payload, $activeSchema['schema'] ?? $activeSchema );
+		// Computed fields (Pro Calculation) are worked out on the server so a
+		// visitor cannot post a tampered total.
+		$payload = self::applyComputedValues( $payload, $activeSchema['schema'] ?? $activeSchema );
 
 		// Conditional logic (2.1): answers to fields the visitor could not see
 		// (hidden fields and skipped steps) are never stored, priced or sent.
@@ -678,56 +678,40 @@ final class PublicSubmitApi {
 	}
 
 	/**
-	 * Recompute every Calculation field from the submitted values.
+	 * A value that a computed field (such as a Pro Calculation) could not work
+	 * out. It is never stored, shown or charged.
+	 */
+	const COMPUTE_ERROR = '__formula_error__';
+
+	/**
+	 * Let add-ons work out computed fields from the submitted values.
+	 *
+	 * The server always recomputes these values, so a visitor cannot post a
+	 * tampered result. SubtleForms Pro fills its Calculation fields here.
 	 *
 	 * @param array $payload Sanitized payload.
 	 * @param mixed $schema  Active schema.
 	 * @return array
 	 */
-	public static function applyCalculations( array $payload, $schema ): array {
-		if ( ! is_array( $schema ) || empty( $schema['fields'] ) || ! is_array( $schema['fields'] ) ) {
+	public static function applyComputedValues( array $payload, $schema ): array {
+		if ( ! is_array( $schema ) ) {
 			return $payload;
 		}
 
-		$calcs = array();
-		$walk  = static function ( array $fields ) use ( &$walk, &$calcs ) {
-			foreach ( $fields as $field ) {
-				if ( ! is_array( $field ) ) {
-					continue;
-				}
-				$config = isset( $field['config'] ) && is_array( $field['config'] ) ? array_merge( $field, $field['config'] ) : $field;
-				if ( ( $field['type'] ?? '' ) === 'calculation' && ! empty( $config['key'] ) && ! empty( $config['formula'] ) ) {
-					$calcs[] = $config;
-				}
-				foreach ( array( 'fields', 'children' ) as $nested ) {
-					if ( ! empty( $field[ $nested ] ) && is_array( $field[ $nested ] ) ) {
-						$walk( $field[ $nested ] );
-					}
-				}
-				if ( ! empty( $field['columns'] ) && is_array( $field['columns'] ) ) {
-					foreach ( $field['columns'] as $column ) {
-						if ( is_array( $column ) ) {
-							$walk( $column );
-						}
-					}
-				}
-			}
-		};
-		$walk( $schema['fields'] );
+		/**
+		 * Filter the submitted values to add computed field values.
+		 *
+		 * Runs before conditional logic, validation, pricing and storage. A
+		 * value that cannot be computed should be PublicSubmitApi::COMPUTE_ERROR.
+		 *
+		 * @since 2.3.9
+		 *
+		 * @param array $payload Submitted values.
+		 * @param array $schema  Form schema.
+		 */
+		$computed = apply_filters( 'subtleforms/submission/computed_values', $payload, $schema );
 
-		// Two passes let one calculation reference another.
-		for ( $pass = 0; $pass < 2; $pass++ ) {
-			foreach ( $calcs as $calc ) {
-				$result                      = \SubtleForms\Engine\Formula::evaluate(
-					(string) $calc['formula'],
-					$payload,
-					isset( $calc['decimals'] ) ? (int) $calc['decimals'] : 2
-				);
-				$payload[ $calc['key'] ] = null === $result ? \SubtleForms\Engine\Formula::ERROR : $result;
-			}
-		}
-
-		return $payload;
+		return is_array( $computed ) ? $computed : $payload;
 	}
 
 	/**
@@ -747,7 +731,7 @@ final class PublicSubmitApi {
 			}
 		}
 		foreach ( $payload as $key => $value ) {
-			if ( \SubtleForms\Engine\Formula::ERROR === $value ) {
+			if ( self::COMPUTE_ERROR === $value ) {
 				$payload[ $key ] = null;
 			}
 		}

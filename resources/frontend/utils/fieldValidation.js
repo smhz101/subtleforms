@@ -12,6 +12,7 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { getIn } from './valuePaths';
 import { fieldConfig } from '../../shared/fieldConfig';
+import { getFieldType } from '../../shared/extend';
 
 export const COMPOSITE_FIELD_TYPES = new Set(['name_group', 'address_group', 'address']);
 
@@ -92,7 +93,9 @@ function isIsoDate(value) {
  * @return {boolean}
  */
 export function isAnswerable(type, config = {}) {
-  if (type === 'calculation') return !!String(config.formula || '').trim();
+  // Add-on field types (SubtleForms Pro) can say when they show anything.
+  const addon = getFieldType(type);
+  if (addon && typeof addon.isAnswerable === 'function') return !!addon.isAnswerable(config);
   if (type === 'checkbox_grid') {
     return (
       Array.isArray(config.rows) &&

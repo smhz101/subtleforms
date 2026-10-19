@@ -111,14 +111,12 @@ final class FieldsApi {
 		$hcaptchaEnabled  = $this->settings ? (bool) $this->settings->get( 'captcha_hcaptcha_enabled', false ) : false;
 		$turnstileEnabled = $this->settings ? (bool) $this->settings->get( 'captcha_turnstile_enabled', false ) : false;
 
-		$canUsePayment = $this->gate->allows( 'actions.payment' );
-
 		if ( $grouped === 'true' || $grouped === '1' ) {
 			$fields = $this->fieldRegistry->byCategory();
 			$fields = array_map(
-				function ( $categoryFields ) use ( $captchaEnabled, $recaptchaEnabled, $hcaptchaEnabled, $turnstileEnabled, $canUsePayment ) {
+				function ( $categoryFields ) use ( $captchaEnabled, $recaptchaEnabled, $hcaptchaEnabled, $turnstileEnabled ) {
 					return array_map(
-						function ( $field ) use ( $captchaEnabled, $recaptchaEnabled, $hcaptchaEnabled, $turnstileEnabled, $canUsePayment ) {
+						function ( $field ) use ( $captchaEnabled, $recaptchaEnabled, $hcaptchaEnabled, $turnstileEnabled ) {
 							$fieldArray = $field->toArray();
 
 							if ( $field->type === 'recaptcha' ) {
@@ -144,7 +142,7 @@ final class FieldsApi {
 		} else {
 			$fields = $this->fieldRegistry->toArray();
 			$fields = array_map(
-				function ( $fieldArray ) use ( $captchaEnabled, $recaptchaEnabled, $hcaptchaEnabled, $turnstileEnabled, $canUsePayment ) {
+				function ( $fieldArray ) use ( $captchaEnabled, $recaptchaEnabled, $hcaptchaEnabled, $turnstileEnabled ) {
 					if ( isset( $fieldArray['type'] ) ) {
 						if ( $fieldArray['type'] === 'recaptcha' ) {
 							$fieldArray['enabled'] = $captchaEnabled && $recaptchaEnabled;

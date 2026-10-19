@@ -21,7 +21,6 @@ declare(strict_types=1);
 
 namespace SubtleForms\Payments;
 
-use SubtleForms\Engine\Formula;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -29,7 +28,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Pricing {
 
-	const PRICED_TYPES = array( 'payment_product', 'payment_choice', 'payment_amount', 'payment_hidden_price', 'calculation' );
+	const PRICED_TYPES = array( 'payment_product', 'payment_choice', 'payment_amount', 'payment_hidden_price' );
 
 	/** Currencies with no minor unit (Stripe "zero-decimal" list). */
 	const ZERO_DECIMAL = array( 'BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF' );
@@ -81,9 +80,6 @@ final class Pricing {
 			if ( in_array( $type, array( 'payment_product', 'payment_choice', 'payment_amount', 'payment_hidden_price', 'payment_card' ), true ) ) {
 				return true;
 			}
-			if ( 'calculation' === $type && ! empty( $f['usePrice'] ) ) {
-				return true;
-			}
 		}
 		$legacy = is_array( $schema ) ? ( $schema['metadata']['payment'] ?? array() ) : array();
 
@@ -124,24 +120,7 @@ final class Pricing {
 		$items   = array();
 		$taxRate = 0.0;
 
-		$formulaError = false;
-		$priced       = $payload;
-		$calcs        = array();
-		foreach ( self::fields( $schema ) as $candidate ) {
-			if ( ( $candidate['type'] ?? '' ) === 'calculation' && ! empty( $candidate['key'] ) && ! empty( $candidate['formula'] ) ) {
-				$calcs[] = $candidate;
-			}
-		}
-		for ( $pass = 0; $pass < 2; $pass++ ) {
-			foreach ( $calcs as $calc ) {
-				$result = Formula::evaluate(
-					(string) $calc['formula'],
-					$priced,
-					isset( $calc['decimals'] ) ? (int) $calc['decimals'] : 2
-				);
-				$priced[ (string) $calc['key'] ] = null === $result ? Formula::ERROR : $result;
-			}
-		}
+		$priced  = $payload;
 
 		foreach ( self::fields( $schema ) as $f ) {
 			$type  = (string) ( $f['type'] ?? '' );
@@ -204,22 +183,6 @@ final class Pricing {
 					}
 					break;
 
-				case 'calculation':
-					if ( ! empty( $f['usePrice'] ) ) {
-						if ( '' === $key || ! array_key_exists( $key, $payload ) ) {
-							break;
-						}
-						if ( Formula::ERROR === $value ) {
-							$formulaError = true;
-							break;
-						}
-						$amount = self::money( is_numeric( $value ) ? $value : 0 );
-						if ( $amount > 0 ) {
-							$items[] = self::item( $key, $label, 1, $amount );
-						}
-					}
-					break;
-
 				case 'payment_summary':
 					if ( ! empty( $f['showTax'] ) && is_numeric( $f['taxRate'] ?? null ) ) {
 						$taxRate = max( 0.0, min( 100.0, (float) $f['taxRate'] ) );
@@ -269,7 +232,9 @@ final class Pricing {
 			'tax_rate' => $taxRate,
 			'tax'      => $tax,
 			'total'    => $total,
-			'formula_error' => $formulaError,
+			// Add-ons with computed prices (Pro Calculation) set this through
+			// the `subtleforms/payments/quote` filter when a total cannot be worked out.
+			'formula_error' => false,
 		);
 
 		/**

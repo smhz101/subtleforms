@@ -13,7 +13,6 @@ import TextareaInspectorControl from './controls/TextareaInspectorControl';
 import OptionsInspectorControl from './controls/OptionsInspectorControl';
 import SubfieldInspectorControl from './controls/SubfieldInspectorControl';
 import LinesInspectorControl from './controls/LinesInspectorControl';
-import FormulaInspectorControl from './controls/FormulaInspectorControl';
 import ChainedLevelsControl from './controls/ChainedLevelsControl';
 import { getInspectorControl } from '../../../../shared/extend';
 
@@ -44,7 +43,6 @@ const CONTROL_REGISTRY = {
 	options: OptionsInspectorControl,
 	subfield: SubfieldInspectorControl,
 	lines: LinesInspectorControl,
-	formula: FormulaInspectorControl,
 	chained_levels: ChainedLevelsControl,
 };
 

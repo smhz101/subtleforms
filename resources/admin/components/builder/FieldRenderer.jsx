@@ -135,6 +135,8 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
   // canvas shows them as the live form does (2.3.2).
   const builderConfig = useContext(ConfigContext);
   const display = fieldDisplay(field, builderConfig?.fieldDefaults || {});
+  // Add-on field types no active plugin provides right now.
+  const addonMissing = (window.subtleformsAdmin?.missingFieldTypes || []).includes(type);
 
   // ── Early return AFTER all hooks ────────────────────────────────────────────
   // Guard against null/undefined field or missing type — do NOT crash builder
@@ -290,23 +292,6 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
             </div>
           ))}
         </div>
-      )}
-
-      {type === 'calculation' && (
-        String(field.formula || '').trim() ? (
-          <div className='sf-field-renderer__calculation'>
-            <span className='sf-field-renderer__calculation-value'>
-              {field.prefix}0{parseInt(field.decimals ?? 2, 10) > 0 ? '.' + '0'.repeat(parseInt(field.decimals ?? 2, 10)) : ''}{field.suffix}
-            </span>
-            <code className='sf-field-renderer__calculation-formula'>{field.formula}</code>
-          </div>
-        ) : (
-          // No formula yet: say what to do instead of showing a fake 0.00. The
-          // field is hidden on the live form until it has one (bug 9).
-          <p className='sf-field-renderer__placeholder-note'>
-            {__('Add a formula in the field settings', 'subtleforms')}
-          </p>
-        )
       )}
 
       {type === 'disclaimer' && (
@@ -542,7 +527,14 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
 
       {type === 'payment_choice' && <ChoicePreview field={field} />}
 
-      {type === 'payment_card' && <CardPreview />}
+      {type === 'payment_card' && !addonMissing && !getCanvasPreview(type) && <CardPreview />}
+
+      {/* A field from an add-on that is not active (SubtleForms Pro). */}
+      {addonMissing && (
+        <p className='sf-field-renderer__placeholder-note'>
+          {__('Needs SubtleForms Pro. Visitors do not see this field until Pro is active.', 'subtleforms')}
+        </p>
+      )}
 
       {/* Canvas previews registered by add-ons (registerCanvasPreview). */}
       {(() => {
@@ -684,20 +676,6 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
             readOnly
             tabIndex='-1'
           />
-        </div>
-      )}
-
-      {/* ── Signature ───────────────────────────────────────────────────────── */}
-      {type === 'signature' && (
-        <div className='sf-field-renderer__signature'>
-          <div className='sf-field-renderer__signature-canvas'>
-            <span className='sf-field-renderer__signature-placeholder'>
-              {__('Sign here', 'subtleforms')}
-            </span>
-          </div>
-          <div className='sf-field-renderer__field-hint'>
-            {__('Draw your signature on the live form', 'subtleforms')}
-          </div>
         </div>
       )}
 

@@ -6,7 +6,7 @@ import ConversationalFormRenderer from './ConversationalFormRenderer';
 import { getIn, setIn, deleteIn, flattenToPathMap } from '../utils/valuePaths';
 import { collectLeafInputPaths, collectContainerKeys } from '../utils/schemaLeaves';
 import { collectDefaultValues } from '../utils/defaults';
-import { evaluateFormula } from '../utils/formula';
+import { computeValues } from '../../shared/extend';
 import { computeLogicState, pickConfirmation } from '../../shared/conditions';
 import {
   validateFields,
@@ -17,7 +17,6 @@ import { getFormClassNames } from '../utils/formStyles';
 import { structuralType } from '../../shared/formType';
 import { formFieldDefaults } from '../../shared/fieldDisplay';
 import { debug } from '../../shared/debug';
-import { fieldConfig } from '../../shared/fieldConfig';
 import { computeQuote, isPricedForm, formatMoney, isPricedType } from '../../shared/pricing';
 import { PaymentContext } from './fields/Payments';
 import { FormContext } from './fields/FileUpload';
@@ -264,32 +263,12 @@ export default function FormRenderer({
     }
   }, [defaultValues]);
 
-  // Calculation fields (2.0): recomputed whenever an input changes. The
-  // server recomputes on submit, so this is display only.
-  const calculationFields = useMemo(
-    () =>
-      allFields.filter(
-        (f) => f.type === 'calculation' && fieldConfig(f).formula
-      ),
-    [allFields]
-  );
+  // Computed fields that add-ons register (Pro Calculation) are worked out
+  // whenever an answer changes. The server recomputes them on submit, so
+  // this is display only.
   useEffect(() => {
-    if (calculationFields.length === 0) return;
-    setValues((prev) => {
-      let next = prev;
-      for (let pass = 0; pass < 2; pass++) {
-        calculationFields.forEach((f) => {
-          const c = fieldConfig(f);
-          const key = c.key || f.key;
-          const result = evaluateFormula(c.formula, next, c.decimals ?? 2);
-          if (next[key] !== result) {
-            next = { ...next, [key]: result };
-          }
-        });
-      }
-      return next;
-    });
-  }, [values, calculationFields]);
+    setValues((prev) => computeValues(allFields, prev));
+  }, [values, allFields]);
 
   // True layout/container types — fields that group other fields but carry no
   // value of their own. Writes to their key are always ignored.

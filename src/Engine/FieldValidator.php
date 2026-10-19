@@ -40,7 +40,6 @@ final class FieldValidator {
 		// System / non-input types
 		'hidden',
 		'html',
-		'calculation',
 	);
 
 	/**
@@ -158,6 +157,43 @@ final class FieldValidator {
 	}
 
 	/**
+	 * Whether a field type collects an answer that can be required.
+	 *
+	 * Layout and system types never do. Neither does a type no plugin has
+	 * registered (for example a Pro field on a site without SubtleForms Pro):
+	 * the live form does not show it, so it cannot be required either.
+	 *
+	 * @param string $type Field type.
+	 */
+	private function acceptsInput( string $type ): bool {
+		/**
+		 * Field types that never collect an answer.
+		 *
+		 * @since 2.3.9
+		 *
+		 * @param string[] $types Types.
+		 */
+		$nonInput = (array) apply_filters( 'subtleforms/fields/non_input_types', self::NON_INPUT_TYPES );
+		if ( in_array( $type, $nonInput, true ) ) {
+			return false;
+		}
+		$registry = self::registry();
+		return null === $registry || '' === $type || $registry->has( $type );
+	}
+
+	/**
+	 * The field registry, when the plugin is booted.
+	 */
+	private static function registry(): ?\SubtleForms\Fields\FieldRegistry {
+		try {
+			$registry = \SubtleForms\Plugin::instance()->container()->get( \SubtleForms\Fields\FieldRegistry::class );
+		} catch ( \Throwable $e ) {
+			return null;
+		}
+		return $registry instanceof \SubtleForms\Fields\FieldRegistry ? $registry : null;
+	}
+
+	/**
 	 * Extract required fields from schema.
 	 */
 	private function extractRequiredFields( array $fields, array &$required = array() ): array {
@@ -166,7 +202,7 @@ final class FieldValidator {
 
 			// Skip layout and system types — they do not accept user input and cannot be required
 			$isRequired = ! empty( $field['required'] ) || ! empty( $field['config']['required'] );
-			if ( ! in_array( $type, self::NON_INPUT_TYPES, true ) && $isRequired ) {
+			if ( $isRequired && $this->acceptsInput( (string) $type ) ) {
 				$required[] = $field['key'];
 			}
 

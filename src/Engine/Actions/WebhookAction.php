@@ -84,6 +84,11 @@ final class WebhookAction implements ActionInterface {
 
 		// Signing: HMAC-SHA256 — adds X-SubtleForms-Signature header
 		$signing = $settings['signing'] ?? array();
+		if ( is_array( $signing ) && ! empty( $signing['enabled'] ) && empty( $signing['secret'] ) ) {
+			// No secret on the action: use the default from Settings > Integrations > Webhooks.
+			$global            = get_option( 'subtleforms_settings', array() );
+			$signing['secret'] = is_array( $global ) ? (string) ( $global['ext_webhooks_signing_secret'] ?? '' ) : '';
+		}
 		if (
 			is_array( $signing ) &&
 			! empty( $signing['enabled'] ) &&
