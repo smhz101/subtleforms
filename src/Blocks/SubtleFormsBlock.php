@@ -38,6 +38,28 @@ final class SubtleFormsBlock {
 				'render_callback' => array( self::class, 'render_block' ),
 			)
 		);
+
+		if ( class_exists( '\WP_Block_Type_Registry' ) ) {
+			$block = \WP_Block_Type_Registry::get_instance()->get_registered( 'subtleforms/form' );
+			$handles = array();
+			if ( $block ) {
+				foreach ( array( 'editor_script', 'script', 'view_script' ) as $prop ) {
+					$value = $block->$prop ?? null;
+					if ( is_string( $value ) && '' !== $value ) {
+						$handles[] = $value;
+					} elseif ( is_array( $value ) ) {
+						foreach ( $value as $handle ) {
+							if ( is_string( $handle ) && '' !== $handle ) {
+								$handles[] = $handle;
+							}
+						}
+					}
+				}
+			}
+			foreach ( array_unique( $handles ) as $handle ) {
+				wp_set_script_translations( $handle, 'subtleforms', SUBTLEFORMS_PLUGIN_DIR . 'languages' );
+			}
+		}
 	}
 
 	/**
@@ -181,6 +203,7 @@ final class SubtleFormsBlock {
 			$asset_file['version'],
 			true
 		);
+		wp_set_script_translations( 'subtleforms-frontend-preview', 'subtleforms', SUBTLEFORMS_PLUGIN_DIR . 'languages' );
 
 		wp_enqueue_style(
 			'subtleforms-frontend-preview',

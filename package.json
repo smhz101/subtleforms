@@ -26,7 +26,8 @@
     "dist:clean": "gulp clean",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build -o storybook-static",
-    "test:browser": "playwright test -c playwright.browser.config.js"
+    "test:browser": "playwright test -c playwright.browser.config.js",
+    "i18n": "wp i18n make-pot . languages/subtleforms.pot --exclude=node_modules,vendor,build,dist,tests && wp i18n make-pot resources languages/subtleforms-js.pot --include=resources && wp i18n make-json languages languages --no-purge"
   },
   "jest": {
     "testEnvironment": "jsdom",

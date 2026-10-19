@@ -71,6 +71,8 @@ final class FrontendAssets {
 			true
 		);
 
+		wp_set_script_translations( 'subtleforms-frontend', 'subtleforms', SUBTLEFORMS_PLUGIN_DIR . 'languages' );
+
 		wp_localize_script(
 			'subtleforms-frontend',
 			'subtleformsFrontend',
