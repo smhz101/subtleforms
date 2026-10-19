@@ -193,4 +193,31 @@ final class FieldValueParity240Test extends TestCase {
 		$errors = $result['data']['error']['meta']['fields'] ?? $result['data']['meta']['fields'] ?? array();
 		$this->assertSame( array( 'people' => 'Add at least 2 entries.' ), $errors );
 	}
+
+	/** FB-04, FLD2-11: numeric labels, placeholders and defaults save. */
+	public function test_numeric_label_placeholder_and_default_save() {
+		$form = $this->publish( array() );
+		$this->asAdmin();
+		foreach ( array( '2026', 2026 ) as $label ) {
+			$request = new \WP_REST_Request( 'POST', '/subtleforms/v1/forms/' . $form . '/schema' );
+			$request->set_header( 'content-type', 'application/json' );
+			$request->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
+			$field = array(
+				'id'           => 'n1',
+				'key'          => 'n1',
+				'type'         => 'number',
+				'label'        => $label,
+				'placeholder'  => is_int( $label ) ? 1000 : '1000',
+				'defaultValue' => is_int( $label ) ? 750 : '750',
+				'config'       => array(
+					'label'        => $label,
+					'placeholder'  => '5550100',
+					'defaultValue' => '750',
+				),
+			);
+			$request->set_body( wp_json_encode( array( 'schema' => array( 'fields' => array( $field ) ) ) ) );
+			$response = rest_do_request( $request );
+			$this->assertSame( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
+		}
+	}
 }

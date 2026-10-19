@@ -1851,6 +1851,12 @@ textarea.sf-field-renderer__input {
 	}
 }
 
+// A long label, or one long word, wraps instead of running off the canvas (FLD2-11).
+.sf-field-renderer__label {
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+
 .sf-field-renderer__label-hidden-badge {
 	position: absolute;
 	top: -18px;
