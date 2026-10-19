@@ -10,7 +10,7 @@
  * - bug 16: honeypot has a random name and no visible label text
  */
 const { test, expect } = require('@playwright/test');
-const { adminApi, publishForm, cleanup, entries, waitForForm, useBundleOverride } = require('./helpers');
+const { adminApi, publishForm, cleanup, entries, waitForForm, useBundleOverride, hasFieldTypes } = require('./helpers');
 
 let client;
 const created = [];
@@ -122,6 +122,9 @@ test('every answer type is saved as typed (bugs 4, 5, 6, 14, 15)', async ({ page
     ],
   });
   created.push(form);
+  // Signature and Calculation are SubtleForms Pro fields since 2.3.9. Without
+  // Pro the live form leaves them out and the other answers are still saved.
+  const pro = await hasFieldTypes(client, ['signature', 'calculation']);
 
   await page.goto(form.url);
   await waitForForm(page);
@@ -139,14 +142,19 @@ test('every answer type is saved as typed (bugs 4, 5, 6, 14, 15)', async ({ page
   await page.click('label[for="subtleforms-field-look-1"]');
 
   const canvas = page.locator('canvas.subtleforms-signature__canvas');
-  await canvas.scrollIntoViewIfNeeded();
-  const box = await canvas.boundingBox();
-  await page.mouse.move(box.x + 20, box.y + 20);
-  await page.mouse.down();
-  await page.mouse.move(box.x + 120, box.y + 60, { steps: 8 });
-  await page.mouse.up();
+  if (pro) {
+    await canvas.scrollIntoViewIfNeeded();
+    const box = await canvas.boundingBox();
+    await page.mouse.move(box.x + 20, box.y + 20);
+    await page.mouse.down();
+    await page.mouse.move(box.x + 120, box.y + 60, { steps: 8 });
+    await page.mouse.up();
 
-  await expect(page.locator('.subtleforms-calculation__value')).toHaveText('8');
+    await expect(page.locator('.subtleforms-calculation__value')).toHaveText('8');
+  } else {
+    await expect(canvas).toHaveCount(0);
+    await expect(page.locator('.subtleforms-calculation__value')).toHaveCount(0);
+  }
   await waitOutTimeTrap(page);
   await page.click('.subtleforms-button-submit');
   await expect(page.locator('.subtleforms-success-message')).toBeVisible();
@@ -159,8 +167,13 @@ test('every answer type is saved as typed (bugs 4, 5, 6, 14, 15)', async ({ page
   expect(p.newsletter).toBe('yes');
   expect(String(p.score)).toBe('4');
   expect(p.look).toBe('dark');
-  expect(String(p.sign)).toMatch(/^data:image\/png;base64,/);
-  expect(String(p.double)).toBe('8');
+  if (pro) {
+    expect(String(p.sign)).toMatch(/^data:image\/png;base64,/);
+    expect(String(p.double)).toBe('8');
+  } else {
+    expect(p.sign ?? '').toBe('');
+    expect(p.double ?? '').toBe('');
+  }
 });
 
 test('fields with nothing to show are hidden; honeypot is anonymous (bugs 8, 9, 10, 16)', async ({ page }) => {
