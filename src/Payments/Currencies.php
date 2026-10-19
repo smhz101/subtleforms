@@ -38,7 +38,7 @@ final class Currencies {
 		'NZD' => array( 'New Zealand dollar', 2, 0.50 ),
 		'CHF' => array( 'Swiss franc', 2, 0.50 ),
 		'JPY' => array( 'Japanese yen', 0, 50 ),
-		'KRW' => array( 'South Korean won', 0, 700 ),
+		'KRW' => array( 'South Korean won', 0, 50 ),
 		'INR' => array( 'Indian rupee', 2, 0.50 ),
 		'PKR' => array( 'Pakistani rupee', 2, 140 ),
 		'AED' => array( 'UAE dirham', 2, 2.00 ),
