@@ -129,6 +129,9 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 
 == Changelog ==
 
+= 2.4.1 - 2026-10-20 =
+* Change: A field ID can use hyphens and up to 64 characters. Saving a form refuses an ID used by two fields anywhere in the form (inside steps, columns and containers too) or a name SubtleForms reserves for its own values.
+
 = 2.4.0 - 2026-10-20 =
 * New: Each payment form can pick its own currency, and more currencies are available, including JPY, INR, PKR and AED.
 * Fix: Forms follow the site currency unless you pick one, the Custom amount field shows the right symbol, and yen totals are whole yen.
