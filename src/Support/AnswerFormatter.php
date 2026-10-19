@@ -658,7 +658,7 @@ final class AnswerFormatter {
 	 */
 	public static function money( float $amount, string $currency ): string {
 		$currency = strtoupper( $currency );
-		$decimals = 'JPY' === $currency ? 0 : 2;
+		$decimals = '' === $currency ? 2 : \SubtleForms\Payments\Currencies::decimals( $currency );
 		$number   = function_exists( 'number_format_i18n' ) ? number_format_i18n( $amount, $decimals ) : number_format( $amount, $decimals );
 		if ( '' === $currency ) {
 			return $number;

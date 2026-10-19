@@ -74,4 +74,11 @@ final class Review37Test extends TestCase {
 		$this->assertTrue( $message['ok'] );
 		$this->assertSame( '', $message['redirect'] );
 	}
+
+	public function test_money_uses_each_currency_s_decimals(): void {
+		$this->assertSame( '50 KRW', \SubtleForms\Support\AnswerFormatter::money( 50, 'KRW' ) );
+		$this->assertSame( "\u{00A5}1,200", \SubtleForms\Support\AnswerFormatter::money( 1200, 'JPY' ) );
+		$this->assertSame( '12.50 CHF', \SubtleForms\Support\AnswerFormatter::money( 12.5, 'CHF' ) );
+		$this->assertSame( '7.00', \SubtleForms\Support\AnswerFormatter::money( 7, '' ) );
+	}
 }
