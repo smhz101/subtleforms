@@ -149,6 +149,27 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: A required Rich text field with no text is refused, and a Repeater below its minimum shows one message.
 * Fix: Hidden field values are worked out on the server, and Order summary and Fixed fee fields store nothing.
 * Fix: A failed builder save names the field, and numeric labels, placeholders and default values save.
+* Fix: The admin and confirmation email switches apply to every form, and the saved sender is used when an email has no From address.
+* Fix: Submitting the form preview does not send email or webhooks, does not count toward the entry limit, and is only available to an administrator.
+* Fix: A form block that is not using AJAX submits with a normal page load.
+* Fix: Confirmation messages and redirects fill merge tags.
+* Fix: A custom webhook body fills merge tags.
+* Fix: Resend says when the email was not queued, and sending it again still sends.
+* Fix: Removing a flag or spam label restores the entry status, including a payment status.
+* Fix: Delete follows the Trash or Hard setting for forms and entries.
+* Fix: The New count follows the form you are viewing, and opening an entry marks it read in the list.
+* Fix: Dashboard counts refresh when an entry is saved.
+* Fix: Dashboard and reports count from midnight in the site timezone.
+* Fix: Autosave uses the interval in Settings, and turning it off stops it.
+* Fix: A link to an entry loads that entry even when it is past the first page. The list keeps its tab and search, and Back returns to the list.
+* Fix: Confirmation rows use the same spacing as the rest of the builder.
+* Fix: A form in a block is the same width as the same form in a shortcode.
+* Fix: A theme-styled form uses the theme button, the theme font and the width of the content column, and the builder preview loads the theme fonts.
+* Fix: Publishing a form no longer looks unpublished when the only difference is the order of appearance settings.
+* Fix: Gravity Forms and Fluent Forms imports keep pages, hidden fields, names and conditional logic, and leave payment, quiz and post fields out.
+* Fix: On Tools, choosing a file is one keyboard stop, notices clear when you change section, and forms with the same title show their number and status.
+* Fix: Importing entries refuses a file from another form and skips entries that are already there. The transfer screen says notes, the IP address, the browser, files, logs and unpublished drafts are not in the file.
+* Fix: A webhook that is still waiting says Queued.
 
 = 2.3.9 - 2026-10-19 =
 * Change: Everything in SubtleForms works without a license: CSV export, reports, full conditional logic, Picture choice, several files per upload field, payment fields and coupons, and the Webhooks and Analytics settings.
