@@ -689,9 +689,12 @@ final class FormsRepository {
 				array(
 					'config'         => $schemaRow['schema_data'],
 					'active_version' => $version,
+					// The same bytes as the live form, so reopening is not
+					// "changes not live" when nothing was edited (FF2-10).
+					'draft_schema'   => $schemaRow['schema_data'],
 				),
 				array( 'id' => $formId ),
-				array( '%s', '%d' ),
+				array( '%s', '%d', '%s' ),
 				array( '%d' )
 			);
 			// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
@@ -958,6 +961,18 @@ final class FormsRepository {
 	}
 
 	/**
+	 * The schema as it is stored. Appearance keys are written in one order so
+	 * a draft of an unchanged form matches the published copy.
+	 *
+	 * @param array $schema Schema.
+	 * @return array
+	 */
+	public static function prepareStoredSchema( array $schema ): array {
+		list( $schema ) = \SubtleForms\Support\SchemaRepair::syncType( $schema );
+		return self::sanitizeAppearance( $schema );
+	}
+
+	/**
 	 * Save draft schema (non-versioned, unpublished).
 	 *
 	 * Draft schemas are stored directly in the forms table and do NOT create versions.
@@ -971,7 +986,7 @@ final class FormsRepository {
 	public function saveDraftSchema( int $formId, array $schema ): bool {
 		// The type follows the structure: a Page Break makes a Standard form
 		// Multi-step and removing the last one makes it Standard again (2.3.2).
-		list( $schema ) = \SubtleForms\Support\SchemaRepair::syncType( $schema );
+		$schema = self::prepareStoredSchema( $schema );
 
 		// Validate schema before saving
 		$validator = new \SubtleForms\Support\SchemaValidator();
