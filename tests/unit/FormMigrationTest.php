@@ -273,7 +273,8 @@ final class FormMigrationTest extends TestCase {
 		$this->assertSame( 'ad', $schema['fields'][3]['value'] );
 		$this->assertSame( 'Name', $schema['fields'][4]['label'] );
 		$this->assertTrue( $schema['fields'][4]['required'] );
-		$this->assertNotSame( 'names', $schema['fields'][4]['key'] );
+		// Fluent's own field name is kept as the field ID (2.4.1).
+		$this->assertSame( 'names', $schema['fields'][4]['key'] );
 		$this->assertSame( 'multi-step', $schema['metadata']['type'] );
 		$notes = implode( ' ', $built['forms'][0]['notes'] );
 		$this->assertStringContainsString( 'left out', $notes );
@@ -404,5 +405,50 @@ final class FormMigrationTest extends TestCase {
 		$this->assertSame( 'processing', $read['submissions'][1]['status'] );
 		$this->assertSame( 0, $read['submissions'][1]['starred'] );
 		$this->assertSame( 'unread', $read['submissions'][2]['status'] );
+	}
+
+	/**
+	 * Imports keep the other plugin's field names as field IDs when they are
+	 * valid and unused (2.4.1): Fluent Forms' name, Gravity Forms' parameter
+	 * name. Anything else gets an ID from the label, as before.
+	 */
+	public function test_imports_keep_incoming_field_names_when_valid(): void {
+		$gravity = FormMigration::schemas(
+			'gravity',
+			array(
+				array(
+					'title'  => 'Contact',
+					'fields' => array(
+						array( 'id' => 1, 'type' => 'text', 'label' => 'Name', 'inputName' => 'crm_name' ),
+						array( 'id' => 2, 'type' => 'email', 'label' => 'Email', 'inputName' => '2bad' ),
+						array( 'id' => 3, 'type' => 'text', 'label' => 'Again', 'inputName' => 'crm_name' ),
+						array( 'id' => 4, 'type' => 'text', 'label' => 'Trap', 'inputName' => 'website_url' ),
+					),
+				),
+			)
+		)['forms'][0]['schema'];
+		$keys = array_column( $gravity['fields'], 'key' );
+		$this->assertSame( 'crm_name', $keys[0] );
+		$this->assertSame( 'email', $keys[1] );
+		$this->assertSame( 'again', $keys[2] );
+		$this->assertSame( 'trap', $keys[3] );
+		( new SchemaValidator() )->validate( $gravity );
+
+		$fluent = FormMigration::schemas(
+			'fluent',
+			array(
+				array(
+					'title'       => 'Signup',
+					'form_fields' => array(
+						'fields' => array(
+							array( 'element' => 'input_text', 'attributes' => array( 'name' => 'company-name' ), 'settings' => array( 'label' => 'Company' ) ),
+							array( 'element' => 'input_email', 'attributes' => array( 'name' => 'email' ), 'settings' => array( 'label' => 'Work email' ) ),
+						),
+					),
+				),
+			)
+		)['forms'][0]['schema'];
+		$this->assertSame( array( 'company-name', 'email' ), array_column( $fluent['fields'], 'key' ) );
+		( new SchemaValidator() )->validate( $fluent );
 	}
 }

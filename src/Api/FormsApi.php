@@ -440,6 +440,11 @@ final class FormsApi {
 		// Single source of truth for type/status/unpublished-changes.
 		$form = \SubtleForms\Support\FormMeta::with_meta( $form );
 
+		// The builder tells an admin who changes a field ID that existing
+		// entries keep their answers under the old ID (2.4.1).
+		$counts                   = $this->submissionsRepo->get_counts_by_forms( array( (int) $form['id'] ) );
+		$form['submission_count'] = (int) ( $counts[ (int) $form['id'] ] ?? 0 );
+
 		$etag     = $this->generateETag( $form, 'form' );
 		$response = ApiResponse::success( $form );
 		return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
