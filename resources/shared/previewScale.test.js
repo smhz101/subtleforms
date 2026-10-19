@@ -1,4 +1,4 @@
-import { previewScale } from './previewScale';
+import { previewFrame, previewScale } from './previewScale';
 
 describe( 'previewScale', () => {
 	it( 'shrinks a desktop form into a narrower canvas', () => {
@@ -14,3 +14,13 @@ describe( 'previewScale', () => {
 		expect( previewScale( 400, 0 ) ).toBe( 1 );
 	} );
 } );
+
+describe( 'previewFrame', () => {
+	it( 'sizes the stage to the scaled form and anchors at the top left', () => {
+		expect( previewFrame( 1280, 0.5 ) ).toEqual( {
+			stageWidth: 640,
+			origin: 'top left',
+		} );
+	} );
+} );
+

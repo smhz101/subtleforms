@@ -11,6 +11,21 @@ describe( 'field delete notice', () => {
 		expect( countSchemaFields( schema ) ).toBe( 3 );
 	} );
 
+	it( 'counts fields nested in children, including inside a step', () => {
+		const schema = {
+			fields: [
+				{
+					type: 'step',
+					children: [
+						{ type: 'text' },
+						{ type: 'columns', children: [ { type: 'email' }, { type: 'textarea' } ] },
+					],
+				},
+			],
+		};
+		expect( countSchemaFields( schema ) ).toBe( 4 );
+	} );
+
 	it( 'names a single delete, and stays quiet when nothing was removed', () => {
 		expect( fieldDeletedMessage( 1 ) ).toBe( 'Field deleted.' );
 		expect( fieldDeletedMessage( 2 ) ).toBe( '2 fields deleted.' );

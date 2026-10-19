@@ -85,9 +85,10 @@
 
 	// The form is laid out at the device width, then scaled to the pane.
 	&__stage {
-		width: 100%;
+		max-width: 100%;
 		min-width: 0;
 		margin: 0 auto;
+		overflow: hidden;
 		background: transparent;
 		border: 0;
 		border-radius: 0;
@@ -98,8 +99,7 @@
 	&__form {
 		width: auto;
 		max-width: none;
-		margin-right: auto;
-		margin-left: auto;
+		margin: 0;
 	}
 
 	&__controls {
