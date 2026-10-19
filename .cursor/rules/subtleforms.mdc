@@ -15,6 +15,7 @@ You work on ONE package at a time. The package file in docs/dev/packages/ is you
 ## Branch and commits
 - Branch: `pkg/<PACKAGE-ID>` from the release branch named in the package file. One commit per bug ID (or per tightly related group), message: `<ID>[, <ID>]: <what changed, plain sentence>`.
 - Never commit build/, dist/, node_modules/, vendor/ or playwright-report/. Never push to main. Open a pull request into the release branch when done.
+- No AI or tool attribution anywhere in git or GitHub: no `Co-Authored-By` lines, no "Generated with" or "Created by" lines, no tool or model names in commit messages, PR titles or PR bodies. Write them as plain notes from the team.
 
 ## Code rules
 - PHP 8.1+, WordPress coding standards, namespace `SubtleForms\`, prefix `subtleforms_` for globals, options, transients, hooks (`subtleforms/...` for new hooks), handles. Text domain `subtleforms` in PHP and JS.
