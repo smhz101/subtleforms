@@ -18,6 +18,7 @@ import { denormalizeTree } from '../utils/schemaTree';
 import { insertPageBreak, moveNodeToStep, getStepIdOf, removeStep } from '../schema/commands/steps';
 import { canDropInto } from '../dnd/resolveDrop';
 import { debug } from '../../../../shared/debug';
+import { confirmDialog } from '../../../utils/confirmDialog';
 
 /**
  * Custom hook for schema command handlers
@@ -149,7 +150,7 @@ export function useSchemaCommands({
   );
 
   const handleDockAdd = useCallback(
-    (type) => {
+    async (type) => {
       // Check for multiple CAPTCHA fields (warning, non-blocking)
       if (type === 'captcha') {
         const captchaCount = Object.values(tree.nodes).filter(
@@ -157,12 +158,15 @@ export function useSchemaCommands({
         ).length;
         if (captchaCount >= 1) {
           const message = __(
-            'Warning: Adding multiple CAPTCHA fields may cause conflicts. Most forms should only use one CAPTCHA field.',
+            'Adding multiple CAPTCHA fields may cause conflicts. Most forms should only use one CAPTCHA field.',
             'subtleforms'
           );
-          // eslint-disable-next-line no-alert
           if (
-            !confirm(message + '\n\n' + __('Continue anyway?', 'subtleforms'))
+            !(await confirmDialog({
+              title: __('Add another CAPTCHA field?', 'subtleforms'),
+              message,
+              confirmText: __('Add anyway', 'subtleforms'),
+            }))
           ) {
             return;
           }
@@ -258,7 +262,7 @@ export function useSchemaCommands({
   );
 
   const handleDuplicate = useCallback(
-    (nodeId, destination) => {
+    async (nodeId, destination) => {
       // Block duplicates in read-only mode
       if (isReadOnly) {
         return;
@@ -272,12 +276,15 @@ export function useSchemaCommands({
       const node = tree.nodes[nodeId];
       if (node?.type === 'captcha') {
         const message = __(
-          'Warning: Duplicating CAPTCHA fields may cause conflicts. Most forms should only use one CAPTCHA field.',
+          'Duplicating CAPTCHA fields may cause conflicts. Most forms should only use one CAPTCHA field.',
           'subtleforms'
         );
-        // eslint-disable-next-line no-alert
         if (
-          !confirm(message + '\n\n' + __('Continue anyway?', 'subtleforms'))
+          !(await confirmDialog({
+            title: __('Duplicate this CAPTCHA field?', 'subtleforms'),
+            message,
+            confirmText: __('Duplicate anyway', 'subtleforms'),
+          }))
         ) {
           return;
         }
@@ -342,7 +349,7 @@ export function useSchemaCommands({
   );
 
   const handleDeleteStep = useCallback(
-    (stepId) => {
+    async (stepId) => {
       const rootNode = tree.nodes[rootId];
       const steps = (rootNode?.children || [])
         .map((id) => tree.nodes[id])
@@ -356,9 +363,11 @@ export function useSchemaCommands({
       if (
         steps.length > 1 &&
         count > 0 &&
-        // eslint-disable-next-line no-alert
-        !window.confirm(
-          sprintf(
+        !(await confirmDialog({
+          destructive: true,
+          title: __('Delete this step?', 'subtleforms'),
+          confirmText: __('Delete step', 'subtleforms'),
+          message: sprintf(
             /* translators: %d: number of fields */
             _n(
               'Delete this step and the %d field in it? You can undo this.',
@@ -367,8 +376,8 @@ export function useSchemaCommands({
               'subtleforms'
             ),
             count
-          )
-        )
+          ),
+        }))
       ) {
         return;
       }

@@ -6,6 +6,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 
 = 2.4.1 - 2026-10-20 =
 * Fix: Entry ages read 1 hour ago, 1 minute ago and 1 day ago instead of using the plural for one.
+* Fix: Deleting a coupon, discarding changes, deleting forms or steps, resetting settings and export errors use the SubtleForms dialog instead of the browser's confirm and alert boxes.
 
 = 2.4.0 - 2026-10-20 =
 * New: A payment form has its own currency setting under Settings, Payments. It follows the site currency until you pick one.

@@ -131,6 +131,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 
 = 2.4.1 - 2026-10-20 =
 * Fix: Entry ages read 1 hour ago, 1 minute ago and 1 day ago instead of using the plural for one.
+* Fix: Deleting a coupon, discarding changes, deleting forms or steps, resetting settings and export errors use the SubtleForms dialog instead of the browser's confirm and alert boxes.
 
 = 2.4.0 - 2026-10-20 =
 * New: Each payment form can pick its own currency, and more currencies are available, including JPY, INR, PKR and AED.

@@ -32,6 +32,7 @@ import { logger, perfMarkers } from '../diagnostics';
 import './FormsList.scss';
 import { formsEmptyState } from './formsEmptyState';
 import { keepRowsAfterFailedLoad, listQueryKey } from '../utils/failedLoad';
+import { confirmDialog } from '../utils/confirmDialog';
 
 export const ALL_FORM_COLUMNS = ['title', 'form_type', 'status', 'id', 'submission_count', 'performance', 'updated_at', 'actions'];
 export const DEFAULT_FORM_VISIBLE = ['title', 'form_type', 'status', 'id', 'submission_count', 'performance', 'updated_at', 'actions'];
@@ -648,8 +649,10 @@ export default function FormsList({
   const handleBulkDelete = async (ids) => {
     const permanent = deletesPermanently(hardDelete ? 'hard' : 'soft', statusFilter === 'trash');
     if (
-      !window.confirm(
-        permanent
+      !(await confirmDialog({
+        destructive: true,
+        confirmText: permanent ? __('Delete permanently', 'subtleforms') : __('Move to Trash', 'subtleforms'),
+        message: permanent
           ? sprintf(
               /* translators: %d: number of forms */
               _n(
@@ -669,8 +672,8 @@ export default function FormsList({
                 'subtleforms'
               ),
               ids.length
-            )
-      )
+            ),
+      }))
     ) {
       return;
     }

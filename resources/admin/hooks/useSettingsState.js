@@ -13,6 +13,7 @@ import { useState, useEffect, useCallback } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import { validateSettings, validateField } from '../utils/validation';
+import { confirmDialog } from '../utils/confirmDialog';
 
 /**
  * Normalize boolean fields coming from the REST API.
@@ -213,12 +214,14 @@ export default function useSettingsState() {
 
 	const resetSettings = useCallback( async () => {
 		if (
-			! confirm(
-				__(
+			! ( await confirmDialog( {
+				destructive: true,
+				confirmText: __( 'Reset settings', 'subtleforms' ),
+				message: __(
 					'Are you sure you want to reset all settings to defaults? This cannot be undone.',
 					'subtleforms'
-				)
-			)
+				),
+			} ) )
 		) {
 			return;
 		}

@@ -48,6 +48,7 @@ import { countSchemaFields, fieldDeletedMessage } from '../utils/fieldDeleteNoti
 import { Skeleton } from '../ui/loading/Skeleton';
 import './BuilderPage.scss';
 import { applyPaymentDefaults } from '../utils/paymentDefaults';
+import { confirmDialog } from '../utils/confirmDialog';
 import {
   structuralType,
   withStructuralType,
@@ -582,16 +583,18 @@ function FormBuilderInner({
   // Discard local draft changes and revert to the last persisted version,
   // staying in the builder (Part B17). Re-fetches from the server so the
   // draft, history, and dirty flag all reset to the saved/published state.
-  const handleDiscardChanges = useCallback(() => {
+  const handleDiscardChanges = useCallback(async () => {
     if (!isDirty) {
       return;
     }
-    const ok = window.confirm(
-      __(
+    const ok = await confirmDialog({
+      destructive: true,
+      confirmText: __('Discard changes', 'subtleforms'),
+      message: __(
         'Discard your unsaved changes and revert to the last saved version?',
         'subtleforms'
-      )
-    );
+      ),
+    });
     if (!ok) {
       return;
     }

@@ -17,6 +17,7 @@ import './ConfirmModal.scss';
  * @param {string} props.secondaryText - Optional secondary button text
  * @param {string} props.cancelText - Cancel button text
  * @param {boolean} props.isLoading - Loading state for primary button
+ * @param {boolean} props.showCancel - Show the cancel button (false for a notice with one button)
  */
 export default function ConfirmModal({
   isOpen,
@@ -30,6 +31,7 @@ export default function ConfirmModal({
   secondaryText,
   cancelText = __('Cancel', 'subtleforms'),
   isLoading = false,
+  showCancel = true,
 }) {
   if (!isOpen) return null;
 
@@ -55,13 +57,15 @@ export default function ConfirmModal({
             </Button>
           )}
 
-          <Button
-            variant='tertiary'
-            onClick={onClose}
-            disabled={isLoading}
-            className='sf-confirm-modal__button'>
-            {cancelText}
-          </Button>
+          {showCancel && (
+            <Button
+              variant='tertiary'
+              onClick={onClose}
+              disabled={isLoading}
+              className='sf-confirm-modal__button'>
+              {cancelText}
+            </Button>
+          )}
 
           <Button
             variant={confirmVariant === 'destructive' ? 'primary' : 'primary'}
