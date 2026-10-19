@@ -263,6 +263,29 @@ final class Payments240Test extends TestCase {
 		}
 	}
 
+	/** PAY-14: coupon dates that cannot be read, or end before they start, are refused. */
+	public function test_pay14_coupon_dates_are_checked() {
+		$bad = array(
+			array( 'starts_at' => '2027-01-01', 'expires_at' => '2026-01-01' ),
+			array( 'expires_at' => 'not a date' ),
+			array( 'starts_at' => 'soon-ish' ),
+		);
+		foreach ( $bad as $i => $dates ) {
+			$saved = CouponsRepository::save( array_merge( array( 'code' => 'PAY14BAD' . $i, 'type' => 'percent', 'amount' => 10 ), $dates ) );
+			if ( is_array( $saved ) ) {
+				$this->couponIds[] = (int) $saved['id'];
+			}
+			$this->assertWPError( $saved );
+			$this->assertSame( 'subtleforms_coupon_date', $saved->get_error_code() );
+			$this->assertSame( 400, $saved->get_error_data()['status'] );
+		}
+		$this->assertNull( CouponsRepository::findByCode( 'PAY14BAD1' ), 'an unreadable expiry is not saved as never expires' );
+
+		$ok = $this->coupon( 'PAY14OK', array( 'starts_at' => '2026-01-01', 'expires_at' => '2027-01-01' ) );
+		$this->assertSame( '2027-01-01 00:00:00', $ok['expires_at'] );
+		$this->assertNull( $this->coupon( 'PAY14NONE', array( 'expires_at' => '' ) )['expires_at'] );
+	}
+
 	private function assertWPError( $value ): void {
 		$this->assertInstanceOf( \WP_Error::class, $value );
 	}

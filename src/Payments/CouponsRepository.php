@@ -121,7 +121,23 @@ final class CouponsRepository {
 				return new \WP_Error( 'subtleforms_coupon_uses', $message, array( 'status' => 400 ) );
 			}
 		}
+		// A date that cannot be read is an error, not "no date": an unreadable
+		// expiry used to save as "never expires" (PAY-14).
+		foreach (
+			array(
+				'starts_at'  => __( 'Enter a valid start date.', 'subtleforms' ),
+				'expires_at' => __( 'Enter a valid expiry date.', 'subtleforms' ),
+			) as $field => $message
+		) {
+			$raw = isset( $data[ $field ] ) && is_scalar( $data[ $field ] ) ? trim( (string) $data[ $field ] ) : '';
+			if ( '' !== $raw && false === strtotime( $raw ) ) {
+				return new \WP_Error( 'subtleforms_coupon_date', $message, array( 'status' => 400 ) );
+			}
+		}
 		$row = self::clean( $data );
+		if ( $row['starts_at'] && $row['expires_at'] && strtotime( $row['starts_at'] ) >= strtotime( $row['expires_at'] ) ) {
+			return new \WP_Error( 'subtleforms_coupon_date', __( 'The expiry date must be after the start date.', 'subtleforms' ), array( 'status' => 400 ) );
+		}
 		if ( '' === $row['code'] ) {
 			return new \WP_Error( 'subtleforms_coupon_code', __( 'Enter a coupon code.', 'subtleforms' ), array( 'status' => 400 ) );
 		}
