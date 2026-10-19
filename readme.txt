@@ -130,6 +130,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 == Changelog ==
 
 = 2.4.1 - 2026-10-20 =
+* Fix: Clearing a saved setting, such as an API key or a sender name, saves it empty instead of keeping the old value.
 * Fix: A form has no padding of its own, so it lines up with the text around it.
 * Fix: No line or border above the submit button.
 * Change: "Inherit from theme" adds no styling of its own. The theme styles the fields, labels and buttons, and the buttons use the theme's button style. Custom controls such as the dropdown and date pickers, the signature pad and the rich text editor keep their look so they stay usable.
