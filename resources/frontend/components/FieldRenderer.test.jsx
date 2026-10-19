@@ -375,3 +375,17 @@ describe('2.3.2: label visibility, help text placement and container labels', ()
     cols.unmount();
   });
 });
+
+describe('PAY-18: Fixed Fee is not drawn on the form', () => {
+  it('prints no label and no help text', () => {
+    const { container, unmount } = render({
+      type: 'payment_hidden_price',
+      key: 'fee',
+      label: 'Processing fee',
+      amount: 2,
+      description: 'Optional description for debugging',
+    });
+    expect(container.innerHTML).toBe('');
+    unmount();
+  });
+});

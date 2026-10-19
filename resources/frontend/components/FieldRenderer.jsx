@@ -252,6 +252,12 @@ export default function FieldRenderer({
     return null;
   }
 
+  if (field.type === 'payment_hidden_price') {
+    // A Fixed Fee has nothing to answer: it appears only as a line in the
+    // order summary, never as a label or help text on the form (PAY-18).
+    return null;
+  }
+
   if (field.type === 'action_hook') {
     // A server-side extension point. It renders nothing, but must be a known
     // type so it doesn't fall through to "Field type not supported".
@@ -979,10 +985,6 @@ function renderInput(
 
     case 'payment_card':
       return <PaymentCard config={config} />;
-
-    case 'payment_hidden_price':
-      // Hidden pricing field - not rendered
-      return null;
 
     case 'captcha':
     case 'recaptcha':
