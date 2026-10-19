@@ -10,6 +10,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 use SubtleForms\Contracts\ActionInterface;
 use SubtleForms\Engine\SubmissionContext;
+use SubtleForms\Support\Webhooks;
 
 final class WebhookAction implements ActionInterface {
 
@@ -31,10 +32,11 @@ final class WebhookAction implements ActionInterface {
 			$settings = array();
 		}
 
-		// URL (required)
-		$url = $settings['url'] ?? null;
-		if ( empty( $url ) || ! is_string( $url ) || ! wp_http_validate_url( $url ) ) {
-			$this->fail( $context, 'invalid_url', array( 'url' => (string) $url ) );
+		// URL (required). "hooks.example.com/x" means https://hooks.example.com/x.
+		$url     = Webhooks::normalizeUrl( is_string( $settings['url'] ?? null ) ? $settings['url'] : '' );
+		$problem = Webhooks::urlProblem( $url );
+		if ( $problem ) {
+			$this->fail( $context, $problem->get_error_code(), array( 'url' => $url, 'response' => $problem->get_error_message() ) );
 			return;
 		}
 
@@ -191,6 +193,14 @@ final class WebhookAction implements ActionInterface {
 		return \SubtleForms\Support\MergeTags::render( $value, $merge, false );
 	}
 
+	/**
+	 * Record an action failure into context meta. A "response" entry is
+	 * shown in the entry's activity log instead of the reason code.
+	 *
+	 * @param SubmissionContext $context Context.
+	 * @param string            $reason  Reason code.
+	 * @param array             $extra   Extra details.
+	 */
 	private function fail( SubmissionContext $context, string $reason, array $extra = array() ): void {
 		$fail   = $context->getMeta( 'action_failures', array() );
 		$fail[] = array_merge( array( 'action' => 'webhook', 'reason' => $reason ), $extra );

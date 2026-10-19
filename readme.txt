@@ -129,6 +129,9 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 
 == Changelog ==
 
+= 2.4.1 - 2026-10-20 =
+* Fix: A webhook address typed without https:// gets it, and an address WordPress refuses (a local or private host, or a port other than 80, 443 and 8080) is listed in the entry's activity log with the reason instead of failing silently.
+
 = 2.4.0 - 2026-10-20 =
 * New: Each payment form can pick its own currency, and more currencies are available, including JPY, INR, PKR and AED.
 * Fix: Forms follow the site currency unless you pick one, the Custom amount field shows the right symbol, and yen totals are whole yen.
