@@ -23,6 +23,7 @@ import { ConfirmModal } from '../modals';
 import { apiGet } from '../utils/api';
 import { apiClient } from '../data';
 import { Icon } from '../ui';
+import { keepRowsAfterFailedLoad, listQueryKey } from '../utils/failedLoad';
 import { downloadCsv } from '../utils/csvDownload';
 import { entrySender } from '../utils/entrySender';
 import './SubmissionsTable.scss';
@@ -103,6 +104,7 @@ const SubmissionsTable = forwardRef(
     // (another tab, filter or a slower request) are ignored so rows are
     // never shown twice or put back after a change (2.3.3).
     const generationRef = useRef(0);
+    const loadedQueryRef = useRef('');
     const { createSuccessNotice, createErrorNotice } =
       useDispatch(noticesStore);
 
@@ -199,6 +201,9 @@ const SubmissionsTable = forwardRef(
 
     // Full reset + reload from page 1 (fresh filters/sort)
     const loadFresh = async () => {
+      const requestQuery = listQueryKey([
+        formId, statusFilter, searchTerm, dateRange, fieldValue, processingStatus, sortBy, sortDirection, perPage,
+      ]);
       setError(null);
       setLoading(true);
       setCurrentPage(1);
@@ -207,12 +212,18 @@ const SubmissionsTable = forwardRef(
       try {
         const { rows, total } = await fetchBatch(0);
         if (generation !== generationRef.current) return;
+        loadedQueryRef.current = requestQuery;
         setBuffer(uniqueRows(rows));
         setPagesLoaded(Math.ceil(rows.length / perPage) || 0);
         setTotalItems(total);
       } catch (err) {
         if (generation !== generationRef.current) return;
         setError(__('Entries could not be loaded.', 'subtleforms'));
+        if (!keepRowsAfterFailedLoad(loadedQueryRef.current, requestQuery)) {
+          setBuffer([]);
+          setPagesLoaded(0);
+          setTotalItems(0);
+        }
       } finally {
         if (generation === generationRef.current) setLoading(false);
       }

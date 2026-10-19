@@ -47,3 +47,15 @@ test('forms list: a failed switch to Trash does not keep the Published forms', a
   await expect(page.getByText('Forms could not be loaded.').first()).toBeVisible();
   await expect(liveRow).toHaveCount(0);
 });
+
+test('entries list: a failed switch to Trash does not keep the Inbox entries', async ({ page }) => {
+  await loginPage(page);
+  await failTrash(page, 'submissions');
+  await page.goto(`/wp-admin/admin.php?page=subtleforms-submissions&form_id=${form.id}`);
+  const entryRow = page.locator('.sf-data-table__table tbody tr', { hasText: 'Stale Ada' });
+  await expect(entryRow).toBeVisible({ timeout: 30000 });
+
+  await page.getByRole('tab', { name: /^Trash/ }).click();
+  await expect(page.getByText('Entries could not be loaded.').first()).toBeVisible();
+  await expect(entryRow).toHaveCount(0);
+});
