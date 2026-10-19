@@ -11,6 +11,7 @@
 
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { getIn } from './valuePaths';
+import { columnFields } from './columnFields';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { getFieldType } from '../../shared/extend';
 import { hasParts, missingParts } from '../../shared/compositeParts';
@@ -495,9 +496,7 @@ export function validateFields(fields, values, hiddenFields, defaults = {}) {
       if (Array.isArray(children)) visit(children, prefix);
 
       if (Array.isArray(field.columns)) {
-        field.columns.forEach((col) => {
-          if (Array.isArray(col)) visit(col, prefix);
-        });
+        field.columns.forEach((col) => visit(columnFields(col), prefix));
       }
     });
   };

@@ -42,6 +42,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: Hidden field values, including {date}, {user_email} and {user_name}, are worked out on the server, so they are stored when a form is sent without JavaScript.
 * Fix: Values sent for an Order summary or Fixed fee field are not stored, so they no longer appear as columns in CSV exports.
 * Fix: A builder save that fails names the field as well as the setting, a numeric label, placeholder or default value saves, and long labels wrap on the canvas.
+* Fix: A column stored as an object with a fields or children list renders its fields on the live form, includes them in the live total, validates them and gives them defaults, so a product in that column is shown as well as charged.
 
 = 2.3.9 - 2026-10-19 =
 * Change: Nothing in SubtleForms is switched off without a license. CSV export, Reports (views, submissions and conversion), full conditional logic (any rule, groups, every operator, conditional emails, webhooks and confirmations), Picture choice, several files per upload field, payment fields (Product, Priced options, Custom amount, Fixed fee, Order summary, Coupon), coupons, and the Webhooks and Analytics settings all work in the free plugin.

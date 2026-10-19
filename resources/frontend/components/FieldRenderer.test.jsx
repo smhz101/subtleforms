@@ -433,3 +433,21 @@ describe('Name and Address on the live form (FB-02, FB-17)', () => {
     unmount();
   });
 });
+
+describe('column containers (review #20)', () => {
+  test('fields stored as columns: [{ fields }] are rendered', () => {
+    const field = {
+      type: 'two_column_container',
+      key: 'cols',
+      config: { key: 'cols' },
+      columns: [
+        { fields: [{ type: 'text', key: 'left_name', config: { key: 'left_name', label: 'Left name' } }] },
+        [{ type: 'text', key: 'right_name', config: { key: 'right_name', label: 'Right name' } }],
+      ],
+    };
+    const { container, unmount } = render(field);
+    expect(container.querySelector('[name="left_name"]')).not.toBeNull();
+    expect(container.querySelector('[name="right_name"]')).not.toBeNull();
+    unmount();
+  });
+});
