@@ -41,7 +41,10 @@ export default function HelpMenu({
           {showWizard && onOpenWizard && (
             <MenuItem
               icon={<Icon.Zap size={16} />}
-              onClick={onOpenWizard}>
+              onClick={() => {
+                onClose();
+                onOpenWizard();
+              }}>
               {__('Quick Start Wizard', 'subtleforms')}
             </MenuItem>
           )}
