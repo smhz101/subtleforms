@@ -4,8 +4,8 @@
  * - bug 7: a single checkbox saved with options opens as Multiple choice with a notice
  * - bug 8/9/10: empty matrix, calculation without a formula and empty
  *   disclaimer show a placeholder on the canvas
- * - bug 12: a published form shows "Published", edits show "changes not
- *   live", and the publish dialog asks "Push your changes live?"
+ * - bug 12: a published form shows "Published" and edits show "changes not
+ *   live". Update saves without asking again. The first Publish still asks.
  * - bug 13: the width button has an accessible name that follows the width
  */
 const { test, expect } = require('@playwright/test');
@@ -52,11 +52,10 @@ test('published status, publish dialog and width button name (bugs 12, 13)', asy
   // The edit makes the live form out of date.
   await expect(badge).toContainText('changes not live');
 
-  // Publishing an already-live form asks to push the changes.
+  // Update on a form that is already live saves. It does not ask again.
   await page.locator('.sf-builder-header-bar__publish-button').click();
-  await expect(page.getByText('Push your changes live?')).toBeVisible();
-  await expect(page.getByText('will make it visible on the frontend')).toHaveCount(0);
-  await page.getByRole('dialog').getByRole('button', { name: 'Update', exact: true }).click();
+  await expect(page.getByText('Push your changes live?')).toHaveCount(0);
+  await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect(badge).toHaveText(/^Published$/, { timeout: 20000 });
 });
 
