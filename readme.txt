@@ -4,7 +4,7 @@ Tags: form builder, contact form, forms, multi-step form, file upload
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.4.0
+Stable tag: 2.4.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -262,6 +262,9 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 The full history is in changelog.txt in the plugin folder.
 
 == Upgrade Notice ==
+
+= 2.4.1 =
+Webhooks now send the documented body, with answers under "fields", and can be tested without Pro. If a receiver reads answers at the top level of the body, update it to read them from "fields". Field IDs can be edited. Update SubtleForms Pro to 2.4.2 at the same time.
 
 = 2.4.0 =
 Field options, CAPTCHA keys, dependent dropdowns and keyboard use of dropdowns, country, phone and date fields.
