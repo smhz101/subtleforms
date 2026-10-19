@@ -20,6 +20,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class FormTemplates {
 
+	/** Smallest donation the Donation Form template accepts. */
+	const DONATION_MINIMUM = 1;
+
 	/**
 	 * Get all available templates.
 	 *
@@ -667,9 +670,12 @@ class FormTemplates {
 				),
 				'fields'   => array(
 					array(
-						'id'    => 'custom_amount',
-						'type'  => 'payment_amount',
-						'label' => __( 'Custom Amount', 'subtleforms' ),
+						'id'       => 'custom_amount',
+						'type'     => 'payment_amount',
+						'label'    => __( 'Custom Amount', 'subtleforms' ),
+						// A donation form must take a donation.
+						'required' => true,
+						'min'      => self::DONATION_MINIMUM,
 					),
 				),
 			),
@@ -737,6 +743,7 @@ class FormTemplates {
 			if ( 'donation_form' === $id && 'custom_amount' === (string) ( $field['id'] ?? '' ) ) {
 				$field['type']  = 'payment_amount';
 				$field['label'] = __( 'Custom Amount', 'subtleforms' );
+				$field          = self::require_positive_amount( $field );
 			}
 			$out[] = $field;
 		}
@@ -805,12 +812,37 @@ class FormTemplates {
 		} ) ) {
 			return $fields;
 		}
-		$fields[] = array(
-			'id'    => 'custom_amount',
-			'type'  => 'payment_amount',
-			'label' => __( 'Custom Amount', 'subtleforms' ),
+		$fields[] = self::require_positive_amount(
+			array(
+				'id'    => 'custom_amount',
+				'type'  => 'payment_amount',
+				'label' => __( 'Custom Amount', 'subtleforms' ),
+			)
 		);
 		return $fields;
+	}
+
+	/**
+	 * A donation amount is required and above zero, so an empty or zero
+	 * amount cannot complete a donation form. A higher minimum is kept.
+	 *
+	 * @param array<string, mixed> $field Custom Amount field.
+	 * @return array<string, mixed>
+	 */
+	private static function require_positive_amount( array $field ): array {
+		$field['required'] = true;
+		$min               = $field['min'] ?? null;
+		if ( ! is_numeric( $min ) || (float) $min <= 0 ) {
+			$field['min'] = self::DONATION_MINIMUM;
+		}
+		// Settings in config win over flat ones, so fix them there too.
+		if ( isset( $field['config'] ) && is_array( $field['config'] ) ) {
+			$field['config']['required'] = true;
+			if ( array_key_exists( 'min', $field['config'] ) && ( ! is_numeric( $field['config']['min'] ) || (float) $field['config']['min'] <= 0 ) ) {
+				$field['config']['min'] = $field['min'];
+			}
+		}
+		return $field;
 	}
 
 	/**

@@ -136,6 +136,44 @@ class TemplateNotifyTest extends TestCase {
 	}
 
 	/**
+	 * Review #15 (4309435338): the donation amount is required with a
+	 * positive minimum, in the built-in template and in one an add-on
+	 * supplies with a zero minimum in its config.
+	 */
+	public function test_donation_amount_is_required_and_positive(): void {
+		$templates = FormTemplates::get_all();
+		$amount    = $templates['donation_form']['schema']['fields'][0];
+		$this->assertSame( 'payment_amount', $amount['type'] );
+		$this->assertTrue( $amount['required'] );
+		$this->assertGreaterThan( 0, $amount['min'] );
+
+		$method = new \ReflectionMethod( FormTemplates::class, 'prepare_template' );
+		$method->setAccessible( true );
+		$donation = $method->invoke(
+			null,
+			'donation_form',
+			array(
+				'id'     => 'donation_form',
+				'schema' => array(
+					'fields' => array(
+						array(
+							'id'     => 'custom_amount',
+							'type'   => 'number',
+							'label'  => 'Amount',
+							'config' => array( 'min' => 0, 'required' => false ),
+						),
+					),
+				),
+			)
+		);
+		$field = $donation['schema']['fields'][0];
+		$this->assertTrue( $field['required'] );
+		$this->assertTrue( $field['config']['required'] );
+		$this->assertGreaterThan( 0, $field['config']['min'] );
+		$this->assertGreaterThan( 0, $field['min'] );
+	}
+
+	/**
 	 * @param array<string, mixed> $template Template definition.
 	 */
 	private function assertTemplateIsSafe( string $id, array $template ): void {

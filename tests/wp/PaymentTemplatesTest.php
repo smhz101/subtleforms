@@ -114,4 +114,21 @@ final class PaymentTemplatesTest extends TestCase {
 		$this->assertSame( 200, $res['status'], wp_json_encode( $res['data'] ) );
 		$this->assertStringContainsString( '"total":10', $this->storedRow( $id ) );
 	}
+
+	/**
+	 * Review #15 (4309435338): a donation form cannot complete without a
+	 * donation. The Custom Amount is required and must be above zero.
+	 */
+	public function test_donation_template_needs_a_positive_amount(): void {
+		$id = $this->fromTemplate( 'donation_form' );
+
+		foreach ( array( array(), array( 'custom_amount' => '' ), array( 'custom_amount' => '0' ), array( 'custom_amount' => '0.5' ) ) as $data ) {
+			$res = $this->submit( $id, $data );
+			$this->assertSame( 422, $res['status'], wp_json_encode( $data ) . ' ' . wp_json_encode( $res['data'] ) );
+		}
+
+		$res = $this->submit( $id, array( 'custom_amount' => '25' ) );
+		$this->assertSame( 200, $res['status'], wp_json_encode( $res['data'] ) );
+		$this->assertStringContainsString( '"total":25', $this->storedRow( $id ) );
+	}
 }
