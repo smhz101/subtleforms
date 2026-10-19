@@ -7,6 +7,7 @@ import {
   levelsFromIndented,
   levelsToCsv,
   removeChoice,
+  renameChoice,
 } from './chainedLevels';
 
 const sample = [
@@ -118,4 +119,48 @@ test('csv cells can contain commas', () => {
   const levels = levelsFromCsv('Group,Choice\n"A, B",One\n');
   expect(levels[0].options[0].label).toBe('A, B');
   expect(levels[1].options[0].parent).toBe('a_b');
+});
+
+describe('readable identifiers that are never reused (FLD2-02, FLD2-03)', () => {
+  const make = { label: 'Make', options: [] };
+
+  test('a typed choice takes its identifier from its label', () => {
+    let levels = addChoice([make], 0);
+    const draft = levels[0].options[0].value;
+    levels = renameChoice(levels, 0, draft, 'F', { rekey: true });
+    levels = renameChoice(levels, 0, 'f', 'Ford', { rekey: true });
+    expect(levels[0].options[0]).toEqual({ label: 'Ford', value: 'ford' });
+  });
+
+  test('a saved choice keeps its identifier when renamed', () => {
+    const levels = renameChoice([{ label: 'Make', options: [{ label: 'Ford', value: 'ford' }] }], 0, 'ford', 'Ford Motor');
+    expect(levels[0].options[0].value).toBe('ford');
+  });
+
+  test('later choices follow a parent whose identifier changes', () => {
+    const levels = [
+      { label: 'Make', options: [{ label: 'Choice 1', value: 'choice_abc12345' }] },
+      { label: 'Model', options: [{ label: 'Focus', value: 'focus', parent: 'choice_abc12345' }] },
+    ];
+    const next = renameChoice(levels, 0, 'choice_abc12345', 'Ford', { rekey: true });
+    expect(next[1].options[0].parent).toBe('ford');
+  });
+
+  test('Urdu and Chinese labels give readable identifiers', () => {
+    const levels = levelsFromCsv(['شہر,城市', 'لاہور,北京'].join('\n'));
+    expect(levels[0].options[0].value).toBe('لاہور');
+    expect(levels[1].options[0].value).toBe('北京');
+  });
+
+  test('a new choice never takes the identifier of a removed one', () => {
+    let levels = [{ label: 'Make', options: [] }];
+    ['Ford', 'Toyota', ''].forEach(() => {
+      levels = addChoice(levels, 0);
+    });
+    const removed = levels[0].options[2].value;
+    levels = removeChoice(levels, 0, removed);
+    levels = addChoice(levels, 0);
+    expect(levels[0].options[2].value).not.toBe(removed);
+    expect(levels[0].options[2].value).not.toMatch(/^choice_\d$/);
+  });
 });

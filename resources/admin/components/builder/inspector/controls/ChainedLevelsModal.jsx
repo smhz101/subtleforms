@@ -61,6 +61,9 @@ export default function ChainedLevelsModal({ levels, onChange, onClose, disabled
 	const [path, setPath] = useState(() => firstPath(levels));
 	const [activeDepth, setActiveDepth] = useState(0);
 	const [paste, setPaste] = useState('');
+	// Choices added while the editor is open: no entry can hold their
+	// identifier yet, so it follows the label as it is typed (FLD2-02).
+	const [fresh, setFresh] = useState(() => new Set());
 	const shown = activePath(levels, path);
 	const columnDepth = Math.min(activeDepth, Math.max(levels.length - 1, 0));
 
@@ -185,9 +188,11 @@ export default function ChainedLevelsModal({ levels, onChange, onClose, disabled
 										)}
 									</header>
 									<div className="sf-chained-modal__list">
-										{options.map((option) => (
+										{options.map((option, index) => (
 											<div
-												key={option.value || option.label}
+												// By position: a new choice's identifier changes as
+												// its label is typed, and the input keeps focus.
+												key={index}
 												className={clsx('sf-chained-modal__choice', {
 													'is-selected': option.value === selected,
 												})}
@@ -199,9 +204,19 @@ export default function ChainedLevelsModal({ levels, onChange, onClose, disabled
 													aria-label={__('Choice', 'subtleforms')}
 													placeholder={__('Choice', 'subtleforms')}
 													onFocus={() => select(depth, option.value)}
-													onChange={(event) =>
-														onChange(renameChoice(levels, depth, option.value, event.target.value))
-													}
+													onChange={(event) => {
+														const rekey = fresh.has(option.value);
+														const at = levels[depth].options.indexOf(option);
+														const next = renameChoice(levels, depth, option.value, event.target.value, { rekey });
+														const renamed = next[depth].options[at]?.value;
+														onChange(next);
+														if (rekey && renamed && renamed !== option.value) {
+															setFresh((prev) => new Set([...prev].filter((v) => v !== option.value)).add(renamed));
+															if (shown[depth] === option.value) {
+																setPath([...shown.slice(0, depth), renamed, ...shown.slice(depth + 1)]);
+															}
+														}
+													}}
 												/>
 												{option.value === selected && depth < levels.length - 1 && (
 													<Icon.Right className="sf-chained-modal__next" size={14} aria-hidden="true" />
@@ -247,6 +262,9 @@ export default function ChainedLevelsModal({ levels, onChange, onClose, disabled
 												const before = levels[depth]?.options?.length || 0;
 												const next = addChoice(levels, depth, depth > 0 ? parentValue : undefined);
 												const added = next[depth].options[before];
+												if (added) {
+													setFresh((prev) => new Set(prev).add(added.value));
+												}
 												commit(
 													next,
 													added ? [...shown.slice(0, depth), added.value] : shown.slice(0, depth)

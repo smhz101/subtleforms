@@ -5,13 +5,29 @@
  * `option.parent`, which is the previous dropdown's choice value.
  */
 
+/**
+ * A readable identifier from a choice label. Letters and digits of every
+ * script are kept, so Urdu or Chinese labels give Urdu or Chinese values
+ * rather than nothing (FLD2-02).
+ */
 export function slugifyChoice(text) {
   return String(text || '')
+    .normalize('NFKC')
     .toLowerCase()
     .trim()
-    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/[^\p{L}\p{M}\p{N}]+/gu, '_')
     .replace(/^_+|_+$/g, '')
     .slice(0, 48);
+}
+
+/**
+ * An identifier for a choice that has no label yet. It is random, so a new
+ * choice never takes the identifier a removed one had: old entries keep
+ * meaning what they meant (FLD2-03).
+ */
+export function newChoiceValue() {
+  const random = Math.random().toString(36).slice(2, 8).padEnd(6, '0');
+  return `choice_${Date.now().toString(36)}${random}`;
 }
 
 export function normalizeLevels(value) {
@@ -56,7 +72,7 @@ export function uniqueValue(options, base) {
 
 export function makeChoice(options, label, parent) {
   const text = String(label || '').trim();
-  const value = uniqueValue(options, slugifyChoice(text) || `choice_${(options || []).length + 1}`);
+  const value = uniqueValue(options, slugifyChoice(text) || newChoiceValue());
   const choice = {
     label: text || `Choice ${(options || []).length + 1}`,
     value,
@@ -116,18 +132,48 @@ export function addChoice(levels, depth, parentValue) {
   return next;
 }
 
-export function renameChoice(levels, depth, value, label) {
+/**
+ * Rename a choice.
+ *
+ * With `rekey` (a choice added in this editing session, so no entry can hold
+ * its identifier yet) the identifier follows the label, and later choices
+ * that name it as their parent follow too (FLD2-02). Saved choices keep their
+ * identifier, so old entries and logic rules still match.
+ *
+ * @param {Array}  levels  Dropdowns.
+ * @param {number} depth   Dropdown of the choice.
+ * @param {string} value   Identifier of the choice.
+ * @param {string} label   New label.
+ * @param {Object} options { rekey }.
+ * @return {Array} Dropdowns.
+ */
+export function renameChoice(levels, depth, value, label, { rekey = false } = {}) {
   const next = normalizeLevels(levels);
   const level = next[depth];
   if (!level) {
     return next;
   }
+  let newValue = String(value);
+  if (rekey) {
+    const others = level.options.filter((option) => String(option.value) !== String(value));
+    const slug = slugifyChoice(label);
+    const keep = /^choice_[a-z0-9]{8,}$/.test(String(value)) ? String(value) : newChoiceValue();
+    newValue = uniqueValue(others, slug || keep);
+  }
   next[depth] = {
     ...level,
     options: level.options.map((option) =>
-      String(option.value) === String(value) ? { ...option, label } : option
+      String(option.value) === String(value) ? { ...option, label, value: newValue } : option
     ),
   };
+  if (newValue !== String(value) && next[depth + 1]) {
+    next[depth + 1] = {
+      ...next[depth + 1],
+      options: next[depth + 1].options.map((option) =>
+        String(option.parent) === String(value) ? { ...option, parent: newValue } : option
+      ),
+    };
+  }
   return next;
 }
 
