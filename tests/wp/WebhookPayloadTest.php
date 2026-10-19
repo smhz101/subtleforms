@@ -76,7 +76,8 @@ final class WebhookPayloadTest extends TestCase {
 		( new WebhookAction() )->handle( $context );
 
 		$this->assertCount( 1, $this->jobs );
-		$body = json_decode( (string) $this->jobs[0]['body'], true );
+		// 2.4.1: answers keyed by field are under "fields".
+		$body = json_decode( (string) $this->jobs[0]['body'], true )['fields'];
 		$this->assertSame( array( 'Pakistan', 'Punjab' ), $body['place'] );
 		$this->assertSame( array( 'Pakistan', 'Punjab' ), $body['offices'][0]['office_place'] );
 		// Other answers are sent as stored, as before.

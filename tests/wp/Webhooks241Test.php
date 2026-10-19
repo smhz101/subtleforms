@@ -1,7 +1,8 @@
 <?php
 // phpcs:disable -- Integration test; not shipped in production plugin.
 /**
- * Webhooks in 2.4.1: the address check with a readable reason.
+ * Webhooks in 2.4.1: the default body and the address check with a
+ * readable reason.
  *
  * @package SubtleForms\Tests\WP
  */
@@ -52,6 +53,32 @@ final class Webhooks241Test extends TestCase {
 		}
 		( new WebhookAction() )->handle( $context );
 		return $context;
+	}
+
+	public function test_full_body_is_the_documented_shape_without_spam_or_captcha_values(): void {
+		$this->handle(
+			array( 'url' => 'https://93.184.216.34/receive', 'payload_mode' => 'full' ),
+			array( 'name' => 'Ann', 'form_rendered_at' => 'v1.token', 'website_url' => '', 'g-recaptcha-response' => 'tok', '_payment' => 'pi_1' )
+		);
+		$this->assertCount( 1, $this->jobs );
+		$body = json_decode( (string) $this->jobs[0]['body'], true );
+		$this->assertSame( 'submission.created', $body['event'] );
+		$this->assertSame( 7, $body['form_id'] );
+		$this->assertSame( 'Contact', $body['form_title'] );
+		$this->assertSame( 41, $body['submission_id'] );
+		$this->assertStringContainsString( 'submission_id=41', $body['entry_url'] );
+		$this->assertSame( array( 'name' => 'Ann' ), $body['fields'] );
+		$this->assertSame( array( array( 'key' => 'name', 'label' => 'Name', 'value' => 'Ann' ) ), $body['answers'] );
+	}
+
+	public function test_custom_body_never_offers_internal_values(): void {
+		$this->handle(
+			array( 'url' => 'https://93.184.216.34/receive', 'payload_mode' => 'custom', 'custom_payload' => '{"n":"{{name}}","t":"{{form_rendered_at}}"}' ),
+			array( 'name' => 'Ann', 'form_rendered_at' => 'v1.token' )
+		);
+		$body = json_decode( (string) $this->jobs[0]['body'], true );
+		$this->assertSame( 'Ann', $body['n'] );
+		$this->assertStringNotContainsString( 'v1.token', (string) $this->jobs[0]['body'] );
 	}
 
 	public function test_an_address_without_scheme_gets_https(): void {

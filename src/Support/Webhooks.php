@@ -2,7 +2,8 @@
 /**
  * Shared rules for webhook actions and the Settings test request (2.4.1).
  *
- * The address rules every webhook delivery uses.
+ * A webhook delivery and a test request use the same address check and the
+ * same body, so a test that succeeds means real entries are delivered too.
  *
  * @package SubtleForms
  * @since   2.4.1
@@ -17,9 +18,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
- * Webhook address.
+ * Webhook address, answers and body.
  */
 final class Webhooks {
+
+	/**
+	 * Values a visitor's browser sends that are not answers: spam traps,
+	 * CAPTCHA tokens and the payment reference.
+	 */
+	const NOT_ANSWERS = array( 'website_url', 'form_rendered_at', 'g-recaptcha-response', 'h-captcha-response', 'cf-turnstile-response', '_payment' );
 
 	/**
 	 * Trim an address and add https:// when no scheme was typed, so
@@ -67,5 +74,90 @@ final class Webhooks {
 			);
 		}
 		return null;
+	}
+
+	/**
+	 * The answers a webhook sends: the copy that is stored for the entry,
+	 * without spam traps, CAPTCHA tokens or other internal values.
+	 *
+	 * @param array $payload Submitted answers.
+	 * @param mixed $schema  Form schema.
+	 * @return array
+	 */
+	public static function answers( array $payload, $schema ): array {
+		$payload = \SubtleForms\Api\PublicSubmitApi::storablePayload( $payload, $schema );
+		foreach ( array_keys( $payload ) as $key ) {
+			$key = (string) $key;
+			if ( '' === $key || '_' === $key[0] || in_array( $key, self::NOT_ANSWERS, true ) ) {
+				unset( $payload[ $key ] );
+			}
+		}
+		return $payload;
+	}
+
+	/**
+	 * The default JSON body: the form and entry, every answer keyed by
+	 * field, and every answer with its label. SubtleForms Pro sends the same
+	 * shape.
+	 *
+	 * @param array $schema  Form schema.
+	 * @param array $answers Answers from answers().
+	 * @param array $entry   form_id, form_title, submission_id, submitted_at.
+	 * @return array
+	 */
+	public static function fullBody( array $schema, array $answers, array $entry ): array {
+		$labelled = array();
+		foreach ( FieldMapper::answers( $schema, $answers, false ) as $row ) {
+			$labelled[] = array(
+				'key'   => (string) $row['key'],
+				'label' => (string) $row['label'],
+				'value' => $row['value'],
+			);
+		}
+		$submissionId = (int) ( $entry['submission_id'] ?? 0 );
+
+		return array(
+			'event'         => 'submission.created',
+			'form_id'       => (int) ( $entry['form_id'] ?? 0 ),
+			'form_title'    => (string) ( $entry['form_title'] ?? '' ),
+			'submission_id' => $submissionId,
+			'created_at'    => (string) ( $entry['submitted_at'] ?? gmdate( 'c' ) ),
+			'site_url'      => home_url( '/' ),
+			'entry_url'     => $submissionId > 0 ? admin_url( 'admin.php?page=subtleforms-submissions&submission_id=' . $submissionId ) : '',
+			// Dependent dropdowns send the label chosen at each level, as emails do.
+			'fields'        => (object) ( $schema ? AnswerFormatter::withChainedLabels( $schema, $answers ) : $answers ),
+			'answers'       => $labelled,
+		);
+	}
+
+	/**
+	 * Sign a body with HMAC-SHA256 for the X-SubtleForms-Signature header.
+	 *
+	 * @param string $body   Request body.
+	 * @param string $secret Signing secret.
+	 * @return string
+	 */
+	public static function signature( string $body, string $secret ): string {
+		return 'sha256=' . hash_hmac( 'sha256', $body, $secret );
+	}
+
+	/**
+	 * Headers from an action's settings, without line breaks that could add
+	 * headers of their own.
+	 *
+	 * @param mixed $headers Name to value.
+	 * @return array<string,string>
+	 */
+	public static function safeHeaders( $headers ): array {
+		$safe = array();
+		foreach ( is_array( $headers ) ? $headers : array() as $name => $value ) {
+			$name  = trim( (string) $name );
+			$value = (string) $value;
+			if ( '' === $name || strpbrk( $name, "\r\n:" ) !== false || strpbrk( $value, "\r\n" ) !== false ) {
+				continue;
+			}
+			$safe[ $name ] = $value;
+		}
+		return $safe;
 	}
 }

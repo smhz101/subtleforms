@@ -42,128 +42,111 @@ final class WebhookAction implements ActionInterface {
 
 		// Method: POST | PUT | PATCH (default POST)
 		$allowed_methods = array( 'POST', 'PUT', 'PATCH' );
-		$method          = strtoupper( $settings['method'] ?? 'POST' );
+		$method          = strtoupper( (string) ( $settings['method'] ?? 'POST' ) );
 		if ( ! in_array( $method, $allowed_methods, true ) ) {
 			$method = 'POST';
 		}
 
+		$schema  = $context->getMeta( 'form_schema' );
+		$schema  = is_array( $schema ) ? $schema : array();
+		$answers = Webhooks::answers( is_array( $context->payload ) ? $context->payload : array(), $schema );
+
 		// Payload mode: full (default) | custom
-		$payload_mode = $settings['payload_mode'] ?? 'full';
+		$payload_mode = ( $settings['payload_mode'] ?? 'full' ) === 'custom' ? 'custom' : 'full';
 
 		if ( 'custom' === $payload_mode ) {
-			$raw_custom = $settings['custom_payload'] ?? '';
-			if ( '' !== $raw_custom ) {
+			$raw_custom = (string) ( $settings['custom_payload'] ?? '' );
+			if ( '' !== trim( $raw_custom ) ) {
 				$decoded = json_decode( $raw_custom, true );
 				if ( json_last_error() !== JSON_ERROR_NONE ) {
 					$this->fail( $context, 'invalid_custom_payload', array( 'error' => json_last_error_msg() ) );
 					return;
 				}
-				$answers = array();
-				foreach ( (array) $context->payload as $key => $value ) {
+				$scalar = array();
+				foreach ( $answers as $key => $value ) {
 					if ( is_scalar( $value ) ) {
-						$answers[ (string) $key ] = (string) $value;
+						$scalar[ (string) $key ] = (string) $value;
 					}
 				}
-				$schema = $context->getMeta( 'form_schema' );
-				$schema = is_array( $schema ) ? $schema : array();
 				$decoded = self::fillCustomPayload(
 					$decoded,
-					$answers,
+					$scalar,
 					array(
 						'form_title' => (string) ( $schema['metadata']['title'] ?? '' ),
 						'entry_id'   => (string) ( $context->getMeta( 'submission_id', '' ) ),
 					)
 				);
-				$body = wp_json_encode( $decoded );
+				$body = (string) wp_json_encode( $decoded );
 			} else {
 				$body = '{}';
 			}
 		} else {
-			// 'full', entire submission payload. Dependent dropdowns send the
-			// label chosen at each level, as emails and integrations do.
-			$schema = $context->getMeta( 'form_schema' );
-			$body   = wp_json_encode(
-				is_array( $schema ) && is_array( $context->payload )
-					? \SubtleForms\Support\AnswerFormatter::withChainedLabels( $schema, $context->payload )
-					: $context->payload
+			// The documented body: form, entry, answers keyed by field and with labels.
+			$body = (string) wp_json_encode(
+				Webhooks::fullBody(
+					$schema,
+					$answers,
+					array(
+						'form_id'       => (int) $context->formId,
+						'form_title'    => (string) ( $schema['metadata']['title'] ?? ( $schema['metadata']['name'] ?? '' ) ),
+						'submission_id' => (int) $context->getMeta( 'submission_id', 0 ),
+						'submitted_at'  => gmdate( 'c' ),
+					)
+				)
 			);
-		}
-
-		// Headers: merge user-supplied over default Content-Type
-		$user_headers = $settings['headers'] ?? array();
-		if ( ! is_array( $user_headers ) ) {
-			$user_headers = array();
-		}
-
-		// Sanitize: prevent header injection via CR/LF
-		$safe_headers = array();
-		foreach ( $user_headers as $name => $value ) {
-			$name  = (string) $name;
-			$value = (string) $value;
-			if ( strpbrk( $name, "\r\n" ) !== false || strpbrk( $value, "\r\n" ) !== false ) {
-				continue;
-			}
-			$safe_headers[ $name ] = $value;
 		}
 
 		$headers = array_merge(
 			array( 'Content-Type' => 'application/json' ),
-			$safe_headers
+			Webhooks::safeHeaders( $settings['headers'] ?? array() )
 		);
 
 		// Signing: HMAC-SHA256, adds X-SubtleForms-Signature header
-		$signing = $settings['signing'] ?? array();
-		if ( is_array( $signing ) && ! empty( $signing['enabled'] ) && empty( $signing['secret'] ) ) {
+		$signing = is_array( $settings['signing'] ?? null ) ? $settings['signing'] : array();
+		if ( ! empty( $signing['enabled'] ) && empty( $signing['secret'] ) ) {
 			// No secret on the action: use the default from Settings > Integrations > Webhooks.
 			$global            = get_option( 'subtleforms_settings', array() );
 			$signing['secret'] = is_array( $global ) ? (string) ( $global['ext_webhooks_signing_secret'] ?? '' ) : '';
 		}
-		if (
-			is_array( $signing ) &&
-			! empty( $signing['enabled'] ) &&
-			! empty( $signing['secret'] ) &&
-			is_string( $signing['secret'] )
-		) {
-			$signature                          = 'sha256=' . hash_hmac( 'sha256', (string) $body, $signing['secret'] );
-			$headers['X-SubtleForms-Signature'] = $signature;
+		$signed = ! empty( $signing['enabled'] ) && is_string( $signing['secret'] ?? null ) && '' !== $signing['secret'];
+		if ( $signed ) {
+			$headers['X-SubtleForms-Signature'] = Webhooks::signature( $body, (string) $signing['secret'] );
 		}
 
 		// Dispatch asynchronously via WP-Cron
 		$submission_id = $context->getMeta( 'submission_id' );
-                $step_id       = $context->getMeta( 'current_step_id', 'webhook' );
-                $dispatched    = \SubtleForms\Async\AsyncDispatcher::dispatchWebhook( array(
-                        'url'           => $url,
-                        'method'        => $method,
-                        'headers'       => $headers,
-                        'body'          => $body,
-                        'timeout'       => 10,
-                        'submission_id' => $submission_id,
-                        'step_id'       => $step_id,
-                ) );
+		$step_id       = $context->getMeta( 'current_step_id', 'webhook' );
+		$dispatched    = \SubtleForms\Async\AsyncDispatcher::dispatchWebhook(
+			array(
+				'url'           => $url,
+				'method'        => $method,
+				'headers'       => $headers,
+				'body'          => $body,
+				'timeout'       => 10,
+				'submission_id' => $submission_id,
+				'step_id'       => $step_id,
+			)
+		);
 
-                if ( ! $dispatched ) {
-                        $this->fail( $context, 'async_dispatch_failed', array( 'url' => $url ) );
-                }
+		if ( ! $dispatched ) {
+			$this->fail( $context, 'async_dispatch_failed', array( 'url' => $url ) );
+		}
 
-                // Capture dispatch details for pipeline log enrichment.
-                $signed = is_array( $signing ) && ! empty( $signing['enabled'] );
-                $context->setMeta(
-                        'step_output_data',
-                        array(
-                                'url'                => $url,
-                                'method'             => $method,
-                                'payload_mode'       => $payload_mode,
-                                'payload_size_bytes' => strlen( (string) $body ),
-                                'signed'             => $signed,
-                                'dispatch_method'    => 'async_cron',
-                                'dispatched'         => $dispatched,
-                        )
-                );
-        }
+		// Capture dispatch details for pipeline log enrichment.
+		$context->setMeta(
+			'step_output_data',
+			array(
+				'url'                => $url,
+				'method'             => $method,
+				'payload_mode'       => $payload_mode,
+				'payload_size_bytes' => strlen( $body ),
+				'signed'             => $signed,
+				'dispatch_method'    => 'async_cron',
+				'dispatched'         => $dispatched,
+			)
+		);
+	}
 
-        /**
-         * Record an action failure into context meta.
-	 */
 	/**
 	 * Fill merge tags inside a custom JSON payload. Tags are replaced in
 	 * string values after the JSON is decoded, so {"name":"{{name}}"} sends
