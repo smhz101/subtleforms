@@ -4,6 +4,9 @@ This file keeps the full release history. readme.txt lists only the latest versi
 
 == Changelog ==
 
+= 2.4.1 - 2026-10-20 =
+* Fix: Forms imported in Tools, migrated from Gravity Forms or Fluent Forms, or created with a schema get the same save steps as a builder save, so add-ons such as SubtleForms Pro can finish them (a signed webhook gets its secret, logic rules for missing fields are removed).
+
 = 2.4.0 - 2026-10-20 =
 * New: A payment form has its own currency setting under Settings, Payments. It follows the site currency until you pick one.
 * New: More currencies for payments, including JPY, KRW, INR, PKR, AED, SAR, SGD, HKD, CHF, NZD, SEK, NOK, DKK, PLN, MXN, BRL and ZAR.

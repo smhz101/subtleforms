@@ -199,7 +199,7 @@ final class TransferService {
 				continue;
 			}
 			try {
-				$this->forms->saveSchemaVersion( $id, self::cleanSchema( $form['schema'] ), true );
+				$this->forms->saveSchemaVersion( $id, FormsRepository::beforeSave( self::cleanSchema( $form['schema'] ), (int) $id, true ), true );
 				$created[] = array(
 					'id'    => $id,
 					'title' => $form['title'],
@@ -253,7 +253,7 @@ final class TransferService {
 				continue;
 			}
 			try {
-				$this->forms->saveSchemaVersion( $id, self::cleanSchema( $form['schema'] ), true );
+				$this->forms->saveSchemaVersion( $id, FormsRepository::beforeSave( self::cleanSchema( $form['schema'] ), (int) $id, true ), true );
 				$created[] = array(
 					'id'    => $id,
 					'title' => $form['title'],
