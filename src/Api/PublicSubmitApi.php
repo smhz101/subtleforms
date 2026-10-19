@@ -139,19 +139,22 @@ final class PublicSubmitApi {
 		);
 	}
 
-	// Spam protection
-		if ( \SubtleForms\Engine\SpamProtection::is_enabled() ) {
-			$tempContext = new SubmissionContext( $formId, $payload );
-			if ( \SubtleForms\Engine\SpamProtection::is_spam( $tempContext ) ) {
-				$reason = $tempContext->getMeta( 'spam_reason', 'spam_detected' );
-				Logger::info( 'Spam blocked (form %d): %s', $formId, $reason );
-				return ApiResponse::success(
-					array(
-						'success' => true,
-						'message' => __( 'Thank you.', 'subtleforms' ),
-					)
-				);
-			}
+		// Spam protection: the honeypot and the time trap each have their own
+		// setting. A site admin testing a form (builder preview) skips the time
+		// trap, since the preview has no server-issued token.
+		$tempContext = new SubmissionContext( $formId, $payload );
+		if ( current_user_can( 'manage_options' ) ) {
+			$tempContext->payload[ \SubtleForms\Engine\SpamProtection::TIME_FIELD ] = \SubtleForms\Engine\SpamProtection::issue_token( $formId, time() - HOUR_IN_SECONDS );
+		}
+		if ( \SubtleForms\Engine\SpamProtection::is_spam( $tempContext ) ) {
+			$reason = $tempContext->getMeta( 'spam_reason', 'spam_detected' );
+			Logger::info( 'Spam blocked (form %d): %s', $formId, $reason );
+			return ApiResponse::success(
+				array(
+					'success' => true,
+					'message' => __( 'Thank you.', 'subtleforms' ),
+				)
+			);
 		}
 
 		// CAPTCHA verification
@@ -229,6 +232,9 @@ final class PublicSubmitApi {
 		// Computed fields (Pro Calculation) are worked out on the server so a
 		// visitor cannot post a tampered total.
 		$payload = self::applyComputedValues( $payload, $activeSchema['schema'] ?? $activeSchema );
+
+		// Fields from an add-on that is not active are not on the live form.
+		$payload = \SubtleForms\Fields\AddonFieldTypes::dropMissingAnswers( $payload, $activeSchema['schema'] ?? $activeSchema );
 
 		// Conditional logic (2.1): answers to fields the visitor could not see
 		// (hidden fields and skipped steps) are never stored, priced or sent.
@@ -318,14 +324,15 @@ final class PublicSubmitApi {
 			try {
 				$result = $this->pipeline->run( $steps, $context, $activeSchema['schema'] );
 			} catch ( \RuntimeException $e ) {
-				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
 				$voidPayment();
-				Logger::error( 'Pipeline execution failed for submission %d: %s', $submissionId, $e->getMessage() );
-
 				$validationErrors = $context->getMeta( 'validation_errors' );
 				if ( is_array( $validationErrors ) && ! empty( $validationErrors ) ) {
+					// Rejected answers are never stored (FB-09, FF-13, FA-24).
+					$this->discard( $submissionId );
 					return ApiResponse::validation_error( __( 'Form validation failed', 'subtleforms' ), $validationErrors );
 				}
+				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
+				Logger::error( 'Pipeline execution failed for submission %d: %s', $submissionId, $e->getMessage() );
 
 				return ApiResponse::server_error( __( 'Your submission could not be completed. Please try again later.', 'subtleforms' ) );
 			} catch ( \Throwable $e ) {
@@ -336,14 +343,15 @@ final class PublicSubmitApi {
 			}
 
 			if ( ! $result->ok ) {
-				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
 				$voidPayment();
-				Logger::error( 'Pipeline execution failed for submission %d: %s', $submissionId, $result->error );
-
 				$validationErrors = $context->getMeta( 'validation_errors' );
 				if ( is_array( $validationErrors ) && ! empty( $validationErrors ) ) {
+					// Rejected answers are never stored (FB-09, FF-13, FA-24).
+					$this->discard( $submissionId );
 					return ApiResponse::validation_error( __( 'Form validation failed', 'subtleforms' ), $validationErrors );
 				}
+				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
+				Logger::error( 'Pipeline execution failed for submission %d: %s', $submissionId, $result->error );
 
 				return ApiResponse::server_error( $result->error );
 			}
@@ -715,6 +723,20 @@ final class PublicSubmitApi {
 	}
 
 	/**
+	 * Remove an entry the pipeline rejected, with its activity log.
+	 *
+	 * The record exists only so the pipeline can run; answers the server
+	 * refuses never stay in Entries, exports or the entry limit count.
+	 *
+	 * @param int $submissionId Entry ID.
+	 */
+	private function discard( int $submissionId ): void {
+		// Uploaded files stay pending, so the visitor can fix the answer and
+		// send again; unclaimed files are removed after a day.
+		$this->submissionsRepo->delete( $submissionId, false );
+	}
+
+	/**
 	 * A copy of the answers that is safe to write to the database.
 	 *
 	 * @param array $payload Answers.
@@ -735,6 +757,8 @@ final class PublicSubmitApi {
 				$payload[ $key ] = null;
 			}
 		}
+		// The spam honeypot and time token are not answers (FLD2-17).
+		unset( $payload[ \SubtleForms\Engine\SpamProtection::TIME_FIELD ], $payload[ \SubtleForms\Engine\SpamProtection::HONEYPOT_FIELD ] );
 		return $payload;
 	}
 
