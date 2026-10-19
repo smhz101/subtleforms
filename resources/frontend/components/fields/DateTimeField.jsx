@@ -186,7 +186,6 @@ export default function DateTimeField({
         aria-haspopup='dialog'
         aria-expanded={open}
         aria-invalid={invalid ? 'true' : undefined}
-        aria-required={required ? 'true' : undefined}
         aria-describedby={describedBy}
         disabled={disabled || readOnly}
         tabIndex={preview ? -1 : 0}

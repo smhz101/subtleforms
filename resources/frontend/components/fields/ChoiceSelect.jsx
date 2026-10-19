@@ -136,12 +136,12 @@ export default function ChoiceSelect({
         id={inputId}
         className='subtleforms-picker__trigger'
         ref={triggerRef}
+        role='combobox'
         aria-haspopup='listbox'
         aria-expanded={open}
         aria-controls={open ? `${inputId || 'choice'}-list` : undefined}
         aria-activedescendant={open ? `${inputId || 'choice'}-opt-${active}` : undefined}
         aria-invalid={invalid ? 'true' : undefined}
-        aria-required={required ? 'true' : undefined}
         aria-describedby={describedBy}
         disabled={disabled || readOnly}
         tabIndex={preview ? -1 : 0}

@@ -129,12 +129,12 @@ export default function CountrySelect({
         ref={triggerRef}
         id={inputId}
         className='subtleforms-picker__trigger'
+        role='combobox'
         aria-haspopup='listbox'
         aria-expanded={open}
         aria-controls={open ? `${inputId || 'country'}-list` : undefined}
         aria-activedescendant={open && !searchable ? `${inputId || 'country'}-opt-${active}` : undefined}
         aria-invalid={invalid ? 'true' : undefined}
-        aria-required={required ? 'true' : undefined}
         aria-describedby={describedBy}
         disabled={disabled || readOnly}
         tabIndex={preview ? -1 : 0}
