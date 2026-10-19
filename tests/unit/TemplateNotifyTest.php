@@ -174,6 +174,50 @@ class TemplateNotifyTest extends TestCase {
 	}
 
 	/**
+	 * Review #15 (4309460612): raw card inputs are found by their id or key
+	 * only. Fields that merely mention a card in a label or an unrelated id,
+	 * and the gateway-managed Card Payment field, are kept.
+	 */
+	public function test_only_raw_card_inputs_are_removed(): void {
+		$method = new \ReflectionMethod( FormTemplates::class, 'prepare_template' );
+		$method->setAccessible( true );
+		$fields = array(
+			array( 'id' => 'card_number', 'type' => 'text', 'label' => 'Number' ),
+			array( 'id' => 'f2', 'key' => 'cc-number', 'type' => 'text', 'label' => 'Number' ),
+			array( 'id' => 'credit_card_number', 'type' => 'text', 'label' => 'Number' ),
+			array( 'id' => 'exp_date', 'type' => 'text', 'label' => 'Valid until' ),
+			array( 'id' => 'f5', 'type' => 'text', 'label' => 'Code', 'config' => array( 'key' => 'cvc' ) ),
+			array( 'id' => 'scorecard', 'type' => 'number', 'label' => 'Scorecard' ),
+			array( 'id' => 'discard_reason', 'type' => 'textarea', 'label' => 'Reason' ),
+			array( 'id' => 'gift_message', 'type' => 'textarea', 'label' => 'Gift card message' ),
+			array( 'id' => 'passport_expiry', 'type' => 'date', 'label' => 'Passport expiry date' ),
+			array( 'id' => 'card', 'type' => 'payment_card', 'label' => 'Card details' ),
+			array(
+				'id'       => 'card_section',
+				'type'     => 'group_container',
+				'label'    => 'Card holder',
+				'children' => array(
+					array( 'id' => 'holder_name', 'type' => 'text', 'label' => 'Name on card' ),
+					array( 'id' => 'cvv', 'type' => 'text', 'label' => 'CVV' ),
+				),
+			),
+		);
+		$out  = $method->invoke( null, 'extension_checkout', array( 'id' => 'extension_checkout', 'schema' => array( 'fields' => $fields ) ) );
+		$kept = array();
+		$walk = static function ( array $list ) use ( &$walk, &$kept ): void {
+			foreach ( $list as $field ) {
+				$kept[] = $field['id'];
+				$walk( $field['children'] ?? array() );
+			}
+		};
+		$walk( $out['schema']['fields'] );
+		$this->assertSame(
+			array( 'scorecard', 'discard_reason', 'gift_message', 'passport_expiry', 'card', 'card_section', 'holder_name' ),
+			$kept
+		);
+	}
+
+	/**
 	 * @param array<string, mixed> $template Template definition.
 	 */
 	private function assertTemplateIsSafe( string $id, array $template ): void {
@@ -226,8 +270,7 @@ class TemplateNotifyTest extends TestCase {
 			if ( ! is_array( $field ) ) {
 				continue;
 			}
-			$haystack = strtolower( (string) ( $field['id'] ?? '' ) . ' ' . (string) ( $field['key'] ?? '' ) . ' ' . (string) ( $field['label'] ?? '' ) );
-			$this->assertSame( 0, preg_match( '/card|cvv|expiry/', $haystack ), $id . ' field ' . $haystack );
+			$this->assertFalse( FormTemplates::is_card_field( $field ), $id . ' field ' . wp_json_encode( $field ) );
 			foreach ( array( 'fields', 'children' ) as $child ) {
 				if ( isset( $field[ $child ] ) && is_array( $field[ $child ] ) ) {
 					$this->assertNoCardFields( $field[ $child ], $id );

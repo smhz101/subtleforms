@@ -24,6 +24,13 @@ class FormTemplates {
 	const DONATION_MINIMUM = 1;
 
 	/**
+	 * Raw card inputs, matched by stable id or key. Labels are not used: a
+	 * "Gift card message" or a "Scorecard" is not a card number, and the
+	 * gateway-managed Card Payment field (payment_card) is always kept.
+	 */
+	const CARD_INPUT_ID = '/^(?:(?:credit|debit)[\s_-]*)?(?:card[\s_-]*(?:number|num|no)|cc[\s_-]*(?:number|num)|cvv2?|cvc|csc|expiry|expiration|exp[\s_-]*date)(?:[\s_-]|$)/';
+
+	/**
 	 * Get all available templates.
 	 *
 	 * @return array Array of template definitions.
@@ -753,14 +760,17 @@ class FormTemplates {
 	/**
 	 * @param array<string, mixed> $field Field definition.
 	 */
-	private static function is_card_field( array $field ): bool {
+	public static function is_card_field( array $field ): bool {
 		if ( 'payment_card' === ( $field['type'] ?? '' ) ) {
 			return false;
 		}
-		$haystack = strtolower(
-			(string) ( $field['id'] ?? '' ) . ' ' . (string) ( $field['key'] ?? '' ) . ' ' . (string) ( $field['label'] ?? '' )
-		);
-		return 1 === preg_match( '/card|cvv|expiry/', $haystack );
+		$config = isset( $field['config'] ) && is_array( $field['config'] ) ? $field['config'] : array();
+		foreach ( array( $field['id'] ?? '', $field['key'] ?? '', $config['key'] ?? '' ) as $identifier ) {
+			if ( is_string( $identifier ) && 1 === preg_match( self::CARD_INPUT_ID, strtolower( trim( $identifier ) ) ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
