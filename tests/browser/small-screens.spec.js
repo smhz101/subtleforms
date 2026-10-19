@@ -9,6 +9,8 @@
  *   960px shows the entry as a full-width overlay with every action visible.
  * - UX2-19: on a phone the forms and submissions lists are cards with no
  *   sideways scrolling, normal-size checkboxes and one line of tabs.
+ * - UX2-25: at 1440x900 every Quick Start Wizard step fits, with its buttons
+ *   inside the dialog, and the help menu closes when an item is chosen.
  */
 const { test, expect } = require('@playwright/test');
 const { adminApi, cleanup, loginPage, publishForm, spamToken, BASE } = require('./helpers');
@@ -174,4 +176,35 @@ test('UX2-19: a desktop window keeps the table', async ({ page }) => {
   await page.waitForSelector('.sf-data-table__row');
   expect(await page.locator('.sf-data-table__row').first().evaluate((r) => getComputedStyle(r).display)).toBe('table-row');
   await expect(page.locator('.sf-data-table__header th').nth(1)).toBeVisible();
+});
+
+test('UX2-25: every Quick Start Wizard step fits at 1440x900', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await loginPage(page);
+  await page.goto('/wp-admin/admin.php?page=subtleforms-forms');
+  await page.getByRole('button', { name: 'Help & tour' }).first().click();
+  await page.getByRole('menuitem', { name: 'Quick Start Wizard' }).click();
+  await expect(page.locator('.subtleforms-help-menu__content')).toHaveCount(0);
+
+  const fits = () =>
+    page.evaluate(() => {
+      const content = document.querySelector('.components-modal__content');
+      const frame = document.querySelector('.components-modal__frame').getBoundingClientRect();
+      const actions = document.querySelector('.sf-onboarding-wizard__actions').getBoundingClientRect();
+      return { overflow: content.scrollHeight - content.clientHeight, inside: actions.bottom <= frame.bottom + 1 && frame.bottom <= window.innerHeight };
+    });
+
+  // Welcome, goal, fields and review.
+  for (let step = 0; step < 4; step++) {
+    const m = await fits();
+    expect(m.overflow, `step ${step} scrolls`).toBeLessThanOrEqual(1);
+    expect(m.inside, `step ${step} buttons`).toBe(true);
+    if (step === 1) {
+      await page.locator('.sf-onboarding-wizard__option').first().click();
+    }
+    const next = page.getByRole('button', { name: 'Next' });
+    if (step < 3) {
+      await next.click();
+    }
+  }
 });
