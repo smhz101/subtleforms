@@ -102,6 +102,22 @@ if ( ! function_exists( 'sanitize_email' ) ) {
 	}
 }
 
+if ( ! function_exists( 'is_email' ) ) {
+	function is_email( $value ) {
+		return (bool) filter_var( (string) $value, FILTER_VALIDATE_EMAIL );
+	}
+}
+
+if ( ! function_exists( 'absint' ) ) {
+	function absint( $value ) {
+		return abs( (int) $value );
+	}
+}
+
+if ( ! defined( 'SUBTLEFORMS_VERSION' ) ) {
+	define( 'SUBTLEFORMS_VERSION', 'test' );
+}
+
 if ( ! function_exists( 'wp_kses' ) ) {
 	function wp_kses( $value, $allowed = array(), $protocols = array() ) {
 		return (string) $value;
