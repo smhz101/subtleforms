@@ -130,6 +130,17 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 == Changelog ==
 
 = 2.4.1 - 2026-10-20 =
+* Fix: A form has no padding of its own, so it lines up with the text around it.
+* Fix: No line or border above the submit button.
+* Change: "Inherit from theme" adds no styling of its own. The theme styles the fields, labels and buttons, and the buttons use the theme's button style. Custom controls such as the dropdown and date pickers, the signature pad and the rich text editor keep their look so they stay usable.
+* Change: A form on "Inherit from theme" whose colours, type or field and button style were changed keeps the SubtleForms styling, starting from the theme. The appearance panel says which applies.
+* Fix: On a theme form whose theme has no primary colour, the submit button is no longer white on white.
+* Change: Fields on the builder canvas use flat colours instead of gradients.
+* Fix: A webhook address typed without https:// gets it, and an address WordPress refuses (a local or private host, or a port other than 80, 443 and 8080) is listed in the entry's activity log with the reason instead of failing silently.
+* Fix: Webhooks no longer send the form's spam check token, the honeypot or CAPTCHA tokens with the answers.
+* Change: The default webhook body is the one the Webhooks settings describe, and the one SubtleForms Pro sends: the event, form and entry IDs, a link to the entry, the answers keyed by field under "fields", and every answer with its label under "answers". Receivers that read answers at the top level of the body should read them from "fields".
+* Fix: The webhook test in Settings works without SubtleForms Pro. The button is ready as soon as an address is typed, the test uses the same address check, body and signing as real deliveries, and it says why an address is refused.
+* New: Each webhook action in Form settings has a Send test request button that sends the action's own method, headers, signing and custom body.
 * Change: A field ID can use hyphens and up to 64 characters. Saving a form refuses an ID used by two fields anywhere in the form (inside steps, columns and containers too) or a name SubtleForms reserves for its own values.
 * Change: Gravity Forms and Fluent Forms imports keep each field's name from the other plugin (Fluent's field name, Gravity's parameter name) as its field ID when it is valid, so data and integrations that use those names keep matching.
 * New: Change a field's ID in the field settings. Click the pencil next to the ID, type the new one, press Enter. The ID is checked as you type, and merge tags, formulas, conditional logic, emails, webhooks, confirmations, integrations and payment settings that use it are updated. Undo puts it back, and earlier entries keep their answers under the old ID.

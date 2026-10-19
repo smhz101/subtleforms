@@ -145,6 +145,8 @@ final class RestController {
 			$settingsApi->registerRoutes();
 		}
 
+		( new WebhooksApi() )->registerRoutes();
+
 		$dashboardApi = new DashboardApi(
 			$this->formsRepo,
 			$this->submissionsRepo,
