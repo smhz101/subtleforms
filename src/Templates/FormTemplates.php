@@ -900,7 +900,7 @@ class FormTemplates {
 		if ( ! str_contains( $candidate, '://' ) ) {
 			$candidate = 'https://' . $candidate;
 		}
-		$host = parse_url( $candidate, PHP_URL_HOST );
+		$host = function_exists( 'wp_parse_url' ) ? wp_parse_url( $candidate, PHP_URL_HOST ) : parse_url( $candidate, PHP_URL_HOST ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- Fallback outside WordPress.
 		if ( ! is_string( $host ) || '' === $host ) {
 			return false;
 		}
