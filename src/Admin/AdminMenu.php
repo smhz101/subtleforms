@@ -365,7 +365,8 @@ class AdminMenu {
 			'currency'       => strtoupper( (string) ( ( get_option( 'subtleforms_settings', array() )['ext_payments_currency'] ?? '' ) ?: 'USD' ) ),
 			'unreadCount'    => $this->get_unread_count(),
 			'capabilities'   => $live_caps->all(),
-			'hasProPlugin'   => defined( 'SUBTLEFORMS_PRO_VERSION' ) || sf_is_pro_active(),
+			'hasProPlugin'   => defined( 'SUBTLEFORMS_PRO_VERSION' ) || subtleforms_is_pro_active(),
+			'missingFieldTypes' => \SubtleForms\Fields\AddonFieldTypes::missing(),
 			'license'        => $license_data,
 			'subscription'   => array(
 				'status'    => 'inactive',
@@ -701,7 +702,8 @@ class AdminMenu {
 			$slug      = $meta['slug'];
 			$cap_key   = 'extensions.' . $slug;
 			$sk        = 'ext_' . $slug;
-			$available = $gate->allows( $cap_key );
+			// Webhooks and analytics are part of the free plugin.
+			$available = in_array( $slug, array( 'webhooks', 'analytics' ), true ) || $gate->allows( $cap_key );
 			$enabled   = (bool) $settings->get( $sk . '_enabled' );
 			if ( 'ecommerce' === $slug ) {
 				// The WooCommerce integration has no on/off switch: it is on
@@ -721,7 +723,7 @@ class AdminMenu {
 				'slug'        => $slug,
 				'label'       => $meta['label'],
 				'description' => $meta['description'],
-				'available'   => $available,  // false = Pro feature locked
+				'available'   => $available,  // false = needs an add-on (SubtleForms Pro)
 				'enabled'     => $enabled && $available,
 				'configured'  => $configured,
 			);

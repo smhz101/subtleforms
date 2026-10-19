@@ -47,49 +47,28 @@ final class Capabilities {
 	 * @return array<string,bool>
 	 */
 	public static function defaults() {
+		// Keys such as fields.advanced, actions.payment, extensions.*,
+		// templates.pro and branding.white_label belong to SubtleForms Pro.
+		// Pro adds them through the `subtleforms/capabilities` filter and
+		// only Pro code reads them; a missing key reads as false.
 		return array(
+			// Everything the free plugin ships is on. Free code never asks
+			// for a capability that is off by default (WordPress.org
+			// guideline 5): a license adds code, it never switches free
+			// code on.
 			'forms.unlimited'            => true,
 
 			'logic.conditional.basic'    => true,
-			'logic.conditional.advanced' => false,
-
-			'pipeline.retry'             => false,
-			'pipeline.delay'             => false,
+			'logic.conditional.advanced' => true,
 
 			'actions.save'               => true,
 			'actions.webhook'            => true,
 			'actions.email'              => true,
-			'actions.payment'            => false,
-
-			'extensions.custom'          => false,
 
 			'api.read'                   => true,
 			'api.write'                  => true,
 
-			// Extensions — all disabled in free tier, Pro plugin overrides via subtleforms/capabilities filter
-			'extensions.webhooks'        => false,
-			'extensions.email_marketing' => false,
-			'extensions.crm'             => false,
-			'extensions.analytics'       => false,
-			'extensions.ecommerce'       => false,
-			'extensions.pdf'             => false,
-			'extensions.multilanguage'   => false,
-			'extensions.payments'        => false,
-
-			// WooCommerce checkout for payment forms and the WooCommerce Product field (2.1, Pro).
-			'integrations.woocommerce'   => false,
-
-			// Templates (existing Pro feature key)
-			'templates.pro'              => false,
-
-			// Submissions
-			'submissions.export'         => false,
-
-			// Advanced field types: Picture Choice, Signature, Calculation (2.0)
-			'fields.advanced'            => false,
-
-			// White label: custom name, logo and hidden credits in wp-admin (2.1, Agency).
-			'branding.white_label'       => false,
+			'submissions.export'         => true,
 		);
 	}
 

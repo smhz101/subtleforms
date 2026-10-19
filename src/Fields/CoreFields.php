@@ -1568,7 +1568,6 @@ final class CoreFields {
 				category: 'payment',
 				icon: 'dashicons-money-alt',
 				kind: 'input',
-				requiredCapabilities: array( 'actions.payment' ),
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					'placeholder'        => '',
@@ -1626,7 +1625,6 @@ final class CoreFields {
 				category: 'payment',
 				icon: 'dashicons-calculator',
 				kind: 'dynamic',
-				requiredCapabilities: array( 'actions.payment' ),
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					'showItems'    => true,
@@ -1701,7 +1699,6 @@ final class CoreFields {
 				category: 'payment',
 				icon: 'dashicons-tag',
 				kind: 'input',
-				requiredCapabilities: array( 'actions.payment' ),
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					'placeholder' => __( 'Enter coupon code', 'subtleforms' ),
@@ -1737,7 +1734,6 @@ final class CoreFields {
 				category: 'payment',
 				icon: 'dashicons-hidden',
 				kind: 'system',
-				requiredCapabilities: array( 'actions.payment' ),
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					'amount'      => 0,
