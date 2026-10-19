@@ -1103,6 +1103,12 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
                   ) }
                   <dt className='is-total'>{ __( 'Total', 'subtleforms' ) }</dt>
                   <dd className='is-total'>{ formatMoney( meta.order.total, meta.order.currency ) }</dd>
+                  { Number( meta.payment?.refunded ) > 0 && (
+                    <>
+                      <dt>{ __( 'Refunded', 'subtleforms' ) }</dt>
+                      <dd>−{ formatMoney( Number( meta.payment.refunded ), meta.order.currency ) }</dd>
+                    </>
+                  ) }
                 </dl>
                 { meta.woocommerce?.order_id && (
                   <p className='sf-order-panel__ref sf-order-panel__woo'>
