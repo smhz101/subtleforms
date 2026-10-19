@@ -44,6 +44,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: A builder save that fails names the field as well as the setting, a numeric label, placeholder or default value saves, and long labels wrap on the canvas.
 * Fix: A column stored as an object with a fields or children list renders its fields on the live form, includes them in the live total, validates them and gives them defaults, so a product in that column is shown as well as charged.
 * Fix: Deleting a field inside a step, container or column shows the Field deleted notice with Undo, and deleting a step counts every field in it.
+* Fix: When the forms list fails to load after a change of tab, search, sort or page size, the previous rows are cleared, so Published forms are not shown or actionable under Trash. A failed retry of the same view keeps its rows.
 
 = 2.3.9 - 2026-10-19 =
 * Change: Nothing in SubtleForms is switched off without a license. CSV export, Reports (views, submissions and conversion), full conditional logic (any rule, groups, every operator, conditional emails, webhooks and confirmations), Picture choice, several files per upload field, payment fields (Product, Priced options, Custom amount, Fixed fee, Order summary, Coupon), coupons, and the Webhooks and Analytics settings all work in the free plugin.

@@ -29,6 +29,7 @@ import { formatRelativeDate, formatDate, isNewForm } from '../utils/formatDate';
 import { logger, perfMarkers } from '../diagnostics';
 import './FormsList.scss';
 import { formsEmptyState } from './formsEmptyState';
+import { keepRowsAfterFailedLoad, listQueryKey } from '../utils/failedLoad';
 
 export const ALL_FORM_COLUMNS = ['title', 'form_type', 'status', 'id', 'submission_count', 'performance', 'updated_at', 'actions'];
 export const DEFAULT_FORM_VISIBLE = ['title', 'form_type', 'status', 'id', 'submission_count', 'performance', 'updated_at', 'actions'];
@@ -79,6 +80,8 @@ export default function FormsList({
   const CHUNK_PAGES = 5;
   const [buffer, setBuffer] = useState([]);
   const [loadError, setLoadError] = useState('');
+  const loadedQueryRef = useRef('');
+  const loadGenerationRef = useRef(0);
   const [pagesLoaded, setPagesLoaded] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [totalItems, setTotalItems] = useState(0);
@@ -164,20 +167,31 @@ export default function FormsList({
 
   // Full reset + reload from page 1 (fresh filters/sort)
   const loadFresh = async () => {
+    const requestQuery = listQueryKey([statusFilter, searchTerm, sortBy, sortDirection, perPage]);
+    const generation = ++loadGenerationRef.current;
     setIsLoading(true);
     setCurrentPage(1);
     try {
       const { rows, total } = await fetchBatch(0);
+      if (generation !== loadGenerationRef.current) return;
+      loadedQueryRef.current = requestQuery;
       setLoadError('');
       setBuffer(rows);
       setPagesLoaded(Math.ceil(rows.length / perPage) || 0);
       setTotalItems(total);
     } catch (err) {
+      if (generation !== loadGenerationRef.current) return;
       console.error('FormsList fetch error:', err);
-      // Keep rows already on screen. A failed first load is an error, not an empty list.
+      // Keep rows only for the same tab, search, and sort. A failed switch
+      // to Trash must not leave the Published forms on screen.
       setLoadError(__('Forms could not be loaded.', 'subtleforms'));
+      if (!keepRowsAfterFailedLoad(loadedQueryRef.current, requestQuery)) {
+        setBuffer([]);
+        setPagesLoaded(0);
+        setTotalItems(0);
+      }
     } finally {
-      setIsLoading(false);
+      if (generation === loadGenerationRef.current) setIsLoading(false);
     }
   };
 
