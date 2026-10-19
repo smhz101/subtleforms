@@ -32,6 +32,15 @@ final class EmailAction implements ActionInterface {
 			$settings = array();
 		}
 
+		// Site-wide switches (Settings, Email). Off means this audience is not sent.
+		$global = get_option( 'subtleforms_settings', array() );
+		if ( ! is_array( $global ) ) {
+			$global = array();
+		}
+		if ( ! self::audienceAllowed( $this->audience( $settings['to'] ?? '' ), $global ) ) {
+			return;
+		}
+
 		$to      = $settings['to'] ?? null;
 		$subject = $settings['subject'] ?? 'Form submission';
 		$body    = $settings['body'] ?? $settings['message'] ?? '';
@@ -151,6 +160,7 @@ final class EmailAction implements ActionInterface {
 		if ( ! $this->has_header( $headers, 'Content-Type' ) ) {
 			$headers[] = $isHtml ? 'Content-Type: text/html; charset=UTF-8' : 'Content-Type: text/plain; charset=UTF-8';
 		}
+		$headers = self::withSender( $headers, $global );
 
 		// Debug logging before send
 		$this->log_debug(
@@ -266,6 +276,48 @@ final class EmailAction implements ActionInterface {
 	 * @param mixed $rawTo Recipient setting before placeholders are replaced.
 	 * @return string 'admin' or 'submitter'.
 	 */
+	/**
+	 * Whether this audience is allowed by Settings, Email.
+	 *
+	 * Admin notifications are on unless the switch is off. The confirmation
+	 * email is off unless its switch is on.
+	 *
+	 * @param string $audience admin or submitter.
+	 * @param array  $settings subtleforms_settings.
+	 * @return bool
+	 */
+	public static function audienceAllowed( string $audience, array $settings ): bool {
+		if ( 'submitter' === $audience ) {
+			return ! empty( $settings['user_confirmation_enabled'] );
+		}
+		if ( array_key_exists( 'admin_notification_enabled', $settings ) ) {
+			return ! empty( $settings['admin_notification_enabled'] );
+		}
+		return true;
+	}
+
+	/**
+	 * Add a From header from the saved sender when the action has none.
+	 *
+	 * @param array $headers Email headers.
+	 * @param array $settings subtleforms_settings.
+	 * @return array
+	 */
+	public static function withSender( array $headers, array $settings ): array {
+		foreach ( $headers as $header ) {
+			if ( is_string( $header ) && preg_match( '/^from\s*:/i', $header ) ) {
+				return $headers;
+			}
+		}
+		$email = sanitize_email( (string) ( $settings['sender_email'] ?? '' ) );
+		if ( '' === $email || ! is_email( $email ) ) {
+			return $headers;
+		}
+		$name = trim( (string) preg_replace( '/[\r\n]+/', '', (string) ( $settings['sender_name'] ?? '' ) ) );
+		$headers[] = '' !== $name ? 'From: ' . $name . ' <' . $email . '>' : 'From: ' . $email;
+		return $headers;
+	}
+
 	private function audience( $rawTo ): string {
 		if ( ! is_string( $rawTo ) ) {
 			return 'admin';
