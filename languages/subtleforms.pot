@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-19T19:12:48+00:00\n"
+"POT-Creation-Date: 2026-10-19T19:42:03+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -289,7 +289,7 @@ msgid "Title"
 msgstr ""
 
 #: src/Admin/AdminMenu.php:1071
-#: src/Api/SubmissionsApi.php:1090
+#: src/Api/SubmissionsApi.php:1095
 #: src/Privacy/PrivacyExporter.php:101
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:299
 #: resources/admin/components/FormsList.jsx:41
@@ -470,7 +470,7 @@ msgstr ""
 #: src/Api/FormsApi.php:1004
 #: src/Api/FormsApi.php:1049
 #: src/Api/PaymentsApi.php:222
-#: src/Api/PublicSubmitApi.php:195
+#: src/Api/PublicSubmitApi.php:204
 #: src/Extensions/PaymentsExtension.php:126
 msgid "Form not found"
 msgstr ""
@@ -610,73 +610,73 @@ msgstr ""
 msgid "Coupon not found."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:179
+#: src/Api/PublicSubmitApi.php:188
 msgid "Preview submissions are only available to administrators."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:208
-#: src/Api/PublicSubmitApi.php:226
+#: src/Api/PublicSubmitApi.php:217
+#: src/Api/PublicSubmitApi.php:235
 msgid "Thank you."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:253
+#: src/Api/PublicSubmitApi.php:262
 msgid "You have reached the maximum number of submissions for this form."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:269
+#: src/Api/PublicSubmitApi.php:278
 msgid "This form is temporarily unavailable. Please try again later."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:297
-#: src/Api/PublicSubmitApi.php:305
+#: src/Api/PublicSubmitApi.php:308
+#: src/Api/PublicSubmitApi.php:316
 #: src/Support/Captcha/HCaptchaProvider.php:103
 #: src/Support/Captcha/RecaptchaProvider.php:127
 #: src/Support/Captcha/TurnstileProvider.php:104
 msgid "CAPTCHA verification failed."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:402
+#: src/Api/PublicSubmitApi.php:413
 msgid "Failed to create submission record"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:444
+#: src/Api/PublicSubmitApi.php:456
 msgid "This form could not be processed. Please contact the site owner."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:479
-#: src/Api/PublicSubmitApi.php:498
+#: src/Api/PublicSubmitApi.php:491
+#: src/Api/PublicSubmitApi.php:510
 msgid "Form validation failed"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:484
+#: src/Api/PublicSubmitApi.php:496
 msgid "Your submission could not be completed. Please try again later."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:489
+#: src/Api/PublicSubmitApi.php:501
 msgid "An unexpected error occurred"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:564
+#: src/Api/PublicSubmitApi.php:576
 msgid "Failed to save submission data"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:712
+#: src/Api/PublicSubmitApi.php:724
 msgid "This total could not be calculated, so the payment was not taken."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:796
+#: src/Api/PublicSubmitApi.php:808
 #: src/Extensions/PaymentsExtension.php:180
 msgid "Online payment is not available right now. Please contact the site owner."
 msgstr ""
 
 #. translators: %s: form title
-#: src/Api/PublicSubmitApi.php:866
+#: src/Api/PublicSubmitApi.php:878
 #, php-format
 msgid "Payment failed: %s"
 msgstr ""
 
 #. translators: 1: entry ID, 2: gateway message, 3: link to the entry
-#: src/Api/PublicSubmitApi.php:869
+#: src/Api/PublicSubmitApi.php:881
 #, php-format
 msgid ""
 "The payment for entry #%1$d did not go through, so no receipt or notification was sent.\n"
@@ -686,7 +686,7 @@ msgid ""
 "Open the entry: %3$s"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:871
+#: src/Api/PublicSubmitApi.php:883
 msgid "not given"
 msgstr ""
 
@@ -723,99 +723,99 @@ msgid "Email address must be valid or left empty"
 msgstr ""
 
 #: src/Api/SubmissionsApi.php:507
-#: src/Api/SubmissionsApi.php:567
-#: src/Api/SubmissionsApi.php:706
-#: src/Api/SubmissionsApi.php:753
-#: src/Api/SubmissionsApi.php:809
-#: src/Api/SubmissionsApi.php:856
-#: src/Api/SubmissionsApi.php:888
-#: src/Api/SubmissionsApi.php:909
+#: src/Api/SubmissionsApi.php:571
+#: src/Api/SubmissionsApi.php:710
+#: src/Api/SubmissionsApi.php:757
+#: src/Api/SubmissionsApi.php:814
+#: src/Api/SubmissionsApi.php:861
+#: src/Api/SubmissionsApi.php:893
+#: src/Api/SubmissionsApi.php:914
 #: resources/admin/pages/SubmissionDetailPage.jsx:570
 #: resources/admin/pages/SubmissionDetailPage.jsx:588
 msgid "Submission not found"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:594
+#: src/Api/SubmissionsApi.php:598
 msgid "No valid changes provided"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:598
+#: src/Api/SubmissionsApi.php:602
 msgid "Restore this entry from the Trash first."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:621
+#: src/Api/SubmissionsApi.php:625
 msgid "Select at least one entry."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:624
+#: src/Api/SubmissionsApi.php:628
 msgid "Select 500 entries or fewer at a time."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:698
+#: src/Api/SubmissionsApi.php:702
 msgid "Write a note first."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:719
+#: src/Api/SubmissionsApi.php:723
 msgid "Note not found"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:732
+#: src/Api/SubmissionsApi.php:736
 #: resources/admin/pages/SubmissionDetailPage.jsx:1030
 msgid "Unknown user"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:757
+#: src/Api/SubmissionsApi.php:761
 msgid "Restore this entry from the Trash before resending its notifications."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:764
+#: src/Api/SubmissionsApi.php:768
 msgid "This entry’s form could not be loaded."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:778
+#: src/Api/SubmissionsApi.php:782
 msgid "This form has no email notifications to send."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:792
+#: src/Api/SubmissionsApi.php:797
 #: resources/admin/pages/SubmissionDetailPage.jsx:459
 msgid "The notifications could not be sent."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:821
+#: src/Api/SubmissionsApi.php:826
 msgid "The submission could not be moved to the Trash."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:832
+#: src/Api/SubmissionsApi.php:837
 msgid "The submission could not be deleted."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:859
+#: src/Api/SubmissionsApi.php:864
 msgid "This entry is not in the Trash."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:863
+#: src/Api/SubmissionsApi.php:868
 #: resources/admin/pages/SubmissionDetailPage.jsx:514
 msgid "The entry could not be restored. Please try again."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:982
+#: src/Api/SubmissionsApi.php:987
 msgid "Error fetching unread count"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:1026
+#: src/Api/SubmissionsApi.php:1031
 msgid "No submissions to export"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:1088
+#: src/Api/SubmissionsApi.php:1093
 #: resources/admin/components/SubmissionsTable.jsx:42
 msgid "ID"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:1089
+#: src/Api/SubmissionsApi.php:1094
 msgid "Form ID"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:1091
+#: src/Api/SubmissionsApi.php:1096
 msgid "Submitted At"
 msgstr ""
 
@@ -843,7 +843,7 @@ msgstr ""
 msgid "This form is not available or has been unpublished."
 msgstr ""
 
-#: src/Engine/Actions/EmailAction.php:143
+#: src/Engine/Actions/EmailAction.php:146
 msgid "A new entry was submitted with no answers."
 msgstr ""
 
@@ -1103,7 +1103,7 @@ msgid "This form has reached its maximum number of entries."
 msgstr ""
 
 #: src/Engine/SpamProtection.php:188
-#: resources/frontend/components/FormRenderer.jsx:1129
+#: resources/frontend/components/FormRenderer.jsx:1178
 msgid "Leave this field empty"
 msgstr ""
 
@@ -3479,8 +3479,8 @@ msgid "Toggle"
 msgstr ""
 
 #: src/Fields/FieldsV2.php:42
-#: src/Support/AnswerFormatter.php:193
-#: src/Support/AnswerFormatter.php:242
+#: src/Support/AnswerFormatter.php:231
+#: src/Support/AnswerFormatter.php:280
 #: resources/admin/components/builder/FieldRenderer.jsx:261
 msgid "Yes"
 msgstr ""
@@ -3634,8 +3634,9 @@ msgid "Show prices next to options"
 msgstr ""
 
 #: src/Frontend/FrontendAssets.php:107
-#: resources/frontend/components/FormRenderer.jsx:885
-#: resources/frontend/components/FormRenderer.jsx:997
+#: resources/frontend/components/FormRenderer.jsx:886
+#: resources/frontend/components/FormRenderer.jsx:999
+#: resources/frontend/components/FormRenderer.jsx:1046
 msgid "Thank you! Your submission has been received."
 msgstr ""
 
@@ -3689,7 +3690,7 @@ msgid "The coupon could not be saved."
 msgstr ""
 
 #: src/Payments/CouponsRepository.php:280
-#: resources/frontend/components/FormRenderer.jsx:519
+#: resources/frontend/components/FormRenderer.jsx:520
 msgid "This coupon code is not valid."
 msgstr ""
 
@@ -3815,21 +3816,21 @@ msgstr ""
 msgid "Queued"
 msgstr ""
 
-#: src/Support/AnswerFormatter.php:150
+#: src/Support/AnswerFormatter.php:188
 #: src/Support/FieldMapper.php:212
 msgid "Signed"
 msgstr ""
 
-#: src/Support/AnswerFormatter.php:151
+#: src/Support/AnswerFormatter.php:189
 msgid "Signed (the signature image is in the entry)"
 msgstr ""
 
-#: src/Support/AnswerFormatter.php:193
-#: src/Support/AnswerFormatter.php:242
+#: src/Support/AnswerFormatter.php:231
+#: src/Support/AnswerFormatter.php:280
 msgid "No"
 msgstr ""
 
-#: src/Support/AnswerFormatter.php:265
+#: src/Support/AnswerFormatter.php:303
 #: resources/admin/pages/SubmissionDetailPage.jsx:246
 #: resources/admin/pages/SubmissionDetailPage.jsx:900
 #: resources/admin/utils/proFeatureDetector.js:18
@@ -3853,7 +3854,7 @@ msgstr ""
 
 #: src/Support/Captcha/CaptchaManager.php:313
 #: resources/frontend/components/ConversationalFormRenderer.jsx:269
-#: resources/frontend/components/FormRenderer.jsx:663
+#: resources/frontend/components/FormRenderer.jsx:664
 msgid "CAPTCHA verification failed. Please try again."
 msgstr ""
 
@@ -3908,8 +3909,14 @@ msgid_plural "Add at least %d entries."
 msgstr[0] ""
 msgstr[1] ""
 
+#. translators: %s: CAPTCHA provider name, such as reCAPTCHA
+#: src/Support/SchemaValidator.php:496
+#, php-format
+msgid "A form can have only one %s field. Remove the extra one or choose another provider for it."
+msgstr ""
+
 #. translators: %s: field key
-#: src/Support/SchemaValidator.php:587
+#: src/Support/SchemaValidator.php:603
 #, php-format
 msgid "The single checkbox \"%s\" has a list of options. Use a Multiple choice field for several options."
 msgstr ""
@@ -4576,11 +4583,11 @@ msgstr ""
 msgid "Import up to %d submissions at a time."
 msgstr ""
 
-#: src/Tools/TransferPackage.php:172
+#: src/Tools/TransferPackage.php:173
 msgid "None of the submissions in this file could be read."
 msgstr ""
 
-#: src/Tools/TransferPackage.php:254
+#: src/Tools/TransferPackage.php:255
 msgid "Imported form"
 msgstr ""
 
@@ -4610,34 +4617,34 @@ msgstr ""
 
 #. translators: %d: maximum number of submissions
 #: src/Tools/TransferService.php:297
-#: src/Tools/TransferService.php:344
+#: src/Tools/TransferService.php:346
 #, php-format
 msgid "This form has more than %d submissions, so nothing was exported."
 msgstr ""
 
 #. translators: 1: source form id, 2: source form title
-#: src/Tools/TransferService.php:383
+#: src/Tools/TransferService.php:385
 #, php-format
 msgid "This file is from form #%1$d (%2$s), not the form you chose."
 msgstr ""
 
-#: src/Tools/TransferService.php:385
+#: src/Tools/TransferService.php:387
 msgid "untitled"
 msgstr ""
 
 #. translators: %s: source form title
-#: src/Tools/TransferService.php:391
+#: src/Tools/TransferService.php:393
 #, php-format
 msgid "This file is from \"%s\", not the form you chose."
 msgstr ""
 
-#: src/Tools/TransferService.php:415
+#: src/Tools/TransferService.php:445
 #: resources/admin/pages/ToolsPage.jsx:186
 msgid "Choose a form to import into."
 msgstr ""
 
 #. translators: %d: number of entries skipped
-#: src/Tools/TransferService.php:503
+#: src/Tools/TransferService.php:556
 #, php-format
 msgid "%d entries were already in this form and were skipped."
 msgstr ""
@@ -4920,7 +4927,7 @@ msgstr ""
 #: resources/admin/pages/ToolsPage.jsx:305
 #: resources/admin/pages/ToolsPage.jsx:494
 #: resources/admin/pages/ToolsPage.jsx:514
-#: resources/frontend/components/FormRenderer.jsx:1116
+#: resources/frontend/components/FormRenderer.jsx:1165
 msgid "Form"
 msgstr ""
 
@@ -5122,7 +5129,7 @@ msgstr ""
 #. translators: 1: control name, 2: colour value
 #. translators: 1: settings area, 2: problem
 #: resources/admin/components/builder/appearance/AppearanceControls.jsx:44
-#: resources/admin/utils/saveErrors.js:109
+#: resources/admin/utils/saveErrors.js:116
 #, js-format
 msgid "%1$s: %2$s"
 msgstr ""
@@ -5884,7 +5891,7 @@ msgstr ""
 
 #: resources/admin/components/builder/ConversationalCanvas.jsx:239
 #: resources/admin/pages/ToolsPage.jsx:616
-#: resources/frontend/components/FormRenderer.jsx:1192
+#: resources/frontend/components/FormRenderer.jsx:1241
 msgid "Previous"
 msgstr ""
 
@@ -5904,7 +5911,7 @@ msgstr ""
 #: resources/admin/components/OnboardingWizard.jsx:606
 #: resources/admin/pages/ToolsPage.jsx:623
 #: resources/frontend/components/ConversationalFormRenderer.jsx:679
-#: resources/frontend/components/FormRenderer.jsx:1202
+#: resources/frontend/components/FormRenderer.jsx:1251
 msgid "Next"
 msgstr ""
 
@@ -6308,7 +6315,7 @@ msgstr ""
 
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:118
 #: resources/frontend/components/ConversationalFormRenderer.jsx:524
-#: resources/frontend/components/FormRenderer.jsx:1222
+#: resources/frontend/components/FormRenderer.jsx:1271
 msgid "Submit"
 msgstr ""
 
@@ -10373,7 +10380,7 @@ msgid "Discard your unsaved changes and revert to the last saved version?"
 msgstr ""
 
 #: resources/admin/pages/BuilderPage.jsx:628
-#: resources/admin/utils/saveErrors.js:121
+#: resources/admin/utils/saveErrors.js:128
 msgid "Your changes are kept in this tab."
 msgstr ""
 
@@ -12243,7 +12250,7 @@ msgid "Field title"
 msgstr ""
 
 #. translators: 1: setting, 2: field label, 3: problem
-#: resources/admin/utils/saveErrors.js:100
+#: resources/admin/utils/saveErrors.js:107
 #, js-format
 msgid "%1$s in \"%2$s\": %3$s"
 msgstr ""
@@ -12549,17 +12556,18 @@ msgid "Select a published form to embed"
 msgstr ""
 
 #: resources/frontend/components/ConversationalFormRenderer.jsx:235
-#: resources/frontend/components/FormRenderer.jsx:628
+#: resources/frontend/components/FormRenderer.jsx:629
 msgid "Save the form first, then submit the preview."
 msgstr ""
 
 #: resources/frontend/components/ConversationalFormRenderer.jsx:360
-#: resources/frontend/components/FormRenderer.jsx:908
+#: resources/frontend/components/FormRenderer.jsx:909
+#: resources/frontend/utils/classicResult.js:59
 msgid "Submission failed."
 msgstr ""
 
 #: resources/frontend/components/ConversationalFormRenderer.jsx:364
-#: resources/frontend/components/FormRenderer.jsx:913
+#: resources/frontend/components/FormRenderer.jsx:914
 msgid "Network error. Please try again."
 msgstr ""
 
@@ -12866,7 +12874,7 @@ msgid "Secure card fields from your payment gateway appear here on the live form
 msgstr ""
 
 #: resources/frontend/components/fields/Payments.jsx:471
-#: resources/frontend/components/FormRenderer.jsx:778
+#: resources/frontend/components/FormRenderer.jsx:779
 msgid "Online payment is not available right now."
 msgstr ""
 
@@ -12929,44 +12937,44 @@ msgstr ""
 msgid "This form couldn’t load. Please refresh the page and try again."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:110
-#: resources/frontend/components/FormRenderer.jsx:115
+#: resources/frontend/components/FormRenderer.jsx:111
+#: resources/frontend/components/FormRenderer.jsx:116
 msgid "Failed to load form."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:523
+#: resources/frontend/components/FormRenderer.jsx:524
 msgid "The code could not be checked. Please try again."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:797
+#: resources/frontend/components/FormRenderer.jsx:798
 msgid "Your payment could not be completed."
 msgstr ""
 
 #. translators: %s: URL
-#: resources/frontend/components/FormRenderer.jsx:881
+#: resources/frontend/components/FormRenderer.jsx:882
 #, js-format
 msgid "Visitors will be sent to %s."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:972
+#: resources/frontend/components/FormRenderer.jsx:1021
 msgid "Loading form..."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:1025
+#: resources/frontend/components/FormRenderer.jsx:1074
 msgid "Submit another response"
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:1212
+#: resources/frontend/components/FormRenderer.jsx:1261
 msgid "Submitting…"
 msgstr ""
 
 #. translators: %s: order total
-#: resources/frontend/components/FormRenderer.jsx:1217
+#: resources/frontend/components/FormRenderer.jsx:1266
 #, js-format
 msgid "Pay %s"
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:1221
+#: resources/frontend/components/FormRenderer.jsx:1270
 msgid "Continue to checkout"
 msgstr ""
 
