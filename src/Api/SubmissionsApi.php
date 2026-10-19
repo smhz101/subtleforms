@@ -1071,7 +1071,7 @@ final class SubmissionsApi {
 			// dates in the field format, file names with links (2.4.0). A
 			// drawn signature reads "Signed" (2.3.3).
 			$schema  = \SubtleForms\Support\EntrySchema::forEntry( $submission, $this->formsRepo ) ?? array();
-			$mapKey  = (int) $submission['form_id'] . ':' . ( $submission['schema_version'] ?? '' );
+			$mapKey  = (int) $submission['form_id'] . ':' . ( $submission['schema_version'] ?? ( 'legacy-entry-' . $submission['id'] ) );
 			if ( ! isset( $fieldMaps[ $mapKey ] ) ) {
 				$fieldMaps[ $mapKey ] = array();
 				foreach ( \SubtleForms\Support\FieldMapper::fields( $schema ) as $field ) {
@@ -1089,7 +1089,7 @@ final class SubmissionsApi {
 			);
 			foreach ( $ordered as $key ) {
 				if ( isset( $repeaters[ $key ] ) ) {
-					foreach ( \SubtleForms\Support\Repeater::csvCells( $payload[ $key ] ?? array(), $repeaters[ $key ], $display ) as $cell ) {
+					foreach ( \SubtleForms\Support\Repeater::csvCells( $payload[ $key ] ?? array(), $fields[ $key ] ?? $repeaters[ $key ], $display ) as $cell ) {
 						$row[] = $cell;
 					}
 					continue;
