@@ -72,7 +72,7 @@ export function BuilderTitle({
         className={`sf-builder-header-bar__form-type-badge sf-builder-header-bar__form-type-badge--${formTypeBadge.color}`}
         title={formTypeBadge.label}>
         <FormTypeIcon className='sf-builder-header-bar__form-type-icon' />
-        {formTypeBadge.label}
+        <span className='sf-builder-header-bar__form-type-label'>{formTypeBadge.label}</span>
       </span>
     </div>
   );
@@ -146,7 +146,7 @@ export function BuilderActions({
         className={`sf-builder-header-bar__mode-badge ${statusBadgeClass}`}
         title={statusBadgeTitle}>
         <span className='sf-builder-header-bar__mode-dot' aria-hidden='true' />
-        {statusBadgeLabel}
+        <span className='sf-builder-header-bar__mode-label'>{statusBadgeLabel}</span>
       </span>
 
       {/* Shortcode — compact copy button; the full shortcode is in the tooltip */}
@@ -184,7 +184,7 @@ export function BuilderActions({
             autoSaving ? 'saving' : effectiveStatus
           }`}
         />
-        <span>{statusLabel}</span>
+        <span className='sf-builder-header-bar__save-label'>{statusLabel}</span>
       </div>
 
       {/* Error Actions */}
@@ -196,7 +196,7 @@ export function BuilderActions({
               isSmall
               onClick={onRetryAutosave}
               className='sf-builder-header-bar__tour-button'>
-              {__('Retry autosave', 'subtleforms')}
+              {__('Retry', 'subtleforms')}
             </Button>
           )}
           {saveError && (
@@ -205,7 +205,7 @@ export function BuilderActions({
               isSmall
               onClick={onRetryLastManualSave}
               className='sf-builder-header-bar__tour-button'>
-              {__('Retry save', 'subtleforms')}
+              {__('Retry', 'subtleforms')}
             </Button>
           )}
           <Button
