@@ -9,7 +9,7 @@
  *   await noticeDialog( { message } );
  */
 
-import { createElement, render, unmountComponentAtNode } from '@wordpress/element';
+import { createElement, createRoot } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import ConfirmModal from '../modals/ConfirmModal';
 
@@ -19,23 +19,23 @@ function open(props) {
     host.className = 'subtleforms-dialog-host';
     document.body.appendChild(host);
 
+    const root = createRoot(host);
     let settled = false;
     const finish = (value) => {
       if (settled) return;
       settled = true;
-      unmountComponentAtNode(host);
+      root.unmount();
       host.remove();
       resolve(value);
     };
 
-    render(
+    root.render(
       createElement(ConfirmModal, {
         isOpen: true,
         ...props,
         onConfirm: () => finish(true),
         onClose: () => finish(false),
-      }),
-      host
+      })
     );
   });
 }
