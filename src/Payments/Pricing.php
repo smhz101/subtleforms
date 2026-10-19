@@ -81,20 +81,23 @@ final class Pricing {
 	 * container it sits in. Keyless nodes are judged by their own show and
 	 * hide rules.
 	 *
-	 * @param mixed $schema  Form schema.
-	 * @param array $payload Submitted values.
+	 * @param mixed      $schema      Form schema.
+	 * @param array      $payload     Submitted values.
+	 * @param array|null $logicValues Answers as typed, for conditional logic.
+	 *                                Defaults to $payload.
 	 * @return array<int, array>
 	 */
-	public static function visibleFields( $schema, array $payload ): array {
+	public static function visibleFields( $schema, array $payload, ?array $logicValues = null ): array {
 		$out = array();
 		if ( ! is_array( $schema ) || empty( $schema['fields'] ) || ! is_array( $schema['fields'] ) ) {
 			return $out;
 		}
-		$logic  = new ConditionalLogic();
-		$state  = $logic->evaluate( $schema, $payload );
-		$hidden = array_flip( array_map( 'strval', array_merge( $state['hidden_fields'], $state['hidden_steps'] ) ) );
+		$logicValues = $logicValues ?? $payload;
+		$logic       = new ConditionalLogic();
+		$state       = $logic->evaluate( $schema, $logicValues );
+		$hidden      = array_flip( array_map( 'strval', array_merge( $state['hidden_fields'], $state['hidden_steps'] ) ) );
 		// Rules on keyless nodes read the answers that count, like the evaluator.
-		$values = $logic->visiblePayload( $schema, $payload );
+		$values = $logic->visiblePayload( $schema, $logicValues );
 
 		$walk = static function ( array $fields, bool $parentHidden ) use ( &$walk, &$out, $hidden, $logic, $values ) {
 			foreach ( $fields as $field ) {
@@ -185,9 +188,11 @@ final class Pricing {
 	 * @param mixed      $schema  Form schema.
 	 * @param array      $payload Submitted values (calculations already applied).
 	 * @param array|null $coupon  A validated coupon row, or null.
+	 * @param array|null $logicValues Answers as typed, for conditional logic.
+	 *                                Defaults to $payload.
 	 * @return array{currency:string,items:array,subtotal:float,discount:float,coupon:?string,tax_rate:float,tax:float,total:float,formula_error:bool}
 	 */
-	public static function quote( $schema, array $payload, ?array $coupon = null ): array {
+	public static function quote( $schema, array $payload, ?array $coupon = null, ?array $logicValues = null ): array {
 		$items    = array();
 		$taxRate  = 0.0;
 		// Prices round to what the currency can charge: whole yen, cents (PAY-12).
@@ -197,7 +202,7 @@ final class Pricing {
 		$priced  = $payload;
 
 		// Visibility comes from conditional logic, never from which keys were sent.
-		foreach ( self::visibleFields( $schema, $payload ) as $f ) {
+		foreach ( self::visibleFields( $schema, $payload, $logicValues ) as $f ) {
 			$type  = (string) ( $f['type'] ?? '' );
 			$key   = (string) ( $f['key'] ?? '' );
 			$label = wp_strip_all_tags( (string) ( $f['label'] ?? $key ) );
