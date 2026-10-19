@@ -14,6 +14,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: Form views from visitors are counted for Reports, and a trashed or draft form refuses entries with a not found answer.
 * Fix: The entry view shows the label of the chosen option, as emails do, and Yes or No for consent, single checkbox and toggle answers.
 * Fix: The Preview tab keeps the form centred and fully visible beside the styling panel on laptop screens.
+* Fix: An HTML block's markup in its settings goes through the WordPress post content filter on save, and every HTML block is filtered again when the live form loads.
 * Fix: Answers the server refuses are not stored as failed entries, and the spam fields are never part of an entry.
 * Fix: Deleting a form deletes its entries, uploaded files, activity logs, schema versions and view totals. The retention purge removes logs too.
 * Fix: The personal data export and erase tools match the exact email address and show the form name.
