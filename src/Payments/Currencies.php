@@ -8,9 +8,10 @@
  *
  * `decimals` is the number of minor-unit digits the gateway uses (0 for
  * zero-decimal currencies such as JPY). `minimum` is the smallest card charge
- * Stripe accepts in that currency; for currencies Stripe gives no figure for,
- * it is a little under the 0.50 USD equivalent, so a real order is never
- * refused by this check before the gateway sees it.
+ * Stripe publishes for that currency when the charge settles in the same
+ * currency (for example 50 KRW). When the merchant settles in another
+ * currency, Stripe may need a higher presentment amount; a gateway can raise
+ * the floor through the subtleforms/payments/card_minimum filter.
  *
  * @package SubtleForms\Payments
  * @since   2.4.0
@@ -38,7 +39,7 @@ final class Currencies {
 		'NZD' => array( 'New Zealand dollar', 2, 0.50 ),
 		'CHF' => array( 'Swiss franc', 2, 0.50 ),
 		'JPY' => array( 'Japanese yen', 0, 50 ),
-		'KRW' => array( 'South Korean won', 0, 700 ),
+		'KRW' => array( 'South Korean won', 0, 50 ),
 		'INR' => array( 'Indian rupee', 2, 0.50 ),
 		'PKR' => array( 'Pakistani rupee', 2, 140 ),
 		'AED' => array( 'UAE dirham', 2, 2.00 ),
@@ -47,7 +48,7 @@ final class Currencies {
 		'HKD' => array( 'Hong Kong dollar', 2, 4.00 ),
 		'MYR' => array( 'Malaysian ringgit', 2, 2.00 ),
 		'THB' => array( 'Thai baht', 2, 10.00 ),
-		'PHP' => array( 'Philippine peso', 2, 25.00 ),
+		'PHP' => array( 'Philippine peso', 2, 0.50 ),
 		'SEK' => array( 'Swedish krona', 2, 3.00 ),
 		'NOK' => array( 'Norwegian krone', 2, 3.00 ),
 		'DKK' => array( 'Danish krone', 2, 2.50 ),
@@ -55,7 +56,7 @@ final class Currencies {
 		'CZK' => array( 'Czech koruna', 2, 15.00 ),
 		'MXN' => array( 'Mexican peso', 2, 10.00 ),
 		'BRL' => array( 'Brazilian real', 2, 0.50 ),
-		'ZAR' => array( 'South African rand', 2, 9.00 ),
+		'ZAR' => array( 'South African rand', 2, 0.50 ),
 	);
 
 	/** Every supported code. */
@@ -101,7 +102,19 @@ final class Currencies {
 	 */
 	public static function minimum( string $currency ): float {
 		$code = strtoupper( trim( $currency ) );
-		return isset( self::LIST[ $code ] ) ? (float) self::LIST[ $code ][2] : 0.0;
+		$min  = isset( self::LIST[ $code ] ) ? (float) self::LIST[ $code ][2] : 0.0;
+		/**
+		 * Filter the smallest card charge for a currency.
+		 *
+		 * Use this when the connected account settles in another currency and
+		 * Stripe needs a higher presentment amount than the published floor.
+		 *
+		 * @param float  $min      Published minimum for $currency.
+		 * @param string $currency Currency code.
+		 * @since 2.4.0
+		 */
+		$filtered = apply_filters( 'subtleforms/payments/card_minimum', $min, $code );
+		return is_numeric( $filtered ) ? (float) $filtered : $min;
 	}
 
 	/**
