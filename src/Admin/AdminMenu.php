@@ -420,6 +420,7 @@ class AdminMenu {
 			'previewBreakpoints' => \SubtleForms\Support\Appearance::previewBreakpoints( self::themeJsonSettings() ),
 			'themeStylesheets'   => self::themeStylesheets(),
 			'themeGlobalCss'     => function_exists( 'wp_get_global_stylesheet' ) ? wp_get_global_stylesheet() : '',
+			'themeFontFaces'     => self::themeFontFaces(),
 			// Submissions inbox. A personal choice wins; otherwise these are the site defaults.
 			'submissionsView'    => ( new Settings() )->resolvedInboxView( get_current_user_id() ),
 		);
@@ -479,6 +480,20 @@ class AdminMenu {
 	 *
 	 * @return string[]
 	 */
+	/**
+	 * Font faces the front end prints, so the builder preview can use them.
+	 *
+	 * @return string
+	 */
+	public static function themeFontFaces(): string {
+		if ( ! function_exists( 'wp_print_font_faces' ) ) {
+			return '';
+		}
+		ob_start();
+		wp_print_font_faces();
+		return (string) ob_get_clean();
+	}
+
 	private static function themeStylesheets(): array {
 		$hrefs = array();
 		if ( function_exists( 'is_child_theme' ) && is_child_theme() && function_exists( 'get_template_directory_uri' ) ) {

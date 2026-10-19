@@ -408,7 +408,7 @@ export const FORM_WIDTHS = {
   wide: '52rem',
   full: '100%',
   // The theme's own content column, when it publishes one.
-  theme: 'var(--wp--style--global--content-size, 40rem)',
+  theme: '100%',
 };
 
 /**
