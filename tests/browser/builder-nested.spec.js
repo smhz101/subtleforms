@@ -145,7 +145,17 @@ for (const container of CONTAINERS) {
     await openBuilder(page, form.id);
 
     const childChrome = page.locator('.sf-field-chrome', { hasText: container.child });
-    await childChrome.click();
+    // Click the field where its input is drawn, not in its middle: since long
+    // labels wrap on the canvas (FLD2-11), a label in a narrow column can fill
+    // the middle, and a click on a label opens inline label editing.
+    const chromeBox = await childChrome.boundingBox();
+    const inputBox = await childChrome.locator('.sf-field-renderer__input').first().boundingBox();
+    await childChrome.click({
+      position: {
+        x: inputBox.x - chromeBox.x + inputBox.width / 2,
+        y: inputBox.y - chromeBox.y + inputBox.height / 2,
+      },
+    });
     await expect(childChrome).toHaveClass(/is-selected/);
     await expect(inspectorTitle(page)).not.toHaveText(/Repeat|Group|Column/i);
     // Every input-like child has Validation and Logic tabs.
