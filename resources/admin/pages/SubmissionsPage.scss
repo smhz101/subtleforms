@@ -292,8 +292,14 @@
 	}
 }
 
-// A narrow screen cannot hold a side-by-side list, so the pane covers it.
-@media (max-width: 900px) {
+// The list and the entry need about 960px side by side. Below that the pane
+// covers the list as a full-width overlay (UX2-18). The width is the inbox's
+// own, not the window's: the WordPress menu takes part of the window.
+.sf-inbox--right {
+	container: sf-inbox / inline-size;
+}
+
+@container sf-inbox (max-width: 959px) {
 	.sf-inbox--right.is-open {
 		.sf-inbox__list {
 			flex: 1 1 auto;
