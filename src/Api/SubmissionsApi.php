@@ -1117,7 +1117,7 @@ public function get_unread_count( WP_REST_Request $request ): WP_REST_Response {
 			// dates in the field format, file names with links (2.4.0). A
 			// drawn signature reads "Signed" (2.3.3).
 			$schema  = \SubtleForms\Support\EntrySchema::forEntry( $submission, $this->formsRepo ) ?? array();
-			$mapKey  = (int) $submission['form_id'] . ':' . ( $submission['schema_version'] ?? '' );
+			$mapKey  = (int) $submission['form_id'] . ':' . ( $submission['schema_version'] ?? ( 'legacy-entry-' . $submission['id'] ) );
 			if ( ! isset( $fieldMaps[ $mapKey ] ) ) {
 				$fieldMaps[ $mapKey ] = array();
 				foreach ( \SubtleForms\Support\FieldMapper::fields( $schema ) as $field ) {
@@ -1135,8 +1135,13 @@ public function get_unread_count( WP_REST_Request $request ): WP_REST_Response {
 			);
 			foreach ( $ordered as $key ) {
 				if ( isset( $repeaters[ $key ] ) ) {
-					foreach ( \SubtleForms\Support\Repeater::csvCells( $payload[ $key ] ?? array(), $repeaters[ $key ], $display ) as $cell ) {
-						$row[] = $cell;
+					// Format with the entry's own version of the Repeater, then
+					// fill the columns of the current version in header order:
+					// a child added or removed since leaves its cell empty
+					// instead of shifting the others.
+					$cells = \SubtleForms\Support\Repeater::csvCells( $payload[ $key ] ?? array(), $fields[ $key ] ?? $repeaters[ $key ], $display );
+					foreach ( \SubtleForms\Support\Repeater::childFields( $repeaters[ $key ] ) as $child ) {
+						$row[] = $cells[ $child['key'] ] ?? '';
 					}
 					continue;
 				}
