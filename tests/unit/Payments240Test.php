@@ -94,4 +94,17 @@ final class Payments240Test extends TestCase {
 		);
 		$this->assertArrayNotHasKey( 'currency', $out['schema']['metadata']['payment'] );
 	}
+
+	/** PAY-17: a Product's name, price and quantity settings are under General. */
+	public function test_pay17_product_settings_are_under_general(): void {
+		$registry = new \SubtleForms\Fields\FieldRegistry();
+		\SubtleForms\Fields\PaymentFields::register( $registry );
+		$sections = array();
+		foreach ( (array) $registry->get( 'payment_product' )->inspectorControls as $c ) {
+			$sections[ $c['name'] ] = $c['section'] ?? 'general-by-name';
+		}
+		foreach ( array( 'productName', 'price', 'allowQuantity', 'minQuantity', 'maxQuantity' ) as $name ) {
+			$this->assertSame( 'general', $sections[ $name ] ?? null, $name );
+		}
+	}
 }
