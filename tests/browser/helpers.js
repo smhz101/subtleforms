@@ -108,6 +108,23 @@ async function waitForForm(page) {
 
 module.exports = { adminApi, publishForm, entries, cleanup, waitForForm, BASE };
 
+/**
+ * Whether every given field type is registered on the site. Signature,
+ * Calculation and Card Payment are registered by SubtleForms Pro since 2.3.9,
+ * so on a site without Pro they are missing.
+ *
+ * @param {Object}   client adminApi() result.
+ * @param {string[]} types  Field types.
+ * @return {Promise<boolean>}
+ */
+async function hasFieldTypes(client, types) {
+  const res = await client.call('GET', '/fields');
+  const registered = res.body?.data || {};
+  return types.every((type) => Object.prototype.hasOwnProperty.call(registered, type));
+}
+
+module.exports.hasFieldTypes = hasFieldTypes;
+
 /** Log the browser page in as the admin. */
 async function loginPage(page) {
   // The local PHP server occasionally stalls one request; a login that does
