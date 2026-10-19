@@ -1,3 +1,4 @@
+import { submissionStatus } from '../utils/submissionStatus';
 import {
   useState,
   useEffect,
@@ -505,7 +506,7 @@ const SubmissionsTable = forwardRef(
       // Priority: spam/flagged > failed > payment_pending > unread
       if (submission.status === 'spam') classes.push('sf-submissions-table__row--spam');
       else if (submission.status === 'flagged') classes.push('sf-submissions-table__row--flagged');
-      else if (submission.status === 'failed') classes.push('sf-submissions-table__row--failed');
+      else if (submission.status === 'failed' || submission.status === 'payment_failed') classes.push('sf-submissions-table__row--failed');
       else if (submission.status === 'payment_pending') classes.push('sf-submissions-table__row--payment-pending');
       else if (parseInt(submission.is_read, 10) === 0) classes.push('sf-submissions-table__row--unread');
       return classes.join(' ');
@@ -630,17 +631,6 @@ const SubmissionsTable = forwardRef(
       return { name, email };
     };
 
-    const STATUS = {
-      completed: { label: __('Completed', 'subtleforms'), cls: 'sf-pill--success' },
-      saved: { label: __('Saved', 'subtleforms'), cls: '' },
-      processing: { label: __('Processing', 'subtleforms'), cls: 'sf-pill--info' },
-      failed: { label: __('Failed', 'subtleforms'), cls: 'sf-pill--danger' },
-      payment_pending: { label: __('Awaiting payment', 'subtleforms'), cls: 'sf-pill--warning' },
-      spam: { label: __('Spam', 'subtleforms'), cls: 'sf-pill--danger' },
-      flagged: { label: __('Flagged', 'subtleforms'), cls: 'sf-pill--warning' },
-      trash: { label: __('Trashed', 'subtleforms'), cls: 'sf-pill--danger' },
-      archived: { label: __('Archived', 'subtleforms'), cls: '' },
-    };
 
     // Define table columns
     const allColumns = [
@@ -697,10 +687,7 @@ const SubmissionsTable = forwardRef(
         title: __('Status', 'subtleforms'),
         sortable: true,
         render: (status) => {
-          const config = STATUS[status] || {
-            label: __('Received', 'subtleforms'),
-            cls: '',
-          };
+          const config = submissionStatus(status);
           return (
             <span className={clsx('sf-pill', 'sf-pill--dot', config.cls)}>
               {config.label}
