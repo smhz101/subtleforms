@@ -127,6 +127,31 @@ final class ClassicResult {
 	}
 
 	/**
+	 * Let wp_safe_redirect() follow a redirect confirmation an administrator
+	 * set to another site, like the AJAX flow does. Only that host is added,
+	 * and only http and https addresses count.
+	 *
+	 * @param string $url Configured redirect address.
+	 * @return string The host that was allowed, or '' when none was.
+	 */
+	public static function allowHostOf( string $url ): string {
+		$scheme = strtolower( (string) wp_parse_url( $url, PHP_URL_SCHEME ) );
+		$host   = strtolower( (string) wp_parse_url( $url, PHP_URL_HOST ) );
+		if ( '' === $host || ! in_array( $scheme, array( 'http', 'https' ), true ) ) {
+			return '';
+		}
+		add_filter(
+			'allowed_redirect_hosts',
+			static function ( $hosts ) use ( $host ) {
+				$hosts   = is_array( $hosts ) ? $hosts : array();
+				$hosts[] = $host;
+				return array_values( array_unique( $hosts ) );
+			}
+		);
+		return $host;
+	}
+
+	/**
 	 * The page to return to with the token, without an older token.
 	 *
 	 * @param string $page  Page address.

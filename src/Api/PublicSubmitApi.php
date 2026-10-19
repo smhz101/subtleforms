@@ -120,6 +120,10 @@ final class PublicSubmitApi {
 
 		// Only a submission that went through follows a redirect confirmation.
 		if ( $outcome['ok'] && '' !== $outcome['redirect'] ) {
+			if ( $outcome['configured'] ) {
+				// The form's confirmation may send visitors to another site.
+				ClassicResult::allowHostOf( $outcome['redirect'] );
+			}
 			wp_safe_redirect( $outcome['redirect'] );
 			exit;
 		}

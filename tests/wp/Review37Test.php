@@ -56,4 +56,15 @@ final class Review37Test extends TestCase {
 		$this->assertSame( 5, $data['body']['data']['submission_id'] );
 		$this->assertSame( array( 'name' => 'Ada' ), $data['values'] );
 	}
+
+	public function test_a_configured_external_confirmation_host_is_allowed_for_the_redirect(): void {
+		$fallback = 'https://fallback.invalid/';
+		$this->assertSame( $fallback, wp_validate_redirect( 'https://thanks.example.net/done', $fallback ), 'Off-site hosts are refused by default.' );
+		$this->assertSame( '', ClassicResult::allowHostOf( 'javascript:alert(1)' ) );
+		$this->assertSame( '', ClassicResult::allowHostOf( 'ftp://thanks.example.net/x' ) );
+		$this->assertSame( 'thanks.example.net', ClassicResult::allowHostOf( 'https://Thanks.example.net/done?x=1' ) );
+		$this->assertSame( 'https://thanks.example.net/done', wp_validate_redirect( 'https://thanks.example.net/done', $fallback ) );
+		$this->assertSame( $fallback, wp_validate_redirect( 'https://other.example.net/', $fallback ), 'Only the configured host is added.' );
+		remove_all_filters( 'allowed_redirect_hosts' );
+	}
 }
