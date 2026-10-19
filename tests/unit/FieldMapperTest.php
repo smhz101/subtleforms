@@ -193,4 +193,12 @@ class FieldMapperTest extends TestCase {
 		$this->assertSame( 'Work email', $rows[0]['label'] );
 		$this->assertSame( 'Extra Note', $rows[2]['label'] );
 	}
+
+	/** PRO2-04: integrations get "Signed", never the image data. */
+	public function test_signature_value_is_a_word_for_integrations(): void {
+		$payload = array( 'sig' => 'data:image/png;base64,iVBORw0KGgo=' );
+		$this->assertSame( 'Signed', FieldMapper::value( $payload, 'sig' ) );
+		$rows = FieldMapper::mapRows( $payload, array( array( 'target' => 'note', 'field' => 'sig' ) ) );
+		$this->assertSame( array( 'note' => 'Signed' ), $rows );
+	}
 }

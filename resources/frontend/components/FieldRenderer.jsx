@@ -1622,8 +1622,11 @@ function renderInput(
             value={value}
             onChange={onChange}
             inputId={inputId}
+            name={name}
+            describedBy={describedBy}
             error={error}
             required={required}
+            values={values}
           />
         );
       }

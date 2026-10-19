@@ -135,6 +135,7 @@ class Settings {
 		'ext_payments_paypal_client_secret' => '',
 		'ext_payments_currency'             => 'USD',
 		'ext_payments_mode'                 => 'test', // test|live
+		'ext_payments_failed_email'         => true,
 	);
 
 	/**
@@ -263,6 +264,7 @@ class Settings {
 		'ext_payments_paypal_client_secret' => array( 'string', 'max' => 500 ),
 		'ext_payments_currency'             => array( 'string', 'max' => 10 ),
 		'ext_payments_mode'                 => array( 'test', 'live' ),
+		'ext_payments_failed_email'         => 'boolean',
 	);
 
 	/**

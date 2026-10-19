@@ -197,6 +197,7 @@ class Schemas {
 					'ext_payments_paypal_client_secret',
 					'ext_payments_currency',
 					'ext_payments_mode',
+					'ext_payments_failed_email',
 				),
 
 				// General
@@ -294,6 +295,7 @@ class Schemas {
 				'ext_payments_paypal_client_secret' => 'optional|string|max:500',
 				'ext_payments_currency'            => 'optional|string|max:10',
 				'ext_payments_mode'                => 'optional|in:test,live',
+				'ext_payments_failed_email'        => 'optional|bool',
 			),
 
 			// Nested schemas
