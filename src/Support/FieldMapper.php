@@ -227,6 +227,11 @@ final class FieldMapper {
 			return '';
 		}
 
+		// An uploaded file reads as its name, not its stored record (FA-03).
+		if ( \SubtleForms\Uploads\Uploads::isRecord( $value ) ) {
+			return trim( (string) $value['name'] );
+		}
+
 		$isName = array_intersect( array_keys( $value ), array( 'first_name', 'last_name', 'middle_name', 'prefix' ) );
 		if ( ! empty( $isName ) ) {
 			$parts = array();

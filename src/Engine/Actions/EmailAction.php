@@ -277,9 +277,17 @@ final class EmailAction implements ActionInterface {
 	 * @param int   $submissionId Entry ID.
 	 * @return array
 	 */
-	private function format_uploads( array $payload, int $submissionId ): array {
+	private function format_uploads( array $payload, int $submissionId, int $depth = 0 ): array {
 		foreach ( $payload as $key => $value ) {
 			if ( ! is_array( $value ) || ! $value ) {
+				continue;
+			}
+			// Repeater groups hold upload answers one level down (FA-03).
+			if ( 0 === $depth && \SubtleForms\Support\Repeater::looksLikeGroups( $value ) ) {
+				foreach ( $value as $index => $group ) {
+					$value[ $index ] = $this->format_uploads( $group, $submissionId, $depth + 1 );
+				}
+				$payload[ $key ] = $value;
 				continue;
 			}
 			$lines = array();
