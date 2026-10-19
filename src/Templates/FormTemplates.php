@@ -28,7 +28,7 @@ class FormTemplates {
 	 * "Gift card message" or a "Scorecard" is not a card number, and the
 	 * gateway-managed Card Payment field (payment_card) is always kept.
 	 */
-	const CARD_INPUT_ID = '/^(?:(?:credit|debit)[\s_-]*)?(?:card[\s_-]*(?:number|num|no)|cc[\s_-]*(?:number|num)|cvv2?|cvc|csc|expiry|expiration|exp[\s_-]*date)(?:[\s_-]|$)/';
+	const CARD_INPUT_ID = '/^(?:(?:credit|debit)[\s_-]*)?(?:card[\s_-]*(?:number|num|no|cvv2?|cvc|csc|expiry|expiration|exp[\s_-]*date)|cc[\s_-]*(?:number|num|cvv2?|cvc)|cvv2?|cvc|csc|expiry|expiration|exp[\s_-]*date)(?:[\s_-]|$)/i';
 
 	/**
 	 * Get all available templates.

@@ -63,7 +63,14 @@ final class Pricing {
 				}
 				if ( ! empty( $field['columns'] ) && is_array( $field['columns'] ) ) {
 					foreach ( $field['columns'] as $column ) {
-						if ( is_array( $column ) ) {
+						if ( ! is_array( $column ) ) {
+							continue;
+						}
+						if ( isset( $column['fields'] ) && is_array( $column['fields'] ) ) {
+							$walk( $column['fields'] );
+						} elseif ( isset( $column['children'] ) && is_array( $column['children'] ) ) {
+							$walk( $column['children'] );
+						} else {
 							$walk( $column );
 						}
 					}
