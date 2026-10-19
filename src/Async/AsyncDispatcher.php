@@ -1,8 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SubtleForms\Async;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Support\Logger;
 /**
@@ -417,6 +421,11 @@ final class AsyncDispatcher {
 	 */
 	private static function log( string $message, array $context = array() ): void {
 		$context_str = empty( $context ) ? '' : ' | ' . wp_json_encode( $context );
-		Logger::error( "[SubtleForms Async] {$message}{$context_str}" );
+		$line        = "[SubtleForms Async] {$message}{$context_str}";
+		if ( 'error' === $level || preg_match( '/fail/i', $message ) ) {
+			Logger::error( $line );
+			return;
+		}
+		Logger::info( $line );
 	}
 }

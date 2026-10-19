@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SubtleForms Forms REST API
  *
@@ -9,6 +10,10 @@
  */
 
 namespace SubtleForms\Api;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Support\SchemaRepair;
 
@@ -754,7 +759,8 @@ final class FormsApi {
 			$validator = new RequestValidator( array( 'schemas' => Schemas::all() ) );
 			$validated = $validator->validateOrFail( $input, Schemas::get( Schemas::FORM_CREATE ) );
 		} catch ( ValidationException $e ) {
-			Logger::error( 'create_form - validation failed: %s Fields: %s', $e->getMessage(), print_r( $e->getFields(), true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			Logger::error( 'create_form - validation failed: %s', $e->getMessage() );
+			Logger::debug( 'create_form - invalid fields: %s', wp_json_encode( $e->getFields() ) );
 			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
 		}
 

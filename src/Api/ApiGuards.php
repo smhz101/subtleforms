@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Shared REST API helpers: rate limiting, ETag, permissions.
  *
@@ -7,6 +8,12 @@
  */
 
 namespace SubtleForms\Api;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+use SubtleForms\Support\Logger;
 
 use SubtleForms\Security\RateLimiter;
 use SubtleForms\Security\ETag;
@@ -127,7 +134,7 @@ trait ApiGuards {
 		}
 
 		if ( empty( $nonce ) ) {
-			error_log( '[SubtleForms] Invalid nonce detected for REST request' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			Logger::debug( 'Invalid nonce detected for REST request' );
 			return new \WP_Error(
 				'subtleforms_invalid_nonce',
 				__( 'Security check failed. Please refresh and try again.', 'subtleforms' ),
@@ -136,7 +143,7 @@ trait ApiGuards {
 		}
 
 		if ( ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
-			error_log( '[SubtleForms] Invalid nonce detected for REST request' ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
+			Logger::debug( 'Invalid nonce detected for REST request' );
 			return new \WP_Error(
 				'subtleforms_invalid_nonce',
 				__( 'Security check failed. Please refresh and try again.', 'subtleforms' ),
