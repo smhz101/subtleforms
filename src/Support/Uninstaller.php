@@ -149,6 +149,16 @@ final class Uninstaller {
 		if ( 1 === preg_match( '/^subtleforms-uploads-[a-z0-9]{16}$/', $folder ) ) {
 			$folders[] = $folder;
 		}
+		$dirs = array();
+		foreach ( $folders as $name ) {
+			$dir = trailingslashit( $uploads['basedir'] ) . $name;
+			if ( is_dir( $dir ) ) {
+				$dirs[] = $dir;
+			}
+		}
+		if ( ! $dirs ) {
+			return;
+		}
 		if ( ! function_exists( 'WP_Filesystem' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/file.php';
 		}
@@ -156,11 +166,8 @@ final class Uninstaller {
 			return;
 		}
 		global $wp_filesystem;
-		foreach ( $folders as $name ) {
-			$dir = trailingslashit( $uploads['basedir'] ) . $name;
-			if ( is_dir( $dir ) ) {
-				$wp_filesystem->rmdir( $dir, true );
-			}
+		foreach ( $dirs as $dir ) {
+			$wp_filesystem->rmdir( $dir, true );
 		}
 	}
 }
