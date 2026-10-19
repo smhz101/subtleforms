@@ -435,7 +435,20 @@ final class CoreFields {
 				kind: 'input',
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
-					'options' => array(),
+					'options' => array(
+						array(
+							'label' => __( 'First choice', 'subtleforms' ),
+							'value' => 'first',
+						),
+						array(
+							'label' => __( 'Second choice', 'subtleforms' ),
+							'value' => 'second',
+						),
+						array(
+							'label' => __( 'Third choice', 'subtleforms' ),
+							'value' => 'third',
+						),
+					),
 				),
 				inspectorControls: array(
 					array(
@@ -457,7 +470,20 @@ final class CoreFields {
 				kind: 'input',
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
-					'options'       => array(),
+					'options'       => array(
+						array(
+							'label' => __( 'First choice', 'subtleforms' ),
+							'value' => 'first',
+						),
+						array(
+							'label' => __( 'Second choice', 'subtleforms' ),
+							'value' => 'second',
+						),
+						array(
+							'label' => __( 'Third choice', 'subtleforms' ),
+							'value' => 'third',
+						),
+					),
 					'allowMultiple' => true,
 				),
 				inspectorControls: array(
@@ -486,7 +512,20 @@ final class CoreFields {
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					'placeholder' => 'Select an option',
-					'options'     => array(),
+					'options'     => array(
+						array(
+							'label' => __( 'First choice', 'subtleforms' ),
+							'value' => 'first',
+						),
+						array(
+							'label' => __( 'Second choice', 'subtleforms' ),
+							'value' => 'second',
+						),
+						array(
+							'label' => __( 'Third choice', 'subtleforms' ),
+							'value' => 'third',
+						),
+					),
 				),
 				inspectorControls: array(
 					array(
@@ -516,7 +555,20 @@ final class CoreFields {
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					'placeholder' => 'Select an option',
-					'options'     => array(),
+					'options'     => array(
+						array(
+							'label' => __( 'First choice', 'subtleforms' ),
+							'value' => 'first',
+						),
+						array(
+							'label' => __( 'Second choice', 'subtleforms' ),
+							'value' => 'second',
+						),
+						array(
+							'label' => __( 'Third choice', 'subtleforms' ),
+							'value' => 'third',
+						),
+					),
 				),
 				inspectorControls: array(
 					array(
@@ -1462,12 +1514,19 @@ final class CoreFields {
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					'site_key' => '',
+					'secret_key' => '',
 				),
 				inspectorControls: array(
 					array(
 						'type'  => 'text',
 						'name'  => 'site_key',
 						'label' => __( 'Site Key', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'text',
+						'name'  => 'secret_key',
+						'label' => __( 'Secret key', 'subtleforms' ),
+						'help'  => __( 'Used to check the answer. Leave blank to use the key saved in Settings for this provider.', 'subtleforms' ),
 					),
 				),
 				meta: array( 'category' => 'system' ),
@@ -1484,12 +1543,19 @@ final class CoreFields {
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					'site_key' => '',
+					'secret_key' => '',
 				),
 				inspectorControls: array(
 					array(
 						'type'  => 'text',
 						'name'  => 'site_key',
 						'label' => __( 'Site Key', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'text',
+						'name'  => 'secret_key',
+						'label' => __( 'Secret key', 'subtleforms' ),
+						'help'  => __( 'Used to check the answer. Leave blank to use the key saved in Settings for this provider.', 'subtleforms' ),
 					),
 				),
 				meta: array( 'category' => 'system' ),
@@ -1506,12 +1572,19 @@ final class CoreFields {
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					'site_key' => '',
+					'secret_key' => '',
 				),
 				inspectorControls: array(
 					array(
 						'type'  => 'text',
 						'name'  => 'site_key',
 						'label' => __( 'Site Key', 'subtleforms' ),
+					),
+					array(
+						'type'  => 'text',
+						'name'  => 'secret_key',
+						'label' => __( 'Secret key', 'subtleforms' ),
+						'help'  => __( 'Used to check the answer. Leave blank to use the key saved in Settings for this provider.', 'subtleforms' ),
 					),
 				),
 				meta: array( 'category' => 'system' ),

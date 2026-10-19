@@ -2,11 +2,12 @@ import { useEffect, useId, useMemo, useRef, useState } from '@wordpress/element'
 import { __ } from '@wordpress/i18n';
 import {
   filterPhoneCountries,
-  flagEmoji,
+  flagMark,
   joinPhoneValue,
   phoneCountry,
   splitPhoneValue,
 } from '../../../shared/phone';
+import { formatUsPhone } from '../../../shared/phoneFormat';
 
 /**
  * Phone input. With country codes on, a searchable list of dial codes sits
@@ -30,6 +31,7 @@ export default function PhoneField({
   const listId = useId();
   const rootRef = useRef(null);
   const searchRef = useRef(null);
+  const triggerRef = useRef(null);
   const preferred = config.defaultCountry || config.default_country || 'US';
   const [localValue, setLocalValue] = useState(value ?? '');
   const stored = onChange ? value : localValue;
@@ -81,6 +83,7 @@ export default function PhoneField({
 
   const choose = (nextCountry) => {
     setOpen(false);
+    triggerRef.current?.focus();
     setQuery('');
     setPickedCode(nextCountry?.code || '');
     emit(joinPhoneValue(nextCountry, national));
@@ -101,6 +104,7 @@ export default function PhoneField({
     } else if (event.key === 'Escape') {
       event.preventDefault();
       setOpen(false);
+      triggerRef.current?.focus();
     }
   };
 
@@ -112,16 +116,18 @@ export default function PhoneField({
       <div className="subtleforms-phone__code">
         <button
           type="button"
+          ref={triggerRef}
           className="subtleforms-phone__trigger"
           aria-haspopup="listbox"
           aria-expanded={open}
           aria-controls={listId}
+          aria-label={country ? `${__('Country code', 'subtleforms')}, ${country.name} +${country.dial}` : __('Country code', 'subtleforms')}
           disabled={disabled || readOnly}
           onClick={() => setOpen((current) => !current)}
         >
           {showFlags && country && (
             <span className="subtleforms-phone__flag" aria-hidden="true">
-              {flagEmoji(country.code)}
+              {flagMark(country.code)}
             </span>
           )}
           <span className="subtleforms-phone__dial">
@@ -164,7 +170,7 @@ export default function PhoneField({
                   >
                     {showFlags && (
                       <span className="subtleforms-phone__flag" aria-hidden="true">
-                        {flagEmoji(item.code)}
+                        {flagMark(item.code)}
                       </span>
                     )}
                     <span className="subtleforms-phone__name">{item.name}</span>
@@ -181,7 +187,7 @@ export default function PhoneField({
         type="tel"
         className={`${inputClassName} subtleforms-phone__input`}
         name={name}
-        value={national}
+        value={config.format === 'us' ? formatUsPhone(national) : national}
         inputMode="tel"
         autoComplete="tel-national"
         placeholder={placeholder || __('Phone number', 'subtleforms')}
@@ -193,7 +199,8 @@ export default function PhoneField({
         readOnly={readOnly || undefined}
         onChange={(event) => {
           setPickedCode(country?.code || '');
-          emit(joinPhoneValue(country, event.target.value));
+          const typed = config.format === 'us' ? formatUsPhone(event.target.value) : event.target.value;
+          emit(joinPhoneValue(country, typed));
         }}
       />
     </div>

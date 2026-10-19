@@ -416,6 +416,69 @@ class CaptchaManager {
 	 *
 	 * @return string
 	 */
+	/**
+	 * Widget HTML for one field, using that field's site key.
+	 *
+	 * @param string $provider_name Provider slug.
+	 * @param string $site_key      Site key.
+	 * @return string
+	 */
+	public function widgetFor( $provider_name, $site_key ) {
+		$provider = $this->getProviderByType( $provider_name );
+		if ( ! $provider || ! is_string( $site_key ) || '' === $site_key ) {
+			return '';
+		}
+		$config              = $this->getProviderConfig( $provider_name );
+		$config['site_key'] = $site_key;
+		return $provider->render( $config );
+	}
+
+	/**
+	 * Global keys for one provider. Empty strings when Settings has none.
+	 *
+	 * @param string $provider_name Provider slug.
+	 * @return array{site_key: string, secret_key: string}
+	 */
+	public function keysFor( $provider_name ) {
+		$config = $this->getProviderConfig( $provider_name );
+		return array(
+			'site_key'   => isset( $config['site_key'] ) && is_string( $config['site_key'] ) ? $config['site_key'] : '',
+			'secret_key' => isset( $config['secret_key'] ) && is_string( $config['secret_key'] ) ? $config['secret_key'] : '',
+		);
+	}
+
+	/**
+	 * Check a token with a secret that may belong to the field, not Settings.
+	 *
+	 * @param string               $provider_name Provider slug.
+	 * @param string               $secret        Secret key.
+	 * @param array<string, mixed> $request       Submitted values.
+	 * @return array{success: bool, error?: string}
+	 */
+	public function verifyField( $provider_name, $secret, array $request ) {
+		$provider = $this->getProviderByType( $provider_name );
+		if ( ! $provider ) {
+			return array(
+				'success' => false,
+				'error'   => __( 'CAPTCHA provider not found.', 'subtleforms' ),
+			);
+		}
+		$response = $this->extractResponseToken( $request, $provider_name );
+		if ( '' === $response ) {
+			return array(
+				'success' => false,
+				'error'   => __( 'Please complete the CAPTCHA.', 'subtleforms' ),
+			);
+		}
+		if ( ! is_string( $secret ) || '' === $secret ) {
+			return array(
+				'success' => false,
+				'error'   => __( 'CAPTCHA secret key is missing.', 'subtleforms' ),
+			);
+		}
+		return $provider->verify( $response, $secret, $this->getClientIp() );
+	}
+
 	public function getScriptUrl() {
 		if ( ! $this->isEnabled() || ! $this->isConfigured() ) {
 			return '';

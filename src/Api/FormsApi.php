@@ -11,6 +11,9 @@
 
 namespace SubtleForms\Api;
 
+use SubtleForms\Fields\ActionHooks;
+use SubtleForms\Support\Captcha\FieldCaptcha;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -1264,17 +1267,10 @@ final class FormsApi {
 	 * Inject CAPTCHA HTML into schema fields for frontend rendering.
 	 */
 	private function injectCaptchaHtml( $schema ) {
-		if ( ! $this->captchaManager || ! $this->captchaManager->isEnabled() || ! $this->captchaManager->isConfigured() ) {
-			return $schema;
+		if ( is_array( $schema ) ) {
+			ActionHooks::fire( $schema, array( 'when' => 'render' ) );
+			$schema['fields'] = $this->processCaptchaFields( $schema['fields'] ?? array(), '' );
 		}
-
-		$captcha_html = $this->captchaManager->render();
-		if ( empty( $captcha_html ) ) {
-			return $schema;
-		}
-
-		$schema['fields'] = $this->processCaptchaFields( $schema['fields'] ?? array(), $captcha_html );
-
 		return $schema;
 	}
 
@@ -1285,9 +1281,20 @@ final class FormsApi {
 		$provider_name = $this->captchaManager ? $this->captchaManager->getActiveProviderName() : '';
 
 		foreach ( $fields as &$field ) {
-			if ( in_array( $field['type'], array( 'captcha', 'recaptcha', 'hcaptcha', 'turnstile' ), true ) ) {
-				$field['config']['captchaHtml']  = $captcha_html;
-				$field['config']['providerName'] = $provider_name;
+			if ( in_array( $field['type'] ?? '', array( 'captcha', 'recaptcha', 'hcaptcha', 'turnstile' ), true ) ) {
+				$provider = FieldCaptcha::provider( $field );
+				$settings = array();
+				if ( $this->captchaManager && '' !== $provider ) {
+					$settings[ $provider ] = $this->captchaManager->keysFor( $provider );
+				}
+				$resolved = FieldCaptcha::resolve( $field, $settings );
+				$html     = '';
+				if ( $resolved['ready'] && $this->captchaManager ) {
+					$html = $this->captchaManager->widgetFor( $resolved['provider'], $resolved['site_key'] );
+				}
+				$field['config']['captchaHtml']     = $html;
+				$field['config']['captchaWarning']  = '' === $html ? $resolved['warning'] : '';
+				$field['config']['providerName']    = $provider;
 			}
 
 			if ( ! empty( $field['fields'] ) && is_array( $field['fields'] ) ) {

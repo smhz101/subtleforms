@@ -11,6 +11,7 @@
 
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { getIn } from './valuePaths';
+import { isCompleteUsPhone } from '../../shared/phoneFormat';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { getFieldType } from '../../shared/extend';
 import { hasParts, missingParts } from '../../shared/compositeParts';
@@ -283,6 +284,9 @@ function rawValidateField(field, value, defaults = {}) {
     if (!/^[\d\s\-\+\(\)]+$/.test(value)) {
       return __('Invalid phone number.', 'subtleforms');
     }
+    if (config.format === 'us' && !isCompleteUsPhone(value)) {
+      return __('Enter a 10-digit US phone number.', 'subtleforms');
+    }
   }
 
   if ((type === 'multiple_choice' || type === 'picture_choice') && Array.isArray(value)) {
@@ -392,6 +396,14 @@ export function validateFields(fields, values, hiddenFields, defaults = {}) {
         const value = getIn(values, key);
         const err = validateField(field, value, defaults);
         if (err) errors[key] = err;
+        if (
+          field.type === 'password' &&
+          (field.config?.requireConfirmation || field.requireConfirmation) &&
+          value &&
+          getIn(values, `${key}_confirm`) !== value
+        ) {
+          errors[key] = __('The passwords do not match.', 'subtleforms');
+        }
       }
 
       if (Array.isArray(children)) visit(children, prefix);

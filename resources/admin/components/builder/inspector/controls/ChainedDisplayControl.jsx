@@ -37,7 +37,7 @@ export default function ChainedDisplayControl({ value, onChange, disabled }) {
 						key={option.value}
 						type="button"
 						className={clsx({ 'is-selected': option.value === current })}
-						aria-pressed={option.value === current}
+						role="radio" aria-checked={option.value === current}
 						disabled={disabled}
 						onClick={() => onChange(option.value)}>
 						{option.label}

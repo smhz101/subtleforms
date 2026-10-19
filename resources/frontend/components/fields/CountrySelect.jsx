@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { orderedCountries, preferredCountryCodes } from '../../../shared/countries';
-import { flagEmoji } from '../../../shared/phone';
+import { flagMark } from '../../../shared/phone';
 import { ChevronIcon } from './PickerIcons';
 import { useMenu } from './useMenu';
+import { typeaheadIndex } from '../../../shared/pickerKeyboard';
 
 function matches(country, query) {
   const needle = query.trim().toLowerCase();
@@ -36,6 +37,8 @@ export default function CountrySelect({
   const { rootRef, open, setOpen } = useMenu();
   const searchRef = useRef(null);
   const listRef = useRef(null);
+  const triggerRef = useRef(null);
+  const typed = useRef('');
   const countries = useMemo(
     () => orderedCountries(preferredCountryCodes(preferredCountries)),
     [preferredCountries]
@@ -94,6 +97,7 @@ export default function CountrySelect({
       setLocalValue(next);
     }
     setOpen(false);
+    triggerRef.current?.focus();
   };
 
   const onSearchKeyDown = (event) => {
@@ -122,20 +126,46 @@ export default function CountrySelect({
       }}>
       <button
         type='button'
+        ref={triggerRef}
         id={inputId}
         className='subtleforms-picker__trigger'
         aria-haspopup='listbox'
         aria-expanded={open}
+        aria-controls={open ? `${inputId || 'country'}-list` : undefined}
+        aria-activedescendant={open && !searchable ? `${inputId || 'country'}-opt-${active}` : undefined}
+        aria-invalid={invalid ? 'true' : undefined}
+        aria-required={required ? 'true' : undefined}
         aria-describedby={describedBy}
         disabled={disabled || readOnly}
         tabIndex={preview ? -1 : 0}
+        onKeyDown={(event) => {
+          if (locked) return;
+          if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+            event.preventDefault();
+            if (!open) setOpen(true);
+            else if (!searchable) onSearchKeyDown(event);
+          } else if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            if (!open) setOpen(true);
+            else if (!searchable && visible[active]) choose(visible[active]);
+          } else if (event.key === 'Escape') {
+            event.preventDefault();
+            setOpen(false);
+            triggerRef.current?.focus();
+          } else if (!searchable && event.key.length === 1 && /\S/.test(event.key)) {
+            typed.current = `${typed.current}${event.key}`.slice(-8);
+            const index = typeaheadIndex(visible.map((country) => country.name), typed.current, active - 1);
+            if (!open) setOpen(true);
+            if (index >= 0) setActive(index);
+          }
+        }}
         onClick={() => {
           if (!locked) {
             setOpen((next) => !next);
           }
         }}>
         <span className={selected ? 'subtleforms-picker__value' : 'subtleforms-picker__placeholder'}>
-          {selected && <span className='subtleforms-picker__flag' aria-hidden='true'>{flagEmoji(selected.code)}</span>}
+          {selected && <span className='subtleforms-picker__flag' aria-hidden='true'>{flagMark(selected.code)}</span>}
           {selected ? selected.name : prompt}
         </span>
         <ChevronIcon />
@@ -168,7 +198,7 @@ export default function CountrySelect({
         ))}
       </select>
       {open && !locked && (
-        <div className='subtleforms-picker__menu' role='listbox' aria-labelledby={inputId}>
+        <div id={`${inputId || 'country'}-list`} className='subtleforms-picker__menu' role='listbox' aria-labelledby={inputId}>
           {searchable && (
             <input
               ref={searchRef}
@@ -203,11 +233,13 @@ export default function CountrySelect({
                   type='button'
                   role='option'
                   className='subtleforms-picker__option'
+                  id={`${inputId || 'country'}-opt-${index}`}
+                  tabIndex={-1}
                   aria-selected={selected?.code === country.code}
                   data-active={index === active ? 'true' : 'false'}
                   onMouseEnter={() => setActive(index)}
                   onClick={() => choose(country)}>
-                  <span className='subtleforms-picker__flag' aria-hidden='true'>{flagEmoji(country.code)}</span>
+                  <span className='subtleforms-picker__flag' aria-hidden='true'>{flagMark(country.code)}</span>
                   <span className='subtleforms-picker__option-label'>{country.name}</span>
                   <span className='subtleforms-picker__meta'>{country.code}</span>
                 </button>

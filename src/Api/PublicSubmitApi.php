@@ -10,6 +10,9 @@
 
 namespace SubtleForms\Api;
 
+use SubtleForms\Fields\ActionHooks;
+use SubtleForms\Support\Captcha\FieldCaptcha;
+
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 use SubtleForms\Support\Helpers;
@@ -166,15 +169,7 @@ final class PublicSubmitApi {
 			);
 		}
 
-		// CAPTCHA verification
-		if ( $this->captchaManager && $this->captchaManager->isEnabled() && $this->captchaManager->isConfigured() ) {
-			$verification = $this->captchaManager->verify( $payload );
-			if ( ! $verification['success'] ) {
-				return ApiResponse::bad_request(
-					$verification['error'] ?? __( 'CAPTCHA verification failed.', 'subtleforms' )
-				);
-			}
-		}
+		// CAPTCHA is checked after the schema is loaded, so a field can use its own provider.
 
 		// Check submission limit
 		$settings = get_option( 'subtleforms_settings', array() );
@@ -209,6 +204,44 @@ final class PublicSubmitApi {
 			return ApiResponse::server_error( __( 'This form is temporarily unavailable. Please try again later.', 'subtleforms' ) );
 		}
 		$formVersion = $activeSchema['version'] ?? null;
+		$schemaForCaptcha = $activeSchema['schema'] ?? $activeSchema;
+		if ( is_array( $schemaForCaptcha ) ) {
+			ActionHooks::fire(
+				$schemaForCaptcha,
+				array(
+					'when'    => 'submit',
+					'form_id' => $formId,
+					'payload' => $payload,
+				)
+			);
+			$captchaFields = FieldCaptcha::fields( $schemaForCaptcha );
+			if ( $captchaFields ) {
+				foreach ( $captchaFields as $captchaField ) {
+					$provider = FieldCaptcha::provider( $captchaField );
+					$settings = array();
+					if ( $this->captchaManager && '' !== $provider ) {
+						$settings[ $provider ] = $this->captchaManager->keysFor( $provider );
+					}
+					$resolved = FieldCaptcha::resolve( $captchaField, $settings );
+					if ( ! $resolved['ready'] || ! $this->captchaManager ) {
+						return ApiResponse::bad_request( $resolved['warning'] );
+					}
+					$verification = $this->captchaManager->verifyField( $resolved['provider'], $resolved['secret'], $payload );
+					if ( empty( $verification['success'] ) ) {
+						return ApiResponse::bad_request(
+							$verification['error'] ?? __( 'CAPTCHA verification failed.', 'subtleforms' )
+						);
+					}
+				}
+			} elseif ( $this->captchaManager && $this->captchaManager->isEnabled() && $this->captchaManager->isConfigured() ) {
+				$verification = $this->captchaManager->verify( $payload );
+				if ( empty( $verification['success'] ) ) {
+					return ApiResponse::bad_request(
+						$verification['error'] ?? __( 'CAPTCHA verification failed.', 'subtleforms' )
+					);
+				}
+			}
+		}
 
 		// Login, schedule and entry-limit rules (2.0). Checked here as well as
 		// at render time so they cannot be bypassed by posting directly.

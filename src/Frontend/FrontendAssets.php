@@ -85,6 +85,8 @@ final class FrontendAssets {
 				'errorMessage'   => $settings ? $settings->get( 'error_message' ) : __( 'An error occurred. Please try again.', 'subtleforms' ),
 				'redirectUrl'    => $settings ? $settings->get( 'redirect_after_submit' ) : '',
 				'currency'       => $settings ? strtoupper( (string) ( $settings->get( 'ext_payments_currency' ) ?: 'USD' ) ) : 'USD',
+				'locale'         => str_replace( '_', '-', get_locale() ),
+				'weekStartsOn'   => (int) get_option( 'start_of_week', 0 ),
 				// Anonymous daily view counter (2.1). See Analytics\Stats.
 				'trackViews'     => \SubtleForms\Analytics\Stats::tracksViews( $settings ),
 				// Default-value tokens {user_email} and {user_name} (2.0).

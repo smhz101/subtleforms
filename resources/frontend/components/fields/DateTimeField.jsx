@@ -1,12 +1,15 @@
-import { useMemo, useState } from '@wordpress/element';
+import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
   formatPhp,
   isIsoDateInRange,
   isTwelveHour,
   joinDateTime,
+  dayName,
   monthCells,
   parseIsoDate,
+  siteLocale,
+  siteWeekStart,
   parseTime,
   splitDateTime,
   toIsoDate,
@@ -14,18 +17,19 @@ import {
 } from '../../../shared/dateTime';
 import { CalendarIcon, ChevronIcon, ClockIcon } from './PickerIcons';
 import { useMenu } from './useMenu';
+import { moveGrid } from '../../../shared/pickerKeyboard';
 
-function weekdayLabels() {
+function weekdayLabels(weekStartsOn, locale) {
   const sunday = new Date(2024, 0, 7);
   return Array.from({ length: 7 }, (_, index) => {
     const day = new Date(sunday);
-    day.setDate(sunday.getDate() + index);
-    return new Intl.DateTimeFormat(undefined, { weekday: 'narrow' }).format(day);
+    day.setDate(sunday.getDate() + ((index + weekStartsOn) % 7));
+    return new Intl.DateTimeFormat(locale, { weekday: 'narrow' }).format(day);
   });
 }
 
-function monthTitle(date) {
-  return new Intl.DateTimeFormat(undefined, { month: 'long', year: 'numeric' }).format(date);
+function monthTitle(date, locale) {
+  return new Intl.DateTimeFormat(locale, { month: 'long', year: 'numeric' }).format(date);
 }
 
 function displayDate(iso, format) {
@@ -71,6 +75,9 @@ export default function DateTimeField({
   preview = false,
 }) {
   const { rootRef, open, setOpen } = useMenu();
+  const gridRef = useRef(null);
+  const locale = siteLocale();
+  const weekStartsOn = siteWeekStart();
   const [localValue, setLocalValue] = useState(value ?? '');
   const stored = onChange ? (value ?? '') : localValue;
   const parts = splitDateTime(mode === 'time' ? '' : stored);
@@ -86,8 +93,8 @@ export default function DateTimeField({
   const parsedTime = parseTime(timeValue) || { hours: 0, minutes: 0 };
   const [cursor, setCursor] = useState(() => parseIsoDate(dateValue) || new Date());
   const locked = preview || disabled || readOnly;
-  const weekdays = useMemo(weekdayLabels, []);
-  const days = monthCells(cursor);
+  const weekdays = useMemo(() => weekdayLabels(weekStartsOn, locale), [weekStartsOn, locale]);
+  const days = monthCells(cursor, weekStartsOn);
 
   const emit = (next) => {
     if (onChange) {
@@ -156,6 +163,13 @@ export default function DateTimeField({
 
   const selectedHour = twelveHour ? (parsedTime.hours % 12 || 12) : parsedTime.hours;
 
+  useEffect(() => {
+    if (!open || mode === 'time') {
+      return;
+    }
+    gridRef.current?.querySelector('[tabindex="0"]')?.focus();
+  }, [open, mode, cursor]);
+
   return (
     <div
       className={`subtleforms-picker${preview ? ' is-preview' : ''}${invalid ? ' is-invalid' : ''}`}
@@ -171,6 +185,8 @@ export default function DateTimeField({
         className='subtleforms-picker__trigger'
         aria-haspopup='dialog'
         aria-expanded={open}
+        aria-invalid={invalid ? 'true' : undefined}
+        aria-required={required ? 'true' : undefined}
         aria-describedby={describedBy}
         disabled={disabled || readOnly}
         tabIndex={preview ? -1 : 0}
@@ -219,35 +235,81 @@ export default function DateTimeField({
                   <button type='button' className='subtleforms-picker__nav' aria-label={__('Previous month', 'subtleforms')} onClick={() => shiftMonth(-1)}>
                     <ChevronIcon />
                   </button>
-                  <span className='subtleforms-picker__month'>{monthTitle(cursor)}</span>
+                  <select
+                    className='subtleforms-picker__month'
+                    aria-label={__('Month', 'subtleforms')}
+                    value={cursor.getMonth()}
+                    onChange={(event) => setCursor(new Date(cursor.getFullYear(), Number(event.target.value), 1))}>
+                    {Array.from({ length: 12 }, (_, month) => (
+                      <option key={month} value={month}>
+                        {new Intl.DateTimeFormat(locale, { month: 'long' }).format(new Date(2024, month, 1))}
+                      </option>
+                    ))}
+                  </select>
+                  <select
+                    className='subtleforms-picker__year'
+                    aria-label={__('Year', 'subtleforms')}
+                    value={cursor.getFullYear()}
+                    onChange={(event) => setCursor(new Date(Number(event.target.value), cursor.getMonth(), 1))}>
+                    {Array.from({ length: 141 }, (_, index) => cursor.getFullYear() - 120 + index).map((year) => (
+                      <option key={year} value={year}>{year}</option>
+                    ))}
+                  </select>
                   <button type='button' className='subtleforms-picker__nav subtleforms-picker__nav--next' aria-label={__('Next month', 'subtleforms')} onClick={() => shiftMonth(1)}>
                     <ChevronIcon />
                   </button>
                 </div>
-                <div className='subtleforms-picker__weekdays'>
-                  {weekdays.map((day, index) => <span key={index}>{day}</span>)}
-                </div>
-                <div className='subtleforms-picker__days'>
-                  {days.map((day) => {
+                <div
+                  className='subtleforms-picker__days'
+                  role='grid'
+                  ref={gridRef}
+                  aria-label={monthTitle(cursor, locale)}
+                  onKeyDown={(event) => {
+                    const current = days.findIndex((day) => toIsoDate(day) === (dateValue || toIsoDate(cursor)));
+                    const next = moveGrid(current < 0 ? 0 : current, event.key, 7, days.length);
+                    if (next === (current < 0 ? 0 : current) && !event.key.startsWith('Arrow')) {
+                      return;
+                    }
+                    event.preventDefault();
+                    const day = days[next];
+                    if (!day) return;
+                    setCursor(new Date(day.getFullYear(), day.getMonth(), 1));
                     const iso = toIsoDate(day);
-                    const outside = day.getMonth() !== cursor.getMonth();
-                    const inRange = isIsoDateInRange(iso, min, max);
-                    const isSelected = iso === dateValue;
-                    return (
-                      <button
-                        key={iso}
-                        type='button'
-                        className={`subtleforms-picker__day${outside ? ' is-outside' : ''}${isSelected ? ' is-selected' : ''}`}
-                        disabled={!inRange}
-                        aria-pressed={isSelected}
-                        onClick={() => {
-                          setCursor(new Date(day.getFullYear(), day.getMonth(), 1));
-                          emitDate(iso);
-                        }}>
-                        {day.getDate()}
-                      </button>
-                    );
-                  })}
+                    if (isIsoDateInRange(iso, min, max)) {
+                      emitDate(iso);
+                    }
+                  }}>
+                  <div className='subtleforms-picker__weekdays' role='row'>
+                    {weekdays.map((day, index) => <span key={index} role='columnheader'>{day}</span>)}
+                  </div>
+                  {Array.from({ length: 6 }, (_, week) => (
+                    <div className='subtleforms-picker__week' role='row' key={week}>
+                      {days.slice(week * 7, week * 7 + 7).map((day) => {
+                        const iso = toIsoDate(day);
+                        const outside = day.getMonth() !== cursor.getMonth();
+                        const inRange = isIsoDateInRange(iso, min, max);
+                        const isSelected = iso === dateValue;
+                        const isCursor = iso === toIsoDate(cursor) || (!dateValue && iso === toIsoDate(new Date(cursor.getFullYear(), cursor.getMonth(), 1)));
+                        return (
+                          <button
+                            key={iso}
+                            type='button'
+                            role='gridcell'
+                            className={`subtleforms-picker__day${outside ? ' is-outside' : ''}${isSelected ? ' is-selected' : ''}`}
+                            disabled={!inRange}
+                            aria-selected={isSelected}
+                            aria-label={dayName(day, locale)}
+                            tabIndex={isSelected || (!dateValue && isCursor) ? 0 : -1}
+                            onClick={() => {
+                              setCursor(new Date(day.getFullYear(), day.getMonth(), 1));
+                              emitDate(iso);
+                            }}>
+                            {day.getDate()}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
@@ -259,6 +321,9 @@ export default function DateTimeField({
                       <button
                         key={hour.value}
                         type='button'
+                        role='option'
+                        tabIndex={-1}
+                        aria-selected={!!timeValue && selectedHour === hour.value}
                         className={`subtleforms-picker__tick${timeValue && selectedHour === hour.value ? ' is-selected' : ''}`}
                         onClick={() => selectHour(hour.value)}>
                         {hour.label}
@@ -270,6 +335,9 @@ export default function DateTimeField({
                       <button
                         key={minute}
                         type='button'
+                        role='option'
+                        tabIndex={-1}
+                        aria-selected={!!timeValue && parsedTime.minutes === minute}
                         className={`subtleforms-picker__tick${timeValue && parsedTime.minutes === minute ? ' is-selected' : ''}`}
                         onClick={() => emitTime(parsedTime.hours, minute)}>
                         {String(minute).padStart(2, '0')}
