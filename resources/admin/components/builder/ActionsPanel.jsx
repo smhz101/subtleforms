@@ -438,6 +438,8 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
               headers: s.headers || {},
               sign: !!s.signing?.enabled,
               secret: s.signing?.secret || '',
+              payload_mode: s.payload_mode === 'custom' ? 'custom' : 'full',
+              custom_payload: s.custom_payload || '',
             })}
           />
 

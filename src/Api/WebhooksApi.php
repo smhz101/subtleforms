@@ -61,6 +61,13 @@ final class WebhooksApi {
 					'secret'  => array(
 						'type' => 'string',
 					),
+					'payload_mode'   => array(
+						'type' => 'string',
+						'enum' => array( 'full', 'custom' ),
+					),
+					'custom_payload' => array(
+						'type' => 'string',
+					),
 				),
 			)
 		);
@@ -95,17 +102,20 @@ final class WebhooksApi {
 				'url'     => (string) $request->get_param( 'url' ),
 				'method'  => (string) $request->get_param( 'method' ),
 				'headers' => $request->get_param( 'headers' ),
-				'sign'    => (bool) $request->get_param( 'sign' ),
-				'secret'  => (string) $request->get_param( 'secret' ),
+				'sign'           => (bool) $request->get_param( 'sign' ),
+				'secret'         => (string) $request->get_param( 'secret' ),
+				'payload_mode'   => (string) $request->get_param( 'payload_mode' ),
+				'custom_payload' => (string) $request->get_param( 'custom_payload' ),
 			)
 		);
 		if ( is_wp_error( $built ) ) {
-			$built->add_data( array( 'status' => 400 ) );
-			return $built;
+			return ApiResponse::error( $built->get_error_code(), $built->get_error_message(), 400 );
 		}
 
+		// The safe client checks every redirect too, so a public address that
+		// redirects to a local one is refused like the local address itself.
 		$start    = microtime( true );
-		$response = wp_remote_request(
+		$response = wp_safe_remote_request(
 			$built['url'],
 			array(
 				'method'  => $built['method'],
@@ -117,21 +127,21 @@ final class WebhooksApi {
 		$ms = (int) round( ( microtime( true ) - $start ) * 1000 );
 
 		if ( is_wp_error( $response ) ) {
-			return new WP_Error(
+			return ApiResponse::error(
 				'subtleforms_webhook_failed',
 				sprintf(
 					/* translators: %s: error from the HTTP request */
 					__( 'The request could not be sent: %s', 'subtleforms' ),
 					$response->get_error_message()
 				),
-				array( 'status' => 400 )
+				400
 			);
 		}
 
 		$code = (int) wp_remote_retrieve_response_code( $response );
 		$ok   = $code >= 200 && $code < 300;
 
-		return new WP_REST_Response(
+		return ApiResponse::success(
 			array(
 				'ok'            => $ok,
 				'http_status'   => $code,
@@ -143,15 +153,14 @@ final class WebhooksApi {
 					? sprintf( __( 'Delivered. The endpoint answered HTTP %1$d in %2$d ms.', 'subtleforms' ), $code, $ms )
 					/* translators: %d: HTTP status code */
 					: sprintf( __( 'The endpoint answered HTTP %d, so real entries would be retried.', 'subtleforms' ), $code ),
-			),
-			200
+			)
 		);
 	}
 
 	/**
 	 * The test request: address, method, headers and a sample body.
 	 *
-	 * @param array $args url, method, headers, sign, secret.
+	 * @param array $args url, method, headers, sign, secret, payload_mode, custom_payload.
 	 * @return array|WP_Error url, method, headers, body.
 	 */
 	public static function build( array $args ) {
@@ -191,6 +200,37 @@ final class WebhooksApi {
 		);
 		$body['test'] = true;
 		$body         = (string) wp_json_encode( $body );
+
+		// An action with a custom JSON body is tested with that body, filled
+		// with the sample answers, as a real delivery would be.
+		if ( 'custom' === ( $args['payload_mode'] ?? 'full' ) ) {
+			$template = trim( (string) ( $args['custom_payload'] ?? '' ) );
+			if ( '' === $template ) {
+				$body = '{}';
+			} else {
+				$decoded = json_decode( $template, true );
+				if ( JSON_ERROR_NONE !== json_last_error() ) {
+					return new \WP_Error(
+						'invalid_custom_payload',
+						sprintf(
+							/* translators: %s: JSON error */
+							__( 'The custom JSON body is not valid: %s', 'subtleforms' ),
+							json_last_error_msg()
+						)
+					);
+				}
+				$body = (string) wp_json_encode(
+					\SubtleForms\Engine\Actions\WebhookAction::fillCustomPayload(
+						$decoded,
+						$answers,
+						array(
+							'form_title' => __( 'Test form', 'subtleforms' ),
+							'entry_id'   => '0',
+						)
+					)
+				);
+			}
+		}
 
 		$headers = array_merge( array( 'Content-Type' => 'application/json' ), Webhooks::safeHeaders( $args['headers'] ?? array() ) );
 		if ( ! empty( $args['sign'] ) ) {

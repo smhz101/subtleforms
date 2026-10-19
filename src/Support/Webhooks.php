@@ -88,7 +88,7 @@ final class Webhooks {
 		$payload = \SubtleForms\Api\PublicSubmitApi::storablePayload( $payload, $schema );
 		foreach ( array_keys( $payload ) as $key ) {
 			$key = (string) $key;
-			if ( '' === $key || '_' === $key[0] || in_array( $key, self::NOT_ANSWERS, true ) ) {
+			if ( '' === $key || in_array( $key, self::NOT_ANSWERS, true ) ) {
 				unset( $payload[ $key ] );
 			}
 		}

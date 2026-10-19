@@ -47,7 +47,9 @@ export default function ConnectionTest({
   const run = async () => {
     setState({ status: 'busy', message: '' });
     try {
-      const res = await callIntegration(path, getBody ? getBody() : {});
+      const raw = await callIntegration(path, getBody ? getBody() : {});
+      // Free routes answer in the { data } envelope; Pro test routes answer flat.
+      const res = raw && typeof raw === 'object' && !('ok' in raw) && raw.data && typeof raw.data === 'object' ? raw.data : raw;
       const ok = res?.ok !== false;
       setState({
         status: ok ? 'ok' : 'error',
@@ -62,7 +64,7 @@ export default function ConnectionTest({
         message:
           requiresPro && error?.code === 'rest_no_route'
             ? __('Connection tests need SubtleForms Pro to be active.', 'subtleforms')
-            : error?.message || __('The connection failed.', 'subtleforms'),
+            : error?.error?.message || error?.message || __('The connection failed.', 'subtleforms'),
       });
     }
   };

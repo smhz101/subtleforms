@@ -314,7 +314,9 @@ public static function dispatchEmail( array $payload ): bool {
 
 			$method = strtoupper( $job['method'] ?? 'POST' );
 
-			$response = wp_remote_request(
+			// The safe client applies the address check to every redirect too
+			// (2.4.1), the same check the webhook action made before queueing.
+			$response = wp_safe_remote_request(
 				$job['url'],
 				array(
 					'method'  => $method,

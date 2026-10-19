@@ -39,7 +39,7 @@ describe('WebhooksPanel test request', () => {
   });
 
   test('is enabled without Pro once an address is typed, and sends it with https://', async () => {
-    apiFetch.mockResolvedValue({ ok: true, message: 'Delivered. The endpoint answered HTTP 200 in 5 ms.' });
+    apiFetch.mockResolvedValue({ data: { ok: true, message: 'Delivered. The endpoint answered HTTP 200 in 5 ms.' } });
     const { container, unmount } = mount();
     const button = [...container.querySelectorAll('button')].find((b) => b.textContent.includes('Send test request'));
     const url = container.querySelector('input[type="url"]');
@@ -63,7 +63,7 @@ describe('WebhooksPanel test request', () => {
   });
 
   test('shows the reason when the server refuses the address', async () => {
-    apiFetch.mockRejectedValue({ code: 'blocked_url', message: 'WordPress blocks requests to localhost:9.' });
+    apiFetch.mockRejectedValue({ error: { code: 'blocked_url', message: 'WordPress blocks requests to localhost:9.' } });
     const { container, unmount } = mount();
     const button = [...container.querySelectorAll('button')].find((b) => b.textContent.includes('Send test request'));
     type(container.querySelector('input[type="url"]'), 'http://localhost:9/x');

@@ -133,8 +133,11 @@ final class Webhooks241Test extends TestCase {
 		$response = rest_do_request( $request );
 
 		$this->assertSame( 200, $response->get_status() );
-		$this->assertTrue( $response->get_data()['ok'] );
-		$this->assertTrue( $response->get_data()['signed'] );
+		$result = $response->get_data()['data'];
+		$this->assertTrue( $result['ok'] );
+		$this->assertTrue( $result['signed'] );
+		// The safe client: redirects are checked like the address itself.
+		$this->assertTrue( $sent['args']['reject_unsafe_urls'] );
 		$this->assertSame( 'https://93.184.216.34/abc', $sent['url'] );
 		$this->assertSame( 'PUT', $sent['args']['method'] );
 		$body = json_decode( (string) $sent['args']['body'], true );
@@ -150,7 +153,8 @@ final class Webhooks241Test extends TestCase {
 		$request->set_body_params( array( 'url' => 'http://localhost:9/x' ) );
 		$response = rest_do_request( $request );
 		$this->assertSame( 400, $response->get_status() );
-		$this->assertStringContainsString( 'WordPress blocks requests to localhost:9', $response->as_error()->get_error_message() );
+		$this->assertSame( 'blocked_url', $response->get_data()['error']['code'] );
+		$this->assertStringContainsString( 'WordPress blocks requests to localhost:9', $response->get_data()['error']['message'] );
 	}
 
 	public function test_the_settings_test_route_is_for_administrators(): void {
@@ -158,5 +162,57 @@ final class Webhooks241Test extends TestCase {
 		$request = new \WP_REST_Request( 'POST', '/subtleforms/v1/webhooks/test' );
 		$request->set_body_params( array( 'url' => 'https://hooks.example.com/abc' ) );
 		$this->assertSame( 403, rest_do_request( $request )->get_status() );
+	}
+
+	public function test_an_action_test_sends_its_custom_body(): void {
+		$this->asAdmin();
+		$sent = array();
+		add_filter(
+			'pre_http_request',
+			static function ( $pre, $args ) use ( &$sent ) {
+				$sent = $args;
+				return array( 'headers' => array(), 'body' => '', 'response' => array( 'code' => 204, 'message' => 'No Content' ), 'cookies' => array() );
+			},
+			10,
+			2
+		);
+		$request = new \WP_REST_Request( 'POST', '/subtleforms/v1/webhooks/test' );
+		$request->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
+		$request->set_body_params( array( 'url' => 'https://93.184.216.34/x', 'payload_mode' => 'custom', 'custom_payload' => '{"who":"{{name}}","form":"{form_title}"}' ) );
+		$response = rest_do_request( $request );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( array( 'who' => 'Test Person', 'form' => 'Test form' ), json_decode( (string) $sent['body'], true ) );
+
+		$bad = new \WP_REST_Request( 'POST', '/subtleforms/v1/webhooks/test' );
+		$bad->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
+		$bad->set_body_params( array( 'url' => 'https://93.184.216.34/x', 'payload_mode' => 'custom', 'custom_payload' => '{"who":' ) );
+		$response = rest_do_request( $bad );
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'invalid_custom_payload', $response->get_data()['error']['code'] );
+	}
+
+	public function test_fields_whose_key_starts_with_an_underscore_are_sent(): void {
+		$context = new SubmissionContext( 7, array( '_account' => 'A-1', 'form_rendered_at' => 'v1.token' ) );
+		$context->setMeta( 'form_schema', array( 'fields' => array( array( 'type' => 'text', 'key' => '_account', 'label' => 'Account' ) ) ) );
+		$context->setMeta( 'submission_id', 42 );
+		$context->setMeta( 'current_step_settings', array( 'url' => 'https://93.184.216.34/receive' ) );
+		( new WebhookAction() )->handle( $context );
+		$body = json_decode( (string) end( $this->jobs )['body'], true );
+		$this->assertSame( array( '_account' => 'A-1' ), $body['fields'] );
+	}
+
+	public function test_deliveries_use_the_safe_client(): void {
+		$args = array();
+		add_filter(
+			'pre_http_request',
+			static function ( $pre, $a ) use ( &$args ) {
+				$args = $a;
+				return array( 'headers' => array(), 'body' => '', 'response' => array( 'code' => 200, 'message' => 'OK' ), 'cookies' => array() );
+			},
+			10,
+			2
+		);
+		\SubtleForms\Async\AsyncDispatcher::executeWebhook( array( 'url' => 'https://93.184.216.34/x', 'method' => 'POST', 'headers' => array(), 'body' => '{}' ) );
+		$this->assertTrue( $args['reject_unsafe_urls'] );
 	}
 }
