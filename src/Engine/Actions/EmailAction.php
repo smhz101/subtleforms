@@ -48,13 +48,18 @@ final class EmailAction implements ActionInterface {
 			unset( $payload[ $secretKey ] );
 		}
 
-		// Uploaded files read as "name (download link)" (2.1).
-		$payload = $this->format_uploads( $payload, (int) $context->getMeta( 'submission_id', 0 ) );
-
 		// Answers as text (recipient, subject, plain emails) or escaped HTML
-		// with line breaks kept (HTML email bodies), by field type.
-		$textPayload = $this->format_answers( $payload, $schema, false );
-		$bodyPayload = $isHtml ? $this->format_answers( $payload, $schema, true ) : $textPayload;
+		// with line breaks kept (HTML email bodies), through the one answer
+		// formatter. Uploaded files read as "name (download link)" (2.1).
+		$display     = \SubtleForms\Support\AnswerFormatter::context(
+			$schema,
+			array(
+				'submission_id' => (int) $context->getMeta( 'submission_id', 0 ),
+				'links'         => true,
+			)
+		);
+		$textPayload = $this->format_answers( $payload, $schema, false, $display );
+		$bodyPayload = $isHtml ? $this->format_answers( $payload, $schema, true, $display ) : $textPayload;
 
 		// Merge tags (2.3): {all_fields}, {field:key}, {form_title},
 		// {entry_id}, {site_name}, {admin_email}, {date}, in single or double
@@ -224,30 +229,28 @@ final class EmailAction implements ActionInterface {
 	/**
 	 * Turn stored answers into the text that replaces their placeholders.
 	 *
-	 * Paragraph answers keep their line breaks: as-is in plain text, as <br>
-	 * in HTML (2.2.1, bug 4). Rich text keeps its formatting in HTML and reads
-	 * as plain text otherwise.
+	 * Every answer goes through the one answer formatter (2.4.0): option
+	 * labels, Yes/No, matrix rows and columns, dates in the field format and
+	 * file names with links. Paragraph answers keep their line breaks: as-is
+	 * in plain text, as <br> in HTML (2.2.1, bug 4). Rich text keeps its
+	 * formatting in HTML and reads as plain text otherwise.
 	 *
 	 * @param array $payload Answers.
 	 * @param array $schema  Form schema.
 	 * @param bool  $isHtml  Whether the email is HTML.
+	 * @param array $display Display context.
 	 * @return array
 	 */
-	private function format_answers( array $payload, array $schema, bool $isHtml ): array {
+	private function format_answers( array $payload, array $schema, bool $isHtml, array $display ): array {
 		$fields = array();
 		foreach ( \SubtleForms\Support\FieldMapper::fields( $schema ) as $entry ) {
 			$fields[ $entry['key'] ] = $entry['field'];
 		}
 		foreach ( $payload as $key => $value ) {
-			$field = $fields[ $key ] ?? array( 'type' => '' );
-			if ( is_string( $value ) && strpos( $value, "\n" ) !== false && ( $field['type'] ?? '' ) === '' ) {
-				// Already formatted (for example upload lines).
-				$payload[ $key ] = $isHtml ? nl2br( esc_html( $value ) ) : $value;
-				continue;
-			}
+			$field           = $fields[ $key ] ?? array( 'type' => '' );
 			$payload[ $key ] = $isHtml
-				? \SubtleForms\Support\EntryValues::toHtml( $value, $field )
-				: \SubtleForms\Support\EntryValues::toText( $value, $field );
+				? \SubtleForms\Support\EntryValues::toHtml( $value, $field, $display )
+				: \SubtleForms\Support\EntryValues::toText( $value, $field, $display );
 		}
 		return $payload;
 	}
@@ -269,43 +272,6 @@ final class EmailAction implements ActionInterface {
 		}
 		$fieldTokens = preg_replace( '/\{\{?\s*(admin_email|site_name|form_title|entry_id|date)\s*\}?\}/', '', $rawTo );
 		return preg_match( '/\{\{?\s*(field:)?[a-zA-Z0-9_]+\s*\}?\}/', (string) $fieldTokens ) ? 'submitter' : 'admin';
-	}
-
-	/**
-	 * Turn uploaded-file answers into readable lines with admin links.
-	 *
-	 * The links open wp-admin, which asks a logged-in admin to confirm the
-	 * download; they never expose the file itself.
-	 *
-	 * @param array $payload      Answers.
-	 * @param int   $submissionId Entry ID.
-	 * @return array
-	 */
-	private function format_uploads( array $payload, int $submissionId, int $depth = 0 ): array {
-		foreach ( $payload as $key => $value ) {
-			if ( ! is_array( $value ) || ! $value ) {
-				continue;
-			}
-			// Repeater groups hold upload answers one level down (FA-03).
-			if ( 0 === $depth && \SubtleForms\Support\Repeater::looksLikeGroups( $value ) ) {
-				foreach ( $value as $index => $group ) {
-					$value[ $index ] = $this->format_uploads( $group, $submissionId, $depth + 1 );
-				}
-				$payload[ $key ] = $value;
-				continue;
-			}
-			$lines = array();
-			foreach ( $value as $item ) {
-				if ( ! \SubtleForms\Uploads\Uploads::isRecord( $item ) ) {
-					continue 2;
-				}
-				$lines[] = $submissionId > 0
-					? sprintf( '%s (%s)', $item['name'], \SubtleForms\Uploads\Uploads::downloadUrl( $submissionId, $item['id'] ) )
-					: (string) $item['name'];
-			}
-			$payload[ $key ] = implode( "\n", $lines );
-		}
-		return $payload;
 	}
 
 	/**

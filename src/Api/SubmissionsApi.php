@@ -531,6 +531,13 @@ final class SubmissionsApi {
 		if ( is_array( $submission['meta'] ?? null ) ) {
 			$submission['meta'] = \SubtleForms\Support\EntrySchema::stripCopy( $submission['meta'] );
 		}
+		// Answers as the entry screen shows them, from the same formatter as
+		// emails, CSV, PDF and integrations (2.4.0).
+		$submission['display'] = \SubtleForms\Support\AnswerFormatter::display(
+			is_array( $submission['schema'] ?? null ) ? $submission['schema'] : array(),
+			is_array( $submission['payload'] ?? null ) ? $submission['payload'] : array(),
+			array( 'submission_id' => (int) $submission['id'] )
+		);
 		if ( isset( $submission['meta']['notes'] ) && is_array( $submission['meta']['notes'] ) ) {
 			$submission['meta']['notes'] = array_map( array( self::class, 'presentNote' ), $submission['meta']['notes'] );
 		}
@@ -1051,6 +1058,7 @@ final class SubmissionsApi {
 		}
 
 		$csv_data = array( $headers );
+		$fieldMaps = array();
 		foreach ( $rows as list( $submission, $payload ) ) {
 			$row = array(
 				$submission['id'],
@@ -1058,23 +1066,44 @@ final class SubmissionsApi {
 				$submission['status'],
 				$submission['created_at'],
 			);
+			// Each entry is read with the schema version it was made with,
+			// through the one answer formatter: labels, Yes/No, matrix rows,
+			// dates in the field format, file names with links (2.4.0). A
+			// drawn signature reads "Signed" (2.3.3).
+			$schema  = \SubtleForms\Support\EntrySchema::forEntry( $submission, $this->formsRepo ) ?? array();
+			$mapKey  = (int) $submission['form_id'] . ':' . ( $submission['schema_version'] ?? '' );
+			if ( ! isset( $fieldMaps[ $mapKey ] ) ) {
+				$fieldMaps[ $mapKey ] = array();
+				foreach ( \SubtleForms\Support\FieldMapper::fields( $schema ) as $field ) {
+					$fieldMaps[ $mapKey ][ $field['key'] ] = $field['field'];
+				}
+			}
+			$fields  = $fieldMaps[ $mapKey ];
+			$display = \SubtleForms\Support\AnswerFormatter::context(
+				$schema,
+				array(
+					'submission_id' => (int) $submission['id'],
+					'links'         => true,
+					'signature'     => 'short',
+				)
+			);
 			foreach ( $ordered as $key ) {
 				if ( isset( $repeaters[ $key ] ) ) {
-					foreach ( \SubtleForms\Support\Repeater::csvCells( $payload[ $key ] ?? array(), $repeaters[ $key ] ) as $cell ) {
+					foreach ( \SubtleForms\Support\Repeater::csvCells( $payload[ $key ] ?? array(), $repeaters[ $key ], $display ) as $cell ) {
 						$row[] = $cell;
 					}
 					continue;
 				}
 				$value = $payload[ $key ] ?? '';
-				// Exports of several forms: groups read as numbered lines.
-				// A drawn signature is an image; the cell says it was signed (2.3.3).
-				if ( \SubtleForms\Support\EntryValues::isSignatureImage( $value ) ) {
-					$row[] = __( 'Signed', 'subtleforms' );
+				if ( isset( $fields[ $key ] ) ) {
+					$row[] = \SubtleForms\Support\AnswerFormatter::text( $value, $fields[ $key ], $display );
 					continue;
 				}
-				$row[] = \SubtleForms\Support\Repeater::looksLikeGroups( $value )
+				// Not in the schema (exports of several forms, or a field since
+				// removed): groups read as numbered lines.
+				$row[] = \SubtleForms\Support\Repeater::looksLikeGroups( $value ) && null === \SubtleForms\Support\AnswerFormatter::items( $value, array(), $display )
 					? $this->groupsText( $value )
-					: \SubtleForms\Support\FieldMapper::toText( $value );
+					: \SubtleForms\Support\AnswerFormatter::text( $value, array(), $display );
 			}
 			$csv_data[] = $row;
 		}

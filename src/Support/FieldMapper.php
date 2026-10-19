@@ -195,16 +195,28 @@ final class FieldMapper {
 	/**
 	 * Resolve a mapping source to a plain string.
 	 *
+	 * With the form schema, a whole-field source is formatted like every
+	 * other output: option labels, Yes/No, chained labels, dates in the
+	 * field format (PRO2-08). Without it the stored value is read as text.
+	 *
 	 * @param array  $payload Submitted answers.
 	 * @param string $source  Mapping source.
+	 * @param array  $schema  Form schema, when known.
 	 * @return string Empty string when there is no value.
 	 */
-	public static function value( array $payload, string $source ): string {
+	public static function value( array $payload, string $source, array $schema = array() ): string {
 		$raw = self::raw( $payload, $source );
 		// A drawn signature is an image; integrations get a word, not the
 		// image data (PRO2-04).
 		if ( EntryValues::isSignatureImage( $raw ) ) {
 			return __( 'Signed', 'subtleforms' );
+		}
+		if ( null !== $raw && $schema ) {
+			foreach ( self::fields( $schema ) as $field ) {
+				if ( $field['key'] === trim( $source ) ) {
+					return AnswerFormatter::text( $raw, $field['field'], AnswerFormatter::context( $schema, array( 'signature' => 'short' ) ) );
+				}
+			}
 		}
 		return self::toText( $raw );
 	}
@@ -413,9 +425,10 @@ final class FieldMapper {
 	 * @param array  $payload   Submitted answers.
 	 * @param array  $rows      Mapping rows.
 	 * @param string $targetKey Name of the target key in each row.
+	 * @param array  $schema    Form schema, so values read as labels (PRO2-08).
 	 * @return array<string,string> target => value
 	 */
-	public static function mapRows( array $payload, array $rows, string $targetKey = 'target' ): array {
+	public static function mapRows( array $payload, array $rows, string $targetKey = 'target', array $schema = array() ): array {
 		$out = array();
 		foreach ( $rows as $row ) {
 			if ( ! is_array( $row ) ) {
@@ -426,7 +439,7 @@ final class FieldMapper {
 			if ( '' === $target || '' === $source ) {
 				continue;
 			}
-			$value = self::value( $payload, $source );
+			$value = self::value( $payload, $source, $schema );
 			if ( '' === $value ) {
 				continue;
 			}
@@ -487,6 +500,8 @@ final class FieldMapper {
 	public static function answers( array $schema, array $payload, bool $skipEmpty = true ): array {
 		$rows = array();
 		$seen = array();
+		// The PDF draws a signature from its image data, so it is kept.
+		$context = AnswerFormatter::context( $schema, array( 'signature' => 'raw' ) );
 
 		foreach ( self::fields( $schema ) as $field ) {
 			$key = $field['key'];
@@ -497,7 +512,7 @@ final class FieldMapper {
 			if ( Repeater::TYPE === $field['type'] ) {
 				// One numbered line per group; `groups` carries the cells for
 				// renderers that draw a table (the Pro PDF, 2.3.1).
-				$text = Repeater::toText( $payload[ $key ], $field['field'] );
+				$text = Repeater::toText( $payload[ $key ], $field['field'], $context );
 				if ( $skipEmpty && '' === $text ) {
 					continue;
 				}
@@ -505,13 +520,13 @@ final class FieldMapper {
 					'key'    => $key,
 					'label'  => '' !== $field['label'] ? $field['label'] : $key,
 					'value'  => $text,
-					'groups' => Repeater::rows( $payload[ $key ], $field['field'] ),
+					'groups' => Repeater::rows( $payload[ $key ], $field['field'], $context ),
 				);
 				continue;
 			}
-			$text         = 'consent' === $field['type']
-				? ( self::isChecked( $payload[ $key ], $field['field'] ) ? __( 'Yes', 'subtleforms' ) : __( 'No', 'subtleforms' ) )
-				: self::toText( self::optionLabels( $payload[ $key ], $field['field'] ) );
+			// The one answer formatter: labels, Yes/No, matrix rows, chained
+			// labels, dates, product lines (2.4.0).
+			$text = AnswerFormatter::text( $payload[ $key ], $field['field'], $context );
 			if ( $skipEmpty && '' === $text ) {
 				continue;
 			}

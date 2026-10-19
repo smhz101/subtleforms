@@ -339,12 +339,13 @@ final class Repeater {
 	/**
 	 * Groups as plain text: one numbered line per group.
 	 *
-	 * @param mixed $value Stored groups.
-	 * @param array $node  Repeater node.
+	 * @param mixed $value   Stored groups.
+	 * @param array $node    Repeater node.
+	 * @param array $context Display context, see AnswerFormatter::text().
 	 */
-	public static function toText( $value, array $node ): string {
+	public static function toText( $value, array $node, array $context = array() ): string {
 		$lines = array();
-		foreach ( self::rows( $value, $node ) as $n => $cells ) {
+		foreach ( self::rows( $value, $node, $context ) as $n => $cells ) {
 			$parts = array();
 			foreach ( $cells as $cell ) {
 				$parts[] = $cell['label'] . ': ' . $cell['value'];
@@ -357,10 +358,11 @@ final class Repeater {
 	/**
 	 * Groups as an HTML table (one row per group, one column per child).
 	 *
-	 * @param mixed $value Stored groups.
-	 * @param array $node  Repeater node.
+	 * @param mixed $value   Stored groups.
+	 * @param array $node    Repeater node.
+	 * @param array $context Display context, see AnswerFormatter::text().
 	 */
-	public static function toHtml( $value, array $node ): string {
+	public static function toHtml( $value, array $node, array $context = array() ): string {
 		$children = self::childFields( $node );
 		$groups   = self::groups( $value );
 		if ( ! $groups || ! $children ) {
@@ -375,7 +377,7 @@ final class Repeater {
 		foreach ( $groups as $n => $group ) {
 			$html .= '<tr><td ' . $cell . '>' . ( $n + 1 ) . '</td>';
 			foreach ( $children as $child ) {
-				$text  = self::childText( $group[ $child['key'] ] ?? null, $child );
+				$text  = self::childText( $group[ $child['key'] ] ?? null, $child, $context );
 				$html .= '<td ' . $cell . '>' . nl2br( esc_html( $text ) ) . '</td>';
 			}
 			$html .= '</tr>';
@@ -386,11 +388,12 @@ final class Repeater {
 	/**
 	 * Answered cells of each group: [ [ ['key','label','value'], ... ], ... ].
 	 *
-	 * @param mixed $value Stored groups.
-	 * @param array $node  Repeater node.
+	 * @param mixed $value   Stored groups.
+	 * @param array $node    Repeater node.
+	 * @param array $context Display context, see AnswerFormatter::text().
 	 * @return array<int,array<int,array{key:string,label:string,value:string}>>
 	 */
-	public static function rows( $value, array $node ): array {
+	public static function rows( $value, array $node, array $context = array() ): array {
 		$children = self::childFields( $node );
 		$rows     = array();
 		foreach ( self::groups( $value ) as $group ) {
@@ -399,7 +402,7 @@ final class Repeater {
 				if ( ! array_key_exists( $child['key'], $group ) ) {
 					continue;
 				}
-				$text = self::childText( $group[ $child['key'] ], $child );
+				$text = self::childText( $group[ $child['key'] ], $child, $context );
 				if ( '' === $text ) {
 					continue;
 				}
@@ -420,17 +423,18 @@ final class Repeater {
 	 * CSV columns for a Repeater: one per child, groups on separate lines
 	 * in the same order in every column (2.3.1, documented in readme.txt).
 	 *
-	 * @param mixed $value Stored groups.
-	 * @param array $node  Repeater node.
+	 * @param mixed $value   Stored groups.
+	 * @param array $node    Repeater node.
+	 * @param array $context Display context, see AnswerFormatter::text().
 	 * @return array<string,string> Child key => cell text.
 	 */
-	public static function csvCells( $value, array $node ): array {
+	public static function csvCells( $value, array $node, array $context = array() ): array {
 		$groups = self::groups( $value );
 		$out    = array();
 		foreach ( self::childFields( $node ) as $child ) {
 			$lines = array();
 			foreach ( $groups as $group ) {
-				$lines[] = self::childText( $group[ $child['key'] ] ?? null, $child );
+				$lines[] = self::childText( $group[ $child['key'] ] ?? null, $child, $context );
 			}
 			$out[ $child['key'] ] = implode( "\n", $lines );
 		}
@@ -438,18 +442,16 @@ final class Repeater {
 	}
 
 	/**
-	 * One child answer as text.
+	 * One child answer as text, through the one answer formatter.
 	 *
-	 * @param mixed $value Answer.
-	 * @param array $child FieldMapper entry.
+	 * @param mixed $value   Answer.
+	 * @param array $child   FieldMapper entry.
+	 * @param array $context Display context.
 	 */
-	private static function childText( $value, array $child ): string {
+	private static function childText( $value, array $child, array $context = array() ): string {
 		if ( null === $value ) {
 			return '';
 		}
-		if ( 'consent' === $child['type'] ) {
-			return FieldMapper::isChecked( $value, $child['field'] ) ? __( 'Yes', 'subtleforms' ) : __( 'No', 'subtleforms' );
-		}
-		return EntryValues::toText( FieldMapper::optionLabels( $value, $child['field'] ), $child['field'] );
+		return AnswerFormatter::text( $value, $child['field'], $context );
 	}
 }
