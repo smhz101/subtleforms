@@ -4,14 +4,14 @@
  * entries leave the other tabs and counts.
  */
 const { test, expect } = require('@playwright/test');
-const { adminApi, publishForm, cleanup, entries, loginPage, BASE } = require('./helpers');
+const { adminApi, publishForm, cleanup, entries, loginPage, BASE, spamToken } = require('./helpers');
 
 let client;
 let form;
 
 async function submitEntry(api, formId, name) {
   const res = await api.post('/wp-json/subtleforms/v1/submit', {
-    data: { form_id: formId, data: { name, form_rendered_at: Math.floor(Date.now() / 1000) - 60 } },
+    data: { form_id: formId, data: { name, form_rendered_at: await spamToken(api, formId) } },
   });
   expect(res.status()).toBe(200);
 }

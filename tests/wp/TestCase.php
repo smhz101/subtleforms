@@ -75,7 +75,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase {
 	 */
 	protected function submit( int $formId, array $data ): array {
 		wp_set_current_user( 0 );
-		$data['form_rendered_at'] = time() - 60;
+		$data['form_rendered_at'] = \SubtleForms\Engine\SpamProtection::issue_token( $formId, time() - 60 );
 		$request                  = new \WP_REST_Request( 'POST', '/subtleforms/v1/submit' );
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body(

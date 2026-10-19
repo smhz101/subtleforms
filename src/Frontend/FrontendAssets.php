@@ -76,7 +76,9 @@ final class FrontendAssets {
 			'subtleformsFrontend',
 			array(
 				'restUrl'        => rest_url( 'subtleforms/v1' ),
-				'nonce'          => wp_create_nonce( 'wp_rest' ),
+				// Only logged-in users need a nonce; a guest's would go stale in a
+				// cached page and block the submit (FF-03).
+				'nonce'          => is_user_logged_in() ? wp_create_nonce( 'wp_rest' ) : '',
 				'successMessage' => $settings ? $settings->get( 'success_message' ) : __( 'Thank you! Your submission has been received.', 'subtleforms' ),
 				'errorMessage'   => $settings ? $settings->get( 'error_message' ) : __( 'An error occurred. Please try again.', 'subtleforms' ),
 				'redirectUrl'    => $settings ? $settings->get( 'redirect_after_submit' ) : '',

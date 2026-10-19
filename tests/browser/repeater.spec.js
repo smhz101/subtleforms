@@ -5,7 +5,7 @@
  */
 const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
-const { adminApi, publishForm, entries, cleanup, waitForForm, loginPage, openBuilder } = require('./helpers');
+const { adminApi, publishForm, entries, cleanup, waitForForm, loginPage, openBuilder, spamToken } = require('./helpers');
 
 let client;
 const created = [];
@@ -130,7 +130,7 @@ test('the server checks each group too (client validation bypassed)', async ({ p
     data: {
       form_id: form.id,
       data: {
-        form_rendered_at: Math.floor(Date.now() / 1000) - 60,
+        form_rendered_at: await spamToken(anon, form.id),
         email: 'x@example.com',
         companies: [
           { ticker: 'AAPL', shares: '1' },
@@ -184,7 +184,7 @@ test('entry detail shows a table and the CSV has one column per child', async ({
     data: {
       form_id: form.id,
       data: {
-        form_rendered_at: Math.floor(Date.now() / 1000) - 60,
+        form_rendered_at: await spamToken(anon, form.id),
         email: 'tab@example.com',
         companies: [
           { ticker: 'AAPL', company: 'Apple', shares: '8' },
