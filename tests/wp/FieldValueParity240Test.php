@@ -37,6 +37,7 @@ final class FieldValueParity240Test extends TestCase {
 			'text single value'          => array( array( 'type' => 'text' ), array( 'a', 'b' ), 'hello' ),
 			// FB-07: read-only keeps its default.
 			'text read-only'             => array( array( 'type' => 'text', 'readOnly' => true, 'defaultValue' => 'fixed' ), 'hacked', 'fixed' ),
+			'url read-only bare domain'  => array( array( 'type' => 'url', 'readOnly' => true, 'defaultValue' => 'example.com' ), 'evil.example', 'example.com', 'https://example.com' ),
 			'number read-only'           => array( array( 'type' => 'number', 'config' => array( 'readOnly' => true, 'defaultValue' => '750' ) ), 600, 750 ),
 			// FB-14: same message as the browser.
 			'number max'                 => array( array( 'type' => 'number', 'max' => 100 ), 101, 50, null, 'Must be no more than 100.' ),

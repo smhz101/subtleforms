@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-19T13:46:38+00:00\n"
+"POT-Creation-Date: 2026-10-19T13:58:32+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -861,133 +861,133 @@ msgstr ""
 msgid "This field cannot be changed."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:797
+#: src/Engine/FieldValidator.php:801
 msgid "Please choose only one option."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:816
+#: src/Engine/FieldValidator.php:820
 msgid "Please choose one of the options shown."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:940
+#: src/Engine/FieldValidator.php:944
 #: resources/frontend/utils/fieldValidation.js:324
 msgid "Please enter a valid date."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:953
+#: src/Engine/FieldValidator.php:957
 #: resources/frontend/utils/fieldValidation.js:327
 msgid "Please enter a valid time."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:971
+#: src/Engine/FieldValidator.php:975
 #: resources/frontend/utils/fieldValidation.js:332
 msgid "Please enter a valid date and time."
 msgstr ""
 
 #. translators: %d: number of stars
-#: src/Engine/FieldValidator.php:1007
+#: src/Engine/FieldValidator.php:1011
 #, php-format
 msgid "Please choose a rating from 1 to %d."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1024
+#: src/Engine/FieldValidator.php:1028
 msgid "Please choose a score from 0 to 10."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1109
+#: src/Engine/FieldValidator.php:1113
 #: resources/frontend/utils/fieldValidation.js:336
 msgid "Please enter a colour as a hex value, such as #336699."
 msgstr ""
 
 #. translators: %d: maximum number of characters
-#: src/Engine/FieldValidator.php:1133
+#: src/Engine/FieldValidator.php:1137
 #: resources/frontend/utils/fieldValidation.js:280
 #, php-format,js-format
 msgid "Must be %d characters or fewer."
 msgstr ""
 
 #. translators: %d: minimum number of characters
-#: src/Engine/FieldValidator.php:1138
+#: src/Engine/FieldValidator.php:1142
 #: resources/frontend/utils/fieldValidation.js:273
 #, php-format,js-format
 msgid "Must be at least %d characters."
 msgstr ""
 
 #. translators: %s: minimum value
-#: src/Engine/FieldValidator.php:1164
+#: src/Engine/FieldValidator.php:1168
 #: resources/frontend/utils/fieldValidation.js:303
 #, php-format,js-format
 msgid "Must be at least %s."
 msgstr ""
 
 #. translators: %s: maximum value
-#: src/Engine/FieldValidator.php:1169
+#: src/Engine/FieldValidator.php:1173
 #: resources/frontend/utils/fieldValidation.js:307
 #, php-format,js-format
 msgid "Must be no more than %s."
 msgstr ""
 
 #. translators: %s: step increment
-#: src/Engine/FieldValidator.php:1180
+#: src/Engine/FieldValidator.php:1184
 #: resources/frontend/utils/fieldValidation.js:316
 #, php-format,js-format
 msgid "Must match the step of %s."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1217
+#: src/Engine/FieldValidator.php:1221
 #: resources/frontend/utils/fieldValidation.js:259
 msgid "Invalid email address."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1266
+#: src/Engine/FieldValidator.php:1270
 #: resources/frontend/utils/fieldValidation.js:262
 msgid "Invalid URL."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1282
-#: src/Engine/FieldValidator.php:1287
+#: src/Engine/FieldValidator.php:1286
+#: src/Engine/FieldValidator.php:1291
 #: resources/frontend/utils/fieldValidation.js:298
 msgid "Please enter a number."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1364
+#: src/Engine/FieldValidator.php:1368
 #: resources/frontend/utils/fieldValidation.js:411
 msgid "Invalid phone number."
 msgstr ""
 
 #. translators: %s: earliest allowed date
-#: src/Engine/FieldValidator.php:1400
+#: src/Engine/FieldValidator.php:1404
 #: resources/frontend/utils/fieldValidation.js:394
 #, php-format,js-format
 msgid "Date must be on or after %s."
 msgstr ""
 
 #. translators: %s: latest allowed date
-#: src/Engine/FieldValidator.php:1405
+#: src/Engine/FieldValidator.php:1409
 #: resources/frontend/utils/fieldValidation.js:401
 #, php-format,js-format
 msgid "Date must be on or before %s."
 msgstr ""
 
 #. translators: %s: field label
-#: src/Engine/FieldValidator.php:1529
+#: src/Engine/FieldValidator.php:1533
 #, php-format
 msgid "%s is required."
 msgstr ""
 
 #. translators: %s: field key
-#: src/Engine/FieldValidator.php:1532
+#: src/Engine/FieldValidator.php:1536
 #, php-format
 msgid "Field \"%s\" is required."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1569
+#: src/Engine/FieldValidator.php:1573
 #: resources/frontend/utils/fieldValidation.js:288
 msgid "Please match the requested format."
 msgstr ""
 
 #. translators: %d: minimum number of selections
-#: src/Engine/FieldValidator.php:1590
+#: src/Engine/FieldValidator.php:1594
 #: resources/frontend/utils/fieldValidation.js:421
 #, php-format,js-format
 msgid "Select at least %d option."
@@ -996,7 +996,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: maximum number of selections
-#: src/Engine/FieldValidator.php:1594
+#: src/Engine/FieldValidator.php:1598
 #: resources/frontend/utils/fieldValidation.js:428
 #, php-format,js-format
 msgid "Select no more than %d option."
@@ -1004,65 +1004,65 @@ msgid_plural "Select no more than %d options."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Engine/FieldValidator.php:1611
-#: src/Engine/FieldValidator.php:1617
+#: src/Engine/FieldValidator.php:1615
+#: src/Engine/FieldValidator.php:1621
 msgid "Please choose a value on the scale."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1771
+#: src/Engine/FieldValidator.php:1775
 #: resources/frontend/utils/fieldValidation.js:340
 msgid "Payment amount must be a valid number."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1778
+#: src/Engine/FieldValidator.php:1782
 #: resources/frontend/utils/fieldValidation.js:341
 msgid "Payment amount must be positive."
 msgstr ""
 
 #. translators: %s: smallest amount
-#: src/Engine/FieldValidator.php:1784
+#: src/Engine/FieldValidator.php:1788
 #: resources/frontend/utils/fieldValidation.js:347
 #, php-format,js-format
 msgid "Payment amount must be at least %s."
 msgstr ""
 
 #. translators: %s: largest amount
-#: src/Engine/FieldValidator.php:1790
+#: src/Engine/FieldValidator.php:1794
 #: resources/frontend/utils/fieldValidation.js:354
 #, php-format,js-format
 msgid "Payment amount cannot exceed %s."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1811
+#: src/Engine/FieldValidator.php:1815
 #: resources/frontend/utils/fieldValidation.js:368
 msgid "Please enter a whole number for the quantity."
 msgstr ""
 
 #. translators: %d: smallest quantity
-#: src/Engine/FieldValidator.php:1817
+#: src/Engine/FieldValidator.php:1821
 #: resources/frontend/utils/fieldValidation.js:375
 #, php-format,js-format
 msgid "The quantity must be at least %d."
 msgstr ""
 
 #. translators: %d: largest quantity
-#: src/Engine/FieldValidator.php:1821
+#: src/Engine/FieldValidator.php:1825
 #: resources/frontend/utils/fieldValidation.js:382
 #, php-format,js-format
 msgid "The quantity can be at most %d."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1839
+#: src/Engine/FieldValidator.php:1843
 msgid "Enter the coupon code as text."
 msgstr ""
 
 #. translators: %d: maximum number of characters
-#: src/Engine/FieldValidator.php:1848
+#: src/Engine/FieldValidator.php:1852
 #, php-format
 msgid "Coupon code cannot be longer than %d characters."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:1854
+#: src/Engine/FieldValidator.php:1858
 msgid "Coupon codes use only letters, numbers, hyphens and underscores."
 msgstr ""
 

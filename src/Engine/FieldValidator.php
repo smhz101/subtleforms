@@ -709,6 +709,10 @@ final class FieldValidator {
 		if ( 'country' === $type ) {
 			return strtoupper( $text );
 		}
+		// Compare read-only URL defaults and submitted values after identical normalization.
+		if ( 'url' === $type ) {
+			return self::normalizeUrl( $text );
+		}
 		return $text;
 	}
 
