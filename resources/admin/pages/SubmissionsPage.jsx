@@ -59,6 +59,11 @@ export default function SubmissionsPage({ formId }) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [view, setView] = useState(readInboxView);
+  // Settings → General can change site defaults without a full reload. Re-read
+  // the localised view whenever this page is shown so those defaults apply.
+  useEffect(() => {
+    setView(readInboxView());
+  }, []);
   const [gearOpen, setGearOpen] = useState(false);
   const [gearError, setGearError] = useState('');
   const [gearSaving, setGearSaving] = useState(false);
