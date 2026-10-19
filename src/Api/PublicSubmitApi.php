@@ -116,16 +116,21 @@ final class PublicSubmitApi {
 		$request->set_body( (string) wp_json_encode( $built ) );
 		$request->set_param( 'form_id', $built['form_id'] );
 		$response = $this->submit_form( $request );
-		$data     = $response->get_data();
-		$payload  = is_array( $data['data'] ?? null ) ? $data['data'] : array();
-		$target   = wp_get_referer();
-		if ( ! is_string( $target ) || '' === $target ) {
-			$target = home_url( '/' );
+		$outcome  = ClassicResult::outcome( $response->get_status(), $response->get_data(), $built['form_id'], $built['data'] );
+
+		// Only a submission that went through follows a redirect confirmation.
+		if ( $outcome['ok'] && '' !== $outcome['redirect'] ) {
+			wp_safe_redirect( $outcome['redirect'] );
+			exit;
 		}
-		if ( ! empty( $payload['confirmation']['redirectUrl'] ) && ( $payload['confirmation']['type'] ?? '' ) === 'redirect' ) {
-			$target = (string) $payload['confirmation']['redirectUrl'];
+
+		// Otherwise return to the page, which shows the confirmation, or the
+		// errors with the visitor's answers.
+		$page = wp_get_referer();
+		if ( ! is_string( $page ) || '' === $page ) {
+			$page = home_url( '/' );
 		}
-		wp_safe_redirect( $target );
+		wp_safe_redirect( ClassicResult::returnUrl( $page, ClassicResult::store( $outcome ) ) );
 		exit;
 	}
 

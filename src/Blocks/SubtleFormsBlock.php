@@ -147,8 +147,12 @@ final class SubtleFormsBlock {
 		$tab_index      = isset( $attributes['tabIndex'] ) ? (int) $attributes['tabIndex'] : 0;
 		$field_values   = isset( $attributes['fieldValues'] ) ? (string) $attributes['fieldValues'] : '';
 
+		// A post of this form without AJAX just returned here: hand its outcome
+		// to the renderer (2.4.0).
+		$classic = $ajax ? null : \SubtleForms\Api\ClassicResult::forForm( (int) $form_id );
+
 		return sprintf(
-			'<div class="%s" data-form-id="%d" data-show-title="%d" data-show-description="%d" data-theme="%s" data-ajax="%d" data-tabindex="%d" data-field-values="%s"></div>',
+			'<div class="%s" data-form-id="%d" data-show-title="%d" data-show-description="%d" data-theme="%s" data-ajax="%d" data-tabindex="%d" data-field-values="%s"%s></div>',
 			esc_attr( implode( ' ', $classes ) ),
 			esc_attr( $form_id ),
 			$show_title ? 1 : 0,
@@ -156,7 +160,8 @@ final class SubtleFormsBlock {
 			esc_attr( $theme ),
 			$ajax ? 1 : 0,
 			$tab_index,
-			esc_attr( $field_values )
+			esc_attr( $field_values ),
+			null === $classic ? '' : ' data-classic-result="' . esc_attr( (string) wp_json_encode( $classic ) ) . '"'
 		);
 	}
 

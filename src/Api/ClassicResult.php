@@ -1,0 +1,149 @@
+<?php
+/**
+ * The outcome of a form posted without AJAX (a block with AJAX turned off).
+ *
+ * The post is answered with a redirect back to the page, so the outcome is
+ * kept for a few minutes under a random token passed in the query string.
+ * The block reads it when the page renders and hands it to the renderer,
+ * which shows the confirmation, or the errors with the visitor's answers.
+ *
+ * @package SubtleForms
+ * @since   2.4.0
+ */
+
+namespace SubtleForms\Api;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Classic submit outcome.
+ */
+final class ClassicResult {
+
+	/**
+	 * Query argument that carries the token.
+	 */
+	const QUERY = 'subtleforms_result';
+
+	/**
+	 * How long an outcome is kept, in seconds.
+	 */
+	const TTL = 600;
+
+	/**
+	 * Answers that are never kept or sent back: spam traps, CAPTCHA tokens
+	 * and the payment reference.
+	 */
+	const SKIP_VALUES = array( 'website_url', 'form_rendered_at', 'g-recaptcha-response', 'h-captcha-response', 'cf-turnstile-response', '_payment' );
+
+	/**
+	 * Outcomes already read in this request, by token.
+	 *
+	 * @var array<string, array>
+	 */
+	private static array $read = array();
+
+	/**
+	 * What a submit response means for a classic post.
+	 *
+	 * @param int   $status HTTP status of the submit response.
+	 * @param mixed $body   Response body.
+	 * @param int   $formId Form ID.
+	 * @param array $values Answers as posted.
+	 * @return array{form_id: int, ok: bool, body: array, values: array, redirect: string, configured: bool}
+	 */
+	public static function outcome( int $status, $body, int $formId, array $values ): array {
+		$body = is_array( $body ) ? $body : array();
+		$data = is_array( $body['data'] ?? null ) ? $body['data'] : array();
+		$ok   = $status < 400 && ! empty( $data['success'] );
+
+		$redirect   = '';
+		$configured = false;
+		if ( $ok ) {
+			$confirmation = is_array( $data['confirmation'] ?? null ) ? $data['confirmation'] : array();
+			if ( ! empty( $data['redirect'] ) && is_string( $data['redirect'] ) ) {
+				// An add-on (such as a WooCommerce checkout) takes the visitor onward.
+				$redirect = $data['redirect'];
+			} elseif ( 'redirect' === ( $confirmation['type'] ?? '' ) && ! empty( $confirmation['redirectUrl'] ) ) {
+				// The form's own confirmation, set by an administrator.
+				$redirect   = (string) $confirmation['redirectUrl'];
+				$configured = true;
+			}
+		}
+
+		return array(
+			'form_id'    => $formId,
+			'ok'         => $ok,
+			'body'       => $body,
+			'values'     => array_diff_key( $values, array_flip( self::SKIP_VALUES ) ),
+			'redirect'   => $redirect,
+			'configured' => $configured,
+		);
+	}
+
+	/**
+	 * Keep an outcome and return its token.
+	 *
+	 * @param array $outcome From outcome().
+	 * @return string
+	 */
+	public static function store( array $outcome ): string {
+		$token = strtolower( wp_generate_password( 24, false ) );
+		unset( $outcome['redirect'], $outcome['configured'] );
+		set_transient( self::key( $token ), $outcome, self::TTL );
+		return $token;
+	}
+
+	/**
+	 * The outcome for a form on this page view, if the visitor just posted it.
+	 * The stored copy is removed once read.
+	 *
+	 * @param int $formId Form ID.
+	 * @return array|null { ok, body, values }
+	 */
+	public static function forForm( int $formId ): ?array {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- A random token that only reads a short-lived outcome; nothing is changed.
+		$token = isset( $_GET[ self::QUERY ] ) ? sanitize_key( wp_unslash( $_GET[ self::QUERY ] ) ) : '';
+		if ( '' === $token ) {
+			return null;
+		}
+		if ( ! isset( self::$read[ $token ] ) ) {
+			$stored = get_transient( self::key( $token ) );
+			if ( ! is_array( $stored ) ) {
+				return null;
+			}
+			delete_transient( self::key( $token ) );
+			self::$read[ $token ] = $stored;
+		}
+		$outcome = self::$read[ $token ];
+		if ( (int) ( $outcome['form_id'] ?? 0 ) !== $formId ) {
+			return null;
+		}
+		return array(
+			'ok'     => ! empty( $outcome['ok'] ),
+			'body'   => is_array( $outcome['body'] ?? null ) ? $outcome['body'] : array(),
+			'values' => is_array( $outcome['values'] ?? null ) ? $outcome['values'] : array(),
+		);
+	}
+
+	/**
+	 * The page to return to with the token, without an older token.
+	 *
+	 * @param string $page  Page address.
+	 * @param string $token Token.
+	 * @return string
+	 */
+	public static function returnUrl( string $page, string $token ): string {
+		return add_query_arg( self::QUERY, $token, remove_query_arg( self::QUERY, $page ) );
+	}
+
+	/**
+	 * Transient name for a token.
+	 *
+	 * @param string $token Token.
+	 * @return string
+	 */
+	private static function key( string $token ): string {
+		return 'subtleforms_classic_' . $token;
+	}
+}

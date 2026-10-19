@@ -152,6 +152,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: The admin and confirmation email switches apply to every form, and the saved sender is used when an email has no From address.
 * Fix: Submitting the form preview does not send email or webhooks, does not count toward the entry limit, and is only available to an administrator.
 * Fix: A form block that is not using AJAX submits with a normal page load.
+* Fix: A form block that is not using AJAX shows the errors and keeps the answers when a submission is refused, shows the confirmation message once it is accepted, and follows a redirect confirmation only after a successful submission.
 * Fix: Confirmation messages and redirects fill merge tags.
 * Fix: A custom webhook body fills merge tags.
 * Fix: Resend says when the email was not queued, and sending it again still sends.
