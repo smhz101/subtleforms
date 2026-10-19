@@ -4,6 +4,9 @@ This file keeps the full release history. readme.txt lists only the latest versi
 
 == Changelog ==
 
+= 2.4.0 - 2026-10-20 =
+* Change: An entry refers to the form version it was sent with instead of storing a full copy of the form, about 1 KB, in its meta. Entry lists no longer carry a form copy. A background job removes the copies older entries hold, a few hundred entries at a time. An older entry whose form version cannot be found keeps its copy, so it stays readable.
+
 = 2.3.9 - 2026-10-19 =
 * Change: Nothing in SubtleForms is switched off without a license. CSV export, Reports (views, submissions and conversion), full conditional logic (any rule, groups, every operator, conditional emails, webhooks and confirmations), Picture choice, several files per upload field, payment fields (Product, Priced options, Custom amount, Fixed fee, Order summary, Coupon), coupons, and the Webhooks and Analytics settings all work in the free plugin.
 * Change: Signature and Calculation fields, the formula engine and the Card Payment field moved to SubtleForms Pro 2.4.0. A form that uses them keeps them: the live form leaves them out and the builder shows a note until Pro is active. Update SubtleForms Pro to 2.4.0 with this release.

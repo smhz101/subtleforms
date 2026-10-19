@@ -395,7 +395,7 @@ final class SubmissionsApi {
 			'order'   => strtoupper( $request->get_param( 'order' ) ?? 'DESC' ) === 'ASC' ? 'ASC' : 'DESC',
 		);
 
-		$submissions = array_map( array( $this, 'redactSecrets' ), $this->submissionsRepo->findAll( $args ) );
+		$submissions = array_map( array( $this, 'listItem' ), $this->submissionsRepo->findAll( $args ) );
 		$total       = $this->submissionsRepo->count( $args );
 
 		return ApiResponse::paginated(
@@ -463,7 +463,7 @@ final class SubmissionsApi {
 			'order'       => strtoupper( $request->get_param( 'order' ) ?? 'DESC' ) === 'ASC' ? 'ASC' : 'DESC',
 		);
 
-		$submissions = array_map( array( $this, 'redactSecrets' ), $this->submissionsRepo->findAll( $args ) );
+		$submissions = array_map( array( $this, 'listItem' ), $this->submissionsRepo->findAll( $args ) );
 		$total       = $this->submissionsRepo->count( $args );
 
 		// Bulk fetch form titles to avoid N+1
@@ -518,13 +518,9 @@ final class SubmissionsApi {
 			$form                     = $this->formsRepo->find( $submission['form_id'] );
 			$submission['form_title'] = $form['title'] ?? __( 'Unknown Form', 'subtleforms' );
 
-			try {
-				$schemaVersion        = $submission['schema_version'] ?? null;
-				$schema               = $this->formsRepo->loadSchemaVersion( $submission['form_id'], $schemaVersion );
-				$submission['schema'] = $schema['schema'] ?? null;
-			} catch ( \RuntimeException $e ) {
-				$submission['schema'] = null;
-			}
+			// The schema version the entry was made with; older entries
+			// may still carry a copy of it (FF-30).
+			$submission['schema'] = \SubtleForms\Support\EntrySchema::forEntry( $submission, $this->formsRepo );
 
 			$adjacent              = $this->submissionsRepo->getAdjacentIds( $submission['id'], $submission['form_id'] );
 			$submission['next_id'] = $adjacent['next'];
@@ -532,6 +528,9 @@ final class SubmissionsApi {
 		}
 
 		$submission = $this->redactSecrets( $submission );
+		if ( is_array( $submission['meta'] ?? null ) ) {
+			$submission['meta'] = \SubtleForms\Support\EntrySchema::stripCopy( $submission['meta'] );
+		}
 		if ( isset( $submission['meta']['notes'] ) && is_array( $submission['meta']['notes'] ) ) {
 			$submission['meta']['notes'] = array_map( array( self::class, 'presentNote' ), $submission['meta']['notes'] );
 		}
@@ -744,19 +743,9 @@ final class SubmissionsApi {
 			return ApiResponse::validation_error( __( 'Restore this entry from the Trash before resending its notifications.', 'subtleforms' ) );
 		}
 
-		try {
-			$loaded = $this->formsRepo->loadSchemaVersion( (int) $submission['form_id'], isset( $submission['schema_version'] ) ? (int) $submission['schema_version'] : null );
-		} catch ( \RuntimeException $e ) {
-			$loaded = null;
-		}
-		if ( ! $loaded ) {
-			try {
-				$loaded = $this->formsRepo->loadSchemaVersion( (int) $submission['form_id'] );
-			} catch ( \RuntimeException $e ) {
-				$loaded = null;
-			}
-		}
-		$schema = is_array( $loaded ) ? ( $loaded['schema'] ?? $loaded ) : null;
+		// The entry's own schema version, else the copy an older entry
+		// carries, else the active schema (FF-30).
+		$schema = \SubtleForms\Support\EntrySchema::forEntry( $submission, $this->formsRepo );
 		if ( ! is_array( $schema ) ) {
 			return ApiResponse::not_found( __( 'This entry’s form could not be loaded.', 'subtleforms' ) );
 		}
@@ -1107,6 +1096,21 @@ final class SubmissionsApi {
 				'rows'     => count( $rows ),
 			)
 		);
+	}
+
+	/**
+	 * One entry in a list response: secrets redacted, and no schema copy
+	 * from an entry saved before 2.4.0 (FF-30).
+	 *
+	 * @param mixed $submission Submission row.
+	 * @return mixed
+	 */
+	public function listItem( $submission ) {
+		$submission = $this->redactSecrets( $submission );
+		if ( is_array( $submission ) && is_array( $submission['meta'] ?? null ) ) {
+			$submission['meta'] = \SubtleForms\Support\EntrySchema::stripCopy( $submission['meta'] );
+		}
+		return $submission;
 	}
 
 	/**
