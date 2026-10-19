@@ -504,9 +504,9 @@ export default function FormRenderer({
   const quote = useMemo(
     () =>
       isPriced
-        ? computeQuote(allFields, values, { coupon, hidden: hiddenFields, currency })
+        ? computeQuote(allFields, values, { coupon, schema, hidden: hiddenFields, currency })
         : null,
-    [isPriced, allFields, values, coupon, hiddenFields, currency]
+    [isPriced, allFields, values, coupon, schema, hiddenFields, currency]
   );
   // Another checkout (e.g. WooCommerce, set by an add-on) takes the payment
   // after the form is sent, so the Card field is not used.

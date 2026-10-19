@@ -1,4 +1,4 @@
-import { computeQuote, isPricedForm, isPricedType, registerPricedType } from './pricing';
+import { computeQuote, hiddenPricing, isPricedForm, isPricedType, registerPricedType } from './pricing';
 import { registerFieldType, isRegisteredInputType, getFieldType } from './extend';
 import { applyPaymentDefaults } from '../admin/utils/paymentDefaults';
 
@@ -125,3 +125,55 @@ describe('add-on priced types (2.3.9)', () => {
   });
 });
 
+
+describe('visibility comes from conditional logic (PAY-01, PAY-02)', () => {
+  const showWhen = (field, value) => ({
+    action: 'show',
+    groups: [{ match: 'all', rules: [{ field, operator: 'equals', value }] }],
+  });
+  const flatten = (list) =>
+    list.flatMap((f) => [...(f.type === 'step' ? [] : [f]), ...flatten(f.children || f.fields || [])]);
+
+  const schema = {
+    fields: [
+      {
+        type: 'step',
+        id: 'step_1',
+        children: [
+          { type: 'select', key: 'want' },
+          { type: 'payment_product', key: 'ticket', label: 'Ticket', price: 20 },
+          { type: 'payment_hidden_price', key: 'parking', config: { amount: 3, description: 'Parking service fee', logic: showWhen('want', 'yes') } },
+        ],
+      },
+      {
+        type: 'step',
+        id: 'step_2',
+        logic: showWhen('want', 'yes'),
+        children: [{ type: 'payment_product', label: 'Keyless', price: 7 }],
+      },
+    ],
+  };
+
+  it('does not charge a hidden Fixed Fee or a product in a skipped step', () => {
+    const q = computeQuote(flatten(schema.fields), { want: 'no' }, { schema });
+    expect(q.items.map((i) => i.key)).toEqual(['ticket']);
+    expect(q.total).toBe(20);
+  });
+
+  it('charges them once they are shown', () => {
+    const q = computeQuote(flatten(schema.fields), { want: 'yes' }, { schema });
+    expect(q.total).toBe(30);
+    expect(q.items[1].label).toBe('Parking service fee');
+  });
+
+  it('charges a fixed product whose key has no value', () => {
+    const fields = [{ type: 'payment_product', key: 'entry_fee', price: 5 }];
+    expect(computeQuote(fields, {}, { schema: { fields } }).total).toBe(5);
+  });
+
+  it('hiddenPricing lists hidden keys and nodes', () => {
+    const { keys, nodes } = hiddenPricing(schema, { want: 'no' });
+    expect([...keys].sort()).toEqual(['parking', 'step_2']);
+    expect(nodes.has(schema.fields[1].children[0])).toBe(true);
+  });
+});
