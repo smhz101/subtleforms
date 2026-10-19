@@ -45,6 +45,8 @@ export function BuilderProvider({
 	onDuplicate,
 	onRequestInsert,
 	onMoveToStep,
+	onRenameKey,
+	entryCount = 0,
 	isReadOnly = false,
 }) {
 	// Tree context - changes on schema mutations
@@ -90,9 +92,11 @@ export function BuilderProvider({
 				onDuplicate,
 				onRequestInsert,
 				onMoveToStep,
+				// Change a field's ID everywhere the form uses it (2.4.1).
+				onRenameKey,
 			},
 		}),
-		[onInsert, onDelete, onUpdate, onMove, onDuplicate, onRequestInsert, onMoveToStep]
+		[onInsert, onDelete, onUpdate, onMove, onDuplicate, onRequestInsert, onMoveToStep, onRenameKey]
 	);
 
 	// Config context - rarely changes
@@ -104,8 +108,10 @@ export function BuilderProvider({
 			// Form-level label visibility and help text placement (2.3.2).
 			fieldDefaults,
 			currency,
+			// Entries the form has, for the field ID editor's note (2.4.1).
+			entryCount,
 		}),
-		[fieldDefinitions, formType, isReadOnly, fieldDefaults, currency]
+		[fieldDefinitions, formType, isReadOnly, fieldDefaults, currency, entryCount]
 	);
 
 	return (

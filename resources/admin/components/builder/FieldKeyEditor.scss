@@ -1,0 +1,95 @@
+// Field ID in the field settings header (2.4.1): a quiet edit control next
+// to the copy chip, and an inline box that keeps the chip's size.
+
+.sf-field-key {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+	max-width: 100%;
+
+	&__row {
+		display: inline-flex;
+		align-items: center;
+		gap: 2px;
+		min-width: 0;
+		max-width: 100%;
+	}
+
+	// The pencil stays out of the way until the header is hovered or focused.
+	&__edit.components-button {
+		width: 20px;
+		min-width: 20px;
+		height: 20px;
+		padding: 0;
+		color: var(--sf-text-subtle);
+		opacity: 0.6;
+		transition: opacity 120ms ease, color 120ms ease;
+
+		&:hover,
+		&:focus-visible {
+			color: var(--sf-text);
+			opacity: 1;
+		}
+	}
+
+	// Same size as the copy chip; wp-admin's input styles are reset here.
+	input#{&}__input,
+	#{&}__input {
+		box-sizing: border-box;
+		width: 100%;
+		max-width: 240px;
+		height: 22px;
+		min-height: 0;
+		margin: 0;
+		padding: 0 6px;
+		border: 1px solid var(--sf-border-strong);
+		border-radius: var(--sf-radius-sm);
+		background: var(--sf-bg-surface);
+		box-shadow: none;
+		color: var(--sf-text);
+		font-family: var(--sf-font-mono);
+		font-size: 11px;
+		line-height: 20px;
+
+		&:focus {
+			border-color: var(--sf-brand);
+			outline: none;
+			box-shadow: 0 0 0 1px var(--sf-brand);
+		}
+
+		&.has-problem,
+		&.has-problem:focus {
+			border-color: var(--sf-danger);
+			box-shadow: 0 0 0 1px var(--sf-danger);
+		}
+	}
+
+	&__hint,
+	&__done {
+		margin: 0;
+		font-size: 11px;
+		line-height: 1.45;
+		color: var(--sf-text-subtle);
+	}
+
+	&__hint.is-problem {
+		color: var(--sf-danger);
+	}
+
+	&__done .components-button.is-link {
+		font-size: 11px;
+		text-decoration: none;
+
+		&:hover,
+		&:focus-visible {
+			text-decoration: underline;
+		}
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sf-field-key__edit.components-button {
+		transition: none;
+	}
+}

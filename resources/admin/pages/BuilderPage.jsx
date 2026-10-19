@@ -78,6 +78,7 @@ function FormBuilderInner({
     autoSaving,
     formStatus,
     hasUnpublishedChanges,
+    entryCount,
     error,
     saveError,
     autoSaveError,
@@ -793,6 +794,7 @@ function FormBuilderInner({
           fieldDefinitions={fieldDefinitions}
           onSchemaChange={handleSchemaChange}
           currentFormId={currentFormId}
+          entryCount={entryCount}
           showWelcome={showWelcomeScreen}
           isDirty={isDirty}
         />

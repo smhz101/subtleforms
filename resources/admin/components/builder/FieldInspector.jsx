@@ -1,5 +1,5 @@
 import { Button, TabPanel, Notice, PanelBody, SelectControl } from '@wordpress/components';
-import { useMemo, useState } from '@wordpress/element';
+import { useMemo } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../../ui/Icon';
 import LogicEditor, { readLogic, countRules } from './LogicEditor';
@@ -9,6 +9,7 @@ import ChainedSourceControl from './inspector/controls/ChainedSourceControl';
 import ChainedCsvControl from './inspector/controls/ChainedCsvControl';
 import { chainedUsesCsv } from '../../../shared/chainedLevels';
 import { useBuilder } from './context/BuilderContext';
+import FieldKeyEditor from './FieldKeyEditor';
 import { useConfig } from './context/ConfigContext';
 import {
   OptionsPanel,
@@ -69,8 +70,7 @@ function StepSetting({ tree, nodeId, onMoveToStep, isReadOnly }) {
  */
 export default function FieldInspector({ field, allFields, formAppearance, isReadOnly = false }) {
   const { setSelectedId, actions, validationErrors, selectedId, tree } = useBuilder();
-  const { fieldDefinitions } = useConfig();
-  const [copied, setCopied] = useState(false);
+  const { fieldDefinitions, entryCount = 0 } = useConfig();
 
   const definition = fieldDefinitions?.[field?.type];
   const fieldCategory = definition?.meta?.category;
@@ -162,6 +162,13 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
   const FieldIcon = getIcon(field.type);
   const typeLabel = definition?.label || field.type?.replace(/_/g, ' ');
   const fieldKey = field.key;
+  // IDs of every other field, for the field ID editor.
+  const usedKeys = new Set(
+    Object.values(tree?.nodes || {})
+      .filter((node) => node && node.id !== selectedId)
+      .map((node) => node.config?.key)
+      .filter(Boolean)
+  );
 
   const tabs = [
     { name: 'settings', title: __('Settings', 'subtleforms') },
@@ -197,27 +204,14 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
         <div className='sf-field-inspector__header-info'>
           <strong className='sf-field-inspector__title'>{typeLabel}</strong>
           {fieldKey && (
-            <button
-              type='button'
-              className='sf-field-inspector__key'
-              title={__('Copy field key', 'subtleforms')}
-              onClick={() => {
-                window.navigator?.clipboard?.writeText(`{${fieldKey}}`).then(() => {
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 1500);
-                });
-              }}>
-              {copied ? (
-                <>
-                  <Icon.Check size={12} /> {__('Copied', 'subtleforms')}
-                </>
-              ) : (
-                <>
-                  <code>{fieldKey}</code>
-                  <Icon.Copy size={12} />
-                </>
-              )}
-            </button>
+            <FieldKeyEditor
+              nodeId={selectedId}
+              fieldKey={fieldKey}
+              usedKeys={usedKeys}
+              onRename={actions.onRenameKey}
+              entryCount={entryCount}
+              isReadOnly={isReadOnly}
+            />
           )}
         </div>
         <div className='sf-field-inspector__header-actions'>
