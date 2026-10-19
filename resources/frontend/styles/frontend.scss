@@ -11,6 +11,7 @@
 // ─── Accessibility utilities ──────────────────────────────────────────────────
 
 .subtleforms-sr-only {
+	/*! inherit: keep */
 	position: absolute;
 	width: 1px;
 	height: 1px;
@@ -58,6 +59,7 @@
 	}
 }
 
+/*! inherit: keep-start (repeater groups and the phone country menu: custom controls) */
 // ── Repeater (2.3.1) ─────────────────────────────────────────────────────
 .subtleforms-repeater {
 	display: flex;
@@ -309,6 +311,8 @@
 	padding: 8px;
 	font-size: 13px;
 }
+
+/*! inherit: keep-end */
 
 // The container keeps the estimated height of the form until the form is
 // drawn, so the content under it does not jump (UX2-27, FormPlaceholder.php).
