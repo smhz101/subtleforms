@@ -40,6 +40,13 @@ final class FormPlaceholder {
 	/** Space under the fields, the step buttons and the submit row of a multi-step form. */
 	private const FOOTER_STEPS = 48 + 107;
 
+	/** A description: its first line with the space above it, then each further line. */
+	private const DESCRIPTION_FIRST = 40;
+	private const DESCRIPTION_LINE  = 24;
+
+	/** Characters on one line of the description: wide, narrow. */
+	private const DESCRIPTION_CHARS = array( 80, 42 );
+
 	/** One question at a time: wide, narrow. */
 	private const CONVERSATIONAL = array( 525, 425 );
 
@@ -79,11 +86,12 @@ final class FormPlaceholder {
 	/**
 	 * Wide and narrow heights for a schema, in pixels.
 	 *
-	 * @param array<string, mixed> $schema    Active schema.
-	 * @param bool                 $showTitle Whether the title is shown.
+	 * @param array<string, mixed> $schema          Active schema.
+	 * @param bool                 $showTitle       Whether the title is shown.
+	 * @param bool                 $showDescription Whether the description is shown.
 	 * @return array{wide: int, narrow: int}
 	 */
-	public static function estimate( array $schema, bool $showTitle = true ): array {
+	public static function estimate( array $schema, bool $showTitle = true, bool $showDescription = true ): array {
 		$type = (string) ( $schema['metadata']['type'] ?? 'regular' );
 		if ( 'conversational' === $type ) {
 			return array(
@@ -102,6 +110,10 @@ final class FormPlaceholder {
 			$wide_header   -= 40;
 			$narrow_header -= 40;
 		}
+		if ( $showDescription ) {
+			$wide_header   += self::description( $schema, self::DESCRIPTION_CHARS[0] );
+			$narrow_header += self::description( $schema, self::DESCRIPTION_CHARS[1] );
+		}
 		$footer = $steps ? self::FOOTER_STEPS : self::FOOTER;
 
 		$wide   = $wide_header + self::rows( $fields, false ) + $footer;
@@ -116,19 +128,36 @@ final class FormPlaceholder {
 	/**
 	 * The style and data attributes for the container.
 	 *
-	 * @param array<string, mixed>|null $schema    Active schema.
-	 * @param bool                      $showTitle Whether the title is shown.
+	 * @param array<string, mixed>|null $schema          Active schema.
+	 * @param bool                      $showTitle       Whether the title is shown.
+	 * @param bool                      $showDescription Whether the description is shown.
 	 * @return string Leading space, then the attributes; empty without a schema.
 	 */
-	public static function attributes( ?array $schema, bool $showTitle = true ): string {
+	public static function attributes( ?array $schema, bool $showTitle = true, bool $showDescription = true ): string {
 		if ( ! is_array( $schema ) ) {
 			return '';
 		}
-		$h = self::estimate( $schema, $showTitle );
+		$h = self::estimate( $schema, $showTitle, $showDescription );
 		return sprintf(
 			' data-reserve="1" style="%s"',
 			esc_attr( sprintf( '--subtleforms-reserve:%dpx;--subtleforms-reserve-narrow:%dpx', $h['wide'], $h['narrow'] ) )
 		);
+	}
+
+	/**
+	 * Height of the form description, 0 without one.
+	 *
+	 * @param array<string, mixed> $schema Schema.
+	 * @param int                  $chars  Characters on one line.
+	 * @return int
+	 */
+	private static function description( array $schema, int $chars ): int {
+		$text = trim( wp_strip_all_tags( (string) ( $schema['metadata']['description'] ?? '' ) ) );
+		if ( '' === $text ) {
+			return 0;
+		}
+		$lines = (int) ceil( ( function_exists( 'mb_strlen' ) ? mb_strlen( $text ) : strlen( $text ) ) / max( 1, $chars ) );
+		return self::DESCRIPTION_FIRST + self::DESCRIPTION_LINE * max( 0, $lines - 1 );
 	}
 
 	/**

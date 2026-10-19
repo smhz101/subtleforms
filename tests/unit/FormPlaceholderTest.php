@@ -81,6 +81,21 @@ final class FormPlaceholderTest extends TestCase {
 		$this->assertGreaterThan( FormPlaceholder::estimate( $single )['narrow'], FormPlaceholder::estimate( $cols )['narrow'] );
 	}
 
+	public function test_the_description_adds_its_lines_unless_hidden(): void {
+		$plain = array( 'fields' => array( array( 'type' => 'text' ) ) );
+		$short = $plain;
+		$short['metadata']['description'] = 'Tell us a little about your project.';
+		$long = $plain;
+		$long['metadata']['description'] = 'Tell us a little about your project, your timeline and your budget, and we will come back to you within two working days with a plan and a quote for the work.';
+
+		$base = FormPlaceholder::estimate( $plain );
+		// Measured: one line adds 40px, a 155-character one 64px wide and 112px at 390px.
+		$this->assertSame( $base['wide'] + 40, FormPlaceholder::estimate( $short )['wide'] );
+		$this->assertSame( $base['wide'] + 64, FormPlaceholder::estimate( $long )['wide'] );
+		$this->assertSame( $base['narrow'] + 112, FormPlaceholder::estimate( $long )['narrow'] );
+		$this->assertSame( $base, FormPlaceholder::estimate( $long, true, false ) );
+	}
+
 	public function test_conversational_forms_keep_one_question(): void {
 		$h = FormPlaceholder::estimate( array( 'metadata' => array( 'type' => 'conversational' ), 'fields' => array_fill( 0, 20, array( 'type' => 'text' ) ) ) );
 		$this->assertSame( 525, $h['wide'] );

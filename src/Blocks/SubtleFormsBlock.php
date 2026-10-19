@@ -154,7 +154,7 @@ final class SubtleFormsBlock {
 		// Kept at the estimated height of the form so the page does not jump
 		// when the form appears (UX2-27).
 		$schema  = \SubtleForms\Engine\FormRestrictions::activeSchema( (int) $form_id );
-		$reserve = \SubtleForms\Frontend\FormPlaceholder::attributes( is_array( $schema ) ? $schema : null, $show_title );
+		$reserve = \SubtleForms\Frontend\FormPlaceholder::attributes( is_array( $schema ) ? $schema : null, $show_title, $show_desc );
 
 		return sprintf(
 			'<div class="%s" data-form-id="%d" data-show-title="%d" data-show-description="%d" data-theme="%s" data-ajax="%d" data-tabindex="%d" data-field-values="%s"%s%s></div>',
