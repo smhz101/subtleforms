@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-19T13:43:49+00:00\n"
+"POT-Creation-Date: 2026-10-19T14:03:29+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -78,7 +78,7 @@ msgstr ""
 #: resources/admin/pages/ReportsPage.jsx:70
 #: resources/admin/pages/ReportsPage.jsx:102
 #: resources/admin/pages/SubmissionDetailPage.jsx:1243
-#: resources/admin/pages/SubmissionsPage.jsx:233
+#: resources/admin/pages/SubmissionsPage.jsx:238
 #: resources/admin/pages/ToolsPage.jsx:301
 msgid "Submissions"
 msgstr ""
@@ -4726,7 +4726,7 @@ msgstr ""
 #: resources/admin/pages/DashboardPage.jsx:101
 #: resources/admin/pages/DashboardPage.jsx:557
 #: resources/admin/pages/ReportsPage.jsx:210
-#: resources/admin/pages/SubmissionsPage.jsx:251
+#: resources/admin/pages/SubmissionsPage.jsx:256
 #: resources/frontend/components/fields/DateTimeField.jsx:308
 msgid "Today"
 msgstr ""
@@ -4738,7 +4738,7 @@ msgstr ""
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:160
 #: resources/admin/pages/DashboardPage.jsx:265
 #: resources/admin/pages/PaymentsPage.jsx:535
-#: resources/admin/pages/SubmissionsPage.jsx:258
+#: resources/admin/pages/SubmissionsPage.jsx:263
 msgid "All forms"
 msgstr ""
 
@@ -4779,7 +4779,7 @@ msgstr ""
 #: resources/admin/pages/BuilderPage.jsx:691
 #: resources/admin/pages/ReportsPage.jsx:100
 #: resources/admin/pages/SubmissionDetailPage.jsx:1169
-#: resources/admin/pages/SubmissionsPage.jsx:512
+#: resources/admin/pages/SubmissionsPage.jsx:517
 #: resources/admin/pages/ToolsPage.jsx:311
 #: resources/admin/pages/ToolsPage.jsx:490
 #: resources/admin/pages/ToolsPage.jsx:510
@@ -5029,7 +5029,7 @@ msgstr ""
 #: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:305
 #: resources/admin/components/builder/appearance/labels.js:94
 #: resources/admin/components/settings/GeneralSettings.jsx:124
-#: resources/admin/pages/SubmissionsPage.jsx:398
+#: resources/admin/pages/SubmissionsPage.jsx:403
 msgid "Default"
 msgstr ""
 
@@ -5420,7 +5420,7 @@ msgstr ""
 
 #: resources/admin/components/builder/appearance/labels.js:114
 #: resources/admin/components/settings/GeneralSettings.jsx:125
-#: resources/admin/pages/SubmissionsPage.jsx:399
+#: resources/admin/pages/SubmissionsPage.jsx:404
 msgid "Compact"
 msgstr ""
 
@@ -8003,7 +8003,7 @@ msgid "Forms could not be loaded."
 msgstr ""
 
 #: resources/admin/components/FormsList.jsx:236
-#: resources/admin/pages/SubmissionsPage.jsx:239
+#: resources/admin/pages/SubmissionsPage.jsx:244
 msgid "New"
 msgstr ""
 
@@ -9517,7 +9517,7 @@ msgid "Submissions list density"
 msgstr ""
 
 #: resources/admin/components/settings/GeneralSettings.jsx:123
-#: resources/admin/pages/SubmissionsPage.jsx:397
+#: resources/admin/pages/SubmissionsPage.jsx:402
 msgid "Comfortable"
 msgstr ""
 
@@ -9526,22 +9526,22 @@ msgid "Row padding on the submissions list. An admin who chooses on that page ke
 msgstr ""
 
 #: resources/admin/components/settings/GeneralSettings.jsx:137
-#: resources/admin/pages/SubmissionsPage.jsx:414
+#: resources/admin/pages/SubmissionsPage.jsx:419
 msgid "Reading pane"
 msgstr ""
 
 #: resources/admin/components/settings/GeneralSettings.jsx:140
-#: resources/admin/pages/SubmissionsPage.jsx:418
+#: resources/admin/pages/SubmissionsPage.jsx:423
 msgid "Right of inbox"
 msgstr ""
 
 #: resources/admin/components/settings/GeneralSettings.jsx:141
-#: resources/admin/pages/SubmissionsPage.jsx:419
+#: resources/admin/pages/SubmissionsPage.jsx:424
 msgid "Below inbox"
 msgstr ""
 
 #: resources/admin/components/settings/GeneralSettings.jsx:142
-#: resources/admin/pages/SubmissionsPage.jsx:420
+#: resources/admin/pages/SubmissionsPage.jsx:425
 msgid "No split"
 msgstr ""
 
@@ -9667,8 +9667,8 @@ msgid "Nothing to export"
 msgstr ""
 
 #: resources/admin/components/SubmissionsTable.jsx:498
-#: resources/admin/pages/SubmissionsPage.jsx:350
 #: resources/admin/pages/SubmissionsPage.jsx:355
+#: resources/admin/pages/SubmissionsPage.jsx:360
 msgid "Failed to export submissions"
 msgstr ""
 
@@ -10398,7 +10398,7 @@ msgstr ""
 #: resources/admin/pages/DashboardPage.jsx:106
 #: resources/admin/pages/ReportsPage.jsx:64
 #: resources/admin/pages/ReportsPage.jsx:71
-#: resources/admin/pages/SubmissionsPage.jsx:252
+#: resources/admin/pages/SubmissionsPage.jsx:257
 msgid "Last 7 days"
 msgstr ""
 
@@ -10641,12 +10641,12 @@ msgid "The form could not be created. Try again."
 msgstr ""
 
 #: resources/admin/pages/FormsPage.jsx:122
-#: resources/admin/pages/SubmissionsPage.jsx:236
+#: resources/admin/pages/SubmissionsPage.jsx:241
 msgid "All"
 msgstr ""
 
 #: resources/admin/pages/FormsPage.jsx:125
-#: resources/admin/pages/SubmissionsPage.jsx:246
+#: resources/admin/pages/SubmissionsPage.jsx:251
 msgid "Trash"
 msgstr ""
 
@@ -10655,12 +10655,12 @@ msgid "Build, publish and manage every form on your site."
 msgstr ""
 
 #: resources/admin/pages/FormsPage.jsx:166
-#: resources/admin/pages/SubmissionsPage.jsx:469
+#: resources/admin/pages/SubmissionsPage.jsx:474
 msgid "Show/hide columns"
 msgstr ""
 
 #: resources/admin/pages/FormsPage.jsx:168
-#: resources/admin/pages/SubmissionsPage.jsx:471
+#: resources/admin/pages/SubmissionsPage.jsx:476
 msgid "View"
 msgstr ""
 
@@ -11091,7 +11091,7 @@ msgstr ""
 
 #: resources/admin/pages/SubmissionDetailPage.jsx:569
 #: resources/admin/pages/SubmissionDetailPage.jsx:587
-#: resources/admin/pages/SubmissionsPage.jsx:601
+#: resources/admin/pages/SubmissionsPage.jsx:606
 msgid "Loading submission…"
 msgstr ""
 
@@ -11171,7 +11171,7 @@ msgid "Mark unread"
 msgstr ""
 
 #: resources/admin/pages/SubmissionDetailPage.jsx:778
-#: resources/admin/pages/SubmissionsPage.jsx:244
+#: resources/admin/pages/SubmissionsPage.jsx:249
 msgid "Starred"
 msgstr ""
 
@@ -11180,7 +11180,7 @@ msgid "Resend notifications"
 msgstr ""
 
 #: resources/admin/pages/SubmissionDetailPage.jsx:797
-#: resources/admin/pages/SubmissionsPage.jsx:245
+#: resources/admin/pages/SubmissionsPage.jsx:250
 #: resources/admin/utils/submissionStatus.js:16
 msgid "Flagged"
 msgstr ""
@@ -11292,7 +11292,7 @@ msgid "Authorised"
 msgstr ""
 
 #: resources/admin/pages/SubmissionDetailPage.jsx:1078
-#: resources/admin/pages/SubmissionsPage.jsx:533
+#: resources/admin/pages/SubmissionsPage.jsx:538
 #: resources/admin/utils/submissionStatus.js:12
 msgid "Failed"
 msgstr ""
@@ -11370,122 +11370,122 @@ msgstr ""
 msgid "Received %1$s · %2$s"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:148
-#: resources/admin/pages/SubmissionsPage.jsx:160
+#: resources/admin/pages/SubmissionsPage.jsx:153
+#: resources/admin/pages/SubmissionsPage.jsx:165
 msgid "The display options could not be saved."
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:232
+#: resources/admin/pages/SubmissionsPage.jsx:237
 msgid "Form submissions"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:242
+#: resources/admin/pages/SubmissionsPage.jsx:247
 msgid "Read"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:243
+#: resources/admin/pages/SubmissionsPage.jsx:248
 #: resources/admin/utils/submissionStatus.js:15
 msgid "Spam"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:250
+#: resources/admin/pages/SubmissionsPage.jsx:255
 msgid "All time"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:253
+#: resources/admin/pages/SubmissionsPage.jsx:258
 msgid "Last 30 days"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:254
+#: resources/admin/pages/SubmissionsPage.jsx:259
 msgid "Last 3 months"
 msgstr ""
 
 #. translators: %1$d: form id
-#: resources/admin/pages/SubmissionsPage.jsx:263
+#: resources/admin/pages/SubmissionsPage.jsx:268
 #, js-format
 msgid "Form #%1$d"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:364
+#: resources/admin/pages/SubmissionsPage.jsx:369
 msgid "Every entry from every form. Open one to read it, reply, or see what happened after it was sent."
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:377
+#: resources/admin/pages/SubmissionsPage.jsx:382
 msgid "Exporting…"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:378
+#: resources/admin/pages/SubmissionsPage.jsx:383
 #: resources/admin/pages/ToolsPage.jsx:326
 msgid "Export CSV"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:385
+#: resources/admin/pages/SubmissionsPage.jsx:390
 msgid "Display options"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:393
+#: resources/admin/pages/SubmissionsPage.jsx:398
 msgid "Density"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:441
+#: resources/admin/pages/SubmissionsPage.jsx:446
 msgid "Use site default"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:446
+#: resources/admin/pages/SubmissionsPage.jsx:451
 msgid "Saved for your account. Site defaults are in Settings → General."
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:447
+#: resources/admin/pages/SubmissionsPage.jsx:452
 msgid "Using the site default. A choice here is saved for your account."
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:495
+#: resources/admin/pages/SubmissionsPage.jsx:500
 msgid "Filters"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:502
+#: resources/admin/pages/SubmissionsPage.jsx:507
 msgid "Search submissions"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:520
+#: resources/admin/pages/SubmissionsPage.jsx:525
 msgid "Date Range"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:528
+#: resources/admin/pages/SubmissionsPage.jsx:533
 msgid "Result"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:531
+#: resources/admin/pages/SubmissionsPage.jsx:536
 msgid "All results"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:532
+#: resources/admin/pages/SubmissionsPage.jsx:537
 #: resources/admin/utils/submissionStatus.js:9
 msgid "Completed"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:534
+#: resources/admin/pages/SubmissionsPage.jsx:539
 msgid "Awaiting Payment"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:535
+#: resources/admin/pages/SubmissionsPage.jsx:540
 #: resources/admin/utils/submissionStatus.js:11
 msgid "Processing"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:547
+#: resources/admin/pages/SubmissionsPage.jsx:552
 msgid "Clear all filters"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:553
+#: resources/admin/pages/SubmissionsPage.jsx:558
 msgid "Search responses"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:558
+#: resources/admin/pages/SubmissionsPage.jsx:563
 msgid "Filter by field value"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:561
+#: resources/admin/pages/SubmissionsPage.jsx:566
 msgid "e.g. john@example.com"
 msgstr ""
 
