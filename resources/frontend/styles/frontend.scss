@@ -11,6 +11,7 @@
 // ─── Accessibility utilities ──────────────────────────────────────────────────
 
 .subtleforms-sr-only {
+	/*! inherit: keep */
 	position: absolute;
 	width: 1px;
 	height: 1px;
@@ -58,6 +59,7 @@
 	}
 }
 
+/*! inherit: keep-start (repeater groups and the phone country menu: custom controls) */
 // ── Repeater (2.3.1) ─────────────────────────────────────────────────────
 .subtleforms-repeater {
 	display: flex;
@@ -310,3 +312,4 @@
 	font-size: 13px;
 }
 
+/*! inherit: keep-end */

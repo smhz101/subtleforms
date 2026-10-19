@@ -35,6 +35,7 @@
 
 /* A hidden container label is hidden visually only. */
 .subtleforms-field--no-label > .subtleforms-container-header > .subtleforms-field-label {
+	/*! inherit: keep */
 	position: absolute;
 	width: 1px;
 	height: 1px;
@@ -121,6 +122,7 @@
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+/*! inherit: keep-start (choices shown as buttons: the radio is hidden) */
 .subtleforms-radio-group.subtleforms-options--buttons,
 .subtleforms-checkbox-group.subtleforms-options--buttons {
 	flex-direction: row;
@@ -155,6 +157,8 @@
 	box-shadow: 0 0 0 2px var(--subtleforms-color-primary);
 }
 
+/*! inherit: keep-end */
+
 @media (max-width: 600px) {
 	.subtleforms-options--columns-2,
 	.subtleforms-options--columns-3 {
@@ -162,6 +166,7 @@
 	}
 }
 
+/*! inherit: keep-start (toggle, opinion scale and picture choice: no native control) */
 /* ── Toggle ────────────────────────────────────────────────────────────── */
 .subtleforms-toggle {
 	position: relative;
@@ -335,6 +340,8 @@
 	text-align: center;
 }
 
+/*! inherit: keep-end */
+
 /* ── Calculation ───────────────────────────────────────────────────────── */
 .subtleforms-calculation {
 	display: flex;
@@ -355,6 +362,7 @@
 	color: var(--subtleforms-color-text-light, #6b7280);
 }
 
+/*! inherit: keep-start (error state and the confirmation after submit) */
 /* ── Error state ───────────────────────────────────────────────────────── */
 .subtleforms-field--has-error .subtleforms-input,
 .subtleforms-field--has-error .subtleforms-textarea,
@@ -398,6 +406,8 @@
 .subtleforms-success-again {
 	margin-top: 12px;
 }
+
+/*! inherit: keep-end */
 
 /* ===== Unavailable form (2.0) ===== */
 .subtleforms-unavailable {
@@ -446,6 +456,7 @@
 	color: var(--subtleforms-color-text);
 }
 
+/*! inherit: keep-start (quantity stepper and priced option cards: custom controls) */
 /* Product */
 .subtleforms-product {
 	display: flex;
@@ -533,6 +544,8 @@
 .subtleforms-priced--cards .subtleforms-priced__label { font-weight: 600; }
 .subtleforms-priced--cards .subtleforms-priced__price { font-size: var(--subtleforms-font-size-lg, 1.25rem); }
 
+/*! inherit: keep-end */
+
 /* Order summary */
 .subtleforms-summary {
 	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
@@ -598,6 +611,7 @@
 	cursor: pointer;
 }
 
+/*! inherit: keep-start (coupon chip, card element and upload drop zone: custom controls) */
 /* Coupon box */
 .subtleforms-coupon__row { display: flex; flex-wrap: wrap; gap: 8px; }
 .subtleforms-coupon__input { flex: 1 1 160px; min-width: min(100%, 160px); text-transform: uppercase; letter-spacing: 0.04em; }
@@ -793,3 +807,5 @@
 	font-size: 0.8125em;
 	color: var(--subtleforms-color-error, #d63638);
 }
+
+/*! inherit: keep-end */

@@ -258,3 +258,48 @@ describe( 'preset contrast', () => {
     expect( formAppearanceClasses( { preset: 'dark' } ) ).toContain( 'subtleforms--preset-dark' );
   } );
 } );
+
+describe( 'buttonThemeClass (2.4.1)', () => {
+  const { buttonThemeClass } = require( './appearance' );
+  test( 'a theme form uses the theme button class', () => {
+    expect( buttonThemeClass( { preset: 'theme' } ) ).toBe( 'wp-element-button' );
+  } );
+  test( 'other presets keep the plugin button', () => {
+    expect( buttonThemeClass( { preset: 'default' } ) ).toBe( '' );
+    expect( buttonThemeClass( undefined ) ).toBe( '' );
+  } );
+} );
+
+describe( 'pure theme forms (2.4.1)', () => {
+  const { formAppearanceClasses, isPureTheme, buttonThemeClass, getPreset } = require( './appearance' );
+  const theme = getPreset( 'theme' );
+  const untouched = { preset: 'theme', tokens: { ...theme.tokens }, variants: { ...theme.variants } };
+
+  test( 'an untouched theme preset is a pure theme form', () => {
+    expect( isPureTheme( untouched ) ).toBe( true );
+    expect( formAppearanceClasses( untouched ) ).toContain( 'subtleforms--inherit-theme' );
+    expect( formAppearanceClasses( untouched ) ).not.toContain( 'subtleforms--theme-tuned' );
+  } );
+
+  test( 'alignment, width and layout keep it pure', () => {
+    const a = { ...untouched, variants: { ...theme.variants, buttonAlign: 'center', width: 'narrow', layout: 'inline' } };
+    expect( isPureTheme( a ) ).toBe( true );
+  } );
+
+  test( 'a changed colour or input style makes it a tuned theme form', () => {
+    for ( const a of [
+      { ...untouched, tokens: { ...theme.tokens, colorPrimary: '#ff0000' } },
+      { ...untouched, variants: { ...theme.variants, input: 'filled' } },
+    ] ) {
+      expect( isPureTheme( a ) ).toBe( false );
+      expect( formAppearanceClasses( a ) ).toContain( 'subtleforms--theme-tuned' );
+      expect( formAppearanceClasses( a ) ).not.toContain( 'subtleforms--inherit-theme' );
+      expect( buttonThemeClass( a ) ).toBe( '' );
+    }
+  } );
+
+  test( 'other presets are never theme forms', () => {
+    expect( isPureTheme( { preset: 'default' } ) ).toBe( false );
+    expect( formAppearanceClasses( { preset: 'minimal', variants: {} } ) ).not.toMatch( /inherit-theme|theme-tuned/ );
+  } );
+} );
