@@ -150,6 +150,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: Hidden field values are worked out on the server, and Order summary and Fixed fee fields store nothing.
 * Fix: A failed builder save names the field, and numeric labels, placeholders and default values save.
 * Fix: Fields inside a column saved as an object with its own fields list are shown, checked and sent, so a product there is not charged unseen.
+* Fix: Deleting a field inside a step or container shows the Field deleted notice with Undo.
 
 = 2.3.9 - 2026-10-19 =
 * Change: Everything in SubtleForms works without a license: CSV export, reports, full conditional logic, Picture choice, several files per upload field, payment fields and coupons, and the Webhooks and Analytics settings.
