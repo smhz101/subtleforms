@@ -3,7 +3,7 @@
 /**
  * Plugin Name: SubtleForms
  * Description: Build contact, multi-step and conversational forms on a visual canvas, then read every entry in a clean inbox. Spam protection built in.
- * Version: 2.3.9
+ * Version: 2.4.0
  * Author: SubtleForms
  * Author URI: https://subtleforms.com/
  * Requires at least: 6.6
@@ -30,7 +30,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'SUBTLEFORMS_VERSION', '2.3.9' );
+define( 'SUBTLEFORMS_VERSION', '2.4.0' );
 define( 'SUBTLEFORMS_API_VERSION', 1 );
 define( 'SUBTLEFORMS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SUBTLEFORMS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
