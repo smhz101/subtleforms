@@ -495,10 +495,10 @@ class Schemas {
 			'PaymentConfig' => array(
 				'__passthrough' => true,
 				'enabled'     => 'optional|bool|default:false',
-				// Must list every currency the Payments panel offers. It offered JPY
-				// and INR while this enum did not, so choosing either made the form
-				// unsaveable from that point on.
-				'currency'    => 'optional|in:USD,EUR,GBP,CAD,AUD,JPY,INR|default:USD',
+				// The list the Payments panels offer (Payments\Currencies). No
+				// default: a form without a currency follows the site currency
+				// (PAY2-02); a default pinned every saved form to USD.
+				'currency'    => 'optional|in:' . implode( ',', \SubtleForms\Payments\Currencies::codes() ),
 				'amountType'  => 'optional|in:fixed,field,calculated|default:fixed',
 				'fixedAmount' => 'optional|number|min:0',
 				'amountField' => 'optional|string|max:100',

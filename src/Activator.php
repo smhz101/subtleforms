@@ -60,6 +60,9 @@ final class Activator {
 		self::migrate_starred_column();
 		self::migrate_trash_columns();
 		self::migrate_form_types();
+		// Entries reference their schema version; old schema copies are
+		// removed in batches in the background (FF-30, 2.4.0).
+		\SubtleForms\Tools\EntrySchemaMigration::schedule();
 
 		// Set default options
 		self::set_default_options();

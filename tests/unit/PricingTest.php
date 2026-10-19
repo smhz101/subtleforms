@@ -21,9 +21,10 @@ final class PricingTest extends TestCase {
 			'fields' => array(
 				array( 'type' => 'payment_product', 'key' => 'ticket', 'label' => 'Ticket', 'price' => 20, 'allowQuantity' => true, 'maxQuantity' => 5 ),
 				array(
-					'type'    => 'payment_choice',
-					'key'     => 'extras',
-					'label'   => 'Extras',
+					'type'      => 'payment_choice',
+					'key'       => 'extras',
+					'label'     => 'Extras',
+					'displayAs' => 'checkbox',
 					'options' => array(
 						array( 'label' => 'Lunch', 'value' => 'lunch', 'price' => 10 ),
 						array( 'label' => 'Video', 'value' => 'video', 'price' => 15 ),
@@ -42,6 +43,18 @@ final class PricingTest extends TestCase {
 		$this->assertSame( 67.5, $q['subtotal'] );
 		$this->assertSame( 6.75, $q['tax'] );
 		$this->assertSame( 74.25, $q['total'] );
+	}
+
+	public function test_a_pick_one_choice_prices_one_option(): void {
+		// PAY-08: radio, cards and dropdown never charge two options.
+		$schema                                = $this->schema();
+		$schema['fields'][1]['displayAs']      = 'radio';
+		$q                                     = Pricing::quote( $schema, array( 'extras' => array( 'lunch', 'video' ) ) );
+		$lines                                 = array_values( array_filter( $q['items'], static fn( $i ) => 'extras' === $i['key'] ) );
+		$this->assertCount( 1, $lines );
+		$this->assertSame( 10.0, $lines[0]['amount'] );
+		$q = Pricing::quote( $schema, array( 'extras' => 'lunch,video' ) );
+		$this->assertCount( 0, array_filter( $q['items'], static fn( $i ) => 'extras' === $i['key'] ) );
 	}
 
 	public function test_quantity_is_clamped_and_prices_come_from_schema(): void {

@@ -267,6 +267,11 @@ final class PublicSubmitApi {
 		// visitor cannot post a tampered total.
 		$payload = self::applyComputedValues( $payload, $activeSchema['schema'] ?? $activeSchema );
 
+		// Answers in the shape the form stores: Hidden field values worked
+		// out on the server, display-only payment fields dropped, websites,
+		// email lists and phone numbers tidied (FLD2-16, PAY2-04, FB-15).
+		$payload = \SubtleForms\Engine\FieldValidator::prepare( $activeSchema['schema'] ?? $activeSchema, $payload );
+
 		// Fields from an add-on that is not active are not on the live form.
 		$payload = \SubtleForms\Fields\AddonFieldTypes::dropMissingAnswers( $payload, $activeSchema['schema'] ?? $activeSchema );
 
@@ -636,21 +641,12 @@ final class PublicSubmitApi {
 			// Hand the visitor's coupon code on (it is removed from the payload
 			// before the entry is stored); the handler validates it itself.
 			$none['external']    = true;
-			$none['coupon_code'] = CouponsRepository::normalizeCode( (string) ( $payload['_coupon'] ?? '' ) );
+			$none['coupon_code'] = CouponsRepository::codeFrom( $schema, $payload );
 			return $none;
 		}
 
 		// The coupon comes from the summary's coupon box or a Coupon field.
-		$code = (string) ( $payload['_coupon'] ?? '' );
-		if ( '' === $code ) {
-			foreach ( Pricing::fields( $schema ) as $f ) {
-				if ( ( $f['type'] ?? '' ) === 'payment_coupon' && ! empty( $f['key'] ) && ! empty( $payload[ $f['key'] ] ) ) {
-					$code = (string) $payload[ $f['key'] ];
-					break;
-				}
-			}
-		}
-		$code = CouponsRepository::normalizeCode( $code );
+		$code = CouponsRepository::codeFrom( $schema, $payload );
 
 		$quote    = Pricing::quote( $schema, $payload );
 		$coupon   = null;
@@ -677,6 +673,19 @@ final class PublicSubmitApi {
 		$settings = get_option( 'subtleforms_settings', array() );
 		$mode     = is_array( $settings ) ? (string) ( $settings['ext_payments_mode'] ?? 'test' ) : 'test';
 
+		$hasCard = false;
+		foreach ( Pricing::fields( $schema ) as $f ) {
+			if ( ( $f['type'] ?? '' ) === 'payment_card' ) {
+				$hasCard = true;
+				break;
+			}
+		}
+		// A card cannot be charged less than the gateway minimum (PAY-26).
+		$tooSmall = $hasCard ? \SubtleForms\Payments\Currencies::belowMinimum( (float) $quote['total'], (string) $quote['currency'] ) : null;
+		if ( null !== $tooSmall ) {
+			return ApiResponse::error( 'subtleforms_amount_too_small', $tooSmall, 422 );
+		}
+
 		/**
 		 * Confirm the visitor's payment for this order.
 		 *
@@ -696,13 +705,6 @@ final class PublicSubmitApi {
 			return ApiResponse::error( $verified->get_error_code(), $verified->get_error_message(), 402 );
 		}
 
-		$hasCard = false;
-		foreach ( Pricing::fields( $schema ) as $f ) {
-			if ( ( $f['type'] ?? '' ) === 'payment_card' ) {
-				$hasCard = true;
-				break;
-			}
-		}
 		if ( null === $verified && $hasCard ) {
 			return ApiResponse::error( 'subtleforms_payment_unavailable', __( 'Online payment is not available right now. Please contact the site owner.', 'subtleforms' ), 402 );
 		}

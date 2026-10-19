@@ -395,7 +395,7 @@ final class SubmissionsApi {
 			'order'   => strtoupper( $request->get_param( 'order' ) ?? 'DESC' ) === 'ASC' ? 'ASC' : 'DESC',
 		);
 
-		$submissions = array_map( array( $this, 'redactSecrets' ), $this->submissionsRepo->findAll( $args ) );
+		$submissions = array_map( array( $this, 'listItem' ), $this->submissionsRepo->findAll( $args ) );
 		$total       = $this->submissionsRepo->count( $args );
 
 		return ApiResponse::paginated(
@@ -463,7 +463,7 @@ final class SubmissionsApi {
 			'order'       => strtoupper( $request->get_param( 'order' ) ?? 'DESC' ) === 'ASC' ? 'ASC' : 'DESC',
 		);
 
-		$submissions = array_map( array( $this, 'redactSecrets' ), $this->submissionsRepo->findAll( $args ) );
+		$submissions = array_map( array( $this, 'listItem' ), $this->submissionsRepo->findAll( $args ) );
 		$total       = $this->submissionsRepo->count( $args );
 
 		// Bulk fetch form titles to avoid N+1
@@ -518,13 +518,9 @@ final class SubmissionsApi {
 			$form                     = $this->formsRepo->find( $submission['form_id'] );
 			$submission['form_title'] = $form['title'] ?? __( 'Unknown Form', 'subtleforms' );
 
-			try {
-				$schemaVersion        = $submission['schema_version'] ?? null;
-				$schema               = $this->formsRepo->loadSchemaVersion( $submission['form_id'], $schemaVersion );
-				$submission['schema'] = $schema['schema'] ?? null;
-			} catch ( \RuntimeException $e ) {
-				$submission['schema'] = null;
-			}
+			// The schema version the entry was made with; older entries
+			// may still carry a copy of it (FF-30).
+			$submission['schema'] = \SubtleForms\Support\EntrySchema::forEntry( $submission, $this->formsRepo );
 
 			$adjacent              = $this->submissionsRepo->getAdjacentIds( $submission['id'], $submission['form_id'] );
 			$submission['next_id'] = $adjacent['next'];
@@ -532,6 +528,16 @@ final class SubmissionsApi {
 		}
 
 		$submission = $this->redactSecrets( $submission );
+		if ( is_array( $submission['meta'] ?? null ) ) {
+			$submission['meta'] = \SubtleForms\Support\EntrySchema::stripCopy( $submission['meta'] );
+		}
+		// Answers as the entry screen shows them, from the same formatter as
+		// emails, CSV, PDF and integrations (2.4.0).
+		$submission['display'] = \SubtleForms\Support\AnswerFormatter::display(
+			is_array( $submission['schema'] ?? null ) ? $submission['schema'] : array(),
+			is_array( $submission['payload'] ?? null ) ? $submission['payload'] : array(),
+			array( 'submission_id' => (int) $submission['id'] )
+		);
 		if ( isset( $submission['meta']['notes'] ) && is_array( $submission['meta']['notes'] ) ) {
 			$submission['meta']['notes'] = array_map( array( self::class, 'presentNote' ), $submission['meta']['notes'] );
 		}
@@ -744,19 +750,9 @@ final class SubmissionsApi {
 			return ApiResponse::validation_error( __( 'Restore this entry from the Trash before resending its notifications.', 'subtleforms' ) );
 		}
 
-		try {
-			$loaded = $this->formsRepo->loadSchemaVersion( (int) $submission['form_id'], isset( $submission['schema_version'] ) ? (int) $submission['schema_version'] : null );
-		} catch ( \RuntimeException $e ) {
-			$loaded = null;
-		}
-		if ( ! $loaded ) {
-			try {
-				$loaded = $this->formsRepo->loadSchemaVersion( (int) $submission['form_id'] );
-			} catch ( \RuntimeException $e ) {
-				$loaded = null;
-			}
-		}
-		$schema = is_array( $loaded ) ? ( $loaded['schema'] ?? $loaded ) : null;
+		// The entry's own schema version, else the copy an older entry
+		// carries, else the active schema (FF-30).
+		$schema = \SubtleForms\Support\EntrySchema::forEntry( $submission, $this->formsRepo );
 		if ( ! is_array( $schema ) ) {
 			return ApiResponse::not_found( __( 'This entry’s form could not be loaded.', 'subtleforms' ) );
 		}
@@ -1062,6 +1058,7 @@ final class SubmissionsApi {
 		}
 
 		$csv_data = array( $headers );
+		$fieldMaps = array();
 		foreach ( $rows as list( $submission, $payload ) ) {
 			$row = array(
 				$submission['id'],
@@ -1069,23 +1066,44 @@ final class SubmissionsApi {
 				$submission['status'],
 				$submission['created_at'],
 			);
+			// Each entry is read with the schema version it was made with,
+			// through the one answer formatter: labels, Yes/No, matrix rows,
+			// dates in the field format, file names with links (2.4.0). A
+			// drawn signature reads "Signed" (2.3.3).
+			$schema  = \SubtleForms\Support\EntrySchema::forEntry( $submission, $this->formsRepo ) ?? array();
+			$mapKey  = (int) $submission['form_id'] . ':' . ( $submission['schema_version'] ?? '' );
+			if ( ! isset( $fieldMaps[ $mapKey ] ) ) {
+				$fieldMaps[ $mapKey ] = array();
+				foreach ( \SubtleForms\Support\FieldMapper::fields( $schema ) as $field ) {
+					$fieldMaps[ $mapKey ][ $field['key'] ] = $field['field'];
+				}
+			}
+			$fields  = $fieldMaps[ $mapKey ];
+			$display = \SubtleForms\Support\AnswerFormatter::context(
+				$schema,
+				array(
+					'submission_id' => (int) $submission['id'],
+					'links'         => true,
+					'signature'     => 'short',
+				)
+			);
 			foreach ( $ordered as $key ) {
 				if ( isset( $repeaters[ $key ] ) ) {
-					foreach ( \SubtleForms\Support\Repeater::csvCells( $payload[ $key ] ?? array(), $repeaters[ $key ] ) as $cell ) {
+					foreach ( \SubtleForms\Support\Repeater::csvCells( $payload[ $key ] ?? array(), $repeaters[ $key ], $display ) as $cell ) {
 						$row[] = $cell;
 					}
 					continue;
 				}
 				$value = $payload[ $key ] ?? '';
-				// Exports of several forms: groups read as numbered lines.
-				// A drawn signature is an image; the cell says it was signed (2.3.3).
-				if ( \SubtleForms\Support\EntryValues::isSignatureImage( $value ) ) {
-					$row[] = __( 'Signed', 'subtleforms' );
+				if ( isset( $fields[ $key ] ) ) {
+					$row[] = \SubtleForms\Support\AnswerFormatter::text( $value, $fields[ $key ], $display );
 					continue;
 				}
-				$row[] = \SubtleForms\Support\Repeater::looksLikeGroups( $value )
+				// Not in the schema (exports of several forms, or a field since
+				// removed): groups read as numbered lines.
+				$row[] = \SubtleForms\Support\Repeater::looksLikeGroups( $value ) && null === \SubtleForms\Support\AnswerFormatter::items( $value, array(), $display )
 					? $this->groupsText( $value )
-					: \SubtleForms\Support\FieldMapper::toText( $value );
+					: \SubtleForms\Support\AnswerFormatter::text( $value, array(), $display );
 			}
 			$csv_data[] = $row;
 		}
@@ -1107,6 +1125,21 @@ final class SubmissionsApi {
 				'rows'     => count( $rows ),
 			)
 		);
+	}
+
+	/**
+	 * One entry in a list response: secrets redacted, and no schema copy
+	 * from an entry saved before 2.4.0 (FF-30).
+	 *
+	 * @param mixed $submission Submission row.
+	 * @return mixed
+	 */
+	public function listItem( $submission ) {
+		$submission = $this->redactSecrets( $submission );
+		if ( is_array( $submission ) && is_array( $submission['meta'] ?? null ) ) {
+			$submission['meta'] = \SubtleForms\Support\EntrySchema::stripCopy( $submission['meta'] );
+		}
+		return $submission;
 	}
 
 	/**

@@ -319,12 +319,17 @@ final class TransferService {
 				$payload = is_array( $row['payload'] ?? null ) ? $row['payload'] : array();
 				$version = (int) ( $row['schema_version'] ?? 0 );
 				$keys    = $secrets[ $version ] ?? $secrets[0];
-				$rows[]  = array(
-					'status'     => (string) ( $row['status'] ?? 'unread' ),
-					'is_read'    => empty( $row['is_read'] ) ? 0 : 1,
-					'starred'    => empty( $row['starred'] ) ? 0 : 1,
-					'created_at' => (string) ( $row['created_at'] ?? '' ),
-					'payload'    => TransferPackage::withoutSecrets( $payload, $keys ),
+				$meta    = is_array( $row['meta'] ?? null ) ? $row['meta'] : array();
+				$rows[]  = array_merge(
+					array(
+						'status'     => (string) ( $row['status'] ?? 'unread' ),
+						'is_read'    => empty( $row['is_read'] ) ? 0 : 1,
+						'starred'    => empty( $row['starred'] ) ? 0 : 1,
+						'created_at' => (string) ( $row['created_at'] ?? '' ),
+						'payload'    => TransferPackage::withoutSecrets( $payload, $keys ),
+					),
+					// The order and payment record go with the entry (PAY2-01).
+					TransferPackage::paymentMeta( $meta )
 				);
 			}
 			$offset += 200;
@@ -386,6 +391,7 @@ final class TransferService {
 						'form_id' => $formId,
 						'payload' => self::cleanPayload( (array) $row['payload'], $schema ),
 						'status'  => $row['status'],
+						'meta'    => (array) ( $row['meta'] ?? array() ),
 					)
 				);
 			} catch ( \Throwable $e ) {

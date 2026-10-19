@@ -121,7 +121,23 @@ final class CouponsRepository {
 				return new \WP_Error( 'subtleforms_coupon_uses', $message, array( 'status' => 400 ) );
 			}
 		}
+		// A date that cannot be read is an error, not "no date": an unreadable
+		// expiry used to save as "never expires" (PAY-14).
+		foreach (
+			array(
+				'starts_at'  => __( 'Enter a valid start date.', 'subtleforms' ),
+				'expires_at' => __( 'Enter a valid expiry date.', 'subtleforms' ),
+			) as $field => $message
+		) {
+			$raw = isset( $data[ $field ] ) && is_scalar( $data[ $field ] ) ? trim( (string) $data[ $field ] ) : '';
+			if ( '' !== $raw && false === strtotime( $raw ) ) {
+				return new \WP_Error( 'subtleforms_coupon_date', $message, array( 'status' => 400 ) );
+			}
+		}
 		$row = self::clean( $data );
+		if ( $row['starts_at'] && $row['expires_at'] && strtotime( $row['starts_at'] ) >= strtotime( $row['expires_at'] ) ) {
+			return new \WP_Error( 'subtleforms_coupon_date', __( 'The expiry date must be after the start date.', 'subtleforms' ), array( 'status' => 400 ) );
+		}
 		if ( '' === $row['code'] ) {
 			return new \WP_Error( 'subtleforms_coupon_code', __( 'Enter a coupon code.', 'subtleforms' ), array( 'status' => 400 ) );
 		}
@@ -310,6 +326,32 @@ final class CouponsRepository {
 		$amount = (float) $coupon['amount'];
 		$off    = 'percent' === $coupon['type'] ? $subtotal * $amount / 100 : $amount;
 		return round( min( $subtotal, max( 0.0, $off ) ), 2 );
+	}
+
+	/**
+	 * The coupon code a visitor entered: the summary's coupon box (`_coupon`),
+	 * else the first Coupon field with a value. Quote, intent and submit all
+	 * read it here, so they always price the same order (PAY-13).
+	 *
+	 * @param mixed $schema  Form schema.
+	 * @param array $payload Submitted values.
+	 */
+	public static function codeFrom( $schema, array $payload ): string {
+		$code = self::normalizeCode( is_scalar( $payload['_coupon'] ?? null ) ? (string) $payload['_coupon'] : '' );
+		if ( '' !== $code ) {
+			return $code;
+		}
+		foreach ( Pricing::fields( $schema ) as $f ) {
+			$key = (string) ( $f['key'] ?? '' );
+			if ( ( $f['type'] ?? '' ) !== 'payment_coupon' || '' === $key || ! is_scalar( $payload[ $key ] ?? null ) ) {
+				continue;
+			}
+			$code = self::normalizeCode( (string) $payload[ $key ] );
+			if ( '' !== $code ) {
+				return $code;
+			}
+		}
+		return '';
 	}
 
 	public static function normalizeCode( string $code ): string {

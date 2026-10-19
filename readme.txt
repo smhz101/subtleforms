@@ -129,7 +129,26 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 
 == Changelog ==
 
-= 2.4.0 - 2026-10-19 =
+= 2.4.0 - 2026-10-20 =
+* New: Each payment form can pick its own currency, and more currencies are available, including JPY, INR, PKR and AED.
+* Fix: Forms follow the site currency unless you pick one, the Custom amount field shows the right symbol, and yen totals are whole yen.
+* Fix: Coupons give the same total at payment and on submit, and coupon dates are checked.
+* Fix: Draft forms are not priced for visitors, and small orders below the card minimum get a clear message.
+* Fix: Product settings are under General, priced options are not shown selected on the canvas, and dropdown priced options use the standard picker.
+* Fix: Failed payments show as Payment failed, payment messages can be translated, and Pro asks admins to connect Stripe when no gateway is set up.
+* Fix: Tools export and import keep each entry's order and payment details.
+* Change: Entries refer to the form version they were sent with instead of keeping a full copy of the form. Older entries are cleaned up in the background and stay readable.
+* Fix: Entries, emails, CSV exports, PDFs and integrations show option labels, Yes or No, matrix rows with their columns, dependent dropdown labels, dates and times in the field format, and product lines with prices.
+* Fix: CSV exports list uploaded files by name with a download link.
+* Fix: A very long field label is shortened in emails, exports, entries and the required message. The admin label is used when it is set.
+* Fix: The submissions list names the sender by a name or email answer, or shows Anonymous, never a quantity or a choice.
+* Fix: The server checks every answer the way the form does: choices, dates, times, ratings, sliders, matrix answers, colours, signatures and read-only fields. Its messages match the form and can be translated.
+* Fix: Email fields accept several addresses when allowed, and user@localhost when RFC validation is off. A website typed without https:// gets it.
+* Fix: Pasted international phone numbers pick their country, the leading 0 is dropped, and the server checks the calling code and length.
+* Fix: Custom amount limits, Product quantity limits and Priced options are enforced instead of charging a different amount.
+* Fix: A required Rich text field with no text is refused, and a Repeater below its minimum shows one message.
+* Fix: Hidden field values are worked out on the server, and Order summary and Fixed fee fields store nothing.
+* Fix: A failed builder save names the field, and numeric labels, placeholders and default values save.
 * Fix: A color field saves the color it shows, including its default.
 * Fix: Each CAPTCHA field uses its own provider and keys, and the form says when a check is not set up.
 * Fix: Password fields can show a strength meter and ask for the password again.
@@ -145,7 +164,6 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: Replacing dependent dropdowns from a file asks first, and a semicolon file imports as separate columns.
 * Fix: Dropdown, country, phone and date fields work from the keyboard. The calendar can jump to a month and year, and country buttons show a letter code.
 * Fix: The first invalid dropdown, country, date or phone control receives focus.
-
 = 2.3.9 - 2026-10-19 =
 * Change: Everything in SubtleForms works without a license: CSV export, reports, full conditional logic, Picture choice, several files per upload field, payment fields and coupons, and the Webhooks and Analytics settings.
 * Change: Signature and Calculation fields and card payments are part of SubtleForms Pro 2.4.0. Forms that use them keep them; the live form leaves them out until Pro is active.

@@ -131,6 +131,19 @@ final class FieldCaptcha {
 					self::walk( $field[ $child_key ], $found );
 				}
 			}
+			if ( isset( $field['columns'] ) && is_array( $field['columns'] ) ) {
+				foreach ( $field['columns'] as $column ) {
+					if ( ! is_array( $column ) ) {
+						continue;
+					}
+					if ( isset( $column['fields'] ) || isset( $column['children'] ) ) {
+						self::walk( $column['fields'] ?? array(), $found );
+						self::walk( $column['children'] ?? array(), $found );
+					} else {
+						self::walk( $column, $found );
+					}
+				}
+			}
 		}
 	}
 }

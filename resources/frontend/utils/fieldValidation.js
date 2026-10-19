@@ -16,6 +16,7 @@ import { fieldConfig } from '../../shared/fieldConfig';
 import { getFieldType } from '../../shared/extend';
 import { hasParts, missingParts } from '../../shared/compositeParts';
 import { firstUnansweredChainedLevel } from '../../shared/chainedOptions';
+import { isValidInternational } from '../../shared/phone';
 
 export const COMPOSITE_FIELD_TYPES = new Set(['name_group', 'address_group', 'address']);
 
@@ -86,6 +87,66 @@ function firstUnansweredMatrixRow(rows, value) {
 
 function isIsoDate(value) {
   return typeof value === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(value);
+}
+
+/** A real calendar day, YYYY-MM-DD (FieldValidator::isIsoDate). */
+function isCalendarDate(value) {
+  if (!isIsoDate(value)) return false;
+  const [y, m, d] = value.split('-').map(Number);
+  const date = new Date(Date.UTC(y, m - 1, d));
+  return date.getUTCFullYear() === y && date.getUTCMonth() === m - 1 && date.getUTCDate() === d;
+}
+
+/** HH:MM on the 24-hour clock, seconds optional. */
+function isClockTime(value) {
+  return typeof value === 'string' && /^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/.test(value);
+}
+
+/**
+ * A website typed without a scheme gets https:// (FB-15). The server stores
+ * it the same way (FieldValidator::normalizeUrl).
+ *
+ * @param {string} value
+ * @return {string}
+ */
+export function normalizeUrl(value) {
+  const v = String(value ?? '').trim();
+  if (!v || v.includes('://')) return v;
+  if (/^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+(:\d+)?([/?#]\S*)?$/i.test(v)) {
+    return `https://${v}`;
+  }
+  return v;
+}
+
+/**
+ * Whether rich text shows nothing (FA-17), such as "<p><br></p>".
+ *
+ * @param {*} value
+ * @return {boolean}
+ */
+function richTextIsBlank(value) {
+  if (typeof value !== 'string') return isEmptyValue(value);
+  if (/<(img|iframe|video|svg|hr)\b/i.test(value)) return false;
+  return value.replace(/<[^>]*>/g, '').replace(/&nbsp;|\s|\u00a0/g, '') === '';
+}
+
+/**
+ * Email check: each address when the field allows several (FB-05); a looser
+ * check with RFC validation off, so user@localhost passes (FB-06).
+ *
+ * @param {string} value
+ * @param {Object} config
+ * @return {boolean}
+ */
+function emailIsValid(value, config = {}) {
+  if (typeof value !== 'string') return false;
+  const list =
+    config.allowMultiple === true
+      ? value.split(/[,;]/).map((v) => v.trim()).filter(Boolean)
+      : [value.trim()];
+  const strict = ![false, 0, '0', 'false'].includes(config.rfcValidation);
+  const re = strict ? /^[^\s@]+@[^\s@]+\.[^\s@]+$/ : /^[^\s@,;]+@[^\s@,;]+$/;
+  return list.length > 0 && list.every((address) => re.test(address));
 }
 
 /**
@@ -185,7 +246,7 @@ function rawValidateField(field, value, defaults = {}) {
           required: true,
         };
       }
-    } else if (isEmptyValue(value)) {
+    } else if (type === 'rich_text' ? richTextIsBlank(value) : isEmptyValue(value)) {
       return requiredMessage;
     }
   }
@@ -194,10 +255,10 @@ function rawValidateField(field, value, defaults = {}) {
     return undefined;
   }
 
-  if (type === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) {
+  if (type === 'email' && !emailIsValid(value, config)) {
     return __('Invalid email address.', 'subtleforms');
   }
-  if (type === 'url' && !/^https?:\/\/.+/.test(value)) {
+  if (type === 'url' && !/^https?:\/\/\S+$/i.test(normalizeUrl(value))) {
     return __('Invalid URL.', 'subtleforms');
   }
 
@@ -259,6 +320,43 @@ function rawValidateField(field, value, defaults = {}) {
     }
   }
 
+  if (type === 'date' && !isCalendarDate(value)) {
+    return __('Please enter a valid date.', 'subtleforms');
+  }
+  if (type === 'time' && !isClockTime(value)) {
+    return __('Please enter a valid time.', 'subtleforms');
+  }
+  if (type === 'datetime') {
+    const [datePart, timePart] = String(value).split(/[T ]/, 2);
+    if (!isCalendarDate(datePart) || (timePart !== undefined && !isClockTime(timePart))) {
+      return __('Please enter a valid date and time.', 'subtleforms');
+    }
+  }
+  if (type === 'color_picker' && !/^#([0-9a-f]{3}|[0-9a-f]{6})$/i.test(String(value).trim())) {
+    return __('Please enter a colour as a hex value, such as #336699.', 'subtleforms');
+  }
+  if (type === 'payment_amount') {
+    const amount = Number(value);
+    if (Number.isNaN(amount)) return __('Payment amount must be a valid number.', 'subtleforms');
+    if (amount < 0) return __('Payment amount must be positive.', 'subtleforms');
+    const min = num(config.min);
+    const max = num(config.max);
+    if (min !== null && Number.isFinite(min) && amount < min) {
+      return sprintf(
+        /* translators: %s: smallest amount */
+        __('Payment amount must be at least %s.', 'subtleforms'),
+        min.toFixed(2)
+      );
+    }
+    if (max !== null && Number.isFinite(max) && max > 0 && amount > max) {
+      return sprintf(
+        /* translators: %s: largest amount */
+        __('Payment amount cannot exceed %s.', 'subtleforms'),
+        max.toFixed(2)
+      );
+    }
+  }
+
   if (type === 'date' && isIsoDate(value)) {
     const minDate = config.minDate;
     const maxDate = config.maxDate;
@@ -281,7 +379,7 @@ function rawValidateField(field, value, defaults = {}) {
   // Same character rule as FieldValidator::validatePhone. Preview never
   // reaches the server, so letters must fail here too.
   if ((type === 'phone' || type === 'tel') && typeof value === 'string') {
-    if (!/^[\d\s\-\+\(\)]+$/.test(value)) {
+    if (!/^[\d\s\-+()]+$/.test(value) || !isValidInternational(value)) {
       return __('Invalid phone number.', 'subtleforms');
     }
     if (config.format === 'us' && !isCompleteUsPhone(value)) {

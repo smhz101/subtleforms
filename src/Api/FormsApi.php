@@ -1152,7 +1152,7 @@ final class FormsApi {
 	 */
 	private function buildPublicSchema( array $schema ): array {
 		$public = array(
-			'fields'         => $schema['fields'] ?? array(),
+			'fields'         => self::stripCaptchaSecrets( $schema['fields'] ?? array() ),
 			'schema_version' => $schema['schema_version'] ?? 1,
 		);
 
@@ -1277,6 +1277,51 @@ final class FormsApi {
 	/**
 	 * Recursively process fields to inject CAPTCHA HTML.
 	 */
+	/**
+	 * Site keys can stay on the public form. Secret keys cannot.
+	 *
+	 * @param mixed $fields Field nodes.
+	 * @return array
+	 */
+	private static function stripCaptchaSecrets( $fields ): array {
+		if ( ! is_array( $fields ) ) {
+			return array();
+		}
+		$clean = array();
+		foreach ( $fields as $key => $field ) {
+			if ( ! is_array( $field ) ) {
+				$clean[ $key ] = $field;
+				continue;
+			}
+			unset( $field['secret_key'] );
+			if ( isset( $field['config'] ) && is_array( $field['config'] ) ) {
+				unset( $field['config']['secret_key'] );
+			}
+			foreach ( array( 'fields', 'children' ) as $child ) {
+				if ( isset( $field[ $child ] ) ) {
+					$field[ $child ] = self::stripCaptchaSecrets( $field[ $child ] );
+				}
+			}
+			if ( isset( $field['columns'] ) && is_array( $field['columns'] ) ) {
+				foreach ( $field['columns'] as $i => $column ) {
+					if ( ! is_array( $column ) ) {
+						continue;
+					}
+					if ( isset( $column['fields'] ) ) {
+						$column['fields'] = self::stripCaptchaSecrets( $column['fields'] );
+					} elseif ( isset( $column['children'] ) ) {
+						$column['children'] = self::stripCaptchaSecrets( $column['children'] );
+					} else {
+						$column = self::stripCaptchaSecrets( $column );
+					}
+					$field['columns'][ $i ] = $column;
+				}
+			}
+			$clean[ $key ] = $field;
+		}
+		return $clean;
+	}
+
 	private function processCaptchaFields( $fields, $captcha_html ) {
 		$provider_name = $this->captchaManager ? $this->captchaManager->getActiveProviderName() : '';
 
@@ -1307,7 +1352,14 @@ final class FormsApi {
 
 			if ( ! empty( $field['columns'] ) && is_array( $field['columns'] ) ) {
 				foreach ( $field['columns'] as &$column ) {
-					if ( is_array( $column ) ) {
+					if ( ! is_array( $column ) ) {
+						continue;
+					}
+					if ( isset( $column['fields'] ) && is_array( $column['fields'] ) ) {
+						$column['fields'] = $this->processCaptchaFields( $column['fields'], $captcha_html );
+					} elseif ( isset( $column['children'] ) && is_array( $column['children'] ) ) {
+						$column['children'] = $this->processCaptchaFields( $column['children'], $captcha_html );
+					} else {
 						$column = $this->processCaptchaFields( $column, $captcha_html );
 					}
 				}

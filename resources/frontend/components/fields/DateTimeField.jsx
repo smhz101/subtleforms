@@ -265,19 +265,24 @@ export default function DateTimeField({
                   ref={gridRef}
                   aria-label={monthTitle(cursor, locale)}
                   onKeyDown={(event) => {
-                    const current = days.findIndex((day) => toIsoDate(day) === (dateValue || toIsoDate(cursor)));
+                    const focusIso = toIsoDate(cursor);
+                    const current = days.findIndex((day) => toIsoDate(day) === focusIso);
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      const iso = focusIso;
+                      if (isIsoDateInRange(iso, min, max)) {
+                        emitDate(iso);
+                      }
+                      return;
+                    }
                     const next = moveGrid(current < 0 ? 0 : current, event.key, 7, days.length);
-                    if (next === (current < 0 ? 0 : current) && !event.key.startsWith('Arrow')) {
+                    if (next === (current < 0 ? 0 : current) || !event.key.startsWith('Arrow')) {
                       return;
                     }
                     event.preventDefault();
                     const day = days[next];
                     if (!day) return;
-                    setCursor(new Date(day.getFullYear(), day.getMonth(), 1));
-                    const iso = toIsoDate(day);
-                    if (isIsoDateInRange(iso, min, max)) {
-                      emitDate(iso);
-                    }
+                    setCursor(day);
                   }}>
                   <div className='subtleforms-picker__weekdays' role='row'>
                     {weekdays.map((day, index) => <span key={index} role='columnheader'>{day}</span>)}
@@ -299,7 +304,7 @@ export default function DateTimeField({
                             disabled={!inRange}
                             aria-selected={isSelected}
                             aria-label={dayName(day, locale)}
-                            tabIndex={isSelected || (!dateValue && isCursor) ? 0 : -1}
+                            tabIndex={toIsoDate(cursor) === iso ? 0 : -1}
                             onClick={() => {
                               setCursor(new Date(day.getFullYear(), day.getMonth(), 1));
                               emitDate(iso);

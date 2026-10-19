@@ -1,4 +1,5 @@
-import { answerText } from '../utils/answerText';
+import { submissionStatus } from '../utils/submissionStatus';
+import { displayItems, displayLabel, displayRow, displayText } from '../utils/entryDisplay';
 import { adminLabel } from '../../shared/fieldDisplay';
 import { structuralType } from '../../shared/formType';
 import { useState, useEffect, useRef } from '@wordpress/element';
@@ -231,17 +232,22 @@ const renderReadableData = (data) => {
 /**
  * Repeater answer (2.3.1): one row per group, one column per child field.
  */
-export function RepeaterTable( { node, groups, submissionId } ) {
+export function RepeaterTable( { node, groups, submissionId, display } ) {
   const children = ( Array.isArray( node?.children ) && node.children.length ? node.children : node?.fields || [] )
     .filter( ( c ) => c && ( c.config?.key || c.key ) );
-  const columns = children.length
-    ? children.map( ( c ) => ( { key: c.config?.key || c.key, label: adminLabel( c ) } ) )
-    : Array.from( new Set( groups.flatMap( ( g ) => Object.keys( g || {} ) ) ) ).map( ( k ) => ( { key: k, label: k } ) );
-  const cell = ( v ) => {
+  // Column names and cell text come from the server formatter when sent.
+  const columns = Array.isArray( display?.columns ) && display.columns.length
+    ? display.columns
+    : children.length
+      ? children.map( ( c ) => ( { key: c.config?.key || c.key, label: adminLabel( c ) } ) )
+      : Array.from( new Set( groups.flatMap( ( g ) => Object.keys( g || {} ) ) ) ).map( ( k ) => ( { key: k, label: k } ) );
+  const cell = ( v, i, key ) => {
     if ( v === undefined || v === null || v === '' ) return '';
     if ( isSignatureImage( v ) ) return <img className='sf-answers__signature' src={ v } alt={ __( 'Signature', 'subtleforms' ) } />;
     // Files uploaded in a group get download links like any other upload (FA-03).
     if ( isFileList( v ) ) return <FileLinks files={ v } submissionId={ submissionId } />;
+    const text = display?.cells?.[ i ]?.[ key ];
+    if ( typeof text === 'string' ) return text;
     if ( Array.isArray( v ) ) return v.map( ( x ) => ( x && typeof x === 'object' ? x.label || JSON.stringify( x ) : String( x ) ) ).join( ', ' );
     if ( typeof v === 'object' ) return Object.values( v ).filter( Boolean ).join( ' ' );
     return String( v );
@@ -259,7 +265,7 @@ export function RepeaterTable( { node, groups, submissionId } ) {
           { groups.map( ( g, i ) => (
             <tr key={ i }>
               <th scope='row'>{ i + 1 }</th>
-              { columns.map( ( c ) => <td key={ c.key }>{ cell( g?.[ c.key ] ) }</td> ) }
+              { columns.map( ( c ) => <td key={ c.key }>{ cell( g?.[ c.key ], i, c.key ) }</td> ) }
             </tr>
           ) ) }
         </tbody>
@@ -511,6 +517,9 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
   };
 
   const getFieldLabel = (key) => {
+    // The server names fields the same way in every output (FLD2-12).
+    const named = displayLabel(submission?.display, key);
+    if (named) return named;
     if (!submission?.schema?.fields) return key;
 
     // Recursively search for field in schema including nested fields
@@ -671,7 +680,6 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
 
   // Field types, so answers can be shown the way they were typed.
   const fieldTypes = {};
-  const fieldNodes = {};
   const repeaterNodes = {};
   ( function collect( list ) {
     ( list || [] ).forEach( ( f ) => {
@@ -679,7 +687,6 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
       const k = f.config?.key || f.key;
       if ( k ) {
         fieldTypes[ k ] = f.type;
-        fieldNodes[ k ] = f;
       }
       // A Repeater's children are answered inside its groups.
       if ( f.type === 'repeat_container' ) {
@@ -711,17 +718,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
     senderEmail ||
     sprintf( __( 'Submission #%d', 'subtleforms' ), submission.id );
 
-  const PIPELINE = {
-    completed: { label: __( 'Completed', 'subtleforms' ), cls: 'sf-pill--success' },
-    failed: { label: __( 'Failed', 'subtleforms' ), cls: 'sf-pill--danger' },
-    processing: { label: __( 'Processing', 'subtleforms' ), cls: 'sf-pill--info' },
-    payment_pending: { label: __( 'Awaiting payment', 'subtleforms' ), cls: 'sf-pill--warning' },
-    payment_failed: { label: __( 'Payment failed', 'subtleforms' ), cls: 'sf-pill--danger' },
-    spam: { label: __( 'Spam', 'subtleforms' ), cls: 'sf-pill--danger' },
-    flagged: { label: __( 'Flagged', 'subtleforms' ), cls: 'sf-pill--warning' },
-    trash: { label: __( 'Trashed', 'subtleforms' ), cls: 'sf-pill--danger' },
-  };
-  const pipeline = PIPELINE[ submission.status ] || { label: __( 'Received', 'subtleforms' ), cls: '' };
+  const pipeline = submissionStatus( submission.status );
 
   const actions = (
     <div className='sf-sub-toolbar'>
@@ -898,19 +895,21 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
                         { isEmpty ? (
                           <span className='sf-answers__empty'>{ __( 'No answer', 'subtleforms' ) }</span>
                         ) : repeaterNodes[ key ] && Array.isArray( value ) ? (
-                          <RepeaterTable node={ repeaterNodes[ key ] } groups={ value } submissionId={ submission.id } />
+                          <RepeaterTable node={ repeaterNodes[ key ] } groups={ value } submissionId={ submission.id } display={ displayRow( submission.display, key ) } />
                         ) : isSignatureImage( value ) ? (
                           <img className='sf-answers__signature' src={ value } alt={ __( 'Signature', 'subtleforms' ) } />
                         ) : isFileList( value ) ? (
                           <FileLinks files={ value } submissionId={ submission.id } />
-                        ) : Array.isArray( value ) ? (
+                        ) : Array.isArray( value ) && displayItems( submission.display, key ) ? (
                           <span className='sf-answers__chips'>
-                            { value.map( ( v, i ) => (
-                              <span key={ i } className='sf-pill sf-pill--outline'>
-                                { v && typeof v === 'object' ? ( v.label ? String( v.label ) : JSON.stringify( v ) ) : answerText( v, fieldNodes[ key ] ) }
-                              </span>
+                            { displayItems( submission.display, key ).map( ( text, i ) => (
+                              <span key={ i } className='sf-pill sf-pill--outline'>{ text }</span>
                             ) ) }
                           </span>
+                        ) : typeof value === 'object' && displayRow( submission.display, key ) ? (
+                          // Matrix, name and address answers read as the server
+                          // formats them ("Mon: AM, PM", FA-10).
+                          <span className='sf-answers__text sf-answers__text--multiline'>{ displayText( submission.display, key, value ) }</span>
                         ) : typeof value === 'object' ? (
                           <div className='sf-answers__object'>{ renderReadableData( value ) }</div>
                         ) : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test( String( value ) ) ? (
@@ -923,7 +922,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
                           // Stored through a small tag allow-list on the server.
                           <span className='sf-answers__text sf-answers__text--rich' dangerouslySetInnerHTML={ { __html: String( value ) } } />
                         ) : (
-                          <span className={ `sf-answers__text${ fieldTypes[ key ] === 'textarea' ? ' sf-answers__text--multiline' : '' }` }>{ answerText( value, fieldNodes[ key ] ) }</span>
+                          <span className={ `sf-answers__text${ fieldTypes[ key ] === 'textarea' ? ' sf-answers__text--multiline' : '' }` }>{ displayText( submission.display, key, value ) }</span>
                         ) }
                       </dd>
                     </div>
@@ -1112,6 +1111,12 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
                   ) }
                   <dt className='is-total'>{ __( 'Total', 'subtleforms' ) }</dt>
                   <dd className='is-total'>{ formatMoney( meta.order.total, meta.order.currency ) }</dd>
+                  { Number( meta.payment?.refunded ) > 0 && (
+                    <>
+                      <dt>{ __( 'Refunded', 'subtleforms' ) }</dt>
+                      <dd>−{ formatMoney( Number( meta.payment.refunded ), meta.order.currency ) }</dd>
+                    </>
+                  ) }
                 </dl>
                 { meta.woocommerce?.order_id && (
                   <p className='sf-order-panel__ref sf-order-panel__woo'>

@@ -31,12 +31,9 @@ final class FrontendAssets {
 	 * @param Settings|null       $settings       Plugin settings, when available.
 	 * @param CaptchaManager|null $captchaManager CAPTCHA manager, when available.
 	 */
-	public static function enqueue( ?Settings $settings = null, ?CaptchaManager $captchaManager = null ): void {
+	public static function enqueue( ?Settings $settings = null, ?CaptchaManager $captchaManager = null, array $providers = array() ): void {
 		static $enqueued = false;
-		if ( $enqueued ) {
-			return;
-		}
-		$enqueued = true;
+		static $loaded_providers = array();
 
 		$asset_file = SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/frontend.asset.php';
 		$asset      = file_exists( $asset_file ) ? require $asset_file : array(
@@ -46,22 +43,48 @@ final class FrontendAssets {
 
 		$dependencies = $asset['dependencies'];
 
-		// The CAPTCHA provider's API has to exist before our script runs, so it
-		// is enqueued first and declared as a dependency rather than merely
-		// added to the page.
+		// Load each CAPTCHA provider the form needs, including a field that
+		// uses its own keys when Settings has CAPTCHA off.
+		$needed = array();
 		if ( $captchaManager && $captchaManager->isEnabled() && $captchaManager->isConfigured() ) {
-			$script_url = $captchaManager->getScriptUrl();
-			if ( ! empty( $script_url ) ) {
-				wp_enqueue_script(
-					'subtleforms-captcha',
-					$script_url,
-					array(),
-					SUBTLEFORMS_VERSION,
-					true
-				);
-				$dependencies[] = 'subtleforms-captcha';
+			$active = $captchaManager->getActiveProviderName();
+			if ( '' !== $active ) {
+				$needed[] = $active;
 			}
 		}
+		foreach ( $providers as $provider ) {
+			if ( is_string( $provider ) && '' !== $provider ) {
+				$needed[] = $provider;
+			}
+		}
+		$needed = array_values( array_unique( $needed ) );
+		foreach ( $needed as $provider ) {
+			if ( isset( $loaded_providers[ $provider ] ) || ! $captchaManager ) {
+				if ( isset( $loaded_providers[ $provider ] ) ) {
+					$dependencies[] = $loaded_providers[ $provider ];
+				}
+				continue;
+			}
+			$script_url = $captchaManager->scriptUrlFor( $provider );
+			if ( '' === $script_url ) {
+				continue;
+			}
+			$handle = 'subtleforms-captcha-' . $provider;
+			wp_enqueue_script(
+				$handle,
+				$script_url,
+				array(),
+				SUBTLEFORMS_VERSION,
+				true
+			);
+			$loaded_providers[ $provider ] = $handle;
+			$dependencies[] = $handle;
+		}
+
+		if ( $enqueued ) {
+			return;
+		}
+		$enqueued = true;
 
 		wp_enqueue_script(
 			'subtleforms-frontend',

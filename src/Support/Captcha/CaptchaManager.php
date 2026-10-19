@@ -479,6 +479,21 @@ class CaptchaManager {
 		return $provider->verify( $response, $secret, $this->getClientIp() );
 	}
 
+	/**
+	 * Script URL for one provider, even when Settings has CAPTCHA off.
+	 *
+	 * @param string $provider_name Provider slug.
+	 * @return string
+	 */
+	public function scriptUrlFor( string $provider_name ): string {
+		$provider = $this->getProviderByType( $provider_name );
+		if ( ! $provider ) {
+			return '';
+		}
+		$config = $this->getProviderConfig( $provider->getName() );
+		return (string) $provider->getScriptUrl( $config );
+	}
+
 	public function getScriptUrl() {
 		if ( ! $this->isEnabled() || ! $this->isConfigured() ) {
 			return '';

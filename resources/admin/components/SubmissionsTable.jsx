@@ -1,3 +1,4 @@
+import { submissionStatus } from '../utils/submissionStatus';
 import {
   useState,
   useEffect,
@@ -23,6 +24,7 @@ import { apiGet } from '../utils/api';
 import { apiClient } from '../data';
 import { Icon } from '../ui';
 import { downloadCsv } from '../utils/csvDownload';
+import { entrySender } from '../utils/entrySender';
 import './SubmissionsTable.scss';
 
 const restNonce =
@@ -505,7 +507,7 @@ const SubmissionsTable = forwardRef(
       // Priority: spam/flagged > failed > payment_pending > unread
       if (submission.status === 'spam') classes.push('sf-submissions-table__row--spam');
       else if (submission.status === 'flagged') classes.push('sf-submissions-table__row--flagged');
-      else if (submission.status === 'failed') classes.push('sf-submissions-table__row--failed');
+      else if (submission.status === 'failed' || submission.status === 'payment_failed') classes.push('sf-submissions-table__row--failed');
       else if (submission.status === 'payment_pending') classes.push('sf-submissions-table__row--payment-pending');
       else if (parseInt(submission.is_read, 10) === 0) classes.push('sf-submissions-table__row--unread');
       return classes.join(' ');
@@ -598,49 +600,10 @@ const SubmissionsTable = forwardRef(
       }
     };
 
-    // Pull a human summary out of the payload: a name and an email when the
-    // form collects them, otherwise the first short answers.
-    const summarize = (submission) => {
-      const payload =
-        submission.payload && typeof submission.payload === 'object'
-          ? submission.payload
-          : {};
-      const entries = Object.entries(payload);
-      const flat = (v) => {
-        if (v === null || v === undefined) return '';
-        if (typeof v === 'object') {
-          if (v.first_name || v.last_name) {
-            return [v.first_name, v.last_name].filter(Boolean).join(' ');
-          }
-          return '';
-        }
-        return String(v);
-      };
-      const byKey = (re) => {
-        const hit = entries.find(([k, v]) => re.test(k) && flat(v).trim());
-        return hit ? flat(hit[1]).trim() : '';
-      };
-      const email = byKey(/e-?mail/i);
-      const name =
-        byKey(/^(full_?)?name$|name_group|your_name|first_name/i) ||
-        entries.map(([, v]) => flat(v)).find(
-          (v) => v && !v.includes('@') && v.length <= 60
-        ) ||
-        '';
-      return { name, email };
-    };
+    // Who sent it: a name answer, else an email answer, else Anonymous.
+    // Other answers are never used as the sender (PAY2-06).
+    const summarize = (submission) => entrySender(submission.payload);
 
-    const STATUS = {
-      completed: { label: __('Completed', 'subtleforms'), cls: 'sf-pill--success' },
-      saved: { label: __('Saved', 'subtleforms'), cls: '' },
-      processing: { label: __('Processing', 'subtleforms'), cls: 'sf-pill--info' },
-      failed: { label: __('Failed', 'subtleforms'), cls: 'sf-pill--danger' },
-      payment_pending: { label: __('Awaiting payment', 'subtleforms'), cls: 'sf-pill--warning' },
-      spam: { label: __('Spam', 'subtleforms'), cls: 'sf-pill--danger' },
-      flagged: { label: __('Flagged', 'subtleforms'), cls: 'sf-pill--warning' },
-      trash: { label: __('Trashed', 'subtleforms'), cls: 'sf-pill--danger' },
-      archived: { label: __('Archived', 'subtleforms'), cls: '' },
-    };
 
     // Define table columns
     const allColumns = [
@@ -656,15 +619,11 @@ const SubmissionsTable = forwardRef(
               className={clsx('sf-sub-entry', { 'is-unread': isUnread })}>
               <span className='sf-sub-entry__dot' aria-hidden='true' />
               <span className='sf-sub-entry__avatar' aria-hidden='true'>
-                {(name || email || '#').trim().charAt(0).toUpperCase()}
+                {(name || email || __('Anonymous', 'subtleforms')).trim().charAt(0).toUpperCase()}
               </span>
               <span className='sf-sub-entry__text'>
                 <span className='sf-sub-entry__name'>
-                  {name || email || sprintf(
-                    /* translators: %d: submission id */
-                    __('Submission #%d', 'subtleforms'),
-                    id
-                  )}
+                  {name || email || __('Anonymous', 'subtleforms')}
                   {isUnread && (
                     <span className='screen-reader-text'>
                       {' '}
@@ -697,10 +656,7 @@ const SubmissionsTable = forwardRef(
         title: __('Status', 'subtleforms'),
         sortable: true,
         render: (status) => {
-          const config = STATUS[status] || {
-            label: __('Received', 'subtleforms'),
-            cls: '',
-          };
+          const config = submissionStatus(status);
           return (
             <span className={clsx('sf-pill', 'sf-pill--dot', config.cls)}>
               {config.label}
