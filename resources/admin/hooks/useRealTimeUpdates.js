@@ -14,6 +14,7 @@ export function useRealTimeUpdates(options = {}) {
   const {
     pollInterval = 30000, // 30 seconds default
     enabled = true,
+    formId = null,
     onUnreadCountChange,
     onSubmissionsUpdate,
   } = options;
@@ -40,7 +41,8 @@ export function useRealTimeUpdates(options = {}) {
     try {
       setIsPolling(true);
 
-      const data = await apiClient.get('/submissions/unread-count');
+      const formQuery = formId ? `?form_id=${encodeURIComponent(formId)}` : '';
+      const data = await apiClient.get(`/submissions/unread-count${formQuery}`);
       const newCount = data.count || 0;
 
       setUnreadCount(newCount);
@@ -73,7 +75,7 @@ export function useRealTimeUpdates(options = {}) {
     } finally {
       setIsPolling(false);
     }
-  }, [enabled]);
+  }, [enabled, formId]);
 
   const startPolling = useCallback(() => {
     if (!enabled || intervalRef.current) return;
@@ -130,8 +132,13 @@ export function useRealTimeUpdates(options = {}) {
     };
   }, [enabled, startPolling, stopPolling]);
 
+  const adjustUnread = useCallback((delta) => {
+    setUnreadCount((count) => Math.max(0, Number(count) + Number(delta)));
+  }, []);
+
   return {
     unreadCount,
+    adjustUnread,
     lastUpdate,
     isPolling,
     forceUpdate,

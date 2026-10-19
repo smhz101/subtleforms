@@ -21,6 +21,8 @@ import PerformanceCell from './analytics/PerformanceCell';
 import { useAnalyticsSummary } from './analytics/useAnalytics';
 import { ConfirmModal } from '../modals';
 import { apiGet, apiPost, apiPut, apiDelete } from '../utils/api';
+import { deletesPermanently } from '../utils/deleteBehavior';
+import { useSettings } from '../data';
 import {
   getFormTypeBadge,
   getFormStatusBadge,
@@ -92,6 +94,8 @@ export default function FormsList({
   const [selectedForms, setSelectedForms] = useState([]);
   const isPrefetchingRef = useRef(false);
   const { createSuccessNotice, createErrorNotice } = useDispatch(noticesStore);
+  const { data: siteSettings } = useSettings();
+  const hardDelete = siteSettings?.delete_behavior === 'hard';
 
   const handleCopyShortcode = (shortcode) => {
     if (navigator.clipboard?.writeText) {
@@ -628,7 +632,7 @@ export default function FormsList({
   };
 
   const handleBulkDelete = async (ids) => {
-    const permanent = statusFilter === 'trash';
+    const permanent = deletesPermanently(hardDelete ? 'hard' : 'soft', statusFilter === 'trash');
     if (
       !window.confirm(
         permanent
@@ -663,7 +667,7 @@ export default function FormsList({
 
     // In the Trash tab, bulk delete is permanent (force=1). Elsewhere it
     // moves forms to the Trash (move_to_trash=1) (Part B10).
-    const inTrash = statusFilter === 'trash';
+    const inTrash = permanent;
     const query = inTrash ? '?force=1' : '?move_to_trash=1';
 
     let successCount = 0;
@@ -870,14 +874,14 @@ export default function FormsList({
         isOpen={!!deleteModal}
         onClose={() => setDeleteModal(null)}
         title={
-          (buffer.find((f) => f.id === deleteModal)?.status === 'trash')
+          deletesPermanently(hardDelete ? 'hard' : 'soft', buffer.find((f) => f.id === deleteModal)?.status === 'trash')
             ? __('Delete form permanently', 'subtleforms')
             : __('Move Form to Trash', 'subtleforms')
         }
         message={(() => {
           const form = buffer.find((f) => f.id === deleteModal);
           const count = form?.submission_count || 0;
-          if (form?.status === 'trash') {
+          if (deletesPermanently(hardDelete ? 'hard' : 'soft', form?.status === 'trash')) {
             return count > 0
               ? sprintf(
                   /* translators: %1$d: number of submissions belonging to this form */
@@ -908,14 +912,14 @@ export default function FormsList({
         })()}
         onConfirm={() => {
           const form = buffer.find((f) => f.id === deleteModal);
-          if (form?.status === 'trash') {
+          if (deletesPermanently(hardDelete ? 'hard' : 'soft', form?.status === 'trash')) {
             handleDeletePermanently(deleteModal);
           } else {
             handleDelete(deleteModal);
           }
         }}
         confirmText={
-          (buffer.find((f) => f.id === deleteModal)?.status === 'trash')
+          deletesPermanently(hardDelete ? 'hard' : 'soft', buffer.find((f) => f.id === deleteModal)?.status === 'trash')
             ? __('Delete permanently', 'subtleforms')
             : __('Move to Trash', 'subtleforms')
         }
