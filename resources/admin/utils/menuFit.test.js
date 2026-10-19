@@ -37,6 +37,14 @@ describe('menuFit (UX2-16)', () => {
     expect(listeners.resize).toBeUndefined();
   });
 
+  test('the menu margins count: a menu 12px short of the space still overflows with its 24px of margin', () => {
+    setup(556); // 600 - 32 (admin bar) = 568 available; 556 + 24 margin = 580.
+    const win = { innerHeight: 600, getComputedStyle: () => ({ marginTop: '12px', marginBottom: '12px' }) };
+    expect(menuOverflows(document, win)).toBe(true);
+    const noMargin = { innerHeight: 600, getComputedStyle: () => ({ marginTop: '0px', marginBottom: '0px' }) };
+    expect(menuOverflows(document, noMargin)).toBe(false);
+  });
+
   test('no menu, no class', () => {
     document.body.innerHTML = '';
     expect(menuOverflows(document, { innerHeight: 100 })).toBe(false);

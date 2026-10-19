@@ -17,7 +17,11 @@ export function menuOverflows(doc, win) {
   if (!menu) return false;
   const bar = doc.getElementById('wpadminbar');
   const barHeight = bar ? bar.getBoundingClientRect().height : 0;
-  return menu.getBoundingClientRect().height > win.innerHeight - barHeight;
+  // #adminmenu has a top and bottom margin (12px each in core) that the
+  // border box leaves out; the menu fits only with both.
+  const style = win.getComputedStyle ? win.getComputedStyle(menu) : null;
+  const margins = style ? (parseFloat(style.marginTop) || 0) + (parseFloat(style.marginBottom) || 0) : 0;
+  return menu.getBoundingClientRect().height + margins > win.innerHeight - barHeight;
 }
 
 /**
