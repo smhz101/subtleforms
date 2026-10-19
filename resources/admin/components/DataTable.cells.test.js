@@ -5,6 +5,7 @@ import { cellProps } from './DataTable';
 describe('DataTable cells on a phone (UX2-19)', () => {
   test('the first column is the card title and has no label', () => {
     expect(cellProps({ key: 'title', title: 'Form Name' }, 0)).toEqual({
+      role: 'cell',
       'data-column': 'title',
       'data-label': undefined,
       'data-primary': 'true',

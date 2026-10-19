@@ -55,6 +55,7 @@ import './DataTable.scss';
 export function cellProps(column, index) {
   const label = typeof column.title === 'string' ? column.title : column.label || '';
   return {
+    role: 'cell',
     'data-column': column.key,
     'data-label': index > 0 && label ? label : undefined,
     'data-primary': index === 0 ? 'true' : undefined,
@@ -216,11 +217,11 @@ const DataTable = memo(function DataTable({
           overflow: shouldVirtualize ? 'auto' : 'visible',
         }}
       >
-        <table className='sf-data-table__table'>
-          <thead className='sf-data-table__header'>
-            <tr>
+        <table className='sf-data-table__table' role='table'>
+          <thead className='sf-data-table__header' role='rowgroup'>
+            <tr role='row'>
               {selectable && (
-                <th className='sf-data-table__header-cell sf-data-table__check-cell'>
+                <th className='sf-data-table__header-cell sf-data-table__check-cell' role='columnheader'>
                   <CheckboxControl
                     checked={allSelected}
                     indeterminate={someSelected}
@@ -248,6 +249,14 @@ const DataTable = memo(function DataTable({
                     data-column={column.key}
                     style={{ width: column.width || 'auto' }}
                     aria-sort={ariaSortValue}
+                    role='columnheader'
+                    tabIndex={column.sortable ? 0 : undefined}
+                    onKeyDown={(e) => {
+                      if (column.sortable && (e.key === 'Enter' || e.key === ' ')) {
+                        e.preventDefault();
+                        handleHeaderClick(column);
+                      }
+                    }}
                     onClick={() => handleHeaderClick(column)}>
                     <div className='sf-data-table__header-th-content'>
                       {column.title}
@@ -258,7 +267,8 @@ const DataTable = memo(function DataTable({
               })}
             </tr>
           </thead>
-          <tbody 
+          <tbody
+            role='rowgroup'
             className='sf-data-table__body'
             style={{
               height: shouldVirtualize ? `${rowVirtualizer.getTotalSize()}px` : 'auto',
@@ -271,6 +281,7 @@ const DataTable = memo(function DataTable({
                 const row = data[virtualRow.index];
                 return (
                   <tr
+                    role='row'
                     key={row.id || virtualRow.index}
                     className={`
                       sf-data-table__row
@@ -292,7 +303,7 @@ const DataTable = memo(function DataTable({
                     }}
                     onClick={() => onRowClick && onRowClick(row)}>
                     {selectable && (
-                      <td className='sf-data-table__check-cell' onClick={(e) => e.stopPropagation()}>
+                      <td className='sf-data-table__check-cell' role='cell' onClick={(e) => e.stopPropagation()}>
                         <CheckboxControl
                           checked={selectedItems.includes(row.id)}
                           onChange={(checked) => handleSelectRow(row.id, checked)}
@@ -318,6 +329,7 @@ const DataTable = memo(function DataTable({
               // Standard rendering for small lists
               data.map((row, index) => (
                 <tr
+                  role='row'
                   key={row.id || index}
                   className={`
                     sf-data-table__row
@@ -331,7 +343,7 @@ const DataTable = memo(function DataTable({
                   `}
                   onClick={() => onRowClick && onRowClick(row)}>
                   {selectable && (
-                    <td className='sf-data-table__check-cell' onClick={(e) => e.stopPropagation()}>
+                    <td className='sf-data-table__check-cell' role='cell' onClick={(e) => e.stopPropagation()}>
                       <CheckboxControl
                         checked={selectedItems.includes(row.id)}
                         onChange={(checked) => handleSelectRow(row.id, checked)}

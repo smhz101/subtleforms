@@ -166,6 +166,16 @@ for (const screen of [
     expect(m.rowDisplay).not.toBe('table-row');
     expect(m.labelled).toBeGreaterThan(0);
     expect(m.tabRows).toBe(1);
+
+    // The column headers stay for screen readers, and a sortable one sorts
+    // from the keyboard.
+    expect(await page.getByRole('columnheader').count()).toBeGreaterThan(2);
+    const sortable = page.locator('.sf-data-table__th--sortable').first();
+    await expect(sortable).toBeVisible();
+    const before = await sortable.getAttribute('aria-sort');
+    await sortable.focus();
+    await page.keyboard.press('Enter');
+    await expect(sortable).not.toHaveAttribute('aria-sort', before || 'none');
   });
 }
 

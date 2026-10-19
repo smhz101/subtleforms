@@ -85,6 +85,12 @@
 			&.is-sorted {
 				color: var(--sf-text);
 			}
+
+			// Sortable headers take keyboard focus.
+			&:focus-visible {
+				outline: 2px solid var(--sf-brand);
+				outline-offset: -2px;
+			}
 		}
 
 		.sf-data-table__header-th-content {
@@ -348,9 +354,43 @@
 				border: 0;
 			}
 
-			// Only the select-all box stays; the column names are on each card.
-			th:not(.sf-data-table__check-cell) {
-				display: none;
+			// The column names are on each card. Headers stay in the page for
+			// screen readers; sortable ones show as small sort buttons.
+			th.sf-data-table__check-cell {
+				flex: 0 0 auto;
+				width: auto;
+				margin-inline-end: 4px;
+			}
+
+			th:not(.sf-data-table__check-cell):not(.sf-data-table__th--sortable) {
+				position: absolute;
+				width: 1px !important;
+				height: 1px;
+				overflow: hidden;
+				clip: rect(0 0 0 0);
+				clip-path: inset(50%);
+				white-space: nowrap;
+			}
+
+			tr {
+				flex-wrap: wrap;
+			}
+
+			th.sf-data-table__th--sortable {
+				display: inline-flex;
+				align-items: center;
+				height: 28px;
+				padding: 0 10px;
+				border: 1px solid var(--sf-border);
+				border-radius: var(--sf-radius-full, 999px);
+				font-size: var(--sf-text-xs);
+				white-space: nowrap;
+				cursor: pointer;
+
+				&.is-sorted {
+					border-color: var(--sf-brand);
+					color: var(--sf-brand);
+				}
 			}
 		}
 
