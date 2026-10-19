@@ -495,13 +495,14 @@ final class FieldMapper {
 	 * @param array $schema  Form schema.
 	 * @param array $payload Submitted answers.
 	 * @param bool  $skipEmpty Leave out unanswered fields.
+	 * @param array $context   Display context, such as the entry's currency (2.4.0).
 	 * @return array<int,array{key:string,label:string,value:string}>
 	 */
-	public static function answers( array $schema, array $payload, bool $skipEmpty = true ): array {
+	public static function answers( array $schema, array $payload, bool $skipEmpty = true, array $context = array() ): array {
 		$rows = array();
 		$seen = array();
 		// The PDF draws a signature from its image data, so it is kept.
-		$context = AnswerFormatter::context( $schema, array( 'signature' => 'raw' ) );
+		$context = AnswerFormatter::context( $schema, $context + array( 'signature' => 'raw' ) );
 
 		foreach ( self::fields( $schema ) as $field ) {
 			$key = $field['key'];

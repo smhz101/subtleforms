@@ -133,6 +133,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * New: Each payment form can pick its own currency, and more currencies are available, including JPY, INR, PKR and AED.
 * Fix: Forms follow the site currency unless you pick one, the Custom amount field shows the right symbol, and yen totals are whole yen.
 * Fix: Product and priced option answers in entries, emails and exports show whole units for every currency without cents, such as KRW, not only for JPY.
+* Fix: Entries, CSV exports and resent emails show prices in the currency the entry was charged in, so changing the site or form currency later does not relabel older entries.
 * Fix: Coupons give the same total at payment and on submit, and coupon dates are checked.
 * Fix: Draft forms are not priced for visitors, and small orders below the card minimum get a clear message.
 * Fix: Product settings are under General, priced options are not shown selected on the canvas, and dropdown priced options use the standard picker.

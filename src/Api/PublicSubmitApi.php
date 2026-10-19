@@ -417,6 +417,7 @@ final class PublicSubmitApi {
 		// Answers as typed, for conditions on actions and steps.
 		$context->setMeta( 'logic_payload', $logicValues );
 		$context->setMeta( 'schema_version', is_int( $formVersion ) ? $formVersion : null );
+		$context->setMeta( 'order_currency', (string) ( $order['quote']['currency'] ?? '' ) );
 
 		$isPaymentForm   = ! empty( $order['payment'] );
 		$paymentMetadata = $order['payment'] ?? null;

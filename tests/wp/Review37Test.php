@@ -67,4 +67,27 @@ final class Review37Test extends TestCase {
 		$this->assertSame( $fallback, wp_validate_redirect( 'https://other.example.net/', $fallback ), 'Only the configured host is added.' );
 		remove_all_filters( 'allowed_redirect_hosts' );
 	}
+
+	public function test_the_entry_view_prices_answers_in_the_entry_s_own_currency(): void {
+		global $wpdb;
+		$product = array( 'id' => 'p1', 'key' => 'sticker', 'type' => 'payment_product', 'config' => array( 'label' => 'Sticker', 'productName' => 'Sticker', 'price' => 5000, 'allowQuantity' => true ) );
+		$formId  = $this->publish( array( $product ) );
+		$wpdb->insert(
+			$wpdb->prefix . 'subtleforms_submissions',
+			array(
+				'form_id'    => $formId,
+				'payload'    => wp_json_encode( array( 'sticker' => 2 ) ),
+				'meta'       => wp_json_encode( array( 'order' => array( 'currency' => 'KRW', 'total' => 10000 ) ) ),
+				'status'     => 'completed',
+				'created_at' => current_time( 'mysql', true ),
+			)
+		);
+		$id = (int) $wpdb->insert_id;
+		wp_set_current_user( 1 );
+		$request = new \WP_REST_Request( 'GET', '/subtleforms/v1/submissions/' . $id );
+		$request->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
+		$data = rest_do_request( $request )->get_data();
+		$data = $data['data'] ?? $data;
+		$this->assertStringContainsString( '10,000 KRW', (string) ( $data['display']['sticker']['text'] ?? '' ) );
+	}
 }

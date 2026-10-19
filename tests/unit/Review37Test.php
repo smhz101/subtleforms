@@ -81,4 +81,19 @@ final class Review37Test extends TestCase {
 		$this->assertSame( '12.50 CHF', \SubtleForms\Support\AnswerFormatter::money( 12.5, 'CHF' ) );
 		$this->assertSame( '7.00', \SubtleForms\Support\AnswerFormatter::money( 7, '' ) );
 	}
+
+	public function test_entry_contexts_use_the_currency_the_entry_was_charged_in(): void {
+		$schema = array( 'metadata' => array( 'payment' => array( 'currency' => 'USD' ) ), 'fields' => array() );
+		$this->assertSame( 'EUR', \SubtleForms\Support\AnswerFormatter::entryCurrency( array( 'meta' => array( 'order' => array( 'currency' => 'eur' ) ) ) ) );
+		$this->assertSame( 'GBP', \SubtleForms\Support\AnswerFormatter::entryCurrency( array( 'meta' => '{"payment":{"currency":"GBP"}}' ) ) );
+		$this->assertSame( '', \SubtleForms\Support\AnswerFormatter::entryCurrency( array( 'meta' => array() ) ) );
+
+		$entry = \SubtleForms\Support\AnswerFormatter::entryContext( $schema, array( 'meta' => array( 'order' => array( 'currency' => 'KRW' ) ) ), array( 'submission_id' => 3 ) );
+		$this->assertSame( 'KRW', $entry['currency'] );
+		$this->assertSame( 3, $entry['submission_id'] );
+		$this->assertSame( 'USD', \SubtleForms\Support\AnswerFormatter::entryContext( $schema, array( 'meta' => array() ) )['currency'], 'An entry without an order uses the form currency.' );
+
+		$product = array( 'id' => 'p', 'key' => 'sticker', 'type' => 'payment_product', 'config' => array( 'label' => 'Sticker', 'productName' => 'Sticker', 'price' => 5000, 'allowQuantity' => true ) );
+		$this->assertSame( "Sticker \u{00D7} 2 (10,000 KRW)", \SubtleForms\Support\AnswerFormatter::text( 2, $product, $entry ) );
+	}
 }
