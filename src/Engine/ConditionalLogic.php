@@ -111,8 +111,10 @@ final class ConditionalLogic {
 	 * @param array<string,mixed> $payload
 	 * @return array<string,mixed>
 	 */
-	public function visiblePayload( array $schema, array $payload ): array {
-		$state = $this->evaluate( $schema, $payload );
+	public function visiblePayload( array $schema, array $payload, ?array $logicValues = null ): array {
+		// Rules read $logicValues when given (the answers as typed), and the
+		// fields they hide are removed from $payload.
+		$state = $this->evaluate( $schema, $logicValues ?? $payload );
 		return self::withoutKeys( $payload, $state['hidden_fields'] );
 	}
 

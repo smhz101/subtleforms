@@ -20,6 +20,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class FormTemplates {
 
+	/** Smallest donation the Donation Form template accepts. */
+	const DONATION_MINIMUM = 1;
+
+	/**
+	 * Raw card inputs, matched by stable id or key. Labels are not used: a
+	 * "Gift card message" or a "Scorecard" is not a card number, and the
+	 * gateway-managed Card Payment field (payment_card) is always kept.
+	 */
+	const CARD_INPUT_ID = '/^(?:(?:credit|debit)[\s_-]*)?(?:card[\s_-]*(?:number|num|no|cvv2?|cvc|csc|expiry|expiration|exp[\s_-]*date)|cc[\s_-]*(?:number|num|cvv2?|cvc)|cvv2?|cvc|csc|expiry|expiration|exp[\s_-]*date)(?:[\s_-]|$)/i';
+
 	/**
 	 * Get all available templates.
 	 *
@@ -621,11 +631,14 @@ class FormTemplates {
 				),
 				'fields'   => array(
 					array(
-						'id'          => 'product',
-						'type'        => 'payment_product',
-						'label'       => __( 'Product', 'subtleforms' ),
-						'productName' => __( 'Product', 'subtleforms' ),
-						'price'       => 10,
+						'id'            => 'product',
+						'type'          => 'payment_product',
+						'label'         => __( 'Product', 'subtleforms' ),
+						'productName'   => __( 'Product', 'subtleforms' ),
+						'price'         => 10,
+						// A fixed product: one in every order, on the form,
+						// in the builder and in the server's quote.
+						'allowQuantity' => false,
 					),
 					array(
 						'id'    => 'order_summary',
@@ -664,9 +677,12 @@ class FormTemplates {
 				),
 				'fields'   => array(
 					array(
-						'id'    => 'custom_amount',
-						'type'  => 'payment_amount',
-						'label' => __( 'Custom Amount', 'subtleforms' ),
+						'id'       => 'custom_amount',
+						'type'     => 'payment_amount',
+						'label'    => __( 'Custom Amount', 'subtleforms' ),
+						// A donation form must take a donation.
+						'required' => true,
+						'min'      => self::DONATION_MINIMUM,
 					),
 				),
 			),
@@ -734,6 +750,7 @@ class FormTemplates {
 			if ( 'donation_form' === $id && 'custom_amount' === (string) ( $field['id'] ?? '' ) ) {
 				$field['type']  = 'payment_amount';
 				$field['label'] = __( 'Custom Amount', 'subtleforms' );
+				$field          = self::require_positive_amount( $field );
 			}
 			$out[] = $field;
 		}
@@ -743,14 +760,17 @@ class FormTemplates {
 	/**
 	 * @param array<string, mixed> $field Field definition.
 	 */
-	private static function is_card_field( array $field ): bool {
+	public static function is_card_field( array $field ): bool {
 		if ( 'payment_card' === ( $field['type'] ?? '' ) ) {
 			return false;
 		}
-		$haystack = strtolower(
-			(string) ( $field['id'] ?? '' ) . ' ' . (string) ( $field['key'] ?? '' ) . ' ' . (string) ( $field['label'] ?? '' )
-		);
-		return 1 === preg_match( '/card|cvv|expiry/', $haystack );
+		$config = isset( $field['config'] ) && is_array( $field['config'] ) ? $field['config'] : array();
+		foreach ( array( $field['id'] ?? '', $field['key'] ?? '', $config['key'] ?? '' ) as $identifier ) {
+			if ( is_string( $identifier ) && 1 === preg_match( self::CARD_INPUT_ID, strtolower( trim( $identifier ) ) ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -758,36 +778,85 @@ class FormTemplates {
 	 * @return array<int, mixed>
 	 */
 	private static function ensure_payment_fields( array $fields ): array {
+		// Any priced field already sets the price. A fixed product added next
+		// to Priced options or a Custom Amount would be charged on top.
 		if ( ! self::field_tree_has( $fields, static function ( array $field ): bool {
-			return 'payment_product' === ( $field['type'] ?? '' );
+			return in_array( $field['type'] ?? '', \SubtleForms\Payments\Pricing::PRICED_TYPES, true );
 		} ) ) {
-			$fields[] = array(
-				'id'          => 'product',
-				'type'        => 'payment_product',
-				'label'       => __( 'Product', 'subtleforms' ),
-				'productName' => __( 'Product', 'subtleforms' ),
-				'price'       => 10,
+			$fields = self::add_to_step(
+				$fields,
+				array(
+					'id'            => 'product',
+					'key'           => 'product',
+					'type'          => 'payment_product',
+					'label'         => __( 'Product', 'subtleforms' ),
+					'productName'   => __( 'Product', 'subtleforms' ),
+					'price'         => 10,
+					'allowQuantity' => false,
+				),
+				'first'
 			);
 		}
 		if ( ! self::field_tree_has( $fields, static function ( array $field ): bool {
 			return 'payment_summary' === ( $field['type'] ?? '' );
 		} ) ) {
-			$fields[] = array(
-				'id'    => 'order_summary',
-				'type'  => 'payment_summary',
-				'label' => __( 'Order Summary', 'subtleforms' ),
+			$fields = self::add_to_step(
+				$fields,
+				array(
+					'id'    => 'order_summary',
+					'key'   => 'order_summary',
+					'type'  => 'payment_summary',
+					'label' => __( 'Order Summary', 'subtleforms' ),
+				),
+				'last'
 			);
 		}
 		if ( ! self::field_tree_has( $fields, static function ( array $field ): bool {
 			return 'payment_note' === ( $field['id'] ?? '' );
 		} ) ) {
-			$fields[] = array(
-				'id'      => 'payment_note',
-				'type'    => 'html',
-				'label'   => __( 'Note', 'subtleforms' ),
-				'content' => __( 'Card payment needs SubtleForms Pro.', 'subtleforms' ),
+			$fields = self::add_to_step(
+				$fields,
+				array(
+					'id'      => 'payment_note',
+					'key'     => 'payment_note',
+					'type'    => 'html',
+					'label'   => __( 'Note', 'subtleforms' ),
+					'content' => __( 'Card payment needs SubtleForms Pro.', 'subtleforms' ),
+				),
+				'last'
 			);
 		}
+		return $fields;
+	}
+
+	/**
+	 * Add a field to a template. In a multi-step template it goes inside the
+	 * first or last top-level step, never beside the steps.
+	 *
+	 * @param array<int, mixed>    $fields Top-level fields.
+	 * @param array<string, mixed> $field  Field to add.
+	 * @param string               $where  'first' or 'last' step.
+	 * @return array<int, mixed>
+	 */
+	private static function add_to_step( array $fields, array $field, string $where ): array {
+		$steps = array();
+		foreach ( $fields as $index => $node ) {
+			if ( is_array( $node ) && 'step' === ( $node['type'] ?? '' ) ) {
+				$steps[] = $index;
+			}
+		}
+		if ( ! $steps ) {
+			$fields[] = $field;
+			return $fields;
+		}
+		$index = 'last' === $where ? end( $steps ) : $steps[0];
+		$list  = isset( $fields[ $index ]['children'] ) || ! isset( $fields[ $index ]['fields'] ) || ! is_array( $fields[ $index ]['fields'] )
+			? 'children'
+			: 'fields';
+		if ( ! isset( $fields[ $index ][ $list ] ) || ! is_array( $fields[ $index ][ $list ] ) ) {
+			$fields[ $index ][ $list ] = array();
+		}
+		$fields[ $index ][ $list ][] = $field;
 		return $fields;
 	}
 
@@ -801,12 +870,41 @@ class FormTemplates {
 		} ) ) {
 			return $fields;
 		}
-		$fields[] = array(
-			'id'    => 'custom_amount',
-			'type'  => 'payment_amount',
-			'label' => __( 'Custom Amount', 'subtleforms' ),
+		return self::add_to_step(
+			$fields,
+			self::require_positive_amount(
+				array(
+					'id'    => 'custom_amount',
+					'key'   => 'custom_amount',
+					'type'  => 'payment_amount',
+					'label' => __( 'Custom Amount', 'subtleforms' ),
+				)
+			),
+			'first'
 		);
-		return $fields;
+	}
+
+	/**
+	 * A donation amount is required and above zero, so an empty or zero
+	 * amount cannot complete a donation form. A higher minimum is kept.
+	 *
+	 * @param array<string, mixed> $field Custom Amount field.
+	 * @return array<string, mixed>
+	 */
+	private static function require_positive_amount( array $field ): array {
+		$field['required'] = true;
+		$min               = $field['min'] ?? null;
+		if ( ! is_numeric( $min ) || (float) $min <= 0 ) {
+			$field['min'] = self::DONATION_MINIMUM;
+		}
+		// Settings in config win over flat ones, so fix them there too.
+		if ( isset( $field['config'] ) && is_array( $field['config'] ) ) {
+			$field['config']['required'] = true;
+			if ( array_key_exists( 'min', $field['config'] ) && ( ! is_numeric( $field['config']['min'] ) || (float) $field['config']['min'] <= 0 ) ) {
+				$field['config']['min'] = $field['min'];
+			}
+		}
+		return $field;
 	}
 
 	/**
@@ -823,6 +921,12 @@ class FormTemplates {
 			}
 			foreach ( array( 'fields', 'children' ) as $child ) {
 				if ( isset( $field[ $child ] ) && is_array( $field[ $child ] ) && self::field_tree_has( $field[ $child ], $match ) ) {
+					return true;
+				}
+			}
+			foreach ( ( isset( $field['columns'] ) && is_array( $field['columns'] ) ) ? $field['columns'] : array() as $column ) {
+				$list = is_array( $column ) ? ( $column['fields'] ?? $column['children'] ?? $column ) : array();
+				if ( is_array( $list ) && self::field_tree_has( $list, $match ) ) {
 					return true;
 				}
 			}

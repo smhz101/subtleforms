@@ -715,8 +715,8 @@ class AdminMenu {
 			$classes .= ' subtleforms-builder-page';
 		}
 
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Admin page slug; no form data processed; sanitize_key() applied.
-		$page = isset( $_GET['page'] ) ? sanitize_key( Helpers::normalize_string( $_GET['page'] ) ) : '';
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Admin page slug; no form data processed.
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
 
 		// Every SubtleForms screen renders inside the app frame. The class is
 		// printed server-side so the frame layout applies before React mounts.

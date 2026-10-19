@@ -19,7 +19,14 @@ export function countSchemaFields( schema ) {
 			if ( field.type && field.type !== 'step' ) {
 				count += 1;
 			}
-			walk( field.fields );
+			// Multi-step and container schemas store nested fields in children.
+			// Older schemas used fields. Prefer children when that list is present.
+			walk( Array.isArray( field.children ) ? field.children : field.fields );
+			if ( Array.isArray( field.columns ) ) {
+				field.columns.forEach( ( column ) => {
+					walk( Array.isArray( column ) ? column : column?.fields || column?.children );
+				} );
+			}
 		} );
 	};
 	walk( schema?.fields );

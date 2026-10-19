@@ -144,7 +144,14 @@ final class FieldMapper {
 
 			if ( ! empty( $node['columns'] ) && is_array( $node['columns'] ) ) {
 				foreach ( $node['columns'] as $column ) {
-					if ( is_array( $column ) && isset( $column[0] ) && is_array( $column[0] ) ) {
+					if ( ! is_array( $column ) ) {
+						continue;
+					}
+					if ( isset( $column['fields'] ) && is_array( $column['fields'] ) ) {
+						self::walk( $column['fields'], $out );
+					} elseif ( isset( $column['children'] ) && is_array( $column['children'] ) ) {
+						self::walk( $column['children'], $out );
+					} elseif ( isset( $column[0] ) && is_array( $column[0] ) ) {
 						self::walk( $column, $out );
 					}
 				}

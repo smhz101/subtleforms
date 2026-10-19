@@ -1,4 +1,5 @@
 import { repeaterLimits } from './fieldValidation';
+import { columnFields } from './columnFields';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { toggleInitialValue } from '../../shared/toggleState';
 /**
@@ -127,7 +128,7 @@ export function collectDefaultValues(fields) {
           : field.fields;
       visit(children);
       if (Array.isArray(field.columns)) {
-        field.columns.forEach((col) => visit(col));
+        field.columns.forEach((col) => visit(columnFields(col)));
       }
     });
   };

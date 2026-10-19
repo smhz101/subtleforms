@@ -144,7 +144,9 @@ final class SchemaCompiler {
 	 * @param SubmissionContext   $ctx
 	 */
 	public function evaluateConditions( array $schema, SubmissionContext $ctx ): void {
-		$conditionalState = $this->conditionalLogic->evaluate( $schema, $ctx->payload );
+		// Rules read the answers as typed when the submit handler kept them.
+		$values           = $ctx->getMeta( 'logic_payload' );
+		$conditionalState = $this->conditionalLogic->evaluate( $schema, is_array( $values ) ? $values : $ctx->payload );
 
 		$ctx->setMeta( 'conditional_state', $conditionalState );
 		$ctx->setMeta( 'hidden_fields', $conditionalState['hidden_fields'] );

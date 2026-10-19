@@ -269,11 +269,16 @@ final class FieldValidator {
 	 *
 	 * Repeater groups are prepared with their child fields.
 	 *
+	 * With $tidy false, websites, email lists and phone numbers keep what the
+	 * visitor typed. Conditional logic reads those answers, as the browser
+	 * does, so a rule for "example.com" still matches (review of PR #28).
+	 *
 	 * @param mixed $schema  Form schema.
 	 * @param array $payload Submitted values.
+	 * @param bool  $tidy    Tidy websites, email lists and phone numbers.
 	 * @return array
 	 */
-	public static function prepare( $schema, array $payload ): array {
+	public static function prepare( $schema, array $payload, bool $tidy = true ): array {
 		$fields = is_array( $schema ) && isset( $schema['fields'] ) && is_array( $schema['fields'] ) ? $schema['fields'] : array();
 		foreach ( self::answerFields( $fields ) as $key => $field ) {
 			$type = (string) ( $field['type'] ?? '' );
@@ -303,13 +308,13 @@ final class FieldValidator {
 					$child = array( 'fields' => \SubtleForms\Support\Repeater::children( $field ) );
 					$groups = array();
 					foreach ( \SubtleForms\Support\Repeater::groups( $value ) as $group ) {
-						$groups[] = self::prepare( $child, $group );
+						$groups[] = self::prepare( $child, $group, $tidy );
 					}
 					$payload[ $key ] = $groups;
 				}
 				continue;
 			}
-			if ( ! is_string( $value ) ) {
+			if ( ! $tidy || ! is_string( $value ) ) {
 				continue;
 			}
 			switch ( $type ) {

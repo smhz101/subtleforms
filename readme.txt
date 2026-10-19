@@ -138,7 +138,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: Failed payments show as Payment failed, payment messages can be translated, and Pro asks admins to connect Stripe when no gateway is set up.
 * Fix: Tools export and import keep each entry's order and payment details.
 * Change: Entries refer to the form version they were sent with instead of keeping a full copy of the form. Older entries are cleaned up in the background and stay readable.
-* Fix: Entries, emails, CSV exports, PDFs and integrations show option labels, Yes or No, matrix rows with their columns, dependent dropdown labels, dates and times in the field format, and product lines with prices.
+* Fix: Entries, emails, CSV exports, PDFs and integrations show option labels, Yes or No, matrix rows with their columns, dependent dropdown labels (also in the Webhook action's full payload), dates and times in the field format, and product lines with prices.
 * Fix: CSV exports list uploaded files by name with a download link.
 * Fix: A very long field label is shortened in emails, exports, entries and the required message. The admin label is used when it is set.
 * Fix: The submissions list names the sender by a name or email answer, or shows Anonymous, never a quantity or a choice.
@@ -164,6 +164,17 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: Replacing dependent dropdowns from a file asks first, and a semicolon file imports as separate columns.
 * Fix: Dropdown, country, phone and date fields work from the keyboard. The calendar can jump to a month and year, and country buttons show a letter code.
 * Fix: The first invalid dropdown, country, date or phone control receives focus.
+* Fix: Fields inside a column saved as an object with its own fields list are shown, checked and sent, so a product there is not charged unseen.
+* Fix: Deleting a field inside a step or container shows the Field deleted notice with Undo.
+* Fix: If the forms list fails to load after you change tab, search or sort, the old rows are cleared instead of shown under the new tab.
+* Fix: If the entries list fails to load after you change tab, search, date or form, the old entries are cleared instead of shown under the new filters.
+* Fix: A desktop preview wider than the builder canvas is scaled from its top left corner and stays whole and centred.
+* Fix: The Payment Form template's product is a fixed product with no quantity box in the builder or on the form, and it is charged once.
+* Fix: The Donation Form template's Custom Amount is required, with a minimum of 1, so a donation form cannot be sent without a donation.
+* Fix: Templates lose only card number, expiry and CVV inputs. A field that just mentions a card, such as a gift card message, is kept.
+* Fix: A payment template that already has Priced options or a Custom Amount gets no extra fixed product, and a multi-step template gets its payment fields inside its steps.
+* Fix: Conditional logic on the server reads a website as it was typed, so a rule for example.com still shows, stores and charges the fields it controls.
+* Fix: The form checks a Product quantity before sending, with the same whole number, minimum and maximum rules as the server.
 = 2.3.9 - 2026-10-19 =
 * Change: Everything in SubtleForms works without a license: CSV export, reports, full conditional logic, Picture choice, several files per upload field, payment fields and coupons, and the Webhooks and Analytics settings.
 * Change: Signature and Calculation fields and card payments are part of SubtleForms Pro 2.4.0. Forms that use them keep them; the live form leaves them out until Pro is active.

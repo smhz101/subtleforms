@@ -270,16 +270,23 @@ final class PublicSubmitApi {
 		// Answers in the shape the form stores: Hidden field values worked
 		// out on the server, display-only payment fields dropped, websites,
 		// email lists and phone numbers tidied (FLD2-16, PAY2-04, FB-15).
-		$payload = \SubtleForms\Engine\FieldValidator::prepare( $activeSchema['schema'] ?? $activeSchema, $payload );
+		// Conditional logic reads the same answers before they are tidied,
+		// as the browser does, so a rule for "example.com" still matches a
+		// website stored as https://example.com (review of PR #28).
+		$logicValues = \SubtleForms\Engine\FieldValidator::prepare( $activeSchema['schema'] ?? $activeSchema, $payload, false );
+		$payload     = \SubtleForms\Engine\FieldValidator::prepare( $activeSchema['schema'] ?? $activeSchema, $payload );
 
 		// Fields from an add-on that is not active are not on the live form.
-		$payload = \SubtleForms\Fields\AddonFieldTypes::dropMissingAnswers( $payload, $activeSchema['schema'] ?? $activeSchema );
+		$payload     = \SubtleForms\Fields\AddonFieldTypes::dropMissingAnswers( $payload, $activeSchema['schema'] ?? $activeSchema );
+		$logicValues = \SubtleForms\Fields\AddonFieldTypes::dropMissingAnswers( $logicValues, $activeSchema['schema'] ?? $activeSchema );
 
 		// Conditional logic (2.1): answers to fields the visitor could not see
 		// (hidden fields and skipped steps) are never stored, priced or sent.
 		$schemaForLogic = $activeSchema['schema'] ?? $activeSchema;
 		if ( is_array( $schemaForLogic ) ) {
-			$payload = ( new \SubtleForms\Engine\ConditionalLogic() )->visiblePayload( $schemaForLogic, $payload );
+			$conditions  = new \SubtleForms\Engine\ConditionalLogic();
+			$payload     = $conditions->visiblePayload( $schemaForLogic, $payload, $logicValues );
+			$logicValues = $conditions->visiblePayload( $schemaForLogic, $logicValues );
 		}
 
 		// File uploads (2.1): swap upload IDs for the files already stored.
@@ -292,7 +299,7 @@ final class PublicSubmitApi {
 		// Payments (2.1): price the order on the server, check the coupon and
 		// confirm the payment with the gateway before anything is stored.
 		$schemaForPricing = $activeSchema['schema'] ?? $activeSchema;
-		$order            = $this->priceOrder( $formId, $schemaForPricing, $payload, $request );
+		$order            = $this->priceOrder( $formId, $schemaForPricing, $payload, $request, $logicValues );
 		if ( $order instanceof WP_REST_Response ) {
 			return $order;
 		}
@@ -333,6 +340,8 @@ final class PublicSubmitApi {
 		// Build submission context
 		$context = new SubmissionContext( $formId, $payload );
 		$context->setMeta( 'submission_id', $submissionId );
+		// Answers as typed, for conditions on actions and steps.
+		$context->setMeta( 'logic_payload', $logicValues );
 		$context->setMeta( 'schema_version', is_int( $formVersion ) ? $formVersion : null );
 
 		$isPaymentForm   = ! empty( $order['payment'] );
@@ -521,7 +530,7 @@ final class PublicSubmitApi {
 					'submission_id' => $submissionId,
 					// What to show the visitor: the first conditional
 					// confirmation that matches, else the default (2.1).
-					'confirmation'  => self::resolveConfirmation( $formId, $activeSchema['schema'] ?? $activeSchema, $payload ),
+					'confirmation'  => self::resolveConfirmation( $formId, $activeSchema['schema'] ?? $activeSchema, $logicValues ),
 				),
 				$submissionId,
 				$formId,
@@ -606,9 +615,10 @@ final class PublicSubmitApi {
 	 * @param mixed           $schema  Active schema.
 	 * @param array           $payload Sanitized payload with calculations applied.
 	 * @param WP_REST_Request $request Incoming request.
+	 * @param array|null      $logicValues Answers as typed, for conditional logic.
 	 * @return array{quote:?array,coupon:?array,payment:?array}|WP_REST_Response
 	 */
-	private function priceOrder( int $formId, $schema, array $payload, WP_REST_Request $request ) {
+	private function priceOrder( int $formId, $schema, array $payload, WP_REST_Request $request, ?array $logicValues = null ) {
 		$none = array(
 			'quote'   => null,
 			'coupon'  => null,
@@ -618,7 +628,7 @@ final class PublicSubmitApi {
 			return $none;
 		}
 
-		$priced = Pricing::quote( $schema, $payload );
+		$priced = Pricing::quote( $schema, $payload, null, $logicValues );
 		if ( ! empty( $priced['formula_error'] ) ) {
 			return ApiResponse::error(
 				'subtleforms_formula_invalid',
@@ -648,7 +658,7 @@ final class PublicSubmitApi {
 		// The coupon comes from the summary's coupon box or a Coupon field.
 		$code = CouponsRepository::codeFrom( $schema, $payload );
 
-		$quote    = Pricing::quote( $schema, $payload );
+		$quote    = Pricing::quote( $schema, $payload, null, $logicValues );
 		$coupon   = null;
 		$customer = CouponsRepository::customerKey( $schema, $payload );
 		if ( '' !== $code ) {
@@ -657,7 +667,7 @@ final class PublicSubmitApi {
 				return ApiResponse::error( 'subtleforms_coupon_invalid', $checked->get_error_message(), 422 );
 			}
 			$coupon = $checked;
-			$quote  = Pricing::quote( $schema, $payload, $coupon );
+			$quote  = Pricing::quote( $schema, $payload, $coupon, $logicValues );
 		}
 
 		$order = array(

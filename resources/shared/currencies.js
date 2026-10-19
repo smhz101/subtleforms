@@ -13,7 +13,7 @@ export const CURRENCIES = {
   NZD: ['New Zealand dollar', 2, 0.5],
   CHF: ['Swiss franc', 2, 0.5],
   JPY: ['Japanese yen', 0, 50],
-  KRW: ['South Korean won', 0, 700],
+  KRW: ['South Korean won', 0, 50],
   INR: ['Indian rupee', 2, 0.5],
   PKR: ['Pakistani rupee', 2, 140],
   AED: ['UAE dirham', 2, 2],
@@ -22,7 +22,7 @@ export const CURRENCIES = {
   HKD: ['Hong Kong dollar', 2, 4],
   MYR: ['Malaysian ringgit', 2, 2],
   THB: ['Thai baht', 2, 10],
-  PHP: ['Philippine peso', 2, 25],
+  PHP: ['Philippine peso', 2, 0.5],
   SEK: ['Swedish krona', 2, 3],
   NOK: ['Norwegian krone', 2, 3],
   DKK: ['Danish krone', 2, 2.5],
@@ -30,7 +30,7 @@ export const CURRENCIES = {
   CZK: ['Czech koruna', 2, 15],
   MXN: ['Mexican peso', 2, 10],
   BRL: ['Brazilian real', 2, 0.5],
-  ZAR: ['South African rand', 2, 9],
+  ZAR: ['South African rand', 2, 0.5],
 };
 
 const ZERO_DECIMAL = ['BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF'];

@@ -113,6 +113,167 @@ class TemplateNotifyTest extends TestCase {
 	}
 
 	/**
+	 * Review #15 (4309435330): the Payment Form product is fixed. It has no
+	 * quantity box on the live form, so the builder must not show one either,
+	 * and the server prices it once with no submitted value.
+	 */
+	public function test_payment_template_product_is_a_fixed_product(): void {
+		$templates = FormTemplates::get_all();
+		$product   = null;
+		foreach ( $templates['payment_form']['schema']['fields'] as $field ) {
+			if ( 'payment_product' === ( $field['type'] ?? '' ) ) {
+				$product = $field;
+			}
+		}
+		$this->assertIsArray( $product );
+		$this->assertArrayHasKey( 'allowQuantity', $product );
+		$this->assertFalse( $product['allowQuantity'] );
+
+		$product['key'] = 'product';
+		$quote          = \SubtleForms\Payments\Pricing::quote( array( 'fields' => array( $product ) ), array() );
+		$this->assertSame( 10.0, (float) $quote['total'] );
+		$this->assertSame( 1, (int) $quote['items'][0]['qty'] );
+	}
+
+	/**
+	 * Review #15 (4309435338): the donation amount is required with a
+	 * positive minimum, in the built-in template and in one an add-on
+	 * supplies with a zero minimum in its config.
+	 */
+	public function test_donation_amount_is_required_and_positive(): void {
+		$templates = FormTemplates::get_all();
+		$amount    = $templates['donation_form']['schema']['fields'][0];
+		$this->assertSame( 'payment_amount', $amount['type'] );
+		$this->assertTrue( $amount['required'] );
+		$this->assertGreaterThan( 0, $amount['min'] );
+
+		$method = new \ReflectionMethod( FormTemplates::class, 'prepare_template' );
+		$method->setAccessible( true );
+		$donation = $method->invoke(
+			null,
+			'donation_form',
+			array(
+				'id'     => 'donation_form',
+				'schema' => array(
+					'fields' => array(
+						array(
+							'id'     => 'custom_amount',
+							'type'   => 'number',
+							'label'  => 'Amount',
+							'config' => array( 'min' => 0, 'required' => false ),
+						),
+					),
+				),
+			)
+		);
+		$field = $donation['schema']['fields'][0];
+		$this->assertTrue( $field['required'] );
+		$this->assertTrue( $field['config']['required'] );
+		$this->assertGreaterThan( 0, $field['config']['min'] );
+		$this->assertGreaterThan( 0, $field['min'] );
+	}
+
+	/**
+	 * Review #15 (4309460612): raw card inputs are found by their id or key
+	 * only. Fields that merely mention a card in a label or an unrelated id,
+	 * and the gateway-managed Card Payment field, are kept.
+	 */
+	public function test_only_raw_card_inputs_are_removed(): void {
+		$method = new \ReflectionMethod( FormTemplates::class, 'prepare_template' );
+		$method->setAccessible( true );
+		$fields = array(
+			array( 'id' => 'card_number', 'type' => 'text', 'label' => 'Number' ),
+			array( 'id' => 'f2', 'key' => 'cc-number', 'type' => 'text', 'label' => 'Number' ),
+			array( 'id' => 'credit_card_number', 'type' => 'text', 'label' => 'Number' ),
+			array( 'id' => 'exp_date', 'type' => 'text', 'label' => 'Valid until' ),
+			array( 'id' => 'f5', 'type' => 'text', 'label' => 'Code', 'config' => array( 'key' => 'cvc' ) ),
+			array( 'id' => 'scorecard', 'type' => 'number', 'label' => 'Scorecard' ),
+			array( 'id' => 'discard_reason', 'type' => 'textarea', 'label' => 'Reason' ),
+			array( 'id' => 'gift_message', 'type' => 'textarea', 'label' => 'Gift card message' ),
+			array( 'id' => 'passport_expiry', 'type' => 'date', 'label' => 'Passport expiry date' ),
+			array( 'id' => 'card', 'type' => 'payment_card', 'label' => 'Card details' ),
+			array(
+				'id'       => 'card_section',
+				'type'     => 'group_container',
+				'label'    => 'Card holder',
+				'children' => array(
+					array( 'id' => 'holder_name', 'type' => 'text', 'label' => 'Name on card' ),
+					array( 'id' => 'cvv', 'type' => 'text', 'label' => 'CVV' ),
+				),
+			),
+		);
+		$out  = $method->invoke( null, 'extension_checkout', array( 'id' => 'extension_checkout', 'schema' => array( 'fields' => $fields ) ) );
+		$kept = array();
+		$walk = static function ( array $list ) use ( &$walk, &$kept ): void {
+			foreach ( $list as $field ) {
+				$kept[] = $field['id'];
+				$walk( $field['children'] ?? array() );
+			}
+		};
+		$walk( $out['schema']['fields'] );
+		$this->assertSame(
+			array( 'scorecard', 'discard_reason', 'gift_message', 'passport_expiry', 'card', 'card_section', 'holder_name' ),
+			$kept
+		);
+	}
+
+	/**
+	 * Review #15 (4309460628): a payment template that already prices the
+	 * order with Priced options or a Custom Amount gets no extra fixed
+	 * product, and missing payment fields go inside the steps of a
+	 * multi-step template.
+	 */
+	public function test_payment_fields_respect_priced_fields_and_steps(): void {
+		$method = new \ReflectionMethod( FormTemplates::class, 'prepare_template' );
+		$method->setAccessible( true );
+		$prepare = static function ( string $id, array $fields ) use ( $method ): array {
+			return $method->invoke( null, $id, array( 'id' => $id, 'schema' => array( 'fields' => $fields ) ) )['schema']['fields'];
+		};
+		$count = function ( array $fields, string $type ) use ( &$count ): int {
+			$n = 0;
+			foreach ( $fields as $field ) {
+				$n += ( $type === ( $field['type'] ?? '' ) ) ? 1 : 0;
+				$n += $count( $field['children'] ?? array(), $type ) + $count( $field['fields'] ?? array(), $type );
+			}
+			return $n;
+		};
+
+		$plans = array(
+			'id'      => 'plan',
+			'type'    => 'payment_choice',
+			'label'   => 'Plan',
+			'options' => array( array( 'label' => 'Basic', 'value' => 'basic', 'price' => 5 ) ),
+		);
+		$this->assertSame( 0, $count( $prepare( 'payment_form', array( $plans ) ), 'payment_product' ) );
+		$this->assertSame( 0, $count( $prepare( 'payment_form', array( array( 'id' => 'amount', 'type' => 'payment_amount', 'label' => 'Amount' ) ) ), 'payment_product' ) );
+		$columns = array(
+			'id'      => 'cols',
+			'type'    => 'two_column_container',
+			'columns' => array( array( 'fields' => array( $plans ) ), array() ),
+		);
+		$this->assertSame( 0, $count( $prepare( 'payment_form', array( $columns ) ), 'payment_product' ) );
+
+		$steps = $prepare(
+			'payment_form',
+			array(
+				array( 'id' => 's1', 'type' => 'step', 'label' => 'You', 'children' => array( array( 'id' => 'name', 'type' => 'text', 'label' => 'Name' ) ) ),
+				array( 'id' => 's2', 'type' => 'step', 'label' => 'Pay', 'fields' => array( array( 'id' => 'email', 'type' => 'email', 'label' => 'Email' ) ) ),
+			)
+		);
+		$this->assertSame( array( 'step', 'step' ), array_column( $steps, 'type' ), 'nothing is added beside the steps' );
+		$this->assertSame( array( 'name', 'product' ), array_column( $steps[0]['children'], 'id' ) );
+		$this->assertSame( array( 'email', 'order_summary', 'payment_note' ), array_column( $steps[1]['fields'], 'id' ) );
+		$this->assertSame( 'product', $steps[0]['children'][1]['key'] );
+
+		$donation = $prepare(
+			'donation_form',
+			array( array( 'id' => 's1', 'type' => 'step', 'label' => 'Give', 'children' => array() ) )
+		);
+		$this->assertCount( 1, $donation );
+		$this->assertSame( 'payment_amount', $donation[0]['children'][0]['type'] );
+	}
+
+	/**
 	 * @param array<string, mixed> $template Template definition.
 	 */
 	private function assertTemplateIsSafe( string $id, array $template ): void {
@@ -165,8 +326,7 @@ class TemplateNotifyTest extends TestCase {
 			if ( ! is_array( $field ) ) {
 				continue;
 			}
-			$haystack = strtolower( (string) ( $field['id'] ?? '' ) . ' ' . (string) ( $field['key'] ?? '' ) . ' ' . (string) ( $field['label'] ?? '' ) );
-			$this->assertSame( 0, preg_match( '/card|cvv|expiry/', $haystack ), $id . ' field ' . $haystack );
+			$this->assertFalse( FormTemplates::is_card_field( $field ), $id . ' field ' . wp_json_encode( $field ) );
 			foreach ( array( 'fields', 'children' ) as $child ) {
 				if ( isset( $field[ $child ] ) && is_array( $field[ $child ] ) ) {
 					$this->assertNoCardFields( $field[ $child ], $id );
