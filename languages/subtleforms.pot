@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-19T21:55:29+00:00\n"
+"POT-Creation-Date: 2026-10-19T22:12:28+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -358,7 +358,7 @@ msgstr ""
 #: src/Api/OnboardingApi.php:271
 #: src/Api/SettingsApi.php:261
 #: src/Api/SettingsApi.php:332
-#: src/Api/WebhooksApi.php:77
+#: src/Api/WebhooksApi.php:84
 msgid "You are not allowed to perform this action."
 msgstr ""
 
@@ -382,7 +382,7 @@ msgstr ""
 #: src/Api/OnboardingApi.php:259
 #: src/Api/OnboardingApi.php:280
 #: src/Api/SettingsApi.php:341
-#: src/Api/WebhooksApi.php:81
+#: src/Api/WebhooksApi.php:88
 msgid "Security check failed. Please refresh and try again."
 msgstr ""
 
@@ -842,29 +842,30 @@ msgid "Choose Gravity Forms or Fluent Forms."
 msgstr ""
 
 #. translators: %s: error from the HTTP request
-#: src/Api/WebhooksApi.php:124
+#: src/Api/WebhooksApi.php:134
 #, php-format
 msgid "The request could not be sent: %s"
 msgstr ""
 
 #. translators: 1: HTTP status code, 2: milliseconds
-#: src/Api/WebhooksApi.php:143
+#: src/Api/WebhooksApi.php:153
 #, php-format
 msgid "Delivered. The endpoint answered HTTP %1$d in %2$d ms."
 msgstr ""
 
 #. translators: %d: HTTP status code
-#: src/Api/WebhooksApi.php:145
+#: src/Api/WebhooksApi.php:155
 #, php-format
 msgid "The endpoint answered HTTP %d, so real entries would be retried."
 msgstr ""
 
-#: src/Api/WebhooksApi.php:170
-#: src/Api/WebhooksApi.php:187
+#: src/Api/WebhooksApi.php:179
+#: src/Api/WebhooksApi.php:196
+#: src/Api/WebhooksApi.php:227
 msgid "Test form"
 msgstr ""
 
-#: src/Api/WebhooksApi.php:172
+#: src/Api/WebhooksApi.php:181
 #: src/Fields/CoreFields.php:1429
 #: src/Fields/FieldSettings.php:72
 #: src/Templates/FormTemplates.php:139
@@ -877,7 +878,7 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: src/Api/WebhooksApi.php:173
+#: src/Api/WebhooksApi.php:182
 #: src/Fields/CoreFields.php:74
 #: src/Templates/FormTemplates.php:198
 #: resources/admin/components/builder/CheckoutPanel.jsx:18
@@ -887,7 +888,7 @@ msgstr ""
 msgid "Email"
 msgstr ""
 
-#: src/Api/WebhooksApi.php:174
+#: src/Api/WebhooksApi.php:183
 #: src/Templates/FormTemplates.php:157
 #: src/Templates/FormTemplates.php:199
 #: src/Templates/FormTemplates.php:229
@@ -900,8 +901,14 @@ msgstr ""
 msgid "Message"
 msgstr ""
 
-#: src/Api/WebhooksApi.php:180
+#: src/Api/WebhooksApi.php:189
 msgid "This is a test webhook from SubtleForms."
+msgstr ""
+
+#. translators: %s: JSON error
+#: src/Api/WebhooksApi.php:217
+#, php-format
+msgid "The custom JSON body is not valid: %s"
 msgstr ""
 
 #: src/Blocks/SubtleFormsBlock.php:109
@@ -5129,47 +5136,47 @@ msgstr ""
 msgid "Send test request"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:447
+#: resources/admin/components/builder/ActionsPanel.jsx:449
 msgid "HTTP Method"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:454
+#: resources/admin/components/builder/ActionsPanel.jsx:456
 msgid "Payload Mode"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:466
+#: resources/admin/components/builder/ActionsPanel.jsx:468
 msgid "Custom JSON Payload"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:491
+#: resources/admin/components/builder/ActionsPanel.jsx:493
 msgid "HMAC-SHA256 Signing"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:495
+#: resources/admin/components/builder/ActionsPanel.jsx:497
 msgid "Adds an X-SubtleForms-Signature header so you can verify requests on your server."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:499
+#: resources/admin/components/builder/ActionsPanel.jsx:501
 msgid "Signing Secret"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:503
+#: resources/admin/components/builder/ActionsPanel.jsx:505
 msgid "Created when you save the form"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:505
+#: resources/admin/components/builder/ActionsPanel.jsx:507
 msgid "Kept server-side; paste the same value into your endpoint to verify the signature."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:600
+#: resources/admin/components/builder/ActionsPanel.jsx:602
 msgid "No actions configured. Add an action to process form submissions."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:633
+#: resources/admin/components/builder/ActionsPanel.jsx:635
 msgid "+ Send Email"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:639
+#: resources/admin/components/builder/ActionsPanel.jsx:641
 msgid "+ Send to API"
 msgstr ""
 
@@ -9125,16 +9132,16 @@ msgstr ""
 msgid "Test connection"
 msgstr ""
 
-#: resources/admin/components/settings/extensions/ConnectionTest.jsx:54
+#: resources/admin/components/settings/extensions/ConnectionTest.jsx:56
 msgid "Connected."
 msgstr ""
 
-#: resources/admin/components/settings/extensions/ConnectionTest.jsx:54
-#: resources/admin/components/settings/extensions/ConnectionTest.jsx:65
+#: resources/admin/components/settings/extensions/ConnectionTest.jsx:56
+#: resources/admin/components/settings/extensions/ConnectionTest.jsx:67
 msgid "The connection failed."
 msgstr ""
 
-#: resources/admin/components/settings/extensions/ConnectionTest.jsx:64
+#: resources/admin/components/settings/extensions/ConnectionTest.jsx:66
 msgid "Connection tests need SubtleForms Pro to be active."
 msgstr ""
 
