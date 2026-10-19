@@ -357,6 +357,34 @@ function rawValidateField(field, value, defaults = {}) {
     }
   }
 
+  // A Product quantity is a whole number within the field's limits, as
+  // FieldValidator::validatePaymentQuantity checks on the server (PAY-06).
+  // Checked here so a card is never authorised for an order the server
+  // will refuse.
+  if (type === 'payment_product' && config.allowQuantity) {
+    const text = typeof value === 'number' ? String(value) : String(value).trim();
+    const qty = Number(text);
+    if (!/^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/.test(text) || !Number.isInteger(qty) || qty < 0) {
+      return __('Please enter a whole number for the quantity.', 'subtleforms');
+    }
+    const minQty = Math.max(0, parseInt(config.minQuantity, 10) || 0);
+    const maxQty = parseInt(config.maxQuantity, 10) || 0;
+    if (qty < minQty) {
+      return sprintf(
+        /* translators: %d: smallest quantity */
+        __('The quantity must be at least %d.', 'subtleforms'),
+        minQty
+      );
+    }
+    if (maxQty > 0 && qty > maxQty) {
+      return sprintf(
+        /* translators: %d: largest quantity */
+        __('The quantity can be at most %d.', 'subtleforms'),
+        maxQty
+      );
+    }
+  }
+
   if (type === 'date' && isIsoDate(value)) {
     const minDate = config.minDate;
     const maxDate = config.maxDate;
