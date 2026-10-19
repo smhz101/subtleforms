@@ -1,5 +1,5 @@
 /**
- * LogicEditor — conditional logic rules for a field, step, email or
+ * LogicEditor, conditional logic rules for a field, step, email or
  * confirmation (2.1).
  *
  * Writes the shared logic shape evaluated by shared/conditions.js in the
@@ -7,15 +7,13 @@
  *
  *   { action, groups: [ { match: 'all' | 'any', rules: [ { field, operator, value, value2 } ] } ] }
  *
- * Free: one group, all rules must match, the basic operators. Pro
- * (logic.conditional.advanced): "any", several groups (OR) and the advanced
- * operators. Locked options stay visible and open the upgrade modal.
+ * Every option is available: "all" or "any" per group, several groups
+ * (OR) and every operator.
  */
 import { Button, SelectControl, TextControl } from '@wordpress/components';
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import Icon from '../../ui/Icon';
-import { isProFeature, openUpgradeModal } from '../../utils/featureGate';
-import { nodeLogics, VALUELESS_OPERATORS, ADVANCED_OPERATORS } from '../../../shared/conditions';
+import { nodeLogics, VALUELESS_OPERATORS } from '../../../shared/conditions';
 import './LogicEditor.scss';
 
 const OPERATOR_LABELS = {
@@ -109,13 +107,11 @@ export default function LogicEditor({
   onChange,
   showAction = true,
   actions = ['show', 'hide'],
-  locked = false,
   disabled = false,
   emptyText,
   addLabel,
 }) {
-  const advanced = isProFeature('logic.conditional.advanced');
-  const readOnly = disabled || locked;
+  const readOnly = disabled;
   const current = logic && Array.isArray(logic.groups) ? logic : null;
   const groups = current?.groups?.length ? current.groups : [];
   const action = current?.action || actions[0];
@@ -128,8 +124,6 @@ export default function LogicEditor({
         : null
     );
   };
-
-  const upgrade = () => openUpgradeModal('logic.conditional.advanced');
 
   const updateGroup = (gi, patch) =>
     commit(groups.map((g, i) => (i === gi ? { ...g, ...patch } : g)));
@@ -154,10 +148,6 @@ export default function LogicEditor({
       : commit([{ match: 'all', rules: [emptyRule()] }]);
 
   const addGroup = () => {
-    if (!advanced) {
-      upgrade();
-      return;
-    }
     commit([...groups, { match: 'all', rules: [emptyRule()] }]);
   };
 
@@ -170,33 +160,11 @@ export default function LogicEditor({
 
   const operatorOptions = [
     ...BASIC_ORDER.map((op) => ({ label: OPERATOR_LABELS[op], value: op })),
-    ...ADVANCED_ORDER.map((op) => ({
-      label: advanced
-        ? OPERATOR_LABELS[op]
-        : sprintf(
-            /* translators: %s: operator name, e.g. "starts with" */
-            __('%s (Pro)', 'subtleforms'),
-            OPERATOR_LABELS[op]
-          ),
-      value: op,
-    })),
+    ...ADVANCED_ORDER.map((op) => ({ label: OPERATOR_LABELS[op], value: op })),
   ];
 
   return (
-    <div className={`sf-logic-editor${locked ? ' is-locked' : ''}`}>
-      {locked && (
-        <div className='sf-logic-editor__lock'>
-          <span className='sf-logic-editor__lock-icon' aria-hidden='true'>
-            <Icon.Lock size={14} />
-          </span>
-          <span className='sf-logic-editor__lock-text'>
-            {__('Conditions here come with SubtleForms Pro.', 'subtleforms')}
-          </span>
-          <Button variant='secondary' size='small' onClick={upgrade}>
-            {__('Unlock', 'subtleforms')}
-          </Button>
-        </div>
-      )}
+    <div className='sf-logic-editor'>
 
       {showAction && groups.length > 0 && (
         <div className='sf-logic-editor__action'>
@@ -240,20 +208,9 @@ export default function LogicEditor({
                 disabled={readOnly}
                 options={[
                   { value: 'all', label: __('All of these rules', 'subtleforms') },
-                  {
-                    value: 'any',
-                    label: advanced
-                      ? __('Any of these rules', 'subtleforms')
-                      : __('Any of these rules (Pro)', 'subtleforms'),
-                  },
+                  { value: 'any', label: __('Any of these rules', 'subtleforms') },
                 ]}
-                onChange={(v) => {
-                  if (v === 'any' && !advanced) {
-                    upgrade();
-                    return;
-                  }
-                  updateGroup(gi, { match: v });
-                }}
+                onChange={(v) => updateGroup(gi, { match: v })}
               />
               {groups.length > 1 && (
                 <Button
@@ -303,13 +260,7 @@ export default function LogicEditor({
                     value={op}
                     disabled={readOnly}
                     options={operatorOptions}
-                    onChange={(v) => {
-                      if (ADVANCED_OPERATORS.includes(v) && !advanced) {
-                        upgrade();
-                        return;
-                      }
-                      updateRule(gi, ri, { operator: v });
-                    }}
+                    onChange={(v) => updateRule(gi, ri, { operator: v })}
                   />
                   {needsValue && useChoices && (
                     <SelectControl
@@ -385,7 +336,7 @@ export default function LogicEditor({
           </Button>
         ) : (
           <Button variant='tertiary' size='compact' disabled={readOnly} onClick={addGroup}>
-            {advanced ? __('+ Add “or” group', 'subtleforms') : __('+ Add “or” group (Pro)', 'subtleforms')}
+            {__('+ Add “or” group', 'subtleforms')}
           </Button>
         )}
       </div>

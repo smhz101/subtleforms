@@ -1,4 +1,5 @@
 <?php
+
 // phpcs:disable -- Unit test file; not shipped in production plugin.
 /**
  * QA-09: Repeater groups are validated per group, conditional rules run per
@@ -8,6 +9,10 @@
  */
 
 namespace SubtleForms\Tests\Unit;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use PHPUnit\Framework\TestCase;
 use SubtleForms\Engine\ConditionalLogic;

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SubtleForms Submissions REST API
  *
@@ -9,6 +10,10 @@
  */
 
 namespace SubtleForms\Api;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Support\Helpers;
 use SubtleForms\Support\FeatureGate;
@@ -438,7 +443,7 @@ final class SubmissionsApi {
 		}
 		$starred_arg = $tab_status === 'starred' ? 1 : null;
 
-		// Processing status (filter bar) — only applies when tab is 'all'
+		// Processing status (filter bar), only applies when tab is 'all'
 		if ( $proc_status && $status_arg === null && $is_read_arg === null && $tab_status !== 'starred' ) {
 			$status_arg = $proc_status;
 		}
@@ -937,7 +942,7 @@ final class SubmissionsApi {
 	}
 
 	/**
-	 * Export submissions as CSV (Pro capability `submissions.export`).
+	 * Export submissions as CSV.
 	 *
 	 * Columns are the union of every exported entry's answers, so a form whose
 	 * fields changed over time keeps all of its data. When one form is
@@ -947,10 +952,6 @@ final class SubmissionsApi {
 		$rateLimitResponse = $this->guardRateLimit( $request );
 		if ( $rateLimitResponse ) {
 			return $rateLimitResponse;
-		}
-
-		if ( ! $this->gate->allows( 'submissions.export' ) ) {
-			return ApiResponse::forbidden( __( 'CSV export is part of SubtleForms Pro.', 'subtleforms' ) );
 		}
 
 		$params = $request->get_json_params();

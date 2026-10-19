@@ -54,7 +54,7 @@ export function useDraftAutosave({ builderState, dispatch, formId, enabled = tru
 
   const { state, draftSchema, isDirty } = builderState;
 
-  // A clean builder means the draft is what the server holds — true on load,
+  // A clean builder means the draft is what the server holds, true on load,
   // after a manual save and after a publish. Recording it here means the first
   // autosave after a load can also be skipped when nothing really changed.
   useEffect(() => {

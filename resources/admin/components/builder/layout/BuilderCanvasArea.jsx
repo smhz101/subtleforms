@@ -5,7 +5,7 @@
  */
 
 import { useMemo } from '@wordpress/element';
-import { Notice } from '@wordpress/components';
+import { Button, Notice } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import FormEditor from '../FormEditor';
 import FormSettings from '../FormSettings';
@@ -13,7 +13,8 @@ import SubmissionsTable from '../../SubmissionsTable';
 import ProDowngradeBanner from '../../ProDowngradeBanner';
 import EmptyFormWelcome from '../EmptyFormWelcome';
 import PreviewWorkspace from '../PreviewWorkspace';
-import { formUsesProFeatures, getProFeaturesUsed } from '../../../utils/proFeatureDetector';
+import { getMissingAddonFields } from '../../../utils/proFeatureDetector';
+import { offlinePaymentNote } from '../../../utils/paymentNotes';
 import './BuilderCanvasArea.scss';
 
 export default function BuilderCanvasArea({
@@ -26,29 +27,38 @@ export default function BuilderCanvasArea({
   onSchemaChange,
   currentFormId,
   saveError,
+  onRetrySave,
   hasValidationErrors,
   showWelcome = false,
   isDirty = false,
 }) {
-  // Detect Pro feature usage and license state
-  const usesProFeatures = useMemo(() => formUsesProFeatures(draftSchema), [draftSchema]);
-  const capabilities = window.subtleformsAdmin?.capabilities || {};
-  const hasProLicense = capabilities['templates.pro'] === true;
-  const isReadOnly = usesProFeatures && !hasProLicense;
-  const proFeaturesUsed = useMemo(() => 
-    isReadOnly ? getProFeaturesUsed(draftSchema) : [],
-    [isReadOnly, draftSchema]
-  );
+  // Fields from an add-on that is not active (the form stays editable).
+  const missingAddonFields = useMemo(() => getMissingAddonFields(draftSchema), [draftSchema]);
+  // A priced form without a Card Payment field saves entries as "Payment
+  // pending" (PAY-03); say so while the form is being built.
+  const paymentNote = useMemo(() => offlinePaymentNote(draftSchema), [draftSchema]);
   return (
     <>
-      {/* Pro Downgrade Banner */}
-      {isReadOnly && <ProDowngradeBanner featuresUsed={proFeaturesUsed} />}
+      <ProDowngradeBanner featuresUsed={missingAddonFields} />
+
+      {paymentNote && view === 'build' && (
+        <div className='sf-builder-canvas-area__validation-notice'>
+          <Notice status='info' isDismissible={false}>
+            {paymentNote}
+          </Notice>
+        </div>
+      )}
 
       {saveError && (
-        <div className='sf-builder-canvas-area__error-banner'>
+        <div className='sf-builder-canvas-area__error-banner' role='alert'>
           <span className='sf-builder-canvas-area__error-text'>
             {saveError}
           </span>
+          {onRetrySave && (
+            <Button variant='secondary' onClick={onRetrySave}>
+              {__('Retry', 'subtleforms')}
+            </Button>
+          )}
         </div>
       )}
 
@@ -96,7 +106,6 @@ export default function BuilderCanvasArea({
                 validationErrors={validationErrors}
                 fieldErrors={fieldErrors}
                 onChange={onSchemaChange}
-                isReadOnly={isReadOnly}
               />
             )}
             {view === 'settings' && (
@@ -105,7 +114,6 @@ export default function BuilderCanvasArea({
                 validationErrors={validationErrors}
                 fieldErrors={fieldErrors}
                 onChange={onSchemaChange}
-                isReadOnly={isReadOnly}
               />
             )}
             {view === 'entries' && currentFormId && (
@@ -129,7 +137,6 @@ export default function BuilderCanvasArea({
                 formId={currentFormId}
                 onChange={onSchemaChange}
                 isDirty={isDirty}
-                isReadOnly={isReadOnly}
               />
             )}
           </>

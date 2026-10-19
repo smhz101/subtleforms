@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Range checks for CouponsRepository::save(). Invalid values must be refused
  * before any row is written.
@@ -7,6 +8,10 @@
 namespace {
 	if ( ! defined( 'ARRAY_A' ) ) {
 		define( 'ARRAY_A', 'ARRAY_A' );
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 	}
 
 	if ( ! function_exists( 'absint' ) ) {

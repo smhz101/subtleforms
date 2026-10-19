@@ -1,5 +1,5 @@
 /**
- * ComponentErrorBoundary — Sub-page Error Isolation
+ * ComponentErrorBoundary, Sub-page Error Isolation
  *
  * Lightweight error boundary for wrapping individual components (DataTable,
  * BuilderCanvas, InspectorPanel, etc.) so a crash in one section doesn't

@@ -1,5 +1,5 @@
 /**
- * PreviewWorkspace — the Preview tab's canvas and styling controls.
+ * PreviewWorkspace, the Preview tab's canvas and styling controls.
  *
  * Two panes side by side: the canvas takes the space that is left, the controls
  * keep a fixed column so the inputs inside them never reflow while the canvas
@@ -78,16 +78,15 @@
 
 	&__canvas {
 		min-width: 0;
-		overflow: auto;
+		overflow-x: hidden;
+		overflow-y: auto;
 		padding: var(--sf-space-8) var(--sf-space-6);
 	}
 
-	// The device keeps its real width. When that is wider than the pane, the
-	// pane scrolls instead of shrinking desktop down to the tablet width.
+	// The form is laid out at the device width, then scaled to the pane.
 	&__stage {
-		width: max-content;
-		min-width: 100%;
-		max-width: none;
+		width: 100%;
+		min-width: 0;
 		margin: 0 auto;
 		background: transparent;
 		border: 0;

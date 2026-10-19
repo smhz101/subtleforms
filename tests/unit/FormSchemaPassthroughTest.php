@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Field settings and form metadata survive a save (2.0).
  *
@@ -11,6 +12,10 @@
  */
 
 namespace SubtleForms\Tests\Unit;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use PHPUnit\Framework\TestCase;
 use SubtleForms\Validation\RequestValidator;

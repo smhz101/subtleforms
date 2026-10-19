@@ -20,8 +20,7 @@ function StatusPill({ ext }) {
   if (!ext.available) {
     return (
       <span className='sf-pill sf-pill--outline sf-ext-row__pro'>
-        <Icon.Lock size={12} aria-hidden='true' />
-        {__('Pro', 'subtleforms')}
+        {__('In SubtleForms Pro', 'subtleforms')}
       </span>
     );
   }
@@ -60,7 +59,7 @@ function ExtensionRow({ ext, onOpen }) {
             variant='tertiary'
             size='compact'
             onClick={() => requirePro(`extensions.${ext.slug}`, () => {}, { label: ext.label })}>
-            {__('Unlock', 'subtleforms')}
+            {__('Learn more', 'subtleforms')}
           </Button>
         ) : (
           <Button variant='secondary' size='compact' onClick={() => onOpen(ext.slug)}>
@@ -85,11 +84,11 @@ function ProHero({ hasProPlugin, onActivate }) {
           {__('SubtleForms Pro', 'subtleforms')}
         </span>
         <h2 id='sf-pro-hero-title' className='sf-pro-hero__title'>
-          {__('Turn forms into payments, leads and reports.', 'subtleforms')}
+          {__('More integrations with SubtleForms Pro', 'subtleforms')}
         </h2>
         <p className='sf-pro-hero__text'>
           {__(
-            'Pro plugs into the forms you already have. Nothing to rebuild: locked fields and actions light up the moment your license is active.',
+            'SubtleForms Pro is a separate plugin that adds Stripe payments, marketing and CRM integrations, entry PDFs, translation and more templates to the forms you already have.',
             'subtleforms'
           )}
         </p>
@@ -125,7 +124,7 @@ function ProHero({ hasProPlugin, onActivate }) {
 }
 
 /**
- * Extensions — the Pro hub. Every extension is listed whether or not it is
+ * Extensions, the Pro hub. Every extension is listed whether or not it is
  * unlocked, so free users see exactly what Pro adds and Pro users get one
  * place to switch things on.
  */
@@ -167,8 +166,7 @@ export default function ExtensionsPage() {
       description={description}
       actions={
         licensed ? (
-          <Button variant='secondary' onClick={openLicense}>
-            <Icon.Crown size={16} aria-hidden='true' />
+          <Button variant='secondary' onClick={openLicense} icon={<Icon.Crown size={16} aria-hidden='true' />}>
             {sprintf(
               /* translators: %s: plan name */
               __('%s license', 'subtleforms'),

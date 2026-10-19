@@ -2,6 +2,10 @@
 
 namespace SubtleForms\Support\Captcha;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use SubtleForms\Contracts\CaptchaProviderInterface;
 
 use SubtleForms\Support\Logger;

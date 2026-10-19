@@ -1,5 +1,5 @@
 /**
- * UpgradeModal — Global event-driven Pro upgrade modal.
+ * UpgradeModal, Global event-driven Pro upgrade modal.
  *
  * Mount once in AppContent. Listens for 'sf:upgrade:required' custom DOM events
  * dispatched by featureGate.js#openUpgradeModal / #requirePro.
@@ -20,196 +20,151 @@ import './UpgradeModal.scss';
 
 const FEATURE_COPY = {
   'fields.advanced': {
-    title: __( 'Smarter fields with Pro', 'subtleforms' ),
-    description: __( 'Picture Choice, Signature, live Calculations and multi-file uploads, in the same builder you already use.', 'subtleforms' ),
-    cta: __( 'Unlock Pro fields', 'subtleforms' ),
+    title: __( 'Signature and Calculation fields', 'subtleforms' ),
+    description: __( 'SubtleForms Pro adds a Signature pad and Calculation fields with a formula builder.', 'subtleforms' ),
+    cta: __( 'About SubtleForms Pro', 'subtleforms' ),
     lossLine: null,
     benefits: [
-      __( 'Picture Choice with image options and multi-select', 'subtleforms' ),
       __( 'Signature pad that works on touch screens', 'subtleforms' ),
-      __( 'Calculations with a formula builder, checked again on the server', 'subtleforms' ),
-    ],
-  },
-
-  'logic.conditional.advanced': {
-    title: __( 'Advanced conditional logic', 'subtleforms' ),
-    description: __( 'Build forms that adapt to each answer: richer rules for fields, steps, emails and confirmations.', 'subtleforms' ),
-    cta: __( 'Unlock advanced logic', 'subtleforms' ),
-    lossLine: null,
-    benefits: [
-      __( 'Match all or any rule, and combine groups of rules', 'subtleforms' ),
-      __( 'Starts with, ends with, is one of, between and date rules', 'subtleforms' ),
-      __( 'Skip steps, send emails and pick confirmations based on answers', 'subtleforms' ),
+      __( 'Calculations worked out live and checked again on the server', 'subtleforms' ),
+      __( 'Use a calculation as the amount to charge', 'subtleforms' ),
     ],
   },
 
   'branding.white_label': {
     title: __( 'White label for client sites', 'subtleforms' ),
-    description: __( 'Show your agency’s name and logo in the forms admin and hide SubtleForms links and prompts. Included in the Agency plan.', 'subtleforms' ),
+    description: __( 'Show your agency name and logo in the forms admin. Included in the Agency plan of SubtleForms Pro.', 'subtleforms' ),
     cta: __( 'See the Agency plan', 'subtleforms' ),
     lossLine: null,
     benefits: [
       __( 'Your plugin name in the admin menu and header', 'subtleforms' ),
       __( 'Your logo from the Media Library', 'subtleforms' ),
-      __( 'No SubtleForms help links, credits or upgrade prompts', 'subtleforms' ),
+      __( 'No SubtleForms help links or credits', 'subtleforms' ),
     ],
   },
 
   'templates.pro': {
-    title: __( 'Pro templates', 'subtleforms' ),
-    description: __( 'Start from proven layouts for registrations, orders, applications and support, then make them yours.', 'subtleforms' ),
-    cta: __( 'Unlock all templates', 'subtleforms' ),
+    title: __( 'More templates', 'subtleforms' ),
+    description: __( 'SubtleForms Pro adds 47 templates for registrations, orders, applications and support.', 'subtleforms' ),
+    cta: __( 'About SubtleForms Pro', 'subtleforms' ),
     lossLine: null,
     benefits: [
-      __( 'Multi-step, conversational and payment-ready layouts', 'subtleforms' ),
-      __( 'Every field and setting stays fully editable', 'subtleforms' ),
+      __( 'Multi-step, conversational and payment layouts', 'subtleforms' ),
+      __( 'Every field and setting stays editable', 'subtleforms' ),
       __( 'New templates added with updates', 'subtleforms' ),
     ],
   },
 
-  'submissions.export': {
-    title: __( 'Export Your Submissions', 'subtleforms' ),
-    description: __( 'Your submissions are collecting dust inside SubtleForms. Export them to see the data, spot patterns, and put it to work.', 'subtleforms' ),
-    cta: __( 'Unlock CSV Export', 'subtleforms' ),
-    lossLine: __( 'Your data is currently trapped inside SubtleForms.', 'subtleforms' ),
-    benefits: [
-      __( 'Stop copying submissions into spreadsheets by hand', 'subtleforms' ),
-      __( 'Analyse your data in Excel, Google Sheets, or any CRM', 'subtleforms' ),
-      __( 'Filter by form, status or start date before you download', 'subtleforms' ),
-    ],
-  },
-
   'actions.payment': {
-    title: __( 'Accept Payments', 'subtleforms' ),
-    description: __( 'Stop sending buyers to a separate checkout page. Add payments directly to your forms and convert while intent is highest.', 'subtleforms' ),
-    cta: __( 'Start Accepting Payments', 'subtleforms' ),
-    lossLine: __( 'You are leaving revenue on the table with every form submission.', 'subtleforms' ),
+    title: __( 'Card payments', 'subtleforms' ),
+    description: __( 'SubtleForms Pro adds a Card Payment field that takes payments with Stripe.', 'subtleforms' ),
+    cta: __( 'About SubtleForms Pro', 'subtleforms' ),
+    lossLine: null,
     benefits: [
-      __( 'Start collecting revenue without building a separate checkout', 'subtleforms' ),
-      __( 'Add pricing fields, coupons, and order summaries to any form', 'subtleforms' ),
-      __( 'Payments go live the moment you publish your form', 'subtleforms' ),
-    ],
-  },
-
-  'extensions.webhooks': {
-    title: __( 'Send Data Anywhere with Webhooks', 'subtleforms' ),
-    description: __( 'Every submission sits idle until you manually move it. Webhooks send it to the right place the instant it arrives.', 'subtleforms' ),
-    cta: __( 'Unlock Webhooks', 'subtleforms' ),
-    lossLine: __( 'Submissions are not reaching your other tools in real time.', 'subtleforms' ),
-    benefits: [
-      __( 'Every submission instantly reaches Zapier, Make, or your own endpoint', 'subtleforms' ),
-      __( 'Stop manually moving data between your tools', 'subtleforms' ),
-      __( 'Build automations in minutes, no code required', 'subtleforms' ),
-    ],
-  },
-
-  'extensions.email_marketing': {
-    title: __( 'Grow Your Email List', 'subtleforms' ),
-    description: __( 'Every form respondent is a potential subscriber. Without this, they complete the form and leave, nothing captured.', 'subtleforms' ),
-    cta: __( 'Grow My Email List', 'subtleforms' ),
-    lossLine: __( 'You are missing a subscriber with every form submission.', 'subtleforms' ),
-    benefits: [
-      __( 'Every respondent is automatically added to your email list', 'subtleforms' ),
-      __( 'Stop losing potential subscribers to manual imports', 'subtleforms' ),
-      __( 'Works with Mailchimp, Brevo and Kit, with tags and consent checks', 'subtleforms' ),
-    ],
-  },
-
-  'extensions.crm': {
-    title: __( 'Sync Leads to Your CRM', 'subtleforms' ),
-    description: __( 'Without CRM sync, every lead sits in your submissions list, unseen by your sales team until someone copies it across.', 'subtleforms' ),
-    cta: __( 'Start Syncing Leads', 'subtleforms' ),
-    lossLine: __( 'Leads from your forms are not reaching your CRM.', 'subtleforms' ),
-    benefits: [
-      __( 'Every form fill becomes a CRM contact, no copy-paste', 'subtleforms' ),
-      __( 'Stop losing leads between your forms and your sales pipeline', 'subtleforms' ),
-      __( 'HubSpot built in, or any CRM through Zapier or Make', 'subtleforms' ),
-    ],
-  },
-
-  'extensions.analytics': {
-    title: __( 'Track Form Performance', 'subtleforms' ),
-    description: __( 'Without analytics, you have no idea which forms convert and which ones lose people. You are optimising blind.', 'subtleforms' ),
-    cta: __( 'Track My Conversions', 'subtleforms' ),
-    lossLine: __( 'You have no visibility into which forms are actually converting.', 'subtleforms' ),
-    benefits: [
-      __( 'See exactly which forms convert, and which ones lose people', 'subtleforms' ),
-      __( 'Stop guessing and start optimising with real submission data', 'subtleforms' ),
-      __( 'Views, submissions and conversion rate on the Forms list and Dashboard', 'subtleforms' ),
-    ],
-  },
-
-  'extensions.ecommerce': {
-    title: __( 'Sell with Your Forms', 'subtleforms' ),
-    description: __( 'Every time a buyer reaches your form and leaves without buying, that sale is gone. Convert them here, when intent is highest.', 'subtleforms' ),
-    cta: __( 'Start Selling with Forms', 'subtleforms' ),
-    lossLine: __( 'You are sending buyers away to checkout instead of converting them here.', 'subtleforms' ),
-    benefits: [
-      __( 'Accept orders directly inside your forms, no separate shop needed', 'subtleforms' ),
-      __( 'Add product selections, quantities, and checkout in minutes', 'subtleforms' ),
-      __( 'Stop losing buyers to a separate, clunky checkout flow', 'subtleforms' ),
-    ],
-  },
-
-  'extensions.pdf': {
-    title: __( 'PDF Copies of Every Entry', 'subtleforms' ),
-    description: __( 'Without this, every receipt, report, or confirmation has to be created manually. That time adds up fast.', 'subtleforms' ),
-    cta: __( 'Automate My PDFs', 'subtleforms' ),
-    lossLine: __( 'You are creating documents manually that could be generated automatically.', 'subtleforms' ),
-    benefits: [
-      __( 'Download any entry as a branded PDF with one click', 'subtleforms' ),
-      __( 'Attach the PDF to your notification emails automatically', 'subtleforms' ),
-      __( 'Order summaries included for payment forms', 'subtleforms' ),
-    ],
-  },
-
-  'extensions.multilanguage': {
-    title: __( 'Reach a Global Audience', 'subtleforms' ),
-    description: __( 'Visitors who see your form in the wrong language leave. Every international visitor you lose is a submission you will never get back.', 'subtleforms' ),
-    cta: __( 'Reach a Global Audience', 'subtleforms' ),
-    lossLine: __( 'International visitors are seeing your forms in the wrong language.', 'subtleforms' ),
-    benefits: [
-      __( 'Show your forms in each visitor’s language automatically', 'subtleforms' ),
-      __( 'Stop losing international visitors to a language barrier', 'subtleforms' ),
-      __( 'Works with WPML and Polylang out of the box', 'subtleforms' ),
+      __( 'Cards, wallets and bank payments through Stripe', 'subtleforms' ),
+      __( 'Works with the free Product, Priced Options and Coupon fields', 'subtleforms' ),
+      __( 'Payment status on every entry', 'subtleforms' ),
     ],
   },
 
   'extensions.payments': {
-    title: __( 'Collect Payments in Your Forms', 'subtleforms' ),
-    description: __( 'Your forms already capture intent. Adding payments converts that intent into revenue, without a separate checkout page.', 'subtleforms' ),
-    cta: __( 'Start Collecting Payments', 'subtleforms' ),
-    lossLine: __( 'You are leaving revenue on the table with every form submission.', 'subtleforms' ),
+    title: __( 'Card payments', 'subtleforms' ),
+    description: __( 'SubtleForms Pro adds a Card Payment field that takes payments with Stripe.', 'subtleforms' ),
+    cta: __( 'About SubtleForms Pro', 'subtleforms' ),
+    lossLine: null,
     benefits: [
-      __( 'Collect one-time card payments directly inside your forms', 'subtleforms' ),
-      __( 'Stop redirecting buyers away to a separate payment page', 'subtleforms' ),
-      __( 'Stripe cards, Apple Pay and Google Pay, with coupons and order totals', 'subtleforms' ),
+      __( 'Cards, wallets and bank payments through Stripe', 'subtleforms' ),
+      __( 'Works with the free Product, Priced Options and Coupon fields', 'subtleforms' ),
+      __( 'Payment status on every entry', 'subtleforms' ),
+    ],
+  },
+
+  'extensions.email_marketing': {
+    title: __( 'Email marketing', 'subtleforms' ),
+    description: __( 'SubtleForms Pro adds people who send a form to Mailchimp, Brevo or Kit.', 'subtleforms' ),
+    cta: __( 'About SubtleForms Pro', 'subtleforms' ),
+    lossLine: null,
+    benefits: [
+      __( 'Choose the list and map fields per form', 'subtleforms' ),
+      __( 'Only add people who ticked a consent box', 'subtleforms' ),
+      __( 'Every delivery is listed on the entry', 'subtleforms' ),
+    ],
+  },
+
+  'extensions.crm': {
+    title: __( 'CRM', 'subtleforms' ),
+    description: __( 'SubtleForms Pro creates HubSpot contacts from form entries.', 'subtleforms' ),
+    cta: __( 'About SubtleForms Pro', 'subtleforms' ),
+    lossLine: null,
+    benefits: [
+      __( 'Map form fields to contact properties', 'subtleforms' ),
+      __( 'Update the contact when the email already exists', 'subtleforms' ),
+      __( 'Every delivery is listed on the entry', 'subtleforms' ),
+    ],
+  },
+
+  'extensions.ecommerce': {
+    title: __( 'WooCommerce', 'subtleforms' ),
+    description: __( 'SubtleForms Pro sends payment forms through the WooCommerce checkout and adds a WooCommerce Product field.', 'subtleforms' ),
+    cta: __( 'About SubtleForms Pro', 'subtleforms' ),
+    lossLine: null,
+    benefits: [
+      __( 'Use the payment methods WooCommerce already has', 'subtleforms' ),
+      __( 'Orders link back to the form entry', 'subtleforms' ),
+      __( 'Sell existing WooCommerce products from a form', 'subtleforms' ),
+    ],
+  },
+
+  'integrations.woocommerce': {
+    title: __( 'WooCommerce checkout', 'subtleforms' ),
+    description: __( 'SubtleForms Pro sends payment forms through the WooCommerce checkout.', 'subtleforms' ),
+    cta: __( 'About SubtleForms Pro', 'subtleforms' ),
+    lossLine: null,
+    benefits: [
+      __( 'Use the payment methods WooCommerce already has', 'subtleforms' ),
+      __( 'Orders link back to the form entry', 'subtleforms' ),
+      __( 'Sell existing WooCommerce products from a form', 'subtleforms' ),
+    ],
+  },
+
+  'extensions.pdf': {
+    title: __( 'Entry PDFs', 'subtleforms' ),
+    description: __( 'SubtleForms Pro makes a PDF of any entry and can attach it to notification emails.', 'subtleforms' ),
+    cta: __( 'About SubtleForms Pro', 'subtleforms' ),
+    lossLine: null,
+    benefits: [
+      __( 'Download a PDF from the entry screen', 'subtleforms' ),
+      __( 'Attach it to admin notification emails', 'subtleforms' ),
+      __( 'Your logo and colours on every page', 'subtleforms' ),
+    ],
+  },
+
+  'extensions.multilanguage': {
+    title: __( 'Translation with WPML and Polylang', 'subtleforms' ),
+    description: __( 'SubtleForms Pro lets WPML or Polylang translate form labels, messages and emails.', 'subtleforms' ),
+    cta: __( 'About SubtleForms Pro', 'subtleforms' ),
+    lossLine: null,
+    benefits: [
+      __( 'Translate labels, help text and options', 'subtleforms' ),
+      __( 'Translate confirmation messages and emails', 'subtleforms' ),
+      __( 'One form for every language', 'subtleforms' ),
     ],
   },
 };
-
-// ─── Copy resolver ────────────────────────────────────────────────────────────
 
 function getFeatureCopy( featureKey, context = {} ) {
   if ( FEATURE_COPY[ featureKey ] ) {
     return FEATURE_COPY[ featureKey ];
   }
 
-  // Fallback: use context.label for a personalised title when available
+  // Fallback: use context.label for the title when available.
   return {
-    title: context.label
-      ? context.label
-      : __( 'Unlock Premium Features', 'subtleforms' ),
-    description: __( 'Upgrade to SubtleForms Pro to unlock this and all other Pro features.', 'subtleforms' ),
-    cta: __( 'Upgrade to Pro', 'subtleforms' ),
+    title: context.label ? context.label : __( 'SubtleForms Pro', 'subtleforms' ),
+    description: __( 'This is part of SubtleForms Pro, a separate plugin.', 'subtleforms' ),
+    cta: __( 'About SubtleForms Pro', 'subtleforms' ),
     lossLine: null,
-    benefits: [
-      __( 'Stop using tools that don\'t connect to your forms', 'subtleforms' ),
-      __( 'Everything you need, in the same place you build forms', 'subtleforms' ),
-      __( 'Unlock all Pro extensions and capabilities immediately', 'subtleforms' ),
-    ],
-  };
-}
+    benefits: [],
+  };}
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -238,10 +193,7 @@ export default function UpgradeModal() {
   const copy = getFeatureCopy( featureKey, context );
   const hasProPlugin = !! window.subtleformsAdmin?.hasProPlugin;
 
-  const outcomeList = copy.benefits.slice(0, 3).map((item, index) => {
-    // convert feature-style text to outcome-style, keep simple fallback
-    return item;
-  });
+  const outcomeList = copy.benefits.slice( 0, 3 );
 
   const handleUpgrade = () => {
     const url = getUpgradeUrl( featureKey || '' );
@@ -261,22 +213,20 @@ export default function UpgradeModal() {
           <Icon.Crown size={14} aria-hidden='true' />
           { __( 'SubtleForms Pro', 'subtleforms' ) }
         </span>
-        <h2 className='sf-upgrade-modal__title'>{copy.title || __('Unlock Premium Features', 'subtleforms')}</h2>
+        <h2 className='sf-upgrade-modal__title'>{copy.title}</h2>
         <p className='sf-upgrade-modal__description'>
-          {copy.description || __('Upgrade to SubtleForms Pro for a premium workflow experience.', 'subtleforms')}
+          {copy.description}
         </p>
 
-        <ul className='sf-upgrade-modal__benefits'>
-          {outcomeList.map((item, idx) => (
-            <li key={idx} className='sf-upgrade-modal__benefit'>
-              <Icon.Check className='sf-upgrade-modal__benefit-icon' size={16} />
-              {item}
-            </li>
-          ))}
-        </ul>
-
-        {copy.lossLine && (
-          <p className='sf-upgrade-modal__loss'>{copy.lossLine}</p>
+        {outcomeList.length > 0 && (
+          <ul className='sf-upgrade-modal__benefits'>
+            {outcomeList.map((item, idx) => (
+              <li key={idx} className='sf-upgrade-modal__benefit'>
+                <Icon.Check className='sf-upgrade-modal__benefit-icon' size={16} />
+                {item}
+              </li>
+            ))}
+          </ul>
         )}
 
         <div className='sf-upgrade-modal__actions'>
@@ -290,7 +240,7 @@ export default function UpgradeModal() {
             </Button>
           ) : (
             <Button variant='primary' onClick={ handleUpgrade } className='sf-upgrade-modal__primary'>
-              { copy.cta || __( 'Upgrade to Pro', 'subtleforms' ) }
+              { copy.cta }
             </Button>
           ) }
 
@@ -301,8 +251,8 @@ export default function UpgradeModal() {
 
         <p className='sf-upgrade-modal__urgency'>
           { hasProPlugin
-            ? __( 'SubtleForms Pro is installed. It switches on as soon as your key is active.', 'subtleforms' )
-            : __( 'Pro is an add-on. Your forms and entries stay exactly as they are.', 'subtleforms' ) }
+            ? __( 'SubtleForms Pro is installed. Add your license key to use it.', 'subtleforms' )
+            : __( 'SubtleForms Pro is a separate plugin. Your forms and entries stay as they are.', 'subtleforms' ) }
         </p>
       </div>
     </Modal>

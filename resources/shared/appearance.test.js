@@ -198,7 +198,7 @@ describe('2.3.0 inline layout and dark surface', () => {
   });
   test('dark surface preset exists and drops the card', () => {
     const preset = getPreset('dark-surface');
-    expect(preset.tokens.colorBackground).toBe('transparent');
+    expect(preset.tokens.colorBackground).toBe('#1b1d24');
     expect(formAppearanceClasses({ preset: 'dark-surface', variants: {} })).toContain('subtleforms--preset-dark-surface');
   });
 });
@@ -227,5 +227,34 @@ describe( 'previewBreakpoints', () => {
   it( 'offers an inherit-from-theme preset', () => {
     expect( getPreset( 'theme' ).variants.width ).toBe( 'theme' );
     expect( formAppearanceClasses( { preset: 'theme' } ) ).toContain( 'subtleforms--inherit-theme' );
+  } );
+} );
+
+function contrast( hex, other ) {
+  const lin = ( channel ) => {
+    const c = channel / 255;
+    return c <= 0.04045 ? c / 12.92 : ( ( c + 0.055 ) / 1.055 ) ** 2.4;
+  };
+  const lum = ( value ) => {
+    const h = value.replace( '#', '' );
+    const r = parseInt( h.slice( 0, 2 ), 16 );
+    const g = parseInt( h.slice( 2, 4 ), 16 );
+    const b = parseInt( h.slice( 4, 6 ), 16 );
+    return ( 0.2126 * lin( r ) ) + ( 0.7152 * lin( g ) ) + ( 0.0722 * lin( b ) );
+  };
+  const hi = Math.max( lum( hex ), lum( other ) );
+  const lo = Math.min( lum( hex ), lum( other ) );
+  return ( hi + 0.05 ) / ( lo + 0.05 );
+}
+
+describe( 'preset contrast', () => {
+  test( 'dark, dark surface and bold stay at 4.5:1', () => {
+    const dark = getPreset( 'dark' );
+    const surface = getPreset( 'dark-surface' );
+    const bold = getPreset( 'bold' );
+    expect( contrast( dark.tokens.colorButtonText, dark.tokens.colorPrimary ) ).toBeGreaterThanOrEqual( 4.5 );
+    expect( contrast( surface.tokens.colorText, surface.tokens.colorBackground ) ).toBeGreaterThanOrEqual( 4.5 );
+    expect( contrast( '#ffffff', bold.tokens.colorPrimary ) ).toBeGreaterThanOrEqual( 4.5 );
+    expect( formAppearanceClasses( { preset: 'dark' } ) ).toContain( 'subtleforms--preset-dark' );
   } );
 } );

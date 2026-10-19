@@ -1,5 +1,5 @@
 /**
- * ActionsPanel — Form-level pipeline action editor
+ * ActionsPanel, Form-level pipeline action editor
  *
  * Renders a list of schema.actions[] with add/remove/reorder support.
  * Supports: webhook, email
@@ -32,7 +32,6 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import LogicEditor, { collectLogicFields, countRules } from './LogicEditor';
-import { isProFeature } from '../../utils/featureGate';
 import MergeTagMenu from '../merge-tags/MergeTagMenu';
 import MergeTagsHelpLink from '../merge-tags/MergeTagsHelp';
 import { insertAt } from '../merge-tags/mergeTags';
@@ -183,11 +182,10 @@ function HeadersEditor({ value, onChange, disabled }) {
 // ─── SortableActionItem ──────────────────────────────────────────────────────
 
 /**
- * "Only when" conditions on an action (Pro, 2.1). The action is skipped when
+ * "Only when" conditions on an action (2.1). The action is skipped when
  * its rules do not match; saving the entry always happens.
  */
 function ActionConditions({ settings, fields, disabled, onChange }) {
-  const advanced = isProFeature('logic.conditional.advanced');
   const logic = settings.logic && Array.isArray(settings.logic.groups) ? settings.logic : null;
   const count = countRules(logic);
 
@@ -203,7 +201,6 @@ function ActionConditions({ settings, fields, disabled, onChange }) {
         logic={logic}
         availableFields={fields}
         showAction={false}
-        locked={!advanced}
         disabled={disabled}
         emptyText={__('Runs for every submission. Add a rule to run it only for some answers.', 'subtleforms')}
         onChange={(next) => onChange(next)}
@@ -425,7 +422,7 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
             disabled={isDisabled}
           />
 
-          {/* Method + Payload mode — side by side */}
+          {/* Method + Payload mode, side by side */}
           <div className='sf-actions-panel__row'>
             <SelectControl
               label={__('HTTP Method', 'subtleforms')}

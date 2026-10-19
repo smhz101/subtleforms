@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Field mapping helpers for integrations.
  *
@@ -17,6 +18,10 @@
  */
 
 namespace SubtleForms\Support;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Resolves mapped answer values.
@@ -195,7 +200,13 @@ final class FieldMapper {
 	 * @return string Empty string when there is no value.
 	 */
 	public static function value( array $payload, string $source ): string {
-		return self::toText( self::raw( $payload, $source ) );
+		$raw = self::raw( $payload, $source );
+		// A drawn signature is an image; integrations get a word, not the
+		// image data (PRO2-04).
+		if ( EntryValues::isSignatureImage( $raw ) ) {
+			return __( 'Signed', 'subtleforms' );
+		}
+		return self::toText( $raw );
 	}
 
 	/**
@@ -219,6 +230,11 @@ final class FieldMapper {
 		}
 		if ( ! is_array( $value ) ) {
 			return '';
+		}
+
+		// An uploaded file reads as its name, not its stored record (FA-03).
+		if ( \SubtleForms\Uploads\Uploads::isRecord( $value ) ) {
+			return trim( (string) $value['name'] );
 		}
 
 		$isName = array_intersect( array_keys( $value ), array( 'first_name', 'last_name', 'middle_name', 'prefix' ) );

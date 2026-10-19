@@ -150,7 +150,7 @@ function SortableWrapper({
 }
 
 /**
- * FieldNode — memoized wrapper for a single leaf field on the canvas.
+ * FieldNode, memoized wrapper for a single leaf field on the canvas.
  *
  * Receives only primitive / stable-reference props so React.memo can bail out
  * when unrelated state (e.g. a different field's selectedId) changes.
@@ -301,10 +301,10 @@ export default function FormBuilder({ appearance } = {}) {
   const selectedIdsRef = useRef([]);
   useEffect(() => { selectedIdsRef.current = selectedIds; }, [selectedIds]);
 
-  // O(1) Set lookup — avoids O(n) .includes() per FieldNode in renderNode (Task 7: memo perf)
+  // O(1) Set lookup, avoids O(n) .includes() per FieldNode in renderNode (Task 7: memo perf)
   const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
-  // Sync selectedIds with tree — prune stale IDs after undo/redo or cascading parent deletes (Task 3)
+  // Sync selectedIds with tree, prune stale IDs after undo/redo or cascading parent deletes (Task 3)
   useEffect(() => {
     setSelectedIds((prev) => {
       if (prev.length === 0) return prev;
@@ -372,7 +372,7 @@ export default function FormBuilder({ appearance } = {}) {
     }
 
     const handleKeyDown = (e) => {
-      // Guard first — never steal keys from inputs
+      // Guard first, never steal keys from inputs
       if (isTypingTarget(e.target)) return;
 
       // "/" → focus FieldDock search (quick field add without touching the mouse)
@@ -400,7 +400,7 @@ export default function FormBuilder({ appearance } = {}) {
         if (hasMulti) {
           const ids = selectedIdsRef.current;
           const idsSet = new Set(ids);
-          // Only delete top-level nodes — parent deletion cascades to children
+          // Only delete top-level nodes, parent deletion cascades to children
           // Walk every node's ancestry; skip it if any ancestor is also selected
           // (deleting the ancestor cascades and avoids a double-delete attempt).
           // A visited set guards against cycles in malformed tree data.

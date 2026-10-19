@@ -1,4 +1,5 @@
 <?php
+
 // phpcs:disable -- Integration test; not shipped in production plugin.
 /**
  * 2.3.2 server behaviour against a real WordPress (Pro active on the test
@@ -16,6 +17,10 @@
  */
 
 namespace SubtleForms\Tests\WP;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Templates\FormTemplates;

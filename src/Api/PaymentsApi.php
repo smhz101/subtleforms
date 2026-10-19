@@ -226,7 +226,7 @@ final class PaymentsApi {
 
 		$data    = $request->get_param( 'data' );
 		$payload = is_array( $data ) ? Sanitizer::sanitizeArrayDeep( $data ) : array();
-		$payload = PublicSubmitApi::applyCalculations( $payload, $schema );
+		$payload = PublicSubmitApi::applyComputedValues( $payload, $schema );
 
 		if ( null === $code ) {
 			$code = CouponsRepository::normalizeCode( (string) ( $payload['_coupon'] ?? '' ) );

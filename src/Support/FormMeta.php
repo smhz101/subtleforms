@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Single source of truth for a form's type and status.
  *
@@ -8,6 +9,10 @@
  */
 
 namespace SubtleForms\Support;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Canonical form type and status helpers.
@@ -132,7 +137,7 @@ final class FormMeta {
 	 *
 	 * Compares the in-progress draft_schema against the published config.
 	 * Draft forms always report false (they are not published, so the
-	 * "unpublished changes" nuance does not apply — they are simply drafts).
+	 * "unpublished changes" nuance does not apply, they are simply drafts).
 	 *
 	 * @param array $form Form row with raw draft_schema and config available.
 	 * @return bool

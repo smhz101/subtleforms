@@ -70,10 +70,16 @@ final class PrivacyEraser {
 		$items_retained = false;
 		$messages       = array();
 		$per_page       = 100;
-		$offset         = ( $page - 1 ) * $per_page;
 
-		// Find submissions by email
-		$submissions = $this->find_submissions_by_email( $email_address, $per_page, $offset );
+		// Entries whose answers hold exactly this address (FF-21). Erased
+		// entries leave the list, so every page starts from the top.
+		$ids         = PrivacyLookup::submissionIds( (string) $email_address );
+		$submissions = array_map(
+			static function ( $id ) {
+				return array( 'id' => $id );
+			},
+			array_slice( $ids, 0, $per_page )
+		);
 
 		foreach ( $submissions as $submission ) {
 			try {
@@ -101,7 +107,7 @@ final class PrivacyEraser {
 			}
 		}
 
-		$done = count( $submissions ) < $per_page;
+		$done = count( $ids ) <= $per_page || $items_retained;
 
 		return array(
 			'items_removed'  => $items_removed,
@@ -109,32 +115,5 @@ final class PrivacyEraser {
 			'messages'       => $messages,
 			'done'           => $done,
 		);
-	}
-
-	/**
-	 * Find submissions by email address.
-	 *
-	 * @param string $email   Email address.
-	 * @param int    $limit   Number of results.
-	 * @param int    $offset  Offset for pagination.
-	 * @return array
-	 */
-	private function find_submissions_by_email( $email, $limit = 100, $offset = 0 ) {
-		global $wpdb;
-		$table = $wpdb->prefix . 'subtleforms_submissions';
-
-		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled; query is properly prepared.
-		$results = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT id, form_id FROM {$table} WHERE payload LIKE %s ORDER BY created_at DESC LIMIT %d OFFSET %d",
-				'%' . $wpdb->esc_like( $email ) . '%',
-				$limit,
-				$offset
-			),
-			ARRAY_A
-		);
-		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-
-		return $results ?: array();
 	}
 }

@@ -3,9 +3,9 @@
 /**
  * Plugin Name: SubtleForms
  * Description: Logic-first, workflow-driven form platform with extension architecture.
- * Version: 2.3.8
+ * Version: 2.3.9
  * Author: Muzammil Hussain
- * Requires at least: 6.0
+ * Requires at least: 6.6
  * Requires PHP: 8.1
  * Text Domain: subtleforms
  * Domain Path: /languages
@@ -25,11 +25,11 @@
 
 // If this file is called directly, abort.
 if ( ! defined( 'ABSPATH' ) ) {
-	wp_die( esc_html__( 'Direct access not allowed.', 'subtleforms' ) );
+	exit;
 }
 
 // Define plugin constants.
-define( 'SUBTLEFORMS_VERSION', '2.3.8' );
+define( 'SUBTLEFORMS_VERSION', '2.3.9' );
 define( 'SUBTLEFORMS_API_VERSION', 1 );
 define( 'SUBTLEFORMS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SUBTLEFORMS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );

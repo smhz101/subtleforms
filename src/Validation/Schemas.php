@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Validation Schemas
  *
@@ -10,6 +11,10 @@
  */
 
 namespace SubtleForms\Validation;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Schemas class
@@ -152,43 +157,43 @@ class Schemas {
 					// Privacy & GDPR
 					'data_retention_days',
 					'entries_trash_days',
-					// Extensions — Webhooks
+					// Extensions, Webhooks
 					'ext_webhooks_enabled',
 					'ext_webhooks_signing_secret',
 					'ext_webhooks_events',
 					'ext_webhooks_retries',
-					// Extensions — Email Marketing
+					// Extensions, Email Marketing
 					'ext_email_marketing_enabled',
 					'ext_email_marketing_provider',
 					'ext_email_marketing_api_key',
 					'ext_email_marketing_list_id',
 					'ext_email_marketing_double_optin',
-					// Extensions — CRM
+					// Extensions, CRM
 					'ext_crm_enabled',
 					'ext_crm_provider',
 					'ext_crm_api_key',
 					'ext_crm_portal_id',
 					'ext_crm_webhook_url',
 					'ext_crm_add_note',
-					// Extensions — Analytics
+					// Extensions, Analytics
 					'ext_analytics_enabled',
 					'ext_analytics_view_tracking',
 					'ext_analytics_retention_days',
-					// Extensions — E-commerce
+					// Extensions, E-commerce
 					'ext_ecommerce_enabled',
 					'ext_ecommerce_product_id',
 					'ext_ecommerce_currency',
 					'ext_ecommerce_default_processor',
 					'ext_ecommerce_empty_cart',
 					'ext_ecommerce_destination',
-					// Extensions — PDF
+					// Extensions, PDF
 					'ext_pdf_enabled',
 					'ext_pdf_template',
 					'ext_pdf_attach_to_email',
-					// Extensions — Multilanguage
+					// Extensions, Multilanguage
 					'ext_multilanguage_enabled',
 					'ext_multilanguage_provider',
-					// Extensions — Payments
+					// Extensions, Payments
 					'ext_payments_enabled',
 					'ext_payments_provider',
 					'ext_payments_stripe_pk',
@@ -197,6 +202,7 @@ class Schemas {
 					'ext_payments_paypal_client_secret',
 					'ext_payments_currency',
 					'ext_payments_mode',
+					'ext_payments_failed_email',
 				),
 
 				// General
@@ -249,43 +255,43 @@ class Schemas {
 				// Privacy & GDPR
 				'data_retention_days'          => 'optional|int|min:0|max:3650',
 				'entries_trash_days'           => 'optional|int|min:1|max:365',
-				// Extensions — Webhooks
+				// Extensions, Webhooks
 				'ext_webhooks_enabled'             => 'optional|bool',
 				'ext_webhooks_signing_secret'      => 'optional|string|max:200',
 				'ext_webhooks_events'              => 'optional|array',
 				'ext_webhooks_retries'             => 'optional|int|min:0|max:5',
-				// Extensions — Email Marketing
+				// Extensions, Email Marketing
 				'ext_email_marketing_enabled'      => 'optional|bool',
 				'ext_email_marketing_provider'     => 'optional|in:mailchimp,brevo,convertkit',
 				'ext_email_marketing_api_key'      => 'optional|string|max:500',
 				'ext_email_marketing_list_id'      => 'optional|string|max:200',
 				'ext_email_marketing_double_optin' => 'optional|bool',
-				// Extensions — CRM
+				// Extensions, CRM
 				'ext_crm_enabled'                  => 'optional|bool',
 				'ext_crm_provider'                 => 'optional|in:hubspot,webhook',
 				'ext_crm_api_key'                  => 'optional|string|max:500',
 				'ext_crm_portal_id'                => 'optional|string|max:100',
 				'ext_crm_webhook_url'              => 'optional|string|max:2000',
 				'ext_crm_add_note'                 => 'optional|bool',
-				// Extensions — Analytics
+				// Extensions, Analytics
 				'ext_analytics_enabled'            => 'optional|bool',
 				'ext_analytics_view_tracking'      => 'optional|bool',
 				'ext_analytics_retention_days'     => 'optional|int|min:1|max:3650',
-				// Extensions — E-commerce
+				// Extensions, E-commerce
 				'ext_ecommerce_enabled'            => 'optional|bool',
 				'ext_ecommerce_product_id'         => 'optional|int|min:0',
 				'ext_ecommerce_currency'           => 'optional|string|max:10',
 				'ext_ecommerce_default_processor'  => 'optional|in:woocommerce,subtleforms',
 				'ext_ecommerce_empty_cart'         => 'optional|bool',
 				'ext_ecommerce_destination'        => 'optional|in:checkout,cart',
-				// Extensions — PDF
+				// Extensions, PDF
 				'ext_pdf_enabled'                  => 'optional|bool',
 				'ext_pdf_template'                 => 'optional|string|max:100',
 				'ext_pdf_attach_to_email'          => 'optional|bool',
-				// Extensions — Multilanguage
+				// Extensions, Multilanguage
 				'ext_multilanguage_enabled'        => 'optional|bool',
 				'ext_multilanguage_provider'       => 'optional|in:wpml,polylang',
-				// Extensions — Payments
+				// Extensions, Payments
 				'ext_payments_enabled'             => 'optional|bool',
 				'ext_payments_provider'            => 'optional|in:stripe,paypal',
 				'ext_payments_stripe_pk'           => 'optional|string|max:500',
@@ -294,6 +300,7 @@ class Schemas {
 				'ext_payments_paypal_client_secret' => 'optional|string|max:500',
 				'ext_payments_currency'            => 'optional|string|max:10',
 				'ext_payments_mode'                => 'optional|in:test,live',
+				'ext_payments_failed_email'        => 'optional|bool',
 			),
 
 			// Nested schemas
@@ -347,7 +354,7 @@ class Schemas {
 			//
 			// `type` is shape-checked, not membership-checked. Which action types
 			// exist is a runtime question owned by ActionRegistry, which extensions
-			// add to through the `subtleforms/register_actions` hook — a literal list
+			// add to through the `subtleforms/register_actions` hook, a literal list
 			// here cannot know about those and would reject them on save. The
 			// compiler is the layer that resolves a type, and it already soft-skips
 			// one it cannot resolve so that a deactivated extension or a migration
@@ -362,7 +369,7 @@ class Schemas {
 				'order'    => 'optional|int|min:0|default:0',
 			),
 
-			// EmailSettings — full settings object for email actions
+			// EmailSettings, full settings object for email actions
 			'EmailSettings' => array(
 				'to'      => 'required|string|max:500',
 				'subject' => 'required|string|max:500',
@@ -370,7 +377,7 @@ class Schemas {
 				'headers' => 'optional|object',
 			),
 
-			// WebhookSettings — full settings object for webhook actions
+			// WebhookSettings, full settings object for webhook actions
 			'WebhookSettings' => array(
 				'url'            => 'optional|string|max:2000',
 				'method'         => 'optional|in:POST,PUT,PATCH',
@@ -435,7 +442,7 @@ class Schemas {
 				'validationMessage'    => 'optional|string|max:500',
 			),
 
-			// FormConfirmation — what visitors see after submitting (2.0).
+			// FormConfirmation, what visitors see after submitting (2.0).
 			'FormConfirmation' => array(
 				'type'         => 'optional|in:message,redirect|default:message',
 				'title'        => 'optional|string|max:200',
@@ -459,7 +466,7 @@ class Schemas {
 				'logic'        => 'optional|object',
 			),
 
-			// FormRestrictions — who can submit, and when (2.0).
+			// FormRestrictions, who can submit, and when (2.0).
 			'FormRestrictions' => array(
 				'requireLogin'   => 'optional|bool',
 				'loginMessage'   => 'optional|string|max:500',
@@ -471,7 +478,7 @@ class Schemas {
 				'limitMessage'   => 'optional|string|max:500',
 			),
 
-			// FormAppearance — form-wide styling.
+			// FormAppearance, form-wide styling.
 			// Token and variant values are shape-checked here and value-checked by
 			// Support\Appearance, which is where the allowed keys live.
 			'FormAppearance' => array(

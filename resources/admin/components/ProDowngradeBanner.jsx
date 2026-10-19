@@ -1,49 +1,30 @@
 /**
- * Pro Downgrade Banner
+ * Missing add-on fields banner.
  *
- * Shows when a Pro form is opened without active license.
- * Provides clear feedback and call-to-action.
+ * Shows in the builder when a form has fields that SubtleForms Pro provides
+ * and Pro is not active. The form stays editable; those fields are kept and
+ * come back on the live form when Pro is active again.
  */
 
-import { Notice, Button } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
-import Icon from '../ui/Icon';
+import { Notice } from '@wordpress/components';
+import { __, sprintf } from '@wordpress/i18n';
 import './ProDowngradeBanner.scss';
 
 export default function ProDowngradeBanner({ featuresUsed = [] }) {
-  const handleActivateLicense = () => {
-    // Navigate to Pro License page
-    const licenseUrl = window.subtleformsAdmin?.proLicenseUrl || '/wp-admin/admin.php?page=subtleforms-pro';
-    window.location.href = licenseUrl;
-  };
-
+  if (!featuresUsed.length) return null;
   return (
     <div className='sf-pro-downgrade-banner'>
-      <Notice status='warning' isDismissible={false} className='sf-pro-downgrade-banner__notice'>
-        <div className='sf-pro-downgrade-banner__content'>
-          <div className='sf-pro-downgrade-banner__icon'>
-            <Icon.Lock />
-          </div>
-          <div className='sf-pro-downgrade-banner__text'>
-            <strong className='sf-pro-downgrade-banner__title'>
-              {__('This form uses Pro features', 'subtleforms')}
-            </strong>
-            <p className='sf-pro-downgrade-banner__message'>
-              {__('This form is in read-only mode. Activate a Pro license to edit. Your form continues working on the frontend. No data loss, no interruption.', 'subtleforms')}
-            </p>
-            {featuresUsed.length > 0 && (
-              <p className='sf-pro-downgrade-banner__features'>
-                <strong>{__('Pro features in use:', 'subtleforms')}</strong> {featuresUsed.join(', ')}
-              </p>
-            )}
-          </div>
-          <Button
-            variant='primary'
-            onClick={handleActivateLicense}
-            className='sf-pro-downgrade-banner__button'>
-            {__('Activate License', 'subtleforms')}
-          </Button>
-        </div>
+      <Notice status='info' isDismissible={false} className='sf-pro-downgrade-banner__notice'>
+        <p className='sf-pro-downgrade-banner__message'>
+          {sprintf(
+            /* translators: %s: list of field types, for example "Signature, Calculation" */
+            __(
+              'This form has fields from SubtleForms Pro: %s. They are kept in the form, but the live form leaves them out until SubtleForms Pro is active.',
+              'subtleforms'
+            ),
+            featuresUsed.join(', ')
+          )}
+        </p>
       </Notice>
     </div>
   );

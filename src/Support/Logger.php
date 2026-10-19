@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SubtleForms Logger
  *
@@ -17,8 +18,12 @@
 
 namespace SubtleForms\Support;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
- * Gated logger — respects WP_DEBUG and SUBTLEFORMS_DEBUG constants.
+ * Gated logger, respects WP_DEBUG and SUBTLEFORMS_DEBUG constants.
  */
 final class Logger {
 

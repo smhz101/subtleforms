@@ -14,10 +14,10 @@ import './SubfieldInspectorControl.scss';
  *   - Expanded: Label input + Placeholder input
  *
  * Props:
- *   value     {Object}  — the `fields` object from config:
+ *   value     {Object} , the `fields` object from config:
  *                         { key: { enabled, label, placeholder }, ... }
- *   onChange  {Function} — (newFields: Object) => void
- *   subfields {Array}   — from PHP ctrl.subfields:
+ *   onChange  {Function}, (newFields: Object) => void
+ *   subfields {Array}  , from PHP ctrl.subfields:
  *                         [{ key, label, toggleable }]
  *   disabled  {boolean}
  */

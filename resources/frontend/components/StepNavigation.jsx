@@ -1,4 +1,21 @@
 import { __, sprintf } from '@wordpress/i18n';
+import { fieldConfig } from '../../shared/fieldConfig';
+
+/**
+ * A step's title and description, whether the step was saved flat or with
+ * its settings under `config` (FA-21).
+ *
+ * @param {Object} step  Step node.
+ * @param {number} index Position of the step.
+ * @return {{title: string, description: string}} Text to show.
+ */
+export function stepText(step, index) {
+  const c = fieldConfig(step);
+  return {
+    title: c.title || c.label || __('Step', 'subtleforms') + ' ' + (index + 1),
+    description: typeof c.description === 'string' ? c.description : '',
+  };
+}
 
 export default function StepNavigation({
   steps,
@@ -19,10 +36,7 @@ export default function StepNavigation({
             const isActive = index === currentStepIndex;
             const isCompleted = index < currentStepIndex;
             const isClickable = index <= currentStepIndex;
-            const stepTitle =
-              step.config?.title ||
-              step.title ||
-              __('Step', 'subtleforms') + ' ' + (index + 1);
+            const { title: stepTitle, description: stepDescription } = stepText(step, index);
 
             return (
               <div
@@ -73,9 +87,9 @@ export default function StepNavigation({
                   </div>
                   <div className='sf-step-content'>
                     <span className='sf-step-title'>{stepTitle}</span>
-                    {step.config?.description && (
+                    {stepDescription && (
                       <span className='sf-step-description'>
-                        {step.config.description}
+                        {stepDescription}
                       </span>
                     )}
                   </div>

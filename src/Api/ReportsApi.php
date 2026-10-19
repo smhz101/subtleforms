@@ -81,16 +81,25 @@ final class ReportsApi {
 		unset( $request );
 		global $wpdb;
 		$table = $wpdb->prefix . 'subtleforms_submissions';
-		$start = gmdate( 'Y-m-d 00:00:00', time() - ( 6 * 86400 ) );
-		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
-		$rows = $wpdb->get_results(
+		$start = ReportSeries::start( 7 );
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		// Only real entries count: spam, failed and trashed entries do not.
+		$counted = \SubtleForms\Analytics\Stats::COUNTED_STATUSES;
+		$in      = implode( ',', array_fill( 0, count( $counted ), '%s' ) );
+		$rows    = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT DATE(created_at) AS day, COUNT(*) AS c FROM {$table} WHERE created_at >= %s AND ( status IS NULL OR status <> 'trash' ) GROUP BY DATE(created_at)",
-				$start
+				"SELECT DATE(created_at) AS day, COUNT(*) AS c FROM {$table} WHERE created_at >= %s AND ( status IS NULL OR status IN ({$in}) ) GROUP BY DATE(created_at)",
+				array_merge( array( $start ), $counted )
 			),
 			ARRAY_A
 		);
-		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
+		$total   = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$table} WHERE status IS NULL OR status IN ({$in})",
+				$counted
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		$counts = array();
 		foreach ( (array) $rows as $row ) {
 			$counts[ substr( (string) ( $row['day'] ?? '' ), 0, 10 ) ] = (int) ( $row['c'] ?? 0 );
@@ -105,7 +114,7 @@ final class ReportsApi {
 		return ApiResponse::success(
 			array(
 				'total_forms'        => $this->forms->count(),
-				'total_submissions'  => $this->submissions->count(),
+				'total_submissions'  => $total,
 				'unread_submissions' => $this->submissions->count( array( 'is_read' => 0 ) ),
 				'series'             => ReportSeries::fillDays( $counts, 7, gmdate( 'Y-m-d' ) ),
 				'forms'              => $forms,

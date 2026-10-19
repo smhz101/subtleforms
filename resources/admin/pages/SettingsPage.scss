@@ -1,5 +1,5 @@
 /**
- * Settings — core Site Settings pattern: grouped navigation on the left, a
+ * Settings, core Site Settings pattern: grouped navigation on the left, a
  * titled section on the right, controls in cards with one row per setting,
  * and a save bar that appears only when something changed.
  */
@@ -206,6 +206,13 @@
 
 }
 
+.sf-ext-settings__more {
+	margin: 16px 12px 0;
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--sf-text-muted);
+}
+
 .sf-section-title {
 	margin: 0 0 4px;
 	font-size: var(--sf-text-sm);
@@ -246,7 +253,7 @@
 	color: var(--sf-danger);
 }
 
-// Danger zone — a separated card with a red heading, not a red box.
+// Danger zone, a separated card with a red heading, not a red box.
 .subtleforms-settings-danger-zone {
 	display: grid;
 	grid-template-columns: minmax(0, 1fr) auto;

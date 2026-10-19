@@ -1,10 +1,10 @@
 /**
- * Frontend field validation — shared by the live form and the builder preview.
+ * Frontend field validation, shared by the live form and the builder preview.
  *
  * The builder preview must behave exactly like the frontend (see Part A3),
  * so the rules live here once and both surfaces call them. Composite fields
  * (name_group / address_group) carry an object value at their root key, so a
- * plain "is the value empty" check passes even when every part is blank —
+ * plain "is the value empty" check passes even when every part is blank -
  * this module understands their shape and reports a group-level error when any
  * required part is missing.
  */
@@ -12,6 +12,9 @@
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { getIn } from './valuePaths';
 import { fieldConfig } from '../../shared/fieldConfig';
+import { getFieldType } from '../../shared/extend';
+import { hasParts, missingParts } from '../../shared/compositeParts';
+import { firstUnansweredChainedLevel } from '../../shared/chainedOptions';
 
 export const COMPOSITE_FIELD_TYPES = new Set(['name_group', 'address_group', 'address']);
 
@@ -92,7 +95,9 @@ function isIsoDate(value) {
  * @return {boolean}
  */
 export function isAnswerable(type, config = {}) {
-  if (type === 'calculation') return !!String(config.formula || '').trim();
+  // Add-on field types (SubtleForms Pro) can say when they show anything.
+  const addon = getFieldType(type);
+  if (addon && typeof addon.isAnswerable === 'function') return !!addon.isAnswerable(config);
   if (type === 'checkbox_grid') {
     return (
       Array.isArray(config.rows) &&
@@ -150,8 +155,19 @@ function rawValidateField(field, value, defaults = {}) {
 
   if (required) {
     if (isCompositeField(field)) {
-      const err = getCompositeRequiredError(type, value);
-      if (err) return { message: err, required: true };
+      const err = getCompositeRequiredError(type, value, config);
+      if (err) {
+        // A custom or form default required message wins, as on the
+        // server (FB-12); the part-specific text is the fallback.
+        const custom =
+          (typeof config?.requiredMessage === 'string' && config.requiredMessage.trim()) ||
+          (typeof defaults?.requiredMessage === 'string' && defaults.requiredMessage.trim()) ||
+          '';
+        return { message: custom || err, required: true };
+      }
+    } else if (type === 'chained_select') {
+      // Every level that offers choices needs an answer (FLD2-10).
+      if (firstUnansweredChainedLevel(config, value) !== -1) return requiredMessage;
     } else if (type === 'toggle') {
       const onValue = config.onValue ?? 'yes';
       if (value !== true && value !== onValue) return requiredMessage;
@@ -294,35 +310,30 @@ function rawValidateField(field, value, defaults = {}) {
 /**
  * Required-check for a composite (object-valued) field.
  *
- * name_group is invalid when first or last name is blank (the non-toggleable
- * parts). address_group is invalid when any of its core parts is blank.
+ * Name and Address demand every part they draw except the optional ones
+ * (middle name, suffix, street line 2); a part switched off in the builder
+ * is neither drawn nor demanded (FB-02, FB-10).
  *
- * @param {string} type  Field type.
- * @param {*}      value Stored object value.
+ * @param {string} type   Field type.
+ * @param {*}      value  Stored object value.
+ * @param {Object} config Merged field settings.
  * @return {string|undefined}
  */
-function getCompositeRequiredError(type, value) {
+function getCompositeRequiredError(type, value, config = {}) {
   const v =
     value && typeof value === 'object' && !Array.isArray(value) ? value : {};
 
-  if (type === 'name_group' || type === 'address') {
+  if (hasParts(type)) {
+    if (!missingParts(type, config, v).length) return undefined;
+    return type === 'name_group'
+      ? __('Please enter your first and last name.', 'subtleforms')
+      : __('Please enter your full address.', 'subtleforms');
+  }
+
+  if (type === 'address') {
     if (isBlank(v.first_name) || isBlank(v.last_name)) {
       return __('Please enter your first and last name.', 'subtleforms');
     }
-    return undefined;
-  }
-
-  if (type === 'address_group') {
-    if (
-      isBlank(v.street_address ?? v.street) ||
-      isBlank(v.city) ||
-      isBlank(v.state) ||
-      isBlank(v.postal_code ?? v.postal) ||
-      isBlank(v.country)
-    ) {
-      return __('Please enter your full address.', 'subtleforms');
-    }
-    return undefined;
   }
 
   return undefined;
@@ -426,20 +437,14 @@ export function getCompositeEmptyParts(field, value) {
   const v =
     value && typeof value === 'object' && !Array.isArray(value) ? value : {};
 
-  if (type === 'name_group' || type === 'address') {
+  if (hasParts(type)) {
+    return missingParts(type, fieldConfig(field), v);
+  }
+
+  if (type === 'address') {
     const out = [];
     if (isBlank(v.first_name)) out.push('first_name');
     if (isBlank(v.last_name)) out.push('last_name');
-    return out;
-  }
-
-  if (type === 'address_group') {
-    const out = [];
-    if (isBlank(v.street_address ?? v.street)) out.push('street_address');
-    if (isBlank(v.city)) out.push('city');
-    if (isBlank(v.state)) out.push('state');
-    if (isBlank(v.postal_code ?? v.postal)) out.push('postal_code');
-    if (isBlank(v.country)) out.push('country');
     return out;
   }
 

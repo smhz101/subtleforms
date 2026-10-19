@@ -1,4 +1,5 @@
 <?php
+
 // phpcs:disable -- Unit test file; not shipped in production plugin.
 /**
  * 2.2.1 server-side rules that need no WordPress: schema validation of single
@@ -9,6 +10,10 @@
  */
 
 namespace SubtleForms\Tests\Unit;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use PHPUnit\Framework\TestCase;
 use SubtleForms\Engine\FieldValidator;

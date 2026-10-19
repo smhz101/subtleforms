@@ -13,7 +13,6 @@ import {
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import LogicEditor, { collectLogicFields } from './LogicEditor';
-import { isProFeature, openUpgradeModal } from '../../utils/featureGate';
 import Icon from '../../ui/Icon';
 
 /** Collect `{key}` merge tags from the field tree for the hint line. */
@@ -125,12 +124,11 @@ export function ConfirmationPanel({ schema, onMetadata, isReadOnly }) {
 }
 
 /**
- * Conditional confirmations (Pro, 2.1): a different message or page for
+ * Conditional confirmations (2.1): a different message or page for
  * different answers. The first one whose rules match is shown; otherwise the
  * default above.
  */
 function ConditionalConfirmations({ schema, onMetadata, isReadOnly }) {
-  const advanced = isProFeature('logic.conditional.advanced');
   const list = Array.isArray(schema?.metadata?.confirmations) ? schema.metadata.confirmations : [];
   const fields = collectLogicFields(schema?.fields || []);
   const save = (next) => !isReadOnly && onMetadata('confirmations', next);
@@ -143,10 +141,6 @@ function ConditionalConfirmations({ schema, onMetadata, isReadOnly }) {
     save(next);
   };
   const add = () => {
-    if (!advanced) {
-      openUpgradeModal('logic.conditional.advanced');
-      return;
-    }
     save([
       ...list,
       {
@@ -182,14 +176,14 @@ function ConditionalConfirmations({ schema, onMetadata, isReadOnly }) {
                 i + 1
               )}
               value={c.label ?? ''}
-              disabled={isReadOnly || !advanced}
+              disabled={isReadOnly}
               onChange={(v) => patch(i, { label: v })}
             />
             <Button
               size='small'
               icon={<Icon.ChevronUp size={16} />}
               label={__('Move up', 'subtleforms')}
-              disabled={isReadOnly || !advanced || i === 0}
+              disabled={isReadOnly || i === 0}
               onClick={() => move(i, -1)}
             />
             <Button
@@ -206,7 +200,6 @@ function ConditionalConfirmations({ schema, onMetadata, isReadOnly }) {
             logic={c.logic}
             availableFields={fields}
             showAction={false}
-            locked={!advanced}
             disabled={isReadOnly}
             emptyText={__('Add a rule. A confirmation without rules is never used.', 'subtleforms')}
             onChange={(logic) => patch(i, { logic })}
@@ -217,7 +210,7 @@ function ConditionalConfirmations({ schema, onMetadata, isReadOnly }) {
             isBlock
             label={__('Show visitors', 'subtleforms')}
             value={c.type || 'message'}
-            onChange={(v) => !isReadOnly && advanced && patch(i, { type: v })}>
+            onChange={(v) => !isReadOnly && patch(i, { type: v })}>
             <ToggleGroupControlOption value='message' label={__('A message', 'subtleforms')} />
             <ToggleGroupControlOption value='redirect' label={__('Another page', 'subtleforms')} />
           </ToggleGroupControl>
@@ -228,7 +221,7 @@ function ConditionalConfirmations({ schema, onMetadata, isReadOnly }) {
                 __next40pxDefaultSize
                 label={__('Heading', 'subtleforms')}
                 value={c.title ?? ''}
-                disabled={isReadOnly || !advanced}
+                disabled={isReadOnly}
                 onChange={(v) => patch(i, { title: v })}
               />
               <TextareaControl
@@ -236,7 +229,7 @@ function ConditionalConfirmations({ schema, onMetadata, isReadOnly }) {
                 label={__('Message', 'subtleforms')}
                 value={c.message ?? ''}
                 rows={3}
-                disabled={isReadOnly || !advanced}
+                disabled={isReadOnly}
                 onChange={(v) => patch(i, { message: v })}
               />
             </>
@@ -248,7 +241,7 @@ function ConditionalConfirmations({ schema, onMetadata, isReadOnly }) {
               label={__('Page URL', 'subtleforms')}
               value={c.redirectUrl ?? ''}
               placeholder='https://'
-              disabled={isReadOnly || !advanced}
+              disabled={isReadOnly}
               onChange={(v) => patch(i, { redirectUrl: v })}
             />
           )}
@@ -256,9 +249,7 @@ function ConditionalConfirmations({ schema, onMetadata, isReadOnly }) {
       ))}
 
       <Button variant='secondary' size='compact' disabled={isReadOnly} onClick={add} className='sf-confirmations__add'>
-        {advanced
-          ? __('Add conditional confirmation', 'subtleforms')
-          : __('Add conditional confirmation (Pro)', 'subtleforms')}
+        {__('Add conditional confirmation', 'subtleforms')}
       </Button>
     </div>
   );

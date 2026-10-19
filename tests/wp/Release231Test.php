@@ -1,4 +1,5 @@
 <?php
+
 // phpcs:disable -- Integration test; not shipped in production plugin.
 /**
  * 2.3.1 server behaviour against a real WordPress:
@@ -18,6 +19,10 @@
  */
 
 namespace SubtleForms\Tests\WP;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Engine\Actions\EmailAction;
 use SubtleForms\Engine\SubmissionContext;

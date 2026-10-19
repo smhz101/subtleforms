@@ -53,7 +53,6 @@ for (const [width, height, label] of [
     await page.goto(form.url);
     await waitForForm(page);
     // Lazy fields finish loading first.
-    await expect(page.locator('canvas.subtleforms-signature__canvas')).toBeVisible();
     await expect(page.locator('.subtleforms-richtext__editor')).toBeVisible();
 
     expect(await audit(page)).toEqual([]);

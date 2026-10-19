@@ -11,11 +11,12 @@ import AdminShell from '../components/AdminShell';
 import FormAnalyticsPanel from '../components/analytics/FormAnalyticsPanel';
 import { getFormTypeBadge, getFormStatusBadge } from '../utils/formMeta';
 import './DashboardPage.scss';
+import { chartColumnProps } from '../utils/chartA11y';
 
 const formatNumber = (value) => Number(value || 0).toLocaleString();
 
 /**
- * Dashboard — what is happening across every form, at a glance.
+ * Dashboard, what is happening across every form, at a glance.
  */
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -148,7 +149,7 @@ export default function Dashboard() {
                 <QuickAction
                   icon={Icon.Plus}
                   title={__('Create a form', 'subtleforms')}
-                  text={__('Start blank or from 50+ templates', 'subtleforms')}
+                  text={__('Start blank or from a template', 'subtleforms')}
                   to='/forms/new'
                 />
                 <QuickAction
@@ -454,7 +455,7 @@ function HealthItem({ label, value }) {
   return (
     <div className='sf-health-grid__item'>
       <dt>{label}</dt>
-      <dd>{value || '—'}</dd>
+      <dd>{value || '-'}</dd>
     </div>
   );
 }
@@ -499,6 +500,18 @@ function TrendChart({ data = [] }) {
         <div
           className='sf-trend__bars'
           onMouseLeave={() => setActive(null)}>
+          <ul className='screen-reader-text'>
+            {data.map((day) => (
+              <li key={day.date}>
+                {sprintf(
+                  /* translators: 1: date, 2: number of submissions */
+                  _n('%1$s: %2$s submission', '%1$s: %2$s submissions', day.count, 'subtleforms'),
+                  formatDay(day.date, { month: 'short', day: 'numeric' }),
+                  formatNumber(day.count)
+                )}
+              </li>
+            ))}
+          </ul>
           {data.map((day, index) => {
             const height = (day.count / niceMax) * 100;
             const label = sprintf(
@@ -515,7 +528,7 @@ function TrendChart({ data = [] }) {
                   'is-today': index === lastIndex,
                 })}
                 tabIndex={0}
-                aria-label={label}
+                {...chartColumnProps(label)}
                 onMouseEnter={() => setActive(index)}
                 onFocus={() => setActive(index)}
                 onBlur={() => setActive(null)}>

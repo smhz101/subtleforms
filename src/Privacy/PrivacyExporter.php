@@ -78,13 +78,14 @@ final class PrivacyExporter {
 		$per_page     = 100;
 		$offset       = ( $page - 1 ) * $per_page;
 
-		// Find submissions by email
-		$submissions = $this->find_submissions_by_email( $email_address, $per_page, $offset );
+		// Entries whose answers hold exactly this address (FF-21).
+		$all         = PrivacyLookup::submissionIds( (string) $email_address );
+		$submissions = array_values( array_filter( array_map( array( $this->submissionsRepo, 'find' ), array_slice( $all, $offset, $per_page ) ) ) );
 
 		foreach ( $submissions as $submission ) {
 			// Get form name
 			$form = $this->formsRepo->find( $submission['form_id'] );
-			$form_name = $form ? $form['name'] : __( 'Unknown Form', 'subtleforms' );
+			$form_name = $form ? ( $form['title'] ?? '' ) : __( 'Unknown Form', 'subtleforms' );
 
 			// Build export item
 			$data = array(
@@ -129,38 +130,11 @@ final class PrivacyExporter {
 			);
 		}
 
-		$done = count( $submissions ) < $per_page;
+		$done = ( $offset + $per_page ) >= count( $all );
 
 		return array(
 			'data' => $export_items,
 			'done' => $done,
 		);
-	}
-
-	/**
-	 * Find submissions by email address.
-	 *
-	 * @param string $email   Email address.
-	 * @param int    $limit   Number of results.
-	 * @param int    $offset  Offset for pagination.
-	 * @return array
-	 */
-	private function find_submissions_by_email( $email, $limit = 100, $offset = 0 ) {
-		global $wpdb;
-		$table = $wpdb->prefix . 'subtleforms_submissions';
-
-		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled; query is properly prepared.
-		$results = $wpdb->get_results(
-			$wpdb->prepare(
-				"SELECT * FROM {$table} WHERE payload LIKE %s ORDER BY created_at DESC LIMIT %d OFFSET %d",
-				'%' . $wpdb->esc_like( $email ) . '%',
-				$limit,
-				$offset
-			),
-			ARRAY_A
-		);
-		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
-
-		return $results ?: array();
 	}
 }

@@ -1,5 +1,10 @@
 <?php
+
 namespace SubtleForms\Support;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Simple Mailer wrapper around wp_mail() to centralize behavior and testing.

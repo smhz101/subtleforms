@@ -10,7 +10,7 @@ import '../FormPreviewModal.scss';
  *
  * Chrome only. The form itself is rendered by FormPreviewBody, which runs the
  * real frontend renderer in preview mode, so this shows exactly what a visitor
- * will get — including conversational and multi-step behaviour, which the
+ * will get, including conversational and multi-step behaviour, which the
  * previous hand-written preview could only approximate.
  *
  * Always previews the draft schema passed in, never the published one.

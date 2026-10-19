@@ -6,7 +6,6 @@ import {
   useMemo,
 } from '@wordpress/element';
 import {
-  Spinner,
   Notice,
 } from '@wordpress/components';
 import { Button } from '../components/navigation';
@@ -44,6 +43,9 @@ import BuilderCanvasArea from '../components/builder/layout/BuilderCanvasArea';
 import BuilderModalsController from '../components/builder/layout/BuilderModalsController';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
 import { getFormTypeBadgeConfig } from '../utils/formMeta';
+import { countSchemaFields, fieldDeletedMessage } from '../utils/fieldDeleteNotice';
+import { Skeleton } from '../ui/loading/Skeleton';
+import './BuilderPage.scss';
 import { applyPaymentDefaults } from '../utils/paymentDefaults';
 import {
   structuralType,
@@ -102,6 +104,8 @@ function FormBuilderInner({
     fieldGroups,
     fieldDefinitions,
     loadingFields,
+    fieldsError,
+    retryFields,
     isHydrating,
     showTour,
     setShowTour,
@@ -144,7 +148,7 @@ function FormBuilderInner({
   const titleInputRef = useRef(null);
   const copyTimeoutRef = useRef(null);
 
-  // Orchestrator — save / publish / delete / discard + modal states
+  // Orchestrator, save / publish / delete / discard + modal states
   const {
     performSave,
     handleSave,
@@ -178,7 +182,7 @@ function FormBuilderInner({
     },
     onSaved,
     navigate,
-    hasValidationErrors: false, // placeholder — replaced after useBuilderValidation
+    hasValidationErrors: false, // placeholder, replaced after useBuilderValidation
   });
 
   // Legacy status mapping for UI components
@@ -367,7 +371,7 @@ function FormBuilderInner({
         return;
       }
 
-      // Controls re-emit their current value routinely — a select firing on
+      // Controls re-emit their current value routinely, a select firing on
       // re-render, a panel writing back a default it just read. Those produce a
       // new object that describes the same form, and dispatching them would
       // mark the builder dirty and autosave a version nobody asked for. Only a
@@ -389,6 +393,21 @@ function FormBuilderInner({
 
       const before = structuralType(draftSchema || {});
       const after = typedSchema?.metadata?.type;
+      const removedFields = countSchemaFields(draftSchema) - countSchemaFields(typedSchema);
+      const deletedMessage = fieldDeletedMessage(removedFields);
+      if (deletedMessage) {
+        createSuccessNotice(deletedMessage, {
+          type: 'snackbar',
+          id: 'subtleforms-field-deleted',
+          actions: [
+            {
+              label: __('Undo', 'subtleforms'),
+              onClick: () => dispatch({ type: BUILDER_ACTIONS.UNDO_SCHEMA }),
+            },
+          ],
+        });
+      }
+
       if (before === TYPE_STANDARD && after === TYPE_MULTI_STEP) {
         createSuccessNotice(
           __('This form is now Multi-step: it has a Page Break.', 'subtleforms'),
@@ -601,11 +620,14 @@ function FormBuilderInner({
 
   const shortcode = currentFormId ? `[subtleforms id="${currentFormId}"]` : '';
   const statusLabel = useMemo(() => {
+    if (effectiveStatus === 'error') {
+      return autoSaveError || saveError || __('Your changes are kept in this tab.', 'subtleforms');
+    }
     if (autoSaving) return __('Saving...', 'subtleforms');
     if (effectiveStatus === 'saving') return __('Saving…', 'subtleforms');
     if (effectiveStatus === 'saved') return __('Saved', 'subtleforms');
     return __('Unsaved changes', 'subtleforms');
-  }, [effectiveStatus, autoSaving]);
+  }, [autoSaveError, autoSaving, effectiveStatus, saveError]);
 
   const statusDescription = useMemo(() => {
     if (effectiveStatus === 'error') {
@@ -650,11 +672,43 @@ function FormBuilderInner({
     saveError,
   ]);
 
-  if (loadingFields) return <Spinner />;
-  if (loading) return <Spinner />;
-  if (error) return <Notice status='error'>{error}</Notice>;
+  if (loadingFields || loading) {
+    return (
+      <AdminShell variant='editor' title={__('Form', 'subtleforms')} onBack={() => navigate('/forms')}>
+        <div className='sf-builder-loading' aria-busy='true' aria-label={__('Loading the form', 'subtleforms')}>
+          <Skeleton width='100%' height='48px' />
+          <div className='sf-builder-loading__columns'>
+            <Skeleton width='100%' height='320px' />
+            <Skeleton width='100%' height='320px' />
+          </div>
+        </div>
+      </AdminShell>
+    );
+  }
 
-  // Get form type badge config — single source of truth (shared selector).
+  if (error || fieldsError) {
+    return (
+      <AdminShell variant='editor' title={__('Form', 'subtleforms')} onBack={() => navigate('/forms')}>
+        <div className='sf-builder-load-error' role='alert'>
+          <Notice status='error' isDismissible={false}>
+            {error || fieldsError}
+          </Notice>
+          <Button
+            variant='primary'
+            onClick={() => {
+              if (fieldsError) {
+                retryFields();
+              }
+              loadForm(true);
+            }}>
+            {__('Retry', 'subtleforms')}
+          </Button>
+        </div>
+      </AdminShell>
+    );
+  }
+
+  // Get form type badge config, single source of truth (shared selector).
   // The builder shows the draft type (what you're editing), which matches the
   // listings (they prefer the draft type when a draft exists).
   // A form saved before 2.3.2 may still say Standard while it has Page
@@ -663,7 +717,7 @@ function FormBuilderInner({
   const formTypeBadge = getFormTypeBadgeConfig(rawFormType);
   const FormTypeIcon = formTypeBadge.icon;
 
-  // Always show the builder canvas — even blank forms should open the editor
+  // Always show the builder canvas, even blank forms should open the editor
   // so users can immediately add fields. The welcome screen was blocking builder
   // access for regular and payment form types with empty fields arrays.
   const showWelcomeScreen = false;
@@ -701,7 +755,8 @@ function FormBuilderInner({
             effectiveStatus={effectiveStatus}
             autoSaving={autoSaving}
             autoSaveError={autoSaveError}
-            saveError={saveError}
+            saveError={saveError || autoSaveError}
+          onRetrySave={saveError ? retryLastManualSave : retryAutosave}
             onRetryAutosave={retryAutosave}
             onRetryLastManualSave={retryLastManualSave}
             onDismissErrors={dismissRecoverableErrors}
@@ -802,7 +857,7 @@ export default function FormBuilderPage(props) {
         next
       );
     } catch ( _e ) {
-      // localStorage unavailable (private browsing etc.) — fall back to timestamp
+      // localStorage unavailable (private browsing etc.), fall back to timestamp
       return sprintf( __( 'New Form %1$d', 'subtleforms' ), Date.now() % 10000 );
     }
   }, []);

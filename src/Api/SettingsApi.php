@@ -2,6 +2,10 @@
 
 namespace SubtleForms\Api;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use SubtleForms\Api\ApiResponse;
 use SubtleForms\Support\Settings;
 use SubtleForms\Validation\RequestValidator;
@@ -578,6 +582,7 @@ class SettingsApi {
 			'ext_payments_paypal_client_secret' => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
 			'ext_payments_currency'             => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
 			'ext_payments_mode'                 => array( 'type' => 'string', 'enum' => array( 'test', 'live' ), 'sanitize_callback' => 'sanitize_text_field' ),
+			'ext_payments_failed_email'         => array( 'type' => 'boolean' ),
 		);
 	}
 }

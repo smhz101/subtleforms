@@ -152,6 +152,13 @@ final class FieldSettings {
 	const CONTAINERS = array( 'repeat_container', 'group_container' );
 
 	/**
+	 * Layout controls that hold what a block says, shown under General.
+	 *
+	 * @var array<int, string>
+	 */
+	const GENERAL_LAYOUT_CONTROLS = array( 'label', 'title', 'description', 'content' );
+
+	/**
 	 * Types that accept a simple default value.
 	 *
 	 * @var array<int, string>
@@ -470,7 +477,7 @@ final class FieldSettings {
 					array(
 						'type'    => 'checkbox',
 						'name'    => 'multiple',
-						'label'   => __( 'Allow several files (Pro)', 'subtleforms' ),
+						'label'   => __( 'Allow several files', 'subtleforms' ),
 						'help'    => __( 'Visitors can drop or pick several files, with upload progress.', 'subtleforms' ),
 						'section' => 'appearance',
 					)
@@ -479,7 +486,7 @@ final class FieldSettings {
 					array(
 						'type'    => 'number',
 						'name'    => 'maxFiles',
-						'label'   => __( 'Most files (Pro)', 'subtleforms' ),
+						'label'   => __( 'Most files', 'subtleforms' ),
 						'min'     => 1,
 						'max'     => 20,
 						'help'    => __( 'Used when several files are allowed. Default 5.', 'subtleforms' ),
@@ -586,6 +593,22 @@ final class FieldSettings {
 					)
 				);
 			}
+		}
+
+		// Content and layout blocks (Notice, Section Heading, Page Break): what
+		// they say is a General setting, how it looks is an Appearance setting,
+		// so each control lands in a panel the inspector draws (FA-02).
+		if ( ! in_array( $type, self::CONTAINERS, true ) && ! $isColumns && is_array( $definition->layoutControls ) ) {
+			$layout = $definition->layoutControls;
+			foreach ( $layout as &$layout_control ) {
+				if ( ! is_array( $layout_control ) || isset( $layout_control['section'] ) ) {
+					continue;
+				}
+				$layout_name               = $layout_control['name'] ?? '';
+				$layout_control['section'] = in_array( $layout_name, self::GENERAL_LAYOUT_CONTROLS, true ) ? 'general' : 'appearance';
+			}
+			unset( $layout_control );
+			$definition->layoutControls = array_values( $layout );
 		}
 
 		// Hidden fields have no visible label, but their answer is listed in

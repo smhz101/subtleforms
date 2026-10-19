@@ -2,6 +2,10 @@
 
 namespace SubtleForms\Contracts;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * CAPTCHA Provider Interface
  *

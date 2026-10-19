@@ -6,7 +6,6 @@ import AdminShell from '../components/AdminShell';
 import GeneralSettings from '../components/settings/GeneralSettings';
 import FrontendSettings from '../components/settings/FrontendSettings';
 import EmailSettings from '../components/settings/EmailSettings';
-import AISettings from '../components/settings/AISettings';
 import AdvancedSettings from '../components/settings/AdvancedSettings';
 import LicenseSettings from '../components/settings/LicenseSettings';
 import ExtensionsSettings from '../components/settings/ExtensionsSettings';
@@ -51,10 +50,10 @@ const GROUPS = [
         description: __('Spam protection, CAPTCHA, data retention and debugging.', 'subtleforms'),
       },
       {
-        name: 'ai',
-        icon: Icon.Sparkles,
-        title: __('AI assistant', 'subtleforms'),
-        description: __('Connect a provider to draft forms and summarise entries.', 'subtleforms'),
+        name: 'extensions',
+        icon: Icon.Puzzle,
+        title: __('Integrations', 'subtleforms'),
+        description: __('Webhook defaults, form analytics and the integrations your add-ons bring.', 'subtleforms'),
       },
     ],
   },
@@ -67,13 +66,6 @@ const GROUPS = [
         icon: Icon.KeyRound,
         title: __('License', 'subtleforms'),
         description: __('Your plan, license key and what it unlocks.', 'subtleforms'),
-      },
-      {
-        name: 'extensions',
-        icon: Icon.Puzzle,
-        title: __('Integrations', 'subtleforms'),
-        description: __('Account-wide settings for payments, CRM, email marketing and more.', 'subtleforms'),
-        pro: true,
       },
       {
         name: 'branding',
@@ -244,9 +236,6 @@ export default function Settings() {
             )}
             {current.name === 'license' && <LicenseSettings />}
             {current.name === 'branding' && <BrandingSettings />}
-            {current.name === 'ai' && (
-              <AISettings settings={settings} updateSetting={updateSetting} fieldErrors={fieldErrors} />
-            )}
             {current.name === 'advanced' && (
               <AdvancedSettings
                 settings={settings}

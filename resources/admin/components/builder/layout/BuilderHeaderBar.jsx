@@ -72,7 +72,7 @@ export function BuilderTitle({
         className={`sf-builder-header-bar__form-type-badge sf-builder-header-bar__form-type-badge--${formTypeBadge.color}`}
         title={formTypeBadge.label}>
         <FormTypeIcon className='sf-builder-header-bar__form-type-icon' />
-        {formTypeBadge.label}
+        <span className='sf-builder-header-bar__form-type-label'>{formTypeBadge.label}</span>
       </span>
     </div>
   );
@@ -118,7 +118,7 @@ export function BuilderActions({
   const isPublished = formStatus === FORM_STATUS_PUBLISHED;
   // A published form with unsaved/unpublished draft edits shows
   // "Published · changes not live" instead of "Draft", using the same status
-  // helper as the All Forms and Dashboard listings — one source of truth
+  // helper as the All Forms and Dashboard listings, one source of truth
   // (Part A5).
   const showUnpublishedChanges = isPublished && (hasUnpublishedChanges || isDirty);
   const statusBadge = getFormStatusBadgeConfig(
@@ -140,16 +140,16 @@ export function BuilderActions({
 
   return (
     <div className='sf-builder-header-bar__center'>
-      {/* Status Badge — single source of truth (shared with listings) */}
+      {/* Status Badge, single source of truth (shared with listings) */}
       <span
         data-tour='status-badge'
         className={`sf-builder-header-bar__mode-badge ${statusBadgeClass}`}
         title={statusBadgeTitle}>
         <span className='sf-builder-header-bar__mode-dot' aria-hidden='true' />
-        {statusBadgeLabel}
+        <span className='sf-builder-header-bar__mode-label'>{statusBadgeLabel}</span>
       </span>
 
-      {/* Shortcode — compact copy button; the full shortcode is in the tooltip */}
+      {/* Shortcode, compact copy button; the full shortcode is in the tooltip */}
       {shortcode && (
         <Button
           size='compact'
@@ -184,7 +184,7 @@ export function BuilderActions({
             autoSaving ? 'saving' : effectiveStatus
           }`}
         />
-        <span>{statusLabel}</span>
+        <span className='sf-builder-header-bar__save-label'>{statusLabel}</span>
       </div>
 
       {/* Error Actions */}
@@ -196,7 +196,7 @@ export function BuilderActions({
               isSmall
               onClick={onRetryAutosave}
               className='sf-builder-header-bar__tour-button'>
-              {__('Retry autosave', 'subtleforms')}
+              {__('Retry', 'subtleforms')}
             </Button>
           )}
           {saveError && (
@@ -205,7 +205,7 @@ export function BuilderActions({
               isSmall
               onClick={onRetryLastManualSave}
               className='sf-builder-header-bar__tour-button'>
-              {__('Retry save', 'subtleforms')}
+              {__('Retry', 'subtleforms')}
             </Button>
           )}
           <Button
@@ -253,8 +253,8 @@ export function BuilderActions({
         />
 
         {/* Publishing is the one outcome autosave cannot produce: it makes the
-            current draft the version visitors see. Its opposite — returning the
-            form to a draft — is the same axis, so it hangs off the same control
+            current draft the version visitors see. Its opposite, returning the
+            form to a draft, is the same axis, so it hangs off the same control
             rather than sitting in a generic menu next to Delete. */}
         <div className='sf-builder-header-bar__publish-group'>
           <Button
@@ -297,7 +297,7 @@ export function BuilderActions({
             {({ onClose }) => (
               <>
                 <MenuGroup label={__('Status', 'subtleforms')}>
-                  {/* Publish — always available (disabled when already live,
+                  {/* Publish, always available (disabled when already live,
                       blocked by validation, or busy). The split-button's main
                       action is the common path; this covers the rest. */}
                   <MenuItem
@@ -339,7 +339,7 @@ export function BuilderActions({
                     {__('Save draft', 'subtleforms')}
                   </MenuItem>
 
-                  {/* Unpublish — takes a live form off the site (keeps draft) */}
+                  {/* Unpublish, takes a live form off the site (keeps draft) */}
                   <MenuItem
                     disabled={!isPublished || busy}
                     info={__(
@@ -353,7 +353,7 @@ export function BuilderActions({
                     {__('Unpublish', 'subtleforms')}
                   </MenuItem>
 
-                  {/* Discard changes — revert local draft to the last
+                  {/* Discard changes, revert local draft to the last
                       persisted version without leaving the builder. */}
                   <MenuItem
                     disabled={!isDirty || busy}

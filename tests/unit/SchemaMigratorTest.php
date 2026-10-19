@@ -1,11 +1,15 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 // phpcs:disable -- Unit test file; not shipped in production plugin.
 /**
- * SchemaMigrator unit tests — migrating a schema must never drop fields.
+ * SchemaMigrator unit tests, migrating a schema must never drop fields.
  *
  * Guards the Part A4 regression: a consent field disappeared from a published
  * form after a 1.9.x normaliser. No migration may remove fields the author
- * added — it may only transform shape.
+ * added, it may only transform shape.
  *
  * @package SubtleForms\Tests
  */

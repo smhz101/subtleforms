@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from '@wordpress/element';
 import { Button, Modal, TextControl, TextareaControl } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
+import { formNameHelp } from '../utils/formNameHelp';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import { useCreateForm, useTemplates } from '../data';
@@ -12,6 +13,9 @@ import { createInitialSchema } from '../utils/initialSchema';
 import { schemaFromTemplate } from '../utils/templateSchema';
 import { TEMPLATE_CATEGORIES } from '../templates';
 import { requirePro } from '../utils/featureGate';
+
+/** Templates SubtleForms Pro adds. */
+const PRO_TEMPLATE_COUNT = 47;
 import './CreateFormPage.scss';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────
@@ -60,7 +64,7 @@ const CHOICE = ['radio', 'multiple_choice', 'checkbox', 'checkboxes', 'consent',
 const TALL = ['textarea', 'rich_text', 'signature', 'file', 'file_upload'];
 
 /**
- * A wireframe of the template's first fields — shows the shape of a form at
+ * A wireframe of the template's first fields, shows the shape of a form at
  * a glance without rendering it.
  */
 function Wireframe({ fields }) {
@@ -107,7 +111,7 @@ const STRUCTURES = [
   {
     id: 'standard',
     icon: Icon.FileText,
-    title: __('Single page', 'subtleforms'),
+    title: __('Standard', 'subtleforms'),
     text: __('All fields on one page.', 'subtleforms'),
   },
   {
@@ -233,6 +237,12 @@ export default function CreateFormPage() {
   }, [chosen, title, description, structure, createFormMutation, navigate, showError]);
 
   const categories = TEMPLATE_CATEGORIES.filter((c) => c.id === 'all' || counts[c.id]);
+  // Without SubtleForms Pro, one card says how many more templates Pro adds.
+  const showProTemplatesCard =
+    category === 'all' &&
+    !query.trim() &&
+    !window.subtleformsAdmin?.hasProPlugin &&
+    !templates.some((t) => t.is_pro);
 
   return (
     <AdminShell
@@ -335,6 +345,27 @@ export default function CreateFormPage() {
                 );
               })}
 
+              {showProTemplatesCard && (
+                <a
+                  className='sf-tpl sf-tpl--more'
+                  href='https://subtleforms.com/templates/'
+                  target='_blank'
+                  rel='noopener noreferrer'>
+                  <span className='sf-tpl__meta'>
+                    <span className='sf-tpl__name'>
+                      {sprintf(
+                        /* translators: %d: number of templates */
+                        __('%d more templates in SubtleForms Pro', 'subtleforms'),
+                        PRO_TEMPLATE_COUNT
+                      )}
+                    </span>
+                    <span className='sf-tpl__desc'>
+                      {__('Event registration, job applications, payments and more. Opens subtleforms.com.', 'subtleforms')}
+                    </span>
+                  </span>
+                </a>
+              )}
+
               {visible.length === 0 && (
                 <div className='sf-empty sf-tpl-grid__empty'>
                   <span className='sf-empty__icon' aria-hidden='true'>
@@ -376,7 +407,7 @@ export default function CreateFormPage() {
               onChange={setTitle}
               autoFocus
               onFocus={(e) => e.target.select()}
-              help={__('Only you see this. You can show a different title on the page.', 'subtleforms')}
+              help={formNameHelp()}
             />
 
             {chosen.id === 'blank' ? (

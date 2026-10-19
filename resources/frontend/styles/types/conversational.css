@@ -87,9 +87,8 @@
 .subtleforms-hint {
 	margin-top: var(--subtleforms-spacing-sm);
 	font-size: var(--subtleforms-font-size-xs, 0.75rem);
-	color: var(--subtleforms-color-text-light);
+	color: var(--subtleforms-color-text, #1e1e1e);
 	text-align: center;
-	opacity: 0.7;
 }
 
 /* ===== Field Focus ===== */
@@ -97,7 +96,7 @@
 	margin-bottom: var(--subtleforms-spacing-lg);
 }
 
-.subtleforms--type-conversational input,
+.subtleforms--type-conversational input:not([type="radio"]):not([type="checkbox"]):not([type="hidden"]),
 .subtleforms--type-conversational textarea,
 .subtleforms--type-conversational select {
 	font-size: 1.125rem;
@@ -106,6 +105,28 @@
 	border-radius: var(--subtleforms-radius-sm);
 	transition: all var(--subtleforms-transition-base);
 	width: 100%;
+}
+
+/* Choice questions are a vertical list, including inline and button layouts. */
+.subtleforms--type-conversational .subtleforms-radio-group,
+.subtleforms--type-conversational .subtleforms-checkbox-group,
+.subtleforms--type-conversational .subtleforms-radio-group.subtleforms-options--inline,
+.subtleforms--type-conversational .subtleforms-checkbox-group.subtleforms-options--inline,
+.subtleforms--type-conversational .subtleforms-radio-group.subtleforms-options--buttons,
+.subtleforms--type-conversational .subtleforms-checkbox-group.subtleforms-options--buttons,
+.subtleforms--type-conversational .subtleforms-options--columns-2,
+.subtleforms--type-conversational .subtleforms-options--columns-3 {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	grid-template-columns: minmax(0, 1fr);
+}
+
+.subtleforms--type-conversational .subtleforms-radio-label,
+.subtleforms--type-conversational .subtleforms-checkbox-label {
+	justify-content: flex-start;
+	text-align: left;
+	width: auto;
 }
 
 .subtleforms--type-conversational input:focus,

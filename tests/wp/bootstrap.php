@@ -42,6 +42,10 @@ if ( $skip ) {
 define( 'WP_USE_THEMES', false );
 require_once $wp_load;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 if ( ! class_exists( \SubtleForms\Plugin::class ) ) {
 	fwrite( STDERR, "SubtleForms is not active on this site.\n" );
 	exit( 1 );

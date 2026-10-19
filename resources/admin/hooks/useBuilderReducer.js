@@ -94,6 +94,7 @@ export const BUILDER_ACTIONS = {
   CLOSE_PREVIEW: 'CLOSE_PREVIEW',
   CLOSE_BUILDER: 'CLOSE_BUILDER',
   DISMISS_ERROR: 'DISMISS_ERROR',
+  LOAD_ERROR: 'LOAD_ERROR',
 };
 
 // ============================================================================
@@ -305,6 +306,28 @@ function builderReducer(state, action) {
     }
 
     // ------------------------------------------------------------------------
+    // LOAD_ERROR
+    // ------------------------------------------------------------------------
+    case BUILDER_ACTIONS.LOAD_ERROR: {
+      const nextState = BUILDER_STATES.ERROR;
+      const message =
+        action.payload?.error || 'The form could not be loaded.';
+      if (state.state !== nextState && !validateTransition(state.state, nextState, action.type)) {
+        return {
+          ...state,
+          loading: false,
+          error: message,
+        };
+      }
+      return {
+        ...state,
+        state: nextState,
+        loading: false,
+        error: message,
+      };
+    }
+
+    // ------------------------------------------------------------------------
     // EDIT_SCHEMA
     // ------------------------------------------------------------------------
     case BUILDER_ACTIONS.EDIT_SCHEMA: {
@@ -320,7 +343,7 @@ function builderReducer(state, action) {
       }
 
       // If the schema reference is unchanged, treat this as a "mark dirty" and
-      // avoid polluting history — a caller re-dispatching the current schema
+      // avoid polluting history, a caller re-dispatching the current schema
       // wants the dirty flag, not an undo step that restores the same state.
       if (nextSchema === state.draftSchema) {
         return {
@@ -579,6 +602,10 @@ function builderReducer(state, action) {
         isDirty: action.payload?.stillDirty || false,
         lastAutoSaveTime: Date.now(),
         autoSaveError: null,
+        saveError: null,
+        // A draft save of a live form is not on the site yet.
+        hasUnpublishedChanges:
+          state.formStatus === 'published' ? true : state.hasUnpublishedChanges,
       };
     }
 

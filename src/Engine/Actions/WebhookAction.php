@@ -1,7 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SubtleForms\Engine\Actions;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Contracts\ActionInterface;
 use SubtleForms\Engine\SubmissionContext;
@@ -56,7 +61,7 @@ final class WebhookAction implements ActionInterface {
 				$body = '{}';
 			}
 		} else {
-			// 'full' — entire submission payload
+			// 'full', entire submission payload
 			$body = wp_json_encode( $context->payload );
 		}
 
@@ -82,8 +87,13 @@ final class WebhookAction implements ActionInterface {
 			$safe_headers
 		);
 
-		// Signing: HMAC-SHA256 — adds X-SubtleForms-Signature header
+		// Signing: HMAC-SHA256, adds X-SubtleForms-Signature header
 		$signing = $settings['signing'] ?? array();
+		if ( is_array( $signing ) && ! empty( $signing['enabled'] ) && empty( $signing['secret'] ) ) {
+			// No secret on the action: use the default from Settings > Integrations > Webhooks.
+			$global            = get_option( 'subtleforms_settings', array() );
+			$signing['secret'] = is_array( $global ) ? (string) ( $global['ext_webhooks_signing_secret'] ?? '' ) : '';
+		}
 		if (
 			is_array( $signing ) &&
 			! empty( $signing['enabled'] ) &&

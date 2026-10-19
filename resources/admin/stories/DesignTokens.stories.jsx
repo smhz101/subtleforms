@@ -1,5 +1,5 @@
 /**
- * Design Tokens — Foundation Story
+ * Design Tokens, Foundation Story
  * Documents all CSS custom properties available in SubtleForms.
  */
 

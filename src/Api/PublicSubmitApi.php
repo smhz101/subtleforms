@@ -124,13 +124,22 @@ final class PublicSubmitApi {
 	$payload = $validated['data'] ?? array();
 	$payload = is_array( $payload ) ? Sanitizer::sanitizeArrayDeep( $payload ) : array();
 
+		// Verify the form exists before any spam check, so a missing, draft or
+		// trashed form always answers 404. Guests only reach published forms. A
+		// logged-in admin (the builder preview) may store an entry on a draft.
+		$form    = $this->formsRepo->find( $formId );
+		$isAdmin = is_user_logged_in() && current_user_can( 'manage_options' );
+		if ( ! $form || ( ( $form['status'] ?? '' ) !== 'published' && ! $isAdmin ) ) {
+			return ApiResponse::not_found( __( 'Form not found', 'subtleforms' ) );
+		}
+
 	// Honeypot: a hidden "website_url" field real users never see. If it has
-	// any value, the submitter is a bot — silently drop the submission (return
+	// any value, the submitter is a bot, so silently drop the submission (return
 	// success without saving) so bots don't learn the field is a trap and retry,
 	// matching the existing SpamProtection pattern (Part B3).
 	$honeypot = isset( $payload['website_url'] ) ? (string) $payload['website_url'] : '';
 	if ( $honeypot !== '' ) {
-		Logger::info( 'Honeypot tripped on form %d — dropping submission', $formId );
+		Logger::info( 'Honeypot tripped on form %d, dropping submission', $formId );
 		return ApiResponse::success(
 			array(
 				'success' => true,
@@ -139,19 +148,22 @@ final class PublicSubmitApi {
 		);
 	}
 
-	// Spam protection
-		if ( \SubtleForms\Engine\SpamProtection::is_enabled() ) {
-			$tempContext = new SubmissionContext( $formId, $payload );
-			if ( \SubtleForms\Engine\SpamProtection::is_spam( $tempContext ) ) {
-				$reason = $tempContext->getMeta( 'spam_reason', 'spam_detected' );
-				Logger::info( 'Spam blocked (form %d): %s', $formId, $reason );
-				return ApiResponse::success(
-					array(
-						'success' => true,
-						'message' => __( 'Thank you.', 'subtleforms' ),
-					)
-				);
-			}
+		// Spam protection: the honeypot and the time trap each have their own
+		// setting. A site admin testing a form (builder preview) skips the time
+		// trap, since the preview has no server-issued token.
+		$tempContext = new SubmissionContext( $formId, $payload );
+		if ( current_user_can( 'manage_options' ) ) {
+			$tempContext->payload[ \SubtleForms\Engine\SpamProtection::TIME_FIELD ] = \SubtleForms\Engine\SpamProtection::issue_token( $formId, time() - HOUR_IN_SECONDS );
+		}
+		if ( \SubtleForms\Engine\SpamProtection::is_spam( $tempContext ) ) {
+			$reason = $tempContext->getMeta( 'spam_reason', 'spam_detected' );
+			Logger::info( 'Spam blocked (form %d): %s', $formId, $reason );
+			return ApiResponse::success(
+				array(
+					'success' => true,
+					'message' => __( 'Thank you.', 'subtleforms' ),
+				)
+			);
 		}
 
 		// CAPTCHA verification
@@ -162,14 +174,6 @@ final class PublicSubmitApi {
 					$verification['error'] ?? __( 'CAPTCHA verification failed.', 'subtleforms' )
 				);
 			}
-		}
-
-		// Verify form exists. Guests only reach published forms. A logged-in
-		// admin (the builder preview) may store an entry on a draft.
-		$form    = $this->formsRepo->find( $formId );
-		$isAdmin = is_user_logged_in() && current_user_can( 'manage_options' );
-		if ( ! $form || ( ( $form['status'] ?? '' ) !== 'published' && ! $isAdmin ) ) {
-			return ApiResponse::not_found( __( 'Form not found', 'subtleforms' ) );
 		}
 
 		// Check submission limit
@@ -226,9 +230,12 @@ final class PublicSubmitApi {
 			$activeSchema['schema'] ?? $activeSchema
 		);
 
-		// Recompute Calculation fields server-side so a visitor cannot post a
-		// tampered total (2.0).
-		$payload = self::applyCalculations( $payload, $activeSchema['schema'] ?? $activeSchema );
+		// Computed fields (Pro Calculation) are worked out on the server so a
+		// visitor cannot post a tampered total.
+		$payload = self::applyComputedValues( $payload, $activeSchema['schema'] ?? $activeSchema );
+
+		// Fields from an add-on that is not active are not on the live form.
+		$payload = \SubtleForms\Fields\AddonFieldTypes::dropMissingAnswers( $payload, $activeSchema['schema'] ?? $activeSchema );
 
 		// Conditional logic (2.1): answers to fields the visitor could not see
 		// (hidden fields and skipped steps) are never stored, priced or sent.
@@ -315,17 +322,42 @@ final class PublicSubmitApi {
 				return ApiResponse::bad_request( __( 'This form could not be processed. Please contact the site owner.', 'subtleforms' ) );
 			}
 
+			// A payment the gateway only authorised is captured after the entry
+			// is saved. Emails, webhooks and integrations wait for that result,
+			// so nobody gets a receipt for a payment that then fails (PAY-04).
+			$deferActions = $isPaymentForm && 'authorized' === ( $paymentMetadata['status'] ?? '' );
+			$laterSteps   = array();
+			if ( $deferActions ) {
+				$laterSteps = array_values(
+					array_filter(
+						$steps,
+						static function ( $step ) {
+							return 'save' !== $step->action()->id();
+						}
+					)
+				);
+				$steps      = array_values(
+					array_filter(
+						$steps,
+						static function ( $step ) {
+							return 'save' === $step->action()->id();
+						}
+					)
+				);
+			}
+
 			try {
 				$result = $this->pipeline->run( $steps, $context, $activeSchema['schema'] );
 			} catch ( \RuntimeException $e ) {
-				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
 				$voidPayment();
-				Logger::error( 'Pipeline execution failed for submission %d: %s', $submissionId, $e->getMessage() );
-
 				$validationErrors = $context->getMeta( 'validation_errors' );
 				if ( is_array( $validationErrors ) && ! empty( $validationErrors ) ) {
+					// Rejected answers are never stored (FB-09, FF-13, FA-24).
+					$this->discard( $submissionId );
 					return ApiResponse::validation_error( __( 'Form validation failed', 'subtleforms' ), $validationErrors );
 				}
+				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
+				Logger::error( 'Pipeline execution failed for submission %d: %s', $submissionId, $e->getMessage() );
 
 				return ApiResponse::server_error( __( 'Your submission could not be completed. Please try again later.', 'subtleforms' ) );
 			} catch ( \Throwable $e ) {
@@ -336,14 +368,15 @@ final class PublicSubmitApi {
 			}
 
 			if ( ! $result->ok ) {
-				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
 				$voidPayment();
-				Logger::error( 'Pipeline execution failed for submission %d: %s', $submissionId, $result->error );
-
 				$validationErrors = $context->getMeta( 'validation_errors' );
 				if ( is_array( $validationErrors ) && ! empty( $validationErrors ) ) {
+					// Rejected answers are never stored (FB-09, FF-13, FA-24).
+					$this->discard( $submissionId );
 					return ApiResponse::validation_error( __( 'Form validation failed', 'subtleforms' ), $validationErrors );
 				}
+				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
+				Logger::error( 'Pipeline execution failed for submission %d: %s', $submissionId, $result->error );
 
 				return ApiResponse::server_error( $result->error );
 			}
@@ -374,7 +407,19 @@ final class PublicSubmitApi {
 					$order['payment']['status'] = 'failed';
 					$order['payment']['error']  = $captured->get_error_message();
 					$this->finishOrder( $submissionId, $finalSubmission, $order, 'payment_failed' );
+					// No receipts or integrations for a failed payment; the site
+					// owner is told instead (PAY-04).
+					self::notifyPaymentFailed( $formId, $submissionId, $activeSchema['schema'] ?? array(), $captured->get_error_message() );
 					return ApiResponse::error( 'subtleforms_payment_failed', $captured->get_error_message(), 402 );
+				}
+				if ( $laterSteps ) {
+					// The payment went through: now send the emails and run the
+					// integrations that waited for it.
+					try {
+						$this->pipeline->run( $laterSteps, $context, $activeSchema['schema'] );
+					} catch ( \Throwable $e ) {
+						Logger::error( 'Actions after payment failed for submission %d: %s', $submissionId, $e->getMessage() );
+					}
 				}
 				$order['payment'] = is_array( $captured ) ? $captured : $paymentMetadata;
 				$status           = in_array( $order['payment']['status'] ?? '', array( 'paid', 'succeeded' ), true ) ? 'completed' : 'payment_pending';
@@ -498,7 +543,7 @@ final class PublicSubmitApi {
 	}
 
 	// ────────────────────────────────────────────────────────────────────
-	// Rate limit (inline — no FeatureGate needed for public endpoint)
+	// Rate limit (inline, no FeatureGate needed for public endpoint)
 	// ────────────────────────────────────────────────────────────────────
 
 	/**
@@ -678,56 +723,84 @@ final class PublicSubmitApi {
 	}
 
 	/**
-	 * Recompute every Calculation field from the submitted values.
+	 * Email the site owner that a payment failed after the entry was saved,
+	 * unless switched off under Settings > Integrations > Payments (PAY-04).
+	 *
+	 * @param int    $formId       Form ID.
+	 * @param int    $submissionId Entry ID.
+	 * @param mixed  $schema       Form schema.
+	 * @param string $reason       Gateway message.
+	 */
+	public static function notifyPaymentFailed( int $formId, int $submissionId, $schema, string $reason ): void {
+		$settings = get_option( 'subtleforms_settings', array() );
+		if ( is_array( $settings ) && array_key_exists( 'ext_payments_failed_email', $settings ) && ! $settings['ext_payments_failed_email'] ) {
+			return;
+		}
+		$to = is_array( $settings ) && ! empty( $settings['admin_email'] ) && is_email( $settings['admin_email'] )
+			? (string) $settings['admin_email']
+			: (string) get_option( 'admin_email' );
+		$title = is_array( $schema ) ? (string) ( $schema['metadata']['title'] ?? '' ) : '';
+		/* translators: %s: form title */
+		$subject = sprintf( __( 'Payment failed: %s', 'subtleforms' ), '' !== $title ? $title : '#' . $formId );
+		$body    = sprintf(
+			/* translators: 1: entry ID, 2: gateway message, 3: link to the entry */
+			__( "The payment for entry #%1\$d did not go through, so no receipt or notification was sent.\n\nReason: %2\$s\n\nOpen the entry: %3\$s", 'subtleforms' ),
+			$submissionId,
+			'' !== $reason ? $reason : __( 'not given', 'subtleforms' ),
+			admin_url( 'admin.php?page=subtleforms-submissions&submission_id=' . $submissionId )
+		);
+		wp_mail( $to, $subject, $body );
+	}
+
+	/**
+	 * A value that a computed field (such as a Pro Calculation) could not work
+	 * out. It is never stored, shown or charged.
+	 */
+	const COMPUTE_ERROR = '__formula_error__';
+
+	/**
+	 * Let add-ons work out computed fields from the submitted values.
+	 *
+	 * The server always recomputes these values, so a visitor cannot post a
+	 * tampered result. SubtleForms Pro fills its Calculation fields here.
 	 *
 	 * @param array $payload Sanitized payload.
 	 * @param mixed $schema  Active schema.
 	 * @return array
 	 */
-	public static function applyCalculations( array $payload, $schema ): array {
-		if ( ! is_array( $schema ) || empty( $schema['fields'] ) || ! is_array( $schema['fields'] ) ) {
+	public static function applyComputedValues( array $payload, $schema ): array {
+		if ( ! is_array( $schema ) ) {
 			return $payload;
 		}
 
-		$calcs = array();
-		$walk  = static function ( array $fields ) use ( &$walk, &$calcs ) {
-			foreach ( $fields as $field ) {
-				if ( ! is_array( $field ) ) {
-					continue;
-				}
-				$config = isset( $field['config'] ) && is_array( $field['config'] ) ? array_merge( $field, $field['config'] ) : $field;
-				if ( ( $field['type'] ?? '' ) === 'calculation' && ! empty( $config['key'] ) && ! empty( $config['formula'] ) ) {
-					$calcs[] = $config;
-				}
-				foreach ( array( 'fields', 'children' ) as $nested ) {
-					if ( ! empty( $field[ $nested ] ) && is_array( $field[ $nested ] ) ) {
-						$walk( $field[ $nested ] );
-					}
-				}
-				if ( ! empty( $field['columns'] ) && is_array( $field['columns'] ) ) {
-					foreach ( $field['columns'] as $column ) {
-						if ( is_array( $column ) ) {
-							$walk( $column );
-						}
-					}
-				}
-			}
-		};
-		$walk( $schema['fields'] );
+		/**
+		 * Filter the submitted values to add computed field values.
+		 *
+		 * Runs before conditional logic, validation, pricing and storage. A
+		 * value that cannot be computed should be PublicSubmitApi::COMPUTE_ERROR.
+		 *
+		 * @since 2.3.9
+		 *
+		 * @param array $payload Submitted values.
+		 * @param array $schema  Form schema.
+		 */
+		$computed = apply_filters( 'subtleforms/submission/computed_values', $payload, $schema );
 
-		// Two passes let one calculation reference another.
-		for ( $pass = 0; $pass < 2; $pass++ ) {
-			foreach ( $calcs as $calc ) {
-				$result                      = \SubtleForms\Engine\Formula::evaluate(
-					(string) $calc['formula'],
-					$payload,
-					isset( $calc['decimals'] ) ? (int) $calc['decimals'] : 2
-				);
-				$payload[ $calc['key'] ] = null === $result ? \SubtleForms\Engine\Formula::ERROR : $result;
-			}
-		}
+		return is_array( $computed ) ? $computed : $payload;
+	}
 
-		return $payload;
+	/**
+	 * Remove an entry the pipeline rejected, with its activity log.
+	 *
+	 * The record exists only so the pipeline can run; answers the server
+	 * refuses never stay in Entries, exports or the entry limit count.
+	 *
+	 * @param int $submissionId Entry ID.
+	 */
+	private function discard( int $submissionId ): void {
+		// Uploaded files stay pending, so the visitor can fix the answer and
+		// send again; unclaimed files are removed after a day.
+		$this->submissionsRepo->delete( $submissionId, false );
 	}
 
 	/**
@@ -747,10 +820,12 @@ final class PublicSubmitApi {
 			}
 		}
 		foreach ( $payload as $key => $value ) {
-			if ( \SubtleForms\Engine\Formula::ERROR === $value ) {
+			if ( self::COMPUTE_ERROR === $value ) {
 				$payload[ $key ] = null;
 			}
 		}
+		// The spam honeypot and time token are not answers (FLD2-17).
+		unset( $payload[ \SubtleForms\Engine\SpamProtection::TIME_FIELD ], $payload[ \SubtleForms\Engine\SpamProtection::HONEYPOT_FIELD ] );
 		return $payload;
 	}
 
@@ -999,7 +1074,7 @@ final class PublicSubmitApi {
                         return $schema;
                 }
 
-                // Check if a pipeline-level webhook action already exists — no double-fire.
+                // Check if a pipeline-level webhook action already exists, no double-fire.
                 $actions = $schema['actions'] ?? array();
                 foreach ( $actions as $action ) {
                         if ( isset( $action['type'] ) && $action['type'] === 'webhook' ) {

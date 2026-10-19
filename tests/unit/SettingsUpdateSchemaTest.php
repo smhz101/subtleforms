@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Settings update accepts in-range autosave, trash days, and blank emails.
  *
@@ -6,6 +7,10 @@
  */
 
 namespace SubtleForms\Tests\Unit;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use PHPUnit\Framework\TestCase;
 use ReflectionMethod;

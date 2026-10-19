@@ -57,7 +57,12 @@ export function describeSaveError(body, status) {
         : `${message}`;
     }
   }
-  if (base) return base;
-  if (status === 0) return __('Could not reach the server. Check your connection and try again.', 'subtleforms');
-  return __('Could not save your changes. Please try again.', 'subtleforms');
+  const code = Number(status);
+  const generic = /valid response from the server|failed to autosave|could not reach the server/i;
+  const lostContact = status === 0 || status === 'abort' || code >= 500 || !base || generic.test(base);
+  // A server or network failure does not drop the draft sitting in this tab.
+  if (lostContact) {
+    return __('Your changes are kept in this tab.', 'subtleforms');
+  }
+  return base;
 }

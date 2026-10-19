@@ -135,7 +135,7 @@ final class FormsRepository {
 
 		$where_clause = empty( $where ) ? '' : ' WHERE ' . implode( ' AND ', $where );
 
-		// Validate orderby (whitelist — safe to interpolate)
+		// Validate orderby (whitelist, safe to interpolate)
 		$allowed_orderby = array( 'id', 'title', 'status', 'created_at', 'updated_at' );
 		$orderby         = in_array( $args['orderby'], $allowed_orderby, true ) ? $args['orderby'] : 'created_at';
 		$order           = strtoupper( $args['order'] ) === 'ASC' ? 'ASC' : 'DESC';
@@ -448,7 +448,7 @@ final class FormsRepository {
 		list( $schema ) = \SubtleForms\Support\SchemaRepair::syncType( $schema );
 
 		// Appearance values are written into CSS custom properties on the rendered
-		// form, so they are checked here — at the point of storage — rather than
+		// form, so they are checked here, at the point of storage, rather than
 		// escaped at output. Every save path goes through this method.
 		$schema = self::sanitizeAppearance( $schema );
 
@@ -786,17 +786,67 @@ final class FormsRepository {
 	}
 
 	/**
-	 * Delete a form.
+	 * Delete a form for good, with everything that belongs to it: its entries
+	 * (and their uploaded files and activity logs), its schema versions and
+	 * its daily view totals (FA-19, FF2-21, FF-27).
 	 */
 	public function delete( int $id ): bool {
 		global $wpdb;
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct delete; no caching for writes.
 		$result = $wpdb->delete( $this->table, array( 'id' => $id ), array( '%d' ) );
+		if ( $result ) {
+			$this->deleteFormData( $id );
+		}
 		if ( $result !== false ) {
 			wp_cache_delete( "subtleforms_form_{$id}", 'subtleforms' );
 			wp_cache_delete( "subtleforms_schema_{$id}", 'subtleforms' );
 		}
 		return $result !== false;
+	}
+
+	/**
+	 * Remove the entries, files, logs, schema versions and view totals of a
+	 * deleted form.
+	 *
+	 * @param int $id Form ID.
+	 */
+	private function deleteFormData( int $id ): void {
+		global $wpdb;
+		$submissions = $wpdb->prefix . 'subtleforms_submissions';
+		$logs        = $wpdb->prefix . 'subtleforms_logs';
+		$stats       = $wpdb->prefix . 'subtleforms_stats';
+
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Table names are from $wpdb->prefix; values are prepared.
+		// Uploaded files first: only entries that carry a file record are read.
+		$with_files = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT payload FROM {$submissions} WHERE form_id = %d AND payload LIKE %s",
+				$id,
+				'%' . $wpdb->esc_like( '"size":' ) . '%'
+			)
+		);
+		foreach ( (array) $with_files as $payload ) {
+			\SubtleForms\Uploads\Uploads::deleteForPayload( (string) $payload );
+		}
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$logs} WHERE submission_id IN ( SELECT id FROM {$submissions} WHERE form_id = %d )", $id ) );
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$submissions} WHERE form_id = %d", $id ) );
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$this->schemas_table} WHERE form_id = %d", $id ) );
+		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $stats ) ) === $stats ) {
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$stats} WHERE form_id = %d", $id ) );
+		}
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+
+		// Count caches of the form's entries.
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", '_transient_subtleforms:%:counts:%' ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		/**
+		 * A form and all its data were deleted for good.
+		 *
+		 * @since 2.3.9
+		 *
+		 * @param int $id Form ID.
+		 */
+		do_action( 'subtleforms/form/deleted', $id );
 	}
 
 	/**

@@ -6,6 +6,7 @@ import { useTemplates } from '../data';
 import { useAbility } from '../policies';
 import clsx from 'clsx';
 import Icon from '../ui/Icon';
+import { formTypeLabel } from '../utils/formTypeChoices';
 import { UpgradePrompt } from '../ui';
 import { TEMPLATE_CATEGORIES } from './index';
 
@@ -59,20 +60,10 @@ export default function TemplateSelector({
   };
 
   const getFormTypeLabel = (type) => {
-    switch (type) {
-      case 'multi-step':
-      case 'multistep':
-        return __('Multi-Step', 'subtleforms');
-      case 'conversational':
-        return __('Conversational', 'subtleforms');
-      case 'sectioned':
-        return __('Sectioned', 'subtleforms');
-      case 'payment':
-        return __('Payment', 'subtleforms');
-      case 'regular':
-      default:
-        return __('Regular', 'subtleforms');
+    if (type === 'payment') {
+      return __('Payment', 'subtleforms');
     }
+    return formTypeLabel(type);
   };
 
   return (

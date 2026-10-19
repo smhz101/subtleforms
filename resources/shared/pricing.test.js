@@ -1,4 +1,4 @@
-import { computeQuote, isPricedForm, isPricedType, registerPricedType } from './pricing';
+import { computeQuote, hiddenPricing, isPricedForm, isPricedType, registerPricedType } from './pricing';
 import { registerFieldType, isRegisteredInputType, getFieldType } from './extend';
 import { applyPaymentDefaults } from '../admin/utils/paymentDefaults';
 
@@ -100,28 +100,80 @@ describe('applyPaymentDefaults with composite fields', () => {
   });
 });
 
-describe('charged formula failures', () => {
-  const charged = (formula) => [
-    { type: 'calculation', config: { key: 'due', label: 'Due', usePrice: true, formula } },
-  ];
-
-  it('does not turn a failed charged formula into a free or payable line', () => {
-    const q = computeQuote(charged('1/0'), { due: 0 });
-    expect(q.formulaError).toBe(true);
-    expect(q.items).toEqual([]);
-    expect(q.items.some((item) => item.amount >= 0)).toBe(false);
+describe('add-on priced types (2.3.9)', () => {
+  registerPricedType('qa_calc', (config, value) => (value === 'ERR' ? { error: true } : [{ label: config.label, qty: 1, unit: value }]), {
+    isPriced: (config) => !!config.usePrice,
   });
 
-  it('does not charge a tampered amount when the formula fails', () => {
-    const q = computeQuote(charged('{qty} / {price}'), { qty: 1, price: 0, due: 25 });
-    expect(q.formulaError).toBe(true);
+  it('charges only fields the add-on says are priced', () => {
+    expect(isPricedForm([{ type: 'qa_calc', config: { usePrice: false } }])).toBe(false);
+    expect(isPricedForm([{ type: 'qa_calc', config: { usePrice: true } }])).toBe(true);
+    const q = computeQuote([{ type: 'qa_calc', config: { key: 'due', label: 'Due', usePrice: false } }], { due: 25 });
     expect(q.items).toEqual([]);
   });
 
-  it('keeps a real zero off the order without flagging a failure', () => {
-    const q = computeQuote(charged('0+0'), { due: 40 });
-    expect(q.formulaError).toBe(false);
+  it('flags an amount the add-on cannot work out and charges nothing for it', () => {
+    const q = computeQuote([{ type: 'qa_calc', config: { key: 'due', label: 'Due', usePrice: true } }], { due: 'ERR' });
+    expect(q.formulaError).toBe(true);
     expect(q.items).toEqual([]);
-    expect(q.total).toBe(0);
+  });
+
+  it('a stored Calculation field without SubtleForms Pro adds nothing', () => {
+    const fields = [{ type: 'calculation', config: { key: 'due', usePrice: true, formula: '2*5' } }];
+    expect(isPricedForm(fields)).toBe(false);
+    expect(computeQuote(fields, { due: 10 }).items).toEqual([]);
+  });
+});
+
+
+describe('visibility comes from conditional logic (PAY-01, PAY-02)', () => {
+  const showWhen = (field, value) => ({
+    action: 'show',
+    groups: [{ match: 'all', rules: [{ field, operator: 'equals', value }] }],
+  });
+  const flatten = (list) =>
+    list.flatMap((f) => [...(f.type === 'step' ? [] : [f]), ...flatten(f.children || f.fields || [])]);
+
+  const schema = {
+    fields: [
+      {
+        type: 'step',
+        id: 'step_1',
+        children: [
+          { type: 'select', key: 'want' },
+          { type: 'payment_product', key: 'ticket', label: 'Ticket', price: 20 },
+          { type: 'payment_hidden_price', key: 'parking', config: { amount: 3, description: 'Parking service fee', logic: showWhen('want', 'yes') } },
+        ],
+      },
+      {
+        type: 'step',
+        id: 'step_2',
+        logic: showWhen('want', 'yes'),
+        children: [{ type: 'payment_product', label: 'Keyless', price: 7 }],
+      },
+    ],
+  };
+
+  it('does not charge a hidden Fixed Fee or a product in a skipped step', () => {
+    const q = computeQuote(flatten(schema.fields), { want: 'no' }, { schema });
+    expect(q.items.map((i) => i.key)).toEqual(['ticket']);
+    expect(q.total).toBe(20);
+  });
+
+  it('charges them once they are shown', () => {
+    const q = computeQuote(flatten(schema.fields), { want: 'yes' }, { schema });
+    expect(q.total).toBe(30);
+    expect(q.items[1].label).toBe('Parking service fee');
+  });
+
+  it('charges a fixed product whose key has no value', () => {
+    const fields = [{ type: 'payment_product', key: 'entry_fee', price: 5 }];
+    expect(computeQuote(fields, {}, { schema: { fields } }).total).toBe(5);
+  });
+
+  it('hiddenPricing lists hidden keys and nodes', () => {
+    const { keys, nodes } = hiddenPricing(schema, { want: 'no' });
+    expect([...keys].sort()).toEqual(['parking', 'step_2']);
+    expect(nodes.has(schema.fields[1].children[0])).toBe(true);
   });
 });

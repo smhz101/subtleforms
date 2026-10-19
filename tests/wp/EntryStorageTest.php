@@ -1,4 +1,5 @@
 <?php
+
 // phpcs:disable -- Integration test; not shipped in production plugin.
 /**
  * 2.2.1 bugs 4, 5, 6, 14 and 15: answers are stored as the visitor gave them,
@@ -8,6 +9,10 @@
  */
 
 namespace SubtleForms\Tests\WP;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Support\EntryValues;
 
@@ -82,7 +87,7 @@ final class EntryStorageTest extends TestCase {
 		$this->assertStringNotContainsString( 'hunter2', $this->storedRow( $id ) );
 	}
 
-	public function test_toggle_scale_picture_signature_and_calculation_are_stored() {
+	public function test_toggle_scale_and_picture_are_stored_and_pro_fields_need_pro() {
 		$id = $this->answerForm();
 		$this->submit(
 			$id,
@@ -98,8 +103,15 @@ final class EntryStorageTest extends TestCase {
 		$this->assertSame( 'yes', $p['tog'] );
 		$this->assertSame( '4', (string) $p['sca'] );
 		$this->assertSame( 'a', $p['pic'] );
-		$this->assertStringStartsWith( 'data:image/png;base64,', $p['sig'] );
-		$this->assertSame( '8', (string) $p['calc'], 'calculations are recomputed on the server' );
+		if ( \SubtleForms\Fields\AddonFieldTypes::missing() ) {
+			// Without SubtleForms Pro, Signature and Calculation are not on the
+			// live form, so posted values for them are not stored (2.3.9).
+			$this->assertArrayNotHasKey( 'sig', $p );
+			$this->assertArrayNotHasKey( 'calc', $p );
+		} else {
+			$this->assertStringStartsWith( 'data:image/png;base64,', $p['sig'] );
+			$this->assertSame( '8', (string) $p['calc'], 'calculations are recomputed on the server' );
+		}
 	}
 
 	public function test_entry_api_shows_password_provided_never_the_value() {

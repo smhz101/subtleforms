@@ -52,11 +52,9 @@ test('published status, publish dialog and width button name (bugs 12, 13)', asy
   // The edit makes the live form out of date.
   await expect(badge).toContainText('changes not live');
 
-  // Publishing an already-live form asks to push the changes.
+  // Update on an already-live form pushes the changes without a dialog (2.3.9).
   await page.locator('.sf-builder-header-bar__publish-button').click();
-  await expect(page.getByText('Push your changes live?')).toBeVisible();
-  await expect(page.getByText('will make it visible on the frontend')).toHaveCount(0);
-  await page.getByRole('dialog').getByRole('button', { name: 'Update', exact: true }).click();
+  await expect(page.getByText('Push your changes live?')).toHaveCount(0);
   await expect(badge).toHaveText(/^Published$/, { timeout: 20000 });
 });
 

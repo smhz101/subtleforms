@@ -3,8 +3,8 @@
  *
  * Values (colour, size, radius) travel as custom properties set on the form
  * root, so they need no CSS here. These rules cover the choices that change
- * structure rather than a value — input treatment, button treatment, alignment
- * — plus the per-field layout overrides.
+ * structure rather than a value, input treatment, button treatment, alignment
+ *, plus the per-field layout overrides.
  *
  * Every selector is scoped to a variant class so a form that has not chosen a
  * variant is untouched.
@@ -47,7 +47,7 @@
 /* Solid is the default (no class needed), but declare it explicitly so the
    variant is never accidentally unset and so the focus/active states have a
    single home. Every variant guarantees readable text (≥ 4.5:1) in default,
-   hover, focus and active states — the Soft preset previously rendered the
+   hover, focus and active states, the Soft preset previously rendered the
    Submit button as an underlined link that turned into a solid bar with
    invisible text on focus (Part A3). */
 .subtleforms--button-solid .subtleforms-button-next,
@@ -101,7 +101,7 @@
 	color: var(--subtleforms-color-primary-hover, #4048b8);
 }
 
-/* A visible focus ring for every variant — never a full-width solid bar and
+/* A visible focus ring for every variant, never a full-width solid bar and
    never invisible text. Uses the accent colour so it stays legible on both
    solid and outline buttons. */
 .subtleforms-button-next:focus-visible,
@@ -241,10 +241,20 @@
 
 /* A form on a dark footer or hero: no card of its own. */
 .subtleforms.subtleforms--preset-dark-surface {
-	background: transparent;
+	background: var(--subtleforms-color-bg, #1b1d24);
 	box-shadow: none;
 	padding-left: 0;
 	padding-right: 0;
+}
+
+/* Dark presets paint their own background, so radios and checkboxes use a dark
+   control. A light accent on a light control looked filled before it was checked. */
+.subtleforms.subtleforms--preset-dark input[type="checkbox"],
+.subtleforms.subtleforms--preset-dark input[type="radio"],
+.subtleforms.subtleforms--preset-dark-surface input[type="checkbox"],
+.subtleforms.subtleforms--preset-dark-surface input[type="radio"] {
+	color-scheme: dark;
+	accent-color: #e9ebef;
 }
 
 /* ── Per-field layout ─────────────────────────────────────────────────────── */
@@ -285,7 +295,7 @@
 	border: 0;
 }
 
-/* Widths collapse to full on narrow viewports — a quarter-width field is not
+/* Widths collapse to full on narrow viewports, a quarter-width field is not
    usable on a phone regardless of what the builder chose. */
 @media (max-width: 600px) {
 	.subtleforms-field {

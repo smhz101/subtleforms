@@ -1,41 +1,10 @@
 /**
- * LogicEditor — conditional logic rules (2.1).
+ * LogicEditor, conditional logic rules (2.1).
  */
 .sf-logic-editor {
 	display: flex;
 	flex-direction: column;
 	gap: 10px;
-
-	&__lock {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		padding: 8px 10px;
-		border: 1px solid var(--sf-border, #dcdcde);
-		border-radius: var(--sf-radius-md, 4px);
-		background: var(--sf-bg-subtle, #f6f7f7);
-		font-size: 12px;
-	}
-
-	&__lock-icon {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		width: 24px;
-		height: 24px;
-		border-radius: 50%;
-		background: #1e1e1e;
-		color: #fff;
-		flex: none;
-
-		svg { fill: none; }
-	}
-
-	&__lock-text { flex: 1 1 auto; color: var(--sf-text-secondary, #50575e); }
-
-	&.is-locked &__group,
-	&.is-locked &__action,
-	&.is-locked &__footer { opacity: 0.6; }
 
 	&__empty {
 		margin: 0;

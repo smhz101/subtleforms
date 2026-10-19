@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SubtleForms Forms REST API
  *
@@ -9,6 +10,10 @@
  */
 
 namespace SubtleForms\Api;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Support\SchemaRepair;
 
@@ -300,7 +305,7 @@ final class FormsApi {
 	 * Permission check for the public schema GET endpoint.
 	 *
 	 * Authenticated admins are always allowed. Unauthenticated users may
-	 * only access schemas for published forms — we reject early with a
+	 * only access schemas for published forms, we reject early with a
 	 * 404 so the handler code is never executed for invalid requests.
 	 *
 	 * @param WP_REST_Request $request REST request.
@@ -468,7 +473,7 @@ final class FormsApi {
 
 		// PUBLIC ACCESS: Only active schema for published forms.
 		// SECURITY: Never expose the full form row (it contains draft_schema,
-		// config, created_at, updated_at, active_version and status — internal
+		// config, created_at, updated_at, active_version and status, internal
 		// data the renderer does not need). Return a minimal form object and
 		// a schema stripped to only the fields the frontend renderer uses.
 		if ( ! $isAuthenticated ) {
@@ -497,8 +502,10 @@ final class FormsApi {
 						'id'    => (int) $form['id'],
 						'title' => $form['title'] ?? '',
 					),
-					'schema'  => self::filterPublicSchema( $this->buildPublicSchema( $schemaData ), (int) $form['id'] ),
-					'version' => $schema['version'] ?? null,
+					'schema'     => self::filterPublicSchema( $this->buildPublicSchema( $schemaData ), (int) $form['id'] ),
+					'version'    => $schema['version'] ?? null,
+					// Server-signed load time for the spam time trap (FF-11, FF-12).
+					'spam_token' => \SubtleForms\Engine\SpamProtection::issue_token( (int) $form['id'] ),
 				)
 			);
 		}
@@ -754,7 +761,8 @@ final class FormsApi {
 			$validator = new RequestValidator( array( 'schemas' => Schemas::all() ) );
 			$validated = $validator->validateOrFail( $input, Schemas::get( Schemas::FORM_CREATE ) );
 		} catch ( ValidationException $e ) {
-			Logger::error( 'create_form - validation failed: %s Fields: %s', $e->getMessage(), print_r( $e->getFields(), true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions
+			Logger::error( 'create_form - validation failed: %s', $e->getMessage() );
+			Logger::debug( 'create_form - invalid fields: %s', wp_json_encode( $e->getFields() ) );
 			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
 		}
 

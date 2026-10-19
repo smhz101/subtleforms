@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SubtleForms Field Registry
  *
@@ -7,6 +8,10 @@
  */
 
 namespace SubtleForms\Fields;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use InvalidArgumentException;
 

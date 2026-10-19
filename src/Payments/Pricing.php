@@ -10,7 +10,11 @@
  * - payment_product      a named product with a fixed price and optional quantity
  * - payment_choice       options that each carry a price (radio, dropdown or checkboxes)
  * - payment_amount       an amount the visitor types (donations, invoices)
- * - payment_hidden_price a fixed fee added to every order
+ * - payment_hidden_price a fixed fee added to every order it is shown in
+ *
+ * Whether a priced field counts is decided by conditional logic: a field that
+ * is hidden, or sits in a hidden container or a skipped step, adds nothing.
+ * Whether its key is in the submitted data never decides it.
  * - calculation          when "Use as price" is on
  *
  * @package SubtleForms\Payments
@@ -21,7 +25,7 @@ declare(strict_types=1);
 
 namespace SubtleForms\Payments;
 
-use SubtleForms\Engine\Formula;
+use SubtleForms\Engine\ConditionalLogic;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -29,7 +33,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class Pricing {
 
-	const PRICED_TYPES = array( 'payment_product', 'payment_choice', 'payment_amount', 'payment_hidden_price', 'calculation' );
+	const PRICED_TYPES = array( 'payment_product', 'payment_choice', 'payment_amount', 'payment_hidden_price' );
 
 	/** Currencies with no minor unit (Stripe "zero-decimal" list). */
 	const ZERO_DECIMAL = array( 'BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF' );
@@ -71,6 +75,72 @@ final class Pricing {
 	}
 
 	/**
+	 * The fields that count for this answer set, flattened like fields().
+	 *
+	 * A field is left out when conditional logic hides it, or hides a step or
+	 * container it sits in. Keyless nodes are judged by their own show and
+	 * hide rules.
+	 *
+	 * @param mixed $schema  Form schema.
+	 * @param array $payload Submitted values.
+	 * @return array<int, array>
+	 */
+	public static function visibleFields( $schema, array $payload ): array {
+		$out = array();
+		if ( ! is_array( $schema ) || empty( $schema['fields'] ) || ! is_array( $schema['fields'] ) ) {
+			return $out;
+		}
+		$logic  = new ConditionalLogic();
+		$state  = $logic->evaluate( $schema, $payload );
+		$hidden = array_flip( array_map( 'strval', array_merge( $state['hidden_fields'], $state['hidden_steps'] ) ) );
+		// Rules on keyless nodes read the answers that count, like the evaluator.
+		$values = $logic->visiblePayload( $schema, $payload );
+
+		$walk = static function ( array $fields, bool $parentHidden ) use ( &$walk, &$out, $hidden, $logic, $values ) {
+			foreach ( $fields as $field ) {
+				if ( ! is_array( $field ) ) {
+					continue;
+				}
+				$config = isset( $field['config'] ) && is_array( $field['config'] ) ? array_merge( $field, $field['config'] ) : $field;
+				$key    = (string) ( $config['key'] ?? '' );
+				if ( '' === $key && ( $field['type'] ?? '' ) === 'step' ) {
+					$key = (string) ( $field['id'] ?? '' );
+				}
+				$isHidden = $parentHidden;
+				if ( '' !== $key ) {
+					$isHidden = $isHidden || isset( $hidden[ $key ] );
+				} else {
+					foreach ( ConditionalLogic::nodeLogics( $field ) as $l ) {
+						$passes = $logic->logicPasses( $l, $values );
+						if ( ( 'show' === $l['action'] && ! $passes ) || ( 'hide' === $l['action'] && $passes ) ) {
+							$isHidden = true;
+						}
+					}
+				}
+				if ( ! $isHidden ) {
+					$out[] = $config;
+				}
+				foreach ( array( 'fields', 'children' ) as $nested ) {
+					if ( ! empty( $field[ $nested ] ) && is_array( $field[ $nested ] ) ) {
+						$walk( $field[ $nested ], $isHidden );
+					}
+				}
+				if ( ! empty( $field['columns'] ) && is_array( $field['columns'] ) ) {
+					foreach ( $field['columns'] as $column ) {
+						if ( ! is_array( $column ) ) {
+							continue;
+						}
+						$list = isset( $column['fields'] ) && is_array( $column['fields'] ) ? $column['fields'] : ( isset( $column['children'] ) && is_array( $column['children'] ) ? $column['children'] : $column );
+						$walk( $list, $isHidden );
+					}
+				}
+			}
+		};
+		$walk( $schema['fields'], false );
+		return $out;
+	}
+
+	/**
 	 * Whether the form charges money at all.
 	 *
 	 * @param mixed $schema Form schema.
@@ -79,9 +149,6 @@ final class Pricing {
 		foreach ( self::fields( $schema ) as $f ) {
 			$type = $f['type'] ?? '';
 			if ( in_array( $type, array( 'payment_product', 'payment_choice', 'payment_amount', 'payment_hidden_price', 'payment_card' ), true ) ) {
-				return true;
-			}
-			if ( 'calculation' === $type && ! empty( $f['usePrice'] ) ) {
 				return true;
 			}
 		}
@@ -124,26 +191,10 @@ final class Pricing {
 		$items   = array();
 		$taxRate = 0.0;
 
-		$formulaError = false;
-		$priced       = $payload;
-		$calcs        = array();
-		foreach ( self::fields( $schema ) as $candidate ) {
-			if ( ( $candidate['type'] ?? '' ) === 'calculation' && ! empty( $candidate['key'] ) && ! empty( $candidate['formula'] ) ) {
-				$calcs[] = $candidate;
-			}
-		}
-		for ( $pass = 0; $pass < 2; $pass++ ) {
-			foreach ( $calcs as $calc ) {
-				$result = Formula::evaluate(
-					(string) $calc['formula'],
-					$priced,
-					isset( $calc['decimals'] ) ? (int) $calc['decimals'] : 2
-				);
-				$priced[ (string) $calc['key'] ] = null === $result ? Formula::ERROR : $result;
-			}
-		}
+		$priced  = $payload;
 
-		foreach ( self::fields( $schema ) as $f ) {
+		// Visibility comes from conditional logic, never from which keys were sent.
+		foreach ( self::visibleFields( $schema, $payload ) as $f ) {
 			$type  = (string) ( $f['type'] ?? '' );
 			$key   = (string) ( $f['key'] ?? '' );
 			$label = wp_strip_all_tags( (string) ( $f['label'] ?? $key ) );
@@ -161,9 +212,9 @@ final class Pricing {
 							$qty = min( $max, $qty );
 						}
 					} else {
-						// A product without a quantity box is always in the order,
-						// unless conditional logic hid it (no value submitted).
-						$qty = null === $value ? 0 : 1;
+						// A product without a quantity box has no visitor control:
+						// it is in every order it is shown in.
+						$qty = 1;
 					}
 					if ( $qty > 0 && $price > 0 ) {
 						$items[] = self::item( $key, (string) ( $f['productName'] ?? '' ) ?: $label, $qty, $price );
@@ -201,22 +252,6 @@ final class Pricing {
 					$amount = self::money( $f['amount'] ?? 0 );
 					if ( $amount > 0 ) {
 						$items[] = self::item( $key, (string) ( $f['description'] ?? '' ) ?: $label, 1, $amount );
-					}
-					break;
-
-				case 'calculation':
-					if ( ! empty( $f['usePrice'] ) ) {
-						if ( '' === $key || ! array_key_exists( $key, $payload ) ) {
-							break;
-						}
-						if ( Formula::ERROR === $value ) {
-							$formulaError = true;
-							break;
-						}
-						$amount = self::money( is_numeric( $value ) ? $value : 0 );
-						if ( $amount > 0 ) {
-							$items[] = self::item( $key, $label, 1, $amount );
-						}
 					}
 					break;
 
@@ -269,7 +304,9 @@ final class Pricing {
 			'tax_rate' => $taxRate,
 			'tax'      => $tax,
 			'total'    => $total,
-			'formula_error' => $formulaError,
+			// Add-ons with computed prices (Pro Calculation) set this through
+			// the `subtleforms/payments/quote` filter when a total cannot be worked out.
+			'formula_error' => false,
 		);
 
 		/**

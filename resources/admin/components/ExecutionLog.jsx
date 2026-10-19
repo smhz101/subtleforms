@@ -42,7 +42,7 @@ export default function ExecutionLog({ submissionId }) {
           const ts = ctx.ts
             ? new Date(ctx.ts * 1000).toLocaleString()
             : l.created_at;
-          const msg = `${ctx.step_id ?? ''} — ${ctx.action_type ?? ''} — ${
+          const msg = `${ctx.step_id ?? ''} · ${ctx.action_type ?? ''} · ${
             ctx.status ?? l.level
           }`;
           return (

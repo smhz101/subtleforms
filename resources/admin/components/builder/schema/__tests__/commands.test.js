@@ -113,7 +113,7 @@ describe('Schema Commands', () => {
       const originalId = tree.nodes['root'].children[0];
       const originalKey = tree.nodes[originalId].config.key;
 
-      // duplicateNode returns { tree, newNodeId } — destructure accordingly
+      // duplicateNode returns { tree, newNodeId }, destructure accordingly
       ({ tree } = duplicateNode(tree, { nodeId: originalId }));
 
       const rootChildren = tree.nodes['root'].children;

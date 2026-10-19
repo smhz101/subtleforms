@@ -370,7 +370,7 @@
 		border-radius: var(--sf-radius-sm);
 	}
 
-	// The frame sizes itself to its content, so it needs no height here — only
+	// The frame sizes itself to its content, so it needs no height here, only
 	// a guarantee that it fills the width it is given.
 	&__frame {
 		width: 100%;

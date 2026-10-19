@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Unit tests for SubtleForms\Container
  *
@@ -7,6 +8,10 @@
  */
 
 namespace SubtleForms\Tests\Unit;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use PHPUnit\Framework\TestCase;
 use SubtleForms\Container;

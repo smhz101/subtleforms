@@ -172,3 +172,45 @@ describe('useBuilderReducer undo/redo', () => {
     expect(next.schemaHistoryFuture).toEqual([]);
   });
 });
+
+test('autosave of a published form keeps the changes off the live form', () => {
+  const state = {
+    ...initialBuilderState,
+    state: BUILDER_STATES.AUTOSAVING,
+    formStatus: 'published',
+    hasUnpublishedChanges: false,
+    saveError: 'The save failed.',
+  };
+  const next = builderReducer(state, {
+    type: BUILDER_ACTIONS.AUTOSAVE_SUCCESS,
+    payload: { stillDirty: false },
+  });
+  expect(next.hasUnpublishedChanges).toBe(true);
+  expect(next.saveError).toBeNull();
+  expect(next.autoSaveError).toBeNull();
+});
+
+test('autosave of a draft does not mark unpublished changes', () => {
+  const state = {
+    ...initialBuilderState,
+    state: BUILDER_STATES.AUTOSAVING,
+    formStatus: 'draft',
+    hasUnpublishedChanges: false,
+  };
+  const next = builderReducer(state, {
+    type: BUILDER_ACTIONS.AUTOSAVE_SUCCESS,
+    payload: { stillDirty: false },
+  });
+  expect(next.hasUnpublishedChanges).toBe(false);
+});
+
+test('a failed load leaves the loading state with an error', () => {
+  const state = { ...initialBuilderState, state: BUILDER_STATES.INIT, loading: true };
+  const next = builderReducer(state, {
+    type: BUILDER_ACTIONS.LOAD_ERROR,
+    payload: { error: 'The form could not be loaded.' },
+  });
+  expect(next.loading).toBe(false);
+  expect(next.state).toBe(BUILDER_STATES.ERROR);
+  expect(next.error).toBe('The form could not be loaded.');
+});

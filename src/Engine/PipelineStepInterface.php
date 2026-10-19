@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SubtleForms
  *
@@ -7,6 +8,10 @@
  */
 
 namespace SubtleForms\Engine;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Contracts\ActionInterface;
 

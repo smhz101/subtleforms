@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SubtleForms Field Definition
  *
@@ -7,6 +8,10 @@
  */
 
 namespace SubtleForms\Fields;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Immutable field definition value object.
@@ -86,7 +91,7 @@ final class FieldDefinition {
 	public $requiredCapabilities;
 
 	/**
-	 * @var array Field meta information — routing and categorisation
+	 * @var array Field meta information, routing and categorisation
 	 * ['category' => 'regular|composite|layout|system']
 	 */
 	public $meta;

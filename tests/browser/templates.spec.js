@@ -116,7 +116,7 @@ test('every template creates the full form in the builder and on the site', asyn
         if (['rating', 'net_promoter_score', 'scale'].includes(leaf.type) || leaf.type === 'html') continue;
         const key = leaf.key || leaf.id;
         await expect(
-          visitor.locator(`[name="${key}"], [name="${key}[]"], [name^="${key}["], [data-field-key="${key}"], #sf-field-${key}`).first(),
+          visitor.locator(`[name="${key}"], [name="${key}[]"], [name^="${key}["], [data-field-key="${key}"], #sf-field-${key}, [id="subtleforms-field-${key}-label"]`).first(),
           `${where}: live field ${key}`
         ).toBeAttached({ timeout: 10000 });
       }

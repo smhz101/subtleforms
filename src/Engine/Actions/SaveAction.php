@@ -1,7 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SubtleForms\Engine\Actions;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Contracts\ActionInterface;
 use SubtleForms\Engine\SubmissionContext;
@@ -47,7 +52,7 @@ final class SaveAction implements ActionInterface {
 		// Validate with conditional logic
 		$schema = $context->getMeta( 'form_schema' );
 		if ( is_array( $schema ) ) {
-			// Task 1: Normalize field schema shape — ensure id, type, label, config on every node
+			// Task 1: Normalize field schema shape, ensure id, type, label, config on every node
 			$schema = $this->normalize_schema_fields( $schema );
 			$context->setMeta( 'form_schema', $schema );
 
@@ -132,7 +137,7 @@ final class SaveAction implements ActionInterface {
 		foreach ( $payload as $key => $value ) {
 			$field = $fields[ $key ] ?? null;
 
-			// Task 3: Strip unknown field keys — not present in schema, prevents injection and data pollution
+			// Task 3: Strip unknown field keys, not present in schema, prevents injection and data pollution
 			if ( ! $field ) {
 				continue;
 			}
@@ -151,7 +156,7 @@ final class SaveAction implements ActionInterface {
 				continue;
 			}
 
-			// Task 5: Normalize null — stored as null
+			// Task 5: Normalize null, stored as null
 			if ( is_null( $value ) ) {
 				$sanitized[ $key ] = null;
 				continue;
@@ -288,7 +293,7 @@ final class SaveAction implements ActionInterface {
 	}
 
 	/**
-	 * Task 1: Normalize schema field nodes — ensure every field has id, type, label, config.
+	 * Task 1: Normalize schema field nodes, ensure every field has id, type, label, config.
 	 * Assigns safe defaults for missing keys. Does not throw.
 	 *
 	 * @param array $schema
@@ -338,14 +343,14 @@ final class SaveAction implements ActionInterface {
 	/**
 	 * Task 2: Normalize a composite field value (name_group, address_group).
 	 * Ensures the value is always an array of sanitized string sub-values.
-	 * Malformed input is normalized — submission is NOT rejected.
+	 * Malformed input is normalized, submission is NOT rejected.
 	 *
 	 * @param mixed $value
 	 * @return array
 	 */
 	private function normalize_composite_value( $value ): array {
 		if ( ! is_array( $value ) ) {
-			// Null, string, or other scalar — return empty composite
+			// Null, string, or other scalar, return empty composite
 			return array();
 		}
 		$normalized = array();

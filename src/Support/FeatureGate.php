@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SubtleForms Feature Gate
  *
@@ -12,6 +13,10 @@
  */
 
 namespace SubtleForms\Support;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Contracts\LicenseManagerInterface;
 use RuntimeException;

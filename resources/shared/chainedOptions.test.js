@@ -1,5 +1,6 @@
 import {
   chainedPresentation,
+  firstUnansweredChainedLevel,
   chainedSelectLevels,
   defaultChainedColumnSelections,
   nextChainedSelections,
@@ -82,4 +83,27 @@ test('columns keep every list, including one with nothing to show', () => {
   expect(rows[1].options.map((opt) => opt.value)).toEqual(['one']);
   expect(rows[2].options).toEqual([]);
   expect(defaultChainedColumnSelections(config, ['beta'])).toEqual(['beta']);
+});
+
+describe('firstUnansweredChainedLevel (FLD2-10)', () => {
+  const config = {
+    levels: [
+      { label: 'Make', options: [{ label: 'Toyota', value: 'toyota' }, { label: 'Kia', value: 'kia' }] },
+      { label: 'Model', options: [{ label: 'Corolla', value: 'corolla', parent: 'toyota' }] },
+    ],
+  };
+
+  it('needs every level that offers choices', () => {
+    expect(firstUnansweredChainedLevel(config, [])).toBe(0);
+    expect(firstUnansweredChainedLevel(config, ['toyota'])).toBe(1);
+    expect(firstUnansweredChainedLevel(config, ['toyota', 'corolla'])).toBe(-1);
+  });
+
+  it('does not ask for a level with no choices for the answer', () => {
+    expect(firstUnansweredChainedLevel(config, ['kia'])).toBe(-1);
+  });
+
+  it('does not count an answer that is not a choice', () => {
+    expect(firstUnansweredChainedLevel(config, ['toyota', 'civic'])).toBe(1);
+  });
 });

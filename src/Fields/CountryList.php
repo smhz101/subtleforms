@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SubtleForms ISO-3166 Country List
  *
@@ -7,6 +8,10 @@
  */
 
 namespace SubtleForms\Fields;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Provides full ISO-3166 country list for Country field.

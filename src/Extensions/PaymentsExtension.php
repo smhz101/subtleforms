@@ -129,7 +129,7 @@ class PaymentsExtension extends AbstractExtension {
 
 		$data    = $request->get_param( 'data' );
 		$payload = is_array( $data ) ? \SubtleForms\Validation\Sanitizer::sanitizeArrayDeep( $data ) : array();
-		$payload = \SubtleForms\Api\PublicSubmitApi::applyCalculations( $payload, $schema );
+		$payload = \SubtleForms\Api\PublicSubmitApi::applyComputedValues( $payload, $schema );
 
 		$quote = \SubtleForms\Payments\Pricing::quote( $schema, $payload );
 		$code  = \SubtleForms\Payments\CouponsRepository::normalizeCode( (string) ( $payload['_coupon'] ?? '' ) );

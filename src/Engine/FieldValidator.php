@@ -1,7 +1,14 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SubtleForms\Engine;
+
+use SubtleForms\Fields\CompositeParts;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Validates field values with conditional logic support.
@@ -40,7 +47,6 @@ final class FieldValidator {
 		// System / non-input types
 		'hidden',
 		'html',
-		'calculation',
 	);
 
 	/**
@@ -118,6 +124,15 @@ final class FieldValidator {
 				continue;
 			}
 
+			// Every dependent dropdown that offers choices needs an answer,
+			// the same rule as the browser (FLD2-10).
+			if ( $type === 'chained_select' ) {
+				if ( null !== $this->chainedMissingLevel( $fields[ $fieldKey ] ?? array(), $value ) ) {
+					$errors[ $fieldKey ] = $requiredMessage;
+				}
+				continue;
+			}
+
 			if ( $type === 'toggle' ) {
 				$onValue = (string) ( $this->attr( $fields[ $fieldKey ] ?? array(), 'onValue' ) ?? 'yes' );
 				if ( $value !== true && (string) $value !== $onValue ) {
@@ -126,7 +141,9 @@ final class FieldValidator {
 				continue;
 			}
 
-			if ( $isComposite ? $this->isCompositeEmpty( $value ) : $this->isEmpty( $value ) ) {
+			// Name and Address demand every part they draw except the optional
+			// ones, the same rule as the browser (FB-10).
+			if ( $isComposite ? array() !== CompositeParts::missing( $type, $fields[ $fieldKey ] ?? array(), $value ) : $this->isEmpty( $value ) ) {
 				$errors[ $fieldKey ] = $requiredMessage;
 			}
 		}
@@ -158,15 +175,52 @@ final class FieldValidator {
 	}
 
 	/**
+	 * Whether a field type collects an answer that can be required.
+	 *
+	 * Layout and system types never do. Neither does a type no plugin has
+	 * registered (for example a Pro field on a site without SubtleForms Pro):
+	 * the live form does not show it, so it cannot be required either.
+	 *
+	 * @param string $type Field type.
+	 */
+	private function acceptsInput( string $type ): bool {
+		/**
+		 * Field types that never collect an answer.
+		 *
+		 * @since 2.3.9
+		 *
+		 * @param string[] $types Types.
+		 */
+		$nonInput = (array) apply_filters( 'subtleforms/fields/non_input_types', self::NON_INPUT_TYPES );
+		if ( in_array( $type, $nonInput, true ) ) {
+			return false;
+		}
+		$registry = self::registry();
+		return null === $registry || '' === $type || $registry->has( $type );
+	}
+
+	/**
+	 * The field registry, when the plugin is booted.
+	 */
+	private static function registry(): ?\SubtleForms\Fields\FieldRegistry {
+		try {
+			$registry = \SubtleForms\Plugin::instance()->container()->get( \SubtleForms\Fields\FieldRegistry::class );
+		} catch ( \Throwable $e ) {
+			return null;
+		}
+		return $registry instanceof \SubtleForms\Fields\FieldRegistry ? $registry : null;
+	}
+
+	/**
 	 * Extract required fields from schema.
 	 */
 	private function extractRequiredFields( array $fields, array &$required = array() ): array {
 		foreach ( $fields as $field ) {
 			$type   = $field['type'] ?? '';
 
-			// Skip layout and system types — they do not accept user input and cannot be required
+			// Skip layout and system types, they do not accept user input and cannot be required
 			$isRequired = ! empty( $field['required'] ) || ! empty( $field['config']['required'] );
-			if ( ! in_array( $type, self::NON_INPUT_TYPES, true ) && $isRequired ) {
+			if ( $isRequired && $this->acceptsInput( (string) $type ) ) {
 				$required[] = $field['key'];
 			}
 
@@ -360,24 +414,6 @@ final class FieldValidator {
 	private function formatNumber( float $number ): string {
 		$formatted = number_format( $number, 2, '.', '' );
 		return rtrim( rtrim( $formatted, '0' ), '.' );
-	}
-
-	/**
-	 * Check if a composite field value (array) is empty (all sub-values empty).
-	 *
-	 * @param mixed $value
-	 * @return bool
-	 */
-	private function isCompositeEmpty( $value ): bool {
-		if ( ! is_array( $value ) || empty( $value ) ) {
-			return true;
-		}
-		foreach ( $value as $v ) {
-			if ( ! $this->isEmpty( $v ) ) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	/**
@@ -677,6 +713,87 @@ final class FieldValidator {
 		$v   = (int) $value;
 		if ( $v < $min || $v > $max ) {
 			return __( 'Please choose a value on the scale.', 'subtleforms' );
+		}
+		return null;
+	}
+
+	/**
+	 * The first level of a chained field that offers choices for the answers
+	 * so far but has no valid answer. Mirrors firstUnansweredChainedLevel()
+	 * in resources/shared/chainedOptions.js.
+	 *
+	 * @param array $field Field.
+	 * @param mixed $value Answer, one choice per level.
+	 * @return int|null Depth, or null when every level is answered.
+	 */
+	private function chainedMissingLevel( array $field, $value ): ?int {
+		$selected = is_array( $value ) ? array_values( $value ) : ( is_scalar( $value ) && '' !== (string) $value ? array( (string) $value ) : array() );
+		$levels   = $this->attr( $field, 'levels' );
+		$levels   = is_array( $levels ) && array() !== $levels ? array_values( $levels ) : null;
+
+		$optionsFor = function ( int $depth ) use ( $levels, $field, $selected ): array {
+			if ( null !== $levels ) {
+				$options = isset( $levels[ $depth ]['options'] ) && is_array( $levels[ $depth ]['options'] ) ? $levels[ $depth ]['options'] : array();
+				$linked  = false;
+				foreach ( $options as $opt ) {
+					if ( is_array( $opt ) && isset( $opt['parent'] ) && '' !== (string) $opt['parent'] ) {
+						$linked = true;
+						break;
+					}
+				}
+				if ( 0 === $depth || ! $linked ) {
+					return $options;
+				}
+				$parent = $selected[ $depth - 1 ] ?? '';
+				if ( ! is_scalar( $parent ) || '' === (string) $parent ) {
+					return array();
+				}
+				return array_values( array_filter( $options, static fn( $o ) => is_array( $o ) && (string) ( $o['parent'] ?? '' ) === (string) $parent ) );
+			}
+			$nodes = $this->attr( $field, 'options' );
+			$nodes = is_array( $nodes ) ? $nodes : array();
+			for ( $i = 0; $i < $depth; $i++ ) {
+				$chosen = null;
+				foreach ( $nodes as $node ) {
+					if ( is_array( $node ) && isset( $selected[ $i ] ) && is_scalar( $selected[ $i ] ) && (string) ( $node['value'] ?? '' ) === (string) $selected[ $i ] ) {
+						$chosen = $node;
+						break;
+					}
+				}
+				$nodes = is_array( $chosen['children'] ?? null ) ? $chosen['children'] : array();
+			}
+			return $nodes;
+		};
+
+		if ( null !== $levels ) {
+			$count = count( $levels );
+		} else {
+			$count = 1;
+			foreach ( array_keys( $selected ) as $i ) {
+				if ( array() !== $optionsFor( $i + 1 ) ) {
+					++$count;
+				}
+			}
+		}
+
+		for ( $depth = 0; $depth < $count; $depth++ ) {
+			$options = $optionsFor( $depth );
+			if ( array() === $options ) {
+				continue;
+			}
+			$answer = $selected[ $depth ] ?? null;
+			$valid  = false;
+			if ( is_scalar( $answer ) && '' !== (string) $answer ) {
+				foreach ( $options as $opt ) {
+					if ( is_array( $opt ) && (string) ( $opt['value'] ?? '' ) === (string) $answer ) {
+						$valid = true;
+						break;
+					}
+				}
+			}
+			if ( ! $valid ) {
+				return $depth;
+			}
 		}
 		return null;
 	}

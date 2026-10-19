@@ -2,19 +2,21 @@
  * DynamicInspectorPanel.jsx
  *
  * Renders inspector controls driven by the field definition's `inspectorControls`
- * array from PHP `FieldDefinition::toArray()`. No hardcoded fields — all controls
+ * array from PHP `FieldDefinition::toArray()`. No hardcoded fields, all controls
  * are declared on the PHP side and rendered generically here.
  *
  * Supports optional grouping: if a control has a `section` string property,
  * consecutive controls sharing the same section are grouped under a PanelSection.
  */
 
-import { useMemo, memo } from '@wordpress/element';
+import { useMemo, memo, useContext } from '@wordpress/element';
 import { Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useConfig } from '../context/ConfigContext';
+import { TreeContext } from '../context/TreeContext';
 import CONTROL_REGISTRY, { getControlComponent } from './controlRegistry';
 import { PanelSection } from '../../../ui';
+import { resolveControls } from './controlSections';
 
 import './DynamicInspectorPanel.scss';
 
@@ -48,9 +50,30 @@ function groupControls( controls ) {
 }
 
 /**
+ * Every other field in the form, as { key, label, type }.
+ *
+ * @param {Object} tree  Builder tree.
+ * @param {Object} field Selected field.
+ * @return {Array} Fields.
+ */
+function formFields( tree, field ) {
+	const nodes = tree?.nodes ? Object.values( tree.nodes ) : [];
+	return nodes
+		.filter( ( n ) => n && n.id !== field?.id )
+		.map( ( n ) => ( {
+			key: n.config?.key || n.key,
+			label: n.config?.label || n.label || n.config?.key || n.key,
+			type: n.type,
+		} ) )
+		.filter( ( f ) => f.key );
+}
+
+/**
  * Renders a single inspector control bound to a field value.
  */
 function ControlRenderer( { ctrl, field, onUpdate, isReadOnly } ) {
+	// Outside the builder (tests, previews) there is no tree.
+	const tree = useContext( TreeContext );
 	// PHP uses `name` as the schema key; support `key` as a future alias
 	const fieldKey = ctrl.key ?? ctrl.name;
 	const ControlComponent = getControlComponent( ctrl.type );
@@ -85,11 +108,14 @@ function ControlRenderer( { ctrl, field, onUpdate, isReadOnly } ) {
 	if ( ctrl.type === 'subfield' ) {
 		props.subfields = Array.isArray( ctrl.subfields ) ? ctrl.subfields : [];
 	}
-	// Add-on controls get the full definition and the selected field.
+	// Add-on controls get the full definition, the selected field and the
+	// other fields of the form ({ key, label, type }), for example to insert
+	// a field into a formula.
 	if ( ! CONTROL_REGISTRY[ ctrl.type ] ) {
 		props.control = ctrl;
 		props.field = field;
 		props.onUpdate = onUpdate;
+		props.formFields = formFields( tree, field );
 	}
 
 	return <ControlComponent { ...props } />;
@@ -111,35 +137,19 @@ function DynamicInspectorPanel( {
 } ) {
 	const { fieldDefinitions } = useConfig();
 
-	const isLayout = useMemo( () => {
-		const def = fieldDefinitions?.[ field?.type ];
-		return def?.meta?.category === 'layout';
-	}, [ fieldDefinitions, field?.type ] );
+	const isLayout = useMemo(
+		() => fieldDefinitions?.[ field?.type ]?.meta?.category === 'layout',
+		[ fieldDefinitions, field?.type ]
+	);
 
-	const controls = useMemo( () => {
-		const def = fieldDefinitions?.[ field?.type ];
-		const layout = Array.isArray( def?.layoutControls ) ? def.layoutControls : [];
-		const inspector = Array.isArray( def?.inspectorControls ) ? def.inspectorControls : [];
-		// Layout types declare their own controls in layoutControls; the 2.0
-		// settings model adds shared ones (CSS class) to inspectorControls.
-		const merged = isLayout ? [ ...layout, ...inspector ] : inspector;
-		const seen = new Set();
-		return merged
-			.filter( ( ctrl ) => {
-				const name = ctrl?.key ?? ctrl?.name;
-				if ( ! name || seen.has( name ) ) return false;
-				seen.add( name );
-				return true;
-			} )
-			.map( ( ctrl ) => {
-				const controlName = ctrl?.name ?? ctrl?.key;
-				const fallback = controlName === 'label' || controlName === 'description' ? 'general' : 'appearance';
-				return { ...ctrl, section: ctrl.section || fallback };
-			} )
-			.filter( ( ctrl ) => ! sections || sections.includes( ctrl.section ) )
-			// Sections become panels in the inspector, not inline headings.
-			.map( ( { section, ...ctrl } ) => ctrl ); // eslint-disable-line no-unused-vars
-	}, [ fieldDefinitions, field?.type, isLayout, sections ] );
+	const controls = useMemo(
+		() =>
+			resolveControls( fieldDefinitions?.[ field?.type ] )
+				.filter( ( ctrl ) => ! sections || sections.includes( ctrl.section ) )
+				// Sections become panels in the inspector, not inline headings.
+				.map( ( { section, ...ctrl } ) => ctrl ), // eslint-disable-line no-unused-vars
+		[ fieldDefinitions, field?.type, sections ]
+	);
 
 	const groups = useMemo( () => groupControls( controls ), [ controls ] );
 

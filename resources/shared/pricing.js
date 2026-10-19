@@ -6,15 +6,14 @@
  * only ever used for display.
  */
 
-import { evaluateFormula, FORMULA_ERROR } from '../frontend/utils/formula';
-import { getPricedType, pricedTypes } from './extend';
+import { getPricedType, chargesMoney } from './extend';
+import { computeLogicState, nodeLogics, logicPasses, visibleValues } from './conditions';
 
 export const PRICED_TYPES = [
   'payment_product',
   'payment_choice',
   'payment_amount',
   'payment_hidden_price',
-  'calculation',
 ];
 
 /**
@@ -43,11 +42,56 @@ export function isPricedForm(fields = []) {
     if (['payment_product', 'payment_choice', 'payment_amount', 'payment_hidden_price', 'payment_card'].includes(f.type)) {
       return true;
     }
-    if (pricedTypes().includes(f.type)) {
-      return true;
-    }
-    return f.type === 'calculation' && !!c.usePrice;
+    return chargesMoney(f.type, c);
   });
+}
+
+/**
+ * Which fields of a schema do not count for these answers: fields hidden by
+ * conditional logic, and every field inside a hidden container or a skipped
+ * step. Mirrors Pricing::visibleFields() on the server.
+ *
+ * @param {Object} schema { fields, logic }.
+ * @param {Object} values Answers keyed by field key.
+ * @return {{keys: Set<string>, nodes: Set<Object>}} Hidden keys and hidden nodes.
+ */
+export function hiddenPricing(schema, values = {}) {
+  const keys = new Set();
+  const nodes = new Set();
+  const fields = Array.isArray(schema?.fields) ? schema.fields : [];
+  if (!fields.length) return { keys, nodes };
+  const state = computeLogicState(schema, values);
+  const hidden = new Set([...state.hidden_fields, ...state.hidden_steps]);
+  const visible = visibleValues(schema, values);
+
+  const walk = (list, parentHidden) => {
+    (Array.isArray(list) ? list : []).forEach((node) => {
+      if (!node || typeof node !== 'object' || Array.isArray(node)) return;
+      const c = cfg(node);
+      const key = c.key || (node.type === 'step' ? node.id : '') || '';
+      let isHidden = parentHidden;
+      if (key) {
+        isHidden = isHidden || hidden.has(key);
+      } else {
+        nodeLogics(node).forEach((l) => {
+          const passes = logicPasses(l, visible);
+          if ((l.action === 'show' && !passes) || (l.action === 'hide' && passes)) isHidden = true;
+        });
+      }
+      if (isHidden) {
+        nodes.add(node);
+        if (key) keys.add(key);
+      }
+      walk(node.children, isHidden);
+      walk(node.fields, isHidden);
+      (Array.isArray(node.columns) ? node.columns : []).forEach((col) => {
+        if (Array.isArray(col)) walk(col, isHidden);
+        else if (col && typeof col === 'object') walk(col.fields || col.children, isHidden);
+      });
+    });
+  };
+  walk(fields, false);
+  return { keys, nodes };
 }
 
 /**
@@ -65,29 +109,23 @@ export function couponDiscount(coupon, subtotal) {
  *
  * @param {Array}  fields  Flattened fields.
  * @param {Object} values  Current values keyed by field key.
- * @param {Object} options { coupon, hidden: Set of hidden keys, currency }.
+ * @param {Object} options { coupon, schema, hidden: Set of hidden keys, currency }.
+ *                         With `schema`, which fields count is worked out from
+ *                         its conditional logic, as on the server.
  */
-export function computeQuote(fields = [], values = {}, { coupon = null, hidden = null, currency = 'USD' } = {}) {
+export function computeQuote(fields = [], values = {}, { coupon = null, schema = null, hidden = null, currency = 'USD' } = {}) {
   const items = [];
+  const byLogic = schema ? hiddenPricing(schema, values) : null;
   let taxRate = 0;
   let taxLabel = '';
   let formulaError = false;
   const working = { ...values };
-  const calcs = fields.filter((field) => field.type === 'calculation' && cfg(field).formula);
-  for (let pass = 0; pass < 2; pass++) {
-    calcs.forEach((field) => {
-      const c = cfg(field);
-      const key = c.key || field.key || '';
-      if (!key) return;
-      const result = evaluateFormula(c.formula, working, c.decimals ?? 2);
-      working[key] = result === null ? FORMULA_ERROR : result;
-    });
-  }
 
   fields.forEach((field) => {
     const c = cfg(field);
     const key = c.key || field.key || '';
     if (hidden && key && hidden.has(key)) return;
+    if (byLogic && (byLogic.nodes.has(field) || (key && byLogic.keys.has(key)))) return;
     const label = c.label || key;
     const value = key ? working[key] : undefined;
 
@@ -101,6 +139,7 @@ export function computeQuote(fields = [], values = {}, { coupon = null, hidden =
           const max = parseInt(c.maxQuantity, 10) || 0;
           if (max > 0) qty = Math.min(max, qty);
         } else {
+          // No visitor control: in every order it is shown in.
           qty = 1;
         }
         if (qty > 0 && price > 0) {
@@ -135,16 +174,6 @@ export function computeQuote(fields = [], values = {}, { coupon = null, hidden =
         if (amount > 0) items.push({ key, label: c.description || label, qty: 1, unit: amount, amount });
         break;
       }
-      case 'calculation': {
-        if (!c.usePrice) break;
-        if (value === FORMULA_ERROR) {
-          formulaError = true;
-          break;
-        }
-        const amount = money(value);
-        if (amount > 0) items.push({ key, label, qty: 1, unit: amount, amount });
-        break;
-      }
       case 'payment_summary':
         if (c.showTax && Number(c.taxRate) > 0) {
           taxRate = Math.min(100, Number(c.taxRate));
@@ -155,13 +184,18 @@ export function computeQuote(fields = [], values = {}, { coupon = null, hidden =
         // Add-on priced types (e.g. a WooCommerce Product field).
         const fn = getPricedType(field.type);
         if (!fn) break;
+        if (!chargesMoney(field.type, c)) break;
         let lines = [];
         try {
           lines = fn(c, value, { currency }) || [];
         } catch (e) {
           lines = [];
         }
-        lines.forEach((line) => {
+        if (lines && lines.error) {
+          formulaError = true;
+          break;
+        }
+        (Array.isArray(lines) ? lines : []).forEach((line) => {
           const qty = Math.max(0, parseInt(line.qty, 10) || 0);
           const unit = money(line.unit);
           if (qty > 0 && unit > 0) {

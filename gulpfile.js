@@ -55,23 +55,27 @@ function copyFilesToTemp() {
       'subtleforms.php',
       'license.txt',
       'readme.txt',
+      'changelog.txt',
       'uninstall.php',
       'composer.json',
+      'composer.lock',
       'languages/**/*',
 
-      // Built assets
+      // Built assets. Source maps are not part of the release.
       'build/**/*',
+      '!build/**/*.map',
 
       // Source code (CRITICAL: includes CaptchaManager and all PHP classes)
       'src/**/*',
+      '!src/Validation/EXAMPLES.php',
 
-      // Composer autoloader (CRITICAL: required for class autoloading)
-      'vendor/autoload.php',
-      'vendor/composer/**/*',
-
-      // Templates and assets
+      // Templates and assets. Placeholder artwork is not shipped.
       'templates/**/*',
       'assets/**/*',
+      '!assets/README.md',
+      '!assets/banner-772x250.svg',
+      '!assets/icon-256x256.svg',
+      '!assets/screenshot-*.svg',
 
       // Exclude built tailwind source
       '!assets/css/tailwind.css',
@@ -139,33 +143,6 @@ function cleanTemp(cb) {
   }
 }
 
-/**
- * Regenerate the Composer autoloader WITHOUT dev dependencies.
- *
- * The dist ships the Composer autoloader files but EXCLUDES dev packages
- * (phpunit, myclabs/deep-copy, etc.). If the autoloader was generated with dev
- * deps, autoload_real.php require()s deep_copy.php at load time and the
- * plugin fatal-errors on every request because those files aren't shipped.
- * This task regenerates the autoloader so it only references production
- * packages. It is a no-op if composer is unavailable (the autoloader is
- * assumed to already be no-dev).
- */
-function dumpAutoloadNoDev(cb) {
-  const { exec } = require('child_process');
-  exec('composer dump-autoload --no-dev 2>&1', (err, stdout, stderr) => {
-    if (err) {
-      console.log('composer not available or dump-autoload failed; assuming vendor autoloader is already no-dev.');
-      console.log(stderr || err.message);
-    } else {
-      console.log(stdout.trim());
-    }
-    cb();
-  });
-}
-
-/**
- * Restore the dev autoloader after a dist build so local tests still work.
- */
 function restoreAutoloadDev(cb) {
   const { exec } = require('child_process');
   exec('composer dump-autoload 2>&1', (err) => {
@@ -184,7 +161,7 @@ function buildProduction() {
   return new Promise((resolve, reject) => {
     console.log('Building production assets...');
 
-    const build = spawn('npm', ['run', 'build'], {
+    const build = spawn('npm', ['run', 'build:all'], {
       stdio: 'inherit',
       shell: true,
     });
@@ -204,11 +181,63 @@ function buildProduction() {
   });
 }
 
+
+function newestMtime(dir) {
+  let max = 0;
+  if (!fs.existsSync(dir)) {
+    return 0;
+  }
+  const walk = (current) => {
+    for (const entry of fs.readdirSync(current, { withFileTypes: true })) {
+      if (entry.name === 'node_modules') {
+        continue;
+      }
+      const full = path.join(current, entry.name);
+      if (entry.isDirectory()) {
+        walk(full);
+      } else {
+        max = Math.max(max, fs.statSync(full).mtimeMs);
+      }
+    }
+  };
+  walk(dir);
+  return max;
+}
+
+function assertBuildFresh(cb) {
+  const resources = newestMtime('resources');
+  const built = newestMtime('build');
+  if (!built || built + 2000 < resources) {
+    cb(new Error('build/ is older than resources/. The release must run npm run build:all.'));
+    return;
+  }
+  cb();
+}
+
+function installComposerNoDev(cb) {
+  const { exec } = require('child_process');
+  const cwd = path.join(TEMP_DIR, PLUGIN_NAME);
+  exec(
+    'composer install --no-dev --optimize-autoloader --no-interaction',
+    { cwd },
+    (err, stdout, stderr) => {
+      if (err) {
+        cb(new Error(stderr || err.message));
+        return;
+      }
+      if (stdout) {
+        console.log(stdout.trim());
+      }
+      cb();
+    }
+  );
+}
+
 // Main tasks
 const build = series(buildProduction);
-const packageZip = series(ensureDistDir, cleanDist, dumpAutoloadNoDev, copyFilesToTemp, createZip, cleanTemp);
-const dist = series(buildProduction, ensureDistDir, cleanDist, dumpAutoloadNoDev, copyFilesToTemp, createZip, cleanTemp, restoreAutoloadDev);
-const quickZip = series(ensureDistDir, cleanDist, dumpAutoloadNoDev, copyFilesToTemp, createZip, cleanTemp);
+const packageZip = series(ensureDistDir, cleanDist, assertBuildFresh, copyFilesToTemp, installComposerNoDev, createZip, cleanTemp);
+const dist = series(buildProduction, assertBuildFresh, ensureDistDir, cleanDist, copyFilesToTemp, installComposerNoDev, createZip, cleanTemp, restoreAutoloadDev);
+const quickZip = series(ensureDistDir, cleanDist, assertBuildFresh, copyFilesToTemp, installComposerNoDev, createZip, cleanTemp);
 
 // Export tasks
 exports.clean = cleanDist;

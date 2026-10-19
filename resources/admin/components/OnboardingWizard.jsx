@@ -1,9 +1,10 @@
 import { useState } from '@wordpress/element';
-import { Modal, Button, CheckboxControl } from '@wordpress/components';
+import { Modal, Button, CheckboxControl, Notice } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { getBranding } from '../utils/branding';
 import clsx from 'clsx';
 import Icon from '../ui/Icon';
+import { formTypeChoices } from '../utils/formTypeChoices';
 import './OnboardingWizard.scss';
 
 const FORM_GOALS = [
@@ -44,32 +45,21 @@ const FORM_GOALS = [
   },
 ];
 
-const FORM_TYPES = [
-  {
-    id: 'regular',
-    label: __('Regular', 'subtleforms'),
-    icon: Icon.FileText,
-    description: __('Standard single-page form', 'subtleforms'),
-  },
-  {
-    id: 'multi-step',
-    label: __('Multi-Step', 'subtleforms'),
-    icon: Icon.Layers,
-    description: __('Break form into multiple steps', 'subtleforms'),
-  },
-  {
-    id: 'sectioned',
-    label: __('Sectioned', 'subtleforms'),
-    icon: Icon.Columns,
-    description: __('Organize into logical sections', 'subtleforms'),
-  },
-  {
-    id: 'conversational',
-    label: __('Conversational', 'subtleforms'),
-    icon: Icon.MessageCircle,
-    description: __('Chat-style one question at a time', 'subtleforms'),
-  },
-];
+const FORM_TYPE_ICONS = {
+  regular: Icon.FileText,
+  'multi-step': Icon.Layers,
+  conversational: Icon.MessageCircle,
+};
+const FORM_TYPE_TEXT = {
+  regular: __('All fields on one page.', 'subtleforms'),
+  'multi-step': __('Split a long form into steps.', 'subtleforms'),
+  conversational: __('One question at a time.', 'subtleforms'),
+};
+const FORM_TYPES = formTypeChoices().map((choice) => ({
+  ...choice,
+  icon: FORM_TYPE_ICONS[choice.id],
+  description: FORM_TYPE_TEXT[choice.id],
+}));
 
 const FIELD_DEFINITIONS = {
   name: {
@@ -164,7 +154,7 @@ const FIELD_DEFINITIONS = {
   },
 };
 
-export default function OnboardingWizard({ onComplete, onDismiss }) {
+export default function OnboardingWizard({ onComplete, onDismiss, createError = '' }) {
   const [step, setStep] = useState(0);
   const [dontShowAgain, setDontShowAgain] = useState(false);
   const [selectedGoal, setSelectedGoal] = useState(null);
@@ -439,7 +429,7 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
                       {goal?.label || __('Your Form', 'subtleforms')}
                     </div>
                     <div className='sf-onboarding-wizard__review-subtitle'>
-                      {type?.label || __('Regular', 'subtleforms')}{' '}
+                      {type?.label || __('Standard', 'subtleforms')}{' '}
                       {__('form', 'subtleforms')}
                     </div>
                   </div>
@@ -581,6 +571,11 @@ export default function OnboardingWizard({ onComplete, onDismiss }) {
 
         {/* Step Content */}
         <div className='sf-onboarding-wizard__content'>{renderStepContent()}</div>
+        {createError && (
+          <Notice status='error' isDismissible={false}>
+            {createError}
+          </Notice>
+        )}
 
         {/* Actions */}
         <div className='sf-onboarding-wizard__actions'>

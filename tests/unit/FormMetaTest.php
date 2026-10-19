@@ -1,7 +1,11 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 // phpcs:disable -- Unit test file; not shipped in production plugin.
 /**
- * FormMeta unit tests — single source of truth for type/status.
+ * FormMeta unit tests, single source of truth for type/status.
  *
  * @package SubtleForms\Tests
  */

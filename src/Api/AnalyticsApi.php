@@ -18,7 +18,6 @@ namespace SubtleForms\Api;
 use SubtleForms\Analytics\Stats;
 use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Security\RateLimiter;
-use SubtleForms\Support\FeatureGate;
 use WP_Error;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -119,16 +118,14 @@ final class AnalyticsApi {
 	// ── Permissions ───────────────────────────────────────────────────────
 
 	/**
-	 * The beacon must carry the page's REST nonce.
+	 * Anyone may report a view: visitors have no REST nonce.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return true|WP_Error
 	 */
 	public function checkBeaconNonce( WP_REST_Request $request ) {
-		$nonce = (string) $request->get_header( 'X-WP-Nonce' );
-		if ( '' === $nonce || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
-			return new WP_Error( 'subtleforms_invalid_nonce', __( 'Invalid request.', 'subtleforms' ), array( 'status' => 403 ) );
-		}
+		// Visitors get no REST nonce (pages may be cached), so a view needs
+		// none. The count is limited per address and only for published forms.
 		return true;
 	}
 
@@ -142,26 +139,6 @@ final class AnalyticsApi {
 			return new WP_Error( 'subtleforms_forbidden', __( 'You are not allowed to perform this action.', 'subtleforms' ), array( 'status' => 403 ) );
 		}
 		return true;
-	}
-
-	/**
-	 * Gate a report behind the analytics capability.
-	 *
-	 * @return WP_Error|null
-	 */
-	private function requireAnalytics(): ?WP_Error {
-		$gate = \SubtleForms\Plugin::instance()->container()->get( FeatureGate::class );
-		if ( $gate instanceof FeatureGate && $gate->allows( 'extensions.analytics' ) ) {
-			return null;
-		}
-		return new WP_Error(
-			'subtleforms_pro_required',
-			__( 'Form analytics reports are part of SubtleForms Pro.', 'subtleforms' ),
-			array(
-				'status'     => 403,
-				'capability' => 'extensions.analytics',
-			)
-		);
 	}
 
 	// ── Beacon ────────────────────────────────────────────────────────────
@@ -182,7 +159,7 @@ final class AnalyticsApi {
 		// Rate limit by a salted hash of the address; the address itself is
 		// never stored.
 		$ip     = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-		$bucket = 'sf_rl_view_' . substr( md5( wp_salt( 'nonce' ) . '|' . $ip ), 0, 20 );
+		$bucket = 'subtleforms_rl_view_' . substr( md5( wp_salt( 'nonce' ) . '|' . $ip ), 0, 20 );
 		$result = RateLimiter::check( $bucket, self::BEACON_LIMIT, self::BEACON_WINDOW );
 		if ( empty( $result['allowed'] ) ) {
 			return new WP_REST_Response( array( 'tracked' => false ), 429 );
@@ -217,11 +194,6 @@ final class AnalyticsApi {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function summary( WP_REST_Request $request ) {
-		$locked = $this->requireAnalytics();
-		if ( $locked ) {
-			return $locked;
-		}
-
 		$days   = max( 1, min( Stats::MAX_DAYS, (int) $request->get_param( 'days' ) ) );
 		$totals = Stats::totalsByForm( $days );
 
@@ -260,11 +232,6 @@ final class AnalyticsApi {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function series( WP_REST_Request $request ) {
-		$locked = $this->requireAnalytics();
-		if ( $locked ) {
-			return $locked;
-		}
-
 		$days   = max( 1, min( Stats::MAX_DAYS, (int) $request->get_param( 'days' ) ) );
 		$formId = (int) $request->get_param( 'form_id' );
 		$series = Stats::series( $days, $formId > 0 ? $formId : null );
@@ -293,11 +260,6 @@ final class AnalyticsApi {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function legacyTotals( WP_REST_Request $request ) {
-		$locked = $this->requireAnalytics();
-		if ( $locked ) {
-			return $locked;
-		}
-
 		$formId = (int) $request->get_param( 'form_id' );
 		$totals = Stats::totalsByForm( Stats::MAX_DAYS );
 

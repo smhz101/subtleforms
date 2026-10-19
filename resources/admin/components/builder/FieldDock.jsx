@@ -48,7 +48,7 @@ function HighlightMatch({ text, query }) {
 }
 
 /**
- * Field library — the left panel of the builder.
+ * Field library, the left panel of the builder.
  *
  * Click (or Enter) adds a field after the current selection. Pro fields are
  * shown in place with a lock; choosing one explains what Pro unlocks rather
@@ -153,7 +153,7 @@ export default function FieldDock({ fieldGroups, onAddField, onCollapsedChange }
     const FieldIcon = getIcon(f.type);
     const description = f.meta?.description || '';
 
-    let title = description ? `${f.label} — ${description}` : f.label;
+    let title = description ? `${f.label}: ${description}` : f.label;
     if (isDisabled) {
       title = __('Turn this provider on in Settings → Advanced to use it.', 'subtleforms');
     } else if (isProLocked) {

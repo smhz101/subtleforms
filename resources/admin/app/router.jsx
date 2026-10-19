@@ -1,5 +1,5 @@
 /**
- * Router compatibility shim — Phase 8 migration
+ * Router compatibility shim, Phase 8 migration
  *
  * The app now uses react-router-dom MemoryRouter (see AdminApp.jsx).
  * This file re-exports path-based ROUTES constants and a thin useRouter()
@@ -59,7 +59,7 @@ export function useRouter() {
 }
 
 /**
- * RouterProvider is no longer needed — the MemoryRouter in AdminApp.jsx
+ * RouterProvider is no longer needed, the MemoryRouter in AdminApp.jsx
  * provides the routing context.  Kept as a passthrough for compile compat.
  */
 export function RouterProvider({ children }) {

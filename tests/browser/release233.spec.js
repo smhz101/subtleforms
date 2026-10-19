@@ -3,7 +3,7 @@
  * one entry (Enter on a focused Submit, double clicks).
  */
 const { test, expect } = require('@playwright/test');
-const { adminApi, publishForm, cleanup, entries, loginPage, BASE } = require('./helpers');
+const { adminApi, publishForm, cleanup, entries, loginPage, BASE, spamToken } = require('./helpers');
 
 const PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 let client;
@@ -27,7 +27,7 @@ test('a signature answer shows as an image in the entry, not as its code', async
   made.push(form);
   const anon = await playwright.request.newContext({ baseURL: BASE });
   const res = await anon.post('/wp-json/subtleforms/v1/submit', {
-    data: { form_id: form.id, data: { name: 'Ada', sig: PNG, form_rendered_at: Math.floor(Date.now() / 1000) - 60 } },
+    data: { form_id: form.id, data: { name: 'Ada', sig: PNG, form_rendered_at: await spamToken(anon, form.id) } },
   });
   expect(res.status(), await res.text()).toBe(200);
   await anon.dispose();

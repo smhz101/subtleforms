@@ -9,7 +9,7 @@ import PreviewFrame from './PreviewFrame';
  * Renders the same FormRenderer the public page uses, in preview mode, inside
  * an iframe carrying the public stylesheet. Multi-step navigation, conversational
  * mode, conditional logic and every field type therefore behave exactly as they
- * will for a visitor, because it is the same code — not a second implementation
+ * will for a visitor, because it is the same code, not a second implementation
  * kept in sync by hand.
  *
  * Submit uses the same public endpoint as the shortcode. The form id is

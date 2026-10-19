@@ -1,5 +1,6 @@
 import { memo, useState, useRef, useCallback, useEffect, useContext } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import { canvasControlName } from '../../utils/canvasControlName';
 import { getFieldIcon } from '../../utils/iconRegistry';
 import Icon from '../../ui/Icon';
 import NameFieldRenderer from './NameFieldRenderer';
@@ -17,7 +18,7 @@ import DateTimeField from '../../../frontend/components/fields/DateTimeField';
 import { ConfigContext } from './context/ConfigContext';
 import './FieldRenderer.scss';
 
-// Types that do not accept user input — required indicator suppressed
+// Types that do not accept user input, required indicator suppressed
 const NON_INPUT_TYPES = new Set([
   'section_break', 'form_step', 'repeat_field', 'html', 'hidden',
   'one_column_container', 'two_column_container', 'three_column_container',
@@ -27,7 +28,7 @@ const NON_INPUT_TYPES = new Set([
   'recaptcha', 'hcaptcha', 'turnstile',
 ]);
 
-// All field types recognized by this renderer — unknown types get legacy fallback
+// All field types recognized by this renderer, unknown types get legacy fallback
 const KNOWN_TYPES = new Set([
   ...NON_INPUT_TYPES,
   'text', 'email', 'phone', 'tel', 'url', 'number', 'textarea', 'checkbox', 'consent',
@@ -53,14 +54,14 @@ function hasText(html) {
  * Only re-renders when field prop changes.
  */
 const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, onLabelChange, interactive = false }) {
-  // Null-safe destructure — required before hooks so all hooks run unconditionally
+  // Null-safe destructure, required before hooks so all hooks run unconditionally
   const { type, label, required, placeholder, options, subFields } = field || {};
 
   const labelClass = 'sf-field-renderer__label';
   const inputClass = 'sf-field-renderer__input';
   const selectClass = 'sf-field-renderer__select';
 
-  // ── Inline label editing state — ALL hooks before any early return ──────────
+  // ── Inline label editing state, ALL hooks before any early return ──────────
   const [isEditingLabel, setIsEditingLabel] = useState(false);
   const [editLabelValue, setEditLabelValue] = useState('');
   const [chainedSelections, setChainedSelections] = useState([]);
@@ -81,7 +82,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
 
   const handleLabelClick = useCallback((e) => {
     if (!onLabelChange) return;
-    // Do NOT stopPropagation — let the click bubble to FieldChrome so the field
+    // Do NOT stopPropagation, let the click bubble to FieldChrome so the field
     // gets selected (inspector opens) before / alongside entering edit mode.
     setEditLabelValue(label || field?.name || '');
     setIsEditingLabel(true);
@@ -120,7 +121,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       return;
     }
     if (previewModeOnMount.current) {
-      // Field was added while preview was already active — grace period.
+      // Field was added while preview was already active, grace period.
       const t = setTimeout(() => {
         setTouched(true);
         previewModeOnMount.current = false;
@@ -135,9 +136,11 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
   // canvas shows them as the live form does (2.3.2).
   const builderConfig = useContext(ConfigContext);
   const display = fieldDisplay(field, builderConfig?.fieldDefaults || {});
+  // Add-on field types no active plugin provides right now.
+  const addonMissing = (window.subtleformsAdmin?.missingFieldTypes || []).includes(type);
 
   // ── Early return AFTER all hooks ────────────────────────────────────────────
-  // Guard against null/undefined field or missing type — do NOT crash builder
+  // Guard against null/undefined field or missing type, do NOT crash builder
   if (!field || !field.type) {
     return null;
   }
@@ -172,11 +175,12 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       previewMode && showRequired && touched ? 'sf-field-renderer--preview-error' : null,
       isCompositeType ? 'sf-field-renderer--composite' : null,
     ].filter(Boolean).join(' ') || undefined}>
-      {/* Label — inline editable when onLabelChange is provided */}
+      {/* Label, inline editable when onLabelChange is provided */}
       {isEditingLabel ? (
         <input
           ref={labelInputRef}
           type='text'
+          aria-label={__('Field label', 'subtleforms')}
           className='sf-field-renderer__label-input'
           value={editLabelValue}
           onChange={(e) => setEditLabelValue(e.target.value)}
@@ -236,7 +240,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
             placeholder={placeholder || ''}
             className={inputClass}
             readOnly
-            tabIndex='-1'
+            aria-label={canvasControlName(field)} tabIndex='-1'
           />
           {field.suffix && <span className='sf-field-renderer__affix-part'>{field.suffix}</span>}
         </div>
@@ -292,23 +296,6 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
-      {type === 'calculation' && (
-        String(field.formula || '').trim() ? (
-          <div className='sf-field-renderer__calculation'>
-            <span className='sf-field-renderer__calculation-value'>
-              {field.prefix}0{parseInt(field.decimals ?? 2, 10) > 0 ? '.' + '0'.repeat(parseInt(field.decimals ?? 2, 10)) : ''}{field.suffix}
-            </span>
-            <code className='sf-field-renderer__calculation-formula'>{field.formula}</code>
-          </div>
-        ) : (
-          // No formula yet: say what to do instead of showing a fake 0.00. The
-          // field is hidden on the live form until it has one (bug 9).
-          <p className='sf-field-renderer__placeholder-note'>
-            {__('Add a formula in the field settings', 'subtleforms')}
-          </p>
-        )
-      )}
-
       {type === 'disclaimer' && (
         hasText(field.content) ? (
           <div
@@ -329,7 +316,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           placeholder={placeholder || ''}
           className={`${inputClass} resize-y`}
           readOnly
-          tabIndex='-1'
+          aria-label={canvasControlName(field)} tabIndex='-1'
         />
       )}
 
@@ -338,7 +325,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           <input
             type='checkbox'
             className='sf-field-renderer__checkbox'
-            tabIndex='-1'
+            aria-label={canvasControlName(field)} tabIndex='-1'
             readOnly
           />
           <span className='sf-field-renderer__checkbox-label'>
@@ -352,7 +339,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           <input
             type='checkbox'
             className='sf-field-renderer__checkbox'
-            tabIndex='-1'
+            aria-label={canvasControlName(field)} tabIndex='-1'
             readOnly
           />
           <span className='sf-field-renderer__checkbox-label'>
@@ -404,7 +391,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
                 type='radio'
                 name={field.key}
                 className='sf-field-renderer__radio'
-                tabIndex='-1'
+                aria-label={canvasControlName(field)} tabIndex='-1'
               />
               <span className='sf-field-renderer__checkbox-label'>
                 {opt.label}
@@ -421,7 +408,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
               <input
                 type={field.allowMultiple === false ? 'radio' : 'checkbox'}
                 className='sf-field-renderer__checkbox'
-                tabIndex='-1'
+                aria-label={canvasControlName(field)} tabIndex='-1'
               />
               <span className='sf-field-renderer__checkbox-label'>
                 {opt.label}
@@ -511,7 +498,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
-      {/* Legacy address field detected — deprecated and ignored */}
+      {/* Legacy address field detected, deprecated and ignored */}
 
       {/* Payment fields */}
       {type === 'payment_amount' && (
@@ -542,7 +529,14 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
 
       {type === 'payment_choice' && <ChoicePreview field={field} />}
 
-      {type === 'payment_card' && <CardPreview />}
+      {type === 'payment_card' && !addonMissing && !getCanvasPreview(type) && <CardPreview />}
+
+      {/* A field from an add-on that is not active (SubtleForms Pro). */}
+      {addonMissing && (
+        <p className='sf-field-renderer__placeholder-note'>
+          {__('Needs SubtleForms Pro. Visitors do not see this field until Pro is active.', 'subtleforms')}
+        </p>
+      )}
 
       {/* Canvas previews registered by add-ons (registerCanvasPreview). */}
       {(() => {
@@ -557,7 +551,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
             placeholder={placeholder || __('Enter coupon code', 'subtleforms')}
             className={`${inputClass} sf-field-renderer__subscribe-input`}
             readOnly
-            tabIndex='-1'
+            aria-label={canvasControlName(field)} tabIndex='-1'
           />
           <button
             type='button'
@@ -682,22 +676,8 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
             placeholder={placeholder || __('#000000', 'subtleforms')}
             className={inputClass}
             readOnly
-            tabIndex='-1'
+            aria-label={canvasControlName(field)} tabIndex='-1'
           />
-        </div>
-      )}
-
-      {/* ── Signature ───────────────────────────────────────────────────────── */}
-      {type === 'signature' && (
-        <div className='sf-field-renderer__signature'>
-          <div className='sf-field-renderer__signature-canvas'>
-            <span className='sf-field-renderer__signature-placeholder'>
-              {__('Sign here', 'subtleforms')}
-            </span>
-          </div>
-          <div className='sf-field-renderer__field-hint'>
-            {__('Draw your signature on the live form', 'subtleforms')}
-          </div>
         </div>
       )}
 
@@ -708,7 +688,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           placeholder={placeholder || '••••••••'}
           className={inputClass}
           readOnly
-          tabIndex='-1'
+          aria-label={canvasControlName(field)} tabIndex='-1'
         />
       )}
 
@@ -793,7 +773,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
                 <span className='sf-field-renderer__checkbox-grid-row-label'>{row?.label ?? row}</span>
                 {gridCols.map((_, j) => (
                   <span key={j} className='sf-field-renderer__checkbox-grid-cell'>
-                    <input type={field.multiplePerRow === false ? 'radio' : 'checkbox'} className='sf-field-renderer__checkbox' readOnly tabIndex='-1' />
+                    <input type={field.multiplePerRow === false ? 'radio' : 'checkbox'} className='sf-field-renderer__checkbox' readOnly aria-label={canvasControlName(field)} tabIndex='-1' />
                   </span>
                 ))}
               </div>
@@ -808,14 +788,14 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       {/* ── Address (composite) ─────────────────────────────────────────────── */}
       {type === 'address_group' && <AddressFieldRenderer field={field} />}
 
-      {/* Unknown / legacy field type — safe fallback, do NOT crash builder */}
+      {/* Unknown / legacy field type, safe fallback, do NOT crash builder */}
       {!KNOWN_TYPES.has(type) && !getCanvasPreview(type) && (
         <div className='sf-field-renderer__unknown-field'>
           {__('Unsupported field (legacy)', 'subtleforms')}
         </div>
       )}
 
-      {/* ── Help text — shown for input fields only ─────────────────────────── */}
+      {/* ── Help text, shown for input fields only ─────────────────────────── */}
       {field.description && !NON_INPUT_TYPES.has(type) && !display.descriptionAbove && (
         <p className='sf-field-renderer__help-text'>{field.description}</p>
       )}

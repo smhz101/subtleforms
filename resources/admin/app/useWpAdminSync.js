@@ -110,7 +110,7 @@ function syncAdminMenu(page) {
 }
 
 /**
- * Replace the first segment of the document title ("Forms ‹ Site — WordPress").
+ * Replace the first segment of the document title ("Forms ‹ Site, WordPress").
  *
  * @param {string} label Screen name.
  */

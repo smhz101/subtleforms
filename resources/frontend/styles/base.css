@@ -11,11 +11,11 @@
  * form are the same design, not two that happen to look similar.
  *
  * Every value is a custom property on :root, so a theme can override any of
- * them without touching this file — which is the point of publishing tokens
+ * them without touching this file, which is the point of publishing tokens
  * rather than hardcoding colours into rules.
  */
 :root {
-	/* Semantic colours — one per meaning. The defaults were Bootstrap's
+	/* Semantic colours, one per meaning. The defaults were Bootstrap's
 	   (#28a745, #dc3545, #ffc107) while the admin used a different palette
 	   again; both now resolve to the same values. */
 	--subtleforms-color-primary: #4f5bd5;
@@ -24,7 +24,7 @@
 	--subtleforms-color-error: #b3261e;
 	--subtleforms-color-warning: #8a5a00;
 
-	/* Neutrals — one ramp, biased slightly blue to sit with the accent. */
+	/* Neutrals, one ramp, biased slightly blue to sit with the accent. */
 	--subtleforms-color-bg: #ffffff;
 	--subtleforms-color-bg-subtle: #f4f5f7;
 	--subtleforms-color-text: #131417;
@@ -40,7 +40,7 @@
 	--subtleforms-spacing-lg: 2rem;
 	--subtleforms-spacing-xl: 3rem;
 
-	/* Typography — public forms keep a 16px base so mobile browsers don't
+	/* Typography, public forms keep a 16px base so mobile browsers don't
 	   zoom on focus, unlike the admin's 14px. */
 	--subtleforms-font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI',
 		Roboto, Oxygen, Ubuntu, sans-serif;
@@ -49,13 +49,13 @@
 	--subtleforms-font-size-lg: 1.125rem;
 	--subtleforms-line-height: 1.5;
 
-	/* Border radius — the same five steps as the admin. */
+	/* Border radius, the same five steps as the admin. */
 	--subtleforms-radius-sm: 4px;
 	--subtleforms-radius-md: 8px;
 	--subtleforms-radius-lg: 12px;
 	--subtleforms-radius-full: 999px;
 
-	/* Elevation — tinted with the ink colour so shadows read as depth. */
+	/* Elevation, tinted with the ink colour so shadows read as depth. */
 	--subtleforms-shadow-sm: 0 1px 3px rgba(19, 20, 23, 0.08);
 	--subtleforms-shadow-md: 0 4px 12px rgba(19, 20, 23, 0.08);
 	--subtleforms-shadow-lg: 0 12px 28px rgba(19, 20, 23, 0.12);

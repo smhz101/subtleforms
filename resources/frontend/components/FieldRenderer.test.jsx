@@ -5,6 +5,7 @@
 import { createRoot } from '@wordpress/element';
 import { act } from 'react';
 import FieldRenderer, { hasVisibleText } from './FieldRenderer';
+import { registerFieldType } from '../../shared/extend';
 import { SAMPLES, WIDTHS, buildField } from '../../../tests/browser/fixtures/fields';
 
 global.IS_REACT_ACT_ENVIRONMENT = true;
@@ -44,8 +45,8 @@ describe.each(WIDTHS)('width %s', (width) => {
     test.each(SAMPLES.map((s) => [s.key || s.type, s]))('%s keeps required, options, placeholder and help', async (_, sample) => {
       const field = buildField(sample, width, shape);
       const { container, unmount } = render(field);
-      // Signature and rich text load lazily (2.3.0): let them resolve.
-      if (['signature', 'rich_text'].includes(sample.type)) {
+      // Rich text loads lazily (2.3.0): let it resolve.
+      if (sample.type === 'rich_text') {
         for (let i = 0; i < 20 && container.querySelector('.subtleforms-field-loading'); i++) {
           // eslint-disable-next-line no-await-in-loop
           await act(async () => {
@@ -139,10 +140,14 @@ describe('2.2.1 field fixes', () => {
     r.unmount();
   });
 
-  test('empty matrix, calculation without formula and empty disclaimer are not drawn (bugs 8, 9, 10)', () => {
+  test('empty matrix, an add-on field with nothing to show and empty disclaimer are not drawn (bugs 8, 9, 10)', () => {
+    registerFieldType('qa_total', {
+      component: () => <output>total</output>,
+      isAnswerable: (config) => !!String(config.formula || '').trim(),
+    });
     for (const field of [
       { key: 'g', type: 'checkbox_grid', label: 'Grid', rows: [], columns: [] },
-      { key: 'c', type: 'calculation', label: 'Total', formula: '' },
+      { key: 'c', type: 'qa_total', label: 'Total', formula: '' },
       { key: 'd', type: 'disclaimer', content: '<p> </p>' },
     ]) {
       const { container, unmount } = render(field);
@@ -151,6 +156,13 @@ describe('2.2.1 field fixes', () => {
     }
     expect(hasVisibleText('<p>&nbsp;</p>')).toBe(false);
     expect(hasVisibleText('<p>Terms apply</p>')).toBe(true);
+  });
+
+  test('a field type no plugin provides is left out of the live form (2.3.9)', () => {
+    const { container, unmount } = render({ key: 'sig', type: 'signature', label: 'Signature' });
+    expect(container.textContent).not.toContain('not supported');
+    expect(container.querySelector('input, canvas, output')).toBeNull();
+    unmount();
   });
 
   test('a disclaimer with text is drawn', () => {
@@ -361,5 +373,63 @@ describe('2.3.2: label visibility, help text placement and container labels', ()
     expect(cols.container.querySelector('.subtleforms-container-label').textContent).toBe('Your name');
     expect(cols.container.querySelectorAll('input')).toHaveLength(2);
     cols.unmount();
+  });
+});
+
+describe('PAY-18: Fixed Fee is not drawn on the form', () => {
+  it('prints no label and no help text', () => {
+    const { container, unmount } = render({
+      type: 'payment_hidden_price',
+      key: 'fee',
+      label: 'Processing fee',
+      amount: 2,
+      description: 'Optional description for debugging',
+    });
+    expect(container.innerHTML).toBe('');
+    unmount();
+  });
+});
+
+describe('Name and Address on the live form (FB-02, FB-17)', () => {
+  it('draws the parts switched on, with their labels, and not the ones switched off', () => {
+    const { container, unmount } = render({
+      type: 'name_group',
+      key: 'nm',
+      label: 'Name QA',
+      fields: {
+        first_name: { enabled: true, label: 'Given name' },
+        middle_name: { enabled: true, label: 'Middle' },
+        suffix: { enabled: true, label: 'Suffix' },
+      },
+    });
+    const labels = [...container.querySelectorAll('.subtleforms-name-part label')].map((l) => l.textContent);
+    expect(labels).toEqual(['Given name', 'Middle', 'Last Name', 'Suffix']);
+    unmount();
+
+    const address = render({
+      type: 'address_group',
+      key: 'addr',
+      label: 'Address',
+      fields: { street2: { enabled: true }, country: { enabled: false } },
+    });
+    expect(address.container.querySelector('#subtleforms-field-addr-street2')).not.toBeNull();
+    expect(address.container.querySelector('#subtleforms-field-addr-country')).toBeNull();
+    address.unmount();
+  });
+
+  it('names the group by its label and links the group error', () => {
+    const { container, unmount } = render(
+      { type: 'address_group', key: 'addr', label: 'Address QA', required: true },
+      { values: { addr: { city: 'X' } }, errors: { addr: 'Please enter your full address.' } }
+    );
+    const group = container.querySelector('[role="group"]');
+    const labelId = group.getAttribute('aria-labelledby');
+    const named = container.querySelector(`#${labelId}`);
+    expect(named.textContent).toContain('Address QA');
+    expect(named.tagName).not.toBe('LABEL');
+    expect(group.getAttribute('aria-describedby')).toContain('subtleforms-field-addr-error');
+    expect(container.querySelector('#subtleforms-field-addr-street').getAttribute('aria-invalid')).toBe('true');
+    expect(container.querySelector('#subtleforms-field-addr-city').getAttribute('aria-invalid')).toBeNull();
+    unmount();
   });
 });

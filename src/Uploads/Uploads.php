@@ -44,7 +44,7 @@ final class Uploads {
 	private const DIR           = 'subtleforms-uploads';
 	private const PENDING       = 'pending';
 	private const STORED        = 'files';
-	private const TRANSIENT     = 'sf_upload_';
+	private const TRANSIENT     = 'subtleforms_upload_';
 	private const CRON_HOOK     = 'subtleforms_uploads_cleanup';
 	private const NONCE_ACTION  = 'subtleforms_file';
 	private const DEFAULT_FILES = 5;
@@ -81,9 +81,6 @@ final class Uploads {
 				}
 			}
 		);
-		// Several files per field is an advanced (Pro) upload feature; without
-		// it the renderer only ever offers one.
-		add_filter( 'subtleforms/public_schema', array( self::class, 'limitPublicSchema' ), 5 );
 	}
 
 	/**
@@ -115,13 +112,6 @@ final class Uploads {
 		);
 	}
 
-	/**
-	 * Whether this site may use several files per field and drag-and-drop.
-	 */
-	public static function advancedAllowed(): bool {
-		return ( new Capabilities() )->allows( 'fields.advanced' );
-	}
-
 	// ── Upload ───────────────────────────────────────────────────────────
 
 	/**
@@ -132,7 +122,7 @@ final class Uploads {
 	 */
 	public static function handleUpload( WP_REST_Request $request ): WP_REST_Response {
 		$ip    = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-		$limit = RateLimiter::check( 'sf_upload_' . md5( $ip ), 30, 10 * MINUTE_IN_SECONDS );
+		$limit = RateLimiter::check( 'subtleforms_rl_upload_' . md5( $ip ), 30, 10 * MINUTE_IN_SECONDS );
 		if ( empty( $limit['allowed'] ) ) {
 			return self::error( 'subtleforms_upload_rate', __( 'Too many uploads. Please wait a few minutes and try again.', 'subtleforms' ), 429 );
 		}
@@ -168,15 +158,11 @@ final class Uploads {
 			return self::error( 'subtleforms_upload_storage', __( 'Uploads are not available right now.', 'subtleforms' ), 500 );
 		}
 
-		$id   = bin2hex( random_bytes( 16 ) );
-		$dest = $dir . '/' . $id;
-		$moved = is_uploaded_file( (string) $file['tmp_name'] )
-			? move_uploaded_file( (string) $file['tmp_name'], $dest ) // phpcs:ignore Generic.PHP.ForbiddenFunctions.Found -- Validated upload moved into the protected folder.
-			: false;
+		$id    = bin2hex( random_bytes( 16 ) );
+		$moved = self::storeUpload( $file, $dir, $id );
 		if ( ! $moved ) {
 			return self::error( 'subtleforms_upload_storage', __( 'The file could not be saved. Please try again.', 'subtleforms' ), 500 );
 		}
-		@chmod( $dest, 0640 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_chmod -- Best effort; not fatal on hosts that disallow it.
 
 		$record = array(
 			'id'   => $id,
@@ -346,7 +332,7 @@ final class Uploads {
 	 * @param array $field Field node.
 	 */
 	public static function maxFiles( array $field ): int {
-		if ( ! self::attr( $field, 'multiple', false ) || ! self::advancedAllowed() ) {
+		if ( ! self::attr( $field, 'multiple', false ) ) {
 			return 1;
 		}
 		$n = (int) self::attr( $field, 'maxFiles', 0 );
@@ -358,53 +344,201 @@ final class Uploads {
 	/**
 	 * Swap upload IDs in a payload for the pending file records.
 	 *
+	 * Upload fields inside a Repeater are resolved in every group (FA-03).
+	 * A file record anywhere else in the payload was not made here, so it is
+	 * dropped: a forged record can never point an entry at another entry's
+	 * file.
+	 *
 	 * @param int   $formId  Form ID.
 	 * @param mixed $schema  Active schema.
 	 * @param array $payload Payload keyed by field key.
 	 * @return array|WP_Error Payload, or an error keyed to the field.
 	 */
 	public static function resolvePayload( int $formId, $schema, array $payload ) {
-		$fields = self::uploadFields( is_array( $schema ) ? ( $schema['fields'] ?? array() ) : array() );
-		$errors = array();
+		$nodes    = is_array( $schema ) ? ( $schema['fields'] ?? array() ) : array();
+		$errors   = array();
+		$resolved = array();
+		$skip     = array();
 
-		foreach ( $fields as $key => $field ) {
+		foreach ( self::uploadFields( $nodes, true ) as $key => $field ) {
 			if ( ! array_key_exists( $key, $payload ) ) {
 				continue;
 			}
-			$ids = self::idsFrom( $payload[ $key ] );
-			if ( ! $ids ) {
-				$payload[ $key ] = array();
+			$skip[ $key ] = true;
+			$value        = self::resolveValue( $formId, (string) $key, $field, $payload[ $key ], $error );
+			if ( null === $value ) {
+				$errors[ $key ] = $error;
 				continue;
 			}
-			if ( count( $ids ) > self::maxFiles( $field ) ) {
-				$errors[ $key ] = sprintf(
-					/* translators: %d: number of files */
-					_n( 'You can attach up to %d file.', 'You can attach up to %d files.', self::maxFiles( $field ), 'subtleforms' ),
-					self::maxFiles( $field )
-				);
+			$payload[ $key ] = $value;
+			$resolved        = array_merge( $resolved, array_column( $value, 'id' ) );
+		}
+
+		foreach ( self::repeaters( $nodes ) as $rkey => $children ) {
+			if ( ! array_key_exists( $rkey, $payload ) || ! is_array( $payload[ $rkey ] ) ) {
 				continue;
 			}
-			$records = array();
-			foreach ( $ids as $id ) {
-				$pending = get_transient( self::TRANSIENT . $id );
-				if ( ! is_array( $pending ) || (int) ( $pending['form_id'] ?? 0 ) !== $formId || ( $pending['field'] ?? '' ) !== $key || ! is_file( self::path( self::PENDING, $id ) ) ) {
-					$errors[ $key ] = __( 'An attached file has expired. Please attach it again.', 'subtleforms' );
-					continue 2;
+			$skip[ $rkey ] = true;
+			$groups        = $payload[ $rkey ];
+			foreach ( $groups as $index => $group ) {
+				if ( ! is_array( $group ) ) {
+					continue;
 				}
-				$records[] = array(
-					'id'   => $id,
-					'name' => (string) $pending['name'],
-					'size' => (int) $pending['size'],
-					'type' => (string) $pending['type'],
-				);
+				foreach ( $children as $ckey => $field ) {
+					if ( ! array_key_exists( $ckey, $group ) ) {
+						continue;
+					}
+					$value = self::resolveValue( $formId, (string) $ckey, $field, $group[ $ckey ], $error );
+					if ( null === $value ) {
+						$errors[ $rkey . '.' . $index . '.' . $ckey ] = $error;
+						continue;
+					}
+					$group[ $ckey ] = $value;
+					$resolved       = array_merge( $resolved, array_column( $value, 'id' ) );
+				}
+				// Anything else in the group that looks like a file record
+				// was not uploaded through this form.
+				foreach ( $group as $ckey => $v ) {
+					if ( ! isset( $children[ $ckey ] ) ) {
+						$group[ $ckey ] = self::withoutRecords( $v );
+					}
+				}
+				$groups[ $index ] = $group;
 			}
-			$payload[ $key ] = $records;
+			$payload[ $rkey ] = $groups;
+		}
+
+		foreach ( $payload as $key => $value ) {
+			if ( ! isset( $skip[ $key ] ) ) {
+				$payload[ $key ] = self::withoutRecords( $value );
+			}
 		}
 
 		if ( $errors ) {
 			return new WP_Error( 'subtleforms_upload_invalid', __( 'Please check the attached files.', 'subtleforms' ), array( 'errors' => $errors ) );
 		}
 		return $payload;
+	}
+
+	/**
+	 * The pending file records for one upload answer.
+	 *
+	 * @param int         $formId Form ID.
+	 * @param string      $key    Field key the files were uploaded to.
+	 * @param array       $field  Upload field.
+	 * @param mixed       $value  Submitted IDs.
+	 * @param string|null $error  Set to the message when the answer is refused.
+	 * @return array|null Records, or null when refused.
+	 */
+	private static function resolveValue( int $formId, string $key, array $field, $value, ?string &$error = null ): ?array {
+		$error = null;
+		$ids   = self::idsFrom( $value );
+		if ( ! $ids ) {
+			return array();
+		}
+		if ( count( $ids ) > self::maxFiles( $field ) ) {
+			$error = sprintf(
+				/* translators: %d: number of files */
+				_n( 'You can attach up to %d file.', 'You can attach up to %d files.', self::maxFiles( $field ), 'subtleforms' ),
+				self::maxFiles( $field )
+			);
+			return null;
+		}
+		$records = array();
+		foreach ( $ids as $id ) {
+			$pending = get_transient( self::TRANSIENT . $id );
+			if ( ! is_array( $pending ) || (int) ( $pending['form_id'] ?? 0 ) !== $formId || ( $pending['field'] ?? '' ) !== $key || ! is_file( self::path( self::PENDING, $id ) ) ) {
+				$error = __( 'An attached file has expired. Please attach it again.', 'subtleforms' );
+				return null;
+			}
+			$records[] = array(
+				'id'   => $id,
+				'name' => (string) $pending['name'],
+				'size' => (int) $pending['size'],
+				'type' => (string) $pending['type'],
+			);
+		}
+		return $records;
+	}
+
+	/**
+	 * A value with every file record taken out.
+	 *
+	 * @param mixed $value Value.
+	 * @return mixed
+	 */
+	private static function withoutRecords( $value, int $depth = 0 ) {
+		if ( ! is_array( $value ) || $depth > 8 ) {
+			return $value;
+		}
+		if ( self::isRecord( $value ) ) {
+			return null;
+		}
+		$isList = array_is_list( $value );
+		foreach ( $value as $k => $v ) {
+			if ( self::isRecord( $v ) ) {
+				unset( $value[ $k ] );
+				continue;
+			}
+			$value[ $k ] = self::withoutRecords( $v, $depth + 1 );
+		}
+		return $isList ? array_values( $value ) : $value;
+	}
+
+	/**
+	 * Repeaters in a field tree with their upload fields, by Repeater key.
+	 *
+	 * @param mixed $nodes Field nodes.
+	 * @return array<string,array<string,array>>
+	 */
+	private static function repeaters( $nodes ): array {
+		$out = array();
+		if ( ! is_array( $nodes ) ) {
+			return $out;
+		}
+		foreach ( $nodes as $node ) {
+			if ( ! is_array( $node ) ) {
+				continue;
+			}
+			$key = $node['key'] ?? ( $node['config']['key'] ?? null );
+			if ( 'repeat_container' === ( $node['type'] ?? '' ) && is_string( $key ) && '' !== $key ) {
+				$children = array();
+				foreach ( array( 'children', 'fields' ) as $k ) {
+					if ( isset( $node[ $k ] ) && is_array( $node[ $k ] ) ) {
+						$children += self::uploadFields( $node[ $k ] );
+					}
+				}
+				$out[ $key ] = $children;
+				continue;
+			}
+			foreach ( self::childLists( $node ) as $list ) {
+				$out += self::repeaters( $list );
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Child field lists of a node: children, fields and columns.
+	 *
+	 * @param array $node Node.
+	 * @return array<int,array>
+	 */
+	private static function childLists( array $node ): array {
+		$lists = array();
+		foreach ( array( 'children', 'fields' ) as $k ) {
+			if ( isset( $node[ $k ] ) && is_array( $node[ $k ] ) ) {
+				$lists[] = $node[ $k ];
+			}
+		}
+		if ( isset( $node['columns'] ) && is_array( $node['columns'] ) ) {
+			foreach ( $node['columns'] as $col ) {
+				if ( is_array( $col ) ) {
+					$lists[] = isset( $col['fields'] ) || isset( $col['children'] ) ? ( $col['fields'] ?? $col['children'] ) : $col;
+				}
+			}
+		}
+		return $lists;
 	}
 
 	/**
@@ -420,8 +554,7 @@ final class Uploads {
 		foreach ( self::recordsIn( $payload ) as $record ) {
 			$from = self::path( self::PENDING, $record['id'] );
 			if ( is_file( $from ) ) {
-				// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- Same filesystem move within the protected folder.
-				rename( $from, $dir . '/' . $record['id'] );
+				self::filesystem()->move( $from, $dir . '/' . $record['id'], true );
 			}
 			delete_transient( self::TRANSIENT . $record['id'] );
 		}
@@ -453,20 +586,30 @@ final class Uploads {
 	}
 
 	/**
-	 * File records found anywhere in a payload.
+	 * File records found anywhere in a payload, including Repeater groups.
 	 *
 	 * @param array $payload Payload.
 	 * @return array<int,array{id:string,name:string,size:int,type:string}>
 	 */
 	public static function recordsIn( array $payload ): array {
-		$out = array();
-		foreach ( $payload as $value ) {
-			if ( ! is_array( $value ) ) {
-				continue;
+		$out  = array();
+		$walk = static function ( $value, int $depth ) use ( &$walk, &$out ) {
+			if ( ! is_array( $value ) || $depth > 8 ) {
+				return;
 			}
+			if ( self::isRecord( $value ) ) {
+				$out[] = $value;
+				return;
+			}
+			// Repeater groups (FA-03) hold upload answers one level down.
 			foreach ( $value as $item ) {
-				if ( self::isRecord( $item ) ) {
-					$out[] = $item;
+				$walk( $item, $depth + 1 );
+			}
+		};
+		foreach ( $payload as $value ) {
+			if ( is_array( $value ) ) {
+				foreach ( $value as $item ) {
+					$walk( $item, 0 );
 				}
 			}
 		}
@@ -567,10 +710,11 @@ final class Uploads {
 		nocache_headers();
 		header( 'Content-Type: application/octet-stream' );
 		header( 'Content-Disposition: attachment; filename="' . str_replace( '"', '', $name ) . '"; filename*=UTF-8\'\'' . rawurlencode( $name ) );
-		header( 'Content-Length: ' . (string) filesize( $path ) );
+		$contents = (string) self::filesystem()->get_contents( $path );
+		header( 'Content-Length: ' . (string) strlen( $contents ) );
 		header( 'X-Content-Type-Options: nosniff' );
 		header( "Content-Security-Policy: default-src 'none'; sandbox" );
-		readfile( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- Streaming a protected file to an authorised admin.
+		echo $contents; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- A file download, sent as an attachment with a sandbox policy.
 		exit;
 	}
 
@@ -593,31 +737,6 @@ final class Uploads {
 			}
 		}
 		return $removed;
-	}
-
-	/**
-	 * Strip "several files" from upload fields when the site cannot use it.
-	 *
-	 * @param mixed $schema Public schema.
-	 * @return mixed
-	 */
-	public static function limitPublicSchema( $schema ) {
-		if ( ! is_array( $schema ) || ! isset( $schema['fields'] ) || ! is_array( $schema['fields'] ) || self::advancedAllowed() ) {
-			return $schema;
-		}
-		$schema['fields'] = self::mapFields(
-			$schema['fields'],
-			static function ( array $f ) {
-				if ( in_array( $f['type'] ?? '', self::FIELD_TYPES, true ) ) {
-					$f['multiple'] = false;
-					if ( isset( $f['config'] ) && is_array( $f['config'] ) ) {
-						$f['config']['multiple'] = false;
-					}
-				}
-				return $f;
-			}
-		);
-		return $schema;
 	}
 
 	// ── Internals ────────────────────────────────────────────────────────
@@ -647,10 +766,11 @@ final class Uploads {
 	/**
 	 * Upload fields in a field tree, keyed by field key.
 	 *
-	 * @param mixed $nodes Field nodes.
+	 * @param mixed $nodes            Field nodes.
+	 * @param bool  $outsideRepeaters Leave out fields inside a Repeater.
 	 * @return array<string,array>
 	 */
-	public static function uploadFields( $nodes ): array {
+	public static function uploadFields( $nodes, bool $outsideRepeaters = false ): array {
 		$out = array();
 		if ( ! is_array( $nodes ) ) {
 			return $out;
@@ -663,56 +783,15 @@ final class Uploads {
 			if ( is_string( $key ) && $key !== '' && in_array( $node['type'] ?? '', self::FIELD_TYPES, true ) ) {
 				$out[ $key ] = $node;
 			}
-			foreach ( array( 'children', 'fields' ) as $k ) {
-				if ( isset( $node[ $k ] ) && is_array( $node[ $k ] ) ) {
-					$out += self::uploadFields( $node[ $k ] );
-				}
+			// A Repeater's upload fields answer inside its groups.
+			if ( $outsideRepeaters && 'repeat_container' === ( $node['type'] ?? '' ) ) {
+				continue;
 			}
-			if ( isset( $node['columns'] ) && is_array( $node['columns'] ) ) {
-				foreach ( $node['columns'] as $col ) {
-					if ( is_array( $col ) ) {
-						$out += self::uploadFields( isset( $col['fields'] ) || isset( $col['children'] ) ? ( $col['fields'] ?? $col['children'] ) : $col );
-					}
-				}
+			foreach ( self::childLists( $node ) as $list ) {
+				$out += self::uploadFields( $list, $outsideRepeaters );
 			}
 		}
 		return $out;
-	}
-
-	/**
-	 * Apply a callback to every field node.
-	 *
-	 * @param array    $nodes Field nodes.
-	 * @param callable $fn    Callback (array $node): array.
-	 */
-	private static function mapFields( array $nodes, callable $fn ): array {
-		foreach ( $nodes as $i => $node ) {
-			if ( ! is_array( $node ) ) {
-				continue;
-			}
-			$node = $fn( $node );
-			foreach ( array( 'children', 'fields' ) as $k ) {
-				if ( isset( $node[ $k ] ) && is_array( $node[ $k ] ) ) {
-					$node[ $k ] = self::mapFields( $node[ $k ], $fn );
-				}
-			}
-			if ( isset( $node['columns'] ) && is_array( $node['columns'] ) ) {
-				foreach ( $node['columns'] as $c => $col ) {
-					if ( ! is_array( $col ) ) {
-						continue;
-					}
-					if ( isset( $col['fields'] ) && is_array( $col['fields'] ) ) {
-						$node['columns'][ $c ]['fields'] = self::mapFields( $col['fields'], $fn );
-					} elseif ( isset( $col['children'] ) && is_array( $col['children'] ) ) {
-						$node['columns'][ $c ]['children'] = self::mapFields( $col['children'], $fn );
-					} else {
-						$node['columns'][ $c ] = self::mapFields( $col, $fn );
-					}
-				}
-			}
-			$nodes[ $i ] = $node;
-		}
-		return $nodes;
 	}
 
 	/**
@@ -761,7 +840,83 @@ final class Uploads {
 
 	private static function baseDir(): string {
 		$uploads = wp_upload_dir( null, false );
-		return rtrim( (string) $uploads['basedir'], '/' ) . '/' . self::DIR;
+		return rtrim( (string) $uploads['basedir'], '/' ) . '/' . self::folderName();
+	}
+
+	/**
+	 * The private uploads folder name.
+	 *
+	 * New sites get a random name that cannot be guessed, so files stay
+	 * private on servers that ignore .htaccess, such as nginx (FA-18). A site
+	 * that already stores files keeps its folder.
+	 */
+	public static function folderName(): string {
+		$name = (string) get_option( 'subtleforms_upload_folder', '' );
+		if ( 1 === preg_match( '/^subtleforms-uploads(-[a-z0-9]{16})?$/', $name ) ) {
+			return $name;
+		}
+		$uploads = wp_upload_dir( null, false );
+		$legacy  = rtrim( (string) $uploads['basedir'], '/' ) . '/' . self::DIR;
+		$name    = is_dir( $legacy ) ? self::DIR : self::DIR . '-' . bin2hex( random_bytes( 8 ) );
+		update_option( 'subtleforms_upload_folder', $name, false );
+		return $name;
+	}
+
+	/**
+	 * Move an uploaded file into the private folder with wp_handle_upload()
+	 * (WP2-18). The file is saved under its random ID, with no extension, so
+	 * it can never run as a script.
+	 *
+	 * @param array  $file $_FILES entry.
+	 * @param string $dir  Destination folder.
+	 * @param string $id   File ID.
+	 */
+	private static function storeUpload( array $file, string $dir, string $id ): bool {
+		if ( ! function_exists( 'wp_handle_upload' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		$to_dir = static function ( $paths ) use ( $dir ) {
+			$paths['path']   = $dir;
+			$paths['subdir'] = '';
+			return $paths;
+		};
+		add_filter( 'upload_dir', $to_dir, PHP_INT_MAX );
+		$result = wp_handle_upload(
+			$file,
+			array(
+				'test_form'                => false,
+				// The type was checked against the field's rules already.
+				'test_type'                => false,
+				'unique_filename_callback' => static function () use ( $id ) {
+					return $id;
+				},
+			)
+		);
+		remove_filter( 'upload_dir', $to_dir, PHP_INT_MAX );
+		return is_array( $result ) && empty( $result['error'] ) && is_file( $dir . '/' . $id );
+	}
+
+	/**
+	 * The WordPress filesystem, set up for direct access to our own folder.
+	 *
+	 * @return \WP_Filesystem_Base
+	 */
+	private static function filesystem() {
+		global $wp_filesystem;
+		if ( ! $wp_filesystem instanceof \WP_Filesystem_Base ) {
+			if ( ! function_exists( 'WP_Filesystem' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/file.php';
+			}
+			WP_Filesystem();
+		}
+		if ( ! $wp_filesystem instanceof \WP_Filesystem_Base || 'direct' !== $wp_filesystem->method ) {
+			if ( ! class_exists( 'WP_Filesystem_Direct' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
+				require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
+			}
+			return new \WP_Filesystem_Direct( null );
+		}
+		return $wp_filesystem;
 	}
 
 	/**
@@ -791,8 +946,7 @@ final class Uploads {
 		);
 		foreach ( $files as $name => $contents ) {
 			if ( ! file_exists( $dir . '/' . $name ) ) {
-				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Small guard files in our own folder.
-				file_put_contents( $dir . '/' . $name, $contents );
+				self::filesystem()->put_contents( $dir . '/' . $name, $contents, defined( 'FS_CHMOD_FILE' ) ? FS_CHMOD_FILE : 0644 );
 			}
 		}
 	}

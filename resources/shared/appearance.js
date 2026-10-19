@@ -20,7 +20,7 @@
  *   }
  *
  * Everything is optional. An absent value falls through to the form, and an
- * absent form value falls through to the stylesheet default — so a form with no
+ * absent form value falls through to the stylesheet default, so a form with no
  * appearance object renders exactly as it did before this existed.
  */
 
@@ -64,7 +64,7 @@ export const FORM_TOKENS = [
   { key: 'buttonRadius', cssVar: '--subtleforms-button-radius', type: 'size', group: 'button', label: 'Button radius', units: ['px'], min: 0, max: 999 },
 ];
 
-/** Variants are classes rather than properties — they change structure, not values. */
+/** Variants are classes rather than properties, they change structure, not values. */
 export const FORM_VARIANTS = [
   {
     key: 'input',
@@ -254,6 +254,7 @@ export const FORM_PRESETS = [
     tokens: {
       colorPrimary: '#7683d9',
       colorPrimaryHover: '#a3adde',
+      colorButtonText: '#111318',
       colorText: '#e9ebef',
       colorTextLight: '#8c94a3',
       colorBackground: '#131417',
@@ -342,10 +343,10 @@ export const FORM_PRESETS = [
     id: 'bold',
     label: 'Bold',
     description: 'High-contrast accent and heavy labels. Built to convert.',
-    swatch: ['#e5484d', '#111111', '#fff7f5'],
+    swatch: ['#c81e1e', '#111111', '#fff7f5'],
     tokens: {
-      colorPrimary: '#e5484d',
-      colorPrimaryHover: '#c93a3f',
+      colorPrimary: '#c81e1e',
+      colorPrimaryHover: '#9b1c1c',
       colorText: '#111111',
       colorTextLight: '#5f5f5f',
       colorBackground: '#fff7f5',
@@ -375,7 +376,7 @@ export const FORM_PRESETS = [
       colorText: '#f4f5f7',
       colorLabel: '#f4f5f7',
       colorTextLight: '#b8bfcc',
-      colorBackground: 'transparent',
+      colorBackground: '#1b1d24',
       colorSurface: 'rgba(255, 255, 255, 0.08)',
       colorInputText: '#ffffff',
       colorBorder: 'rgba(255, 255, 255, 0.28)',
@@ -591,6 +592,9 @@ export function formAppearanceClasses( appearance ) {
   if ( appearance?.preset === 'dark-surface' ) {
     classes.push( 'subtleforms--preset-dark-surface' );
   }
+  if ( appearance?.preset === 'dark' ) {
+    classes.push( 'subtleforms--preset-dark' );
+  }
   if ( appearance?.preset === 'theme' ) {
     classes.push( 'subtleforms--inherit-theme' );
   }
@@ -703,7 +707,7 @@ export function isPresetModified( appearance ) {
  *
  * `action_hook` is a server-side extension point and `step` is a boundary the
  * form renderer consumes to slice pages; neither draws an element. Every other
- * type — including section breaks, HTML blocks and containers — has a wrapper
+ * type, including section breaks, HTML blocks and containers, has a wrapper
  * that carries appearance.
  *
  * @param {string} type Field type.

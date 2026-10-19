@@ -12,7 +12,7 @@ import { __ } from '@wordpress/i18n';
 let wpDate = null;
 try {
   // Imported lazily so test environments without @wordpress/date still load
-  // this module — the fallback path is used there.
+  // this module, the fallback path is used there.
   wpDate = require('@wordpress/date');
 } catch (e) {
   wpDate = null;
@@ -102,7 +102,7 @@ function sprintfHoursAgo(hours) {
 }
 
 /**
- * Whether a form is "new" — created within the last 7 days (Part B7).
+ * Whether a form is "new", created within the last 7 days (Part B7).
  *
  * @param {object} form Form object with created_at.
  * @return {boolean}

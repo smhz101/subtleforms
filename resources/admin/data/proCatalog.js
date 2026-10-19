@@ -16,26 +16,26 @@ export const PRO_PILLARS = [
 	{
 		key: 'fields',
 		icon: Icon.Calculator,
-		title: __( 'Smarter fields', 'subtleforms' ),
-		text: __( 'Picture Choice, Signature, live Calculations and multi-file uploads, plus advanced conditional logic.', 'subtleforms' ),
+		title: __( 'Signature and Calculation', 'subtleforms' ),
+		text: __( 'A signature pad and live calculations, with a calculation as the amount to charge.', 'subtleforms' ),
 	},
 	{
 		key: 'payments',
 		icon: Icon.CreditCard,
-		title: __( 'Payments', 'subtleforms' ),
-		text: __( 'Stripe card checkout, products, coupons and order summaries.', 'subtleforms' ),
+		title: __( 'Stripe payments', 'subtleforms' ),
+		text: __( 'A Card Payment field for the free Product, Priced Options and Coupon fields.', 'subtleforms' ),
 	},
 	{
 		key: 'automation',
-		icon: Icon.Webhook,
-		title: __( 'Automation', 'subtleforms' ),
-		text: __( 'Webhooks with automatic retries, CRM and email marketing sync.', 'subtleforms' ),
+		icon: Icon.Users,
+		title: __( 'Marketing and CRM', 'subtleforms' ),
+		text: __( 'Mailchimp, Brevo, Kit, HubSpot, Zapier and WooCommerce.', 'subtleforms' ),
 	},
 	{
 		key: 'insights',
-		icon: Icon.TrendingUp,
-		title: __( 'Insights & exports', 'subtleforms' ),
-		text: __( 'Conversion analytics, CSV export and PDF copies of every entry.', 'subtleforms' ),
+		icon: Icon.FileText,
+		title: __( 'PDFs and translation', 'subtleforms' ),
+		text: __( 'PDF copies of entries, WPML and Polylang, and 47 more templates.', 'subtleforms' ),
 	},
 ];
 
@@ -96,14 +96,12 @@ export const EXTENSION_GROUPS = [
  * Plain feature checklist used on the License screen.
  */
 export const PRO_CHECKLIST = [
-	__( 'Picture Choice, Signature and Calculation fields', 'subtleforms' ),
-	__( 'Several files per upload field, with drag and drop', 'subtleforms' ),
-	__( 'Stripe card payments, coupons and order summaries', 'subtleforms' ),
-	__( 'Webhooks with retries, CRM and email marketing actions', 'subtleforms' ),
-	__( 'Advanced conditional logic: any/all rules, skipped steps, conditional emails and confirmations', 'subtleforms' ),
-	__( 'CSV export of submissions', 'subtleforms' ),
-	__( 'PDF generator and analytics', 'subtleforms' ),
-	__( 'Pro templates', 'subtleforms' ),
+	__( 'Signature and Calculation fields', 'subtleforms' ),
+	__( 'Stripe card payments with a Card Payment field', 'subtleforms' ),
+	__( 'Mailchimp, Brevo, Kit, HubSpot and Zapier actions', 'subtleforms' ),
+	__( 'WooCommerce checkout and a WooCommerce Product field', 'subtleforms' ),
+	__( 'PDF copies of entries', 'subtleforms' ),
+	__( '47 more templates', 'subtleforms' ),
 	__( 'White label and WPML or Polylang translation (Agency)', 'subtleforms' ),
 ];
 

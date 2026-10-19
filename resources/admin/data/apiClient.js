@@ -134,7 +134,7 @@ const normalizeError = (body, status) => {
  * Response headers are only reachable by asking apiFetch NOT to parse the body
  * (`parse: false`) and handling the raw `Response` ourselves. A `.then()`
  * callback receives exactly one argument, so the headers cannot arrive as a
- * second parameter — reading them that way silently yields `undefined` and
+ * second parameter, reading them that way silently yields `undefined` and
  * disables optimistic locking entirely.
  */
 /**
@@ -160,7 +160,7 @@ const isResponse = (value) =>
   !!value && typeof value.status === 'number' && typeof value.text === 'function';
 
 apiFetch.use((options, next) => {
-  // Caller explicitly wants the raw Response — don't interfere.
+  // Caller explicitly wants the raw Response, don't interfere.
   if (options.parse === false) {
     return next(options);
   }
@@ -182,7 +182,7 @@ apiFetch.use((options, next) => {
     // With parse:false, apiFetch rejects on any non-2xx and hands back the raw
     // Response rather than a parsed error, so the error body has to be read
     // here. Without this, callers lose `code`, `meta`, validation fields,
-    // retry-after and conflict ETags — everything normalizeError attaches.
+    // retry-after and conflict ETags, everything normalizeError attaches.
     async (error) => {
       if (!isResponse(error)) {
         throw error;

@@ -3,6 +3,7 @@ import { useState } from '@wordpress/element';
 import { DropdownMenu, MenuGroup, MenuItem } from '@wordpress/components';
 import clsx from 'clsx';
 import { getIcon } from './utils/iconMap';
+import { toolbarButtonTabIndex, toolbarVisibilityProps } from './toolbarA11y';
 import './FieldToolbar.scss';
 
 /**
@@ -67,6 +68,7 @@ export default function FieldToolbar({
         onMouseDown={stop}
         onPointerDown={stop}
         disabled={disabled}
+        tabIndex={toolbarButtonTabIndex(visible)}
         aria-label={label}
         title={label}
         className={clsx('sf-field-toolbar__button', {
@@ -82,7 +84,7 @@ export default function FieldToolbar({
 
   return (
     <div
-      aria-hidden={!visible}
+      {...toolbarVisibilityProps(visible)}
       data-tour='field-toolbar'
       className={clsx('sf-field-toolbar', {
         'sf-field-toolbar--visible': visible,
@@ -108,6 +110,7 @@ export default function FieldToolbar({
         }}
         onClick={stop}
         title={__('Drag to reorder', 'subtleforms')}
+        tabIndex={toolbarButtonTabIndex(visible)}
         aria-label={__('Drag field', 'subtleforms')}
         className='sf-field-toolbar__button sf-field-toolbar__button--drag'>
         {(() => {
@@ -137,7 +140,7 @@ export default function FieldToolbar({
           <DropdownMenu
             icon={<MoveToIcon size={16} />}
             label={__('Move to', 'subtleforms')}
-            toggleProps={{ className: 'sf-field-toolbar__button sf-field-toolbar__button--default', size: 'small' }}
+            toggleProps={{ className: 'sf-field-toolbar__button sf-field-toolbar__button--default', size: 'small', tabIndex: toolbarButtonTabIndex(visible) }}
             popoverProps={{ placement: 'bottom-start' }}>
             {({ onClose }) => (
               <MenuGroup label={__('Move field into', 'subtleforms')}>
@@ -167,6 +170,7 @@ export default function FieldToolbar({
               type='button'
               className='sf-field-toolbar__button sf-field-toolbar__button--text'
               aria-haspopup='true'
+              tabIndex={toolbarButtonTabIndex(visible)}
               aria-expanded={widthOpen}
               aria-label={sprintf(
                 /* translators: %s: current field width, e.g. Full or Half */

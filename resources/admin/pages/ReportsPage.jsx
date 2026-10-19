@@ -1,21 +1,14 @@
 import { useEffect, useState } from '@wordpress/element';
-import { Button, Spinner } from '@wordpress/components';
+import { Spinner } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import AdminShell from '../components/AdminShell';
 import FormAnalyticsPanel from '../components/analytics/FormAnalyticsPanel';
 import { formatRate, useAnalyticsSummary } from '../components/analytics/useAnalytics';
-import Icon from '../ui/Icon';
 import { apiGet } from '../utils/api';
-import { requirePro } from '../utils/featureGate';
 import './DashboardPage.scss';
 import './ReportsPage.scss';
-
-const SAMPLE_FORMS = [
-  { form_id: 1, title: 'Contact', views: 420, submissions: 64, conversion: 15.2 },
-  { form_id: 2, title: 'Newsletter', views: 880, submissions: 210, conversion: 23.9 },
-  { form_id: 3, title: 'Support', views: 190, submissions: 41, conversion: 21.6 },
-];
+import { chartColumnProps } from '../utils/chartA11y';
 
 const formatNumber = ( value ) => Number( value || 0 ).toLocaleString();
 
@@ -44,18 +37,17 @@ export default function ReportsPage() {
   const forms = overview?.forms || [];
   const series = overview?.series || [];
   const week = series.reduce( ( sum, day ) => sum + Number( day.count || 0 ), 0 );
-  const rows = summary.locked
-    ? SAMPLE_FORMS
-    : Object.values( summary.data?.forms || {} ).map( ( row ) => ( {
-      ...row,
-      title: forms.find( ( form ) => Number( form.id ) === Number( row.form_id ) )?.title
-        || sprintf( __( 'Form #%d', 'subtleforms' ), row.form_id ),
-    } ) );
+  const rows = Object.values( summary.data?.forms || {} ).map( ( row ) => ( {
+    ...row,
+    title: forms.find( ( form ) => Number( form.id ) === Number( row.form_id ) )?.title
+      /* translators: %d: form ID */
+      || sprintf( __( 'Form #%d', 'subtleforms' ), row.form_id ),
+  } ) );
 
   return (
     <AdminShell
       title={ __( 'Reports', 'subtleforms' ) }
-      description={ __( 'How many people send a form. Views and conversion are part of Pro.', 'subtleforms' ) }
+      description={ __( 'How many people see and send each form. Spam, failed and trashed entries are not counted.', 'subtleforms' ) }
       isLoading={ ! overview && ! error }
       error={ error }>
       { overview && (
@@ -90,15 +82,15 @@ export default function ReportsPage() {
 
           <FormAnalyticsPanel forms={ forms } />
 
-          <section className={ clsx( 'sf-panel', 'sf-analytics-panel', { 'is-locked': summary.locked } ) }>
+          <section className='sf-panel sf-analytics-panel'>
             <header className='sf-panel__header'>
               <div>
                 <h2 className='sf-panel__title'>{ __( 'Each form, last 30 days', 'subtleforms' ) }</h2>
-                <p className='sf-panel__subtitle'>{ __( 'Views and conversion are part of Pro.', 'subtleforms' ) }</p>
+                <p className='sf-panel__subtitle'>{ __( 'Conversion is submissions divided by views.', 'subtleforms' ) }</p>
               </div>
             </header>
             <div className='sf-panel__body sf-panel__body--flush'>
-              { summary.isLoading && ! summary.locked ? (
+              { summary.isLoading ? (
                 <div className='sf-reports__loading'><Spinner /></div>
               ) : (
                 <div className='sf-analytics-panel__chart'>
@@ -120,26 +112,11 @@ export default function ReportsPage() {
                           <td>{ formatRate( row.conversion ) }</td>
                         </tr>
                       ) ) }
-                      { ! summary.locked && rows.length === 0 && (
+                      { rows.length === 0 && (
                         <tr><td colSpan='4'>{ __( 'No views yet.', 'subtleforms' ) }</td></tr>
                       ) }
                     </tbody>
                   </table>
-                </div>
-              ) }
-              { summary.locked && (
-                <div className='sf-analytics-panel__lock'>
-                  <span className='sf-analytics-panel__lock-icon' aria-hidden='true'><Icon.Lock size={ 16 } /></span>
-                  <div>
-                    <p className='sf-analytics-panel__lock-title'>{ __( 'See which forms convert', 'subtleforms' ) }</p>
-                    <p className='sf-analytics-panel__lock-text'>{ __( 'Sample data shown. Views are already being counted, so your reports are ready the moment you upgrade.', 'subtleforms' ) }</p>
-                  </div>
-                  <Button
-                    variant='primary'
-                    size='compact'
-                    onClick={ () => requirePro( 'extensions.analytics', () => {}, { label: __( 'Reports', 'subtleforms' ) } ) }>
-                    { __( 'Unlock reports', 'subtleforms' ) }
-                  </Button>
                 </div>
               ) }
             </div>
@@ -184,6 +161,18 @@ function TrendChart( { data = [] } ) {
           <span data-value='0' />
         </div>
         <div className='sf-trend__bars' onMouseLeave={ () => setActive( null ) }>
+          <ul className='screen-reader-text'>
+            { data.map( ( day ) => (
+              <li key={ day.date }>
+                { sprintf(
+                  /* translators: 1: date, 2: number of submissions */
+                  _n( '%1$s: %2$s submission', '%1$s: %2$s submissions', day.count, 'subtleforms' ),
+                  formatDay( day.date, { month: 'short', day: 'numeric' } ),
+                  formatNumber( day.count )
+                ) }
+              </li>
+            ) ) }
+          </ul>
           { data.map( ( day, index ) => {
             const label = sprintf(
               /* translators: 1: date, 2: number of submissions */
@@ -196,7 +185,7 @@ function TrendChart( { data = [] } ) {
                 key={ day.date }
                 className={ clsx( 'sf-trend__col', { 'is-active': active === index, 'is-today': index === last } ) }
                 tabIndex={ 0 }
-                aria-label={ label }
+                { ...chartColumnProps( label ) }
                 onMouseEnter={ () => setActive( index ) }
                 onFocus={ () => setActive( index ) }
                 onBlur={ () => setActive( null ) }>

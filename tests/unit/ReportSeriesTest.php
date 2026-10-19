@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Free reports day buckets.
  *
@@ -6,6 +7,10 @@
  */
 
 namespace SubtleForms\Tests\Unit;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use PHPUnit\Framework\TestCase;
 use SubtleForms\Tools\ReportSeries;
@@ -32,6 +37,11 @@ final class ReportSeriesTest extends TestCase {
 		$this->assertSame( 1, $series[4]['count'] );
 		$this->assertSame( '2026-10-18', $series[6]['date'] );
 		$this->assertSame( 4, $series[6]['count'] );
+	}
+
+	public function test_seven_days_starts_six_midnights_ago(): void {
+		$now = strtotime( '2026-10-18 15:00:00 UTC' );
+		$this->assertSame( '2026-10-12 00:00:00', ReportSeries::start( 7, $now ) );
 	}
 
 	public function test_window_is_clamped(): void {

@@ -7,7 +7,7 @@
  * forms) makes a draft copy; a failure shows the real reason.
  */
 const { test, expect } = require('@playwright/test');
-const { adminApi, publishForm, cleanup, loginPage, BASE } = require('./helpers');
+const { adminApi, publishForm, cleanup, loginPage, BASE, spamToken } = require('./helpers');
 
 let client;
 const created = [];
@@ -74,7 +74,7 @@ test('trashing, the Trash tab, restore and permanent delete (QA-11)', async ({ p
   const anon = await playwright.request.newContext({ baseURL: BASE });
   expect((await anon.get(`/wp-json/subtleforms/v1/forms/${live.id}/schema`)).status()).toBe(404);
   const submit = await anon.post('/wp-json/subtleforms/v1/submit', {
-    data: { form_id: live.id, data: { name: 'x', form_rendered_at: Math.floor(Date.now() / 1000) - 60 } },
+    data: { form_id: live.id, data: { name: 'x', form_rendered_at: await spamToken(anon, live.id) } },
   });
   expect(submit.status()).toBe(404);
   await page.goto(`${BASE}${live.url}`);

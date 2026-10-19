@@ -8,7 +8,6 @@ import ChainedDisplayControl from './inspector/controls/ChainedDisplayControl';
 import ChainedSourceControl from './inspector/controls/ChainedSourceControl';
 import ChainedCsvControl from './inspector/controls/ChainedCsvControl';
 import { chainedUsesCsv } from '../../../shared/chainedLevels';
-import { isProFeature } from '../../utils/featureGate';
 import { useBuilder } from './context/BuilderContext';
 import { useConfig } from './context/ConfigContext';
 import {
@@ -17,6 +16,7 @@ import {
   DynamicInspectorPanel,
 } from './inspector/panels';
 import { CHOICE_TYPES } from './inspector/panels/OptionsPanel';
+import { hasSection, LOGIC_ONLY_TYPES } from './inspector/controlSections';
 import FieldAppearancePanel from './appearance/FieldAppearancePanel';
 import { supportsAppearance } from '../../../shared/appearance';
 import { getIcon } from './utils/iconMap';
@@ -60,11 +60,11 @@ function StepSetting({ tree, nodeId, onMoveToStep, isReadOnly }) {
 }
 
 /**
- * Field inspector — the right panel of the builder.
+ * Field inspector, the right panel of the builder.
  *
  * Header: what the field is and its key (copyable, used in formulas, emails
- * and webhooks), with duplicate and delete. Body: four tabs — Settings,
- * Validation, Logic and Style — each made of collapsible panels like the
+ * and webhooks), with duplicate and delete. Body: four tabs, Settings,
+ * Validation, Logic and Style, each made of collapsible panels like the
  * block editor's sidebar.
  */
 export default function FieldInspector({ field, allFields, formAppearance, isReadOnly = false }) {
@@ -104,9 +104,6 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
     }
     if (CHOICE_TYPES.includes(field.type) && (!field.options || field.options.length === 0)) {
       warnings.push(__('Add at least one option.', 'subtleforms'));
-    }
-    if (field.type === 'calculation' && !field.formula?.trim()) {
-      warnings.push(__('Add a formula to show a result.', 'subtleforms'));
     }
     return warnings;
   }, [field]);
@@ -183,7 +180,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
           },
           logicTab,
         ]
-      : isStep || isContentBlock || isRepeater
+      : LOGIC_ONLY_TYPES.includes(field.type)
       ? [logicTab]
       : []),
     ...(supportsAppearance(field.type)
@@ -251,13 +248,8 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
         </div>
       </div>
 
-      {(isReadOnly || validationMessages.length > 0 || fieldWarnings.length > 0) && (
+      {(validationMessages.length > 0 || fieldWarnings.length > 0) && (
         <div className='sf-field-inspector__notices'>
-          {isReadOnly && (
-            <Notice status='info' isDismissible={false}>
-              {__('Read-only: this form uses Pro features. Activate your license to edit it. The live form keeps working.', 'subtleforms')}
-            </Notice>
-          )}
           {validationMessages.slice(0, 1).map((m, i) => (
             <Notice key={`v${i}`} status='warning' isDismissible={false}>
               {m}
@@ -358,6 +350,8 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
                     ? __('Skip this step unless its rules match. Fields in a skipped step are not checked or saved.', 'subtleforms')
                     : isRepeater
                     ? __('Show or hide this repeater based on answers to other fields. A hidden repeater, including every row inside it, is not checked or saved.', 'subtleforms')
+                    : field.type === 'payment_hidden_price'
+                    ? __('Add this fee only when its rules match. A hidden fee is not charged and not listed in the order.', 'subtleforms')
                     : sprintf(
                         /* translators: %s: field label */
                         __('Show or hide “%s” based on answers to other fields. Hidden fields are not checked or saved.', 'subtleforms'),
@@ -367,7 +361,6 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
                 <LogicEditor
                   logic={fieldLogic}
                   availableFields={(allFields || []).filter((f) => f.key !== field.key)}
-                  locked={isStep && !isProFeature('logic.conditional.advanced')}
                   disabled={isReadOnly}
                   emptyText={
                     isStep
@@ -396,16 +389,12 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
 }
 
 /**
- * Appearance panel — only rendered when the field type has appearance settings.
+ * Appearance panel, only rendered when the field type has appearance settings.
  */
 function AppearancePanel({ field, onUpdate, isReadOnly }) {
   const { fieldDefinitions } = useConfig();
-  const def = fieldDefinitions?.[field.type];
-  const all = [
-    ...(Array.isArray(def?.inspectorControls) ? def.inspectorControls : []),
-    ...(Array.isArray(def?.layoutControls) ? def.layoutControls : []),
-  ];
-  if (!all.some((c) => c?.section === 'appearance')) {
+  // The same controls, in the same sections, as the panel draws (FA-02).
+  if (!hasSection(fieldDefinitions?.[field.type], 'appearance')) {
     return null;
   }
   return (
@@ -422,16 +411,12 @@ function AppearancePanel({ field, onUpdate, isReadOnly }) {
 }
 
 /**
- * Advanced panel — only rendered when the field type has advanced settings.
+ * Advanced panel, only rendered when the field type has advanced settings.
  */
 function AdvancedPanel({ field, onUpdate, isReadOnly }) {
   const { fieldDefinitions } = useConfig();
-  const def = fieldDefinitions?.[field.type];
-  const all = [
-    ...(Array.isArray(def?.inspectorControls) ? def.inspectorControls : []),
-    ...(Array.isArray(def?.layoutControls) ? def.layoutControls : []),
-  ];
-  if (!all.some((c) => c?.section === 'advanced')) {
+  // The same controls, in the same sections, as the panel draws (FA-02).
+  if (!hasSection(fieldDefinitions?.[field.type], 'advanced')) {
     return null;
   }
   return (

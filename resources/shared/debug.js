@@ -6,7 +6,7 @@
  * `false` and the minifier drops the body. Nothing is logged on a public page.
  *
  * The comparison is written inline rather than behind a helper so the bundler
- * can fold it statically — wrapping it in another function defeats that.
+ * can fold it statically, wrapping it in another function defeats that.
  *
  * Genuine problems should keep using `console.warn` / `console.error`, which
  * are meant to surface in production.

@@ -6,7 +6,7 @@ import ConversationalFormRenderer from './ConversationalFormRenderer';
 import { getIn, setIn, deleteIn, flattenToPathMap } from '../utils/valuePaths';
 import { collectLeafInputPaths, collectContainerKeys } from '../utils/schemaLeaves';
 import { collectDefaultValues } from '../utils/defaults';
-import { evaluateFormula } from '../utils/formula';
+import { computeValues } from '../../shared/extend';
 import { computeLogicState, pickConfirmation } from '../../shared/conditions';
 import {
   validateFields,
@@ -27,14 +27,7 @@ import {
   getPreset,
 } from '../../shared/appearance';
 
-const restUrl =
-  window.subtleformsFrontend?.restUrl ||
-  window.subtleformsAdmin?.restUrl ||
-  '/wp-json/subtleforms/v1';
-const nonce =
-  window.subtleformsFrontend?.nonce ||
-  window.subtleformsAdmin?.restNonce ||
-  '';
+import { restFetch, restUrl, restNonce } from '../utils/restFetch';
 
 /**
  * Whether a submitted value counts as missing.
@@ -43,7 +36,7 @@ const nonce =
  * of 0, a number field holding 0. A plain falsy test rejects all three and makes
  * the lowest option on those fields impossible to submit.
  *
- * An unchecked checkbox stays "empty" — a required checkbox means it must be
+ * An unchecked checkbox stays "empty", a required checkbox means it must be
  * ticked, so `false` is genuinely missing there.
  */
 export const isEmptyValue = ( value ) =>
@@ -62,6 +55,8 @@ export default function FormRenderer({
 }) {
   const [loading, setLoading] = useState(!preloadedSchema);
   const [schema, setSchema] = useState(preloadedSchema);
+  // Server-signed load time for the spam time trap (FF-11, FF-12).
+  const [spamToken, setSpamToken] = useState('');
   const [error, setError] = useState(null);
   const [values, setValues] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -78,7 +73,7 @@ export default function FormRenderer({
   const [liveMessage, setLiveMessage] = useState('');
   const liveRegionRef = useRef(null);
   // Root of the rendered form, used to scope "focus first invalid input" to
-  // THIS form only — document.querySelector would jump across forms when two
+  // THIS form only, document.querySelector would jump across forms when two
   // forms share a page (A2/P1-5).
   const formRootRef = useRef(null);
   // Random per mount: a name like "website" invites autofill (bug 16). The
@@ -92,11 +87,6 @@ export default function FormRenderer({
 
   // Load schema (skip if preloaded)
   useEffect(() => {
-    // Set render time for spam protection time trap
-    if (!window.subtleformsRenderTime) {
-      window.subtleformsRenderTime = Math.floor(Date.now() / 1000);
-    }
-
     if (preloadedSchema) {
       // Keep the builder preview live: the schema prop changes on every edit
       // (appearance, fields, settings), and useState only read it once.
@@ -105,16 +95,12 @@ export default function FormRenderer({
       return;
     }
 
-    fetch(`${restUrl.replace(/\/$/, '')}/forms/${formId}/schema`, {
-      credentials: 'same-origin',
-      headers: {
-        'X-WP-Nonce': nonce,
-      },
-    })
+    restFetch(`/forms/${formId}/schema`)
       .then((res) => res.json())
       .then((data) => {
         // API wraps responses in { data: ... }, but fall back to root-level schema for compatibility
         const schemaPayload = data?.data?.schema ?? data?.schema ?? null;
+        setSpamToken(data?.data?.spam_token || '');
         if (schemaPayload) {
           setSchema(schemaPayload);
         } else {
@@ -130,7 +116,7 @@ export default function FormRenderer({
 
   // Prefill field values from the block's "Field Values" option (one
   // key=value pair per line). Runs once on mount. This hook MUST stay above
-  // any conditional return — React requires hooks to run in the same order
+  // any conditional return, React requires hooks to run in the same order
   // on every render, and an early `return` here would skip it and trigger
   // React error #310 ("Rendered more hooks than during the previous render").
   useEffect(() => {
@@ -205,6 +191,8 @@ export default function FormRenderer({
 
   const hasSteps = steps.length > 0;
   const currentStep = hasSteps ? steps[currentStepIndex] : null;
+  // Steps are saved flat or with settings under `config` (FA-21).
+  const currentStepConfig = fieldConfig(currentStep);
 
   // Get fields to render
   const fieldsToRender = useMemo(() => {
@@ -264,39 +252,19 @@ export default function FormRenderer({
     }
   }, [defaultValues]);
 
-  // Calculation fields (2.0): recomputed whenever an input changes. The
-  // server recomputes on submit, so this is display only.
-  const calculationFields = useMemo(
-    () =>
-      allFields.filter(
-        (f) => f.type === 'calculation' && fieldConfig(f).formula
-      ),
-    [allFields]
-  );
+  // Computed fields that add-ons register (Pro Calculation) are worked out
+  // whenever an answer changes. The server recomputes them on submit, so
+  // this is display only.
   useEffect(() => {
-    if (calculationFields.length === 0) return;
-    setValues((prev) => {
-      let next = prev;
-      for (let pass = 0; pass < 2; pass++) {
-        calculationFields.forEach((f) => {
-          const c = fieldConfig(f);
-          const key = c.key || f.key;
-          const result = evaluateFormula(c.formula, next, c.decimals ?? 2);
-          if (next[key] !== result) {
-            next = { ...next, [key]: result };
-          }
-        });
-      }
-      return next;
-    });
-  }, [values, calculationFields]);
+    setValues((prev) => computeValues(allFields, prev));
+  }, [values, allFields]);
 
-  // True layout/container types — fields that group other fields but carry no
+  // True layout/container types, fields that group other fields but carry no
   // value of their own. Writes to their key are always ignored.
   //
   // Composite INPUT fields (name_group, address_group, address, checkbox_grid,
   // …) also have children, but they DO carry a value (an object) at their root
-  // key — their renderers call onChange with an object that must be written.
+  // key, their renderers call onChange with an object that must be written.
   // Treating "has children" as "is a container" (the old logic) wrongly added
   // name_group's key here, so every keystroke into First/Last Name was silently
   // dropped (the value object was rejected as a "container write"). Only true
@@ -539,9 +507,9 @@ export default function FormRenderer({
   const quote = useMemo(
     () =>
       isPriced
-        ? computeQuote(allFields, values, { coupon, hidden: hiddenFields, currency })
+        ? computeQuote(allFields, values, { coupon, schema, hidden: hiddenFields, currency })
         : null,
-    [isPriced, allFields, values, coupon, hiddenFields, currency]
+    [isPriced, allFields, values, coupon, schema, hiddenFields, currency]
   );
   // Another checkout (e.g. WooCommerce, set by an add-on) takes the payment
   // after the form is sent, so the Card field is not used.
@@ -557,11 +525,9 @@ export default function FormRenderer({
       setCouponBusy(true);
       setCouponError('');
       try {
-        const res = await fetch(`${restUrl.replace(/\/$/, '')}/payments/coupon`, {
+        const res = await restFetch('/payments/coupon', {
           method: 'POST',
-          credentials: 'same-origin',
-          headers: { 'Content-Type': 'application/json', 'X-WP-Nonce': nonce },
-          body: JSON.stringify({ form_id: formId, code, data: flattenToPathMap(values) }),
+          body: { form_id: formId, code, data: flattenToPathMap(values) },
         });
         const json = await res.json().catch(() => ({}));
         const found = json?.data?.coupon;
@@ -783,8 +749,7 @@ export default function FormRenderer({
         const submissionPayload = {
           ...payload,
           website_url: honeypotInput ? honeypotInput.value : '',
-          form_rendered_at:
-            window.subtleformsRenderTime || Math.floor(Date.now() / 1000),
+          form_rendered_at: spamToken,
         };
 
         // Include CAPTCHA response (v2 or v3)
@@ -837,8 +802,8 @@ export default function FormRenderer({
               const paid = await cardRef.current.confirm({
                 formId,
                 data: submissionPayload,
-                restUrl: restUrl.replace(/\/$/, ''),
-                nonce,
+                restUrl,
+                nonce: restNonce(),
               });
               submissionPayload._payment = paid?.reference || '';
             } catch (payErr) {
@@ -856,17 +821,9 @@ export default function FormRenderer({
           }
         }
 
-        const response = await fetch(`${restUrl.replace(/\/$/, '')}/submit`, {
+        const response = await restFetch('/submit', {
           method: 'POST',
-          credentials: 'same-origin',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-WP-Nonce': nonce,
-          },
-          body: JSON.stringify({
-            form_id: formId,
-            data: submissionPayload,
-          }),
+          body: { form_id: formId, data: submissionPayload },
         });
 
         const result = await response.json();
@@ -979,6 +936,7 @@ export default function FormRenderer({
       coupon,
       quote,
       hasCardField,
+      spamToken,
     ]
   );
 
@@ -1028,6 +986,7 @@ export default function FormRenderer({
         formId={formId}
         preview={preview}
         onSubmit={customOnSubmit}
+        spamToken={spamToken}
       />
     );
   }
@@ -1190,14 +1149,14 @@ export default function FormRenderer({
         )}
 
         <div className='subtleforms-step-content'>
-          {currentStep?.config?.label && (
+          {currentStepConfig.label && (
             <h3 className='subtleforms-step-title-main'>
-              {currentStep.config.label}
+              {currentStepConfig.label}
             </h3>
           )}
-          {currentStep?.config?.description && (
+          {currentStepConfig.description && (
             <p className='subtleforms-step-description'>
-              {currentStep.config.description}
+              {currentStepConfig.description}
             </p>
           )}
 

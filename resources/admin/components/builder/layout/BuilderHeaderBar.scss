@@ -12,7 +12,8 @@
 	}
 
 	&__title-input {
-		min-width: 220px;
+		min-width: 0;
+		max-width: 28ch;
 		height: 32px;
 		padding: 0 8px;
 		border: 1px solid var(--sf-brand);
@@ -26,7 +27,7 @@
 	}
 
 	&__title-button {
-		min-width: 120px;
+		min-width: 0;
 		max-width: 28ch;
 		height: 32px;
 		padding: 0 8px;
@@ -99,8 +100,11 @@
 		display: inline-flex;
 		align-items: center;
 		gap: 6px;
+		min-width: 0;
+		max-width: 18ch;
 		height: 24px;
-		padding: 0 10px;
+		padding: 0 8px;
+		overflow: hidden;
 		border-radius: var(--sf-radius-full);
 		font-size: var(--sf-text-xs);
 		font-weight: var(--sf-weight-medium);
@@ -121,6 +125,12 @@
 			background: var(--sf-warning-bg);
 			color: var(--sf-warning);
 		}
+	}
+
+	&__mode-label {
+		min-width: 0;
+		overflow: hidden;
+		text-overflow: ellipsis;
 	}
 
 	&__mode-dot {
@@ -295,9 +305,18 @@
 	}
 
 	@media (max-width: 1100px) {
-		&__form-type-badge,
-		&__save-status span:last-child {
+		&__divider {
 			display: none;
 		}
 	}
 }
+
+// Collapse secondary labels from the bar's own width, not the viewport, so the
+// WordPress menu cannot push the status pill over Preview and Entries.
+@container (max-width: 1440px) {
+	.sf-builder-header-bar__form-type-label,
+	.sf-builder-header-bar__save-label {
+		display: none;
+	}
+}
+

@@ -83,6 +83,19 @@ export default function PaymentsPanel({ settings, updateSetting, fieldErrors = {
               <FieldError errors={fieldErrors.ext_payments_currency} />
             </div>
 
+            <div className='sf-settings-field'>
+              <ToggleControl
+                label={__('Email me when a payment fails', 'subtleforms')}
+                checked={settings.ext_payments_failed_email ?? true}
+                onChange={(v) => updateSetting('ext_payments_failed_email', v)}
+                help={__(
+                  'When the card is declined after the entry is saved, no receipt or notification is sent. This email tells you instead.',
+                  'subtleforms'
+                )}
+              />
+              <FieldError errors={fieldErrors.ext_payments_failed_email} />
+            </div>
+
             {provider === 'stripe' && (
               <>
                 <div className='sf-settings-field'>

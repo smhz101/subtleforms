@@ -1,12 +1,16 @@
 <?php
+
 /**
  * Server-side order maths for payment forms (2.1).
  */
 
 namespace SubtleForms\Tests\Unit;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use PHPUnit\Framework\TestCase;
-use SubtleForms\Engine\Formula;
 use SubtleForms\Payments\Pricing;
 use SubtleForms\Payments\CouponsRepository;
 
@@ -63,7 +67,9 @@ final class PricingTest extends TestCase {
 		$this->assertSame( 500, Pricing::toMinor( 500, 'JPY' ) );
 	}
 
-	public function test_charged_formula_failure_is_not_a_silent_line(): void {
+	public function test_free_pricing_has_no_calculation_engine(): void {
+		// Calculation fields come from SubtleForms Pro (2.3.9). Without Pro, a
+		// stored Calculation field neither prices the form nor adds a line.
 		$schema = array(
 			'fields' => array(
 				array(
@@ -71,31 +77,15 @@ final class PricingTest extends TestCase {
 					'key'      => 'due',
 					'label'    => 'Due',
 					'usePrice' => true,
-					'formula'  => '1/0',
+					'formula'  => '2 * 5',
 				),
 			),
 		);
-		$q = Pricing::quote( $schema, array( 'due' => 0 ) );
-		$this->assertTrue( $q['formula_error'] );
+		$this->assertFalse( Pricing::isPriced( $schema ) );
+		$q = Pricing::quote( $schema, array( 'due' => 10 ) );
 		$this->assertSame( array(), $q['items'] );
-		$this->assertNull( Formula::evaluate( '1/0', array() ) );
-	}
-
-	public function test_charged_missing_reference_is_not_a_silent_line(): void {
-		$schema = array(
-			'fields' => array(
-				array(
-					'type'     => 'calculation',
-					'key'      => 'due',
-					'label'    => 'Due',
-					'usePrice' => true,
-					'formula'  => '{qty} / {price}',
-				),
-			),
-		);
-		$q = Pricing::quote( $schema, array( 'qty' => 1, 'due' => 25 ) );
-		$this->assertTrue( $q['formula_error'] );
-		$this->assertSame( array(), $q['items'] );
+		$this->assertFalse( $q['formula_error'] );
+		$this->assertFalse( class_exists( 'SubtleForms\\Engine\\Formula' ) );
 	}
 
 	public function test_charged_explicit_zero_is_not_a_failure(): void {

@@ -16,7 +16,7 @@
  *
  * Note: these hold `var()` references, so they cannot be passed to SCSS colour
  * functions such as `darken()` or `rgba()`. Use a token with the opacity baked
- * in instead — `--sf-shadow-*` and `--sf-primary-bg` cover the existing cases.
+ * in instead, `--sf-shadow-*` and `--sf-primary-bg` cover the existing cases.
  */
 
 // ── Neutrals ─────────────────────────────────────────────────────────────────

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -32,6 +33,10 @@ declare(strict_types=1);
  */
 
 namespace SubtleForms\Support;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use InvalidArgumentException;
 use SubtleForms\Fields\FieldRegistry;
@@ -77,6 +82,13 @@ final class SchemaValidator {
 		'dynamic_field',
 		'post_selection',
 		'html',
+		'payment_product',
+		'payment_choice',
+		'payment_amount',
+		'payment_summary',
+		'payment_card',
+		'payment_coupon',
+		'payment_hidden_price',
 		'hidden',
 		'address',
 		'section_break',
@@ -116,6 +128,9 @@ final class SchemaValidator {
 					if ( ! empty( $types ) ) {
 						// include legacy aliases such as 'select'
 						$types[] = 'select';
+						// Add-on fields (Pro Signature, Calculation, Card Payment)
+						// stay in a form while the add-on is inactive (2.3.9).
+						$types = array_merge( $types, \SubtleForms\Fields\AddonFieldTypes::types() );
 						return array_values( array_unique( $types ) );
 					}
 				}
@@ -124,7 +139,7 @@ final class SchemaValidator {
 			}
 		}
 
-		return self::FALLBACK_ALLOWED_FIELD_TYPES;
+		return array_values( array_unique( array_merge( self::FALLBACK_ALLOWED_FIELD_TYPES, \SubtleForms\Fields\AddonFieldTypes::types() ) ) );
 	}
 
 	/**

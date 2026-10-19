@@ -8,6 +8,7 @@ import {
   Modal,
   TextControl,
   SelectControl,
+  Notice,
 } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
@@ -19,7 +20,6 @@ import DataTable from './DataTable';
 import PerformanceCell from './analytics/PerformanceCell';
 import { useAnalyticsSummary } from './analytics/useAnalytics';
 import { ConfirmModal } from '../modals';
-import { PRO_TEMPLATE_IDS } from '../utils/proFeatureDetector';
 import { apiGet, apiPost, apiPut, apiDelete } from '../utils/api';
 import {
   getFormTypeBadge,
@@ -78,6 +78,7 @@ export default function FormsList({
   // Each API call fetches CHUNK_PAGES pages at once.
   const CHUNK_PAGES = 5;
   const [buffer, setBuffer] = useState([]);
+  const [loadError, setLoadError] = useState('');
   const [pagesLoaded, setPagesLoaded] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [totalItems, setTotalItems] = useState(0);
@@ -167,18 +168,14 @@ export default function FormsList({
     setCurrentPage(1);
     try {
       const { rows, total } = await fetchBatch(0);
+      setLoadError('');
       setBuffer(rows);
       setPagesLoaded(Math.ceil(rows.length / perPage) || 0);
       setTotalItems(total);
     } catch (err) {
       console.error('FormsList fetch error:', err);
-      createErrorNotice(
-        err.message || __('Failed to load forms', 'subtleforms'),
-        { type: 'snackbar' }
-      );
-      setBuffer([]);
-      setPagesLoaded(0);
-      setTotalItems(0);
+      // Keep rows already on screen. A failed first load is an error, not an empty list.
+      setLoadError(__('Forms could not be loaded.', 'subtleforms'));
     } finally {
       setIsLoading(false);
     }
@@ -222,7 +219,7 @@ export default function FormsList({
   }, [currentPage, pagesLoaded, totalItems, perPage]);
 
   // Define table columns
-  // Views, submissions and conversion per form (2.1, Pro reports).
+  // Views, submissions and conversion per form (2.1).
   const analytics = useAnalyticsSummary(30);
   const formStats = analytics.data?.forms || {};
 
@@ -234,11 +231,6 @@ export default function FormsList({
       render: (title, form) => (
         <div className='sf-form-name'>
           <span className='sf-form-name__title'>{title}</span>
-          {form.template_id && PRO_TEMPLATE_IDS.includes(form.template_id) && (
-            <span className='sf-form-name__pro-badge'>
-              {__('Pro', 'subtleforms')}
-            </span>
-          )}
           {isNewForm(form) && (
             <span className='sf-form-name__new-badge'>
               {__('New', 'subtleforms')}
@@ -340,7 +332,6 @@ export default function FormsList({
       render: (_value, form) => (
         <PerformanceCell
           stats={formStats[form.id] || formStats[String(form.id)]}
-          locked={analytics.locked}
           loading={analytics.isLoading}
         />
       ),
@@ -351,7 +342,7 @@ export default function FormsList({
       sortable: true,
       render: (updatedAt) => {
         // Relative for the last 48h, then the site's WP date format
-        // everywhere (Part B8) — one helper shared with the Dashboard.
+        // everywhere (Part B8), one helper shared with the Dashboard.
         const displayText = formatRelativeDate(updatedAt);
         const absolute = formatDate(updatedAt);
         return (
@@ -787,6 +778,14 @@ export default function FormsList({
         </ContextualTip>
       )}
       
+      {loadError && buffer.length > 0 && (
+        <Notice status='error' isDismissible={false}>
+          {loadError}{' '}
+          <Button variant='link' onClick={loadFresh}>
+            {__('Retry', 'subtleforms')}
+          </Button>
+        </Notice>
+      )}
       <DataTable
         columns={displayColumns}
         data={displayedRows}
@@ -832,6 +831,17 @@ export default function FormsList({
               ]
         }
         emptyMessage={
+          loadError && buffer.length === 0 ? (
+            <div className='sf-empty' role='alert'>
+              <h3 className='sf-empty__title'>{__('Forms could not be loaded.', 'subtleforms')}</h3>
+              <p className='sf-empty__text'>{__('Check your connection, then try again.', 'subtleforms')}</p>
+              <div className='sf-empty__actions'>
+                <Button variant='primary' onClick={loadFresh}>
+                  {__('Retry', 'subtleforms')}
+                </Button>
+              </div>
+            </div>
+          ) : (
           <div className='sf-empty'>
             <span className='sf-empty__icon'>
               {searchTerm ? <Icon.Search size={20} /> : <Icon.FileText size={20} />}
@@ -851,6 +861,7 @@ export default function FormsList({
               </div>
             )}
           </div>
+          )
         }
         onRowClick={(form) => handleEditForm(form.id)}
       />

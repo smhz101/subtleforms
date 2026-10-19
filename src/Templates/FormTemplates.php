@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Form Templates
  *
@@ -9,6 +10,10 @@
  */
 
 namespace SubtleForms\Templates;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Form template definitions.
@@ -21,7 +26,48 @@ class FormTemplates {
 	 * @return array Array of template definitions.
 	 */
 	public static function get_all() {
-		$templates = array(
+		$templates = self::base_templates();
+
+		/**
+		 * Filter available form templates.
+		 *
+		 * Allows extensions (like Pro) to add additional templates.
+		 *
+		 * @param array $templates Associative array of template definitions.
+		 * @since 1.5.0
+		 */
+		$templates = apply_filters( 'subtleforms/templates', $templates );
+
+		return self::prepare_all( $templates );
+	}
+
+	/**
+	 * The templates this plugin ships, without add-on templates.
+	 *
+	 * @return array Template definitions.
+	 */
+	public static function free_templates(): array {
+		return self::prepare_all( self::base_templates() );
+	}
+
+	/**
+	 * @param array $templates Templates.
+	 * @return array
+	 */
+	private static function prepare_all( array $templates ): array {
+		foreach ( $templates as $key => $template ) {
+			if ( is_array( $template ) ) {
+				$templates[ $key ] = self::prepare_template( (string) $key, $template );
+			}
+		}
+		return $templates;
+	}
+
+	/**
+	 * @return array Template definitions.
+	 */
+	private static function base_templates(): array {
+		return array(
 			// ── Contact ─────────────────────────────────────────────────────
 			'contact'              => self::contact_form(),
 			'simple_contact'       => self::simple_contact_form(),
@@ -39,28 +85,10 @@ class FormTemplates {
 			'rsvp'                 => self::rsvp_form(),
 			// ── Support ─────────────────────────────────────────────────────
 			'bug_report'           => self::bug_report(),
+			// ── Payment ─────────────────────────────────────────────────────
+			'payment_form'        => self::payment_form(),
+			'donation_form'       => self::donation_form(),
 		);
-
-		/**
-		 * Filter available form templates.
-		 *
-		 * Allows extensions (like Pro) to add additional templates.
-		 *
-		 * @param array $templates Associative array of template definitions.
-		 * @since 1.5.0
-		 */
-		$templates = apply_filters( 'subtleforms/templates', $templates );
-
-		// Merge Pro stubs for any Pro templates not already present (e.g. when
-		// subtleforms-pro is inactive). Stubs carry no schema/fields — they are
-		// displayed as locked "upgrade" preview cards in the template browser.
-		foreach ( self::get_pro_stubs() as $key => $stub ) {
-			if ( ! isset( $templates[ $key ] ) ) {
-				$templates[ $key ] = $stub;
-			}
-		}
-
-		return $templates;
 	}
 
 	/**
@@ -573,74 +601,311 @@ class FormTemplates {
 	}
 
 	/**
-	 * Lightweight Pro template stubs shown as locked upgrade cards when
-	 * subtleforms-pro is not active. No schema or fields are included.
+	 * Payment form: a product and an order summary. Card numbers are not collected.
 	 *
-	 * @return array Associative array of stub template definitions.
+	 * @return array Template definition.
 	 */
-	private static function get_pro_stubs(): array {
+	private static function payment_form(): array {
 		return array(
-			// ── Contact ───────────────────────────────────────────────────
-			'advanced_contact'        => array( 'id' => 'advanced_contact',        'name' => __( 'Advanced Contact Form', 'subtleforms' ),          'description' => __( 'Enhanced contact form with department routing and file attachment.', 'subtleforms' ),        'category' => 'contact',      'icon' => 'email-alt',           'is_pro' => true ),
-			'sales_inquiry'           => array( 'id' => 'sales_inquiry',           'name' => __( 'Sales Inquiry', 'subtleforms' ),                   'description' => __( 'Capture qualified sales leads with company size, budget, and timeline.', 'subtleforms' ),    'category' => 'contact',      'icon' => 'chart-line',          'is_pro' => true ),
-			'partnership_request'     => array( 'id' => 'partnership_request',     'name' => __( 'Partnership Request', 'subtleforms' ),             'description' => __( 'Structured inquiry form for potential business partnerships.', 'subtleforms' ),              'category' => 'contact',      'icon' => 'groups',              'is_pro' => true ),
-			'press_inquiry'           => array( 'id' => 'press_inquiry',           'name' => __( 'Press Inquiry', 'subtleforms' ),                   'description' => __( 'Media and press contact form for journalists and publications.', 'subtleforms' ),             'category' => 'contact',      'icon' => 'megaphone',           'is_pro' => true ),
-			// ── Registration ──────────────────────────────────────────────
-			'event_registration'      => array( 'id' => 'event_registration',      'name' => __( 'Event Registration', 'subtleforms' ),              'description' => __( 'Professional event registration with attendee details and ticket selection.', 'subtleforms' ), 'category' => 'events',       'icon' => 'calendar-alt',        'is_pro' => true ),
-			'webinar_signup'          => array( 'id' => 'webinar_signup',          'name' => __( 'Webinar Signup', 'subtleforms' ),                  'description' => __( 'Register attendees for online events and webinars with session selection.', 'subtleforms' ),  'category' => 'events',       'icon' => 'video-alt2',          'is_pro' => true ),
-			'membership_application'  => array( 'id' => 'membership_application',  'name' => __( 'Membership Application', 'subtleforms' ),          'description' => __( 'Comprehensive membership application with plan selection and terms.', 'subtleforms' ),        'category' => 'registration', 'icon' => 'id-alt',              'is_pro' => true ),
-			'course_enrollment'       => array( 'id' => 'course_enrollment',       'name' => __( 'Course Enrollment', 'subtleforms' ),               'description' => __( 'Student enrollment form with course selection and prior experience.', 'subtleforms' ),        'category' => 'registration', 'icon' => 'welcome-learn-more',  'is_pro' => true ),
-			'volunteer_signup'        => array( 'id' => 'volunteer_signup',        'name' => __( 'Volunteer Signup', 'subtleforms' ),                'description' => __( 'Recruit volunteers with availability and skills assessment.', 'subtleforms' ),               'category' => 'registration', 'icon' => 'heart',               'is_pro' => true ),
-			'conference_registration' => array( 'id' => 'conference_registration', 'name' => __( 'Conference Registration', 'subtleforms' ),         'description' => __( 'Multi-day conference registration with session and workshop selection.', 'subtleforms' ),    'category' => 'events',       'icon' => 'building',            'is_pro' => true ),
-			// ── Feedback ──────────────────────────────────────────────────
-			'survey_nps'              => array( 'id' => 'survey_nps',              'name' => __( 'NPS Survey', 'subtleforms' ),                      'description' => __( 'Net Promoter Score survey to measure customer loyalty and satisfaction.', 'subtleforms' ),    'category' => 'survey',       'icon' => 'star-filled',         'is_pro' => true ),
-			'employee_satisfaction'   => array( 'id' => 'employee_satisfaction',   'name' => __( 'Employee Satisfaction Survey', 'subtleforms' ),    'description' => __( 'Measure internal team morale, engagement, and workplace satisfaction.', 'subtleforms' ),    'category' => 'survey',       'icon' => 'chart-bar',           'is_pro' => true ),
-			'onboarding_checkin'      => array( 'id' => 'onboarding_checkin',      'name' => __( 'Onboarding Check-in', 'subtleforms' ),             'description' => __( 'New employee onboarding feedback form for HR teams.', 'subtleforms' ),                      'category' => 'hr',           'icon' => 'welcome-add-page',    'is_pro' => true ),
-			// ── Support ───────────────────────────────────────────────────
-			'support_ticket'          => array( 'id' => 'support_ticket',          'name' => __( 'Support Ticket', 'subtleforms' ),                  'description' => __( 'Professional support ticket form with priority, category, and file attachment.', 'subtleforms' ), 'category' => 'support',   'icon' => 'sos',                 'is_pro' => true ),
-			'feature_request'         => array( 'id' => 'feature_request',         'name' => __( 'Feature Request', 'subtleforms' ),                 'description' => __( 'Structured form for collecting and prioritising product feature ideas.', 'subtleforms' ),    'category' => 'support',      'icon' => 'lightbulb',           'is_pro' => true ),
-			// ── Payment / Booking ─────────────────────────────────────────
-			'payment_form'            => array( 'id' => 'payment_form',            'name' => __( 'Payment Form', 'subtleforms' ),                    'description' => __( 'Secure payment collection with billing details and amount selection.', 'subtleforms' ),      'category' => 'payment',      'icon' => 'money-alt',           'is_pro' => true ),
-			'donation_form'           => array( 'id' => 'donation_form',           'name' => __( 'Donation Form', 'subtleforms' ),                   'description' => __( 'Charitable donation form with custom amount and dedication options.', 'subtleforms' ),       'category' => 'payment',      'icon' => 'heart',               'is_pro' => true ),
-			'booking_form'            => array( 'id' => 'booking_form',            'name' => __( 'Appointment Booking', 'subtleforms' ),             'description' => __( 'Schedule appointments with date/time selection and service type.', 'subtleforms' ),         'category' => 'events',       'icon' => 'clock',               'is_pro' => true ),
-			// ── HR / Applications ─────────────────────────────────────────
-			'job_application'         => array( 'id' => 'job_application',         'name' => __( 'Job Application', 'subtleforms' ),                 'description' => __( 'Comprehensive job application with resume upload and position selection.', 'subtleforms' ),  'category' => 'hr',           'icon' => 'businessman',         'is_pro' => true ),
-			'vendor_application'      => array( 'id' => 'vendor_application',      'name' => __( 'Vendor Application', 'subtleforms' ),              'description' => __( 'Supplier and vendor onboarding application with compliance details.', 'subtleforms' ),      'category' => 'hr',           'icon' => 'store',               'is_pro' => true ),
-			// ── Events & Webinars (new) ───────────────────────────────────
-			'virtual_summit_registration' => array( 'id' => 'virtual_summit_registration', 'name' => __( 'Virtual Summit Registration', 'subtleforms' ), 'description' => __( 'Multi-track virtual summit registration with session and networking preferences.', 'subtleforms' ), 'category' => 'events',      'icon' => 'video-alt2',        'is_pro' => true ),
-			'workshop_registration'       => array( 'id' => 'workshop_registration',       'name' => __( 'Workshop Registration', 'subtleforms' ),       'description' => __( 'In-person or online workshop sign-up with skill level and materials preferences.', 'subtleforms' ), 'category' => 'events',      'icon' => 'welcome-learn-more','is_pro' => true ),
-			'post_webinar_feedback'       => array( 'id' => 'post_webinar_feedback',       'name' => __( 'Post-Webinar Feedback', 'subtleforms' ),       'description' => __( 'Collect attendee ratings and improvement suggestions after a webinar.', 'subtleforms' ),          'category' => 'events',      'icon' => 'admin-comments',    'is_pro' => true ),
-			// ── Surveys & Research (new) ──────────────────────────────────
-			'market_research_survey'   => array( 'id' => 'market_research_survey',   'name' => __( 'Market Research Survey', 'subtleforms' ),   'description' => __( 'Gather demographic and buying-behaviour insights for product positioning.', 'subtleforms' ),       'category' => 'survey',      'icon' => 'chart-bar',         'is_pro' => true ),
-			'product_usability_survey' => array( 'id' => 'product_usability_survey', 'name' => __( 'Product Usability Survey', 'subtleforms' ), 'description' => __( 'Measure ease-of-use and identify friction points in your product experience.', 'subtleforms' ),    'category' => 'survey',      'icon' => 'visibility',        'is_pro' => true ),
-			'post_purchase_survey'     => array( 'id' => 'post_purchase_survey',     'name' => __( 'Post-Purchase Survey', 'subtleforms' ),     'description' => __( 'Capture customer satisfaction and referral source immediately after a purchase.', 'subtleforms' ), 'category' => 'survey',      'icon' => 'cart',              'is_pro' => true ),
-			'customer_exit_survey'     => array( 'id' => 'customer_exit_survey',     'name' => __( 'Customer Exit Survey', 'subtleforms' ),     'description' => __( 'Understand why customers are leaving and what would bring them back.', 'subtleforms' ),            'category' => 'survey',      'icon' => 'migrate',           'is_pro' => true ),
-			// ── HR & Recruitment (new) ────────────────────────────────────
-			'leave_request'             => array( 'id' => 'leave_request',             'name' => __( 'Leave Request', 'subtleforms' ),             'description' => __( 'Employee leave and time-off request form with manager routing.', 'subtleforms' ),              'category' => 'hr',          'icon' => 'calendar-alt',      'is_pro' => true ),
-			'performance_review_self'   => array( 'id' => 'performance_review_self',   'name' => __( 'Self-Assessment Review', 'subtleforms' ),   'description' => __( 'Employee self-evaluation form for annual or mid-year performance reviews.', 'subtleforms' ),    'category' => 'hr',          'icon' => 'chart-line',        'is_pro' => true ),
-			'employee_offboarding'      => array( 'id' => 'employee_offboarding',      'name' => __( 'Employee Offboarding', 'subtleforms' ),      'description' => __( 'Exit interview and asset return checklist for departing employees.', 'subtleforms' ),           'category' => 'hr',          'icon' => 'exit',              'is_pro' => true ),
-			'internal_transfer_request' => array( 'id' => 'internal_transfer_request', 'name' => __( 'Internal Transfer Request', 'subtleforms' ), 'description' => __( 'Request a department or role transfer with motivation and manager sign-off.', 'subtleforms' ),   'category' => 'hr',          'icon' => 'randomize',         'is_pro' => true ),
-			// ── E-Commerce (new) ──────────────────────────────────────────
-			'product_return'        => array( 'id' => 'product_return',        'name' => __( 'Return & Refund Request', 'subtleforms' ),       'description' => __( 'Customer product return and refund request with reason and photographic evidence.', 'subtleforms' ), 'category' => 'ecommerce',   'icon' => 'undo',              'is_pro' => true ),
-			'warranty_registration' => array( 'id' => 'warranty_registration', 'name' => __( 'Warranty Registration', 'subtleforms' ),        'description' => __( 'Register a purchased product for warranty coverage and support benefits.', 'subtleforms' ),           'category' => 'ecommerce',   'icon' => 'shield',            'is_pro' => true ),
-			'pre_order_form'        => array( 'id' => 'pre_order_form',        'name' => __( 'Pre-Order Form', 'subtleforms' ),               'description' => __( 'Capture customer interest and deposits for upcoming products before launch.', 'subtleforms' ),         'category' => 'ecommerce',   'icon' => 'cart',              'is_pro' => true ),
-			'affiliate_application' => array( 'id' => 'affiliate_application', 'name' => __( 'Affiliate Program Application', 'subtleforms' ),'description' => __( 'Recruit new affiliate and referral partners with traffic and audience data.', 'subtleforms' ),          'category' => 'ecommerce',   'icon' => 'networking',        'is_pro' => true ),
-			// ── Healthcare (new) ──────────────────────────────────────────
-			'patient_intake'       => array( 'id' => 'patient_intake',       'name' => __( 'Patient Intake Form', 'subtleforms' ),              'description' => __( 'New patient registration with medical history and insurance information.', 'subtleforms' ),            'category' => 'healthcare',  'icon' => 'heart',             'is_pro' => true ),
-			'appointment_request'  => array( 'id' => 'appointment_request',  'name' => __( 'Medical Appointment Request', 'subtleforms' ),      'description' => __( 'Request a doctor or specialist appointment with preferred dates and reason.', 'subtleforms' ),         'category' => 'healthcare',  'icon' => 'calendar',          'is_pro' => true ),
-			'health_assessment'    => array( 'id' => 'health_assessment',    'name' => __( 'Health & Wellness Questionnaire', 'subtleforms' ),  'description' => __( 'Lifestyle and wellness assessment to guide personalised health recommendations.', 'subtleforms' ),     'category' => 'healthcare',  'icon' => 'plus-alt',          'is_pro' => true ),
-			// ── Legal & Compliance (new) ──────────────────────────────────
-			'gdpr_request'  => array( 'id' => 'gdpr_request',  'name' => __( 'GDPR Data Request', 'subtleforms' ),          'description' => __( 'Handle GDPR subject access, erasure, and data portability requests securely.', 'subtleforms' ),           'category' => 'legal',       'icon' => 'privacy',           'is_pro' => true ),
-			'consent_form'  => array( 'id' => 'consent_form',  'name' => __( 'Consent & Terms Agreement', 'subtleforms' ),  'description' => __( 'Collect explicit informed consent with version-stamped terms and conditions.', 'subtleforms' ),            'category' => 'legal',       'icon' => 'yes-alt',           'is_pro' => true ),
-			'nda_agreement' => array( 'id' => 'nda_agreement', 'name' => __( 'NDA Agreement Request', 'subtleforms' ),      'description' => __( 'Collect party details and intent for mutual or one-way NDA agreements.', 'subtleforms' ),               'category' => 'legal',       'icon' => 'lock',              'is_pro' => true ),
-                        'grant_application' => array( 'id' => 'grant_application', 'name' => __( 'Grant Application', 'subtleforms' ), 'description' => __( 'Four-step grant or funding application covering organisation, project, budget, and supporting information.', 'subtleforms' ), 'category' => 'legal', 'icon' => 'awards', 'is_pro' => true, 'schema' => array( 'metadata' => array( 'type' => 'multi-step' ) ) ),
-                        // ── Conversational / Quizzes ──────────────────────────────────
-                        'product_fit_quiz'   => array( 'id' => 'product_fit_quiz',   'name' => __( 'Product Fit Quiz', 'subtleforms' ),         'description' => __( 'Interactive conversational quiz that qualifies leads by matching them to the right plan or product.', 'subtleforms' ),          'category' => 'lead',    'icon' => 'star-filled',   'is_pro' => true, 'schema' => array( 'metadata' => array( 'type' => 'conversational' ) ) ),
-                        'work_style_quiz'    => array( 'id' => 'work_style_quiz',    'name' => __( 'Work Style Quiz', 'subtleforms' ),          'description' => __( 'Personality-style quiz that reveals how someone works best: great for team-building and HR insights.', 'subtleforms' ),         'category' => 'survey',  'icon' => 'lightbulb',     'is_pro' => true, 'schema' => array( 'metadata' => array( 'type' => 'conversational' ) ) ),
-                        'coaching_discovery' => array( 'id' => 'coaching_discovery', 'name' => __( 'Coaching Discovery Quiz', 'subtleforms' ),  'description' => __( 'Conversational intake questionnaire to qualify coaching or consulting prospects before a discovery call.', 'subtleforms' ),   'category' => 'lead',    'icon' => 'format-chat',   'is_pro' => true, 'schema' => array( 'metadata' => array( 'type' => 'conversational' ) ) ),
-                        // ── Multi-Step ────────────────────────────────────────────────
-                        'product_demo_request' => array( 'id' => 'product_demo_request', 'name' => __( 'Product Demo Request', 'subtleforms' ),    'description' => __( 'Three-step form to qualify and book a product demo: contact details, project needs, and preferred schedule.', 'subtleforms' ), 'category' => 'lead',      'icon' => 'desktop',     'is_pro' => true, 'schema' => array( 'metadata' => array( 'type' => 'multi-step' ) ) ),
-                        'financial_quote'      => array( 'id' => 'financial_quote',      'name' => __( 'Financial Quote Request', 'subtleforms' ), 'description' => __( 'Three-step quote request for insurance, loans, or financial services: personal info, coverage needs, and confirmation.', 'subtleforms' ), 'category' => 'ecommerce', 'icon' => 'chart-line',  'is_pro' => true, 'schema' => array( 'metadata' => array( 'type' => 'multi-step' ) ) ),
+			'id'          => 'payment_form',
+			'name'        => __( 'Payment Form', 'subtleforms' ),
+			'description' => __( 'A product and an order summary. Card payment needs SubtleForms Pro.', 'subtleforms' ),
+			'category'    => 'payment',
+			'icon'        => 'money-alt',
+			'is_pro'      => false,
+			'schema'      => array(
+				'metadata' => array(
+					'title'       => __( 'Payment', 'subtleforms' ),
+					'name'        => 'payment_form',
+					'description' => '',
+				),
+				'fields'   => array(
+					array(
+						'id'          => 'product',
+						'type'        => 'payment_product',
+						'label'       => __( 'Product', 'subtleforms' ),
+						'productName' => __( 'Product', 'subtleforms' ),
+						'price'       => 10,
+					),
+					array(
+						'id'    => 'order_summary',
+						'type'  => 'payment_summary',
+						'label' => __( 'Order Summary', 'subtleforms' ),
+					),
+					array(
+						'id'      => 'payment_note',
+						'type'    => 'html',
+						'label'   => __( 'Note', 'subtleforms' ),
+						'content' => __( 'Card payment needs SubtleForms Pro.', 'subtleforms' ),
+					),
+				),
+			),
 		);
 	}
+
+	/**
+	 * Donation form with a custom amount.
+	 *
+	 * @return array Template definition.
+	 */
+	private static function donation_form(): array {
+		return array(
+			'id'          => 'donation_form',
+			'name'        => __( 'Donation Form', 'subtleforms' ),
+			'description' => __( 'A donation with a custom amount.', 'subtleforms' ),
+			'category'    => 'payment',
+			'icon'        => 'heart',
+			'is_pro'      => false,
+			'schema'      => array(
+				'metadata' => array(
+					'title'       => __( 'Donation', 'subtleforms' ),
+					'name'        => 'donation_form',
+					'description' => '',
+				),
+				'fields'   => array(
+					array(
+						'id'    => 'custom_amount',
+						'type'  => 'payment_amount',
+						'label' => __( 'Custom Amount', 'subtleforms' ),
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Drop example.com webhooks, notify the site owner, and keep payment
+	 * templates away from card numbers. Runs after other plugins add templates.
+	 *
+	 * @param string $id       Template id.
+	 * @param array  $template Template definition.
+	 * @return array
+	 */
+	private static function prepare_template( string $id, array $template ): array {
+		$schema = ( isset( $template['schema'] ) && is_array( $template['schema'] ) ) ? $template['schema'] : array();
+
+		// Templates from add-ons (SubtleForms Pro) keep their fields, such as
+		// the Card Payment field; only their actions are checked here.
+		if ( ! empty( $template['is_pro'] ) ) {
+			if ( isset( $schema['actions'] ) || isset( $schema['fields'] ) ) {
+				$schema['actions']  = self::owner_actions( is_array( $schema['actions'] ?? null ) ? $schema['actions'] : array() );
+				$template['schema'] = $schema;
+			}
+			return $template;
+		}
+
+		foreach ( array( 'fields', 'steps' ) as $list ) {
+			if ( isset( $schema[ $list ] ) && is_array( $schema[ $list ] ) ) {
+				$schema[ $list ] = self::prepare_field_list( $schema[ $list ], $id );
+			}
+		}
+
+		if ( 'payment_form' === $id ) {
+			$schema['fields'] = self::ensure_payment_fields( is_array( $schema['fields'] ?? null ) ? $schema['fields'] : array() );
+		}
+		if ( 'donation_form' === $id ) {
+			$schema['fields'] = self::ensure_custom_amount( is_array( $schema['fields'] ?? null ) ? $schema['fields'] : array() );
+		}
+
+		$schema['actions']   = self::owner_actions( is_array( $schema['actions'] ?? null ) ? $schema['actions'] : array() );
+		$template['schema']  = $schema;
+		return $template;
+	}
+
+	/**
+	 * @param array<int, mixed> $fields Fields or steps.
+	 * @param string            $id     Template id.
+	 * @return array<int, mixed>
+	 */
+	private static function prepare_field_list( array $fields, string $id ): array {
+		$out = array();
+		foreach ( $fields as $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+			foreach ( array( 'fields', 'children' ) as $child ) {
+				if ( isset( $field[ $child ] ) && is_array( $field[ $child ] ) ) {
+					$field[ $child ] = self::prepare_field_list( $field[ $child ], $id );
+				}
+			}
+			if ( self::is_card_field( $field ) ) {
+				continue;
+			}
+			if ( 'donation_form' === $id && 'custom_amount' === (string) ( $field['id'] ?? '' ) ) {
+				$field['type']  = 'payment_amount';
+				$field['label'] = __( 'Custom Amount', 'subtleforms' );
+			}
+			$out[] = $field;
+		}
+		return $out;
+	}
+
+	/**
+	 * @param array<string, mixed> $field Field definition.
+	 */
+	private static function is_card_field( array $field ): bool {
+		if ( 'payment_card' === ( $field['type'] ?? '' ) ) {
+			return false;
+		}
+		$haystack = strtolower(
+			(string) ( $field['id'] ?? '' ) . ' ' . (string) ( $field['key'] ?? '' ) . ' ' . (string) ( $field['label'] ?? '' )
+		);
+		return 1 === preg_match( '/card|cvv|expiry/', $haystack );
+	}
+
+	/**
+	 * @param array<int, mixed> $fields Fields.
+	 * @return array<int, mixed>
+	 */
+	private static function ensure_payment_fields( array $fields ): array {
+		if ( ! self::field_tree_has( $fields, static function ( array $field ): bool {
+			return 'payment_product' === ( $field['type'] ?? '' );
+		} ) ) {
+			$fields[] = array(
+				'id'          => 'product',
+				'type'        => 'payment_product',
+				'label'       => __( 'Product', 'subtleforms' ),
+				'productName' => __( 'Product', 'subtleforms' ),
+				'price'       => 10,
+			);
+		}
+		if ( ! self::field_tree_has( $fields, static function ( array $field ): bool {
+			return 'payment_summary' === ( $field['type'] ?? '' );
+		} ) ) {
+			$fields[] = array(
+				'id'    => 'order_summary',
+				'type'  => 'payment_summary',
+				'label' => __( 'Order Summary', 'subtleforms' ),
+			);
+		}
+		if ( ! self::field_tree_has( $fields, static function ( array $field ): bool {
+			return 'payment_note' === ( $field['id'] ?? '' );
+		} ) ) {
+			$fields[] = array(
+				'id'      => 'payment_note',
+				'type'    => 'html',
+				'label'   => __( 'Note', 'subtleforms' ),
+				'content' => __( 'Card payment needs SubtleForms Pro.', 'subtleforms' ),
+			);
+		}
+		return $fields;
+	}
+
+	/**
+	 * @param array<int, mixed> $fields Fields.
+	 * @return array<int, mixed>
+	 */
+	private static function ensure_custom_amount( array $fields ): array {
+		if ( self::field_tree_has( $fields, static function ( array $field ): bool {
+			return 'payment_amount' === ( $field['type'] ?? '' );
+		} ) ) {
+			return $fields;
+		}
+		$fields[] = array(
+			'id'    => 'custom_amount',
+			'type'  => 'payment_amount',
+			'label' => __( 'Custom Amount', 'subtleforms' ),
+		);
+		return $fields;
+	}
+
+	/**
+	 * @param array<int, mixed> $fields Fields.
+	 * @param callable          $match  Field predicate.
+	 */
+	private static function field_tree_has( array $fields, callable $match ): bool {
+		foreach ( $fields as $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+			if ( $match( $field ) ) {
+				return true;
+			}
+			foreach ( array( 'fields', 'children' ) as $child ) {
+				if ( isset( $field[ $child ] ) && is_array( $field[ $child ] ) && self::field_tree_has( $field[ $child ], $match ) ) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Keep every action except example.com webhooks and previous emails, then
+	 * add one email to the site owner. An empty message sends {all_fields}.
+	 *
+	 * @param array<int, mixed> $actions Actions.
+	 * @return array<int, mixed>
+	 */
+	private static function owner_actions( array $actions ): array {
+		$kept = array();
+		foreach ( $actions as $action ) {
+			if ( ! is_array( $action ) ) {
+				continue;
+			}
+			$type = (string) ( $action['type'] ?? '' );
+			if ( 'email' === $type ) {
+				continue;
+			}
+			if ( 'webhook' === $type && self::webhook_is_example( $action ) ) {
+				continue;
+			}
+			$kept[] = $action;
+		}
+		$kept[] = array(
+			'id'      => 'email',
+			'type'    => 'email',
+			'enabled' => true,
+			'config'  => array(
+				'to'      => '{admin_email}',
+				'subject' => __( 'New entry: {form_title}', 'subtleforms' ),
+				'message' => '',
+			),
+		);
+		return $kept;
+	}
+
+	/**
+	 * @param array<string, mixed> $action Webhook action.
+	 */
+	private static function webhook_is_example( array $action ): bool {
+		$values = array();
+		if ( isset( $action['url'] ) && is_string( $action['url'] ) ) {
+			$values[] = $action['url'];
+		}
+		$config = $action['config'] ?? array();
+		if ( is_array( $config ) ) {
+			foreach ( $config as $value ) {
+				if ( is_string( $value ) ) {
+					$values[] = $value;
+				}
+			}
+		}
+		foreach ( $values as $value ) {
+			if ( self::is_example_host( $value ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Whether a webhook address is example.com or a subdomain of it.
+	 */
+	private static function is_example_host( string $value ): bool {
+		$candidate = trim( $value );
+		if ( '' === $candidate ) {
+			return false;
+		}
+		if ( ! str_contains( $candidate, '://' ) ) {
+			$candidate = 'https://' . $candidate;
+		}
+		$host = function_exists( 'wp_parse_url' ) ? wp_parse_url( $candidate, PHP_URL_HOST ) : parse_url( $candidate, PHP_URL_HOST ); // phpcs:ignore WordPress.WP.AlternativeFunctions.parse_url_parse_url -- Fallback outside WordPress.
+		if ( ! is_string( $host ) || '' === $host ) {
+			return false;
+		}
+		$host = strtolower( $host );
+		return 'example.com' === $host || str_ends_with( $host, '.example.com' );
+	}
+
 }

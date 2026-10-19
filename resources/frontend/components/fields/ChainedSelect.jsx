@@ -1,4 +1,3 @@
-import { useEffect, useRef } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import {
@@ -34,31 +33,9 @@ export default function ChainedSelect( {
   const rows = chainedSelectLevels( config, activeSelections, {
     includeEmpty: presentation === 'columns',
   } );
-  const seeded = useRef( '' );
-
-  useEffect( () => {
-    if ( presentation !== 'columns' || disabled ) {
-      return;
-    }
-    const current = Array.isArray( value ) ? value : [];
-    const next = defaultChainedColumnSelections( config, current );
-    if ( ! next.length || next[ 0 ] === undefined || String( next[ 0 ] ) === '' ) {
-      return;
-    }
-    if (
-      current.length === next.length &&
-      current.every( ( item, index ) => String( item ) === String( next[ index ] ) )
-    ) {
-      return;
-    }
-    const key = next.map( ( item ) => String( item ) ).join( '\u0001' );
-    if ( seeded.current === key ) {
-      return;
-    }
-    seeded.current = key;
-    onChange( next );
-  }, [ presentation, disabled, config, value, onChange ] );
-
+  // Columns show the first choice's lists before anything is picked, but
+  // that preview is never written into the answer: an untouched required
+  // field stays unanswered (FLD2-09).
   const handleLevelChange = ( depth, newValue ) => {
     onChange( nextChainedSelections( activeSelections, depth, newValue ) );
   };
@@ -108,7 +85,7 @@ export default function ChainedSelect( {
         const { depth, options } = row;
         const levelId = depth === 0 ? inputId : `${ inputId }-${ depth }`;
         const levelLabel = row.label || __( 'Selection', 'subtleforms' );
-        const selected = activeSelections[ depth ] ?? '';
+        const selected = selections[ depth ] ?? '';
 
         if ( presentation === 'dropdowns' ) {
           return (

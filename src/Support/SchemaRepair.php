@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Repairs for saved schemas whose structure older builds got wrong.
  *
@@ -9,6 +10,10 @@
 declare(strict_types=1);
 
 namespace SubtleForms\Support;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Structural repairs applied when a schema is served or copied.

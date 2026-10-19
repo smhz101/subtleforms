@@ -1,7 +1,5 @@
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import Icon from '../../ui/Icon';
-import { requirePro } from '../../utils/featureGate';
 import WebhooksPanel from './extensions/WebhooksPanel';
 import EmailMarketingPanel from './extensions/EmailMarketingPanel';
 import CrmPanel from './extensions/CrmPanel';
@@ -37,49 +35,14 @@ const EXTENSION_ORDER = [
 /**
  * Extension status dot
  */
-function StatusDot({ enabled, configured, available }) {
-  if (!available) {
-    return (
-      <span className='sf-ext-status sf-ext-status--locked' title={__('Pro feature', 'subtleforms')}>
-        <Icon.Lock size={12} aria-hidden='true' />
-      </span>
-    );
-  }
+function StatusDot({ enabled, configured }) {
   if (enabled && configured) return <span className='sf-ext-status sf-ext-status--active' title={__('Active', 'subtleforms')} />;
-  if (enabled) return <span className='sf-ext-status sf-ext-status--warning' title={__('Enabled – needs configuration', 'subtleforms')} />;
+  if (enabled) return <span className='sf-ext-status sf-ext-status--warning' title={__('Enabled, needs configuration', 'subtleforms')} />;
   return <span className='sf-ext-status sf-ext-status--inactive' title={__('Disabled', 'subtleforms')} />;
 }
 
 /**
- * Pro-lock overlay for unavailable extensions.
- * Minimal inline notice — no blur, no blocking overlay.
- */
-function ProLockOverlay({ slug, label }) {
-  return (
-    <div className='sf-ext-pro-overlay'>
-      <span className='sf-ext-pro-overlay__icon' aria-hidden='true'>
-        <Icon.Lock size={16} />
-      </span>
-      <div className='sf-ext-pro-overlay__inner'>
-        <p className='sf-ext-pro-overlay__title'>
-          {__('Included with SubtleForms Pro', 'subtleforms')}
-        </p>
-        <p className='sf-ext-pro-overlay__desc'>
-          {__('You can look around. Settings unlock as soon as your license is active.', 'subtleforms')}
-        </p>
-      </div>
-      <button
-        type='button'
-        className='components-button is-primary is-compact sf-ext-pro-overlay__cta'
-        onClick={() => requirePro( `extensions.${slug}`, () => {}, { label } )}>
-        {__('Unlock', 'subtleforms')}
-      </button>
-    </div>
-  );
-}
-
-/**
- * ExtensionsSettings — two-panel layout for the Settings > Extensions tab.
+ * ExtensionsSettings, two-panel layout for the Settings > Extensions tab.
  *
  * @param {Object}   props
  * @param {Object}   props.settings      - Full settings object from useSettingsState
@@ -87,7 +50,13 @@ function ProLockOverlay({ slug, label }) {
  * @param {Object}   props.fieldErrors   - Per-field validation errors
  */
 export default function ExtensionsSettings({ settings, updateSetting, fieldErrors = {} }) {
-  const extensions = window.subtleformsAdmin?.extensions ?? {};
+  // Only integrations this site can use are listed. SubtleForms Pro adds
+  // its own (email marketing, CRM, WooCommerce, PDF, translation, payments).
+  const allExtensions = window.subtleformsAdmin?.extensions ?? {};
+  const extensions = Object.fromEntries(
+    Object.entries(allExtensions).filter(([, ext]) => ext && ext.available)
+  );
+  const hasPro = !!window.subtleformsAdmin?.hasProPlugin;
   const hashSlug = (window.location.hash.match(/[#&]ext=([\w-]+)/) || [])[1];
   const firstSlug =
     (hashSlug && extensions[hashSlug] ? hashSlug : null) ??
@@ -96,7 +65,6 @@ export default function ExtensionsSettings({ settings, updateSetting, fieldError
   const [activeSlug, setActiveSlug] = useState(firstSlug);
 
   const ActivePanel = EXTENSION_PANELS[activeSlug] ?? null;
-  const activeExt = extensions[activeSlug] ?? {};
 
   return (
     <div className='sf-ext-settings'>
@@ -121,30 +89,31 @@ export default function ExtensionsSettings({ settings, updateSetting, fieldError
                     window.history.replaceState(null, '', `#${params.toString()}`);
                   }}>
                   <span className='sf-ext-settings__item-label'>{ext.label}</span>
-                  <StatusDot
-                    enabled={ext.enabled}
-                    configured={ext.configured}
-                    available={ext.available}
-                  />
+                  <StatusDot enabled={ext.enabled} configured={ext.configured} />
                 </button>
               </li>
             );
           })}
         </ul>
+        {!hasPro && (
+          <p className='sf-ext-settings__more'>
+            {__('SubtleForms Pro adds Mailchimp, Brevo, HubSpot, WooCommerce, entry PDFs, WPML and Polylang, and Stripe.', 'subtleforms')}{' '}
+            <a href='https://subtleforms.com/pricing/' target='_blank' rel='noopener noreferrer'>
+              {__('About SubtleForms Pro', 'subtleforms')}
+            </a>
+          </p>
+        )}
       </nav>
 
       {/* Content */}
       <div className='sf-ext-settings__content'>
         {ActivePanel && (
           <div className='sf-ext-settings__panel-wrap'>
-            {!activeExt.available && <ProLockOverlay slug={activeSlug} label={activeExt.label} />}
-            <fieldset className='sf-ext-settings__fields' disabled={!activeExt.available}>
             <ActivePanel
               settings={settings}
               updateSetting={updateSetting}
               fieldErrors={fieldErrors}
             />
-            </fieldset>
           </div>
         )}
       </div>

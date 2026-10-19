@@ -1,10 +1,11 @@
 <?php
 /**
- * Payment field types added in 2.1: Product, Priced Choice and Card.
+ * Payment field types added in 2.1: Product and Priced Choice.
  *
  * Prices live in the form schema, so the server can always recompute the order
- * (see SubtleForms\Payments\Pricing). Card collects the payment details through
- * the active gateway (Stripe in SubtleForms Pro).
+ * (see SubtleForms\Payments\Pricing). The Card Payment field (`payment_card`)
+ * is registered by a payment gateway add-on such as SubtleForms Pro, through
+ * the `subtleforms/fields/register` action.
  *
  * @package SubtleForms\Fields
  * @since   2.1.0
@@ -18,8 +19,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class PaymentFields {
 
-	const CAP = 'actions.payment';
-
 	public static function register( FieldRegistry $registry ): void {
 
 		// Product: a named item with a price and an optional quantity box.
@@ -31,7 +30,6 @@ final class PaymentFields {
 				category: 'payment',
 				icon: 'dashicons-cart',
 				kind: 'input',
-				requiredCapabilities: array( self::CAP ),
 				fieldSpecificAttributes: array(
 					'productName'   => '',
 					'price'         => 10,
@@ -93,7 +91,6 @@ final class PaymentFields {
 				category: 'payment',
 				icon: 'dashicons-tickets-alt',
 				kind: 'input',
-				requiredCapabilities: array( self::CAP ),
 				fieldSpecificAttributes: array(
 					'displayAs' => 'radio',
 					'showPrice' => true,
@@ -148,31 +145,6 @@ final class PaymentFields {
 						'type'  => 'checkbox',
 						'name'  => 'showPrice',
 						'label' => __( 'Show prices next to options', 'subtleforms' ),
-					),
-				),
-				meta: array( 'category' => 'regular' ),
-			)
-		);
-
-		// Card: secure payment details from the active gateway.
-		self::add(
-			$registry,
-			new FieldDefinition(
-				type: 'payment_card',
-				label: __( 'Card Payment', 'subtleforms' ),
-				category: 'payment',
-				icon: 'dashicons-id',
-				kind: 'input',
-				requiredCapabilities: array( self::CAP ),
-				fieldSpecificAttributes: array(
-					'label' => __( 'Payment details', 'subtleforms' ),
-				),
-				inspectorControls: array(
-					array(
-						'type'  => 'text',
-						'name'  => 'label',
-						'label' => __( 'Label', 'subtleforms' ),
-						'help'  => __( 'Card, wallet and bank details are collected by your payment gateway and never touch your server.', 'subtleforms' ),
 					),
 				),
 				meta: array( 'category' => 'regular' ),

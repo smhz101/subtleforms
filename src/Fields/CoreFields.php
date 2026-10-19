@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SubtleForms Core Field Definitions
  *
@@ -7,6 +8,10 @@
  */
 
 namespace SubtleForms\Fields;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Register all core field definitions with normalized architecture.
@@ -350,7 +355,7 @@ final class CoreFields {
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					// A checkbox is a single consent-style checkbox (NOT a
-					// multi-option list — that is `multiple_choice`). The label
+					// multi-option list, that is `multiple_choice`). The label
 					// next to the box is the consent statement, so canvas, preview,
 					// settings and frontend all read the same `checkboxLabel`.
 					'checkboxLabel' => __( 'I agree', 'subtleforms' ),
@@ -372,7 +377,7 @@ final class CoreFields {
 			)
 		);
 
-		// Consent / GDPR field — a single checkbox with a rich label that can
+		// Consent / GDPR field, a single checkbox with a rich label that can
 		// link to the Privacy Policy, required by default, and recorded as a
 		// consent + timestamp on submission. Distinct from `checkbox` so legal
 		// consent is explicit and auditable.
@@ -1568,7 +1573,6 @@ final class CoreFields {
 				category: 'payment',
 				icon: 'dashicons-money-alt',
 				kind: 'input',
-				requiredCapabilities: array( 'actions.payment' ),
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					'placeholder'        => '',
@@ -1626,7 +1630,6 @@ final class CoreFields {
 				category: 'payment',
 				icon: 'dashicons-calculator',
 				kind: 'dynamic',
-				requiredCapabilities: array( 'actions.payment' ),
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					'showItems'    => true,
@@ -1701,7 +1704,6 @@ final class CoreFields {
 				category: 'payment',
 				icon: 'dashicons-tag',
 				kind: 'input',
-				requiredCapabilities: array( 'actions.payment' ),
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					'placeholder' => __( 'Enter coupon code', 'subtleforms' ),
@@ -1737,7 +1739,6 @@ final class CoreFields {
 				category: 'payment',
 				icon: 'dashicons-hidden',
 				kind: 'system',
-				requiredCapabilities: array( 'actions.payment' ),
 				baseAttributes: array(),
 				fieldSpecificAttributes: array(
 					'amount'      => 0,
@@ -1761,7 +1762,7 @@ final class CoreFields {
 						'type'  => 'text',
 						'name'  => 'description',
 						'label' => __( 'Description', 'subtleforms' ),
-						'help'  => __( 'Optional description for debugging', 'subtleforms' ),
+						'help'  => __( 'Name of the line in the order summary and receipt. Not shown on the form.', 'subtleforms' ),
 					),
 				),
 				meta: array( 'category' => 'system' ),

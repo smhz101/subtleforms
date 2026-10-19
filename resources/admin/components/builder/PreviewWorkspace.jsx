@@ -1,9 +1,10 @@
-import { useState } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import { Button, Notice } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import FormPreviewBody from '../form-preview/FormPreviewBody';
 import FormAppearancePanel from './appearance/FormAppearancePanel';
 import { appearanceBackdrop, previewBreakpoints } from '../../../shared/appearance';
+import { previewScale } from '../../../shared/previewScale';
 import Icon from '../../ui/Icon';
 import './PreviewWorkspace.scss';
 
@@ -46,8 +47,32 @@ export default function PreviewWorkspace( {
 } ) {
   const [ viewport, setViewport ] = useState( 'desktop' );
   const [ showControls, setShowControls ] = useState( true );
+  const [ scale, setScale ] = useState( 1 );
+  const [ stageHeight, setStageHeight ] = useState( 0 );
+  const canvasRef = useRef( null );
+  const formRef = useRef( null );
 
   const active = VIEWPORTS.find( ( v ) => v.id === viewport ) || VIEWPORTS[ 0 ];
+
+  useEffect( () => {
+    const canvas = canvasRef.current;
+    const form = formRef.current;
+    if ( ! canvas || ! form || typeof ResizeObserver === 'undefined' ) {
+      return undefined;
+    }
+    const measure = () => {
+      const styles = window.getComputedStyle( canvas );
+      const pad = ( parseFloat( styles.paddingLeft ) || 0 ) + ( parseFloat( styles.paddingRight ) || 0 );
+      const nextScale = previewScale( canvas.clientWidth - pad, active.width );
+      setScale( nextScale );
+      setStageHeight( form.offsetHeight * nextScale );
+    };
+    measure();
+    const observer = new ResizeObserver( measure );
+    observer.observe( canvas );
+    observer.observe( form );
+    return () => observer.disconnect();
+  }, [ active.width, schema ] );
 
   return (
     <div className='sf-preview-workspace'>
@@ -94,12 +119,17 @@ export default function PreviewWorkspace( {
         className={ `sf-preview-workspace__body${
           showControls ? '' : ' is-controls-hidden'
         }` }>
-        <div className='sf-preview-workspace__canvas'>
-          <div className='sf-preview-workspace__stage'>
+        <div className='sf-preview-workspace__canvas' ref={ canvasRef }>
+          <div
+            className='sf-preview-workspace__stage'
+            style={ stageHeight ? { height: `${ stageHeight }px` } : undefined }>
             <div
+              ref={ formRef }
               className='sf-preview-workspace__form'
               style={ {
                 width: `${ active.width }px`,
+                transform: `scale(${ scale })`,
+                transformOrigin: 'top center',
                 // A form made for a dark footer is previewed on one (2.3.0).
                 ...( appearanceBackdrop( schema?.metadata?.appearance )
                   ? { background: appearanceBackdrop( schema?.metadata?.appearance ), padding: '24px' }

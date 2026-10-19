@@ -1,5 +1,5 @@
 /**
- * useBuilderOrchestrator — Save / Publish / Delete API orchestration
+ * useBuilderOrchestrator, Save / Publish / Delete API orchestration
  *
  * Extracts all side-effectful form lifecycle operations from FormBuilderInner:
  * - performSave (draft save, autosave, publish)
@@ -159,7 +159,7 @@ export default function useBuilderOrchestrator({
 				});
 
 				if (!ok) {
-					// HTTP 422 — Validation error
+					// HTTP 422, Validation error
 					if (isValidationError({ status: saveStatus })) {
 						// Normalise across two API shapes:
 						//   new: { error: { meta: { fields: [...] } } }
@@ -217,7 +217,7 @@ export default function useBuilderOrchestrator({
 						}
 					}
 
-					// HTTP 429 — Rate limit
+					// HTTP 429, Rate limit
 					if (isRateLimitError({ status: saveStatus })) {
 						const retryAfter =
 							body?.data?.retry_after ||
@@ -261,7 +261,7 @@ export default function useBuilderOrchestrator({
 						return;
 					}
 
-					// HTTP 409 — Conflict
+					// HTTP 409, Conflict
 					if (isConflictError({ status: saveStatus })) {
 						const currentETag = body?.data?.current_etag;
 						const providedIfMatch =
@@ -515,8 +515,8 @@ export default function useBuilderOrchestrator({
 				);
 				onSaved?.(detail);
 
+				removeNotice(ERROR_NOTICE_ID);
 				if (!auto) {
-					removeNotice(ERROR_NOTICE_ID);
 					createSuccessNotice(
 						targetStatus === 'published'
 							? __('Form published', 'subtleforms')
@@ -720,9 +720,8 @@ export default function useBuilderOrchestrator({
 			return;
 		}
 
-		// Ask before changing what visitors see: a first publish, or edits to a
-		// form that is already live ("Push your changes live?", 2.2.1 bug 12).
-		if (formStatus === 'draft' || isDirty || hasUnpublishedChanges) {
+		// The first Publish asks. Update on a form that is already live does not.
+		if (formStatus !== 'published') {
 			setShowPublishConfirm(true);
 		} else {
 			performSave({ auto: false, targetStatus: 'published' });

@@ -95,7 +95,7 @@ final class SubmissionsRepository {
 
 		$where_clause = 'WHERE ' . implode( ' AND ', $where );
 
-		// Validate orderby (whitelist — safe to interpolate)
+		// Validate orderby (whitelist, safe to interpolate)
 		$allowed_orderby = array( 'id', 'form_id', 'status', 'created_at' );
 		$orderby         = in_array( $args['orderby'], $allowed_orderby, true ) ? $args['orderby'] : 'created_at';
 		$order           = strtoupper( $args['order'] ) === 'ASC' ? 'ASC' : 'DESC';
@@ -202,7 +202,7 @@ final class SubmissionsRepository {
 
 		if ( isset( $data['status'] ) ) {
 			if ( $data['status'] === 'none' ) {
-				// 'none' clears admin status override — set to NULL in DB
+				// 'none' clears admin status override, set to NULL in DB
 				$update_data['status'] = null;
 			} else {
 				$update_data['status'] = $data['status'];
@@ -267,8 +267,13 @@ final class SubmissionsRepository {
 
 	/**
 	 * Delete a submission.
+	 *
+	 * @param int  $id         Entry ID.
+	 * @param bool $with_files Also delete its uploaded files (false keeps
+	 *                         files a visitor may send again after fixing
+	 *                         an answer).
 	 */
-	public function delete( int $id ): bool {
+	public function delete( int $id, bool $with_files = true ): bool {
 		global $wpdb;
 
 		// Phase B3: Get form_id before delete for cache invalidation
@@ -277,9 +282,12 @@ final class SubmissionsRepository {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Direct delete; no caching for write operations.
 		$result = $wpdb->delete( $this->table, array( 'id' => $id ), array( '%d' ) );
 
-		// Uploaded files go with their entry (2.1).
+		// Uploaded files and the activity log go with their entry (2.1, FA-19, FF-27).
 		if ( $result && $submission ) {
-			\SubtleForms\Uploads\Uploads::deleteForPayload( $submission['payload'] ?? array() );
+			if ( $with_files ) {
+				\SubtleForms\Uploads\Uploads::deleteForPayload( $submission['payload'] ?? array() );
+			}
+			( new LogsRepository() )->deleteBySubmission( $id );
 		}
 
 		// Invalidate count cache
@@ -475,7 +483,7 @@ final class SubmissionsRepository {
 
 		$whereClause = ! empty( $where ) ? 'WHERE ' . implode( ' AND ', $where ) : '';
 
-		// Validate orderby (whitelist — safe to interpolate)
+		// Validate orderby (whitelist, safe to interpolate)
 		$allowed_orderby = array( 'id', 'form_id', 'status', 'created_at' );
 		$orderby         = in_array( $args['orderby'], $allowed_orderby, true ) ? $args['orderby'] : 'created_at';
 		$order           = strtoupper( $args['order'] ) === 'ASC' ? 'ASC' : 'DESC';
@@ -776,6 +784,17 @@ final class SubmissionsRepository {
 		foreach ( (array) $with_files as $stored_payload ) {
 			\SubtleForms\Uploads\Uploads::deleteForPayload( (string) $stored_payload );
 		}
+
+		// The activity log of purged entries goes too (FF-27).
+		$logs = $wpdb->prefix . 'subtleforms_logs';
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table names are from $wpdb->prefix; date value is prepared.
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$logs} WHERE submission_id IN ( SELECT id FROM {$this->table} WHERE created_at < %s )",
+				$cutoff_date
+			)
+		);
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from $wpdb->prefix; date value is prepared.
 		$deleted = $wpdb->query(

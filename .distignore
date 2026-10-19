@@ -33,7 +33,6 @@ babel.config.js
 storybook-static
 
 # ── PHP dev tooling ───────────────────────────────────────────
-composer.json
 composer.lock
 .phpcs.xml.dist
 phpunit.xml.dist
@@ -112,3 +111,18 @@ bundle-stats.json
 .wp-env.json
 playwright.browser.config.js
 phpunit-wp.xml.dist
+
+# Development notes and AI rules
+docs/
+.cursor/
+_plan/
+
+# Release hygiene (F239-2)
+src/Validation/EXAMPLES.php
+assets/README.md
+assets/banner-772x250.svg
+assets/icon-256x256.svg
+assets/screenshot-builder.svg
+assets/screenshot-form-preview.svg
+assets/screenshot-submissions.svg
+*.map

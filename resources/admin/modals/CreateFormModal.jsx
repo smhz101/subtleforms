@@ -82,7 +82,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
     }
 
     if (!schemaToSend) {
-      // Blank form — use createInitialSchema for canonical, correct field init
+      // Blank form, use createInitialSchema for canonical, correct field init
       const schema = createInitialSchema({
         title: safeTitle,
         description: description,
@@ -144,7 +144,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
       id: 'standard',
       title: __('Standard', 'subtleforms'),
       description: __(
-        'Single page or multi-step form. Best for contact forms, applications.',
+        'All fields on one page, or split into steps. Best for contact forms and applications.',
         'subtleforms'
       ),
       icon: Icon.File,
@@ -340,7 +340,7 @@ export default function CreateFormModal({ isOpen, onClose, onFormCreated }) {
                       onChange={() => setIsMultiStep(false)}
                     />
                     <span className='sf-create-form-modal__radio-label'>
-                      {__('Single page form', 'subtleforms')}
+                      {__('Standard', 'subtleforms')}
                     </span>
                   </label>
                   <label className='sf-create-form-modal__radio-option'>
