@@ -74,6 +74,19 @@ final class Payments240Test extends TestCase {
 		$this->assertNull( Currencies::belowMinimum( 1.0, 'PHP' ) );
 	}
 
+	/** PAY-26: a gateway can raise the card minimum through a filter. */
+	public function test_pay26_card_minimum_filter_raises_the_floor(): void {
+		$GLOBALS['sf_test_filters']['subtleforms/payments/card_minimum'] = static function ( $min, $code ) {
+			return 'KRW' === $code ? 700.0 : $min;
+		};
+		try {
+			$this->assertSame( 700.0, Currencies::minimum( 'KRW' ) );
+			$this->assertSame( 0.5, Currencies::minimum( 'USD' ) );
+		} finally {
+			unset( $GLOBALS['sf_test_filters']['subtleforms/payments/card_minimum'] );
+		}
+	}
+
 	/** PAY2-02: a form with no currency of its own follows the site currency. */
 	public function test_pay2_02_form_without_currency_follows_the_site(): void {
 		$GLOBALS['sf_test_options']['subtleforms_settings'] = array( 'ext_payments_currency' => 'eur' );

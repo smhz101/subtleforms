@@ -26,6 +26,10 @@ if ( ! function_exists( 'apply_filters' ) ) {
 	 * Stub: returns the first argument unchanged (no filter pipeline).
 	 */
 	function apply_filters( string $hook, $value, ...$args ) {
+		// A test can register one callback per hook here.
+		if ( isset( $GLOBALS['sf_test_filters'][ $hook ] ) && is_callable( $GLOBALS['sf_test_filters'][ $hook ] ) ) {
+			return $GLOBALS['sf_test_filters'][ $hook ]( $value, ...$args );
+		}
 		return $value;
 	}
 }
