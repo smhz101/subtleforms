@@ -211,10 +211,7 @@ const SubmissionsTable = forwardRef(
         setTotalItems(total);
       } catch (err) {
         if (generation !== generationRef.current) return;
-        setError(__('Failed to load submissions', 'subtleforms'));
-        setBuffer([]);
-        setPagesLoaded(0);
-        setTotalItems(0);
+        setError(__('Entries could not be loaded.', 'subtleforms'));
       } finally {
         if (generation === generationRef.current) setLoading(false);
       }
@@ -851,8 +848,15 @@ const SubmissionsTable = forwardRef(
           : visible.includes(col.key))
     );
 
-    if (error) {
-      return <Notice status='error'>{error}</Notice>;
+    if (error && buffer.length === 0) {
+      return (
+        <div className='sf-submissions-table__error' role='alert'>
+          <Notice status='error' isDismissible={false}>{error}</Notice>
+          <Button variant='primary' onClick={loadFresh}>
+            {__('Retry', 'subtleforms')}
+          </Button>
+        </div>
+      );
     }
 
     // Slice the buffer for the current page (client-side pagination)
@@ -865,6 +869,14 @@ const SubmissionsTable = forwardRef(
       <div className={`sf-submissions-table${
         density === 'comfortable' || density === 'compact' ? ` sf-submissions-table--${density}` : ''
       }`}>
+        {error && buffer.length > 0 && (
+          <Notice status='error' isDismissible={false}>
+            {error}{' '}
+            <Button variant='link' onClick={loadFresh}>
+              {__('Retry', 'subtleforms')}
+            </Button>
+          </Notice>
+        )}
         <DataTable
           columns={columns}
           data={displayedRows}

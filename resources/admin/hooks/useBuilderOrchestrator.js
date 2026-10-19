@@ -515,8 +515,8 @@ export default function useBuilderOrchestrator({
 				);
 				onSaved?.(detail);
 
+				removeNotice(ERROR_NOTICE_ID);
 				if (!auto) {
-					removeNotice(ERROR_NOTICE_ID);
 					createSuccessNotice(
 						targetStatus === 'published'
 							? __('Form published', 'subtleforms')
@@ -720,9 +720,8 @@ export default function useBuilderOrchestrator({
 			return;
 		}
 
-		// Ask before changing what visitors see: a first publish, or edits to a
-		// form that is already live ("Push your changes live?", 2.2.1 bug 12).
-		if (formStatus === 'draft' || isDirty || hasUnpublishedChanges) {
+		// The first Publish asks. Update on a form that is already live does not.
+		if (formStatus !== 'published') {
 			setShowPublishConfirm(true);
 		} else {
 			performSave({ auto: false, targetStatus: 'published' });

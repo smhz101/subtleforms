@@ -8,6 +8,7 @@ import {
   Modal,
   TextControl,
   SelectControl,
+  Notice,
 } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useDispatch } from '@wordpress/data';
@@ -78,6 +79,7 @@ export default function FormsList({
   // Each API call fetches CHUNK_PAGES pages at once.
   const CHUNK_PAGES = 5;
   const [buffer, setBuffer] = useState([]);
+  const [loadError, setLoadError] = useState('');
   const [pagesLoaded, setPagesLoaded] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [totalItems, setTotalItems] = useState(0);
@@ -167,18 +169,14 @@ export default function FormsList({
     setCurrentPage(1);
     try {
       const { rows, total } = await fetchBatch(0);
+      setLoadError('');
       setBuffer(rows);
       setPagesLoaded(Math.ceil(rows.length / perPage) || 0);
       setTotalItems(total);
     } catch (err) {
       console.error('FormsList fetch error:', err);
-      createErrorNotice(
-        err.message || __('Failed to load forms', 'subtleforms'),
-        { type: 'snackbar' }
-      );
-      setBuffer([]);
-      setPagesLoaded(0);
-      setTotalItems(0);
+      // Keep rows already on screen. A failed first load is an error, not an empty list.
+      setLoadError(__('Forms could not be loaded.', 'subtleforms'));
     } finally {
       setIsLoading(false);
     }
@@ -787,6 +785,14 @@ export default function FormsList({
         </ContextualTip>
       )}
       
+      {loadError && buffer.length > 0 && (
+        <Notice status='error' isDismissible={false}>
+          {loadError}{' '}
+          <Button variant='link' onClick={loadFresh}>
+            {__('Retry', 'subtleforms')}
+          </Button>
+        </Notice>
+      )}
       <DataTable
         columns={displayColumns}
         data={displayedRows}
@@ -832,6 +838,17 @@ export default function FormsList({
               ]
         }
         emptyMessage={
+          loadError && buffer.length === 0 ? (
+            <div className='sf-empty' role='alert'>
+              <h3 className='sf-empty__title'>{__('Forms could not be loaded.', 'subtleforms')}</h3>
+              <p className='sf-empty__text'>{__('Check your connection, then try again.', 'subtleforms')}</p>
+              <div className='sf-empty__actions'>
+                <Button variant='primary' onClick={loadFresh}>
+                  {__('Retry', 'subtleforms')}
+                </Button>
+              </div>
+            </div>
+          ) : (
           <div className='sf-empty'>
             <span className='sf-empty__icon'>
               {searchTerm ? <Icon.Search size={20} /> : <Icon.FileText size={20} />}
@@ -851,6 +868,7 @@ export default function FormsList({
               </div>
             )}
           </div>
+          )
         }
         onRowClick={(form) => handleEditForm(form.id)}
       />

@@ -11,8 +11,10 @@ describe('describeSaveError (QA-03)', () => {
     expect(describeSaveError(body, 422)).toBe('Field label: Maximum length is 2000 characters');
   });
   it('falls back to the server message, then a plain sentence', () => {
-    expect(describeSaveError({ error: { message: 'Form not found' } })).toBe('Form not found');
-    expect(describeSaveError(null, 0)).toMatch(/connection/);
-    expect(describeSaveError({}, 500)).toMatch(/Could not save/);
+    expect(describeSaveError({ error: { message: 'Form not found' } }, 404)).toBe('Form not found');
+    expect(describeSaveError(null, 0)).toBe('Your changes are kept in this tab.');
+    expect(describeSaveError({}, 500)).toBe('Your changes are kept in this tab.');
+    expect(describeSaveError(null, 'abort')).toBe('Your changes are kept in this tab.');
+    expect(describeSaveError({ message: 'Could not get a valid response from the server.' })).toBe('Your changes are kept in this tab.');
   });
 });
