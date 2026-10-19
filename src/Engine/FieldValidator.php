@@ -623,8 +623,9 @@ final class FieldValidator {
 		}
 		$label = $this->attr( $field, 'label' );
 		if ( is_string( $label ) && trim( $label ) !== '' ) {
+			// A paragraph-long label is shortened in the message (FLD2-12).
 			/* translators: %s: field label */
-			return sprintf( __( '%s is required.', 'subtleforms' ), wp_strip_all_tags( $label ) );
+			return sprintf( __( '%s is required.', 'subtleforms' ), \SubtleForms\Support\AnswerFormatter::shorten( $label ) );
 		}
 		/* translators: %s: field key */
 		return sprintf( __( 'Field "%s" is required.', 'subtleforms' ), $key );

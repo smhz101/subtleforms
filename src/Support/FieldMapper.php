@@ -89,15 +89,8 @@ final class FieldMapper {
 	 * @return string
 	 */
 	public static function adminLabel( array $node, string $key = '' ): string {
-		$admin = $node['adminLabel'] ?? ( $node['config']['adminLabel'] ?? '' );
-		if ( is_string( $admin ) && '' !== trim( $admin ) ) {
-			return trim( $admin );
-		}
-		$label = $node['label'] ?? ( $node['config']['label'] ?? '' );
-		if ( is_string( $label ) && '' !== trim( $label ) ) {
-			return $label;
-		}
-		return '' !== $key ? $key : (string) ( $node['key'] ?? ( $node['config']['key'] ?? '' ) );
+		// A long public label is shortened in outputs (FLD2-12).
+		return AnswerFormatter::label( $node, $key );
 	}
 
 	/**

@@ -13,6 +13,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: Dependent dropdown answers show the label chosen at each level in emails, PDFs, CRM notes and webhooks, and in mapped integration fields when the add-on passes the form.
 * Fix: Product answers read as order lines with a quantity and price, and priced options show their label and price.
 * Fix: CSV exports list uploaded files by name with an admin download link instead of the stored file record.
+* Fix: A field with a very long label and no admin label is named by its label shortened to 60 characters in emails, CSV headers, entries, PDFs and the required message.
 
 = 2.3.9 - 2026-10-19 =
 * Change: Nothing in SubtleForms is switched off without a license. CSV export, Reports (views, submissions and conversion), full conditional logic (any rule, groups, every operator, conditional emails, webhooks and confirmations), Picture choice, several files per upload field, payment fields (Product, Priced options, Custom amount, Fixed fee, Order summary, Coupon), coupons, and the Webhooks and Analytics settings all work in the free plugin.

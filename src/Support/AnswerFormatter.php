@@ -13,6 +13,7 @@
  * - Dates and times follow the field's display format.
  * - Uploads read as file names, with admin download links when asked.
  * - Payment fields show option labels and product lines with prices.
+ * - Field names use the admin label, and a long public label is shortened.
  *
  * Pure PHP apart from optional WordPress helpers (guarded), so the rules are
  * unit tested in isolation.
@@ -31,6 +32,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Formats stored answers as display text.
  */
 final class AnswerFormatter {
+
+	/**
+	 * Longest field name used in outputs before it is shortened.
+	 */
+	public const LABEL_MAX = 60;
 
 	/**
 	 * Field types that store a yes/no answer.
@@ -58,6 +64,49 @@ final class AnswerFormatter {
 		'JPY' => "\u{00A5}",
 		'INR' => "\u{20B9}",
 	);
+
+	/**
+	 * The name of a field in outputs: its admin label when set, else its
+	 * public label shortened to LABEL_MAX characters, else its key.
+	 *
+	 * @param array  $node Field node (flat or wrapped in `config`).
+	 * @param string $key  Field key.
+	 * @return string
+	 */
+	public static function label( array $node, string $key = '' ): string {
+		$admin = $node['adminLabel'] ?? ( $node['config']['adminLabel'] ?? '' );
+		if ( is_string( $admin ) && '' !== trim( $admin ) ) {
+			return trim( $admin );
+		}
+		$label = $node['label'] ?? ( $node['config']['label'] ?? '' );
+		if ( is_string( $label ) && '' !== trim( $label ) ) {
+			return self::shorten( $label );
+		}
+		return '' !== $key ? $key : (string) ( $node['key'] ?? ( $node['config']['key'] ?? '' ) );
+	}
+
+	/**
+	 * Shorten a label for use as a line label, column header or message.
+	 *
+	 * Tags are removed and white space collapsed. A label longer than $max
+	 * characters is cut at the last word that fits and ends with an ellipsis.
+	 *
+	 * @param string $label Label.
+	 * @param int    $max   Longest length kept.
+	 * @return string
+	 */
+	public static function shorten( string $label, int $max = self::LABEL_MAX ): string {
+		$text = trim( (string) preg_replace( '/\s+/u', ' ', strip_tags( $label ) ) );
+		if ( self::length( $text ) <= $max ) {
+			return $text;
+		}
+		$cut   = self::slice( $text, $max - 1 );
+		$space = strrpos( $cut, ' ' );
+		if ( false !== $space && $space > (int) ( strlen( $cut ) / 2 ) ) {
+			$cut = substr( $cut, 0, $space );
+		}
+		return rtrim( $cut, " \t,.;:" ) . "\u{2026}";
+	}
 
 	/**
 	 * Display context for a form: the currency used for prices.
@@ -543,7 +592,7 @@ final class AnswerFormatter {
 		if ( '' === trim( $name ) ) {
 			$name = (string) ( EntryValues::attr( $field, 'label' ) ?? '' );
 		}
-		$name  = wp_strip_all_tags( '' !== trim( $name ) ? $name : (string) ( $field['key'] ?? '' ) );
+		$name  = self::shorten( '' !== trim( $name ) ? $name : (string) ( $field['key'] ?? '' ) );
 		$qty   = empty( EntryValues::attr( $field, 'allowQuantity' ) ) ? 1 : ( is_numeric( $value ) ? (int) $value : 0 );
 		$price = is_numeric( EntryValues::attr( $field, 'price' ) ) ? (float) EntryValues::attr( $field, 'price' ) : 0.0;
 		$line  = $name . " \u{00D7} " . $qty;
@@ -578,5 +627,26 @@ final class AnswerFormatter {
 			return $number;
 		}
 		return isset( self::SYMBOLS[ $currency ] ) ? self::SYMBOLS[ $currency ] . $number : $number . ' ' . $currency;
+	}
+
+	// ── Strings ──────────────────────────────────────────────────────────
+
+	/**
+	 * Character length, multibyte safe.
+	 *
+	 * @param string $text Text.
+	 */
+	private static function length( string $text ): int {
+		return function_exists( 'mb_strlen' ) ? mb_strlen( $text, 'UTF-8' ) : strlen( $text );
+	}
+
+	/**
+	 * The first $length characters, multibyte safe.
+	 *
+	 * @param string $text   Text.
+	 * @param int    $length Characters.
+	 */
+	private static function slice( string $text, int $length ): string {
+		return function_exists( 'mb_substr' ) ? mb_substr( $text, 0, $length, 'UTF-8' ) : substr( $text, 0, $length );
 	}
 }
