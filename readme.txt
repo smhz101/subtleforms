@@ -167,6 +167,11 @@ For support, please visit the plugins support forum on WordPress.org or GitHub r
 
 == Changelog ==
 
+= 2.3.9 - 2026-10-19 =
+* Fix: Submitting a form from a template emails the site owner instead of posting the entry to an example address.
+* Fix: The Payment Form asks for a product and shows an order summary. It no longer collects a card number, expiry date or CVV.
+* Change: The Donation Form includes a custom amount.
+
 = 2.3.8 - 2026-10-19 =
 * New: Dependent dropdowns open in a column editor. Each column is one dropdown, and choosing an item shows only what belongs to it.
 * New: On the form, a chained field can be dropdowns, buttons, or columns. Columns show every list at once. The first choice is selected, and a list with nothing for that choice stays empty.
