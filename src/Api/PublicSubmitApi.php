@@ -321,6 +321,30 @@ final class PublicSubmitApi {
 				return ApiResponse::bad_request( __( 'This form could not be processed. Please contact the site owner.', 'subtleforms' ) );
 			}
 
+			// A payment the gateway only authorised is captured after the entry
+			// is saved. Emails, webhooks and integrations wait for that result,
+			// so nobody gets a receipt for a payment that then fails (PAY-04).
+			$deferActions = $isPaymentForm && 'authorized' === ( $paymentMetadata['status'] ?? '' );
+			$laterSteps   = array();
+			if ( $deferActions ) {
+				$laterSteps = array_values(
+					array_filter(
+						$steps,
+						static function ( $step ) {
+							return 'save' !== $step->action()->id();
+						}
+					)
+				);
+				$steps      = array_values(
+					array_filter(
+						$steps,
+						static function ( $step ) {
+							return 'save' === $step->action()->id();
+						}
+					)
+				);
+			}
+
 			try {
 				$result = $this->pipeline->run( $steps, $context, $activeSchema['schema'] );
 			} catch ( \RuntimeException $e ) {
@@ -382,7 +406,19 @@ final class PublicSubmitApi {
 					$order['payment']['status'] = 'failed';
 					$order['payment']['error']  = $captured->get_error_message();
 					$this->finishOrder( $submissionId, $finalSubmission, $order, 'payment_failed' );
+					// No receipts or integrations for a failed payment; the site
+					// owner is told instead (PAY-04).
+					self::notifyPaymentFailed( $formId, $submissionId, $activeSchema['schema'] ?? array(), $captured->get_error_message() );
 					return ApiResponse::error( 'subtleforms_payment_failed', $captured->get_error_message(), 402 );
+				}
+				if ( $laterSteps ) {
+					// The payment went through: now send the emails and run the
+					// integrations that waited for it.
+					try {
+						$this->pipeline->run( $laterSteps, $context, $activeSchema['schema'] );
+					} catch ( \Throwable $e ) {
+						Logger::error( 'Actions after payment failed for submission %d: %s', $submissionId, $e->getMessage() );
+					}
 				}
 				$order['payment'] = is_array( $captured ) ? $captured : $paymentMetadata;
 				$status           = in_array( $order['payment']['status'] ?? '', array( 'paid', 'succeeded' ), true ) ? 'completed' : 'payment_pending';
@@ -683,6 +719,36 @@ final class PublicSubmitApi {
 		if ( ! empty( $order['coupon']['id'] ) && in_array( $status, array( 'completed', 'payment_pending' ), true ) ) {
 			CouponsRepository::recordUse( (int) $order['coupon']['id'], (string) ( $order['customer'] ?? '' ), $submissionId );
 		}
+	}
+
+	/**
+	 * Email the site owner that a payment failed after the entry was saved,
+	 * unless switched off under Settings > Integrations > Payments (PAY-04).
+	 *
+	 * @param int    $formId       Form ID.
+	 * @param int    $submissionId Entry ID.
+	 * @param mixed  $schema       Form schema.
+	 * @param string $reason       Gateway message.
+	 */
+	public static function notifyPaymentFailed( int $formId, int $submissionId, $schema, string $reason ): void {
+		$settings = get_option( 'subtleforms_settings', array() );
+		if ( is_array( $settings ) && array_key_exists( 'ext_payments_failed_email', $settings ) && ! $settings['ext_payments_failed_email'] ) {
+			return;
+		}
+		$to = is_array( $settings ) && ! empty( $settings['admin_email'] ) && is_email( $settings['admin_email'] )
+			? (string) $settings['admin_email']
+			: (string) get_option( 'admin_email' );
+		$title = is_array( $schema ) ? (string) ( $schema['metadata']['title'] ?? '' ) : '';
+		/* translators: %s: form title */
+		$subject = sprintf( __( 'Payment failed: %s', 'subtleforms' ), '' !== $title ? $title : '#' . $formId );
+		$body    = sprintf(
+			/* translators: 1: entry ID, 2: gateway message, 3: link to the entry */
+			__( "The payment for entry #%1\$d did not go through, so no receipt or notification was sent.\n\nReason: %2\$s\n\nOpen the entry: %3\$s", 'subtleforms' ),
+			$submissionId,
+			'' !== $reason ? $reason : __( 'not given', 'subtleforms' ),
+			admin_url( 'admin.php?page=subtleforms-submissions&submission_id=' . $submissionId )
+		);
+		wp_mail( $to, $subject, $body );
 	}
 
 	/**
