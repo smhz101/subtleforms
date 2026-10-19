@@ -241,10 +241,20 @@
 
 /* A form on a dark footer or hero: no card of its own. */
 .subtleforms.subtleforms--preset-dark-surface {
-	background: transparent;
+	background: var(--subtleforms-color-bg, #1b1d24);
 	box-shadow: none;
 	padding-left: 0;
 	padding-right: 0;
+}
+
+/* Dark presets paint their own background, so radios and checkboxes use a dark
+   control. A light accent on a light control looked filled before it was checked. */
+.subtleforms.subtleforms--preset-dark input[type="checkbox"],
+.subtleforms.subtleforms--preset-dark input[type="radio"],
+.subtleforms.subtleforms--preset-dark-surface input[type="checkbox"],
+.subtleforms.subtleforms--preset-dark-surface input[type="radio"] {
+	color-scheme: dark;
+	accent-color: #e9ebef;
 }
 
 /* ── Per-field layout ─────────────────────────────────────────────────────── */

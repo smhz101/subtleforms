@@ -254,6 +254,7 @@ export const FORM_PRESETS = [
     tokens: {
       colorPrimary: '#7683d9',
       colorPrimaryHover: '#a3adde',
+      colorButtonText: '#111318',
       colorText: '#e9ebef',
       colorTextLight: '#8c94a3',
       colorBackground: '#131417',
@@ -342,10 +343,10 @@ export const FORM_PRESETS = [
     id: 'bold',
     label: 'Bold',
     description: 'High-contrast accent and heavy labels. Built to convert.',
-    swatch: ['#e5484d', '#111111', '#fff7f5'],
+    swatch: ['#c81e1e', '#111111', '#fff7f5'],
     tokens: {
-      colorPrimary: '#e5484d',
-      colorPrimaryHover: '#c93a3f',
+      colorPrimary: '#c81e1e',
+      colorPrimaryHover: '#9b1c1c',
       colorText: '#111111',
       colorTextLight: '#5f5f5f',
       colorBackground: '#fff7f5',
@@ -375,7 +376,7 @@ export const FORM_PRESETS = [
       colorText: '#f4f5f7',
       colorLabel: '#f4f5f7',
       colorTextLight: '#b8bfcc',
-      colorBackground: 'transparent',
+      colorBackground: '#1b1d24',
       colorSurface: 'rgba(255, 255, 255, 0.08)',
       colorInputText: '#ffffff',
       colorBorder: 'rgba(255, 255, 255, 0.28)',
@@ -590,6 +591,9 @@ export function formAppearanceClasses( appearance ) {
   // Presets that change the form's chrome, not only its colours.
   if ( appearance?.preset === 'dark-surface' ) {
     classes.push( 'subtleforms--preset-dark-surface' );
+  }
+  if ( appearance?.preset === 'dark' ) {
+    classes.push( 'subtleforms--preset-dark' );
   }
   if ( appearance?.preset === 'theme' ) {
     classes.push( 'subtleforms--inherit-theme' );
