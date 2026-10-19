@@ -86,8 +86,7 @@ final class TemplateNotifyTest extends TestCase {
 			if ( ! is_array( $field ) ) {
 				continue;
 			}
-			$haystack = strtolower( (string) ( $field['id'] ?? '' ) . ' ' . (string) ( $field['key'] ?? '' ) . ' ' . (string) ( $field['label'] ?? '' ) );
-			$this->assertSame( 0, preg_match( '/card|cvv|expiry/', $haystack ), $id . ' field ' . $haystack );
+			$this->assertFalse( FormTemplates::is_card_field( $field ), $id . ' field ' . wp_json_encode( $field ) );
 			foreach ( array( 'fields', 'children' ) as $child ) {
 				if ( isset( $field[ $child ] ) && is_array( $field[ $child ] ) ) {
 					$this->assertNoCardFields( $field[ $child ], $id );
