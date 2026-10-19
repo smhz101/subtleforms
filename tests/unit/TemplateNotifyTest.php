@@ -218,6 +218,62 @@ class TemplateNotifyTest extends TestCase {
 	}
 
 	/**
+	 * Review #15 (4309460628): a payment template that already prices the
+	 * order with Priced options or a Custom Amount gets no extra fixed
+	 * product, and missing payment fields go inside the steps of a
+	 * multi-step template.
+	 */
+	public function test_payment_fields_respect_priced_fields_and_steps(): void {
+		$method = new \ReflectionMethod( FormTemplates::class, 'prepare_template' );
+		$method->setAccessible( true );
+		$prepare = static function ( string $id, array $fields ) use ( $method ): array {
+			return $method->invoke( null, $id, array( 'id' => $id, 'schema' => array( 'fields' => $fields ) ) )['schema']['fields'];
+		};
+		$count = function ( array $fields, string $type ) use ( &$count ): int {
+			$n = 0;
+			foreach ( $fields as $field ) {
+				$n += ( $type === ( $field['type'] ?? '' ) ) ? 1 : 0;
+				$n += $count( $field['children'] ?? array(), $type ) + $count( $field['fields'] ?? array(), $type );
+			}
+			return $n;
+		};
+
+		$plans = array(
+			'id'      => 'plan',
+			'type'    => 'payment_choice',
+			'label'   => 'Plan',
+			'options' => array( array( 'label' => 'Basic', 'value' => 'basic', 'price' => 5 ) ),
+		);
+		$this->assertSame( 0, $count( $prepare( 'payment_form', array( $plans ) ), 'payment_product' ) );
+		$this->assertSame( 0, $count( $prepare( 'payment_form', array( array( 'id' => 'amount', 'type' => 'payment_amount', 'label' => 'Amount' ) ) ), 'payment_product' ) );
+		$columns = array(
+			'id'      => 'cols',
+			'type'    => 'two_column_container',
+			'columns' => array( array( 'fields' => array( $plans ) ), array() ),
+		);
+		$this->assertSame( 0, $count( $prepare( 'payment_form', array( $columns ) ), 'payment_product' ) );
+
+		$steps = $prepare(
+			'payment_form',
+			array(
+				array( 'id' => 's1', 'type' => 'step', 'label' => 'You', 'children' => array( array( 'id' => 'name', 'type' => 'text', 'label' => 'Name' ) ) ),
+				array( 'id' => 's2', 'type' => 'step', 'label' => 'Pay', 'fields' => array( array( 'id' => 'email', 'type' => 'email', 'label' => 'Email' ) ) ),
+			)
+		);
+		$this->assertSame( array( 'step', 'step' ), array_column( $steps, 'type' ), 'nothing is added beside the steps' );
+		$this->assertSame( array( 'name', 'product' ), array_column( $steps[0]['children'], 'id' ) );
+		$this->assertSame( array( 'email', 'order_summary', 'payment_note' ), array_column( $steps[1]['fields'], 'id' ) );
+		$this->assertSame( 'product', $steps[0]['children'][1]['key'] );
+
+		$donation = $prepare(
+			'donation_form',
+			array( array( 'id' => 's1', 'type' => 'step', 'label' => 'Give', 'children' => array() ) )
+		);
+		$this->assertCount( 1, $donation );
+		$this->assertSame( 'payment_amount', $donation[0]['children'][0]['type'] );
+	}
+
+	/**
 	 * @param array<string, mixed> $template Template definition.
 	 */
 	private function assertTemplateIsSafe( string $id, array $template ): void {

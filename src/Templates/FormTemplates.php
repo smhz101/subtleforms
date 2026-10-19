@@ -778,37 +778,85 @@ class FormTemplates {
 	 * @return array<int, mixed>
 	 */
 	private static function ensure_payment_fields( array $fields ): array {
+		// Any priced field already sets the price. A fixed product added next
+		// to Priced options or a Custom Amount would be charged on top.
 		if ( ! self::field_tree_has( $fields, static function ( array $field ): bool {
-			return 'payment_product' === ( $field['type'] ?? '' );
+			return in_array( $field['type'] ?? '', \SubtleForms\Payments\Pricing::PRICED_TYPES, true );
 		} ) ) {
-			$fields[] = array(
-				'id'            => 'product',
-				'type'          => 'payment_product',
-				'label'         => __( 'Product', 'subtleforms' ),
-				'productName'   => __( 'Product', 'subtleforms' ),
-				'price'         => 10,
-				'allowQuantity' => false,
+			$fields = self::add_to_step(
+				$fields,
+				array(
+					'id'            => 'product',
+					'key'           => 'product',
+					'type'          => 'payment_product',
+					'label'         => __( 'Product', 'subtleforms' ),
+					'productName'   => __( 'Product', 'subtleforms' ),
+					'price'         => 10,
+					'allowQuantity' => false,
+				),
+				'first'
 			);
 		}
 		if ( ! self::field_tree_has( $fields, static function ( array $field ): bool {
 			return 'payment_summary' === ( $field['type'] ?? '' );
 		} ) ) {
-			$fields[] = array(
-				'id'    => 'order_summary',
-				'type'  => 'payment_summary',
-				'label' => __( 'Order Summary', 'subtleforms' ),
+			$fields = self::add_to_step(
+				$fields,
+				array(
+					'id'    => 'order_summary',
+					'key'   => 'order_summary',
+					'type'  => 'payment_summary',
+					'label' => __( 'Order Summary', 'subtleforms' ),
+				),
+				'last'
 			);
 		}
 		if ( ! self::field_tree_has( $fields, static function ( array $field ): bool {
 			return 'payment_note' === ( $field['id'] ?? '' );
 		} ) ) {
-			$fields[] = array(
-				'id'      => 'payment_note',
-				'type'    => 'html',
-				'label'   => __( 'Note', 'subtleforms' ),
-				'content' => __( 'Card payment needs SubtleForms Pro.', 'subtleforms' ),
+			$fields = self::add_to_step(
+				$fields,
+				array(
+					'id'      => 'payment_note',
+					'key'     => 'payment_note',
+					'type'    => 'html',
+					'label'   => __( 'Note', 'subtleforms' ),
+					'content' => __( 'Card payment needs SubtleForms Pro.', 'subtleforms' ),
+				),
+				'last'
 			);
 		}
+		return $fields;
+	}
+
+	/**
+	 * Add a field to a template. In a multi-step template it goes inside the
+	 * first or last top-level step, never beside the steps.
+	 *
+	 * @param array<int, mixed>    $fields Top-level fields.
+	 * @param array<string, mixed> $field  Field to add.
+	 * @param string               $where  'first' or 'last' step.
+	 * @return array<int, mixed>
+	 */
+	private static function add_to_step( array $fields, array $field, string $where ): array {
+		$steps = array();
+		foreach ( $fields as $index => $node ) {
+			if ( is_array( $node ) && 'step' === ( $node['type'] ?? '' ) ) {
+				$steps[] = $index;
+			}
+		}
+		if ( ! $steps ) {
+			$fields[] = $field;
+			return $fields;
+		}
+		$index = 'last' === $where ? end( $steps ) : $steps[0];
+		$list  = isset( $fields[ $index ]['children'] ) || ! isset( $fields[ $index ]['fields'] ) || ! is_array( $fields[ $index ]['fields'] )
+			? 'children'
+			: 'fields';
+		if ( ! isset( $fields[ $index ][ $list ] ) || ! is_array( $fields[ $index ][ $list ] ) ) {
+			$fields[ $index ][ $list ] = array();
+		}
+		$fields[ $index ][ $list ][] = $field;
 		return $fields;
 	}
 
@@ -822,14 +870,18 @@ class FormTemplates {
 		} ) ) {
 			return $fields;
 		}
-		$fields[] = self::require_positive_amount(
-			array(
-				'id'    => 'custom_amount',
-				'type'  => 'payment_amount',
-				'label' => __( 'Custom Amount', 'subtleforms' ),
-			)
+		return self::add_to_step(
+			$fields,
+			self::require_positive_amount(
+				array(
+					'id'    => 'custom_amount',
+					'key'   => 'custom_amount',
+					'type'  => 'payment_amount',
+					'label' => __( 'Custom Amount', 'subtleforms' ),
+				)
+			),
+			'first'
 		);
-		return $fields;
 	}
 
 	/**
@@ -869,6 +921,12 @@ class FormTemplates {
 			}
 			foreach ( array( 'fields', 'children' ) as $child ) {
 				if ( isset( $field[ $child ] ) && is_array( $field[ $child ] ) && self::field_tree_has( $field[ $child ], $match ) ) {
+					return true;
+				}
+			}
+			foreach ( ( isset( $field['columns'] ) && is_array( $field['columns'] ) ) ? $field['columns'] : array() as $column ) {
+				$list = is_array( $column ) ? ( $column['fields'] ?? $column['children'] ?? $column ) : array();
+				if ( is_array( $list ) && self::field_tree_has( $list, $match ) ) {
 					return true;
 				}
 			}
