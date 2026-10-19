@@ -88,7 +88,14 @@ export function describeSaveError(body, status, schema = null) {
   const fields = error?.meta?.fields || body?.meta?.fields || error?.fields || null;
   const base = error?.message || body?.message || '';
   if (fields && typeof fields === 'object') {
-    const [path, message] = Object.entries(fields)[0] || [];
+    // Field errors come as { path: message }, or, from schema validation on
+    // publish, as a list of { path, message } (2.4.0).
+    const entries = Array.isArray(fields)
+      ? fields
+          .filter((item) => item && typeof item === 'object')
+          .map((item) => [String(item.path || ''), String(item.message || '')])
+      : Object.entries(fields);
+    const [path, message] = entries[0] || [];
     if (path) {
       const area = areaOf(path);
       // Name the field too, so a long or numeric label can be found (FLD2-11).

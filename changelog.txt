@@ -10,6 +10,8 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: Saving a form's Payments settings no longer fixes the form to US dollars, so the site currency applies.
 * Fix: The Custom amount field shows the form's currency symbol on the live form and in the builder.
 * Fix: Yen and other currencies without cents are rounded to whole units in prices, the summary, the charge and the entry.
+* Fix: Product and priced option answers in entries, emails and exports show whole units for every currency without cents, such as KRW, not only for JPY.
+* Fix: Entries, CSV exports and resent emails show prices in the currency the entry was charged in, so changing the site or form currency later does not relabel older entries.
 * Fix: A coupon typed in a Coupon field, or with spaces in it, gives the same total at payment and on submit.
 * Fix: A coupon with an unreadable date, or an expiry before its start, is refused with a message.
 * Fix: Order quotes, coupon checks and payment intents answer not found for a draft form, like submitting does.
@@ -55,6 +57,8 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: The live form refuses a Product quantity that is not a whole number, is below the minimum (including the starting 1 when the minimum is higher) or is above the maximum, with the server's messages, before any card payment is started.
 * Fix: A color field saves the color it shows, including its default.
 * Fix: Each CAPTCHA field uses its own provider and keys, and the form says when a check is not set up.
+* Fix: A form has one CAPTCHA field per provider. Publishing a second reCAPTCHA, hCaptcha or Turnstile field is refused with a message, and the visitor's token is checked once.
+* Fix: When publishing is refused because of a field, the builder shows the reason instead of [object Object].
 * Fix: Password fields can show a strength meter and ask for the password again.
 * Fix: A US phone number is grouped as it is typed, and a short number is rejected.
 * Fix: Dropdown, radio and multiple choice start with choices, and the canvas shows the default choice.
@@ -71,6 +75,8 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: The admin and confirmation email switches apply to every form, and the saved sender is used when an email has no From address.
 * Fix: Submitting the form preview does not send email or webhooks, does not count toward the entry limit, and is only available to an administrator.
 * Fix: A form block that is not using AJAX submits with a normal page load.
+* Fix: A form block that is not using AJAX shows the errors and keeps the answers when a submission is refused, shows the confirmation message once it is accepted, and follows a redirect confirmation only after a successful submission.
+* Fix: A form block that is not using AJAX follows a confirmation redirect to another site, as the AJAX form does, instead of sending visitors to the home page.
 * Fix: Confirmation messages and redirects fill merge tags.
 * Fix: A custom webhook body fills merge tags.
 * Fix: Resend says when the email was not queued, and sending it again still sends.
@@ -88,6 +94,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: Gravity Forms and Fluent Forms imports keep pages, hidden fields, names and conditional logic, and leave payment, quiz and post fields out.
 * Fix: On Tools, choosing a file is one keyboard stop, notices clear when you change section, and forms with the same title show their number and status.
 * Fix: Importing entries warns when a file is from another form and skips entries that are already there. The transfer screen says notes, the IP address, the browser, files, logs and unpublished drafts are not in the file.
+* Fix: Importing the same entries file again skips entries that were flagged, marked as spam, restored, read or starred since, and two different entries with the same answers at the same time are both imported.
 * Fix: A webhook that is still waiting says Queued.
 
 = 2.3.9 - 2026-10-19 =

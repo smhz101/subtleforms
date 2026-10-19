@@ -31,6 +31,7 @@ import {
 import { restFetch, restUrl, restNonce } from '../utils/restFetch';
 import { fillConfirmation } from '../../shared/confirmationTags';
 import { classicFieldInputs } from '../utils/classicFields';
+import { classicOutcome, forgetClassicToken } from '../utils/classicResult';
 
 /**
  * Whether a submitted value counts as missing.
@@ -965,6 +966,54 @@ export default function FormRenderer({
     setIsSubmitIntentional(true);
     // Form onSubmit will be triggered naturally by button type="submit"
   }, []);
+
+  // A post of this form without AJAX came back to this page (2.4.0): show the
+  // confirmation, or the server's errors with the visitor's answers. Runs once,
+  // after the schema is loaded.
+  const classicHandledRef = useRef(false);
+  useEffect(() => {
+    if (classicHandledRef.current || !schema || !blockOptions?.classicResult) {
+      return;
+    }
+    const outcome = classicOutcome(blockOptions.classicResult);
+    classicHandledRef.current = true;
+    forgetClassicToken();
+    if (!outcome) {
+      return;
+    }
+    if (outcome.ok) {
+      const conf = outcome.confirmation || {};
+      const merge = (text) =>
+        fillConfirmation(text, {
+          values: { ...flattenToPathMap(outcome.values), ...outcome.values },
+          formTitle: schema?.metadata?.title || '',
+          entryId: outcome.submissionId || '',
+          encode: false,
+        });
+      setConfirmationView({
+        title: conf.type === 'message' ? merge(conf.title) : '',
+        message:
+          conf.type === 'message' && conf.message
+            ? merge(conf.message)
+            : window.subtleformsFrontend?.successMessage ||
+              __('Thank you! Your submission has been received.', 'subtleforms'),
+        allowAnother: !!conf.allowAnother,
+      });
+      setSubmitSuccess(true);
+      return;
+    }
+    setValues((prev) => ({ ...prev, ...outcome.values }));
+    const count = Object.keys(outcome.fieldErrors).length;
+    if (count > 0) {
+      setValidationErrors(outcome.fieldErrors);
+      setSubmitError(null);
+      goToStepWithError(outcome.fieldErrors);
+      focusFirstInvalid(count);
+    } else {
+      setSubmitError(outcome.message);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [schema]);
 
   if (loading) {
     return (

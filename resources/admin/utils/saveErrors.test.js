@@ -36,3 +36,19 @@ describe('describeSaveError (QA-03)', () => {
     expect(describeSaveError(placeholder, 422)).toBe('Placeholder: Maximum length is 255 characters');
   });
 });
+
+describe('describeSaveError with schema validation lists (2.4.0, #37)', () => {
+  test('a list of { path, message } shows the message, not [object Object]', () => {
+    const text = describeSaveError(
+      {
+        error: {
+          message: 'Schema validation failed',
+          meta: { fields: [{ path: 'fields.c2', message: 'A form can have only one reCAPTCHA field.' }] },
+        },
+      },
+      422,
+      { fields: [] }
+    );
+    expect(text).toBe('A form can have only one reCAPTCHA field.');
+  });
+});

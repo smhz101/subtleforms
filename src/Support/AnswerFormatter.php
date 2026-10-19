@@ -124,6 +124,44 @@ final class AnswerFormatter {
 	}
 
 	/**
+	 * The currency an entry was priced in, from its stored order (or payment).
+	 * Empty when the entry has no order.
+	 *
+	 * @param mixed $submission Submission row (meta as an array or JSON).
+	 * @return string ISO code.
+	 */
+	public static function entryCurrency( $submission ): string {
+		$meta = is_array( $submission ) ? ( $submission['meta'] ?? array() ) : array();
+		if ( is_string( $meta ) ) {
+			$decoded = json_decode( $meta, true );
+			$meta    = is_array( $decoded ) ? $decoded : array();
+		}
+		if ( ! is_array( $meta ) ) {
+			return '';
+		}
+		$code = $meta['order']['currency'] ?? ( $meta['payment']['currency'] ?? '' );
+		return is_string( $code ) ? strtoupper( trim( $code ) ) : '';
+	}
+
+	/**
+	 * Display context for one entry: prices in the currency the entry was
+	 * charged in, so a later change of the site or form currency does not
+	 * relabel older answers. Falls back to the form currency.
+	 *
+	 * @param mixed $schema     Form schema.
+	 * @param mixed $submission Submission row.
+	 * @param array $extra      More context.
+	 * @return array
+	 */
+	public static function entryContext( $schema, $submission, array $extra = array() ): array {
+		$currency = self::entryCurrency( $submission );
+		if ( '' !== $currency ) {
+			$extra['currency'] = $currency;
+		}
+		return self::context( $schema, $extra );
+	}
+
+	/**
 	 * A stored answer as display text.
 	 *
 	 * Context keys:
@@ -658,7 +696,7 @@ final class AnswerFormatter {
 	 */
 	public static function money( float $amount, string $currency ): string {
 		$currency = strtoupper( $currency );
-		$decimals = 'JPY' === $currency ? 0 : 2;
+		$decimals = '' === $currency ? 2 : \SubtleForms\Payments\Currencies::decimals( $currency );
 		$number   = function_exists( 'number_format_i18n' ) ? number_format_i18n( $amount, $decimals ) : number_format( $amount, $decimals );
 		if ( '' === $currency ) {
 			return $number;

@@ -536,7 +536,11 @@ final class SubmissionsApi {
 		$submission['display'] = \SubtleForms\Support\AnswerFormatter::display(
 			is_array( $submission['schema'] ?? null ) ? $submission['schema'] : array(),
 			is_array( $submission['payload'] ?? null ) ? $submission['payload'] : array(),
-			array( 'submission_id' => (int) $submission['id'] )
+			\SubtleForms\Support\AnswerFormatter::entryContext(
+				is_array( $submission['schema'] ?? null ) ? $submission['schema'] : array(),
+				$submission,
+				array( 'submission_id' => (int) $submission['id'] )
+			)
 		);
 		if ( isset( $submission['meta']['notes'] ) && is_array( $submission['meta']['notes'] ) ) {
 			$submission['meta']['notes'] = array_map( array( self::class, 'presentNote' ), $submission['meta']['notes'] );
@@ -784,6 +788,7 @@ final class SubmissionsApi {
 		$context->setMeta( 'schema_version', isset( $submission['schema_version'] ) ? (int) $submission['schema_version'] : null );
 		$context->setMeta( 'form_schema', $schema );
 		$context->setMeta( 'resent', true );
+		$context->setMeta( 'order_currency', \SubtleForms\Support\AnswerFormatter::entryCurrency( $submission ) );
 
 		$result = $pipeline->run( $steps, $context, $schema );
 		$failures = $context->getMeta( 'action_failures', array() );
@@ -1125,8 +1130,9 @@ public function get_unread_count( WP_REST_Request $request ): WP_REST_Response {
 				}
 			}
 			$fields  = $fieldMaps[ $mapKey ];
-			$display = \SubtleForms\Support\AnswerFormatter::context(
+			$display = \SubtleForms\Support\AnswerFormatter::entryContext(
 				$schema,
+				$submission,
 				array(
 					'submission_id' => (int) $submission['id'],
 					'links'         => true,

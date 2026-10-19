@@ -101,6 +101,8 @@ function autoMountForms() {
         ajax: container.dataset.ajax === '1',
         tabIndex: parseInt(container.dataset.tabindex, 10) || 0,
         fieldValues: container.dataset.fieldValues || '',
+        // Outcome of a post without AJAX that just returned here (2.4.0).
+        classicResult: container.dataset.classicResult || '',
       };
       mount(container, { formId, blockOptions });
       observeView(container, formId, window.subtleformsFrontend || {});

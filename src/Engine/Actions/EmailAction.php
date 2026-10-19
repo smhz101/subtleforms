@@ -60,13 +60,16 @@ final class EmailAction implements ActionInterface {
 		// Answers as text (recipient, subject, plain emails) or escaped HTML
 		// with line breaks kept (HTML email bodies), through the one answer
 		// formatter. Uploaded files read as "name (download link)" (2.1).
-		$display     = \SubtleForms\Support\AnswerFormatter::context(
-			$schema,
-			array(
-				'submission_id' => (int) $context->getMeta( 'submission_id', 0 ),
-				'links'         => true,
-			)
+		$displayExtra  = array(
+			'submission_id' => (int) $context->getMeta( 'submission_id', 0 ),
+			'links'         => true,
 		);
+		$orderCurrency = strtoupper( (string) $context->getMeta( 'order_currency', '' ) );
+		if ( '' !== $orderCurrency ) {
+			// The currency the entry was charged in (2.4.0).
+			$displayExtra['currency'] = $orderCurrency;
+		}
+		$display     = \SubtleForms\Support\AnswerFormatter::context( $schema, $displayExtra );
 		$textPayload = $this->format_answers( $payload, $schema, false, $display );
 		$bodyPayload = $isHtml ? $this->format_answers( $payload, $schema, true, $display ) : $textPayload;
 

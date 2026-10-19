@@ -132,6 +132,8 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 = 2.4.0 - 2026-10-20 =
 * New: Each payment form can pick its own currency, and more currencies are available, including JPY, INR, PKR and AED.
 * Fix: Forms follow the site currency unless you pick one, the Custom amount field shows the right symbol, and yen totals are whole yen.
+* Fix: Product and priced option answers in entries, emails and exports show whole units for every currency without cents, such as KRW, not only for JPY.
+* Fix: Entries, CSV exports and resent emails show prices in the currency the entry was charged in, so changing the site or form currency later does not relabel older entries.
 * Fix: Coupons give the same total at payment and on submit, and coupon dates are checked.
 * Fix: Draft forms are not priced for visitors, and small orders below the card minimum get a clear message.
 * Fix: Product settings are under General, priced options are not shown selected on the canvas, and dropdown priced options use the standard picker.
@@ -152,6 +154,8 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: The admin and confirmation email switches apply to every form, and the saved sender is used when an email has no From address.
 * Fix: Submitting the form preview does not send email or webhooks, does not count toward the entry limit, and is only available to an administrator.
 * Fix: A form block that is not using AJAX submits with a normal page load.
+* Fix: A form block that is not using AJAX shows the errors and keeps the answers when a submission is refused, shows the confirmation message once it is accepted, and follows a redirect confirmation only after a successful submission.
+* Fix: A form block that is not using AJAX follows a confirmation redirect to another site, as the AJAX form does, instead of sending visitors to the home page.
 * Fix: Confirmation messages and redirects fill merge tags.
 * Fix: A custom webhook body fills merge tags.
 * Fix: Resend says when the email was not queued, and sending it again still sends.
@@ -169,9 +173,12 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: Gravity Forms and Fluent Forms imports keep pages, hidden fields, names and conditional logic, and leave payment, quiz and post fields out.
 * Fix: On Tools, choosing a file is one keyboard stop, notices clear when you change section, and forms with the same title show their number and status.
 * Fix: Importing entries warns when a file is from another form and skips entries that are already there. The transfer screen says notes, the IP address, the browser, files, logs and unpublished drafts are not in the file.
+* Fix: Importing the same entries file again skips entries that were flagged, marked as spam, restored, read or starred since, and two different entries with the same answers at the same time are both imported.
 * Fix: A webhook that is still waiting says Queued.
 * Fix: A color field saves the color it shows, including its default.
 * Fix: Each CAPTCHA field uses its own provider and keys, and the form says when a check is not set up.
+* Fix: A form has one CAPTCHA field per provider. Publishing a second reCAPTCHA, hCaptcha or Turnstile field is refused with a message, and the visitor's token is checked once.
+* Fix: When publishing is refused because of a field, the builder shows the reason instead of [object Object].
 * Fix: Password fields can show a strength meter and ask for the password again.
 * Fix: A US phone number is grouped as it is typed, and a short number is rejected.
 * Fix: Dropdown, radio and multiple choice start with choices, and the canvas shows the default choice.
