@@ -1,4 +1,5 @@
 import { createRoot } from '@wordpress/element';
+import { releaseReserve } from './utils/reserve';
 import FormRenderer from './components/FormRenderer';
 import FormErrorBoundary from './components/FormErrorBoundary';
 import './frontend.css';
@@ -39,6 +40,9 @@ function mount(container, options = {}) {
       />
     </FormErrorBoundary>
   );
+
+  // Release the height kept for the form once it is drawn (UX2-27).
+  releaseReserve(container);
 
   // Store root reference for cleanup
   container._subtleformsRoot = root;

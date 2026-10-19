@@ -139,6 +139,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: On a phone the forms and submissions lists show each row as a card instead of a table that scrolls sideways, checkboxes keep their normal size, the tabs stay on one line and the search box gets its own line.
 * Fix: The Quick Start Wizard fits the window on every step with its buttons always in view, and the Help & tour menu closes when you pick Start Tour or View Documentation.
 * Fix: The builder tour describes the real header buttons, shows the toolbar and settings of a selected field, and no longer scrolls the page.
+* Fix: Pages with a form no longer jump when the form appears: the space for the form is kept from the start.
 
 = 2.4.0 - 2026-10-20 =
 * New: Each payment form can pick its own currency, and more currencies are available, including JPY, INR, PKR and AED.

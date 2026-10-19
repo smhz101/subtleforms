@@ -71,10 +71,13 @@ final class Shortcode {
 		// Enqueue frontend assets
 		$this->enqueueAssets( $formId );
 
-		// Render container
+		// Render container, at the estimated height of the form so the page
+		// does not jump when the form appears (UX2-27).
+		$schema = \SubtleForms\Engine\FormRestrictions::activeSchema( $formId );
 		return sprintf(
-			'<div class="subtleforms-form-container" data-form-id="%d"></div>',
-			esc_attr( (string) $formId )
+			'<div class="subtleforms-form-container" data-form-id="%d"%s></div>',
+			esc_attr( (string) $formId ),
+			FormPlaceholder::attributes( is_array( $schema ) ? $schema : null )
 		);
 	}
 
