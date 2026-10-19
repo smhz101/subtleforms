@@ -123,7 +123,8 @@ class DashboardApi {
 		$totalSubmissions = $this->submissionsRepo->count();
 
 		// Submissions today
-		$todayStart       = gmdate( 'Y-m-d 00:00:00' );
+		$zone             = \SubtleForms\Tools\ReportSeries::siteZone();
+		$todayStart       = \SubtleForms\Tools\ReportSeries::start( 1, null, $zone );
 		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled.
 		$submissionsToday = (int) $wpdb->get_var(
 			$wpdb->prepare(
@@ -134,7 +135,7 @@ class DashboardApi {
 		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		// Submissions this week (last 7 days)
-		$weekStart           = ReportSeries::start( 7 );
+		$weekStart           = ReportSeries::start( 7, null, $zone );
 		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled.
 		$submissionsThisWeek = (int) $wpdb->get_var(
 			$wpdb->prepare(
@@ -180,12 +181,14 @@ class DashboardApi {
 		global $wpdb;
 		$days             = max( 1, min( 90, $days ) );
 		$submissionsTable = $wpdb->prefix . 'subtleforms_submissions';
-		$start            = gmdate( 'Y-m-d 00:00:00', strtotime( '-' . ( $days - 1 ) . ' days' ) );
+		$zone             = ReportSeries::siteZone();
+		$start            = ReportSeries::start( $days, null, $zone );
+		$shift            = ReportSeries::offsetSeconds( $zone );
 
 		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled.
 		$rows = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT DATE(created_at) AS day, COUNT(*) AS c FROM {$submissionsTable} WHERE created_at >= %s AND ( status IS NULL OR status <> 'trash' ) GROUP BY DATE(created_at)",
+				"SELECT DATE(DATE_ADD(created_at, INTERVAL {$shift} SECOND)) AS day, COUNT(*) AS c FROM {$submissionsTable} WHERE created_at >= %s AND ( status IS NULL OR status <> 'trash' ) GROUP BY DATE(DATE_ADD(created_at, INTERVAL {$shift} SECOND))",
 				$start
 			),
 			ARRAY_A
@@ -193,8 +196,10 @@ class DashboardApi {
 		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		$counts = array();
-		for ( $i = $days - 1; $i >= 0; $i-- ) {
-			$counts[ gmdate( 'Y-m-d', strtotime( '-' . $i . ' days' ) ) ] = 0;
+		$today = ReportSeries::today( $zone );
+		$counts = array();
+		foreach ( ReportSeries::fillDays( array(), $days, $today ) as $bucket ) {
+			$counts[ $bucket['date'] ] = 0;
 		}
 
 		foreach ( (array) $rows as $row ) {

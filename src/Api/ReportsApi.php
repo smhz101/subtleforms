@@ -81,14 +81,16 @@ final class ReportsApi {
 		unset( $request );
 		global $wpdb;
 		$table = $wpdb->prefix . 'subtleforms_submissions';
-		$start = ReportSeries::start( 7 );
+		$zone  = ReportSeries::siteZone();
+		$start = ReportSeries::start( 7, null, $zone );
+		$shift = ReportSeries::offsetSeconds( $zone );
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		// Only real entries count: spam, failed and trashed entries do not.
 		$counted = \SubtleForms\Analytics\Stats::COUNTED_STATUSES;
 		$in      = implode( ',', array_fill( 0, count( $counted ), '%s' ) );
 		$rows    = $wpdb->get_results(
 			$wpdb->prepare(
-				"SELECT DATE(created_at) AS day, COUNT(*) AS c FROM {$table} WHERE created_at >= %s AND ( status IS NULL OR status IN ({$in}) ) GROUP BY DATE(created_at)",
+				"SELECT DATE(DATE_ADD(created_at, INTERVAL {$shift} SECOND)) AS day, COUNT(*) AS c FROM {$table} WHERE created_at >= %s AND ( status IS NULL OR status IN ({$in}) ) GROUP BY DATE(DATE_ADD(created_at, INTERVAL {$shift} SECOND))",
 				array_merge( array( $start ), $counted )
 			),
 			ARRAY_A
@@ -116,7 +118,7 @@ final class ReportsApi {
 				'total_forms'        => $this->forms->count(),
 				'total_submissions'  => $total,
 				'unread_submissions' => $this->submissions->count( array( 'is_read' => 0 ) ),
-				'series'             => ReportSeries::fillDays( $counts, 7, gmdate( 'Y-m-d' ) ),
+				'series'             => ReportSeries::fillDays( $counts, 7, ReportSeries::today( $zone ) ),
 				'forms'              => $forms,
 			)
 		);

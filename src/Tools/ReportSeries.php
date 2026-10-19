@@ -26,17 +26,57 @@ final class ReportSeries {
 	 * @param int|null $now  Unix time. Defaults to now.
 	 * @return string Y-m-d H:i:s.
 	 */
-	public static function start( int $days, ?int $now = null ): string {
+	public static function start( int $days, ?int $now = null, ?\DateTimeZone $timezone = null ): string {
 		$days = max( 1, min( 90, $days ) );
 		$now  = $now ?? time();
-		$today = gmdate( 'Y-m-d', $now );
-		$end   = strtotime( $today . ' 00:00:00 UTC' );
-		if ( ! $end ) {
-			$end = $now;
+		$zone = $timezone ?? new \DateTimeZone( 'UTC' );
+		$local = ( new \DateTimeImmutable( '@' . $now ) )->setTimezone( $zone );
+		$midnight = $local->setTime( 0, 0 );
+		if ( $days > 1 ) {
+			$midnight = $midnight->modify( '-' . ( $days - 1 ) . ' days' );
 		}
-		$day    = defined( 'DAY_IN_SECONDS' ) ? DAY_IN_SECONDS : 86400;
-		$oldest = gmdate( 'Y-m-d', $end - ( ( $days - 1 ) * $day ) );
-		return $oldest . ' 00:00:00';
+		return $midnight->setTimezone( new \DateTimeZone( 'UTC' ) )->format( 'Y-m-d H:i:s' );
+	}
+
+	/**
+	 * The site timezone when WordPress provides one, otherwise UTC.
+	 *
+	 * @return \DateTimeZone
+	 */
+	public static function siteZone(): \DateTimeZone {
+		if ( function_exists( 'wp_timezone' ) ) {
+			$zone = wp_timezone();
+			if ( $zone instanceof \DateTimeZone ) {
+				return $zone;
+			}
+		}
+		return new \DateTimeZone( 'UTC' );
+	}
+
+	/**
+	 * Seconds to add to a UTC timestamp to land on the site's calendar day.
+	 *
+	 * @param \DateTimeZone|null $timezone Zone.
+	 * @param int|null            $now Unix time.
+	 * @return int
+	 */
+	public static function offsetSeconds( ?\DateTimeZone $timezone = null, ?int $now = null ): int {
+		$zone = $timezone ?? new \DateTimeZone( 'UTC' );
+		$now  = $now ?? time();
+		return $zone->getOffset( new \DateTimeImmutable( '@' . $now ) );
+	}
+
+	/**
+	 * Today's date in a timezone.
+	 *
+	 * @param \DateTimeZone|null $timezone Zone.
+	 * @param int|null            $now Unix time.
+	 * @return string Y-m-d.
+	 */
+	public static function today( ?\DateTimeZone $timezone = null, ?int $now = null ): string {
+		$zone = $timezone ?? new \DateTimeZone( 'UTC' );
+		$now  = $now ?? time();
+		return ( new \DateTimeImmutable( '@' . $now ) )->setTimezone( $zone )->format( 'Y-m-d' );
 	}
 
 	/**
