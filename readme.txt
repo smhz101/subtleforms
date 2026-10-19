@@ -132,6 +132,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 = 2.4.1 - 2026-10-20 =
 * Fix: Forms imported in Tools, migrated from Gravity Forms or Fluent Forms, or created with a schema get the same save steps as a builder save, so add-ons such as SubtleForms Pro can finish them (a signed webhook gets its secret, logic rules for missing fields are removed).
 * Fix: The live form sends the page's language with its requests when a translation add-on gives one, so translated labels and confirmations are used.
+* New: An action, subtleforms/submission/deleted, fires when an entry is deleted for good, so add-ons can remove what they keep about it.
 
 = 2.4.0 - 2026-10-20 =
 * New: Each payment form can pick its own currency, and more currencies are available, including JPY, INR, PKR and AED.

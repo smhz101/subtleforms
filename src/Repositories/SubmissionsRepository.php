@@ -285,6 +285,16 @@ final class SubmissionsRepository {
 				\SubtleForms\Uploads\Uploads::deleteForPayload( $submission['payload'] ?? array() );
 			}
 			( new LogsRepository() )->deleteBySubmission( $id );
+
+			/**
+			 * Fires after an entry was deleted for good (2.4.1), so add-ons can
+			 * remove what they keep about it, such as integration logs.
+			 *
+			 * @param int   $id         Entry ID.
+			 * @param array $submission The deleted entry.
+			 * @since 2.4.1
+			 */
+			do_action( 'subtleforms/submission/deleted', $id, $submission );
 		}
 
 		// Invalidate count cache
