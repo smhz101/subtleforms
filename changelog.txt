@@ -24,6 +24,16 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: The live form sends the page's language with its requests when a translation add-on gives one, so translated labels and confirmations are used.
 * New: An action, subtleforms/submission/deleted, fires when an entry is deleted for good, so add-ons can remove what they keep about it.
 * Fix: Settings, Integrations lists integrations your SubtleForms Pro plan does not include with the plan that has them, and an integration's status dot turns green as soon as it is switched on and set up, without a reload.
+* Fix: Entry ages read 1 hour ago, 1 minute ago and 1 day ago instead of using the plural for one.
+* Fix: Deleting a coupon, discarding changes, deleting forms or steps, resetting settings and export errors use the SubtleForms dialog instead of the browser's confirm and alert boxes.
+* Change: In the builder the field inspector's first tab is called Field and its Appearance section is called Display, so they are not confused with the Settings view and the Style tab.
+* Fix: On a window shorter than the WordPress menu, SubtleForms screens fill the window instead of showing a dark band under the page, and the lower menu items stay reachable.
+* Fix: On a phone the form builder says it needs a wider screen instead of showing a clipped toolbar, with a button back to the forms and an option to open it anyway.
+* Fix: With the reading pane on the right, a narrow window shows the open entry over the list at full width, and its actions wrap onto a second line instead of overlapping or being cut off.
+* Fix: On a phone the forms and submissions lists show each row as a card instead of a table that scrolls sideways, checkboxes keep their normal size, the tabs stay on one line and the search box gets its own line.
+* Fix: The Quick Start Wizard fits the window on every step with its buttons always in view, and the Help & tour menu closes when you pick Start Tour or View Documentation.
+* Fix: The builder tour describes the real header buttons, shows the toolbar and settings of a selected field, and no longer scrolls the page.
+* Fix: Pages with a form no longer jump when the form appears: the space for the form is kept from the start.
 
 = 2.4.0 - 2026-10-20 =
 * New: A payment form has its own currency setting under Settings, Payments. It follows the site currency until you pick one.

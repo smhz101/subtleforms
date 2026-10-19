@@ -34,7 +34,10 @@ export default function HelpMenu({
           {onStartTour && (
             <MenuItem
               icon={<Icon.Play size={16} />}
-              onClick={onStartTour}>
+              onClick={() => {
+                onClose();
+                onStartTour();
+              }}>
               {__('Start Tour', 'subtleforms')}
             </MenuItem>
           )}
@@ -61,6 +64,7 @@ export default function HelpMenu({
             <MenuItem
               icon={<Icon.Book size={16} />}
               onClick={() => {
+                onClose();
                 window.open('https://subtleforms.com/docs', '_blank');
               }}>
               {__('View Documentation', 'subtleforms')}

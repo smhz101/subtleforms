@@ -1,5 +1,6 @@
 import { render } from '@wordpress/element';
 import AdminApp from './app/AdminApp';
+import { watchMenuFit } from './utils/menuFit';
 // Add-on registry (window.SubtleFormsExtend) must exist before add-on scripts run.
 import '../shared/extend';
 
@@ -18,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // document.body) pick up the SubtleForms primary without forking them
   // (Part C step 2).
   document.body.classList.add('subtleforms-admin-scope');
+  watchMenuFit();
 
   render(<AdminApp />, mount);
 });

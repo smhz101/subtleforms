@@ -12,6 +12,7 @@ import apiFetch from '@wordpress/api-fetch';
 import { apiPost } from '../utils/api';
 import { useForms } from '../data';
 import lazyWithRetry from '../utils/lazyWithRetry';
+import { noticeDialog } from '../utils/confirmDialog';
 import './SubmissionsPage.scss';
 
 const SubmissionDetailPage = lazyWithRetry(
@@ -379,13 +380,13 @@ export default function SubmissionsPage({ formId }) {
         link.click();
         document.body.removeChild(link);
       } else {
-        alert(
-          response.message || __('Failed to export submissions', 'subtleforms')
-        );
+        await noticeDialog({
+          message: response.message || __('Failed to export submissions', 'subtleforms'),
+        });
       }
     } catch (error) {
       console.error('Export failed:', error);
-      alert(__('Failed to export submissions', 'subtleforms'));
+      await noticeDialog({ message: __('Failed to export submissions', 'subtleforms') });
     } finally {
       setExporting(false);
     }

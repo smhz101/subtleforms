@@ -251,10 +251,11 @@ a:not([class]):hover,
  * WCAG 2.1 Success Criterion 2.5.5
  */
 @media (max-width: 768px) {
+  /* Checkboxes and radios keep their drawn size (WordPress makes them 25px
+     on small screens, above the 24px AA target size); stretching the box to
+     44px left an empty square with a small tick (UX2-19). */
   button,
   a,
-  input[type="checkbox"],
-  input[type="radio"],
   .sf-button,
   .sf-field-toolbar__button {
     min-width: 44px;

@@ -29,6 +29,7 @@ import { Icon } from '../ui';
 import { keepRowsAfterFailedLoad, listQueryKey } from '../utils/failedLoad';
 import { downloadCsv } from '../utils/csvDownload';
 import { entrySender } from '../utils/entrySender';
+import { timeAgo } from '../utils/formatDate';
 import './SubmissionsTable.scss';
 
 const restNonce =
@@ -578,41 +579,10 @@ const SubmissionsTable = forwardRef(
       setCurrentPage(1);
     };
 
-    // Stored timestamps are UTC without a zone suffix; parse them as UTC so
-    // relative times match the dashboard in every browser timezone.
+    // Stored timestamps are UTC without a zone suffix; parse them as UTC.
     const parseUtc = (value) => {
       const raw = String(value || '');
       return new Date(raw && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(raw) ? `${raw.replace(' ', 'T')}Z` : raw);
-    };
-
-    const getRelativeTime = (dateString) => {
-      const date = parseUtc(dateString);
-      const now = new Date();
-      const diff = Math.max(0, Math.floor((now - date) / 1000));
-      if (diff < 60) return __('Just now', 'subtleforms');
-      if (diff < 3600)
-        return (() => {
-          /* translators: %1$d: number of minutes */
-          return sprintf(
-            __('%1$d minutes ago', 'subtleforms'),
-            Math.floor(diff / 60)
-          );
-        })();
-      if (diff < 86400)
-        return (() => {
-          /* translators: %1$d: number of hours ago */
-          return sprintf(
-            __('%1$d hours ago', 'subtleforms'),
-            Math.floor(diff / 3600)
-          );
-        })();
-      return (() => {
-        /* translators: %1$d: number of days */
-        return sprintf(
-          __('%1$d days ago', 'subtleforms'),
-          Math.floor(diff / 86400)
-        );
-      })();
     };
 
     const getBrowserDevice = (userAgent) => {
@@ -725,7 +695,7 @@ const SubmissionsTable = forwardRef(
         sortable: true,
         render: (createdAt) => (
           <time className='sf-sub-time' title={formatAbsDate(createdAt)} dateTime={createdAt}>
-            {getRelativeTime(createdAt)}
+            {timeAgo(createdAt)}
           </time>
         ),
       },

@@ -23,6 +23,7 @@ import AdminShell from '../components/AdminShell';
 import Icon from '../ui/Icon';
 import { getPlanState } from '../data/proCatalog';
 import { formatMoney } from '../../shared/pricing';
+import { confirmDialog } from '../utils/confirmDialog';
 import './PaymentsPage.scss';
 
 const NS = '/subtleforms/v1';
@@ -349,8 +350,12 @@ export default function PaymentsPage() {
   const ready = gateways.find(([, g]) => g.ready);
 
   const remove = async (c) => {
-    // eslint-disable-next-line no-alert
-    if (!window.confirm(sprintf(/* translators: %s: coupon code */ __('Delete coupon %s? Orders that used it keep their discount.', 'subtleforms'), c.code))) return;
+    const ok = await confirmDialog({
+      destructive: true,
+      confirmText: __('Delete coupon', 'subtleforms'),
+      message: sprintf(/* translators: %s: coupon code */ __('Delete coupon %s? Orders that used it keep their discount.', 'subtleforms'), c.code),
+    });
+    if (!ok) return;
     try {
       await apiFetch({ path: `${NS}/coupons/${c.id}`, method: 'DELETE' });
       setCoupons((list) => list.filter((x) => x.id !== c.id));

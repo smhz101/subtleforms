@@ -7,7 +7,7 @@
  * locale string when that library is not available (e.g. unit tests).
  */
 
-import { __ } from '@wordpress/i18n';
+import { __, _n, sprintf } from '@wordpress/i18n';
 
 let wpDate = null;
 try {
@@ -96,9 +96,53 @@ export function formatRelativeDate(value) {
 }
 
 function sprintfHoursAgo(hours) {
-  // Kept inline so the helper stays dependency-free in test envs.
-  /* translators: %1$d: number of hours ago */
-  return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+  return sprintf(
+    /* translators: %d: number of hours */
+    _n('%d hour ago', '%d hours ago', hours, 'subtleforms'),
+    hours
+  );
+}
+
+/**
+ * "Just now", "1 minute ago", "3 hours ago", "1 day ago": a short age with
+ * the right singular or plural form (UX2-28).
+ *
+ * Stored timestamps are UTC without a zone suffix and are read as UTC.
+ *
+ * @param {string|number|Date} value Date value.
+ * @param {Date}               now   Current time (for tests).
+ * @return {string}
+ */
+export function timeAgo(value, now = new Date()) {
+  if (value === null || value === undefined || value === '') return '';
+  let date;
+  if (value instanceof Date || typeof value === 'number') {
+    // A Date or an epoch in milliseconds.
+    date = new Date(value);
+  } else {
+    const raw = String(value);
+    date = new Date(!/[zZ]|[+-]\d{2}:?\d{2}$/.test(raw) ? `${raw.replace(' ', 'T')}Z` : raw);
+  }
+  if (isNaN(date.getTime())) return '';
+  const diff = Math.max(0, Math.floor((now - date) / 1000));
+  if (diff < 60) return __('Just now', 'subtleforms');
+  if (diff < 3600) {
+    const minutes = Math.floor(diff / 60);
+    return sprintf(
+      /* translators: %d: number of minutes */
+      _n('%d minute ago', '%d minutes ago', minutes, 'subtleforms'),
+      minutes
+    );
+  }
+  if (diff < 86400) {
+    return sprintfHoursAgo(Math.floor(diff / 3600));
+  }
+  const days = Math.floor(diff / 86400);
+  return sprintf(
+    /* translators: %d: number of days */
+    _n('%d day ago', '%d days ago', days, 'subtleforms'),
+    days
+  );
 }
 
 /**
