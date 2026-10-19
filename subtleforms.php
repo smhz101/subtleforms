@@ -2,9 +2,10 @@
 
 /**
  * Plugin Name: SubtleForms
- * Description: Logic-first, workflow-driven form platform with extension architecture.
+ * Description: Build contact, multi-step and conversational forms on a visual canvas, then read every entry in a clean inbox. Spam protection built in.
  * Version: 2.3.9
- * Author: Muzammil Hussain
+ * Author: SubtleForms
+ * Author URI: https://subtleforms.com/
  * Requires at least: 6.6
  * Requires PHP: 8.1
  * Text Domain: subtleforms
@@ -18,9 +19,9 @@
  *
  * @package SubtleForms
  * @version 1.0.0
- * @author Muzammil Hussain
+ * @author SubtleForms
  * @license GPL-2.0+
- * @link https://muzammil.dev
+ * @link https://subtleforms.com/
  */
 
 // If this file is called directly, abort.
