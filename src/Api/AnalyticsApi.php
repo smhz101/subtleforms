@@ -118,16 +118,14 @@ final class AnalyticsApi {
 	// ── Permissions ───────────────────────────────────────────────────────
 
 	/**
-	 * The beacon must carry the page's REST nonce.
+	 * Anyone may report a view: visitors have no REST nonce.
 	 *
 	 * @param WP_REST_Request $request Request.
 	 * @return true|WP_Error
 	 */
 	public function checkBeaconNonce( WP_REST_Request $request ) {
-		$nonce = (string) $request->get_header( 'X-WP-Nonce' );
-		if ( '' === $nonce || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
-			return new WP_Error( 'subtleforms_invalid_nonce', __( 'Invalid request.', 'subtleforms' ), array( 'status' => 403 ) );
-		}
+		// Visitors get no REST nonce (pages may be cached), so a view needs
+		// none. The count is limited per address and only for published forms.
 		return true;
 	}
 

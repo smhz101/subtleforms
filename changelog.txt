@@ -11,6 +11,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Change: Global functions and transients use the subtleforms_ prefix.
 * Fix: Webhook retries and the default signing secret follow Settings, Integrations, Webhooks.
 * Fix: Visitors can send a form from a page served by a page cache. The spam time check uses a token signed by the server, so a wrong device clock no longer blocks a person, and a bot cannot skip it.
+* Fix: Form views from visitors are counted for Reports, and a trashed or draft form refuses entries with a not found answer.
 * Fix: Answers the server refuses are not stored as failed entries, and the spam fields are never part of an entry.
 * Fix: Deleting a form deletes its entries, uploaded files, activity logs, schema versions and view totals. The retention purge removes logs too.
 * Fix: The personal data export and erase tools match the exact email address and show the form name.

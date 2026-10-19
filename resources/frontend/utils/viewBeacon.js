@@ -31,10 +31,9 @@ export function sendView(formId, config = {}) {
       // itself sets no cookies.
       credentials: 'same-origin',
       keepalive: true,
-      headers: {
-        'Content-Type': 'application/json',
-        'X-WP-Nonce': config.nonce || '',
-      },
+      headers: config.nonce
+        ? { 'Content-Type': 'application/json', 'X-WP-Nonce': config.nonce }
+        : { 'Content-Type': 'application/json' },
       body: '{}',
     }).catch(() => {});
   } catch (e) {

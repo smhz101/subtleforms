@@ -25,6 +25,12 @@ describe('viewBeacon', () => {
     expect(options.body).toBe('{}');
   });
 
+  it('sends no nonce header for a visitor', () => {
+    sendView(9, { restUrl: '/wp-json/subtleforms/v1' });
+    const [, options] = global.fetch.mock.calls[0];
+    expect(options.headers).not.toHaveProperty('X-WP-Nonce');
+  });
+
   it('does nothing when view tracking is off', () => {
     const el = document.createElement('div');
     observeView(el, 3, { restUrl: '/x', trackViews: false });
