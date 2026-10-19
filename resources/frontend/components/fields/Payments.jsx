@@ -9,6 +9,7 @@ import { createContext, useContext, useEffect, useRef, useState } from '@wordpre
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { formatMoney } from '../../../shared/pricing';
 import { currencySymbol, currencyDecimals, currencyMinimum } from '../../../shared/currencies';
+import ChoiceSelect from './ChoiceSelect';
 
 export const PaymentContext = createContext(null);
 
@@ -113,7 +114,7 @@ export function PaymentAmount({ config, value, onChange, inputId, name, placehol
 
 /* ── Priced options ─────────────────────────────────────────────────────── */
 
-export function PaymentChoice({ config, value, onChange, inputId, error, name }) {
+export function PaymentChoice({ config, value, onChange, inputId, error, name, required = false, describedBy, placeholder }) {
   const pay = usePayment();
   const currency = pay?.currency || 'USD';
   const options = Array.isArray(config.options) ? config.options : [];
@@ -130,20 +131,23 @@ export function PaymentChoice({ config, value, onChange, inputId, error, name })
   const priceText = (o) => (showPrice && Number(o.price) > 0 ? formatMoney(o.price, currency) : '');
 
   if (mode === 'dropdown') {
+    // The same picker as every other dropdown, with a name and required
+    // state for the browser and assistive tech (PAY2-03).
     return (
-      <select
-        id={inputId}
-        className='subtleforms-select'
+      <ChoiceSelect
+        inputId={inputId}
+        name={name || inputId}
         value={selected}
-        aria-invalid={!!error}
-        onChange={(e) => onChange(e.target.value)}>
-        <option value=''>{__('Select an option', 'subtleforms')}</option>
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {priceText(o) ? `${o.label} (${priceText(o)})` : o.label}
-          </option>
-        ))}
-      </select>
+        onChange={onChange}
+        options={options.map((o) => ({
+          value: o.value,
+          label: priceText(o) ? `${o.label} (${priceText(o)})` : o.label,
+        }))}
+        placeholder={placeholder}
+        required={required}
+        describedBy={describedBy}
+        invalid={!!error}
+      />
     );
   }
 
@@ -151,6 +155,8 @@ export function PaymentChoice({ config, value, onChange, inputId, error, name })
     <div
       className={`subtleforms-priced subtleforms-priced--${mode}`}
       role={multiple ? 'group' : 'radiogroup'}
+      aria-required={!multiple && required ? true : undefined}
+      aria-describedby={describedBy}
       aria-invalid={!!error}>
       {options.map((o, i) => {
         const checked = multiple ? selected.includes(o.value) : selected === o.value;
@@ -162,6 +168,7 @@ export function PaymentChoice({ config, value, onChange, inputId, error, name })
               name={name || inputId}
               value={o.value}
               checked={checked}
+              required={(!multiple && required && i === 0) || undefined}
               onChange={(e) => {
                 if (!multiple) {
                   onChange(o.value);

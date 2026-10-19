@@ -69,3 +69,31 @@ describe('PAY-26: card minimum', () => {
     unmount();
   });
 });
+
+describe('PAY2-03: Priced Options dropdown', () => {
+  const field = {
+    id: 'c',
+    type: 'payment_choice',
+    key: 'size',
+    label: 'Size',
+    required: true,
+    description: 'Pick one size',
+    displayAs: 'dropdown',
+    options: [
+      { label: 'Small', value: 'small', price: 5 },
+      { label: 'Large', value: 'large', price: 9 },
+    ],
+  };
+
+  it('uses the shared picker with a name, required state and description', () => {
+    const { container, unmount } = render(field, { currency: 'USD' });
+    expect(container.querySelector('.subtleforms-picker')).not.toBeNull();
+    const fallback = container.querySelector('select.subtleforms-picker__fallback');
+    expect(fallback.getAttribute('name')).toBeTruthy();
+    expect(fallback.required).toBe(true);
+    const trigger = container.querySelector('.subtleforms-picker__trigger');
+    expect(trigger.getAttribute('aria-describedby')).toBeTruthy();
+    expect([...fallback.options].map((o) => o.textContent)).toEqual(['Select an option', 'Small ($5.00)', 'Large ($9.00)']);
+    unmount();
+  });
+});

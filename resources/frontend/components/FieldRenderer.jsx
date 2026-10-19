@@ -959,6 +959,9 @@ function renderInput(
           inputId={inputId}
           error={error}
           name={name}
+          required={required}
+          describedBy={describedBy}
+          placeholder={placeholder}
         />
       );
 
