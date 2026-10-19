@@ -14,6 +14,7 @@ import { getIn } from './valuePaths';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { getFieldType } from '../../shared/extend';
 import { hasParts, missingParts } from '../../shared/compositeParts';
+import { firstUnansweredChainedLevel } from '../../shared/chainedOptions';
 
 export const COMPOSITE_FIELD_TYPES = new Set(['name_group', 'address_group', 'address']);
 
@@ -164,6 +165,9 @@ function rawValidateField(field, value, defaults = {}) {
           '';
         return { message: custom || err, required: true };
       }
+    } else if (type === 'chained_select') {
+      // Every level that offers choices needs an answer (FLD2-10).
+      if (firstUnansweredChainedLevel(config, value) !== -1) return requiredMessage;
     } else if (type === 'toggle') {
       const onValue = config.onValue ?? 'yes';
       if (value !== true && value !== onValue) return requiredMessage;

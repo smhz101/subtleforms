@@ -119,6 +119,15 @@ final class FieldValidator {
 				continue;
 			}
 
+			// Every dependent dropdown that offers choices needs an answer,
+			// the same rule as the browser (FLD2-10).
+			if ( $type === 'chained_select' ) {
+				if ( null !== $this->chainedMissingLevel( $fields[ $fieldKey ] ?? array(), $value ) ) {
+					$errors[ $fieldKey ] = $requiredMessage;
+				}
+				continue;
+			}
+
 			if ( $type === 'toggle' ) {
 				$onValue = (string) ( $this->attr( $fields[ $fieldKey ] ?? array(), 'onValue' ) ?? 'yes' );
 				if ( $value !== true && (string) $value !== $onValue ) {
@@ -699,6 +708,87 @@ final class FieldValidator {
 		$v   = (int) $value;
 		if ( $v < $min || $v > $max ) {
 			return __( 'Please choose a value on the scale.', 'subtleforms' );
+		}
+		return null;
+	}
+
+	/**
+	 * The first level of a chained field that offers choices for the answers
+	 * so far but has no valid answer. Mirrors firstUnansweredChainedLevel()
+	 * in resources/shared/chainedOptions.js.
+	 *
+	 * @param array $field Field.
+	 * @param mixed $value Answer, one choice per level.
+	 * @return int|null Depth, or null when every level is answered.
+	 */
+	private function chainedMissingLevel( array $field, $value ): ?int {
+		$selected = is_array( $value ) ? array_values( $value ) : ( is_scalar( $value ) && '' !== (string) $value ? array( (string) $value ) : array() );
+		$levels   = $this->attr( $field, 'levels' );
+		$levels   = is_array( $levels ) && array() !== $levels ? array_values( $levels ) : null;
+
+		$optionsFor = function ( int $depth ) use ( $levels, $field, $selected ): array {
+			if ( null !== $levels ) {
+				$options = isset( $levels[ $depth ]['options'] ) && is_array( $levels[ $depth ]['options'] ) ? $levels[ $depth ]['options'] : array();
+				$linked  = false;
+				foreach ( $options as $opt ) {
+					if ( is_array( $opt ) && isset( $opt['parent'] ) && '' !== (string) $opt['parent'] ) {
+						$linked = true;
+						break;
+					}
+				}
+				if ( 0 === $depth || ! $linked ) {
+					return $options;
+				}
+				$parent = $selected[ $depth - 1 ] ?? '';
+				if ( ! is_scalar( $parent ) || '' === (string) $parent ) {
+					return array();
+				}
+				return array_values( array_filter( $options, static fn( $o ) => is_array( $o ) && (string) ( $o['parent'] ?? '' ) === (string) $parent ) );
+			}
+			$nodes = $this->attr( $field, 'options' );
+			$nodes = is_array( $nodes ) ? $nodes : array();
+			for ( $i = 0; $i < $depth; $i++ ) {
+				$chosen = null;
+				foreach ( $nodes as $node ) {
+					if ( is_array( $node ) && isset( $selected[ $i ] ) && is_scalar( $selected[ $i ] ) && (string) ( $node['value'] ?? '' ) === (string) $selected[ $i ] ) {
+						$chosen = $node;
+						break;
+					}
+				}
+				$nodes = is_array( $chosen['children'] ?? null ) ? $chosen['children'] : array();
+			}
+			return $nodes;
+		};
+
+		if ( null !== $levels ) {
+			$count = count( $levels );
+		} else {
+			$count = 1;
+			foreach ( array_keys( $selected ) as $i ) {
+				if ( array() !== $optionsFor( $i + 1 ) ) {
+					++$count;
+				}
+			}
+		}
+
+		for ( $depth = 0; $depth < $count; $depth++ ) {
+			$options = $optionsFor( $depth );
+			if ( array() === $options ) {
+				continue;
+			}
+			$answer = $selected[ $depth ] ?? null;
+			$valid  = false;
+			if ( is_scalar( $answer ) && '' !== (string) $answer ) {
+				foreach ( $options as $opt ) {
+					if ( is_array( $opt ) && (string) ( $opt['value'] ?? '' ) === (string) $answer ) {
+						$valid = true;
+						break;
+					}
+				}
+			}
+			if ( ! $valid ) {
+				return $depth;
+			}
 		}
 		return null;
 	}
