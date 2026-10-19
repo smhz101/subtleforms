@@ -215,10 +215,9 @@ final class Repeater {
 			if ( self::isRepeater( $node ) ) {
 				$key      = (string) ( $node['key'] ?? ( $node['config']['key'] ?? '' ) );
 				$groups   = self::groups( $payload[ $key ] ?? array() );
-				list( $min ) = self::limits( $node );
-				// Required children of groups the visitor must fill are checked
-				// even when nothing was posted for them.
-				$count    = max( count( $groups ), $min );
+				// Only the groups that were sent are checked. Too few groups is
+				// one error on the Repeater itself (FA-23, countErrors()).
+				$count    = count( $groups );
 				$expanded = array();
 				for ( $g = 0; $g < $count; $g++ ) {
 					foreach ( self::children( $node ) as $child ) {
@@ -308,11 +307,12 @@ final class Repeater {
 			if ( $count > $max ) {
 				/* translators: %d: maximum number of groups */
 				$errors[ $key ] = sprintf( _n( 'Add no more than %d entry.', 'Add no more than %d entries.', $max, 'subtleforms' ), $max );
+			} elseif ( $count < $min ) {
+				// The browser always sends at least `min` groups, so fewer is
+				// reported once, on the Repeater (FA-23).
+				/* translators: %d: minimum number of groups */
+				$errors[ $key ] = sprintf( _n( 'Add at least %d entry.', 'Add at least %d entries.', $min, 'subtleforms' ), $min );
 			}
-			// Fewer groups than the minimum is not an error by itself: the
-			// browser always sends `min` groups, and the required children of
-			// missing groups are reported on their own inputs.
-			unset( $min );
 		}
 		return $errors;
 	}

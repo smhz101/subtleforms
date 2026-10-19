@@ -173,4 +173,24 @@ final class FieldValueParity240Test extends TestCase {
 		$this->assertArrayNotHasKey( 'fee', $payload );
 		$this->assertArrayNotHasKey( 'summary', $payload );
 	}
+
+	/** FA-23: too few Repeater groups is one message on the Repeater. */
+	public function test_repeater_minimum_is_one_message() {
+		$form   = $this->publish(
+			array(
+				array(
+					'id'       => 'people',
+					'key'      => 'people',
+					'type'     => 'repeat_container',
+					'label'    => 'People',
+					'min'      => 2,
+					'children' => array( array( 'id' => 'pn', 'key' => 'pn', 'type' => 'text', 'label' => 'Name', 'required' => true ) ),
+				),
+			)
+		);
+		$result = $this->submit( $form, array( 'people' => array( array( 'pn' => 'Ada' ) ) ) );
+		$this->assertSame( 422, $result['status'] );
+		$errors = $result['data']['error']['meta']['fields'] ?? $result['data']['meta']['fields'] ?? array();
+		$this->assertSame( array( 'people' => 'Add at least 2 entries.' ), $errors );
+	}
 }
