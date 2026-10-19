@@ -1089,8 +1089,13 @@ final class SubmissionsApi {
 			);
 			foreach ( $ordered as $key ) {
 				if ( isset( $repeaters[ $key ] ) ) {
-					foreach ( \SubtleForms\Support\Repeater::csvCells( $payload[ $key ] ?? array(), $fields[ $key ] ?? $repeaters[ $key ], $display ) as $cell ) {
-						$row[] = $cell;
+					// Format with the entry's own version of the Repeater, then
+					// fill the columns of the current version in header order:
+					// a child added or removed since leaves its cell empty
+					// instead of shifting the others.
+					$cells = \SubtleForms\Support\Repeater::csvCells( $payload[ $key ] ?? array(), $fields[ $key ] ?? $repeaters[ $key ], $display );
+					foreach ( \SubtleForms\Support\Repeater::childFields( $repeaters[ $key ] ) as $child ) {
+						$row[] = $cells[ $child['key'] ] ?? '';
 					}
 					continue;
 				}
