@@ -124,13 +124,22 @@ final class PublicSubmitApi {
 	$payload = $validated['data'] ?? array();
 	$payload = is_array( $payload ) ? Sanitizer::sanitizeArrayDeep( $payload ) : array();
 
+		// Verify the form exists before any spam check, so a missing, draft or
+		// trashed form always answers 404. Guests only reach published forms. A
+		// logged-in admin (the builder preview) may store an entry on a draft.
+		$form    = $this->formsRepo->find( $formId );
+		$isAdmin = is_user_logged_in() && current_user_can( 'manage_options' );
+		if ( ! $form || ( ( $form['status'] ?? '' ) !== 'published' && ! $isAdmin ) ) {
+			return ApiResponse::not_found( __( 'Form not found', 'subtleforms' ) );
+		}
+
 	// Honeypot: a hidden "website_url" field real users never see. If it has
-	// any value, the submitter is a bot — silently drop the submission (return
+	// any value, the submitter is a bot, so silently drop the submission (return
 	// success without saving) so bots don't learn the field is a trap and retry,
 	// matching the existing SpamProtection pattern (Part B3).
 	$honeypot = isset( $payload['website_url'] ) ? (string) $payload['website_url'] : '';
 	if ( $honeypot !== '' ) {
-		Logger::info( 'Honeypot tripped on form %d — dropping submission', $formId );
+		Logger::info( 'Honeypot tripped on form %d, dropping submission', $formId );
 		return ApiResponse::success(
 			array(
 				'success' => true,
@@ -165,14 +174,6 @@ final class PublicSubmitApi {
 					$verification['error'] ?? __( 'CAPTCHA verification failed.', 'subtleforms' )
 				);
 			}
-		}
-
-		// Verify form exists. Guests only reach published forms. A logged-in
-		// admin (the builder preview) may store an entry on a draft.
-		$form    = $this->formsRepo->find( $formId );
-		$isAdmin = is_user_logged_in() && current_user_can( 'manage_options' );
-		if ( ! $form || ( ( $form['status'] ?? '' ) !== 'published' && ! $isAdmin ) ) {
-			return ApiResponse::not_found( __( 'Form not found', 'subtleforms' ) );
 		}
 
 		// Check submission limit
@@ -542,7 +543,7 @@ final class PublicSubmitApi {
 	}
 
 	// ────────────────────────────────────────────────────────────────────
-	// Rate limit (inline — no FeatureGate needed for public endpoint)
+	// Rate limit (inline, no FeatureGate needed for public endpoint)
 	// ────────────────────────────────────────────────────────────────────
 
 	/**
@@ -1073,7 +1074,7 @@ final class PublicSubmitApi {
                         return $schema;
                 }
 
-                // Check if a pipeline-level webhook action already exists — no double-fire.
+                // Check if a pipeline-level webhook action already exists, no double-fire.
                 $actions = $schema['actions'] ?? array();
                 foreach ( $actions as $action ) {
                         if ( isset( $action['type'] ) && $action['type'] === 'webhook' ) {
