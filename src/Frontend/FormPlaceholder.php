@@ -9,8 +9,8 @@
  * estimated height of the form's first page, on a wide and a narrow screen,
  * and the renderer releases it once the form is drawn.
  *
- * The heights are those of the default form style; a theme-styled form is
- * close enough that the shift stays small.
+ * The heights are those of the default form style (no padding of its own,
+ * 2.4.1); a theme-styled form is close enough that the shift stays small.
  *
  * @package SubtleForms
  * @since   2.4.1
@@ -29,16 +29,19 @@ final class FormPlaceholder {
 	private const GAP = 44;
 
 	/** Title and description above the fields. */
-	private const HEADER = 96;
+	private const HEADER = 64;
 
-	/** Title, description and the step progress of a multi-step form. */
-	private const HEADER_STEPS = 360;
+	/** Title, description and the step progress of a multi-step form: wide, narrow. */
+	private const HEADER_STEPS = array( 328, 302 );
 
-	/** Padding under the fields, the submit row and the bottom padding. */
-	private const FOOTER = 149;
+	/** Space under the fields and the submit row. */
+	private const FOOTER = 24 + 72;
 
-	/** One question at a time. */
-	private const CONVERSATIONAL = 600;
+	/** Space under the fields, the step buttons and the submit row of a multi-step form. */
+	private const FOOTER_STEPS = 48 + 107;
+
+	/** One question at a time: wide, narrow. */
+	private const CONVERSATIONAL = array( 525, 425 );
 
 	/** Largest height kept, so a broken estimate cannot leave a huge gap. */
 	private const MAX = 4000;
@@ -84,8 +87,8 @@ final class FormPlaceholder {
 		$type = (string) ( $schema['metadata']['type'] ?? 'regular' );
 		if ( 'conversational' === $type ) {
 			return array(
-				'wide'   => self::CONVERSATIONAL,
-				'narrow' => self::CONVERSATIONAL,
+				'wide'   => self::CONVERSATIONAL[0],
+				'narrow' => self::CONVERSATIONAL[1],
 			);
 		}
 
@@ -93,13 +96,16 @@ final class FormPlaceholder {
 		$steps  = false;
 		list( $fields, $steps ) = self::firstPage( $fields );
 
-		$header = $steps ? self::HEADER_STEPS : self::HEADER;
+		$wide_header   = $steps ? self::HEADER_STEPS[0] : self::HEADER;
+		$narrow_header = $steps ? self::HEADER_STEPS[1] : self::HEADER;
 		if ( ! $showTitle ) {
-			$header -= 48;
+			$wide_header   -= 40;
+			$narrow_header -= 40;
 		}
+		$footer = $steps ? self::FOOTER_STEPS : self::FOOTER;
 
-		$wide   = $header + self::rows( $fields, false ) + self::FOOTER;
-		$narrow = $header + 10 + self::rows( $fields, true ) + self::FOOTER;
+		$wide   = $wide_header + self::rows( $fields, false ) + $footer;
+		$narrow = $narrow_header + self::rows( $fields, true ) + $footer;
 
 		return array(
 			'wide'   => (int) min( self::MAX, max( 0, $wide ) ),
@@ -215,9 +221,6 @@ final class FormPlaceholder {
 		if ( in_array( $type, self::CHOICES, true ) ) {
 			$count = is_array( $field['options'] ?? null ) ? count( $field['options'] ) : 3;
 			return 32 + 31 * max( 1, $count );
-		}
-		if ( 'consent' === $type && $narrow ) {
-			return 86;
 		}
 		if ( 'address_group' === $type && $narrow ) {
 			return 420;

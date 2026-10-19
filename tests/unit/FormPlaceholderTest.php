@@ -37,9 +37,9 @@ final class FormPlaceholderTest extends TestCase {
 
 	public function test_estimate_matches_the_drawn_form(): void {
 		$h = FormPlaceholder::estimate( $this->inquiry() );
-		// Measured in the browser: 891px wide, 1167px at 390px.
-		$this->assertEqualsWithDelta( 891, $h['wide'], 20 );
-		$this->assertEqualsWithDelta( 1167, $h['narrow'], 30 );
+		// Measured in the browser: 806px wide, 1038px at 390px.
+		$this->assertEqualsWithDelta( 806, $h['wide'], 20 );
+		$this->assertEqualsWithDelta( 1038, $h['narrow'], 30 );
 	}
 
 	public function test_a_field_shown_by_logic_does_not_count(): void {
@@ -83,7 +83,7 @@ final class FormPlaceholderTest extends TestCase {
 
 	public function test_conversational_forms_keep_one_question(): void {
 		$h = FormPlaceholder::estimate( array( 'metadata' => array( 'type' => 'conversational' ), 'fields' => array_fill( 0, 20, array( 'type' => 'text' ) ) ) );
-		$this->assertSame( 600, $h['wide'] );
+		$this->assertSame( 525, $h['wide'] );
 	}
 
 	public function test_hidden_fields_draw_nothing_and_a_huge_form_is_capped(): void {
