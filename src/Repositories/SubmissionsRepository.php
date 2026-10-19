@@ -195,28 +195,16 @@ final class SubmissionsRepository {
 			$format[]               = '%s';
 		}
 
-		if ( isset( $data['meta'] ) ) {
-			$update_data['meta'] = wp_json_encode( $data['meta'] );
-			$format[]            = '%s';
-		}
-
-		if ( isset( $data['status'] ) ) {
-			$current = $this->find( $id );
-			$meta    = array();
-			if ( is_array( $current ) && is_array( $current['meta'] ?? null ) ) {
-				$meta = $current['meta'];
+		$current = isset( $data['status'] ) ? $this->find( $id ) : null;
+		$columns = self::statusColumns( $data, is_array( $current ) ? $current : array() );
+		foreach ( $columns as $column => $value ) {
+			if ( 'meta' === $column ) {
+				$update_data['meta'] = wp_json_encode( $value );
+				$format[]            = '%s';
+				continue;
 			}
-			$resolved = self::reviewStatus( (string) ( $current['status'] ?? '' ), (string) $data['status'], $meta );
-			if ( is_array( $resolved['meta'] ) ) {
-				$data['meta'] = $resolved['meta'];
-			}
-			if ( $resolved['status'] === 'none' ) {
-				// 'none' clears admin status override, set to NULL in DB
-				$update_data['status'] = null;
-			} else {
-				$update_data['status'] = $resolved['status'];
-			}
-			$format[] = '%s';
+			$update_data[ $column ] = $value;
+			$format[]               = 'status' === $column ? '%s' : '%s';
 		}
 
 		if ( isset( $data['is_read'] ) ) {
@@ -900,6 +888,34 @@ $cutoff_date
 	 * @param array  $meta Submission meta.
 	 * @return array{status: string, meta: array|null}
 	 */
+	/**
+	 * Columns to write when an entry is updated. Flagging stores the previous
+	 * status in meta, and that meta has to be part of the same write.
+	 *
+	 * @param array $data Requested changes.
+	 * @param array $current Stored row.
+	 * @return array
+	 */
+	public static function statusColumns( array $data, array $current ): array {
+		$columns = array();
+		if ( isset( $data['meta'] ) && is_array( $data['meta'] ) ) {
+			$columns['meta'] = $data['meta'];
+		}
+		if ( ! isset( $data['status'] ) ) {
+			return $columns;
+		}
+		$meta = is_array( $current['meta'] ?? null ) ? $current['meta'] : array();
+		if ( isset( $columns['meta'] ) ) {
+			$meta = array_merge( $meta, $columns['meta'] );
+		}
+		$resolved = self::reviewStatus( (string) ( $current['status'] ?? '' ), (string) $data['status'], $meta );
+		if ( is_array( $resolved['meta'] ) ) {
+			$columns['meta'] = $resolved['meta'];
+		}
+		$columns['status'] = 'none' === $resolved['status'] ? null : $resolved['status'];
+		return $columns;
+	}
+
 	public static function reviewStatus( string $current, string $next, array $meta ): array {
 		$review = array( 'spam', 'flagged', 'archived' );
 		if ( in_array( $next, $review, true ) ) {

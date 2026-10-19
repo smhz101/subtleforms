@@ -182,31 +182,22 @@ class DashboardApi {
 		$days             = max( 1, min( 90, $days ) );
 		$submissionsTable = $wpdb->prefix . 'subtleforms_submissions';
 		$zone             = ReportSeries::siteZone();
-		$start            = ReportSeries::start( $days, null, $zone );
-		$shift            = ReportSeries::offsetSeconds( $zone );
+		$start = ReportSeries::start( $days, null, $zone );
 
 		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled.
-		$rows = $wpdb->get_results(
+		$rows = $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT DATE(DATE_ADD(created_at, INTERVAL {$shift} SECOND)) AS day, COUNT(*) AS c FROM {$submissionsTable} WHERE created_at >= %s AND ( status IS NULL OR status <> 'trash' ) GROUP BY DATE(DATE_ADD(created_at, INTERVAL {$shift} SECOND))",
+				"SELECT created_at FROM {$submissionsTable} WHERE created_at >= %s AND ( status IS NULL OR status <> 'trash' )",
 				$start
-			),
-			ARRAY_A
+			)
 		);
 		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
-		$counts = array();
-		$today = ReportSeries::today( $zone );
-		$counts = array();
+		$grouped = ReportSeries::countByLocalDay( (array) $rows, $zone );
+		$today   = ReportSeries::today( $zone );
+		$counts  = array();
 		foreach ( ReportSeries::fillDays( array(), $days, $today ) as $bucket ) {
-			$counts[ $bucket['date'] ] = 0;
-		}
-
-		foreach ( (array) $rows as $row ) {
-			$day = substr( (string) ( $row['day'] ?? '' ), 0, 10 );
-			if ( isset( $counts[ $day ] ) ) {
-				$counts[ $day ] += (int) ( $row['c'] ?? 0 );
-			}
+			$counts[ $bucket['date'] ] = (int) ( $grouped[ $bucket['date'] ] ?? 0 );
 		}
 
 		$trend = array();

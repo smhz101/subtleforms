@@ -29,6 +29,7 @@ import {
 
 import { restFetch, restUrl, restNonce } from '../utils/restFetch';
 import { fillConfirmation } from '../../shared/confirmationTags';
+import { classicFieldInputs } from '../utils/classicFields';
 
 /**
  * Whether a submitted value counts as missing.
@@ -835,9 +836,7 @@ export default function FormRenderer({
           };
           add('subtleforms_classic', '1');
           add('subtleforms_form_id', String(formId));
-          Object.entries(submissionPayload).forEach(([key, value]) => {
-            add(`data[${key}]`, typeof value === 'object' ? JSON.stringify(value) : value);
-          });
+          classicFieldInputs(submissionPayload).forEach(([name, value]) => add(name, value));
           document.body.appendChild(classic);
           classic.submit();
           return;

@@ -424,13 +424,6 @@ final class TransferService {
 			);
 		}
 		$mismatch = self::formMismatch( $package, $formId, (string) ( $form['title'] ?? '' ) );
-		if ( '' !== $mismatch ) {
-			return array(
-				'imported' => 0,
-				'skipped'  => 0,
-				'error'    => $mismatch,
-			);
-		}
 		try {
 			$loaded = $this->forms->loadSchemaVersion( $formId );
 		} catch ( \Throwable $e ) {
@@ -500,14 +493,18 @@ final class TransferService {
 			++$imported;
 			$existing[ self::submissionIdentity( $row ) ] = true;
 		}
-		$error = '';
+		$notes = array();
+		if ( '' !== $mismatch ) {
+			$notes[] = $mismatch;
+		}
 		if ( $skipped > 0 ) {
-			$error = sprintf(
+			$notes[] = sprintf(
 				/* translators: %d: number of entries skipped */
 				__( '%d entries were already in this form and were skipped.', 'subtleforms' ),
 				$skipped
 			);
 		}
+		$error = implode( ' ', $notes );
 		return array(
 			'imported' => $imported,
 			'skipped'  => $skipped,

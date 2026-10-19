@@ -83,17 +83,15 @@ final class ReportsApi {
 		$table = $wpdb->prefix . 'subtleforms_submissions';
 		$zone  = ReportSeries::siteZone();
 		$start = ReportSeries::start( 7, null, $zone );
-		$shift = ReportSeries::offsetSeconds( $zone );
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		// Only real entries count: spam, failed and trashed entries do not.
 		$counted = \SubtleForms\Analytics\Stats::COUNTED_STATUSES;
 		$in      = implode( ',', array_fill( 0, count( $counted ), '%s' ) );
-		$rows    = $wpdb->get_results(
+		$rows    = $wpdb->get_col(
 			$wpdb->prepare(
-				"SELECT DATE(DATE_ADD(created_at, INTERVAL {$shift} SECOND)) AS day, COUNT(*) AS c FROM {$table} WHERE created_at >= %s AND ( status IS NULL OR status IN ({$in}) ) GROUP BY DATE(DATE_ADD(created_at, INTERVAL {$shift} SECOND))",
+				"SELECT created_at FROM {$table} WHERE created_at >= %s AND ( status IS NULL OR status IN ({$in}) )",
 				array_merge( array( $start ), $counted )
-			),
-			ARRAY_A
+			)
 		);
 		$total   = (int) $wpdb->get_var(
 			$wpdb->prepare(
@@ -102,10 +100,7 @@ final class ReportsApi {
 			)
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
-		$counts = array();
-		foreach ( (array) $rows as $row ) {
-			$counts[ substr( (string) ( $row['day'] ?? '' ), 0, 10 ) ] = (int) ( $row['c'] ?? 0 );
-		}
+		$counts = ReportSeries::countByLocalDay( (array) $rows, $zone );
 		$forms = array();
 		foreach ( (array) $this->forms->all( array( 'limit' => 100, 'orderby' => 'title', 'order' => 'ASC' ) ) as $form ) {
 			$forms[] = array(

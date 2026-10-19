@@ -131,7 +131,7 @@ final class Release2404Test extends TestCase {
 		);
 	}
 
-	public function test_submission_import_refuses_another_form_and_skips_the_same_entry(): void {
+	public function test_submission_import_warns_about_another_form_and_matches_the_same_entry(): void {
 		$wrong = TransferService::formMismatch(
 			array( 'form' => array( 'id' => 4, 'title' => 'Other' ) ),
 			9,
@@ -155,6 +155,27 @@ final class Release2404Test extends TestCase {
 		$same            = $row;
 		$same['payload'] = array( 'a' => '1', 'b' => '2' );
 		$this->assertSame( TransferService::submissionIdentity( $row ), TransferService::submissionIdentity( $same ) );
+	}
+
+	public function test_flagging_keeps_the_pipeline_status_in_the_same_write(): void {
+		$columns = SubmissionsRepository::statusColumns(
+			array( 'status' => 'flagged' ),
+			array(
+				'status' => 'payment_pending',
+				'meta'   => array(),
+			)
+		);
+		$this->assertSame( 'flagged', $columns['status'] );
+		$this->assertSame( 'payment_pending', $columns['meta']['pipeline_status'] );
+	}
+
+	public function test_a_daylight_saving_change_keeps_the_local_day(): void {
+		$zone = new \DateTimeZone( 'America/New_York' );
+		$counts = ReportSeries::countByLocalDay(
+			array( '2026-11-01 04:30:00' ),
+			$zone
+		);
+		$this->assertSame( array( '2026-11-01' => 1 ), $counts );
 	}
 
 	public function test_report_window_uses_the_site_timezone(): void {

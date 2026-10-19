@@ -961,12 +961,14 @@ final class FormsApi {
 			return $conflictResponse;
 		}
 
-		// Settings, General, Delete behavior. A form already in the Trash is
-		// deleted. The move_to_trash query does not override the setting.
+		// The forms screen sends move_to_trash. A bare DELETE is the builder
+		// dropping a new form the visitor never saved, and that stays a
+		// permanent delete. Hard delete ignores the query.
 		$alreadyTrashed = ( $form['status'] ?? '' ) === 'trash';
 		$settings       = get_option( 'subtleforms_settings', array() );
 		$behavior       = is_array( $settings ) ? (string) ( $settings['delete_behavior'] ?? 'soft' ) : 'soft';
-		if ( \SubtleForms\Support\Settings::deletionMode( $behavior, $alreadyTrashed ) === 'trash' ) {
+		$wantsTrash     = rest_sanitize_boolean( $request->get_param( 'move_to_trash' ) );
+		if ( $wantsTrash && \SubtleForms\Support\Settings::deletionMode( $behavior, $alreadyTrashed ) === 'trash' ) {
 			$this->formsRepo->trash( $id );
 			return ApiResponse::success( array( 'success' => true, 'trashed' => true ) );
 		}

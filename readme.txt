@@ -168,7 +168,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: Publishing a form no longer looks unpublished when the only difference is the order of appearance settings.
 * Fix: Gravity Forms and Fluent Forms imports keep pages, hidden fields, names and conditional logic, and leave payment, quiz and post fields out.
 * Fix: On Tools, choosing a file is one keyboard stop, notices clear when you change section, and forms with the same title show their number and status.
-* Fix: Importing entries refuses a file from another form and skips entries that are already there. The transfer screen says notes, the IP address, the browser, files, logs and unpublished drafts are not in the file.
+* Fix: Importing entries warns when a file is from another form and skips entries that are already there. The transfer screen says notes, the IP address, the browser, files, logs and unpublished drafts are not in the file.
 * Fix: A webhook that is still waiting says Queued.
 
 = 2.3.9 - 2026-10-19 =

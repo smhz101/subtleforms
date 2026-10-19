@@ -60,6 +60,29 @@ final class ReportSeries {
 	 * @param int|null            $now Unix time.
 	 * @return int
 	 */
+	/**
+	 * Count UTC timestamps on the local calendar day. A daylight-saving
+	 * change in the window uses the offset that applied at each time.
+	 *
+	 * @param array               $timestamps UTC Y-m-d H:i:s values.
+	 * @param \DateTimeZone|null $zone Local zone. UTC when omitted.
+	 * @return array<string, int>
+	 */
+	public static function countByLocalDay( array $timestamps, ?\DateTimeZone $zone = null ): array {
+		$zone   = $zone ?? new \DateTimeZone( 'UTC' );
+		$counts = array();
+		foreach ( $timestamps as $stamp ) {
+			$stamp = (string) $stamp;
+			if ( ! preg_match( '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $stamp ) ) {
+				continue;
+			}
+			$utc = new \DateTimeImmutable( $stamp, new \DateTimeZone( 'UTC' ) );
+			$day = $utc->setTimezone( $zone )->format( 'Y-m-d' );
+			$counts[ $day ] = ( $counts[ $day ] ?? 0 ) + 1;
+		}
+		return $counts;
+	}
+
 	public static function offsetSeconds( ?\DateTimeZone $timezone = null, ?int $now = null ): int {
 		$zone = $timezone ?? new \DateTimeZone( 'UTC' );
 		$now  = $now ?? time();
