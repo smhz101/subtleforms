@@ -621,11 +621,14 @@ class FormTemplates {
 				),
 				'fields'   => array(
 					array(
-						'id'          => 'product',
-						'type'        => 'payment_product',
-						'label'       => __( 'Product', 'subtleforms' ),
-						'productName' => __( 'Product', 'subtleforms' ),
-						'price'       => 10,
+						'id'            => 'product',
+						'type'          => 'payment_product',
+						'label'         => __( 'Product', 'subtleforms' ),
+						'productName'   => __( 'Product', 'subtleforms' ),
+						'price'         => 10,
+						// A fixed product: one in every order, on the form,
+						// in the builder and in the server's quote.
+						'allowQuantity' => false,
 					),
 					array(
 						'id'    => 'order_summary',
@@ -762,11 +765,12 @@ class FormTemplates {
 			return 'payment_product' === ( $field['type'] ?? '' );
 		} ) ) {
 			$fields[] = array(
-				'id'          => 'product',
-				'type'        => 'payment_product',
-				'label'       => __( 'Product', 'subtleforms' ),
-				'productName' => __( 'Product', 'subtleforms' ),
-				'price'       => 10,
+				'id'            => 'product',
+				'type'          => 'payment_product',
+				'label'         => __( 'Product', 'subtleforms' ),
+				'productName'   => __( 'Product', 'subtleforms' ),
+				'price'         => 10,
+				'allowQuantity' => false,
 			);
 		}
 		if ( ! self::field_tree_has( $fields, static function ( array $field ): bool {

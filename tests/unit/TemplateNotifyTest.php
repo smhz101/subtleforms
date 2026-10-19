@@ -113,6 +113,29 @@ class TemplateNotifyTest extends TestCase {
 	}
 
 	/**
+	 * Review #15 (4309435330): the Payment Form product is fixed. It has no
+	 * quantity box on the live form, so the builder must not show one either,
+	 * and the server prices it once with no submitted value.
+	 */
+	public function test_payment_template_product_is_a_fixed_product(): void {
+		$templates = FormTemplates::get_all();
+		$product   = null;
+		foreach ( $templates['payment_form']['schema']['fields'] as $field ) {
+			if ( 'payment_product' === ( $field['type'] ?? '' ) ) {
+				$product = $field;
+			}
+		}
+		$this->assertIsArray( $product );
+		$this->assertArrayHasKey( 'allowQuantity', $product );
+		$this->assertFalse( $product['allowQuantity'] );
+
+		$product['key'] = 'product';
+		$quote          = \SubtleForms\Payments\Pricing::quote( array( 'fields' => array( $product ) ), array() );
+		$this->assertSame( 10.0, (float) $quote['total'] );
+		$this->assertSame( 1, (int) $quote['items'][0]['qty'] );
+	}
+
+	/**
 	 * @param array<string, mixed> $template Template definition.
 	 */
 	private function assertTemplateIsSafe( string $id, array $template ): void {
