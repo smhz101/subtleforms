@@ -4,6 +4,19 @@ This file keeps the full release history. readme.txt lists only the latest versi
 
 == Changelog ==
 
+= 2.4.0 - 2026-10-20 =
+* Fix: The server checks every answer the way the form does. A choice must be one the field offers; dates, times, ratings, scores, sliders, matrix answers, colours and signatures must be real values; a field that takes one value refuses a list; and a read-only field keeps its value.
+* Fix: Server error messages use the same words as the form and can be translated.
+* Fix: An email field that allows several addresses accepts them separated by commas and stores each one. With RFC validation off, an address such as user@localhost is accepted.
+* Fix: A website can be typed without https://, which is added. Only http and https addresses are accepted, in the form and on the server.
+* Fix: Pasting an international phone number picks its country, the leading 0 of a national number is dropped, and the server checks the calling code and the length. A +1 number with a Canadian area code shows Canada.
+* Fix: A Custom amount outside its minimum or maximum, a Product quantity above its maximum and a Priced option that is not offered are refused, instead of being charged a different amount. A pick-one Priced options field charges one option.
+* Fix: A required Rich text field with no text in it is refused.
+* Fix: A Repeater with fewer entries than its minimum shows one message, such as "Add at least 2 entries.", instead of errors for fields that were never shown.
+* Fix: Hidden field values, including {date}, {user_email} and {user_name}, are worked out on the server, so they are stored when a form is sent without JavaScript.
+* Fix: Values sent for an Order summary or Fixed fee field are not stored, so they no longer appear as columns in CSV exports.
+* Fix: A builder save that fails names the field as well as the setting, a numeric label, placeholder or default value saves, and long labels wrap on the canvas.
+
 = 2.3.9 - 2026-10-19 =
 * Change: Nothing in SubtleForms is switched off without a license. CSV export, Reports (views, submissions and conversion), full conditional logic (any rule, groups, every operator, conditional emails, webhooks and confirmations), Picture choice, several files per upload field, payment fields (Product, Priced options, Custom amount, Fixed fee, Order summary, Coupon), coupons, and the Webhooks and Analytics settings all work in the free plugin.
 * Change: Signature and Calculation fields, the formula engine and the Card Payment field moved to SubtleForms Pro 2.4.0. A form that uses them keeps them: the live form leaves them out and the builder shows a note until Pro is active. Update SubtleForms Pro to 2.4.0 with this release.

@@ -129,6 +129,15 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 
 == Changelog ==
 
+= 2.4.0 - 2026-10-20 =
+* Fix: The server checks every answer the way the form does: choices, dates, times, ratings, sliders, matrix answers, colours, signatures and read-only fields. Its messages match the form and can be translated.
+* Fix: Email fields accept several addresses when allowed, and user@localhost when RFC validation is off. A website typed without https:// gets it.
+* Fix: Pasted international phone numbers pick their country, the leading 0 is dropped, and the server checks the calling code and length.
+* Fix: Custom amount limits, Product quantity limits and Priced options are enforced instead of charging a different amount.
+* Fix: A required Rich text field with no text is refused, and a Repeater below its minimum shows one message.
+* Fix: Hidden field values are worked out on the server, and Order summary and Fixed fee fields store nothing.
+* Fix: A failed builder save names the field, and numeric labels, placeholders and default values save.
+
 = 2.3.9 - 2026-10-19 =
 * Change: Everything in SubtleForms works without a license: CSV export, reports, full conditional logic, Picture choice, several files per upload field, payment fields and coupons, and the Webhooks and Analytics settings.
 * Change: Signature and Calculation fields and card payments are part of SubtleForms Pro 2.4.0. Forms that use them keep them; the live form leaves them out until Pro is active.
