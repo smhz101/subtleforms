@@ -195,7 +195,13 @@ final class FieldMapper {
 	 * @return string Empty string when there is no value.
 	 */
 	public static function value( array $payload, string $source ): string {
-		return self::toText( self::raw( $payload, $source ) );
+		$raw = self::raw( $payload, $source );
+		// A drawn signature is an image; integrations get a word, not the
+		// image data (PRO2-04).
+		if ( EntryValues::isSignatureImage( $raw ) ) {
+			return __( 'Signed', 'subtleforms' );
+		}
+		return self::toText( $raw );
 	}
 
 	/**
