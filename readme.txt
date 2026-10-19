@@ -177,6 +177,8 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: A webhook that is still waiting says Queued.
 * Fix: A color field saves the color it shows, including its default.
 * Fix: Each CAPTCHA field uses its own provider and keys, and the form says when a check is not set up.
+* Fix: A form has one CAPTCHA field per provider. Publishing a second reCAPTCHA, hCaptcha or Turnstile field is refused with a message, and the visitor's token is checked once.
+* Fix: When publishing is refused because of a field, the builder shows the reason instead of [object Object].
 * Fix: Password fields can show a strength meter and ask for the password again.
 * Fix: A US phone number is grouped as it is typed, and a short number is rejected.
 * Fix: Dropdown, radio and multiple choice start with choices, and the canvas shows the default choice.

@@ -288,7 +288,9 @@ final class PublicSubmitApi {
 					'payload' => $payload,
 				)
 			);
-			$captchaFields = FieldCaptcha::fields( $schemaForCaptcha );
+			// One check per provider: the browser sends one token per provider,
+			// and a token can be verified only once (2.4.0).
+			$captchaFields = FieldCaptcha::onePerProvider( FieldCaptcha::fields( $schemaForCaptcha ) );
 			if ( $captchaFields ) {
 				foreach ( $captchaFields as $captchaField ) {
 					$provider = FieldCaptcha::provider( $captchaField );

@@ -484,6 +484,22 @@ final class SchemaValidator {
 			$push( $errors, 'version', 'Schema.version must be an integer when present.' );
 		}
 
+		// One CAPTCHA field per provider: the provider answers with one token
+		// per form, so a second field of the same kind could never pass (2.4.0).
+		$captchas = \SubtleForms\Support\Captcha\FieldCaptcha::fields( $schema );
+		foreach ( \SubtleForms\Support\Captcha\FieldCaptcha::repeated( $captchas ) as $field ) {
+			$push(
+				$errors,
+				'fields.' . (string) ( $field['id'] ?? '' ),
+				sprintf(
+					/* translators: %s: CAPTCHA provider name, such as reCAPTCHA */
+					__( 'A form can have only one %s field. Remove the extra one or choose another provider for it.', 'subtleforms' ),
+					\SubtleForms\Support\Captcha\FieldCaptcha::label( \SubtleForms\Support\Captcha\FieldCaptcha::provider( $field ) )
+				),
+				array( 'field_id' => (string) ( $field['id'] ?? '' ) )
+			);
+		}
+
 		return $errors;
 	}
 

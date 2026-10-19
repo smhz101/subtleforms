@@ -118,4 +118,37 @@ final class Review37Test extends TestCase {
 		$back = $service->importSubmissions( $from, $package );
 		$this->assertSame( 0, $back['imported'], 'Entries imported back into their own form are recognised.' );
 	}
+
+	public function test_a_form_with_two_captchas_of_one_provider_verifies_the_token_once(): void {
+		$formId = $this->publish(
+			array(
+				array( 'id' => 'name', 'key' => 'name', 'type' => 'text', 'config' => array( 'label' => 'Name' ) ),
+				array( 'id' => 'c1', 'key' => 'c1', 'type' => 'recaptcha', 'config' => array( 'site_key' => 'site-a', 'secret_key' => 'secret-a' ) ),
+				array( 'id' => 'c2', 'key' => 'c2', 'type' => 'recaptcha', 'config' => array( 'site_key' => 'site-b', 'secret_key' => 'secret-b' ) ),
+			)
+		);
+		$calls = array();
+		$mock  = static function ( $pre, $args, $url ) use ( &$calls ) {
+			if ( false === strpos( (string) $url, 'siteverify' ) ) {
+				return $pre;
+			}
+			$calls[] = $args['body'] ?? array();
+			// A token is good once: the provider rejects a replay.
+			$ok = count( $calls ) === 1;
+			return array(
+				'headers'  => array(),
+				'body'     => wp_json_encode( array( 'success' => $ok, 'score' => 0.9, 'error-codes' => $ok ? array() : array( 'timeout-or-duplicate' ) ) ),
+				'response' => array( 'code' => 200, 'message' => 'OK' ),
+				'cookies'  => array(),
+				'filename' => null,
+			);
+		};
+		add_filter( 'pre_http_request', $mock, 10, 3 );
+		$result = $this->submit( $formId, array( 'name' => 'Ada', 'g-recaptcha-response' => 'token-1' ) );
+		remove_filter( 'pre_http_request', $mock, 10 );
+
+		$this->assertCount( 1, $calls, 'The token is verified once.' );
+		$this->assertSame( 'secret-a', $calls[0]['secret'] ?? '', 'With the first field\'s keys.' );
+		$this->assertLessThan( 400, $result['status'], wp_json_encode( $result['data'] ) );
+	}
 }

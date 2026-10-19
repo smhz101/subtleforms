@@ -113,4 +113,29 @@ final class Review37Test extends TestCase {
 		);
 		$this->assertSame( 17, \SubtleForms\Tools\TransferPackage::readSubmissions( $package )['submissions'][0]['entry_id'] );
 	}
+
+	public function test_one_captcha_field_per_provider(): void {
+		$schema = array(
+			'schema_version' => 1,
+			'metadata'       => array( 'name' => 'C', 'title' => 'C' ),
+			'fields'         => array(
+				array( 'id' => 'c1', 'key' => 'c1', 'type' => 'recaptcha', 'config' => array( 'site_key' => 'a', 'secret_key' => 'b' ) ),
+				array( 'id' => 'name', 'key' => 'name', 'type' => 'text', 'config' => array( 'label' => 'Name' ) ),
+				array( 'id' => 'c2', 'key' => 'c2', 'type' => 'recaptcha', 'config' => array( 'site_key' => 'c', 'secret_key' => 'd' ) ),
+				array( 'id' => 'c3', 'key' => 'c3', 'type' => 'hcaptcha', 'config' => array() ),
+			),
+		);
+		$fields = \SubtleForms\Support\Captcha\FieldCaptcha::fields( $schema );
+		$this->assertSame( array( 'c2' ), array_column( \SubtleForms\Support\Captcha\FieldCaptcha::repeated( $fields ), 'id' ) );
+		$this->assertSame( array( 'c1', 'c3' ), array_column( \SubtleForms\Support\Captcha\FieldCaptcha::onePerProvider( $fields ), 'id' ) );
+
+		$errors = ( new \SubtleForms\Support\SchemaValidator() )->validateWithErrors( $schema );
+		$captcha = array_values( array_filter( $errors, static fn( $e ) => ( $e['field_id'] ?? '' ) === 'c2' ) );
+		$this->assertCount( 1, $captcha );
+		$this->assertStringContainsString( 'only one reCAPTCHA field', $captcha[0]['message'] );
+
+		unset( $schema['fields'][2] );
+		$errors = ( new \SubtleForms\Support\SchemaValidator() )->validateWithErrors( $schema );
+		$this->assertSame( array(), array_values( array_filter( $errors, static fn( $e ) => isset( $e['field_id'] ) ) ), 'Different providers are fine.' );
+	}
 }

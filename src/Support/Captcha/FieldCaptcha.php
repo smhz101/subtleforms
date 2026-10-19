@@ -70,6 +70,62 @@ final class FieldCaptcha {
 	}
 
 	/**
+	 * CAPTCHA fields that use a provider an earlier CAPTCHA field already
+	 * uses. A provider answers with one token per form, so only one field per
+	 * provider can be checked (2.4.0).
+	 *
+	 * @param array<int, array<string, mixed>> $fields From fields().
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function repeated( array $fields ): array {
+		$seen = array();
+		$out  = array();
+		foreach ( $fields as $field ) {
+			$provider = self::provider( $field );
+			if ( isset( $seen[ $provider ] ) ) {
+				$out[] = $field;
+			} else {
+				$seen[ $provider ] = true;
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * The first CAPTCHA field of each provider, in form order.
+	 *
+	 * @param array<int, array<string, mixed>> $fields From fields().
+	 * @return array<int, array<string, mixed>>
+	 */
+	public static function onePerProvider( array $fields ): array {
+		$seen = array();
+		$out  = array();
+		foreach ( $fields as $field ) {
+			$provider = self::provider( $field );
+			if ( ! isset( $seen[ $provider ] ) ) {
+				$seen[ $provider ] = true;
+				$out[]             = $field;
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Provider name for messages.
+	 *
+	 * @param string $provider Provider slug.
+	 * @return string
+	 */
+	public static function label( string $provider ): string {
+		$labels = array(
+			'recaptcha' => 'reCAPTCHA',
+			'hcaptcha'  => 'hCaptcha',
+			'turnstile' => 'Turnstile',
+		);
+		return $labels[ $provider ] ?? $provider;
+	}
+
+	/**
 	 * @param string $provider Provider slug.
 	 * @param string $site     Site key.
 	 * @return string
