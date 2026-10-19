@@ -148,7 +148,7 @@ class Release239Test extends PHPUnit\Framework\TestCase {
 
 	public function test_readme_wordpress_org_hygiene(): void {
 		$readme = file_get_contents( $this->root . '/readme.txt' );
-		$this->assertStringContainsString( 'Contributors: smhz101', $readme );
+		$this->assertStringContainsString( 'Contributors: subtleforms, smhz101', $readme );
 		$this->assertStringContainsString( 'Requires at least: 6.6', $readme );
 		$this->assertStringContainsString( '== External services ==', $readme );
 		$this->assertStringContainsString( 'changelog.txt', $readme );

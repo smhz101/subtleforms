@@ -1,5 +1,5 @@
 === SubtleForms ===
-Contributors: smhz101
+Contributors: subtleforms, smhz101
 Tags: form builder, contact form, forms, multi-step form, file upload
 Requires at least: 6.6
 Tested up to: 7.1
@@ -125,7 +125,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 3. A multi-step form on the live site.
 4. A conversational form on the live site.
 5. The submissions inbox with an entry open in the reading pane.
-6. Form appearance settings.
+6. The form preview with appearance presets.
 
 == Changelog ==
 
@@ -133,6 +133,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Change: Everything in SubtleForms works without a license: CSV export, reports, full conditional logic, Picture choice, several files per upload field, payment fields and coupons, and the Webhooks and Analytics settings.
 * Change: Signature and Calculation fields and card payments are part of SubtleForms Pro 2.4.0. Forms that use them keep them; the live form leaves them out until Pro is active.
 * Fix: Visitors can send a form from a cached page, their views are counted for Reports, and the spam time check uses the server clock.
+* Fix: Entries show the label of the chosen option and Yes or No for consent, and the form preview stays centred beside the styling panel.
 * Fix: Answers the server refuses are not stored, and deleting a form deletes its entries, files and logs.
 * Fix: The personal data tools match the exact email address, and imports are cleaned like a builder save.
 * Fix: Name and Address parts, Notice, Section heading and Page break settings, Repeater uploads, dependent dropdowns and hidden priced fields work as set.
