@@ -18,6 +18,26 @@ use SubtleForms\Support\Settings;
 final class Activator {
 
 	/**
+	 * Run the activation steps again when the version stored on the site
+	 * is not this build's version. This is how an update that is not a
+	 * fresh activation creates tables, runs migrations and schedules
+	 * background jobs such as the entry schema clean-up (FF-30).
+	 *
+	 * @param string|null $current Version of this build. Defaults to SUBTLEFORMS_VERSION.
+	 * @return bool Whether the activation steps ran.
+	 */
+	public static function maybe_upgrade( ?string $current = null ): bool {
+		$current = $current ?? SUBTLEFORMS_VERSION;
+		if ( get_option( 'subtleforms_db_version' ) === $current ) {
+			return false;
+		}
+		self::activate();
+		update_option( 'subtleforms_db_version', $current );
+		update_option( 'subtleforms_version', $current );
+		return true;
+	}
+
+	/**
 	 * Activate the plugin.
 	 */
 	public static function activate(): void {

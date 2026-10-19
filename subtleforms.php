@@ -61,12 +61,7 @@ add_action(
 	'plugins_loaded',
 	function () {
 		// Check for DB schema updates (only runs dbDelta when db_version changes).
-		$db_version = get_option( 'subtleforms_db_version' );
-		if ( $db_version !== SUBTLEFORMS_VERSION ) {
-			SubtleForms\Activator::activate();
-			update_option( 'subtleforms_db_version', SUBTLEFORMS_VERSION );
-			update_option( 'subtleforms_version', SUBTLEFORMS_VERSION );
-		}
+		SubtleForms\Activator::maybe_upgrade();
 
 		SubtleForms\init();
 	}
