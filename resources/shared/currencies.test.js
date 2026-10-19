@@ -27,6 +27,11 @@ describe('PAY-12: zero-decimal currencies', () => {
     expect(currencyMinimum('KRW')).toBe(50);
   });
 
+  it('uses Stripe published minimums for PHP and ZAR', () => {
+    expect(currencyMinimum('PHP')).toBe(0.5);
+    expect(currencyMinimum('ZAR')).toBe(0.5);
+  });
+
   it('knows decimals, rounding and symbols', () => {
     expect(currencyDecimals('jpy')).toBe(0);
     expect(currencyDecimals('USD')).toBe(2);

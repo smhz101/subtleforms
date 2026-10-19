@@ -66,6 +66,14 @@ final class Payments240Test extends TestCase {
 		$this->assertSame( $server, $browser );
 	}
 
+	/** PAY-26: minimums follow Stripe's published table where it lists the currency. */
+	public function test_pay26_minimums_match_stripe_published_amounts(): void {
+		$this->assertSame( 50.0, Currencies::minimum( 'KRW' ) );
+		$this->assertSame( 0.5, Currencies::minimum( 'PHP' ) );
+		$this->assertSame( 0.5, Currencies::minimum( 'ZAR' ) );
+		$this->assertNull( Currencies::belowMinimum( 1.0, 'PHP' ) );
+	}
+
 	/** PAY2-02: a form with no currency of its own follows the site currency. */
 	public function test_pay2_02_form_without_currency_follows_the_site(): void {
 		$GLOBALS['sf_test_options']['subtleforms_settings'] = array( 'ext_payments_currency' => 'eur' );

@@ -47,7 +47,7 @@ final class Currencies {
 		'HKD' => array( 'Hong Kong dollar', 2, 4.00 ),
 		'MYR' => array( 'Malaysian ringgit', 2, 2.00 ),
 		'THB' => array( 'Thai baht', 2, 10.00 ),
-		'PHP' => array( 'Philippine peso', 2, 25.00 ),
+		'PHP' => array( 'Philippine peso', 2, 0.50 ),
 		'SEK' => array( 'Swedish krona', 2, 3.00 ),
 		'NOK' => array( 'Norwegian krone', 2, 3.00 ),
 		'DKK' => array( 'Danish krone', 2, 2.50 ),
@@ -55,7 +55,7 @@ final class Currencies {
 		'CZK' => array( 'Czech koruna', 2, 15.00 ),
 		'MXN' => array( 'Mexican peso', 2, 10.00 ),
 		'BRL' => array( 'Brazilian real', 2, 0.50 ),
-		'ZAR' => array( 'South African rand', 2, 9.00 ),
+		'ZAR' => array( 'South African rand', 2, 0.50 ),
 	);
 
 	/** Every supported code. */
