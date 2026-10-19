@@ -9,7 +9,7 @@
  * - bug 13: the width button has an accessible name that follows the width
  */
 const { test, expect } = require('@playwright/test');
-const { adminApi, publishForm, cleanup, loginPage, openBuilder } = require('./helpers');
+const { adminApi, publishForm, cleanup, loginPage, openBuilder, hasFieldTypes } = require('./helpers');
 
 let client;
 const created = [];
@@ -116,7 +116,13 @@ test('placeholders and checkbox conversion on the canvas (bugs 7, 8, 9, 10)', as
   await loginPage(page);
   await openBuilder(page, id);
 
-  await expect(page.getByText('Add a formula in the field settings')).toBeVisible();
+  if (await hasFieldTypes(client, ['calculation'])) {
+    await expect(page.getByText('Add a formula in the field settings')).toBeVisible();
+  } else {
+    // Calculation is a SubtleForms Pro field since 2.3.9: without Pro the
+    // canvas keeps the field and says it needs Pro.
+    await expect(page.locator('.sf-field-chrome', { hasText: 'Total' })).toContainText('Needs SubtleForms Pro');
+  }
   await expect(page.getByText(/Add the disclaimer text in the field settings/)).toBeVisible();
   await expect(page.getByText('Add at least one row and one column in the field settings.')).toBeVisible();
   await expect(page.locator('.sf-form-editor__conversions')).toContainText('"Extras" was a single checkbox with a list of options');
