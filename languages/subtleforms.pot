@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-19T22:38:22+00:00\n"
+"POT-Creation-Date: 2026-10-19T22:33:13+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -18,7 +18,7 @@ msgstr ""
 #. Author of the plugin
 #: subtleforms.php
 #: src/Admin/AdminMenu.php:525
-#: src/Admin/AdminMenu.php:1181
+#: src/Admin/AdminMenu.php:1172
 #: resources/admin/components/builder/CheckoutPanel.jsx:83
 #: resources/blocks/form/edit.jsx:238
 #: resources/blocks/form/edit.jsx:403
@@ -158,12 +158,12 @@ msgid "An error occurred. Please try again."
 msgstr ""
 
 #: src/Admin/AdminMenu.php:410
-#: src/Admin/AdminMenu.php:1054
+#: src/Admin/AdminMenu.php:1045
 msgid "Action completed successfully."
 msgstr ""
 
 #: src/Admin/AdminMenu.php:604
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:46
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:47
 #: resources/admin/pages/ToolsPage.jsx:17
 #: resources/admin/pages/ToolsPage.jsx:476
 msgid "Webhooks"
@@ -235,60 +235,60 @@ msgstr ""
 msgid "Accept Stripe or PayPal payments directly through your forms."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:782
+#: src/Admin/AdminMenu.php:773
 msgid "Security check failed."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:807
-#: src/Admin/AdminMenu.php:820
-#: src/Admin/AdminMenu.php:839
-#: src/Admin/AdminMenu.php:862
-#: src/Admin/AdminMenu.php:888
-#: src/Admin/AdminMenu.php:899
-#: src/Admin/AdminMenu.php:909
-#: src/Admin/AdminMenu.php:916
-#: src/Admin/AdminMenu.php:927
+#: src/Admin/AdminMenu.php:798
+#: src/Admin/AdminMenu.php:811
+#: src/Admin/AdminMenu.php:830
+#: src/Admin/AdminMenu.php:853
+#: src/Admin/AdminMenu.php:879
+#: src/Admin/AdminMenu.php:890
+#: src/Admin/AdminMenu.php:900
+#: src/Admin/AdminMenu.php:907
+#: src/Admin/AdminMenu.php:918
 msgid "You do not have permission to access this page."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:850
-#: src/Admin/AdminMenu.php:982
+#: src/Admin/AdminMenu.php:841
+#: src/Admin/AdminMenu.php:973
 #: src/Frontend/Shortcode.php:56
 msgid "Form not found."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:955
-#: src/Admin/AdminMenu.php:977
-#: src/Admin/AdminMenu.php:1010
+#: src/Admin/AdminMenu.php:946
+#: src/Admin/AdminMenu.php:968
+#: src/Admin/AdminMenu.php:1001
 msgid "Invalid request."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1062
+#: src/Admin/AdminMenu.php:1053
 msgid "Coming Soon"
 msgstr ""
 
 #. translators: %s: Name of the interface being developed
-#: src/Admin/AdminMenu.php:1066
+#: src/Admin/AdminMenu.php:1057
 #, php-format
 msgid "The %s interface is under development."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1070
+#: src/Admin/AdminMenu.php:1061
 msgid "This is a placeholder. Template files will be created in the templates/admin/ directory."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1075
+#: src/Admin/AdminMenu.php:1066
 msgid "Your Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1079
+#: src/Admin/AdminMenu.php:1070
 #: src/Fields/CoreFields.php:1215
 #: src/Fields/CoreFields.php:1243
 #: src/Fields/CoreFields.php:1412
 msgid "Title"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1080
+#: src/Admin/AdminMenu.php:1071
 #: src/Api/SubmissionsApi.php:1095
 #: src/Privacy/PrivacyExporter.php:101
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:299
@@ -302,16 +302,16 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1081
+#: src/Admin/AdminMenu.php:1072
 msgid "Created"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1082
+#: src/Admin/AdminMenu.php:1073
 #: resources/admin/pages/PaymentsPage.jsx:507
 msgid "Actions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1107
+#: src/Admin/AdminMenu.php:1098
 #: resources/admin/components/builder/ContainerWrapper.jsx:77
 #: resources/admin/components/builder/FieldInspector.jsx:236
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:54
@@ -319,20 +319,20 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1121
+#: src/Admin/AdminMenu.php:1112
 msgid "Total Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1125
+#: src/Admin/AdminMenu.php:1116
 msgid "Active Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1129
+#: src/Admin/AdminMenu.php:1120
 msgid "Total Submissions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1158
-#: src/Admin/AdminMenu.php:1163
+#: src/Admin/AdminMenu.php:1149
+#: src/Admin/AdminMenu.php:1154
 msgid "WordPress Admin"
 msgstr ""
 
@@ -358,6 +358,7 @@ msgstr ""
 #: src/Api/OnboardingApi.php:271
 #: src/Api/SettingsApi.php:261
 #: src/Api/SettingsApi.php:332
+#: src/Api/WebhooksApi.php:84
 msgid "You are not allowed to perform this action."
 msgstr ""
 
@@ -381,6 +382,7 @@ msgstr ""
 #: src/Api/OnboardingApi.php:259
 #: src/Api/OnboardingApi.php:280
 #: src/Api/SettingsApi.php:341
+#: src/Api/WebhooksApi.php:88
 msgid "Security check failed. Please refresh and try again."
 msgstr ""
 
@@ -465,10 +467,10 @@ msgstr ""
 
 #: src/Api/FormsApi.php:437
 #: src/Api/FormsApi.php:597
-#: src/Api/FormsApi.php:845
-#: src/Api/FormsApi.php:948
-#: src/Api/FormsApi.php:993
-#: src/Api/FormsApi.php:1038
+#: src/Api/FormsApi.php:856
+#: src/Api/FormsApi.php:959
+#: src/Api/FormsApi.php:1004
+#: src/Api/FormsApi.php:1049
 #: src/Api/PaymentsApi.php:222
 #: src/Api/PublicSubmitApi.php:212
 #: src/Extensions/PaymentsExtension.php:126
@@ -484,84 +486,84 @@ msgstr ""
 msgid "Failed to load form schema"
 msgstr ""
 
-#: src/Api/FormsApi.php:652
+#: src/Api/FormsApi.php:665
 msgid "Schema validation failed"
 msgstr ""
 
-#: src/Api/FormsApi.php:668
+#: src/Api/FormsApi.php:681
 msgid "Schema was saved but could not be loaded back"
 msgstr ""
 
-#: src/Api/FormsApi.php:686
+#: src/Api/FormsApi.php:699
 msgid "Failed to save draft schema"
 msgstr ""
 
-#: src/Api/FormsApi.php:767
+#: src/Api/FormsApi.php:780
 msgid "This template requires a Pro license."
 msgstr ""
 
 #. translators: %s: reason the form could not be created
-#: src/Api/FormsApi.php:818
+#: src/Api/FormsApi.php:829
 #, php-format
 msgid "The form could not be created: %s"
 msgstr ""
 
-#: src/Api/FormsApi.php:880
+#: src/Api/FormsApi.php:891
 msgid "Cannot publish form: Failed to activate schema."
 msgstr ""
 
-#: src/Api/FormsApi.php:887
+#: src/Api/FormsApi.php:898
 msgid "Cannot publish form: No schema exists. Please save your form first."
 msgstr ""
 
-#: src/Api/FormsApi.php:891
+#: src/Api/FormsApi.php:902
 msgid "Cannot publish form: No active schema version. Please save and activate a schema first."
 msgstr ""
 
-#: src/Api/FormsApi.php:897
+#: src/Api/FormsApi.php:908
 msgid "Cannot publish form: Schema data is corrupt or invalid."
 msgstr ""
 
-#: src/Api/FormsApi.php:914
+#: src/Api/FormsApi.php:925
 msgid "Cannot publish form: Fix validation errors."
 msgstr ""
 
-#: src/Api/FormsApi.php:919
+#: src/Api/FormsApi.php:930
 msgid "Cannot publish form:"
 msgstr ""
 
-#: src/Api/FormsApi.php:997
+#: src/Api/FormsApi.php:1008
 msgid "Form is not in the Trash"
 msgstr ""
 
-#: src/Api/FormsApi.php:1002
+#: src/Api/FormsApi.php:1013
 msgid "The form could not be restored. Please try again."
 msgstr ""
 
-#: src/Api/FormsApi.php:1041
+#: src/Api/FormsApi.php:1052
 msgid "Restore this form from the Trash before copying it."
 msgstr ""
 
 #. translators: %s: error message
-#: src/Api/FormsApi.php:1054
+#: src/Api/FormsApi.php:1065
 #, php-format
 msgid "The form could not be copied because its fields could not be read: %s"
 msgstr ""
 
 #. translators: %s: title of the form being copied
 #. translators: %s: form title
-#: src/Api/FormsApi.php:1065
+#: src/Api/FormsApi.php:1076
 #: resources/admin/components/FormsList.jsx:493
 #, php-format,js-format
 msgid "%s (copy)"
 msgstr ""
 
-#: src/Api/FormsApi.php:1084
+#: src/Api/FormsApi.php:1095
 msgid "The copy could not be created in the database. Please try again."
 msgstr ""
 
 #. translators: %s: error message
-#: src/Api/FormsApi.php:1095
+#: src/Api/FormsApi.php:1106
 #, php-format
 msgid "The form could not be copied: %s"
 msgstr ""
@@ -837,6 +839,76 @@ msgstr ""
 
 #: src/Api/ToolsApi.php:299
 msgid "Choose Gravity Forms or Fluent Forms."
+msgstr ""
+
+#. translators: %s: error from the HTTP request
+#: src/Api/WebhooksApi.php:134
+#, php-format
+msgid "The request could not be sent: %s"
+msgstr ""
+
+#. translators: 1: HTTP status code, 2: milliseconds
+#: src/Api/WebhooksApi.php:153
+#, php-format
+msgid "Delivered. The endpoint answered HTTP %1$d in %2$d ms."
+msgstr ""
+
+#. translators: %d: HTTP status code
+#: src/Api/WebhooksApi.php:155
+#, php-format
+msgid "The endpoint answered HTTP %d, so real entries would be retried."
+msgstr ""
+
+#: src/Api/WebhooksApi.php:179
+#: src/Api/WebhooksApi.php:196
+#: src/Api/WebhooksApi.php:227
+msgid "Test form"
+msgstr ""
+
+#: src/Api/WebhooksApi.php:181
+#: src/Fields/CoreFields.php:1429
+#: src/Fields/FieldSettings.php:72
+#: src/Templates/FormTemplates.php:139
+#: src/Templates/FormTemplates.php:197
+#: src/Tools/FormMigration.php:622
+#: resources/admin/components/builder/CheckoutPanel.jsx:19
+#: resources/admin/components/builder/FormBehaviorPanels.jsx:171
+#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:171
+#: resources/admin/components/OnboardingWizard.jsx:69
+msgid "Name"
+msgstr ""
+
+#: src/Api/WebhooksApi.php:182
+#: src/Fields/CoreFields.php:74
+#: src/Templates/FormTemplates.php:198
+#: resources/admin/components/builder/CheckoutPanel.jsx:18
+#: resources/admin/components/builder/IntegrationsPanel.jsx:107
+#: resources/admin/components/OnboardingWizard.jsx:78
+#: resources/admin/pages/SettingsPage.jsx:43
+msgid "Email"
+msgstr ""
+
+#: src/Api/WebhooksApi.php:183
+#: src/Templates/FormTemplates.php:157
+#: src/Templates/FormTemplates.php:199
+#: src/Templates/FormTemplates.php:229
+#: resources/admin/components/builder/ActionsPanel.jsx:371
+#: resources/admin/components/builder/ActionsPanel.jsx:381
+#: resources/admin/components/builder/FormBehaviorPanels.jsx:69
+#: resources/admin/components/builder/FormBehaviorPanels.jsx:229
+#: resources/admin/components/OnboardingWizard.jsx:87
+#: resources/admin/pages/SubmissionDetailPage.jsx:985
+msgid "Message"
+msgstr ""
+
+#: src/Api/WebhooksApi.php:189
+msgid "This is a test webhook from SubtleForms."
+msgstr ""
+
+#. translators: %s: JSON error
+#: src/Api/WebhooksApi.php:217
+#, php-format
+msgid "The custom JSON body is not valid: %s"
 msgstr ""
 
 #: src/Blocks/SubtleFormsBlock.php:109
@@ -1194,15 +1266,6 @@ msgstr ""
 #: src/Fields/CoreFields.php:63
 #: src/Fields/CoreFields.php:147
 msgid "Max Length"
-msgstr ""
-
-#: src/Fields/CoreFields.php:74
-#: src/Templates/FormTemplates.php:198
-#: resources/admin/components/builder/CheckoutPanel.jsx:18
-#: resources/admin/components/builder/IntegrationsPanel.jsx:107
-#: resources/admin/components/OnboardingWizard.jsx:78
-#: resources/admin/pages/SettingsPage.jsx:43
-msgid "Email"
 msgstr ""
 
 #: src/Fields/CoreFields.php:98
@@ -1725,18 +1788,6 @@ msgstr ""
 msgid "Step"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1429
-#: src/Fields/FieldSettings.php:72
-#: src/Templates/FormTemplates.php:139
-#: src/Templates/FormTemplates.php:197
-#: src/Tools/FormMigration.php:622
-#: resources/admin/components/builder/CheckoutPanel.jsx:19
-#: resources/admin/components/builder/FormBehaviorPanels.jsx:171
-#: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:171
-#: resources/admin/components/OnboardingWizard.jsx:69
-msgid "Name"
-msgstr ""
-
 #: src/Fields/CoreFields.php:1452
 #: src/Templates/FormTemplates.php:311
 #: src/Templates/FormTemplates.php:340
@@ -1852,7 +1903,7 @@ msgstr ""
 
 #: src/Fields/CoreFields.php:1632
 #: src/Fields/FieldsV2.php:65
-#: resources/admin/components/builder/ActionsPanel.jsx:290
+#: resources/admin/components/builder/ActionsPanel.jsx:292
 msgid "Enabled"
 msgstr ""
 
@@ -3494,7 +3545,7 @@ msgid "Default state"
 msgstr ""
 
 #: src/Fields/FieldsV2.php:64
-#: resources/admin/components/settings/ExtensionsSettings.jsx:69
+#: resources/admin/components/settings/ExtensionsSettings.jsx:41
 #: resources/admin/pages/PaymentsPage.jsx:62
 msgid "Disabled"
 msgstr ""
@@ -3921,6 +3972,16 @@ msgstr ""
 msgid "The single checkbox \"%s\" has a list of options. Use a Multiple choice field for several options."
 msgstr ""
 
+#: src/Support/Webhooks.php:63
+msgid "Enter the full webhook address, for example https://hooks.example.com/abc."
+msgstr ""
+
+#. translators: %s: host name of the webhook address
+#: src/Support/Webhooks.php:71
+#, php-format
+msgid "WordPress blocks requests to %s. Local and private addresses, and ports other than 80, 443 and 8080, are refused for safety. Use a public address, or ask your developer to allow it with the http_request_host_is_external and http_allowed_safe_ports filters."
+msgstr ""
+
 #: src/Templates/FormTemplates.php:125
 #: resources/admin/components/OnboardingWizard.jsx:13
 msgid "Contact Form"
@@ -3950,21 +4011,9 @@ msgstr ""
 
 #: src/Templates/FormTemplates.php:151
 #: src/Templates/FormTemplates.php:228
-#: resources/admin/components/builder/ActionsPanel.jsx:341
-#: resources/admin/components/builder/ActionsPanel.jsx:352
+#: resources/admin/components/builder/ActionsPanel.jsx:343
+#: resources/admin/components/builder/ActionsPanel.jsx:354
 msgid "Subject"
-msgstr ""
-
-#: src/Templates/FormTemplates.php:157
-#: src/Templates/FormTemplates.php:199
-#: src/Templates/FormTemplates.php:229
-#: resources/admin/components/builder/ActionsPanel.jsx:369
-#: resources/admin/components/builder/ActionsPanel.jsx:379
-#: resources/admin/components/builder/FormBehaviorPanels.jsx:69
-#: resources/admin/components/builder/FormBehaviorPanels.jsx:229
-#: resources/admin/components/OnboardingWizard.jsx:87
-#: resources/admin/pages/SubmissionDetailPage.jsx:985
-msgid "Message"
 msgstr ""
 
 #: src/Templates/FormTemplates.php:159
@@ -4459,7 +4508,7 @@ msgid "Donation"
 msgstr ""
 
 #: src/Templates/FormTemplates.php:965
-#: resources/admin/components/builder/ActionsPanel.jsx:91
+#: resources/admin/components/builder/ActionsPanel.jsx:93
 #: resources/admin/utils/initialSchema.js:61
 msgid "New entry: {form_title}"
 msgstr ""
@@ -4960,71 +5009,71 @@ msgstr ""
 msgid "unread"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:97
+#: resources/admin/components/builder/ActionsPanel.jsx:99
 msgid "Send data to API (Webhook)"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:98
+#: resources/admin/components/builder/ActionsPanel.jsx:100
 msgid "Send Email Notification"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:102
+#: resources/admin/components/builder/ActionsPanel.jsx:104
 msgid "Send form data to an external API endpoint"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:103
+#: resources/admin/components/builder/ActionsPanel.jsx:105
 msgid "Send an email after form submission"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:113
+#: resources/admin/components/builder/ActionsPanel.jsx:115
 msgid "Full submission data"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:114
+#: resources/admin/components/builder/ActionsPanel.jsx:116
 msgid "Custom data (JSON)"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:163
+#: resources/admin/components/builder/ActionsPanel.jsx:165
 msgid "Custom headers (advanced)"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:177
+#: resources/admin/components/builder/ActionsPanel.jsx:179
 msgid "JSON object of extra HTTP headers. Example: {\"X-Source\": \"subtleforms\"}"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:195
+#: resources/admin/components/builder/ActionsPanel.jsx:197
 msgid "Only when…"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:197
+#: resources/admin/components/builder/ActionsPanel.jsx:199
 msgid "Conditional"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:197
+#: resources/admin/components/builder/ActionsPanel.jsx:199
 msgid "Every submission"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:205
+#: resources/admin/components/builder/ActionsPanel.jsx:207
 msgid "Runs for every submission. Add a rule to run it only for some answers."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:243
+#: resources/admin/components/builder/ActionsPanel.jsx:245
 msgid "Invalid JSON"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:258
-#: resources/admin/components/builder/ActionsPanel.jsx:259
+#: resources/admin/components/builder/ActionsPanel.jsx:260
+#: resources/admin/components/builder/ActionsPanel.jsx:261
 #: resources/admin/components/builder/FieldToolbar.jsx:112
 #: resources/admin/components/builder/inspector/panels/OptionsPanel.jsx:92
 msgid "Drag to reorder"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:276
+#: resources/admin/components/builder/ActionsPanel.jsx:278
 #: resources/admin/pages/ExtensionsPage.jsx:31
 msgid "Needs setup"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:302
+#: resources/admin/components/builder/ActionsPanel.jsx:304
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:192
 #: resources/admin/components/builder/IntegrationsPanel.jsx:74
 #: resources/frontend/components/fields/Payments.jsx:233
@@ -5032,30 +5081,30 @@ msgstr ""
 msgid "Remove"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:312
-#: resources/admin/components/builder/ActionsPanel.jsx:323
+#: resources/admin/components/builder/ActionsPanel.jsx:314
+#: resources/admin/components/builder/ActionsPanel.jsx:325
 #: resources/admin/components/builder/LogicEditor.jsx:310
 #: resources/admin/components/builder/LogicEditor.jsx:312
 msgid "To"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:330
+#: resources/admin/components/builder/ActionsPanel.jsx:332
 msgid "An address, several separated by commas, or a field tag such as {field:email}."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:336
+#: resources/admin/components/builder/ActionsPanel.jsx:338
 msgid "A recipient email address is required."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:356
+#: resources/admin/components/builder/ActionsPanel.jsx:358
 msgid "New entry from {field:name}"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:364
+#: resources/admin/components/builder/ActionsPanel.jsx:366
 msgid "A subject line is required."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:383
+#: resources/admin/components/builder/ActionsPanel.jsx:385
 msgid ""
 "Hello,\n"
 "\n"
@@ -5064,65 +5113,70 @@ msgid ""
 "{all_fields}"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:389
+#: resources/admin/components/builder/ActionsPanel.jsx:391
 msgid "Leave the message empty to send every answer ({all_fields})."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:394
+#: resources/admin/components/builder/ActionsPanel.jsx:396
 msgid "Send as HTML"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:395
+#: resources/admin/components/builder/ActionsPanel.jsx:397
 msgid "Formats the email with line breaks, rich text and a table for {all_fields}. Off sends plain text."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:417
+#: resources/admin/components/builder/ActionsPanel.jsx:419
 #: resources/admin/components/builder/IntegrationsPanel.jsx:436
 #: resources/admin/components/settings/extensions/CrmPanel.jsx:111
 msgid "Webhook URL"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:428
+#: resources/admin/components/builder/ActionsPanel.jsx:433
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:116
+msgid "Send test request"
+msgstr ""
+
+#: resources/admin/components/builder/ActionsPanel.jsx:449
 msgid "HTTP Method"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:435
+#: resources/admin/components/builder/ActionsPanel.jsx:456
 msgid "Payload Mode"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:447
+#: resources/admin/components/builder/ActionsPanel.jsx:468
 msgid "Custom JSON Payload"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:472
+#: resources/admin/components/builder/ActionsPanel.jsx:493
 msgid "HMAC-SHA256 Signing"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:476
+#: resources/admin/components/builder/ActionsPanel.jsx:497
 msgid "Adds an X-SubtleForms-Signature header so you can verify requests on your server."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:480
+#: resources/admin/components/builder/ActionsPanel.jsx:501
 msgid "Signing Secret"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:484
+#: resources/admin/components/builder/ActionsPanel.jsx:505
 msgid "Created when you save the form"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:486
+#: resources/admin/components/builder/ActionsPanel.jsx:507
 msgid "Kept server-side; paste the same value into your endpoint to verify the signature."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:581
+#: resources/admin/components/builder/ActionsPanel.jsx:602
 msgid "No actions configured. Add an action to process form submissions."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:614
+#: resources/admin/components/builder/ActionsPanel.jsx:635
 msgid "+ Send Email"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:620
+#: resources/admin/components/builder/ActionsPanel.jsx:641
 msgid "+ Send to API"
 msgstr ""
 
@@ -9082,20 +9136,20 @@ msgstr ""
 msgid "Privacy: no cookies are set and no IP address, user agent or other personal data is stored. Each view only adds one to a daily total for the form, kept in your WordPress database."
 msgstr ""
 
-#: resources/admin/components/settings/extensions/ConnectionTest.jsx:37
+#: resources/admin/components/settings/extensions/ConnectionTest.jsx:40
 msgid "Test connection"
 msgstr ""
 
-#: resources/admin/components/settings/extensions/ConnectionTest.jsx:50
+#: resources/admin/components/settings/extensions/ConnectionTest.jsx:56
 msgid "Connected."
 msgstr ""
 
-#: resources/admin/components/settings/extensions/ConnectionTest.jsx:50
-#: resources/admin/components/settings/extensions/ConnectionTest.jsx:61
+#: resources/admin/components/settings/extensions/ConnectionTest.jsx:56
+#: resources/admin/components/settings/extensions/ConnectionTest.jsx:67
 msgid "The connection failed."
 msgstr ""
 
-#: resources/admin/components/settings/extensions/ConnectionTest.jsx:60
+#: resources/admin/components/settings/extensions/ConnectionTest.jsx:66
 msgid "Connection tests need SubtleForms Pro to be active."
 msgstr ""
 
@@ -9502,98 +9556,88 @@ msgstr ""
 msgid "Adds the entry PDF to emails sent to you and your team. Emails sent to the person who filled in the form (a recipient like {{email}}) are left as they are. The PDF is created after the visitor's submission, so it never slows the form down."
 msgstr ""
 
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:11
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:12
 msgid "Do not retry"
 msgstr ""
 
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:13
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:14
 msgid "1 retry (after 1 minute)"
 msgstr ""
 
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:14
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:15
 msgid "2 retries (1 and 5 minutes)"
 msgstr ""
 
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:15
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:16
 msgid "3 retries (up to 25 minutes)"
 msgstr ""
 
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:16
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:17
 msgid "4 retries (up to 2 hours)"
 msgstr ""
 
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:17
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:18
 msgid "5 retries (up to 10 hours)"
 msgstr ""
 
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:48
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:49
 msgid "Send each entry as JSON to any URL. Add a webhook to a form under Form settings > Actions; the settings below apply to every webhook action."
 msgstr ""
 
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:58
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:59
 msgid "Retry failed deliveries"
 msgstr ""
 
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:62
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:63
 msgid "Webhooks are sent in the background, so visitors never wait. When the endpoint is down or answers with an error, SubtleForms tries again with growing gaps. Every attempt is listed in the entry's activity log."
 msgstr ""
 
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:73
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:74
 msgid "Default signing secret"
 msgstr ""
 
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:78
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:79
 msgid "Used by webhook actions that have HMAC-SHA256 signing on but no secret of their own. The signature is sent in the X-SubtleForms-Signature header as sha256=HMAC of the body."
 msgstr ""
 
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:87
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:88
 #: resources/admin/pages/PaymentsPage.jsx:175
 msgid "Generate"
 msgstr ""
 
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:96
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:97
 msgid "Test an endpoint"
 msgstr ""
 
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:101
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:103
 msgid "Sends a sample entry to this URL and shows the response. Nothing is saved."
 msgstr ""
 
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:104
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:106
 #: resources/admin/pages/ToolsPage.jsx:582
 msgid "Method"
 msgstr ""
 
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:113
-msgid "Send test request"
-msgstr ""
-
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:122
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:125
 msgid "The default body contains the form and entry IDs, every answer keyed by field and with its label, and a link to the entry. Choose a custom JSON body, method, headers and signing on each webhook action."
 msgstr ""
 
-#: resources/admin/components/settings/ExtensionsSettings.jsx:67
+#: resources/admin/components/settings/ExtensionsSettings.jsx:39
 #: resources/admin/pages/ExtensionsPage.jsx:28
 #: resources/admin/pages/PaymentsPage.jsx:68
 #: resources/admin/pages/PaymentsPage.jsx:290
 msgid "Active"
 msgstr ""
 
-#: resources/admin/components/settings/ExtensionsSettings.jsx:68
+#: resources/admin/components/settings/ExtensionsSettings.jsx:40
 msgid "Enabled, needs configuration"
 msgstr ""
 
-#. translators: %s: plan name, for example Agency
-#: resources/admin/components/settings/ExtensionsSettings.jsx:129
-#, js-format
-msgid "Needs %s"
-msgstr ""
-
-#: resources/admin/components/settings/ExtensionsSettings.jsx:140
+#: resources/admin/components/settings/ExtensionsSettings.jsx:100
 msgid "SubtleForms Pro adds Mailchimp, Brevo, HubSpot, WooCommerce, entry PDFs, WPML and Polylang, and Stripe."
 msgstr ""
 
-#: resources/admin/components/settings/ExtensionsSettings.jsx:142
+#: resources/admin/components/settings/ExtensionsSettings.jsx:102
 #: resources/admin/ui/UpgradeModal.jsx:25
 #: resources/admin/ui/UpgradeModal.jsx:49
 #: resources/admin/ui/UpgradeModal.jsx:61
@@ -9606,18 +9650,6 @@ msgstr ""
 #: resources/admin/ui/UpgradeModal.jsx:145
 #: resources/admin/ui/UpgradeModal.jsx:164
 msgid "About SubtleForms Pro"
-msgstr ""
-
-#. translators: %s: plan name, for example Agency
-#: resources/admin/components/settings/ExtensionsSettings.jsx:157
-#, js-format
-msgid "Included with the %s plan. Your license does not include it."
-msgstr ""
-
-#: resources/admin/components/settings/ExtensionsSettings.jsx:163
-#: resources/admin/pages/ExtensionsPage.jsx:107
-#: resources/admin/pages/ExtensionsPage.jsx:217
-msgid "Compare plans"
 msgstr ""
 
 #: resources/admin/components/settings/FrontendSettings.jsx:24
@@ -10784,6 +10816,11 @@ msgstr ""
 #: resources/admin/pages/ExtensionsPage.jsx:98
 #: resources/admin/ui/UpgradeModal.jsx:239
 msgid "Activate your license"
+msgstr ""
+
+#: resources/admin/pages/ExtensionsPage.jsx:107
+#: resources/admin/pages/ExtensionsPage.jsx:217
+msgid "Compare plans"
 msgstr ""
 
 #. translators: 1: active count, 2: total count
