@@ -202,7 +202,10 @@ final class Payments240Test extends TestCase {
 		$this->assertStringNotContainsString( 'Pro plugin', $guest->get_error_message() );
 
 		remove_all_filters( 'subtleforms_is_pro_active' );
-		$this->assertSame( 'subtleforms_pro_required', $this->intent( $id, array() )->get_error_code() );
+		// Without Pro loaded, the answer is that Pro is required.
+		if ( ! defined( 'SUBTLEFORMS_PRO_VERSION' ) ) {
+			$this->assertSame( 'subtleforms_pro_required', $this->intent( $id, array() )->get_error_code() );
+		}
 	}
 
 	/** PAY-26: a card order below the gateway minimum is refused with a clear message. */
