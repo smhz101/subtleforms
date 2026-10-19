@@ -14,6 +14,8 @@ import { Button, SelectControl, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import Icon from '../../ui/Icon';
 import { nodeLogics, VALUELESS_OPERATORS } from '../../../shared/conditions';
+import { logicOperatorsFor, logicValueChoices } from '../../../shared/logicFields';
+import { orderedCountries } from '../../../shared/countries';
 import './LogicEditor.scss';
 
 const OPERATOR_LABELS = {
@@ -77,7 +79,7 @@ export function collectLogicFields(nodes, out = []) {
     const cfg = n.config && typeof n.config === 'object' ? { ...n, ...n.config } : n;
     const type = n.type || '';
     if (cfg.key && !LAYOUT_TYPES.includes(type) && !type.includes('container')) {
-      out.push({ key: cfg.key, label: cfg.label || cfg.key, type, options: cfg.options });
+      out.push({ key: cfg.key, label: cfg.label || cfg.key, type, options: cfg.options, onValue: cfg.onValue, offValue: cfg.offValue });
     }
     collectLogicFields(n.children, out);
     collectLogicFields(n.fields, out);
@@ -158,11 +160,6 @@ export default function LogicEditor({
       .map((f) => ({ label: f.label || f.key, value: f.key })),
   ];
 
-  const operatorOptions = [
-    ...BASIC_ORDER.map((op) => ({ label: OPERATOR_LABELS[op], value: op })),
-    ...ADVANCED_ORDER.map((op) => ({ label: OPERATOR_LABELS[op], value: op })),
-  ];
-
   return (
     <div className='sf-logic-editor'>
 
@@ -226,7 +223,13 @@ export default function LogicEditor({
 
             {group.rules.map((rule, ri) => {
               const source = availableFields.find((f) => f.key === (rule.field || rule.sourceField));
-              const choices = optionPairs(source?.options);
+              const allowed = logicOperatorsFor(source?.type);
+              const operatorOptions = (allowed || [...BASIC_ORDER, ...ADVANCED_ORDER])
+                .concat(rule.operator && allowed && !allowed.includes(rule.operator) ? [rule.operator] : [])
+                .map((op) => ({ label: OPERATOR_LABELS[op] || op, value: op }));
+              const choices = source?.type === 'country'
+                ? logicValueChoices(source, orderedCountries())
+                : (logicValueChoices(source).length ? logicValueChoices(source) : optionPairs(source?.options));
               const op = rule.operator || 'equals';
               const needsValue = !VALUELESS_OPERATORS.includes(op);
               const isDate = op === 'before' || op === 'after' || DATE_TYPES.includes(source?.type);

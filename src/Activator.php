@@ -18,6 +18,26 @@ use SubtleForms\Support\Settings;
 final class Activator {
 
 	/**
+	 * Run the activation steps again when the version stored on the site
+	 * is not this build's version. This is how an update that is not a
+	 * fresh activation creates tables, runs migrations and schedules
+	 * background jobs such as the entry schema clean-up (FF-30).
+	 *
+	 * @param string|null $current Version of this build. Defaults to SUBTLEFORMS_VERSION.
+	 * @return bool Whether the activation steps ran.
+	 */
+	public static function maybe_upgrade( ?string $current = null ): bool {
+		$current = $current ?? SUBTLEFORMS_VERSION;
+		if ( get_option( 'subtleforms_db_version' ) === $current ) {
+			return false;
+		}
+		self::activate();
+		update_option( 'subtleforms_db_version', $current );
+		update_option( 'subtleforms_version', $current );
+		return true;
+	}
+
+	/**
 	 * Activate the plugin.
 	 */
 	public static function activate(): void {
@@ -266,6 +286,10 @@ final class Activator {
 			$wpdb->query( "ALTER TABLE {$table_name} ADD COLUMN is_read tinyint(1) NOT NULL DEFAULT 0 AFTER status" );
 			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Table name is controlled from $wpdb->prefix; ALTER TABLE cannot use prepare().
 			$wpdb->query( "ALTER TABLE {$table_name} ADD KEY is_read (is_read)" );
+			// Older builds stored read/unread in status. Map those rows so the new
+			// column matches what admins already saw before this migration.
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is controlled from $wpdb->prefix.
+			$wpdb->query( "UPDATE {$table_name} SET is_read = 1 WHERE status = 'read'" );
 			Logger::info( 'Added is_read column to submissions table' );
 		}
 	}

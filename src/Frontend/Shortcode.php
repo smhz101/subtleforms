@@ -64,12 +64,12 @@ final class Shortcode {
 		// Login, schedule and entry-limit rules (2.0).
 		$blocked = \SubtleForms\Engine\FormRestrictions::blockedReason( $formId, \SubtleForms\Engine\FormRestrictions::activeSchema( $formId ) );
 		if ( $blocked !== null ) {
-			$this->enqueueAssets();
+			$this->enqueueAssets( $formId );
 			return \SubtleForms\Engine\FormRestrictions::render( $blocked );
 		}
 
 		// Enqueue frontend assets
-		$this->enqueueAssets();
+		$this->enqueueAssets( $formId );
 
 		// Render container
 		return sprintf(
@@ -81,7 +81,19 @@ final class Shortcode {
 	/**
 	 * Enqueue frontend scripts and styles.
 	 */
-	private function enqueueAssets(): void {
-		FrontendAssets::enqueue( $this->settings, $this->captchaManager );
+	private function enqueueAssets( int $formId = 0 ): void {
+		$providers = array();
+		if ( $formId > 0 ) {
+			$schema = \SubtleForms\Engine\FormRestrictions::activeSchema( $formId );
+			if ( is_array( $schema ) ) {
+				foreach ( \SubtleForms\Support\Captcha\FieldCaptcha::fields( $schema ) as $field ) {
+					$provider = \SubtleForms\Support\Captcha\FieldCaptcha::provider( $field );
+					if ( '' !== $provider ) {
+						$providers[] = $provider;
+					}
+				}
+			}
+		}
+		FrontendAssets::enqueue( $this->settings, $this->captchaManager, $providers );
 	}
 }

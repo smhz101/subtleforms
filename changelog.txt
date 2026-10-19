@@ -26,7 +26,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: Dropdown, radio, checkbox, picture and priced option answers show their labels. Single checkbox, consent and toggle answers read Yes or No everywhere, including the PDF.
 * Fix: Matrix answers name each row and its chosen columns, for example "Speed: Good; Price: OK" and "Mon: AM, PM".
 * Fix: Date, time and date and time answers follow the field's display format in the entry view, emails, CSV exports and PDFs.
-* Fix: Dependent dropdown answers show the label chosen at each level in emails, PDFs, CRM notes and webhooks, and in mapped integration fields when the add-on passes the form.
+* Fix: Dependent dropdown answers show the label chosen at each level in emails, PDFs, CRM notes and webhooks, including the full payload of a Webhook action, and in mapped integration fields when the add-on passes the form.
 * Fix: Product answers read as order lines with a quantity and price, and priced options show their label and price.
 * Fix: CSV exports list uploaded files by name with an admin download link instead of the stored file record.
 * Fix: A field with a very long label and no admin label is named by its label shortened to 60 characters in emails, CSV headers, entries, PDFs and the required message.
@@ -42,6 +42,17 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: Hidden field values, including {date}, {user_email} and {user_name}, are worked out on the server, so they are stored when a form is sent without JavaScript.
 * Fix: Values sent for an Order summary or Fixed fee field are not stored, so they no longer appear as columns in CSV exports.
 * Fix: A builder save that fails names the field as well as the setting, a numeric label, placeholder or default value saves, and long labels wrap on the canvas.
+* Fix: A column stored as an object with a fields or children list renders its fields on the live form, includes them in the live total, validates them and gives them defaults, so a product in that column is shown as well as charged.
+* Fix: Deleting a field inside a step, container or column shows the Field deleted notice with Undo, and deleting a step counts every field in it.
+* Fix: When the forms list fails to load after a change of tab, search, sort or page size, the previous rows are cleared, so Published forms are not shown or actionable under Trash. A failed retry of the same view keeps its rows.
+* Fix: When the entries list fails to load after a change of tab, search, date range, form or sort, the previous entries are cleared, so Inbox entries are not shown or actionable under Trash. A failed retry of the same view keeps its entries.
+* Fix: In the builder Preview, a desktop form wider than the canvas is scaled into a stage of the scaled size, centred in the canvas, so the whole form stays visible beside the styling panel with no sideways scroll.
+* Fix: The Payment Form template's product is set as a fixed product: no quantity box in the builder or on the live form, and the quote, the payment intent and the entry charge it once without a submitted value.
+* Fix: The Donation Form template's Custom Amount is required and has a minimum of 1, in the browser and on the server, so an empty or zero amount cannot complete a donation form. A donation template from an add-on gets the same rule unless it sets a higher minimum.
+* Fix: Templates from add-ons lose only raw card inputs, found by an id or key such as card_number, expiry or cvv. A field or container whose label or id only mentions a card, such as a Gift card message or a Scorecard, is kept, and so is the Card Payment field.
+* Fix: A payment template from an add-on that already prices the order with Priced options, a Custom Amount or a Fixed fee no longer gets a 10.00 fixed product added and charged on top. In a multi-step template, a missing product goes in the first step and a missing Order summary and note go in the last step, instead of beside the steps.
+* Fix: The server checks conditional logic against the answers as typed, before a website gets https:// and before email lists and phone numbers are tidied, as the browser does. A rule such as Website equals example.com keeps the fields, priced fields, conditional emails and confirmations it controls. The stored answers are still tidied.
+* Fix: The live form refuses a Product quantity that is not a whole number, is below the minimum (including the starting 1 when the minimum is higher) or is above the maximum, with the server's messages, before any card payment is started.
 
 = 2.3.9 - 2026-10-19 =
 * Change: Nothing in SubtleForms is switched off without a license. CSV export, Reports (views, submissions and conversion), full conditional logic (any rule, groups, every operator, conditional emails, webhooks and confirmations), Picture choice, several files per upload field, payment fields (Product, Priced options, Custom amount, Fixed fee, Order summary, Coupon), coupons, and the Webhooks and Analytics settings all work in the free plugin.

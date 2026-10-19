@@ -11,6 +11,9 @@
 
 namespace SubtleForms\Api;
 
+use SubtleForms\Fields\ActionHooks;
+use SubtleForms\Support\Captcha\FieldCaptcha;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
@@ -1152,7 +1155,7 @@ final class FormsApi {
 	 */
 	private function buildPublicSchema( array $schema ): array {
 		$public = array(
-			'fields'         => $schema['fields'] ?? array(),
+			'fields'         => self::stripCaptchaSecrets( $schema['fields'] ?? array() ),
 			'schema_version' => $schema['schema_version'] ?? 1,
 		);
 
@@ -1267,30 +1270,79 @@ final class FormsApi {
 	 * Inject CAPTCHA HTML into schema fields for frontend rendering.
 	 */
 	private function injectCaptchaHtml( $schema ) {
-		if ( ! $this->captchaManager || ! $this->captchaManager->isEnabled() || ! $this->captchaManager->isConfigured() ) {
-			return $schema;
+		if ( is_array( $schema ) ) {
+			ActionHooks::fire( $schema, array( 'when' => 'render' ) );
+			$schema['fields'] = $this->processCaptchaFields( $schema['fields'] ?? array(), '' );
 		}
-
-		$captcha_html = $this->captchaManager->render();
-		if ( empty( $captcha_html ) ) {
-			return $schema;
-		}
-
-		$schema['fields'] = $this->processCaptchaFields( $schema['fields'] ?? array(), $captcha_html );
-
 		return $schema;
 	}
 
 	/**
 	 * Recursively process fields to inject CAPTCHA HTML.
 	 */
+	/**
+	 * Site keys can stay on the public form. Secret keys cannot.
+	 *
+	 * @param mixed $fields Field nodes.
+	 * @return array
+	 */
+	private static function stripCaptchaSecrets( $fields ): array {
+		if ( ! is_array( $fields ) ) {
+			return array();
+		}
+		$clean = array();
+		foreach ( $fields as $key => $field ) {
+			if ( ! is_array( $field ) ) {
+				$clean[ $key ] = $field;
+				continue;
+			}
+			unset( $field['secret_key'] );
+			if ( isset( $field['config'] ) && is_array( $field['config'] ) ) {
+				unset( $field['config']['secret_key'] );
+			}
+			foreach ( array( 'fields', 'children' ) as $child ) {
+				if ( isset( $field[ $child ] ) ) {
+					$field[ $child ] = self::stripCaptchaSecrets( $field[ $child ] );
+				}
+			}
+			if ( isset( $field['columns'] ) && is_array( $field['columns'] ) ) {
+				foreach ( $field['columns'] as $i => $column ) {
+					if ( ! is_array( $column ) ) {
+						continue;
+					}
+					if ( isset( $column['fields'] ) ) {
+						$column['fields'] = self::stripCaptchaSecrets( $column['fields'] );
+					} elseif ( isset( $column['children'] ) ) {
+						$column['children'] = self::stripCaptchaSecrets( $column['children'] );
+					} else {
+						$column = self::stripCaptchaSecrets( $column );
+					}
+					$field['columns'][ $i ] = $column;
+				}
+			}
+			$clean[ $key ] = $field;
+		}
+		return $clean;
+	}
+
 	private function processCaptchaFields( $fields, $captcha_html ) {
 		$provider_name = $this->captchaManager ? $this->captchaManager->getActiveProviderName() : '';
 
 		foreach ( $fields as &$field ) {
-			if ( in_array( $field['type'], array( 'captcha', 'recaptcha', 'hcaptcha', 'turnstile' ), true ) ) {
-				$field['config']['captchaHtml']  = $captcha_html;
-				$field['config']['providerName'] = $provider_name;
+			if ( in_array( $field['type'] ?? '', array( 'captcha', 'recaptcha', 'hcaptcha', 'turnstile' ), true ) ) {
+				$provider = FieldCaptcha::provider( $field );
+				$settings = array();
+				if ( $this->captchaManager && '' !== $provider ) {
+					$settings[ $provider ] = $this->captchaManager->keysFor( $provider );
+				}
+				$resolved = FieldCaptcha::resolve( $field, $settings );
+				$html     = '';
+				if ( $resolved['ready'] && $this->captchaManager ) {
+					$html = $this->captchaManager->widgetFor( $resolved['provider'], $resolved['site_key'] );
+				}
+				$field['config']['captchaHtml']     = $html;
+				$field['config']['captchaWarning']  = '' === $html ? $resolved['warning'] : '';
+				$field['config']['providerName']    = $provider;
 			}
 
 			if ( ! empty( $field['fields'] ) && is_array( $field['fields'] ) ) {
@@ -1303,7 +1355,14 @@ final class FormsApi {
 
 			if ( ! empty( $field['columns'] ) && is_array( $field['columns'] ) ) {
 				foreach ( $field['columns'] as &$column ) {
-					if ( is_array( $column ) ) {
+					if ( ! is_array( $column ) ) {
+						continue;
+					}
+					if ( isset( $column['fields'] ) && is_array( $column['fields'] ) ) {
+						$column['fields'] = $this->processCaptchaFields( $column['fields'], $captcha_html );
+					} elseif ( isset( $column['children'] ) && is_array( $column['children'] ) ) {
+						$column['children'] = $this->processCaptchaFields( $column['children'], $captcha_html );
+					} else {
 						$column = $this->processCaptchaFields( $column, $captcha_html );
 					}
 				}

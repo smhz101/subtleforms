@@ -27,7 +27,7 @@ export default function ChainedSourceControl({ field, onChange, disabled }) {
 				<button
 					type="button"
 					className={clsx({ 'is-selected': !csv })}
-					aria-pressed={!csv}
+					role="radio" aria-checked={!csv}
 					disabled={disabled}
 					onClick={() => choose('manual')}>
 					{__('Manual', 'subtleforms')}
@@ -35,7 +35,7 @@ export default function ChainedSourceControl({ field, onChange, disabled }) {
 				<button
 					type="button"
 					className={clsx({ 'is-selected': csv })}
-					aria-pressed={csv}
+					role="radio" aria-checked={csv}
 					disabled={disabled}
 					onClick={() => choose('csv')}>
 					{__('CSV', 'subtleforms')}

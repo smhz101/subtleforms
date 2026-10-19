@@ -84,15 +84,18 @@
 	}
 
 	// The form is laid out at the device width, then scaled to the pane.
-	// Flex centring keeps a form wider than the pane centred before it is
-	// scaled, so the scaled form is not pushed under the styling panel.
+	// The stage is given the scaled width inline and centred with auto
+	// margins, so it sits in the middle of the canvas and never under the
+	// styling panel. The form scales from its top left corner, so the
+	// scaled form fills the stage exactly. Do not flex-centre the stage:
+	// with a top left origin that shifts a form wider than the stage out
+	// of view.
 	&__stage {
-		display: flex;
-		justify-content: center;
-		align-items: flex-start;
-		width: 100%;
+		display: block;
+		max-width: 100%;
 		min-width: 0;
 		margin: 0 auto;
+		overflow: hidden;
 		background: transparent;
 		border: 0;
 		border-radius: 0;
@@ -101,11 +104,9 @@
 	}
 
 	&__form {
-		flex: none;
 		width: auto;
 		max-width: none;
-		margin-right: auto;
-		margin-left: auto;
+		margin: 0;
 	}
 
 	&__controls {

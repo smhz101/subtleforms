@@ -26,6 +26,10 @@ if ( ! function_exists( 'apply_filters' ) ) {
 	 * Stub: returns the first argument unchanged (no filter pipeline).
 	 */
 	function apply_filters( string $hook, $value, ...$args ) {
+		// A test can register one callback per hook here.
+		if ( isset( $GLOBALS['sf_test_filters'][ $hook ] ) && is_callable( $GLOBALS['sf_test_filters'][ $hook ] ) ) {
+			return $GLOBALS['sf_test_filters'][ $hook ]( $value, ...$args );
+		}
 		return $value;
 	}
 }
@@ -134,5 +138,30 @@ if ( ! function_exists( 'wp_json_encode' ) ) {
 	 */
 	function wp_json_encode( $data ) {
 		return json_encode( $data );
+	}
+}
+
+if ( ! function_exists( 'sanitize_key' ) ) {
+	function sanitize_key( $key ): string {
+		$key = strtolower( (string) $key );
+		return (string) preg_replace( '/[^a-z0-9_\-]/', '', $key );
+	}
+}
+
+if ( ! function_exists( 'esc_attr' ) ) {
+	function esc_attr( $text ): string {
+		return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8' );
+	}
+}
+
+if ( ! function_exists( 'get_locale' ) ) {
+	function get_locale(): string {
+		return 'en_US';
+	}
+}
+
+if ( ! function_exists( 'get_option' ) ) {
+	function get_option( $option, $default = false ) {
+		return $default;
 	}
 }

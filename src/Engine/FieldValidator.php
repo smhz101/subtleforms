@@ -15,6 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 final class FieldValidator {
 
+	/** @var array<string, mixed> */
+	private $payload = array();
+
 	/**
 	 * Form-level default messages for the current validate() call.
 	 *
@@ -123,6 +126,7 @@ final class FieldValidator {
 	 * @return array{valid: bool, errors: array<string,string>}
 	 */
 	public function validate( array $schema, array $payload, array $conditionalState ): array {
+		$this->payload = $payload;
 		$errors         = array();
 		$hiddenFields   = $conditionalState['hidden_fields'] ?? array();
 		$requiredFields = array_merge(
@@ -265,11 +269,16 @@ final class FieldValidator {
 	 *
 	 * Repeater groups are prepared with their child fields.
 	 *
+	 * With $tidy false, websites, email lists and phone numbers keep what the
+	 * visitor typed. Conditional logic reads those answers, as the browser
+	 * does, so a rule for "example.com" still matches (review of PR #28).
+	 *
 	 * @param mixed $schema  Form schema.
 	 * @param array $payload Submitted values.
+	 * @param bool  $tidy    Tidy websites, email lists and phone numbers.
 	 * @return array
 	 */
-	public static function prepare( $schema, array $payload ): array {
+	public static function prepare( $schema, array $payload, bool $tidy = true ): array {
 		$fields = is_array( $schema ) && isset( $schema['fields'] ) && is_array( $schema['fields'] ) ? $schema['fields'] : array();
 		foreach ( self::answerFields( $fields ) as $key => $field ) {
 			$type = (string) ( $field['type'] ?? '' );
@@ -299,13 +308,13 @@ final class FieldValidator {
 					$child = array( 'fields' => \SubtleForms\Support\Repeater::children( $field ) );
 					$groups = array();
 					foreach ( \SubtleForms\Support\Repeater::groups( $value ) as $group ) {
-						$groups[] = self::prepare( $child, $group );
+						$groups[] = self::prepare( $child, $group, $tidy );
 					}
 					$payload[ $key ] = $groups;
 				}
 				continue;
 			}
-			if ( ! is_string( $value ) ) {
+			if ( ! $tidy || ! is_string( $value ) ) {
 				continue;
 			}
 			switch ( $type ) {
@@ -504,8 +513,13 @@ final class FieldValidator {
 				$error = $this->validateTextLength( $value, $field );
 				return $error ?: $this->validatePattern( $value, $field );
 			case 'textarea':
-			case 'password':
 				return $this->validateTextLength( $value, $field );
+			case 'password':
+				$lengthError = $this->validateTextLength( $value, $field );
+				if ( $lengthError ) {
+					return $lengthError;
+				}
+				return $this->validatePasswordConfirm( $value, $field );
 			case 'multiple_choice':
 			case 'picture_choice':
 				$error = $this->validateChoices( $value, $field, true === $this->attr( $field, 'allowMultiple' ) );
@@ -549,7 +563,7 @@ final class FieldValidator {
 				return $this->validateColour( $value );
 			case 'phone':
 			case 'tel':
-				return $this->validatePhone( $value );
+				return $this->validatePhone( $value, $field );
 			case 'payment_amount':
 				return $this->validatePaymentAmount( $value, $field );
 			case 'payment_coupon':
@@ -1355,7 +1369,7 @@ final class FieldValidator {
 	 * @param mixed $value
 	 * @return string|null
 	 */
-	private function validatePhone( $value ) {
+	private function validatePhone( $value, array $field = array() ) {
 		if ( self::phoneIsBlank( $value ) ) {
 			return null;
 		}
@@ -1364,6 +1378,22 @@ final class FieldValidator {
 		if ( ! is_string( $value ) || ! preg_match( '/^[\d\s\-\+\(\)]+$/', $value ) ) {
 			return $invalid;
 		}
+
+		if ( 'us' === (string) $this->attr( $field, 'format' ) ) {
+			$digits = (string) preg_replace( '/\D/', '', $value );
+			// A country prefix is not part of the 10-digit US length.
+			if ( str_starts_with( trim( $value ), '+' ) ) {
+				$dial = self::dialCodeOf( $digits );
+				if ( null !== $dial ) {
+					$digits = substr( $digits, strlen( $dial ) );
+				}
+			}
+			if ( 10 !== strlen( $digits ) ) {
+				return __( 'Enter a 10-digit US phone number.', 'subtleforms' );
+			}
+			return null;
+		}
+
 		if ( ! str_starts_with( trim( $value ), '+' ) ) {
 			return null;
 		}
@@ -1375,6 +1405,25 @@ final class FieldValidator {
 		$national = strlen( $digits ) - strlen( $dial );
 		$ok       = '1' === $dial ? 10 === $national : ( $national >= 4 && strlen( $digits ) <= 15 );
 		return $ok ? null : $invalid;
+	}
+
+	/**
+	 * Confirmation is stored beside the password as `{key}_confirm`.
+	 *
+	 * @param mixed $value Password.
+	 * @param array $field Field.
+	 * @return string|null
+	 */
+	private function validatePasswordConfirm( $value, array $field ) {
+		if ( empty( $this->attr( $field, 'requireConfirmation' ) ) || $this->isEmpty( $value ) ) {
+			return null;
+		}
+		$key     = (string) ( $field['key'] ?? ( $field['config']['key'] ?? '' ) );
+		$confirm = $this->payload[ $key . '_confirm' ] ?? null;
+		if ( (string) $confirm !== (string) $value ) {
+			return __( 'The passwords do not match.', 'subtleforms' );
+		}
+		return null;
 	}
 
 	/**

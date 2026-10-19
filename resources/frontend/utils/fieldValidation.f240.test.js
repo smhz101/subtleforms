@@ -71,3 +71,33 @@ describe('custom amount (PAY-05)', () => {
     expect(check('payment_amount', '50', { min: 5, max: 500 })).toBeUndefined();
   });
 });
+
+describe('product quantity (review #28, PAY-06)', () => {
+  const product = { allowQuantity: true, minQuantity: 2, maxQuantity: 5, price: 10 };
+
+  test('a fractional, negative or non-numeric quantity is refused as on the server', () => {
+    expect(check('payment_product', '1.5', product)).toBe('Please enter a whole number for the quantity.');
+    expect(check('payment_product', '-1', product)).toBe('Please enter a whole number for the quantity.');
+    expect(check('payment_product', '0x3', product)).toBe('Please enter a whole number for the quantity.');
+    expect(check('payment_product', 'abc', product)).toBe('Please enter a whole number for the quantity.');
+  });
+
+  test('the untouched default of 1 is refused when the minimum is higher', () => {
+    expect(check('payment_product', '1', product)).toBe('The quantity must be at least 2.');
+  });
+
+  test('a quantity above the maximum is refused', () => {
+    expect(check('payment_product', '6', product)).toBe('The quantity can be at most 5.');
+  });
+
+  test('a whole quantity in range passes, and so does an empty one', () => {
+    expect(check('payment_product', '3', product)).toBeUndefined();
+    expect(check('payment_product', 3, product)).toBeUndefined();
+    expect(check('payment_product', '3.0', product)).toBeUndefined();
+    expect(check('payment_product', '', product)).toBeUndefined();
+  });
+
+  test('a fixed product without a quantity box has nothing to check', () => {
+    expect(check('payment_product', '1.5', { allowQuantity: false, price: 10 })).toBeUndefined();
+  });
+});

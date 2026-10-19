@@ -138,7 +138,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: Failed payments show as Payment failed, payment messages can be translated, and Pro asks admins to connect Stripe when no gateway is set up.
 * Fix: Tools export and import keep each entry's order and payment details.
 * Change: Entries refer to the form version they were sent with instead of keeping a full copy of the form. Older entries are cleaned up in the background and stay readable.
-* Fix: Entries, emails, CSV exports, PDFs and integrations show option labels, Yes or No, matrix rows with their columns, dependent dropdown labels, dates and times in the field format, and product lines with prices.
+* Fix: Entries, emails, CSV exports, PDFs and integrations show option labels, Yes or No, matrix rows with their columns, dependent dropdown labels (also in the Webhook action's full payload), dates and times in the field format, and product lines with prices.
 * Fix: CSV exports list uploaded files by name with a download link.
 * Fix: A very long field label is shortened in emails, exports, entries and the required message. The admin label is used when it is set.
 * Fix: The submissions list names the sender by a name or email answer, or shows Anonymous, never a quantity or a choice.
@@ -170,7 +170,32 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: On Tools, choosing a file is one keyboard stop, notices clear when you change section, and forms with the same title show their number and status.
 * Fix: Importing entries warns when a file is from another form and skips entries that are already there. The transfer screen says notes, the IP address, the browser, files, logs and unpublished drafts are not in the file.
 * Fix: A webhook that is still waiting says Queued.
-
+* Fix: A color field saves the color it shows, including its default.
+* Fix: Each CAPTCHA field uses its own provider and keys, and the form says when a check is not set up.
+* Fix: Password fields can show a strength meter and ask for the password again.
+* Fix: A US phone number is grouped as it is typed, and a short number is rejected.
+* Fix: Dropdown, radio and multiple choice start with choices, and the canvas shows the default choice.
+* Fix: Choice groups are not tied to a missing control, prefix and suffix text is named for screen readers, and a consent link uses the words already in the sentence.
+* Fix: A section heading and custom HTML each take a full row, and column layouts use a real column count.
+* Fix: Hidden and color fields no longer repeat the admin label or the default value.
+* Fix: Net Promoter Score has a low and a high label, and a Calculation field has a prefix and a suffix.
+* Fix: An Action Hook field runs when the form is shown and when it is submitted.
+* Fix: Logic for a checkbox, toggle or country offers the real values, and an off toggle counts as empty.
+* Fix: The second dependent dropdown lists only the choices that belong to the first answer, and the first dropdown keeps its label.
+* Fix: Replacing dependent dropdowns from a file asks first, and a semicolon file imports as separate columns.
+* Fix: Dropdown, country, phone and date fields work from the keyboard. The calendar can jump to a month and year, and country buttons show a letter code.
+* Fix: The first invalid dropdown, country, date or phone control receives focus.
+* Fix: Fields inside a column saved as an object with its own fields list are shown, checked and sent, so a product there is not charged unseen.
+* Fix: Deleting a field inside a step or container shows the Field deleted notice with Undo.
+* Fix: If the forms list fails to load after you change tab, search or sort, the old rows are cleared instead of shown under the new tab.
+* Fix: If the entries list fails to load after you change tab, search, date or form, the old entries are cleared instead of shown under the new filters.
+* Fix: A desktop preview wider than the builder canvas is scaled from its top left corner and stays whole and centred.
+* Fix: The Payment Form template's product is a fixed product with no quantity box in the builder or on the form, and it is charged once.
+* Fix: The Donation Form template's Custom Amount is required, with a minimum of 1, so a donation form cannot be sent without a donation.
+* Fix: Templates lose only card number, expiry and CVV inputs. A field that just mentions a card, such as a gift card message, is kept.
+* Fix: A payment template that already has Priced options or a Custom Amount gets no extra fixed product, and a multi-step template gets its payment fields inside its steps.
+* Fix: Conditional logic on the server reads a website as it was typed, so a rule for example.com still shows, stores and charges the fields it controls.
+* Fix: The form checks a Product quantity before sending, with the same whole number, minimum and maximum rules as the server.
 = 2.3.9 - 2026-10-19 =
 * Change: Everything in SubtleForms works without a license: CSV export, reports, full conditional logic, Picture choice, several files per upload field, payment fields and coupons, and the Webhooks and Analytics settings.
 * Change: Signature and Calculation fields and card payments are part of SubtleForms Pro 2.4.0. Forms that use them keep them; the live form leaves them out until Pro is active.
@@ -199,6 +224,9 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 The full history is in changelog.txt in the plugin folder.
 
 == Upgrade Notice ==
+
+= 2.4.0 =
+Field options, CAPTCHA keys, dependent dropdowns and keyboard use of dropdowns, country, phone and date fields.
 
 = 2.3.9 =
 Free plugin and SubtleForms Pro split cleanly: everything in this plugin works without a license. Requires WordPress 6.6. Update SubtleForms Pro to 2.4.0 at the same time.

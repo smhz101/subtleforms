@@ -11,6 +11,8 @@
 
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { getIn } from './valuePaths';
+import { isCompleteUsPhone } from '../../shared/phoneFormat';
+import { columnFields } from './columnFields';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { getFieldType } from '../../shared/extend';
 import { hasParts, missingParts } from '../../shared/compositeParts';
@@ -356,6 +358,34 @@ function rawValidateField(field, value, defaults = {}) {
     }
   }
 
+  // A Product quantity is a whole number within the field's limits, as
+  // FieldValidator::validatePaymentQuantity checks on the server (PAY-06).
+  // Checked here so a card is never authorised for an order the server
+  // will refuse.
+  if (type === 'payment_product' && config.allowQuantity) {
+    const text = typeof value === 'number' ? String(value) : String(value).trim();
+    const qty = Number(text);
+    if (!/^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/.test(text) || !Number.isInteger(qty) || qty < 0) {
+      return __('Please enter a whole number for the quantity.', 'subtleforms');
+    }
+    const minQty = Math.max(0, parseInt(config.minQuantity, 10) || 0);
+    const maxQty = parseInt(config.maxQuantity, 10) || 0;
+    if (qty < minQty) {
+      return sprintf(
+        /* translators: %d: smallest quantity */
+        __('The quantity must be at least %d.', 'subtleforms'),
+        minQty
+      );
+    }
+    if (maxQty > 0 && qty > maxQty) {
+      return sprintf(
+        /* translators: %d: largest quantity */
+        __('The quantity can be at most %d.', 'subtleforms'),
+        maxQty
+      );
+    }
+  }
+
   if (type === 'date' && isIsoDate(value)) {
     const minDate = config.minDate;
     const maxDate = config.maxDate;
@@ -380,6 +410,9 @@ function rawValidateField(field, value, defaults = {}) {
   if ((type === 'phone' || type === 'tel') && typeof value === 'string') {
     if (!/^[\d\s\-+()]+$/.test(value) || !isValidInternational(value)) {
       return __('Invalid phone number.', 'subtleforms');
+    }
+    if (config.format === 'us' && !isCompleteUsPhone(value)) {
+      return __('Enter a 10-digit US phone number.', 'subtleforms');
     }
   }
 
@@ -490,14 +523,20 @@ export function validateFields(fields, values, hiddenFields, defaults = {}) {
         const value = getIn(values, key);
         const err = validateField(field, value, defaults);
         if (err) errors[key] = err;
+        if (
+          field.type === 'password' &&
+          (field.config?.requireConfirmation || field.requireConfirmation) &&
+          value &&
+          getIn(values, `${key}_confirm`) !== value
+        ) {
+          errors[key] = __('The passwords do not match.', 'subtleforms');
+        }
       }
 
       if (Array.isArray(children)) visit(children, prefix);
 
       if (Array.isArray(field.columns)) {
-        field.columns.forEach((col) => {
-          if (Array.isArray(col)) visit(col, prefix);
-        });
+        field.columns.forEach((col) => visit(columnFields(col), prefix));
       }
     });
   };

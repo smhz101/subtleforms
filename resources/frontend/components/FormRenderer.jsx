@@ -5,6 +5,7 @@ import StepNavigation from './StepNavigation';
 import ConversationalFormRenderer from './ConversationalFormRenderer';
 import { getIn, setIn, deleteIn, flattenToPathMap } from '../utils/valuePaths';
 import { collectLeafInputPaths, collectContainerKeys } from '../utils/schemaLeaves';
+import { columnFields, flattenSchemaFields } from '../utils/columnFields';
 import { collectDefaultValues } from '../utils/defaults';
 import { computeValues } from '../../shared/extend';
 import { computeLogicState, pickConfirmation } from '../../shared/conditions';
@@ -217,29 +218,7 @@ export default function FormRenderer({
   const allFields = useMemo(() => {
     if (!schema?.fields) return [];
 
-    const flatten = (fields) => {
-      let result = [];
-      fields.forEach((field) => {
-        if (field.type !== 'step') {
-          result.push(field);
-        }
-        // Support both children and fields properties
-        const childFields = field.children || field.fields;
-        if (childFields && Array.isArray(childFields)) {
-          result = result.concat(flatten(childFields));
-        }
-        if (field.columns && Array.isArray(field.columns)) {
-          field.columns.forEach((col) => {
-            if (Array.isArray(col)) {
-              result = result.concat(flatten(col));
-            }
-          });
-        }
-      });
-      return result;
-    };
-
-    return flatten(schema.fields);
+    return flattenSchemaFields(schema.fields);
   }, [schema]);
 
   // Default values (2.0): applied once the schema is known, never over
@@ -596,7 +575,7 @@ export default function FormRenderer({
           return (
             stepHasError(n?.children) ||
             stepHasError(n?.fields) ||
-            (Array.isArray(n?.columns) && n.columns.some((c) => Array.isArray(c) && stepHasError(c)))
+            (Array.isArray(n?.columns) && n.columns.some((c) => stepHasError(columnFields(c))))
           );
         });
       const index = steps.findIndex((step) => stepHasError(step.children || step.fields));

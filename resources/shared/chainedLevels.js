@@ -388,12 +388,39 @@ function csvCell(value) {
   return text;
 }
 
+export function detectCsvDelimiter(text) {
+  const sample = String(text || '').replace(/^\uFEFF/, '').split(/\r?\n/).slice(0, 5).join('\n');
+  let commas = 0;
+  let semis = 0;
+  let tabs = 0;
+  let quoted = false;
+  for (let i = 0; i < sample.length; i += 1) {
+    const char = sample[i];
+    if (char === '"') {
+      quoted = !quoted;
+      continue;
+    }
+    if (quoted) continue;
+    if (char === ',') commas += 1;
+    else if (char === ';') semis += 1;
+    else if (char === '\t') tabs += 1;
+  }
+  if (semis > commas && semis >= tabs) return ';';
+  if (tabs > commas && tabs >= semis) return '\t';
+  return ',';
+}
+
+export function needsReplaceConfirm(levels) {
+  return normalizeLevels(levels).some((level) => level.options.length > 0);
+}
+
 function parseCsv(text) {
   const rows = [];
   let row = [];
   let cell = '';
   let quoted = false;
   const src = String(text || '').replace(/^\uFEFF/, '');
+  const delimiter = detectCsvDelimiter(src);
   for (let i = 0; i < src.length; i += 1) {
     const char = src[i];
     if (quoted) {
@@ -413,7 +440,7 @@ function parseCsv(text) {
       quoted = true;
       continue;
     }
-    if (char === ',') {
+    if (char === delimiter) {
       row.push(cell);
       cell = '';
       continue;

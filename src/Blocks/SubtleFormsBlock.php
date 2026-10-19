@@ -115,7 +115,7 @@ final class SubtleFormsBlock {
 		// Login, schedule and entry-limit rules (2.0).
 		$blocked = \SubtleForms\Engine\FormRestrictions::blockedReason( (int) $form_id, \SubtleForms\Engine\FormRestrictions::activeSchema( (int) $form_id ) );
 		if ( $blocked !== null ) {
-			self::enqueue_frontend_assets();
+			self::enqueue_frontend_assets( (int) $form_id );
 			return \SubtleForms\Engine\FormRestrictions::render( $blocked );
 		}
 
@@ -135,7 +135,7 @@ final class SubtleFormsBlock {
 		// appear. A block in a template part or a widget area is rendered the
 		// same way as one in post content, and now gets its assets the same way
 		// too.
-		self::enqueue_frontend_assets();
+		self::enqueue_frontend_assets( (int) $form_id );
 
 		// Block options are forwarded to the frontend renderer as data
 		// attributes so the form renders with the user's chosen theme, title
@@ -166,7 +166,7 @@ final class SubtleFormsBlock {
 	 * Shared with the shortcode so a form behaves identically however it is
 	 * embedded, same script, same styles, same configured messages.
 	 */
-	private static function enqueue_frontend_assets(): void {
+	private static function enqueue_frontend_assets( int $formId = 0 ): void {
 		if ( is_admin() ) {
 			return;
 		}
@@ -192,7 +192,20 @@ final class SubtleFormsBlock {
 			$captcha  = null;
 		}
 
-		\SubtleForms\Frontend\FrontendAssets::enqueue( $settings, $captcha );
+		$providers = array();
+		if ( $formId > 0 ) {
+			$schema = \SubtleForms\Engine\FormRestrictions::activeSchema( $formId );
+			if ( is_array( $schema ) ) {
+				foreach ( \SubtleForms\Support\Captcha\FieldCaptcha::fields( $schema ) as $field ) {
+					$provider = \SubtleForms\Support\Captcha\FieldCaptcha::provider( $field );
+					if ( '' !== $provider ) {
+						$providers[] = $provider;
+					}
+				}
+			}
+		}
+
+		\SubtleForms\Frontend\FrontendAssets::enqueue( $settings, $captcha, $providers );
 	}
 
 	/**

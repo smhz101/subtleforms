@@ -77,8 +77,14 @@ final class WebhookAction implements ActionInterface {
 				$body = '{}';
 			}
 		} else {
-			// 'full', entire submission payload
-			$body = wp_json_encode( $context->payload );
+			// 'full', entire submission payload. Dependent dropdowns send the
+			// label chosen at each level, as emails and integrations do.
+			$schema = $context->getMeta( 'form_schema' );
+			$body   = wp_json_encode(
+				is_array( $schema ) && is_array( $context->payload )
+					? \SubtleForms\Support\AnswerFormatter::withChainedLabels( $schema, $context->payload )
+					: $context->payload
+			);
 		}
 
 		// Headers: merge user-supplied over default Content-Type

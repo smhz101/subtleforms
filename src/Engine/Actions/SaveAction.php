@@ -55,6 +55,7 @@ final class SaveAction implements ActionInterface {
 			// Task 1: Normalize field schema shape, ensure id, type, label, config on every node
 			$schema = $this->normalize_schema_fields( $schema );
 			$context->setMeta( 'form_schema', $schema );
+			$context->payload = \SubtleForms\Fields\ImplicitDefaults::apply( $schema, $context->payload );
 
 			$conditionalState = $context->getMeta(
 				'conditional_state',
@@ -87,6 +88,9 @@ final class SaveAction implements ActionInterface {
 		// The entry references its schema by version (the schema_version
 		// column) instead of keeping a full copy in its meta (FF-30).
 		$meta    = \SubtleForms\Support\EntrySchema::stripCopy( $context->meta );
+		// The answers as typed are only for conditional logic in this
+		// request. They are not sanitized for storage and are never saved.
+		unset( $meta['logic_payload'] );
 
 		if ( is_array( $schema ) ) {
 			$payload = $this->sanitize_payload( $schema, $payload );

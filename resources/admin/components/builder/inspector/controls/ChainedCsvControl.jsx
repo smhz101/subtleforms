@@ -2,10 +2,12 @@ import { useRef, useState } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../../../../ui/Icon';
+import ConfirmModal from '../../../../modals/ConfirmModal';
 import {
 	CHAINED_EXAMPLE_CSV,
 	levelsFromCsv,
 	levelsToCsv,
+	needsReplaceConfirm,
 	normalizeLevels,
 } from '../../../../../shared/chainedLevels';
 
@@ -26,6 +28,7 @@ function downloadCsv(filename, contents) {
 export default function ChainedCsvControl({ levels, fileName, onChange, disabled }) {
 	const inputRef = useRef(null);
 	const [error, setError] = useState('');
+	const [pending, setPending] = useState(null);
 	const current = normalizeLevels(levels);
 	const hasChoices = current.some((level) => level.options.length);
 
@@ -41,7 +44,12 @@ export default function ChainedCsvControl({ levels, fileName, onChange, disabled
 				return;
 			}
 			setError('');
-			onChange({ levels: next, csvFileName: file.name, source: 'csv', sourceChosen: true });
+			const change = { levels: next, csvFileName: file.name, source: 'csv', sourceChosen: true };
+			if (needsReplaceConfirm(current)) {
+				setPending(change);
+				return;
+			}
+			onChange(change);
 		};
 		reader.readAsText(file);
 	};
@@ -98,6 +106,18 @@ export default function ChainedCsvControl({ levels, fileName, onChange, disabled
 				) : null}
 			</div>
 			{error ? <p className="sf-chained-csv__error">{error}</p> : null}
+			<ConfirmModal
+				isOpen={!!pending}
+				title={__('Replace these dropdowns?', 'subtleforms')}
+				message={__('The lists you have now will be replaced by this file. This cannot be undone.', 'subtleforms')}
+				confirmText={__('Replace', 'subtleforms')}
+				confirmVariant="destructive"
+				onConfirm={() => {
+					if (pending) onChange(pending);
+					setPending(null);
+				}}
+				onClose={() => setPending(null)}
+			/>
 		</div>
 	);
 }

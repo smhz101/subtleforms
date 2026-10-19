@@ -163,7 +163,7 @@ final class FieldSettings {
 	 *
 	 * @var array<int, string>
 	 */
-	const DEFAULTABLE = array( 'text', 'email', 'number', 'phone', 'tel', 'url', 'textarea', 'dropdown', 'select', 'radio', 'country', 'date', 'time', 'range_slider', 'color_picker', 'hidden', 'scale' );
+	const DEFAULTABLE = array( 'text', 'email', 'number', 'phone', 'tel', 'url', 'textarea', 'dropdown', 'select', 'radio', 'country', 'date', 'time', 'range_slider', 'scale' );
 
 	/**
 	 * Decorate every registered definition.
@@ -261,7 +261,9 @@ final class FieldSettings {
 			static fn( $c ) => is_array( $c ) ? ( $c['name'] ?? '' ) : '',
 			$controls
 		);
-		$has   = static fn( string $name ) => in_array( $name, $names, true );
+		$has   = static function ( string $name ) use ( &$names ): bool {
+			return in_array( $name, $names, true );
+		};
 		$add   = static function ( array $control ) use ( &$controls, &$names ) {
 			$controls[] = $control;
 			$names[]    = $control['name'];
@@ -519,6 +521,7 @@ final class FieldSettings {
 			}
 
 			// Advanced.
+			if ( ! $has( 'adminLabel' ) ) {
 			$add(
 				array(
 					'type'    => 'text',
@@ -528,6 +531,7 @@ final class FieldSettings {
 					'section' => 'advanced',
 				)
 			);
+			}
 			if ( in_array( $type, self::TEXT_LIKE, true ) || in_array( $type, array( 'date', 'time', 'datetime' ), true ) ) {
 				$add(
 					array(
@@ -647,6 +651,48 @@ final class FieldSettings {
 			);
 		}
 
+		if ( 'net_promoter_score' === $type ) {
+			if ( ! $has( 'minLabel' ) ) {
+				$add(
+					array(
+						'type'  => 'text',
+						'name'  => 'minLabel',
+						'label' => __( 'Low label', 'subtleforms' ),
+					)
+				);
+			}
+			if ( ! $has( 'maxLabel' ) ) {
+				$add(
+					array(
+						'type'  => 'text',
+						'name'  => 'maxLabel',
+						'label' => __( 'High label', 'subtleforms' ),
+					)
+				);
+			}
+		}
+
+		if ( 'calculation' === $type ) {
+			if ( ! $has( 'prefix' ) ) {
+				$add(
+					array(
+						'type'  => 'text',
+						'name'  => 'prefix',
+						'label' => __( 'Prefix', 'subtleforms' ),
+					)
+				);
+			}
+			if ( ! $has( 'suffix' ) ) {
+				$add(
+					array(
+						'type'  => 'text',
+						'name'  => 'suffix',
+						'label' => __( 'Suffix', 'subtleforms' ),
+					)
+				);
+			}
+		}
+
 		$definition->inspectorControls = array_values( $controls );
 	}
 
@@ -716,7 +762,7 @@ final class FieldSettings {
 			'url'                => __( 'Website address', 'subtleforms' ),
 			'name_group'         => __( 'First, middle and last name', 'subtleforms' ),
 			'address_group'      => __( 'Street, city, region and country', 'subtleforms' ),
-			'password'           => __( 'Hidden input with strength meter', 'subtleforms' ),
+			'password'           => __( 'Password with a strength meter and an optional confirmation', 'subtleforms' ),
 			'dropdown'           => __( 'Pick one from a list', 'subtleforms' ),
 			'radio'              => __( 'Pick one, all options visible', 'subtleforms' ),
 			'multiple_choice'    => __( 'Pick any number of options', 'subtleforms' ),
