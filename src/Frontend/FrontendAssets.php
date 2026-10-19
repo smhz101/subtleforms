@@ -109,6 +109,16 @@ final class FrontendAssets {
 				'redirectUrl'    => $settings ? $settings->get( 'redirect_after_submit' ) : '',
 				'currency'       => $settings ? strtoupper( (string) ( $settings->get( 'ext_payments_currency' ) ?: 'USD' ) ) : 'USD',
 				'locale'         => str_replace( '_', '-', get_locale() ),
+				/**
+				 * Language of the page the form is on, sent with every request
+				 * the live form makes (2.4.1). Translation add-ons return the
+				 * current Polylang or WPML language so the form's labels and
+				 * confirmation come back translated. Empty means no language.
+				 *
+				 * @param string $language Language code.
+				 * @since 2.4.1
+				 */
+				'lang'           => sanitize_key( (string) apply_filters( 'subtleforms/frontend/language', '' ) ),
 				'weekStartsOn'   => (int) get_option( 'start_of_week', 0 ),
 				// Anonymous daily view counter (2.1). See Analytics\Stats.
 				'trackViews'     => \SubtleForms\Analytics\Stats::tracksViews( $settings ),
