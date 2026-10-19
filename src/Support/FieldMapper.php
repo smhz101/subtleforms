@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Field mapping helpers for integrations.
  *
@@ -17,6 +18,10 @@
  */
 
 namespace SubtleForms\Support;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Resolves mapped answer values.

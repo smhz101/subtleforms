@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Gravity Forms and Fluent Forms imports.
  *
@@ -6,6 +7,10 @@
  */
 
 namespace SubtleForms\Tests\Unit;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use PHPUnit\Framework\TestCase;
 use SubtleForms\Support\SchemaValidator;

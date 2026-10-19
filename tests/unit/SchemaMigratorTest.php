@@ -1,4 +1,8 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 // phpcs:disable -- Unit test file; not shipped in production plugin.
 /**
  * SchemaMigrator unit tests — migrating a schema must never drop fields.

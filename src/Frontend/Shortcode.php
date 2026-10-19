@@ -1,7 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SubtleForms\Frontend;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Support\Settings;

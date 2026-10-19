@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SubtleForms Onboarding REST API
  *
@@ -9,6 +10,10 @@
  */
 
 namespace SubtleForms\Api;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Security\RateLimiter;
 use WP_REST_Request;

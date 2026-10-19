@@ -1,4 +1,5 @@
 <?php
+
 // phpcs:disable -- Unit test file; not shipped in production plugin.
 /**
  * Conditional logic: server half of the shared spec.
@@ -11,6 +12,10 @@
  */
 
 namespace SubtleForms\Tests\Unit;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use PHPUnit\Framework\TestCase;
 use SubtleForms\Engine\ConditionalLogic;

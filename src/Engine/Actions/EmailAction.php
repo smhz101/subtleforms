@@ -1,7 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SubtleForms\Engine\Actions;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Contracts\ActionInterface;
 use SubtleForms\Engine\SubmissionContext;
@@ -141,7 +146,6 @@ final class EmailAction implements ActionInterface {
 		if ( ! $this->has_header( $headers, 'Content-Type' ) ) {
 			$headers[] = $isHtml ? 'Content-Type: text/html; charset=UTF-8' : 'Content-Type: text/plain; charset=UTF-8';
 		}
-
 
 		// Debug logging before send
 		$this->log_debug(

@@ -12,8 +12,8 @@
 
 namespace SubtleForms\Security;
 
-if (!defined('ABSPATH')) {
-    exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 
 /**

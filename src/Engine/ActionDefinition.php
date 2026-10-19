@@ -1,7 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SubtleForms\Engine;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Describes an Action type: metadata, capability requirements and settings schema.

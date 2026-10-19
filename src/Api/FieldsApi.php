@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SubtleForms Fields & Templates REST API
  *
@@ -9,6 +10,10 @@
  */
 
 namespace SubtleForms\Api;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Support\Logger;
 use SubtleForms\Support\FeatureGate;

@@ -1,4 +1,5 @@
 <?php
+
 // phpcs:disable -- Unit test file; not shipped in production plugin.
 /**
  * FieldValidator unit tests — consent/checkbox required validation.
@@ -7,6 +8,10 @@
  */
 
 namespace SubtleForms\Tests\Unit;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use PHPUnit\Framework\TestCase;
 use SubtleForms\Engine\FieldValidator;

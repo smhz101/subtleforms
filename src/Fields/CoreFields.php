@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SubtleForms Core Field Definitions
  *
@@ -7,6 +8,10 @@
  */
 
 namespace SubtleForms\Fields;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Register all core field definitions with normalized architecture.

@@ -1,9 +1,14 @@
 <?php
+
 /**
  * Formula evaluator: non-finite results are failures, not zero.
  */
 
 namespace SubtleForms\Tests\Unit;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use PHPUnit\Framework\TestCase;
 use SubtleForms\Engine\Formula;

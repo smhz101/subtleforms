@@ -2,6 +2,10 @@
 
 namespace SubtleForms\Api;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 use SubtleForms\Api\ApiResponse;
 use SubtleForms\Support\Settings;
 use SubtleForms\Validation\RequestValidator;

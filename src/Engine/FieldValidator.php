@@ -1,7 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SubtleForms\Engine;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Validates field values with conditional logic support.

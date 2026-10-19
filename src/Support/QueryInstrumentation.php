@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SubtleForms Query Instrumentation
  *
@@ -12,6 +13,9 @@
 
 namespace SubtleForms\Support;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Support\Logger;
 /**

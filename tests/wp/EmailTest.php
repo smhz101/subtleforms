@@ -1,4 +1,5 @@
 <?php
+
 // phpcs:disable -- Integration test; not shipped in production plugin.
 /**
  * 2.2.1 bugs 4 and 6 in notification emails: line breaks are kept, and
@@ -8,6 +9,10 @@
  */
 
 namespace SubtleForms\Tests\WP;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Engine\Actions\EmailAction;
 use SubtleForms\Engine\SubmissionContext;

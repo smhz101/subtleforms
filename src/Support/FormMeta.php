@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Single source of truth for a form's type and status.
  *
@@ -8,6 +9,10 @@
  */
 
 namespace SubtleForms\Support;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Canonical form type and status helpers.

@@ -1,4 +1,5 @@
 <?php
+
 /**
  * RequestValidator
  *
@@ -10,6 +11,10 @@
  */
 
 namespace SubtleForms\Validation;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * RequestValidator class

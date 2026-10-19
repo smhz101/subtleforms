@@ -1,4 +1,5 @@
 <?php
+
 // phpcs:disable -- Unit test file; not shipped in production plugin.
 /**
  * QA-08: a multi-step form saved with fields outside every step (form 9) is
@@ -8,6 +9,10 @@
  */
 
 namespace SubtleForms\Tests\Unit;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use PHPUnit\Framework\TestCase;
 use SubtleForms\Support\SchemaRepair;

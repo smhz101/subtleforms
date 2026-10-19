@@ -1,6 +1,11 @@
 <?php
+
 // phpcs:disable -- Test helper; not shipped in production plugin.
 namespace SubtleForms\Tests\WP;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Repositories\FormsRepository;
 

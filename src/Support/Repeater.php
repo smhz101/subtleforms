@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Repeater answers (2.3.1).
  *
@@ -20,6 +21,10 @@
 declare(strict_types=1);
 
 namespace SubtleForms\Support;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Helpers for Repeater (repeat_container) answers.

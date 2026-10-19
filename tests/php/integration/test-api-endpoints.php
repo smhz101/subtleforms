@@ -1,4 +1,8 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 // phpcs:disable -- Integration test file; not shipped in production plugin.
 /**
  * API Endpoints Integration Tests

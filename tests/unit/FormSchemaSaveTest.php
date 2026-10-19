@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Regression tests for the form-schema save contract.
  *
@@ -14,6 +15,10 @@
  */
 
 namespace SubtleForms\Tests\Unit;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use PHPUnit\Framework\TestCase;
 use SubtleForms\Validation\RequestValidator;
