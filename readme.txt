@@ -153,6 +153,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: Deleting a field inside a step or container shows the Field deleted notice with Undo.
 * Fix: If the forms list fails to load after you change tab, search or sort, the old rows are cleared instead of shown under the new tab.
 * Fix: If the entries list fails to load after you change tab, search, date or form, the old entries are cleared instead of shown under the new filters.
+* Fix: A desktop preview wider than the builder canvas is scaled from its top left corner and stays whole and centred.
 
 = 2.3.9 - 2026-10-19 =
 * Change: Everything in SubtleForms works without a license: CSV export, reports, full conditional logic, Picture choice, several files per upload field, payment fields and coupons, and the Webhooks and Analytics settings.

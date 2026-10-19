@@ -46,6 +46,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: Deleting a field inside a step, container or column shows the Field deleted notice with Undo, and deleting a step counts every field in it.
 * Fix: When the forms list fails to load after a change of tab, search, sort or page size, the previous rows are cleared, so Published forms are not shown or actionable under Trash. A failed retry of the same view keeps its rows.
 * Fix: When the entries list fails to load after a change of tab, search, date range, form or sort, the previous entries are cleared, so Inbox entries are not shown or actionable under Trash. A failed retry of the same view keeps its entries.
+* Fix: In the builder Preview, a desktop form wider than the canvas is scaled into a stage of the scaled size, centred in the canvas, so the whole form stays visible beside the styling panel with no sideways scroll.
 
 = 2.3.9 - 2026-10-19 =
 * Change: Nothing in SubtleForms is switched off without a license. CSV export, Reports (views, submissions and conversion), full conditional logic (any rule, groups, every operator, conditional emails, webhooks and confirmations), Picture choice, several files per upload field, payment fields (Product, Priced options, Custom amount, Fixed fee, Order summary, Coupon), coupons, and the Webhooks and Analytics settings all work in the free plugin.
