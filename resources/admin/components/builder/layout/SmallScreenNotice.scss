@@ -1,0 +1,29 @@
+.sf-builder-small-screen {
+	display: flex;
+	flex-direction: column;
+	gap: var(--sf-space-3, 12px);
+	max-width: 420px;
+	margin: 0 auto;
+	padding: var(--sf-space-8, 32px) var(--sf-space-5, 20px);
+
+	&__title {
+		margin: 0;
+		font-size: var(--sf-text-lg, 18px);
+		line-height: 1.35;
+		font-weight: 600;
+		color: var(--sf-text, #1e1e1e);
+	}
+
+	&__text {
+		margin: 0;
+		color: var(--sf-text-secondary, #50575e);
+		line-height: 1.55;
+	}
+
+	&__actions {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--sf-space-2, 8px);
+		margin-top: var(--sf-space-2, 8px);
+	}
+}

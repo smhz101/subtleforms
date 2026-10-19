@@ -13,6 +13,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../ui/Icon';
 import AdminShell from '../components/AdminShell';
+import { useViewportMatch } from '@wordpress/compose';
+import SmallScreenNotice, { useSmallScreenChoice } from '../components/builder/layout/SmallScreenNotice';
 import CreateFormWizard from '../components/CreateFormWizard';
 import {
   apiGet,
@@ -66,6 +68,9 @@ function FormBuilderInner({
   autoShowTour = false,
 }) {
   const navigate = useNavigate();
+  // UX2-17: below 600px the builder explains it needs a wider screen.
+  const isSmallScreen = useViewportMatch('small', '<');
+  const [openSmallAnyway, openBuilderAnyway] = useSmallScreenChoice();
   // Builder FSM State (replaces individual useState calls)
   const [builderState, dispatch] = useBuilderReducer(formId);
 
@@ -728,6 +733,14 @@ function FormBuilderInner({
   // so users can immediately add fields. The welcome screen was blocking builder
   // access for regular and payment form types with empty fields arrays.
   const showWelcomeScreen = false;
+
+  if (isSmallScreen && !openSmallAnyway) {
+    return (
+      <AdminShell variant='editor' title={formTitle || __('Form', 'subtleforms')} onBack={() => navigate('/forms')}>
+        <SmallScreenNotice onBack={() => navigate('/forms')} onOpenAnyway={openBuilderAnyway} />
+      </AdminShell>
+    );
+  }
 
   return (
     <>
