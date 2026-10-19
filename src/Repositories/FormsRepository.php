@@ -359,6 +359,34 @@ final class FormsRepository {
 	}
 
 	/**
+	 * Run the schema_before_save filter (2.4.1).
+	 *
+	 * Every path that stores a schema a person made goes through this: builder
+	 * saves, new forms created with a schema, and forms imported in Tools.
+	 * Add-ons rely on it, for example to give a signed webhook its secret or to
+	 * drop logic rules that point at missing fields.
+	 *
+	 * @param array $schema   Schema about to be saved.
+	 * @param int   $formId   Form ID.
+	 * @param bool  $activate Whether this save publishes the schema.
+	 * @return array
+	 */
+	public static function beforeSave( array $schema, int $formId, bool $activate ): array {
+		/**
+		 * Filter a form schema before it is saved (draft or published). Add-ons
+		 * use this to store data they need at render time, such as a snapshot
+		 * of WooCommerce products for the WooCommerce Product field.
+		 *
+		 * @param array $schema   Schema about to be saved.
+		 * @param int   $formId   Form ID.
+		 * @param bool  $activate Whether this save publishes the schema.
+		 * @since 2.1.0
+		 */
+		$filtered = apply_filters( 'subtleforms/forms/schema_before_save', $schema, $formId, $activate );
+		return is_array( $filtered ) ? $filtered : $schema;
+	}
+
+	/**
 	 * Walk a field list, sanitising each field's appearance override.
 	 *
 	 * Mirrors the nesting SchemaCompiler normalises: fields, children and the

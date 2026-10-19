@@ -671,6 +671,15 @@ class AdminMenu {
 				'available'   => $available,  // false = needs an add-on (SubtleForms Pro)
 				'enabled'     => $enabled && $available,
 				'configured'  => $configured,
+				/**
+				 * The plan an integration this site cannot use yet is part of
+				 * (2.4.1), such as "Pro" or "Agency". Empty hides it.
+				 *
+				 * @param string $plan Plan name.
+				 * @param string $slug Integration slug.
+				 * @since 2.4.1
+				 */
+				'requires'    => $available ? '' : sanitize_text_field( (string) apply_filters( 'subtleforms/extensions/requires', '', $slug ) ),
 			);
 		}
 
