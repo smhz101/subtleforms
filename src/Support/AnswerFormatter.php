@@ -347,6 +347,43 @@ final class AnswerFormatter {
 		return $out;
 	}
 
+	/**
+	 * Answers with each dependent dropdown answer replaced by the label
+	 * chosen at each level, including inside Repeater groups. Every other
+	 * answer is left as stored. Used for the webhook "full" payload, which
+	 * otherwise sends answers as stored.
+	 *
+	 * @param array $schema  Form schema.
+	 * @param array $payload Stored answers.
+	 * @return array
+	 */
+	public static function withChainedLabels( array $schema, array $payload ): array {
+		foreach ( FieldMapper::fields( $schema ) as $entry ) {
+			$key = $entry['key'];
+			if ( ! array_key_exists( $key, $payload ) ) {
+				continue;
+			}
+			if ( 'chained_select' === $entry['type'] && is_array( $payload[ $key ] ) ) {
+				$payload[ $key ] = self::chained( $payload[ $key ], $entry['field'] );
+				continue;
+			}
+			if ( Repeater::TYPE === $entry['type'] && is_array( $payload[ $key ] ) ) {
+				foreach ( $payload[ $key ] as $index => $group ) {
+					if ( ! is_array( $group ) ) {
+						continue;
+					}
+					foreach ( Repeater::childFields( $entry['field'] ) as $child ) {
+						$childKey = $child['key'];
+						if ( 'chained_select' === $child['type'] && isset( $group[ $childKey ] ) && is_array( $group[ $childKey ] ) ) {
+							$payload[ $key ][ $index ][ $childKey ] = self::chained( $group[ $childKey ], $child['field'] );
+						}
+					}
+				}
+			}
+		}
+		return $payload;
+	}
+
 	// ── Field types ──────────────────────────────────────────────────────
 
 	/**

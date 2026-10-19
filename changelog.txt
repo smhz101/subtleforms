@@ -26,7 +26,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: Dropdown, radio, checkbox, picture and priced option answers show their labels. Single checkbox, consent and toggle answers read Yes or No everywhere, including the PDF.
 * Fix: Matrix answers name each row and its chosen columns, for example "Speed: Good; Price: OK" and "Mon: AM, PM".
 * Fix: Date, time and date and time answers follow the field's display format in the entry view, emails, CSV exports and PDFs.
-* Fix: Dependent dropdown answers show the label chosen at each level in emails, PDFs, CRM notes and webhooks, and in mapped integration fields when the add-on passes the form.
+* Fix: Dependent dropdown answers show the label chosen at each level in emails, PDFs, CRM notes and webhooks, including the full payload of a Webhook action, and in mapped integration fields when the add-on passes the form.
 * Fix: Product answers read as order lines with a quantity and price, and priced options show their label and price.
 * Fix: CSV exports list uploaded files by name with an admin download link instead of the stored file record.
 * Fix: A field with a very long label and no admin label is named by its label shortened to 60 characters in emails, CSV headers, entries, PDFs and the required message.

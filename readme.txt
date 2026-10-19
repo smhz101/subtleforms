@@ -138,7 +138,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: Failed payments show as Payment failed, payment messages can be translated, and Pro asks admins to connect Stripe when no gateway is set up.
 * Fix: Tools export and import keep each entry's order and payment details.
 * Change: Entries refer to the form version they were sent with instead of keeping a full copy of the form. Older entries are cleaned up in the background and stay readable.
-* Fix: Entries, emails, CSV exports, PDFs and integrations show option labels, Yes or No, matrix rows with their columns, dependent dropdown labels, dates and times in the field format, and product lines with prices.
+* Fix: Entries, emails, CSV exports, PDFs and integrations show option labels, Yes or No, matrix rows with their columns, dependent dropdown labels (also in the Webhook action's full payload), dates and times in the field format, and product lines with prices.
 * Fix: CSV exports list uploaded files by name with a download link.
 * Fix: A very long field label is shortened in emails, exports, entries and the required message. The admin label is used when it is set.
 * Fix: The submissions list names the sender by a name or email answer, or shows Anonymous, never a quantity or a choice.
