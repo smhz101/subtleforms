@@ -10,6 +10,7 @@
 	margin: 0 auto;
 }
 
+/*! inherit: keep-start (step indicator: a widget with no native control) */
 /* ===== Step Navigation ===== */
 .subtleforms--type-steps .subtleforms-step-navigation,
 .subtleforms--type-multistep .subtleforms-step-navigation {
@@ -94,6 +95,8 @@
 	background: var(--subtleforms-color-success);
 }
 
+/*! inherit: keep-end */
+
 /* ===== Step Content ===== */
 .subtleforms--type-steps .subtleforms-step-content,
 .subtleforms--type-multistep .subtleforms-step-content {
@@ -134,10 +137,9 @@
 	display: flex;
 	justify-content: space-between;
 	gap: var(--subtleforms-spacing-sm);
-	padding-top: var(--subtleforms-spacing-md);
-	border-top: 1px solid var(--subtleforms-color-border);
 }
 
+/*! inherit: keep-start (step indicator on phones) */
 /* Mobile responsive */
 @media (max-width: 768px) {
 	.subtleforms--type-steps .subtleforms-step-navigation,
@@ -154,3 +156,5 @@
 		font-size: 12px;
 	}
 }
+
+/*! inherit: keep-end */

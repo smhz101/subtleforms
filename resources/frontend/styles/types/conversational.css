@@ -1,3 +1,4 @@
+/*! inherit: keep-start (custom menu or one-question layout: no native control for a theme to style) */
 /**
  * SubtleForms - Conversational Form Type Styles
  * 
@@ -7,7 +8,6 @@
 .subtleforms--type-conversational {
 	max-width: 700px;
 	margin: 0 auto;
-	padding: var(--subtleforms-spacing-xl);
 }
 
 /* ===== Progress Bar ===== */
@@ -298,10 +298,6 @@
 
 /* ===== Mobile Responsive ===== */
 @media (max-width: 640px) {
-	.subtleforms--type-conversational {
-		padding: var(--subtleforms-spacing-md);
-	}
-
 	.subtleforms-conversational-question-label {
 		font-size: 1.5rem;
 	}
@@ -319,3 +315,5 @@
 		gap: 0.375rem;
 	}
 }
+
+/*! inherit: keep-end */

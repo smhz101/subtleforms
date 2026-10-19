@@ -130,6 +130,12 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 == Changelog ==
 
 = 2.4.1 - 2026-10-20 =
+* Fix: A form has no padding of its own, so it lines up with the text around it.
+* Fix: No line or border above the submit button.
+* Change: "Inherit from theme" adds no styling of its own. The theme styles the fields, labels and buttons, and the buttons use the theme's button style. Custom controls such as the dropdown and date pickers, the signature pad and the rich text editor keep their look so they stay usable.
+* Change: A form on "Inherit from theme" whose colours, type or field and button style were changed keeps the SubtleForms styling, starting from the theme. The appearance panel says which applies.
+* Fix: On a theme form whose theme has no primary colour, the submit button is no longer white on white.
+* Change: Fields on the builder canvas use flat colours instead of gradients.
 * Fix: Forms imported in Tools, migrated from Gravity Forms or Fluent Forms, or created with a schema get the same save steps as a builder save, so add-ons such as SubtleForms Pro can finish them (a signed webhook gets its secret, logic rules for missing fields are removed).
 * Fix: The live form sends the page's language with its requests when a translation add-on gives one, so translated labels and confirmations are used.
 * New: An action, subtleforms/submission/deleted, fires when an entry is deleted for good, so add-ons can remove what they keep about it.

@@ -14,6 +14,7 @@ import {
   FONT_STACKS,
   getPreset,
   isPresetModified,
+  isPureTheme,
   resolvedToken,
 } from '../../../../shared/appearance';
 import AppearanceControls from './AppearanceControls';
@@ -264,6 +265,13 @@ export default function FormAppearancePanel( { schema, onChange, isReadOnly = fa
             ) }{ ' ' }
             { modified && <span className='sf-preset-tile__badge'>{ __( 'edited', 'subtleforms' ) }</span> }
           </p>
+          { appearance.preset === 'theme' && (
+            <p className='components-base-control__help sf-form-appearance__theme-note'>
+              { isPureTheme( appearance )
+                ? __( 'Your theme styles this form. Changing colours, type, or the field and button style below switches to SubtleForms styling that starts from your theme.', 'subtleforms' )
+                : __( 'SubtleForms styles this form, starting from your theme. Revert to let your theme style it again.', 'subtleforms' ) }
+            </p>
+          ) }
           { ! isReadOnly && (
             <Button
               variant='secondary'
