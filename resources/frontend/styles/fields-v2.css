@@ -11,7 +11,7 @@
 	margin: 6px 0 0;
 	font-size: var(--subtleforms-font-size-sm, 0.875rem);
 	line-height: 1.45;
-	color: var(--subtleforms-color-text-light, #6b7280);
+	color: var(--subtleforms-color-text, #1e1e1e);
 }
 
 /* Help text above the input (2.3.2): sits between the label and the input. */

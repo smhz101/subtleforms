@@ -147,10 +147,34 @@ export function formatPhp(date, format) {
 }
 
 /** Six weeks of days, Sunday first, covering the month that contains `cursor`. */
-export function monthCells(cursor) {
+export function siteLocale() {
+  if (typeof window !== 'undefined' && window.subtleformsFrontend && window.subtleformsFrontend.locale) {
+    return window.subtleformsFrontend.locale;
+  }
+  return undefined;
+}
+
+export function siteWeekStart() {
+  const raw = typeof window !== 'undefined' && window.subtleformsFrontend
+    ? window.subtleformsFrontend.weekStartsOn
+    : 0;
+  const value = Number(raw);
+  if (!Number.isFinite(value)) {
+    return 0;
+  }
+  return ((value % 7) + 7) % 7;
+}
+
+export function dayName(date, locale) {
+  return new Intl.DateTimeFormat(locale, { day: 'numeric', month: 'long', year: 'numeric' }).format(date);
+}
+
+export function monthCells(cursor, weekStartsOn = 0) {
   const first = new Date(cursor.getFullYear(), cursor.getMonth(), 1);
+  const startOn = ((Number(weekStartsOn) % 7) + 7) % 7 || 0;
+  const offset = (first.getDay() - startOn + 7) % 7;
   const start = new Date(first);
-  start.setDate(1 - first.getDay());
+  start.setDate(1 - offset);
   return Array.from({ length: 42 }, (_, index) => {
     const day = new Date(start);
     day.setDate(start.getDate() + index);

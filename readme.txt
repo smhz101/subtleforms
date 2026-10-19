@@ -149,6 +149,21 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: A required Rich text field with no text is refused, and a Repeater below its minimum shows one message.
 * Fix: Hidden field values are worked out on the server, and Order summary and Fixed fee fields store nothing.
 * Fix: A failed builder save names the field, and numeric labels, placeholders and default values save.
+* Fix: A color field saves the color it shows, including its default.
+* Fix: Each CAPTCHA field uses its own provider and keys, and the form says when a check is not set up.
+* Fix: Password fields can show a strength meter and ask for the password again.
+* Fix: A US phone number is grouped as it is typed, and a short number is rejected.
+* Fix: Dropdown, radio and multiple choice start with choices, and the canvas shows the default choice.
+* Fix: Choice groups are not tied to a missing control, prefix and suffix text is named for screen readers, and a consent link uses the words already in the sentence.
+* Fix: A section heading and custom HTML each take a full row, and column layouts use a real column count.
+* Fix: Hidden and color fields no longer repeat the admin label or the default value.
+* Fix: Net Promoter Score has a low and a high label, and a Calculation field has a prefix and a suffix.
+* Fix: An Action Hook field runs when the form is shown and when it is submitted.
+* Fix: Logic for a checkbox, toggle or country offers the real values, and an off toggle counts as empty.
+* Fix: The second dependent dropdown lists only the choices that belong to the first answer, and the first dropdown keeps its label.
+* Fix: Replacing dependent dropdowns from a file asks first, and a semicolon file imports as separate columns.
+* Fix: Dropdown, country, phone and date fields work from the keyboard. The calendar can jump to a month and year, and country buttons show a letter code.
+* Fix: The first invalid dropdown, country, date or phone control receives focus.
 * Fix: Fields inside a column saved as an object with its own fields list are shown, checked and sent, so a product there is not charged unseen.
 * Fix: Deleting a field inside a step or container shows the Field deleted notice with Undo.
 * Fix: If the forms list fails to load after you change tab, search or sort, the old rows are cleared instead of shown under the new tab.
@@ -160,7 +175,6 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: A payment template that already has Priced options or a Custom Amount gets no extra fixed product, and a multi-step template gets its payment fields inside its steps.
 * Fix: Conditional logic on the server reads a website as it was typed, so a rule for example.com still shows, stores and charges the fields it controls.
 * Fix: The form checks a Product quantity before sending, with the same whole number, minimum and maximum rules as the server.
-
 = 2.3.9 - 2026-10-19 =
 * Change: Everything in SubtleForms works without a license: CSV export, reports, full conditional logic, Picture choice, several files per upload field, payment fields and coupons, and the Webhooks and Analytics settings.
 * Change: Signature and Calculation fields and card payments are part of SubtleForms Pro 2.4.0. Forms that use them keep them; the live form leaves them out until Pro is active.
@@ -189,6 +203,9 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 The full history is in changelog.txt in the plugin folder.
 
 == Upgrade Notice ==
+
+= 2.4.0 =
+Field options, CAPTCHA keys, dependent dropdowns and keyboard use of dropdowns, country, phone and date fields.
 
 = 2.3.9 =
 Free plugin and SubtleForms Pro split cleanly: everything in this plugin works without a license. Requires WordPress 6.6. Update SubtleForms Pro to 2.4.0 at the same time.

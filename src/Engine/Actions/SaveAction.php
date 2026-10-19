@@ -55,6 +55,7 @@ final class SaveAction implements ActionInterface {
 			// Task 1: Normalize field schema shape, ensure id, type, label, config on every node
 			$schema = $this->normalize_schema_fields( $schema );
 			$context->setMeta( 'form_schema', $schema );
+			$context->payload = \SubtleForms\Fields\ImplicitDefaults::apply( $schema, $context->payload );
 
 			$conditionalState = $context->getMeta(
 				'conditional_state',

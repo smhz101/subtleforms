@@ -124,7 +124,7 @@ final class ConditionalLogic {
 	 * @param mixed               $logic
 	 * @param array<string,mixed> $values
 	 */
-	public function logicPasses( $logic, array $values ): bool {
+	public function logicPasses( $logic, array $values, array $fields_by_key = array() ): bool {
 		$l = self::normalizeLogic( $logic );
 		if ( $l === null ) {
 			return true;
@@ -132,7 +132,8 @@ final class ConditionalLogic {
 		foreach ( $l['groups'] as $group ) {
 			$hits = 0;
 			foreach ( $group['rules'] as $rule ) {
-				if ( $this->evaluateCondition( self::readValue( $values, $rule['field'] ), $rule['operator'], $rule['value'], $rule['value2'] ) ) {
+				$field = $fields_by_key[ $rule['field'] ] ?? null;
+				if ( $this->evaluateCondition( self::readValue( $values, $rule['field'] ), $rule['operator'], $rule['value'], $rule['value2'], is_array( $field ) ? $field : null ) ) {
 					++$hits;
 				}
 			}
@@ -209,16 +210,16 @@ final class ConditionalLogic {
 	 * @param mixed  $compare  The rule's value.
 	 * @param mixed  $compare2 Upper bound for "between".
 	 */
-	public function evaluateCondition( $value, string $operator, $compare, $compare2 = '' ): bool {
+	public function evaluateCondition( $value, string $operator, $compare, $compare2 = '', $field = null ): bool {
 		$today = $this->today();
 		$items = self::listOf( $value );
 		$c     = self::toText( $compare );
 
 		switch ( $operator ) {
 			case 'equals':
-				return self::anyEquals( $items, $c );
+				return self::matches( $value, $items, $c, $field );
 			case 'not_equals':
-				return ! self::anyEquals( $items, $c );
+				return ! self::matches( $value, $items, $c, $field );
 			case 'contains':
 			case 'not_contains':
 				$needle = self::norm( $c );
@@ -253,9 +254,9 @@ final class ConditionalLogic {
 				}
 				return false;
 			case 'empty':
-				return self::isEmptyValue( $value );
+				return self::isEmptyForField( $value, $field );
 			case 'not_empty':
-				return ! self::isEmptyValue( $value );
+				return ! self::isEmptyForField( $value, $field );
 			case 'greater_than':
 			case 'less_than':
 				if ( ! self::isNumeric( $c ) ) {
@@ -460,7 +461,9 @@ final class ConditionalLogic {
 			'disabled'    => array(),
 			'hiddenSteps' => array(),
 		);
-		$this->walk( $fields, $values, false, $state );
+		$indexed = array();
+		$this->indexFields( $fields, $indexed );
+		$this->walk( $fields, $values, false, $state, '', $indexed );
 		return $state;
 	}
 
@@ -470,7 +473,7 @@ final class ConditionalLogic {
 	 * @param bool                $parentHidden
 	 * @param array               $state
 	 */
-	private function walk( array $nodes, array $values, bool $parentHidden, array &$state, string $prefix = '' ): void {
+	private function walk( array $nodes, array $values, bool $parentHidden, array &$state, string $prefix = '', array $fields_by_key = array() ): void {
 		foreach ( $nodes as $node ) {
 			if ( ! is_array( $node ) || self::isList( $node ) ) {
 				continue;
@@ -480,7 +483,7 @@ final class ConditionalLogic {
 			$hidden = $parentHidden;
 
 			foreach ( self::nodeLogics( $node ) as $l ) {
-				$passes = $this->logicPasses( $l, $values );
+				$passes = $this->logicPasses( $l, $values, $fields_by_key );
 				if ( ( $l['action'] === 'show' && ! $passes ) || ( $l['action'] === 'hide' && $passes ) ) {
 					$hidden = true;
 				} elseif ( $l['action'] === 'require' && $passes ) {
@@ -503,14 +506,14 @@ final class ConditionalLogic {
 			if ( ( $node['type'] ?? '' ) === 'repeat_container' && null !== $rawKey ) {
 				foreach ( self::repeaterGroups( self::readValue( $values, $rawKey ) ) as $index => $group ) {
 					foreach ( self::childLists( $node ) as $list ) {
-						$this->walk( $list, array_merge( $values, $group ), $hidden, $state, $key . '.' . $index . '.' );
+						$this->walk( $list, array_merge( $values, $group ), $hidden, $state, $key . '.' . $index . '.', $fields_by_key );
 					}
 				}
 				continue;
 			}
 
 			foreach ( self::childLists( $node ) as $list ) {
-				$this->walk( $list, $values, $hidden, $state, $prefix );
+				$this->walk( $list, $values, $hidden, $state, $prefix, $fields_by_key );
 			}
 		}
 	}
@@ -819,6 +822,72 @@ final class ConditionalLogic {
 	/**
 	 * @param mixed $value
 	 */
+
+	/**
+	 * @param array<int,mixed>           $nodes
+	 * @param array<string,array>        $map
+	 */
+	private function indexFields( array $nodes, array &$map ): void {
+		foreach ( $nodes as $node ) {
+			if ( ! is_array( $node ) || self::isList( $node ) ) {
+				continue;
+			}
+			$key = $node['key'] ?? ( $node['config']['key'] ?? '' );
+			if ( is_string( $key ) && '' !== $key ) {
+				$map[ $key ] = $node;
+			}
+			foreach ( array( 'children', 'fields' ) as $child_key ) {
+				if ( isset( $node[ $child_key ] ) && is_array( $node[ $child_key ] ) ) {
+					$this->indexFields( $node[ $child_key ], $map );
+				}
+			}
+		}
+	}
+
+	/**
+	 * @param mixed       $value
+	 * @param string[]    $items
+	 * @param string      $expected
+	 * @param array|null  $field
+	 */
+	private static function matches( $value, array $items, string $expected, $field ): bool {
+		$type = is_array( $field ) ? (string) ( $field['type'] ?? '' ) : '';
+		if ( in_array( $type, array( 'checkbox', 'consent' ), true ) ) {
+			return self::sameCheck( $value, $expected );
+		}
+		return self::anyEquals( $items, $expected );
+	}
+
+	/**
+	 * @param mixed  $actual
+	 * @param string $expected
+	 */
+	private static function sameCheck( $actual, string $expected ): bool {
+		$yes = array( 'true', '1', 'yes', 'checked', 'on' );
+		$no  = array( 'false', '0', 'no', 'unchecked', 'off', '' );
+		$a    = is_bool( $actual ) ? ( $actual ? 'true' : 'false' ) : strtolower( trim( self::toText( $actual ) ) );
+		$e    = strtolower( trim( $expected ) );
+		if ( in_array( $e, $yes, true ) && in_array( $a, $yes, true ) ) {
+			return true;
+		}
+		if ( in_array( $e, $no, true ) && in_array( $a, $no, true ) ) {
+			return true;
+		}
+		return $a === $e;
+	}
+
+	/**
+	 * @param mixed      $value
+	 * @param array|null $field
+	 */
+	private static function isEmptyForField( $value, $field ): bool {
+		if ( is_array( $field ) && 'toggle' === ( $field['type'] ?? '' ) ) {
+			$off = (string) ( $field['config']['offValue'] ?? ( $field['offValue'] ?? 'no' ) );
+			return self::isEmptyValue( $value ) || self::textEquals( self::toText( $value ), $off );
+		}
+		return self::isEmptyValue( $value );
+	}
+
 	public static function isEmptyValue( $value ): bool {
 		if ( $value === null || $value === false ) {
 			return true;

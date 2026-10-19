@@ -117,6 +117,8 @@ export function collectDefaultValues(fields) {
           out[key] = config.default_country;
         } else if (field.type === 'hidden' && config.value) {
           out[key] = resolveTokens(config.value);
+        } else if (field.type === 'color_picker' && (config.default || config.defaultValue)) {
+          out[key] = config.default || config.defaultValue;
         }
       }
 

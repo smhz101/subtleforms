@@ -1,11 +1,15 @@
 import { __, sprintf } from '@wordpress/i18n';
 import { getIn } from '../utils/valuePaths';
+import { columnCountFromType } from '../../shared/columnCount';
+import { consentParts } from '../../shared/consentLabel';
+import { formatUsPhone, isCompleteUsPhone } from '../../shared/phoneFormat';
+import { passwordStrength } from '../../shared/passwordStrength';
 import { columnFields } from '../utils/columnFields';
 import { getCompositeEmptyParts } from '../utils/fieldValidation';
 import { compositeParts, partValue } from '../../shared/compositeParts';
 import { rangeSliderSeed } from '../utils/defaults';
 import { debug } from '../../shared/debug';
-import { lazy, Suspense, useContext, useEffect } from '@wordpress/element';
+import { cloneElement, lazy, Suspense, useContext, useEffect } from '@wordpress/element';
 import ChainedSelect from './fields/ChainedSelect';
 import PhoneField from './fields/PhoneField';
 import ChoiceSelect from './fields/ChoiceSelect';
@@ -62,46 +66,6 @@ const AUTOCOMPLETE_TOKENS = {
   password: 'new-password',
 };
 
-
-/**
- * Split a consent statement into text/link parts for rendering.
- *
- * Supports a `{{link}}` placeholder (recommended) and a bare Privacy Policy
- * URL as a fallback. Returns an array of { text, url? } parts so the renderer
- * can wrap the link in an <a> and keep the rest as plain text.
- *
- * @param {string} label    Consent statement text.
- * @param {string} url      Privacy Policy URL.
- * @param {string} linkText Link text for the placeholder.
- * @returns {Array<{text: string, url?: string}>}
- */
-function renderConsentLabel(label, url, linkText) {
-  if (!label) {
-    return [{ text: linkText, url }];
-  }
-
-  if (label.indexOf('{{link}}') !== -1) {
-    const [before, after] = label.split('{{link}}');
-    const parts = [];
-    if (before) parts.push({ text: before });
-    parts.push({ text: linkText, url });
-    if (after) parts.push({ text: after });
-    return parts;
-  }
-
-  // Fallback: if the URL itself appears in the statement, link it; otherwise
-  // append the link at the end so the consent statement always has one.
-  if (url && label.indexOf(url) !== -1) {
-    const [before, after] = label.split(url);
-    const parts = [];
-    if (before) parts.push({ text: before });
-    parts.push({ text: url, url });
-    if (after) parts.push({ text: after });
-    return parts;
-  }
-
-  return [{ text: label + ' ' }, { text: linkText, url }];
-}
 
 export default function FieldRenderer({
   field,
@@ -345,10 +309,7 @@ export default function FieldRenderer({
 
   // Handle column containers
   if (field.type?.includes('_column_container')) {
-    const columnCount = parseInt(
-      field.type.replace('_column_container', ''),
-      10
-    );
+    const columnCount = columnCountFromType(field.type);
     const columns = field.columns || [];
 
     const columnsBody = (
@@ -500,20 +461,20 @@ export default function FieldRenderer({
     );
   }
 
-  // Handle reCAPTCHA v3 separately (invisible, no label/wrapper needed)
-  if (
-    (field.type === 'captcha' ||
-      field.type === 'recaptcha' ||
-      field.type === 'hcaptcha' ||
-      field.type === 'turnstile') &&
-    config.captchaHtml?.includes('subtleforms-recaptcha-v3')
-  ) {
-    debug('[SubtleForms] Rendering reCAPTCHA v3 (invisible)');
+  if (['captcha', 'recaptcha', 'hcaptcha', 'turnstile'].includes(field.type)) {
+    if (config.captchaHtml) {
+      const hidden = config.captchaHtml.includes('subtleforms-recaptcha-v3');
+      return (
+        <div
+          className={hidden ? 'subtleforms-captcha-hidden' : 'subtleforms-captcha-container'}
+          dangerouslySetInnerHTML={{ __html: config.captchaHtml }}
+        />
+      );
+    }
     return (
-      <div
-        className='subtleforms-captcha-hidden'
-        dangerouslySetInnerHTML={{ __html: config.captchaHtml || '' }}
-      />
+      <p className='subtleforms-captcha-warning' role='status'>
+        {config.captchaWarning || __('This CAPTCHA is not set up yet.', 'subtleforms')}
+      </p>
     );
   }
 
@@ -531,12 +492,22 @@ export default function FieldRenderer({
         .filter(Boolean)
         .join(' ')}
       style={appearanceStyle}>
-      <label htmlFor={inputId} id={`${inputId}-label`} className='subtleforms-field-label'>
-        {label}
-        {required && (
-          <span className='subtleforms-required' aria-label={', required'}>*</span>
-        )}
-      </label>
+      {(() => {
+        const grouped = ['radio', 'multiple_choice', 'picture_choice'].includes(field.type)
+          || (field.type === 'checkbox' && Array.isArray(config.options) && config.options.length > 0);
+        const LabelTag = grouped ? 'div' : 'label';
+        return (
+          <LabelTag
+            id={`${inputId}-label`}
+            className='subtleforms-field-label'
+            {...(grouped ? {} : { htmlFor: inputId })}>
+            {label}
+            {required && (
+              <span className='subtleforms-required' aria-label={', required'}>*</span>
+            )}
+          </LabelTag>
+        );
+      })()}
 
       {config.description && display.descriptionAbove && (
         <p id={`${inputId}-help`} className='subtleforms-field-help subtleforms-field-help--above'>
@@ -547,13 +518,14 @@ export default function FieldRenderer({
       {renderInput(
         field,
         value,
-        (next) => onChange(resolvedPath, next),
+        (next, path) => onChange(path || resolvedPath, next),
         placeholder,
         inputId,
         required,
         error,
         values,
-        inputName
+        inputName,
+        resolvedPath
       )}
 
       {config.description && !display.descriptionAbove && (
@@ -585,7 +557,8 @@ function renderInput(
   required,
   error,
   values = {},
-  inputName = undefined
+  inputName = undefined,
+  valuePath = ''
 ) {
   const config = fieldConfig(field);
   const describedBy =
@@ -653,19 +626,69 @@ function renderInput(
           maxLength={isLength ? numOrUndef(config.maxLength) : undefined}
         />
       );
+      if (field.type === 'phone' && config.format === 'us') {
+        const shown = formatUsPhone(value ?? '');
+        return (
+          <input
+            {...input.props}
+            value={shown}
+            inputMode='tel'
+            aria-invalid={!!error || (shown && !isCompleteUsPhone(shown)) || undefined}
+            onChange={(event) => onChange(formatUsPhone(event.target.value))}
+          />
+        );
+      }
+      if (field.type === 'password' && (config.strengthMeter !== false || config.requireConfirmation)) {
+        const level = passwordStrength(value ?? '');
+        const confirmPath = valuePath ? `${valuePath}_confirm` : `${name || 'password'}_confirm`;
+        const confirm = getIn(values, confirmPath, '') ?? '';
+        const mismatch = config.requireConfirmation && value && confirm && confirm !== value;
+        return (
+          <div className='subtleforms-password'>
+            {input}
+            {config.strengthMeter !== false && (
+              <p className={`subtleforms-password__meter is-${level}`} role='status'>
+                {level === 'strong'
+                  ? __('Strong password', 'subtleforms')
+                  : level === 'fair'
+                    ? __('Fair password', 'subtleforms')
+                    : __('Weak password', 'subtleforms')}
+              </p>
+            )}
+            {config.requireConfirmation && (
+              <input
+                type='password'
+                className='subtleforms-input subtleforms-password__confirm'
+                name={name ? `${name}_confirm` : undefined}
+                value={confirm}
+                autoComplete='new-password'
+                placeholder={__('Confirm password', 'subtleforms')}
+                aria-label={__('Confirm password', 'subtleforms')}
+                aria-invalid={!!mismatch || undefined}
+                onChange={(event) => onChange(event.target.value, confirmPath)}
+              />
+            )}
+          </div>
+        );
+      }
       if (!config.prefix && !config.suffix) {
         return input;
       }
+      const prefixId = config.prefix ? `${inputId}-prefix` : null;
+      const suffixId = config.suffix ? `${inputId}-suffix` : null;
+      const withAffix = cloneElement(input, {
+        'aria-describedby': [input.props['aria-describedby'], prefixId, suffixId].filter(Boolean).join(' ') || undefined,
+      });
       return (
         <div className='subtleforms-input-affix'>
           {config.prefix && (
-            <span className='subtleforms-input-affix__prefix' aria-hidden='true'>
+            <span id={prefixId} className='subtleforms-input-affix__prefix'>
               {config.prefix}
             </span>
           )}
-          {input}
+          {withAffix}
           {config.suffix && (
-            <span className='subtleforms-input-affix__suffix' aria-hidden='true'>
+            <span id={suffixId} className='subtleforms-input-affix__suffix'>
               {config.suffix}
             </span>
           )}
@@ -757,7 +780,7 @@ function renderInput(
       const linkText = config.linkText || __('Privacy Policy', 'subtleforms');
       const hasLink = !!policyUrl;
       const parts = hasLink
-        ? renderConsentLabel(consentLabel, policyUrl, linkText)
+        ? consentParts(consentLabel, policyUrl, linkText)
         : [{ text: consentLabel }];
 
       return (

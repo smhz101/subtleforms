@@ -257,6 +257,11 @@ export const DIAL_CODES = {
  * @param {string} code
  * @return {string}
  */
+export function flagMark(code) {
+  const letters = String(code || '').toUpperCase().replace(/[^A-Z]/g, '');
+  return letters.slice(0, 2);
+}
+
 export function flagEmoji(code) {
   const cc = String(code || '').toUpperCase();
   if (!/^[A-Z]{2}$/.test(cc)) {
