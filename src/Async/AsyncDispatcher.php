@@ -422,7 +422,7 @@ final class AsyncDispatcher {
 	private static function log( string $message, array $context = array() ): void {
 		$context_str = empty( $context ) ? '' : ' | ' . wp_json_encode( $context );
 		$line        = "[SubtleForms Async] {$message}{$context_str}";
-		if ( 'error' === $level || preg_match( '/fail/i', $message ) ) {
+		if ( preg_match( '/fail/i', $message ) ) {
 			Logger::error( $line );
 			return;
 		}

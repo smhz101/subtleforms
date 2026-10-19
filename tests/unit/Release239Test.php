@@ -177,6 +177,10 @@ class Release239Test extends PHPUnit\Framework\TestCase {
 	}
 
 	public function test_uninstall_clears_every_site_and_can_keep_data(): void {
+		$uninstall = file_get_contents( $this->root . '/uninstall.php' );
+		$this->assertStringContainsString( "require_once __DIR__ . '/src/Support/Uninstaller.php'", $uninstall );
+		$this->assertStringNotContainsString( 'vendor/autoload.php', $uninstall );
+
 		$GLOBALS['sf_test_cron'] = array(
 			time() => array(
 				'subtleforms_async_email' => array(
@@ -239,6 +243,7 @@ class Release239Test extends PHPUnit\Framework\TestCase {
 		$async = file_get_contents( $this->root . '/src/Async/AsyncDispatcher.php' );
 		$this->assertStringContainsString( 'Logger::info', $async );
 		$this->assertStringNotContainsString( "Logger::error( \"[SubtleForms Async]", $async );
+		$this->assertStringNotContainsString( '$level', $async );
 		$guards = file_get_contents( $this->root . '/src/Api/ApiGuards.php' );
 		$this->assertStringNotContainsString( 'error_log(', $guards );
 		$this->assertStringContainsString( 'Logger::debug', $guards );

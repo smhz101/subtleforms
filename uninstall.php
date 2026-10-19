@@ -15,6 +15,6 @@ if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
 	exit;
 }
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/src/Support/Uninstaller.php';
 
 \SubtleForms\Support\Uninstaller::run();
