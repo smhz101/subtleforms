@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-19T19:42:03+00:00\n"
+"POT-Creation-Date: 2026-10-19T19:54:10+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -470,7 +470,7 @@ msgstr ""
 #: src/Api/FormsApi.php:1004
 #: src/Api/FormsApi.php:1049
 #: src/Api/PaymentsApi.php:222
-#: src/Api/PublicSubmitApi.php:204
+#: src/Api/PublicSubmitApi.php:212
 #: src/Extensions/PaymentsExtension.php:126
 msgid "Form not found"
 msgstr ""
@@ -610,73 +610,73 @@ msgstr ""
 msgid "Coupon not found."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:188
+#: src/Api/PublicSubmitApi.php:196
 msgid "Preview submissions are only available to administrators."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:217
-#: src/Api/PublicSubmitApi.php:235
+#: src/Api/PublicSubmitApi.php:225
+#: src/Api/PublicSubmitApi.php:243
 msgid "Thank you."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:262
+#: src/Api/PublicSubmitApi.php:270
 msgid "You have reached the maximum number of submissions for this form."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:278
+#: src/Api/PublicSubmitApi.php:286
 msgid "This form is temporarily unavailable. Please try again later."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:308
 #: src/Api/PublicSubmitApi.php:316
+#: src/Api/PublicSubmitApi.php:324
 #: src/Support/Captcha/HCaptchaProvider.php:103
 #: src/Support/Captcha/RecaptchaProvider.php:127
 #: src/Support/Captcha/TurnstileProvider.php:104
 msgid "CAPTCHA verification failed."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:413
+#: src/Api/PublicSubmitApi.php:421
 msgid "Failed to create submission record"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:456
+#: src/Api/PublicSubmitApi.php:464
 msgid "This form could not be processed. Please contact the site owner."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:491
-#: src/Api/PublicSubmitApi.php:510
+#: src/Api/PublicSubmitApi.php:499
+#: src/Api/PublicSubmitApi.php:518
 msgid "Form validation failed"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:496
+#: src/Api/PublicSubmitApi.php:504
 msgid "Your submission could not be completed. Please try again later."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:501
+#: src/Api/PublicSubmitApi.php:509
 msgid "An unexpected error occurred"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:576
+#: src/Api/PublicSubmitApi.php:584
 msgid "Failed to save submission data"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:724
+#: src/Api/PublicSubmitApi.php:732
 msgid "This total could not be calculated, so the payment was not taken."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:808
+#: src/Api/PublicSubmitApi.php:816
 #: src/Extensions/PaymentsExtension.php:180
 msgid "Online payment is not available right now. Please contact the site owner."
 msgstr ""
 
 #. translators: %s: form title
-#: src/Api/PublicSubmitApi.php:878
+#: src/Api/PublicSubmitApi.php:886
 #, php-format
 msgid "Payment failed: %s"
 msgstr ""
 
 #. translators: 1: entry ID, 2: gateway message, 3: link to the entry
-#: src/Api/PublicSubmitApi.php:881
+#: src/Api/PublicSubmitApi.php:889
 #, php-format
 msgid ""
 "The payment for entry #%1$d did not go through, so no receipt or notification was sent.\n"
@@ -686,7 +686,7 @@ msgid ""
 "Open the entry: %3$s"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:883
+#: src/Api/PublicSubmitApi.php:891
 msgid "not given"
 msgstr ""
 
