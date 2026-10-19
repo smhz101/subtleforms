@@ -815,3 +815,10 @@
 	color: var(--subtleforms-color-text-light);
 	font-size: 0.875em;
 }
+
+/* A block form uses the same width as a shortcode form: the content column. */
+.subtleforms-block.subtleforms-form-container,
+.wp-block-subtleforms-form {
+	width: 100%;
+	max-width: none;
+}

@@ -72,6 +72,15 @@ final class SubtleFormsBlock {
 	 * @param string $content Block inner content (empty for this block)
 	 * @return string Rendered block HTML
 	 */
+	/**
+	 * Classes shared with the shortcode so both use the same width.
+	 *
+	 * @return string[]
+	 */
+	public static function wrapperClasses(): array {
+		return array( 'subtleforms-block', 'subtleforms-form-container' );
+	}
+
 	public static function render_block( array $attributes, string $content = '' ): string {
 		$form_id = $attributes['formId'] ?? 0;
 
@@ -111,7 +120,7 @@ final class SubtleFormsBlock {
 		}
 
 		// Build CSS classes
-		$classes = array( 'subtleforms-block' );
+		$classes = self::wrapperClasses();
 
 		if ( ! empty( $attributes['align'] ) ) {
 			$classes[] = 'align' . esc_attr( $attributes['align'] );
