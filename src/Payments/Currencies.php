@@ -8,9 +8,10 @@
  *
  * `decimals` is the number of minor-unit digits the gateway uses (0 for
  * zero-decimal currencies such as JPY). `minimum` is the smallest card charge
- * Stripe accepts in that currency; for currencies Stripe gives no figure for,
- * it is a little under the 0.50 USD equivalent, so a real order is never
- * refused by this check before the gateway sees it.
+ * Stripe publishes for that currency when the charge settles in the same
+ * currency (for example 50 KRW). When the merchant settles in another
+ * currency, Stripe may need a higher presentment amount; a gateway can raise
+ * the floor through the subtleforms/payments/card_minimum filter.
  *
  * @package SubtleForms\Payments
  * @since   2.4.0
@@ -101,7 +102,19 @@ final class Currencies {
 	 */
 	public static function minimum( string $currency ): float {
 		$code = strtoupper( trim( $currency ) );
-		return isset( self::LIST[ $code ] ) ? (float) self::LIST[ $code ][2] : 0.0;
+		$min  = isset( self::LIST[ $code ] ) ? (float) self::LIST[ $code ][2] : 0.0;
+		/**
+		 * Filter the smallest card charge for a currency.
+		 *
+		 * Use this when the connected account settles in another currency and
+		 * Stripe needs a higher presentment amount than the published floor.
+		 *
+		 * @param float  $min      Published minimum for $currency.
+		 * @param string $currency Currency code.
+		 * @since 2.4.0
+		 */
+		$filtered = apply_filters( 'subtleforms/payments/card_minimum', $min, $code );
+		return is_numeric( $filtered ) ? (float) $filtered : $min;
 	}
 
 	/**
