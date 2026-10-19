@@ -96,12 +96,13 @@ class Schemas {
 
 			// Public Submit Payload
 			self::PUBLIC_SUBMIT => array(
-				'__allow'          => array( 'form_id', 'data', 'meta', 'website_url', 'form_rendered_at' ),
+				'__allow'          => array( 'form_id', 'data', 'meta', 'website_url', 'form_rendered_at', 'preview' ),
 				'form_id'          => 'optional|int',
 				'data'             => 'required|object',
 				'meta'             => 'optional|object',
 				'website_url'      => 'optional|string', // Honeypot
 				'form_rendered_at' => 'optional|string', // Time trap
+				'preview'          => 'optional|bool',
 			),
 
 			// Settings Update
