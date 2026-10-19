@@ -173,6 +173,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: Gravity Forms and Fluent Forms imports keep pages, hidden fields, names and conditional logic, and leave payment, quiz and post fields out.
 * Fix: On Tools, choosing a file is one keyboard stop, notices clear when you change section, and forms with the same title show their number and status.
 * Fix: Importing entries warns when a file is from another form and skips entries that are already there. The transfer screen says notes, the IP address, the browser, files, logs and unpublished drafts are not in the file.
+* Fix: Importing the same entries file again skips entries that were flagged, marked as spam, restored, read or starred since, and two different entries with the same answers at the same time are both imported.
 * Fix: A webhook that is still waiting says Queued.
 * Fix: A color field saves the color it shows, including its default.
 * Fix: Each CAPTCHA field uses its own provider and keys, and the form says when a check is not set up.

@@ -322,6 +322,8 @@ final class TransferService {
 				$meta    = is_array( $row['meta'] ?? null ) ? $row['meta'] : array();
 				$rows[]  = array_merge(
 					array(
+						// Lets an import recognise this entry again (2.4.0).
+						'entry_id'   => (int) ( $row['id'] ?? 0 ),
 						'status'     => (string) ( $row['status'] ?? 'unread' ),
 						'is_read'    => empty( $row['is_read'] ) ? 0 : 1,
 						'starred'    => empty( $row['starred'] ) ? 0 : 1,
@@ -397,6 +399,8 @@ final class TransferService {
 
 	/**
 	 * Identity of an entry inside an export: the same answers at the same time.
+	 * Status, read and star flags change after import (flagged, spam,
+	 * restored), so they are not part of it (2.4.0).
 	 *
 	 * @param array $row Submission row.
 	 * @return string
@@ -404,7 +408,33 @@ final class TransferService {
 	public static function submissionIdentity( array $row ): string {
 		$payload = is_array( $row['payload'] ?? null ) ? $row['payload'] : array();
 		ksort( $payload );
-		return md5( (string) ( $row['created_at'] ?? '' ) . '|' . (string) ( $row['status'] ?? '' ) . '|' . (string) wp_json_encode( $payload ) );
+		return md5( (string) ( $row['created_at'] ?? '' ) . '|' . (string) wp_json_encode( $payload ) );
+	}
+
+	/**
+	 * Where an entry came from: its form and entry ID on the site it was
+	 * exported from. Empty when the export did not say (files before 2.4.0).
+	 *
+	 * @param int $formId  Source form ID.
+	 * @param int $entryId Source entry ID.
+	 * @return string
+	 */
+	public static function entryRef( int $formId, int $entryId ): string {
+		return $formId > 0 && $entryId > 0 ? $formId . ':' . $entryId : '';
+	}
+
+	/**
+	 * The source reference of an entry already in the form: the one recorded
+	 * when it was imported, else its own form and ID.
+	 *
+	 * @param array $row    Stored submission row.
+	 * @param int   $formId Form ID.
+	 * @return string
+	 */
+	public static function storedRef( array $row, int $formId ): string {
+		$meta = is_array( $row['meta'] ?? null ) ? $row['meta'] : array();
+		$ref  = (string) ( $meta['import']['ref'] ?? '' );
+		return '' !== $ref ? $ref : self::entryRef( $formId, (int) ( $row['id'] ?? 0 ) );
 	}
 
 	public function importSubmissions( int $formId, array $package ): array {
@@ -430,8 +460,10 @@ final class TransferService {
 			$loaded = null;
 		}
 		$schema   = is_array( $loaded ) && is_array( $loaded['schema'] ?? null ) ? $loaded['schema'] : ( $this->forms->getDraftSchema( $formId ) ?? array() );
-		$existing = array();
-		$offset   = 0;
+		$existing     = array();
+		$existingRefs = array();
+		$sourceForm   = absint( $package['form']['id'] ?? 0 );
+		$offset       = 0;
 		while ( $offset < TransferPackage::MAX_SUBMISSIONS ) {
 			$batch = $this->submissions->findByForm(
 				$formId,
@@ -444,7 +476,9 @@ final class TransferService {
 				break;
 			}
 			foreach ( $batch as $have ) {
-				$existing[ self::submissionIdentity( $have ) ] = true;
+				$identity              = self::submissionIdentity( $have );
+				$existing[ $identity ] = true;
+				$existingRefs[ $identity . '|' . self::storedRef( $have, $formId ) ] = true;
 			}
 			$offset += 200;
 			if ( count( $batch ) < 200 ) {
@@ -454,17 +488,33 @@ final class TransferService {
 		$imported = 0;
 		$skipped  = 0;
 		foreach ( $read['submissions'] as $row ) {
-			if ( isset( $existing[ self::submissionIdentity( $row ) ] ) ) {
+			// Compared on the answers as they are stored, after cleaning.
+			$clean    = self::cleanPayload( (array) $row['payload'], $schema );
+			$identity = self::submissionIdentity(
+				array(
+					'created_at' => $row['created_at'],
+					'payload'    => $clean,
+				)
+			);
+			// Same time, same answers and the same source entry. Files without
+			// entry IDs fall back to time and answers.
+			$ref       = self::entryRef( $sourceForm, (int) ( $row['entry_id'] ?? 0 ) );
+			$duplicate = '' !== $ref ? isset( $existingRefs[ $identity . '|' . $ref ] ) : isset( $existing[ $identity ] );
+			if ( $duplicate ) {
 				++$skipped;
 				continue;
+			}
+			$meta = (array) ( $row['meta'] ?? array() );
+			if ( '' !== $ref ) {
+				$meta['import'] = array( 'ref' => $ref );
 			}
 			try {
 				$id = $this->submissions->create(
 					array(
 						'form_id' => $formId,
-						'payload' => self::cleanPayload( (array) $row['payload'], $schema ),
+						'payload' => $clean,
 						'status'  => $row['status'],
-						'meta'    => (array) ( $row['meta'] ?? array() ),
+						'meta'    => $meta,
 					)
 				);
 			} catch ( \Throwable $e ) {
@@ -491,7 +541,10 @@ final class TransferService {
 				}
 			}
 			++$imported;
-			$existing[ self::submissionIdentity( $row ) ] = true;
+			$existing[ $identity ] = true;
+			if ( '' !== $ref ) {
+				$existingRefs[ $identity . '|' . $ref ] = true;
+			}
 		}
 		$notes = array();
 		if ( '' !== $mismatch ) {

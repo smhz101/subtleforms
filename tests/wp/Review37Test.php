@@ -90,4 +90,32 @@ final class Review37Test extends TestCase {
 		$data = $data['data'] ?? $data;
 		$this->assertStringContainsString( '10,000 KRW', (string) ( $data['display']['sticker']['text'] ?? '' ) );
 	}
+
+	public function test_reimporting_after_a_status_change_skips_the_entries_and_twins_stay_apart(): void {
+		wp_set_current_user( 1 );
+		$fields = array( array( 'id' => 'f1', 'key' => 'name', 'type' => 'text', 'config' => array( 'label' => 'Name' ) ) );
+		$from   = $this->publish( $fields );
+		$to     = $this->publish( $fields );
+		$subs   = new \SubtleForms\Repositories\SubmissionsRepository();
+		// Two entries with the same answers at the same second.
+		$a = $subs->create( array( 'form_id' => $from, 'payload' => array( 'name' => 'Ada' ), 'status' => 'completed' ) );
+		$b = $subs->create( array( 'form_id' => $from, 'payload' => array( 'name' => 'Ada' ), 'status' => 'completed' ) );
+		$subs->setCreatedAt( $a, '2026-10-18 12:00:00' );
+		$subs->setCreatedAt( $b, '2026-10-18 12:00:00' );
+
+		$service = new \SubtleForms\Tools\TransferService( new \SubtleForms\Repositories\FormsRepository(), $subs );
+		$package = json_decode( wp_json_encode( $service->exportSubmissions( $from ) ), true );
+		$this->assertSame( 2, $service->importSubmissions( $to, $package )['imported'], 'Twins with different source entries are both imported.' );
+
+		$rows = $subs->findByForm( $to, array( 'orderby' => 'id', 'order' => 'ASC' ) );
+		$subs->update( (int) $rows[0]['id'], array( 'status' => 'spam' ) );
+		$subs->update( (int) $rows[1]['id'], array( 'is_read' => 1, 'starred' => 1 ) );
+
+		$again = $service->importSubmissions( $to, $package );
+		$this->assertSame( 0, $again['imported'] );
+		$this->assertSame( 2, $again['skipped'] );
+
+		$back = $service->importSubmissions( $from, $package );
+		$this->assertSame( 0, $back['imported'], 'Entries imported back into their own form are recognised.' );
+	}
 }

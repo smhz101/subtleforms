@@ -96,4 +96,21 @@ final class Review37Test extends TestCase {
 		$product = array( 'id' => 'p', 'key' => 'sticker', 'type' => 'payment_product', 'config' => array( 'label' => 'Sticker', 'productName' => 'Sticker', 'price' => 5000, 'allowQuantity' => true ) );
 		$this->assertSame( "Sticker \u{00D7} 2 (10,000 KRW)", \SubtleForms\Support\AnswerFormatter::text( 2, $product, $entry ) );
 	}
+
+	public function test_import_identity_ignores_status_and_flags_and_reads_the_source_entry(): void {
+		$row     = array( 'created_at' => '2026-10-18 12:00:00', 'status' => 'completed', 'is_read' => 0, 'starred' => 0, 'payload' => array( 'a' => '1' ) );
+		$flagged = array_merge( $row, array( 'status' => 'flagged', 'is_read' => 1, 'starred' => 1 ) );
+		$this->assertSame( \SubtleForms\Tools\TransferService::submissionIdentity( $row ), \SubtleForms\Tools\TransferService::submissionIdentity( $flagged ) );
+
+		$this->assertSame( '4:17', \SubtleForms\Tools\TransferService::entryRef( 4, 17 ) );
+		$this->assertSame( '', \SubtleForms\Tools\TransferService::entryRef( 0, 17 ) );
+		$this->assertSame( '4:17', \SubtleForms\Tools\TransferService::storedRef( array( 'id' => 90, 'meta' => array( 'import' => array( 'ref' => '4:17' ) ) ), 9 ) );
+		$this->assertSame( '9:90', \SubtleForms\Tools\TransferService::storedRef( array( 'id' => 90, 'meta' => array() ), 9 ) );
+
+		$package = \SubtleForms\Tools\TransferPackage::submissions(
+			array( 'id' => 4, 'title' => 'Join' ),
+			array( array( 'entry_id' => 17, 'status' => 'read', 'created_at' => '2026-10-01 12:00:00', 'payload' => array( 'a' => '1' ) ) )
+		);
+		$this->assertSame( 17, \SubtleForms\Tools\TransferPackage::readSubmissions( $package )['submissions'][0]['entry_id'] );
+	}
 }

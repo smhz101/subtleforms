@@ -158,6 +158,7 @@ final class TransferPackage {
 				continue;
 			}
 			$clean[] = array(
+				'entry_id'   => absint( $row['entry_id'] ?? 0 ),
 				'status'     => self::status( $raw_status ),
 				'is_read'    => empty( $row['is_read'] ) ? 0 : 1,
 				'starred'    => empty( $row['starred'] ) ? 0 : 1,
