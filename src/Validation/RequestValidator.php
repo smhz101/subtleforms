@@ -28,6 +28,10 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class RequestValidator {
 
+	/** Field settings that hold markup shown on the live form. */
+	const MARKUP_KEYS = array( 'content', 'html' );
+
+
 	/**
 	 * Maximum recursion depth for nested validation
 	 *
@@ -264,6 +268,16 @@ class RequestValidator {
 			if ( ! $valid ) {
 				$errors[ $path ] = $error;
 			} else {
+				// Markup kept in a field's settings (an HTML block's content)
+				// is shown on the live form, so it gets the same post-content
+				// filter as top-level markup.
+				if ( 'config' === $field && ! empty( $schema['__passthrough'] ) && is_array( $fieldSanitized ) ) {
+					foreach ( self::MARKUP_KEYS as $markupKey ) {
+						if ( isset( $fieldSanitized[ $markupKey ] ) && is_string( $fieldSanitized[ $markupKey ] ) ) {
+							$fieldSanitized[ $markupKey ] = wp_kses_post( $fieldSanitized[ $markupKey ] );
+						}
+					}
+				}
 				$sanitized[ $field ] = $fieldSanitized;
 			}
 		}

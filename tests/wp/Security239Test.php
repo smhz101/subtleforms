@@ -39,6 +39,23 @@ class Security239Test extends TestCase {
 		return array( 'status' => $response->get_status(), 'data' => $response->get_data() );
 	}
 
+	/** An HTML block never stores or serves a script, in content or in its settings. */
+	public function test_html_block_markup_is_filtered() {
+		$formId = $this->publish(
+			array(
+				array( 'id' => 'h', 'key' => 'h', 'type' => 'html', 'label' => 'H', 'content' => '<p>Hi</p><script>alert(1)</script>', 'config' => array( 'content' => '<b>ok</b><script>alert(2)</script>' ) ),
+				array( 'id' => 'n', 'key' => 'name', 'type' => 'text', 'label' => 'Name' ),
+			)
+		);
+		wp_set_current_user( 0 );
+		$response = rest_do_request( new \WP_REST_Request( 'GET', '/subtleforms/v1/forms/' . $formId . '/schema' ) );
+		$json     = wp_json_encode( $response->get_data() );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertStringNotContainsString( '<script', $json );
+		$this->assertStringNotContainsString( '<\/script', $json );
+		$this->assertStringContainsString( '<b>ok<\/b>', $json );
+	}
+
 	/** A visitor without a REST nonce counts a view on a published form. */
 	public function test_visitor_view_is_counted_without_a_nonce() {
 		$formId = $this->nameForm();

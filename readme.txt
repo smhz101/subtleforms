@@ -134,6 +134,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Change: Signature and Calculation fields and card payments are part of SubtleForms Pro 2.4.0. Forms that use them keep them; the live form leaves them out until Pro is active.
 * Fix: Visitors can send a form from a cached page, their views are counted for Reports, and the spam time check uses the server clock.
 * Fix: Entries show the label of the chosen option and Yes or No for consent, and the form preview stays centred beside the styling panel.
+* Fix: HTML block markup is filtered when the form is saved and when it is shown.
 * Fix: Answers the server refuses are not stored, and deleting a form deletes its entries, files and logs.
 * Fix: The personal data tools match the exact email address, and imports are cleaned like a builder save.
 * Fix: Name and Address parts, Notice, Section heading and Page break settings, Repeater uploads, dependent dropdowns and hidden priced fields work as set.

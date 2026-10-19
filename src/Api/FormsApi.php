@@ -1216,7 +1216,48 @@ final class FormsApi {
 		 * @since 2.1.0
 		 */
 		$filtered = apply_filters( 'subtleforms/public_schema', $schema, $formId );
-		return is_array( $filtered ) ? $filtered : $schema;
+		$filtered = is_array( $filtered ) ? $filtered : $schema;
+		if ( isset( $filtered['fields'] ) && is_array( $filtered['fields'] ) ) {
+			$filtered['fields'] = self::escapeMarkup( $filtered['fields'] );
+		}
+		return $filtered;
+	}
+
+	/**
+	 * Run HTML block markup through the post-content filter on the way out,
+	 * so markup stored before it was filtered on save is never sent raw.
+	 *
+	 * @param array $fields Field nodes.
+	 * @return array
+	 */
+	private static function escapeMarkup( array $fields ): array {
+		foreach ( $fields as $i => $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+			if ( 'html' === ( $field['type'] ?? '' ) ) {
+				if ( isset( $field['content'] ) && is_string( $field['content'] ) ) {
+					$field['content'] = wp_kses_post( $field['content'] );
+				}
+				if ( isset( $field['config']['content'] ) && is_string( $field['config']['content'] ) ) {
+					$field['config']['content'] = wp_kses_post( $field['config']['content'] );
+				}
+			}
+			foreach ( array( 'children', 'fields' ) as $child ) {
+				if ( isset( $field[ $child ] ) && is_array( $field[ $child ] ) ) {
+					$field[ $child ] = self::escapeMarkup( $field[ $child ] );
+				}
+			}
+			if ( isset( $field['columns'] ) && is_array( $field['columns'] ) ) {
+				foreach ( $field['columns'] as $c => $column ) {
+					if ( is_array( $column ) ) {
+						$field['columns'][ $c ] = self::escapeMarkup( $column );
+					}
+				}
+			}
+			$fields[ $i ] = $field;
+		}
+		return $fields;
 	}
 
 	/**
