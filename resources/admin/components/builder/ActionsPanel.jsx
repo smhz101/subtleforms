@@ -35,6 +35,8 @@ import LogicEditor, { collectLogicFields, countRules } from './LogicEditor';
 import MergeTagMenu from '../merge-tags/MergeTagMenu';
 import MergeTagsHelpLink from '../merge-tags/MergeTagsHelp';
 import { insertAt } from '../merge-tags/mergeTags';
+import ConnectionTest from '../settings/extensions/ConnectionTest';
+import { normalizeWebhookUrl } from '../../utils/webhookUrl';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -418,8 +420,25 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
             type='url'
             value={s.url || ''}
             onChange={(v) => patchSettings({ url: v })}
+            onBlur={() => {
+              const url = normalizeWebhookUrl(s.url);
+              if (url !== (s.url || '')) patchSettings({ url });
+            }}
             placeholder='https://example.com/webhook'
             disabled={isDisabled}
+          />
+          <ConnectionTest
+            path='/webhooks/test'
+            requiresPro={false}
+            label={__('Send test request', 'subtleforms')}
+            disabled={isDisabled || !String(s.url || '').trim()}
+            getBody={() => ({
+              url: normalizeWebhookUrl(s.url),
+              method: s.method || 'POST',
+              headers: s.headers || {},
+              sign: !!s.signing?.enabled,
+              secret: s.signing?.secret || '',
+            })}
           />
 
           {/* Method + Payload mode, side by side */}

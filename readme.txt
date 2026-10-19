@@ -133,6 +133,8 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: A webhook address typed without https:// gets it, and an address WordPress refuses (a local or private host, or a port other than 80, 443 and 8080) is listed in the entry's activity log with the reason instead of failing silently.
 * Fix: Webhooks no longer send the form's spam check token, the honeypot or CAPTCHA tokens with the answers.
 * Change: The default webhook body is the one the Webhooks settings describe, and the one SubtleForms Pro sends: the event, form and entry IDs, a link to the entry, the answers keyed by field under "fields", and every answer with its label under "answers". Receivers that read answers at the top level of the body should read them from "fields".
+* Fix: The webhook test in Settings works without SubtleForms Pro. The button is ready as soon as an address is typed, the test uses the same address check, body and signing as real deliveries, and it says why an address is refused.
+* New: Each webhook action in Form settings has a Send test request button.
 
 = 2.4.0 - 2026-10-20 =
 * New: Each payment form can pick its own currency, and more currencies are available, including JPY, INR, PKR and AED.

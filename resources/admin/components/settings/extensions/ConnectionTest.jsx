@@ -29,6 +29,9 @@ export function callIntegration(path, data) {
  * @param {Function} props.onSuccess Receives the response body.
  * @param {string}   props.label     Button label.
  * @param {boolean}  props.disabled  Disable the button.
+ * @param {boolean}  props.requiresPro The route belongs to SubtleForms Pro
+ *                                     (webhook tests are part of the free
+ *                                     plugin since 2.4.1).
  */
 export default function ConnectionTest({
   path,
@@ -36,6 +39,7 @@ export default function ConnectionTest({
   onSuccess,
   label = __('Test connection', 'subtleforms'),
   disabled = false,
+  requiresPro = true,
 }) {
   const [state, setState] = useState({ status: 'idle', message: '' });
   const hasPro = !!window.subtleformsAdmin?.hasProPlugin;
@@ -56,7 +60,7 @@ export default function ConnectionTest({
       setState({
         status: 'error',
         message:
-          error?.code === 'rest_no_route'
+          requiresPro && error?.code === 'rest_no_route'
             ? __('Connection tests need SubtleForms Pro to be active.', 'subtleforms')
             : error?.message || __('The connection failed.', 'subtleforms'),
       });
@@ -69,7 +73,7 @@ export default function ConnectionTest({
         variant='secondary'
         size='compact'
         onClick={run}
-        disabled={disabled || !hasPro || state.status === 'busy'}
+        disabled={disabled || (requiresPro && !hasPro) || state.status === 'busy'}
         aria-describedby={state.message ? `${path}-result` : undefined}>
         {state.status === 'busy' ? <Spinner /> : null}
         {label}

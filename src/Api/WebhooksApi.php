@@ -1,0 +1,214 @@
+<?php
+/**
+ * Webhook test request (2.4.1).
+ *
+ * Settings > Integrations > Webhooks and each webhook action can send a
+ * sample entry to an address and show the answer. The request uses the same
+ * address check, body and signing as a real delivery, so a test that
+ * succeeds means entries are delivered too. Before 2.4.1 the test needed a
+ * licensed SubtleForms Pro, so the button never worked on its own.
+ *
+ * @package SubtleForms
+ * @since   2.4.1
+ */
+
+declare(strict_types=1);
+
+namespace SubtleForms\Api;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+use SubtleForms\Support\Webhooks;
+use WP_Error;
+use WP_REST_Request;
+use WP_REST_Response;
+
+/**
+ * POST /subtleforms/v1/webhooks/test
+ */
+final class WebhooksApi {
+
+	const METHODS = array( 'POST', 'PUT', 'PATCH' );
+
+	/**
+	 * Register the route.
+	 */
+	public function registerRoutes(): void {
+		register_rest_route(
+			'subtleforms/v1',
+			'/webhooks/test',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'test' ),
+				'permission_callback' => array( $this, 'checkPermissions' ),
+				'args'                => array(
+					'url'     => array(
+						'type'     => 'string',
+						'required' => true,
+					),
+					'method'  => array(
+						'type' => 'string',
+						'enum' => self::METHODS,
+					),
+					'headers' => array(
+						'type' => 'object',
+					),
+					'sign'    => array(
+						'type' => 'boolean',
+					),
+					'secret'  => array(
+						'type' => 'string',
+					),
+				),
+			)
+		);
+	}
+
+	/**
+	 * Administrators only, with the REST nonce.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return true|WP_Error
+	 */
+	public function checkPermissions( WP_REST_Request $request ) {
+		if ( ! current_user_can( 'manage_options' ) ) {
+			return new WP_Error( 'subtleforms_forbidden', __( 'You are not allowed to perform this action.', 'subtleforms' ), array( 'status' => 403 ) );
+		}
+		$nonce = $request->get_header( 'X-WP-Nonce' );
+		if ( empty( $nonce ) || ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+			return new WP_Error( 'subtleforms_invalid_nonce', __( 'Security check failed. Please refresh and try again.', 'subtleforms' ), array( 'status' => 403 ) );
+		}
+		return true;
+	}
+
+	/**
+	 * Send a sample entry and report the answer.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function test( WP_REST_Request $request ) {
+		$built = self::build(
+			array(
+				'url'     => (string) $request->get_param( 'url' ),
+				'method'  => (string) $request->get_param( 'method' ),
+				'headers' => $request->get_param( 'headers' ),
+				'sign'    => (bool) $request->get_param( 'sign' ),
+				'secret'  => (string) $request->get_param( 'secret' ),
+			)
+		);
+		if ( is_wp_error( $built ) ) {
+			$built->add_data( array( 'status' => 400 ) );
+			return $built;
+		}
+
+		$start    = microtime( true );
+		$response = wp_remote_request(
+			$built['url'],
+			array(
+				'method'  => $built['method'],
+				'headers' => $built['headers'],
+				'body'    => $built['body'],
+				'timeout' => 10,
+			)
+		);
+		$ms = (int) round( ( microtime( true ) - $start ) * 1000 );
+
+		if ( is_wp_error( $response ) ) {
+			return new WP_Error(
+				'subtleforms_webhook_failed',
+				sprintf(
+					/* translators: %s: error from the HTTP request */
+					__( 'The request could not be sent: %s', 'subtleforms' ),
+					$response->get_error_message()
+				),
+				array( 'status' => 400 )
+			);
+		}
+
+		$code = (int) wp_remote_retrieve_response_code( $response );
+		$ok   = $code >= 200 && $code < 300;
+
+		return new WP_REST_Response(
+			array(
+				'ok'            => $ok,
+				'http_status'   => $code,
+				'duration_ms'   => $ms,
+				'signed'        => isset( $built['headers']['X-SubtleForms-Signature'] ),
+				'response_body' => substr( (string) wp_remote_retrieve_body( $response ), 0, 300 ),
+				'message'       => $ok
+					/* translators: 1: HTTP status code, 2: milliseconds */
+					? sprintf( __( 'Delivered. The endpoint answered HTTP %1$d in %2$d ms.', 'subtleforms' ), $code, $ms )
+					/* translators: %d: HTTP status code */
+					: sprintf( __( 'The endpoint answered HTTP %d, so real entries would be retried.', 'subtleforms' ), $code ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * The test request: address, method, headers and a sample body.
+	 *
+	 * @param array $args url, method, headers, sign, secret.
+	 * @return array|WP_Error url, method, headers, body.
+	 */
+	public static function build( array $args ) {
+		$url     = Webhooks::normalizeUrl( (string) ( $args['url'] ?? '' ) );
+		$problem = Webhooks::urlProblem( $url );
+		if ( $problem ) {
+			return $problem;
+		}
+
+		$method = strtoupper( (string) ( $args['method'] ?? 'POST' ) );
+		if ( ! in_array( $method, self::METHODS, true ) ) {
+			$method = 'POST';
+		}
+
+		$schema  = array(
+			'metadata' => array( 'title' => __( 'Test form', 'subtleforms' ) ),
+			'fields'   => array(
+				array( 'id' => 'name', 'key' => 'name', 'type' => 'text', 'label' => __( 'Name', 'subtleforms' ) ),
+				array( 'id' => 'email', 'key' => 'email', 'type' => 'email', 'label' => __( 'Email', 'subtleforms' ) ),
+				array( 'id' => 'message', 'key' => 'message', 'type' => 'textarea', 'label' => __( 'Message', 'subtleforms' ) ),
+			),
+		);
+		$answers = array(
+			'name'    => 'Test Person',
+			'email'   => 'test@example.com',
+			'message' => __( 'This is a test webhook from SubtleForms.', 'subtleforms' ),
+		);
+		$body          = Webhooks::fullBody(
+			$schema,
+			$answers,
+			array(
+				'form_id'       => 0,
+				'form_title'    => __( 'Test form', 'subtleforms' ),
+				'submission_id' => 0,
+				'submitted_at'  => gmdate( 'c' ),
+			)
+		);
+		$body['test'] = true;
+		$body         = (string) wp_json_encode( $body );
+
+		$headers = array_merge( array( 'Content-Type' => 'application/json' ), Webhooks::safeHeaders( $args['headers'] ?? array() ) );
+		if ( ! empty( $args['sign'] ) ) {
+			$secret = (string) ( $args['secret'] ?? '' );
+			if ( '' === $secret ) {
+				$global = get_option( 'subtleforms_settings', array() );
+				$secret = is_array( $global ) ? (string) ( $global['ext_webhooks_signing_secret'] ?? '' ) : '';
+			}
+			if ( '' !== $secret ) {
+				$headers['X-SubtleForms-Signature'] = Webhooks::signature( $body, $secret );
+			}
+		}
+
+		return array(
+			'url'     => $url,
+			'method'  => $method,
+			'headers' => $headers,
+			'body'    => $body,
+		);
+	}
+}

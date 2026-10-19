@@ -1,8 +1,8 @@
 <?php
 // phpcs:disable -- Integration test; not shipped in production plugin.
 /**
- * Webhooks in 2.4.1: the default body and the address check with a
- * readable reason.
+ * Webhooks in 2.4.1: the default body, the address check with a readable
+ * reason, and the free Settings test request.
  *
  * @package SubtleForms\Tests\WP
  */
@@ -13,6 +13,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+use SubtleForms\Api\WebhooksApi;
 use SubtleForms\Engine\Actions\WebhookAction;
 use SubtleForms\Engine\SubmissionContext;
 use SubtleForms\Support\Webhooks;
@@ -112,4 +113,50 @@ final class Webhooks241Test extends TestCase {
 		$this->assertNull( Webhooks::urlProblem( 'https://93.184.216.34/x' ) );
 	}
 
+	public function test_the_settings_test_route_needs_no_pro_and_reports_the_answer(): void {
+		$this->asAdmin();
+		$sent = array();
+		add_filter(
+			'pre_http_request',
+			static function ( $pre, $args, $url ) use ( &$sent ) {
+				$sent = array( 'url' => $url, 'args' => $args );
+				return array( 'headers' => array(), 'body' => '{"ok":true}', 'response' => array( 'code' => 200, 'message' => 'OK' ), 'cookies' => array() );
+			},
+			10,
+			3
+		);
+		update_option( 'subtleforms_settings', array_merge( (array) get_option( 'subtleforms_settings', array() ), array( 'ext_webhooks_signing_secret' => 'fixture' . 'secret' ) ) );
+
+		$request = new \WP_REST_Request( 'POST', '/subtleforms/v1/webhooks/test' );
+		$request->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
+		$request->set_body_params( array( 'url' => '93.184.216.34/abc', 'method' => 'PUT', 'sign' => true ) );
+		$response = rest_do_request( $request );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( $response->get_data()['ok'] );
+		$this->assertTrue( $response->get_data()['signed'] );
+		$this->assertSame( 'https://93.184.216.34/abc', $sent['url'] );
+		$this->assertSame( 'PUT', $sent['args']['method'] );
+		$body = json_decode( (string) $sent['args']['body'], true );
+		$this->assertTrue( $body['test'] );
+		$this->assertSame( 'Test Person', $body['fields']['name'] );
+		$this->assertSame( Webhooks::signature( (string) $sent['args']['body'], 'fixture' . 'secret' ), $sent['args']['headers']['X-SubtleForms-Signature'] );
+	}
+
+	public function test_the_settings_test_route_explains_a_blocked_address(): void {
+		$this->asAdmin();
+		$request = new \WP_REST_Request( 'POST', '/subtleforms/v1/webhooks/test' );
+		$request->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
+		$request->set_body_params( array( 'url' => 'http://localhost:9/x' ) );
+		$response = rest_do_request( $request );
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertStringContainsString( 'WordPress blocks requests to localhost:9', $response->as_error()->get_error_message() );
+	}
+
+	public function test_the_settings_test_route_is_for_administrators(): void {
+		wp_set_current_user( 0 );
+		$request = new \WP_REST_Request( 'POST', '/subtleforms/v1/webhooks/test' );
+		$request->set_body_params( array( 'url' => 'https://hooks.example.com/abc' ) );
+		$this->assertSame( 403, rest_do_request( $request )->get_status() );
+	}
 }
