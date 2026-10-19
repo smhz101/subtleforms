@@ -84,7 +84,12 @@
 	}
 
 	// The form is laid out at the device width, then scaled to the pane.
+	// Flex centring keeps a form wider than the pane centred before it is
+	// scaled, so the scaled form is not pushed under the styling panel.
 	&__stage {
+		display: flex;
+		justify-content: center;
+		align-items: flex-start;
 		width: 100%;
 		min-width: 0;
 		margin: 0 auto;
@@ -96,6 +101,7 @@
 	}
 
 	&__form {
+		flex: none;
 		width: auto;
 		max-width: none;
 		margin-right: auto;
