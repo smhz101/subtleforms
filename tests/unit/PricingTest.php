@@ -1,9 +1,14 @@
 <?php
+
 /**
  * Server-side order maths for payment forms (2.1).
  */
 
 namespace SubtleForms\Tests\Unit;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use PHPUnit\Framework\TestCase;
 use SubtleForms\Payments\Pricing;

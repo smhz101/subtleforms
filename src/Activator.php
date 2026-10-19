@@ -11,6 +11,7 @@ namespace SubtleForms;
 if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 use SubtleForms\Support\Logger;
+use SubtleForms\Support\Settings;
 /**
  * Handles plugin activation tasks.
  */
@@ -36,12 +37,12 @@ final class Activator {
 
 		// Check WordPress version requirement
 		global $wp_version;
-		if ( version_compare( $wp_version, '5.0', '<' ) ) {
+		if ( version_compare( $wp_version, '6.6', '<' ) ) {
 			deactivate_plugins( SUBTLEFORMS_PLUGIN_BASENAME );
 			wp_die(
 				sprintf(
 					/* translators: %s: Current WordPress version */
-					esc_html__( 'SubtleForms requires WordPress 5.0 or higher. You are running %s', 'subtleforms' ),
+					esc_html__( 'SubtleForms requires WordPress 6.6 or higher. You are running %s', 'subtleforms' ),
 					$wp_version // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $wp_version is a trusted WordPress core global.
 				),
 				esc_html__( 'Plugin Activation Error', 'subtleforms' ),
@@ -62,6 +63,7 @@ final class Activator {
 
 		// Set default options
 		self::set_default_options();
+		Settings::remove_ai_options();
 
 		// Schedule privacy cron jobs
 		if ( ! wp_next_scheduled( 'subtleforms_daily_cleanup' ) ) {
@@ -211,7 +213,7 @@ final class Activator {
 
 			// Log the error
 			Logger::error( 'Activation Error: ' . $error_message );
-			Logger::error( 'dbDelta results: ' . print_r( $results, true ) ); // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
+			Logger::debug( 'dbDelta results: %s', wp_json_encode( $results ) );
 
 			// Show admin notice instead of wp_die to allow debugging
 			add_option( 'subtleforms_activation_error', $error_message );

@@ -9,6 +9,10 @@
 
 namespace SubtleForms\Support;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Global helper accessors.
  * You can later replace these with your Container calls.

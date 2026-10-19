@@ -53,7 +53,7 @@ class AdminMenu {
 		$this->submissionsRepo = $submissionsRepo ?? new SubmissionsRepository();
 
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
-		add_action( 'admin_head', array( $this, 'menu_icon_styles' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'menu_icon_styles' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 		add_action( 'admin_init', array( $this, 'handle_actions' ) );
 		add_filter( 'admin_body_class', array( $this, 'filter_admin_body_class' ) );
@@ -146,7 +146,12 @@ class AdminMenu {
 	 * Keep the menu mark at the header size. Core fades and pads image icons.
 	 */
 	public function menu_icon_styles(): void {
-		echo '<style id="subtleforms-menu-icon">#adminmenu #toplevel_page_subtleforms .wp-menu-image img{width:20px;height:20px;padding:7px 0 0;opacity:1;object-fit:contain;}</style>';
+		wp_register_style( 'subtleforms-menu-icon', false, array(), SUBTLEFORMS_VERSION );
+		wp_enqueue_style( 'subtleforms-menu-icon' );
+		wp_add_inline_style(
+			'subtleforms-menu-icon',
+			'#adminmenu #toplevel_page_subtleforms .wp-menu-image img{width:20px;height:20px;padding:7px 0 0;opacity:1;object-fit:contain;}'
+		);
 	}
 
 	/**
@@ -293,6 +298,11 @@ class AdminMenu {
 			SUBTLEFORMS_VERSION
 		);
 
+		wp_add_inline_style(
+			'subtleforms-admin',
+			'.subtleforms-placeholder{text-align:center;padding:60px 20px;max-width:800px;margin:0 auto}.subtleforms-placeholder-icon{font-size:64px;color:#ddd;margin-bottom:20px}.subtleforms-placeholder h2{font-size:24px;margin-bottom:10px}.subtleforms-quick-list{margin-top:40px;text-align:left}'
+		);
+
 		// Component styles from wp-scripts build (Settings, Dashboard, etc.)
 		wp_enqueue_style(
 			'subtleforms-components',
@@ -426,6 +436,7 @@ class AdminMenu {
 
 		// Localize script with data
 		wp_localize_script( 'subtleforms-admin', 'subtleformsAdmin', $admin_data );
+		wp_set_script_translations( 'subtleforms-admin', 'subtleforms', SUBTLEFORMS_PLUGIN_DIR . 'languages' );
 
 		// Additional data for Settings page
 		wp_localize_script(
@@ -463,104 +474,23 @@ class AdminMenu {
 
 
 	/**
-	 * Stylesheets the public site loads for the active theme.
-	 *
-	 * A child theme often enqueues the parent stylesheet, and many themes
-	 * split CSS across more than style.css. The preview iframe needs those
-	 * files, not only get_stylesheet_uri(). The enqueue runs against a
-	 * temporary style queue so it does not add theme CSS to the admin page.
+	 * Stylesheet URLs for the active theme. Global styles are passed separately
+	 * through wp_get_global_stylesheet(). This does not run front-end hooks.
 	 *
 	 * @return string[]
 	 */
 	private static function themeStylesheets(): array {
-		global $wp_styles, $wp_scripts, $wp_actions;
-
-		$saved_styles  = $wp_styles ?? null;
-		$saved_scripts = $wp_scripts ?? null;
-		$ran           = ( isset( $wp_actions['wp_enqueue_scripts'] ) ) ? $wp_actions['wp_enqueue_scripts'] : 0;
-		$hrefs         = array();
-
-		if ( class_exists( '\WP_Styles' ) && class_exists( '\WP_Scripts' ) ) {
-			$wp_styles  = new \WP_Styles();
-			$wp_scripts = new \WP_Scripts();
-			try {
-				do_action( 'wp_enqueue_scripts' );
-				$hrefs = self::queuedStyleHrefs( $wp_styles );
-			} finally {
-				$wp_styles  = $saved_styles;
-				$wp_scripts = $saved_scripts;
-				if ( is_array( $wp_actions ) ) {
-					$wp_actions['wp_enqueue_scripts'] = $ran;
-				}
-			}
-		}
-
-		$seen = array();
-		foreach ( $hrefs as $href ) {
-			$seen[ self::stylePath( $href ) ] = true;
-		}
-
-		$parent = '';
-		if ( function_exists( 'is_child_theme' ) && is_child_theme() ) {
-			$parent = get_template_directory_uri() . '/style.css';
-		}
-		$child = function_exists( 'get_stylesheet_uri' ) ? get_stylesheet_uri() : '';
-
-		if ( $parent && ! isset( $seen[ self::stylePath( $parent ) ] ) ) {
-			array_unshift( $hrefs, $parent );
-			$seen[ self::stylePath( $parent ) ] = true;
-		}
-		if ( $child && ! isset( $seen[ self::stylePath( $child ) ] ) ) {
-			$hrefs[] = $child;
-		}
-
-		return array_values( $hrefs );
-	}
-
-	/**
-	 * Stylesheet URLs for a queue, dependencies first.
-	 *
-	 * @param \WP_Styles $styles Style queue.
-	 * @return string[]
-	 */
-	private static function queuedStyleHrefs( $styles ): array {
 		$hrefs = array();
-		$seen  = array();
-
-		$walk = static function ( $handle ) use ( &$walk, &$hrefs, &$seen, $styles ) {
-			if ( isset( $seen[ $handle ] ) || ! isset( $styles->registered[ $handle ] ) ) {
-				return;
-			}
-			$seen[ $handle ] = true;
-			$style           = $styles->registered[ $handle ];
-			foreach ( (array) $style->deps as $dep ) {
-				$walk( $dep );
-			}
-			if ( empty( $style->src ) ) {
-				return;
-			}
-			$href = $styles->_css_href( $style->src, $style->ver, $handle );
-			if ( is_string( $href ) && '' !== $href ) {
-				$hrefs[] = $href;
-			}
-		};
-
-		foreach ( (array) $styles->queue as $handle ) {
-			$walk( $handle );
+		if ( function_exists( 'is_child_theme' ) && is_child_theme() && function_exists( 'get_template_directory_uri' ) ) {
+			$hrefs[] = get_template_directory_uri() . '/style.css';
 		}
-
+		if ( function_exists( 'get_stylesheet_uri' ) ) {
+			$child = get_stylesheet_uri();
+			if ( is_string( $child ) && '' !== $child && ! in_array( $child, $hrefs, true ) ) {
+				$hrefs[] = $child;
+			}
+		}
 		return $hrefs;
-	}
-
-	/**
-	 * Path of a stylesheet URL, without the query, for de-duplication.
-	 *
-	 * @param string $href URL.
-	 * @return string
-	 */
-	private static function stylePath( $href ): string {
-		$path = wp_parse_url( (string) $href, PHP_URL_PATH );
-		return is_string( $path ) && '' !== $path ? $path : (string) $href;
 	}
 
 	/**
@@ -1180,27 +1110,6 @@ class AdminMenu {
 			</div>
 		</div>
 
-		<style>
-			.subtleforms-placeholder {
-				text-align: center;
-				padding: 60px 20px;
-				max-width: 800px;
-				margin: 0 auto;
-			}
-			.subtleforms-placeholder-icon {
-				font-size: 64px;
-				color: #ddd;
-				margin-bottom: 20px;
-			}
-			.subtleforms-placeholder h2 {
-				font-size: 24px;
-				margin-bottom: 10px;
-			}
-			.subtleforms-quick-list {
-				margin-top: 40px;
-				text-align: left;
-			}
-		</style>
 		<?php
 		exit;
 	}

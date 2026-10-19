@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SubtleForms REST API Router
  *
@@ -12,6 +13,10 @@
  */
 
 namespace SubtleForms\Api;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Support\Logger;
 use SubtleForms\Engine\Pipeline;

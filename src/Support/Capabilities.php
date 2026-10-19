@@ -9,6 +9,10 @@
 
 namespace SubtleForms\Support;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Capabilities service for feature gating.
  *

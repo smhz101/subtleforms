@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SubtleForms Submissions REST API
  *
@@ -9,6 +10,10 @@
  */
 
 namespace SubtleForms\Api;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Support\Helpers;
 use SubtleForms\Support\FeatureGate;

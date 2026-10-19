@@ -1,4 +1,8 @@
 <?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 // phpcs:disable -- Unit test file; not shipped in production plugin.
 /**
  * QA-20: the dashboard performance selector is not capped at 10 forms.

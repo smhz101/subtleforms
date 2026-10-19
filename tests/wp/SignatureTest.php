@@ -1,4 +1,5 @@
 <?php
+
 // phpcs:disable -- Integration test; not shipped in production plugin.
 /**
  * 2.3.3: a drawn signature reads as an image in HTML emails (embedded, not a
@@ -8,6 +9,10 @@
  */
 
 namespace SubtleForms\Tests\WP;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Engine\Actions\EmailAction;
 use SubtleForms\Engine\SubmissionContext;

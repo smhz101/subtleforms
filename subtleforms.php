@@ -5,7 +5,7 @@
  * Description: Logic-first, workflow-driven form platform with extension architecture.
  * Version: 2.3.8
  * Author: Muzammil Hussain
- * Requires at least: 6.0
+ * Requires at least: 6.6
  * Requires PHP: 8.1
  * Text Domain: subtleforms
  * Domain Path: /languages
@@ -25,7 +25,7 @@
 
 // If this file is called directly, abort.
 if ( ! defined( 'ABSPATH' ) ) {
-	wp_die( esc_html__( 'Direct access not allowed.', 'subtleforms' ) );
+	exit;
 }
 
 // Define plugin constants.

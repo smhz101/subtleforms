@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SubtleForms REST API Response Helper
  *
@@ -11,6 +12,10 @@
  */
 
 namespace SubtleForms\Api;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use WP_REST_Response;
 

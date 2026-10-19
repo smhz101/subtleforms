@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Form Templates
  *
@@ -9,6 +10,10 @@
  */
 
 namespace SubtleForms\Templates;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Form template definitions.

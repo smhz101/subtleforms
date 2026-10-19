@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SubtleForms Action Interface
  *
@@ -7,6 +8,10 @@
  */
 
 namespace SubtleForms\Contracts;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Engine\SubmissionContext;
 

@@ -857,7 +857,7 @@ final class Uploads {
 		}
 		$uploads = wp_upload_dir( null, false );
 		$legacy  = rtrim( (string) $uploads['basedir'], '/' ) . '/' . self::DIR;
-		$name    = is_dir( $legacy ) ? self::DIR : self::DIR . '-' . strtolower( wp_generate_password( 16, false, false ) );
+		$name    = is_dir( $legacy ) ? self::DIR : self::DIR . '-' . bin2hex( random_bytes( 8 ) );
 		update_option( 'subtleforms_upload_folder', $name, false );
 		return $name;
 	}

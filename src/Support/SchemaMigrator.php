@@ -1,8 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 namespace SubtleForms\Support;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use SubtleForms\Support\Logger;
 class SchemaMigrator {

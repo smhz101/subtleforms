@@ -9,15 +9,15 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-18T21:16:40+00:00\n"
+"POT-Creation-Date: 2026-10-19T00:08:12+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
 
 #. Plugin Name of the plugin
 #: subtleforms.php
-#: src/Admin/AdminMenu.php:579
-#: src/Admin/AdminMenu.php:1246
+#: src/Admin/AdminMenu.php:509
+#: src/Admin/AdminMenu.php:1155
 #: resources/admin/components/builder/CheckoutPanel.jsx:83
 #: resources/blocks/form/edit.jsx:238
 #: resources/blocks/form/edit.jsx:403
@@ -35,23 +35,23 @@ msgid "Muzammil Hussain"
 msgstr ""
 
 #. translators: %s: Current PHP version
-#: src/Activator.php:29
+#: src/Activator.php:30
 #, php-format
 msgid "SubtleForms requires PHP 7.4 or higher. Your server is running PHP %s"
 msgstr ""
 
-#: src/Activator.php:32
-#: src/Activator.php:47
+#: src/Activator.php:33
+#: src/Activator.php:48
 msgid "Plugin Activation Error"
 msgstr ""
 
 #. translators: %s: Current WordPress version
-#: src/Activator.php:44
+#: src/Activator.php:45
 #, php-format
-msgid "SubtleForms requires WordPress 5.0 or higher. You are running %s"
+msgid "SubtleForms requires WordPress 6.6 or higher. You are running %s"
 msgstr ""
 
-#: src/Activator.php:222
+#: src/Activator.php:224
 msgid "Database Creation Error"
 msgstr ""
 
@@ -64,7 +64,7 @@ msgid "Dashboard"
 msgstr ""
 
 #: src/Admin/AdminMenu.php:118
-#: src/Admin/AdminMenu.php:202
+#: src/Admin/AdminMenu.php:207
 #: resources/admin/app/AdminApp.jsx:175
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:35
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:112
@@ -82,22 +82,22 @@ msgstr ""
 msgid "Submissions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:181
-#: src/Admin/AdminMenu.php:182
+#: src/Admin/AdminMenu.php:186
+#: src/Admin/AdminMenu.php:187
 msgid "All Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:191
+#: src/Admin/AdminMenu.php:196
 msgid "Add New Form"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:192
-#: src/Fields/CoreFields.php:1274
+#: src/Admin/AdminMenu.php:197
+#: src/Fields/CoreFields.php:1279
 msgid "Add New"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:212
-#: src/Admin/AdminMenu.php:213
+#: src/Admin/AdminMenu.php:217
+#: src/Admin/AdminMenu.php:218
 #: resources/admin/app/AdminApp.jsx:179
 #: resources/admin/components/AppNav.jsx:44
 #: resources/admin/pages/ToolsPage.jsx:72
@@ -105,8 +105,8 @@ msgstr ""
 msgid "Tools"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:222
-#: src/Admin/AdminMenu.php:223
+#: src/Admin/AdminMenu.php:227
+#: src/Admin/AdminMenu.php:228
 #: resources/admin/app/AdminApp.jsx:180
 #: resources/admin/components/AppNav.jsx:52
 #: resources/admin/pages/ReportsPage.jsx:57
@@ -114,9 +114,9 @@ msgstr ""
 msgid "Reports"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:232
-#: src/Admin/AdminMenu.php:233
-#: src/Admin/AdminMenu.php:693
+#: src/Admin/AdminMenu.php:237
+#: src/Admin/AdminMenu.php:238
+#: src/Admin/AdminMenu.php:623
 #: resources/admin/app/AdminApp.jsx:178
 #: resources/admin/components/AppNav.jsx:60
 #: resources/admin/components/builder/FieldDock.jsx:26
@@ -128,8 +128,8 @@ msgstr ""
 msgid "Payments"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:242
-#: src/Admin/AdminMenu.php:243
+#: src/Admin/AdminMenu.php:247
+#: src/Admin/AdminMenu.php:248
 #: resources/admin/app/AdminApp.jsx:177
 #: resources/admin/components/AppNav.jsx:68
 #: resources/admin/pages/DashboardPage.jsx:177
@@ -137,63 +137,63 @@ msgstr ""
 msgid "Extensions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:252
-#: src/Admin/AdminMenu.php:253
+#: src/Admin/AdminMenu.php:257
+#: src/Admin/AdminMenu.php:258
 #: resources/admin/app/AdminApp.jsx:176
 #: resources/admin/components/AppNav.jsx:76
 #: resources/admin/components/builder/FieldInspector.jsx:170
 #: resources/admin/components/builder/layout/BuilderViewSwitcher.jsx:11
-#: resources/admin/pages/SettingsPage.jsx:150
-#: resources/admin/pages/SettingsPage.jsx:160
-#: resources/admin/pages/SettingsPage.jsx:171
+#: resources/admin/pages/SettingsPage.jsx:143
+#: resources/admin/pages/SettingsPage.jsx:153
+#: resources/admin/pages/SettingsPage.jsx:164
 msgid "Settings"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:397
+#: src/Admin/AdminMenu.php:407
 msgid "Are you sure you want to delete this item?"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:398
-#: src/Frontend/FrontendAssets.php:81
+#: src/Admin/AdminMenu.php:408
+#: src/Frontend/FrontendAssets.php:83
 msgid "An error occurred. Please try again."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:399
-#: src/Admin/AdminMenu.php:1098
+#: src/Admin/AdminMenu.php:409
+#: src/Admin/AdminMenu.php:1028
 msgid "Action completed successfully."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:658
+#: src/Admin/AdminMenu.php:588
 #: resources/admin/components/settings/extensions/WebhooksPanel.jsx:46
 #: resources/admin/pages/ToolsPage.jsx:16
 #: resources/admin/pages/ToolsPage.jsx:468
 msgid "Webhooks"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:659
+#: src/Admin/AdminMenu.php:589
 msgid "Send each entry as JSON to any URL, with retries and signed requests."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:663
+#: src/Admin/AdminMenu.php:593
 #: resources/admin/components/settings/extensions/EmailMarketingPanel.jsx:70
 msgid "Email Marketing"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:664
+#: src/Admin/AdminMenu.php:594
 msgid "Add people who fill in a form to Mailchimp, Brevo or Kit."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:668
+#: src/Admin/AdminMenu.php:598
 #: resources/admin/components/builder/IntegrationsPanel.jsx:344
 #: resources/admin/components/settings/extensions/CrmPanel.jsx:21
 msgid "CRM"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:669
+#: src/Admin/AdminMenu.php:599
 msgid "Create or update HubSpot contacts, or send contacts to Zapier or Make."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:673
+#: src/Admin/AdminMenu.php:603
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:259
 #: resources/admin/components/analytics/PerformanceCell.jsx:24
 #: resources/admin/components/builder/IntegrationsPanel.jsx:421
@@ -201,97 +201,97 @@ msgstr ""
 msgid "Analytics"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:674
+#: src/Admin/AdminMenu.php:604
 msgid "Views, submissions and conversion rate for every form."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:678
+#: src/Admin/AdminMenu.php:608
 #: resources/admin/components/settings/extensions/EcommercePanel.jsx:22
 msgid "WooCommerce"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:679
+#: src/Admin/AdminMenu.php:609
 msgid "Take form payments through the WooCommerce checkout and sell WooCommerce products from any form."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:683
+#: src/Admin/AdminMenu.php:613
 #: resources/admin/components/settings/extensions/PdfPanel.jsx:18
 msgid "Entry PDF"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:684
+#: src/Admin/AdminMenu.php:614
 msgid "Download any entry as a PDF and attach it to notification emails."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:688
+#: src/Admin/AdminMenu.php:618
 #: resources/admin/components/settings/extensions/MultilanguagePanel.jsx:64
 msgid "Multilanguage"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:689
+#: src/Admin/AdminMenu.php:619
 msgid "Register form strings with WPML or Polylang for full translation support."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:694
+#: src/Admin/AdminMenu.php:624
 msgid "Accept Stripe or PayPal payments directly through your forms."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:826
+#: src/Admin/AdminMenu.php:756
 msgid "Security check failed."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:851
-#: src/Admin/AdminMenu.php:864
+#: src/Admin/AdminMenu.php:781
+#: src/Admin/AdminMenu.php:794
+#: src/Admin/AdminMenu.php:813
+#: src/Admin/AdminMenu.php:836
+#: src/Admin/AdminMenu.php:862
+#: src/Admin/AdminMenu.php:873
 #: src/Admin/AdminMenu.php:883
-#: src/Admin/AdminMenu.php:906
-#: src/Admin/AdminMenu.php:932
-#: src/Admin/AdminMenu.php:943
-#: src/Admin/AdminMenu.php:953
-#: src/Admin/AdminMenu.php:960
-#: src/Admin/AdminMenu.php:971
+#: src/Admin/AdminMenu.php:890
+#: src/Admin/AdminMenu.php:901
 msgid "You do not have permission to access this page."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:894
-#: src/Admin/AdminMenu.php:1026
-#: src/Frontend/Shortcode.php:51
+#: src/Admin/AdminMenu.php:824
+#: src/Admin/AdminMenu.php:956
+#: src/Frontend/Shortcode.php:56
 msgid "Form not found."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:999
-#: src/Admin/AdminMenu.php:1021
-#: src/Admin/AdminMenu.php:1054
+#: src/Admin/AdminMenu.php:929
+#: src/Admin/AdminMenu.php:951
+#: src/Admin/AdminMenu.php:984
 #: src/Api/AnalyticsApi.php:130
 msgid "Invalid request."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1106
+#: src/Admin/AdminMenu.php:1036
 msgid "Coming Soon"
 msgstr ""
 
 #. translators: %s: Name of the interface being developed
-#: src/Admin/AdminMenu.php:1110
+#: src/Admin/AdminMenu.php:1040
 #, php-format
 msgid "The %s interface is under development."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1114
+#: src/Admin/AdminMenu.php:1044
 msgid "This is a placeholder. Template files will be created in the templates/admin/ directory."
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1119
+#: src/Admin/AdminMenu.php:1049
 msgid "Your Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1123
-#: src/Fields/CoreFields.php:1158
-#: src/Fields/CoreFields.php:1186
-#: src/Fields/CoreFields.php:1355
+#: src/Admin/AdminMenu.php:1053
+#: src/Fields/CoreFields.php:1163
+#: src/Fields/CoreFields.php:1191
+#: src/Fields/CoreFields.php:1360
 msgid "Title"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1124
-#: src/Api/SubmissionsApi.php:1047
+#: src/Admin/AdminMenu.php:1054
+#: src/Api/SubmissionsApi.php:1052
 #: src/Privacy/PrivacyExporter.php:100
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:299
 #: resources/admin/components/FormsList.jsx:38
@@ -304,16 +304,16 @@ msgstr ""
 msgid "Status"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1125
+#: src/Admin/AdminMenu.php:1055
 msgid "Created"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1126
+#: src/Admin/AdminMenu.php:1056
 #: resources/admin/pages/PaymentsPage.jsx:509
 msgid "Actions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1151
+#: src/Admin/AdminMenu.php:1081
 #: resources/admin/components/builder/ContainerWrapper.jsx:77
 #: resources/admin/components/builder/FieldInspector.jsx:239
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:54
@@ -321,20 +321,20 @@ msgstr ""
 msgid "Delete"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1165
+#: src/Admin/AdminMenu.php:1095
 msgid "Total Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1169
+#: src/Admin/AdminMenu.php:1099
 msgid "Active Forms"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1173
+#: src/Admin/AdminMenu.php:1103
 msgid "Total Submissions"
 msgstr ""
 
-#: src/Admin/AdminMenu.php:1223
-#: src/Admin/AdminMenu.php:1228
+#: src/Admin/AdminMenu.php:1132
+#: src/Admin/AdminMenu.php:1137
 msgid "WordPress Admin"
 msgstr ""
 
@@ -345,15 +345,15 @@ msgid "<strong>SubtleForms:</strong> The REST API requires pretty permalinks to 
 msgstr ""
 
 #: src/Api/AnalyticsApi.php:142
-#: src/Api/ApiGuards.php:161
-#: src/Api/ApiGuards.php:174
-#: src/Api/ApiGuards.php:192
-#: src/Api/ApiGuards.php:205
+#: src/Api/ApiGuards.php:168
+#: src/Api/ApiGuards.php:181
+#: src/Api/ApiGuards.php:199
+#: src/Api/ApiGuards.php:212
 #: src/Api/DashboardApi.php:461
-#: src/Api/OnboardingApi.php:245
-#: src/Api/OnboardingApi.php:266
-#: src/Api/SettingsApi.php:257
-#: src/Api/SettingsApi.php:328
+#: src/Api/OnboardingApi.php:250
+#: src/Api/OnboardingApi.php:271
+#: src/Api/SettingsApi.php:261
+#: src/Api/SettingsApi.php:332
 msgid "You are not allowed to perform this action."
 msgstr ""
 
@@ -361,65 +361,65 @@ msgstr ""
 msgid "Form analytics reports are part of SubtleForms Pro."
 msgstr ""
 
-#: src/Api/ApiGuards.php:43
+#: src/Api/ApiGuards.php:50
 #: src/Api/DashboardApi.php:441
 #: src/Api/PaymentsApi.php:132
-#: src/Api/SettingsApi.php:152
+#: src/Api/SettingsApi.php:156
 #: src/Extensions/PaymentsExtension.php:98
 msgid "Too many requests. Please try again later."
 msgstr ""
 
 #. translators: %s: resource type (e.g. "form", "submission")
-#: src/Api/ApiGuards.php:77
+#: src/Api/ApiGuards.php:84
 #, php-format
 msgid "The %s has been modified by another user. Please refresh and try again."
 msgstr ""
 
-#: src/Api/ApiGuards.php:133
-#: src/Api/ApiGuards.php:142
+#: src/Api/ApiGuards.php:140
+#: src/Api/ApiGuards.php:149
 #: src/Api/DashboardApi.php:470
-#: src/Api/OnboardingApi.php:254
-#: src/Api/OnboardingApi.php:275
-#: src/Api/SettingsApi.php:337
+#: src/Api/OnboardingApi.php:259
+#: src/Api/OnboardingApi.php:280
+#: src/Api/SettingsApi.php:341
 msgid "Security check failed. Please refresh and try again."
 msgstr ""
 
-#: src/Api/ApiResponse.php:93
+#: src/Api/ApiResponse.php:98
 msgid "Resource not found"
 msgstr ""
 
-#: src/Api/ApiResponse.php:107
+#: src/Api/ApiResponse.php:112
 msgid "Forbidden"
 msgstr ""
 
-#: src/Api/ApiResponse.php:121
+#: src/Api/ApiResponse.php:126
 msgid "Unauthorized"
 msgstr ""
 
-#: src/Api/ApiResponse.php:135
+#: src/Api/ApiResponse.php:140
 msgid "Bad request"
 msgstr ""
 
-#: src/Api/ApiResponse.php:151
+#: src/Api/ApiResponse.php:156
 msgid "Validation failed"
 msgstr ""
 
-#: src/Api/ApiResponse.php:173
+#: src/Api/ApiResponse.php:178
 msgid "Resource version conflict"
 msgstr ""
 
-#: src/Api/ApiResponse.php:198
+#: src/Api/ApiResponse.php:203
 msgid "Too many requests"
 msgstr ""
 
-#: src/Api/ApiResponse.php:225
+#: src/Api/ApiResponse.php:230
 msgid "Internal server error"
 msgstr ""
 
 #: src/Api/DashboardApi.php:247
-#: src/Api/SubmissionsApi.php:471
-#: src/Api/SubmissionsApi.php:473
-#: src/Api/SubmissionsApi.php:514
+#: src/Api/SubmissionsApi.php:476
+#: src/Api/SubmissionsApi.php:478
+#: src/Api/SubmissionsApi.php:519
 #: src/Privacy/PrivacyExporter.php:87
 msgid "Unknown Form"
 msgstr ""
@@ -456,143 +456,143 @@ msgid_plural "%d days ago"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Api/FormsApi.php:321
-#: src/Api/FormsApi.php:329
-#: src/Api/FormsApi.php:462
-#: src/Api/FormsApi.php:476
+#: src/Api/FormsApi.php:326
+#: src/Api/FormsApi.php:334
+#: src/Api/FormsApi.php:467
+#: src/Api/FormsApi.php:481
 msgid "Form not available"
 msgstr ""
 
-#: src/Api/FormsApi.php:429
-#: src/Api/FormsApi.php:587
-#: src/Api/FormsApi.php:845
-#: src/Api/FormsApi.php:948
-#: src/Api/FormsApi.php:990
-#: src/Api/FormsApi.php:1035
+#: src/Api/FormsApi.php:434
+#: src/Api/FormsApi.php:592
+#: src/Api/FormsApi.php:851
+#: src/Api/FormsApi.php:954
+#: src/Api/FormsApi.php:996
+#: src/Api/FormsApi.php:1041
 #: src/Api/PaymentsApi.php:222
 #: src/Api/PublicSubmitApi.php:172
 #: src/Extensions/PaymentsExtension.php:125
 msgid "Form not found"
 msgstr ""
 
-#: src/Api/FormsApi.php:483
-#: src/Api/FormsApi.php:487
+#: src/Api/FormsApi.php:488
+#: src/Api/FormsApi.php:492
 msgid "Schema not available"
 msgstr ""
 
-#: src/Api/FormsApi.php:529
+#: src/Api/FormsApi.php:534
 msgid "Failed to load form schema"
 msgstr ""
 
-#: src/Api/FormsApi.php:655
+#: src/Api/FormsApi.php:660
 msgid "Schema validation failed"
 msgstr ""
 
-#: src/Api/FormsApi.php:671
+#: src/Api/FormsApi.php:676
 msgid "Schema was saved but could not be loaded back"
 msgstr ""
 
-#: src/Api/FormsApi.php:689
+#: src/Api/FormsApi.php:694
 msgid "Failed to save draft schema"
 msgstr ""
 
-#: src/Api/FormsApi.php:769
+#: src/Api/FormsApi.php:775
 msgid "This template requires a Pro license."
 msgstr ""
 
 #. translators: %s: reason the form could not be created
-#: src/Api/FormsApi.php:818
+#: src/Api/FormsApi.php:824
 #, php-format
 msgid "The form could not be created: %s"
 msgstr ""
 
-#: src/Api/FormsApi.php:880
+#: src/Api/FormsApi.php:886
 msgid "Cannot publish form: Failed to activate schema."
 msgstr ""
 
-#: src/Api/FormsApi.php:887
+#: src/Api/FormsApi.php:893
 msgid "Cannot publish form: No schema exists. Please save your form first."
 msgstr ""
 
-#: src/Api/FormsApi.php:891
+#: src/Api/FormsApi.php:897
 msgid "Cannot publish form: No active schema version. Please save and activate a schema first."
 msgstr ""
 
-#: src/Api/FormsApi.php:897
+#: src/Api/FormsApi.php:903
 msgid "Cannot publish form: Schema data is corrupt or invalid."
 msgstr ""
 
-#: src/Api/FormsApi.php:914
+#: src/Api/FormsApi.php:920
 msgid "Cannot publish form: Fix validation errors."
 msgstr ""
 
-#: src/Api/FormsApi.php:919
+#: src/Api/FormsApi.php:925
 msgid "Cannot publish form:"
 msgstr ""
 
-#: src/Api/FormsApi.php:994
+#: src/Api/FormsApi.php:1000
 msgid "Form is not in the Trash"
 msgstr ""
 
-#: src/Api/FormsApi.php:999
+#: src/Api/FormsApi.php:1005
 msgid "The form could not be restored. Please try again."
 msgstr ""
 
-#: src/Api/FormsApi.php:1038
+#: src/Api/FormsApi.php:1044
 msgid "Restore this form from the Trash before copying it."
 msgstr ""
 
 #. translators: %s: error message
-#: src/Api/FormsApi.php:1051
+#: src/Api/FormsApi.php:1057
 #, php-format
 msgid "The form could not be copied because its fields could not be read: %s"
 msgstr ""
 
 #. translators: %s: title of the form being copied
 #. translators: %s: form title
-#: src/Api/FormsApi.php:1062
+#: src/Api/FormsApi.php:1068
 #: resources/admin/components/FormsList.jsx:484
 #, php-format,js-format
 msgid "%s (copy)"
 msgstr ""
 
-#: src/Api/FormsApi.php:1081
+#: src/Api/FormsApi.php:1087
 msgid "The copy could not be created in the database. Please try again."
 msgstr ""
 
 #. translators: %s: error message
-#: src/Api/FormsApi.php:1092
+#: src/Api/FormsApi.php:1098
 #, php-format
 msgid "The form could not be copied: %s"
 msgstr ""
 
-#: src/Api/OnboardingApi.php:103
-#: src/Api/OnboardingApi.php:166
-#: src/Api/OnboardingApi.php:205
+#: src/Api/OnboardingApi.php:108
+#: src/Api/OnboardingApi.php:171
+#: src/Api/OnboardingApi.php:210
 msgid "User not authenticated"
 msgstr ""
 
-#: src/Api/OnboardingApi.php:111
+#: src/Api/OnboardingApi.php:116
 msgid "Onboarding dismissed"
 msgstr ""
 
-#: src/Api/OnboardingApi.php:141
+#: src/Api/OnboardingApi.php:146
 msgid "SubtleForms: Test email"
 msgstr ""
 
-#: src/Api/OnboardingApi.php:142
+#: src/Api/OnboardingApi.php:147
 msgid "This is a test email sent from SubtleForms to verify delivery to your admin email address."
 msgstr ""
 
-#: src/Api/OnboardingApi.php:153
+#: src/Api/OnboardingApi.php:158
 msgid "Failed to send test email"
 msgstr ""
 
-#: src/Api/OnboardingApi.php:174
+#: src/Api/OnboardingApi.php:179
 msgid "Create wizard dismissed"
 msgstr ""
 
-#: src/Api/OnboardingApi.php:213
+#: src/Api/OnboardingApi.php:218
 msgid "Tour completed"
 msgstr ""
 
@@ -616,9 +616,9 @@ msgid "Thank you."
 msgstr ""
 
 #: src/Api/PublicSubmitApi.php:162
-#: src/Support/Captcha/HCaptchaProvider.php:99
-#: src/Support/Captcha/RecaptchaProvider.php:123
-#: src/Support/Captcha/TurnstileProvider.php:100
+#: src/Support/Captcha/HCaptchaProvider.php:103
+#: src/Support/Captcha/RecaptchaProvider.php:127
+#: src/Support/Captcha/TurnstileProvider.php:104
 msgid "CAPTCHA verification failed."
 msgstr ""
 
@@ -663,140 +663,140 @@ msgstr ""
 msgid "Online payment is not available right now. Please contact the site owner."
 msgstr ""
 
-#: src/Api/SettingsApi.php:179
+#: src/Api/SettingsApi.php:183
 msgid "Invalid settings data"
 msgstr ""
 
-#: src/Api/SettingsApi.php:205
+#: src/Api/SettingsApi.php:209
 msgid "Settings updated successfully"
 msgstr ""
 
-#: src/Api/SettingsApi.php:215
+#: src/Api/SettingsApi.php:219
 msgid "Failed to update settings: "
 msgstr ""
 
-#: src/Api/SettingsApi.php:239
+#: src/Api/SettingsApi.php:243
 msgid "Settings reset to defaults"
 msgstr ""
 
-#: src/Api/SettingsApi.php:244
+#: src/Api/SettingsApi.php:248
 msgid "Failed to reset settings: "
 msgstr ""
 
-#: src/Api/SettingsApi.php:268
+#: src/Api/SettingsApi.php:272
 msgid "Choose a density and a reading pane."
 msgstr ""
 
-#: src/Api/SettingsApi.php:308
+#: src/Api/SettingsApi.php:312
 msgid "Settings have been modified by another user. Please refresh and try again."
 msgstr ""
 
-#: src/Api/SettingsApi.php:364
+#: src/Api/SettingsApi.php:368
 msgid "Email address must be valid or left empty"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:502
-#: src/Api/SubmissionsApi.php:556
-#: src/Api/SubmissionsApi.php:688
-#: src/Api/SubmissionsApi.php:735
-#: src/Api/SubmissionsApi.php:804
-#: src/Api/SubmissionsApi.php:846
-#: src/Api/SubmissionsApi.php:878
-#: src/Api/SubmissionsApi.php:899
+#: src/Api/SubmissionsApi.php:507
+#: src/Api/SubmissionsApi.php:561
+#: src/Api/SubmissionsApi.php:693
+#: src/Api/SubmissionsApi.php:740
+#: src/Api/SubmissionsApi.php:809
+#: src/Api/SubmissionsApi.php:851
+#: src/Api/SubmissionsApi.php:883
+#: src/Api/SubmissionsApi.php:904
 #: resources/admin/pages/SubmissionDetailPage.jsx:558
 #: resources/admin/pages/SubmissionDetailPage.jsx:576
 msgid "Submission not found"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:583
+#: src/Api/SubmissionsApi.php:588
 msgid "No valid changes provided"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:587
+#: src/Api/SubmissionsApi.php:592
 msgid "Restore this entry from the Trash first."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:610
+#: src/Api/SubmissionsApi.php:615
 msgid "Select at least one entry."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:613
+#: src/Api/SubmissionsApi.php:618
 msgid "Select 500 entries or fewer at a time."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:680
+#: src/Api/SubmissionsApi.php:685
 msgid "Write a note first."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:701
+#: src/Api/SubmissionsApi.php:706
 msgid "Note not found"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:714
+#: src/Api/SubmissionsApi.php:719
 #: resources/admin/pages/SubmissionDetailPage.jsx:1024
 msgid "Unknown user"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:739
+#: src/Api/SubmissionsApi.php:744
 msgid "Restore this entry from the Trash before resending its notifications."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:756
+#: src/Api/SubmissionsApi.php:761
 msgid "This entry’s form could not be loaded."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:770
+#: src/Api/SubmissionsApi.php:775
 msgid "This form has no email notifications to send."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:782
+#: src/Api/SubmissionsApi.php:787
 #: resources/admin/pages/SubmissionDetailPage.jsx:450
 msgid "The notifications could not be sent."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:811
+#: src/Api/SubmissionsApi.php:816
 msgid "The submission could not be moved to the Trash."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:822
+#: src/Api/SubmissionsApi.php:827
 msgid "The submission could not be deleted."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:849
+#: src/Api/SubmissionsApi.php:854
 msgid "This entry is not in the Trash."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:853
+#: src/Api/SubmissionsApi.php:858
 #: resources/admin/pages/SubmissionDetailPage.jsx:505
 msgid "The entry could not be restored. Please try again."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:935
+#: src/Api/SubmissionsApi.php:940
 msgid "Error fetching unread count"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:953
+#: src/Api/SubmissionsApi.php:958
 msgid "CSV export is part of SubtleForms Pro."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:983
+#: src/Api/SubmissionsApi.php:988
 msgid "No submissions to export"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:1045
+#: src/Api/SubmissionsApi.php:1050
 #: resources/admin/components/SubmissionsTable.jsx:37
 msgid "ID"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:1046
+#: src/Api/SubmissionsApi.php:1051
 msgid "Form ID"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:1048
+#: src/Api/SubmissionsApi.php:1053
 msgid "Submitted At"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:1082
+#: src/Api/SubmissionsApi.php:1087
 msgid "Signed"
 msgstr ""
 
@@ -820,75 +820,75 @@ msgstr ""
 msgid "Choose Gravity Forms or Fluent Forms."
 msgstr ""
 
-#: src/Blocks/SubtleFormsBlock.php:78
+#: src/Blocks/SubtleFormsBlock.php:100
 msgid "This form is not available or has been unpublished."
 msgstr ""
 
-#: src/Engine/Actions/EmailAction.php:124
+#: src/Engine/Actions/EmailAction.php:129
 msgid "A new entry was submitted with no answers."
 msgstr ""
 
 #. translators: %s: matrix row label
-#: src/Engine/FieldValidator.php:99
+#: src/Engine/FieldValidator.php:104
 #: resources/frontend/utils/fieldValidation.js:165
 #, php-format,js-format
 msgid "Please answer the \"%s\" row."
 msgstr ""
 
 #. translators: %d: maximum number of characters
-#: src/Engine/FieldValidator.php:308
+#: src/Engine/FieldValidator.php:313
 #: resources/frontend/utils/fieldValidation.js:202
 #, php-format,js-format
 msgid "Must be %d characters or fewer."
 msgstr ""
 
 #. translators: %d: minimum number of characters
-#: src/Engine/FieldValidator.php:313
+#: src/Engine/FieldValidator.php:318
 #: resources/frontend/utils/fieldValidation.js:195
 #, php-format,js-format
 msgid "Must be at least %d characters."
 msgstr ""
 
 #. translators: %s: step increment
-#: src/Engine/FieldValidator.php:353
+#: src/Engine/FieldValidator.php:358
 #: resources/frontend/utils/fieldValidation.js:238
 #, php-format,js-format
 msgid "Must match the step of %s."
 msgstr ""
 
 #. translators: %s: earliest allowed date
-#: src/Engine/FieldValidator.php:471
+#: src/Engine/FieldValidator.php:476
 #: resources/frontend/utils/fieldValidation.js:251
 #, php-format,js-format
 msgid "Date must be on or after %s."
 msgstr ""
 
 #. translators: %s: latest allowed date
-#: src/Engine/FieldValidator.php:476
+#: src/Engine/FieldValidator.php:481
 #: resources/frontend/utils/fieldValidation.js:258
 #, php-format,js-format
 msgid "Date must be on or before %s."
 msgstr ""
 
 #. translators: %s: field label
-#: src/Engine/FieldValidator.php:591
+#: src/Engine/FieldValidator.php:596
 #, php-format
 msgid "%s is required."
 msgstr ""
 
 #. translators: %s: field key
-#: src/Engine/FieldValidator.php:594
+#: src/Engine/FieldValidator.php:599
 #, php-format
 msgid "Field \"%s\" is required."
 msgstr ""
 
-#: src/Engine/FieldValidator.php:631
+#: src/Engine/FieldValidator.php:636
 #: resources/frontend/utils/fieldValidation.js:210
 msgid "Please match the requested format."
 msgstr ""
 
 #. translators: %d: minimum number of selections
-#: src/Engine/FieldValidator.php:652
+#: src/Engine/FieldValidator.php:657
 #: resources/frontend/utils/fieldValidation.js:278
 #, php-format,js-format
 msgid "Select at least %d option."
@@ -897,7 +897,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: maximum number of selections
-#: src/Engine/FieldValidator.php:656
+#: src/Engine/FieldValidator.php:661
 #: resources/frontend/utils/fieldValidation.js:285
 #, php-format,js-format
 msgid "Select no more than %d option."
@@ -905,8 +905,8 @@ msgid_plural "Select no more than %d options."
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Engine/FieldValidator.php:673
-#: src/Engine/FieldValidator.php:679
+#: src/Engine/FieldValidator.php:678
+#: src/Engine/FieldValidator.php:684
 msgid "Please choose a value on the scale."
 msgstr ""
 
@@ -931,7 +931,7 @@ msgstr ""
 msgid "This form has reached its maximum number of entries."
 msgstr ""
 
-#: src/Engine/SpamProtection.php:138
+#: src/Engine/SpamProtection.php:143
 #: resources/frontend/components/FormRenderer.jsx:1170
 msgid "Leave this field empty"
 msgstr ""
@@ -944,49 +944,49 @@ msgstr ""
 msgid "Payment processing requires the SubtleForms Pro plugin."
 msgstr ""
 
-#: src/Fields/CoreFields.php:35
+#: src/Fields/CoreFields.php:40
 #: src/Fields/FieldSettings.php:53
 #: resources/admin/components/builder/appearance/labels.js:16
 msgid "Text"
 msgstr ""
 
-#: src/Fields/CoreFields.php:48
-#: src/Fields/CoreFields.php:83
-#: src/Fields/CoreFields.php:125
-#: src/Fields/CoreFields.php:168
-#: src/Fields/CoreFields.php:214
-#: src/Fields/CoreFields.php:276
-#: src/Fields/CoreFields.php:307
-#: src/Fields/CoreFields.php:362
-#: src/Fields/CoreFields.php:398
-#: src/Fields/CoreFields.php:439
-#: src/Fields/CoreFields.php:462
-#: src/Fields/CoreFields.php:490
-#: src/Fields/CoreFields.php:520
-#: src/Fields/CoreFields.php:550
-#: src/Fields/CoreFields.php:601
-#: src/Fields/CoreFields.php:659
-#: src/Fields/CoreFields.php:692
-#: src/Fields/CoreFields.php:729
-#: src/Fields/CoreFields.php:756
-#: src/Fields/CoreFields.php:786
-#: src/Fields/CoreFields.php:814
-#: src/Fields/CoreFields.php:843
-#: src/Fields/CoreFields.php:874
-#: src/Fields/CoreFields.php:911
-#: src/Fields/CoreFields.php:936
-#: src/Fields/CoreFields.php:956
-#: src/Fields/CoreFields.php:980
-#: src/Fields/CoreFields.php:1002
-#: src/Fields/CoreFields.php:1029
-#: src/Fields/CoreFields.php:1209
-#: src/Fields/CoreFields.php:1323
-#: src/Fields/CoreFields.php:1389
-#: src/Fields/CoreFields.php:1429
-#: src/Fields/CoreFields.php:1585
-#: src/Fields/CoreFields.php:1645
-#: src/Fields/CoreFields.php:1715
-#: src/Fields/CoreFields.php:1751
+#: src/Fields/CoreFields.php:53
+#: src/Fields/CoreFields.php:88
+#: src/Fields/CoreFields.php:130
+#: src/Fields/CoreFields.php:173
+#: src/Fields/CoreFields.php:219
+#: src/Fields/CoreFields.php:281
+#: src/Fields/CoreFields.php:312
+#: src/Fields/CoreFields.php:367
+#: src/Fields/CoreFields.php:403
+#: src/Fields/CoreFields.php:444
+#: src/Fields/CoreFields.php:467
+#: src/Fields/CoreFields.php:495
+#: src/Fields/CoreFields.php:525
+#: src/Fields/CoreFields.php:555
+#: src/Fields/CoreFields.php:606
+#: src/Fields/CoreFields.php:664
+#: src/Fields/CoreFields.php:697
+#: src/Fields/CoreFields.php:734
+#: src/Fields/CoreFields.php:761
+#: src/Fields/CoreFields.php:791
+#: src/Fields/CoreFields.php:819
+#: src/Fields/CoreFields.php:848
+#: src/Fields/CoreFields.php:879
+#: src/Fields/CoreFields.php:916
+#: src/Fields/CoreFields.php:941
+#: src/Fields/CoreFields.php:961
+#: src/Fields/CoreFields.php:985
+#: src/Fields/CoreFields.php:1007
+#: src/Fields/CoreFields.php:1034
+#: src/Fields/CoreFields.php:1214
+#: src/Fields/CoreFields.php:1328
+#: src/Fields/CoreFields.php:1394
+#: src/Fields/CoreFields.php:1434
+#: src/Fields/CoreFields.php:1590
+#: src/Fields/CoreFields.php:1650
+#: src/Fields/CoreFields.php:1720
+#: src/Fields/CoreFields.php:1756
 #: src/Fields/FieldSettings.php:271
 #: src/Fields/FieldSettings.php:546
 #: src/Fields/FieldsV2.php:58
@@ -1001,35 +1001,35 @@ msgstr ""
 msgid "Label"
 msgstr ""
 
-#: src/Fields/CoreFields.php:53
-#: src/Fields/CoreFields.php:88
-#: src/Fields/CoreFields.php:130
-#: src/Fields/CoreFields.php:173
-#: src/Fields/CoreFields.php:219
-#: src/Fields/CoreFields.php:281
-#: src/Fields/CoreFields.php:312
-#: src/Fields/CoreFields.php:495
-#: src/Fields/CoreFields.php:525
-#: src/Fields/CoreFields.php:555
-#: src/Fields/CoreFields.php:606
-#: src/Fields/CoreFields.php:1590
-#: src/Fields/CoreFields.php:1720
+#: src/Fields/CoreFields.php:58
+#: src/Fields/CoreFields.php:93
+#: src/Fields/CoreFields.php:135
+#: src/Fields/CoreFields.php:178
+#: src/Fields/CoreFields.php:224
+#: src/Fields/CoreFields.php:286
+#: src/Fields/CoreFields.php:317
+#: src/Fields/CoreFields.php:500
+#: src/Fields/CoreFields.php:530
+#: src/Fields/CoreFields.php:560
+#: src/Fields/CoreFields.php:611
+#: src/Fields/CoreFields.php:1595
+#: src/Fields/CoreFields.php:1725
 #: src/Fields/FieldSettings.php:283
 #: resources/admin/utils/saveErrors.js:25
 msgid "Placeholder"
 msgstr ""
 
-#: src/Fields/CoreFields.php:58
-#: src/Fields/CoreFields.php:142
+#: src/Fields/CoreFields.php:63
+#: src/Fields/CoreFields.php:147
 msgid "Max Length"
 msgstr ""
 
-#: src/Fields/CoreFields.php:69
-#: src/Templates/FormTemplates.php:160
+#: src/Fields/CoreFields.php:74
+#: src/Templates/FormTemplates.php:165
 #: resources/admin/components/builder/CheckoutPanel.jsx:18
 #: resources/admin/components/builder/IntegrationsPanel.jsx:107
 #: resources/admin/components/OnboardingWizard.jsx:88
-#: resources/admin/pages/SettingsPage.jsx:44
+#: resources/admin/pages/SettingsPage.jsx:43
 #: resources/admin/templates/free/contact.js:24
 #: resources/admin/templates/free/contact.js:112
 #: resources/admin/templates/free/feedback.js:24
@@ -1038,384 +1038,384 @@ msgstr ""
 msgid "Email"
 msgstr ""
 
-#: src/Fields/CoreFields.php:93
+#: src/Fields/CoreFields.php:98
 msgid "RFC Validation"
 msgstr ""
 
-#: src/Fields/CoreFields.php:94
+#: src/Fields/CoreFields.php:99
 msgid "Use strict RFC 5322 email validation"
 msgstr ""
 
-#: src/Fields/CoreFields.php:99
-#: src/Fields/CoreFields.php:467
+#: src/Fields/CoreFields.php:104
+#: src/Fields/CoreFields.php:472
 msgid "Allow Multiple"
 msgstr ""
 
-#: src/Fields/CoreFields.php:100
+#: src/Fields/CoreFields.php:105
 msgid "Allow comma-separated email addresses"
 msgstr ""
 
-#: src/Fields/CoreFields.php:111
+#: src/Fields/CoreFields.php:116
 msgid "Textarea"
 msgstr ""
 
-#: src/Fields/CoreFields.php:135
+#: src/Fields/CoreFields.php:140
 #: src/Fields/FieldSettings.php:428
 msgid "Rows"
 msgstr ""
 
-#: src/Fields/CoreFields.php:153
+#: src/Fields/CoreFields.php:158
 msgid "Number"
 msgstr ""
 
-#: src/Fields/CoreFields.php:178
+#: src/Fields/CoreFields.php:183
 msgid "Minimum Value"
 msgstr ""
 
-#: src/Fields/CoreFields.php:183
+#: src/Fields/CoreFields.php:188
 msgid "Maximum Value"
 msgstr ""
 
-#: src/Fields/CoreFields.php:188
-#: src/Fields/CoreFields.php:889
-#: src/Fields/CoreFields.php:1607
+#: src/Fields/CoreFields.php:193
+#: src/Fields/CoreFields.php:894
+#: src/Fields/CoreFields.php:1612
 msgid "Step size"
 msgstr ""
 
-#: src/Fields/CoreFields.php:199
-#: src/Fields/CoreFields.php:537
+#: src/Fields/CoreFields.php:204
+#: src/Fields/CoreFields.php:542
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:146
 #: resources/admin/components/builder/CheckoutPanel.jsx:21
 #: resources/admin/components/OnboardingWizard.jsx:116
 msgid "Phone"
 msgstr ""
 
-#: src/Fields/CoreFields.php:224
+#: src/Fields/CoreFields.php:229
 #: resources/frontend/components/fields/PhoneField.jsx:148
 msgid "Country code"
 msgstr ""
 
-#: src/Fields/CoreFields.php:225
+#: src/Fields/CoreFields.php:230
 msgid "Add a searchable country list with dial codes in front of the number."
 msgstr ""
 
-#: src/Fields/CoreFields.php:231
-#: src/Fields/CoreFields.php:611
+#: src/Fields/CoreFields.php:236
+#: src/Fields/CoreFields.php:616
 msgid "Default country"
 msgstr ""
 
-#: src/Fields/CoreFields.php:233
+#: src/Fields/CoreFields.php:238
 msgid "Two-letter country code used when the country picker is on, for example US, GB or PK."
 msgstr ""
 
-#: src/Fields/CoreFields.php:239
-#: src/Fields/CoreFields.php:560
+#: src/Fields/CoreFields.php:244
+#: src/Fields/CoreFields.php:565
 msgid "Format"
 msgstr ""
 
-#: src/Fields/CoreFields.php:243
-#: src/Fields/CoreFields.php:564
+#: src/Fields/CoreFields.php:248
+#: src/Fields/CoreFields.php:569
 msgid "International"
 msgstr ""
 
-#: src/Fields/CoreFields.php:247
-#: src/Fields/CoreFields.php:568
+#: src/Fields/CoreFields.php:252
+#: src/Fields/CoreFields.php:573
 msgid "US"
 msgstr ""
 
-#: src/Fields/CoreFields.php:251
-#: src/Fields/CoreFields.php:572
+#: src/Fields/CoreFields.php:256
+#: src/Fields/CoreFields.php:577
 #: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:205
 msgid "Custom"
 msgstr ""
 
-#: src/Fields/CoreFields.php:264
+#: src/Fields/CoreFields.php:269
 msgid "URL"
 msgstr ""
 
-#: src/Fields/CoreFields.php:292
+#: src/Fields/CoreFields.php:297
 msgid "Password"
 msgstr ""
 
-#: src/Fields/CoreFields.php:317
+#: src/Fields/CoreFields.php:322
 msgid "Minimum Length"
 msgstr ""
 
-#: src/Fields/CoreFields.php:322
+#: src/Fields/CoreFields.php:327
 msgid "Show Strength Meter"
 msgstr ""
 
-#: src/Fields/CoreFields.php:327
+#: src/Fields/CoreFields.php:332
 msgid "Require Confirmation"
 msgstr ""
 
-#: src/Fields/CoreFields.php:332
+#: src/Fields/CoreFields.php:337
 msgid "Store a hash"
 msgstr ""
 
-#: src/Fields/CoreFields.php:333
+#: src/Fields/CoreFields.php:338
 msgid "Passwords are never stored as typed. By default the entry only records that a password was provided. Turn this on to keep a one-way hash instead. Passwords are never included in emails or exports."
 msgstr ""
 
-#: src/Fields/CoreFields.php:346
+#: src/Fields/CoreFields.php:351
 msgid "Checkbox"
 msgstr ""
 
-#: src/Fields/CoreFields.php:356
+#: src/Fields/CoreFields.php:361
 #: resources/admin/components/builder/FieldRenderer.jsx:345
 #: resources/frontend/components/FieldRenderer.jsx:735
 msgid "I agree"
 msgstr ""
 
-#: src/Fields/CoreFields.php:367
+#: src/Fields/CoreFields.php:372
 msgid "Checkbox label"
 msgstr ""
 
-#: src/Fields/CoreFields.php:368
+#: src/Fields/CoreFields.php:373
 msgid "Text shown next to the checkbox."
 msgstr ""
 
-#: src/Fields/CoreFields.php:382
+#: src/Fields/CoreFields.php:387
 msgid "Consent"
 msgstr ""
 
-#: src/Fields/CoreFields.php:390
+#: src/Fields/CoreFields.php:395
 #: resources/admin/components/builder/FieldRenderer.jsx:360
 #: resources/frontend/components/FieldRenderer.jsx:743
 msgid "I agree to the Privacy Policy."
 msgstr ""
 
-#: src/Fields/CoreFields.php:392
+#: src/Fields/CoreFields.php:397
 #: resources/admin/components/builder/FieldRenderer.jsx:362
 #: resources/frontend/components/FieldRenderer.jsx:745
 msgid "Privacy Policy"
 msgstr ""
 
-#: src/Fields/CoreFields.php:403
+#: src/Fields/CoreFields.php:408
 msgid "Consent statement"
 msgstr ""
 
-#: src/Fields/CoreFields.php:404
+#: src/Fields/CoreFields.php:409
 msgid "Text shown next to the checkbox. Add the link placeholder below to insert a Privacy Policy link."
 msgstr ""
 
-#: src/Fields/CoreFields.php:410
+#: src/Fields/CoreFields.php:415
 msgid "Privacy Policy URL"
 msgstr ""
 
-#: src/Fields/CoreFields.php:411
+#: src/Fields/CoreFields.php:416
 msgid "Link target for the consent statement. Defaults to the site Privacy Policy page."
 msgstr ""
 
-#: src/Fields/CoreFields.php:416
+#: src/Fields/CoreFields.php:421
 msgid "Link text"
 msgstr ""
 
-#: src/Fields/CoreFields.php:417
+#: src/Fields/CoreFields.php:422
 msgid "Text of the Privacy Policy link inside the consent statement."
 msgstr ""
 
-#: src/Fields/CoreFields.php:427
+#: src/Fields/CoreFields.php:432
 msgid "Radio"
 msgstr ""
 
-#: src/Fields/CoreFields.php:449
+#: src/Fields/CoreFields.php:454
 msgid "Multiple Choice"
 msgstr ""
 
-#: src/Fields/CoreFields.php:477
+#: src/Fields/CoreFields.php:482
 msgid "Dropdown"
 msgstr ""
 
-#: src/Fields/CoreFields.php:507
+#: src/Fields/CoreFields.php:512
 msgid "Select"
 msgstr ""
 
-#: src/Fields/CoreFields.php:585
-#: src/Fields/CoreFields.php:1440
+#: src/Fields/CoreFields.php:590
+#: src/Fields/CoreFields.php:1445
 #: resources/admin/components/builder/utils/schemaTree.js:381
 #: resources/frontend/components/FieldRenderer.jsx:1186
 msgid "Country"
 msgstr ""
 
-#: src/Fields/CoreFields.php:618
+#: src/Fields/CoreFields.php:623
 msgid "Preferred countries"
 msgstr ""
 
-#: src/Fields/CoreFields.php:619
+#: src/Fields/CoreFields.php:624
 msgid "ISO codes shown first, one per line. Example: US"
 msgstr ""
 
-#: src/Fields/CoreFields.php:625
+#: src/Fields/CoreFields.php:630
 msgid "Output Format"
 msgstr ""
 
-#: src/Fields/CoreFields.php:627
+#: src/Fields/CoreFields.php:632
 msgid "ISO Code (US, GB)"
 msgstr ""
 
-#: src/Fields/CoreFields.php:628
+#: src/Fields/CoreFields.php:633
 msgid "Country Name"
 msgstr ""
 
-#: src/Fields/CoreFields.php:634
+#: src/Fields/CoreFields.php:639
 msgid "Enable Search"
 msgstr ""
 
-#: src/Fields/CoreFields.php:644
+#: src/Fields/CoreFields.php:649
 msgid "Chained Select"
 msgstr ""
 
-#: src/Fields/CoreFields.php:664
+#: src/Fields/CoreFields.php:669
 #: resources/admin/components/builder/FieldInspector.jsx:311
 #: resources/admin/components/builder/inspector/controls/ChainedDisplayControl.jsx:8
 msgid "Dropdowns"
 msgstr ""
 
-#: src/Fields/CoreFields.php:666
+#: src/Fields/CoreFields.php:671
 msgid "Each dropdown appears after the one above it. A choice in a later dropdown is only offered when the visitor picks its parent."
 msgstr ""
 
-#: src/Fields/CoreFields.php:678
+#: src/Fields/CoreFields.php:683
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:110
 #: resources/admin/components/merge-tags/mergeTags.js:13
 #: resources/admin/pages/DashboardPage.jsx:557
 msgid "Date"
 msgstr ""
 
-#: src/Fields/CoreFields.php:697
+#: src/Fields/CoreFields.php:702
 msgid "Date Format"
 msgstr ""
 
-#: src/Fields/CoreFields.php:702
+#: src/Fields/CoreFields.php:707
 msgid "Min Date"
 msgstr ""
 
-#: src/Fields/CoreFields.php:707
+#: src/Fields/CoreFields.php:712
 msgid "Max Date"
 msgstr ""
 
-#: src/Fields/CoreFields.php:717
+#: src/Fields/CoreFields.php:722
 #: resources/admin/pages/SubmissionDetailPage.jsx:977
 #: resources/admin/pages/ToolsPage.jsx:578
 msgid "Time"
 msgstr ""
 
-#: src/Fields/CoreFields.php:734
+#: src/Fields/CoreFields.php:739
 msgid "Time Format"
 msgstr ""
 
-#: src/Fields/CoreFields.php:744
+#: src/Fields/CoreFields.php:749
 msgid "Date & Time"
 msgstr ""
 
-#: src/Fields/CoreFields.php:761
+#: src/Fields/CoreFields.php:766
 msgid "DateTime Format"
 msgstr ""
 
-#: src/Fields/CoreFields.php:773
+#: src/Fields/CoreFields.php:778
 msgid "Image Upload"
 msgstr ""
 
-#: src/Fields/CoreFields.php:791
-#: src/Fields/CoreFields.php:819
+#: src/Fields/CoreFields.php:796
+#: src/Fields/CoreFields.php:824
 msgid "Max Size (bytes)"
 msgstr ""
 
-#: src/Fields/CoreFields.php:801
+#: src/Fields/CoreFields.php:806
 msgid "File Upload"
 msgstr ""
 
-#: src/Fields/CoreFields.php:831
+#: src/Fields/CoreFields.php:836
 #: resources/admin/components/OnboardingWizard.jsx:125
 msgid "Rating"
 msgstr ""
 
-#: src/Fields/CoreFields.php:848
+#: src/Fields/CoreFields.php:853
 msgid "Max Rating"
 msgstr ""
 
-#: src/Fields/CoreFields.php:860
+#: src/Fields/CoreFields.php:865
 msgid "Range Slider"
 msgstr ""
 
-#: src/Fields/CoreFields.php:879
+#: src/Fields/CoreFields.php:884
 msgid "Minimum"
 msgstr ""
 
-#: src/Fields/CoreFields.php:884
+#: src/Fields/CoreFields.php:889
 msgid "Maximum"
 msgstr ""
 
-#: src/Fields/CoreFields.php:899
+#: src/Fields/CoreFields.php:904
 msgid "Color Picker"
 msgstr ""
 
-#: src/Fields/CoreFields.php:916
+#: src/Fields/CoreFields.php:921
 msgid "Default Color"
 msgstr ""
 
-#: src/Fields/CoreFields.php:926
+#: src/Fields/CoreFields.php:931
 msgid "Rich Text Input"
 msgstr ""
 
-#: src/Fields/CoreFields.php:946
+#: src/Fields/CoreFields.php:951
 msgid "Net Promoter Score"
 msgstr ""
 
-#: src/Fields/CoreFields.php:966
+#: src/Fields/CoreFields.php:971
 msgid "Checkbox Grid"
 msgstr ""
 
-#: src/Fields/CoreFields.php:973
+#: src/Fields/CoreFields.php:978
 msgid "Row 1"
 msgstr ""
 
-#: src/Fields/CoreFields.php:973
+#: src/Fields/CoreFields.php:978
 msgid "Row 2"
 msgstr ""
 
-#: src/Fields/CoreFields.php:974
+#: src/Fields/CoreFields.php:979
 msgid "Column 1"
 msgstr ""
 
-#: src/Fields/CoreFields.php:974
+#: src/Fields/CoreFields.php:979
 msgid "Column 2"
 msgstr ""
 
-#: src/Fields/CoreFields.php:974
+#: src/Fields/CoreFields.php:979
 msgid "Column 3"
 msgstr ""
 
-#: src/Fields/CoreFields.php:990
+#: src/Fields/CoreFields.php:995
 msgid "Dynamic Field"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1007
+#: src/Fields/CoreFields.php:1012
 msgid "Data Source"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1017
+#: src/Fields/CoreFields.php:1022
 msgid "Post Selection"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1034
+#: src/Fields/CoreFields.php:1039
 msgid "Post Type"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1044
+#: src/Fields/CoreFields.php:1049
 msgid "HTML"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1056
+#: src/Fields/CoreFields.php:1061
 msgid "HTML Content"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1066
+#: src/Fields/CoreFields.php:1071
 msgid "Hidden"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1078
+#: src/Fields/CoreFields.php:1083
 #: resources/admin/components/builder/ConditionEditor.jsx:108
 #: resources/admin/components/builder/inspector/panels/OptionsPanel.jsx:171
 #: resources/admin/components/builder/LogicEditor.jsx:317
@@ -1424,107 +1424,107 @@ msgstr ""
 msgid "Value"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1079
+#: src/Fields/CoreFields.php:1084
 msgid "Sent with the entry to notifications and integrations. Visitors never see it. Supports {user_email}, {user_name}, {date} and {get:param}."
 msgstr ""
 
-#: src/Fields/CoreFields.php:1096
+#: src/Fields/CoreFields.php:1101
 msgid "Disclaimer"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1111
+#: src/Fields/CoreFields.php:1116
 msgid "Disclaimer Text"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1116
+#: src/Fields/CoreFields.php:1121
 #: resources/admin/components/builder/FieldInspector.jsx:190
 msgid "Style"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1119
+#: src/Fields/CoreFields.php:1124
 #: resources/admin/pages/ToolsPage.jsx:478
 msgid "Info"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1123
+#: src/Fields/CoreFields.php:1128
 #: resources/admin/pages/ToolsPage.jsx:479
 msgid "Warning"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1127
+#: src/Fields/CoreFields.php:1132
 msgid "Success"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1131
+#: src/Fields/CoreFields.php:1136
 #: resources/admin/templates/free/feedback.js:36
 msgid "Neutral"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1143
+#: src/Fields/CoreFields.php:1148
 #: resources/admin/components/builder/FieldRenderer.jsx:161
 msgid "Section Break"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1163
-#: src/Fields/CoreFields.php:1360
-#: src/Fields/CoreFields.php:1763
+#: src/Fields/CoreFields.php:1168
+#: src/Fields/CoreFields.php:1365
+#: src/Fields/CoreFields.php:1768
 #: resources/admin/components/builder/FormSettings.jsx:279
 #: resources/admin/modals/CreateFormModal.jsx:298
 #: resources/admin/pages/PaymentsPage.jsx:210
 msgid "Description"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1172
+#: src/Fields/CoreFields.php:1177
 msgid "Form Step"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1195
+#: src/Fields/CoreFields.php:1200
 msgid "Repeat Field"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1214
+#: src/Fields/CoreFields.php:1219
 msgid "Max Items"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1227
+#: src/Fields/CoreFields.php:1232
 msgid "Column"
 msgid_plural "Columns"
 msgstr[0] ""
 msgstr[1] ""
 
-#: src/Fields/CoreFields.php:1243
-#: src/Fields/CoreFields.php:1298
-#: src/Fields/CoreFields.php:1328
+#: src/Fields/CoreFields.php:1248
+#: src/Fields/CoreFields.php:1303
+#: src/Fields/CoreFields.php:1333
 msgid "Spacing (px)"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1265
+#: src/Fields/CoreFields.php:1270
 #: resources/admin/components/builder/ContainerWrapper.jsx:48
 msgid "Repeat Container"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1283
+#: src/Fields/CoreFields.php:1288
 msgid "Min Repeats"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1288
+#: src/Fields/CoreFields.php:1293
 msgid "Max Repeats"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1293
+#: src/Fields/CoreFields.php:1298
 msgid "Button Label"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1307
-#: src/Fields/CoreFields.php:1314
+#: src/Fields/CoreFields.php:1312
+#: src/Fields/CoreFields.php:1319
 #: src/Fields/FieldSettings.php:67
 #: resources/admin/components/builder/ContainerRenderer.jsx:44
 #: resources/admin/components/builder/GroupRenderer.jsx:25
 msgid "Group"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1339
-#: src/Fields/CoreFields.php:1346
+#: src/Fields/CoreFields.php:1344
+#: src/Fields/CoreFields.php:1351
 #: resources/admin/components/builder/ContainerRenderer.jsx:38
 #: resources/admin/components/builder/FieldInspector.jsx:43
 #: resources/admin/components/builder/FieldRenderer.jsx:612
@@ -1533,10 +1533,10 @@ msgstr ""
 msgid "Step"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1372
+#: src/Fields/CoreFields.php:1377
 #: src/Fields/FieldSettings.php:72
-#: src/Templates/FormTemplates.php:101
-#: src/Templates/FormTemplates.php:159
+#: src/Templates/FormTemplates.php:106
+#: src/Templates/FormTemplates.php:164
 #: resources/admin/components/builder/CheckoutPanel.jsx:19
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:177
 #: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:168
@@ -1547,10 +1547,10 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1395
-#: src/Templates/FormTemplates.php:273
-#: src/Templates/FormTemplates.php:302
-#: src/Templates/FormTemplates.php:536
+#: src/Fields/CoreFields.php:1400
+#: src/Templates/FormTemplates.php:278
+#: src/Templates/FormTemplates.php:307
+#: src/Templates/FormTemplates.php:541
 #: resources/admin/components/builder/utils/schemaTree.js:371
 #: resources/admin/templates/free/lead.js:19
 #: resources/admin/templates/pro/registration.js:93
@@ -1559,8 +1559,8 @@ msgstr ""
 msgid "First Name"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1396
-#: src/Templates/FormTemplates.php:303
+#: src/Fields/CoreFields.php:1401
+#: src/Templates/FormTemplates.php:308
 #: resources/admin/components/builder/utils/schemaTree.js:373
 #: resources/admin/templates/pro/registration.js:99
 #: resources/frontend/components/FieldRenderer.jsx:1061
@@ -1568,19 +1568,19 @@ msgstr ""
 msgid "Last Name"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1397
+#: src/Fields/CoreFields.php:1402
 #: resources/admin/components/builder/utils/schemaTree.js:372
 #: resources/frontend/components/FieldRenderer.jsx:1041
 #: resources/frontend/components/FieldRenderer.jsx:1051
 msgid "Middle Name"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1398
+#: src/Fields/CoreFields.php:1403
 #: src/Fields/FieldSettings.php:335
 msgid "Suffix"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1410
+#: src/Fields/CoreFields.php:1415
 #: src/Fields/FieldSettings.php:73
 #: resources/admin/components/builder/CheckoutPanel.jsx:23
 #: resources/admin/templates/pro/contact.js:37
@@ -1588,7 +1588,7 @@ msgstr ""
 msgid "Address"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1435
+#: src/Fields/CoreFields.php:1440
 #: resources/admin/components/builder/utils/schemaTree.js:376
 #: resources/admin/templates/pro/registration.js:304
 #: resources/frontend/components/FieldRenderer.jsx:1088
@@ -1596,13 +1596,13 @@ msgstr ""
 msgid "Street Address"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1436
+#: src/Fields/CoreFields.php:1441
 #: resources/admin/components/builder/utils/schemaTree.js:377
 #: resources/frontend/components/FieldRenderer.jsx:1107
 msgid "Street Address Line 2"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1437
+#: src/Fields/CoreFields.php:1442
 #: resources/admin/components/builder/utils/schemaTree.js:378
 #: resources/admin/templates/pro/registration.js:310
 #: resources/frontend/components/FieldRenderer.jsx:1129
@@ -1610,14 +1610,14 @@ msgstr ""
 msgid "City"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1438
+#: src/Fields/CoreFields.php:1443
 #: resources/admin/components/builder/utils/schemaTree.js:379
 #: resources/frontend/components/FieldRenderer.jsx:1148
 #: resources/frontend/components/FieldRenderer.jsx:1158
 msgid "State / Province"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1439
+#: src/Fields/CoreFields.php:1444
 #: resources/admin/components/builder/utils/schemaTree.js:380
 #: resources/admin/templates/pro/registration.js:322
 #: resources/frontend/components/FieldRenderer.jsx:1167
@@ -1625,1151 +1625,1151 @@ msgstr ""
 msgid "Postal Code"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1453
+#: src/Fields/CoreFields.php:1458
 msgid "reCaptcha"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1465
-#: src/Fields/CoreFields.php:1487
-#: src/Fields/CoreFields.php:1509
+#: src/Fields/CoreFields.php:1470
+#: src/Fields/CoreFields.php:1492
+#: src/Fields/CoreFields.php:1514
 #: resources/admin/components/settings/AdvancedSettings.jsx:181
 #: resources/admin/components/settings/AdvancedSettings.jsx:268
 #: resources/admin/components/settings/AdvancedSettings.jsx:358
 msgid "Site Key"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1475
+#: src/Fields/CoreFields.php:1480
 #: resources/admin/components/settings/AdvancedSettings.jsx:236
 msgid "hCaptcha"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1497
+#: src/Fields/CoreFields.php:1502
 msgid "Turnstile"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1519
+#: src/Fields/CoreFields.php:1524
 #: src/Fields/FieldSettings.php:75
 #: resources/admin/components/builder/FieldRenderer.jsx:584
 msgid "Action Hook"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1531
+#: src/Fields/CoreFields.php:1536
 msgid "Hook Name"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1542
+#: src/Fields/CoreFields.php:1547
 msgid "Save & Resume"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1554
+#: src/Fields/CoreFields.php:1559
 #: src/Fields/FieldsV2.php:72
 #: resources/admin/components/builder/ActionsPanel.jsx:293
 msgid "Enabled"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1567
+#: src/Fields/CoreFields.php:1572
 #: resources/admin/templates/pro/payment.js:47
 msgid "Payment Amount"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1595
+#: src/Fields/CoreFields.php:1600
 msgid "Minimum Amount"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1601
+#: src/Fields/CoreFields.php:1606
 msgid "Maximum Amount"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1614
+#: src/Fields/CoreFields.php:1619
 msgid "Show Currency Symbol"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1625
+#: src/Fields/CoreFields.php:1630
 msgid "Payment Summary"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1636
+#: src/Fields/CoreFields.php:1641
 #: resources/admin/components/builder/PaymentPreviews.jsx:102
 #: resources/frontend/components/fields/Payments.jsx:334
 msgid "Tax"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1639
+#: src/Fields/CoreFields.php:1644
 #: resources/admin/components/builder/PaymentPreviews.jsx:115
 #: resources/frontend/components/fields/Payments.jsx:352
 msgid "Have a coupon code?"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1650
+#: src/Fields/CoreFields.php:1655
 msgid "List each item"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1655
+#: src/Fields/CoreFields.php:1660
 msgid "Coupon box in the summary"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1656
+#: src/Fields/CoreFields.php:1661
 msgid "Lets visitors apply a code right where they see the total. Manage codes in SubtleForms › Payments."
 msgstr ""
 
-#: src/Fields/CoreFields.php:1661
+#: src/Fields/CoreFields.php:1666
 msgid "Coupon link text"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1666
+#: src/Fields/CoreFields.php:1671
 msgid "Tax label"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1671
+#: src/Fields/CoreFields.php:1676
 msgid "Show Subtotal"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1676
+#: src/Fields/CoreFields.php:1681
 msgid "Show Tax"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1681
+#: src/Fields/CoreFields.php:1686
 msgid "Tax Rate (%)"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1689
+#: src/Fields/CoreFields.php:1694
 msgid "Show Total"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1700
+#: src/Fields/CoreFields.php:1705
 msgid "Coupon Code"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1707
+#: src/Fields/CoreFields.php:1712
 #: resources/admin/components/builder/FieldRenderer.jsx:557
 msgid "Enter coupon code"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1708
+#: src/Fields/CoreFields.php:1713
 #: resources/admin/components/builder/FieldRenderer.jsx:567
 #: resources/admin/components/builder/inspector/panels/OptionsPanel.jsx:348
 #: resources/frontend/components/fields/Payments.jsx:224
 msgid "Apply"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1725
+#: src/Fields/CoreFields.php:1730
 msgid "Button Text"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1736
+#: src/Fields/CoreFields.php:1741
 msgid "Hidden Price"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1752
+#: src/Fields/CoreFields.php:1757
 msgid "Internal label for reference"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1757
+#: src/Fields/CoreFields.php:1762
 #: resources/admin/components/OnboardingWizard.jsx:150
 msgid "Amount"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1764
+#: src/Fields/CoreFields.php:1769
 msgid "Optional description for debugging"
 msgstr ""
 
-#: src/Fields/CoreFields.php:1784
+#: src/Fields/CoreFields.php:1789
 msgid "No default"
 msgstr ""
 
-#: src/Fields/CountryList.php:26
+#: src/Fields/CountryList.php:31
 msgid "Afghanistan"
 msgstr ""
 
-#: src/Fields/CountryList.php:27
+#: src/Fields/CountryList.php:32
 msgid "Åland Islands"
 msgstr ""
 
-#: src/Fields/CountryList.php:28
+#: src/Fields/CountryList.php:33
 msgid "Albania"
 msgstr ""
 
-#: src/Fields/CountryList.php:29
+#: src/Fields/CountryList.php:34
 msgid "Algeria"
 msgstr ""
 
-#: src/Fields/CountryList.php:30
+#: src/Fields/CountryList.php:35
 msgid "American Samoa"
 msgstr ""
 
-#: src/Fields/CountryList.php:31
+#: src/Fields/CountryList.php:36
 msgid "Andorra"
 msgstr ""
 
-#: src/Fields/CountryList.php:32
+#: src/Fields/CountryList.php:37
 msgid "Angola"
 msgstr ""
 
-#: src/Fields/CountryList.php:33
+#: src/Fields/CountryList.php:38
 msgid "Anguilla"
 msgstr ""
 
-#: src/Fields/CountryList.php:34
+#: src/Fields/CountryList.php:39
 msgid "Antarctica"
 msgstr ""
 
-#: src/Fields/CountryList.php:35
+#: src/Fields/CountryList.php:40
 msgid "Antigua and Barbuda"
 msgstr ""
 
-#: src/Fields/CountryList.php:36
+#: src/Fields/CountryList.php:41
 msgid "Argentina"
 msgstr ""
 
-#: src/Fields/CountryList.php:37
+#: src/Fields/CountryList.php:42
 msgid "Armenia"
 msgstr ""
 
-#: src/Fields/CountryList.php:38
+#: src/Fields/CountryList.php:43
 msgid "Aruba"
 msgstr ""
 
-#: src/Fields/CountryList.php:39
+#: src/Fields/CountryList.php:44
 msgid "Australia"
 msgstr ""
 
-#: src/Fields/CountryList.php:40
+#: src/Fields/CountryList.php:45
 msgid "Austria"
 msgstr ""
 
-#: src/Fields/CountryList.php:41
+#: src/Fields/CountryList.php:46
 msgid "Azerbaijan"
 msgstr ""
 
-#: src/Fields/CountryList.php:42
+#: src/Fields/CountryList.php:47
 msgid "Bahamas"
 msgstr ""
 
-#: src/Fields/CountryList.php:43
+#: src/Fields/CountryList.php:48
 msgid "Bahrain"
 msgstr ""
 
-#: src/Fields/CountryList.php:44
+#: src/Fields/CountryList.php:49
 msgid "Bangladesh"
 msgstr ""
 
-#: src/Fields/CountryList.php:45
+#: src/Fields/CountryList.php:50
 msgid "Barbados"
 msgstr ""
 
-#: src/Fields/CountryList.php:46
+#: src/Fields/CountryList.php:51
 msgid "Belarus"
 msgstr ""
 
-#: src/Fields/CountryList.php:47
+#: src/Fields/CountryList.php:52
 msgid "Belgium"
 msgstr ""
 
-#: src/Fields/CountryList.php:48
+#: src/Fields/CountryList.php:53
 msgid "Belize"
 msgstr ""
 
-#: src/Fields/CountryList.php:49
+#: src/Fields/CountryList.php:54
 msgid "Benin"
 msgstr ""
 
-#: src/Fields/CountryList.php:50
+#: src/Fields/CountryList.php:55
 msgid "Bermuda"
 msgstr ""
 
-#: src/Fields/CountryList.php:51
+#: src/Fields/CountryList.php:56
 msgid "Bhutan"
 msgstr ""
 
-#: src/Fields/CountryList.php:52
+#: src/Fields/CountryList.php:57
 msgid "Bolivia"
 msgstr ""
 
-#: src/Fields/CountryList.php:53
+#: src/Fields/CountryList.php:58
 msgid "Bonaire, Sint Eustatius and Saba"
 msgstr ""
 
-#: src/Fields/CountryList.php:54
+#: src/Fields/CountryList.php:59
 msgid "Bosnia and Herzegovina"
 msgstr ""
 
-#: src/Fields/CountryList.php:55
+#: src/Fields/CountryList.php:60
 msgid "Botswana"
 msgstr ""
 
-#: src/Fields/CountryList.php:56
+#: src/Fields/CountryList.php:61
 msgid "Bouvet Island"
 msgstr ""
 
-#: src/Fields/CountryList.php:57
+#: src/Fields/CountryList.php:62
 msgid "Brazil"
 msgstr ""
 
-#: src/Fields/CountryList.php:58
+#: src/Fields/CountryList.php:63
 msgid "British Indian Ocean Territory"
 msgstr ""
 
-#: src/Fields/CountryList.php:59
+#: src/Fields/CountryList.php:64
 msgid "Brunei Darussalam"
 msgstr ""
 
-#: src/Fields/CountryList.php:60
+#: src/Fields/CountryList.php:65
 msgid "Bulgaria"
 msgstr ""
 
-#: src/Fields/CountryList.php:61
+#: src/Fields/CountryList.php:66
 msgid "Burkina Faso"
 msgstr ""
 
-#: src/Fields/CountryList.php:62
+#: src/Fields/CountryList.php:67
 msgid "Burundi"
 msgstr ""
 
-#: src/Fields/CountryList.php:63
+#: src/Fields/CountryList.php:68
 msgid "Cabo Verde"
 msgstr ""
 
-#: src/Fields/CountryList.php:64
+#: src/Fields/CountryList.php:69
 msgid "Cambodia"
 msgstr ""
 
-#: src/Fields/CountryList.php:65
+#: src/Fields/CountryList.php:70
 msgid "Cameroon"
 msgstr ""
 
-#: src/Fields/CountryList.php:66
+#: src/Fields/CountryList.php:71
 msgid "Canada"
 msgstr ""
 
-#: src/Fields/CountryList.php:67
+#: src/Fields/CountryList.php:72
 msgid "Cayman Islands"
 msgstr ""
 
-#: src/Fields/CountryList.php:68
+#: src/Fields/CountryList.php:73
 msgid "Central African Republic"
 msgstr ""
 
-#: src/Fields/CountryList.php:69
+#: src/Fields/CountryList.php:74
 msgid "Chad"
 msgstr ""
 
-#: src/Fields/CountryList.php:70
+#: src/Fields/CountryList.php:75
 msgid "Chile"
 msgstr ""
 
-#: src/Fields/CountryList.php:71
+#: src/Fields/CountryList.php:76
 msgid "China"
 msgstr ""
 
-#: src/Fields/CountryList.php:72
+#: src/Fields/CountryList.php:77
 msgid "Christmas Island"
 msgstr ""
 
-#: src/Fields/CountryList.php:73
+#: src/Fields/CountryList.php:78
 msgid "Cocos (Keeling) Islands"
 msgstr ""
 
-#: src/Fields/CountryList.php:74
+#: src/Fields/CountryList.php:79
 msgid "Colombia"
 msgstr ""
 
-#: src/Fields/CountryList.php:75
+#: src/Fields/CountryList.php:80
 msgid "Comoros"
 msgstr ""
 
-#: src/Fields/CountryList.php:76
+#: src/Fields/CountryList.php:81
 msgid "Congo"
 msgstr ""
 
-#: src/Fields/CountryList.php:77
+#: src/Fields/CountryList.php:82
 msgid "Congo, Democratic Republic of the"
 msgstr ""
 
-#: src/Fields/CountryList.php:78
+#: src/Fields/CountryList.php:83
 msgid "Cook Islands"
 msgstr ""
 
-#: src/Fields/CountryList.php:79
+#: src/Fields/CountryList.php:84
 msgid "Costa Rica"
 msgstr ""
 
-#: src/Fields/CountryList.php:80
+#: src/Fields/CountryList.php:85
 msgid "Côte d'Ivoire"
 msgstr ""
 
-#: src/Fields/CountryList.php:81
+#: src/Fields/CountryList.php:86
 msgid "Croatia"
 msgstr ""
 
-#: src/Fields/CountryList.php:82
+#: src/Fields/CountryList.php:87
 msgid "Cuba"
 msgstr ""
 
-#: src/Fields/CountryList.php:83
+#: src/Fields/CountryList.php:88
 msgid "Curaçao"
 msgstr ""
 
-#: src/Fields/CountryList.php:84
+#: src/Fields/CountryList.php:89
 msgid "Cyprus"
 msgstr ""
 
-#: src/Fields/CountryList.php:85
+#: src/Fields/CountryList.php:90
 msgid "Czechia"
 msgstr ""
 
-#: src/Fields/CountryList.php:86
+#: src/Fields/CountryList.php:91
 msgid "Denmark"
 msgstr ""
 
-#: src/Fields/CountryList.php:87
+#: src/Fields/CountryList.php:92
 msgid "Djibouti"
 msgstr ""
 
-#: src/Fields/CountryList.php:88
+#: src/Fields/CountryList.php:93
 msgid "Dominica"
 msgstr ""
 
-#: src/Fields/CountryList.php:89
+#: src/Fields/CountryList.php:94
 msgid "Dominican Republic"
 msgstr ""
 
-#: src/Fields/CountryList.php:90
+#: src/Fields/CountryList.php:95
 msgid "Ecuador"
 msgstr ""
 
-#: src/Fields/CountryList.php:91
+#: src/Fields/CountryList.php:96
 msgid "Egypt"
 msgstr ""
 
-#: src/Fields/CountryList.php:92
+#: src/Fields/CountryList.php:97
 msgid "El Salvador"
 msgstr ""
 
-#: src/Fields/CountryList.php:93
+#: src/Fields/CountryList.php:98
 msgid "Equatorial Guinea"
 msgstr ""
 
-#: src/Fields/CountryList.php:94
+#: src/Fields/CountryList.php:99
 msgid "Eritrea"
 msgstr ""
 
-#: src/Fields/CountryList.php:95
+#: src/Fields/CountryList.php:100
 msgid "Estonia"
 msgstr ""
 
-#: src/Fields/CountryList.php:96
+#: src/Fields/CountryList.php:101
 msgid "Eswatini"
 msgstr ""
 
-#: src/Fields/CountryList.php:97
+#: src/Fields/CountryList.php:102
 msgid "Ethiopia"
 msgstr ""
 
-#: src/Fields/CountryList.php:98
+#: src/Fields/CountryList.php:103
 msgid "Falkland Islands (Malvinas)"
 msgstr ""
 
-#: src/Fields/CountryList.php:99
+#: src/Fields/CountryList.php:104
 msgid "Faroe Islands"
 msgstr ""
 
-#: src/Fields/CountryList.php:100
+#: src/Fields/CountryList.php:105
 msgid "Fiji"
 msgstr ""
 
-#: src/Fields/CountryList.php:101
+#: src/Fields/CountryList.php:106
 msgid "Finland"
 msgstr ""
 
-#: src/Fields/CountryList.php:102
+#: src/Fields/CountryList.php:107
 msgid "France"
 msgstr ""
 
-#: src/Fields/CountryList.php:103
+#: src/Fields/CountryList.php:108
 msgid "French Guiana"
 msgstr ""
 
-#: src/Fields/CountryList.php:104
+#: src/Fields/CountryList.php:109
 msgid "French Polynesia"
 msgstr ""
 
-#: src/Fields/CountryList.php:105
+#: src/Fields/CountryList.php:110
 msgid "French Southern Territories"
 msgstr ""
 
-#: src/Fields/CountryList.php:106
+#: src/Fields/CountryList.php:111
 msgid "Gabon"
 msgstr ""
 
-#: src/Fields/CountryList.php:107
+#: src/Fields/CountryList.php:112
 msgid "Gambia"
 msgstr ""
 
-#: src/Fields/CountryList.php:108
+#: src/Fields/CountryList.php:113
 msgid "Georgia"
 msgstr ""
 
-#: src/Fields/CountryList.php:109
+#: src/Fields/CountryList.php:114
 msgid "Germany"
 msgstr ""
 
-#: src/Fields/CountryList.php:110
+#: src/Fields/CountryList.php:115
 msgid "Ghana"
 msgstr ""
 
-#: src/Fields/CountryList.php:111
+#: src/Fields/CountryList.php:116
 msgid "Gibraltar"
 msgstr ""
 
-#: src/Fields/CountryList.php:112
+#: src/Fields/CountryList.php:117
 msgid "Greece"
 msgstr ""
 
-#: src/Fields/CountryList.php:113
+#: src/Fields/CountryList.php:118
 msgid "Greenland"
 msgstr ""
 
-#: src/Fields/CountryList.php:114
+#: src/Fields/CountryList.php:119
 msgid "Grenada"
 msgstr ""
 
-#: src/Fields/CountryList.php:115
+#: src/Fields/CountryList.php:120
 msgid "Guadeloupe"
 msgstr ""
 
-#: src/Fields/CountryList.php:116
+#: src/Fields/CountryList.php:121
 msgid "Guam"
 msgstr ""
 
-#: src/Fields/CountryList.php:117
+#: src/Fields/CountryList.php:122
 msgid "Guatemala"
 msgstr ""
 
-#: src/Fields/CountryList.php:118
+#: src/Fields/CountryList.php:123
 msgid "Guernsey"
 msgstr ""
 
-#: src/Fields/CountryList.php:119
+#: src/Fields/CountryList.php:124
 msgid "Guinea"
 msgstr ""
 
-#: src/Fields/CountryList.php:120
+#: src/Fields/CountryList.php:125
 msgid "Guinea-Bissau"
 msgstr ""
 
-#: src/Fields/CountryList.php:121
+#: src/Fields/CountryList.php:126
 msgid "Guyana"
 msgstr ""
 
-#: src/Fields/CountryList.php:122
+#: src/Fields/CountryList.php:127
 msgid "Haiti"
 msgstr ""
 
-#: src/Fields/CountryList.php:123
+#: src/Fields/CountryList.php:128
 msgid "Heard Island and McDonald Islands"
 msgstr ""
 
-#: src/Fields/CountryList.php:124
+#: src/Fields/CountryList.php:129
 msgid "Holy See"
 msgstr ""
 
-#: src/Fields/CountryList.php:125
+#: src/Fields/CountryList.php:130
 msgid "Honduras"
 msgstr ""
 
-#: src/Fields/CountryList.php:126
+#: src/Fields/CountryList.php:131
 msgid "Hong Kong"
 msgstr ""
 
-#: src/Fields/CountryList.php:127
+#: src/Fields/CountryList.php:132
 msgid "Hungary"
 msgstr ""
 
-#: src/Fields/CountryList.php:128
+#: src/Fields/CountryList.php:133
 msgid "Iceland"
 msgstr ""
 
-#: src/Fields/CountryList.php:129
+#: src/Fields/CountryList.php:134
 msgid "India"
 msgstr ""
 
-#: src/Fields/CountryList.php:130
+#: src/Fields/CountryList.php:135
 msgid "Indonesia"
 msgstr ""
 
-#: src/Fields/CountryList.php:131
+#: src/Fields/CountryList.php:136
 msgid "Iran"
 msgstr ""
 
-#: src/Fields/CountryList.php:132
+#: src/Fields/CountryList.php:137
 msgid "Iraq"
 msgstr ""
 
-#: src/Fields/CountryList.php:133
+#: src/Fields/CountryList.php:138
 msgid "Ireland"
 msgstr ""
 
-#: src/Fields/CountryList.php:134
+#: src/Fields/CountryList.php:139
 msgid "Isle of Man"
 msgstr ""
 
-#: src/Fields/CountryList.php:135
+#: src/Fields/CountryList.php:140
 msgid "Israel"
 msgstr ""
 
-#: src/Fields/CountryList.php:136
+#: src/Fields/CountryList.php:141
 msgid "Italy"
 msgstr ""
 
-#: src/Fields/CountryList.php:137
+#: src/Fields/CountryList.php:142
 msgid "Jamaica"
 msgstr ""
 
-#: src/Fields/CountryList.php:138
+#: src/Fields/CountryList.php:143
 msgid "Japan"
 msgstr ""
 
-#: src/Fields/CountryList.php:139
+#: src/Fields/CountryList.php:144
 msgid "Jersey"
 msgstr ""
 
-#: src/Fields/CountryList.php:140
+#: src/Fields/CountryList.php:145
 msgid "Jordan"
 msgstr ""
 
-#: src/Fields/CountryList.php:141
+#: src/Fields/CountryList.php:146
 msgid "Kazakhstan"
 msgstr ""
 
-#: src/Fields/CountryList.php:142
+#: src/Fields/CountryList.php:147
 msgid "Kenya"
 msgstr ""
 
-#: src/Fields/CountryList.php:143
+#: src/Fields/CountryList.php:148
 msgid "Kiribati"
 msgstr ""
 
-#: src/Fields/CountryList.php:144
+#: src/Fields/CountryList.php:149
 msgid "Korea, Democratic People's Republic of"
 msgstr ""
 
-#: src/Fields/CountryList.php:145
+#: src/Fields/CountryList.php:150
 msgid "Korea, Republic of"
 msgstr ""
 
-#: src/Fields/CountryList.php:146
+#: src/Fields/CountryList.php:151
 msgid "Kuwait"
 msgstr ""
 
-#: src/Fields/CountryList.php:147
+#: src/Fields/CountryList.php:152
 msgid "Kyrgyzstan"
 msgstr ""
 
-#: src/Fields/CountryList.php:148
+#: src/Fields/CountryList.php:153
 msgid "Lao People's Democratic Republic"
 msgstr ""
 
-#: src/Fields/CountryList.php:149
+#: src/Fields/CountryList.php:154
 msgid "Latvia"
 msgstr ""
 
-#: src/Fields/CountryList.php:150
+#: src/Fields/CountryList.php:155
 msgid "Lebanon"
 msgstr ""
 
-#: src/Fields/CountryList.php:151
+#: src/Fields/CountryList.php:156
 msgid "Lesotho"
 msgstr ""
 
-#: src/Fields/CountryList.php:152
+#: src/Fields/CountryList.php:157
 msgid "Liberia"
 msgstr ""
 
-#: src/Fields/CountryList.php:153
+#: src/Fields/CountryList.php:158
 msgid "Libya"
 msgstr ""
 
-#: src/Fields/CountryList.php:154
+#: src/Fields/CountryList.php:159
 msgid "Liechtenstein"
 msgstr ""
 
-#: src/Fields/CountryList.php:155
+#: src/Fields/CountryList.php:160
 msgid "Lithuania"
 msgstr ""
 
-#: src/Fields/CountryList.php:156
+#: src/Fields/CountryList.php:161
 msgid "Luxembourg"
 msgstr ""
 
-#: src/Fields/CountryList.php:157
+#: src/Fields/CountryList.php:162
 msgid "Macao"
 msgstr ""
 
-#: src/Fields/CountryList.php:158
+#: src/Fields/CountryList.php:163
 msgid "Madagascar"
 msgstr ""
 
-#: src/Fields/CountryList.php:159
+#: src/Fields/CountryList.php:164
 msgid "Malawi"
 msgstr ""
 
-#: src/Fields/CountryList.php:160
+#: src/Fields/CountryList.php:165
 msgid "Malaysia"
 msgstr ""
 
-#: src/Fields/CountryList.php:161
+#: src/Fields/CountryList.php:166
 msgid "Maldives"
 msgstr ""
 
-#: src/Fields/CountryList.php:162
+#: src/Fields/CountryList.php:167
 msgid "Mali"
 msgstr ""
 
-#: src/Fields/CountryList.php:163
+#: src/Fields/CountryList.php:168
 msgid "Malta"
 msgstr ""
 
-#: src/Fields/CountryList.php:164
+#: src/Fields/CountryList.php:169
 msgid "Marshall Islands"
 msgstr ""
 
-#: src/Fields/CountryList.php:165
+#: src/Fields/CountryList.php:170
 msgid "Martinique"
 msgstr ""
 
-#: src/Fields/CountryList.php:166
+#: src/Fields/CountryList.php:171
 msgid "Mauritania"
 msgstr ""
 
-#: src/Fields/CountryList.php:167
+#: src/Fields/CountryList.php:172
 msgid "Mauritius"
 msgstr ""
 
-#: src/Fields/CountryList.php:168
+#: src/Fields/CountryList.php:173
 msgid "Mayotte"
 msgstr ""
 
-#: src/Fields/CountryList.php:169
+#: src/Fields/CountryList.php:174
 msgid "Mexico"
 msgstr ""
 
-#: src/Fields/CountryList.php:170
+#: src/Fields/CountryList.php:175
 msgid "Micronesia"
 msgstr ""
 
-#: src/Fields/CountryList.php:171
+#: src/Fields/CountryList.php:176
 msgid "Moldova"
 msgstr ""
 
-#: src/Fields/CountryList.php:172
+#: src/Fields/CountryList.php:177
 msgid "Monaco"
 msgstr ""
 
-#: src/Fields/CountryList.php:173
+#: src/Fields/CountryList.php:178
 msgid "Mongolia"
 msgstr ""
 
-#: src/Fields/CountryList.php:174
+#: src/Fields/CountryList.php:179
 msgid "Montenegro"
 msgstr ""
 
-#: src/Fields/CountryList.php:175
+#: src/Fields/CountryList.php:180
 msgid "Montserrat"
 msgstr ""
 
-#: src/Fields/CountryList.php:176
+#: src/Fields/CountryList.php:181
 msgid "Morocco"
 msgstr ""
 
-#: src/Fields/CountryList.php:177
+#: src/Fields/CountryList.php:182
 msgid "Mozambique"
 msgstr ""
 
-#: src/Fields/CountryList.php:178
+#: src/Fields/CountryList.php:183
 msgid "Myanmar"
 msgstr ""
 
-#: src/Fields/CountryList.php:179
+#: src/Fields/CountryList.php:184
 msgid "Namibia"
 msgstr ""
 
-#: src/Fields/CountryList.php:180
+#: src/Fields/CountryList.php:185
 msgid "Nauru"
 msgstr ""
 
-#: src/Fields/CountryList.php:181
+#: src/Fields/CountryList.php:186
 msgid "Nepal"
 msgstr ""
 
-#: src/Fields/CountryList.php:182
+#: src/Fields/CountryList.php:187
 msgid "Netherlands"
 msgstr ""
 
-#: src/Fields/CountryList.php:183
+#: src/Fields/CountryList.php:188
 msgid "New Caledonia"
 msgstr ""
 
-#: src/Fields/CountryList.php:184
+#: src/Fields/CountryList.php:189
 msgid "New Zealand"
 msgstr ""
 
-#: src/Fields/CountryList.php:185
+#: src/Fields/CountryList.php:190
 msgid "Nicaragua"
 msgstr ""
 
-#: src/Fields/CountryList.php:186
+#: src/Fields/CountryList.php:191
 msgid "Niger"
 msgstr ""
 
-#: src/Fields/CountryList.php:187
+#: src/Fields/CountryList.php:192
 msgid "Nigeria"
 msgstr ""
 
-#: src/Fields/CountryList.php:188
+#: src/Fields/CountryList.php:193
 msgid "Niue"
 msgstr ""
 
-#: src/Fields/CountryList.php:189
+#: src/Fields/CountryList.php:194
 msgid "Norfolk Island"
 msgstr ""
 
-#: src/Fields/CountryList.php:190
+#: src/Fields/CountryList.php:195
 msgid "North Macedonia"
 msgstr ""
 
-#: src/Fields/CountryList.php:191
+#: src/Fields/CountryList.php:196
 msgid "Northern Mariana Islands"
 msgstr ""
 
-#: src/Fields/CountryList.php:192
+#: src/Fields/CountryList.php:197
 msgid "Norway"
 msgstr ""
 
-#: src/Fields/CountryList.php:193
+#: src/Fields/CountryList.php:198
 msgid "Oman"
 msgstr ""
 
-#: src/Fields/CountryList.php:194
+#: src/Fields/CountryList.php:199
 msgid "Pakistan"
 msgstr ""
 
-#: src/Fields/CountryList.php:195
+#: src/Fields/CountryList.php:200
 msgid "Palau"
 msgstr ""
 
-#: src/Fields/CountryList.php:196
+#: src/Fields/CountryList.php:201
 msgid "Palestine, State of"
 msgstr ""
 
-#: src/Fields/CountryList.php:197
+#: src/Fields/CountryList.php:202
 msgid "Panama"
 msgstr ""
 
-#: src/Fields/CountryList.php:198
+#: src/Fields/CountryList.php:203
 msgid "Papua New Guinea"
 msgstr ""
 
-#: src/Fields/CountryList.php:199
+#: src/Fields/CountryList.php:204
 msgid "Paraguay"
 msgstr ""
 
-#: src/Fields/CountryList.php:200
+#: src/Fields/CountryList.php:205
 msgid "Peru"
 msgstr ""
 
-#: src/Fields/CountryList.php:201
+#: src/Fields/CountryList.php:206
 msgid "Philippines"
 msgstr ""
 
-#: src/Fields/CountryList.php:202
+#: src/Fields/CountryList.php:207
 msgid "Pitcairn"
 msgstr ""
 
-#: src/Fields/CountryList.php:203
+#: src/Fields/CountryList.php:208
 msgid "Poland"
 msgstr ""
 
-#: src/Fields/CountryList.php:204
+#: src/Fields/CountryList.php:209
 msgid "Portugal"
 msgstr ""
 
-#: src/Fields/CountryList.php:205
+#: src/Fields/CountryList.php:210
 msgid "Puerto Rico"
 msgstr ""
 
-#: src/Fields/CountryList.php:206
+#: src/Fields/CountryList.php:211
 msgid "Qatar"
 msgstr ""
 
-#: src/Fields/CountryList.php:207
+#: src/Fields/CountryList.php:212
 msgid "Réunion"
 msgstr ""
 
-#: src/Fields/CountryList.php:208
+#: src/Fields/CountryList.php:213
 msgid "Romania"
 msgstr ""
 
-#: src/Fields/CountryList.php:209
+#: src/Fields/CountryList.php:214
 msgid "Russian Federation"
 msgstr ""
 
-#: src/Fields/CountryList.php:210
+#: src/Fields/CountryList.php:215
 msgid "Rwanda"
 msgstr ""
 
-#: src/Fields/CountryList.php:211
+#: src/Fields/CountryList.php:216
 msgid "Saint Barthélemy"
 msgstr ""
 
-#: src/Fields/CountryList.php:212
+#: src/Fields/CountryList.php:217
 msgid "Saint Helena, Ascension and Tristan da Cunha"
 msgstr ""
 
-#: src/Fields/CountryList.php:213
+#: src/Fields/CountryList.php:218
 msgid "Saint Kitts and Nevis"
 msgstr ""
 
-#: src/Fields/CountryList.php:214
+#: src/Fields/CountryList.php:219
 msgid "Saint Lucia"
 msgstr ""
 
-#: src/Fields/CountryList.php:215
+#: src/Fields/CountryList.php:220
 msgid "Saint Martin (French part)"
 msgstr ""
 
-#: src/Fields/CountryList.php:216
+#: src/Fields/CountryList.php:221
 msgid "Saint Pierre and Miquelon"
 msgstr ""
 
-#: src/Fields/CountryList.php:217
+#: src/Fields/CountryList.php:222
 msgid "Saint Vincent and the Grenadines"
 msgstr ""
 
-#: src/Fields/CountryList.php:218
+#: src/Fields/CountryList.php:223
 msgid "Samoa"
 msgstr ""
 
-#: src/Fields/CountryList.php:219
+#: src/Fields/CountryList.php:224
 msgid "San Marino"
 msgstr ""
 
-#: src/Fields/CountryList.php:220
+#: src/Fields/CountryList.php:225
 msgid "Sao Tome and Principe"
 msgstr ""
 
-#: src/Fields/CountryList.php:221
+#: src/Fields/CountryList.php:226
 msgid "Saudi Arabia"
 msgstr ""
 
-#: src/Fields/CountryList.php:222
+#: src/Fields/CountryList.php:227
 msgid "Senegal"
 msgstr ""
 
-#: src/Fields/CountryList.php:223
+#: src/Fields/CountryList.php:228
 msgid "Serbia"
 msgstr ""
 
-#: src/Fields/CountryList.php:224
+#: src/Fields/CountryList.php:229
 msgid "Seychelles"
 msgstr ""
 
-#: src/Fields/CountryList.php:225
+#: src/Fields/CountryList.php:230
 msgid "Sierra Leone"
 msgstr ""
 
-#: src/Fields/CountryList.php:226
+#: src/Fields/CountryList.php:231
 msgid "Singapore"
 msgstr ""
 
-#: src/Fields/CountryList.php:227
+#: src/Fields/CountryList.php:232
 msgid "Sint Maarten (Dutch part)"
 msgstr ""
 
-#: src/Fields/CountryList.php:228
+#: src/Fields/CountryList.php:233
 msgid "Slovakia"
 msgstr ""
 
-#: src/Fields/CountryList.php:229
+#: src/Fields/CountryList.php:234
 msgid "Slovenia"
 msgstr ""
 
-#: src/Fields/CountryList.php:230
+#: src/Fields/CountryList.php:235
 msgid "Solomon Islands"
 msgstr ""
 
-#: src/Fields/CountryList.php:231
+#: src/Fields/CountryList.php:236
 msgid "Somalia"
 msgstr ""
 
-#: src/Fields/CountryList.php:232
+#: src/Fields/CountryList.php:237
 msgid "South Africa"
 msgstr ""
 
-#: src/Fields/CountryList.php:233
+#: src/Fields/CountryList.php:238
 msgid "South Georgia and the South Sandwich Islands"
 msgstr ""
 
-#: src/Fields/CountryList.php:234
+#: src/Fields/CountryList.php:239
 msgid "South Sudan"
 msgstr ""
 
-#: src/Fields/CountryList.php:235
+#: src/Fields/CountryList.php:240
 msgid "Spain"
 msgstr ""
 
-#: src/Fields/CountryList.php:236
+#: src/Fields/CountryList.php:241
 msgid "Sri Lanka"
 msgstr ""
 
-#: src/Fields/CountryList.php:237
+#: src/Fields/CountryList.php:242
 msgid "Sudan"
 msgstr ""
 
-#: src/Fields/CountryList.php:238
+#: src/Fields/CountryList.php:243
 msgid "Suriname"
 msgstr ""
 
-#: src/Fields/CountryList.php:239
+#: src/Fields/CountryList.php:244
 msgid "Svalbard and Jan Mayen"
 msgstr ""
 
-#: src/Fields/CountryList.php:240
+#: src/Fields/CountryList.php:245
 msgid "Sweden"
 msgstr ""
 
-#: src/Fields/CountryList.php:241
+#: src/Fields/CountryList.php:246
 msgid "Switzerland"
 msgstr ""
 
-#: src/Fields/CountryList.php:242
+#: src/Fields/CountryList.php:247
 msgid "Syrian Arab Republic"
 msgstr ""
 
-#: src/Fields/CountryList.php:243
+#: src/Fields/CountryList.php:248
 msgid "Taiwan"
 msgstr ""
 
-#: src/Fields/CountryList.php:244
+#: src/Fields/CountryList.php:249
 msgid "Tajikistan"
 msgstr ""
 
-#: src/Fields/CountryList.php:245
+#: src/Fields/CountryList.php:250
 msgid "Tanzania, United Republic of"
 msgstr ""
 
-#: src/Fields/CountryList.php:246
+#: src/Fields/CountryList.php:251
 msgid "Thailand"
 msgstr ""
 
-#: src/Fields/CountryList.php:247
+#: src/Fields/CountryList.php:252
 msgid "Timor-Leste"
 msgstr ""
 
-#: src/Fields/CountryList.php:248
+#: src/Fields/CountryList.php:253
 msgid "Togo"
 msgstr ""
 
-#: src/Fields/CountryList.php:249
+#: src/Fields/CountryList.php:254
 msgid "Tokelau"
 msgstr ""
 
-#: src/Fields/CountryList.php:250
+#: src/Fields/CountryList.php:255
 msgid "Tonga"
 msgstr ""
 
-#: src/Fields/CountryList.php:251
+#: src/Fields/CountryList.php:256
 msgid "Trinidad and Tobago"
 msgstr ""
 
-#: src/Fields/CountryList.php:252
+#: src/Fields/CountryList.php:257
 msgid "Tunisia"
 msgstr ""
 
-#: src/Fields/CountryList.php:253
+#: src/Fields/CountryList.php:258
 msgid "Turkey"
 msgstr ""
 
-#: src/Fields/CountryList.php:254
+#: src/Fields/CountryList.php:259
 msgid "Turkmenistan"
 msgstr ""
 
-#: src/Fields/CountryList.php:255
+#: src/Fields/CountryList.php:260
 msgid "Turks and Caicos Islands"
 msgstr ""
 
-#: src/Fields/CountryList.php:256
+#: src/Fields/CountryList.php:261
 msgid "Tuvalu"
 msgstr ""
 
-#: src/Fields/CountryList.php:257
+#: src/Fields/CountryList.php:262
 msgid "Uganda"
 msgstr ""
 
-#: src/Fields/CountryList.php:258
+#: src/Fields/CountryList.php:263
 msgid "Ukraine"
 msgstr ""
 
-#: src/Fields/CountryList.php:259
+#: src/Fields/CountryList.php:264
 msgid "United Arab Emirates"
 msgstr ""
 
-#: src/Fields/CountryList.php:260
+#: src/Fields/CountryList.php:265
 msgid "United Kingdom"
 msgstr ""
 
-#: src/Fields/CountryList.php:261
+#: src/Fields/CountryList.php:266
 msgid "United States"
 msgstr ""
 
-#: src/Fields/CountryList.php:262
+#: src/Fields/CountryList.php:267
 msgid "United States Minor Outlying Islands"
 msgstr ""
 
-#: src/Fields/CountryList.php:263
+#: src/Fields/CountryList.php:268
 msgid "Uruguay"
 msgstr ""
 
-#: src/Fields/CountryList.php:264
+#: src/Fields/CountryList.php:269
 msgid "Uzbekistan"
 msgstr ""
 
-#: src/Fields/CountryList.php:265
+#: src/Fields/CountryList.php:270
 msgid "Vanuatu"
 msgstr ""
 
-#: src/Fields/CountryList.php:266
+#: src/Fields/CountryList.php:271
 msgid "Venezuela"
 msgstr ""
 
-#: src/Fields/CountryList.php:267
+#: src/Fields/CountryList.php:272
 msgid "Viet Nam"
 msgstr ""
 
-#: src/Fields/CountryList.php:268
+#: src/Fields/CountryList.php:273
 msgid "Virgin Islands, British"
 msgstr ""
 
-#: src/Fields/CountryList.php:269
+#: src/Fields/CountryList.php:274
 msgid "Virgin Islands, U.S."
 msgstr ""
 
-#: src/Fields/CountryList.php:270
+#: src/Fields/CountryList.php:275
 msgid "Wallis and Futuna"
 msgstr ""
 
-#: src/Fields/CountryList.php:271
+#: src/Fields/CountryList.php:276
 msgid "Western Sahara"
 msgstr ""
 
-#: src/Fields/CountryList.php:272
+#: src/Fields/CountryList.php:277
 msgid "Yemen"
 msgstr ""
 
-#: src/Fields/CountryList.php:273
+#: src/Fields/CountryList.php:278
 msgid "Zambia"
 msgstr ""
 
-#: src/Fields/CountryList.php:274
+#: src/Fields/CountryList.php:279
 msgid "Zimbabwe"
 msgstr ""
 
@@ -3278,8 +3278,8 @@ msgid "Toggle"
 msgstr ""
 
 #: src/Fields/FieldsV2.php:49
-#: src/Support/FieldMapper.php:497
-#: src/Support/Repeater.php:446
+#: src/Support/FieldMapper.php:502
+#: src/Support/Repeater.php:451
 #: resources/admin/components/builder/FieldRenderer.jsx:253
 msgid "Yes"
 msgstr ""
@@ -3485,17 +3485,17 @@ msgstr ""
 msgid "Card, wallet and bank details are collected by your payment gateway and never touch your server."
 msgstr ""
 
-#: src/Frontend/FrontendAssets.php:80
+#: src/Frontend/FrontendAssets.php:82
 #: resources/frontend/components/FormRenderer.jsx:928
 #: resources/frontend/components/FormRenderer.jsx:1038
 msgid "Thank you! Your submission has been received."
 msgstr ""
 
-#: src/Frontend/Shortcode.php:45
+#: src/Frontend/Shortcode.php:50
 msgid "Invalid form ID."
 msgstr ""
 
-#: src/Frontend/Shortcode.php:56
+#: src/Frontend/Shortcode.php:61
 msgid "This form is not published yet."
 msgstr ""
 
@@ -3644,39 +3644,39 @@ msgstr ""
 msgid "<p>Form submissions may trigger email notifications which are sent through your web host's mail server or a third-party email service if configured.</p>"
 msgstr ""
 
-#: src/Support/Captcha/CaptchaManager.php:224
+#: src/Support/Captcha/CaptchaManager.php:228
 msgid "CAPTCHA provider is not enabled."
 msgstr ""
 
-#: src/Support/Captcha/CaptchaManager.php:231
-#: src/Support/Captcha/CaptchaManager.php:259
+#: src/Support/Captcha/CaptchaManager.php:235
+#: src/Support/Captcha/CaptchaManager.php:263
 msgid "CAPTCHA is not properly configured."
 msgstr ""
 
-#: src/Support/Captcha/CaptchaManager.php:239
-#: src/Support/Captcha/CaptchaManager.php:267
+#: src/Support/Captcha/CaptchaManager.php:243
+#: src/Support/Captcha/CaptchaManager.php:271
 msgid "CAPTCHA provider not found."
 msgstr ""
 
-#: src/Support/Captcha/CaptchaManager.php:309
+#: src/Support/Captcha/CaptchaManager.php:313
 #: resources/frontend/components/ConversationalFormRenderer.jsx:274
 #: resources/frontend/components/FormRenderer.jsx:716
 msgid "CAPTCHA verification failed. Please try again."
 msgstr ""
 
-#: src/Support/Captcha/CaptchaManager.php:320
+#: src/Support/Captcha/CaptchaManager.php:324
 msgid "CAPTCHA secret key is missing."
 msgstr ""
 
-#: src/Support/Captcha/HCaptchaProvider.php:62
-#: src/Support/Captcha/RecaptchaProvider.php:86
-#: src/Support/Captcha/TurnstileProvider.php:62
+#: src/Support/Captcha/HCaptchaProvider.php:66
+#: src/Support/Captcha/RecaptchaProvider.php:90
+#: src/Support/Captcha/TurnstileProvider.php:66
 msgid "CAPTCHA response is missing."
 msgstr ""
 
-#: src/Support/Captcha/HCaptchaProvider.php:85
-#: src/Support/Captcha/RecaptchaProvider.php:109
-#: src/Support/Captcha/TurnstileProvider.php:86
+#: src/Support/Captcha/HCaptchaProvider.php:89
+#: src/Support/Captcha/RecaptchaProvider.php:113
+#: src/Support/Captcha/TurnstileProvider.php:90
 msgid "CAPTCHA verification request failed."
 msgstr ""
 
@@ -3692,8 +3692,8 @@ msgstr ""
 msgid "Signed (the signature image is in the entry)"
 msgstr ""
 
-#: src/Support/FieldMapper.php:497
-#: src/Support/Repeater.php:446
+#: src/Support/FieldMapper.php:502
+#: src/Support/Repeater.php:451
 msgid "No"
 msgstr ""
 
@@ -3708,7 +3708,7 @@ msgstr ""
 
 #. translators: %d: maximum number of groups
 #. translators: %d: maximum number of entries
-#: src/Support/Repeater.php:305
+#: src/Support/Repeater.php:310
 #: resources/frontend/utils/fieldValidation.js:370
 #, php-format,js-format
 msgid "Add no more than %d entry."
@@ -3717,35 +3717,35 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %s: field key
-#: src/Support/SchemaValidator.php:572
+#: src/Support/SchemaValidator.php:577
 #, php-format
 msgid "The single checkbox \"%s\" has a list of options. Use a Multiple choice field for several options."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:87
+#: src/Templates/FormTemplates.php:92
 #: resources/admin/components/OnboardingWizard.jsx:12
 msgid "Contact Form"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:88
+#: src/Templates/FormTemplates.php:93
 msgid "A simple contact form with name, email, and message fields"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:93
-#: src/Templates/FormTemplates.php:155
-#: src/Templates/FormTemplates.php:184
+#: src/Templates/FormTemplates.php:98
+#: src/Templates/FormTemplates.php:160
+#: src/Templates/FormTemplates.php:189
 msgid "Contact Us"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:95
+#: src/Templates/FormTemplates.php:100
 msgid "Get in touch with us"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:107
-#: src/Templates/FormTemplates.php:189
-#: src/Templates/FormTemplates.php:274
-#: src/Templates/FormTemplates.php:445
-#: src/Templates/FormTemplates.php:543
+#: src/Templates/FormTemplates.php:112
+#: src/Templates/FormTemplates.php:194
+#: src/Templates/FormTemplates.php:279
+#: src/Templates/FormTemplates.php:450
+#: src/Templates/FormTemplates.php:548
 #: resources/admin/templates/free/contact.js:62
 #: resources/admin/templates/free/feedback.js:69
 #: resources/admin/templates/free/feedback.js:115
@@ -3768,8 +3768,8 @@ msgstr ""
 msgid "Email Address"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:113
-#: src/Templates/FormTemplates.php:190
+#: src/Templates/FormTemplates.php:118
+#: src/Templates/FormTemplates.php:195
 #: resources/admin/components/builder/ActionsPanel.jsx:344
 #: resources/admin/components/builder/ActionsPanel.jsx:355
 #: resources/admin/templates/free/contact.js:68
@@ -3778,9 +3778,9 @@ msgstr ""
 msgid "Subject"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:119
-#: src/Templates/FormTemplates.php:161
-#: src/Templates/FormTemplates.php:191
+#: src/Templates/FormTemplates.php:124
+#: src/Templates/FormTemplates.php:166
+#: src/Templates/FormTemplates.php:196
 #: resources/admin/components/builder/ActionsPanel.jsx:372
 #: resources/admin/components/builder/ActionsPanel.jsx:382
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:70
@@ -3794,15 +3794,15 @@ msgstr ""
 msgid "Message"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:121
+#: src/Templates/FormTemplates.php:126
 msgid "Tell us how we can help..."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:137
+#: src/Templates/FormTemplates.php:142
 msgid "New Contact Form Submission"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:138
+#: src/Templates/FormTemplates.php:143
 msgid ""
 "Name: {{name}}\n"
 "Email: {{email}}\n"
@@ -3812,36 +3812,36 @@ msgid ""
 "{{message}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:149
+#: src/Templates/FormTemplates.php:154
 msgid "Simple Contact"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:150
+#: src/Templates/FormTemplates.php:155
 msgid "Minimal contact form: just name, email, and message. Perfect for sidebars and footers."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:167
+#: src/Templates/FormTemplates.php:172
 msgid "New Contact Form Message"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:168
-#: src/Templates/FormTemplates.php:199
+#: src/Templates/FormTemplates.php:173
+#: src/Templates/FormTemplates.php:204
 msgid ""
 "From: {{name}} <{{email}}>\n"
 "\n"
 "{{message}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:178
+#: src/Templates/FormTemplates.php:183
 msgid "Contact + Attachment"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:179
+#: src/Templates/FormTemplates.php:184
 msgid "Contact form that lets visitors attach a file: handy for design briefs, CVs, or support docs."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:188
-#: src/Templates/FormTemplates.php:444
+#: src/Templates/FormTemplates.php:193
+#: src/Templates/FormTemplates.php:449
 #: resources/admin/templates/free/contact.js:56
 #: resources/admin/templates/free/feedback.js:109
 #: resources/admin/templates/free/lead.js:98
@@ -3856,133 +3856,133 @@ msgstr ""
 msgid "Your Name"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:192
+#: src/Templates/FormTemplates.php:197
 #: resources/admin/templates/free/contact.js:131
 msgid "Attachment (optional)"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:215
-#: src/Templates/FormTemplates.php:221
+#: src/Templates/FormTemplates.php:220
+#: src/Templates/FormTemplates.php:226
 msgid "Newsletter"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:216
+#: src/Templates/FormTemplates.php:221
 msgid "Email only, with the button on the same row. Made for footers and hero sections."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:224
-#: src/Templates/FormTemplates.php:269
+#: src/Templates/FormTemplates.php:229
+#: src/Templates/FormTemplates.php:274
 msgid "Subscribe"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:238
+#: src/Templates/FormTemplates.php:243
 msgid "Email address"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:239
+#: src/Templates/FormTemplates.php:244
 msgid "you@example.com"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:251
+#: src/Templates/FormTemplates.php:256
 msgid "New subscriber: {field:email}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:252
+#: src/Templates/FormTemplates.php:257
 msgid "A new subscriber joined from {form_title}: {field:email}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:263
+#: src/Templates/FormTemplates.php:268
 msgid "Newsletter Sign-Up"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:264
+#: src/Templates/FormTemplates.php:269
 msgid "Ultra-light sign-up: just first name and email, with consent checkbox."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:275
+#: src/Templates/FormTemplates.php:280
 msgid "I agree to receive emails and accept the Privacy Policy."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:281
+#: src/Templates/FormTemplates.php:286
 msgid "New Newsletter Subscriber: {{first_name}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:282
+#: src/Templates/FormTemplates.php:287
 msgid ""
 "New subscriber:\n"
 "\n"
 "{{first_name}}, {{email}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:292
+#: src/Templates/FormTemplates.php:297
 msgid "Free Resource Download"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:293
+#: src/Templates/FormTemplates.php:298
 msgid "Gated content form: collect name and email before granting access to a guide or ebook."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:298
+#: src/Templates/FormTemplates.php:303
 msgid "Get the Free Guide"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:304
+#: src/Templates/FormTemplates.php:309
 #: resources/admin/templates/free/lead.js:61
 #: resources/admin/templates/pro/registration.js:105
 msgid "Work Email"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:305
+#: src/Templates/FormTemplates.php:310
 msgid "Company (optional)"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:311
+#: src/Templates/FormTemplates.php:316
 msgid "New Resource Download Request"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:312
+#: src/Templates/FormTemplates.php:317
 msgid ""
 "{{first_name}} {{last_name}} ({{company}}) requested the guide.\n"
 "Email: {{email}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:322
+#: src/Templates/FormTemplates.php:327
 msgid "Product Feedback"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:323
+#: src/Templates/FormTemplates.php:328
 msgid "Collect star ratings and open-ended feedback about your product."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:328
+#: src/Templates/FormTemplates.php:333
 msgid "Share Your Feedback"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:332
+#: src/Templates/FormTemplates.php:337
 msgid "Overall Rating"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:333
+#: src/Templates/FormTemplates.php:338
 msgid "How are you using our product?"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:334
+#: src/Templates/FormTemplates.php:339
 msgid "What do you like most?"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:335
+#: src/Templates/FormTemplates.php:340
 msgid "What could we improve?"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:336
+#: src/Templates/FormTemplates.php:341
 msgid "Your email (optional, for follow-up)"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:342
+#: src/Templates/FormTemplates.php:347
 msgid "New Product Feedback ({{rating}} stars)"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:343
+#: src/Templates/FormTemplates.php:348
 msgid ""
 "Rating: {{rating}}/5\n"
 "\n"
@@ -3993,48 +3993,48 @@ msgid ""
 "Reply to: {{email}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:353
-#: src/Templates/FormTemplates.php:359
+#: src/Templates/FormTemplates.php:358
+#: src/Templates/FormTemplates.php:364
 msgid "Website Feedback"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:354
+#: src/Templates/FormTemplates.php:359
 msgid "Quick feedback on your website: usability, design, and suggestions."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:366
+#: src/Templates/FormTemplates.php:371
 msgid "How did you find what you needed?"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:369
+#: src/Templates/FormTemplates.php:374
 msgid "Easily"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:370
+#: src/Templates/FormTemplates.php:375
 msgid "With some effort"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:371
+#: src/Templates/FormTemplates.php:376
 msgid "With great difficulty"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:372
+#: src/Templates/FormTemplates.php:377
 msgid "Could not find it"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:375
+#: src/Templates/FormTemplates.php:380
 msgid "Design rating"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:376
+#: src/Templates/FormTemplates.php:381
 msgid "Suggestions for improvement"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:382
+#: src/Templates/FormTemplates.php:387
 msgid "Website Feedback Received"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:383
+#: src/Templates/FormTemplates.php:388
 msgid ""
 "Finding: {{finding}}\n"
 "Design: {{design_rating}}/5\n"
@@ -4043,55 +4043,55 @@ msgid ""
 "{{suggestions}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:393
+#: src/Templates/FormTemplates.php:398
 msgid "Customer Satisfaction (CSAT)"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:394
+#: src/Templates/FormTemplates.php:399
 msgid "Post-purchase or post-support satisfaction survey."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:399
+#: src/Templates/FormTemplates.php:404
 msgid "How did we do?"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:403
+#: src/Templates/FormTemplates.php:408
 msgid "How satisfied are you?"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:407
+#: src/Templates/FormTemplates.php:412
 msgid "Would you recommend us to a friend?"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:410
+#: src/Templates/FormTemplates.php:415
 msgid "Definitely yes"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:411
+#: src/Templates/FormTemplates.php:416
 msgid "Probably yes"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:412
+#: src/Templates/FormTemplates.php:417
 msgid "Not sure"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:413
+#: src/Templates/FormTemplates.php:418
 msgid "Probably not"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:414
+#: src/Templates/FormTemplates.php:419
 msgid "Definitely not"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:417
+#: src/Templates/FormTemplates.php:422
 msgid "Any additional comments?"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:423
+#: src/Templates/FormTemplates.php:428
 msgid "CSAT Response: {{satisfaction}}/5"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:424
+#: src/Templates/FormTemplates.php:429
 msgid ""
 "Satisfaction: {{satisfaction}}/5\n"
 "Recommend: {{recommend}}\n"
@@ -4100,40 +4100,40 @@ msgid ""
 "{{comments}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:434
-#: src/Templates/FormTemplates.php:440
+#: src/Templates/FormTemplates.php:439
+#: src/Templates/FormTemplates.php:445
 msgid "RSVP"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:435
+#: src/Templates/FormTemplates.php:440
 msgid "Event RSVP: yes / no, guest count, and dietary requirements."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:449
+#: src/Templates/FormTemplates.php:454
 msgid "Will you attend?"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:452
+#: src/Templates/FormTemplates.php:457
 msgid "Yes, I will attend"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:453
+#: src/Templates/FormTemplates.php:458
 msgid "No, I cannot attend"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:456
+#: src/Templates/FormTemplates.php:461
 msgid "Number of additional guests"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:457
+#: src/Templates/FormTemplates.php:462
 msgid "Dietary requirements (optional)"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:463
+#: src/Templates/FormTemplates.php:468
 msgid "RSVP: {{name}} ({{attending}})"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:464
+#: src/Templates/FormTemplates.php:469
 msgid ""
 "Name: {{name}}\n"
 "Email: {{email}}\n"
@@ -4142,76 +4142,76 @@ msgid ""
 "Dietary: {{dietary}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:474
+#: src/Templates/FormTemplates.php:479
 #: resources/admin/templates/pro/support.js:61
 #: resources/admin/templates/pro/support.js:132
 msgid "Bug Report"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:475
+#: src/Templates/FormTemplates.php:480
 msgid "Let users report bugs with steps to reproduce, severity, and device info."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:480
+#: src/Templates/FormTemplates.php:485
 msgid "Report a Bug"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:484
+#: src/Templates/FormTemplates.php:489
 msgid "Brief summary of the issue"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:485
+#: src/Templates/FormTemplates.php:490
 msgid "Steps to reproduce"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:486
+#: src/Templates/FormTemplates.php:491
 msgid ""
 "1. Go to…\n"
 "2. Click on…\n"
 "3. See error"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:487
+#: src/Templates/FormTemplates.php:492
 msgid "Expected behaviour"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:488
+#: src/Templates/FormTemplates.php:493
 msgid "Actual behaviour"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:492
+#: src/Templates/FormTemplates.php:497
 msgid "Severity"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:495
+#: src/Templates/FormTemplates.php:500
 msgid "Critical: app is unusable"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:496
+#: src/Templates/FormTemplates.php:501
 msgid "High: major feature broken"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:497
+#: src/Templates/FormTemplates.php:502
 msgid "Medium: partial functionality affected"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:498
+#: src/Templates/FormTemplates.php:503
 msgid "Low: minor inconvenience"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:501
+#: src/Templates/FormTemplates.php:506
 msgid "Browser & OS"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:502
+#: src/Templates/FormTemplates.php:507
 msgid "Your email (for follow-up)"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:508
+#: src/Templates/FormTemplates.php:513
 msgid "[{{severity}}] Bug: {{summary}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:509
+#: src/Templates/FormTemplates.php:514
 msgid ""
 "Summary: {{summary}}\n"
 "Severity: {{severity}}\n"
@@ -4226,43 +4226,43 @@ msgid ""
 "Contact: {{email}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:522
+#: src/Templates/FormTemplates.php:527
 #: resources/admin/components/OnboardingWizard.jsx:19
 msgid "Lead Capture"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:523
+#: src/Templates/FormTemplates.php:528
 msgid "Simple lead capture form with name and email"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:528
+#: src/Templates/FormTemplates.php:533
 msgid "Stay Updated"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:530
+#: src/Templates/FormTemplates.php:535
 msgid "Subscribe to our newsletter"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:538
+#: src/Templates/FormTemplates.php:543
 #: resources/admin/templates/free/lead.js:20
 msgid "John"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:545
+#: src/Templates/FormTemplates.php:550
 #: resources/admin/templates/free/contact.js:63
 #: resources/admin/templates/free/feedback.js:116
 msgid "john@example.com"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:550
+#: src/Templates/FormTemplates.php:555
 msgid "I agree to receive marketing emails"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:566
+#: src/Templates/FormTemplates.php:571
 msgid "New Lead: {{first_name}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:567
+#: src/Templates/FormTemplates.php:572
 msgid ""
 "New lead captured:\n"
 "\n"
@@ -4272,403 +4272,403 @@ msgid ""
 "Consent: {{consent}}"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:584
+#: src/Templates/FormTemplates.php:589
 #: resources/admin/templates/pro/contact.js:11
 #: resources/admin/templates/pro/contact.js:51
 msgid "Advanced Contact Form"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:584
+#: src/Templates/FormTemplates.php:589
 msgid "Enhanced contact form with department routing and file attachment."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:585
+#: src/Templates/FormTemplates.php:590
 #: resources/admin/templates/pro/contact.js:61
 #: resources/admin/templates/pro/contact.js:124
 msgid "Sales Inquiry"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:585
+#: src/Templates/FormTemplates.php:590
 msgid "Capture qualified sales leads with company size, budget, and timeline."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:586
+#: src/Templates/FormTemplates.php:591
 #: resources/admin/templates/pro/contact.js:134
 #: resources/admin/templates/pro/contact.js:186
 msgid "Partnership Request"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:586
+#: src/Templates/FormTemplates.php:591
 msgid "Structured inquiry form for potential business partnerships."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:587
+#: src/Templates/FormTemplates.php:592
 msgid "Press Inquiry"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:587
+#: src/Templates/FormTemplates.php:592
 msgid "Media and press contact form for journalists and publications."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:589
+#: src/Templates/FormTemplates.php:594
 #: resources/admin/templates/pro/registration.js:19
 #: resources/admin/templates/pro/registration.js:75
 msgid "Event Registration"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:589
+#: src/Templates/FormTemplates.php:594
 msgid "Professional event registration with attendee details and ticket selection."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:590
+#: src/Templates/FormTemplates.php:595
 #: resources/admin/templates/pro/registration.js:85
 #: resources/admin/templates/pro/registration.js:138
 msgid "Webinar Signup"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:590
+#: src/Templates/FormTemplates.php:595
 msgid "Register attendees for online events and webinars with session selection."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:591
+#: src/Templates/FormTemplates.php:596
 #: resources/admin/templates/pro/registration.js:209
 #: resources/admin/templates/pro/registration.js:258
 msgid "Membership Application"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:591
+#: src/Templates/FormTemplates.php:596
 msgid "Comprehensive membership application with plan selection and terms."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:592
+#: src/Templates/FormTemplates.php:597
 #: resources/admin/templates/pro/registration.js:148
 #: resources/admin/templates/pro/registration.js:199
 msgid "Course Enrollment"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:592
+#: src/Templates/FormTemplates.php:597
 msgid "Student enrollment form with course selection and prior experience."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:593
+#: src/Templates/FormTemplates.php:598
 msgid "Volunteer Signup"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:593
+#: src/Templates/FormTemplates.php:598
 msgid "Recruit volunteers with availability and skills assessment."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:594
+#: src/Templates/FormTemplates.php:599
 msgid "Conference Registration"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:594
+#: src/Templates/FormTemplates.php:599
 msgid "Multi-day conference registration with session and workshop selection."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:596
+#: src/Templates/FormTemplates.php:601
 #: resources/admin/templates/free/feedback.js:61
 #: resources/admin/templates/free/feedback.js:91
 msgid "NPS Survey"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:596
+#: src/Templates/FormTemplates.php:601
 msgid "Net Promoter Score survey to measure customer loyalty and satisfaction."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:597
+#: src/Templates/FormTemplates.php:602
 msgid "Employee Satisfaction Survey"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:597
+#: src/Templates/FormTemplates.php:602
 msgid "Measure internal team morale, engagement, and workplace satisfaction."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:598
+#: src/Templates/FormTemplates.php:603
 msgid "Onboarding Check-in"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:598
+#: src/Templates/FormTemplates.php:603
 msgid "New employee onboarding feedback form for HR teams."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:600
+#: src/Templates/FormTemplates.php:605
 #: resources/admin/templates/pro/support.js:10
 #: resources/admin/templates/pro/support.js:51
 msgid "Support Ticket"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:600
+#: src/Templates/FormTemplates.php:605
 msgid "Professional support ticket form with priority, category, and file attachment."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:601
+#: src/Templates/FormTemplates.php:606
 #: resources/admin/templates/pro/support.js:142
 #: resources/admin/templates/pro/support.js:207
 msgid "Feature Request"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:601
+#: src/Templates/FormTemplates.php:606
 msgid "Structured form for collecting and prioritising product feature ideas."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:603
+#: src/Templates/FormTemplates.php:608
 #: resources/admin/components/builder/FormSettings.jsx:260
 #: resources/admin/components/OnboardingWizard.jsx:33
 msgid "Payment Form"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:603
+#: src/Templates/FormTemplates.php:608
 msgid "Secure payment collection with billing details and amount selection."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:604
+#: src/Templates/FormTemplates.php:609
 #: resources/admin/templates/pro/payment.js:84
 #: resources/admin/templates/pro/payment.js:145
 msgid "Donation Form"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:604
+#: src/Templates/FormTemplates.php:609
 msgid "Charitable donation form with custom amount and dedication options."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:605
+#: src/Templates/FormTemplates.php:610
 msgid "Appointment Booking"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:605
+#: src/Templates/FormTemplates.php:610
 msgid "Schedule appointments with date/time selection and service type."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:607
+#: src/Templates/FormTemplates.php:612
 msgid "Job Application"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:607
+#: src/Templates/FormTemplates.php:612
 msgid "Comprehensive job application with resume upload and position selection."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:608
+#: src/Templates/FormTemplates.php:613
 msgid "Vendor Application"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:608
+#: src/Templates/FormTemplates.php:613
 msgid "Supplier and vendor onboarding application with compliance details."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:610
+#: src/Templates/FormTemplates.php:615
 msgid "Virtual Summit Registration"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:610
+#: src/Templates/FormTemplates.php:615
 msgid "Multi-track virtual summit registration with session and networking preferences."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:611
+#: src/Templates/FormTemplates.php:616
 msgid "Workshop Registration"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:611
+#: src/Templates/FormTemplates.php:616
 msgid "In-person or online workshop sign-up with skill level and materials preferences."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:612
+#: src/Templates/FormTemplates.php:617
 msgid "Post-Webinar Feedback"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:612
+#: src/Templates/FormTemplates.php:617
 msgid "Collect attendee ratings and improvement suggestions after a webinar."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:614
+#: src/Templates/FormTemplates.php:619
 msgid "Market Research Survey"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:614
+#: src/Templates/FormTemplates.php:619
 msgid "Gather demographic and buying-behaviour insights for product positioning."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:615
+#: src/Templates/FormTemplates.php:620
 msgid "Product Usability Survey"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:615
+#: src/Templates/FormTemplates.php:620
 msgid "Measure ease-of-use and identify friction points in your product experience."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:616
+#: src/Templates/FormTemplates.php:621
 msgid "Post-Purchase Survey"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:616
+#: src/Templates/FormTemplates.php:621
 msgid "Capture customer satisfaction and referral source immediately after a purchase."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:617
+#: src/Templates/FormTemplates.php:622
 msgid "Customer Exit Survey"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:617
+#: src/Templates/FormTemplates.php:622
 msgid "Understand why customers are leaving and what would bring them back."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:619
+#: src/Templates/FormTemplates.php:624
 msgid "Leave Request"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:619
+#: src/Templates/FormTemplates.php:624
 msgid "Employee leave and time-off request form with manager routing."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:620
+#: src/Templates/FormTemplates.php:625
 msgid "Self-Assessment Review"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:620
+#: src/Templates/FormTemplates.php:625
 msgid "Employee self-evaluation form for annual or mid-year performance reviews."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:621
+#: src/Templates/FormTemplates.php:626
 msgid "Employee Offboarding"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:621
+#: src/Templates/FormTemplates.php:626
 msgid "Exit interview and asset return checklist for departing employees."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:622
+#: src/Templates/FormTemplates.php:627
 msgid "Internal Transfer Request"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:622
+#: src/Templates/FormTemplates.php:627
 msgid "Request a department or role transfer with motivation and manager sign-off."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:624
+#: src/Templates/FormTemplates.php:629
 msgid "Return & Refund Request"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:624
+#: src/Templates/FormTemplates.php:629
 msgid "Customer product return and refund request with reason and photographic evidence."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:625
+#: src/Templates/FormTemplates.php:630
 msgid "Warranty Registration"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:625
+#: src/Templates/FormTemplates.php:630
 msgid "Register a purchased product for warranty coverage and support benefits."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:626
+#: src/Templates/FormTemplates.php:631
 msgid "Pre-Order Form"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:626
+#: src/Templates/FormTemplates.php:631
 msgid "Capture customer interest and deposits for upcoming products before launch."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:627
+#: src/Templates/FormTemplates.php:632
 msgid "Affiliate Program Application"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:627
+#: src/Templates/FormTemplates.php:632
 msgid "Recruit new affiliate and referral partners with traffic and audience data."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:629
+#: src/Templates/FormTemplates.php:634
 msgid "Patient Intake Form"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:629
+#: src/Templates/FormTemplates.php:634
 msgid "New patient registration with medical history and insurance information."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:630
+#: src/Templates/FormTemplates.php:635
 msgid "Medical Appointment Request"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:630
+#: src/Templates/FormTemplates.php:635
 msgid "Request a doctor or specialist appointment with preferred dates and reason."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:631
+#: src/Templates/FormTemplates.php:636
 msgid "Health & Wellness Questionnaire"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:631
+#: src/Templates/FormTemplates.php:636
 msgid "Lifestyle and wellness assessment to guide personalised health recommendations."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:633
+#: src/Templates/FormTemplates.php:638
 msgid "GDPR Data Request"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:633
+#: src/Templates/FormTemplates.php:638
 msgid "Handle GDPR subject access, erasure, and data portability requests securely."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:634
+#: src/Templates/FormTemplates.php:639
 msgid "Consent & Terms Agreement"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:634
+#: src/Templates/FormTemplates.php:639
 msgid "Collect explicit informed consent with version-stamped terms and conditions."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:635
+#: src/Templates/FormTemplates.php:640
 msgid "NDA Agreement Request"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:635
+#: src/Templates/FormTemplates.php:640
 msgid "Collect party details and intent for mutual or one-way NDA agreements."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:636
+#: src/Templates/FormTemplates.php:641
 msgid "Grant Application"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:636
+#: src/Templates/FormTemplates.php:641
 msgid "Four-step grant or funding application covering organisation, project, budget, and supporting information."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:638
+#: src/Templates/FormTemplates.php:643
 msgid "Product Fit Quiz"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:638
+#: src/Templates/FormTemplates.php:643
 msgid "Interactive conversational quiz that qualifies leads by matching them to the right plan or product."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:639
+#: src/Templates/FormTemplates.php:644
 msgid "Work Style Quiz"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:639
+#: src/Templates/FormTemplates.php:644
 msgid "Personality-style quiz that reveals how someone works best: great for team-building and HR insights."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:640
+#: src/Templates/FormTemplates.php:645
 msgid "Coaching Discovery Quiz"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:640
+#: src/Templates/FormTemplates.php:645
 msgid "Conversational intake questionnaire to qualify coaching or consulting prospects before a discovery call."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:642
+#: src/Templates/FormTemplates.php:647
 msgid "Product Demo Request"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:642
+#: src/Templates/FormTemplates.php:647
 msgid "Three-step form to qualify and book a product demo: contact details, project needs, and preferred schedule."
 msgstr ""
 
-#: src/Templates/FormTemplates.php:643
+#: src/Templates/FormTemplates.php:648
 msgid "Financial Quote Request"
 msgstr ""
 
-#: src/Templates/FormTemplates.php:643
+#: src/Templates/FormTemplates.php:648
 msgid "Three-step quote request for insurance, loans, or financial services: personal info, coverage needs, and confirmation."
 msgstr ""
 
@@ -4878,10 +4878,6 @@ msgstr ""
 msgid "Download file"
 msgstr ""
 
-#: subtleforms.php:28
-msgid "Direct access not allowed."
-msgstr ""
-
 #: subtleforms.php:116
 msgid "Cookie nonce is invalid. Please refresh and try again."
 msgstr ""
@@ -4914,7 +4910,7 @@ msgstr ""
 #: resources/admin/components/AppNav.jsx:27
 #: resources/admin/pages/FormsPage.jsx:165
 #: resources/admin/pages/ReportsPage.jsx:64
-#: resources/admin/pages/SettingsPage.jsx:27
+#: resources/admin/pages/SettingsPage.jsx:26
 #: resources/admin/pages/ToolsPage.jsx:259
 msgid "Forms"
 msgstr ""
@@ -5104,8 +5100,8 @@ msgstr ""
 #: resources/admin/components/licensing/ProBadge.jsx:25
 #: resources/admin/pages/CreateFormPage.jsx:322
 #: resources/admin/pages/ExtensionsPage.jsx:24
-#: resources/admin/pages/SettingsPage.jsx:63
-#: resources/admin/pages/SettingsPage.jsx:207
+#: resources/admin/pages/SettingsPage.jsx:56
+#: resources/admin/pages/SettingsPage.jsx:200
 #: resources/admin/pages/SubmissionsPage.jsx:383
 #: resources/admin/pages/ToolsPage.jsx:322
 #: resources/admin/templates/TemplateSelector.jsx:147
@@ -6267,7 +6263,7 @@ msgstr ""
 
 #: resources/admin/components/builder/FieldInspector.jsx:282
 #: resources/admin/components/builder/FormSettings.jsx:160
-#: resources/admin/pages/SettingsPage.jsx:32
+#: resources/admin/pages/SettingsPage.jsx:31
 msgid "General"
 msgstr ""
 
@@ -6642,7 +6638,7 @@ msgstr ""
 
 #: resources/admin/components/builder/FormEditorHeader.jsx:89
 #: resources/admin/pages/BuilderPage.jsx:607
-#: resources/admin/pages/SettingsPage.jsx:267
+#: resources/admin/pages/SettingsPage.jsx:257
 msgid "Unsaved changes"
 msgstr ""
 
@@ -6655,7 +6651,7 @@ msgid "Copied!"
 msgstr ""
 
 #: resources/admin/components/builder/FormEditorHeader.jsx:185
-#: resources/admin/pages/SettingsPage.jsx:181
+#: resources/admin/pages/SettingsPage.jsx:174
 msgid "Save"
 msgstr ""
 
@@ -6712,7 +6708,7 @@ msgid "How this form charges, and where the visitor checks out."
 msgstr ""
 
 #: resources/admin/components/builder/FormSettings.jsx:189
-#: resources/admin/pages/SettingsPage.jsx:74
+#: resources/admin/pages/SettingsPage.jsx:67
 msgid "Integrations"
 msgstr ""
 
@@ -7582,7 +7578,7 @@ msgstr ""
 
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:274
 #: resources/admin/pages/BuilderPage.jsx:605
-#: resources/admin/pages/SettingsPage.jsx:181
+#: resources/admin/pages/SettingsPage.jsx:174
 msgid "Saving…"
 msgstr ""
 
@@ -7666,7 +7662,7 @@ msgid "Publishing this form will make it visible on the frontend. Are you ready 
 msgstr ""
 
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:86
-#: resources/admin/pages/SettingsPage.jsx:270
+#: resources/admin/pages/SettingsPage.jsx:260
 msgid "You have unsaved changes"
 msgstr ""
 
@@ -9168,119 +9164,6 @@ msgstr ""
 
 #: resources/admin/components/settings/AdvancedSettings.jsx:476
 msgid "Reset All Settings"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:40
-msgid "Connection successful! AI services are ready."
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:48
-msgid "Connection failed. Please check your API key and try again."
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:91
-msgid "AI Provider"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:113
-msgid "Select your preferred AI service provider"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:125
-#: resources/admin/components/settings/AISettings.jsx:161
-msgid "Model"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:146
-msgid "Choose the AI model for processing"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:183
-msgid "Choose the Claude model version"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:197
-msgid "API Key"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:205
-msgid "Get your API key from https://platform.openai.com/api-keys"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:210
-msgid "Get your API key from https://console.anthropic.com/"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:214
-msgid "Enter your custom endpoint API key"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:219
-msgid "sk-..."
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:233
-msgid "Custom Endpoint URL"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:247
-msgid "OpenAI-compatible API endpoint"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:273
-msgid "Testing Connection..."
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:277
-msgid "Test Connection"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:300
-msgid "AI Agents"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:303
-msgid "Enable intelligent automation agents to enhance form functionality"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:317
-msgid "Spam Detection"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:334
-msgid "Detect and block spam submissions using AI analysis"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:348
-msgid "Automated Workflows"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:365
-msgid "Trigger smart actions based on submission content"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:379
-msgid "Form Assistance"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:396
-msgid "Provide contextual help and suggestions to users"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:410
-msgid "Smart Routing"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:427
-msgid "Automatically route submissions to the right team"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:440
-msgid "Estimated Monthly Cost"
-msgstr ""
-
-#: resources/admin/components/settings/AISettings.jsx:450
-msgid "Based on enabled agents and average usage. Actual costs may vary."
 msgstr ""
 
 #: resources/admin/components/settings/BrandingSettings.jsx:30
@@ -11522,83 +11405,75 @@ msgstr ""
 msgid "Unlock reports"
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:33
+#: resources/admin/pages/SettingsPage.jsx:32
 msgid "Defaults for new forms, autosave and deleting."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:38
+#: resources/admin/pages/SettingsPage.jsx:37
 msgid "Display"
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:39
+#: resources/admin/pages/SettingsPage.jsx:38
 msgid "Messages and behaviour visitors see on your site."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:45
+#: resources/admin/pages/SettingsPage.jsx:44
 msgid "Who gets notified, what they receive and who it comes from."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:50
+#: resources/admin/pages/SettingsPage.jsx:49
 msgid "Security & privacy"
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:51
+#: resources/admin/pages/SettingsPage.jsx:50
 msgid "Spam protection, CAPTCHA, data retention and debugging."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:56
-msgid "AI assistant"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:57
-msgid "Connect a provider to draft forms and summarise entries."
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:68
+#: resources/admin/pages/SettingsPage.jsx:61
 msgid "License"
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:69
+#: resources/admin/pages/SettingsPage.jsx:62
 msgid "Your plan, license key and what it unlocks."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:75
+#: resources/admin/pages/SettingsPage.jsx:68
 msgid "Account-wide settings for payments, CRM, email marketing and more."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:81
+#: resources/admin/pages/SettingsPage.jsx:74
 msgid "Branding"
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:82
+#: resources/admin/pages/SettingsPage.jsx:75
 msgid "Your name and logo in the forms admin, and which SubtleForms links appear."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:152
+#: resources/admin/pages/SettingsPage.jsx:145
 msgid "Loading settings…"
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:161
+#: resources/admin/pages/SettingsPage.jsx:154
 msgid "Settings could not be loaded."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:172
+#: resources/admin/pages/SettingsPage.jsx:165
 msgid "Site-wide defaults. Each form can override most of these in its own settings."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:186
+#: resources/admin/pages/SettingsPage.jsx:179
 msgid "Settings sections"
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:204
+#: resources/admin/pages/SettingsPage.jsx:197
 msgid "Agency"
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:274
+#: resources/admin/pages/SettingsPage.jsx:264
 msgid "Discard"
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:277
+#: resources/admin/pages/SettingsPage.jsx:267
 msgid "Save changes"
 msgstr ""
 

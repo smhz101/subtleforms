@@ -1,6 +1,11 @@
 <?php
+
 // phpcs:disable -- Unit test file; not shipped in production plugin.
 namespace SubtleForms\Tests\Unit;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use PHPUnit\Framework\TestCase;
 use SubtleForms\Support\Appearance;

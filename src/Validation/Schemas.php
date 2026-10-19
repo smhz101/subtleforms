@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Validation Schemas
  *
@@ -10,6 +11,10 @@
  */
 
 namespace SubtleForms\Validation;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Schemas class

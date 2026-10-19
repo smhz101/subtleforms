@@ -1,4 +1,5 @@
 <?php
+
 /**
  * License Manager Interface.
  *
@@ -11,6 +12,10 @@
  */
 
 namespace SubtleForms\Contracts;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Interface LicenseManagerInterface

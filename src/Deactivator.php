@@ -1,4 +1,5 @@
 <?php
+
 /**
  * SubtleForms Deactivator
  *
@@ -7,6 +8,10 @@
  */
 
 namespace SubtleForms;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 /**
  * Handles plugin deactivation tasks.

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 /**
@@ -32,6 +33,10 @@ declare(strict_types=1);
  */
 
 namespace SubtleForms\Support;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use InvalidArgumentException;
 use SubtleForms\Fields\FieldRegistry;

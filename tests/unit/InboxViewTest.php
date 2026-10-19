@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Submissions inbox choices stay inside the allowed sets.
  *
@@ -6,6 +7,10 @@
  */
 
 namespace SubtleForms\Tests\Unit;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
 use PHPUnit\Framework\TestCase;
 use SubtleForms\Support\Settings;
