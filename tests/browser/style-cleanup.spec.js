@@ -4,13 +4,14 @@
  * - The form has no padding of its own in any preset, so it lines up with the
  *   content around it.
  * - Nothing draws a line above the submit button.
+ * - Fields on the builder canvas use flat colours, no gradients.
  * - "Inherit from theme" adds no visual CSS: a text input, a label and the
  *   submit button compute the same styles as the same elements placed on the
  *   page outside the form, which only the theme styles. The submit button
  *   carries the theme's button class.
  */
 const { test, expect } = require('@playwright/test');
-const { adminApi, publishForm, cleanup, waitForForm, useBundleOverride } = require('./helpers');
+const { adminApi, publishForm, cleanup, waitForForm, useBundleOverride, loginPage, openBuilder } = require('./helpers');
 
 const FIELDS = [
   { id: 'name', key: 'name', name: 'name', type: 'text', label: 'Name', placeholder: 'Ada' },
@@ -154,4 +155,46 @@ test('tuned theme form: a changed colour applies and the button is visible', asy
   });
   expect(colors[1]).toBe('rgb(170, 51, 0)');
   expect(colors[0]).not.toBe(colors[1]);
+});
+
+test('builder: fields on the canvas use flat colours', async ({ page }) => {
+  const form = await publishForm(client, {
+    title: 'Flat builder',
+    fields: [
+      { id: 'name', key: 'name', name: 'name', type: 'text', label: 'Name' },
+      { id: 'secret', key: 'secret', name: 'secret', type: 'hidden', label: 'Source', defaultValue: 'ads' },
+      { id: 'day', key: 'day', name: 'day', type: 'date', label: 'Day' },
+      { id: 'at', key: 'at', name: 'at', type: 'time', label: 'Time' },
+      { id: 'when', key: 'when', name: 'when', type: 'datetime', label: 'When' },
+      { id: 'cv', key: 'cv', name: 'cv', type: 'file_upload', label: 'CV' },
+    ],
+  });
+  forms.flat = form;
+  await loginPage(page);
+  await openBuilder(page, form.id);
+
+  const gradients = () =>
+    page.evaluate(() => {
+      const found = [];
+      for (const el of document.querySelectorAll('.sf-form-editor__canvas *')) {
+        for (const pseudo of [null, '::before', '::after']) {
+          const bg = getComputedStyle(el, pseudo).backgroundImage;
+          if (bg && bg.includes('gradient')) {
+            found.push(`${el.className}${pseudo || ''}: ${bg.slice(0, 60)}`);
+          }
+        }
+      }
+      return found;
+    });
+
+  expect(await gradients()).toEqual([]);
+  // Hover states too.
+  for (const sel of ['.sf-field-renderer__date-placeholder', '.sf-field-renderer__datetime-placeholder', '.sf-field-renderer__hidden-field']) {
+    const el = page.locator(sel).first();
+    if (await el.count()) {
+      await el.hover();
+      expect(await gradients(), `${sel} hovered`).toEqual([]);
+    }
+  }
+  await page.screenshot({ path: 'test-results/shots/builder-flat.png', fullPage: false });
 });
