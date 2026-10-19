@@ -7,6 +7,8 @@
  *   opened anyway.
  * - UX2-18: with the reading pane right of the inbox, an inbox narrower than
  *   960px shows the entry as a full-width overlay with every action visible.
+ * - UX2-19: on a phone the forms and submissions lists are cards with no
+ *   sideways scrolling, normal-size checkboxes and one line of tabs.
  */
 const { test, expect } = require('@playwright/test');
 const { adminApi, cleanup, loginPage, publishForm, spamToken, BASE } = require('./helpers');
@@ -130,4 +132,46 @@ test('UX2-18: at 390 every entry action is visible', async ({ page }) => {
 test('UX2-18: a wide inbox keeps the list beside the entry', async ({ page }) => {
   const m = await openEntry(page, 1440, 900);
   expect(m.pane).toBeLessThan(m.inbox - 300);
+});
+
+for (const screen of [
+  { slug: 'subtleforms-forms', name: 'All Forms' },
+  { slug: 'subtleforms-submissions', name: 'Submissions' },
+]) {
+  test(`UX2-19: ${screen.name} at 390 shows cards without sideways scrolling`, async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await loginPage(page);
+    await page.goto(`/wp-admin/admin.php?page=${screen.slug}`);
+    await page.waitForSelector('.sf-data-table__row');
+    const m = await page.evaluate(() => {
+      const sc = document.querySelector('.sf-data-table__scroll-container');
+      const box = document.querySelector('.sf-data-table__row input[type="checkbox"]').getBoundingClientRect();
+      const row = document.querySelector('.sf-data-table__row');
+      const tabs = [...document.querySelectorAll('.sf-tab-bar__tab')].map((t) => Math.round(t.getBoundingClientRect().top));
+      return {
+        scroll: sc.scrollWidth - sc.clientWidth,
+        doc: document.documentElement.scrollWidth - window.innerWidth,
+        box: [box.width, box.height],
+        rowDisplay: getComputedStyle(row).display,
+        labelled: row.querySelectorAll('td[data-label]').length,
+        tabRows: new Set(tabs).size,
+      };
+    });
+    expect(m.scroll).toBeLessThanOrEqual(1);
+    expect(m.doc).toBeLessThanOrEqual(1);
+    expect(m.box[0]).toBeLessThanOrEqual(26);
+    expect(m.box[1]).toBeLessThanOrEqual(26);
+    expect(m.rowDisplay).not.toBe('table-row');
+    expect(m.labelled).toBeGreaterThan(0);
+    expect(m.tabRows).toBe(1);
+  });
+}
+
+test('UX2-19: a desktop window keeps the table', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  await loginPage(page);
+  await page.goto('/wp-admin/admin.php?page=subtleforms-forms');
+  await page.waitForSelector('.sf-data-table__row');
+  expect(await page.locator('.sf-data-table__row').first().evaluate((r) => getComputedStyle(r).display)).toBe('table-row');
+  await expect(page.locator('.sf-data-table__header th').nth(1)).toBeVisible();
 });

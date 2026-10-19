@@ -2,6 +2,7 @@ import { memo, useRef } from '@wordpress/element';
 import { Button, SelectControl, CheckboxControl } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useVirtualizer } from '@tanstack/react-virtual';
+import { useViewportMatch } from '@wordpress/compose';
 import Icon from '../ui/Icon';
 import TableSkeleton from './TableSkeleton';
 import './DataTable.scss';
@@ -42,6 +43,24 @@ import './DataTable.scss';
  * @param {Array} props.bulkActions - Array of bulk actions [{ label, onClick, isDestructive }]
  * @param {Function|null} props.rowClassName - Optional function to get additional classes for row (row)
  */
+
+/**
+ * Cell attributes. On a phone each row is a card and every cell but the
+ * first shows its column name before the value (UX2-19).
+ *
+ * @param {Object} column Column.
+ * @param {number} index  Column position.
+ * @return {Object} Props for the <td>.
+ */
+export function cellProps(column, index) {
+  const label = typeof column.title === 'string' ? column.title : column.label || '';
+  return {
+    'data-column': column.key,
+    'data-label': index > 0 && label ? label : undefined,
+    'data-primary': index === 0 ? 'true' : undefined,
+  };
+}
+
 const DataTable = memo(function DataTable({
   columns = [],
   data = [],
@@ -66,7 +85,10 @@ const DataTable = memo(function DataTable({
   
   // Virtualization setup - only for large lists
   const parentRef = useRef(null);
-  const shouldVirtualize = data.length > 20;
+  // On a phone the rows become cards of varying height (UX2-19), which the
+  // fixed-height virtual rows cannot hold.
+  const isPhone = useViewportMatch('small', '<');
+  const shouldVirtualize = data.length > 20 && !isPhone;
   
   const rowVirtualizer = useVirtualizer({
     count: shouldVirtualize ? data.length : 0,
@@ -282,8 +304,8 @@ const DataTable = memo(function DataTable({
                         />
                       </td>
                     )}
-                    {columns.map((column) => (
-                      <td key={column.key} data-column={column.key}>
+                    {columns.map((column, i) => (
+                      <td key={column.key} {...cellProps(column, i)}>
                         {column.render
                           ? column.render(row[column.key], row)
                           : row[column.key]}
@@ -321,8 +343,8 @@ const DataTable = memo(function DataTable({
                       />
                     </td>
                   )}
-                  {columns.map((column) => (
-                    <td key={column.key} data-column={column.key}>
+                  {columns.map((column, i) => (
+                    <td key={column.key} {...cellProps(column, i)}>
                       {column.render
                         ? column.render(row[column.key], row)
                         : row[column.key]}

@@ -4,8 +4,17 @@
 
 .sf-submissions-actions {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	gap: 8px;
+
+	// On a phone the search box takes its own line so View and Filters are
+	// not cut off (UX2-19).
+	@media (max-width: 599px) {
+		.components-search-control {
+			flex: 1 1 100%;
+		}
+	}
 }
 
 // Small "Pro" tag inside locked buttons.

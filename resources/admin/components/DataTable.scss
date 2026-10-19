@@ -313,3 +313,101 @@
 		transform: rotate(360deg);
 	}
 }
+
+// ── Phone: rows become cards (UX2-19) ────────────────────────────────────────
+// Each row is a card: the checkbox on the left, the first column as the
+// title, the other columns as "Name: value" lines. No sideways scrolling.
+@media (max-width: 599px) {
+	.sf-data-table {
+		&__scroll-container {
+			overflow-x: visible;
+		}
+
+		&__table,
+		&__body {
+			display: block;
+			width: 100%;
+		}
+
+		&__header {
+			display: block;
+
+			tr {
+				display: flex;
+				align-items: center;
+				gap: 12px;
+				padding: 8px var(--sf-gutter);
+				border-bottom: 1px solid var(--sf-border);
+			}
+
+			th,
+			th.sf-data-table__check-cell {
+				position: static;
+				height: auto;
+				padding: 0;
+				border: 0;
+			}
+
+			// Only the select-all box stays; the column names are on each card.
+			th:not(.sf-data-table__check-cell) {
+				display: none;
+			}
+		}
+
+		&__row {
+			position: relative;
+			display: flex;
+			flex-direction: column;
+			gap: 4px;
+			min-height: 0;
+			padding: 12px calc(var(--sf-gutter) + 44px) 12px calc(var(--sf-gutter) + 36px);
+			border-bottom: 1px solid var(--sf-border);
+
+			> td {
+				display: flex;
+				align-items: baseline;
+				gap: 8px;
+				min-width: 0;
+				width: auto !important;
+				height: auto;
+				padding: 0;
+				border: 0;
+				font-size: var(--sf-text-sm);
+				white-space: normal;
+				overflow-wrap: anywhere;
+			}
+
+			> td.sf-data-table__check-cell.sf-data-table__check-cell {
+				position: absolute;
+				top: 12px;
+				inset-inline-start: var(--sf-gutter);
+				padding: 0;
+			}
+
+			> td[data-primary] {
+				font-size: var(--sf-text-base);
+				margin-bottom: 2px;
+			}
+
+			> td[data-label]::before {
+				content: attr(data-label);
+				flex: 0 0 auto;
+				min-width: 96px;
+				color: var(--sf-text-muted);
+				font-size: var(--sf-text-xs);
+			}
+
+			// The row actions (a cell with no column name) sit top right.
+			> td:not([data-label]):not([data-primary]):not(.sf-data-table__check-cell) {
+				position: absolute;
+				top: 4px;
+				inset-inline-end: calc(var(--sf-gutter) - 8px);
+			}
+
+			> td:empty {
+				display: none;
+			}
+		}
+	}
+}
+

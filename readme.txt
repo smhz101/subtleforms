@@ -136,6 +136,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: On a window shorter than the WordPress menu, SubtleForms screens fill the window instead of showing a dark band under the page, and the lower menu items stay reachable.
 * Fix: On a phone the form builder says it needs a wider screen instead of showing a clipped toolbar, with a button back to the forms and an option to open it anyway.
 * Fix: With the reading pane on the right, a narrow window shows the open entry over the list at full width, and its actions wrap onto a second line instead of overlapping or being cut off.
+* Fix: On a phone the forms and submissions lists show each row as a card instead of a table that scrolls sideways, checkboxes keep their normal size, the tabs stay on one line and the search box gets its own line.
 
 = 2.4.0 - 2026-10-20 =
 * New: Each payment form can pick its own currency, and more currencies are available, including JPY, INR, PKR and AED.
