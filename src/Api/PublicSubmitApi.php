@@ -98,9 +98,15 @@ final class PublicSubmitApi {
 	 * A block with AJAX turned off posts the form to the page.
 	 */
 	public function handleClassicPost(): void {
-		if ( ( $_SERVER['REQUEST_METHOD'] ?? '' ) !== 'POST' || empty( $_POST['subtleforms_classic'] ) ) {
+		$method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_key( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
+		// Public form posts carry no nonce, like the REST submit route: visitors have
+		// no nonce so cached pages keep working (2.3.9). The post goes through the
+		// same spam, rate limit and validation checks as an AJAX submit.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Public form; see above.
+		if ( 'post' !== $method || empty( $_POST['subtleforms_classic'] ) ) {
 			return;
 		}
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Public form; each answer is sanitized and validated by submit_form().
 		$built = self::classicSubmission( wp_unslash( $_POST ) );
 		if ( $built['form_id'] < 1 ) {
 			return;

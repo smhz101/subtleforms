@@ -96,7 +96,7 @@ final class AnswerFormatter {
 	 * @return string
 	 */
 	public static function shorten( string $label, int $max = self::LABEL_MAX ): string {
-		$text = trim( (string) preg_replace( '/\s+/u', ' ', strip_tags( $label ) ) );
+		$text = trim( (string) preg_replace( '/\s+/u', ' ', wp_strip_all_tags( $label ) ) );
 		if ( self::length( $text ) <= $max ) {
 			return $text;
 		}
