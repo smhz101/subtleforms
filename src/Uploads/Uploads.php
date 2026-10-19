@@ -44,7 +44,7 @@ final class Uploads {
 	private const DIR           = 'subtleforms-uploads';
 	private const PENDING       = 'pending';
 	private const STORED        = 'files';
-	private const TRANSIENT     = 'sf_upload_';
+	private const TRANSIENT     = 'subtleforms_upload_';
 	private const CRON_HOOK     = 'subtleforms_uploads_cleanup';
 	private const NONCE_ACTION  = 'subtleforms_file';
 	private const DEFAULT_FILES = 5;
@@ -81,9 +81,6 @@ final class Uploads {
 				}
 			}
 		);
-		// Several files per field is an advanced (Pro) upload feature; without
-		// it the renderer only ever offers one.
-		add_filter( 'subtleforms/public_schema', array( self::class, 'limitPublicSchema' ), 5 );
 	}
 
 	/**
@@ -115,13 +112,6 @@ final class Uploads {
 		);
 	}
 
-	/**
-	 * Whether this site may use several files per field and drag-and-drop.
-	 */
-	public static function advancedAllowed(): bool {
-		return ( new Capabilities() )->allows( 'fields.advanced' );
-	}
-
 	// ── Upload ───────────────────────────────────────────────────────────
 
 	/**
@@ -132,7 +122,7 @@ final class Uploads {
 	 */
 	public static function handleUpload( WP_REST_Request $request ): WP_REST_Response {
 		$ip    = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-		$limit = RateLimiter::check( 'sf_upload_' . md5( $ip ), 30, 10 * MINUTE_IN_SECONDS );
+		$limit = RateLimiter::check( 'subtleforms_rl_upload_' . md5( $ip ), 30, 10 * MINUTE_IN_SECONDS );
 		if ( empty( $limit['allowed'] ) ) {
 			return self::error( 'subtleforms_upload_rate', __( 'Too many uploads. Please wait a few minutes and try again.', 'subtleforms' ), 429 );
 		}
@@ -346,7 +336,7 @@ final class Uploads {
 	 * @param array $field Field node.
 	 */
 	public static function maxFiles( array $field ): int {
-		if ( ! self::attr( $field, 'multiple', false ) || ! self::advancedAllowed() ) {
+		if ( ! self::attr( $field, 'multiple', false ) ) {
 			return 1;
 		}
 		$n = (int) self::attr( $field, 'maxFiles', 0 );
@@ -595,31 +585,6 @@ final class Uploads {
 		return $removed;
 	}
 
-	/**
-	 * Strip "several files" from upload fields when the site cannot use it.
-	 *
-	 * @param mixed $schema Public schema.
-	 * @return mixed
-	 */
-	public static function limitPublicSchema( $schema ) {
-		if ( ! is_array( $schema ) || ! isset( $schema['fields'] ) || ! is_array( $schema['fields'] ) || self::advancedAllowed() ) {
-			return $schema;
-		}
-		$schema['fields'] = self::mapFields(
-			$schema['fields'],
-			static function ( array $f ) {
-				if ( in_array( $f['type'] ?? '', self::FIELD_TYPES, true ) ) {
-					$f['multiple'] = false;
-					if ( isset( $f['config'] ) && is_array( $f['config'] ) ) {
-						$f['config']['multiple'] = false;
-					}
-				}
-				return $f;
-			}
-		);
-		return $schema;
-	}
-
 	// ── Internals ────────────────────────────────────────────────────────
 
 	/**
@@ -677,42 +642,6 @@ final class Uploads {
 			}
 		}
 		return $out;
-	}
-
-	/**
-	 * Apply a callback to every field node.
-	 *
-	 * @param array    $nodes Field nodes.
-	 * @param callable $fn    Callback (array $node): array.
-	 */
-	private static function mapFields( array $nodes, callable $fn ): array {
-		foreach ( $nodes as $i => $node ) {
-			if ( ! is_array( $node ) ) {
-				continue;
-			}
-			$node = $fn( $node );
-			foreach ( array( 'children', 'fields' ) as $k ) {
-				if ( isset( $node[ $k ] ) && is_array( $node[ $k ] ) ) {
-					$node[ $k ] = self::mapFields( $node[ $k ], $fn );
-				}
-			}
-			if ( isset( $node['columns'] ) && is_array( $node['columns'] ) ) {
-				foreach ( $node['columns'] as $c => $col ) {
-					if ( ! is_array( $col ) ) {
-						continue;
-					}
-					if ( isset( $col['fields'] ) && is_array( $col['fields'] ) ) {
-						$node['columns'][ $c ]['fields'] = self::mapFields( $col['fields'], $fn );
-					} elseif ( isset( $col['children'] ) && is_array( $col['children'] ) ) {
-						$node['columns'][ $c ]['children'] = self::mapFields( $col['children'], $fn );
-					} else {
-						$node['columns'][ $c ] = self::mapFields( $col, $fn );
-					}
-				}
-			}
-			$nodes[ $i ] = $node;
-		}
-		return $nodes;
 	}
 
 	/**

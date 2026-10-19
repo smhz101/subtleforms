@@ -45,7 +45,7 @@ test('no assets on a page without a form', async ({ page }) => {
   expect(await page.locator('link[href*="/plugins/subtleforms/"], script[src*="/plugins/subtleforms/"]').count()).toBe(0);
 });
 
-test('signature and rich text code loads only when needed', async ({ page }) => {
+test('rich text code loads only when needed', async ({ page }) => {
   const plain = await publishForm(client, {
     title: 'Perf plain',
     fields: [{ id: 'p1', key: 'name', type: 'text', label: 'Name' }],
@@ -53,7 +53,6 @@ test('signature and rich text code loads only when needed', async ({ page }) => 
   const rich = await publishForm(client, {
     title: 'Perf rich',
     fields: [
-      { id: 'r1', key: 'sig', type: 'signature', label: 'Signature' },
       { id: 'r2', key: 'bio', type: 'rich_text', label: 'Bio' },
     ],
   });
@@ -62,13 +61,11 @@ test('signature and rich text code loads only when needed', async ({ page }) => 
   let seen = await freeAssets(page, plain.url);
   await waitForForm(page);
   expect(seen.some((u) => /frontend\.js/.test(u))).toBe(true);
-  expect(seen.filter((u) => /field-(signature|rich-text)/.test(u))).toEqual([]);
+  expect(seen.filter((u) => /field-rich-text/.test(u))).toEqual([]);
 
   const page2 = await page.context().newPage();
   seen = await freeAssets(page2, rich.url);
   await waitForForm(page2);
-  await expect(page2.locator('canvas.subtleforms-signature__canvas')).toBeVisible();
   await expect(page2.locator('.subtleforms-richtext__editor')).toBeVisible();
-  expect(seen.some((u) => /field-signature\./.test(u))).toBe(true);
   expect(seen.some((u) => /field-rich-text\./.test(u))).toBe(true);
 });

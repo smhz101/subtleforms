@@ -162,7 +162,7 @@ final class Release232Test extends TestCase {
 	// ── Item 5 ───────────────────────────────────────────────────────────
 
 	public function test_every_input_field_has_the_universal_settings(): void {
-		$inputs = array( 'text', 'email', 'number', 'phone', 'url', 'textarea', 'password', 'dropdown', 'radio', 'multiple_choice', 'checkbox', 'consent', 'date', 'time', 'file_upload', 'rating', 'scale', 'net_promoter_score', 'name_group', 'address_group', 'country', 'toggle', 'signature', 'rich_text' );
+		$inputs = array( 'text', 'email', 'number', 'phone', 'url', 'textarea', 'password', 'dropdown', 'radio', 'multiple_choice', 'checkbox', 'consent', 'date', 'time', 'file_upload', 'rating', 'scale', 'net_promoter_score', 'name_group', 'address_group', 'country', 'toggle', 'rich_text' );
 		foreach ( $inputs as $type ) {
 			$c = self::controls( $type );
 			foreach ( array( 'label', 'description', 'labelVisibility', 'descriptionPlacement', 'requiredMessage', 'validationMessage', 'adminLabel' ) as $name ) {

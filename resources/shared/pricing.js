@@ -6,15 +6,13 @@
  * only ever used for display.
  */
 
-import { evaluateFormula, FORMULA_ERROR } from '../frontend/utils/formula';
-import { getPricedType, pricedTypes } from './extend';
+import { getPricedType, chargesMoney } from './extend';
 
 export const PRICED_TYPES = [
   'payment_product',
   'payment_choice',
   'payment_amount',
   'payment_hidden_price',
-  'calculation',
 ];
 
 /**
@@ -43,10 +41,7 @@ export function isPricedForm(fields = []) {
     if (['payment_product', 'payment_choice', 'payment_amount', 'payment_hidden_price', 'payment_card'].includes(f.type)) {
       return true;
     }
-    if (pricedTypes().includes(f.type)) {
-      return true;
-    }
-    return f.type === 'calculation' && !!c.usePrice;
+    return chargesMoney(f.type, c);
   });
 }
 
@@ -73,16 +68,6 @@ export function computeQuote(fields = [], values = {}, { coupon = null, hidden =
   let taxLabel = '';
   let formulaError = false;
   const working = { ...values };
-  const calcs = fields.filter((field) => field.type === 'calculation' && cfg(field).formula);
-  for (let pass = 0; pass < 2; pass++) {
-    calcs.forEach((field) => {
-      const c = cfg(field);
-      const key = c.key || field.key || '';
-      if (!key) return;
-      const result = evaluateFormula(c.formula, working, c.decimals ?? 2);
-      working[key] = result === null ? FORMULA_ERROR : result;
-    });
-  }
 
   fields.forEach((field) => {
     const c = cfg(field);
@@ -135,16 +120,6 @@ export function computeQuote(fields = [], values = {}, { coupon = null, hidden =
         if (amount > 0) items.push({ key, label: c.description || label, qty: 1, unit: amount, amount });
         break;
       }
-      case 'calculation': {
-        if (!c.usePrice) break;
-        if (value === FORMULA_ERROR) {
-          formulaError = true;
-          break;
-        }
-        const amount = money(value);
-        if (amount > 0) items.push({ key, label, qty: 1, unit: amount, amount });
-        break;
-      }
       case 'payment_summary':
         if (c.showTax && Number(c.taxRate) > 0) {
           taxRate = Math.min(100, Number(c.taxRate));
@@ -155,13 +130,18 @@ export function computeQuote(fields = [], values = {}, { coupon = null, hidden =
         // Add-on priced types (e.g. a WooCommerce Product field).
         const fn = getPricedType(field.type);
         if (!fn) break;
+        if (!chargesMoney(field.type, c)) break;
         let lines = [];
         try {
           lines = fn(c, value, { currency }) || [];
         } catch (e) {
           lines = [];
         }
-        lines.forEach((line) => {
+        if (lines && lines.error) {
+          formulaError = true;
+          break;
+        }
+        (Array.isArray(lines) ? lines : []).forEach((line) => {
           const qty = Math.max(0, parseInt(line.qty, 10) || 0);
           const unit = money(line.unit);
           if (qty > 0 && unit > 0) {

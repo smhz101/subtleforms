@@ -3,7 +3,6 @@ import {
   TextControl,
   ToggleControl,
   RadioControl,
-  Notice,
   __experimentalToggleGroupControl as ToggleGroupControl,
   __experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
@@ -209,11 +208,6 @@ export default function FormSettings({
           {__('Form Settings', 'subtleforms')}
         </h2>
 
-        {isReadOnly && (
-          <Notice status='info' isDismissible={false}>
-            <p>{__('Settings are read-only: Activate your Pro license to edit. Your form continues working. No data loss.', 'subtleforms')}</p>
-          </Notice>
-        )}
 
         <div className='sf-form-settings__layout'>
           <nav className='sf-form-settings__nav' aria-label={__('Form settings sections', 'subtleforms')}>

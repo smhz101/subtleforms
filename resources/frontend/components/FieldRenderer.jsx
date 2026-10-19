@@ -24,11 +24,8 @@ import { fieldConfig } from '../../shared/fieldConfig';
 import { fieldDisplay } from '../../shared/fieldDisplay';
 import { toggleIsOn } from '../../shared/toggleState';
 
-// The signature pad and rich text editor are only downloaded on pages whose
-// form has those fields (2.3.0). Every other form skips that code.
-const SignaturePad = lazy(() =>
-  import(/* webpackChunkName: "field-signature" */ './fields/SignaturePad')
-);
+// The rich text editor is only downloaded on pages whose form has that
+// field (2.3.0). Every other form skips that code.
 const RichTextInput = lazy(() =>
   import(/* webpackChunkName: "field-rich-text" */ './fields/RichTextInput')
 );
@@ -237,8 +234,10 @@ export default function FieldRenderer({
     );
   }
 
-  // A calculation with no formula has nothing to show (bug 9).
-  if (field.type === 'calculation' && !String(config.formula || '').trim()) {
+  // An add-on field with nothing to show (for example a Pro Calculation
+  // without a formula) is not drawn (bug 9).
+  const addonType = getFieldType(field.type);
+  if (addonType && typeof addonType.isAnswerable === 'function' && !addonType.isAnswerable(config)) {
     return null;
   }
 
@@ -1553,26 +1552,6 @@ function renderInput(
       );
     }
 
-    case 'calculation': {
-      const decimals = parseInt(config.decimals ?? 2, 10);
-      const num = typeof value === 'number' ? value : parseFloat(value) || 0;
-      const formatted = num.toLocaleString(undefined, {
-        minimumFractionDigits: decimals,
-        maximumFractionDigits: decimals,
-      });
-      return (
-        <output
-          id={inputId}
-          className='subtleforms-calculation'
-          aria-live='polite'
-          aria-describedby={describedBy}>
-          {config.prefix && <span className='subtleforms-calculation__affix'>{config.prefix}</span>}
-          <span className='subtleforms-calculation__value'>{formatted}</span>
-          {config.suffix && <span className='subtleforms-calculation__affix'>{config.suffix}</span>}
-        </output>
-      );
-    }
-
     case 'color_picker':
       return (
         <div className='subtleforms-color'>
@@ -1599,21 +1578,6 @@ function renderInput(
             pattern='#[0-9a-fA-F]{6}'
           />
         </div>
-      );
-
-    case 'signature':
-      return (
-        <Suspense fallback={<FieldLoading />}>
-        <SignaturePad
-          inputId={inputId}
-          name={name}
-          describedBy={describedBy}
-          value={value}
-          onChange={onChange}
-          required={required}
-          error={error}
-        />
-        </Suspense>
       );
 
     case 'rich_text':
@@ -1663,11 +1627,9 @@ function renderInput(
           />
         );
       }
-      return (
-        <div className='subtleforms-unsupported'>
-          {__('Field type not supported:', 'subtleforms')} {field.type}
-        </div>
-      );
+      // A type no active plugin provides (for example a SubtleForms Pro
+      // field after Pro is deactivated) is left out of the live form.
+      return null;
     }
   }
 }

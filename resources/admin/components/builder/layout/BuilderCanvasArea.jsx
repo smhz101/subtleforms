@@ -13,7 +13,7 @@ import SubmissionsTable from '../../SubmissionsTable';
 import ProDowngradeBanner from '../../ProDowngradeBanner';
 import EmptyFormWelcome from '../EmptyFormWelcome';
 import PreviewWorkspace from '../PreviewWorkspace';
-import { formUsesProFeatures, getProFeaturesUsed } from '../../../utils/proFeatureDetector';
+import { getMissingAddonFields } from '../../../utils/proFeatureDetector';
 import './BuilderCanvasArea.scss';
 
 export default function BuilderCanvasArea({
@@ -30,19 +30,11 @@ export default function BuilderCanvasArea({
   showWelcome = false,
   isDirty = false,
 }) {
-  // Detect Pro feature usage and license state
-  const usesProFeatures = useMemo(() => formUsesProFeatures(draftSchema), [draftSchema]);
-  const capabilities = window.subtleformsAdmin?.capabilities || {};
-  const hasProLicense = capabilities['templates.pro'] === true;
-  const isReadOnly = usesProFeatures && !hasProLicense;
-  const proFeaturesUsed = useMemo(() => 
-    isReadOnly ? getProFeaturesUsed(draftSchema) : [],
-    [isReadOnly, draftSchema]
-  );
+  // Fields from an add-on that is not active (the form stays editable).
+  const missingAddonFields = useMemo(() => getMissingAddonFields(draftSchema), [draftSchema]);
   return (
     <>
-      {/* Pro Downgrade Banner */}
-      {isReadOnly && <ProDowngradeBanner featuresUsed={proFeaturesUsed} />}
+      <ProDowngradeBanner featuresUsed={missingAddonFields} />
 
       {saveError && (
         <div className='sf-builder-canvas-area__error-banner'>
@@ -96,7 +88,6 @@ export default function BuilderCanvasArea({
                 validationErrors={validationErrors}
                 fieldErrors={fieldErrors}
                 onChange={onSchemaChange}
-                isReadOnly={isReadOnly}
               />
             )}
             {view === 'settings' && (
@@ -105,7 +96,6 @@ export default function BuilderCanvasArea({
                 validationErrors={validationErrors}
                 fieldErrors={fieldErrors}
                 onChange={onSchemaChange}
-                isReadOnly={isReadOnly}
               />
             )}
             {view === 'entries' && currentFormId && (
@@ -129,7 +119,6 @@ export default function BuilderCanvasArea({
                 formId={currentFormId}
                 onChange={onSchemaChange}
                 isDirty={isDirty}
-                isReadOnly={isReadOnly}
               />
             )}
           </>

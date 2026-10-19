@@ -1,134 +1,85 @@
 /**
- * Pro Feature Detector
+ * Add-on field detection.
  *
- * Detects if a form schema uses Pro features.
- * This is schema-based and deterministic - no UI state dependencies.
+ * Signature, Calculation and Card Payment fields come from SubtleForms Pro.
+ * A form keeps them when Pro is not active; the live form leaves them out
+ * until Pro is back. This module finds them in a schema. It never locks the
+ * builder: everything in the free plugin stays editable.
  *
  * @package SubtleForms
  */
 
-/**
- * List of Pro template IDs
- * These match the PHP ProTemplates::get_all() array keys (snake_case)
- */
-export const PRO_TEMPLATE_IDS = [
-  'event_registration',
-  'support_ticket',
-  'payment_form',
-  'booking_form',
-  'job_application',
-  'advanced_contact',
-  'survey_nps',
-  'membership_application',
-];
+import { __ } from '@wordpress/i18n';
+
+/** Field types provided by SubtleForms Pro. */
+export const ADDON_FIELD_TYPES = ['signature', 'calculation', 'payment_card'];
+
+const LABELS = {
+  signature: () => __('Signature', 'subtleforms'),
+  calculation: () => __('Calculation', 'subtleforms'),
+  payment_card: () => __('Card Payment', 'subtleforms'),
+};
 
 /**
- * List of Pro-only field types
- * These fields require Pro license to use
- */
-const PRO_FIELD_TYPES = [
-  // File and Image Upload are free fields; several files per field is the
-  // Pro part, and the server enforces it.
-  'signature',
-  // Add more as Pro fields are introduced
-];
-
-/**
- * Check if a field uses Pro features
+ * Every field type used in a list of fields, at any depth.
  *
- * @param {Object} field - Field object from schema
- * @return {boolean} True if field requires Pro
+ * @param {Array} fields Field nodes.
+ * @param {Set}   out    Collected types.
+ * @return {Set} Types.
  */
-function fieldUsesProFeatures(field) {
-  if (!field || !field.type) {
-    return false;
-  }
-
-  // Check if field type is Pro-only
-  if (PRO_FIELD_TYPES.includes(field.type)) {
-    return true;
-  }
-
-  // Check nested fields (for groups, steps, columns)
-  // Accept both 'children' (canonical key) and 'fields' (legacy key for backward compat)
-  const nestedFields = field.children || field.fields;
-  if (Array.isArray(nestedFields) && nestedFields.length > 0) {
-    return nestedFields.some((child) => fieldUsesProFeatures(child));
-  }
-
-  if (field.columns && Array.isArray(field.columns)) {
-    return field.columns.some((column) =>
-      column.fields?.some((child) => fieldUsesProFeatures(child))
-    );
-  }
-
-  return false;
+function collectTypes(fields, out = new Set()) {
+  (Array.isArray(fields) ? fields : []).forEach((field) => {
+    if (!field || typeof field !== 'object') return;
+    if (field.type) out.add(field.type);
+    collectTypes(field.children || field.fields, out);
+    if (Array.isArray(field.columns)) {
+      field.columns.forEach((column) => {
+        collectTypes(Array.isArray(column) ? column : column?.fields || column?.children, out);
+      });
+    }
+  });
+  return out;
 }
 
 /**
- * Check if form schema uses Pro features
+ * Whether a schema contains fields that SubtleForms Pro provides.
  *
- * Detection criteria:
- * 1. Template origin is a Pro template
- * 2. Contains Pro-only field types
- * 3. Uses Pro-only actions/settings (future)
- *
- * @param {Object} schema - Form schema object
- * @return {boolean} True if form uses Pro features
+ * @param {Object} schema Form schema.
+ * @return {boolean} True when it does.
  */
 export function formUsesProFeatures(schema) {
-  if (!schema) {
-    return false;
-  }
-
-  // 1. Check if created from Pro template
-  const templateId = schema.metadata?.template;
-  if (templateId && PRO_TEMPLATE_IDS.includes(templateId)) {
-    return true;
-  }
-
-  // 2. Check if any field uses Pro features
-  const fields = schema.fields || [];
-  if (fields.some((field) => fieldUsesProFeatures(field))) {
-    return true;
-  }
-
-  // 3. Future: Check for Pro actions (webhooks, integrations)
-  // const actions = schema.metadata?.actions || [];
-  // if (actions.some(action => PRO_ACTION_TYPES.includes(action.type))) {
-  //   return true;
-  // }
-
-  return false;
+  if (!schema) return false;
+  const types = collectTypes(schema.fields);
+  return ADDON_FIELD_TYPES.some((type) => types.has(type));
 }
 
 /**
- * Get list of Pro features used in this form
+ * Labels of the Pro field types a schema uses.
  *
- * Useful for showing specific feature requirements to user.
- *
- * @param {Object} schema - Form schema object
- * @return {Array<string>} Array of feature names used
+ * @param {Object} schema Form schema.
+ * @return {string[]} Labels.
  */
 export function getProFeaturesUsed(schema) {
-  const features = [];
+  if (!schema) return [];
+  const types = collectTypes(schema.fields);
+  return ADDON_FIELD_TYPES.filter((type) => types.has(type)).map((type) => LABELS[type]());
+}
 
-  if (!schema) {
-    return features;
-  }
-
-  // Check template origin
-  const templateId = schema.metadata?.template;
-  if (templateId && PRO_TEMPLATE_IDS.includes(templateId)) {
-    features.push('Pro Template');
-  }
-
-  // Check Pro fields (simplified - could be more detailed)
-  const fields = schema.fields || [];
-  const hasProFields = fields.some((field) => fieldUsesProFeatures(field));
-  if (hasProFields) {
-    features.push('Pro Fields');
-  }
-
-  return features;
+/**
+ * Labels of add-on fields in a schema that no active plugin provides on
+ * this site right now.
+ *
+ * @param {Object}   schema  Form schema.
+ * @param {string[]} missing Missing types (default: from the server).
+ * @return {string[]} Labels.
+ */
+export function getMissingAddonFields(
+  schema,
+  missing = window.subtleformsAdmin?.missingFieldTypes || []
+) {
+  if (!schema || !Array.isArray(missing) || missing.length === 0) return [];
+  const types = collectTypes(schema.fields);
+  return missing
+    .filter((type) => types.has(type))
+    .map((type) => (LABELS[type] ? LABELS[type]() : type));
 }

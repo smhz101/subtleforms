@@ -5,6 +5,7 @@
 import { createRoot } from '@wordpress/element';
 import { act } from 'react';
 import FieldRenderer, { hasVisibleText } from './FieldRenderer';
+import { registerFieldType } from '../../shared/extend';
 import { SAMPLES, WIDTHS, buildField } from '../../../tests/browser/fixtures/fields';
 
 global.IS_REACT_ACT_ENVIRONMENT = true;
@@ -44,8 +45,8 @@ describe.each(WIDTHS)('width %s', (width) => {
     test.each(SAMPLES.map((s) => [s.key || s.type, s]))('%s keeps required, options, placeholder and help', async (_, sample) => {
       const field = buildField(sample, width, shape);
       const { container, unmount } = render(field);
-      // Signature and rich text load lazily (2.3.0): let them resolve.
-      if (['signature', 'rich_text'].includes(sample.type)) {
+      // Rich text loads lazily (2.3.0): let it resolve.
+      if (sample.type === 'rich_text') {
         for (let i = 0; i < 20 && container.querySelector('.subtleforms-field-loading'); i++) {
           // eslint-disable-next-line no-await-in-loop
           await act(async () => {
@@ -139,10 +140,14 @@ describe('2.2.1 field fixes', () => {
     r.unmount();
   });
 
-  test('empty matrix, calculation without formula and empty disclaimer are not drawn (bugs 8, 9, 10)', () => {
+  test('empty matrix, an add-on field with nothing to show and empty disclaimer are not drawn (bugs 8, 9, 10)', () => {
+    registerFieldType('qa_total', {
+      component: () => <output>total</output>,
+      isAnswerable: (config) => !!String(config.formula || '').trim(),
+    });
     for (const field of [
       { key: 'g', type: 'checkbox_grid', label: 'Grid', rows: [], columns: [] },
-      { key: 'c', type: 'calculation', label: 'Total', formula: '' },
+      { key: 'c', type: 'qa_total', label: 'Total', formula: '' },
       { key: 'd', type: 'disclaimer', content: '<p> </p>' },
     ]) {
       const { container, unmount } = render(field);
@@ -151,6 +156,13 @@ describe('2.2.1 field fixes', () => {
     }
     expect(hasVisibleText('<p>&nbsp;</p>')).toBe(false);
     expect(hasVisibleText('<p>Terms apply</p>')).toBe(true);
+  });
+
+  test('a field type no plugin provides is left out of the live form (2.3.9)', () => {
+    const { container, unmount } = render({ key: 'sig', type: 'signature', label: 'Signature' });
+    expect(container.textContent).not.toContain('not supported');
+    expect(container.querySelector('input, canvas, output')).toBeNull();
+    unmount();
   });
 
   test('a disclaimer with text is drawn', () => {
