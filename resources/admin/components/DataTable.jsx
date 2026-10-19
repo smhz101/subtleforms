@@ -352,8 +352,8 @@ const DataTable = memo(function DataTable({
             </span>
 
             <div className='sf-data-table__pagination-info-controls'>
-              <label>{__('Rows per page', 'subtleforms')}</label>
               <SelectControl
+                label={__('Rows per page', 'subtleforms')}
                 __nextHasNoMarginBottom
                 __next40pxDefaultSize={false}
                 size='compact'

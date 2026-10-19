@@ -9,6 +9,7 @@ import {
   Spinner,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
+import { formTypeChoices } from '../utils/formTypeChoices';
 import './CreateFormWizard.scss';
 
 const STEPS = [
@@ -136,21 +137,10 @@ export default function CreateFormWizard({
             <RadioControl
               label={__('Choose a form type', 'subtleforms')}
               selected={formType}
-              options={[
-                { label: __('Regular form', 'subtleforms'), value: 'regular' },
-                {
-                  label: __('Multi-step form', 'subtleforms'),
-                  value: 'multi-step',
-                },
-                {
-                  label: __('Sectioned form', 'subtleforms'),
-                  value: 'sectioned',
-                },
-                {
-                  label: __('Conversational form', 'subtleforms'),
-                  value: 'conversational',
-                },
-              ]}
+              options={formTypeChoices().map((choice) => ({
+                label: choice.label,
+                value: choice.id,
+              }))}
               onChange={(v) => setFormType(v)}
               disabled={submitting}
             />

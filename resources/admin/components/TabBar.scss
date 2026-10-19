@@ -6,15 +6,12 @@
 
 .sf-tab-bar {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: stretch;
 	gap: 4px;
 	margin-bottom: -1px;
-	overflow-x: auto;
-	scrollbar-width: none;
-
-	&::-webkit-scrollbar {
-		display: none;
-	}
+	padding: 4px;
+	overflow: visible;
 
 	&__tab {
 		position: relative;
@@ -51,7 +48,9 @@
 		}
 
 		&:focus-visible {
-			box-shadow: inset var(--sf-shadow-focus);
+			outline: 2px solid var(--sf-brand);
+			outline-offset: 2px;
+			box-shadow: none;
 			border-radius: var(--sf-radius-sm);
 		}
 

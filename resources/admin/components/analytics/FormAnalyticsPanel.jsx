@@ -8,6 +8,7 @@ import {
   formatRate,
 } from './useAnalytics';
 import './analytics.scss';
+import { chartColumnProps } from '../../utils/chartA11y';
 
 const fmt = (n) => Number(n || 0).toLocaleString();
 
@@ -38,6 +39,19 @@ export function ViewsChart({ data = [] }) {
           <span data-value='0' />
         </div>
         <div className='sf-trend__bars' onMouseLeave={() => setActive(null)}>
+          <ul className='screen-reader-text'>
+            {data.map((d) => (
+              <li key={d.date}>
+                {sprintf(
+                  /* translators: 1: date, 2: views, 3: submissions */
+                  __('%1$s: %2$s views, %3$s submissions', 'subtleforms'),
+                  day(d.date, { month: 'short', day: 'numeric' }),
+                  fmt(d.views),
+                  fmt(d.submissions)
+                )}
+              </li>
+            ))}
+          </ul>
           {data.map((d, i) => {
             const rate = d.views > 0 ? (d.submissions / d.views) * 100 : null;
             const label = sprintf(
@@ -52,7 +66,7 @@ export function ViewsChart({ data = [] }) {
                 key={d.date}
                 className={clsx('sf-trend__col', 'sf-views-chart__col', { 'is-active': active === i })}
                 tabIndex={0}
-                aria-label={label}
+                {...chartColumnProps(label)}
                 onMouseEnter={() => setActive(i)}
                 onFocus={() => setActive(i)}
                 onBlur={() => setActive(null)}>

@@ -8,6 +8,8 @@ import {
 } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
+import { formNameHelp } from '../../utils/formNameHelp';
+import { formTypeLabel } from '../../utils/formTypeChoices';
 import ConfirmModal from '../../modals/ConfirmModal';
 import {
   structuralType,
@@ -248,9 +250,9 @@ export default function FormSettings({
                 {formType !== 'regular' && formType !== 'standard' && (
                   <div className='sf-form-type-banner' data-form-type={formType}>
                     <h3 className='sf-form-type-banner__title'>
-                      {isMultiStep && __('Multi-step Form', 'subtleforms')}
-                      {formType === 'sectioned' && __('Sectioned Form', 'subtleforms')}
-                      {formType === 'conversational' && __('Conversational Form', 'subtleforms')}
+                      {isMultiStep && formTypeLabel('multi-step')}
+                      {formType === 'sectioned' && formTypeLabel('sectioned')}
+                      {formType === 'conversational' && formTypeLabel('conversational')}
                       {formType === 'payment' && __('Payment Form', 'subtleforms')}
                     </h3>
                     <p className='sf-form-type-banner__description'>
@@ -266,7 +268,7 @@ export default function FormSettings({
                   label={__('Form name', 'subtleforms')}
                   value={metadata.title || ''}
                   onChange={(value) => handleMetadataChange('title', value)}
-                  help={__('The name shown to you and your visitors for this form.', 'subtleforms')}
+                  help={formNameHelp()}
                   disabled={isReadOnly}
                 />
                 <TextControl

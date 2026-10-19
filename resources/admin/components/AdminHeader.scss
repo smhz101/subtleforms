@@ -262,16 +262,19 @@
 // ── Editor bar (builder) ─────────────────────────────────────────────────────
 
 .sf-topbar--editor {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+	align-items: center;
 	gap: 16px;
 	height: 64px;
 	padding: 0 16px 0 0;
+	container-type: inline-size;
 
 	.sf-topbar__start {
 		display: flex;
 		align-items: center;
 		gap: 12px;
 		min-width: 0;
-		flex: 1 1 auto;
 	}
 
 	.sf-topbar__title {
@@ -286,14 +289,17 @@
 		align-items: center;
 		justify-content: flex-end;
 		gap: 8px;
-		flex: 1 1 auto;
 		min-width: 0;
 	}
 
+	// The view switcher sits on top of anything the side columns still paint.
 	.sf-topbar__center {
+		position: relative;
+		z-index: 2;
 		display: flex;
 		justify-content: center;
-		flex: 0 0 auto;
+		padding-inline: 8px;
+		background: var(--sf-bg-surface);
 	}
 }
 
@@ -362,7 +368,7 @@
 }
 
 .sf-topbar__title-input {
-	min-width: 220px;
+	min-width: 0;
 	height: 32px;
 	padding: 0 8px;
 	border: 1px solid var(--sf-brand);

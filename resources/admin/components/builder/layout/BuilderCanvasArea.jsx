@@ -5,7 +5,7 @@
  */
 
 import { useMemo } from '@wordpress/element';
-import { Notice } from '@wordpress/components';
+import { Button, Notice } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import FormEditor from '../FormEditor';
 import FormSettings from '../FormSettings';
@@ -27,6 +27,7 @@ export default function BuilderCanvasArea({
   onSchemaChange,
   currentFormId,
   saveError,
+  onRetrySave,
   hasValidationErrors,
   showWelcome = false,
   isDirty = false,
@@ -49,10 +50,15 @@ export default function BuilderCanvasArea({
       )}
 
       {saveError && (
-        <div className='sf-builder-canvas-area__error-banner'>
+        <div className='sf-builder-canvas-area__error-banner' role='alert'>
           <span className='sf-builder-canvas-area__error-text'>
             {saveError}
           </span>
+          {onRetrySave && (
+            <Button variant='secondary' onClick={onRetrySave}>
+              {__('Retry', 'subtleforms')}
+            </Button>
+          )}
         </div>
       )}
 

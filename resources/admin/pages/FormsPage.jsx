@@ -11,6 +11,7 @@ import FormsList, { ALL_FORM_COLUMNS, DEFAULT_FORM_VISIBLE, FORM_COLUMN_LABELS }
 import OnboardingWizard from '../components/OnboardingWizard';
 import HelpMenu from '../components/HelpMenu';
 import { apiGet, apiPost } from '../utils/api';
+import { wizardCreateBody } from '../utils/wizardCreate';
 import './FormsPage.scss';
 
 export default function FormsPage() {
@@ -18,6 +19,7 @@ export default function FormsPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [showWizard, setShowWizard] = useState(false);
+  const [wizardError, setWizardError] = useState('');
   const [formsCount, setFormsCount] = useState(null);
   const [isDismissed, setIsDismissed] = useState(true);
   // Per-status counts for the tab bar (Part B10).
@@ -92,59 +94,23 @@ export default function FormsPage() {
   }, []);
 
   const handleWizardComplete = async (formData) => {
-    setShowWizard(false);
-
-    // Create form with wizard data
+    setWizardError('');
     try {
-      const schema = {
-        schema_version: 1,
-        metadata: {
-          name: formData.goal || 'new_form',
-          type: formData.type || 'regular',
-          title: __('New Form', 'subtleforms'),
-        },
-        fields: formData.fields || [],
-      };
-
-      const { body: createData } = await apiPost('/forms', {
-        title:
-          __('My ', 'subtleforms') +
-          (formData.goal?.charAt(0).toUpperCase() + formData.goal?.slice(1) ||
-            __('Form', 'subtleforms')),
-        status: 'draft',
-      });
-
-      if (createData?.id) {
-        // Save schema
-        await apiPost(`/forms/${createData.id}/schema`, { schema });
-
-        // Send onboarding test email to admin to validate delivery
-        try {
-          const { body: testData } = await apiPost(
-            '/onboarding/send-test-email'
-          );
-
-          {
-            if (testData?.success) {
-              alert(
-                __(
-                  'A test email has been sent to your admin email.',
-                  'subtleforms'
-                )
-              );
-            } else {
-              console.warn('Test email response:', testData);
-            }
-          }
-        } catch (err) {
-          console.warn('Failed to send onboarding test email:', err);
-        }
-
-        // Navigate to builder
-        navigate('/forms/' + createData.id);
+      const payload = wizardCreateBody(formData);
+      const created = await apiPost('/forms', { title: payload.title });
+      const id = created.body?.data?.id ?? created.body?.id;
+      if (!created.ok || !id) {
+        setWizardError(__('The form could not be created. Try again.', 'subtleforms'));
+        return;
       }
+      if (payload.schema) {
+        await apiPost(`/forms/${id}/schema`, { schema: payload.schema });
+      }
+      setShowWizard(false);
+      navigate('/forms/' + id);
     } catch (error) {
       console.error('Failed to create form:', error);
+      setWizardError(__('The form could not be created. Try again.', 'subtleforms'));
     }
   };
 
@@ -233,6 +199,7 @@ export default function FormsPage() {
         <OnboardingWizard
           onComplete={handleWizardComplete}
           onDismiss={handleWizardDismiss}
+          createError={wizardError}
         />
       )}
     </>

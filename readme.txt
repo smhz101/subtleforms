@@ -130,6 +130,25 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Change: SubtleForms requires WordPress 6.6.
 * Fix: Deleting the plugin removes its tables, options, transients and scheduled tasks on every site in a network.
 * Fix: Text in the admin and on the public form can be translated with a language pack.
+* Fix: The builder header keeps the title, status, and Preview tabs from covering each other.
+* Fix: Preview scales the form to the space it has, so a desktop width is not cut off.
+* Fix: Choice questions in a conversational form are a vertical list.
+* Fix: The coupon field stays wide enough to type in, and Apply moves under it on a narrow screen.
+* Fix: When forms, entries, or the builder fail to load, you see an error with Retry instead of an empty list.
+* Fix: The builder shows a placeholder while a form loads, instead of a blank screen.
+* Fix: Dark, Dark surface, and Bold presets keep readable text and buttons on their own background.
+* Fix: The focus ring on form status tabs stays visible.
+* Fix: Quick Start creates the form and closes the help menu.
+* Fix: Saving a published form shows that the changes are not live yet.
+* Fix: A failed save says your changes are kept in this tab, with Retry, and that note clears when the save works.
+* Fix: Update on a published form no longer asks you to confirm. The first Publish still does.
+* Fix: Last 7 days is the same count on the dashboard and on Reports.
+* Fix: Deleting a field says Field deleted, with Undo.
+* Fix: Form types use the names Standard, Multi-step, and Conversational.
+* Fix: Form name help says the same thing when you create a form and in its settings.
+* Fix: Charts have a text summary, and Rows per page has a name.
+* Fix: Muted text is dark enough to read, including the Press Enter hint.
+* Fix: A hidden field toolbar is not in the tab order, and canvas fields have names.
 
 = 2.3.8 - 2026-10-19 =
 * New: Dependent dropdowns open in a column editor. Each column is one dropdown, and choosing an item shows only what belongs to it.
@@ -148,7 +167,7 @@ The full history is in changelog.txt in the plugin folder.
 == Upgrade Notice ==
 
 = 2.3.9 =
-The AI assistant settings tab is gone, WordPress 6.6 is required, and deleting the plugin cleans up every site.
+Free plugin and SubtleForms Pro split cleanly: everything in this plugin works without a license. Requires WordPress 6.6. Update SubtleForms Pro to 2.4.0 at the same time.
 
 = 2.3.8 =
 Dependent dropdowns are edited as columns and can show as dropdowns, buttons or columns on the form.

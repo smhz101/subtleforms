@@ -599,9 +599,13 @@
 }
 
 /* Coupon box */
-.subtleforms-coupon__row { display: flex; gap: 8px; }
-.subtleforms-coupon__input { flex: 1; min-width: 0; text-transform: uppercase; letter-spacing: 0.04em; }
-.subtleforms-coupon__apply { flex-shrink: 0; }
+.subtleforms-coupon__row { display: flex; flex-wrap: wrap; gap: 8px; }
+.subtleforms-coupon__input { flex: 1 1 160px; min-width: min(100%, 160px); text-transform: uppercase; letter-spacing: 0.04em; }
+.subtleforms-coupon__apply { flex: 0 0 auto; }
+@media (max-width: 400px) {
+	.subtleforms-coupon__input,
+	.subtleforms-coupon__apply { flex-basis: 100%; }
+}
 .subtleforms-coupon__error {
 	margin: 6px 0 0;
 	font-size: var(--subtleforms-font-size-sm, 0.875rem);

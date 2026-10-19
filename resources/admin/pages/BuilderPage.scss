@@ -1,0 +1,26 @@
+.sf-builder-loading {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	padding: 24px;
+
+	&__columns {
+		display: grid;
+		grid-template-columns: 240px minmax(0, 1fr);
+		gap: 16px;
+	}
+}
+
+.sf-builder-load-error {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 16px;
+	padding: 24px;
+}
+
+@media (max-width: 600px) {
+	.sf-builder-loading__columns {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}

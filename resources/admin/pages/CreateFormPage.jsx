@@ -1,6 +1,7 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from '@wordpress/element';
 import { Button, Modal, TextControl, TextareaControl } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
+import { formNameHelp } from '../utils/formNameHelp';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import { useCreateForm, useTemplates } from '../data';
@@ -110,7 +111,7 @@ const STRUCTURES = [
   {
     id: 'standard',
     icon: Icon.FileText,
-    title: __('Single page', 'subtleforms'),
+    title: __('Standard', 'subtleforms'),
     text: __('All fields on one page.', 'subtleforms'),
   },
   {
@@ -406,7 +407,7 @@ export default function CreateFormPage() {
               onChange={setTitle}
               autoFocus
               onFocus={(e) => e.target.select()}
-              help={__('Only you see this. You can show a different title on the page.', 'subtleforms')}
+              help={formNameHelp()}
             />
 
             {chosen.id === 'blank' ? (

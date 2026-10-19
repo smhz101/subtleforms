@@ -6,7 +6,6 @@ import {
   useMemo,
 } from '@wordpress/element';
 import {
-  Spinner,
   Notice,
 } from '@wordpress/components';
 import { Button } from '../components/navigation';
@@ -44,6 +43,9 @@ import BuilderCanvasArea from '../components/builder/layout/BuilderCanvasArea';
 import BuilderModalsController from '../components/builder/layout/BuilderModalsController';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
 import { getFormTypeBadgeConfig } from '../utils/formMeta';
+import { countSchemaFields, fieldDeletedMessage } from '../utils/fieldDeleteNotice';
+import { Skeleton } from '../ui/loading/Skeleton';
+import './BuilderPage.scss';
 import { applyPaymentDefaults } from '../utils/paymentDefaults';
 import {
   structuralType,
@@ -102,6 +104,8 @@ function FormBuilderInner({
     fieldGroups,
     fieldDefinitions,
     loadingFields,
+    fieldsError,
+    retryFields,
     isHydrating,
     showTour,
     setShowTour,
@@ -389,6 +393,21 @@ function FormBuilderInner({
 
       const before = structuralType(draftSchema || {});
       const after = typedSchema?.metadata?.type;
+      const removedFields = countSchemaFields(draftSchema) - countSchemaFields(typedSchema);
+      const deletedMessage = fieldDeletedMessage(removedFields);
+      if (deletedMessage) {
+        createSuccessNotice(deletedMessage, {
+          type: 'snackbar',
+          id: 'subtleforms-field-deleted',
+          actions: [
+            {
+              label: __('Undo', 'subtleforms'),
+              onClick: () => dispatch({ type: BUILDER_ACTIONS.UNDO_SCHEMA }),
+            },
+          ],
+        });
+      }
+
       if (before === TYPE_STANDARD && after === TYPE_MULTI_STEP) {
         createSuccessNotice(
           __('This form is now Multi-step: it has a Page Break.', 'subtleforms'),
@@ -601,11 +620,14 @@ function FormBuilderInner({
 
   const shortcode = currentFormId ? `[subtleforms id="${currentFormId}"]` : '';
   const statusLabel = useMemo(() => {
+    if (effectiveStatus === 'error') {
+      return autoSaveError || saveError || __('Your changes are kept in this tab.', 'subtleforms');
+    }
     if (autoSaving) return __('Saving...', 'subtleforms');
     if (effectiveStatus === 'saving') return __('Saving…', 'subtleforms');
     if (effectiveStatus === 'saved') return __('Saved', 'subtleforms');
     return __('Unsaved changes', 'subtleforms');
-  }, [effectiveStatus, autoSaving]);
+  }, [autoSaveError, autoSaving, effectiveStatus, saveError]);
 
   const statusDescription = useMemo(() => {
     if (effectiveStatus === 'error') {
@@ -650,9 +672,41 @@ function FormBuilderInner({
     saveError,
   ]);
 
-  if (loadingFields) return <Spinner />;
-  if (loading) return <Spinner />;
-  if (error) return <Notice status='error'>{error}</Notice>;
+  if (loadingFields || loading) {
+    return (
+      <AdminShell variant='editor' title={__('Form', 'subtleforms')} onBack={() => navigate('/forms')}>
+        <div className='sf-builder-loading' aria-busy='true' aria-label={__('Loading the form', 'subtleforms')}>
+          <Skeleton width='100%' height='48px' />
+          <div className='sf-builder-loading__columns'>
+            <Skeleton width='100%' height='320px' />
+            <Skeleton width='100%' height='320px' />
+          </div>
+        </div>
+      </AdminShell>
+    );
+  }
+
+  if (error || fieldsError) {
+    return (
+      <AdminShell variant='editor' title={__('Form', 'subtleforms')} onBack={() => navigate('/forms')}>
+        <div className='sf-builder-load-error' role='alert'>
+          <Notice status='error' isDismissible={false}>
+            {error || fieldsError}
+          </Notice>
+          <Button
+            variant='primary'
+            onClick={() => {
+              if (fieldsError) {
+                retryFields();
+              }
+              loadForm(true);
+            }}>
+            {__('Retry', 'subtleforms')}
+          </Button>
+        </div>
+      </AdminShell>
+    );
+  }
 
   // Get form type badge config — single source of truth (shared selector).
   // The builder shows the draft type (what you're editing), which matches the
@@ -701,7 +755,8 @@ function FormBuilderInner({
             effectiveStatus={effectiveStatus}
             autoSaving={autoSaving}
             autoSaveError={autoSaveError}
-            saveError={saveError}
+            saveError={saveError || autoSaveError}
+          onRetrySave={saveError ? retryLastManualSave : retryAutosave}
             onRetryAutosave={retryAutosave}
             onRetryLastManualSave={retryLastManualSave}
             onDismissErrors={dismissRecoverableErrors}

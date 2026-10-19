@@ -6,6 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
 
 use SubtleForms\Api\ApiResponse;
 use SubtleForms\Repositories\FormsRepository;
+use SubtleForms\Tools\ReportSeries;
 use SubtleForms\Repositories\SubmissionsRepository;
 use SubtleForms\Support\Settings;
 use SubtleForms\Security\RateLimiter;
@@ -133,7 +134,7 @@ class DashboardApi {
 		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		// Submissions this week (last 7 days)
-		$weekStart           = gmdate( 'Y-m-d 00:00:00', strtotime( '-7 days' ) );
+		$weekStart           = ReportSeries::start( 7 );
 		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is $wpdb->prefix controlled.
 		$submissionsThisWeek = (int) $wpdb->get_var(
 			$wpdb->prepare(

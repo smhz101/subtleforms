@@ -13,6 +13,8 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
   const [fieldGroups, setFieldGroups] = useState({});
   const [fieldDefinitions, setFieldDefinitions] = useState({});
   const [loadingFields, setLoadingFields] = useState(true);
+  const [fieldsError, setFieldsError] = useState(null);
+  const [fieldsAttempt, setFieldsAttempt] = useState(0);
   const [isHydrating, setIsHydrating] = useState(false);
   const [showTour, setShowTour] = useState(false);
   const [tourCompleted, setTourCompleted] = useState(true);
@@ -34,6 +36,8 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
 
   // Load field definitions from API
   useEffect(() => {
+    setFieldsError(null);
+    setLoadingFields(true);
     Promise.all([apiGet('/fields?grouped=true'), apiGet('/settings')]).then(
       async ([fieldsRes, settingsRes]) => {
         if (!fieldsRes.ok) {
@@ -42,6 +46,7 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
           const fallback = await apiGet('/fields');
           if (!fallback.ok) {
             console.error('Fallback /fields failed, cannot load fields', fallback);
+            setFieldsError(__('The form could not be loaded.', 'subtleforms'));
             setLoadingFields(false);
             return;
           }
@@ -115,10 +120,14 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
 
         setFieldGroups(groups);
         setFieldDefinitions(definitions);
+        setFieldsError(null);
         setLoadingFields(false);
       }
-    );
-  }, []);
+    ).catch(() => {
+      setFieldsError(__('The form could not be loaded.', 'subtleforms'));
+      setLoadingFields(false);
+    });
+  }, [fieldsAttempt]);
 
   // Check if tour should be shown
   useEffect(() => {
@@ -192,11 +201,15 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
       ]).then(([schemaRes, formRes]) => {
         if (!schemaRes.ok) {
           dispatch({
-            type: BUILDER_ACTIONS.AUTOSAVE_ERROR,
+            type: BUILDER_ACTIONS.LOAD_ERROR,
             payload: {
-              error: schemaRes.body?.message || __('Failed to load schema', 'subtleforms'),
+              error:
+                schemaRes.body?.message ||
+                schemaRes.body?.error?.message ||
+                __('The form could not be loaded.', 'subtleforms'),
             },
           });
+          setIsHydrating(false);
           return;
         }
 
@@ -242,6 +255,14 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
 
         // Clear hydrating flag after next render to allow FormEditor to initialize
         setTimeout(() => setIsHydrating(false), 0);
+      }).catch(() => {
+        dispatch({
+          type: BUILDER_ACTIONS.LOAD_ERROR,
+          payload: {
+            error: __('The form could not be loaded.', 'subtleforms'),
+          },
+        });
+        setIsHydrating(false);
       });
     },
     [formId, bootstrap, dispatch]
@@ -256,6 +277,8 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
     fieldGroups,
     fieldDefinitions,
     loadingFields,
+    fieldsError,
+    retryFields: () => setFieldsAttempt((attempt) => attempt + 1),
     isHydrating,
     showTour,
     setShowTour,

@@ -81,7 +81,7 @@ final class ReportsApi {
 		unset( $request );
 		global $wpdb;
 		$table = $wpdb->prefix . 'subtleforms_submissions';
-		$start = gmdate( 'Y-m-d 00:00:00', time() - ( 6 * 86400 ) );
+		$start = ReportSeries::start( 7 );
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter
 		// Only real entries count: spam, failed and trashed entries do not.
 		$counted = \SubtleForms\Analytics\Stats::COUNTED_STATUSES;
