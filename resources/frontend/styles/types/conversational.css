@@ -7,7 +7,6 @@
 .subtleforms--type-conversational {
 	max-width: 700px;
 	margin: 0 auto;
-	padding: var(--subtleforms-spacing-xl);
 }
 
 /* ===== Progress Bar ===== */
@@ -298,10 +297,6 @@
 
 /* ===== Mobile Responsive ===== */
 @media (max-width: 640px) {
-	.subtleforms--type-conversational {
-		padding: var(--subtleforms-spacing-md);
-	}
-
 	.subtleforms-conversational-question-label {
 		font-size: 1.5rem;
 	}

@@ -76,7 +76,9 @@
 	border: 0;
 	border-radius: 0;
 	box-shadow: none;
-	padding: var(--subtleforms-spacing-lg);
+	/* No padding of its own (2.4.1): the form lines up with the content around
+	   it, and the space between fields comes from the field gap. */
+	padding: 0;
 	box-sizing: border-box;
 }
 

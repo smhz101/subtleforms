@@ -516,14 +516,6 @@
 
 /* Responsive */
 @media (max-width: 768px) {
-	.subtleforms-form-container {
-		padding: 10px;
-	}
-
-	.subtleforms-form {
-		padding: 20px;
-	}
-
 	.subtleforms-step-navigation {
 		gap: 10px;
 	}

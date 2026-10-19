@@ -251,8 +251,6 @@
 .subtleforms.subtleforms--preset-dark-surface {
 	background: var(--subtleforms-color-bg, #1b1d24);
 	box-shadow: none;
-	padding-left: 0;
-	padding-right: 0;
 }
 
 /* Dark presets paint their own background, so radios and checkboxes use a dark
