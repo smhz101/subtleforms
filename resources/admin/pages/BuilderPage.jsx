@@ -29,6 +29,7 @@ import useBuilderReducer, {
   HISTORY_BATCH_WINDOW_MS,
 } from '../hooks/useBuilderReducer';
 import useDraftAutosave from '../hooks/useDraftAutosave';
+import { useSettings } from '../data';
 import useBuilderBoot from '../hooks/builder/useBuilderBoot';
 import useBuilderKeyboardShortcuts from '../hooks/builder/useBuilderKeyboardShortcuts';
 import useBuilderValidation from '../hooks/builder/useBuilderValidation';
@@ -129,11 +130,14 @@ function FormBuilderInner({
   } = useBuilderNotices();
 
   // Autosave hook - handles automatic draft saving
+  const { data: siteSettings } = useSettings();
+  const autosaveOn = siteSettings ? siteSettings.autosave_enabled !== false : true;
   const { forceAutosave } = useDraftAutosave({
     builderState,
     dispatch,
     formId: stateFormId || formId,
-    enabled: !isHydrating, // Don't autosave during hydration
+    enabled: !isHydrating && autosaveOn,
+    intervalSeconds: siteSettings?.autosave_interval,
   });
 
   // Remaining UI-specific state

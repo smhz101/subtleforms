@@ -73,6 +73,7 @@ final class PublicSubmitApi {
 	 * Register REST API routes.
 	 */
 	public function registerRoutes(): void {
+		add_action( 'template_redirect', array( $this, 'handleClassicPost' ) );
 		register_rest_route(
 			self::NAMESPACE,
 			'/submit',
@@ -89,6 +90,50 @@ final class PublicSubmitApi {
 					),
 				),
 			)
+		);
+	}
+
+
+	/**
+	 * A block with AJAX turned off posts the form to the page.
+	 */
+	public function handleClassicPost(): void {
+		if ( ( $_SERVER['REQUEST_METHOD'] ?? '' ) !== 'POST' || empty( $_POST['subtleforms_classic'] ) ) {
+			return;
+		}
+		$built = self::classicSubmission( wp_unslash( $_POST ) );
+		if ( $built['form_id'] < 1 ) {
+			return;
+		}
+		$request = new WP_REST_Request( 'POST', '/subtleforms/v1/submit' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( (string) wp_json_encode( $built ) );
+		$request->set_param( 'form_id', $built['form_id'] );
+		$response = $this->submit_form( $request );
+		$data     = $response->get_data();
+		$payload  = is_array( $data['data'] ?? null ) ? $data['data'] : array();
+		$target   = wp_get_referer();
+		if ( ! is_string( $target ) || '' === $target ) {
+			$target = home_url( '/' );
+		}
+		if ( ! empty( $payload['confirmation']['redirectUrl'] ) && ( $payload['confirmation']['type'] ?? '' ) === 'redirect' ) {
+			$target = (string) $payload['confirmation']['redirectUrl'];
+		}
+		wp_safe_redirect( $target );
+		exit;
+	}
+
+	/**
+	 * The JSON body a classic form post becomes.
+	 *
+	 * @param array $post Request body.
+	 * @return array{form_id: int, data: array}
+	 */
+	public static function classicSubmission( array $post ): array {
+		$data = isset( $post['data'] ) && is_array( $post['data'] ) ? $post['data'] : array();
+		return array(
+			'form_id' => absint( $post['subtleforms_form_id'] ?? 0 ),
+			'data'    => $data,
 		);
 	}
 
@@ -120,6 +165,14 @@ final class PublicSubmitApi {
 		try {
 			$validator = new RequestValidator( array( 'schemas' => Schemas::all() ) );
 			$validated = $validator->validateOrFail( $rawInput, Schemas::get( Schemas::PUBLIC_SUBMIT ) );
+			$previewDecision = self::previewDecision(
+				$validated,
+				is_user_logged_in() && current_user_can( 'manage_options' )
+			);
+			if ( 'forbidden' === $previewDecision ) {
+				return ApiResponse::forbidden( __( 'Preview submissions are only available to administrators.', 'subtleforms' ) );
+			}
+			$isPreview = 'preview' === $previewDecision;
 		} catch ( ValidationException $e ) {
 			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
 		}
@@ -173,7 +226,7 @@ final class PublicSubmitApi {
 
 		// Check submission limit
 		$settings = get_option( 'subtleforms_settings', array() );
-		if ( ! empty( $settings['submission_limit_enabled'] ) ) {
+		if ( empty( $isPreview ) && ! empty( $settings['submission_limit_enabled'] ) ) {
 			$limit   = isset( $settings['submission_limit'] ) ? (int) $settings['submission_limit'] : 1;
 			$user_id = get_current_user_id();
 
@@ -199,6 +252,12 @@ final class PublicSubmitApi {
 		// Resolve active schema version
 		try {
 			$activeSchema = $this->formsRepo->loadSchemaVersion( $formId );
+			if ( ! empty( $isPreview ) ) {
+				$draft = $this->formsRepo->getDraftSchema( $formId );
+				if ( is_array( $draft ) ) {
+					$activeSchema['schema'] = $draft;
+				}
+			}
 		} catch ( \RuntimeException $e ) {
 			Logger::error( 'Submission Error: %s', $e->getMessage() );
 			return ApiResponse::server_error( __( 'This form is temporarily unavailable. Please try again later.', 'subtleforms' ) );
@@ -362,6 +421,16 @@ final class PublicSubmitApi {
 
 			try {
 				$steps = $this->compiler->compile( $activeSchema['schema'] );
+				if ( ! empty( $isPreview ) ) {
+					$steps = array_values(
+						array_filter(
+							$steps,
+							static function ( $step ) {
+								return 'save' === $step->action()->id();
+							}
+						)
+					);
+				}
 			} catch ( \InvalidArgumentException $e ) {
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
 				$voidPayment();
@@ -436,8 +505,8 @@ final class PublicSubmitApi {
 			$this->recordConsents( $submissionId, $finalSubmission, $payload, $activeSchema['schema'] ?? $activeSchema );
 
 			if ( ! $isPaymentForm ) {
-				$this->submissionsRepo->update( $submissionId, array( 'status' => 'completed' ) );
-				if ( ! empty( $order['quote']['coupon'] ) ) {
+				$this->submissionsRepo->update( $submissionId, array( 'status' => ! empty( $isPreview ) ? 'preview' : 'completed' ) );
+				if ( empty( $isPreview ) && ! empty( $order['quote']['coupon'] ) ) {
 					// A coupon that made the order free still counts as used.
 					$this->finishOrder( $submissionId, $finalSubmission, $order, 'free' );
 				}
@@ -509,7 +578,9 @@ final class PublicSubmitApi {
 			 * @param array $schema       Active form schema.
 			 * @since 2.1.0
 			 */
-			do_action( 'subtleforms/submission/completed', $submissionId, $formId, $payload, $stored, $activeSchema['schema'] ?? $activeSchema );
+			if ( empty( $isPreview ) ) {
+				do_action( 'subtleforms/submission/completed', $submissionId, $formId, $payload, $stored, $activeSchema['schema'] ?? $activeSchema );
+			}
 
 			/** Legacy extension hook: ( form id, submission row with payload ). */
 			do_action( 'subtleforms/submission/saved', $formId, array_merge( $stored, array( 'payload' => $payload ) ) );
@@ -1055,6 +1126,41 @@ final class PublicSubmitApi {
 		}
 	}
 
+		/**
+	 * A builder preview is accepted only for an administrator.
+	 *
+	 * @param array $input Validated body.
+	 * @param bool  $canManage Whether the caller can manage options.
+	 * @return string live, preview, or forbidden.
+	 */
+	public static function previewDecision( array $input, bool $canManage ): string {
+		if ( empty( $input['preview'] ) ) {
+			return 'live';
+		}
+		return $canManage ? 'preview' : 'forbidden';
+	}
+
+	/**
+	 * Notification steps are not run for a preview submission.
+	 *
+	 * @param array $stepIds Action ids.
+	 * @param bool  $preview Preview submit.
+	 * @return array
+	 */
+	public static function stepsToRun( array $stepIds, bool $preview ): array {
+		if ( ! $preview ) {
+			return $stepIds;
+		}
+		return array_values(
+			array_filter(
+				$stepIds,
+				static function ( $id ) {
+					return 'save' === $id;
+				}
+			)
+		);
+	}
+
 	private function countSubmissionsBy( int $formId, string $predicate, $value ): int {
 		global $wpdb;
 
@@ -1063,7 +1169,7 @@ final class PublicSubmitApi {
 		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare, WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from $wpdb->prefix. $predicate is one of two fixed internal strings, each carrying exactly one placeholder, so the sniff's count is short by one; both values are bound by prepare().
 		return (int) $wpdb->get_var(
 			$wpdb->prepare(
-				"SELECT COUNT(*) FROM {$table_name} WHERE form_id = %d AND {$predicate} AND status != 'spam' AND status != 'trash'",
+				"SELECT COUNT(*) FROM {$table_name} WHERE form_id = %d AND {$predicate} AND status != 'spam' AND status != 'trash' AND status != 'preview'",
 				$formId,
 				$value
 			)

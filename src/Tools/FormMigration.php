@@ -3,8 +3,9 @@
  * Import a form built in Gravity Forms or Fluent Forms.
  *
  * Payments, quizzes and add-ons are left out and named in the preview.
- * A name or address becomes one field. Anything else we cannot map is
- * kept as a short HTML note so the question is not silently dropped.
+ * A container's fields are imported. A name or address becomes one field.
+ * Anything else we cannot map is kept as a short HTML note so the question
+ * is not silently dropped.
  *
  * @package SubtleForms\Tools
  */
@@ -163,22 +164,34 @@ final class FormMigration {
 	private static function fromGravity( array $form ): array {
 		$notes  = array();
 		$used   = array();
+		$idKeys = array();
+		foreach ( (array) ( $form['fields'] ?? array() ) as $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+			$id             = (string) ( $field['id'] ?? '' );
+			$idKeys[ $id ]  = self::key( self::gravityLabel( $field ), $id, $used );
+		}
+
 		$fields = array();
 		foreach ( (array) ( $form['fields'] ?? array() ) as $field ) {
 			if ( ! is_array( $field ) ) {
 				continue;
 			}
-			$mapped = self::mapGravityField( $field, $used, $notes );
-			if ( $mapped ) {
+			$id = (string) ( $field['id'] ?? '' );
+			foreach ( self::mapGravityField( $field, $idKeys[ $id ] ?? self::key( 'field', $id, $used ), $idKeys, $notes ) as $mapped ) {
 				$fields[] = $mapped;
 			}
 		}
-		$schema = self::schema( (string) ( $form['title'] ?? '' ), (string) ( $form['description'] ?? '' ), $fields );
-		$schema['actions'] = self::gravityEmails( (array) ( $form['notifications'] ?? array() ) );
-		$confirmation      = self::gravityConfirmation( (array) ( $form['confirmations'] ?? array() ) );
+
+		$schema            = self::schema( (string) ( $form['title'] ?? '' ), (string) ( $form['description'] ?? '' ), $fields );
+		$schema['actions'] = self::gravityEmails( (array) ( $form['notifications'] ?? array() ), $idKeys, $notes );
+		$confirmation      = self::gravityConfirmation( (array) ( $form['confirmations'] ?? array() ), $idKeys, $notes );
 		if ( $confirmation ) {
 			$schema['metadata']['confirmation'] = $confirmation;
 		}
+		self::noteNotifications( $schema['actions'], $notes );
+
 		return array(
 			'title'  => TransferPackage::title( (string) ( $form['title'] ?? '' ) ),
 			'schema' => $schema,
@@ -191,6 +204,7 @@ final class FormMigration {
 	 * @return array{title: string, schema: array, notes: string[]}
 	 */
 	private static function fromFluent( array $form ): array {
+		$form     = self::fluentMeta( $form );
 		$notes    = array();
 		$used     = array();
 		$fields   = array();
@@ -203,18 +217,19 @@ final class FormMigration {
 			if ( ! is_array( $field ) ) {
 				continue;
 			}
-			$mapped = self::mapFluentField( $field, $used, $notes );
-			if ( $mapped ) {
+			foreach ( self::mapFluentField( $field, $used, $notes ) as $mapped ) {
 				$fields[] = $mapped;
 			}
 		}
-		$title  = (string) ( $form['title'] ?? '' );
-		$schema = self::schema( $title, '', $fields );
-		$schema['actions'] = self::fluentEmails( $form );
-		$confirmation      = self::fluentConfirmation( $form );
+		$title             = (string) ( $form['title'] ?? '' );
+		$schema            = self::schema( $title, '', $fields );
+		$schema['actions'] = self::fluentEmails( $form, $notes );
+		$confirmation      = self::fluentConfirmation( $form, $notes );
 		if ( $confirmation ) {
 			$schema['metadata']['confirmation'] = $confirmation;
 		}
+		self::noteNotifications( $schema['actions'], $notes );
+
 		return array(
 			'title'  => TransferPackage::title( $title ),
 			'schema' => $schema,
@@ -223,16 +238,114 @@ final class FormMigration {
 	}
 
 	/**
-	 * @param array    $field Gravity field.
-	 * @param array    $used  Keys already used.
-	 * @param string[] $notes Notes, by reference.
-	 * @return array|null
+	 * Current Fluent exports store notifications and form settings as JSON
+	 * strings on `metas` rows. Older files put them on the form itself.
+	 *
+	 * @param array $form Fluent form.
+	 * @return array
 	 */
-	private static function mapGravityField( array $field, array &$used, array &$notes ): ?array {
-		$type  = strtolower( (string) ( $field['type'] ?? '' ) );
-		$label = (string) ( $field['label'] ?? '' );
-		$key   = self::key( (string) ( $field['adminLabel'] ?? $label ), (string) ( $field['id'] ?? '' ), $used );
-		$map   = array(
+	private static function fluentMeta( array $form ): array {
+		foreach ( (array) ( $form['metas'] ?? array() ) as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+			$key = (string) ( $row['meta_key'] ?? $row['key'] ?? '' );
+			if ( '' === $key || isset( $form[ $key ] ) ) {
+				continue;
+			}
+			$value = $row['value'] ?? $row['meta_value'] ?? null;
+			if ( is_string( $value ) ) {
+				$decoded = json_decode( $value, true );
+				if ( is_array( $decoded ) ) {
+					$value = $decoded;
+				}
+			}
+			if ( is_array( $value ) ) {
+				$form[ $key ] = $value;
+			}
+		}
+		return $form;
+	}
+
+	/**
+	 * @param array $actions Imported email actions.
+	 * @param array $notes Notes, by reference.
+	 */
+	private static function noteNotifications( array $actions, array &$notes ): void {
+		if ( ! $actions ) {
+			return;
+		}
+		$notes[] = sprintf(
+			/* translators: %d: number of email notifications */
+			__( 'Imported %d email notification(s).', 'subtleforms' ),
+			count( $actions )
+		);
+	}
+
+	/**
+	 * The label a Gravity field should keep. An empty admin label is not a label.
+	 *
+	 * @param array $field Gravity field.
+	 * @return string
+	 */
+	private static function gravityLabel( array $field ): string {
+		$admin = trim( (string) ( $field['adminLabel'] ?? '' ) );
+		if ( '' !== $admin ) {
+			return $admin;
+		}
+		$label = trim( (string) ( $field['label'] ?? '' ) );
+		if ( '' !== $label ) {
+			return $label;
+		}
+		return '';
+	}
+
+	/**
+	 * @param array    $field Gravity field.
+	 * @param string   $key Field key already reserved for this id.
+	 * @param array    $idKeys Gravity field id to SubtleForms key.
+	 * @param string[] $notes Notes, by reference.
+	 * @return array<int, array>
+	 */
+	private static function mapGravityField( array $field, string $key, array $idKeys, array &$notes ): array {
+		$type     = strtolower( (string) ( $field['type'] ?? '' ) );
+		$label    = self::gravityLabel( $field );
+		$required = ! empty( $field['isRequired'] );
+		$leftOut  = array( 'product', 'quantity', 'option', 'shipping', 'total', 'creditcard', 'stripe', 'stripe_creditcard', 'paypal', 'paypal_checkout', 'quiz', 'poll', 'survey', 'captcha', 'post_title', 'post_content', 'post_excerpt', 'post_tags', 'post_category', 'post_image', 'post_custom_field' );
+		if ( in_array( $type, $leftOut, true ) ) {
+			$notes[] = sprintf(
+				/* translators: 1: field label, 2: original field type */
+				__( '%1$s (%2$s) was left out. Payments, quizzes and post fields are not imported.', 'subtleforms' ),
+				'' !== $label ? $label : $key,
+				$type
+			);
+			return array();
+		}
+		if ( 'page' === $type ) {
+			$built          = self::field( 'form_step', $key, '' !== $label ? $label : __( 'Step', 'subtleforms' ), false );
+			$built['title'] = $built['label'];
+			return array( self::withLogic( $built, $field, $idKeys, $notes ) );
+		}
+		if ( 'name' === $type || 'address' === $type ) {
+			$notes[] = sprintf(
+				/* translators: %s: field label */
+				__( '%s was imported as one text field.', 'subtleforms' ),
+				'' !== $label ? $label : $key
+			);
+			$built = self::field( 'name' === $type ? 'text' : 'textarea', $key, $label, $required );
+			return array( self::withLogic( $built, $field, $idKeys, $notes ) );
+		}
+		if ( 'checkbox' === $type ) {
+			$built = self::field( 'multiple_choice', $key, $label, $required, self::gravityChoices( $field ) );
+			return array( self::withLogic( $built, $field, $idKeys, $notes ) );
+		}
+		if ( 'multiselect' === $type ) {
+			$built                   = self::field( 'multiple_choice', $key, $label, $required, self::gravityChoices( $field ) );
+			$built['allowMultiple']  = true;
+			return array( self::withLogic( $built, $field, $idKeys, $notes ) );
+		}
+
+		$map = array(
 			'text'       => 'text',
 			'email'      => 'email',
 			'textarea'   => 'textarea',
@@ -242,7 +355,6 @@ final class FormMigration {
 			'url'        => 'url',
 			'password'   => 'password',
 			'select'     => 'dropdown',
-			'multiselect'=> 'dropdown',
 			'radio'      => 'radio',
 			'date'       => 'date',
 			'time'       => 'time',
@@ -253,37 +365,24 @@ final class FormMigration {
 			'html'       => 'html',
 			'consent'    => 'consent',
 		);
-		if ( in_array( $type, array( 'product', 'quantity', 'option', 'shipping', 'total', 'creditcard', 'quiz', 'poll', 'survey', 'captcha', 'post_title', 'post_content', 'post_excerpt', 'post_tags', 'post_category', 'post_image', 'post_custom_field' ), true ) ) {
-			$notes[] = sprintf(
-				/* translators: 1: field label, 2: original field type */
-				__( '%1$s (%2$s) was left out. Payments, quizzes and post fields are not imported.', 'subtleforms' ),
-				'' !== $label ? $label : $key,
-				$type
-			);
-			return null;
-		}
-		if ( 'name' === $type || 'address' === $type ) {
-			$notes[] = sprintf(
-				/* translators: %s: field label */
-				__( '%s was imported as one text field.', 'subtleforms' ),
-				'' !== $label ? $label : $key
-			);
-			return self::field( 'name' === $type ? 'text' : 'textarea', $key, $label, ! empty( $field['isRequired'] ) );
-		}
-		if ( 'checkbox' === $type ) {
-			return self::field( 'multiple_choice', $key, $label, ! empty( $field['isRequired'] ), self::gravityChoices( $field ) );
-		}
-		if ( 'page' === $type ) {
-			return self::field( 'section_break', $key, $label, false );
-		}
 		if ( isset( $map[ $type ] ) ) {
-			$choices = in_array( $map[ $type ], array( 'dropdown', 'radio' ), true ) ? self::gravityChoices( $field ) : array();
-			$built   = self::field( $map[ $type ], $key, $label, ! empty( $field['isRequired'] ), $choices );
+			$choices = in_array( $map[ $type ], array( 'dropdown', 'radio', 'multiple_choice' ), true ) ? self::gravityChoices( $field ) : array();
+			$built   = self::field( $map[ $type ], $key, $label, $required, $choices );
 			if ( 'html' === $map[ $type ] ) {
 				$built['content'] = (string) ( $field['content'] ?? $label );
 			}
-			return $built;
+			if ( 'consent' === $map[ $type ] ) {
+				$text = trim( (string) ( $field['checkboxLabel'] ?? '' ) );
+				if ( '' === $text && isset( $field['inputs'][0]['label'] ) ) {
+					$text = trim( (string) $field['inputs'][0]['label'] );
+				}
+				if ( '' !== $text ) {
+					$built['checkboxLabel'] = $text;
+				}
+			}
+			return array( self::withLogic( $built, $field, $idKeys, $notes ) );
 		}
+
 		$notes[] = sprintf(
 			/* translators: 1: field label, 2: original field type */
 			__( '%1$s (%2$s) was kept as a note.', 'subtleforms' ),
@@ -297,6 +396,69 @@ final class FormMigration {
 			'' !== $label ? $label : $key,
 			'' !== $type ? $type : 'unknown'
 		);
+		return array( $built );
+	}
+
+	/**
+	 * Gravity conditional logic, rewritten onto the shared logic shape.
+	 * A rule we cannot map is named in the preview instead of dropped quietly.
+	 *
+	 * @param array    $built Mapped field.
+	 * @param array    $field Gravity field.
+	 * @param array    $idKeys Gravity field id to SubtleForms key.
+	 * @param string[] $notes Notes, by reference.
+	 * @return array
+	 */
+	private static function withLogic( array $built, array $field, array $idKeys, array &$notes ): array {
+		$logic = $field['conditionalLogic'] ?? null;
+		if ( ! is_array( $logic ) || empty( $logic['enabled'] ) ) {
+			return $built;
+		}
+		$operators = array(
+			'is'          => 'equals',
+			'isnot'       => 'not_equals',
+			'>'           => 'greater_than',
+			'<'           => 'less_than',
+			'contains'    => 'contains',
+			'starts_with' => 'starts_with',
+			'ends_with'   => 'ends_with',
+		);
+		$rules   = array();
+		$skipped = false;
+		foreach ( (array) ( $logic['rules'] ?? array() ) as $rule ) {
+			if ( ! is_array( $rule ) ) {
+				continue;
+			}
+			$source = $idKeys[ (string) ( $rule['fieldId'] ?? '' ) ] ?? '';
+			$op     = $operators[ strtolower( (string) ( $rule['operator'] ?? 'is' ) ) ] ?? '';
+			if ( '' === $source || '' === $op ) {
+				$skipped = true;
+				continue;
+			}
+			$rules[] = array(
+				'field'    => $source,
+				'operator' => $op,
+				'value'    => (string) ( $rule['value'] ?? '' ),
+			);
+		}
+		if ( $rules ) {
+			$built['logic'] = array(
+				'action' => ( 'hide' === ( $logic['actionType'] ?? 'show' ) ) ? 'hide' : 'show',
+				'groups' => array(
+					array(
+						'match' => ( 'any' === ( $logic['logicType'] ?? 'all' ) ) ? 'any' : 'all',
+						'rules' => $rules,
+					),
+				),
+			);
+		}
+		if ( $skipped || ! $rules ) {
+			$notes[] = sprintf(
+				/* translators: %s: field label */
+				__( 'Conditional logic on %s was not fully imported.', 'subtleforms' ),
+				'' !== ( $built['label'] ?? '' ) ? $built['label'] : $built['key']
+			);
+		}
 		return $built;
 	}
 
@@ -304,40 +466,37 @@ final class FormMigration {
 	 * @param array    $field Fluent field.
 	 * @param array    $used  Keys already used.
 	 * @param string[] $notes Notes, by reference.
-	 * @return array|null
+	 * @return array<int, array>
 	 */
-	private static function mapFluentField( array $field, array &$used, array &$notes ): ?array {
+	private static function mapFluentField( array $field, array &$used, array &$notes ): array {
 		$element  = strtolower( (string) ( $field['element'] ?? $field['type'] ?? '' ) );
 		$settings = is_array( $field['settings'] ?? null ) ? $field['settings'] : array();
-		$label    = (string) ( $settings['label'] ?? $field['label'] ?? '' );
+		$label    = self::fluentLabel( $field, $element );
 		$name     = (string) ( $field['attributes']['name'] ?? $settings['name'] ?? '' );
-		$key      = self::key( '' !== $name ? $name : $label, '', $used );
-		$required = ! empty( $settings['validation_rules']['required']['value'] ) || ! empty( $field['required'] );
-		$map      = array(
-			'input_text'     => 'text',
-			'input_email'    => 'email',
-			'textarea'       => 'textarea',
-			'input_number'   => 'number',
-			'phone'          => 'phone',
-			'input_url'      => 'url',
-			'input_password' => 'password',
-			'select'         => 'dropdown',
-			'dropdown'       => 'dropdown',
-			'input_radio'    => 'radio',
-			'input_date'     => 'date',
-			'input_file'     => 'file_upload',
-			'custom_html'    => 'html',
-			'section_break'  => 'section_break',
-			'terms_and_condition' => 'consent',
-		);
-		if ( in_array( $element, array( 'payment_method', 'subscription_payment', 'multi_payment', 'quiz', 'ratings' ), true ) ) {
+		$key      = self::key( '' !== $label ? $label : $name, $name, $used );
+		$required = self::fluentRequired( $field );
+
+		if ( 'container' === $element ) {
+			return self::fluentContainer( $field, $used, $notes, $label );
+		}
+		if ( self::fluentPayment( $element ) ) {
 			$notes[] = sprintf(
 				/* translators: 1: field label, 2: original field type */
 				__( '%1$s (%2$s) was left out. Payments and quizzes are not imported.', 'subtleforms' ),
 				'' !== $label ? $label : $key,
 				$element
 			);
-			return null;
+			return array();
+		}
+		if ( 'form_step' === $element ) {
+			$built          = self::field( 'form_step', $key, '' !== $label ? $label : __( 'Step', 'subtleforms' ), false );
+			$built['title'] = (string) ( $settings['step_title'] ?? $settings['title'] ?? $built['label'] );
+			return array( $built );
+		}
+		if ( 'input_hidden' === $element ) {
+			$built          = self::field( 'hidden', $key, '' !== $label ? $label : $name, false );
+			$built['value'] = (string) ( $settings['value'] ?? $field['attributes']['value'] ?? '' );
+			return array( $built );
 		}
 		if ( in_array( $element, array( 'input_name', 'address' ), true ) ) {
 			$notes[] = sprintf(
@@ -345,19 +504,38 @@ final class FormMigration {
 				__( '%s was imported as one text field.', 'subtleforms' ),
 				'' !== $label ? $label : $key
 			);
-			return self::field( 'input_name' === $element ? 'text' : 'textarea', $key, $label, $required );
+			return array( self::field( 'input_name' === $element ? 'text' : 'textarea', $key, $label, $required ) );
 		}
 		if ( 'input_checkbox' === $element ) {
-			return self::field( 'multiple_choice', $key, $label, $required, self::fluentChoices( $field ) );
+			return array( self::field( 'multiple_choice', $key, $label, $required, self::fluentChoices( $field ) ) );
 		}
+
+		$map = array(
+			'input_text'          => 'text',
+			'input_email'         => 'email',
+			'textarea'            => 'textarea',
+			'input_number'        => 'number',
+			'phone'               => 'phone',
+			'input_url'           => 'url',
+			'input_password'      => 'password',
+			'select'              => 'dropdown',
+			'dropdown'            => 'dropdown',
+			'input_radio'         => 'radio',
+			'input_date'          => 'date',
+			'input_file'          => 'file_upload',
+			'custom_html'         => 'html',
+			'section_break'       => 'section_break',
+			'terms_and_condition' => 'consent',
+		);
 		if ( isset( $map[ $element ] ) ) {
 			$choices = in_array( $map[ $element ], array( 'dropdown', 'radio' ), true ) ? self::fluentChoices( $field ) : array();
 			$built   = self::field( $map[ $element ], $key, $label, $required, $choices );
 			if ( 'html' === $map[ $element ] ) {
 				$built['content'] = (string) ( $settings['html_codes'] ?? $settings['content'] ?? $label );
 			}
-			return $built;
+			return array( $built );
 		}
+
 		$notes[] = sprintf(
 			/* translators: 1: field label, 2: original field type */
 			__( '%1$s (%2$s) was kept as a note.', 'subtleforms' ),
@@ -371,7 +549,103 @@ final class FormMigration {
 			'' !== $label ? $label : $key,
 			'' !== $element ? $element : 'unknown'
 		);
-		return $built;
+		return array( $built );
+	}
+
+	/**
+	 * Columns of a Fluent container become real fields, not a note the visitor sees.
+	 *
+	 * @param array    $field Container field.
+	 * @param array    $used Keys already used.
+	 * @param string[] $notes Notes, by reference.
+	 * @param string   $label Container label.
+	 * @return array<int, array>
+	 */
+	private static function fluentContainer( array $field, array &$used, array &$notes, string $label ): array {
+		$settings = is_array( $field['settings'] ?? null ) ? $field['settings'] : array();
+		$columns  = $field['columns'] ?? $settings['columns'] ?? array();
+		$children = array();
+		foreach ( (array) $columns as $column ) {
+			if ( ! is_array( $column ) ) {
+				continue;
+			}
+			$inner = isset( $column['fields'] ) && is_array( $column['fields'] ) ? $column['fields'] : $column;
+			foreach ( $inner as $child ) {
+				if ( ! is_array( $child ) || isset( $child['width'] ) && ! isset( $child['element'] ) && ! isset( $child['type'] ) ) {
+					continue;
+				}
+				if ( ! isset( $child['element'] ) && ! isset( $child['type'] ) ) {
+					continue;
+				}
+				foreach ( self::mapFluentField( $child, $used, $notes ) as $mapped ) {
+					$children[] = $mapped;
+				}
+			}
+		}
+		if ( ! $children ) {
+			$notes[] = sprintf(
+				/* translators: %s: field label */
+				__( '%s was a container with no fields.', 'subtleforms' ),
+				'' !== $label ? $label : __( 'A field', 'subtleforms' )
+			);
+		}
+		return $children;
+	}
+
+	/**
+	 * Payment, coupon, quantity and summary fields are left out of the form.
+	 *
+	 * @param string $element Fluent element name.
+	 * @return bool
+	 */
+	private static function fluentPayment( string $element ): bool {
+		if ( in_array( $element, array( 'payment_method', 'subscription_payment', 'multi_payment', 'custom_payment_amount', 'quiz', 'ratings' ), true ) ) {
+			return true;
+		}
+		return str_ends_with( $element, '_component' );
+	}
+
+	/**
+	 * @param array  $field Fluent field.
+	 * @param string $element Element name.
+	 * @return string
+	 */
+	private static function fluentLabel( array $field, string $element ): string {
+		$settings = is_array( $field['settings'] ?? null ) ? $field['settings'] : array();
+		foreach ( array( $settings['label'] ?? '', $settings['admin_field_label'] ?? '', $field['admin_field_label'] ?? '', $field['label'] ?? '' ) as $candidate ) {
+			$candidate = trim( (string) $candidate );
+			if ( '' !== $candidate ) {
+				return $candidate;
+			}
+		}
+		if ( 'input_name' === $element ) {
+			return __( 'Name', 'subtleforms' );
+		}
+		return '';
+	}
+
+	/**
+	 * @param array $field Fluent field.
+	 * @return bool
+	 */
+	private static function fluentRequired( array $field ): bool {
+		if ( ! empty( $field['required'] ) ) {
+			return true;
+		}
+		$settings = is_array( $field['settings'] ?? null ) ? $field['settings'] : array();
+		if ( ! empty( $settings['required'] ) ) {
+			return true;
+		}
+		$rules = $settings['validation_rules'] ?? array();
+		if ( ! empty( $rules['required']['value'] ) ) {
+			return true;
+		}
+		foreach ( (array) $rules as $rule ) {
+			if ( is_array( $rule ) && ( 'required' === ( $rule['type'] ?? '' ) || ! empty( $rule['required'] ) ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -445,24 +719,35 @@ final class FormMigration {
 	}
 
 	/**
-	 * @param array $notifications Gravity notifications keyed by id.
+	 * @param array    $notifications Gravity notifications keyed by id.
+	 * @param array    $idKeys Gravity field id to SubtleForms key.
+	 * @param string[] $notes Notes, by reference.
 	 * @return array
 	 */
-	private static function gravityEmails( array $notifications ): array {
+	private static function gravityEmails( array $notifications, array $idKeys, array &$notes ): array {
 		$actions = array();
 		$index   = 1;
-		foreach ( $notifications as $id => $note ) {
+		foreach ( $notifications as $note ) {
 			if ( ! is_array( $note ) ) {
 				continue;
+			}
+			$to = (string) ( $note['to'] ?? '{admin_email}' );
+			if ( 'field' === ( $note['toType'] ?? '' ) ) {
+				$target = $idKeys[ (string) ( $note['to'] ?? '' ) ] ?? '';
+				if ( '' !== $target ) {
+					$to = '{field:' . $target . '}';
+				} else {
+					$notes[] = __( 'A notification was addressed to a field that was not imported.', 'subtleforms' );
+				}
 			}
 			$actions[] = array(
 				'id'       => 'imported_' . $index,
 				'type'     => 'email',
 				'enabled'  => ! isset( $note['isActive'] ) || (bool) $note['isActive'],
 				'settings' => array(
-					'to'      => (string) ( $note['to'] ?? '{admin_email}' ),
-					'subject' => (string) ( $note['subject'] ?? __( 'New entry', 'subtleforms' ) ),
-					'message' => (string) ( $note['message'] ?? '' ),
+					'to'      => self::rewriteTags( $to, $idKeys, $notes ),
+					'subject' => self::rewriteTags( (string) ( $note['subject'] ?? __( 'New entry', 'subtleforms' ) ), $idKeys, $notes ),
+					'message' => self::rewriteTags( (string) ( $note['message'] ?? '' ), $idKeys, $notes ),
 					'format'  => 'html',
 				),
 			);
@@ -472,10 +757,12 @@ final class FormMigration {
 	}
 
 	/**
-	 * @param array $confirmations Gravity confirmations.
+	 * @param array    $confirmations Gravity confirmations.
+	 * @param array    $idKeys Gravity field id to SubtleForms key.
+	 * @param string[] $notes Notes, by reference.
 	 * @return array
 	 */
-	private static function gravityConfirmation( array $confirmations ): array {
+	private static function gravityConfirmation( array $confirmations, array $idKeys, array &$notes ): array {
 		$chosen = null;
 		foreach ( $confirmations as $item ) {
 			if ( ! is_array( $item ) ) {
@@ -489,43 +776,128 @@ final class FormMigration {
 			return array();
 		}
 		$type = (string) ( $chosen['type'] ?? 'message' );
-		if ( 'redirect' === $type || 'page' === $type ) {
+		if ( 'page' === $type ) {
+			$pageId = (int) ( $chosen['pageId'] ?? $chosen['page_id'] ?? 0 );
+			if ( $pageId > 0 ) {
+				$notes[] = sprintf(
+					/* translators: %d: WordPress page id */
+					__( 'The confirmation opens WordPress page %d.', 'subtleforms' ),
+					$pageId
+				);
+				return array(
+					'type'        => 'redirect',
+					'redirectUrl' => '/?page_id=' . $pageId,
+				);
+			}
+			$notes[] = __( 'The page confirmation had no page, so the message is used instead.', 'subtleforms' );
+			$message = self::rewriteTags( (string) ( $chosen['message'] ?? '' ), $idKeys, $notes );
+			return '' === $message ? array() : array(
+				'type'    => 'message',
+				'message' => $message,
+			);
+		}
+		if ( 'redirect' === $type ) {
+			$url = self::rewriteTags( (string) ( $chosen['url'] ?? '' ), $idKeys, $notes );
+			if ( '' === $url ) {
+				$notes[] = __( 'The redirect confirmation had no address, so the default message is used.', 'subtleforms' );
+				return array();
+			}
 			return array(
 				'type'        => 'redirect',
-				'redirectUrl' => (string) ( $chosen['url'] ?? '' ),
+				'redirectUrl' => $url,
 			);
 		}
 		return array(
 			'type'    => 'message',
 			'title'   => (string) ( $chosen['name'] ?? '' ),
-			'message' => (string) ( $chosen['message'] ?? '' ),
+			'message' => self::rewriteTags( (string) ( $chosen['message'] ?? '' ), $idKeys, $notes ),
 		);
 	}
 
 	/**
-	 * @param array $form Fluent form.
+	 * Turn `{Label:1.3}` and `{inputs.email}` into `{field:key}`.
+	 *
+	 * @param string   $text Text that may contain merge tags.
+	 * @param array    $idKeys Gravity field id to SubtleForms key.
+	 * @param string[] $notes Notes, by reference.
+	 * @return string
+	 */
+	private static function rewriteTags( string $text, array $idKeys, array &$notes ): string {
+		$replaced = preg_replace_callback(
+			'/\{([^{}]*)\}/',
+			static function ( array $match ) use ( $idKeys, &$notes ): string {
+				$inner = $match[1];
+				if ( preg_match( '/:(\d+)(?:\.\d+)?$/', $inner, $id ) ) {
+					$key = $idKeys[ $id[1] ] ?? '';
+					if ( '' !== $key ) {
+						return '{field:' . $key . '}';
+					}
+					$notes[] = __( 'A merge tag pointed at a field that was not imported.', 'subtleforms' );
+					return $match[0];
+				}
+				if ( preg_match( '/^(?:inputs|field)\.([A-Za-z0-9_]+)$/', $inner, $name ) ) {
+					return '{field:' . $name[1] . '}';
+				}
+				return $match[0];
+			},
+			$text
+		);
+		return is_string( $replaced ) ? $replaced : $text;
+	}
+
+	/**
+	 * One notification object, a list, or a map of notifications.
+	 *
+	 * @param array $notes Raw notifications value.
+	 * @return array<int, array>
+	 */
+	private static function notificationList( array $notes ): array {
+		if ( ! $notes ) {
+			return array();
+		}
+		if ( array_is_list( $notes ) ) {
+			return $notes;
+		}
+		if ( isset( $notes['sendTo'] ) || isset( $notes['subject'] ) || isset( $notes['email'] ) || isset( $notes['email_body'] ) || isset( $notes['message'] ) || isset( $notes['to'] ) ) {
+			return array( $notes );
+		}
+		$list = array();
+		foreach ( $notes as $note ) {
+			if ( is_array( $note ) ) {
+				$list[] = $note;
+			}
+		}
+		return $list;
+	}
+
+	/**
+	 * @param array    $form Fluent form.
+	 * @param string[] $notes Notes, by reference.
 	 * @return array
 	 */
-	private static function fluentEmails( array $form ): array {
-		$notes = $form['notifications'] ?? $form['formSettings']['notifications'] ?? array();
-		if ( ! is_array( $notes ) ) {
+	private static function fluentEmails( array $form, array &$notes ): array {
+		$raw = $form['notifications'] ?? $form['formSettings']['notifications'] ?? array();
+		if ( ! is_array( $raw ) ) {
 			return array();
 		}
 		$actions = array();
 		$index   = 1;
-		foreach ( $notes as $note ) {
+		foreach ( self::notificationList( $raw ) as $note ) {
 			if ( ! is_array( $note ) ) {
 				continue;
 			}
-			$to = $note['email'] ?? $note['sendTo']['email'] ?? '{admin_email}';
+			$to = $note['email'] ?? $note['sendTo']['email'] ?? $note['sendTo'] ?? '{admin_email}';
+			if ( ! is_string( $to ) ) {
+				$to = '{admin_email}';
+			}
 			$actions[] = array(
 				'id'       => 'imported_' . $index,
 				'type'     => 'email',
 				'enabled'  => ! isset( $note['enabled'] ) || (bool) $note['enabled'],
 				'settings' => array(
-					'to'      => is_string( $to ) ? $to : '{admin_email}',
-					'subject' => (string) ( $note['subject'] ?? __( 'New entry', 'subtleforms' ) ),
-					'message' => (string) ( $note['message'] ?? $note['email_body'] ?? '' ),
+					'to'      => self::rewriteTags( $to, array(), $notes ),
+					'subject' => self::rewriteTags( (string) ( $note['subject'] ?? __( 'New entry', 'subtleforms' ) ), array(), $notes ),
+					'message' => self::rewriteTags( (string) ( $note['message'] ?? $note['email_body'] ?? '' ), array(), $notes ),
 					'format'  => 'html',
 				),
 			);
@@ -535,10 +907,11 @@ final class FormMigration {
 	}
 
 	/**
-	 * @param array $form Fluent form.
+	 * @param array    $form Fluent form.
+	 * @param string[] $notes Notes, by reference.
 	 * @return array
 	 */
-	private static function fluentConfirmation( array $form ): array {
+	private static function fluentConfirmation( array $form, array &$notes ): array {
 		$settings = is_array( $form['formSettings'] ?? null ) ? $form['formSettings'] : array();
 		$confirm  = $settings['confirmation'] ?? $form['confirmation'] ?? null;
 		if ( ! is_array( $confirm ) ) {
@@ -547,10 +920,10 @@ final class FormMigration {
 		if ( ( $confirm['redirectTo'] ?? '' ) === 'customUrl' || ( $confirm['type'] ?? '' ) === 'redirect' ) {
 			return array(
 				'type'        => 'redirect',
-				'redirectUrl' => (string) ( $confirm['customUrl'] ?? $confirm['redirectUrl'] ?? '' ),
+				'redirectUrl' => self::rewriteTags( (string) ( $confirm['customUrl'] ?? $confirm['redirectUrl'] ?? '' ), array(), $notes ),
 			);
 		}
-		$message = (string) ( $confirm['messageToShow'] ?? $confirm['message'] ?? '' );
+		$message = self::rewriteTags( (string) ( $confirm['messageToShow'] ?? $confirm['message'] ?? '' ), array(), $notes );
 		if ( '' === $message ) {
 			return array();
 		}
@@ -567,7 +940,7 @@ final class FormMigration {
 	 * @return array
 	 */
 	private static function schema( string $title, string $description, array $fields ): array {
-		return array(
+		$schema = array(
 			'schema_version' => 1,
 			'metadata'       => array(
 				'name'        => 'form_schema',
@@ -578,6 +951,8 @@ final class FormMigration {
 			'fields'         => $fields,
 			'actions'        => array(),
 		);
+		list( $schema ) = \SubtleForms\Support\SchemaRepair::syncType( $schema );
+		return $schema;
 	}
 
 	/**

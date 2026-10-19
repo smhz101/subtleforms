@@ -643,7 +643,14 @@ final class SubmissionsApi {
 			$inTrash = ( $row['status'] ?? '' ) === SubmissionsRepository::TRASH;
 			try {
 				if ( $action === 'trash' ) {
-					if ( $this->submissionsRepo->trash( $id ) ) {
+					$settings = get_option( 'subtleforms_settings', array() );
+					$behavior = is_array( $settings ) ? (string) ( $settings['delete_behavior'] ?? 'soft' ) : 'soft';
+					if ( \SubtleForms\Support\Settings::deletionMode( $behavior, false ) === 'delete' ) {
+						if ( $this->submissionsRepo->delete( $id ) ) {
+							( new \SubtleForms\Repositories\LogsRepository() )->deleteBySubmission( $id );
+							$done[] = $id;
+						}
+					} elseif ( $this->submissionsRepo->trash( $id ) ) {
 						$done[] = $id;
 					}
 				} elseif ( $action === 'untrash' ) {
@@ -779,16 +786,13 @@ final class SubmissionsApi {
 		$context->setMeta( 'resent', true );
 
 		$result = $pipeline->run( $steps, $context, $schema );
-		if ( ! $result->ok ) {
+		$failures = $context->getMeta( 'action_failures', array() );
+		$summary  = self::resendResult( (bool) $result->ok, count( $steps ), is_array( $failures ) ? $failures : array() );
+		if ( ! $summary['sent'] ) {
 			return ApiResponse::server_error( __( 'The notifications could not be sent.', 'subtleforms' ) );
 		}
 
-		return ApiResponse::success(
-			array(
-				'sent'  => true,
-				'count' => count( $steps ),
-			)
-		);
+		return ApiResponse::success( $summary );
 	}
 
 	/**
@@ -805,9 +809,14 @@ final class SubmissionsApi {
 			return ApiResponse::not_found( __( 'Submission not found', 'subtleforms' ) );
 		}
 
-		// Without force the entry goes to the Trash, where it can be restored
-		// for the retention period (2.3.1).
-		if ( ! rest_sanitize_boolean( $request->get_param( 'force' ) ) ) {
+		$row = $this->submissionsRepo->find( $id );
+		$alreadyTrashed = is_array( $row ) && ( $row['status'] ?? '' ) === SubmissionsRepository::TRASH;
+		$settings = get_option( 'subtleforms_settings', array() );
+		$behavior = is_array( $settings ) ? (string) ( $settings['delete_behavior'] ?? 'soft' ) : 'soft';
+		// The setting decides. An entry already in the Trash is deleted for good.
+		// force still deletes from the Trash tab.
+		$forced = rest_sanitize_boolean( $request->get_param( 'force' ) ) && $alreadyTrashed;
+		if ( \SubtleForms\Support\Settings::deletionMode( $behavior, $alreadyTrashed || $forced ) === 'trash' ) {
 			if ( ! $this->submissionsRepo->trash( $id ) ) {
 				return ApiResponse::server_error( __( 'The submission could not be moved to the Trash.', 'subtleforms' ) );
 			}
@@ -917,14 +926,51 @@ final class SubmissionsApi {
 	/**
 	 * Get unread submissions count.
 	 */
-	public function get_unread_count( WP_REST_Request $request ): WP_REST_Response {
+		/**
+	 * Unread count filters. A form filter counts only that form.
+	 *
+	 * @param mixed $formId Form id, or empty for every form.
+	 * @return array
+	 */
+	public static function unreadCountArgs( $formId ): array {
+		$args   = array( 'is_read' => 0 );
+		$formId = (int) $formId;
+		if ( $formId > 0 ) {
+			$args['form_id'] = $formId;
+		}
+		return $args;
+	}
+
+	/**
+	 * What Resend should tell the browser. A dispatch that cron refused is not sent.
+	 *
+	 * @param bool  $ok Pipeline finished.
+	 * @param int   $steps Email steps that were run.
+	 * @param array $failures action_failures from the context.
+	 * @return array{sent: bool, count: int}
+	 */
+	public static function resendResult( bool $ok, int $steps, array $failures ): array {
+		$failed = 0;
+		foreach ( $failures as $failure ) {
+			if ( is_array( $failure ) && ( $failure['reason'] ?? '' ) === 'async_dispatch_failed' && ( $failure['action'] ?? '' ) === 'email' ) {
+				++$failed;
+			}
+		}
+		$queued = max( 0, $steps - $failed );
+		return array(
+			'sent'  => $ok && $failed < $steps && $queued > 0,
+			'count' => $queued,
+		);
+	}
+
+public function get_unread_count( WP_REST_Request $request ): WP_REST_Response {
 		$rateLimitResponse = $this->guardRateLimit( $request );
 		if ( $rateLimitResponse ) {
 			return $rateLimitResponse;
 		}
 
 		try {
-			$unreadCount = $this->submissionsRepo->count( array( 'is_read' => 0 ) );
+			$unreadCount = $this->submissionsRepo->count( self::unreadCountArgs( $request->get_param( 'form_id' ) ) );
 
 			return ApiResponse::success(
 				array(

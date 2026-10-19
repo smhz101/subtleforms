@@ -275,6 +275,23 @@ class Settings {
 	 *
 	 * @return array
 	 */
+		/**
+	 * Trash, or delete for good.
+	 *
+	 * An entry or form already in the Trash is always deleted. Otherwise Hard
+	 * deletes and Soft moves it to the Trash. The client does not override this.
+	 *
+	 * @param string $behavior soft or hard.
+	 * @param bool   $alreadyTrashed Already in the Trash.
+	 * @return string trash or delete.
+	 */
+	public static function deletionMode( string $behavior, bool $alreadyTrashed ): string {
+		if ( $alreadyTrashed || 'hard' === $behavior ) {
+			return 'delete';
+		}
+		return 'trash';
+	}
+
 	public function getAll() {
 		$settings = get_option( self::OPTION_NAME, array() );
 		return wp_parse_args( $settings, self::DEFAULTS );

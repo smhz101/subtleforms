@@ -58,11 +58,27 @@ export default function SubmissionsPage({ formId }) {
   const gearRef = useRef(null);
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const queryKey = searchParams.toString();
   const [view, setView] = useState(readInboxView);
   const [gearOpen, setGearOpen] = useState(false);
   const [gearError, setGearError] = useState('');
   const [gearSaving, setGearSaving] = useState(false);
   const split = view.reading_pane !== 'off';
+
+  // Tab and search live in the URL so a reload keeps the filtered list.
+  useEffect(() => {
+    const tab = searchParams.get('tab') || 'all';
+    const q = searchParams.get('search') || '';
+    setStatusFilter(tab);
+    setSearch(q);
+    setDebouncedSearch(q);
+    if (split) {
+      const id = parseInt(searchParams.get('submission_id') || '', 10);
+      setOpenId(id > 0 ? id : null);
+    }
+    // queryKey changes when the URL does, including browser Back.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [queryKey, split]);
   const [openId, setOpenId] = useState(() => {
     if (readInboxView().reading_pane === 'off') {
       return null;
@@ -167,7 +183,13 @@ export default function SubmissionsPage({ formId }) {
     setOpenId(id);
     const next = new URLSearchParams(searchParams);
     next.set('submission_id', String(id));
-    setSearchParams(next, { replace: true });
+    if (statusFilter && statusFilter !== 'all') {
+      next.set('tab', statusFilter);
+    }
+    if (debouncedSearch) {
+      next.set('search', debouncedSearch);
+    }
+    setSearchParams(next);
   };
 
   const closePane = () => {
@@ -187,7 +209,9 @@ export default function SubmissionsPage({ formId }) {
   const { data: formsData = [] } = useForms({}, { enabled: !formId });
 
   // Real-time updates for live badge and table refresh
-  const { unreadCount, lastUpdate, isPolling } = useRealTimeUpdates({
+  const countFormId = selectedFormId !== 'all' ? selectedFormId : (formId || '');
+  const { unreadCount, lastUpdate, isPolling, adjustUnread } = useRealTimeUpdates({
+    formId: countFormId || undefined,
     pollInterval: 30000, // Poll every 30 seconds
     enabled: true,
     onUnreadCountChange: (newCount, previousCount) => {
@@ -217,6 +241,15 @@ export default function SubmissionsPage({ formId }) {
     clearTimeout(searchTimerRef.current);
     searchTimerRef.current = setTimeout(() => {
       setDebouncedSearch(value);
+      setSearchParams((current) => {
+        const params = new URLSearchParams(current);
+        if (value) {
+          params.set('search', value);
+        } else {
+          params.delete('search');
+        }
+        return params;
+      }, { replace: true });
     }, 300);
   };
 
@@ -456,7 +489,18 @@ export default function SubmissionsPage({ formId }) {
         <TabBar
           tabs={tabs}
           activeTab={statusFilter}
-          onTabChange={setStatusFilter}
+          onTabChange={(key) => {
+            setStatusFilter(key);
+            setSearchParams((current) => {
+              const params = new URLSearchParams(current);
+              if (!key || key === 'all') {
+                params.delete('tab');
+              } else {
+                params.set('tab', key);
+              }
+              return params;
+            }, { replace: true });
+          }}
         />
       }
       actionBarRight={
@@ -580,12 +624,12 @@ export default function SubmissionsPage({ formId }) {
             density={view.density}
             readingId={split ? openId : null}
             onNeighbors={split ? onNeighbors : null}
+            onMarkedRead={() => adjustUnread?.(-1)}
             onRowClick={(submission) => {
               if (!split) {
-                const formQuery = searchParams.get('form_id');
-                navigate(
-                  `/submissions/${submission.id}${formQuery ? `?form_id=${formQuery}` : ''}`
-                );
+                const params = new URLSearchParams(searchParams);
+                params.delete('submission_id');
+                navigate(`/submissions/${submission.id}${params.toString() ? `?${params}` : ''}`);
                 return;
               }
               selectEntry(submission.id);

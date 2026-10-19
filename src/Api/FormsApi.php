@@ -964,18 +964,21 @@ final class FormsApi {
 			return $conflictResponse;
 		}
 
-		// move_to_trash soft-deletes; force (or default) hard-deletes. The
-		// default stays a hard delete so the builder's orphan-draft cleanup
-		// and existing callers keep working (Part B10).
-		$move_to_trash = (bool) $request->get_param( 'move_to_trash' );
-		if ( $move_to_trash ) {
+		// The forms screen sends move_to_trash. A bare DELETE is the builder
+		// dropping a new form the visitor never saved, and that stays a
+		// permanent delete. Hard delete ignores the query.
+		$alreadyTrashed = ( $form['status'] ?? '' ) === 'trash';
+		$settings       = get_option( 'subtleforms_settings', array() );
+		$behavior       = is_array( $settings ) ? (string) ( $settings['delete_behavior'] ?? 'soft' ) : 'soft';
+		$wantsTrash     = rest_sanitize_boolean( $request->get_param( 'move_to_trash' ) );
+		if ( $wantsTrash && \SubtleForms\Support\Settings::deletionMode( $behavior, $alreadyTrashed ) === 'trash' ) {
 			$this->formsRepo->trash( $id );
 			return ApiResponse::success( array( 'success' => true, 'trashed' => true ) );
 		}
 
 		$this->formsRepo->delete( $id );
 
-		return ApiResponse::success( array( 'success' => true ) );
+		return ApiResponse::success( array( 'success' => true, 'deleted' => true ) );
 	}
 
 	/**

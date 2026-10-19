@@ -50,6 +50,13 @@ export default function PreviewFrame( { children, title, className } ) {
       doc.head.appendChild( theme );
     } );
 
+    const themeFonts = window.subtleformsAdmin?.themeFontFaces;
+    if ( themeFonts ) {
+      const faces = doc.createElement( 'style' );
+      faces.textContent = themeFonts;
+      doc.head.appendChild( faces );
+    }
+
     const themeCss = window.subtleformsAdmin?.themeGlobalCss;
     if ( themeCss ) {
       const globals = doc.createElement( 'style' );

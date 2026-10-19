@@ -42,7 +42,7 @@ describe( 'formAppearanceStyle', () => {
     expect( formAppearanceStyle( { variants: { width: 'narrow' } } ).maxWidth ).toBe( '30rem' );
     expect( formAppearanceStyle( { variants: { width: 'full' } } ).maxWidth ).toBe( '100%' );
     expect( formAppearanceStyle( { variants: { width: 'theme' } } ).maxWidth ).toBe(
-      'var(--wp--style--global--content-size, 40rem)'
+      '100%'
     );
   } );
 

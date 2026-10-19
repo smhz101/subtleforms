@@ -29,6 +29,8 @@ import {
 } from '../../shared/appearance';
 
 import { restFetch, restUrl, restNonce } from '../utils/restFetch';
+import { fillConfirmation } from '../../shared/confirmationTags';
+import { classicFieldInputs } from '../utils/classicFields';
 
 /**
  * Whether a submitted value counts as missing.
@@ -800,9 +802,32 @@ export default function FormRenderer({
           }
         }
 
+        if (blockOptions && blockOptions.ajax === false && !preview) {
+          const classic = document.createElement('form');
+          classic.method = 'post';
+          classic.action = window.location.href;
+          const add = (name, value) => {
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = name;
+            input.value = value == null ? '' : String(value);
+            classic.appendChild(input);
+          };
+          add('subtleforms_classic', '1');
+          add('subtleforms_form_id', String(formId));
+          classicFieldInputs(submissionPayload).forEach(([name, value]) => add(name, value));
+          document.body.appendChild(classic);
+          classic.submit();
+          return;
+        }
+
         const response = await restFetch('/submit', {
           method: 'POST',
-          body: { form_id: formId, data: submissionPayload },
+          body: {
+            form_id: formId,
+            data: submissionPayload,
+            ...(preview ? { preview: true } : {}),
+          },
         });
 
         const result = await response.json();
@@ -823,15 +848,11 @@ export default function FormRenderer({
             pickConfirmation(schema?.metadata, payload) ||
             {};
           const merge = (text, encode = false) =>
-            String(text || '').replace(/\{([\w.-]+)\}/g, (match, key) => {
-              const raw = getIn(values, key) ?? flatValues[key];
-              if (raw === undefined || raw === null) return '';
-              const str = Array.isArray(raw)
-                ? raw.join(', ')
-                : typeof raw === 'object'
-                ? Object.values(raw).filter(Boolean).join(' ')
-                : String(raw);
-              return encode ? encodeURIComponent(str) : str;
+            fillConfirmation(text, {
+              values: { ...flatValues, ...(typeof values === 'object' && values ? values : {}) },
+              formTitle: schema?.metadata?.title || '',
+              entryId: result?.data?.submission_id || '',
+              encode,
             });
           const globalRedirect = window.subtleformsFrontend?.redirectUrl || '';
           const redirectTo =

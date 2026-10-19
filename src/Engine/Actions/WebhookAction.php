@@ -56,6 +56,22 @@ final class WebhookAction implements ActionInterface {
 					$this->fail( $context, 'invalid_custom_payload', array( 'error' => json_last_error_msg() ) );
 					return;
 				}
+				$answers = array();
+				foreach ( (array) $context->payload as $key => $value ) {
+					if ( is_scalar( $value ) ) {
+						$answers[ (string) $key ] = (string) $value;
+					}
+				}
+				$schema = $context->getMeta( 'form_schema' );
+				$schema = is_array( $schema ) ? $schema : array();
+				$decoded = self::fillCustomPayload(
+					$decoded,
+					$answers,
+					array(
+						'form_title' => (string) ( $schema['metadata']['title'] ?? '' ),
+						'entry_id'   => (string) ( $context->getMeta( 'submission_id', '' ) ),
+					)
+				);
 				$body = wp_json_encode( $decoded );
 			} else {
 				$body = '{}';
@@ -146,6 +162,35 @@ final class WebhookAction implements ActionInterface {
         /**
          * Record an action failure into context meta.
 	 */
+	/**
+	 * Fill merge tags inside a custom JSON payload. Tags are replaced in
+	 * string values after the JSON is decoded, so {"name":"{{name}}"} sends
+	 * the answer rather than the tag.
+	 *
+	 * @param mixed $value Decoded JSON.
+	 * @param array $answers Field key to answer.
+	 * @param array $context form_title and entry_id.
+	 * @return mixed
+	 */
+	public static function fillCustomPayload( $value, array $answers, array $context = array() ) {
+		if ( is_array( $value ) ) {
+			$filled = array();
+			foreach ( $value as $key => $item ) {
+				$filled[ $key ] = self::fillCustomPayload( $item, $answers, $context );
+			}
+			return $filled;
+		}
+		if ( ! is_string( $value ) || ! str_contains( $value, '{' ) ) {
+			return $value;
+		}
+		$merge = array(
+			'answers'    => $answers,
+			'form_title' => (string) ( $context['form_title'] ?? '' ),
+			'entry_id'   => (string) ( $context['entry_id'] ?? '' ),
+		);
+		return \SubtleForms\Support\MergeTags::render( $value, $merge, false );
+	}
+
 	private function fail( SubmissionContext $context, string $reason, array $extra = array() ): void {
 		$fail   = $context->getMeta( 'action_failures', array() );
 		$fail[] = array_merge( array( 'action' => 'webhook', 'reason' => $reason ), $extra );

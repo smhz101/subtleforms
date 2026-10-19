@@ -221,22 +221,30 @@
    token still wins because it is set on the form itself. */
 .subtleforms.subtleforms--inherit-theme {
 	color: var(--wp--preset--color--foreground, inherit);
-	font-family: var(--wp--preset--font-family--body, inherit);
+	font-family: var(--subtleforms-font-family, var(--wp--preset--font-family--body, inherit));
 	font-size: var(--wp--preset--font-size--medium, inherit);
 	background: transparent;
 	box-shadow: none;
+	width: 100%;
+	max-width: 100%;
 	--subtleforms-color-text: var(--wp--preset--color--foreground, inherit);
 	--subtleforms-label-color: var(--wp--preset--color--foreground, inherit);
 	--subtleforms-input-text: var(--wp--preset--color--foreground, inherit);
 	--subtleforms-color-text-light: var(--wp--preset--color--secondary, inherit);
-	--subtleforms-color-primary: var(--wp--preset--color--primary, var(--wp--preset--color--contrast, currentColor));
-	--subtleforms-color-primary-hover: var(--wp--preset--color--primary, var(--wp--preset--color--contrast, currentColor));
+	--subtleforms-color-primary: var(--wp--preset--color--primary, var(--wp--preset--color--accent, var(--wp--elements--button--color--background, var(--button--color-background, var(--global--color-primary, currentColor)))));
+	--subtleforms-color-primary-hover: var(--wp--preset--color--primary, var(--wp--preset--color--accent, var(--wp--elements--button--color--background, var(--button--color-background, var(--global--color-primary, currentColor)))));
 	--subtleforms-color-bg: transparent;
 	--subtleforms-color-bg-subtle: transparent;
 	--subtleforms-color-border: var(--wp--preset--color--border, currentColor);
-	--subtleforms-color-border-focus: var(--wp--preset--color--primary, var(--wp--preset--color--contrast, currentColor));
+	--subtleforms-color-border-focus: var(--wp--preset--color--primary, var(--wp--preset--color--accent, var(--wp--elements--button--color--background, currentColor)));
 	--subtleforms-font-family: var(--wp--preset--font-family--body, inherit);
 	--subtleforms-font-size-base: var(--wp--preset--font-size--medium, inherit);
+	--subtleforms-radius-button: var(--wp--elements--button--border--radius, var(--wp--preset--border-radius--button, var(--button--border-radius, 4px)));
+}
+
+.subtleforms.subtleforms--inherit-theme .subtleforms-button-next,
+.subtleforms.subtleforms--inherit-theme .subtleforms-button-submit {
+	border-radius: var(--subtleforms-radius-button, 4px);
 }
 
 /* A form on a dark footer or hero: no card of its own. */

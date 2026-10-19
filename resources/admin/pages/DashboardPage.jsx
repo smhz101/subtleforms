@@ -100,7 +100,7 @@ export default function Dashboard() {
           <Kpi
             label={__('Today', 'subtleforms')}
             value={stats.submissions_today}
-            meta={__('Since midnight (UTC)', 'subtleforms')}
+            meta={__('Since midnight', 'subtleforms')}
           />
           <Kpi
             label={__('Last 7 days', 'subtleforms')}
