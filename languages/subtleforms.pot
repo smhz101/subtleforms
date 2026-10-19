@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-19T22:33:13+00:00\n"
+"POT-Creation-Date: 2026-10-19T22:49:27+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -140,7 +140,7 @@ msgstr ""
 #: src/Admin/AdminMenu.php:258
 #: resources/admin/app/AdminApp.jsx:186
 #: resources/admin/components/AppNav.jsx:76
-#: resources/admin/components/builder/FieldInspector.jsx:167
+#: resources/admin/components/builder/FieldInspector.jsx:174
 #: resources/admin/components/builder/layout/BuilderViewSwitcher.jsx:11
 #: resources/admin/pages/SettingsPage.jsx:142
 #: resources/admin/pages/SettingsPage.jsx:152
@@ -313,7 +313,7 @@ msgstr ""
 
 #: src/Admin/AdminMenu.php:1098
 #: resources/admin/components/builder/ContainerWrapper.jsx:77
-#: resources/admin/components/builder/FieldInspector.jsx:236
+#: resources/admin/components/builder/FieldInspector.jsx:230
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:54
 #: resources/admin/pages/PaymentsPage.jsx:574
 msgid "Delete"
@@ -460,110 +460,110 @@ msgstr[1] ""
 
 #: src/Api/FormsApi.php:329
 #: src/Api/FormsApi.php:337
-#: src/Api/FormsApi.php:470
-#: src/Api/FormsApi.php:484
+#: src/Api/FormsApi.php:475
+#: src/Api/FormsApi.php:489
 msgid "Form not available"
 msgstr ""
 
 #: src/Api/FormsApi.php:437
-#: src/Api/FormsApi.php:597
-#: src/Api/FormsApi.php:856
-#: src/Api/FormsApi.php:959
-#: src/Api/FormsApi.php:1004
-#: src/Api/FormsApi.php:1049
+#: src/Api/FormsApi.php:602
+#: src/Api/FormsApi.php:861
+#: src/Api/FormsApi.php:964
+#: src/Api/FormsApi.php:1009
+#: src/Api/FormsApi.php:1054
 #: src/Api/PaymentsApi.php:222
 #: src/Api/PublicSubmitApi.php:212
 #: src/Extensions/PaymentsExtension.php:126
 msgid "Form not found"
 msgstr ""
 
-#: src/Api/FormsApi.php:491
-#: src/Api/FormsApi.php:495
+#: src/Api/FormsApi.php:496
+#: src/Api/FormsApi.php:500
 msgid "Schema not available"
 msgstr ""
 
-#: src/Api/FormsApi.php:539
+#: src/Api/FormsApi.php:544
 msgid "Failed to load form schema"
 msgstr ""
 
-#: src/Api/FormsApi.php:665
+#: src/Api/FormsApi.php:670
 msgid "Schema validation failed"
 msgstr ""
 
-#: src/Api/FormsApi.php:681
+#: src/Api/FormsApi.php:686
 msgid "Schema was saved but could not be loaded back"
 msgstr ""
 
-#: src/Api/FormsApi.php:699
+#: src/Api/FormsApi.php:704
 msgid "Failed to save draft schema"
 msgstr ""
 
-#: src/Api/FormsApi.php:780
+#: src/Api/FormsApi.php:785
 msgid "This template requires a Pro license."
 msgstr ""
 
 #. translators: %s: reason the form could not be created
-#: src/Api/FormsApi.php:829
+#: src/Api/FormsApi.php:834
 #, php-format
 msgid "The form could not be created: %s"
 msgstr ""
 
-#: src/Api/FormsApi.php:891
+#: src/Api/FormsApi.php:896
 msgid "Cannot publish form: Failed to activate schema."
 msgstr ""
 
-#: src/Api/FormsApi.php:898
+#: src/Api/FormsApi.php:903
 msgid "Cannot publish form: No schema exists. Please save your form first."
 msgstr ""
 
-#: src/Api/FormsApi.php:902
+#: src/Api/FormsApi.php:907
 msgid "Cannot publish form: No active schema version. Please save and activate a schema first."
 msgstr ""
 
-#: src/Api/FormsApi.php:908
+#: src/Api/FormsApi.php:913
 msgid "Cannot publish form: Schema data is corrupt or invalid."
 msgstr ""
 
-#: src/Api/FormsApi.php:925
+#: src/Api/FormsApi.php:930
 msgid "Cannot publish form: Fix validation errors."
 msgstr ""
 
-#: src/Api/FormsApi.php:930
+#: src/Api/FormsApi.php:935
 msgid "Cannot publish form:"
 msgstr ""
 
-#: src/Api/FormsApi.php:1008
+#: src/Api/FormsApi.php:1013
 msgid "Form is not in the Trash"
 msgstr ""
 
-#: src/Api/FormsApi.php:1013
+#: src/Api/FormsApi.php:1018
 msgid "The form could not be restored. Please try again."
 msgstr ""
 
-#: src/Api/FormsApi.php:1052
+#: src/Api/FormsApi.php:1057
 msgid "Restore this form from the Trash before copying it."
 msgstr ""
 
 #. translators: %s: error message
-#: src/Api/FormsApi.php:1065
+#: src/Api/FormsApi.php:1070
 #, php-format
 msgid "The form could not be copied because its fields could not be read: %s"
 msgstr ""
 
 #. translators: %s: title of the form being copied
 #. translators: %s: form title
-#: src/Api/FormsApi.php:1076
+#: src/Api/FormsApi.php:1081
 #: resources/admin/components/FormsList.jsx:493
 #, php-format,js-format
 msgid "%s (copy)"
 msgstr ""
 
-#: src/Api/FormsApi.php:1095
+#: src/Api/FormsApi.php:1100
 msgid "The copy could not be created in the database. Please try again."
 msgstr ""
 
 #. translators: %s: error message
-#: src/Api/FormsApi.php:1106
+#: src/Api/FormsApi.php:1111
 #, php-format
 msgid "The form could not be copied: %s"
 msgstr ""
@@ -1521,7 +1521,7 @@ msgid "Chained Select"
 msgstr ""
 
 #: src/Fields/CoreFields.php:721
-#: resources/admin/components/builder/FieldInspector.jsx:303
+#: resources/admin/components/builder/FieldInspector.jsx:297
 #: resources/admin/components/builder/inspector/controls/ChainedDisplayControl.jsx:8
 msgid "Dropdowns"
 msgstr ""
@@ -1691,7 +1691,7 @@ msgid "Disclaimer Text"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1173
-#: resources/admin/components/builder/FieldInspector.jsx:187
+#: resources/admin/components/builder/FieldInspector.jsx:194
 msgid "Style"
 msgstr ""
 
@@ -1781,7 +1781,7 @@ msgstr ""
 #: src/Tools/FormMigration.php:325
 #: src/Tools/FormMigration.php:492
 #: resources/admin/components/builder/ContainerRenderer.jsx:38
-#: resources/admin/components/builder/FieldInspector.jsx:43
+#: resources/admin/components/builder/FieldInspector.jsx:44
 #: resources/admin/components/builder/FieldRenderer.jsx:587
 #: resources/admin/components/OnboardingWizard.jsx:555
 #: resources/frontend/components/StepNavigation.jsx:15
@@ -3960,14 +3960,33 @@ msgid_plural "Add at least %d entries."
 msgstr[0] ""
 msgstr[1] ""
 
+#. translators: %s: field key
+#: src/Support/SchemaValidator.php:89
+#, php-format
+msgid "Two fields use the ID %s. Give one of them another ID."
+msgstr ""
+
+#. translators: %s: field key
+#: src/Support/SchemaValidator.php:97
+#, php-format
+msgid "The field ID %s can only use letters, numbers, _ and -, up to 64 characters."
+msgstr ""
+
+#. translators: %s: field key
+#: src/Support/SchemaValidator.php:100
+#: src/Support/SchemaValidator.php:467
+#, php-format
+msgid "SubtleForms uses %s itself. Give the field another ID."
+msgstr ""
+
 #. translators: %s: CAPTCHA provider name, such as reCAPTCHA
-#: src/Support/SchemaValidator.php:496
+#: src/Support/SchemaValidator.php:580
 #, php-format
 msgid "A form can have only one %s field. Remove the extra one or choose another provider for it."
 msgstr ""
 
 #. translators: %s: field key
-#: src/Support/SchemaValidator.php:603
+#: src/Support/SchemaValidator.php:687
 #, php-format
 msgid "The single checkbox \"%s\" has a list of options. Use a Multiple choice field for several options."
 msgstr ""
@@ -4968,8 +4987,8 @@ msgstr ""
 #: resources/admin/components/builder/FormSettings.jsx:162
 #: resources/admin/components/SubmissionsTable.jsx:43
 #: resources/admin/components/SubmissionsTable.jsx:688
-#: resources/admin/pages/BuilderPage.jsx:681
-#: resources/admin/pages/BuilderPage.jsx:695
+#: resources/admin/pages/BuilderPage.jsx:683
+#: resources/admin/pages/BuilderPage.jsx:697
 #: resources/admin/pages/ReportsPage.jsx:100
 #: resources/admin/pages/SubmissionDetailPage.jsx:1169
 #: resources/admin/pages/SubmissionsPage.jsx:556
@@ -5755,7 +5774,7 @@ msgstr ""
 #: resources/admin/components/builder/ColumnDropZone.jsx:64
 #: resources/admin/components/builder/FieldList.jsx:103
 #: resources/admin/components/builder/FieldList.jsx:144
-#: resources/admin/components/builder/FormEditor.jsx:53
+#: resources/admin/components/builder/FormEditor.jsx:55
 #: resources/admin/components/builder/InlineAddButton.jsx:31
 msgid "Add Field"
 msgstr ""
@@ -5887,7 +5906,7 @@ msgid "Move Down"
 msgstr ""
 
 #: resources/admin/components/builder/ContainerWrapper.jsx:71
-#: resources/admin/components/builder/FieldInspector.jsx:227
+#: resources/admin/components/builder/FieldInspector.jsx:221
 #: resources/admin/components/FormsList.jsx:442
 msgid "Duplicate"
 msgstr ""
@@ -6021,12 +6040,12 @@ msgid "Field group. Press Enter to select."
 msgstr ""
 
 #: resources/admin/components/builder/FieldDock.jsx:22
-#: resources/admin/components/builder/FieldInspector.jsx:294
+#: resources/admin/components/builder/FieldInspector.jsx:288
 msgid "Choices"
 msgstr ""
 
 #: resources/admin/components/builder/FieldDock.jsx:23
-#: resources/admin/components/builder/FieldInspector.jsx:423
+#: resources/admin/components/builder/FieldInspector.jsx:417
 #: resources/admin/components/builder/FormSettings.jsx:198
 #: resources/admin/components/builder/FormSettings.jsx:200
 #: resources/blocks/form/edit.jsx:362
@@ -6084,7 +6103,7 @@ msgstr ""
 #: resources/admin/components/builder/FieldDock.jsx:253
 #: resources/admin/components/builder/FieldDock.jsx:269
 #: resources/admin/components/builder/FieldInspector.jsx:129
-#: resources/admin/components/builder/FormEditor.jsx:70
+#: resources/admin/components/builder/FormEditor.jsx:72
 msgid "Search fields"
 msgstr ""
 
@@ -6098,11 +6117,11 @@ msgstr ""
 msgid "Results"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:49
+#: resources/admin/components/builder/FieldInspector.jsx:50
 msgid "Moving it takes the field out of its container and puts it at the end of the chosen step."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:50
+#: resources/admin/components/builder/FieldInspector.jsx:51
 msgid "Moves the field to the end of the chosen step."
 msgstr ""
 
@@ -6123,11 +6142,12 @@ msgid "Select a field on the canvas to edit its label, options, validation and l
 msgstr ""
 
 #: resources/admin/components/builder/FieldInspector.jsx:133
+#: resources/admin/components/builder/FieldKeyEditor.jsx:211
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:231
 #: resources/admin/components/SubmissionsTable.jsx:429
-#: resources/admin/pages/BuilderPage.jsx:408
-#: resources/admin/pages/BuilderPage.jsx:423
-#: resources/admin/pages/BuilderPage.jsx:438
+#: resources/admin/pages/BuilderPage.jsx:410
+#: resources/admin/pages/BuilderPage.jsx:425
+#: resources/admin/pages/BuilderPage.jsx:440
 msgid "Undo"
 msgstr ""
 
@@ -6140,53 +6160,109 @@ msgstr ""
 msgid "Logic"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:174
+#: resources/admin/components/builder/FieldInspector.jsx:181
 msgid "Validation"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:203
-msgid "Copy field key"
-msgstr ""
-
-#: resources/admin/components/builder/FieldInspector.jsx:212
-msgid "Copied"
-msgstr ""
-
-#: resources/admin/components/builder/FieldInspector.jsx:244
+#: resources/admin/components/builder/FieldInspector.jsx:238
 msgid "Close settings"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:274
+#: resources/admin/components/builder/FieldInspector.jsx:268
 #: resources/admin/components/builder/FormSettings.jsx:164
 #: resources/admin/pages/SettingsPage.jsx:31
 msgid "General"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:350
+#: resources/admin/components/builder/FieldInspector.jsx:344
 msgid "Skip this step unless its rules match. Fields in a skipped step are not checked or saved."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:352
+#: resources/admin/components/builder/FieldInspector.jsx:346
 msgid "Show or hide this repeater based on answers to other fields. A hidden repeater, including every row inside it, is not checked or saved."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:354
+#: resources/admin/components/builder/FieldInspector.jsx:348
 msgid "Add this fee only when its rules match. A hidden fee is not charged and not listed in the order."
 msgstr ""
 
 #. translators: %s: field label
-#: resources/admin/components/builder/FieldInspector.jsx:357
+#: resources/admin/components/builder/FieldInspector.jsx:351
 #, js-format
 msgid "Show or hide “%s” based on answers to other fields. Hidden fields are not checked or saved."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:367
+#: resources/admin/components/builder/FieldInspector.jsx:361
 msgid "This step is always shown."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:401
+#: resources/admin/components/builder/FieldInspector.jsx:395
 #: resources/admin/components/builder/PreviewWorkspace.jsx:156
 msgid "Appearance"
+msgstr ""
+
+#: resources/admin/components/builder/FieldKeyEditor.jsx:27
+msgid "Enter an ID."
+msgstr ""
+
+#: resources/admin/components/builder/FieldKeyEditor.jsx:29
+msgid "Start the ID with a letter."
+msgstr ""
+
+#: resources/admin/components/builder/FieldKeyEditor.jsx:31
+msgid "Use lower case letters, numbers, _ and - only."
+msgstr ""
+
+#. translators: %d: longest ID length
+#: resources/admin/components/builder/FieldKeyEditor.jsx:34
+#, js-format
+msgid "Use %d characters or fewer."
+msgstr ""
+
+#: resources/admin/components/builder/FieldKeyEditor.jsx:36
+msgid "SubtleForms uses this name itself. Choose another."
+msgstr ""
+
+#: resources/admin/components/builder/FieldKeyEditor.jsx:38
+msgid "Another field in this form already uses this ID."
+msgstr ""
+
+#: resources/admin/components/builder/FieldKeyEditor.jsx:124
+msgid "Field ID"
+msgstr ""
+
+#: resources/admin/components/builder/FieldKeyEditor.jsx:148
+msgid "Enter to save, Esc to cancel."
+msgstr ""
+
+#: resources/admin/components/builder/FieldKeyEditor.jsx:160
+msgid "Copy field ID as a merge tag"
+msgstr ""
+
+#: resources/admin/components/builder/FieldKeyEditor.jsx:169
+msgid "Copied"
+msgstr ""
+
+#: resources/admin/components/builder/FieldKeyEditor.jsx:183
+msgid "Change field ID"
+msgstr ""
+
+#. translators: %d: number of merge tags, rules and settings updated
+#: resources/admin/components/builder/FieldKeyEditor.jsx:195
+#, js-format
+msgid "ID changed, %d place updated."
+msgid_plural "ID changed, %d places updated."
+msgstr[0] ""
+msgstr[1] ""
+
+#: resources/admin/components/builder/FieldKeyEditor.jsx:198
+msgid "ID changed."
+msgstr ""
+
+#. translators: %s: previous field ID
+#: resources/admin/components/builder/FieldKeyEditor.jsx:204
+#, js-format
+msgid "Earlier entries keep %s."
 msgstr ""
 
 #: resources/admin/components/builder/FieldRenderer.jsx:187
@@ -6512,44 +6588,44 @@ msgstr ""
 msgid "Prices on this form are shown and charged in this currency."
 msgstr ""
 
-#: resources/admin/components/builder/FormEditor.jsx:63
+#: resources/admin/components/builder/FormEditor.jsx:65
 msgid "Search fields…"
 msgstr ""
 
-#: resources/admin/components/builder/FormEditor.jsx:80
+#: resources/admin/components/builder/FormEditor.jsx:82
 msgid "Clear search"
 msgstr ""
 
-#: resources/admin/components/builder/FormEditor.jsx:91
+#: resources/admin/components/builder/FormEditor.jsx:93
 msgid "No fields match"
 msgstr ""
 
 #. translators: %s: field label
-#: resources/admin/components/builder/FormEditor.jsx:375
+#: resources/admin/components/builder/FormEditor.jsx:402
 #, js-format
 msgid "\"%s\" was a single checkbox with a list of options, so it is now a Multiple choice field where visitors can tick any of them. Publish to update the live form."
 msgstr ""
 
 #. translators: %d: number of fields
-#: resources/admin/components/builder/FormEditor.jsx:390
+#: resources/admin/components/builder/FormEditor.jsx:417
 #, js-format
 msgid "%d field was outside every step, so it was moved into the first step. Save or publish to keep this."
 msgid_plural "%d fields were outside every step, so they were moved into the first step. Save or publish to keep this."
 msgstr[0] ""
 msgstr[1] ""
 
-#: resources/admin/components/builder/FormEditor.jsx:406
+#: resources/admin/components/builder/FormEditor.jsx:433
 msgid "Tip: Click a field (or container) to edit its settings."
 msgstr ""
 
 #: resources/admin/components/builder/FormEditorHeader.jsx:88
 #: resources/admin/components/builder/FormEditorHeader.jsx:184
-#: resources/admin/pages/BuilderPage.jsx:630
+#: resources/admin/pages/BuilderPage.jsx:632
 msgid "Saving..."
 msgstr ""
 
 #: resources/admin/components/builder/FormEditorHeader.jsx:89
-#: resources/admin/pages/BuilderPage.jsx:633
+#: resources/admin/pages/BuilderPage.jsx:635
 #: resources/admin/pages/SettingsPage.jsx:256
 msgid "Unsaved changes"
 msgstr ""
@@ -7399,33 +7475,33 @@ msgstr ""
 msgid "Kept from an older version and still sent. Add a Webhook action under Actions instead for headers, signing and retries, then clear this field."
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:59
+#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:60
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:199
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:208
 #: resources/admin/components/FormsList.jsx:803
 #: resources/admin/components/FormsList.jsx:858
 #: resources/admin/components/SubmissionsTable.jsx:855
 #: resources/admin/components/SubmissionsTable.jsx:875
-#: resources/admin/pages/BuilderPage.jsx:708
+#: resources/admin/pages/BuilderPage.jsx:710
 #: resources/admin/ui/ErrorState.jsx:59
 msgid "Retry"
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:69
+#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:70
 msgid "Validation issues detected. Publishing is blocked until these are fixed:"
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:77
+#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:78
 msgid "Validation error"
 msgstr ""
 
 #. translators: %1$d: number of additional validation issues
-#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:85
+#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:86
 #, js-format
 msgid "…and %1$d more"
 msgstr ""
 
-#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:130
+#: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:132
 msgid "Save the form first to view entries"
 msgstr ""
 
@@ -7472,7 +7548,7 @@ msgid "Shift+Ctrl/Cmd+Z"
 msgstr ""
 
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:274
-#: resources/admin/pages/BuilderPage.jsx:631
+#: resources/admin/pages/BuilderPage.jsx:633
 #: resources/admin/pages/SettingsPage.jsx:173
 msgid "Saving…"
 msgstr ""
@@ -10185,8 +10261,8 @@ msgstr ""
 #: resources/admin/hooks/builder/useBuilderBoot.js:33
 #: resources/admin/modals/CreateFormModal.jsx:33
 #: resources/admin/modals/CreateFormModal.jsx:39
-#: resources/admin/pages/BuilderPage.jsx:860
-#: resources/admin/pages/BuilderPage.jsx:865
+#: resources/admin/pages/BuilderPage.jsx:863
+#: resources/admin/pages/BuilderPage.jsx:868
 #, js-format
 msgid "New Form %1$d"
 msgstr ""
@@ -10420,60 +10496,60 @@ msgid "Creating..."
 msgstr ""
 
 #. translators: %1$d: numeric suffix used to create a unique title
-#: resources/admin/pages/BuilderPage.jsx:350
+#: resources/admin/pages/BuilderPage.jsx:352
 #, js-format
 msgid "Untitled Form %1$d"
 msgstr ""
 
-#: resources/admin/pages/BuilderPage.jsx:417
+#: resources/admin/pages/BuilderPage.jsx:419
 msgid "This form is now Multi-step: it has a Page Break."
 msgstr ""
 
-#: resources/admin/pages/BuilderPage.jsx:431
+#: resources/admin/pages/BuilderPage.jsx:433
 msgid "This form is now Standard: it has no Page Breaks left. Every field is kept."
 msgstr ""
 
-#: resources/admin/pages/BuilderPage.jsx:590
+#: resources/admin/pages/BuilderPage.jsx:592
 msgid "Discard your unsaved changes and revert to the last saved version?"
 msgstr ""
 
-#: resources/admin/pages/BuilderPage.jsx:628
+#: resources/admin/pages/BuilderPage.jsx:630
 #: resources/admin/utils/saveErrors.js:128
 msgid "Your changes are kept in this tab."
 msgstr ""
 
-#: resources/admin/pages/BuilderPage.jsx:632
+#: resources/admin/pages/BuilderPage.jsx:634
 #: resources/admin/utils/submissionStatus.js:10
 msgid "Saved"
 msgstr ""
 
 #. translators: %1$s: localized time string (e.g. 12:34 PM)
-#: resources/admin/pages/BuilderPage.jsx:654
+#: resources/admin/pages/BuilderPage.jsx:656
 #, js-format
 msgid "Saving… (last saved at %1$s)"
 msgstr ""
 
 #. translators: %1$s: localized time string (e.g. 12:34 PM)
-#: resources/admin/pages/BuilderPage.jsx:663
+#: resources/admin/pages/BuilderPage.jsx:665
 #, js-format
 msgid "Last saved at %1$s"
 msgstr ""
 
-#: resources/admin/pages/BuilderPage.jsx:682
+#: resources/admin/pages/BuilderPage.jsx:684
 msgid "Loading the form"
 msgstr ""
 
-#: resources/admin/pages/BuilderPage.jsx:928
-#: resources/admin/pages/BuilderPage.jsx:934
+#: resources/admin/pages/BuilderPage.jsx:931
+#: resources/admin/pages/BuilderPage.jsx:937
 msgid "Failed to create draft form"
 msgstr ""
 
-#: resources/admin/pages/BuilderPage.jsx:945
+#: resources/admin/pages/BuilderPage.jsx:948
 msgid "Failed to initialize draft schema"
 msgstr ""
 
-#: resources/admin/pages/BuilderPage.jsx:961
-#: resources/admin/pages/BuilderPage.jsx:993
+#: resources/admin/pages/BuilderPage.jsx:964
+#: resources/admin/pages/BuilderPage.jsx:996
 msgid "Failed to create form"
 msgstr ""
 

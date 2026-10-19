@@ -16,6 +16,9 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Change: The default webhook body is the one the Webhooks settings describe, and the one SubtleForms Pro sends: the event, form and entry IDs, a link to the entry, the answers keyed by field under "fields", and every answer with its label under "answers". Receivers that read answers at the top level of the body should read them from "fields".
 * Fix: The webhook test in Settings works without SubtleForms Pro. The button is ready as soon as an address is typed, the test uses the same address check, body and signing as real deliveries, and it says why an address is refused.
 * New: Each webhook action in Form settings has a Send test request button that sends the action's own method, headers, signing and custom body.
+* Change: A field ID can use hyphens and up to 64 characters. Saving a form refuses an ID used by two fields anywhere in the form (inside steps, columns and containers too) or a name SubtleForms reserves for its own values.
+* Change: Gravity Forms and Fluent Forms imports keep each field's name from the other plugin (Fluent's field name, Gravity's parameter name) as its field ID when it is valid, so data and integrations that use those names keep matching.
+* New: Change a field's ID in the field settings. Click the pencil next to the ID, type the new one, press Enter. The ID is checked as you type, and merge tags, formulas, conditional logic, emails, webhooks, confirmations, integrations and payment settings that use it are updated. Undo puts it back, and earlier entries keep their answers under the old ID.
 
 = 2.4.0 - 2026-10-20 =
 * New: A payment form has its own currency setting under Settings, Payments. It follows the site currency until you pick one.
