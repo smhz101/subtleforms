@@ -10,6 +10,7 @@ import { apiGet } from '../utils/api';
 import { requirePro } from '../utils/featureGate';
 import './DashboardPage.scss';
 import './ReportsPage.scss';
+import { chartColumnProps } from '../utils/chartA11y';
 
 const SAMPLE_FORMS = [
   { form_id: 1, title: 'Contact', views: 420, submissions: 64, conversion: 15.2 },
@@ -184,6 +185,18 @@ function TrendChart( { data = [] } ) {
           <span data-value='0' />
         </div>
         <div className='sf-trend__bars' onMouseLeave={ () => setActive( null ) }>
+          <ul className='screen-reader-text'>
+            { data.map( ( day ) => (
+              <li key={ day.date }>
+                { sprintf(
+                  /* translators: 1: date, 2: number of submissions */
+                  _n( '%1$s: %2$s submission', '%1$s: %2$s submissions', day.count, 'subtleforms' ),
+                  formatDay( day.date, { month: 'short', day: 'numeric' } ),
+                  formatNumber( day.count )
+                ) }
+              </li>
+            ) ) }
+          </ul>
           { data.map( ( day, index ) => {
             const label = sprintf(
               /* translators: 1: date, 2: number of submissions */
@@ -196,7 +209,7 @@ function TrendChart( { data = [] } ) {
                 key={ day.date }
                 className={ clsx( 'sf-trend__col', { 'is-active': active === index, 'is-today': index === last } ) }
                 tabIndex={ 0 }
-                aria-label={ label }
+                { ...chartColumnProps( label ) }
                 onMouseEnter={ () => setActive( index ) }
                 onFocus={ () => setActive( index ) }
                 onBlur={ () => setActive( null ) }>

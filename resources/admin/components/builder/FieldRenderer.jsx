@@ -1,5 +1,6 @@
 import { memo, useState, useRef, useCallback, useEffect, useContext } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import { canvasControlName } from '../../utils/canvasControlName';
 import { getFieldIcon } from '../../utils/iconRegistry';
 import Icon from '../../ui/Icon';
 import NameFieldRenderer from './NameFieldRenderer';
@@ -177,6 +178,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         <input
           ref={labelInputRef}
           type='text'
+          aria-label={__('Field label', 'subtleforms')}
           className='sf-field-renderer__label-input'
           value={editLabelValue}
           onChange={(e) => setEditLabelValue(e.target.value)}
@@ -236,7 +238,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
             placeholder={placeholder || ''}
             className={inputClass}
             readOnly
-            tabIndex='-1'
+            aria-label={canvasControlName(field)} tabIndex='-1'
           />
           {field.suffix && <span className='sf-field-renderer__affix-part'>{field.suffix}</span>}
         </div>
@@ -329,7 +331,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           placeholder={placeholder || ''}
           className={`${inputClass} resize-y`}
           readOnly
-          tabIndex='-1'
+          aria-label={canvasControlName(field)} tabIndex='-1'
         />
       )}
 
@@ -338,7 +340,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           <input
             type='checkbox'
             className='sf-field-renderer__checkbox'
-            tabIndex='-1'
+            aria-label={canvasControlName(field)} tabIndex='-1'
             readOnly
           />
           <span className='sf-field-renderer__checkbox-label'>
@@ -352,7 +354,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           <input
             type='checkbox'
             className='sf-field-renderer__checkbox'
-            tabIndex='-1'
+            aria-label={canvasControlName(field)} tabIndex='-1'
             readOnly
           />
           <span className='sf-field-renderer__checkbox-label'>
@@ -404,7 +406,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
                 type='radio'
                 name={field.key}
                 className='sf-field-renderer__radio'
-                tabIndex='-1'
+                aria-label={canvasControlName(field)} tabIndex='-1'
               />
               <span className='sf-field-renderer__checkbox-label'>
                 {opt.label}
@@ -421,7 +423,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
               <input
                 type={field.allowMultiple === false ? 'radio' : 'checkbox'}
                 className='sf-field-renderer__checkbox'
-                tabIndex='-1'
+                aria-label={canvasControlName(field)} tabIndex='-1'
               />
               <span className='sf-field-renderer__checkbox-label'>
                 {opt.label}
@@ -557,7 +559,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
             placeholder={placeholder || __('Enter coupon code', 'subtleforms')}
             className={`${inputClass} sf-field-renderer__subscribe-input`}
             readOnly
-            tabIndex='-1'
+            aria-label={canvasControlName(field)} tabIndex='-1'
           />
           <button
             type='button'
@@ -682,7 +684,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
             placeholder={placeholder || __('#000000', 'subtleforms')}
             className={inputClass}
             readOnly
-            tabIndex='-1'
+            aria-label={canvasControlName(field)} tabIndex='-1'
           />
         </div>
       )}
@@ -708,7 +710,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           placeholder={placeholder || '••••••••'}
           className={inputClass}
           readOnly
-          tabIndex='-1'
+          aria-label={canvasControlName(field)} tabIndex='-1'
         />
       )}
 
@@ -793,7 +795,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
                 <span className='sf-field-renderer__checkbox-grid-row-label'>{row?.label ?? row}</span>
                 {gridCols.map((_, j) => (
                   <span key={j} className='sf-field-renderer__checkbox-grid-cell'>
-                    <input type={field.multiplePerRow === false ? 'radio' : 'checkbox'} className='sf-field-renderer__checkbox' readOnly tabIndex='-1' />
+                    <input type={field.multiplePerRow === false ? 'radio' : 'checkbox'} className='sf-field-renderer__checkbox' readOnly aria-label={canvasControlName(field)} tabIndex='-1' />
                   </span>
                 ))}
               </div>
