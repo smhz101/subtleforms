@@ -71,19 +71,26 @@ final class TransferService {
 				),
 			);
 		}
-		$forms = array();
+		$forms   = array();
+		$missing = array();
 		foreach ( $ids as $id ) {
 			$form = $this->forms->find( $id );
 			if ( ! is_array( $form ) || ( $form['status'] ?? '' ) === 'trash' ) {
+				$missing[] = '#' . $id;
 				continue;
 			}
 			try {
 				$loaded = $this->forms->loadSchemaVersion( $id );
 			} catch ( \Throwable $e ) {
-				continue;
+				$loaded = null;
 			}
 			$schema = is_array( $loaded ) ? ( $loaded['schema'] ?? null ) : null;
 			if ( ! is_array( $schema ) ) {
+				// Never published: export the draft the builder holds (FF2-07).
+				$schema = $this->forms->getDraftSchema( $id );
+			}
+			if ( ! is_array( $schema ) ) {
+				$missing[] = (string) ( $form['title'] ?? '#' . $id );
 				continue;
 			}
 			$status = (string) ( $form['status'] ?? 'draft' );
@@ -93,7 +100,74 @@ final class TransferService {
 				'schema' => $schema,
 			);
 		}
+		// An export that silently leaves forms out cannot be imported back,
+		// so name them instead (FF2-07).
+		if ( $missing ) {
+			return array(
+				'error' => sprintf(
+					/* translators: %s: form titles or IDs */
+					__( 'These forms could not be exported because they have no saved content or no longer exist: %s', 'subtleforms' ),
+					implode( ', ', $missing )
+				),
+			);
+		}
+		if ( ! $forms ) {
+			return array( 'error' => __( 'There are no forms to export.', 'subtleforms' ) );
+		}
 		return TransferPackage::forms( $forms );
+	}
+
+	/**
+	 * Clean an imported schema exactly like a builder save (FF2-01).
+	 *
+	 * Imports go through the same request validator and sanitiser as the
+	 * builder, so markup in labels, help text or Custom HTML is filtered
+	 * the same way however the form arrived.
+	 *
+	 * @param array $schema Schema from a file.
+	 * @return array Clean schema.
+	 * @throws \SubtleForms\Validation\ValidationException When the schema is not valid.
+	 */
+	public static function cleanSchema( array $schema ): array {
+		$validator = new \SubtleForms\Validation\RequestValidator( array( 'schemas' => \SubtleForms\Validation\Schemas::all() ) );
+		$validated = $validator->validateOrFail( array( 'schema' => $schema ), \SubtleForms\Validation\Schemas::get( \SubtleForms\Validation\Schemas::FORM_SCHEMA_SAVE ) );
+		return is_array( $validated['schema'] ?? null ) ? $validated['schema'] : array();
+	}
+
+	/**
+	 * Clean imported answers like a visitor's submit (FF2-01): text is
+	 * stripped of markup, and only Rich text answers keep safe formatting.
+	 *
+	 * @param array $payload Answers from a file.
+	 * @param array $schema  The form's schema.
+	 * @return array
+	 */
+	public static function cleanPayload( array $payload, array $schema ): array {
+		$rich = array();
+		foreach ( \SubtleForms\Payments\Pricing::fields( $schema ) as $field ) {
+			if ( ( $field['type'] ?? '' ) === 'rich_text' && ! empty( $field['key'] ) ) {
+				$rich[] = (string) $field['key'];
+			}
+		}
+		$clean = static function ( $value, bool $keepMarkup ) use ( &$clean ) {
+			if ( is_array( $value ) ) {
+				$out = array();
+				foreach ( $value as $k => $v ) {
+					$out[ is_string( $k ) ? sanitize_text_field( $k ) : $k ] = $clean( $v, $keepMarkup );
+				}
+				return $out;
+			}
+			if ( ! is_string( $value ) ) {
+				return is_scalar( $value ) || null === $value ? $value : '';
+			}
+			return $keepMarkup ? wp_kses_post( $value ) : sanitize_textarea_field( $value );
+		};
+		$out = array();
+		foreach ( $payload as $key => $value ) {
+			$key         = sanitize_text_field( (string) $key );
+			$out[ $key ] = $clean( $value, in_array( $key, $rich, true ) );
+		}
+		return $out;
 	}
 
 	/**
@@ -125,7 +199,7 @@ final class TransferService {
 				continue;
 			}
 			try {
-				$this->forms->saveSchemaVersion( $id, $form['schema'], true );
+				$this->forms->saveSchemaVersion( $id, self::cleanSchema( $form['schema'] ), true );
 				$created[] = array(
 					'id'    => $id,
 					'title' => $form['title'],
@@ -179,7 +253,7 @@ final class TransferService {
 				continue;
 			}
 			try {
-				$this->forms->saveSchemaVersion( $id, $form['schema'], true );
+				$this->forms->saveSchemaVersion( $id, self::cleanSchema( $form['schema'] ), true );
 				$created[] = array(
 					'id'    => $id,
 					'title' => $form['title'],
@@ -298,13 +372,19 @@ final class TransferService {
 				'error'    => $read['error'],
 			);
 		}
+		try {
+			$loaded = $this->forms->loadSchemaVersion( $formId );
+		} catch ( \Throwable $e ) {
+			$loaded = null;
+		}
+		$schema   = is_array( $loaded ) && is_array( $loaded['schema'] ?? null ) ? $loaded['schema'] : ( $this->forms->getDraftSchema( $formId ) ?? array() );
 		$imported = 0;
 		foreach ( $read['submissions'] as $row ) {
 			try {
 				$id = $this->submissions->create(
 					array(
 						'form_id' => $formId,
-						'payload' => $row['payload'],
+						'payload' => self::cleanPayload( (array) $row['payload'], $schema ),
 						'status'  => $row['status'],
 					)
 				);
