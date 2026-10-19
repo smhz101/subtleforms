@@ -13,7 +13,7 @@ export const CURRENCIES = {
   NZD: ['New Zealand dollar', 2, 0.5],
   CHF: ['Swiss franc', 2, 0.5],
   JPY: ['Japanese yen', 0, 50],
-  KRW: ['South Korean won', 0, 700],
+  KRW: ['South Korean won', 0, 50],
   INR: ['Indian rupee', 2, 0.5],
   PKR: ['Pakistani rupee', 2, 140],
   AED: ['UAE dirham', 2, 2],
