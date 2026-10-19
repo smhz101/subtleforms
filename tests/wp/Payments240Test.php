@@ -240,6 +240,29 @@ final class Payments240Test extends TestCase {
 		$this->assertSame( 200, $res['status'], wp_json_encode( $res['data'] ) );
 	}
 
+	/** PAY-25: payment validation messages go through translation. */
+	public function test_pay25_payment_validation_messages_are_translated() {
+		$marker = static function ( $translation, $text, $domain ) {
+			return 'subtleforms' === $domain ? '[t] ' . $translation : $translation;
+		};
+		add_filter( 'gettext', $marker, 10, 3 );
+		$schema = array(
+			'fields' => array(
+				array( 'id' => 'a', 'type' => 'payment_amount', 'key' => 'tip', 'config' => array( 'key' => 'tip', 'label' => 'Tip', 'min' => 5, 'max' => 50 ) ),
+				array( 'id' => 'c', 'type' => 'payment_coupon', 'key' => 'promo', 'config' => array( 'key' => 'promo', 'label' => 'Coupon' ) ),
+			),
+		);
+		$messages = array();
+		foreach ( array( array( 'tip' => 'abc' ), array( 'tip' => '-1' ), array( 'tip' => '2' ), array( 'tip' => '99' ), array( 'promo' => 'BAD!' ) ) as $payload ) {
+			$result     = ( new \SubtleForms\Engine\FieldValidator() )->validate( $schema, $payload, array( 'hidden_fields' => array(), 'required_fields' => array() ) );
+			$messages[] = implode( ' ', array_map( static fn( $e ) => is_array( $e ) ? implode( ' ', $e ) : (string) $e, (array) ( $result['errors'] ?? $result ) ) );
+		}
+		remove_filter( 'gettext', $marker, 10 );
+		foreach ( $messages as $message ) {
+			$this->assertStringContainsString( '[t] ', $message, $message );
+		}
+	}
+
 	private function assertWPError( $value ): void {
 		$this->assertInstanceOf( \WP_Error::class, $value );
 	}
