@@ -19,7 +19,6 @@ import DataTable from './DataTable';
 import PerformanceCell from './analytics/PerformanceCell';
 import { useAnalyticsSummary } from './analytics/useAnalytics';
 import { ConfirmModal } from '../modals';
-import { PRO_TEMPLATE_IDS } from '../utils/proFeatureDetector';
 import { apiGet, apiPost, apiPut, apiDelete } from '../utils/api';
 import {
   getFormTypeBadge,
@@ -222,7 +221,7 @@ export default function FormsList({
   }, [currentPage, pagesLoaded, totalItems, perPage]);
 
   // Define table columns
-  // Views, submissions and conversion per form (2.1, Pro reports).
+  // Views, submissions and conversion per form (2.1).
   const analytics = useAnalyticsSummary(30);
   const formStats = analytics.data?.forms || {};
 
@@ -234,11 +233,6 @@ export default function FormsList({
       render: (title, form) => (
         <div className='sf-form-name'>
           <span className='sf-form-name__title'>{title}</span>
-          {form.template_id && PRO_TEMPLATE_IDS.includes(form.template_id) && (
-            <span className='sf-form-name__pro-badge'>
-              {__('Pro', 'subtleforms')}
-            </span>
-          )}
           {isNewForm(form) && (
             <span className='sf-form-name__new-badge'>
               {__('New', 'subtleforms')}
@@ -340,7 +334,6 @@ export default function FormsList({
       render: (_value, form) => (
         <PerformanceCell
           stats={formStats[form.id] || formStats[String(form.id)]}
-          locked={analytics.locked}
           loading={analytics.isLoading}
         />
       ),

@@ -372,12 +372,10 @@ export default function PaymentsPage() {
       description={__('Take payments on any form, with live order totals and discount codes.', 'subtleforms')}
       actions={
         <>
-          <Button variant='secondary' onClick={openPaymentSettings}>
-            <Icon.Settings size={16} aria-hidden='true' />
+          <Button variant='secondary' onClick={openPaymentSettings} icon={<Icon.Settings size={16} aria-hidden='true' />}>
             {__('Gateway settings', 'subtleforms')}
           </Button>
-          <Button variant='primary' onClick={() => setEditing(null)}>
-            <Icon.Plus size={16} aria-hidden='true' />
+          <Button variant='primary' onClick={() => setEditing(null)} icon={<Icon.Plus size={16} aria-hidden='true' />}>
             {__('New coupon', 'subtleforms')}
           </Button>
         </>
@@ -448,8 +446,8 @@ export default function PaymentsPage() {
             </h2>
             <p>
               {licensed
-                ? __('Add your Stripe keys in Gateway settings. Until then, payment forms still work: entries are saved as “Payment pending” so you can collect payment offline.', 'subtleforms')
-                : __('Products, priced options, order summaries and coupons work on every plan. Pro adds Stripe card, Apple Pay and Google Pay checkout.', 'subtleforms')}
+                ? __('Add your Stripe keys in Gateway settings. Until then, a form with a Card Payment field tells visitors that online payment is not available and saves no entry. A form without a Card Payment field saves the entry as “Payment pending” so you can collect payment offline.', 'subtleforms')
+                : __('Products, priced options, order summaries and coupons are part of SubtleForms. Entries from these forms are saved as “Payment pending” so you can collect payment offline. SubtleForms Pro adds a Card Payment field for Stripe card, Apple Pay and Google Pay.', 'subtleforms')}
             </p>
           </div>
           <ol className='sf-pay-setup__steps'>

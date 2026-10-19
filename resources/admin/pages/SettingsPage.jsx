@@ -51,6 +51,12 @@ const GROUPS = [
         description: __('Spam protection, CAPTCHA, data retention and debugging.', 'subtleforms'),
       },
       {
+        name: 'extensions',
+        icon: Icon.Puzzle,
+        title: __('Integrations', 'subtleforms'),
+        description: __('Webhook defaults, form analytics and the integrations your add-ons bring.', 'subtleforms'),
+      },
+      {
         name: 'ai',
         icon: Icon.Sparkles,
         title: __('AI assistant', 'subtleforms'),
@@ -67,13 +73,6 @@ const GROUPS = [
         icon: Icon.KeyRound,
         title: __('License', 'subtleforms'),
         description: __('Your plan, license key and what it unlocks.', 'subtleforms'),
-      },
-      {
-        name: 'extensions',
-        icon: Icon.Puzzle,
-        title: __('Integrations', 'subtleforms'),
-        description: __('Account-wide settings for payments, CRM, email marketing and more.', 'subtleforms'),
-        pro: true,
       },
       {
         name: 'branding',

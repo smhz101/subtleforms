@@ -1,14 +1,11 @@
 import { useState } from '@wordpress/element';
-import { Button, SelectControl, Spinner, TextControl } from '@wordpress/components';
+import { SelectControl, Spinner, TextControl } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
-import Icon from '../../ui/Icon';
-import { requirePro } from '../../utils/featureGate';
 import {
   ANALYTICS_DAYS,
   useAnalyticsSeries,
   formatRate,
-  sampleSeries,
 } from './useAnalytics';
 import './analytics.scss';
 
@@ -164,21 +161,14 @@ export function performanceFormOptions(forms, query = '') {
 export default function FormAnalyticsPanel({ forms = [] }) {
   const [formId, setFormId] = useState(0);
   const [formQuery, setFormQuery] = useState('');
-  const { data, isLoading, error, locked } = useAnalyticsSeries(formId, ANALYTICS_DAYS);
+  const { data, isLoading, error } = useAnalyticsSeries(formId, ANALYTICS_DAYS);
 
-  const series = locked ? sampleSeries(ANALYTICS_DAYS) : data?.series || [];
-  const totals = locked
-    ? {
-        views: series.reduce((s, d) => s + d.views, 0),
-        submissions: series.reduce((s, d) => s + d.submissions, 0),
-      }
-    : data?.totals || { views: 0, submissions: 0, conversion: null };
-  const conversion = locked
-    ? Math.round((totals.submissions / Math.max(1, totals.views)) * 1000) / 10
-    : totals.conversion;
+  const series = data?.series || [];
+  const totals = data?.totals || { views: 0, submissions: 0, conversion: null };
+  const conversion = totals.conversion;
 
   return (
-    <section className={clsx('sf-panel', 'sf-analytics-panel', { 'is-locked': locked })}>
+    <section className='sf-panel sf-analytics-panel'>
       <header className='sf-panel__header'>
         <div>
           <h2 className='sf-panel__title'>{__('Form performance', 'subtleforms')}</h2>
@@ -190,7 +180,7 @@ export default function FormAnalyticsPanel({ forms = [] }) {
             )}
           </p>
         </div>
-        {!locked && forms.length > 0 && (
+        {forms.length > 0 && (
           <div className='sf-analytics-panel__select'>
             <TextControl
               label={__('Find a form', 'subtleforms')}
@@ -228,39 +218,22 @@ export default function FormAnalyticsPanel({ forms = [] }) {
           </div>
         </dl>
 
-        {isLoading && !locked ? (
+        {isLoading ? (
           <div className='sf-analytics-panel__loading'><Spinner /></div>
-        ) : error && !locked ? (
+        ) : error ? (
           <p className='sf-analytics-panel__empty'>{error.message || __('Analytics could not be loaded.', 'subtleforms')}</p>
         ) : (
-          <div className='sf-analytics-panel__chart' aria-hidden={locked ? 'true' : undefined}>
+          <div className='sf-analytics-panel__chart'>
             <ViewsChart data={series} />
           </div>
         )}
 
-        {!locked && !isLoading && !error && totals.views === 0 && totals.submissions === 0 && (
+        {!isLoading && !error && totals.views === 0 && totals.submissions === 0 && (
           <p className='sf-analytics-panel__empty'>
             {__('No views yet. Views are counted when a published form scrolls into sight on your site.', 'subtleforms')}
           </p>
         )}
 
-        {locked && (
-          <div className='sf-analytics-panel__lock'>
-            <span className='sf-analytics-panel__lock-icon' aria-hidden='true'><Icon.Lock size={16} /></span>
-            <div>
-              <p className='sf-analytics-panel__lock-title'>{__('See which forms convert', 'subtleforms')}</p>
-              <p className='sf-analytics-panel__lock-text'>
-                {__('Sample data shown. Views are already being counted, so your reports are ready the moment you upgrade.', 'subtleforms')}
-              </p>
-            </div>
-            <Button
-              variant='primary'
-              size='compact'
-              onClick={() => requirePro('extensions.analytics', () => {}, { label: __('Analytics', 'subtleforms') })}>
-              {__('Unlock analytics', 'subtleforms')}
-            </Button>
-          </div>
-        )}
       </div>
     </section>
   );
