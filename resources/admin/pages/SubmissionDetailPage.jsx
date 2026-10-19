@@ -1,3 +1,4 @@
+import { answerText } from '../utils/answerText';
 import { adminLabel } from '../../shared/fieldDisplay';
 import { structuralType } from '../../shared/formType';
 import { useState, useEffect, useRef } from '@wordpress/element';
@@ -670,12 +671,16 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
 
   // Field types, so answers can be shown the way they were typed.
   const fieldTypes = {};
+  const fieldNodes = {};
   const repeaterNodes = {};
   ( function collect( list ) {
     ( list || [] ).forEach( ( f ) => {
       if ( ! f || typeof f !== 'object' ) return;
       const k = f.config?.key || f.key;
-      if ( k ) fieldTypes[ k ] = f.type;
+      if ( k ) {
+        fieldTypes[ k ] = f.type;
+        fieldNodes[ k ] = f;
+      }
       // A Repeater's children are answered inside its groups.
       if ( f.type === 'repeat_container' ) {
         if ( k ) repeaterNodes[ k ] = f;
@@ -902,7 +907,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
                           <span className='sf-answers__chips'>
                             { value.map( ( v, i ) => (
                               <span key={ i } className='sf-pill sf-pill--outline'>
-                                { v && typeof v === 'object' ? ( v.label ? String( v.label ) : JSON.stringify( v ) ) : String( v ) }
+                                { v && typeof v === 'object' ? ( v.label ? String( v.label ) : JSON.stringify( v ) ) : answerText( v, fieldNodes[ key ] ) }
                               </span>
                             ) ) }
                           </span>
@@ -918,7 +923,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
                           // Stored through a small tag allow-list on the server.
                           <span className='sf-answers__text sf-answers__text--rich' dangerouslySetInnerHTML={ { __html: String( value ) } } />
                         ) : (
-                          <span className={ `sf-answers__text${ fieldTypes[ key ] === 'textarea' ? ' sf-answers__text--multiline' : '' }` }>{ String( value ) }</span>
+                          <span className={ `sf-answers__text${ fieldTypes[ key ] === 'textarea' ? ' sf-answers__text--multiline' : '' }` }>{ answerText( value, fieldNodes[ key ] ) }</span>
                         ) }
                       </dd>
                     </div>

@@ -126,3 +126,4 @@ assets/screenshot-builder.svg
 assets/screenshot-form-preview.svg
 assets/screenshot-submissions.svg
 *.map
+.wordpress-org/

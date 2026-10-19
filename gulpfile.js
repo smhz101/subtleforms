@@ -73,6 +73,7 @@ function copyFilesToTemp() {
       'templates/**/*',
       'assets/**/*',
       '!assets/README.md',
+      '!.wordpress-org/**',
       '!assets/banner-772x250.svg',
       '!assets/icon-256x256.svg',
       '!assets/screenshot-*.svg',
