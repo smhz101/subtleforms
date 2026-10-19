@@ -145,7 +145,17 @@ for (const container of CONTAINERS) {
     await openBuilder(page, form.id);
 
     const childChrome = page.locator('.sf-field-chrome', { hasText: container.child });
-    await childChrome.click();
+    // Click the field where its input is drawn, not in its middle: since long
+    // labels wrap on the canvas (FLD2-11), a label in a narrow column can fill
+    // the middle, and a click on a label opens inline label editing.
+    const chromeBox = await childChrome.boundingBox();
+    const inputBox = await childChrome.locator('.sf-field-renderer__input').first().boundingBox();
+    await childChrome.click({
+      position: {
+        x: inputBox.x - chromeBox.x + inputBox.width / 2,
+        y: inputBox.y - chromeBox.y + inputBox.height / 2,
+      },
+    });
     await expect(childChrome).toHaveClass(/is-selected/);
     await expect(inspectorTitle(page)).not.toHaveText(/Repeat|Group|Column/i);
     // Every input-like child has Validation and Logic tabs.
@@ -279,7 +289,18 @@ test('drops into a Group, a column and a nested Group highlight only the zone th
   const outerZone = page.locator('[data-dropzone="outer-root"]');
   const tile = page.locator('.sf-inserter__item', { hasText: /^Number$/ }).first();
   const from = await tile.boundingBox();
-  const to = await innerZone.boundingBox();
+  // The field that just left the top of the form takes a moment to leave the
+  // layout, and the inner Group moves up by its height. Measure the zone once
+  // it has stopped moving, or the pointer lands below it.
+  let to = null;
+  await expect
+    .poll(async () => {
+      const box = await innerZone.boundingBox();
+      const settled = !!(to && box && Math.abs(box.y - to.y) < 1 && Math.abs(box.x - to.x) < 1);
+      to = box;
+      return settled;
+    }, { intervals: [100, 100, 200, 200, 250] })
+    .toBe(true);
   await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
   await page.mouse.down();
   await page.mouse.move(from.x + 30, from.y + 10, { steps: 4 });
