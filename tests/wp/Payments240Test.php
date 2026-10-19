@@ -205,6 +205,41 @@ final class Payments240Test extends TestCase {
 		$this->assertSame( 'subtleforms_pro_required', $this->intent( $id, array() )->get_error_code() );
 	}
 
+	/** PAY-26: a card order below the gateway minimum is refused with a clear message. */
+	public function test_pay26_card_orders_below_the_minimum_are_refused() {
+		$id = $this->form(
+			array(
+				array( 'id' => 'p', 'key' => 'sticker', 'type' => 'payment_product', 'label' => 'Sticker', 'price' => 0.30 ),
+				array( 'id' => 'k', 'key' => 'card', 'type' => 'payment_card', 'label' => 'Card' ),
+			),
+			'published',
+			array( 'currency' => 'USD' )
+		);
+		$this->catchIntent();
+		$this->catchVerify();
+
+		$intent = $this->intent( $id, array() );
+		$this->assertWPError( $intent );
+		$this->assertSame( 'subtleforms_amount_too_small', $intent->get_error_code() );
+		$this->assertStringContainsString( '0.50 USD', $intent->get_error_message() );
+		$this->assertNull( $this->intentQuote );
+
+		$res = $this->submit( $id, array() );
+		$this->assertSame( 422, $res['status'] );
+		$this->assertNull( $this->verifyQuote, 'the gateway is not asked to confirm' );
+	}
+
+	/** PAY-26: without a card field (offline payment) a small order is still saved. */
+	public function test_pay26_small_offline_orders_are_kept() {
+		$id  = $this->form(
+			array( array( 'id' => 'p', 'key' => 'sticker', 'type' => 'payment_product', 'label' => 'Sticker', 'price' => 0.30 ) ),
+			'published',
+			array( 'currency' => 'USD' )
+		);
+		$res = $this->submit( $id, array() );
+		$this->assertSame( 200, $res['status'], wp_json_encode( $res['data'] ) );
+	}
+
 	private function assertWPError( $value ): void {
 		$this->assertInstanceOf( \WP_Error::class, $value );
 	}

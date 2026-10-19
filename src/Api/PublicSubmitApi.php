@@ -635,6 +635,19 @@ final class PublicSubmitApi {
 		$settings = get_option( 'subtleforms_settings', array() );
 		$mode     = is_array( $settings ) ? (string) ( $settings['ext_payments_mode'] ?? 'test' ) : 'test';
 
+		$hasCard = false;
+		foreach ( Pricing::fields( $schema ) as $f ) {
+			if ( ( $f['type'] ?? '' ) === 'payment_card' ) {
+				$hasCard = true;
+				break;
+			}
+		}
+		// A card cannot be charged less than the gateway minimum (PAY-26).
+		$tooSmall = $hasCard ? \SubtleForms\Payments\Currencies::belowMinimum( (float) $quote['total'], (string) $quote['currency'] ) : null;
+		if ( null !== $tooSmall ) {
+			return ApiResponse::error( 'subtleforms_amount_too_small', $tooSmall, 422 );
+		}
+
 		/**
 		 * Confirm the visitor's payment for this order.
 		 *
@@ -654,13 +667,6 @@ final class PublicSubmitApi {
 			return ApiResponse::error( $verified->get_error_code(), $verified->get_error_message(), 402 );
 		}
 
-		$hasCard = false;
-		foreach ( Pricing::fields( $schema ) as $f ) {
-			if ( ( $f['type'] ?? '' ) === 'payment_card' ) {
-				$hasCard = true;
-				break;
-			}
-		}
 		if ( null === $verified && $hasCard ) {
 			return ApiResponse::error( 'subtleforms_payment_unavailable', __( 'Online payment is not available right now. Please contact the site owner.', 'subtleforms' ), 402 );
 		}

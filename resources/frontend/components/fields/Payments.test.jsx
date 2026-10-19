@@ -46,3 +46,26 @@ describe('PAY-09: Custom Amount symbol', () => {
     unmount();
   });
 });
+
+describe('PAY-26: card minimum', () => {
+  beforeEach(() => {
+    window.SubtleFormsPayments = { mount: () => ({ update() {}, destroy() {} }) };
+  });
+  afterEach(() => {
+    delete window.SubtleFormsPayments;
+  });
+
+  const pay = (total) => ({ currency: 'USD', quote: { total }, formId: 1, registerCard() {} });
+
+  it('says so before the card step when the total is below the minimum', () => {
+    const { container, unmount } = render({ id: 'k', type: 'payment_card', key: 'card', label: 'Card' }, pay(0.3));
+    expect(container.querySelector('.subtleforms-card__minimum').textContent).toMatch(/at least \$0\.50/);
+    unmount();
+  });
+
+  it('stays quiet for a normal total', () => {
+    const { container, unmount } = render({ id: 'k', type: 'payment_card', key: 'card', label: 'Card' }, pay(12));
+    expect(container.querySelector('.subtleforms-card__minimum')).toBeNull();
+    unmount();
+  });
+});

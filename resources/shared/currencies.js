@@ -50,6 +50,12 @@ export function roundMoney(amount, code) {
   return Math.round(n * f) / f;
 }
 
+/** The smallest card charge in a currency, or 0 when not known. */
+export function currencyMinimum(code) {
+  const c = String(code || '').toUpperCase();
+  return CURRENCIES[c] ? CURRENCIES[c][2] : 0;
+}
+
 /** Options for a select control: [{ value, label }]. */
 export function currencyOptions() {
   return Object.keys(CURRENCIES).map((code) => ({ value: code, label: `${code} - ${CURRENCIES[code][0]}` }));

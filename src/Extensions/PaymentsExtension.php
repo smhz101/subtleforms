@@ -146,6 +146,12 @@ class PaymentsExtension extends AbstractExtension {
 			return new \WP_Error( 'subtleforms_nothing_to_pay', __( 'There is nothing to pay for this order.', 'subtleforms' ), array( 'status' => 400 ) );
 		}
 
+		// Gateways refuse very small charges; say so before the card step (PAY-26).
+		$tooSmall = \SubtleForms\Payments\Currencies::belowMinimum( (float) $quote['total'], (string) $quote['currency'] );
+		if ( null !== $tooSmall ) {
+			return new \WP_Error( 'subtleforms_amount_too_small', $tooSmall, array( 'status' => 422 ) );
+		}
+
 		/**
 		 * Create a payment intent with the gateway.
 		 *
@@ -164,12 +170,6 @@ class PaymentsExtension extends AbstractExtension {
 			return $result;
 		}
 
-		return new \WP_Error(
-			'subtleforms_pro_required',
-			__( 'Payment processing requires the SubtleForms Pro plugin.', 'subtleforms' ),
-			array( 'status' => 501 )
-		);
-	}
 		// Pro is active but no gateway took the intent: Stripe is not connected
 		// yet (PAY-24). Admins get the fix, visitors a plain message.
 		if ( defined( 'SUBTLEFORMS_PRO_VERSION' ) || subtleforms_is_pro_active() ) {
@@ -182,4 +182,10 @@ class PaymentsExtension extends AbstractExtension {
 			);
 		}
 
+		return new \WP_Error(
+			'subtleforms_pro_required',
+			__( 'Payment processing requires the SubtleForms Pro plugin.', 'subtleforms' ),
+			array( 'status' => 501 )
+		);
+	}
 }

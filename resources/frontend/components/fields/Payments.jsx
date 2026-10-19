@@ -8,7 +8,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { formatMoney } from '../../../shared/pricing';
-import { currencySymbol, currencyDecimals } from '../../../shared/currencies';
+import { currencySymbol, currencyDecimals, currencyMinimum } from '../../../shared/currencies';
 
 export const PaymentContext = createContext(null);
 
@@ -413,6 +413,9 @@ export function PaymentCard({ config }) {
 
   const amount = pay?.quote?.total || 0;
   const currency = pay?.currency || 'USD';
+  // Gateways refuse very small charges; the server checks this too (PAY-26).
+  const minimum = currencyMinimum(currency);
+  const tooSmall = amount > 0 && minimum > 0 && amount < minimum;
 
   useEffect(() => {
     if (!ready || !ref.current || !window.SubtleFormsPayments || pay?.preview || pay?.external) return undefined;
@@ -467,6 +470,15 @@ export function PaymentCard({ config }) {
   return (
     <div className='subtleforms-card'>
       <div ref={ref} className='subtleforms-card__element' />
+      {tooSmall && (
+        <p className='subtleforms-card__error subtleforms-card__minimum' role='status'>
+          {sprintf(
+            /* translators: %s: smallest amount, for example $0.50 */
+            __('Card payments need an order of at least %s.', 'subtleforms'),
+            formatMoney(minimum, currency)
+          )}
+        </p>
+      )}
       {error && (
         <p className='subtleforms-card__error' role='alert'>
           {error}
