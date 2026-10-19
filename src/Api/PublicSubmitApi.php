@@ -121,6 +121,14 @@ final class PublicSubmitApi {
 		// Only a submission that went through follows a redirect confirmation.
 		if ( $outcome['ok'] && '' !== $outcome['redirect'] ) {
 			if ( $outcome['configured'] ) {
+				// Merge tags are filled here, as the browser does for AJAX.
+				$form                = $this->formsRepo->find( $built['form_id'] );
+				$outcome['redirect'] = ClassicResult::fillTags(
+					$outcome['redirect'],
+					$outcome['values'],
+					is_array( $form ) ? (string) ( $form['title'] ?? '' ) : '',
+					(int) ( $outcome['body']['data']['submission_id'] ?? 0 )
+				);
 				// The form's confirmation may send visitors to another site.
 				ClassicResult::allowHostOf( $outcome['redirect'] );
 			}

@@ -138,4 +138,14 @@ final class Review37Test extends TestCase {
 		$errors = ( new \SubtleForms\Support\SchemaValidator() )->validateWithErrors( $schema );
 		$this->assertSame( array(), array_values( array_filter( $errors, static fn( $e ) => isset( $e['field_id'] ) ) ), 'Different providers are fine.' );
 	}
+
+	public function test_classic_redirect_merge_tags_are_filled_and_encoded(): void {
+		$url = ClassicResult::fillTags(
+			'https://example.org/thanks?email={field:email}&id={entry_id}&f={{form_title}}&n={name}&x={unknown}&c={colors}',
+			array( 'email' => 'a+b@c.co', 'name' => array( 'first' => 'Ada', 'last' => 'Lovelace' ), 'colors' => array( 'red', 'blue' ) ),
+			'Sign up',
+			42
+		);
+		$this->assertSame( 'https://example.org/thanks?email=a%2Bb%40c.co&id=42&f=Sign%20up&n=Ada%20Lovelace&x=&c=red%2C%20blue', $url );
+	}
 }

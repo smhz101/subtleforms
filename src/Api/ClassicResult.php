@@ -127,6 +127,42 @@ final class ClassicResult {
 	}
 
 	/**
+	 * Fill the merge tags of a redirect confirmation the way the browser does
+	 * for an AJAX submit (fillConfirmation): {field:key}, {key}, {form_title}
+	 * and {entry_id}, single or double braces, values URL-encoded. A tag
+	 * without a value is removed.
+	 *
+	 * @param string     $url       Redirect address with tags.
+	 * @param array      $values    Answers as posted.
+	 * @param string     $formTitle Form title.
+	 * @param int|string $entryId   Entry ID.
+	 * @return string
+	 */
+	public static function fillTags( string $url, array $values, string $formTitle, $entryId ): string {
+		return (string) preg_replace_callback(
+			'/\{\{?\s*(?:field:)?([\w.-]+)\s*\}?\}/',
+			static function ( $m ) use ( $values, $formTitle, $entryId ) {
+				$key = $m[1];
+				if ( 'form_title' === $key ) {
+					$raw = $formTitle;
+				} elseif ( 'entry_id' === $key ) {
+					$raw = (string) $entryId;
+				} elseif ( array_key_exists( $key, $values ) ) {
+					$raw = $values[ $key ];
+				} else {
+					return '';
+				}
+				if ( is_array( $raw ) ) {
+					$scalars = array_filter( $raw, 'is_scalar' );
+					$raw     = array_is_list( $raw ) ? implode( ', ', array_map( 'strval', $scalars ) ) : implode( ' ', array_filter( array_map( 'strval', $scalars ), 'strlen' ) );
+				}
+				return null === $raw ? '' : rawurlencode( (string) $raw );
+			},
+			$url
+		);
+	}
+
+	/**
 	 * Let wp_safe_redirect() follow a redirect confirmation an administrator
 	 * set to another site, like the AJAX flow does. Only that host is added,
 	 * and only http and https addresses count.
