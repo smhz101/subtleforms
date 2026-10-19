@@ -16,6 +16,7 @@ import { useConfig } from '../context/ConfigContext';
 import { TreeContext } from '../context/TreeContext';
 import CONTROL_REGISTRY, { getControlComponent } from './controlRegistry';
 import { PanelSection } from '../../../ui';
+import { resolveControls } from './controlSections';
 
 import './DynamicInspectorPanel.scss';
 
@@ -136,35 +137,19 @@ function DynamicInspectorPanel( {
 } ) {
 	const { fieldDefinitions } = useConfig();
 
-	const isLayout = useMemo( () => {
-		const def = fieldDefinitions?.[ field?.type ];
-		return def?.meta?.category === 'layout';
-	}, [ fieldDefinitions, field?.type ] );
+	const isLayout = useMemo(
+		() => fieldDefinitions?.[ field?.type ]?.meta?.category === 'layout',
+		[ fieldDefinitions, field?.type ]
+	);
 
-	const controls = useMemo( () => {
-		const def = fieldDefinitions?.[ field?.type ];
-		const layout = Array.isArray( def?.layoutControls ) ? def.layoutControls : [];
-		const inspector = Array.isArray( def?.inspectorControls ) ? def.inspectorControls : [];
-		// Layout types declare their own controls in layoutControls; the 2.0
-		// settings model adds shared ones (CSS class) to inspectorControls.
-		const merged = isLayout ? [ ...layout, ...inspector ] : inspector;
-		const seen = new Set();
-		return merged
-			.filter( ( ctrl ) => {
-				const name = ctrl?.key ?? ctrl?.name;
-				if ( ! name || seen.has( name ) ) return false;
-				seen.add( name );
-				return true;
-			} )
-			.map( ( ctrl ) => {
-				const controlName = ctrl?.name ?? ctrl?.key;
-				const fallback = controlName === 'label' || controlName === 'description' ? 'general' : 'appearance';
-				return { ...ctrl, section: ctrl.section || fallback };
-			} )
-			.filter( ( ctrl ) => ! sections || sections.includes( ctrl.section ) )
-			// Sections become panels in the inspector, not inline headings.
-			.map( ( { section, ...ctrl } ) => ctrl ); // eslint-disable-line no-unused-vars
-	}, [ fieldDefinitions, field?.type, isLayout, sections ] );
+	const controls = useMemo(
+		() =>
+			resolveControls( fieldDefinitions?.[ field?.type ] )
+				.filter( ( ctrl ) => ! sections || sections.includes( ctrl.section ) )
+				// Sections become panels in the inspector, not inline headings.
+				.map( ( { section, ...ctrl } ) => ctrl ), // eslint-disable-line no-unused-vars
+		[ fieldDefinitions, field?.type, sections ]
+	);
 
 	const groups = useMemo( () => groupControls( controls ), [ controls ] );
 

@@ -16,6 +16,7 @@ import {
   DynamicInspectorPanel,
 } from './inspector/panels';
 import { CHOICE_TYPES } from './inspector/panels/OptionsPanel';
+import { hasSection, LOGIC_ONLY_TYPES } from './inspector/controlSections';
 import FieldAppearancePanel from './appearance/FieldAppearancePanel';
 import { supportsAppearance } from '../../../shared/appearance';
 import { getIcon } from './utils/iconMap';
@@ -179,7 +180,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
           },
           logicTab,
         ]
-      : isStep || isContentBlock || isRepeater
+      : LOGIC_ONLY_TYPES.includes(field.type)
       ? [logicTab]
       : []),
     ...(supportsAppearance(field.type)
@@ -349,6 +350,8 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
                     ? __('Skip this step unless its rules match. Fields in a skipped step are not checked or saved.', 'subtleforms')
                     : isRepeater
                     ? __('Show or hide this repeater based on answers to other fields. A hidden repeater, including every row inside it, is not checked or saved.', 'subtleforms')
+                    : field.type === 'payment_hidden_price'
+                    ? __('Add this fee only when its rules match. A hidden fee is not charged and not listed in the order.', 'subtleforms')
                     : sprintf(
                         /* translators: %s: field label */
                         __('Show or hide “%s” based on answers to other fields. Hidden fields are not checked or saved.', 'subtleforms'),
@@ -390,12 +393,8 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
  */
 function AppearancePanel({ field, onUpdate, isReadOnly }) {
   const { fieldDefinitions } = useConfig();
-  const def = fieldDefinitions?.[field.type];
-  const all = [
-    ...(Array.isArray(def?.inspectorControls) ? def.inspectorControls : []),
-    ...(Array.isArray(def?.layoutControls) ? def.layoutControls : []),
-  ];
-  if (!all.some((c) => c?.section === 'appearance')) {
+  // The same controls, in the same sections, as the panel draws (FA-02).
+  if (!hasSection(fieldDefinitions?.[field.type], 'appearance')) {
     return null;
   }
   return (
@@ -416,12 +415,8 @@ function AppearancePanel({ field, onUpdate, isReadOnly }) {
  */
 function AdvancedPanel({ field, onUpdate, isReadOnly }) {
   const { fieldDefinitions } = useConfig();
-  const def = fieldDefinitions?.[field.type];
-  const all = [
-    ...(Array.isArray(def?.inspectorControls) ? def.inspectorControls : []),
-    ...(Array.isArray(def?.layoutControls) ? def.layoutControls : []),
-  ];
-  if (!all.some((c) => c?.section === 'advanced')) {
+  // The same controls, in the same sections, as the panel draws (FA-02).
+  if (!hasSection(fieldDefinitions?.[field.type], 'advanced')) {
     return null;
   }
   return (
