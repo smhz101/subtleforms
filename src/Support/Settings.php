@@ -2,6 +2,10 @@
 
 namespace SubtleForms\Support;
 
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
 /**
  * Settings Manager
  *
@@ -28,7 +32,6 @@ class Settings {
 	 * Allowed reading panes. Right of the list is the site default.
 	 */
 	const INBOX_PANE = array( 'right', 'below', 'off' );
-
 
 	/**
 	 * Default settings
@@ -535,5 +538,32 @@ class Settings {
 			'personal'     => $personal,
 			'site'         => $site,
 		);
+	}
+
+	/**
+	 * Drop stored AI assistant keys. Nothing in the plugin reads them, and
+	 * saving one used to fail the whole settings form.
+	 */
+	public static function remove_ai_options(): void {
+		$stored = get_option( self::OPTION_NAME, array() );
+		if ( is_array( $stored ) ) {
+			$clean = array();
+			foreach ( $stored as $key => $value ) {
+				if ( is_string( $key ) && str_starts_with( $key, 'ai_' ) ) {
+					continue;
+				}
+				$clean[ $key ] = $value;
+			}
+			if ( $clean !== $stored ) {
+				update_option( self::OPTION_NAME, $clean );
+			}
+		}
+
+		global $wpdb;
+		if ( is_object( $wpdb ) && isset( $wpdb->options ) && method_exists( $wpdb, 'prepare' ) ) {
+			$like = $wpdb->esc_like( 'subtleforms_ai_' ) . '%';
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $like ) );
+		}
 	}
 }
