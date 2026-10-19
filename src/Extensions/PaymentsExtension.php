@@ -170,4 +170,16 @@ class PaymentsExtension extends AbstractExtension {
 			array( 'status' => 501 )
 		);
 	}
+		// Pro is active but no gateway took the intent: Stripe is not connected
+		// yet (PAY-24). Admins get the fix, visitors a plain message.
+		if ( defined( 'SUBTLEFORMS_PRO_VERSION' ) || subtleforms_is_pro_active() ) {
+			return new \WP_Error(
+				'subtleforms_payment_unavailable',
+				current_user_can( 'manage_options' )
+					? __( 'Connect Stripe under SubtleForms > Settings > Integrations > Payments to take card payments.', 'subtleforms' )
+					: __( 'Online payment is not available right now. Please contact the site owner.', 'subtleforms' ),
+				array( 'status' => 503 )
+			);
+		}
+
 }

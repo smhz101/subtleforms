@@ -186,6 +186,25 @@ final class Payments240Test extends TestCase {
 		$this->assertSame( 200, $this->post( '/payments/quote', array( 'form_id' => $id, 'data' => array() ) )['status'] );
 	}
 
+	/** PAY-24: with Pro active and no gateway connected, the answer is about connecting Stripe. */
+	public function test_pay24_pro_without_a_gateway_asks_to_connect_stripe() {
+		add_filter( 'subtleforms_is_pro_active', '__return_true' );
+		$id = $this->form( array( array( 'id' => 'p', 'key' => 'ticket', 'type' => 'payment_product', 'label' => 'Ticket', 'price' => 20 ) ) );
+
+		$this->asAdmin();
+		$admin = $this->intent( $id, array() );
+		$this->assertWPError( $admin );
+		$this->assertSame( 'subtleforms_payment_unavailable', $admin->get_error_code() );
+		$this->assertStringContainsString( 'Connect Stripe', $admin->get_error_message() );
+
+		wp_set_current_user( 0 );
+		$guest = $this->intent( $id, array() );
+		$this->assertStringNotContainsString( 'Pro plugin', $guest->get_error_message() );
+
+		remove_all_filters( 'subtleforms_is_pro_active' );
+		$this->assertSame( 'subtleforms_pro_required', $this->intent( $id, array() )->get_error_code() );
+	}
+
 	private function assertWPError( $value ): void {
 		$this->assertInstanceOf( \WP_Error::class, $value );
 	}
