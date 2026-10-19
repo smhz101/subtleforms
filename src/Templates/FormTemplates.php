@@ -21,7 +21,48 @@ class FormTemplates {
 	 * @return array Array of template definitions.
 	 */
 	public static function get_all() {
-		$templates = array(
+		$templates = self::base_templates();
+
+		/**
+		 * Filter available form templates.
+		 *
+		 * Allows extensions (like Pro) to add additional templates.
+		 *
+		 * @param array $templates Associative array of template definitions.
+		 * @since 1.5.0
+		 */
+		$templates = apply_filters( 'subtleforms/templates', $templates );
+
+		return self::prepare_all( $templates );
+	}
+
+	/**
+	 * The templates this plugin ships, without add-on templates.
+	 *
+	 * @return array Template definitions.
+	 */
+	public static function free_templates(): array {
+		return self::prepare_all( self::base_templates() );
+	}
+
+	/**
+	 * @param array $templates Templates.
+	 * @return array
+	 */
+	private static function prepare_all( array $templates ): array {
+		foreach ( $templates as $key => $template ) {
+			if ( is_array( $template ) ) {
+				$templates[ $key ] = self::prepare_template( (string) $key, $template );
+			}
+		}
+		return $templates;
+	}
+
+	/**
+	 * @return array Template definitions.
+	 */
+	private static function base_templates(): array {
+		return array(
 			// ── Contact ─────────────────────────────────────────────────────
 			'contact'              => self::contact_form(),
 			'simple_contact'       => self::simple_contact_form(),
@@ -39,19 +80,10 @@ class FormTemplates {
 			'rsvp'                 => self::rsvp_form(),
 			// ── Support ─────────────────────────────────────────────────────
 			'bug_report'           => self::bug_report(),
+			// ── Payment ─────────────────────────────────────────────────────
+			'payment_form'        => self::payment_form(),
+			'donation_form'       => self::donation_form(),
 		);
-
-		/**
-		 * Filter available form templates.
-		 *
-		 * Allows extensions (like Pro) to add additional templates.
-		 *
-		 * @param array $templates Associative array of template definitions.
-		 * @since 1.5.0
-		 */
-		$templates = apply_filters( 'subtleforms/templates', $templates );
-
-		return $templates;
 	}
 
 	/**
@@ -562,4 +594,313 @@ class FormTemplates {
 			),
 		);
 	}
+
+	/**
+	 * Payment form: a product and an order summary. Card numbers are not collected.
+	 *
+	 * @return array Template definition.
+	 */
+	private static function payment_form(): array {
+		return array(
+			'id'          => 'payment_form',
+			'name'        => __( 'Payment Form', 'subtleforms' ),
+			'description' => __( 'A product and an order summary. Card payment needs SubtleForms Pro.', 'subtleforms' ),
+			'category'    => 'payment',
+			'icon'        => 'money-alt',
+			'is_pro'      => false,
+			'schema'      => array(
+				'metadata' => array(
+					'title'       => __( 'Payment', 'subtleforms' ),
+					'name'        => 'payment_form',
+					'description' => '',
+				),
+				'fields'   => array(
+					array(
+						'id'          => 'product',
+						'type'        => 'payment_product',
+						'label'       => __( 'Product', 'subtleforms' ),
+						'productName' => __( 'Product', 'subtleforms' ),
+						'price'       => 10,
+					),
+					array(
+						'id'    => 'order_summary',
+						'type'  => 'payment_summary',
+						'label' => __( 'Order Summary', 'subtleforms' ),
+					),
+					array(
+						'id'      => 'payment_note',
+						'type'    => 'html',
+						'label'   => __( 'Note', 'subtleforms' ),
+						'content' => __( 'Card payment needs SubtleForms Pro.', 'subtleforms' ),
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Donation form with a custom amount.
+	 *
+	 * @return array Template definition.
+	 */
+	private static function donation_form(): array {
+		return array(
+			'id'          => 'donation_form',
+			'name'        => __( 'Donation Form', 'subtleforms' ),
+			'description' => __( 'A donation with a custom amount.', 'subtleforms' ),
+			'category'    => 'payment',
+			'icon'        => 'heart',
+			'is_pro'      => false,
+			'schema'      => array(
+				'metadata' => array(
+					'title'       => __( 'Donation', 'subtleforms' ),
+					'name'        => 'donation_form',
+					'description' => '',
+				),
+				'fields'   => array(
+					array(
+						'id'    => 'custom_amount',
+						'type'  => 'payment_amount',
+						'label' => __( 'Custom Amount', 'subtleforms' ),
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Drop example.com webhooks, notify the site owner, and keep payment
+	 * templates away from card numbers. Runs after other plugins add templates.
+	 *
+	 * @param string $id       Template id.
+	 * @param array  $template Template definition.
+	 * @return array
+	 */
+	private static function prepare_template( string $id, array $template ): array {
+		$schema = ( isset( $template['schema'] ) && is_array( $template['schema'] ) ) ? $template['schema'] : array();
+
+		// Templates from add-ons (SubtleForms Pro) keep their fields, such as
+		// the Card Payment field; only their actions are checked here.
+		if ( ! empty( $template['is_pro'] ) ) {
+			if ( isset( $schema['actions'] ) || isset( $schema['fields'] ) ) {
+				$schema['actions']  = self::owner_actions( is_array( $schema['actions'] ?? null ) ? $schema['actions'] : array() );
+				$template['schema'] = $schema;
+			}
+			return $template;
+		}
+
+		foreach ( array( 'fields', 'steps' ) as $list ) {
+			if ( isset( $schema[ $list ] ) && is_array( $schema[ $list ] ) ) {
+				$schema[ $list ] = self::prepare_field_list( $schema[ $list ], $id );
+			}
+		}
+
+		if ( 'payment_form' === $id ) {
+			$schema['fields'] = self::ensure_payment_fields( is_array( $schema['fields'] ?? null ) ? $schema['fields'] : array() );
+		}
+		if ( 'donation_form' === $id ) {
+			$schema['fields'] = self::ensure_custom_amount( is_array( $schema['fields'] ?? null ) ? $schema['fields'] : array() );
+		}
+
+		$schema['actions']   = self::owner_actions( is_array( $schema['actions'] ?? null ) ? $schema['actions'] : array() );
+		$template['schema']  = $schema;
+		return $template;
+	}
+
+	/**
+	 * @param array<int, mixed> $fields Fields or steps.
+	 * @param string            $id     Template id.
+	 * @return array<int, mixed>
+	 */
+	private static function prepare_field_list( array $fields, string $id ): array {
+		$out = array();
+		foreach ( $fields as $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+			foreach ( array( 'fields', 'children' ) as $child ) {
+				if ( isset( $field[ $child ] ) && is_array( $field[ $child ] ) ) {
+					$field[ $child ] = self::prepare_field_list( $field[ $child ], $id );
+				}
+			}
+			if ( self::is_card_field( $field ) ) {
+				continue;
+			}
+			if ( 'donation_form' === $id && 'custom_amount' === (string) ( $field['id'] ?? '' ) ) {
+				$field['type']  = 'payment_amount';
+				$field['label'] = __( 'Custom Amount', 'subtleforms' );
+			}
+			$out[] = $field;
+		}
+		return $out;
+	}
+
+	/**
+	 * @param array<string, mixed> $field Field definition.
+	 */
+	private static function is_card_field( array $field ): bool {
+		if ( 'payment_card' === ( $field['type'] ?? '' ) ) {
+			return false;
+		}
+		$haystack = strtolower(
+			(string) ( $field['id'] ?? '' ) . ' ' . (string) ( $field['key'] ?? '' ) . ' ' . (string) ( $field['label'] ?? '' )
+		);
+		return 1 === preg_match( '/card|cvv|expiry/', $haystack );
+	}
+
+	/**
+	 * @param array<int, mixed> $fields Fields.
+	 * @return array<int, mixed>
+	 */
+	private static function ensure_payment_fields( array $fields ): array {
+		if ( ! self::field_tree_has( $fields, static function ( array $field ): bool {
+			return 'payment_product' === ( $field['type'] ?? '' );
+		} ) ) {
+			$fields[] = array(
+				'id'          => 'product',
+				'type'        => 'payment_product',
+				'label'       => __( 'Product', 'subtleforms' ),
+				'productName' => __( 'Product', 'subtleforms' ),
+				'price'       => 10,
+			);
+		}
+		if ( ! self::field_tree_has( $fields, static function ( array $field ): bool {
+			return 'payment_summary' === ( $field['type'] ?? '' );
+		} ) ) {
+			$fields[] = array(
+				'id'    => 'order_summary',
+				'type'  => 'payment_summary',
+				'label' => __( 'Order Summary', 'subtleforms' ),
+			);
+		}
+		if ( ! self::field_tree_has( $fields, static function ( array $field ): bool {
+			return 'payment_note' === ( $field['id'] ?? '' );
+		} ) ) {
+			$fields[] = array(
+				'id'      => 'payment_note',
+				'type'    => 'html',
+				'label'   => __( 'Note', 'subtleforms' ),
+				'content' => __( 'Card payment needs SubtleForms Pro.', 'subtleforms' ),
+			);
+		}
+		return $fields;
+	}
+
+	/**
+	 * @param array<int, mixed> $fields Fields.
+	 * @return array<int, mixed>
+	 */
+	private static function ensure_custom_amount( array $fields ): array {
+		if ( self::field_tree_has( $fields, static function ( array $field ): bool {
+			return 'payment_amount' === ( $field['type'] ?? '' );
+		} ) ) {
+			return $fields;
+		}
+		$fields[] = array(
+			'id'    => 'custom_amount',
+			'type'  => 'payment_amount',
+			'label' => __( 'Custom Amount', 'subtleforms' ),
+		);
+		return $fields;
+	}
+
+	/**
+	 * @param array<int, mixed> $fields Fields.
+	 * @param callable          $match  Field predicate.
+	 */
+	private static function field_tree_has( array $fields, callable $match ): bool {
+		foreach ( $fields as $field ) {
+			if ( ! is_array( $field ) ) {
+				continue;
+			}
+			if ( $match( $field ) ) {
+				return true;
+			}
+			foreach ( array( 'fields', 'children' ) as $child ) {
+				if ( isset( $field[ $child ] ) && is_array( $field[ $child ] ) && self::field_tree_has( $field[ $child ], $match ) ) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Keep every action except example.com webhooks and previous emails, then
+	 * add one email to the site owner. An empty message sends {all_fields}.
+	 *
+	 * @param array<int, mixed> $actions Actions.
+	 * @return array<int, mixed>
+	 */
+	private static function owner_actions( array $actions ): array {
+		$kept = array();
+		foreach ( $actions as $action ) {
+			if ( ! is_array( $action ) ) {
+				continue;
+			}
+			$type = (string) ( $action['type'] ?? '' );
+			if ( 'email' === $type ) {
+				continue;
+			}
+			if ( 'webhook' === $type && self::webhook_is_example( $action ) ) {
+				continue;
+			}
+			$kept[] = $action;
+		}
+		$kept[] = array(
+			'id'      => 'email',
+			'type'    => 'email',
+			'enabled' => true,
+			'config'  => array(
+				'to'      => '{admin_email}',
+				'subject' => __( 'New entry: {form_title}', 'subtleforms' ),
+				'message' => '',
+			),
+		);
+		return $kept;
+	}
+
+	/**
+	 * @param array<string, mixed> $action Webhook action.
+	 */
+	private static function webhook_is_example( array $action ): bool {
+		$values = array();
+		if ( isset( $action['url'] ) && is_string( $action['url'] ) ) {
+			$values[] = $action['url'];
+		}
+		$config = $action['config'] ?? array();
+		if ( is_array( $config ) ) {
+			foreach ( $config as $value ) {
+				if ( is_string( $value ) ) {
+					$values[] = $value;
+				}
+			}
+		}
+		foreach ( $values as $value ) {
+			if ( self::is_example_host( $value ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Whether a webhook address is example.com or a subdomain of it.
+	 */
+	private static function is_example_host( string $value ): bool {
+		$candidate = trim( $value );
+		if ( '' === $candidate ) {
+			return false;
+		}
+		if ( ! str_contains( $candidate, '://' ) ) {
+			$candidate = 'https://' . $candidate;
+		}
+		$host = parse_url( $candidate, PHP_URL_HOST );
+		if ( ! is_string( $host ) || '' === $host ) {
+			return false;
+		}
+		$host = strtolower( $host );
+		return 'example.com' === $host || str_ends_with( $host, '.example.com' );
+	}
+
 }
