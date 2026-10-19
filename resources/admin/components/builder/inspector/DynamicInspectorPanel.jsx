@@ -9,10 +9,11 @@
  * consecutive controls sharing the same section are grouped under a PanelSection.
  */
 
-import { useMemo, memo } from '@wordpress/element';
+import { useMemo, memo, useContext } from '@wordpress/element';
 import { Notice } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { useConfig } from '../context/ConfigContext';
+import { TreeContext } from '../context/TreeContext';
 import CONTROL_REGISTRY, { getControlComponent } from './controlRegistry';
 import { PanelSection } from '../../../ui';
 
@@ -48,9 +49,30 @@ function groupControls( controls ) {
 }
 
 /**
+ * Every other field in the form, as { key, label, type }.
+ *
+ * @param {Object} tree  Builder tree.
+ * @param {Object} field Selected field.
+ * @return {Array} Fields.
+ */
+function formFields( tree, field ) {
+	const nodes = tree?.nodes ? Object.values( tree.nodes ) : [];
+	return nodes
+		.filter( ( n ) => n && n.id !== field?.id )
+		.map( ( n ) => ( {
+			key: n.config?.key || n.key,
+			label: n.config?.label || n.label || n.config?.key || n.key,
+			type: n.type,
+		} ) )
+		.filter( ( f ) => f.key );
+}
+
+/**
  * Renders a single inspector control bound to a field value.
  */
 function ControlRenderer( { ctrl, field, onUpdate, isReadOnly } ) {
+	// Outside the builder (tests, previews) there is no tree.
+	const tree = useContext( TreeContext );
 	// PHP uses `name` as the schema key; support `key` as a future alias
 	const fieldKey = ctrl.key ?? ctrl.name;
 	const ControlComponent = getControlComponent( ctrl.type );
@@ -85,11 +107,14 @@ function ControlRenderer( { ctrl, field, onUpdate, isReadOnly } ) {
 	if ( ctrl.type === 'subfield' ) {
 		props.subfields = Array.isArray( ctrl.subfields ) ? ctrl.subfields : [];
 	}
-	// Add-on controls get the full definition and the selected field.
+	// Add-on controls get the full definition, the selected field and the
+	// other fields of the form ({ key, label, type }), for example to insert
+	// a field into a formula.
 	if ( ! CONTROL_REGISTRY[ ctrl.type ] ) {
 		props.control = ctrl;
 		props.field = field;
 		props.onUpdate = onUpdate;
+		props.formFields = formFields( tree, field );
 	}
 
 	return <ControlComponent { ...props } />;
