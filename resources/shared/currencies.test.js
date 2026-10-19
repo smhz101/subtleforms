@@ -1,5 +1,5 @@
 import { computeQuote, formatMoney } from './pricing';
-import { currencyDecimals, roundMoney, currencySymbol, currencyOptions } from './currencies';
+import { currencyDecimals, roundMoney, currencySymbol, currencyOptions, currencyMinimum } from './currencies';
 
 describe('PAY-12: zero-decimal currencies', () => {
   const fields = [
@@ -21,6 +21,10 @@ describe('PAY-12: zero-decimal currencies', () => {
 
   it('formats yen without decimals', () => {
     expect(formatMoney(1352, 'JPY')).not.toMatch(/[.,]\d{2}$/);
+  });
+
+  it('uses the Stripe minimum of 50 KRW, not an approximate USD equivalent', () => {
+    expect(currencyMinimum('KRW')).toBe(50);
   });
 
   it('knows decimals, rounding and symbols', () => {
