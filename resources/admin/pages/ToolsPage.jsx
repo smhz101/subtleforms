@@ -301,7 +301,7 @@ function Transfer( { forms, busy, setBusy, tell } ) {
             <h2 className='sf-panel__title'>{ __( 'Submissions', 'subtleforms' ) }</h2>
             <p className='sf-panel__subtitle'>{ sprintf(
               /* translators: %s: plugin name */
-              __( 'JSON import and export move entries between %s sites. Passwords are left out, and read and starred state is kept. A form with more than 2,000 submissions is not exported in part. Export CSV makes a spreadsheet file.', 'subtleforms' ),
+              __( 'JSON import and export move entries between %s sites. Passwords are left out. Status, read and starred state, and order and payment details are kept. A form with more than 2,000 submissions is not exported in part. Export CSV makes a spreadsheet file.', 'subtleforms' ),
               getBranding().name
             ) }</p>
           </div>

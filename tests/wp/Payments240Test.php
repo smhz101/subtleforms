@@ -286,6 +286,47 @@ final class Payments240Test extends TestCase {
 		$this->assertNull( $this->coupon( 'PAY14NONE', array( 'expires_at' => '' ) )['expires_at'] );
 	}
 
+	/** PAY2-01: Tools export and import keep the order, payment record and payment status. */
+	public function test_pay2_01_transfer_keeps_order_and_payment() {
+		$this->asAdmin();
+		$fields = array( array( 'id' => 'p', 'key' => 'ticket', 'type' => 'payment_product', 'label' => 'Ticket', 'price' => 20 ) );
+		$from   = $this->form( $fields );
+		$to     = $this->form( $fields );
+		$subs   = new \SubtleForms\Repositories\SubmissionsRepository();
+		$order  = array(
+			'currency' => 'EUR',
+			'items'    => array( array( 'key' => 'ticket', 'label' => 'Ticket', 'qty' => 1, 'unit' => 20, 'amount' => 20 ) ),
+			'subtotal' => 20,
+			'discount' => 2,
+			'coupon'   => 'SAVE10',
+			'tax_rate' => 0,
+			'tax'      => 0,
+			'total'    => 18,
+		);
+		$paid   = array( 'status' => 'paid', 'gateway' => 'stripe', 'transaction_id' => 'pi_123', 'amount' => 18, 'currency' => 'EUR', 'mode' => 'test' );
+		$subs->create( array( 'form_id' => $from, 'payload' => array( 'ticket' => '1' ), 'status' => 'completed', 'meta' => array( 'order' => $order, 'payment' => $paid, 'notes' => array() ) ) );
+		$subs->create( array( 'form_id' => $from, 'payload' => array( 'ticket' => '1' ), 'status' => 'payment_failed', 'meta' => array( 'order' => $order, 'payment' => array_merge( $paid, array( 'status' => 'failed' ) ) ) ) );
+
+		$service = new \SubtleForms\Tools\TransferService( new FormsRepository(), $subs );
+		$package = json_decode( wp_json_encode( $service->exportSubmissions( $from ) ), true );
+		$this->assertSame( 'pi_123', $package['submissions'][0]['payment']['transaction_id'] );
+
+		$result = $service->importSubmissions( $to, $package );
+		$this->assertSame( 2, $result['imported'], $result['error'] );
+
+		$rows = $subs->findByForm( $to, array( 'orderby' => 'id', 'order' => 'ASC' ) );
+		$this->assertCount( 2, $rows );
+		$this->assertSame( 'completed', $rows[0]['status'] );
+		$this->assertSame( 'payment_failed', $rows[1]['status'], 'a failed payment is not imported as unread' );
+		$this->assertSame( 'SAVE10', $rows[0]['meta']['order']['coupon'] );
+		$this->assertEquals( 18, $rows[0]['meta']['order']['total'] );
+		$this->assertSame( 'Ticket', $rows[0]['meta']['order']['items'][0]['label'] );
+		$this->assertSame( 'paid', $rows[0]['meta']['payment']['status'] );
+		$this->assertSame( 'stripe', $rows[0]['meta']['payment']['gateway'] );
+		$this->assertSame( 'pi_123', $rows[0]['meta']['payment']['transaction_id'] );
+		$this->assertArrayNotHasKey( 'notes', $rows[0]['meta'] );
+	}
+
 	private function assertWPError( $value ): void {
 		$this->assertInstanceOf( \WP_Error::class, $value );
 	}
