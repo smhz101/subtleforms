@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from '@wordpress/element';
+import { currencySymbol as symbolFor, currencyDecimals } from '../../shared/currencies';
 import { __, sprintf } from '@wordpress/i18n';
 import FieldRenderer from './FieldRenderer';
 import { getIn, setIn, flattenToPathMap } from '../utils/valuePaths';
@@ -446,15 +447,9 @@ export default function ConversationalFormRenderer({
   };
 
   const totalAmount = calculateTotal();
-  const currency = paymentSettings.currency || 'USD';
-  const currencySymbol =
-    currency === 'USD'
-      ? '$'
-      : currency === 'EUR'
-      ? '€'
-      : currency === 'GBP'
-      ? '£'
-      : currency;
+  // A form without its own currency follows the site currency (PAY2-02).
+  const currency = paymentSettings.currency || window.subtleformsFrontend?.currency || 'USD';
+  const currencySymbol = symbolFor(currency);
 
   // Render Review Step
   if (currentStep === 'review') {
@@ -568,7 +563,7 @@ export default function ConversationalFormRenderer({
               </span>
               <span className='subtleforms-payment-value'>
                 {currencySymbol}
-                {totalAmount.toFixed(2)}
+                {totalAmount.toFixed(currencyDecimals(currency))}
               </span>
             </div>
 

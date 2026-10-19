@@ -831,7 +831,7 @@ final class FieldValidator {
 		}
 
 		if ( ! is_numeric( $value ) ) {
-			return 'Payment amount must be a valid number.';
+			return __( 'Enter the amount as a number.', 'subtleforms' );
 		}
 
 		$amount = floatval( $value );
@@ -839,20 +839,22 @@ final class FieldValidator {
 
 		// Must be positive
 		if ( $amount < 0 ) {
-			return 'Payment amount must be positive.';
+			return __( 'The amount cannot be negative.', 'subtleforms' );
 		}
 
 		// Check minimum
 		$min = isset( $config['min'] ) ? floatval( $config['min'] ) : 0;
 		if ( $amount < $min ) {
-			return sprintf( 'Payment amount must be at least %s.', number_format( $min, 2 ) );
+			/* translators: %s: smallest amount allowed */
+			return sprintf( __( 'The amount must be at least %s.', 'subtleforms' ), $this->formatNumber( $min ) );
 		}
 
 		// Check maximum
 		if ( isset( $config['max'] ) ) {
 			$max = floatval( $config['max'] );
 			if ( $amount > $max ) {
-				return sprintf( 'Payment amount cannot exceed %s.', number_format( $max, 2 ) );
+				/* translators: %s: largest amount allowed */
+				return sprintf( __( 'The amount cannot be more than %s.', 'subtleforms' ), $this->formatNumber( $max ) );
 			}
 		}
 
@@ -872,19 +874,22 @@ final class FieldValidator {
 		}
 
 		if ( ! is_string( $value ) ) {
-			return 'Coupon code must be a string.';
+			return __( 'Enter the coupon code as text.', 'subtleforms' );
 		}
 
 		$config    = $field['config'] ?? array();
 		$maxLength = isset( $config['maxLength'] ) ? intval( $config['maxLength'] ) : 50;
+		$value     = trim( $value );
 
 		if ( strlen( $value ) > $maxLength ) {
-			return sprintf( 'Coupon code cannot exceed %d characters.', $maxLength );
+			/* translators: %d: maximum number of characters */
+			return sprintf( __( 'Coupon code cannot be longer than %d characters.', 'subtleforms' ), $maxLength );
 		}
 
-		// Basic sanitization check - alphanumeric and common special chars only
-		if ( ! preg_match( '/^[a-zA-Z0-9\-_]+$/', $value ) ) {
-			return 'Coupon code contains invalid characters.';
+		// Letters, numbers, hyphens and underscores. Spaces are allowed: the
+		// code is read without them, as the summary's coupon box does (PAY-13).
+		if ( ! preg_match( '/^[a-zA-Z0-9\-_ ]+$/', $value ) ) {
+			return __( 'Coupon codes use only letters, numbers, hyphens and underscores.', 'subtleforms' );
 		}
 
 		return null;

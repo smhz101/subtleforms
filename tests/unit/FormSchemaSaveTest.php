@@ -166,10 +166,10 @@ final class FormSchemaSaveTest extends TestCase {
 	}
 
 	public function offeredCurrencies(): array {
-		// Mirrors the options in resources/admin/components/builder/FormSettings.jsx.
+		// The form and site pickers both offer Payments\Currencies (2.4.0).
 		return array_map(
 			static fn( $c ) => array( $c ),
-			array( 'USD', 'EUR', 'GBP', 'CAD', 'AUD', 'JPY', 'INR' )
+			\SubtleForms\Payments\Currencies::codes()
 		);
 	}
 

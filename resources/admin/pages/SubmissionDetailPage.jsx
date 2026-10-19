@@ -1,4 +1,5 @@
 import { answerText } from '../utils/answerText';
+import { submissionStatus } from '../utils/submissionStatus';
 import { adminLabel } from '../../shared/fieldDisplay';
 import { structuralType } from '../../shared/formType';
 import { useState, useEffect, useRef } from '@wordpress/element';
@@ -711,17 +712,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
     senderEmail ||
     sprintf( __( 'Submission #%d', 'subtleforms' ), submission.id );
 
-  const PIPELINE = {
-    completed: { label: __( 'Completed', 'subtleforms' ), cls: 'sf-pill--success' },
-    failed: { label: __( 'Failed', 'subtleforms' ), cls: 'sf-pill--danger' },
-    processing: { label: __( 'Processing', 'subtleforms' ), cls: 'sf-pill--info' },
-    payment_pending: { label: __( 'Awaiting payment', 'subtleforms' ), cls: 'sf-pill--warning' },
-    payment_failed: { label: __( 'Payment failed', 'subtleforms' ), cls: 'sf-pill--danger' },
-    spam: { label: __( 'Spam', 'subtleforms' ), cls: 'sf-pill--danger' },
-    flagged: { label: __( 'Flagged', 'subtleforms' ), cls: 'sf-pill--warning' },
-    trash: { label: __( 'Trashed', 'subtleforms' ), cls: 'sf-pill--danger' },
-  };
-  const pipeline = PIPELINE[ submission.status ] || { label: __( 'Received', 'subtleforms' ), cls: '' };
+  const pipeline = submissionStatus( submission.status );
 
   const actions = (
     <div className='sf-sub-toolbar'>

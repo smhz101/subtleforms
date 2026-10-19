@@ -18,6 +18,7 @@ import {
   PaymentProduct,
   PaymentChoice,
   PaymentCard,
+  PaymentAmount,
   usePayment,
 } from './fields/Payments';
 import { getFieldType } from '../../shared/extend';
@@ -923,48 +924,20 @@ function renderInput(
         />
       );
 
-    case 'payment_amount': {
-      const min = config.min || 0;
-      const max = config.max;
-      const step = config.step || 0.01;
-      const currency = config.currency || window.subtleformsFrontend?.currency || 'USD';
-      const showSymbol = config.showCurrencySymbol !== false;
-      let currencySymbol = '';
-      try {
-        currencySymbol =
-          new Intl.NumberFormat(undefined, { style: 'currency', currency })
-            .formatToParts(0)
-            .find((p) => p.type === 'currency')?.value || '';
-      } catch (e) {
-        currencySymbol = currency;
-      }
-
+    case 'payment_amount':
       return (
-        <div className='subtleforms-payment-amount'>
-          {showSymbol && currencySymbol && (
-            <span className='subtleforms-currency-symbol'>
-              {currencySymbol}
-            </span>
-          )}
-          <input
-            id={inputId}
-            type='number'
-            className='subtleforms-input'
-            name={name}
-            value={value ?? ''}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={placeholder}
-            min={min}
-            max={max}
-            step={step}
-            required={required || undefined}
-            aria-required={required}
-            aria-invalid={!!error}
-            aria-describedby={describedBy}
-          />
-        </div>
+        <PaymentAmount
+          config={config}
+          value={value}
+          onChange={onChange}
+          inputId={inputId}
+          name={name}
+          placeholder={placeholder}
+          required={required}
+          error={error}
+          describedBy={describedBy}
+        />
       );
-    }
 
     case 'payment_summary':
       return <PaymentSummary config={config} />;
@@ -986,6 +959,9 @@ function renderInput(
           inputId={inputId}
           error={error}
           name={name}
+          required={required}
+          describedBy={describedBy}
+          placeholder={placeholder}
         />
       );
 

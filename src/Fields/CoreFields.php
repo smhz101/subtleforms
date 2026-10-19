@@ -1579,7 +1579,6 @@ final class CoreFields {
 					'min'                => 0,
 					'max'                => null,
 					'step'               => 0.01,
-					'currency'           => 'USD',
 					'showCurrencySymbol' => true,
 				),
 				inspectorControls: array(

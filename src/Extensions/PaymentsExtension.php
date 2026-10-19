@@ -121,7 +121,8 @@ class PaymentsExtension extends AbstractExtension {
 		$formId = absint( $request->get_param( 'form_id' ) );
 		$repo   = new \SubtleForms\Repositories\FormsRepository();
 		$form   = $formId ? $repo->find( $formId ) : null;
-		if ( ! $form ) {
+		// Like /submit: guests only reach published forms (PAY-16).
+		if ( ! $form || ! \SubtleForms\Api\PaymentsApi::formIsOpen( $form ) ) {
 			return new \WP_Error( 'subtleforms_not_found', __( 'Form not found', 'subtleforms' ), array( 'status' => 404 ) );
 		}
 		$active = $repo->loadSchemaVersion( $formId );
@@ -132,7 +133,7 @@ class PaymentsExtension extends AbstractExtension {
 		$payload = \SubtleForms\Api\PublicSubmitApi::applyComputedValues( $payload, $schema );
 
 		$quote = \SubtleForms\Payments\Pricing::quote( $schema, $payload );
-		$code  = \SubtleForms\Payments\CouponsRepository::normalizeCode( (string) ( $payload['_coupon'] ?? '' ) );
+		$code  = \SubtleForms\Payments\CouponsRepository::codeFrom( $schema, $payload );
 		if ( '' !== $code ) {
 			$coupon = \SubtleForms\Payments\CouponsRepository::validate( $code, $formId, (float) $quote['subtotal'], \SubtleForms\Payments\CouponsRepository::customerKey( $schema, $payload ) );
 			if ( is_wp_error( $coupon ) ) {
@@ -143,6 +144,12 @@ class PaymentsExtension extends AbstractExtension {
 
 		if ( $quote['total'] <= 0 ) {
 			return new \WP_Error( 'subtleforms_nothing_to_pay', __( 'There is nothing to pay for this order.', 'subtleforms' ), array( 'status' => 400 ) );
+		}
+
+		// Gateways refuse very small charges; say so before the card step (PAY-26).
+		$tooSmall = \SubtleForms\Payments\Currencies::belowMinimum( (float) $quote['total'], (string) $quote['currency'] );
+		if ( null !== $tooSmall ) {
+			return new \WP_Error( 'subtleforms_amount_too_small', $tooSmall, array( 'status' => 422 ) );
 		}
 
 		/**
@@ -161,6 +168,18 @@ class PaymentsExtension extends AbstractExtension {
 
 		if ( $result !== null ) {
 			return $result;
+		}
+
+		// Pro is active but no gateway took the intent: Stripe is not connected
+		// yet (PAY-24). Admins get the fix, visitors a plain message.
+		if ( defined( 'SUBTLEFORMS_PRO_VERSION' ) || subtleforms_is_pro_active() ) {
+			return new \WP_Error(
+				'subtleforms_payment_unavailable',
+				current_user_can( 'manage_options' )
+					? __( 'Connect Stripe under SubtleForms > Settings > Integrations > Payments to take card payments.', 'subtleforms' )
+					: __( 'Online payment is not available right now. Please contact the site owner.', 'subtleforms' ),
+				array( 'status' => 503 )
+			);
 		}
 
 		return new \WP_Error(
