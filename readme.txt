@@ -129,6 +129,14 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 
 == Changelog ==
 
+= 2.4.1 - 2026-10-20 =
+* Fix: A form has no padding of its own, so it lines up with the text around it.
+* Fix: No line or border above the submit button.
+* Change: "Inherit from theme" adds no styling of its own. The theme styles the fields, labels and buttons, and the buttons use the theme's button style. Custom controls such as the dropdown and date pickers, the signature pad and the rich text editor keep their look so they stay usable.
+* Change: A form on "Inherit from theme" whose colours, type or field and button style were changed keeps the SubtleForms styling, starting from the theme. The appearance panel says which applies.
+* Fix: On a theme form whose theme has no primary colour, the submit button is no longer white on white.
+* Change: Fields on the builder canvas use flat colours instead of gradients.
+
 = 2.4.0 - 2026-10-20 =
 * New: Each payment form can pick its own currency, and more currencies are available, including JPY, INR, PKR and AED.
 * Fix: Forms follow the site currency unless you pick one, the Custom amount field shows the right symbol, and yen totals are whole yen.

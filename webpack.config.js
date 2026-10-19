@@ -9,6 +9,7 @@
 const defaultConfig = require('@wordpress/scripts/config/webpack.config');
 const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer');
 const MiniCSSExtractPlugin = require('mini-css-extract-plugin');
+const inheritThemeScope = require('./bin/postcss/inherit-theme-scope');
 
 // Check if we should run the analyzer
 const shouldAnalyze = process.env.ANALYZE === 'true';
@@ -34,6 +35,29 @@ module.exports = {
 				return {
 					...rule,
 					use: rule.use.map((loader) => {
+						if (
+							typeof loader === 'object' &&
+							loader.loader &&
+							loader.loader.includes('postcss-loader') &&
+							loader.options?.postcssOptions
+						) {
+							// "Inherit from theme" forms get no visual CSS from the
+							// plugin; see bin/postcss/inherit-theme-scope.js.
+							return {
+								...loader,
+								options: {
+									...loader.options,
+									sourceMap: true,
+									postcssOptions: {
+										...loader.options.postcssOptions,
+										plugins: [
+											inheritThemeScope(),
+											...(loader.options.postcssOptions.plugins || []),
+										],
+									},
+								},
+							};
+						}
 						if (typeof loader === 'object' && loader.loader) {
 							// Enable source maps for css-loader and sass-loader
 							if (
