@@ -5,9 +5,32 @@ This file keeps the full release history. readme.txt lists only the latest versi
 == Changelog ==
 
 = 2.3.9 - 2026-10-19 =
+* Change: Nothing in SubtleForms is switched off without a license. CSV export, Reports (views, submissions and conversion), full conditional logic (any rule, groups, every operator, conditional emails, webhooks and confirmations), Picture choice, several files per upload field, payment fields (Product, Priced options, Custom amount, Fixed fee, Order summary, Coupon), coupons, and the Webhooks and Analytics settings all work in the free plugin.
+* Change: Signature and Calculation fields, the formula engine and the Card Payment field moved to SubtleForms Pro 2.4.0. A form that uses them keeps them: the live form leaves them out and the builder shows a note until Pro is active. Update SubtleForms Pro to 2.4.0 with this release.
+* Change: Upgrade messages say plainly what SubtleForms Pro adds. Reports show real numbers only, and the template screen shows one card for the 47 Pro templates.
+* Change: Global functions and transients use the subtleforms_ prefix.
+* Fix: Webhook retries and the default signing secret follow Settings, Integrations, Webhooks.
+* Fix: Visitors can send a form from a page served by a page cache. The spam time check uses a token signed by the server, so a wrong device clock no longer blocks a person, and a bot cannot skip it.
+* Fix: Answers the server refuses are not stored as failed entries, and the spam fields are never part of an entry.
+* Fix: Deleting a form deletes its entries, uploaded files, activity logs, schema versions and view totals. The retention purge removes logs too.
+* Fix: The personal data export and erase tools match the exact email address and show the form name.
+* Fix: Imported forms and entries are cleaned like a builder save. A form export never leaves forms out without saying so.
+* Fix: The API log skips unknown routes and visitor traffic, and is capped. The submit route has its own rate limit.
+* Fix: A numeric HubSpot Portal ID no longer blocks saving Settings.
+* Fix: Uploads use the WordPress upload and filesystem functions, and new sites store files in a folder with a random name.
+* Fix: Name and Address part settings are kept, drawn and checked the same way in the browser and on the server.
+* Fix: Notice, Section heading and Page break settings show in the builder, and a step shows its description.
+* Fix: Files uploaded inside a Repeater are kept with the entry and linked in the entry and email.
+* Fix: Dependent dropdown values come from their labels, a new choice never reuses an old value, the Columns layout does not pre-fill an answer, and every level of a required dependent field is required.
+* Fix: Priced fields hidden by conditional logic are not charged, and a hidden Fixed fee is not charged or listed.
+* Fix: For card payments, emails and integrations run only after the payment goes through. A failed payment emails the site owner instead.
+* Fix: The builder notes when a priced form has no Card Payment field and will save entries as Payment pending.
+* Fix: Every template emails the site owner instead of posting to an example address. The Payment form has a product and an order summary, without card number fields, and the Donation form has a custom amount.
+* Fix: The builder header, preview, conversational choices, coupon field and presets fit and stay readable. Failed loads and saves show Retry. The builder shows a placeholder while loading. Deleting a field can be undone. Quick Start creates the form. Last 7 days matches on the dashboard and Reports.
+* Fix: Charts have a text summary, Rows per page has a name, muted text is readable, and a hidden field toolbar is out of the tab order.
 * Fix: The AI assistant settings tab is removed. It reported a successful connection for any key and blocked saving other settings.
 * Change: SubtleForms requires WordPress 6.6.
-* Fix: Deleting the plugin removes its tables, options, transients and scheduled tasks on every site in a network.
+* Fix: Deleting the plugin removes its tables, options, transients, uploads and scheduled tasks on every site in a network.
 * Fix: Text in the admin and on the public form can be translated with a language pack.
 
 = 2.3.8 - 2026-10-19 =

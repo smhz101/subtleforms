@@ -4,7 +4,7 @@ Tags: form builder, contact form, forms, multi-step form, file upload
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.3.8
+Stable tag: 2.3.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -26,14 +26,16 @@ SubtleForms is a form builder for WordPress. You build a form on a canvas that l
 = Fields =
 
 * Text, Paragraph, Email, Number, Phone, Website, Password, Name and Address
-* Dropdown, Radio buttons, Checkboxes, Single checkbox, Toggle, Country, Consent and Dependent dropdowns (as menus, buttons or columns, typed in or loaded from CSV)
+* Dropdown, Radio buttons, Checkboxes, Picture choice, Single checkbox, Toggle, Country, Consent and Dependent dropdowns (as menus, buttons or columns, typed in or loaded from CSV)
 * Date, Time, Date and time, Rating, Opinion scale, NPS, Slider, Matrix, Colour picker and Rich text
-* File and image uploads with allowed types and size limits, stored in a protected folder and downloaded by admins only
+* File and image uploads, one or several files per field, with allowed types and size limits, stored in a private folder and downloaded by admins only
+* Payment fields: Product, Priced options, Custom amount, Fixed fee, Order summary and Coupon, with coupons managed under Payments. Entries are saved as "Payment pending" so you can collect payment yourself
 * Hidden fields with merge values such as {user_email} and {get:param}, HTML blocks, section breaks, Repeater, Group and Columns
 
 = Logic and after submit =
 
-* Show or hide fields and steps when rules match. Hidden fields are not validated or saved, in the browser and on the server
+* Show or hide fields and steps when rules match: all or any rule, several groups of rules, and operators such as starts with, is one of, between and date rules. Hidden fields are not validated or saved, in the browser and on the server
+* Send an email or webhook, or pick a confirmation, only when its rules match
 * Email notifications and webhooks after each entry, with merge tags such as {all_fields}, {field:email} and {entry_id}, plain text or HTML
 * A confirmation message with answers merged in, or a redirect
 * Availability rules: logged-in visitors only, open and close dates, and an entry limit
@@ -42,8 +44,9 @@ SubtleForms is a form builder for WordPress. You build a form on a canvas that l
 
 * An inbox with tabs, search, filters and a reading pane
 * Read and unread, star, flag, notes, resend notifications and a Trash, one entry at a time or in bulk
-* JSON export and import of forms and entries, and import of Gravity Forms and Fluent Forms export files as draft forms
-* Activity, webhook and API logs, and submission totals for the last 7 days
+* CSV export of entries, JSON export and import of forms and entries, and import of Gravity Forms and Fluent Forms export files as draft forms
+* Reports: views, submissions and conversion for each form, counted on your site without cookies (view counting can be turned off)
+* Activity, webhook and API logs
 
 = Spam protection and privacy =
 
@@ -53,7 +56,7 @@ SubtleForms is a form builder for WordPress. You build a form on a canvas that l
 
 = SubtleForms Pro =
 
-SubtleForms Pro is a separate, paid add-on available at [subtleforms.com](https://subtleforms.com/pricing/). It adds Stripe card checkout, WooCommerce checkout, Mailchimp, Brevo, Kit, HubSpot and Zapier integrations, entry PDFs, more templates, white label and WPML or Polylang support. This plugin does not need Pro, and nothing in this plugin is disabled without it.
+SubtleForms Pro is a separate, paid add-on available at [subtleforms.com](https://subtleforms.com/pricing/). It adds Signature and Calculation fields, Stripe card checkout, WooCommerce checkout, Mailchimp, Brevo, Kit, HubSpot and Zapier integrations, entry PDFs, more templates, white label and WPML or Polylang support. This plugin does not need Pro, and nothing in this plugin is disabled without it.
 
 == Installation ==
 
@@ -78,6 +81,10 @@ Every form has a honeypot, a minimum time check and rate limiting. You can also 
 = Can I export entries? =
 
 Yes. SubtleForms, Tools exports forms and entries as JSON, and the Submissions screen exports entries as CSV.
+
+= Are uploaded files private on nginx? =
+
+Files are saved under a folder with a random name, without file extensions, and are only served to admins through wp-admin. Apache and IIS also get rules that deny direct access. On nginx, you can add `location ~* /wp-content/uploads/subtleforms-uploads { deny all; }` to your server block.
 
 = What data does SubtleForms store? =
 
@@ -123,32 +130,15 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 == Changelog ==
 
 = 2.3.9 - 2026-10-19 =
-* Fix: Submitting a form from a template emails the site owner instead of posting the entry to an example address.
-* Fix: The Payment Form asks for a product and shows an order summary. It no longer collects a card number, expiry date or CVV.
-* Change: The Donation Form includes a custom amount.
-* Fix: The AI assistant settings tab is removed. It reported a successful connection for any key and blocked saving other settings.
-* Change: SubtleForms requires WordPress 6.6.
-* Fix: Deleting the plugin removes its tables, options, transients and scheduled tasks on every site in a network.
-* Fix: Text in the admin and on the public form can be translated with a language pack.
-* Fix: The builder header keeps the title, status, and Preview tabs from covering each other.
-* Fix: Preview scales the form to the space it has, so a desktop width is not cut off.
-* Fix: Choice questions in a conversational form are a vertical list.
-* Fix: The coupon field stays wide enough to type in, and Apply moves under it on a narrow screen.
-* Fix: When forms, entries, or the builder fail to load, you see an error with Retry instead of an empty list.
-* Fix: The builder shows a placeholder while a form loads, instead of a blank screen.
-* Fix: Dark, Dark surface, and Bold presets keep readable text and buttons on their own background.
-* Fix: The focus ring on form status tabs stays visible.
-* Fix: Quick Start creates the form and closes the help menu.
-* Fix: Saving a published form shows that the changes are not live yet.
-* Fix: A failed save says your changes are kept in this tab, with Retry, and that note clears when the save works.
-* Fix: Update on a published form no longer asks you to confirm. The first Publish still does.
-* Fix: Last 7 days is the same count on the dashboard and on Reports.
-* Fix: Deleting a field says Field deleted, with Undo.
-* Fix: Form types use the names Standard, Multi-step, and Conversational.
-* Fix: Form name help says the same thing when you create a form and in its settings.
-* Fix: Charts have a text summary, and Rows per page has a name.
-* Fix: Muted text is dark enough to read, including the Press Enter hint.
-* Fix: A hidden field toolbar is not in the tab order, and canvas fields have names.
+* Change: Everything in SubtleForms works without a license: CSV export, reports, full conditional logic, Picture choice, several files per upload field, payment fields and coupons, and the Webhooks and Analytics settings.
+* Change: Signature and Calculation fields and card payments are part of SubtleForms Pro 2.4.0. Forms that use them keep them; the live form leaves them out until Pro is active.
+* Fix: Visitors can send a form from a cached page, and the spam time check uses the server clock.
+* Fix: Answers the server refuses are not stored, and deleting a form deletes its entries, files and logs.
+* Fix: The personal data tools match the exact email address, and imports are cleaned like a builder save.
+* Fix: Name and Address parts, Notice, Section heading and Page break settings, Repeater uploads, dependent dropdowns and hidden priced fields work as set.
+* Fix: Template emails go to the site owner, the builder header, preview, presets and load errors are easier to use, and Quick Start creates the form.
+* Fix: Emails and integrations wait for a card payment to go through.
+* Change: The AI assistant tab is removed, WordPress 6.6 is required, and deleting the plugin removes all its data on every site.
 
 = 2.3.8 - 2026-10-19 =
 * New: Dependent dropdowns open in a column editor. Each column is one dropdown, and choosing an item shows only what belongs to it.
