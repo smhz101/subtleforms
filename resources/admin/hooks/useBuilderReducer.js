@@ -202,6 +202,9 @@ export const initialBuilderState = {
   // config (i.e. the admin has unpublished edits). Drives the "Published ·
   // unpublished changes" header label so the builder agrees with listings.
   hasUnpublishedChanges: false,
+  // Entries the form has (2.4.1): the field ID editor says that entries
+  // sent before a rename keep their answers under the old ID.
+  entryCount: 0,
 
   // Schema state
   draftSchema: null,
@@ -296,6 +299,7 @@ function builderReducer(state, action) {
         formTitle: form.title || '',
         formStatus: form.status || 'draft',
         hasUnpublishedChanges: !!(form.has_unpublished_changes),
+        entryCount: Number(form.submission_count) || 0,
         draftSchema: schema || [],
         isDirty: false,
         schemaHistoryPast: [],

@@ -26,6 +26,7 @@ export default function BuilderCanvasArea({
   fieldErrors = {},
   onSchemaChange,
   currentFormId,
+  entryCount = 0,
   saveError,
   onRetrySave,
   hasValidationErrors,
@@ -106,6 +107,7 @@ export default function BuilderCanvasArea({
                 validationErrors={validationErrors}
                 fieldErrors={fieldErrors}
                 onChange={onSchemaChange}
+                entryCount={entryCount}
               />
             )}
             {view === 'settings' && (

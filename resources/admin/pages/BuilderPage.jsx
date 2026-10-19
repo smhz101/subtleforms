@@ -7,6 +7,7 @@ import {
 } from '@wordpress/element';
 import {
   Notice,
+  Spinner,
 } from '@wordpress/components';
 import { Button } from '../components/navigation';
 import { useNavigate, useParams } from 'react-router-dom';
@@ -78,6 +79,7 @@ function FormBuilderInner({
     autoSaving,
     formStatus,
     hasUnpublishedChanges,
+    entryCount,
     error,
     saveError,
     autoSaveError,
@@ -793,6 +795,7 @@ function FormBuilderInner({
           fieldDefinitions={fieldDefinitions}
           onSchemaChange={handleSchemaChange}
           currentFormId={currentFormId}
+          entryCount={entryCount}
           showWelcome={showWelcomeScreen}
           isDirty={isDirty}
         />

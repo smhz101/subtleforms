@@ -170,7 +170,7 @@ final class FormMigration {
 				continue;
 			}
 			$id             = (string) ( $field['id'] ?? '' );
-			$idKeys[ $id ]  = self::key( self::gravityLabel( $field ), $id, $used );
+			$idKeys[ $id ]  = self::incomingKey( (string) ( $field['inputName'] ?? '' ), self::gravityLabel( $field ), $id, $used );
 		}
 
 		$fields = array();
@@ -473,7 +473,7 @@ final class FormMigration {
 		$settings = is_array( $field['settings'] ?? null ) ? $field['settings'] : array();
 		$label    = self::fluentLabel( $field, $element );
 		$name     = (string) ( $field['attributes']['name'] ?? $settings['name'] ?? '' );
-		$key      = self::key( '' !== $label ? $label : $name, $name, $used );
+		$key      = self::incomingKey( $name, '' !== $label ? $label : $name, $name, $used );
 		$required = self::fluentRequired( $field );
 
 		if ( 'container' === $element ) {
@@ -956,11 +956,36 @@ final class FormMigration {
 	}
 
 	/**
-	 * A field key that the schema validator accepts.
+	 * The field ID for an imported field: the name the other plugin used when
+	 * it is valid and unused, otherwise one made from the label.
+	 *
+	 * @param string $incoming Field name in the other plugin.
+	 * @param string $label    Label for the fallback.
+	 * @param string $id       Original field ID, for the fallback.
+	 * @param array  $used     Keys already used, by reference.
+	 * @return string
+	 */
+	private static function incomingKey( string $incoming, string $label, string $id, array &$used ): string {
+		// The field name the other plugin used (Fluent Forms' name, a Gravity
+		// Forms parameter name) is kept when it is a valid, unused field ID,
+		// so imported entries and integrations keep matching (2.4.1).
+		$incoming = trim( $incoming );
+		if ( '' !== $incoming
+			&& preg_match( '/^[a-zA-Z][a-zA-Z0-9_-]{0,63}$/', $incoming )
+			&& ! in_array( $incoming, \SubtleForms\Support\SchemaValidator::RESERVED_KEYS, true )
+			&& ! isset( $used[ $incoming ] ) ) {
+			$used[ $incoming ] = true;
+			return $incoming;
+		}
+		return self::key( $label, $id, $used );
+	}
+
+	/**
+	 * A field key that the schema validator accepts, made from a label.
 	 *
 	 * @param string $label Preferred label or name.
-	 * @param string $id Fallback id.
-	 * @param array  $used Keys already used.
+	 * @param string $id    Fallback id.
+	 * @param array  $used  Keys already used.
 	 * @return string
 	 */
 	private static function key( string $label, string $id, array &$used ): string {
