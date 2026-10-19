@@ -3,7 +3,7 @@
  * one entry (Enter on a focused Submit, double clicks).
  */
 const { test, expect } = require('@playwright/test');
-const { adminApi, publishForm, cleanup, entries, loginPage, BASE, spamToken } = require('./helpers');
+const { adminApi, publishForm, cleanup, entries, loginPage, BASE, spamToken, hasFieldTypes } = require('./helpers');
 
 const PNG = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
 let client;
@@ -17,6 +17,8 @@ test.afterAll(async () => {
 });
 
 test('a signature answer shows as an image in the entry, not as its code', async ({ page, playwright }) => {
+  // Signature is a SubtleForms Pro field since 2.3.9; without Pro no signature can be submitted.
+  test.skip(!(await hasFieldTypes(client, ['signature'])), 'Signature needs SubtleForms Pro');
   const form = await publishForm(client, {
     title: 'Signature entry',
     fields: [

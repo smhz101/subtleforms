@@ -108,6 +108,9 @@ test('visitors add and remove groups within min and max, with focus and names (l
   await expect(input(page, 0, 'ticker')).not.toHaveAttribute('aria-invalid', 'true');
 
   await input(page, 1, 'note').fill('LSE');
+  // The spam time trap quietly drops a form sent less than 3 seconds after it
+  // loaded (FF-11, FF-12), and this test fills it faster than that.
+  await page.waitForTimeout(3200);
   await page.click('.subtleforms-button-submit');
   await expect(page.locator('.subtleforms-success-message')).toBeVisible({ timeout: 30000 });
 

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-19T12:24:50+00:00\n"
+"POT-Creation-Date: 2026-10-19T13:48:10+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -353,7 +353,7 @@ msgstr ""
 #: src/Api/ApiGuards.php:181
 #: src/Api/ApiGuards.php:199
 #: src/Api/ApiGuards.php:212
-#: src/Api/DashboardApi.php:467
+#: src/Api/DashboardApi.php:458
 #: src/Api/OnboardingApi.php:250
 #: src/Api/OnboardingApi.php:271
 #: src/Api/SettingsApi.php:261
@@ -362,7 +362,7 @@ msgid "You are not allowed to perform this action."
 msgstr ""
 
 #: src/Api/ApiGuards.php:50
-#: src/Api/DashboardApi.php:447
+#: src/Api/DashboardApi.php:438
 #: src/Api/PaymentsApi.php:132
 #: src/Api/SettingsApi.php:156
 #: src/Extensions/PaymentsExtension.php:98
@@ -377,7 +377,7 @@ msgstr ""
 
 #: src/Api/ApiGuards.php:140
 #: src/Api/ApiGuards.php:149
-#: src/Api/DashboardApi.php:476
+#: src/Api/DashboardApi.php:467
 #: src/Api/OnboardingApi.php:259
 #: src/Api/OnboardingApi.php:280
 #: src/Api/SettingsApi.php:341
@@ -416,7 +416,7 @@ msgstr ""
 msgid "Internal server error"
 msgstr ""
 
-#: src/Api/DashboardApi.php:253
+#: src/Api/DashboardApi.php:244
 #: src/Api/SubmissionsApi.php:476
 #: src/Api/SubmissionsApi.php:478
 #: src/Api/SubmissionsApi.php:519
@@ -425,7 +425,7 @@ msgid "Unknown Form"
 msgstr ""
 
 #. translators: %d: number of seconds
-#: src/Api/DashboardApi.php:397
+#: src/Api/DashboardApi.php:388
 #, php-format
 msgid "%d second ago"
 msgid_plural "%d seconds ago"
@@ -433,7 +433,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of minutes
-#: src/Api/DashboardApi.php:401
+#: src/Api/DashboardApi.php:392
 #, php-format
 msgid "%d minute ago"
 msgid_plural "%d minutes ago"
@@ -441,7 +441,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of hours
-#: src/Api/DashboardApi.php:405
+#: src/Api/DashboardApi.php:396
 #, php-format
 msgid "%d hour ago"
 msgid_plural "%d hours ago"
@@ -449,7 +449,7 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of days
-#: src/Api/DashboardApi.php:409
+#: src/Api/DashboardApi.php:400
 #, php-format
 msgid "%d day ago"
 msgid_plural "%d days ago"
@@ -467,8 +467,8 @@ msgstr ""
 #: src/Api/FormsApi.php:594
 #: src/Api/FormsApi.php:853
 #: src/Api/FormsApi.php:956
-#: src/Api/FormsApi.php:999
-#: src/Api/FormsApi.php:1044
+#: src/Api/FormsApi.php:1001
+#: src/Api/FormsApi.php:1046
 #: src/Api/PaymentsApi.php:222
 #: src/Api/PublicSubmitApi.php:186
 #: src/Extensions/PaymentsExtension.php:126
@@ -530,38 +530,38 @@ msgstr ""
 msgid "Cannot publish form:"
 msgstr ""
 
-#: src/Api/FormsApi.php:1003
+#: src/Api/FormsApi.php:1005
 msgid "Form is not in the Trash"
 msgstr ""
 
-#: src/Api/FormsApi.php:1008
+#: src/Api/FormsApi.php:1010
 msgid "The form could not be restored. Please try again."
 msgstr ""
 
-#: src/Api/FormsApi.php:1047
+#: src/Api/FormsApi.php:1049
 msgid "Restore this form from the Trash before copying it."
 msgstr ""
 
 #. translators: %s: error message
-#: src/Api/FormsApi.php:1060
+#: src/Api/FormsApi.php:1062
 #, php-format
 msgid "The form could not be copied because its fields could not be read: %s"
 msgstr ""
 
 #. translators: %s: title of the form being copied
 #. translators: %s: form title
-#: src/Api/FormsApi.php:1071
+#: src/Api/FormsApi.php:1073
 #: resources/admin/components/FormsList.jsx:479
 #, php-format,js-format
 msgid "%s (copy)"
 msgstr ""
 
-#: src/Api/FormsApi.php:1090
+#: src/Api/FormsApi.php:1092
 msgid "The copy could not be created in the database. Please try again."
 msgstr ""
 
 #. translators: %s: error message
-#: src/Api/FormsApi.php:1101
+#: src/Api/FormsApi.php:1103
 #, php-format
 msgid "The form could not be copied: %s"
 msgstr ""
@@ -1089,7 +1089,7 @@ msgid "This form has reached its maximum number of entries."
 msgstr ""
 
 #: src/Engine/SpamProtection.php:188
-#: resources/frontend/components/FormRenderer.jsx:1151
+#: resources/frontend/components/FormRenderer.jsx:1150
 msgid "Leave this field empty"
 msgstr ""
 
@@ -3582,8 +3582,8 @@ msgid "Show prices next to options"
 msgstr ""
 
 #: src/Frontend/FrontendAssets.php:84
-#: resources/frontend/components/FormRenderer.jsx:907
-#: resources/frontend/components/FormRenderer.jsx:1019
+#: resources/frontend/components/FormRenderer.jsx:906
+#: resources/frontend/components/FormRenderer.jsx:1018
 msgid "Thank you! Your submission has been received."
 msgstr ""
 
@@ -3637,7 +3637,7 @@ msgid "The coupon could not be saved."
 msgstr ""
 
 #: src/Payments/CouponsRepository.php:280
-#: resources/frontend/components/FormRenderer.jsx:539
+#: resources/frontend/components/FormRenderer.jsx:540
 msgid "This coupon code is not valid."
 msgstr ""
 
@@ -3800,7 +3800,7 @@ msgstr ""
 
 #: src/Support/Captcha/CaptchaManager.php:313
 #: resources/frontend/components/ConversationalFormRenderer.jsx:269
-#: resources/frontend/components/FormRenderer.jsx:683
+#: resources/frontend/components/FormRenderer.jsx:684
 msgid "CAPTCHA verification failed. Please try again."
 msgstr ""
 
@@ -4575,7 +4575,7 @@ msgid "Choose a form to import into."
 msgstr ""
 
 #. translators: %d: number of entries skipped
-#: src/Tools/TransferService.php:507
+#: src/Tools/TransferService.php:503
 #, php-format
 msgid "%d entries were already in this form and were skipped."
 msgstr ""
@@ -4858,7 +4858,7 @@ msgstr ""
 #: resources/admin/pages/ToolsPage.jsx:305
 #: resources/admin/pages/ToolsPage.jsx:494
 #: resources/admin/pages/ToolsPage.jsx:514
-#: resources/frontend/components/FormRenderer.jsx:1138
+#: resources/frontend/components/FormRenderer.jsx:1137
 msgid "Form"
 msgstr ""
 
@@ -5822,7 +5822,7 @@ msgstr ""
 
 #: resources/admin/components/builder/ConversationalCanvas.jsx:239
 #: resources/admin/pages/ToolsPage.jsx:616
-#: resources/frontend/components/FormRenderer.jsx:1214
+#: resources/frontend/components/FormRenderer.jsx:1213
 msgid "Previous"
 msgstr ""
 
@@ -5842,7 +5842,7 @@ msgstr ""
 #: resources/admin/components/OnboardingWizard.jsx:606
 #: resources/admin/pages/ToolsPage.jsx:623
 #: resources/frontend/components/ConversationalFormRenderer.jsx:679
-#: resources/frontend/components/FormRenderer.jsx:1224
+#: resources/frontend/components/FormRenderer.jsx:1223
 msgid "Next"
 msgstr ""
 
@@ -6242,7 +6242,7 @@ msgstr ""
 
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:118
 #: resources/frontend/components/ConversationalFormRenderer.jsx:524
-#: resources/frontend/components/FormRenderer.jsx:1244
+#: resources/frontend/components/FormRenderer.jsx:1243
 msgid "Submit"
 msgstr ""
 
@@ -11682,7 +11682,7 @@ msgstr ""
 #. translators: %s: plugin name
 #: resources/admin/pages/ToolsPage.jsx:298
 #, js-format
-msgid "JSON import and export move entries between %s sites. Passwords are left out. Notes, IP address, browser, uploaded files, logs and unpublished draft changes are not in the file. Status, read and starred state, and order and payment details are kept. Importing the same file again skips entries that are already there, and a file from another form is refused. A form with more than 2,000 submissions is not exported in part. Export CSV makes a spreadsheet file."
+msgid "JSON import and export move entries between %s sites. Passwords are left out. Notes, IP address, browser, uploaded files, logs and unpublished draft changes are not in the file. Status, read and starred state, and order and payment details are kept. Importing the same file again skips entries that are already there. A file from another form still imports and says which form it came from. A form with more than 2,000 submissions is not exported in part. Export CSV makes a spreadsheet file."
 msgstr ""
 
 #: resources/admin/pages/ToolsPage.jsx:308
@@ -12469,17 +12469,17 @@ msgid "Select a published form to embed"
 msgstr ""
 
 #: resources/frontend/components/ConversationalFormRenderer.jsx:235
-#: resources/frontend/components/FormRenderer.jsx:648
+#: resources/frontend/components/FormRenderer.jsx:649
 msgid "Save the form first, then submit the preview."
 msgstr ""
 
 #: resources/frontend/components/ConversationalFormRenderer.jsx:360
-#: resources/frontend/components/FormRenderer.jsx:930
+#: resources/frontend/components/FormRenderer.jsx:929
 msgid "Submission failed."
 msgstr ""
 
 #: resources/frontend/components/ConversationalFormRenderer.jsx:364
-#: resources/frontend/components/FormRenderer.jsx:935
+#: resources/frontend/components/FormRenderer.jsx:934
 msgid "Network error. Please try again."
 msgstr ""
 
@@ -12757,7 +12757,7 @@ msgid "Secure card fields from your payment gateway appear here on the live form
 msgstr ""
 
 #: resources/frontend/components/fields/Payments.jsx:471
-#: resources/frontend/components/FormRenderer.jsx:798
+#: resources/frontend/components/FormRenderer.jsx:799
 msgid "Online payment is not available right now."
 msgstr ""
 
@@ -12820,44 +12820,44 @@ msgstr ""
 msgid "This form couldn’t load. Please refresh the page and try again."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:108
-#: resources/frontend/components/FormRenderer.jsx:113
+#: resources/frontend/components/FormRenderer.jsx:109
+#: resources/frontend/components/FormRenderer.jsx:114
 msgid "Failed to load form."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:543
+#: resources/frontend/components/FormRenderer.jsx:544
 msgid "The code could not be checked. Please try again."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:817
+#: resources/frontend/components/FormRenderer.jsx:818
 msgid "Your payment could not be completed."
 msgstr ""
 
 #. translators: %s: URL
-#: resources/frontend/components/FormRenderer.jsx:903
+#: resources/frontend/components/FormRenderer.jsx:902
 #, js-format
 msgid "Visitors will be sent to %s."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:994
+#: resources/frontend/components/FormRenderer.jsx:993
 msgid "Loading form..."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:1047
+#: resources/frontend/components/FormRenderer.jsx:1046
 msgid "Submit another response"
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:1234
+#: resources/frontend/components/FormRenderer.jsx:1233
 msgid "Submitting…"
 msgstr ""
 
 #. translators: %s: order total
-#: resources/frontend/components/FormRenderer.jsx:1239
+#: resources/frontend/components/FormRenderer.jsx:1238
 #, js-format
 msgid "Pay %s"
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:1243
+#: resources/frontend/components/FormRenderer.jsx:1242
 msgid "Continue to checkout"
 msgstr ""
 
