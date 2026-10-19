@@ -8,6 +8,7 @@
 import { createContext, useContext, useEffect, useRef, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { formatMoney } from '../../../shared/pricing';
+import { currencySymbol, currencyDecimals } from '../../../shared/currencies';
 
 export const PaymentContext = createContext(null);
 
@@ -70,6 +71,42 @@ export function PaymentProduct({ config, value, onChange, inputId, error }) {
           </button>
         </div>
       )}
+    </div>
+  );
+}
+
+/* ── Custom amount ─────────────────────────────────────────────────────── */
+
+/**
+ * An amount the visitor types. The symbol is the form's currency, the one the
+ * summary shows and the order is charged in (PAY-09). A `currency` stored on
+ * the field by older builds is ignored: no control ever set it.
+ */
+export function PaymentAmount({ config, value, onChange, inputId, name, placeholder, required, error, describedBy }) {
+  const pay = usePayment();
+  const currency = pay?.currency || window.subtleformsFrontend?.currency || 'USD';
+  const showSymbol = config.showCurrencySymbol !== false;
+  const symbol = showSymbol ? currencySymbol(currency) : '';
+
+  return (
+    <div className='subtleforms-payment-amount'>
+      {symbol && <span className='subtleforms-currency-symbol'>{symbol}</span>}
+      <input
+        id={inputId}
+        type='number'
+        className='subtleforms-input'
+        name={name}
+        value={value ?? ''}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        min={config.min || 0}
+        max={config.max}
+        step={currencyDecimals(currency) === 0 ? 1 : config.step || 0.01}
+        required={required || undefined}
+        aria-required={required}
+        aria-invalid={!!error}
+        aria-describedby={describedBy}
+      />
     </div>
   );
 }

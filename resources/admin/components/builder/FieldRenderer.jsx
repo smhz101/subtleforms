@@ -16,6 +16,7 @@ import ChoiceSelect from '../../../frontend/components/fields/ChoiceSelect';
 import CountrySelect from '../../../frontend/components/fields/CountrySelect';
 import DateTimeField from '../../../frontend/components/fields/DateTimeField';
 import { ConfigContext } from './context/ConfigContext';
+import { currencySymbol } from '../../../shared/currencies';
 import './FieldRenderer.scss';
 
 // Types that do not accept user input, required indicator suppressed
@@ -136,6 +137,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
   // canvas shows them as the live form does (2.3.2).
   const builderConfig = useContext(ConfigContext);
   const display = fieldDisplay(field, builderConfig?.fieldDefaults || {});
+  const formCurrency = builderConfig?.currency || '';
   // Add-on field types no active plugin provides right now.
   const addonMissing = (window.subtleformsAdmin?.missingFieldTypes || []).includes(type);
 
@@ -503,15 +505,10 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
       {/* Payment fields */}
       {type === 'payment_amount' && (
         <div className='sf-field-renderer__rating-wrapper'>
-          {field.showCurrencySymbol !== false && field.currency && (
+          {field.showCurrencySymbol !== false && (
             <span className='sf-field-renderer__rating-text'>
-              {field.currency === 'USD'
-                ? '$'
-                : field.currency === 'EUR'
-                ? '€'
-                : field.currency === 'GBP'
-                ? '£'
-                : field.currency}
+              {/* The form charges in the site or form currency, never a per-field one (PAY-09). */}
+              {currencySymbol(formCurrency || window.subtleformsAdmin?.currency || 'USD')}
             </span>
           )}
           <input
