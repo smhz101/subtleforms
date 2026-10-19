@@ -222,8 +222,15 @@ final class Pricing {
 					break;
 
 				case 'payment_choice':
-					$selected = is_array( $value ) ? $value : ( null === $value || '' === $value ? array() : explode( ',', (string) $value ) );
-					$selected = array_map( 'strval', array_map( 'trim', $selected ) );
+					if ( 'checkbox' === (string) ( $f['displayAs'] ?? 'radio' ) ) {
+						$selected = is_array( $value ) ? $value : ( null === $value || '' === $value ? array() : explode( ',', (string) $value ) );
+					} else {
+						// Radio, cards and dropdown pick one option: only the
+						// first answer is ever priced (PAY-08).
+						$first    = is_array( $value ) ? reset( $value ) : $value;
+						$selected = null === $first || false === $first || '' === $first || ! is_scalar( $first ) ? array() : array( $first );
+					}
+					$selected = array_map( 'strval', array_map( 'trim', array_filter( $selected, 'is_scalar' ) ) );
 					foreach ( (array) ( $f['options'] ?? array() ) as $opt ) {
 						if ( ! is_array( $opt ) || ! in_array( (string) ( $opt['value'] ?? '' ), $selected, true ) ) {
 							continue;
