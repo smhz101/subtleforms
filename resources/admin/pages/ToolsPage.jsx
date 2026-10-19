@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { Button, Notice, SearchControl, SelectControl, Spinner } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
@@ -7,6 +7,7 @@ import AdminShell from '../components/AdminShell';
 import Icon from '../ui/Icon';
 import { apiGet, apiPost } from '../utils/api';
 import { getBranding } from '../utils/branding';
+import { formOptionLabel } from '../utils/toolLabels';
 import './ToolsPage.scss';
 
 const SECTIONS = [
@@ -38,13 +39,6 @@ function messageFrom( result ) {
     || __( 'That did not work. Check the file and try again.', 'subtleforms' );
 }
 
-function formTitle( form ) {
-  return form.title || sprintf(
-    /* translators: %d: form id */
-    __( 'Form #%d', 'subtleforms' ),
-    form.id
-  );
-}
 
 export default function ToolsPage() {
   const [ section, setSection ] = useState( 'transfer' );
@@ -82,7 +76,7 @@ export default function ToolsPage() {
                     type='button'
                     className={ clsx( 'sf-tools__nav-item', { 'is-active': section === item.id } ) }
                     aria-current={ section === item.id ? 'page' : undefined }
-                    onClick={ () => setSection( item.id ) }>
+                    onClick={ () => { setNotice( null ); setSection( item.id ); } }>
                     <ItemIcon size={ 16 } aria-hidden='true' />
                     { item.label }
                   </button>
@@ -121,7 +115,7 @@ function Transfer( { forms, busy, setBusy, tell } ) {
     if ( ! needle ) {
       return forms;
     }
-    return forms.filter( ( form ) => formTitle( form ).toLowerCase().includes( needle ) );
+    return forms.filter( ( form ) => formOptionLabel( form ).toLowerCase().includes( needle ) );
   }, [ forms, query ] );
 
   const toggle = ( id ) => {
@@ -281,7 +275,7 @@ function Transfer( { forms, busy, setBusy, tell } ) {
                       checked={ selected.includes( Number( form.id ) ) }
                       onChange={ () => toggle( Number( form.id ) ) }
                     />
-                    <span>{ formTitle( form ) }</span>
+                    <span>{ formOptionLabel( form ) }</span>
                   </label>
                 </li>
               ) ) }
@@ -301,7 +295,7 @@ function Transfer( { forms, busy, setBusy, tell } ) {
             <h2 className='sf-panel__title'>{ __( 'Submissions', 'subtleforms' ) }</h2>
             <p className='sf-panel__subtitle'>{ sprintf(
               /* translators: %s: plugin name */
-              __( 'JSON import and export move entries between %s sites. Passwords are left out. Status, read and starred state, and order and payment details are kept. A form with more than 2,000 submissions is not exported in part. Export CSV makes a spreadsheet file.', 'subtleforms' ),
+              __( 'JSON import and export move entries between %s sites. Passwords are left out. Notes, IP address, browser, uploaded files, logs and unpublished draft changes are not in the file. Status, read and starred state, and order and payment details are kept. Importing the same file again skips entries that are already there, and a file from another form is refused. A form with more than 2,000 submissions is not exported in part. Export CSV makes a spreadsheet file.', 'subtleforms' ),
               getBranding().name
             ) }</p>
           </div>
@@ -312,7 +306,7 @@ function Transfer( { forms, busy, setBusy, tell } ) {
             value={ target }
             options={ [
               { label: __( 'Choose a form', 'subtleforms' ), value: '' },
-              ...forms.map( ( form ) => ( { label: formTitle( form ), value: String( form.id ) } ) ),
+              ...forms.map( ( form ) => ( { label: formOptionLabel( form ), value: String( form.id ) } ) ),
             ] }
             onChange={ setTarget }
             __nextHasNoMarginBottom
@@ -332,13 +326,23 @@ function Transfer( { forms, busy, setBusy, tell } ) {
 }
 
 function FileButton( { label, busy, onFile } ) {
+  const inputRef = useRef( null );
   return (
-    <label className='sf-tools__file'>
-      <Button variant='secondary' disabled={ busy }>{ label }</Button>
+    <>
+      <Button
+        variant='secondary'
+        disabled={ busy }
+        onClick={ () => inputRef.current?.click() }>
+        { label }
+      </Button>
       <input
+        ref={ inputRef }
         type='file'
         accept='application/json,.json'
+        tabIndex={ -1 }
+        aria-hidden='true'
         disabled={ busy }
+        style={ { position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0 0 0 0)' } }
         onChange={ ( event ) => {
           const file = event.target.files?.[ 0 ];
           event.target.value = '';
@@ -347,7 +351,7 @@ function FileButton( { label, busy, onFile } ) {
           }
         } }
       />
-    </label>
+    </>
   );
 }
 
@@ -492,7 +496,7 @@ function LogList( { kind, forms, description } ) {
             value={ formId }
             options={ [
               { label: __( 'Any form', 'subtleforms' ), value: '' },
-              ...forms.map( ( form ) => ( { label: formTitle( form ), value: String( form.id ) } ) ),
+              ...forms.map( ( form ) => ( { label: formOptionLabel( form ), value: String( form.id ) } ) ),
             ] }
             onChange={ ( value ) => { setPage( 1 ); setFormId( value ); } }
             __nextHasNoMarginBottom

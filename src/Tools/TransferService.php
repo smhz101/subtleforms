@@ -362,6 +362,51 @@ final class TransferService {
 	 * @param array $package Decoded JSON.
 	 * @return array{imported: int, error: string}
 	 */
+		/**
+	 * Warn when the file belongs to a different form.
+	 *
+	 * @param array  $package Decoded JSON.
+	 * @param int    $formId Target form.
+	 * @param string $title Target title.
+	 * @return string Empty when the file matches.
+	 */
+	public static function formMismatch( array $package, int $formId, string $title ): string {
+		$form = $package['form'] ?? array();
+		if ( ! is_array( $form ) ) {
+			return '';
+		}
+		$sourceId    = (int) ( $form['id'] ?? 0 );
+		$sourceTitle = trim( (string) ( $form['title'] ?? '' ) );
+		if ( $sourceId > 0 && $sourceId !== $formId ) {
+			return sprintf(
+				/* translators: 1: source form id, 2: source form title */
+				__( 'This file is from form #%1$d (%2$s), not the form you chose.', 'subtleforms' ),
+				$sourceId,
+				'' !== $sourceTitle ? $sourceTitle : __( 'untitled', 'subtleforms' )
+			);
+		}
+		if ( 0 === $sourceId && '' !== $sourceTitle && 0 !== strcasecmp( $sourceTitle, $title ) ) {
+			return sprintf(
+				/* translators: %s: source form title */
+				__( 'This file is from "%s", not the form you chose.', 'subtleforms' ),
+				$sourceTitle
+			);
+		}
+		return '';
+	}
+
+	/**
+	 * Identity of an entry inside an export: the same answers at the same time.
+	 *
+	 * @param array $row Submission row.
+	 * @return string
+	 */
+	public static function submissionIdentity( array $row ): string {
+		$payload = is_array( $row['payload'] ?? null ) ? $row['payload'] : array();
+		ksort( $payload );
+		return md5( (string) ( $row['created_at'] ?? '' ) . '|' . (string) ( $row['status'] ?? '' ) . '|' . (string) wp_json_encode( $payload ) );
+	}
+
 	public function importSubmissions( int $formId, array $package ): array {
 		$form = $this->forms->find( $formId );
 		if ( ! is_array( $form ) || ( $form['status'] ?? '' ) === 'trash' ) {
@@ -374,7 +419,16 @@ final class TransferService {
 		if ( $read['error'] !== '' ) {
 			return array(
 				'imported' => 0,
+				'skipped'  => 0,
 				'error'    => $read['error'],
+			);
+		}
+		$mismatch = self::formMismatch( $package, $formId, (string) ( $form['title'] ?? '' ) );
+		if ( '' !== $mismatch ) {
+			return array(
+				'imported' => 0,
+				'skipped'  => 0,
+				'error'    => $mismatch,
 			);
 		}
 		try {
@@ -383,8 +437,34 @@ final class TransferService {
 			$loaded = null;
 		}
 		$schema   = is_array( $loaded ) && is_array( $loaded['schema'] ?? null ) ? $loaded['schema'] : ( $this->forms->getDraftSchema( $formId ) ?? array() );
+		$existing = array();
+		$offset   = 0;
+		while ( $offset < TransferPackage::MAX_SUBMISSIONS ) {
+			$batch = $this->submissions->findByForm(
+				$formId,
+				array(
+					'limit'  => 200,
+					'offset' => $offset,
+				)
+			);
+			if ( ! $batch ) {
+				break;
+			}
+			foreach ( $batch as $have ) {
+				$existing[ self::submissionIdentity( $have ) ] = true;
+			}
+			$offset += 200;
+			if ( count( $batch ) < 200 ) {
+				break;
+			}
+		}
 		$imported = 0;
+		$skipped  = 0;
 		foreach ( $read['submissions'] as $row ) {
+			if ( isset( $existing[ self::submissionIdentity( $row ) ] ) ) {
+				++$skipped;
+				continue;
+			}
 			try {
 				$id = $this->submissions->create(
 					array(
@@ -418,10 +498,20 @@ final class TransferService {
 				}
 			}
 			++$imported;
+			$existing[ self::submissionIdentity( $row ) ] = true;
+		}
+		$error = '';
+		if ( $skipped > 0 ) {
+			$error = sprintf(
+				/* translators: %d: number of entries skipped */
+				__( '%d entries were already in this form and were skipped.', 'subtleforms' ),
+				$skipped
+			);
 		}
 		return array(
 			'imported' => $imported,
-			'error'    => '',
+			'skipped'  => $skipped,
+			'error'    => $error,
 		);
 	}
 
