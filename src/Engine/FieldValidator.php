@@ -1763,26 +1763,26 @@ final class FieldValidator {
 		}
 
 		if ( ! is_numeric( $value ) ) {
-			return __( 'Enter the amount as a number.', 'subtleforms' );
+			return __( 'Payment amount must be a valid number.', 'subtleforms' );
 		}
 
 		$amount = floatval( $value );
 		$field  = is_array( $field ) ? $field : array();
 
 		if ( $amount < 0 ) {
-			return __( 'The amount cannot be negative.', 'subtleforms' );
+			return __( 'Payment amount must be positive.', 'subtleforms' );
 		}
 
 		$min = $this->attr( $field, 'min' );
 		if ( is_numeric( $min ) && $amount < (float) $min ) {
-			/* translators: %s: smallest amount allowed */
-			return sprintf( __( 'The amount must be at least %s.', 'subtleforms' ), $this->formatNumber( (float) $min ) );
+			/* translators: %s: smallest amount */
+			return sprintf( __( 'Payment amount must be at least %s.', 'subtleforms' ), number_format( (float) $min, 2, '.', '' ) );
 		}
 
 		$max = $this->attr( $field, 'max' );
 		if ( is_numeric( $max ) && (float) $max > 0 && $amount > (float) $max ) {
-			/* translators: %s: largest amount allowed */
-			return sprintf( __( 'The amount cannot be more than %s.', 'subtleforms' ), $this->formatNumber( (float) $max ) );
+			/* translators: %s: largest amount */
+			return sprintf( __( 'Payment amount cannot exceed %s.', 'subtleforms' ), number_format( (float) $max, 2, '.', '' ) );
 		}
 
 		return null;
