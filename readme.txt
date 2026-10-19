@@ -131,6 +131,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 
 = 2.4.1 - 2026-10-20 =
 * Change: A field ID can use hyphens and up to 64 characters. Saving a form refuses an ID used by two fields anywhere in the form (inside steps, columns and containers too) or a name SubtleForms reserves for its own values.
+* Change: Gravity Forms and Fluent Forms imports keep each field's name from the other plugin (Fluent's field name, Gravity's parameter name) as its field ID when it is valid, so data and integrations that use those names keep matching.
 
 = 2.4.0 - 2026-10-20 =
 * New: Each payment form can pick its own currency, and more currencies are available, including JPY, INR, PKR and AED.
