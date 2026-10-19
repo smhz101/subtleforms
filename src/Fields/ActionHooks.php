@@ -35,6 +35,7 @@ final class ActionHooks {
 	 */
 	public static function fire( array $schema, array $context = array() ): void {
 		foreach ( self::names( $schema ) as $name ) {
+			// phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.DynamicHooknameFound -- The site owner names the hook in the Action Hook field.
 			do_action( $name, $context );
 		}
 	}
