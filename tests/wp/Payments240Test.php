@@ -164,6 +164,28 @@ final class Payments240Test extends TestCase {
 		$this->assertSame( 18.0, (float) $this->verifyQuote['total'] );
 	}
 
+	/** PAY-16: guests get 404 from quote, coupon and intent on a draft form, as from submit. */
+	public function test_pay16_draft_forms_are_not_priced_for_guests() {
+		$this->coupon( 'PAY16' );
+		$id = $this->form(
+			array( array( 'id' => 'p', 'key' => 'ticket', 'type' => 'payment_product', 'label' => 'Ticket', 'price' => 20 ) ),
+			'draft'
+		);
+		$this->catchIntent();
+		wp_set_current_user( 0 );
+
+		$this->assertSame( 404, $this->post( '/payments/quote', array( 'form_id' => $id, 'data' => array() ) )['status'] );
+		$this->assertSame( 404, $this->post( '/payments/coupon', array( 'form_id' => $id, 'code' => 'PAY16', 'data' => array() ) )['status'] );
+		$intent = $this->intent( $id, array() );
+		$this->assertWPError( $intent );
+		$this->assertSame( 404, $intent->get_error_data()['status'] );
+		$this->assertNull( $this->intentQuote, 'no intent is created' );
+
+		// The builder preview (an admin) still prices a draft.
+		$this->asAdmin();
+		$this->assertSame( 200, $this->post( '/payments/quote', array( 'form_id' => $id, 'data' => array() ) )['status'] );
+	}
+
 	private function assertWPError( $value ): void {
 		$this->assertInstanceOf( \WP_Error::class, $value );
 	}

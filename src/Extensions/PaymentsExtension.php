@@ -121,7 +121,8 @@ class PaymentsExtension extends AbstractExtension {
 		$formId = absint( $request->get_param( 'form_id' ) );
 		$repo   = new \SubtleForms\Repositories\FormsRepository();
 		$form   = $formId ? $repo->find( $formId ) : null;
-		if ( ! $form ) {
+		// Like /submit: guests only reach published forms (PAY-16).
+		if ( ! $form || ! \SubtleForms\Api\PaymentsApi::formIsOpen( $form ) ) {
 			return new \WP_Error( 'subtleforms_not_found', __( 'Form not found', 'subtleforms' ), array( 'status' => 404 ) );
 		}
 		$active = $repo->loadSchemaVersion( $formId );

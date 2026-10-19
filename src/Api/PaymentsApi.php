@@ -218,7 +218,7 @@ final class PaymentsApi {
 	private function context( WP_REST_Request $request, ?string $code = null ) {
 		$formId = absint( $request->get_param( 'form_id' ) );
 		$form   = $formId ? $this->formsRepo->find( $formId ) : null;
-		if ( ! $form ) {
+		if ( ! $form || ! self::formIsOpen( $form ) ) {
 			return ApiResponse::not_found( __( 'Form not found', 'subtleforms' ) );
 		}
 		$active = $this->formsRepo->loadSchemaVersion( $formId );
@@ -242,6 +242,20 @@ final class PaymentsApi {
 			'coupon'  => $coupon,
 			'quote'   => $quote,
 		);
+	}
+
+	/**
+	 * Whether a public payment request may use this form. Like /submit, guests
+	 * only reach published forms; an admin may price a draft in the builder
+	 * preview (PAY-16).
+	 *
+	 * @param array $form Form row.
+	 */
+	public static function formIsOpen( array $form ): bool {
+		if ( 'published' === ( $form['status'] ?? '' ) ) {
+			return true;
+		}
+		return is_user_logged_in() && current_user_can( 'manage_options' );
 	}
 
 	private function fromError( \WP_Error $error ): WP_REST_Response {
