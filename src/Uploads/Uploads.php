@@ -158,15 +158,11 @@ final class Uploads {
 			return self::error( 'subtleforms_upload_storage', __( 'Uploads are not available right now.', 'subtleforms' ), 500 );
 		}
 
-		$id   = bin2hex( random_bytes( 16 ) );
-		$dest = $dir . '/' . $id;
-		$moved = is_uploaded_file( (string) $file['tmp_name'] )
-			? move_uploaded_file( (string) $file['tmp_name'], $dest ) // phpcs:ignore Generic.PHP.ForbiddenFunctions.Found -- Validated upload moved into the protected folder.
-			: false;
+		$id    = bin2hex( random_bytes( 16 ) );
+		$moved = self::storeUpload( $file, $dir, $id );
 		if ( ! $moved ) {
 			return self::error( 'subtleforms_upload_storage', __( 'The file could not be saved. Please try again.', 'subtleforms' ), 500 );
 		}
-		@chmod( $dest, 0640 ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.file_system_operations_chmod -- Best effort; not fatal on hosts that disallow it.
 
 		$record = array(
 			'id'   => $id,
@@ -410,8 +406,7 @@ final class Uploads {
 		foreach ( self::recordsIn( $payload ) as $record ) {
 			$from = self::path( self::PENDING, $record['id'] );
 			if ( is_file( $from ) ) {
-				// phpcs:ignore WordPress.WP.AlternativeFunctions.rename_rename -- Same filesystem move within the protected folder.
-				rename( $from, $dir . '/' . $record['id'] );
+				self::filesystem()->move( $from, $dir . '/' . $record['id'], true );
 			}
 			delete_transient( self::TRANSIENT . $record['id'] );
 		}
@@ -557,10 +552,11 @@ final class Uploads {
 		nocache_headers();
 		header( 'Content-Type: application/octet-stream' );
 		header( 'Content-Disposition: attachment; filename="' . str_replace( '"', '', $name ) . '"; filename*=UTF-8\'\'' . rawurlencode( $name ) );
-		header( 'Content-Length: ' . (string) filesize( $path ) );
+		$contents = (string) self::filesystem()->get_contents( $path );
+		header( 'Content-Length: ' . (string) strlen( $contents ) );
 		header( 'X-Content-Type-Options: nosniff' );
 		header( "Content-Security-Policy: default-src 'none'; sandbox" );
-		readfile( $path ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_readfile -- Streaming a protected file to an authorised admin.
+		echo $contents; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- A file download, sent as an attachment with a sandbox policy.
 		exit;
 	}
 
@@ -690,7 +686,83 @@ final class Uploads {
 
 	private static function baseDir(): string {
 		$uploads = wp_upload_dir( null, false );
-		return rtrim( (string) $uploads['basedir'], '/' ) . '/' . self::DIR;
+		return rtrim( (string) $uploads['basedir'], '/' ) . '/' . self::folderName();
+	}
+
+	/**
+	 * The private uploads folder name.
+	 *
+	 * New sites get a random name that cannot be guessed, so files stay
+	 * private on servers that ignore .htaccess, such as nginx (FA-18). A site
+	 * that already stores files keeps its folder.
+	 */
+	public static function folderName(): string {
+		$name = (string) get_option( 'subtleforms_upload_folder', '' );
+		if ( 1 === preg_match( '/^subtleforms-uploads(-[a-z0-9]{16})?$/', $name ) ) {
+			return $name;
+		}
+		$uploads = wp_upload_dir( null, false );
+		$legacy  = rtrim( (string) $uploads['basedir'], '/' ) . '/' . self::DIR;
+		$name    = is_dir( $legacy ) ? self::DIR : self::DIR . '-' . strtolower( wp_generate_password( 16, false, false ) );
+		update_option( 'subtleforms_upload_folder', $name, false );
+		return $name;
+	}
+
+	/**
+	 * Move an uploaded file into the private folder with wp_handle_upload()
+	 * (WP2-18). The file is saved under its random ID, with no extension, so
+	 * it can never run as a script.
+	 *
+	 * @param array  $file $_FILES entry.
+	 * @param string $dir  Destination folder.
+	 * @param string $id   File ID.
+	 */
+	private static function storeUpload( array $file, string $dir, string $id ): bool {
+		if ( ! function_exists( 'wp_handle_upload' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+		}
+		$to_dir = static function ( $paths ) use ( $dir ) {
+			$paths['path']   = $dir;
+			$paths['subdir'] = '';
+			return $paths;
+		};
+		add_filter( 'upload_dir', $to_dir, PHP_INT_MAX );
+		$result = wp_handle_upload(
+			$file,
+			array(
+				'test_form'                => false,
+				// The type was checked against the field's rules already.
+				'test_type'                => false,
+				'unique_filename_callback' => static function () use ( $id ) {
+					return $id;
+				},
+			)
+		);
+		remove_filter( 'upload_dir', $to_dir, PHP_INT_MAX );
+		return is_array( $result ) && empty( $result['error'] ) && is_file( $dir . '/' . $id );
+	}
+
+	/**
+	 * The WordPress filesystem, set up for direct access to our own folder.
+	 *
+	 * @return \WP_Filesystem_Base
+	 */
+	private static function filesystem() {
+		global $wp_filesystem;
+		if ( ! $wp_filesystem instanceof \WP_Filesystem_Base ) {
+			if ( ! function_exists( 'WP_Filesystem' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/file.php';
+			}
+			WP_Filesystem();
+		}
+		if ( ! $wp_filesystem instanceof \WP_Filesystem_Base || 'direct' !== $wp_filesystem->method ) {
+			if ( ! class_exists( 'WP_Filesystem_Direct' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
+				require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
+			}
+			return new \WP_Filesystem_Direct( null );
+		}
+		return $wp_filesystem;
 	}
 
 	/**
@@ -720,8 +792,7 @@ final class Uploads {
 		);
 		foreach ( $files as $name => $contents ) {
 			if ( ! file_exists( $dir . '/' . $name ) ) {
-				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Small guard files in our own folder.
-				file_put_contents( $dir . '/' . $name, $contents );
+				self::filesystem()->put_contents( $dir . '/' . $name, $contents, defined( 'FS_CHMOD_FILE' ) ? FS_CHMOD_FILE : 0644 );
 			}
 		}
 	}
