@@ -24,6 +24,7 @@ import { createNodeId, createFieldKey } from './utils/idGenerator';
 import ActionsPanel from './ActionsPanel';
 import { ConfirmationPanel, AvailabilityPanel } from './FormBehaviorPanels';
 import CheckoutPanel from './CheckoutPanel';
+import FormCurrencyControl from './FormCurrencyControl';
 import IntegrationsPanel from './IntegrationsPanel';
 import { isPricedForm, isPricedType } from '../../../shared/pricing';
 import Icon from '../../ui/Icon';
@@ -49,11 +50,11 @@ export default function FormSettings({
   const isMultiStep = formType === 'multi-step' || formType === 'multistep';
   const supportsPayment = isPaymentForm || isConversationalForm;
 
-  // Payment settings
+  // Payment settings. No currency default: a form follows the site currency
+  // until the admin picks one (PAY2-02).
   const paymentSettings = metadata.payment || {
     enabled: isPaymentForm ? true : false, // Payment forms have payment enabled by default
     mode: 'test',
-    currency: 'USD',
     amountType: 'fixed',
     fixedAmount: '',
     amountField: '',
@@ -94,10 +95,12 @@ export default function FormSettings({
       ...schema,
       metadata: {
         ...metadata,
-        payment: {
-          ...(metadata.payment || {}),
-          [key]: value,
-        },
+        payment: (() => {
+          const next = { ...(metadata.payment || {}), [key]: value };
+          // An empty currency means the site currency: leave it unset.
+          if (key === 'currency' && !value) delete next.currency;
+          return next;
+        })(),
       },
     });
   };
@@ -385,21 +388,6 @@ export default function FormSettings({
                           onChange={(value) => handlePaymentSettingChange('mode', value)}
                           help={__('Test mode will not process real payments', 'subtleforms')}
                         />
-                        <SelectControl
-                          label={__('Currency', 'subtleforms')}
-                          value={paymentSettings.currency}
-                          options={[
-                            { label: 'USD - US Dollar', value: 'USD' },
-                            { label: 'EUR - Euro', value: 'EUR' },
-                            { label: 'GBP - British Pound', value: 'GBP' },
-                            { label: 'CAD - Canadian Dollar', value: 'CAD' },
-                            { label: 'AUD - Australian Dollar', value: 'AUD' },
-                            { label: 'JPY - Japanese Yen', value: 'JPY' },
-                            { label: 'INR - Indian Rupee', value: 'INR' },
-                          ]}
-                          onChange={(value) => handlePaymentSettingChange('currency', value)}
-                          help={__('Currency for payment transactions', 'subtleforms')}
-                        />
                         <RadioControl
                           label={__('Amount Type', 'subtleforms')}
                           selected={paymentSettings.amountType}
@@ -435,6 +423,11 @@ export default function FormSettings({
                         )}
                       </>
                     )}
+                  </div>
+                )}
+                {takesMoney && (metadata.payment?.processor || 'subtleforms') !== 'woocommerce' && (
+                  <div className='sf-form-settings__card'>
+                    <FormCurrencyControl schema={schema} onPayment={handleCheckoutChange} isReadOnly={isReadOnly} />
                   </div>
                 )}
                 {takesMoney && !!window.subtleformsAdmin?.woocommerce && (

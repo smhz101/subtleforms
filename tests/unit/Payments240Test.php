@@ -65,4 +65,33 @@ final class Payments240Test extends TestCase {
 		);
 		$this->assertSame( $server, $browser );
 	}
+
+	/** PAY2-02: a form with no currency of its own follows the site currency. */
+	public function test_pay2_02_form_without_currency_follows_the_site(): void {
+		$GLOBALS['sf_test_options']['subtleforms_settings'] = array( 'ext_payments_currency' => 'eur' );
+		$this->assertSame( 'EUR', Pricing::currency( array( 'metadata' => array( 'payment' => array( 'processor' => 'subtleforms' ) ) ) ) );
+		$this->assertSame( 'EUR', Pricing::currency( array( 'metadata' => array( 'payment' => array( 'currency' => '' ) ) ) ) );
+		$this->assertSame( 'JPY', Pricing::currency( array( 'metadata' => array( 'payment' => array( 'currency' => 'jpy' ) ) ) ) );
+	}
+
+	/** PAY2-02: saving payment settings never adds a currency, and every listed code saves. */
+	public function test_pay2_02_saving_payment_settings_adds_no_currency(): void {
+		$validator = new \SubtleForms\Validation\RequestValidator( array( 'schemas' => \SubtleForms\Validation\Schemas::all() ) );
+		$rules     = \SubtleForms\Validation\Schemas::all()['PaymentConfig'];
+		$this->assertStringNotContainsString( 'default:', $rules['currency'] );
+		foreach ( array( 'PKR', 'AED', 'KRW' ) as $code ) {
+			$this->assertStringContainsString( $code, $rules['currency'] );
+		}
+		$out = $validator->validateOrFail(
+			array(
+				'activate' => false,
+				'schema'   => array(
+					'metadata' => array( 'type' => 'payment', 'payment' => array( 'processor' => 'subtleforms', 'enabled' => true ) ),
+					'fields'   => array(),
+				),
+			),
+			\SubtleForms\Validation\Schemas::get( \SubtleForms\Validation\Schemas::FORM_SCHEMA_SAVE )
+		);
+		$this->assertArrayNotHasKey( 'currency', $out['schema']['metadata']['payment'] );
+	}
 }

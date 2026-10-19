@@ -170,9 +170,9 @@ final class Pricing {
 	 * @param mixed $schema Form schema.
 	 */
 	public static function currency( $schema ): string {
-		$form = is_array( $schema ) ? (string) ( $schema['metadata']['payment']['currency'] ?? '' ) : '';
-		if ( '' !== $form ) {
-			return strtoupper( $form );
+		$form = is_array( $schema ) ? strtoupper( trim( (string) ( $schema['metadata']['payment']['currency'] ?? '' ) ) ) : '';
+		if ( '' !== $form && Currencies::isSupported( $form ) ) {
+			return $form;
 		}
 		$settings = get_option( 'subtleforms_settings', array() );
 		$site     = is_array( $settings ) ? (string) ( $settings['ext_payments_currency'] ?? '' ) : '';
