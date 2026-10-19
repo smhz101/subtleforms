@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace SubtleForms\Engine;
 
+use SubtleForms\Fields\CompositeParts;
+
 /**
  * Validates field values with conditional logic support.
  */
@@ -125,7 +127,9 @@ final class FieldValidator {
 				continue;
 			}
 
-			if ( $isComposite ? $this->isCompositeEmpty( $value ) : $this->isEmpty( $value ) ) {
+			// Name and Address demand every part they draw except the optional
+			// ones, the same rule as the browser (FB-10).
+			if ( $isComposite ? array() !== CompositeParts::missing( $type, $fields[ $fieldKey ] ?? array(), $value ) : $this->isEmpty( $value ) ) {
 				$errors[ $fieldKey ] = $requiredMessage;
 			}
 		}
@@ -396,24 +400,6 @@ final class FieldValidator {
 	private function formatNumber( float $number ): string {
 		$formatted = number_format( $number, 2, '.', '' );
 		return rtrim( rtrim( $formatted, '0' ), '.' );
-	}
-
-	/**
-	 * Check if a composite field value (array) is empty (all sub-values empty).
-	 *
-	 * @param mixed $value
-	 * @return bool
-	 */
-	private function isCompositeEmpty( $value ): bool {
-		if ( ! is_array( $value ) || empty( $value ) ) {
-			return true;
-		}
-		foreach ( $value as $v ) {
-			if ( ! $this->isEmpty( $v ) ) {
-				return false;
-			}
-		}
-		return true;
 	}
 
 	/**

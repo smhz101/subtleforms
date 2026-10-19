@@ -81,3 +81,26 @@ describe('fieldValidation (Part A2: required validation skips composite fields)'
     expect(errors['email_1']).toBeUndefined();
   });
 });
+
+describe('Name and Address follow their part settings (FB-02, FB-12)', () => {
+  test('a switched-off address part is not demanded', () => {
+    const field = {
+      type: 'address_group',
+      key: 'addr',
+      required: true,
+      fields: { country: { enabled: false }, state: { enabled: false } },
+    };
+    expect(validateField(field, { street_address: '1 Way', city: 'X', postal_code: '1' })).toBeUndefined();
+    expect(validateField(field, { city: 'X' })).toBe('Please enter your full address.');
+  });
+
+  test('the custom required message wins', () => {
+    const field = { type: 'name_group', key: 'nm', required: true, requiredMessage: 'Tell us who you are.' };
+    expect(validateField(field, {})).toBe('Tell us who you are.');
+  });
+
+  test('the form default required message wins over the part text', () => {
+    const field = { type: 'address_group', key: 'addr', required: true };
+    expect(validateField(field, {}, { requiredMessage: 'Please answer this.' })).toBe('Please answer this.');
+  });
+});

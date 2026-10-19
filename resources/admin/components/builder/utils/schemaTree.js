@@ -6,6 +6,7 @@ import {
   collectExistingKeys,
 } from './idGenerator';
 import { fieldConfig } from '../../../../shared/fieldConfig';
+import { partSettingsMap } from '../../../../shared/compositeParts';
 
 const ROOT_NODE_ID = 'root';
 
@@ -87,6 +88,18 @@ function extractConfig(rawField) {
     config.fields = fieldsArray;
   }
 
+  // Name and Address saved before 2.3.9 lost the part keys of `fields` and
+  // kept a plain list of settings, not child fields: give them their keys
+  // back (FB-01).
+  let childList = fieldsArray;
+  if (COMPOSITE_FIELD_TYPES.has(type) && Array.isArray(fieldsArray)) {
+    const repaired = partSettingsMap(type, fieldsArray);
+    if (repaired) {
+      config.fields = repaired;
+    }
+    childList = undefined;
+  }
+
   if (!config.label && typeof field.label === 'string') {
     config.label = field.label;
   }
@@ -99,7 +112,7 @@ function extractConfig(rawField) {
     id: id || field.key || null,
     config,
     // Prefer 'children' (canonical); fall back to 'fields' for schemas saved before this fix
-    childFields: Array.isArray(childrenArray) ? childrenArray : (Array.isArray(fieldsArray) ? fieldsArray : []),
+    childFields: Array.isArray(childrenArray) ? childrenArray : (Array.isArray(childList) ? childList : []),
     columnChildren: Array.isArray(columnChildren) ? columnChildren : [],
     type,
     kind: kind || 'input',
