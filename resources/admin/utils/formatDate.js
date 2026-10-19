@@ -114,11 +114,15 @@ function sprintfHoursAgo(hours) {
  * @return {string}
  */
 export function timeAgo(value, now = new Date()) {
-  if (!value) return '';
-  const raw = String(value);
-  const date = new Date(
-    raw && !/[zZ]|[+-]\d{2}:?\d{2}$/.test(raw) ? `${raw.replace(' ', 'T')}Z` : raw
-  );
+  if (value === null || value === undefined || value === '') return '';
+  let date;
+  if (value instanceof Date || typeof value === 'number') {
+    // A Date or an epoch in milliseconds.
+    date = new Date(value);
+  } else {
+    const raw = String(value);
+    date = new Date(!/[zZ]|[+-]\d{2}:?\d{2}$/.test(raw) ? `${raw.replace(' ', 'T')}Z` : raw);
+  }
   if (isNaN(date.getTime())) return '';
   const diff = Math.max(0, Math.floor((now - date) / 1000));
   if (diff < 60) return __('Just now', 'subtleforms');
