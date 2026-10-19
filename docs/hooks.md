@@ -19,6 +19,7 @@ This page lists the hooks an add-on such as SubtleForms Pro uses to add field ty
 | `subtleforms/submission/computed_values` | filter `( array $payload, array $schema )` | Work out computed fields (Pro Calculation) from the submitted values. Runs before conditional logic, validation, pricing and storage, and before payment quotes. Use `PublicSubmitApi::COMPUTE_ERROR` for a value that cannot be worked out; it is never stored. |
 | `subtleforms/payments/is_priced` | filter `( bool $priced, array $schema )` | Return true when your field type makes the form take money. |
 | `subtleforms/payments/line_items` | filter `( array $items, array $schema, array $payload )` | Add order lines for your field type. Each line: `key`, `label`, `qty`, `unit`, `amount`. |
+| `subtleforms/payments/card_minimum` | filter `( float $min, string $currency )` | The smallest card charge for a currency. Defaults to Stripe's published figure; raise it when the account settles in another currency. |
 | `subtleforms/payments/quote` | filter `( array $quote, array $schema, array $payload )` | The final order. Set `formula_error` to true when a charged amount cannot be worked out; the submission is then refused and nothing is charged. |
 | `subtleforms/payment/verify` | filter `( array\|WP_Error\|null $result, array $quote, array $payload, int $formId, array $schema )` | Gateways confirm the payment here. |
 
