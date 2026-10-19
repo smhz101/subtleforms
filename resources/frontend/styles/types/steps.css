@@ -134,8 +134,6 @@
 	display: flex;
 	justify-content: space-between;
 	gap: var(--subtleforms-spacing-sm);
-	padding-top: var(--subtleforms-spacing-md);
-	border-top: 1px solid var(--subtleforms-color-border);
 }
 
 /* Mobile responsive */

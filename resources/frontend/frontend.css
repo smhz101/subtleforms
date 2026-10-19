@@ -433,13 +433,13 @@
 	min-width: 0;
 }
 
-/* Buttons */
+/* Buttons. No rule or border above the row (2.4.1); the margin keeps the
+   buttons clear of the last field in every preset. */
 .subtleforms-buttons {
+	/*! inherit: keep */
 	display: flex;
 	justify-content: space-between;
 	margin-top: 30px;
-	padding-top: 20px;
-	border-top: 1px solid var(--subtleforms-color-border);
 }
 
 .subtleforms-button {
