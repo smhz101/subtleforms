@@ -27,6 +27,8 @@ function mount(container, options = {}) {
     return;
   }
 
+  container.removeAttribute('aria-busy');
+
   const root = createRoot(container);
   root.render(
     <FormErrorBoundary>

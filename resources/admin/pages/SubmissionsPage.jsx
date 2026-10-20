@@ -3,6 +3,8 @@ import { SearchControl, SelectControl } from '@wordpress/components';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '../components/navigation';
 import { __, sprintf } from '@wordpress/i18n';
+import { useDispatch } from '@wordpress/data';
+import { store as noticesStore } from '@wordpress/notices';
 import AdminShell from '../components/AdminShell';
 import TabBar from '../components/TabBar';
 import SubmissionsTable, { ALL_COLUMNS, DEFAULT_VISIBLE, COLUMN_LABELS } from '../components/SubmissionsTable';
@@ -30,6 +32,7 @@ function readInboxView() {
 }
 
 export default function SubmissionsPage({ formId }) {
+  const { createErrorNotice } = useDispatch(noticesStore);
   const [search, setSearch] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const searchTimerRef = useRef(null);
@@ -379,13 +382,16 @@ export default function SubmissionsPage({ formId }) {
         link.click();
         document.body.removeChild(link);
       } else {
-        alert(
-          response.message || __('Failed to export submissions', 'subtleforms')
+        createErrorNotice(
+          response.message || __('Failed to export submissions', 'subtleforms'),
+          { type: 'snackbar' }
         );
       }
     } catch (error) {
       console.error('Export failed:', error);
-      alert(__('Failed to export submissions', 'subtleforms'));
+      createErrorNotice(__('Failed to export submissions', 'subtleforms'), {
+        type: 'snackbar',
+      });
     } finally {
       setExporting(false);
     }

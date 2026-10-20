@@ -7,6 +7,7 @@
  */
 import { useEffect, useMemo, useState, useCallback } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
+import { askConfirm } from '../modals';
 import apiFetch from '@wordpress/api-fetch';
 import {
   Button,
@@ -349,8 +350,17 @@ export default function PaymentsPage() {
   const ready = gateways.find(([, g]) => g.ready);
 
   const remove = async (c) => {
-    // eslint-disable-next-line no-alert
-    if (!window.confirm(sprintf(/* translators: %s: coupon code */ __('Delete coupon %s? Orders that used it keep their discount.', 'subtleforms'), c.code))) return;
+    const ok = await askConfirm({
+      title: __('Delete coupon', 'subtleforms'),
+      message: sprintf(
+        /* translators: %s: coupon code */
+        __('Delete coupon %s? Orders that used it keep their discount.', 'subtleforms'),
+        c.code
+      ),
+      confirmText: __('Delete', 'subtleforms'),
+      confirmVariant: 'destructive',
+    });
+    if (!ok) return;
     try {
       await apiFetch({ path: `${NS}/coupons/${c.id}`, method: 'DELETE' });
       setCoupons((list) => list.filter((x) => x.id !== c.id));

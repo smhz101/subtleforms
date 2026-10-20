@@ -3,12 +3,12 @@ import clsx from 'clsx';
 import Icon from '../../../ui/Icon';
 
 /**
- * Segmented control in the centre of the builder bar: Build, Settings,
+ * Segmented control in the centre of the builder bar: Build, Form,
  * Entries, Preview. Arrow keys move between views (WAI-ARIA tabs pattern).
  */
 const VIEWS = [
   { key: 'build', label: __('Build', 'subtleforms'), icon: Icon.LayoutGrid },
-  { key: 'settings', label: __('Settings', 'subtleforms'), icon: Icon.Settings },
+  { key: 'settings', label: __('Form', 'subtleforms'), icon: Icon.Settings },
   {
     key: 'entries',
     label: __('Entries', 'subtleforms'),

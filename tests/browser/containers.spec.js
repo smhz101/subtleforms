@@ -4,7 +4,7 @@
  * show on the canvas and on the live form.
  */
 const { test, expect } = require('@playwright/test');
-const { adminApi, cleanup, loginPage, openBuilder, openPanel, BASE } = require('./helpers');
+const { adminApi, cleanup, loginPage, openBuilder, openInspectorTab, BASE } = require('./helpers');
 
 const SHOTS = 'test-results/shots/free232';
 let client;
@@ -57,7 +57,7 @@ test('Repeater, Group and Columns: label and help text are editable, saved and s
 
   const edits = [
     { index: 0, label: 'Companies you worked for', help: 'Add one group per company.', extra: async () => {
-      await openPanel(page, 'Appearance');
+      await openInspectorTab(page, 'Style');
       await page.getByLabel('Button Label').fill('Add a company');
       await page.getByLabel('Max Repeats').fill('4');
     } },

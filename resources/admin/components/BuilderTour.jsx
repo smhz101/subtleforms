@@ -10,7 +10,7 @@ const TOUR_STEPS = [
     id: 'header',
     title: __('Form Header', 'subtleforms'),
     content: __(
-      'This is your form title. Click to edit it. You can see the form status (Draft/Published) and use Save, Publish, or Delete buttons.',
+      'This is your form title. Click to edit it. The badge shows the form type, and the centre of the bar has Draft or Published status plus Save and Publish in the actions menu.',
       'subtleforms'
     ),
     selector: '[data-tour="header"]',
@@ -44,7 +44,7 @@ const TOUR_STEPS = [
       'subtleforms'
     ),
     selector: '[data-tour="canvas"]',
-    position: 'top',
+    position: 'bottom',
   },
   {
     id: 'field-toolbar',
@@ -60,10 +60,10 @@ const TOUR_STEPS = [
     id: 'right-panel',
     title: __('Field Inspector', 'subtleforms'),
     content: __(
-      'Configure the selected field here. Set properties, validation rules, and conditional logic in the tabs.',
+      'Select a field on the canvas to open its settings here. You can change labels, validation, logic and style in the tabs.',
       'subtleforms'
     ),
-    selector: '[data-tour="field-inspector"]',
+    selector: '[data-tour="field-inspector"], [data-tour="fields-panel"]',
     position: 'left',
   },
   {
@@ -164,11 +164,7 @@ export default function BuilderTour({ onComplete, onSkip }) {
       setIsPositioned(true);
 
       // Scroll target into view
-      targetElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-        inline: 'center',
-      });
+      targetElement.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
     };
 
     // Delay positioning to allow DOM to settle

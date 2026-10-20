@@ -29,11 +29,23 @@ body.subtleforms-admin-page,
 body.subtleforms-admin-scope {
 	background: var(--sf-bg-frame);
 	overflow: hidden;
+	// Fill the window even when the WP menu is taller than the viewport
+	// (UX2-16). A scrolling document used to leave a dark band under the app.
+	min-height: 100vh;
+	min-height: 100dvh;
 
-	#wpwrap,
+	#wpwrap {
+		background: var(--sf-bg-frame);
+		height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
+		height: calc(100dvh - var(--wp-admin--admin-bar--height, 32px));
+		overflow: hidden;
+	}
+
 	#wpcontent,
 	#wpbody {
 		background: var(--sf-bg-frame);
+		height: 100%;
+		overflow: hidden;
 	}
 
 	#wpcontent {

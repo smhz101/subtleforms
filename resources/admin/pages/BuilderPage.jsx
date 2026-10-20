@@ -41,6 +41,7 @@ import {
 } from '../components/builder/layout/BuilderHeaderBar';
 import BuilderViewSwitcher from '../components/builder/layout/BuilderViewSwitcher';
 import BuilderCanvasArea from '../components/builder/layout/BuilderCanvasArea';
+import BuilderNarrowScreen from '../components/builder/layout/BuilderNarrowScreen';
 import BuilderModalsController from '../components/builder/layout/BuilderModalsController';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
 import { getFormTypeBadgeConfig } from '../utils/formMeta';
@@ -586,17 +587,9 @@ function FormBuilderInner({
     if (!isDirty) {
       return;
     }
-    const ok = window.confirm(
-      __(
-        'Discard your unsaved changes and revert to the last saved version?',
-        'subtleforms'
-      )
-    );
-    if (!ok) {
-      return;
-    }
-    loadForm(true);
-  }, [isDirty, loadForm]);
+    // ConfirmModal in BuilderModalsController (showDiscardConfirm).
+    setShowDiscardConfirm(true);
+  }, [isDirty, setShowDiscardConfirm]);
 
   // Wrap handleSaveAndClose to delete the form when the user closes a newly
   // created form they never edited (instead of leaving an orphan draft).
@@ -782,6 +775,7 @@ function FormBuilderInner({
           />
         }
         noScroll={true}>
+        <BuilderNarrowScreen />
         <BuilderCanvasArea
           view={builderView}
           saveError={saveError}

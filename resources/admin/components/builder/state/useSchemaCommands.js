@@ -7,6 +7,7 @@
 
 import { useCallback } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
+import { askConfirm } from '../../../modals';
 import {
   insertNode,
   deleteNode,
@@ -149,7 +150,7 @@ export function useSchemaCommands({
   );
 
   const handleDockAdd = useCallback(
-    (type) => {
+    async (type) => {
       // Check for multiple CAPTCHA fields (warning, non-blocking)
       if (type === 'captcha') {
         const captchaCount = Object.values(tree.nodes).filter(
@@ -160,10 +161,13 @@ export function useSchemaCommands({
             'Warning: Adding multiple CAPTCHA fields may cause conflicts. Most forms should only use one CAPTCHA field.',
             'subtleforms'
           );
-          // eslint-disable-next-line no-alert
-          if (
-            !confirm(message + '\n\n' + __('Continue anyway?', 'subtleforms'))
-          ) {
+          const ok = await askConfirm({
+            title: __('Add another CAPTCHA?', 'subtleforms'),
+            message: message,
+            confirmText: __('Continue anyway', 'subtleforms'),
+            confirmVariant: 'primary',
+          });
+          if (!ok) {
             return;
           }
         }
@@ -258,7 +262,7 @@ export function useSchemaCommands({
   );
 
   const handleDuplicate = useCallback(
-    (nodeId, destination) => {
+    async (nodeId, destination) => {
       // Block duplicates in read-only mode
       if (isReadOnly) {
         return;
@@ -275,10 +279,13 @@ export function useSchemaCommands({
           'Warning: Duplicating CAPTCHA fields may cause conflicts. Most forms should only use one CAPTCHA field.',
           'subtleforms'
         );
-        // eslint-disable-next-line no-alert
-        if (
-          !confirm(message + '\n\n' + __('Continue anyway?', 'subtleforms'))
-        ) {
+        const ok = await askConfirm({
+          title: __('Add another CAPTCHA?', 'subtleforms'),
+          message: message,
+          confirmText: __('Continue anyway', 'subtleforms'),
+          confirmVariant: 'primary',
+        });
+        if (!ok) {
           return;
         }
       }
@@ -342,7 +349,7 @@ export function useSchemaCommands({
   );
 
   const handleDeleteStep = useCallback(
-    (stepId) => {
+    async (stepId) => {
       const rootNode = tree.nodes[rootId];
       const steps = (rootNode?.children || [])
         .map((id) => tree.nodes[id])
@@ -353,12 +360,10 @@ export function useSchemaCommands({
       // A step with fields takes them with it: ask first. The only step
       // always keeps its fields (they go back to the page).
       const count = (tree.nodes[stepId]?.children || []).length;
-      if (
-        steps.length > 1 &&
-        count > 0 &&
-        // eslint-disable-next-line no-alert
-        !window.confirm(
-          sprintf(
+      if (steps.length > 1 && count > 0) {
+        const ok = await askConfirm({
+          title: __('Delete step', 'subtleforms'),
+          message: sprintf(
             /* translators: %d: number of fields */
             _n(
               'Delete this step and the %d field in it? You can undo this.',
@@ -367,10 +372,13 @@ export function useSchemaCommands({
               'subtleforms'
             ),
             count
-          )
-        )
-      ) {
-        return;
+          ),
+          confirmText: __('Delete step', 'subtleforms'),
+          confirmVariant: 'destructive',
+        });
+        if (!ok) {
+          return;
+        }
       }
 
       updateTree((currentTree) => removeStep(currentTree, stepId).tree);

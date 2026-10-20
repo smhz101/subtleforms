@@ -590,29 +590,28 @@ const SubmissionsTable = forwardRef(
       const now = new Date();
       const diff = Math.max(0, Math.floor((now - date) / 1000));
       if (diff < 60) return __('Just now', 'subtleforms');
-      if (diff < 3600)
-        return (() => {
-          /* translators: %1$d: number of minutes */
-          return sprintf(
-            __('%1$d minutes ago', 'subtleforms'),
-            Math.floor(diff / 60)
-          );
-        })();
-      if (diff < 86400)
-        return (() => {
-          /* translators: %1$d: number of hours ago */
-          return sprintf(
-            __('%1$d hours ago', 'subtleforms'),
-            Math.floor(diff / 3600)
-          );
-        })();
-      return (() => {
-        /* translators: %1$d: number of days */
+      if (diff < 3600) {
+        const minutes = Math.floor(diff / 60);
         return sprintf(
-          __('%1$d days ago', 'subtleforms'),
-          Math.floor(diff / 86400)
+          /* translators: %d: number of minutes */
+          _n('%d minute ago', '%d minutes ago', minutes, 'subtleforms'),
+          minutes
         );
-      })();
+      }
+      if (diff < 86400) {
+        const hours = Math.floor(diff / 3600);
+        return sprintf(
+          /* translators: %d: number of hours */
+          _n('%d hour ago', '%d hours ago', hours, 'subtleforms'),
+          hours
+        );
+      }
+      const days = Math.floor(diff / 86400);
+      return sprintf(
+        /* translators: %d: number of days */
+        _n('%d day ago', '%d days ago', days, 'subtleforms'),
+        days
+      );
     };
 
     const getBrowserDevice = (userAgent) => {

@@ -63,7 +63,7 @@ function StepSetting({ tree, nodeId, onMoveToStep, isReadOnly }) {
  * Field inspector, the right panel of the builder.
  *
  * Header: what the field is and its key (copyable, used in formulas, emails
- * and webhooks), with duplicate and delete. Body: four tabs, Settings,
+ * and webhooks), with duplicate and delete. Body: four tabs, Field,
  * Validation, Logic and Style, each made of collapsible panels like the
  * block editor's sidebar.
  */
@@ -164,7 +164,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
   const fieldKey = field.key;
 
   const tabs = [
-    { name: 'settings', title: __('Settings', 'subtleforms') },
+    { name: 'settings', title: __('Field', 'subtleforms') },
     ...(isInputLike
       ? [
           {
@@ -285,11 +285,6 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
                     sections={['general']}
                   />
                 </PanelBody>
-                <AppearancePanel
-                  field={field}
-                  onUpdate={handleUpdate}
-                  isReadOnly={isReadOnly}
-                />
                 {CHOICE_TYPES.includes(field.type) && (
                   <PanelBody title={__('Choices', 'subtleforms')} initialOpen>
                     <OptionsPanel
@@ -373,6 +368,11 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
             )}
             {tab.name === 'style' && (
               <div className='sf-field-inspector__pad sf-field-inspector__pad--style'>
+                <AppearancePanel
+                  field={field}
+                  onUpdate={handleUpdate}
+                  isReadOnly={isReadOnly}
+                />
                 <FieldAppearancePanel
                   field={field}
                   onUpdate={handleUpdate}
@@ -393,20 +393,19 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
  */
 function AppearancePanel({ field, onUpdate, isReadOnly }) {
   const { fieldDefinitions } = useConfig();
-  // The same controls, in the same sections, as the panel draws (FA-02).
+  // Type-specific look controls live on the Style tab (UX2-13), not a
+  // second accordion also named Appearance.
   if (!hasSection(fieldDefinitions?.[field.type], 'appearance')) {
     return null;
   }
   return (
-    <PanelBody title={__('Appearance', 'subtleforms')} initialOpen={false}>
-      <DynamicInspectorPanel
-        field={field}
-        onUpdate={onUpdate}
-        isReadOnly={isReadOnly}
-        sections={['appearance']}
-        showEmpty={false}
-      />
-    </PanelBody>
+    <DynamicInspectorPanel
+      field={field}
+      onUpdate={onUpdate}
+      isReadOnly={isReadOnly}
+      sections={['appearance']}
+      showEmpty={false}
+    />
   );
 }
 

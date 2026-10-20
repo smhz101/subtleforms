@@ -293,7 +293,7 @@
 }
 
 // A narrow screen cannot hold a side-by-side list, so the pane covers it.
-@media (max-width: 900px) {
+@media (max-width: 1100px) {
 	.sf-inbox--right.is-open {
 		.sf-inbox__list {
 			flex: 1 1 auto;

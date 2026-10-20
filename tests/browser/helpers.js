@@ -176,7 +176,8 @@ async function useBundleOverride(page) {
 module.exports.useBundleOverride = useBundleOverride;
 
 /**
- * Open a collapsed inspector panel (for example Appearance, 2.3.3) if needed.
+ * Open a collapsed inspector accordion panel if needed.
+ * Appearance was merged into the Style tab; prefer openInspectorTab for tabs.
  */
 async function openPanel(page, title) {
   const toggle = page.locator('.sf-field-inspector .components-panel__body-toggle', { hasText: title }).first();
@@ -186,6 +187,30 @@ async function openPanel(page, title) {
 }
 
 module.exports.openPanel = openPanel;
+
+/**
+ * Click an inspector tab (Style, Field, Validation, etc.).
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} name Tab accessible name.
+ */
+async function openInspectorTab(page, name) {
+  await page.locator('.sf-field-inspector').getByRole('tab', { name }).click();
+}
+
+module.exports.openInspectorTab = openInspectorTab;
+
+/**
+ * Confirm a ConfirmModal (role=dialog) by clicking its confirm button.
+ *
+ * @param {import('@playwright/test').Page} page
+ * @param {string} buttonName Confirm button label.
+ */
+async function confirmModal(page, buttonName) {
+  await page.getByRole('dialog').getByRole('button', { name: buttonName }).click();
+}
+
+module.exports.confirmModal = confirmModal;
 
 /**
  * The server-signed spam time token for a form, aged past the time trap

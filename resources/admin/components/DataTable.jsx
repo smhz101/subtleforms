@@ -157,7 +157,7 @@ const DataTable = memo(function DataTable({
     data.some((item) => selectedItems.includes(item.id)) && !allSelected;
 
   return (
-    <div className='sf-data-table'>
+    <div className='sf-data-table sf-data-table--responsive'>
       {/* Bulk Actions Bar */}
       {selectable && selectedItems.length > 0 && (
         <div className='sf-data-table__bulk-actions'>
@@ -283,7 +283,10 @@ const DataTable = memo(function DataTable({
                       </td>
                     )}
                     {columns.map((column) => (
-                      <td key={column.key} data-column={column.key}>
+                      <td
+                        key={column.key}
+                        data-column={column.key}
+                        data-label={typeof column.title === 'string' ? column.title : column.key}>
                         {column.render
                           ? column.render(row[column.key], row)
                           : row[column.key]}
@@ -322,7 +325,10 @@ const DataTable = memo(function DataTable({
                     </td>
                   )}
                   {columns.map((column) => (
-                    <td key={column.key} data-column={column.key}>
+                    <td
+                      key={column.key}
+                      data-column={column.key}
+                      data-label={typeof column.title === 'string' ? column.title : column.key}>
                       {column.render
                         ? column.render(row[column.key], row)
                         : row[column.key]}

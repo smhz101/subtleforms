@@ -313,3 +313,77 @@
 		transform: rotate(360deg);
 	}
 }
+
+
+// Card rows on phones (UX2-19). Avoid sideways scroll and huge empty
+// checkbox squares by stacking cells with their column title.
+@media (max-width: 600px) {
+	.sf-data-table--responsive {
+		.sf-data-table__header {
+			display: none;
+		}
+
+		.sf-data-table__table,
+		.sf-data-table__body,
+		.sf-data-table__row {
+			display: block;
+			width: 100%;
+		}
+
+		.sf-data-table__row {
+			margin: 0 0 12px;
+			padding: 12px 16px;
+			border: 1px solid var(--sf-border);
+			border-radius: var(--sf-radius-lg);
+			background: var(--sf-bg-surface);
+		}
+
+		.sf-data-table__row td {
+			display: flex;
+			align-items: flex-start;
+			justify-content: space-between;
+			gap: 12px;
+			width: 100%;
+			padding: 8px 0;
+			border: 0;
+			font-size: 14px;
+		}
+
+		.sf-data-table__row td::before {
+			content: attr(data-label);
+			flex: 0 0 40%;
+			max-width: 40%;
+			font-size: 12px;
+			font-weight: 500;
+			color: var(--sf-text-muted);
+		}
+
+		.sf-data-table__check-cell {
+			justify-content: flex-start;
+			padding-bottom: 4px;
+
+			&::before {
+				display: none;
+			}
+
+			.components-checkbox-control__input-container,
+			.components-checkbox-control__input {
+				width: 20px;
+				height: 20px;
+				min-width: 20px;
+				min-height: 20px;
+			}
+		}
+
+		.sf-data-table__body {
+			height: auto !important;
+			position: static !important;
+		}
+
+		.sf-data-table__row {
+			position: static !important;
+			transform: none !important;
+			height: auto !important;
+		}
+	}
+}

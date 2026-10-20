@@ -11,7 +11,7 @@
  */
 const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
-const { adminApi, cleanup, loginPage, openBuilder, openPanel, entries, BASE } = require('./helpers');
+const { adminApi, cleanup, loginPage, openBuilder, openInspectorTab, entries, BASE } = require('./helpers');
 
 const SHOTS = 'test-results/shots/free232';
 let client;
@@ -69,9 +69,9 @@ test('label visibility, help text placement, messages and admin label: builder, 
   await loginPage(page);
   await openBuilder(page, form.id);
 
-  // Name: hidden label.
+  // Name: hidden label (Style tab).
   await chrome(page, 0).click();
-  await openPanel(page, 'Appearance');
+  await openInspectorTab(page, 'Style');
   await inspector(page).getByLabel('Field label visibility').selectOption('hidden');
   await expect(chrome(page, 0).locator('.sf-field-renderer__header')).toHaveClass(/is-label-hidden/);
   await expect(chrome(page, 0).locator('.sf-field-renderer__label-hidden-badge')).toBeVisible();
@@ -79,7 +79,7 @@ test('label visibility, help text placement, messages and admin label: builder, 
   // Email: help text above, messages, admin label.
   await chrome(page, 1).click();
   await inspector(page).getByLabel('Help text', { exact: true }).fill('We only use it to reply.');
-  await openPanel(page, 'Appearance');
+  await openInspectorTab(page, 'Style');
   await inspector(page).getByLabel('Help text placement').selectOption('above');
   const emailChrome = chrome(page, 1);
   await expect(emailChrome.locator('.sf-field-renderer__help-text--above')).toHaveText('We only use it to reply.');
@@ -96,7 +96,7 @@ test('label visibility, help text placement, messages and admin label: builder, 
   await inspector(page).getByLabel('Message when left empty').fill('We need your email.');
   await inspector(page).getByLabel('Custom validation message').fill('That does not look like an email address.');
   await page.screenshot({ path: `${SHOTS}/item5-validation-tab.png` });
-  await inspector(page).getByRole('tab', { name: 'Settings' }).click();
+  await openInspectorTab(page, 'Field');
   await inspector(page).getByRole('button', { name: 'Advanced' }).click();
   await inspector(page).getByLabel('Admin label').fill('Contact email');
   await page.screenshot({ path: `${SHOTS}/item5-settings-tab.png` });
