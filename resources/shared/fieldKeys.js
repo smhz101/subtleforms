@@ -87,6 +87,89 @@ export function collectFieldKeys(fields) {
   return keys;
 }
 
+/** A Repeater: its fields are answered inside each group, under their own IDs. */
+const REPEATER_TYPE = 'repeat_container';
+
+function nodeKey(node) {
+  const config = node.config && typeof node.config === 'object' ? node.config : {};
+  const key = node.key ?? config.key;
+  return typeof key === 'string' ? key : '';
+}
+
+function nodeLists(node) {
+  const config = node.config && typeof node.config === 'object' ? node.config : {};
+  const lists = [node.children, node.fields, config.children];
+  if (Array.isArray(node.columns)) {
+    node.columns.forEach((column) => lists.push(Array.isArray(column) ? column : column?.children ?? column?.fields));
+  }
+  return lists.filter(Array.isArray);
+}
+
+/**
+ * Walk schema fields, telling the visitor each node, its nearest Repeater
+ * (null for the form itself) and its parent chain.
+ *
+ * @param {Array}    fields  Schema fields.
+ * @param {Function} visitor (node, repeater) => void.
+ */
+function walkFields(fields, visitor) {
+  const walk = (list, repeater) => {
+    (Array.isArray(list) ? list : []).forEach((node) => {
+      if (!node || typeof node !== 'object') {
+        return;
+      }
+      visitor(node, repeater);
+      const inner = node.type === REPEATER_TYPE ? node : repeater;
+      nodeLists(node).forEach((child) => walk(child, inner));
+    });
+  };
+  walk(fields, null);
+}
+
+/**
+ * Find a field node by its builder node ID (or, without one, by its ID), with
+ * the Repeater it belongs to.
+ *
+ * @param {Array}       fields   Schema fields.
+ * @param {string}      key      Field ID.
+ * @param {string|null} nodeId   Builder node ID.
+ * @return {{ node: Object, repeater: Object|null }|null} Match.
+ */
+export function locateField(fields, key, nodeId = null) {
+  let found = null;
+  walkFields(fields, (node, repeater) => {
+    if (found || typeof node.type !== 'string') {
+      return;
+    }
+    if (nodeId ? node.id === nodeId : nodeKey(node) === key) {
+      found = { node, repeater };
+    }
+  });
+  return found;
+}
+
+/**
+ * IDs a field cannot take: those of the other fields in its namespace. The
+ * form is one namespace; each Repeater is its own, because its fields are
+ * answered inside each group (the server applies the same rule).
+ *
+ * @param {Array}  fields Schema fields.
+ * @param {string} nodeId Builder node ID of the field being edited.
+ * @return {Set<string>} IDs.
+ */
+export function namespaceKeys(fields, nodeId) {
+  const target = locateField(fields, '', nodeId);
+  const scope = target ? target.repeater : null;
+  const keys = new Set();
+  walkFields(fields, (node, repeater) => {
+    const key = nodeKey(node);
+    if (key && repeater === scope && node.id !== nodeId) {
+      keys.add(key);
+    }
+  });
+  return keys;
+}
+
 /**
  * Why a new ID cannot be used, or '' when it can.
  *
@@ -175,28 +258,66 @@ export function renameKeyInText(text, oldKey, newKey) {
  * payment settings. Entries are not touched; their answers stay under the
  * old ID.
  *
- * @param {Object} schema Form schema.
- * @param {string} oldKey Current ID.
- * @param {string} newKey New ID.
+ * Only the selected field is renamed. A field inside a Repeater lives in
+ * that Repeater's namespace: references inside the Repeater follow, and so
+ * do {repeater.field} tags elsewhere. A field outside Repeaters leaves alone
+ * any Repeater that has its own field with the same ID.
+ *
+ * @param {Object}      schema Form schema.
+ * @param {string}      oldKey Current ID.
+ * @param {string}      newKey New ID.
+ * @param {string|null} nodeId Builder node ID of the field (recommended; without
+ *   it the first field with the old ID is renamed).
  * @return {{ schema: Object, references: number }} New schema, and how many
  *   references other than the field itself were updated.
  */
-export function renameFieldKey(schema, oldKey, newKey) {
+export function renameFieldKey(schema, oldKey, newKey, nodeId = null) {
   if (!schema || !oldKey || !newKey || oldKey === newKey) {
     return { schema, references: 0 };
   }
+  const where = locateField(schema.fields, oldKey, nodeId);
+  if (!where || nodeKey(where.node) !== oldKey) {
+    return { schema, references: 0 };
+  }
+  const target = where.node;
+  const owner = where.repeater;
+  const ownerKey = owner ? nodeKey(owner) : '';
+  // Repeaters that answer their own field with the old ID: a rename from
+  // outside does not reach into them.
+  const shadowing = (node) =>
+    node &&
+    node.type === REPEATER_TYPE &&
+    node !== owner &&
+    locateField(nodeLists(node).flat(), oldKey) !== null;
+
   let references = 0;
 
-  const visit = (value, path) => {
-    if (typeof value === 'string') {
-      const result = renameKeyInText(value, oldKey, newKey);
+  const text = (value, inScope) => {
+    let out = value;
+    if (inScope) {
+      const result = renameKeyInText(out, oldKey, newKey);
       references += result.count;
-      return result.text;
+      out = result.text;
+    }
+    if (ownerKey) {
+      const dotted = renameKeyInText(out, `${ownerKey}.${oldKey}`, `${ownerKey}.${newKey}`);
+      references += dotted.count;
+      out = dotted.text;
+    }
+    return out;
+  };
+
+  // Properties that hold a node's own fields.
+  const LIST_PROPS = new Set(['children', 'fields', 'columns']);
+
+  const visit = (value, path, inScope) => {
+    if (typeof value === 'string') {
+      return text(value, inScope);
     }
     if (Array.isArray(value)) {
       let changed = false;
       const next = value.map((item, i) => {
-        const out = visit(item, path.concat(i));
+        const out = visit(item, path.concat(i), inScope);
         changed = changed || out !== item;
         return out;
       });
@@ -205,20 +326,38 @@ export function renameFieldKey(schema, oldKey, newKey) {
     if (!value || typeof value !== 'object') {
       return value;
     }
+    // A Repeater's own settings (its ID, label, logic) belong to the
+    // namespace around it; its fields belong to its own namespace.
+    let listScope = inScope;
+    if (value === owner) {
+      listScope = true;
+    } else if (!owner && shadowing(value)) {
+      listScope = false;
+    }
+    return visitObject(value, path, inScope, listScope);
+  };
 
+  const visitObject = (value, path, ownScope, listScope) => {
     const contextProps = Object.keys(CONTEXT_PROPS)
       .filter((name) => path.includes(name))
       .map((name) => CONTEXT_PROPS[name]);
-    // The field being renamed: a node with a type and this key.
-    const isTarget = typeof value.type === 'string' && value.key === oldKey;
+    const isTarget = value === target;
     let changed = false;
     const next = {};
     Object.keys(value).forEach((prop) => {
       const item = value[prop];
+      const scope = LIST_PROPS.has(prop) ? listScope : ownScope;
       let out;
       if (prop === 'key' && isTarget) {
         out = newKey;
+      } else if (prop === 'config' && item && typeof item === 'object' && !Array.isArray(item) && (isTarget || listScope !== ownScope)) {
+        // A node wrapped in `config` keeps its ID and fields there.
+        out = visitObject(item, path.concat(prop), ownScope, listScope);
+        if (isTarget && item.key === oldKey) {
+          out = { ...out, key: newKey };
+        }
       } else if (
+        scope &&
         typeof item === 'string' &&
         item === oldKey &&
         (REFERENCE_PROPS.has(prop) || contextProps.some((set) => set.has(prop)))
@@ -226,7 +365,7 @@ export function renameFieldKey(schema, oldKey, newKey) {
         out = newKey;
         references += 1;
       } else {
-        out = visit(item, path.concat(prop));
+        out = visit(item, path.concat(prop), scope);
       }
       changed = changed || out !== item;
       next[prop] = out;
@@ -234,5 +373,5 @@ export function renameFieldKey(schema, oldKey, newKey) {
     return changed ? next : value;
   };
 
-  return { schema: visit(schema, []), references };
+  return { schema: visit(schema, [], !owner), references };
 }

@@ -14,7 +14,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../ui/Icon';
 import AdminShell from '../components/AdminShell';
-import { useViewportMatch } from '@wordpress/compose';
+import usePhoneLayout from '../hooks/usePhoneLayout';
 import SmallScreenNotice, { useSmallScreenChoice } from '../components/builder/layout/SmallScreenNotice';
 import CreateFormWizard from '../components/CreateFormWizard';
 import {
@@ -70,7 +70,7 @@ function FormBuilderInner({
 }) {
   const navigate = useNavigate();
   // UX2-17: below 600px the builder explains it needs a wider screen.
-  const isSmallScreen = useViewportMatch('small', '<');
+  const isSmallScreen = usePhoneLayout();
   const [openSmallAnyway, openBuilderAnyway] = useSmallScreenChoice();
   // Builder FSM State (replaces individual useState calls)
   const [builderState, dispatch] = useBuilderReducer(formId);
