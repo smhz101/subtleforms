@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-19T23:52:53+00:00\n"
+"POT-Creation-Date: 2026-10-20T00:38:03+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -291,9 +291,9 @@ msgstr ""
 #: src/Api/SubmissionsApi.php:1095
 #: src/Privacy/PrivacyExporter.php:101
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:299
-#: resources/admin/components/FormsList.jsx:42
-#: resources/admin/components/FormsList.jsx:278
-#: resources/admin/components/FormsList.jsx:953
+#: resources/admin/components/FormsList.jsx:43
+#: resources/admin/components/FormsList.jsx:280
+#: resources/admin/components/FormsList.jsx:955
 #: resources/admin/components/SubmissionsTable.jsx:45
 #: resources/admin/components/SubmissionsTable.jsx:667
 #: resources/admin/pages/PaymentsPage.jsx:511
@@ -312,7 +312,7 @@ msgstr ""
 
 #: src/Admin/AdminMenu.php:1107
 #: resources/admin/components/builder/ContainerWrapper.jsx:77
-#: resources/admin/components/builder/FieldInspector.jsx:230
+#: resources/admin/components/builder/FieldInspector.jsx:229
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:54
 #: resources/admin/pages/PaymentsPage.jsx:579
 msgid "Delete"
@@ -555,7 +555,7 @@ msgstr ""
 #. translators: %s: title of the form being copied
 #. translators: %s: form title
 #: src/Api/FormsApi.php:1070
-#: resources/admin/components/FormsList.jsx:494
+#: resources/admin/components/FormsList.jsx:496
 #, php-format,js-format
 msgid "%s (copy)"
 msgstr ""
@@ -1523,7 +1523,7 @@ msgid "Chained Select"
 msgstr ""
 
 #: src/Fields/CoreFields.php:721
-#: resources/admin/components/builder/FieldInspector.jsx:297
+#: resources/admin/components/builder/FieldInspector.jsx:296
 #: resources/admin/components/builder/inspector/controls/ChainedDisplayControl.jsx:8
 msgid "Dropdowns"
 msgstr ""
@@ -1693,7 +1693,7 @@ msgid "Disclaimer Text"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1173
-#: resources/admin/components/builder/FieldInspector.jsx:194
+#: resources/admin/components/builder/FieldInspector.jsx:193
 msgid "Style"
 msgstr ""
 
@@ -1783,7 +1783,7 @@ msgstr ""
 #: src/Tools/FormMigration.php:325
 #: src/Tools/FormMigration.php:492
 #: resources/admin/components/builder/ContainerRenderer.jsx:38
-#: resources/admin/components/builder/FieldInspector.jsx:44
+#: resources/admin/components/builder/FieldInspector.jsx:46
 #: resources/admin/components/builder/FieldRenderer.jsx:587
 #: resources/admin/components/OnboardingWizard.jsx:555
 #: resources/frontend/components/StepNavigation.jsx:15
@@ -3810,8 +3810,8 @@ msgid "Error deleting submission #%1$d: %2$s"
 msgstr ""
 
 #: src/Privacy/PrivacyExporter.php:93
-#: resources/admin/components/FormsList.jsx:40
-#: resources/admin/components/FormsList.jsx:248
+#: resources/admin/components/FormsList.jsx:41
+#: resources/admin/components/FormsList.jsx:250
 msgid "Form Name"
 msgstr ""
 
@@ -3970,25 +3970,33 @@ msgstr ""
 
 #. translators: %s: field key
 #: src/Support/SchemaValidator.php:97
+#: src/Support/SchemaValidator.php:122
 #, php-format
 msgid "The field ID %s can only use letters, numbers, _ and -, up to 64 characters."
 msgstr ""
 
 #. translators: %s: field key
 #: src/Support/SchemaValidator.php:100
-#: src/Support/SchemaValidator.php:467
+#: src/Support/SchemaValidator.php:125
+#: src/Support/SchemaValidator.php:524
 #, php-format
 msgid "SubtleForms uses %s itself. Give the field another ID."
 msgstr ""
 
+#. translators: 1: Repeater field ID, 2: field ID
+#: src/Support/SchemaValidator.php:119
+#, php-format
+msgid "Two fields in the repeater %1$s use the ID %2$s. Give one of them another ID."
+msgstr ""
+
 #. translators: %s: CAPTCHA provider name, such as reCAPTCHA
-#: src/Support/SchemaValidator.php:580
+#: src/Support/SchemaValidator.php:637
 #, php-format
 msgid "A form can have only one %s field. Remove the extra one or choose another provider for it."
 msgstr ""
 
 #. translators: %s: field key
-#: src/Support/SchemaValidator.php:687
+#: src/Support/SchemaValidator.php:744
 #, php-format
 msgid "The single checkbox \"%s\" has a list of options. Use a Multiple choice field for several options."
 msgstr ""
@@ -5911,8 +5919,8 @@ msgid "Move Down"
 msgstr ""
 
 #: resources/admin/components/builder/ContainerWrapper.jsx:71
-#: resources/admin/components/builder/FieldInspector.jsx:221
-#: resources/admin/components/FormsList.jsx:443
+#: resources/admin/components/builder/FieldInspector.jsx:220
+#: resources/admin/components/FormsList.jsx:445
 msgid "Duplicate"
 msgstr ""
 
@@ -5967,7 +5975,7 @@ msgstr ""
 #: resources/admin/components/builder/inspector/panels/OptionsPanel.jsx:329
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:96
 #: resources/admin/components/CreateFormWizard.jsx:186
-#: resources/admin/components/FormsList.jsx:964
+#: resources/admin/components/FormsList.jsx:966
 #: resources/admin/modals/ConfirmModal.jsx:32
 #: resources/admin/modals/CreateFormModal.jsx:395
 #: resources/admin/pages/CreateFormPage.jsx:261
@@ -6046,12 +6054,12 @@ msgid "Field group. Press Enter to select."
 msgstr ""
 
 #: resources/admin/components/builder/FieldDock.jsx:22
-#: resources/admin/components/builder/FieldInspector.jsx:288
+#: resources/admin/components/builder/FieldInspector.jsx:287
 msgid "Choices"
 msgstr ""
 
 #: resources/admin/components/builder/FieldDock.jsx:23
-#: resources/admin/components/builder/FieldInspector.jsx:417
+#: resources/admin/components/builder/FieldInspector.jsx:416
 #: resources/admin/components/builder/FormSettings.jsx:198
 #: resources/admin/components/builder/FormSettings.jsx:200
 #: resources/blocks/form/edit.jsx:362
@@ -6108,7 +6116,7 @@ msgstr ""
 
 #: resources/admin/components/builder/FieldDock.jsx:253
 #: resources/admin/components/builder/FieldDock.jsx:269
-#: resources/admin/components/builder/FieldInspector.jsx:129
+#: resources/admin/components/builder/FieldInspector.jsx:131
 #: resources/admin/components/builder/FormEditor.jsx:72
 msgid "Search fields"
 msgstr ""
@@ -6123,31 +6131,31 @@ msgstr ""
 msgid "Results"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:50
+#: resources/admin/components/builder/FieldInspector.jsx:52
 msgid "Moving it takes the field out of its container and puts it at the end of the chosen step."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:51
+#: resources/admin/components/builder/FieldInspector.jsx:53
 msgid "Moves the field to the end of the chosen step."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:102
+#: resources/admin/components/builder/FieldInspector.jsx:104
 msgid "This required field has no label, so visitors won’t know what to enter."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:106
+#: resources/admin/components/builder/FieldInspector.jsx:108
 msgid "Add at least one option."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:119
+#: resources/admin/components/builder/FieldInspector.jsx:121
 msgid "No field selected"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:122
+#: resources/admin/components/builder/FieldInspector.jsx:124
 msgid "Select a field on the canvas to edit its label, options, validation and logic."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:133
+#: resources/admin/components/builder/FieldInspector.jsx:135
 #: resources/admin/components/builder/FieldKeyEditor.jsx:211
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:231
 #: resources/admin/components/SubmissionsTable.jsx:430
@@ -6157,57 +6165,57 @@ msgstr ""
 msgid "Undo"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:136
+#: resources/admin/components/builder/FieldInspector.jsx:138
 msgid "Delete selected field"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:154
+#: resources/admin/components/builder/FieldInspector.jsx:156
 #: resources/admin/utils/saveErrors.js:14
 msgid "Logic"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:174
+#: resources/admin/components/builder/FieldInspector.jsx:173
 #: resources/admin/components/builder/LogicEditor.jsx:243
 msgid "Field"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:181
+#: resources/admin/components/builder/FieldInspector.jsx:180
 msgid "Validation"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:238
+#: resources/admin/components/builder/FieldInspector.jsx:237
 msgid "Close settings"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:268
+#: resources/admin/components/builder/FieldInspector.jsx:267
 #: resources/admin/components/builder/FormSettings.jsx:164
 #: resources/admin/pages/SettingsPage.jsx:31
 msgid "General"
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:344
+#: resources/admin/components/builder/FieldInspector.jsx:343
 msgid "Skip this step unless its rules match. Fields in a skipped step are not checked or saved."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:346
+#: resources/admin/components/builder/FieldInspector.jsx:345
 msgid "Show or hide this repeater based on answers to other fields. A hidden repeater, including every row inside it, is not checked or saved."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:348
+#: resources/admin/components/builder/FieldInspector.jsx:347
 msgid "Add this fee only when its rules match. A hidden fee is not charged and not listed in the order."
 msgstr ""
 
 #. translators: %s: field label
-#: resources/admin/components/builder/FieldInspector.jsx:351
+#: resources/admin/components/builder/FieldInspector.jsx:350
 #, js-format
 msgid "Show or hide “%s” based on answers to other fields. Hidden fields are not checked or saved."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:361
+#: resources/admin/components/builder/FieldInspector.jsx:360
 msgid "This step is always shown."
 msgstr ""
 
-#: resources/admin/components/builder/FieldInspector.jsx:395
+#: resources/admin/components/builder/FieldInspector.jsx:394
 #: resources/admin/pages/SettingsPage.jsx:37
 msgid "Display"
 msgstr ""
@@ -6612,20 +6620,20 @@ msgid "No fields match"
 msgstr ""
 
 #. translators: %s: field label
-#: resources/admin/components/builder/FormEditor.jsx:402
+#: resources/admin/components/builder/FormEditor.jsx:403
 #, js-format
 msgid "\"%s\" was a single checkbox with a list of options, so it is now a Multiple choice field where visitors can tick any of them. Publish to update the live form."
 msgstr ""
 
 #. translators: %d: number of fields
-#: resources/admin/components/builder/FormEditor.jsx:417
+#: resources/admin/components/builder/FormEditor.jsx:418
 #, js-format
 msgid "%d field was outside every step, so it was moved into the first step. Save or publish to keep this."
 msgid_plural "%d fields were outside every step, so they were moved into the first step. Save or publish to keep this."
 msgstr[0] ""
 msgstr[1] ""
 
-#: resources/admin/components/builder/FormEditor.jsx:433
+#: resources/admin/components/builder/FormEditor.jsx:434
 msgid "Tip: Click a field (or container) to edit its settings."
 msgstr ""
 
@@ -7489,8 +7497,8 @@ msgstr ""
 #: resources/admin/components/builder/layout/BuilderCanvasArea.jsx:60
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:199
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:208
-#: resources/admin/components/FormsList.jsx:806
-#: resources/admin/components/FormsList.jsx:861
+#: resources/admin/components/FormsList.jsx:808
+#: resources/admin/components/FormsList.jsx:863
 #: resources/admin/components/SubmissionsTable.jsx:825
 #: resources/admin/components/SubmissionsTable.jsx:845
 #: resources/admin/pages/BuilderPage.jsx:718
@@ -7566,7 +7574,7 @@ msgstr ""
 
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:276
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:78
-#: resources/admin/components/FormsList.jsx:967
+#: resources/admin/components/FormsList.jsx:969
 msgid "Update"
 msgstr ""
 
@@ -7663,8 +7671,8 @@ msgstr ""
 
 #: resources/admin/components/builder/layout/BuilderViewSwitcher.jsx:14
 #: resources/admin/components/BuilderTour.jsx:114
-#: resources/admin/components/FormsList.jsx:44
-#: resources/admin/components/FormsList.jsx:314
+#: resources/admin/components/FormsList.jsx:45
+#: resources/admin/components/FormsList.jsx:316
 msgid "Entries"
 msgstr ""
 
@@ -8307,82 +8315,82 @@ msgstr ""
 msgid "Nothing in this view yet."
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:41
-#: resources/admin/components/FormsList.jsx:263
+#: resources/admin/components/FormsList.jsx:42
+#: resources/admin/components/FormsList.jsx:265
 msgid "Type"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:43
-#: resources/admin/components/FormsList.jsx:294
+#: resources/admin/components/FormsList.jsx:44
+#: resources/admin/components/FormsList.jsx:296
 msgid "Shortcode"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:45
-#: resources/admin/components/FormsList.jsx:350
+#: resources/admin/components/FormsList.jsx:46
+#: resources/admin/components/FormsList.jsx:352
 msgid "Conversion (30 days)"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:46
-#: resources/admin/components/FormsList.jsx:360
+#: resources/admin/components/FormsList.jsx:47
+#: resources/admin/components/FormsList.jsx:362
 msgid "Last Updated"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:110
+#: resources/admin/components/FormsList.jsx:112
 msgid "Shortcode copied to clipboard"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:118
+#: resources/admin/components/FormsList.jsx:120
 msgid "Failed to copy shortcode"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:192
-#: resources/admin/components/FormsList.jsx:857
+#: resources/admin/components/FormsList.jsx:194
+#: resources/admin/components/FormsList.jsx:859
 msgid "Forms could not be loaded."
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:255
+#: resources/admin/components/FormsList.jsx:257
 #: resources/admin/pages/SubmissionsPage.jsx:273
 msgid "New"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:305
+#: resources/admin/components/FormsList.jsx:307
 msgid "Click to copy"
 msgstr ""
 
 #. translators: %1$d: unread count, %2$d: total submissions
-#: resources/admin/components/FormsList.jsx:329
+#: resources/admin/components/FormsList.jsx:331
 #, js-format
 msgid "%1$d unread, %2$d total entries"
 msgstr ""
 
 #. translators: %d: number of unread entries
-#: resources/admin/components/FormsList.jsx:339
+#: resources/admin/components/FormsList.jsx:341
 #, js-format
 msgid "%d new"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:385
+#: resources/admin/components/FormsList.jsx:387
 #: resources/admin/pages/PaymentsPage.jsx:572
 #: resources/frontend/components/ConversationalFormRenderer.jsx:501
 msgid "Edit"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:396
+#: resources/admin/components/FormsList.jsx:398
 msgid "More actions"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:411
-#: resources/admin/components/FormsList.jsx:829
+#: resources/admin/components/FormsList.jsx:413
+#: resources/admin/components/FormsList.jsx:831
 #: resources/admin/components/SubmissionsTable.jsx:766
 #: resources/admin/components/SubmissionsTable.jsx:885
 #: resources/admin/pages/SubmissionDetailPage.jsx:807
 msgid "Restore"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:421
-#: resources/admin/components/FormsList.jsx:654
-#: resources/admin/components/FormsList.jsx:833
-#: resources/admin/components/FormsList.jsx:940
+#: resources/admin/components/FormsList.jsx:423
+#: resources/admin/components/FormsList.jsx:656
+#: resources/admin/components/FormsList.jsx:835
+#: resources/admin/components/FormsList.jsx:942
 #: resources/admin/components/SubmissionsTable.jsx:778
 #: resources/admin/components/SubmissionsTable.jsx:791
 #: resources/admin/components/SubmissionsTable.jsx:889
@@ -8394,69 +8402,69 @@ msgstr ""
 msgid "Delete permanently"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:434
+#: resources/admin/components/FormsList.jsx:436
 msgid "Change status"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:452
+#: resources/admin/components/FormsList.jsx:454
 msgid "View submissions"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:462
-#: resources/admin/components/FormsList.jsx:654
-#: resources/admin/components/FormsList.jsx:848
-#: resources/admin/components/FormsList.jsx:941
+#: resources/admin/components/FormsList.jsx:464
+#: resources/admin/components/FormsList.jsx:656
+#: resources/admin/components/FormsList.jsx:850
+#: resources/admin/components/FormsList.jsx:943
 #: resources/admin/components/SubmissionsTable.jsx:791
 #: resources/admin/components/SubmissionsTable.jsx:924
 #: resources/admin/pages/SubmissionDetailPage.jsx:814
 msgid "Move to Trash"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:508
+#: resources/admin/components/FormsList.jsx:510
 msgid "Form duplicated"
 msgstr ""
 
 #. translators: %s: reason the copy failed
-#: resources/admin/components/FormsList.jsx:520
+#: resources/admin/components/FormsList.jsx:522
 #, js-format
 msgid "Failed to duplicate form: %s"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:523
+#: resources/admin/components/FormsList.jsx:525
 msgid "Failed to duplicate form. Please try again."
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:540
+#: resources/admin/components/FormsList.jsx:542
 msgid "Form moved to Trash"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:545
+#: resources/admin/components/FormsList.jsx:547
 #: resources/admin/hooks/useBuilderOrchestrator.js:777
 #: resources/admin/hooks/useBuilderOrchestrator.js:800
 msgid "Failed to delete form"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:556
+#: resources/admin/components/FormsList.jsx:558
 msgid "Form restored from Trash"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:561
+#: resources/admin/components/FormsList.jsx:563
 msgid "Failed to restore form"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:575
+#: resources/admin/components/FormsList.jsx:577
 msgid "Form permanently deleted"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:581
+#: resources/admin/components/FormsList.jsx:583
 msgid "Failed to permanently delete form"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:605
+#: resources/admin/components/FormsList.jsx:607
 msgid "Status updated"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:610
+#: resources/admin/components/FormsList.jsx:612
 #: resources/admin/pages/SubmissionDetailPage.jsx:401
 #: resources/admin/pages/SubmissionDetailPage.jsx:416
 #: resources/admin/pages/SubmissionDetailPage.jsx:431
@@ -8464,7 +8472,7 @@ msgid "Failed to update status"
 msgstr ""
 
 #. translators: %d: number of forms
-#: resources/admin/components/FormsList.jsx:630
+#: resources/admin/components/FormsList.jsx:632
 #, js-format
 msgid "%d form restored"
 msgid_plural "%d forms restored"
@@ -8472,13 +8480,13 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: 1: restored, 2: selected
-#: resources/admin/components/FormsList.jsx:639
+#: resources/admin/components/FormsList.jsx:641
 #, js-format
 msgid "Some forms could not be restored (%1$d of %2$d restored)."
 msgstr ""
 
 #. translators: %d: number of forms
-#: resources/admin/components/FormsList.jsx:658
+#: resources/admin/components/FormsList.jsx:660
 #, js-format
 msgid "Delete %d form permanently? Its entries are deleted too. This cannot be undone."
 msgid_plural "Delete %d forms permanently? Their entries are deleted too. This cannot be undone."
@@ -8486,21 +8494,21 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: number of forms
-#: resources/admin/components/FormsList.jsx:668
+#: resources/admin/components/FormsList.jsx:670
 #, js-format
 msgid "Move %d form to the Trash? You can restore it from the Trash tab."
 msgid_plural "Move %d forms to the Trash? You can restore them from the Trash tab."
 msgstr[0] ""
 msgstr[1] ""
 
-#: resources/admin/components/FormsList.jsx:706
+#: resources/admin/components/FormsList.jsx:708
 #, js-format
 msgid "%1$d form permanently deleted"
 msgid_plural "%1$d forms permanently deleted"
 msgstr[0] ""
 msgstr[1] ""
 
-#: resources/admin/components/FormsList.jsx:707
+#: resources/admin/components/FormsList.jsx:709
 #, js-format
 msgid "%1$d form moved to the Trash"
 msgid_plural "%1$d forms moved to the Trash"
@@ -8508,79 +8516,79 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %1$d: number deleted, %2$d: total requested
-#: resources/admin/components/FormsList.jsx:718
+#: resources/admin/components/FormsList.jsx:720
 #, js-format
 msgid "Failed to delete some forms (%1$d/%2$d deleted)"
 msgstr ""
 
 #. translators: %1$d: number of forms updated
-#: resources/admin/components/FormsList.jsx:752
+#: resources/admin/components/FormsList.jsx:754
 #, js-format
 msgid "%1$d forms updated"
 msgstr ""
 
 #. translators: %1$d: number updated, %2$d: total requested
-#: resources/admin/components/FormsList.jsx:763
+#: resources/admin/components/FormsList.jsx:765
 #, js-format
 msgid "Failed to update some forms (%1$d/%2$d updated)"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:798
+#: resources/admin/components/FormsList.jsx:800
 msgid "Tip: click any row to open the builder, or use the ⋮ menu to duplicate, export or delete."
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:840
+#: resources/admin/components/FormsList.jsx:842
 msgid "Mark as Published"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:844
+#: resources/admin/components/FormsList.jsx:846
 msgid "Mark as Draft"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:858
+#: resources/admin/components/FormsList.jsx:860
 msgid "Check your connection, then try again."
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:880
+#: resources/admin/components/FormsList.jsx:882
 #: resources/admin/pages/CreateFormPage.jsx:249
 #: resources/admin/pages/DashboardPage.jsx:31
 #: resources/admin/pages/FormsPage.jsx:148
 msgid "New form"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:895
+#: resources/admin/components/FormsList.jsx:897
 msgid "Delete form permanently"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:896
+#: resources/admin/components/FormsList.jsx:898
 msgid "Move Form to Trash"
 msgstr ""
 
 #. translators: %1$d: number of submissions belonging to this form
-#: resources/admin/components/FormsList.jsx:905
+#: resources/admin/components/FormsList.jsx:907
 #, js-format
 msgid "Are you sure you want to permanently delete this form? It has %1$d submissions which will also be permanently deleted. This action cannot be undone."
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:911
+#: resources/admin/components/FormsList.jsx:913
 msgid "Are you sure you want to permanently delete this form? This action cannot be undone."
 msgstr ""
 
 #. translators: %1$d: number of submissions belonging to this form
-#: resources/admin/components/FormsList.jsx:919
+#: resources/admin/components/FormsList.jsx:921
 #, js-format
 msgid "Move this form to the Trash? It has %1$d submissions, which will be kept with the form and can be restored."
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:925
+#: resources/admin/components/FormsList.jsx:927
 msgid "Move this form to the Trash? You can restore it or delete it permanently from the Trash tab."
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:948
+#: resources/admin/components/FormsList.jsx:950
 msgid "Change Status"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:957
+#: resources/admin/components/FormsList.jsx:959
 #: resources/admin/components/settings/GeneralSettings.jsx:30
 #: resources/admin/pages/DashboardPage.jsx:310
 #: resources/admin/pages/FormsPage.jsx:124
@@ -8588,14 +8596,14 @@ msgstr ""
 msgid "Draft"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:958
+#: resources/admin/components/FormsList.jsx:960
 #: resources/admin/components/settings/GeneralSettings.jsx:32
 #: resources/admin/pages/FormsPage.jsx:123
 #: resources/admin/utils/formMeta.js:170
 msgid "Published"
 msgstr ""
 
-#: resources/admin/components/FormsList.jsx:959
+#: resources/admin/components/FormsList.jsx:961
 #: resources/admin/utils/formMeta.js:176
 #: resources/admin/utils/submissionStatus.js:18
 msgid "Archived"
