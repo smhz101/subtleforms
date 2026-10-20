@@ -118,6 +118,23 @@ final class FieldKeys241Test extends TestCase {
 		$invalid = $this->errors( array( $repeater( array( array( 'type' => 'text', 'key' => 'bad key!', 'label' => 'Bad' ) ) ) ) );
 		$this->assertCount( 1, $invalid );
 
+		// The wrapped shape keeps the fields in config.children.
+		$wrapped = $this->errors(
+			array(
+				array(
+					'type'   => 'repeat_container',
+					'key'    => 'offices',
+					'config' => array(
+						'key'      => 'offices',
+						'label'    => 'Offices',
+						'children' => array( array( 'type' => 'text', 'key' => 'city', 'label' => 'City' ), array( 'type' => 'text', 'key' => 'city', 'label' => 'Town' ) ),
+					),
+				),
+			)
+		);
+		$this->assertCount( 1, $wrapped );
+		$this->assertStringContainsString( 'repeater offices use the ID city', $wrapped[0] );
+
 		// Two Repeaters, inside a step, may use the same IDs as each other.
 		$this->assertSame(
 			array(),

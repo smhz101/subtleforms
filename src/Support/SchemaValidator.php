@@ -108,7 +108,12 @@ final class SchemaValidator {
 		foreach ( self::repeaters( (array) ( $schema['fields'] ?? array() ) ) as $repeater ) {
 			$name   = (string) ( $repeater['key'] ?? ( $repeater['config']['key'] ?? '' ) );
 			$counts = array();
-			foreach ( Repeater::childFields( $repeater ) as $entry ) {
+			// A wrapped node keeps its fields in config.children.
+			$children = Repeater::children( $repeater );
+			if ( ! $children && isset( $repeater['config']['children'] ) && is_array( $repeater['config']['children'] ) ) {
+				$children = array_values( array_filter( $repeater['config']['children'], 'is_array' ) );
+			}
+			foreach ( FieldMapper::fields( array( 'fields' => $children ) ) as $entry ) {
 				$key            = (string) $entry['key'];
 				$counts[ $key ] = ( $counts[ $key ] ?? 0 ) + 1;
 			}
