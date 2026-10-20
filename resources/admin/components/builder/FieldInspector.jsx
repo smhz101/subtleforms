@@ -10,6 +10,8 @@ import ChainedCsvControl from './inspector/controls/ChainedCsvControl';
 import { chainedUsesCsv } from '../../../shared/chainedLevels';
 import { useBuilder } from './context/BuilderContext';
 import FieldKeyEditor from './FieldKeyEditor';
+import { namespaceKeys } from '../../../shared/fieldKeys';
+import { denormalizeTree } from './utils/schemaTree';
 import { useConfig } from './context/ConfigContext';
 import {
   OptionsPanel,
@@ -162,13 +164,10 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
   const FieldIcon = getIcon(field.type);
   const typeLabel = definition?.label || field.type?.replace(/_/g, ' ');
   const fieldKey = field.key;
-  // IDs of every other field, for the field ID editor.
-  const usedKeys = new Set(
-    Object.values(tree?.nodes || {})
-      .filter((node) => node && node.id !== selectedId)
-      .map((node) => node.config?.key)
-      .filter(Boolean)
-  );
+  // IDs the field cannot take: the other fields of its namespace (the form,
+  // or the Repeater it is in), the same rule the server applies.
+  // (Computed directly: a hook here would follow the early return above.)
+  const usedKeys = tree ? namespaceKeys(denormalizeTree(tree), selectedId) : new Set();
 
   const tabs = [
     { name: 'settings', title: __('Field', 'subtleforms') },

@@ -230,7 +230,8 @@ export default function FormEditor({
         schema_version: schemaRef.current?.schema_version || 1,
         fields: denormalizeTree(tree),
       };
-      const { schema: next, references } = renameFieldKey(current, oldKey, newKey);
+      // Only the selected field is renamed, in its own namespace (review of #47).
+      const { schema: next, references } = renameFieldKey(current, oldKey, newKey, nodeId);
       onChange(next);
       return { oldKey, newKey, references };
     },

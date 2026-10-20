@@ -5,6 +5,7 @@ import {
   renameKeyInText,
   tidyFieldKey,
   FIELD_KEY_MAX,
+  namespaceKeys,
 } from './fieldKeys';
 
 describe('field ID rules (2.4.1)', () => {
@@ -145,5 +146,59 @@ describe('renameFieldKey', () => {
 
   test('renaming back restores the schema', () => {
     expect(renameFieldKey(out, 'customer_email', 'email').schema).toEqual(schema);
+  });
+});
+
+describe('field IDs in Repeaters (2.4.1, review of #47)', () => {
+  const form = () => ({
+    fields: [
+      { id: 'n1', type: 'text', key: 'city', label: 'City' },
+      {
+        id: 'n2',
+        type: 'repeat_container',
+        key: 'offices',
+        label: 'Offices',
+        logic: { rules: [{ field: 'city', operator: 'not_empty' }] },
+        children: [
+          { id: 'n3', type: 'text', key: 'city', label: 'Office city' },
+          { id: 'n4', type: 'text', key: 'note', label: 'Note for {city}', logic: { rules: [{ field: 'city', operator: 'not_empty' }] } },
+        ],
+      },
+      { id: 'n5', type: 'text', key: 'zip', label: 'Zip' },
+    ],
+    settings: { notifications: [{ body: 'City {city}; offices {offices.city}' }] },
+  });
+
+  test('renaming the form field leaves the Repeater field with the same ID alone', () => {
+    const { schema, references } = renameFieldKey(form(), 'city', 'town', 'n1');
+    expect(schema.fields[0].key).toBe('town');
+    const repeater = schema.fields[1];
+    expect(repeater.children[0].key).toBe('city');
+    expect(repeater.children[1].label).toBe('Note for {city}');
+    expect(repeater.children[1].logic.rules[0].field).toBe('city');
+    // The Repeater's own logic sits in the form's namespace.
+    expect(repeater.logic.rules[0].field).toBe('town');
+    expect(schema.settings.notifications[0].body).toBe('City {town}; offices {offices.city}');
+    expect(references).toBe(2);
+  });
+
+  test('renaming the Repeater field changes only that Repeater and its {repeater.field} tags', () => {
+    const { schema, references } = renameFieldKey(form(), 'city', 'office_city', 'n3');
+    expect(schema.fields[0].key).toBe('city');
+    const repeater = schema.fields[1];
+    expect(repeater.children[0].key).toBe('office_city');
+    expect(repeater.children[1].label).toBe('Note for {office_city}');
+    expect(repeater.children[1].logic.rules[0].field).toBe('office_city');
+    expect(repeater.logic.rules[0].field).toBe('city');
+    expect(schema.settings.notifications[0].body).toBe('City {city}; offices {offices.office_city}');
+    expect(references).toBe(3);
+  });
+
+  test('each Repeater is its own namespace for taken IDs', () => {
+    const fields = form().fields;
+    expect([...namespaceKeys(fields, 'n1')].sort()).toEqual(['offices', 'zip']);
+    expect([...namespaceKeys(fields, 'n3')].sort()).toEqual(['note']);
+    expect(fieldKeyProblem('note', namespaceKeys(fields, 'n3'))).toBe('taken');
+    expect(fieldKeyProblem('zip', namespaceKeys(fields, 'n3'))).toBe('');
   });
 });
