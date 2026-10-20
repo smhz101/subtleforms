@@ -41,6 +41,7 @@ import {
 } from '../components/builder/layout/BuilderHeaderBar';
 import BuilderViewSwitcher from '../components/builder/layout/BuilderViewSwitcher';
 import BuilderCanvasArea from '../components/builder/layout/BuilderCanvasArea';
+import BuilderNarrowScreen from '../components/builder/layout/BuilderNarrowScreen';
 import BuilderModalsController from '../components/builder/layout/BuilderModalsController';
 import { enrichSchemaWithProMarkers } from '../utils/schemaEnricher';
 import { getFormTypeBadgeConfig } from '../utils/formMeta';
@@ -774,6 +775,7 @@ function FormBuilderInner({
           />
         }
         noScroll={true}>
+        <BuilderNarrowScreen />
         <BuilderCanvasArea
           view={builderView}
           saveError={saveError}
