@@ -7,7 +7,7 @@
  * forms) makes a draft copy; a failure shows the real reason.
  */
 const { test, expect } = require('@playwright/test');
-const { adminApi, publishForm, cleanup, loginPage, BASE, spamToken } = require('./helpers');
+const { adminApi, publishForm, cleanup, loginPage, BASE, spamToken, confirmModal } = require('./helpers');
 
 let client;
 const created = [];
@@ -65,8 +65,8 @@ test('trashing, the Trash tab, restore and permanent delete (QA-11)', async ({ p
   for (const f of [live, draft]) {
     await page.getByRole('checkbox', { name: `Select row ${f.id}`, exact: true }).check();
   }
-  page.once('dialog', (d) => d.accept());
   await page.locator('.sf-data-table__bulk-actions').getByRole('button', { name: 'Move to Trash' }).click();
+  await confirmModal(page, 'Move to Trash');
   await expect(row(page, `Trash live ${stamp}`)).toHaveCount(0);
   await expect(page.getByText('2 forms moved to the Trash').first()).toBeVisible({ timeout: 20000 });
 

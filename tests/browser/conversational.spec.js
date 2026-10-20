@@ -8,7 +8,7 @@
  * form shows the same questions in the same order.
  */
 const { test, expect } = require('@playwright/test');
-const { adminApi, cleanup, loginPage, openBuilder, openPanel, BASE } = require('./helpers');
+const { adminApi, cleanup, loginPage, openBuilder, openInspectorTab, BASE } = require('./helpers');
 
 const SHOTS = 'test-results/shots/free232';
 let client;
@@ -116,7 +116,7 @@ test('any question (a welcome screen too) can be edited, replaced, reordered and
 
   // The welcome screen is editable in the inspector.
   await question(page).click();
-  await openPanel(page, 'Appearance');
+  await openInspectorTab(page, 'Style');
   const content = page.getByLabel('HTML Content');
   await expect(content).toBeVisible();
   await content.fill('<p>Hello and welcome</p>');

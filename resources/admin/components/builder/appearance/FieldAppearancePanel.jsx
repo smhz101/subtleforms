@@ -198,9 +198,9 @@ export default function FieldAppearancePanel( { field, onUpdate, formAppearance,
         </div>
 
         { /* 2.3.2: hiding the label is the Field label visibility setting
-             on the Settings tab (one setting, also used by the form default). */ }
+             on the Style tab (one setting, also used by the form default). */ }
         <p className='sf-field-appearance__note'>
-          { __( 'To hide the label, use Field label visibility on the Settings tab.', 'subtleforms' ) }
+          { __( 'To hide the label, use Field label visibility on the Style tab.', 'subtleforms' ) }
         </p>
       </PanelBody>
 
