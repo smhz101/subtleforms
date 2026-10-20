@@ -100,7 +100,64 @@ final class SchemaValidator {
 				$problems[] = array( 'key' => $key, 'message' => sprintf( __( 'SubtleForms uses %s itself. Give the field another ID.', 'subtleforms' ), $key ) );
 			}
 		}
+
+		// A Repeater's fields are answered inside each group, so each Repeater
+		// is its own namespace: its fields may repeat an ID used outside it,
+		// but not each other's, and the same character and reserved rules
+		// apply (review of #47).
+		foreach ( self::repeaters( (array) ( $schema['fields'] ?? array() ) ) as $repeater ) {
+			$name   = (string) ( $repeater['key'] ?? ( $repeater['config']['key'] ?? '' ) );
+			$counts = array();
+			foreach ( Repeater::childFields( $repeater ) as $entry ) {
+				$key            = (string) $entry['key'];
+				$counts[ $key ] = ( $counts[ $key ] ?? 0 ) + 1;
+			}
+			foreach ( $counts as $key => $count ) {
+				$key = (string) $key;
+				if ( $count > 1 ) {
+					/* translators: 1: Repeater field ID, 2: field ID */
+					$problems[] = array( 'key' => $key, 'message' => sprintf( __( 'Two fields in the repeater %1$s use the ID %2$s. Give one of them another ID.', 'subtleforms' ), $name, $key ) );
+				} elseif ( ! preg_match( self::KEY_PATTERN, $key ) ) {
+					/* translators: %s: field key */
+					$problems[] = array( 'key' => $key, 'message' => sprintf( __( 'The field ID %s can only use letters, numbers, _ and -, up to 64 characters.', 'subtleforms' ), $key ) );
+				} elseif ( in_array( $key, self::RESERVED_KEYS, true ) ) {
+					/* translators: %s: field key */
+					$problems[] = array( 'key' => $key, 'message' => sprintf( __( 'SubtleForms uses %s itself. Give the field another ID.', 'subtleforms' ), $key ) );
+				}
+			}
+		}
 		return $problems;
+	}
+
+	/**
+	 * Every Repeater in a field list, at any depth, including Repeaters
+	 * inside another Repeater.
+	 *
+	 * @param array $fields Field list.
+	 * @return array<int,array> Repeater nodes.
+	 */
+	private static function repeaters( array $fields ): array {
+		$out = array();
+		foreach ( $fields as $node ) {
+			if ( ! is_array( $node ) ) {
+				continue;
+			}
+			if ( Repeater::isRepeater( $node ) ) {
+				$out[] = $node;
+			}
+			$lists = array( $node['children'] ?? null, $node['fields'] ?? null, $node['config']['children'] ?? null );
+			foreach ( (array) ( $node['columns'] ?? array() ) as $column ) {
+				if ( is_array( $column ) ) {
+					$lists[] = isset( $column[0] ) ? $column : ( $column['fields'] ?? ( $column['children'] ?? null ) );
+				}
+			}
+			foreach ( $lists as $list ) {
+				if ( is_array( $list ) ) {
+					$out = array_merge( $out, self::repeaters( $list ) );
+				}
+			}
+		}
+		return $out;
 	}
 
 	/**

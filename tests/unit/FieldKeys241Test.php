@@ -103,4 +103,36 @@ final class FieldKeys241Test extends TestCase {
 		);
 		$this->assertCount( 1, $messages );
 	}
+
+	public function test_each_repeater_checks_its_own_fields(): void {
+		$repeater = static fn( array $children ) => array( 'type' => 'repeat_container', 'key' => 'offices', 'label' => 'Offices', 'children' => $children );
+
+		$duplicate = $this->errors( array( $repeater( array( array( 'type' => 'text', 'key' => 'city', 'label' => 'City' ), array( 'type' => 'text', 'key' => 'city', 'label' => 'Town' ) ) ) ) );
+		$this->assertCount( 1, $duplicate );
+		$this->assertStringContainsString( 'repeater offices use the ID city', $duplicate[0] );
+
+		$reserved = $this->errors( array( $repeater( array( array( 'type' => 'text', 'key' => 'website_url', 'label' => 'Site' ) ) ) ) );
+		$this->assertCount( 1, $reserved );
+		$this->assertStringContainsString( 'website_url', $reserved[0] );
+
+		$invalid = $this->errors( array( $repeater( array( array( 'type' => 'text', 'key' => 'bad key!', 'label' => 'Bad' ) ) ) ) );
+		$this->assertCount( 1, $invalid );
+
+		// Two Repeaters, inside a step, may use the same IDs as each other.
+		$this->assertSame(
+			array(),
+			$this->errors(
+				array(
+					array(
+						'type'     => 'step',
+						'key'      => 'step_1',
+						'children' => array(
+							$repeater( array( array( 'type' => 'text', 'key' => 'city', 'label' => 'City' ) ) ),
+							array( 'type' => 'repeat_container', 'key' => 'homes', 'label' => 'Homes', 'children' => array( array( 'type' => 'text', 'key' => 'city', 'label' => 'City' ) ) ),
+						),
+					),
+				)
+			)
+		);
+	}
 }
