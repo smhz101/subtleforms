@@ -35,7 +35,7 @@ import { NoticeProvider, ErrorBoundary } from '../ui/feedback';
 import { ModalProvider } from '../ui/modals';
 import PageErrorBoundary from '../components/PageErrorBoundary';
 import { RouteLoadingFallback } from '../components/RouteTransition';
-import { CreateFormModal } from '../modals';
+import { CreateFormModal, ConfirmDialogHost } from '../modals';
 import { UpgradeModal } from '../ui';
 import useWpAdminSync from './useWpAdminSync';
 
@@ -407,6 +407,7 @@ export default function AdminApp() {
 			<QueryClientProvider client={queryClient}>
 				<NoticeProvider>
 					<ModalProvider>
+						<ConfirmDialogHost />
 						<MemoryRouter initialEntries={[getInitialPath()]}>
 							<AppContent />
 						</MemoryRouter>

@@ -586,17 +586,9 @@ function FormBuilderInner({
     if (!isDirty) {
       return;
     }
-    const ok = window.confirm(
-      __(
-        'Discard your unsaved changes and revert to the last saved version?',
-        'subtleforms'
-      )
-    );
-    if (!ok) {
-      return;
-    }
-    loadForm(true);
-  }, [isDirty, loadForm]);
+    // ConfirmModal in BuilderModalsController (showDiscardConfirm).
+    setShowDiscardConfirm(true);
+  }, [isDirty, setShowDiscardConfirm]);
 
   // Wrap handleSaveAndClose to delete the form when the user closes a newly
   // created form they never edited (instead of leaving an orphan draft).

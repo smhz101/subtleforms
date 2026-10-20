@@ -19,7 +19,7 @@ import { ContextualTip } from '../ui';
 import DataTable from './DataTable';
 import PerformanceCell from './analytics/PerformanceCell';
 import { useAnalyticsSummary } from './analytics/useAnalytics';
-import { ConfirmModal } from '../modals';
+import { ConfirmModal, askConfirm } from '../modals';
 import { apiGet, apiPost, apiPut, apiDelete } from '../utils/api';
 import { deletesPermanently } from '../utils/deleteBehavior';
 import { useSettings } from '../data';
@@ -647,31 +647,38 @@ export default function FormsList({
 
   const handleBulkDelete = async (ids) => {
     const permanent = deletesPermanently(hardDelete ? 'hard' : 'soft', statusFilter === 'trash');
-    if (
-      !window.confirm(
-        permanent
-          ? sprintf(
-              /* translators: %d: number of forms */
-              _n(
-                'Delete %d form permanently? Its entries are deleted too. This cannot be undone.',
-                'Delete %d forms permanently? Their entries are deleted too. This cannot be undone.',
-                ids.length,
-                'subtleforms'
-              ),
-              ids.length
-            )
-          : sprintf(
-              /* translators: %d: number of forms */
-              _n(
-                'Move %d form to the Trash? You can restore it from the Trash tab.',
-                'Move %d forms to the Trash? You can restore them from the Trash tab.',
-                ids.length,
-                'subtleforms'
-              ),
-              ids.length
-            )
-      )
-    ) {
+    const message = permanent
+      ? sprintf(
+          /* translators: %d: number of forms */
+          _n(
+            'Delete %d form permanently? Its entries are deleted too. This cannot be undone.',
+            'Delete %d forms permanently? Their entries are deleted too. This cannot be undone.',
+            ids.length,
+            'subtleforms'
+          ),
+          ids.length
+        )
+      : sprintf(
+          /* translators: %d: number of forms */
+          _n(
+            'Move %d form to the Trash? You can restore it from the Trash tab.',
+            'Move %d forms to the Trash? You can restore them from the Trash tab.',
+            ids.length,
+            'subtleforms'
+          ),
+          ids.length
+        );
+    const ok = await askConfirm({
+      title: permanent
+        ? __('Delete forms permanently', 'subtleforms')
+        : __('Move forms to Trash', 'subtleforms'),
+      message,
+      confirmText: permanent
+        ? __('Delete permanently', 'subtleforms')
+        : __('Move to Trash', 'subtleforms'),
+      confirmVariant: 'destructive',
+    });
+    if (!ok) {
       return;
     }
 
