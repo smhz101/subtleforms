@@ -7,12 +7,15 @@ import {
 } from '@wordpress/element';
 import {
   Notice,
+  Spinner,
 } from '@wordpress/components';
 import { Button } from '../components/navigation';
 import { useNavigate, useParams } from 'react-router-dom';
 import { __, sprintf } from '@wordpress/i18n';
 import Icon from '../ui/Icon';
 import AdminShell from '../components/AdminShell';
+import usePhoneLayout from '../hooks/usePhoneLayout';
+import SmallScreenNotice, { useSmallScreenChoice } from '../components/builder/layout/SmallScreenNotice';
 import CreateFormWizard from '../components/CreateFormWizard';
 import {
   apiGet,
@@ -48,6 +51,7 @@ import { countSchemaFields, fieldDeletedMessage } from '../utils/fieldDeleteNoti
 import { Skeleton } from '../ui/loading/Skeleton';
 import './BuilderPage.scss';
 import { applyPaymentDefaults } from '../utils/paymentDefaults';
+import { confirmDialog } from '../utils/confirmDialog';
 import {
   structuralType,
   withStructuralType,
@@ -65,6 +69,9 @@ function FormBuilderInner({
   autoShowTour = false,
 }) {
   const navigate = useNavigate();
+  // UX2-17: below 600px the builder explains it needs a wider screen.
+  const isSmallScreen = usePhoneLayout();
+  const [openSmallAnyway, openBuilderAnyway] = useSmallScreenChoice();
   // Builder FSM State (replaces individual useState calls)
   const [builderState, dispatch] = useBuilderReducer(formId);
 
@@ -78,6 +85,7 @@ function FormBuilderInner({
     autoSaving,
     formStatus,
     hasUnpublishedChanges,
+    entryCount,
     error,
     saveError,
     autoSaveError,
@@ -582,16 +590,18 @@ function FormBuilderInner({
   // Discard local draft changes and revert to the last persisted version,
   // staying in the builder (Part B17). Re-fetches from the server so the
   // draft, history, and dirty flag all reset to the saved/published state.
-  const handleDiscardChanges = useCallback(() => {
+  const handleDiscardChanges = useCallback(async () => {
     if (!isDirty) {
       return;
     }
-    const ok = window.confirm(
-      __(
+    const ok = await confirmDialog({
+      destructive: true,
+      confirmText: __('Discard changes', 'subtleforms'),
+      message: __(
         'Discard your unsaved changes and revert to the last saved version?',
         'subtleforms'
-      )
-    );
+      ),
+    });
     if (!ok) {
       return;
     }
@@ -726,6 +736,14 @@ function FormBuilderInner({
   // access for regular and payment form types with empty fields arrays.
   const showWelcomeScreen = false;
 
+  if (isSmallScreen && !openSmallAnyway) {
+    return (
+      <AdminShell variant='editor' title={formTitle || __('Form', 'subtleforms')} onBack={() => navigate('/forms')}>
+        <SmallScreenNotice onBack={() => navigate('/forms')} onOpenAnyway={openBuilderAnyway} />
+      </AdminShell>
+    );
+  }
+
   return (
     <>
       <AdminShell
@@ -793,6 +811,7 @@ function FormBuilderInner({
           fieldDefinitions={fieldDefinitions}
           onSchemaChange={handleSchemaChange}
           currentFormId={currentFormId}
+          entryCount={entryCount}
           showWelcome={showWelcomeScreen}
           isDirty={isDirty}
         />

@@ -65,8 +65,9 @@ test('trashing, the Trash tab, restore and permanent delete (QA-11)', async ({ p
   for (const f of [live, draft]) {
     await page.getByRole('checkbox', { name: `Select row ${f.id}`, exact: true }).check();
   }
-  page.once('dialog', (d) => d.accept());
   await page.locator('.sf-data-table__bulk-actions').getByRole('button', { name: 'Move to Trash' }).click();
+  // The SubtleForms dialog asks first (UX2-10).
+  await page.getByRole('dialog').getByRole('button', { name: 'Move to Trash' }).click();
   await expect(row(page, `Trash live ${stamp}`)).toHaveCount(0);
   await expect(page.getByText('2 forms moved to the Trash').first()).toBeVisible({ timeout: 20000 });
 

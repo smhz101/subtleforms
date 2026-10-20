@@ -596,13 +596,58 @@ export function formAppearanceClasses( appearance ) {
     classes.push( 'subtleforms--preset-dark' );
   }
   if ( appearance?.preset === 'theme' ) {
-    classes.push( 'subtleforms--inherit-theme' );
+    // Untouched, the theme styles the whole form and the plugin adds no look
+    // of its own (2.4.1). Once colours, type or the input and button styles are
+    // changed, the plugin styles the form from the theme's colours and type and
+    // the changes apply.
+    classes.push( isPureTheme( appearance ) ? 'subtleforms--inherit-theme' : 'subtleforms--theme-tuned' );
   }
   if ( v.layout === 'inline' ) {
     classes.push( 'subtleforms--layout-inline' );
   }
 
   return classes.join( ' ' );
+}
+
+/**
+ * Extra class for the form's buttons.
+ *
+ * A theme form uses the theme's own button design: WordPress themes style
+ * `.wp-element-button` from theme.json, the same class core blocks such as
+ * Search put on their buttons (2.4.1).
+ *
+ * @param {Object} appearance metadata.appearance
+ * @return {string} Class name, or an empty string.
+ */
+export function buttonThemeClass( appearance ) {
+  return isPureTheme( appearance ) ? 'wp-element-button' : '';
+}
+
+/**
+ * Whether a form uses "Inherit from theme" without changing its look.
+ *
+ * Alignment, width and field layout are layout, not look, so they keep the
+ * form a pure theme form. Colours, type, shape, and the input and button
+ * styles do not.
+ *
+ * @param {Object} appearance metadata.appearance
+ * @return {boolean} True when the theme styles the whole form.
+ */
+export function isPureTheme( appearance ) {
+  if ( appearance?.preset !== 'theme' ) {
+    return false;
+  }
+  const preset = getPreset( 'theme' );
+  const tokens = appearance?.tokens || {};
+  // A token that is not set is not a change.
+  const sameTokens = Object.keys( tokens ).every(
+    ( k ) => tokens[ k ] === undefined || tokens[ k ] === '' || tokens[ k ] === preset.tokens[ k ]
+  );
+  const variants = appearance?.variants || {};
+  const sameLook = [ 'input', 'button' ].every(
+    ( k ) => ( variants[ k ] ?? preset.variants[ k ] ) === preset.variants[ k ]
+  );
+  return sameTokens && sameLook;
 }
 
 /**

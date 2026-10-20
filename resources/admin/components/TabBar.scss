@@ -99,4 +99,26 @@
 	&__hover-line {
 		display: none;
 	}
+
+	// A phone keeps the tabs on one line that scrolls sideways, instead of
+	// wrapping them into uneven rows (UX2-19).
+	@media (max-width: 599px) {
+		flex-wrap: nowrap;
+		overflow-x: auto;
+		overflow-y: hidden;
+		scrollbar-width: none;
+		-webkit-overflow-scrolling: touch;
+
+		&::-webkit-scrollbar {
+			display: none;
+		}
+
+		&__tab {
+			flex: 0 0 auto;
+		}
+
+		&__tab + &__tab {
+			margin-inline-start: 0;
+		}
+	}
 }

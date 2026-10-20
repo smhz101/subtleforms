@@ -32,6 +32,8 @@ import { logger, perfMarkers } from '../diagnostics';
 import './FormsList.scss';
 import { formsEmptyState } from './formsEmptyState';
 import { keepRowsAfterFailedLoad, listQueryKey } from '../utils/failedLoad';
+import { confirmDialog } from '../utils/confirmDialog';
+import { chunkPages } from '../utils/listBatches';
 
 export const ALL_FORM_COLUMNS = ['title', 'form_type', 'status', 'id', 'submission_count', 'performance', 'updated_at', 'actions'];
 export const DEFAULT_FORM_VISIBLE = ['title', 'form_type', 'status', 'id', 'submission_count', 'performance', 'updated_at', 'actions'];
@@ -78,8 +80,6 @@ export default function FormsList({
   onFormsChanged,
 }) {
   // Chunked prefetch: buffer accumulates rows; sliced client-side per page.
-  // Each API call fetches CHUNK_PAGES pages at once.
-  const CHUNK_PAGES = 5;
   const [buffer, setBuffer] = useState([]);
   const [loadError, setLoadError] = useState('');
   const loadedQueryRef = useRef('');
@@ -89,6 +89,9 @@ export default function FormsList({
   const [totalItems, setTotalItems] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [perPage, setPerPage] = useState(20);
+  // Each API call fetches several pages at once, never more rows than the
+  // forms route allows in one request (100): 5 pages of 20, 2 of 50, 1 of 100.
+  const CHUNK_PAGES = chunkPages(perPage);
   const [sortBy, setSortBy] = useState('created_at');
   const [sortDirection, setSortDirection] = useState('desc');
   const [deleteModal, setDeleteModal] = useState(null);
@@ -648,8 +651,10 @@ export default function FormsList({
   const handleBulkDelete = async (ids) => {
     const permanent = deletesPermanently(hardDelete ? 'hard' : 'soft', statusFilter === 'trash');
     if (
-      !window.confirm(
-        permanent
+      !(await confirmDialog({
+        destructive: true,
+        confirmText: permanent ? __('Delete permanently', 'subtleforms') : __('Move to Trash', 'subtleforms'),
+        message: permanent
           ? sprintf(
               /* translators: %d: number of forms */
               _n(
@@ -669,8 +674,8 @@ export default function FormsList({
                 'subtleforms'
               ),
               ids.length
-            )
-      )
+            ),
+      }))
     ) {
       return;
     }

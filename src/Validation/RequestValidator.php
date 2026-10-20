@@ -191,7 +191,16 @@ class RequestValidator {
 		$isRequired = in_array( 'required', $parsedRules, true );
 		$valueIsEmpty = is_null( $value ) || ( is_string( $value ) && trim( $value ) === '' ) || ( is_array( $value ) && empty( $value ) );
 		if ( ! $isRequired && $valueIsEmpty ) {
-			// Do not include optional empty fields in sanitized output
+			// A schema with __keep_empty (settings updates) keeps an empty text or
+			// list value that was sent, so a saved value can be cleared (2.4.1).
+			// Other optional empty fields stay out of the sanitized output.
+			if ( ! empty( $schema['__keep_empty'] ) && is_array( $input ) && array_key_exists( $field, $input ) ) {
+				if ( in_array( 'array', $parsedRules, true ) ) {
+					$sanitized[ $field ] = array();
+				} elseif ( in_array( 'string', $parsedRules, true ) ) {
+					$sanitized[ $field ] = '';
+				}
+			}
 			continue;
 		}
 

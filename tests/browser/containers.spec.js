@@ -57,7 +57,7 @@ test('Repeater, Group and Columns: label and help text are editable, saved and s
 
   const edits = [
     { index: 0, label: 'Companies you worked for', help: 'Add one group per company.', extra: async () => {
-      await openPanel(page, 'Appearance');
+      await openPanel(page, 'Display');
       await page.getByLabel('Button Label').fill('Add a company');
       await page.getByLabel('Max Repeats').fill('4');
     } },

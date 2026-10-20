@@ -5,12 +5,53 @@ import Icon from '../ui/Icon';
 import clsx from 'clsx';
 import './BuilderTour.scss';
 
-const TOUR_STEPS = [
+/**
+ * Select the first field on the canvas when none is selected, so the field
+ * toolbar and the inspector steps point at something (UX2-26).
+ */
+export function selectFirstField(doc = document) {
+  if (doc.querySelector('.sf-field-toolbar--visible')) {
+    return;
+  }
+  const field = doc.querySelector('[data-tour="canvas"] .sf-field-chrome');
+  if (field) {
+    field.click();
+  }
+}
+
+/**
+ * Bring a target into view by scrolling its own scroll container, never
+ * the window: the builder fills the window and must not move (UX2-26).
+ *
+ * @param {Element} el Target.
+ */
+export function revealInContainer(el) {
+  let box = el.parentElement;
+  while (box && box !== document.body) {
+    const style = window.getComputedStyle(box);
+    if (/(auto|scroll)/.test(style.overflowY) && box.scrollHeight > box.clientHeight) {
+      break;
+    }
+    box = box.parentElement;
+  }
+  if (!box || box === document.body) {
+    return;
+  }
+  const target = el.getBoundingClientRect();
+  const area = box.getBoundingClientRect();
+  if (target.top >= area.top && target.bottom <= area.bottom) {
+    return;
+  }
+  // A target taller than its area shows from its top.
+  box.scrollTop += target.top - area.top - 16;
+}
+
+export const TOUR_STEPS = [
   {
     id: 'header',
-    title: __('Form Header', 'subtleforms'),
+    title: __('Form header', 'subtleforms'),
     content: __(
-      'This is your form title. Click to edit it. You can see the form status (Draft/Published) and use Save, Publish, or Delete buttons.',
+      'This is the form title: click it to rename the form. The Publish button on the right makes the form live, and its arrow opens Save draft, Discard changes and Delete form.',
       'subtleforms'
     ),
     selector: '[data-tour="header"]',
@@ -18,7 +59,7 @@ const TOUR_STEPS = [
   },
   {
     id: 'draft-vs-publish',
-    title: __('Draft vs Publish', 'subtleforms'),
+    title: __('Draft and published', 'subtleforms'),
     content: __(
       'Draft means your changes are saved but not live. Publish makes the form live. If it is already published, Update applies your latest changes.',
       'subtleforms'
@@ -28,9 +69,9 @@ const TOUR_STEPS = [
   },
   {
     id: 'left-panel',
-    title: __('Fields Panel', 'subtleforms'),
+    title: __('Fields', 'subtleforms'),
     content: __(
-      'Browse available field types organized by category. Click any field to add it to your form canvas.',
+      'Browse the field types by category. Click a field, or drag it, to add it to the form.',
       'subtleforms'
     ),
     selector: '[data-tour="fields-panel"]',
@@ -38,39 +79,41 @@ const TOUR_STEPS = [
   },
   {
     id: 'canvas',
-    title: __('Form Canvas', 'subtleforms'),
+    title: __('Form canvas', 'subtleforms'),
     content: __(
-      'This is your form canvas. Add fields, drag to reorder, and organize your form structure. Click any field to select and configure it.',
+      'This is your form. Drag fields to reorder them and click a field to select it.',
       'subtleforms'
     ),
     selector: '[data-tour="canvas"]',
-    position: 'top',
-  },
-  {
-    id: 'field-toolbar',
-    title: __('Field Toolbar', 'subtleforms'),
-    content: __(
-      'When a field is selected, use these tools to move it up/down, duplicate, or delete it.',
-      'subtleforms'
-    ),
-    selector: '[data-tour="field-toolbar"]',
     position: 'left',
   },
   {
-    id: 'right-panel',
-    title: __('Field Inspector', 'subtleforms'),
+    id: 'field-toolbar',
+    title: __('Field toolbar', 'subtleforms'),
     content: __(
-      'Configure the selected field here. Set properties, validation rules, and conditional logic in the tabs.',
+      'A selected field has these tools: drag it, move it up or down, change its width, duplicate it or delete it.',
+      'subtleforms'
+    ),
+    selector: '.sf-field-toolbar--visible[data-tour="field-toolbar"]',
+    position: 'bottom',
+    prepare: selectFirstField,
+  },
+  {
+    id: 'right-panel',
+    title: __('Field settings', 'subtleforms'),
+    content: __(
+      'The selected field is set up here: its label and options under Field, then Validation, Logic and Style.',
       'subtleforms'
     ),
     selector: '[data-tour="field-inspector"]',
     position: 'left',
+    prepare: selectFirstField,
   },
   {
     id: 'entries-tab',
-    title: __('Submissions Tab', 'subtleforms'),
+    title: __('Entries', 'subtleforms'),
     content: __(
-      'Switch to this tab to view form submissions. You can see all responses, filter them, and export data.',
+      'Open Entries to read the submissions of this form, filter them and export them.',
       'subtleforms'
     ),
     selector: '.data-tour-submissions-tab',
@@ -78,9 +121,9 @@ const TOUR_STEPS = [
   },
   {
     id: 'complete',
-    title: __('Tour Complete!', 'subtleforms'),
+    title: __('That is the tour', 'subtleforms'),
     content: __(
-      "You're ready to build amazing forms! Click the help icon anytime to restart this tour.",
+      'You can start it again from the help icon at any time.',
       'subtleforms'
     ),
     selector: null,
@@ -113,10 +156,19 @@ export default function BuilderTour({ onComplete, onSkip }) {
       const targetElement = document.querySelector(step.selector);
       const tooltipElement = tooltipRef.current;
 
-      if (!targetElement || !tooltipElement) {
+      if (!tooltipElement) {
         setIsPositioned(false);
         return;
       }
+      if (!targetElement) {
+        // Nothing to point at: show the step in the middle (UX2-26).
+        setTooltipPosition({ top: '50%', left: '50%', transform: 'translate(-50%, -50%)' });
+        setIsPositioned(true);
+        return;
+      }
+
+      // Scroll first, then measure, so the tooltip lands next to the target.
+      revealInContainer(targetElement);
 
       const targetRect = targetElement.getBoundingClientRect();
       const tooltipRect = tooltipElement.getBoundingClientRect();
@@ -162,17 +214,14 @@ export default function BuilderTour({ onComplete, onSkip }) {
 
       setTooltipPosition({ top, left });
       setIsPositioned(true);
-
-      // Scroll target into view
-      targetElement.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-        inline: 'center',
-      });
     };
 
+    if (step.prepare) {
+      step.prepare(document);
+    }
+
     // Delay positioning to allow DOM to settle
-    const timeout = setTimeout(positionTooltip, 100);
+    const timeout = setTimeout(positionTooltip, 150);
 
     // Reposition on window resize
     window.addEventListener('resize', positionTooltip);

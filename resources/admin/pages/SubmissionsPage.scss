@@ -4,8 +4,17 @@
 
 .sf-submissions-actions {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	gap: 8px;
+
+	// On a phone the search box takes its own line so View and Filters are
+	// not cut off (UX2-19).
+	@media (max-width: 599px) {
+		.components-search-control {
+			flex: 1 1 100%;
+		}
+	}
 }
 
 // Small "Pro" tag inside locked buttons.
@@ -292,8 +301,14 @@
 	}
 }
 
-// A narrow screen cannot hold a side-by-side list, so the pane covers it.
-@media (max-width: 900px) {
+// The list and the entry need about 960px side by side. Below that the pane
+// covers the list as a full-width overlay (UX2-18). The width is the inbox's
+// own, not the window's: the WordPress menu takes part of the window.
+.sf-inbox--right {
+	container: sf-inbox / inline-size;
+}
+
+@container sf-inbox (max-width: 959px) {
 	.sf-inbox--right.is-open {
 		.sf-inbox__list {
 			flex: 1 1 auto;

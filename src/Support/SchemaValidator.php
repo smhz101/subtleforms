@@ -45,6 +45,127 @@ use SubtleForms\Plugin;
 final class SchemaValidator {
 
 	/**
+	 * A field key (the field ID in the builder): letters, numbers, _ and -,
+	 * up to 64 characters (2.4.1; "-" and the length limit are new).
+	 */
+	const KEY_PATTERN = '/^[a-zA-Z0-9_-]{1,64}$/';
+
+	/**
+	 * Keys the browser sends with every entry beside the answers. A field
+	 * with one of these keys would lose its answer (2.4.1).
+	 */
+	const RESERVED_KEYS = array( 'website_url', 'form_rendered_at', 'g-recaptcha-response', 'h-captcha-response', 'cf-turnstile-response', '_payment' );
+
+	/**
+	 * Keys of fields inside steps, columns and containers that repeat a key
+	 * used elsewhere in the form, or use a reserved or invalid key. Fields in
+	 * the top-level list are checked by the main loops; a Repeater's own
+	 * fields are answered inside each group, so they only clash with each
+	 * other (2.4.1).
+	 *
+	 * @param array $schema Schema.
+	 * @return array<int, array{key:string,message:string}>
+	 */
+	public static function nestedKeyProblems( array $schema ): array {
+		// How often each key appears in the top-level list (checked by the
+		// main loops) and among every answered field.
+		$top = array();
+		foreach ( (array) ( $schema['fields'] ?? array() ) as $field ) {
+			if ( is_array( $field ) && isset( $field['key'] ) && is_string( $field['key'] ) ) {
+				$top[ $field['key'] ] = ( $top[ $field['key'] ] ?? 0 ) + 1;
+			}
+		}
+		$all = array();
+		foreach ( FieldMapper::fields( $schema ) as $entry ) {
+			$key         = (string) $entry['key'];
+			$all[ $key ] = ( $all[ $key ] ?? 0 ) + 1;
+		}
+
+		$problems = array();
+		foreach ( $all as $key => $count ) {
+			$key = (string) $key;
+			if ( $count > 1 && $count > ( $top[ $key ] ?? 0 ) ) {
+				/* translators: %s: field key */
+				$problems[] = array( 'key' => $key, 'message' => sprintf( __( 'Two fields use the ID %s. Give one of them another ID.', 'subtleforms' ), $key ) );
+				continue;
+			}
+			if ( isset( $top[ $key ] ) ) {
+				continue;
+			}
+			if ( ! preg_match( self::KEY_PATTERN, $key ) ) {
+				/* translators: %s: field key */
+				$problems[] = array( 'key' => $key, 'message' => sprintf( __( 'The field ID %s can only use letters, numbers, _ and -, up to 64 characters.', 'subtleforms' ), $key ) );
+			} elseif ( in_array( $key, self::RESERVED_KEYS, true ) ) {
+				/* translators: %s: field key */
+				$problems[] = array( 'key' => $key, 'message' => sprintf( __( 'SubtleForms uses %s itself. Give the field another ID.', 'subtleforms' ), $key ) );
+			}
+		}
+
+		// A Repeater's fields are answered inside each group, so each Repeater
+		// is its own namespace: its fields may repeat an ID used outside it,
+		// but not each other's, and the same character and reserved rules
+		// apply (review of #47).
+		foreach ( self::repeaters( (array) ( $schema['fields'] ?? array() ) ) as $repeater ) {
+			$name   = (string) ( $repeater['key'] ?? ( $repeater['config']['key'] ?? '' ) );
+			$counts = array();
+			// A wrapped node keeps its fields in config.children.
+			$children = Repeater::children( $repeater );
+			if ( ! $children && isset( $repeater['config']['children'] ) && is_array( $repeater['config']['children'] ) ) {
+				$children = array_values( array_filter( $repeater['config']['children'], 'is_array' ) );
+			}
+			foreach ( FieldMapper::fields( array( 'fields' => $children ) ) as $entry ) {
+				$key            = (string) $entry['key'];
+				$counts[ $key ] = ( $counts[ $key ] ?? 0 ) + 1;
+			}
+			foreach ( $counts as $key => $count ) {
+				$key = (string) $key;
+				if ( $count > 1 ) {
+					/* translators: 1: Repeater field ID, 2: field ID */
+					$problems[] = array( 'key' => $key, 'message' => sprintf( __( 'Two fields in the repeater %1$s use the ID %2$s. Give one of them another ID.', 'subtleforms' ), $name, $key ) );
+				} elseif ( ! preg_match( self::KEY_PATTERN, $key ) ) {
+					/* translators: %s: field key */
+					$problems[] = array( 'key' => $key, 'message' => sprintf( __( 'The field ID %s can only use letters, numbers, _ and -, up to 64 characters.', 'subtleforms' ), $key ) );
+				} elseif ( in_array( $key, self::RESERVED_KEYS, true ) ) {
+					/* translators: %s: field key */
+					$problems[] = array( 'key' => $key, 'message' => sprintf( __( 'SubtleForms uses %s itself. Give the field another ID.', 'subtleforms' ), $key ) );
+				}
+			}
+		}
+		return $problems;
+	}
+
+	/**
+	 * Every Repeater in a field list, at any depth, including Repeaters
+	 * inside another Repeater.
+	 *
+	 * @param array $fields Field list.
+	 * @return array<int,array> Repeater nodes.
+	 */
+	private static function repeaters( array $fields ): array {
+		$out = array();
+		foreach ( $fields as $node ) {
+			if ( ! is_array( $node ) ) {
+				continue;
+			}
+			if ( Repeater::isRepeater( $node ) ) {
+				$out[] = $node;
+			}
+			$lists = array( $node['children'] ?? null, $node['fields'] ?? null, $node['config']['children'] ?? null );
+			foreach ( (array) ( $node['columns'] ?? array() ) as $column ) {
+				if ( is_array( $column ) ) {
+					$lists[] = isset( $column[0] ) ? $column : ( $column['fields'] ?? ( $column['children'] ?? null ) );
+				}
+			}
+			foreach ( $lists as $list ) {
+				if ( is_array( $list ) ) {
+					$out = array_merge( $out, self::repeaters( $list ) );
+				}
+			}
+		}
+		return $out;
+	}
+
+	/**
 	 * Allowed field types for freemium core. Extensions may add more.
 	 *
 	 * @var string[]
@@ -192,8 +313,12 @@ final class SchemaValidator {
 				throw new InvalidArgumentException( "Field at index {$i} must have a string 'key'." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
-			if ( ! preg_match( '/^[a-zA-Z0-9_]+$/', $field['key'] ) ) {
+			if ( ! preg_match( self::KEY_PATTERN, $field['key'] ) ) {
 				throw new InvalidArgumentException( "Field key '{$field['key']}' at index {$i} contains invalid characters." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			}
+
+			if ( in_array( $field['key'], self::RESERVED_KEYS, true ) ) {
+				throw new InvalidArgumentException( "Field key '{$field['key']}' at index {$i} is reserved." ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 			}
 
 			if ( in_array( $field['key'], $keys, true ) ) {
@@ -303,6 +428,10 @@ final class SchemaValidator {
 			throw new InvalidArgumentException( 'Schema.version must be an integer when present.' );
 		}
 
+		foreach ( self::nestedKeyProblems( $schema ) as $problem ) {
+			throw new InvalidArgumentException( $problem['message'] ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
+
 		return true;
 	}
 
@@ -392,7 +521,20 @@ final class SchemaValidator {
 				if ( empty( $field['key'] ) || ! is_string( $field['key'] ) ) {
 					$push( $errors, "fields[{$i}].key", "Field at index {$i} must have a string 'key'.", array( 'index' => $i ) );
 				} else {
-					if ( ! preg_match( '/^[a-zA-Z0-9_]+$/', $field['key'] ) ) {
+					if ( in_array( $field['key'], self::RESERVED_KEYS, true ) ) {
+						$push(
+							$errors,
+							"fields[{$i}].key",
+							/* translators: %s: field key */
+							sprintf( __( 'SubtleForms uses %s itself. Give the field another ID.', 'subtleforms' ), $field['key'] ),
+							array(
+								'index'    => $i,
+								'fieldKey' => $field['key'],
+							)
+						);
+					}
+
+					if ( ! preg_match( self::KEY_PATTERN, $field['key'] ) ) {
 						$push(
 							$errors,
 							"fields[{$i}].key",
@@ -487,6 +629,10 @@ final class SchemaValidator {
 		// One CAPTCHA field per provider: the provider answers with one token
 		// per form, so a second field of the same kind could never pass (2.4.0).
 		$captchas = \SubtleForms\Support\Captcha\FieldCaptcha::fields( $schema );
+		foreach ( self::nestedKeyProblems( $schema ) as $problem ) {
+			$push( $errors, 'fields', $problem['message'], array( 'fieldKey' => $problem['key'] ) );
+		}
+
 		foreach ( \SubtleForms\Support\Captcha\FieldCaptcha::repeated( $captchas ) as $field ) {
 			$push(
 				$errors,

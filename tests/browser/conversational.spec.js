@@ -116,7 +116,7 @@ test('any question (a welcome screen too) can be edited, replaced, reordered and
 
   // The welcome screen is editable in the inspector.
   await question(page).click();
-  await openPanel(page, 'Appearance');
+  await openPanel(page, 'Display');
   const content = page.getByLabel('HTML Content');
   await expect(content).toBeVisible();
   await content.fill('<p>Hello and welcome</p>');

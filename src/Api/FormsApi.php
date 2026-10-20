@@ -440,6 +440,11 @@ final class FormsApi {
 		// Single source of truth for type/status/unpublished-changes.
 		$form = \SubtleForms\Support\FormMeta::with_meta( $form );
 
+		// The builder tells an admin who changes a field ID that existing
+		// entries keep their answers under the old ID (2.4.1).
+		$counts                   = $this->submissionsRepo->get_counts_by_forms( array( (int) $form['id'] ) );
+		$form['submission_count'] = (int) ( $counts[ (int) $form['id'] ] ?? 0 );
+
 		$etag     = $this->generateETag( $form, 'form' );
 		$response = ApiResponse::success( $form );
 		return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
@@ -638,20 +643,7 @@ final class FormsApi {
 			$schema['fields'] = array();
 		}
 
-		/**
-		 * Filter a form schema before it is saved (draft or published). Add-ons
-		 * use this to store data they need at render time, such as a snapshot
-		 * of WooCommerce products for the WooCommerce Product field.
-		 *
-		 * @param array $schema   Schema about to be saved.
-		 * @param int   $formId   Form ID.
-		 * @param bool  $activate Whether this save publishes the schema.
-		 * @since 2.1.0
-		 */
-		$filtered = apply_filters( 'subtleforms/forms/schema_before_save', $schema, $formId, (bool) $activate );
-		if ( is_array( $filtered ) ) {
-			$schema = $filtered;
-		}
+		$schema = FormsRepository::beforeSave( $schema, $formId, (bool) $activate );
 
 		// Structured validation for activation
 		if ( $activate ) {
@@ -815,6 +807,8 @@ final class FormsApi {
 			// as the builder does when it opens such a field (2.3.2). Templates
 			// from add-ons may still use the old shape.
 			list( $schema['fields'] ) = \SubtleForms\Support\SchemaRepair::checkboxListsToMultipleChoice( $schema['fields'] );
+
+			$schema = FormsRepository::beforeSave( $schema, (int) $id, true );
 
 			try {
 				$this->formsRepo->saveSchemaVersion( $id, $schema, true );

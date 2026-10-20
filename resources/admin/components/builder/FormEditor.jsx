@@ -13,6 +13,8 @@ import BuilderDnd from './dnd/BuilderDnd';
 import { useBuilderState, useSchemaCommands, useInsertPicker } from './state';
 import { questionIds } from '../../../shared/conversational';
 import { formFieldDefaults } from '../../../shared/fieldDisplay';
+import { renameFieldKey } from '../../../shared/fieldKeys';
+import { denormalizeTree } from './utils/schemaTree';
 import './FormEditor.scss';
 
 function FieldPickerPopover({ fieldGroups, context, onInsert }) {
@@ -150,6 +152,7 @@ export default function FormEditor({
   onChange,
   isReadOnly = false,
   renderCanvas = null,
+  entryCount = 0,
 }) {
   // State management
   const builderState = useBuilderState(schema, validationErrors, fieldErrors, onChange, isReadOnly);
@@ -211,6 +214,29 @@ export default function FormEditor({
     handleMoveToStep,
   } = commands;
   const [repairsDismissed, setRepairsDismissed] = useState(false);
+
+  // Change a field's ID and every reference to it (2.4.1). The whole schema
+  // goes through renameFieldKey(), so form settings outside the field tree
+  // (emails, webhooks, confirmations, integrations, payments) follow too, and
+  // the change lands in the builder's undo history like any other edit.
+  const handleRenameKey = useCallback(
+    (nodeId, newKey) => {
+      const oldKey = tree.nodes[nodeId]?.config?.key;
+      if (isReadOnly || !oldKey || !newKey || oldKey === newKey) {
+        return null;
+      }
+      const current = {
+        ...schemaRef.current,
+        schema_version: schemaRef.current?.schema_version || 1,
+        fields: denormalizeTree(tree),
+      };
+      // Only the selected field is renamed, in its own namespace (review of #47).
+      const { schema: next, references } = renameFieldKey(current, oldKey, newKey, nodeId);
+      onChange(next);
+      return { oldKey, newKey, references };
+    },
+    [tree, schemaRef, onChange, isReadOnly]
+  );
 
   // Conversational forms (2.3.2): the current question, or an empty question
   // slot, shared by the canvas and the field panel.
@@ -328,6 +354,8 @@ export default function FormEditor({
       onDuplicate={handleDuplicate}
       onRequestInsert={handleRequestInsert}
       onMoveToStep={handleMoveToStep}
+      onRenameKey={handleRenameKey}
+      entryCount={entryCount}
       isReadOnly={isReadOnly}>
       <BuilderDnd
         tree={tree}

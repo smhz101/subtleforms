@@ -3,6 +3,7 @@ import { TextControl, SelectControl, Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import FieldError from '../FieldError';
 import ConnectionTest from './ConnectionTest';
+import { normalizeWebhookUrl } from '../../../utils/webhookUrl';
 
 const RETRIES = [0, 1, 2, 3, 4, 5].map((n) => ({
   value: String(n),
@@ -97,6 +98,7 @@ export default function WebhooksPanel({ settings, updateSetting, fieldErrors = {
               type='url'
               value={testUrl}
               onChange={setTestUrl}
+              onBlur={() => setTestUrl(normalizeWebhookUrl(testUrl))}
               placeholder='https://example.com/webhook'
               help={__('Sends a sample entry to this URL and shows the response. Nothing is saved.', 'subtleforms')}
             />
@@ -109,10 +111,11 @@ export default function WebhooksPanel({ settings, updateSetting, fieldErrors = {
           </div>
           <div style={{ marginTop: 12 }}>
             <ConnectionTest
-              path='/integrations/webhooks/test'
+              path='/webhooks/test'
+              requiresPro={false}
               label={__('Send test request', 'subtleforms')}
-              disabled={!/^https?:\/\/.+/i.test(testUrl)}
-              getBody={() => ({ url: testUrl, method: testMethod, sign: true })}
+              disabled={!testUrl.trim()}
+              getBody={() => ({ url: normalizeWebhookUrl(testUrl), method: testMethod, sign: true })}
             />
           </div>
         </div>

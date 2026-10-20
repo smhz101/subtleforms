@@ -19,13 +19,7 @@
 		left: 1rem;
 		right: 1rem;
 		height: 1px;
-		background: linear-gradient(
-			to right,
-			transparent,
-			rgba(0, 0, 0, 0.04) 20%,
-			rgba(0, 0, 0, 0.04) 80%,
-			transparent
-		);
+		background: rgba(0, 0, 0, 0.04);
 		pointer-events: none;
 	}
 

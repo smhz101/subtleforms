@@ -107,6 +107,8 @@ class Schemas {
 
 			// Settings Update
 			self::SETTINGS_UPDATE => array(
+				// Sending "" for a text setting (or [] for a list) clears it.
+				'__keep_empty'                 => true,
 				'__allow'                      => array(
 					// General
 					'default_form_status',

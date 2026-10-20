@@ -448,6 +448,18 @@
 
 	&__panel-wrap { position: relative; }
 
+	// An integration the plan does not include (2.4.1).
+	&__item-plan {
+		flex-shrink: 0;
+		font-size: 11px;
+		color: var(--sf-text-subtle);
+	}
+
+	&__locked {
+		h3 { margin-top: 0; }
+		p { color: var(--sf-text-subtle); }
+	}
+
 	&__fields {
 		min-width: 0;
 		margin: 0;

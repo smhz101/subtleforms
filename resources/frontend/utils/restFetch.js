@@ -19,6 +19,25 @@ export function restNonce() {
   return window.subtleformsFrontend?.nonce || window.subtleformsAdmin?.restNonce || '';
 }
 
+/** The page's language for translated forms (2.4.1), or '' when none. */
+export function restLang() {
+  if (typeof window === 'undefined') return '';
+  return String(window.subtleformsFrontend?.lang || '');
+}
+
+/**
+ * Full URL for a route, with the page's language when there is one.
+ *
+ * @param {string} path Route under subtleforms/v1.
+ * @return {string} URL.
+ */
+export function restRouteUrl(path) {
+  const url = `${restUrl}/${String(path).replace(/^\//, '')}`;
+  const lang = restLang();
+  if (!lang || /[?&]lang=/.test(url)) return url;
+  return `${url}${url.includes('?') ? '&' : '?'}lang=${encodeURIComponent(lang)}`;
+}
+
 /**
  * Fetch a SubtleForms REST route.
  *
@@ -27,7 +46,7 @@ export function restNonce() {
  * @return {Promise<Response>} Response.
  */
 export async function restFetch(path, { method = 'GET', body, headers = {} } = {}) {
-  const url = `${restUrl}/${String(path).replace(/^\//, '')}`;
+  const url = restRouteUrl(path);
   const nonce = restNonce();
   const send = (withNonce) =>
     fetch(url, {

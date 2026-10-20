@@ -151,8 +151,13 @@ final class SubtleFormsBlock {
 		// to the renderer (2.4.0).
 		$classic = $ajax ? null : \SubtleForms\Api\ClassicResult::forForm( (int) $form_id );
 
+		// Kept at the estimated height of the form so the page does not jump
+		// when the form appears (UX2-27).
+		$schema  = \SubtleForms\Engine\FormRestrictions::activeSchema( (int) $form_id );
+		$reserve = \SubtleForms\Frontend\FormPlaceholder::attributes( is_array( $schema ) ? $schema : null, $show_title, $show_desc );
+
 		return sprintf(
-			'<div class="%s" data-form-id="%d" data-show-title="%d" data-show-description="%d" data-theme="%s" data-ajax="%d" data-tabindex="%d" data-field-values="%s"%s></div>',
+			'<div class="%s" data-form-id="%d" data-show-title="%d" data-show-description="%d" data-theme="%s" data-ajax="%d" data-tabindex="%d" data-field-values="%s"%s%s></div>',
 			esc_attr( implode( ' ', $classes ) ),
 			esc_attr( $form_id ),
 			$show_title ? 1 : 0,
@@ -161,7 +166,8 @@ final class SubtleFormsBlock {
 			$ajax ? 1 : 0,
 			$tab_index,
 			esc_attr( $field_values ),
-			null === $classic ? '' : ' data-classic-result="' . esc_attr( (string) wp_json_encode( $classic ) ) . '"'
+			null === $classic ? '' : ' data-classic-result="' . esc_attr( (string) wp_json_encode( $classic ) ) . '"',
+			$reserve
 		);
 	}
 

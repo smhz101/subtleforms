@@ -25,6 +25,7 @@ import { FormContext } from './fields/FileUpload';
 import {
   formAppearanceStyle,
   formAppearanceClasses,
+  buttonThemeClass,
   getPreset,
 } from '../../shared/appearance';
 
@@ -1119,6 +1120,11 @@ export default function FormRenderer({
   // Appearance is applied as custom properties on the root, so every rule in the
   // public stylesheet picks it up by inheritance and no per-form CSS is emitted.
   const appearanceStyle = formAppearanceStyle(effectiveAppearance);
+  // A theme form's buttons take the theme's button design (2.4.1).
+  const buttonClass = (kind) =>
+    ['subtleforms-button', `subtleforms-button-${kind}`, buttonThemeClass(effectiveAppearance)]
+      .filter(Boolean)
+      .join(' ');
 
   return (
     <div ref={formRootRef} className={formClassNames} style={appearanceStyle}>
@@ -1236,7 +1242,7 @@ export default function FormRenderer({
           {hasSteps && prevVisibleStep(currentStepIndex) !== -1 && (
             <button
               type='button'
-              className='subtleforms-button subtleforms-button-prev'
+              className={buttonClass('prev')}
               onClick={handlePrevStep}>
               {__('Previous', 'subtleforms')}
             </button>
@@ -1246,7 +1252,7 @@ export default function FormRenderer({
             // Multi-step: Show Next button (does NOT submit)
             <button
               type='button'
-              className='subtleforms-button subtleforms-button-next'
+              className={buttonClass('next')}
               onClick={handleNextStep}>
               {__('Next', 'subtleforms')}
             </button>
@@ -1254,7 +1260,7 @@ export default function FormRenderer({
             // Final step or single-page: Show Submit button (DOES submit)
             <button
               type='submit'
-              className='subtleforms-button subtleforms-button-submit'
+              className={buttonClass('submit')}
               disabled={submitting}
               onClick={handleExplicitSubmit}>
               {submitting
