@@ -2,7 +2,7 @@ import { memo, useRef } from '@wordpress/element';
 import { Button, SelectControl, CheckboxControl } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useViewportMatch } from '@wordpress/compose';
+import usePhoneLayout from '../hooks/usePhoneLayout';
 import Icon from '../ui/Icon';
 import TableSkeleton from './TableSkeleton';
 import './DataTable.scss';
@@ -88,7 +88,7 @@ const DataTable = memo(function DataTable({
   const parentRef = useRef(null);
   // On a phone the rows become cards of varying height (UX2-19), which the
   // fixed-height virtual rows cannot hold.
-  const isPhone = useViewportMatch('small', '<');
+  const isPhone = usePhoneLayout();
   const shouldVirtualize = data.length > 20 && !isPhone;
   
   const rowVirtualizer = useVirtualizer({
