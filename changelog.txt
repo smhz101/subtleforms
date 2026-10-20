@@ -5,6 +5,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 == Changelog ==
 
 = 2.4.1 - 2026-10-20 =
+* Fix: Choosing 50 or 100 rows per page on the Forms screen shows the forms instead of "Forms could not be loaded".
 * Fix: Clearing a saved setting, such as an API key or a sender name, saves it empty instead of keeping the old value.
 * Fix: A form has no padding of its own, so it lines up with the text around it.
 * Fix: No line or border above the submit button.
