@@ -1,11 +1,10 @@
----
-description: SubtleForms standing rules for every task in this repository
-alwaysApply: true
----
-
 # SubtleForms: standing rules
 
-You work on ONE package at a time. The package file in docs/dev/packages/ is your whole task. Do not audit, refactor, rename or "improve" anything outside it.
+These rules apply to every change in this repository. Claude is the only author; there is no other contributor to hand packages to.
+
+Before starting any package, open docs/dev/bug-ledger.csv and read the `status` and `fixed_in` columns. A bug marked `fixed` is not redone. If a package file still says "Still open" for it, the ledger is right and the package file is stale.
+
+Work on ONE package at a time. The package file in docs/dev/packages/ is your whole task. Do not audit, refactor, rename or "improve" anything outside it.
 
 ## Read only what you need
 - Your package file lists every bug with repro, expected result, actual result and likely cause (file:line from 2.3.3 or 2.3.8; line numbers may have moved, search for the function).
@@ -15,7 +14,7 @@ You work on ONE package at a time. The package file in docs/dev/packages/ is you
 ## Branch and commits
 - Branch: `pkg/<PACKAGE-ID>` from the release branch named in the package file. One commit per bug ID (or per tightly related group), message: `<ID>[, <ID>]: <what changed, plain sentence>`.
 - Never commit build/, dist/, node_modules/, vendor/ or playwright-report/. Never push to main. Open a pull request into the release branch when done.
-- Never merge anything. Open the pull request and stop. docs/dev/MERGING.md lists what a pull request needs before it can be merged: green CI, no conflicts, every review comment answered, current POT files (`bin/make-pot.sh`).
+- Merge only when docs/dev/MERGING.md is satisfied: every check green, no conflicts, every review comment answered, current POT files (`bin/make-pot.sh`). If any of it is not true, the pull request waits.
 - No AI or tool attribution anywhere in git or GitHub: no `Co-Authored-By` lines, no "Generated with" or "Created by" lines, no tool or model names in commit messages, PR titles or PR bodies. Write them as plain notes from the team.
 
 ## Code rules
@@ -27,7 +26,8 @@ You work on ONE package at a time. The package file in docs/dev/packages/ is you
 ## Done means
 1. Every bug ID in the package is fixed at its cause, with a regression test that failed before and passes now (PHPUnit `tests/unit` or `tests/wp`, Jest next to the file, or Playwright `tests/browser`). Pure copy or CSS fixes may use a Jest snapshot or Playwright assertion instead.
 2. These pass: `vendor/bin/phpunit --testsuite unit`, `npx jest`, `npm run lint:js` if present, `npm run build:all`. Run the Playwright specs you touched or added against wp-env (`npx wp-env start`).
-3. readme.txt changelog: add one plain sentence per user-visible fix under the release version named in the package file, grouped as Fix / New / Change.
+3. docs/dev/bug-ledger.csv: set `status` to `fixed` and `fixed_in` to the pull request number and release for each bug fixed.
+4. readme.txt changelog: add one plain sentence per user-visible fix under the release version named in the package file, grouped as Fix / New / Change.
 
 ## Report (keep it short; this is the only thing to write back)
 ```

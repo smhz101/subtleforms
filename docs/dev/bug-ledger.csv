@@ -1,267 +1,267 @@
-id,severity,release,package,owner,status_on_2.3.8,found_in,summary
-WP2-01,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,wporg.md (2.3.8),CSV export code ships in free but is locked (trialware)
-WP2-02,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,wporg.md (2.3.8),Analytics reports computed in free and hidden; views counted by default
-WP2-03,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,wporg.md (2.3.8),"Advanced logic runs in free, only editor locks it"
-WP2-04,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,wporg.md (2.3.8),"Picture Choice, Signature, Calculation render in free but locked in library"
-WP2-05,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,wporg.md (2.3.8),"Payment fields and coupons in free, locked; Payments page says they work on every plan"
-WP2-06,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,wporg.md (2.3.8),Multi-file uploads implemented and stripped in free
-WP2-09,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,wporg.md (2.3.8),Upsell copy implies paying to unlock included features
-UX2-29,P2,Free 2.3.9,F239-1,Claude,new in 2.3.8,ui-ux.md (2.3.8),Payments copy vs live form
-WP2-07,P2,Free 2.3.9,F239-1,Claude,new in 2.3.8,wporg.md (2.3.8),Webhooks and Analytics settings locked in free though free uses them; free user cannot turn off view counting
-WP2-14,P2,Free 2.3.9,F239-1,Claude,new in 2.3.8,wporg.md (2.3.8),"2-letter global prefix and sf_ transients, hidden by phpcs:disable"
-FF2-19,P3,Free 2.3.9,F239-1,Claude,new in 2.3.8,free-features.md (2.3.8),Reports with spam and failed entries; Reports with Pro off
-PRO-09,P3,Free 2.3.9,F239-1,Claude,Still open,pro.md (2.3.3),No license; open a form that uses Calculation or Picture Choice or advanced logic but no Signature
-PRO-10,P3,Free 2.3.9,F239-1,Claude,"Still open, and wider",pro.md (2.3.3),"No license; POST /forms with a Signature field and a starts_with rule, or a Pro template schema without metadata.template"
-PRO2-06,P3,Free 2.3.9,F239-1,Claude,new in 2.3.8,pro-server.md (2.3.8),"Agency (or white label with ""Hide credits"") open Reports and Tools"
-UX2-15,P3,Free 2.3.9,F239-1,Claude,new in 2.3.8,ui-ux.md (2.3.8),"Payments, Extensions"
-FF-02,P1,Free 2.3.9,F239-2,Cursor,Still open,free-features.md (2.3.3),"Settings > AI assistant, enter any key, click Test Connection, then Save"
-WP2-08,P1,Free 2.3.9,F239-2,Cursor,new in 2.3.8,wporg.md (2.3.8),AI assistant tab is non-functional and fakes success
-WP2-10,P1,Free 2.3.9,F239-2,Cursor,new in 2.3.8,wporg.md (2.3.8),No External services section in readme
-WP2-11,P1,Free 2.3.9,F239-2,Cursor,new in 2.3.8,wporg.md (2.3.8),Contributors names another person's account
-FF-23,P2,Free 2.3.9,F239-2,Cursor,Partly fixed,free-features.md (2.3.3),Install any language pack
-FF-31,P2,Free 2.3.9,F239-2,Cursor,Still open (code),free-features.md (2.3.3),"Multisite: network activate, use on a subsite, network deactivate, delete"
-FF2-09,P2,Free 2.3.9,F239-2,Cursor,new in 2.3.8,free-features.md (2.3.8),"On 8934: deactivate SubtleForms, run uninstall.php"
-FLD2-01,P2,Free 2.3.9,F239-2,Cursor,new in 2.3.8,fields.md (2.3.8),Install the 2.3.8 zip; form with a chained field in Buttons or Columns; Tab into it and press ArrowRight
-WP2-12,P2,Free 2.3.9,F239-2,Cursor,new in 2.3.8,wporg.md (2.3.8),Requires at least 6.0 but build needs 6.6
-WP2-13,P2,Free 2.3.9,F239-2,Cursor,new in 2.3.8,wporg.md (2.3.8),readme too long and inaccurate
-WP2-15,P2,Free 2.3.9,F239-2,Cursor,new in 2.3.8,wporg.md (2.3.8),Dev and placeholder files in the zip
-WP2-16,P2,Free 2.3.9,F239-2,Cursor,new in 2.3.8,wporg.md (2.3.8),Uninstall leaves data
-FF2-20,P3,Free 2.3.9,F239-2,Cursor,new in 2.3.8,free-features.md (2.3.8),Load any SubtleForms admin page
-FF2-22,P3,Free 2.3.9,F239-2,Cursor,new in 2.3.8,free-features.md (2.3.8),Any submission with WP_DEBUG_LOG on and Debug Mode off
-WP2-17,P3,Free 2.3.9,F239-2,Cursor,new in 2.3.8,wporg.md (2.3.8),Direct request to main file causes fatal (wp_die undefined); class files fatal with path
-WP2-19,P3,Free 2.3.9,F239-2,Cursor,new in 2.3.8,wporg.md (2.3.8),Inline style printed directly on every admin page
-WP2-20,P3,Free 2.3.9,F239-2,Cursor,new in 2.3.8,wporg.md (2.3.8),Plugin fires core hook wp_enqueue_scripts in admin and swaps core globals
-WP2-21,P3,Free 2.3.9,F239-2,Cursor,new in 2.3.8,wporg.md (2.3.8),No wp_set_script_translations
-WP2-22,P3,Free 2.3.9,F239-2,Cursor,new in 2.3.8,wporg.md (2.3.8),Error log noise
-FF-01,P1,Free 2.3.9,F239-3,Claude,Still open,free-features.md (2.3.3),"Store a numeric HubSpot Portal ID such as 4455 (all real IDs are numeric). Go to Settings, any tab, change anything, Save."
-FF-03,P1,Free 2.3.9,F239-3,Claude,Still open,free-features.md (2.3.3),Serve a form page from a full-page cache older than the nonce lifetime (simulated by sending an expired X-WP-Nonce as a guest) and submit
-FF2-01,P1,Free 2.3.9,F239-3,Claude,new in 2.3.8,free-features.md (2.3.8),"Tools > Import forms with a SubtleForms file whose Custom HTML field content is <img src=x onerror=""...""> (or a label with markup); open the published page. Tools > Import submissions with a rich text answer <img src="
-FA-19,P2,Free 2.3.9,F239-3,Claude,Still open,fields-advanced.md (2.3.3),Delete a form permanently that has entries with uploads
-FB-09,P2,Free 2.3.9,F239-3,Claude,Still open,fields-basic.md (2.3.3),Submit any answer the server rejects (for example txt too short) by REST.
-FF-11,P2,Free 2.3.9,F239-3,Claude,Still open,free-features.md (2.3.3),Visitor whose device clock is 5 minutes fast submits within 5 minutes
-FF-12,P2,Free 2.3.9,F239-3,Claude,Still open,free-features.md (2.3.3),POST /submit without form_rendered_at
-FF-13,P2,Free 2.3.9,F239-3,Claude,Still open,free-features.md (2.3.3),Submit a form with a required field missing (422 to the visitor)
-FF-21,P2,Free 2.3.9,F239-3,Claude,Still open,free-features.md (2.3.3),Erase personal data for ann@example.com
-FF2-07,P2,Free 2.3.9,F239-3,Claude,new in 2.3.8,free-features.md (2.3.8),"Tools > tick a form that was never published (only autosaved), Export forms. Or GET /tools/forms/export?ids=<id>,999999"
-FF2-08,P2,Free 2.3.9,F239-3,Claude,new in 2.3.8,free-features.md (2.3.8),"As a guest, request 500 random paths under /wp-json/subtleforms/v1/"
-PRO2-01,P2,Free 2.3.9,F239-3,Claude,new in 2.3.8,pro-server.md (2.3.8),"Settings, Integrations, CRM: enter a HubSpot Portal ID (any real one, for example 4455 or 12345678). Then change anything on any Settings tab and save"
-FA-18,P3,Free 2.3.9,F239-3,Claude,Still open,fields-advanced.md (2.3.3),"Open /wp-content/uploads/subtleforms-uploads/files/<id> on a server that ignores .htaccess (PHP built-in server here, nginx in production)"
-FA-24,P3,Free 2.3.9,F239-3,Claude,Still open,fields-advanced.md (2.3.3),Failed submits
-FF-20,P3,Free 2.3.9,F239-3,Claude,Still open,free-features.md (2.3.3),Tools > Export Personal Data for an email with entries
-FF-27,P3,Free 2.3.9,F239-3,Claude,Still open,free-features.md (2.3.3),Retention purge
-FF-28,P3,Free 2.3.9,F239-3,Claude,Still open,free-features.md (2.3.3),Rate limit policy for public submit
-FF2-21,P3,Free 2.3.9,F239-3,Claude,new in 2.3.8,free-features.md (2.3.8),Delete a published form permanently
-FLD2-17,P3,Free 2.3.9,F239-3,Claude,new in 2.3.8,fields.md (2.3.8),Rejected submission
-WP2-18,P3,Free 2.3.9,F239-3,Claude,new in 2.3.8,wporg.md (2.3.8),Raw upload and filesystem functions
-FF-04,P1,Free 2.3.9,F239-4,Cursor,Still open,free-features.md (2.3.3),"Create a form from Advanced Contact, Sales Inquiry, Payment Form, Donation Form and 17 other templates, then submit"
-FF-05,P1,Free 2.3.9,F239-4,Cursor,Still open,free-features.md (2.3.3),"Use the ""Payment Form"" template"
-FA-02,P1,Free 2.3.9,F239-5,Claude,Still open,fields-advanced.md (2.3.3),"Builder: add Notice, Section Heading or Page Break from the library and open Settings"
-FA-03,P1,Free 2.3.9,F239-5,Claude,Still open,fields-advanced.md (2.3.3),Repeater with a File Upload child; upload small.txt in row 1 and submit
-FB-01,P1,Free 2.3.9,F239-5,Claude,Still open,fields-basic.md (2.3.3),"Builder: add Name, Settings > Appearance, switch on Middle Name and Suffix (or Address: switch on Street line 2, switch off Country). Save draft, reload."
-FB-02,P1,Free 2.3.9,F239-5,Claude,Still open,fields-basic.md (2.3.3),"Even with the sub-field map intact (builder before save, or REST): enable Middle Name / Suffix / Street line 2, or disable State / Postal / Country, view the live form."
-PAY-01,P1,Free 2.3.9,F239-5,Claude,Still open,payments.md (2.3.3),"Form with Product ""Entry fee"" 5.00, Allow quantity off. POST /payments/intent and /submit with data that simply omits the entry_fee key."
-PAY-02,P1,Free 2.3.9,F239-5,Claude,Still open,payments.md (2.3.3),"Form: select want (yes/no), Fixed Fee 3.00 with logic show when want = yes, Card field. In browser pick No."
-FB-10,P2,Free 2.3.9,F239-5,Claude,Still open,fields-basic.md (2.3.3),"Required Name: REST {""nm"":{""first_name"":""Ada""}}. Required Address: {""addr"":{""city"":""X""}}."
-FLD2-02,P2,Free 2.3.9,F239-5,Claude,new in 2.3.8,fields.md (2.3.8),"Builder, chained field, Edit dropdowns, add choices and type Ford, Toyota; or import a CSV with Urdu or Chinese labels; submit"
-FLD2-03,P2,Free 2.3.9,F239-5,Claude,new in 2.3.8,fields.md (2.3.8),"Editor: Make has Ford, Toyota, Kia; remove Kia; add Honda; save"
-FLD2-09,P2,Free 2.3.9,F239-5,Claude,new in 2.3.8,fields.md (2.3.8),Required chained field in Columns layout; submit without touching it
-FA-21,P3,Free 2.3.9,F239-5,Claude,Still open,fields-advanced.md (2.3.3),"Page Break description ""Step one help"""
-FB-12,P3,Free 2.3.9,F239-5,Claude,Still open,fields-basic.md (2.3.3),"Name or Address required with a custom ""Message when left empty"" or a form default required message; submit empty."
-FB-17,P3,Free 2.3.9,F239-5,Claude,Still open,fields-basic.md (2.3.3),Screen reader on Name or Address group.
-FLD2-10,P3,Free 2.3.9,F239-5,Claude,new in 2.3.8,fields.md (2.3.8),"Required chained field; REST [""toyota""] or browser with only Make chosen"
-PAY-18,P3,Free 2.3.9,F239-5,Claude,Still open,payments.md (2.3.3),Add a Fixed Fee field.
-UX2-01,P1,Free 2.3.9,F239-6,Cursor (Claude reviews),new in 2.3.8,ui-ux.md (2.3.8),Builder header
-UX2-02,P1,Free 2.3.9,F239-6,Cursor (Claude reviews),new in 2.3.8,ui-ux.md (2.3.8),Builder Preview
-UX2-03,P1,Free 2.3.9,F239-6,Cursor (Claude reviews),new in 2.3.8,ui-ux.md (2.3.8),Public conversational
-UX2-04,P1,Free 2.3.9,F239-6,Cursor (Claude reviews),new in 2.3.8,ui-ux.md (2.3.8),Public payment
-UX2-05,P1,Free 2.3.9,F239-6,Cursor (Claude reviews),new in 2.3.8,ui-ux.md (2.3.8),All Forms
-UX2-08,P1,Free 2.3.9,F239-6,Cursor (Claude reviews),new in 2.3.8,ui-ux.md (2.3.8),Public presets
-UX2-20,P1,Free 2.3.9,F239-6,Cursor (Claude reviews),new in 2.3.8,ui-ux.md (2.3.8),All Forms status tabs
-FF-06,P2,Free 2.3.9,F239-6,Cursor (Claude reviews),Still open,free-features.md (2.3.3),"Forms > ""?"" > Quick Start Wizard > Next x4 > Create Form"
-FF-07,P2,Free 2.3.9,F239-6,Cursor (Claude reviews),Still open,free-features.md (2.3.3),"Open a published form, add a field, wait for autosave (or use Save draft)"
-UX2-06,P2,Free 2.3.9,F239-6,Cursor (Claude reviews),new in 2.3.8,ui-ux.md (2.3.8),Builder save
-UX2-07,P2,Free 2.3.9,F239-6,Cursor (Claude reviews),new in 2.3.8,ui-ux.md (2.3.8),Builder load
-UX2-09,P2,Free 2.3.9,F239-6,Cursor (Claude reviews),new in 2.3.8,ui-ux.md (2.3.8),Dashboard vs Reports
-UX2-11,P2,Free 2.3.9,F239-6,Cursor (Claude reviews),new in 2.3.8,ui-ux.md (2.3.8),Builder
-UX2-12,P2,Free 2.3.9,F239-6,Cursor (Claude reviews),new in 2.3.8,ui-ux.md (2.3.8),"Wizard, create modal, builder"
-UX2-14,P2,Free 2.3.9,F239-6,Cursor (Claude reviews),new in 2.3.8,ui-ux.md (2.3.8),Create modal vs Form settings
-UX2-21,P2,Free 2.3.9,F239-6,Cursor (Claude reviews),new in 2.3.8,ui-ux.md (2.3.8),"Dashboard, Reports"
-UX2-22,P2,Free 2.3.9,F239-6,Cursor (Claude reviews),new in 2.3.8,ui-ux.md (2.3.8),"All Forms, Submissions"
-UX2-23,P2,Free 2.3.9,F239-6,Cursor (Claude reviews),new in 2.3.8,ui-ux.md (2.3.8),"Submissions, builder, public hint"
-UX2-24,P2,Free 2.3.9,F239-6,Cursor (Claude reviews),new in 2.3.8,ui-ux.md (2.3.8),Builder canvas
-FA-01,P2,Free 2.4.0,F240-1,Claude,Still open,fields-advanced.md (2.3.3),"REST POST /subtleforms/v1/submit to a form with date (min/max, read-only), time, datetime, rating (7), NPS, slider (10 to 50 step 5), matrix, signature, colour with: d1 ""not-a-date"", d2 changed, t1 ""99:99"", dt1 ""garbage"""
-FB-04,P2,Free 2.4.0,F240-1,Claude,"Still open, message changed for labels",fields-basic.md (2.3.3),"Builder: Number field, Placeholder ""1000"" (or Default value ""750"", or a label ""2024""... any purely numeric value above 255 for label/placeholder, above 500 for default value). Save draft."
-FB-05,P2,Free 2.4.0,F240-1,Claude,Still open,fields-basic.md (2.3.3),"Email field with Allow Multiple on; enter ""a@example.com, b@example.com""."
-FB-07,P2,Free 2.4.0,F240-1,Claude,Still open,fields-basic.md (2.3.3),"Text with Read-only and Default value ""fixed""; REST submit {""rot"":""hacked""}."
-FB-11,P2,Free 2.4.0,F240-1,Claude,Still open,fields-basic.md (2.3.3),"REST submit values not offered by the field: dropdown ""zzz"", radio ""purple"", checkboxes [""bogus""], picture [""zzz""], country ""Narnia"", chained [""x"",""y""], toggle ""maybe"", checkbox ""hello"", consent ""yes""."
-FLD2-07,P2,Free 2.4.0,F240-1,Claude,new in 2.3.8,fields.md (2.3.8),"Phone with country (PK). Paste ""+44 20 7946 0958""; type ""07700 900123"" with +44; REST ""+1"", ""+1 5"", ""+999 123"""
-PAY-05,P2,Free 2.4.0,F240-1,Claude,Still open,payments.md (2.3.3),"Custom Amount min 5 max 500 (set in builder). Submit 1, then 600."
-PAY-06,P2,Free 2.4.0,F240-1,Claude,Still open,payments.md (2.3.3),Product qty max 5; submit tshirt=99 via REST.
-PAY-07,P2,Free 2.4.0,F240-1,Claude,Still open,payments.md (2.3.3),Priced Options required; submit plan=bogus.
-FA-17,P3,Free 2.4.0,F240-1,Claude,Still open,fields-advanced.md (2.3.3),"REST submit a required Rich Text with ""<p><br></p>"""
-FA-23,P3,Free 2.4.0,F240-1,Claude,Still open,fields-advanced.md (2.3.3),REST submit 1 group to a Repeater with Min Repeats 2
-FB-06,P3,Free 2.4.0,F240-1,Claude,Still open,fields-basic.md (2.3.3),"Email with RFC Validation off; submit ""user@localhost""."
-FB-14,P3,Free 2.4.0,F240-1,Claude,Still open,fields-basic.md (2.3.3),Number out of range by REST.
-FB-15,P3,Free 2.4.0,F240-1,Claude,Still open,fields-basic.md (2.3.3),"Website: REST ""ftp://example.com"" accepted; browser rejects it. Browser rejects ""example.com""."
-FB-23,P3,Free 2.4.0,F240-1,Claude,Still open,fields-basic.md (2.3.3),"Text field: REST {""txt"":[""a"",""b""]}."
-FLD2-11,P3,Free 2.4.0,F240-1,Claude,new in 2.3.8,fields.md (2.3.8),"Builder: label of 2,001 characters, or ""2026""; Save draft"
-FLD2-16,P3,Free 2.4.0,F240-1,Claude,new in 2.3.8,fields.md (2.3.8),"Hidden field with {date} or {user_email}, submitted by REST or without JavaScript"
-PAY-08,P3,Free 2.4.0,F240-1,Claude,Still open,payments.md (2.3.3),"Radio Priced Options; submit plan=[""basic"",""premium""]."
-PAY2-04,P3,Free 2.4.0,F240-1,Claude,new in 2.3.8,payments.md (2.3.8),"REST submit with extra keys for display-only payment fields, for example fee=0 and summary=0.01"
-FA-10,P2,Free 2.4.0,F240-2,Claude,Still open,fields-advanced.md (2.3.3),"Matrix single (rows Speed, Price) and multi (Mon x AM/PM); submit and read email, CSV, PDF"
-FA-11,P2,Free 2.4.0,F240-2,Claude,Partly fixed,fields-advanced.md (2.3.3),"Date format d/m/Y, Time format g:i A, DateTime format d/m/Y H:i"
-FA-12,P2,Free 2.4.0,F240-2,Claude,Still open,fields-advanced.md (2.3.3),Export CSV of a form with uploads
-FB-13,P2,Free 2.4.0,F240-2,Claude,Still open,fields-basic.md (2.3.3),"Submit Dropdown ""Beta"" (value b), Checkboxes One/Two, Picture A, Single Checkbox ticked. Look at entry, email, CSV."
-FF-25,P3,Free 2.4.0,F240-2,Claude,Still open,free-features.md (2.3.3),"Select field with label ""Sales"" / value ""sales""; view the email and entry"
-FF-30,P3,Free 2.4.0,F240-2,Claude,Still open,free-features.md (2.3.3),Any entry
-FLD2-12,P3,Free 2.4.0,F240-2,Claude,new in 2.3.8,fields.md (2.3.8),"Checkbox with a 1,476 character label, submit"
-PAY-23,P3,Free 2.4.0,F240-2,Claude,Still open,payments.md (2.3.3),Open a paid entry.
-PAY2-06,P3,Free 2.4.0,F240-2,Claude,new in 2.3.8,payments.md (2.3.8),Open Submissions with payment entries whose form has no name field
-PRO-23,P3,Free 2.4.0,F240-2,Claude,"Still open, and wider",pro.md (2.3.3),PDF of an entry with a single checkbox ticked
-PRO2-08,P3,Free 2.4.0,F240-2,Claude,new in 2.3.8,pro-server.md (2.3.8),"Chained Select with labels Pakistan and Punjab, values pakistan and punjab; submit with Mailchimp, HubSpot, PDF and email"
-FA-04,P2,Free 2.4.0,F240-3,Cursor,Fixed,fields-advanced.md (2.3.3),Builder field library
-FA-05,P2,Free 2.4.0,F240-3,Cursor,Fixed,fields-advanced.md (2.3.3),"Form with a Hidden field, open the live page"
-FA-06,P2,Free 2.4.0,F240-3,Cursor,Still open,fields-advanced.md (2.3.3),Required Color Picker with Default Color #ff0000; submit without touching it
-FA-13,P2,Free 2.4.0,F240-3,Cursor,Still open,fields-advanced.md (2.3.3),"Add reCaptcha, hCaptcha and Turnstile fields with their own Site Key, no global CAPTCHA settings"
-FB-03,P2,Free 2.4.0,F240-3,Cursor,Still open,fields-basic.md (2.3.3),"Password field, Show Strength Meter on (default) and Require Confirmation on. View live."
-FB-08,P2,Free 2.4.0,F240-3,Cursor,Partly fixed,fields-basic.md (2.3.3),"Phone Format ""US"" and submit ""12""; Country ""Enable Search"" on."
-FB-21,P2,Free 2.4.0,F240-3,Cursor,Fixed (with new bugs),fields-basic.md (2.3.3),Chained Select: add two levels with options. Live: choose Ford.
-FLD2-04,P2,Free 2.4.0,F240-3,Cursor,new in 2.3.8,fields.md (2.3.8),Keyboard and screen reader on Dropdown and Country pickers
-FLD2-05,P2,Free 2.4.0,F240-3,Cursor,new in 2.3.8,fields.md (2.3.8),"Keyboard on Date, Time, Date and Time pickers"
-FA-14,P3,Free 2.4.0,F240-3,Cursor,Still open,fields-advanced.md (2.3.3),Action Hook field with Hook Name qa_adv_hook; render and submit
-FA-15,P3,Free 2.4.0,F240-3,Cursor,Still open,fields-advanced.md (2.3.3),"NPS end labels, Calculation prefix/suffix"
-FA-20,P3,Free 2.4.0,F240-3,Cursor,"Still open, looks worse",fields-advanced.md (2.3.3),Section Heading followed by Custom HTML
-FA-22,P3,Free 2.4.0,F240-3,Cursor,Still open,fields-advanced.md (2.3.3),Any column container on the live form
-FA-25,P3,Free 2.4.0,F240-3,Cursor,Partly fixed,fields-advanced.md (2.3.3),Hidden field definition
-FB-16,P3,Free 2.4.0,F240-3,Cursor,Still open,fields-basic.md (2.3.3),"Add Dropdown, Radio Buttons or Checkboxes from the library."
-FB-18,P3,Free 2.4.0,F240-3,Cursor,Still open,fields-basic.md (2.3.3),"Radio, Checkboxes, Picture Choice: the visible field label has for=""subtleforms-field-rd"" but no element has that id."
-FB-19,P3,Free 2.4.0,F240-3,Cursor,Still open,fields-basic.md (2.3.3),"Text/Number/Website with prefix ""$"" and suffix ""kg""."
-FB-20,P3,Free 2.4.0,F240-3,Cursor,Still open (not re-run in the UI),fields-basic.md (2.3.3),"Logic rule on a Single Checkbox, Consent, Toggle or Country trigger."
-FB-22,P3,Free 2.4.0,F240-3,Cursor,Still open,fields-basic.md (2.3.3),Add Consent / GDPR from the library and look at the canvas.
-FB-24,P3,Free 2.4.0,F240-3,Cursor,Partly fixed,fields-basic.md (2.3.3),"Builder canvas: Dropdown default ""Beta"", Radio default ""Green"", Checkboxes default ""One"", Toggle default on."
-FLD2-06,P3,Free 2.4.0,F240-3,Cursor,new in 2.3.8,fields.md (2.3.8),Submit the required pickers form empty
-FLD2-08,P3,Free 2.4.0,F240-3,Cursor,new in 2.3.8,fields.md (2.3.8),Screen reader on the phone country button; Windows browsers
-FLD2-13,P3,Free 2.4.0,F240-3,Cursor,new in 2.3.8,fields.md (2.3.8),Import a semicolon CSV (Excel in many locales); replace lists with CSV or outline on a form with entries
-FLD2-14,P3,Free 2.4.0,F240-3,Cursor,new in 2.3.8,fields.md (2.3.8),"Builder chained ""On the form"" and ""Source"" groups with a screen reader"
-FLD2-15,P3,Free 2.4.0,F240-3,Cursor,new in 2.3.8,fields.md (2.3.8),Calendar for a date of birth
-FLD2-18,P3,Free 2.4.0,F240-3,Cursor,new in 2.3.8,fields.md (2.3.8),"Chained Columns layout, axe"
-FLD2-19,P3,Free 2.4.0,F240-3,Cursor,new in 2.3.8,fields.md (2.3.8),Select a Repeater and look at its toolbar
-FF-08,P2,Free 2.4.0,F240-4,Cursor,Still open,free-features.md (2.3.3),"Settings > Email: set Sender Name and Email, or turn Admin Notifications off, then submit a form"
-FF-14,P2,Free 2.4.0,F240-4,Cursor,Still open,free-features.md (2.3.3),"Builder: add a field (unpublished), Preview, fill it, submit"
-FF-17,P2,Free 2.4.0,F240-4,Cursor,Still open,free-features.md (2.3.3),"Free webhook, Payload Mode Custom {""name"":""{{name}}""} (placeholder shown in the UI)"
-FF-18,P2,Free 2.4.0,F240-4,Cursor,Still open,free-features.md (2.3.3),"Entry detail > Flag, then click Flagged to unflag"
-FF-19,P2,Free 2.4.0,F240-4,Cursor,Still open,free-features.md (2.3.3),"Entry with status payment_pending (or failed): bulk Flag or Spam, then Restore"
-FF2-02,P2,Free 2.4.0,F240-4,Cursor,new in 2.3.8,free-features.md (2.3.8),Tools > Migrate with a current Fluent Forms export (notifications and formSettings in metas)
-FF2-03,P2,Free 2.4.0,F240-4,Cursor,new in 2.3.8,free-features.md (2.3.8),"Same Fluent file with a two-column container (Company, Job title), a form_step, an input_hidden and a Name field"
-FF2-04,P2,Free 2.4.0,F240-4,Cursor,new in 2.3.8,free-features.md (2.3.8),"Tools > Migrate with a Gravity Forms export: multi-page, a field with conditional logic, notifications using {Name (First):1.3}, a ""send to field"" notification (toType: field, to: ""2""), a page confirmation (pageId"
-FF2-05,P2,Free 2.4.0,F240-4,Cursor,new in 2.3.8,free-features.md (2.3.8),Tools > Migrate with an older Fluent file that has a top-level notifications object
-FF2-06,P2,Free 2.4.0,F240-4,Cursor,new in 2.3.8,free-features.md (2.3.8),"Submissions, open a link with submission_id of an entry below row 200 (tested rows 200, 300, 5,000)"
-FF-09,P3,Free 2.4.0,F240-4,Cursor,Still open,free-features.md (2.3.3),"Settings > General > Delete Behavior ""Hard"", then delete an entry. ""Soft"", then delete a form."
-FF-10,P3,Free 2.4.0,F240-4,Cursor,Still open,free-features.md (2.3.3),"Settings > Autosave off, or interval 3 s; edit in the builder"
-FF-15,P3,Free 2.4.0,F240-4,Cursor,Still open,free-features.md (2.3.3),"Confirmation message ""Got it {field:name}"" or redirect ?who={field:name}"
-FF-16,P3,Free 2.4.0,F240-4,Cursor,Still open,free-features.md (2.3.3),Entry > Resend notifications twice within 10 minutes (before cron runs)
-FF-22,P3,Free 2.4.0,F240-4,Cursor,Still open,free-features.md (2.3.3),Block option AJAX on or off
-FF-24,P3,Free 2.4.0,F240-4,Cursor,"Still open, also in the new Reports",free-features.md (2.3.3),"Site timezone UTC+5, look at Dashboard ""Today"" and the chart"
-FF-26,P3,Free 2.4.0,F240-4,Cursor,Still open,free-features.md (2.3.3),Entries filtered to one form
-FF-29,P3,Free 2.4.0,F240-4,Cursor,Still open,free-features.md (2.3.3),Every submission
-FF-32,P3,Free 2.4.0,F240-4,Cursor,Still open,free-features.md (2.3.3),"Settings > Email ""Admin Notifications"" help vs per-form actions"
-FF-33,P3,Free 2.4.0,F240-4,Cursor,Fixed,free-features.md (2.3.3),Builder Settings view
-FF-34,P3,Free 2.4.0,F240-4,Cursor,Still open,free-features.md (2.3.3),Block forms and a shortcode form on one page
-FF2-10,P3,Free 2.4.0,F240-4,Cursor,new in 2.3.8,free-features.md (2.3.8),Builder > Preview > Appearance > Inherit from theme > Update (publish) and reopen
-FF2-11,P3,Free 2.4.0,F240-4,Cursor,new in 2.3.8,free-features.md (2.3.8),"Inherit from theme on subtleforms-site, Twenty Twenty; add a custom font Georgia"
-FF2-12,P3,Free 2.4.0,F240-4,Cursor,new in 2.3.8,free-features.md (2.3.8),Builder Preview with Twenty Twenty-Five active
-FF2-13,P3,Free 2.4.0,F240-4,Cursor,new in 2.3.8,free-features.md (2.3.8),"New tab, open entries 8, 12, 16 in the pane"
-FF2-14,P3,Free 2.4.0,F240-4,Cursor,new in 2.3.8,free-features.md (2.3.8),"Search ""Inbox Person 7"", open 7, reload. Or ""No split"", open an entry, press browser Back"
-FF2-15,P3,Free 2.4.0,F240-4,Cursor,new in 2.3.8,free-features.md (2.3.8),Form with a webhook; submit; Tools > Webhooks
-FF2-16,P3,Free 2.4.0,F240-4,Cursor,new in 2.3.8,free-features.md (2.3.8),"Tools, Tab to ""Import forms"" / ""Import submissions"" / ""Choose export file"", press Enter or Space"
-FF2-17,P3,Free 2.4.0,F240-4,Cursor,new in 2.3.8,free-features.md (2.3.8),"Tools: import a wrong file on Transfer, switch to Migrate. Look at the form picker"
-FF2-18,P3,Free 2.4.0,F240-4,Cursor,new in 2.3.8,free-features.md (2.3.8),Import the same submissions file twice; import RT entries into the Inbox form
-PAY2-07,P3,Free 2.4.0,F240-4,Cursor,new in 2.3.8,payments.md (2.3.8),"Tools > Migrate preview of a Gravity Forms export with a Stripe or PayPal field, or a Fluent Forms export with custom amount, coupon, quantity or summary components"
-UX2-10,P2,Free 2.4.0,F240-5,Cursor,new in 2.3.8,ui-ux.md (2.3.8),Several
-UX2-13,P2,Free 2.4.0,F240-5,Cursor,new in 2.3.8,ui-ux.md (2.3.8),Builder
-UX2-16,P2,Free 2.4.0,F240-5,Cursor,new in 2.3.8,ui-ux.md (2.3.8),All admin
-UX2-17,P2,Free 2.4.0,F240-5,Cursor,new in 2.3.8,ui-ux.md (2.3.8),Builder at 390
-UX2-18,P2,Free 2.4.0,F240-5,Cursor,new in 2.3.8,ui-ux.md (2.3.8),Submissions pane
-UX2-19,P2,Free 2.4.0,F240-5,Cursor,new in 2.3.8,ui-ux.md (2.3.8),"All Forms, Submissions at 390"
-UX2-25,P2,Free 2.4.0,F240-5,Cursor,new in 2.3.8,ui-ux.md (2.3.8),Onboarding wizard
-UX2-27,P2,Free 2.4.0,F240-5,Cursor,new in 2.3.8,ui-ux.md (2.3.8),Public forms
-UX2-26,P3,Free 2.4.0,F240-5,Cursor,new in 2.3.8,ui-ux.md (2.3.8),Builder tour
-UX2-28,P3,Free 2.4.0,F240-5,Cursor,new in 2.3.8,ui-ux.md (2.3.8),Submissions Trash
-PAY-09,P2,Free 2.4.0,F240-6,Claude,Still open,payments.md (2.3.3),Form currency JPY (or site EUR) with a Custom Amount field.
-PAY2-01,P2,Free 2.4.0,F240-6,Claude,new in 2.3.8,payments.md (2.3.8),"Tools > export submissions of a payment form, then import the file (same or another form). Also export an entry with status payment_failed"
-PAY2-02,P2,Free 2.4.0,F240-6,Claude,new in 2.3.8,payments.md (2.3.8),"Site currency EUR (Settings > Integrations > Payments). Open a priced form, Settings > Payments, change anything and Update"
-PAY-12,P3,Free 2.4.0,F240-6,Claude,Still open,payments.md (2.3.3),"JPY form, product 1250.50, tip 100.70."
-PAY-13,P3,Free 2.4.0,F240-6,Claude,Still open,payments.md (2.3.3),REST: put a code only in the Coupon field key (not _coupon) and pay.
-PAY-14,P3,Free 2.4.0,F240-6,Claude,Still open,payments.md (2.3.3),"Create coupon with starts 2027-01-01 and expires 2026-01-01, or expires ""not a date""."
-PAY-16,P3,Free 2.4.0,F240-6,Claude,"Still open, wider",payments.md (2.3.3),POST /payments/quote and /payments/intent for a draft form.
-PAY-17,P3,Free 2.4.0,F240-6,Claude,Still open,payments.md (2.3.3),Select a Product in the builder.
-PAY-19,P3,Free 2.4.0,F240-6,Claude,Fixed,payments.md (2.3.3),Open a form with radio Priced Options in the builder.
-PAY-22,P3,Free 2.4.0,F240-6,Claude,Still open,payments.md (2.3.3),Entry with status payment_failed.
-PAY-24,P3,Free 2.4.0,F240-6,Claude,Still open,payments.md (2.3.3),"Gateway not configured, Pro active, POST /payments/intent."
-PAY-25,P3,Free 2.4.0,F240-6,Claude,Still open,payments.md (2.3.3),Any payment validation error.
-PAY-26,P3,Free 2.4.0,F240-6,Claude,Still open,payments.md (2.3.3),Order total below Stripe minimum (for example 0.30 USD).
-PAY2-03,P3,Free 2.4.0,F240-6,Claude,new in 2.3.8,payments.md (2.3.8),"Priced Options with ""Dropdown (pick one)"" on the live form"
-FA-07,P2,Pro 2.4.0,P240-1,Claude,Still open,fields-advanced.md (2.3.3),Repeater row with Number {rq} and Calculation {rq}*2; enter 2 and 5
-FA-08,P2,Pro 2.4.0,P240-1,Claude,Still open,fields-advanced.md (2.3.3),"Total = {qty}*{price}+{pick}+{adds}, leave the optional checkbox ""adds"" empty"
-FA-09,P2,Pro 2.4.0,P240-1,Claude,Still open,fields-advanced.md (2.3.3),Divide = {qty}/{price} with price 0
-FA-16,P3,Pro 2.4.0,P240-1,Claude,Still open,fields-advanced.md (2.3.3),"Signature, Clear button text ""Wipe"""
-PRO2-04,P3,Pro 2.4.0,P240-1,Claude,new in 2.3.8,pro-server.md (2.3.8),"Form with a Signature and HubSpot ""add note"" on; submit"
-PRO2-07,P3,Pro 2.4.0,P240-1,Claude,new in 2.3.8,pro-server.md (2.3.8),"Calculation ""{qty} * 12.5"", submit with qty empty, open the PDF"
-PRO-01,P1,Pro 2.4.0,P240-2,Cursor,Still open,pro.md (2.3.3),"Create a form from the Pro template ""Payment Form"", submit it"
-PRO-02,P1,Pro 2.4.0,P240-2,Cursor,Still open,pro.md (2.3.3),"Create a form from any of 20 Pro templates (advanced_contact, event_registration, support_ticket, payment_form, booking_form, job_application, survey_nps, membership_application, sales_inquiry, partnership_request, press"
-PRO-22,P3,Pro 2.4.0,P240-2,Cursor,Still open,pro.md (2.3.3),Use the Donation Form template
-PAY-03,P1,Pro 2.4.0,P240-3,Claude,Still open,payments.md (2.3.3),Configure Stripe keys. Publish a form with Product + Order Summary and no Card field. Submit.
-PAY-04,P1,Pro 2.4.0,P240-3,Claude,Still open,payments.md (2.3.3),Stripe capture declines (mock 402 on capture). Form has admin and visitor email actions.
-PAY-10,P2,Pro 2.4.1,P241-1,Claude,Still open,payments.md (2.3.3),"Intent status ""processing"" (bank debits, some wallets)."
-PAY-11,P2,Pro 2.4.1,P241-1,Claude,Still open,payments.md (2.3.3),WooCommerce checkout form with Order Summary tax 10 percent.
-PAY-15,P3,Pro 2.4.1,P241-1,Claude,Still open,payments.md (2.3.3),Set Mode = Live with sk_test keys (or the reverse).
-PAY-20,P3,Pro 2.4.1,P241-1,Claude,Still open,payments.md (2.3.3),"WooCommerce form, pay with Cash on delivery."
-PAY-21,P3,Pro 2.4.1,P241-1,Claude,Still open,payments.md (2.3.3),Partial refund of 10 on a completed Woo order.
-PAY2-05,P3,Pro 2.4.1,P241-1,Claude,new in 2.3.8,payments.md (2.3.8),WooCommerce form with a WooCommerce Product field; download the entry PDF
-PRO-03,P2,Pro 2.4.1,P241-2,Claude,Still open,pro.md (2.3.3),"Let next_check pass (every 12 h, or 5 min after a failure) while the license server is slow or times out; load any front-end page"
-PRO-14,P3,Pro 2.4.1,P241-2,Claude,Still open,pro.md (2.3.3),"Remove the site's activation on the server (revoked), open Settings > License"
-PRO-16,P3,Pro 2.4.1,P241-2,Claude,Still open,pro.md (2.3.3),Pro active while the free plugin is missing or too old
-PRO-17,P3,Pro 2.4.1,P241-2,Claude,Still open,pro.md (2.3.3),"Activate SF-DEV-AGENCY on a local site, then switch the environment to production"
-PRO-18,P3,Pro 2.4.1,P241-2,Claude,Still open,pro.md (2.3.3),Watch the update requests
-PRO-19,P3,Pro 2.4.1,P241-2,Claude,Still open,pro.md (2.3.3),"Activate any key, look at the server activation"
-PRO-20,P3,Pro 2.4.1,P241-2,Claude,Still open,pro.md (2.3.3),License expiring in 4 days (or cron skips a day)
-PRO-31,P3,Pro 2.4.1,P241-2,Claude,Still open,pro.md (2.3.3),No Update URI header in subtleforms-pro.php
-PRO2-03,P3,Pro 2.4.1,P241-2,Claude,new in 2.3.8,pro-server.md (2.3.8),"Activate key A on a production site, then activate key B on the same site (key form, or ""Use a different key"" on a lapsed license)"
-PRO-06,P2,Pro 2.4.1,P241-3,Cursor,Still open,pro.md (2.3.3),HubSpot connected; HubSpot answers the upsert with HTTP 207 and an errors array
-PRO-11,P3,Pro 2.4.1,P241-3,Cursor,Still open,pro.md (2.3.3),Submit any form with a webhook
-PRO-12,P3,Pro 2.4.1,P241-3,Cursor,Still open,pro.md (2.3.3),Look at webhook rows in the delivery log or the integration log table
-PRO-13,P3,Pro 2.4.1,P241-3,Cursor,Still open,pro.md (2.3.3),Read error messages on the entry screen
-PRO-21,P3,Pro 2.4.1,P241-3,Cursor,Still open,pro.md (2.3.3),"Map PHONE on a form for Mailchimp, then switch the global provider to Kit or Brevo"
-PRO-27,P3,Pro 2.4.1,P241-3,Cursor,Still open,pro.md (2.3.3),GET /subtleforms/v1/settings as admin
-PRO2-02,P3,Pro 2.4.1,P241-3,Cursor,new in 2.3.8,pro-server.md (2.3.8),"Export a form with a signed webhook (or edit the JSON so signing is on with an empty secret, as a hand-made or older export would have), import it in Tools, submit"
-PRO-04,P2,Pro 2.4.1,P241-4,Cursor,Still open (code and network check; not re-run with Polylang,pro.md (2.3.3),"Agency, Polylang active with English and French, Settings > Integrations > Multilanguage on, translate ""Full name"" to ""Nom complet"" in String Translation, open the French page with the form"
-PRO-05,P2,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),"Submit an entry with Arabic, Urdu, Hebrew, Chinese and emoji text, download the PDF"
-PRO-07,P2,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),"Send an entry to Mailchimp or a webhook, then permanently delete the entry (or uninstall Pro)"
-PRO-08,P3,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),"Activate a Starter license, open Settings > Integrations > Email Marketing, CRM or Multilanguage"
-PRO-15,P3,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),Uninstall Pro
-PRO-24,P3,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),"Agency white label with ""Only I can see License and Branding"", log in as another admin"
-PRO-25,P3,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),Click Disconnect on Settings > License
-PRO-26,P3,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),Create a form (POST /forms) whose logic references a missing field
-PRO-28,P3,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),Server without .htaccess support (nginx): PDF email attachment written to uploads/subtleforms-pdf-tmp/{form}-entry-{id}.pdf
-PRO-29,P3,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),"WP_DEBUG on, any license check"
-PRO-30,P3,Pro 2.4.1,P241-4,Cursor,Still open,pro.md (2.3.3),Integrations panel on the Agency screenshot
-PRO2-05,P3,Pro 2.4.1,P241-4,Cursor,new in 2.3.8,pro-server.md (2.3.8),"Agency, Multilanguage on, form with a Chained Select"
-LS-01,P1,Server 1.7.0,S170-1,Claude,Still open,license-server.md (2.3.3),1. A guest buys a license as victim@x (no account). 2. Any other signed-in customer opens My Account > Account details and changes the email to victim@x (no password or confirmation needed). 3. Open My Account > Licenses
-LS-02,P1,Server 1.7.0,S170-1,Claude,Still open,license-server.md (2.3.3),"Signed out, buy Starter with cheque, admin completes the order, click Download Pro in the email or on the thank-you page."
-LS-03,P2,Server 1.7.0,S170-1,Claude,Still open,license-server.md (2.3.3),"Upgrade Starter to Pro (order 6415, $50), complete, then refund it in full. Separately renew (order 6422, $79), complete, refund."
-LS-04,P2,Server 1.7.0,S170-1,Claude,Still open,license-server.md (2.3.3),"Signed out, open /?sfls_buy=3004 (Starter Renewal, $39) and check out."
-LS-06,P2,Server 1.7.0,S170-1,Claude,Still open,license-server.md (2.3.3),"Send 5 validate requests for one key from 5 different IPs with a limit of 5 (temporary filter), then a 6th from a new IP."
-LS-07,P2,Server 1.7.0,S170-1,Claude,Still open,license-server.md (2.3.3),"Starter key already on 1 site; activate myshop.wpengine.com, dev.realclient.com."
-LS-08,P2,Server 1.7.0,S170-1,Claude,Still open,license-server.md (2.3.3),Request http://localhost:8899/wp-content/uploads/sfls-private/subtleforms-pro-2.2.0.zip without auth.
-LS-13,P3,Server 1.7.0,S170-1,Claude,Still open,license-server.md (2.3.3),"Link an order to a subscription (subscription.activated), then send subscription.past_due whose occurred_at is later than the activated event but earlier than the moment the link was processed."
-LS-15,P3,Server 1.7.0,S170-1,Claude,Still open,license-server.md (2.3.3),/connect-site/ with return=http://...
-LS-16,P3,Server 1.7.0,S170-1,Claude,Still open (code review plus observation),license-server.md (2.3.3),Review data retention.
-LS-05,P2,Server 1.7.0,S170-2,Cursor,Still open,license-server.md (2.3.3),Open /pricing/.
-LS-09,P3,Server 1.7.0,S170-2,Cursor,Still open,license-server.md (2.3.3),"Export 10,000 licenses as CSV."
-LS-10,P3,Server 1.7.0,S170-2,Cursor,Still open,license-server.md (2.3.3),validate on a site that is not activated; activate with site_url=javascript:alert(1).
-LS-11,P3,Server 1.7.0,S170-2,Cursor,Still open (subject re-run; renewal thank-you text not re-ru,license-server.md (2.3.3),Complete a license order; place a renewal order.
-LS-12,P3,Server 1.7.0,S170-2,Cursor,Still open,license-server.md (2.3.3),Open Licenses > Pro releases.
-LS-14,P3,Server 1.7.0,S170-2,Cursor,Still open,license-server.md (2.3.3),update/check changelog.
-LS-17,P3,Server 1.7.0,S170-2,Cursor,Still open,license-server.md (2.3.3),"Run wp sfls remind --dry-run with 10,000 licenses (1,000 expiring within 30 days)."
-LS-18,P3,Server 1.7.0,S170-2,Cursor,Still open,license-server.md (2.3.3),Issue a license by hand for a customer email.
-UX2-30,P3,Server 1.7.0,S170-2,Cursor,new in 2.3.8,ui-ux.md (2.3.8),License server Pro downloads
+id,severity,release,package,owner,status_on_2.3.8,status,fixed_in,found_in,summary,note
+WP2-01,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),CSV export code ships in free but is locked (trialware),
+WP2-02,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,wporg.md (2.3.8),Analytics reports computed in free and hidden; views counted by default,Test is weak: no test covers the view-counting switch or that /analytics/summary returns 200 in free; static string check only
+WP2-03,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,wporg.md (2.3.8),"Advanced logic runs in free, only editor locks it","Test is weak: static string-absence tests only, no behavioural test of advanced rules in editor"
+WP2-04,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),"Picture Choice, Signature, Calculation render in free but locked in library",
+WP2-05,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),"Payment fields and coupons in free, locked; Payments page says they work on every plan",
+WP2-06,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),Multi-file uploads implemented and stripped in free,
+WP2-09,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),Upsell copy implies paying to unlock included features,
+UX2-29,P2,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),Payments copy vs live form,Fix commit names this ID; not re-checked line by line.
+WP2-07,P2,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),Webhooks and Analytics settings locked in free though free uses them; free user cannot turn off view counting,Fix commit names this ID; not re-checked line by line.
+WP2-14,P2,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),"2-letter global prefix and sf_ transients, hidden by phpcs:disable",Fix commit names this ID; not re-checked line by line.
+FF2-19,P3,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed,Free 2.3.9,free-features.md (2.3.8),Reports with spam and failed entries; Reports with Pro off,Fix commit names this ID; not re-checked line by line.
+PRO-09,P3,Free 2.3.9,F239-1,Claude,Still open,fixed,Free 2.3.9,pro.md (2.3.3),No license; open a form that uses Calculation or Picture Choice or advanced logic but no Signature,Fix commit names this ID; not re-checked line by line.
+PRO-10,P3,Free 2.3.9,F239-1,Claude,"Still open, and wider",fixed,Free 2.3.9,pro.md (2.3.3),"No license; POST /forms with a Signature field and a starts_with rule, or a Pro template schema without metadata.template",Fix commit names this ID; not re-checked line by line.
+PRO2-06,P3,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed,Free 2.3.9,pro-server.md (2.3.8),"Agency (or white label with ""Hide credits"") open Reports and Tools",Fix commit names this ID; not re-checked line by line.
+UX2-15,P3,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),"Payments, Extensions",Fix commit names this ID; not re-checked line by line.
+FF-02,P1,Free 2.3.9,F239-2,Claude,Still open,fixed-no-test,Free 2.3.9,free-features.md (2.3.3),"Settings > AI assistant, enter any key, click Test Connection, then Save",no test asserting the tab/keys are gone
+WP2-08,P1,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,wporg.md (2.3.8),AI assistant tab is non-functional and fakes success,no regression test
+WP2-10,P1,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,wporg.md (2.3.8),No External services section in readme,no test; readme not testable (consider a readme lint)
+WP2-11,P1,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,wporg.md (2.3.8),Contributors names another person's account,"no test; list still includes the generic ""subtleforms"" account"
+FF-23,P2,Free 2.3.9,F239-2,Claude,Partly fixed,fixed,Free 2.3.9,free-features.md (2.3.3),Install any language pack,Fix commit names this ID; not re-checked line by line.
+FF-31,P2,Free 2.3.9,F239-2,Claude,Still open (code),fixed,Free 2.3.9,free-features.md (2.3.3),"Multisite: network activate, use on a subsite, network deactivate, delete",Fix commit names this ID; not re-checked line by line.
+FF2-09,P2,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed,Free 2.3.9,free-features.md (2.3.8),"On 8934: deactivate SubtleForms, run uninstall.php",Fix commit names this ID; not re-checked line by line.
+FLD2-01,P2,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed,Free 2.3.9,fields.md (2.3.8),Install the 2.3.8 zip; form with a chained field in Buttons or Columns; Tab into it and press ArrowRight,Fix commit names this ID; not re-checked line by line.
+WP2-12,P2,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),Requires at least 6.0 but build needs 6.6,Fix commit names this ID; not re-checked line by line.
+WP2-13,P2,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),readme too long and inaccurate,Fix commit names this ID; not re-checked line by line.
+WP2-15,P2,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),Dev and placeholder files in the zip,Fix commit names this ID; not re-checked line by line.
+WP2-16,P2,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),Uninstall leaves data,
+FF2-20,P3,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed,Free 2.3.9,free-features.md (2.3.8),Load any SubtleForms admin page,Fix commit names this ID; not re-checked line by line.
+FF2-22,P3,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed,Free 2.3.9,free-features.md (2.3.8),Any submission with WP_DEBUG_LOG on and Debug Mode off,Fix commit names this ID; not re-checked line by line.
+WP2-17,P3,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),Direct request to main file causes fatal (wp_die undefined); class files fatal with path,
+WP2-19,P3,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),Inline style printed directly on every admin page,Fix commit names this ID; not re-checked line by line.
+WP2-20,P3,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),Plugin fires core hook wp_enqueue_scripts in admin and swaps core globals,Fix commit names this ID; not re-checked line by line.
+WP2-21,P3,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),No wp_set_script_translations,Fix commit names this ID; not re-checked line by line.
+WP2-22,P3,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),Error log noise,Fix commit names this ID; not re-checked line by line.
+FF-01,P1,Free 2.3.9,F239-3,Claude,Still open,fixed,Free 2.3.9,free-features.md (2.3.3),"Store a numeric HubSpot Portal ID such as 4455 (all real IDs are numeric). Go to Settings, any tab, change anything, Save.",
+FF-03,P1,Free 2.3.9,F239-3,Claude,Still open,fixed,Free 2.3.9,free-features.md (2.3.3),Serve a form page from a full-page cache older than the nonce lifetime (simulated by sending an expired X-WP-Nonce as a guest) and submit,
+FF2-01,P1,Free 2.3.9,F239-3,Claude,new in 2.3.8,fixed,Free 2.3.9,free-features.md (2.3.8),"Tools > Import forms with a SubtleForms file whose Custom HTML field content is <img src=x onerror=""...""> (or a label with markup); open the published page. Tools > Import submissions with a rich text answer <img src=",
+FA-19,P2,Free 2.3.9,F239-3,Claude,Still open,fixed,Free 2.3.9,fields-advanced.md (2.3.3),Delete a form permanently that has entries with uploads,Fix commit names this ID; not re-checked line by line.
+FB-09,P2,Free 2.3.9,F239-3,Claude,Still open,fixed,Free 2.3.9,fields-basic.md (2.3.3),Submit any answer the server rejects (for example txt too short) by REST.,Fix commit names this ID; not re-checked line by line.
+FF-11,P2,Free 2.3.9,F239-3,Claude,Still open,fixed,Free 2.3.9,free-features.md (2.3.3),Visitor whose device clock is 5 minutes fast submits within 5 minutes,Fix commit names this ID; not re-checked line by line.
+FF-12,P2,Free 2.3.9,F239-3,Claude,Still open,fixed,Free 2.3.9,free-features.md (2.3.3),POST /submit without form_rendered_at,
+FF-13,P2,Free 2.3.9,F239-3,Claude,Still open,fixed,Free 2.3.9,free-features.md (2.3.3),Submit a form with a required field missing (422 to the visitor),Fix commit names this ID; not re-checked line by line.
+FF-21,P2,Free 2.3.9,F239-3,Claude,Still open,fixed,Free 2.3.9,free-features.md (2.3.3),Erase personal data for ann@example.com,Fix commit names this ID; not re-checked line by line.
+FF2-07,P2,Free 2.3.9,F239-3,Claude,new in 2.3.8,fixed,Free 2.3.9,free-features.md (2.3.8),"Tools > tick a form that was never published (only autosaved), Export forms. Or GET /tools/forms/export?ids=<id>,999999",Fix commit names this ID; not re-checked line by line.
+FF2-08,P2,Free 2.3.9,F239-3,Claude,new in 2.3.8,fixed,Free 2.3.9,free-features.md (2.3.8),"As a guest, request 500 random paths under /wp-json/subtleforms/v1/",Fix commit names this ID; not re-checked line by line.
+PRO2-01,P2,Free 2.3.9,F239-3,Claude,new in 2.3.8,fixed,Free 2.3.9,pro-server.md (2.3.8),"Settings, Integrations, CRM: enter a HubSpot Portal ID (any real one, for example 4455 or 12345678). Then change anything on any Settings tab and save",Fix commit names this ID; not re-checked line by line.
+FA-18,P3,Free 2.3.9,F239-3,Claude,Still open,fixed,Free 2.3.9,fields-advanced.md (2.3.3),"Open /wp-content/uploads/subtleforms-uploads/files/<id> on a server that ignores .htaccess (PHP built-in server here, nginx in production)",Fix commit names this ID; not re-checked line by line.
+FA-24,P3,Free 2.3.9,F239-3,Claude,Still open,fixed,Free 2.3.9,fields-advanced.md (2.3.3),Failed submits,
+FF-20,P3,Free 2.3.9,F239-3,Claude,Still open,fixed,Free 2.3.9,free-features.md (2.3.3),Tools > Export Personal Data for an email with entries,Fix commit names this ID; not re-checked line by line.
+FF-27,P3,Free 2.3.9,F239-3,Claude,Still open,fixed,Free 2.3.9,free-features.md (2.3.3),Retention purge,
+FF-28,P3,Free 2.3.9,F239-3,Claude,Still open,fixed,Free 2.3.9,free-features.md (2.3.3),Rate limit policy for public submit,Fix commit names this ID; not re-checked line by line.
+FF2-21,P3,Free 2.3.9,F239-3,Claude,new in 2.3.8,fixed,Free 2.3.9,free-features.md (2.3.8),Delete a published form permanently,
+FLD2-17,P3,Free 2.3.9,F239-3,Claude,new in 2.3.8,fixed,Free 2.3.9,fields.md (2.3.8),Rejected submission,
+WP2-18,P3,Free 2.3.9,F239-3,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),Raw upload and filesystem functions,Fix commit names this ID; not re-checked line by line.
+FF-04,P1,Free 2.3.9,F239-4,Claude,Still open,fixed,Free 2.3.9,free-features.md (2.3.3),"Create a form from Advanced Contact, Sales Inquiry, Payment Form, Donation Form and 17 other templates, then submit",
+FF-05,P1,Free 2.3.9,F239-4,Claude,Still open,fixed,Free 2.3.9,free-features.md (2.3.3),"Use the ""Payment Form"" template",
+FA-02,P1,Free 2.3.9,F239-5,Claude,Still open,fixed,Free 2.3.9,fields-advanced.md (2.3.3),"Builder: add Notice, Section Heading or Page Break from the library and open Settings",
+FA-03,P1,Free 2.3.9,F239-5,Claude,Still open,fixed,Free 2.3.9,fields-advanced.md (2.3.3),Repeater with a File Upload child; upload small.txt in row 1 and submit,
+FB-01,P1,Free 2.3.9,F239-5,Claude,Still open,fixed,Free 2.3.9,fields-basic.md (2.3.3),"Builder: add Name, Settings > Appearance, switch on Middle Name and Suffix (or Address: switch on Street line 2, switch off Country). Save draft, reload.",
+FB-02,P1,Free 2.3.9,F239-5,Claude,Still open,fixed,Free 2.3.9,fields-basic.md (2.3.3),"Even with the sub-field map intact (builder before save, or REST): enable Middle Name / Suffix / Street line 2, or disable State / Postal / Country, view the live form.",
+PAY-01,P1,Free 2.3.9,F239-5,Claude,Still open,fixed,Free 2.3.9,payments.md (2.3.3),"Form with Product ""Entry fee"" 5.00, Allow quantity off. POST /payments/intent and /submit with data that simply omits the entry_fee key.",
+PAY-02,P1,Free 2.3.9,F239-5,Claude,Still open,fixed,Free 2.3.9,payments.md (2.3.3),"Form: select want (yes/no), Fixed Fee 3.00 with logic show when want = yes, Card field. In browser pick No.",
+FB-10,P2,Free 2.3.9,F239-5,Claude,Still open,fixed,Free 2.3.9,fields-basic.md (2.3.3),"Required Name: REST {""nm"":{""first_name"":""Ada""}}. Required Address: {""addr"":{""city"":""X""}}.",Fix commit names this ID; not re-checked line by line.
+FLD2-02,P2,Free 2.3.9,F239-5,Claude,new in 2.3.8,fixed,Free 2.3.9,fields.md (2.3.8),"Builder, chained field, Edit dropdowns, add choices and type Ford, Toyota; or import a CSV with Urdu or Chinese labels; submit",Fix commit names this ID; not re-checked line by line.
+FLD2-03,P2,Free 2.3.9,F239-5,Claude,new in 2.3.8,fixed,Free 2.3.9,fields.md (2.3.8),"Editor: Make has Ford, Toyota, Kia; remove Kia; add Honda; save",Fix commit names this ID; not re-checked line by line.
+FLD2-09,P2,Free 2.3.9,F239-5,Claude,new in 2.3.8,fixed,Free 2.3.9,fields.md (2.3.8),Required chained field in Columns layout; submit without touching it,Fix commit names this ID; not re-checked line by line.
+FA-21,P3,Free 2.3.9,F239-5,Claude,Still open,fixed,Free 2.3.9,fields-advanced.md (2.3.3),"Page Break description ""Step one help""",Fix commit names this ID; not re-checked line by line.
+FB-12,P3,Free 2.3.9,F239-5,Claude,Still open,fixed,Free 2.3.9,fields-basic.md (2.3.3),"Name or Address required with a custom ""Message when left empty"" or a form default required message; submit empty.",Fix commit names this ID; not re-checked line by line.
+FB-17,P3,Free 2.3.9,F239-5,Claude,Still open,fixed,Free 2.3.9,fields-basic.md (2.3.3),Screen reader on Name or Address group.,Fix commit names this ID; not re-checked line by line.
+FLD2-10,P3,Free 2.3.9,F239-5,Claude,new in 2.3.8,fixed,Free 2.3.9,fields.md (2.3.8),"Required chained field; REST [""toyota""] or browser with only Make chosen",Fix commit names this ID; not re-checked line by line.
+PAY-18,P3,Free 2.3.9,F239-5,Claude,Still open,fixed,Free 2.3.9,payments.md (2.3.3),Add a Fixed Fee field.,Fix commit names this ID; not re-checked line by line.
+UX2-01,P1,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,ui-ux.md (2.3.8),Builder header,"CSS layout fix, no regression test (no visual/browser test at 1280-1600)"
+UX2-02,P1,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),Builder Preview,
+UX2-03,P1,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,ui-ux.md (2.3.8),Public conversational,no regression test
+UX2-04,P1,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,ui-ux.md (2.3.8),Public payment,no regression test
+UX2-05,P1,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,ui-ux.md (2.3.8),All Forms,Test is weak: tests cover reducer/saveErrors only; no test for FormsList or SubmissionsTable error state
+UX2-08,P1,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),Public presets,
+UX2-20,P1,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,ui-ux.md (2.3.8),All Forms status tabs,no regression test; ring may clip again on phones
+FF-06,P2,Free 2.3.9,F239-6,Claude,Still open,fixed,Free 2.3.9,free-features.md (2.3.3),"Forms > ""?"" > Quick Start Wizard > Next x4 > Create Form",
+FF-07,P2,Free 2.3.9,F239-6,Claude,Still open,fixed,Free 2.3.9,free-features.md (2.3.3),"Open a published form, add a field, wait for autosave (or use Save draft)",Fix commit names this ID; not re-checked line by line.
+UX2-06,P2,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),Builder save,Fix commit names this ID; not re-checked line by line.
+UX2-07,P2,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,ui-ux.md (2.3.8),Builder load,no regression test
+UX2-09,P2,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),Dashboard vs Reports,Fix commit names this ID; not re-checked line by line.
+UX2-11,P2,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),Builder,Fix commit names this ID; not re-checked line by line.
+UX2-12,P2,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),"Wizard, create modal, builder",Fix commit names this ID; not re-checked line by line.
+UX2-14,P2,Free 2.3.9,F239-6,Claude,new in 2.3.8,open,,ui-ux.md (2.3.8),Create modal vs Form settings,Not verified in any repo; create modal vs form settings needs a check in Free.
+UX2-21,P2,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),"Dashboard, Reports",Fix commit names this ID; not re-checked line by line.
+UX2-22,P2,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),"All Forms, Submissions",Fix commit names this ID; not re-checked line by line.
+UX2-23,P2,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),"Submissions, builder, public hint",Fix commit names this ID; not re-checked line by line.
+UX2-24,P2,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),Builder canvas,Fix commit names this ID; not re-checked line by line.
+FA-01,P2,Free 2.4.0,F240-1,Claude,Still open,fixed,Free 2.4.0,fields-advanced.md (2.3.3),"REST POST /subtleforms/v1/submit to a form with date (min/max, read-only), time, datetime, rating (7), NPS, slider (10 to 50 step 5), matrix, signature, colour with: d1 ""not-a-date"", d2 changed, t1 ""99:99"", dt1 ""garbage""",
+FB-04,P2,Free 2.4.0,F240-1,Claude,"Still open, message changed for labels",fixed,Free 2.4.0,fields-basic.md (2.3.3),"Builder: Number field, Placeholder ""1000"" (or Default value ""750"", or a label ""2024""... any purely numeric value above 255 for label/placeholder, above 500 for default value). Save draft.",Fix commit names this ID; not re-checked line by line.
+FB-05,P2,Free 2.4.0,F240-1,Claude,Still open,fixed,Free 2.4.0,fields-basic.md (2.3.3),"Email field with Allow Multiple on; enter ""a@example.com, b@example.com"".",
+FB-07,P2,Free 2.4.0,F240-1,Claude,Still open,fixed,Free 2.4.0,fields-basic.md (2.3.3),"Text with Read-only and Default value ""fixed""; REST submit {""rot"":""hacked""}.",Fix commit names this ID; not re-checked line by line.
+FB-11,P2,Free 2.4.0,F240-1,Claude,Still open,fixed,Free 2.4.0,fields-basic.md (2.3.3),"REST submit values not offered by the field: dropdown ""zzz"", radio ""purple"", checkboxes [""bogus""], picture [""zzz""], country ""Narnia"", chained [""x"",""y""], toggle ""maybe"", checkbox ""hello"", consent ""yes"".",Fix commit names this ID; not re-checked line by line.
+FLD2-07,P2,Free 2.4.0,F240-1,Claude,new in 2.3.8,fixed,Free 2.4.0,fields.md (2.3.8),"Phone with country (PK). Paste ""+44 20 7946 0958""; type ""07700 900123"" with +44; REST ""+1"", ""+1 5"", ""+999 123""",Fix commit names this ID; not re-checked line by line.
+PAY-05,P2,Free 2.4.0,F240-1,Claude,Still open,fixed,Free 2.4.0,payments.md (2.3.3),"Custom Amount min 5 max 500 (set in builder). Submit 1, then 600.",Fix commit names this ID; not re-checked line by line.
+PAY-06,P2,Free 2.4.0,F240-1,Claude,Still open,fixed,Free 2.4.0,payments.md (2.3.3),Product qty max 5; submit tshirt=99 via REST.,Fix commit names this ID; not re-checked line by line.
+PAY-07,P2,Free 2.4.0,F240-1,Claude,Still open,fixed,Free 2.4.0,payments.md (2.3.3),Priced Options required; submit plan=bogus.,
+FA-17,P3,Free 2.4.0,F240-1,Claude,Still open,fixed,Free 2.4.0,fields-advanced.md (2.3.3),"REST submit a required Rich Text with ""<p><br></p>""",Fix commit names this ID; not re-checked line by line.
+FA-23,P3,Free 2.4.0,F240-1,Claude,Still open,fixed,Free 2.4.0,fields-advanced.md (2.3.3),REST submit 1 group to a Repeater with Min Repeats 2,Fix commit names this ID; not re-checked line by line.
+FB-06,P3,Free 2.4.0,F240-1,Claude,Still open,fixed,Free 2.4.0,fields-basic.md (2.3.3),"Email with RFC Validation off; submit ""user@localhost"".",Fix commit names this ID; not re-checked line by line.
+FB-14,P3,Free 2.4.0,F240-1,Claude,Still open,fixed,Free 2.4.0,fields-basic.md (2.3.3),Number out of range by REST.,
+FB-15,P3,Free 2.4.0,F240-1,Claude,Still open,fixed,Free 2.4.0,fields-basic.md (2.3.3),"Website: REST ""ftp://example.com"" accepted; browser rejects it. Browser rejects ""example.com"".",Fix commit names this ID; not re-checked line by line.
+FB-23,P3,Free 2.4.0,F240-1,Claude,Still open,fixed,Free 2.4.0,fields-basic.md (2.3.3),"Text field: REST {""txt"":[""a"",""b""]}.",Fix commit names this ID; not re-checked line by line.
+FLD2-11,P3,Free 2.4.0,F240-1,Claude,new in 2.3.8,fixed,Free 2.4.0,fields.md (2.3.8),"Builder: label of 2,001 characters, or ""2026""; Save draft",Fix commit names this ID; not re-checked line by line.
+FLD2-16,P3,Free 2.4.0,F240-1,Claude,new in 2.3.8,fixed,Free 2.4.0,fields.md (2.3.8),"Hidden field with {date} or {user_email}, submitted by REST or without JavaScript",Fix commit names this ID; not re-checked line by line.
+PAY-08,P3,Free 2.4.0,F240-1,Claude,Still open,fixed,Free 2.4.0,payments.md (2.3.3),"Radio Priced Options; submit plan=[""basic"",""premium""].",Fix commit names this ID; not re-checked line by line.
+PAY2-04,P3,Free 2.4.0,F240-1,Claude,new in 2.3.8,fixed,Free 2.4.0,payments.md (2.3.8),"REST submit with extra keys for display-only payment fields, for example fee=0 and summary=0.01",Fix commit names this ID; not re-checked line by line.
+FA-10,P2,Free 2.4.0,F240-2,Claude,Still open,fixed,Free 2.4.0,fields-advanced.md (2.3.3),"Matrix single (rows Speed, Price) and multi (Mon x AM/PM); submit and read email, CSV, PDF",
+FA-11,P2,Free 2.4.0,F240-2,Claude,Partly fixed,fixed,Free 2.4.0,fields-advanced.md (2.3.3),"Date format d/m/Y, Time format g:i A, DateTime format d/m/Y H:i",Fix commit names this ID; not re-checked line by line.
+FA-12,P2,Free 2.4.0,F240-2,Claude,Still open,fixed,Free 2.4.0,fields-advanced.md (2.3.3),Export CSV of a form with uploads,Fix commit names this ID; not re-checked line by line.
+FB-13,P2,Free 2.4.0,F240-2,Claude,Still open,fixed,Free 2.4.0,fields-basic.md (2.3.3),"Submit Dropdown ""Beta"" (value b), Checkboxes One/Two, Picture A, Single Checkbox ticked. Look at entry, email, CSV.",Fix commit names this ID; not re-checked line by line.
+FF-25,P3,Free 2.4.0,F240-2,Claude,Still open,fixed,Free 2.4.0,free-features.md (2.3.3),"Select field with label ""Sales"" / value ""sales""; view the email and entry",Fix commit names this ID; not re-checked line by line.
+FF-30,P3,Free 2.4.0,F240-2,Claude,Still open,fixed,Free 2.4.0,free-features.md (2.3.3),Any entry,Fix commit names this ID; not re-checked line by line.
+FLD2-12,P3,Free 2.4.0,F240-2,Claude,new in 2.3.8,fixed,Free 2.4.0,fields.md (2.3.8),"Checkbox with a 1,476 character label, submit",Fix commit names this ID; not re-checked line by line.
+PAY-23,P3,Free 2.4.0,F240-2,Claude,Still open,fixed,Free 2.4.0,payments.md (2.3.3),Open a paid entry.,Fix commit names this ID; not re-checked line by line.
+PAY2-06,P3,Free 2.4.0,F240-2,Claude,new in 2.3.8,fixed,Free 2.4.0,payments.md (2.3.8),Open Submissions with payment entries whose form has no name field,Fix commit names this ID; not re-checked line by line.
+PRO-23,P3,Free 2.4.0,F240-2,Claude,"Still open, and wider",fixed,Free 2.4.0,pro.md (2.3.3),PDF of an entry with a single checkbox ticked,Fix commit names this ID; not re-checked line by line.
+PRO2-08,P3,Free 2.4.0,F240-2,Claude,new in 2.3.8,fixed,Free 2.4.0,pro-server.md (2.3.8),"Chained Select with labels Pakistan and Punjab, values pakistan and punjab; submit with Mailchimp, HubSpot, PDF and email",Fix commit names this ID; not re-checked line by line.
+FA-04,P2,Free 2.4.0,F240-3,Claude,Fixed,fixed,Free 2.4.0 (#31),fields-advanced.md (2.3.3),Builder field library,
+FA-05,P2,Free 2.4.0,F240-3,Claude,Fixed,fixed,Free 2.4.0 (#31),fields-advanced.md (2.3.3),"Form with a Hidden field, open the live page",
+FA-06,P2,Free 2.4.0,F240-3,Claude,Still open,fixed,Free 2.4.0 (#31),fields-advanced.md (2.3.3),Required Color Picker with Default Color #ff0000; submit without touching it,
+FA-13,P2,Free 2.4.0,F240-3,Claude,Still open,fixed,Free 2.4.0 (#31),fields-advanced.md (2.3.3),"Add reCaptcha, hCaptcha and Turnstile fields with their own Site Key, no global CAPTCHA settings",
+FB-03,P2,Free 2.4.0,F240-3,Claude,Still open,fixed,Free 2.4.0 (#31),fields-basic.md (2.3.3),"Password field, Show Strength Meter on (default) and Require Confirmation on. View live.",
+FB-08,P2,Free 2.4.0,F240-3,Claude,Partly fixed,fixed-no-test,Free 2.4.0 (#31),fields-basic.md (2.3.3),"Phone Format ""US"" and submit ""12""; Country ""Enable Search"" on.",No test for Country searchable on versus off (the search half has no test of any kind).
+FB-21,P2,Free 2.4.0,F240-3,Claude,Fixed (with new bugs),fixed,Free 2.4.0 (#31),fields-basic.md (2.3.3),Chained Select: add two levels with options. Live: choose Ford.,
+FLD2-04,P2,Free 2.4.0,F240-3,Claude,new in 2.3.8,partly,Free 2.4.0 (#31),fields.md (2.3.8),Keyboard and screen reader on Dropdown and Country pickers,"Country with search ON (the default): focus sits in the search input, which has no role=combobox or aria-activedescendant, so the active option is not announced; Escape pressed in that input is handled only by useMenu's document listener, closes the menu and unmounts the focused input, so focus falls to the page body (CountrySelect.jsx search onKeyDown has no Escape branch). Phone list has no aria-activedescendant either. No component or browser test; only the typeaheadIndex/moveGrid helpers are tested (shared/pickerKeyboard.test.js)."
+FLD2-05,P2,Free 2.4.0,F240-3,Claude,new in 2.3.8,partly,Free 2.4.0 (#31),fields.md (2.3.8),"Keyboard on Date, Time, Date and Time pickers","Time and Date-and-time pickers: hour and minute columns now have role=option buttons with tabIndex -1 and no key handler, so they cannot be reached or operated from the keyboard at all (before 49310ac they were at least tabbable); time mode does not move focus into the dialog; Escape does not return focus to the trigger (focused day button unmounts). No component or browser test of the grid, only pickerKeyboard.moveGrid and dayName helper tests."
+FA-14,P3,Free 2.4.0,F240-3,Claude,Still open,fixed-no-test,Free 2.4.0 (#31),fields-advanced.md (2.3.3),Action Hook field with Hook Name qa_adv_hook; render and submit,"Release240Test only tests ActionHooks::names() sanitizing; nothing asserts do_action actually fires on render or submit. Note the submit call runs before CAPTCHA verification, so rejected submissions also fire the hook."
+FA-15,P3,Free 2.4.0,F240-3,Claude,Still open,fixed,Free 2.4.0 (#31),fields-advanced.md (2.3.3),"NPS end labels, Calculation prefix/suffix",
+FA-20,P3,Free 2.4.0,F240-3,Claude,"Still open, looks worse",fixed-no-test,Free 2.4.0 (#31),fields-advanced.md (2.3.3),Section Heading followed by Custom HTML,No test (CSS only; no browser spec for heading followed by Custom HTML).
+FA-22,P3,Free 2.4.0,F240-3,Claude,Still open,fixed,Free 2.4.0 (#31),fields-advanced.md (2.3.3),Any column container on the live form,
+FA-25,P3,Free 2.4.0,F240-3,Claude,Partly fixed,fixed,Free 2.4.0 (#31),fields-advanced.md (2.3.3),Hidden field definition,
+FB-16,P3,Free 2.4.0,F240-3,Claude,Still open,fixed,Free 2.4.0 (#31),fields-basic.md (2.3.3),"Add Dropdown, Radio Buttons or Checkboxes from the library.",
+FB-18,P3,Free 2.4.0,F240-3,Claude,Still open,fixed-no-test,Free 2.4.0 (#31),fields-basic.md (2.3.3),"Radio, Checkboxes, Picture Choice: the visible field label has for=""subtleforms-field-rd"" but no element has that id.",No test asserts there is no label[for] pointing at a missing id for these types.
+FB-19,P3,Free 2.4.0,F240-3,Claude,Still open,partly,Free 2.4.0 (#31),fields-basic.md (2.3.3),"Text/Number/Website with prefix ""$"" and suffix ""kg"".","Contrast not fixed: fields-v2.css affix colour is still var(--subtleforms-color-text-light), which base.css :root defines as #6b7382, on a grey affix background (about 4.3:1 by calculation, under 4.5). The 49310ac CSS edits only changed fallback values or other elements. No test."
+FB-20,P3,Free 2.4.0,F240-3,Claude,Still open (not re-run in the UI),partly,Free 2.4.0 (#31),fields-basic.md (2.3.3),"Logic rule on a Single Checkbox, Consent, Toggle or Country trigger.","Country picker always stores the ISO code, but a Country field with Output Format 'name' stores the name, and neither ConditionalLogic.php nor conditions.js maps between them, so the picked rule never matches. Browser-side evaluation (conditions.js) has no test for checkbox or toggle."
+FB-22,P3,Free 2.4.0,F240-3,Claude,Still open,fixed,Free 2.4.0 (#31),fields-basic.md (2.3.3),Add Consent / GDPR from the library and look at the canvas.,
+FB-24,P3,Free 2.4.0,F240-3,Claude,Partly fixed,partly,Free 2.4.0 (#31),fields-basic.md (2.3.3),"Builder canvas: Dropdown default ""Beta"", Radio default ""Green"", Checkboxes default ""One"", Toggle default on.","Radio and Checkboxes on the canvas (builder FieldRenderer.jsx ~371-402) still render unchecked inputs with no checked/defaultValue logic, so 'Green' and 'One' are not previewed."
+FLD2-06,P3,Free 2.4.0,F240-3,Claude,new in 2.3.8,partly,Free 2.4.0 (#31),fields.md (2.3.8),Submit the required pickers form empty,aria-required is not set on any of the three triggers (a code comment in FieldRenderer.test.jsx says it is not allowed on a button; it is valid on the role=combobox triggers of Dropdown and Country). No test asserts aria-invalid on picker triggers or the focus target.
+FLD2-08,P3,Free 2.4.0,F240-3,Claude,new in 2.3.8,fixed-no-test,Free 2.4.0 (#31),fields.md (2.3.8),Screen reader on the phone country button; Windows browsers,No test for the trigger's accessible name or flagMark.
+FLD2-13,P3,Free 2.4.0,F240-3,Claude,new in 2.3.8,fixed,Free 2.4.0 (#31),fields.md (2.3.8),Import a semicolon CSV (Excel in many locales); replace lists with CSV or outline on a form with entries,
+FLD2-14,P3,Free 2.4.0,F240-3,Claude,new in 2.3.8,fixed-no-test,Free 2.4.0 (#31),fields.md (2.3.8),"Builder chained ""On the form"" and ""Source"" groups with a screen reader",No test of the ARIA roles.
+FLD2-15,P3,Free 2.4.0,F240-3,Claude,new in 2.3.8,fixed-no-test,Free 2.4.0 (#31),fields.md (2.3.8),Calendar for a date of birth,Only monthCells(weekStart) and dayName are tested (shared/dateTime.week.test.js); nothing tests the month/year jump or the locale wiring. formatPhp F/M tokens still use the browser locale for the text shown on the trigger.
+FLD2-18,P3,Free 2.4.0,F240-3,Claude,new in 2.3.8,open,,fields.md (2.3.8),"Chained Columns layout, axe",Use a darker colour for the column header label (not the fallback); add an axe or contrast check for the Columns layout.
+FLD2-19,P3,Free 2.4.0,F240-3,Claude,new in 2.3.8,fixed-no-test,Free 2.4.0 (#31),fields.md (2.3.8),Select a Repeater and look at its toolbar,The only related test is resolveDrop.test.js moveTargets (helper); nothing renders a Repeater toolbar and checks for Move to.
+FF-08,P2,Free 2.4.0,F240-4,Claude,Still open,fixed,Free 2.4.0 (#32),free-features.md (2.3.3),"Settings > Email: set Sender Name and Email, or turn Admin Notifications off, then submit a form",
+FF-14,P2,Free 2.4.0,F240-4,Claude,Still open,partly,Free 2.4.0 (#32),free-features.md (2.3.3),"Builder: add a field (unpublished), Preview, fill it, submit","Preview entries are not excluded from Dashboard totals/today/week/trend (DashboardApi and ReportsApi filter only status<>'trash'), unread count, or the Inbox All tab, and 'preview' has no label in the admin status UI. Draft-schema swap has no test."
+FF-17,P2,Free 2.4.0,F240-4,Claude,Still open,fixed,Free 2.4.0 (#32),free-features.md (2.3.3),"Free webhook, Payload Mode Custom {""name"":""{{name}}""} (placeholder shown in the UI)",
+FF-18,P2,Free 2.4.0,F240-4,Claude,Still open,fixed,Free 2.4.0 (#32),free-features.md (2.3.3),"Entry detail > Flag, then click Flagged to unflag",
+FF-19,P2,Free 2.4.0,F240-4,Claude,Still open,fixed,Free 2.4.0 (#32),free-features.md (2.3.3),"Entry with status payment_pending (or failed): bulk Flag or Spam, then Restore",
+FF2-02,P2,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),Tools > Migrate with a current Fluent Forms export (notifications and formSettings in metas),
+FF2-03,P2,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),"Same Fluent file with a two-column container (Company, Job title), a form_step, an input_hidden and a Name field",
+FF2-04,P2,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),"Tools > Migrate with a Gravity Forms export: multi-page, a field with conditional logic, notifications using {Name (First):1.3}, a ""send to field"" notification (toType: field, to: ""2""), a page confirmation (pageId",
+FF2-05,P2,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),Tools > Migrate with an older Fluent file that has a top-level notifications object,
+FF2-06,P2,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),"Submissions, open a link with submission_id of an entry below row 200 (tested rows 200, 300, 5,000)",
+FF-09,P3,Free 2.4.0,F240-4,Claude,Still open,fixed,Free 2.4.0 (#32),free-features.md (2.3.3),"Settings > General > Delete Behavior ""Hard"", then delete an entry. ""Soft"", then delete a form.",
+FF-10,P3,Free 2.4.0,F240-4,Claude,Still open,fixed,Free 2.4.0 (#32),free-features.md (2.3.3),"Settings > Autosave off, or interval 3 s; edit in the builder",
+FF-15,P3,Free 2.4.0,F240-4,Claude,Still open,fixed,Free 2.4.0 (#32),free-features.md (2.3.3),"Confirmation message ""Got it {field:name}"" or redirect ?who={field:name}",
+FF-16,P3,Free 2.4.0,F240-4,Claude,Still open,fixed,Free 2.4.0 (#32),free-features.md (2.3.3),Entry > Resend notifications twice within 10 minutes (before cron runs),
+FF-22,P3,Free 2.4.0,F240-4,Claude,Still open,fixed,Free 2.4.0 (#32),free-features.md (2.3.3),Block option AJAX on or off,
+FF-24,P3,Free 2.4.0,F240-4,Claude,"Still open, also in the new Reports",fixed,Free 2.4.0 (#32),free-features.md (2.3.3),"Site timezone UTC+5, look at Dashboard ""Today"" and the chart",
+FF-26,P3,Free 2.4.0,F240-4,Claude,Still open,fixed,Free 2.4.0 (#32),free-features.md (2.3.3),Entries filtered to one form,
+FF-29,P3,Free 2.4.0,F240-4,Claude,Still open,fixed,Free 2.4.0 (#32),free-features.md (2.3.3),Every submission,
+FF-32,P3,Free 2.4.0,F240-4,Claude,Still open,fixed,Free 2.4.0 (#32),free-features.md (2.3.3),"Settings > Email ""Admin Notifications"" help vs per-form actions",
+FF-33,P3,Free 2.4.0,F240-4,Claude,Fixed,fixed,Free 2.4.0 (#32),free-features.md (2.3.3),Builder Settings view,
+FF-34,P3,Free 2.4.0,F240-4,Claude,Still open,fixed,Free 2.4.0 (#32),free-features.md (2.3.3),Block forms and a shortcode form on one page,
+FF2-10,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),Builder > Preview > Appearance > Inherit from theme > Update (publish) and reopen,
+FF2-11,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),"Inherit from theme on subtleforms-site, Twenty Twenty; add a custom font Georgia",
+FF2-12,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed-no-test,Free 2.4.0 (#32),free-features.md (2.3.8),Builder Preview with Twenty Twenty-Five active,No test. Whether wp_print_font_faces() outputs anything in an admin request needs a runtime check.
+FF2-13,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),"New tab, open entries 8, 12, 16 in the pane",
+FF2-14,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),"Search ""Inbox Person 7"", open 7, reload. Or ""No split"", open an entry, press browser Back",
+FF2-15,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),Form with a webhook; submit; Tools > Webhooks,
+FF2-16,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed-no-test,Free 2.4.0 (#32),free-features.md (2.3.8),"Tools, Tab to ""Import forms"" / ""Import submissions"" / ""Choose export file"", press Enter or Space",No test (keyboard activation not covered by jest or playwright).
+FF2-17,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),"Tools: import a wrong file on Transfer, switch to Migrate. Look at the form picker",
+FF2-18,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),Import the same submissions file twice; import RT entries into the Inbox form,
+PAY2-07,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),payments.md (2.3.8),"Tools > Migrate preview of a Gravity Forms export with a Stripe or PayPal field, or a Fluent Forms export with custom amount, coupon, quantity or summary components",
+UX2-10,P2,Free 2.4.0,F240-5,Claude,new in 2.3.8,fixed,Free 2.4.1 (#44),ui-ux.md (2.3.8),Several,Fix commit names this ID; not re-checked line by line.
+UX2-13,P2,Free 2.4.0,F240-5,Claude,new in 2.3.8,fixed,Free 2.4.1 (#44),ui-ux.md (2.3.8),Builder,Fix commit names this ID; not re-checked line by line.
+UX2-16,P2,Free 2.4.0,F240-5,Claude,new in 2.3.8,fixed,Free 2.4.1 (#44),ui-ux.md (2.3.8),All admin,Fix commit names this ID; not re-checked line by line.
+UX2-17,P2,Free 2.4.0,F240-5,Claude,new in 2.3.8,fixed,Free 2.4.1 (#44),ui-ux.md (2.3.8),Builder at 390,Fix commit names this ID; not re-checked line by line.
+UX2-18,P2,Free 2.4.0,F240-5,Claude,new in 2.3.8,fixed,Free 2.4.1 (#44),ui-ux.md (2.3.8),Submissions pane,Fix commit names this ID; not re-checked line by line.
+UX2-19,P2,Free 2.4.0,F240-5,Claude,new in 2.3.8,fixed,Free 2.4.1 (#44),ui-ux.md (2.3.8),"All Forms, Submissions at 390",Fix commit names this ID; not re-checked line by line.
+UX2-25,P2,Free 2.4.0,F240-5,Claude,new in 2.3.8,fixed,Free 2.4.1 (#44),ui-ux.md (2.3.8),Onboarding wizard,Fix commit names this ID; not re-checked line by line.
+UX2-27,P2,Free 2.4.0,F240-5,Claude,new in 2.3.8,fixed,Free 2.4.1 (#44),ui-ux.md (2.3.8),Public forms,Fix commit names this ID; not re-checked line by line.
+UX2-26,P3,Free 2.4.0,F240-5,Claude,new in 2.3.8,fixed,Free 2.4.1 (#44),ui-ux.md (2.3.8),Builder tour,
+UX2-28,P3,Free 2.4.0,F240-5,Claude,new in 2.3.8,fixed,Free 2.4.1 (#44),ui-ux.md (2.3.8),Submissions Trash,Fix commit names this ID; not re-checked line by line.
+PAY-09,P2,Free 2.4.0,F240-6,Claude,Still open,fixed,Free 2.4.0,payments.md (2.3.3),Form currency JPY (or site EUR) with a Custom Amount field.,Fix commit names this ID; not re-checked line by line.
+PAY2-01,P2,Free 2.4.0,F240-6,Claude,new in 2.3.8,fixed,Free 2.4.0,payments.md (2.3.8),"Tools > export submissions of a payment form, then import the file (same or another form). Also export an entry with status payment_failed",Fix commit names this ID; not re-checked line by line.
+PAY2-02,P2,Free 2.4.0,F240-6,Claude,new in 2.3.8,fixed,Free 2.4.0,payments.md (2.3.8),"Site currency EUR (Settings > Integrations > Payments). Open a priced form, Settings > Payments, change anything and Update",
+PAY-12,P3,Free 2.4.0,F240-6,Claude,Still open,fixed,Free 2.4.0,payments.md (2.3.3),"JPY form, product 1250.50, tip 100.70.",Fix commit names this ID; not re-checked line by line.
+PAY-13,P3,Free 2.4.0,F240-6,Claude,Still open,fixed,Free 2.4.0,payments.md (2.3.3),REST: put a code only in the Coupon field key (not _coupon) and pay.,Fix commit names this ID; not re-checked line by line.
+PAY-14,P3,Free 2.4.0,F240-6,Claude,Still open,fixed,Free 2.4.0,payments.md (2.3.3),"Create coupon with starts 2027-01-01 and expires 2026-01-01, or expires ""not a date"".",
+PAY-16,P3,Free 2.4.0,F240-6,Claude,"Still open, wider",fixed,Free 2.4.0,payments.md (2.3.3),POST /payments/quote and /payments/intent for a draft form.,Fix commit names this ID; not re-checked line by line.
+PAY-17,P3,Free 2.4.0,F240-6,Claude,Still open,fixed,Free 2.4.0,payments.md (2.3.3),Select a Product in the builder.,Fix commit names this ID; not re-checked line by line.
+PAY-19,P3,Free 2.4.0,F240-6,Claude,Fixed,fixed,Free 2.4.0,payments.md (2.3.3),Open a form with radio Priced Options in the builder.,Fix commit names this ID; not re-checked line by line.
+PAY-22,P3,Free 2.4.0,F240-6,Claude,Still open,fixed,Free 2.4.0,payments.md (2.3.3),Entry with status payment_failed.,Fix commit names this ID; not re-checked line by line.
+PAY-24,P3,Free 2.4.0,F240-6,Claude,Still open,fixed,Free 2.4.0,payments.md (2.3.3),"Gateway not configured, Pro active, POST /payments/intent.",Fix commit names this ID; not re-checked line by line.
+PAY-25,P3,Free 2.4.0,F240-6,Claude,Still open,fixed,Free 2.4.0,payments.md (2.3.3),Any payment validation error.,Fix commit names this ID; not re-checked line by line.
+PAY-26,P3,Free 2.4.0,F240-6,Claude,Still open,fixed,Free 2.4.0,payments.md (2.3.3),Order total below Stripe minimum (for example 0.30 USD).,
+PAY2-03,P3,Free 2.4.0,F240-6,Claude,new in 2.3.8,fixed,Free 2.4.0,payments.md (2.3.8),"Priced Options with ""Dropdown (pick one)"" on the live form",Fix commit names this ID; not re-checked line by line.
+FA-07,P2,Pro 2.4.0,P240-1,Claude,Still open,fixed,Pro 2.4.0,fields-advanced.md (2.3.3),Repeater row with Number {rq} and Calculation {rq}*2; enter 2 and 5,Fix commit names this ID; not re-checked line by line.
+FA-08,P2,Pro 2.4.0,P240-1,Claude,Still open,fixed,Pro 2.4.0,fields-advanced.md (2.3.3),"Total = {qty}*{price}+{pick}+{adds}, leave the optional checkbox ""adds"" empty",
+FA-09,P2,Pro 2.4.0,P240-1,Claude,Still open,fixed,Pro 2.4.0,fields-advanced.md (2.3.3),Divide = {qty}/{price} with price 0,Fix commit names this ID; not re-checked line by line.
+FA-16,P3,Pro 2.4.0,P240-1,Claude,Still open,fixed,Pro 2.4.0,fields-advanced.md (2.3.3),"Signature, Clear button text ""Wipe""",Fix commit names this ID; not re-checked line by line.
+PRO2-04,P3,Pro 2.4.0,P240-1,Claude,new in 2.3.8,fixed,Pro 2.4.0,pro-server.md (2.3.8),"Form with a Signature and HubSpot ""add note"" on; submit",Fix commit names this ID; not re-checked line by line.
+PRO2-07,P3,Pro 2.4.0,P240-1,Claude,new in 2.3.8,fixed,Pro 2.4.0,pro-server.md (2.3.8),"Calculation ""{qty} * 12.5"", submit with qty empty, open the PDF",Fix commit names this ID; not re-checked line by line.
+PRO-01,P1,Pro 2.4.0,P240-2,Claude,Still open,fixed,Pro 2.4.0,pro.md (2.3.3),"Create a form from the Pro template ""Payment Form"", submit it",
+PRO-02,P1,Pro 2.4.0,P240-2,Claude,Still open,fixed,Pro 2.4.0,pro.md (2.3.3),"Create a form from any of 20 Pro templates (advanced_contact, event_registration, support_ticket, payment_form, booking_form, job_application, survey_nps, membership_application, sales_inquiry, partnership_request, press",
+PRO-22,P3,Pro 2.4.0,P240-2,Claude,Still open,fixed,Pro 2.4.0,pro.md (2.3.3),Use the Donation Form template,
+PAY-03,P1,Pro 2.4.0,P240-3,Claude,Still open,fixed,Pro 2.4.0,payments.md (2.3.3),Configure Stripe keys. Publish a form with Product + Order Summary and no Card field. Submit.,
+PAY-04,P1,Pro 2.4.0,P240-3,Claude,Still open,fixed,Pro 2.4.0,payments.md (2.3.3),Stripe capture declines (mock 402 on capture). Form has admin and visitor email actions.,
+PAY-10,P2,Pro 2.4.1,P241-1,Claude,Still open,fixed,Pro 2.4.1,payments.md (2.3.3),"Intent status ""processing"" (bank debits, some wallets).",Fix commit names this ID; not re-checked line by line.
+PAY-11,P2,Pro 2.4.1,P241-1,Claude,Still open,fixed,Pro 2.4.1,payments.md (2.3.3),WooCommerce checkout form with Order Summary tax 10 percent.,Fix commit names this ID; not re-checked line by line.
+PAY-15,P3,Pro 2.4.1,P241-1,Claude,Still open,fixed,Pro 2.4.1,payments.md (2.3.3),Set Mode = Live with sk_test keys (or the reverse).,Fix commit names this ID; not re-checked line by line.
+PAY-20,P3,Pro 2.4.1,P241-1,Claude,Still open,fixed,Pro 2.4.1,payments.md (2.3.3),"WooCommerce form, pay with Cash on delivery.",Fix commit names this ID; not re-checked line by line.
+PAY-21,P3,Pro 2.4.1,P241-1,Claude,Still open,fixed,Pro 2.4.1,payments.md (2.3.3),Partial refund of 10 on a completed Woo order.,Fix commit names this ID; not re-checked line by line.
+PAY2-05,P3,Pro 2.4.1,P241-1,Claude,new in 2.3.8,fixed,Pro 2.4.1,payments.md (2.3.8),WooCommerce form with a WooCommerce Product field; download the entry PDF,Fix commit names this ID; not re-checked line by line.
+PRO-03,P2,Pro 2.4.1,P241-2,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),"Let next_check pass (every 12 h, or 5 min after a failure) while the license server is slow or times out; load any front-end page",Fix commit names this ID; not re-checked line by line.
+PRO-14,P3,Pro 2.4.1,P241-2,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),"Remove the site's activation on the server (revoked), open Settings > License",Fix commit names this ID; not re-checked line by line.
+PRO-16,P3,Pro 2.4.1,P241-2,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),Pro active while the free plugin is missing or too old,
+PRO-17,P3,Pro 2.4.1,P241-2,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),"Activate SF-DEV-AGENCY on a local site, then switch the environment to production",Fix commit names this ID; not re-checked line by line.
+PRO-18,P3,Pro 2.4.1,P241-2,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),Watch the update requests,Fix commit names this ID; not re-checked line by line.
+PRO-19,P3,Pro 2.4.1,P241-2,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),"Activate any key, look at the server activation",Fix commit names this ID; not re-checked line by line.
+PRO-20,P3,Pro 2.4.1,P241-2,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),License expiring in 4 days (or cron skips a day),
+PRO-31,P3,Pro 2.4.1,P241-2,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),No Update URI header in subtleforms-pro.php,Fix commit names this ID; not re-checked line by line.
+PRO2-03,P3,Pro 2.4.1,P241-2,Claude,new in 2.3.8,fixed,Pro 2.4.1,pro-server.md (2.3.8),"Activate key A on a production site, then activate key B on the same site (key form, or ""Use a different key"" on a lapsed license)",Fix commit names this ID; not re-checked line by line.
+PRO-06,P2,Pro 2.4.1,P241-3,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),HubSpot connected; HubSpot answers the upsert with HTTP 207 and an errors array,Fix commit names this ID; not re-checked line by line.
+PRO-11,P3,Pro 2.4.1,P241-3,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),Submit any form with a webhook,Fix commit names this ID; not re-checked line by line.
+PRO-12,P3,Pro 2.4.1,P241-3,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),Look at webhook rows in the delivery log or the integration log table,Fix commit names this ID; not re-checked line by line.
+PRO-13,P3,Pro 2.4.1,P241-3,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),Read error messages on the entry screen,Fix commit names this ID; not re-checked line by line.
+PRO-21,P3,Pro 2.4.1,P241-3,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),"Map PHONE on a form for Mailchimp, then switch the global provider to Kit or Brevo",
+PRO-27,P3,Pro 2.4.1,P241-3,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),GET /subtleforms/v1/settings as admin,Fix commit names this ID; not re-checked line by line.
+PRO2-02,P3,Pro 2.4.1,P241-3,Claude,new in 2.3.8,fixed,Pro 2.4.1,pro-server.md (2.3.8),"Export a form with a signed webhook (or edit the JSON so signing is on with an empty secret, as a hand-made or older export would have), import it in Tools, submit",Fix commit names this ID; not re-checked line by line.
+PRO-04,P2,Pro 2.4.1,P241-4,Claude,Still open (code and network check; not re-run with Polylang,fixed,Pro 2.4.1,pro.md (2.3.3),"Agency, Polylang active with English and French, Settings > Integrations > Multilanguage on, translate ""Full name"" to ""Nom complet"" in String Translation, open the French page with the form",Fix commit names this ID; not re-checked line by line.
+PRO-05,P2,Pro 2.4.1,P241-4,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),"Submit an entry with Arabic, Urdu, Hebrew, Chinese and emoji text, download the PDF",Fix commit names this ID; not re-checked line by line.
+PRO-07,P2,Pro 2.4.1,P241-4,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),"Send an entry to Mailchimp or a webhook, then permanently delete the entry (or uninstall Pro)",Fix commit names this ID; not re-checked line by line.
+PRO-08,P3,Pro 2.4.1,P241-4,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),"Activate a Starter license, open Settings > Integrations > Email Marketing, CRM or Multilanguage",Fix commit names this ID; not re-checked line by line.
+PRO-15,P3,Pro 2.4.1,P241-4,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),Uninstall Pro,
+PRO-24,P3,Pro 2.4.1,P241-4,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),"Agency white label with ""Only I can see License and Branding"", log in as another admin",Fix commit names this ID; not re-checked line by line.
+PRO-25,P3,Pro 2.4.1,P241-4,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),Click Disconnect on Settings > License,Fix commit names this ID; not re-checked line by line.
+PRO-26,P3,Pro 2.4.1,P241-4,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),Create a form (POST /forms) whose logic references a missing field,Fix commit names this ID; not re-checked line by line.
+PRO-28,P3,Pro 2.4.1,P241-4,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),Server without .htaccess support (nginx): PDF email attachment written to uploads/subtleforms-pdf-tmp/{form}-entry-{id}.pdf,Fix commit names this ID; not re-checked line by line.
+PRO-29,P3,Pro 2.4.1,P241-4,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),"WP_DEBUG on, any license check",Fix commit names this ID; not re-checked line by line.
+PRO-30,P3,Pro 2.4.1,P241-4,Claude,Still open,fixed,Pro 2.4.1,pro.md (2.3.3),Integrations panel on the Agency screenshot,Fix commit names this ID; not re-checked line by line.
+PRO2-05,P3,Pro 2.4.1,P241-4,Claude,new in 2.3.8,fixed,Pro 2.4.1,pro-server.md (2.3.8),"Agency, Multilanguage on, form with a Chained Select",
+LS-01,P1,Server 1.7.0,S170-1,Claude,Still open,fixed,Server 1.7.0,license-server.md (2.3.3),1. A guest buys a license as victim@x (no account). 2. Any other signed-in customer opens My Account > Account details and changes the email to victim@x (no password or confirmation needed). 3. Open My Account > Licenses,
+LS-02,P1,Server 1.7.0,S170-1,Claude,Still open,fixed,Server 1.7.0,license-server.md (2.3.3),"Signed out, buy Starter with cheque, admin completes the order, click Download Pro in the email or on the thank-you page.",
+LS-03,P2,Server 1.7.0,S170-1,Claude,Still open,fixed,Server 1.7.0,license-server.md (2.3.3),"Upgrade Starter to Pro (order 6415, $50), complete, then refund it in full. Separately renew (order 6422, $79), complete, refund.",
+LS-04,P2,Server 1.7.0,S170-1,Claude,Still open,fixed,Server 1.7.0,license-server.md (2.3.3),"Signed out, open /?sfls_buy=3004 (Starter Renewal, $39) and check out.",
+LS-06,P2,Server 1.7.0,S170-1,Claude,Still open,partly,Server 1.7.0,license-server.md (2.3.3),"Send 5 validate requests for one key from 5 different IPs with a limit of 5 (temporary filter), then a 6th from a new IP.",Report's literal repro still ends in 429: a new IP using a not-yet-activated site (e.g. a legit new activation or dev site) is refused once someone holding the key burns the failure budget (the test asserts 429 for the attacker site). Activate/validate for new sites can still be griefed for the window; no test for a legitimate new-site activation during exhaustion. Decide if acceptable or add per-IP failure counting instead of per-key.
+LS-07,P2,Server 1.7.0,S170-1,Claude,Still open,fixed,Server 1.7.0,license-server.md (2.3.3),"Starter key already on 1 site; activate myshop.wpengine.com, dev.realclient.com.",
+LS-08,P2,Server 1.7.0,S170-1,Claude,Still open,fixed,Server 1.7.0,license-server.md (2.3.3),Request http://localhost:8899/wp-content/uploads/sfls-private/subtleforms-pro-2.2.0.zip without auth.,
+LS-13,P3,Server 1.7.0,S170-1,Claude,Still open,fixed,Server 1.7.0,license-server.md (2.3.3),"Link an order to a subscription (subscription.activated), then send subscription.past_due whose occurred_at is later than the activated event but earlier than the moment the link was processed.",
+LS-15,P3,Server 1.7.0,S170-1,Claude,Still open,fixed,Server 1.7.0,license-server.md (2.3.3),/connect-site/ with return=http://...,
+LS-16,P3,Server 1.7.0,S170-1,Claude,Still open (code review plus observation),fixed,Server 1.7.0,license-server.md (2.3.3),Review data retention.,
+LS-05,P2,Server 1.7.0,S170-2,Claude,Still open,partly,Server 1.7.0,license-server.md (2.3.3),Open /pricing/.,"The bug is hard-coded text in the /pricing/ page content (and theme demo content), which is outside this repo. Nothing in code changes that text; page must be edited to use the shortcode. git grep finds no remaining '30% off' string in plugin code, so the live page is the open part."
+LS-09,P3,Server 1.7.0,S170-2,Claude,Still open,fixed,Server 1.7.0,license-server.md (2.3.3),"Export 10,000 licenses as CSV.",
+LS-10,P3,Server 1.7.0,S170-2,Claude,Still open,fixed,Server 1.7.0,license-server.md (2.3.3),validate on a site that is not activated; activate with site_url=javascript:alert(1).,
+LS-11,P3,Server 1.7.0,S170-2,Claude,Still open (subject re-run; renewal thank-you text not re-ru,fixed,Server 1.7.0,license-server.md (2.3.3),Complete a license order; place a renewal order.,
+LS-12,P3,Server 1.7.0,S170-2,Claude,Still open,fixed,Server 1.7.0,license-server.md (2.3.3),Open Licenses > Pro releases.,
+LS-14,P3,Server 1.7.0,S170-2,Claude,Still open,fixed,Server 1.7.0,license-server.md (2.3.3),update/check changelog.,
+LS-17,P3,Server 1.7.0,S170-2,Claude,Still open,fixed,Server 1.7.0,license-server.md (2.3.3),"Run wp sfls remind --dry-run with 10,000 licenses (1,000 expiring within 30 days).",
+LS-18,P3,Server 1.7.0,S170-2,Claude,Still open,fixed,Server 1.7.0,license-server.md (2.3.3),Issue a license by hand for a customer email.,
+UX2-30,P3,Server 1.7.0,S170-2,Claude,new in 2.3.8,fixed,Server 1.7.0,ui-ux.md (2.3.8),License server Pro downloads,
