@@ -99,11 +99,19 @@ final class SignatureTest extends TestCase {
 			}
 		};
 		add_action( 'phpmailer_init', $spy, 99 );
+		// A site or must-use plugin may short-circuit wp_mail() (a mail catcher,
+		// the e2e helper). The test needs PHPMailer to be set up, so put any
+		// such filter aside for the call and restore it after.
+		$short_circuit = $GLOBALS['wp_filter']['pre_wp_mail'] ?? null;
+		unset( $GLOBALS['wp_filter']['pre_wp_mail'] );
 		$from = static fn() => 'site@example.com';
 		add_filter( 'wp_mail_from', $from );
 		Mailer::send( 'owner@example.com', 'Hi', '<p>Sig</p><img src="' . self::PNG . '" alt="">', array( 'Content-Type: text/html; charset=UTF-8' ) );
 		remove_action( 'phpmailer_init', $spy, 99 );
 		remove_filter( 'wp_mail_from', $from );
+		if ( null !== $short_circuit ) {
+			$GLOBALS['wp_filter']['pre_wp_mail'] = $short_circuit;
+		}
 
 		$this->assertCount( 1, $embedded );
 		$this->assertSame( 'inline', $embedded[0]['disposition'] );

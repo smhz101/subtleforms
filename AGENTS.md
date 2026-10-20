@@ -1,5 +1,7 @@
 # SubtleForms — Agents & Onboarding 📋
 
+> **Standing rules:** read `docs/dev/RULES.md` and `docs/dev/MERGING.md` before any change, and check `docs/dev/bug-ledger.csv` before starting bug work. They apply to every change, not only to packages.
+
 A concise guide for contributors and automated agents working on the SubtleForms plugin. Use this for fast onboarding, troubleshooting, and safe edits.
 
 ---
