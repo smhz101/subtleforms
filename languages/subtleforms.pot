@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-20T00:38:03+00:00\n"
+"POT-Creation-Date: 2026-10-20T00:51:48+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -3970,33 +3970,33 @@ msgstr ""
 
 #. translators: %s: field key
 #: src/Support/SchemaValidator.php:97
-#: src/Support/SchemaValidator.php:122
+#: src/Support/SchemaValidator.php:127
 #, php-format
 msgid "The field ID %s can only use letters, numbers, _ and -, up to 64 characters."
 msgstr ""
 
 #. translators: %s: field key
 #: src/Support/SchemaValidator.php:100
-#: src/Support/SchemaValidator.php:125
-#: src/Support/SchemaValidator.php:524
+#: src/Support/SchemaValidator.php:130
+#: src/Support/SchemaValidator.php:529
 #, php-format
 msgid "SubtleForms uses %s itself. Give the field another ID."
 msgstr ""
 
 #. translators: 1: Repeater field ID, 2: field ID
-#: src/Support/SchemaValidator.php:119
+#: src/Support/SchemaValidator.php:124
 #, php-format
 msgid "Two fields in the repeater %1$s use the ID %2$s. Give one of them another ID."
 msgstr ""
 
 #. translators: %s: CAPTCHA provider name, such as reCAPTCHA
-#: src/Support/SchemaValidator.php:637
+#: src/Support/SchemaValidator.php:642
 #, php-format
 msgid "A form can have only one %s field. Remove the extra one or choose another provider for it."
 msgstr ""
 
 #. translators: %s: field key
-#: src/Support/SchemaValidator.php:744
+#: src/Support/SchemaValidator.php:749
 #, php-format
 msgid "The single checkbox \"%s\" has a list of options. Use a Multiple choice field for several options."
 msgstr ""
