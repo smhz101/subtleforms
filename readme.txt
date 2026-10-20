@@ -16,7 +16,7 @@ SubtleForms is a form builder for WordPress. You build a form on a canvas that l
 
 = Building forms =
 
-* Visual builder with a field library, a live canvas and a settings panel for each field (Settings, Validation, Logic, Style)
+* Visual builder with a field library, a live canvas and a settings panel for each field (Field, Validation, Logic, Style)
 * Regular, multi-step and conversational (one question at a time) forms
 * Ready-made templates, including contact, lead capture and newsletter forms, plus a blank form
 * Field widths to place fields side by side, and an inline layout for email and button on one row
@@ -130,6 +130,14 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 == Changelog ==
 
 = 2.4.0 - 2026-10-20 =
+* Fix: Confirmations use the in-app dialog instead of the browser confirm box, and export errors use a snackbar.
+* Fix: The builder Form view and Field tab have distinct names, and field look controls sit under Style.
+* Fix: The admin app fills the window so a dark band no longer shows under the stage.
+* Fix: On a narrow screen the builder folds the WordPress menu and explains that it needs a wider window.
+* Fix: The submissions reading pane covers the list on screens under 1100px, and Forms and Submissions lists stack as cards on phones.
+* Fix: The quick start wizard fits shorter windows, and Help closes when you start the tour.
+* Fix: Public forms reserve height before they load so the page does not jump.
+* Fix: The builder tour copy matches the header and inspector, and relative times say "1 hour ago".
 * New: Each payment form can pick its own currency, and more currencies are available, including JPY, INR, PKR and AED.
 * Fix: Forms follow the site currency unless you pick one, the Custom amount field shows the right symbol, and yen totals are whole yen.
 * Fix: Product and priced option answers in entries, emails and exports show whole units for every currency without cents, such as KRW, not only for JPY.
