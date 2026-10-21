@@ -96,8 +96,8 @@ test('every tab shows its count on first load, from one request', async ({ page 
   });
   await page.goto(listUrl());
   await expect(rows(page).first()).toBeVisible({ timeout: 30000 });
-  // 9 entries, 1 trashed: 8 live. Read: 2. New: 6.
-  await expectCounts(page, { All: 8, New: 6, Read: 2, Spam: 1, Starred: 2, Flagged: 1, Trash: 1 });
+  // 9 entries, 1 trashed: 8 live. Read: 2.
+  await expectCounts(page, { All: 8, Read: 2, Spam: 1, Starred: 2, Flagged: 1, Trash: 1 });
   expect(counted.length).toBe(1);
 });
 
@@ -105,7 +105,7 @@ test('counts follow every action without a reload', async ({ page }) => {
   await loginPage(page);
   await page.goto(listUrl());
   await expect(rows(page).first()).toBeVisible({ timeout: 30000 });
-  await expectCounts(page, { All: 8, New: 6, Read: 2, Spam: 1, Starred: 2, Flagged: 1, Trash: 1 });
+  await expectCounts(page, { All: 8, Read: 2, Spam: 1, Starred: 2, Flagged: 1, Trash: 1 });
 
   // Star then unstar the first row.
   const first = rowNamed(page, 'Ada');
@@ -119,7 +119,7 @@ test('counts follow every action without a reload', async ({ page }) => {
   // Trash (the newest entry is a read one): leaves All and Read, joins Trash.
   await first.hover();
   await first.getByRole('button', { name: 'Move to Trash' }).click();
-  await expectCounts(page, { All: 7, Read: 1, New: 6, Trash: 2 });
+  await expectCounts(page, { All: 7, Read: 1, Trash: 2 });
 
   // Restore it from the Trash tab.
   await page.getByRole('tab', { name: /^Trash/ }).click();
@@ -127,7 +127,7 @@ test('counts follow every action without a reload', async ({ page }) => {
   const trashed = rowNamed(page, 'Ada');
   await trashed.hover();
   await trashed.getByRole('button', { name: 'Restore' }).click();
-  await expectCounts(page, { All: 8, Read: 2, New: 6, Trash: 1 });
+  await expectCounts(page, { All: 8, Read: 2, Trash: 1 });
 
   // Delete forever the entry that was trashed before.
   const remaining = rowNamed(page, 'Dennis');
@@ -141,15 +141,34 @@ test('counts follow every action without a reload', async ({ page }) => {
   await expect(rows(page).first()).toBeVisible();
   await page.getByRole('checkbox', { name: 'Select all' }).check();
   await page.getByRole('toolbar', { name: 'Bulk actions' }).getByRole('button', { name: 'Mark read' }).click();
-  await expectCounts(page, { New: 0, Read: 8 });
+  await expectCounts(page, { Read: 8 });
   await page.getByRole('checkbox', { name: 'Select all' }).check();
   await page.getByRole('toolbar', { name: 'Bulk actions' }).getByRole('button', { name: 'Mark unread' }).click();
-  await expectCounts(page, { New: 8, Read: 0 });
+  await expectCounts(page, { Read: 0 });
 
   // The numbers are what the server says.
   const server = await client.call('GET', `/submissions/unread-count?form_id=${form.id}`);
   expect(server.body.data.counts.all).toBe(8);
   expect(server.body.data.counts.unread).toBe(8);
+});
+
+test('there is no New tab, an old New link opens All, and the unread count is still kept', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 800 });
+  await loginPage(page);
+  for (const old of ['unread', 'new']) {
+    await page.goto(`${listUrl()}&tab=${old}`);
+    await expect(rows(page).first()).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('tab', { name: /^All/ })).toHaveAttribute('aria-selected', 'true');
+    await expect(page).not.toHaveURL(/tab=/);
+  }
+  await expect(page.getByRole('tab', { name: /^New/ })).toHaveCount(0);
+  await expect(page.getByRole('tab')).toHaveText([/^All/, /^Read/, /^Spam/, /^Starred/, /^Flagged/, /^Trash/]);
+  // Unread entries are in All, and the menu badge still counts them.
+  await expect(page.locator('.sf-submissions-table__row--unread').first()).toBeVisible();
+  await expect(page.locator('.sf-appnav__count').first()).toBeVisible();
+  const server = await client.call('GET', `/submissions/unread-count?form_id=${form.id}`);
+  expect(server.body.data.counts.unread).toBeGreaterThan(0);
+  await page.screenshot({ path: 'test-results/screens-2.5.1/tabs-without-new.png' });
 });
 
 test('actions in the entry pane update the counts too', async ({ page }) => {
