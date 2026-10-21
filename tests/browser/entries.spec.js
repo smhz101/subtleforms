@@ -45,7 +45,7 @@ test('bulk star, mark read, export selected and delete', async ({ page }) => {
 
   await page.getByRole('checkbox', { name: /Select row/ }).nth(0).check();
   await page.getByRole('checkbox', { name: /Select row/ }).nth(1).check();
-  await expect(page.locator('.sf-data-table__bulk-actions')).toContainText('2 items selected');
+  await expect(page.locator('.sf-data-table__bulk-actions')).toContainText('2 selected');
 
   await page.getByRole('button', { name: 'Star', exact: true }).first().click();
   await expect.poll(async () => (await entries(client, form.id)).filter((e) => Number(e.starred) === 1).length).toBe(2);
@@ -74,7 +74,7 @@ test('bulk star, mark read, export selected and delete', async ({ page }) => {
   await page.goto(`/wp-admin/admin.php?page=subtleforms-submissions&form_id=${form.id}`);
   await expect(rows).toHaveCount(3, { timeout: 20000 });
   await page.getByRole('checkbox', { name: 'Select all' }).check();
-  await page.getByRole('button', { name: 'Mark as Read' }).click();
+  await page.getByRole('button', { name: 'Mark read' }).click();
   await expect.poll(async () => (await entries(client, form.id)).filter((e) => Number(e.is_read) === 1).length).toBe(3);
 
   // Bulk delete moves the entry to the Trash (2.3.1); it leaves the list.

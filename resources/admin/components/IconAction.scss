@@ -1,0 +1,69 @@
+/**
+ * IconAction, a quiet icon-only button. Ghost: no border, no fill until
+ * hover, so rows and bars of them stay calm.
+ */
+
+.sf-icon-action {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	flex: 0 0 auto;
+	width: 28px;
+	height: 28px;
+	margin: 0;
+	padding: 0;
+	border: 0;
+	border-radius: var(--sf-radius-sm);
+	background: transparent;
+	color: var(--sf-text-secondary);
+	cursor: pointer;
+	transition: background-color var(--sf-transition-fast), color var(--sf-transition-fast);
+
+	svg {
+		width: 16px;
+		height: 16px;
+		fill: none;
+		pointer-events: none;
+	}
+
+	&:hover:not(:disabled) {
+		background: var(--sf-bg-muted);
+		color: var(--sf-text);
+	}
+
+	&:focus-visible {
+		outline: 2px solid var(--sf-brand);
+		outline-offset: -1px;
+	}
+
+	&:disabled {
+		opacity: 0.45;
+		cursor: default;
+	}
+
+	&.is-destructive:hover:not(:disabled) {
+		background: var(--sf-danger-bg);
+		color: var(--sf-danger);
+	}
+
+	// Touch targets are a little larger (32px, above the 24px minimum).
+	@media (pointer: coarse) {
+		width: 32px;
+		height: 32px;
+	}
+}
+
+// Fixed to the window, so no scrolling list or sticky bar can clip it.
+.sf-icon-action__tooltip {
+	position: fixed;
+	z-index: 1000001;
+	max-width: 240px;
+	padding: 4px 8px;
+	border-radius: var(--sf-radius-xs);
+	background: #1e1e1e;
+	color: #ffffff;
+	font-size: 12px;
+	line-height: 1.4;
+	pointer-events: none;
+	white-space: nowrap;
+}

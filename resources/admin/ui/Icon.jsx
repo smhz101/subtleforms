@@ -128,6 +128,11 @@ import {
   Heading,
   TextCursorInput,
   Replace as ReplaceIcon,
+  MailOpen,
+  ShieldAlert,
+  Ellipsis,
+  Download,
+  StarOff,
 } from 'lucide-react';
 
 /**
@@ -299,6 +304,11 @@ const Icon = {
   Textarea: AlignLeft,
   Address: MapPin,
   Password: Lock,
+  MailOpen,
+  ShieldAlert,
+  Ellipsis,
+  Download,
+  StarOff,
 };
 
 // Export both named and default
