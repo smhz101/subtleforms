@@ -35,6 +35,25 @@ Add-on scripts call these on `window.SubtleFormsExtend`. Load your script after 
 | `registerCanvasPreview( type, Component )` | The builder canvas preview. |
 | `registerInspectorControl( type, Component )` | A builder settings control for a PHP `inspectorControls` type (for example `formula`). |
 
+## Settings tabs (JavaScript)
+
+The Settings screen lists Tools and MCP. Add-ons register the body of a tab on `window.SubtleFormsExtend` from a script that loads after the `subtleforms-admin` script on SubtleForms admin pages:
+
+```js
+window.SubtleFormsExtend.registerSettingsTab( 'mcp', {
+	component: McpSettings, // takes no props
+	title: 'MCP', // optional, overrides the Free title
+	description: '...', // optional, overrides the Free description
+} );
+```
+
+| Name | Result |
+| --- | --- |
+| `mcp` | Replaces the note that Free shows (what MCP is, with an upgrade link) in the existing MCP tab. |
+| any other `[a-z0-9-]+` name | Adds a tab to the Pro group. `title` is required; `description` and `order` (a number, default last) are optional. |
+
+The tab opens at `admin.php?page=subtleforms-settings#tab=<name>`. The body looks after its own data and saving, so Settings shows no Save button or save bar for it. Tools is part of Settings now: `admin.php?page=subtleforms-tools` redirects to `#tab=tools`.
+
 ## Capabilities
 
 `subtleforms/capabilities` filters the capability map. The free plugin only reads capabilities that are on by default. Keys such as `fields.advanced`, `actions.payment`, `extensions.*`, `templates.pro` and `branding.white_label` belong to SubtleForms Pro: Pro adds them and only Pro code reads them.

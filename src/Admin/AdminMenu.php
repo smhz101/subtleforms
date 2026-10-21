@@ -55,6 +55,9 @@ class AdminMenu {
 		add_action( 'admin_menu', array( $this, 'register_menu' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'menu_icon_styles' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		// WordPress checks access to a page right after `admin_menu`, so the
+		// old Tools URL is sent on before that check.
+		add_action( 'admin_menu', array( $this, 'redirect_legacy_pages' ), 1 );
 		add_action( 'admin_init', array( $this, 'handle_actions' ) );
 		add_filter( 'admin_body_class', array( $this, 'filter_admin_body_class' ) );
 		// Hook title filter with highest priority to catch null values first
@@ -209,16 +212,6 @@ class AdminMenu {
 			$this->caps->manage_cap(),
 			'subtleforms-submissions',
 			array( $this, 'render_submissions' )
-		);
-
-		// Tools: transfer, migration and logs.
-		add_submenu_page(
-			'subtleforms',
-			__( 'Tools', 'subtleforms' ),
-			__( 'Tools', 'subtleforms' ),
-			$this->caps->manage_cap(),
-			'subtleforms-tools',
-			array( $this, 'render_tools' )
 		);
 
 		// Reports. Views and conversion stay behind Pro.
@@ -892,13 +885,29 @@ class AdminMenu {
 	}
 
 	/**
-	 * Render payments page.
+	 * Where the old Tools screen went.
+	 *
+	 * Tools is a tab of Settings now. The old URL, admin.php?page=subtleforms-tools,
+	 * still works: it opens Settings on that tab, so bookmarks and links from
+	 * add-ons keep working.
+	 *
+	 * @return string Admin URL of the Tools tab.
 	 */
-	public function render_tools(): void {
-		if ( ! current_user_can( $this->caps->manage_cap() ) ) {
-			wp_die( esc_html__( 'You do not have permission to access this page.', 'subtleforms' ) );
+	public static function tools_tab_url(): string {
+		return admin_url( 'admin.php?page=subtleforms-settings#tab=tools' );
+	}
+
+	/**
+	 * Send the old Tools URL to the Tools tab of Settings.
+	 */
+	public function redirect_legacy_pages(): void {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading the page slug of a navigation request.
+		$page = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : '';
+		if ( 'subtleforms-tools' !== $page || ! current_user_can( $this->caps->manage_cap() ) ) {
+			return;
 		}
-		$this->get_template( 'tools' );
+		wp_safe_redirect( self::tools_tab_url() );
+		exit;
 	}
 
 	/**

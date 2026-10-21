@@ -234,7 +234,7 @@ test('the builder shows a loading skeleton, then the form (UX2-07)', async ({ pa
 
 test('the Tools file buttons open the file picker from the keyboard (FF2-16)', async ({ page }) => {
   await loginPage(page);
-  await page.goto('/wp-admin/admin.php?page=subtleforms-tools');
+  await page.goto('/wp-admin/admin.php?page=subtleforms-settings#tab=tools');
   const button = page.getByRole('button', { name: 'Import forms', exact: true });
   await expect(button).toBeVisible({ timeout: 30000 });
 

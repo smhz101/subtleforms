@@ -16,7 +16,7 @@
  *   /extensions             → Extensions
  */
 
-import { useState, useEffect, useRef, Suspense } from '@wordpress/element';
+import { useState, useEffect, useLayoutEffect, useRef, Suspense } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import { __, sprintf } from '@wordpress/i18n';
@@ -66,9 +66,30 @@ const SubmissionDetailPage = lazyWithRetry(() => import(/* webpackChunkName: "pa
 const BuilderPage        = lazyWithRetry(() => import(/* webpackChunkName: "page-builder" */        '../pages/BuilderPage'));
 const ExtensionsPage     = lazyWithRetry(() => import(/* webpackChunkName: "page-extensions" */     '../pages/ExtensionsPage'));
 const PaymentsPage       = lazyWithRetry(() => import(/* webpackChunkName: "page-payments" */       '../pages/PaymentsPage'));
-const ToolsPage          = lazyWithRetry(() => import(/* webpackChunkName: "page-tools" */          '../pages/ToolsPage'));
 const ReportsPage        = lazyWithRetry(() => import(/* webpackChunkName: "page-reports" */        '../pages/ReportsPage'));
 const CreateFormPage     = lazyWithRetry(() => import(/* webpackChunkName: "page-create-form" */    '../pages/CreateFormPage'));
+
+/**
+ * Point the Settings tab at Tools and give back the Settings route. The tab
+ * is read from the URL hash when Settings opens.
+ */
+function openToolsTab() {
+	try {
+		window.history.replaceState(null, '', '#tab=tools');
+	} catch (e) {
+		// The hash is only a convenience; Settings opens on its first tab.
+	}
+	return '/settings';
+}
+
+/** The old /tools route: open Settings on its Tools tab. */
+function ToolsRedirect() {
+	const navigate = useNavigate();
+	useLayoutEffect(() => {
+		navigate(openToolsTab(), { replace: true });
+	}, [navigate]);
+	return null;
+}
 
 // ─── Initial path resolver ────────────────────────────────────────────────────
 
@@ -126,8 +147,10 @@ function getInitialPath() {
 		case 'subtleforms-payments':
 			return '/payments';
 
+		// Tools is the Tools tab of Settings (the server redirects the old
+		// URL; this covers a page that is already open).
 		case 'subtleforms-tools':
-			return '/tools';
+			return openToolsTab();
 
 		case 'subtleforms-reports':
 			return '/reports';
@@ -186,7 +209,6 @@ function getPageNameFromPath(pathname) {
 		'/settings': __('Settings', 'subtleforms'),
 		'/extensions': __('Extensions', 'subtleforms'),
 		'/payments': __('Payments', 'subtleforms'),
-		'/tools': __('Tools', 'subtleforms'),
 		'/reports': __('Reports', 'subtleforms'),
 	};
 	if (pathname.startsWith('/forms/') && pathname !== '/forms/new') {
@@ -354,14 +376,7 @@ function AppContent() {
 							</PageErrorBoundary>
 						}
 					/>
-					<Route
-						path='/tools'
-						element={
-							<PageErrorBoundary pageName='Tools'>
-								<ToolsPage />
-							</PageErrorBoundary>
-						}
-					/>
+					<Route path='/tools' element={<ToolsRedirect />} />
 					<Route
 						path='/reports'
 						element={
