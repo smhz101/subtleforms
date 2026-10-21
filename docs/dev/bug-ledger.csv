@@ -1,7 +1,7 @@
 id,severity,release,package,owner,status_on_2.3.8,status,fixed_in,found_in,summary,note
 WP2-01,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),CSV export code ships in free but is locked (trialware),
-WP2-02,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,wporg.md (2.3.8),Analytics reports computed in free and hidden; views counted by default,Test is weak: no test covers the view-counting switch or that /analytics/summary returns 200 in free; static string check only
-WP2-03,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,wporg.md (2.3.8),"Advanced logic runs in free, only editor locks it","Test is weak: static string-absence tests only, no behavioural test of advanced rules in editor"
+WP2-02,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),Analytics reports computed in free and hidden; views counted by default,
+WP2-03,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),"Advanced logic runs in free, only editor locks it",
 WP2-04,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),"Picture Choice, Signature, Calculation render in free but locked in library",
 WP2-05,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),"Payment fields and coupons in free, locked; Payments page says they work on every plan",
 WP2-06,P1,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),Multi-file uploads implemented and stripped in free,
@@ -14,10 +14,10 @@ PRO-09,P3,Free 2.3.9,F239-1,Claude,Still open,fixed,Free 2.3.9,pro.md (2.3.3),No
 PRO-10,P3,Free 2.3.9,F239-1,Claude,"Still open, and wider",fixed,Free 2.3.9,pro.md (2.3.3),"No license; POST /forms with a Signature field and a starts_with rule, or a Pro template schema without metadata.template",Fix commit names this ID; not re-checked line by line.
 PRO2-06,P3,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed,Free 2.3.9,pro-server.md (2.3.8),"Agency (or white label with ""Hide credits"") open Reports and Tools",Fix commit names this ID; not re-checked line by line.
 UX2-15,P3,Free 2.3.9,F239-1,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),"Payments, Extensions",Fix commit names this ID; not re-checked line by line.
-FF-02,P1,Free 2.3.9,F239-2,Claude,Still open,fixed-no-test,Free 2.3.9,free-features.md (2.3.3),"Settings > AI assistant, enter any key, click Test Connection, then Save",no test asserting the tab/keys are gone
-WP2-08,P1,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,wporg.md (2.3.8),AI assistant tab is non-functional and fakes success,no regression test
-WP2-10,P1,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,wporg.md (2.3.8),No External services section in readme,no test; readme not testable (consider a readme lint)
-WP2-11,P1,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,wporg.md (2.3.8),Contributors names another person's account,"no test; list still includes the generic ""subtleforms"" account"
+FF-02,P1,Free 2.3.9,F239-2,Claude,Still open,fixed,Free 2.3.9,free-features.md (2.3.3),"Settings > AI assistant, enter any key, click Test Connection, then Save",
+WP2-08,P1,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),AI assistant tab is non-functional and fakes success,
+WP2-10,P1,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),No External services section in readme,
+WP2-11,P1,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed,Free 2.3.9,wporg.md (2.3.8),Contributors names another person's account,
 FF-23,P2,Free 2.3.9,F239-2,Claude,Partly fixed,fixed,Free 2.3.9,free-features.md (2.3.3),Install any language pack,Fix commit names this ID; not re-checked line by line.
 FF-31,P2,Free 2.3.9,F239-2,Claude,Still open (code),fixed,Free 2.3.9,free-features.md (2.3.3),"Multisite: network activate, use on a subsite, network deactivate, delete",Fix commit names this ID; not re-checked line by line.
 FF2-09,P2,Free 2.3.9,F239-2,Claude,new in 2.3.8,fixed,Free 2.3.9,free-features.md (2.3.8),"On 8934: deactivate SubtleForms, run uninstall.php",Fix commit names this ID; not re-checked line by line.
@@ -70,17 +70,17 @@ FB-12,P3,Free 2.3.9,F239-5,Claude,Still open,fixed,Free 2.3.9,fields-basic.md (2
 FB-17,P3,Free 2.3.9,F239-5,Claude,Still open,fixed,Free 2.3.9,fields-basic.md (2.3.3),Screen reader on Name or Address group.,Fix commit names this ID; not re-checked line by line.
 FLD2-10,P3,Free 2.3.9,F239-5,Claude,new in 2.3.8,fixed,Free 2.3.9,fields.md (2.3.8),"Required chained field; REST [""toyota""] or browser with only Make chosen",Fix commit names this ID; not re-checked line by line.
 PAY-18,P3,Free 2.3.9,F239-5,Claude,Still open,fixed,Free 2.3.9,payments.md (2.3.3),Add a Fixed Fee field.,Fix commit names this ID; not re-checked line by line.
-UX2-01,P1,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,ui-ux.md (2.3.8),Builder header,"CSS layout fix, no regression test (no visual/browser test at 1280-1600)"
+UX2-01,P1,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),Builder header,"Layout checks at 1280, 1440 and 1600 px guard against a regression. They also pass against the earlier CSS here, so they did not reproduce the original overlap."
 UX2-02,P1,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),Builder Preview,
-UX2-03,P1,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,ui-ux.md (2.3.8),Public conversational,no regression test
-UX2-04,P1,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,ui-ux.md (2.3.8),Public payment,no regression test
-UX2-05,P1,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,ui-ux.md (2.3.8),All Forms,Test is weak: tests cover reducer/saveErrors only; no test for FormsList or SubmissionsTable error state
+UX2-03,P1,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),Public conversational,
+UX2-04,P1,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),Public payment,
+UX2-05,P1,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),All Forms,
 UX2-08,P1,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),Public presets,
-UX2-20,P1,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,ui-ux.md (2.3.8),All Forms status tabs,no regression test; ring may clip again on phones
+UX2-20,P1,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),All Forms status tabs,
 FF-06,P2,Free 2.3.9,F239-6,Claude,Still open,fixed,Free 2.3.9,free-features.md (2.3.3),"Forms > ""?"" > Quick Start Wizard > Next x4 > Create Form",
 FF-07,P2,Free 2.3.9,F239-6,Claude,Still open,fixed,Free 2.3.9,free-features.md (2.3.3),"Open a published form, add a field, wait for autosave (or use Save draft)",Fix commit names this ID; not re-checked line by line.
 UX2-06,P2,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),Builder save,Fix commit names this ID; not re-checked line by line.
-UX2-07,P2,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed-no-test,Free 2.3.9,ui-ux.md (2.3.8),Builder load,no regression test
+UX2-07,P2,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),Builder load,
 UX2-09,P2,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),Dashboard vs Reports,Fix commit names this ID; not re-checked line by line.
 UX2-11,P2,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),Builder,Fix commit names this ID; not re-checked line by line.
 UX2-12,P2,Free 2.3.9,F239-6,Claude,new in 2.3.8,fixed,Free 2.3.9,ui-ux.md (2.3.8),"Wizard, create modal, builder",Fix commit names this ID; not re-checked line by line.
@@ -124,28 +124,28 @@ FA-05,P2,Free 2.4.0,F240-3,Claude,Fixed,fixed,Free 2.4.0 (#31),fields-advanced.m
 FA-06,P2,Free 2.4.0,F240-3,Claude,Still open,fixed,Free 2.4.0 (#31),fields-advanced.md (2.3.3),Required Color Picker with Default Color #ff0000; submit without touching it,
 FA-13,P2,Free 2.4.0,F240-3,Claude,Still open,fixed,Free 2.4.0 (#31),fields-advanced.md (2.3.3),"Add reCaptcha, hCaptcha and Turnstile fields with their own Site Key, no global CAPTCHA settings",
 FB-03,P2,Free 2.4.0,F240-3,Claude,Still open,fixed,Free 2.4.0 (#31),fields-basic.md (2.3.3),"Password field, Show Strength Meter on (default) and Require Confirmation on. View live.",
-FB-08,P2,Free 2.4.0,F240-3,Claude,Partly fixed,fixed-no-test,Free 2.4.0 (#31),fields-basic.md (2.3.3),"Phone Format ""US"" and submit ""12""; Country ""Enable Search"" on.",No test for Country searchable on versus off (the search half has no test of any kind).
+FB-08,P2,Free 2.4.0,F240-3,Claude,Partly fixed,fixed,Free 2.4.0 (#31),fields-basic.md (2.3.3),"Phone Format ""US"" and submit ""12""; Country ""Enable Search"" on.",
 FB-21,P2,Free 2.4.0,F240-3,Claude,Fixed (with new bugs),fixed,Free 2.4.0 (#31),fields-basic.md (2.3.3),Chained Select: add two levels with options. Live: choose Ford.,
 FLD2-04,P2,Free 2.4.0,F240-3,Claude,new in 2.3.8,fixed,Free 2.5.0 (#53),fields.md (2.3.8),Keyboard and screen reader on Dropdown and Country pickers,
 FLD2-05,P2,Free 2.4.0,F240-3,Claude,new in 2.3.8,fixed,Free 2.5.0 (#53),fields.md (2.3.8),"Keyboard on Date, Time, Date and Time pickers",
-FA-14,P3,Free 2.4.0,F240-3,Claude,Still open,fixed-no-test,Free 2.4.0 (#31),fields-advanced.md (2.3.3),Action Hook field with Hook Name qa_adv_hook; render and submit,"Release240Test only tests ActionHooks::names() sanitizing; nothing asserts do_action actually fires on render or submit. Note the submit call runs before CAPTCHA verification, so rejected submissions also fire the hook."
+FA-14,P3,Free 2.4.0,F240-3,Claude,Still open,fixed,Free 2.4.0 (#31),fields-advanced.md (2.3.3),Action Hook field with Hook Name qa_adv_hook; render and submit,"The hook also runs for a submission that CAPTCHA then rejects, because it runs before the CAPTCHA check."
 FA-15,P3,Free 2.4.0,F240-3,Claude,Still open,fixed,Free 2.4.0 (#31),fields-advanced.md (2.3.3),"NPS end labels, Calculation prefix/suffix",
-FA-20,P3,Free 2.4.0,F240-3,Claude,"Still open, looks worse",fixed-no-test,Free 2.4.0 (#31),fields-advanced.md (2.3.3),Section Heading followed by Custom HTML,No test (CSS only; no browser spec for heading followed by Custom HTML).
+FA-20,P3,Free 2.4.0,F240-3,Claude,"Still open, looks worse",fixed,Free 2.4.0 (#31),fields-advanced.md (2.3.3),Section Heading followed by Custom HTML,
 FA-22,P3,Free 2.4.0,F240-3,Claude,Still open,fixed,Free 2.4.0 (#31),fields-advanced.md (2.3.3),Any column container on the live form,
 FA-25,P3,Free 2.4.0,F240-3,Claude,Partly fixed,fixed,Free 2.4.0 (#31),fields-advanced.md (2.3.3),Hidden field definition,
 FB-16,P3,Free 2.4.0,F240-3,Claude,Still open,fixed,Free 2.4.0 (#31),fields-basic.md (2.3.3),"Add Dropdown, Radio Buttons or Checkboxes from the library.",
-FB-18,P3,Free 2.4.0,F240-3,Claude,Still open,fixed-no-test,Free 2.4.0 (#31),fields-basic.md (2.3.3),"Radio, Checkboxes, Picture Choice: the visible field label has for=""subtleforms-field-rd"" but no element has that id.",No test asserts there is no label[for] pointing at a missing id for these types.
+FB-18,P3,Free 2.4.0,F240-3,Claude,Still open,fixed,Free 2.4.0 (#31),fields-basic.md (2.3.3),"Radio, Checkboxes, Picture Choice: the visible field label has for=""subtleforms-field-rd"" but no element has that id.",
 FB-19,P3,Free 2.4.0,F240-3,Claude,Still open,fixed,Free 2.5.0 (#53),fields-basic.md (2.3.3),"Text/Number/Website with prefix ""$"" and suffix ""kg"".",
 FB-20,P3,Free 2.4.0,F240-3,Claude,Still open (not re-run in the UI),fixed,Free 2.5.0 (#53),fields-basic.md (2.3.3),"Logic rule on a Single Checkbox, Consent, Toggle or Country trigger.",
 FB-22,P3,Free 2.4.0,F240-3,Claude,Still open,fixed,Free 2.4.0 (#31),fields-basic.md (2.3.3),Add Consent / GDPR from the library and look at the canvas.,
 FB-24,P3,Free 2.4.0,F240-3,Claude,Partly fixed,fixed,Free 2.5.0 (#53),fields-basic.md (2.3.3),"Builder canvas: Dropdown default ""Beta"", Radio default ""Green"", Checkboxes default ""One"", Toggle default on.",
 FLD2-06,P3,Free 2.4.0,F240-3,Claude,new in 2.3.8,fixed,Free 2.5.0 (#53),fields.md (2.3.8),Submit the required pickers form empty,
-FLD2-08,P3,Free 2.4.0,F240-3,Claude,new in 2.3.8,fixed-no-test,Free 2.4.0 (#31),fields.md (2.3.8),Screen reader on the phone country button; Windows browsers,No test for the trigger's accessible name or flagMark.
+FLD2-08,P3,Free 2.4.0,F240-3,Claude,new in 2.3.8,fixed,Free 2.4.0 (#31),fields.md (2.3.8),Screen reader on the phone country button; Windows browsers,
 FLD2-13,P3,Free 2.4.0,F240-3,Claude,new in 2.3.8,fixed,Free 2.4.0 (#31),fields.md (2.3.8),Import a semicolon CSV (Excel in many locales); replace lists with CSV or outline on a form with entries,
-FLD2-14,P3,Free 2.4.0,F240-3,Claude,new in 2.3.8,fixed-no-test,Free 2.4.0 (#31),fields.md (2.3.8),"Builder chained ""On the form"" and ""Source"" groups with a screen reader",No test of the ARIA roles.
-FLD2-15,P3,Free 2.4.0,F240-3,Claude,new in 2.3.8,fixed-no-test,Free 2.4.0 (#31),fields.md (2.3.8),Calendar for a date of birth,Only monthCells(weekStart) and dayName are tested (shared/dateTime.week.test.js); nothing tests the month/year jump or the locale wiring. formatPhp F/M tokens still use the browser locale for the text shown on the trigger.
+FLD2-14,P3,Free 2.4.0,F240-3,Claude,new in 2.3.8,fixed,Free 2.4.0 (#31),fields.md (2.3.8),"Builder chained ""On the form"" and ""Source"" groups with a screen reader",
+FLD2-15,P3,Free 2.4.0,F240-3,Claude,new in 2.3.8,partly,Free 2.4.0 (#31),fields.md (2.3.8),Calendar for a date of birth,The month and year jump and the site language are tested. The F and M date format tokens still use the browser language for the text shown on the field.
 FLD2-18,P3,Free 2.4.0,F240-3,Claude,new in 2.3.8,fixed,Free 2.5.0 (#53),fields.md (2.3.8),"Chained Columns layout, axe",
-FLD2-19,P3,Free 2.4.0,F240-3,Claude,new in 2.3.8,fixed-no-test,Free 2.4.0 (#31),fields.md (2.3.8),Select a Repeater and look at its toolbar,The only related test is resolveDrop.test.js moveTargets (helper); nothing renders a Repeater toolbar and checks for Move to.
+FLD2-19,P3,Free 2.4.0,F240-3,Claude,new in 2.3.8,fixed,Free 2.4.0 (#31),fields.md (2.3.8),Select a Repeater and look at its toolbar,
 FF-08,P2,Free 2.4.0,F240-4,Claude,Still open,fixed,Free 2.4.0 (#32),free-features.md (2.3.3),"Settings > Email: set Sender Name and Email, or turn Admin Notifications off, then submit a form",
 FF-14,P2,Free 2.4.0,F240-4,Claude,Still open,fixed,Free 2.5.0 (#53),free-features.md (2.3.3),"Builder: add a field (unpublished), Preview, fill it, submit",
 FF-17,P2,Free 2.4.0,F240-4,Claude,Still open,fixed,Free 2.4.0 (#32),free-features.md (2.3.3),"Free webhook, Payload Mode Custom {""name"":""{{name}}""} (placeholder shown in the UI)",
@@ -169,11 +169,11 @@ FF-33,P3,Free 2.4.0,F240-4,Claude,Fixed,fixed,Free 2.4.0 (#32),free-features.md 
 FF-34,P3,Free 2.4.0,F240-4,Claude,Still open,fixed,Free 2.4.0 (#32),free-features.md (2.3.3),Block forms and a shortcode form on one page,
 FF2-10,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),Builder > Preview > Appearance > Inherit from theme > Update (publish) and reopen,
 FF2-11,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),"Inherit from theme on subtleforms-site, Twenty Twenty; add a custom font Georgia",
-FF2-12,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed-no-test,Free 2.4.0 (#32),free-features.md (2.3.8),Builder Preview with Twenty Twenty-Five active,No test. Whether wp_print_font_faces() outputs anything in an admin request needs a runtime check.
+FF2-12,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,partly,Free 2.4.0 (#32),free-features.md (2.3.8),Builder Preview with Twenty Twenty-Five active,A test checks the font face call returns a string. Whether the theme font faces print in an admin request is not verified.
 FF2-13,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),"New tab, open entries 8, 12, 16 in the pane",
 FF2-14,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),"Search ""Inbox Person 7"", open 7, reload. Or ""No split"", open an entry, press browser Back",
 FF2-15,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),Form with a webhook; submit; Tools > Webhooks,
-FF2-16,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed-no-test,Free 2.4.0 (#32),free-features.md (2.3.8),"Tools, Tab to ""Import forms"" / ""Import submissions"" / ""Choose export file"", press Enter or Space",No test (keyboard activation not covered by jest or playwright).
+FF2-16,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),"Tools, Tab to ""Import forms"" / ""Import submissions"" / ""Choose export file"", press Enter or Space",
 FF2-17,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),"Tools: import a wrong file on Transfer, switch to Migrate. Look at the form picker",
 FF2-18,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),free-features.md (2.3.8),Import the same submissions file twice; import RT entries into the Inbox form,
 PAY2-07,P3,Free 2.4.0,F240-4,Claude,new in 2.3.8,fixed,Free 2.4.0 (#32),payments.md (2.3.8),"Tools > Migrate preview of a Gravity Forms export with a Stripe or PayPal field, or a Fluent Forms export with custom amount, coupon, quantity or summary components",
