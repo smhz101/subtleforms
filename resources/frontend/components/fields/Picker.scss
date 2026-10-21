@@ -232,11 +232,12 @@
 		color: #fff;
 	}
 
-	&:hover:not(:disabled):not(.is-selected) {
+	&:hover:not(:disabled):not([aria-disabled='true']):not(.is-selected) {
 		background: var(--subtleforms-color-bg-subtle, #f4f5f7);
 	}
 
-	&:disabled {
+	&:disabled,
+	&[aria-disabled='true'] {
 		cursor: default;
 		opacity: 0.35;
 	}
