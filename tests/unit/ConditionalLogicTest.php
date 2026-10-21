@@ -38,6 +38,24 @@ final class ConditionalLogicTest extends TestCase {
 		return new ConditionalLogic( self::spec()['today'] );
 	}
 
+	/** WP2-03: advanced operators run in the free plugin, with no capability or licence. */
+	public function test_every_advanced_operator_is_exercised_by_the_shared_cases(): void {
+		$seen = array();
+		$spec = self::spec();
+		array_walk_recursive(
+			$spec,
+			static function ( $value, $key ) use ( &$seen ) {
+				if ( 'operator' === $key ) {
+					$seen[ $value ] = true;
+				}
+			}
+		);
+		foreach ( ConditionalLogic::ADVANCED_OPERATORS as $operator ) {
+			$this->assertArrayHasKey( $operator, $seen, "{$operator} has a case in the shared fixture." );
+		}
+		$this->assertTrue( ( new \SubtleForms\Support\Capabilities() )->allows( 'logic.conditional.advanced' ) );
+	}
+
 	public function conditionCases(): array {
 		$out = array();
 		foreach ( self::spec()['conditions'] as $case ) {
