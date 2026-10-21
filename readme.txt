@@ -129,6 +129,13 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 
 == Changelog ==
 
+= Unreleased =
+* Fix: In "Right of inbox" the Submissions list no longer scrolls sideways. Each entry is two lines: the form title and number, then the result, the time and the actions under the title. The rows per page and page controls stay at the bottom of the list while the rows scroll.
+* Change: Bulk actions on the Submissions list are a slim bar of icon buttons with tooltips and a More menu, instead of a long row of text buttons.
+* Fix: Every Submissions tab (All, New, Read, Spam, Starred, Flagged, Trash) shows its count, and the counts update at once when you trash, restore, delete, star, flag, mark spam or mark read or unread, from the list or the entry.
+* Change: A starred entry shows a filled amber star and no row tint. The star button no longer turns dark.
+* Fix: Each action icon on a Submissions row shows its own tooltip, so "Move to Trash" no longer appears over the Star button.
+
 = 2.4.1 - 2026-10-20 =
 * Fix: Choosing 50 or 100 rows per page on the Forms screen shows the forms instead of "Forms could not be loaded".
 * Fix: Clearing a saved setting, such as an API key or a sender name, saves it empty instead of keeping the old value.
