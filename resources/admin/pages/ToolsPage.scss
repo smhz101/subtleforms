@@ -233,3 +233,22 @@
 	width: 220px;
 	margin: 0;
 }
+
+// Inside Settings the content column is narrow and already has a list on its
+// left: the sections become a row of buttons above the cards.
+.sf-tools--embedded {
+	display: block;
+	padding: 0;
+
+	.sf-tools__nav {
+		position: static;
+		margin-bottom: 20px;
+		padding-bottom: 8px;
+		overflow-x: auto;
+		border-bottom: 1px solid var(--sf-border);
+
+		ul { flex-direction: row; flex-wrap: wrap; gap: 4px; }
+	}
+
+	.sf-tools__nav-item { width: auto; }
+}

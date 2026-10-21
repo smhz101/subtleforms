@@ -37,6 +37,7 @@ import './DataTable.scss';
  * @param {Function} props.onPerPageChange - Callback when per page changes (newPerPage)
  * @param {boolean} props.loading - Loading state
  * @param {string} props.emptyMessage - Message when no data
+ * @param {boolean} props.alwaysShowPagination - Keep the footer ("0 results", disabled page buttons, rows per page) when there are no rows
  * @param {Function|null} props.onRowClick - Optional row click handler (row)
  * @param {boolean} props.selectable - Enable row selection
  * @param {Array} props.selectedItems - Array of selected item IDs
@@ -58,6 +59,17 @@ import './DataTable.scss';
  * @return {string} Range text.
  */
 export function rangeText(page, perPage, total) {
+  if (!total) {
+    return __('0 results', 'subtleforms');
+  }
+  if ((page - 1) * perPage >= total) {
+    // A page past the end (the last row of it was just removed).
+    return sprintf(
+      /* translators: %d: total items */
+      _n('%d result', '%d results', total, 'subtleforms'),
+      total
+    );
+  }
   return sprintf(
     /* translators: %1$d: first item number, %2$d: last item number, %3$d: total items */
     __('%1$d to %2$d of %3$d', 'subtleforms'),
@@ -151,7 +163,7 @@ function CompactPagination({ currentPage, totalPages, perPage, totalItems, onPag
         <IconAction
           label={__('Previous page', 'subtleforms')}
           icon={<Icon.ChevronLeft size={16} />}
-          disabled={currentPage === 1}
+          disabled={currentPage <= 1}
           onClick={() => onPageChange(currentPage - 1)}
         />
         <span className='sf-data-table__pagination-info-text' aria-live='polite'>
@@ -160,7 +172,7 @@ function CompactPagination({ currentPage, totalPages, perPage, totalItems, onPag
         <IconAction
           label={__('Next page', 'subtleforms')}
           icon={<Icon.ChevronRight size={16} />}
-          disabled={currentPage === totalPages}
+          disabled={currentPage >= totalPages}
           onClick={() => onPageChange(currentPage + 1)}
         />
       </div>
@@ -176,6 +188,75 @@ function CompactPagination({ currentPage, totalPages, perPage, totalItems, onPag
           </option>
         ))}
       </select>
+    </div>
+  );
+}
+
+/**
+ * Full footer: "1–20 of 739" with the rows-per-page select, then previous,
+ * "Page 1 of 37" and next.
+ */
+function FullPagination({ currentPage, totalPages, perPage, totalItems, onPageChange, onPerPageChange }) {
+  return (
+    <div className='sf-data-table__pagination'>
+      <div className='sf-data-table__pagination-info'>
+        <span className='sf-data-table__pagination-info-text' aria-live='polite'>
+          {totalItems && (currentPage - 1) * perPage < totalItems
+            ? sprintf(
+                /* translators: %1$d: starting item number, %2$d: ending item number, %3$d: total items */
+                __('%1$d–%2$d of %3$d', 'subtleforms'),
+                (currentPage - 1) * perPage + 1,
+                Math.min(currentPage * perPage, totalItems),
+                totalItems
+              )
+            : rangeText(currentPage, perPage, totalItems)}
+        </span>
+
+        <div className='sf-data-table__pagination-info-controls'>
+          <SelectControl
+            label={__('Rows per page', 'subtleforms')}
+            __nextHasNoMarginBottom
+            __next40pxDefaultSize={false}
+            size='compact'
+            value={perPage.toString()}
+            onChange={(value) => onPerPageChange(parseInt(value))}
+            options={PER_PAGE_OPTIONS.map((size) => ({ label: String(size), value: String(size) }))}
+          />
+        </div>
+      </div>
+
+      <div className='sf-data-table__pagination-buttons'>
+        <Button
+          disabled={currentPage <= 1}
+          accessibleWhenDisabled
+          onClick={() => onPageChange(currentPage - 1)}
+          variant='tertiary'
+          size='compact'
+          className='sf-data-table__page-button'
+          icon={<Icon.ChevronLeft size={16} />}
+          label={__('Previous page', 'subtleforms')}
+        />
+
+        <span className='sf-data-table__pagination-page-indicator'>
+          {sprintf(
+            /* translators: %1$d: Current page number, %2$d: Total pages */
+            __('Page %1$d of %2$d', 'subtleforms'),
+            currentPage,
+            totalPages
+          )}
+        </span>
+
+        <Button
+          disabled={currentPage >= totalPages}
+          accessibleWhenDisabled
+          onClick={() => onPageChange(currentPage + 1)}
+          variant='tertiary'
+          size='compact'
+          className='sf-data-table__page-button'
+          icon={<Icon.ChevronRight size={16} />}
+          label={__('Next page', 'subtleforms')}
+        />
+      </div>
     </div>
   );
 }
@@ -219,6 +300,7 @@ const DataTable = memo(function DataTable({
   rowClassName = null,
   compact = false,
   renderCompactRow = null,
+  alwaysShowPagination = false,
 }) {
   const totalPages = Math.ceil(totalItems / perPage);
   
@@ -294,7 +376,7 @@ const DataTable = memo(function DataTable({
   }
 
   if (data.length === 0) {
-    return (
+    const empty = (
       <div className='sf-data-table__empty'>
         <div className='sf-data-table__empty-content'>
           {typeof emptyMessage === 'string' ? (
@@ -308,6 +390,25 @@ const DataTable = memo(function DataTable({
             emptyMessage
           )}
         </div>
+      </div>
+    );
+    if (!alwaysShowPagination) {
+      return empty;
+    }
+    // The footer stays, so the rows-per-page choice can be changed and the
+    // page does not change shape between a tab with entries and an empty one.
+    const FooterComponent = compact ? CompactPagination : FullPagination;
+    return (
+      <div className={`sf-data-table sf-data-table--empty${compact ? ' sf-data-table--compact' : ''}`}>
+        {empty}
+        <FooterComponent
+          currentPage={currentPage}
+          totalPages={Math.max(1, totalPages)}
+          perPage={perPage}
+          totalItems={totalItems}
+          onPageChange={onPageChange}
+          onPerPageChange={onPerPageChange}
+        />
       </div>
     );
   }
@@ -589,75 +690,15 @@ const DataTable = memo(function DataTable({
         </table>
       </div>
 
-      {/* Pagination - Always show if data exists and totalPages > 0 */}
       {totalPages > 0 && (
-        <div className='sf-data-table__pagination'>
-          <div className='sf-data-table__pagination-info'>
-            <span className='sf-data-table__pagination-info-text'>
-              {(() => {
-                return sprintf(
-                  /* translators: %1$d: starting item number, %2$d: ending item number, %3$d: total items */
-                  __('%1$d–%2$d of %3$d', 'subtleforms'),
-                  (currentPage - 1) * perPage + 1,
-                  Math.min(currentPage * perPage, totalItems),
-                  totalItems
-                );
-              })()}
-            </span>
-
-            <div className='sf-data-table__pagination-info-controls'>
-              <SelectControl
-                label={__('Rows per page', 'subtleforms')}
-                __nextHasNoMarginBottom
-                __next40pxDefaultSize={false}
-                size='compact'
-                value={perPage.toString()}
-                onChange={(value) => onPerPageChange(parseInt(value))}
-                options={[
-                  { label: '10', value: '10' },
-                  { label: '20', value: '20' },
-                  { label: '50', value: '50' },
-                  { label: '100', value: '100' },
-                ]}
-              />
-            </div>
-          </div>
-
-          <div className='sf-data-table__pagination-buttons'>
-            <Button
-              disabled={currentPage === 1}
-              accessibleWhenDisabled
-              onClick={() => onPageChange(currentPage - 1)}
-              variant='tertiary'
-              size='compact'
-              className='sf-data-table__page-button'
-              icon={<Icon.ChevronLeft size={16} />}
-              label={__('Previous page', 'subtleforms')}
-            />
-
-            <span className='sf-data-table__pagination-page-indicator'>
-              {(() => {
-                return sprintf(
-                  /* translators: %1$d: Current page number, %2$d: Total pages */
-                  __('Page %1$d of %2$d', 'subtleforms'),
-                  currentPage,
-                  totalPages
-                );
-              })()}
-            </span>
-
-            <Button
-              disabled={currentPage === totalPages}
-              accessibleWhenDisabled
-              onClick={() => onPageChange(currentPage + 1)}
-              variant='tertiary'
-              size='compact'
-              className='sf-data-table__page-button'
-              icon={<Icon.ChevronRight size={16} />}
-              label={__('Next page', 'subtleforms')}
-            />
-          </div>
-        </div>
+        <FullPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          perPage={perPage}
+          totalItems={totalItems}
+          onPageChange={onPageChange}
+          onPerPageChange={onPerPageChange}
+        />
       )}
     </div>
   );

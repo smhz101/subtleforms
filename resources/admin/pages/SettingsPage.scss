@@ -855,3 +855,41 @@
 }
 
 .sf-license .components-notice { margin: 0; }
+
+// ── MCP tab without Pro ─────────────────────────────────────────────────────
+.sf-mcp-placeholder {
+	display: flex;
+	gap: 16px;
+	align-items: flex-start;
+	padding: 20px;
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius-lg);
+	background: var(--sf-bg-page);
+
+	&__icon {
+		display: inline-flex;
+		flex: 0 0 auto;
+		align-items: center;
+		justify-content: center;
+		width: 40px;
+		height: 40px;
+		border-radius: var(--sf-radius-lg);
+		background: var(--sf-bg-muted);
+		color: var(--sf-text-muted);
+	}
+
+	&__title {
+		margin: 0 0 6px;
+		font-size: var(--sf-text-base);
+		font-weight: var(--sf-weight-medium);
+	}
+
+	&__body p {
+		margin: 0 0 10px;
+		max-width: 60ch;
+		color: var(--sf-text-secondary);
+		font-size: var(--sf-text-sm);
+	}
+
+	&__body p:last-child { margin-bottom: 0; }
+}

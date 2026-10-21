@@ -1,8 +1,7 @@
 /**
  * F240-5: SubtleForms admin screens at small and short windows.
  *
- * - UX2-16: a window shorter than the WordPress menu shows no dark band; the
- *   page stays at the window height and the menu scrolls in its own column.
+ * - The WordPress admin menu keeps its core behaviour on SubtleForms screens.
  * - UX2-17: on a phone the builder says it needs a wider screen, and can be
  *   opened anyway.
  * - UX2-18: with the reading pane right of the inbox, an inbox narrower than
@@ -66,36 +65,32 @@ test.afterAll(async () => {
   if (form) await cleanup(client, form);
 });
 
-test('UX2-16: a short window shows the stage to the bottom edge', async ({ page }) => {
+test('the WordPress admin menu keeps its core positioning and stays reachable on a short window', async ({ page }) => {
   await page.setViewportSize({ width: 1024, height: 600 });
   await loginPage(page);
   await page.goto('/wp-admin/admin.php?page=subtleforms');
   await page.waitForSelector('.sf-app');
-  await expect(page.locator('body')).toHaveClass(/sf-menu-scrolls/);
-
-  const metrics = await page.evaluate(() => {
-    window.scrollTo(0, document.documentElement.scrollHeight);
-    const stage = document.querySelector('.sf-app__stage').getBoundingClientRect();
-    return { doc: document.documentElement.scrollHeight, inner: window.innerHeight, scrollY: window.scrollY, stageBottom: stage.bottom };
+  await expect(page.locator('body')).not.toHaveClass(/sf-menu-scrolls/);
+  const wrap = await page.evaluate(() => {
+    const s = window.getComputedStyle(document.getElementById('adminmenuwrap'));
+    return { position: s.position, overflowY: s.overflowY };
   });
-  expect(metrics.doc).toBeLessThanOrEqual(metrics.inner);
-  expect(metrics.scrollY).toBe(0);
-  expect(metrics.inner - metrics.stageBottom).toBeLessThanOrEqual(12);
-
-  // The last menu item can be reached by scrolling the menu column.
+  expect(wrap.position).not.toBe('fixed');
+  expect(wrap.overflowY).not.toBe('auto');
+  // The page scrolls as in WordPress, so the last menu item can be reached.
   const collapse = page.locator('#collapse-button');
   await collapse.scrollIntoViewIfNeeded();
   await expect(collapse).toBeInViewport();
+  await page.screenshot({ path: 'test-results/screens-2.5.1/menu-core-short-window.png' });
 });
 
-test('UX2-16: a tall window keeps the core menu and its flyouts', async ({ page }) => {
+test('a tall window does not scroll the page', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 1000 });
   await loginPage(page);
   await page.goto('/wp-admin/admin.php?page=subtleforms');
   await page.waitForSelector('.sf-app');
-  await expect(page.locator('body')).not.toHaveClass(/sf-menu-scrolls/);
-  await page.hover('#menu-settings > a');
-  await expect(page.locator('#menu-settings .wp-submenu')).toBeInViewport();
+  const over = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
+  expect(over).toBeLessThanOrEqual(1);
 });
 
 test('UX2-17: on a phone the builder says it needs a wider screen', async ({ page }) => {

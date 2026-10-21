@@ -3,7 +3,6 @@ import { Button, Notice, SearchControl, SelectControl, Spinner } from '@wordpres
 import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import clsx from 'clsx';
-import AdminShell from '../components/AdminShell';
 import Icon from '../ui/Icon';
 import { apiGet, apiPost } from '../utils/api';
 import { getBranding } from '../utils/branding';
@@ -40,7 +39,14 @@ function messageFrom( result ) {
 }
 
 
-export default function ToolsPage() {
+/**
+ * Tools body: transfer, migration and the activity logs. It is the Tools tab
+ * of Settings, so it has no page frame of its own.
+ *
+ * @param {Object}  props
+ * @param {boolean} props.embedded Laid out inside the Settings content column.
+ */
+export default function ToolsPanel( { embedded = false } ) {
   const [ section, setSection ] = useState( 'transfer' );
   const [ forms, setForms ] = useState( [] );
   const [ notice, setNotice ] = useState( null );
@@ -62,47 +68,43 @@ export default function ToolsPage() {
   const tell = ( status, content ) => setNotice( { status, content } );
 
   return (
-    <AdminShell
-      title={ __( 'Tools', 'subtleforms' ) }
-      description={ __( 'Move forms and entries, bring a form across from another plugin, and read what the site has been doing.', 'subtleforms' ) }>
-      <div className='sf-tools'>
-        <nav className='sf-tools__nav' aria-label={ __( 'Tools', 'subtleforms' ) }>
-          <ul>
-            { SECTIONS.map( ( item ) => {
-              const ItemIcon = item.icon;
-              return (
-                <li key={ item.id }>
-                  <button
-                    type='button'
-                    className={ clsx( 'sf-tools__nav-item', { 'is-active': section === item.id } ) }
-                    aria-current={ section === item.id ? 'page' : undefined }
-                    onClick={ () => { setNotice( null ); setSection( item.id ); } }>
-                    <ItemIcon size={ 16 } aria-hidden='true' />
-                    { item.label }
-                  </button>
-                </li>
-              );
-            } ) }
-          </ul>
-        </nav>
-        <div className='sf-tools__main'>
-          { notice && (
-            <Notice status={ notice.status } onRemove={ () => setNotice( null ) } isDismissible>
-              { notice.content }
-            </Notice>
-          ) }
-          { section === 'transfer' && (
-            <Transfer forms={ forms } busy={ busy } setBusy={ setBusy } tell={ tell } />
-          ) }
-          { section === 'migrate' && (
-            <Migrate busy={ busy } setBusy={ setBusy } tell={ tell } description={ current.description } />
-          ) }
-          { section === 'activity' && <LogList kind='activity' forms={ forms } description={ current.description } /> }
-          { section === 'webhooks' && <LogList kind='webhook' forms={ forms } description={ current.description } /> }
-          { section === 'api' && <ApiList description={ current.description } /> }
-        </div>
+    <div className={ clsx( 'sf-tools', { 'sf-tools--embedded': embedded } ) }>
+      <nav className='sf-tools__nav' aria-label={ __( 'Tools', 'subtleforms' ) }>
+        <ul>
+          { SECTIONS.map( ( item ) => {
+            const ItemIcon = item.icon;
+            return (
+              <li key={ item.id }>
+                <button
+                  type='button'
+                  className={ clsx( 'sf-tools__nav-item', { 'is-active': section === item.id } ) }
+                  aria-current={ section === item.id ? 'page' : undefined }
+                  onClick={ () => { setNotice( null ); setSection( item.id ); } }>
+                  <ItemIcon size={ 16 } aria-hidden='true' />
+                  { item.label }
+                </button>
+              </li>
+            );
+          } ) }
+        </ul>
+      </nav>
+      <div className='sf-tools__main'>
+        { notice && (
+          <Notice status={ notice.status } onRemove={ () => setNotice( null ) } isDismissible>
+            { notice.content }
+          </Notice>
+        ) }
+        { section === 'transfer' && (
+          <Transfer forms={ forms } busy={ busy } setBusy={ setBusy } tell={ tell } />
+        ) }
+        { section === 'migrate' && (
+          <Migrate busy={ busy } setBusy={ setBusy } tell={ tell } description={ current.description } />
+        ) }
+        { section === 'activity' && <LogList kind='activity' forms={ forms } description={ current.description } /> }
+        { section === 'webhooks' && <LogList kind='webhook' forms={ forms } description={ current.description } /> }
+        { section === 'api' && <ApiList description={ current.description } /> }
       </div>
-    </AdminShell>
+    </div>
   );
 }
 

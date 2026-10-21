@@ -96,8 +96,8 @@ test('every tab shows its count on first load, from one request', async ({ page 
   });
   await page.goto(listUrl());
   await expect(rows(page).first()).toBeVisible({ timeout: 30000 });
-  // 9 entries, 1 trashed: 8 live. Read: 2. New: 6.
-  await expectCounts(page, { All: 8, New: 6, Read: 2, Spam: 1, Starred: 2, Flagged: 1, Trash: 1 });
+  // 9 entries, 1 trashed: 8 live. Read: 2.
+  await expectCounts(page, { All: 8, Read: 2, Spam: 1, Starred: 2, Flagged: 1, Trash: 1 });
   expect(counted.length).toBe(1);
 });
 
@@ -105,7 +105,7 @@ test('counts follow every action without a reload', async ({ page }) => {
   await loginPage(page);
   await page.goto(listUrl());
   await expect(rows(page).first()).toBeVisible({ timeout: 30000 });
-  await expectCounts(page, { All: 8, New: 6, Read: 2, Spam: 1, Starred: 2, Flagged: 1, Trash: 1 });
+  await expectCounts(page, { All: 8, Read: 2, Spam: 1, Starred: 2, Flagged: 1, Trash: 1 });
 
   // Star then unstar the first row.
   const first = rowNamed(page, 'Ada');
@@ -119,7 +119,7 @@ test('counts follow every action without a reload', async ({ page }) => {
   // Trash (the newest entry is a read one): leaves All and Read, joins Trash.
   await first.hover();
   await first.getByRole('button', { name: 'Move to Trash' }).click();
-  await expectCounts(page, { All: 7, Read: 1, New: 6, Trash: 2 });
+  await expectCounts(page, { All: 7, Read: 1, Trash: 2 });
 
   // Restore it from the Trash tab.
   await page.getByRole('tab', { name: /^Trash/ }).click();
@@ -127,7 +127,7 @@ test('counts follow every action without a reload', async ({ page }) => {
   const trashed = rowNamed(page, 'Ada');
   await trashed.hover();
   await trashed.getByRole('button', { name: 'Restore' }).click();
-  await expectCounts(page, { All: 8, Read: 2, New: 6, Trash: 1 });
+  await expectCounts(page, { All: 8, Read: 2, Trash: 1 });
 
   // Delete forever the entry that was trashed before.
   const remaining = rowNamed(page, 'Dennis');
@@ -141,15 +141,34 @@ test('counts follow every action without a reload', async ({ page }) => {
   await expect(rows(page).first()).toBeVisible();
   await page.getByRole('checkbox', { name: 'Select all' }).check();
   await page.getByRole('toolbar', { name: 'Bulk actions' }).getByRole('button', { name: 'Mark read' }).click();
-  await expectCounts(page, { New: 0, Read: 8 });
+  await expectCounts(page, { Read: 8 });
   await page.getByRole('checkbox', { name: 'Select all' }).check();
   await page.getByRole('toolbar', { name: 'Bulk actions' }).getByRole('button', { name: 'Mark unread' }).click();
-  await expectCounts(page, { New: 8, Read: 0 });
+  await expectCounts(page, { Read: 0 });
 
   // The numbers are what the server says.
   const server = await client.call('GET', `/submissions/unread-count?form_id=${form.id}`);
   expect(server.body.data.counts.all).toBe(8);
   expect(server.body.data.counts.unread).toBe(8);
+});
+
+test('there is no New tab, an old New link opens All, and the unread count is still kept', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 800 });
+  await loginPage(page);
+  for (const old of ['unread', 'new']) {
+    await page.goto(`${listUrl()}&tab=${old}`);
+    await expect(rows(page).first()).toBeVisible({ timeout: 30000 });
+    await expect(page.getByRole('tab', { name: /^All/ })).toHaveAttribute('aria-selected', 'true');
+    await expect(page).not.toHaveURL(/tab=/);
+  }
+  await expect(page.getByRole('tab', { name: /^New/ })).toHaveCount(0);
+  await expect(page.getByRole('tab')).toHaveText([/^All/, /^Read/, /^Spam/, /^Starred/, /^Flagged/, /^Trash/]);
+  // Unread entries are in All, and the menu badge still counts them.
+  await expect(page.locator('.sf-submissions-table__row--unread').first()).toBeVisible();
+  await expect(page.locator('.sf-appnav__count').first()).toBeVisible();
+  const server = await client.call('GET', `/submissions/unread-count?form_id=${form.id}`);
+  expect(server.body.data.counts.unread).toBeGreaterThan(0);
+  await page.screenshot({ path: 'test-results/screens-2.5.1/tabs-without-new.png' });
 });
 
 test('actions in the entry pane update the counts too', async ({ page }) => {
@@ -242,6 +261,81 @@ test('the footer stays at the bottom of the list pane while the rows scroll', as
   expect(Math.abs(after.y + after.height - (pane.y + pane.height))).toBeLessThan(3);
   await expect(footer).toContainText(/1 to \d+ of \d+/);
   await expect(footer.getByLabel('Rows per page')).toBeVisible();
+});
+
+/** The footer of an empty list: "0 results", both page buttons off, the rows-per-page select, pinned to the pane bottom. */
+async function expectEmptyFooter(page, shot) {
+  await expect(page.locator('.sf-data-table__empty')).toBeVisible({ timeout: 30000 });
+  const footer = page.locator('.sf-data-table__pagination').first();
+  await expect(footer).toBeVisible();
+  await expect(footer).toContainText('0 results');
+  for (const name of ['Previous page', 'Next page']) {
+    const button = footer.getByRole('button', { name });
+    await expect(button).toBeVisible();
+    await expect(button).toBeDisabled();
+  }
+  await expect(footer.getByLabel('Rows per page')).toBeVisible();
+  const pane = await page.locator('.sf-inbox__list').boundingBox();
+  const box = await footer.boundingBox();
+  expect(Math.abs(box.y + box.height - (pane.y + pane.height))).toBeLessThan(3);
+  await page.screenshot({ path: `test-results/screens-2.5.1/${shot}.png` });
+}
+
+test('an empty list keeps its footer: a search with no results, wide and narrow', async ({ page }) => {
+  await loginPage(page);
+  for (const [width, shot] of [[1440, 'empty-search-wide'], [820, 'empty-search-narrow']]) {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto(`${listUrl()}&search=zzqq-no-such-entry`);
+    await expectEmptyFooter(page, shot);
+  }
+});
+
+test('an empty tab and a form with no entries keep their footer', async ({ page }) => {
+  await loginPage(page);
+  await page.setViewportSize({ width: 1440, height: 800 });
+  await page.goto(`${listUrl()}&tab=trash&search=zzqq-no-such-entry`);
+  await expectEmptyFooter(page, 'empty-trash-tab');
+
+  const bare = await publishForm(client, {
+    title: `Submissions empty ${Date.now()}`,
+    fields: [{ id: 'n', key: 'name', type: 'text', label: 'Name' }],
+  });
+  try {
+    await page.goto(`/wp-admin/admin.php?page=subtleforms-submissions&form_id=${bare.id}`);
+    await expectEmptyFooter(page, 'empty-form');
+    // The rows-per-page choice still works on an empty list.
+    await page.locator('.sf-data-table__pagination').first().getByLabel('Rows per page').selectOption('50');
+    await expect(page.locator('.sf-data-table__pagination').first().getByLabel('Rows per page')).toHaveValue('50');
+  } finally {
+    await cleanup(client, bare);
+  }
+});
+
+test('choosing 50 or 100 rows per page lists the entries instead of an error', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 800 });
+  await loginPage(page);
+  await page.goto(listUrl());
+  await expect(rows(page).first()).toBeVisible({ timeout: 30000 });
+  const urls = [];
+  page.on('request', (request) => {
+    if (/\/submissions\?/.test(request.url())) urls.push(request.url());
+  });
+  for (const size of ['50', '100']) {
+    await page.getByLabel('Rows per page').selectOption(size);
+    await expect(rows(page).first()).toBeVisible({ timeout: 20000 });
+    await expect(page.getByText('Entries could not be loaded.')).toHaveCount(0);
+    await expect(page.getByLabel('Rows per page')).toHaveValue(size);
+  }
+  // The API pages by offset: every list request names one and none asks for more than 100 rows.
+  const listed = urls.filter((u) => /per_page=/.test(u));
+  expect(listed.length).toBeGreaterThan(0);
+  for (const u of listed) {
+    expect(u).toMatch(/offset=\d+/);
+    expect(parseInt(new URL(u).searchParams.get('per_page'), 10)).toBeLessThanOrEqual(100);
+  }
+  const first = await client.call('GET', `/submissions?form_id=${form.id}&per_page=1&offset=0`);
+  const second = await client.call('GET', `/submissions?form_id=${form.id}&per_page=1&offset=1`);
+  expect(second.body.data[0].id).not.toBe(first.body.data[0].id);
 });
 
 test('starred rows have no background tint, only the filled star', async ({ page }) => {

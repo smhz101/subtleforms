@@ -32,6 +32,7 @@ import { entrySender } from '../utils/entrySender';
 import { timeAgo } from '../utils/formatDate';
 import { entryAfter } from '../utils/tabCounts';
 import useElementWidth from '../hooks/useElementWidth';
+import { chunkPagesFor } from '../utils/listChunks';
 import SubmissionRowActions from './SubmissionRowActions';
 import './SubmissionsTable.scss';
 
@@ -192,9 +193,10 @@ const SubmissionsTable = forwardRef(
 
     // Fetch one batch: batchIndex 0 → rows 1..(CHUNK_PAGES*perPage), index 1 → next batch, etc.
     const fetchBatch = async (batchIndex) => {
-      const batchSize = perPage * CHUNK_PAGES;
+      const batchSize = perPage * chunkPagesFor(perPage, CHUNK_PAGES);
       const params = buildFilterParams();
-      params.set('page', (batchIndex + 1).toString());
+      // The endpoint pages by offset and ignores `page`.
+      params.set('offset', (batchIndex * batchSize).toString());
       params.set('per_page', batchSize.toString());
 
       const { ok, body, headers } = await apiGet(`/submissions?${params}`);
@@ -262,7 +264,7 @@ const SubmissionsTable = forwardRef(
       }
 
       isPrefetchingRef.current = true;
-      const batchIndex = Math.ceil(pagesLoadedRef.current / CHUNK_PAGES);
+      const batchIndex = Math.ceil(pagesLoadedRef.current / chunkPagesFor(perPageRef.current, CHUNK_PAGES));
       const generation = generationRef.current;
       const pending = (async () => {
         try {
@@ -876,6 +878,7 @@ const SubmissionsTable = forwardRef(
           onRowClick={handleRowClick}
           rowClassName={getRowClassName}
           compact={compact}
+          alwaysShowPagination
           renderCompactRow={renderCompactRow}
           selectable={true}
           selectedItems={selectedSubmissions}

@@ -20,10 +20,12 @@ const store =
     priced: {},
     controls: {},
     previews: {},
+    settingsTabs: {},
   });
 // Stores created by an older bundle may miss newer keys.
 store.pricedWhen = store.pricedWhen || {};
 store.computers = store.computers || [];
+store.settingsTabs = store.settingsTabs || {};
 
 /**
  * Register a public field renderer.
@@ -143,10 +145,43 @@ export function getCanvasPreview(type) {
   return store.previews[type] || null;
 }
 
+/**
+ * Register a Settings tab (Settings screen, left list).
+ *
+ * `mcp` is a built-in slot in Free: it shows an upgrade note until an add-on
+ * registers a component under that name. Any other name adds a tab to the
+ * Pro group, which then needs `title` and `description`.
+ *
+ * The body manages its own data and saving, so the Settings Save button and
+ * save bar are not shown for add-on tabs.
+ *
+ * @param {string} name Tab name: lowercase letters, numbers, dashes. It is the
+ *                      value of `#tab=` in the Settings URL.
+ * @param {Object} def  { component, title, description, order }.
+ *                      `component` takes no props. `order` (number) places a
+ *                      new tab among the Pro group tabs; the default is the end.
+ */
+export function registerSettingsTab(name, def) {
+  if (typeof name === 'string' && /^[a-z0-9-]+$/.test(name) && def && def.component) {
+    store.settingsTabs[name] = { ...def };
+  }
+}
+
+/** The tab registered under a name, or null. */
+export function getSettingsTab(name) {
+  return store.settingsTabs[name] || null;
+}
+
+/** Every registered Settings tab as { name, ...def }. */
+export function settingsTabs() {
+  return Object.keys(store.settingsTabs).map((name) => ({ name, ...store.settingsTabs[name] }));
+}
+
 root.SubtleFormsExtend = Object.assign(root.SubtleFormsExtend || {}, {
   registerFieldType,
   registerPricedType,
   registerValueComputer,
   registerInspectorControl,
   registerCanvasPreview,
+  registerSettingsTab,
 });

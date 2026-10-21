@@ -13,6 +13,7 @@ import { apiPost } from '../utils/api';
 import { useForms, useSettings } from '../data';
 import { deletesPermanently } from '../utils/deleteBehavior';
 import { tabsFor } from '../utils/tabCounts';
+import { normalizeInboxTab } from '../utils/inboxTabs';
 import lazyWithRetry from '../utils/lazyWithRetry';
 import { noticeDialog } from '../utils/confirmDialog';
 import './SubmissionsPage.scss';
@@ -70,7 +71,21 @@ export default function SubmissionsPage({ formId }) {
 
   // Tab and search live in the URL so a reload keeps the filtered list.
   useEffect(() => {
-    const tab = searchParams.get('tab') || 'all';
+    const rawTab = searchParams.get('tab') || 'all';
+    // The old "New" tab is gone (All lists those entries): an old link with
+    // tab=unread or tab=new opens All and drops the parameter.
+    const tab = normalizeInboxTab(rawTab);
+    if (tab !== rawTab) {
+      setSearchParams((current) => {
+        const params = new URLSearchParams(current);
+        if (tab === 'all') {
+          params.delete('tab');
+        } else {
+          params.set('tab', tab);
+        }
+        return params;
+      }, { replace: true });
+    }
     const q = searchParams.get('search') || '';
     setStatusFilter(tab);
     setSearch(q);
@@ -296,7 +311,6 @@ export default function SubmissionsPage({ formId }) {
   const tabCount = (key) => (counts[key] > 0 ? counts[key] : undefined);
   const tabs = [
     { key: 'all', label: __('All', 'subtleforms'), count: tabCount('all') },
-    { key: 'unread', label: __('New', 'subtleforms'), count: tabCount('unread') },
     { key: 'read', label: __('Read', 'subtleforms'), count: tabCount('read') },
     { key: 'spam', label: __('Spam', 'subtleforms'), count: tabCount('spam') },
     { key: 'starred', label: __('Starred', 'subtleforms'), count: tabCount('starred') },
