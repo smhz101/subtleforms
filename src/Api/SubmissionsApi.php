@@ -929,9 +929,6 @@ final class SubmissionsApi {
 	}
 
 	/**
-	 * Get unread submissions count.
-	 */
-		/**
 	 * Unread count filters. A form filter counts only that form.
 	 *
 	 * @param mixed $formId Form id, or empty for every form.
@@ -968,18 +965,22 @@ final class SubmissionsApi {
 		);
 	}
 
-public function get_unread_count( WP_REST_Request $request ): WP_REST_Response {
+	/**
+	 * Get the unread count and the count of every tab (one request).
+	 */
+	public function get_unread_count( WP_REST_Request $request ): WP_REST_Response {
 		$rateLimitResponse = $this->guardRateLimit( $request );
 		if ( $rateLimitResponse ) {
 			return $rateLimitResponse;
 		}
 
 		try {
-			$unreadCount = $this->submissionsRepo->count( self::unreadCountArgs( $request->get_param( 'form_id' ) ) );
+			$counts = $this->submissionsRepo->tabCounts( $request->get_param( 'form_id' ) );
 
 			return ApiResponse::success(
 				array(
-					'count'     => $unreadCount,
+					'count'     => $counts['unread'],
+					'counts'    => $counts,
 					'timestamp' => current_time( 'mysql' ),
 				)
 			);
