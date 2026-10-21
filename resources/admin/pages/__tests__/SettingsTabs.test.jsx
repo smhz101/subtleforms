@@ -61,3 +61,19 @@ test('a stale tab=branding falls back to the first tab', () => {
   expect(container.querySelector('.sf-settings__title').textContent).toBe(ALL_TABS[0].title);
   unmount();
 });
+
+// FF-02, WP2-08: the AI assistant tab was a screen that faked a connection
+// test. It is gone, and so are its words.
+test('Settings has no AI assistant tab and no connection test', () => {
+  expect(ALL_TABS.map((t) => t.name)).not.toContain('ai');
+  const { container, unmount } = render('general');
+  expect(container.textContent).not.toMatch(/AI assistant|Test Connection|API key/i);
+  unmount();
+});
+
+test('a stale tab=ai falls back to the first tab', () => {
+  expect(resolveTab('ai').name).toBe(ALL_TABS[0].name);
+  const { container, unmount } = render('ai');
+  expect(container.querySelector('.sf-settings__title').textContent).toBe(ALL_TABS[0].title);
+  unmount();
+});
