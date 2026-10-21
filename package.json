@@ -31,6 +31,9 @@
   },
   "jest": {
     "testEnvironment": "jsdom",
+    "moduleNameMapper": {
+      "\\.(scss|css)$": "<rootDir>/tests/js/styleMock.js"
+    },
     "testPathIgnorePatterns": [
       "/node_modules/",
       "/tests/e2e/",
