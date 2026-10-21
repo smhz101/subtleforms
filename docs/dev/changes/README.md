@@ -19,4 +19,4 @@ Rules for the text: plain words, no leading bullet, no em dashes, one change per
 
 At release time the release pull request runs `bin/compile-changes.sh <version> --apply`. It prints the readme.txt block, writes `docs/dev/releases/<version>-changes.md` and moves the fragments to `docs/dev/changes/<version>/`. See `docs/dev/RELEASING.md`. Entries that were already released are not migrated.
 
-Check the script with `bash bin/test-compile-changes.sh`.
+Ledger rows follow the same idea: see `docs/dev/ledger-updates/` and `bin/merge-ledger-updates.sh`. Check the script with `bash bin/test-compile-changes.sh`.

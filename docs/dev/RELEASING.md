@@ -8,13 +8,14 @@ The release is one pull request, `release/<version>`, opened after every feature
 2. Branch from `main`: `git switch -c release/<version> origin/main`.
 3. Bump the version: `Version:` and `SUBTLEFORMS_VERSION` in `subtleforms.php`, `version` in `package.json`, `Stable tag:` in `readme.txt`. Check `Tested up to`, `Requires at least` and `Requires PHP`.
 4. Compile the changelog: `bin/compile-changes.sh <version> --apply`. Paste the printed block into `readme.txt` and `changelog.txt` under `== Changelog ==`. If a `= Unreleased =` heading from before this flow is still there, replace the heading with the version heading and keep its lines in the same block. `readme.txt` lists only the latest versions; `changelog.txt` keeps all of them. Add an upgrade notice if users must act.
-5. Regenerate the POT as the last edit, after all strings are final:
+5. Merge the ledger updates: `bin/merge-ledger-updates.sh` (rows from `docs/dev/ledger-updates/*.csv` replace or extend `docs/dev/bug-ledger.csv`, then the files are removed).
+6. Regenerate the POT as the last edit, after all strings are final:
    ```
    WP_CLI=wp bin/make-pot.sh
    ```
    In the agent environment, where WP-CLI runs offline: `WP_CLI="env I18N_OFFLINE=1 php /tmp/claude-0/wp-cli-latest-offline.phar --allow-root" bin/make-pot.sh`. The checkout folder must be named `subtleforms`. Commit `languages/subtleforms.pot` and `languages/subtleforms-js.pot`.
-6. Open the pull request from `release/<version>` into `main`. The `POT freshness check` job fails a stale POT only for this pull request and for pushes to `main`; feature pull requests only get a warning.
-7. When every check is green and `docs/dev/MERGING.md` is satisfied, merge, tag `main` as `v<version>` and follow `RELEASE.md` for WordPress.org.
+7. Open the pull request from `release/<version>` into `main`. The `POT freshness check` job fails a stale POT only for pull requests whose head branch starts with `release/`; every other pull request and pushes to `main` only get a warning (a failing extraction always fails).
+8. When every check is green and `docs/dev/MERGING.md` is satisfied, merge, tag `main` as `v<version>` and follow `RELEASE.md` for WordPress.org.
 
 ## Why the POT is not in every pull request
 
@@ -22,4 +23,4 @@ The POT lists every string with its source line, so any two pull requests that t
 
 ## Why there is no merge driver for the POT
 
-`.gitattributes` marks `languages/*.pot` as `-diff linguist-generated` so it collapses in review. It deliberately has no `merge=union`: a union merge keeps both sides of a conflicting hunk, which produces duplicate `msgid` entries and duplicate header lines, and such a file is invalid. If a POT ever conflicts, take either side and run the command in step 5.
+`.gitattributes` marks `languages/*.pot` as `-diff linguist-generated` so it collapses in review. It deliberately has no `merge=union`: a union merge keeps both sides of a conflicting hunk, which produces duplicate `msgid` entries and duplicate header lines, and such a file is invalid. If a POT ever conflicts, take either side and run the command in step 6.

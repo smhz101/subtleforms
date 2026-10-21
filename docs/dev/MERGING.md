@@ -13,7 +13,7 @@ A pull request is merged only when all of these are true:
    branch or answered with the reason it is not a problem. No comment is left
    unanswered.
 4. No conflict markers anywhere: `git grep -nE '^(<<<<<<<|>>>>>>>)' -- . ':!node_modules'` prints nothing.
-5. The POT files are current, for release pull requests only (`release/*`):
+5. The POT files are current, for release pull requests only (`release/*`, the only place the freshness check fails):
    `bin/make-pot.sh` is the last commit of the release. Feature and fix pull
    requests do not commit POT files and do not edit `readme.txt`, the
    changelog, release notes or version files; they add one changelog fragment
@@ -23,7 +23,8 @@ A pull request is merged only when all of these are true:
    `npm run build:all`, and the Playwright specs touched by the change.
 
 Release order: merge every feature and fix pull request first. Then one
-release pull request bumps the version, runs `bin/compile-changes.sh <version>
+release pull request bumps the version, runs `bin/merge-ledger-updates.sh`
+(bug-ledger.csv rows come from `docs/dev/ledger-updates/*.csv`), runs `bin/compile-changes.sh <version>
 --apply` (readme.txt and changelog.txt block, release notes, fragments moved),
 regenerates the POT as its last step and is merged and tagged last. Commands:
 docs/dev/RELEASING.md.
