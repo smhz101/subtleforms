@@ -1,3 +1,4 @@
+jest.mock('./IconAction.scss', () => ({}));
 jest.mock('./DataTable.scss', () => ({}));
 jest.mock('./TableSkeleton', () => () => null);
 import { cellProps } from './DataTable';

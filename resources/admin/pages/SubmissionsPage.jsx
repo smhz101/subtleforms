@@ -10,7 +10,9 @@ import useRealTimeUpdates from '../hooks/useRealTimeUpdates';
 import { Icon } from '../ui';
 import apiFetch from '@wordpress/api-fetch';
 import { apiPost } from '../utils/api';
-import { useForms } from '../data';
+import { useForms, useSettings } from '../data';
+import { deletesPermanently } from '../utils/deleteBehavior';
+import { tabsFor } from '../utils/tabCounts';
 import lazyWithRetry from '../utils/lazyWithRetry';
 import { noticeDialog } from '../utils/confirmDialog';
 import './SubmissionsPage.scss';
@@ -211,7 +213,7 @@ export default function SubmissionsPage({ formId }) {
 
   // Real-time updates for live badge and table refresh
   const countFormId = selectedFormId !== 'all' ? selectedFormId : (formId || '');
-  const { unreadCount, lastUpdate, isPolling, adjustUnread } = useRealTimeUpdates({
+  const { counts, adjustCounts } = useRealTimeUpdates({
     formId: countFormId || undefined,
     pollInterval: 30000, // Poll every 30 seconds
     enabled: true,
@@ -236,6 +238,31 @@ export default function SubmissionsPage({ formId }) {
   });
 
   const forms = Array.isArray(formsData) ? formsData : [];
+  const { data: siteSettings } = useSettings();
+  const hardDelete = deletesPermanently(siteSettings?.delete_behavior, false);
+
+  // An entry changed in the entry pane: the tab counts move at once, and the
+  // row in the list follows. A row that left the Trash (or went into it)
+  // leaves this list.
+  const entryUpdated = (before, after) => {
+    const next = after && after.status === 'trash' && hardDelete && before?.status !== 'trash' ? null : after;
+    adjustCounts([{ before, after: next }]);
+    const table = submissionsTableRef.current;
+    if (!table || !before) {
+      return;
+    }
+    const wasTrashed = tabsFor(before).includes('trash');
+    const isTrashed = tabsFor(next).includes('trash');
+    if (!next || wasTrashed !== isTrashed) {
+      table.removeEntry?.(before.id);
+    } else {
+      table.patchEntry?.(before.id, {
+        is_read: next.is_read,
+        starred: next.starred,
+        status: next.status,
+      });
+    }
+  };
 
   const handleSearchChange = (value) => {
     setSearch(value);
@@ -266,18 +293,15 @@ export default function SubmissionsPage({ formId }) {
     ? __('Form submissions', 'subtleforms')
     : __('Submissions', 'subtleforms');
 
+  const tabCount = (key) => (counts[key] > 0 ? counts[key] : undefined);
   const tabs = [
-    { key: 'all', label: __('All', 'subtleforms') },
-    {
-      key: 'unread',
-      label: __('New', 'subtleforms'),
-      count: unreadCount > 0 ? unreadCount : undefined,
-    },
-    { key: 'read', label: __('Read', 'subtleforms') },
-    { key: 'spam', label: __('Spam', 'subtleforms') },
-    { key: 'starred', label: __('Starred', 'subtleforms') },
-    { key: 'flagged', label: __('Flagged', 'subtleforms') },
-    { key: 'trash', label: __('Trash', 'subtleforms') },
+    { key: 'all', label: __('All', 'subtleforms'), count: tabCount('all') },
+    { key: 'unread', label: __('New', 'subtleforms'), count: tabCount('unread') },
+    { key: 'read', label: __('Read', 'subtleforms'), count: tabCount('read') },
+    { key: 'spam', label: __('Spam', 'subtleforms'), count: tabCount('spam') },
+    { key: 'starred', label: __('Starred', 'subtleforms'), count: tabCount('starred') },
+    { key: 'flagged', label: __('Flagged', 'subtleforms'), count: tabCount('flagged') },
+    { key: 'trash', label: __('Trash', 'subtleforms'), count: tabCount('trash') },
   ];
 
   const dateRangeOptions = [
@@ -626,7 +650,7 @@ export default function SubmissionsPage({ formId }) {
             density={view.density}
             readingId={split ? openId : null}
             onNeighbors={split ? onNeighbors : null}
-            onMarkedRead={() => adjustUnread?.(-1)}
+            onEntriesChanged={adjustCounts}
             onRowClick={(submission) => {
               if (!split) {
                 const params = new URLSearchParams(searchParams);
@@ -653,6 +677,7 @@ export default function SubmissionsPage({ formId }) {
                   formId={selectedFormId !== 'all' ? parseInt(selectedFormId, 10) : formId}
                   onBack={closePane}
                   onEntryChanged={() => submissionsTableRef.current?.removeEntry?.(openId)}
+                  onEntryUpdated={entryUpdated}
                   onBrowse={{
                     hasPrev: neighbors.hasPrev,
                     hasNext: neighbors.hasNext,

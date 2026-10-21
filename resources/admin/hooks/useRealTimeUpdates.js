@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from '@wordpress/element';
 import { apiClient } from '../data';
+import { applyChanges, normalizeCounts, emptyCounts } from '../utils/tabCounts';
 
 /**
  * Custom hook for real-time updates of submission counts and data
@@ -19,11 +20,17 @@ export function useRealTimeUpdates(options = {}) {
     onSubmissionsUpdate,
   } = options;
 
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [counts, setCounts] = useState(emptyCounts);
+  const unreadCount = counts.unread;
   const [lastUpdate, setLastUpdate] = useState(null);
   const [isPolling, setIsPolling] = useState(false);
   const intervalRef = useRef(null);
   const lastUnreadCountRef = useRef(null);
+  // Counts change in the browser (an entry is trashed) while a poll is on its
+  // way. The poll's answer is older than the change, so it is dropped.
+  const changeVersionRef = useRef(0);
+  const countsRef = useRef(counts);
+  countsRef.current = counts;
 
   // Store callbacks in refs to prevent dependency changes
   const onUnreadCountChangeRef = useRef(onUnreadCountChange);
@@ -35,18 +42,40 @@ export function useRealTimeUpdates(options = {}) {
     onSubmissionsUpdateRef.current = onSubmissionsUpdate;
   }, [onUnreadCountChange, onSubmissionsUpdate]);
 
-  const fetchUnreadCount = useCallback(async () => {
+  // A different form is a different baseline.
+  useEffect(() => {
+    lastUnreadCountRef.current = null;
+  }, [formId]);
+
+  /**
+   * Fetch the count of every tab (one request). `silent` is for a refresh
+   * after a change made in this browser: the list already shows it, so the
+   * list is not loaded again.
+   */
+  const fetchUnreadCount = useCallback(async ({ silent = false } = {}) => {
     if (!enabled) return;
 
     try {
       setIsPolling(true);
 
+      const version = changeVersionRef.current;
       const formQuery = formId ? `?form_id=${encodeURIComponent(formId)}` : '';
       const data = await apiClient.get(`/submissions/unread-count${formQuery}`);
-      const newCount = data.count || 0;
+      if (version !== changeVersionRef.current) {
+        return;
+      }
+      const nextCounts = normalizeCounts(
+        data.counts || { unread: data.count || 0 }
+      );
+      const newCount = nextCounts.unread;
 
-      setUnreadCount(newCount);
+      setCounts(nextCounts);
       setLastUpdate(new Date(data.timestamp || Date.now()));
+
+      if (silent) {
+        lastUnreadCountRef.current = newCount;
+        return;
+      }
 
       // The first answer only sets the baseline: the list has just loaded
       // itself, and a second load could undo a change made meanwhile (2.3.3).
@@ -98,7 +127,7 @@ export function useRealTimeUpdates(options = {}) {
   }, []);
 
   const forceUpdate = useCallback(() => {
-    fetchUnreadCount();
+    fetchUnreadCount({ silent: true });
   }, [fetchUnreadCount]);
 
   // Setup and cleanup polling
@@ -132,13 +161,37 @@ export function useRealTimeUpdates(options = {}) {
     };
   }, [enabled, startPolling, stopPolling]);
 
-  const adjustUnread = useCallback((delta) => {
-    setUnreadCount((count) => Math.max(0, Number(count) + Number(delta)));
-  }, []);
+  /**
+   * Move the tab counts at once for entries changed in this browser, then
+   * ask the server for the true numbers.
+   *
+   * @param {Array<{before: Object|null, after: Object|null}>} changes Entry
+   *   states before and after each change.
+   */
+  const adjustCounts = useCallback(
+    (changes) => {
+      if (!Array.isArray(changes)) {
+        return;
+      }
+      if (changes.length === 0) {
+        // Nothing to estimate (a failed action): ask for the true numbers.
+        fetchUnreadCount({ silent: true });
+        return;
+      }
+      changeVersionRef.current += 1;
+      const next = applyChanges(countsRef.current, changes);
+      countsRef.current = next;
+      lastUnreadCountRef.current = next.unread;
+      setCounts(next);
+      fetchUnreadCount({ silent: true });
+    },
+    [fetchUnreadCount]
+  );
 
   return {
     unreadCount,
-    adjustUnread,
+    counts,
+    adjustCounts,
     lastUpdate,
     isPolling,
     forceUpdate,

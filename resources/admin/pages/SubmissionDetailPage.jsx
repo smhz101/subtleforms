@@ -324,7 +324,7 @@ function FileLinks( { files, submissionId } ) {
   );
 }
 
-export default function SubmissionDetailPage({ submissionId, onBack, formId, embedded = false, onBrowse = null, onEntryChanged = null }) {
+export default function SubmissionDetailPage({ submissionId, onBack, formId, embedded = false, onBrowse = null, onEntryChanged = null, onEntryUpdated = null }) {
   const routerNavigate = useNavigate();
   const [submission, setSubmission] = useState(null);
   const [logs, setLogs] = useState([]);
@@ -397,6 +397,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
     try {
       await apiClient.put(`/submissions/${submission.id}`, { status: newStatus });
       setSubmission({ ...submission, status: newStatus });
+      onEntryUpdated?.(submission, { ...submission, status: newStatus });
     } catch (err) {
       setError(__('Failed to update status', 'subtleforms'));
     } finally {
@@ -412,6 +413,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
     try {
       await apiClient.put(`/submissions/${submission.id}`, { is_read: nextRead });
       setSubmission({ ...submission, is_read: nextRead });
+      onEntryUpdated?.(submission, { ...submission, is_read: nextRead });
     } catch (err) {
       setError(__('Failed to update status', 'subtleforms'));
     } finally {
@@ -427,6 +429,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
     try {
       await apiClient.put(`/submissions/${submission.id}`, { starred: !!next });
       setSubmission({ ...submission, starred: next });
+      onEntryUpdated?.(submission, { ...submission, starred: next });
     } catch (err) {
       setError(__('Failed to update status', 'subtleforms'));
     } finally {
@@ -499,6 +502,10 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
     try {
       await apiClient.delete(`/submissions/${submission.id}${isTrashed ? '?force=1' : ''}`);
       onEntryChanged?.();
+      onEntryUpdated?.(
+        submission,
+        isTrashed ? null : { ...submission, status: 'trash', trashed_from: submission.status }
+      );
       onBack();
     } catch (err) {
       setError(__('Failed to delete submission', 'subtleforms'));
@@ -510,6 +517,7 @@ export default function SubmissionDetailPage({ submissionId, onBack, formId, emb
     try {
       const res = await apiClient.post(`/submissions/${submission.id}/restore`, {});
       setSubmission((prev) => ({ ...prev, status: res?.status || 'completed' }));
+      onEntryUpdated?.(submission, { ...submission, status: res?.status || 'completed' });
     } catch (err) {
       setError(__('The entry could not be restored. Please try again.', 'subtleforms'));
     }

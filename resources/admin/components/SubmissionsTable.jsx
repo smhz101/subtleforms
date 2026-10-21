@@ -30,7 +30,15 @@ import { keepRowsAfterFailedLoad, listQueryKey } from '../utils/failedLoad';
 import { downloadCsv } from '../utils/csvDownload';
 import { entrySender } from '../utils/entrySender';
 import { timeAgo } from '../utils/formatDate';
+import { entryAfter } from '../utils/tabCounts';
+import useElementWidth from '../hooks/useElementWidth';
+import SubmissionRowActions from './SubmissionRowActions';
 import './SubmissionsTable.scss';
+
+/** Narrower than this, the columns do not fit and rows become two lines. */
+const COMPACT_BELOW = 960;
+/** Narrower than this (a phone), the second line gives up its indent so it fits. */
+const NARROW_BELOW = 420;
 
 const restNonce =
   window.subtleformsAdmin && window.subtleformsAdmin.restNonce
@@ -74,10 +82,16 @@ const SubmissionsTable = forwardRef(
       readingId = null,
       density = 'default',
       onNeighbors = null,
-      onMarkedRead = null,
+      onEntriesChanged = null,
     },
     ref
   ) => {
+    // The list switches to compact two-line rows when its own width is too
+    // small for the columns (a narrow pane beside the entry, a phone).
+    const [rootRef, rootWidth] = useElementWidth();
+    const extraColumns = ['browser', 'device'].filter((key) => (visibleColumns || []).includes(key)).length;
+    const compact = rootWidth !== null && rootWidth < COMPACT_BELOW + extraColumns * 90;
+    const narrow = compact && rootWidth < NARROW_BELOW;
     // Chunked prefetch: buffer accumulates rows; sliced client-side per page.
     // Each API call fetches CHUNK_PAGES pages at once.
     const CHUNK_PAGES = 5;
@@ -316,6 +330,13 @@ const SubmissionsTable = forwardRef(
       setTotalItems(totalRef.current);
     };
 
+    // Show a change made elsewhere (the entry pane) in the row.
+    const patchEntry = (id, patch) => {
+      const next = bufferRef.current.map((row) => (String(row.id) === String(id) ? { ...row, ...patch } : row));
+      bufferRef.current = next;
+      setBuffer(next);
+    };
+
     // Expose refresh method via ref for real-time updates.
     // step goes through a ref so the handle does not change on every render.
     useImperativeHandle(
@@ -324,6 +345,7 @@ const SubmissionsTable = forwardRef(
         refreshData: loadFresh,
         step: (id, direction) => stepRef.current(id, direction),
         removeEntry: (id) => removeEntry(id),
+        patchEntry: (id, patch) => patchEntry(id, patch),
       }),
       [loadFresh]
     );
@@ -391,10 +413,11 @@ const SubmissionsTable = forwardRef(
       if (!marked.changed) {
         return;
       }
+      const before = bufferRef.current.find((row) => String(row.id) === String(readingId));
       bufferRef.current = marked.rows;
       setBuffer(marked.rows);
-      onMarkedRead?.(readingId);
-    }, [readingId, onMarkedRead]);
+      onEntriesChanged?.([{ before, after: entryAfter('read', before) }]);
+    }, [readingId]);
 
     const inTrash = statusFilter === 'trash';
 
@@ -412,6 +435,7 @@ const SubmissionsTable = forwardRef(
 
     // Deleting moves entries to the Trash; the snackbar offers Undo (2.3.1).
     const trashEntries = async (ids) => {
+      const rows = bufferRef.current.filter((row) => ids.includes(row.id));
       setBuffer((prev) => prev.filter((s) => !ids.includes(s.id)));
       setSelectedSubmissions([]);
       try {
@@ -429,7 +453,8 @@ const SubmissionsTable = forwardRef(
                 {
                   label: __('Undo', 'subtleforms'),
                   onClick: async () => {
-                    await runBulk(ids, 'untrash');
+                    const trashed = rows.map((row) => ({ ...row, status: 'trash', trashed_from: row.status }));
+                    await runBulk(ids, 'untrash', trashed);
                     loadFresh();
                   },
                 },
@@ -446,25 +471,35 @@ const SubmissionsTable = forwardRef(
 
     const handleDelete = async (submissionId) => {
       setDeleteModal(null);
+      const gone = bufferRef.current.find((row) => row.id === submissionId);
       setBuffer((prev) => prev.filter((s) => s.id !== submissionId));
 
       try {
         await apiClient.delete(`/submissions/${submissionId}?force=1`);
+        onEntriesChanged?.(gone ? [{ before: gone, after: null }] : []);
         createSuccessNotice(__('Entry deleted permanently', 'subtleforms'), {
           type: 'snackbar',
         });
       } catch (err) {
         loadFresh(); // Revert on failure
+        onEntriesChanged?.([]);
         createErrorNotice(__('Failed to delete submission', 'subtleforms'), {
           type: 'snackbar',
         });
       }
     };
 
-    // One request for any number of entries (2.3.0).
-    const runBulk = async (ids, action) => {
+    // One request for any number of entries (2.3.0). Resolves with how many
+    // were changed. The tab counts move for exactly those entries.
+    const runBulk = async (ids, action, rows = bufferRef.current) => {
       const res = await apiClient.post('/submissions/bulk', { ids, action });
-      return Array.isArray(res?.updated) ? res.updated.length : 0;
+      const updated = Array.isArray(res?.updated) ? res.updated : [];
+      const changes = updated
+        .map((id) => rows.find((row) => String(row.id) === String(id)))
+        .filter(Boolean)
+        .map((before) => ({ before, after: entryAfter(action, before) }));
+      onEntriesChanged?.(changes);
+      return updated.length;
     };
 
     const notifyBulk = (done, total, verb) => {
@@ -479,6 +514,7 @@ const SubmissionsTable = forwardRef(
           { type: 'snackbar' }
         );
       } else {
+        onEntriesChanged?.([]);
         createErrorNotice(
           sprintf(
             /* translators: %1$d: number done, %2$d: total requested */
@@ -616,6 +652,67 @@ const SubmissionsTable = forwardRef(
     const summarize = (submission) => entrySender(submission.payload);
 
 
+    // The row's action icons: view, star, flag, trash.
+    const renderActions = (submission) => (
+      <SubmissionRowActions
+        submission={submission}
+        hardDelete={hardDelete}
+        onView={handleRowClick}
+        onMark={(id, action) => handleBulkMarkStatus([id], action)}
+        onRestore={(id) => restoreEntries([id])}
+        onTrash={(id) => trashEntries([id])}
+        onDelete={(id) => setDeleteModal(id)}
+      />
+    );
+
+    // Two lines for a narrow pane. Line 1: initial, form title, entry number.
+    // Line 2: result, received time, action icons, under the title.
+    const renderCompactRow = (submission) => {
+      const isUnread = parseInt(submission.is_read, 10) === 0;
+      const isStarred = parseInt(submission.starred, 10) === 1;
+      const { name, email } = summarize(submission);
+      const sender = name || email || __('Anonymous', 'subtleforms');
+      const formTitle = submission.form_title || `#${submission.form_id}`;
+      const showsForm = showFormColumn && (!Array.isArray(visibleColumns) || visibleColumns.includes('form_title'));
+      const title = showsForm ? formTitle : sender;
+      const config = submissionStatus(submission.status);
+      return (
+        <div className={clsx('sf-sub-compact', { 'is-unread': isUnread })}>
+          <div className='sf-sub-compact__line'>
+            <span className='sf-sub-entry__dot' aria-hidden='true' />
+            <span className='sf-sub-entry__avatar' aria-hidden='true' title={sender}>
+              {sender.trim().charAt(0).toUpperCase()}
+            </span>
+            <span className='sf-sub-compact__text'>
+              <span className='sf-sub-compact__title' title={title}>
+                {title}
+                {isUnread && <span className='screen-reader-text'> {__('(unread)', 'subtleforms')}</span>}
+              </span>
+              {showsForm && (name || email) && (
+                <span className='sf-sub-compact__sender' title={sender}>
+                  {sender}
+                </span>
+              )}
+            </span>
+            {isStarred && (
+              <span className='sf-sub-compact__star' title={__('Starred', 'subtleforms')}>
+                <Icon.Star size={14} aria-hidden='true' />
+                <span className='screen-reader-text'>{__('Starred', 'subtleforms')}</span>
+              </span>
+            )}
+            <span className='sf-sub-entry__id'>#{submission.id}</span>
+          </div>
+          <div className='sf-sub-compact__meta'>
+            <span className={clsx('sf-pill', 'sf-pill--dot', config.cls)}>{config.label}</span>
+            <time className='sf-sub-time' title={formatAbsDate(submission.created_at)} dateTime={submission.created_at}>
+              {timeAgo(submission.created_at)}
+            </time>
+            {renderActions(submission)}
+          </div>
+        </div>
+      );
+    };
+
     // Define table columns
     const allColumns = [
       {
@@ -702,106 +799,7 @@ const SubmissionsTable = forwardRef(
       {
         key: 'actions',
         title: null,
-        render: (_, submission) => (
-          <div className='subtleforms-row-actions sf-submissions-table__actions'>
-            <Button
-              size='compact'
-              icon={<Icon.Eye size={16} />}
-              label={__('Open', 'subtleforms')}
-              showTooltip
-              onClick={(e) => {
-                e.stopPropagation();
-                handleRowClick(submission);
-              }}
-            />
-            <Button
-              size='compact'
-              icon={<Icon.Star size={16} fill={parseInt(submission.starred, 10) === 1 ? 'currentColor' : 'none'} />}
-              label={
-                parseInt(submission.starred, 10) === 1
-                  ? __('Remove star', 'subtleforms')
-                  : __('Star', 'subtleforms')
-              }
-              showTooltip
-              isPressed={parseInt(submission.starred, 10) === 1}
-              className={clsx(
-                'sf-submissions-table__star-btn',
-                parseInt(submission.starred, 10) === 1 && 'sf-submissions-table__star-btn--active'
-              )}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleBulkMarkStatus(
-                  [submission.id],
-                  parseInt(submission.starred, 10) === 1 ? 'unstar' : 'star'
-                );
-              }}
-            />
-            <Button
-              size='compact'
-              icon={<Icon.AlertCircle size={16} />}
-              label={
-                submission.status === 'flagged'
-                  ? __('Remove flag', 'subtleforms')
-                  : __('Flag for follow-up', 'subtleforms')
-              }
-              showTooltip
-              isPressed={submission.status === 'flagged'}
-              className={clsx(
-                'sf-submissions-table__flag-btn',
-                submission.status === 'flagged' && 'sf-submissions-table__flag-btn--active'
-              )}
-              onClick={(e) => {
-                e.stopPropagation();
-                handleBulkMarkStatus(
-                  [submission.id],
-                  submission.status === 'flagged' ? 'restore' : 'flagged'
-                );
-              }}
-            />
-            {submission.status === 'trash' ? (
-              <>
-                <Button
-                  size='compact'
-                  icon={<Icon.Undo size={16} />}
-                  label={__('Restore', 'subtleforms')}
-                  showTooltip
-                  className='sf-submissions-table__restore-btn'
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    restoreEntries([submission.id]);
-                  }}
-                />
-                <Button
-                  size='compact'
-                  isDestructive
-                  icon={<Icon.Trash size={16} />}
-                  label={__('Delete permanently', 'subtleforms')}
-                  showTooltip
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setDeleteModal(submission.id);
-                  }}
-                />
-              </>
-            ) : (
-              <Button
-                size='compact'
-                isDestructive
-                icon={<Icon.Trash size={16} />}
-                label={hardDelete ? __('Delete permanently', 'subtleforms') : __('Move to Trash', 'subtleforms')}
-                showTooltip
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (hardDelete) {
-                    setDeleteModal(submission.id);
-                  } else {
-                    trashEntries([submission.id]);
-                  }
-                }}
-              />
-            )}
-          </div>
-        ),
+        render: (_, submission) => renderActions(submission),
       },
     ];
 
@@ -835,9 +833,11 @@ const SubmissionsTable = forwardRef(
     );
 
     return (
-      <div className={`sf-submissions-table${
-        density === 'comfortable' || density === 'compact' ? ` sf-submissions-table--${density}` : ''
-      }`}>
+      <div
+        ref={rootRef}
+        className={`sf-submissions-table${
+          density === 'comfortable' || density === 'compact' ? ` sf-submissions-table--${density}` : ''
+        }${compact ? ' is-compact' : ''}${narrow ? ' is-narrow' : ''}`}>
         {error && buffer.length > 0 && (
           <Notice status='error' isDismissible={false}>
             {error}{' '}
@@ -875,6 +875,8 @@ const SubmissionsTable = forwardRef(
           }
           onRowClick={handleRowClick}
           rowClassName={getRowClassName}
+          compact={compact}
+          renderCompactRow={renderCompactRow}
           selectable={true}
           selectedItems={selectedSubmissions}
           onSelectionChange={setSelectedSubmissions}
@@ -882,48 +884,68 @@ const SubmissionsTable = forwardRef(
             inTrash
               ? [
                   {
+                    key: 'restore',
                     label: __('Restore', 'subtleforms'),
+                    icon: <Icon.Undo size={16} />,
                     onClick: restoreEntries,
                   },
                   {
+                    key: 'delete',
                     label: __('Delete permanently', 'subtleforms'),
+                    icon: <Icon.Trash size={16} />,
                     onClick: handleBulkDelete,
                     isDestructive: true,
                   },
                 ]
               : [
                   {
-                    label: __('Mark as Read', 'subtleforms'),
+                    key: 'read',
+                    label: __('Mark read', 'subtleforms'),
+                    icon: <Icon.MailOpen size={16} />,
                     onClick: (ids) => handleBulkMarkStatus(ids, 'read'),
                   },
                   {
-                    label: __('Mark as Unread', 'subtleforms'),
+                    key: 'unread',
+                    label: __('Mark unread', 'subtleforms'),
+                    icon: <Icon.Mail size={16} />,
                     onClick: (ids) => handleBulkMarkStatus(ids, 'unread'),
                   },
                   {
+                    key: 'star',
                     label: __('Star', 'subtleforms'),
+                    icon: <Icon.Star size={16} />,
                     onClick: (ids) => handleBulkMarkStatus(ids, 'star'),
                   },
                   {
+                    key: 'unstar',
                     label: __('Remove star', 'subtleforms'),
+                    icon: <Icon.StarOff size={16} />,
                     onClick: (ids) => handleBulkMarkStatus(ids, 'unstar'),
                   },
                   {
-                    label: __('Export selected (CSV)', 'subtleforms'),
-                    onClick: handleExportSelected,
-                  },
-                  {
-                    label: __('Mark as Spam', 'subtleforms'),
+                    key: 'spam',
+                    label: __('Mark as spam', 'subtleforms'),
+                    icon: <Icon.ShieldAlert size={16} />,
                     onClick: (ids) => handleBulkMarkStatus(ids, 'spam'),
                   },
                   {
-                    label: __('Mark as Flagged', 'subtleforms'),
-                    onClick: (ids) => handleBulkMarkStatus(ids, 'flagged'),
+                    key: 'export',
+                    label: __('Export selected (CSV)', 'subtleforms'),
+                    icon: <Icon.Download size={16} />,
+                    onClick: handleExportSelected,
                   },
                   {
+                    key: 'trash',
                     label: hardDelete ? __('Delete permanently', 'subtleforms') : __('Move to Trash', 'subtleforms'),
+                    icon: <Icon.Trash size={16} />,
                     onClick: hardDelete ? handleBulkDelete : trashEntries,
                     isDestructive: true,
+                  },
+                  {
+                    key: 'flagged',
+                    label: __('Mark as flagged', 'subtleforms'),
+                    inMenu: true,
+                    onClick: (ids) => handleBulkMarkStatus(ids, 'flagged'),
                   },
                 ]
           }

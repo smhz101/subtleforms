@@ -8,6 +8,16 @@
 	flex-direction: column;
 	min-height: 0;
 
+	// Amber, flat. At least 3.5:1 on every row background, 4.4:1 on white.
+	--sf-star: #a86a00;
+
+	min-width: 0;
+	max-width: 100%;
+	// Contain off-screen text (screen reader labels) without making the
+	// table a scroll container, so the sticky bars keep working.
+	position: relative;
+	overflow-x: clip;
+
 	&__row--unread {
 		background: var(--sf-bg-surface);
 	}
@@ -17,42 +27,54 @@
 		color: var(--sf-text-muted);
 	}
 
+	// Row action icons: view, star, flag, trash. Hidden until the row is
+	// hovered or focused (always shown on touch); a starred entry keeps its
+	// star in view in the table.
 	&__actions {
 		display: flex;
 		align-items: center;
 		justify-content: flex-end;
 		gap: 2px;
+		opacity: 1;
+	}
 
-		.components-button {
-			width: 32px;
-			min-width: 32px;
-			height: 32px;
-			padding: 0;
-			justify-content: center;
-			color: var(--sf-text-secondary);
+	.sf-data-table .subtleforms-row-actions {
+		opacity: 1;
+	}
 
-			svg {
-				fill: none;
-			}
+	.subtleforms-row-actions .sf-icon-action {
+		opacity: 0;
+	}
 
-			&:hover:not(:disabled) {
-				background: var(--sf-bg-muted);
-				color: var(--sf-text);
-			}
+	&:not(.is-compact) .subtleforms-row-actions .sf-icon-action.is-starred {
+		opacity: 1;
+	}
 
-			&.is-destructive {
-				box-shadow: none;
-			}
+	tr:hover .subtleforms-row-actions .sf-icon-action,
+	tr:focus-within .subtleforms-row-actions .sf-icon-action,
+	tr.sf-data-table__row--selected .subtleforms-row-actions .sf-icon-action,
+	.sf-data-table__row--compact:hover .subtleforms-row-actions .sf-icon-action,
+	.sf-data-table__row--compact:focus-within .subtleforms-row-actions .sf-icon-action,
+	.sf-data-table__row--compact.sf-data-table__row--selected .subtleforms-row-actions .sf-icon-action {
+		opacity: 1;
+	}
 
-			&.is-destructive:hover:not(:disabled) {
-				color: var(--sf-danger);
-			}
+	@media (hover: none) {
+		.subtleforms-row-actions .sf-icon-action {
+			opacity: 1;
 		}
 	}
 
-	&__flag-btn--active.components-button,
-	&__flag-btn--active.components-button:hover:not(:disabled) {
-		background: var(--sf-warning-bg);
+	// Starred: a filled amber star, nothing else changes. Flagged: amber icon.
+	.sf-icon-action.is-starred {
+		color: var(--sf-star);
+
+		svg {
+			fill: currentColor;
+		}
+	}
+
+	.sf-icon-action.is-flagged {
 		color: var(--sf-warning);
 	}
 
@@ -203,9 +225,21 @@
 	}
 }
 
+// Row states, each its own look: hover is a light grey, a ticked row a brand
+// tint, the open entry a stronger tint with a brand bar. Starred rows have no
+// background at all, only the star.
+.sf-submissions-table tr.sf-data-table__row--selected,
+.sf-submissions-table tr.sf-data-table__row--selected:hover,
+.sf-submissions-table .sf-data-table__row--compact.sf-data-table__row--selected,
+.sf-submissions-table .sf-data-table__row--compact.sf-data-table__row--selected:hover {
+	background: var(--sf-primary-100);
+}
+
 // The open entry, distinct from a checkbox selection.
 .sf-submissions-table tr.sf-submissions-table__row--reading,
-.sf-submissions-table tr.sf-submissions-table__row--reading:hover {
+.sf-submissions-table tr.sf-submissions-table__row--reading:hover,
+.sf-submissions-table .sf-data-table__row--compact.sf-submissions-table__row--reading,
+.sf-submissions-table .sf-data-table__row--compact.sf-submissions-table__row--reading:hover {
 	background: var(--sf-bg-selected);
 	box-shadow: inset 3px 0 0 var(--sf-brand);
 }
@@ -266,10 +300,145 @@
 	}
 }
 
-// Inside the split inbox the list is its own scroller, so the header sticks to it.
+// Compact two-line row (a narrow pane or a phone).
+.sf-sub-compact {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+
+	&__line {
+		position: relative;
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		min-width: 0;
+
+		.sf-sub-entry__dot {
+			position: absolute;
+			top: -2px;
+			inset-inline-start: 18px;
+			width: 8px;
+			height: 8px;
+			margin: 0;
+		}
+
+		.sf-sub-entry__avatar {
+			width: 24px;
+			height: 24px;
+			font-size: 11px;
+		}
+
+		.sf-sub-entry__id {
+			flex: 0 0 auto;
+		}
+	}
+
+	&.is-unread &__line .sf-sub-entry__dot {
+		background: var(--sf-brand);
+		box-shadow: 0 0 0 2px var(--sf-bg-page);
+	}
+
+	&.is-unread &__line .sf-sub-entry__avatar {
+		background: var(--sf-primary-100);
+		color: var(--sf-primary-700);
+	}
+
+	// The form title, then who sent it in a quieter colour. Each truncates
+	// with an ellipsis; the title keeps at least half the room.
+	&__text {
+		display: flex;
+		flex: 1 1 auto;
+		align-items: baseline;
+		gap: 6px;
+		min-width: 0;
+	}
+
+	&__title {
+		flex: 0 1 auto;
+		min-width: 50%;
+		overflow: hidden;
+		font-weight: var(--sf-weight-medium);
+		color: var(--sf-text);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&__sender {
+		flex: 1 1 0;
+		min-width: 0;
+		overflow: hidden;
+		color: var(--sf-text-muted);
+		font-size: var(--sf-text-xs);
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	&.is-unread &__title {
+		font-weight: var(--sf-weight-semibold);
+	}
+
+	&__star {
+		display: inline-flex;
+		flex: 0 0 auto;
+		color: var(--sf-star);
+
+		svg {
+			fill: currentColor;
+		}
+	}
+
+	// Under the title: result, time, then the action icons, aligned left. It
+	// wraps when the pane is very narrow.
+	&__meta {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: 2px 8px;
+		min-width: 0;
+		padding-inline-start: 32px;
+
+		.sf-pill {
+			flex: 0 0 auto;
+			max-width: 100%;
+		}
+
+		.sf-sub-time {
+			flex: 0 0 auto;
+			font-size: var(--sf-text-xs);
+		}
+
+		.subtleforms-row-actions {
+			justify-content: flex-start;
+			gap: 0;
+			margin-inline-start: -4px;
+		}
+	}
+}
+
+// On a phone the second line starts at the left edge of the row text, so the
+// result, the time and the four icons still fit on one line.
+.sf-submissions-table.is-narrow {
+	--sf-gutter: 14px;
+}
+
+.sf-submissions-table.is-narrow .sf-sub-compact__meta {
+	padding-inline-start: 0;
+	gap: 2px 6px;
+}
+
+// Inside the split inbox the list is its own scroller, so the header sticks to
+// it, and the page controls stay at its bottom while the rows scroll.
 .sf-inbox__list {
 	.sf-data-table__header th,
 	.sf-data-table__bulk-actions {
 		top: 0;
+	}
+
+	.sf-data-table__pagination {
+		position: sticky;
+		bottom: 0;
+		z-index: 11;
+		border-top: 1px solid var(--sf-border);
 	}
 }

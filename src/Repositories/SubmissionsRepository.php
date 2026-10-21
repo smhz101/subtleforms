@@ -629,6 +629,55 @@ final class SubmissionsRepository {
 	}
 
 	/**
+	 * Entry counts for every tab of the Submissions screen, in one query.
+	 *
+	 * Each number is what that tab lists: entries in the Trash only count
+	 * under Trash and are left out of every other tab. Builder preview entries count nowhere.
+	 *
+	 * @param int|null $formId Count one form, or every form when empty.
+	 * @return array{all: int, unread: int, read: int, spam: int, starred: int, flagged: int, trash: int}
+	 */
+	public function tabCounts( $formId = null ): array {
+		global $wpdb;
+
+		$live   = self::LISTED;
+		$where  = '';
+		$params = array();
+		$formId = (int) $formId;
+		if ( $formId > 0 ) {
+			$where    = 'WHERE form_id = %d';
+			$params[] = $formId;
+		}
+
+		$sql = "SELECT
+			COALESCE( SUM( CASE WHEN {$live} THEN 1 ELSE 0 END ), 0 ) AS all_count,
+			COALESCE( SUM( CASE WHEN {$live} AND is_read = 0 THEN 1 ELSE 0 END ), 0 ) AS unread_count,
+			COALESCE( SUM( CASE WHEN {$live} AND is_read = 1 THEN 1 ELSE 0 END ), 0 ) AS read_count,
+			COALESCE( SUM( CASE WHEN status = 'spam' THEN 1 ELSE 0 END ), 0 ) AS spam_count,
+			COALESCE( SUM( CASE WHEN {$live} AND starred = 1 THEN 1 ELSE 0 END ), 0 ) AS starred_count,
+			COALESCE( SUM( CASE WHEN status = 'flagged' THEN 1 ELSE 0 END ), 0 ) AS flagged_count,
+			COALESCE( SUM( CASE WHEN status = 'trash' THEN 1 ELSE 0 END ), 0 ) AS trash_count
+			FROM {$this->table} {$where}";
+
+		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- $sql is built from $wpdb->prefix table name and constants; the form id is prepared.
+		$row = $params
+			? $wpdb->get_row( $wpdb->prepare( $sql, ...$params ), ARRAY_A )
+			: $wpdb->get_row( $sql, ARRAY_A );
+		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.NotPrepared, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+
+		$row = is_array( $row ) ? $row : array();
+		return array(
+			'all'     => (int) ( $row['all_count'] ?? 0 ),
+			'unread'  => (int) ( $row['unread_count'] ?? 0 ),
+			'read'    => (int) ( $row['read_count'] ?? 0 ),
+			'spam'    => (int) ( $row['spam_count'] ?? 0 ),
+			'starred' => (int) ( $row['starred_count'] ?? 0 ),
+			'flagged' => (int) ( $row['flagged_count'] ?? 0 ),
+			'trash'   => (int) ( $row['trash_count'] ?? 0 ),
+		);
+	}
+
+	/**
 	 * Starred filter and an explicit list of IDs (2.3.0).
 	 *
 	 * @param array $where  WHERE fragments, appended by reference.

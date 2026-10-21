@@ -12,28 +12,65 @@
 	min-height: 0;
 
 	// ── Bulk actions ─────────────────────────────────────────────────────────
+	// A slim bar: "N selected" and ghost icon buttons. It wraps rather than
+	// scrolling, at any width.
 	&__bulk-actions {
 		position: sticky;
 		top: 56px;
 		z-index: 12;
 		display: flex;
+		flex-wrap: wrap;
 		align-items: center;
-		gap: 12px;
-		min-height: 48px;
-		padding: 8px var(--sf-gutter);
-		border-bottom: 1px solid var(--sf-primary-200);
-		background: var(--sf-primary-50);
+		gap: 4px 8px;
+		min-width: 0;
+		min-height: 44px;
+		padding: 6px var(--sf-gutter);
+		border-bottom: 1px solid var(--sf-border);
+		background: var(--sf-bg-page);
 		font-size: var(--sf-text-sm);
 
 		&-selected {
 			font-weight: var(--sf-weight-semibold);
-			color: var(--sf-primary-800);
+			color: var(--sf-text);
+			white-space: nowrap;
 		}
 
 		&-buttons {
 			display: flex;
+			flex-wrap: wrap;
 			align-items: center;
-			gap: 8px;
+			gap: 2px;
+			min-width: 0;
+		}
+
+		.sf-data-table__bulk-more .components-button {
+			width: 28px;
+			min-width: 28px;
+			height: 28px;
+			padding: 0;
+			justify-content: center;
+			color: var(--sf-text-secondary);
+
+			svg {
+				fill: none;
+			}
+		}
+
+		.sf-data-table__bulk-clear.components-button {
+			height: 28px;
+			margin-inline-start: 6px;
+			padding: 0 4px;
+			color: var(--sf-text-muted);
+			text-decoration: none;
+
+			&:hover {
+				color: var(--sf-text);
+				text-decoration: underline;
+			}
+		}
+
+		.sf-data-table__compact-all {
+			margin: 0;
 		}
 	}
 
@@ -160,12 +197,21 @@
 
 	tr:hover .subtleforms-row-actions,
 	tr:focus-within .subtleforms-row-actions,
-	tr.sf-data-table__row--selected .subtleforms-row-actions {
+	tr.sf-data-table__row--selected .subtleforms-row-actions,
+	.sf-data-table__row--compact:hover .subtleforms-row-actions,
+	.sf-data-table__row--compact:focus-within .subtleforms-row-actions,
+	.sf-data-table__row--compact.sf-data-table__row--selected .subtleforms-row-actions {
 		opacity: 1;
 	}
 
+	.sf-data-table__row--compact .subtleforms-row-actions {
+		opacity: 0;
+		transition: opacity var(--sf-transition-fast);
+	}
+
 	@media (hover: none) {
-		tr .subtleforms-row-actions {
+		tr .subtleforms-row-actions,
+		.sf-data-table__row--compact .subtleforms-row-actions {
 			opacity: 1;
 		}
 	}
@@ -317,6 +363,148 @@
 @keyframes spin {
 	to {
 		transform: rotate(360deg);
+	}
+}
+
+// ── Compact list (a narrow pane) ─────────────────────────────────────────────
+// Rows are two-line items: nothing is wider than the pane, so the pane never
+// scrolls sideways.
+.sf-data-table--compact {
+	min-width: 0;
+	max-width: 100%;
+
+	.sf-data-table__compact-head {
+		position: sticky;
+		top: 0;
+		z-index: 11;
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 8px;
+		min-width: 0;
+		min-height: 40px;
+		padding: 0 var(--sf-gutter);
+		border-bottom: 1px solid var(--sf-border);
+		background: var(--sf-bg-page);
+
+		.components-base-control__field {
+			margin: 0;
+		}
+	}
+
+	.sf-data-table__compact-sort {
+		display: flex;
+		align-items: center;
+		gap: 2px;
+		margin-inline-start: auto;
+		min-width: 0;
+	}
+
+	.sf-data-table__compact-list {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+		min-width: 0;
+	}
+
+	.sf-data-table__row--compact {
+		position: relative;
+		display: flex;
+		align-items: flex-start;
+		gap: 8px;
+		min-width: 0;
+		margin: 0;
+		padding: 10px var(--sf-gutter) 10px calc(var(--sf-gutter) - 4px);
+		border-bottom: 1px solid var(--sf-border-subtle);
+		background: var(--sf-bg-page);
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text);
+		transition: background-color var(--sf-transition-fast);
+
+		&.sf-data-table__row--clickable {
+			cursor: pointer;
+		}
+
+		&:hover {
+			background: var(--sf-bg-hover);
+		}
+	}
+
+	.sf-data-table__compact-check {
+		flex: 0 0 auto;
+		display: flex;
+		align-items: center;
+		height: 24px;
+
+		.components-base-control,
+		.components-base-control__field,
+		.components-checkbox-control,
+		.components-checkbox-control__input-container {
+			margin: 0;
+		}
+
+		.components-checkbox-control__input-container {
+			display: block;
+		}
+	}
+
+	.sf-data-table__compact-body {
+		flex: 1 1 auto;
+		min-width: 0;
+	}
+}
+
+// The footer sits at the bottom of the list's own scroller. Rows scroll
+// above it. In a list that does not scroll it is simply the last line.
+.sf-data-table__pagination--compact {
+	position: sticky;
+	bottom: 0;
+	z-index: 11;
+	flex-wrap: nowrap;
+	gap: 8px;
+	min-width: 0;
+	padding: 6px var(--sf-gutter);
+	border-top: 1px solid var(--sf-border);
+	background: var(--sf-bg-page);
+
+	.sf-data-table__pagination-pager {
+		display: flex;
+		flex: 1 1 auto;
+		align-items: center;
+		gap: 2px;
+		min-width: 0;
+	}
+
+	.sf-data-table__pagination-info-text {
+		min-width: 0;
+		padding: 0 4px;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+}
+
+.sf-data-table .sf-data-table__per-page {
+	flex: 0 0 auto;
+	box-sizing: border-box;
+	width: auto;
+	min-width: 0;
+	max-width: 110px;
+	height: 28px;
+	min-height: 28px;
+	margin: 0;
+	padding: 0 24px 0 8px;
+	border: 1px solid var(--sf-border);
+	border-radius: var(--sf-radius-sm);
+	background-color: var(--sf-bg-page);
+	color: var(--sf-text);
+	font-size: var(--sf-text-sm);
+	line-height: 26px;
+
+	&:focus {
+		border-color: var(--sf-brand);
+		box-shadow: 0 0 0 1px var(--sf-brand);
+		outline: none;
 	}
 }
 

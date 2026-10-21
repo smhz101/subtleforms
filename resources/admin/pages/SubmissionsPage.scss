@@ -239,10 +239,13 @@
 		min-height: 0;
 	}
 
+	// The list scrolls up and down inside its pane, never sideways: its rows
+	// are sized to the pane (compact rows when narrow).
 	&--right &__list,
 	&--below &__list {
 		flex: 1 1 auto;
-		overflow: auto;
+		overflow-x: hidden;
+		overflow-y: auto;
 	}
 
 	&__pane {

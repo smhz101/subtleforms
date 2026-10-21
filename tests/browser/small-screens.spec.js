@@ -136,10 +136,8 @@ test('UX2-18: a wide inbox keeps the list beside the entry', async ({ page }) =>
   expect(m.pane).toBeLessThan(m.inbox - 300);
 });
 
-for (const screen of [
-  { slug: 'subtleforms-forms', name: 'All Forms' },
-  { slug: 'subtleforms-submissions', name: 'Submissions' },
-]) {
+// Submissions has its own two-line rows on a phone (see submissions-list.spec.js).
+for (const screen of [{ slug: 'subtleforms-forms', name: 'All Forms' }]) {
   test(`UX2-19: ${screen.name} at 390 shows cards without sideways scrolling`, async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
     await loginPage(page);
@@ -178,6 +176,36 @@ for (const screen of [
     await expect(sortable).not.toHaveAttribute('aria-sort', before || 'none');
   });
 }
+
+test('UX2-19: Submissions at 390 shows two-line rows without sideways scrolling', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await loginPage(page);
+  await page.goto('/wp-admin/admin.php?page=subtleforms-submissions');
+  await page.waitForSelector('.sf-data-table__row--compact');
+  const m = await page.evaluate(() => {
+    const list = document.querySelector('.sf-inbox__list');
+    const row = document.querySelector('.sf-data-table__row--compact');
+    const box = row.querySelector('input[type="checkbox"]').getBoundingClientRect();
+    const tabs = [...document.querySelectorAll('.sf-tab-bar__tab')].map((t) => Math.round(t.getBoundingClientRect().top));
+    return {
+      scroll: list.scrollWidth - list.clientWidth,
+      doc: document.documentElement.scrollWidth - window.innerWidth,
+      box: [box.width, box.height],
+      title: !!row.querySelector('.sf-sub-compact__title'),
+      meta: !!row.querySelector('.sf-sub-compact__meta .sf-sub-time'),
+      tabRows: new Set(tabs).size,
+    };
+  });
+  expect(m.scroll).toBeLessThanOrEqual(1);
+  expect(m.doc).toBeLessThanOrEqual(1);
+  expect(m.box[0]).toBeLessThanOrEqual(26);
+  expect(m.box[1]).toBeLessThanOrEqual(26);
+  expect(m.title).toBe(true);
+  expect(m.meta).toBe(true);
+  expect(m.tabRows).toBe(1);
+  // Sorting is a select and a direction button above the rows.
+  await expect(page.getByLabel('Sort by')).toBeVisible();
+});
 
 test('UX2-19: a desktop window keeps the table', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 });

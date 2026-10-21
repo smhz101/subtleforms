@@ -1,10 +1,11 @@
 import { memo, useRef } from '@wordpress/element';
-import { Button, SelectControl, CheckboxControl } from '@wordpress/components';
+import { Button, SelectControl, CheckboxControl, DropdownMenu, MenuGroup, MenuItem } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import usePhoneLayout from '../hooks/usePhoneLayout';
 import Icon from '../ui/Icon';
 import TableSkeleton from './TableSkeleton';
+import IconAction from './IconAction';
 import './DataTable.scss';
 
 /**
@@ -40,9 +41,144 @@ import './DataTable.scss';
  * @param {boolean} props.selectable - Enable row selection
  * @param {Array} props.selectedItems - Array of selected item IDs
  * @param {Function} props.onSelectionChange - Callback when selection changes (newSelectedItems)
- * @param {Array} props.bulkActions - Array of bulk actions [{ label, onClick, isDestructive }]
+ * @param {Array} props.bulkActions - Array of bulk actions [{ label, onClick, isDestructive, icon, inMenu }].
+ *   An action with an icon is an icon-only button with a tooltip; `inMenu` moves it to the More menu.
  * @param {Function|null} props.rowClassName - Optional function to get additional classes for row (row)
+ * @param {boolean} props.compact - Draw each row as a compact two-line item (renderCompactRow) instead of a
+ *   table row, for a narrow list pane. The footer is compact too.
+ * @param {Function|null} props.renderCompactRow - Content of a compact row (row)
  */
+
+/**
+ * Text of the compact footer: "1 to 20 of 739".
+ *
+ * @param {number} page Current page.
+ * @param {number} perPage Rows per page.
+ * @param {number} total Total rows.
+ * @return {string} Range text.
+ */
+export function rangeText(page, perPage, total) {
+  return sprintf(
+    /* translators: %1$d: first item number, %2$d: last item number, %3$d: total items */
+    __('%1$d to %2$d of %3$d', 'subtleforms'),
+    (page - 1) * perPage + 1,
+    Math.min(page * perPage, total),
+    total
+  );
+}
+
+const PER_PAGE_OPTIONS = [10, 20, 50, 100];
+
+/**
+ * Bulk action bar: how many are selected, then the actions. Actions with an
+ * icon are icon-only ghost buttons with tooltips; the rest sit in a More menu.
+ * The bar wraps instead of scrolling.
+ */
+function BulkBar({ count, actions, selectedItems, onClear, children }) {
+  const inline = actions.filter((action) => !action.inMenu);
+  const menu = actions.filter((action) => action.inMenu);
+  return (
+    <div className='sf-data-table__bulk-actions' role='toolbar' aria-label={__('Bulk actions', 'subtleforms')}>
+      {children}
+      <span className='sf-data-table__bulk-actions-selected'>
+        {sprintf(
+          /* translators: %1$d: number of selected items */
+          _n('%1$d selected', '%1$d selected', count, 'subtleforms'),
+          count
+        )}
+      </span>
+      <div className='sf-data-table__bulk-actions-buttons'>
+        {inline.map((action, index) =>
+          action.icon ? (
+            <IconAction
+              key={action.key || index}
+              label={action.label}
+              icon={action.icon}
+              isDestructive={action.isDestructive}
+              onClick={() => action.onClick(selectedItems)}
+            />
+          ) : (
+            <Button
+              key={action.key || index}
+              size='compact'
+              variant='link'
+              isDestructive={action.isDestructive}
+              onClick={() => action.onClick(selectedItems)}>
+              {action.label}
+            </Button>
+          )
+        )}
+        {menu.length > 0 && (
+          <DropdownMenu
+            icon={<Icon.Ellipsis size={16} />}
+            label={__('More actions', 'subtleforms')}
+            className='sf-data-table__bulk-more'
+            toggleProps={{ size: 'compact' }}
+            popoverProps={{ placement: 'bottom-end' }}>
+            {({ onClose }) => (
+              <MenuGroup>
+                {menu.map((action, index) => (
+                  <MenuItem
+                    key={action.key || index}
+                    isDestructive={action.isDestructive}
+                    onClick={() => {
+                      onClose();
+                      action.onClick(selectedItems);
+                    }}>
+                    {action.label}
+                  </MenuItem>
+                ))}
+              </MenuGroup>
+            )}
+          </DropdownMenu>
+        )}
+        <Button variant='link' size='compact' className='sf-data-table__bulk-clear' onClick={onClear}>
+          {__('Clear', 'subtleforms')}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Compact footer: previous, "1 to 20 of 739", next, and a small rows-per-page
+ * select. One line, never wider than its pane.
+ */
+function CompactPagination({ currentPage, totalPages, perPage, totalItems, onPageChange, onPerPageChange }) {
+  return (
+    <div className='sf-data-table__pagination sf-data-table__pagination--compact'>
+      <div className='sf-data-table__pagination-pager'>
+        <IconAction
+          label={__('Previous page', 'subtleforms')}
+          icon={<Icon.ChevronLeft size={16} />}
+          disabled={currentPage === 1}
+          onClick={() => onPageChange(currentPage - 1)}
+        />
+        <span className='sf-data-table__pagination-info-text' aria-live='polite'>
+          {rangeText(currentPage, perPage, totalItems)}
+        </span>
+        <IconAction
+          label={__('Next page', 'subtleforms')}
+          icon={<Icon.ChevronRight size={16} />}
+          disabled={currentPage === totalPages}
+          onClick={() => onPageChange(currentPage + 1)}
+        />
+      </div>
+      <select
+        className='sf-data-table__per-page'
+        aria-label={__('Rows per page', 'subtleforms')}
+        title={__('Rows per page', 'subtleforms')}
+        value={String(perPage)}
+        onChange={(event) => onPerPageChange(parseInt(event.target.value, 10))}>
+        {PER_PAGE_OPTIONS.map((size) => (
+          <option key={size} value={size}>
+            {size}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
 
 /**
  * Cell attributes. On a phone each row is a card and every cell but the
@@ -81,6 +217,8 @@ const DataTable = memo(function DataTable({
   onSelectionChange = () => {},
   bulkActions = [],
   rowClassName = null,
+  compact = false,
+  renderCompactRow = null,
 }) {
   const totalPages = Math.ceil(totalItems / perPage);
   
@@ -89,7 +227,7 @@ const DataTable = memo(function DataTable({
   // On a phone the rows become cards of varying height (UX2-19), which the
   // fixed-height virtual rows cannot hold.
   const isPhone = usePhoneLayout();
-  const shouldVirtualize = data.length > 20 && !isPhone;
+  const shouldVirtualize = data.length > 20 && !isPhone && !compact;
   
   const rowVirtualizer = useVirtualizer({
     count: shouldVirtualize ? data.length : 0,
@@ -179,33 +317,115 @@ const DataTable = memo(function DataTable({
   const someSelected =
     data.some((item) => selectedItems.includes(item.id)) && !allSelected;
 
+  if (compact && renderCompactRow) {
+    const sortable = columns.filter((column) => column.sortable);
+    return (
+      <div className='sf-data-table sf-data-table--compact'>
+        {selectable && selectedItems.length > 0 ? (
+          <BulkBar
+            count={selectedItems.length}
+            actions={bulkActions}
+            selectedItems={selectedItems}
+            onClear={() => onSelectionChange([])}>
+            <CheckboxControl
+              className='sf-data-table__compact-all'
+              checked={allSelected}
+              indeterminate={someSelected}
+              onChange={handleSelectAll}
+              aria-label={__('Select all', 'subtleforms')}
+            />
+          </BulkBar>
+        ) : (
+          <div className='sf-data-table__compact-head'>
+            {selectable && (
+              <CheckboxControl
+                className='sf-data-table__compact-all'
+                checked={allSelected}
+                indeterminate={someSelected}
+                onChange={handleSelectAll}
+                aria-label={__('Select all', 'subtleforms')}
+              />
+            )}
+            {sortable.length > 0 && (
+              <div className='sf-data-table__compact-sort'>
+                <select
+                  className='sf-data-table__per-page'
+                  aria-label={__('Sort by', 'subtleforms')}
+                  value={sortBy || ''}
+                  onChange={(event) => onSort(event.target.value, sortDirection)}>
+                  {sortable.map((column) => (
+                    <option key={column.key} value={column.key}>
+                      {column.sortLabel || column.title}
+                    </option>
+                  ))}
+                </select>
+                <IconAction
+                  label={
+                    sortDirection === 'asc'
+                      ? __('Ascending, switch to descending', 'subtleforms')
+                      : __('Descending, switch to ascending', 'subtleforms')
+                  }
+                  icon={sortDirection === 'asc' ? <Icon.ChevronUp size={16} /> : <Icon.ChevronDown size={16} />}
+                  onClick={() => onSort(sortBy || sortable[0].key, sortDirection === 'asc' ? 'desc' : 'asc')}
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        <ul className='sf-data-table__compact-list' role='list'>
+          {data.map((row, index) => {
+            const isSelected = selectedItems.includes(row.id);
+            return (
+              <li
+                key={row.id || index}
+                className={`sf-data-table__row--compact${
+                  isSelected ? ' sf-data-table__row--selected' : ''
+                }${onRowClick ? ' sf-data-table__row--clickable' : ''} ${rowClassName ? rowClassName(row) : ''}`}
+                onClick={() => onRowClick && onRowClick(row)}>
+                {selectable && (
+                  <div className='sf-data-table__compact-check' onClick={(event) => event.stopPropagation()}>
+                    <CheckboxControl
+                      checked={isSelected}
+                      onChange={(checked) => handleSelectRow(row.id, checked)}
+                      aria-label={sprintf(
+                        /* translators: %s: row number */
+                        __('Select row %s', 'subtleforms'),
+                        row.id
+                      )}
+                    />
+                  </div>
+                )}
+                <div className='sf-data-table__compact-body'>{renderCompactRow(row)}</div>
+              </li>
+            );
+          })}
+        </ul>
+
+        {totalPages > 0 && (
+          <CompactPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            perPage={perPage}
+            totalItems={totalItems}
+            onPageChange={onPageChange}
+            onPerPageChange={onPerPageChange}
+          />
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className='sf-data-table'>
       {/* Bulk Actions Bar */}
       {selectable && selectedItems.length > 0 && (
-        <div className='sf-data-table__bulk-actions'>
-          <span className='sf-data-table__bulk-actions-selected'>
-            {(() => {
-              return sprintf(
-                /* translators: %1$d: number of selected items */
-                _n('%1$d item selected', '%1$d items selected', selectedItems.length, 'subtleforms'),
-                selectedItems.length
-              );
-            })()}
-          </span>
-          <div className='sf-data-table__bulk-actions-buttons'>
-            {bulkActions.map((action, index) => (
-              <Button
-                key={index}
-                size='compact'
-                isDestructive={action.isDestructive}
-                variant={action.isDestructive ? 'tertiary' : 'secondary'}
-                onClick={() => action.onClick(selectedItems)}>
-                {action.label}
-              </Button>
-            ))}
-          </div>
-        </div>
+        <BulkBar
+          count={selectedItems.length}
+          actions={bulkActions}
+          selectedItems={selectedItems}
+          onClear={() => onSelectionChange([])}
+        />
       )}
 
       {/* Table - Scrollable */}
