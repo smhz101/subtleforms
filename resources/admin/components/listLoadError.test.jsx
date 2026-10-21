@@ -65,15 +65,6 @@ const success = (rows) => ({
 const retryButton = (container) => [...container.querySelectorAll('button')].find((b) => b.textContent.trim() === 'Retry');
 
 beforeEach(() => {
-  // jsdom has no matchMedia; the table reads it when it has rows to draw.
-  window.matchMedia = window.matchMedia || ((query) => ({
-    matches: false,
-    media: query,
-    addEventListener() {},
-    removeEventListener() {},
-    addListener() {},
-    removeListener() {},
-  }));
   apiGet.mockReset();
   jest.spyOn(console, 'error').mockImplementation(() => {});
 });
