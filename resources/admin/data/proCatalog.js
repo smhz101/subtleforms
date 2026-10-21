@@ -102,7 +102,7 @@ export const PRO_CHECKLIST = [
 	__( 'WooCommerce checkout and a WooCommerce Product field', 'subtleforms' ),
 	__( 'PDF copies of entries', 'subtleforms' ),
 	__( '47 more templates', 'subtleforms' ),
-	__( 'White label and WPML or Polylang translation (Agency)', 'subtleforms' ),
+	__( 'White label branding set in your licence portal, and WPML or Polylang translation (Agency)', 'subtleforms' ),
 ];
 
 /**
