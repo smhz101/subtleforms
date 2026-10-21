@@ -4,7 +4,7 @@ Tags: form builder, contact form, forms, multi-step form, file upload
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.4.1
+Stable tag: 2.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -129,7 +129,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 
 == Changelog ==
 
-= Unreleased =
+= 2.5.0 - 2026-10-21 =
 * Change: The Branding tab is gone from Settings. White label branding for Agency licences is set once in the licence portal on subtleforms.com and applied by SubtleForms Pro on every site that uses the licence.
 * Fix: The date, time and date and time pickers work from the keyboard. Focus moves into the dialog when it opens, the hour and minute columns take the arrow keys, Home, End and Enter, and Escape returns focus to the field.
 * Fix: The Country and phone country search is announced as a combobox with the active country, Escape returns focus to the field instead of the page, and required dropdown, country, date and time fields are marked required for screen readers.
@@ -143,6 +143,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: Custom headers of a webhook are name and value rows you can type into, with a JSON view. Before, the field put the old text back on every keystroke. Headers that SubtleForms sets itself, such as Host and the signature, are refused with a reason.
 * Change: The webhook test in a form sends the ticked data built from the form's own fields.
 * Fix: The question text of a Checkbox grid is no longer a label that points at a control which does not exist, so screen readers name the group once.
+* Fix: The Submissions list no longer scrolls sideways in a narrow pane, shows each entry on two lines with a sticky footer and a slim icon bulk bar, shows a count on every tab that updates at once after each action, marks starred entries with a flat amber star only, and gives each row action its own tooltip.
 
 = 2.4.1 - 2026-10-20 =
 * Fix: Choosing 50 or 100 rows per page on the Forms screen shows the forms instead of "Forms could not be loaded".
@@ -278,6 +279,9 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 The full history is in changelog.txt in the plugin folder.
 
 == Upgrade Notice ==
+
+= 2.5.0 =
+The Branding tab is gone from Settings. White label branding for Agency licences is now set in the licence portal on subtleforms.com. Update SubtleForms Pro to 2.5.0 at the same time.
 
 = 2.4.1 =
 Webhooks now send the documented body, with answers under "fields", and can be tested without Pro. If a receiver reads answers at the top level of the body, update it to read them from "fields". Field IDs can be edited. Update SubtleForms Pro to 2.4.2 at the same time.
