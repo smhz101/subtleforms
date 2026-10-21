@@ -15,12 +15,11 @@ const NAMES = ['Ada', 'Grace', 'Linus', 'Margaret', 'Alan', 'Katherine', 'Dennis
 const listUrl = () => `/wp-admin/admin.php?page=subtleforms-submissions&form_id=${form.id}`;
 const rows = (page) => page.locator('.sf-data-table__row--compact, .sf-data-table__table tbody tr');
 
-/** Count shown on a tab, 0 when there is no badge. */
+/** Count shown on a tab, 0 when there is no badge. Read in one step so a badge that goes away mid-read cannot stall the check. */
 async function tabCount(page, label) {
   const tab = page.getByRole('tab', { name: new RegExp(`^${label}`) });
-  const badge = tab.locator('.sf-tab-bar__count');
-  if ((await badge.count()) === 0) return 0;
-  return parseInt((await badge.textContent()) || '0', 10);
+  const text = await tab.evaluate((el) => el.querySelector('.sf-tab-bar__count')?.textContent || '0');
+  return parseInt(text, 10) || 0;
 }
 
 async function expectCounts(page, expected) {
@@ -39,12 +38,18 @@ async function openNarrowPane(page) {
 }
 
 async function setPane(pane) {
-  const res = await client.call('POST', '/settings/inbox-view', { reading_pane: pane, density: 'default' });
+  // Other specs share the per-minute limit on this endpoint: wait it out.
+  let res;
+  for (let i = 0; i < 4; i++) {
+    res = await client.call('POST', '/settings/inbox-view', { reading_pane: pane, density: 'default' });
+    if (res.status !== 429) break;
+    await new Promise((r) => setTimeout(r, 15000));
+  }
   expect(res.status).toBeLessThan(300);
 }
 
 test.beforeAll(async ({ playwright }, testInfo) => {
-  testInfo.setTimeout(240000);
+  testInfo.setTimeout(300000);
   client = await adminApi();
   form = await publishForm(client, {
     title: `Submissions list ${Date.now()}`,
@@ -53,9 +58,15 @@ test.beforeAll(async ({ playwright }, testInfo) => {
   await setPane('right');
   const anon = await playwright.request.newContext({ baseURL: BASE });
   for (const name of NAMES) {
-    const res = await anon.post('/wp-json/subtleforms/v1/submit', {
-      data: { form_id: form.id, data: { name, form_rendered_at: await spamToken(anon, form.id) } },
-    });
+    let res;
+    for (let i = 0; i < 6; i++) {
+      res = await anon.post('/wp-json/subtleforms/v1/submit', {
+        data: { form_id: form.id, data: { name, form_rendered_at: await spamToken(anon, form.id) } },
+      });
+      if (res.status() !== 429) break;
+      // The public form allows 10 sends a minute across every spec.
+      await new Promise((r) => setTimeout(r, 15000));
+    }
     expect(res.status(), await res.text()).toBe(200);
   }
   await anon.dispose();
