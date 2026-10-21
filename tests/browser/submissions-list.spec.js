@@ -244,6 +244,19 @@ test('the footer stays at the bottom of the list pane while the rows scroll', as
   await expect(footer.getByLabel('Rows per page')).toBeVisible();
 });
 
+test('choosing 50 or 100 rows per page lists the entries instead of an error', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 800 });
+  await loginPage(page);
+  await page.goto(listUrl());
+  await expect(rows(page).first()).toBeVisible({ timeout: 30000 });
+  for (const size of ['50', '100']) {
+    await page.getByLabel('Rows per page').selectOption(size);
+    await expect(rows(page).first()).toBeVisible({ timeout: 20000 });
+    await expect(page.getByText('Entries could not be loaded.')).toHaveCount(0);
+    await expect(page.getByLabel('Rows per page')).toHaveValue(size);
+  }
+});
+
 test('starred rows have no background tint, only the filled star', async ({ page }) => {
   await loginPage(page);
   await page.goto(listUrl());

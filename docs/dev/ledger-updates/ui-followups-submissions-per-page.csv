@@ -1,0 +1,1 @@
+UI251-02,P2,Free 2.5.1,,Claude,new in 2.5.0,fixed,Free 2.5.1 (#58),owner report (2.5.0),Choosing 50 or 100 rows per page on Submissions fails with "Entries could not be loaded" because one request asked for more than 100 rows.,
