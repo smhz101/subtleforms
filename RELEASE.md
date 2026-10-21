@@ -27,7 +27,8 @@ This document covers the full release process for SubtleForms — from developme
    - Bump `SUBTLEFORMS_VERSION` constant in `subtleforms.php`
    - Bump `version` in `package.json`
    - Update `Stable tag:` in `readme.txt`
-   - Add changelog entry to `readme.txt`
+   - Run `bin/compile-changes.sh 1.9.0 --apply` and paste the block into `readme.txt` and `changelog.txt`
+   - Regenerate the POT last with `bin/make-pot.sh`
    - Add upgrade notice to `readme.txt` (if notable)
 
 3. Open a PR from `release/1.9.0` → `main`. Get it reviewed and merged.
@@ -50,9 +51,10 @@ Before opening the release PR, verify every item:
 - [ ] `Tested up to:` in `readme.txt` reflects the latest tested WordPress version
 - [ ] `Requires at least:` in `readme.txt` still accurate
 - [ ] `Requires PHP:` in `readme.txt` still accurate
-- [ ] Changelog entry added under `== Changelog ==` in `readme.txt`
+- [ ] Changelog block compiled from `docs/dev/changes/unreleased/` and added under `== Changelog ==` in `readme.txt` and `changelog.txt`
+- [ ] POT files regenerated (`bin/make-pot.sh`) as the last commit
 - [ ] Upgrade notice added under `== Upgrade Notice ==` in `readme.txt` (if user action needed)
-- [ ] All changelog entries since last release are included (check git log)
+- [ ] `docs/dev/changes/unreleased/` is empty after compiling
 
 ---
 

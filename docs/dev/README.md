@@ -6,6 +6,7 @@
 - `wporg-readme.txt`: the validated readme draft for the WordPress.org submission.
 - `RULES.md`: standing rules for every change: branches, commits, tests, what "done" means.
 - `MERGING.md`: what a pull request needs before it is merged.
+- `changes/`: changelog fragments, one new file per pull request (`changes/README.md`). `RELEASING.md`: the release pull request, in order. `ledger-updates/`: one CSV of replacement ledger rows per pull request, merged into `bug-ledger.csv` at release.
 
 Flow: release branch `release/<version>` from main. Each package on `pkg/<ID>` from the release branch, pull request back into it. The release branch gets the full suites (PHPUnit unit and WP, Jest, Playwright with axe, Plugin Check) on a clean site, then it is merged to main, tagged, and the zips are built.
 
