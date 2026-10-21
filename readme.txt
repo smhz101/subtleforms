@@ -142,6 +142,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * New: A webhook sends only the data you tick: form, entry details, each answer and, on payment forms, the amount, currency and status. A live example shows the exact JSON, and "View as JSON" edits the same body with merge tags. Webhooks saved before keep sending the same body.
 * Fix: Custom headers of a webhook are name and value rows you can type into, with a JSON view. Before, the field put the old text back on every keystroke. Headers that SubtleForms sets itself, such as Host and the signature, are refused with a reason.
 * Change: The webhook test in a form sends the ticked data built from the form's own fields.
+* Fix: The question text of a Checkbox grid is no longer a label that points at a control which does not exist, so screen readers name the group once.
 
 = 2.4.1 - 2026-10-20 =
 * Fix: Choosing 50 or 100 rows per page on the Forms screen shows the forms instead of "Forms could not be loaded".
