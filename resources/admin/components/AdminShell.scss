@@ -84,24 +84,6 @@ body.subtleforms-admin-scope {
 	#adminmenu > li.current > a.current::after {
 		border-inline-end-color: #fff;
 	}
-
-	// A window shorter than the WordPress menu (UX2-16): the menu scrolls in
-	// its own column instead of making the page taller than the window, so
-	// the stage always fills the window and no dark band shows under it.
-	// utils/menuFit.js adds the class only while the menu does not fit, so
-	// hover flyouts keep working whenever it does.
-	@media (min-width: 783px) {
-		&.sf-menu-scrolls #adminmenuwrap {
-			position: fixed;
-			top: var(--wp-admin--admin-bar--height, 32px);
-			bottom: 0;
-			overflow-x: hidden;
-			overflow-y: auto;
-			overscroll-behavior: contain;
-			scrollbar-width: thin;
-		}
-
-	}
 }
 
 // The document itself never scrolls on SubtleForms screens (UX2-16).
