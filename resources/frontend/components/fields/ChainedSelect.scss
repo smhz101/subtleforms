@@ -11,14 +11,14 @@
 	&__label {
 		display: block;
 		margin-bottom: 4px;
-		color: var(--subtleforms-label-color, var(--subtleforms-color-text-light, #1e1e1e));
+		color: var(--subtleforms-label-color, var(--subtleforms-color-text-light, #5b6270));
 		font-size: 0.8125rem;
 		font-weight: var(--subtleforms-label-weight, 600);
 	}
 
 	&__empty {
 		margin: 0;
-		color: var(--subtleforms-color-text-light, #1e1e1e);
+		color: var(--subtleforms-color-text-light, #5b6270);
 		font-size: 0.875rem;
 	}
 
@@ -85,7 +85,7 @@
 			background: var(--subtleforms-color-bg-subtle, #f6f7f7);
 
 			.subtleforms-chained-select__label {
-				color: var(--subtleforms-color-text-light, #1e1e1e);
+				color: var(--subtleforms-color-text-light, #5b6270);
 			}
 
 			.subtleforms-chained-select__choices {
