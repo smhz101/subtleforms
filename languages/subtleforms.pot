@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-21T12:39:01+00:00\n"
+"POT-Creation-Date: 2026-10-21T12:45:07+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -291,6 +291,7 @@ msgstr ""
 #: src/Api/SubmissionsApi.php:1095
 #: src/Privacy/PrivacyExporter.php:101
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:299
+#: resources/admin/components/builder/webhook/webhookModel.js:273
 #: resources/admin/components/FormsList.jsx:43
 #: resources/admin/components/FormsList.jsx:280
 #: resources/admin/components/FormsList.jsx:955
@@ -816,6 +817,7 @@ msgid "ID"
 msgstr ""
 
 #: src/Api/SubmissionsApi.php:1094
+#: resources/admin/components/builder/webhook/webhookModel.js:263
 msgid "Form ID"
 msgstr ""
 
@@ -1675,6 +1677,7 @@ msgstr ""
 #: resources/admin/components/builder/LogicEditor.jsx:271
 #: resources/admin/components/builder/LogicEditor.jsx:282
 #: resources/admin/components/builder/LogicEditor.jsx:288
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:119
 msgid "Value"
 msgstr ""
 
@@ -2004,6 +2007,7 @@ msgid "Internal label for reference"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1830
+#: resources/admin/components/builder/webhook/webhookModel.js:284
 #: resources/admin/components/OnboardingWizard.jsx:140
 msgid "Amount"
 msgstr ""
@@ -3783,6 +3787,7 @@ msgstr ""
 
 #: src/Payments/Pricing.php:299
 #: src/Templates/FormTemplates.php:628
+#: resources/admin/components/builder/webhook/webhookModel.js:282
 #: resources/admin/pages/CreateFormPage.jsx:39
 #: resources/admin/pages/SubmissionDetailPage.jsx:624
 #: resources/admin/templates/TemplateSelector.jsx:64
@@ -4881,6 +4886,7 @@ msgstr ""
 
 #: resources/admin/components/AdminHeader.jsx:143
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:44
+#: resources/admin/components/builder/webhook/webhookModel.js:264
 #: resources/admin/components/merge-tags/mergeTags.js:9
 msgid "Form title"
 msgstr ""
@@ -4994,6 +5000,7 @@ msgstr ""
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:215
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:226
 #: resources/admin/components/builder/FormSettings.jsx:162
+#: resources/admin/components/builder/webhook/webhookModel.js:261
 #: resources/admin/components/SubmissionsTable.jsx:44
 #: resources/admin/components/SubmissionsTable.jsx:658
 #: resources/admin/pages/BuilderPage.jsx:691
@@ -6450,6 +6457,7 @@ msgstr ""
 
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:98
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:241
+#: resources/admin/components/builder/webhook/webhookModel.js:274
 msgid "Page URL"
 msgstr ""
 
@@ -6589,6 +6597,7 @@ msgid "Site currency (%s)"
 msgstr ""
 
 #: resources/admin/components/builder/FormCurrencyControl.jsx:30
+#: resources/admin/components/builder/webhook/webhookModel.js:285
 #: resources/admin/components/settings/extensions/PaymentsPanel.jsx:74
 #: resources/admin/pages/PaymentsPage.jsx:422
 msgid "Currency"
@@ -8048,6 +8057,274 @@ msgstr ""
 msgid "Apt, Suite, etc."
 msgstr ""
 
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:79
+msgid "Custom headers"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:81
+msgid "Extra HTTP headers sent with every request, for example an API key your endpoint expects."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:89
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:132
+msgid "View as JSON"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:89
+msgid "Back to rows"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:96
+msgid "No custom headers."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:105
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:107
+msgid "Header name"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:117
+msgid "Header value"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:134
+msgid "Remove header"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:149
+msgid "Add header"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:158
+msgid "Headers as JSON"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:167
+msgid "A JSON object of header names and values. Rows that SubtleForms refuses are listed below."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:171
+msgid "What you typed is kept. Nothing is saved until it is valid."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:177
+msgid "(no name)"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:95
+msgid "This is not valid JSON yet. What you typed is kept, but it is not saved until it is valid."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:121
+msgid "Data to send"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:124
+msgid "This is the body as a template. Merge tags such as {{field:email}} are replaced with each answer."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:125
+msgid "Tick what your endpoint should receive. Passwords and signatures are never sent."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:132
+msgid "Back to checkboxes"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:138
+msgid "This webhook sends the standard body, which also has the site address and a link to the entry. Change a tick to choose your own data instead."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:144
+msgid "Custom JSON."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:145
+msgid "The checkboxes are off because this body does not match them."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:147
+msgid "Start over with checkboxes"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:168
+#: resources/admin/pages/SubmissionDetailPage.jsx:863
+msgid "Answers"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:170
+msgid "This form has no fields yet."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:178
+#: resources/admin/components/DataTable.jsx:229
+msgid "Select all"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:184
+msgid "Select none"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:191
+msgid "All groups, as one list"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:199
+msgid "Send field labels with values"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:200
+msgid "Adds an \"answers\" list with each ticked field name, label and value."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:214
+msgid "Body as JSON"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:232
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:241
+msgid "Data that will be sent"
+msgstr ""
+
+#. translators: %s: the HTTP method, for example POST
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:236
+#, js-format
+msgid "An example entry. Real values come from each submission. Sent as the body of a %s request."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:61
+msgid "A header name can use letters, numbers and these characters: - _ . ! # $ % & ' * + ^ ` | ~"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:62
+msgid "Enter a header name."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:64
+msgid "SubtleForms sets this header itself, so it cannot be changed here."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:66
+msgid "A header value must be on one line."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:68
+msgid "This header is already listed. A header can only be set once."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:148
+msgid "This is not valid JSON yet. Check the quotes, commas and brackets."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:151
+msgid "Headers must be a JSON object, for example {\"X-Source\": \"subtleforms\"}."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:155
+msgid "The value of each header must be text."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:157
+msgid "A header needs a name."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:269
+#: resources/admin/components/SubmissionsTable.jsx:623
+#: resources/admin/pages/SubmissionDetailPage.jsx:585
+msgid "Submission"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:271
+msgid "Entry ID"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:272
+msgid "Submitted date"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:275
+#: resources/admin/pages/SubmissionDetailPage.jsx:1192
+msgid "IP address"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:276
+msgid "User agent"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:277
+msgid "User ID"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:286
+msgid "Payment status"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:388
+msgid "Example text"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:388
+msgid "Example answer"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:401
+#: resources/admin/pages/CreateFormPage.jsx:30
+msgid "Untitled form"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:510
+msgid "The JSON is not valid yet."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:512
+msgid "The body is not a JSON object."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:513
+msgid "The body does not start with the standard \"event\" entry."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:520
+msgid "A value was changed from its standard tag."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:523
+msgid "\"fields\" must be an object."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:526
+msgid "The body uses a field that is not on this form."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:527
+msgid "A field value was changed from its standard tag."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:531
+msgid "\"answers\" must be a list."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:536
+msgid "The labelled answers list was changed."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:540
+msgid "The labelled answers list does not match the fields."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:544
+#: resources/admin/components/builder/webhook/webhookModel.js:547
+msgid "The payment details were changed."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:551
+msgid "The body has an entry that the checkboxes cannot show."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:576
+msgid "The JSON is not valid yet, so there is no example to show."
+msgstr ""
+
 #: resources/admin/components/BuilderTour.jsx:52
 msgid "Form header"
 msgstr ""
@@ -8182,10 +8459,6 @@ msgid "%1$d item selected"
 msgid_plural "%1$d items selected"
 msgstr[0] ""
 msgstr[1] ""
-
-#: resources/admin/components/DataTable.jsx:229
-msgid "Select all"
-msgstr ""
 
 #. translators: %s: row number
 #: resources/admin/components/DataTable.jsx:312
@@ -10031,11 +10304,6 @@ msgstr ""
 msgid "Failed to export submissions"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:623
-#: resources/admin/pages/SubmissionDetailPage.jsx:585
-msgid "Submission"
-msgstr ""
-
 #: resources/admin/components/SubmissionsTable.jsx:633
 #: resources/admin/components/SubmissionsTable.jsx:637
 msgid "Anonymous"
@@ -10604,10 +10872,6 @@ msgstr ""
 #: resources/admin/pages/CreateFormPage.jsx:28
 #, js-format
 msgid "Untitled form %d"
-msgstr ""
-
-#: resources/admin/pages/CreateFormPage.jsx:30
-msgid "Untitled form"
 msgstr ""
 
 #: resources/admin/pages/CreateFormPage.jsx:121
@@ -11537,10 +11801,6 @@ msgstr ""
 msgid "Send this entry’s email notifications again, with the answers as they were saved? Passwords are never included."
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:863
-msgid "Answers"
-msgstr ""
-
 #: resources/admin/pages/SubmissionDetailPage.jsx:869
 msgid "Empty fields"
 msgstr ""
@@ -11689,10 +11949,6 @@ msgstr ""
 
 #: resources/admin/pages/SubmissionDetailPage.jsx:1188
 msgid "Visitor"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:1192
-msgid "IP address"
 msgstr ""
 
 #: resources/admin/pages/SubmissionDetailPage.jsx:1193
