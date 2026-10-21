@@ -325,7 +325,7 @@ function Transfer( { forms, busy, setBusy, tell } ) {
   );
 }
 
-function FileButton( { label, busy, onFile } ) {
+export function FileButton( { label, busy, onFile } ) {
   const inputRef = useRef( null );
   return (
     <>
