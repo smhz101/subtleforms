@@ -877,6 +877,7 @@ const SubmissionsTable = forwardRef(
           onRowClick={handleRowClick}
           rowClassName={getRowClassName}
           compact={compact}
+          alwaysShowPagination
           renderCompactRow={renderCompactRow}
           selectable={true}
           selectedItems={selectedSubmissions}

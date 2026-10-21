@@ -244,6 +244,54 @@ test('the footer stays at the bottom of the list pane while the rows scroll', as
   await expect(footer.getByLabel('Rows per page')).toBeVisible();
 });
 
+/** The footer of an empty list: "0 results", both page buttons off, the rows-per-page select, pinned to the pane bottom. */
+async function expectEmptyFooter(page, shot) {
+  await expect(page.locator('.sf-data-table__empty')).toBeVisible({ timeout: 30000 });
+  const footer = page.locator('.sf-data-table__pagination').first();
+  await expect(footer).toBeVisible();
+  await expect(footer).toContainText('0 results');
+  for (const name of ['Previous page', 'Next page']) {
+    const button = footer.getByRole('button', { name });
+    await expect(button).toBeVisible();
+    await expect(button).toBeDisabled();
+  }
+  await expect(footer.getByLabel('Rows per page')).toBeVisible();
+  const pane = await page.locator('.sf-inbox__list').boundingBox();
+  const box = await footer.boundingBox();
+  expect(Math.abs(box.y + box.height - (pane.y + pane.height))).toBeLessThan(3);
+  await page.screenshot({ path: `test-results/screens-2.5.1/${shot}.png` });
+}
+
+test('an empty list keeps its footer: a search with no results, wide and narrow', async ({ page }) => {
+  await loginPage(page);
+  for (const [width, shot] of [[1440, 'empty-search-wide'], [820, 'empty-search-narrow']]) {
+    await page.setViewportSize({ width, height: 800 });
+    await page.goto(`${listUrl()}&search=zzqq-no-such-entry`);
+    await expectEmptyFooter(page, shot);
+  }
+});
+
+test('an empty tab and a form with no entries keep their footer', async ({ page }) => {
+  await loginPage(page);
+  await page.setViewportSize({ width: 1440, height: 800 });
+  await page.goto(`${listUrl()}&tab=trash&search=zzqq-no-such-entry`);
+  await expectEmptyFooter(page, 'empty-trash-tab');
+
+  const bare = await publishForm(client, {
+    title: `Submissions empty ${Date.now()}`,
+    fields: [{ id: 'n', key: 'name', type: 'text', label: 'Name' }],
+  });
+  try {
+    await page.goto(`/wp-admin/admin.php?page=subtleforms-submissions&form_id=${bare.id}`);
+    await expectEmptyFooter(page, 'empty-form');
+    // The rows-per-page choice still works on an empty list.
+    await page.locator('.sf-data-table__pagination').first().getByLabel('Rows per page').selectOption('50');
+    await expect(page.locator('.sf-data-table__pagination').first().getByLabel('Rows per page')).toHaveValue('50');
+  } finally {
+    await cleanup(client, bare);
+  }
+});
+
 test('choosing 50 or 100 rows per page lists the entries instead of an error', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 800 });
   await loginPage(page);

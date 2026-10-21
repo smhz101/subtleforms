@@ -442,3 +442,22 @@
 		border-top: 1px solid var(--sf-border);
 	}
 }
+
+// An empty tab or a search with no results keeps its footer: the table fills
+// the pane, the message takes the free space, and the footer sits at the
+// bottom edge like it does with rows.
+.sf-inbox__list > .sf-submissions-table {
+	min-height: 100%;
+
+	> .sf-data-table--empty {
+		flex: 1 1 auto;
+
+		.sf-data-table__empty {
+			flex: 1 1 auto;
+		}
+
+		.sf-data-table__pagination {
+			margin-block-start: auto;
+		}
+	}
+}
