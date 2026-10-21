@@ -52,7 +52,7 @@ final class ConditionalLogicTest extends TestCase {
 	public function test_condition( array $case ) {
 		$this->assertSame(
 			$case['expected'],
-			$this->logic()->evaluateCondition( $case['value'], $case['operator'], $case['compare'] ?? '', $case['compare2'] ?? '' )
+			$this->logic()->evaluateCondition( $case['value'], $case['operator'], $case['compare'] ?? '', $case['compare2'] ?? '', $case['field'] ?? null )
 		);
 	}
 

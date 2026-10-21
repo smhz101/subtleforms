@@ -285,3 +285,23 @@ export function orderedCountries(preferred = []) {
     .filter(Boolean);
   return [...top, ...COUNTRIES.filter((c) => !wanted.includes(c.code))];
 }
+
+/**
+ * The ISO code for a country given as a code or an English name, or '' when
+ * it is neither. Mirrors CountryList::codeFor() so conditional logic matches a
+ * Country field whether it stores the code or the name (FB-20).
+ *
+ * @param {*} text A code such as "DE" or a name such as "Germany".
+ * @return {string}
+ */
+export function countryCodeFor(text) {
+  const value = String(text ?? '').trim();
+  if (value === '') {
+    return '';
+  }
+  const lower = value.toLowerCase();
+  const found = COUNTRIES.find(
+    (country) => country.code.toLowerCase() === lower || country.name.toLowerCase() === lower
+  );
+  return found ? found.code : '';
+}

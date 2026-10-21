@@ -59,7 +59,42 @@
     { "name": "after today", "value": "2026-10-12", "operator": "after", "compare": "today", "expected": true },
     { "name": "before today", "value": "2026-10-11", "operator": "before", "compare": "today", "expected": false },
     { "name": "before invalid date", "value": "next week", "operator": "before", "compare": "2026-06-01", "expected": false },
-    { "name": "unknown operator", "value": "x", "operator": "matches_regex", "compare": ".*", "expected": false }
+    { "name": "unknown operator", "value": "x", "operator": "matches_regex", "compare": ".*", "expected": false },
+    {"name": "checkbox ticked equals yes", "value": true, "operator": "equals", "compare": "yes", "expected": true, "field": {"type": "checkbox"}},
+    {"name": "checkbox ticked as 1 equals checked", "value": "1", "operator": "equals", "compare": "checked", "expected": true, "field": {"type": "checkbox"}},
+    {"name": "checkbox ticked as on equals true", "value": "on", "operator": "equals", "compare": "true", "expected": true, "field": {"type": "checkbox"}},
+    {"name": "checkbox unticked equals unchecked", "value": "", "operator": "equals", "compare": "unchecked", "expected": true, "field": {"type": "checkbox"}},
+    {"name": "checkbox unticked as false equals unchecked", "value": "false", "operator": "equals", "compare": "unchecked", "expected": true, "field": {"type": "checkbox"}},
+    {"name": "checkbox ticked does not equal unchecked", "value": "1", "operator": "equals", "compare": "unchecked", "expected": false, "field": {"type": "checkbox"}},
+    {"name": "checkbox unticked does not equal checked", "value": "", "operator": "equals", "compare": "checked", "expected": false, "field": {"type": "checkbox"}},
+    {"name": "checkbox ticked not_equals unchecked", "value": true, "operator": "not_equals", "compare": "unchecked", "expected": true, "field": {"type": "checkbox"}},
+    {"name": "checkbox ticked not_equals checked", "value": true, "operator": "not_equals", "compare": "checked", "expected": false, "field": {"type": "checkbox"}},
+    {"name": "consent accepted equals true", "value": "yes", "operator": "equals", "compare": "true", "expected": true, "field": {"type": "consent"}},
+    {"name": "consent missing equals false", "value": null, "operator": "equals", "compare": "false", "expected": true, "field": {"type": "consent"}},
+    {"name": "toggle on is not empty", "value": "yes", "operator": "not_empty", "compare": "", "expected": true, "field": {"type": "toggle"}},
+    {"name": "toggle off (default no) is empty", "value": "no", "operator": "empty", "compare": "", "expected": true, "field": {"type": "toggle"}},
+    {"name": "toggle off (default no) is not not_empty", "value": "no", "operator": "not_empty", "compare": "", "expected": false, "field": {"type": "toggle"}},
+    {"name": "toggle with its own off value is empty", "value": "off", "operator": "empty", "compare": "", "expected": true, "field": {"type": "toggle", "config": {"offValue": "off"}}},
+    {"name": "toggle with its own off value on the field is empty", "value": "Off", "operator": "empty", "compare": "", "expected": true, "field": {"type": "toggle", "offValue": "off"}},
+    {"name": "toggle with its own off value still on when yes", "value": "yes", "operator": "empty", "compare": "", "expected": false, "field": {"type": "toggle", "config": {"offValue": "off"}}},
+    {"name": "toggle on equals its on value", "value": "yes", "operator": "equals", "compare": "yes", "expected": true, "field": {"type": "toggle"}},
+    {"name": "country code equals code", "value": "DE", "operator": "equals", "compare": "DE", "expected": true, "field": {"type": "country"}},
+    {"name": "country name equals the picked code", "value": "Germany", "operator": "equals", "compare": "DE", "expected": true, "field": {"type": "country"}},
+    {"name": "country name is case-insensitive", "value": "germany", "operator": "equals", "compare": "DE", "expected": true, "field": {"type": "country"}},
+    {"name": "country code equals a rule holding the name", "value": "DE", "operator": "equals", "compare": "Germany", "expected": true, "field": {"type": "country"}},
+    {"name": "country lower-case code equals code", "value": "de", "operator": "equals", "compare": "DE", "expected": true, "field": {"type": "country"}},
+    {"name": "country name with accents equals its code", "value": "Åland Islands", "operator": "equals", "compare": "AX", "expected": true, "field": {"type": "country"}},
+    {"name": "country other name does not equal", "value": "France", "operator": "equals", "compare": "DE", "expected": false, "field": {"type": "country"}},
+    {"name": "country name not_equals other code", "value": "France", "operator": "not_equals", "compare": "DE", "expected": true, "field": {"type": "country"}},
+    {"name": "country name not_equals same code", "value": "Germany", "operator": "not_equals", "compare": "DE", "expected": false, "field": {"type": "country"}},
+    {"name": "country empty equals nothing", "value": "", "operator": "equals", "compare": "DE", "expected": false, "field": {"type": "country"}},
+    {"name": "country unknown text falls back to text", "value": "Atlantis", "operator": "equals", "compare": "atlantis", "expected": true, "field": {"type": "country"}},
+    {"name": "country in a list of codes by name", "value": "Germany", "operator": "in", "compare": "FR, DE", "expected": true, "field": {"type": "country"}},
+    {"name": "country in a list of codes by code", "value": "DE", "operator": "in", "compare": "FR, DE", "expected": true, "field": {"type": "country"}},
+    {"name": "country not in a list", "value": "Spain", "operator": "in", "compare": "FR, DE", "expected": false, "field": {"type": "country"}},
+    {"name": "country not_in a list by name", "value": "Germany", "operator": "not_in", "compare": "FR, DE", "expected": false, "field": {"type": "country"}},
+    {"name": "country not_in a list other", "value": "Spain", "operator": "not_in", "compare": "FR, DE", "expected": true, "field": {"type": "country"}},
+    {"name": "country is not empty when a name is stored", "value": "Germany", "operator": "not_empty", "compare": "", "expected": true, "field": {"type": "country"}}
   ],
   "logic": [
     {
@@ -193,7 +228,10 @@
       },
       "values": { "a": "x" },
       "expected": { "hidden_fields": ["b"], "required_fields": [], "hidden_steps": [] }
-    }
+    },
+    {"name": "a rule on a Country field that stores names shows the field", "schema": {"fields": [{"key": "where", "type": "country", "config": {"output_format": "name"}}, {"key": "vat", "type": "text", "required": true, "logic": {"action": "show", "groups": [{"match": "all", "rules": [{"field": "where", "operator": "equals", "value": "DE"}]}]}}]}, "values": {"where": "Germany", "vat": "x"}, "expected": {"hidden_fields": [], "required_fields": [], "hidden_steps": []}},
+    {"name": "the same rule hides the field for another country, inside columns too", "schema": {"fields": [{"type": "two_column_container", "key": "cols", "columns": [[{"key": "where", "type": "country"}], [{"key": "vat", "type": "text", "logic": {"action": "show", "groups": [{"match": "all", "rules": [{"field": "where", "operator": "equals", "value": "Germany"}]}]}}]]}]}, "values": {"where": "FR", "vat": "x"}, "expected": {"hidden_fields": ["vat"], "required_fields": [], "hidden_steps": []}},
+    {"name": "a ticked checkbox and a toggle that is off drive show rules", "schema": {"fields": [{"key": "agree", "type": "checkbox"}, {"key": "news", "type": "toggle"}, {"key": "a", "type": "text", "logic": {"action": "show", "groups": [{"match": "all", "rules": [{"field": "agree", "operator": "equals", "value": "checked"}]}]}}, {"key": "b", "type": "text", "logic": {"action": "show", "groups": [{"match": "all", "rules": [{"field": "news", "operator": "not_empty"}]}]}}]}, "values": {"agree": "1", "news": "no", "a": "1", "b": "1"}, "expected": {"hidden_fields": ["b"], "required_fields": [], "hidden_steps": []}}
   ],
   "confirmations": [
     {

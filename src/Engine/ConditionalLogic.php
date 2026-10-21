@@ -275,10 +275,11 @@ final class ConditionalLogic {
 			case 'not_in':
 				$options = self::optionList( $compare );
 				$found   = false;
+				$country = is_array( $field ) && 'country' === ( $field['type'] ?? '' );
 				if ( ! self::isEmptyValue( $value ) ) {
 					foreach ( $items as $x ) {
 						foreach ( $options as $o ) {
-							if ( self::textEquals( $x, $o ) ) {
+							if ( $country ? self::anyCountryEquals( array( $x ), $o ) : self::textEquals( $x, $o ) ) {
 								$found = true;
 								break 2;
 							}
@@ -836,10 +837,8 @@ final class ConditionalLogic {
 			if ( is_string( $key ) && '' !== $key ) {
 				$map[ $key ] = $node;
 			}
-			foreach ( array( 'children', 'fields' ) as $child_key ) {
-				if ( isset( $node[ $child_key ] ) && is_array( $node[ $child_key ] ) ) {
-					$this->indexFields( $node[ $child_key ], $map );
-				}
+			foreach ( self::childLists( $node ) as $list ) {
+				$this->indexFields( $list, $map );
 			}
 		}
 	}
@@ -855,7 +854,34 @@ final class ConditionalLogic {
 		if ( in_array( $type, array( 'checkbox', 'consent' ), true ) ) {
 			return self::sameCheck( $value, $expected );
 		}
+		if ( 'country' === $type ) {
+			return self::anyCountryEquals( $items, $expected );
+		}
 		return self::anyEquals( $items, $expected );
+	}
+
+	/**
+	 * A Country field stores the ISO code or the name, depending on its
+	 * Output Format, and a rule holds the code the builder picked. Both sides
+	 * are compared as codes when they name a known country (FB-20).
+	 *
+	 * @param string[] $items
+	 */
+	private static function anyCountryEquals( array $items, string $expected ): bool {
+		$want = \SubtleForms\Fields\CountryList::codeFor( $expected );
+		foreach ( $items as $x ) {
+			$have = \SubtleForms\Fields\CountryList::codeFor( $x );
+			if ( '' !== $want && '' !== $have ) {
+				if ( $want === $have ) {
+					return true;
+				}
+				continue;
+			}
+			if ( self::textEquals( $x, $expected ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
