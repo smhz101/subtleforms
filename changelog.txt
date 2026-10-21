@@ -11,6 +11,7 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Fix: The small grey text in the Columns layout headers, prefix and suffix text and country codes is darker so it reaches the 4.5 to 1 contrast WCAG asks for.
 * Fix: On the builder canvas, Radio and Checkboxes fields show their default choices selected, like Dropdown and Toggle already did.
 * Fix: A logic rule on a Country field matches whether the field stores the country code or the country name, in the browser and on submit.
+* Fix: Entries sent from the builder Preview are left out of the dashboard totals, today, week and trend, reports, the unread count, the Inbox and a form's entry limit. They show as Preview and can be listed with the Result filter.
 
 = 2.4.1 - 2026-10-20 =
 * Fix: Choosing 50 or 100 rows per page on the Forms screen shows the forms instead of "Forms could not be loaded".

@@ -158,7 +158,7 @@ final class SubmissionsApi {
 					),
 					'processing_status' => array(
 						'type'              => 'string',
-						'enum'              => array( 'completed', 'failed', 'payment_pending', 'processing' ),
+						'enum'              => array( 'completed', 'failed', 'payment_pending', 'processing', 'preview' ),
 						'sanitize_callback' => 'sanitize_text_field',
 					),
 				),

@@ -34,6 +34,37 @@ final class SubmissionsRepository {
 	public const NOT_TRASHED = "( status IS NULL OR status <> 'trash' )";
 
 	/**
+	 * Status of an entry sent from the builder's Preview (2.4.0). It is a test
+	 * answer, so counts, reports and the inbox leave it out.
+	 */
+	public const PREVIEW = 'preview';
+
+	/**
+	 * SQL condition that leaves Trash and Preview entries out: the entries
+	 * that count as real submissions in totals, the dashboard and the inbox.
+	 */
+	public const LISTED = "( status IS NULL OR status NOT IN ( 'trash', 'preview' ) )";
+
+	/**
+	 * The visibility conditions for a list or a count.
+	 *
+	 * Trash only shows in the Trash, Preview entries only when asked for by
+	 * name, and everything else shows real entries.
+	 *
+	 * @param string|null $status Status filter, if any.
+	 * @return string[]
+	 */
+	public static function visibilityConditions( $status ): array {
+		if ( self::TRASH === $status ) {
+			return array();
+		}
+		if ( self::PREVIEW === $status ) {
+			return array( self::NOT_TRASHED );
+		}
+		return array( self::LISTED );
+	}
+
+	/**
 	 * Default number of days an entry stays in the Trash.
 	 */
 	public const TRASH_DAYS = 30;
@@ -89,9 +120,7 @@ final class SubmissionsRepository {
 			$where[]  = 'status = %s';
 			$params[] = $args['status'];
 		}
-		if ( $args['status'] !== self::TRASH ) {
-			$where[] = self::NOT_TRASHED;
-		}
+		$where = array_merge( $where, self::visibilityConditions( $args['status'] ) );
 
 		$where_clause = 'WHERE ' . implode( ' AND ', $where );
 
@@ -455,10 +484,9 @@ final class SubmissionsRepository {
 			$where[]  = 'status = %s';
 			$params[] = $args['status'];
 		}
-		// Entries in the Trash only show in the Trash (2.3.1).
-		if ( $args['status'] !== self::TRASH ) {
-			$where[] = self::NOT_TRASHED;
-		}
+		// Entries in the Trash only show in the Trash (2.3.1), and Preview
+		// entries only when asked for.
+		$where = array_merge( $where, self::visibilityConditions( $args['status'] ) );
 
 		if ( $args['is_read'] !== null ) {
 			$where[]  = 'is_read = %d';
@@ -555,10 +583,9 @@ final class SubmissionsRepository {
 			$where[]  = 'status = %s';
 			$params[] = $args['status'];
 		}
-		// Entries in the Trash only show in the Trash (2.3.1).
-		if ( $args['status'] !== self::TRASH ) {
-			$where[] = self::NOT_TRASHED;
-		}
+		// Entries in the Trash only show in the Trash (2.3.1), and Preview
+		// entries only when asked for.
+		$where = array_merge( $where, self::visibilityConditions( $args['status'] ) );
 
 		if ( isset( $args['is_read'] ) && $args['is_read'] !== null ) {
 			$where[]  = 'is_read = %d';
@@ -718,7 +745,7 @@ final class SubmissionsRepository {
 	public function getAdjacentIds( int $currentId, ?int $formId = null ): array {
 		global $wpdb;
 
-		$conditions = array( self::NOT_TRASHED );
+		$conditions = array( self::LISTED );
 		$params     = array();
 
 		if ( $formId ) {
@@ -851,7 +878,7 @@ $cutoff_date
 		} else {
 			$query = $wpdb->prepare(
 				"SELECT form_id, COUNT(*) as count FROM {$this->table}
-                WHERE form_id IN ({$placeholders}) AND ( status IS NULL OR status <> 'trash' )
+                WHERE form_id IN ({$placeholders}) AND ( status IS NULL OR status NOT IN ( 'trash', 'preview' ) )
                 GROUP BY form_id",
 				$form_ids
 			);
