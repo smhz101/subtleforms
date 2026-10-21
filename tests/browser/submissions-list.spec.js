@@ -316,12 +316,26 @@ test('choosing 50 or 100 rows per page lists the entries instead of an error', a
   await loginPage(page);
   await page.goto(listUrl());
   await expect(rows(page).first()).toBeVisible({ timeout: 30000 });
+  const urls = [];
+  page.on('request', (request) => {
+    if (/\/submissions\?/.test(request.url())) urls.push(request.url());
+  });
   for (const size of ['50', '100']) {
     await page.getByLabel('Rows per page').selectOption(size);
     await expect(rows(page).first()).toBeVisible({ timeout: 20000 });
     await expect(page.getByText('Entries could not be loaded.')).toHaveCount(0);
     await expect(page.getByLabel('Rows per page')).toHaveValue(size);
   }
+  // The API pages by offset: every list request names one and none asks for more than 100 rows.
+  const listed = urls.filter((u) => /per_page=/.test(u));
+  expect(listed.length).toBeGreaterThan(0);
+  for (const u of listed) {
+    expect(u).toMatch(/offset=\d+/);
+    expect(parseInt(new URL(u).searchParams.get('per_page'), 10)).toBeLessThanOrEqual(100);
+  }
+  const first = await client.call('GET', `/submissions?form_id=${form.id}&per_page=1&offset=0`);
+  const second = await client.call('GET', `/submissions?form_id=${form.id}&per_page=1&offset=1`);
+  expect(second.body.data[0].id).not.toBe(first.body.data[0].id);
 });
 
 test('starred rows have no background tint, only the filled star', async ({ page }) => {

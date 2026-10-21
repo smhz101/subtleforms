@@ -195,7 +195,8 @@ const SubmissionsTable = forwardRef(
     const fetchBatch = async (batchIndex) => {
       const batchSize = perPage * chunkPagesFor(perPage, CHUNK_PAGES);
       const params = buildFilterParams();
-      params.set('page', (batchIndex + 1).toString());
+      // The endpoint pages by offset and ignores `page`.
+      params.set('offset', (batchIndex * batchSize).toString());
       params.set('per_page', batchSize.toString());
 
       const { ok, body, headers } = await apiGet(`/submissions?${params}`);

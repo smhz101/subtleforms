@@ -6,7 +6,8 @@
  * a fixed top bar, and a single scroll container for page content.
  *
  * SCROLL CONTRACT
- * - The document never scrolls on SubtleForms screens.
+ * - The document scrolls only as WordPress does: when the admin menu is
+ *   taller than the window, so the whole menu stays reachable.
  * - `.sf-app__main` is the one scroll container per page.
  * - With `noScroll` (`.is-fixed`), the page manages its own panels (builder).
  */
@@ -28,7 +29,6 @@
 body.subtleforms-admin-page,
 body.subtleforms-admin-scope {
 	background: var(--sf-bg-frame);
-	overflow: hidden;
 
 	#wpwrap,
 	#wpcontent,
@@ -84,12 +84,6 @@ body.subtleforms-admin-scope {
 	#adminmenu > li.current > a.current::after {
 		border-inline-end-color: #fff;
 	}
-}
-
-// The document itself never scrolls on SubtleForms screens (UX2-16).
-html:has(body.subtleforms-admin-page),
-html:has(body.subtleforms-admin-scope) {
-	overflow: hidden;
 }
 
 #subtleforms-admin-app {

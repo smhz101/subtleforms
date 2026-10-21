@@ -15,6 +15,13 @@ describe('admin menu is left to WordPress', () => {
     expect(scss).not.toMatch(/#adminmenuwrap/);
   });
 
+  test('the document is not locked, so a short window can scroll to the whole menu', () => {
+    const scss = read('resources/admin/components/AdminShell.scss');
+    expect(scss).not.toMatch(/html:has\(body\.subtleforms-admin/);
+    const body = scss.slice(scss.indexOf('body.subtleforms-admin-page'), scss.indexOf('#wpwrap'));
+    expect(body).not.toMatch(/overflow\s*:/);
+  });
+
   test('the admin entry does not toggle a menu class', () => {
     const entry = read('resources/admin/index.jsx');
     expect(entry).not.toMatch(/sf-menu-scrolls|watchMenuFit|menuFit/);

@@ -65,7 +65,7 @@ test.afterAll(async () => {
   if (form) await cleanup(client, form);
 });
 
-test('the WordPress admin menu keeps its core positioning on a short window', async ({ page }) => {
+test('the WordPress admin menu keeps its core positioning and stays reachable on a short window', async ({ page }) => {
   await page.setViewportSize({ width: 1024, height: 600 });
   await loginPage(page);
   await page.goto('/wp-admin/admin.php?page=subtleforms');
@@ -77,7 +77,20 @@ test('the WordPress admin menu keeps its core positioning on a short window', as
   });
   expect(wrap.position).not.toBe('fixed');
   expect(wrap.overflowY).not.toBe('auto');
+  // The page scrolls as in WordPress, so the last menu item can be reached.
+  const collapse = page.locator('#collapse-button');
+  await collapse.scrollIntoViewIfNeeded();
+  await expect(collapse).toBeInViewport();
   await page.screenshot({ path: 'test-results/screens-2.5.1/menu-core-short-window.png' });
+});
+
+test('a tall window does not scroll the page', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 1000 });
+  await loginPage(page);
+  await page.goto('/wp-admin/admin.php?page=subtleforms');
+  await page.waitForSelector('.sf-app');
+  const over = await page.evaluate(() => document.documentElement.scrollHeight - window.innerHeight);
+  expect(over).toBeLessThanOrEqual(1);
 });
 
 test('UX2-17: on a phone the builder says it needs a wider screen', async ({ page }) => {

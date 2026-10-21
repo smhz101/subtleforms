@@ -22,6 +22,14 @@ beforeAll(() => {
     (() => ({ matches: false, addListener() {}, removeListener() {}, addEventListener() {}, removeEventListener() {} }));
 });
 
+describe('rangeText past the last page', () => {
+  test('reads the total, not a range that does not exist', () => {
+    expect(rangeText(2, 20, 20)).toBe('20 results');
+    expect(rangeText(3, 20, 21)).toBe('21 results');
+    expect(rangeText(1, 20, 1)).toBe('1 to 1 of 1');
+  });
+});
+
 describe('rangeText with no rows', () => {
   test('reads "0 results"', () => {
     expect(rangeText(1, 20, 0)).toBe('0 results');
@@ -72,6 +80,18 @@ describe('DataTable with no rows', () => {
       fireEvent.change(select, { target: { value: '50' } });
     });
     expect(onPerPageChange).toHaveBeenCalledWith(50);
+  });
+
+  test('an empty page 2 of a longer list keeps the real page state and Previous works', () => {
+    const onPageChange = jest.fn();
+    mount({ alwaysShowPagination: true, totalItems: 20, currentPage: 2, onPageChange });
+    expect(screen.getByText('20 results')).toBeTruthy();
+    const prev = screen.getByRole('button', { name: 'Previous page' });
+    expect(prev.disabled || prev.getAttribute('aria-disabled') === 'true').toBe(false);
+    act(() => {
+      fireEvent.click(prev);
+    });
+    expect(onPageChange).toHaveBeenCalledWith(1);
   });
 
   test('without the prop an empty list shows only the message', () => {

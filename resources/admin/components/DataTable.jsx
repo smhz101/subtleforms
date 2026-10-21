@@ -62,6 +62,14 @@ export function rangeText(page, perPage, total) {
   if (!total) {
     return __('0 results', 'subtleforms');
   }
+  if ((page - 1) * perPage >= total) {
+    // A page past the end (the last row of it was just removed).
+    return sprintf(
+      /* translators: %d: total items */
+      _n('%d result', '%d results', total, 'subtleforms'),
+      total
+    );
+  }
   return sprintf(
     /* translators: %1$d: first item number, %2$d: last item number, %3$d: total items */
     __('%1$d to %2$d of %3$d', 'subtleforms'),
@@ -193,7 +201,7 @@ function FullPagination({ currentPage, totalPages, perPage, totalItems, onPageCh
     <div className='sf-data-table__pagination'>
       <div className='sf-data-table__pagination-info'>
         <span className='sf-data-table__pagination-info-text' aria-live='polite'>
-          {totalItems
+          {totalItems && (currentPage - 1) * perPage < totalItems
             ? sprintf(
                 /* translators: %1$d: starting item number, %2$d: ending item number, %3$d: total items */
                 __('%1$d–%2$d of %3$d', 'subtleforms'),
@@ -394,10 +402,10 @@ const DataTable = memo(function DataTable({
       <div className={`sf-data-table sf-data-table--empty${compact ? ' sf-data-table--compact' : ''}`}>
         {empty}
         <FooterComponent
-          currentPage={1}
-          totalPages={1}
+          currentPage={currentPage}
+          totalPages={Math.max(1, totalPages)}
           perPage={perPage}
-          totalItems={0}
+          totalItems={totalItems}
           onPageChange={onPageChange}
           onPerPageChange={onPerPageChange}
         />
