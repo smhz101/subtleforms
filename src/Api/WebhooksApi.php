@@ -63,10 +63,29 @@ final class WebhooksApi {
 					),
 					'payload_mode'   => array(
 						'type' => 'string',
-						'enum' => array( 'full', 'custom' ),
+						'enum' => array( 'full', 'custom', 'selected' ),
 					),
 					'custom_payload' => array(
 						'type' => 'string',
+					),
+					// The "selected" mode: the ticked keys, the form's fields and
+					// example answers, as the builder shows them (2.5.0).
+					'payload_selection' => array(
+						'type'  => 'array',
+						'items' => array( 'type' => 'string' ),
+					),
+					'fields'         => array(
+						'type'  => 'array',
+						'items' => array( 'type' => 'object' ),
+					),
+					'sample'         => array(
+						'type' => 'object',
+					),
+					'form_title'     => array(
+						'type' => 'string',
+					),
+					'form_id'        => array(
+						'type' => 'integer',
 					),
 				),
 			)
@@ -106,6 +125,11 @@ final class WebhooksApi {
 				'secret'         => (string) $request->get_param( 'secret' ),
 				'payload_mode'   => (string) $request->get_param( 'payload_mode' ),
 				'custom_payload' => (string) $request->get_param( 'custom_payload' ),
+				'payload_selection' => $request->get_param( 'payload_selection' ),
+				'fields'         => $request->get_param( 'fields' ),
+				'sample'         => $request->get_param( 'sample' ),
+				'form_title'     => (string) $request->get_param( 'form_title' ),
+				'form_id'        => (int) $request->get_param( 'form_id' ),
 			)
 		);
 		if ( is_wp_error( $built ) ) {
@@ -175,8 +199,9 @@ final class WebhooksApi {
 			$method = 'POST';
 		}
 
+		$title   = '' !== trim( (string) ( $args['form_title'] ?? '' ) ) ? sanitize_text_field( (string) $args['form_title'] ) : __( 'Test form', 'subtleforms' );
 		$schema  = array(
-			'metadata' => array( 'title' => __( 'Test form', 'subtleforms' ) ),
+			'metadata' => array( 'title' => $title ),
 			'fields'   => array(
 				array( 'id' => 'name', 'key' => 'name', 'type' => 'text', 'label' => __( 'Name', 'subtleforms' ) ),
 				array( 'id' => 'email', 'key' => 'email', 'type' => 'email', 'label' => __( 'Email', 'subtleforms' ) ),
@@ -188,16 +213,56 @@ final class WebhooksApi {
 			'email'   => 'test@example.com',
 			'message' => __( 'This is a test webhook from SubtleForms.', 'subtleforms' ),
 		);
-		$body          = Webhooks::fullBody(
-			$schema,
-			$answers,
-			array(
-				'form_id'       => 0,
-				'form_title'    => __( 'Test form', 'subtleforms' ),
-				'submission_id' => 0,
-				'submitted_at'  => gmdate( 'c' ),
-			)
+
+		// An action test from the builder sends the form's own fields with the
+		// example answers shown in "Data that will be sent" (2.5.0).
+		$form_fields = array();
+		foreach ( is_array( $args['fields'] ?? null ) ? $args['fields'] : array() as $field ) {
+			if ( is_array( $field ) && ! empty( $field['key'] ) ) {
+				$form_fields[] = array(
+					'id'    => sanitize_key( (string) $field['key'] ),
+					'key'   => sanitize_text_field( (string) $field['key'] ),
+					'type'  => sanitize_key( (string) ( $field['type'] ?? 'text' ) ),
+					'label' => sanitize_text_field( (string) ( $field['label'] ?? $field['key'] ) ),
+				);
+			}
+		}
+		if ( $form_fields ) {
+			$schema['fields'] = $form_fields;
+			$answers          = Webhooks::answers( is_array( $args['sample'] ?? null ) ? $args['sample'] : array(), $schema );
+		}
+
+		$sample_entry = array(
+			'form_id'          => (int) ( $args['form_id'] ?? 0 ),
+			'form_title'       => $title,
+			'submission_id'    => 0,
+			'created_at'       => gmdate( 'c' ),
+			'status'           => 'completed',
+			'page_url'         => home_url( '/contact/' ),
+			'ip_address'       => '203.0.113.10',
+			'user_agent'       => 'Mozilla/5.0 (sample)',
+			'user_id'          => 0,
+			'payment_amount'   => 0.0,
+			'payment_currency' => '',
+			'payment_status'   => '',
 		);
+
+		if ( 'selected' === ( $args['payload_mode'] ?? 'full' ) ) {
+			// The ticked data, built with the same builder a real delivery uses.
+			$selected         = is_array( $args['payload_selection'] ?? null ) ? $args['payload_selection'] : array();
+			$body             = Webhooks::selectedBody( $schema, $answers, $sample_entry, $selected );
+		} else {
+			$body = Webhooks::fullBody(
+				$schema,
+				$answers,
+				array(
+					'form_id'       => $sample_entry['form_id'],
+					'form_title'    => $title,
+					'submission_id' => 0,
+					'submitted_at'  => gmdate( 'c' ),
+				)
+			);
+		}
 		$body['test'] = true;
 		$body         = (string) wp_json_encode( $body );
 
@@ -224,8 +289,10 @@ final class WebhooksApi {
 						$decoded,
 						$answers,
 						array(
-							'form_title' => __( 'Test form', 'subtleforms' ),
+							'form_title' => $title,
 							'entry_id'   => '0',
+							'entry'      => $sample_entry,
+							'raw'        => Webhooks::rawAnswers( $schema, $answers ),
 						)
 					)
 				);
