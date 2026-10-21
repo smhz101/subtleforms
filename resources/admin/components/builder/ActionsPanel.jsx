@@ -5,7 +5,7 @@
  * Supports: webhook, email
  */
 
-import { useCallback, useRef, useId } from '@wordpress/element';
+import { useCallback, useMemo, useRef, useId } from '@wordpress/element';
 import {
   Button,
   TextControl,
@@ -14,7 +14,7 @@ import {
   ToggleControl,
   Notice,
 } from '@wordpress/components';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import {
   DndContext,
   PointerSensor,
@@ -37,6 +37,10 @@ import MergeTagsHelpLink from '../merge-tags/MergeTagsHelp';
 import { insertAt } from '../merge-tags/mergeTags';
 import ConnectionTest from '../settings/extensions/ConnectionTest';
 import { normalizeWebhookUrl } from '../../utils/webhookUrl';
+import Icon from '../../ui/Icon';
+import HeadersEditor from './webhook/HeadersEditor';
+import PayloadPicker, { currentSelection, payloadMode } from './webhook/PayloadPicker';
+import { collectPayloadFields, defaultSelection, formHasPayment, sampleAnswers } from './webhook/webhookModel';
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
@@ -77,7 +81,10 @@ const DEFAULT_WEBHOOK_SETTINGS = {
   url:            '',
   method:         'POST',
   headers:        {},
-  payload_mode:   'full',
+  // New webhooks send the ticked data (2.5.0); every webhook saved before
+  // keeps the mode it has.
+  payload_mode:   'selected',
+  payload_selection: [],
   custom_payload: '',
   // Signed by default; SubtleForms Pro creates a secret for each webhook
   // when the form is saved (2.3.0).
@@ -96,24 +103,19 @@ const DEFAULT_EMAIL_SETTINGS = {
 };
 
 const ACTION_LABELS = {
-  webhook: __('Send data to API (Webhook)',   'subtleforms'),
-  email:   __('Send Email Notification',      'subtleforms'),
+  webhook: __('Webhook',            'subtleforms'),
+  email:   __('Email notification', 'subtleforms'),
 };
 
 const ACTION_DESCRIPTIONS = {
-  webhook: __('Send form data to an external API endpoint', 'subtleforms'),
-  email:   __('Send an email after form submission',        'subtleforms'),
+  webhook: __('Send the form data to an API endpoint', 'subtleforms'),
+  email:   __('Send an email after form submission',   'subtleforms'),
 };
 
 const METHOD_OPTIONS = [
   { label: 'POST', value: 'POST' },
   { label: 'PUT',  value: 'PUT'  },
   { label: 'PATCH', value: 'PATCH' },
-];
-
-const PAYLOAD_MODE_OPTIONS = [
-  { label: __('Full submission data', 'subtleforms'), value: 'full'   },
-  { label: __('Custom data (JSON)',    'subtleforms'), value: 'custom' },
 ];
 
 // ─── MergeTagField ──────────────────────────────────────────────────────────
@@ -149,38 +151,6 @@ function MergeTagField({ label, fields, value, onChange, disabled, allowAll = tr
   );
 }
 
-// ─── HeadersEditor ──────────────────────────────────────────────────────────
-
-/**
- * Simple key/value textarea that stores headers as a JSON object.
- * Shows raw JSON so power-users can paste in bulk; validates on change.
- */
-function HeadersEditor({ value, onChange, disabled }) {
-  const jsonStr = typeof value === 'object' && value !== null
-    ? JSON.stringify(value, null, 2)
-    : '{}';
-
-  return (
-    <TextareaControl
-      label={__('Custom headers (advanced)', 'subtleforms')}
-      value={jsonStr}
-      rows={4}
-      disabled={disabled}
-      onChange={(raw) => {
-        try {
-          const parsed = JSON.parse(raw);
-          if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
-            onChange(parsed);
-          }
-        } catch (_) {
-          // Let the user keep typing; don't propagate invalid JSON
-        }
-      }}
-      help={__('JSON object of extra HTTP headers. Example: {"X-Source": "subtleforms"}', 'subtleforms')}
-    />
-  );
-}
-
 // ─── SortableActionItem ──────────────────────────────────────────────────────
 
 /**
@@ -211,7 +181,7 @@ function ActionConditions({ settings, fields, disabled, onChange }) {
   );
 }
 
-function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fields }) {
+function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fields, payloadFields, hasPayment, form }) {
   const {
     attributes,
     listeners,
@@ -237,13 +207,6 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
   /** Merge a patch into settings */
   const patchSettings = (patch) => onUpdate(index, { settings: { ...s, ...patch } });
   const patchSigning  = (patch) => patchSettings({ signing: { ...signing, ...patch } });
-
-  /** Validate custom_payload: must be empty or valid JSON */
-  let customPayloadError = null;
-  if (s.payload_mode === 'custom' && s.custom_payload) {
-    try { JSON.parse(s.custom_payload); }
-    catch (_) { customPayloadError = __('Invalid JSON', 'subtleforms'); }
-  }
 
   return (
     <div
@@ -426,59 +389,32 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
             }}
             placeholder='https://example.com/webhook'
             disabled={isDisabled}
-          />
-          <ConnectionTest
-            path='/webhooks/test'
-            requiresPro={false}
-            label={__('Send test request', 'subtleforms')}
-            disabled={isDisabled || !String(s.url || '').trim()}
-            getBody={() => ({
-              url: normalizeWebhookUrl(s.url),
-              method: s.method || 'POST',
-              headers: s.headers || {},
-              sign: !!s.signing?.enabled,
-              secret: s.signing?.secret || '',
-              payload_mode: s.payload_mode === 'custom' ? 'custom' : 'full',
-              custom_payload: s.custom_payload || '',
-            })}
+            help={sprintf(
+              /* translators: %s: HTTP method, for example POST */
+              __('On every submission SubtleForms sends a %s request to this URL with the data you choose below.', 'subtleforms'),
+              s.method || 'POST'
+            )}
           />
 
-          {/* Method + Payload mode, side by side */}
-          <div className='sf-actions-panel__row'>
-            <SelectControl
-              label={__('HTTP Method', 'subtleforms')}
-              value={s.method || 'POST'}
-              options={METHOD_OPTIONS}
-              onChange={(v) => patchSettings({ method: v })}
-              disabled={isDisabled}
-            />
-            <SelectControl
-              label={__('Payload Mode', 'subtleforms')}
-              value={s.payload_mode || 'full'}
-              options={PAYLOAD_MODE_OPTIONS}
-              onChange={(v) => patchSettings({ payload_mode: v })}
-              disabled={isDisabled}
-            />
-          </div>
+          <SelectControl
+            label={__('HTTP method', 'subtleforms')}
+            value={s.method || 'POST'}
+            options={METHOD_OPTIONS}
+            onChange={(v) => patchSettings({ method: v })}
+            disabled={isDisabled}
+            className='sf-webhook-method'
+          />
 
-          {/* Custom payload */}
-          {s.payload_mode === 'custom' && (
-            <>
-              <TextareaControl
-                label={__('Custom JSON Payload', 'subtleforms')}
-                value={s.custom_payload || ''}
-                rows={5}
-                onChange={(v) => patchSettings({ custom_payload: v })}
-                placeholder={'{\n  "name": "{{name}}",\n  "email": "{{email}}"\n}'}
-                disabled={isDisabled}
-              />
-              {customPayloadError && (
-                <Notice status='error' isDismissible={false}>
-                  {customPayloadError}
-                </Notice>
-              )}
-            </>
-          )}
+          <PayloadPicker
+            settings={s}
+            fields={payloadFields}
+            hasPayment={hasPayment}
+            formId={form.id}
+            formTitle={form.title}
+            siteUrl={form.siteUrl}
+            disabled={isDisabled}
+            patch={patchSettings}
+          />
 
           {/* Headers */}
           <HeadersEditor
@@ -509,6 +445,36 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
             )}
           </div>
 
+          {/* Test */}
+          <div className='sf-webhook-test'>
+            <ConnectionTest
+              path='/webhooks/test'
+              requiresPro={false}
+              label={__('Send test', 'subtleforms')}
+              disabled={isDisabled || !String(s.url || '').trim()}
+              getBody={() => {
+                const mode = payloadMode(s);
+                return {
+                  url: normalizeWebhookUrl(s.url),
+                  method: s.method || 'POST',
+                  headers: s.headers || {},
+                  sign: !!s.signing?.enabled,
+                  secret: s.signing?.secret || '',
+                  payload_mode: mode,
+                  custom_payload: s.custom_payload || '',
+                  payload_selection: mode === 'selected' ? currentSelection(s, payloadFields, hasPayment) : [],
+                  fields: payloadFields.map((f) => ({ key: f.key, label: f.label, type: f.type })),
+                  sample: sampleAnswers(payloadFields),
+                  form_title: form.title,
+                  form_id: form.id,
+                };
+              }}
+            />
+            <p className='sf-webhook-section__help'>
+              {__('Sends the example above to your URL now, so you can see the answer your endpoint gives.', 'subtleforms')}
+            </p>
+          </div>
+
           <ActionConditions
             settings={s}
             fields={fields}
@@ -522,11 +488,48 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
   );
 }
 
+// ─── AddBar ──────────────────────────────────────────────────────────────────
+
+/**
+ * The two "add" buttons as one group, shown above the list and, when there
+ * are notifications, below it as well (2.5.0).
+ */
+function AddBar({ isReadOnly, onAddEmail, onAddWebhook, label, position = 'before' }) {
+  return (
+    <div className={`sf-actions-panel__add sf-actions-panel__add--${position}`} role='group' aria-label={label}>
+      <Button variant='secondary' disabled={isReadOnly} onClick={onAddEmail}>
+        <Icon.Mail size={16} aria-hidden='true' />
+        {__('Send email', 'subtleforms')}
+      </Button>
+      <Button
+        variant='secondary'
+        disabled={isReadOnly}
+        onClick={onAddWebhook}
+        title={__('Send form data to an API endpoint', 'subtleforms')}>
+        <Icon.Webhook size={16} aria-hidden='true' />
+        {__('Send to webhook', 'subtleforms')}
+      </Button>
+    </div>
+  );
+}
+
 // ─── ActionsPanel ────────────────────────────────────────────────────────────
 
 export default function ActionsPanel({ schema, onChange, isReadOnly = false }) {
   const actions = normalizeActions(schema?.actions);
   const logicFields = collectLogicFields(schema?.fields || []);
+  const payloadFields = useMemo(() => collectPayloadFields(schema?.fields || []), [schema?.fields]);
+  const hasPayment = useMemo(() => formHasPayment(schema?.fields || []), [schema?.fields]);
+  const form = useMemo(() => {
+    let id = 0;
+    try {
+      id = Number(new URLSearchParams(window.location.search).get('form_id')) || 0;
+    } catch (e) {
+      id = 0;
+    }
+    const meta = schema?.metadata || {};
+    return { id, title: meta.title || meta.name || '', siteUrl: window.location.origin };
+  }, [schema?.metadata]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
@@ -574,10 +577,10 @@ export default function ActionsPanel({ schema, onChange, isReadOnly = false }) {
         id:       uid(),
         type:     'webhook',
         enabled:  true,
-        settings: { ...DEFAULT_WEBHOOK_SETTINGS },
+        settings: { ...DEFAULT_WEBHOOK_SETTINGS, payload_selection: defaultSelection(payloadFields) },
       },
     ]);
-  }, [actions, commit, isReadOnly]);
+  }, [actions, commit, isReadOnly, payloadFields]);
 
   const handleAddEmail = useCallback(() => {
     if (isReadOnly) return;
@@ -600,11 +603,18 @@ export default function ActionsPanel({ schema, onChange, isReadOnly = false }) {
           {actions.length === 0 && (
             <p className='sf-actions-panel__empty'>
               {__(
-                'No actions configured. Add an action to process form submissions.',
+                'No notifications yet. Send an email or call a webhook when an entry arrives.',
                 'subtleforms'
               )}
             </p>
           )}
+
+          <AddBar
+            isReadOnly={isReadOnly}
+            onAddEmail={handleAddEmail}
+            onAddWebhook={handleAddWebhook}
+            label={__('Add a notification', 'subtleforms')}
+          />
 
           <DndContext
             sensors={sensors}
@@ -622,25 +632,23 @@ export default function ActionsPanel({ schema, onChange, isReadOnly = false }) {
                   onUpdate={handleUpdate}
                   onRemove={handleRemove}
                   fields={logicFields}
+                  payloadFields={payloadFields}
+                  hasPayment={hasPayment}
+                  form={form}
                 />
               ))}
             </SortableContext>
           </DndContext>
 
-          <div className='sf-actions-panel__footer'>
-            <Button
-              variant='secondary'
-              disabled={isReadOnly}
-              onClick={handleAddEmail}>
-              {__('+ Send Email', 'subtleforms')}
-            </Button>
-            <Button
-              variant='secondary'
-              disabled={isReadOnly}
-              onClick={handleAddWebhook}>
-              {__('+ Send to API', 'subtleforms')}
-            </Button>
-          </div>
+          {actions.length > 0 && (
+            <AddBar
+              isReadOnly={isReadOnly}
+              onAddEmail={handleAddEmail}
+              onAddWebhook={handleAddWebhook}
+              label={__('Add another notification', 'subtleforms')}
+              position='after'
+            />
+          )}
         </div>
   );
 }
