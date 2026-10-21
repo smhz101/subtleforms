@@ -92,6 +92,14 @@ final class SubmissionTabCountsTest extends TestCase {
 		$this->assertSame( $this->repo->count( array( 'form_id' => $form, 'status' => 'trash' ) ), $counts['trash'] );
 	}
 
+	public function test_builder_preview_entries_count_nowhere(): void {
+		$form   = $this->seed();
+		$before = $this->repo->tabCounts( $form );
+		$this->entry( $form, array( 'status' => 'preview', 'starred' => 1 ) );
+		$this->entry( $form, array( 'status' => 'preview', 'is_read' => 1 ) );
+		$this->assertSame( $before, $this->repo->tabCounts( $form ) );
+	}
+
 	public function test_a_form_filter_counts_only_that_form(): void {
 		$first  = $this->seed();
 		$second = $this->publish( array( array( 'id' => 'n', 'key' => 'name', 'type' => 'text', 'label' => 'Name' ) ) );

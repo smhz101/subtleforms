@@ -632,7 +632,7 @@ final class SubmissionsRepository {
 	 * Entry counts for every tab of the Submissions screen, in one query.
 	 *
 	 * Each number is what that tab lists: entries in the Trash only count
-	 * under Trash and are left out of every other tab.
+	 * under Trash and are left out of every other tab. Builder preview entries count nowhere.
 	 *
 	 * @param int|null $formId Count one form, or every form when empty.
 	 * @return array{all: int, unread: int, read: int, spam: int, starred: int, flagged: int, trash: int}
@@ -640,7 +640,7 @@ final class SubmissionsRepository {
 	public function tabCounts( $formId = null ): array {
 		global $wpdb;
 
-		$live   = self::NOT_TRASHED;
+		$live   = self::LISTED;
 		$where  = '';
 		$params = array();
 		$formId = (int) $formId;
