@@ -1,4 +1,5 @@
 import { sameCheckValue } from './logicFields';
+import { countryCodeFor } from './countries';
 /**
  * Conditional logic: one evaluator for the builder, the frontend renderer and
  * (mirrored line for line) the server in src/Engine/ConditionalLogic.php.
@@ -106,6 +107,18 @@ function textEquals(a, b) {
   return norm(a) === norm(b);
 }
 
+/**
+ * A Country field stores the ISO code or the name, depending on its Output
+ * Format, and a rule holds the code the builder picked. Both sides compare as
+ * codes when they name a known country (FB-20).
+ */
+function countryEquals(x, expected) {
+  const want = countryCodeFor(expected);
+  const have = countryCodeFor(x);
+  if (want !== '' && have !== '') return want === have;
+  return textEquals(x, expected);
+}
+
 function isEmptyForField(value, field) {
   if (field && field.type === 'toggle') {
     const off = field.offValue || field.config?.offValue || 'no';
@@ -163,10 +176,16 @@ export function evaluateCondition(value, operator, compare, compare2, opts = {})
       if (opts.field && (opts.field.type === 'checkbox' || opts.field.type === 'consent')) {
         return sameCheckValue(value, c);
       }
+      if (opts.field && opts.field.type === 'country') {
+        return items.some((x) => countryEquals(x, c));
+      }
       return items.some((x) => textEquals(x, c));
     case 'not_equals':
       if (opts.field && (opts.field.type === 'checkbox' || opts.field.type === 'consent')) {
         return !sameCheckValue(value, c);
+      }
+      if (opts.field && opts.field.type === 'country') {
+        return !items.some((x) => countryEquals(x, c));
       }
       return !items.some((x) => textEquals(x, c));
     case 'contains':
@@ -199,9 +218,10 @@ export function evaluateCondition(value, operator, compare, compare2, opts = {})
     case 'in':
     case 'not_in': {
       const opts2 = optionList(compare);
+      const same = opts.field && opts.field.type === 'country' ? countryEquals : textEquals;
       const found =
         !isEmptyValue(value) &&
-        items.some((x) => opts2.some((o) => textEquals(x, o)));
+        items.some((x) => opts2.some((o) => same(x, o)));
       return operator === 'in' ? found : !found;
     }
     case 'between': {
@@ -359,8 +379,7 @@ function indexLogicFields(nodes, out) {
     if (key) {
       out[key] = { ...node, ...(node.config && typeof node.config === 'object' ? node.config : {}) };
     }
-    indexLogicFields(node.children, out);
-    indexLogicFields(node.fields, out);
+    childLists(node).forEach((list) => indexLogicFields(list, out));
   });
   return out;
 }

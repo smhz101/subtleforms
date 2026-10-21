@@ -9,7 +9,7 @@ import { ProductPreview, ChoicePreview, SummaryPreview, CardPreview } from './Pa
 import { getCanvasPreview } from '../../../shared/extend';
 import { fieldDisplay } from '../../../shared/fieldDisplay';
 import { fieldConfig } from '../../../shared/fieldConfig';
-import { choiceShowsDefault } from '../../../shared/canvasDefaults';
+import { choiceChecked, choiceShowsDefault } from '../../../shared/canvasDefaults';
 import { consentParts } from '../../../shared/consentLabel';
 import { toggleInitialValue, toggleIsOn } from '../../../shared/toggleState';
 import ChainedSelect from '../../../frontend/components/fields/ChainedSelect';
@@ -20,6 +20,8 @@ import DateTimeField from '../../../frontend/components/fields/DateTimeField';
 import { ConfigContext } from './context/ConfigContext';
 import { currencySymbol } from '../../../shared/currencies';
 import './FieldRenderer.scss';
+
+const noop = () => {};
 
 // Types that do not accept user input, required indicator suppressed
 const NON_INPUT_TYPES = new Set([
@@ -376,6 +378,9 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
                 type='radio'
                 name={field.key}
                 className='sf-field-renderer__radio'
+                checked={choiceChecked(options, fieldConfig(field).defaultValue, idx, true)}
+                readOnly
+                onChange={noop}
                 aria-label={canvasControlName(field)} tabIndex='-1'
               />
               <span className='sf-field-renderer__checkbox-label'>
@@ -393,6 +398,9 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
               <input
                 type={field.allowMultiple === false ? 'radio' : 'checkbox'}
                 className='sf-field-renderer__checkbox'
+                checked={choiceChecked(options, fieldConfig(field).defaultValue, idx, field.allowMultiple === false)}
+                readOnly
+                onChange={noop}
                 aria-label={canvasControlName(field)} tabIndex='-1'
               />
               <span className='sf-field-renderer__checkbox-label'>

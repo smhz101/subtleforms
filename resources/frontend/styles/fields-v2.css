@@ -73,7 +73,7 @@
 	padding: 0 12px;
 	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
 	background: color-mix(in srgb, var(--subtleforms-color-border, #d1d5db) 30%, transparent);
-	color: var(--subtleforms-color-text-light, #6b7280);
+	color: var(--subtleforms-color-text-light, #5b6270);
 	font-size: var(--subtleforms-font-size-sm, 0.875rem);
 	white-space: nowrap;
 }
@@ -264,7 +264,7 @@
 	justify-content: space-between;
 	margin-top: 6px;
 	font-size: var(--subtleforms-font-size-sm, 0.875rem);
-	color: var(--subtleforms-color-text-light, #6b7280);
+	color: var(--subtleforms-color-text-light, #5b6270);
 }
 
 /* ── Picture choice ────────────────────────────────────────────────────── */
@@ -359,7 +359,7 @@
 .subtleforms-calculation__affix {
 	font-size: var(--subtleforms-font-size-base, 1rem);
 	font-weight: 500;
-	color: var(--subtleforms-color-text-light, #6b7280);
+	color: var(--subtleforms-color-text-light, #5b6270);
 }
 
 /*! inherit: keep-start (error state and the confirmation after submit) */

@@ -10,6 +10,7 @@ import {
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import { formTypeChoices } from '../utils/formTypeChoices';
+import { formDescriptionHelp, formDescriptionLabel, formNameHelp, formNameLabel } from '../utils/formNameHelp';
 import './CreateFormWizard.scss';
 
 const STEPS = [
@@ -119,13 +120,15 @@ export default function CreateFormWizard({
           {step.key === 'basics' && (
             <div className='sf-create-form-wizard__body-fields'>
               <TextControl
-                label={__('Form name', 'subtleforms')}
+                label={formNameLabel()}
+                help={formNameHelp()}
                 value={title}
                 onChange={(v) => setTitle(v)}
                 disabled={submitting}
               />
               <TextareaControl
-                label={__('Short description (optional)', 'subtleforms')}
+                label={formDescriptionLabel()}
+                help={formDescriptionHelp()}
                 value={description}
                 onChange={(v) => setDescription(v)}
                 disabled={submitting}

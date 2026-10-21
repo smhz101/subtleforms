@@ -29,6 +29,28 @@ final class Webhooks {
 	const NOT_ANSWERS = array( 'website_url', 'form_rendered_at', 'g-recaptcha-response', 'h-captcha-response', 'cf-turnstile-response', '_payment' );
 
 	/**
+	 * Field types a webhook never sends, even when asked: they hold a secret
+	 * or an image of a signature.
+	 */
+	const SENSITIVE_TYPES = array( 'password', 'signature', 'payment_card' );
+
+	/**
+	 * Keys of the "selected" payload mode (2.5.0), by group. An answer is
+	 * selected as "field:<key>".
+	 */
+	const FORM_KEYS       = array( 'form_id', 'form_title' );
+	const SUBMISSION_KEYS = array( 'submission_id', 'created_at', 'status', 'page_url', 'ip_address', 'user_agent', 'user_id' );
+	const PAYMENT_KEYS    = array( 'payment_amount', 'payment_currency', 'payment_status' );
+	const FIELD_PREFIX    = 'field:';
+	const LABELS_OPTION   = 'answers_with_labels';
+
+	/**
+	 * Headers a webhook cannot set: they would break the request or forge
+	 * the signature that SubtleForms adds itself.
+	 */
+	const BLOCKED_HEADERS = array( 'host', 'content-length', 'transfer-encoding', 'connection', 'keep-alive', 'upgrade', 'te', 'trailer', 'proxy-authorization', 'proxy-connection', 'x-subtleforms-signature' );
+
+	/**
 	 * Trim an address and add https:// when no scheme was typed, so
 	 * "hooks.example.com/abc" works like "https://hooks.example.com/abc".
 	 *
@@ -142,8 +164,30 @@ final class Webhooks {
 	}
 
 	/**
-	 * Headers from an action's settings, without line breaks that could add
-	 * headers of their own.
+	 * Why a header cannot be sent, or an empty string when it can. The
+	 * builder shows the same reasons.
+	 *
+	 * @param string $name  Header name.
+	 * @param string $value Header value.
+	 * @return string Reason code: empty, invalid_name, blocked or invalid_value.
+	 */
+	public static function headerProblem( string $name, string $value ): string {
+		$name = trim( $name );
+		if ( '' === $name || ! preg_match( '/^[A-Za-z0-9!#$%&\'*+.^_`|~-]+$/', $name ) ) {
+			return 'invalid_name';
+		}
+		if ( in_array( strtolower( $name ), self::BLOCKED_HEADERS, true ) ) {
+			return 'blocked';
+		}
+		if ( strpbrk( $value, "\r\n" ) !== false ) {
+			return 'invalid_value';
+		}
+		return '';
+	}
+
+	/**
+	 * Headers from an action's settings, without names or values that could
+	 * break the request or add headers of their own.
 	 *
 	 * @param mixed $headers Name to value.
 	 * @return array<string,string>
@@ -152,12 +196,134 @@ final class Webhooks {
 		$safe = array();
 		foreach ( is_array( $headers ) ? $headers : array() as $name => $value ) {
 			$name  = trim( (string) $name );
-			$value = (string) $value;
-			if ( '' === $name || strpbrk( $name, "\r\n:" ) !== false || strpbrk( $value, "\r\n" ) !== false ) {
+			$value = is_scalar( $value ) ? (string) $value : '';
+			if ( '' !== self::headerProblem( $name, $value ) ) {
 				continue;
 			}
 			$safe[ $name ] = $value;
 		}
 		return $safe;
+	}
+
+	/**
+	 * Every value the "selected" payload can send about the entry, with
+	 * its real value (2.5.0).
+	 *
+	 * @param \SubtleForms\Engine\SubmissionContext $context Submission context.
+	 * @param array                                   $schema  Form schema.
+	 * @return array<string,mixed>
+	 */
+	public static function entryValues( $context, array $schema ): array {
+		$payment = $context->getMeta( 'payment_info', array() );
+		$payment = is_array( $payment ) ? $payment : array();
+		return array(
+			'form_id'          => (int) $context->formId,
+			'form_title'       => (string) ( $schema['metadata']['title'] ?? ( $schema['metadata']['name'] ?? '' ) ),
+			'submission_id'    => (int) $context->getMeta( 'submission_id', 0 ),
+			'created_at'       => gmdate( 'c' ),
+			'status'           => (string) $context->getMeta( 'entry_status', '' ),
+			'page_url'         => (string) $context->getMeta( 'request_page_url', '' ),
+			'ip_address'       => (string) $context->getMeta( 'request_ip', '' ),
+			'user_agent'       => (string) $context->getMeta( 'request_user_agent', '' ),
+			'user_id'          => (int) $context->getMeta( 'request_user_id', 0 ),
+			'payment_amount'   => (float) ( $payment['amount'] ?? 0 ),
+			'payment_currency' => (string) ( $payment['currency'] ?? '' ),
+			'payment_status'   => (string) ( $payment['status'] ?? '' ),
+		);
+	}
+
+	/**
+	 * The fields a "selected" payload may send: every answer-bearing field
+	 * of the form except the types in SENSITIVE_TYPES, by key.
+	 *
+	 * @param array $schema Form schema.
+	 * @return array<string,array> Key to FieldMapper::fields() row.
+	 */
+	public static function sendableFields( array $schema ): array {
+		$out = array();
+		foreach ( FieldMapper::fields( $schema ) as $row ) {
+			if ( in_array( $row['type'], self::SENSITIVE_TYPES, true ) || EntryValues::isSecret( $row['field'] ) || isset( $out[ $row['key'] ] ) ) {
+				continue;
+			}
+			$out[ $row['key'] ] = $row;
+		}
+		return $out;
+	}
+
+	/**
+	 * Answers as stored, by field key, for the {{raw:key}} tag of a custom
+	 * body. Sensitive fields are left out.
+	 *
+	 * @param array $schema  Form schema.
+	 * @param array $answers Answers from answers().
+	 * @return array
+	 */
+	public static function rawAnswers( array $schema, array $answers ): array {
+		$formatted = $schema ? AnswerFormatter::withChainedLabels( $schema, $answers ) : $answers;
+		$allowed   = self::sendableFields( $schema );
+		return $schema ? array_intersect_key( $formatted, $allowed ) : $formatted;
+	}
+
+	/**
+	 * The JSON body of the "selected" payload mode: only what was ticked.
+	 * Unknown keys and fields that are no longer on the form are skipped,
+	 * and sensitive fields are never sent, whatever the settings say.
+	 *
+	 * @param array $schema   Form schema.
+	 * @param array $answers  Answers from answers().
+	 * @param array $entry    Values from entryValues().
+	 * @param array $selected Ticked keys.
+	 * @return array
+	 */
+	public static function selectedBody( array $schema, array $answers, array $entry, array $selected ): array {
+		$selected = array_values( array_unique( array_filter( array_map( 'strval', $selected ) ) ) );
+		$body     = array( 'event' => 'submission.created' );
+
+		$ints = array( 'form_id', 'submission_id', 'user_id' );
+		foreach ( array_merge( self::FORM_KEYS, self::SUBMISSION_KEYS ) as $key ) {
+			if ( ! in_array( $key, $selected, true ) ) {
+				continue;
+			}
+			$value        = $entry[ $key ] ?? '';
+			$body[ $key ] = in_array( $key, $ints, true ) ? (int) $value : (string) $value;
+		}
+
+		$sendable = self::sendableFields( $schema );
+		$keys     = array();
+		foreach ( $sendable as $key => $row ) {
+			if ( in_array( self::FIELD_PREFIX . $key, $selected, true ) ) {
+				$keys[] = $key;
+			}
+		}
+		if ( $keys ) {
+			$formatted = $schema ? AnswerFormatter::withChainedLabels( $schema, $answers ) : $answers;
+			$fields    = array();
+			$labelled  = array();
+			foreach ( $keys as $key ) {
+				$fields[ $key ] = array_key_exists( $key, $formatted ) ? $formatted[ $key ] : null;
+				$labelled[]     = array(
+					'key'   => $key,
+					'label' => (string) $sendable[ $key ]['label'],
+					'value' => $fields[ $key ],
+				);
+			}
+			$body['fields'] = (object) $fields;
+			if ( in_array( self::LABELS_OPTION, $selected, true ) ) {
+				$body['answers'] = $labelled;
+			}
+		}
+
+		$payment = array();
+		foreach ( self::PAYMENT_KEYS as $key ) {
+			if ( in_array( $key, $selected, true ) ) {
+				$value                                    = $entry[ $key ] ?? '';
+				$payment[ substr( $key, strlen( 'payment_' ) ) ] = 'payment_amount' === $key ? (float) $value : (string) $value;
+			}
+		}
+		if ( $payment ) {
+			$body['payment'] = $payment;
+		}
+
+		return $body;
 	}
 }

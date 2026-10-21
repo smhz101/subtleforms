@@ -17,7 +17,7 @@ import {
 } from '../../../shared/dateTime';
 import { CalendarIcon, ChevronIcon, ClockIcon } from './PickerIcons';
 import { useMenu } from './useMenu';
-import { moveGrid } from '../../../shared/pickerKeyboard';
+import { moveDate, moveIndex } from '../../../shared/pickerKeyboard';
 
 function weekdayLabels(weekStartsOn, locale) {
   const sunday = new Date(2024, 0, 7);
@@ -46,11 +46,83 @@ function displayTime(clock, format) {
   return formatPhp(date, format || 'H:i');
 }
 
+const minuteChoices = Array.from({ length: 60 }, (_, minute) => ({
+  value: minute,
+  label: String(minute).padStart(2, '0'),
+}));
+
 function hourChoices(twelveHour) {
   if (!twelveHour) {
     return Array.from({ length: 24 }, (_, hour) => ({ value: hour, label: String(hour).padStart(2, '0') }));
   }
   return Array.from({ length: 12 }, (_, index) => ({ value: index + 1, label: String(index + 1) }));
+}
+
+/**
+ * One column of the time picker (hours or minutes), a listbox with a single
+ * tab stop. Arrows, Home, End, PageUp and PageDown move through it, Enter or
+ * Space picks the focused value, and the left and right arrows jump to the
+ * neighbouring column (FLD2-05).
+ */
+function TimeColumn({ label, options, selected, onPick }) {
+  const listRef = useRef(null);
+  const selectedIndex = options.findIndex((option) => option.value === selected);
+  const [focusIndex, setFocusIndex] = useState(Math.max(0, selectedIndex));
+
+  useEffect(() => {
+    if (selectedIndex >= 0) {
+      setFocusIndex(selectedIndex);
+    }
+  }, [selectedIndex]);
+
+  const focusOption = (index) => {
+    setFocusIndex(index);
+    listRef.current?.children[index]?.focus();
+  };
+
+  const onKeyDown = (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      if (options[focusIndex]) {
+        onPick(options[focusIndex].value);
+      }
+      return;
+    }
+    if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
+      const sibling = event.key === 'ArrowLeft'
+        ? listRef.current?.previousElementSibling
+        : listRef.current?.nextElementSibling;
+      const target = sibling?.querySelector('[role="option"][tabindex="0"]');
+      if (target) {
+        event.preventDefault();
+        target.focus();
+      }
+      return;
+    }
+    const next = moveIndex(focusIndex, event.key, options.length);
+    if (next >= 0) {
+      event.preventDefault();
+      focusOption(next);
+    }
+  };
+
+  return (
+    <div className='subtleforms-picker__column' role='listbox' aria-label={label} ref={listRef} onKeyDown={onKeyDown}>
+      {options.map((option, index) => (
+        <button
+          key={option.value}
+          type='button'
+          role='option'
+          tabIndex={index === focusIndex ? 0 : -1}
+          aria-selected={option.value === selected}
+          className={`subtleforms-picker__tick${option.value === selected ? ' is-selected' : ''}`}
+          onFocus={() => setFocusIndex(index)}
+          onClick={() => onPick(option.value)}>
+          {option.label}
+        </button>
+      ))}
+    </div>
+  );
 }
 
 /**
@@ -74,8 +146,12 @@ export default function DateTimeField({
   invalid = false,
   preview = false,
 }) {
-  const { rootRef, open, setOpen } = useMenu();
+  const triggerRef = useRef(null);
+  const { rootRef, open, setOpen } = useMenu(triggerRef);
   const gridRef = useRef(null);
+  const timeRef = useRef(null);
+  const focusGrid = useRef(false);
+  const dialogId = `${inputId || 'datetime'}-dialog`;
   const locale = siteLocale();
   const weekStartsOn = siteWeekStart();
   const [localValue, setLocalValue] = useState(value ?? '');
@@ -104,13 +180,18 @@ export default function DateTimeField({
     }
   };
 
+  const closeMenu = () => {
+    setOpen(false);
+    triggerRef.current?.focus();
+  };
+
   const emitDate = (iso) => {
     if (mode === 'datetime') {
       emit(joinDateTime(iso, timeValue));
       return;
     }
     emit(iso);
-    setOpen(false);
+    closeMenu();
   };
 
   const emitTime = (hours, minutes) => {
@@ -163,12 +244,21 @@ export default function DateTimeField({
 
   const selectedHour = twelveHour ? (parsedTime.hours % 12 || 12) : parsedTime.hours;
 
+  // Focus goes into the dialog when it opens, and follows the arrow keys in
+  // the calendar. Changing the month with its selects keeps focus there.
   useEffect(() => {
-    if (!open || mode === 'time') {
+    if (!open || mode === 'time' || !focusGrid.current) {
       return;
     }
+    focusGrid.current = false;
     gridRef.current?.querySelector('[tabindex="0"]')?.focus();
   }, [open, mode, cursor]);
+
+  useEffect(() => {
+    if (open && mode === 'time') {
+      timeRef.current?.querySelector('[role="option"][tabindex="0"]')?.focus();
+    }
+  }, [open, mode]);
 
   return (
     <div
@@ -182,17 +272,30 @@ export default function DateTimeField({
       <button
         type='button'
         id={inputId}
+        ref={triggerRef}
         className='subtleforms-picker__trigger'
+        role='combobox'
         aria-haspopup='dialog'
         aria-expanded={open}
+        aria-controls={open ? dialogId : undefined}
+        aria-required={required || undefined}
         aria-invalid={invalid ? 'true' : undefined}
         aria-describedby={describedBy}
         disabled={disabled || readOnly}
         tabIndex={preview ? -1 : 0}
+        onKeyDown={(event) => {
+          if (!locked && !open && (event.key === 'ArrowDown' || event.key === 'ArrowUp')) {
+            event.preventDefault();
+            event.currentTarget.click();
+          }
+        }}
         onClick={() => {
           if (!locked) {
-            if (!open && dateValue) {
-              setCursor(parseIsoDate(dateValue) || new Date());
+            if (!open) {
+              focusGrid.current = true;
+              if (dateValue) {
+                setCursor(parseIsoDate(dateValue) || new Date());
+              }
             }
             setOpen((next) => !next);
           }
@@ -226,7 +329,7 @@ export default function DateTimeField({
         />
       ) : null}
       {open && !locked && (
-        <div className='subtleforms-picker__menu subtleforms-picker__menu--calendar' role='dialog' aria-label={prompt}>
+        <div id={dialogId} className='subtleforms-picker__menu subtleforms-picker__menu--calendar' role='dialog' aria-label={prompt}>
           <div className='subtleforms-picker__panel'>
             {mode !== 'time' && (
               <div className='subtleforms-picker__calendar'>
@@ -264,24 +367,21 @@ export default function DateTimeField({
                   ref={gridRef}
                   aria-label={monthTitle(cursor, locale)}
                   onKeyDown={(event) => {
-                    const focusIso = toIsoDate(cursor);
-                    const current = days.findIndex((day) => toIsoDate(day) === focusIso);
                     if (event.key === 'Enter' || event.key === ' ') {
                       event.preventDefault();
-                      const iso = focusIso;
+                      const iso = toIsoDate(cursor);
                       if (isIsoDateInRange(iso, min, max)) {
                         emitDate(iso);
                       }
                       return;
                     }
-                    const next = moveGrid(current < 0 ? 0 : current, event.key, 7, days.length);
-                    if (next === (current < 0 ? 0 : current) || !event.key.startsWith('Arrow')) {
+                    const next = moveDate(cursor, event.key, weekStartsOn);
+                    if (!next) {
                       return;
                     }
                     event.preventDefault();
-                    const day = days[next];
-                    if (!day) return;
-                    setCursor(day);
+                    focusGrid.current = true;
+                    setCursor(next);
                   }}>
                   <div className='subtleforms-picker__weekdays' role='row'>
                     {weekdays.map((day, index) => <span key={index} role='columnheader'>{day}</span>)}
@@ -293,19 +393,21 @@ export default function DateTimeField({
                         const outside = day.getMonth() !== cursor.getMonth();
                         const inRange = isIsoDateInRange(iso, min, max);
                         const isSelected = iso === dateValue;
-                        const isCursor = iso === toIsoDate(cursor) || (!dateValue && iso === toIsoDate(new Date(cursor.getFullYear(), cursor.getMonth(), 1)));
                         return (
                           <button
                             key={iso}
                             type='button'
                             role='gridcell'
                             className={`subtleforms-picker__day${outside ? ' is-outside' : ''}${isSelected ? ' is-selected' : ''}`}
-                            disabled={!inRange}
+                            aria-disabled={!inRange || undefined}
                             aria-selected={isSelected}
                             aria-label={dayName(day, locale)}
                             tabIndex={toIsoDate(cursor) === iso ? 0 : -1}
                             onClick={() => {
-                              setCursor(new Date(day.getFullYear(), day.getMonth(), 1));
+                              if (!inRange) {
+                                return;
+                              }
+                              setCursor(day);
                               emitDate(iso);
                             }}>
                             {day.getDate()}
@@ -318,36 +420,20 @@ export default function DateTimeField({
               </div>
             )}
             {mode !== 'date' && (
-              <div className='subtleforms-picker__time'>
+              <div className='subtleforms-picker__time' ref={timeRef}>
                 <div className='subtleforms-picker__columns'>
-                  <div className='subtleforms-picker__column' role='listbox' aria-label={__('Hour', 'subtleforms')}>
-                    {hourChoices(twelveHour).map((hour) => (
-                      <button
-                        key={hour.value}
-                        type='button'
-                        role='option'
-                        tabIndex={-1}
-                        aria-selected={!!timeValue && selectedHour === hour.value}
-                        className={`subtleforms-picker__tick${timeValue && selectedHour === hour.value ? ' is-selected' : ''}`}
-                        onClick={() => selectHour(hour.value)}>
-                        {hour.label}
-                      </button>
-                    ))}
-                  </div>
-                  <div className='subtleforms-picker__column' role='listbox' aria-label={__('Minute', 'subtleforms')}>
-                    {Array.from({ length: 60 }, (_, minute) => (
-                      <button
-                        key={minute}
-                        type='button'
-                        role='option'
-                        tabIndex={-1}
-                        aria-selected={!!timeValue && parsedTime.minutes === minute}
-                        className={`subtleforms-picker__tick${timeValue && parsedTime.minutes === minute ? ' is-selected' : ''}`}
-                        onClick={() => emitTime(parsedTime.hours, minute)}>
-                        {String(minute).padStart(2, '0')}
-                      </button>
-                    ))}
-                  </div>
+                  <TimeColumn
+                    label={__('Hour', 'subtleforms')}
+                    options={hourChoices(twelveHour)}
+                    selected={timeValue ? selectedHour : null}
+                    onPick={selectHour}
+                  />
+                  <TimeColumn
+                    label={__('Minute', 'subtleforms')}
+                    options={minuteChoices}
+                    selected={timeValue ? parsedTime.minutes : null}
+                    onPick={(minute) => emitTime(parsedTime.hours, minute)}
+                  />
                 </div>
                 {twelveHour && (
                   <div className='subtleforms-picker__meridiem'>
@@ -385,7 +471,7 @@ export default function DateTimeField({
               className='subtleforms-picker__text-button'
               onClick={() => {
                 emit('');
-                setOpen(false);
+                closeMenu();
               }}>
               {__('Clear', 'subtleforms')}
             </button>

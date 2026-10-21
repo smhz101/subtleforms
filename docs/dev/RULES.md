@@ -14,7 +14,7 @@ Work on ONE package at a time. The package file in docs/dev/packages/ is your wh
 ## Branch and commits
 - Branch: `pkg/<PACKAGE-ID>` from the release branch named in the package file. One commit per bug ID (or per tightly related group), message: `<ID>[, <ID>]: <what changed, plain sentence>`.
 - Never commit build/, dist/, node_modules/, vendor/ or playwright-report/. Never push to main. Open a pull request into the release branch when done.
-- Merge only when docs/dev/MERGING.md is satisfied: every check green, no conflicts, every review comment answered, current POT files (`bin/make-pot.sh`). If any of it is not true, the pull request waits.
+- Merge only when docs/dev/MERGING.md is satisfied: every check green, no conflicts, every review comment answered. Release pull requests also need current POT files (`bin/make-pot.sh`). If any of it is not true, the pull request waits.
 - No AI or tool attribution anywhere in git or GitHub: no `Co-Authored-By` lines, no "Generated with" or "Created by" lines, no tool or model names in commit messages, PR titles or PR bodies. Write them as plain notes from the team.
 
 ## Code rules
@@ -26,8 +26,11 @@ Work on ONE package at a time. The package file in docs/dev/packages/ is your wh
 ## Done means
 1. Every bug ID in the package is fixed at its cause, with a regression test that failed before and passes now (PHPUnit `tests/unit` or `tests/wp`, Jest next to the file, or Playwright `tests/browser`). Pure copy or CSS fixes may use a Jest snapshot or Playwright assertion instead.
 2. These pass: `vendor/bin/phpunit --testsuite unit`, `npx jest`, `npm run lint:js` if present, `npm run build:all`. Run the Playwright specs you touched or added against wp-env (`npx wp-env start`).
-3. docs/dev/bug-ledger.csv: set `status` to `fixed` and `fixed_in` to the pull request number and release for each bug fixed.
-4. readme.txt changelog: add one plain sentence per user-visible fix under the release version named in the package file, grouped as Fix / New / Change.
+3. Ledger: do NOT edit docs/dev/bug-ledger.csv in a pull request. Add ONE new file `docs/dev/ledger-updates/<slug>.csv` with the full replacement row for each bug you fixed (same columns as the ledger, no header line), with `status` `fixed` and `fixed_in` set to the pull request number and release. The release pull request merges these files into the ledger with `bin/merge-ledger-updates.sh`, which replaces a row with the same ID or appends a new one.
+4. Changelog: add ONE new file `docs/dev/changes/unreleased/<short-branch-slug>.md` with the first line `type: Added|Changed|Fixed|Security` and one plain sentence below it (format in docs/dev/changes/README.md). A pull request with no user-visible change adds none.
+
+## Files only a release pull request edits
+Feature and fix pull requests must NOT edit `docs/dev/bug-ledger.csv`, `readme.txt`, `changelog.txt`, `docs/dev/releases/`, the version in `subtleforms.php` or `package.json`, or `languages/*.pot`. Two pull requests that edit those lines conflict on every merge. The release pull request (`release/<version>`) bumps the version, runs `bin/compile-changes.sh <version> --apply` and regenerates the POT as its last step. The exact commands are in docs/dev/RELEASING.md. The `POT freshness check` fails a stale POT only for pull requests from a `release/*` branch; elsewhere (other pull requests, pushes to main) it only warns, and a failing extraction always fails.
 
 ## Report (keep it short; this is the only thing to write back)
 ```

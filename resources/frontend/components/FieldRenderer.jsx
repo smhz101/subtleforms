@@ -493,7 +493,7 @@ export default function FieldRenderer({
         .join(' ')}
       style={appearanceStyle}>
       {(() => {
-        const grouped = ['radio', 'multiple_choice', 'picture_choice'].includes(field.type)
+        const grouped = ['radio', 'multiple_choice', 'picture_choice', 'checkbox_grid'].includes(field.type)
           || (field.type === 'checkbox' && Array.isArray(config.options) && config.options.length > 0);
         const LabelTag = grouped ? 'div' : 'label';
         return (

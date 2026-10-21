@@ -82,6 +82,12 @@ export default function PhoneField({
     setActive(0);
   }, [query, open]);
 
+  useEffect(() => {
+    if (open) {
+      rootRef.current?.querySelector('.subtleforms-phone__option.is-active')?.scrollIntoView?.({ block: 'nearest' });
+    }
+  }, [open, active, matches]);
+
   const choose = (nextCountry) => {
     setOpen(false);
     triggerRef.current?.focus();
@@ -121,7 +127,7 @@ export default function PhoneField({
           className="subtleforms-phone__trigger"
           aria-haspopup="listbox"
           aria-expanded={open}
-          aria-controls={listId}
+          aria-controls={open ? listId : undefined}
           aria-label={country ? `${__('Country code', 'subtleforms')}, ${country.name} +${country.dial}` : __('Country code', 'subtleforms')}
           disabled={disabled || readOnly}
           onClick={() => setOpen((current) => !current)}
@@ -145,6 +151,13 @@ export default function PhoneField({
               value={query}
               placeholder={__('Search country or code', 'subtleforms')}
               aria-label={__('Search country or code', 'subtleforms')}
+              role="combobox"
+              aria-autocomplete="list"
+              aria-expanded="true"
+              aria-haspopup="listbox"
+              aria-controls={listId}
+              aria-activedescendant={matches[active] ? `${listId}-opt-${active}` : undefined}
+              autoComplete="off"
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={onSearchKeyDown}
             />
@@ -164,6 +177,8 @@ export default function PhoneField({
                   <button
                     type="button"
                     role="option"
+                    id={`${listId}-opt-${index}`}
+                    tabIndex={-1}
                     aria-selected={item.code === country?.code}
                     className={`subtleforms-phone__option${index === active ? ' is-active' : ''}`}
                     onMouseEnter={() => setActive(index)}

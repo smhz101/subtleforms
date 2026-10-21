@@ -385,8 +385,9 @@ class Schemas {
 				'url'            => 'optional|string|max:2000',
 				'method'         => 'optional|in:POST,PUT,PATCH',
 				'headers'        => 'optional|object',
-				'payload_mode'   => 'optional|in:full,custom',
+				'payload_mode'   => 'optional|in:full,custom,selected',
 				'custom_payload' => 'optional|string|max:50000',
+				'payload_selection' => 'optional|array',
 				'signing'        => 'optional|object',
 			),
 

@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-21T13:32:28+00:00\n"
+"POT-Creation-Date: 2026-10-21T14:19:27+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -77,8 +77,8 @@ msgstr ""
 #: resources/admin/pages/ReportsPage.jsx:57
 #: resources/admin/pages/ReportsPage.jsx:70
 #: resources/admin/pages/ReportsPage.jsx:102
-#: resources/admin/pages/SubmissionDetailPage.jsx:1251
-#: resources/admin/pages/SubmissionsPage.jsx:294
+#: resources/admin/pages/SubmissionDetailPage.jsx:1243
+#: resources/admin/pages/SubmissionsPage.jsx:267
 #: resources/admin/pages/ToolsPage.jsx:295
 msgid "Submissions"
 msgstr ""
@@ -141,9 +141,9 @@ msgstr ""
 #: resources/admin/app/AdminApp.jsx:186
 #: resources/admin/components/AppNav.jsx:76
 #: resources/admin/components/builder/layout/BuilderViewSwitcher.jsx:11
-#: resources/admin/pages/SettingsPage.jsx:142
-#: resources/admin/pages/SettingsPage.jsx:152
-#: resources/admin/pages/SettingsPage.jsx:163
+#: resources/admin/pages/SettingsPage.jsx:139
+#: resources/admin/pages/SettingsPage.jsx:149
+#: resources/admin/pages/SettingsPage.jsx:160
 msgid "Settings"
 msgstr ""
 
@@ -184,7 +184,7 @@ msgstr ""
 #: src/Admin/AdminMenu.php:614
 #: resources/admin/components/builder/IntegrationsPanel.jsx:344
 #: resources/admin/components/settings/extensions/CrmPanel.jsx:21
-#: resources/admin/ui/UpgradeModal.jsx:95
+#: resources/admin/ui/UpgradeModal.jsx:83
 msgid "CRM"
 msgstr ""
 
@@ -204,7 +204,7 @@ msgstr ""
 
 #: src/Admin/AdminMenu.php:624
 #: resources/admin/components/settings/extensions/EcommercePanel.jsx:22
-#: resources/admin/ui/UpgradeModal.jsx:107
+#: resources/admin/ui/UpgradeModal.jsx:95
 msgid "WooCommerce"
 msgstr ""
 
@@ -288,14 +288,15 @@ msgid "Title"
 msgstr ""
 
 #: src/Admin/AdminMenu.php:1080
-#: src/Api/SubmissionsApi.php:1096
+#: src/Api/SubmissionsApi.php:1095
 #: src/Privacy/PrivacyExporter.php:101
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:299
+#: resources/admin/components/builder/webhook/webhookModel.js:273
 #: resources/admin/components/FormsList.jsx:43
 #: resources/admin/components/FormsList.jsx:280
 #: resources/admin/components/FormsList.jsx:955
-#: resources/admin/components/SubmissionsTable.jsx:53
-#: resources/admin/components/SubmissionsTable.jsx:764
+#: resources/admin/components/SubmissionsTable.jsx:45
+#: resources/admin/components/SubmissionsTable.jsx:667
 #: resources/admin/pages/PaymentsPage.jsx:511
 #: resources/admin/pages/ToolsPage.jsx:584
 msgid "Status"
@@ -357,7 +358,7 @@ msgstr ""
 #: src/Api/OnboardingApi.php:271
 #: src/Api/SettingsApi.php:261
 #: src/Api/SettingsApi.php:332
-#: src/Api/WebhooksApi.php:84
+#: src/Api/WebhooksApi.php:103
 msgid "You are not allowed to perform this action."
 msgstr ""
 
@@ -381,7 +382,7 @@ msgstr ""
 #: src/Api/OnboardingApi.php:259
 #: src/Api/OnboardingApi.php:280
 #: src/Api/SettingsApi.php:341
-#: src/Api/WebhooksApi.php:88
+#: src/Api/WebhooksApi.php:107
 msgid "Security check failed. Please refresh and try again."
 msgstr ""
 
@@ -643,44 +644,44 @@ msgstr ""
 msgid "Failed to create submission record"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:464
+#: src/Api/PublicSubmitApi.php:480
 msgid "This form could not be processed. Please contact the site owner."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:499
-#: src/Api/PublicSubmitApi.php:518
+#: src/Api/PublicSubmitApi.php:515
+#: src/Api/PublicSubmitApi.php:534
 msgid "Form validation failed"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:504
+#: src/Api/PublicSubmitApi.php:520
 msgid "Your submission could not be completed. Please try again later."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:509
+#: src/Api/PublicSubmitApi.php:525
 msgid "An unexpected error occurred"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:584
+#: src/Api/PublicSubmitApi.php:605
 msgid "Failed to save submission data"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:732
+#: src/Api/PublicSubmitApi.php:753
 msgid "This total could not be calculated, so the payment was not taken."
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:816
+#: src/Api/PublicSubmitApi.php:837
 #: src/Extensions/PaymentsExtension.php:180
 msgid "Online payment is not available right now. Please contact the site owner."
 msgstr ""
 
 #. translators: %s: form title
-#: src/Api/PublicSubmitApi.php:886
+#: src/Api/PublicSubmitApi.php:907
 #, php-format
 msgid "Payment failed: %s"
 msgstr ""
 
 #. translators: 1: entry ID, 2: gateway message, 3: link to the entry
-#: src/Api/PublicSubmitApi.php:889
+#: src/Api/PublicSubmitApi.php:910
 #, php-format
 msgid ""
 "The payment for entry #%1$d did not go through, so no receipt or notification was sent.\n"
@@ -690,7 +691,7 @@ msgid ""
 "Open the entry: %3$s"
 msgstr ""
 
-#: src/Api/PublicSubmitApi.php:891
+#: src/Api/PublicSubmitApi.php:912
 msgid "not given"
 msgstr ""
 
@@ -734,8 +735,8 @@ msgstr ""
 #: src/Api/SubmissionsApi.php:861
 #: src/Api/SubmissionsApi.php:893
 #: src/Api/SubmissionsApi.php:914
-#: resources/admin/pages/SubmissionDetailPage.jsx:578
-#: resources/admin/pages/SubmissionDetailPage.jsx:596
+#: resources/admin/pages/SubmissionDetailPage.jsx:570
+#: resources/admin/pages/SubmissionDetailPage.jsx:588
 msgid "Submission not found"
 msgstr ""
 
@@ -764,7 +765,7 @@ msgid "Note not found"
 msgstr ""
 
 #: src/Api/SubmissionsApi.php:736
-#: resources/admin/pages/SubmissionDetailPage.jsx:1038
+#: resources/admin/pages/SubmissionDetailPage.jsx:1030
 msgid "Unknown user"
 msgstr ""
 
@@ -781,7 +782,7 @@ msgid "This form has no email notifications to send."
 msgstr ""
 
 #: src/Api/SubmissionsApi.php:797
-#: resources/admin/pages/SubmissionDetailPage.jsx:462
+#: resources/admin/pages/SubmissionDetailPage.jsx:459
 msgid "The notifications could not be sent."
 msgstr ""
 
@@ -798,28 +799,29 @@ msgid "This entry is not in the Trash."
 msgstr ""
 
 #: src/Api/SubmissionsApi.php:868
-#: resources/admin/pages/SubmissionDetailPage.jsx:522
+#: resources/admin/pages/SubmissionDetailPage.jsx:514
 msgid "The entry could not be restored. Please try again."
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:988
+#: src/Api/SubmissionsApi.php:987
 msgid "Error fetching unread count"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:1032
+#: src/Api/SubmissionsApi.php:1031
 msgid "No submissions to export"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:1094
-#: resources/admin/components/SubmissionsTable.jsx:51
+#: src/Api/SubmissionsApi.php:1093
+#: resources/admin/components/SubmissionsTable.jsx:43
 msgid "ID"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:1095
+#: src/Api/SubmissionsApi.php:1094
+#: resources/admin/components/builder/webhook/webhookModel.js:263
 msgid "Form ID"
 msgstr ""
 
-#: src/Api/SubmissionsApi.php:1097
+#: src/Api/SubmissionsApi.php:1096
 msgid "Submitted At"
 msgstr ""
 
@@ -844,30 +846,28 @@ msgid "Choose Gravity Forms or Fluent Forms."
 msgstr ""
 
 #. translators: %s: error from the HTTP request
-#: src/Api/WebhooksApi.php:134
+#: src/Api/WebhooksApi.php:158
 #, php-format
 msgid "The request could not be sent: %s"
 msgstr ""
 
 #. translators: 1: HTTP status code, 2: milliseconds
-#: src/Api/WebhooksApi.php:153
+#: src/Api/WebhooksApi.php:177
 #, php-format
 msgid "Delivered. The endpoint answered HTTP %1$d in %2$d ms."
 msgstr ""
 
 #. translators: %d: HTTP status code
-#: src/Api/WebhooksApi.php:155
+#: src/Api/WebhooksApi.php:179
 #, php-format
 msgid "The endpoint answered HTTP %d, so real entries would be retried."
 msgstr ""
 
-#: src/Api/WebhooksApi.php:179
-#: src/Api/WebhooksApi.php:196
-#: src/Api/WebhooksApi.php:227
+#: src/Api/WebhooksApi.php:202
 msgid "Test form"
 msgstr ""
 
-#: src/Api/WebhooksApi.php:181
+#: src/Api/WebhooksApi.php:206
 #: src/Fields/CoreFields.php:1429
 #: src/Fields/FieldSettings.php:72
 #: src/Templates/FormTemplates.php:139
@@ -880,35 +880,35 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: src/Api/WebhooksApi.php:182
+#: src/Api/WebhooksApi.php:207
 #: src/Fields/CoreFields.php:74
 #: src/Templates/FormTemplates.php:198
 #: resources/admin/components/builder/CheckoutPanel.jsx:18
 #: resources/admin/components/builder/IntegrationsPanel.jsx:107
 #: resources/admin/components/OnboardingWizard.jsx:78
-#: resources/admin/pages/SettingsPage.jsx:43
+#: resources/admin/pages/SettingsPage.jsx:41
 msgid "Email"
 msgstr ""
 
-#: src/Api/WebhooksApi.php:183
+#: src/Api/WebhooksApi.php:208
 #: src/Templates/FormTemplates.php:157
 #: src/Templates/FormTemplates.php:199
 #: src/Templates/FormTemplates.php:229
-#: resources/admin/components/builder/ActionsPanel.jsx:371
-#: resources/admin/components/builder/ActionsPanel.jsx:381
+#: resources/admin/components/builder/ActionsPanel.jsx:334
+#: resources/admin/components/builder/ActionsPanel.jsx:344
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:69
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:229
 #: resources/admin/components/OnboardingWizard.jsx:87
-#: resources/admin/pages/SubmissionDetailPage.jsx:993
+#: resources/admin/pages/SubmissionDetailPage.jsx:985
 msgid "Message"
 msgstr ""
 
-#: src/Api/WebhooksApi.php:189
+#: src/Api/WebhooksApi.php:214
 msgid "This is a test webhook from SubtleForms."
 msgstr ""
 
 #. translators: %s: JSON error
-#: src/Api/WebhooksApi.php:217
+#: src/Api/WebhooksApi.php:282
 #, php-format
 msgid "The custom JSON body is not valid: %s"
 msgstr ""
@@ -1323,8 +1323,8 @@ msgid "Phone"
 msgstr ""
 
 #: src/Fields/CoreFields.php:229
-#: resources/frontend/components/fields/PhoneField.jsx:125
-#: resources/frontend/components/fields/PhoneField.jsx:155
+#: resources/frontend/components/fields/PhoneField.jsx:131
+#: resources/frontend/components/fields/PhoneField.jsx:168
 msgid "Country code"
 msgstr ""
 
@@ -1395,7 +1395,7 @@ msgid "Checkbox"
 msgstr ""
 
 #: src/Fields/CoreFields.php:361
-#: resources/admin/components/builder/FieldRenderer.jsx:336
+#: resources/admin/components/builder/FieldRenderer.jsx:338
 #: resources/frontend/components/FieldRenderer.jsx:770
 msgid "I agree"
 msgstr ""
@@ -1413,13 +1413,13 @@ msgid "Consent"
 msgstr ""
 
 #: src/Fields/CoreFields.php:395
-#: resources/admin/components/builder/FieldRenderer.jsx:351
+#: resources/admin/components/builder/FieldRenderer.jsx:353
 #: resources/frontend/components/FieldRenderer.jsx:778
 msgid "I agree to the Privacy Policy."
 msgstr ""
 
 #: src/Fields/CoreFields.php:397
-#: resources/admin/components/builder/FieldRenderer.jsx:353
+#: resources/admin/components/builder/FieldRenderer.jsx:355
 #: resources/frontend/components/FieldRenderer.jsx:780
 msgid "Privacy Policy"
 msgstr ""
@@ -1552,7 +1552,7 @@ msgid "Max Date"
 msgstr ""
 
 #: src/Fields/CoreFields.php:774
-#: resources/admin/pages/SubmissionDetailPage.jsx:991
+#: resources/admin/pages/SubmissionDetailPage.jsx:983
 #: resources/admin/pages/ToolsPage.jsx:586
 msgid "Time"
 msgstr ""
@@ -1677,6 +1677,7 @@ msgstr ""
 #: resources/admin/components/builder/LogicEditor.jsx:271
 #: resources/admin/components/builder/LogicEditor.jsx:282
 #: resources/admin/components/builder/LogicEditor.jsx:288
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:119
 msgid "Value"
 msgstr ""
 
@@ -1716,16 +1717,16 @@ msgid "Neutral"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1200
-#: resources/admin/components/builder/FieldRenderer.jsx:168
+#: resources/admin/components/builder/FieldRenderer.jsx:170
 msgid "Section Break"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1220
 #: src/Fields/CoreFields.php:1417
 #: src/Fields/CoreFields.php:1836
-#: resources/admin/components/builder/FormSettings.jsx:278
 #: resources/admin/modals/CreateFormModal.jsx:298
 #: resources/admin/pages/PaymentsPage.jsx:211
+#: resources/admin/utils/formNameHelp.js:26
 msgid "Description"
 msgstr ""
 
@@ -1784,7 +1785,7 @@ msgstr ""
 #: src/Tools/FormMigration.php:492
 #: resources/admin/components/builder/ContainerRenderer.jsx:38
 #: resources/admin/components/builder/FieldInspector.jsx:46
-#: resources/admin/components/builder/FieldRenderer.jsx:587
+#: resources/admin/components/builder/FieldRenderer.jsx:595
 #: resources/admin/components/OnboardingWizard.jsx:555
 #: resources/frontend/components/StepNavigation.jsx:15
 msgid "Step"
@@ -1891,7 +1892,7 @@ msgstr ""
 
 #: src/Fields/CoreFields.php:1597
 #: src/Fields/FieldSettings.php:75
-#: resources/admin/components/builder/FieldRenderer.jsx:559
+#: resources/admin/components/builder/FieldRenderer.jsx:567
 msgid "Action Hook"
 msgstr ""
 
@@ -1905,7 +1906,7 @@ msgstr ""
 
 #: src/Fields/CoreFields.php:1632
 #: src/Fields/FieldsV2.php:65
-#: resources/admin/components/builder/ActionsPanel.jsx:292
+#: resources/admin/components/builder/ActionsPanel.jsx:255
 msgid "Enabled"
 msgstr ""
 
@@ -1982,12 +1983,12 @@ msgid "Coupon Code"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1781
-#: resources/admin/components/builder/FieldRenderer.jsx:532
+#: resources/admin/components/builder/FieldRenderer.jsx:540
 msgid "Enter coupon code"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1782
-#: resources/admin/components/builder/FieldRenderer.jsx:542
+#: resources/admin/components/builder/FieldRenderer.jsx:550
 #: resources/admin/components/builder/inspector/panels/OptionsPanel.jsx:348
 #: resources/frontend/components/fields/Payments.jsx:268
 msgid "Apply"
@@ -2006,6 +2007,7 @@ msgid "Internal label for reference"
 msgstr ""
 
 #: src/Fields/CoreFields.php:1830
+#: resources/admin/components/builder/webhook/webhookModel.js:284
 #: resources/admin/components/OnboardingWizard.jsx:140
 msgid "Amount"
 msgstr ""
@@ -3135,7 +3137,7 @@ msgstr ""
 #: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:60
 #: resources/admin/components/builder/FieldDock.jsx:25
 #: resources/admin/components/settings/extensions/PdfPanel.jsx:30
-#: resources/admin/pages/CreateFormPage.jsx:415
+#: resources/admin/pages/CreateFormPage.jsx:418
 msgid "Layout"
 msgstr ""
 
@@ -3231,7 +3233,7 @@ msgid "Message when left empty"
 msgstr ""
 
 #: src/Fields/FieldSettings.php:508
-#: resources/admin/components/builder/FieldRenderer.jsx:794
+#: resources/admin/components/builder/FieldRenderer.jsx:802
 #: resources/admin/components/builder/FormSettings.jsx:317
 #: resources/frontend/utils/fieldValidation.js:216
 msgid "This field is required."
@@ -3340,7 +3342,7 @@ msgid "Numbers with optional limits"
 msgstr ""
 
 #: src/Fields/FieldSettings.php:761
-#: resources/frontend/components/fields/PhoneField.jsx:194
+#: resources/frontend/components/fields/PhoneField.jsx:209
 msgid "Phone number"
 msgstr ""
 
@@ -3534,7 +3536,7 @@ msgstr ""
 #: src/Fields/FieldsV2.php:42
 #: src/Support/AnswerFormatter.php:231
 #: src/Support/AnswerFormatter.php:280
-#: resources/admin/components/builder/FieldRenderer.jsx:261
+#: resources/admin/components/builder/FieldRenderer.jsx:263
 msgid "Yes"
 msgstr ""
 
@@ -3565,12 +3567,12 @@ msgid "Opinion Scale"
 msgstr ""
 
 #: src/Fields/FieldsV2.php:96
-#: resources/admin/components/builder/FieldRenderer.jsx:726
+#: resources/admin/components/builder/FieldRenderer.jsx:734
 msgid "Not likely"
 msgstr ""
 
 #: src/Fields/FieldsV2.php:97
-#: resources/admin/components/builder/FieldRenderer.jsx:727
+#: resources/admin/components/builder/FieldRenderer.jsx:735
 msgid "Very likely"
 msgstr ""
 
@@ -3645,13 +3647,11 @@ msgstr ""
 
 #: src/Fields/PaymentFields.php:108
 #: resources/admin/components/builder/appearance/labels.js:74
-#: resources/admin/components/builder/FormSettings.jsx:565
 #: resources/admin/components/OnboardingWizard.jsx:432
 #: resources/admin/modals/CreateFormModal.jsx:145
 #: resources/admin/modals/CreateFormModal.jsx:343
-#: resources/admin/pages/CreateFormPage.jsx:114
-#: resources/admin/pages/SubmissionDetailPage.jsx:629
-#: resources/admin/pages/SubmissionDetailPage.jsx:634
+#: resources/admin/pages/SubmissionDetailPage.jsx:621
+#: resources/admin/pages/SubmissionDetailPage.jsx:626
 #: resources/admin/utils/formMeta.js:109
 #: resources/admin/utils/formTypeChoices.js:10
 #: resources/admin/utils/formTypeChoices.js:27
@@ -3785,8 +3785,9 @@ msgstr ""
 
 #: src/Payments/Pricing.php:299
 #: src/Templates/FormTemplates.php:628
-#: resources/admin/pages/CreateFormPage.jsx:39
-#: resources/admin/pages/SubmissionDetailPage.jsx:632
+#: resources/admin/components/builder/webhook/webhookModel.js:282
+#: resources/admin/pages/CreateFormPage.jsx:37
+#: resources/admin/pages/SubmissionDetailPage.jsx:624
 #: resources/admin/templates/TemplateSelector.jsx:64
 #: resources/frontend/components/ConversationalFormRenderer.jsx:546
 msgid "Payment"
@@ -3885,7 +3886,7 @@ msgstr ""
 
 #: src/Support/AnswerFormatter.php:303
 #: resources/admin/pages/SubmissionDetailPage.jsx:246
-#: resources/admin/pages/SubmissionDetailPage.jsx:908
+#: resources/admin/pages/SubmissionDetailPage.jsx:900
 #: resources/admin/utils/proFeatureDetector.js:18
 msgid "Signature"
 msgstr ""
@@ -4001,12 +4002,12 @@ msgstr ""
 msgid "The single checkbox \"%s\" has a list of options. Use a Multiple choice field for several options."
 msgstr ""
 
-#: src/Support/Webhooks.php:63
+#: src/Support/Webhooks.php:85
 msgid "Enter the full webhook address, for example https://hooks.example.com/abc."
 msgstr ""
 
 #. translators: %s: host name of the webhook address
-#: src/Support/Webhooks.php:71
+#: src/Support/Webhooks.php:93
 #, php-format
 msgid "WordPress blocks requests to %s. Local and private addresses, and ports other than 80, 443 and 8080, are refused for safety. Use a public address, or ask your developer to allow it with the http_request_host_is_external and http_allowed_safe_ports filters."
 msgstr ""
@@ -4040,8 +4041,8 @@ msgstr ""
 
 #: src/Templates/FormTemplates.php:151
 #: src/Templates/FormTemplates.php:228
-#: resources/admin/components/builder/ActionsPanel.jsx:343
-#: resources/admin/components/builder/ActionsPanel.jsx:354
+#: resources/admin/components/builder/ActionsPanel.jsx:306
+#: resources/admin/components/builder/ActionsPanel.jsx:317
 msgid "Subject"
 msgstr ""
 
@@ -4537,7 +4538,7 @@ msgid "Donation"
 msgstr ""
 
 #: src/Templates/FormTemplates.php:965
-#: resources/admin/components/builder/ActionsPanel.jsx:93
+#: resources/admin/components/builder/ActionsPanel.jsx:100
 #: resources/admin/utils/initialSchema.js:61
 msgid "New entry: {form_title}"
 msgstr ""
@@ -4856,7 +4857,7 @@ msgstr ""
 #: resources/admin/components/AppNav.jsx:27
 #: resources/admin/pages/FormsPage.jsx:131
 #: resources/admin/pages/ReportsPage.jsx:56
-#: resources/admin/pages/SettingsPage.jsx:26
+#: resources/admin/pages/SettingsPage.jsx:24
 #: resources/admin/pages/ToolsPage.jsx:250
 msgid "Forms"
 msgstr ""
@@ -4883,6 +4884,7 @@ msgstr ""
 
 #: resources/admin/components/AdminHeader.jsx:143
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:44
+#: resources/admin/components/builder/webhook/webhookModel.js:264
 #: resources/admin/components/merge-tags/mergeTags.js:9
 msgid "Form title"
 msgstr ""
@@ -4896,7 +4898,7 @@ msgid "Rename"
 msgstr ""
 
 #: resources/admin/components/AdminHeader.jsx:170
-#: resources/admin/components/builder/FieldRenderer.jsx:99
+#: resources/admin/components/builder/FieldRenderer.jsx:101
 #: resources/admin/components/builder/StepNavigator.jsx:81
 msgid "Untitled"
 msgstr ""
@@ -4911,7 +4913,7 @@ msgid "Something went wrong loading this page."
 msgstr ""
 
 #: resources/admin/components/AdminShell.jsx:80
-#: resources/admin/pages/SubmissionDetailPage.jsx:582
+#: resources/admin/pages/SubmissionDetailPage.jsx:574
 msgid "Try again"
 msgstr ""
 
@@ -4951,8 +4953,8 @@ msgstr ""
 #: resources/admin/pages/DashboardPage.jsx:101
 #: resources/admin/pages/DashboardPage.jsx:557
 #: resources/admin/pages/ReportsPage.jsx:210
-#: resources/admin/pages/SubmissionsPage.jsx:309
-#: resources/frontend/components/fields/DateTimeField.jsx:380
+#: resources/admin/pages/SubmissionsPage.jsx:285
+#: resources/frontend/components/fields/DateTimeField.jsx:466
 msgid "Today"
 msgstr ""
 
@@ -4963,14 +4965,14 @@ msgstr ""
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:160
 #: resources/admin/pages/DashboardPage.jsx:265
 #: resources/admin/pages/PaymentsPage.jsx:540
-#: resources/admin/pages/SubmissionsPage.jsx:316
+#: resources/admin/pages/SubmissionsPage.jsx:292
 msgid "All forms"
 msgstr ""
 
 #. translators: %d: form ID
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:163
 #: resources/admin/pages/ReportsPage.jsx:44
-#: resources/admin/pages/SubmissionDetailPage.jsx:1185
+#: resources/admin/pages/SubmissionDetailPage.jsx:1177
 #, js-format
 msgid "Form #%d"
 msgstr ""
@@ -4996,14 +4998,15 @@ msgstr ""
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:215
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:226
 #: resources/admin/components/builder/FormSettings.jsx:162
-#: resources/admin/components/SubmissionsTable.jsx:52
-#: resources/admin/components/SubmissionsTable.jsx:755
+#: resources/admin/components/builder/webhook/webhookModel.js:261
+#: resources/admin/components/SubmissionsTable.jsx:44
+#: resources/admin/components/SubmissionsTable.jsx:658
 #: resources/admin/pages/BuilderPage.jsx:691
 #: resources/admin/pages/BuilderPage.jsx:705
 #: resources/admin/pages/BuilderPage.jsx:741
 #: resources/admin/pages/ReportsPage.jsx:100
-#: resources/admin/pages/SubmissionDetailPage.jsx:1177
-#: resources/admin/pages/SubmissionsPage.jsx:581
+#: resources/admin/pages/SubmissionDetailPage.jsx:1169
+#: resources/admin/pages/SubmissionsPage.jsx:557
 #: resources/admin/pages/ToolsPage.jsx:305
 #: resources/admin/pages/ToolsPage.jsx:494
 #: resources/admin/pages/ToolsPage.jsx:514
@@ -5040,71 +5043,51 @@ msgstr ""
 msgid "unread"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:99
-msgid "Send data to API (Webhook)"
+#: resources/admin/components/builder/ActionsPanel.jsx:106
+msgid "Webhook"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:100
-msgid "Send Email Notification"
+#: resources/admin/components/builder/ActionsPanel.jsx:107
+msgid "Email notification"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:104
-msgid "Send form data to an external API endpoint"
+#: resources/admin/components/builder/ActionsPanel.jsx:111
+msgid "Send the form data to an API endpoint"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:105
+#: resources/admin/components/builder/ActionsPanel.jsx:112
 msgid "Send an email after form submission"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:115
-msgid "Full submission data"
-msgstr ""
-
-#: resources/admin/components/builder/ActionsPanel.jsx:116
-msgid "Custom data (JSON)"
-msgstr ""
-
-#: resources/admin/components/builder/ActionsPanel.jsx:165
-msgid "Custom headers (advanced)"
-msgstr ""
-
-#: resources/admin/components/builder/ActionsPanel.jsx:179
-msgid "JSON object of extra HTTP headers. Example: {\"X-Source\": \"subtleforms\"}"
-msgstr ""
-
-#: resources/admin/components/builder/ActionsPanel.jsx:197
+#: resources/admin/components/builder/ActionsPanel.jsx:167
 msgid "Only when…"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:199
+#: resources/admin/components/builder/ActionsPanel.jsx:169
 msgid "Conditional"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:199
+#: resources/admin/components/builder/ActionsPanel.jsx:169
 msgid "Every submission"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:207
+#: resources/admin/components/builder/ActionsPanel.jsx:177
 msgid "Runs for every submission. Add a rule to run it only for some answers."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:245
-msgid "Invalid JSON"
-msgstr ""
-
-#: resources/admin/components/builder/ActionsPanel.jsx:260
-#: resources/admin/components/builder/ActionsPanel.jsx:261
+#: resources/admin/components/builder/ActionsPanel.jsx:223
+#: resources/admin/components/builder/ActionsPanel.jsx:224
 #: resources/admin/components/builder/FieldToolbar.jsx:112
 #: resources/admin/components/builder/inspector/panels/OptionsPanel.jsx:92
 msgid "Drag to reorder"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:278
+#: resources/admin/components/builder/ActionsPanel.jsx:241
 #: resources/admin/pages/ExtensionsPage.jsx:31
 msgid "Needs setup"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:304
+#: resources/admin/components/builder/ActionsPanel.jsx:267
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:192
 #: resources/admin/components/builder/IntegrationsPanel.jsx:74
 #: resources/frontend/components/fields/Payments.jsx:233
@@ -5112,30 +5095,30 @@ msgstr ""
 msgid "Remove"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:314
-#: resources/admin/components/builder/ActionsPanel.jsx:325
+#: resources/admin/components/builder/ActionsPanel.jsx:277
+#: resources/admin/components/builder/ActionsPanel.jsx:288
 #: resources/admin/components/builder/LogicEditor.jsx:310
 #: resources/admin/components/builder/LogicEditor.jsx:312
 msgid "To"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:332
+#: resources/admin/components/builder/ActionsPanel.jsx:295
 msgid "An address, several separated by commas, or a field tag such as {field:email}."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:338
+#: resources/admin/components/builder/ActionsPanel.jsx:301
 msgid "A recipient email address is required."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:358
+#: resources/admin/components/builder/ActionsPanel.jsx:321
 msgid "New entry from {field:name}"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:366
+#: resources/admin/components/builder/ActionsPanel.jsx:329
 msgid "A subject line is required."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:385
+#: resources/admin/components/builder/ActionsPanel.jsx:348
 msgid ""
 "Hello,\n"
 "\n"
@@ -5144,71 +5127,84 @@ msgid ""
 "{all_fields}"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:391
+#: resources/admin/components/builder/ActionsPanel.jsx:354
 msgid "Leave the message empty to send every answer ({all_fields})."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:396
+#: resources/admin/components/builder/ActionsPanel.jsx:359
 msgid "Send as HTML"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:397
+#: resources/admin/components/builder/ActionsPanel.jsx:360
 msgid "Formats the email with line breaks, rich text and a table for {all_fields}. Off sends plain text."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:419
+#: resources/admin/components/builder/ActionsPanel.jsx:382
 #: resources/admin/components/builder/IntegrationsPanel.jsx:436
 #: resources/admin/components/settings/extensions/CrmPanel.jsx:111
 msgid "Webhook URL"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:433
-#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:116
-msgid "Send test request"
+#. translators: %s: HTTP method, for example POST
+#: resources/admin/components/builder/ActionsPanel.jsx:394
+#, js-format
+msgid "On every submission SubtleForms sends a %s request to this URL with the data you choose below."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:449
-msgid "HTTP Method"
+#: resources/admin/components/builder/ActionsPanel.jsx:400
+msgid "HTTP method"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:456
-msgid "Payload Mode"
-msgstr ""
-
-#: resources/admin/components/builder/ActionsPanel.jsx:468
-msgid "Custom JSON Payload"
-msgstr ""
-
-#: resources/admin/components/builder/ActionsPanel.jsx:493
+#: resources/admin/components/builder/ActionsPanel.jsx:429
 msgid "HMAC-SHA256 Signing"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:497
+#: resources/admin/components/builder/ActionsPanel.jsx:433
 msgid "Adds an X-SubtleForms-Signature header so you can verify requests on your server."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:501
+#: resources/admin/components/builder/ActionsPanel.jsx:437
 msgid "Signing Secret"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:505
+#: resources/admin/components/builder/ActionsPanel.jsx:441
 msgid "Created when you save the form"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:507
+#: resources/admin/components/builder/ActionsPanel.jsx:443
 msgid "Kept server-side; paste the same value into your endpoint to verify the signature."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:602
-msgid "No actions configured. Add an action to process form submissions."
+#: resources/admin/components/builder/ActionsPanel.jsx:453
+msgid "Send test"
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:635
-msgid "+ Send Email"
+#: resources/admin/components/builder/ActionsPanel.jsx:474
+msgid "Sends the example above to your URL now, so you can see the answer your endpoint gives."
 msgstr ""
 
-#: resources/admin/components/builder/ActionsPanel.jsx:641
-msgid "+ Send to API"
+#: resources/admin/components/builder/ActionsPanel.jsx:502
+msgid "Send email"
+msgstr ""
+
+#: resources/admin/components/builder/ActionsPanel.jsx:508
+msgid "Send form data to an API endpoint"
+msgstr ""
+
+#: resources/admin/components/builder/ActionsPanel.jsx:510
+msgid "Send to webhook"
+msgstr ""
+
+#: resources/admin/components/builder/ActionsPanel.jsx:605
+msgid "No notifications yet. Send an email or call a webhook when an entry arrives."
+msgstr ""
+
+#: resources/admin/components/builder/ActionsPanel.jsx:616
+msgid "Add a notification"
+msgstr ""
+
+#: resources/admin/components/builder/ActionsPanel.jsx:648
+msgid "Add another notification"
 msgstr ""
 
 #. translators: 1: control name, 2: colour value
@@ -5258,7 +5254,7 @@ msgstr ""
 #: resources/admin/components/builder/appearance/FormAppearancePanel.jsx:313
 #: resources/admin/components/builder/appearance/labels.js:94
 #: resources/admin/components/settings/GeneralSettings.jsx:124
-#: resources/admin/pages/SubmissionsPage.jsx:456
+#: resources/admin/pages/SubmissionsPage.jsx:432
 msgid "Default"
 msgstr ""
 
@@ -5325,8 +5321,7 @@ msgid "Following the form’s Appearance"
 msgstr ""
 
 #: resources/admin/components/builder/appearance/FieldAppearancePanel.jsx:140
-#: resources/admin/components/DataTable.jsx:136
-#: resources/frontend/components/fields/DateTimeField.jsx:390
+#: resources/frontend/components/fields/DateTimeField.jsx:476
 msgid "Clear"
 msgstr ""
 
@@ -5659,7 +5654,7 @@ msgstr ""
 
 #: resources/admin/components/builder/appearance/labels.js:114
 #: resources/admin/components/settings/GeneralSettings.jsx:125
-#: resources/admin/pages/SubmissionsPage.jsx:457
+#: resources/admin/pages/SubmissionsPage.jsx:433
 msgid "Compact"
 msgstr ""
 
@@ -5729,7 +5724,7 @@ msgstr ""
 #: resources/admin/components/builder/CheckoutPanel.jsx:78
 #: resources/admin/components/builder/CheckoutPanel.jsx:90
 #: resources/admin/components/builder/CheckoutPanel.jsx:104
-#: resources/admin/ui/UpgradeModal.jsx:119
+#: resources/admin/ui/UpgradeModal.jsx:107
 msgid "WooCommerce checkout"
 msgstr ""
 
@@ -5892,7 +5887,7 @@ msgid "Drag container"
 msgstr ""
 
 #: resources/admin/components/builder/ContainerRenderer.jsx:119
-#: resources/admin/components/builder/FieldRenderer.jsx:212
+#: resources/admin/components/builder/FieldRenderer.jsx:214
 msgid "Label hidden"
 msgstr ""
 
@@ -5975,11 +5970,11 @@ msgstr ""
 #: resources/admin/components/builder/ConversationalCanvas.jsx:214
 #: resources/admin/components/builder/inspector/panels/OptionsPanel.jsx:329
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:96
-#: resources/admin/components/CreateFormWizard.jsx:186
+#: resources/admin/components/CreateFormWizard.jsx:189
 #: resources/admin/components/FormsList.jsx:966
 #: resources/admin/modals/ConfirmModal.jsx:32
 #: resources/admin/modals/CreateFormModal.jsx:395
-#: resources/admin/pages/CreateFormPage.jsx:261
+#: resources/admin/pages/CreateFormPage.jsx:264
 #: resources/admin/pages/PaymentsPage.jsx:299
 #: resources/admin/utils/confirmDialog.js:59
 msgid "Cancel"
@@ -6003,7 +5998,7 @@ msgstr ""
 
 #: resources/admin/components/builder/ConversationalCanvas.jsx:283
 #: resources/admin/components/BuilderTour.jsx:384
-#: resources/admin/components/CreateFormWizard.jsx:53
+#: resources/admin/components/CreateFormWizard.jsx:54
 #: resources/admin/components/OnboardingWizard.jsx:606
 #: resources/admin/pages/ToolsPage.jsx:623
 #: resources/frontend/components/ConversationalFormRenderer.jsx:679
@@ -6095,9 +6090,9 @@ msgstr ""
 
 #: resources/admin/components/builder/FieldDock.jsx:200
 #: resources/admin/components/licensing/ProBadge.jsx:25
-#: resources/admin/pages/CreateFormPage.jsx:332
-#: resources/admin/pages/SettingsPage.jsx:62
-#: resources/admin/pages/SettingsPage.jsx:199
+#: resources/admin/pages/CreateFormPage.jsx:335
+#: resources/admin/pages/SettingsPage.jsx:60
+#: resources/admin/pages/SettingsPage.jsx:193
 #: resources/admin/templates/TemplateSelector.jsx:138
 msgid "Pro"
 msgstr ""
@@ -6159,7 +6154,7 @@ msgstr ""
 #: resources/admin/components/builder/FieldInspector.jsx:135
 #: resources/admin/components/builder/FieldKeyEditor.jsx:211
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:231
-#: resources/admin/components/SubmissionsTable.jsx:454
+#: resources/admin/components/SubmissionsTable.jsx:430
 #: resources/admin/pages/BuilderPage.jsx:416
 #: resources/admin/pages/BuilderPage.jsx:431
 #: resources/admin/pages/BuilderPage.jsx:446
@@ -6190,7 +6185,7 @@ msgstr ""
 
 #: resources/admin/components/builder/FieldInspector.jsx:267
 #: resources/admin/components/builder/FormSettings.jsx:164
-#: resources/admin/pages/SettingsPage.jsx:31
+#: resources/admin/pages/SettingsPage.jsx:29
 msgid "General"
 msgstr ""
 
@@ -6217,7 +6212,7 @@ msgid "This step is always shown."
 msgstr ""
 
 #: resources/admin/components/builder/FieldInspector.jsx:394
-#: resources/admin/pages/SettingsPage.jsx:37
+#: resources/admin/pages/SettingsPage.jsx:35
 msgid "Display"
 msgstr ""
 
@@ -6285,93 +6280,93 @@ msgstr ""
 msgid "Earlier entries keep %s."
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:187
+#: resources/admin/components/builder/FieldRenderer.jsx:189
 #: resources/admin/utils/saveErrors.js:66
 msgid "Field label"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:312
+#: resources/admin/components/builder/FieldRenderer.jsx:314
 msgid "Add the disclaimer text in the field settings. Empty disclaimers are hidden on the live form."
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:412
+#: resources/admin/components/builder/FieldRenderer.jsx:420
 msgid "Add choices in the field settings to show them here."
 msgstr ""
 
 #. translators: %s: value sent with the entry
-#: resources/admin/components/builder/FieldRenderer.jsx:445
+#: resources/admin/components/builder/FieldRenderer.jsx:453
 #, js-format
 msgid "Sends \"%s\". Visitors do not see this."
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:448
+#: resources/admin/components/builder/FieldRenderer.jsx:456
 msgid "Hidden value. Visitors do not see this."
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:464
+#: resources/admin/components/builder/FieldRenderer.jsx:472
 msgid "Add HTML content in the field settings."
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:473
+#: resources/admin/components/builder/FieldRenderer.jsx:481
 msgid "Click to upload or drag image here"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:482
+#: resources/admin/components/builder/FieldRenderer.jsx:490
 msgid "Click to upload or drag file here"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:518
+#: resources/admin/components/builder/FieldRenderer.jsx:526
 msgid "Needs SubtleForms Pro. Visitors do not see this field until Pro is active."
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:549
+#: resources/admin/components/builder/FieldRenderer.jsx:557
 msgid "Hidden pricing field (not visible to users)"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:562
+#: resources/admin/components/builder/FieldRenderer.jsx:570
 msgid "WordPress Action Integration"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:590
+#: resources/admin/components/builder/FieldRenderer.jsx:598
 msgid "Multi-step form container"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:611
+#: resources/admin/components/builder/FieldRenderer.jsx:619
 msgid "Verify you're human"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:619
+#: resources/admin/components/builder/FieldRenderer.jsx:627
 msgid "I'm not a robot"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:626
+#: resources/admin/components/builder/FieldRenderer.jsx:634
 msgid "CAPTCHA will appear here on the live form"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:626
+#: resources/admin/components/builder/FieldRenderer.jsx:634
 msgid "Add a site key and a secret key, or this check will not run."
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:657
+#: resources/admin/components/builder/FieldRenderer.jsx:665
 msgid "#000000"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:712
+#: resources/admin/components/builder/FieldRenderer.jsx:720
 msgid "Rich text content…"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:736
+#: resources/admin/components/builder/FieldRenderer.jsx:744
 msgid "Add at least one row and one column in the field settings."
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:775
+#: resources/admin/components/builder/FieldRenderer.jsx:783
 msgid "Unsupported field (legacy)"
 msgstr ""
 
-#: resources/admin/components/builder/FieldRenderer.jsx:787
+#: resources/admin/components/builder/FieldRenderer.jsx:795
 #: resources/admin/components/builder/inspector/panels/ValidationPanel.jsx:20
 #: resources/admin/components/OnboardingWizard.jsx:457
-#: resources/admin/pages/CreateFormPage.jsx:445
+#: resources/admin/pages/CreateFormPage.jsx:448
 msgid "Required"
 msgstr ""
 
@@ -6460,6 +6455,7 @@ msgstr ""
 
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:98
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:241
+#: resources/admin/components/builder/webhook/webhookModel.js:274
 msgid "Page URL"
 msgstr ""
 
@@ -6599,6 +6595,7 @@ msgid "Site currency (%s)"
 msgstr ""
 
 #: resources/admin/components/builder/FormCurrencyControl.jsx:30
+#: resources/admin/components/builder/webhook/webhookModel.js:285
 #: resources/admin/components/settings/extensions/PaymentsPanel.jsx:74
 #: resources/admin/pages/PaymentsPage.jsx:422
 msgid "Currency"
@@ -6646,7 +6643,7 @@ msgstr ""
 
 #: resources/admin/components/builder/FormEditorHeader.jsx:89
 #: resources/admin/pages/BuilderPage.jsx:643
-#: resources/admin/pages/SettingsPage.jsx:256
+#: resources/admin/pages/SettingsPage.jsx:248
 msgid "Unsaved changes"
 msgstr ""
 
@@ -6659,7 +6656,7 @@ msgid "Copied!"
 msgstr ""
 
 #: resources/admin/components/builder/FormEditorHeader.jsx:185
-#: resources/admin/pages/SettingsPage.jsx:173
+#: resources/admin/pages/SettingsPage.jsx:170
 msgid "Save"
 msgstr ""
 
@@ -6716,7 +6713,7 @@ msgid "How this form charges, and where the visitor checks out."
 msgstr ""
 
 #: resources/admin/components/builder/FormSettings.jsx:193
-#: resources/admin/pages/SettingsPage.jsx:55
+#: resources/admin/pages/SettingsPage.jsx:53
 msgid "Integrations"
 msgstr ""
 
@@ -6751,16 +6748,6 @@ msgstr ""
 
 #: resources/admin/components/builder/FormSettings.jsx:265
 msgid "This form collects payment information. Configure payment settings in Payments."
-msgstr ""
-
-#: resources/admin/components/builder/FormSettings.jsx:271
-#: resources/admin/components/CreateFormWizard.jsx:122
-#: resources/admin/pages/CreateFormPage.jsx:405
-msgid "Form name"
-msgstr ""
-
-#: resources/admin/components/builder/FormSettings.jsx:281
-msgid "Shown under the title when the block or shortcode displays it."
 msgstr ""
 
 #: resources/admin/components/builder/FormSettings.jsx:316
@@ -6891,37 +6878,14 @@ msgid "Fields are split into steps by Page Breaks. Removing the last Page Break 
 msgstr ""
 
 #: resources/admin/components/builder/FormSettings.jsx:551
-#: resources/admin/pages/CreateFormPage.jsx:127
+#: resources/admin/pages/CreateFormPage.jsx:130
 msgid "One question at a time, full screen."
 msgstr ""
 
 #: resources/admin/components/builder/FormSettings.jsx:561
-#: resources/admin/components/CreateFormWizard.jsx:17
-#: resources/admin/pages/SubmissionDetailPage.jsx:1188
+#: resources/admin/components/CreateFormWizard.jsx:18
+#: resources/admin/pages/SubmissionDetailPage.jsx:1180
 msgid "Form type"
-msgstr ""
-
-#: resources/admin/components/builder/FormSettings.jsx:566
-#: resources/admin/pages/CreateFormPage.jsx:35
-#: resources/admin/pages/CreateFormPage.jsx:36
-#: resources/admin/pages/CreateFormPage.jsx:37
-#: resources/admin/pages/CreateFormPage.jsx:120
-#: resources/admin/pages/SubmissionDetailPage.jsx:631
-#: resources/admin/utils/formMeta.js:115
-#: resources/admin/utils/formTypeChoices.js:11
-#: resources/admin/utils/formTypeChoices.js:24
-msgid "Multi-step"
-msgstr ""
-
-#: resources/admin/components/builder/FormSettings.jsx:567
-#: resources/admin/components/OnboardingWizard.jsx:41
-#: resources/admin/modals/CreateFormModal.jsx:154
-#: resources/admin/pages/CreateFormPage.jsx:38
-#: resources/admin/pages/CreateFormPage.jsx:126
-#: resources/admin/pages/SubmissionDetailPage.jsx:630
-#: resources/admin/utils/formMeta.js:121
-#: resources/admin/utils/formTypeChoices.js:12
-msgid "Conversational"
 msgstr ""
 
 #: resources/admin/components/builder/FormSettings.jsx:577
@@ -7137,7 +7101,7 @@ msgid "Choose a %s first."
 msgstr ""
 
 #: resources/admin/components/builder/inspector/controls/ChainedLevelsModal.jsx:252
-#: resources/frontend/components/fields/ChoiceSelect.jsx:197
+#: resources/frontend/components/fields/ChoiceSelect.jsx:198
 msgid "No choices yet."
 msgstr ""
 
@@ -7356,7 +7320,7 @@ msgstr ""
 
 #: resources/admin/components/builder/IntegrationsPanel.jsx:222
 #: resources/admin/components/builder/IntegrationsPanel.jsx:236
-#: resources/admin/ui/UpgradeModal.jsx:83
+#: resources/admin/ui/UpgradeModal.jsx:71
 msgid "Email marketing"
 msgstr ""
 
@@ -7500,7 +7464,7 @@ msgstr ""
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:208
 #: resources/admin/components/FormsList.jsx:808
 #: resources/admin/components/FormsList.jsx:863
-#: resources/admin/components/SubmissionsTable.jsx:823
+#: resources/admin/components/SubmissionsTable.jsx:825
 #: resources/admin/components/SubmissionsTable.jsx:845
 #: resources/admin/pages/BuilderPage.jsx:718
 #: resources/admin/ui/ErrorState.jsx:59
@@ -7569,7 +7533,7 @@ msgstr ""
 
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:274
 #: resources/admin/pages/BuilderPage.jsx:641
-#: resources/admin/pages/SettingsPage.jsx:173
+#: resources/admin/pages/SettingsPage.jsx:170
 msgid "Saving…"
 msgstr ""
 
@@ -7654,7 +7618,7 @@ msgid "Publishing this form will make it visible on the frontend. Are you ready 
 msgstr ""
 
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:86
-#: resources/admin/pages/SettingsPage.jsx:259
+#: resources/admin/pages/SettingsPage.jsx:251
 msgid "You have unsaved changes"
 msgstr ""
 
@@ -7679,7 +7643,8 @@ msgstr ""
 
 #: resources/admin/components/builder/layout/BuilderViewSwitcher.jsx:18
 #: resources/admin/components/form-preview/FormPreviewModal.jsx:27
-#: resources/admin/pages/CreateFormPage.jsx:337
+#: resources/admin/pages/CreateFormPage.jsx:340
+#: resources/admin/utils/submissionStatus.js:19
 msgid "Preview"
 msgstr ""
 
@@ -7841,7 +7806,7 @@ msgid "Add a Product or Priced Options field to build the order."
 msgstr ""
 
 #: resources/admin/components/builder/PaymentPreviews.jsx:118
-#: resources/admin/pages/SubmissionDetailPage.jsx:1120
+#: resources/admin/pages/SubmissionDetailPage.jsx:1112
 #: resources/frontend/components/fields/Payments.jsx:384
 msgid "Total"
 msgstr ""
@@ -7862,7 +7827,7 @@ msgid "CVC"
 msgstr ""
 
 #: resources/admin/components/builder/PreviewWorkspace.jsx:36
-#: resources/admin/pages/SubmissionDetailPage.jsx:645
+#: resources/admin/pages/SubmissionDetailPage.jsx:637
 msgid "Desktop"
 msgstr ""
 
@@ -7871,7 +7836,7 @@ msgid "Tablet"
 msgstr ""
 
 #: resources/admin/components/builder/PreviewWorkspace.jsx:38
-#: resources/admin/pages/SubmissionDetailPage.jsx:644
+#: resources/admin/pages/SubmissionDetailPage.jsx:636
 msgid "Mobile"
 msgstr ""
 
@@ -8058,6 +8023,274 @@ msgstr ""
 msgid "Apt, Suite, etc."
 msgstr ""
 
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:79
+msgid "Custom headers"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:81
+msgid "Extra HTTP headers sent with every request, for example an API key your endpoint expects."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:89
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:132
+msgid "View as JSON"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:89
+msgid "Back to rows"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:96
+msgid "No custom headers."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:105
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:107
+msgid "Header name"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:117
+msgid "Header value"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:134
+msgid "Remove header"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:149
+msgid "Add header"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:158
+msgid "Headers as JSON"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:167
+msgid "A JSON object of header names and values. Rows that SubtleForms refuses are listed below."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:171
+msgid "What you typed is kept. Nothing is saved until it is valid."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/HeadersEditor.jsx:177
+msgid "(no name)"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:95
+msgid "This is not valid JSON yet. What you typed is kept, but it is not saved until it is valid."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:121
+msgid "Data to send"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:124
+msgid "This is the body as a template. Merge tags such as {{field:email}} are replaced with each answer."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:125
+msgid "Tick what your endpoint should receive. Passwords and signatures are never sent."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:132
+msgid "Back to checkboxes"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:138
+msgid "This webhook sends the standard body, which also has the site address and a link to the entry. Change a tick to choose your own data instead."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:144
+msgid "Custom JSON."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:145
+msgid "The checkboxes are off because this body does not match them."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:147
+msgid "Start over with checkboxes"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:168
+#: resources/admin/pages/SubmissionDetailPage.jsx:863
+msgid "Answers"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:170
+msgid "This form has no fields yet."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:178
+#: resources/admin/components/DataTable.jsx:229
+msgid "Select all"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:184
+msgid "Select none"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:191
+msgid "All groups, as one list"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:199
+msgid "Send field labels with values"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:200
+msgid "Adds an \"answers\" list with each ticked field name, label and value."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:214
+msgid "Body as JSON"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:232
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:241
+msgid "Data that will be sent"
+msgstr ""
+
+#. translators: %s: the HTTP method, for example POST
+#: resources/admin/components/builder/webhook/PayloadPicker.jsx:236
+#, js-format
+msgid "An example entry. Real values come from each submission. Sent as the body of a %s request."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:61
+msgid "A header name can use letters, numbers and these characters: - _ . ! # $ % & ' * + ^ ` | ~"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:62
+msgid "Enter a header name."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:64
+msgid "SubtleForms sets this header itself, so it cannot be changed here."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:66
+msgid "A header value must be on one line."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:68
+msgid "This header is already listed. A header can only be set once."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:148
+msgid "This is not valid JSON yet. Check the quotes, commas and brackets."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:151
+msgid "Headers must be a JSON object, for example {\"X-Source\": \"subtleforms\"}."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:155
+msgid "The value of each header must be text."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:157
+msgid "A header needs a name."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:269
+#: resources/admin/components/SubmissionsTable.jsx:623
+#: resources/admin/pages/SubmissionDetailPage.jsx:585
+msgid "Submission"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:271
+msgid "Entry ID"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:272
+msgid "Submitted date"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:275
+#: resources/admin/pages/SubmissionDetailPage.jsx:1192
+msgid "IP address"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:276
+msgid "User agent"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:277
+msgid "User ID"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:286
+msgid "Payment status"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:388
+msgid "Example text"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:388
+msgid "Example answer"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:401
+#: resources/admin/pages/CreateFormPage.jsx:31
+msgid "Untitled form"
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:510
+msgid "The JSON is not valid yet."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:512
+msgid "The body is not a JSON object."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:513
+msgid "The body does not start with the standard \"event\" entry."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:520
+msgid "A value was changed from its standard tag."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:523
+msgid "\"fields\" must be an object."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:526
+msgid "The body uses a field that is not on this form."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:527
+msgid "A field value was changed from its standard tag."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:531
+msgid "\"answers\" must be a list."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:536
+msgid "The labelled answers list was changed."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:540
+msgid "The labelled answers list does not match the fields."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:544
+#: resources/admin/components/builder/webhook/webhookModel.js:547
+msgid "The payment details were changed."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:551
+msgid "The body has an entry that the checkboxes cannot show."
+msgstr ""
+
+#: resources/admin/components/builder/webhook/webhookModel.js:576
+msgid "The JSON is not valid yet, so there is no example to show."
+msgstr ""
+
 #: resources/admin/components/BuilderTour.jsx:52
 msgid "Form header"
 msgstr ""
@@ -8119,9 +8352,9 @@ msgid "Close tour"
 msgstr ""
 
 #: resources/admin/components/BuilderTour.jsx:371
-#: resources/admin/components/CreateFormWizard.jsx:182
+#: resources/admin/components/CreateFormWizard.jsx:185
 #: resources/admin/components/OnboardingWizard.jsx:595
-#: resources/admin/pages/CreateFormPage.jsx:471
+#: resources/admin/pages/CreateFormPage.jsx:475
 #: resources/frontend/components/ConversationalFormRenderer.jsx:514
 #: resources/frontend/components/ConversationalFormRenderer.jsx:668
 msgid "Back"
@@ -8135,133 +8368,91 @@ msgstr ""
 msgid "Finish"
 msgstr ""
 
-#: resources/admin/components/CreateFormWizard.jsx:16
+#: resources/admin/components/CreateFormWizard.jsx:17
 msgid "Form basics"
 msgstr ""
 
-#: resources/admin/components/CreateFormWizard.jsx:18
-#: resources/admin/components/CreateFormWizard.jsx:152
+#: resources/admin/components/CreateFormWizard.jsx:19
+#: resources/admin/components/CreateFormWizard.jsx:155
 msgid "Starting point"
 msgstr ""
 
-#: resources/admin/components/CreateFormWizard.jsx:55
-#: resources/admin/components/CreateFormWizard.jsx:97
+#: resources/admin/components/CreateFormWizard.jsx:56
+#: resources/admin/components/CreateFormWizard.jsx:98
 #: resources/admin/modals/CreateFormModal.jsx:405
-#: resources/admin/pages/CreateFormPage.jsx:479
+#: resources/admin/pages/CreateFormPage.jsx:483
 #: resources/admin/pages/DashboardPage.jsx:340
 msgid "Create form"
 msgstr ""
 
-#: resources/admin/components/CreateFormWizard.jsx:81
+#: resources/admin/components/CreateFormWizard.jsx:82
 msgid "Failed to create form."
 msgstr ""
 
-#: resources/admin/components/CreateFormWizard.jsx:106
-#: resources/admin/pages/CreateFormPage.jsx:479
+#: resources/admin/components/CreateFormWizard.jsx:107
+#: resources/admin/pages/CreateFormPage.jsx:483
 msgid "Creating…"
 msgstr ""
 
-#: resources/admin/components/CreateFormWizard.jsx:128
-msgid "Short description (optional)"
-msgstr ""
-
-#: resources/admin/components/CreateFormWizard.jsx:138
+#: resources/admin/components/CreateFormWizard.jsx:141
 msgid "Choose a form type"
 msgstr ""
 
-#: resources/admin/components/CreateFormWizard.jsx:155
+#: resources/admin/components/CreateFormWizard.jsx:158
 msgid "Blank"
 msgstr ""
 
-#: resources/admin/components/CreateFormWizard.jsx:157
+#: resources/admin/components/CreateFormWizard.jsx:160
 msgid "Minimal template (based on form type)"
 msgstr ""
 
-#: resources/admin/components/CreateFormWizard.jsx:169
+#: resources/admin/components/CreateFormWizard.jsx:172
 msgid "Don't show again"
 msgstr ""
 
-#. translators: %1$d: first item number, %2$d: last item number, %3$d: total items
-#: resources/admin/components/DataTable.jsx:63
-#, js-format
-msgid "%1$d to %2$d of %3$d"
-msgstr ""
-
-#: resources/admin/components/DataTable.jsx:81
-msgid "Bulk actions"
-msgstr ""
-
-#. translators: %1$d: number of selected items
-#: resources/admin/components/DataTable.jsx:86
-#, js-format
-msgid "%1$d selected"
-msgid_plural "%1$d selected"
-msgstr[0] ""
-msgstr[1] ""
-
-#: resources/admin/components/DataTable.jsx:114
-#: resources/admin/components/FormsList.jsx:398
-msgid "More actions"
-msgstr ""
-
-#: resources/admin/components/DataTable.jsx:152
-#: resources/admin/components/DataTable.jsx:635
-msgid "Previous page"
-msgstr ""
-
-#: resources/admin/components/DataTable.jsx:161
-#: resources/admin/components/DataTable.jsx:657
-msgid "Next page"
-msgstr ""
-
-#: resources/admin/components/DataTable.jsx:169
-#: resources/admin/components/DataTable.jsx:170
-#: resources/admin/components/DataTable.jsx:610
-msgid "Rows per page"
-msgstr ""
-
-#: resources/admin/components/DataTable.jsx:213
+#: resources/admin/components/DataTable.jsx:77
 msgid "No items found"
 msgstr ""
 
-#: resources/admin/components/DataTable.jsx:335
-#: resources/admin/components/DataTable.jsx:346
-#: resources/admin/components/DataTable.jsx:449
-msgid "Select all"
-msgstr ""
-
-#: resources/admin/components/DataTable.jsx:353
-msgid "Sort by"
-msgstr ""
-
-#: resources/admin/components/DataTable.jsx:365
-msgid "Ascending, switch to descending"
-msgstr ""
-
-#: resources/admin/components/DataTable.jsx:366
-msgid "Descending, switch to ascending"
-msgstr ""
+#. translators: %1$d: number of selected items
+#: resources/admin/components/DataTable.jsx:191
+#, js-format
+msgid "%1$d item selected"
+msgid_plural "%1$d items selected"
+msgstr[0] ""
+msgstr[1] ""
 
 #. translators: %s: row number
-#: resources/admin/components/DataTable.jsx:393
-#: resources/admin/components/DataTable.jsx:532
-#: resources/admin/components/DataTable.jsx:572
+#: resources/admin/components/DataTable.jsx:312
+#: resources/admin/components/DataTable.jsx:352
 #, js-format
 msgid "Select row %s"
 msgstr ""
 
 #. translators: %1$d: starting item number, %2$d: ending item number, %3$d: total items
-#: resources/admin/components/DataTable.jsx:600
+#: resources/admin/components/DataTable.jsx:380
 #, js-format
 msgid "%1$d–%2$d of %3$d"
 msgstr ""
 
+#: resources/admin/components/DataTable.jsx:390
+msgid "Rows per page"
+msgstr ""
+
+#: resources/admin/components/DataTable.jsx:415
+msgid "Previous page"
+msgstr ""
+
 #. translators: %1$d: Current page number, %2$d: Total pages
 #. translators: 1: current page, 2: page count
-#: resources/admin/components/DataTable.jsx:642
+#: resources/admin/components/DataTable.jsx:422
 #: resources/admin/pages/ToolsPage.jsx:619
 #, js-format
 msgid "Page %1$d of %2$d"
+msgstr ""
+
+#: resources/admin/components/DataTable.jsx:437
+msgid "Next page"
 msgstr ""
 
 #: resources/admin/components/ExecutionLog.jsx:20
@@ -8384,7 +8575,7 @@ msgid "Forms could not be loaded."
 msgstr ""
 
 #: resources/admin/components/FormsList.jsx:257
-#: resources/admin/pages/SubmissionsPage.jsx:299
+#: resources/admin/pages/SubmissionsPage.jsx:273
 msgid "New"
 msgstr ""
 
@@ -8410,11 +8601,15 @@ msgstr ""
 msgid "Edit"
 msgstr ""
 
+#: resources/admin/components/FormsList.jsx:398
+msgid "More actions"
+msgstr ""
+
 #: resources/admin/components/FormsList.jsx:413
 #: resources/admin/components/FormsList.jsx:831
-#: resources/admin/components/SubmissionRowActions.jsx:52
-#: resources/admin/components/SubmissionsTable.jsx:888
-#: resources/admin/pages/SubmissionDetailPage.jsx:815
+#: resources/admin/components/SubmissionsTable.jsx:766
+#: resources/admin/components/SubmissionsTable.jsx:885
+#: resources/admin/pages/SubmissionDetailPage.jsx:807
 msgid "Restore"
 msgstr ""
 
@@ -8422,14 +8617,14 @@ msgstr ""
 #: resources/admin/components/FormsList.jsx:656
 #: resources/admin/components/FormsList.jsx:835
 #: resources/admin/components/FormsList.jsx:942
-#: resources/admin/components/SubmissionRowActions.jsx:57
-#: resources/admin/components/SubmissionRowActions.jsx:65
-#: resources/admin/components/SubmissionsTable.jsx:894
-#: resources/admin/components/SubmissionsTable.jsx:939
-#: resources/admin/components/SubmissionsTable.jsx:968
-#: resources/admin/components/SubmissionsTable.jsx:980
-#: resources/admin/pages/SubmissionDetailPage.jsx:822
-#: resources/admin/pages/SubmissionDetailPage.jsx:859
+#: resources/admin/components/SubmissionsTable.jsx:778
+#: resources/admin/components/SubmissionsTable.jsx:791
+#: resources/admin/components/SubmissionsTable.jsx:889
+#: resources/admin/components/SubmissionsTable.jsx:924
+#: resources/admin/components/SubmissionsTable.jsx:946
+#: resources/admin/components/SubmissionsTable.jsx:958
+#: resources/admin/pages/SubmissionDetailPage.jsx:814
+#: resources/admin/pages/SubmissionDetailPage.jsx:851
 msgid "Delete permanently"
 msgstr ""
 
@@ -8445,9 +8640,9 @@ msgstr ""
 #: resources/admin/components/FormsList.jsx:656
 #: resources/admin/components/FormsList.jsx:850
 #: resources/admin/components/FormsList.jsx:943
-#: resources/admin/components/SubmissionRowActions.jsx:65
-#: resources/admin/components/SubmissionsTable.jsx:939
-#: resources/admin/pages/SubmissionDetailPage.jsx:822
+#: resources/admin/components/SubmissionsTable.jsx:791
+#: resources/admin/components/SubmissionsTable.jsx:924
+#: resources/admin/pages/SubmissionDetailPage.jsx:814
 msgid "Move to Trash"
 msgstr ""
 
@@ -8496,9 +8691,9 @@ msgid "Status updated"
 msgstr ""
 
 #: resources/admin/components/FormsList.jsx:612
-#: resources/admin/pages/SubmissionDetailPage.jsx:402
-#: resources/admin/pages/SubmissionDetailPage.jsx:418
-#: resources/admin/pages/SubmissionDetailPage.jsx:434
+#: resources/admin/pages/SubmissionDetailPage.jsx:401
+#: resources/admin/pages/SubmissionDetailPage.jsx:416
+#: resources/admin/pages/SubmissionDetailPage.jsx:431
 msgid "Failed to update status"
 msgstr ""
 
@@ -8581,7 +8776,7 @@ msgid "Check your connection, then try again."
 msgstr ""
 
 #: resources/admin/components/FormsList.jsx:882
-#: resources/admin/pages/CreateFormPage.jsx:249
+#: resources/admin/pages/CreateFormPage.jsx:252
 #: resources/admin/pages/DashboardPage.jsx:31
 #: resources/admin/pages/FormsPage.jsx:148
 msgid "New form"
@@ -8683,7 +8878,7 @@ msgid "Insert tag"
 msgstr ""
 
 #: resources/admin/components/merge-tags/MergeTagMenu.jsx:37
-#: resources/admin/pages/SubmissionDetailPage.jsx:1167
+#: resources/admin/pages/SubmissionDetailPage.jsx:1159
 #: resources/frontend/components/fields/RepeaterField.jsx:101
 msgid "Entry"
 msgstr ""
@@ -8772,12 +8967,20 @@ msgstr ""
 msgid "Accept payments online"
 msgstr ""
 
+#: resources/admin/components/OnboardingWizard.jsx:41
+#: resources/admin/modals/CreateFormModal.jsx:154
+#: resources/admin/pages/SubmissionDetailPage.jsx:622
+#: resources/admin/utils/formMeta.js:121
+#: resources/admin/utils/formTypeChoices.js:12
+msgid "Conversational"
+msgstr ""
+
 #: resources/admin/components/OnboardingWizard.jsx:43
 msgid "Chat-like interactive form"
 msgstr ""
 
 #: resources/admin/components/OnboardingWizard.jsx:54
-#: resources/admin/pages/CreateFormPage.jsx:115
+#: resources/admin/pages/CreateFormPage.jsx:118
 msgid "All fields on one page."
 msgstr ""
 
@@ -9150,46 +9353,6 @@ msgstr ""
 
 #: resources/admin/components/settings/AdvancedSettings.jsx:476
 msgid "Reset All Settings"
-msgstr ""
-
-#: resources/admin/components/settings/BrandingSettings.jsx:30
-msgid "Included with the Agency plan"
-msgstr ""
-
-#: resources/admin/components/settings/BrandingSettings.jsx:33
-msgid "Put your own name and logo on the forms admin for your clients."
-msgstr ""
-
-#: resources/admin/components/settings/BrandingSettings.jsx:41
-msgid "Unlock"
-msgstr ""
-
-#: resources/admin/components/settings/BrandingSettings.jsx:48
-msgid "Plugin name"
-msgstr ""
-
-#: resources/admin/components/settings/BrandingSettings.jsx:50
-msgid "Client Forms"
-msgstr ""
-
-#: resources/admin/components/settings/BrandingSettings.jsx:51
-msgid "Shown in the admin menu and the app header."
-msgstr ""
-
-#: resources/admin/components/settings/BrandingSettings.jsx:55
-msgid "Logo"
-msgstr ""
-
-#: resources/admin/components/settings/BrandingSettings.jsx:57
-msgid "Choose from Media Library"
-msgstr ""
-
-#: resources/admin/components/settings/BrandingSettings.jsx:62
-msgid "Hide SubtleForms credits, help links and upgrade prompts"
-msgstr ""
-
-#: resources/admin/components/settings/BrandingSettings.jsx:68
-msgid "Only I can see the License and Branding screens"
 msgstr ""
 
 #: resources/admin/components/settings/EmailSettings.jsx:59
@@ -9775,6 +9938,10 @@ msgstr ""
 msgid "Method"
 msgstr ""
 
+#: resources/admin/components/settings/extensions/WebhooksPanel.jsx:116
+msgid "Send test request"
+msgstr ""
+
 #: resources/admin/components/settings/extensions/WebhooksPanel.jsx:125
 msgid "The default body contains the form and entry IDs, every answer keyed by field and with its label, and a link to the entry. Choose a custom JSON body, method, headers and signing on each webhook action."
 msgstr ""
@@ -9802,6 +9969,7 @@ msgstr ""
 
 #: resources/admin/components/settings/ExtensionsSettings.jsx:142
 #: resources/admin/ui/UpgradeModal.jsx:25
+#: resources/admin/ui/UpgradeModal.jsx:37
 #: resources/admin/ui/UpgradeModal.jsx:49
 #: resources/admin/ui/UpgradeModal.jsx:61
 #: resources/admin/ui/UpgradeModal.jsx:73
@@ -9810,8 +9978,7 @@ msgstr ""
 #: resources/admin/ui/UpgradeModal.jsx:109
 #: resources/admin/ui/UpgradeModal.jsx:121
 #: resources/admin/ui/UpgradeModal.jsx:133
-#: resources/admin/ui/UpgradeModal.jsx:145
-#: resources/admin/ui/UpgradeModal.jsx:164
+#: resources/admin/ui/UpgradeModal.jsx:152
 msgid "About SubtleForms Pro"
 msgstr ""
 
@@ -9912,7 +10079,7 @@ msgid "Submissions list density"
 msgstr ""
 
 #: resources/admin/components/settings/GeneralSettings.jsx:123
-#: resources/admin/pages/SubmissionsPage.jsx:455
+#: resources/admin/pages/SubmissionsPage.jsx:431
 msgid "Comfortable"
 msgstr ""
 
@@ -9921,22 +10088,22 @@ msgid "Row padding on the submissions list. An admin who chooses on that page ke
 msgstr ""
 
 #: resources/admin/components/settings/GeneralSettings.jsx:137
-#: resources/admin/pages/SubmissionsPage.jsx:472
+#: resources/admin/pages/SubmissionsPage.jsx:448
 msgid "Reading pane"
 msgstr ""
 
 #: resources/admin/components/settings/GeneralSettings.jsx:140
-#: resources/admin/pages/SubmissionsPage.jsx:476
+#: resources/admin/pages/SubmissionsPage.jsx:452
 msgid "Right of inbox"
 msgstr ""
 
 #: resources/admin/components/settings/GeneralSettings.jsx:141
-#: resources/admin/pages/SubmissionsPage.jsx:477
+#: resources/admin/pages/SubmissionsPage.jsx:453
 msgid "Below inbox"
 msgstr ""
 
 #: resources/admin/components/settings/GeneralSettings.jsx:142
-#: resources/admin/pages/SubmissionsPage.jsx:478
+#: resources/admin/pages/SubmissionsPage.jsx:454
 msgid "No split"
 msgstr ""
 
@@ -9945,7 +10112,7 @@ msgid "Where an entry opens. Right of the list is the default. No split opens th
 msgstr ""
 
 #: resources/admin/components/settings/LicenseSettings.jsx:51
-#: resources/admin/pages/SubmissionDetailPage.jsx:1084
+#: resources/admin/pages/SubmissionDetailPage.jsx:1076
 #: resources/admin/templates/TemplateSelector.jsx:142
 msgid "Free"
 msgstr ""
@@ -9994,75 +10161,49 @@ msgstr ""
 msgid "SubtleForms %s"
 msgstr ""
 
-#: resources/admin/components/SubmissionRowActions.jsx:31
-#: resources/admin/pages/FormsPage.jsx:168
-#: resources/admin/pages/SubmissionsPage.jsx:540
-msgid "View"
-msgstr ""
-
-#: resources/admin/components/SubmissionRowActions.jsx:36
-#: resources/admin/components/SubmissionsTable.jsx:921
-msgid "Remove star"
-msgstr ""
-
-#: resources/admin/components/SubmissionRowActions.jsx:36
-#: resources/admin/components/SubmissionsTable.jsx:915
-#: resources/admin/pages/SubmissionDetailPage.jsx:786
-msgid "Star"
-msgstr ""
-
-#: resources/admin/components/SubmissionRowActions.jsx:43
-msgid "Remove flag"
-msgstr ""
-
-#: resources/admin/components/SubmissionRowActions.jsx:43
-#: resources/admin/pages/SubmissionDetailPage.jsx:805
-msgid "Flag"
-msgstr ""
-
-#: resources/admin/components/SubmissionsTable.jsx:54
-#: resources/admin/components/SubmissionsTable.jsx:777
-#: resources/admin/pages/SubmissionDetailPage.jsx:1202
+#: resources/admin/components/SubmissionsTable.jsx:46
+#: resources/admin/components/SubmissionsTable.jsx:680
+#: resources/admin/pages/SubmissionDetailPage.jsx:1194
 msgid "Browser"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:55
-#: resources/admin/components/SubmissionsTable.jsx:784
-#: resources/admin/pages/SubmissionDetailPage.jsx:1204
+#: resources/admin/components/SubmissionsTable.jsx:47
+#: resources/admin/components/SubmissionsTable.jsx:687
+#: resources/admin/pages/SubmissionDetailPage.jsx:1196
 msgid "Device"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:56
+#: resources/admin/components/SubmissionsTable.jsx:48
 msgid "Submitted"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:242
+#: resources/admin/components/SubmissionsTable.jsx:228
 msgid "Entries could not be loaded."
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:430
+#: resources/admin/components/SubmissionsTable.jsx:407
 msgid "restored"
 msgstr ""
 
 #. translators: %d: number of entries
-#: resources/admin/components/SubmissionsTable.jsx:447
+#: resources/admin/components/SubmissionsTable.jsx:423
 #, js-format
 msgid "%d entry moved to the Trash"
 msgid_plural "%d entries moved to the Trash"
 msgstr[0] ""
 msgstr[1] ""
 
-#: resources/admin/components/SubmissionsTable.jsx:480
+#: resources/admin/components/SubmissionsTable.jsx:453
 msgid "Entry deleted permanently"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:486
-#: resources/admin/pages/SubmissionDetailPage.jsx:511
+#: resources/admin/components/SubmissionsTable.jsx:458
+#: resources/admin/pages/SubmissionDetailPage.jsx:504
 msgid "Failed to delete submission"
 msgstr ""
 
 #. translators: %1$d: number of entries, %2$s: what happened, e.g. "updated"
-#: resources/admin/components/SubmissionsTable.jsx:510
+#: resources/admin/components/SubmissionsTable.jsx:475
 #, js-format
 msgid "%1$d entry %2$s"
 msgid_plural "%1$d entries %2$s"
@@ -10070,56 +10211,65 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %1$d: number done, %2$d: total requested
-#: resources/admin/components/SubmissionsTable.jsx:521
+#: resources/admin/components/SubmissionsTable.jsx:485
 #, js-format
 msgid "Some entries could not be changed (%1$d of %2$d done)"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:539
+#: resources/admin/components/SubmissionsTable.jsx:503
 msgid "deleted permanently"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:562
+#: resources/admin/components/SubmissionsTable.jsx:526
 msgid "updated"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:573
+#: resources/admin/components/SubmissionsTable.jsx:537
 msgid "Nothing to export"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:576
-#: resources/admin/pages/SubmissionsPage.jsx:408
-#: resources/admin/pages/SubmissionsPage.jsx:413
+#: resources/admin/components/SubmissionsTable.jsx:540
+#: resources/admin/pages/SubmissionsPage.jsx:384
+#: resources/admin/pages/SubmissionsPage.jsx:389
 msgid "Failed to export submissions"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:674
-#: resources/admin/components/SubmissionsTable.jsx:730
-#: resources/admin/components/SubmissionsTable.jsx:734
+#: resources/admin/components/SubmissionsTable.jsx:633
+#: resources/admin/components/SubmissionsTable.jsx:637
 msgid "Anonymous"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:689
-#: resources/admin/components/SubmissionsTable.jsx:738
+#: resources/admin/components/SubmissionsTable.jsx:641
 msgid "(unread)"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:698
-#: resources/admin/components/SubmissionsTable.jsx:700
-#: resources/admin/pages/SubmissionDetailPage.jsx:786
-#: resources/admin/pages/SubmissionsPage.jsx:302
-msgid "Starred"
-msgstr ""
-
-#: resources/admin/components/SubmissionsTable.jsx:720
-#: resources/admin/pages/SubmissionDetailPage.jsx:593
-msgid "Submission"
-msgstr ""
-
-#: resources/admin/components/SubmissionsTable.jsx:791
-#: resources/admin/pages/SubmissionDetailPage.jsx:1169
-#: resources/admin/utils/submissionStatus.js:20
+#: resources/admin/components/SubmissionsTable.jsx:694
+#: resources/admin/pages/SubmissionDetailPage.jsx:1161
+#: resources/admin/utils/submissionStatus.js:21
 msgid "Received"
+msgstr ""
+
+#: resources/admin/components/SubmissionsTable.jsx:710
+msgid "Open"
+msgstr ""
+
+#: resources/admin/components/SubmissionsTable.jsx:722
+#: resources/admin/components/SubmissionsTable.jsx:908
+msgid "Remove star"
+msgstr ""
+
+#: resources/admin/components/SubmissionsTable.jsx:723
+#: resources/admin/components/SubmissionsTable.jsx:904
+#: resources/admin/pages/SubmissionDetailPage.jsx:778
+msgid "Star"
+msgstr ""
+
+#: resources/admin/components/SubmissionsTable.jsx:744
+msgid "Remove flag"
+msgstr ""
+
+#: resources/admin/components/SubmissionsTable.jsx:745
+msgid "Flag for follow-up"
 msgstr ""
 
 #: resources/admin/components/SubmissionsTable.jsx:867
@@ -10138,46 +10288,44 @@ msgstr ""
 msgid "Entries show up the moment a visitor sends one of your forms. Try another tab or clear the filters."
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:903
-#: resources/admin/pages/SubmissionDetailPage.jsx:778
-msgid "Mark read"
+#: resources/admin/components/SubmissionsTable.jsx:896
+msgid "Mark as Read"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:909
-#: resources/admin/pages/SubmissionDetailPage.jsx:778
-msgid "Mark unread"
+#: resources/admin/components/SubmissionsTable.jsx:900
+msgid "Mark as Unread"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:927
-msgid "Mark as spam"
-msgstr ""
-
-#: resources/admin/components/SubmissionsTable.jsx:933
+#: resources/admin/components/SubmissionsTable.jsx:912
 msgid "Export selected (CSV)"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:946
-msgid "Mark as flagged"
+#: resources/admin/components/SubmissionsTable.jsx:916
+msgid "Mark as Spam"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:956
+#: resources/admin/components/SubmissionsTable.jsx:920
+msgid "Mark as Flagged"
+msgstr ""
+
+#: resources/admin/components/SubmissionsTable.jsx:934
 msgid "Delete entries permanently"
 msgstr ""
 
 #. translators: %d: number of entries
-#: resources/admin/components/SubmissionsTable.jsx:959
+#: resources/admin/components/SubmissionsTable.jsx:937
 #, js-format
 msgid "Delete %d entry permanently? Its uploaded files are deleted too. This cannot be undone."
 msgid_plural "Delete %d entries permanently? Their uploaded files are deleted too. This cannot be undone."
 msgstr[0] ""
 msgstr[1] ""
 
-#: resources/admin/components/SubmissionsTable.jsx:974
+#: resources/admin/components/SubmissionsTable.jsx:952
 msgid "Delete entry permanently"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:975
-#: resources/admin/pages/SubmissionDetailPage.jsx:860
+#: resources/admin/components/SubmissionsTable.jsx:953
+#: resources/admin/pages/SubmissionDetailPage.jsx:852
 msgid "Delete this entry permanently? Its uploaded files are deleted too. This cannot be undone."
 msgstr ""
 
@@ -10345,7 +10493,7 @@ msgid "47 more templates"
 msgstr ""
 
 #: resources/admin/data/proCatalog.js:105
-msgid "White label and WPML or Polylang translation (Agency)"
+msgid "White label branding set in your licence portal, and WPML or Polylang translation (Agency)"
 msgstr ""
 
 #. translators: %1$d: sequential form number
@@ -10651,79 +10799,75 @@ msgid "Failed to create form"
 msgstr ""
 
 #. translators: %d: sequence number
-#: resources/admin/pages/CreateFormPage.jsx:28
+#: resources/admin/pages/CreateFormPage.jsx:29
 #, js-format
 msgid "Untitled form %d"
 msgstr ""
 
-#: resources/admin/pages/CreateFormPage.jsx:30
-msgid "Untitled form"
-msgstr ""
-
-#: resources/admin/pages/CreateFormPage.jsx:121
+#: resources/admin/pages/CreateFormPage.jsx:124
 msgid "Split long forms into steps with a progress bar."
 msgstr ""
 
 #. translators: %d: number of templates
-#: resources/admin/pages/CreateFormPage.jsx:254
+#: resources/admin/pages/CreateFormPage.jsx:257
 #, js-format
 msgid "Start from a blank canvas or one of %d ready-made templates. You can change everything later."
 msgstr ""
 
-#: resources/admin/pages/CreateFormPage.jsx:257
+#: resources/admin/pages/CreateFormPage.jsx:260
 msgid "Start from a blank canvas or a ready-made template."
 msgstr ""
 
-#: resources/admin/pages/CreateFormPage.jsx:265
+#: resources/admin/pages/CreateFormPage.jsx:268
 msgid "Template categories"
 msgstr ""
 
-#: resources/admin/pages/CreateFormPage.jsx:273
-#: resources/admin/pages/CreateFormPage.jsx:274
+#: resources/admin/pages/CreateFormPage.jsx:276
+#: resources/admin/pages/CreateFormPage.jsx:277
 msgid "Search templates"
 msgstr ""
 
-#: resources/admin/pages/CreateFormPage.jsx:311
+#: resources/admin/pages/CreateFormPage.jsx:314
 msgid "Blank form"
 msgstr ""
 
-#: resources/admin/pages/CreateFormPage.jsx:312
+#: resources/admin/pages/CreateFormPage.jsx:315
 msgid "Build from scratch with drag and drop."
 msgstr ""
 
-#: resources/admin/pages/CreateFormPage.jsx:337
+#: resources/admin/pages/CreateFormPage.jsx:340
 msgid "Use template"
 msgstr ""
 
 #. translators: %d: number of templates
-#: resources/admin/pages/CreateFormPage.jsx:358
+#: resources/admin/pages/CreateFormPage.jsx:361
 #, js-format
 msgid "%d more templates in SubtleForms Pro"
 msgstr ""
 
-#: resources/admin/pages/CreateFormPage.jsx:363
+#: resources/admin/pages/CreateFormPage.jsx:366
 msgid "Event registration, job applications, payments and more. Opens subtleforms.com."
 msgstr ""
 
-#: resources/admin/pages/CreateFormPage.jsx:374
+#: resources/admin/pages/CreateFormPage.jsx:377
 #: resources/admin/templates/TemplateSelector.jsx:110
 msgid "No templates found"
 msgstr ""
 
-#: resources/admin/pages/CreateFormPage.jsx:376
+#: resources/admin/pages/CreateFormPage.jsx:379
 msgid "Try another word, or start with a blank form."
 msgstr ""
 
-#: resources/admin/pages/CreateFormPage.jsx:380
+#: resources/admin/pages/CreateFormPage.jsx:383
 msgid "Start blank"
 msgstr ""
 
-#: resources/admin/pages/CreateFormPage.jsx:392
+#: resources/admin/pages/CreateFormPage.jsx:395
 msgid "New blank form"
 msgstr ""
 
 #. translators: %d: number of fields
-#: resources/admin/pages/CreateFormPage.jsx:437
+#: resources/admin/pages/CreateFormPage.jsx:440
 #, js-format
 msgid "%d field included"
 msgid_plural "%d fields included"
@@ -10731,13 +10875,9 @@ msgstr[0] ""
 msgstr[1] ""
 
 #. translators: %d: remaining field count
-#: resources/admin/pages/CreateFormPage.jsx:452
+#: resources/admin/pages/CreateFormPage.jsx:455
 #, js-format
 msgid "and %d more"
-msgstr ""
-
-#: resources/admin/pages/CreateFormPage.jsx:463
-msgid "Description (optional)"
 msgstr ""
 
 #: resources/admin/pages/DashboardPage.jsx:39
@@ -10770,7 +10910,7 @@ msgstr ""
 
 #: resources/admin/pages/DashboardPage.jsx:90
 #: resources/admin/pages/ReportsPage.jsx:59
-#: resources/admin/pages/SubmissionDetailPage.jsx:1163
+#: resources/admin/pages/SubmissionDetailPage.jsx:1155
 msgid "Unread"
 msgstr ""
 
@@ -10791,7 +10931,7 @@ msgstr ""
 #: resources/admin/pages/DashboardPage.jsx:106
 #: resources/admin/pages/ReportsPage.jsx:64
 #: resources/admin/pages/ReportsPage.jsx:71
-#: resources/admin/pages/SubmissionsPage.jsx:310
+#: resources/admin/pages/SubmissionsPage.jsx:286
 msgid "Last 7 days"
 msgstr ""
 
@@ -10973,8 +11113,8 @@ msgid "Set up"
 msgstr ""
 
 #: resources/admin/pages/ExtensionsPage.jsx:84
-#: resources/admin/ui/UpgradeModal.jsx:162
-#: resources/admin/ui/UpgradeModal.jsx:214
+#: resources/admin/ui/UpgradeModal.jsx:150
+#: resources/admin/ui/UpgradeModal.jsx:202
 msgid "SubtleForms Pro"
 msgstr ""
 
@@ -10987,7 +11127,7 @@ msgid "SubtleForms Pro is a separate plugin that adds Stripe payments, marketing
 msgstr ""
 
 #: resources/admin/pages/ExtensionsPage.jsx:98
-#: resources/admin/ui/UpgradeModal.jsx:239
+#: resources/admin/ui/UpgradeModal.jsx:227
 msgid "Activate your license"
 msgstr ""
 
@@ -11031,12 +11171,12 @@ msgid "The form could not be created. Try again."
 msgstr ""
 
 #: resources/admin/pages/FormsPage.jsx:122
-#: resources/admin/pages/SubmissionsPage.jsx:298
+#: resources/admin/pages/SubmissionsPage.jsx:270
 msgid "All"
 msgstr ""
 
 #: resources/admin/pages/FormsPage.jsx:125
-#: resources/admin/pages/SubmissionsPage.jsx:304
+#: resources/admin/pages/SubmissionsPage.jsx:280
 msgid "Trash"
 msgstr ""
 
@@ -11045,8 +11185,13 @@ msgid "Build, publish and manage every form on your site."
 msgstr ""
 
 #: resources/admin/pages/FormsPage.jsx:166
-#: resources/admin/pages/SubmissionsPage.jsx:538
+#: resources/admin/pages/SubmissionsPage.jsx:514
 msgid "Show/hide columns"
+msgstr ""
+
+#: resources/admin/pages/FormsPage.jsx:168
+#: resources/admin/pages/SubmissionsPage.jsx:516
+msgid "View"
 msgstr ""
 
 #: resources/admin/pages/FormsPage.jsx:189
@@ -11370,71 +11515,59 @@ msgstr ""
 msgid "No views yet."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:32
+#: resources/admin/pages/SettingsPage.jsx:30
 msgid "Defaults for new forms, autosave and deleting."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:38
+#: resources/admin/pages/SettingsPage.jsx:36
 msgid "Messages and behaviour visitors see on your site."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:44
+#: resources/admin/pages/SettingsPage.jsx:42
 msgid "Who gets notified, what they receive and who it comes from."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:49
+#: resources/admin/pages/SettingsPage.jsx:47
 msgid "Security & privacy"
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:50
+#: resources/admin/pages/SettingsPage.jsx:48
 msgid "Spam protection, CAPTCHA, data retention and debugging."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:56
+#: resources/admin/pages/SettingsPage.jsx:54
 msgid "Webhook defaults, form analytics and the integrations your add-ons bring."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:67
+#: resources/admin/pages/SettingsPage.jsx:65
 msgid "License"
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:68
+#: resources/admin/pages/SettingsPage.jsx:66
 msgid "Your plan, license key and what it unlocks."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:73
-msgid "Branding"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:74
-msgid "Your name and logo in the forms admin, and which SubtleForms links appear."
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:144
+#: resources/admin/pages/SettingsPage.jsx:141
 msgid "Loading settings…"
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:153
+#: resources/admin/pages/SettingsPage.jsx:150
 msgid "Settings could not be loaded."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:164
+#: resources/admin/pages/SettingsPage.jsx:161
 msgid "Site-wide defaults. Each form can override most of these in its own settings."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:178
+#: resources/admin/pages/SettingsPage.jsx:175
 msgid "Settings sections"
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:196
-msgid "Agency"
-msgstr ""
-
-#: resources/admin/pages/SettingsPage.jsx:263
+#: resources/admin/pages/SettingsPage.jsx:255
 msgid "Discard"
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:266
+#: resources/admin/pages/SettingsPage.jsx:258
 msgid "Save changes"
 msgstr ""
 
@@ -11459,401 +11592,421 @@ msgid "Failed to load submission"
 msgstr ""
 
 #. translators: %d: number of email notifications
-#: resources/admin/pages/SubmissionDetailPage.jsx:453
+#: resources/admin/pages/SubmissionDetailPage.jsx:450
 #, js-format
 msgid "%d notification queued again."
 msgid_plural "%d notifications queued again."
 msgstr[0] ""
 msgstr[1] ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:480
+#: resources/admin/pages/SubmissionDetailPage.jsx:477
 msgid "The note could not be saved."
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:491
+#: resources/admin/pages/SubmissionDetailPage.jsx:488
 msgid "The note could not be deleted."
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:577
-#: resources/admin/pages/SubmissionDetailPage.jsx:595
-#: resources/admin/pages/SubmissionsPage.jsx:670
+#: resources/admin/pages/SubmissionDetailPage.jsx:569
+#: resources/admin/pages/SubmissionDetailPage.jsx:587
+#: resources/admin/pages/SubmissionsPage.jsx:647
 msgid "Loading submission…"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:586
-#: resources/admin/pages/SubmissionDetailPage.jsx:738
+#: resources/admin/pages/SubmissionDetailPage.jsx:578
+#: resources/admin/pages/SubmissionDetailPage.jsx:730
 msgid "Close"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:600
+#: resources/admin/pages/SubmissionDetailPage.jsx:592
 msgid "All submissions"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:639
+#: resources/admin/pages/SubmissionDetailPage.jsx:623
+#: resources/admin/utils/formMeta.js:115
+#: resources/admin/utils/formTypeChoices.js:11
+#: resources/admin/utils/formTypeChoices.js:24
+msgid "Multi-step"
+msgstr ""
+
+#: resources/admin/pages/SubmissionDetailPage.jsx:631
 msgid "Unknown"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:640
-#: resources/admin/pages/SubmissionDetailPage.jsx:646
+#: resources/admin/pages/SubmissionDetailPage.jsx:632
+#: resources/admin/pages/SubmissionDetailPage.jsx:638
 msgid "N/A"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:668
+#: resources/admin/pages/SubmissionDetailPage.jsx:660
 msgid "just now"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:669
+#: resources/admin/pages/SubmissionDetailPage.jsx:661
 #, js-format
 msgid "%ds ago"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:670
+#: resources/admin/pages/SubmissionDetailPage.jsx:662
 #, js-format
 msgid "%dm ago"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:671
+#: resources/admin/pages/SubmissionDetailPage.jsx:663
 #, js-format
 msgid "%dh ago"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:672
+#: resources/admin/pages/SubmissionDetailPage.jsx:664
 #, js-format
 msgid "%dd ago"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:727
+#: resources/admin/pages/SubmissionDetailPage.jsx:719
 #, js-format
 msgid "Submission #%d"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:733
+#: resources/admin/pages/SubmissionDetailPage.jsx:725
 msgid "Browse submissions"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:746
+#: resources/admin/pages/SubmissionDetailPage.jsx:738
 msgid "Newer submission"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:755
+#: resources/admin/pages/SubmissionDetailPage.jsx:747
 msgid "Older submission"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:762
+#: resources/admin/pages/SubmissionDetailPage.jsx:754
 msgid "Submission actions"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:770
+#: resources/admin/pages/SubmissionDetailPage.jsx:762
 msgid "PDF"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:795
+#: resources/admin/pages/SubmissionDetailPage.jsx:770
+msgid "Mark read"
+msgstr ""
+
+#: resources/admin/pages/SubmissionDetailPage.jsx:770
+msgid "Mark unread"
+msgstr ""
+
+#: resources/admin/pages/SubmissionDetailPage.jsx:778
+#: resources/admin/pages/SubmissionsPage.jsx:278
+msgid "Starred"
+msgstr ""
+
+#: resources/admin/pages/SubmissionDetailPage.jsx:787
 msgid "Resend notifications"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:805
-#: resources/admin/pages/SubmissionsPage.jsx:303
+#: resources/admin/pages/SubmissionDetailPage.jsx:797
+#: resources/admin/pages/SubmissionsPage.jsx:279
 #: resources/admin/utils/submissionStatus.js:16
 msgid "Flagged"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:841
+#: resources/admin/pages/SubmissionDetailPage.jsx:797
+msgid "Flag"
+msgstr ""
+
+#: resources/admin/pages/SubmissionDetailPage.jsx:833
 msgid "Resend"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:842
+#: resources/admin/pages/SubmissionDetailPage.jsx:834
 msgid "Send this entry’s email notifications again, with the answers as they were saved? Passwords are never included."
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:871
-msgid "Answers"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:877
+#: resources/admin/pages/SubmissionDetailPage.jsx:869
 msgid "Empty fields"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:883
+#: resources/admin/pages/SubmissionDetailPage.jsx:875
 msgid "Field keys"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:904
+#: resources/admin/pages/SubmissionDetailPage.jsx:896
 msgid "No answer"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:943
+#: resources/admin/pages/SubmissionDetailPage.jsx:935
 msgid "No answers recorded"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:945
+#: resources/admin/pages/SubmissionDetailPage.jsx:937
 msgid "The entry was saved without field data. The activity log below usually explains why."
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:952
+#: resources/admin/pages/SubmissionDetailPage.jsx:944
 msgid "Raw payload and meta (JSON)"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:962
+#: resources/admin/pages/SubmissionDetailPage.jsx:954
 msgid "What happened next"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:969
+#: resources/admin/pages/SubmissionDetailPage.jsx:961
 #, js-format
 msgid "Actions (%d)"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:970
+#: resources/admin/pages/SubmissionDetailPage.jsx:962
 #, js-format
 msgid "Log (%d)"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:971
+#: resources/admin/pages/SubmissionDetailPage.jsx:963
 #, js-format
 msgid "API calls (%d)"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:982
+#: resources/admin/pages/SubmissionDetailPage.jsx:974
 msgid "No actions ran for this entry."
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:992
+#: resources/admin/pages/SubmissionDetailPage.jsx:984
 #: resources/admin/pages/ToolsPage.jsx:481
 #: resources/admin/pages/ToolsPage.jsx:513
 msgid "Level"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1010
+#: resources/admin/pages/SubmissionDetailPage.jsx:1002
 msgid "Nothing logged."
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1028
+#: resources/admin/pages/SubmissionDetailPage.jsx:1020
 msgid "Notes"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1045
+#: resources/admin/pages/SubmissionDetailPage.jsx:1037
 msgid "Delete note"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1054
+#: resources/admin/pages/SubmissionDetailPage.jsx:1046
 msgid "Private notes for your team. Visitors never see them."
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1058
+#: resources/admin/pages/SubmissionDetailPage.jsx:1050
 msgid "Add a note"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1070
+#: resources/admin/pages/SubmissionDetailPage.jsx:1062
 msgid "Add note"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1078
+#: resources/admin/pages/SubmissionDetailPage.jsx:1070
 msgid "Order"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1082
-#: resources/admin/pages/SubmissionDetailPage.jsx:1083
+#: resources/admin/pages/SubmissionDetailPage.jsx:1074
+#: resources/admin/pages/SubmissionDetailPage.jsx:1075
 msgid "Paid"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1085
+#: resources/admin/pages/SubmissionDetailPage.jsx:1077
 msgid "Authorised"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1086
-#: resources/admin/pages/SubmissionsPage.jsx:602
+#: resources/admin/pages/SubmissionDetailPage.jsx:1078
+#: resources/admin/pages/SubmissionsPage.jsx:578
 #: resources/admin/utils/submissionStatus.js:12
 msgid "Failed"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1087
-#: resources/admin/pages/SubmissionDetailPage.jsx:1124
+#: resources/admin/pages/SubmissionDetailPage.jsx:1079
+#: resources/admin/pages/SubmissionDetailPage.jsx:1116
 msgid "Refunded"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1088
+#: resources/admin/pages/SubmissionDetailPage.jsx:1080
 msgid "Cancelled"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1089
+#: resources/admin/pages/SubmissionDetailPage.jsx:1081
 msgid "Payment pending"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1110
+#: resources/admin/pages/SubmissionDetailPage.jsx:1102
 #, js-format
 msgid "Coupon %s"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1116
+#: resources/admin/pages/SubmissionDetailPage.jsx:1108
 #, js-format
 msgid "Tax (%s%%)"
 msgstr ""
 
 #. translators: 1: order number, 2: order status
-#: resources/admin/pages/SubmissionDetailPage.jsx:1134
+#: resources/admin/pages/SubmissionDetailPage.jsx:1126
 #, js-format
 msgid "WooCommerce order #%1$s (%2$s)"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1149
+#: resources/admin/pages/SubmissionDetailPage.jsx:1141
 msgid "View in Stripe"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1162
+#: resources/admin/pages/SubmissionDetailPage.jsx:1154
 msgid "Details"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1171
+#: resources/admin/pages/SubmissionDetailPage.jsx:1163
 msgid "Submitted by"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1174
+#: resources/admin/pages/SubmissionDetailPage.jsx:1166
 #, js-format
 msgid "User #%d"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1175
+#: resources/admin/pages/SubmissionDetailPage.jsx:1167
 msgid "Guest"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1196
+#: resources/admin/pages/SubmissionDetailPage.jsx:1188
 msgid "Visitor"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1200
-msgid "IP address"
-msgstr ""
-
-#: resources/admin/pages/SubmissionDetailPage.jsx:1201
+#: resources/admin/pages/SubmissionDetailPage.jsx:1193
 msgid "Not stored"
 msgstr ""
 
-#: resources/admin/pages/SubmissionDetailPage.jsx:1208
+#: resources/admin/pages/SubmissionDetailPage.jsx:1200
 msgid "Page"
 msgstr ""
 
 #. translators: 1: absolute date, 2: relative time
-#: resources/admin/pages/SubmissionDetailPage.jsx:1233
-#: resources/admin/pages/SubmissionDetailPage.jsx:1257
+#: resources/admin/pages/SubmissionDetailPage.jsx:1225
+#: resources/admin/pages/SubmissionDetailPage.jsx:1249
 #, js-format
 msgid "Received %1$s · %2$s"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:167
-#: resources/admin/pages/SubmissionsPage.jsx:179
+#: resources/admin/pages/SubmissionsPage.jsx:165
+#: resources/admin/pages/SubmissionsPage.jsx:177
 msgid "The display options could not be saved."
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:293
+#: resources/admin/pages/SubmissionsPage.jsx:266
 msgid "Form submissions"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:300
+#: resources/admin/pages/SubmissionsPage.jsx:276
 msgid "Read"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:301
+#: resources/admin/pages/SubmissionsPage.jsx:277
 #: resources/admin/utils/submissionStatus.js:15
 msgid "Spam"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:308
+#: resources/admin/pages/SubmissionsPage.jsx:284
 msgid "All time"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:311
+#: resources/admin/pages/SubmissionsPage.jsx:287
 msgid "Last 30 days"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:312
+#: resources/admin/pages/SubmissionsPage.jsx:288
 msgid "Last 3 months"
 msgstr ""
 
 #. translators: %1$d: form id
-#: resources/admin/pages/SubmissionsPage.jsx:321
+#: resources/admin/pages/SubmissionsPage.jsx:297
 #, js-format
 msgid "Form #%1$d"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:422
+#: resources/admin/pages/SubmissionsPage.jsx:398
 msgid "Every entry from every form. Open one to read it, reply, or see what happened after it was sent."
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:435
+#: resources/admin/pages/SubmissionsPage.jsx:411
 msgid "Exporting…"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:436
+#: resources/admin/pages/SubmissionsPage.jsx:412
 #: resources/admin/pages/ToolsPage.jsx:320
 msgid "Export CSV"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:443
+#: resources/admin/pages/SubmissionsPage.jsx:419
 msgid "Display options"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:451
+#: resources/admin/pages/SubmissionsPage.jsx:427
 msgid "Density"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:499
+#: resources/admin/pages/SubmissionsPage.jsx:475
 msgid "Use site default"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:504
+#: resources/admin/pages/SubmissionsPage.jsx:480
 msgid "Saved for your account. Site defaults are in Settings → General."
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:505
+#: resources/admin/pages/SubmissionsPage.jsx:481
 msgid "Using the site default. A choice here is saved for your account."
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:564
+#: resources/admin/pages/SubmissionsPage.jsx:540
 msgid "Filters"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:571
+#: resources/admin/pages/SubmissionsPage.jsx:547
 msgid "Search submissions"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:589
+#: resources/admin/pages/SubmissionsPage.jsx:565
 msgid "Date Range"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:597
+#: resources/admin/pages/SubmissionsPage.jsx:573
 msgid "Result"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:600
+#: resources/admin/pages/SubmissionsPage.jsx:576
 msgid "All results"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:601
+#: resources/admin/pages/SubmissionsPage.jsx:577
 #: resources/admin/utils/submissionStatus.js:9
 msgid "Completed"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:603
+#: resources/admin/pages/SubmissionsPage.jsx:579
 msgid "Awaiting Payment"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:604
+#: resources/admin/pages/SubmissionsPage.jsx:580
 #: resources/admin/utils/submissionStatus.js:11
 msgid "Processing"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:616
+#: resources/admin/pages/SubmissionsPage.jsx:581
+msgid "Preview (test entries)"
+msgstr ""
+
+#: resources/admin/pages/SubmissionsPage.jsx:593
 msgid "Clear all filters"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:622
+#: resources/admin/pages/SubmissionsPage.jsx:599
 msgid "Search responses"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:627
+#: resources/admin/pages/SubmissionsPage.jsx:604
 msgid "Filter by field value"
 msgstr ""
 
-#: resources/admin/pages/SubmissionsPage.jsx:630
+#: resources/admin/pages/SubmissionsPage.jsx:607
 msgid "e.g. john@example.com"
 msgstr ""
 
@@ -12210,179 +12363,155 @@ msgid "Use a calculation as the amount to charge"
 msgstr ""
 
 #: resources/admin/ui/UpgradeModal.jsx:35
-msgid "White label for client sites"
-msgstr ""
-
-#: resources/admin/ui/UpgradeModal.jsx:36
-msgid "Show your agency name and logo in the forms admin. Included in the Agency plan of SubtleForms Pro."
-msgstr ""
-
-#: resources/admin/ui/UpgradeModal.jsx:37
-msgid "See the Agency plan"
-msgstr ""
-
-#: resources/admin/ui/UpgradeModal.jsx:40
-msgid "Your plugin name in the admin menu and header"
-msgstr ""
-
-#: resources/admin/ui/UpgradeModal.jsx:41
-msgid "Your logo from the Media Library"
-msgstr ""
-
-#: resources/admin/ui/UpgradeModal.jsx:42
-msgid "No SubtleForms help links or credits"
-msgstr ""
-
-#: resources/admin/ui/UpgradeModal.jsx:47
 msgid "More templates"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:48
+#: resources/admin/ui/UpgradeModal.jsx:36
 msgid "SubtleForms Pro adds 47 templates for registrations, orders, applications and support."
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:52
+#: resources/admin/ui/UpgradeModal.jsx:40
 msgid "Multi-step, conversational and payment layouts"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:53
+#: resources/admin/ui/UpgradeModal.jsx:41
 msgid "Every field and setting stays editable"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:54
+#: resources/admin/ui/UpgradeModal.jsx:42
 msgid "New templates added with updates"
 msgstr ""
 
+#: resources/admin/ui/UpgradeModal.jsx:47
 #: resources/admin/ui/UpgradeModal.jsx:59
-#: resources/admin/ui/UpgradeModal.jsx:71
 msgid "Card payments"
 msgstr ""
 
+#: resources/admin/ui/UpgradeModal.jsx:48
 #: resources/admin/ui/UpgradeModal.jsx:60
-#: resources/admin/ui/UpgradeModal.jsx:72
 msgid "SubtleForms Pro adds a Card Payment field that takes payments with Stripe."
 msgstr ""
 
+#: resources/admin/ui/UpgradeModal.jsx:52
 #: resources/admin/ui/UpgradeModal.jsx:64
-#: resources/admin/ui/UpgradeModal.jsx:76
 msgid "Cards, wallets and bank payments through Stripe"
 msgstr ""
 
+#: resources/admin/ui/UpgradeModal.jsx:53
 #: resources/admin/ui/UpgradeModal.jsx:65
-#: resources/admin/ui/UpgradeModal.jsx:77
 msgid "Works with the free Product, Priced Options and Coupon fields"
 msgstr ""
 
+#: resources/admin/ui/UpgradeModal.jsx:54
 #: resources/admin/ui/UpgradeModal.jsx:66
-#: resources/admin/ui/UpgradeModal.jsx:78
 msgid "Payment status on every entry"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:84
+#: resources/admin/ui/UpgradeModal.jsx:72
 msgid "SubtleForms Pro adds people who send a form to Mailchimp, Brevo or Kit."
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:88
+#: resources/admin/ui/UpgradeModal.jsx:76
 msgid "Choose the list and map fields per form"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:89
+#: resources/admin/ui/UpgradeModal.jsx:77
 msgid "Only add people who ticked a consent box"
 msgstr ""
 
+#: resources/admin/ui/UpgradeModal.jsx:78
 #: resources/admin/ui/UpgradeModal.jsx:90
-#: resources/admin/ui/UpgradeModal.jsx:102
 msgid "Every delivery is listed on the entry"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:96
+#: resources/admin/ui/UpgradeModal.jsx:84
 msgid "SubtleForms Pro creates HubSpot contacts from form entries."
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:100
+#: resources/admin/ui/UpgradeModal.jsx:88
 msgid "Map form fields to contact properties"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:101
+#: resources/admin/ui/UpgradeModal.jsx:89
 msgid "Update the contact when the email already exists"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:108
+#: resources/admin/ui/UpgradeModal.jsx:96
 msgid "SubtleForms Pro sends payment forms through the WooCommerce checkout and adds a WooCommerce Product field."
 msgstr ""
 
+#: resources/admin/ui/UpgradeModal.jsx:100
 #: resources/admin/ui/UpgradeModal.jsx:112
-#: resources/admin/ui/UpgradeModal.jsx:124
 msgid "Use the payment methods WooCommerce already has"
 msgstr ""
 
+#: resources/admin/ui/UpgradeModal.jsx:101
 #: resources/admin/ui/UpgradeModal.jsx:113
-#: resources/admin/ui/UpgradeModal.jsx:125
 msgid "Orders link back to the form entry"
 msgstr ""
 
+#: resources/admin/ui/UpgradeModal.jsx:102
 #: resources/admin/ui/UpgradeModal.jsx:114
-#: resources/admin/ui/UpgradeModal.jsx:126
 msgid "Sell existing WooCommerce products from a form"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:120
+#: resources/admin/ui/UpgradeModal.jsx:108
 msgid "SubtleForms Pro sends payment forms through the WooCommerce checkout."
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:131
+#: resources/admin/ui/UpgradeModal.jsx:119
 msgid "Entry PDFs"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:132
+#: resources/admin/ui/UpgradeModal.jsx:120
 msgid "SubtleForms Pro makes a PDF of any entry and can attach it to notification emails."
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:136
+#: resources/admin/ui/UpgradeModal.jsx:124
 msgid "Download a PDF from the entry screen"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:137
+#: resources/admin/ui/UpgradeModal.jsx:125
 msgid "Attach it to admin notification emails"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:138
+#: resources/admin/ui/UpgradeModal.jsx:126
 msgid "Your logo and colours on every page"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:143
+#: resources/admin/ui/UpgradeModal.jsx:131
 msgid "Translation with WPML and Polylang"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:144
+#: resources/admin/ui/UpgradeModal.jsx:132
 msgid "SubtleForms Pro lets WPML or Polylang translate form labels, messages and emails."
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:148
+#: resources/admin/ui/UpgradeModal.jsx:136
 msgid "Translate labels, help text and options"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:149
+#: resources/admin/ui/UpgradeModal.jsx:137
 msgid "Translate confirmation messages and emails"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:150
+#: resources/admin/ui/UpgradeModal.jsx:138
 msgid "One form for every language"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:163
+#: resources/admin/ui/UpgradeModal.jsx:151
 msgid "This is part of SubtleForms Pro, a separate plugin."
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:248
+#: resources/admin/ui/UpgradeModal.jsx:236
 msgid "Not now"
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:254
+#: resources/admin/ui/UpgradeModal.jsx:242
 msgid "SubtleForms Pro is installed. Add your license key to use it."
 msgstr ""
 
-#: resources/admin/ui/UpgradeModal.jsx:255
+#: resources/admin/ui/UpgradeModal.jsx:243
 msgid "SubtleForms Pro is a separate plugin. Your forms and entries stay as they are."
 msgstr ""
 
@@ -12430,8 +12559,16 @@ msgstr ""
 msgid "Published, changes not live"
 msgstr ""
 
-#: resources/admin/utils/formNameHelp.js:10
+#: resources/admin/utils/formNameHelp.js:11
+msgid "Form name"
+msgstr ""
+
+#: resources/admin/utils/formNameHelp.js:21
 msgid "The name shown to you and your visitors."
+msgstr ""
+
+#: resources/admin/utils/formNameHelp.js:31
+msgid "Shown under the title when the block or shortcode displays it."
 msgstr ""
 
 #: resources/admin/utils/initialSchema.js:80
@@ -12913,58 +13050,58 @@ msgstr ""
 msgid "Select…"
 msgstr ""
 
-#: resources/frontend/components/fields/ChoiceSelect.jsx:192
-#: resources/frontend/components/fields/CountrySelect.jsx:222
+#: resources/frontend/components/fields/ChoiceSelect.jsx:193
+#: resources/frontend/components/fields/CountrySelect.jsx:236
 msgid "Clear selection"
 msgstr ""
 
-#: resources/frontend/components/fields/CountrySelect.jsx:116
+#: resources/frontend/components/fields/CountrySelect.jsx:120
 msgid "Select a country"
 msgstr ""
 
-#: resources/frontend/components/fields/CountrySelect.jsx:208
-#: resources/frontend/components/fields/CountrySelect.jsx:209
+#: resources/frontend/components/fields/CountrySelect.jsx:221
+#: resources/frontend/components/fields/CountrySelect.jsx:222
 msgid "Search countries"
 msgstr ""
 
-#: resources/frontend/components/fields/CountrySelect.jsx:226
-#: resources/frontend/components/fields/PhoneField.jsx:159
+#: resources/frontend/components/fields/CountrySelect.jsx:240
+#: resources/frontend/components/fields/PhoneField.jsx:172
 msgid "No countries match that search."
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:139
+#: resources/frontend/components/fields/DateTimeField.jsx:220
 msgid "Select a time"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:141
+#: resources/frontend/components/fields/DateTimeField.jsx:222
 msgid "Select date and time"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:142
+#: resources/frontend/components/fields/DateTimeField.jsx:223
 msgid "Select a date"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:234
+#: resources/frontend/components/fields/DateTimeField.jsx:337
 msgid "Previous month"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:239
+#: resources/frontend/components/fields/DateTimeField.jsx:342
 msgid "Month"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:250
+#: resources/frontend/components/fields/DateTimeField.jsx:353
 msgid "Year"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:257
+#: resources/frontend/components/fields/DateTimeField.jsx:360
 msgid "Next month"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:323
+#: resources/frontend/components/fields/DateTimeField.jsx:426
 msgid "Hour"
 msgstr ""
 
-#: resources/frontend/components/fields/DateTimeField.jsx:337
+#: resources/frontend/components/fields/DateTimeField.jsx:432
 msgid "Minute"
 msgstr ""
 
@@ -13113,8 +13250,8 @@ msgstr ""
 msgid "Payments are encrypted and processed securely."
 msgstr ""
 
-#: resources/frontend/components/fields/PhoneField.jsx:146
-#: resources/frontend/components/fields/PhoneField.jsx:147
+#: resources/frontend/components/fields/PhoneField.jsx:152
+#: resources/frontend/components/fields/PhoneField.jsx:153
 msgid "Search country or code"
 msgstr ""
 

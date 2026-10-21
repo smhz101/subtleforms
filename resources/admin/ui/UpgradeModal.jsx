@@ -31,18 +31,6 @@ const FEATURE_COPY = {
     ],
   },
 
-  'branding.white_label': {
-    title: __( 'White label for client sites', 'subtleforms' ),
-    description: __( 'Show your agency name and logo in the forms admin. Included in the Agency plan of SubtleForms Pro.', 'subtleforms' ),
-    cta: __( 'See the Agency plan', 'subtleforms' ),
-    lossLine: null,
-    benefits: [
-      __( 'Your plugin name in the admin menu and header', 'subtleforms' ),
-      __( 'Your logo from the Media Library', 'subtleforms' ),
-      __( 'No SubtleForms help links or credits', 'subtleforms' ),
-    ],
-  },
-
   'templates.pro': {
     title: __( 'More templates', 'subtleforms' ),
     description: __( 'SubtleForms Pro adds 47 templates for registrations, orders, applications and support.', 'subtleforms' ),

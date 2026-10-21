@@ -56,7 +56,7 @@ SubtleForms is a form builder for WordPress. You build a form on a canvas that l
 
 = SubtleForms Pro =
 
-SubtleForms Pro is a separate, paid add-on available at [subtleforms.com](https://subtleforms.com/pricing/). It adds Signature and Calculation fields, Stripe card checkout, WooCommerce checkout, Mailchimp, Brevo, Kit, HubSpot and Zapier integrations, entry PDFs, more templates, white label and WPML or Polylang support. This plugin does not need Pro, and nothing in this plugin is disabled without it.
+SubtleForms Pro is a separate, paid add-on available at [subtleforms.com](https://subtleforms.com/pricing/). It adds Signature and Calculation fields, Stripe card checkout, WooCommerce checkout, Mailchimp, Brevo, Kit, HubSpot and Zapier integrations, entry PDFs, more templates, white label branding (Agency licences set it in the licence portal on subtleforms.com) and WPML or Polylang support. This plugin does not need Pro, and nothing in this plugin is disabled without it.
 
 == Installation ==
 
@@ -130,11 +130,19 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 == Changelog ==
 
 = Unreleased =
-* Fix: In "Right of inbox" the Submissions list no longer scrolls sideways. Each entry is two lines: the form title and number, then the result, the time and the actions under the title. The rows per page and page controls stay at the bottom of the list while the rows scroll.
-* Change: Bulk actions on the Submissions list are a slim bar of icon buttons with tooltips and a More menu, instead of a long row of text buttons.
-* Fix: Every Submissions tab (All, New, Read, Spam, Starred, Flagged, Trash) shows its count, and the counts update at once when you trash, restore, delete, star, flag, mark spam or mark read or unread, from the list or the entry.
-* Change: A starred entry shows a filled amber star and no row tint. The star button no longer turns dark.
-* Fix: Each action icon on a Submissions row shows its own tooltip, so "Move to Trash" no longer appears over the Star button.
+* Change: The Branding tab is gone from Settings. White label branding for Agency licences is set once in the licence portal on subtleforms.com and applied by SubtleForms Pro on every site that uses the licence.
+* Fix: The date, time and date and time pickers work from the keyboard. Focus moves into the dialog when it opens, the hour and minute columns take the arrow keys, Home, End and Enter, and Escape returns focus to the field.
+* Fix: The Country and phone country search is announced as a combobox with the active country, Escape returns focus to the field instead of the page, and required dropdown, country, date and time fields are marked required for screen readers.
+* Fix: The small grey text in the Columns layout headers, prefix and suffix text and country codes is darker so it reaches the 4.5 to 1 contrast WCAG asks for.
+* Fix: On the builder canvas, Radio and Checkboxes fields show their default choices selected, like Dropdown and Toggle already did.
+* Fix: A logic rule on a Country field matches whether the field stores the country code or the country name, in the browser and on submit.
+* Fix: Entries sent from the builder Preview are left out of the dashboard totals, today, week and trend, reports, the unread count, the Inbox and a form's entry limit. They show as Preview and can be listed with the Result filter.
+* Change: The create form dialog, the quick start wizard and Form settings use the same wording and help for the form name, description and form types.
+* Change: In Form settings, Notifications, the Send email and Send to webhook buttons are one group with a gap, above the list and again below it once there is a notification. The webhook is called "Webhook" everywhere.
+* New: A webhook sends only the data you tick: form, entry details, each answer and, on payment forms, the amount, currency and status. A live example shows the exact JSON, and "View as JSON" edits the same body with merge tags. Webhooks saved before keep sending the same body.
+* Fix: Custom headers of a webhook are name and value rows you can type into, with a JSON view. Before, the field put the old text back on every keystroke. Headers that SubtleForms sets itself, such as Host and the signature, are refused with a reason.
+* Change: The webhook test in a form sends the ticked data built from the form's own fields.
+* Fix: The question text of a Checkbox grid is no longer a label that points at a control which does not exist, so screen readers name the group once.
 
 = 2.4.1 - 2026-10-20 =
 * Fix: Choosing 50 or 100 rows per page on the Forms screen shows the forms instead of "Forms could not be loaded".
