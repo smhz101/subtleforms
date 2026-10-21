@@ -13,6 +13,7 @@ let form;
 const NAMES = ['Ada', 'Grace', 'Linus', 'Margaret', 'Alan', 'Katherine', 'Dennis', 'Barbara', 'Ken'];
 
 const listUrl = () => `/wp-admin/admin.php?page=subtleforms-submissions&form_id=${form.id}`;
+const rowNamed = (page, name) => rows(page).filter({ hasText: name }).first();
 const rows = (page) => page.locator('.sf-data-table__row--compact, .sf-data-table__table tbody tr');
 
 /** Count shown on a tab, 0 when there is no badge. Read in one step so a badge that goes away mid-read cannot stall the check. */
@@ -73,7 +74,8 @@ test.beforeAll(async ({ playwright }, testInfo) => {
   // 9 entries: 2 read, 1 spam, 1 flagged, 2 starred, 1 trashed.
   const all = await entries(client, form.id);
   expect(all).toHaveLength(NAMES.length);
-  const ids = all.map((e) => e.id);
+  // Entries made in the same second can list in any order: find each by name.
+  const ids = NAMES.map((name) => all.find((e) => e.payload?.name === name).id);
   await client.call('POST', '/submissions/bulk', { ids: ids.slice(0, 2), action: 'read' });
   await client.call('POST', '/submissions/bulk', { ids: [ids[2]], action: 'spam' });
   await client.call('POST', '/submissions/bulk', { ids: [ids[3]], action: 'flagged' });
@@ -106,7 +108,7 @@ test('counts follow every action without a reload', async ({ page }) => {
   await expectCounts(page, { All: 8, New: 6, Read: 2, Spam: 1, Starred: 2, Flagged: 1, Trash: 1 });
 
   // Star then unstar the first row.
-  const first = rows(page).first();
+  const first = rowNamed(page, 'Ada');
   await first.hover();
   await first.getByRole('button', { name: 'Star', exact: true }).click();
   await expectCounts(page, { Starred: 3 });
@@ -122,13 +124,13 @@ test('counts follow every action without a reload', async ({ page }) => {
   // Restore it from the Trash tab.
   await page.getByRole('tab', { name: /^Trash/ }).click();
   await expect(rows(page)).toHaveCount(2, { timeout: 15000 });
-  const trashed = rows(page).first();
+  const trashed = rowNamed(page, 'Ada');
   await trashed.hover();
   await trashed.getByRole('button', { name: 'Restore' }).click();
   await expectCounts(page, { All: 8, Read: 2, New: 6, Trash: 1 });
 
   // Delete forever the entry that was trashed before.
-  const remaining = rows(page).first();
+  const remaining = rowNamed(page, 'Dennis');
   await remaining.hover();
   await remaining.getByRole('button', { name: 'Delete permanently' }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Delete permanently' }).click();
@@ -156,7 +158,7 @@ test('actions in the entry pane update the counts too', async ({ page }) => {
   await expect(rows(page).first()).toBeVisible({ timeout: 30000 });
   const before = { starred: await tabCount(page, 'Starred'), trash: await tabCount(page, 'Trash'), all: await tabCount(page, 'All') };
 
-  await rows(page).first().locator('.sf-sub-compact__title, td[data-column="id"] .sf-sub-entry__name').first().click();
+  await rowNamed(page, 'Ken').locator('.sf-sub-compact__title, td[data-column="id"] .sf-sub-entry__name').first().click();
   const pane = page.locator('.sf-inbox-entry');
   await expect(pane.getByRole('button', { name: 'Star', exact: true })).toBeVisible({ timeout: 20000 });
   await pane.getByRole('button', { name: 'Star', exact: true }).click();

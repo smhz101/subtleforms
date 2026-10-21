@@ -19,7 +19,7 @@ module.exports = defineConfig({
   fullyParallel: false,
   workers: 1,
   retries: process.env.CI ? 1 : 0,
-  reporter: process.env.CI ? [['list'], ['html', { open: 'never', outputFolder: 'playwright-report/browser' }]] : 'list',
+  reporter: process.env.CI ? [['list'], ['github'], ['html', { open: 'never', outputFolder: 'playwright-report/browser' }]] : 'list',
   use: {
     baseURL: process.env.SF_BASE_URL || 'http://localhost:8899',
     trace: 'retain-on-failure',
