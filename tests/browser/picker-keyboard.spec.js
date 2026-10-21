@@ -7,7 +7,8 @@ const { test, expect } = require('@playwright/test');
 const AxeBuilder = require('@axe-core/playwright').default;
 const { adminApi, publishForm, cleanup, waitForForm } = require('./helpers');
 
-const SHOTS = process.env.SF_SHOTS || '/home/claude/dist/screens-2.5.0';
+const SHOTS = process.env.SF_SHOTS || 'test-results/shots/bugs250';
+require('fs').mkdirSync(SHOTS, { recursive: true });
 let client;
 let form;
 
