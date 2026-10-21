@@ -138,6 +138,10 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: A logic rule on a Country field matches whether the field stores the country code or the country name, in the browser and on submit.
 * Fix: Entries sent from the builder Preview are left out of the dashboard totals, today, week and trend, reports, the unread count, the Inbox and a form's entry limit. They show as Preview and can be listed with the Result filter.
 * Change: The create form dialog, the quick start wizard and Form settings use the same wording and help for the form name, description and form types.
+* Change: In Form settings, Notifications, the Send email and Send to webhook buttons are one group with a gap, above the list and again below it once there is a notification. The webhook is called "Webhook" everywhere.
+* New: A webhook sends only the data you tick: form, entry details, each answer and, on payment forms, the amount, currency and status. A live example shows the exact JSON, and "View as JSON" edits the same body with merge tags. Webhooks saved before keep sending the same body.
+* Fix: Custom headers of a webhook are name and value rows you can type into, with a JSON view. Before, the field put the old text back on every keystroke. Headers that SubtleForms sets itself, such as Host and the signature, are refused with a reason.
+* Change: The webhook test in a form sends the ticked data built from the form's own fields.
 
 = 2.4.1 - 2026-10-20 =
 * Fix: Choosing 50 or 100 rows per page on the Forms screen shows the forms instead of "Forms could not be loaded".

@@ -429,6 +429,22 @@ final class PublicSubmitApi {
 		$context->setMeta( 'schema_version', is_int( $formVersion ) ? $formVersion : null );
 		$context->setMeta( 'order_currency', (string) ( $order['quote']['currency'] ?? '' ) );
 
+		// What a webhook can send about the visit and the payment (2.5.0).
+		$referer = function_exists( 'wp_get_raw_referer' ) ? wp_get_raw_referer() : '';
+		$context->setMeta( 'request_ip', (string) $ip );
+		$context->setMeta( 'request_user_agent', isset( $_SERVER['HTTP_USER_AGENT'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_USER_AGENT'] ) ) : '' );
+		$context->setMeta( 'request_page_url', is_string( $referer ) ? esc_url_raw( $referer ) : '' );
+		$context->setMeta( 'request_user_id', get_current_user_id() );
+		$context->setMeta( 'entry_status', ! empty( $order['payment'] ) ? 'payment_pending' : 'completed' );
+		$context->setMeta(
+			'payment_info',
+			array(
+				'amount'   => (float) ( $order['quote']['total'] ?? 0 ),
+				'currency' => (string) ( $order['quote']['currency'] ?? '' ),
+				'status'   => (string) ( $order['payment']['status'] ?? ( ! empty( $order['quote'] ) ? 'free' : '' ) ),
+			)
+		);
+
 		$isPaymentForm   = ! empty( $order['payment'] );
 		$paymentMetadata = $order['payment'] ?? null;
 		if ( $isPaymentForm ) {
@@ -557,6 +573,11 @@ final class PublicSubmitApi {
 				if ( $laterSteps ) {
 					// The payment went through: now send the emails and run the
 					// integrations that waited for it.
+					$captureStatus = is_array( $captured ) ? (string) ( $captured['status'] ?? '' ) : '';
+					$context->setMeta( 'entry_status', in_array( $captureStatus, array( 'paid', 'succeeded' ), true ) ? 'completed' : 'payment_pending' );
+					$info           = $context->getMeta( 'payment_info', array() );
+					$info['status'] = '' !== $captureStatus ? $captureStatus : ( $info['status'] ?? '' );
+					$context->setMeta( 'payment_info', $info );
 					try {
 						$this->pipeline->run( $laterSteps, $context, $activeSchema['schema'] );
 					} catch ( \Throwable $e ) {
