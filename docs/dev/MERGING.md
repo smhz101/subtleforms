@@ -13,11 +13,20 @@ A pull request is merged only when all of these are true:
    branch or answered with the reason it is not a problem. No comment is left
    unanswered.
 4. No conflict markers anywhere: `git grep -nE '^(<<<<<<<|>>>>>>>)' -- . ':!node_modules'` prints nothing.
-5. The POT files are current: run `bin/make-pot.sh` after changing any
-   translatable string and commit the result.
+5. The POT files are current, for release pull requests only (`release/*`):
+   `bin/make-pot.sh` is the last commit of the release. Feature and fix pull
+   requests do not commit POT files and do not edit `readme.txt`, the
+   changelog, release notes or version files; they add one changelog fragment
+   in `docs/dev/changes/unreleased/` instead.
 6. The suites pass locally as well: `vendor/bin/phpunit --testsuite unit`,
    `npx jest`, the WordPress suite (`phpunit -c phpunit-wp.xml.dist`),
    `npm run build:all`, and the Playwright specs touched by the change.
+
+Release order: merge every feature and fix pull request first. Then one
+release pull request bumps the version, runs `bin/compile-changes.sh <version>
+--apply` (readme.txt and changelog.txt block, release notes, fragments moved),
+regenerates the POT as its last step and is merged and tagged last. Commands:
+docs/dev/RELEASING.md.
 
 Merging is done with the merge button (or the API), never by pushing a local
 merge to the base branch. A release branch is merged into `main` only after the

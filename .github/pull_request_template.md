@@ -19,8 +19,8 @@
 
 <!-- Check any that apply. These affect the WordPress.org submission review. -->
 
-- [ ] I updated `readme.txt` changelog for this change
-- [ ] The `Stable tag` in `readme.txt` matches the plugin `Version` header (if this is a release)
+- [ ] I added one changelog fragment in `docs/dev/changes/unreleased/` (or this change is not user-visible); I did not edit `readme.txt`, versions or `languages/*.pot`
+- [ ] Release pull request only: version files bumped, `bin/compile-changes.sh` run, POT regenerated last, `Stable tag` in `readme.txt` matches the plugin `Version` header
 - [ ] No new GPL-incompatible dependencies introduced
 - [ ] No obfuscated or minified code added without a readable source
 - [ ] No calls to external services without user consent/disclosure
