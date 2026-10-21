@@ -134,6 +134,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 * Fix: The date, time and date and time pickers work from the keyboard. Focus moves into the dialog when it opens, the hour and minute columns take the arrow keys, Home, End and Enter, and Escape returns focus to the field.
 * Fix: The Country and phone country search is announced as a combobox with the active country, Escape returns focus to the field instead of the page, and required dropdown, country, date and time fields are marked required for screen readers.
 * Fix: The small grey text in the Columns layout headers, prefix and suffix text and country codes is darker so it reaches the 4.5 to 1 contrast WCAG asks for.
+* Fix: On the builder canvas, Radio and Checkboxes fields show their default choices selected, like Dropdown and Toggle already did.
 
 = 2.4.1 - 2026-10-20 =
 * Fix: Choosing 50 or 100 rows per page on the Forms screen shows the forms instead of "Forms could not be loaded".
