@@ -33,9 +33,9 @@ export default function ChoiceSelect({
   preview = false,
   emptyLabel,
 }) {
-  const { rootRef, open, setOpen } = useMenu();
-  const listRef = useRef(null);
   const triggerRef = useRef(null);
+  const { rootRef, open, setOpen } = useMenu(triggerRef);
+  const listRef = useRef(null);
   const typed = useRef('');
   const choices = useMemo(() => normalizeOptions(options), [options]);
   const [localValue, setLocalValue] = useState(value ?? '');
@@ -141,6 +141,7 @@ export default function ChoiceSelect({
         aria-expanded={open}
         aria-controls={open ? `${inputId || 'choice'}-list` : undefined}
         aria-activedescendant={open ? `${inputId || 'choice'}-opt-${active}` : undefined}
+        aria-required={required || undefined}
         aria-invalid={invalid ? 'true' : undefined}
         aria-describedby={describedBy}
         disabled={disabled || readOnly}

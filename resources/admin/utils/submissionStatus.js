@@ -16,6 +16,7 @@ export function submissionStatus(status) {
     flagged: { label: __('Flagged', 'subtleforms'), cls: 'sf-pill--warning' },
     trash: { label: __('Trashed', 'subtleforms'), cls: 'sf-pill--danger' },
     archived: { label: __('Archived', 'subtleforms'), cls: '' },
+    preview: { label: __('Preview', 'subtleforms'), cls: 'sf-pill--info' },
   };
   return map[status] || { label: __('Received', 'subtleforms'), cls: '' };
 }

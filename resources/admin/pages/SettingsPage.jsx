@@ -9,9 +9,7 @@ import EmailSettings from '../components/settings/EmailSettings';
 import AdvancedSettings from '../components/settings/AdvancedSettings';
 import LicenseSettings from '../components/settings/LicenseSettings';
 import ExtensionsSettings from '../components/settings/ExtensionsSettings';
-import BrandingSettings from '../components/settings/BrandingSettings';
 import { getBranding } from '../utils/branding';
-import { isProFeature } from '../utils/featureGate';
 import Icon from '../ui/Icon';
 import { getPlanState } from '../data/proCatalog';
 import './SettingsPage.scss';
@@ -67,31 +65,30 @@ const GROUPS = [
         title: __('License', 'subtleforms'),
         description: __('Your plan, license key and what it unlocks.', 'subtleforms'),
       },
-      {
-        name: 'branding',
-        icon: Icon.Palette,
-        title: __('Branding', 'subtleforms'),
-        description: __('Your name and logo in the forms admin, and which SubtleForms links appear.', 'subtleforms'),
-        pro: true,
-        // Restricted with the License screen when white label limits it to one admin.
-        ownerOnly: true,
-      },
     ],
   },
 ];
 
-// White label can limit the License and Branding screens to one admin.
+// White label can limit the License screen to one admin.
 const VISIBLE_GROUPS = getBranding().showLicense
   ? GROUPS
   : GROUPS.map((g) => ({
       ...g,
-      tabs: g.tabs.filter((t) => t.name !== 'license' && !t.ownerOnly),
+      tabs: g.tabs.filter((t) => t.name !== 'license'),
     }));
 
-const ALL_TABS = VISIBLE_GROUPS.flatMap((g) => g.tabs);
+export const ALL_TABS = VISIBLE_GROUPS.flatMap((g) => g.tabs);
+
+/**
+ * The tab to show for a name from the URL. A name that no longer exists, for
+ * example a bookmarked tab=branding, falls back to the first tab.
+ */
+export function resolveTab(name, tabs = ALL_TABS) {
+  return tabs.find((t) => t.name === name) || tabs[0];
+}
 
 // Tabs with nothing to save (they manage their own state).
-const READ_ONLY_TABS = ['license', 'branding'];
+const READ_ONLY_TABS = ['license'];
 
 export default function Settings() {
   const {
@@ -111,7 +108,7 @@ export default function Settings() {
   } = useSettingsState();
 
   const { licensed } = getPlanState();
-  const current = ALL_TABS.find((t) => t.name === activeTab) || ALL_TABS[0];
+  const current = resolveTab(activeTab);
 
   // Keep the tab in the hash so reloads and links land in the same place.
   useEffect(() => {
@@ -192,12 +189,8 @@ export default function Settings() {
                         onClick={() => setActiveTab(tab.name)}>
                         <TabIcon size={18} aria-hidden='true' />
                         <span>{tab.title}</span>
-                        {tab.name === 'branding' && !isProFeature('branding.white_label') ? (
-                          <span className='sf-settings__nav-pro'>{__('Agency', 'subtleforms')}</span>
-                        ) : (
-                          tab.pro && !licensed && (
-                            <span className='sf-settings__nav-pro'>{__('Pro', 'subtleforms')}</span>
-                          )
+                        {tab.pro && !licensed && (
+                          <span className='sf-settings__nav-pro'>{__('Pro', 'subtleforms')}</span>
                         )}
                       </button>
                     </li>
@@ -235,7 +228,6 @@ export default function Settings() {
               <EmailSettings settings={settings} updateSetting={updateSetting} fieldErrors={fieldErrors} />
             )}
             {current.name === 'license' && <LicenseSettings />}
-            {current.name === 'branding' && <BrandingSettings />}
             {current.name === 'advanced' && (
               <AdvancedSettings
                 settings={settings}

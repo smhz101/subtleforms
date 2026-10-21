@@ -20,7 +20,7 @@ const sorted = (a) => [...a].sort();
 describe('conditional logic spec: conditions', () => {
   test.each(spec.conditions.map((c) => [c.name, c]))('%s', (_name, c) => {
     expect(
-      evaluateCondition(c.value, c.operator, c.compare ?? '', c.compare2 ?? '', opts)
+      evaluateCondition(c.value, c.operator, c.compare ?? '', c.compare2 ?? '', { ...opts, field: c.field })
     ).toBe(c.expected);
   });
 });

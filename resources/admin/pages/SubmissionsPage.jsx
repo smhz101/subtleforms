@@ -578,6 +578,7 @@ export default function SubmissionsPage({ formId }) {
               { label: __('Failed', 'subtleforms'), value: 'failed' },
               { label: __('Awaiting Payment', 'subtleforms'), value: 'payment_pending' },
               { label: __('Processing', 'subtleforms'), value: 'processing' },
+              { label: __('Preview (test entries)', 'subtleforms'), value: 'preview' },
             ]}
             onChange={setProcessingStatus}
             className='sf-filter-control'

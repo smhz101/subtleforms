@@ -34,10 +34,10 @@ export default function CountrySelect({
   invalid = false,
   preview = false,
 }) {
-  const { rootRef, open, setOpen } = useMenu();
+  const triggerRef = useRef(null);
+  const { rootRef, open, setOpen } = useMenu(triggerRef);
   const searchRef = useRef(null);
   const listRef = useRef(null);
-  const triggerRef = useRef(null);
   const typed = useRef('');
   const countries = useMemo(
     () => orderedCountries(preferredCountryCodes(preferredCountries)),
@@ -110,10 +110,16 @@ export default function CountrySelect({
     } else if (event.key === 'Enter' && visible[active]) {
       event.preventDefault();
       choose(visible[active]);
+    } else if (event.key === 'Escape') {
+      event.preventDefault();
+      setOpen(false);
+      triggerRef.current?.focus();
     }
   };
 
   const prompt = placeholder || __('Select a country', 'subtleforms');
+  const listId = `${inputId || 'country'}-list`;
+  const activeOptionId = visible[active] ? `${inputId || 'country'}-opt-${active}` : undefined;
 
   return (
     <div
@@ -132,8 +138,9 @@ export default function CountrySelect({
         role='combobox'
         aria-haspopup='listbox'
         aria-expanded={open}
-        aria-controls={open ? `${inputId || 'country'}-list` : undefined}
-        aria-activedescendant={open && !searchable ? `${inputId || 'country'}-opt-${active}` : undefined}
+        aria-controls={open ? listId : undefined}
+        aria-activedescendant={open && !searchable ? activeOptionId : undefined}
+        aria-required={required || undefined}
         aria-invalid={invalid ? 'true' : undefined}
         aria-describedby={describedBy}
         disabled={disabled || readOnly}
@@ -198,20 +205,27 @@ export default function CountrySelect({
         ))}
       </select>
       {open && !locked && (
-        <div id={`${inputId || 'country'}-list`} className='subtleforms-picker__menu' role='listbox' aria-labelledby={inputId}>
+        <div className='subtleforms-picker__menu'>
           {searchable && (
             <input
               ref={searchRef}
               className='subtleforms-picker__search'
               type='text'
+              role='combobox'
+              aria-autocomplete='list'
+              aria-expanded='true'
+              aria-haspopup='listbox'
+              aria-controls={listId}
+              aria-activedescendant={activeOptionId}
               value={query}
               placeholder={__('Search countries', 'subtleforms')}
               aria-label={__('Search countries', 'subtleforms')}
+              autoComplete='off'
               onChange={(event) => setQuery(event.target.value)}
               onKeyDown={onSearchKeyDown}
             />
           )}
-          <div className='subtleforms-picker__list' ref={listRef}>
+          <div id={listId} className='subtleforms-picker__list' role='listbox' aria-labelledby={inputId} ref={listRef}>
             {!required && selected && (
               <button
                 type='button'

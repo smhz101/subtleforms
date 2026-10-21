@@ -21,3 +21,9 @@ describe('PAY-22 entry status labels', () => {
     expect(src).toMatch(/submissionStatus\(/);
   });
 });
+
+describe('FF-14 preview entries', () => {
+  it('labels a preview entry Preview', () => {
+    expect(submissionStatus('preview').label).toBe('Preview');
+  });
+});

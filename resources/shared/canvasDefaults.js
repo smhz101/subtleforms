@@ -18,3 +18,25 @@ export function choiceShowsDefault(raw, optionValue) {
   }
   return text === String(optionValue);
 }
+
+/**
+ * Whether the choice at `index` is drawn checked on the canvas. A single
+ * choice list (radio buttons) checks only the first match, so a default that
+ * names two choices never shows two selected radios.
+ *
+ * @param {Array<{value: *}>} options Choices.
+ * @param {*}                 raw     defaultValue.
+ * @param {number}            index   Choice position.
+ * @param {boolean}           single  Radio buttons rather than checkboxes.
+ * @return {boolean}
+ */
+export function choiceChecked(options, raw, index, single = false) {
+  const list = Array.isArray(options) ? options : [];
+  if (!list[index] || !choiceShowsDefault(raw, list[index].value)) {
+    return false;
+  }
+  if (!single) {
+    return true;
+  }
+  return list.findIndex((option) => choiceShowsDefault(raw, option.value)) === index;
+}

@@ -1,7 +1,8 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from '@wordpress/element';
 import { Button, Modal, TextControl, TextareaControl } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { formNameHelp } from '../utils/formNameHelp';
+import { formDescriptionHelp, formDescriptionLabel, formNameHelp, formNameLabel } from '../utils/formNameHelp';
+import { formTypeChoices, formTypeLabel } from '../utils/formTypeChoices';
 import { useNavigate } from 'react-router-dom';
 import clsx from 'clsx';
 import { useCreateForm, useTemplates } from '../data';
@@ -31,13 +32,12 @@ function generateDefaultTitle() {
   }
 }
 
-const TYPE_LABELS = {
-  'multi-step': __('Multi-step', 'subtleforms'),
-  multistep: __('Multi-step', 'subtleforms'),
-  sectioned: __('Multi-step', 'subtleforms'),
-  conversational: __('Conversational', 'subtleforms'),
-  payment: __('Payment', 'subtleforms'),
-};
+// The tag on a template card: the form type name, except for Standard.
+function templateTypeTag(type) {
+  if (type === 'payment') return __('Payment', 'subtleforms');
+  if (['multi-step', 'multistep', 'sectioned', 'conversational'].includes(type)) return formTypeLabel(type);
+  return '';
+}
 
 /** Flatten a template schema to its input fields, in order. */
 function flattenFields(fields = []) {
@@ -107,23 +107,26 @@ function Wireframe({ fields }) {
   );
 }
 
+// The type names come from the one list Form settings and the wizard use.
+const typeName = (id) => formTypeChoices().find((choice) => choice.id === id)?.label || id;
+
 const STRUCTURES = [
   {
     id: 'standard',
     icon: Icon.FileText,
-    title: __('Standard', 'subtleforms'),
+    title: typeName('regular'),
     text: __('All fields on one page.', 'subtleforms'),
   },
   {
     id: 'multi-step',
     icon: Icon.Layers,
-    title: __('Multi-step', 'subtleforms'),
+    title: typeName('multi-step'),
     text: __('Split long forms into steps with a progress bar.', 'subtleforms'),
   },
   {
     id: 'conversational',
     icon: Icon.MessageCircle,
-    title: __('Conversational', 'subtleforms'),
+    title: typeName('conversational'),
     text: __('One question at a time, full screen.', 'subtleforms'),
   },
 ];
@@ -315,7 +318,7 @@ export default function CreateFormPage() {
               )}
 
               {visible.map((tpl) => {
-                const type = TYPE_LABELS[tpl.schema?.metadata?.type];
+                const type = templateTypeTag(tpl.schema?.metadata?.type);
                 return (
                   <button
                     key={tpl.id}
@@ -402,7 +405,7 @@ export default function CreateFormPage() {
             <TextControl
               __nextHasNoMarginBottom
               __next40pxDefaultSize
-              label={__('Form name', 'subtleforms')}
+              label={formNameLabel()}
               value={title}
               onChange={setTitle}
               autoFocus
@@ -460,7 +463,8 @@ export default function CreateFormPage() {
 
             <TextareaControl
               __nextHasNoMarginBottom
-              label={__('Description (optional)', 'subtleforms')}
+              label={formDescriptionLabel()}
+              help={formDescriptionHelp()}
               value={description}
               onChange={setDescription}
               rows={2}

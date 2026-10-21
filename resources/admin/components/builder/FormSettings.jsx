@@ -8,7 +8,7 @@ import {
 } from '@wordpress/components';
 import { useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { formNameHelp } from '../../utils/formNameHelp';
+import { formDescriptionHelp, formDescriptionLabel, formNameHelp, formNameLabel } from '../../utils/formNameHelp';
 import { formTypeLabel } from '../../utils/formTypeChoices';
 import ConfirmModal from '../../modals/ConfirmModal';
 import {
@@ -268,17 +268,17 @@ export default function FormSettings({
                 )}
                 <FormTypeControl schema={schema} onChange={onChange} isReadOnly={isReadOnly} />
                 <TextControl
-                  label={__('Form name', 'subtleforms')}
+                  label={formNameLabel()}
                   value={metadata.title || ''}
                   onChange={(value) => handleMetadataChange('title', value)}
                   help={formNameHelp()}
                   disabled={isReadOnly}
                 />
                 <TextControl
-                  label={__('Description', 'subtleforms')}
+                  label={formDescriptionLabel()}
                   value={metadata.description || ''}
                   onChange={(value) => handleMetadataChange('description', value)}
-                  help={__('Shown under the title when the block or shortcode displays it.', 'subtleforms')}
+                  help={formDescriptionHelp()}
                   disabled={isReadOnly}
                 />
               </div>
@@ -562,9 +562,9 @@ export function FormTypeControl({ schema, onChange, isReadOnly = false }) {
         help={help}
         value={type}
         onChange={(v) => v && request(v)}>
-        <ToggleGroupControlOption value={TYPE_STANDARD} label={__('Standard', 'subtleforms')} disabled={isReadOnly} />
-        <ToggleGroupControlOption value={TYPE_MULTI_STEP} label={__('Multi-step', 'subtleforms')} disabled={isReadOnly} />
-        <ToggleGroupControlOption value={TYPE_CONVERSATIONAL} label={__('Conversational', 'subtleforms')} disabled={isReadOnly} />
+        <ToggleGroupControlOption value={TYPE_STANDARD} label={formTypeLabel(TYPE_STANDARD)} disabled={isReadOnly} />
+        <ToggleGroupControlOption value={TYPE_MULTI_STEP} label={formTypeLabel(TYPE_MULTI_STEP)} disabled={isReadOnly} />
+        <ToggleGroupControlOption value={TYPE_CONVERSATIONAL} label={formTypeLabel(TYPE_CONVERSATIONAL)} disabled={isReadOnly} />
       </ToggleGroupControl>
       <ConfirmModal
         isOpen={!!pending}

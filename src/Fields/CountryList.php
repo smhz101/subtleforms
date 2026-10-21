@@ -370,4 +370,34 @@ final class CountryList {
 		remove_filter( 'gettext_subtleforms', $untranslated, PHP_INT_MAX );
 		return $names;
 	}
+
+	/**
+	 * The ISO code for a country given as a code or as a name (the site
+	 * language's or the English one), or an empty string when it is neither.
+	 * Conditional logic uses it so a rule on a Country field matches whether
+	 * the field stores the code or the name.
+	 *
+	 * @param string $text A code such as "DE" or a name such as "Germany".
+	 */
+	public static function codeFor( string $text ): string {
+		$text = trim( $text );
+		if ( '' === $text ) {
+			return '';
+		}
+		$upper = strtoupper( $text );
+		$names = self::getAll();
+		if ( 2 === strlen( $upper ) && isset( $names[ $upper ] ) ) {
+			return $upper;
+		}
+		$lower = function_exists( 'mb_strtolower' ) ? mb_strtolower( $text, 'UTF-8' ) : strtolower( $text );
+		foreach ( array( $names, self::englishNames() ) as $list ) {
+			foreach ( $list as $code => $name ) {
+				$candidate = function_exists( 'mb_strtolower' ) ? mb_strtolower( (string) $name, 'UTF-8' ) : strtolower( (string) $name );
+				if ( $candidate === $lower ) {
+					return (string) $code;
+				}
+			}
+		}
+		return '';
+	}
 }
