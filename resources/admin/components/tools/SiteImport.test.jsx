@@ -119,6 +119,32 @@ describe('one-click import', () => {
     unmount();
   });
 
+  test('a slow answer for an earlier plugin does not replace the current plugin forms', async () => {
+    const pending = {};
+    apiGet.mockImplementation((path) => {
+      if (path === '/tools/migrate/sources') {
+        return Promise.resolve(ok(SOURCES));
+      }
+      const id = path.match(/sources\/([a-z0-9]+)\/forms/)[1];
+      return new Promise((resolve) => { pending[id] = resolve; });
+    });
+    const { container, unmount } = await mount();
+    expect(pending.cf7).toBeDefined();
+    click(container.querySelectorAll('input[name="sf-import-source"]')[1]);
+    await flush();
+    expect(pending.gravity).toBeDefined();
+
+    // Gravity answers first, then the older Contact Form 7 answer arrives.
+    await act(async () => { pending.gravity(ok([ { id: '3', title: 'Job application', fields: 21, notes: 14, imported: [] } ])); });
+    await act(async () => { pending.cf7(ok(CF7_FORMS)); });
+    await flush();
+
+    const list = container.querySelector('.sf-import__list').textContent;
+    expect(list).toContain('Job application');
+    expect(list).not.toContain('Contact form 1');
+    unmount();
+  });
+
   test('imports the ticked forms one at a time and shows a card with the report', async () => {
     routes();
     let release;

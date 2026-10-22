@@ -67,6 +67,8 @@ export default function SiteImport() {
   const [ results, setResults ] = useState( [] );
   const [ error, setError ] = useState( '' );
   const resultsHeading = useRef( null );
+  // The source whose forms were asked for last; an older answer is ignored.
+  const latestSource = useRef( '' );
   const busy = progress !== null;
 
   useEffect( () => {
@@ -94,8 +96,12 @@ export default function SiteImport() {
     if ( ! id ) {
       return Promise.resolve();
     }
+    latestSource.current = id;
     setForms( null );
     return apiGet( `/tools/migrate/sources/${ id }/forms` ).then( ( result ) => {
+      if ( latestSource.current !== id ) {
+        return;
+      }
       setForms( result.ok && Array.isArray( result.body?.data ) ? result.body.data : [] );
       if ( ! result.ok ) {
         setError( errorText( result ) );
