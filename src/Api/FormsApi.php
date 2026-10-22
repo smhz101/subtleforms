@@ -489,33 +489,12 @@ final class FormsApi {
 				return ApiResponse::not_found( __( 'Form not available', 'subtleforms' ) );
 			}
 
-			try {
-				$schema = $this->formsRepo->loadSchemaVersion( $formId, $version );
-			} catch ( \RuntimeException $e ) {
-				Logger::error( 'API Error: %s', $e->getMessage() );
+			$payload = $this->publicPayload( $form, $version );
+			if ( null === $payload ) {
 				return ApiResponse::not_found( __( 'Schema not available', 'subtleforms' ) );
 			}
 
-			if ( ! $schema ) {
-				return ApiResponse::not_found( __( 'Schema not available', 'subtleforms' ) );
-			}
-
-			$schemaData = $schema['schema'] ?? $schema;
-			$schemaData = is_array( $schemaData ) ? SchemaRepair::repair( $schemaData, (int) $form['id'] ) : $schemaData;
-			$schemaData = $this->injectCaptchaHtml( $schemaData );
-
-			return ApiResponse::success(
-				array(
-					'form'    => array(
-						'id'    => (int) $form['id'],
-						'title' => $form['title'] ?? '',
-					),
-					'schema'     => self::filterPublicSchema( $this->buildPublicSchema( $schemaData ), (int) $form['id'] ),
-					'version'    => $schema['version'] ?? null,
-					// Server-signed load time for the spam time trap (FF-11, FF-12).
-					'spam_token' => \SubtleForms\Engine\SpamProtection::issue_token( (int) $form['id'] ),
-				)
-			);
+			return ApiResponse::success( $payload );
 		}
 
 		// AUTHENTICATED: Allow draft schema with context=builder
@@ -583,6 +562,49 @@ final class FormsApi {
 	}
 
 	/**
+	 * What a visitor gets for a published form: the form's id and title, the
+	 * public schema, its version and a signed load time. Nothing else from the
+	 * form row (draft schema, config, notifications, webhooks) is included.
+	 *
+	 * This is the one place that builds it. The schema route returns it and,
+	 * since 2.6.1, the shortcode and the block print the same array into the
+	 * page (Frontend\InlineData), so what the browser draws from the page and
+	 * what it would have fetched can never differ.
+	 *
+	 * @param array<string, mixed> $form    Form row.
+	 * @param int|null             $version Schema version, null for the active one.
+	 * @return array<string, mixed>|null Null when the form has no schema.
+	 */
+	public function publicPayload( array $form, ?int $version = null ): ?array {
+		$formId = (int) ( $form['id'] ?? 0 );
+		try {
+			$schema = $this->formsRepo->loadSchemaVersion( $formId, $version );
+		} catch ( \RuntimeException $e ) {
+			Logger::error( 'API Error: %s', $e->getMessage() );
+			return null;
+		}
+
+		if ( ! $schema ) {
+			return null;
+		}
+
+		$schemaData = $schema['schema'] ?? $schema;
+		$schemaData = is_array( $schemaData ) ? SchemaRepair::repair( $schemaData, $formId ) : $schemaData;
+		$schemaData = $this->injectCaptchaHtml( $schemaData );
+
+		return array(
+			'form'       => array(
+				'id'    => $formId,
+				'title' => $form['title'] ?? '',
+			),
+			'schema'     => self::filterPublicSchema( $this->buildPublicSchema( $schemaData ), $formId ),
+			'version'    => $schema['version'] ?? null,
+			// Server-signed load time for the spam time trap (FF-11, FF-12).
+			'spam_token' => \SubtleForms\Engine\SpamProtection::issue_token( $formId ),
+		);
+	}
+
+	/**
 	 * Save form schema (draft or versioned).
 	 */
 	public function save_form_schema( WP_REST_Request $request ): WP_REST_Response {
@@ -643,6 +665,8 @@ final class FormsApi {
 			$schema['fields'] = array();
 		}
 
+		$schema = $this->keepSpamSettings( $formId, $schema );
+
 		$schema = FormsRepository::beforeSave( $schema, $formId, (bool) $activate );
 
 		// Structured validation for activation
@@ -700,6 +724,46 @@ final class FormsApi {
 			Logger::error( 'Save failed for form %d: %s', $formId, $e->getMessage() );
 			return ApiResponse::server_error( $e->getMessage() );
 		}
+	}
+
+	/**
+	 * Spam settings for a schema about to be saved (2.6.0).
+	 *
+	 * A schema that carries its own spam settings is saved as sent. One that
+	 * does not (an older client or script) keeps the settings already stored
+	 * for the form. The first schema of a form created without one gets the
+	 * new form defaults, so every way of creating a form starts protected.
+	 * A form saved before 2.6.0 that has no settings is left as it is.
+	 *
+	 * @param int   $formId Form ID.
+	 * @param array $schema Schema.
+	 * @return array
+	 */
+	private function keepSpamSettings( int $formId, array $schema ): array {
+		$key = \SubtleForms\Engine\SpamProtection::FORM_KEY;
+		if ( isset( $schema['metadata'][ $key ] ) && is_array( $schema['metadata'][ $key ] ) && $schema['metadata'][ $key ] ) {
+			return $schema;
+		}
+
+		try {
+			$stored = $this->formsRepo->getDraftSchema( $formId );
+			$active = $this->formsRepo->loadSchemaVersion( $formId );
+		} catch ( \RuntimeException $e ) {
+			return $schema;
+		}
+		$active = is_array( $active ) ? ( $active['schema'] ?? null ) : null;
+
+		foreach ( array( $stored, $active ) as $candidate ) {
+			if ( is_array( $candidate ) && isset( $candidate['metadata'][ $key ] ) && is_array( $candidate['metadata'][ $key ] ) && $candidate['metadata'][ $key ] ) {
+				$schema['metadata'][ $key ] = $candidate['metadata'][ $key ];
+				return $schema;
+			}
+		}
+
+		if ( null === $stored && null === $active ) {
+			return \SubtleForms\Engine\SpamProtection::with_new_form_defaults( $schema );
+		}
+		return $schema;
 	}
 
 	/**
@@ -807,6 +871,10 @@ final class FormsApi {
 			// as the builder does when it opens such a field (2.3.2). Templates
 			// from add-ons may still use the old shape.
 			list( $schema['fields'] ) = \SubtleForms\Support\SchemaRepair::checkboxListsToMultipleChoice( $schema['fields'] );
+
+			// New forms stop robots quietly: the hidden trap field and the
+			// time trap start on, from the site defaults (2.6.0).
+			$schema = \SubtleForms\Engine\SpamProtection::with_new_form_defaults( $schema );
 
 			$schema = FormsRepository::beforeSave( $schema, (int) $id, true );
 

@@ -10,7 +10,7 @@
 	align-items: stretch;
 	gap: 4px;
 	margin-bottom: -1px;
-	padding: 4px;
+	padding: 4px 4px 0 4px;
 	overflow: visible;
 
 	&__tab {
@@ -115,6 +115,13 @@
 
 		&__tab {
 			flex: 0 0 auto;
+		}
+
+		// The bar scrolls sideways here and has no bottom padding, so the
+		// keyboard focus ring is drawn inside the tab to stay fully visible.
+		// It overrides the shared [role="tab"] focus rule, which is !important.
+		.sf-tab-bar__tab:focus-visible {
+			outline-offset: -2px !important;
 		}
 
 		&__tab + &__tab {

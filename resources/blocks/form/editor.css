@@ -1,37 +1,41 @@
 /**
  * Editor styles for the SubtleForms block.
  *
- * The frontend form stylesheet is enqueued in the editor (see
- * SubtleFormsBlock::enqueue_editor_assets), so the preview already gets the
- * real form styling. This file only adds the minimal editor-only chrome around
- * the preview, a subtle frame and a small "Preview" badge, without
+ * The frontend form stylesheet is loaded into the editor canvas (see
+ * SubtleFormsBlock::enqueue_canvas_styles), so the preview gets the real form
+ * styling. This file only adds the minimal editor-only chrome around the
+ * preview, a selection outline and a small "Preview" label, without
  * overriding any form colours, so the block canvas matches the frontend.
  */
 
-/* Preview container: a light, neutral frame. No colours that would clash with
-   the form theme the user picks. */
+/* The frame around the preview: the form itself is drawn by the front-end
+   renderer with the front-end stylesheet, so nothing here sets colours. */
+.subtleforms-block-preview-frame {
+	position: relative;
+}
+
+/* The form cannot be used in the editor. */
 .subtleforms-block-preview {
 	position: relative;
 	min-height: 120px;
-	padding: 0;
-	background: transparent;
-	border: none;
-	border-radius: 0;
+	pointer-events: none;
+	user-select: none;
 }
 
-/* Small, non-intrusive preview badge, editor only, outside the form flow. */
-.subtleforms-block-preview::after {
-	content: attr(data-preview-label);
-	display: block;
-	margin-top: 16px;
-	padding: 6px 10px;
+/* Small "Preview" label, above the form and outside its flow. */
+.subtleforms-block-preview__label {
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: 1;
+	padding: 2px 8px;
 	background: #f0f6fc;
 	border: 1px solid #c4e0ec;
-	border-radius: 4px;
+	border-radius: 0 0 0 4px;
 	color: #1d2327;
-	font-size: 12px;
-	line-height: 1.4;
-	text-align: center;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+	font-size: 11px;
+	line-height: 1.5;
 	pointer-events: none;
 }
 
@@ -49,8 +53,8 @@
 
 /* When the block is selected, show a soft outline so the editor frame is
    visible without recolouring the form. */
-.wp-block.is-selected .subtleforms-block-preview,
-.wp-block.is-highlighted .subtleforms-block-preview {
+.wp-block.is-selected .subtleforms-block-preview-frame,
+.wp-block.is-highlighted .subtleforms-block-preview-frame {
 	outline: 2px dashed #2271b1;
 	outline-offset: 6px;
 	border-radius: 4px;

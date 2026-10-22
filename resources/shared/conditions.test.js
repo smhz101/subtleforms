@@ -5,6 +5,8 @@
  * suite (tests/unit/ConditionalLogicTest.php) also runs.
  */
 import spec from '../../tests/fixtures/conditional-logic.json';
+// A form with a Country rule always has the country list on the page.
+import './countries';
 import {
   evaluateCondition,
   logicPasses,

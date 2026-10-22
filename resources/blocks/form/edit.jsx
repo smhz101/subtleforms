@@ -8,7 +8,7 @@
  *   the frontend (the frontend stylesheet is enqueued server-side).
  */
 import { __ } from '@wordpress/i18n';
-import { useEffect, useState, useRef } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { debug } from '../../shared/debug';
 import {
@@ -21,12 +21,7 @@ import {
 	TextareaControl,
 	Button,
 } from '@wordpress/components';
-import {
-	FORM_PRESETS,
-	getPreset,
-	formAppearanceStyle,
-	formAppearanceClasses,
-} from '../../shared/appearance';
+import { FORM_PRESETS } from '../../shared/appearance';
 
 /**
  * Fetch published forms from REST API
@@ -107,148 +102,122 @@ async function fetchFormSchema(formId) {
 }
 
 /**
- * Build a metadata.appearance object for the chosen theme preset.
- *
- * The block stores only the preset id; the live tokens/variants are derived
- * here so the preview and the frontend always agree with the preset.
- */
-function appearanceForTheme(theme) {
-	const preset = getPreset(theme) || getPreset('default');
-	return {
-	preset: preset.id,
-	tokens: { ...preset.tokens },
-	variants: { ...preset.variants },
-	};
-}
-
-/**
  * Preview Component
- * Renders the form using the frontend renderer in read-only mode, with the
- * block's theme applied so the canvas matches the frontend.
+ *
+ * Draws the form with the front-end renderer, the same one that draws it on
+ * the site, handing it the same block options the front end hands it (theme,
+ * title and description toggles). The renderer applies the form's own builder
+ * styling (theme, colours, layout) from its schema as CSS variables, and the
+ * front-end stylesheet is loaded into the editor canvas by
+ * SubtleFormsBlock::enqueue_canvas_styles, so what is drawn here is what the
+ * site shows. The preview cannot be used: it is inert, so nothing in it
+ * takes focus, accepts typing or submits.
  */
 function FormPreview({ attributes }) {
 	const { formId, theme, showTitle, showDescription } = attributes;
 	const [schema, setSchema] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState(null);
-	const containerRef = useRef(null);
+	// The element the form is drawn in. Kept in state so the effects below run
+	// when it appears (it is not rendered while the form loads).
+	const [container, setContainer] = useState(null);
 
 	useEffect(() => {
-	let mounted = true;
-
-	async function loadForm() {
+		let mounted = true;
+		setSchema(null);
 		setLoading(true);
 		setError(null);
 
-		const formData = await fetchFormSchema(formId);
-		debug('SubtleForms block: Fetched form data:', formData);
+		fetchFormSchema(formId).then((formData) => {
+			if (!mounted) return;
 
-		if (!mounted) return;
+			if (!formData || !formData.schema) {
+				setError(
+					__('Form not available or has been unpublished', 'subtleforms')
+				);
+				setLoading(false);
+				return;
+			}
 
-		if (!formData || !formData.schema) {
-		setError(
-			__('Form not available or has been unpublished', 'subtleforms')
-		);
-		setLoading(false);
-		return;
-		}
-
-		debug('SubtleForms block: Setting schema:', formData.schema);
-		setSchema(formData.schema);
-		setLoading(false);
-	}
-
-	loadForm();
-
-	return () => {
-		mounted = false;
-	};
-	}, [formId]);
-
-	useEffect(() => {
-	if (!schema || !containerRef.current) {
-		debug('SubtleForms block: Cannot mount - schema or container missing', {
-		hasSchema: !!schema,
-		hasContainer: !!containerRef.current,
+			debug('SubtleForms block: Fetched form data:', formData);
+			setSchema(formData.schema);
+			setLoading(false);
 		});
-		return;
-	}
-
-	debug('SubtleForms block: Mounting form preview with schema:', schema);
-
-	if (typeof window.SubtleForms?.mount === 'function') {
-		const container = containerRef.current;
-
-		// Merge the block's theme appearance into the schema so the preview
-		// reflects the selected theme live.
-		const appearance = appearanceForTheme(theme);
-		const mergedSchema = {
-		...schema,
-		metadata: {
-			...schema.metadata,
-			appearance,
-			// Honour the title/description toggles in the preview too.
-			_showTitle: showTitle,
-			_showDescription: showDescription,
-		},
-		};
-
-		window.SubtleForms.mount(container, {
-		formId,
-		schema: mergedSchema,
-		preview: true,
-		onSubmit: () => {
-			console.warn(
-			'SubtleForms: Form submission disabled in editor preview'
-			);
-		},
-		});
-
-		debug('SubtleForms block: Form mounted successfully');
 
 		return () => {
-		if (typeof window.SubtleForms?.unmount === 'function') {
-			window.SubtleForms.unmount(container);
-		}
+			mounted = false;
 		};
-	} else {
-		console.error('SubtleForms block: window.SubtleForms.mount not available');
-		setError(
-		__(
-			'Form renderer not loaded. Frontend preview unavailable.',
-			'subtleforms'
-		)
-		);
-	}
-	}, [schema, formId, theme, showTitle, showDescription]);
+	}, [formId]);
+
+	// Draw (and redraw on a change) with the renderer's own mount().
+	useEffect(() => {
+		if (!schema || !container) {
+			return;
+		}
+		if (typeof window.SubtleForms?.mount !== 'function') {
+			console.error('SubtleForms block: window.SubtleForms.mount not available');
+			setError(
+				__(
+					'Form renderer not loaded. Frontend preview unavailable.',
+					'subtleforms'
+				)
+			);
+			return;
+		}
+		window.SubtleForms.mount(container, {
+			formId,
+			schema,
+			preview: true,
+			blockOptions: { theme, showTitle, showDescription },
+			onSubmit: () => {
+				console.warn(
+					'SubtleForms: Form submission disabled in editor preview'
+				);
+			},
+		});
+	}, [schema, container, formId, theme, showTitle, showDescription]);
+
+	// Release the form when its element goes away or the block is removed.
+	useEffect(() => {
+		return () => {
+			if (container && typeof window.SubtleForms?.unmount === 'function') {
+				window.SubtleForms.unmount(container);
+			}
+		};
+	}, [container]);
 
 	if (loading) {
-	return (
-		<div className='subtleforms-block__loading'>
-		<Spinner />
-		<p>{__('Loading form preview...', 'subtleforms')}</p>
-		</div>
-	);
+		return (
+			<div className='subtleforms-block__loading'>
+				<Spinner />
+				<p>{__('Loading form preview...', 'subtleforms')}</p>
+			</div>
+		);
 	}
 
 	if (error) {
-	return (
-		<Placeholder
-		icon='warning'
-		label={__('SubtleForms', 'subtleforms')}
-		instructions={error}
-		/>
-	);
+		return (
+			<Placeholder
+				icon='warning'
+				label={__('SubtleForms', 'subtleforms')}
+				instructions={error}
+			/>
+		);
 	}
 
 	return (
-	<div
-		ref={containerRef}
-		className='subtleforms-block-preview'
-		style={{
-		pointerEvents: 'none', // Prevent interactions in editor
-		}}
-	/>
+		<div className='subtleforms-block-preview-frame'>
+			<span className='subtleforms-block-preview__label'>
+				{__('Preview', 'subtleforms')}
+			</span>
+			{/* inert: no focus, typing, clicks or submit in the editor. */}
+			<div
+				ref={setContainer}
+				className='subtleforms-block-preview'
+				inert=''
+				data-form-id={formId}
+			/>
+		</div>
 	);
 }
 
@@ -299,7 +268,11 @@ export default function Edit({ attributes, setAttributes }) {
 
 	// Theme options derived from the shared preset list.
 	const themeOptions = FORM_PRESETS.map((preset) => ({
-	label: preset.label,
+	// "default" keeps the styling the form was given in the builder.
+	label:
+		preset.id === 'default'
+		? __("Form's own style", 'subtleforms')
+		: preset.label,
 	value: preset.id,
 	}));
 
@@ -345,7 +318,7 @@ export default function Edit({ attributes, setAttributes }) {
 			options={themeOptions}
 			onChange={(value) => setAttributes({ theme: value })}
 			help={__(
-			'Applies a built-in theme. Updates the preview instantly.',
+			'Keeps the form\'s own styling, or applies a built-in theme instead. Updates the preview instantly.',
 			'subtleforms'
 			)}
 			__next40pxDefaultSize
@@ -423,7 +396,7 @@ export default function Edit({ attributes, setAttributes }) {
 	return (
 	<div {...blockProps}>
 		{inspector}
-		<FormPreview attributes={attributes} />
+		<FormPreview key={formId} attributes={attributes} />
 	</div>
 	);
 }

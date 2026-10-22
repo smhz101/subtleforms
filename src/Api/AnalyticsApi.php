@@ -156,6 +156,12 @@ final class AnalyticsApi {
 			return new WP_REST_Response( array( 'tracked' => false ), 200 );
 		}
 
+		// People who manage SubtleForms are left out, as in the funnel, so
+		// Seen and Started count the same audience (2.6.0).
+		if ( \SubtleForms\Analytics\Funnel::skipsCurrentUser() ) {
+			return new WP_REST_Response( array( 'tracked' => false ), 200 );
+		}
+
 		// Rate limit by a salted hash of the address; the address itself is
 		// never stored.
 		$ip     = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
@@ -196,6 +202,8 @@ final class AnalyticsApi {
 	public function summary( WP_REST_Request $request ) {
 		$days   = max( 1, min( Stats::MAX_DAYS, (int) $request->get_param( 'days' ) ) );
 		$totals = Stats::totalsByForm( $days );
+		// Visitors who started and left without sending (2.6.0).
+		$left = \SubtleForms\Analytics\Funnel::dropsByForm( $days );
 
 		$forms     = array();
 		$allViews  = 0;
@@ -203,11 +211,16 @@ final class AnalyticsApi {
 		foreach ( $totals as $formId => $row ) {
 			$allViews        += $row['views'];
 			$allSubs         += $row['submissions'];
+			$leftCount        = (int) ( $left[ $formId ] ?? 0 );
+			$started          = $leftCount + $row['submissions'];
 			$forms[ $formId ] = array(
 				'form_id'     => $formId,
 				'views'       => $row['views'],
 				'submissions' => $row['submissions'],
 				'conversion'  => Stats::conversion( $row['views'], $row['submissions'] ),
+				'left'        => $leftCount,
+				// Of the people who started, the share who sent the form.
+				'completion'  => $started > 0 ? Stats::conversion( $started, $row['submissions'] ) : null,
 			);
 		}
 

@@ -144,7 +144,8 @@ export default function RepeaterField({
       style={appearanceStyle}
       role='group'
       aria-labelledby={`${baseId}-label`}
-      data-repeater={path}>
+      data-repeater={path}
+      data-sf-key={config?.key || field?.key || undefined}>
       <div className='subtleforms-container-header'>
         <div id={`${baseId}-label`} className='subtleforms-field-label subtleforms-repeater__label'>
           {label}

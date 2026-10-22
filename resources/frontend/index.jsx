@@ -1,3 +1,5 @@
+// Must stay first: where the field code files are loaded from (2.6.0).
+import './utils/setPublicPath';
 import { createRoot } from '@wordpress/element';
 import { releaseReserve } from './utils/reserve';
 import FormRenderer from './components/FormRenderer';
@@ -6,6 +8,9 @@ import './frontend.css';
 import './styles/frontend.scss';
 import { debug } from '../shared/debug';
 import { observeView } from './utils/viewBeacon';
+import { containerGroups, loadGroups } from './components/fields/lazyFields';
+import { readInlineFormData } from './utils/inlineData';
+import { trackFunnel } from './utils/funnelTracker';
 
 /**
  * Mount a form renderer in a container
@@ -28,24 +33,47 @@ function mount(container, options = {}) {
     return;
   }
 
-  const root = createRoot(container);
-  root.render(
-    <FormErrorBoundary>
-      <FormRenderer
-        formId={formId}
-        preloadedSchema={schema}
-        preview={preview}
-        onSubmit={onSubmit}
-        blockOptions={blockOptions}
-      />
-    </FormErrorBoundary>
-  );
+  // Start downloading the code of this form's heavier fields now, while the
+  // form itself loads (2.6.0). The server lists them in data-features.
+  const fieldCode = loadGroups(containerGroups(container));
+
+  // A container that already has a form gets the new options on the same
+  // root: a second root would draw the form twice and load it twice.
+  const existing = container._subtleformsRoot;
+  const root = existing || createRoot(container);
+  // Store root reference for cleanup
+  container._subtleformsRoot = root;
+  const draw = () => {
+    // Unmounted while the field code was downloading.
+    if (!existing && container._subtleformsRoot !== root) {
+      return;
+    }
+    root.render(
+      <FormErrorBoundary>
+        <FormRenderer
+          formId={formId}
+          preloadedSchema={schema}
+          preview={preview}
+          onSubmit={onSubmit}
+          blockOptions={blockOptions}
+        />
+      </FormErrorBoundary>
+    );
+  };
+  // A form whose data the server printed (2.6.1) keeps the server-drawn
+  // outline in the container until the form can replace it in one go, with
+  // its field code in, instead of showing a loading line first.
+  if (!existing && !schema && readInlineFormData(formId)) {
+    fieldCode.then(draw);
+  } else {
+    draw();
+  }
+  if (existing) {
+    return;
+  }
 
   // Release the height kept for the form once it is drawn (UX2-27).
   releaseReserve(container);
-
-  // Store root reference for cleanup
-  container._subtleformsRoot = root;
 }
 
 /**
@@ -70,9 +98,10 @@ window.SubtleForms = {
 function autoMountForms() {
   debug('SubtleForms: Auto-mounting forms...');
 
-  // Mount shortcode containers
+  // Mount shortcode containers. Block containers carry this class too (for
+  // the shared width) and are mounted below with their block options.
   const shortcodeContainers = document.querySelectorAll(
-    '.subtleforms-form-container'
+    '.subtleforms-form-container:not(.subtleforms-block)'
   );
   debug(
     `SubtleForms: Found ${shortcodeContainers.length} shortcode containers`
@@ -85,6 +114,7 @@ function autoMountForms() {
       );
       mount(container, { formId });
       observeView(container, formId, window.subtleformsFrontend || {});
+      trackFunnel(container, formId, window.subtleformsFrontend || {});
     }
   });
 
@@ -110,12 +140,16 @@ function autoMountForms() {
       };
       mount(container, { formId, blockOptions });
       observeView(container, formId, window.subtleformsFrontend || {});
+      trackFunnel(container, formId, window.subtleformsFrontend || {});
     }
   });
 }
 
-// Auto-mount forms when DOM is fully ready (frontend only, not in editor)
-// Use 'DOMContentLoaded' to ensure all dependencies (wp-element) are loaded
+// Auto-mount forms once the page is parsed (frontend only, not in editor).
+// The script is deferred (2.6.0), so it usually runs while the document is
+// "interactive" and DOMContentLoaded has not fired yet; waiting for it lets
+// add-on scripts that load after this one register their fields first.
+// "load" is the fallback for a script added after DOMContentLoaded.
 debug(
   'SubtleForms: Script loaded, document.readyState:',
   document.readyState
@@ -125,15 +159,18 @@ debug(
 const isBlockEditor = typeof window.wp !== 'undefined' && window.wp.blockEditor;
 
 if (!isBlockEditor) {
-  if (document.readyState === 'loading') {
-    // Still loading, wait for DOMContentLoaded
-    document.addEventListener('DOMContentLoaded', autoMountForms);
-  } else if (document.readyState === 'interactive') {
-    // DOM parsed but resources still loading, wait for full load
-    window.addEventListener('load', autoMountForms);
-  } else {
-    // DOM and all resources loaded, run immediately
+  if (document.readyState === 'complete') {
     autoMountForms();
+  } else {
+    let mounted = false;
+    const once = () => {
+      if (!mounted) {
+        mounted = true;
+        autoMountForms();
+      }
+    };
+    document.addEventListener('DOMContentLoaded', once);
+    window.addEventListener('load', once);
   }
 } else {
   debug('SubtleForms: Block editor detected, skipping auto-mount');

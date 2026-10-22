@@ -301,6 +301,10 @@ const DataTable = memo(function DataTable({
   compact = false,
   renderCompactRow = null,
   alwaysShowPagination = false,
+  // Off where the table already sits in a scrolling pane (the Submissions
+  // inbox): a virtual list needs a fixed-height box of its own, which would
+  // be a second scrollbar inside the pane. Pages hold at most 100 rows.
+  virtualize = true,
 }) {
   const totalPages = Math.ceil(totalItems / perPage);
   
@@ -309,7 +313,7 @@ const DataTable = memo(function DataTable({
   // On a phone the rows become cards of varying height (UX2-19), which the
   // fixed-height virtual rows cannot hold.
   const isPhone = usePhoneLayout();
-  const shouldVirtualize = data.length > 20 && !isPhone && !compact;
+  const shouldVirtualize = virtualize && data.length > 20 && !isPhone && !compact;
   
   const rowVirtualizer = useVirtualizer({
     count: shouldVirtualize ? data.length : 0,

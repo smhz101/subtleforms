@@ -5,15 +5,15 @@
  * Order Summary shows it with an inline coupon box, and the Card field hands
  * the total to the gateway. The server recomputes the order on submit.
  */
-import { createContext, useContext, useEffect, useRef, useState } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { formatMoney } from '../../../shared/pricing';
 import { currencySymbol, currencyDecimals, currencyMinimum } from '../../../shared/currencies';
 import ChoiceSelect from './ChoiceSelect';
 
-export const PaymentContext = createContext(null);
+import { PaymentContext, usePayment } from './contexts';
 
-export const usePayment = () => useContext(PaymentContext);
+export { PaymentContext, usePayment };
 
 function Price({ amount, currency }) {
   return <span className='subtleforms-price'>{formatMoney(amount, currency)}</span>;

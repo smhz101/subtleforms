@@ -50,7 +50,7 @@ export default function AdvancedSettings( {
 				</h4>
 				<ToggleControl
 					label={ __(
-						'Enable Honeypot Protection',
+						'Hidden trap field on new forms',
 						'subtleforms'
 					) }
 					checked={ settings.enable_honeypot ?? true }
@@ -58,7 +58,7 @@ export default function AdvancedSettings( {
 						updateSetting( 'enable_honeypot', value )
 					}
 					help={ __(
-						'Adds invisible fields to detect and block spam bots',
+						'New forms start with a field that visitors never see and robots fill in. Each form can change this under Form settings, Spam protection.',
 						'subtleforms'
 					) }
 				/>
@@ -68,7 +68,7 @@ export default function AdvancedSettings( {
 			<div>
 				<TextControl
 					label={ __(
-						'Minimum Submission Time (seconds)',
+						'Too-fast check (seconds)',
 						'subtleforms'
 					) }
 					type="number"
@@ -82,7 +82,7 @@ export default function AdvancedSettings( {
 					min="0"
 					max="60"
 					help={ __(
-						'Minimum time required before form submission (prevents instant bot submissions)',
+						'Anything sent sooner than this after the form loaded is dropped quietly. 0 turns the check off for new forms and for forms that have no setting of their own.',
 						'subtleforms'
 					) }
 				/>

@@ -1,0 +1,17 @@
+{
+  "base": {
+    "files": [
+      "frontend.js",
+      "index.jsx.css"
+    ],
+    "measuredGzipBytes": 46237,
+    "limitGzipBytes": 50861,
+    "note": "Limit is the 2.6.0 size plus 10 percent (46237 * 1.1).",
+    "mustNotContain": [
+      "Afghanistan"
+    ],
+    "why": {
+      "Afghanistan": "the country list belongs in the phone and country field file, which only forms with those fields download."
+    }
+  }
+}

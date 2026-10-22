@@ -26,6 +26,7 @@ import { ConfirmationPanel, AvailabilityPanel } from './FormBehaviorPanels';
 import CheckoutPanel from './CheckoutPanel';
 import FormCurrencyControl from './FormCurrencyControl';
 import IntegrationsPanel from './IntegrationsPanel';
+import SpamProtectionPanel from './SpamProtectionPanel';
 import { isPricedForm, isPricedType } from '../../../shared/pricing';
 import Icon from '../../ui/Icon';
 import './FormSettings.scss';
@@ -38,7 +39,8 @@ export default function FormSettings({
   onChange, 
   validationErrors = [], 
   fieldErrors = {}, 
-  isReadOnly = false 
+  isReadOnly = false,
+  formId = 0,
 }) {
   const metadata = schema?.metadata || {};
   // The structure decides between Standard and Multi-step (2.3.2).
@@ -178,6 +180,7 @@ export default function FormSettings({
           icon: Icon.Clock,
           badge: availabilityOn ? String(availabilityOn) : '',
         },
+        { id: 'spam', title: __('Spam protection', 'subtleforms'), description: __('Stop robots quietly, without a puzzle for your visitors.', 'subtleforms'), icon: Icon.ShieldCheck },
       ],
     },
     {
@@ -346,6 +349,12 @@ export default function FormSettings({
             {current.id === 'availability' && (
               <div className='sf-form-settings__card'>
                 <AvailabilityPanel schema={schema} onMetadata={handleMetadataChange} isReadOnly={isReadOnly} />
+              </div>
+            )}
+
+            {current.id === 'spam' && (
+              <div className='sf-form-settings__card'>
+                <SpamProtectionPanel schema={schema} onMetadata={handleMetadataChange} isReadOnly={isReadOnly} formId={formId} />
               </div>
             )}
 

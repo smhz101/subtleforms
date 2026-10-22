@@ -7,11 +7,12 @@ import Icon from '../ui/Icon';
 import { apiGet, apiPost } from '../utils/api';
 import { getBranding } from '../utils/branding';
 import { formOptionLabel } from '../utils/toolLabels';
+import SiteImport from '../components/tools/SiteImport';
 import './ToolsPage.scss';
 
 const SECTIONS = [
   { id: 'transfer', label: __( 'Transfer', 'subtleforms' ), icon: Icon.Package, description: __( 'Move SubtleForms forms and submissions between sites.', 'subtleforms' ) },
-  { id: 'migrate', label: __( 'Migrate', 'subtleforms' ), icon: Icon.FileUp, description: __( 'Bring a form across from Gravity Forms or Fluent Forms.', 'subtleforms' ) },
+  { id: 'migrate', label: __( 'Migrate', 'subtleforms' ), icon: Icon.FileUp, description: __( 'Bring forms across from Contact Form 7, Gravity Forms or Fluent Forms.', 'subtleforms' ) },
   { id: 'activity', label: __( 'Activity', 'subtleforms' ), icon: Icon.Activity, description: __( 'What happened after each entry was sent.', 'subtleforms' ) },
   { id: 'webhooks', label: __( 'Webhooks', 'subtleforms' ), icon: Icon.Webhook, description: __( 'Calls this site made to another address.', 'subtleforms' ) },
   { id: 'api', label: __( 'API', 'subtleforms' ), icon: Icon.Code, description: __( 'SubtleForms REST calls from the last 30 days.', 'subtleforms' ) },
@@ -97,8 +98,9 @@ export default function ToolsPanel( { embedded = false } ) {
         { section === 'transfer' && (
           <Transfer forms={ forms } busy={ busy } setBusy={ setBusy } tell={ tell } />
         ) }
+        { section === 'migrate' && <SiteImport /> }
         { section === 'migrate' && (
-          <Migrate busy={ busy } setBusy={ setBusy } tell={ tell } description={ current.description } />
+          <Migrate busy={ busy } setBusy={ setBusy } tell={ tell } />
         ) }
         { section === 'activity' && <LogList kind='activity' forms={ forms } description={ current.description } /> }
         { section === 'webhooks' && <LogList kind='webhook' forms={ forms } description={ current.description } /> }
@@ -357,7 +359,7 @@ export function FileButton( { label, busy, onFile } ) {
   );
 }
 
-function Migrate( { busy, setBusy, tell, description } ) {
+function Migrate( { busy, setBusy, tell } ) {
   const [ preview, setPreview ] = useState( null );
   const [ fileJson, setFileJson ] = useState( null );
 
@@ -404,8 +406,8 @@ function Migrate( { busy, setBusy, tell, description } ) {
     <section className='sf-panel'>
       <header className='sf-panel__header'>
         <div>
-          <h2 className='sf-panel__title'>{ __( 'Gravity Forms and Fluent Forms', 'subtleforms' ) }</h2>
-          <p className='sf-panel__subtitle'>{ description }</p>
+          <h2 className='sf-panel__title'>{ __( 'From an export file', 'subtleforms' ) }</h2>
+          <p className='sf-panel__subtitle'>{ __( 'A Gravity Forms or Fluent Forms JSON export, for forms made on another site.', 'subtleforms' ) }</p>
         </div>
       </header>
       <div className='sf-panel__body'>

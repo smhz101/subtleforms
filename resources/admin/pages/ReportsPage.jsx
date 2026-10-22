@@ -4,13 +4,39 @@ import { __, _n, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import AdminShell from '../components/AdminShell';
 import FormAnalyticsPanel from '../components/analytics/FormAnalyticsPanel';
+import FunnelPanel from '../components/analytics/FunnelPanel';
 import { formatRate, useAnalyticsSummary } from '../components/analytics/useAnalytics';
+import ShowAllButton, { useShowAll } from '../components/analytics/ShowAll';
 import { apiGet } from '../utils/api';
 import './DashboardPage.scss';
 import './ReportsPage.scss';
 import { chartColumnProps } from '../utils/chartA11y';
 
 const formatNumber = ( value ) => Number( value || 0 ).toLocaleString();
+
+// Forms listed in "Each form" before "Show all".
+export const REPORT_TOP_FORMS = 10;
+
+/**
+ * Rows for "Each form, last 30 days": most viewed first, then most sent.
+ *
+ * @param {Object} summaryForms Per-form totals keyed by form ID.
+ * @param {Array}  forms        Forms ({ id, title }).
+ * @return {Array} Rows with a title.
+ */
+export function reportRows( summaryForms, forms ) {
+  return Object.values( summaryForms || {} )
+    .map( ( row ) => ( {
+      ...row,
+      title: ( forms || [] ).find( ( form ) => Number( form.id ) === Number( row.form_id ) )?.title
+        /* translators: %d: form ID */
+        || sprintf( __( 'Form #%d', 'subtleforms' ), row.form_id ),
+    } ) )
+    .sort( ( a, b ) =>
+      Number( b.views || 0 ) - Number( a.views || 0 )
+      || Number( b.submissions || 0 ) - Number( a.submissions || 0 )
+      || Number( a.form_id ) - Number( b.form_id ) );
+}
 
 export default function ReportsPage() {
   const [ overview, setOverview ] = useState( null );
@@ -37,12 +63,8 @@ export default function ReportsPage() {
   const forms = overview?.forms || [];
   const series = overview?.series || [];
   const week = series.reduce( ( sum, day ) => sum + Number( day.count || 0 ), 0 );
-  const rows = Object.values( summary.data?.forms || {} ).map( ( row ) => ( {
-    ...row,
-    title: forms.find( ( form ) => Number( form.id ) === Number( row.form_id ) )?.title
-      /* translators: %d: form ID */
-      || sprintf( __( 'Form #%d', 'subtleforms' ), row.form_id ),
-  } ) );
+  const rows = reportRows( summary.data?.forms, forms );
+  const formRows = useShowAll( rows, REPORT_TOP_FORMS );
 
   return (
     <AdminShell
@@ -82,6 +104,8 @@ export default function ReportsPage() {
 
           <FormAnalyticsPanel forms={ forms } />
 
+          <FunnelPanel forms={ forms } />
+
           <section className='sf-panel sf-analytics-panel'>
             <header className='sf-panel__header'>
               <div>
@@ -94,7 +118,7 @@ export default function ReportsPage() {
                 <div className='sf-reports__loading'><Spinner /></div>
               ) : (
                 <div className='sf-analytics-panel__chart'>
-                  <table className='sf-reports__table'>
+                  <table className='sf-reports__table' id='sf-reports-forms'>
                     <thead>
                       <tr>
                         <th>{ __( 'Form', 'subtleforms' ) }</th>
@@ -104,7 +128,7 @@ export default function ReportsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      { rows.map( ( row ) => (
+                      { formRows.visible.map( ( row ) => (
                         <tr key={ row.form_id }>
                           <td>{ row.title }</td>
                           <td>{ formatNumber( row.views ) }</td>
@@ -117,6 +141,18 @@ export default function ReportsPage() {
                       ) }
                     </tbody>
                   </table>
+                  <ShowAllButton
+                    hidden={ formRows.hidden }
+                    expanded={ formRows.expanded }
+                    onToggle={ formRows.toggle }
+                    controls='sf-reports-forms'
+                    more={ sprintf(
+                      /* translators: %d: number of forms */
+                      _n( 'Show all %d form', 'Show all %d forms', rows.length, 'subtleforms' ),
+                      rows.length
+                    ) }
+                    less={ __( 'Show fewer forms', 'subtleforms' ) }
+                  />
                 </div>
               ) }
             </div>

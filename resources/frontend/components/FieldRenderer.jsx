@@ -9,42 +9,30 @@ import { getCompositeEmptyParts } from '../utils/fieldValidation';
 import { compositeParts, partValue } from '../../shared/compositeParts';
 import { rangeSliderSeed } from '../utils/defaults';
 import { debug } from '../../shared/debug';
-import { cloneElement, lazy, Suspense, useContext, useEffect } from '@wordpress/element';
-import ChainedSelect from './fields/ChainedSelect';
-import PhoneField from './fields/PhoneField';
+import { cloneElement, useContext, useEffect } from '@wordpress/element';
 import ChoiceSelect from './fields/ChoiceSelect';
-import CountrySelect from './fields/CountrySelect';
-import DateTimeField from './fields/DateTimeField';
-import FileUpload, { FormContext } from './fields/FileUpload';
-import RepeaterField from './fields/RepeaterField';
-import {
-  PaymentSummary,
-  PaymentCoupon,
-  PaymentProduct,
-  PaymentChoice,
-  PaymentCard,
-  PaymentAmount,
-  usePayment,
-} from './fields/Payments';
+import { FormContext, usePayment } from './fields/contexts';
+import { lazyField } from './fields/lazyFields';
 import { getFieldType } from '../../shared/extend';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { fieldDisplay } from '../../shared/fieldDisplay';
 import { toggleIsOn } from '../../shared/toggleState';
 
-// The rich text editor is only downloaded on pages whose form has that
-// field (2.3.0). Every other form skips that code.
-const RichTextInput = lazy(() =>
-  import(/* webpackChunkName: "field-rich-text" */ './fields/RichTextInput')
-);
-
-/** Placeholder while a lazily loaded field downloads. */
-function FieldLoading() {
-  return (
-    <div className='subtleforms-field-loading' aria-busy='true'>
-      {__('Loading…', 'subtleforms')}
-    </div>
-  );
-}
+// Heavier fields are only downloaded for forms that have them (rich text
+// since 2.3.0, the rest since 2.6.0). See fields/lazyFields.jsx.
+const ChainedSelect = lazyField('chained');
+const PhoneField = lazyField('geo', 'PhoneField');
+const CountrySelect = lazyField('geo', 'CountrySelect');
+const DateTimeField = lazyField('date');
+const FileUpload = lazyField('upload');
+const RepeaterField = lazyField('repeater');
+const RichTextInput = lazyField('richText');
+const PaymentSummary = lazyField('payments', 'PaymentSummary');
+const PaymentCoupon = lazyField('payments', 'PaymentCoupon');
+const PaymentProduct = lazyField('payments', 'PaymentProduct');
+const PaymentChoice = lazyField('payments', 'PaymentChoice');
+const PaymentCard = lazyField('payments', 'PaymentCard');
+const PaymentAmount = lazyField('payments', 'PaymentAmount');
 import {
   fieldAppearanceStyle,
   fieldAppearanceClasses,
@@ -378,6 +366,7 @@ export default function FieldRenderer({
     return (
       <div
         role='group'
+        data-sf-key={ownKey || undefined}
         className={[`subtleforms-field subtleforms-field-${field.type} subtleforms-group-field`, appearanceClasses]
           .filter(Boolean)
           .join(' ')}
@@ -491,7 +480,8 @@ export default function FieldRenderer({
       ]
         .filter(Boolean)
         .join(' ')}
-      style={appearanceStyle}>
+      style={appearanceStyle}
+      data-sf-key={ownKey || undefined}>
       {(() => {
         const grouped = ['radio', 'multiple_choice', 'picture_choice', 'checkbox_grid'].includes(field.type)
           || (field.type === 'checkbox' && Array.isArray(config.options) && config.options.length > 0);
@@ -1454,7 +1444,6 @@ function renderInput(
 
     case 'rich_text':
       return (
-        <Suspense fallback={<FieldLoading />}>
         <RichTextInput
           inputId={inputId}
           name={name}
@@ -1465,7 +1454,6 @@ function renderInput(
           required={required}
           error={error}
         />
-        </Suspense>
       );
 
     case 'chained_select':

@@ -303,6 +303,29 @@ function SortableActionItem({ action, index, isReadOnly, onUpdate, onRemove, fie
           )}
 
           <MergeTagField
+            label={__('Reply-To', 'subtleforms')}
+            fields={fields}
+            allowAll={false}
+            disabled={isDisabled}
+            value={s.replyTo || ''}
+            onChange={(v) => patchSettings({ replyTo: v })}
+            render={(ref, labelId) => (
+              <TextControl
+                ref={ref}
+                aria-labelledby={labelId}
+                hideLabelFromVision
+                label={__('Reply-To', 'subtleforms')}
+                type='text'
+                value={s.replyTo || ''}
+                onChange={(v) => patchSettings({ replyTo: v })}
+                placeholder='{field:email}'
+                disabled={isDisabled}
+                help={__('Optional. One address, or a field tag such as {field:email} so a reply goes to the person who sent the form. An answer that is not one valid address is left out.', 'subtleforms')}
+              />
+            )}
+          />
+
+          <MergeTagField
             label={__('Subject', 'subtleforms')}
             fields={fields}
             allowAll={false}

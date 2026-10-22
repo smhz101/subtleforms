@@ -1,0 +1,2 @@
+type: Added
+A form funnel on the Reports screen shows how many people saw, started and sent each form and the last field people touched before leaving without sending it, with a plain suggestion for each field; it keeps only daily totals per form, sets no cookies, stores no answers or IP addresses, skips robots and people who manage SubtleForms, and follows the Count form views switch. Form views are no longer counted for people who manage SubtleForms either, so Seen and Started count the same visitors.

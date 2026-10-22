@@ -17,7 +17,7 @@ import { fieldConfig } from '../../shared/fieldConfig';
 import { getFieldType } from '../../shared/extend';
 import { hasParts, missingParts } from '../../shared/compositeParts';
 import { firstUnansweredChainedLevel } from '../../shared/chainedOptions';
-import { isValidInternational } from '../../shared/phone';
+import { isValidInternational } from '../../shared/phoneDial';
 
 export const COMPOSITE_FIELD_TYPES = new Set(['name_group', 'address_group', 'address']);
 

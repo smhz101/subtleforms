@@ -1,4 +1,3 @@
-import { useState } from '@wordpress/element';
 import { submissionStatus } from '../utils/submissionStatus';
 import { Button } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
@@ -12,7 +11,9 @@ import AdminShell from '../components/AdminShell';
 import FormAnalyticsPanel from '../components/analytics/FormAnalyticsPanel';
 import { getFormTypeBadge, getFormStatusBadge } from '../utils/formMeta';
 import './DashboardPage.scss';
-import { chartColumnProps } from '../utils/chartA11y';
+import TrendChart from '../components/TrendChart';
+import SpamBlockedCard from '../components/SpamBlockedCard';
+import SpamProtectionNotice from '../components/SpamProtectionNotice';
 
 const formatNumber = (value) => Number(value || 0).toLocaleString();
 
@@ -68,6 +69,9 @@ export default function Dashboard() {
       description={__('Everything happening across your forms.', 'subtleforms')}
       actions={headerActions}>
       <div className='sf-dash'>
+        {/* One-time offer to turn spam protection on (2.6.0) */}
+        <SpamProtectionNotice />
+
         {/* KPIs */}
         <section
           className='sf-kpis'
@@ -184,6 +188,9 @@ export default function Dashboard() {
             </div>
           </section>
         </div>
+
+        {/* Spam blocked in the last 30 days (2.6.0) */}
+        <SpamBlockedCard />
 
         {/* Activity */}
         {/* Views, submissions and conversion (2.1, Pro reports) */}
@@ -453,126 +460,3 @@ function HealthItem({ label, value }) {
   );
 }
 
-/**
- * Daily submissions bar chart.
- *
- * One series, so no legend: the panel title names it. Bars are a single hue
- * with 4px rounded tops anchored to the baseline and a 2px gap. Each bar has a
- * hover/focus tooltip, and the numbers are also exposed as a visually hidden
- * table for screen readers.
- */
-function TrendChart({ data = [] }) {
-  const [active, setActive] = useState(null);
-
-  if (!data.length) {
-    return null;
-  }
-
-  const max = Math.max(1, ...data.map((d) => d.count));
-  // A tidy axis maximum (1, 2, 5, 10, 20, 50…).
-  const niceMax = (() => {
-    const pow = 10 ** Math.floor(Math.log10(max));
-    const n = max / pow;
-    const step = n <= 1 ? 1 : n <= 2 ? 2 : n <= 5 ? 5 : 10;
-    return step * pow;
-  })();
-
-  const formatDay = (iso, opts) =>
-    new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, opts);
-
-  const lastIndex = data.length - 1;
-
-  return (
-    <div className='sf-trend'>
-      <div className='sf-trend__plot'>
-        <div className='sf-trend__grid' aria-hidden='true'>
-          <span data-value={formatNumber(niceMax)} />
-          <span data-value={formatNumber(niceMax / 2)} />
-          <span data-value='0' />
-        </div>
-        <div
-          className='sf-trend__bars'
-          onMouseLeave={() => setActive(null)}>
-          <ul className='screen-reader-text'>
-            {data.map((day) => (
-              <li key={day.date}>
-                {sprintf(
-                  /* translators: 1: date, 2: number of submissions */
-                  _n('%1$s: %2$s submission', '%1$s: %2$s submissions', day.count, 'subtleforms'),
-                  formatDay(day.date, { month: 'short', day: 'numeric' }),
-                  formatNumber(day.count)
-                )}
-              </li>
-            ))}
-          </ul>
-          {data.map((day, index) => {
-            const height = (day.count / niceMax) * 100;
-            const label = sprintf(
-              /* translators: 1: date, 2: number of submissions */
-              _n('%1$s: %2$s submission', '%1$s: %2$s submissions', day.count, 'subtleforms'),
-              formatDay(day.date, { month: 'short', day: 'numeric' }),
-              formatNumber(day.count)
-            );
-            return (
-              <div
-                key={day.date}
-                className={clsx('sf-trend__col', {
-                  'is-active': active === index,
-                  'is-today': index === lastIndex,
-                })}
-                tabIndex={0}
-                {...chartColumnProps(label)}
-                onMouseEnter={() => setActive(index)}
-                onFocus={() => setActive(index)}
-                onBlur={() => setActive(null)}>
-                <span
-                  className='sf-trend__bar'
-                  style={{ height: day.count > 0 ? `max(${height}%, 3px)` : 0 }}
-                />
-                {active === index && (
-                  <span className='sf-trend__tip' role='tooltip'>
-                    <strong>{formatNumber(day.count)}</strong>
-                    <span>
-                      {formatDay(day.date, {
-                        weekday: 'short',
-                        month: 'short',
-                        day: 'numeric',
-                      })}
-                    </span>
-                  </span>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-      <div className='sf-trend__axis' aria-hidden='true'>
-        <span>{formatDay(data[0].date, { month: 'short', day: 'numeric' })}</span>
-        <span>
-          {formatDay(data[Math.floor(lastIndex / 2)].date, {
-            month: 'short',
-            day: 'numeric',
-          })}
-        </span>
-        <span>{__('Today', 'subtleforms')}</span>
-      </div>
-      <table className='screen-reader-text'>
-        <caption>{__('Submissions per day, last 14 days', 'subtleforms')}</caption>
-        <thead>
-          <tr>
-            <th scope='col'>{__('Date', 'subtleforms')}</th>
-            <th scope='col'>{__('Submissions', 'subtleforms')}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((day) => (
-            <tr key={day.date}>
-              <td>{day.date}</td>
-              <td>{day.count}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
-}

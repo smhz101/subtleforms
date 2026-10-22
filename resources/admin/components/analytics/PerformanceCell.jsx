@@ -37,6 +37,15 @@ export default function PerformanceCell({ stats, loading }) {
           submissions.toLocaleString()
         )}
       </span>
+      {stats?.completion !== null && stats?.completion !== undefined && (
+        <span className='sf-perf__completion'>
+          {sprintf(
+            /* translators: %s: share of the people who started the form that sent it */
+            __('Completion rate %s', 'subtleforms'),
+            formatRate(stats.completion)
+          )}
+        </span>
+      )}
       {rate !== null && (
         <span className='sf-perf__meter' aria-hidden='true'>
           <span style={{ width: `${Math.min(100, rate)}%` }} />

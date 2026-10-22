@@ -5,6 +5,11 @@ import { createRoot } from '@wordpress/element';
 import { act } from 'react';
 import FieldRenderer from '../FieldRenderer';
 import { PaymentContext } from './Payments';
+import { loadAllFieldGroups } from './lazyFields';
+
+// The live form downloads a field's code before drawing it (2.6.0); these
+// tests draw fields directly, so they load that code first.
+beforeAll(() => loadAllFieldGroups());
 
 global.IS_REACT_ACT_ENVIRONMENT = true;
 

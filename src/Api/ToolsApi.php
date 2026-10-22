@@ -17,6 +17,7 @@ use SubtleForms\Repositories\SubmissionsRepository;
 use SubtleForms\Support\FeatureGate;
 use SubtleForms\Tools\ApiLog;
 use SubtleForms\Tools\FormMigration;
+use SubtleForms\Tools\Import\Importer;
 use SubtleForms\Tools\TransferService;
 use WP_REST_Request;
 use WP_REST_Response;
@@ -41,6 +42,9 @@ final class ToolsApi {
 
 	/** @var TransferService */
 	private $transfer;
+
+	/** @var Importer|null */
+	private $importer;
 
 	/**
 	 * @param FormsRepository       $forms Forms.
@@ -119,6 +123,34 @@ final class ToolsApi {
 			array(
 				'methods'             => 'POST',
 				'callback'            => array( $this, 'importMigration' ),
+				'permission_callback' => $write,
+			)
+		);
+		// One-click import from other form plugins on this site (2.6.0).
+		register_rest_route(
+			self::NAMESPACE,
+			'/tools/migrate/sources',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'importSources' ),
+				'permission_callback' => $write,
+			)
+		);
+		register_rest_route(
+			self::NAMESPACE,
+			'/tools/migrate/sources/(?P<source>[a-z0-9_-]+)/forms',
+			array(
+				'methods'             => 'GET',
+				'callback'            => array( $this, 'importFormsList' ),
+				'permission_callback' => $write,
+			)
+		);
+		register_rest_route(
+			self::NAMESPACE,
+			'/tools/migrate/sources/(?P<source>[a-z0-9_-]+)/import',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'importFromSource' ),
 				'permission_callback' => $write,
 			)
 		);
@@ -247,6 +279,81 @@ final class ToolsApi {
 			return ApiResponse::validation_error( $result['error'] );
 		}
 		return ApiResponse::success( $result );
+	}
+
+	/**
+	 * The importer, made on first use.
+	 *
+	 * @return Importer
+	 */
+	private function importer(): Importer {
+		if ( null === $this->importer ) {
+			$this->importer = new Importer( $this->forms );
+		}
+		return $this->importer;
+	}
+
+	/**
+	 * Form plugins that left forms on this site.
+	 *
+	 * @return WP_REST_Response
+	 */
+	public function importSources(): WP_REST_Response {
+		return ApiResponse::success( $this->importer()->detect() );
+	}
+
+	/**
+	 * The forms of one plugin, with field counts and earlier imports.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response
+	 */
+	public function importFormsList( WP_REST_Request $request ): WP_REST_Response {
+		$source = $this->importer()->source( sanitize_key( (string) $request->get_param( 'source' ) ) );
+		if ( ! $source ) {
+			return ApiResponse::not_found( __( 'That form plugin is not supported.', 'subtleforms' ) );
+		}
+		return ApiResponse::success( $this->importer()->forms( $source ) );
+	}
+
+	/**
+	 * Import forms of one plugin as drafts. Ids in `copies` are imported
+	 * again even when they were imported before.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 * @return WP_REST_Response
+	 */
+	public function importFromSource( WP_REST_Request $request ): WP_REST_Response {
+		$source = $this->importer()->source( sanitize_key( (string) $request->get_param( 'source' ) ) );
+		if ( ! $source ) {
+			return ApiResponse::not_found( __( 'That form plugin is not supported.', 'subtleforms' ) );
+		}
+		$body   = $request->get_json_params();
+		$body   = is_array( $body ) ? $body : array();
+		$clean  = static function ( $list ): array {
+			$out = array();
+			foreach ( is_array( $list ) ? $list : array() as $id ) {
+				if ( is_scalar( $id ) && preg_match( '/^[A-Za-z0-9_-]{1,64}$/', (string) $id ) ) {
+					$out[] = (string) $id;
+				}
+			}
+			return $out;
+		};
+		$ids    = $clean( $body['ids'] ?? array() );
+		$copies = $clean( $body['copies'] ?? array() );
+		if ( ! $ids ) {
+			return ApiResponse::validation_error( __( 'Choose at least one form to import.', 'subtleforms' ) );
+		}
+		if ( count( $ids ) > Importer::MAX_PER_REQUEST ) {
+			return ApiResponse::validation_error(
+				sprintf(
+					/* translators: %d: maximum number of forms */
+					__( 'Import up to %d forms at a time.', 'subtleforms' ),
+					Importer::MAX_PER_REQUEST
+				)
+			);
+		}
+		return ApiResponse::success( $this->importer()->import( $source, $ids, $copies ) );
 	}
 
 	/**

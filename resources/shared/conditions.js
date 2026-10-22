@@ -1,5 +1,5 @@
 import { sameCheckValue } from './logicFields';
-import { countryCodeFor } from './countries';
+import { countryCodeLookup as countryCodeFor } from './countryLookup';
 /**
  * Conditional logic: one evaluator for the builder, the frontend renderer and
  * (mirrored line for line) the server in src/Engine/ConditionalLogic.php.

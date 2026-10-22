@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback, useMemo, useRef } from '@wordpress/el
 import { __, sprintf, _n } from '@wordpress/i18n';
 import FieldRenderer from './FieldRenderer';
 import StepNavigation from './StepNavigation';
-import ConversationalFormRenderer from './ConversationalFormRenderer';
 import { getIn, setIn, deleteIn, flattenToPathMap } from '../utils/valuePaths';
 import { collectLeafInputPaths, collectContainerKeys } from '../utils/schemaLeaves';
 import { columnFields, flattenSchemaFields } from '../utils/columnFields';
@@ -20,8 +19,9 @@ import { formFieldDefaults } from '../../shared/fieldDisplay';
 import { debug } from '../../shared/debug';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { computeQuote, isPricedForm, formatMoney, isPricedType } from '../../shared/pricing';
-import { PaymentContext } from './fields/Payments';
-import { FormContext } from './fields/FileUpload';
+import { FormContext, PaymentContext } from './fields/contexts';
+import { lazyField, loadFieldsFor, fieldsReadyFor } from './fields/lazyFields';
+import { readInlineFormData } from '../utils/inlineData';
 import {
   formAppearanceStyle,
   formAppearanceClasses,
@@ -33,6 +33,7 @@ import { restFetch, restUrl, restNonce } from '../utils/restFetch';
 import { fillConfirmation } from '../../shared/confirmationTags';
 import { classicFieldInputs } from '../utils/classicFields';
 import { classicOutcome, forgetClassicToken } from '../utils/classicResult';
+import { announceSubmitted } from '../utils/funnelTracker';
 
 /**
  * Whether a submitted value counts as missing.
@@ -51,6 +52,18 @@ export const isEmptyValue = ( value ) =>
   value === false ||
   ( Array.isArray( value ) && value.length === 0 );
 
+/** Shown while the conversational layout downloads (builder preview only). */
+function ConversationalLoading() {
+  return (
+    <div className='subtleforms-loading'>
+      {__('Loading form...', 'subtleforms')}
+    </div>
+  );
+}
+
+// One question at a time is its own download (2.6.0).
+const ConversationalFormRenderer = lazyField('conversational', 'default', ConversationalLoading);
+
 export default function FormRenderer({
   formId,
   preloadedSchema = null,
@@ -58,10 +71,16 @@ export default function FormRenderer({
   onSubmit: customOnSubmit = null,
   blockOptions = null,
 }) {
-  const [loading, setLoading] = useState(!preloadedSchema);
-  const [schema, setSchema] = useState(preloadedSchema);
+  // The data the server printed into the page, when it did (2.6.1): the form
+  // is drawn from it without a request. Read once; a form handed its schema
+  // (the builder preview) never uses it.
+  const [inline] = useState(() => (preloadedSchema ? null : readInlineFormData(formId)));
+  const [loading, setLoading] = useState(
+    !preloadedSchema && !(inline && fieldsReadyFor(inline.schema))
+  );
+  const [schema, setSchema] = useState(preloadedSchema || inline?.schema || null);
   // Server-signed load time for the spam time trap (FF-11, FF-12).
-  const [spamToken, setSpamToken] = useState('');
+  const [spamToken, setSpamToken] = useState(inline?.spamToken || '');
   const [error, setError] = useState(null);
   const [values, setValues] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -95,29 +114,60 @@ export default function FormRenderer({
     if (preloadedSchema) {
       // Keep the builder preview live: the schema prop changes on every edit
       // (appearance, fields, settings), and useState only read it once.
+      // Field code still downloading shows a loading line in its place.
+      loadFieldsFor(preloadedSchema);
       setSchema(preloadedSchema);
       setLoading(false);
       return;
     }
 
+    // Printed by the server: no request. Wait for the field code first when
+    // it is not here yet, so the whole form appears at once.
+    if (inline) {
+      let active = true;
+      loadFieldsFor(inline.schema).then(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+      return () => {
+        active = false;
+      };
+    }
+
+    let active = true;
     restFetch(`/forms/${formId}/schema`)
       .then((res) => res.json())
       .then((data) => {
         // API wraps responses in { data: ... }, but fall back to root-level schema for compatibility
         const schemaPayload = data?.data?.schema ?? data?.schema ?? null;
-        setSpamToken(data?.data?.spam_token || '');
-        if (schemaPayload) {
-          setSchema(schemaPayload);
-        } else {
-          setError(__('Failed to load form.', 'subtleforms'));
-        }
-        setLoading(false);
+        // Fetch the code of this form's heavier fields before drawing it, so
+        // the whole form appears at once (2.6.0). Usually it is already here:
+        // the page asked for it while the schema was on its way.
+        return (schemaPayload ? loadFieldsFor(schemaPayload) : Promise.resolve()).then(() => {
+          if (!active) {
+            return;
+          }
+          setSpamToken(data?.data?.spam_token || '');
+          if (schemaPayload) {
+            setSchema(schemaPayload);
+          } else {
+            setError(__('Failed to load form.', 'subtleforms'));
+          }
+          setLoading(false);
+        });
       })
       .catch((err) => {
+        if (!active) {
+          return;
+        }
         setError(__('Failed to load form.', 'subtleforms'));
         setLoading(false);
       });
-  }, [formId, preloadedSchema]);
+    return () => {
+      active = false;
+    };
+  }, [formId, preloadedSchema, inline]);
 
   // Prefill field values from the block's "Field Values" option (one
   // key=value pair per line). Runs once on mount. This hook MUST stay above
@@ -149,6 +199,13 @@ export default function FormRenderer({
     // Intentionally mount-only: prefill should not wipe user edits on re-render.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // A sent form is not a drop-off: tell the funnel tracker (2.6.0).
+  useEffect(() => {
+    if (submitSuccess && !preview) {
+      announceSubmitted(formId);
+    }
+  }, [submitSuccess, preview, formId]);
 
   // Extract steps from schema
   // Detect form type from metadata
@@ -1017,8 +1074,11 @@ export default function FormRenderer({
   }, [schema]);
 
   if (loading) {
+    // Its own key, so the form replaces this node instead of React reusing
+    // it: a reused node that moves (a block is wider than the form inside
+    // it) counts as a layout shift (2.6.0).
     return (
-      <div className='subtleforms-loading'>
+      <div key='subtleforms-loading' className='subtleforms-loading'>
         {__('Loading form...', 'subtleforms')}
       </div>
     );
@@ -1094,7 +1154,11 @@ export default function FormRenderer({
     blockOptions?.showDescription ?? schema?.metadata?._showDescription ?? true;
 
   const blockAppearance = (() => {
-    const theme = blockOptions?.theme || schema?.metadata?._theme;
+    // "default" is what a block has until a theme is picked: the form keeps
+    // the styling it was given in the builder (2.6.1). Any other theme is
+    // the block's own choice and replaces it.
+    const chosen = blockOptions?.theme;
+    const theme = chosen && chosen !== 'default' ? chosen : schema?.metadata?._theme;
     if (!theme) {
       return null;
     }
@@ -1127,7 +1191,11 @@ export default function FormRenderer({
       .join(' ');
 
   return (
-    <div ref={formRootRef} className={formClassNames} style={appearanceStyle}>
+    <div
+      ref={formRootRef}
+      className={formClassNames}
+      style={appearanceStyle}
+      data-sf-step={hasSteps ? currentStepIndex : undefined}>
       {/* Screen reader live region for submission results and validation announcements */}
       <div
         ref={liveRegionRef}

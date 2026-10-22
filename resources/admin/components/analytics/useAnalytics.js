@@ -53,3 +53,19 @@ export function formatRate(rate) {
   return `${Number(rate).toLocaleString(undefined, { maximumFractionDigits: 1 })}%`;
 }
 
+
+/**
+ * Where visitors stop filling in one form (2.6.0).
+ *
+ * @param {number} formId Form ID; nothing is fetched without one.
+ * @param {number} days   Window in days.
+ * @return {Object} Query result: { data, isLoading, error }.
+ */
+export function useFunnel(formId = 0, days = ANALYTICS_DAYS) {
+  return useQuery({
+    queryKey: ['subtleforms', 'analytics', 'funnel', formId, days],
+    queryFn: () => apiClient.get(`/analytics/funnel?form_id=${formId}&days=${days}`),
+    enabled: Number(formId) > 0,
+    staleTime: 60 * 1000,
+  });
+}

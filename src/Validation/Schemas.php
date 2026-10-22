@@ -182,6 +182,7 @@ class Schemas {
 					'ext_analytics_enabled',
 					'ext_analytics_view_tracking',
 					'ext_analytics_retention_days',
+					'ext_analytics_funnel_retention_days',
 					// Extensions, E-commerce
 					'ext_ecommerce_enabled',
 					'ext_ecommerce_product_id',
@@ -280,6 +281,7 @@ class Schemas {
 				'ext_analytics_enabled'            => 'optional|bool',
 				'ext_analytics_view_tracking'      => 'optional|bool',
 				'ext_analytics_retention_days'     => 'optional|int|min:1|max:3650',
+				'ext_analytics_funnel_retention_days' => 'optional|int|min:1|max:3650',
 				// Extensions, E-commerce
 				'ext_ecommerce_enabled'            => 'optional|bool',
 				'ext_ecommerce_product_id'         => 'optional|int|min:0',
@@ -444,6 +446,15 @@ class Schemas {
 				'descriptionPlacement' => 'optional|in:below,above',
 				'requiredMessage'      => 'optional|string|max:500',
 				'validationMessage'    => 'optional|string|max:500',
+				// 2.6.0: the form's own spam protection switches.
+				'spam'                 => 'optional|object|map:FormSpam',
+			),
+
+			// FormSpam, a form's spam protection (2.6.0). A missing key keeps
+			// the behaviour the form had before (SpamProtection::for_form).
+			'FormSpam' => array(
+				'honeypot' => 'optional|bool',
+				'timeTrap' => 'optional|bool',
 			),
 
 			// FormConfirmation, what visitors see after submitting (2.0).

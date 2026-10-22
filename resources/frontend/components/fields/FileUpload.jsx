@@ -10,11 +10,12 @@
  * Pro "advanced uploads" (the server only sends `multiple: true` when the
  * site's plan includes it). Single-file fields show a plain picker.
  */
-import { createContext, useContext, useRef, useState } from '@wordpress/element';
+import { useContext, useRef, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
-/** Form-level details fields need: which form, and whether it is a preview. */
-export const FormContext = createContext({ formId: null, preview: false });
+import { FormContext } from './contexts';
+
+export { FormContext };
 
 const DEFAULT_EXT = {
   image_upload: ['jpg', 'jpeg', 'png', 'gif', 'webp'],

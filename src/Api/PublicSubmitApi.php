@@ -30,6 +30,8 @@ use SubtleForms\Validation\Sanitizer;
 use SubtleForms\Payments\Pricing;
 use SubtleForms\Payments\CouponsRepository;
 use SubtleForms\Security\RateLimiter;
+use SubtleForms\Analytics\SpamStats;
+use SubtleForms\Engine\SpamProtection;
 use WP_REST_Request;
 use WP_REST_Response;
 
@@ -147,6 +149,42 @@ final class PublicSubmitApi {
 	}
 
 	/**
+	 * Count a submission the rate limit turned away, for a form that exists.
+	 * Unknown form IDs are not counted, so a bot cannot fill the table.
+	 *
+	 * @param WP_REST_Request $request Request.
+	 */
+	private function countRateLimited( WP_REST_Request $request ): void {
+		$formId = absint( $request->get_param( 'form_id' ) );
+		if ( $formId > 0 && $this->formsRepo->find( $formId ) ) {
+			SpamStats::blocked( $formId, 'rate_limit' );
+		}
+	}
+
+	/**
+	 * The schema whose spam settings apply: the published one, or the draft
+	 * for a preview. Null when it cannot be read (the old behaviour applies).
+	 *
+	 * @param int  $formId    Form ID.
+	 * @param bool $isPreview Whether this is a builder preview.
+	 * @return array|null
+	 */
+	private function spamSchema( int $formId, bool $isPreview ): ?array {
+		try {
+			if ( $isPreview ) {
+				$draft = $this->formsRepo->getDraftSchema( $formId );
+				if ( is_array( $draft ) ) {
+					return $draft;
+				}
+			}
+			$active = $this->formsRepo->loadSchemaVersion( $formId );
+		} catch ( \RuntimeException $e ) {
+			return null;
+		}
+		return is_array( $active ) ? ( $active['schema'] ?? $active ) : null;
+	}
+
+	/**
 	 * The JSON body a classic form post becomes.
 	 *
 	 * @param array $post Request body.
@@ -167,6 +205,7 @@ final class PublicSubmitApi {
 		// Rate limiting
 		$rateLimitResponse = $this->guardRateLimit( $request );
 		if ( $rateLimitResponse ) {
+			$this->countRateLimited( $request );
 			return $rateLimitResponse;
 		}
 
@@ -212,31 +251,24 @@ final class PublicSubmitApi {
 			return ApiResponse::not_found( __( 'Form not found', 'subtleforms' ) );
 		}
 
-	// Honeypot: a hidden "website_url" field real users never see. If it has
-	// any value, the submitter is a bot, so silently drop the submission (return
-	// success without saving) so bots don't learn the field is a trap and retry,
-	// matching the existing SpamProtection pattern (Part B3).
-	$honeypot = isset( $payload['website_url'] ) ? (string) $payload['website_url'] : '';
-	if ( $honeypot !== '' ) {
-		Logger::info( 'Honeypot tripped on form %d, dropping submission', $formId );
-		return ApiResponse::success(
-			array(
-				'success' => true,
-				'message' => __( 'Thank you.', 'subtleforms' ),
-			)
+		// Spam protection: the hidden trap field ("website_url", which real
+		// visitors never see) and the time trap. Each form has its own switch
+		// for both (2.6.0); a form saved earlier keeps its old behaviour. A
+		// blocked submission gets the same "Thank you." as a real one and
+		// nothing is stored, so a bot does not learn it was caught and retry.
+		// A site admin testing a form (builder preview) skips the time trap,
+		// since the preview has no server-issued token.
+		$spamReason = SpamProtection::block_reason(
+			$payload,
+			$formId,
+			SpamProtection::for_form( $this->spamSchema( $formId, ! empty( $isPreview ) ) ),
+			current_user_can( 'manage_options' )
 		);
-	}
-
-		// Spam protection: the honeypot and the time trap each have their own
-		// setting. A site admin testing a form (builder preview) skips the time
-		// trap, since the preview has no server-issued token.
-		$tempContext = new SubmissionContext( $formId, $payload );
-		if ( current_user_can( 'manage_options' ) ) {
-			$tempContext->payload[ \SubtleForms\Engine\SpamProtection::TIME_FIELD ] = \SubtleForms\Engine\SpamProtection::issue_token( $formId, time() - HOUR_IN_SECONDS );
-		}
-		if ( \SubtleForms\Engine\SpamProtection::is_spam( $tempContext ) ) {
-			$reason = $tempContext->getMeta( 'spam_reason', 'spam_detected' );
-			Logger::info( 'Spam blocked (form %d): %s', $formId, $reason );
+		if ( null !== $spamReason ) {
+			Logger::info( 'Spam blocked (form %d): %s', $formId, $spamReason );
+			if ( empty( $isPreview ) ) {
+				SpamStats::blocked( $formId, $spamReason );
+			}
 			return ApiResponse::success(
 				array(
 					'success' => true,
@@ -312,6 +344,9 @@ final class PublicSubmitApi {
 					}
 					$verification = $this->captchaManager->verifyField( $resolved['provider'], $resolved['secret'], $payload );
 					if ( empty( $verification['success'] ) ) {
+						if ( empty( $isPreview ) ) {
+							SpamStats::blocked( $formId, 'captcha_failed' );
+						}
 						return ApiResponse::bad_request(
 							$verification['error'] ?? __( 'CAPTCHA verification failed.', 'subtleforms' )
 						);
@@ -320,6 +355,9 @@ final class PublicSubmitApi {
 			} elseif ( $this->captchaManager && $this->captchaManager->isEnabled() && $this->captchaManager->isConfigured() ) {
 				$verification = $this->captchaManager->verify( $payload );
 				if ( empty( $verification['success'] ) ) {
+					if ( empty( $isPreview ) ) {
+						SpamStats::blocked( $formId, 'captcha_failed' );
+					}
 					return ApiResponse::bad_request(
 						$verification['error'] ?? __( 'CAPTCHA verification failed.', 'subtleforms' )
 					);
@@ -613,6 +651,12 @@ final class PublicSubmitApi {
 			\SubtleForms\Uploads\Uploads::claim( $payload );
 
 			$stored = $this->submissionsRepo->find( $submissionId ) ?: array();
+
+			// A rule in the pipeline (an add-on spam check) stored the entry
+			// as spam: it is counted with the blocked spam (2.6.0).
+			if ( empty( $isPreview ) && 'spam' === ( $stored['status'] ?? '' ) ) {
+				SpamStats::blocked( $formId, 'spam_rule' );
+			}
 
 			/**
 			 * A submission was stored and its pipeline finished. Integrations

@@ -14,6 +14,42 @@ const inheritThemeScope = require('./bin/postcss/inherit-theme-scope');
 // Check if we should run the analyzer
 const shouldAnalyze = process.env.ANALYZE === 'true';
 
+/**
+ * Writes chunks.json next to the bundle: the file of every named lazy chunk
+ * (for example "field-date" => "field-date.1a2b3c4d.js"). The front end reads
+ * it to let the browser fetch a form's field code from the page head, in
+ * parallel with the main script (2.6.0, FrontendAssets::preloadFieldCode).
+ */
+class ChunkManifestPlugin {
+	apply(compiler) {
+		compiler.hooks.thisCompilation.tap('ChunkManifestPlugin', (compilation) => {
+			compilation.hooks.processAssets.tap(
+				{
+					name: 'ChunkManifestPlugin',
+					stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_SUMMARIZE,
+				},
+				() => {
+					const manifest = {};
+					for (const chunk of compilation.chunks) {
+						if (!chunk.name || chunk.canBeInitial()) {
+							continue;
+						}
+						const js = [...chunk.files].find((file) => file.endsWith('.js'));
+						if (js) {
+							manifest[chunk.name] = js;
+						}
+					}
+					const sorted = Object.fromEntries(Object.entries(manifest).sort());
+					compilation.emitAsset(
+						'chunks.json',
+						new compiler.webpack.sources.RawSource(JSON.stringify(sorted, null, '\t') + '\n')
+					);
+				}
+			);
+		});
+	}
+}
+
 module.exports = {
 	...defaultConfig,
 	// Enable source maps for easier debugging
@@ -125,6 +161,7 @@ module.exports = {
 	// to use content-hashed chunk filenames so CSS splits get proper cache busting.
 	plugins: [
 		...defaultConfig.plugins.filter((p) => !(p instanceof MiniCSSExtractPlugin)),
+		new ChunkManifestPlugin(),
 		new MiniCSSExtractPlugin({
 			filename: '[name].css',
 			chunkFilename: '[name].[contenthash:8].css',

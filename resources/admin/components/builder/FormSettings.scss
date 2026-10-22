@@ -870,3 +870,31 @@
 .sf-webhook-test {
 	align-items: flex-start;
 }
+
+// Spam protection: this form's blocked spam in the last 30 days (2.6.0).
+.sf-spam-panel__count {
+	font-size: var(--sf-text-sm);
+	color: var(--sf-text-secondary);
+
+	p {
+		margin: 0;
+	}
+
+	strong {
+		color: var(--sf-text);
+		font-weight: var(--sf-weight-medium);
+	}
+}
+
+.sf-spam-panel__reasons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 16px;
+	margin: 8px 0 0;
+	padding: 0;
+	list-style: none;
+
+	li {
+		margin: 0;
+	}
+}

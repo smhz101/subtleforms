@@ -395,3 +395,28 @@ body.subtleforms-admin-scope {
     height: 16px;
   }
 }
+
+// ── Select label and select on one line ──────────────────────────────────────
+// A core SelectControl stacks its label above the select (the Flex wrapper is a
+// column). In the list footers ("Rows per page") the label sits beside the
+// select. Scoped to the SubtleForms admin root, to the list footer or to a
+// wrapper marked `sf-select-row`, and to wrappers that hold a select, so text
+// inputs, full-width settings selects and core screens keep their own layout.
+.subtleforms-admin :is(.sf-data-table__pagination, .sf-select-row) .components-input-base:has(> .components-input-control__container select) {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 8px;
+
+  > .components-flex-item,
+  > .components-input-control__label {
+    flex: 0 0 auto;
+    max-width: none;
+    white-space: nowrap;
+  }
+
+  > .components-input-control__container {
+    flex: 1 1 auto;
+    min-width: 72px;
+  }
+}

@@ -116,6 +116,7 @@ export default function BuilderCanvasArea({
                 validationErrors={validationErrors}
                 fieldErrors={fieldErrors}
                 onChange={onSchemaChange}
+                formId={currentFormId || 0}
               />
             )}
             {view === 'entries' && currentFormId && (

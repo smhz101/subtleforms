@@ -6,6 +6,11 @@ import { createRoot } from '@wordpress/element';
 import { act } from 'react';
 import FieldRenderer, { hasVisibleText } from './FieldRenderer';
 import { registerFieldType } from '../../shared/extend';
+import { loadAllFieldGroups } from './fields/lazyFields';
+
+// The live form downloads a field's code before drawing it (2.6.0); these
+// tests draw fields directly, so they load that code first.
+beforeAll(() => loadAllFieldGroups());
 import { SAMPLES, WIDTHS, buildField } from '../../../tests/browser/fixtures/fields';
 
 global.IS_REACT_ACT_ENVIRONMENT = true;

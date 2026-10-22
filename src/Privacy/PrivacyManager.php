@@ -89,6 +89,12 @@ final class PrivacyManager {
 
 		$text .= __( '<p>When you submit a form on this website, we collect the information you provide in the form fields. This may include your name, email address, phone number, and any other information you choose to share.</p>', 'subtleforms' );
 
+		if ( \SubtleForms\Analytics\Funnel::tracks( $this->settings instanceof \SubtleForms\Support\Settings ? $this->settings : null ) ) {
+			$text .= __( '<h3>Form statistics</h3>', 'subtleforms' );
+
+			$text .= __( '<p>To learn how our forms can be improved, we count how many people see a form, how many start filling it in, and the last field someone touched before leaving without sending it. Only daily totals per form are kept. No cookies are set, and no answers, IP addresses or other personal data are stored for these statistics.</p>', 'subtleforms' );
+		}
+
 		$text .= __( '<h3>How long we retain your data</h3>', 'subtleforms' );
 
 		if ( $retention_days > 0 ) {

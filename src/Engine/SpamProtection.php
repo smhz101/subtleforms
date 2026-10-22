@@ -45,6 +45,12 @@ final class SpamProtection {
 	const MIN_SUBMISSION_TIME = 3;
 
 	/**
+	 * Key in a form's metadata that holds its own spam settings (2.6.0):
+	 * `{ "honeypot": bool, "timeTrap": bool }`.
+	 */
+	const FORM_KEY = 'spam';
+
+	/**
 	 * Check if submission appears to be spam: the honeypot (when switched on)
 	 * and the time trap (when a minimum time is set). They are independent.
 	 *
@@ -68,6 +74,102 @@ final class SpamProtection {
 		}
 
 		return false;
+	}
+
+	/**
+	 * The protection a form uses (2.6.0).
+	 *
+	 * A form's own choice (metadata.spam) wins. A form saved before 2.6.0 has
+	 * none and keeps working exactly as it did: the hidden trap field was
+	 * always checked, and the time trap followed the site's minimum time.
+	 *
+	 * @param array|null $schema Form schema (the published one at submit time).
+	 * @return array{honeypot: bool, timeTrap: bool, minSeconds: int, own: bool}
+	 */
+	public static function for_form( ?array $schema ): array {
+		$own     = is_array( $schema['metadata'][ self::FORM_KEY ] ?? null ) ? $schema['metadata'][ self::FORM_KEY ] : array();
+		$siteMin = self::min_seconds();
+
+		$honeypot = isset( $own['honeypot'] ) && is_bool( $own['honeypot'] ) ? $own['honeypot'] : true;
+		$timeTrap = isset( $own['timeTrap'] ) && is_bool( $own['timeTrap'] ) ? $own['timeTrap'] : $siteMin > 0;
+
+		return array(
+			'honeypot'   => $honeypot,
+			'timeTrap'   => $timeTrap,
+			// A form that asks for the time trap while the site minimum is 0
+			// uses the usual minimum, so "on" always means on.
+			'minSeconds' => $siteMin > 0 ? $siteMin : self::MIN_SUBMISSION_TIME,
+			'own'        => isset( $own['honeypot'] ) || isset( $own['timeTrap'] ),
+		);
+	}
+
+	/**
+	 * Spam settings a new form starts with: the site defaults, which are on
+	 * for new installs (2.6.0).
+	 *
+	 * @return array{honeypot: bool, timeTrap: bool}
+	 */
+	public static function new_form_defaults(): array {
+		return array(
+			'honeypot' => self::is_enabled(),
+			'timeTrap' => self::min_seconds() > 0,
+		);
+	}
+
+	/**
+	 * Give a new form's schema the default spam settings. A choice already in
+	 * the schema (a template, an import, a copy) is kept.
+	 *
+	 * @param array $schema Schema.
+	 * @return array
+	 */
+	public static function with_new_form_defaults( array $schema ): array {
+		if ( ! isset( $schema['metadata'] ) || ! is_array( $schema['metadata'] ) ) {
+			$schema['metadata'] = array();
+		}
+		$own = is_array( $schema['metadata'][ self::FORM_KEY ] ?? null ) ? $schema['metadata'][ self::FORM_KEY ] : array();
+		foreach ( self::new_form_defaults() as $key => $value ) {
+			if ( ! isset( $own[ $key ] ) || ! is_bool( $own[ $key ] ) ) {
+				$own[ $key ] = $value;
+			}
+		}
+		$schema['metadata'][ self::FORM_KEY ] = $own;
+		return $schema;
+	}
+
+	/**
+	 * Why a submission is blocked as spam, or null when it passes (2.6.0).
+	 *
+	 * @param array $data          Submitted answers (with website_url and form_rendered_at).
+	 * @param int   $form_id       Form ID.
+	 * @param array $protection    From for_form().
+	 * @param bool  $skip_time_trap True for a site admin testing a form.
+	 * @param int|null $now        Unix time. Defaults to now.
+	 * @return string|null honeypot_filled, time_token_missing, submission_too_fast or null.
+	 */
+	public static function block_reason( array $data, int $form_id, array $protection, bool $skip_time_trap = false, ?int $now = null ): ?string {
+		if ( ! empty( $protection['honeypot'] ) ) {
+			$value = $data[ self::HONEYPOT_FIELD ] ?? '';
+			if ( is_scalar( $value ) && '' !== (string) $value ) {
+				return 'honeypot_filled';
+			}
+		}
+
+		if ( ! empty( $protection['timeTrap'] ) && ! $skip_time_trap ) {
+			$issued = self::token_time( $data[ self::TIME_FIELD ] ?? null, $form_id );
+			if ( null === $issued ) {
+				return 'time_token_missing';
+			}
+			// Only a submission that comes too soon is blocked. A token from a
+			// page or a response that was cached hours ago is older, so it
+			// passes: page caching never blocks a real visitor.
+			$now = $now ?? time();
+			if ( ( $now - $issued ) < max( 1, (int) ( $protection['minSeconds'] ?? self::MIN_SUBMISSION_TIME ) ) ) {
+				return 'submission_too_fast';
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -181,7 +283,7 @@ final class SpamProtection {
 		$html = sprintf(
 			'<div class="subtleforms-hp" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;" aria-hidden="true" tabindex="-1">
 				<label for="subtleforms_hp_%1$d">%2$s</label>
-				<input type="text" id="subtleforms_hp_%1$d" name="%3$s" value="" autocomplete="off" tabindex="-1" />
+				<input type="text" id="subtleforms_hp_%1$d" name="%3$s" value="" autocomplete="off" tabindex="-1" aria-hidden="true" data-lpignore="true" data-1p-ignore="true" data-form-type="other" />
 				<input type="hidden" name="%4$s" value="%5$s" />
 			</div>',
 			absint( $form_id ),

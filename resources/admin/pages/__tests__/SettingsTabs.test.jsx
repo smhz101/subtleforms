@@ -20,7 +20,7 @@ jest.mock('../../hooks/useSettingsState', () => ({
 
 import useSettingsState from '../../hooks/useSettingsState';
 import '../../../shared/extend';
-import Settings, { ALL_TABS, resolveTab } from '../SettingsPage';
+import Settings, { ALL_TABS, getGroups, resolveTab } from '../SettingsPage';
 
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
@@ -133,5 +133,57 @@ describe('Tools and MCP tabs', () => {
     expect(container.querySelector('.sf-savebar')).toBeNull();
     unmount();
     delete window.__subtleformsExtend.settingsTabs['reports-mail'];
+  });
+});
+
+// 2.6.0: MCP comes right after Tools, with or without Pro's registered tab.
+describe('MCP sits right after Tools', () => {
+  const navNames = (container) =>
+    [...container.querySelectorAll('.sf-settings__nav-item span:not(.sf-settings__nav-pro)')].map((el) => el.textContent);
+  const order = () => getGroups().flatMap((g) => g.tabs.map((t) => t.name));
+  // Tools and MCP in one list, MCP straight after Tools (not under another heading).
+  const sameList = () => {
+    const group = getGroups().find((g) => g.tabs.some((t) => t.name === 'tools'));
+    const names = group.tabs.map((t) => t.name);
+    return names[names.indexOf('tools') + 1] === 'mcp';
+  };
+
+  afterEach(() => {
+    delete window.__subtleformsExtend.settingsTabs.mcp;
+    delete window.__subtleformsExtend.settingsTabs['reports-mail'];
+  });
+
+  test('without Pro: the placeholder tab follows Tools in the nav', () => {
+    const names = order();
+    expect(names[names.indexOf('tools') + 1]).toBe('mcp');
+    expect(sameList()).toBe(true);
+    const { container, unmount } = render('general');
+    const labels = navNames(container);
+    expect(labels[labels.indexOf('Tools') + 1]).toBe('MCP');
+    unmount();
+  });
+
+  test("Pro's registered tab lands in the same slot, even with its own title or order", () => {
+    const before = order();
+    window.SubtleFormsExtend.registerSettingsTab('mcp', {
+      title: 'MCP server',
+      order: 1,
+      component: () => <p className='pro-mcp'>Pro MCP screen</p>,
+    });
+    window.SubtleFormsExtend.registerSettingsTab('reports-mail', {
+      title: 'Report email',
+      component: () => <p>Body</p>,
+    });
+    const after = order();
+    expect(after.indexOf('mcp')).toBe(before.indexOf('mcp'));
+    expect(after[after.indexOf('tools') + 1]).toBe('mcp');
+    expect(after.filter((n) => n === 'mcp')).toHaveLength(1);
+    expect(sameList()).toBe(true);
+
+    const { container, unmount } = render('mcp');
+    const labels = navNames(container);
+    expect(labels[labels.indexOf('Tools') + 1]).toBe('MCP server');
+    expect(container.querySelector('.pro-mcp')).not.toBeNull();
+    unmount();
   });
 });

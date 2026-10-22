@@ -1,0 +1,2 @@
+type: Added
+Settings, Tools, Migrate finds the forms you made with Contact Form 7, Gravity Forms or Fluent Forms on this site and imports the ones you tick as drafts, with their fields, required rules, choices, email notifications and thank-you message, and a report of anything that could not be copied; entries and payment settings are not imported and the original forms are not changed. Email notifications have a Reply-To setting that takes one address or a field tag such as {field:email}, and imported forms keep their Reply-To.

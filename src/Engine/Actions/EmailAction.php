@@ -159,6 +159,21 @@ final class EmailAction implements ActionInterface {
 			$headers
 		);
 
+		// Reply-To may hold a merge tag such as {field:email}; the answer is
+		// used only when it is one valid address. From never takes a tag
+		// (2.6.0).
+		$replyTo = \SubtleForms\Support\ReplyTo::apply(
+			$headers,
+			is_string( $settings['replyTo'] ?? null ) ? $settings['replyTo'] : '',
+			static function ( string $text ) use ( $textPayload, $mergeContext ): string {
+				return \SubtleForms\Support\MergeTags::render( $text, array( 'answers' => $textPayload ) + $mergeContext, false );
+			}
+		);
+		$headers = $replyTo['headers'];
+		if ( $replyTo['dropped'] ) {
+			$this->log_debug( $context, 'Email: header left out, it was not one valid address or used a merge tag in From', array( 'headers' => $replyTo['dropped'] ) );
+		}
+
 		// Add default headers
 		if ( ! $this->has_header( $headers, 'Content-Type' ) ) {
 			$headers[] = $isHtml ? 'Content-Type: text/html; charset=UTF-8' : 'Content-Type: text/plain; charset=UTF-8';

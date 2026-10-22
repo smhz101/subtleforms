@@ -111,6 +111,8 @@ class Settings {
 		'ext_analytics_enabled'             => true,
 		'ext_analytics_view_tracking'       => true,
 		'ext_analytics_retention_days'      => 90,
+		// Where visitors stop filling in a form (2.6.0).
+		'ext_analytics_funnel_retention_days' => 180,
 
 		// E-commerce (WooCommerce)
 		'ext_ecommerce_enabled'             => false,
@@ -248,6 +250,7 @@ class Settings {
 		'ext_analytics_enabled'             => 'boolean',
 		'ext_analytics_view_tracking'       => 'boolean',
 		'ext_analytics_retention_days'      => array( 'integer', 'min' => 1, 'max' => 3650 ),
+		'ext_analytics_funnel_retention_days' => array( 'integer', 'min' => 1, 'max' => 3650 ),
 		'ext_ecommerce_enabled'             => 'boolean',
 		'ext_ecommerce_product_id'          => array( 'integer', 'min' => 0 ),
 		'ext_ecommerce_currency'            => array( 'string', 'max' => 10 ),

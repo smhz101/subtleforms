@@ -70,6 +70,9 @@ final class Activator {
 			);
 		}
 
+		// Read before the tables store the database version (2.6.0).
+		$fresh_install = \SubtleForms\Support\SpamDefaults::isFreshInstall();
+
 		// Create database tables
 		self::create_tables();
 
@@ -87,6 +90,9 @@ final class Activator {
 		// Set default options
 		self::set_default_options();
 		Settings::remove_ai_options();
+		// New installs start with spam protection on; existing sites are
+		// offered it once on the dashboard and nothing changes on its own.
+		\SubtleForms\Support\SpamDefaults::afterActivate( $fresh_install );
 
 		// Schedule privacy cron jobs
 		if ( ! wp_next_scheduled( 'subtleforms_daily_cleanup' ) ) {

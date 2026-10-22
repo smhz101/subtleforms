@@ -49,6 +49,13 @@ export const queryKeys = {
     stats: () => [...queryKeys.dashboard.all, 'stats'],
   },
 
+  // Spam protection (2.6.0)
+  spam: {
+    all: ['spam'],
+    stats: (days, formId) => ['spam', 'stats', { days, formId }],
+    protection: () => ['spam', 'protection'],
+  },
+
   // Extensions
   extensions: {
     all: ['extensions'],

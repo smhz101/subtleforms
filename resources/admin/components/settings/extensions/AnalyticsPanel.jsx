@@ -37,7 +37,7 @@ export default function AnalyticsPanel({ settings, updateSetting, fieldErrors = 
                 checked={!!settings.ext_analytics_view_tracking}
                 onChange={(v) => updateSetting('ext_analytics_view_tracking', v)}
                 help={__(
-                  'A view is counted once per page load, when the form scrolls into sight. Turn this off to count submissions only.',
+                  'A view is counted once per page load, when the form scrolls into sight. This also turns on the form funnel: the last field someone touched before leaving without sending. Turn this off to count submissions only.',
                   'subtleforms'
                 )}
               />
@@ -56,13 +56,31 @@ export default function AnalyticsPanel({ settings, updateSetting, fieldErrors = 
               />
               <FieldError errors={fieldErrors.ext_analytics_retention_days} />
             </div>
+
+            {settings.ext_analytics_view_tracking && (
+              <div className='sf-settings-field'>
+                <TextControl
+                  label={__('Keep funnel totals for (days)', 'subtleforms')}
+                  type='number'
+                  value={String(settings.ext_analytics_funnel_retention_days ?? 180)}
+                  onChange={(v) => updateSetting('ext_analytics_funnel_retention_days', Number(v))}
+                  min='1'
+                  max='3650'
+                  help={__(
+                    'The funnel on the Reports screen shows where people stop filling in a form. Older daily totals are deleted once a day. Between 1 and 3650 days.',
+                    'subtleforms'
+                  )}
+                />
+                <FieldError errors={fieldErrors.ext_analytics_funnel_retention_days} />
+              </div>
+            )}
           </>
         )}
 
         <div className='sf-ext-panel__info'>
           <p className='sf-ext-panel__info-text'>
             {__(
-              'Privacy: no cookies are set and no IP address, user agent or other personal data is stored. Each view only adds one to a daily total for the form, kept in your WordPress database.',
+              'Privacy: no cookies are set and no IP address, user agent, answer or other personal data is stored. Each view or drop-off only adds one to a daily total for the form, kept in your WordPress database.',
               'subtleforms'
             )}
           </p>

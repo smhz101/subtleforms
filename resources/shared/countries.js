@@ -7,6 +7,8 @@
  * missing). src/Fields/CountryList.php carries the same codes for the server;
  * countries.test.js keeps the two in step.
  */
+import { setCountryLookup } from './countryLookup';
+
 export const COUNTRIES = [
   { code: 'AF', name: 'Afghanistan' },
   { code: 'AX', name: 'Åland Islands' },
@@ -305,3 +307,6 @@ export function countryCodeFor(text) {
   );
   return found ? found.code : '';
 }
+
+// Conditional logic reads countries through countryLookup.js (2.6.0).
+setCountryLookup(countryCodeFor);

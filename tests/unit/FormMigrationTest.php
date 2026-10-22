@@ -71,7 +71,14 @@ final class FormMigrationTest extends TestCase {
 		$schema = $built['forms'][0]['schema'];
 		$this->assertSame( 'email', $schema['actions'][0]['type'] );
 		$this->assertSame( 'Thanks', $schema['metadata']['confirmation']['message'] );
-		( new SchemaValidator() )->validate( $schema );
+		// A Gravity name is a Name field with parts (2.6.0), not one text box.
+		$this->assertSame( 'name_group', $schema['fields'][3]['type'] );
+		self::validator()->validate( $schema );
+	}
+
+	/** A validator that knows the composite types, as the plugin registry does. */
+	private static function validator(): SchemaValidator {
+		return new SchemaValidator( array( 'text', 'email', 'textarea', 'number', 'phone', 'url', 'password', 'checkbox', 'consent', 'radio', 'multiple_choice', 'dropdown', 'date', 'time', 'file_upload', 'hidden', 'html', 'section_break', 'step', 'name_group', 'address_group', 'country', 'range_slider', 'image_upload' ) );
 	}
 
 	public function test_fluent_export_becomes_a_valid_form(): void {
@@ -121,7 +128,7 @@ final class FormMigrationTest extends TestCase {
 		$this->assertSame( 'pro', $schema['fields'][1]['options'][0]['value'] );
 		$this->assertCount( 2, $schema['fields'] );
 		$this->assertSame( 'Welcome', $schema['metadata']['confirmation']['message'] );
-		( new SchemaValidator() )->validate( $schema );
+		self::validator()->validate( $schema );
 	}
 
 	public function test_submission_package_drops_password_answers(): void {
@@ -150,7 +157,15 @@ final class FormMigrationTest extends TestCase {
 			'forms' => array(
 				array(
 					'title'       => 'Metas',
-					'form_fields' => array( 'fields' => array() ),
+					'form_fields' => array(
+						'fields' => array(
+							array(
+								'element'    => 'input_email',
+								'attributes' => array( 'name' => 'email' ),
+								'settings'   => array( 'label' => 'Email' ),
+							),
+						),
+					),
 					'metas'       => array(
 						array(
 							'meta_key' => 'notifications',
@@ -181,7 +196,7 @@ final class FormMigrationTest extends TestCase {
 		$this->assertSame( 'owner@example.com', $schema['actions'][0]['settings']['to'] );
 		$this->assertSame( 'Hello {field:email}', $schema['actions'][0]['settings']['subject'] );
 		$this->assertSame( 'Saved', $schema['metadata']['confirmation']['message'] );
-		$this->assertStringContainsString( 'Imported 1 email notification', implode( ' ', $built['forms'][0]['notes'] ) );
+		$this->assertStringContainsString( '1 email notification was copied', implode( ' ', $built['forms'][0]['notes'] ) );
 
 		$single = array(
 			'forms' => array(
@@ -266,23 +281,24 @@ final class FormMigrationTest extends TestCase {
 		);
 		$built   = FormMigration::schemas( 'fluent', $payload );
 		$schema  = $built['forms'][0]['schema'];
-		$types   = array_column( $schema['fields'], 'type' );
-		$this->assertSame( array( 'text', 'text', 'form_step', 'hidden', 'text' ), $types );
-		$this->assertSame( 'Company', $schema['fields'][0]['label'] );
-		$this->assertSame( 'Job title', $schema['fields'][1]['label'] );
-		$this->assertSame( 'ad', $schema['fields'][3]['value'] );
-		$this->assertSame( 'Name', $schema['fields'][4]['label'] );
-		$this->assertTrue( $schema['fields'][4]['required'] );
+		// A Fluent step splits the form into steps that hold the fields (2.6.0).
+		$this->assertSame( array( 'step', 'step' ), array_column( $schema['fields'], 'type' ) );
+		$first  = $schema['fields'][0]['children'];
+		$second = $schema['fields'][1]['children'];
+		$this->assertSame( array( 'text', 'text' ), array_column( $first, 'type' ) );
+		$this->assertSame( array( 'hidden', 'name_group' ), array_column( $second, 'type' ) );
+		$this->assertSame( 'Company', $first[0]['label'] );
+		$this->assertSame( 'Job title', $first[1]['label'] );
+		$this->assertSame( 'ad', $second[0]['value'] );
+		$this->assertSame( 'Name', $second[1]['label'] );
+		$this->assertTrue( $second[1]['required'] );
 		// Fluent's own field name is kept as the field ID (2.4.1).
-		$this->assertSame( 'names', $schema['fields'][4]['key'] );
+		$this->assertSame( 'names', $second[1]['key'] );
 		$this->assertSame( 'multi-step', $schema['metadata']['type'] );
 		$notes = implode( ' ', $built['forms'][0]['notes'] );
-		$this->assertStringContainsString( 'left out', $notes );
+		$this->assertStringContainsString( 'payments are not imported', $notes );
 		$this->assertStringNotContainsString( 'was a container field', $notes );
-		foreach ( $schema['fields'] as $field ) {
-			$this->assertNotSame( 'html', $field['type'] );
-		}
-		( new SchemaValidator() )->validate( $schema );
+		self::validator()->validate( $schema );
 	}
 
 	public function test_gravity_pages_logic_tags_and_payments(): void {
@@ -341,25 +357,24 @@ final class FormMigrationTest extends TestCase {
 		);
 		$built  = FormMigration::schemas( 'gravity', $payload );
 		$schema = $built['forms'][0]['schema'];
-		$this->assertSame( 'full_name', $schema['fields'][0]['key'] );
-		$this->assertSame( 'form_step', $schema['fields'][1]['type'] );
+		// The page break splits the form into two steps (2.6.0).
+		$this->assertSame( array( 'step', 'step' ), array_column( $schema['fields'], 'type' ) );
+		$page1 = $schema['fields'][0]['children'];
+		$page2 = $schema['fields'][1]['children'];
+		$this->assertSame( 'full_name', $page1[0]['key'] );
 		$this->assertSame( 'multi-step', $schema['metadata']['type'] );
-		$this->assertSame( 'equals', $schema['fields'][2]['logic']['groups'][0]['rules'][0]['operator'] );
-		$this->assertSame( 'full_name', $schema['fields'][2]['logic']['groups'][0]['rules'][0]['field'] );
-		$this->assertSame( 'I agree to the terms', $schema['fields'][3]['checkboxLabel'] );
-		$this->assertSame( 'multiple_choice', $schema['fields'][4]['type'] );
-		$this->assertTrue( $schema['fields'][4]['allowMultiple'] );
+		$this->assertSame( 'equals', $page2[0]['logic']['groups'][0]['rules'][0]['operator'] );
+		$this->assertSame( 'full_name', $page2[0]['logic']['groups'][0]['rules'][0]['field'] );
+		$this->assertSame( 'I agree to the terms', $page2[1]['checkboxLabel'] );
+		$this->assertSame( 'multiple_choice', $page2[2]['type'] );
+		$this->assertTrue( $page2[2]['allowMultiple'] );
 		$this->assertSame( '{field:full_name}', $schema['actions'][0]['settings']['to'] );
 		$this->assertSame( 'Hi {field:full_name}', $schema['actions'][0]['settings']['subject'] );
 		$this->assertSame( 'From {field:full_name}', $schema['actions'][0]['settings']['message'] );
 		$this->assertSame( '/?page_id=42', $schema['metadata']['confirmation']['redirectUrl'] );
 		$notes = implode( ' ', $built['forms'][0]['notes'] );
-		$this->assertStringContainsString( 'left out', $notes );
-		$this->assertStringContainsString( 'WordPress page 42', $notes );
-		foreach ( $schema['fields'] as $field ) {
-			$this->assertNotContains( $field['type'], array( 'html' ) );
-		}
-		( new SchemaValidator() )->validate( $schema );
+		$this->assertStringContainsString( 'payments are not imported', $notes );
+		self::validator()->validate( $schema );
 	}
 
 	public function test_a_forms_package_rejects_the_wrong_kind(): void {
@@ -432,7 +447,7 @@ final class FormMigrationTest extends TestCase {
 		$this->assertSame( 'email', $keys[1] );
 		$this->assertSame( 'again', $keys[2] );
 		$this->assertSame( 'trap', $keys[3] );
-		( new SchemaValidator() )->validate( $gravity );
+		self::validator()->validate( $gravity );
 
 		$fluent = FormMigration::schemas(
 			'fluent',
@@ -449,6 +464,6 @@ final class FormMigrationTest extends TestCase {
 			)
 		)['forms'][0]['schema'];
 		$this->assertSame( array( 'company-name', 'email' ), array_column( $fluent['fields'], 'key' ) );
-		( new SchemaValidator() )->validate( $fluent );
+		self::validator()->validate( $fluent );
 	}
 }

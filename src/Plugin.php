@@ -112,6 +112,11 @@ final class Plugin {
 
 		// Form view and submission counters (2.1).
 		\SubtleForms\Analytics\Stats::register();
+		// Blocked spam counter (2.6.0).
+		\SubtleForms\Analytics\SpamStats::register();
+		\SubtleForms\Support\SpamDefaults::register();
+		// Where visitors stop filling in a form (2.6.0).
+		\SubtleForms\Analytics\Funnel::register();
 
 		// Allow other plugins/themes to hook in
 		do_action( 'subtleforms/loaded', $this );
