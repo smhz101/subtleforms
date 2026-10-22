@@ -56,6 +56,7 @@ final class SpamStats {
 		add_action( 'init', array( __CLASS__, 'maybeInstall' ), 5 );
 		add_action( self::BLOCKED_ACTION, array( __CLASS__, 'record' ), 10, 2 );
 		add_action( self::PRUNE_HOOK, array( __CLASS__, 'prune' ) );
+		add_action( 'subtleforms/form/deleted', array( __CLASS__, 'deleteForm' ) );
 		add_action(
 			'init',
 			static function () {
@@ -65,6 +66,18 @@ final class SpamStats {
 			},
 			30
 		);
+	}
+
+	/**
+	 * Remove the blocked counts of a form that was deleted for good.
+	 *
+	 * @param int $formId Form ID.
+	 */
+	public static function deleteForm( $formId ): void {
+		global $wpdb;
+		$table = self::table();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Fixed table name; value is prepared.
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE form_id = %d", (int) $formId ) );
 	}
 
 	/**

@@ -65,6 +65,19 @@ final class Funnel {
 		// Pruned by the daily analytics event, so no new cron is added.
 		add_action( Stats::PRUNE_HOOK, array( __CLASS__, 'prune' ) );
 		add_action( 'rest_api_init', array( __CLASS__, 'registerRoutes' ) );
+		add_action( 'subtleforms/form/deleted', array( __CLASS__, 'deleteForm' ) );
+	}
+
+	/**
+	 * Remove the funnel totals of a form that was deleted for good.
+	 *
+	 * @param int $formId Form ID.
+	 */
+	public static function deleteForm( $formId ): void {
+		global $wpdb;
+		$table = self::table();
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter -- Fixed table name; value is prepared.
+		$wpdb->query( $wpdb->prepare( "DELETE FROM {$table} WHERE form_id = %d", (int) $formId ) );
 	}
 
 	/**

@@ -339,6 +339,35 @@ final class Funnel260Test extends TestCase {
 		$this->assertNull( $forms[ $empty ]['completion'], 'Nobody started: no rate.' );
 	}
 
+	public function test_deleting_a_form_removes_its_funnel_and_spam_rows(): void {
+		global $wpdb;
+		$formId = $this->form();
+		$kept   = $this->form();
+		\SubtleForms\Analytics\SpamStats::maybeInstall();
+		$this->beacon( $formId, array( 'a' => 'drop', 'f' => 'phone', 's' => '0' ) );
+		$this->beacon( $kept, array( 'a' => 'drop', 'f' => 'phone', 's' => '0' ) );
+		\SubtleForms\Analytics\SpamStats::record( $formId, 'honeypot' );
+		\SubtleForms\Analytics\SpamStats::record( $kept, 'honeypot' );
+		$this->assertNotEmpty( $this->rows( $formId ) );
+
+		$this->assertTrue( ( new FormsRepository() )->delete( $formId ) );
+
+		$spam = \SubtleForms\Analytics\SpamStats::table();
+		$this->assertSame( array(), $this->rows( $formId ), 'Funnel rows are gone.' );
+		$this->assertSame( 0, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$spam} WHERE form_id = %d", $formId ) ), 'Spam rows are gone.' );
+		$this->assertNotEmpty( $this->rows( $kept ), 'Other forms keep theirs.' );
+		$this->assertSame( 1, \SubtleForms\Analytics\SpamStats::summary( 30, $kept )['total'] );
+		$this->assertSame( 1, \SubtleForms\Analytics\SpamStats::summary( 30 )['total'] - $this->otherSpam( $kept ), 'The site total no longer counts the deleted form.' );
+		$wpdb->delete( $spam, array( 'form_id' => $kept ) );
+	}
+
+	/** Spam counted for forms other than the given one (rows from other tests). */
+	private function otherSpam( int $formId ): int {
+		global $wpdb;
+		$spam = \SubtleForms\Analytics\SpamStats::table();
+		return (int) $wpdb->get_var( $wpdb->prepare( "SELECT COALESCE(SUM(blocked),0) FROM {$spam} WHERE form_id <> %d", $formId ) );
+	}
+
 	public function test_the_report_is_for_managers_only(): void {
 		$formId  = $this->form();
 		$request = new \WP_REST_Request( 'GET', '/subtleforms/v1/analytics/funnel' );
