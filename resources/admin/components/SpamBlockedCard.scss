@@ -1,0 +1,98 @@
+/**
+ * Spam blocked card (dashboard, 2.6.0).
+ */
+
+.sf-spam-card {
+	&__headline {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		margin: 0 0 16px;
+		font-size: var(--sf-text-sm);
+		font-weight: var(--sf-weight-medium);
+		color: var(--sf-text);
+
+		svg {
+			flex: none;
+			color: var(--sf-success);
+		}
+	}
+
+	&__hint,
+	&__loading {
+		margin: 0;
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-muted);
+	}
+
+	&__error {
+		display: flex;
+		align-items: center;
+		gap: 12px;
+
+		p {
+			margin: 0;
+			font-size: var(--sf-text-sm);
+			color: var(--sf-text-muted);
+		}
+	}
+
+	&__grid {
+		display: grid;
+		grid-template-columns: minmax(0, 2fr) minmax(220px, 1fr);
+		gap: 24px;
+		align-items: start;
+
+		@media (max-width: 900px) {
+			grid-template-columns: minmax(0, 1fr);
+		}
+	}
+
+	&__reasons-title {
+		margin: 0 0 8px;
+		font-size: var(--sf-text-xs);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text-muted);
+		text-transform: none;
+	}
+
+	&__reasons ul {
+		display: flex;
+		flex-direction: column;
+		gap: 10px;
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	&__reason {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) auto;
+		row-gap: 4px;
+		margin: 0;
+		font-size: var(--sf-text-sm);
+	}
+
+	&__reason-label {
+		color: var(--sf-text);
+	}
+
+	&__reason-count {
+		font-variant-numeric: tabular-nums;
+		color: var(--sf-text);
+		font-weight: var(--sf-weight-medium);
+	}
+
+	&__reason-bar {
+		grid-column: 1 / -1;
+		height: 4px;
+		border-radius: var(--sf-radius-full);
+		background: var(--sf-brand);
+		opacity: 0.7;
+	}
+}
+
+// A shorter chart inside a card.
+.sf-trend--compact .sf-trend__plot {
+	height: 120px;
+}
