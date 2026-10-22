@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: SubtleForms 2.6.0\n"
+"Project-Id-Version: SubtleForms 2.6.1\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/subtleforms\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-22T01:11:58+00:00\n"
+"POT-Creation-Date: 2026-10-22T21:00:29+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -20,8 +20,8 @@ msgstr ""
 #: src/Admin/AdminMenu.php:518
 #: src/Admin/AdminMenu.php:1190
 #: resources/admin/components/builder/CheckoutPanel.jsx:83
-#: resources/blocks/form/edit.jsx:238
-#: resources/blocks/form/edit.jsx:403
+#: resources/blocks/form/edit.jsx:202
+#: resources/blocks/form/edit.jsx:376
 msgid "SubtleForms"
 msgstr ""
 
@@ -242,7 +242,7 @@ msgstr ""
 
 #: src/Admin/AdminMenu.php:843
 #: src/Admin/AdminMenu.php:991
-#: src/Frontend/Shortcode.php:82
+#: src/Frontend/Shortcode.php:85
 msgid "Form not found."
 msgstr ""
 
@@ -344,7 +344,7 @@ msgstr ""
 #: src/Api/ApiGuards.php:199
 #: src/Api/ApiGuards.php:212
 #: src/Api/DashboardApi.php:458
-#: src/Api/FunnelApi.php:102
+#: src/Api/FunnelApi.php:108
 #: src/Api/OnboardingApi.php:250
 #: src/Api/OnboardingApi.php:271
 #: src/Api/SettingsApi.php:261
@@ -460,12 +460,12 @@ msgid "Form not available"
 msgstr ""
 
 #: src/Api/FormsApi.php:437
-#: src/Api/FormsApi.php:602
-#: src/Api/FormsApi.php:896
-#: src/Api/FormsApi.php:999
-#: src/Api/FormsApi.php:1044
-#: src/Api/FormsApi.php:1089
-#: src/Api/FunnelApi.php:207
+#: src/Api/FormsApi.php:624
+#: src/Api/FormsApi.php:918
+#: src/Api/FormsApi.php:1021
+#: src/Api/FormsApi.php:1066
+#: src/Api/FormsApi.php:1111
+#: src/Api/FunnelApi.php:215
 #: src/Api/PaymentsApi.php:222
 #: src/Api/PublicSubmitApi.php:251
 #: src/Api/SpamApi.php:124
@@ -473,94 +473,93 @@ msgstr ""
 msgid "Form not found"
 msgstr ""
 
-#: src/Api/FormsApi.php:496
-#: src/Api/FormsApi.php:500
+#: src/Api/FormsApi.php:494
 msgid "Schema not available"
 msgstr ""
 
-#: src/Api/FormsApi.php:544
+#: src/Api/FormsApi.php:523
 msgid "Failed to load form schema"
 msgstr ""
 
-#: src/Api/FormsApi.php:659
+#: src/Api/FormsApi.php:681
 msgid "Schema validation failed"
 msgstr ""
 
-#: src/Api/FormsApi.php:675
+#: src/Api/FormsApi.php:697
 msgid "Schema was saved but could not be loaded back"
 msgstr ""
 
-#: src/Api/FormsApi.php:693
+#: src/Api/FormsApi.php:715
 msgid "Failed to save draft schema"
 msgstr ""
 
-#: src/Api/FormsApi.php:814
+#: src/Api/FormsApi.php:836
 msgid "This template requires a Pro license."
 msgstr ""
 
 #. translators: %s: reason the form could not be created
-#: src/Api/FormsApi.php:869
+#: src/Api/FormsApi.php:891
 #, php-format
 msgid "The form could not be created: %s"
 msgstr ""
 
-#: src/Api/FormsApi.php:931
+#: src/Api/FormsApi.php:953
 msgid "Cannot publish form: Failed to activate schema."
 msgstr ""
 
-#: src/Api/FormsApi.php:938
+#: src/Api/FormsApi.php:960
 msgid "Cannot publish form: No schema exists. Please save your form first."
 msgstr ""
 
-#: src/Api/FormsApi.php:942
+#: src/Api/FormsApi.php:964
 msgid "Cannot publish form: No active schema version. Please save and activate a schema first."
 msgstr ""
 
-#: src/Api/FormsApi.php:948
+#: src/Api/FormsApi.php:970
 msgid "Cannot publish form: Schema data is corrupt or invalid."
 msgstr ""
 
-#: src/Api/FormsApi.php:965
+#: src/Api/FormsApi.php:987
 msgid "Cannot publish form: Fix validation errors."
 msgstr ""
 
-#: src/Api/FormsApi.php:970
+#: src/Api/FormsApi.php:992
 msgid "Cannot publish form:"
 msgstr ""
 
-#: src/Api/FormsApi.php:1048
+#: src/Api/FormsApi.php:1070
 msgid "Form is not in the Trash"
 msgstr ""
 
-#: src/Api/FormsApi.php:1053
+#: src/Api/FormsApi.php:1075
 msgid "The form could not be restored. Please try again."
 msgstr ""
 
-#: src/Api/FormsApi.php:1092
+#: src/Api/FormsApi.php:1114
 msgid "Restore this form from the Trash before copying it."
 msgstr ""
 
 #. translators: %s: error message
-#: src/Api/FormsApi.php:1105
+#: src/Api/FormsApi.php:1127
 #, php-format
 msgid "The form could not be copied because its fields could not be read: %s"
 msgstr ""
 
 #. translators: %s: title of the form being copied
 #. translators: %s: form title
-#: src/Api/FormsApi.php:1116
+#: src/Api/FormsApi.php:1138
 #: src/Tools/Import/Importer.php:201
 #: resources/admin/components/FormsList.jsx:496
 #, php-format,js-format
 msgid "%s (copy)"
 msgstr ""
 
-#: src/Api/FormsApi.php:1135
+#: src/Api/FormsApi.php:1157
 msgid "The copy could not be created in the database. Please try again."
 msgstr ""
 
 #. translators: %s: error message
-#: src/Api/FormsApi.php:1146
+#: src/Api/FormsApi.php:1168
 #, php-format
 msgid "The form could not be copied: %s"
 msgstr ""
@@ -923,7 +922,7 @@ msgstr ""
 msgid "The custom JSON body is not valid: %s"
 msgstr ""
 
-#: src/Blocks/SubtleFormsBlock.php:109
+#: src/Blocks/SubtleFormsBlock.php:110
 msgid "This form is not available or has been unpublished."
 msgstr ""
 
@@ -1187,7 +1186,7 @@ msgid "This form has reached its maximum number of entries."
 msgstr ""
 
 #: src/Engine/SpamProtection.php:290
-#: resources/frontend/components/FormRenderer.jsx:1227
+#: resources/frontend/components/FormRenderer.jsx:1252
 msgid "Leave this field empty"
 msgstr ""
 
@@ -3697,17 +3696,17 @@ msgid "Show prices next to options"
 msgstr ""
 
 #: src/Frontend/FrontendAssets.php:143
-#: resources/frontend/components/FormRenderer.jsx:923
-#: resources/frontend/components/FormRenderer.jsx:1036
-#: resources/frontend/components/FormRenderer.jsx:1086
+#: resources/frontend/components/FormRenderer.jsx:944
+#: resources/frontend/components/FormRenderer.jsx:1057
+#: resources/frontend/components/FormRenderer.jsx:1107
 msgid "Thank you! Your submission has been received."
 msgstr ""
 
-#: src/Frontend/Shortcode.php:76
+#: src/Frontend/Shortcode.php:79
 msgid "Invalid form ID."
 msgstr ""
 
-#: src/Frontend/Shortcode.php:87
+#: src/Frontend/Shortcode.php:90
 msgid "This form is not published yet."
 msgstr ""
 
@@ -3753,7 +3752,7 @@ msgid "The coupon could not be saved."
 msgstr ""
 
 #: src/Payments/CouponsRepository.php:280
-#: resources/frontend/components/FormRenderer.jsx:557
+#: resources/frontend/components/FormRenderer.jsx:578
 msgid "This coupon code is not valid."
 msgstr ""
 
@@ -3926,7 +3925,7 @@ msgstr ""
 
 #: src/Support/Captcha/CaptchaManager.php:313
 #: resources/frontend/components/ConversationalFormRenderer.jsx:277
-#: resources/frontend/components/FormRenderer.jsx:701
+#: resources/frontend/components/FormRenderer.jsx:722
 msgid "CAPTCHA verification failed. Please try again."
 msgstr ""
 
@@ -5301,7 +5300,7 @@ msgstr ""
 #: resources/admin/pages/ToolsPage.jsx:309
 #: resources/admin/pages/ToolsPage.jsx:498
 #: resources/admin/pages/ToolsPage.jsx:518
-#: resources/frontend/components/FormRenderer.jsx:1214
+#: resources/frontend/components/FormRenderer.jsx:1239
 msgid "Form"
 msgstr ""
 
@@ -6523,7 +6522,7 @@ msgstr ""
 
 #: resources/admin/components/builder/ConversationalCanvas.jsx:239
 #: resources/admin/pages/ToolsPage.jsx:620
-#: resources/frontend/components/FormRenderer.jsx:1290
+#: resources/frontend/components/FormRenderer.jsx:1315
 msgid "Previous"
 msgstr ""
 
@@ -6543,7 +6542,7 @@ msgstr ""
 #: resources/admin/components/OnboardingWizard.jsx:606
 #: resources/admin/pages/ToolsPage.jsx:627
 #: resources/frontend/components/ConversationalFormRenderer.jsx:687
-#: resources/frontend/components/FormRenderer.jsx:1300
+#: resources/frontend/components/FormRenderer.jsx:1325
 msgid "Next"
 msgstr ""
 
@@ -6599,7 +6598,7 @@ msgstr ""
 #: resources/admin/components/builder/FieldInspector.jsx:416
 #: resources/admin/components/builder/FormSettings.jsx:201
 #: resources/admin/components/builder/FormSettings.jsx:203
-#: resources/blocks/form/edit.jsx:362
+#: resources/blocks/form/edit.jsx:335
 msgid "Advanced"
 msgstr ""
 
@@ -7012,7 +7011,7 @@ msgstr ""
 
 #: resources/admin/components/builder/FormBehaviorPanels.jsx:118
 #: resources/frontend/components/ConversationalFormRenderer.jsx:532
-#: resources/frontend/components/FormRenderer.jsx:1320
+#: resources/frontend/components/FormRenderer.jsx:1345
 msgid "Submit"
 msgstr ""
 
@@ -7273,7 +7272,7 @@ msgid "Builder width and the internal name used by developers."
 msgstr ""
 
 #: resources/admin/components/builder/FormSettings.jsx:216
-#: resources/blocks/form/edit.jsx:318
+#: resources/blocks/form/edit.jsx:291
 msgid "Form Settings"
 msgstr ""
 
@@ -8192,6 +8191,7 @@ msgstr ""
 #: resources/admin/components/form-preview/FormPreviewModal.jsx:27
 #: resources/admin/pages/CreateFormPage.jsx:340
 #: resources/admin/utils/submissionStatus.js:19
+#: resources/blocks/form/edit.jsx:211
 msgid "Preview"
 msgstr ""
 
@@ -8703,7 +8703,7 @@ msgstr ""
 #: resources/admin/components/DataTable.jsx:440
 #: resources/admin/components/DataTable.jsx:451
 #: resources/admin/components/DataTable.jsx:554
-#: resources/admin/components/tools/SiteImport.jsx:223
+#: resources/admin/components/tools/SiteImport.jsx:229
 msgid "Select all"
 msgstr ""
 
@@ -11119,7 +11119,7 @@ msgstr ""
 
 #. translators: %d: number of fields
 #: resources/admin/components/tools/SiteImport.jsx:39
-#: resources/admin/components/tools/SiteImport.jsx:238
+#: resources/admin/components/tools/SiteImport.jsx:244
 #, js-format
 msgid "%d field"
 msgid_plural "%d fields"
@@ -11146,103 +11146,103 @@ msgid_plural "%d notes"
 msgstr[0] ""
 msgstr[1] ""
 
-#: resources/admin/components/tools/SiteImport.jsx:163
+#: resources/admin/components/tools/SiteImport.jsx:169
 msgid "From this site"
 msgstr ""
 
-#: resources/admin/components/tools/SiteImport.jsx:164
+#: resources/admin/components/tools/SiteImport.jsx:170
 msgid "Copy forms you made with Contact Form 7, Gravity Forms or Fluent Forms. The other plugin does not need to be active."
 msgstr ""
 
-#: resources/admin/components/tools/SiteImport.jsx:169
+#: resources/admin/components/tools/SiteImport.jsx:175
 msgid "Forms are copied as drafts with their fields, required rules, choices, email notifications and thank-you message. Entries and payment settings are not imported, no emails are sent, and your original forms are not changed."
 msgstr ""
 
-#: resources/admin/components/tools/SiteImport.jsx:175
+#: resources/admin/components/tools/SiteImport.jsx:181
 msgid "No Contact Form 7, Gravity Forms or Fluent Forms forms were found on this site."
 msgstr ""
 
-#: resources/admin/components/tools/SiteImport.jsx:178
+#: resources/admin/components/tools/SiteImport.jsx:184
 msgid "Plugin"
 msgstr ""
 
-#: resources/admin/components/tools/SiteImport.jsx:192
+#: resources/admin/components/tools/SiteImport.jsx:198
 msgid "No forms found"
 msgstr ""
 
 #. translators: %d: number of forms
-#: resources/admin/components/tools/SiteImport.jsx:195
+#: resources/admin/components/tools/SiteImport.jsx:201
 #, js-format
 msgid "%d form"
 msgid_plural "%d forms"
 msgstr[0] ""
 msgstr[1] ""
 
-#: resources/admin/components/tools/SiteImport.jsx:199
+#: resources/admin/components/tools/SiteImport.jsx:205
 msgid "plugin not active"
 msgstr ""
 
 #. translators: %s: plugin name
-#: resources/admin/components/tools/SiteImport.jsx:214
+#: resources/admin/components/tools/SiteImport.jsx:220
 #, js-format
 msgid "Forms in %s"
 msgstr ""
 
-#: resources/admin/components/tools/SiteImport.jsx:243
+#: resources/admin/components/tools/SiteImport.jsx:249
 msgid "Imported before"
 msgstr ""
 
 #. translators: 1: forms done, 2: forms to import
-#: resources/admin/components/tools/SiteImport.jsx:258
+#: resources/admin/components/tools/SiteImport.jsx:264
 #, js-format
 msgid "Importing %1$d of %2$d"
 msgstr ""
 
-#: resources/admin/components/tools/SiteImport.jsx:269
+#: resources/admin/components/tools/SiteImport.jsx:275
 msgid "Import results"
 msgstr ""
 
 #. translators: %d: number of forms
-#: resources/admin/components/tools/SiteImport.jsx:294
+#: resources/admin/components/tools/SiteImport.jsx:300
 #, js-format
 msgid "Import %d form"
 msgid_plural "Import %d forms"
 msgstr[0] ""
 msgstr[1] ""
 
-#: resources/admin/components/tools/SiteImport.jsx:297
+#: resources/admin/components/tools/SiteImport.jsx:303
 msgid "Import"
 msgstr ""
 
-#: resources/admin/components/tools/SiteImport.jsx:299
+#: resources/admin/components/tools/SiteImport.jsx:305
 msgid "Entries are not imported in this version."
 msgstr ""
 
-#: resources/admin/components/tools/SiteImport.jsx:314
+#: resources/admin/components/tools/SiteImport.jsx:320
 msgid "Open in the builder"
 msgstr ""
 
-#: resources/admin/components/tools/SiteImport.jsx:320
+#: resources/admin/components/tools/SiteImport.jsx:326
 msgid "Show the report"
 msgstr ""
 
-#: resources/admin/components/tools/SiteImport.jsx:341
+#: resources/admin/components/tools/SiteImport.jsx:347
 msgid "This form was imported before as"
 msgstr ""
 
-#: resources/admin/components/tools/SiteImport.jsx:343
+#: resources/admin/components/tools/SiteImport.jsx:349
 msgid "Import again as a copy?"
 msgstr ""
 
-#: resources/admin/components/tools/SiteImport.jsx:348
+#: resources/admin/components/tools/SiteImport.jsx:354
 msgid "Import a copy"
 msgstr ""
 
-#: resources/admin/components/tools/SiteImport.jsx:351
+#: resources/admin/components/tools/SiteImport.jsx:357
 msgid "Keep the one I have"
 msgstr ""
 
-#: resources/admin/components/tools/SiteImport.jsx:361
+#: resources/admin/components/tools/SiteImport.jsx:367
 msgid "This form could not be imported."
 msgstr ""
 
@@ -13758,87 +13758,91 @@ msgstr ""
 msgid "Turnstile secret key cannot exceed 100 characters"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:150
+#: resources/blocks/form/edit.jsx:136
 msgid "Form not available or has been unpublished"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:217
+#: resources/blocks/form/edit.jsx:160
 msgid "Form renderer not loaded. Frontend preview unavailable."
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:229
+#: resources/blocks/form/edit.jsx:193
 msgid "Loading form preview..."
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:293
+#: resources/blocks/form/edit.jsx:262
 msgid "Select a form"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:320
+#: resources/blocks/form/edit.jsx:274
+msgid "Form's own style"
+msgstr ""
+
+#: resources/blocks/form/edit.jsx:293
 msgid "Select Form"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:330
+#: resources/blocks/form/edit.jsx:303
 msgid "Show form title"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:335
+#: resources/blocks/form/edit.jsx:308
 msgid "Show form description"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:341
+#: resources/blocks/form/edit.jsx:314
 msgid "Form Styling"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:343
+#: resources/blocks/form/edit.jsx:316
 msgid "Form Theme"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:347
-msgid "Applies a built-in theme. Updates the preview instantly."
+#: resources/blocks/form/edit.jsx:320
+msgid "Keeps the form's own styling, or applies a built-in theme instead. Updates the preview instantly."
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:358
+#: resources/blocks/form/edit.jsx:331
 msgid "Reset to defaults"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:364
+#: resources/blocks/form/edit.jsx:337
 msgid "Enable AJAX submission"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:367
+#: resources/blocks/form/edit.jsx:340
 msgid "Submit the form without reloading the page."
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:374
+#: resources/blocks/form/edit.jsx:347
 msgid "Tab Index"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:382
+#: resources/blocks/form/edit.jsx:355
 msgid "Field Values"
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:385
+#: resources/blocks/form/edit.jsx:358
 msgid "One field per line, as key=value pairs, to prefill the form."
 msgstr ""
 
-#: resources/blocks/form/edit.jsx:404
+#: resources/blocks/form/edit.jsx:377
 msgid "Select a published form to embed"
 msgstr ""
 
 #: resources/frontend/components/ConversationalFormRenderer.jsx:243
-#: resources/frontend/components/FormRenderer.jsx:666
+#: resources/frontend/components/FormRenderer.jsx:687
 msgid "Save the form first, then submit the preview."
 msgstr ""
 
 #: resources/frontend/components/ConversationalFormRenderer.jsx:368
-#: resources/frontend/components/FormRenderer.jsx:946
+#: resources/frontend/components/FormRenderer.jsx:967
 #: resources/frontend/utils/classicResult.js:59
 msgid "Submission failed."
 msgstr ""
 
 #: resources/frontend/components/ConversationalFormRenderer.jsx:372
-#: resources/frontend/components/FormRenderer.jsx:951
+#: resources/frontend/components/FormRenderer.jsx:972
 msgid "Network error. Please try again."
 msgstr ""
 
@@ -14145,7 +14149,7 @@ msgid "Secure card fields from your payment gateway appear here on the live form
 msgstr ""
 
 #: resources/frontend/components/fields/Payments.jsx:471
-#: resources/frontend/components/FormRenderer.jsx:816
+#: resources/frontend/components/FormRenderer.jsx:837
 msgid "Online payment is not available right now."
 msgstr ""
 
@@ -14208,45 +14212,45 @@ msgstr ""
 msgid "This form couldn’t load. Please refresh the page and try again."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:58
-#: resources/frontend/components/FormRenderer.jsx:1061
+#: resources/frontend/components/FormRenderer.jsx:59
+#: resources/frontend/components/FormRenderer.jsx:1082
 msgid "Loading form..."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:134
-#: resources/frontend/components/FormRenderer.jsx:143
+#: resources/frontend/components/FormRenderer.jsx:155
+#: resources/frontend/components/FormRenderer.jsx:164
 msgid "Failed to load form."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:561
+#: resources/frontend/components/FormRenderer.jsx:582
 msgid "The code could not be checked. Please try again."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:835
+#: resources/frontend/components/FormRenderer.jsx:856
 msgid "Your payment could not be completed."
 msgstr ""
 
 #. translators: %s: URL
-#: resources/frontend/components/FormRenderer.jsx:919
+#: resources/frontend/components/FormRenderer.jsx:940
 #, js-format
 msgid "Visitors will be sent to %s."
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:1114
+#: resources/frontend/components/FormRenderer.jsx:1135
 msgid "Submit another response"
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:1310
+#: resources/frontend/components/FormRenderer.jsx:1335
 msgid "Submitting…"
 msgstr ""
 
 #. translators: %s: order total
-#: resources/frontend/components/FormRenderer.jsx:1315
+#: resources/frontend/components/FormRenderer.jsx:1340
 #, js-format
 msgid "Pay %s"
 msgstr ""
 
-#: resources/frontend/components/FormRenderer.jsx:1319
+#: resources/frontend/components/FormRenderer.jsx:1344
 msgid "Continue to checkout"
 msgstr ""
 
