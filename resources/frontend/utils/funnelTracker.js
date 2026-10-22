@@ -93,10 +93,20 @@ export function trackFunnel(container, formId, config = {}, win = window) {
 
   const beacon = (params) => {
     try {
-      const body = new win.URLSearchParams(params);
+      const encoded = new win.URLSearchParams(params);
+      const body = encoded.toString();
+      // sendBeacon with a typed Blob so the body is form-urlencoded; a bare
+      // URLSearchParams is often sent as text/plain and WP REST ignores it.
+      if (typeof nav.sendBeacon === 'function') {
+        const payload =
+          typeof win.Blob === 'function'
+            ? new win.Blob([body], { type: 'application/x-www-form-urlencoded' })
+            : encoded;
+        if (nav.sendBeacon(url, payload)) {
+          return;
+        }
+      }
       if (typeof win.fetch === 'function') {
-        // Prefer fetch keepalive so the body is form-urlencoded (WP REST
-        // parses it) and Playwright can observe the request.
         win
           .fetch(url, {
             method: 'POST',
@@ -106,14 +116,6 @@ export function trackFunnel(container, formId, config = {}, win = window) {
             body,
           })
           .catch(() => {});
-        return;
-      }
-      if (typeof nav.sendBeacon === 'function') {
-        const payload =
-          typeof win.Blob === 'function'
-            ? new win.Blob([body.toString()], { type: 'application/x-www-form-urlencoded' })
-            : body;
-        nav.sendBeacon(url, payload);
       }
     } catch (e) {
       // Statistics must never interfere with the form.
