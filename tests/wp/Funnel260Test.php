@@ -232,6 +232,31 @@ final class Funnel260Test extends TestCase {
 		$this->assertStringNotContainsString( '198.51.100.7', implode( ' ', $keys ), 'The bucket name holds a hash, not the address.' );
 	}
 
+	public function test_made_up_form_ids_create_no_rate_limit_records(): void {
+		global $wpdb;
+		$count  = static function () use ( $wpdb ): int {
+			return (int) $wpdb->get_var( "SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '%subtleforms_rl_funnel_%'" );
+		};
+		$before = $count();
+		for ( $i = 0; $i < 50; $i++ ) {
+			$this->assertSame( 404, $this->beacon( 900000 + $i, array( 'a' => 'drop', 'f' => 'name' ) )['status'] );
+		}
+		$this->assertSame( $before, $count(), 'Unknown forms never reach the rate limiter.' );
+	}
+
+	public function test_one_address_is_limited_across_all_forms(): void {
+		$forms = array( $this->form(), $this->form(), $this->form(), $this->form() );
+		for ( $f = 0; $f < 3; $f++ ) {
+			for ( $i = 0; $i < FunnelApi::BEACON_LIMIT; $i++ ) {
+				$this->assertSame( 200, $this->beacon( $forms[ $f ], array( 'a' => 'drop', 'f' => 'name' ) )['status'] );
+			}
+		}
+		$this->assertSame( 3 * FunnelApi::BEACON_LIMIT, FunnelApi::IP_LIMIT );
+		$this->assertSame( 429, $this->beacon( $forms[3], array( 'a' => 'drop', 'f' => 'name' ) )['status'], 'The address is over its all-forms limit.' );
+		$_SERVER['REMOTE_ADDR'] = '198.51.100.8';
+		$this->assertSame( 200, $this->beacon( $forms[3], array( 'a' => 'drop', 'f' => 'name' ) )['status'] );
+	}
+
 	public function test_move_and_undo_correct_an_earlier_report_without_going_below_zero(): void {
 		$formId = $this->form();
 		$this->beacon( $formId, array( 'a' => 'drop', 'f' => 'name', 's' => '0' ) );

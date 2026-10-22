@@ -40,6 +40,12 @@ final class FunnelApi {
 	/** Rate limit window, in seconds. */
 	const BEACON_WINDOW = 600;
 
+	/** Reports one network address may send for all forms per window. */
+	const IP_LIMIT = 60;
+
+	/** Window of the all-forms limit, in seconds. */
+	const IP_WINDOW = 600;
+
 	/** Date range presets offered in the report. */
 	const PRESETS = array( 7, 30, 90 );
 
@@ -133,19 +139,21 @@ final class FunnelApi {
 			return new WP_REST_Response( array( 'tracked' => false ), 200 );
 		}
 
-		// Rate limit by a salted hash of the address and the form; the
-		// address itself is never stored.
-		$ip     = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
-		$bucket = self::bucket( $ip, $formId );
-		$result = RateLimiter::check( $bucket, self::BEACON_LIMIT, self::BEACON_WINDOW );
-		if ( empty( $result['allowed'] ) ) {
-			return new WP_REST_Response( array( 'tracked' => false ), 429 );
-		}
-
+		// The form comes first: a made-up form ID must not create a rate
+		// limit record of its own.
 		$repo = new FormsRepository();
 		$form = $repo->find( $formId );
 		if ( ! $form || ( $form['status'] ?? '' ) !== 'published' ) {
 			return new WP_REST_Response( array( 'tracked' => false ), 404 );
+		}
+
+		// Rate limit by a salted hash of the address, for any form and for
+		// this form; the address itself is never stored.
+		$ip      = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+		$overall = RateLimiter::check( self::bucket( $ip, 0 ), self::IP_LIMIT, self::IP_WINDOW );
+		$result  = empty( $overall['allowed'] ) ? $overall : RateLimiter::check( self::bucket( $ip, $formId ), self::BEACON_LIMIT, self::BEACON_WINDOW );
+		if ( empty( $result['allowed'] ) ) {
+			return new WP_REST_Response( array( 'tracked' => false ), 429 );
 		}
 
 		try {
