@@ -707,3 +707,10 @@
 }
 
 /*! inherit: keep-end */
+
+.subtleforms-success-link {
+	color: var(--subtleforms-color-primary, currentColor);
+	text-decoration: underline;
+	text-underline-offset: 2px;
+	overflow-wrap: anywhere;
+}

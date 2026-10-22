@@ -31,6 +31,8 @@ import {
 
 import { restFetch, restUrl, restNonce } from '../utils/restFetch';
 import { fillConfirmation } from '../../shared/confirmationTags';
+import { messageParagraphs } from '../../shared/safeLinks';
+import ConfirmationText from './ConfirmationText';
 import { classicFieldInputs } from '../utils/classicFields';
 import { classicOutcome, forgetClassicToken } from '../utils/classicResult';
 import { announceSubmitted } from '../utils/submitted';
@@ -929,19 +931,23 @@ export default function FormRenderer({
             return;
           }
 
+          const ownMessage = conf.type === 'message' && conf.message;
+          const message = ownMessage
+            ? merge(conf.message)
+            : redirectTo
+            ? sprintf(
+                /* translators: %s: URL */
+                __('Visitors will be sent to %s.', 'subtleforms'),
+                redirectTo
+              )
+            : window.subtleformsFrontend?.successMessage ||
+              __('Thank you! Your submission has been received.', 'subtleforms');
           setConfirmationView({
             title: conf.type === 'message' ? merge(conf.title) : '',
-            message:
-              conf.type === 'message' && conf.message
-                ? merge(conf.message)
-                : redirectTo
-                ? sprintf(
-                    /* translators: %s: URL */
-                    __('Visitors will be sent to %s.', 'subtleforms'),
-                    redirectTo
-                  )
-                : window.subtleformsFrontend?.successMessage ||
-                  __('Thank you! Your submission has been received.', 'subtleforms'),
+            message,
+            // Links in the message are found in your own text first, then the
+            // answers are filled in, so an answer can never make a link.
+            paragraphs: messageParagraphs(ownMessage ? conf.message : message, ownMessage ? merge : undefined),
             allowAnother: !!conf.allowAnother,
           });
           setSubmitSuccess(true);
@@ -1041,20 +1047,22 @@ export default function FormRenderer({
     }
     if (outcome.ok) {
       const conf = outcome.confirmation || {};
-      const merge = (text) =>
+      const merge = (text, encode = false) =>
         fillConfirmation(text, {
           values: { ...flattenToPathMap(outcome.values), ...outcome.values },
           formTitle: schema?.metadata?.title || '',
           entryId: outcome.submissionId || '',
-          encode: false,
+          encode,
         });
+      const ownMessage = conf.type === 'message' && conf.message;
+      const message = ownMessage
+        ? merge(conf.message)
+        : window.subtleformsFrontend?.successMessage ||
+          __('Thank you! Your submission has been received.', 'subtleforms');
       setConfirmationView({
         title: conf.type === 'message' ? merge(conf.title) : '',
-        message:
-          conf.type === 'message' && conf.message
-            ? merge(conf.message)
-            : window.subtleformsFrontend?.successMessage ||
-              __('Thank you! Your submission has been received.', 'subtleforms'),
+        message,
+        paragraphs: messageParagraphs(ownMessage ? conf.message : message, ownMessage ? merge : undefined),
         allowAnother: !!conf.allowAnother,
       });
       setSubmitSuccess(true);
@@ -1119,11 +1127,7 @@ export default function FormRenderer({
             </svg>
           </span>
           {view.title && <h3>{view.title}</h3>}
-          {String(view.message)
-            .split(/\n{2,}/)
-            .map((para, i) => (
-              <p key={i}>{para}</p>
-            ))}
+          <ConfirmationText paragraphs={view.paragraphs || messageParagraphs(String(view.message))} />
           {view.allowAnother && (
             <button
               type='button'

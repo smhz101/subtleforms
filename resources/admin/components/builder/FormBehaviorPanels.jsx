@@ -71,7 +71,7 @@ export function ConfirmationPanel({ schema, onMetadata, isReadOnly }) {
             onChange={(v) => set('message', v)}
             rows={3}
             disabled={isReadOnly}
-            help={
+            help={`${
               keys.length
                 ? sprintf(
                     /* translators: %s: example merge tags */
@@ -79,7 +79,7 @@ export function ConfirmationPanel({ schema, onMetadata, isReadOnly }) {
                     keys.map((k) => `{${k}}`).join(' ')
                   )
                 : __('Insert answers with merge tags like {email}.', 'subtleforms')
-            }
+            } ${__('Add a link with [text](https://example.com) or a web address.', 'subtleforms')}`}
           />
           <ToggleControl
             __nextHasNoMarginBottom

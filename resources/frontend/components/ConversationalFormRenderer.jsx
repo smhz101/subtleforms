@@ -22,6 +22,8 @@ import { validateFields } from '../utils/fieldValidation';
 
 import { restFetch } from '../utils/restFetch';
 import { announceSubmitted } from '../utils/submitted';
+import { messageParagraphs } from '../../shared/safeLinks';
+import ConfirmationText from './ConfirmationText';
 
 /**
  * ConversationalFormRenderer - Renders form one question at a time
@@ -336,11 +338,12 @@ export default function ConversationalFormRenderer({
 
         if (response.ok && result?.data?.success) {
           const conf = result.data.confirmation || null;
-          const fill = (text) =>
+          const fill = (text, encode = false) =>
             String(text || '').replace(/\{([\w.-]+)\}/g, (m, key) => {
               const raw = payload[key];
               if (raw === undefined || raw === null) return '';
-              return Array.isArray(raw) ? raw.join(', ') : String(raw);
+              const str = Array.isArray(raw) ? raw.join(', ') : String(raw);
+              return encode ? encodeURIComponent(str) : str;
             });
           if (conf?.type === 'redirect' && conf.redirectUrl && !preview) {
             window.location.assign(
@@ -352,7 +355,12 @@ export default function ConversationalFormRenderer({
           }
           setConfirmation(
             conf && conf.type !== 'redirect'
-              ? { title: fill(conf.title), message: fill(conf.message) }
+              ? {
+                  title: fill(conf.title),
+                  message: fill(conf.message),
+                  // Links are found in your own text first, then the answers are filled in.
+                  paragraphs: messageParagraphs(conf.message, fill),
+                }
               : null
           );
           setSubmitSuccess(true);
@@ -400,13 +408,17 @@ export default function ConversationalFormRenderer({
         <div className='subtleforms-conversational-success'>
           <div className='subtleforms-success-icon'>✓</div>
           <h2>{confirmation?.title || __('Thank you!', 'subtleforms')}</h2>
-          <p>
-            {confirmation?.message ||
-              __(
-                'Your response has been submitted successfully.',
-                'subtleforms'
-              )}
-          </p>
+          {confirmation?.paragraphs && confirmation.message ? (
+            <ConfirmationText paragraphs={confirmation.paragraphs} />
+          ) : (
+            <p>
+              {confirmation?.message ||
+                __(
+                  'Your response has been submitted successfully.',
+                  'subtleforms'
+                )}
+            </p>
+          )}
         </div>
       </div>
     );
