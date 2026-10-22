@@ -4,6 +4,11 @@ This file keeps the full release history. readme.txt lists only the latest versi
 
 == Changelog ==
 
+= 2.6.1 - 2026-10-23 =
+* Change: A form on your site now appears sooner and without a gap: its fields and labels are printed in the page and drawn from there instead of being fetched after the page loads, and a plain outline of the form is shown until the form is ready.
+* Fix: The SubtleForms block now keeps the form's own styling (colours, theme and layout) both on your site and in the editor preview, the preview is marked and cannot be used, and a theme chosen in the block still overrides it.
+* Fix: The "Rows per page" label in the list footers now sits on one line with its select instead of above it.
+
 = 2.6.0 - 2026-10-22 =
 * New: A form funnel on the Reports screen shows how many people saw, started and sent each form and the last field people touched before leaving without sending it, with a plain suggestion for each field; it keeps only daily totals per form, sets no cookies, stores no answers or IP addresses, skips robots and people who manage SubtleForms, and follows the Count form views switch. Form views are no longer counted for people who manage SubtleForms either, so Seen and Started count the same visitors.
 * New: Settings, Tools, Migrate finds the forms you made with Contact Form 7, Gravity Forms or Fluent Forms on this site and imports the ones you tick as drafts, with their fields, required rules, choices, email notifications and thank-you message, and a report of anything that could not be copied; entries and payment settings are not imported and the original forms are not changed. Email notifications have a Reply-To setting that takes one address or a field tag such as {field:email}, and imported forms keep their Reply-To.

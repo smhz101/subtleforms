@@ -4,7 +4,7 @@ Tags: form builder, contact form, forms, multi-step form, file upload
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.6.0
+Stable tag: 2.6.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -132,6 +132,11 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 6. The form preview with appearance presets.
 
 == Changelog ==
+
+= 2.6.1 - 2026-10-23 =
+* Change: A form on your site now appears sooner and without a gap: its fields and labels are printed in the page and drawn from there instead of being fetched after the page loads, and a plain outline of the form is shown until the form is ready.
+* Fix: The SubtleForms block now keeps the form's own styling (colours, theme and layout) both on your site and in the editor preview, the preview is marked and cannot be used, and a theme chosen in the block still overrides it.
+* Fix: The "Rows per page" label in the list footers now sits on one line with its select instead of above it.
 
 = 2.6.0 - 2026-10-22 =
 * New: A form funnel on the Reports screen shows how many people saw, started and sent each form and the last field people touched before leaving without sending it, with a plain suggestion for each field; it keeps only daily totals per form, sets no cookies, stores no answers or IP addresses, skips robots and people who manage SubtleForms, and follows the Count form views switch. Form views are no longer counted for people who manage SubtleForms either, so Seen and Started count the same visitors.
@@ -296,6 +301,9 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 The full history is in changelog.txt in the plugin folder.
 
 == Upgrade Notice ==
+
+= 2.6.1 =
+Forms appear faster, and the SubtleForms block shows the form with its own style in the editor and on the site.
 
 = 2.6.0 =
 Spam protection (the hidden trap field and the too-fast check) is on for new forms only. Nothing changes for your existing forms unless you accept the offer on the SubtleForms dashboard to turn it on for all of them.
