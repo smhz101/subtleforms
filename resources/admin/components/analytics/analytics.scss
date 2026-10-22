@@ -1,0 +1,339 @@
+// Form analytics (2.1): Dashboard panel and Forms list column.
+//
+// Two series on one count axis. Views and submissions use the first two
+// slots of the validated categorical palette (blue, orange): all checks pass
+// on the light surface (CVD ΔE 24.7, normal ΔE 33.6, contrast >= 3:1).
+
+.sf-views-chart,
+.sf-analytics-panel,
+.sf-perf {
+	--sf-series-views: #2a78d6;
+	--sf-series-subs: #eb6834;
+}
+
+.sf-views-chart {
+	&__legend {
+		display: flex;
+		gap: 16px;
+		margin: 0 0 12px;
+		padding: 0;
+		list-style: none;
+		font-size: 12px;
+		color: var(--sf-text-secondary);
+
+		li {
+			display: inline-flex;
+			align-items: center;
+			gap: 6px;
+			margin: 0;
+		}
+	}
+
+	&__swatch {
+		display: inline-block;
+		width: 10px;
+		height: 10px;
+		border-radius: 2px;
+
+		&--views { background: var(--sf-series-views); }
+		&--subs { background: var(--sf-series-subs); }
+	}
+
+	// Columns hold two bars side by side, 2px apart.
+	.sf-trend__col.sf-views-chart__col {
+		gap: 2px;
+		padding: 0 2px;
+	}
+
+	&__bar {
+		display: block;
+		flex: 1 1 0;
+		max-width: 12px;
+		border-radius: 4px 4px 0 0;
+		transition: opacity var(--sf-transition-fast);
+
+		&--views { background: var(--sf-series-views); }
+		&--subs { background: var(--sf-series-subs); }
+
+		.sf-trend__bars:hover .sf-trend__col:not(.is-active) & {
+			opacity: 0.55;
+		}
+	}
+}
+
+.sf-analytics-panel {
+	position: relative;
+
+	.sf-panel__header {
+		align-items: flex-start;
+	}
+
+	&__select {
+		min-width: 180px;
+
+		.components-base-control__field { margin-bottom: 0; }
+	}
+
+	&__totals {
+		display: grid;
+		grid-template-columns: repeat(3, minmax(0, 1fr));
+		gap: 12px;
+		margin: 0 0 20px;
+
+		div {
+			padding: 12px 14px;
+			border: 1px solid var(--sf-border-subtle);
+			border-radius: var(--sf-radius-md);
+			background: var(--sf-bg-subtle);
+		}
+
+		dt {
+			margin: 0 0 4px;
+			font-size: 12px;
+			color: var(--sf-text-muted);
+		}
+
+		dd {
+			margin: 0;
+			font-size: var(--sf-text-lg, 18px);
+			font-weight: var(--sf-weight-semibold);
+			font-variant-numeric: tabular-nums;
+			color: var(--sf-text);
+		}
+	}
+
+	&__loading {
+		display: flex;
+		justify-content: center;
+		padding: 60px 0;
+	}
+
+	&__empty {
+		margin: 12px 0 0;
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-muted);
+	}
+}
+
+// Forms list: "Performance" cell.
+.sf-perf {
+	display: inline-flex;
+	flex-direction: column;
+	gap: 2px;
+	font-size: 12px;
+	line-height: 1.35;
+	color: var(--sf-text-secondary);
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+
+	&__rate {
+		font-size: var(--sf-text-sm);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
+	}
+
+	&__meter {
+		display: block;
+		width: 64px;
+		height: 4px;
+		margin-top: 2px;
+		overflow: hidden;
+		border-radius: 2px;
+		background: var(--sf-bg-muted);
+
+		span {
+			display: block;
+			height: 100%;
+			border-radius: 2px;
+			background: var(--sf-series-subs);
+		}
+	}
+
+}
+
+// Form funnel (2.6.0): Reports screen. One flat colour per stage from the
+// same palette; the drop-off bars use the muted orange of submissions.
+.sf-funnel {
+	--sf-funnel-seen: var(--sf-series-views);
+	--sf-funnel-started: var(--sf-blue-400);
+	--sf-funnel-submitted: var(--sf-series-subs);
+
+	&__controls {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 12px;
+	}
+
+	&__range {
+		display: inline-flex;
+		gap: 4px;
+	}
+
+	&__notice {
+		margin: 0 0 16px;
+		padding: 10px 14px;
+		border: 1px solid var(--sf-info-border);
+		border-radius: var(--sf-radius-md);
+		background: var(--sf-info-bg);
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text);
+
+		p { margin: 0; }
+	}
+
+	&__summary {
+		margin: 0 0 16px;
+		font-size: var(--sf-text-md, 15px);
+		font-weight: var(--sf-weight-medium);
+		color: var(--sf-text);
+	}
+
+	&__stages,
+	&__drops,
+	&__steps {
+		margin: 0;
+		padding: 0;
+		list-style: none;
+	}
+
+	&__stage {
+		display: grid;
+		grid-template-columns: 88px minmax(0, 1fr) 64px 96px;
+		align-items: center;
+		gap: 12px;
+		margin: 0 0 10px;
+		font-size: var(--sf-text-sm);
+		font-variant-numeric: tabular-nums;
+	}
+
+	&__stage-label {
+		color: var(--sf-text-secondary);
+	}
+
+	&__stage-count {
+		font-weight: var(--sf-weight-semibold);
+		text-align: end;
+		color: var(--sf-text);
+	}
+
+	&__stage-share {
+		font-size: 12px;
+		color: var(--sf-text-muted);
+	}
+
+	&__track {
+		display: block;
+		height: 12px;
+		overflow: hidden;
+		border-radius: var(--sf-radius-sm);
+		background: var(--sf-bg-muted);
+
+		&--drop {
+			height: 6px;
+			margin: 6px 0 0;
+		}
+	}
+
+	&__fill {
+		display: block;
+		height: 100%;
+		border-radius: inherit;
+		background: var(--sf-funnel-submitted);
+
+		.sf-funnel__stage--seen & { background: var(--sf-funnel-seen); }
+		.sf-funnel__stage--started & { background: var(--sf-funnel-started); }
+	}
+
+	&__completion {
+		margin: 4px 0 20px;
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-secondary);
+	}
+
+	&__heading {
+		margin: 0 0 10px;
+		font-size: var(--sf-text-sm);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
+	}
+
+	&__drop {
+		margin: 0;
+		padding: 12px 0;
+		border-top: 1px solid var(--sf-border-subtle);
+
+		&:first-child { border-top: 0; padding-top: 0; }
+	}
+
+	&__drop-head,
+	&__steps li {
+		display: flex;
+		flex-wrap: wrap;
+		justify-content: space-between;
+		gap: 4px 12px;
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text);
+	}
+
+	&__drop-name {
+		font-weight: var(--sf-weight-medium);
+	}
+
+	&__drop-count {
+		color: var(--sf-text-secondary);
+		font-variant-numeric: tabular-nums;
+	}
+
+	&__hint {
+		margin: 6px 0 0;
+		font-size: 12px;
+		line-height: 1.5;
+		color: var(--sf-text-secondary);
+	}
+
+	&__steps {
+		margin-bottom: 16px;
+
+		li {
+			margin: 0;
+			padding: 8px 0;
+			border-top: 1px solid var(--sf-border-subtle);
+
+			&:first-child { border-top: 0; }
+		}
+	}
+
+	&__note {
+		margin: 16px 0 0;
+		font-size: 12px;
+		color: var(--sf-text-muted);
+	}
+
+	// Title and controls share the header on wide screens and stack when
+	// there is no room for both.
+	.sf-panel__header {
+		flex-wrap: wrap;
+
+		> div:first-child {
+			flex: 1 1 260px;
+		}
+	}
+
+	@media (max-width: 600px) {
+		&__controls {
+			justify-content: flex-start;
+			width: 100%;
+		}
+
+		&__stage {
+			grid-template-columns: 72px minmax(0, 1fr) 48px;
+
+			.sf-funnel__stage-share {
+				grid-column: 2 / -1;
+				margin-top: -6px;
+			}
+		}
+	}
+}

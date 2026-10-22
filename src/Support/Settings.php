@@ -1,0 +1,591 @@
+<?php
+
+namespace SubtleForms\Support;
+
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+/**
+ * Settings Manager
+ *
+ * Handles plugin settings storage, retrieval, and validation.
+ */
+class Settings {
+
+	/**
+	 * Option name in wp_options table
+	 */
+	const OPTION_NAME = 'subtleforms_settings';
+
+	/**
+	 * User meta key for one admin's submissions inbox choices.
+	 */
+	const INBOX_META = 'subtleforms_submissions_view';
+
+	/**
+	 * Allowed list densities.
+	 */
+	const INBOX_DENSITY = array( 'comfortable', 'default', 'compact' );
+
+	/**
+	 * Allowed reading panes. Right of the list is the site default.
+	 */
+	const INBOX_PANE = array( 'right', 'below', 'off' );
+
+	/**
+	 * Default settings
+	 */
+	const DEFAULTS = array(
+		// General
+		'default_form_status'        => 'draft',
+		'autosave_enabled'           => true,
+		'autosave_interval'          => 3,
+		'delete_behavior'            => 'soft',
+		'submissions_density'        => 'default',
+		'submissions_reading_pane'   => 'right',
+
+		// Frontend
+		'success_message'            => 'Thank you! Your submission has been received.',
+		'error_message'              => 'An error occurred. Please try again.',
+		'redirect_after_submit'      => '',
+		'submission_limit_enabled'   => false,
+		'submission_limit'           => 1,
+
+		// Email / Notifications
+		'admin_notification_enabled' => true,
+		'user_confirmation_enabled'  => false,
+		'sender_name'                => '',
+		'sender_email'               => '',
+		'admin_email'                => '',
+
+		// Advanced
+		'debug_mode'                 => false,
+
+		// Spam Protection
+		'enable_honeypot'            => true,
+		'min_submission_time'        => 3,
+
+		// CAPTCHA
+		'captcha_enabled'            => false,
+		'captcha_provider'           => '', // Deprecated: kept for backwards compatibility
+		'captcha_recaptcha_enabled'  => false,
+		'captcha_recaptcha_site_key' => '',
+		'captcha_recaptcha_secret_key' => '',
+		'captcha_recaptcha_version'  => 'v2',
+		'captcha_hcaptcha_enabled'   => false,
+		'captcha_hcaptcha_site_key'  => '',
+		'captcha_hcaptcha_secret_key' => '',
+		'captcha_turnstile_enabled'  => false,
+		'captcha_turnstile_site_key' => '',
+		'captcha_turnstile_secret_key' => '',
+
+		// Privacy & GDPR
+		'data_retention_days'        => 0, // 0 = keep forever
+		'entries_trash_days'         => 30, // Days an entry stays in the Trash (2.3.1).
+
+		// ── Extensions ───────────────────────────────────────────────────────
+
+		// Webhooks
+		'ext_webhooks_enabled'              => false,
+		'ext_webhooks_signing_secret'       => '',
+		'ext_webhooks_events'               => array( 'submission.created' ),
+		'ext_webhooks_retries'              => 3,
+
+		// Email Marketing
+		'ext_email_marketing_enabled'       => false,
+		'ext_email_marketing_provider'      => 'mailchimp', // mailchimp|brevo|convertkit (Kit)
+		'ext_email_marketing_api_key'       => '',
+		'ext_email_marketing_list_id'       => '',
+		'ext_email_marketing_double_optin'  => false,
+
+		// CRM (HubSpot)
+		'ext_crm_enabled'                   => false,
+		'ext_crm_provider'                  => 'hubspot',
+		'ext_crm_api_key'                   => '',
+		'ext_crm_portal_id'                 => '',
+		'ext_crm_webhook_url'               => '',
+		'ext_crm_add_note'                  => true,
+
+		// Analytics
+		'ext_analytics_enabled'             => true,
+		'ext_analytics_view_tracking'       => true,
+		'ext_analytics_retention_days'      => 90,
+		// Where visitors stop filling in a form (2.6.0).
+		'ext_analytics_funnel_retention_days' => 180,
+
+		// E-commerce (WooCommerce)
+		'ext_ecommerce_enabled'             => false,
+		'ext_ecommerce_product_id'          => 0,
+		'ext_ecommerce_currency'            => 'USD',
+		'ext_ecommerce_default_processor'   => 'woocommerce',
+		'ext_ecommerce_empty_cart'          => true,
+		'ext_ecommerce_destination'         => 'checkout',
+
+		// PDF Generation
+		'ext_pdf_enabled'                   => false,
+		'ext_pdf_template'                  => 'default',
+		'ext_pdf_attach_to_email'           => false,
+
+		// Multilanguage
+		'ext_multilanguage_enabled'         => false,
+		'ext_multilanguage_provider'        => 'wpml', // wpml|polylang
+
+		// Payments (Stripe / PayPal)
+		'ext_payments_enabled'              => false,
+		'ext_payments_provider'             => 'stripe', // stripe|paypal
+		'ext_payments_stripe_pk'            => '',
+		'ext_payments_stripe_sk'            => '',
+		'ext_payments_paypal_client_id'     => '',
+		'ext_payments_paypal_client_secret' => '',
+		'ext_payments_currency'             => 'USD',
+		'ext_payments_mode'                 => 'test', // test|live
+		'ext_payments_failed_email'         => true,
+	);
+
+	/**
+	 * Validation rules for settings
+	 */
+	const VALIDATION_RULES = array(
+		'default_form_status'        => array( 'draft', 'published' ),
+		'autosave_enabled'           => 'boolean',
+		'autosave_interval'          => array(
+			'integer',
+			'min' => 1,
+			'max' => 60,
+		),
+		'delete_behavior'            => array( 'soft', 'hard' ),
+		'submissions_density'        => array( 'comfortable', 'default', 'compact' ),
+		'submissions_reading_pane'   => array( 'right', 'below', 'off' ),
+		'success_message'            => array(
+			'string',
+			'max' => 500,
+		),
+		'error_message'              => array(
+			'string',
+			'max' => 500,
+		),
+		'redirect_after_submit'      => array(
+			'string',
+			'max' => 500,
+		),
+		'submission_limit_enabled'   => 'boolean',
+		'submission_limit'           => array(
+			'integer',
+			'min' => 1,
+			'max' => 100,
+		),
+		'admin_notification_enabled' => 'boolean',
+		'user_confirmation_enabled'  => 'boolean',
+		'sender_name'                => array(
+			'string',
+			'max' => 100,
+		),
+		'sender_email'               => 'email',
+		'admin_email'                => 'email',
+		'debug_mode'                 => 'boolean',
+		'captcha_enabled'            => 'boolean',
+		'captcha_provider'           => array( '', 'recaptcha', 'hcaptcha', 'turnstile' ), // Deprecated
+		'captcha_recaptcha_enabled'  => 'boolean',
+		'captcha_recaptcha_site_key' => array(
+			'string',
+			'max' => 200,
+		),
+		'captcha_recaptcha_secret_key' => array(
+			'string',
+			'max' => 200,
+		),
+		'captcha_recaptcha_version'  => array( 'v2', 'v3' ),
+		'captcha_hcaptcha_enabled'   => 'boolean',
+		'captcha_hcaptcha_site_key'  => array(
+			'string',
+			'max' => 200,
+		),
+		'captcha_hcaptcha_secret_key' => array(
+			'string',
+			'max' => 200,
+		),
+		'captcha_turnstile_enabled'  => 'boolean',
+		'captcha_turnstile_site_key' => array(
+			'string',
+			'max' => 200,
+		),
+		'captcha_turnstile_secret_key' => array(
+			'string',
+			'max' => 200,
+		),
+		'enable_honeypot'            => 'boolean',
+		'min_submission_time'        => array(
+			'integer',
+			'min' => 0,
+			'max' => 60,
+		),
+		'data_retention_days'        => array(
+			'integer',
+			'min' => 0,
+			'max' => 3650,
+		),
+		'entries_trash_days'         => array(
+			'integer',
+			'min' => 1,
+			'max' => 365,
+		),
+
+		// Extensions
+		'ext_webhooks_enabled'              => 'boolean',
+		'ext_webhooks_signing_secret'       => array( 'string', 'max' => 200 ),
+		'ext_webhooks_events'               => 'array',
+		'ext_webhooks_retries'              => array( 'integer', 'min' => 0, 'max' => 5 ),
+		'ext_email_marketing_enabled'       => 'boolean',
+		'ext_email_marketing_provider'      => array( 'mailchimp', 'brevo', 'convertkit' ),
+		'ext_email_marketing_api_key'       => array( 'string', 'max' => 500 ),
+		'ext_email_marketing_list_id'       => array( 'string', 'max' => 200 ),
+		'ext_email_marketing_double_optin'  => 'boolean',
+		'ext_crm_enabled'                   => 'boolean',
+		'ext_crm_provider'                  => array( 'hubspot', 'webhook' ),
+		'ext_crm_api_key'                   => array( 'string', 'max' => 500 ),
+		'ext_crm_portal_id'                 => array( 'string', 'max' => 100 ),
+		'ext_crm_webhook_url'               => array( 'string', 'max' => 2000 ),
+		'ext_crm_add_note'                  => 'boolean',
+		'ext_analytics_enabled'             => 'boolean',
+		'ext_analytics_view_tracking'       => 'boolean',
+		'ext_analytics_retention_days'      => array( 'integer', 'min' => 1, 'max' => 3650 ),
+		'ext_analytics_funnel_retention_days' => array( 'integer', 'min' => 1, 'max' => 3650 ),
+		'ext_ecommerce_enabled'             => 'boolean',
+		'ext_ecommerce_product_id'          => array( 'integer', 'min' => 0 ),
+		'ext_ecommerce_currency'            => array( 'string', 'max' => 10 ),
+		'ext_ecommerce_default_processor'   => array( 'woocommerce', 'subtleforms' ),
+		'ext_ecommerce_empty_cart'          => 'boolean',
+		'ext_ecommerce_destination'         => array( 'checkout', 'cart' ),
+		'ext_pdf_enabled'                   => 'boolean',
+		'ext_pdf_template'                  => array( 'string', 'max' => 100 ),
+		'ext_pdf_attach_to_email'           => 'boolean',
+		'ext_multilanguage_enabled'         => 'boolean',
+		'ext_multilanguage_provider'        => array( 'wpml', 'polylang' ),
+		'ext_payments_enabled'              => 'boolean',
+		'ext_payments_provider'             => array( 'stripe', 'paypal' ),
+		'ext_payments_stripe_pk'            => array( 'string', 'max' => 500 ),
+		'ext_payments_stripe_sk'            => array( 'string', 'max' => 500 ),
+		'ext_payments_paypal_client_id'     => array( 'string', 'max' => 500 ),
+		'ext_payments_paypal_client_secret' => array( 'string', 'max' => 500 ),
+		'ext_payments_currency'             => array( 'string', 'max' => 10 ),
+		'ext_payments_mode'                 => array( 'test', 'live' ),
+		'ext_payments_failed_email'         => 'boolean',
+	);
+
+	/**
+	 * Get all settings
+	 *
+	 * @return array
+	 */
+		/**
+	 * Trash, or delete for good.
+	 *
+	 * An entry or form already in the Trash is always deleted. Otherwise Hard
+	 * deletes and Soft moves it to the Trash. The client does not override this.
+	 *
+	 * @param string $behavior soft or hard.
+	 * @param bool   $alreadyTrashed Already in the Trash.
+	 * @return string trash or delete.
+	 */
+	public static function deletionMode( string $behavior, bool $alreadyTrashed ): string {
+		if ( $alreadyTrashed || 'hard' === $behavior ) {
+			return 'delete';
+		}
+		return 'trash';
+	}
+
+	public function getAll() {
+		$settings = get_option( self::OPTION_NAME, array() );
+		return wp_parse_args( $settings, self::DEFAULTS );
+	}
+
+	/**
+	 * Get a specific setting
+	 *
+	 * @param string $key Setting key
+	 * @param mixed  $default Default value if not found
+	 * @return mixed
+	 */
+	public function get( $key, $default = null ) {
+		$settings = $this->getAll();
+
+		if ( isset( $settings[ $key ] ) ) {
+			return $settings[ $key ];
+		}
+
+		return $default !== null ? $default : ( self::DEFAULTS[ $key ] ?? null );
+	}
+
+	/**
+	 * Update settings
+	 *
+	 * @param array $newSettings New settings to merge
+	 * @return bool
+	 */
+	public function update( $newSettings ) {
+		$currentSettings = $this->getAll();
+		$mergedSettings  = array_merge( $currentSettings, $newSettings );
+
+		// Validate settings
+		$validatedSettings = $this->validate( $mergedSettings );
+
+		return update_option( self::OPTION_NAME, $validatedSettings );
+	}
+
+	/**
+	 * Reset settings to defaults
+	 *
+	 * @return bool
+	 */
+	public function reset() {
+		return update_option( self::OPTION_NAME, self::DEFAULTS );
+	}
+
+	/**
+	 * Validate settings
+	 *
+	 * @param array $settings Settings to validate
+	 * @return array Validated settings
+	 * @throws \InvalidArgumentException If validation fails
+	 */
+	public function validate( $settings ) {
+		$validated = array();
+
+		foreach ( $settings as $key => $value ) {
+			if ( ! isset( self::VALIDATION_RULES[ $key ] ) ) {
+				continue;
+			}
+
+			$rule = self::VALIDATION_RULES[ $key ];
+
+			// Handle type validation
+			if ( is_string( $rule ) ) {
+				$validated[ $key ] = $this->validateType( $key, $value, $rule );
+				continue;
+			}
+
+			// Handle complex validation rules with type and constraints
+			if ( is_array( $rule ) && isset( $rule[0] ) && ( isset( $rule['min'] ) || isset( $rule['max'] ) ) ) {
+				$validated[ $key ] = $this->validateWithRules( $key, $value, $rule );
+				continue;
+			}
+
+			// Handle array of allowed values (enum)
+			if ( is_array( $rule ) && isset( $rule[0] ) ) {
+				if ( ! in_array( $value, $rule, true ) ) {
+					throw new \InvalidArgumentException( "Invalid value for {$key}" ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				}
+				$validated[ $key ] = $value;
+				continue;
+			}
+		}
+
+		return $validated;
+	}
+
+	/**
+	 * Validate by type
+	 *
+	 * @param string $key Setting key
+	 * @param mixed  $value Value to validate
+	 * @param string $type Type to validate against
+	 * @return mixed Validated value
+	 * @throws \InvalidArgumentException If validation fails
+	 */
+	private function validateType( $key, $value, $type ) {
+		switch ( $type ) {
+			case 'boolean':
+				// Handle various boolean representations
+				if ( is_bool( $value ) ) {
+					return $value;
+				}
+				if ( is_string( $value ) ) {
+					return filter_var( $value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE ) ?? false;
+				}
+				return (bool) $value;
+
+			case 'integer':
+				if ( ! is_numeric( $value ) ) {
+					throw new \InvalidArgumentException( "{$key} must be an integer" ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				}
+				return (int) $value;
+
+			case 'string':
+				return sanitize_text_field( $value );
+
+			case 'email':
+				if ( ! empty( $value ) && ! is_email( $value ) ) {
+					throw new \InvalidArgumentException( "{$key} must be a valid email" ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+				}
+				return sanitize_email( $value );
+
+			default:
+				return $value;
+		}
+	}
+
+	/**
+	 * Validate with complex rules
+	 *
+	 * @param string $key Setting key
+	 * @param mixed  $value Value to validate
+	 * @param array  $rules Validation rules
+	 * @return mixed Validated value
+	 * @throws \InvalidArgumentException If validation fails
+	 */
+	private function validateWithRules( $key, $value, $rules ) {
+		$type      = $rules[0] ?? 'string';
+		$validated = $this->validateType( $key, $value, $type );
+
+		// Check min value
+		if ( isset( $rules['min'] ) && $validated < $rules['min'] ) {
+			throw new \InvalidArgumentException( "{$key} must be at least {$rules['min']}" ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
+
+		// Check max value
+		if ( isset( $rules['max'] ) ) {
+			if ( $type === 'string' && strlen( $validated ) > $rules['max'] ) {
+				throw new \InvalidArgumentException( "{$key} must be at most {$rules['max']} characters" ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			}
+			if ( $type === 'integer' && $validated > $rules['max'] ) {
+				throw new \InvalidArgumentException( "{$key} must be at most {$rules['max']}" ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			}
+		}
+
+		return $validated;
+	}
+
+	/**
+	 * Get sender email with fallback to the WordPress default sender.
+	 *
+	 * Defaults to wordpress@<site domain>, matching WordPress' own default
+	 * From: address. Using the site domain (rather than the admin's personal
+	 * email) keeps the sender on the same domain as the site, which avoids
+	 * SPF/DMARC rejection and deliverability issues (Part B20).
+	 *
+	 * @return string
+	 */
+	public function getSenderEmail() {
+		$email = $this->get( 'sender_email' );
+		if ( ! empty( $email ) ) {
+			return $email;
+		}
+
+		$domain = $this->get_site_domain();
+		return 'wordpress@' . $domain;
+	}
+
+	/**
+	 * Get the site domain (host without scheme/path), lowercased.
+	 *
+	 * Falls back to the hostname parsed from the WordPress site URL, then to
+	 * the server HTTP_HOST, and finally to 'localhost' for CLI/test contexts.
+	 *
+	 * @return string
+	 */
+	protected function get_site_domain() {
+		$url = home_url();
+		$host = wp_parse_url( $url, PHP_URL_HOST );
+		if ( empty( $host ) ) {
+			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.NonceVerification.Recommended -- Read-only fallback.
+			$host = isset( $_SERVER['HTTP_HOST'] ) ? sanitize_text_field( wp_unslash( $_SERVER['HTTP_HOST'] ) ) : '';
+		}
+		if ( empty( $host ) ) {
+			$host = 'localhost';
+		}
+		return strtolower( $host );
+	}
+
+	/**
+	 * Get sender name with fallback to site name
+	 *
+	 * @return string
+	 */
+	public function getSenderName() {
+		$name = $this->get( 'sender_name' );
+		return ! empty( $name ) ? $name : get_option( 'blogname' );
+	}
+
+	/**
+	 * Get admin email with fallback to WordPress admin email
+	 *
+	 * @return string
+	 */
+	public function getAdminEmail() {
+		$email = $this->get( 'admin_email' );
+		return ! empty( $email ) ? $email : get_option( 'admin_email' );
+	}
+
+	/**
+	 * Keep a submissions-inbox choice inside its allowed set.
+	 *
+	 * @param string $key   density|reading_pane.
+	 * @param mixed  $value Raw value.
+	 * @return string
+	 */
+	public static function inboxChoice( $key, $value ) {
+		$allowed  = 'density' === $key ? self::INBOX_DENSITY : self::INBOX_PANE;
+		$fallback = 'density' === $key ? 'default' : 'right';
+
+		return is_string( $value ) && in_array( $value, $allowed, true ) ? $value : $fallback;
+	}
+
+	/**
+	 * The inbox an admin should see.
+	 *
+	 * A saved user-meta choice wins. Otherwise the site settings apply.
+	 *
+	 * @param int $user_id Admin user id.
+	 * @return array{density: string, reading_pane: string, personal: bool, site: array}
+	 */
+	public function resolvedInboxView( $user_id ) {
+		$site = array(
+			'density'       => self::inboxChoice( 'density', $this->get( 'submissions_density' ) ),
+			'reading_pane'  => self::inboxChoice( 'reading_pane', $this->get( 'submissions_reading_pane' ) ),
+		);
+
+		$stored   = $user_id > 0 ? get_user_meta( (int) $user_id, self::INBOX_META, true ) : array();
+		$personal = is_array( $stored ) && isset( $stored['density'], $stored['reading_pane'] );
+		$view     = $personal
+			? array(
+				'density'      => self::inboxChoice( 'density', $stored['density'] ),
+				'reading_pane' => self::inboxChoice( 'reading_pane', $stored['reading_pane'] ),
+			)
+			: $site;
+
+		return array(
+			'density'      => $view['density'],
+			'reading_pane' => $view['reading_pane'],
+			'personal'     => $personal,
+			'site'         => $site,
+		);
+	}
+
+	/**
+	 * Drop stored AI assistant keys. Nothing in the plugin reads them, and
+	 * saving one used to fail the whole settings form.
+	 */
+	public static function remove_ai_options(): void {
+		$stored = get_option( self::OPTION_NAME, array() );
+		if ( is_array( $stored ) ) {
+			$clean = array();
+			foreach ( $stored as $key => $value ) {
+				if ( is_string( $key ) && str_starts_with( $key, 'ai_' ) ) {
+					continue;
+				}
+				$clean[ $key ] = $value;
+			}
+			if ( $clean !== $stored ) {
+				update_option( self::OPTION_NAME, $clean );
+			}
+		}
+
+		global $wpdb;
+		if ( is_object( $wpdb ) && isset( $wpdb->options ) && method_exists( $wpdb, 'prepare' ) ) {
+			$like = $wpdb->esc_like( 'subtleforms_ai_' ) . '%';
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s", $like ) );
+		}
+	}
+}
