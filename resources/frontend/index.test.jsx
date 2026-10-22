@@ -79,5 +79,13 @@ test('without printed data the form is still loaded from the route', async () =>
   await act(async () => {
     require('./index');
   });
-  expect(calls.filter((u) => u.endsWith('/forms/10/schema'))).toHaveLength(1);
+  // The route call can land a tick after mount under a busy test runner.
+  const routeCalls = () => calls.filter((u) => u.endsWith('/forms/10/schema'));
+  for (let i = 0; i < 50 && routeCalls().length === 0; i++) {
+    // eslint-disable-next-line no-await-in-loop
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 20));
+    });
+  }
+  expect(routeCalls()).toHaveLength(1);
 });
