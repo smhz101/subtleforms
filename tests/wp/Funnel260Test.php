@@ -323,6 +323,22 @@ final class Funnel260Test extends TestCase {
 		$this->assertSame( 75.0, $row['completion'] );
 	}
 
+	public function test_completion_is_full_when_forms_were_sent_and_nobody_left(): void {
+		$formId = $this->form();
+		$empty  = $this->form();
+		Stats::increment( $formId, 'views' );
+		Stats::increment( $formId, 'submissions' );
+		Stats::increment( $formId, 'submissions' );
+		Stats::increment( $empty, 'views' );
+
+		$this->asAdmin();
+		$response = rest_do_request( new \WP_REST_Request( 'GET', '/subtleforms/v1/analytics/summary' ) );
+		$forms    = (array) $response->get_data()['data']['forms'];
+		$this->assertSame( 0, $forms[ $formId ]['left'] );
+		$this->assertSame( 100.0, $forms[ $formId ]['completion'], 'Sent forms and no drop-off rows is a full completion.' );
+		$this->assertNull( $forms[ $empty ]['completion'], 'Nobody started: no rate.' );
+	}
+
 	public function test_the_report_is_for_managers_only(): void {
 		$formId  = $this->form();
 		$request = new \WP_REST_Request( 'GET', '/subtleforms/v1/analytics/funnel' );

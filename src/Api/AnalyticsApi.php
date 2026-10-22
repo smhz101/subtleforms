@@ -211,14 +211,16 @@ final class AnalyticsApi {
 		foreach ( $totals as $formId => $row ) {
 			$allViews        += $row['views'];
 			$allSubs         += $row['submissions'];
+			$leftCount        = (int) ( $left[ $formId ] ?? 0 );
+			$started          = $leftCount + $row['submissions'];
 			$forms[ $formId ] = array(
 				'form_id'     => $formId,
 				'views'       => $row['views'],
 				'submissions' => $row['submissions'],
 				'conversion'  => Stats::conversion( $row['views'], $row['submissions'] ),
-				'left'        => $left[ $formId ] ?? 0,
+				'left'        => $leftCount,
 				// Of the people who started, the share who sent the form.
-				'completion'  => isset( $left[ $formId ] ) ? Stats::conversion( $left[ $formId ] + $row['submissions'], $row['submissions'] ) : null,
+				'completion'  => $started > 0 ? Stats::conversion( $started, $row['submissions'] ) : null,
 			);
 		}
 
