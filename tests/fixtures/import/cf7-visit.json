@@ -1,0 +1,31 @@
+{
+  "_comment": "A richer Contact Form 7 form: every common form-tag, pipes, defaults, a quiz, an autoresponder and additional settings.",
+  "title": "Book a visit",
+  "form": "<h3>Book a visit</h3>\n<p>Tell us a little about your visit and we will confirm by email.</p>\n\n<label> Full name *\n    [text* full-name placeholder \"Jane Smith\"] </label>\n\n<label> Email\n    [email* email-address] </label>\n\n<label> Website\n    [url website \"https://\"] </label>\n\n<label> Phone\n    [tel phone 20/30] </label>\n\n<label> Guests\n    [number* guests min:1 max:12 step:1 \"2\"] </label>\n\n<label> Visit date\n    [date visit-date min:2026-01-01 max:2026-12-31] </label>\n\n<label> Time of day\n    [select* time-of-day include_blank \"Morning|am\" \"Afternoon|pm\" \"Evening|eve\"] </label>\n\n<label> Interests\n    [select interests multiple \"Gardens\" \"History\" \"Food\"] </label>\n\n<label> Extras\n    [checkbox extras use_label_element default:2 \"Parking\" \"Lunch\" \"Guided tour\"] </label>\n\n<label> How did you hear about us?\n    [radio heard-about use_label_element \"Search\" \"Friend\" \"Social media\"] </label>\n\n<label> Notes\n    [textarea notes 40x6 maxlength:500 placeholder \"Anything we should know?\"] </label>\n\n<label> Floor plan\n    [file floor-plan limit:2mb filetypes:pdf|jpg|png] </label>\n\n[hidden campaign default:get \"spring\"]\n\n<label> What is 2 plus 3?\n    [quiz human \"What is 2 plus 3?|5\"] </label>\n\n[acceptance terms] I agree to the <a href=\"https://example.com/terms\">visit terms</a>. [/acceptance]\n\n[submit \"Request a visit\"]",
+  "mail": {
+    "subject": "New visit request from [full-name]",
+    "sender": "[_site_title] <wordpress@example.com>",
+    "body": "<p>[full-name] ([email-address]) would like to visit on [visit-date] in the [time-of-day].</p>\n<p>Guests: [guests]<br>Extras: [extras]<br>Heard about us: [heard-about]</p>\n<p>[notes]</p>\n<p>Sent from [_remote_ip] on [_date] at [_time]. Quiz: [human]</p>",
+    "recipient": "bookings@example.com",
+    "additional_headers": "Reply-To: [email-address]\nCc: manager@example.com",
+    "attachments": "[floor-plan]",
+    "use_html": true,
+    "exclude_blank": true
+  },
+  "mail_2": {
+    "active": true,
+    "subject": "We received your visit request",
+    "sender": "[_site_title] <wordpress@example.com>",
+    "body": "Hi [full-name],\n\nThanks for your request. We will confirm your visit on [visit-date] soon.\n\n[_site_title]\n[_site_url]",
+    "recipient": "[email-address]",
+    "additional_headers": "Reply-To: [_site_admin_email]",
+    "attachments": "",
+    "use_html": false,
+    "exclude_blank": false
+  },
+  "messages": {
+    "mail_sent_ok": "Thanks! We will confirm your visit within one working day.",
+    "invalid_required": "This one is needed."
+  },
+  "additional_settings": "subscribers_only: true\non_sent_ok: \"location = 'https://example.com/thanks/';\""
+}

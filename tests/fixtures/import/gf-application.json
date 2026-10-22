@@ -1,0 +1,472 @@
+{
+  "_comment": "A Gravity Forms 2.8 form as stored: the wp_gf_form row and the display_meta, notifications and confirmations JSON columns of wp_gf_form_meta.",
+  "form": {
+    "id": 3,
+    "title": "Job application",
+    "date_created": "2026-09-14 10:22:41",
+    "date_updated": "2026-10-01 08:05:12",
+    "is_active": 1,
+    "is_trash": 0
+  },
+  "display_meta": {
+    "title": "Job application",
+    "description": "Apply for an open role.",
+    "labelPlacement": "top_label",
+    "descriptionPlacement": "below",
+    "button": {
+      "type": "text",
+      "text": "Send application",
+      "imageUrl": ""
+    },
+    "version": "2.8.4",
+    "id": 3,
+    "useCurrentUserAsAuthor": true,
+    "postContentTemplateEnabled": false,
+    "requireLogin": false,
+    "limitEntries": true,
+    "limitEntriesCount": 200,
+    "limitEntriesPeriod": "",
+    "limitEntriesMessage": "Applications are closed.",
+    "scheduleForm": false,
+    "save": {
+      "enabled": false,
+      "button": {
+        "type": "link",
+        "text": "Save and Continue Later"
+      }
+    },
+    "pagination": {
+      "type": "steps",
+      "pages": [
+        "About you",
+        "Your application"
+      ],
+      "style": "blue",
+      "display_progressbar_on_confirmation": false
+    },
+    "cssClass": "careers-form",
+    "fields": [
+      {
+        "type": "name",
+        "id": 1,
+        "label": "Name",
+        "adminLabel": "",
+        "isRequired": true,
+        "nameFormat": "advanced",
+        "cssClass": "",
+        "inputs": [
+          {
+            "id": "1.2",
+            "label": "Prefix",
+            "name": "",
+            "isHidden": true,
+            "inputType": "radio"
+          },
+          {
+            "id": "1.3",
+            "label": "First",
+            "name": "",
+            "placeholder": "Jane"
+          },
+          {
+            "id": "1.4",
+            "label": "Middle",
+            "name": "",
+            "isHidden": true
+          },
+          {
+            "id": "1.6",
+            "label": "Last",
+            "name": "",
+            "placeholder": "Smith"
+          },
+          {
+            "id": "1.8",
+            "label": "Suffix",
+            "name": "",
+            "isHidden": true
+          }
+        ]
+      },
+      {
+        "type": "email",
+        "id": 2,
+        "label": "Email",
+        "isRequired": true,
+        "placeholder": "you@example.com",
+        "emailConfirmEnabled": true,
+        "inputName": "applicant_email"
+      },
+      {
+        "type": "phone",
+        "id": 3,
+        "label": "Phone",
+        "isRequired": false,
+        "phoneFormat": "international",
+        "description": "We only call about this application."
+      },
+      {
+        "type": "address",
+        "id": 4,
+        "label": "Address",
+        "isRequired": false,
+        "addressType": "international",
+        "inputs": [
+          {
+            "id": "4.1",
+            "label": "Street Address",
+            "name": ""
+          },
+          {
+            "id": "4.2",
+            "label": "Address Line 2",
+            "name": "",
+            "isHidden": true
+          },
+          {
+            "id": "4.3",
+            "label": "City",
+            "name": ""
+          },
+          {
+            "id": "4.4",
+            "label": "State / Province / Region",
+            "name": ""
+          },
+          {
+            "id": "4.5",
+            "label": "ZIP / Postal Code",
+            "name": ""
+          },
+          {
+            "id": "4.6",
+            "label": "Country",
+            "name": ""
+          }
+        ]
+      },
+      {
+        "type": "website",
+        "id": 5,
+        "label": "Portfolio",
+        "isRequired": false,
+        "placeholder": "https://"
+      },
+      {
+        "type": "page",
+        "id": 6,
+        "label": "",
+        "nextButton": {
+          "type": "text",
+          "text": "Next"
+        },
+        "previousButton": {
+          "type": "text",
+          "text": "Previous"
+        }
+      },
+      {
+        "type": "section",
+        "id": 7,
+        "label": "The role",
+        "description": "Tell us which role you want."
+      },
+      {
+        "type": "select",
+        "id": 8,
+        "label": "Role",
+        "isRequired": true,
+        "enableChoiceValue": true,
+        "placeholder": "Choose a role",
+        "choices": [
+          {
+            "text": "Designer",
+            "value": "design",
+            "isSelected": false
+          },
+          {
+            "text": "Developer",
+            "value": "dev",
+            "isSelected": true
+          },
+          {
+            "text": "Support",
+            "value": "support",
+            "isSelected": false
+          }
+        ]
+      },
+      {
+        "type": "radio",
+        "id": 9,
+        "label": "Can you start this month?",
+        "isRequired": true,
+        "enableOtherChoice": true,
+        "choices": [
+          {
+            "text": "Yes",
+            "value": "yes"
+          },
+          {
+            "text": "No",
+            "value": "no"
+          }
+        ]
+      },
+      {
+        "type": "textarea",
+        "id": 10,
+        "label": "When can you start?",
+        "maxLength": 300,
+        "conditionalLogic": {
+          "actionType": "show",
+          "logicType": "all",
+          "rules": [
+            {
+              "fieldId": "9",
+              "operator": "is",
+              "value": "no"
+            }
+          ]
+        }
+      },
+      {
+        "type": "checkbox",
+        "id": 11,
+        "label": "Skills",
+        "choices": [
+          {
+            "text": "PHP",
+            "value": "php",
+            "isSelected": false
+          },
+          {
+            "text": "React",
+            "value": "react",
+            "isSelected": true
+          },
+          {
+            "text": "Writing",
+            "value": "writing",
+            "isSelected": true
+          }
+        ],
+        "inputs": [
+          {
+            "id": "11.1",
+            "label": "PHP"
+          },
+          {
+            "id": "11.2",
+            "label": "React"
+          },
+          {
+            "id": "11.3",
+            "label": "Writing"
+          }
+        ]
+      },
+      {
+        "type": "multiselect",
+        "id": 12,
+        "label": "Languages",
+        "choices": [
+          {
+            "text": "English",
+            "value": "en"
+          },
+          {
+            "text": "Urdu",
+            "value": "ur"
+          }
+        ]
+      },
+      {
+        "type": "number",
+        "id": 13,
+        "label": "Years of experience",
+        "rangeMin": 0,
+        "rangeMax": 40,
+        "numberFormat": "decimal_dot"
+      },
+      {
+        "type": "date",
+        "id": 14,
+        "label": "Available from",
+        "dateType": "datepicker",
+        "dateFormat": "dmy"
+      },
+      {
+        "type": "time",
+        "id": 15,
+        "label": "Best time to call",
+        "timeFormat": "12"
+      },
+      {
+        "type": "fileupload",
+        "id": 16,
+        "label": "CV",
+        "isRequired": true,
+        "allowedExtensions": "pdf, docx",
+        "maxFileSize": 5,
+        "multipleFiles": false
+      },
+      {
+        "type": "list",
+        "id": 17,
+        "label": "References",
+        "enableColumns": true,
+        "choices": [
+          {
+            "text": "Name"
+          },
+          {
+            "text": "Email"
+          }
+        ]
+      },
+      {
+        "type": "product",
+        "id": 18,
+        "label": "Application fee",
+        "inputType": "singleproduct",
+        "basePrice": "$10.00"
+      },
+      {
+        "type": "hidden",
+        "id": 19,
+        "label": "Source",
+        "defaultValue": "{user:user_email}"
+      },
+      {
+        "type": "html",
+        "id": 20,
+        "label": "HTML Block",
+        "content": "<p>We read every application.</p>"
+      },
+      {
+        "type": "captcha",
+        "id": 21,
+        "label": "CAPTCHA"
+      },
+      {
+        "type": "consent",
+        "id": 22,
+        "label": "Consent",
+        "isRequired": true,
+        "checkboxLabel": "I agree to the privacy policy.",
+        "description": "We keep applications for six months.",
+        "inputs": [
+          {
+            "id": "22.1",
+            "label": "Consent"
+          },
+          {
+            "id": "22.2",
+            "label": "Text",
+            "isHidden": true
+          },
+          {
+            "id": "22.3",
+            "label": "Description",
+            "isHidden": true
+          }
+        ]
+      }
+    ]
+  },
+  "notifications": {
+    "5f1a2b3c4d5e6": {
+      "id": "5f1a2b3c4d5e6",
+      "isActive": true,
+      "name": "Admin Notification",
+      "service": "wordpress",
+      "event": "form_submission",
+      "to": "{admin_email}",
+      "toType": "email",
+      "cc": "",
+      "bcc": "hiring@example.com",
+      "subject": "New application: {Name (First):1.3} {Name (Last):1.6}",
+      "message": "{all_fields}",
+      "from": "{admin_email}",
+      "fromName": "Careers",
+      "replyTo": "{Email:2}",
+      "routing": null,
+      "conditionalLogic": null,
+      "disableAutoformat": false,
+      "enableAttachments": true
+    },
+    "5f1a2b3c4d5e7": {
+      "id": "5f1a2b3c4d5e7",
+      "isActive": true,
+      "name": "Applicant receipt",
+      "service": "wordpress",
+      "event": "form_submission",
+      "to": "2",
+      "toType": "field",
+      "subject": "Thanks for applying, {Name (First):1.3}",
+      "message": "<p>We received your application for {Role:8}.</p><p>Sent from {ip} on {date_mdy}.</p>",
+      "from": "careers@example.com",
+      "fromName": "",
+      "replyTo": "",
+      "conditionalLogic": {
+        "actionType": "show",
+        "logicType": "all",
+        "rules": [
+          {
+            "fieldId": "8",
+            "operator": "isnot",
+            "value": "support"
+          }
+        ]
+      }
+    },
+    "5f1a2b3c4d5e8": {
+      "id": "5f1a2b3c4d5e8",
+      "isActive": true,
+      "name": "Team routing",
+      "event": "form_submission",
+      "toType": "routing",
+      "routing": [
+        {
+          "fieldId": "8",
+          "operator": "is",
+          "value": "dev",
+          "email": "dev@example.com"
+        }
+      ],
+      "subject": "Application",
+      "message": "{all_fields}"
+    }
+  },
+  "confirmations": {
+    "5f1a2b3c4d5f0": {
+      "id": "5f1a2b3c4d5f0",
+      "name": "Default Confirmation",
+      "isDefault": true,
+      "type": "message",
+      "message": "Thanks {Name (First):1.3}! We will reply to {Email:2} within a week.",
+      "url": "",
+      "pageId": "",
+      "queryString": ""
+    },
+    "5f1a2b3c4d5f1": {
+      "id": "5f1a2b3c4d5f1",
+      "name": "Developers",
+      "isDefault": false,
+      "type": "redirect",
+      "url": "https://example.com/dev-thanks/",
+      "conditionalLogic": {
+        "actionType": "show",
+        "logicType": "all",
+        "rules": [
+          {
+            "fieldId": "8",
+            "operator": "is",
+            "value": "dev"
+          }
+        ]
+      }
+    }
+  }
+}

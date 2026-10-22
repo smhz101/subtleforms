@@ -1,0 +1,854 @@
+{
+  "_comment": "A Fluent Forms 5.2 form as stored: the wp_fluentform_forms row (form_fields is a JSON string in the table) and its wp_fluentform_form_meta rows.",
+  "form": {
+    "id": 7,
+    "title": "Salon booking",
+    "status": "published",
+    "appearance_settings": null,
+    "form_fields": {
+      "fields": [
+        {
+          "index": 0,
+          "element": "input_name",
+          "attributes": {
+            "name": "names",
+            "data-type": "name-element"
+          },
+          "settings": {
+            "container_class": "",
+            "admin_field_label": "Name",
+            "conditional_logics": [],
+            "label_placement": "top"
+          },
+          "fields": {
+            "first_name": {
+              "element": "input_text",
+              "attributes": {
+                "type": "text",
+                "name": "first_name",
+                "value": "",
+                "id": "",
+                "class": "",
+                "placeholder": "First name",
+                "maxlength": ""
+              },
+              "settings": {
+                "container_class": "",
+                "label": "First name",
+                "help_message": "",
+                "visible": true,
+                "validation_rules": {
+                  "required": {
+                    "value": true,
+                    "message": "First name is required"
+                  }
+                },
+                "conditional_logics": []
+              }
+            },
+            "middle_name": {
+              "element": "input_text",
+              "attributes": {
+                "type": "text",
+                "name": "middle_name",
+                "value": "",
+                "placeholder": ""
+              },
+              "settings": {
+                "label": "Middle name",
+                "visible": false,
+                "validation_rules": {
+                  "required": {
+                    "value": false
+                  }
+                }
+              }
+            },
+            "last_name": {
+              "element": "input_text",
+              "attributes": {
+                "type": "text",
+                "name": "last_name",
+                "value": "",
+                "placeholder": "Last name"
+              },
+              "settings": {
+                "label": "Last name",
+                "visible": true,
+                "validation_rules": {
+                  "required": {
+                    "value": false
+                  }
+                }
+              }
+            }
+          },
+          "editor_options": {
+            "title": "Name Fields"
+          }
+        },
+        {
+          "index": 0,
+          "element": "input_email",
+          "attributes": {
+            "type": "email",
+            "name": "email",
+            "value": "",
+            "class": "",
+            "placeholder": "you@example.com"
+          },
+          "settings": {
+            "container_class": "",
+            "label": "Email",
+            "label_placement": "",
+            "admin_field_label": "",
+            "help_message": "",
+            "validation_rules": {
+              "required": {
+                "value": true,
+                "message": "This field is required"
+              }
+            },
+            "conditional_logics": []
+          },
+          "editor_options": {
+            "title": "Email"
+          }
+        },
+        {
+          "index": 2,
+          "element": "phone",
+          "attributes": {
+            "name": "phone",
+            "class": "",
+            "value": "",
+            "type": "tel",
+            "placeholder": "Mobile number"
+          },
+          "settings": {
+            "label": "Phone",
+            "help_message": "",
+            "validation_rules": {
+              "required": {
+                "value": false
+              }
+            },
+            "conditional_logics": []
+          }
+        },
+        {
+          "index": 3,
+          "element": "select",
+          "attributes": {
+            "name": "service",
+            "value": "",
+            "id": "",
+            "class": ""
+          },
+          "settings": {
+            "label": "Service",
+            "placeholder": "Pick a service",
+            "help_message": "",
+            "advanced_options": [
+              {
+                "label": "Haircut",
+                "value": "haircut",
+                "calc_value": ""
+              },
+              {
+                "label": "Colour",
+                "value": "colour",
+                "calc_value": ""
+              },
+              {
+                "label": "Styling",
+                "value": "styling",
+                "calc_value": ""
+              }
+            ],
+            "validation_rules": {
+              "required": {
+                "value": true
+              }
+            },
+            "conditional_logics": []
+          }
+        },
+        {
+          "index": 4,
+          "element": "input_radio",
+          "attributes": {
+            "type": "radio",
+            "name": "visit_type",
+            "value": "first"
+          },
+          "settings": {
+            "label": "Visit type",
+            "advanced_options": [
+              {
+                "label": "First visit",
+                "value": "first"
+              },
+              {
+                "label": "Returning",
+                "value": "returning"
+              }
+            ],
+            "validation_rules": {
+              "required": {
+                "value": true
+              }
+            },
+            "conditional_logics": []
+          }
+        },
+        {
+          "index": 5,
+          "element": "input_checkbox",
+          "attributes": {
+            "type": "checkbox",
+            "name": "extras",
+            "value": [
+              "wash"
+            ]
+          },
+          "settings": {
+            "label": "Extras",
+            "advanced_options": [
+              {
+                "label": "Wash",
+                "value": "wash"
+              },
+              {
+                "label": "Head massage",
+                "value": "massage"
+              }
+            ],
+            "validation_rules": {
+              "required": {
+                "value": false
+              }
+            },
+            "conditional_logics": {
+              "type": "any",
+              "status": true,
+              "conditions": [
+                {
+                  "field": "service",
+                  "value": "haircut",
+                  "operator": "="
+                },
+                {
+                  "field": "service",
+                  "value": "colour",
+                  "operator": "="
+                }
+              ]
+            }
+          }
+        },
+        {
+          "index": 6,
+          "element": "form_step",
+          "attributes": {
+            "id": "",
+            "class": ""
+          },
+          "settings": {
+            "prev_btn": {
+              "type": "default",
+              "text": "Previous"
+            },
+            "next_btn": {
+              "type": "default",
+              "text": "Next"
+            }
+          },
+          "editor_options": {
+            "title": "Form Step"
+          }
+        },
+        {
+          "index": 7,
+          "element": "input_date",
+          "attributes": {
+            "type": "text",
+            "name": "visit_date",
+            "value": "",
+            "placeholder": "Pick a day"
+          },
+          "settings": {
+            "label": "Day",
+            "date_format": "d/m/Y",
+            "validation_rules": {
+              "required": {
+                "value": true
+              }
+            },
+            "conditional_logics": []
+          }
+        },
+        {
+          "index": 8,
+          "element": "input_number",
+          "attributes": {
+            "type": "number",
+            "name": "people",
+            "value": "1",
+            "placeholder": ""
+          },
+          "settings": {
+            "label": "People",
+            "number_step": "1",
+            "validation_rules": {
+              "required": {
+                "value": false
+              },
+              "numeric": {
+                "value": true
+              },
+              "min": {
+                "value": "1"
+              },
+              "max": {
+                "value": "4"
+              }
+            },
+            "conditional_logics": []
+          }
+        },
+        {
+          "index": 9,
+          "element": "container",
+          "attributes": [],
+          "settings": {
+            "container_class": "",
+            "conditional_logics": []
+          },
+          "columns": [
+            {
+              "width": 50,
+              "fields": [
+                {
+                  "index": 0,
+                  "element": "input_text",
+                  "attributes": {
+                    "type": "text",
+                    "name": "company",
+                    "value": "",
+                    "class": "",
+                    "placeholder": ""
+                  },
+                  "settings": {
+                    "container_class": "",
+                    "label": "Company",
+                    "label_placement": "",
+                    "admin_field_label": "",
+                    "help_message": "",
+                    "validation_rules": {
+                      "required": {
+                        "value": false,
+                        "message": "This field is required"
+                      }
+                    },
+                    "conditional_logics": []
+                  },
+                  "editor_options": {
+                    "title": "Company"
+                  }
+                }
+              ]
+            },
+            {
+              "width": 50,
+              "fields": [
+                {
+                  "index": 0,
+                  "element": "input_url",
+                  "attributes": {
+                    "type": "url",
+                    "name": "website",
+                    "value": "",
+                    "placeholder": "https://"
+                  },
+                  "settings": {
+                    "label": "Website",
+                    "validation_rules": {
+                      "required": {
+                        "value": false
+                      },
+                      "url": {
+                        "value": true
+                      }
+                    },
+                    "conditional_logics": []
+                  }
+                }
+              ]
+            }
+          ],
+          "editor_options": {
+            "title": "Two Column Container"
+          }
+        },
+        {
+          "index": 10,
+          "element": "address",
+          "attributes": {
+            "id": "",
+            "class": "",
+            "name": "address_1",
+            "data-type": "address-element"
+          },
+          "settings": {
+            "label": "Address",
+            "admin_field_label": "Address",
+            "conditional_logics": []
+          },
+          "fields": {
+            "address_line_1": {
+              "element": "input_text",
+              "attributes": {
+                "type": "text",
+                "name": "address_line_1",
+                "value": "",
+                "placeholder": "Street"
+              },
+              "settings": {
+                "label": "Address line 1",
+                "visible": true,
+                "validation_rules": {
+                  "required": {
+                    "value": true
+                  }
+                }
+              }
+            },
+            "address_line_2": {
+              "element": "input_text",
+              "attributes": {
+                "type": "text",
+                "name": "address_line_2",
+                "value": "",
+                "placeholder": ""
+              },
+              "settings": {
+                "label": "Address line 2",
+                "visible": true,
+                "validation_rules": {
+                  "required": {
+                    "value": false
+                  }
+                }
+              }
+            },
+            "city": {
+              "element": "input_text",
+              "attributes": {
+                "name": "city",
+                "placeholder": "City"
+              },
+              "settings": {
+                "label": "City",
+                "visible": true,
+                "validation_rules": {
+                  "required": {
+                    "value": true
+                  }
+                }
+              }
+            },
+            "state": {
+              "element": "input_text",
+              "attributes": {
+                "name": "state",
+                "placeholder": ""
+              },
+              "settings": {
+                "label": "State",
+                "visible": false,
+                "validation_rules": {
+                  "required": {
+                    "value": false
+                  }
+                }
+              }
+            },
+            "zip": {
+              "element": "input_text",
+              "attributes": {
+                "name": "zip",
+                "placeholder": "Postcode"
+              },
+              "settings": {
+                "label": "Postcode",
+                "visible": true,
+                "validation_rules": {
+                  "required": {
+                    "value": false
+                  }
+                }
+              }
+            },
+            "country": {
+              "element": "select_country",
+              "attributes": {
+                "name": "country",
+                "value": ""
+              },
+              "settings": {
+                "label": "Country",
+                "visible": true,
+                "validation_rules": {
+                  "required": {
+                    "value": false
+                  }
+                }
+              }
+            }
+          }
+        },
+        {
+          "index": 11,
+          "element": "section_break",
+          "attributes": {
+            "id": "",
+            "class": ""
+          },
+          "settings": {
+            "label": "Anything else",
+            "description": "Optional details.",
+            "align": "left",
+            "conditional_logics": []
+          },
+          "editor_options": {
+            "title": "Section Break"
+          }
+        },
+        {
+          "index": 12,
+          "element": "textarea",
+          "attributes": {
+            "name": "message",
+            "value": "",
+            "placeholder": "Your message",
+            "rows": 4,
+            "cols": 2,
+            "maxlength": "800"
+          },
+          "settings": {
+            "label": "Message",
+            "help_message": "Allergies, accessibility needs, anything.",
+            "validation_rules": {
+              "required": {
+                "value": false
+              }
+            },
+            "conditional_logics": []
+          }
+        },
+        {
+          "index": 13,
+          "element": "input_file",
+          "attributes": {
+            "type": "file",
+            "name": "photo",
+            "value": "",
+            "id": "",
+            "class": ""
+          },
+          "settings": {
+            "label": "Reference photo",
+            "btn_text": "Choose File",
+            "validation_rules": {
+              "required": {
+                "value": false
+              },
+              "max_file_size": {
+                "value": 3145728,
+                "_valueFrom": "MB",
+                "message": "Too big"
+              },
+              "max_file_count": {
+                "value": "2"
+              },
+              "allowed_file_types": {
+                "value": [
+                  "jpg|jpeg|gif|png|bmp"
+                ],
+                "message": "Not allowed"
+              }
+            },
+            "conditional_logics": []
+          }
+        },
+        {
+          "index": 14,
+          "element": "custom_html",
+          "attributes": [],
+          "settings": {
+            "html_codes": "<p>Please arrive five minutes early.</p>",
+            "conditional_logics": []
+          }
+        },
+        {
+          "index": 15,
+          "element": "input_hidden",
+          "attributes": {
+            "type": "hidden",
+            "name": "referrer",
+            "value": "{get.ref}"
+          },
+          "settings": {
+            "admin_field_label": "Referrer"
+          }
+        },
+        {
+          "index": 16,
+          "element": "payment_method",
+          "attributes": {
+            "name": "payment_method",
+            "type": "radio",
+            "value": ""
+          },
+          "settings": {
+            "label": "Pay deposit",
+            "payment_methods": {
+              "stripe": {
+                "enabled": "yes"
+              }
+            }
+          }
+        },
+        {
+          "index": 17,
+          "element": "recaptcha",
+          "attributes": {
+            "name": "g-recaptcha-response"
+          },
+          "settings": {
+            "label": ""
+          }
+        },
+        {
+          "index": 18,
+          "element": "terms_and_condition",
+          "attributes": {
+            "type": "checkbox",
+            "name": "terms-n-condition",
+            "value": false,
+            "class": "ff_terms_and_condition"
+          },
+          "settings": {
+            "tnc_html": "I have read the <a href=\"https://example.com/salon-terms\" target=\"_blank\">booking terms</a>.",
+            "has_checkbox": true,
+            "validation_rules": {
+              "required": {
+                "value": true,
+                "message": "Please accept the terms"
+              }
+            },
+            "conditional_logics": []
+          }
+        },
+        {
+          "index": 19,
+          "element": "gdpr_agreement",
+          "attributes": {
+            "type": "checkbox",
+            "name": "gdpr-agreement",
+            "value": false
+          },
+          "settings": {
+            "label": "GDPR Agreement",
+            "tnc_html": "I consent to having this website store my submitted information so they can respond to my inquiry.",
+            "required_field_message": "",
+            "validation_rules": {
+              "required": {
+                "value": true
+              }
+            }
+          }
+        }
+      ],
+      "submitButton": {
+        "uniqElKey": "el_1695",
+        "element": "button",
+        "attributes": {
+          "type": "submit",
+          "class": ""
+        },
+        "settings": {
+          "align": "left",
+          "button_style": "default",
+          "container_class": "",
+          "help_message": "",
+          "background_color": "#1a7efb",
+          "button_size": "md",
+          "color": "#ffffff",
+          "button_ui": {
+            "type": "default",
+            "text": "Book now",
+            "img_url": ""
+          }
+        },
+        "editor_options": {
+          "title": "Submit Button"
+        }
+      },
+      "stepsWrapper": {
+        "stepStart": {
+          "element": "step_start",
+          "attributes": {
+            "id": "",
+            "class": ""
+          },
+          "settings": {
+            "progress_indicator": "progress-bar",
+            "step_titles": [
+              "Your details",
+              "Your visit"
+            ],
+            "disable_auto_focus": "no"
+          },
+          "editor_options": {
+            "title": "Start Paging"
+          }
+        },
+        "stepEnd": {
+          "element": "step_end",
+          "attributes": {
+            "id": "",
+            "class": ""
+          },
+          "settings": {
+            "prev_btn": {
+              "type": "default",
+              "text": "Previous"
+            }
+          },
+          "editor_options": {
+            "title": "End Paging"
+          }
+        }
+      }
+    },
+    "has_payment": 1,
+    "type": "form",
+    "conditions": null,
+    "created_by": 1,
+    "created_at": "2026-08-02 11:40:09",
+    "updated_at": "2026-10-03 16:12:55"
+  },
+  "meta": [
+    {
+      "meta_key": "formSettings",
+      "value": {
+        "confirmation": {
+          "redirectTo": "samePage",
+          "messageToShow": "<p>Thanks {inputs.names.first_name}, your booking for {inputs.visit_date} is in.</p>",
+          "customPage": null,
+          "samePageFormBehavior": "hide_form",
+          "customUrl": null
+        },
+        "restrictions": {
+          "limitNumberOfEntries": {
+            "enabled": false,
+            "numberOfEntries": null,
+            "period": "total",
+            "limitReachedMsg": "Maximum number of entries exceeded."
+          },
+          "scheduleForm": {
+            "enabled": false
+          },
+          "requireLogin": {
+            "enabled": false,
+            "requireLoginMsg": "You must be logged in to submit the form."
+          },
+          "denyEmptySubmission": {
+            "enabled": false
+          }
+        },
+        "layout": {
+          "labelPlacement": "top",
+          "helpMessagePlacement": "with_label",
+          "errorMessagePlacement": "inline",
+          "asteriskPlacement": "asterisk-right"
+        }
+      }
+    },
+    {
+      "meta_key": "notifications",
+      "value": {
+        "name": "Admin Notification Email",
+        "sendTo": {
+          "type": "email",
+          "email": "{wp.admin_email}",
+          "field": "email",
+          "routing": [
+            {
+              "email": null,
+              "field": null,
+              "operator": "=",
+              "value": null
+            }
+          ]
+        },
+        "fromName": "{wp.site_title}",
+        "fromEmail": "",
+        "replyTo": "{inputs.email}",
+        "bcc": "",
+        "subject": "New booking: {inputs.names}",
+        "message": "<p>{all_data}</p><p>Form: {form_title}, entry {submission.id} from {ip}</p>",
+        "conditionals": {
+          "status": false,
+          "type": "all",
+          "conditions": [
+            {
+              "field": null,
+              "value": null,
+              "operator": null
+            }
+          ]
+        },
+        "enabled": true,
+        "email_template": ""
+      }
+    },
+    {
+      "meta_key": "notifications",
+      "value": {
+        "name": "Customer confirmation",
+        "sendTo": {
+          "type": "field",
+          "email": "",
+          "field": "email",
+          "routing": []
+        },
+        "fromName": "Salon",
+        "fromEmail": "hello@example.com",
+        "replyTo": "",
+        "bcc": "",
+        "subject": "Your booking at {wp.site_title}",
+        "message": "Hi {inputs.names.first_name}, see you on {inputs.visit_date}.",
+        "conditionals": {
+          "status": true,
+          "type": "all",
+          "conditions": [
+            {
+              "field": "visit_type",
+              "value": "first",
+              "operator": "="
+            }
+          ]
+        },
+        "enabled": true,
+        "asPlainText": "yes"
+      }
+    },
+    {
+      "meta_key": "step_data_persistency_status",
+      "value": "no"
+    }
+  ]
+}

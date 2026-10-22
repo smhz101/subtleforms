@@ -1,0 +1,37 @@
+{
+  "_comment": "A wpcf7_contact_form post as Contact Form 7 5.9 stores it: post_title, the _form template and the _mail, _mail_2, _messages and _additional_settings meta.",
+  "title": "Contact form 1",
+  "form": "<label> Your name\n    [text* your-name autocomplete:name] </label>\n\n<label> Your email\n    [email* your-email autocomplete:email] </label>\n\n<label> Subject\n    [text* your-subject] </label>\n\n<label> Your message (optional)\n    [textarea your-message] </label>\n\n[submit \"Submit\"]",
+  "mail": {
+    "subject": "[_site_title] \"[your-subject]\"",
+    "sender": "[_site_title] <wordpress@example.com>",
+    "body": "From: [your-name] [your-email]\nSubject: [your-subject]\n\nMessage Body:\n[your-message]\n\n-- \nThis is a notification that a contact form was submitted on your website ([_site_title] [_site_url]).",
+    "recipient": "[_site_admin_email]",
+    "additional_headers": "Reply-To: [your-email]",
+    "attachments": "",
+    "use_html": false,
+    "exclude_blank": false
+  },
+  "mail_2": {
+    "active": false,
+    "subject": "[_site_title] \"[your-subject]\"",
+    "sender": "[_site_title] <wordpress@example.com>",
+    "body": "Message Body:\n[your-message]\n\n-- \nThis email is a receipt for your contact form submission on our website ([_site_title] [_site_url]) in which your email address was used. If that was not you, please ignore this message.",
+    "recipient": "[your-email]",
+    "additional_headers": "Reply-To: [_site_admin_email]",
+    "attachments": "",
+    "use_html": false,
+    "exclude_blank": false
+  },
+  "messages": {
+    "mail_sent_ok": "Thank you for your message. It has been sent.",
+    "mail_sent_ng": "There was an error trying to send your message. Please try again later.",
+    "validation_error": "One or more fields have an error. Please check and try again.",
+    "spam": "There was an error trying to send your message. Please try again later.",
+    "accept_terms": "You must accept the terms and conditions before sending your message.",
+    "invalid_required": "Please fill out this field.",
+    "invalid_too_long": "This field has a too long input.",
+    "invalid_too_short": "This field has a too short input."
+  },
+  "additional_settings": ""
+}
