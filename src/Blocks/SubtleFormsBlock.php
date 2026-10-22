@@ -25,6 +25,7 @@ final class SubtleFormsBlock {
 	public static function init(): void {
 		add_action( 'init', array( self::class, 'register_block' ) );
 		add_action( 'enqueue_block_editor_assets', array( self::class, 'enqueue_editor_assets' ) );
+		add_action( 'enqueue_block_assets', array( self::class, 'enqueue_canvas_styles' ) );
 	}
 
 	/**
@@ -227,9 +228,37 @@ final class SubtleFormsBlock {
 	}
 
 	/**
+	 * The form stylesheet, inside the editor canvas (2.6.1).
+	 *
+	 * The editor draws blocks in an iframe (WordPress 6.3 and later), and a
+	 * style enqueued on enqueue_block_editor_assets only reaches the editor
+	 * around it, so the preview was drawn without the form's styles. Styles
+	 * enqueued on enqueue_block_assets are the ones copied into the canvas, so
+	 * the preview gets the same stylesheet the site loads. Every rule in it is
+	 * scoped to the form's own classes, so it does not touch the editor itself.
+	 */
+	public static function enqueue_canvas_styles(): void {
+		if ( ! is_admin() ) {
+			return;
+		}
+		// Only on the screens that draw blocks (post, site and widget editors).
+		$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		if ( ! $screen || ! method_exists( $screen, 'is_block_editor' ) || ! $screen->is_block_editor() ) {
+			return;
+		}
+		wp_enqueue_style(
+			'subtleforms-frontend-preview',
+			SUBTLEFORMS_PLUGIN_URL . 'build/frontend/index.jsx.css',
+			array(),
+			SUBTLEFORMS_VERSION
+		);
+	}
+
+	/**
 	 * Enqueue assets needed in block editor.
 	 *
-	 * The frontend renderer is needed for live preview in the editor.
+	 * The frontend renderer is needed for live preview in the editor. Its
+	 * stylesheet goes into the canvas (enqueue_canvas_styles).
 	 */
 	public static function enqueue_editor_assets(): void {
 		// Load asset file with proper dependencies
@@ -244,13 +273,6 @@ final class SubtleFormsBlock {
 			true
 		);
 		wp_set_script_translations( 'subtleforms-frontend-preview', 'subtleforms', SUBTLEFORMS_PLUGIN_DIR . 'languages' );
-
-		wp_enqueue_style(
-			'subtleforms-frontend-preview',
-			SUBTLEFORMS_PLUGIN_URL . 'build/frontend/index.jsx.css',
-			array(),
-			SUBTLEFORMS_VERSION
-		);
 
 		// Pass REST URL and nonce for block editor
 		wp_localize_script(

@@ -1154,7 +1154,11 @@ export default function FormRenderer({
     blockOptions?.showDescription ?? schema?.metadata?._showDescription ?? true;
 
   const blockAppearance = (() => {
-    const theme = blockOptions?.theme || schema?.metadata?._theme;
+    // "default" is what a block has until a theme is picked: the form keeps
+    // the styling it was given in the builder (2.6.1). Any other theme is
+    // the block's own choice and replaces it.
+    const chosen = blockOptions?.theme;
+    const theme = chosen && chosen !== 'default' ? chosen : schema?.metadata?._theme;
     if (!theme) {
       return null;
     }
