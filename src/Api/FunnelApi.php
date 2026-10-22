@@ -113,7 +113,7 @@ final class FunnelApi {
 	/**
 	 * Record a visitor leaving a form.
 	 *
-	 * Parameters (form encoded, from navigator.sendBeacon):
+	 * Parameters (form-encoded POST via fetch keepalive or sendBeacon):
 	 * - a:  drop (left the form), move (left again at another field after an
 	 *       earlier report) or undo (sent the form after an earlier report).
 	 * - f, s:   field key and step index where the visitor left.

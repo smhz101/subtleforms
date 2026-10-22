@@ -92,6 +92,7 @@ test('a visitor who leaves shows up as a drop-off; a sent form raises Submitted'
   // beacon that is never sent fails here with its own message. The page is
   // gone by the time the server answers, so the answer is read from the
   // report below.
+  // The leave beacon uses fetch keepalive, so waitForEvent can see it.
   const isBeacon = (req) => req.url().includes(`/forms/${form.id}/funnel`) && req.method() === 'POST';
   const beaconSent = visitor.context.waitForEvent('request', { predicate: isBeacon, timeout: 20000 });
   await visitor.page.goto('/');

@@ -8,7 +8,9 @@ function fakeWindow(userAgent = 'Mozilla/5.0 (X11; Linux x86_64) Chrome/130.0 Sa
   win.document = new EventTarget();
   win.document.visibilityState = 'visible';
   win.navigator = { userAgent, sendBeacon: jest.fn(() => true) };
+  win.fetch = jest.fn(() => Promise.resolve({ ok: true }));
   win.URLSearchParams = URLSearchParams;
+  win.Blob = Blob;
   return win;
 }
 
@@ -35,8 +37,8 @@ const type = (el, value) => {
   el.dispatchEvent(new Event('input', { bubbles: true }));
 };
 const sentParams = (win, call = 0) => {
-  const [url, body] = win.navigator.sendBeacon.mock.calls[call];
-  return { url, params: Object.fromEntries(new URLSearchParams(body)) };
+  const [url, init] = win.fetch.mock.calls[call];
+  return { url, params: Object.fromEntries(new URLSearchParams(init.body)) };
 };
 
 describe('funnelTracker', () => {
@@ -49,7 +51,7 @@ describe('funnelTracker', () => {
     const container = buildForm();
     trackFunnel(container, 5, CONFIG, win);
     win.dispatchEvent(new Event('pagehide'));
-    expect(win.navigator.sendBeacon).not.toHaveBeenCalled();
+    expect(win.fetch).not.toHaveBeenCalled();
   });
 
   it('records the start and the last field touched, and sends one beacon on leaving', () => {
@@ -67,7 +69,7 @@ describe('funnelTracker', () => {
     win.document.dispatchEvent(new Event('visibilitychange'));
     win.dispatchEvent(new Event('pagehide'));
 
-    expect(win.navigator.sendBeacon).toHaveBeenCalledTimes(1);
+    expect(win.fetch).toHaveBeenCalledTimes(1);
     const { url, params } = sentParams(win);
     expect(url).toBe('https://example.test/wp-json/subtleforms/v1/forms/5/funnel');
     expect(params).toEqual({ a: 'drop', f: 'phone', s: '-1' });
@@ -80,9 +82,9 @@ describe('funnelTracker', () => {
     type(container.querySelector('#name'), 'secret-answer@example.test');
     win.dispatchEvent(new Event('pagehide'));
 
-    const [, body] = win.navigator.sendBeacon.mock.calls[0];
-    expect(String(body)).not.toContain('secret');
-    expect(String(body)).not.toContain('example.test');
+    const [, init] = win.fetch.mock.calls[0];
+    expect(String(init.body)).not.toContain('secret');
+    expect(String(init.body)).not.toContain('example.test');
     expect(Object.keys(sentParams(win).params).sort()).toEqual(['a', 'f', 's']);
   });
 
@@ -102,7 +104,7 @@ describe('funnelTracker', () => {
     type(container.querySelector('#name'), 'Ada');
     win.document.dispatchEvent(new CustomEvent(SUBMITTED_EVENT, { detail: { formId: 5 } }));
     win.dispatchEvent(new Event('pagehide'));
-    expect(win.navigator.sendBeacon).not.toHaveBeenCalled();
+    expect(win.fetch).not.toHaveBeenCalled();
   });
 
   it('ignores the sent event of another form on the page', () => {
@@ -112,7 +114,7 @@ describe('funnelTracker', () => {
     type(container.querySelector('#name'), 'Ada');
     win.document.dispatchEvent(new CustomEvent(SUBMITTED_EVENT, { detail: { formId: 6 } }));
     win.dispatchEvent(new Event('pagehide'));
-    expect(win.navigator.sendBeacon).toHaveBeenCalledTimes(1);
+    expect(win.fetch).toHaveBeenCalledTimes(1);
   });
 
   it('sends nothing while a classic post is leaving the page', () => {
@@ -122,7 +124,7 @@ describe('funnelTracker', () => {
     type(container.querySelector('#name'), 'Ada');
     container.querySelector('form').dispatchEvent(new Event('submit', { bubbles: true, cancelable: true }));
     win.dispatchEvent(new Event('pagehide'));
-    expect(win.navigator.sendBeacon).not.toHaveBeenCalled();
+    expect(win.fetch).not.toHaveBeenCalled();
   });
 
   it('counts a failed submit followed by leaving as a drop', () => {
@@ -147,7 +149,7 @@ describe('funnelTracker', () => {
     win.document.visibilityState = 'visible';
     win.document.dispatchEvent(new CustomEvent(SUBMITTED_EVENT, { detail: { formId: 5 } }));
 
-    expect(win.navigator.sendBeacon).toHaveBeenCalledTimes(2);
+    expect(win.fetch).toHaveBeenCalledTimes(2);
     expect(sentParams(win, 1).params).toEqual({ a: 'undo', pf: 'name', ps: '-1' });
   });
 
@@ -158,21 +160,22 @@ describe('funnelTracker', () => {
     type(container.querySelector('#name'), 'Ada');
     win.dispatchEvent(new Event('pagehide'));
     win.dispatchEvent(new Event('pagehide'));
-    expect(win.navigator.sendBeacon).toHaveBeenCalledTimes(1);
+    expect(win.fetch).toHaveBeenCalledTimes(1);
 
     focus(container.querySelector('#phone'));
     win.dispatchEvent(new Event('pagehide'));
     expect(sentParams(win, 1).params).toEqual({ a: 'move', f: 'phone', s: '-1', pf: 'name', ps: '-1' });
   });
 
-  it('stays off when tracking is off, for robots and without sendBeacon', () => {
+  it('stays off when tracking is off, for robots and without fetch or sendBeacon', () => {
     const container = buildForm();
     expect(trackFunnel(container, 5, { ...CONFIG, trackFunnel: false }, fakeWindow())).toBeNull();
     expect(trackFunnel(container, 5, CONFIG, fakeWindow('Googlebot/2.1'))).toBeNull();
     expect(trackFunnel(container, 5, CONFIG, fakeWindow('Mozilla/5.0 HeadlessChrome/130.0'))).toBeNull();
-    const noBeacon = fakeWindow();
-    delete noBeacon.navigator.sendBeacon;
-    expect(trackFunnel(container, 5, CONFIG, noBeacon)).toBeNull();
+    const noTransport = fakeWindow();
+    delete noTransport.fetch;
+    delete noTransport.navigator.sendBeacon;
+    expect(trackFunnel(container, 5, CONFIG, noTransport)).toBeNull();
     expect(trackFunnel(container, 0, CONFIG, fakeWindow())).toBeNull();
   });
 

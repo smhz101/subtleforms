@@ -134,6 +134,7 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 == Changelog ==
 
 = 2.6.1 - 2026-10-23 =
+* Fix: A visitor who starts a form and leaves is counted in the form funnel again; the leave report is sent as form data so WordPress can read it.
 * Change: A form on your site now appears sooner and without a gap: its fields and labels are printed in the page and drawn from there instead of being fetched after the page loads, and a plain outline of the form is shown until the form is ready.
 * Fix: The SubtleForms block now keeps the form's own styling (colours, theme and layout) both on your site and in the editor preview, the preview is marked and cannot be used, and a theme chosen in the block still overrides it.
 * Fix: The "Rows per page" label in the list footers now sits on one line with its select instead of above it.

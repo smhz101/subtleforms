@@ -74,7 +74,7 @@ export function trackFunnel(container, formId, config = {}, win = window) {
     !formId ||
     !config.trackFunnel ||
     !config.restUrl ||
-    typeof nav.sendBeacon !== 'function' ||
+    (typeof win.fetch !== 'function' && typeof nav.sendBeacon !== 'function') ||
     BOT.test(nav.userAgent || '')
   ) {
     return null;
@@ -93,7 +93,28 @@ export function trackFunnel(container, formId, config = {}, win = window) {
 
   const beacon = (params) => {
     try {
-      nav.sendBeacon(url, new win.URLSearchParams(params));
+      const body = new win.URLSearchParams(params);
+      if (typeof win.fetch === 'function') {
+        // Prefer fetch keepalive so the body is form-urlencoded (WP REST
+        // parses it) and Playwright can observe the request.
+        win
+          .fetch(url, {
+            method: 'POST',
+            credentials: 'same-origin',
+            keepalive: true,
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+            body,
+          })
+          .catch(() => {});
+        return;
+      }
+      if (typeof nav.sendBeacon === 'function') {
+        const payload =
+          typeof win.Blob === 'function'
+            ? new win.Blob([body.toString()], { type: 'application/x-www-form-urlencoded' })
+            : body;
+        nav.sendBeacon(url, payload);
+      }
     } catch (e) {
       // Statistics must never interfere with the form.
     }
