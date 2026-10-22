@@ -81,7 +81,7 @@ const FEATURE_COPY = {
 
   'templates.pro': {
     title: __( 'More templates', 'subtleforms' ),
-    description: __( 'SubtleForms Pro adds 47 templates for registrations, orders, applications and support.', 'subtleforms' ),
+    description: __( 'SubtleForms Pro adds 52 templates for registrations, orders, applications and support.', 'subtleforms' ),
     cta: __( 'About SubtleForms Pro', 'subtleforms' ),
     lossLine: null,
     benefits: [

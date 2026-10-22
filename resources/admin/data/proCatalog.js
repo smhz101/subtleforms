@@ -35,7 +35,7 @@ export const PRO_PILLARS = [
 		key: 'insights',
 		icon: Icon.FileText,
 		title: __( 'PDFs and translation', 'subtleforms' ),
-		text: __( 'PDF copies of entries, WPML and Polylang, and 47 more templates.', 'subtleforms' ),
+		text: __( 'PDF copies of entries, WPML and Polylang, and 52 more templates.', 'subtleforms' ),
 	},
 ];
 
@@ -104,7 +104,7 @@ export const PRO_CHECKLIST = [
 	__( 'Mailchimp, Brevo, Kit, HubSpot and Zapier actions', 'subtleforms' ),
 	__( 'WooCommerce checkout and a WooCommerce Product field', 'subtleforms' ),
 	__( 'PDF copies of entries', 'subtleforms' ),
-	__( '47 more templates', 'subtleforms' ),
+	__( '52 more templates', 'subtleforms' ),
 	__( 'White label branding set in your licence portal, and WPML or Polylang translation (Agency)', 'subtleforms' ),
 ];
 
