@@ -34,3 +34,50 @@ test('each form container is mounted and loaded once', async () => {
   });
   expect(schemaCalls(8)).toBe(1);
 });
+
+test('a form whose data the server printed is drawn without a request', async () => {
+  jest.resetModules();
+  document.body.innerHTML = `
+    <script type="application/json" id="sf-form-data-9"></script>
+    <div class="subtleforms-form-container" data-form-id="9" data-reserve="1"><div class="subtleforms-skeleton">Name</div></div>
+  `;
+  document.getElementById('sf-form-data-9').textContent = JSON.stringify({
+    form: { id: 9, title: 'Inline' },
+    schema: {
+      metadata: { title: 'Inline form' },
+      fields: [{ id: 'f1', key: 'name', type: 'text', label: 'Your name' }],
+    },
+    spam_token: 'v1.1700000000.9.abcdefabcdefabcdefabcdefabcdefab',
+  });
+  global.fetch = jest.fn(() => new Promise(() => {}));
+  delete window.SubtleForms;
+
+  await act(async () => {
+    require('./index');
+  });
+  // The container was handed over in the same tick: no loading line.
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
+  });
+
+  expect(global.fetch).not.toHaveBeenCalled();
+  const container = document.querySelector('.subtleforms-form-container');
+  expect(container.querySelector('.subtleforms-loading')).toBeNull();
+  expect(container.querySelector('.subtleforms-skeleton')).toBeNull();
+  expect(container.textContent).toContain('Your name');
+});
+
+test('without printed data the form is still loaded from the route', async () => {
+  jest.resetModules();
+  document.body.innerHTML = '<div class="subtleforms-form-container" data-form-id="10"></div>';
+  const calls = [];
+  global.fetch = jest.fn((url) => {
+    calls.push(String(url));
+    return new Promise(() => {});
+  });
+  delete window.SubtleForms;
+  await act(async () => {
+    require('./index');
+  });
+  expect(calls.filter((u) => u.endsWith('/forms/10/schema'))).toHaveLength(1);
+});

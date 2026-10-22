@@ -2,8 +2,9 @@
  * 2.6.0 front-end speed.
  *
  * - A page without a form requests nothing from SubtleForms.
- * - A plain form loads the base script (deferred) and stylesheet only, and
- *   its data once, from the preload the page head started.
+ * - A plain form loads the base script (deferred) and stylesheet only. Since
+ *   2.6.1 its data is printed in the page, so it is not requested at all, and
+ *   the container shows the form's real labels before any script runs.
  * - Heavier field code is downloaded only for forms that have those fields,
  *   and each of those fields still works: the date picker opens and picks a
  *   day, the phone country list searches and switches the code, the country
@@ -88,10 +89,54 @@ test('a plain form loads only the base code, deferred, and its data once', async
   expect(scripts.map((u) => u.replace(/\?.*$/, ''))).toEqual(['build/frontend/frontend.js']);
   await expect(page.locator('script#subtleforms-frontend-js')).toHaveAttribute('defer', '');
   expect(await page.locator('script[src*="jquery"]').count()).toBe(0);
-  // Visitors fetch the form's data from a preload in the head, once.
-  await expect(page.locator('head link[rel="preload"][as="fetch"][href*="/schema"]')).toHaveCount(1);
-  expect(seen.schema).toHaveLength(1);
+  // 2.6.1: the page carries the form's data, so there is nothing to fetch
+  // and nothing to hint at.
+  await expect(page.locator(`script#sf-form-data-${form.id}[type="application/json"]`)).toHaveCount(1);
+  await expect(page.locator('head link[rel="preload"][as="fetch"]')).toHaveCount(0);
+  expect(seen.schema).toHaveLength(0);
   await page.locator('.subtleforms-form-container').screenshot({ path: `${SHOTS}/plain-form.png` });
+});
+
+test('the page shows the form\'s real labels before any script has run', async ({ page }) => {
+  const form = await publishForm(client, {
+    title: 'Speed outline',
+    fields: [
+      { id: 'n', key: 'name', type: 'text', label: 'Your full name' },
+      { id: 'm', key: 'message', type: 'textarea', label: 'Tell us more' },
+    ],
+  });
+  created.push(form);
+  // The script never arrives: what is on the page is what the server sent.
+  await page.route('**/build/frontend/frontend.js*', (route) => route.abort());
+  await page.goto(form.url);
+  const outline = page.locator('.subtleforms-form-container .subtleforms-skeleton');
+  await expect(outline).toBeVisible();
+  await expect(outline).toContainText('Your full name');
+  await expect(outline).toContainText('Tell us more');
+  await expect(outline).toHaveAttribute('aria-hidden', 'true');
+  // Nothing in it can be focused or filled in.
+  await expect(outline.locator('input, textarea, select, button, a')).toHaveCount(0);
+  // Its boxes are styled (the stylesheet is not the script).
+  await expect(outline.locator('.subtleforms-skeleton__control').first()).toHaveCSS('border-top-style', 'solid');
+});
+
+test('a form is still loaded from the route when the page carries no data', async ({ page }) => {
+  const form = await publishForm(client, {
+    title: 'Speed fallback',
+    fields: [{ id: 'n', key: 'name', type: 'text', label: 'Fallback name' }],
+  });
+  created.push(form);
+  // As a page cache or an optimiser that strips the data tag would serve it.
+  await page.route(`**/?page_id=${form.pageId}`, async (route) => {
+    const response = await route.fetch();
+    const body = (await response.text()).replace(/<script type="application\/json" id="sf-form-data-\d+">.*?<\/script>/s, '');
+    await route.fulfill({ response, body });
+  });
+  const seen = watch(page);
+  await page.goto(form.url);
+  await formReady(page);
+  await expect(page.locator('.subtleforms-form-container')).toContainText('Fallback name');
+  expect(seen.schema).toHaveLength(1);
 });
 
 test('special fields load their code and still work', async ({ page }) => {
@@ -219,7 +264,8 @@ test('a block form is drawn once, without a layout shift', async ({ page }) => {
   await page.goto(`/?page_id=${blockPage}`);
   await formReady(page);
   await page.waitForTimeout(500);
-  expect(seen.schema).toHaveLength(1);
+  // Drawn from the data the page carries (2.6.1): no request for it.
+  expect(seen.schema).toHaveLength(0);
   expect(await page.evaluate(() => window.__sfShift)).toBeLessThan(0.01);
   await expect(page.locator('.subtleforms-block form')).toHaveCount(1);
 });

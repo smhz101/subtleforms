@@ -158,11 +158,11 @@ final class SubtleFormsBlock {
 		$reserve = \SubtleForms\Frontend\FormPlaceholder::attributes( $schema, $show_title, $show_desc )
 			. \SubtleForms\Frontend\Shortcode::featuresAttribute( $schema );
 
-		\SubtleForms\Frontend\FrontendAssets::preloadSchema( (int) $form_id );
+		$inline = \SubtleForms\Frontend\Shortcode::inlineParts( (int) $form_id, $schema, $show_title, $show_desc );
 		\SubtleForms\Frontend\FrontendAssets::preloadFieldCode( $schema );
 		\SubtleForms\Frontend\FrontendAssets::loadFieldTranslations( $schema );
 		return sprintf(
-			'<div class="%s" data-form-id="%d" data-show-title="%d" data-show-description="%d" data-theme="%s" data-ajax="%d" data-tabindex="%d" data-field-values="%s"%s%s></div>',
+			'<div class="%s" data-form-id="%d" data-show-title="%d" data-show-description="%d" data-theme="%s" data-ajax="%d" data-tabindex="%d" data-field-values="%s"%s%s>%s</div>%s',
 			esc_attr( implode( ' ', $classes ) ),
 			esc_attr( $form_id ),
 			$show_title ? 1 : 0,
@@ -172,7 +172,9 @@ final class SubtleFormsBlock {
 			$tab_index,
 			esc_attr( $field_values ),
 			null === $classic ? '' : ' data-classic-result="' . esc_attr( (string) wp_json_encode( $classic ) ) . '"',
-			$reserve
+			$reserve,
+			$inline['outline'],
+			$inline['tag']
 		);
 	}
 

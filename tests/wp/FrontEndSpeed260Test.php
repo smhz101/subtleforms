@@ -119,6 +119,18 @@ final class FrontEndSpeed260Test extends TestCase {
 
 		$this->assertTrue( $this->formAssetsEnqueued() );
 		$this->assertSame( 'defer', wp_scripts()->get_data( 'subtleforms-frontend', 'strategy' ) );
+		// The page carries the form's data (2.6.1), so no hint to fetch it.
+		$this->assertNotContains( FrontendAssets::schemaUrl( $formId ), wp_list_pluck( apply_filters( 'wp_preload_resources', array() ), 'href' ) );
+	}
+
+	public function test_schema_is_preloaded_when_the_page_does_not_carry_it(): void {
+		$formId = $this->contactForm();
+		$off    = '__return_false';
+		add_filter( 'subtleforms/frontend/inline_form_data', $off );
+		$this->viewPage( '<p>Contact us</p>[subtleforms id="' . $formId . '"]' );
+		do_action( 'wp_enqueue_scripts' );
+		remove_filter( 'subtleforms/frontend/inline_form_data', $off );
+
 		$this->assertContains( FrontendAssets::schemaUrl( $formId ), wp_list_pluck( apply_filters( 'wp_preload_resources', array() ), 'href' ) );
 	}
 

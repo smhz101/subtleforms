@@ -9,6 +9,7 @@ import './styles/frontend.scss';
 import { debug } from '../shared/debug';
 import { observeView } from './utils/viewBeacon';
 import { containerGroups, loadGroups } from './components/fields/lazyFields';
+import { readInlineFormData } from './utils/inlineData';
 import { trackFunnel } from './utils/funnelTracker';
 
 /**
@@ -34,32 +35,45 @@ function mount(container, options = {}) {
 
   // Start downloading the code of this form's heavier fields now, while the
   // form itself loads (2.6.0). The server lists them in data-features.
-  loadGroups(containerGroups(container));
+  const fieldCode = loadGroups(containerGroups(container));
 
   // A container that already has a form gets the new options on the same
   // root: a second root would draw the form twice and load it twice.
   const existing = container._subtleformsRoot;
   const root = existing || createRoot(container);
-  root.render(
-    <FormErrorBoundary>
-      <FormRenderer
-        formId={formId}
-        preloadedSchema={schema}
-        preview={preview}
-        onSubmit={onSubmit}
-        blockOptions={blockOptions}
-      />
-    </FormErrorBoundary>
-  );
+  // Store root reference for cleanup
+  container._subtleformsRoot = root;
+  const draw = () => {
+    // Unmounted while the field code was downloading.
+    if (!existing && container._subtleformsRoot !== root) {
+      return;
+    }
+    root.render(
+      <FormErrorBoundary>
+        <FormRenderer
+          formId={formId}
+          preloadedSchema={schema}
+          preview={preview}
+          onSubmit={onSubmit}
+          blockOptions={blockOptions}
+        />
+      </FormErrorBoundary>
+    );
+  };
+  // A form whose data the server printed (2.6.1) keeps the server-drawn
+  // outline in the container until the form can replace it in one go, with
+  // its field code in, instead of showing a loading line first.
+  if (!existing && !schema && readInlineFormData(formId)) {
+    fieldCode.then(draw);
+  } else {
+    draw();
+  }
   if (existing) {
     return;
   }
 
   // Release the height kept for the form once it is drawn (UX2-27).
   releaseReserve(container);
-
-  // Store root reference for cleanup
-  container._subtleformsRoot = root;
 }
 
 /**

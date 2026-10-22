@@ -20,7 +20,8 @@ import { debug } from '../../shared/debug';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { computeQuote, isPricedForm, formatMoney, isPricedType } from '../../shared/pricing';
 import { FormContext, PaymentContext } from './fields/contexts';
-import { lazyField, loadFieldsFor } from './fields/lazyFields';
+import { lazyField, loadFieldsFor, fieldsReadyFor } from './fields/lazyFields';
+import { readInlineFormData } from '../utils/inlineData';
 import {
   formAppearanceStyle,
   formAppearanceClasses,
@@ -70,10 +71,16 @@ export default function FormRenderer({
   onSubmit: customOnSubmit = null,
   blockOptions = null,
 }) {
-  const [loading, setLoading] = useState(!preloadedSchema);
-  const [schema, setSchema] = useState(preloadedSchema);
+  // The data the server printed into the page, when it did (2.6.1): the form
+  // is drawn from it without a request. Read once; a form handed its schema
+  // (the builder preview) never uses it.
+  const [inline] = useState(() => (preloadedSchema ? null : readInlineFormData(formId)));
+  const [loading, setLoading] = useState(
+    !preloadedSchema && !(inline && fieldsReadyFor(inline.schema))
+  );
+  const [schema, setSchema] = useState(preloadedSchema || inline?.schema || null);
   // Server-signed load time for the spam time trap (FF-11, FF-12).
-  const [spamToken, setSpamToken] = useState('');
+  const [spamToken, setSpamToken] = useState(inline?.spamToken || '');
   const [error, setError] = useState(null);
   const [values, setValues] = useState({});
   const [submitting, setSubmitting] = useState(false);
@@ -114,6 +121,20 @@ export default function FormRenderer({
       return;
     }
 
+    // Printed by the server: no request. Wait for the field code first when
+    // it is not here yet, so the whole form appears at once.
+    if (inline) {
+      let active = true;
+      loadFieldsFor(inline.schema).then(() => {
+        if (active) {
+          setLoading(false);
+        }
+      });
+      return () => {
+        active = false;
+      };
+    }
+
     let active = true;
     restFetch(`/forms/${formId}/schema`)
       .then((res) => res.json())
@@ -146,7 +167,7 @@ export default function FormRenderer({
     return () => {
       active = false;
     };
-  }, [formId, preloadedSchema]);
+  }, [formId, preloadedSchema, inline]);
 
   // Prefill field values from the block's "Field Values" option (one
   // key=value pair per line). Runs once on mount. This hook MUST stay above

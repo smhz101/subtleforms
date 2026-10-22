@@ -53,7 +53,10 @@ final class Shortcode {
 				$schema = is_array( $schema ) ? $schema : null;
 				// A closed or login-only form shows a message, not the form.
 				if ( null === \SubtleForms\Engine\FormRestrictions::blockedReason( $formId, $schema ) ) {
-					FrontendAssets::preloadSchema( $formId );
+					// A page that carries the form's data needs no hint to fetch it (2.6.1).
+					if ( ! InlineData::enabled() ) {
+						FrontendAssets::preloadSchema( $formId );
+					}
 					FrontendAssets::preloadFieldCode( $schema );
 				}
 			}
@@ -101,14 +104,41 @@ final class Shortcode {
 		// does not jump when the form appears (UX2-27).
 		$schema = \SubtleForms\Engine\FormRestrictions::activeSchema( $formId );
 		$schema = is_array( $schema ) ? $schema : null;
-		FrontendAssets::preloadSchema( $formId );
+		$inline = self::inlineParts( $formId, $schema );
 		FrontendAssets::preloadFieldCode( $schema );
 		FrontendAssets::loadFieldTranslations( $schema );
 		return sprintf(
-			'<div class="subtleforms-form-container" data-form-id="%d"%s%s></div>',
+			'<div class="subtleforms-form-container" data-form-id="%d"%s%s>%s</div>%s',
 			esc_attr( (string) $formId ),
 			FormPlaceholder::attributes( $schema ),
-			self::featuresAttribute( $schema )
+			self::featuresAttribute( $schema ),
+			$inline['outline'],
+			$inline['tag']
+		);
+	}
+
+	/**
+	 * What goes with a form's container (2.6.1): the form's data as a JSON
+	 * script tag, so the script draws the form without a request, and the
+	 * outline of the form for the container. When the data is not printed the
+	 * browser is told to fetch it early instead (the head hint of 2.6.0).
+	 *
+	 * @param int                       $formId Form ID.
+	 * @param array<string, mixed>|null $schema Active schema.
+	 * @param bool                      $showTitle       Whether the title is shown.
+	 * @param bool                      $showDescription Whether the description is shown.
+	 * @return array{tag: string, outline: string}
+	 */
+	public static function inlineParts( int $formId, ?array $schema, bool $showTitle = true, bool $showDescription = true ): array {
+		$payload = InlineData::enabled() ? InlineData::payload( $formId ) : null;
+		$tag     = null === $payload ? '' : InlineData::tag( $formId, $payload );
+		if ( ! InlineData::printed( $formId ) ) {
+			FrontendAssets::preloadSchema( $formId );
+		}
+		$public = is_array( $payload['schema'] ?? null ) ? $payload['schema'] : $schema;
+		return array(
+			'tag'     => $tag,
+			'outline' => Skeleton::html( $public, $showTitle, $showDescription ),
 		);
 	}
 

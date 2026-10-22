@@ -327,3 +327,95 @@
 		min-height: var(--subtleforms-reserve-narrow, var(--subtleforms-reserve, 0px));
 	}
 }
+
+// The outline the server prints inside the container (Skeleton.php, 2.6.1): the
+// form's real title and labels with empty boxes where the fields go, so the
+// page shows the form's shape before the script has run. The renderer replaces
+// it in one go when the form is drawn. It sits outside the form's root, so these
+// rules stay whole for every form (the build scopes other rules to a form root).
+/*! inherit: keep-start (the outline is drawn outside any form root) */
+.subtleforms-skeleton {
+	display: flex;
+	flex-wrap: wrap;
+	// The form's own rhythm: 44px between rows (FormPlaceholder::GAP).
+	gap: 44px var(--subtleforms-field-gap, 20px);
+	margin: 0;
+	padding: 0;
+	font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+	font-size: 1rem;
+	line-height: 1.5;
+	pointer-events: none;
+	user-select: none;
+}
+
+.subtleforms-skeleton__title {
+	flex: 1 1 100%;
+	margin: 0 0 -20px;
+	font-size: 1.75rem;
+	font-weight: 600;
+	line-height: 1.3;
+}
+
+.subtleforms-skeleton__description {
+	flex: 1 1 100%;
+	margin: 0 0 -20px;
+	font-size: 1rem;
+	opacity: 0.7;
+}
+
+.subtleforms-skeleton__field {
+	flex: 1 1 100%;
+	min-width: 0;
+}
+
+.subtleforms-skeleton__label {
+	display: block;
+	margin-bottom: 6px;
+	font-size: 1rem;
+	font-weight: var(--subtleforms-label-weight, 500);
+	line-height: 1.4;
+}
+
+.subtleforms-skeleton__control {
+	display: block;
+	box-sizing: border-box;
+	width: 100%;
+	min-height: 44px;
+	border: 1px solid var(--subtleforms-color-border, #d0d5dd);
+	border-radius: var(--subtleforms-radius-md, 4px);
+	background: rgba(127, 127, 127, 0.06);
+}
+
+.subtleforms-skeleton__control--textarea {
+	min-height: 100px;
+}
+
+.subtleforms-skeleton__control--choice {
+	min-height: 0;
+	height: 20px;
+	width: 55%;
+	margin-bottom: 10px;
+	border-radius: 999px;
+}
+
+.subtleforms-skeleton__button {
+	display: block;
+	width: 140px;
+	height: 44px;
+	border-radius: var(--subtleforms-radius-md, 4px);
+	background: rgba(127, 127, 127, 0.18);
+}
+
+.subtleforms-skeleton__action {
+	flex: 1 1 100%;
+}
+
+@media (max-width: 600px) {
+	.subtleforms-skeleton__field {
+		flex-basis: 100% !important;
+	}
+}
+
+/*! inherit: keep-end */
+
+/*! inherit: keep-end */

@@ -489,33 +489,12 @@ final class FormsApi {
 				return ApiResponse::not_found( __( 'Form not available', 'subtleforms' ) );
 			}
 
-			try {
-				$schema = $this->formsRepo->loadSchemaVersion( $formId, $version );
-			} catch ( \RuntimeException $e ) {
-				Logger::error( 'API Error: %s', $e->getMessage() );
+			$payload = $this->publicPayload( $form, $version );
+			if ( null === $payload ) {
 				return ApiResponse::not_found( __( 'Schema not available', 'subtleforms' ) );
 			}
 
-			if ( ! $schema ) {
-				return ApiResponse::not_found( __( 'Schema not available', 'subtleforms' ) );
-			}
-
-			$schemaData = $schema['schema'] ?? $schema;
-			$schemaData = is_array( $schemaData ) ? SchemaRepair::repair( $schemaData, (int) $form['id'] ) : $schemaData;
-			$schemaData = $this->injectCaptchaHtml( $schemaData );
-
-			return ApiResponse::success(
-				array(
-					'form'    => array(
-						'id'    => (int) $form['id'],
-						'title' => $form['title'] ?? '',
-					),
-					'schema'     => self::filterPublicSchema( $this->buildPublicSchema( $schemaData ), (int) $form['id'] ),
-					'version'    => $schema['version'] ?? null,
-					// Server-signed load time for the spam time trap (FF-11, FF-12).
-					'spam_token' => \SubtleForms\Engine\SpamProtection::issue_token( (int) $form['id'] ),
-				)
-			);
+			return ApiResponse::success( $payload );
 		}
 
 		// AUTHENTICATED: Allow draft schema with context=builder
@@ -579,6 +558,49 @@ final class FormsApi {
 				'schema'  => $schemaData,
 				'version' => $schema['version'] ?? null,
 			)
+		);
+	}
+
+	/**
+	 * What a visitor gets for a published form: the form's id and title, the
+	 * public schema, its version and a signed load time. Nothing else from the
+	 * form row (draft schema, config, notifications, webhooks) is included.
+	 *
+	 * This is the one place that builds it. The schema route returns it and,
+	 * since 2.6.1, the shortcode and the block print the same array into the
+	 * page (Frontend\InlineData), so what the browser draws from the page and
+	 * what it would have fetched can never differ.
+	 *
+	 * @param array<string, mixed> $form    Form row.
+	 * @param int|null             $version Schema version, null for the active one.
+	 * @return array<string, mixed>|null Null when the form has no schema.
+	 */
+	public function publicPayload( array $form, ?int $version = null ): ?array {
+		$formId = (int) ( $form['id'] ?? 0 );
+		try {
+			$schema = $this->formsRepo->loadSchemaVersion( $formId, $version );
+		} catch ( \RuntimeException $e ) {
+			Logger::error( 'API Error: %s', $e->getMessage() );
+			return null;
+		}
+
+		if ( ! $schema ) {
+			return null;
+		}
+
+		$schemaData = $schema['schema'] ?? $schema;
+		$schemaData = is_array( $schemaData ) ? SchemaRepair::repair( $schemaData, $formId ) : $schemaData;
+		$schemaData = $this->injectCaptchaHtml( $schemaData );
+
+		return array(
+			'form'       => array(
+				'id'    => $formId,
+				'title' => $form['title'] ?? '',
+			),
+			'schema'     => self::filterPublicSchema( $this->buildPublicSchema( $schemaData ), $formId ),
+			'version'    => $schema['version'] ?? null,
+			// Server-signed load time for the spam time trap (FF-11, FF-12).
+			'spam_token' => \SubtleForms\Engine\SpamProtection::issue_token( $formId ),
 		);
 	}
 
