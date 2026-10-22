@@ -1,6 +1,6 @@
 {
   "name": "subtleforms-admin",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "private": true,
   "engines": {
     "node": ">=20.0.0"
@@ -14,6 +14,7 @@
     "start:block": "wp-scripts start ./resources/blocks/form/index.js --output-path=./build/blocks/form",
     "build:block": "wp-scripts build ./resources/blocks/form/index.js --output-path=./build/blocks/form && cp resources/blocks/form/block.json resources/blocks/form/editor.css build/blocks/form/",
     "build:all": "npm run build && npm run build:frontend && npm run build:block",
+    "size": "node bin/check-bundle-size.js",
     "test": "wp-scripts test-unit-js",
     "lint:js": "wp-scripts lint-js",
     "test:e2e": "playwright test",

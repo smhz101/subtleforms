@@ -1,1 +1,0 @@
-UI251-02,P2,Free 2.5.1,,Claude,new in 2.5.0,fixed,Free 2.5.1 (#58),owner report (2.5.0),Choosing 50 or 100 rows per page on Submissions fails or stops after 100 entries because requests asked for too many rows and paged by a parameter the API ignores.,Batches now advance with offset.

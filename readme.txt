@@ -4,7 +4,7 @@ Tags: form builder, contact form, forms, multi-step form, file upload
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.5.0
+Stable tag: 2.6.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -90,6 +90,10 @@ Files are saved under a folder with a random name, without file extensions, and 
 
 The answers a visitor sends, the time, and the visitor's IP address and browser user agent for spam checks. It also counts form views per day, without storing who viewed. You can set how long entries are kept, and the WordPress privacy tools can export or erase a person's entries.
 
+= Does the form funnel track visitors? =
+
+No. It keeps daily totals per form of how many people saw, started and left a form and the last field touched. It sets no cookies and stores no answers, IP addresses or other personal data.
+
 = Where are the docs and support? =
 
 Documentation is at [subtleforms.com/docs](https://subtleforms.com/docs/). Ask questions in the support forum on WordPress.org.
@@ -128,6 +132,18 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 6. The form preview with appearance presets.
 
 == Changelog ==
+
+= 2.6.0 - 2026-10-22 =
+* New: A form funnel on the Reports screen shows how many people saw, started and sent each form and the last field people touched before leaving without sending it, with a plain suggestion for each field; it keeps only daily totals per form, sets no cookies, stores no answers or IP addresses, skips robots and people who manage SubtleForms, and follows the Count form views switch. Form views are no longer counted for people who manage SubtleForms either, so Seen and Started count the same visitors.
+* New: Settings, Tools, Migrate finds the forms you made with Contact Form 7, Gravity Forms or Fluent Forms on this site and imports the ones you tick as drafts, with their fields, required rules, choices, email notifications and thank-you message, and a report of anything that could not be copied; entries and payment settings are not imported and the original forms are not changed. Email notifications have a Reply-To setting that takes one address or a field tag such as {field:email}, and imported forms keep their Reply-To.
+* New: New forms now stop spam robots quietly without a CAPTCHA, because the hidden trap field and the too-fast check are on by default for every form you create, the dashboard shows how many spam messages were blocked in the last 30 days and why, each form shows its own count under Spam protection, and sites that update get a one-time offer to turn both on for all their forms with Undo.
+* Change: Forms load faster: every page with a form now downloads 22 percent less SubtleForms code (46 KB instead of 59 KB compressed), the date picker, phone and country lists, uploads, payments and the conversational layout are only downloaded by forms that use them, pages without a form still load nothing, and on a slow mobile connection a form is ready about a quarter of a second sooner.
+* Change: The SubtleForms screens no longer pin the WordPress admin menu in its own scrolling column on short windows; the menu behaves as in WordPress.
+* Change: The Submissions screen no longer has a New tab, because All already lists unread entries; an old link to the New tab opens All.
+* Change: Tools is now a tab in Settings, and Settings has an MCP tab (Pro adds its screen; without Pro it explains MCP and links to the upgrade page). The old Tools address opens the Tools tab.
+* Fix: The Submissions footer (result count, previous and next, rows per page) stays at the bottom of the list when a tab or a search has no results.
+* Fix: Submissions lists past the first 100 entries when 50 or 100 rows per page are chosen, and an empty page after the last row was removed keeps its real page count so Previous works.
+* Fix: Choosing 50 or 100 rows per page on the Submissions screen lists the entries instead of showing "Entries could not be loaded".
 
 = 2.5.0 - 2026-10-21 =
 * Change: The Branding tab is gone from Settings. White label branding for Agency licences is set once in the licence portal on subtleforms.com and applied by SubtleForms Pro on every site that uses the licence.
@@ -279,6 +295,9 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 The full history is in changelog.txt in the plugin folder.
 
 == Upgrade Notice ==
+
+= 2.6.0 =
+Spam protection (the hidden trap field and the too-fast check) is on for new forms only. Nothing changes for your existing forms unless you accept the offer on the SubtleForms dashboard to turn it on for all of them.
 
 = 2.5.0 =
 The Branding tab is gone from Settings. White label branding for Agency licences is now set in the licence portal on subtleforms.com. Update SubtleForms Pro to 2.5.0 at the same time.

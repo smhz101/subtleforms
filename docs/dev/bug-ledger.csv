@@ -270,3 +270,8 @@ SUB5-02,P3,Free 2.5.0,,Claude,new in 2.4.1,fixed,Free 2.5.0 (#54),owner report (
 SUB5-03,P2,Free 2.5.0,,Claude,new in 2.4.1,fixed,Free 2.5.0 (#54),owner report (2.4.1),Trash Read Spam and Starred tabs show no counts and counts go stale after actions.,
 SUB5-04,P3,Free 2.5.0,,Claude,new in 2.4.1,fixed,Free 2.5.0 (#54),owner report (2.4.1),Starred rows get a dark background; now only a flat amber star.,
 SUB5-05,P3,Free 2.5.0,,Claude,new in 2.4.1,fixed,Free 2.5.0 (#54),owner report (2.4.1),Row action tooltips can show another button's label.,
+UI251-03,P3,Free 2.6.0,,Claude,new in 2.5.0,fixed,Free 2.6.0 (#58),owner report (2.5.0),Submissions footer disappears when a tab or search has no results.,
+UI251-01,P3,Free 2.6.0,,Claude,new in 2.5.0,fixed,Free 2.6.0 (#58),owner report (2.5.0),The pinned scrolling admin menu on SubtleForms screens is removed; the WordPress menu behaves as in core.,Supersedes the UX2-16 menu column.
+UI251-04,P3,Free 2.6.0,,Claude,new in 2.5.0,fixed,Free 2.6.0 (#58),owner report (2.5.0),Remove the New tab from Submissions; old tab=unread and tab=new links open All.,Unread data counts and the menu badge are unchanged.
+UI251-05,P3,Free 2.6.0,,Claude,new in 2.5.0,fixed,Free 2.6.0 (#58),owner report (2.5.0),Tools moves into Settings as a tab; Settings gets an MCP tab with a slot for Pro and a Free note.,Old subtleforms-tools URL redirects to the Tools tab. Extension point: SubtleFormsExtend.registerSettingsTab.
+UI251-02,P2,Free 2.6.0,,Claude,new in 2.5.0,fixed,Free 2.6.0 (#58),owner report (2.5.0),Choosing 50 or 100 rows per page on Submissions fails or stops after 100 entries because requests asked for too many rows and paged by a parameter the API ignores.,Batches now advance with offset.
