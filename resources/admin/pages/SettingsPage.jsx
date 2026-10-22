@@ -21,7 +21,7 @@ const ToolsPanel = lazyWithRetry(() => import(/* webpackChunkName: "page-tools" 
 
 /**
  * Settings sections, grouped like core's Site Settings: what the plugin does
- * day to day, then Pro.
+ * day to day (ending with Tools, then MCP), then Pro.
  */
 const GROUPS = [
   {
@@ -64,21 +64,22 @@ const GROUPS = [
         title: __('Tools', 'subtleforms'),
         description: __('Move forms and entries, bring a form across from another plugin, and read what the site has been doing.', 'subtleforms'),
       },
-    ],
-  },
-  {
-    key: 'pro',
-    title: __('Pro', 'subtleforms'),
-    tabs: [
+      // MCP comes right after Tools. Pro registers the body with
+      // SubtleFormsExtend.registerSettingsTab('mcp', ...) and the tab keeps
+      // this slot; without Pro it explains what MCP is and where to get it.
       {
-        // Pro registers the body with SubtleFormsExtend.registerSettingsTab('mcp', ...).
-        // Without it the tab explains what MCP is and where to get it.
         name: 'mcp',
         icon: Icon.Bot,
         pro: true,
         title: __('MCP', 'subtleforms'),
         description: __('Connect AI tools to your forms through the Model Context Protocol.', 'subtleforms'),
       },
+    ],
+  },
+  {
+    key: 'pro',
+    title: __('Pro', 'subtleforms'),
+    tabs: [
       {
         name: 'license',
         icon: Icon.KeyRound,
@@ -97,6 +98,9 @@ const VISIBLE_GROUPS = getBranding().showLicense
       tabs: g.tabs.filter((t) => t.name !== 'license'),
     }));
 
+// A group with no tab left (Pro without License and no add-on tab) is not shown.
+const withTabs = (groups) => groups.filter((g) => g.tabs.length > 0);
+
 export const ALL_TABS = VISIBLE_GROUPS.flatMap((g) => g.tabs);
 
 const BUILT_IN = ALL_TABS.map((t) => t.name);
@@ -104,19 +108,20 @@ const BUILT_IN = ALL_TABS.map((t) => t.name);
 /**
  * The groups with the tabs add-ons registered (SubtleFormsExtend.registerSettingsTab).
  * A registered name that Free already lists keeps its place and can set its
- * own title and description; a new name joins the Pro group.
+ * own title and description (so Pro's MCP tab stays right after Tools,
+ * whatever order it asks for); a new name joins the Pro group.
  *
  * @return {Array} Groups.
  */
 export function getGroups() {
   const added = settingsTabs();
-  if (!added.length) return VISIBLE_GROUPS;
+  if (!added.length) return withTabs(VISIBLE_GROUPS);
   const byName = Object.fromEntries(added.map((t) => [t.name, t]));
   const fresh = added
     .filter((t) => !BUILT_IN.includes(t.name) && t.title)
     .sort((a, b) => (a.order ?? 100) - (b.order ?? 100))
     .map((t) => ({ name: t.name, icon: Icon.Puzzle, title: t.title, description: t.description || '' }));
-  return VISIBLE_GROUPS.map((g) => ({
+  return withTabs(VISIBLE_GROUPS.map((g) => ({
     ...g,
     tabs: [
       ...g.tabs.map((tab) => {
@@ -125,7 +130,7 @@ export function getGroups() {
       }),
       ...(g.key === 'pro' ? fresh : []),
     ],
-  }));
+  })));
 }
 
 /**

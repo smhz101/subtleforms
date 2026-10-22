@@ -443,21 +443,26 @@
 	}
 }
 
-// An empty tab or a search with no results keeps its footer: the table fills
-// the pane, the message takes the free space, and the footer sits at the
-// bottom edge like it does with rows.
+// The footer (count, previous and next, rows per page) sits on the bottom edge
+// of the list pane whether the list has no entry, one, a few or more than fit:
+// the table fills the pane, the rows take the space they need, and the footer
+// is pushed to the bottom. With more rows than fit, the list scrolls and the
+// footer sticks to the bottom (above). An empty tab or a search with no
+// results gives the free space to its message.
 .sf-inbox__list > .sf-submissions-table {
 	min-height: 100%;
 
-	> .sf-data-table--empty {
-		flex: 1 1 auto;
+	> .sf-data-table {
+		flex: 1 0 auto;
 
+		> .sf-data-table__pagination {
+			margin-block-start: auto;
+		}
+	}
+
+	> .sf-data-table--empty {
 		.sf-data-table__empty {
 			flex: 1 1 auto;
-		}
-
-		.sf-data-table__pagination {
-			margin-block-start: auto;
 		}
 	}
 }

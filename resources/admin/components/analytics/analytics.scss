@@ -64,23 +64,49 @@
 .sf-analytics-panel {
 	position: relative;
 
+	// Title and form selector share the header and stack when there is no
+	// room for both, so nothing is pushed past the panel edge.
 	.sf-panel__header {
+		flex-wrap: wrap;
 		align-items: flex-start;
+
+		> div:first-child {
+			flex: 1 1 240px;
+			min-width: 0;
+		}
 	}
 
+	// Search box and form list side by side, as wide as the header allows.
 	&__select {
-		min-width: 180px;
+		display: flex;
+		gap: inherit;
+		flex-direction: row;
+		flex: 0 1 auto;
+		min-width: 0;
+		max-width: 100%;
+
+		> * {
+			flex: 1 1 160px;
+			min-width: 0;
+		}
 
 		.components-base-control__field { margin-bottom: 0; }
 	}
 
+	&__chart {
+		min-width: 0;
+	}
+
+	// Three boxes in a row; a large number on a narrow screen moves a box to
+	// the next row instead of running out of it.
 	&__totals {
 		display: grid;
-		grid-template-columns: repeat(3, minmax(0, 1fr));
+		grid-template-columns: repeat(auto-fit, minmax(min(100%, 128px), 1fr));
 		gap: 12px;
 		margin: 0 0 20px;
 
 		div {
+			min-width: 0;
 			padding: 12px 14px;
 			border: 1px solid var(--sf-border-subtle);
 			border-radius: var(--sf-radius-md);
@@ -95,6 +121,7 @@
 
 		dd {
 			margin: 0;
+			overflow-wrap: anywhere;
 			font-size: var(--sf-text-lg, 18px);
 			font-weight: var(--sf-weight-semibold);
 			font-variant-numeric: tabular-nums;
@@ -164,10 +191,13 @@
 		align-items: center;
 		justify-content: flex-end;
 		gap: 12px;
+		min-width: 0;
+		max-width: 100%;
 	}
 
 	&__range {
 		display: inline-flex;
+		flex-wrap: wrap;
 		gap: 4px;
 	}
 
@@ -185,6 +215,7 @@
 
 	&__summary {
 		margin: 0 0 16px;
+		overflow-wrap: anywhere;
 		font-size: var(--sf-text-md, 15px);
 		font-weight: var(--sf-weight-medium);
 		color: var(--sf-text);
@@ -200,7 +231,7 @@
 
 	&__stage {
 		display: grid;
-		grid-template-columns: 88px minmax(0, 1fr) 64px 96px;
+		grid-template-columns: 88px minmax(0, 1fr) minmax(64px, auto) 96px;
 		align-items: center;
 		gap: 12px;
 		margin: 0 0 10px;
@@ -270,6 +301,8 @@
 	&__drop-head,
 	&__steps li {
 		display: flex;
+		min-width: 0;
+		overflow-wrap: anywhere;
 		flex-wrap: wrap;
 		justify-content: space-between;
 		gap: 4px 12px;
@@ -278,12 +311,15 @@
 	}
 
 	&__drop-name {
+		min-width: 0;
 		font-weight: var(--sf-weight-medium);
+		overflow-wrap: anywhere;
 	}
 
 	&__drop-count {
 		color: var(--sf-text-secondary);
 		font-variant-numeric: tabular-nums;
+		white-space: nowrap;
 	}
 
 	&__hint {
@@ -328,12 +364,24 @@
 		}
 
 		&__stage {
-			grid-template-columns: 72px minmax(0, 1fr) 48px;
+			grid-template-columns: 64px minmax(0, 1fr) auto;
+			gap: 8px;
 
 			.sf-funnel__stage-share {
 				grid-column: 2 / -1;
 				margin-top: -6px;
 			}
 		}
+	}
+}
+
+// "Show all" under a shortened report list (2.6.0).
+.sf-show-all {
+	margin: 4px 0 20px;
+
+	.sf-panel__body--flush & {
+		margin: 0;
+		padding: 12px 16px;
+		border-top: 1px solid var(--sf-border-subtle);
 	}
 }

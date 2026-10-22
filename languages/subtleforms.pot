@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-21T22:57:44+00:00\n"
+"POT-Creation-Date: 2026-10-22T01:11:58+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: subtleforms\n"
@@ -74,9 +74,9 @@ msgstr ""
 #: resources/admin/components/TrendChart.jsx:39
 #: resources/admin/pages/DashboardPage.jsx:80
 #: resources/admin/pages/DashboardPage.jsx:126
-#: resources/admin/pages/ReportsPage.jsx:58
-#: resources/admin/pages/ReportsPage.jsx:71
-#: resources/admin/pages/ReportsPage.jsx:105
+#: resources/admin/pages/ReportsPage.jsx:79
+#: resources/admin/pages/ReportsPage.jsx:92
+#: resources/admin/pages/ReportsPage.jsx:126
 #: resources/admin/pages/SubmissionDetailPage.jsx:1251
 #: resources/admin/pages/SubmissionsPage.jsx:309
 #: resources/admin/pages/ToolsPage.jsx:299
@@ -101,7 +101,7 @@ msgstr ""
 #: src/Admin/AdminMenu.php:221
 #: resources/admin/app/AdminApp.jsx:212
 #: resources/admin/components/AppNav.jsx:44
-#: resources/admin/pages/ReportsPage.jsx:50
+#: resources/admin/pages/ReportsPage.jsx:71
 msgid "Reports"
 msgstr ""
 
@@ -132,9 +132,9 @@ msgstr ""
 #: resources/admin/app/AdminApp.jsx:209
 #: resources/admin/components/AppNav.jsx:68
 #: resources/admin/components/builder/layout/BuilderViewSwitcher.jsx:11
-#: resources/admin/pages/SettingsPage.jsx:203
-#: resources/admin/pages/SettingsPage.jsx:213
-#: resources/admin/pages/SettingsPage.jsx:224
+#: resources/admin/pages/SettingsPage.jsx:208
+#: resources/admin/pages/SettingsPage.jsx:218
+#: resources/admin/pages/SettingsPage.jsx:229
 msgid "Settings"
 msgstr ""
 
@@ -5143,7 +5143,7 @@ msgstr ""
 #: resources/admin/app/AdminApp.jsx:206
 #: resources/admin/components/AppNav.jsx:27
 #: resources/admin/pages/FormsPage.jsx:131
-#: resources/admin/pages/ReportsPage.jsx:57
+#: resources/admin/pages/ReportsPage.jsx:78
 #: resources/admin/pages/SettingsPage.jsx:29
 #: resources/admin/pages/ToolsPage.jsx:254
 msgid "Forms"
@@ -5191,7 +5191,7 @@ msgid "Untitled"
 msgstr ""
 
 #: resources/admin/components/AdminShell.jsx:64
-#: resources/admin/pages/SettingsPage.jsx:308
+#: resources/admin/pages/SettingsPage.jsx:313
 #: resources/frontend/components/fields/lazyFields.jsx:190
 msgid "Loading…"
 msgstr ""
@@ -5209,7 +5209,7 @@ msgstr ""
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:32
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:122
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:222
-#: resources/admin/pages/ReportsPage.jsx:104
+#: resources/admin/pages/ReportsPage.jsx:125
 msgid "Views"
 msgstr ""
 
@@ -5241,7 +5241,7 @@ msgstr ""
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:115
 #: resources/admin/components/TrendChart.jsx:114
 #: resources/admin/pages/DashboardPage.jsx:105
-#: resources/admin/pages/ReportsPage.jsx:213
+#: resources/admin/pages/ReportsPage.jsx:246
 #: resources/admin/pages/SubmissionsPage.jsx:323
 #: resources/frontend/components/fields/DateTimeField.jsx:466
 msgid "Today"
@@ -5260,7 +5260,7 @@ msgstr ""
 
 #. translators: %d: form ID
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:163
-#: resources/admin/pages/ReportsPage.jsx:45
+#: resources/admin/pages/ReportsPage.jsx:33
 #: resources/admin/pages/SubmissionDetailPage.jsx:1185
 #, js-format
 msgid "Form #%d"
@@ -5278,8 +5278,8 @@ msgstr ""
 
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:200
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:203
-#: resources/admin/components/analytics/FunnelPanel.jsx:71
-#: resources/admin/components/analytics/FunnelPanel.jsx:74
+#: resources/admin/components/analytics/FunnelPanel.jsx:76
+#: resources/admin/components/analytics/FunnelPanel.jsx:79
 #: resources/admin/pages/ToolsPage.jsx:264
 msgid "Find a form"
 msgstr ""
@@ -5295,7 +5295,7 @@ msgstr ""
 #: resources/admin/pages/BuilderPage.jsx:691
 #: resources/admin/pages/BuilderPage.jsx:705
 #: resources/admin/pages/BuilderPage.jsx:741
-#: resources/admin/pages/ReportsPage.jsx:103
+#: resources/admin/pages/ReportsPage.jsx:124
 #: resources/admin/pages/SubmissionDetailPage.jsx:1177
 #: resources/admin/pages/SubmissionsPage.jsx:595
 #: resources/admin/pages/ToolsPage.jsx:309
@@ -5306,7 +5306,7 @@ msgid "Form"
 msgstr ""
 
 #: resources/admin/components/analytics/FormAnalyticsPanel.jsx:230
-#: resources/admin/pages/ReportsPage.jsx:106
+#: resources/admin/pages/ReportsPage.jsx:127
 msgid "Conversion"
 msgstr ""
 
@@ -5418,111 +5418,135 @@ msgstr ""
 msgid "%s submitted"
 msgstr ""
 
-#: resources/admin/components/analytics/FunnelPanel.jsx:61
+#: resources/admin/components/analytics/FunnelPanel.jsx:66
 msgid "Form funnel"
 msgstr ""
 
-#: resources/admin/components/analytics/FunnelPanel.jsx:64
+#: resources/admin/components/analytics/FunnelPanel.jsx:69
 msgid "How many people saw, started and sent a form, and where the others stopped."
 msgstr ""
 
-#: resources/admin/components/analytics/FunnelPanel.jsx:79
+#: resources/admin/components/analytics/FunnelPanel.jsx:84
 msgid "Form for the funnel"
 msgstr ""
 
-#: resources/admin/components/analytics/FunnelPanel.jsx:82
+#: resources/admin/components/analytics/FunnelPanel.jsx:87
 msgid "No matching form"
 msgstr ""
 
-#: resources/admin/components/analytics/FunnelPanel.jsx:87
+#: resources/admin/components/analytics/FunnelPanel.jsx:92
 msgid "Date range"
 msgstr ""
 
 #. translators: %d: number of days
-#: resources/admin/components/analytics/FunnelPanel.jsx:97
+#: resources/admin/components/analytics/FunnelPanel.jsx:102
 #, js-format
 msgid "%d day"
 msgid_plural "%d days"
 msgstr[0] ""
 msgstr[1] ""
 
-#: resources/admin/components/analytics/FunnelPanel.jsx:110
+#: resources/admin/components/analytics/FunnelPanel.jsx:115
 msgid "Create and publish a form to see its funnel here."
 msgstr ""
 
-#: resources/admin/components/analytics/FunnelPanel.jsx:116
+#: resources/admin/components/analytics/FunnelPanel.jsx:121
 msgid "The funnel could not be loaded."
 msgstr ""
 
-#: resources/admin/components/analytics/FunnelPanel.jsx:145
+#: resources/admin/components/analytics/FunnelPanel.jsx:152
 msgid "Form statistics are off, so new visits and drop-offs are not counted. Submissions still are."
 msgstr ""
 
-#: resources/admin/components/analytics/FunnelPanel.jsx:146
+#: resources/admin/components/analytics/FunnelPanel.jsx:153
 msgid "Turn on Count form views"
 msgstr ""
 
-#: resources/admin/components/analytics/FunnelPanel.jsx:152
+#: resources/admin/components/analytics/FunnelPanel.jsx:159
 msgid "Statistics are turned off for this form in its settings."
 msgstr ""
 
 #. translators: %d: number of days
-#: resources/admin/components/analytics/FunnelPanel.jsx:160
+#: resources/admin/components/analytics/FunnelPanel.jsx:167
 #, js-format
 msgid "Nobody has seen this form in the last %d day. Numbers appear once people open it on your site."
 msgid_plural "Nobody has seen this form in the last %d days. Numbers appear once people open it on your site."
 msgstr[0] ""
 msgstr[1] ""
 
-#: resources/admin/components/analytics/FunnelPanel.jsx:173
+#: resources/admin/components/analytics/FunnelPanel.jsx:180
 msgid "Funnel stages"
 msgstr ""
 
 #. translators: %s: share, for example 38%
-#: resources/admin/components/analytics/FunnelPanel.jsx:186
+#: resources/admin/components/analytics/FunnelPanel.jsx:193
 #, js-format
 msgid "%s of seen"
 msgstr ""
 
-#: resources/admin/components/analytics/FunnelPanel.jsx:196
+#: resources/admin/components/analytics/FunnelPanel.jsx:203
 msgid "Completion rate: no one has started the form yet."
 msgstr ""
 
 #. translators: %s: share, for example 63%
-#: resources/admin/components/analytics/FunnelPanel.jsx:199
+#: resources/admin/components/analytics/FunnelPanel.jsx:206
 #, js-format
 msgid "Completion rate: %s of the people who started sent the form."
 msgstr ""
 
-#: resources/admin/components/analytics/FunnelPanel.jsx:204
+#: resources/admin/components/analytics/FunnelPanel.jsx:211
 msgid "Where people stopped"
 msgstr ""
 
-#: resources/admin/components/analytics/FunnelPanel.jsx:207
+#: resources/admin/components/analytics/FunnelPanel.jsx:214
 msgid "No one has left this form part way in this period."
 msgstr ""
 
 #. translators: 1: number of people, 2: share of everyone who left
-#: resources/admin/components/analytics/FunnelPanel.jsx:218
+#: resources/admin/components/analytics/FunnelPanel.jsx:226
 #, js-format
 msgid "%1$s person (%2$s)"
 msgid_plural "%1$s people (%2$s)"
 msgstr[0] ""
 msgstr[1] ""
 
-#: resources/admin/components/analytics/FunnelPanel.jsx:235
+#. translators: %d: number of fields
+#: resources/admin/components/analytics/FunnelPanel.jsx:246
+#, js-format
+msgid "Show all %d field"
+msgid_plural "Show all %d fields"
+msgstr[0] ""
+msgstr[1] ""
+
+#: resources/admin/components/analytics/FunnelPanel.jsx:249
+msgid "Show fewer fields"
+msgstr ""
+
+#: resources/admin/components/analytics/FunnelPanel.jsx:256
 msgid "Steps where people stopped"
 msgstr ""
 
 #. translators: %s: number of people
-#: resources/admin/components/analytics/FunnelPanel.jsx:243
+#: resources/admin/components/analytics/FunnelPanel.jsx:264
 #, js-format
 msgid "%s person left"
 msgid_plural "%s people left"
 msgstr[0] ""
 msgstr[1] ""
 
-#: resources/admin/components/analytics/FunnelPanel.jsx:254
+#. translators: %d: number of steps
+#: resources/admin/components/analytics/FunnelPanel.jsx:278
+#, js-format
+msgid "Show all %d step"
+msgid_plural "Show all %d steps"
+msgstr[0] ""
+msgstr[1] ""
+
+#: resources/admin/components/analytics/FunnelPanel.jsx:281
+msgid "Show fewer steps"
+msgstr ""
+
+#: resources/admin/components/analytics/FunnelPanel.jsx:287
 msgid "Seen counts views of the form. Started counts everyone who sent it or left after touching it. People who manage SubtleForms, robots and builder previews are not counted."
 msgstr ""
 
@@ -6609,8 +6633,8 @@ msgstr ""
 #: resources/admin/components/builder/FieldDock.jsx:200
 #: resources/admin/components/licensing/ProBadge.jsx:25
 #: resources/admin/pages/CreateFormPage.jsx:335
-#: resources/admin/pages/SettingsPage.jsx:71
-#: resources/admin/pages/SettingsPage.jsx:257
+#: resources/admin/pages/SettingsPage.jsx:81
+#: resources/admin/pages/SettingsPage.jsx:262
 #: resources/admin/templates/TemplateSelector.jsx:138
 msgid "Pro"
 msgstr ""
@@ -7162,7 +7186,7 @@ msgstr ""
 
 #: resources/admin/components/builder/FormEditorHeader.jsx:89
 #: resources/admin/pages/BuilderPage.jsx:643
-#: resources/admin/pages/SettingsPage.jsx:319
+#: resources/admin/pages/SettingsPage.jsx:324
 msgid "Unsaved changes"
 msgstr ""
 
@@ -7175,7 +7199,7 @@ msgid "Copied!"
 msgstr ""
 
 #: resources/admin/components/builder/FormEditorHeader.jsx:185
-#: resources/admin/pages/SettingsPage.jsx:234
+#: resources/admin/pages/SettingsPage.jsx:239
 msgid "Save"
 msgstr ""
 
@@ -8056,7 +8080,7 @@ msgstr ""
 
 #: resources/admin/components/builder/layout/BuilderHeaderBar.jsx:274
 #: resources/admin/pages/BuilderPage.jsx:641
-#: resources/admin/pages/SettingsPage.jsx:234
+#: resources/admin/pages/SettingsPage.jsx:239
 msgid "Saving…"
 msgstr ""
 
@@ -8141,7 +8165,7 @@ msgid "Publishing this form will make it visible on the frontend. Are you ready 
 msgstr ""
 
 #: resources/admin/components/builder/layout/BuilderModalsController.jsx:86
-#: resources/admin/pages/SettingsPage.jsx:322
+#: resources/admin/pages/SettingsPage.jsx:327
 msgid "You have unsaved changes"
 msgstr ""
 
@@ -8676,9 +8700,9 @@ msgid "This form has no fields yet."
 msgstr ""
 
 #: resources/admin/components/builder/webhook/PayloadPicker.jsx:178
-#: resources/admin/components/DataTable.jsx:436
-#: resources/admin/components/DataTable.jsx:447
-#: resources/admin/components/DataTable.jsx:550
+#: resources/admin/components/DataTable.jsx:440
+#: resources/admin/components/DataTable.jsx:451
+#: resources/admin/components/DataTable.jsx:554
 #: resources/admin/components/tools/SiteImport.jsx:223
 msgid "Select all"
 msgstr ""
@@ -9035,22 +9059,22 @@ msgstr ""
 msgid "No items found"
 msgstr ""
 
-#: resources/admin/components/DataTable.jsx:454
+#: resources/admin/components/DataTable.jsx:458
 msgid "Sort by"
 msgstr ""
 
-#: resources/admin/components/DataTable.jsx:466
+#: resources/admin/components/DataTable.jsx:470
 msgid "Ascending, switch to descending"
 msgstr ""
 
-#: resources/admin/components/DataTable.jsx:467
+#: resources/admin/components/DataTable.jsx:471
 msgid "Descending, switch to ascending"
 msgstr ""
 
 #. translators: %s: row number
-#: resources/admin/components/DataTable.jsx:494
-#: resources/admin/components/DataTable.jsx:633
-#: resources/admin/components/DataTable.jsx:673
+#: resources/admin/components/DataTable.jsx:498
+#: resources/admin/components/DataTable.jsx:637
+#: resources/admin/components/DataTable.jsx:677
 #, js-format
 msgid "Select row %s"
 msgstr ""
@@ -9203,7 +9227,7 @@ msgstr ""
 #: resources/admin/components/FormsList.jsx:413
 #: resources/admin/components/FormsList.jsx:831
 #: resources/admin/components/SubmissionRowActions.jsx:52
-#: resources/admin/components/SubmissionsTable.jsx:891
+#: resources/admin/components/SubmissionsTable.jsx:892
 #: resources/admin/pages/SubmissionDetailPage.jsx:815
 msgid "Restore"
 msgstr ""
@@ -9214,10 +9238,10 @@ msgstr ""
 #: resources/admin/components/FormsList.jsx:942
 #: resources/admin/components/SubmissionRowActions.jsx:57
 #: resources/admin/components/SubmissionRowActions.jsx:65
-#: resources/admin/components/SubmissionsTable.jsx:897
-#: resources/admin/components/SubmissionsTable.jsx:942
-#: resources/admin/components/SubmissionsTable.jsx:971
-#: resources/admin/components/SubmissionsTable.jsx:983
+#: resources/admin/components/SubmissionsTable.jsx:898
+#: resources/admin/components/SubmissionsTable.jsx:943
+#: resources/admin/components/SubmissionsTable.jsx:972
+#: resources/admin/components/SubmissionsTable.jsx:984
 #: resources/admin/pages/SubmissionDetailPage.jsx:822
 #: resources/admin/pages/SubmissionDetailPage.jsx:859
 msgid "Delete permanently"
@@ -9236,7 +9260,7 @@ msgstr ""
 #: resources/admin/components/FormsList.jsx:850
 #: resources/admin/components/FormsList.jsx:943
 #: resources/admin/components/SubmissionRowActions.jsx:65
-#: resources/admin/components/SubmissionsTable.jsx:942
+#: resources/admin/components/SubmissionsTable.jsx:943
 #: resources/admin/pages/SubmissionDetailPage.jsx:822
 msgid "Move to Trash"
 msgstr ""
@@ -10880,12 +10904,12 @@ msgid "View"
 msgstr ""
 
 #: resources/admin/components/SubmissionRowActions.jsx:36
-#: resources/admin/components/SubmissionsTable.jsx:924
+#: resources/admin/components/SubmissionsTable.jsx:925
 msgid "Remove star"
 msgstr ""
 
 #: resources/admin/components/SubmissionRowActions.jsx:36
-#: resources/admin/components/SubmissionsTable.jsx:918
+#: resources/admin/components/SubmissionsTable.jsx:919
 #: resources/admin/pages/SubmissionDetailPage.jsx:786
 msgid "Star"
 msgstr ""
@@ -11008,45 +11032,45 @@ msgstr ""
 msgid "Entries show up the moment a visitor sends one of your forms. Try another tab or clear the filters."
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:906
+#: resources/admin/components/SubmissionsTable.jsx:907
 #: resources/admin/pages/SubmissionDetailPage.jsx:778
 msgid "Mark read"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:912
+#: resources/admin/components/SubmissionsTable.jsx:913
 #: resources/admin/pages/SubmissionDetailPage.jsx:778
 msgid "Mark unread"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:930
+#: resources/admin/components/SubmissionsTable.jsx:931
 msgid "Mark as spam"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:936
+#: resources/admin/components/SubmissionsTable.jsx:937
 msgid "Export selected (CSV)"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:949
+#: resources/admin/components/SubmissionsTable.jsx:950
 msgid "Mark as flagged"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:959
+#: resources/admin/components/SubmissionsTable.jsx:960
 msgid "Delete entries permanently"
 msgstr ""
 
 #. translators: %d: number of entries
-#: resources/admin/components/SubmissionsTable.jsx:962
+#: resources/admin/components/SubmissionsTable.jsx:963
 #, js-format
 msgid "Delete %d entry permanently? Its uploaded files are deleted too. This cannot be undone."
 msgid_plural "Delete %d entries permanently? Their uploaded files are deleted too. This cannot be undone."
 msgstr[0] ""
 msgstr[1] ""
 
-#: resources/admin/components/SubmissionsTable.jsx:977
+#: resources/admin/components/SubmissionsTable.jsx:978
 msgid "Delete entry permanently"
 msgstr ""
 
-#: resources/admin/components/SubmissionsTable.jsx:978
+#: resources/admin/components/SubmissionsTable.jsx:979
 #: resources/admin/pages/SubmissionDetailPage.jsx:860
 msgid "Delete this entry permanently? Its uploaded files are deleted too. This cannot be undone."
 msgstr ""
@@ -11256,8 +11280,8 @@ msgstr ""
 
 #. translators: 1: date, 2: number of submissions
 #: resources/admin/components/TrendChart.jsx:15
-#: resources/admin/pages/ReportsPage.jsx:172
-#: resources/admin/pages/ReportsPage.jsx:182
+#: resources/admin/pages/ReportsPage.jsx:205
+#: resources/admin/pages/ReportsPage.jsx:215
 #, js-format
 msgid "%1$s: %2$s submission"
 msgid_plural "%1$s: %2$s submissions"
@@ -11771,7 +11795,7 @@ msgid "Failed to load dashboard data"
 msgstr ""
 
 #: resources/admin/pages/DashboardPage.jsx:78
-#: resources/admin/pages/ReportsPage.jsx:56
+#: resources/admin/pages/ReportsPage.jsx:77
 msgid "Key figures"
 msgstr ""
 
@@ -11786,18 +11810,18 @@ msgid "No published forms yet"
 msgstr ""
 
 #: resources/admin/pages/DashboardPage.jsx:94
-#: resources/admin/pages/ReportsPage.jsx:60
+#: resources/admin/pages/ReportsPage.jsx:81
 #: resources/admin/pages/SubmissionDetailPage.jsx:1163
 msgid "Unread"
 msgstr ""
 
 #: resources/admin/pages/DashboardPage.jsx:98
-#: resources/admin/pages/ReportsPage.jsx:62
+#: resources/admin/pages/ReportsPage.jsx:83
 msgid "Waiting for review"
 msgstr ""
 
 #: resources/admin/pages/DashboardPage.jsx:99
-#: resources/admin/pages/ReportsPage.jsx:62
+#: resources/admin/pages/ReportsPage.jsx:83
 msgid "Inbox zero"
 msgstr ""
 
@@ -11806,8 +11830,8 @@ msgid "Since midnight"
 msgstr ""
 
 #: resources/admin/pages/DashboardPage.jsx:110
-#: resources/admin/pages/ReportsPage.jsx:65
-#: resources/admin/pages/ReportsPage.jsx:72
+#: resources/admin/pages/ReportsPage.jsx:86
+#: resources/admin/pages/ReportsPage.jsx:93
 #: resources/admin/pages/SubmissionsPage.jsx:324
 msgid "Last 7 days"
 msgstr ""
@@ -11825,7 +11849,7 @@ msgid "Last 14 days"
 msgstr ""
 
 #: resources/admin/pages/DashboardPage.jsx:137
-#: resources/admin/pages/ReportsPage.jsx:76
+#: resources/admin/pages/ReportsPage.jsx:97
 msgid "in period"
 msgstr ""
 
@@ -12340,36 +12364,48 @@ msgstr ""
 msgid "Always"
 msgstr ""
 
-#: resources/admin/pages/ReportsPage.jsx:30
+#: resources/admin/pages/ReportsPage.jsx:55
 msgid "Reports could not be loaded."
 msgstr ""
 
-#: resources/admin/pages/ReportsPage.jsx:51
+#: resources/admin/pages/ReportsPage.jsx:72
 msgid "How many people see and send each form. Spam, failed and trashed entries are not counted."
 msgstr ""
 
-#: resources/admin/pages/ReportsPage.jsx:57
+#: resources/admin/pages/ReportsPage.jsx:78
 msgid "Not in the Trash"
 msgstr ""
 
-#: resources/admin/pages/ReportsPage.jsx:58
+#: resources/admin/pages/ReportsPage.jsx:79
 msgid "Every form"
 msgstr ""
 
-#: resources/admin/pages/ReportsPage.jsx:65
+#: resources/admin/pages/ReportsPage.jsx:86
 msgid "Submissions received"
 msgstr ""
 
-#: resources/admin/pages/ReportsPage.jsx:91
+#: resources/admin/pages/ReportsPage.jsx:112
 msgid "Each form, last 30 days"
 msgstr ""
 
-#: resources/admin/pages/ReportsPage.jsx:92
+#: resources/admin/pages/ReportsPage.jsx:113
 msgid "Conversion is submissions divided by views."
 msgstr ""
 
-#: resources/admin/pages/ReportsPage.jsx:119
+#: resources/admin/pages/ReportsPage.jsx:140
 msgid "No views yet."
+msgstr ""
+
+#. translators: %d: number of forms
+#: resources/admin/pages/ReportsPage.jsx:151
+#, js-format
+msgid "Show all %d form"
+msgid_plural "Show all %d forms"
+msgstr[0] ""
+msgstr[1] ""
+
+#: resources/admin/pages/ReportsPage.jsx:154
+msgid "Show fewer forms"
 msgstr ""
 
 #: resources/admin/pages/SettingsPage.jsx:35
@@ -12405,43 +12441,43 @@ msgstr ""
 msgid "Move forms and entries, bring a form across from another plugin, and read what the site has been doing."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:79
+#: resources/admin/pages/SettingsPage.jsx:74
 msgid "MCP"
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:80
+#: resources/admin/pages/SettingsPage.jsx:75
 msgid "Connect AI tools to your forms through the Model Context Protocol."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:85
+#: resources/admin/pages/SettingsPage.jsx:86
 msgid "License"
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:86
+#: resources/admin/pages/SettingsPage.jsx:87
 msgid "Your plan, license key and what it unlocks."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:205
+#: resources/admin/pages/SettingsPage.jsx:210
 msgid "Loading settings…"
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:214
+#: resources/admin/pages/SettingsPage.jsx:219
 msgid "Settings could not be loaded."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:225
+#: resources/admin/pages/SettingsPage.jsx:230
 msgid "Site-wide defaults. Each form can override most of these in its own settings."
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:239
+#: resources/admin/pages/SettingsPage.jsx:244
 msgid "Settings sections"
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:326
+#: resources/admin/pages/SettingsPage.jsx:331
 msgid "Discard"
 msgstr ""
 
-#: resources/admin/pages/SettingsPage.jsx:329
+#: resources/admin/pages/SettingsPage.jsx:334
 msgid "Save changes"
 msgstr ""
 

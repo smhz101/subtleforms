@@ -11,8 +11,9 @@ This file keeps the full release history. readme.txt lists only the latest versi
 * Change: Forms load faster: every page with a form now downloads 22 percent less SubtleForms code (46 KB instead of 59 KB compressed), the date picker, phone and country lists, uploads, payments and the conversational layout are only downloaded by forms that use them, pages without a form still load nothing, and on a slow mobile connection a form is ready about a quarter of a second sooner.
 * Change: The SubtleForms screens no longer pin the WordPress admin menu in its own scrolling column on short windows; the menu behaves as in WordPress.
 * Change: The Submissions screen no longer has a New tab, because All already lists unread entries; an old link to the New tab opens All.
-* Change: Tools is now a tab in Settings, and Settings has an MCP tab (Pro adds its screen; without Pro it explains MCP and links to the upgrade page). The old Tools address opens the Tools tab.
-* Fix: The Submissions footer (result count, previous and next, rows per page) stays at the bottom of the list when a tab or a search has no results.
+* Change: Tools is now a tab in Settings, with an MCP tab right after it (Pro adds its screen; without Pro it explains MCP and links to the upgrade page). The old Tools address opens the Tools tab.
+* Change: Report panels no longer scroll inside their own boxes: long lists in Form funnel and Each form show the top rows with a Show all button, and every panel fits from phone to wide screens.
+* Fix: The Submissions footer (result count, previous and next, rows per page) stays at the bottom edge of the list pane with no entries, a few or many.
 * Fix: Submissions lists past the first 100 entries when 50 or 100 rows per page are chosen, and an empty page after the last row was removed keeps its real page count so Previous works.
 * Fix: Choosing 50 or 100 rows per page on the Submissions screen lists the entries instead of showing "Entries could not be loaded".
 

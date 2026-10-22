@@ -185,7 +185,9 @@ for (const width of [1280, 390]) {
       const style = getComputedStyle(tab);
       const width = parseFloat(style.outlineWidth) || 0;
       const offset = parseFloat(style.outlineOffset) || 0;
-      const reach = style.outlineStyle === 'none' ? 0 : width + Math.max(offset, 0);
+      // The ring reaches width + offset past the border box (a negative
+      // offset draws it inside).
+      const reach = style.outlineStyle === 'none' ? 0 : Math.max(width + offset, 0);
       const rect = tab.getBoundingClientRect();
       const ring = { top: rect.top - reach, left: rect.left - reach, right: rect.right + reach, bottom: rect.bottom + reach };
       // Every ancestor that clips must still contain the ring.

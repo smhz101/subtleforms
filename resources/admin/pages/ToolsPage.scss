@@ -134,15 +134,30 @@
 	max-width: 420px;
 }
 
+// Level and form filters of Activity and Webhooks: one line at every width.
+// The two selects share the room and shrink rather than wrap, and the header
+// puts them under the title when both do not fit side by side, so they still
+// fit on a 390px phone.
 .sf-tools__filters {
 	display: flex;
-	flex-wrap: wrap;
+	flex-wrap: nowrap;
 	gap: 8px;
-	min-width: 280px;
+	min-width: 0;
+	max-width: 100%;
 
 	.components-base-control {
+		flex: 1 1 160px;
+		min-width: 0;
 		margin: 0;
-		min-width: 160px;
+	}
+}
+
+.sf-panel__header:has(> .sf-tools__filters) {
+	flex-wrap: wrap;
+
+	> div:first-child {
+		flex: 1 1 240px;
+		min-width: 0;
 	}
 }
 

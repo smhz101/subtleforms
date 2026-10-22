@@ -16,7 +16,12 @@ import {
   share,
   stepName,
 } from './funnelModel';
+import ShowAllButton, { useShowAll } from './ShowAll';
 import './analytics.scss';
+
+// Rows shown before "Show all" in the drop-off lists.
+export const FUNNEL_TOP_FIELDS = 5;
+export const FUNNEL_TOP_STEPS = 5;
 
 const fmt = (n) => Number(n || 0).toLocaleString();
 
@@ -136,6 +141,8 @@ export function FunnelBody({ report, days }) {
   const steps = Array.isArray(report.steps) ? report.steps : [];
   const left = Number(report.left || 0);
   const completion = completionRate(report);
+  const fieldRows = useShowAll(fields, FUNNEL_TOP_FIELDS);
+  const stepRows = useShowAll(steps, FUNNEL_TOP_STEPS);
 
   return (
     <div className='sf-funnel__body'>
@@ -207,8 +214,9 @@ export function FunnelBody({ report, days }) {
               {__('No one has left this form part way in this period.', 'subtleforms')}
             </p>
           ) : (
-            <ol className='sf-funnel__drops'>
-              {fields.map((row) => (
+            <>
+            <ol className='sf-funnel__drops' id='sf-funnel-drops'>
+              {fieldRows.visible.map((row) => (
                 <li key={row.key || '_none'} className='sf-funnel__drop'>
                   <div className='sf-funnel__drop-head'>
                     <span className='sf-funnel__drop-name'>{fieldName(row)}</span>
@@ -228,13 +236,26 @@ export function FunnelBody({ report, days }) {
                 </li>
               ))}
             </ol>
+            <ShowAllButton
+              hidden={fieldRows.hidden}
+              expanded={fieldRows.expanded}
+              onToggle={fieldRows.toggle}
+              controls='sf-funnel-drops'
+              more={sprintf(
+                /* translators: %d: number of fields */
+                _n('Show all %d field', 'Show all %d fields', fields.length, 'subtleforms'),
+                fields.length
+              )}
+              less={__('Show fewer fields', 'subtleforms')}
+            />
+            </>
           )}
 
           {steps.length > 0 && (
             <>
               <h3 className='sf-funnel__heading'>{__('Steps where people stopped', 'subtleforms')}</h3>
-              <ul className='sf-funnel__steps'>
-                {steps.map((row) => (
+              <ul className='sf-funnel__steps' id='sf-funnel-steps'>
+                {stepRows.visible.map((row) => (
                   <li key={row.index}>
                     <span>{stepName(row)}</span>
                     <span className='sf-funnel__drop-count'>
@@ -247,6 +268,18 @@ export function FunnelBody({ report, days }) {
                   </li>
                 ))}
               </ul>
+              <ShowAllButton
+                hidden={stepRows.hidden}
+                expanded={stepRows.expanded}
+                onToggle={stepRows.toggle}
+                controls='sf-funnel-steps'
+                more={sprintf(
+                  /* translators: %d: number of steps */
+                  _n('Show all %d step', 'Show all %d steps', steps.length, 'subtleforms'),
+                  steps.length
+                )}
+                less={__('Show fewer steps', 'subtleforms')}
+              />
             </>
           )}
 
