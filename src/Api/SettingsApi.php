@@ -555,8 +555,6 @@ class SettingsApi {
 
 			// E-commerce
 			'ext_ecommerce_enabled'             => array( 'type' => 'boolean' ),
-			'ext_ecommerce_product_id'          => array( 'type' => 'integer', 'minimum' => 0 ),
-			'ext_ecommerce_currency'            => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
 			'ext_ecommerce_default_processor'   => array( 'type' => 'string', 'enum' => array( 'woocommerce', 'subtleforms' ) ),
 			'ext_ecommerce_empty_cart'          => array( 'type' => 'boolean' ),
 			'ext_ecommerce_destination'         => array( 'type' => 'string', 'enum' => array( 'checkout', 'cart' ) ),

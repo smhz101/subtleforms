@@ -109,8 +109,6 @@ class Settings {
 
 		// E-commerce (WooCommerce)
 		'ext_ecommerce_enabled'             => false,
-		'ext_ecommerce_product_id'          => 0,
-		'ext_ecommerce_currency'            => 'USD',
 		'ext_ecommerce_default_processor'   => 'woocommerce',
 		'ext_ecommerce_empty_cart'          => true,
 		'ext_ecommerce_destination'         => 'checkout',
@@ -241,8 +239,6 @@ class Settings {
 		'ext_crm_webhook_url'               => array( 'string', 'max' => 2000 ),
 		'ext_crm_add_note'                  => 'boolean',
 		'ext_ecommerce_enabled'             => 'boolean',
-		'ext_ecommerce_product_id'          => array( 'integer', 'min' => 0 ),
-		'ext_ecommerce_currency'            => array( 'string', 'max' => 10 ),
 		'ext_ecommerce_default_processor'   => array( 'woocommerce', 'subtleforms' ),
 		'ext_ecommerce_empty_cart'          => 'boolean',
 		'ext_ecommerce_destination'         => array( 'checkout', 'cart' ),

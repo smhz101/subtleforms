@@ -180,8 +180,6 @@ class Schemas {
 					'ext_crm_add_note',
 					// Extensions, E-commerce
 					'ext_ecommerce_enabled',
-					'ext_ecommerce_product_id',
-					'ext_ecommerce_currency',
 					'ext_ecommerce_default_processor',
 					'ext_ecommerce_empty_cart',
 					'ext_ecommerce_destination',
@@ -275,8 +273,6 @@ class Schemas {
 				// Extensions, Analytics
 				// Extensions, E-commerce
 				'ext_ecommerce_enabled'            => 'optional|bool',
-				'ext_ecommerce_product_id'         => 'optional|int|min:0',
-				'ext_ecommerce_currency'           => 'optional|string|max:10',
 				'ext_ecommerce_default_processor'  => 'optional|in:woocommerce,subtleforms',
 				'ext_ecommerce_empty_cart'         => 'optional|bool',
 				'ext_ecommerce_destination'        => 'optional|in:checkout,cart',
