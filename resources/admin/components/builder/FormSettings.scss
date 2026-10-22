@@ -1,0 +1,900 @@
+/**
+ * FormSettings, the builder's Settings tab.
+ *
+ * Vertical sections, the same idea as the plugin Settings page. The outer
+ * padding and page background come from `.subtleforms-form-settings` in
+ * BuilderCanvasArea.scss.
+ */
+
+.sf-form-settings {
+
+	&__container {
+		margin: 0;
+		max-width: none;
+	}
+
+	&__layout {
+		display: grid;
+		grid-template-columns: 220px minmax(0, 1fr);
+		align-items: start;
+		gap: 32px;
+
+		@media (max-width: 782px) {
+			grid-template-columns: 1fr;
+			gap: 16px;
+		}
+	}
+
+	&__nav {
+		position: sticky;
+		top: 16px;
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+
+		ul {
+			display: flex;
+			flex-direction: column;
+			gap: 2px;
+			margin: 0;
+			padding: 0;
+			list-style: none;
+		}
+
+		li { margin: 0; }
+
+		@media (max-width: 782px) {
+			position: static;
+			flex-direction: row;
+			gap: 16px;
+			overflow-x: auto;
+			padding-bottom: 8px;
+			border-bottom: 1px solid var(--sf-border);
+
+			ul { flex-direction: row; }
+		}
+	}
+
+	&__nav-heading {
+		margin: 0 0 6px;
+		padding: 0 12px;
+		font-size: 11px;
+		font-weight: var(--sf-weight-medium);
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--sf-text-muted);
+
+		@media (max-width: 782px) { display: none; }
+	}
+
+	&__nav-item {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		width: 100%;
+		min-height: 36px;
+		padding: 0 12px;
+		border: 0;
+		border-radius: var(--sf-radius-control);
+		background: transparent;
+		color: var(--sf-text-secondary);
+		font-size: var(--sf-text-sm);
+		font-weight: var(--sf-weight-medium);
+		text-align: start;
+		white-space: nowrap;
+		cursor: pointer;
+
+		svg {
+			flex-shrink: 0;
+			fill: none;
+			color: var(--sf-text-muted);
+		}
+
+		&:hover {
+			background: var(--sf-bg-muted);
+			color: var(--sf-text);
+		}
+
+		&.is-active {
+			background: var(--sf-bg-muted);
+			color: var(--sf-text);
+
+			svg { color: var(--sf-brand); }
+		}
+
+		&:focus-visible {
+			outline: none;
+			box-shadow: var(--sf-shadow-focus);
+		}
+	}
+
+	&__nav-badge {
+		margin-inline-start: auto;
+		min-width: 18px;
+		padding: 0 6px;
+		border-radius: var(--sf-radius-full);
+		background: var(--sf-bg-surface);
+		color: var(--sf-text);
+		font-size: 11px;
+		font-weight: var(--sf-weight-semibold);
+		line-height: 18px;
+		text-align: center;
+	}
+
+	&__content {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+		min-width: 0;
+	}
+
+	&__header { padding-top: 4px; }
+
+	&__section-title {
+		margin: 0;
+		font-size: var(--sf-text-md);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
+	}
+
+	&__description {
+		margin: 4px 0 0;
+		font-size: var(--sf-text-sm);
+		line-height: var(--sf-leading-normal);
+		color: var(--sf-text-muted);
+	}
+
+	&__stack {
+		display: flex;
+		flex-direction: column;
+		gap: 16px;
+	}
+
+	&__card {
+		display: flex;
+		flex-direction: column;
+		overflow: visible;
+		border: 1px solid var(--sf-border);
+		border-radius: var(--sf-radius-lg);
+		background: var(--sf-bg-surface);
+
+		> * {
+			padding: 16px 20px;
+			margin: 0;
+			border-bottom: 1px solid var(--sf-border-subtle);
+
+			&:last-child { border-bottom: 0; }
+			&:empty { display: none; }
+		}
+
+		// Radio groups are fieldsets. A legend is painted on the top border, so
+		// the card's padding never shows above the label and overflow clips it.
+		> fieldset {
+			padding: 0 20px 16px;
+			margin: 0;
+			border: 0;
+			min-inline-size: 0;
+
+			> legend {
+				display: table;
+				float: none;
+				width: auto;
+				margin: 0 0 8px;
+				padding: 16px 0 0;
+			}
+		}
+
+		.components-base-control { margin-bottom: 0; }
+
+		&--stack {
+			padding: 16px 20px;
+			gap: 16px;
+
+			> * {
+				padding: 0;
+				border-bottom: 0;
+			}
+		}
+	}
+
+	&__title {
+		margin: 0 0 var(--sf-space-6);
+		font-size: var(--sf-text-lg);
+		line-height: var(--sf-leading-tight);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
+	}
+
+	&__section {
+		display: flex;
+		flex-direction: column;
+		gap: var(--sf-space-4);
+	}
+
+	&__intro {
+		margin: 0 0 var(--sf-space-4);
+		font-size: var(--sf-text-base);
+		line-height: var(--sf-leading-normal);
+		color: var(--sf-text-muted);
+	}
+
+	&__hint {
+		font-size: var(--sf-text-base);
+		line-height: var(--sf-leading-normal);
+		color: var(--sf-text-muted);
+	}
+
+	// One extension per block, separated rather than boxed: the PanelBody is
+	// already a box, and a box inside a box reads as two unrelated groups.
+	&__integration {
+		padding-bottom: var(--sf-space-4);
+
+		& + & {
+			padding-top: var(--sf-space-4);
+			border-top: 1px solid var(--sf-border-subtle);
+		}
+
+		&:last-child {
+			padding-bottom: 0;
+		}
+	}
+
+	&__integration-title {
+		margin: 0 0 var(--sf-space-3);
+		font-size: var(--sf-text-base);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
+	}
+
+	// The accordion sits on the grey tab background, so it needs its own
+	// surface, otherwise the bodies read as floating text.
+	&__container > .components-panel {
+		background: var(--sf-bg-surface);
+		border: 1px solid var(--sf-border);
+		border-radius: var(--sf-radius-md);
+		box-shadow: var(--sf-shadow-xs);
+		overflow: hidden;
+	}
+
+	// WordPress spaces stacked controls with a bottom margin that the last one
+	// in a body also carries, which leaves the body looking bottom-heavy.
+	.components-panel__body > .components-base-control:last-child {
+		margin-bottom: 0;
+	}
+}
+
+// ── Form type banner ─────────────────────────────────────────────────────────
+// Colour is keyed off the stored type. Both multi-step spellings appear in
+// saved schemas, so both select the same treatment.
+.sf-form-settings .sf-form-type-banner {
+	padding: var(--sf-space-4);
+	margin-bottom: var(--sf-space-6);
+	border-left: 4px solid;
+	border-radius: 0 var(--sf-radius-sm) var(--sf-radius-sm) 0;
+
+	// Neutral by default; the attribute selectors below are more specific, so a
+	// recognised type overrides this regardless of source order.
+	background-color: var(--sf-bg-subtle);
+	border-color: var(--sf-border-strong);
+
+	&[data-form-type="multistep"],
+	&[data-form-type="multi-step"] {
+		background-color: var(--sf-purple-50);
+		border-color: var(--sf-purple-500);
+
+		.sf-form-type-banner__title {
+			color: var(--sf-purple-900);
+		}
+
+		.sf-form-type-banner__description {
+			color: var(--sf-purple-700);
+		}
+	}
+
+	&[data-form-type="sectioned"] {
+		background-color: var(--sf-indigo-50);
+		border-color: var(--sf-indigo-500);
+
+		.sf-form-type-banner__title {
+			color: var(--sf-indigo-900);
+		}
+
+		.sf-form-type-banner__description {
+			color: var(--sf-indigo-700);
+		}
+	}
+
+	&[data-form-type="conversational"] {
+		background-color: var(--sf-blue-50);
+		border-color: var(--sf-blue-500);
+
+		.sf-form-type-banner__title {
+			color: var(--sf-blue-900);
+		}
+
+		.sf-form-type-banner__description {
+			color: var(--sf-blue-700);
+		}
+	}
+
+	&[data-form-type="payment"] {
+		background-color: var(--sf-green-50);
+		border-color: var(--sf-green-500);
+
+		.sf-form-type-banner__title {
+			color: var(--sf-green-900);
+		}
+
+		.sf-form-type-banner__description {
+			color: var(--sf-emerald-900);
+		}
+	}
+
+}
+
+.sf-form-settings .sf-form-type-banner__title {
+	margin: 0 0 var(--sf-space-1);
+	font-size: var(--sf-text-base);
+	line-height: var(--sf-leading-tight);
+	font-weight: var(--sf-weight-semibold);
+	color: var(--sf-text);
+}
+
+.sf-form-settings .sf-form-type-banner__description {
+	margin: 0;
+	font-size: var(--sf-text-xs);
+	line-height: var(--sf-leading-normal);
+	color: var(--sf-text-secondary);
+}
+
+// ── Inline info boxes ────────────────────────────────────────────────────────
+.sf-form-settings .sf-info-box {
+	padding: var(--sf-space-4);
+	border-radius: var(--sf-radius-sm);
+
+	&__text {
+		margin: 0;
+		font-size: var(--sf-text-base);
+		line-height: var(--sf-leading-normal);
+	}
+
+	&--blue {
+		background-color: var(--sf-blue-50);
+		border: 1px solid var(--sf-blue-200);
+
+		.sf-info-box__text {
+			color: var(--sf-blue-800);
+		}
+	}
+
+	&--yellow {
+		background-color: var(--sf-amber-100);
+		border: 1px solid var(--sf-yellow-400);
+
+		.sf-info-box__text {
+			color: var(--sf-amber-800);
+		}
+	}
+}
+
+// ── ActionsPanel ─────────────────────────────────────────────────────────────
+.sf-actions-panel {
+	display: flex;
+	flex-direction: column;
+	gap: var(--sf-space-3);
+
+	&__empty {
+		font-size: var(--sf-text-base);
+		color: var(--sf-text-muted);
+		margin-bottom: var(--sf-space-2);
+	}
+
+	// The two add buttons: one tidy group, wrapping on narrow screens (2.5.0).
+	&__add {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--sf-space-2) var(--sf-space-3);
+
+		.components-button {
+			gap: var(--sf-space-2);
+
+			svg {
+				flex-shrink: 0;
+			}
+		}
+	}
+
+	// Individual action card
+	&__item {
+		border: 1px solid var(--sf-border);
+		border-radius: var(--sf-radius-md);
+		background: var(--sf-bg-subtle);
+		overflow: hidden;
+
+		&.is-dragging {
+			box-shadow: var(--sf-shadow-md);
+			background: var(--sf-bg-surface);
+		}
+
+		&-header {
+			display: flex;
+			align-items: center;
+			gap: var(--sf-space-3);
+			min-width: 0;
+			padding: var(--sf-space-2) var(--sf-space-3);
+			background: var(--sf-bg-surface);
+			border-bottom: 1px solid var(--sf-border);
+		}
+
+		&-label {
+			display: flex;
+			flex: 1 1 auto;
+			flex-wrap: wrap;
+			align-items: baseline;
+			gap: 2px 12px;
+			min-width: 0;
+		}
+
+		&-type {
+			font-size: var(--sf-text-sm);
+			font-weight: var(--sf-weight-semibold);
+			text-transform: uppercase;
+			letter-spacing: 0.04em;
+			color: var(--sf-text-secondary);
+		}
+
+		&-summary {
+			flex: 1 1 10rem;
+			min-width: 0;
+			font-size: var(--sf-text-sm);
+			color: var(--sf-text-subtle);
+			overflow: hidden;
+			text-overflow: ellipsis;
+			white-space: nowrap;
+		}
+
+		&-controls {
+			display: flex;
+			flex: 0 0 auto;
+			align-items: center;
+			gap: var(--sf-space-2);
+			margin-left: auto;
+
+			// Shrink the toggle label area
+			.components-toggle-control {
+				margin-bottom: 0;
+
+				.components-base-control__field {
+					margin-bottom: 0;
+				}
+			}
+		}
+
+		&-body {
+			padding: var(--sf-space-3);
+			display: flex;
+			flex-direction: column;
+			gap: var(--sf-space-3);
+
+			.components-base-control {
+				margin-bottom: 0;
+			}
+
+			.components-text-control__input,
+			.components-select-control__input,
+			.components-textarea-control__input {
+				font-size: var(--sf-text-base);
+			}
+		}
+
+		// Disabled / inactive state
+		&.is-disabled {
+			opacity: 0.6;
+		}
+	}
+
+	// Two-column row for Method + Payload Mode selects
+	&__row {
+		display: grid;
+		grid-template-columns: 1fr 1fr;
+		gap: var(--sf-space-3);
+
+		.components-base-control {
+			margin-bottom: 0;
+		}
+	}
+
+	// Signing section
+	&__signing {
+		border-top: 1px solid var(--sf-border);
+		padding-top: var(--sf-space-3);
+		margin-top: var(--sf-space-1);
+
+		.components-toggle-control {
+			margin-bottom: 0;
+		}
+	}
+
+	// Drag handle
+	&__drag-handle {
+		cursor: grab;
+		color: var(--sf-text-subtle);
+		font-size: var(--sf-text-md);
+		padding: 0 var(--sf-space-1);
+		user-select: none;
+		line-height: 1;
+
+		&:hover {
+			color: var(--sf-text-secondary);
+		}
+
+		&:active {
+			cursor: grabbing;
+		}
+	}
+}
+
+// ── 2.0 ─────────────────────────────────────────────────────────────────────
+// Settings read like core's document settings: one card of collapsible
+// sections, sentence-case labels, even spacing, neutral form-type note.
+.sf-form-settings {
+	&__title {
+		margin-bottom: 16px;
+		font-size: var(--sf-text-md);
+	}
+
+	&__intro {
+		margin: 0 0 16px;
+		font-size: 12px;
+		color: var(--sf-text-muted);
+	}
+
+	&__row {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: 12px;
+
+		@media (max-width: 600px) { grid-template-columns: 1fr; }
+	}
+
+	&__container > .components-panel {
+		border-radius: var(--sf-radius-lg);
+		box-shadow: none;
+	}
+
+	.components-panel__body {
+		> .components-panel__body-title .components-panel__body-toggle {
+			padding: 18px 20px;
+			font-size: var(--sf-text-sm);
+			font-weight: var(--sf-weight-semibold);
+		}
+
+		&.is-opened { padding: 0 20px 20px; }
+
+		&.is-opened > .components-panel__body-title { margin: 0 -20px; }
+
+		.components-base-control,
+		.components-toggle-group-control,
+		.sf-form-settings__row {
+			margin-bottom: 16px;
+		}
+
+		.components-base-control__label,
+		.components-input-control__label.components-input-control__label,
+		.components-toggle-group-control .components-base-control__label {
+			font-size: var(--sf-text-sm);
+			font-weight: var(--sf-weight-medium);
+			text-transform: none;
+			color: var(--sf-text);
+		}
+
+		.components-base-control__help {
+			font-size: 12px;
+			color: var(--sf-text-muted);
+		}
+	}
+}
+
+.sf-form-settings .sf-form-type-banner {
+	&,
+	&[data-form-type] {
+		margin-bottom: 16px;
+		padding: 12px 16px;
+		border: 1px solid var(--sf-border);
+		border-radius: var(--sf-radius-md);
+		background: var(--sf-bg-surface);
+	}
+
+	&[data-form-type] .sf-form-type-banner__title,
+	.sf-form-type-banner__title {
+		margin: 0 0 2px;
+		font-size: var(--sf-text-sm);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text);
+	}
+
+	&[data-form-type] .sf-form-type-banner__description,
+	.sf-form-type-banner__description {
+		margin: 0;
+		font-size: 12px;
+		color: var(--sf-text-muted);
+	}
+}
+
+// ── Checkout (2.1) ───────────────────────────────────────────────────────────
+.sf-checkout-panel {
+	&__upgrade {
+		display: flex;
+		align-items: center;
+		gap: var(--sf-space-2);
+		padding: var(--sf-space-3) var(--sf-space-4);
+		border: 1px solid var(--sf-border);
+		border-radius: var(--sf-radius-md);
+		background: var(--sf-bg-subtle);
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-secondary);
+
+		svg { flex-shrink: 0; fill: none; }
+		span { flex: 1 1 auto; }
+	}
+
+	&__billing {
+		padding-top: var(--sf-space-4);
+		border-top: 1px solid var(--sf-border-subtle);
+
+		.sf-form-settings__hint { margin: 0 0 var(--sf-space-3); }
+	}
+
+	&__grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+		gap: var(--sf-space-4);
+	}
+}
+
+// Email action: hint under the message (2.3.0).
+.sf-actions-panel__hint {
+	margin: -4px 0 12px;
+	font-size: 12px;
+	line-height: 1.5;
+	color: var(--sf-text-muted, #757575);
+
+	.components-button.is-link {
+		font-size: 12px;
+	}
+}
+
+// An action that is missing a required setting (2.3.1).
+.sf-actions-panel__needs-setup {
+	display: inline-flex;
+	align-items: center;
+	margin-inline-start: 8px;
+	padding: 1px 8px;
+	border-radius: 999px;
+	background: var(--sf-warning-bg, #fcf9e8);
+	color: var(--sf-warning, #8a6100);
+	font-size: 11px;
+	font-weight: 600;
+	line-height: 18px;
+	vertical-align: middle;
+}
+
+// Form type selector and field defaults (2.3.2): space between controls.
+.sf-form-type-control {
+	margin-bottom: var(--sf-space-4);
+}
+
+.sf-form-settings .components-panel__body .components-base-control + .components-base-control {
+	margin-top: var(--sf-space-4);
+}
+
+// Webhook action (2.5.0): URL, the data to send, headers and a test.
+.sf-webhook-method {
+	max-width: 14rem;
+}
+
+.sf-webhook-data,
+.sf-webhook-headers,
+.sf-webhook-test {
+	display: flex;
+	flex-direction: column;
+	gap: var(--sf-space-3);
+	padding-top: var(--sf-space-4);
+	border-top: 1px solid var(--sf-border-subtle);
+}
+
+.sf-webhook-section {
+	&__head {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: flex-start;
+		justify-content: space-between;
+		gap: var(--sf-space-2) var(--sf-space-4);
+	}
+
+	&__title {
+		margin: 0;
+		font-size: var(--sf-text-base);
+		font-weight: var(--sf-weight-semibold);
+		color: var(--sf-text-secondary);
+	}
+
+	&__help {
+		margin: var(--sf-space-1) 0 0;
+		font-size: var(--sf-text-xs);
+		line-height: 1.5;
+		color: var(--sf-text-muted);
+	}
+}
+
+.sf-webhook-note {
+	margin: 0;
+	font-size: var(--sf-text-sm);
+	line-height: 1.5;
+	color: var(--sf-text-muted);
+}
+
+.sf-webhook-notice.components-notice {
+	margin: 0;
+	padding: var(--sf-space-2) var(--sf-space-3);
+
+	.components-notice__content {
+		margin: 0;
+		font-size: var(--sf-text-sm);
+	}
+}
+
+.sf-webhook-groups {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+	gap: var(--sf-space-4) var(--sf-space-6);
+	align-items: start;
+}
+
+.sf-webhook-group {
+	min-width: 0;
+	margin: 0;
+	padding: 0;
+	border: 0;
+
+	&__title {
+		padding: 0;
+		margin-bottom: var(--sf-space-2);
+		font-size: var(--sf-text-xs);
+		font-weight: var(--sf-weight-semibold);
+		letter-spacing: 0.04em;
+		text-transform: uppercase;
+		color: var(--sf-text-muted);
+	}
+
+	&__items {
+		display: flex;
+		flex-direction: column;
+		gap: var(--sf-space-2);
+
+		.components-base-control {
+			margin-bottom: 0;
+		}
+
+		.components-checkbox-control__label {
+			overflow-wrap: anywhere;
+		}
+	}
+
+	&__bulk {
+		display: flex;
+		gap: var(--sf-space-3);
+	}
+
+	&__option {
+		padding-top: var(--sf-space-2);
+		border-top: 1px solid var(--sf-border-subtle);
+	}
+}
+
+.sf-webhook-code textarea {
+	font-family: var(--sf-font-mono);
+	font-size: var(--sf-text-sm);
+	line-height: 1.5;
+}
+
+.sf-webhook-preview {
+	display: flex;
+	flex-direction: column;
+	gap: var(--sf-space-2);
+	padding-top: var(--sf-space-4);
+	border-top: 1px solid var(--sf-border-subtle);
+
+	&__code {
+		margin: 0;
+		max-height: 20rem;
+		overflow: auto;
+		padding: var(--sf-space-3);
+		border-radius: var(--sf-radius-md);
+		background: var(--sf-bg-muted);
+		color: var(--sf-text-secondary);
+		font-family: var(--sf-font-mono);
+		font-size: var(--sf-text-xs);
+		line-height: 1.6;
+		white-space: pre;
+	}
+}
+
+.sf-webhook-headers {
+	&__empty {
+		margin: 0;
+		font-size: var(--sf-text-sm);
+		color: var(--sf-text-muted);
+	}
+
+	&__fields {
+		display: grid;
+		grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
+		align-items: center;
+		gap: var(--sf-space-2);
+
+		.components-base-control {
+			margin-bottom: 0;
+		}
+
+		@media (max-width: 600px) {
+			grid-template-columns: minmax(0, 1fr) auto;
+
+			.components-base-control:nth-child(2) {
+				grid-column: 1;
+				grid-row: 2;
+			}
+
+			.sf-webhook-headers__remove {
+				grid-column: 2;
+				grid-row: 1 / span 2;
+			}
+		}
+	}
+
+	&__row {
+		display: flex;
+		flex-direction: column;
+		gap: var(--sf-space-1);
+	}
+
+	&__error {
+		margin: 0;
+		font-size: var(--sf-text-xs);
+		line-height: 1.5;
+		color: var(--sf-danger-strong);
+	}
+}
+
+.sf-webhook-test {
+	align-items: flex-start;
+}
+
+// Spam protection: this form's blocked spam in the last 30 days (2.6.0).
+.sf-spam-panel__count {
+	font-size: var(--sf-text-sm);
+	color: var(--sf-text-secondary);
+
+	p {
+		margin: 0;
+	}
+
+	strong {
+		color: var(--sf-text);
+		font-weight: var(--sf-weight-medium);
+	}
+}
+
+.sf-spam-panel__reasons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 4px 16px;
+	margin: 8px 0 0;
+	padding: 0;
+	list-style: none;
+
+	li {
+		margin: 0;
+	}
+}
