@@ -104,6 +104,11 @@ jobs:
       - name: Build assets
         run: npm run build:all
 
+      # Fails when the base front-end bundle (every page with a form) grows
+      # past the limit in bin/bundle-budget.json.
+      - name: Front-end bundle size budget
+        run: npm run size
+
       - name: Start WordPress (wp-env)
         run: |
           npx --yes @wordpress/env@10 start
