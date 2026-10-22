@@ -135,7 +135,8 @@ function IdentityFields({ value = {}, onChange, fieldOptions, disabled, lastName
  * Form builder > Settings > Integrations (2.1).
  *
  * Stores per-form config in metadata.integrations.{email_marketing,crm}. Add-ons
- * add their own sections in the `form.integrations` slot.
+ * add their own sections in the `form.integrations` slot (registerSlotItem or
+ * registerFormIntegration).
  */
 export default function IntegrationsPanel({ schema, onChange, isReadOnly = false }) {
   const extensions = window.subtleformsAdmin?.extensions ?? {};
@@ -143,6 +144,8 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
   const integrations = metadata.integrations || {};
 
   const shown = ['email_marketing', 'crm'].filter((slug) => extensions[slug]?.available);
+  // One slot for every add-on panel, however it was registered
+  // (registerSlotItem or registerFormIntegration).
   const slotItems = getSlotItems('form.integrations');
   const legacyWebhookUrl = (integrations.webhooks || {}).url || '';
 
@@ -418,16 +421,19 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
         </div>
       )}
 
-      {/* Per-form switches add-ons bring (SubtleForms Pro: analytics). */}
-      {getSlotItems('form.integrations').map((item) => {
+      {/* Panels and switches from add-ons such as SubtleForms Pro (form.integrations slot) */}
+      {slotItems.map((item) => {
         const Slot = item.component;
         return (
           <Slot
             key={item.id}
             schema={schema}
             integrations={integrations}
+            onChange={onChange}
             patch={patch}
             isReadOnly={isReadOnly}
+            fieldOptions={fieldOptions}
+            crmProvider={crmProvider}
           />
         );
       })}

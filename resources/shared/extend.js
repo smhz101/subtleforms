@@ -310,6 +310,34 @@ export function addonProvides(feature) {
   return Array.isArray(list) && list.includes(feature);
 }
 
+/**
+ * Register a per-form integration panel (builder > Form settings > Integrations).
+ *
+ * This is a shortcut for registerSlotItem('form.integrations', slug, def), so
+ * there is one mechanism: every panel, whichever way it is registered, is
+ * drawn below the built-in integrations in the order of `order`.
+ *
+ * The panel decides for itself whether to show anything (an add-on checks its
+ * own plan and connection) and returns null otherwise.
+ *
+ * @param {string} slug Lowercase letters, numbers, dashes and underscores. The
+ *                      panel keeps its settings in `metadata.integrations[slug]`.
+ * @param {Object} def  { component, order }. `component` receives
+ *                      { schema, integrations, onChange, isReadOnly, fieldOptions, patch, crmProvider }:
+ *                      `patch(slug, values)` merges values into the panel's settings and
+ *                      `fieldOptions` is the list of form fields for mapping.
+ */
+export function registerFormIntegration(slug, def) {
+  if (typeof slug === 'string' && /^[a-z0-9_-]+$/.test(slug) && def && def.component) {
+    registerSlotItem('form.integrations', slug, def);
+  }
+}
+
+/** Every panel in the form.integrations slot as { slug, id, ...def }, in order. */
+export function formIntegrations() {
+  return getSlotItems('form.integrations').map((item) => ({ slug: item.id, ...item }));
+}
+
 root.SubtleFormsExtend = Object.assign(root.SubtleFormsExtend || {}, {
   registerFieldType,
   registerPricedType,
@@ -322,4 +350,5 @@ root.SubtleFormsExtend = Object.assign(root.SubtleFormsExtend || {}, {
   registerLogicEditor,
   registerSlotItem,
   registerFormMountHook,
+  registerFormIntegration,
 });
