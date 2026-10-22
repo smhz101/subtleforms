@@ -75,9 +75,27 @@ test('a visitor who leaves shows up as a drop-off; a sent form raises Submitted'
   });
   await visitor.page.goto(form.url);
   await waitForForm(visitor.page);
+  // The page must be set up to report: tracking on in the page config, a
+  // user agent the tracker does not take for a robot.
+  const pageState = await visitor.page.evaluate(() => ({
+    agent: navigator.userAgent,
+    track: Boolean((window.subtleformsFrontend || {}).trackFunnel),
+    rest: String((window.subtleformsFrontend || {}).restUrl || ''),
+  }));
+  expect(pageState.agent).not.toMatch(/headless/i);
+  expect(pageState.track).toBe(true);
+  expect(pageState.rest).toContain('/subtleforms/v1');
   await visitor.page.fill('#subtleforms-field-name', 'Ada Lovelace');
   await visitor.page.fill('#subtleforms-field-phone', '2025550143');
+
+  // Leaving the page sends the beacon (pagehide). Wait for that request, so a
+  // beacon that is never sent fails here with its own message. The page is
+  // gone by the time the server answers, so the answer is read from the
+  // report below.
+  const isBeacon = (req) => req.url().includes(`/forms/${form.id}/funnel`) && req.method() === 'POST';
+  const beaconSent = visitor.context.waitForEvent('request', { predicate: isBeacon, timeout: 20000 });
   await visitor.page.goto('/');
+  await beaconSent;
 
   await expect.poll(async () => (await funnel()).left, { timeout: 20000 }).toBe(1);
   expect(beacons).toHaveLength(1);
