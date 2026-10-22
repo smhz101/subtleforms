@@ -4,6 +4,17 @@ This file keeps the full release history. readme.txt lists only the latest versi
 
 == Changelog ==
 
+= 2.7.0 - 2026-10-23 =
+* New: Web addresses and links written as [text](https://example.com) in a form's confirmation message are now clickable; only http, https and site-relative links are allowed and anything else stays plain text.
+* New: Add-ons can register their own panel in the form builder under Integrations, so Pro can offer Salesforce, Pipedrive and Close there.
+* New: Extension points for add-ons: field type overrides, logic evaluators, Reports panel slots, form mount hooks and a form-deleted action, with Pro placeholders in the builder and Reports.
+* Change: Advanced conditional logic (any-match, groups, more operators, step, action and confirmation rules) is now part of SubtleForms Pro; basic show and hide rules stay free and saved advanced rules are ignored without Pro.
+* Change: Form analytics (views, conversion, the form funnel and the Reports panels) is now part of SubtleForms Pro; entry counts, dashboard totals and the spam card stay free and stored counts are kept.
+* Change: Uploading several files in one field is now part of SubtleForms Pro; a saved multi-file field accepts one file without it.
+* Change: Picture Choice is now part of SubtleForms Pro; forms that use it keep working as a plain choice field until Pro is active.
+* Change: The Pro upgrade notes now say SubtleForms Pro has 52 templates, including scored quizzes and five calculators.
+* Change: Removed two settings that were saved but never used: the WooCommerce product and currency fields.
+
 = 2.6.1 - 2026-10-23 =
 * Fix: A visitor who starts a form and leaves is counted in the form funnel again; the leave report is sent as form data so WordPress can read it.
 * Change: A form on your site now appears sooner and without a gap: its fields and labels are printed in the page and drawn from there instead of being fetched after the page loads, and a plain outline of the form is shown until the form is ready.
