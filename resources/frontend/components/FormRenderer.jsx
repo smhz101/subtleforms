@@ -33,7 +33,7 @@ import { restFetch, restUrl, restNonce } from '../utils/restFetch';
 import { fillConfirmation } from '../../shared/confirmationTags';
 import { classicFieldInputs } from '../utils/classicFields';
 import { classicOutcome, forgetClassicToken } from '../utils/classicResult';
-import { announceSubmitted } from '../utils/funnelTracker';
+import { announceSubmitted } from '../utils/submitted';
 
 /**
  * Whether a submitted value counts as missing.
@@ -200,7 +200,7 @@ export default function FormRenderer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // A sent form is not a drop-off: tell the funnel tracker (2.6.0).
+  // Tell the page the form was sent (add-ons listen for it).
   useEffect(() => {
     if (submitSuccess && !preview) {
       announceSubmitted(formId);

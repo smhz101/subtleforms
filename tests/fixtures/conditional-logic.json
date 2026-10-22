@@ -1,295 +1,1765 @@
 {
-  "_comment": "Shared conditional logic spec. Read by tests/unit/ConditionalLogicTest.php (PHP) and resources/shared/conditions.test.js (JS). Both must agree on every case.",
-  "today": "2026-10-11",
-  "conditions": [
-    { "name": "equals text, case-insensitive", "value": "Yes", "operator": "equals", "compare": "yes", "expected": true },
-    { "name": "equals trims", "value": " yes ", "operator": "equals", "compare": "yes", "expected": true },
-    { "name": "equals numeric forms", "value": "5.0", "operator": "equals", "compare": "5", "expected": true },
-    { "name": "equals number vs string", "value": 5, "operator": "equals", "compare": "5", "expected": true },
-    { "name": "equals mismatch", "value": "no", "operator": "equals", "compare": "yes", "expected": false },
-    { "name": "equals multi-value any item", "value": ["red", "blue"], "operator": "equals", "compare": "blue", "expected": true },
-    { "name": "equals empty answer vs empty", "value": "", "operator": "equals", "compare": "", "expected": true },
-    { "name": "equals missing answer", "value": null, "operator": "equals", "compare": "yes", "expected": false },
-    { "name": "equals boolean true", "value": true, "operator": "equals", "compare": "true", "expected": true },
-    { "name": "not_equals", "value": "no", "operator": "not_equals", "compare": "yes", "expected": true },
-    { "name": "not_equals multi contains it", "value": ["yes", "no"], "operator": "not_equals", "compare": "yes", "expected": false },
-    { "name": "not_equals missing answer", "value": null, "operator": "not_equals", "compare": "yes", "expected": true },
-    { "name": "contains substring", "value": "Hello World", "operator": "contains", "compare": "world", "expected": true },
-    { "name": "contains array element", "value": ["apple", "banana"], "operator": "contains", "compare": "Banana", "expected": true },
-    { "name": "contains array no partial", "value": ["apple", "banana"], "operator": "contains", "compare": "nan", "expected": false },
-    { "name": "contains empty needle", "value": "abc", "operator": "contains", "compare": "", "expected": false },
-    { "name": "not_contains", "value": "Hello", "operator": "not_contains", "compare": "xyz", "expected": true },
-    { "name": "contains composite object", "value": { "first_name": "Ada", "last_name": "Lovelace" }, "operator": "contains", "compare": "lovelace", "expected": true },
-    { "name": "empty string", "value": "", "operator": "empty", "expected": true },
-    { "name": "empty whitespace", "value": "   ", "operator": "empty", "expected": true },
-    { "name": "empty null", "value": null, "operator": "empty", "expected": true },
-    { "name": "empty list", "value": [], "operator": "empty", "expected": true },
-    { "name": "empty false", "value": false, "operator": "empty", "expected": true },
-    { "name": "zero is not empty", "value": 0, "operator": "empty", "expected": false },
-    { "name": "empty composite", "value": { "first_name": "", "last_name": " " }, "operator": "empty", "expected": true },
-    { "name": "empty object", "value": {}, "operator": "empty", "expected": true },
-    { "name": "not_empty", "value": "x", "operator": "not_empty", "expected": true },
-    { "name": "not_empty composite partly filled", "value": { "first_name": "Ada", "last_name": "" }, "operator": "not_empty", "expected": true },
-    { "name": "greater_than", "value": "10", "operator": "greater_than", "compare": "9.5", "expected": true },
-    { "name": "greater_than equal", "value": "10", "operator": "greater_than", "compare": "10", "expected": false },
-    { "name": "greater_than non numeric", "value": "abc", "operator": "greater_than", "compare": "1", "expected": false },
-    { "name": "greater_than empty compare", "value": "5", "operator": "greater_than", "compare": "", "expected": false },
-    { "name": "less_than negative", "value": "-3", "operator": "less_than", "compare": "0", "expected": true },
-    { "name": "less_than decimal", "value": ".5", "operator": "less_than", "compare": "1", "expected": true },
-    { "name": "starts_with", "value": "SF-12345", "operator": "starts_with", "compare": "sf-", "expected": true },
-    { "name": "starts_with no", "value": "AB-1", "operator": "starts_with", "compare": "sf", "expected": false },
-    { "name": "ends_with", "value": "ada@example.com", "operator": "ends_with", "compare": "@EXAMPLE.com", "expected": true },
-    { "name": "ends_with empty needle", "value": "abc", "operator": "ends_with", "compare": "", "expected": false },
-    { "name": "in comma list", "value": "UK", "operator": "in", "compare": "us, uk, ae", "expected": true },
-    { "name": "in array list", "value": "3", "operator": "in", "compare": ["1", "2", "3"], "expected": true },
-    { "name": "in no match", "value": "FR", "operator": "in", "compare": "US,UK", "expected": false },
-    { "name": "in empty answer", "value": "", "operator": "in", "compare": "US,UK", "expected": false },
-    { "name": "in multi answer", "value": ["fr", "uk"], "operator": "in", "compare": "US,UK", "expected": true },
-    { "name": "not_in", "value": "FR", "operator": "not_in", "compare": "US,UK", "expected": true },
-    { "name": "not_in empty answer", "value": "", "operator": "not_in", "compare": "US,UK", "expected": true },
-    { "name": "between inclusive low", "value": "18", "operator": "between", "compare": "18", "compare2": "65", "expected": true },
-    { "name": "between inclusive high", "value": 65, "operator": "between", "compare": "18", "compare2": "65", "expected": true },
-    { "name": "between outside", "value": "70", "operator": "between", "compare": "18", "compare2": "65", "expected": false },
-    { "name": "between array bounds", "value": "5", "operator": "between", "compare": ["1", "10"], "expected": true },
-    { "name": "between dates", "value": "2026-05-01", "operator": "between", "compare": "2026-01-01", "compare2": "2026-12-31", "expected": true },
-    { "name": "between missing bound", "value": "5", "operator": "between", "compare": "1", "compare2": "", "expected": false },
-    { "name": "before date", "value": "2026-01-01", "operator": "before", "compare": "2026-06-01", "expected": true },
-    { "name": "before same day", "value": "2026-06-01", "operator": "before", "compare": "2026-06-01", "expected": false },
-    { "name": "after with time", "value": "2026-06-01T10:30", "operator": "after", "compare": "2026-06-01", "expected": true },
-    { "name": "after today", "value": "2026-10-12", "operator": "after", "compare": "today", "expected": true },
-    { "name": "before today", "value": "2026-10-11", "operator": "before", "compare": "today", "expected": false },
-    { "name": "before invalid date", "value": "next week", "operator": "before", "compare": "2026-06-01", "expected": false },
-    { "name": "unknown operator", "value": "x", "operator": "matches_regex", "compare": ".*", "expected": false },
-    {"name": "checkbox ticked equals yes", "value": true, "operator": "equals", "compare": "yes", "expected": true, "field": {"type": "checkbox"}},
-    {"name": "checkbox ticked as 1 equals checked", "value": "1", "operator": "equals", "compare": "checked", "expected": true, "field": {"type": "checkbox"}},
-    {"name": "checkbox ticked as on equals true", "value": "on", "operator": "equals", "compare": "true", "expected": true, "field": {"type": "checkbox"}},
-    {"name": "checkbox unticked equals unchecked", "value": "", "operator": "equals", "compare": "unchecked", "expected": true, "field": {"type": "checkbox"}},
-    {"name": "checkbox unticked as false equals unchecked", "value": "false", "operator": "equals", "compare": "unchecked", "expected": true, "field": {"type": "checkbox"}},
-    {"name": "checkbox ticked does not equal unchecked", "value": "1", "operator": "equals", "compare": "unchecked", "expected": false, "field": {"type": "checkbox"}},
-    {"name": "checkbox unticked does not equal checked", "value": "", "operator": "equals", "compare": "checked", "expected": false, "field": {"type": "checkbox"}},
-    {"name": "checkbox ticked not_equals unchecked", "value": true, "operator": "not_equals", "compare": "unchecked", "expected": true, "field": {"type": "checkbox"}},
-    {"name": "checkbox ticked not_equals checked", "value": true, "operator": "not_equals", "compare": "checked", "expected": false, "field": {"type": "checkbox"}},
-    {"name": "consent accepted equals true", "value": "yes", "operator": "equals", "compare": "true", "expected": true, "field": {"type": "consent"}},
-    {"name": "consent missing equals false", "value": null, "operator": "equals", "compare": "false", "expected": true, "field": {"type": "consent"}},
-    {"name": "toggle on is not empty", "value": "yes", "operator": "not_empty", "compare": "", "expected": true, "field": {"type": "toggle"}},
-    {"name": "toggle off (default no) is empty", "value": "no", "operator": "empty", "compare": "", "expected": true, "field": {"type": "toggle"}},
-    {"name": "toggle off (default no) is not not_empty", "value": "no", "operator": "not_empty", "compare": "", "expected": false, "field": {"type": "toggle"}},
-    {"name": "toggle with its own off value is empty", "value": "off", "operator": "empty", "compare": "", "expected": true, "field": {"type": "toggle", "config": {"offValue": "off"}}},
-    {"name": "toggle with its own off value on the field is empty", "value": "Off", "operator": "empty", "compare": "", "expected": true, "field": {"type": "toggle", "offValue": "off"}},
-    {"name": "toggle with its own off value still on when yes", "value": "yes", "operator": "empty", "compare": "", "expected": false, "field": {"type": "toggle", "config": {"offValue": "off"}}},
-    {"name": "toggle on equals its on value", "value": "yes", "operator": "equals", "compare": "yes", "expected": true, "field": {"type": "toggle"}},
-    {"name": "country code equals code", "value": "DE", "operator": "equals", "compare": "DE", "expected": true, "field": {"type": "country"}},
-    {"name": "country name equals the picked code", "value": "Germany", "operator": "equals", "compare": "DE", "expected": true, "field": {"type": "country"}},
-    {"name": "country name is case-insensitive", "value": "germany", "operator": "equals", "compare": "DE", "expected": true, "field": {"type": "country"}},
-    {"name": "country code equals a rule holding the name", "value": "DE", "operator": "equals", "compare": "Germany", "expected": true, "field": {"type": "country"}},
-    {"name": "country lower-case code equals code", "value": "de", "operator": "equals", "compare": "DE", "expected": true, "field": {"type": "country"}},
-    {"name": "country name with accents equals its code", "value": "Åland Islands", "operator": "equals", "compare": "AX", "expected": true, "field": {"type": "country"}},
-    {"name": "country other name does not equal", "value": "France", "operator": "equals", "compare": "DE", "expected": false, "field": {"type": "country"}},
-    {"name": "country name not_equals other code", "value": "France", "operator": "not_equals", "compare": "DE", "expected": true, "field": {"type": "country"}},
-    {"name": "country name not_equals same code", "value": "Germany", "operator": "not_equals", "compare": "DE", "expected": false, "field": {"type": "country"}},
-    {"name": "country empty equals nothing", "value": "", "operator": "equals", "compare": "DE", "expected": false, "field": {"type": "country"}},
-    {"name": "country unknown text falls back to text", "value": "Atlantis", "operator": "equals", "compare": "atlantis", "expected": true, "field": {"type": "country"}},
-    {"name": "country in a list of codes by name", "value": "Germany", "operator": "in", "compare": "FR, DE", "expected": true, "field": {"type": "country"}},
-    {"name": "country in a list of codes by code", "value": "DE", "operator": "in", "compare": "FR, DE", "expected": true, "field": {"type": "country"}},
-    {"name": "country not in a list", "value": "Spain", "operator": "in", "compare": "FR, DE", "expected": false, "field": {"type": "country"}},
-    {"name": "country not_in a list by name", "value": "Germany", "operator": "not_in", "compare": "FR, DE", "expected": false, "field": {"type": "country"}},
-    {"name": "country not_in a list other", "value": "Spain", "operator": "not_in", "compare": "FR, DE", "expected": true, "field": {"type": "country"}},
-    {"name": "country is not empty when a name is stored", "value": "Germany", "operator": "not_empty", "compare": "", "expected": true, "field": {"type": "country"}}
-  ],
-  "logic": [
-    {
-      "name": "all rules match",
-      "logic": { "action": "show", "groups": [ { "match": "all", "rules": [ { "field": "a", "operator": "equals", "value": "1" }, { "field": "b", "operator": "not_empty" } ] } ] },
-      "values": { "a": "1", "b": "x" },
-      "expected": true
-    },
-    {
-      "name": "all rules, one fails",
-      "logic": { "action": "show", "groups": [ { "match": "all", "rules": [ { "field": "a", "operator": "equals", "value": "1" }, { "field": "b", "operator": "not_empty" } ] } ] },
-      "values": { "a": "1", "b": "" },
-      "expected": false
-    },
-    {
-      "name": "any rule matches",
-      "logic": { "action": "show", "groups": [ { "match": "any", "rules": [ { "field": "a", "operator": "equals", "value": "1" }, { "field": "b", "operator": "not_empty" } ] } ] },
-      "values": { "a": "2", "b": "x" },
-      "expected": true
-    },
-    {
-      "name": "groups are OR'ed",
-      "logic": { "action": "show", "groups": [
-        { "match": "all", "rules": [ { "field": "country", "operator": "equals", "value": "US" }, { "field": "age", "operator": "greater_than", "value": "20" } ] },
-        { "match": "all", "rules": [ { "field": "country", "operator": "equals", "value": "UK" }, { "field": "age", "operator": "greater_than", "value": "17" } ] }
-      ] },
-      "values": { "country": "UK", "age": "18" },
-      "expected": true
-    },
-    {
-      "name": "groups none pass",
-      "logic": { "action": "show", "groups": [
-        { "match": "all", "rules": [ { "field": "country", "operator": "equals", "value": "US" }, { "field": "age", "operator": "greater_than", "value": "20" } ] },
-        { "match": "all", "rules": [ { "field": "country", "operator": "equals", "value": "UK" }, { "field": "age", "operator": "greater_than", "value": "17" } ] }
-      ] },
-      "values": { "country": "US", "age": "18" },
-      "expected": false
-    },
-    {
-      "name": "flat rules shape",
-      "logic": { "action": "show", "match": "any", "rules": [ { "field": "a", "operator": "equals", "value": "1" }, { "field": "a", "operator": "equals", "value": "2" } ] },
-      "values": { "a": "2" },
-      "expected": true
-    },
-    {
-      "name": "legacy sourceField key",
-      "logic": { "groups": [ { "rules": [ { "sourceField": "a", "operator": "equals", "value": "1" } ] } ] },
-      "values": { "a": "1" },
-      "expected": true
-    },
-    {
-      "name": "no rules means inactive (passes)",
-      "logic": { "action": "show", "groups": [ { "match": "all", "rules": [ { "field": "", "operator": "equals", "value": "1" } ] } ] },
-      "values": {},
-      "expected": true
-    },
-    {
-      "name": "dotted key reads nested value",
-      "logic": { "groups": [ { "rules": [ { "field": "name.first_name", "operator": "equals", "value": "Ada" } ] } ] },
-      "values": { "name": { "first_name": "Ada", "last_name": "L" } },
-      "expected": true
-    }
-  ],
-  "state": [
-    {
-      "name": "show field when all match",
-      "schema": { "fields": [
-        { "key": "plan", "type": "select" },
-        { "key": "seats", "type": "number" },
-        { "key": "invoice", "type": "text", "required": true, "logic": { "action": "show", "groups": [ { "match": "all", "rules": [ { "field": "plan", "operator": "equals", "value": "business" }, { "field": "seats", "operator": "greater_than", "value": "5" } ] } ] } }
-      ] },
-      "values": { "plan": "business", "seats": "3", "invoice": "stale" },
-      "expected": { "hidden_fields": ["invoice"], "required_fields": [], "hidden_steps": [] }
-    },
-    {
-      "name": "hide field",
-      "schema": { "fields": [
-        { "key": "member", "type": "radio" },
-        { "key": "fee", "type": "number", "logic": { "action": "hide", "groups": [ { "match": "all", "rules": [ { "field": "member", "operator": "equals", "value": "yes" } ] } ] } }
-      ] },
-      "values": { "member": "yes" },
-      "expected": { "hidden_fields": ["fee"], "required_fields": [], "hidden_steps": [] }
-    },
-    {
-      "name": "legacy conditions on field",
-      "schema": { "fields": [
-        { "key": "a", "type": "text" },
-        { "key": "b", "type": "text", "conditions": [ { "sourceField": "a", "operator": "equals", "value": "x", "effect": "show" } ] },
-        { "key": "c", "type": "text", "config": { "conditions": [ { "sourceField": "a", "operator": "equals", "value": "x", "effect": "require" } ] } }
-      ] },
-      "values": { "a": "x" },
-      "expected": { "hidden_fields": [], "required_fields": ["c"], "hidden_steps": [] }
-    },
-    {
-      "name": "chained: field depending on a hidden field is hidden",
-      "schema": { "fields": [
-        { "key": "a", "type": "text" },
-        { "key": "b", "type": "text", "logic": { "action": "show", "groups": [ { "rules": [ { "field": "a", "operator": "equals", "value": "go" } ] } ] } },
-        { "key": "c", "type": "text", "logic": { "action": "show", "groups": [ { "rules": [ { "field": "b", "operator": "equals", "value": "go" } ] } ] } }
-      ] },
-      "values": { "a": "stop", "b": "go" },
-      "expected": { "hidden_fields": ["b", "c"], "required_fields": [], "hidden_steps": [] }
-    },
-    {
-      "name": "skipped step hides its fields",
-      "schema": { "fields": [
-        { "key": "s1", "type": "step", "children": [ { "key": "need_ship", "type": "radio" } ] },
-        { "key": "s2", "type": "step", "logic": { "action": "show", "groups": [ { "rules": [ { "field": "need_ship", "operator": "equals", "value": "yes" } ] } ] }, "children": [
-          { "key": "address", "type": "text", "required": true },
-          { "key": "row", "type": "two_column_container", "columns": [ [ { "key": "zip", "type": "text" } ], { "fields": [ { "key": "city", "type": "text" } ] } ] }
-        ] },
-        { "key": "s3", "type": "step", "children": [ { "key": "email", "type": "email" } ] }
-      ] },
-      "values": { "need_ship": "no" },
-      "expected": { "hidden_fields": ["address", "row", "zip", "city"], "required_fields": [], "hidden_steps": ["s2"] }
-    },
-    {
-      "name": "step shown",
-      "schema": { "fields": [
-        { "key": "s1", "type": "step", "children": [ { "key": "need_ship", "type": "radio" } ] },
-        { "id": "s2", "type": "step", "logic": { "action": "show", "groups": [ { "rules": [ { "field": "need_ship", "operator": "equals", "value": "yes" } ] } ] }, "children": [ { "key": "address", "type": "text" } ] }
-      ] },
-      "values": { "need_ship": "yes" },
-      "expected": { "hidden_fields": [], "required_fields": [], "hidden_steps": [] }
-    },
-    {
-      "name": "global logic rule hides target",
-      "schema": {
-        "fields": [ { "key": "a", "type": "text" }, { "key": "b", "type": "text" } ],
-        "logic": [ { "if": { "field": "a", "operator": "equals", "value": "x" }, "then": { "action": "hide", "target": "b" } } ]
-      },
-      "values": { "a": "x" },
-      "expected": { "hidden_fields": ["b"], "required_fields": [], "hidden_steps": [] }
-    },
-    {"name": "a rule on a Country field that stores names shows the field", "schema": {"fields": [{"key": "where", "type": "country", "config": {"output_format": "name"}}, {"key": "vat", "type": "text", "required": true, "logic": {"action": "show", "groups": [{"match": "all", "rules": [{"field": "where", "operator": "equals", "value": "DE"}]}]}}]}, "values": {"where": "Germany", "vat": "x"}, "expected": {"hidden_fields": [], "required_fields": [], "hidden_steps": []}},
-    {"name": "the same rule hides the field for another country, inside columns too", "schema": {"fields": [{"type": "two_column_container", "key": "cols", "columns": [[{"key": "where", "type": "country"}], [{"key": "vat", "type": "text", "logic": {"action": "show", "groups": [{"match": "all", "rules": [{"field": "where", "operator": "equals", "value": "Germany"}]}]}}]]}]}, "values": {"where": "FR", "vat": "x"}, "expected": {"hidden_fields": ["vat"], "required_fields": [], "hidden_steps": []}},
-    {"name": "a ticked checkbox and a toggle that is off drive show rules", "schema": {"fields": [{"key": "agree", "type": "checkbox"}, {"key": "news", "type": "toggle"}, {"key": "a", "type": "text", "logic": {"action": "show", "groups": [{"match": "all", "rules": [{"field": "agree", "operator": "equals", "value": "checked"}]}]}}, {"key": "b", "type": "text", "logic": {"action": "show", "groups": [{"match": "all", "rules": [{"field": "news", "operator": "not_empty"}]}]}}]}, "values": {"agree": "1", "news": "no", "a": "1", "b": "1"}, "expected": {"hidden_fields": ["b"], "required_fields": [], "hidden_steps": []}}
-  ],
-  "confirmations": [
-    {
-      "name": "first matching confirmation wins",
-      "metadata": {
-        "confirmation": { "id": "default", "type": "message" },
-        "confirmations": [
-          { "id": "vip", "logic": { "groups": [ { "rules": [ { "field": "budget", "operator": "greater_than", "value": "10000" } ] } ] } },
-          { "id": "big", "logic": { "groups": [ { "rules": [ { "field": "budget", "operator": "greater_than", "value": "1000" } ] } ] } }
-        ]
-      },
-      "values": { "budget": "50000" },
-      "expected": "vip"
-    },
-    {
-      "name": "second confirmation",
-      "metadata": {
-        "confirmation": { "id": "default" },
-        "confirmations": [
-          { "id": "vip", "logic": { "groups": [ { "rules": [ { "field": "budget", "operator": "greater_than", "value": "10000" } ] } ] } },
-          { "id": "big", "logic": { "groups": [ { "rules": [ { "field": "budget", "operator": "greater_than", "value": "1000" } ] } ] } }
-        ]
-      },
-      "values": { "budget": "5000" },
-      "expected": "big"
-    },
-    {
-      "name": "fallback to default",
-      "metadata": {
-        "confirmation": { "id": "default" },
-        "confirmations": [ { "id": "vip", "logic": { "groups": [ { "rules": [ { "field": "budget", "operator": "greater_than", "value": "10000" } ] } ] } } ]
-      },
-      "values": { "budget": "5" },
-      "expected": "default"
-    },
-    {
-      "name": "confirmation without rules never matches",
-      "metadata": { "confirmation": { "id": "default" }, "confirmations": [ { "id": "empty", "logic": { "groups": [] } } ] },
-      "values": {},
-      "expected": "default"
-    },
-    {
-      "name": "disabled confirmation skipped",
-      "metadata": { "confirmation": { "id": "default" }, "confirmations": [ { "id": "off", "enabled": false, "logic": { "groups": [ { "rules": [ { "field": "a", "operator": "empty" } ] } ] } } ] },
-      "values": {},
-      "expected": "default"
-    },
-    {
-      "name": "no default",
-      "metadata": {},
-      "values": {},
-      "expected": null
-    }
-  ],
-  "advanced": [
-    { "name": "basic logic", "logic": { "groups": [ { "match": "all", "rules": [ { "field": "a", "operator": "equals", "value": "1" } ] } ] }, "expected": false },
-    { "name": "any match", "logic": { "groups": [ { "match": "any", "rules": [ { "field": "a", "operator": "equals", "value": "1" } ] } ] }, "expected": true },
-    { "name": "two groups", "logic": { "groups": [ { "rules": [ { "field": "a", "operator": "equals" } ] }, { "rules": [ { "field": "b", "operator": "equals" } ] } ] }, "expected": true },
-    { "name": "advanced operator", "logic": { "groups": [ { "rules": [ { "field": "a", "operator": "between", "value": "1", "value2": "2" } ] } ] }, "expected": true }
-  ]
+	"_comment": "Shared basic conditional logic spec. Read by tests/unit/ConditionalLogicTest.php (PHP) and resources/shared/conditions.test.js (JS). Both must agree on every case. The plugin evaluates one group whose rules all match, on fields, with the basic operators; anything else is ignored (sections ignored and ignoredState). The full spec, with groups, the any match, the other operators and conditions on steps and confirmations, is in SubtleForms Pro.",
+	"today": "2026-10-11",
+	"conditions": [
+		{
+			"name": "equals text, case-insensitive",
+			"value": "Yes",
+			"operator": "equals",
+			"compare": "yes",
+			"expected": true
+		},
+		{
+			"name": "equals trims",
+			"value": " yes ",
+			"operator": "equals",
+			"compare": "yes",
+			"expected": true
+		},
+		{
+			"name": "equals numeric forms",
+			"value": "5.0",
+			"operator": "equals",
+			"compare": "5",
+			"expected": true
+		},
+		{
+			"name": "equals number vs string",
+			"value": 5,
+			"operator": "equals",
+			"compare": "5",
+			"expected": true
+		},
+		{
+			"name": "equals mismatch",
+			"value": "no",
+			"operator": "equals",
+			"compare": "yes",
+			"expected": false
+		},
+		{
+			"name": "equals multi-value any item",
+			"value": [
+				"red",
+				"blue"
+			],
+			"operator": "equals",
+			"compare": "blue",
+			"expected": true
+		},
+		{
+			"name": "equals empty answer vs empty",
+			"value": "",
+			"operator": "equals",
+			"compare": "",
+			"expected": true
+		},
+		{
+			"name": "equals missing answer",
+			"value": null,
+			"operator": "equals",
+			"compare": "yes",
+			"expected": false
+		},
+		{
+			"name": "equals boolean true",
+			"value": true,
+			"operator": "equals",
+			"compare": "true",
+			"expected": true
+		},
+		{
+			"name": "not_equals",
+			"value": "no",
+			"operator": "not_equals",
+			"compare": "yes",
+			"expected": true
+		},
+		{
+			"name": "not_equals multi contains it",
+			"value": [
+				"yes",
+				"no"
+			],
+			"operator": "not_equals",
+			"compare": "yes",
+			"expected": false
+		},
+		{
+			"name": "not_equals missing answer",
+			"value": null,
+			"operator": "not_equals",
+			"compare": "yes",
+			"expected": true
+		},
+		{
+			"name": "contains substring",
+			"value": "Hello World",
+			"operator": "contains",
+			"compare": "world",
+			"expected": true
+		},
+		{
+			"name": "contains array element",
+			"value": [
+				"apple",
+				"banana"
+			],
+			"operator": "contains",
+			"compare": "Banana",
+			"expected": true
+		},
+		{
+			"name": "contains array no partial",
+			"value": [
+				"apple",
+				"banana"
+			],
+			"operator": "contains",
+			"compare": "nan",
+			"expected": false
+		},
+		{
+			"name": "contains empty needle",
+			"value": "abc",
+			"operator": "contains",
+			"compare": "",
+			"expected": false
+		},
+		{
+			"name": "not_contains",
+			"value": "Hello",
+			"operator": "not_contains",
+			"compare": "xyz",
+			"expected": true
+		},
+		{
+			"name": "contains composite object",
+			"value": {
+				"first_name": "Ada",
+				"last_name": "Lovelace"
+			},
+			"operator": "contains",
+			"compare": "lovelace",
+			"expected": true
+		},
+		{
+			"name": "empty string",
+			"value": "",
+			"operator": "empty",
+			"expected": true
+		},
+		{
+			"name": "empty whitespace",
+			"value": "   ",
+			"operator": "empty",
+			"expected": true
+		},
+		{
+			"name": "empty null",
+			"value": null,
+			"operator": "empty",
+			"expected": true
+		},
+		{
+			"name": "empty list",
+			"value": [],
+			"operator": "empty",
+			"expected": true
+		},
+		{
+			"name": "empty false",
+			"value": false,
+			"operator": "empty",
+			"expected": true
+		},
+		{
+			"name": "zero is not empty",
+			"value": 0,
+			"operator": "empty",
+			"expected": false
+		},
+		{
+			"name": "empty composite",
+			"value": {
+				"first_name": "",
+				"last_name": " "
+			},
+			"operator": "empty",
+			"expected": true
+		},
+		{
+			"name": "empty object",
+			"value": {},
+			"operator": "empty",
+			"expected": true
+		},
+		{
+			"name": "not_empty",
+			"value": "x",
+			"operator": "not_empty",
+			"expected": true
+		},
+		{
+			"name": "not_empty composite partly filled",
+			"value": {
+				"first_name": "Ada",
+				"last_name": ""
+			},
+			"operator": "not_empty",
+			"expected": true
+		},
+		{
+			"name": "greater_than",
+			"value": "10",
+			"operator": "greater_than",
+			"compare": "9.5",
+			"expected": true
+		},
+		{
+			"name": "greater_than equal",
+			"value": "10",
+			"operator": "greater_than",
+			"compare": "10",
+			"expected": false
+		},
+		{
+			"name": "greater_than non numeric",
+			"value": "abc",
+			"operator": "greater_than",
+			"compare": "1",
+			"expected": false
+		},
+		{
+			"name": "greater_than empty compare",
+			"value": "5",
+			"operator": "greater_than",
+			"compare": "",
+			"expected": false
+		},
+		{
+			"name": "less_than negative",
+			"value": "-3",
+			"operator": "less_than",
+			"compare": "0",
+			"expected": true
+		},
+		{
+			"name": "less_than decimal",
+			"value": ".5",
+			"operator": "less_than",
+			"compare": "1",
+			"expected": true
+		},
+		{
+			"name": "unknown operator",
+			"value": "x",
+			"operator": "matches_regex",
+			"compare": ".*",
+			"expected": false
+		},
+		{
+			"name": "checkbox ticked equals yes",
+			"value": true,
+			"operator": "equals",
+			"compare": "yes",
+			"expected": true,
+			"field": {
+				"type": "checkbox"
+			}
+		},
+		{
+			"name": "checkbox ticked as 1 equals checked",
+			"value": "1",
+			"operator": "equals",
+			"compare": "checked",
+			"expected": true,
+			"field": {
+				"type": "checkbox"
+			}
+		},
+		{
+			"name": "checkbox ticked as on equals true",
+			"value": "on",
+			"operator": "equals",
+			"compare": "true",
+			"expected": true,
+			"field": {
+				"type": "checkbox"
+			}
+		},
+		{
+			"name": "checkbox unticked equals unchecked",
+			"value": "",
+			"operator": "equals",
+			"compare": "unchecked",
+			"expected": true,
+			"field": {
+				"type": "checkbox"
+			}
+		},
+		{
+			"name": "checkbox unticked as false equals unchecked",
+			"value": "false",
+			"operator": "equals",
+			"compare": "unchecked",
+			"expected": true,
+			"field": {
+				"type": "checkbox"
+			}
+		},
+		{
+			"name": "checkbox ticked does not equal unchecked",
+			"value": "1",
+			"operator": "equals",
+			"compare": "unchecked",
+			"expected": false,
+			"field": {
+				"type": "checkbox"
+			}
+		},
+		{
+			"name": "checkbox unticked does not equal checked",
+			"value": "",
+			"operator": "equals",
+			"compare": "checked",
+			"expected": false,
+			"field": {
+				"type": "checkbox"
+			}
+		},
+		{
+			"name": "checkbox ticked not_equals unchecked",
+			"value": true,
+			"operator": "not_equals",
+			"compare": "unchecked",
+			"expected": true,
+			"field": {
+				"type": "checkbox"
+			}
+		},
+		{
+			"name": "checkbox ticked not_equals checked",
+			"value": true,
+			"operator": "not_equals",
+			"compare": "checked",
+			"expected": false,
+			"field": {
+				"type": "checkbox"
+			}
+		},
+		{
+			"name": "consent accepted equals true",
+			"value": "yes",
+			"operator": "equals",
+			"compare": "true",
+			"expected": true,
+			"field": {
+				"type": "consent"
+			}
+		},
+		{
+			"name": "consent missing equals false",
+			"value": null,
+			"operator": "equals",
+			"compare": "false",
+			"expected": true,
+			"field": {
+				"type": "consent"
+			}
+		},
+		{
+			"name": "toggle on is not empty",
+			"value": "yes",
+			"operator": "not_empty",
+			"compare": "",
+			"expected": true,
+			"field": {
+				"type": "toggle"
+			}
+		},
+		{
+			"name": "toggle off (default no) is empty",
+			"value": "no",
+			"operator": "empty",
+			"compare": "",
+			"expected": true,
+			"field": {
+				"type": "toggle"
+			}
+		},
+		{
+			"name": "toggle off (default no) is not not_empty",
+			"value": "no",
+			"operator": "not_empty",
+			"compare": "",
+			"expected": false,
+			"field": {
+				"type": "toggle"
+			}
+		},
+		{
+			"name": "toggle with its own off value is empty",
+			"value": "off",
+			"operator": "empty",
+			"compare": "",
+			"expected": true,
+			"field": {
+				"type": "toggle",
+				"config": {
+					"offValue": "off"
+				}
+			}
+		},
+		{
+			"name": "toggle with its own off value on the field is empty",
+			"value": "Off",
+			"operator": "empty",
+			"compare": "",
+			"expected": true,
+			"field": {
+				"type": "toggle",
+				"offValue": "off"
+			}
+		},
+		{
+			"name": "toggle with its own off value still on when yes",
+			"value": "yes",
+			"operator": "empty",
+			"compare": "",
+			"expected": false,
+			"field": {
+				"type": "toggle",
+				"config": {
+					"offValue": "off"
+				}
+			}
+		},
+		{
+			"name": "toggle on equals its on value",
+			"value": "yes",
+			"operator": "equals",
+			"compare": "yes",
+			"expected": true,
+			"field": {
+				"type": "toggle"
+			}
+		},
+		{
+			"name": "country code equals code",
+			"value": "DE",
+			"operator": "equals",
+			"compare": "DE",
+			"expected": true,
+			"field": {
+				"type": "country"
+			}
+		},
+		{
+			"name": "country name equals the picked code",
+			"value": "Germany",
+			"operator": "equals",
+			"compare": "DE",
+			"expected": true,
+			"field": {
+				"type": "country"
+			}
+		},
+		{
+			"name": "country name is case-insensitive",
+			"value": "germany",
+			"operator": "equals",
+			"compare": "DE",
+			"expected": true,
+			"field": {
+				"type": "country"
+			}
+		},
+		{
+			"name": "country code equals a rule holding the name",
+			"value": "DE",
+			"operator": "equals",
+			"compare": "Germany",
+			"expected": true,
+			"field": {
+				"type": "country"
+			}
+		},
+		{
+			"name": "country lower-case code equals code",
+			"value": "de",
+			"operator": "equals",
+			"compare": "DE",
+			"expected": true,
+			"field": {
+				"type": "country"
+			}
+		},
+		{
+			"name": "country name with accents equals its code",
+			"value": "Åland Islands",
+			"operator": "equals",
+			"compare": "AX",
+			"expected": true,
+			"field": {
+				"type": "country"
+			}
+		},
+		{
+			"name": "country other name does not equal",
+			"value": "France",
+			"operator": "equals",
+			"compare": "DE",
+			"expected": false,
+			"field": {
+				"type": "country"
+			}
+		},
+		{
+			"name": "country name not_equals other code",
+			"value": "France",
+			"operator": "not_equals",
+			"compare": "DE",
+			"expected": true,
+			"field": {
+				"type": "country"
+			}
+		},
+		{
+			"name": "country name not_equals same code",
+			"value": "Germany",
+			"operator": "not_equals",
+			"compare": "DE",
+			"expected": false,
+			"field": {
+				"type": "country"
+			}
+		},
+		{
+			"name": "country empty equals nothing",
+			"value": "",
+			"operator": "equals",
+			"compare": "DE",
+			"expected": false,
+			"field": {
+				"type": "country"
+			}
+		},
+		{
+			"name": "country unknown text falls back to text",
+			"value": "Atlantis",
+			"operator": "equals",
+			"compare": "atlantis",
+			"expected": true,
+			"field": {
+				"type": "country"
+			}
+		},
+		{
+			"name": "country is not empty when a name is stored",
+			"value": "Germany",
+			"operator": "not_empty",
+			"compare": "",
+			"expected": true,
+			"field": {
+				"type": "country"
+			}
+		}
+	],
+	"logic": [
+		{
+			"name": "all rules match",
+			"logic": {
+				"action": "show",
+				"groups": [
+					{
+						"match": "all",
+						"rules": [
+							{
+								"field": "a",
+								"operator": "equals",
+								"value": "1"
+							},
+							{
+								"field": "b",
+								"operator": "not_empty"
+							}
+						]
+					}
+				]
+			},
+			"values": {
+				"a": "1",
+				"b": "x"
+			},
+			"expected": true
+		},
+		{
+			"name": "all rules, one fails",
+			"logic": {
+				"action": "show",
+				"groups": [
+					{
+						"match": "all",
+						"rules": [
+							{
+								"field": "a",
+								"operator": "equals",
+								"value": "1"
+							},
+							{
+								"field": "b",
+								"operator": "not_empty"
+							}
+						]
+					}
+				]
+			},
+			"values": {
+				"a": "1",
+				"b": ""
+			},
+			"expected": false
+		},
+		{
+			"name": "legacy sourceField key",
+			"logic": {
+				"groups": [
+					{
+						"rules": [
+							{
+								"sourceField": "a",
+								"operator": "equals",
+								"value": "1"
+							}
+						]
+					}
+				]
+			},
+			"values": {
+				"a": "1"
+			},
+			"expected": true
+		},
+		{
+			"name": "no rules means inactive (passes)",
+			"logic": {
+				"action": "show",
+				"groups": [
+					{
+						"match": "all",
+						"rules": [
+							{
+								"field": "",
+								"operator": "equals",
+								"value": "1"
+							}
+						]
+					}
+				]
+			},
+			"values": {},
+			"expected": true
+		},
+		{
+			"name": "dotted key reads nested value",
+			"logic": {
+				"groups": [
+					{
+						"rules": [
+							{
+								"field": "name.first_name",
+								"operator": "equals",
+								"value": "Ada"
+							}
+						]
+					}
+				]
+			},
+			"values": {
+				"name": {
+					"first_name": "Ada",
+					"last_name": "L"
+				}
+			},
+			"expected": true
+		}
+	],
+	"ignored": [
+		{
+			"name": "ignored: any rule matches",
+			"scope": "field",
+			"logic": {
+				"action": "show",
+				"groups": [
+					{
+						"match": "any",
+						"rules": [
+							{
+								"field": "a",
+								"operator": "equals",
+								"value": "1"
+							},
+							{
+								"field": "b",
+								"operator": "not_empty"
+							}
+						]
+					}
+				]
+			},
+			"values": {
+				"a": "2",
+				"b": "x"
+			},
+			"expected": true
+		},
+		{
+			"name": "ignored: groups are OR'ed",
+			"scope": "field",
+			"logic": {
+				"action": "show",
+				"groups": [
+					{
+						"match": "all",
+						"rules": [
+							{
+								"field": "country",
+								"operator": "equals",
+								"value": "US"
+							},
+							{
+								"field": "age",
+								"operator": "greater_than",
+								"value": "20"
+							}
+						]
+					},
+					{
+						"match": "all",
+						"rules": [
+							{
+								"field": "country",
+								"operator": "equals",
+								"value": "UK"
+							},
+							{
+								"field": "age",
+								"operator": "greater_than",
+								"value": "17"
+							}
+						]
+					}
+				]
+			},
+			"values": {
+				"country": "UK",
+				"age": "18"
+			},
+			"expected": true
+		},
+		{
+			"name": "ignored: groups none pass",
+			"scope": "field",
+			"logic": {
+				"action": "show",
+				"groups": [
+					{
+						"match": "all",
+						"rules": [
+							{
+								"field": "country",
+								"operator": "equals",
+								"value": "US"
+							},
+							{
+								"field": "age",
+								"operator": "greater_than",
+								"value": "20"
+							}
+						]
+					},
+					{
+						"match": "all",
+						"rules": [
+							{
+								"field": "country",
+								"operator": "equals",
+								"value": "UK"
+							},
+							{
+								"field": "age",
+								"operator": "greater_than",
+								"value": "17"
+							}
+						]
+					}
+				]
+			},
+			"values": {
+				"country": "US",
+				"age": "18"
+			},
+			"expected": true
+		},
+		{
+			"name": "ignored: flat rules shape",
+			"scope": "field",
+			"logic": {
+				"action": "show",
+				"match": "any",
+				"rules": [
+					{
+						"field": "a",
+						"operator": "equals",
+						"value": "1"
+					},
+					{
+						"field": "a",
+						"operator": "equals",
+						"value": "2"
+					}
+				]
+			},
+			"values": {
+				"a": "2"
+			},
+			"expected": true
+		},
+		{
+			"name": "ignored: advanced operator starts_with",
+			"scope": "field",
+			"logic": {
+				"action": "show",
+				"groups": [
+					{
+						"match": "all",
+						"rules": [
+							{
+								"field": "a",
+								"operator": "starts_with",
+								"value": "sf-"
+							}
+						]
+					}
+				]
+			},
+			"values": {
+				"a": "zzz"
+			},
+			"expected": true
+		},
+		{
+			"name": "ignored: advanced operator in",
+			"scope": "field",
+			"logic": {
+				"action": "show",
+				"groups": [
+					{
+						"match": "all",
+						"rules": [
+							{
+								"field": "a",
+								"operator": "in",
+								"value": "1,2"
+							}
+						]
+					}
+				]
+			},
+			"values": {
+				"a": "9"
+			},
+			"expected": true
+		},
+		{
+			"name": "ignored: advanced operator between",
+			"scope": "field",
+			"logic": {
+				"action": "show",
+				"groups": [
+					{
+						"match": "all",
+						"rules": [
+							{
+								"field": "a",
+								"operator": "between",
+								"value": "1",
+								"value2": "5"
+							}
+						]
+					}
+				]
+			},
+			"values": {
+				"a": "9"
+			},
+			"expected": true
+		},
+		{
+			"name": "ignored: advanced operator before",
+			"scope": "field",
+			"logic": {
+				"action": "show",
+				"groups": [
+					{
+						"match": "all",
+						"rules": [
+							{
+								"field": "a",
+								"operator": "before",
+								"value": "2026-01-01"
+							}
+						]
+					}
+				]
+			},
+			"values": {
+				"a": "2030-01-01"
+			},
+			"expected": true
+		},
+		{
+			"name": "ignored: a basic rule on a step",
+			"scope": "step",
+			"logic": {
+				"action": "show",
+				"groups": [
+					{
+						"match": "all",
+						"rules": [
+							{
+								"field": "a",
+								"operator": "equals",
+								"value": "1"
+							}
+						]
+					}
+				]
+			},
+			"values": {
+				"a": "2"
+			},
+			"expected": true
+		},
+		{
+			"name": "ignored: a basic rule on an action",
+			"scope": "action",
+			"logic": {
+				"groups": [
+					{
+						"match": "all",
+						"rules": [
+							{
+								"field": "a",
+								"operator": "equals",
+								"value": "1"
+							}
+						]
+					}
+				]
+			},
+			"values": {
+				"a": "2"
+			},
+			"expected": true
+		}
+	],
+	"state": [
+		{
+			"name": "show field when all match",
+			"schema": {
+				"fields": [
+					{
+						"key": "plan",
+						"type": "select"
+					},
+					{
+						"key": "seats",
+						"type": "number"
+					},
+					{
+						"key": "invoice",
+						"type": "text",
+						"required": true,
+						"logic": {
+							"action": "show",
+							"groups": [
+								{
+									"match": "all",
+									"rules": [
+										{
+											"field": "plan",
+											"operator": "equals",
+											"value": "business"
+										},
+										{
+											"field": "seats",
+											"operator": "greater_than",
+											"value": "5"
+										}
+									]
+								}
+							]
+						}
+					}
+				]
+			},
+			"values": {
+				"plan": "business",
+				"seats": "3",
+				"invoice": "stale"
+			},
+			"expected": {
+				"hidden_fields": [
+					"invoice"
+				],
+				"required_fields": [],
+				"hidden_steps": []
+			}
+		},
+		{
+			"name": "hide field",
+			"schema": {
+				"fields": [
+					{
+						"key": "member",
+						"type": "radio"
+					},
+					{
+						"key": "fee",
+						"type": "number",
+						"logic": {
+							"action": "hide",
+							"groups": [
+								{
+									"match": "all",
+									"rules": [
+										{
+											"field": "member",
+											"operator": "equals",
+											"value": "yes"
+										}
+									]
+								}
+							]
+						}
+					}
+				]
+			},
+			"values": {
+				"member": "yes"
+			},
+			"expected": {
+				"hidden_fields": [
+					"fee"
+				],
+				"required_fields": [],
+				"hidden_steps": []
+			}
+		},
+		{
+			"name": "legacy conditions on field",
+			"schema": {
+				"fields": [
+					{
+						"key": "a",
+						"type": "text"
+					},
+					{
+						"key": "b",
+						"type": "text",
+						"conditions": [
+							{
+								"sourceField": "a",
+								"operator": "equals",
+								"value": "x",
+								"effect": "show"
+							}
+						]
+					},
+					{
+						"key": "c",
+						"type": "text",
+						"config": {
+							"conditions": [
+								{
+									"sourceField": "a",
+									"operator": "equals",
+									"value": "x",
+									"effect": "require"
+								}
+							]
+						}
+					}
+				]
+			},
+			"values": {
+				"a": "x"
+			},
+			"expected": {
+				"hidden_fields": [],
+				"required_fields": [
+					"c"
+				],
+				"hidden_steps": []
+			}
+		},
+		{
+			"name": "chained: field depending on a hidden field is hidden",
+			"schema": {
+				"fields": [
+					{
+						"key": "a",
+						"type": "text"
+					},
+					{
+						"key": "b",
+						"type": "text",
+						"logic": {
+							"action": "show",
+							"groups": [
+								{
+									"rules": [
+										{
+											"field": "a",
+											"operator": "equals",
+											"value": "go"
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"key": "c",
+						"type": "text",
+						"logic": {
+							"action": "show",
+							"groups": [
+								{
+									"rules": [
+										{
+											"field": "b",
+											"operator": "equals",
+											"value": "go"
+										}
+									]
+								}
+							]
+						}
+					}
+				]
+			},
+			"values": {
+				"a": "stop",
+				"b": "go"
+			},
+			"expected": {
+				"hidden_fields": [
+					"b",
+					"c"
+				],
+				"required_fields": [],
+				"hidden_steps": []
+			}
+		},
+		{
+			"name": "step shown",
+			"schema": {
+				"fields": [
+					{
+						"key": "s1",
+						"type": "step",
+						"children": [
+							{
+								"key": "need_ship",
+								"type": "radio"
+							}
+						]
+					},
+					{
+						"id": "s2",
+						"type": "step",
+						"logic": {
+							"action": "show",
+							"groups": [
+								{
+									"rules": [
+										{
+											"field": "need_ship",
+											"operator": "equals",
+											"value": "yes"
+										}
+									]
+								}
+							]
+						},
+						"children": [
+							{
+								"key": "address",
+								"type": "text"
+							}
+						]
+					}
+				]
+			},
+			"values": {
+				"need_ship": "yes"
+			},
+			"expected": {
+				"hidden_fields": [],
+				"required_fields": [],
+				"hidden_steps": []
+			}
+		},
+		{
+			"name": "global logic rule hides target",
+			"schema": {
+				"fields": [
+					{
+						"key": "a",
+						"type": "text"
+					},
+					{
+						"key": "b",
+						"type": "text"
+					}
+				],
+				"logic": [
+					{
+						"if": {
+							"field": "a",
+							"operator": "equals",
+							"value": "x"
+						},
+						"then": {
+							"action": "hide",
+							"target": "b"
+						}
+					}
+				]
+			},
+			"values": {
+				"a": "x"
+			},
+			"expected": {
+				"hidden_fields": [
+					"b"
+				],
+				"required_fields": [],
+				"hidden_steps": []
+			}
+		},
+		{
+			"name": "a rule on a Country field that stores names shows the field",
+			"schema": {
+				"fields": [
+					{
+						"key": "where",
+						"type": "country",
+						"config": {
+							"output_format": "name"
+						}
+					},
+					{
+						"key": "vat",
+						"type": "text",
+						"required": true,
+						"logic": {
+							"action": "show",
+							"groups": [
+								{
+									"match": "all",
+									"rules": [
+										{
+											"field": "where",
+											"operator": "equals",
+											"value": "DE"
+										}
+									]
+								}
+							]
+						}
+					}
+				]
+			},
+			"values": {
+				"where": "Germany",
+				"vat": "x"
+			},
+			"expected": {
+				"hidden_fields": [],
+				"required_fields": [],
+				"hidden_steps": []
+			}
+		},
+		{
+			"name": "the same rule hides the field for another country, inside columns too",
+			"schema": {
+				"fields": [
+					{
+						"type": "two_column_container",
+						"key": "cols",
+						"columns": [
+							[
+								{
+									"key": "where",
+									"type": "country"
+								}
+							],
+							[
+								{
+									"key": "vat",
+									"type": "text",
+									"logic": {
+										"action": "show",
+										"groups": [
+											{
+												"match": "all",
+												"rules": [
+													{
+														"field": "where",
+														"operator": "equals",
+														"value": "Germany"
+													}
+												]
+											}
+										]
+									}
+								}
+							]
+						]
+					}
+				]
+			},
+			"values": {
+				"where": "FR",
+				"vat": "x"
+			},
+			"expected": {
+				"hidden_fields": [
+					"vat"
+				],
+				"required_fields": [],
+				"hidden_steps": []
+			}
+		},
+		{
+			"name": "a ticked checkbox and a toggle that is off drive show rules",
+			"schema": {
+				"fields": [
+					{
+						"key": "agree",
+						"type": "checkbox"
+					},
+					{
+						"key": "news",
+						"type": "toggle"
+					},
+					{
+						"key": "a",
+						"type": "text",
+						"logic": {
+							"action": "show",
+							"groups": [
+								{
+									"match": "all",
+									"rules": [
+										{
+											"field": "agree",
+											"operator": "equals",
+											"value": "checked"
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"key": "b",
+						"type": "text",
+						"logic": {
+							"action": "show",
+							"groups": [
+								{
+									"match": "all",
+									"rules": [
+										{
+											"field": "news",
+											"operator": "not_empty"
+										}
+									]
+								}
+							]
+						}
+					}
+				]
+			},
+			"values": {
+				"agree": "1",
+				"news": "no",
+				"a": "1",
+				"b": "1"
+			},
+			"expected": {
+				"hidden_fields": [
+					"b"
+				],
+				"required_fields": [],
+				"hidden_steps": []
+			}
+		}
+	],
+	"ignoredState": [
+		{
+			"name": "a step with a rule is not skipped without an add-on",
+			"schema": {
+				"fields": [
+					{
+						"key": "s1",
+						"type": "step",
+						"children": [
+							{
+								"key": "need_ship",
+								"type": "radio"
+							}
+						]
+					},
+					{
+						"key": "s2",
+						"type": "step",
+						"logic": {
+							"action": "show",
+							"groups": [
+								{
+									"rules": [
+										{
+											"field": "need_ship",
+											"operator": "equals",
+											"value": "yes"
+										}
+									]
+								}
+							]
+						},
+						"children": [
+							{
+								"key": "address",
+								"type": "text",
+								"required": true
+							},
+							{
+								"key": "row",
+								"type": "two_column_container",
+								"columns": [
+									[
+										{
+											"key": "zip",
+											"type": "text"
+										}
+									],
+									{
+										"fields": [
+											{
+												"key": "city",
+												"type": "text"
+											}
+										]
+									}
+								]
+							}
+						]
+					},
+					{
+						"key": "s3",
+						"type": "step",
+						"children": [
+							{
+								"key": "email",
+								"type": "email"
+							}
+						]
+					}
+				]
+			},
+			"values": {
+				"need_ship": "no"
+			},
+			"expected": {
+				"hidden_fields": [],
+				"required_fields": [],
+				"hidden_steps": []
+			}
+		},
+		{
+			"name": "a field with an any match is always shown",
+			"schema": {
+				"fields": [
+					{
+						"key": "plan",
+						"type": "select"
+					},
+					{
+						"key": "invoice",
+						"type": "text",
+						"required": true,
+						"logic": {
+							"action": "show",
+							"groups": [
+								{
+									"match": "any",
+									"rules": [
+										{
+											"field": "plan",
+											"operator": "equals",
+											"value": "business"
+										},
+										{
+											"field": "plan",
+											"operator": "equals",
+											"value": "team"
+										}
+									]
+								}
+							]
+						}
+					}
+				]
+			},
+			"values": {
+				"plan": "free"
+			},
+			"expected": {
+				"hidden_fields": [],
+				"required_fields": [],
+				"hidden_steps": []
+			}
+		},
+		{
+			"name": "a field with an or group is always shown",
+			"schema": {
+				"fields": [
+					{
+						"key": "plan",
+						"type": "select"
+					},
+					{
+						"key": "note",
+						"type": "text",
+						"logic": {
+							"action": "hide",
+							"groups": [
+								{
+									"match": "all",
+									"rules": [
+										{
+											"field": "plan",
+											"operator": "equals",
+											"value": "free"
+										}
+									]
+								},
+								{
+									"match": "all",
+									"rules": [
+										{
+											"field": "plan",
+											"operator": "equals",
+											"value": "trial"
+										}
+									]
+								}
+							]
+						}
+					}
+				]
+			},
+			"values": {
+				"plan": "free"
+			},
+			"expected": {
+				"hidden_fields": [],
+				"required_fields": [],
+				"hidden_steps": []
+			}
+		}
+	],
+	"confirmations": [
+		{
+			"name": "default is used: first matching confirmation wins",
+			"metadata": {
+				"confirmation": {
+					"id": "default",
+					"type": "message"
+				},
+				"confirmations": [
+					{
+						"id": "vip",
+						"logic": {
+							"groups": [
+								{
+									"rules": [
+										{
+											"field": "budget",
+											"operator": "greater_than",
+											"value": "10000"
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"id": "big",
+						"logic": {
+							"groups": [
+								{
+									"rules": [
+										{
+											"field": "budget",
+											"operator": "greater_than",
+											"value": "1000"
+										}
+									]
+								}
+							]
+						}
+					}
+				]
+			},
+			"values": {
+				"budget": "50000"
+			},
+			"expected": "default"
+		},
+		{
+			"name": "default is used: second confirmation",
+			"metadata": {
+				"confirmation": {
+					"id": "default"
+				},
+				"confirmations": [
+					{
+						"id": "vip",
+						"logic": {
+							"groups": [
+								{
+									"rules": [
+										{
+											"field": "budget",
+											"operator": "greater_than",
+											"value": "10000"
+										}
+									]
+								}
+							]
+						}
+					},
+					{
+						"id": "big",
+						"logic": {
+							"groups": [
+								{
+									"rules": [
+										{
+											"field": "budget",
+											"operator": "greater_than",
+											"value": "1000"
+										}
+									]
+								}
+							]
+						}
+					}
+				]
+			},
+			"values": {
+				"budget": "5000"
+			},
+			"expected": "default"
+		},
+		{
+			"name": "default is used: fallback to default",
+			"metadata": {
+				"confirmation": {
+					"id": "default"
+				},
+				"confirmations": [
+					{
+						"id": "vip",
+						"logic": {
+							"groups": [
+								{
+									"rules": [
+										{
+											"field": "budget",
+											"operator": "greater_than",
+											"value": "10000"
+										}
+									]
+								}
+							]
+						}
+					}
+				]
+			},
+			"values": {
+				"budget": "5"
+			},
+			"expected": "default"
+		},
+		{
+			"name": "default is used: confirmation without rules never matches",
+			"metadata": {
+				"confirmation": {
+					"id": "default"
+				},
+				"confirmations": [
+					{
+						"id": "empty",
+						"logic": {
+							"groups": []
+						}
+					}
+				]
+			},
+			"values": {},
+			"expected": "default"
+		},
+		{
+			"name": "default is used: disabled confirmation skipped",
+			"metadata": {
+				"confirmation": {
+					"id": "default"
+				},
+				"confirmations": [
+					{
+						"id": "off",
+						"enabled": false,
+						"logic": {
+							"groups": [
+								{
+									"rules": [
+										{
+											"field": "a",
+											"operator": "empty"
+										}
+									]
+								}
+							]
+						}
+					}
+				]
+			},
+			"values": {},
+			"expected": "default"
+		},
+		{
+			"name": "default is used: no default",
+			"metadata": {},
+			"values": {},
+			"expected": null
+		}
+	]
 }

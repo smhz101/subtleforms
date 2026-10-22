@@ -251,7 +251,7 @@ final class SchemaValidator {
 						$types[] = 'select';
 						// Add-on fields (Pro Signature, Calculation, Card Payment)
 						// stay in a form while the add-on is inactive (2.3.9).
-						$types = array_merge( $types, \SubtleForms\Fields\AddonFieldTypes::types() );
+						$types = array_merge( $types, \SubtleForms\Fields\AddonFieldTypes::knownTypes() );
 						return array_values( array_unique( $types ) );
 					}
 				}
@@ -260,7 +260,7 @@ final class SchemaValidator {
 			}
 		}
 
-		return array_values( array_unique( array_merge( self::FALLBACK_ALLOWED_FIELD_TYPES, \SubtleForms\Fields\AddonFieldTypes::types() ) ) );
+		return array_values( array_unique( array_merge( self::FALLBACK_ALLOWED_FIELD_TYPES, \SubtleForms\Fields\AddonFieldTypes::knownTypes() ) ) );
 	}
 
 	/**

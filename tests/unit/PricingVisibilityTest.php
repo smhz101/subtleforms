@@ -77,7 +77,11 @@ final class PricingVisibilityTest extends TestCase {
 		$this->assertSame( 'Parking service fee', $yes['items'][1]['label'] );
 	}
 
-	public function test_pay02_priced_fields_in_a_skipped_step_do_not_count(): void {
+	/**
+	 * A rule on a step is advanced logic (SubtleForms Pro). Without it the rule
+	 * is ignored, the step is shown, and what is shown is what is charged.
+	 */
+	public function test_pay02_a_step_rule_is_ignored_without_an_add_on_so_its_fields_count(): void {
 		$schema = array(
 			'fields' => array(
 				array(
@@ -99,7 +103,7 @@ final class PricingVisibilityTest extends TestCase {
 				),
 			),
 		);
-		$this->assertSame( 20.0, Pricing::quote( $schema, array( 'want' => 'no' ) )['total'] );
+		$this->assertSame( 30.0, Pricing::quote( $schema, array( 'want' => 'no' ) )['total'] );
 		$this->assertSame( 30.0, Pricing::quote( $schema, array( 'want' => 'yes' ) )['total'] );
 	}
 }

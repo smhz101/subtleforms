@@ -41,7 +41,9 @@ final class FreeProSplitTest extends TestCase {
 		}
 		$caps = new Capabilities();
 		$this->assertTrue( $caps->allows( 'submissions.export' ) );
-		$this->assertTrue( $caps->allows( 'logic.conditional.advanced' ) );
+		// Advanced conditional logic is part of SubtleForms Pro (2.7.0).
+		$this->assertFalse( $caps->allows( 'logic.conditional.advanced' ) );
+		$this->assertFalse( $caps->allows( 'extensions.analytics' ) );
 	}
 
 	/** WP2-04, WP2-05, PRO-10: no free field type needs a capability. */
@@ -58,7 +60,8 @@ final class FreeProSplitTest extends TestCase {
 		foreach ( array( 'signature', 'calculation', 'payment_card' ) as $type ) {
 			$this->assertFalse( $registry->has( $type ), "{$type} is not registered by the free plugin" );
 		}
-		$this->assertTrue( $registry->has( 'picture_choice' ) );
+		// Picture Choice moved to SubtleForms Pro in 2.7.0.
+		$this->assertFalse( $registry->has( 'picture_choice' ) );
 		$this->assertTrue( $registry->has( 'payment_product' ) );
 		$this->assertTrue( $registry->has( 'payment_coupon' ) );
 		$this->assertFalse( class_exists( 'SubtleForms\\Engine\\Formula' ) );
@@ -66,10 +69,10 @@ final class FreeProSplitTest extends TestCase {
 		$this->assertFileDoesNotExist( self::root() . '/resources/frontend/utils/formula.js' );
 	}
 
-	/** WP2-06: several files per field work without any license. */
-	public function test_multi_file_uploads_are_not_limited(): void {
+	/** Several files per field moved to SubtleForms Pro in 2.7.0: a saved multi-file field takes one file. */
+	public function test_multi_file_uploads_take_one_file_without_an_add_on(): void {
 		$field = array( 'type' => 'file_upload', 'multiple' => true, 'maxFiles' => 4 );
-		$this->assertSame( 4, Uploads::maxFiles( $field ) );
+		$this->assertSame( 1, Uploads::maxFiles( $field ) );
 		$this->assertSame( 1, Uploads::maxFiles( array( 'type' => 'file_upload' ) ) );
 		$this->assertFalse( method_exists( Uploads::class, 'limitPublicSchema' ) );
 	}
@@ -101,18 +104,18 @@ final class FreeProSplitTest extends TestCase {
 		foreach ( array( 'sf_is_pro_active', 'sf_is_feature_enabled', 'sf_show_upgrade_notice' ) as $old ) {
 			$this->assertFalse( function_exists( $old ), "{$old} is gone" );
 		}
-		foreach ( array( 'src/Uploads/Uploads.php', 'src/Api/AnalyticsApi.php' ) as $file ) {
+		foreach ( array( 'src/Uploads/Uploads.php' ) as $file ) {
 			$this->assertDoesNotMatchRegularExpression( "#'sf_(upload|rl_view)_#", (string) file_get_contents( self::root() . '/' . $file ) );
 		}
 	}
 
 	/** WP2-01, WP2-02, PRO2-06: no Pro gate or Pro copy left on free routes. */
 	public function test_free_routes_have_no_pro_gate(): void {
-		$export    = (string) file_get_contents( self::root() . '/src/Api/SubmissionsApi.php' );
-		$analytics = (string) file_get_contents( self::root() . '/src/Api/AnalyticsApi.php' );
+		$export = (string) file_get_contents( self::root() . '/src/Api/SubmissionsApi.php' );
 		$this->assertStringNotContainsString( 'part of SubtleForms Pro', $export );
-		$this->assertStringNotContainsString( 'requireAnalytics', $analytics );
-		$this->assertStringNotContainsString( 'part of SubtleForms Pro', $analytics );
+		// The analytics routes moved to SubtleForms Pro in 2.7.0.
+		$this->assertFileDoesNotExist( self::root() . '/src/Api/AnalyticsApi.php' );
+		$this->assertFileDoesNotExist( self::root() . '/src/Api/FunnelApi.php' );
 	}
 
 	/** WP2-09, FF2-19: upsell copy is factual, and no sample data poses as a report. */
@@ -122,7 +125,7 @@ final class FreeProSplitTest extends TestCase {
 			'resources/admin/pages/ExtensionsPage.jsx',
 			'resources/admin/pages/ReportsPage.jsx',
 			'resources/admin/pages/ToolsPage.jsx',
-			'resources/admin/components/analytics/FormAnalyticsPanel.jsx',
+			'resources/admin/ui/ProNotice.jsx',
 			'resources/admin/components/settings/ExtensionsSettings.jsx',
 		);
 		foreach ( $files as $file ) {

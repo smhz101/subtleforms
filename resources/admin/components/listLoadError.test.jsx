@@ -31,10 +31,6 @@ jest.mock('../data', () => ({
   useSettings: () => ({ data: {} }),
   apiClient: { get: jest.fn(), post: jest.fn() },
 }));
-jest.mock('./analytics/useAnalytics', () => ({
-  useAnalyticsSummary: () => ({ data: null, loading: false }),
-}));
-jest.mock('./analytics/PerformanceCell', () => () => null);
 
 import { apiGet } from '../utils/api';
 import FormsList from './FormsList';

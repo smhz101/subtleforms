@@ -305,11 +305,6 @@ class AdminMenu {
 		);
 
 		if ( $this->is_builder_screen( $hook ) ) {
-			// Media Library for Picture Choice images (2.0).
-			if ( function_exists( 'wp_enqueue_media' ) ) {
-				wp_enqueue_media();
-			}
-
 			wp_enqueue_style(
 				'subtleforms-admin-builder',
 				SUBTLEFORMS_PLUGIN_URL . 'assets/css/admin-builder.css',
@@ -370,6 +365,8 @@ class AdminMenu {
 			'capabilities'   => $live_caps->all(),
 			'hasProPlugin'   => defined( 'SUBTLEFORMS_PRO_VERSION' ) || subtleforms_is_pro_active(),
 			'missingFieldTypes' => \SubtleForms\Fields\AddonFieldTypes::missing(),
+			// Features an active add-on provides (see Support\ExtensionPoints).
+			'addonFeatures'  => \SubtleForms\Support\ExtensionPoints::provided(),
 			'license'        => $license_data,
 			'subscription'   => array(
 				'status'    => 'inactive',
@@ -640,8 +637,8 @@ class AdminMenu {
 			$slug      = $meta['slug'];
 			$cap_key   = 'extensions.' . $slug;
 			$sk        = 'ext_' . $slug;
-			// Webhooks and analytics are part of the free plugin.
-			$available = in_array( $slug, array( 'webhooks', 'analytics' ), true ) || $gate->allows( $cap_key );
+			// Webhook defaults are part of the free plugin.
+			$available = 'webhooks' === $slug || $gate->allows( $cap_key );
 			$enabled   = (bool) $settings->get( $sk . '_enabled' );
 			if ( 'ecommerce' === $slug ) {
 				// The WooCommerce integration has no on/off switch: it is on
@@ -653,6 +650,16 @@ class AdminMenu {
 				// (2.1); their panels only hold defaults.
 				$enabled = true;
 			}
+			/**
+			 * Whether an integration an add-on keeps its own switch for is on
+			 * (form analytics in SubtleForms Pro). The status dot in Settings
+			 * uses it.
+			 *
+			 * @param bool   $enabled Switch kept in this plugin's settings.
+			 * @param string $slug    Integration slug.
+			 * @since 2.7.0
+			 */
+			$enabled = (bool) apply_filters( 'subtleforms/extensions/enabled', $enabled, $slug );
 
 			// Lightweight check: does the extension have its primary credential set?
 			$configured = $this->isExtensionConfigured( $slug, $settings );

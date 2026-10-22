@@ -11,7 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use SubtleForms\Analytics\Stats;
 use SubtleForms\Repositories\FormsRepository;
 use SubtleForms\Repositories\SubmissionsRepository;
 use SubtleForms\Support\EntryValues;
@@ -532,14 +531,18 @@ final class TransferService {
 			if ( $row['created_at'] !== '' ) {
 				$this->submissions->setCreatedAt( $id, $row['created_at'] );
 			}
-			if ( in_array( $row['status'], \SubtleForms\Analytics\Stats::COUNTED_STATUSES, true ) ) {
-				$day = $row['created_at'] !== '' ? substr( $row['created_at'], 0, 10 ) : '';
-				try {
-					Stats::increment( $formId, 'submissions', $day );
-				} catch ( \Throwable $e ) {
-					// The entry is stored either way.
-				}
-			}
+			/**
+			 * An entry was brought in from an export file. It does not fire
+			 * `subtleforms/submission/completed`; add-ons that keep daily
+			 * counts (such as form analytics) listen here instead.
+			 *
+			 * @param int    $submissionId New entry ID.
+			 * @param int    $formId       Form ID.
+			 * @param string $status       Entry status.
+			 * @param string $createdAt    Original entry time (UTC, Y-m-d H:i:s), or ''.
+			 * @since 2.7.0
+			 */
+			do_action( 'subtleforms/submission/imported', $id, $formId, (string) $row['status'], (string) $row['created_at'] );
 			++$imported;
 			$existing[ $identity ] = true;
 			if ( '' !== $ref ) {

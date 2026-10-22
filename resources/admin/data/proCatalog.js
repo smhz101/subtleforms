@@ -96,7 +96,10 @@ export const EXTENSION_GROUPS = [
  * Plain feature checklist used on the License screen.
  */
 export const PRO_CHECKLIST = [
-	__( 'Signature and Calculation fields', 'subtleforms' ),
+	__( 'Signature, Calculation and Picture Choice fields', 'subtleforms' ),
+	__( 'Several files per upload field', 'subtleforms' ),
+	__( 'Advanced conditional logic', 'subtleforms' ),
+	__( 'Form analytics: views, conversion rate and funnel', 'subtleforms' ),
 	__( 'Stripe card payments with a Card Payment field', 'subtleforms' ),
 	__( 'Mailchimp, Brevo, Kit, HubSpot and Zapier actions', 'subtleforms' ),
 	__( 'WooCommerce checkout and a WooCommerce Product field', 'subtleforms' ),

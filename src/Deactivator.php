@@ -56,7 +56,9 @@ final class Deactivator {
 			wp_unschedule_event( $timestamp, 'subtleforms_daily_license_check' );
 		}
 
-		// Clear analytics retention cron (2.1).
+		// The analytics clean-up event moved to SubtleForms Pro in 2.7.0. A site
+		// that scheduled it before keeps no stray event once this plugin is
+		// deactivated.
 		wp_clear_scheduled_hook( 'subtleforms_stats_prune' );
 
 		// Clear the clean-up of uploads that were never submitted (2.1).

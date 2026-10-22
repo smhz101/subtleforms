@@ -179,7 +179,7 @@ export default function FieldDock({ fieldGroups, onAddField, onCollapsedChange }
         onClick={() => {
           if (isDisabled) return;
           if (isProLocked) {
-            openUpgradeModal(f.category === 'payment' ? 'actions.payment' : 'fields.advanced', {
+            openUpgradeModal(f.upgrade_key || (f.category === 'payment' ? 'actions.payment' : 'fields.advanced'), {
               label: f.label,
             });
             return;

@@ -154,13 +154,15 @@ describe('visibility comes from conditional logic (PAY-01, PAY-02)', () => {
     ],
   };
 
-  it('does not charge a hidden Fixed Fee or a product in a skipped step', () => {
+  // A rule on a step is advanced logic (SubtleForms Pro). Without it the rule
+  // is ignored, the step is shown, and what is shown is what is charged.
+  it('does not charge a hidden Fixed Fee, and charges a step whose rule is ignored', () => {
     const q = computeQuote(flatten(schema.fields), { want: 'no' }, { schema });
-    expect(q.items.map((i) => i.key)).toEqual(['ticket']);
-    expect(q.total).toBe(20);
+    expect(q.items.map((i) => i.key)).toEqual(['ticket', '']);
+    expect(q.total).toBe(27);
   });
 
-  it('charges them once they are shown', () => {
+  it('charges the Fixed Fee once it is shown', () => {
     const q = computeQuote(flatten(schema.fields), { want: 'yes' }, { schema });
     expect(q.total).toBe(30);
     expect(q.items[1].label).toBe('Parking service fee');
@@ -173,7 +175,8 @@ describe('visibility comes from conditional logic (PAY-01, PAY-02)', () => {
 
   it('hiddenPricing lists hidden keys and nodes', () => {
     const { keys, nodes } = hiddenPricing(schema, { want: 'no' });
-    expect([...keys].sort()).toEqual(['parking', 'step_2']);
-    expect(nodes.has(schema.fields[1].children[0])).toBe(true);
+    expect([...keys].sort()).toEqual(['parking']);
+    expect(nodes.has(schema.fields[0].children[2])).toBe(true);
+    expect(nodes.has(schema.fields[1].children[0])).toBe(false);
   });
 });

@@ -1,6 +1,6 @@
 /**
  * SubtleForms 2.0 field styles: help text, prefix/suffix, option layouts,
- * toggle, opinion scale, picture choice and calculation.
+ * toggle, opinion scale and calculation.
  *
  * Everything reads the form's --subtleforms-* tokens so the Design tab and
  * presets restyle these the same way they restyle every other field.
@@ -166,7 +166,7 @@
 	}
 }
 
-/*! inherit: keep-start (toggle, opinion scale and picture choice: no native control) */
+/*! inherit: keep-start (toggle and opinion scale: no native control) */
 /* ── Toggle ────────────────────────────────────────────────────────────── */
 .subtleforms-toggle {
 	position: relative;
@@ -265,79 +265,6 @@
 	margin-top: 6px;
 	font-size: var(--subtleforms-font-size-sm, 0.875rem);
 	color: var(--subtleforms-color-text-light, #5b6270);
-}
-
-/* ── Picture choice ────────────────────────────────────────────────────── */
-.subtleforms-picture-choice {
-	display: grid;
-	grid-template-columns: repeat(var(--subtleforms-picture-columns, 3), minmax(0, 1fr));
-	gap: 12px;
-}
-
-@media (max-width: 600px) {
-	.subtleforms-picture-choice {
-		grid-template-columns: repeat(2, minmax(0, 1fr));
-	}
-}
-
-.subtleforms-picture-choice__option {
-	position: relative;
-	display: flex;
-	flex-direction: column;
-	overflow: hidden;
-	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
-	border-radius: var(--subtleforms-radius-lg, 8px);
-	background: var(--subtleforms-color-bg, #fff);
-	cursor: pointer;
-	transition: border-color var(--subtleforms-transition-fast, 0.15s), box-shadow var(--subtleforms-transition-fast, 0.15s);
-}
-
-.subtleforms-picture-choice__option:hover {
-	border-color: var(--subtleforms-color-border-strong, #9ca3af);
-}
-
-.subtleforms-picture-choice__option.is-selected {
-	border-color: var(--subtleforms-color-primary);
-	box-shadow: 0 0 0 1px var(--subtleforms-color-primary);
-}
-
-.subtleforms-picture-choice__option:has(input:focus-visible) {
-	box-shadow: 0 0 0 2px var(--subtleforms-color-primary);
-}
-
-.subtleforms-picture-choice__input {
-	position: absolute;
-	top: 10px;
-	right: 10px;
-	z-index: 1;
-	accent-color: var(--subtleforms-color-primary);
-}
-
-.subtleforms-picture-choice__media {
-	display: block;
-	aspect-ratio: 4 / 3;
-	background: color-mix(in srgb, var(--subtleforms-color-border, #d1d5db) 30%, transparent);
-}
-
-.subtleforms-picture-choice__media img {
-	display: block;
-	width: 100%;
-	height: 100%;
-	object-fit: cover;
-}
-
-.subtleforms-picture-choice__placeholder {
-	display: block;
-	width: 100%;
-	height: 100%;
-	background:
-		linear-gradient(135deg, transparent 48%, var(--subtleforms-color-border, #d1d5db) 49%, var(--subtleforms-color-border, #d1d5db) 51%, transparent 52%);
-}
-
-.subtleforms-picture-choice__label {
-	padding: 10px 12px;
-	font-weight: 500;
-	text-align: center;
 }
 
 /*! inherit: keep-end */
@@ -696,35 +623,6 @@
 	display: flex;
 	flex-direction: column;
 	gap: 8px;
-}
-
-.subtleforms-upload__drop {
-	display: flex;
-	flex-direction: column;
-	align-items: center;
-	gap: 6px;
-	width: 100%;
-	padding: 22px 16px;
-	border: var(--subtleforms-border-width, 1px) dashed var(--subtleforms-color-border, #c3c4c7);
-	border-radius: var(--subtleforms-radius-md, 4px);
-	background: var(--subtleforms-color-bg, #fff);
-	color: var(--subtleforms-color-text-light, #50575e);
-	font: inherit;
-	cursor: pointer;
-	transition: border-color var(--subtleforms-transition-fast, 0.15s), background-color var(--subtleforms-transition-fast, 0.15s);
-}
-
-.subtleforms-upload__drop:hover,
-.subtleforms-upload__drop:focus-visible,
-.subtleforms-upload.is-dragging .subtleforms-upload__drop {
-	border-color: var(--subtleforms-color-primary, #3858e9);
-	background: color-mix(in srgb, var(--subtleforms-color-primary, #3858e9) 6%, transparent);
-	color: var(--subtleforms-color-text, #1e1e1e);
-	outline: none;
-}
-
-.subtleforms-upload__drop-title {
-	font-weight: 500;
 }
 
 .subtleforms-upload__hint {

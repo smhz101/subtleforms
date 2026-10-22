@@ -8,7 +8,7 @@ import { useDashboardStats } from '../data';
 import { NavLink } from '../components/navigation';
 import Icon from '../ui/Icon';
 import AdminShell from '../components/AdminShell';
-import FormAnalyticsPanel from '../components/analytics/FormAnalyticsPanel';
+import ExtensionSlot from '../components/ExtensionSlot';
 import { getFormTypeBadge, getFormStatusBadge } from '../utils/formMeta';
 import './DashboardPage.scss';
 import TrendChart from '../components/TrendChart';
@@ -193,8 +193,8 @@ export default function Dashboard() {
         <SpamBlockedCard />
 
         {/* Activity */}
-        {/* Views, submissions and conversion (2.1, Pro reports) */}
-        <FormAnalyticsPanel forms={recentForms} />
+        {/* Panels add-ons bring (views and conversion with SubtleForms Pro). */}
+        <ExtensionSlot name='dashboard.panels' forms={recentForms} />
 
         <div className='sf-dash__row'>
           <section className='sf-panel'>

@@ -25,7 +25,6 @@ use SubtleForms\Extensions\ExtensionManager;
 use SubtleForms\Extensions\WebhooksExtension;
 use SubtleForms\Extensions\EmailMarketingExtension;
 use SubtleForms\Extensions\CrmExtension;
-use SubtleForms\Extensions\AnalyticsExtension;
 use SubtleForms\Extensions\EcommerceExtension;
 use SubtleForms\Extensions\PdfExtension;
 use SubtleForms\Extensions\MultilanguageExtension;
@@ -224,10 +223,6 @@ final class Container {
 			fn( $c ) => new CrmExtension( $c->get( Settings::class ), $c->get( FeatureGate::class ) )
 		);
 		$this->singleton(
-			AnalyticsExtension::class,
-			fn( $c ) => new AnalyticsExtension( $c->get( Settings::class ), $c->get( FeatureGate::class ) )
-		);
-		$this->singleton(
 			EcommerceExtension::class,
 			fn( $c ) => new EcommerceExtension( $c->get( Settings::class ), $c->get( FeatureGate::class ) )
 		);
@@ -253,7 +248,6 @@ final class Container {
 				$mgr->add( $this->get( WebhooksExtension::class ) );
 				$mgr->add( $this->get( EmailMarketingExtension::class ) );
 				$mgr->add( $this->get( CrmExtension::class ) );
-				$mgr->add( $this->get( AnalyticsExtension::class ) );
 				$mgr->add( $this->get( EcommerceExtension::class ) );
 				$mgr->add( $this->get( PdfExtension::class ) );
 				$mgr->add( $this->get( MultilanguageExtension::class ) );

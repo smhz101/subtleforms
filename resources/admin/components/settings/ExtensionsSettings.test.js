@@ -8,7 +8,6 @@ import { createRoot } from 'react-dom/client';
 jest.mock('./extensions/WebhooksPanel', () => () => null);
 jest.mock('./extensions/EmailMarketingPanel', () => () => null);
 jest.mock('./extensions/CrmPanel', () => () => null);
-jest.mock('./extensions/AnalyticsPanel', () => () => null);
 jest.mock('./extensions/EcommercePanel', () => () => null);
 jest.mock('./extensions/PdfPanel', () => () => null);
 jest.mock('./extensions/MultilanguagePanel', () => () => null);

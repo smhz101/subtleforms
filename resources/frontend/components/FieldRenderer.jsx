@@ -13,7 +13,8 @@ import { cloneElement, useContext, useEffect } from '@wordpress/element';
 import ChoiceSelect from './fields/ChoiceSelect';
 import { FormContext, usePayment } from './fields/contexts';
 import { lazyField } from './fields/lazyFields';
-import { getFieldType } from '../../shared/extend';
+import { getFieldType, getFieldOverride } from '../../shared/extend';
+import { effectiveFieldType } from '../../shared/fieldFallback';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { fieldDisplay } from '../../shared/fieldDisplay';
 import { toggleIsOn } from '../../shared/toggleState';
@@ -483,7 +484,7 @@ export default function FieldRenderer({
       style={appearanceStyle}
       data-sf-key={ownKey || undefined}>
       {(() => {
-        const grouped = ['radio', 'multiple_choice', 'picture_choice', 'checkbox_grid'].includes(field.type)
+        const grouped = ['radio', 'multiple_choice', 'checkbox_grid'].includes(effectiveFieldType(field))
           || (field.type === 'checkbox' && Array.isArray(config.options) && config.options.length > 0);
         const LabelTag = grouped ? 'div' : 'label';
         return (
@@ -563,7 +564,30 @@ function renderInput(
   const optionLayoutClass = config.optionLayout
     ? ` subtleforms-options--${config.optionLayout}`
     : '';
-  switch (field.type) {
+  // An add-on can draw a built-in type its own way for some fields (for
+  // example an upload that takes several files). Without it, the built-in
+  // renderer below runs.
+  const override = getFieldOverride(field, config);
+  if (override) {
+    return (
+      <AddonField
+        component={override.component}
+        field={field}
+        config={config}
+        value={value}
+        onChange={onChange}
+        inputId={inputId}
+        name={name}
+        describedBy={describedBy}
+        error={error}
+        required={required}
+        values={values}
+      />
+    );
+  }
+  // A type that an add-on provides but is not active (picture choice) is
+  // drawn as the plain choice it falls back to; its images are ignored.
+  switch (effectiveFieldType(field)) {
     case 'text':
     case 'email':
     case 'url':
@@ -1354,62 +1378,6 @@ function renderInput(
               <span>{config.maxLabel}</span>
             </div>
           )}
-        </div>
-      );
-    }
-
-    case 'picture_choice': {
-      const pcOptions = config.options || [];
-      const multiple = config.allowMultiple === true;
-      const selected = Array.isArray(value) ? value : value ? [value] : [];
-      const cols = parseInt(config.pictureColumns || 3, 10);
-      return (
-        <div
-          className='subtleforms-picture-choice'
-          role={multiple ? 'group' : 'radiogroup'}
-          aria-labelledby={`${inputId}-label`}
-          aria-required={multiple ? undefined : required}
-          aria-invalid={!!error}
-          aria-describedby={describedBy}
-          style={{ '--subtleforms-picture-columns': cols }}>
-          {pcOptions.map((option, index) => {
-            const optionId = `${inputId}-${index}`;
-            const isChecked = selected.includes(option.value);
-            return (
-              <label
-                key={option.value || index}
-                htmlFor={optionId}
-                className={`subtleforms-picture-choice__option${isChecked ? ' is-selected' : ''}`}>
-                <input
-                  id={optionId}
-                  type={multiple ? 'checkbox' : 'radio'}
-                  name={name}
-                  className='subtleforms-picture-choice__input'
-                  value={option.value}
-                  checked={isChecked}
-                  onChange={() => {
-                    if (multiple) {
-                      onChange(
-                        isChecked
-                          ? selected.filter((v) => v !== option.value)
-                          : [...selected, option.value]
-                      );
-                    } else {
-                      onChange(option.value);
-                    }
-                  }}
-                />
-                <span className='subtleforms-picture-choice__media'>
-                  {option.image ? (
-                    <img src={option.image} alt='' loading='lazy' />
-                  ) : (
-                    <span className='subtleforms-picture-choice__placeholder' aria-hidden='true' />
-                  )}
-                </span>
-                <span className='subtleforms-picture-choice__label'>{option.label}</span>
-              </label>
-            );
-          })}
         </div>
       );
     }

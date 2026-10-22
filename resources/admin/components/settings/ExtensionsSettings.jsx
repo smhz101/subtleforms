@@ -3,17 +3,18 @@ import { __, sprintf } from '@wordpress/i18n';
 import WebhooksPanel from './extensions/WebhooksPanel';
 import EmailMarketingPanel from './extensions/EmailMarketingPanel';
 import CrmPanel from './extensions/CrmPanel';
-import AnalyticsPanel from './extensions/AnalyticsPanel';
 import EcommercePanel from './extensions/EcommercePanel';
 import PdfPanel from './extensions/PdfPanel';
 import MultilanguagePanel from './extensions/MultilanguagePanel';
 import PaymentsPanel from './extensions/PaymentsPanel';
+import { getSlotItems } from '../../../shared/extend';
 
+// Panels add-ons bring are registered in the `settings.extensions` slot with
+// the integration slug as id (form analytics is one, from SubtleForms Pro).
 const EXTENSION_PANELS = {
   webhooks: WebhooksPanel,
   email_marketing: EmailMarketingPanel,
   crm: CrmPanel,
-  analytics: AnalyticsPanel,
   ecommerce: EcommercePanel,
   pdf: PdfPanel,
   multilanguage: MultilanguagePanel,
@@ -44,7 +45,7 @@ const EXTENSION_ORDER = [
 export function extensionStatus(slug, ext, settings = {}) {
   const has = (key) => !!(settings[key] !== undefined ? settings[key] : null);
   let enabled = !!ext?.enabled;
-  if (['email_marketing', 'crm', 'analytics', 'multilanguage', 'payments'].includes(slug) && settings[`ext_${slug}_enabled`] !== undefined) {
+  if (['email_marketing', 'crm', 'multilanguage', 'payments'].includes(slug) && settings[`ext_${slug}_enabled`] !== undefined) {
     enabled = !!settings[`ext_${slug}_enabled`] && ext?.available !== false;
   }
   let configured = !!ext?.configured;
@@ -54,7 +55,7 @@ export function extensionStatus(slug, ext, settings = {}) {
     configured = has(settings.ext_crm_provider === 'webhook' ? 'ext_crm_webhook_url' : 'ext_crm_api_key');
   } else if (slug === 'payments' && settings.ext_payments_stripe_pk !== undefined) {
     configured = has('ext_payments_stripe_pk');
-  } else if (['webhooks', 'analytics', 'ecommerce', 'pdf', 'multilanguage'].includes(slug)) {
+  } else if (['webhooks', 'ecommerce', 'pdf', 'multilanguage'].includes(slug)) {
     configured = true;
   }
   return { enabled, configured };
@@ -95,7 +96,10 @@ export default function ExtensionsSettings({ settings, updateSetting, fieldError
     EXTENSION_ORDER[0];
   const [activeSlug, setActiveSlug] = useState(firstSlug);
 
-  const ActivePanel = EXTENSION_PANELS[activeSlug] ?? null;
+  const ActivePanel =
+    EXTENSION_PANELS[activeSlug] ??
+    getSlotItems('settings.extensions').find((item) => item.id === activeSlug)?.component ??
+    null;
 
   return (
     <div className='sf-ext-settings'>

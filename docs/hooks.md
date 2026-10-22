@@ -57,3 +57,64 @@ The tab opens at `admin.php?page=subtleforms-settings#tab=<name>`. The body look
 ## Capabilities
 
 `subtleforms/capabilities` filters the capability map. The free plugin only reads capabilities that are on by default. Keys such as `fields.advanced`, `actions.payment`, `extensions.*`, `templates.pro` and `branding.white_label` belong to SubtleForms Pro: Pro adds them and only Pro code reads them.
+
+## Moved to Pro in 2.7.0
+
+Picture choice, several files per upload field, advanced conditional logic and form analytics are part of SubtleForms Pro. The free plugin holds no working code for them. It keeps the extension points below, a plain fallback for forms that already use them, and Pro placeholders in the screens.
+
+`SubtleForms\Support\ExtensionPoints` names the four points (`picture_choice`, `multi_file_uploads`, `advanced_logic`, `analytics`) and its `LEVEL` constant (1) is the contract version. An add-on checks `ExtensionPoints::has( $name )` before it registers, so it never registers twice against an older plugin that still ships the feature. It reports what it runs through:
+
+| Hook | Type | Use |
+| --- | --- | --- |
+| `subtleforms/addon/features` | filter `( string[] $names )` | Return the extension point names the add-on runs. The admin script reads them as `subtleformsAdmin.addonFeatures`. |
+| `subtleforms/extensions/enabled` | filter `( bool $enabled, string $slug )` | Whether an extension (for example `analytics`) is available in Settings. |
+
+### Field types and uploads (PHP)
+
+| Hook | Type | Use |
+| --- | --- | --- |
+| `subtleforms/fields/register` | action `( FieldRegistry $registry )` | Register `picture_choice` with a `FieldDefinition`. Existing hook. |
+| `subtleforms/fields/validate_value` | filter | Validate the type. Existing hook. |
+| `subtleforms/uploads/max_files` | filter `( int $max, array $field )` | Files accepted for one upload field. Default 1. Pro returns the field's own limit. |
+| `subtleforms/fields/inspector_controls` | filter `( array $controls, string $type )` | Change the settings controls of a field type. Free ships a `pro_notice` control named `multiple` on file uploads; Pro replaces it with the real toggle and a `maxFiles` number. |
+
+Without Pro, a saved `picture_choice` is shown, checked and stored as a radio group, or as a multiple choice when `allowMultiple` is true. A saved multi-file upload accepts one file, and a request that posts more is refused with "You can attach up to 1 file". Nothing in the saved form JSON is changed.
+
+### Conditional logic (PHP)
+
+Free evaluates one group, all rules must match, with `equals`, `not_equals`, `contains`, `not_contains`, `empty`, `not_empty`, `greater_than` and `less_than`, on fields. Anything else (groups, "any", `starts_with`, `ends_with`, `in`, `not_in`, `between`, `before`, `after`, logic on steps, actions and confirmations) is ignored: the field is shown, the step is shown, the action runs and the default confirmation is used. The server never refuses a form because of rules it does not know.
+
+| Hook | Type | Use |
+| --- | --- | --- |
+| `subtleforms/logic/supports` | filter `( bool $supported, array $logic, string $scope )` | Return true when the add-on can evaluate this logic. |
+| `subtleforms/logic/passes` | filter `( ?bool $result, array $logic, array $values, array $fields_by_key, string $scope, $engine )` | Return the outcome for logic Free cannot evaluate, or null to use the default. |
+| `subtleforms/logic/evaluate_condition` | filter `( ?bool $result, mixed $value, string $operator, mixed $compare, mixed $compare2, array $field, $engine )` | Evaluate one operator Free does not know. |
+
+Scopes are `field`, `step`, `action` and `confirmation`. `ConditionalLogic::logicPasses`, `hasLogic`, `isBasic`, `isSupported` and the value helpers are public for add-ons.
+
+### Analytics (PHP)
+
+| Hook | Type | Use |
+| --- | --- | --- |
+| `subtleforms/submission/imported` | action `( int $id, int $formId, string $status, string $created_at )` | A submission was imported, so a counter can include it. |
+| `subtleforms/form/deleted` | action `( int $id )` | A form was deleted, so the add-on removes its own rows. |
+| `subtleforms/frontend/enqueued` | action | Enqueue the add-on front-end script. Existing hook. |
+
+Counts already stored in the `subtleforms_stats` and `subtleforms_funnel` tables stay when the plugin is updated, and the add-on adopts them. `Settings::update` keeps stored keys it has no rule for, so the old `ext_analytics_*` values survive.
+
+### JavaScript (`window.SubtleFormsExtend`)
+
+| Function | Use |
+| --- | --- |
+| `registerFieldOverride( type, { applies( field, config ), component } )` | Replace the live renderer of a core type for some fields (Pro uses it for multi-file uploads). |
+| `registerLogicExtension( { supports, passes, evaluateCondition } )` | Browser side of the logic hooks. Functions get a helpers object: `toText`, `listOf`, `norm`, `isNumeric`, `isEmptyValue`, `textEquals`, `countryEquals`, `readValue`, `today`, `evaluateCondition`. |
+| `registerLogicEditor( Component )` | Replace the builder logic editor. It gets the editor props (`logic`, `availableFields`, `onChange`, `scope`, `disabled`, ...) plus `countries` (the country list for country rules) and `Fallback`, the free editor. |
+| `registerSlotItem( slot, id, { component, order } )` | Add an item to a screen slot. |
+| `registerFormMountHook( fn )` | `fn( { container, formId, config } )` runs when a form mounts on a page (view beacon, funnel tracker). |
+| `registerFieldType`, `registerInspectorControl`, `registerCanvasPreview` | Existing. |
+
+Slots: `reports.panels` and `dashboard.panels` (props: `forms`), `forms.list.column` (`{ component( form ), header, order }`), `settings.extensions` (id is the extension slug), `form.integrations` (props: `schema`, `integrations`, `patch`, `isReadOnly`) and `form.confirmations` (props: `schema`, `onMetadata`, `isReadOnly`).
+
+The front end dispatches the `subtleforms:submitted` event on `document` with `detail.formId` after a successful send. Field wrappers carry `data-sf-key` and steps carry `data-sf-step`, which Pro reads for the funnel.
+
+Upgrade keys used by the placeholders: `fields.picture_choice`, `uploads.multiple`, `logic.conditional.advanced`, `extensions.analytics`.

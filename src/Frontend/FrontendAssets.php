@@ -156,12 +156,6 @@ final class FrontendAssets {
 				 */
 				'lang'           => sanitize_key( (string) apply_filters( 'subtleforms/frontend/language', '' ) ),
 				'weekStartsOn'   => (int) get_option( 'start_of_week', 0 ),
-				// Anonymous daily view counter (2.1). See Analytics\Stats.
-				// Off for people who manage SubtleForms, like the funnel (2.6.0).
-				'trackViews'     => \SubtleForms\Analytics\Stats::tracksViews( $settings ) && ! \SubtleForms\Analytics\Funnel::skipsCurrentUser(),
-				// Where visitors stop filling in a form (2.6.0). Off for people
-				// who manage SubtleForms, so testing a form does not count.
-				'trackFunnel'    => \SubtleForms\Analytics\Funnel::tracks( $settings ) && ! \SubtleForms\Analytics\Funnel::skipsCurrentUser(),
 				// Default-value tokens {user_email} and {user_name} (2.0).
 				'user'           => is_user_logged_in()
 					? array(

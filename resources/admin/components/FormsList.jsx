@@ -17,8 +17,7 @@ import clsx from 'clsx';
 import Icon from '../ui/Icon';
 import { ContextualTip } from '../ui';
 import DataTable from './DataTable';
-import PerformanceCell from './analytics/PerformanceCell';
-import { useAnalyticsSummary } from './analytics/useAnalytics';
+import { getSlotItems } from '../../shared/extend';
 import { ConfirmModal } from '../modals';
 import { apiGet, apiPost, apiPut, apiDelete } from '../utils/api';
 import { deletesPermanently } from '../utils/deleteBehavior';
@@ -240,9 +239,9 @@ export default function FormsList({
   }, [currentPage, pagesLoaded, totalItems, perPage]);
 
   // Define table columns
-  // Views, submissions and conversion per form (2.1).
-  const analytics = useAnalyticsSummary(30);
-  const formStats = analytics.data?.forms || {};
+  // A column an add-on brings (conversion and completion with SubtleForms
+  // Pro). Nothing is shown, fetched or reserved without one.
+  const [extraColumn] = getSlotItems('forms.list.column');
 
   const columns = [
     {
@@ -347,16 +346,19 @@ export default function FormsList({
         );
       },
     },
-    {
-      key: 'performance',
-      title: __('Conversion (30 days)', 'subtleforms'),
-      render: (_value, form) => (
-        <PerformanceCell
-          stats={formStats[form.id] || formStats[String(form.id)]}
-          loading={analytics.isLoading}
-        />
-      ),
-    },
+    ...(extraColumn
+      ? [
+          {
+            // The key the "View" menu and saved column choices already use.
+            key: 'performance',
+            title: extraColumn.header || '',
+            render: (_value, form) => {
+              const Cell = extraColumn.component;
+              return <Cell form={form} />;
+            },
+          },
+        ]
+      : []),
     {
       key: 'updated_at',
       title: __('Last Updated', 'subtleforms'),

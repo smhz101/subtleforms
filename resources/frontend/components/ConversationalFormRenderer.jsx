@@ -21,7 +21,7 @@ import { collectDefaultValues } from '../utils/defaults';
 import { validateFields } from '../utils/fieldValidation';
 
 import { restFetch } from '../utils/restFetch';
-import { announceSubmitted } from '../utils/funnelTracker';
+import { announceSubmitted } from '../utils/submitted';
 
 /**
  * ConversationalFormRenderer - Renders form one question at a time
@@ -46,7 +46,7 @@ export default function ConversationalFormRenderer({
   // Confirmation chosen by the server (2.1: conditional confirmations).
   const [confirmation, setConfirmation] = useState(null);
 
-  // A sent form is not a drop-off: tell the funnel tracker (2.6.0).
+  // Tell the page the form was sent (add-ons listen for it).
   useEffect(() => {
     if (submitSuccess && !preview) {
       announceSubmitted(formId);

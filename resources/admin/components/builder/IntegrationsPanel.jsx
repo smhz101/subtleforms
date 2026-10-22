@@ -8,6 +8,7 @@ import {
 import { __, sprintf } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
 import Icon from '../../ui/Icon';
+import { getSlotItems } from '../../../shared/extend';
 import ConnectionTest from '../settings/extensions/ConnectionTest';
 import { integrationFieldOptions, consentFieldOptions } from './utils/integrationFields';
 import '../settings/extensions/extensions.scss';
@@ -133,14 +134,16 @@ function IdentityFields({ value = {}, onChange, fieldOptions, disabled, lastName
 /**
  * Form builder > Settings > Integrations (2.1).
  *
- * Stores per-form config in metadata.integrations.{email_marketing,crm,analytics}.
+ * Stores per-form config in metadata.integrations.{email_marketing,crm}. Add-ons
+ * add their own sections in the `form.integrations` slot.
  */
 export default function IntegrationsPanel({ schema, onChange, isReadOnly = false }) {
   const extensions = window.subtleformsAdmin?.extensions ?? {};
   const metadata = schema?.metadata || {};
   const integrations = metadata.integrations || {};
 
-  const shown = ['email_marketing', 'crm', 'analytics'].filter((slug) => extensions[slug]?.available);
+  const shown = ['email_marketing', 'crm'].filter((slug) => extensions[slug]?.available);
+  const slotItems = getSlotItems('form.integrations');
   const legacyWebhookUrl = (integrations.webhooks || {}).url || '';
 
   const [global, setGlobal] = useState(null);
@@ -168,7 +171,7 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
   const fieldOptions = useMemo(() => integrationFieldOptions(schema?.fields), [schema?.fields]);
   const consentOptions = useMemo(() => consentFieldOptions(schema?.fields), [schema?.fields]);
 
-  if (shown.length === 0 && !legacyWebhookUrl) {
+  if (shown.length === 0 && slotItems.length === 0 && !legacyWebhookUrl) {
     return (
       <p className='sf-form-settings__intro'>
         {__('No integrations are available yet. Connect one under the plugin’s Settings, then come back to attach it to this form.', 'subtleforms')}
@@ -415,18 +418,19 @@ export default function IntegrationsPanel({ schema, onChange, isReadOnly = false
         </div>
       )}
 
-      {/* Analytics */}
-      {shown.includes('analytics') && (
-        <div className='sf-form-settings__integration'>
-          <h4 className='sf-form-settings__integration-title'>{__('Analytics', 'subtleforms')}</h4>
-          <ToggleControl
-            label={__('Count views and submissions for this form', 'subtleforms')}
-            checked={(integrations.analytics || {}).enabled !== false}
-            onChange={(v) => patch('analytics', { enabled: v })}
-            disabled={isReadOnly}
+      {/* Per-form switches add-ons bring (SubtleForms Pro: analytics). */}
+      {getSlotItems('form.integrations').map((item) => {
+        const Slot = item.component;
+        return (
+          <Slot
+            key={item.id}
+            schema={schema}
+            integrations={integrations}
+            patch={patch}
+            isReadOnly={isReadOnly}
           />
-        </div>
-      )}
+        );
+      })}
 
       {/* Legacy per-form webhook URL (pre 1.9). Shown only when set. */}
       {legacyWebhookUrl && (

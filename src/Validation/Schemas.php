@@ -178,11 +178,6 @@ class Schemas {
 					'ext_crm_portal_id',
 					'ext_crm_webhook_url',
 					'ext_crm_add_note',
-					// Extensions, Analytics
-					'ext_analytics_enabled',
-					'ext_analytics_view_tracking',
-					'ext_analytics_retention_days',
-					'ext_analytics_funnel_retention_days',
 					// Extensions, E-commerce
 					'ext_ecommerce_enabled',
 					'ext_ecommerce_product_id',
@@ -278,10 +273,6 @@ class Schemas {
 				'ext_crm_webhook_url'              => 'optional|string|max:2000',
 				'ext_crm_add_note'                 => 'optional|bool',
 				// Extensions, Analytics
-				'ext_analytics_enabled'            => 'optional|bool',
-				'ext_analytics_view_tracking'      => 'optional|bool',
-				'ext_analytics_retention_days'     => 'optional|int|min:1|max:3650',
-				'ext_analytics_funnel_retention_days' => 'optional|int|min:1|max:3650',
 				// Extensions, E-commerce
 				'ext_ecommerce_enabled'            => 'optional|bool',
 				'ext_ecommerce_product_id'         => 'optional|int|min:0',

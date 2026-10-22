@@ -1,5 +1,6 @@
 import { sameCheckValue } from './logicFields';
 import { countryCodeLookup as countryCodeFor } from './countryLookup';
+import { getLogicExtensions } from './extend';
 /**
  * Conditional logic: one evaluator for the builder, the frontend renderer and
  * (mirrored line for line) the server in src/Engine/ConditionalLogic.php.
@@ -17,15 +18,18 @@ import { countryCodeLookup as countryCodeFor } from './countryLookup';
  *     ]
  *   }
  *
- * Groups are OR'ed: the logic passes when any group passes. A group passes
- * when all (or any) of its rules match. Free forms use one group matching
- * all rules; "any", several groups and the advanced operators are Pro.
+ * This plugin evaluates the basic form on fields: one group whose rules must
+ * all match, with the basic operators. Several groups (OR), the "any" match,
+ * the other operators and logic on steps, actions and confirmations belong to
+ * an add-on (SubtleForms Pro) that registers a logic extension (see
+ * registerLogicExtension in extend.js). Logic nobody evaluates is ignored, as
+ * if the field had no rule, exactly like the server.
  *
  * The older `conditions: [ { sourceField, operator, value, effect } ]` shape
  * is still read: rules sharing an effect become one "all" group.
  */
 
-/** Operators every plan can use. */
+/** Operators this plugin evaluates. */
 export const BASIC_OPERATORS = [
   'equals',
   'not_equals',
@@ -37,22 +41,10 @@ export const BASIC_OPERATORS = [
   'less_than',
 ];
 
-/** Operators that need SubtleForms Pro (logic.conditional.advanced). */
-export const ADVANCED_OPERATORS = [
-  'starts_with',
-  'ends_with',
-  'in',
-  'not_in',
-  'between',
-  'before',
-  'after',
-];
-
 /** Operators that take no comparison value. */
 export const VALUELESS_OPERATORS = ['empty', 'not_empty'];
 
 const NUMERIC_RE = /^\s*[-+]?(\d+(\.\d*)?|\.\d+)\s*$/;
-const DATE_RE = /^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2}))?)?$/;
 const MAX_PASSES = 5;
 
 const isPlainObject = (v) =>
@@ -77,32 +69,20 @@ export function toText(value) {
 }
 
 /** Values to test: each item of a multi-value answer, else the one value. */
-function listOf(value) {
+export function listOf(value) {
   if (Array.isArray(value)) return value.map(toText);
   // An empty object arrives on the server as an empty list; match that.
   if (isPlainObject(value) && Object.keys(value).length === 0) return [];
   return [toText(value)];
 }
 
-const norm = (s) => String(s).trim().toLowerCase();
+export const norm = (s) => String(s).trim().toLowerCase();
 
 export function isNumeric(s) {
   return typeof s === 'number' ? Number.isFinite(s) : NUMERIC_RE.test(String(s));
 }
 
-/**
- * ISO date (YYYY-MM-DD, optional time) as a sortable "YYYY-MM-DD HH:MM:SS"
- * string, or null. "today" resolves to the given day.
- */
-export function toDate(s, today) {
-  let str = String(s).trim();
-  if (str.toLowerCase() === 'today') str = today || '';
-  const m = DATE_RE.exec(str);
-  if (!m) return null;
-  return `${m[1]}-${m[2]}-${m[3]} ${m[4] || '00'}:${m[5] || '00'}:${m[6] || '00'}`;
-}
-
-function textEquals(a, b) {
+export function textEquals(a, b) {
   if (isNumeric(a) && isNumeric(b)) return parseFloat(a) === parseFloat(b);
   return norm(a) === norm(b);
 }
@@ -112,7 +92,7 @@ function textEquals(a, b) {
  * Format, and a rule holds the code the builder picked. Both sides compare as
  * codes when they name a known country (FB-20).
  */
-function countryEquals(x, expected) {
+export function countryEquals(x, expected) {
   const want = countryCodeFor(expected);
   const have = countryCodeFor(x);
   if (want !== '' && have !== '') return want === have;
@@ -136,38 +116,16 @@ export function isEmptyValue(value) {
   return false;
 }
 
-function optionList(compare) {
-  if (Array.isArray(compare)) {
-    return compare.map(toText).map((s) => s.trim()).filter((s) => s !== '');
-  }
-  return toText(compare)
-    .split(',')
-    .map((s) => s.trim())
-    .filter((s) => s !== '');
-}
-
-function inRange(x, min, max, today) {
-  if (isNumeric(x) && isNumeric(min) && isNumeric(max)) {
-    const n = parseFloat(x);
-    return n >= parseFloat(min) && n <= parseFloat(max);
-  }
-  const d = toDate(x, today);
-  const lo = toDate(min, today);
-  const hi = toDate(max, today);
-  return d !== null && lo !== null && hi !== null && d >= lo && d <= hi;
-}
-
 /**
  * Whether one answer satisfies one operator.
  *
  * @param {*}      value    The answer (string, number, array, object, bool).
  * @param {string} operator Operator key.
  * @param {*}      compare  The rule's value.
- * @param {*}      compare2 Upper bound for "between".
- * @param {Object} opts     { today: 'YYYY-MM-DD' }.
+ * @param {*}      compare2 Upper bound for "between" (an add-on operator).
+ * @param {Object} opts     { today: 'YYYY-MM-DD', field }.
  */
 export function evaluateCondition(value, operator, compare, compare2, opts = {}) {
-  const today = opts.today || localToday();
   const items = listOf(value);
   const c = toText(compare);
 
@@ -199,14 +157,6 @@ export function evaluateCondition(value, operator, compare, compare2, opts = {})
       }
       return operator === 'contains' ? found : !found;
     }
-    case 'starts_with': {
-      const needle = norm(c);
-      return needle !== '' && items.some((x) => norm(x).startsWith(needle));
-    }
-    case 'ends_with': {
-      const needle = norm(c);
-      return needle !== '' && items.some((x) => norm(x).endsWith(needle));
-    }
     case 'empty':
       return isEmptyForField(value, opts.field);
     case 'not_empty':
@@ -215,37 +165,40 @@ export function evaluateCondition(value, operator, compare, compare2, opts = {})
       return isNumeric(c) && items.some((x) => isNumeric(x) && parseFloat(x) > parseFloat(c));
     case 'less_than':
       return isNumeric(c) && items.some((x) => isNumeric(x) && parseFloat(x) < parseFloat(c));
-    case 'in':
-    case 'not_in': {
-      const opts2 = optionList(compare);
-      const same = opts.field && opts.field.type === 'country' ? countryEquals : textEquals;
-      const found =
-        !isEmptyValue(value) &&
-        items.some((x) => opts2.some((o) => same(x, o)));
-      return operator === 'in' ? found : !found;
-    }
-    case 'between': {
-      let lo = compare;
-      let hi = compare2;
-      if (Array.isArray(compare) && compare.length === 2) {
-        [lo, hi] = compare;
-      }
-      return items.some((x) => inRange(x, toText(lo), toText(hi), today));
-    }
-    case 'before':
-    case 'after': {
-      const limit = toDate(c, today);
-      if (limit === null) return false;
-      return items.some((x) => {
-        const d = toDate(x, today);
-        if (d === null) return false;
-        return operator === 'before' ? d < limit : d > limit;
-      });
-    }
     default:
-      return false;
+      return extensionCondition(value, operator, compare, compare2, opts);
   }
 }
+
+/** An operator this plugin does not know: ask the logic extensions. */
+function extensionCondition(value, operator, compare, compare2, opts) {
+  for (const ext of getLogicExtensions()) {
+    if (typeof ext.evaluateCondition !== 'function') continue;
+    try {
+      const result = ext.evaluateCondition(value, operator, compare, compare2, { today: localToday(), ...opts }, helpers);
+      if (result !== null && result !== undefined) return !!result;
+    } catch (e) {
+      // A broken add-on must not stop the form.
+    }
+  }
+  return false;
+}
+
+/** The evaluator's own helpers, handed to logic extensions. */
+export const helpers = {
+  toText,
+  listOf,
+  norm,
+  isNumeric,
+  isEmptyValue,
+  textEquals,
+  countryEquals,
+  readValue: (values, key) => readValue(values, key),
+  today: () => localToday(),
+  // One rule, basic or not: an extension's group logic uses it per rule.
+  evaluateCondition: (value, operator, compare, compare2, opts) =>
+    evaluateCondition(value, operator, compare, compare2, opts),
+};
 
 function localToday() {
   const d = new Date();
@@ -303,23 +256,69 @@ export function normalizeLogic(logic) {
   return { action, groups: clean };
 }
 
-/** Whether a logic object's conditions are met. Inactive logic passes. */
-export function logicPasses(logic, values, opts = {}) {
-  const l = normalizeLogic(logic);
-  if (!l) return true;
-  return l.groups.some((g) => {
-    const test = (r) =>
-      evaluateCondition(readValue(values, r.field), r.operator, r.value, r.value2, {
-        ...opts,
-        field: opts.fieldsByKey ? opts.fieldsByKey[r.field] : undefined,
-      });
-    return g.match === 'any' ? g.rules.some(test) : g.rules.every(test);
+/**
+ * Whether normalised logic is the basic form this plugin evaluates itself:
+ * on a field, one group whose rules must all match, basic operators only.
+ */
+export function isBasic(l, scope = 'field') {
+  return (
+    scope === 'field' &&
+    !!l &&
+    l.groups.length === 1 &&
+    l.groups[0].match === 'all' &&
+    l.groups[0].rules.every((r) => BASIC_OPERATORS.includes(r.operator))
+  );
+}
+
+/** Whether this page evaluates a normalised logic object. */
+export function isSupported(l, scope = 'field') {
+  if (isBasic(l, scope)) return true;
+  return getLogicExtensions().some((ext) => {
+    try {
+      return typeof ext.supports === 'function' && !!ext.supports(l, scope);
+    } catch (e) {
+      return false;
+    }
   });
 }
 
-/** Whether a logic object has any rule to evaluate. */
-export function hasLogic(logic) {
-  return normalizeLogic(logic) !== null;
+/**
+ * Whether a logic object's conditions are met. Inactive logic passes, and so
+ * does logic nobody evaluates.
+ *
+ * @param {*}      logic  Logic object.
+ * @param {Object} values Answers.
+ * @param {Object} opts   { today, fieldsByKey }.
+ * @param {string} scope  field, step, action or confirmation.
+ */
+export function logicPasses(logic, values, opts = {}, scope = 'field') {
+  const l = normalizeLogic(logic);
+  if (!l) return true;
+  const test = (r) =>
+    evaluateCondition(readValue(values, r.field), r.operator, r.value, r.value2, {
+      ...opts,
+      field: opts.fieldsByKey ? opts.fieldsByKey[r.field] : undefined,
+    });
+  if (isBasic(l, scope)) {
+    return l.groups[0].rules.every(test);
+  }
+  for (const ext of getLogicExtensions()) {
+    if (typeof ext.passes !== 'function') continue;
+    try {
+      if (ext.supports && !ext.supports(l, scope)) continue;
+      const result = ext.passes(l, values, helpers, { today: localToday(), ...opts }, scope);
+      if (result !== null && result !== undefined) return !!result;
+    } catch (e) {
+      // A broken add-on must not stop the form.
+    }
+  }
+  return true;
+}
+
+/** Whether a logic object has a rule that is evaluated on this page. */
+export function hasLogic(logic, scope = 'field') {
+  const l = normalizeLogic(logic);
+  return l !== null && isSupported(l, scope);
 }
 
 /**
@@ -327,6 +326,11 @@ export function hasLogic(logic) {
  * per-rule `conditions` grouped by effect.
  */
 export function nodeLogics(node) {
+  const scope = isPlainObject(node) && node.type === 'step' ? 'step' : 'field';
+  return allNodeLogics(node).filter((l) => isSupported(l, scope));
+}
+
+function allNodeLogics(node) {
   if (!isPlainObject(node)) return [];
   const cfg = isPlainObject(node.config) ? node.config : {};
   const logic = node.logic ?? cfg.logic;
@@ -403,8 +407,9 @@ function evaluateOnce(fields, values, opts) {
       const key = rawKey && scope.prefix ? `${scope.prefix}${rawKey}` : rawKey;
       let hidden = parentHidden;
 
+      const logicScope = node.type === 'step' ? 'step' : 'field';
       nodeLogics(node).forEach((l) => {
-        const passes = logicPasses(l, scope.values, withFields);
+        const passes = logicPasses(l, scope.values, withFields, logicScope);
         if ((l.action === 'show' && !passes) || (l.action === 'hide' && passes)) {
           hidden = true;
         } else if (l.action === 'require' && passes) {
@@ -574,21 +579,9 @@ export function pickConfirmation(metadata, values, opts = {}) {
   const list = Array.isArray(meta.confirmations) ? meta.confirmations : [];
   for (const c of list) {
     if (!isPlainObject(c) || c.enabled === false) continue;
-    if (hasLogic(c.logic) && logicPasses(c.logic, values, opts)) {
+    if (hasLogic(c.logic, 'confirmation') && logicPasses(c.logic, values, opts, 'confirmation')) {
       return c;
     }
   }
   return isPlainObject(meta.confirmation) ? meta.confirmation : {};
-}
-
-/**
- * Whether a logic object uses anything beyond the free basics.
- */
-export function usesAdvancedLogic(logic) {
-  const l = normalizeLogic(logic);
-  if (!l) return false;
-  if (l.groups.length > 1) return true;
-  return l.groups.some(
-    (g) => g.match === 'any' || g.rules.some((r) => ADVANCED_OPERATORS.includes(r.operator))
-  );
 }

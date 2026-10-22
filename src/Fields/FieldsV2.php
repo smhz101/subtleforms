@@ -2,7 +2,7 @@
 /**
  * SubtleForms 2.0 field additions.
  *
- * A toggle, an opinion scale and picture choices. Signature and Calculation
+ * A toggle and an opinion scale. Signature, Calculation and Picture Choice
  * fields are registered by SubtleForms Pro through the
  * `subtleforms/fields/register` action (see docs/hooks.md).
  *
@@ -127,48 +127,6 @@ final class FieldsV2 {
 						'type'  => 'text',
 						'name'  => 'maxLabel',
 						'label' => __( 'High end label', 'subtleforms' ),
-					),
-				),
-			)
-		);
-
-		// Picture choice: options with images.
-		self::add(
-			$registry,
-			new FieldDefinition(
-				type: 'picture_choice',
-				label: __( 'Picture Choice', 'subtleforms' ),
-				category: 'choices',
-				icon: 'dashicons-format-gallery',
-				kind: 'input',
-				fieldSpecificAttributes: array(
-					'options'       => array(
-						array( 'label' => __( 'First choice', 'subtleforms' ), 'value' => 'first', 'image' => '' ),
-						array( 'label' => __( 'Second choice', 'subtleforms' ), 'value' => 'second', 'image' => '' ),
-					),
-					'allowMultiple' => false,
-					'pictureColumns' => 3,
-				),
-				inspectorControls: array(
-					array(
-						'type'  => 'text',
-						'name'  => 'label',
-						'label' => __( 'Label', 'subtleforms' ),
-					),
-					array(
-						'type'  => 'checkbox',
-						'name'  => 'allowMultiple',
-						'label' => __( 'Allow more than one choice', 'subtleforms' ),
-					),
-					array(
-						'type'    => 'select',
-						'name'    => 'pictureColumns',
-						'label'   => __( 'Columns', 'subtleforms' ),
-						'options' => array(
-							array( 'value' => 2, 'label' => '2' ),
-							array( 'value' => 3, 'label' => '3' ),
-							array( 'value' => 4, 'label' => '4' ),
-						),
 					),
 				),
 			)

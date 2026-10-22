@@ -552,10 +552,6 @@ class SettingsApi {
 			'ext_crm_add_note'                  => array( 'type' => 'boolean' ),
 
 			// Analytics
-			'ext_analytics_enabled'             => array( 'type' => 'boolean' ),
-			'ext_analytics_view_tracking'       => array( 'type' => 'boolean' ),
-			'ext_analytics_retention_days'      => array( 'type' => 'integer', 'minimum' => 1, 'maximum' => 3650 ),
-			'ext_analytics_funnel_retention_days' => array( 'type' => 'integer', 'minimum' => 1, 'maximum' => 3650 ),
 
 			// E-commerce
 			'ext_ecommerce_enabled'             => array( 'type' => 'boolean' ),

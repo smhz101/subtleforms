@@ -10,21 +10,35 @@ import { Notice } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import './ProDowngradeBanner.scss';
 
-export default function ProDowngradeBanner({ featuresUsed = [] }) {
-  if (!featuresUsed.length) return null;
+export default function ProDowngradeBanner({ featuresUsed = [], limited = [] }) {
+  if (!featuresUsed.length && !limited.length) return null;
   return (
     <div className='sf-pro-downgrade-banner'>
       <Notice status='info' isDismissible={false} className='sf-pro-downgrade-banner__notice'>
-        <p className='sf-pro-downgrade-banner__message'>
-          {sprintf(
-            /* translators: %s: list of field types, for example "Signature, Calculation" */
-            __(
-              'This form has fields from SubtleForms Pro: %s. They are kept in the form, but the live form leaves them out until SubtleForms Pro is active.',
-              'subtleforms'
-            ),
-            featuresUsed.join(', ')
-          )}
-        </p>
+        {featuresUsed.length > 0 && (
+          <p className='sf-pro-downgrade-banner__message'>
+            {sprintf(
+              /* translators: %s: list of field types, for example "Signature, Calculation" */
+              __(
+                'This form has fields from SubtleForms Pro: %s. They are kept in the form, but the live form leaves them out until SubtleForms Pro is active.',
+                'subtleforms'
+              ),
+              featuresUsed.join(', ')
+            )}
+          </p>
+        )}
+        {limited.length > 0 && (
+          <p className='sf-pro-downgrade-banner__message'>
+            {sprintf(
+              /* translators: %s: list of features, for example "Picture Choice (shown without pictures)" */
+              __(
+                'This form uses features from SubtleForms Pro: %s. Everything stays saved and works again when SubtleForms Pro is active.',
+                'subtleforms'
+              ),
+              limited.join(', ')
+            )}
+          </p>
+        )}
       </Notice>
     </div>
   );

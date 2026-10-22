@@ -24,6 +24,14 @@ final class AddonFieldTypes {
 	const TYPES = array( 'signature', 'calculation', 'payment_card' );
 
 	/**
+	 * Field types an add-on provides that still work without it, as a plain
+	 * choice: a Picture Choice field shows its labels as radio buttons (or
+	 * checkboxes when several are allowed) and its images are left out. The
+	 * form is not stripped of them and saved forms keep every key.
+	 */
+	const FALLBACKS = array( 'picture_choice' );
+
+	/**
 	 * Register hooks.
 	 */
 	public static function register(): void {
@@ -44,6 +52,61 @@ final class AddonFieldTypes {
 		 * @param string[] $types Field types.
 		 */
 		return array_values( array_filter( (array) apply_filters( 'subtleforms/fields/addon_types', self::TYPES ), 'is_string' ) );
+	}
+
+	/**
+	 * Types a saved form may contain: add-on types plus those with a fallback.
+	 *
+	 * @return string[]
+	 */
+	public static function knownTypes(): array {
+		return array_values( array_unique( array_merge( self::types(), self::FALLBACKS ) ) );
+	}
+
+	/**
+	 * The type a field is checked and drawn as. A field type with a fallback
+	 * whose add-on is not active is a plain choice; every other type is itself.
+	 *
+	 * @param string             $type     Field type.
+	 * @param array              $field    Field node, for the "allow several" setting.
+	 * @param FieldRegistry|null $registry Registry (null: the plugin's own).
+	 * @return string The type, or radio / multiple_choice for a fallback.
+	 */
+	public static function effectiveType( string $type, array $field = array(), ?FieldRegistry $registry = null ): string {
+		if ( ! in_array( $type, self::FALLBACKS, true ) ) {
+			return $type;
+		}
+		if ( null === $registry ) {
+			try {
+				$registry = \SubtleForms\Plugin::instance()->container()->get( FieldRegistry::class );
+			} catch ( \Throwable $e ) {
+				$registry = null;
+			}
+		}
+		if ( $registry instanceof FieldRegistry && $registry->has( $type ) ) {
+			return $type;
+		}
+		$config   = isset( $field['config'] ) && is_array( $field['config'] ) ? $field['config'] : array();
+		$multiple = $field['allowMultiple'] ?? $config['allowMultiple'] ?? false;
+		return true === $multiple ? 'multiple_choice' : 'radio';
+	}
+
+	/**
+	 * The type the server checks an answer as. A field type with a fallback
+	 * is always checked as the plain choice, with or without its add-on: the
+	 * rules are the same, only the look differs.
+	 *
+	 * @param string $type  Field type.
+	 * @param array  $field Field node, for the "allow several" setting.
+	 * @return string The type, or radio / multiple_choice for a fallback.
+	 */
+	public static function validationType( string $type, array $field = array() ): string {
+		if ( ! in_array( $type, self::FALLBACKS, true ) ) {
+			return $type;
+		}
+		$config   = isset( $field['config'] ) && is_array( $field['config'] ) ? $field['config'] : array();
+		$multiple = $field['allowMultiple'] ?? $config['allowMultiple'] ?? false;
+		return true === $multiple ? 'multiple_choice' : 'radio';
 	}
 
 	/**

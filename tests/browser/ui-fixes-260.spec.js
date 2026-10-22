@@ -4,8 +4,10 @@
  * - Reports and the dashboard report cards: no panel has a scrollbar of its
  *   own and nothing scrolls sideways, from a 390px phone to a 1920px screen.
  *   The report endpoints are answered with a large, fixed data set (many
- *   forms with long titles, many drop-off fields and steps, every spam
- *   reason), so the layout is checked at its worst.
+ *   forms with long titles, every spam reason), so the layout is checked at
+ *   its worst. The analytics panels and the funnel moved to SubtleForms Pro
+ *   in 2.7.0; their layout checks live in the Pro repository. Here Reports
+ *   shows the Pro card in their place.
  * - Settings lists MCP right after Tools.
  * - Submissions: in the split inbox the pagination footer sits on the bottom
  *   edge of the list pane with one entry and with many.
@@ -58,37 +60,6 @@ const DATA = {
     series: days(7, (i) => ({ count: 1000 + i * 137 })),
     forms: FORMS,
   },
-  summary: {
-    days: 30,
-    forms: Object.fromEntries(
-      FORMS.map((f, i) => [
-        f.id,
-        { form_id: f.id, views: 123456 + i, submissions: 4567 + i, conversion: 3.7, left: 10, completion: 50 },
-      ])
-    ),
-  },
-  series: (formId) => ({
-    days: 30,
-    form_id: formId,
-    series: days(30, (i) => ({ views: 2000 + i * 13, submissions: 120 + i })),
-    totals: { views: 1234567, submissions: 98765, conversion: 8 },
-  }),
-  funnel: {
-    tracking: true,
-    form_tracked: true,
-    seen: 1234567,
-    started: 234567,
-    submitted: 123456,
-    left: 111111,
-    fields: Array.from({ length: 24 }, (_, i) => ({
-      key: `field_${i}`,
-      label: i % 2 ? `${LONG} field ${i}` : `Field ${i}`,
-      type: ['text', 'email', 'phone', 'textarea', 'select', 'file'][i % 6],
-      count: 5000 - i * 150,
-      known: true,
-    })),
-    steps: Array.from({ length: 12 }, (_, i) => ({ index: i, label: `${LONG} step ${i + 1}`, count: 900 - i * 50 })),
-  },
   spam: {
     total: 98765,
     since: '',
@@ -100,15 +71,11 @@ const DATA = {
 /** Answer the report endpoints with the large data set. */
 async function mockReports(page) {
   await page.route(
-    (url) => /subtleforms(\/|%2F)v1(\/|%2F)(reports|analytics|spam)/.test(url.toString()),
+    (url) => /subtleforms(\/|%2F)v1(\/|%2F)(reports|spam)/.test(url.toString()),
     (route) => {
       const url = decodeURIComponent(route.request().url());
-      const formId = Number((/form_id=(\d+)/.exec(url) || [])[1] || 0);
       let body = null;
       if (url.includes('/reports/overview')) body = DATA.overview;
-      else if (url.includes('/analytics/summary')) body = DATA.summary;
-      else if (url.includes('/analytics/series')) body = DATA.series(formId);
-      else if (url.includes('/analytics/funnel')) body = DATA.funnel;
       else if (url.includes('/spam/stats')) body = DATA.spam;
       if (!body) return route.continue();
       return route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ data: body }) });
@@ -200,43 +167,16 @@ test.describe('Reports and dashboard cards fit without scrollbars', () => {
     for (const width of WIDTHS) {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(REPORTS);
-      const funnel = page.locator('.sf-funnel');
-      await expect(funnel.locator('.sf-funnel__summary')).toBeVisible({ timeout: 30000 });
-      await expect(page.locator('.sf-reports__table tbody tr').first()).toBeVisible();
+      // Entry counts stay free; analytics is a Pro card with an upgrade link.
+      await expect(page.locator('.sf-kpis')).toBeVisible({ timeout: 30000 });
+      const card = page.locator('.sf-pro-notice').first();
+      await expect(card).toBeVisible();
+      await expect(card).toContainText('Views, conversion rate and form funnel');
+      await expect(card.locator('.sf-pro-tag').first()).toBeVisible();
+      await expect(page.locator('.sf-funnel, .sf-analytics-panel')).toHaveCount(0);
       await expectNoScrollers(page, SCREEN, `Reports ${width}px`);
-
-      // Long lists show their top rows and a "Show all" toggle, then all rows
-      // in the page flow, still without a scrollbar of their own.
-      const drops = funnel.locator('.sf-funnel__drop');
-      expect(await drops.count()).toBeLessThan(DATA.funnel.fields.length);
-      const table = page.locator('.sf-reports__table tbody tr');
-      expect(await table.count()).toBeLessThan(FORMS.length);
       await shot(page, `reports-${width}.png`);
-
-      await funnel.getByRole('button', { name: /Show all \d+ fields/ }).click();
-      await expect(drops).toHaveCount(DATA.funnel.fields.length);
-      await funnel.getByRole('button', { name: /Show all \d+ steps/ }).click();
-      await expect(funnel.locator('.sf-funnel__steps li')).toHaveCount(DATA.funnel.steps.length);
-      await page.getByRole('button', { name: /Show all \d+ forms/ }).click();
-      await expect(table).toHaveCount(FORMS.length);
-      await expectNoScrollers(page, SCREEN, `Reports ${width}px, everything shown`);
-      if (width === 390 || width === 1280) await shot(page, `reports-all-${width}.png`);
-      await expect(funnel.getByRole('button', { name: 'Show fewer fields' })).toBeVisible();
     }
-  });
-
-  test('the form selector of a report panel is a row of controls', async ({ page }) => {
-    await loginPage(page);
-    await mockReports(page);
-    await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto(REPORTS);
-    const select = page.locator('.sf-analytics-panel__select').first();
-    await expect(select).toBeVisible({ timeout: 30000 });
-    const style = await select.evaluate((el) => {
-      const s = getComputedStyle(el);
-      return { display: s.display, direction: s.flexDirection };
-    });
-    expect(style).toEqual({ display: 'flex', direction: 'row' });
   });
 
   test('dashboard report cards at every width', async ({ page }) => {
@@ -246,7 +186,6 @@ test.describe('Reports and dashboard cards fit without scrollbars', () => {
       await page.setViewportSize({ width, height: 900 });
       await page.goto(DASHBOARD);
       await expect(page.locator('.sf-spam-card__reasons')).toBeVisible({ timeout: 30000 });
-      await expect(page.locator('.sf-analytics-panel').first()).toBeVisible();
       await expectNoScrollers(page, SCREEN, `Dashboard ${width}px`);
       await shot(page, `dashboard-${width}.png`);
     }

@@ -38,22 +38,13 @@ final class ConditionalLogicTest extends TestCase {
 		return new ConditionalLogic( self::spec()['today'] );
 	}
 
-	/** WP2-03: advanced operators run in the free plugin, with no capability or licence. */
-	public function test_every_advanced_operator_is_exercised_by_the_shared_cases(): void {
-		$seen = array();
-		$spec = self::spec();
-		array_walk_recursive(
-			$spec,
-			static function ( $value, $key ) use ( &$seen ) {
-				if ( 'operator' === $key ) {
-					$seen[ $value ] = true;
-				}
-			}
+	/** The plugin evaluates the basic operators only; the rest belong to an add-on. */
+	public function test_the_plugin_does_not_ship_advanced_operators(): void {
+		$this->assertSame(
+			array( 'equals', 'not_equals', 'contains', 'not_contains', 'empty', 'not_empty', 'greater_than', 'less_than' ),
+			ConditionalLogic::BASIC_OPERATORS
 		);
-		foreach ( ConditionalLogic::ADVANCED_OPERATORS as $operator ) {
-			$this->assertArrayHasKey( $operator, $seen, "{$operator} has a case in the shared fixture." );
-		}
-		$this->assertTrue( ( new \SubtleForms\Support\Capabilities() )->allows( 'logic.conditional.advanced' ) );
+		$this->assertFalse( ( new \SubtleForms\Support\Capabilities() )->allows( 'logic.conditional.advanced' ) );
 	}
 
 	public function conditionCases(): array {
@@ -127,19 +118,55 @@ final class ConditionalLogicTest extends TestCase {
 		$this->assertSame( $case['expected'], $picked['id'] ?? null );
 	}
 
-	public function advancedCases(): array {
+	public function ignoredCases(): array {
 		$out = array();
-		foreach ( self::spec()['advanced'] as $case ) {
+		foreach ( self::spec()['ignored'] as $case ) {
 			$out[ $case['name'] ] = array( $case );
 		}
 		return $out;
 	}
 
 	/**
-	 * @dataProvider advancedCases
+	 * Logic the plugin does not evaluate passes: the field, step, email or
+	 * webhook is not held back by a rule nobody checks.
+	 *
+	 * @dataProvider ignoredCases
 	 */
-	public function test_uses_advanced( array $case ) {
-		$this->assertSame( $case['expected'], ConditionalLogic::usesAdvancedLogic( $case['logic'] ) );
+	public function test_unsupported_logic_is_ignored( array $case ) {
+		$this->assertSame( $case['expected'], $this->logic()->logicPasses( $case['logic'], $case['values'], array(), $case['scope'] ) );
+		$this->assertFalse( ConditionalLogic::hasLogic( $case['logic'], $case['scope'] ) );
+	}
+
+	public function ignoredStateCases(): array {
+		$out = array();
+		foreach ( self::spec()['ignoredState'] as $case ) {
+			$out[ $case['name'] ] = array( $case );
+		}
+		return $out;
+	}
+
+	/**
+	 * @dataProvider ignoredStateCases
+	 */
+	public function test_unsupported_logic_changes_no_field_state( array $case ) {
+		$state = $this->logic()->evaluate( $case['schema'], $case['values'] );
+		foreach ( array( 'hidden_fields', 'required_fields', 'hidden_steps' ) as $k ) {
+			$this->assertSame( $case['expected'][ $k ], $state[ $k ], $k );
+		}
+	}
+
+	public function test_an_add_on_can_take_on_advanced_logic(): void {
+		$GLOBALS['sf_test_filters']['subtleforms/logic/supports'] = static fn( $supported, $l, $scope ) => 'step' === $scope ? true : $supported;
+		$GLOBALS['sf_test_filters']['subtleforms/logic/passes']   = static fn( $result, $l, $values ) => 'go' === ( $values['a'] ?? '' );
+		try {
+			$logic = array( 'action' => 'show', 'groups' => array( array( 'match' => 'all', 'rules' => array( array( 'field' => 'a', 'operator' => 'equals', 'value' => '1' ) ) ) ) );
+			$this->assertTrue( ConditionalLogic::hasLogic( $logic, 'step' ) );
+			$this->assertTrue( $this->logic()->logicPasses( $logic, array( 'a' => 'go' ), array(), 'step' ) );
+			$this->assertFalse( $this->logic()->logicPasses( $logic, array( 'a' => 'no' ), array(), 'step' ) );
+			$this->assertFalse( ConditionalLogic::hasLogic( $logic, 'action' ), 'Only the scopes the add-on claims are evaluated.' );
+		} finally {
+			unset( $GLOBALS['sf_test_filters']['subtleforms/logic/supports'], $GLOBALS['sf_test_filters']['subtleforms/logic/passes'] );
+		}
 	}
 
 	public function test_visible_payload_drops_hidden_answers() {
@@ -161,10 +188,15 @@ final class ConditionalLogicTest extends TestCase {
 		$this->assertArrayHasKey( 'invoice', $result['errors'] );
 	}
 
-	public function test_required_field_in_skipped_step_is_not_validated() {
-		$schema = self::spec()['state'][4]['schema'];
+	/** A step rule is ignored, so the step is shown and its required field is checked like any other. */
+	public function test_required_field_in_a_step_with_an_ignored_rule_is_validated() {
+		$schema = self::spec()['ignoredState'][0]['schema'];
 		$state  = $this->logic()->evaluate( $schema, array( 'need_ship' => 'no' ) );
 		$result = ( new FieldValidator() )->validate( $schema, array( 'need_ship' => 'no' ), $state );
-		$this->assertTrue( $result['valid'] );
+		$this->assertFalse( $result['valid'] );
+		$this->assertArrayHasKey( 'address', $result['errors'] );
+
+		$ok = ( new FieldValidator() )->validate( $schema, array( 'need_ship' => 'no', 'address' => '1 Main St' ), $state );
+		$this->assertTrue( $ok['valid'] );
 	}
 }

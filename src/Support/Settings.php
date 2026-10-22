@@ -107,13 +107,6 @@ class Settings {
 		'ext_crm_webhook_url'               => '',
 		'ext_crm_add_note'                  => true,
 
-		// Analytics
-		'ext_analytics_enabled'             => true,
-		'ext_analytics_view_tracking'       => true,
-		'ext_analytics_retention_days'      => 90,
-		// Where visitors stop filling in a form (2.6.0).
-		'ext_analytics_funnel_retention_days' => 180,
-
 		// E-commerce (WooCommerce)
 		'ext_ecommerce_enabled'             => false,
 		'ext_ecommerce_product_id'          => 0,
@@ -247,10 +240,6 @@ class Settings {
 		'ext_crm_portal_id'                 => array( 'string', 'max' => 100 ),
 		'ext_crm_webhook_url'               => array( 'string', 'max' => 2000 ),
 		'ext_crm_add_note'                  => 'boolean',
-		'ext_analytics_enabled'             => 'boolean',
-		'ext_analytics_view_tracking'       => 'boolean',
-		'ext_analytics_retention_days'      => array( 'integer', 'min' => 1, 'max' => 3650 ),
-		'ext_analytics_funnel_retention_days' => array( 'integer', 'min' => 1, 'max' => 3650 ),
 		'ext_ecommerce_enabled'             => 'boolean',
 		'ext_ecommerce_product_id'          => array( 'integer', 'min' => 0 ),
 		'ext_ecommerce_currency'            => array( 'string', 'max' => 10 ),
@@ -329,6 +318,16 @@ class Settings {
 
 		// Validate settings
 		$validatedSettings = $this->validate( $mergedSettings );
+
+		// Keep what an add-on stored here before: a value this plugin has no
+		// rule for (for example the form analytics options of SubtleForms Pro,
+		// which older versions kept here) must not be lost by saving another
+		// setting. New keys without a rule are still refused.
+		foreach ( $currentSettings as $key => $value ) {
+			if ( ! isset( self::VALIDATION_RULES[ $key ] ) && ! array_key_exists( $key, self::DEFAULTS ) && ! array_key_exists( $key, $validatedSettings ) ) {
+				$validatedSettings[ $key ] = $value;
+			}
+		}
 
 		return update_option( self::OPTION_NAME, $validatedSettings );
 	}
