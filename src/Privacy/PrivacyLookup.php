@@ -140,21 +140,12 @@ final class PrivacyLookup {
 		$table  = $wpdb->prefix . 'subtleforms_submissions';
 		$user   = function_exists( 'get_user_by' ) ? get_user_by( 'email', $email ) : false;
 		$userId = ( $user && self::hasUserIdColumn() ) ? (int) $user->ID : 0;
-		$ips    = array();
-		if ( $userId > 0 ) {
-			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Fixed table name; value is prepared.
-			$ips = array_values( array_filter( (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT ip_address FROM {$table} WHERE user_id = %d AND ip_address IS NOT NULL AND ip_address <> '' LIMIT 50", $userId ) ) ) );
-		}
 
 		$where = array( 'payload LIKE %s' );
 		$args  = array( '%' . $wpdb->esc_like( $email ) . '%' );
 		if ( $userId > 0 ) {
 			$where[] = 'user_id = %d';
 			$args[]  = $userId;
-		}
-		if ( $ips ) {
-			$where[] = 'ip_address IN (' . implode( ', ', array_fill( 0, count( $ips ), '%s' ) ) . ')';
-			$args    = array_merge( $args, $ips );
 		}
 		$condition = implode( ' OR ', $where );
 
@@ -180,7 +171,7 @@ final class PrivacyLookup {
 			// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from $wpdb->prefix; $condition holds only placeholders; values are prepared.
 			$rows = $wpdb->get_results(
 				$wpdb->prepare(
-					"SELECT id, payload, user_id, ip_address FROM {$table} WHERE id < %d AND ({$condition}) ORDER BY id DESC LIMIT 500",
+					"SELECT id, payload, user_id FROM {$table} WHERE id < %d AND ({$condition}) ORDER BY id DESC LIMIT 500",
 					array_merge( array( $last ), $args )
 				),
 				ARRAY_A
@@ -188,7 +179,7 @@ final class PrivacyLookup {
 			// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 			foreach ( (array) $rows as $row ) {
 				$last = (int) $row['id'];
-				if ( ! self::rowBelongs( $row, $email, $userId, $ips ) ) {
+				if ( ! self::rowBelongs( $row, $email, $userId ) ) {
 					continue;
 				}
 				if ( count( $ids ) >= $perPage ) {
@@ -212,12 +203,11 @@ final class PrivacyLookup {
 	/**
 	 * Whether a scanned row belongs to the requested address.
 	 *
-	 * @param array    $row    id, payload, user_id, ip_address.
+	 * @param array    $row    id, payload, user_id.
 	 * @param string   $email  Lower-case email address.
 	 * @param int      $userId The account that has the address (0: none).
-	 * @param string[] $ips    IP addresses stored with that account's entries.
 	 */
-	private static function rowBelongs( array $row, string $email, int $userId, array $ips ): bool {
+	private static function rowBelongs( array $row, string $email, int $userId ): bool {
 		if ( self::payloadHasEmail( $row['payload'], $email ) ) {
 			return true;
 		}
@@ -225,34 +215,7 @@ final class PrivacyLookup {
 		if ( $userId > 0 && $rowUser === $userId ) {
 			return true;
 		}
-		// Same stored IP: only an entry nobody else owns.
-		if ( $ips && in_array( (string) ( $row['ip_address'] ?? '' ), $ips, true ) && 0 === $rowUser ) {
-			return ! self::payloadHasOtherEmail( $row['payload'], $email );
-		}
 		return false;
-	}
-
-	/**
-	 * Whether a payload holds an email address other than the given one.
-	 *
-	 * @param mixed  $payload Stored payload (JSON string or array).
-	 * @param string $email   Lower-case email address.
-	 */
-	private static function payloadHasOtherEmail( $payload, string $email ): bool {
-		$data = is_string( $payload ) ? json_decode( $payload, true ) : $payload;
-		if ( ! is_array( $data ) ) {
-			return false;
-		}
-		$other = false;
-		array_walk_recursive(
-			$data,
-			static function ( $value ) use ( $email, &$other ) {
-				if ( ! $other && is_string( $value ) && is_email( trim( $value ) ) && strtolower( trim( $value ) ) !== $email ) {
-					$other = true;
-				}
-			}
-		);
-		return $other;
 	}
 
 	/**

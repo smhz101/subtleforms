@@ -153,7 +153,7 @@ final class FreeQa272Test extends TestCase {
 		return (int) $wpdb->insert_id;
 	}
 
-	public function test_the_privacy_export_matches_by_account_and_ip_and_pages_by_id(): void {
+	public function test_the_privacy_export_matches_by_account_and_email_never_by_ip_and_pages_by_id(): void {
 		$formId = $this->publish( array( array( 'id' => 'n', 'key' => 'name', 'type' => 'text', 'label' => 'Name' ) ) );
 		$name   = strtolower( 'sf272_' . wp_generate_password( 6, false ) );
 		$email  = $name . '@example.com';
@@ -169,13 +169,14 @@ final class FreeQa272Test extends TestCase {
 		$all = array();
 		$page = 1;
 		do {
-			$found = PrivacyLookup::page( $email, $page, 2 );
-			$this->assertLessThanOrEqual( 2, count( $found['ids'] ) );
+			$found = PrivacyLookup::page( $email, $page, 1 );
+			$this->assertLessThanOrEqual( 1, count( $found['ids'] ) );
 			$all = array_merge( $all, $found['ids'] );
 			$page++;
 		} while ( ! $found['done'] && $page < 10 );
 
-		$this->assertSame( array( $byIp, $byAccount, $byAnswer ), $all, 'newest first, three pages worth of two' );
+		$this->assertSame( array( $byAccount, $byAnswer ), $all, 'newest first, one per page' );
+		$this->assertNotContains( $byIp, $all, 'an anonymous entry from the same address is not proof of identity' );
 		$this->assertNotContains( $someone, $all, 'an entry with another email address is not exported' );
 		$this->assertNotContains( $stranger, $all );
 
@@ -183,7 +184,7 @@ final class FreeQa272Test extends TestCase {
 		$this->assertNotFalse( get_transient( 'subtleforms_privx_' . md5( $email ) . '_2' ) );
 		$exporter = new \SubtleForms\Privacy\PrivacyExporter( new \SubtleForms\Repositories\SubmissionsRepository(), new \SubtleForms\Repositories\FormsRepository() );
 		$first    = $exporter->export_user_data( $email, 1 );
-		$this->assertCount( 3, $first['data'] );
+		$this->assertCount( 2, $first['data'] );
 		$this->assertTrue( $first['done'] );
 
 		require_once ABSPATH . 'wp-admin/includes/user.php';
