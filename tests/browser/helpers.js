@@ -189,21 +189,18 @@ module.exports.openPanel = openPanel;
 
 /**
  * The server-signed spam time token for a form, aged past the time trap
- * (2.3.9, FF-11 and FF-12). One token per form is reused.
+ * (2.3.9, FF-11 and FF-12). A new token for every call.
  *
  * @param {Object} api    A Playwright request context.
  * @param {number} formId Form ID.
  * @return {Promise<string>} Token.
  */
-const spamTokens = new Map();
 async function spamToken(api, formId) {
-  if (!spamTokens.has(formId)) {
-    const res = await api.get(`/wp-json/subtleforms/v1/forms/${formId}/schema`);
-    const body = await res.json();
-    spamTokens.set(formId, body?.data?.spam_token || '');
-    // The default minimum time between loading and sending a form is 3 seconds.
-    await new Promise((resolve) => setTimeout(resolve, 3500));
-  }
-  return spamTokens.get(formId);
+  // A token works once (it is claimed on submit), so each call gets a new one.
+  const res = await api.get(`/wp-json/subtleforms/v1/forms/${formId}/schema`);
+  const body = await res.json();
+  // The default minimum time between loading and sending a form is 3 seconds.
+  await new Promise((resolve) => setTimeout(resolve, 3500));
+  return body?.data?.spam_token || '';
 }
 module.exports.spamToken = spamToken;

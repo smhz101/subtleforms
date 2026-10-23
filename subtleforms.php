@@ -18,7 +18,7 @@
  * Subtle Forms
  *
  * @package SubtleForms
- * @version 1.0.0
+ * @version 2.7.0
  * @author SubtleForms
  * @license GPL-2.0+
  * @link https://subtleforms.com/
@@ -65,6 +65,19 @@ add_action(
 
 		SubtleForms\init();
 	}
+);
+
+// A site updated by FTP or a deploy never ran the activation hook. The check
+// above covers admin requests and WP-CLI; this one is the same check again on
+// admin_init, so the schema is upgraded on the first admin page load even if
+// is_admin() was not known yet at plugins_loaded. It is a no-op once the stored
+// version matches, and it never runs on a visitor's request.
+add_action(
+	'admin_init',
+	function () {
+		SubtleForms\Activator::maybe_upgrade();
+	},
+	1
 );
 
 // Add REST API nonce verification for authenticated endpoints

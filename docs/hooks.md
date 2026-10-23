@@ -9,7 +9,7 @@ This page lists the hooks an add-on such as SubtleForms Pro uses to add field ty
 | `subtleforms/fields/register` | action `( FieldRegistry $registry )` | Register a `FieldDefinition`. Fires before the free types are added, so an add-on can also replace one. |
 | `subtleforms/fields/validate_value` | filter `( ?string $error, string $type, mixed $value, array $field )` | Return an error message for a bad value of your type, or null. |
 | `subtleforms/fields/non_input_types` | filter `( string[] $types )` | Types that never collect an answer, so they cannot be required. |
-| `subtleforms/fields/addon_types` | filter `( string[] $types )` | Types that exist only while an add-on registers them. Default: `signature`, `calculation`, `payment_card`. When the type is not registered, the live form leaves those fields out and the builder shows a note. |
+| `subtleforms/fields/addon_types` | filter `( string[] $types )` | Types that exist only while an add-on registers them. Default: `signature`, `calculation`, `payment_card`, `payment_product`, `payment_choice`, `payment_amount`, `payment_summary`, `payment_coupon`, `payment_hidden_price`. When the type is not registered, the live form leaves those fields out and the builder shows a note. |
 | `subtleforms/public_schema` | filter `( array $schema, int $formId )` | The schema sent to the browser to render a form. |
 
 ## Computed values and prices (PHP)
@@ -62,7 +62,7 @@ The tab opens at `admin.php?page=subtleforms-settings#tab=<name>`. The body look
 
 Picture choice, several files per upload field, advanced conditional logic and form analytics are part of SubtleForms Pro. The free plugin holds no working code for them. It keeps the extension points below, a plain fallback for forms that already use them, and Pro placeholders in the screens.
 
-`SubtleForms\Support\ExtensionPoints` names the four points (`picture_choice`, `multi_file_uploads`, `advanced_logic`, `analytics`) and its `LEVEL` constant (1) is the contract version. An add-on checks `ExtensionPoints::has( $name )` before it registers, so it never registers twice against an older plugin that still ships the feature. It reports what it runs through:
+`SubtleForms\Support\ExtensionPoints` names the four points (`picture_choice`, `multi_file_uploads`, `advanced_logic`, `analytics`) and its `LEVEL` constant (2) is the contract version. Level 2 adds the logic, upload and add-on feature hooks of 2.7.0 and the `FeatureGate` setters. An add-on checks `ExtensionPoints::has( $name )` before it registers, so it never registers twice against an older plugin that still ships the feature. It reports what it runs through:
 
 | Hook | Type | Use |
 | --- | --- | --- |
@@ -118,3 +118,42 @@ Slots: `reports.panels` and `dashboard.panels` (props: `forms`), `forms.list.col
 The front end dispatches the `subtleforms:submitted` event on `document` with `detail.formId` after a successful send. Field wrappers carry `data-sf-key` and steps carry `data-sf-step`, which Pro reads for the funnel.
 
 Upgrade keys used by the placeholders: `fields.picture_choice`, `uploads.multiple`, `logic.conditional.advanced`, `extensions.analytics`.
+
+## Add-on boot and gate (PHP)
+
+`SubtleForms\Support\FeatureGate` is the one gate in the container. An add-on sets its own pieces on it instead of replacing the container entry, so every service that already holds the gate sees them.
+
+| Method | Use |
+| --- | --- |
+| `FeatureGate::setLicenseManager( ?object $manager )` | Give the gate a license manager: any object with `isValid()` and `hasFeature( string )`. Pass null to remove it. An object without both methods throws `InvalidArgumentException`. Since 2.7.1. |
+| `FeatureGate::setCapabilities( Capabilities $caps )` | Swap the capability map, for example after the add-on has added its `subtleforms/capabilities` filter. Since 2.7.1. |
+
+## Orders (PHP, 2.8.0)
+
+Payments are part of SubtleForms Pro. The free submit route keeps two hooks where the order is priced and finished, and does nothing else with money.
+
+| Hook | Type | Use |
+| --- | --- | --- |
+| `subtleforms/submit/price_order` | filter `( array\|WP_REST_Response $order, int $formId, mixed $schema, array $payload, WP_REST_Request $request, ?array $logicValues )` | Price the order, check the coupon and confirm payment. The start value is an empty order (`quote`, `coupon`, `payment`, `customer` all empty). Return the order array, or a `WP_REST_Response` to refuse the submission. Anything else is ignored. |
+| `subtleforms/submit/finish_order` | action `( int $submissionId, array $submission, array $order, string $status )` | Fires once a priced submission is stored. Store the order on the entry, set the final status and count the coupon. |
+
+Gateways still confirm money through `subtleforms/payment/verify`, `subtleforms/payment/capture` and `subtleforms/payment/void`.
+
+## Visitor IP (PHP and settings)
+
+`SubtleForms\Security\ClientIp::get()` is the only place that reads `REMOTE_ADDR`. The rate limiter, the CAPTCHA check, uploads and the address stored on an entry all call it, so they agree. By default it returns `REMOTE_ADDR` and ignores forwarding headers, because a visitor can send any header. Two settings (Settings, Advanced, Visitor IP behind a proxy) let the site owner say which proxies to believe:
+
+| Setting | Type | Use |
+| --- | --- | --- |
+| `trusted_proxy_cidrs` | array of strings | IP addresses or CIDR ranges (for example `10.0.0.0/8`). Only a request from one of these may name the visitor in `X-Forwarded-For`; the header is read from the right and skips trusted hops. Invalid entries are refused when saving. Default: empty. |
+| `trust_cloudflare` | bool | Trust Cloudflare's published ranges and read `CF-Connecting-IP` from them. Default: false. |
+
+| Hook | Type | Use |
+| --- | --- | --- |
+| `subtleforms/client_ip/trusted_proxies` | filter `( string[] $trusted )` | Change the trusted addresses and ranges, for example to read them from a host's configuration. |
+
+## Time token route
+
+A form page that stays open or is cached for hours holds an expired time token. The front end trades it for a fresh one just before it submits.
+
+`POST /wp-json/subtleforms/v1/forms/{id}/spam-token` with `token` (the old token). It is public and rate limited. It answers `{ "data": { "spam_token": "..." } }` only for a validly signed token of that published form; a missing or forged token, or an unknown or unpublished form, gets 404, so a token can never be created from nothing.

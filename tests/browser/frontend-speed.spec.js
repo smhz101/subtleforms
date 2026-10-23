@@ -8,7 +8,7 @@
  * - Heavier field code is downloaded only for forms that have those fields,
  *   and each of those fields still works: the date picker opens and picks a
  *   day, the phone country list searches and switches the code, the country
- *   list opens, a file uploads, the order summary shows the total.
+ *   list opens, a file uploads.
  * - Multi-step and conversational forms still move between pages.
  * - A form placed with the block is drawn once, without a layout shift.
  */
@@ -88,7 +88,9 @@ test('a plain form loads only the base code, deferred, and its data once', async
   const scripts = seen.assets.filter((u) => /\.js(\?|$)/.test(u));
   expect(scripts.map((u) => u.replace(/\?.*$/, ''))).toEqual(['build/frontend/frontend.js']);
   await expect(page.locator('script#subtleforms-frontend-js')).toHaveAttribute('defer', '');
-  expect(await page.locator('script[src*="jquery"]').count()).toBe(0);
+  // Only SubtleForms' own scripts count: a theme or another plugin may load jQuery.
+  expect(await page.locator('script[src*="/plugins/subtleforms/"][src*="jquery"]').count()).toBe(0);
+  expect(seen.assets.filter((u) => /jquery/i.test(u))).toEqual([]);
   // 2.6.1: the page carries the form's data, so there is nothing to fetch
   // and nothing to hint at.
   await expect(page.locator(`script#sf-form-data-${form.id}[type="application/json"]`)).toHaveCount(1);
@@ -147,6 +149,8 @@ test('special fields load their code and still work', async ({ page }) => {
       { id: 'p1', key: 'phone', type: 'phone', label: 'Phone', enableCountryCode: true },
       { id: 'k1', key: 'country', type: 'country', label: 'Country' },
       { id: 'f1', key: 'upload', type: 'file_upload', label: 'Upload' },
+      // Payment fields are part of SubtleForms Pro: a saved form that has them
+      // leaves them off the live form and loads none of their code without it.
       { id: 'pp', key: 'ticket', type: 'payment_product', label: 'Ticket', price: 10 },
       { id: 'ps', key: 'summary', type: 'payment_summary', label: 'Summary' },
     ],
@@ -155,7 +159,7 @@ test('special fields load their code and still work', async ({ page }) => {
   const seen = watch(page);
   await page.goto(form.url);
   await formReady(page);
-  for (const name of ['field-date', 'field-phone-country', 'field-upload', 'field-payments']) {
+  for (const name of ['field-date', 'field-phone-country', 'field-upload']) {
     expect(chunk(seen, name), name).toBe(true);
     // Hinted from the page head and downloaded once.
     await expect(page.locator(`head link[rel="preload"][as="script"][href*="/${name}."]`)).toHaveCount(1);
@@ -163,7 +167,8 @@ test('special fields load their code and still work', async ({ page }) => {
   }
   expect(chunk(seen, 'form-conversational')).toBe(false);
   expect(chunk(seen, 'field-repeater')).toBe(false);
-  await expect(page.locator('.subtleforms-form-container')).toHaveAttribute('data-features', 'date geo payments upload');
+  expect(chunk(seen, 'field-payments')).toBe(false);
+  await expect(page.locator('.subtleforms-form-container')).toHaveAttribute('data-features', 'date geo upload');
 
   // Date picker opens and picks a day.
   const date = page.locator('.subtleforms-field-date .subtleforms-picker, .subtleforms-picker').first();
@@ -193,8 +198,9 @@ test('special fields load their code and still work', async ({ page }) => {
   await page.locator('input[type="file"]').setInputFiles({ name: 'notes.txt', mimeType: 'text/plain', buffer: Buffer.from('hello') });
   await expect(page.locator('.subtleforms-upload__name', { hasText: 'notes.txt' })).toBeVisible({ timeout: 20000 });
 
-  // The order summary shows the total.
-  await expect(page.locator('.subtleforms-form-container')).toContainText('$10.00');
+  // The payment fields of the saved form are not on the live form.
+  await expect(page.locator('.subtleforms-form-container')).not.toContainText('Ticket');
+  await expect(page.locator('.subtleforms-form-container')).not.toContainText('$10.00');
   await page.locator('.subtleforms-form-container').screenshot({ path: `${SHOTS}/special-fields.png` });
 });
 
