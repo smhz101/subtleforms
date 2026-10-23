@@ -378,7 +378,16 @@ export default function FormAppearancePanel( {
                     isBlock
                     label={ __( 'Button width', 'subtleforms' ) }
                     value={ buttonWidth }
-                    onChange={ ( next ) => setVariant( 'buttonAlign', next === 'full' ? 'full' : lastAlign ) }
+                    onChange={ ( next ) => {
+                      if ( next === 'full' ) {
+                        if ( buttonAlign !== 'full' ) {
+                          setLastAlign( buttonAlign );
+                        }
+                        setVariant( 'buttonAlign', 'full' );
+                      } else {
+                        setVariant( 'buttonAlign', lastAlign );
+                      }
+                    } }
                     disabled={ isReadOnly }
                     className='sf-form-appearance__variant sf-form-appearance__button-width'>
                     <ToggleGroupControlOption value='auto' label={ __( 'Auto', 'subtleforms' ) } />
