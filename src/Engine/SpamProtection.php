@@ -45,6 +45,21 @@ final class SpamProtection {
 	const MIN_SUBMISSION_TIME = 3;
 
 	/**
+	 * Seconds a time token stays valid (2 hours). An older token must be
+	 * refreshed (see refresh_token()) before it is used.
+	 *
+	 * @var int
+	 */
+	const TOKEN_TTL = 7200;
+
+	/**
+	 * How long a used token that was already stale is remembered (30 days).
+	 *
+	 * @var int
+	 */
+	const STALE_CLAIM_TTL = 2592000;
+
+	/**
 	 * Key in a form's metadata that holds its own spam settings (2.6.0):
 	 * `{ "honeypot": bool, "timeTrap": bool }`.
 	 */
@@ -156,15 +171,22 @@ final class SpamProtection {
 		}
 
 		if ( ! empty( $protection['timeTrap'] ) && ! $skip_time_trap ) {
-			$issued = self::token_time( $data[ self::TIME_FIELD ] ?? null, $form_id );
-			if ( null === $issued ) {
+			$info = self::token_info( $data[ self::TIME_FIELD ] ?? null, $form_id );
+			if ( null === $info ) {
 				return 'time_token_missing';
 			}
-			// Only a submission that comes too soon is blocked. A token from a
-			// page or a response that was cached hours ago is older, so it
-			// passes: page caching never blocks a real visitor.
 			$now = $now ?? time();
-			if ( ( $now - $issued ) < max( 1, (int) ( $protection['minSeconds'] ?? self::MIN_SUBMISSION_TIME ) ) ) {
+			$age = $now - $info['time'];
+			// A token older than the lifetime is not accepted as proof of
+			// time. The page refreshes it first (a cached page keeps working).
+			// A classic post cannot refresh, so it may use it once.
+			if ( $age > self::TOKEN_TTL && empty( $protection['acceptStale'] ) ) {
+				return 'time_token_expired';
+			}
+			// A refreshed token was issued to a visitor who had the form open
+			// for hours, so the minimum time does not apply to it. A fresh
+			// token must be at least the minimum seconds old.
+			if ( ! $info['refreshed'] && $age < max( 1, (int) ( $protection['minSeconds'] ?? self::MIN_SUBMISSION_TIME ) ) ) {
 				return 'submission_too_fast';
 			}
 		}
@@ -188,6 +210,76 @@ final class SpamProtection {
 	}
 
 	/**
+	 * A token for a visitor whose page token is older than the lifetime. It
+	 * is issued only against a validly signed old token (a bot cannot ask for
+	 * one from nothing), and it skips the minimum-time check.
+	 *
+	 * @param mixed    $old     The page's token.
+	 * @param int      $form_id Form ID.
+	 * @param int|null $now     Unix time. Defaults to now.
+	 * @return string|null New token, the same token while it is still valid, or null when the old one is not valid.
+	 */
+	public static function refresh_token( $old, int $form_id, ?int $now = null ): ?string {
+		$info = self::token_info( $old, $form_id );
+		if ( null === $info ) {
+			return null;
+		}
+		$now = $now ?? time();
+		if ( ( $now - $info['time'] ) <= self::TOKEN_TTL ) {
+			return (string) $old;
+		}
+		return 'v2.' . $now . '.' . $form_id . '.' . self::sign( $now, $form_id, 'r' );
+	}
+
+	/**
+	 * Use a token once. Returns false when it was used before. The mark is
+	 * kept in the object cache (atomic) when there is a persistent one, else
+	 * in a transient keyed on the token's hash.
+	 *
+	 * @param mixed    $token   Token from the submission.
+	 * @param int|null $time    Issue time of the token, to size the mark.
+	 * @param int|null $now     Unix time. Defaults to now.
+	 * @return bool True the first time.
+	 */
+	public static function claim_token( $token, ?int $time = null, ?int $now = null ): bool {
+		if ( ! is_string( $token ) || '' === $token ) {
+			return false;
+		}
+		$now = $now ?? time();
+		$ttl = ( null !== $time && ( $now - $time ) <= self::TOKEN_TTL )
+			? self::TOKEN_TTL + 60
+			: self::STALE_CLAIM_TTL;
+		$key = 'subtleforms_tt_' . md5( $token );
+
+		if ( function_exists( 'wp_using_ext_object_cache' ) && wp_using_ext_object_cache() ) {
+			return (bool) wp_cache_add( $key, 1, 'subtleforms', $ttl );
+		}
+		if ( false !== get_transient( $key ) ) {
+			return false;
+		}
+		set_transient( $key, 1, $ttl );
+		return true;
+	}
+
+	/**
+	 * Undo claim_token() when the entry was rejected or failed, so the
+	 * visitor can send again with the same token.
+	 *
+	 * @param mixed $token Token that was claimed (null: nothing to release).
+	 */
+	public static function release_token( $token ): void {
+		if ( ! is_string( $token ) || '' === $token ) {
+			return;
+		}
+		$key = 'subtleforms_tt_' . md5( $token );
+		if ( function_exists( 'wp_using_ext_object_cache' ) && wp_using_ext_object_cache() ) {
+			wp_cache_delete( $key, 'subtleforms' );
+			return;
+		}
+		delete_transient( $key );
+	}
+
+	/**
 	 * The issue time of a valid token for this form, or null.
 	 *
 	 * @param mixed $token   Token from the submission.
@@ -195,21 +287,38 @@ final class SpamProtection {
 	 * @return int|null
 	 */
 	public static function token_time( $token, int $form_id ): ?int {
-		if ( ! is_string( $token ) || 1 !== preg_match( '/^v1\.(\d{9,11})\.(\d+)\.([a-f0-9]{32})$/', $token, $m ) ) {
+		$info = self::token_info( $token, $form_id );
+		return null === $info ? null : $info['time'];
+	}
+
+	/**
+	 * Issue time and kind of a valid token for this form, or null.
+	 *
+	 * @param mixed $token   Token from the submission.
+	 * @param int   $form_id Form ID.
+	 * @return array{time: int, refreshed: bool}|null
+	 */
+	public static function token_info( $token, int $form_id ): ?array {
+		if ( ! is_string( $token ) || 1 !== preg_match( '/^(v1|v2)\.(\d{9,11})\.(\d+)\.([a-f0-9]{32})$/', $token, $m ) ) {
 			return null;
 		}
-		$time = (int) $m[1];
-		if ( (int) $m[2] !== $form_id || ! hash_equals( self::sign( $time, $form_id ), $m[3] ) ) {
+		$time      = (int) $m[2];
+		$refreshed = 'v2' === $m[1];
+		if ( (int) $m[3] !== $form_id || ! hash_equals( self::sign( $time, $form_id, $refreshed ? 'r' : '' ), $m[4] ) ) {
 			return null;
 		}
-		return $time;
+		return array(
+			'time'      => $time,
+			'refreshed' => $refreshed,
+		);
 	}
 
 	/**
 	 * Signature for a token.
 	 */
-	private static function sign( int $time, int $form_id ): string {
-		return substr( hash_hmac( 'sha256', $time . '|' . $form_id, wp_salt( 'nonce' ) ), 0, 32 );
+	private static function sign( int $time, int $form_id, string $kind = '' ): string {
+		$data = '' === $kind ? $time . '|' . $form_id : $kind . '|' . $time . '|' . $form_id;
+		return substr( hash_hmac( 'sha256', $data, wp_salt( 'nonce' ) ), 0, 32 );
 	}
 
 	/**

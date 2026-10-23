@@ -27,14 +27,61 @@ final class Activator {
 	 * @return bool Whether the activation steps ran.
 	 */
 	public static function maybe_upgrade( ?string $current = null ): bool {
-		$current = $current ?? SUBTLEFORMS_VERSION;
+		$explicit = null !== $current;
+		$current  = $current ?? SUBTLEFORMS_VERSION;
 		if ( get_option( 'subtleforms_db_version' ) === $current ) {
 			return false;
 		}
-		self::activate();
-		update_option( 'subtleforms_db_version', $current );
-		update_option( 'subtleforms_version', $current );
+
+		// The implicit call from plugins_loaded must not run schema work on a
+		// visitor's request. It runs for admin screens, admin-ajax and WP-CLI;
+		// front-end code guards the columns it needs until it has run.
+		if ( ! $explicit && ! self::is_upgrade_context() ) {
+			return false;
+		}
+
+		if ( ! self::acquire_upgrade_lock() ) {
+			return false;
+		}
+
+		try {
+			self::activate();
+			update_option( 'subtleforms_db_version', $current );
+			update_option( 'subtleforms_version', $current );
+		} finally {
+			delete_option( self::UPGRADE_LOCK );
+		}
 		return true;
+	}
+
+	/**
+	 * Option that holds the upgrade lock (value: unix time it was taken).
+	 */
+	const UPGRADE_LOCK = 'subtleforms_upgrade_lock';
+
+	/**
+	 * Whether this request may run schema upgrades on its own.
+	 */
+	private static function is_upgrade_context(): bool {
+		return ( function_exists( 'is_admin' ) && is_admin() )
+			|| ( defined( 'WP_CLI' ) && WP_CLI );
+	}
+
+	/**
+	 * Take the upgrade lock. add_option() fails when the row exists, so two
+	 * concurrent requests cannot both pass. A lock older than five minutes is
+	 * treated as left behind by a crashed request.
+	 */
+	private static function acquire_upgrade_lock(): bool {
+		if ( add_option( self::UPGRADE_LOCK, time(), '', false ) ) {
+			return true;
+		}
+		$taken = (int) get_option( self::UPGRADE_LOCK, 0 );
+		if ( $taken > 0 && ( time() - $taken ) > 300 ) {
+			delete_option( self::UPGRADE_LOCK );
+			return (bool) add_option( self::UPGRADE_LOCK, time(), '', false );
+		}
+		return false;
 	}
 
 	/**
@@ -144,9 +191,11 @@ final class Activator {
   trashed_at datetime DEFAULT NULL,
   ip_address varchar(45),
   user_agent varchar(255),
+  user_id bigint(20) unsigned NOT NULL DEFAULT 0,
   created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY  (id),
   KEY form_id (form_id),
+  KEY form_user (form_id, user_id),
   KEY status (status),
   KEY is_read (is_read),
   KEY starred (starred),

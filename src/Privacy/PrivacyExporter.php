@@ -79,7 +79,7 @@ final class PrivacyExporter {
 		$offset       = ( $page - 1 ) * $per_page;
 
 		// Entries whose answers hold exactly this address (FF-21).
-		$all         = PrivacyLookup::submissionIds( (string) $email_address );
+		$all         = PrivacyLookup::submissionIds( (string) $email_address, (int) $page > 1 );
 		$submissions = array_values( array_filter( array_map( array( $this->submissionsRepo, 'find' ), array_slice( $all, $offset, $per_page ) ) ) );
 
 		foreach ( $submissions as $submission ) {
@@ -102,6 +102,25 @@ final class PrivacyExporter {
 					'value' => $submission['status'],
 				),
 			);
+
+			// What was recorded about the visit.
+			foreach ( array(
+				'ip_address' => __( 'IP address', 'subtleforms' ),
+				'user_agent' => __( 'Browser', 'subtleforms' ),
+			) as $column => $label ) {
+				if ( ! empty( $submission[ $column ] ) ) {
+					$data[] = array(
+						'name'  => $label,
+						'value' => $submission[ $column ],
+					);
+				}
+			}
+			if ( ! empty( $submission['user_id'] ) ) {
+				$data[] = array(
+					'name'  => __( 'User ID', 'subtleforms' ),
+					'value' => (int) $submission['user_id'],
+				);
+			}
 
 			// Add form field data
 			$payload = is_string( $submission['payload'] )

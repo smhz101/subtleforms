@@ -32,7 +32,7 @@ final class RawLogicTest extends TestCase {
 
 	public function capture( $pre, $event ) {
 		if ( isset( $event->hook ) && 'subtleforms_async_email' === $event->hook ) {
-			$this->emails[] = $event->args[0];
+			$this->emails[] = \SubtleForms\Async\AsyncDispatcher::resolve( $event->args[0] );
 			return true;
 		}
 		return $pre;

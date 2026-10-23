@@ -17,3 +17,21 @@ if ( ! function_exists( 'esc_html__' ) ) {
 		return $text;
 	}
 }
+
+if ( ! function_exists( 'get_transient' ) ) {
+	function get_transient( $key ) {
+		return $GLOBALS['subtleforms_test_transients'][ $key ] ?? false;
+	}
+}
+if ( ! function_exists( 'set_transient' ) ) {
+	function set_transient( $key, $value, $ttl = 0 ) {
+		$GLOBALS['subtleforms_test_transients'][ $key ] = $value;
+		return true;
+	}
+}
+if ( ! function_exists( 'delete_transient' ) ) {
+	function delete_transient( $key ) {
+		unset( $GLOBALS['subtleforms_test_transients'][ $key ] );
+		return true;
+	}
+}

@@ -1,3 +1,4 @@
+import { freshSpamToken } from '../utils/spamToken';
 import { useState, useEffect, useCallback, useMemo, useRef } from '@wordpress/element';
 import { currencySymbol as symbolFor, currencyDecimals } from '../../shared/currencies';
 import { __, sprintf } from '@wordpress/i18n';
@@ -331,7 +332,7 @@ export default function ConversationalFormRenderer({
       try {
         const response = await restFetch('/submit', {
           method: 'POST',
-          body: { form_id: formId, data: { ...payload, form_rendered_at: spamToken } },
+          body: { form_id: formId, data: { ...payload, form_rendered_at: await freshSpamToken(formId, spamToken) } },
         });
 
         const result = await response.json();
