@@ -10,6 +10,13 @@ import { debug } from '../shared/debug';
 import { containerGroups, loadGroups } from './components/fields/lazyFields';
 import { readInlineFormData } from './utils/inlineData';
 import { runFormMountHooks } from '../shared/extend';
+import * as contexts from './components/fields/contexts';
+import * as pricing from '../shared/pricing';
+
+// Shared with SubtleForms Pro's payment fields: the order context and the price maths.
+if (typeof window !== 'undefined') {
+  window.SubtleFormsExtend = Object.assign(window.SubtleFormsExtend || {}, { contexts, pricing });
+}
 
 /**
  * Mount a form renderer in a container
