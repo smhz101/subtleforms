@@ -9,10 +9,13 @@ import {
   splitPhoneValue,
 } from '../../../shared/phone';
 import { formatUsPhone } from '../../../shared/phoneFormat';
+import FlagIcon from './FlagIcon';
 
 /**
  * Phone input. With country codes on, a searchable list of dial codes sits
- * in front of the number. Flags can be hidden from Appearance.
+ * in front of the number. Flags can be hidden from Appearance. With
+ * `flagImages` (the field's "Show country flags" setting, 2.7.2) the flag is
+ * a small image instead of the two letters.
  */
 export default function PhoneField({
   inputId,
@@ -27,6 +30,7 @@ export default function PhoneField({
   disabled = false,
   readOnly = false,
   showFlags = true,
+  flagImages = false,
   inputClassName = 'subtleforms-input',
 }) {
   const listId = useId();
@@ -134,7 +138,7 @@ export default function PhoneField({
         >
           {showFlags && country && (
             <span className="subtleforms-phone__flag" aria-hidden="true">
-              {flagMark(country.code)}
+              {flagImages ? <FlagIcon code={country.code} /> : flagMark(country.code)}
             </span>
           )}
           <span className="subtleforms-phone__dial">
@@ -186,7 +190,7 @@ export default function PhoneField({
                   >
                     {showFlags && (
                       <span className="subtleforms-phone__flag" aria-hidden="true">
-                        {flagMark(item.code)}
+                        {flagImages ? <FlagIcon code={item.code} /> : flagMark(item.code)}
                       </span>
                     )}
                     <span className="subtleforms-phone__name">{item.name}</span>

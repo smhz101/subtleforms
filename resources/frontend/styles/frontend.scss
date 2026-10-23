@@ -230,6 +230,17 @@
 .subtleforms-phone__flag {
 	font-size: 18px;
 	line-height: 1;
+	display: inline-flex;
+	align-items: center;
+	flex: none;
+}
+
+.subtleforms-flag {
+	display: block;
+	flex: none;
+	width: 20px;
+	height: 15px;
+	border-radius: 2px;
 }
 
 .subtleforms-phone__caret {
@@ -287,7 +298,7 @@
 	background: transparent;
 	color: inherit;
 	font: inherit;
-	text-align: left;
+	text-align: start;
 	cursor: pointer;
 }
 

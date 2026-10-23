@@ -16,6 +16,7 @@ import { lazyField } from './fields/lazyFields';
 import { getFieldType, getFieldOverride } from '../../shared/extend';
 import { effectiveFieldType } from '../../shared/fieldFallback';
 import { fieldConfig } from '../../shared/fieldConfig';
+import { flagsOn } from '../../shared/flagsOn';
 import { fieldDisplay } from '../../shared/fieldDisplay';
 import { toggleIsOn } from '../../shared/toggleState';
 
@@ -604,6 +605,7 @@ function renderInput(
             error={error}
             readOnly={config.readOnly === true}
             showFlags={appearance.showFlags !== false}
+            flagImages={flagsOn(config.showFlags)}
           />
         );
       }
@@ -941,6 +943,7 @@ function renderInput(
           describedBy={describedBy}
           invalid={!!error}
           readOnly={config.readOnly === true}
+          flagImages={flagsOn(config.showFlags)}
         />
       );
     }

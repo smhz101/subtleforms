@@ -17,9 +17,11 @@ import { __ } from '@wordpress/i18n';
 import { lazy, Suspense, useState } from '@wordpress/element';
 import { fieldConfig } from '../../../shared/fieldConfig';
 import { structuralType } from '../../../shared/formType';
+import { flagsOn } from '../../../shared/flagsOn';
 
 const LOADERS = {
   date: () => import(/* webpackChunkName: "field-date" */ './DateTimeField'),
+  flags: () => import(/* webpackChunkName: "feature-flags" */ './flagsPrime'),
   geo: () => import(/* webpackChunkName: "field-phone-country" */ './geoFields'),
   upload: () => import(/* webpackChunkName: "field-upload" */ './FileUpload'),
   repeater: () => import(/* webpackChunkName: "field-repeater" */ './RepeaterField'),
@@ -93,6 +95,9 @@ export function fieldGroups(schema) {
     const group = fieldGroup(node);
     if (group) {
       groups.add(group);
+    }
+    if ((group === 'geo' && (node.type === 'country' || fieldConfig(node).enableCountryCode)) && flagsOn(fieldConfig(node).showFlags)) {
+      groups.add('flags');
     }
     ['fields', 'children', 'columns'].forEach((key) => walk(node[key]));
     if (node.config && typeof node.config === 'object') {

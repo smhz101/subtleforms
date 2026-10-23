@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { orderedCountries, preferredCountryCodes } from '../../../shared/countries';
 import { flagMark } from '../../../shared/phone';
+import FlagIcon from './FlagIcon';
 import { ChevronIcon } from './PickerIcons';
 import { useMenu } from './useMenu';
 import { typeaheadIndex } from '../../../shared/pickerKeyboard';
@@ -33,6 +34,7 @@ export default function CountrySelect({
   describedBy,
   invalid = false,
   preview = false,
+  flagImages = false,
 }) {
   const triggerRef = useRef(null);
   const { rootRef, open, setOpen } = useMenu(triggerRef);
@@ -172,7 +174,7 @@ export default function CountrySelect({
           }
         }}>
         <span className={selected ? 'subtleforms-picker__value' : 'subtleforms-picker__placeholder'}>
-          {selected && <span className='subtleforms-picker__flag' aria-hidden='true'>{flagMark(selected.code)}</span>}
+          {selected && <span className='subtleforms-picker__flag' aria-hidden='true'>{flagImages ? <FlagIcon code={selected.code} /> : flagMark(selected.code)}</span>}
           {selected ? selected.name : prompt}
         </span>
         <ChevronIcon />
@@ -253,7 +255,7 @@ export default function CountrySelect({
                   data-active={index === active ? 'true' : 'false'}
                   onMouseEnter={() => setActive(index)}
                   onClick={() => choose(country)}>
-                  <span className='subtleforms-picker__flag' aria-hidden='true'>{flagMark(country.code)}</span>
+                  <span className='subtleforms-picker__flag' aria-hidden='true'>{flagImages ? <FlagIcon code={country.code} /> : flagMark(country.code)}</span>
                   <span className='subtleforms-picker__option-label'>{country.name}</span>
                   <span className='subtleforms-picker__meta'>{country.code}</span>
                 </button>

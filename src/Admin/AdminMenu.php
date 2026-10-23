@@ -359,6 +359,8 @@ class AdminMenu {
 			),
 			// WooCommerce status for the checkout settings (2.1). Null when inactive.
 			'woocommerce'    => self::woocommerceData(),
+			// Country flag sprite, for the builder canvas and the previews (2.7.2).
+			'flagSpriteUrl'  => SUBTLEFORMS_PLUGIN_URL . 'build/frontend/flags.svg',
 			// Nonce for admin download links to uploaded files (2.1).
 			'fileNonce'      => \SubtleForms\Uploads\Uploads::nonce(),
 			// Name, logo and which credits/links to show (white label, 2.1).
