@@ -121,17 +121,28 @@ final class Uninstaller {
 		// Each base also has a Pro form (subtleforms_pro_, _transient_subtleforms_pro_)
 		// that is kept, as are the Pro options without the prefix.
 		$option_bases = array( 'subtleforms', '_transient_subtleforms', '_transient_timeout_subtleforms', '_site_transient_subtleforms', '_site_transient_timeout_subtleforms' );
-		$kept_options = implode( ', ', array_fill( 0, count( self::pro_options() ), '%s' ) );
+		$kept = self::pro_options();
 		foreach ( $option_bases as $base ) {
-			$pattern = $wpdb->esc_like( 'subtleforms' === $base ? 'subtleforms_' : $base ) . '%';
-			$sql     = "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s AND option_name NOT LIKE %s AND option_name NOT IN ({$kept_options})";
-			$args    = array( $pattern, $wpdb->esc_like( $base . self::PRO_SUFFIX ) . '%', ...self::pro_options() );
+			$pattern  = $wpdb->esc_like( 'subtleforms' === $base ? 'subtleforms_' : $base ) . '%';
+			$pro_keep = array( $base . self::PRO_SUFFIX );
 			foreach ( self::PRO_NAME_PREFIXES as $name_prefix ) {
-				$sql   .= ' AND option_name NOT LIKE %s';
-				$args[] = $wpdb->esc_like( preg_replace( '/^subtleforms/', $base, $name_prefix ) ) . '%';
+				$pro_keep[] = preg_replace( '/^subtleforms/', $base, $name_prefix );
 			}
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The IN list and the extra conditions hold only placeholders.
-			$wpdb->query( $wpdb->prepare( $sql, ...$args ) );
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$names = (array) $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", $pattern ) );
+			foreach ( $names as $name ) {
+				$name = (string) $name;
+				if ( in_array( $name, $kept, true ) ) {
+					continue;
+				}
+				foreach ( $pro_keep as $keep_prefix ) {
+					if ( str_starts_with( $name, $keep_prefix ) ) {
+						continue 2;
+					}
+				}
+				// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+				$wpdb->delete( $wpdb->options, array( 'option_name' => $name ) );
+			}
 		}
 
 		$meta_like = $wpdb->esc_like( 'subtleforms' ) . '%';

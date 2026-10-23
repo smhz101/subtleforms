@@ -99,9 +99,22 @@ class F2392_Wpdb {
 		return $query;
 	}
 
+	public $option_names = array();
+	public $deleted = array();
+
 	public function get_col( $sql ) {
 		$this->queries[] = $sql;
+		if ( false !== strpos( $sql, 'SELECT option_name' ) ) {
+			preg_match( "/LIKE '(.*)%'/", $sql, $m );
+			$prefix = stripslashes( $m[1] ?? '' );
+			return array_values( array_filter( $this->option_names, static fn( $n ) => 0 === strpos( $n, $prefix ) ) );
+		}
 		return $this->tables;
+	}
+
+	public function delete( $table, $where ) {
+		$this->deleted[] = $where['option_name'];
+		return 1;
 	}
 
 	public function query( $sql ) {
@@ -218,22 +231,22 @@ class Release239Test extends PHPUnit\Framework\TestCase {
 				'subtleforms_stats_prune'            => array( array( 'args' => array() ) ),
 			),
 		);
+		$GLOBALS['wpdb']->option_names = array( 'subtleforms_settings', 'subtleforms_coupons_db', 'subtleforms_license_key', 'subtleforms_pro_state', 'subtleforms_rl_funnel_abc', 'subtleforms_other' );
 		Uninstaller::clean_site();
 		$sql = implode( "\n", $GLOBALS['wpdb']->queries );
+		$this->assertContains( 'subtleforms_settings', $GLOBALS['wpdb']->deleted );
+		$this->assertContains( 'subtleforms_other', $GLOBALS['wpdb']->deleted );
+		foreach ( array( 'subtleforms_coupons_db', 'subtleforms_license_key', 'subtleforms_pro_state', 'subtleforms_rl_funnel_abc' ) as $kept ) {
+			$this->assertNotContains( $kept, $GLOBALS['wpdb']->deleted, $kept );
+		}
 		$this->assertStringContainsString( 'DROP TABLE IF EXISTS wp_subtleforms_forms', $sql );
 		$this->assertStringNotContainsString( 'DROP TABLE IF EXISTS wp_subtleforms_pro_', $sql );
 		foreach ( array( 'coupons', 'coupon_uses', 'stats', 'funnel' ) as $proTable ) {
 			$this->assertStringNotContainsString( 'DROP TABLE IF EXISTS wp_subtleforms_' . $proTable . "\n", $sql . "\n", $proTable );
 		}
 		$this->assertStringContainsString( 'DROP TABLE IF EXISTS wp_subtleforms_rate_limits', $sql, 'Free tables are still dropped' );
-		foreach ( array( 'subtleforms_coupons_db', 'subtleforms_stats_db', 'subtleforms_funnel_db' ) as $proOption ) {
-			$this->assertStringContainsString( "'" . $proOption . "'", $sql, $proOption );
-		}
 		$this->assertContains( 'subtleforms_async_email', $GLOBALS['sf_test_cleared'] );
 		$this->assertNotContains( 'subtleforms_stats_prune', $GLOBALS['sf_test_cleared'] );
-		$this->assertStringContainsString( "option_name NOT LIKE 'subtleforms\\_pro\\_%'", $sql );
-		$this->assertStringContainsString( "'subtleforms_license_key', 'subtleforms_license_data'", $sql );
-		$this->assertStringContainsString( "option_name NOT LIKE '\\_transient\\_subtleforms\\_pro\\_%'", $sql );
 		$this->assertStringContainsString( "meta_key NOT LIKE 'subtleforms\\_pro\\_%'", $sql );
 		$this->assertContains( 'subtleforms_async_email', $GLOBALS['sf_test_cleared'] );
 		$this->assertNotContains( 'subtleforms_pro_daily_license_check', $GLOBALS['sf_test_cleared'] );
