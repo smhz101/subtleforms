@@ -114,6 +114,7 @@ final class Plugin {
 		\SubtleForms\Analytics\SpamStats::register();
 		\SubtleForms\Security\RateLimitStore::register();
 		\SubtleForms\Support\SpamDefaults::register();
+		\SubtleForms\Support\ThemeStyles::register();
 
 		// Allow other plugins/themes to hook in
 		do_action( 'subtleforms/loaded', $this );

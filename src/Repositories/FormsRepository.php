@@ -340,9 +340,12 @@ final class FormsRepository {
 	 * @param array $schema Form schema.
 	 * @return array Schema with appearance values checked.
 	 */
-	private static function sanitizeAppearance( array $schema ): array {
+	private static function sanitizeAppearance( array $schema, ?callable $previousCss = null ): array {
 		if ( isset( $schema['metadata']['appearance'] ) ) {
-			$clean = \SubtleForms\Support\Appearance::sanitizeForm( $schema['metadata']['appearance'] );
+			// Custom CSS (2.7.2) can only be changed by a person who may post
+			// unfiltered HTML; for anyone else the stored CSS is kept as it is.
+			$keep  = ( null !== $previousCss && ! \SubtleForms\Support\Appearance::canEditCustomCss() ) ? (string) $previousCss() : null;
+			$clean = \SubtleForms\Support\Appearance::sanitizeForm( $schema['metadata']['appearance'], $keep );
 
 			if ( empty( $clean ) ) {
 				unset( $schema['metadata']['appearance'] );
@@ -478,7 +481,7 @@ final class FormsRepository {
 		// Appearance values are written into CSS custom properties on the rendered
 		// form, so they are checked here, at the point of storage, rather than
 		// escaped at output. Every save path goes through this method.
-		$schema = self::sanitizeAppearance( $schema );
+		$schema = self::sanitizeAppearance( $schema, fn() => $this->storedCustomCss( $formId ) );
 
 		// Validate schema before saving
 		$validator = new \SubtleForms\Support\SchemaValidator();
@@ -991,9 +994,27 @@ final class FormsRepository {
 	 * @param array $schema Schema.
 	 * @return array
 	 */
-	public static function prepareStoredSchema( array $schema ): array {
+	public static function prepareStoredSchema( array $schema, ?callable $previousCss = null ): array {
 		list( $schema ) = \SubtleForms\Support\SchemaRepair::syncType( $schema );
-		return self::sanitizeAppearance( $schema );
+		return self::sanitizeAppearance( $schema, $previousCss );
+	}
+
+	/**
+	 * The custom CSS a form has now: the draft's when there is a draft, else
+	 * the published schema's (2.7.2). Used to keep it for a person who may not
+	 * edit it.
+	 *
+	 * @param int $formId Form ID.
+	 * @return string
+	 */
+	private function storedCustomCss( int $formId ): string {
+		$schema = $this->getDraftSchema( $formId );
+		if ( ! is_array( $schema ) ) {
+			$loaded = $this->loadSchemaVersion( $formId );
+			$schema = is_array( $loaded ) ? ( $loaded['schema'] ?? null ) : null;
+		}
+		$css = is_array( $schema ) ? ( $schema['metadata']['appearance']['customCss'] ?? '' ) : '';
+		return is_string( $css ) ? $css : '';
 	}
 
 	/**
@@ -1010,7 +1031,7 @@ final class FormsRepository {
 	public function saveDraftSchema( int $formId, array $schema ): bool {
 		// The type follows the structure: a Page Break makes a Standard form
 		// Multi-step and removing the last one makes it Standard again (2.3.2).
-		$schema = self::prepareStoredSchema( $schema );
+		$schema = self::prepareStoredSchema( $schema, fn() => $this->storedCustomCss( $formId ) );
 
 		// Validate schema before saving
 		$validator = new \SubtleForms\Support\SchemaValidator();
