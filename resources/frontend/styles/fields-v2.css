@@ -299,9 +299,9 @@
 
 /* ===== Confirmation (2.0) ===== */
 .subtleforms-success {
-	padding: 32px 24px;
-	border: 1px solid var(--subtleforms-color-border, #e0e0e0);
-	background: var(--subtleforms-color-background, #fff);
+	padding: 0;
+	border: 0;
+	background: transparent;
 	color: var(--subtleforms-color-text, #1e1e1e);
 	text-align: center;
 }

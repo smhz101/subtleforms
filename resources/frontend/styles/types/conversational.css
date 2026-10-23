@@ -25,11 +25,7 @@
 
 .subtleforms-progress-fill {
 	height: 100%;
-	background: linear-gradient(
-		90deg,
-		var(--subtleforms-color-primary) 0%,
-		var(--subtleforms-color-primary-hover) 100%
-	);
+	background: var(--subtleforms-color-primary);
 	transition: width var(--subtleforms-transition-base);
 	border-radius: 4px;
 }

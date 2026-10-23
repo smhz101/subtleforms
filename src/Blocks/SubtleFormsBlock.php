@@ -19,6 +19,9 @@ if ( ! defined( 'ABSPATH' ) ) { exit; }
  */
 final class SubtleFormsBlock {
 
+	/** Handle of the small script that carries the editor settings and loads the preview. */
+	private const LOADER_HANDLE = 'subtleforms-block-editor-loader';
+
 	/**
 	 * Initialize block registration hooks.
 	 */
@@ -252,6 +255,7 @@ final class SubtleFormsBlock {
 			array(),
 			SUBTLEFORMS_VERSION
 		);
+		wp_style_add_data( 'subtleforms-frontend-preview', 'rtl', 'replace' );
 	}
 
 	/**
@@ -263,26 +267,51 @@ final class SubtleFormsBlock {
 	public static function enqueue_editor_assets(): void {
 		// Load asset file with proper dependencies
 		$asset_file = include SUBTLEFORMS_PLUGIN_DIR . 'build/frontend/frontend.asset.php';
+		$src        = SUBTLEFORMS_PLUGIN_URL . 'build/frontend/frontend.js';
 
-		// Enqueue frontend renderer for block preview
-		wp_enqueue_script(
-			'subtleforms-frontend-preview',
-			SUBTLEFORMS_PLUGIN_URL . 'build/frontend/frontend.js',
-			$asset_file['dependencies'],
-			$asset_file['version'],
-			true
-		);
-		wp_set_script_translations( 'subtleforms-frontend-preview', 'subtleforms', SUBTLEFORMS_PLUGIN_DIR . 'languages' );
-
-		// Pass REST URL and nonce for block editor
+		// REST address and nonce for the block, always present, because the
+		// form list in the block settings needs them even before the preview
+		// script has loaded.
+		wp_register_script( self::LOADER_HANDLE, false, array( 'wp-data', 'wp-dom-ready' ), SUBTLEFORMS_VERSION, true );
+		wp_enqueue_script( self::LOADER_HANDLE );
 		wp_localize_script(
-			'subtleforms-frontend-preview',
+			self::LOADER_HANDLE,
 			'subtleformsAdmin',
 			array(
 				'restUrl' => rest_url( 'subtleforms/v1/' ),
 				'nonce'   => wp_create_nonce( 'wp_rest' ),
 			)
 		);
-	}
 
+		// The 113 KB renderer is the live preview of a form block. A post that
+		// has the block gets it at once (and so do the site editor and widget
+		// screens, where the content is not known here); on any other post it
+		// loads when the block is first inserted or the inserter opens (2.7.1).
+		$post     = get_post();
+		$has_form = ! $post instanceof \WP_Post || has_block( 'subtleforms/form', $post );
+		if ( $has_form ) {
+			wp_enqueue_script(
+				'subtleforms-frontend-preview',
+				$src,
+				$asset_file['dependencies'],
+				$asset_file['version'],
+				true
+			);
+			wp_set_script_translations( 'subtleforms-frontend-preview', 'subtleforms', SUBTLEFORMS_PLUGIN_DIR . 'languages' );
+			return;
+		}
+
+		wp_add_inline_script(
+			self::LOADER_HANDLE,
+			'( function () {'
+			. 'var src = ' . wp_json_encode( add_query_arg( 'ver', (string) $asset_file['version'], $src ) ) . ', started = false;'
+			. 'function load() { if ( started ) { return; } started = true; var s = document.createElement( "script" ); s.src = src; document.head.appendChild( s ); }'
+			. 'function hasBlock( blocks ) { return blocks.some( function ( b ) { return b.name === "subtleforms/form" || hasBlock( b.innerBlocks || [] ); } ); }'
+			. 'function inserterOpen() { try { var ed = wp.data.select( "core/editor" ), ep = wp.data.select( "core/edit-post" );'
+			. ' return !! ( ( ed && ed.isInserterOpened && ed.isInserterOpened() ) || ( ep && ep.isInserterOpened && ep.isInserterOpened() ) ); } catch ( e ) { return false; } }'
+			. 'wp.domReady( function () { var stop = wp.data.subscribe( function () { var be = wp.data.select( "core/block-editor" );'
+			. ' if ( be && ( hasBlock( be.getBlocks() ) || inserterOpen() ) ) { load(); if ( stop ) { stop(); } } } ); } );'
+			. '} )();'
+		);
+	}
 }

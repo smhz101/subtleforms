@@ -448,8 +448,9 @@ export default function FormRenderer({
   const focusFirstInvalid = useCallback((errorCount = 0) => {
     if (errorCount > 0) {
       const summary = fixFieldsSummary(errorCount);
+      // One announcement: the visible summary below (role alert). The field
+      // errors themselves are not live regions.
       setErrorSummary(summary);
-      setLiveMessage(summary);
     }
     // Two frames: the error state has to render before aria-invalid exists.
     requestAnimationFrame(() =>
@@ -467,7 +468,9 @@ export default function FormRenderer({
         if (target && typeof target.focus === 'function') {
           target.focus();
           if (typeof target.scrollIntoView === 'function') {
-            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const reduce = typeof window.matchMedia === 'function'
+              && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
           }
         }
       })
@@ -1204,7 +1207,7 @@ export default function FormRenderer({
       <div
         ref={liveRegionRef}
         role='status'
-        aria-live='assertive'
+        aria-live='polite'
         aria-atomic='true'
         className='subtleforms-sr-only'
       >

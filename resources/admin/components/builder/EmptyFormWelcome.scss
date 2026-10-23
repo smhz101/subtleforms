@@ -11,44 +11,9 @@
 	align-items: center;
 	justify-content: center;
 	padding: $space-10;
-	background: linear-gradient(
-		135deg,
-		rgba(247, 254, 231, 0.3) 0%,
-		rgba(237, 233, 254, 0.3) 100%
-	);
+	background: var(--sf-surface, #fff);
 	position: relative;
 	overflow: hidden;
-
-	// Decorative background pattern
-	&::before {
-		content: '';
-		position: absolute;
-		top: -50%;
-		left: -50%;
-		width: 200%;
-		height: 200%;
-		background-image: radial-gradient(
-			circle at 20% 50%,
-			rgba(132, 204, 22, 0.05) 0%,
-			transparent 50%
-		),
-		radial-gradient(
-			circle at 80% 50%,
-			rgba(139, 92, 246, 0.05) 0%,
-			transparent 50%
-		);
-		animation: sf-welcome-bg-drift 20s ease-in-out infinite;
-		pointer-events: none;
-	}
-}
-
-@keyframes sf-welcome-bg-drift {
-	0%, 100% {
-		transform: translate(0, 0) rotate(0deg);
-	}
-	50% {
-		transform: translate(-5%, 5%) rotate(2deg);
-	}
 }
 
 .sf-empty-form-welcome__container {
@@ -76,10 +41,9 @@
 	justify-content: center;
 	width: 80px;
 	height: 80px;
-	background: linear-gradient(135deg, $sf-blue-500 0%, $sf-blue-600 100%);
+	background: $sf-blue-500;
 	border-radius: $radius-full;
 	margin-bottom: $space-6;
-	box-shadow: $shadow-lg, 0 0 40px rgba(59, 130, 246, 0.18);
 
 	svg {
 		width: 40px;
@@ -88,16 +52,6 @@
 		filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 	}
 
-	animation: sf-icon-pulse 2s ease-in-out infinite;
-}
-
-@keyframes sf-icon-pulse {
-	0%, 100% {
-		transform: scale(1);
-	}
-	50% {
-		transform: scale(1.05);
-	}
 }
 
 .sf-empty-form-welcome__title {
@@ -148,7 +102,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: linear-gradient(135deg, $sf-blue-500 0%, $sf-blue-600 100%);
+	background: $sf-blue-500;
 	color: white;
 	border-radius: $radius-full;
 	font-weight: 700;
@@ -217,5 +171,11 @@
 			width: 32px;
 			height: 32px;
 		}
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.sf-empty-form-welcome__container {
+		animation: none;
 	}
 }

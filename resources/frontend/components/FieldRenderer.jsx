@@ -426,8 +426,6 @@ export default function FieldRenderer({
           <div
             id={`${inputId}-error`}
             className='subtleforms-field-error'
-            role='alert'
-            aria-live='assertive'
           >
             {error}
           </div>
@@ -468,9 +466,15 @@ export default function FieldRenderer({
     );
   }
 
+  // A group of choices is a fieldset with a legend, so a screen reader names
+  // the group once when focus enters it.
+  const groupedChoice = ['radio', 'multiple_choice', 'checkbox_grid'].includes(effectiveFieldType(field))
+    || (field.type === 'checkbox' && Array.isArray(config.options) && config.options.length > 0);
+  const FieldTag = groupedChoice ? 'fieldset' : 'div';
+
   // Render input fields
   return (
-    <div
+    <FieldTag
       className={[
         'subtleforms-field',
         `subtleforms-field-${field.type}`,
@@ -484,9 +488,8 @@ export default function FieldRenderer({
       style={appearanceStyle}
       data-sf-key={ownKey || undefined}>
       {(() => {
-        const grouped = ['radio', 'multiple_choice', 'checkbox_grid'].includes(effectiveFieldType(field))
-          || (field.type === 'checkbox' && Array.isArray(config.options) && config.options.length > 0);
-        const LabelTag = grouped ? 'div' : 'label';
+        const grouped = groupedChoice;
+        const LabelTag = grouped ? 'legend' : 'label';
         return (
           <LabelTag
             id={`${inputId}-label`}
@@ -529,13 +532,11 @@ export default function FieldRenderer({
         <div
           id={`${inputId}-error`}
           className='subtleforms-field-error'
-          role='alert'
-          aria-live='assertive'
         >
           {error}
         </div>
       )}
-    </div>
+    </FieldTag>
   );
 }
 
