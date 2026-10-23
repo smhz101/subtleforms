@@ -67,6 +67,23 @@ export function getProFeaturesUsed(schema) {
 }
 
 /**
+ * Whether a schema has a payment field that no active plugin provides. Such a
+ * form is not shown to visitors until SubtleForms Pro is active.
+ *
+ * @param {Object}   schema  Form schema.
+ * @param {string[]} missing Missing types (default: from the server).
+ * @return {boolean} True when it does.
+ */
+export function needsMissingPayment(
+  schema,
+  missing = window.subtleformsAdmin?.missingFieldTypes || []
+) {
+  if (!schema || !Array.isArray(missing)) return false;
+  const types = collectTypes(schema.fields);
+  return missing.some((type) => String(type).startsWith('payment_') && types.has(type));
+}
+
+/**
  * Labels of add-on fields in a schema that no active plugin provides on
  * this site right now.
  *

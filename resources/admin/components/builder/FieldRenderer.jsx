@@ -5,7 +5,6 @@ import { getFieldIcon } from '../../utils/iconRegistry';
 import Icon from '../../ui/Icon';
 import NameFieldRenderer from './NameFieldRenderer';
 import AddressFieldRenderer from './AddressFieldRenderer';
-import { ProductPreview, ChoicePreview, SummaryPreview, CardPreview } from './PaymentPreviews';
 import { getCanvasPreview, addonProvides } from '../../../shared/extend';
 import { fieldDisplay } from '../../../shared/fieldDisplay';
 import { fieldConfig } from '../../../shared/fieldConfig';
@@ -500,14 +499,6 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           />
         </div>
       )}
-
-      {type === 'payment_summary' && <SummaryPreview field={field} />}
-
-      {type === 'payment_product' && <ProductPreview field={field} />}
-
-      {type === 'payment_choice' && <ChoicePreview field={field} />}
-
-      {type === 'payment_card' && !addonMissing && !getCanvasPreview(type) && <CardPreview />}
 
       {pictureFallback && (
         <p className='sf-field-renderer__placeholder-note'>

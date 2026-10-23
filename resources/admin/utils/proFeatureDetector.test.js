@@ -1,4 +1,4 @@
-import { formUsesProFeatures, getProFeaturesUsed, getMissingAddonFields } from './proFeatureDetector';
+import { formUsesProFeatures, getProFeaturesUsed, getMissingAddonFields, needsMissingPayment } from './proFeatureDetector';
 
 const schema = {
   fields: [
@@ -61,5 +61,19 @@ describe('features a form uses that need Pro to work in full', () => {
     const schema = { fields: [{ type: 'picture_choice', key: 'p' }, { type: 'image_upload', key: 'u', multiple: true }] };
     expect(getLimitedFeatures(schema, ['picture_choice', 'multi_file_uploads'])).toEqual([]);
     expect(getLimitedFeatures(schema, ['picture_choice'])).toHaveLength(1);
+  });
+});
+
+describe('needsMissingPayment', () => {
+  const schema = { fields: [{ type: 'text' }, { type: 'two_column_container', columns: [[{ type: 'payment_amount' }]] }] };
+
+  test('is true when a payment field is missing', () => {
+    expect(needsMissingPayment(schema, ['signature', 'payment_amount'])).toBe(true);
+  });
+
+  test('is false when the payment type is registered or the form has none', () => {
+    expect(needsMissingPayment(schema, ['signature'])).toBe(false);
+    expect(needsMissingPayment({ fields: [{ type: 'signature' }] }, ['signature', 'payment_amount'])).toBe(false);
+    expect(needsMissingPayment(null, ['payment_amount'])).toBe(false);
   });
 });

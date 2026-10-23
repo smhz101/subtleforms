@@ -149,14 +149,14 @@ export default function FieldDock({ fieldGroups, onAddField, onCollapsedChange }
 
   const renderTile = (f) => {
     const isDisabled = f.enabled === false;
-    const isProLocked = f.is_pro_locked === true;
+    const isProPlaceholder = f.pro_placeholder === true;
     const FieldIcon = getIcon(f.type);
     const description = f.meta?.description || '';
 
     let title = description ? `${f.label}: ${description}` : f.label;
     if (isDisabled) {
       title = __('Turn this provider on in Settings → Advanced to use it.', 'subtleforms');
-    } else if (isProLocked) {
+    } else if (isProPlaceholder) {
       title = sprintf(
         /* translators: %s: field name */
         __('%s is part of SubtleForms Pro', 'subtleforms'),
@@ -169,16 +169,16 @@ export default function FieldDock({ fieldGroups, onAddField, onCollapsedChange }
         key={f.type}
         type={f.type}
         label={f.label}
-        draggable={!isDisabled && !isProLocked}
+        draggable={!isDisabled && !isProPlaceholder}
         className={clsx('sf-inserter__item', {
           'is-disabled': isDisabled,
-          'is-locked': isProLocked,
+          'is-locked': isProPlaceholder,
         })}
         disabled={isDisabled}
         title={title}
         onClick={() => {
           if (isDisabled) return;
-          if (isProLocked) {
+          if (isProPlaceholder) {
             openUpgradeModal(f.upgrade_key || (f.category === 'payment' ? 'actions.payment' : 'fields.advanced'), {
               label: f.label,
             });
@@ -187,7 +187,7 @@ export default function FieldDock({ fieldGroups, onAddField, onCollapsedChange }
           handleFieldClick(f.type);
         }}
         onDoubleClick={() => {
-          if (isDisabled || isProLocked) return;
+          if (isDisabled || isProPlaceholder) return;
           handleFieldDoubleClick(f.type);
         }}>
         <span className='sf-inserter__item-icon' aria-hidden='true'>
@@ -196,7 +196,7 @@ export default function FieldDock({ fieldGroups, onAddField, onCollapsedChange }
         <span className='sf-inserter__item-label'>
           <HighlightMatch text={f.label} query={searchQuery} />
         </span>
-        {isProLocked && (
+        {isProPlaceholder && (
           <span className='sf-inserter__item-pro'>{__('Pro', 'subtleforms')}</span>
         )}
       </LibraryTile>
@@ -260,7 +260,7 @@ export default function FieldDock({ fieldGroups, onAddField, onCollapsedChange }
               }
               if (e.key === 'Enter' && searchResults?.length === 1) {
                 const only = searchResults[0];
-                if (only.enabled !== false && !only.is_pro_locked) {
+                if (only.enabled !== false && !only.pro_placeholder) {
                   onAddField(only.type);
                   setSearchQuery('');
                 }

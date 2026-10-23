@@ -259,6 +259,8 @@ export function getLogicEditor() {
  *   dashboard.panels     Dashboard, below the totals.
  *   forms.list.column    Forms list, extra cell: { component, header, order }
  *   settings.extensions  Extension switches: { component, title, order }
+ *   form.settings.checkout  Form settings > Payments, below the currency: { component, order }
+ *   builder.canvas.notes    Builder, above the canvas: { component, order }
  *
  * @param {string} slot Slot name.
  * @param {string} id   Unique id within the slot.

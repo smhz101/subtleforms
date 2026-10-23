@@ -19,7 +19,7 @@ function payment(type, label, icon, kind, description) {
     category: 'payment',
     meta: { description },
     is_pro: true,
-    is_pro_locked: true,
+    pro_placeholder: true,
     upgrade_key: 'fields.payments',
   };
 }
@@ -37,7 +37,7 @@ function placeholders() {
         description: __('Visitors pick one or more images. Part of SubtleForms Pro.', 'subtleforms'),
       },
       is_pro: true,
-      is_pro_locked: true,
+      pro_placeholder: true,
       upgrade_key: 'fields.picture_choice',
     },
     payment('payment_amount', __('Custom Amount', 'subtleforms'), 'payment_amount', 'input',

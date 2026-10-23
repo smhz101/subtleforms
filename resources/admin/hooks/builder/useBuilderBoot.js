@@ -100,7 +100,7 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
               category: field.category || category,
               meta: field.meta || {},
               is_pro: field.is_pro === true,
-              is_pro_locked: field.is_pro_locked === true,
+              pro_placeholder: field.pro_placeholder === true,
             };
           });
         });

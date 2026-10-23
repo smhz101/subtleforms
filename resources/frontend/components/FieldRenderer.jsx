@@ -28,12 +28,6 @@ const DateTimeField = lazyField('date');
 const FileUpload = lazyField('upload');
 const RepeaterField = lazyField('repeater');
 const RichTextInput = lazyField('richText');
-const PaymentSummary = lazyField('payments', 'PaymentSummary');
-const PaymentCoupon = lazyField('payments', 'PaymentCoupon');
-const PaymentProduct = lazyField('payments', 'PaymentProduct');
-const PaymentChoice = lazyField('payments', 'PaymentChoice');
-const PaymentCard = lazyField('payments', 'PaymentCard');
-const PaymentAmount = lazyField('payments', 'PaymentAmount');
 import {
   fieldAppearanceStyle,
   fieldAppearanceClasses,
@@ -961,50 +955,6 @@ function renderInput(
           onChange={(e) => onChange(e.target.value)}
         />
       );
-
-    case 'payment_amount':
-      return (
-        <PaymentAmount
-          config={config}
-          value={value}
-          onChange={onChange}
-          inputId={inputId}
-          name={name}
-          placeholder={placeholder}
-          required={required}
-          error={error}
-          describedBy={describedBy}
-        />
-      );
-
-    case 'payment_summary':
-      return <PaymentSummary config={config} />;
-
-    case 'payment_coupon':
-      return <PaymentCoupon config={config} />;
-
-    case 'payment_product':
-      return (
-        <PaymentProduct config={config} value={value} onChange={onChange} inputId={inputId} error={error} />
-      );
-
-    case 'payment_choice':
-      return (
-        <PaymentChoice
-          config={config}
-          value={value}
-          onChange={onChange}
-          inputId={inputId}
-          error={error}
-          name={name}
-          required={required}
-          describedBy={describedBy}
-          placeholder={placeholder}
-        />
-      );
-
-    case 'payment_card':
-      return <PaymentCard config={config} />;
 
     case 'captcha':
     case 'recaptcha':

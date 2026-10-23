@@ -10,11 +10,19 @@ import { Notice } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import './ProDowngradeBanner.scss';
 
-export default function ProDowngradeBanner({ featuresUsed = [], limited = [] }) {
-  if (!featuresUsed.length && !limited.length) return null;
+export default function ProDowngradeBanner({ featuresUsed = [], limited = [], paymentForm = false }) {
+  if (!featuresUsed.length && !limited.length && !paymentForm) return null;
   return (
     <div className='sf-pro-downgrade-banner'>
       <Notice status='info' isDismissible={false} className='sf-pro-downgrade-banner__notice'>
+        {paymentForm && (
+          <p className='sf-pro-downgrade-banner__message'>
+            {__(
+              'This form takes payments, which needs SubtleForms Pro. Until Pro is active, visitors see "This form is not available right now." and no entries are accepted.',
+              'subtleforms'
+            )}
+          </p>
+        )}
         {featuresUsed.length > 0 && (
           <p className='sf-pro-downgrade-banner__message'>
             {sprintf(

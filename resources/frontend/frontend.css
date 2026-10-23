@@ -7,7 +7,6 @@
 @import './styles/types/default.css';
 @import './styles/types/steps.css';
 @import './styles/types/conversational.css';
-@import './styles/types/payment.css';
 @import './styles/appearance.css';
 
 /* Base styles (shared across all form types) */
