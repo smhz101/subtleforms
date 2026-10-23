@@ -13,7 +13,8 @@ import { cloneElement, useContext, useEffect } from '@wordpress/element';
 import ChoiceSelect from './fields/ChoiceSelect';
 import { FormContext, usePayment } from './fields/contexts';
 import { lazyField } from './fields/lazyFields';
-import { getFieldType } from '../../shared/extend';
+import { getFieldType, getFieldOverride } from '../../shared/extend';
+import { effectiveFieldType } from '../../shared/fieldFallback';
 import { fieldConfig } from '../../shared/fieldConfig';
 import { fieldDisplay } from '../../shared/fieldDisplay';
 import { toggleIsOn } from '../../shared/toggleState';
@@ -27,12 +28,6 @@ const DateTimeField = lazyField('date');
 const FileUpload = lazyField('upload');
 const RepeaterField = lazyField('repeater');
 const RichTextInput = lazyField('richText');
-const PaymentSummary = lazyField('payments', 'PaymentSummary');
-const PaymentCoupon = lazyField('payments', 'PaymentCoupon');
-const PaymentProduct = lazyField('payments', 'PaymentProduct');
-const PaymentChoice = lazyField('payments', 'PaymentChoice');
-const PaymentCard = lazyField('payments', 'PaymentCard');
-const PaymentAmount = lazyField('payments', 'PaymentAmount');
 import {
   fieldAppearanceStyle,
   fieldAppearanceClasses,
@@ -425,8 +420,6 @@ export default function FieldRenderer({
           <div
             id={`${inputId}-error`}
             className='subtleforms-field-error'
-            role='alert'
-            aria-live='assertive'
           >
             {error}
           </div>
@@ -467,9 +460,15 @@ export default function FieldRenderer({
     );
   }
 
+  // A group of choices is a fieldset with a legend, so a screen reader names
+  // the group once when focus enters it.
+  const groupedChoice = ['radio', 'multiple_choice', 'checkbox_grid'].includes(effectiveFieldType(field))
+    || (field.type === 'checkbox' && Array.isArray(config.options) && config.options.length > 0);
+  const FieldTag = groupedChoice ? 'fieldset' : 'div';
+
   // Render input fields
   return (
-    <div
+    <FieldTag
       className={[
         'subtleforms-field',
         `subtleforms-field-${field.type}`,
@@ -483,9 +482,8 @@ export default function FieldRenderer({
       style={appearanceStyle}
       data-sf-key={ownKey || undefined}>
       {(() => {
-        const grouped = ['radio', 'multiple_choice', 'picture_choice', 'checkbox_grid'].includes(field.type)
-          || (field.type === 'checkbox' && Array.isArray(config.options) && config.options.length > 0);
-        const LabelTag = grouped ? 'div' : 'label';
+        const grouped = groupedChoice;
+        const LabelTag = grouped ? 'legend' : 'label';
         return (
           <LabelTag
             id={`${inputId}-label`}
@@ -528,13 +526,11 @@ export default function FieldRenderer({
         <div
           id={`${inputId}-error`}
           className='subtleforms-field-error'
-          role='alert'
-          aria-live='assertive'
         >
           {error}
         </div>
       )}
-    </div>
+    </FieldTag>
   );
 }
 
@@ -563,7 +559,30 @@ function renderInput(
   const optionLayoutClass = config.optionLayout
     ? ` subtleforms-options--${config.optionLayout}`
     : '';
-  switch (field.type) {
+  // An add-on can draw a built-in type its own way for some fields (for
+  // example an upload that takes several files). Without it, the built-in
+  // renderer below runs.
+  const override = getFieldOverride(field, config);
+  if (override) {
+    return (
+      <AddonField
+        component={override.component}
+        field={field}
+        config={config}
+        value={value}
+        onChange={onChange}
+        inputId={inputId}
+        name={name}
+        describedBy={describedBy}
+        error={error}
+        required={required}
+        values={values}
+      />
+    );
+  }
+  // A type that an add-on provides but is not active (picture choice) is
+  // drawn as the plain choice it falls back to; its images are ignored.
+  switch (effectiveFieldType(field)) {
     case 'text':
     case 'email':
     case 'url':
@@ -936,50 +955,6 @@ function renderInput(
           onChange={(e) => onChange(e.target.value)}
         />
       );
-
-    case 'payment_amount':
-      return (
-        <PaymentAmount
-          config={config}
-          value={value}
-          onChange={onChange}
-          inputId={inputId}
-          name={name}
-          placeholder={placeholder}
-          required={required}
-          error={error}
-          describedBy={describedBy}
-        />
-      );
-
-    case 'payment_summary':
-      return <PaymentSummary config={config} />;
-
-    case 'payment_coupon':
-      return <PaymentCoupon config={config} />;
-
-    case 'payment_product':
-      return (
-        <PaymentProduct config={config} value={value} onChange={onChange} inputId={inputId} error={error} />
-      );
-
-    case 'payment_choice':
-      return (
-        <PaymentChoice
-          config={config}
-          value={value}
-          onChange={onChange}
-          inputId={inputId}
-          error={error}
-          name={name}
-          required={required}
-          describedBy={describedBy}
-          placeholder={placeholder}
-        />
-      );
-
-    case 'payment_card':
-      return <PaymentCard config={config} />;
 
     case 'captcha':
     case 'recaptcha':
@@ -1354,62 +1329,6 @@ function renderInput(
               <span>{config.maxLabel}</span>
             </div>
           )}
-        </div>
-      );
-    }
-
-    case 'picture_choice': {
-      const pcOptions = config.options || [];
-      const multiple = config.allowMultiple === true;
-      const selected = Array.isArray(value) ? value : value ? [value] : [];
-      const cols = parseInt(config.pictureColumns || 3, 10);
-      return (
-        <div
-          className='subtleforms-picture-choice'
-          role={multiple ? 'group' : 'radiogroup'}
-          aria-labelledby={`${inputId}-label`}
-          aria-required={multiple ? undefined : required}
-          aria-invalid={!!error}
-          aria-describedby={describedBy}
-          style={{ '--subtleforms-picture-columns': cols }}>
-          {pcOptions.map((option, index) => {
-            const optionId = `${inputId}-${index}`;
-            const isChecked = selected.includes(option.value);
-            return (
-              <label
-                key={option.value || index}
-                htmlFor={optionId}
-                className={`subtleforms-picture-choice__option${isChecked ? ' is-selected' : ''}`}>
-                <input
-                  id={optionId}
-                  type={multiple ? 'checkbox' : 'radio'}
-                  name={name}
-                  className='subtleforms-picture-choice__input'
-                  value={option.value}
-                  checked={isChecked}
-                  onChange={() => {
-                    if (multiple) {
-                      onChange(
-                        isChecked
-                          ? selected.filter((v) => v !== option.value)
-                          : [...selected, option.value]
-                      );
-                    } else {
-                      onChange(option.value);
-                    }
-                  }}
-                />
-                <span className='subtleforms-picture-choice__media'>
-                  {option.image ? (
-                    <img src={option.image} alt='' loading='lazy' />
-                  ) : (
-                    <span className='subtleforms-picture-choice__placeholder' aria-hidden='true' />
-                  )}
-                </span>
-                <span className='subtleforms-picture-choice__label'>{option.label}</span>
-              </label>
-            );
-          })}
         </div>
       );
     }

@@ -6,11 +6,12 @@
  * holds the returned records ({ id, name, size, type }); on submit the server
  * swaps the IDs for the stored files.
  *
- * Several files per field, drag-and-drop and per-file progress bars are the
- * Pro "advanced uploads" (the server only sends `multiple: true` when the
- * site's plan includes it). Single-file fields show a plain picker.
+ * A field takes one file. Several files per field is an add-on feature (the
+ * `multi_file_uploads` extension point): an add-on registers a field override
+ * for fields that ask for it. Without one, a field saved with "allow multiple
+ * files" still works and takes a single file, matching the server.
  */
-import { useContext, useRef, useState } from '@wordpress/element';
+import { useContext, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 
 import { FormContext } from './contexts';
@@ -86,21 +87,14 @@ function uploadFile({ file, formId, fieldKey, onProgress }) {
 
 export default function FileUpload({ field, config, value, onChange, inputId, error, required }) {
   const { formId, preview } = useContext(FormContext);
-  const inputRef = useRef(null);
   const [pending, setPending] = useState([]);
   const [localError, setLocalError] = useState('');
-  const [dragging, setDragging] = useState(false);
 
   const type = field.type;
   const fieldKey = config.key || field.key;
-  const multiple = config.multiple === true;
-  const limit = multiple ? Math.min(Number(config.maxFiles) || 5, 20) : 1;
   const exts = allowedExtensions(type, config);
   const max = maxBytes(type, config);
   const files = asList(value);
-  // Latest list for async callbacks (several uploads finish at different times).
-  const filesRef = useRef(files);
-  filesRef.current = files;
 
   const accept = exts.map((e) => `.${e}`).join(',');
 
@@ -109,19 +103,11 @@ export default function FileUpload({ field, config, value, onChange, inputId, er
     const picked = Array.from(list || []);
     if (!picked.length) return;
 
-    const room = multiple ? limit - filesRef.current.length - pending.length : 1;
-    if (room <= 0) {
-      setLocalError(
-        sprintf(
-          /* translators: %d: number of files */
-          __('You can attach up to %d files.', 'subtleforms'),
-          limit
-        )
-      );
+    if (files.length + pending.length > 0) {
       return;
     }
 
-    picked.slice(0, room).forEach((file) => {
+    picked.slice(0, 1).forEach((file) => {
       const ext = (file.name.split('.').pop() || '').toLowerCase();
       if (!exts.includes(ext)) {
         setLocalError(
@@ -147,7 +133,7 @@ export default function FileUpload({ field, config, value, onChange, inputId, er
       if (preview || !formId) {
         // The builder preview never stores files.
         const record = { id: `preview-${Date.now()}`, name: file.name, size: file.size, type: file.type };
-        onChange(multiple ? [...filesRef.current, record] : [record]);
+        onChange([record]);
         return;
       }
 
@@ -161,32 +147,19 @@ export default function FileUpload({ field, config, value, onChange, inputId, er
           setPending((p) => p.map((x) => (x.temp === temp ? { ...x, progress } : x))),
       })
         .then((record) => {
-          const next = multiple ? [...filesRef.current, record] : [record];
-          filesRef.current = next;
-          onChange(next);
+          onChange([record]);
         })
         .catch((err) => setLocalError(err.message))
         .finally(() => setPending((p) => p.filter((x) => x.temp !== temp)));
     });
-
-    if (picked.length > room) {
-      setLocalError(
-        sprintf(
-          /* translators: %d: number of files */
-          __('You can attach up to %d files.', 'subtleforms'),
-          limit
-        )
-      );
-    }
   };
 
   const remove = (id) => {
-    const next = filesRef.current.filter((f) => f.id !== id);
-    onChange(next.length ? next : []);
+    onChange(files.filter((f) => f.id !== id));
   };
 
   const describedBy = [error ? `${inputId}-error` : null, `${inputId}-hint`].filter(Boolean).join(' ');
-  const canAdd = multiple ? files.length + pending.length < limit : files.length + pending.length === 0;
+  const canAdd = files.length + pending.length === 0;
 
   const hint = sprintf(
     /* translators: 1: allowed extensions, 2: maximum size */
@@ -196,34 +169,13 @@ export default function FileUpload({ field, config, value, onChange, inputId, er
   );
 
   return (
-    <div
-      className={`subtleforms-upload${multiple ? ' subtleforms-upload--multiple' : ''}${dragging ? ' is-dragging' : ''}`}
-      onDragOver={
-        multiple
-          ? (e) => {
-              e.preventDefault();
-              if (!dragging) setDragging(true);
-            }
-          : undefined
-      }
-      onDragLeave={multiple ? () => setDragging(false) : undefined}
-      onDrop={
-        multiple
-          ? (e) => {
-              e.preventDefault();
-              setDragging(false);
-              addFiles(e.dataTransfer?.files);
-            }
-          : undefined
-      }>
+    <div className='subtleforms-upload'>
       <input
-        ref={inputRef}
         id={inputId}
-        name={fieldKey ? (multiple ? `${fieldKey}[]` : fieldKey) : undefined}
+        name={fieldKey || undefined}
         type='file'
-        className={multiple ? 'subtleforms-sr-only' : 'subtleforms-input subtleforms-file-input'}
+        className='subtleforms-input subtleforms-file-input'
         accept={accept}
-        multiple={multiple}
         disabled={!canAdd}
         onChange={(e) => {
           addFiles(e.target.files);
@@ -234,30 +186,8 @@ export default function FileUpload({ field, config, value, onChange, inputId, er
         aria-describedby={describedBy}
       />
 
-      {multiple && canAdd && (
-        <button
-          type='button'
-          className='subtleforms-upload__drop'
-          onClick={() => inputRef.current?.click()}>
-          <svg width='22' height='22' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' aria-hidden='true'>
-            <path d='M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4' />
-            <path d='m17 8-5-5-5 5' />
-            <path d='M12 3v12' />
-          </svg>
-          <span className='subtleforms-upload__drop-title'>
-            {__('Drop files here or click to choose', 'subtleforms')}
-          </span>
-        </button>
-      )}
-
       <p id={`${inputId}-hint`} className='subtleforms-upload__hint'>
         {hint}
-        {multiple &&
-          ` · ${sprintf(
-            /* translators: %d: number of files */
-            __('up to %d files', 'subtleforms'),
-            limit
-          )}`}
       </p>
 
       {(files.length > 0 || pending.length > 0) && (

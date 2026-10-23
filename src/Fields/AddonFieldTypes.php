@@ -21,7 +21,15 @@ final class AddonFieldTypes {
 	/**
 	 * Field types this plugin knows belong to add-ons.
 	 */
-	const TYPES = array( 'signature', 'calculation', 'payment_card' );
+	const TYPES = array( 'signature', 'calculation', 'payment_card', 'payment_product', 'payment_choice', 'payment_amount', 'payment_summary', 'payment_coupon', 'payment_hidden_price' );
+
+	/**
+	 * Field types an add-on provides that still work without it, as a plain
+	 * choice: a Picture Choice field shows its labels as radio buttons (or
+	 * checkboxes when several are allowed) and its images are left out. The
+	 * form is not stripped of them and saved forms keep every key.
+	 */
+	const FALLBACKS = array( 'picture_choice' );
 
 	/**
 	 * Register hooks.
@@ -44,6 +52,61 @@ final class AddonFieldTypes {
 		 * @param string[] $types Field types.
 		 */
 		return array_values( array_filter( (array) apply_filters( 'subtleforms/fields/addon_types', self::TYPES ), 'is_string' ) );
+	}
+
+	/**
+	 * Types a saved form may contain: add-on types plus those with a fallback.
+	 *
+	 * @return string[]
+	 */
+	public static function knownTypes(): array {
+		return array_values( array_unique( array_merge( self::types(), self::FALLBACKS ) ) );
+	}
+
+	/**
+	 * The type a field is checked and drawn as. A field type with a fallback
+	 * whose add-on is not active is a plain choice; every other type is itself.
+	 *
+	 * @param string             $type     Field type.
+	 * @param array              $field    Field node, for the "allow several" setting.
+	 * @param FieldRegistry|null $registry Registry (null: the plugin's own).
+	 * @return string The type, or radio / multiple_choice for a fallback.
+	 */
+	public static function effectiveType( string $type, array $field = array(), ?FieldRegistry $registry = null ): string {
+		if ( ! in_array( $type, self::FALLBACKS, true ) ) {
+			return $type;
+		}
+		if ( null === $registry ) {
+			try {
+				$registry = \SubtleForms\Plugin::instance()->container()->get( FieldRegistry::class );
+			} catch ( \Throwable $e ) {
+				$registry = null;
+			}
+		}
+		if ( $registry instanceof FieldRegistry && $registry->has( $type ) ) {
+			return $type;
+		}
+		$config   = isset( $field['config'] ) && is_array( $field['config'] ) ? $field['config'] : array();
+		$multiple = $field['allowMultiple'] ?? $config['allowMultiple'] ?? false;
+		return true === $multiple ? 'multiple_choice' : 'radio';
+	}
+
+	/**
+	 * The type the server checks an answer as. A field type with a fallback
+	 * is always checked as the plain choice, with or without its add-on: the
+	 * rules are the same, only the look differs.
+	 *
+	 * @param string $type  Field type.
+	 * @param array  $field Field node, for the "allow several" setting.
+	 * @return string The type, or radio / multiple_choice for a fallback.
+	 */
+	public static function validationType( string $type, array $field = array() ): string {
+		if ( ! in_array( $type, self::FALLBACKS, true ) ) {
+			return $type;
+		}
+		$config   = isset( $field['config'] ) && is_array( $field['config'] ) ? $field['config'] : array();
+		$multiple = $field['allowMultiple'] ?? $config['allowMultiple'] ?? false;
+		return true === $multiple ? 'multiple_choice' : 'radio';
 	}
 
 	/**
@@ -92,6 +155,34 @@ final class AddonFieldTypes {
 	}
 
 	/**
+	 * Whether a schema has a payment field and nothing registers it. Without
+	 * SubtleForms Pro such a form cannot take its payment, so it is not shown
+	 * and does not accept entries.
+	 *
+	 * @param mixed $schema Form schema (the `schema` part of a version row).
+	 */
+	public static function needsMissingPayment( $schema ): bool {
+		if ( ! is_array( $schema ) ) {
+			return false;
+		}
+		$missing = array_filter(
+			self::missing(),
+			static function ( $type ) {
+				return 0 === strpos( (string) $type, 'payment_' );
+			}
+		);
+		if ( ! $missing ) {
+			return false;
+		}
+		foreach ( \SubtleForms\Support\SchemaFields::flat( $schema ) as $field ) {
+			if ( in_array( (string) ( $field['type'] ?? '' ), $missing, true ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Drop answers to fields whose add-on is not active: the live form does
 	 * not show them, so a value can only come from a crafted request.
 	 *
@@ -104,7 +195,7 @@ final class AddonFieldTypes {
 		if ( ! $missing || ! is_array( $schema ) ) {
 			return $payload;
 		}
-		foreach ( \SubtleForms\Payments\Pricing::fields( $schema ) as $field ) {
+		foreach ( \SubtleForms\Support\SchemaFields::flat( $schema ) as $field ) {
 			if ( in_array( (string) ( $field['type'] ?? '' ), $missing, true ) && ! empty( $field['key'] ) ) {
 				unset( $payload[ (string) $field['key'] ] );
 			}

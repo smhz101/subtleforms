@@ -1,3 +1,4 @@
+import { createSpamTokenSource } from '../utils/spamToken';
 import { useState, useEffect, useCallback, useMemo, useRef } from '@wordpress/element';
 import { currencySymbol as symbolFor, currencyDecimals } from '../../shared/currencies';
 import { __, sprintf } from '@wordpress/i18n';
@@ -21,7 +22,9 @@ import { collectDefaultValues } from '../utils/defaults';
 import { validateFields } from '../utils/fieldValidation';
 
 import { restFetch } from '../utils/restFetch';
-import { announceSubmitted } from '../utils/funnelTracker';
+import { announceSubmitted } from '../utils/submitted';
+import { messageParagraphs } from '../../shared/safeLinks';
+import ConfirmationText from './ConfirmationText';
 
 /**
  * ConversationalFormRenderer - Renders form one question at a time
@@ -36,6 +39,8 @@ export default function ConversationalFormRenderer({
   onSubmit: customOnSubmit = null,
   spamToken = '',
 }) {
+  const spamTokens = useMemo(() => createSpamTokenSource(formId), [formId]);
+  const primeSpamToken = useCallback(() => spamTokens.prime(spamToken), [spamTokens, spamToken]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentStep, setCurrentStep] = useState('questions'); // 'questions', 'review', 'payment'
   const [values, setValues] = useState({});
@@ -46,7 +51,7 @@ export default function ConversationalFormRenderer({
   // Confirmation chosen by the server (2.1: conditional confirmations).
   const [confirmation, setConfirmation] = useState(null);
 
-  // A sent form is not a drop-off: tell the funnel tracker (2.6.0).
+  // Tell the page the form was sent (add-ons listen for it).
   useEffect(() => {
     if (submitSuccess && !preview) {
       announceSubmitted(formId);
@@ -329,18 +334,19 @@ export default function ConversationalFormRenderer({
       try {
         const response = await restFetch('/submit', {
           method: 'POST',
-          body: { form_id: formId, data: { ...payload, form_rendered_at: spamToken } },
+          body: { form_id: formId, data: { ...payload, form_rendered_at: await spamTokens.take(spamToken) } },
         });
 
         const result = await response.json();
 
         if (response.ok && result?.data?.success) {
           const conf = result.data.confirmation || null;
-          const fill = (text) =>
+          const fill = (text, encode = false) =>
             String(text || '').replace(/\{([\w.-]+)\}/g, (m, key) => {
               const raw = payload[key];
               if (raw === undefined || raw === null) return '';
-              return Array.isArray(raw) ? raw.join(', ') : String(raw);
+              const str = Array.isArray(raw) ? raw.join(', ') : String(raw);
+              return encode ? encodeURIComponent(str) : str;
             });
           if (conf?.type === 'redirect' && conf.redirectUrl && !preview) {
             window.location.assign(
@@ -352,7 +358,12 @@ export default function ConversationalFormRenderer({
           }
           setConfirmation(
             conf && conf.type !== 'redirect'
-              ? { title: fill(conf.title), message: fill(conf.message) }
+              ? {
+                  title: fill(conf.title),
+                  message: fill(conf.message),
+                  // Links are found in your own text first, then the answers are filled in.
+                  paragraphs: messageParagraphs(conf.message, fill),
+                }
               : null
           );
           setSubmitSuccess(true);
@@ -374,7 +385,7 @@ export default function ConversationalFormRenderer({
         setSubmitting(false);
       }
     },
-    [formId, values, leafPaths, preview, customOnSubmit, hiddenFields, spamToken]
+    [formId, values, leafPaths, preview, customOnSubmit, hiddenFields, spamToken, spamTokens]
   );
 
   const handleSubmit = useCallback(
@@ -400,13 +411,17 @@ export default function ConversationalFormRenderer({
         <div className='subtleforms-conversational-success'>
           <div className='subtleforms-success-icon'>✓</div>
           <h2>{confirmation?.title || __('Thank you!', 'subtleforms')}</h2>
-          <p>
-            {confirmation?.message ||
-              __(
-                'Your response has been submitted successfully.',
-                'subtleforms'
-              )}
-          </p>
+          {confirmation?.paragraphs && confirmation.message ? (
+            <ConfirmationText paragraphs={confirmation.paragraphs} />
+          ) : (
+            <p>
+              {confirmation?.message ||
+                __(
+                  'Your response has been submitted successfully.',
+                  'subtleforms'
+                )}
+            </p>
+          )}
         </div>
       </div>
     );
@@ -621,7 +636,7 @@ export default function ConversationalFormRenderer({
 
   // Render Questions Step (default)
   return (
-    <div className={formClassNames} style={appearanceStyle}>
+    <div className={formClassNames} style={appearanceStyle} onFocusCapture={primeSpamToken} onInputCapture={primeSpamToken}>
       {trackingInputs}
       {/* Progress Bar */}
       <div className='subtleforms-progress'>

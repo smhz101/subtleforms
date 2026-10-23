@@ -34,7 +34,7 @@ final class WebhookPayloadTest extends TestCase {
 
 	public function capture( $pre, $event ) {
 		if ( isset( $event->hook ) && 'subtleforms_async_webhook' === $event->hook ) {
-			$this->jobs[] = $event->args[0];
+			$this->jobs[] = \SubtleForms\Async\AsyncDispatcher::resolve( $event->args[0] );
 			return true;
 		}
 		return $pre;

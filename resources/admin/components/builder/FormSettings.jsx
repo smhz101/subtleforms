@@ -23,7 +23,7 @@ import {
 import { createNodeId, createFieldKey } from './utils/idGenerator';
 import ActionsPanel from './ActionsPanel';
 import { ConfirmationPanel, AvailabilityPanel } from './FormBehaviorPanels';
-import CheckoutPanel from './CheckoutPanel';
+import ExtensionSlot from '../ExtensionSlot';
 import FormCurrencyControl from './FormCurrencyControl';
 import IntegrationsPanel from './IntegrationsPanel';
 import SpamProtectionPanel from './SpamProtectionPanel';
@@ -439,15 +439,14 @@ export default function FormSettings({
                     <FormCurrencyControl schema={schema} onPayment={handleCheckoutChange} isReadOnly={isReadOnly} />
                   </div>
                 )}
-                {takesMoney && !!window.subtleformsAdmin?.woocommerce && (
-                  <div className='sf-form-settings__card sf-form-settings__card--stack'>
-                    <CheckoutPanel
-                      schema={schema}
-                      fields={pricedFields}
-                      onPayment={handleCheckoutChange}
-                      isReadOnly={isReadOnly}
-                    />
-                  </div>
+                {takesMoney && (
+                  <ExtensionSlot
+                    name='form.settings.checkout'
+                    schema={schema}
+                    fields={pricedFields}
+                    onPayment={handleCheckoutChange}
+                    isReadOnly={isReadOnly}
+                  />
                 )}
               </div>
             )}

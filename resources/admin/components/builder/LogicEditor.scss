@@ -29,26 +29,29 @@
 		gap: 8px;
 	}
 
-	&__match { flex: 1 1 auto; }
+	&__match-note {
+		font-size: 12px;
+		color: var(--sf-text-muted, #757575);
+	}
 
-	&__or {
+	&__pro {
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+		padding: 10px;
+		border: 1px dashed var(--sf-border-strong, #c3c4c7);
+		border-radius: var(--sf-radius-md, 4px);
+		color: var(--sf-text-muted, #757575);
+
+		p { margin: 0; font-size: 12px; }
+	}
+
+	&__pro-head {
 		display: flex;
 		align-items: center;
 		gap: 8px;
-		margin: 2px 0 8px;
-		font-size: 11px;
-		font-weight: 600;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
-		color: var(--sf-text-muted, #757575);
-
-		&::before,
-		&::after {
-			content: '';
-			flex: 1 1 auto;
-			height: 1px;
-			background: var(--sf-border, #dcdcde);
-		}
+		font-weight: 500;
+		color: var(--sf-text, #1e1e1e);
 	}
 
 	&__rule {
@@ -70,14 +73,6 @@
 
 	&__remove { flex: none; }
 
-	&__between {
-		display: grid;
-		grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-		align-items: center;
-		gap: 6px;
-		font-size: 12px;
-		color: var(--sf-text-muted, #757575);
-	}
 
 	&__add-rule { align-self: flex-start; font-size: 12px; }
 
@@ -116,7 +111,7 @@
 	color: var(--sf-text-muted, #757575);
 }
 
-// Conditional confirmations list (After submit panel).
+// After submit panel: the Pro note for conditional confirmations.
 .sf-confirmations {
 	display: flex;
 	flex-direction: column;
@@ -126,36 +121,6 @@
 	&__intro {
 		margin: 0;
 		font-size: 12px;
-		color: var(--sf-text-muted, #757575);
-	}
-
-	&__item {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-		padding: 16px;
-		border: 1px solid var(--sf-border, #dcdcde);
-		border-radius: var(--sf-radius-md, 4px);
-		background: var(--sf-bg, #fff);
-	}
-
-	&__head {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-
-		> :first-child { flex: 1 1 auto; min-width: 0; }
-	}
-
-	&__add {
-		margin-top: 8px;
-	}
-
-	&__label {
-		font-size: 11px;
-		font-weight: 600;
-		letter-spacing: 0.04em;
-		text-transform: uppercase;
 		color: var(--sf-text-muted, #757575);
 	}
 }

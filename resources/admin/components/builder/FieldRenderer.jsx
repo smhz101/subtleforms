@@ -5,8 +5,7 @@ import { getFieldIcon } from '../../utils/iconRegistry';
 import Icon from '../../ui/Icon';
 import NameFieldRenderer from './NameFieldRenderer';
 import AddressFieldRenderer from './AddressFieldRenderer';
-import { ProductPreview, ChoicePreview, SummaryPreview, CardPreview } from './PaymentPreviews';
-import { getCanvasPreview } from '../../../shared/extend';
+import { getCanvasPreview, addonProvides } from '../../../shared/extend';
 import { fieldDisplay } from '../../../shared/fieldDisplay';
 import { fieldConfig } from '../../../shared/fieldConfig';
 import { choiceChecked, choiceShowsDefault } from '../../../shared/canvasDefaults';
@@ -142,6 +141,10 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
   const builderConfig = useContext(ConfigContext);
   const display = fieldDisplay(field, builderConfig?.fieldDefaults || {});
   const formCurrency = builderConfig?.currency || '';
+  // Picture choice is an add-on field. Without the add-on the canvas shows the
+  // plain choice that visitors get (labels only) with a note.
+  const pictureFallback = type === 'picture_choice' && !getCanvasPreview(type) && !addonProvides('picture_choice');
+  const previewType = pictureFallback ? (field.allowMultiple === true ? 'multiple_choice' : 'radio') : type;
   // Add-on field types no active plugin provides right now.
   const addonMissing = (window.subtleformsAdmin?.missingFieldTypes || []).includes(type);
 
@@ -287,21 +290,6 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         );
       })()}
 
-      {type === 'picture_choice' && (
-        <div
-          className='sf-field-renderer__pictures'
-          style={{ '--sf-picture-cols': parseInt(field.pictureColumns || 3, 10) }}>
-          {(options || []).map((opt, i) => (
-            <div key={opt.value || i} className='sf-field-renderer__picture'>
-              <div className='sf-field-renderer__picture-media'>
-                {opt.image ? <img src={opt.image} alt='' /> : <Icon.Image size={20} />}
-              </div>
-              <span>{opt.label}</span>
-            </div>
-          ))}
-        </div>
-      )}
-
       {type === 'disclaimer' && (
         hasText(field.content) ? (
           <div
@@ -370,7 +358,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
-      {type === 'radio' && options && (
+      {previewType === 'radio' && options && (
         <div className={`sf-field-renderer__options-list sf-field-renderer__options-list--${field.optionLayout || 'stacked'}`}>
           {options.map((opt, idx) => (
             <div key={idx} className='sf-field-renderer__checkbox-wrapper'>
@@ -391,7 +379,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
-      {type === 'multiple_choice' && options && (
+      {previewType === 'multiple_choice' && options && (
         <div className={`sf-field-renderer__options-list sf-field-renderer__options-list--${field.optionLayout || 'stacked'}`}>
           {options.map((opt, idx) => (
             <div key={idx} className='sf-field-renderer__checkbox-wrapper'>
@@ -512,13 +500,11 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
         </div>
       )}
 
-      {type === 'payment_summary' && <SummaryPreview field={field} />}
-
-      {type === 'payment_product' && <ProductPreview field={field} />}
-
-      {type === 'payment_choice' && <ChoicePreview field={field} />}
-
-      {type === 'payment_card' && !addonMissing && !getCanvasPreview(type) && <CardPreview />}
+      {pictureFallback && (
+        <p className='sf-field-renderer__placeholder-note'>
+          {__('Needs SubtleForms Pro for pictures. Visitors see these choices without images until Pro is active.', 'subtleforms')}
+        </p>
+      )}
 
       {/* A field from an add-on that is not active (SubtleForms Pro). */}
       {addonMissing && (

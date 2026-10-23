@@ -30,6 +30,13 @@ final class FormRestrictions {
 			return null;
 		}
 
+		// A form with a payment field and no plugin that takes payments
+		// would store entries nobody paid for. Visitors get the generic
+		// message; the builder banner tells the admin what is needed.
+		if ( \SubtleForms\Fields\AddonFieldTypes::needsMissingPayment( $schema ) ) {
+			return __( 'This form is not available right now.', 'subtleforms' );
+		}
+
 		$rules = $schema['metadata']['restrictions'] ?? array();
 		if ( ! is_array( $rules ) || empty( $rules ) ) {
 			return null;

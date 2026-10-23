@@ -260,6 +260,30 @@ final class FormsApi {
 		)
 	);
 
+		// The page ticket is traded for a per-visitor single-use submit token on
+		// first interaction, and an old token for a fresh one (2.7.1).
+		register_rest_route(
+			self::NAMESPACE,
+			'/forms/(?P<id>\d+)/spam-token',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'refresh_spam_token' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'id'    => array(
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					),
+					'token' => array(
+						'type'              => 'string',
+						'required'          => true,
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+			)
+		);
+
 		register_rest_route(
 			self::NAMESPACE,
 			'/forms/(?P<id>\d+)/schema',
@@ -475,7 +499,7 @@ final class FormsApi {
 			return ApiResponse::not_found( __( 'Form not available', 'subtleforms' ) );
 		}
 
-		$isAuthenticated = is_user_logged_in() && current_user_can( 'edit_posts' );
+		$isAuthenticated = is_user_logged_in() && current_user_can( 'manage_options' );
 		$isPublished     = isset( $form['status'] ) && $form['status'] === 'published';
 		$requestsDraft   = $context === 'builder';
 
@@ -562,6 +586,34 @@ final class FormsApi {
 	}
 
 	/**
+	 * Trade the page's render ticket (or an expired submit token) for a
+	 * per-visitor single-use submit token. Rate limited per client address.
+	 * Only a validly signed value for this published form is answered; a missing or forged token,
+	 * or an unknown form, gets a 404 so nothing can be minted from scratch.
+	 *
+	 * @param WP_REST_Request $request REST request.
+	 */
+	public function refresh_spam_token( WP_REST_Request $request ): WP_REST_Response {
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		$formId = absint( $request->get_param( 'id' ) );
+		$form   = $this->formsRepo->find( $formId );
+		if ( ! $form || 'published' !== ( $form['status'] ?? '' ) ) {
+			return ApiResponse::not_found( __( 'Form not available', 'subtleforms' ) );
+		}
+
+		$token = \SubtleForms\Engine\SpamProtection::refresh_token( $request->get_param( 'token' ), $formId );
+		if ( null === $token ) {
+			return ApiResponse::not_found( __( 'Form not available', 'subtleforms' ) );
+		}
+
+		return ApiResponse::success( array( 'spam_token' => $token ) );
+	}
+
+	/**
 	 * What a visitor gets for a published form: the form's id and title, the
 	 * public schema, its version and a signed load time. Nothing else from the
 	 * form row (draft schema, config, notifications, webhooks) is included.
@@ -599,8 +651,9 @@ final class FormsApi {
 			),
 			'schema'     => self::filterPublicSchema( $this->buildPublicSchema( $schemaData ), $formId ),
 			'version'    => $schema['version'] ?? null,
-			// Server-signed load time for the spam time trap (FF-11, FF-12).
-			'spam_token' => \SubtleForms\Engine\SpamProtection::issue_token( $formId ),
+			// Server-signed build time (a render ticket) for the spam time trap
+			// (FF-11, FF-12). The browser trades it for a submit token.
+			'spam_token' => \SubtleForms\Engine\SpamProtection::issue_ticket( $formId ),
 		);
 	}
 
@@ -823,20 +876,6 @@ final class FormsApi {
 			Logger::error( 'create_form - validation failed: %s', $e->getMessage() );
 			Logger::debug( 'create_form - invalid fields: %s', wp_json_encode( $e->getFields() ) );
 			return ApiResponse::validation_error( $e->getMessage(), $e->getFields() );
-		}
-
-		// Gate Pro-template usage server-side.
-		$_schema_check = $validated['schema'] ?? null;
-		if ( is_array( $_schema_check ) ) {
-			$_tpl_id = $_schema_check['metadata']['template'] ?? null;
-			if ( $_tpl_id && $_tpl_id !== 'blank' ) {
-				$_tpl = \SubtleForms\Templates\FormTemplates::get( $_tpl_id );
-				if ( $_tpl && ! empty( $_tpl['is_pro'] ) && ! $this->gate->allows( 'templates.pro' ) ) {
-					return ApiResponse::forbidden(
-						__( 'This template requires a Pro license.', 'subtleforms' )
-					);
-				}
-			}
 		}
 
 		$defaultStatus = $this->settings ? $this->settings->get( 'default_form_status', 'draft' ) : 'draft';

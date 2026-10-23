@@ -3,7 +3,7 @@
 /**
  * Plugin Name: SubtleForms
  * Description: Build contact, multi-step and conversational forms on a visual canvas, then read every entry in a clean inbox. Spam protection built in.
- * Version: 2.6.1
+ * Version: 2.7.1
  * Author: SubtleForms
  * Author URI: https://subtleforms.com/
  * Requires at least: 6.6
@@ -18,7 +18,7 @@
  * Subtle Forms
  *
  * @package SubtleForms
- * @version 1.0.0
+ * @version 2.7.1
  * @author SubtleForms
  * @license GPL-2.0+
  * @link https://subtleforms.com/
@@ -30,8 +30,8 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 // Define plugin constants.
-define( 'SUBTLEFORMS_VERSION', '2.6.1' );
-define( 'SUBTLEFORMS_API_VERSION', 1 );
+define( 'SUBTLEFORMS_VERSION', '2.7.1' );
+define( 'SUBTLEFORMS_API_VERSION', 2 );
 define( 'SUBTLEFORMS_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'SUBTLEFORMS_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 define( 'SUBTLEFORMS_PLUGIN_FILE', __FILE__ );
@@ -65,6 +65,19 @@ add_action(
 
 		SubtleForms\init();
 	}
+);
+
+// A site updated by FTP or a deploy never ran the activation hook. The check
+// above covers admin requests and WP-CLI; this one is the same check again on
+// admin_init, so the schema is upgraded on the first admin page load even if
+// is_admin() was not known yet at plugins_loaded. It is a no-op once the stored
+// version matches, and it never runs on a visitor's request.
+add_action(
+	'admin_init',
+	function () {
+		SubtleForms\Activator::maybe_upgrade();
+	},
+	1
 );
 
 // Add REST API nonce verification for authenticated endpoints

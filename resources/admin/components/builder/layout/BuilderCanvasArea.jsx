@@ -13,8 +13,8 @@ import SubmissionsTable from '../../SubmissionsTable';
 import ProDowngradeBanner from '../../ProDowngradeBanner';
 import EmptyFormWelcome from '../EmptyFormWelcome';
 import PreviewWorkspace from '../PreviewWorkspace';
-import { getMissingAddonFields } from '../../../utils/proFeatureDetector';
-import { offlinePaymentNote } from '../../../utils/paymentNotes';
+import { getMissingAddonFields, getLimitedFeatures, needsMissingPayment } from '../../../utils/proFeatureDetector';
+import ExtensionSlot from '../../ExtensionSlot';
 import './BuilderCanvasArea.scss';
 
 export default function BuilderCanvasArea({
@@ -35,20 +35,14 @@ export default function BuilderCanvasArea({
 }) {
   // Fields from an add-on that is not active (the form stays editable).
   const missingAddonFields = useMemo(() => getMissingAddonFields(draftSchema), [draftSchema]);
-  // A priced form without a Card Payment field saves entries as "Payment
-  // pending" (PAY-03); say so while the form is being built.
-  const paymentNote = useMemo(() => offlinePaymentNote(draftSchema), [draftSchema]);
+  const paymentMissing = useMemo(() => needsMissingPayment(draftSchema), [draftSchema]);
+  const limitedFeatures = useMemo(() => getLimitedFeatures(draftSchema), [draftSchema]);
   return (
     <>
-      <ProDowngradeBanner featuresUsed={missingAddonFields} />
+      <ProDowngradeBanner featuresUsed={missingAddonFields} limited={limitedFeatures} paymentForm={paymentMissing} />
 
-      {paymentNote && view === 'build' && (
-        <div className='sf-builder-canvas-area__validation-notice'>
-          <Notice status='info' isDismissible={false}>
-            {paymentNote}
-          </Notice>
-        </div>
-      )}
+      {/* Notes from add-ons about the form being built (for example how a payment form takes money). */}
+      {view === 'build' && <ExtensionSlot name='builder.canvas.notes' schema={draftSchema} />}
 
       {saveError && (
         <div className='sf-builder-canvas-area__error-banner' role='alert'>

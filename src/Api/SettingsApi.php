@@ -115,13 +115,35 @@ class SettingsApi {
 			$response = ApiResponse::success(
 				array(
 					'success' => true,
-					'data'    => $settings,
+					'data'    => self::maskSecrets( $settings ),
 				)
 			);
 			return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
 		} catch ( \Exception $e ) {
 			return ApiResponse::server_error( $e->getMessage() );
 		}
+	}
+
+	/** What the settings screen receives instead of a saved CAPTCHA secret key. */
+	public const SECRET_MASK = '********';
+
+	/** Settings that hold a CAPTCHA secret key. */
+	private const SECRET_KEYS = array( 'captcha_recaptcha_secret_key', 'captcha_hcaptcha_secret_key', 'captcha_turnstile_secret_key' );
+
+	/**
+	 * Replace saved CAPTCHA secret keys with a mask. An empty key stays empty, so
+	 * the screen can tell whether one is saved.
+	 *
+	 * @param array $settings Settings.
+	 * @return array Settings safe to send to the browser.
+	 */
+	public static function maskSecrets( array $settings ): array {
+		foreach ( self::SECRET_KEYS as $key ) {
+			if ( isset( $settings[ $key ] ) && '' !== (string) $settings[ $key ] ) {
+				$settings[ $key ] = self::SECRET_MASK;
+			}
+		}
+		return $settings;
 	}
 
 	/**
@@ -134,9 +156,7 @@ class SettingsApi {
 	 */
 	private function guardRateLimit( WP_REST_Request $request ): ?WP_REST_Response {
 		$userId = get_current_user_id() ?: null;
-		$ip     = isset( $_SERVER['REMOTE_ADDR'] )
-			? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) )
-			: '0.0.0.0';
+		$ip     = \SubtleForms\Security\ClientIp::get() ?: '0.0.0.0';
 		$route  = $request->get_route();
 		$method = $request->get_method();
 
@@ -191,8 +211,29 @@ class SettingsApi {
 			}
 
 			// Validate input
+			$schema = Schemas::get( Schemas::SETTINGS_UPDATE );
+
+			// The settings screen sends back every key it was given. Keys an
+			// add-on stored under ext_ (this plugin has no rule for them) are
+			// kept as they are by Settings::update() and are not part of this
+			// request, so they are not reported as unknown.
+			$allowed = is_array( $schema['__allow'] ?? null ) ? $schema['__allow'] : array();
+			foreach ( array_keys( $input ) as $key ) {
+				if ( is_string( $key ) && 0 === strpos( $key, 'ext_' ) && ! in_array( $key, $allowed, true ) ) {
+					unset( $input[ $key ] );
+				}
+			}
+
+			// The screen sends back the mask it was given for a saved secret
+			// key. That means "unchanged": the stored key is kept.
+			foreach ( self::SECRET_KEYS as $secretKey ) {
+				if ( isset( $input[ $secretKey ] ) && self::SECRET_MASK === $input[ $secretKey ] ) {
+					unset( $input[ $secretKey ] );
+				}
+			}
+
 			$validator = new RequestValidator( array( 'schemas' => Schemas::all() ) );
-			$validated = $validator->validateOrFail( $input, Schemas::get( Schemas::SETTINGS_UPDATE ) );
+			$validated = $validator->validateOrFail( $input, $schema );
 
 			// Update with validated data only
 			$this->settings->update( $validated );
@@ -207,7 +248,7 @@ class SettingsApi {
 				array(
 					'success' => true,
 					'message' => __( 'Settings updated successfully', 'subtleforms' ),
-					'data'    => $updatedSettings,
+					'data'    => self::maskSecrets( $updatedSettings ),
 				)
 			);
 			return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
@@ -241,7 +282,7 @@ class SettingsApi {
 				array(
 					'success' => true,
 					'message' => __( 'Settings reset to defaults', 'subtleforms' ),
-					'data'    => $settings,
+					'data'    => self::maskSecrets( $settings ),
 				)
 			);
 		} catch ( \Exception $e ) {
@@ -448,6 +489,27 @@ class SettingsApi {
 				'minimum' => 1,
 				'maximum' => 300,
 			),
+			// Visitor IP behind a proxy
+			'trusted_proxy_cidrs'       => array(
+				'type'              => 'array',
+				'items'             => array( 'type' => 'string' ),
+				'validate_callback' => static function ( $value ) {
+					$list = \SubtleForms\Security\ClientIp::parse_list( $value );
+					if ( count( $list ) > 100 ) {
+						return new \WP_Error( 'rest_invalid_param', __( 'Enter at most 100 proxy addresses or ranges.', 'subtleforms' ), array( 'status' => 400 ) );
+					}
+					foreach ( $list as $entry ) {
+						if ( ! \SubtleForms\Security\ClientIp::valid_range( $entry ) ) {
+							/* translators: %s: the rejected address */
+							return new \WP_Error( 'rest_invalid_param', sprintf( __( '"%s" is not an IP address or CIDR range.', 'subtleforms' ), sanitize_text_field( $entry ) ), array( 'status' => 400 ) );
+						}
+					}
+					return true;
+				},
+			),
+			'trust_cloudflare'          => array(
+				'type' => 'boolean',
+			),
 			'admin_notification_enabled' => array(
 				'type' => 'boolean',
 			),
@@ -527,6 +589,7 @@ class SettingsApi {
 				'minimum' => 1,
 				'maximum' => 365,
 			),
+			'keep_data_on_uninstall'     => array( 'type' => 'boolean' ),
 
 			// ── Extensions ────────────────────────────────────────────────────
 
@@ -536,54 +599,7 @@ class SettingsApi {
 			'ext_webhooks_events'               => array( 'type' => 'array' ),
 			'ext_webhooks_retries'              => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 5 ),
 
-			// Email Marketing
-			'ext_email_marketing_enabled'       => array( 'type' => 'boolean' ),
-			'ext_email_marketing_provider'      => array( 'type' => 'string', 'enum' => array( 'mailchimp', 'brevo', 'convertkit' ), 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_email_marketing_api_key'       => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_email_marketing_list_id'       => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_email_marketing_double_optin'  => array( 'type' => 'boolean' ),
-
-			// CRM
-			'ext_crm_enabled'                   => array( 'type' => 'boolean' ),
-			'ext_crm_provider'                  => array( 'type' => 'string', 'enum' => array( 'hubspot', 'webhook' ), 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_crm_api_key'                   => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_crm_portal_id'                 => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_crm_webhook_url'               => array( 'type' => 'string', 'sanitize_callback' => 'esc_url_raw' ),
-			'ext_crm_add_note'                  => array( 'type' => 'boolean' ),
-
 			// Analytics
-			'ext_analytics_enabled'             => array( 'type' => 'boolean' ),
-			'ext_analytics_view_tracking'       => array( 'type' => 'boolean' ),
-			'ext_analytics_retention_days'      => array( 'type' => 'integer', 'minimum' => 1, 'maximum' => 3650 ),
-			'ext_analytics_funnel_retention_days' => array( 'type' => 'integer', 'minimum' => 1, 'maximum' => 3650 ),
-
-			// E-commerce
-			'ext_ecommerce_enabled'             => array( 'type' => 'boolean' ),
-			'ext_ecommerce_product_id'          => array( 'type' => 'integer', 'minimum' => 0 ),
-			'ext_ecommerce_currency'            => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_ecommerce_default_processor'   => array( 'type' => 'string', 'enum' => array( 'woocommerce', 'subtleforms' ) ),
-			'ext_ecommerce_empty_cart'          => array( 'type' => 'boolean' ),
-			'ext_ecommerce_destination'         => array( 'type' => 'string', 'enum' => array( 'checkout', 'cart' ) ),
-
-			// PDF
-			'ext_pdf_enabled'                   => array( 'type' => 'boolean' ),
-			'ext_pdf_template'                  => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_pdf_attach_to_email'           => array( 'type' => 'boolean' ),
-
-			// Multilanguage
-			'ext_multilanguage_enabled'         => array( 'type' => 'boolean' ),
-			'ext_multilanguage_provider'        => array( 'type' => 'string', 'enum' => array( 'wpml', 'polylang' ), 'sanitize_callback' => 'sanitize_text_field' ),
-
-			// Payments
-			'ext_payments_enabled'              => array( 'type' => 'boolean' ),
-			'ext_payments_provider'             => array( 'type' => 'string', 'enum' => array( 'stripe', 'paypal' ), 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_payments_stripe_pk'            => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_payments_stripe_sk'            => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_payments_paypal_client_id'     => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_payments_paypal_client_secret' => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_payments_currency'             => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_payments_mode'                 => array( 'type' => 'string', 'enum' => array( 'test', 'live' ), 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_payments_failed_email'         => array( 'type' => 'boolean' ),
 		);
 	}
 }

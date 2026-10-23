@@ -24,6 +24,8 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 class RateLimiter
 {
+    const CACHE_GROUP = 'subtleforms_rl';
+
     /**
      * Check if request is allowed under rate limit
      *
@@ -41,34 +43,80 @@ class RateLimiter
     {
         $now = time();
         $transientKey = self::sanitizeTransientKey($key);
-        
-        // Get current bucket state
+
+        // With a persistent object cache the counter is incremented atomically
+        // and no database row is written per visitor.
+        if (function_exists('wp_using_ext_object_cache') && wp_using_ext_object_cache()) {
+            $resetAt = (int) wp_cache_get($transientKey . '_r', self::CACHE_GROUP);
+            if ($resetAt <= $now) {
+                $resetAt = $now + $windowSeconds;
+                wp_cache_set($transientKey . '_r', $resetAt, self::CACHE_GROUP, $windowSeconds);
+                wp_cache_set($transientKey, 0, self::CACHE_GROUP, $windowSeconds);
+            }
+            $resetIn = max(1, $resetAt - $now);
+            $count = wp_cache_incr($transientKey, 1, self::CACHE_GROUP);
+            if (false === $count) {
+                wp_cache_set($transientKey, 1, self::CACHE_GROUP, $resetIn);
+                $count = 1;
+            }
+            if ($count > $limit) {
+                return array(
+                    'allowed' => false,
+                    'remaining' => 0,
+                    'reset_in' => $resetIn,
+                    'retry_after' => $resetIn,
+                );
+            }
+            return array(
+                'allowed' => true,
+                'remaining' => max(0, $limit - $count),
+                'reset_in' => $resetIn,
+                'retry_after' => 0,
+            );
+        }
+
+        // Without one the counter is a row in a small table, updated by a
+        // single INSERT ... ON DUPLICATE KEY UPDATE, so simultaneous
+        // requests are all counted.
+        $row = RateLimitStore::hit($transientKey, $windowSeconds, $now);
+        if (null !== $row) {
+            if ($row['hits'] > $limit) {
+                return array(
+                    'allowed' => false,
+                    'remaining' => 0,
+                    'reset_in' => $row['reset_in'],
+                    'retry_after' => $row['reset_in'],
+                );
+            }
+            return array(
+                'allowed' => true,
+                'remaining' => max(0, $limit - $row['hits']),
+                'reset_in' => $row['reset_in'],
+                'retry_after' => 0,
+            );
+        }
+
+        // The table is not available: a transient, best effort, because two
+        // simultaneous requests can read the same count.
         $bucket = get_transient($transientKey);
-        
-        // Initialize or reset expired bucket
         if ($bucket === false || !is_array($bucket) || $bucket['reset_at'] <= $now) {
             $bucket = array(
                 'count' => 0,
                 'reset_at' => $now + $windowSeconds,
             );
         }
-        
         $resetIn = $bucket['reset_at'] - $now;
-        
-        // Check if limit exceeded
         if ($bucket['count'] >= $limit) {
             return array(
                 'allowed' => false,
                 'remaining' => 0,
-                'reset_in' => max(1, $resetIn), // Ensure at least 1 second
+                'reset_in' => max(1, $resetIn),
                 'retry_after' => max(1, $resetIn),
             );
         }
-        
-        // Increment counter
         $bucket['count']++;
         set_transient($transientKey, $bucket, $resetIn);
-        
+
         return array(
             'allowed' => true,
             'remaining' => max(0, $limit - $bucket['count']),
@@ -76,7 +124,7 @@ class RateLimiter
             'retry_after' => 0,
         );
     }
-    
+
     /**
      * Build rate limit key for a request
      *
@@ -93,6 +141,8 @@ class RateLimiter
             return sprintf('subtleforms_rl_user_%d_%s_%s', $userId, $method, md5($route));
         }
         
+        // Callers pass \SubtleForms\Security\ClientIp::get(), which already
+        // honours the trusted proxy settings.
         // Fall back to IP-based limiting for anonymous requests
         $sanitizedIp = self::sanitizeIp($ip);
         return sprintf('subtleforms_rl_ip_%s_%s_%s', $sanitizedIp, $method, md5($route));
@@ -122,6 +172,12 @@ class RateLimiter
             return array('limit' => 10, 'window' => 60);
         }
         
+        // Trading a page ticket for a submit token: once per visitor and form,
+        // plus a retry, so a low limit per client address.
+        if (preg_match('#^/forms/[^/]+/spam-token/?$#', $route) && $method === 'POST') {
+            return array('limit' => 20, 'window' => 60);
+        }
+
         // FORM SCHEMA ENDPOINTS (very lenient for authenticated admins due to autosave)
         if (preg_match('#^/forms/[^/]+/schema$#', $route) && $isAuthenticatedAdmin) {
             return array('limit' => 300, 'window' => 60);

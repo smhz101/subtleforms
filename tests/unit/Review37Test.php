@@ -13,6 +13,11 @@ use SubtleForms\Api\ClassicResult;
 
 final class Review37Test extends TestCase {
 
+	protected function tearDown(): void {
+		unset( $GLOBALS['sf_test_filters']['subtleforms/format/currency'] );
+		parent::tearDown();
+	}
+
 	public function test_a_rejected_classic_post_is_not_a_success_and_keeps_its_errors_and_answers(): void {
 		$body    = array(
 			'error' => array(
@@ -83,6 +88,7 @@ final class Review37Test extends TestCase {
 	}
 
 	public function test_entry_contexts_use_the_currency_the_entry_was_charged_in(): void {
+		$GLOBALS['sf_test_filters']['subtleforms/format/currency'] = static fn( $c, $schema ) => strtoupper( (string) ( $schema['metadata']['payment']['currency'] ?? '' ) );
 		$schema = array( 'metadata' => array( 'payment' => array( 'currency' => 'USD' ) ), 'fields' => array() );
 		$this->assertSame( 'EUR', \SubtleForms\Support\AnswerFormatter::entryCurrency( array( 'meta' => array( 'order' => array( 'currency' => 'eur' ) ) ) ) );
 		$this->assertSame( 'GBP', \SubtleForms\Support\AnswerFormatter::entryCurrency( array( 'meta' => '{"payment":{"currency":"GBP"}}' ) ) );

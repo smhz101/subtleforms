@@ -4,9 +4,9 @@
       "frontend.js",
       "index.jsx.css"
     ],
-    "measuredGzipBytes": 46237,
+    "measuredGzipBytes": 46606,
     "limitGzipBytes": 50861,
-    "note": "Limit is the 2.6.0 size plus 10 percent (46237 * 1.1).",
+    "note": "Limit is the 2.6.0 size plus 10 percent (46237 * 1.1) and is kept as is. The 2.7.0 move of picture choice, multi upload, advanced logic and analytics to Pro shrank the bundle to 46606 (47493 measured at 2.6.1).",
     "mustNotContain": [
       "Afghanistan"
     ],

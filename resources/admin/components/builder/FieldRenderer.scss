@@ -1660,46 +1660,6 @@ textarea.sf-field-renderer__input {
 	font-variant-numeric: tabular-nums;
 }
 
-// Picture choice
-.sf-field-renderer__pictures {
-	display: grid;
-	grid-template-columns: repeat(var(--sf-picture-cols, 3), minmax(0, 1fr));
-	gap: 10px;
-}
-
-.sf-field-renderer__picture {
-	overflow: hidden;
-	border: 1px solid var(--sf-border);
-	border-radius: var(--sf-radius-lg);
-	font-size: var(--sf-text-sm);
-	font-weight: var(--sf-weight-medium);
-	text-align: center;
-
-	> span {
-		display: block;
-		padding: 8px;
-	}
-}
-
-.sf-field-renderer__picture-media {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	aspect-ratio: 4 / 3;
-	background: var(--sf-bg-muted);
-	color: var(--sf-text-subtle);
-
-	img {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
-
-	svg {
-		fill: none;
-	}
-}
-
 // Calculation
 .sf-field-renderer__calculation {
 	display: flex;

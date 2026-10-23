@@ -313,13 +313,40 @@ final class SpamDefault260Test extends TestCase {
 		$this->assertSame( 1, $this->entries( $id ) );
 	}
 
-	public function test_a_token_from_a_cached_page_still_passes(): void {
+	public function test_a_token_from_a_cached_page_is_refreshed_not_rejected(): void {
 		$this->siteSettings( array( 'min_submission_time' => 3 ) );
-		$id = $this->legacyForm();
-		// A page cache served schema and token issued two days ago.
-		$this->rawSubmit( $id, array( 'name' => 'Ada', 'form_rendered_at' => SpamProtection::issue_token( $id, time() - 2 * DAY_IN_SECONDS ) ) );
+		$id  = $this->legacyForm();
+		$old = SpamProtection::issue_ticket( $id, time() - 2 * DAY_IN_SECONDS );
 
+		// The old token alone is answered with a fresh one, nothing is stored.
+		$res = $this->rawSubmit( $id, array( 'name' => 'Ada', 'form_rendered_at' => $old ) );
+		$this->assertSame( 409, $res['status'] );
+		$this->assertSame( 0, $this->entries( $id ) );
+		$this->assertStringStartsWith( 's2.', $res['data']['error']['meta']['spam_token'] );
+
+		// The page trades the old token for a new one over REST, then submits.
+		wp_set_current_user( 0 );
+		$request = new \WP_REST_Request( 'POST', '/subtleforms/v1/forms/' . $id . '/spam-token' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'token' => $old ) ) );
+		$token = rest_do_request( $request )->get_data()['data']['spam_token'] ?? '';
+		$this->assertStringStartsWith( 's2.', $token );
+
+		$this->rawSubmit( $id, array( 'name' => 'Ada', 'form_rendered_at' => $token ) );
 		$this->assertSame( 1, $this->entries( $id ) );
+
+		// A token works once.
+		$this->rawSubmit( $id, array( 'name' => 'Replay', 'form_rendered_at' => $token ) );
+		$this->assertSame( 1, $this->entries( $id ) );
+	}
+
+	public function test_nothing_can_be_minted_without_a_valid_token(): void {
+		$id = $this->legacyForm();
+		wp_set_current_user( 0 );
+		$request = new \WP_REST_Request( 'POST', '/subtleforms/v1/forms/' . $id . '/spam-token' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'token' => 's2.1700000000.' . $id . '.' . str_repeat( 'a', 32 ) ) ) );
+		$this->assertSame( 404, rest_do_request( $request )->get_status() );
 	}
 
 	public function test_the_public_schema_hands_out_a_fresh_token_on_every_load(): void {
@@ -328,8 +355,8 @@ final class SpamDefault260Test extends TestCase {
 		wp_set_current_user( 0 );
 		$token = rest_do_request( $request )->get_data()['data']['spam_token'] ?? '';
 
-		$this->assertNotNull( SpamProtection::token_time( $token, $id ) );
-		$this->assertLessThanOrEqual( 2, time() - SpamProtection::token_time( $token, $id ) );
+		$this->assertNotNull( SpamProtection::ticket_time( $token, $id ) );
+		$this->assertLessThanOrEqual( 2, time() - SpamProtection::ticket_time( $token, $id ) );
 	}
 
 	public function test_rate_limited_submits_are_counted_only_for_real_forms(): void {

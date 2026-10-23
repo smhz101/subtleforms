@@ -47,7 +47,6 @@ final class Uploads {
 	private const TRANSIENT     = 'subtleforms_upload_';
 	private const CRON_HOOK     = 'subtleforms_uploads_cleanup';
 	private const NONCE_ACTION  = 'subtleforms_file';
-	private const DEFAULT_FILES = 5;
 
 	/** Extensions that are never accepted, whatever a field allows. */
 	private const BLOCKED = array(
@@ -121,7 +120,7 @@ final class Uploads {
 	 * @return WP_REST_Response
 	 */
 	public static function handleUpload( WP_REST_Request $request ): WP_REST_Response {
-		$ip    = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+		$ip    = \SubtleForms\Security\ClientIp::get();
 		$limit = RateLimiter::check( 'subtleforms_rl_upload_' . md5( $ip ), 30, 10 * MINUTE_IN_SECONDS );
 		if ( empty( $limit['allowed'] ) ) {
 			return self::error( 'subtleforms_upload_rate', __( 'Too many uploads. Please wait a few minutes and try again.', 'subtleforms' ), 429 );
@@ -327,16 +326,23 @@ final class Uploads {
 	}
 
 	/**
-	 * Most files one field accepts.
+	 * Most files one field accepts: one, unless an add-on allows more. A form
+	 * saved with several files allowed keeps its settings; this plugin simply
+	 * accepts the first file.
 	 *
 	 * @param array $field Field node.
 	 */
 	public static function maxFiles( array $field ): int {
-		if ( ! self::attr( $field, 'multiple', false ) ) {
-			return 1;
-		}
-		$n = (int) self::attr( $field, 'maxFiles', 0 );
-		return $n > 0 ? min( $n, 20 ) : self::DEFAULT_FILES;
+		/**
+		 * Most files one upload field accepts (1 to 20). An add-on that
+		 * provides several files per field returns the field's own limit.
+		 *
+		 * @param int   $max   Default 1.
+		 * @param array $field Field node, as saved in the form.
+		 * @since 2.7.0
+		 */
+		$max = (int) apply_filters( 'subtleforms/uploads/max_files', 1, $field );
+		return max( 1, min( 20, $max ) );
 	}
 
 	// ── Submit ───────────────────────────────────────────────────────────

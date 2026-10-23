@@ -31,15 +31,75 @@ const FEATURE_COPY = {
     ],
   },
 
+  'fields.picture_choice': {
+    title: __( 'Picture Choice fields', 'subtleforms' ),
+    description: __( 'SubtleForms Pro adds a Picture Choice field where visitors pick from images.', 'subtleforms' ),
+    cta: __( 'About SubtleForms Pro', 'subtleforms' ),
+    lossLine: null,
+    benefits: [
+      __( 'Pick one image or several, in two to six columns', 'subtleforms' ),
+      __( 'Choose each image from the Media Library', 'subtleforms' ),
+      __( 'Forms with a Picture Choice field keep working as a plain choice without Pro', 'subtleforms' ),
+    ],
+  },
+
+  'uploads.multiple': {
+    title: __( 'Several files per upload field', 'subtleforms' ),
+    description: __( 'SubtleForms Pro lets visitors attach several files to one upload field.', 'subtleforms' ),
+    cta: __( 'About SubtleForms Pro', 'subtleforms' ),
+    lossLine: null,
+    benefits: [
+      __( 'Set how many files a visitor can add', 'subtleforms' ),
+      __( 'Drag and drop with a progress bar for each file', 'subtleforms' ),
+      __( 'A single file per field stays free', 'subtleforms' ),
+    ],
+  },
+
+  'logic.conditional.advanced': {
+    title: __( 'Advanced conditional logic', 'subtleforms' ),
+    description: __( 'SubtleForms Pro adds condition groups, the "any" match, more operators and conditions on steps, emails, webhooks and confirmations.', 'subtleforms' ),
+    cta: __( 'About SubtleForms Pro', 'subtleforms' ),
+    lossLine: null,
+    benefits: [
+      __( 'Combine rules with all, any and several groups', 'subtleforms' ),
+      __( 'Starts with, ends with, is one of, between, before and after', 'subtleforms' ),
+      __( 'Send an email or a webhook, skip a step or show a confirmation only when rules match', 'subtleforms' ),
+    ],
+  },
+
+  'extensions.analytics': {
+    title: __( 'Form analytics', 'subtleforms' ),
+    description: __( 'SubtleForms Pro counts views and shows the conversion rate and a funnel of where visitors leave.', 'subtleforms' ),
+    cta: __( 'About SubtleForms Pro', 'subtleforms' ),
+    lossLine: null,
+    benefits: [
+      __( 'Views, entries and conversion rate for every form', 'subtleforms' ),
+      __( 'See which field or step visitors leave on', 'subtleforms' ),
+      __( 'Completion rate in the forms list', 'subtleforms' ),
+    ],
+  },
+
   'templates.pro': {
     title: __( 'More templates', 'subtleforms' ),
-    description: __( 'SubtleForms Pro adds 47 templates for registrations, orders, applications and support.', 'subtleforms' ),
+    description: __( 'SubtleForms Pro adds 52 templates for registrations, orders, applications and support.', 'subtleforms' ),
     cta: __( 'About SubtleForms Pro', 'subtleforms' ),
     lossLine: null,
     benefits: [
       __( 'Multi-step, conversational and payment layouts', 'subtleforms' ),
       __( 'Every field and setting stays editable', 'subtleforms' ),
       __( 'New templates added with updates', 'subtleforms' ),
+    ],
+  },
+
+  'fields.payments': {
+    title: __( 'Payment fields', 'subtleforms' ),
+    description: __( 'SubtleForms Pro adds the fields that price an order: Custom Amount, Order Summary, Coupon and Fixed Fee.', 'subtleforms' ),
+    cta: __( 'About SubtleForms Pro', 'subtleforms' ),
+    lossLine: null,
+    benefits: [
+      __( 'Let visitors enter an amount, or add a fixed fee to every order', 'subtleforms' ),
+      __( 'Show the order total with a coupon box', 'subtleforms' ),
+      __( 'Forms that use these fields keep them and leave them off the live form without Pro', 'subtleforms' ),
     ],
   },
 
@@ -50,7 +110,7 @@ const FEATURE_COPY = {
     lossLine: null,
     benefits: [
       __( 'Cards, wallets and bank payments through Stripe', 'subtleforms' ),
-      __( 'Works with the free Product, Priced Options and Coupon fields', 'subtleforms' ),
+      __( 'Works with the Product, Priced Options, Custom Amount and Coupon fields', 'subtleforms' ),
       __( 'Payment status on every entry', 'subtleforms' ),
     ],
   },
@@ -62,7 +122,7 @@ const FEATURE_COPY = {
     lossLine: null,
     benefits: [
       __( 'Cards, wallets and bank payments through Stripe', 'subtleforms' ),
-      __( 'Works with the free Product, Priced Options and Coupon fields', 'subtleforms' ),
+      __( 'Works with the Product, Priced Options, Custom Amount and Coupon fields', 'subtleforms' ),
       __( 'Payment status on every entry', 'subtleforms' ),
     ],
   },

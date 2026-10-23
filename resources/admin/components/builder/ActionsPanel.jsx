@@ -32,6 +32,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import LogicEditor, { collectLogicFields, countRules } from './LogicEditor';
+import { getLogicEditor } from '../../../shared/extend';
 import MergeTagMenu from '../merge-tags/MergeTagMenu';
 import MergeTagsHelpLink from '../merge-tags/MergeTagsHelp';
 import { insertAt } from '../merge-tags/mergeTags';
@@ -166,13 +167,16 @@ function ActionConditions({ settings, fields, disabled, onChange }) {
       <summary>
         {__('Only when…', 'subtleforms')}
         <span className='sf-actions-panel__conditions-state'>
-          {count > 0 ? __('Conditional', 'subtleforms') : __('Every submission', 'subtleforms')}
+          {count > 0
+            ? (getLogicEditor() ? __('Conditional', 'subtleforms') : __('Ignored without Pro', 'subtleforms'))
+            : __('Every submission', 'subtleforms')}
         </span>
       </summary>
       <LogicEditor
         logic={logic}
         availableFields={fields}
         showAction={false}
+        scope='action'
         disabled={disabled}
         emptyText={__('Runs for every submission. Add a rule to run it only for some answers.', 'subtleforms')}
         onChange={(next) => onChange(next)}

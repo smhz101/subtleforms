@@ -40,13 +40,13 @@ describe('fieldGroups', () => {
             },
           ],
         },
-        { type: 'repeat_container', config: { fields: [{ type: 'payment_amount' }] } },
+        { type: 'repeat_container', config: { fields: [{ type: 'text' }] } },
         { type: 'chained_select' },
         { type: 'rich_text' },
       ],
     };
     expect([...fieldGroups(schema)].sort()).toEqual(
-      ['chained', 'conversational', 'date', 'geo', 'payments', 'repeater', 'richText', 'upload']
+      ['chained', 'conversational', 'date', 'geo', 'repeater', 'richText', 'upload']
     );
   });
 

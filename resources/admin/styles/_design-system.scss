@@ -35,6 +35,15 @@
 	}
 }
 
+// Isolated box model, so theme or plugin rules for `*` cannot bend the screens.
+.subtleforms-admin {
+	*,
+	*::before,
+	*::after {
+		box-sizing: border-box;
+	}
+}
+
 .subtleforms-admin {
 	.components-panel {
 		&__body {

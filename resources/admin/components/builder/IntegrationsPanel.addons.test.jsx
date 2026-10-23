@@ -1,0 +1,75 @@
+/**
+ * Panels an add-on registers with registerFormIntegration() are drawn in the
+ * form's Integrations tab, even when no built-in integration is available.
+ */
+import { createRoot } from '@wordpress/element';
+import { act } from 'react';
+import IntegrationsPanel from './IntegrationsPanel';
+import { registerFormIntegration } from '../../../shared/extend';
+
+jest.mock('../settings/extensions/ConnectionTest', () => () => null);
+jest.mock('../settings/extensions/extensions.scss', () => ({}));
+jest.mock('@wordpress/api-fetch', () => jest.fn(() => Promise.resolve({})));
+
+global.IS_REACT_ACT_ENVIRONMENT = true;
+
+afterEach(() => {
+  delete window.__subtleformsExtend.slots['form.integrations'];
+  delete window.subtleformsAdmin;
+});
+
+function mount(props) {
+  const container = document.createElement('div');
+  document.body.appendChild(container);
+  const root = createRoot(container);
+  act(() => root.render(<IntegrationsPanel {...props} />));
+  return { container, unmount: () => act(() => root.unmount()) };
+}
+
+test('draws a registered panel with the form schema and a patch helper', () => {
+  window.subtleformsAdmin = { extensions: {} };
+  const seen = {};
+  registerFormIntegration('demo', {
+    component: (props) => {
+      Object.assign(seen, props);
+      return <p data-testid='demo'>Demo panel</p>;
+    },
+  });
+  const onChange = jest.fn();
+  const schema = { fields: [{ key: 'email', type: 'email', label: 'Email' }], metadata: { integrations: {} } };
+  const { container, unmount } = mount({ schema, onChange });
+
+  expect(container.textContent).toContain('Demo panel');
+  expect(container.textContent).not.toContain('No integrations are available');
+  expect(seen.schema).toBe(schema);
+  expect(seen.onChange).toBe(onChange);
+  expect(Array.isArray(seen.fieldOptions)).toBe(true);
+  expect(seen.crmProvider).toBe('hubspot');
+
+  act(() => seen.patch('demo', { enabled: true }));
+  expect(onChange).toHaveBeenCalledWith({ ...schema, metadata: { integrations: { demo: { enabled: true } } } });
+  unmount();
+});
+
+test('read-only forms do not change', () => {
+  window.subtleformsAdmin = { extensions: {} };
+  let patch;
+  registerFormIntegration('demo', {
+    component: (props) => {
+      patch = props.patch;
+      return null;
+    },
+  });
+  const onChange = jest.fn();
+  const { unmount } = mount({ schema: { metadata: {} }, onChange, isReadOnly: true });
+  act(() => patch('demo', { enabled: true }));
+  expect(onChange).not.toHaveBeenCalled();
+  unmount();
+});
+
+test('shows the empty note when nothing is available and nothing is registered', () => {
+  window.subtleformsAdmin = { extensions: {} };
+  const { container, unmount } = mount({ schema: { metadata: {} }, onChange: jest.fn() });
+  expect(container.textContent).toContain('No integrations are available');
+  unmount();
+});

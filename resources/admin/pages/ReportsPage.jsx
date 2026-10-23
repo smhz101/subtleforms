@@ -1,47 +1,18 @@
 import { useEffect, useState } from '@wordpress/element';
-import { Spinner } from '@wordpress/components';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import clsx from 'clsx';
 import AdminShell from '../components/AdminShell';
-import FormAnalyticsPanel from '../components/analytics/FormAnalyticsPanel';
-import FunnelPanel from '../components/analytics/FunnelPanel';
-import { formatRate, useAnalyticsSummary } from '../components/analytics/useAnalytics';
-import ShowAllButton, { useShowAll } from '../components/analytics/ShowAll';
+import ExtensionSlot from '../components/ExtensionSlot';
+import ProNotice from '../ui/ProNotice';
 import { apiGet } from '../utils/api';
 import './DashboardPage.scss';
-import './ReportsPage.scss';
 import { chartColumnProps } from '../utils/chartA11y';
 
 const formatNumber = ( value ) => Number( value || 0 ).toLocaleString();
 
-// Forms listed in "Each form" before "Show all".
-export const REPORT_TOP_FORMS = 10;
-
-/**
- * Rows for "Each form, last 30 days": most viewed first, then most sent.
- *
- * @param {Object} summaryForms Per-form totals keyed by form ID.
- * @param {Array}  forms        Forms ({ id, title }).
- * @return {Array} Rows with a title.
- */
-export function reportRows( summaryForms, forms ) {
-  return Object.values( summaryForms || {} )
-    .map( ( row ) => ( {
-      ...row,
-      title: ( forms || [] ).find( ( form ) => Number( form.id ) === Number( row.form_id ) )?.title
-        /* translators: %d: form ID */
-        || sprintf( __( 'Form #%d', 'subtleforms' ), row.form_id ),
-    } ) )
-    .sort( ( a, b ) =>
-      Number( b.views || 0 ) - Number( a.views || 0 )
-      || Number( b.submissions || 0 ) - Number( a.submissions || 0 )
-      || Number( a.form_id ) - Number( b.form_id ) );
-}
-
 export default function ReportsPage() {
   const [ overview, setOverview ] = useState( null );
   const [ error, setError ] = useState( '' );
-  const summary = useAnalyticsSummary( 30 );
 
   useEffect( () => {
     let cancelled = false;
@@ -63,13 +34,11 @@ export default function ReportsPage() {
   const forms = overview?.forms || [];
   const series = overview?.series || [];
   const week = series.reduce( ( sum, day ) => sum + Number( day.count || 0 ), 0 );
-  const rows = reportRows( summary.data?.forms, forms );
-  const formRows = useShowAll( rows, REPORT_TOP_FORMS );
 
   return (
     <AdminShell
       title={ __( 'Reports', 'subtleforms' ) }
-      description={ __( 'How many people see and send each form. Spam, failed and trashed entries are not counted.', 'subtleforms' ) }
+      description={ __( 'How many entries your forms receive. Spam, failed and trashed entries are not counted.', 'subtleforms' ) }
       isLoading={ ! overview && ! error }
       error={ error }>
       { overview && (
@@ -102,61 +71,28 @@ export default function ReportsPage() {
             </div>
           </section>
 
-          <FormAnalyticsPanel forms={ forms } />
-
-          <FunnelPanel forms={ forms } />
-
-          <section className='sf-panel sf-analytics-panel'>
-            <header className='sf-panel__header'>
-              <div>
-                <h2 className='sf-panel__title'>{ __( 'Each form, last 30 days', 'subtleforms' ) }</h2>
-                <p className='sf-panel__subtitle'>{ __( 'Conversion is submissions divided by views.', 'subtleforms' ) }</p>
-              </div>
-            </header>
-            <div className='sf-panel__body sf-panel__body--flush'>
-              { summary.isLoading ? (
-                <div className='sf-reports__loading'><Spinner /></div>
-              ) : (
-                <div className='sf-analytics-panel__chart'>
-                  <table className='sf-reports__table' id='sf-reports-forms'>
-                    <thead>
-                      <tr>
-                        <th>{ __( 'Form', 'subtleforms' ) }</th>
-                        <th>{ __( 'Views', 'subtleforms' ) }</th>
-                        <th>{ __( 'Submissions', 'subtleforms' ) }</th>
-                        <th>{ __( 'Conversion', 'subtleforms' ) }</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      { formRows.visible.map( ( row ) => (
-                        <tr key={ row.form_id }>
-                          <td>{ row.title }</td>
-                          <td>{ formatNumber( row.views ) }</td>
-                          <td>{ formatNumber( row.submissions ) }</td>
-                          <td>{ formatRate( row.conversion ) }</td>
-                        </tr>
-                      ) ) }
-                      { rows.length === 0 && (
-                        <tr><td colSpan='4'>{ __( 'No views yet.', 'subtleforms' ) }</td></tr>
-                      ) }
-                    </tbody>
-                  </table>
-                  <ShowAllButton
-                    hidden={ formRows.hidden }
-                    expanded={ formRows.expanded }
-                    onToggle={ formRows.toggle }
-                    controls='sf-reports-forms'
-                    more={ sprintf(
-                      /* translators: %d: number of forms */
-                      _n( 'Show all %d form', 'Show all %d forms', rows.length, 'subtleforms' ),
-                      rows.length
-                    ) }
-                    less={ __( 'Show fewer forms', 'subtleforms' ) }
+          { /* Form analytics (views, conversion, funnel) come from SubtleForms Pro. */ }
+          <ExtensionSlot
+            name='reports.panels'
+            forms={ forms }
+            fallback={
+              <section className='sf-panel'>
+                <header className='sf-panel__header'>
+                  <div>
+                    <h2 className='sf-panel__title'>{ __( 'Form analytics', 'subtleforms' ) }</h2>
+                    <p className='sf-panel__subtitle'>{ __( 'Views, conversion and where visitors leave', 'subtleforms' ) }</p>
+                  </div>
+                </header>
+                <div className='sf-panel__body'>
+                  <ProNotice
+                    label={ __( 'Views, conversion rate and form funnel', 'subtleforms' ) }
+                    help={ __( 'See how many people view each form, how many send it and which field or step they leave on. Entry counts above stay free. Analytics are part of SubtleForms Pro; data already counted is kept and shows once Pro is active.', 'subtleforms' ) }
+                    feature='extensions.analytics'
                   />
                 </div>
-              ) }
-            </div>
-          </section>
+              </section>
+            }
+          />
         </div>
       ) }
     </AdminShell>

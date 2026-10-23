@@ -391,6 +391,11 @@ final class FieldValidator {
 		if ( in_array( $type, $nonInput, true ) ) {
 			return false;
 		}
+		// A type with a plain fallback (picture choice) still takes an answer
+		// when its add-on is not active: it is checked as the choice it falls back to.
+		if ( in_array( $type, \SubtleForms\Fields\AddonFieldTypes::FALLBACKS, true ) ) {
+			return true;
+		}
 		$registry = self::registry();
 		return null === $registry || '' === $type || $registry->has( $type );
 	}
@@ -487,6 +492,13 @@ final class FieldValidator {
 		$type  = isset( $field['type'] ) ? $field['type'] : null;
 		$field = is_array( $field ) ? $field : array();
 
+		// A field type with a plain fallback (picture choice) is checked as the
+		// choice it falls back to, whether or not its add-on is active: the
+		// rules are the same, the add-on only changes how it looks.
+		if ( is_string( $type ) ) {
+			$type = \SubtleForms\Fields\AddonFieldTypes::validationType( $type, $field );
+		}
+
 		// A field that answers with one value never takes a list (FB-23).
 		if ( is_array( $value ) && $this->expectsSingleValue( (string) $type, $field ) ) {
 			return __( 'Please enter a single value.', 'subtleforms' );
@@ -521,7 +533,6 @@ final class FieldValidator {
 				}
 				return $this->validatePasswordConfirm( $value, $field );
 			case 'multiple_choice':
-			case 'picture_choice':
 				$error = $this->validateChoices( $value, $field, true === $this->attr( $field, 'allowMultiple' ) );
 				return $error ?: $this->validateChoiceCount( $value, $field );
 			case 'radio':

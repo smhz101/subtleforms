@@ -845,7 +845,6 @@ final class FormsRepository {
 		global $wpdb;
 		$submissions = $wpdb->prefix . 'subtleforms_submissions';
 		$logs        = $wpdb->prefix . 'subtleforms_logs';
-		$stats       = $wpdb->prefix . 'subtleforms_stats';
 
 		// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange -- Table names are from $wpdb->prefix; values are prepared.
 		// Uploaded files first: only entries that carry a file record are read.
@@ -862,9 +861,6 @@ final class FormsRepository {
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$logs} WHERE submission_id IN ( SELECT id FROM {$submissions} WHERE form_id = %d )", $id ) );
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$submissions} WHERE form_id = %d", $id ) );
 		$wpdb->query( $wpdb->prepare( "DELETE FROM {$this->schemas_table} WHERE form_id = %d", $id ) );
-		if ( $wpdb->get_var( $wpdb->prepare( 'SHOW TABLES LIKE %s', $stats ) ) === $stats ) {
-			$wpdb->query( $wpdb->prepare( "DELETE FROM {$stats} WHERE form_id = %d", $id ) );
-		}
 		// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
 
 		// Count caches of the form's entries.

@@ -7,7 +7,6 @@
 @import './styles/types/default.css';
 @import './styles/types/steps.css';
 @import './styles/types/conversational.css';
-@import './styles/types/payment.css';
 @import './styles/appearance.css';
 
 /* Base styles (shared across all form types) */
@@ -309,6 +308,23 @@
 	margin-bottom: 6px;
 }
 
+/* A group of choices is a fieldset: drop the browser's box, keep the legend
+   looking like the label of any other field. */
+fieldset.subtleforms-field {
+	/*! inherit: keep */
+	border: 0;
+	margin: 0;
+	padding: 0;
+	min-width: 0;
+}
+
+fieldset.subtleforms-field > legend.subtleforms-field-label {
+	/*! inherit: keep */
+	float: none;
+	width: 100%;
+	padding: 0;
+}
+
 .subtleforms-field-label {
 	font-weight: var(--subtleforms-label-weight, 500);
 	color: var(--subtleforms-color-text);
@@ -497,10 +513,9 @@
 /*! inherit: keep-start (submission result and unsupported field notices) */
 /* Success Message, neutral card with a green check (2.0) */
 .subtleforms-success {
-	background: var(--subtleforms-color-bg, #fff);
-	border: 1px solid var(--subtleforms-color-border, #e0e0e0);
-	border-radius: 8px;
-	padding: 32px 24px;
+	background: transparent;
+	border: 0;
+	padding: 0;
 	color: var(--subtleforms-color-text, #1e1e1e);
 	text-align: center;
 }

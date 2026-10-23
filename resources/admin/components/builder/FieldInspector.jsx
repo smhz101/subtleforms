@@ -354,6 +354,7 @@ export default function FieldInspector({ field, allFields, formAppearance, isRea
                 <LogicEditor
                   logic={fieldLogic}
                   availableFields={(allFields || []).filter((f) => f.key !== field.key)}
+                  scope={isStep ? 'step' : 'field'}
                   disabled={isReadOnly}
                   emptyText={
                     isStep

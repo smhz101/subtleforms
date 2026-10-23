@@ -39,27 +39,20 @@ final class Deactivator {
 	 * Clear scheduled cron events.
 	 */
 	private static function clear_scheduled_events(): void {
-		$timestamp = wp_next_scheduled( 'subtleforms_cleanup' );
-		if ( $timestamp ) {
-			wp_unschedule_event( $timestamp, 'subtleforms_cleanup' );
-		}
-
 		// Clear privacy cleanup cron
 		$timestamp = wp_next_scheduled( 'subtleforms_daily_cleanup' );
 		if ( $timestamp ) {
 			wp_unschedule_event( $timestamp, 'subtleforms_daily_cleanup' );
 		}
 
-		// Clear license check cron
-		$timestamp = wp_next_scheduled( 'subtleforms_daily_license_check' );
-		if ( $timestamp ) {
-			wp_unschedule_event( $timestamp, 'subtleforms_daily_license_check' );
-		}
-
-		// Clear analytics retention cron (2.1).
+		// The analytics clean-up event moved to SubtleForms Pro in 2.7.0. A site
+		// that scheduled it before keeps no stray event once this plugin is
+		// deactivated.
 		wp_clear_scheduled_hook( 'subtleforms_stats_prune' );
 
-		// Clear the clean-up of uploads that were never submitted (2.1).
+		// Clear the clean-up of uploads that were never submitted (2.1) and the
+		// spam statistics prune.
 		wp_clear_scheduled_hook( 'subtleforms_uploads_cleanup' );
+		wp_clear_scheduled_hook( 'subtleforms_spam_stats_prune' );
 	}
 }

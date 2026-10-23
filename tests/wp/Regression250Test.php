@@ -12,7 +12,6 @@
 namespace SubtleForms\Tests\WP;
 
 use SubtleForms\Admin\AdminMenu;
-use SubtleForms\Analytics\Stats;
 use SubtleForms\Support\Settings;
 
 final class Regression250Test extends TestCase {
@@ -78,48 +77,6 @@ final class Regression250Test extends TestCase {
 		$this->listen();
 		$this->submit( $formId, array( 'name' => 'Ada' ) );
 		$this->assertSame( array(), $this->fired );
-	}
-
-	/** WP2-02: the analytics summary answers in the free plugin, with no licence. */
-	public function test_analytics_summary_answers_200_for_an_administrator(): void {
-		$this->asAdmin();
-		$request = new \WP_REST_Request( 'GET', '/subtleforms/v1/analytics/summary' );
-		$request->set_header( 'X-WP-Nonce', wp_create_nonce( 'wp_rest' ) );
-		$response = rest_do_request( $request );
-
-		$this->assertSame( 200, $response->get_status(), wp_json_encode( $response->get_data() ) );
-	}
-
-	/** WP2-02: the summary is for administrators; a visitor is refused. */
-	public function test_analytics_summary_refuses_a_visitor(): void {
-		wp_set_current_user( 0 );
-		$response = rest_do_request( new \WP_REST_Request( 'GET', '/subtleforms/v1/analytics/summary' ) );
-		$this->assertContains( $response->get_status(), array( 401, 403 ) );
-	}
-
-	/** WP2-02: the view counting switch decides whether views are counted. */
-	public function test_view_counting_follows_the_settings_switch(): void {
-		update_option( Settings::OPTION_NAME, array( 'ext_analytics_enabled' => true, 'ext_analytics_view_tracking' => true ) );
-		$this->assertTrue( Stats::tracksViews( new Settings() ) );
-
-		update_option( Settings::OPTION_NAME, array( 'ext_analytics_enabled' => true, 'ext_analytics_view_tracking' => false ) );
-		$this->assertFalse( Stats::tracksViews( new Settings() ), 'Switched off: no views are counted.' );
-
-		update_option( Settings::OPTION_NAME, array( 'ext_analytics_enabled' => false, 'ext_analytics_view_tracking' => true ) );
-		$this->assertFalse( Stats::tracksViews( new Settings() ), 'Analytics off: no views are counted.' );
-	}
-
-	/** WP2-02: with the switch off the beacon answers and counts nothing. */
-	public function test_view_beacon_counts_nothing_when_switched_off(): void {
-		$formId = $this->publish( array( array( 'id' => 'f1', 'key' => 'name', 'type' => 'text', 'label' => 'Name' ) ) );
-		update_option( Settings::OPTION_NAME, array( 'ext_analytics_enabled' => true, 'ext_analytics_view_tracking' => false ) );
-
-		$request = new \WP_REST_Request( 'POST', '/subtleforms/v1/analytics/view' );
-		$request->set_param( 'form_id', $formId );
-		$response = ( new \SubtleForms\Api\AnalyticsApi() )->recordView( $request );
-
-		$this->assertSame( 200, $response->get_status() );
-		$this->assertFalse( $response->get_data()['tracked'] );
 	}
 
 	/** FF-02, WP2-08: stored AI assistant keys are removed, other settings stay. */

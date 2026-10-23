@@ -23,7 +23,7 @@ export const PRO_PILLARS = [
 		key: 'payments',
 		icon: Icon.CreditCard,
 		title: __( 'Stripe payments', 'subtleforms' ),
-		text: __( 'A Card Payment field for the free Product, Priced Options and Coupon fields.', 'subtleforms' ),
+		text: __( 'Product, Priced Options, Custom Amount, Order Summary and Coupon fields, with a Card Payment field for Stripe.', 'subtleforms' ),
 	},
 	{
 		key: 'automation',
@@ -35,7 +35,7 @@ export const PRO_PILLARS = [
 		key: 'insights',
 		icon: Icon.FileText,
 		title: __( 'PDFs and translation', 'subtleforms' ),
-		text: __( 'PDF copies of entries, WPML and Polylang, and 47 more templates.', 'subtleforms' ),
+		text: __( 'PDF copies of entries, WPML and Polylang, and 52 more templates.', 'subtleforms' ),
 	},
 ];
 
@@ -96,12 +96,15 @@ export const EXTENSION_GROUPS = [
  * Plain feature checklist used on the License screen.
  */
 export const PRO_CHECKLIST = [
-	__( 'Signature and Calculation fields', 'subtleforms' ),
+	__( 'Signature, Calculation and Picture Choice fields', 'subtleforms' ),
+	__( 'Several files per upload field', 'subtleforms' ),
+	__( 'Advanced conditional logic', 'subtleforms' ),
+	__( 'Form analytics: views, conversion rate and funnel', 'subtleforms' ),
 	__( 'Stripe card payments with a Card Payment field', 'subtleforms' ),
 	__( 'Mailchimp, Brevo, Kit, HubSpot and Zapier actions', 'subtleforms' ),
 	__( 'WooCommerce checkout and a WooCommerce Product field', 'subtleforms' ),
 	__( 'PDF copies of entries', 'subtleforms' ),
-	__( '47 more templates', 'subtleforms' ),
+	__( '52 more templates', 'subtleforms' ),
 	__( 'White label branding set in your licence portal, and WPML or Polylang translation (Agency)', 'subtleforms' ),
 ];
 

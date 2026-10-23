@@ -25,9 +25,7 @@
 	padding: 32px;
 	border: 1px solid var(--sf-border);
 	border-radius: var(--sf-radius-lg);
-	background:
-		radial-gradient(120% 140% at 100% 0%, var(--sf-primary-50) 0%, transparent 55%),
-		var(--sf-bg-surface);
+	background: var(--sf-bg-surface);
 
 	@media (max-width: 960px) {
 		grid-template-columns: 1fr;

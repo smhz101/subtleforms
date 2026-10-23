@@ -52,7 +52,7 @@ final class FrontEndSpeed260Test extends TestCase {
 				),
 				array(
 					'type'   => 'repeat_container',
-					'config' => array( 'fields' => array( array( 'type' => 'payment_product' ) ) ),
+					'config' => array( 'fields' => array( array( 'type' => 'text' ) ) ),
 				),
 				array( 'type' => 'chained_select' ),
 				array( 'type' => 'rich_text' ),
@@ -60,7 +60,7 @@ final class FrontEndSpeed260Test extends TestCase {
 			),
 		);
 		$this->assertSame(
-			array( 'chained', 'conversational', 'date', 'geo', 'payments', 'repeater', 'richText', 'upload' ),
+			array( 'chained', 'conversational', 'date', 'geo', 'repeater', 'richText', 'upload' ),
 			FrontendAssets::fieldGroups( $schema )
 		);
 	}

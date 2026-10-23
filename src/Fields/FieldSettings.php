@@ -35,7 +35,7 @@ final class FieldSettings {
 	 */
 	const LIBRARY = array(
 		'basic'    => array( 'text', 'textarea', 'email', 'number', 'phone', 'url', 'name_group', 'address_group', 'password' ),
-		'choices'  => array( 'dropdown', 'radio', 'multiple_choice', 'checkbox', 'toggle', 'picture_choice', 'country', 'chained_select', 'consent' ),
+		'choices'  => array( 'dropdown', 'radio', 'multiple_choice', 'checkbox', 'toggle', 'country', 'chained_select', 'consent' ),
 		'advanced' => array( 'date', 'time', 'datetime', 'rating', 'scale', 'net_promoter_score', 'range_slider', 'checkbox_grid', 'calculation', 'signature', 'color_picker', 'rich_text', 'hidden' ),
 		'media'    => array( 'file_upload', 'image_upload' ),
 		'layout'   => array( 'section_break', 'html', 'disclaimer', 'step', 'group_container', 'two_column_container', 'three_column_container', 'four_column_container', 'repeat_container' ),
@@ -402,7 +402,7 @@ final class FieldSettings {
 					)
 				);
 			}
-			if ( in_array( $type, array( 'multiple_choice', 'picture_choice' ), true ) ) {
+			if ( 'multiple_choice' === $type ) {
 				if ( ! $has( 'minChoices' ) ) {
 					$add(
 						array(
@@ -475,23 +475,17 @@ final class FieldSettings {
 						)
 					);
 				}
+				// Several files per field is a SubtleForms Pro feature. Without
+				// it the builder shows a note with an upgrade link in its place;
+				// Pro swaps this control for the real ones through the
+				// `subtleforms/fields/inspector_controls` filter.
 				$add(
 					array(
-						'type'    => 'checkbox',
+						'type'    => 'pro_notice',
 						'name'    => 'multiple',
 						'label'   => __( 'Allow several files', 'subtleforms' ),
-						'help'    => __( 'Visitors can drop or pick several files, with upload progress.', 'subtleforms' ),
-						'section' => 'appearance',
-					)
-				);
-				$add(
-					array(
-						'type'    => 'number',
-						'name'    => 'maxFiles',
-						'label'   => __( 'Most files', 'subtleforms' ),
-						'min'     => 1,
-						'max'     => 20,
-						'help'    => __( 'Used when several files are allowed. Default 5.', 'subtleforms' ),
+						'help'    => __( 'Visitors can drop or pick several files, with upload progress. Part of SubtleForms Pro.', 'subtleforms' ),
+						'feature' => 'uploads.multiple',
 						'section' => 'appearance',
 					)
 				);
@@ -693,7 +687,19 @@ final class FieldSettings {
 			}
 		}
 
-		$definition->inspectorControls = array_values( $controls );
+		/**
+		 * The settings a field type shows in the builder, after the plugin
+		 * added its own. Add-ons add, change or replace controls here (for
+		 * example SubtleForms Pro swaps the several files note on upload fields
+		 * for its settings).
+		 *
+		 * @param array  $controls Controls, each with type, name, label and section.
+		 * @param string $type     Field type.
+		 * @since 2.7.0
+		 */
+		$controls = apply_filters( 'subtleforms/fields/inspector_controls', array_values( $controls ), $type );
+
+		$definition->inspectorControls = array_values( is_array( $controls ) ? $controls : array() );
 	}
 
 	/**
@@ -768,7 +774,6 @@ final class FieldSettings {
 			'multiple_choice'    => __( 'Pick any number of options', 'subtleforms' ),
 			'checkbox'           => __( 'A single tick box', 'subtleforms' ),
 			'toggle'             => __( 'Yes / no switch', 'subtleforms' ),
-			'picture_choice'     => __( 'Choices shown as images', 'subtleforms' ),
 			'country'            => __( 'Searchable country list', 'subtleforms' ),
 			'chained_select'     => __( 'Dependent dropdowns', 'subtleforms' ),
 			'consent'            => __( 'Terms or privacy agreement', 'subtleforms' ),

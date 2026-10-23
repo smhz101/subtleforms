@@ -1,5 +1,7 @@
 /**
  * Choices editor for Dropdown, Radio Buttons, Checkboxes and Picture Choice.
+ * A Picture Choice field edits its labels here; the images are edited by
+ * SubtleForms Pro, and an image already saved on an option is kept.
  *
  * - Drag the handle (or use Alt+↑/↓) to reorder.
  * - "Show values" reveals the stored value beside each label; values are
@@ -7,7 +9,6 @@
  * - Tick the circle/box to make an option selected by default.
  * - "Bulk edit" swaps the list for a textarea (one option per line,
  *   `Label|value` to set a value).
- * - Picture Choice adds an image per option, picked from the Media Library.
  */
 
 import { useState, useMemo, useRef } from '@wordpress/element';
@@ -42,27 +43,6 @@ const slugify = (text) =>
     .replace(/^_+|_+$/g, '')
     .slice(0, 48) || `option_${nanoid(6)}`;
 
-function openMediaPicker(onSelect) {
-  const media = window.wp?.media;
-  if (!media) {
-    return false;
-  }
-  const frame = media({
-    title: __('Choose image', 'subtleforms'),
-    button: { text: __('Use image', 'subtleforms') },
-    library: { type: 'image' },
-    multiple: false,
-  });
-  frame.on('select', () => {
-    const attachment = frame.state().get('selection').first()?.toJSON();
-    if (attachment?.url) {
-      onSelect(attachment.sizes?.medium?.url || attachment.url);
-    }
-  });
-  frame.open();
-  return true;
-}
-
 function OptionRow({
   option,
   index,
@@ -70,7 +50,6 @@ function OptionRow({
   isDefault,
   multiple,
   showValues,
-  withImage,
   withPrice,
   disabled,
   onChange,
@@ -120,24 +99,6 @@ function OptionRow({
         onClick={onToggleDefault}>
         {isDefault && <Icon.Check size={11} />}
       </button>
-
-      {withImage && (
-        <button
-          type='button'
-          className='sf-options__image'
-          disabled={disabled}
-          title={__('Choose image', 'subtleforms')}
-          onClick={() => {
-            const opened = openMediaPicker((url) => onChange({ ...option, image: url }));
-            if (!opened) {
-              // eslint-disable-next-line no-alert
-              const url = window.prompt(__('Image URL', 'subtleforms'), option.image || '');
-              if (url !== null) onChange({ ...option, image: url });
-            }
-          }}>
-          {option.image ? <img src={option.image} alt='' /> : <Icon.Image size={14} />}
-        </button>
-      )}
 
       <div className='sf-options__inputs'>
         <input
@@ -251,7 +212,6 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
       : field.type === 'picture_choice'
         ? field.allowMultiple === true
         : false;
-  const withImage = field.type === 'picture_choice';
 
   const defaults = String(field.defaultValue ?? '')
     .split(',')
@@ -371,7 +331,6 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
                   isDefault={defaults.includes(option.value)}
                   multiple={multiple}
                   showValues={showValues}
-                  withImage={withImage}
                   withPrice={withPrice}
                   disabled={isReadOnly}
                   onMove={move}
@@ -408,7 +367,6 @@ export default function OptionsPanel({ field, onUpdate, isReadOnly }) {
               {
                 label,
                 value: `option_${nanoid(6)}`,
-                ...(withImage ? { image: '' } : {}),
                 ...(withPrice ? { price: 0 } : {}),
               },
             ]);

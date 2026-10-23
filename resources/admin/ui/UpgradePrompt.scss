@@ -6,7 +6,7 @@
   display: flex;
   gap: 16px;
   padding: 16px;
-  background: linear-gradient(135deg, var(--sf-gray-50) 0%, var(--sf-surface) 100%);
+  background: var(--sf-gray-50);
   border: 1px solid var(--wp-gray-30);
   border-radius: var(--sf-radius-sm);
   
@@ -27,7 +27,7 @@
   &--banner {
     align-items: center;
     padding: 16px 24px;
-    background: linear-gradient(90deg, var(--wp-blue-link) 0%, var(--wp-blue-700) 100%);
+    background: var(--wp-blue-link);
     border: none;
     color: var(--sf-surface);
     
@@ -48,7 +48,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, var(--wp-blue-link) 0%, var(--wp-blue-700) 100%);
+  background: var(--wp-blue-link);
   border-radius: 50%;
   color: var(--sf-surface);
   

@@ -51,8 +51,9 @@ final class Capabilities {
 	 * @return array<string,bool>
 	 */
 	public static function defaults() {
-		// Keys such as fields.advanced, actions.payment, extensions.*,
-		// templates.pro and branding.white_label belong to SubtleForms Pro.
+		// Keys such as fields.advanced, logic.conditional.advanced,
+		// actions.payment, extensions.*, templates.pro and branding.white_label
+		// belong to SubtleForms Pro.
 		// Pro adds them through the `subtleforms/capabilities` filter and
 		// only Pro code reads them; a missing key reads as false.
 		return array(
@@ -63,7 +64,6 @@ final class Capabilities {
 			'forms.unlimited'            => true,
 
 			'logic.conditional.basic'    => true,
-			'logic.conditional.advanced' => true,
 
 			'actions.save'               => true,
 			'actions.webhook'            => true,

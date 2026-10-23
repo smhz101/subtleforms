@@ -4,7 +4,7 @@ Tags: form builder, contact form, forms, multi-step form, file upload
 Requires at least: 6.6
 Tested up to: 7.1
 Requires PHP: 8.1
-Stable tag: 2.6.1
+Stable tag: 2.7.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -12,7 +12,7 @@ Build contact, multi-step and conversational forms on a visual canvas, then read
 
 == Description ==
 
-SubtleForms is a form builder for WordPress. You build a form on a canvas that looks like the live form, publish it with a shortcode or the SubtleForms block, and read the entries in an inbox inside wp-admin. Everything listed here is in this plugin and works without an account or a license.
+SubtleForms is a form builder for WordPress. You build a form on a canvas that looks like the live form, publish it with a shortcode or the SubtleForms block, and read the entries in an inbox inside wp-admin. Everything listed here is in this plugin and works without an account or a license. A few extras (Picture choice, several files per upload field, advanced conditional logic, form analytics, integrations and card payments) are part of the separate SubtleForms Pro plugin.
 
 = Building forms =
 
@@ -26,18 +26,16 @@ SubtleForms is a form builder for WordPress. You build a form on a canvas that l
 = Fields =
 
 * Text, Paragraph, Email, Number, Phone, Website, Password, Name and Address
-* Dropdown, Radio buttons, Checkboxes, Picture choice, Single checkbox, Toggle, Country, Consent and Dependent dropdowns (as menus, buttons or columns, typed in or loaded from CSV)
+* Dropdown, Radio buttons, Checkboxes, Single checkbox, Toggle, Country, Consent and Dependent dropdowns (as menus, buttons or columns, typed in or loaded from CSV)
 * Date, Time, Date and time, Rating, Opinion scale, NPS, Slider, Matrix, Colour picker and Rich text
-* File and image uploads, one or several files per field, with allowed types and size limits, stored in a private folder and downloaded by admins only
-* Payment fields: Product, Priced options, Custom amount, Fixed fee, Order summary and Coupon, with coupons managed under Payments. Entries are saved as "Payment pending" so you can collect payment yourself
+* File and image uploads, one file per field (several files per field need SubtleForms Pro), with allowed types and size limits, stored in a private folder and downloaded by admins only
 * Hidden fields with merge values such as {user_email} and {get:param}, HTML blocks, section breaks, Repeater, Group and Columns
 
 = Logic and after submit =
 
-* Show or hide fields and steps when rules match: all or any rule, several groups of rules, and operators such as starts with, is one of, between and date rules. Hidden fields are not validated or saved, in the browser and on the server
-* Send an email or webhook, or pick a confirmation, only when its rules match
+* Show or hide fields when all of their rules match, with the basic operators: equals, does not equal, contains, does not contain, is empty, is not empty, greater than and less than. Hidden fields are not validated or saved, in the browser and on the server. Any-match rules, groups, more operators and rules for steps, emails, webhooks and confirmations need SubtleForms Pro
 * Email notifications and webhooks after each entry, with merge tags such as {all_fields}, {field:email} and {entry_id}, plain text or HTML
-* A confirmation message with answers merged in, or a redirect
+* A confirmation message with answers merged in and clickable links, or a redirect
 * Availability rules: logged-in visitors only, open and close dates, and an entry limit
 
 = Entries =
@@ -45,7 +43,7 @@ SubtleForms is a form builder for WordPress. You build a form on a canvas that l
 * An inbox with tabs, search, filters and a reading pane
 * Read and unread, star, flag, notes, resend notifications and a Trash, one entry at a time or in bulk
 * CSV export of entries, JSON export and import of forms and entries, and import of Gravity Forms and Fluent Forms export files as draft forms
-* Reports: views, submissions and conversion for each form, counted on your site without cookies (view counting can be turned off)
+* Reports: submissions, unread entries and a chart of the last days. Form views, conversion and the form funnel are part of SubtleForms Pro
 * Activity, webhook and API logs
 
 = Spam protection and privacy =
@@ -88,11 +86,11 @@ Files are saved under a folder with a random name, without file extensions, and 
 
 = What data does SubtleForms store? =
 
-The answers a visitor sends, the time, and the visitor's IP address and browser user agent for spam checks. It also counts form views per day, without storing who viewed. You can set how long entries are kept, and the WordPress privacy tools can export or erase a person's entries.
+The answers a visitor sends, the time, and the visitor's IP address and browser user agent for spam checks. You can set how long entries are kept, and the WordPress privacy tools can export or erase a person's entries.
 
 = Does the form funnel track visitors? =
 
-No. It keeps daily totals per form of how many people saw, started and left a form and the last field touched. It sets no cookies and stores no answers, IP addresses or other personal data.
+The form funnel is part of SubtleForms Pro, not this plugin. It keeps daily totals per form of how many people saw, started and left a form and the last field touched. It sets no cookies and stores no answers, IP addresses or other personal data.
 
 = Where are the docs and support? =
 
@@ -132,6 +130,26 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 6. The form preview with appearance presets.
 
 == Changelog ==
+
+= 2.7.1 - 2026-10-23 =
+* Change: Payments, coupons and the Payments page moved to SubtleForms Pro. Forms with payment fields show a not available message until Pro 2.7.0 is active.
+* Change: Forms that inherit the theme load no SubtleForms stylesheet, and the stylesheet has an RTL version.
+* Change: Choice groups use a fieldset with a legend, and error and success boxes use theme-neutral colours.
+* Fix: The keep-data uninstall setting is now saved and honoured.
+* Fix: The per-user entry limit works.
+* Security: Form schemas need the manage_options capability, reCAPTCHA v3 checks the score and action, and time tokens expire after two hours and work once.
+* Security: The client IP honours trusted proxies, and queued mail and webhook details stay out of the cron option.
+
+= 2.7.0 - 2026-10-23 =
+* New: Web addresses and links written as [text](https://example.com) in a form's confirmation message are now clickable; only http, https and site-relative links are allowed and anything else stays plain text.
+* New: Add-ons can register their own panel in the form builder under Integrations, so Pro can offer Salesforce, Pipedrive and Close there.
+* New: Extension points for add-ons: field type overrides, logic evaluators, Reports panel slots, form mount hooks and a form-deleted action, with Pro placeholders in the builder and Reports.
+* Change: Advanced conditional logic (any-match, groups, more operators, step, action and confirmation rules) is now part of SubtleForms Pro; basic show and hide rules stay free and saved advanced rules are ignored without Pro.
+* Change: Form analytics (views, conversion, the form funnel and the Reports panels) is now part of SubtleForms Pro; entry counts, dashboard totals and the spam card stay free and stored counts are kept.
+* Change: Uploading several files in one field is now part of SubtleForms Pro; a saved multi-file field accepts one file without it.
+* Change: Picture Choice is now part of SubtleForms Pro; forms that use it keep working as a plain choice field until Pro is active.
+* Change: The Pro upgrade notes now say SubtleForms Pro has 52 templates, including scored quizzes and five calculators.
+* Change: Removed two settings that were saved but never used: the WooCommerce product and currency fields.
 
 = 2.6.1 - 2026-10-23 =
 * Fix: A visitor who starts a form and leaves is counted in the form funnel again; the leave report is sent as form data so WordPress can read it.
@@ -302,6 +320,12 @@ The JavaScript and CSS in the build folder are compiled. The human-readable sour
 The full history is in changelog.txt in the plugin folder.
 
 == Upgrade Notice ==
+
+= 2.7.1 =
+Payments, coupons and the Payments page moved to SubtleForms Pro. Forms with payment fields now need Pro 2.7.0; without it they show a not available message instead of taking unpaid orders.
+
+= 2.7.0 =
+Picture Choice, multiple file uploads, advanced logic and form analytics are now part of SubtleForms Pro. Forms that use them keep working: without Pro they fall back to plain choices, one file and simple show and hide. Install Pro 2.6.0 to keep the full features.
 
 = 2.6.1 =
 Forms appear faster, and the SubtleForms block shows the form with its own style in the editor and on the site.

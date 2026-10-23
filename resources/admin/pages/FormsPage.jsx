@@ -7,6 +7,7 @@ import { useForms, useCreateForm } from '../data';
 import Icon from '../ui/Icon';
 import AdminShell from '../components/AdminShell';
 import TabBar from '../components/TabBar';
+import { getSlotItems } from '../../shared/extend';
 import FormsList, { ALL_FORM_COLUMNS, DEFAULT_FORM_VISIBLE, FORM_COLUMN_LABELS } from '../components/FormsList';
 import OnboardingWizard from '../components/OnboardingWizard';
 import HelpMenu from '../components/HelpMenu';
@@ -45,6 +46,8 @@ export default function FormsPage() {
     }
   });
   const [showColPicker, setShowColPicker] = useState(false);
+  // A column an add-on brings (conversion with SubtleForms Pro); no toggle without one.
+  const [extraColumn] = getSlotItems('forms.list.column');
   const colPickerRef = useRef(null);
 
   const toggleColumn = (key) => {
@@ -170,14 +173,14 @@ export default function FormsPage() {
               </Button>
               {showColPicker && (
                 <div className='sf-col-picker__dropdown'>
-                  {ALL_FORM_COLUMNS.filter((k) => k !== 'actions').map((key) => (
+                  {ALL_FORM_COLUMNS.filter((k) => k !== 'actions' && (k !== 'performance' || extraColumn)).map((key) => (
                     <label key={key} className='sf-col-picker__item'>
                       <input
                         type='checkbox'
                         checked={visibleColumns.includes(key)}
                         onChange={() => toggleColumn(key)}
                       />
-                      <span>{FORM_COLUMN_LABELS[key] || key}</span>
+                      <span>{(key === 'performance' && extraColumn?.header) || FORM_COLUMN_LABELS[key] || key}</span>
                     </label>
                   ))}
                 </div>

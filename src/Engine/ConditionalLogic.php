@@ -24,13 +24,20 @@ if ( ! defined( 'ABSPATH' ) ) {
  *         ),
  *     )
  *
- * Groups are OR'ed; a group passes when all (or any) of its rules match. The
- * older `conditions` list ({ sourceField, operator, value, effect }) is still
- * read: rules that share an effect form one "all" group.
+ * This plugin evaluates the basic form of logic on fields: one group whose
+ * rules must all match, with the basic operators. Everything beyond that is
+ * left to an add-on (SubtleForms Pro): several groups (OR), the "any" match,
+ * the other operators, and conditions on steps, actions and confirmations.
+ * Logic this plugin does not evaluate and no add-on claims through
+ * `subtleforms/logic/supports` is ignored, as if the field had no rule: it is
+ * stored untouched, never rejected, and never changes what a visitor sees.
+ *
+ * The older `conditions` list ({ sourceField, operator, value, effect }) is
+ * still read: rules that share an effect form one "all" group.
  */
 final class ConditionalLogic {
 
-	/** Operators available on every plan. */
+	/** Operators this plugin evaluates. */
 	public const BASIC_OPERATORS = array(
 		'equals',
 		'not_equals',
@@ -42,19 +49,7 @@ final class ConditionalLogic {
 		'less_than',
 	);
 
-	/** Operators that need logic.conditional.advanced. */
-	public const ADVANCED_OPERATORS = array(
-		'starts_with',
-		'ends_with',
-		'in',
-		'not_in',
-		'between',
-		'before',
-		'after',
-	);
-
 	private const NUMERIC_RE = '/^\s*[-+]?(\d+(\.\d*)?|\.\d+)\s*$/';
-	private const DATE_RE    = '/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2})(?::(\d{2}))?)?$/';
 	private const MAX_PASSES = 5;
 
 	/** @var string|null Day used for "today" (YYYY-MM-DD); null = site's today. */
@@ -119,65 +114,100 @@ final class ConditionalLogic {
 	}
 
 	/**
-	 * Whether a logic object's conditions are met. Inactive logic passes.
+	 * Whether a logic object's conditions are met. Inactive logic passes, and
+	 * so does logic nobody evaluates (see the class notes): it is ignored.
 	 *
 	 * @param mixed               $logic
 	 * @param array<string,mixed> $values
+	 * @param array<string,array> $fields_by_key Fields by key, for field specific matching.
+	 * @param string              $scope          field, step, action or confirmation.
 	 */
-	public function logicPasses( $logic, array $values, array $fields_by_key = array() ): bool {
+	public function logicPasses( $logic, array $values, array $fields_by_key = array(), string $scope = 'field' ): bool {
 		$l = self::normalizeLogic( $logic );
 		if ( $l === null ) {
 			return true;
 		}
-		foreach ( $l['groups'] as $group ) {
-			$hits = 0;
-			foreach ( $group['rules'] as $rule ) {
-				$field = $fields_by_key[ $rule['field'] ] ?? null;
-				if ( $this->evaluateCondition( self::readValue( $values, $rule['field'] ), $rule['operator'], $rule['value'], $rule['value2'], is_array( $field ) ? $field : null ) ) {
-					++$hits;
-				}
-			}
-			$passes = $group['match'] === 'any' ? $hits > 0 : $hits === count( $group['rules'] );
-			if ( $passes ) {
-				return true;
+		if ( ! self::isBasic( $l, $scope ) ) {
+			/**
+			 * Whether advanced logic passes. An add-on that returned true from
+			 * `subtleforms/logic/supports` evaluates it here: several groups,
+			 * the "any" match, other operators, and logic on steps, actions and
+			 * confirmations. Return true or false, or null to leave it ignored.
+			 *
+			 * @param bool|null           $result        Null.
+			 * @param array               $logic         Normalised logic: action and groups of match and rules.
+			 * @param array<string,mixed> $values        Answers by field key.
+			 * @param array<string,array> $fields_by_key Fields by key.
+			 * @param string              $scope         field, step, action or confirmation.
+			 * @param ConditionalLogic    $engine        The evaluator, for its helpers.
+			 * @since 2.7.0
+			 */
+			$result = apply_filters( 'subtleforms/logic/passes', null, $l, $values, $fields_by_key, $scope, $this );
+			return null === $result ? true : (bool) $result;
+		}
+		foreach ( $l['groups'][0]['rules'] as $rule ) {
+			$field = $fields_by_key[ $rule['field'] ] ?? null;
+			if ( ! $this->evaluateCondition( self::readValue( $values, $rule['field'] ), $rule['operator'], $rule['value'], $rule['value2'], is_array( $field ) ? $field : null ) ) {
+				return false;
 			}
 		}
-		return false;
+		return true;
 	}
 
 	/**
-	 * Whether a logic object has at least one rule.
+	 * Whether a logic object has at least one rule that is evaluated: a
+	 * basic rule on a field, or logic an add-on evaluates. Logic nobody
+	 * evaluates counts as none.
 	 *
-	 * @param mixed $logic
+	 * @param mixed  $logic
+	 * @param string $scope field, step, action or confirmation.
 	 */
-	public static function hasLogic( $logic ): bool {
-		return self::normalizeLogic( $logic ) !== null;
-	}
-
-	/**
-	 * Whether a logic object uses anything beyond the free basics.
-	 *
-	 * @param mixed $logic
-	 */
-	public static function usesAdvancedLogic( $logic ): bool {
+	public static function hasLogic( $logic, string $scope = 'field' ): bool {
 		$l = self::normalizeLogic( $logic );
-		if ( $l === null ) {
+		return $l !== null && self::isSupported( $l, $scope );
+	}
+
+	/**
+	 * Whether normalised logic is the basic form this plugin evaluates itself:
+	 * on a field, one group whose rules must all match, with basic operators.
+	 *
+	 * @param array  $l     Normalised logic.
+	 * @param string $scope field, step, action or confirmation.
+	 */
+	public static function isBasic( array $l, string $scope = 'field' ): bool {
+		if ( 'field' !== $scope || count( $l['groups'] ) !== 1 || $l['groups'][0]['match'] !== 'all' ) {
 			return false;
 		}
-		if ( count( $l['groups'] ) > 1 ) {
+		foreach ( $l['groups'][0]['rules'] as $rule ) {
+			if ( ! in_array( $rule['operator'], self::BASIC_OPERATORS, true ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Whether this site evaluates a normalised logic object.
+	 *
+	 * @param array  $l     Normalised logic.
+	 * @param string $scope field, step, action or confirmation.
+	 */
+	public static function isSupported( array $l, string $scope = 'field' ): bool {
+		if ( self::isBasic( $l, $scope ) ) {
 			return true;
 		}
-		foreach ( $l['groups'] as $group ) {
-			if ( $group['match'] === 'any' ) {
-				return true;
-			}
-			foreach ( $group['rules'] as $rule ) {
-				if ( in_array( $rule['operator'], self::ADVANCED_OPERATORS, true ) ) {
-					return true;
-				}
-			}
-		}
-		return false;
+		/**
+		 * Whether an add-on evaluates this logic. Return true to take it on
+		 * (and evaluate it with `subtleforms/logic/passes`). Logic that no one
+		 * takes on is ignored: the field is shown, the step, email or webhook
+		 * runs, and the default confirmation is used.
+		 *
+		 * @param bool   $supported Default false.
+		 * @param array  $logic     Normalised logic: action and groups of match and rules.
+		 * @param string $scope     field, step, action or confirmation.
+		 * @since 2.7.0
+		 */
+		return (bool) apply_filters( 'subtleforms/logic/supports', false, $l, $scope );
 	}
 
 	/**
@@ -195,7 +225,7 @@ final class ConditionalLogic {
 			if ( ! is_array( $c ) || ( array_key_exists( 'enabled', $c ) && $c['enabled'] === false ) ) {
 				continue;
 			}
-			if ( self::hasLogic( $c['logic'] ?? null ) && $this->logicPasses( $c['logic'], $values ) ) {
+			if ( self::hasLogic( $c['logic'] ?? null, 'confirmation' ) && $this->logicPasses( $c['logic'], $values, array(), 'confirmation' ) ) {
 				return $c;
 			}
 		}
@@ -211,7 +241,6 @@ final class ConditionalLogic {
 	 * @param mixed  $compare2 Upper bound for "between".
 	 */
 	public function evaluateCondition( $value, string $operator, $compare, $compare2 = '', $field = null ): bool {
-		$today = $this->today();
 		$items = self::listOf( $value );
 		$c     = self::toText( $compare );
 
@@ -237,22 +266,6 @@ final class ConditionalLogic {
 					}
 				}
 				return $operator === 'contains' ? $found : ! $found;
-			case 'starts_with':
-			case 'ends_with':
-				$needle = self::norm( $c );
-				if ( $needle === '' ) {
-					return false;
-				}
-				foreach ( $items as $x ) {
-					$x = self::norm( $x );
-					$hit = $operator === 'starts_with'
-						? strncmp( $x, $needle, strlen( $needle ) ) === 0
-						: ( strlen( $x ) >= strlen( $needle ) && substr( $x, -strlen( $needle ) ) === $needle );
-					if ( $hit ) {
-						return true;
-					}
-				}
-				return false;
 			case 'empty':
 				return self::isEmptyForField( $value, $field );
 			case 'not_empty':
@@ -271,53 +284,23 @@ final class ConditionalLogic {
 					}
 				}
 				return false;
-			case 'in':
-			case 'not_in':
-				$options = self::optionList( $compare );
-				$found   = false;
-				$country = is_array( $field ) && 'country' === ( $field['type'] ?? '' );
-				if ( ! self::isEmptyValue( $value ) ) {
-					foreach ( $items as $x ) {
-						foreach ( $options as $o ) {
-							if ( $country ? self::anyCountryEquals( array( $x ), $o ) : self::textEquals( $x, $o ) ) {
-								$found = true;
-								break 2;
-							}
-						}
-					}
-				}
-				return $operator === 'in' ? $found : ! $found;
-			case 'between':
-				$lo = $compare;
-				$hi = $compare2;
-				if ( self::isList( $compare ) && count( $compare ) === 2 ) {
-					$lo = $compare[0];
-					$hi = $compare[1];
-				}
-				foreach ( $items as $x ) {
-					if ( self::inRange( $x, self::toText( $lo ), self::toText( $hi ), $today ) ) {
-						return true;
-					}
-				}
-				return false;
-			case 'before':
-			case 'after':
-				$limit = self::toDate( $c, $today );
-				if ( $limit === null ) {
-					return false;
-				}
-				foreach ( $items as $x ) {
-					$d = self::toDate( $x, $today );
-					if ( $d === null ) {
-						continue;
-					}
-					if ( $operator === 'before' ? strcmp( $d, $limit ) < 0 : strcmp( $d, $limit ) > 0 ) {
-						return true;
-					}
-				}
-				return false;
 			default:
-				return false;
+				/**
+				 * Evaluate an operator this plugin does not know (an add-on's
+				 * operator). Return true or false, or null for an unknown one,
+				 * which does not match.
+				 *
+				 * @param bool|null        $result   Null.
+				 * @param mixed            $value    The answer.
+				 * @param string           $operator Operator key.
+				 * @param mixed            $compare  The rule's value.
+				 * @param mixed            $compare2 Upper bound for "between".
+				 * @param array|null       $field    The field the rule reads.
+				 * @param ConditionalLogic $engine   The evaluator, for its helpers.
+				 * @since 2.7.0
+				 */
+				$result = apply_filters( 'subtleforms/logic/evaluate_condition', null, $value, $operator, $compare, $compare2, $field, $this );
+				return null === $result ? false : (bool) $result;
 		}
 	}
 
@@ -408,6 +391,22 @@ final class ConditionalLogic {
 	 * @return array<int,array>
 	 */
 	public static function nodeLogics( array $node ): array {
+		$scope = ( $node['type'] ?? '' ) === 'step' ? 'step' : 'field';
+		return array_values(
+			array_filter(
+				self::allNodeLogics( $node ),
+				static fn( array $l ): bool => self::isSupported( $l, $scope )
+			)
+		);
+	}
+
+	/**
+	 * Every logic object on a node, evaluated or not.
+	 *
+	 * @param array<string,mixed> $node
+	 * @return array<int,array>
+	 */
+	private static function allNodeLogics( array $node ): array {
 		$cfg   = isset( $node['config'] ) && is_array( $node['config'] ) ? $node['config'] : array();
 		$logic = $node['logic'] ?? $cfg['logic'] ?? null;
 		$one   = self::normalizeLogic( $logic );
@@ -483,8 +482,9 @@ final class ConditionalLogic {
 			$key    = ( null !== $rawKey && '' !== $prefix ) ? $prefix . $rawKey : $rawKey;
 			$hidden = $parentHidden;
 
+			$scope = ( $node['type'] ?? '' ) === 'step' ? 'step' : 'field';
 			foreach ( self::nodeLogics( $node ) as $l ) {
-				$passes = $this->logicPasses( $l, $values, $fields_by_key );
+				$passes = $this->logicPasses( $l, $values, $fields_by_key, $scope );
 				if ( ( $l['action'] === 'show' && ! $passes ) || ( $l['action'] === 'hide' && $passes ) ) {
 					$hidden = true;
 				} elseif ( $l['action'] === 'require' && $passes ) {
@@ -680,7 +680,7 @@ final class ConditionalLogic {
 	 * @param array<string,mixed> $values
 	 * @return mixed
 	 */
-	private static function readValue( array $values, string $key ) {
+	public static function readValue( array $values, string $key ) {
 		if ( $key === '' ) {
 			return null;
 		}
@@ -700,7 +700,7 @@ final class ConditionalLogic {
 	/**
 	 * @param mixed $value
 	 */
-	private static function isList( $value ): bool {
+	public static function isList( $value ): bool {
 		if ( ! is_array( $value ) ) {
 			return false;
 		}
@@ -757,14 +757,14 @@ final class ConditionalLogic {
 	 * @param mixed $value
 	 * @return string[]
 	 */
-	private static function listOf( $value ): array {
+	public static function listOf( $value ): array {
 		if ( self::isList( $value ) ) {
 			return array_map( array( self::class, 'toText' ), $value );
 		}
 		return array( self::toText( $value ) );
 	}
 
-	private static function norm( string $s ): string {
+	public static function norm( string $s ): string {
 		$s = trim( $s );
 		return function_exists( 'mb_strtolower' ) ? mb_strtolower( $s, 'UTF-8' ) : strtolower( $s );
 	}
@@ -779,29 +779,7 @@ final class ConditionalLogic {
 		return is_string( $s ) && preg_match( self::NUMERIC_RE, $s ) === 1;
 	}
 
-	/**
-	 * ISO date as a sortable "YYYY-MM-DD HH:MM:SS" string, or null.
-	 */
-	public static function toDate( string $s, string $today ): ?string {
-		$str = trim( $s );
-		if ( strtolower( $str ) === 'today' ) {
-			$str = $today;
-		}
-		if ( ! preg_match( self::DATE_RE, $str, $m ) ) {
-			return null;
-		}
-		return sprintf(
-			'%s-%s-%s %s:%s:%s',
-			$m[1],
-			$m[2],
-			$m[3],
-			isset( $m[4] ) && $m[4] !== '' ? $m[4] : '00',
-			isset( $m[5] ) && $m[5] !== '' ? $m[5] : '00',
-			isset( $m[6] ) && $m[6] !== '' ? $m[6] : '00'
-		);
-	}
-
-	private static function textEquals( string $a, string $b ): bool {
+	public static function textEquals( string $a, string $b ): bool {
 		if ( self::isNumeric( $a ) && self::isNumeric( $b ) ) {
 			return (float) $a === (float) $b;
 		}
@@ -867,7 +845,7 @@ final class ConditionalLogic {
 	 *
 	 * @param string[] $items
 	 */
-	private static function anyCountryEquals( array $items, string $expected ): bool {
+	public static function anyCountryEquals( array $items, string $expected ): bool {
 		$want = \SubtleForms\Fields\CountryList::codeFor( $expected );
 		foreach ( $items as $x ) {
 			$have = \SubtleForms\Fields\CountryList::codeFor( $x );
@@ -933,35 +911,9 @@ final class ConditionalLogic {
 	}
 
 	/**
-	 * @param mixed $compare
-	 * @return string[]
+	 * The day "today" means in a rule (Y-m-d), for add-on operators.
 	 */
-	private static function optionList( $compare ): array {
-		$raw = self::isList( $compare )
-			? array_map( array( self::class, 'toText' ), $compare )
-			: explode( ',', self::toText( $compare ) );
-		$out = array();
-		foreach ( $raw as $o ) {
-			$o = trim( $o );
-			if ( $o !== '' ) {
-				$out[] = $o;
-			}
-		}
-		return $out;
-	}
-
-	private static function inRange( string $x, string $min, string $max, string $today ): bool {
-		if ( self::isNumeric( $x ) && self::isNumeric( $min ) && self::isNumeric( $max ) ) {
-			$n = (float) $x;
-			return $n >= (float) $min && $n <= (float) $max;
-		}
-		$d  = self::toDate( $x, $today );
-		$lo = self::toDate( $min, $today );
-		$hi = self::toDate( $max, $today );
-		return $d !== null && $lo !== null && $hi !== null && strcmp( $d, $lo ) >= 0 && strcmp( $d, $hi ) <= 0;
-	}
-
-	private function today(): string {
+	public function today(): string {
 		if ( $this->today !== null ) {
 			return $this->today;
 		}

@@ -47,7 +47,6 @@ final class Release232Test extends TestCase {
 			self::$registry = new FieldRegistry();
 			CoreFields::register( self::$registry );
 			\SubtleForms\Fields\FieldsV2::register( self::$registry );
-			\SubtleForms\Fields\PaymentFields::register( self::$registry );
 			FieldSettings::decorateAll( self::$registry );
 		}
 		return self::$registry;

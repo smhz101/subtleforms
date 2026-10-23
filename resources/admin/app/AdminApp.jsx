@@ -65,7 +65,7 @@ const SubmissionsPage    = lazyWithRetry(() => import(/* webpackChunkName: "page
 const SubmissionDetailPage = lazyWithRetry(() => import(/* webpackChunkName: "page-submission-detail" */ '../pages/SubmissionDetailPage'));
 const BuilderPage        = lazyWithRetry(() => import(/* webpackChunkName: "page-builder" */        '../pages/BuilderPage'));
 const ExtensionsPage     = lazyWithRetry(() => import(/* webpackChunkName: "page-extensions" */     '../pages/ExtensionsPage'));
-const PaymentsPage       = lazyWithRetry(() => import(/* webpackChunkName: "page-payments" */       '../pages/PaymentsPage'));
+const PaymentsPage       = lazyWithRetry(() => import(/* webpackChunkName: "page-payments" */       '../pages/PaymentsUpsell'));
 const ReportsPage        = lazyWithRetry(() => import(/* webpackChunkName: "page-reports" */        '../pages/ReportsPage'));
 const CreateFormPage     = lazyWithRetry(() => import(/* webpackChunkName: "page-create-form" */    '../pages/CreateFormPage'));
 

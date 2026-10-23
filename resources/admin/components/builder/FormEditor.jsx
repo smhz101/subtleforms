@@ -28,7 +28,7 @@ function FieldPickerPopover({ fieldGroups, context, onInsert }) {
     Object.values(fieldGroups).forEach((fields) =>
       fields.forEach((f) => {
         if (
-          !f.is_pro_locked &&
+          !f.pro_placeholder &&
           (f.label.toLowerCase().includes(q) || f.type.toLowerCase().includes(q))
         ) {
           results.push(f);
@@ -42,7 +42,7 @@ function FieldPickerPopover({ fieldGroups, context, onInsert }) {
     if (query.trim()) return null;
     const result = {};
     Object.entries(fieldGroups).forEach(([cat, fields]) => {
-      const visible = fields.filter((f) => !f.is_pro_locked);
+      const visible = fields.filter((f) => !f.pro_placeholder);
       if (visible.length) result[cat] = visible;
     });
     return result;

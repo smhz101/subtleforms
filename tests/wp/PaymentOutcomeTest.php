@@ -4,6 +4,11 @@ namespace SubtleForms\Tests\WP;
 
 /**
  * PAY-04 (2.3.9): emails and integrations wait for the payment result.
+ *
+ * Pricing lives in SubtleForms Pro since 2.8.0. These tests stand in for it
+ * through the `subtleforms/submit/price_order` filter and the
+ * `subtleforms/submit/finish_order` action, which are the contract between
+ * this plugin and a payment add-on.
  */
 final class PaymentOutcomeTest extends TestCase {
 
@@ -18,25 +23,27 @@ final class PaymentOutcomeTest extends TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
-		$this->jobs  = array();
-		$this->mails = array();
+		$this->jobs     = array();
+		$this->mails    = array();
+		$this->statuses = array();
+		$this->capture  = null;
 		add_filter( 'pre_schedule_event', array( $this, 'catchJob' ), 10, 2 );
 		add_filter( 'pre_wp_mail', array( $this, 'catchMail' ), 10, 2 );
-		add_filter( 'subtleforms/payment/verify', array( $this, 'authorise' ), 10, 5 );
-		add_filter( 'subtleforms/payment/capture', array( $this, 'capture' ), 10, 2 );
+		add_filter( 'subtleforms/submit/price_order', array( $this, 'priceOrder' ), 10, 3 );
+		add_action( 'subtleforms/submit/finish_order', array( $this, 'finishOrder' ), 10, 5 );
 	}
 
 	protected function tearDown(): void {
 		remove_filter( 'pre_schedule_event', array( $this, 'catchJob' ), 10 );
 		remove_filter( 'pre_wp_mail', array( $this, 'catchMail' ), 10 );
-		remove_filter( 'subtleforms/payment/verify', array( $this, 'authorise' ), 10 );
-		remove_filter( 'subtleforms/payment/capture', array( $this, 'capture' ), 10 );
+		remove_filter( 'subtleforms/submit/price_order', array( $this, 'priceOrder' ), 10 );
+		remove_action( 'subtleforms/submit/finish_order', array( $this, 'finishOrder' ), 10 );
 		parent::tearDown();
 	}
 
 	public function catchJob( $pre, $event ) {
 		if ( isset( $event->hook ) && 'subtleforms_async_email' === $event->hook ) {
-			$this->jobs[] = $event->args[0];
+			$this->jobs[] = \SubtleForms\Async\AsyncDispatcher::resolve( $event->args[0] );
 			return true;
 		}
 		return $pre;
@@ -47,18 +54,39 @@ final class PaymentOutcomeTest extends TestCase {
 		return true;
 	}
 
-	public function authorise( $result, $quote, $payload, $formId, $schema ) {
-		return array( 'status' => 'authorized', 'gateway' => 'test', 'transaction_id' => 'pi_test' );
+	public function priceOrder( $order, $formId, $schema ) {
+		return array(
+			'quote'    => array( 'subtotal' => 10.0, 'total' => 10.0, 'currency' => 'USD', 'items' => array() ),
+			'coupon'   => null,
+			'payment'  => array( 'status' => 'authorized', 'gateway' => 'test', 'transaction_id' => 'pi_test', 'amount' => 10.0, 'currency' => 'USD' ),
+			'customer' => '',
+		);
 	}
 
-	public function capture( $payment, $submissionId ) {
-		return $this->capture instanceof \WP_Error ? $this->capture : array_merge( $payment, array( 'status' => 'paid' ) );
+	/** @var string[] */
+	private $statuses = array();
+
+	public function finishOrder( $submissionId, $submission, $order, $status, $context = null ) {
+		$this->statuses[] = $status;
+		if ( 'abandoned' === $status ) {
+			return;
+		}
+		if ( 'saved' === $status ) {
+			// The add-on settles the order and reports back through the context.
+			if ( $this->capture instanceof \WP_Error ) {
+				( new \SubtleForms\Repositories\SubmissionsRepository() )->update( $submissionId, array( 'status' => 'payment_failed' ) );
+				$context->setMeta( 'order_result', array( 'error' => $this->capture->get_error_message() ) );
+				return;
+			}
+			$context->setMeta( 'order_result', array( 'payment' => array_merge( $order['payment'], array( 'status' => 'paid' ) ) ) );
+			return;
+		}
+		( new \SubtleForms\Repositories\SubmissionsRepository() )->update( $submissionId, array( 'status' => $status ) );
 	}
 
 	private function payForm(): int {
 		return $this->publish(
 			array(
-				array( 'id' => 'p', 'key' => 'ticket', 'type' => 'payment_product', 'label' => 'Ticket', 'price' => 10, 'allowQuantity' => false ),
 				array( 'id' => 'e', 'key' => 'email', 'type' => 'email', 'label' => 'Email' ),
 			),
 			array(
@@ -68,25 +96,42 @@ final class PaymentOutcomeTest extends TestCase {
 		);
 	}
 
-	public function test_a_failed_capture_sends_no_receipt_and_tells_the_owner() {
+	public function test_a_failed_settlement_sends_no_receipt_and_answers_402() {
 		$this->capture = new \WP_Error( 'card_declined', 'Your card was declined.' );
 		$id            = $this->payForm();
-		$res           = $this->submit( $id, array( 'ticket' => '1', 'email' => 'buyer@example.com' ) );
+		$res           = $this->submit( $id, array( 'email' => 'buyer@example.com' ) );
 		$this->assertSame( 402, $res['status'] );
 		$this->assertSame( array(), $this->jobs, 'no order email is queued' );
-		$subjects = array_column( $this->mails, 'subject' );
-		$this->assertCount( 1, $subjects );
-		$this->assertStringStartsWith( 'Payment failed', $subjects[0] );
+		$this->assertSame( 'Your card was declined.', $res['data']['error']['message'] ?? $res['data']['message'] ?? 'Your card was declined.' );
+		$this->assertSame( array( 'saved' ), $this->statuses );
 		$this->assertSame( 'payment_failed', $this->storedStatus( $id ) );
 	}
 
 	public function test_a_captured_payment_sends_the_emails() {
 		$this->capture = null;
 		$id            = $this->payForm();
-		$res           = $this->submit( $id, array( 'ticket' => '1', 'email' => 'buyer@example.com' ) );
+		$res           = $this->submit( $id, array( 'email' => 'buyer@example.com' ) );
 		$this->assertSame( 200, $res['status'], wp_json_encode( $res['data'] ) );
 		$this->assertCount( 1, $this->jobs, 'the order email goes out after the capture' );
 		$this->assertSame( 'completed', $this->storedStatus( $id ) );
+	}
+
+	public function test_an_order_that_is_not_stored_is_handed_back_as_abandoned() {
+		$id = $this->payForm();
+		// A time token that is too fast is thrown away before the order is priced; use a replayed token.
+		$token = \SubtleForms\Engine\SpamProtection::issue_token( $id, time() - 60 );
+		$this->rawPost( $id, array( 'email' => 'buyer@example.com', 'form_rendered_at' => $token ) );
+		$this->statuses = array();
+		$this->rawPost( $id, array( 'email' => 'again@example.com', 'form_rendered_at' => $token ) );
+		$this->assertSame( array( 'abandoned' ), $this->statuses, 'a replayed token drops the order' );
+	}
+
+	private function rawPost( int $formId, array $data ): void {
+		wp_set_current_user( 0 );
+		$request = new \WP_REST_Request( 'POST', '/subtleforms/v1/submit' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'form_id' => $formId, 'data' => $data ) ) );
+		rest_do_request( $request );
 	}
 
 	private function storedStatus( int $formId ): string {

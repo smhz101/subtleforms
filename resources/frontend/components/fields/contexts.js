@@ -2,9 +2,9 @@
  * Contexts the form shares with its fields.
  *
  * They live in their own small file so the form can provide them without
- * importing the upload or payment field code, which is only downloaded for
- * forms that have those fields. FileUpload.jsx and Payments.jsx re-export
- * them, so older imports keep working.
+ * importing the upload field code, which is only downloaded for forms that
+ * have those fields. FileUpload.jsx re-exports them, so older imports keep
+ * working. SubtleForms Pro draws its payment fields with these contexts.
  */
 import { createContext, useContext } from '@wordpress/element';
 

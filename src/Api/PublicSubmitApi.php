@@ -27,8 +27,6 @@ use SubtleForms\Validation\RequestValidator;
 use SubtleForms\Validation\ValidationException;
 use SubtleForms\Validation\Schemas;
 use SubtleForms\Validation\Sanitizer;
-use SubtleForms\Payments\Pricing;
-use SubtleForms\Payments\CouponsRepository;
 use SubtleForms\Security\RateLimiter;
 use SubtleForms\Analytics\SpamStats;
 use SubtleForms\Engine\SpamProtection;
@@ -39,6 +37,13 @@ use WP_REST_Response;
  * REST API controller for public form submissions.
  */
 final class PublicSubmitApi {
+
+	/**
+	 * Whether the submission being handled is a classic (no JavaScript) post.
+	 *
+	 * @var bool
+	 */
+	private $classicPost = false;
 
 	private const NAMESPACE = 'subtleforms/v1';
 
@@ -117,8 +122,9 @@ final class PublicSubmitApi {
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body( (string) wp_json_encode( $built ) );
 		$request->set_param( 'form_id', $built['form_id'] );
-		$response = $this->submit_form( $request );
-		$outcome  = ClassicResult::outcome( $response->get_status(), $response->get_data(), $built['form_id'], $built['data'] );
+		$this->classicPost = true;
+		$response          = $this->submit_form( $request );
+		$outcome           = ClassicResult::outcome( $response->get_status(), $response->get_data(), $built['form_id'], $built['data'] );
 
 		// Only a submission that went through follows a redirect confirmation.
 		if ( $outcome['ok'] && '' !== $outcome['redirect'] ) {
@@ -209,7 +215,7 @@ final class PublicSubmitApi {
 			return $rateLimitResponse;
 		}
 
-		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+		$ip = \SubtleForms\Security\ClientIp::get();
 
 		// Validate form ID
 		try {
@@ -258,12 +264,40 @@ final class PublicSubmitApi {
 		// nothing is stored, so a bot does not learn it was caught and retry.
 		// A site admin testing a form (builder preview) skips the time trap,
 		// since the preview has no server-issued token.
-		$spamReason = SpamProtection::block_reason(
+		$protection = SpamProtection::for_form( $this->spamSchema( $formId, ! empty( $isPreview ) ) );
+		// A classic post cannot refresh an old token, so it may use one once.
+		$protection['acceptStale'] = $this->classicPost;
+		$skipTimeTrap              = current_user_can( 'manage_options' );
+		// A classic post cannot trade the page ticket in the browser, so the
+		// server trades it here, before the checks.
+		if ( $this->classicPost && null !== SpamProtection::ticket_time( $payload[ SpamProtection::TIME_FIELD ] ?? null, $formId ) ) {
+			$payload[ SpamProtection::TIME_FIELD ] = (string) SpamProtection::exchange_ticket( $payload[ SpamProtection::TIME_FIELD ], $formId );
+		}
+		$spamReason                = SpamProtection::block_reason(
 			$payload,
 			$formId,
-			SpamProtection::for_form( $this->spamSchema( $formId, ! empty( $isPreview ) ) ),
-			current_user_can( 'manage_options' )
+			$protection,
+			$skipTimeTrap
 		);
+		if ( 'time_token_expired' === $spamReason || 'time_ticket' === $spamReason ) {
+			// Not spam: the page was open or cached for hours, or the browser
+			// sent the page ticket before trading it. Hand back a submit token
+			// so the browser can send the same answers again.
+			$fresh = SpamProtection::refresh_token( $payload[ SpamProtection::TIME_FIELD ] ?? null, $formId );
+			return new WP_REST_Response(
+				array(
+					'error' => array(
+						'code'    => 'subtleforms_token_expired',
+						'message' => __( 'This form was open for a long time. Please send it again.', 'subtleforms' ),
+						'meta'    => array( 'spam_token' => (string) $fresh ),
+					),
+				),
+				409
+			);
+		}
+		$timeTokenToClaim = ( null === $spamReason && ! empty( $protection['timeTrap'] ) && ! $skipTimeTrap && empty( $isPreview ) )
+			? ( $payload[ SpamProtection::TIME_FIELD ] ?? null )
+			: null;
 		if ( null !== $spamReason ) {
 			Logger::info( 'Spam blocked (form %d): %s', $formId, $spamReason );
 			if ( empty( $isPreview ) ) {
@@ -292,7 +326,12 @@ final class PublicSubmitApi {
 			$count = null;
 
 			if ( $user_id > 0 ) {
-				$count = $this->countSubmissionsBy( $formId, 'user_id = %d', $user_id );
+				// The user_id column arrives with the schema upgrade (2.7.1).
+				// Until it has run there is nothing to count by account, so the
+				// query is not sent (it would fail and read as zero).
+				if ( \SubtleForms\Privacy\PrivacyLookup::hasUserIdColumn() ) {
+					$count = $this->countSubmissionsBy( $formId, 'user_id = %d', $user_id );
+				}
 			} elseif ( $ip !== '' ) {
 				$count = $this->countSubmissionsBy( $formId, 'ip_address = %s', $ip );
 			}
@@ -426,17 +465,32 @@ final class PublicSubmitApi {
 			return $order;
 		}
 		unset( $payload['_coupon'], $payload['_payment'] );
-		$voidPayment = static function () use ( $order ) {
+		// An order that was priced but not stored is handed back as
+		// abandoned, so the add-on that priced it can release what it holds.
+		$voidPayment = function () use ( $order ) {
 			if ( ! empty( $order['payment'] ) ) {
-				/**
-				 * The submission failed after the gateway authorised the payment.
-				 * Gateways release the hold here.
-				 *
-				 * @param array $payment Payment details.
-				 */
-				do_action( 'subtleforms/payment/void', $order['payment'] );
+				$this->finishOrder( 0, array(), $order, 'abandoned' );
 			}
 		};
+
+		// A time token is good for one submission. A repeat is dropped like
+		// any other spam. The mark is released again if the entry is rejected
+		// or fails, so a visitor can correct a field and send again.
+		$claimedToken = null;
+		if ( is_string( $timeTokenToClaim ) && '' !== $timeTokenToClaim ) {
+			$tokenInfo = SpamProtection::token_info( $timeTokenToClaim, $formId );
+			if ( ! SpamProtection::claim_token( $timeTokenToClaim, $tokenInfo['time'] ?? null ) ) {
+				$voidPayment();
+				SpamStats::blocked( $formId, 'time_token_reused' );
+				return ApiResponse::success(
+					array(
+						'success' => true,
+						'message' => __( 'Thank you.', 'subtleforms' ),
+					)
+				);
+			}
+			$claimedToken = $timeTokenToClaim;
+		}
 
 		// Create submission record
 		try {
@@ -454,9 +508,18 @@ final class PublicSubmitApi {
 			);
 		} catch ( \RuntimeException $e ) {
 			Logger::error( 'Failed to create submission record: %s', $e->getMessage() );
+			SpamProtection::release_token( $claimedToken );
 			// The entry was not saved: release an authorised payment.
 			$voidPayment();
 			return ApiResponse::server_error( __( 'Failed to create submission record', 'subtleforms' ) );
+		}
+
+		// Remember which account sent the entry, for the per-user limit and
+		// for privacy requests. Only once the column exists.
+		if ( get_current_user_id() > 0 && \SubtleForms\Privacy\PrivacyLookup::hasUserIdColumn() ) {
+			global $wpdb;
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Single column update on the entry just created.
+			$wpdb->update( $wpdb->prefix . 'subtleforms_submissions', array( 'user_id' => get_current_user_id() ), array( 'id' => (int) $submissionId ), array( '%d' ), array( '%d' ) );
 		}
 
 		// Build submission context
@@ -518,7 +581,7 @@ final class PublicSubmitApi {
 				return ApiResponse::bad_request( __( 'This form could not be processed. Please contact the site owner.', 'subtleforms' ) );
 			}
 
-			// A payment the gateway only authorised is captured after the entry
+			// An order that still has to be settled is settled after the entry
 			// is saved. Emails, webhooks and integrations wait for that result,
 			// so nobody gets a receipt for a payment that then fails (PAY-04).
 			$deferActions = $isPaymentForm && 'authorized' === ( $paymentMetadata['status'] ?? '' );
@@ -550,9 +613,11 @@ final class PublicSubmitApi {
 				if ( is_array( $validationErrors ) && ! empty( $validationErrors ) ) {
 					// Rejected answers are never stored (FB-09, FF-13, FA-24).
 					$this->discard( $submissionId );
+					SpamProtection::release_token( $claimedToken );
 					return ApiResponse::validation_error( __( 'Form validation failed', 'subtleforms' ), $validationErrors );
 				}
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
+				SpamProtection::release_token( $claimedToken );
 				Logger::error( 'Pipeline execution failed for submission %d: %s', $submissionId, $e->getMessage() );
 
 				return ApiResponse::server_error( __( 'Your submission could not be completed. Please try again later.', 'subtleforms' ) );
@@ -569,9 +634,11 @@ final class PublicSubmitApi {
 				if ( is_array( $validationErrors ) && ! empty( $validationErrors ) ) {
 					// Rejected answers are never stored (FB-09, FF-13, FA-24).
 					$this->discard( $submissionId );
+					SpamProtection::release_token( $claimedToken );
 					return ApiResponse::validation_error( __( 'Form validation failed', 'subtleforms' ), $validationErrors );
 				}
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
+				SpamProtection::release_token( $claimedToken );
 				Logger::error( 'Pipeline execution failed for submission %d: %s', $submissionId, $result->error );
 
 				return ApiResponse::server_error( $result->error );
@@ -591,27 +658,20 @@ final class PublicSubmitApi {
 					$this->finishOrder( $submissionId, $finalSubmission, $order, 'free' );
 				}
 			} else {
-				/**
-				 * Capture an authorised payment now that the submission is safely
-				 * stored. Return the updated payment array, or a WP_Error.
-				 *
-				 * @param array $payment      Payment details.
-				 * @param int   $submissionId Submission ID.
-				 */
-				$captured = apply_filters( 'subtleforms/payment/capture', $paymentMetadata, $submissionId );
-				if ( is_wp_error( $captured ) ) {
-					$order['payment']['status'] = 'failed';
-					$order['payment']['error']  = $captured->get_error_message();
-					$this->finishOrder( $submissionId, $finalSubmission, $order, 'payment_failed' );
-					// No receipts or integrations for a failed payment; the site
-					// owner is told instead (PAY-04).
-					self::notifyPaymentFailed( $formId, $submissionId, $activeSchema['schema'] ?? array(), $captured->get_error_message() );
-					return ApiResponse::error( 'subtleforms_payment_failed', $captured->get_error_message(), 402 );
+				// The entry is safely stored: the add-on settles the order and
+				// reports the outcome through the context (`order_result`:
+				// error, status, payment).
+				$this->finishOrder( $submissionId, $finalSubmission, $order, 'saved', $context );
+				$result = $context->getMeta( 'order_result', array() );
+				$result = is_array( $result ) ? $result : array();
+				if ( ! empty( $result['error'] ) ) {
+					return ApiResponse::error( 'subtleforms_payment_failed', (string) $result['error'], 402 );
 				}
+				$captured = is_array( $result['payment'] ?? null ) ? $result['payment'] : $paymentMetadata;
 				if ( $laterSteps ) {
 					// The payment went through: now send the emails and run the
 					// integrations that waited for it.
-					$captureStatus = is_array( $captured ) ? (string) ( $captured['status'] ?? '' ) : '';
+					$captureStatus = (string) ( $captured['status'] ?? '' );
 					$context->setMeta( 'entry_status', in_array( $captureStatus, array( 'paid', 'succeeded' ), true ) ? 'completed' : 'payment_pending' );
 					$info           = $context->getMeta( 'payment_info', array() );
 					$info['status'] = '' !== $captureStatus ? $captureStatus : ( $info['status'] ?? '' );
@@ -622,19 +682,9 @@ final class PublicSubmitApi {
 						Logger::error( 'Actions after payment failed for submission %d: %s', $submissionId, $e->getMessage() );
 					}
 				}
-				$order['payment'] = is_array( $captured ) ? $captured : $paymentMetadata;
+				$order['payment'] = $captured;
 				$status           = in_array( $order['payment']['status'] ?? '', array( 'paid', 'succeeded' ), true ) ? 'completed' : 'payment_pending';
 				$this->finishOrder( $submissionId, $finalSubmission, $order, $status );
-
-				/**
-				 * Hook: a payment form was submitted.
-				 *
-				 * @param int               $submissionId    The submission ID.
-				 * @param array             $paymentMetadata Payment details.
-				 * @param SubmissionContext $context         Full submission context.
-				 * @since 1.2.0
-				 */
-				do_action( 'subtleforms/payment/required', $submissionId, $order['payment'], $context );
 			}
 			} elseif ( ! $finalSubmission || $finalSubmission['status'] === 'processing' ) {
 				Logger::error( 'Submission %d did not reach saved status', $submissionId );
@@ -771,12 +821,15 @@ final class PublicSubmitApi {
 	 * @return int Number of matching submissions.
 	 */
 	/**
-	 * Price the order, check the coupon and confirm the payment.
+	 * Price the order for a form that takes payment.
 	 *
-	 * @param int             $formId  Form ID.
-	 * @param mixed           $schema  Active schema.
-	 * @param array           $payload Sanitized payload with calculations applied.
-	 * @param WP_REST_Request $request Incoming request.
+	 * This plugin prices nothing itself. A payment add-on (SubtleForms Pro)
+	 * answers the filter; without one every form is free and no order is made.
+	 *
+	 * @param int             $formId      Form ID.
+	 * @param mixed           $schema      Active schema.
+	 * @param array           $payload     Sanitized payload with calculations applied.
+	 * @param WP_REST_Request $request     Incoming request.
 	 * @param array|null      $logicValues Answers as typed, for conditional logic.
 	 * @return array{quote:?array,coupon:?array,payment:?array}|WP_REST_Response
 	 */
@@ -786,177 +839,57 @@ final class PublicSubmitApi {
 			'coupon'  => null,
 			'payment' => null,
 		);
-		if ( ! Pricing::isPriced( $schema ) ) {
-			return $none;
-		}
-
-		$priced = Pricing::quote( $schema, $payload, null, $logicValues );
-		if ( ! empty( $priced['formula_error'] ) ) {
-			return ApiResponse::error(
-				'subtleforms_formula_invalid',
-				__( 'This total could not be calculated, so the payment was not taken.', 'subtleforms' ),
-				422
-			);
-		}
 
 		/**
-		 * Whether another system takes this form's payment (for example the
-		 * WooCommerce checkout in SubtleForms Pro). When true, SubtleForms does
-		 * not price, verify or charge; the handler finishes the order on
-		 * `subtleforms/submission/completed`.
+		 * Price this submission's order, check its coupon and confirm payment.
 		 *
-		 * @param bool  $external Default false.
-		 * @param mixed $schema   Active schema.
-		 * @param int   $formId   Form ID.
+		 * Return the order array ({ quote, coupon, payment, customer }), or a
+		 * WP_REST_Response to refuse the submission. An order with a `payment`
+		 * is settled and released through `subtleforms/submit/finish_order`.
+		 *
+		 * @param array|WP_REST_Response $order       Empty order.
+		 * @param int                    $formId      Form ID.
+		 * @param mixed                  $schema      Active schema.
+		 * @param array                  $payload     Sanitized payload.
+		 * @param WP_REST_Request        $request     Incoming request.
+		 * @param array|null             $logicValues Answers as typed.
+		 * @since 2.8.0
 		 */
-		if ( apply_filters( 'subtleforms/payments/external', false, $schema, $formId ) ) {
-			// Hand the visitor's coupon code on (it is removed from the payload
-			// before the entry is stored); the handler validates it itself.
-			$none['external']    = true;
-			$none['coupon_code'] = CouponsRepository::codeFrom( $schema, $payload );
-			return $none;
-		}
+		$order = apply_filters( 'subtleforms/submit/price_order', $none, $formId, $schema, $payload, $request, $logicValues );
 
-		// The coupon comes from the summary's coupon box or a Coupon field.
-		$code = CouponsRepository::codeFrom( $schema, $payload );
-
-		$quote    = Pricing::quote( $schema, $payload, null, $logicValues );
-		$coupon   = null;
-		$customer = CouponsRepository::customerKey( $schema, $payload );
-		if ( '' !== $code ) {
-			$checked = CouponsRepository::validate( $code, $formId, (float) $quote['subtotal'], $customer );
-			if ( is_wp_error( $checked ) ) {
-				return ApiResponse::error( 'subtleforms_coupon_invalid', $checked->get_error_message(), 422 );
-			}
-			$coupon = $checked;
-			$quote  = Pricing::quote( $schema, $payload, $coupon, $logicValues );
-		}
-
-		$order = array(
-			'quote'    => $quote,
-			'coupon'   => $coupon,
-			'payment'  => null,
-			'customer' => $customer,
-		);
-		if ( $quote['total'] <= 0 ) {
-			return $order;
-		}
-
-		$settings = get_option( 'subtleforms_settings', array() );
-		$mode     = is_array( $settings ) ? (string) ( $settings['ext_payments_mode'] ?? 'test' ) : 'test';
-
-		$hasCard = false;
-		foreach ( Pricing::fields( $schema ) as $f ) {
-			if ( ( $f['type'] ?? '' ) === 'payment_card' ) {
-				$hasCard = true;
-				break;
-			}
-		}
-		// A card cannot be charged less than the gateway minimum (PAY-26).
-		$tooSmall = $hasCard ? \SubtleForms\Payments\Currencies::belowMinimum( (float) $quote['total'], (string) $quote['currency'] ) : null;
-		if ( null !== $tooSmall ) {
-			return ApiResponse::error( 'subtleforms_amount_too_small', $tooSmall, 422 );
-		}
-
-		/**
-		 * Confirm the visitor's payment for this order.
-		 *
-		 * Gateways return an array with `status` ("authorized", "paid" or
-		 * "pending"), `gateway` and `transaction_id`, or a WP_Error to reject
-		 * the submission. Returning null means no gateway handled it, and the
-		 * entry is stored as "payment pending" for offline payment.
-		 *
-		 * @param array|\WP_Error|null $result  Default null.
-		 * @param array                $quote   Server-computed order.
-		 * @param array                $payload Submitted values (includes `_payment`).
-		 * @param int                  $formId  Form ID.
-		 * @param mixed                $schema  Active schema.
-		 */
-		$verified = apply_filters( 'subtleforms/payment/verify', null, $quote, $payload, $formId, $schema );
-		if ( is_wp_error( $verified ) ) {
-			return ApiResponse::error( $verified->get_error_code(), $verified->get_error_message(), 402 );
-		}
-
-		if ( null === $verified && $hasCard ) {
-			return ApiResponse::error( 'subtleforms_payment_unavailable', __( 'Online payment is not available right now. Please contact the site owner.', 'subtleforms' ), 402 );
-		}
-
-		$verified         = is_array( $verified ) ? $verified : array();
-		$order['payment'] = array(
-			'status'         => (string) ( $verified['status'] ?? 'pending' ),
-			'gateway'        => $verified['gateway'] ?? null,
-			'transaction_id' => $verified['transaction_id'] ?? null,
-			'amount'         => $quote['total'],
-			'currency'       => $quote['currency'],
-			'mode'           => $mode,
-			'created_at'     => current_time( 'mysql', true ),
-		);
-		return $order;
+		return ( $order instanceof WP_REST_Response || is_array( $order ) ) ? $order : $none;
 	}
 
 	/**
-	 * Store the order on the submission and count the coupon.
+	 * Hand the finished order to the payment add-on, which stores it on the
+	 * submission and counts the coupon.
 	 *
 	 * @param int    $submissionId Submission ID.
 	 * @param array  $submission   Stored submission.
 	 * @param array  $order        Result of priceOrder().
 	 * @param string $status       Final submission status.
 	 */
-	private function finishOrder( int $submissionId, array $submission, array $order, string $status ): void {
-		$meta = is_array( $submission['meta'] ?? null ) ? $submission['meta'] : array();
-		if ( ! empty( $order['quote'] ) ) {
-			$meta['order'] = $order['quote'];
-		}
-		if ( ! empty( $order['payment'] ) ) {
-			$meta['payment'] = $order['payment'];
-		} elseif ( 'free' === $status ) {
-			$meta['payment'] = array(
-				'status'   => 'free',
-				'amount'   => 0,
-				'currency' => $order['quote']['currency'] ?? '',
-			);
-			$status          = 'completed';
-		}
-		$this->submissionsRepo->update(
-			$submissionId,
-			array(
-				'status' => $status,
-				'meta'   => $meta,
-			)
-		);
-		if ( ! empty( $order['coupon']['id'] ) && in_array( $status, array( 'completed', 'payment_pending' ), true ) ) {
-			CouponsRepository::recordUse( (int) $order['coupon']['id'], (string) ( $order['customer'] ?? '' ), $submissionId );
-		}
-	}
-
-	/**
-	 * Email the site owner that a payment failed after the entry was saved,
-	 * unless switched off under Settings > Integrations > Payments (PAY-04).
-	 *
-	 * @param int    $formId       Form ID.
-	 * @param int    $submissionId Entry ID.
-	 * @param mixed  $schema       Form schema.
-	 * @param string $reason       Gateway message.
-	 */
-	public static function notifyPaymentFailed( int $formId, int $submissionId, $schema, string $reason ): void {
-		$settings = get_option( 'subtleforms_settings', array() );
-		if ( is_array( $settings ) && array_key_exists( 'ext_payments_failed_email', $settings ) && ! $settings['ext_payments_failed_email'] ) {
-			return;
-		}
-		$to = is_array( $settings ) && ! empty( $settings['admin_email'] ) && is_email( $settings['admin_email'] )
-			? (string) $settings['admin_email']
-			: (string) get_option( 'admin_email' );
-		$title = is_array( $schema ) ? (string) ( $schema['metadata']['title'] ?? '' ) : '';
-		/* translators: %s: form title */
-		$subject = sprintf( __( 'Payment failed: %s', 'subtleforms' ), '' !== $title ? $title : '#' . $formId );
-		$body    = sprintf(
-			/* translators: 1: entry ID, 2: gateway message, 3: link to the entry */
-			__( "The payment for entry #%1\$d did not go through, so no receipt or notification was sent.\n\nReason: %2\$s\n\nOpen the entry: %3\$s", 'subtleforms' ),
-			$submissionId,
-			'' !== $reason ? $reason : __( 'not given', 'subtleforms' ),
-			admin_url( 'admin.php?page=subtleforms-submissions&submission_id=' . $submissionId )
-		);
-		wp_mail( $to, $subject, $body );
+	private function finishOrder( int $submissionId, array $submission, array $order, string $status, ?SubmissionContext $context = null ): void {
+		/**
+		 * Fires at each step of a priced order after the entry is stored, and
+		 * when an order is dropped.
+		 *
+		 * Status `saved`: the entry is stored and the order has a `payment`
+		 * to settle. The add-on settles it and reports back with
+		 * `$context->setMeta( 'order_result', array( 'error' => string,
+		 * 'status' => string, 'payment' => array ) )`; an error answers the
+		 * visitor with HTTP 402. Status `abandoned` (submission ID 0): the
+		 * order will not be stored, release what it holds. Any other status is
+		 * the final status of the entry (completed, payment_pending, free).
+		 *
+		 * @param int                    $submissionId Submission ID.
+		 * @param array                  $submission   Stored submission.
+		 * @param array                  $order        Order from `subtleforms/submit/price_order`.
+		 * @param string                 $status       Step or final status.
+		 * @param SubmissionContext|null $context      Submission context, for `saved`.
+		 * @since 2.8.0
+		 */
+		do_action( 'subtleforms/submit/finish_order', $submissionId, $submission, $order, $status, $context );
 	}
 
 	/**
@@ -1270,9 +1203,8 @@ final class PublicSubmitApi {
 
 	private function guardRateLimit( WP_REST_Request $request ): ?WP_REST_Response {
 		$userId = get_current_user_id() ?: null;
-		$ip     = isset( $_SERVER['REMOTE_ADDR'] )
-			? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) )
-			: '0.0.0.0';
+		$ip     = \SubtleForms\Security\ClientIp::get();
+		$ip     = '' !== $ip ? $ip : '0.0.0.0';
 		$route  = $request->get_route();
 		$method = $request->get_method();
 

@@ -111,7 +111,7 @@ function ControlRenderer( { ctrl, field, onUpdate, isReadOnly } ) {
 	// Add-on controls get the full definition, the selected field and the
 	// other fields of the form ({ key, label, type }), for example to insert
 	// a field into a formula.
-	if ( ! CONTROL_REGISTRY[ ctrl.type ] ) {
+	if ( ! CONTROL_REGISTRY[ ctrl.type ] || ctrl.type === 'pro_notice' ) {
 		props.control = ctrl;
 		props.field = field;
 		props.onUpdate = onUpdate;

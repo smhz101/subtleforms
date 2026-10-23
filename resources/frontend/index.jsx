@@ -7,10 +7,16 @@ import FormErrorBoundary from './components/FormErrorBoundary';
 import './frontend.css';
 import './styles/frontend.scss';
 import { debug } from '../shared/debug';
-import { observeView } from './utils/viewBeacon';
 import { containerGroups, loadGroups } from './components/fields/lazyFields';
 import { readInlineFormData } from './utils/inlineData';
-import { trackFunnel } from './utils/funnelTracker';
+import { runFormMountHooks } from '../shared/extend';
+import * as contexts from './components/fields/contexts';
+import * as pricing from '../shared/pricing';
+
+// Shared with SubtleForms Pro's payment fields: the order context and the price maths.
+if (typeof window !== 'undefined') {
+  window.SubtleFormsExtend = Object.assign(window.SubtleFormsExtend || {}, { contexts, pricing });
+}
 
 /**
  * Mount a form renderer in a container
@@ -113,8 +119,7 @@ function autoMountForms() {
         `SubtleForms: Mounting form ${formId} in shortcode container`
       );
       mount(container, { formId });
-      observeView(container, formId, window.subtleformsFrontend || {});
-      trackFunnel(container, formId, window.subtleformsFrontend || {});
+      runFormMountHooks({ container, formId, config: window.subtleformsFrontend || {} });
     }
   });
 
@@ -139,8 +144,7 @@ function autoMountForms() {
         classicResult: container.dataset.classicResult || '',
       };
       mount(container, { formId, blockOptions });
-      observeView(container, formId, window.subtleformsFrontend || {});
-      trackFunnel(container, formId, window.subtleformsFrontend || {});
+      runFormMountHooks({ container, formId, config: window.subtleformsFrontend || {} });
     }
   });
 }

@@ -1,8 +1,8 @@
 <?php
 /**
- * Reports that do not need the analytics add-on.
+ * Report totals: forms, entries and a seven day chart of entries.
  *
- * Views and conversion stay on the analytics routes, behind Pro.
+ * Views, conversion and the form funnel are provided by SubtleForms Pro.
  *
  * @package SubtleForms\Api
  */
@@ -85,7 +85,7 @@ final class ReportsApi {
 		$start = ReportSeries::start( 7, null, $zone );
 		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
 		// Only real entries count: spam, failed and trashed entries do not.
-		$counted = \SubtleForms\Analytics\Stats::COUNTED_STATUSES;
+		$counted = ReportSeries::COUNTED_STATUSES;
 		$in      = implode( ',', array_fill( 0, count( $counted ), '%s' ) );
 		$rows    = $wpdb->get_col(
 			$wpdb->prepare(

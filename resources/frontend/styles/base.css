@@ -106,11 +106,11 @@
 /* ===== Error State ===== */
 .subtleforms-error {
 	/*! inherit: keep */
-	background: #f8d7da;
-	border: 1px solid #f5c6cb;
+	background: transparent;
+	border: 1px solid currentColor;
 	border-radius: var(--subtleforms-radius-sm);
-	padding: var(--subtleforms-spacing-md);
-	color: #721c24;
+	padding: 0;
+	color: var(--subtleforms-color-error, #b3261e);
 	margin-bottom: var(--subtleforms-spacing-md);
 }
 
@@ -127,11 +127,11 @@
 /* ===== Success State ===== */
 .subtleforms-success {
 	/*! inherit: keep */
-	background: #d4edda;
-	border: 1px solid #c3e6cb;
+	background: transparent;
+	border: 1px solid currentColor;
 	border-radius: var(--subtleforms-radius-sm);
-	padding: var(--subtleforms-spacing-md);
-	color: #155724;
+	padding: 0;
+	color: var(--subtleforms-color-success, #1a7f37);
 	margin-bottom: var(--subtleforms-spacing-md);
 }
 
@@ -211,3 +211,19 @@
 	padding: var(--subtleforms-spacing-xl);
 	color: var(--subtleforms-color-text-light);
 }
+
+/*! inherit: keep-start (motion preference applies to every form) */
+@media (prefers-reduced-motion: reduce) {
+	.subtleforms *,
+	.subtleforms *::before,
+	.subtleforms *::after,
+	.subtleforms-form-container *,
+	.subtleforms-form-container *::before,
+	.subtleforms-form-container *::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
+}
+/*! inherit: keep-end */

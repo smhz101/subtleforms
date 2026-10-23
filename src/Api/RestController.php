@@ -134,11 +134,6 @@ final class RestController {
 		);
 		$fieldsApi->registerRoutes();
 
-		// Payments: live quotes, coupons (2.1).
-		\SubtleForms\Payments\CouponsRepository::maybeInstall();
-		$paymentsApi = new PaymentsApi( $this->formsRepo, $this->gate );
-		$paymentsApi->registerRoutes();
-
 		// ── Already-extracted controllers ──────────────────────────────
 		if ( $this->settings ) {
 			$settingsApi = new SettingsApi( $this->settings );

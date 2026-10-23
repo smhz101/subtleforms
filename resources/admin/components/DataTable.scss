@@ -190,6 +190,12 @@
 	}
 
 	// Row actions: visible on hover/focus, always on touch.
+	.subtleforms-row-actions {
+		display: flex;
+		gap: 8px;
+		align-items: center;
+	}
+
 	tr .subtleforms-row-actions {
 		opacity: 0;
 		transition: opacity var(--sf-transition-fast);

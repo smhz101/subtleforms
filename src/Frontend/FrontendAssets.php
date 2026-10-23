@@ -46,12 +46,6 @@ final class FrontendAssets {
 		'address_group'    => 'geo',
 		'file_upload'      => 'upload',
 		'image_upload'     => 'upload',
-		'payment_amount'   => 'payments',
-		'payment_summary'  => 'payments',
-		'payment_coupon'   => 'payments',
-		'payment_product'  => 'payments',
-		'payment_choice'   => 'payments',
-		'payment_card'     => 'payments',
 		'repeat_container' => 'repeater',
 		'chained_select'   => 'chained',
 		'rich_text'        => 'richText',
@@ -156,12 +150,6 @@ final class FrontendAssets {
 				 */
 				'lang'           => sanitize_key( (string) apply_filters( 'subtleforms/frontend/language', '' ) ),
 				'weekStartsOn'   => (int) get_option( 'start_of_week', 0 ),
-				// Anonymous daily view counter (2.1). See Analytics\Stats.
-				// Off for people who manage SubtleForms, like the funnel (2.6.0).
-				'trackViews'     => \SubtleForms\Analytics\Stats::tracksViews( $settings ) && ! \SubtleForms\Analytics\Funnel::skipsCurrentUser(),
-				// Where visitors stop filling in a form (2.6.0). Off for people
-				// who manage SubtleForms, so testing a form does not count.
-				'trackFunnel'    => \SubtleForms\Analytics\Funnel::tracks( $settings ) && ! \SubtleForms\Analytics\Funnel::skipsCurrentUser(),
 				// Default-value tokens {user_email} and {user_name} (2.0).
 				'user'           => is_user_logged_in()
 					? array(
@@ -172,12 +160,10 @@ final class FrontendAssets {
 			)
 		);
 
-		wp_enqueue_style(
-			self::HANDLE,
-			SUBTLEFORMS_PLUGIN_URL . 'build/frontend/index.jsx.css',
-			array(),
-			$asset['version']
-		);
+		self::$styleVersion = (string) $asset['version'];
+		if ( ! ( self::$themeFormSeen && ! self::$styledFormSeen ) ) {
+			self::enqueueStyle();
+		}
 
 		/**
 		 * Fires after the public form assets are enqueued, so add-ons (such as
@@ -189,6 +175,184 @@ final class FrontendAssets {
 		do_action( 'subtleforms/frontend/enqueued', $settings );
 
 		self::printLateIfNeeded();
+	}
+
+	/** Version string of the form stylesheet. */
+	private static $styleVersion = SUBTLEFORMS_VERSION;
+
+	/** Whether a form that uses the theme's own look was drawn on this page. */
+	private static $themeFormSeen = false;
+
+	/** Whether a form that needs the plugin stylesheet was drawn on this page. */
+	private static $styledFormSeen = false;
+
+	/** Field types a theme form can use without any plugin CSS. */
+	private const PLAIN_TYPES = array(
+		'text',
+		'email',
+		'url',
+		'number',
+		'password',
+		'textarea',
+		'select',
+		'dropdown',
+		'radio',
+		'multiple_choice',
+		'checkbox',
+		'consent',
+		'hidden',
+		'name_group',
+		'hcaptcha',
+		'recaptcha',
+		'turnstile',
+		'captcha',
+	);
+
+	/**
+	 * Enqueue the form stylesheet and tell WordPress which file to use on a
+	 * right-to-left site (2.7.1).
+	 */
+	private static function enqueueStyle(): void {
+		wp_enqueue_style(
+			self::HANDLE,
+			SUBTLEFORMS_PLUGIN_URL . 'build/frontend/index.jsx.css',
+			array(),
+			self::$styleVersion
+		);
+		// The build writes index.jsx-rtl.css next to it. 'replace' swaps the
+		// file, so an Arabic or Urdu site gets mirrored rules.
+		wp_style_add_data( self::HANDLE, 'rtl', 'replace' );
+	}
+
+	/**
+	 * Whether a form needs no plugin CSS beyond a few layout lines: it takes
+	 * the theme's look untouched, is a single page, and uses only fields a
+	 * theme already styles (2.7.1).
+	 *
+	 * @param array<string, mixed>|null $schema Active schema.
+	 */
+	public static function isPlainThemeForm( ?array $schema ): bool {
+		if ( ! is_array( $schema ) ) {
+			return false;
+		}
+		$meta       = is_array( $schema['metadata'] ?? null ) ? $schema['metadata'] : array();
+		$appearance = is_array( $meta['appearance'] ?? null ) ? $meta['appearance'] : array();
+		if ( 'theme' !== ( $appearance['preset'] ?? '' ) ) {
+			return false;
+		}
+		// Same test as isPureTheme() in resources/shared/appearance.js.
+		$preset_tokens = array(
+			'fontFamily'      => 'inherit',
+			'colorBackground' => 'transparent',
+		);
+		$tokens        = is_array( $appearance['tokens'] ?? null ) ? $appearance['tokens'] : array();
+		foreach ( $tokens as $key => $value ) {
+			if ( null === $value || '' === $value ) {
+				continue;
+			}
+			if ( ! isset( $preset_tokens[ $key ] ) || $preset_tokens[ $key ] !== $value ) {
+				return false;
+			}
+		}
+		$variants = is_array( $appearance['variants'] ?? null ) ? $appearance['variants'] : array();
+		if ( ( $variants['input'] ?? 'outlined' ) !== 'outlined' || ( $variants['button'] ?? 'solid' ) !== 'solid' ) {
+			return false;
+		}
+		if ( 'inline' === ( $variants['layout'] ?? '' ) ) {
+			return false;
+		}
+		// Multi-step and conversational forms draw their own widgets.
+		$type = strtolower( (string) ( $meta['type'] ?? '' ) );
+		if ( ! in_array( $type, array( '', 'regular', 'standard', 'single', 'default' ), true ) ) {
+			return false;
+		}
+		$plain = true;
+		$walk  = static function ( $node ) use ( &$walk, &$plain ): void {
+			if ( ! $plain || ! is_array( $node ) ) {
+				return;
+			}
+			if ( array_is_list( $node ) ) {
+				foreach ( $node as $child ) {
+					$walk( $child );
+				}
+				return;
+			}
+			$node_type = (string) ( $node['type'] ?? '' );
+			if ( '' !== $node_type && ! in_array( $node_type, self::PLAIN_TYPES, true ) ) {
+				$plain = false;
+				return;
+			}
+			$config = is_array( $node['config'] ?? null ) ? $node['config'] : array();
+			foreach ( array( 'fields', 'children', 'columns', 'steps' ) as $key ) {
+				$walk( $node[ $key ] ?? null );
+				$walk( $config[ $key ] ?? null );
+			}
+		};
+		$walk( $schema['steps'] ?? null );
+		$walk( $schema['fields'] ?? null );
+		return $plain;
+	}
+
+	/**
+	 * Record which look a form needs, once per form drawn (2.7.1).
+	 *
+	 * A page whose forms all inherit the theme loads no plugin stylesheet, only
+	 * a few lines of layout. As soon as one form needs the stylesheet it is
+	 * loaded for the page.
+	 *
+	 * @param array<string, mixed>|null $schema Active schema of the form.
+	 */
+	public static function noteFormLook( ?array $schema ): void {
+		if ( is_admin() || ! is_array( $schema ) ) {
+			return;
+		}
+		if ( self::isPlainThemeForm( $schema ) ) {
+			self::$themeFormSeen = true;
+		} else {
+			self::$styledFormSeen = true;
+		}
+		if ( self::$styledFormSeen ) {
+			if ( ! wp_style_is( self::HANDLE, 'enqueued' ) && ! wp_style_is( self::HANDLE, 'done' ) ) {
+				self::enqueueStyle();
+				self::printLateIfNeeded();
+			}
+			return;
+		}
+		wp_dequeue_style( self::HANDLE );
+		if ( ! wp_style_is( self::LAYOUT_HANDLE, 'registered' ) ) {
+			wp_register_style( self::LAYOUT_HANDLE, false, array(), SUBTLEFORMS_VERSION );
+			wp_add_inline_style( self::LAYOUT_HANDLE, self::layoutCss() );
+		}
+		wp_enqueue_style( self::LAYOUT_HANDLE );
+		self::printLateIfNeeded();
+	}
+
+	/** Handle of the inline layout lines a theme form gets. */
+	private const LAYOUT_HANDLE = 'subtleforms-frontend-layout';
+
+	/**
+	 * The only CSS a form that inherits the theme receives: layout, hidden
+	 * text for screen readers, the honeypot and the field error colour. No
+	 * colour, border, font, size or spacing of the plugin's own (2.7.1).
+	 */
+	public static function layoutCss(): string {
+		return '.subtleforms-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border-width:0}'
+			. '.subtleforms-honeypot{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}'
+			. '.subtleforms-form-container[data-reserve],.subtleforms-block[data-reserve]{min-height:var(--subtleforms-reserve,0px)}'
+			. '.subtleforms-skeleton{display:flex;flex-wrap:wrap;gap:44px var(--subtleforms-field-gap,20px);pointer-events:none;user-select:none}'
+			. '.subtleforms-skeleton__title,.subtleforms-skeleton__description,.subtleforms-skeleton__field,.subtleforms-skeleton__action{flex:1 1 100%;min-width:0}'
+			. '.subtleforms-skeleton__control{display:block;min-height:44px}'
+			. '.subtleforms-fields{display:flex;flex-wrap:wrap;gap:var(--subtleforms-field-gap,20px)}'
+			. '.subtleforms-field{flex:1 1 100%;min-width:0}'
+			. '.subtleforms-field-label{display:block}'
+			. 'fieldset.subtleforms-field{border:0;margin:0;padding:0;min-width:0}'
+			. 'fieldset.subtleforms-field>legend{float:none;width:100%;padding:0}'
+			. '.subtleforms-buttons{display:flex;flex-wrap:wrap;gap:12px}'
+			. '.subtleforms--buttons-center .subtleforms-buttons{justify-content:center}'
+			. '.subtleforms--buttons-right .subtleforms-buttons{justify-content:flex-end}'
+			. '.subtleforms--buttons-full .subtleforms-buttons{flex-direction:column}'
+			. '.subtleforms--buttons-full .subtleforms-button{width:100%}'
+			. '.subtleforms-field-error{color:var(--subtleforms-color-error,#b3261e)}';
 	}
 
 	/**
@@ -206,7 +370,10 @@ final class FrontendAssets {
 		if ( 'conversational' === strtolower( (string) ( $schema['metadata']['type'] ?? '' ) ) ) {
 			$groups['conversational'] = true;
 		}
-		$walk = static function ( $node ) use ( &$walk, &$groups ): void {
+		// Fields of an add-on that is not active are left off the live form,
+		// so their code is not downloaded either.
+		$absent = \SubtleForms\Fields\AddonFieldTypes::missing();
+		$walk   = static function ( $node ) use ( &$walk, &$groups, $absent ): void {
 			if ( ! is_array( $node ) ) {
 				return;
 			}
@@ -220,7 +387,7 @@ final class FrontendAssets {
 			$config = is_array( $node['config'] ?? null ) ? $node['config'] : array();
 			if ( ( 'phone' === $type || 'tel' === $type ) && ( ! empty( $node['enableCountryCode'] ) || ! empty( $config['enableCountryCode'] ) ) ) {
 				$groups['geo'] = true;
-			} elseif ( isset( self::TYPE_GROUPS[ $type ] ) ) {
+			} elseif ( isset( self::TYPE_GROUPS[ $type ] ) && ! in_array( $type, $absent, true ) ) {
 				$groups[ self::TYPE_GROUPS[ $type ] ] = true;
 			}
 			foreach ( array( 'fields', 'children', 'columns' ) as $key ) {
@@ -252,7 +419,6 @@ final class FrontendAssets {
 		'conversational' => 'form-conversational',
 		'date'           => 'field-date',
 		'geo'            => 'field-phone-country',
-		'payments'       => 'field-payments',
 		'repeater'       => 'field-repeater',
 		'richText'       => 'field-rich-text',
 		'upload'         => 'field-upload',
@@ -310,6 +476,7 @@ final class FrontendAssets {
 	 * @return int Number of files hinted.
 	 */
 	public static function preloadFieldCode( ?array $schema ): int {
+		self::noteFormLook( $schema );
 		$groups = array_intersect( self::fieldGroups( $schema ), array_keys( self::GROUP_CHUNKS ) );
 		if ( ! $groups || is_admin() || is_feed() || ( defined( 'REST_REQUEST' ) && REST_REQUEST ) || wp_doing_ajax() ) {
 			return 0;
@@ -338,6 +505,7 @@ final class FrontendAssets {
 	 * @param array<string, mixed>|null $schema Active schema.
 	 */
 	public static function loadFieldTranslations( ?array $schema ): void {
+		self::noteFormLook( $schema );
 		if ( ! wp_script_is( self::HANDLE, 'registered' ) ) {
 			return;
 		}
@@ -437,6 +605,8 @@ final class FrontendAssets {
 		self::$preloadGroups    = array();
 		self::$translatedChunks = array();
 		self::$lateScheduled    = false;
+		self::$themeFormSeen    = false;
+		self::$styledFormSeen   = false;
 		remove_filter( 'wp_preload_resources', array( self::class, 'preloadResources' ) );
 		remove_action( 'wp_footer', array( self::class, 'printLate' ), PHP_INT_MAX );
 		remove_action( 'shutdown', array( self::class, 'printLate' ), 0 );

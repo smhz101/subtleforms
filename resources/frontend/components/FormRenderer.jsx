@@ -30,10 +30,13 @@ import {
 } from '../../shared/appearance';
 
 import { restFetch, restUrl, restNonce } from '../utils/restFetch';
+import { createSpamTokenSource } from '../utils/spamToken';
 import { fillConfirmation } from '../../shared/confirmationTags';
+import { messageParagraphs } from '../../shared/safeLinks';
+import ConfirmationText from './ConfirmationText';
 import { classicFieldInputs } from '../utils/classicFields';
 import { classicOutcome, forgetClassicToken } from '../utils/classicResult';
-import { announceSubmitted } from '../utils/funnelTracker';
+import { announceSubmitted } from '../utils/submitted';
 
 /**
  * Whether a submitted value counts as missing.
@@ -100,6 +103,9 @@ export default function FormRenderer({
   // THIS form only, document.querySelector would jump across forms when two
   // forms share a page (A2/P1-5).
   const formRootRef = useRef(null);
+  // Trades the page ticket for this visitor's submit token (spamToken.js).
+  const spamTokens = useMemo(() => createSpamTokenSource(formId), [formId]);
+  const primeSpamToken = useCallback(() => spamTokens.prime(spamToken), [spamTokens, spamToken]);
   // Random per mount: a name like "website" invites autofill (bug 16). The
   // value is still sent to the server as website_url.
   const honeypotSuffix = useMemo(
@@ -200,7 +206,7 @@ export default function FormRenderer({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // A sent form is not a drop-off: tell the funnel tracker (2.6.0).
+  // Tell the page the form was sent (add-ons listen for it).
   useEffect(() => {
     if (submitSuccess && !preview) {
       announceSubmitted(formId);
@@ -446,8 +452,9 @@ export default function FormRenderer({
   const focusFirstInvalid = useCallback((errorCount = 0) => {
     if (errorCount > 0) {
       const summary = fixFieldsSummary(errorCount);
+      // One announcement: the visible summary below (role alert). The field
+      // errors themselves are not live regions.
       setErrorSummary(summary);
-      setLiveMessage(summary);
     }
     // Two frames: the error state has to render before aria-invalid exists.
     requestAnimationFrame(() =>
@@ -465,7 +472,9 @@ export default function FormRenderer({
         if (target && typeof target.focus === 'function') {
           target.focus();
           if (typeof target.scrollIntoView === 'function') {
-            target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            const reduce = typeof window.matchMedia === 'function'
+              && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' });
           }
         }
       })
@@ -789,7 +798,7 @@ export default function FormRenderer({
         const submissionPayload = {
           ...payload,
           website_url: honeypotInput ? honeypotInput.value : '',
-          form_rendered_at: spamToken,
+          form_rendered_at: await spamTokens.take(spamToken),
         };
 
         // Include CAPTCHA response (v2 or v3)
@@ -929,19 +938,23 @@ export default function FormRenderer({
             return;
           }
 
+          const ownMessage = conf.type === 'message' && conf.message;
+          const message = ownMessage
+            ? merge(conf.message)
+            : redirectTo
+            ? sprintf(
+                /* translators: %s: URL */
+                __('Visitors will be sent to %s.', 'subtleforms'),
+                redirectTo
+              )
+            : window.subtleformsFrontend?.successMessage ||
+              __('Thank you! Your submission has been received.', 'subtleforms');
           setConfirmationView({
             title: conf.type === 'message' ? merge(conf.title) : '',
-            message:
-              conf.type === 'message' && conf.message
-                ? merge(conf.message)
-                : redirectTo
-                ? sprintf(
-                    /* translators: %s: URL */
-                    __('Visitors will be sent to %s.', 'subtleforms'),
-                    redirectTo
-                  )
-                : window.subtleformsFrontend?.successMessage ||
-                  __('Thank you! Your submission has been received.', 'subtleforms'),
+            message,
+            // Links in the message are found in your own text first, then the
+            // answers are filled in, so an answer can never make a link.
+            paragraphs: messageParagraphs(ownMessage ? conf.message : message, ownMessage ? merge : undefined),
             allowAnother: !!conf.allowAnother,
           });
           setSubmitSuccess(true);
@@ -996,6 +1009,7 @@ export default function FormRenderer({
       quote,
       hasCardField,
       spamToken,
+      spamTokens,
     ]
   );
 
@@ -1041,20 +1055,22 @@ export default function FormRenderer({
     }
     if (outcome.ok) {
       const conf = outcome.confirmation || {};
-      const merge = (text) =>
+      const merge = (text, encode = false) =>
         fillConfirmation(text, {
           values: { ...flattenToPathMap(outcome.values), ...outcome.values },
           formTitle: schema?.metadata?.title || '',
           entryId: outcome.submissionId || '',
-          encode: false,
+          encode,
         });
+      const ownMessage = conf.type === 'message' && conf.message;
+      const message = ownMessage
+        ? merge(conf.message)
+        : window.subtleformsFrontend?.successMessage ||
+          __('Thank you! Your submission has been received.', 'subtleforms');
       setConfirmationView({
         title: conf.type === 'message' ? merge(conf.title) : '',
-        message:
-          conf.type === 'message' && conf.message
-            ? merge(conf.message)
-            : window.subtleformsFrontend?.successMessage ||
-              __('Thank you! Your submission has been received.', 'subtleforms'),
+        message,
+        paragraphs: messageParagraphs(ownMessage ? conf.message : message, ownMessage ? merge : undefined),
         allowAnother: !!conf.allowAnother,
       });
       setSubmitSuccess(true);
@@ -1119,11 +1135,7 @@ export default function FormRenderer({
             </svg>
           </span>
           {view.title && <h3>{view.title}</h3>}
-          {String(view.message)
-            .split(/\n{2,}/)
-            .map((para, i) => (
-              <p key={i}>{para}</p>
-            ))}
+          <ConfirmationText paragraphs={view.paragraphs || messageParagraphs(String(view.message))} />
           {view.allowAnother && (
             <button
               type='button'
@@ -1193,6 +1205,8 @@ export default function FormRenderer({
   return (
     <div
       ref={formRootRef}
+      onFocusCapture={primeSpamToken}
+      onInputCapture={primeSpamToken}
       className={formClassNames}
       style={appearanceStyle}
       data-sf-step={hasSteps ? currentStepIndex : undefined}>
@@ -1200,7 +1214,7 @@ export default function FormRenderer({
       <div
         ref={liveRegionRef}
         role='status'
-        aria-live='assertive'
+        aria-live='polite'
         aria-atomic='true'
         className='subtleforms-sr-only'
       >

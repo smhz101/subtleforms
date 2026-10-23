@@ -65,14 +65,16 @@ final class Pipeline {
 			foreach ( $steps as $step ) {
 				$ts = time();
 
-				// "Only when" conditions on an action (2.1): an email or webhook
-				// whose conditions are not met is skipped. Saving always runs.
+				// "Only when" conditions on an action (an add-on feature): an
+				// email or webhook whose conditions are not met is skipped.
+				// Saving always runs. Without an add-on the conditions are
+				// ignored and the action runs.
 				$stepSettings = $step->settings();
 				if (
 					$step->action()->id() !== 'save'
 					&& is_array( $stepSettings )
-					&& ConditionalLogic::hasLogic( $stepSettings['logic'] ?? null )
-					&& ! $logic->logicPasses( $stepSettings['logic'], $logicValues )
+					&& ConditionalLogic::hasLogic( $stepSettings['logic'] ?? null, 'action' )
+					&& ! $logic->logicPasses( $stepSettings['logic'], $logicValues, array(), 'action' )
 				) {
 					$this->logEvent( $ctx, $step, 'skipped', 'conditions_not_met', $ts );
 					continue;

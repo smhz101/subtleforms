@@ -39,21 +39,9 @@ final class TemplateNotifyTest extends TestCase {
 			$this->assertSame( '', $emails[0]['config']['message'] ?? null, (string) $id );
 		}
 
-		$free    = FormTemplates::free_templates();
-		$payment = $free['payment_form']['schema']['fields'];
-		$this->assertTrue( $this->has_type( $payment, 'payment_product' ) );
-		$this->assertTrue( $this->has_type( $payment, 'payment_summary' ) );
-		$this->assertStringContainsString( 'SubtleForms Pro', wp_json_encode( $payment ) );
-
-		$donation = $free['donation_form']['schema']['fields'];
-		$this->assertTrue(
-			$this->has_field(
-				$donation,
-				static function ( array $field ): bool {
-					return 'payment_amount' === ( $field['type'] ?? '' ) && 'Custom Amount' === ( $field['label'] ?? '' );
-				}
-			)
-		);
+		$free = FormTemplates::free_templates();
+		$this->assertArrayNotHasKey( 'payment_form', $free );
+		$this->assertArrayNotHasKey( 'donation_form', $free );
 	}
 
 	/**

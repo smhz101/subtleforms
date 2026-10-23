@@ -16,7 +16,7 @@ import { TEMPLATE_CATEGORIES } from '../templates';
 import { requirePro } from '../utils/featureGate';
 
 /** Templates SubtleForms Pro adds. */
-const PRO_TEMPLATE_COUNT = 47;
+const PRO_TEMPLATE_COUNT = 52;
 import './CreateFormPage.scss';
 
 // ── Helpers ─────────────────────────────────────────────────────────────────

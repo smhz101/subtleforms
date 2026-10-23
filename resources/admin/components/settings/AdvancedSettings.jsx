@@ -1,11 +1,73 @@
+import { useEffect, useState } from '@wordpress/element';
 import {
 	Button,
 	TextControl,
+	TextareaControl,
 	ToggleControl,
 	SelectControl,
 } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import FieldError from './FieldError';
+
+/** Turn the textarea (one address or range per line, or commas) into a list. */
+export function parseProxyList( text ) {
+	return String( text || '' )
+		.split( /[\s,]+/ )
+		.map( ( item ) => item.trim() )
+		.filter( Boolean );
+}
+
+/**
+ * Visitor IP behind a proxy: the proxies whose forwarding headers are believed.
+ */
+function ProxySettings( { settings, updateSetting, fieldErrors } ) {
+	const list = Array.isArray( settings.trusted_proxy_cidrs )
+		? settings.trusted_proxy_cidrs
+		: parseProxyList( settings.trusted_proxy_cidrs );
+	const [ text, setText ] = useState( list.join( '\n' ) );
+
+	// Follow a reset or a reload, but never rewrite what the person is typing.
+	useEffect( () => {
+		if ( parseProxyList( text ).join( ' ' ) !== list.join( ' ' ) ) {
+			setText( list.join( '\n' ) );
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [ list.join( ' ' ) ] );
+
+	return (
+		<div>
+			<h4 className="sf-section-title">
+				{ __( 'Visitor IP behind a proxy', 'subtleforms' ) }
+			</h4>
+			<ToggleControl
+				label={ __( 'Site is behind Cloudflare', 'subtleforms' ) }
+				checked={ !! settings.trust_cloudflare }
+				onChange={ ( value ) =>
+					updateSetting( 'trust_cloudflare', value )
+				}
+				help={ __(
+					'Read the visitor address from Cloudflare when the request really comes from Cloudflare. Leave this off if the site is not behind Cloudflare.',
+					'subtleforms'
+				) }
+			/>
+			<FieldError errors={ fieldErrors.trust_cloudflare } />
+			<TextareaControl
+				label={ __( 'Trusted proxy addresses', 'subtleforms' ) }
+				value={ text }
+				rows={ 3 }
+				onChange={ ( value ) => {
+					setText( value );
+					updateSetting( 'trusted_proxy_cidrs', parseProxyList( value ) );
+				} }
+				help={ __(
+					'One IP address or range (such as 10.0.0.0/8) per line. Only requests from these addresses may say who the visitor is. Leave empty unless a load balancer or reverse proxy sits in front of the site.',
+					'subtleforms'
+				) }
+			/>
+			<FieldError errors={ fieldErrors.trusted_proxy_cidrs } />
+		</div>
+	);
+}
 
 /**
  * Advanced Settings Tab
@@ -88,6 +150,12 @@ export default function AdvancedSettings( {
 				/>
 				<FieldError errors={ fieldErrors.min_submission_time } />
 			</div>
+
+			<ProxySettings
+				settings={ settings }
+				updateSetting={ updateSetting }
+				fieldErrors={ fieldErrors }
+			/>
 
 			{/* ── CAPTCHA ── */ }
 			<div>
@@ -450,6 +518,21 @@ export default function AdvancedSettings( {
 					) }
 				/>
 				<FieldError errors={ fieldErrors.entries_trash_days } />
+				<ToggleControl
+					label={ __(
+						'Keep my data when the plugin is deleted',
+						'subtleforms'
+					) }
+					checked={ !! settings.keep_data_on_uninstall }
+					onChange={ ( value ) =>
+						updateSetting( 'keep_data_on_uninstall', !! value )
+					}
+					help={ __(
+						'Off by default. When this is off, deleting SubtleForms from the Plugins screen removes its forms, entries, settings and uploaded files. SubtleForms Pro settings and license are never removed.',
+						'subtleforms'
+					) }
+				/>
+				<FieldError errors={ fieldErrors.keep_data_on_uninstall } />
 				<p className="sf-section-description">
 					{ __(
 						'Note: Submissions can also be exported or erased via WordPress Privacy Tools (Tools → Export/Erase Personal Data).',

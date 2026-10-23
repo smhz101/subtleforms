@@ -75,7 +75,7 @@ final class InlineFormData261Test extends TestCase {
 		$this->assertSame( $route['schema'], $data['schema'] );
 		$this->assertSame( $route['form'], $data['form'] );
 		$this->assertSame( $route['version'], $data['version'] );
-		$this->assertNotNull( \SubtleForms\Engine\SpamProtection::token_time( $data['spam_token'], $formId ) );
+		$this->assertNotNull( \SubtleForms\Engine\SpamProtection::ticket_time( $data['spam_token'], $formId ) );
 	}
 
 	public function test_block_prints_the_same_data(): void {

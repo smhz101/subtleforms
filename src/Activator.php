@@ -27,14 +27,61 @@ final class Activator {
 	 * @return bool Whether the activation steps ran.
 	 */
 	public static function maybe_upgrade( ?string $current = null ): bool {
-		$current = $current ?? SUBTLEFORMS_VERSION;
+		$explicit = null !== $current;
+		$current  = $current ?? SUBTLEFORMS_VERSION;
 		if ( get_option( 'subtleforms_db_version' ) === $current ) {
 			return false;
 		}
-		self::activate();
-		update_option( 'subtleforms_db_version', $current );
-		update_option( 'subtleforms_version', $current );
+
+		// The implicit call from plugins_loaded must not run schema work on a
+		// visitor's request. It runs for admin screens, admin-ajax and WP-CLI;
+		// front-end code guards the columns it needs until it has run.
+		if ( ! $explicit && ! self::is_upgrade_context() ) {
+			return false;
+		}
+
+		if ( ! self::acquire_upgrade_lock() ) {
+			return false;
+		}
+
+		try {
+			self::activate();
+			update_option( 'subtleforms_db_version', $current );
+			update_option( 'subtleforms_version', $current );
+		} finally {
+			delete_option( self::UPGRADE_LOCK );
+		}
 		return true;
+	}
+
+	/**
+	 * Option that holds the upgrade lock (value: unix time it was taken).
+	 */
+	const UPGRADE_LOCK = 'subtleforms_upgrade_lock';
+
+	/**
+	 * Whether this request may run schema upgrades on its own.
+	 */
+	private static function is_upgrade_context(): bool {
+		return ( function_exists( 'is_admin' ) && is_admin() )
+			|| ( defined( 'WP_CLI' ) && WP_CLI );
+	}
+
+	/**
+	 * Take the upgrade lock. add_option() fails when the row exists, so two
+	 * concurrent requests cannot both pass. A lock older than five minutes is
+	 * treated as left behind by a crashed request.
+	 */
+	private static function acquire_upgrade_lock(): bool {
+		if ( add_option( self::UPGRADE_LOCK, time(), '', false ) ) {
+			return true;
+		}
+		$taken = (int) get_option( self::UPGRADE_LOCK, 0 );
+		if ( $taken > 0 && ( time() - $taken ) > 300 ) {
+			delete_option( self::UPGRADE_LOCK );
+			return (bool) add_option( self::UPGRADE_LOCK, time(), '', false );
+		}
+		return false;
 	}
 
 	/**
@@ -42,12 +89,12 @@ final class Activator {
 	 */
 	public static function activate(): void {
 		// Check PHP version requirement
-		if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
+		if ( version_compare( PHP_VERSION, '8.1', '<' ) ) {
 			deactivate_plugins( SUBTLEFORMS_PLUGIN_BASENAME );
 			wp_die(
 				sprintf(
 					/* translators: %s: Current PHP version */
-					esc_html__( 'SubtleForms requires PHP 7.4 or higher. Your server is running PHP %s', 'subtleforms' ),
+					esc_html__( 'SubtleForms requires PHP 8.1 or higher. Your server is running PHP %s', 'subtleforms' ),
 					PHP_VERSION
 				),
 				esc_html__( 'Plugin Activation Error', 'subtleforms' ),
@@ -144,9 +191,11 @@ final class Activator {
   trashed_at datetime DEFAULT NULL,
   ip_address varchar(45),
   user_agent varchar(255),
+  user_id bigint(20) unsigned NOT NULL DEFAULT 0,
   created_at datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY  (id),
   KEY form_id (form_id),
+  KEY form_user (form_id, user_id),
   KEY status (status),
   KEY is_read (is_read),
   KEY starred (starred),
@@ -184,27 +233,6 @@ final class Activator {
   KEY created_at (created_at)
 ) {$charset_collate};";
 
-		// License metadata table (Pro version)
-		$license_table = $wpdb->prefix . 'subtleforms_license_meta';
-		$license_sql   = "CREATE TABLE {$license_table} (
-  id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  license_key varchar(255) NOT NULL,
-  status varchar(20) NOT NULL DEFAULT 'inactive',
-  plan varchar(50) NOT NULL DEFAULT 'free',
-  domain varchar(255) NOT NULL,
-  activations int unsigned NOT NULL DEFAULT 0,
-  activation_limit int unsigned NOT NULL DEFAULT 1,
-  expires_at int unsigned DEFAULT NULL,
-  activated_at int unsigned DEFAULT NULL,
-  last_checked int unsigned DEFAULT NULL,
-  metadata longtext,
-  PRIMARY KEY  (id),
-  UNIQUE KEY license_key (license_key),
-  KEY status (status),
-  KEY domain (domain),
-  KEY expires_at (expires_at)
-) {$charset_collate};";
-
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 		$results                = array();
@@ -213,8 +241,8 @@ final class Activator {
 		$results['schemas']     = dbDelta( $schemas_sql );
 		$results['logs']        = dbDelta( $logs_sql );
 		\SubtleForms\Tools\ApiLog::install();
+		\SubtleForms\Security\RateLimitStore::install();
 		update_option( 'subtleforms_api_log_table', '1', false );
-		$results['license']     = dbDelta( $license_sql );
 
 		// Verify tables were created
 		$tables_to_check = array(
@@ -222,7 +250,6 @@ final class Activator {
 			'submissions' => $submissions_table,
 			'schemas'     => $schemas_table,
 			'logs'        => $logs_table,
-			'license'     => $license_table,
 		);
 
 		$missing_tables = array();

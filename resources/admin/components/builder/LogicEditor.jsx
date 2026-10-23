@@ -7,13 +7,20 @@
  *
  *   { action, groups: [ { match: 'all' | 'any', rules: [ { field, operator, value, value2 } ] } ] }
  *
- * Every option is available: "all" or "any" per group, several groups
- * (OR) and every operator.
+ * This editor writes the basic form: one group whose rules must all match,
+ * with the basic operators, on a field. Condition groups, the "any" match,
+ * the other operators and conditions on steps, emails, webhooks and
+ * confirmations are SubtleForms Pro. Where Pro is active it registers its own
+ * editor (registerLogicEditor in shared/extend.js) and this one steps aside.
+ * Without Pro those options show as Pro notes with an upgrade link, and
+ * saved rules this editor cannot show are left as they are.
  */
 import { Button, SelectControl, TextControl } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
 import Icon from '../../ui/Icon';
-import { nodeLogics, VALUELESS_OPERATORS } from '../../../shared/conditions';
+import { nodeLogics, normalizeLogic, isBasic, VALUELESS_OPERATORS } from '../../../shared/conditions';
+import { getLogicEditor } from '../../../shared/extend';
+import ProNotice, { ProTag, ProUpgradeLink } from '../../ui/ProNotice';
 import { logicOperatorsFor, logicValueChoices } from '../../../shared/logicFields';
 import { orderedCountries } from '../../../shared/countries';
 import './LogicEditor.scss';
@@ -27,18 +34,9 @@ const OPERATOR_LABELS = {
   not_empty: __('is not empty', 'subtleforms'),
   greater_than: __('is greater than', 'subtleforms'),
   less_than: __('is less than', 'subtleforms'),
-  starts_with: __('starts with', 'subtleforms'),
-  ends_with: __('ends with', 'subtleforms'),
-  in: __('is one of', 'subtleforms'),
-  not_in: __('is not one of', 'subtleforms'),
-  between: __('is between', 'subtleforms'),
-  before: __('is before (date)', 'subtleforms'),
-  after: __('is after (date)', 'subtleforms'),
 };
 
 const BASIC_ORDER = ['equals', 'not_equals', 'contains', 'not_contains', 'empty', 'not_empty', 'greater_than', 'less_than'];
-const ADVANCED_ORDER = ['starts_with', 'ends_with', 'in', 'not_in', 'between', 'before', 'after'];
-const DATE_TYPES = ['date', 'datetime'];
 
 const emptyRule = () => ({ field: '', operator: 'equals', value: '' });
 
@@ -103,7 +101,98 @@ function optionPairs(options) {
     .filter((o) => o.value !== '');
 }
 
-export default function LogicEditor({
+const PRO_FEATURE = 'logic.conditional.advanced';
+
+/** Whether saved logic needs Pro: it is more than the basic form on a field. */
+function needsPro(logic, scope) {
+  const l = normalizeLogic(logic);
+  return l !== null && !isBasic(l, scope);
+}
+
+/**
+ * Condition options that are part of Pro, shown as a note. Nothing here
+ * changes the rules.
+ */
+function AdvancedOptionsNote() {
+  return (
+    <div className='sf-logic-editor__pro'>
+      <div className='sf-logic-editor__pro-head'>
+        <span>{__('More ways to match', 'subtleforms')}</span>
+        <ProTag />
+      </div>
+      <p>
+        {__('Match any rule, add “or” groups, and use starts with, ends with, is one of, is between, is before and is after.', 'subtleforms')}
+      </p>
+      <ProUpgradeLink feature={PRO_FEATURE} label={__('Advanced conditional logic', 'subtleforms')} />
+    </div>
+  );
+}
+
+const SCOPE_NOTES = {
+  step: __('Skipping a step based on answers is part of SubtleForms Pro.', 'subtleforms'),
+  action: __('Running an email, webhook or other action only for some answers is part of SubtleForms Pro.', 'subtleforms'),
+  confirmation: __('Showing a confirmation based on answers is part of SubtleForms Pro.', 'subtleforms'),
+};
+
+/**
+ * The editor in the plugin: rules on a field, basic form. Other places
+ * (steps, actions, confirmations) show a Pro note.
+ */
+function BasicLogicEditor(props) {
+  const { logic, scope = 'field', onChange, disabled = false } = props;
+  const hasSaved = countRules(logic) > 0;
+
+  if (scope !== 'field') {
+    return (
+      <div className='sf-logic-editor'>
+        <ProNotice
+          label={__('Conditions', 'subtleforms')}
+          help={SCOPE_NOTES[scope] || SCOPE_NOTES.step}
+          feature={PRO_FEATURE}
+        />
+        {hasSaved && (
+          <p className='sf-logic-editor__empty'>
+            {__('A condition is saved here. It is ignored until SubtleForms Pro is active, then it applies again.', 'subtleforms')}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  if (hasSaved && needsPro(logic, scope)) {
+    return (
+      <div className='sf-logic-editor'>
+        <p className='sf-logic-editor__empty'>
+          {__('These rules use advanced options. They are ignored and the field is always shown until SubtleForms Pro is active, then they apply again.', 'subtleforms')}
+        </p>
+        <AdvancedOptionsNote />
+        <div className='sf-logic-editor__footer'>
+          <Button
+            variant='tertiary'
+            size='compact'
+            isDestructive
+            disabled={disabled}
+            onClick={() => onChange(null)}>
+            {__('Clear rules', 'subtleforms')}
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return <FieldLogicEditor {...props} />;
+}
+
+/** Pro's editor when registered, else the basic one. */
+export default function LogicEditor(props) {
+  const Registered = getLogicEditor();
+  if (Registered) {
+    return <Registered {...props} countries={orderedCountries()} Fallback={BasicLogicEditor} />;
+  }
+  return <BasicLogicEditor {...props} />;
+}
+
+function FieldLogicEditor({
   logic,
   availableFields = [],
   onChange,
@@ -149,10 +238,6 @@ export default function LogicEditor({
       ? updateGroup(gi, { rules: [...groups[gi].rules, emptyRule()] })
       : commit([{ match: 'all', rules: [emptyRule()] }]);
 
-  const addGroup = () => {
-    commit([...groups, { match: 'all', rules: [emptyRule()] }]);
-  };
-
   const fieldOptions = [
     { label: __('Choose a field…', 'subtleforms'), value: '' },
     ...availableFields
@@ -189,42 +274,19 @@ export default function LogicEditor({
 
       {groups.map((group, gi) => (
         <div key={gi} className='sf-logic-editor__group-wrap'>
-          {gi > 0 && (
-            <div className='sf-logic-editor__or' aria-hidden='true'>
-              <span>{__('or', 'subtleforms')}</span>
-            </div>
-          )}
           <div className='sf-logic-editor__group'>
             <div className='sf-logic-editor__group-head'>
-              <SelectControl
-                __nextHasNoMarginBottom
-                label={__('Match', 'subtleforms')}
-                hideLabelFromVision
-                className='sf-logic-editor__match'
-                value={group.match === 'any' ? 'any' : 'all'}
-                disabled={readOnly}
-                options={[
-                  { value: 'all', label: __('All of these rules', 'subtleforms') },
-                  { value: 'any', label: __('Any of these rules', 'subtleforms') },
-                ]}
-                onChange={(v) => updateGroup(gi, { match: v })}
-              />
-              {groups.length > 1 && (
-                <Button
-                  size='small'
-                  variant='tertiary'
-                  isDestructive
-                  disabled={readOnly}
-                  onClick={() => commit(groups.filter((_, i) => i !== gi))}>
-                  {__('Remove group', 'subtleforms')}
-                </Button>
-              )}
+              <span className='sf-logic-editor__match-note'>
+                {group.rules.length > 1
+                  ? __('All of these rules must match', 'subtleforms')
+                  : __('This rule must match', 'subtleforms')}
+              </span>
             </div>
 
             {group.rules.map((rule, ri) => {
               const source = availableFields.find((f) => f.key === (rule.field || rule.sourceField));
               const allowed = logicOperatorsFor(source?.type);
-              const operatorOptions = (allowed || [...BASIC_ORDER, ...ADVANCED_ORDER])
+              const operatorOptions = (allowed || BASIC_ORDER)
                 .concat(rule.operator && allowed && !allowed.includes(rule.operator) ? [rule.operator] : [])
                 .map((op) => ({ label: OPERATOR_LABELS[op] || op, value: op }));
               const choices = source?.type === 'country'
@@ -232,7 +294,6 @@ export default function LogicEditor({
                 : (logicValueChoices(source).length ? logicValueChoices(source) : optionPairs(source?.options));
               const op = rule.operator || 'equals';
               const needsValue = !VALUELESS_OPERATORS.includes(op);
-              const isDate = op === 'before' || op === 'after' || DATE_TYPES.includes(source?.type);
               const useChoices = choices.length > 0 && ['equals', 'not_equals', 'contains', 'not_contains'].includes(op);
 
               return (
@@ -276,46 +337,16 @@ export default function LogicEditor({
                       onChange={(v) => updateRule(gi, ri, { value: v })}
                     />
                   )}
-                  {needsValue && !useChoices && op !== 'between' && (
+                  {needsValue && !useChoices && (
                     <TextControl
                       __nextHasNoMarginBottom
                       label={__('Value', 'subtleforms')}
                       hideLabelFromVision
-                      type={isDate && op !== 'in' && op !== 'not_in' && String(rule.value || '') !== 'today' ? 'date' : 'text'}
-                      placeholder={
-                        op === 'in' || op === 'not_in'
-                          ? __('Values separated by commas', 'subtleforms')
-                          : __('Value', 'subtleforms')
-                      }
+                      placeholder={__('Value', 'subtleforms')}
                       value={String(rule.value ?? '')}
                       disabled={readOnly}
                       onChange={(v) => updateRule(gi, ri, { value: v })}
                     />
-                  )}
-                  {op === 'between' && (
-                    <div className='sf-logic-editor__between'>
-                      <TextControl
-                        __nextHasNoMarginBottom
-                        label={__('From', 'subtleforms')}
-                        hideLabelFromVision
-                        placeholder={__('From', 'subtleforms')}
-                        type={isDate ? 'date' : 'text'}
-                        value={String(rule.value ?? '')}
-                        disabled={readOnly}
-                        onChange={(v) => updateRule(gi, ri, { value: v })}
-                      />
-                      <span aria-hidden='true'>{__('and', 'subtleforms')}</span>
-                      <TextControl
-                        __nextHasNoMarginBottom
-                        label={__('To', 'subtleforms')}
-                        hideLabelFromVision
-                        placeholder={__('To', 'subtleforms')}
-                        type={isDate ? 'date' : 'text'}
-                        value={String(rule.value2 ?? '')}
-                        disabled={readOnly}
-                        onChange={(v) => updateRule(gi, ri, { value2: v })}
-                      />
-                    </div>
                   )}
                 </div>
               );
@@ -337,12 +368,10 @@ export default function LogicEditor({
           <Button variant='secondary' size='compact' disabled={readOnly} onClick={() => addRule(0)}>
             {addLabel || __('Add rule', 'subtleforms')}
           </Button>
-        ) : (
-          <Button variant='tertiary' size='compact' disabled={readOnly} onClick={addGroup}>
-            {__('+ Add “or” group', 'subtleforms')}
-          </Button>
-        )}
+        ) : null}
       </div>
+
+      <AdvancedOptionsNote />
     </div>
   );
 }

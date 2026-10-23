@@ -7,6 +7,7 @@
 import { useState, useEffect, useCallback } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { apiGet } from '../../utils/api';
+import { withProPlaceholders } from '../../utils/proPlaceholders';
 import { BUILDER_ACTIONS } from '../useBuilderReducer';
 
 export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTour }) {
@@ -99,7 +100,7 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
               category: field.category || category,
               meta: field.meta || {},
               is_pro: field.is_pro === true,
-              is_pro_locked: field.is_pro_locked === true,
+              pro_placeholder: field.pro_placeholder === true,
             };
           });
         });
@@ -118,7 +119,7 @@ export default function useBuilderBoot({ formId, bootstrap, dispatch, autoShowTo
           // The library still works; hidden types just show fewer settings.
         }
 
-        setFieldGroups(groups);
+        setFieldGroups(withProPlaceholders(groups));
         setFieldDefinitions(definitions);
         setFieldsError(null);
         setLoadingFields(false);

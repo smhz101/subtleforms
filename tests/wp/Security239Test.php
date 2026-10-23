@@ -56,20 +56,6 @@ class Security239Test extends TestCase {
 		$this->assertStringContainsString( '<b>ok<\/b>', $json );
 	}
 
-	/** A visitor without a REST nonce counts a view on a published form. */
-	public function test_visitor_view_is_counted_without_a_nonce() {
-		$formId = $this->nameForm();
-		wp_set_current_user( 0 );
-		$before = (int) ( \SubtleForms\Analytics\Stats::totalsByForm( 1 )[ $formId ]['views'] ?? 0 );
-		$request = new \WP_REST_Request( 'POST', '/subtleforms/v1/forms/' . $formId . '/view' );
-		$request->set_header( 'content-type', 'application/json' );
-		$request->set_body( '{}' );
-		$response = rest_do_request( $request );
-		$this->assertSame( 200, $response->get_status() );
-		$this->assertTrue( $response->get_data()['tracked'] );
-		$this->assertSame( $before + 1, (int) ( \SubtleForms\Analytics\Stats::totalsByForm( 1 )[ $formId ]['views'] ?? 0 ) );
-	}
-
 	/** FB-09, FF-13, FA-24, FLD2-17: rejected answers are never stored; the spam token never is. */
 	public function test_rejected_submissions_are_not_stored() {
 		$id  = $this->nameForm();
@@ -104,7 +90,7 @@ class Security239Test extends TestCase {
 		$request = new \WP_REST_Request( 'GET', '/subtleforms/v1/forms/' . $id . '/schema' );
 		$data    = rest_do_request( $request )->get_data();
 		$token   = $data['data']['spam_token'] ?? '';
-		$this->assertNotNull( SpamProtection::token_time( $token, $id ) );
+		$this->assertNotNull( SpamProtection::ticket_time( $token, $id ) );
 	}
 
 	/** FF-03: a stale nonce on a public route is treated as a visitor. */

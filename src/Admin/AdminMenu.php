@@ -224,26 +224,6 @@ class AdminMenu {
 			array( $this, 'render_reports' )
 		);
 
-		// Payments and coupons (2.1)
-		add_submenu_page(
-			'subtleforms',
-			__( 'Payments', 'subtleforms' ),
-			__( 'Payments', 'subtleforms' ),
-			$this->caps->manage_cap(),
-			'subtleforms-payments',
-			array( $this, 'render_payments' )
-		);
-
-		// Extensions
-		add_submenu_page(
-			'subtleforms',
-			__( 'Extensions', 'subtleforms' ),
-			__( 'Extensions', 'subtleforms' ),
-			$this->caps->manage_cap(),
-			'subtleforms-extensions',
-			array( $this, 'render_extensions' )
-		);
-
 		// Settings
 		add_submenu_page(
 			'subtleforms',
@@ -283,40 +263,13 @@ class AdminMenu {
 		// than merely differently themed.
 		wp_enqueue_style( 'wp-components' );
 
-		// Main admin CSS
-		wp_enqueue_style(
-			'subtleforms-admin',
-			SUBTLEFORMS_PLUGIN_URL . 'assets/css/admin.css',
-			array( 'wp-components' ),
-			SUBTLEFORMS_VERSION
-		);
-
-		wp_add_inline_style(
-			'subtleforms-admin',
-			'.subtleforms-placeholder{text-align:center;padding:60px 20px;max-width:800px;margin:0 auto}.subtleforms-placeholder-icon{font-size:64px;color:#ddd;margin-bottom:20px}.subtleforms-placeholder h2{font-size:24px;margin-bottom:10px}.subtleforms-quick-list{margin-top:40px;text-align:left}'
-		);
-
 		// Component styles from wp-scripts build (Settings, Dashboard, etc.)
 		wp_enqueue_style(
 			'subtleforms-components',
 			SUBTLEFORMS_PLUGIN_URL . 'build/admin/index.jsx.css',
-			array( 'subtleforms-admin' ),
+			array( 'wp-components' ),
 			SUBTLEFORMS_VERSION
 		);
-
-		if ( $this->is_builder_screen( $hook ) ) {
-			// Media Library for Picture Choice images (2.0).
-			if ( function_exists( 'wp_enqueue_media' ) ) {
-				wp_enqueue_media();
-			}
-
-			wp_enqueue_style(
-				'subtleforms-admin-builder',
-				SUBTLEFORMS_PLUGIN_URL . 'assets/css/admin-builder.css',
-				array( 'subtleforms-admin' ),
-				SUBTLEFORMS_VERSION
-			);
-		}
 
 		// Main admin JS (built bundle at build/admin/admin.js)
 		$asset_file = SUBTLEFORMS_PLUGIN_DIR . 'build/admin/admin.asset.php';
@@ -365,18 +318,20 @@ class AdminMenu {
 			'nonce'          => wp_create_nonce( 'subtleforms_admin' ),
 			'restNonce'      => wp_create_nonce( 'wp_rest' ),
 			'version'        => SUBTLEFORMS_VERSION,
-			'currency'       => strtoupper( (string) ( ( get_option( 'subtleforms_settings', array() )['ext_payments_currency'] ?? '' ) ?: 'USD' ) ),
+			'currency'       => 'USD',
 			'unreadCount'    => $this->get_unread_count(),
 			'capabilities'   => $live_caps->all(),
 			'hasProPlugin'   => defined( 'SUBTLEFORMS_PRO_VERSION' ) || subtleforms_is_pro_active(),
 			'missingFieldTypes' => \SubtleForms\Fields\AddonFieldTypes::missing(),
+			// Features an active add-on provides (see Support\ExtensionPoints).
+			'addonFeatures'  => \SubtleForms\Support\ExtensionPoints::provided(),
 			'license'        => $license_data,
 			'subscription'   => array(
 				'status'    => 'inactive',
 				'plan'      => 'free',
 				'connected' => false,
 			),
-			'extensions'     => $this->buildExtensionsData( $live_caps ),
+			'extensions'     => $this->buildExtensionsData(),
 			'isDev'          => defined( 'WP_DEBUG' ) && WP_DEBUG,
 			// The builder preview renders the real frontend markup inside an
 			// iframe, so it needs the public stylesheet to look like production
@@ -580,129 +535,36 @@ class AdminMenu {
 	}
 
 	/**
-	 * Build the extensions data array for the front end.
+	 * The integrations the Settings screen lists.
 	 *
-	 * Returns a map of slug => {label, enabled, configured, available} where:
-	 *   - enabled:    admin has turned the extension on in Settings
-	 *   - configured: the required API keys / settings appear to be present
-	 *   - available:  the capability gate allows this extension (Pro licence)
+	 * Webhooks are part of this plugin. Any other integration comes from an
+	 * add-on, which adds its entry through the filter below.
+	 *
+	 * @return array<string, array> Map of slug to { slug, label, description,
+	 *                              available, enabled, configured, requires }.
 	 */
-	private function buildExtensionsData( ?Capabilities $caps = null ): array {
-		$settings = new \SubtleForms\Support\Settings();
-		$gate     = new \SubtleForms\Support\FeatureGate( $caps ?? $this->caps );
-
-		$extensions = array(
-			array(
+	private function buildExtensionsData(): array {
+		$result = array(
+			'webhooks' => array(
 				'slug'        => 'webhooks',
 				'label'       => __( 'Webhooks', 'subtleforms' ),
 				'description' => __( 'Send each entry as JSON to any URL, with retries and signed requests.', 'subtleforms' ),
-			),
-			array(
-				'slug'        => 'email_marketing',
-				'label'       => __( 'Email Marketing', 'subtleforms' ),
-				'description' => __( 'Add people who fill in a form to Mailchimp, Brevo or Kit.', 'subtleforms' ),
-			),
-			array(
-				'slug'        => 'crm',
-				'label'       => __( 'CRM', 'subtleforms' ),
-				'description' => __( 'Create or update HubSpot contacts, or send contacts to Zapier or Make.', 'subtleforms' ),
-			),
-			array(
-				'slug'        => 'analytics',
-				'label'       => __( 'Analytics', 'subtleforms' ),
-				'description' => __( 'Views, submissions and conversion rate for every form.', 'subtleforms' ),
-			),
-			array(
-				'slug'        => 'ecommerce',
-				'label'       => __( 'WooCommerce', 'subtleforms' ),
-				'description' => __( 'Take form payments through the WooCommerce checkout and sell WooCommerce products from any form.', 'subtleforms' ),
-			),
-			array(
-				'slug'        => 'pdf',
-				'label'       => __( 'Entry PDF', 'subtleforms' ),
-				'description' => __( 'Download any entry as a PDF and attach it to notification emails.', 'subtleforms' ),
-			),
-			array(
-				'slug'        => 'multilanguage',
-				'label'       => __( 'Multilanguage', 'subtleforms' ),
-				'description' => __( 'Register form strings with WPML or Polylang for full translation support.', 'subtleforms' ),
-			),
-			array(
-				'slug'        => 'payments',
-				'label'       => __( 'Payments', 'subtleforms' ),
-				'description' => __( 'Accept Stripe or PayPal payments directly through your forms.', 'subtleforms' ),
+				'available'   => true,
+				'enabled'     => true,
+				'configured'  => true,
+				'requires'    => '',
 			),
 		);
 
-		$result = array();
+		/**
+		 * Integrations an add-on lists in Settings (SubtleForms Pro).
+		 *
+		 * @param array<string, array> $integrations Map of slug to integration data.
+		 * @since 2.8.0
+		 */
+		$result = apply_filters( 'subtleforms/admin/integrations', $result );
 
-		foreach ( $extensions as $meta ) {
-			$slug      = $meta['slug'];
-			$cap_key   = 'extensions.' . $slug;
-			$sk        = 'ext_' . $slug;
-			// Webhooks and analytics are part of the free plugin.
-			$available = in_array( $slug, array( 'webhooks', 'analytics' ), true ) || $gate->allows( $cap_key );
-			$enabled   = (bool) $settings->get( $sk . '_enabled' );
-			if ( 'ecommerce' === $slug ) {
-				// The WooCommerce integration has no on/off switch: it is on
-				// whenever WooCommerce is active.
-				$enabled = class_exists( 'WooCommerce' );
-			}
-			if ( 'webhooks' === $slug || 'pdf' === $slug ) {
-				// Webhook actions and entry PDF downloads have no master switch
-				// (2.1); their panels only hold defaults.
-				$enabled = true;
-			}
-
-			// Lightweight check: does the extension have its primary credential set?
-			$configured = $this->isExtensionConfigured( $slug, $settings );
-
-			$result[ $slug ] = array(
-				'slug'        => $slug,
-				'label'       => $meta['label'],
-				'description' => $meta['description'],
-				'available'   => $available,  // false = needs an add-on (SubtleForms Pro)
-				'enabled'     => $enabled && $available,
-				'configured'  => $configured,
-				/**
-				 * The plan an integration this site cannot use yet is part of
-				 * (2.4.1), such as "Pro" or "Agency". Empty hides it.
-				 *
-				 * @param string $plan Plan name.
-				 * @param string $slug Integration slug.
-				 * @since 2.4.1
-				 */
-				'requires'    => $available ? '' : sanitize_text_field( (string) apply_filters( 'subtleforms/extensions/requires', '', $slug ) ),
-			);
-		}
-
-		return $result;
-	}
-
-	/**
-	 * Rough check whether the critical settings for an extension look populated.
-	 */
-	private function isExtensionConfigured( string $slug, \SubtleForms\Support\Settings $settings ): bool {
-		$checks = array(
-			'webhooks'       => array(), // no required key, endpoint can be per-form
-			'email_marketing' => array( 'ext_email_marketing_api_key' ),
-			'crm'            => array( 'webhook' === $settings->get( 'ext_crm_provider' ) ? 'ext_crm_webhook_url' : 'ext_crm_api_key' ),
-			'analytics'      => array(), // no external API needed
-			'ecommerce'      => array(), // depends on WooCommerce products
-			'pdf'            => array(), // no API key needed
-			'multilanguage'  => array(), // no API key needed
-			'payments'       => array( 'ext_payments_stripe_pk' ), // either stripe or paypal
-		);
-
-		$required = $checks[ $slug ] ?? array();
-
-		foreach ( $required as $key ) {
-			if ( ! $settings->get( $key ) ) {
-				return false;
-			}
-		}
-
-		return true;
+		return is_array( $result ) ? $result : array();
 	}
 
 	private function is_builder_screen( string $hook ): bool {
@@ -874,17 +736,6 @@ class AdminMenu {
 	}
 
 	/**
-	 * Render extensions page.
-	 */
-	public function render_extensions(): void {
-		if ( ! current_user_can( $this->caps->manage_cap() ) ) {
-			wp_die( esc_html__( 'You do not have permission to access this page.', 'subtleforms' ) );
-		}
-
-		$this->get_template( 'extensions' );
-	}
-
-	/**
 	 * Where the old Tools screen went.
 	 *
 	 * Tools is a tab of Settings now. The old URL, admin.php?page=subtleforms-tools,
@@ -918,14 +769,6 @@ class AdminMenu {
 			wp_die( esc_html__( 'You do not have permission to access this page.', 'subtleforms' ) );
 		}
 		$this->get_template( 'reports' );
-	}
-
-	public function render_payments(): void {
-		if ( ! current_user_can( $this->caps->manage_cap() ) ) {
-			wp_die( esc_html__( 'You do not have permission to access this page.', 'subtleforms' ) );
-		}
-
-		$this->get_template( 'payments' );
 	}
 
 	/**
@@ -1034,7 +877,7 @@ class AdminMenu {
 	}
 
 	/**
-	 * Get template file path or render inline fallback.
+	 * Include an admin template.
 	 */
 	private function get_template( string $name, array $data = array() ): void {
 		$templatePath = SUBTLEFORMS_PLUGIN_DIR . 'templates/admin/' . $name . '.php';
@@ -1045,106 +888,7 @@ class AdminMenu {
 			return;
 		}
 
-		// Inline fallback template
-		$this->render_fallback_template( $name, $data );
-	}
-
-	/**
-	 * Render inline fallback template when file doesn't exist.
-	 */
-	private function render_fallback_template( string $name, array $data ): void {
-		?>
-		<div class="wrap subtleforms-admin">
-			<h1><?php echo esc_html( ucwords( str_replace( '-', ' ', $name ) ) ); ?></h1>
-			
-			<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Only checking URL param to display success notice, not processing form data. ?>
-			<?php if ( isset( $_GET['message'] ) ) : ?>
-				<div class="notice notice-success is-dismissible">
-					<p><?php esc_html_e( 'Action completed successfully.', 'subtleforms' ); ?></p>
-				</div>
-			<?php endif; ?>
-
-			<div class="subtleforms-placeholder">
-				<div class="subtleforms-placeholder-icon">
-					<span class="dashicons dashicons-feedback"></span>
-				</div>
-				<h2><?php esc_html_e( 'Coming Soon', 'subtleforms' ); ?></h2>
-				<p>
-					<?php
-					/* translators: %s: Name of the interface being developed */
-					printf( esc_html__( 'The %s interface is under development.', 'subtleforms' ), '<strong>' . esc_html( $name ) . '</strong>' );
-					?>
-				</p>
-				<p class="description">
-					<?php esc_html_e( 'This is a placeholder. Template files will be created in the templates/admin/ directory.', 'subtleforms' ); ?>
-				</p>
-				
-				<?php if ( $name === 'forms-list' && ! empty( $data['forms'] ) ) : ?>
-					<div class="subtleforms-quick-list">
-						<h3><?php esc_html_e( 'Your Forms', 'subtleforms' ); ?></h3>
-						<table class="widefat">
-							<thead>
-								<tr>
-										<th><?php esc_html_e( 'Title', 'subtleforms' ); ?></th>
-										<th><?php esc_html_e( 'Status', 'subtleforms' ); ?></th>
-										<th><?php esc_html_e( 'Created', 'subtleforms' ); ?></th>
-										<th><?php esc_html_e( 'Actions', 'subtleforms' ); ?></th>
-								</tr>
-							</thead>
-							<tbody>
-								<?php foreach ( $data['forms'] as $form ) : ?>
-									<tr>
-										<td><strong><?php echo esc_html( Helpers::safe_array_get( $form, 'title' ) ); ?></strong></td>
-										<td><?php echo esc_html( Helpers::safe_array_get( $form, 'status' ) ); ?></td>
-										<td><?php echo esc_html( Helpers::safe_array_get( $form, 'created_at' ) ); ?></td>
-										<td>
-											<a href="
-											<?php
-											echo esc_url(
-												wp_nonce_url(
-													add_query_arg(
-														array(
-															'action' => 'delete_form',
-															'id' => Helpers::safe_array_get( $form, 'id', 0 ),
-														),
-														admin_url( 'admin.php' )
-													),
-													'subtleforms_action'
-												)
-											);
-											?>
-														" class="button button-small"><?php esc_html_e( 'Delete', 'subtleforms' ); ?></a>
-										</td>
-									</tr>
-								<?php endforeach; ?>
-							</tbody>
-						</table>
-					</div>
-				<?php endif; ?>
-
-				<?php if ( $name === 'dashboard' && isset( $data['total_forms'] ) ) : ?>
-					<div class="subtleforms-stats" style="margin-top: 30px;">
-						<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; max-width: 800px; margin: 0 auto;">
-							<div class="subtleforms-stat-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
-								<h3 style="margin: 0 0 10px;"><?php echo esc_html( Helpers::safe_array_get( $data, 'total_forms', 0 ) ); ?></h3>
-								<p style="margin: 0; color: #666;"><?php esc_html_e( 'Total Forms', 'subtleforms' ); ?></p>
-							</div>
-							<div class="subtleforms-stat-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
-								<h3 style="margin: 0 0 10px;"><?php echo esc_html( Helpers::safe_array_get( $data, 'active_forms', 0 ) ); ?></h3>
-								<p style="margin: 0; color: #666;"><?php esc_html_e( 'Active Forms', 'subtleforms' ); ?></p>
-							</div>
-							<div class="subtleforms-stat-card" style="background: #fff; padding: 20px; border: 1px solid #ccc; border-radius: 4px;">
-								<h3 style="margin: 0 0 10px;"><?php echo esc_html( Helpers::safe_array_get( $data, 'total_submissions', 0 ) ); ?></h3>
-								<p style="margin: 0; color: #666;"><?php esc_html_e( 'Total Submissions', 'subtleforms' ); ?></p>
-							</div>
-						</div>
-					</div>
-				<?php endif; ?>
-			</div>
-		</div>
-
-		<?php
-		exit;
+		wp_die( esc_html__( 'This screen could not be loaded.', 'subtleforms' ) );
 	}
 
 	/**

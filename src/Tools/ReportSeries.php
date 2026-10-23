@@ -17,6 +17,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 final class ReportSeries {
 
 	/**
+	 * Statuses of entries that count as real submissions in reports and
+	 * totals. Spam, failed, preview and trashed entries do not.
+	 */
+	const COUNTED_STATUSES = array( 'completed', 'saved', 'unread', 'read', 'flagged', 'payment_pending' );
+
+	/**
 	 * Midnight, UTC, of the oldest day in a window that includes today.
 	 *
 	 * Seven days is today and the six days before it, the same window the

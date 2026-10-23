@@ -11,7 +11,6 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @package SubtleForms\Tests
  */
 
-use SubtleForms\Payments\Pricing;
 use SubtleForms\Support\FieldMapper;
 use SubtleForms\Templates\FormTemplates;
 
@@ -31,9 +30,9 @@ class ObjectColumnsTest extends PHPUnit\Framework\TestCase {
 		);
 	}
 
-	public function test_pricing_reads_products_in_object_columns(): void {
+	public function test_schema_fields_read_products_in_object_columns(): void {
 		foreach ( array( 'fields', 'children' ) as $shape ) {
-			$keys = array_column( Pricing::fields( $this->schema( $shape ) ), 'key' );
+			$keys = array_column( \SubtleForms\Support\SchemaFields::flat( $this->schema( $shape ) ), 'key' );
 			$this->assertContains( 'ticket', $keys, $shape );
 		}
 	}
