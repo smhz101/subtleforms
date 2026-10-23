@@ -1201,7 +1201,8 @@ export default function FormRenderer({
   // public stylesheet picks it up by inheritance and no per-form CSS is emitted.
   const appearanceStyle = formAppearanceStyle(effectiveAppearance);
   // The form's own CSS, limited to this form (2.7.2).
-  const customCss = effectiveAppearance?.customCss;
+  // It belongs to the form, so a block theme choice does not remove it.
+  const customCss = schema.metadata?.appearance?.customCss;
   // A theme form's buttons take the theme's button design (2.4.1).
   const buttonClass = (kind) =>
     ['subtleforms-button', `subtleforms-button-${kind}`, buttonThemeClass(effectiveAppearance)]
