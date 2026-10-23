@@ -196,6 +196,19 @@ describe('FlagIcon', () => {
     unmount();
   });
 
+  test('shows the two letters when the flag file fails to load', () => {
+    window.subtleformsAdmin = { flagBaseUrl: 'https://example.test/admin/flags' };
+    const { container, unmount } = mount(<span><FlagIcon code='pk' /></span>);
+    const img = container.querySelector('img');
+    expect(img).not.toBeNull();
+    act(() => {
+      img.dispatchEvent(new Event('error'));
+    });
+    expect(container.querySelector('img')).toBeNull();
+    expect(container.textContent).toBe('PK');
+    unmount();
+  });
+
   test('only a two-letter code can become a file name', () => {
     expect(flagCode('pk')).toBe('PK');
     ['', 'pak', 'p', 'p1', '../x', 'pk"><script>', null, undefined].forEach((bad) => {
@@ -230,7 +243,7 @@ describe('the flags feature in the browser', () => {
 
 describe('the flag files', () => {
   const os = require('os');
-  const source = path.join(__dirname, '../../../../node_modules/flag-icons/flags/4x3');
+  const source = path.join(__dirname, '../../../flags');
   const target = fs.mkdtempSync(path.join(os.tmpdir(), 'sf-flags-'));
   const { codes, sizes } = buildFlags(source, target);
 
@@ -249,6 +262,12 @@ describe('the flag files', () => {
       expect(svg).toMatch(/viewBox="0 0 640 480"/);
       expect(svg).not.toMatch(/<script|<image|data:|javascript:|onload=/i);
     });
+  });
+
+  test('ships the flag license notice and adds no package for the flags', () => {
+    expect(fs.readFileSync(path.join(target, 'LICENSE'), 'utf8')).toMatch(/MIT License[\s\S]*Panayiotis Lipiridis/);
+    const pkg = JSON.parse(fs.readFileSync(path.join(__dirname, '../../../../package.json'), 'utf8'));
+    expect(Object.keys({ ...pkg.dependencies, ...pkg.devDependencies })).not.toContain('flag-icons');
   });
 
   test('the flag of a country is small', () => {

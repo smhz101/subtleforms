@@ -1,3 +1,4 @@
+import { useState } from '@wordpress/element';
 import { flagCode, flagUrl } from '../../../shared/flagFiles';
 import { flagMark } from '../../../shared/phone';
 
@@ -9,7 +10,7 @@ import { flagMark } from '../../../shared/phone';
  * once. Flags in the open list are lazy, so only the rows in view load.
  *
  * Falls back to the two letters the pickers always showed when the folder is
- * unknown or the code is not a country code.
+ * unknown, the code is not a country code, or the file fails to load.
  *
  * @param {Object}  props       Props.
  * @param {string}  props.code  Two-letter country code.
@@ -18,7 +19,8 @@ import { flagMark } from '../../../shared/phone';
  */
 export default function FlagIcon({ code, eager = false }) {
   const src = flagUrl(code);
-  if (!src) {
+  const [failed, setFailed] = useState(false);
+  if (!src || failed) {
     return flagMark(code);
   }
   return (
@@ -31,6 +33,7 @@ export default function FlagIcon({ code, eager = false }) {
       height='15'
       decoding='async'
       loading={eager ? 'eager' : 'lazy'}
+      onError={() => setFailed(true)}
       data-flag={flagCode(code)}
     />
   );
