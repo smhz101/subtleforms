@@ -352,7 +352,8 @@ final class FrontendAssets {
 			. '.subtleforms--buttons-right .subtleforms-buttons{justify-content:flex-end}'
 			. '.subtleforms--buttons-full .subtleforms-buttons{flex-direction:column}'
 			. '.subtleforms--buttons-full .subtleforms-button{width:100%}'
-			. '.subtleforms-field-error{color:var(--subtleforms-color-error,#b3261e)}';
+			. '.subtleforms-field-error{color:var(--subtleforms-color-error,#b3261e)}'
+			. '.subtleforms-flag{display:inline-block;flex:none;width:20px;height:15px;border-radius:2px;overflow:hidden}';
 	}
 
 	/**
@@ -385,7 +386,12 @@ final class FrontendAssets {
 			}
 			$type   = (string) ( $node['type'] ?? '' );
 			$config = is_array( $node['config'] ?? null ) ? $node['config'] : array();
-			if ( ( 'phone' === $type || 'tel' === $type ) && ( ! empty( $node['enableCountryCode'] ) || ! empty( $config['enableCountryCode'] ) ) ) {
+			$phonePicker = ( 'phone' === $type || 'tel' === $type ) && ( ! empty( $node['enableCountryCode'] ) || ! empty( $config['enableCountryCode'] ) );
+			// Country flags: one more lazy group, only for a field that asks (2.7.2).
+			if ( ( $phonePicker || 'country' === $type ) && self::wantsFlags( $node, $config ) ) {
+				$groups['flags'] = true;
+			}
+			if ( $phonePicker ) {
 				$groups['geo'] = true;
 			} elseif ( isset( self::TYPE_GROUPS[ $type ] ) && ! in_array( $type, $absent, true ) ) {
 				$groups[ self::TYPE_GROUPS[ $type ] ] = true;
@@ -399,6 +405,19 @@ final class FrontendAssets {
 		$names = array_keys( $groups );
 		sort( $names );
 		return $names;
+	}
+
+	/**
+	 * Whether a Phone or Country field asks for country flags. Off unless the
+	 * setting is a true boolean (or the "1"/"true" a saved form may hold).
+	 *
+	 * @param array<string, mixed> $node   Field node.
+	 * @param array<string, mixed> $config Its config, when it has one.
+	 * @return bool
+	 */
+	private static function wantsFlags( array $node, array $config ): bool {
+		$value = array_key_exists( 'showFlags', $config ) ? $config['showFlags'] : ( $node['showFlags'] ?? false );
+		return true === filter_var( $value, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 	}
 
 	/** Form IDs whose data is preloaded from the page head. */
@@ -418,6 +437,7 @@ final class FrontendAssets {
 		'chained'        => 'field-chained-select',
 		'conversational' => 'form-conversational',
 		'date'           => 'field-date',
+		'flags'          => 'feature-flags',
 		'geo'            => 'field-phone-country',
 		'repeater'       => 'field-repeater',
 		'richText'       => 'field-rich-text',

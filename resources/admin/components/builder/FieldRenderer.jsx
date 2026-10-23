@@ -8,6 +8,7 @@ import AddressFieldRenderer from './AddressFieldRenderer';
 import { getCanvasPreview, addonProvides } from '../../../shared/extend';
 import { fieldDisplay } from '../../../shared/fieldDisplay';
 import { fieldConfig } from '../../../shared/fieldConfig';
+import { flagsOn } from '../../../shared/flagsOn';
 import { choiceChecked, choiceShowsDefault } from '../../../shared/canvasDefaults';
 import { consentParts } from '../../../shared/consentLabel';
 import { toggleInitialValue, toggleIsOn } from '../../../shared/toggleState';
@@ -231,6 +232,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           config={fieldConfig(field)}
           value=""
           showFlags={(fieldConfig(field).appearance || {}).showFlags !== false}
+          flagImages={flagsOn(fieldConfig(field).showFlags)}
           disabled={!interactive}
           inputClassName={inputClass}
           placeholder={placeholder}
@@ -428,6 +430,7 @@ const FieldRenderer = memo(function FieldRenderer({ field, previewMode = false, 
           searchable={fieldConfig(field).searchable !== false}
           placeholder={placeholder}
           preview={!interactive}
+          flagImages={flagsOn(fieldConfig(field).showFlags)}
         />
       )}
 
