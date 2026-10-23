@@ -153,12 +153,8 @@ class RecaptchaProvider implements CaptchaProviderInterface {
 		 * @param float $min_score Default 0.5.
 		 */
 		$min_score = (float) apply_filters( 'subtleforms/captcha/recaptcha_min_score', 0.5 );
-		/**
-		 * The reCAPTCHA v3 action the form page requests.
-		 *
-		 * @param string $action Default "submit".
-		 */
-		$action = (string) apply_filters( 'subtleforms/captcha/recaptcha_action', 'submit' );
+		// The form page always requests the "submit" action.
+		$action = 'submit';
 
 		if ( '' !== $action && ( $result['action'] ?? '' ) !== $action ) {
 			return __( 'CAPTCHA verification failed.', 'subtleforms' ) . ' (action-mismatch)';
