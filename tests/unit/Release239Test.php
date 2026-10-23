@@ -210,6 +210,62 @@ class Release239Test extends PHPUnit\Framework\TestCase {
 		$this->assertSame( 2, $GLOBALS['sf_test_restored'] );
 	}
 
+	/** 2.8.0: deleting SubtleForms never removes what SubtleForms Pro owns. */
+	public function test_uninstall_leaves_pro_options_tables_and_cron_alone(): void {
+		$GLOBALS['wpdb']->tables = array( 'wp_subtleforms_forms', 'wp_subtleforms_pro_stripe_events', 'wp_subtleforms_pro_integration_log' );
+		$GLOBALS['sf_test_cron'] = array(
+			time() => array(
+				'subtleforms_async_email'            => array( array( 'args' => array() ) ),
+				'subtleforms_pro_daily_license_check' => array( array( 'args' => array() ) ),
+			),
+		);
+		Uninstaller::clean_site();
+		$sql = implode( "\n", $GLOBALS['wpdb']->queries );
+		$this->assertStringContainsString( 'DROP TABLE IF EXISTS wp_subtleforms_forms', $sql );
+		$this->assertStringNotContainsString( 'DROP TABLE IF EXISTS wp_subtleforms_pro_', $sql );
+		$this->assertStringContainsString( "option_name NOT LIKE 'subtleforms\\_pro\\_%'", $sql );
+		$this->assertStringContainsString( "'subtleforms_license_key', 'subtleforms_license_data'", $sql );
+		$this->assertStringContainsString( "option_name NOT LIKE '\\_transient\\_subtleforms\\_pro\\_%'", $sql );
+		$this->assertStringContainsString( "meta_key NOT LIKE 'subtleforms\\_pro\\_%'", $sql );
+		$this->assertContains( 'subtleforms_async_email', $GLOBALS['sf_test_cleared'] );
+		$this->assertNotContains( 'subtleforms_pro_daily_license_check', $GLOBALS['sf_test_cleared'] );
+	}
+
+	/** 2.8.0: Keep my data is a real setting: off by default and accepted by every layer that saves. */
+	public function test_keep_data_on_uninstall_can_be_saved(): void {
+		$this->assertFalse( Settings::DEFAULTS['keep_data_on_uninstall'] );
+		$this->assertSame( 'boolean', Settings::VALIDATION_RULES['keep_data_on_uninstall'] );
+		$schema = \SubtleForms\Validation\Schemas::get( \SubtleForms\Validation\Schemas::SETTINGS_UPDATE );
+		$this->assertContains( 'keep_data_on_uninstall', $schema['__allow'] );
+		$validator = new \SubtleForms\Validation\RequestValidator( array( 'schemas' => \SubtleForms\Validation\Schemas::all() ) );
+		$out       = $validator->validateOrFail( array( 'keep_data_on_uninstall' => true ), $schema );
+		$this->assertTrue( $out['keep_data_on_uninstall'] );
+		$this->assertSame( true, ( new Settings() )->validate( array( 'keep_data_on_uninstall' => true ) )['keep_data_on_uninstall'] );
+
+		$GLOBALS['wpdb']->queries = array();
+		$GLOBALS['sf_test_options']['subtleforms_settings'] = array( 'keep_data_on_uninstall' => true );
+		$GLOBALS['sf_test_multisite'] = true;
+		$GLOBALS['sf_test_sites']     = array( 2 );
+		Uninstaller::run();
+		$this->assertSame( array(), $GLOBALS['wpdb']->queries, 'a site that keeps its data also keeps the network options' );
+	}
+
+	/** 2.8.0: the trialware parts are gone from this plugin. */
+	public function test_payment_and_license_machinery_is_not_shipped(): void {
+		foreach ( array( 'src/Payments', 'src/Api/PaymentsApi.php', 'src/Fields/PaymentFields.php', 'src/Contracts/LicenseManagerInterface.php', 'templates/admin/payments.php', 'templates/admin/extensions.php', 'src/Extensions/PaymentsExtension.php', 'src/Extensions/CrmExtension.php' ) as $path ) {
+			$this->assertFileDoesNotExist( $this->root . '/' . $path, $path );
+		}
+		$activator = file_get_contents( $this->root . '/src/Activator.php' );
+		$this->assertStringNotContainsString( 'subtleforms_license_meta', $activator );
+		$this->assertStringContainsString( "'8.1', '<'", $activator );
+		$settings = file_get_contents( $this->root . '/src/Support/Settings.php' );
+		foreach ( array( 'ext_payments_', 'ext_crm_', 'ext_email_marketing_', 'ext_pdf_', 'ext_ecommerce_', 'ext_multilanguage_' ) as $prefix ) {
+			$this->assertStringNotContainsString( $prefix, $settings, $prefix );
+		}
+		$this->assertStringNotContainsString( 'is_pro_locked', file_get_contents( $this->root . '/src/Api/FieldsApi.php' ) );
+		$this->assertStringNotContainsString( 'requires a Pro license', file_get_contents( $this->root . '/src/Api/FormsApi.php' ) );
+	}
+
 	public function test_php_files_exit_when_accessed_directly(): void {
 		$missing = array();
 		$iterator = new RecursiveIteratorIterator( new RecursiveDirectoryIterator( $this->root . '/src' ) );

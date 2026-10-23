@@ -55,6 +55,9 @@ final class AnswerFormatter {
 	/**
 	 * Currency symbols used in product lines; other currencies show the code.
 	 */
+	/** Currencies with no minor unit (shown without decimals). */
+	private const ZERO_DECIMAL = array( 'BIF', 'CLP', 'DJF', 'GNF', 'JPY', 'KMF', 'KRW', 'MGA', 'PYG', 'RWF', 'UGX', 'VND', 'VUV', 'XAF', 'XOF', 'XPF' );
+
 	private const SYMBOLS = array(
 		'USD' => '$',
 		'EUR' => "\u{20AC}",
@@ -116,10 +119,15 @@ final class AnswerFormatter {
 	 * @return array
 	 */
 	public static function context( $schema, array $extra = array() ): array {
-		$currency = '';
-		if ( is_array( $schema ) && class_exists( '\SubtleForms\Payments\Pricing' ) ) {
-			$currency = \SubtleForms\Payments\Pricing::currency( $schema );
-		}
+		/**
+		 * The currency used for prices on this form. The payment add-on
+		 * (SubtleForms Pro) supplies it; empty when none is active.
+		 *
+		 * @param string $currency ISO code.
+		 * @param mixed  $schema   Form schema.
+		 * @since 2.8.0
+		 */
+		$currency = is_array( $schema ) ? (string) apply_filters( 'subtleforms/format/currency', '', $schema ) : '';
 		return $extra + array( 'currency' => $currency );
 	}
 
@@ -696,7 +704,7 @@ final class AnswerFormatter {
 	 */
 	public static function money( float $amount, string $currency ): string {
 		$currency = strtoupper( $currency );
-		$decimals = '' === $currency ? 2 : \SubtleForms\Payments\Currencies::decimals( $currency );
+		$decimals = '' === $currency || ! in_array( $currency, self::ZERO_DECIMAL, true ) ? 2 : 0;
 		$number   = function_exists( 'number_format_i18n' ) ? number_format_i18n( $amount, $decimals ) : number_format( $amount, $decimals );
 		if ( '' === $currency ) {
 			return $number;

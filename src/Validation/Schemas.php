@@ -160,46 +160,12 @@ class Schemas {
 					// Privacy & GDPR
 					'data_retention_days',
 					'entries_trash_days',
+					'keep_data_on_uninstall',
 					// Extensions, Webhooks
 					'ext_webhooks_enabled',
 					'ext_webhooks_signing_secret',
 					'ext_webhooks_events',
 					'ext_webhooks_retries',
-					// Extensions, Email Marketing
-					'ext_email_marketing_enabled',
-					'ext_email_marketing_provider',
-					'ext_email_marketing_api_key',
-					'ext_email_marketing_list_id',
-					'ext_email_marketing_double_optin',
-					// Extensions, CRM
-					'ext_crm_enabled',
-					'ext_crm_provider',
-					'ext_crm_api_key',
-					'ext_crm_portal_id',
-					'ext_crm_webhook_url',
-					'ext_crm_add_note',
-					// Extensions, E-commerce
-					'ext_ecommerce_enabled',
-					'ext_ecommerce_default_processor',
-					'ext_ecommerce_empty_cart',
-					'ext_ecommerce_destination',
-					// Extensions, PDF
-					'ext_pdf_enabled',
-					'ext_pdf_template',
-					'ext_pdf_attach_to_email',
-					// Extensions, Multilanguage
-					'ext_multilanguage_enabled',
-					'ext_multilanguage_provider',
-					// Extensions, Payments
-					'ext_payments_enabled',
-					'ext_payments_provider',
-					'ext_payments_stripe_pk',
-					'ext_payments_stripe_sk',
-					'ext_payments_paypal_client_id',
-					'ext_payments_paypal_client_secret',
-					'ext_payments_currency',
-					'ext_payments_mode',
-					'ext_payments_failed_email',
 				),
 
 				// General
@@ -252,47 +218,13 @@ class Schemas {
 				// Privacy & GDPR
 				'data_retention_days'          => 'optional|int|min:0|max:3650',
 				'entries_trash_days'           => 'optional|int|min:1|max:365',
+				'keep_data_on_uninstall'       => 'optional|bool',
 				// Extensions, Webhooks
 				'ext_webhooks_enabled'             => 'optional|bool',
 				'ext_webhooks_signing_secret'      => 'optional|string|max:200',
 				'ext_webhooks_events'              => 'optional|array',
 				'ext_webhooks_retries'             => 'optional|int|min:0|max:5',
-				// Extensions, Email Marketing
-				'ext_email_marketing_enabled'      => 'optional|bool',
-				'ext_email_marketing_provider'     => 'optional|in:mailchimp,brevo,convertkit',
-				'ext_email_marketing_api_key'      => 'optional|string|max:500',
-				'ext_email_marketing_list_id'      => 'optional|string|max:200',
-				'ext_email_marketing_double_optin' => 'optional|bool',
-				// Extensions, CRM
-				'ext_crm_enabled'                  => 'optional|bool',
-				'ext_crm_provider'                 => 'optional|in:hubspot,webhook',
-				'ext_crm_api_key'                  => 'optional|string|max:500',
-				'ext_crm_portal_id'                => 'optional|string|max:100',
-				'ext_crm_webhook_url'              => 'optional|string|max:2000',
-				'ext_crm_add_note'                 => 'optional|bool',
 				// Extensions, Analytics
-				// Extensions, E-commerce
-				'ext_ecommerce_enabled'            => 'optional|bool',
-				'ext_ecommerce_default_processor'  => 'optional|in:woocommerce,subtleforms',
-				'ext_ecommerce_empty_cart'         => 'optional|bool',
-				'ext_ecommerce_destination'        => 'optional|in:checkout,cart',
-				// Extensions, PDF
-				'ext_pdf_enabled'                  => 'optional|bool',
-				'ext_pdf_template'                 => 'optional|string|max:100',
-				'ext_pdf_attach_to_email'          => 'optional|bool',
-				// Extensions, Multilanguage
-				'ext_multilanguage_enabled'        => 'optional|bool',
-				'ext_multilanguage_provider'       => 'optional|in:wpml,polylang',
-				// Extensions, Payments
-				'ext_payments_enabled'             => 'optional|bool',
-				'ext_payments_provider'            => 'optional|in:stripe,paypal',
-				'ext_payments_stripe_pk'           => 'optional|string|max:500',
-				'ext_payments_stripe_sk'           => 'optional|string|max:500',
-				'ext_payments_paypal_client_id'    => 'optional|string|max:500',
-				'ext_payments_paypal_client_secret' => 'optional|string|max:500',
-				'ext_payments_currency'            => 'optional|string|max:10',
-				'ext_payments_mode'                => 'optional|in:test,live',
-				'ext_payments_failed_email'        => 'optional|bool',
 			),
 
 			// Nested schemas
@@ -497,10 +429,10 @@ class Schemas {
 			'PaymentConfig' => array(
 				'__passthrough' => true,
 				'enabled'     => 'optional|bool|default:false',
-				// The list the Payments panels offer (Payments\Currencies). No
-				// default: a form without a currency follows the site currency
-				// (PAY2-02); a default pinned every saved form to USD.
-				'currency'    => 'optional|in:' . implode( ',', \SubtleForms\Payments\Currencies::codes() ),
+				// A three-letter code. No default: a form without a currency
+				// follows the site currency (PAY2-02). The payment add-on
+				// (SubtleForms Pro) decides which codes it can charge.
+				'currency'    => 'optional|string|max:10',
 				'amountType'  => 'optional|in:fixed,field,calculated|default:fixed',
 				'fixedAmount' => 'optional|number|min:0',
 				'amountField' => 'optional|string|max:100',

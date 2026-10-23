@@ -29,7 +29,6 @@ SubtleForms is a form builder for WordPress. You build a form on a canvas that l
 * Dropdown, Radio buttons, Checkboxes, Single checkbox, Toggle, Country, Consent and Dependent dropdowns (as menus, buttons or columns, typed in or loaded from CSV)
 * Date, Time, Date and time, Rating, Opinion scale, NPS, Slider, Matrix, Colour picker and Rich text
 * File and image uploads, one file per field (several files per field need SubtleForms Pro), with allowed types and size limits, stored in a private folder and downloaded by admins only
-* Payment fields: Product, Priced options, Custom amount, Fixed fee, Order summary and Coupon, with coupons managed under Payments. Entries are saved as "Payment pending" so you can collect payment yourself
 * Hidden fields with merge values such as {user_email} and {get:param}, HTML blocks, section breaks, Repeater, Group and Columns
 
 = Logic and after submit =

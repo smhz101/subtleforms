@@ -191,8 +191,21 @@ class SettingsApi {
 			}
 
 			// Validate input
+			$schema = Schemas::get( Schemas::SETTINGS_UPDATE );
+
+			// The settings screen sends back every key it was given. Keys an
+			// add-on stored under ext_ (this plugin has no rule for them) are
+			// kept as they are by Settings::update() and are not part of this
+			// request, so they are not reported as unknown.
+			$allowed = is_array( $schema['__allow'] ?? null ) ? $schema['__allow'] : array();
+			foreach ( array_keys( $input ) as $key ) {
+				if ( is_string( $key ) && 0 === strpos( $key, 'ext_' ) && ! in_array( $key, $allowed, true ) ) {
+					unset( $input[ $key ] );
+				}
+			}
+
 			$validator = new RequestValidator( array( 'schemas' => Schemas::all() ) );
-			$validated = $validator->validateOrFail( $input, Schemas::get( Schemas::SETTINGS_UPDATE ) );
+			$validated = $validator->validateOrFail( $input, $schema );
 
 			// Update with validated data only
 			$this->settings->update( $validated );
@@ -527,6 +540,7 @@ class SettingsApi {
 				'minimum' => 1,
 				'maximum' => 365,
 			),
+			'keep_data_on_uninstall'     => array( 'type' => 'boolean' ),
 
 			// ── Extensions ────────────────────────────────────────────────────
 
@@ -536,48 +550,7 @@ class SettingsApi {
 			'ext_webhooks_events'               => array( 'type' => 'array' ),
 			'ext_webhooks_retries'              => array( 'type' => 'integer', 'minimum' => 0, 'maximum' => 5 ),
 
-			// Email Marketing
-			'ext_email_marketing_enabled'       => array( 'type' => 'boolean' ),
-			'ext_email_marketing_provider'      => array( 'type' => 'string', 'enum' => array( 'mailchimp', 'brevo', 'convertkit' ), 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_email_marketing_api_key'       => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_email_marketing_list_id'       => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_email_marketing_double_optin'  => array( 'type' => 'boolean' ),
-
-			// CRM
-			'ext_crm_enabled'                   => array( 'type' => 'boolean' ),
-			'ext_crm_provider'                  => array( 'type' => 'string', 'enum' => array( 'hubspot', 'webhook' ), 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_crm_api_key'                   => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_crm_portal_id'                 => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_crm_webhook_url'               => array( 'type' => 'string', 'sanitize_callback' => 'esc_url_raw' ),
-			'ext_crm_add_note'                  => array( 'type' => 'boolean' ),
-
 			// Analytics
-
-			// E-commerce
-			'ext_ecommerce_enabled'             => array( 'type' => 'boolean' ),
-			'ext_ecommerce_default_processor'   => array( 'type' => 'string', 'enum' => array( 'woocommerce', 'subtleforms' ) ),
-			'ext_ecommerce_empty_cart'          => array( 'type' => 'boolean' ),
-			'ext_ecommerce_destination'         => array( 'type' => 'string', 'enum' => array( 'checkout', 'cart' ) ),
-
-			// PDF
-			'ext_pdf_enabled'                   => array( 'type' => 'boolean' ),
-			'ext_pdf_template'                  => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_pdf_attach_to_email'           => array( 'type' => 'boolean' ),
-
-			// Multilanguage
-			'ext_multilanguage_enabled'         => array( 'type' => 'boolean' ),
-			'ext_multilanguage_provider'        => array( 'type' => 'string', 'enum' => array( 'wpml', 'polylang' ), 'sanitize_callback' => 'sanitize_text_field' ),
-
-			// Payments
-			'ext_payments_enabled'              => array( 'type' => 'boolean' ),
-			'ext_payments_provider'             => array( 'type' => 'string', 'enum' => array( 'stripe', 'paypal' ), 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_payments_stripe_pk'            => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_payments_stripe_sk'            => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_payments_paypal_client_id'     => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_payments_paypal_client_secret' => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_payments_currency'             => array( 'type' => 'string', 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_payments_mode'                 => array( 'type' => 'string', 'enum' => array( 'test', 'live' ), 'sanitize_callback' => 'sanitize_text_field' ),
-			'ext_payments_failed_email'         => array( 'type' => 'boolean' ),
 		);
 	}
 }

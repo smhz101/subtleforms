@@ -101,23 +101,9 @@ final class FieldValueParity240Test extends TestCase {
 			'phone code only, required'  => array( array( 'type' => 'phone', 'enableCountryCode' => true, 'required' => true ), '+1', '+92 300 1234567', '+92 3001234567' ),
 			// FA-17: rich text with nothing in it is empty.
 			'rich text required'         => array( array( 'type' => 'rich_text', 'required' => true ), '<p><br></p>', '<p>Hello</p>' ),
-			// PAY-05, PAY-06, PAY-07, PAY-08: payment field limits.
+			// PAY-05, PAY-06: payment field limits (Product and Priced options moved to SubtleForms Pro in 2.8.0).
 			'custom amount max'          => array( array( 'type' => 'payment_amount', 'min' => 5, 'max' => 500 ), 600, 50, null, 'Payment amount cannot exceed 500.00.' ),
 			'custom amount min'          => array( array( 'type' => 'payment_amount', 'min' => 5, 'max' => 500 ), 1, 5 ),
-			'product quantity'           => array( array( 'type' => 'payment_product', 'price' => 10, 'allowQuantity' => true, 'maxQuantity' => 5 ), 99, '3' ),
-			'priced options'             => array( array( 'type' => 'payment_choice', 'required' => true, 'options' => array( array( 'label' => 'Basic', 'value' => 'basic', 'price' => 19 ) ) ), 'bogus', 'basic' ),
-			'priced options pick one'    => array(
-				array(
-					'type'      => 'payment_choice',
-					'displayAs' => 'radio',
-					'options'   => array(
-						array( 'label' => 'Basic', 'value' => 'basic', 'price' => 19 ),
-						array( 'label' => 'Premium', 'value' => 'premium', 'price' => 99 ),
-					),
-				),
-				array( 'basic', 'premium' ),
-				'premium',
-			),
 		);
 	}
 
@@ -162,7 +148,7 @@ final class FieldValueParity240Test extends TestCase {
 	public function test_display_only_payment_fields_store_nothing() {
 		$form = $this->publish(
 			array(
-				array( 'id' => 'p', 'key' => 'p', 'type' => 'payment_choice', 'label' => 'Plan', 'options' => array( array( 'label' => 'Basic', 'value' => 'basic', 'price' => 19 ) ) ),
+				array( 'id' => 'p', 'key' => 'p', 'type' => 'text', 'label' => 'Plan' ),
 				array( 'id' => 'fee', 'key' => 'fee', 'type' => 'payment_hidden_price', 'label' => 'Processing fee', 'amount' => 2 ),
 				array( 'id' => 'summary', 'key' => 'summary', 'type' => 'payment_summary', 'label' => 'Summary' ),
 			)

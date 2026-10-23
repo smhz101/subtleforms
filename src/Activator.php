@@ -42,12 +42,12 @@ final class Activator {
 	 */
 	public static function activate(): void {
 		// Check PHP version requirement
-		if ( version_compare( PHP_VERSION, '7.4', '<' ) ) {
+		if ( version_compare( PHP_VERSION, '8.1', '<' ) ) {
 			deactivate_plugins( SUBTLEFORMS_PLUGIN_BASENAME );
 			wp_die(
 				sprintf(
 					/* translators: %s: Current PHP version */
-					esc_html__( 'SubtleForms requires PHP 7.4 or higher. Your server is running PHP %s', 'subtleforms' ),
+					esc_html__( 'SubtleForms requires PHP 8.1 or higher. Your server is running PHP %s', 'subtleforms' ),
 					PHP_VERSION
 				),
 				esc_html__( 'Plugin Activation Error', 'subtleforms' ),
@@ -184,27 +184,6 @@ final class Activator {
   KEY created_at (created_at)
 ) {$charset_collate};";
 
-		// License metadata table (Pro version)
-		$license_table = $wpdb->prefix . 'subtleforms_license_meta';
-		$license_sql   = "CREATE TABLE {$license_table} (
-  id bigint(20) unsigned NOT NULL AUTO_INCREMENT,
-  license_key varchar(255) NOT NULL,
-  status varchar(20) NOT NULL DEFAULT 'inactive',
-  plan varchar(50) NOT NULL DEFAULT 'free',
-  domain varchar(255) NOT NULL,
-  activations int unsigned NOT NULL DEFAULT 0,
-  activation_limit int unsigned NOT NULL DEFAULT 1,
-  expires_at int unsigned DEFAULT NULL,
-  activated_at int unsigned DEFAULT NULL,
-  last_checked int unsigned DEFAULT NULL,
-  metadata longtext,
-  PRIMARY KEY  (id),
-  UNIQUE KEY license_key (license_key),
-  KEY status (status),
-  KEY domain (domain),
-  KEY expires_at (expires_at)
-) {$charset_collate};";
-
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 
 		$results                = array();
@@ -214,7 +193,6 @@ final class Activator {
 		$results['logs']        = dbDelta( $logs_sql );
 		\SubtleForms\Tools\ApiLog::install();
 		update_option( 'subtleforms_api_log_table', '1', false );
-		$results['license']     = dbDelta( $license_sql );
 
 		// Verify tables were created
 		$tables_to_check = array(
@@ -222,7 +200,6 @@ final class Activator {
 			'submissions' => $submissions_table,
 			'schemas'     => $schemas_table,
 			'logs'        => $logs_table,
-			'license'     => $license_table,
 		);
 
 		$missing_tables = array();

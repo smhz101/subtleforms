@@ -16,7 +16,6 @@ use SubtleForms\Fields\AddonFieldTypes;
 use SubtleForms\Fields\CoreFields;
 use SubtleForms\Fields\FieldRegistry;
 use SubtleForms\Fields\FieldsV2;
-use SubtleForms\Fields\PaymentFields;
 use SubtleForms\Support\Capabilities;
 use SubtleForms\Uploads\Uploads;
 
@@ -26,7 +25,6 @@ final class FreeProSplitTest extends TestCase {
 		$registry = new FieldRegistry();
 		CoreFields::register( $registry );
 		FieldsV2::register( $registry );
-		PaymentFields::register( $registry );
 		return $registry;
 	}
 
@@ -62,8 +60,10 @@ final class FreeProSplitTest extends TestCase {
 		}
 		// Picture Choice moved to SubtleForms Pro in 2.7.0.
 		$this->assertFalse( $registry->has( 'picture_choice' ) );
-		$this->assertTrue( $registry->has( 'payment_product' ) );
-		$this->assertTrue( $registry->has( 'payment_coupon' ) );
+		// Product and Priced options moved to SubtleForms Pro in 2.8.0.
+		$this->assertFalse( $registry->has( 'payment_product' ) );
+		$this->assertFalse( $registry->has( 'payment_choice' ) );
+		$this->assertFalse( class_exists( 'SubtleForms\\Payments\\Pricing' ) );
 		$this->assertFalse( class_exists( 'SubtleForms\\Engine\\Formula' ) );
 		$this->assertFileDoesNotExist( self::root() . '/resources/frontend/components/fields/SignaturePad.jsx' );
 		$this->assertFileDoesNotExist( self::root() . '/resources/frontend/utils/formula.js' );
@@ -94,7 +94,10 @@ final class FreeProSplitTest extends TestCase {
 		$this->assertCount( 2, $out );
 		$this->assertSame( 'text', $out[0]['type'] );
 		$this->assertSame( array( 'email' ), array_column( $out[1]['children'], 'type' ) );
-		$this->assertSame( array( 'signature', 'calculation', 'payment_card' ), AddonFieldTypes::missing( self::registry() ) );
+		$missing = AddonFieldTypes::missing( self::registry() );
+		foreach ( array( 'signature', 'calculation', 'payment_card', 'payment_product', 'payment_choice' ) as $type ) {
+			$this->assertContains( $type, $missing );
+		}
 	}
 
 	/** WP2-14: no two-letter globals and no sf_ transients. */

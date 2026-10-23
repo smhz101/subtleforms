@@ -19,9 +19,9 @@ final class SettingsClear241Test extends TestCase {
 	}
 
 	public function test_an_empty_text_setting_that_was_sent_is_kept(): void {
-		$out = $this->validate( array( 'ext_crm_api_key' => '', 'sender_name' => 'Shop' ) );
-		$this->assertArrayHasKey( 'ext_crm_api_key', $out );
-		$this->assertSame( '', $out['ext_crm_api_key'] );
+		$out = $this->validate( array( 'ext_webhooks_signing_secret' => '', 'sender_name' => 'Shop' ) );
+		$this->assertArrayHasKey( 'ext_webhooks_signing_secret', $out );
+		$this->assertSame( '', $out['ext_webhooks_signing_secret'] );
 		$this->assertSame( 'Shop', $out['sender_name'] );
 	}
 
@@ -32,7 +32,7 @@ final class SettingsClear241Test extends TestCase {
 
 	public function test_settings_that_were_not_sent_stay_out(): void {
 		$out = $this->validate( array( 'sender_name' => 'Shop' ) );
-		$this->assertArrayNotHasKey( 'ext_crm_api_key', $out );
+		$this->assertArrayNotHasKey( 'ext_webhooks_signing_secret', $out );
 	}
 
 	public function test_empty_numbers_switches_and_choices_are_still_ignored(): void {

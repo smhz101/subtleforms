@@ -141,7 +141,7 @@ final class FormSchemaSaveTest extends TestCase {
 	// ── payment.currency ───────────────────────────────────────────────
 
 	/**
-	 * The Payments panel's currency picker is the list that matters: anything
+	 * A payment add-on's currency picker is the list that matters: anything
 	 * it offers has to save.
 	 *
 	 * @dataProvider offeredCurrencies
@@ -166,10 +166,10 @@ final class FormSchemaSaveTest extends TestCase {
 	}
 
 	public function offeredCurrencies(): array {
-		// The form and site pickers both offer Payments\Currencies (2.4.0).
+		// A payment add-on offers its own list; any three-letter code saves.
 		return array_map(
 			static fn( $c ) => array( $c ),
-			\SubtleForms\Payments\Currencies::codes()
+			array( 'USD', 'EUR', 'GBP', 'JPY', 'PKR', 'AED', 'KRW' )
 		);
 	}
 
