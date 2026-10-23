@@ -49,7 +49,7 @@ class IntegrationFollowups280Test extends TestCase {
 		}
 	}
 
-	public function test_a_saved_form_with_required_payment_fields_still_submits_without_pro() {
+	public function test_a_saved_form_with_payment_fields_is_not_available_without_pro() {
 		$form = $this->publish(
 			array(
 				array( 'id' => 'n', 'key' => 'name', 'type' => 'text', 'label' => 'Name' ),
@@ -64,16 +64,25 @@ class IntegrationFollowups280Test extends TestCase {
 		$types  = array_column( $public['data']['schema']['fields'] ?? array(), 'type' );
 		$this->assertSame( array( 'text' ), $types );
 
-		// A submission that skips them, or sends a crafted value, is accepted and stores neither.
-		$result = $this->submit( $form, array( 'name' => 'Ada', 'amount' => 1, 'coupon' => 'FREE', 'fee' => 9, 'summary' => 9 ) );
-		$this->assertSame( 200, $result['status'], wp_json_encode( $result['data'] ) );
-		$payload = $this->storedPayload( $form );
-		$this->assertSame( 'Ada', $payload['name'] ?? null );
-		foreach ( array( 'amount', 'coupon', 'fee', 'summary' ) as $key ) {
-			$this->assertArrayNotHasKey( $key, $payload );
+		// Nothing is stored: a form that cannot take its payment is not a free form.
+		foreach ( array( array( 'name' => 'Ada', 'amount' => 1, 'coupon' => 'FREE' ), array( 'name' => 'Grace' ) ) as $answers ) {
+			$result = $this->submit( $form, $answers );
+			$this->assertSame( 403, $result['status'], wp_json_encode( $result['data'] ) );
+			$this->assertSame( 'This form is not available right now.', $result['data']['error']['message'] ?? '' );
 		}
-		$result = $this->submit( $form, array( 'name' => 'Grace' ) );
-		$this->assertSame( 200, $result['status'], wp_json_encode( $result['data'] ) );
+		global $wpdb;
+		$this->assertSame( 0, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}subtleforms_submissions WHERE form_id = %d", $form ) ) );
+
+		// Visitors see the generic message, with no mention of Pro or payments.
+		$html = \SubtleForms\Plugin::instance()->container()->get( \SubtleForms\Frontend\Shortcode::class )->render( array( 'id' => $form ) );
+		$this->assertStringContainsString( 'This form is not available right now.', $html );
+		$this->assertStringNotContainsString( 'Pro', $html );
+		$this->assertStringNotContainsString( 'ayment', $html );
+		$this->assertStringNotContainsString( 'subtleforms-form-container', $html );
+
+		// A form without payment fields is not affected.
+		$plain = $this->publish( array( array( 'id' => 'n', 'key' => 'name', 'type' => 'text', 'label' => 'Name' ) ) );
+		$this->assertSame( 200, $this->submit( $plain, array( 'name' => 'Ada' ) )['status'] );
 	}
 
 	public function test_no_payments_code_is_hinted_for_fields_nobody_registers() {

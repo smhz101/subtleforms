@@ -28,6 +28,9 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase {
 		parent::setUp();
 		global $wpdb;
 		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '%transient%subtleforms_rl_%'" );
+		if ( '1' === get_option( \SubtleForms\Security\RateLimitStore::DB_OPTION ) ) {
+			$wpdb->query( 'DELETE FROM ' . \SubtleForms\Security\RateLimitStore::table() );
+		}
 		wp_cache_flush();
 	}
 

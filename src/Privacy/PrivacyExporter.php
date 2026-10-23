@@ -76,11 +76,12 @@ final class PrivacyExporter {
 	public function export_user_data( $email_address, $page = 1 ) {
 		$export_items = array();
 		$per_page     = 100;
-		$offset       = ( $page - 1 ) * $per_page;
 
-		// Entries whose answers hold exactly this address (FF-21).
-		$all         = PrivacyLookup::submissionIds( (string) $email_address, (int) $page > 1 );
-		$submissions = array_values( array_filter( array_map( array( $this->submissionsRepo, 'find' ), array_slice( $all, $offset, $per_page ) ) ) );
+		// Entries whose answers hold exactly this address (FF-21), entries sent
+		// while logged in to its account, and anonymous entries stored with
+		// the same IP address. Each page continues from the last entry id.
+		$found       = PrivacyLookup::page( (string) $email_address, (int) $page, $per_page );
+		$submissions = array_values( array_filter( array_map( array( $this->submissionsRepo, 'find' ), $found['ids'] ) ) );
 
 		foreach ( $submissions as $submission ) {
 			// Get form name
@@ -149,11 +150,9 @@ final class PrivacyExporter {
 			);
 		}
 
-		$done = ( $offset + $per_page ) >= count( $all );
-
 		return array(
 			'data' => $export_items,
-			'done' => $done,
+			'done' => $found['done'],
 		);
 	}
 }

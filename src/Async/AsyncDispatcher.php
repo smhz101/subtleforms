@@ -158,6 +158,9 @@ public static function dispatchEmail( array $payload ): bool {
 			self::log( 'Email job skipped: its stored details expired' );
 			return;
 		}
+		// The stored copy has done its job: it is deleted now, and written
+		// again only if a retry is scheduled.
+		self::forget( $job );
 		$retry_count   = $job['retry_count'] ?? 0;
 		$submission_id = isset( $job['submission_id'] ) ? (int) $job['submission_id'] : 0;
 		$step_id       = $job['step_id'] ?? 'email';
@@ -286,7 +289,7 @@ public static function dispatchEmail( array $payload ): bool {
 				wp_schedule_single_event(
 					time() + $delay,
 					'subtleforms_async_email',
-					array( self::stash( $job ) )
+					array( self::stash( $job, $delay ) )
 				);
 
 				self::log( "Email retry scheduled (#{$job['retry_count']} in {$delay}s)", array(
@@ -315,6 +318,9 @@ public static function dispatchEmail( array $payload ): bool {
 			self::log( 'Webhook job skipped: its stored details expired' );
 			return;
 		}
+		// The stored copy has done its job: it is deleted now, and written
+		// again only if a retry is scheduled.
+		self::forget( $job );
 		$retry_count   = $job['retry_count'] ?? 0;
 		$submission_id = isset( $job['submission_id'] ) ? (int) $job['submission_id'] : 0;
 		$step_id       = $job['step_id'] ?? 'webhook';
@@ -425,7 +431,7 @@ public static function dispatchEmail( array $payload ): bool {
 				wp_schedule_single_event(
 					time() + $delay,
 					'subtleforms_async_webhook',
-					array( self::stash( $job ) )
+					array( self::stash( $job, $delay ) )
 				);
 
 				self::log( "Webhook retry scheduled (#{$job['retry_count']} in {$delay}s)", array(
@@ -448,16 +454,30 @@ public static function dispatchEmail( array $payload ): bool {
 	const JOB_PREFIX = 'subtleforms_job_';
 
 	/**
+	 * How long stored details wait for their cron event.
+	 */
+	const JOB_TTL = 6 * HOUR_IN_SECONDS;
+
+	/**
 	 * Keep a job's details (recipients, body, headers, signature) out of the
-	 * cron option. They are stored under the job's id for a day and the cron
-	 * event carries only the id and the fields needed to find the entry.
+	 * cron option. They are stored under the job's id for six hours (longer
+	 * only when a retry is scheduled further ahead) and the cron event
+	 * carries the id and the fields it needs to find the entry. What the
+	 * reference already holds, and the form id (which the entry knows), are
+	 * not stored again. The copy is deleted when the job runs.
 	 *
-	 * @param array $job Full job.
+	 * @param array $job   Full job.
+	 * @param int   $delay Seconds until the job runs.
 	 * @return array Reference job for wp_schedule_single_event().
 	 */
-	private static function stash( array $job ): array {
-		$ref = (string) ( $job['dispatch_id'] ?? self::dispatchId() );
-		set_transient( self::JOB_PREFIX . md5( $ref ), $job, DAY_IN_SECONDS );
+	private static function stash( array $job, int $delay = 0 ): array {
+		$ref    = (string) ( $job['dispatch_id'] ?? self::dispatchId() );
+		$stored = $job;
+		unset( $stored['dispatch_id'], $stored['submission_id'], $stored['step_id'], $stored['retry_count'] );
+		if ( ! empty( $job['submission_id'] ) ) {
+			unset( $stored['form_id'] );
+		}
+		set_transient( self::JOB_PREFIX . md5( $ref ), $stored, max( self::JOB_TTL, $delay + HOUR_IN_SECONDS ) );
 		return array(
 			'job_ref'       => $ref,
 			'dispatch_id'   => $ref,
@@ -482,8 +502,14 @@ public static function dispatchEmail( array $payload ): bool {
 		if ( ! is_array( $stored ) ) {
 			return null;
 		}
-		$stored['retry_count'] = $job['retry_count'] ?? ( $stored['retry_count'] ?? 0 );
-		$stored['dispatch_id'] = $job['dispatch_id'] ?? $job['job_ref'];
+		$stored['retry_count']   = $job['retry_count'] ?? 0;
+		$stored['dispatch_id']   = $job['dispatch_id'] ?? $job['job_ref'];
+		$stored['submission_id'] = $job['submission_id'] ?? null;
+		$stored['step_id']       = $job['step_id'] ?? '';
+		if ( isset( $stored['audience'] ) && ! isset( $stored['form_id'] ) && ! empty( $stored['submission_id'] ) && class_exists( '\SubtleForms\Repositories\SubmissionsRepository' ) ) {
+			$row               = ( new \SubtleForms\Repositories\SubmissionsRepository() )->find( (int) $stored['submission_id'] );
+			$stored['form_id'] = (int) ( $row['form_id'] ?? 0 );
+		}
 		return $stored;
 	}
 

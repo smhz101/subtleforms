@@ -155,6 +155,34 @@ final class AddonFieldTypes {
 	}
 
 	/**
+	 * Whether a schema has a payment field and nothing registers it. Without
+	 * SubtleForms Pro such a form cannot take its payment, so it is not shown
+	 * and does not accept entries.
+	 *
+	 * @param mixed $schema Form schema (the `schema` part of a version row).
+	 */
+	public static function needsMissingPayment( $schema ): bool {
+		if ( ! is_array( $schema ) ) {
+			return false;
+		}
+		$missing = array_filter(
+			self::missing(),
+			static function ( $type ) {
+				return 0 === strpos( (string) $type, 'payment_' );
+			}
+		);
+		if ( ! $missing ) {
+			return false;
+		}
+		foreach ( \SubtleForms\Support\SchemaFields::flat( $schema ) as $field ) {
+			if ( in_array( (string) ( $field['type'] ?? '' ), $missing, true ) ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
 	 * Drop answers to fields whose add-on is not active: the live form does
 	 * not show them, so a value can only come from a crafted request.
 	 *

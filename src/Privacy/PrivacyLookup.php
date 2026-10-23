@@ -111,6 +111,151 @@ final class PrivacyLookup {
 	}
 
 	/**
+	 * One page of the entries that belong to an email address, for the
+	 * exporter. Pages follow the entry id, so each page continues where the
+	 * last one stopped instead of scanning the table from the top again. An
+	 * entry belongs to the address when an answer is exactly that address,
+	 * when it was sent while logged in to the account that has the address,
+	 * or when it was stored with an IP address that one of those account
+	 * entries was stored with, was sent by nobody else (no other account, no
+	 * other email address in the answers).
+	 *
+	 * @param string $email   Email address.
+	 * @param int    $page    Page number, from 1.
+	 * @param int    $perPage Entries per page.
+	 * @return array{ids:int[], done:bool}
+	 */
+	public static function page( string $email, int $page, int $perPage = 100 ): array {
+		global $wpdb;
+		$email   = strtolower( trim( $email ) );
+		$page    = max( 1, $page );
+		$perPage = max( 1, $perPage );
+		if ( '' === $email || ! is_email( $email ) ) {
+			return array(
+				'ids'  => array(),
+				'done' => true,
+			);
+		}
+
+		$table  = $wpdb->prefix . 'subtleforms_submissions';
+		$user   = function_exists( 'get_user_by' ) ? get_user_by( 'email', $email ) : false;
+		$userId = ( $user && self::hasUserIdColumn() ) ? (int) $user->ID : 0;
+		$ips    = array();
+		if ( $userId > 0 ) {
+			// phpcs:ignore PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Fixed table name; value is prepared.
+			$ips = array_values( array_filter( (array) $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT ip_address FROM {$table} WHERE user_id = %d AND ip_address IS NOT NULL AND ip_address <> '' LIMIT 50", $userId ) ) ) );
+		}
+
+		$where = array( 'payload LIKE %s' );
+		$args  = array( '%' . $wpdb->esc_like( $email ) . '%' );
+		if ( $userId > 0 ) {
+			$where[] = 'user_id = %d';
+			$args[]  = $userId;
+		}
+		if ( $ips ) {
+			$where[] = 'ip_address IN (' . implode( ', ', array_fill( 0, count( $ips ), '%s' ) ) . ')';
+			$args    = array_merge( $args, $ips );
+		}
+		$condition = implode( ' OR ', $where );
+
+		// Where this page starts: the id the previous page ended at.
+		$cursorKey = 'subtleforms_privx_' . md5( $email ) . '_';
+		$cursor    = PHP_INT_MAX;
+		if ( $page > 1 ) {
+			$saved = get_transient( $cursorKey . $page );
+			if ( false === $saved ) {
+				// Pages are normally asked in order; walk up to this one if not.
+				for ( $p = 1; $p < $page; $p++ ) {
+					self::page( $email, $p, $perPage );
+				}
+				$saved = get_transient( $cursorKey . $page );
+			}
+			$cursor = false === $saved ? PHP_INT_MAX : (int) $saved;
+		}
+
+		$ids  = array();
+		$more = false;
+		$last = $cursor;
+		do {
+			// phpcs:disable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Table name is from $wpdb->prefix; $condition holds only placeholders; values are prepared.
+			$rows = $wpdb->get_results(
+				$wpdb->prepare(
+					"SELECT id, payload, user_id, ip_address FROM {$table} WHERE id < %d AND ({$condition}) ORDER BY id DESC LIMIT 500",
+					array_merge( array( $last ), $args )
+				),
+				ARRAY_A
+			);
+			// phpcs:enable PluginCheck.Security.DirectDB.UnescapedDBParameter, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			foreach ( (array) $rows as $row ) {
+				$last = (int) $row['id'];
+				if ( ! self::rowBelongs( $row, $email, $userId, $ips ) ) {
+					continue;
+				}
+				if ( count( $ids ) >= $perPage ) {
+					$more = true;
+					break 2;
+				}
+				$ids[]  = (int) $row['id'];
+				$cursor = (int) $row['id'];
+			}
+		} while ( is_array( $rows ) && count( $rows ) === 500 );
+
+		if ( $more ) {
+			set_transient( $cursorKey . ( $page + 1 ), $cursor, HOUR_IN_SECONDS );
+		}
+		return array(
+			'ids'  => $ids,
+			'done' => ! $more,
+		);
+	}
+
+	/**
+	 * Whether a scanned row belongs to the requested address.
+	 *
+	 * @param array    $row    id, payload, user_id, ip_address.
+	 * @param string   $email  Lower-case email address.
+	 * @param int      $userId The account that has the address (0: none).
+	 * @param string[] $ips    IP addresses stored with that account's entries.
+	 */
+	private static function rowBelongs( array $row, string $email, int $userId, array $ips ): bool {
+		if ( self::payloadHasEmail( $row['payload'], $email ) ) {
+			return true;
+		}
+		$rowUser = (int) ( $row['user_id'] ?? 0 );
+		if ( $userId > 0 && $rowUser === $userId ) {
+			return true;
+		}
+		// Same stored IP: only an entry nobody else owns.
+		if ( $ips && in_array( (string) ( $row['ip_address'] ?? '' ), $ips, true ) && 0 === $rowUser ) {
+			return ! self::payloadHasOtherEmail( $row['payload'], $email );
+		}
+		return false;
+	}
+
+	/**
+	 * Whether a payload holds an email address other than the given one.
+	 *
+	 * @param mixed  $payload Stored payload (JSON string or array).
+	 * @param string $email   Lower-case email address.
+	 */
+	private static function payloadHasOtherEmail( $payload, string $email ): bool {
+		$data = is_string( $payload ) ? json_decode( $payload, true ) : $payload;
+		if ( ! is_array( $data ) ) {
+			return false;
+		}
+		$other = false;
+		array_walk_recursive(
+			$data,
+			static function ( $value ) use ( $email, &$other ) {
+				if ( ! $other && is_string( $value ) && is_email( trim( $value ) ) && strtolower( trim( $value ) ) !== $email ) {
+					$other = true;
+				}
+			}
+		);
+		return $other;
+	}
+
+	/**
 	 * Drop the remembered list for an address (after an erase).
 	 *
 	 * @param string $email Email address.

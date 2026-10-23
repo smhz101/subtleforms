@@ -241,6 +241,7 @@ final class Activator {
 		$results['schemas']     = dbDelta( $schemas_sql );
 		$results['logs']        = dbDelta( $logs_sql );
 		\SubtleForms\Tools\ApiLog::install();
+		\SubtleForms\Security\RateLimitStore::install();
 		update_option( 'subtleforms_api_log_table', '1', false );
 
 		// Verify tables were created

@@ -115,13 +115,35 @@ class SettingsApi {
 			$response = ApiResponse::success(
 				array(
 					'success' => true,
-					'data'    => $settings,
+					'data'    => self::maskSecrets( $settings ),
 				)
 			);
 			return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
 		} catch ( \Exception $e ) {
 			return ApiResponse::server_error( $e->getMessage() );
 		}
+	}
+
+	/** What the settings screen receives instead of a saved CAPTCHA secret key. */
+	public const SECRET_MASK = '********';
+
+	/** Settings that hold a CAPTCHA secret key. */
+	private const SECRET_KEYS = array( 'captcha_recaptcha_secret_key', 'captcha_hcaptcha_secret_key', 'captcha_turnstile_secret_key' );
+
+	/**
+	 * Replace saved CAPTCHA secret keys with a mask. An empty key stays empty, so
+	 * the screen can tell whether one is saved.
+	 *
+	 * @param array $settings Settings.
+	 * @return array Settings safe to send to the browser.
+	 */
+	public static function maskSecrets( array $settings ): array {
+		foreach ( self::SECRET_KEYS as $key ) {
+			if ( isset( $settings[ $key ] ) && '' !== (string) $settings[ $key ] ) {
+				$settings[ $key ] = self::SECRET_MASK;
+			}
+		}
+		return $settings;
 	}
 
 	/**
@@ -202,6 +224,14 @@ class SettingsApi {
 				}
 			}
 
+			// The screen sends back the mask it was given for a saved secret
+			// key. That means "unchanged": the stored key is kept.
+			foreach ( self::SECRET_KEYS as $secretKey ) {
+				if ( isset( $input[ $secretKey ] ) && self::SECRET_MASK === $input[ $secretKey ] ) {
+					unset( $input[ $secretKey ] );
+				}
+			}
+
 			$validator = new RequestValidator( array( 'schemas' => Schemas::all() ) );
 			$validated = $validator->validateOrFail( $input, $schema );
 
@@ -218,7 +248,7 @@ class SettingsApi {
 				array(
 					'success' => true,
 					'message' => __( 'Settings updated successfully', 'subtleforms' ),
-					'data'    => $updatedSettings,
+					'data'    => self::maskSecrets( $updatedSettings ),
 				)
 			);
 			return ApiResponse::withHeaders( $response, array( 'ETag' => $etag ) );
@@ -252,7 +282,7 @@ class SettingsApi {
 				array(
 					'success' => true,
 					'message' => __( 'Settings reset to defaults', 'subtleforms' ),
-					'data'    => $settings,
+					'data'    => self::maskSecrets( $settings ),
 				)
 			);
 		} catch ( \Exception $e ) {

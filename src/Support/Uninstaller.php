@@ -15,9 +15,9 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Site cleanup used by uninstall.php. The "Keep my data when the plugin is
  * deleted" setting (keep_data_on_uninstall, off by default) skips the site it
  * is set on. Options, tables, user meta and cron events that belong to
- * SubtleForms Pro are never removed here: Pro names them with the
- * subtleforms_pro_ prefix, and its license key and license data options are
- * listed in PRO_OPTIONS.
+ * SubtleForms Pro are never removed here: Pro names most of them with the
+ * subtleforms_pro_ prefix, and the few that do not (coupons, stats, funnel,
+ * the license options) are listed in the PRO_* constants below.
  */
 final class Uninstaller {
 
@@ -28,6 +28,33 @@ final class Uninstaller {
 	 * Pro options that do not carry the Pro prefix.
 	 */
 	private const PRO_OPTIONS = array( 'subtleforms_license_key', 'subtleforms_license_data' );
+
+	/**
+	 * Pro tables and their "installed version" options that do not carry the
+	 * Pro prefix. Names are the part after "subtleforms_"; the table is
+	 * <site prefix>subtleforms_<stem> and the option subtleforms_<stem>_db
+	 * (coupons, stats and funnel; the coupon use rows live in coupon_uses).
+	 */
+	private const PRO_STEMS = array( 'coupons', 'coupon_uses', 'stats', 'funnel' );
+
+	/**
+	 * Pro option, transient and cron names that start with these are kept
+	 * (rate limit counters of Pro's view and funnel beacons, the stats prune event).
+	 */
+	private const PRO_NAME_PREFIXES = array( 'subtleforms_rl_funnel_', 'subtleforms_rl_view_', 'subtleforms_stats_prune' );
+
+	/**
+	 * Every Pro option without the Pro prefix.
+	 *
+	 * @return string[]
+	 */
+	private static function pro_options(): array {
+		$options = self::PRO_OPTIONS;
+		foreach ( self::PRO_STEMS as $stem ) {
+			$options[] = 'subtleforms_' . $stem . '_db';
+		}
+		return $options;
+	}
 
 	/**
 	 * Clean every site. On a network, each site is cleaned on its own.
@@ -94,12 +121,17 @@ final class Uninstaller {
 		// Each base also has a Pro form (subtleforms_pro_, _transient_subtleforms_pro_)
 		// that is kept, as are the Pro options without the prefix.
 		$option_bases = array( 'subtleforms', '_transient_subtleforms', '_transient_timeout_subtleforms', '_site_transient_subtleforms', '_site_transient_timeout_subtleforms' );
-		$kept_options = implode( ', ', array_fill( 0, count( self::PRO_OPTIONS ), '%s' ) );
+		$kept_options = implode( ', ', array_fill( 0, count( self::pro_options() ), '%s' ) );
 		foreach ( $option_bases as $base ) {
 			$pattern = $wpdb->esc_like( 'subtleforms' === $base ? 'subtleforms_' : $base ) . '%';
-			$pro     = $wpdb->esc_like( $base . self::PRO_SUFFIX ) . '%';
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The IN list holds only placeholders.
-			$wpdb->query( $wpdb->prepare( "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s AND option_name NOT LIKE %s AND option_name NOT IN ({$kept_options})", $pattern, $pro, ...self::PRO_OPTIONS ) );
+			$sql     = "DELETE FROM {$wpdb->options} WHERE option_name LIKE %s AND option_name NOT LIKE %s AND option_name NOT IN ({$kept_options})";
+			$args    = array( $pattern, $wpdb->esc_like( $base . self::PRO_SUFFIX ) . '%', ...self::pro_options() );
+			foreach ( self::PRO_NAME_PREFIXES as $name_prefix ) {
+				$sql   .= ' AND option_name NOT LIKE %s';
+				$args[] = $wpdb->esc_like( preg_replace( '/^subtleforms/', $base, $name_prefix ) ) . '%';
+			}
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- The IN list and the extra conditions hold only placeholders.
+			$wpdb->query( $wpdb->prepare( $sql, ...$args ) );
 		}
 
 		$meta_like = $wpdb->esc_like( 'subtleforms' ) . '%';
@@ -136,7 +168,32 @@ final class Uninstaller {
 	 */
 	private static function is_pro_table( string $table ): bool {
 		global $wpdb;
-		return str_starts_with( $table, $wpdb->prefix . 'subtleforms' . self::PRO_SUFFIX );
+		if ( str_starts_with( $table, $wpdb->prefix . 'subtleforms' . self::PRO_SUFFIX ) ) {
+			return true;
+		}
+		foreach ( self::PRO_STEMS as $stem ) {
+			if ( $table === $wpdb->prefix . 'subtleforms_' . $stem ) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Whether a hook or key name belongs to SubtleForms Pro.
+	 *
+	 * @param string $name Name such as a cron hook.
+	 */
+	private static function is_pro_name( string $name ): bool {
+		if ( str_starts_with( $name, 'subtleforms' . self::PRO_SUFFIX ) ) {
+			return true;
+		}
+		foreach ( self::PRO_NAME_PREFIXES as $prefix ) {
+			if ( str_starts_with( $name, $prefix ) ) {
+				return true;
+			}
+		}
+		return false;
 	}
 
 	/**
@@ -156,7 +213,7 @@ final class Uninstaller {
 				continue;
 			}
 			foreach ( array_keys( $events ) as $hook ) {
-				if ( is_string( $hook ) && str_starts_with( $hook, 'subtleforms' ) && ! str_starts_with( $hook, 'subtleforms' . self::PRO_SUFFIX ) ) {
+				if ( is_string( $hook ) && str_starts_with( $hook, 'subtleforms' ) && ! self::is_pro_name( $hook ) ) {
 					$hooks[ $hook ] = true;
 				}
 			}

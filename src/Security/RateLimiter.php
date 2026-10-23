@@ -75,7 +75,28 @@ class RateLimiter
             );
         }
 
-        // Without one the counter is a transient: best effort, because two
+        // Without one the counter is a row in a small table, updated by a
+        // single INSERT ... ON DUPLICATE KEY UPDATE, so simultaneous
+        // requests are all counted.
+        $row = RateLimitStore::hit($transientKey, $windowSeconds, $now);
+        if (null !== $row) {
+            if ($row['hits'] > $limit) {
+                return array(
+                    'allowed' => false,
+                    'remaining' => 0,
+                    'reset_in' => $row['reset_in'],
+                    'retry_after' => $row['reset_in'],
+                );
+            }
+            return array(
+                'allowed' => true,
+                'remaining' => max(0, $limit - $row['hits']),
+                'reset_in' => $row['reset_in'],
+                'retry_after' => 0,
+            );
+        }
+
+        // The table is not available: a transient, best effort, because two
         // simultaneous requests can read the same count.
         $bucket = get_transient($transientKey);
         if ($bucket === false || !is_array($bucket) || $bucket['reset_at'] <= $now) {
@@ -151,6 +172,12 @@ class RateLimiter
             return array('limit' => 10, 'window' => 60);
         }
         
+        // Trading a page ticket for a submit token: once per visitor and form,
+        // plus a retry, so a low limit per client address.
+        if (preg_match('#^/forms/[^/]+/spam-token/?$#', $route) && $method === 'POST') {
+            return array('limit' => 20, 'window' => 60);
+        }
+
         // FORM SCHEMA ENDPOINTS (very lenient for authenticated admins due to autosave)
         if (preg_match('#^/forms/[^/]+/schema$#', $route) && $isAuthenticatedAdmin) {
             return array('limit' => 300, 'window' => 60);

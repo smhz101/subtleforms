@@ -141,13 +141,13 @@ final class FieldValueParity240Test extends TestCase {
 		$this->assertSame( 'newsletter', $payload['h2'] ?? null );
 	}
 
-	/** PAY2-04: Order Summary and Fixed Fee take no answer. */
-	public function test_display_only_payment_fields_store_nothing() {
+	/** PAY2-04: fields of an add-on that is not active take no answer. */
+	public function test_fields_of_a_missing_addon_store_nothing() {
 		$form = $this->publish(
 			array(
 				array( 'id' => 'p', 'key' => 'p', 'type' => 'text', 'label' => 'Plan' ),
-				array( 'id' => 'fee', 'key' => 'fee', 'type' => 'payment_hidden_price', 'label' => 'Processing fee', 'amount' => 2 ),
-				array( 'id' => 'summary', 'key' => 'summary', 'type' => 'payment_summary', 'label' => 'Summary' ),
+				array( 'id' => 'fee', 'key' => 'fee', 'type' => 'calculation', 'label' => 'Processing fee' ),
+				array( 'id' => 'summary', 'key' => 'summary', 'type' => 'signature', 'label' => 'Summary' ),
 			)
 		);
 		$result = $this->submit( $form, array( 'p' => 'basic', 'fee' => 0, 'summary' => 0.01 ) );

@@ -192,8 +192,6 @@ class Release239Test extends PHPUnit\Framework\TestCase {
 		Uninstaller::clean_site();
 		$sql = implode( "\n", $GLOBALS['wpdb']->queries );
 		$this->assertStringContainsString( 'DROP TABLE IF EXISTS wp_subtleforms_api_logs', $sql );
-		$this->assertStringContainsString( 'DROP TABLE IF EXISTS wp_subtleforms_coupons', $sql );
-		$this->assertStringContainsString( 'DROP TABLE IF EXISTS wp_subtleforms_coupon_uses', $sql );
 		$this->assertStringContainsString( 'subtleforms', $sql );
 		$this->assertContains( 'subtleforms_async_email', $GLOBALS['sf_test_cleared'] );
 
@@ -212,17 +210,27 @@ class Release239Test extends PHPUnit\Framework\TestCase {
 
 	/** 2.8.0: deleting SubtleForms never removes what SubtleForms Pro owns. */
 	public function test_uninstall_leaves_pro_options_tables_and_cron_alone(): void {
-		$GLOBALS['wpdb']->tables = array( 'wp_subtleforms_forms', 'wp_subtleforms_pro_stripe_events', 'wp_subtleforms_pro_integration_log' );
+		$GLOBALS['wpdb']->tables = array( 'wp_subtleforms_forms', 'wp_subtleforms_pro_stripe_events', 'wp_subtleforms_pro_integration_log', 'wp_subtleforms_coupons', 'wp_subtleforms_coupon_uses', 'wp_subtleforms_stats', 'wp_subtleforms_funnel', 'wp_subtleforms_rate_limits' );
 		$GLOBALS['sf_test_cron'] = array(
 			time() => array(
 				'subtleforms_async_email'            => array( array( 'args' => array() ) ),
 				'subtleforms_pro_daily_license_check' => array( array( 'args' => array() ) ),
+				'subtleforms_stats_prune'            => array( array( 'args' => array() ) ),
 			),
 		);
 		Uninstaller::clean_site();
 		$sql = implode( "\n", $GLOBALS['wpdb']->queries );
 		$this->assertStringContainsString( 'DROP TABLE IF EXISTS wp_subtleforms_forms', $sql );
 		$this->assertStringNotContainsString( 'DROP TABLE IF EXISTS wp_subtleforms_pro_', $sql );
+		foreach ( array( 'coupons', 'coupon_uses', 'stats', 'funnel' ) as $proTable ) {
+			$this->assertStringNotContainsString( 'DROP TABLE IF EXISTS wp_subtleforms_' . $proTable . "\n", $sql . "\n", $proTable );
+		}
+		$this->assertStringContainsString( 'DROP TABLE IF EXISTS wp_subtleforms_rate_limits', $sql, 'Free tables are still dropped' );
+		foreach ( array( 'subtleforms_coupons_db', 'subtleforms_stats_db', 'subtleforms_funnel_db' ) as $proOption ) {
+			$this->assertStringContainsString( "'" . $proOption . "'", $sql, $proOption );
+		}
+		$this->assertContains( 'subtleforms_async_email', $GLOBALS['sf_test_cleared'] );
+		$this->assertNotContains( 'subtleforms_stats_prune', $GLOBALS['sf_test_cleared'] );
 		$this->assertStringContainsString( "option_name NOT LIKE 'subtleforms\\_pro\\_%'", $sql );
 		$this->assertStringContainsString( "'subtleforms_license_key', 'subtleforms_license_data'", $sql );
 		$this->assertStringContainsString( "option_name NOT LIKE '\\_transient\\_subtleforms\\_pro\\_%'", $sql );
@@ -262,7 +270,7 @@ class Release239Test extends PHPUnit\Framework\TestCase {
 		foreach ( array( 'ext_payments_', 'ext_crm_', 'ext_email_marketing_', 'ext_pdf_', 'ext_ecommerce_', 'ext_multilanguage_' ) as $prefix ) {
 			$this->assertStringNotContainsString( $prefix, $settings, $prefix );
 		}
-		$this->assertStringNotContainsString( 'is_pro_locked', file_get_contents( $this->root . '/src/Api/FieldsApi.php' ) );
+		$this->assertStringNotContainsString( 'pro_placeholder', file_get_contents( $this->root . '/src/Api/FieldsApi.php' ) );
 		$this->assertStringNotContainsString( 'requires a Pro license', file_get_contents( $this->root . '/src/Api/FormsApi.php' ) );
 	}
 
