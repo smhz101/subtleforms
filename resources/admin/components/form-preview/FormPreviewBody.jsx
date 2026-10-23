@@ -2,6 +2,7 @@ import { __ } from '@wordpress/i18n';
 import FormRenderer from '../../../frontend/components/FormRenderer';
 import FormErrorBoundary from '../../../frontend/components/FormErrorBoundary';
 import PreviewFrame from './PreviewFrame';
+import { appearanceBackdrop } from '../../../shared/appearance';
 
 /**
  * The builder preview.
@@ -36,6 +37,8 @@ export default function FormPreviewBody( { schema, formId = null, isDirty = fals
       ) }
       <PreviewFrame
         className='sf-form-preview__frame'
+        conversational={ String( schema.metadata?.type || '' ).toLowerCase() === 'conversational' }
+        transparent={ !! appearanceBackdrop( schema.metadata?.appearance ) }
         title={ __( 'Form preview', 'subtleforms' ) }>
         <FormErrorBoundary>
           <FormRenderer preloadedSchema={ schema } formId={ formId } preview />

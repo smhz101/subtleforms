@@ -18,7 +18,7 @@ import { __ } from '@wordpress/i18n';
  * it, which makes "preview matches production" a property of the setup rather
  * than something that has to be maintained by hand.
  */
-export default function PreviewFrame( { children, title, className } ) {
+export default function PreviewFrame( { children, title, className, transparent = false, conversational = false } ) {
   const iframeRef = useRef( null );
   const [ mountNode, setMountNode ] = useState( null );
   const [ height, setHeight ] = useState( 320 );
@@ -66,17 +66,22 @@ export default function PreviewFrame( { children, title, className } ) {
 
     const styles = window.subtleformsAdmin?.frontendStyles ?? [];
     styles.forEach( ( href ) => {
+      // The conversational layout's file styles every submit button, so only
+      // a conversational form gets it, as on the site (2.7.2).
+      if ( ! conversational && /conversational\.css/.test( href ) ) {
+        return;
+      }
       const link = doc.createElement( 'link' );
       link.rel = 'stylesheet';
       link.href = href;
       doc.head.appendChild( link );
     } );
 
-    // Theme type wins when the theme publishes it. Otherwise stay off Times.
+    // The page keeps the theme's own font, text colour and background, so the
+    // form sits on what a visitor sees (2.7.2). A form made for a dark footer
+    // is drawn on the backdrop the workspace gives it instead.
     const base = doc.createElement( 'style' );
-    base.textContent =
-      'html,body{margin:0;padding:16px;background:transparent;' +
-      'font-family:var(--wp--preset--font-family--body,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif);}';
+    base.textContent = `html,body{margin:0;padding:16px;${ transparent ? 'background:transparent;' : '' }}`;
     doc.head.appendChild( base );
 
     const container = doc.createElement( 'div' );

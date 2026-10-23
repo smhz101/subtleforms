@@ -206,3 +206,61 @@
 .sf-form-appearance__inherit {
 	margin: 0 0 var(--sf-space-4);
 }
+
+// ── Custom styling controls (2.7.2) ─────────────────────────────────────────
+.sf-form-appearance__advanced-toggle { margin: 4px 0; }
+
+.sf-style-control {
+	display: flex;
+	align-items: flex-end;
+	gap: 4px;
+	min-width: 0;
+
+	&__body {
+		flex: 1 1 auto;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 6px;
+	}
+
+	&__reset.components-button {
+		flex: 0 0 auto;
+		margin-bottom: 4px;
+		color: var(--sf-text-muted);
+	}
+
+	&:not(.is-set) &__reset.components-button { opacity: 0.35; }
+
+	&__sizes {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
+	}
+}
+
+// Colours sit two to a row; the reset button stays beside its chip.
+.sf-appearance-group--swatches .sf-style-control {
+	align-items: center;
+	&__reset.components-button { margin-bottom: 0; }
+}
+
+.sf-form-appearance__contrast {
+	margin: 4px 0 0;
+	padding: 8px 10px;
+	border-inline-start: 3px solid var(--sf-warning, #b26200);
+	background: var(--sf-bg-subtle);
+	font-size: 12px;
+	line-height: 1.45;
+	color: var(--sf-text);
+}
+
+.sf-form-appearance__css textarea {
+	font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+	font-size: 12px;
+	line-height: 1.5;
+	tab-size: 2;
+}
+
+.sf-form-appearance__fonts-note,
+.sf-form-appearance__css-note { margin: 0 0 8px; }
