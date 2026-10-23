@@ -17,6 +17,9 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase {
 	/** @var int[] */
 	protected $formIds = array();
 
+	/** Makes each token differ: a time token is good for one submission. */
+	protected static $tokenSeq = 0;
+
 	/**
 	 * Every test starts with fresh rate limits: the suite makes more REST
 	 * calls in a minute than one visitor or admin could (2.3.2).
@@ -80,7 +83,7 @@ abstract class TestCase extends \PHPUnit\Framework\TestCase {
 	 */
 	protected function submit( int $formId, array $data ): array {
 		wp_set_current_user( 0 );
-		$data['form_rendered_at'] = \SubtleForms\Engine\SpamProtection::issue_token( $formId, time() - 60 );
+		$data['form_rendered_at'] = \SubtleForms\Engine\SpamProtection::issue_token( $formId, time() - 60 - ( ++self::$tokenSeq ) );
 		$request                  = new \WP_REST_Request( 'POST', '/subtleforms/v1/submit' );
 		$request->set_header( 'content-type', 'application/json' );
 		$request->set_body(

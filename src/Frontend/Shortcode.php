@@ -64,6 +64,14 @@ final class Shortcode {
 	}
 
 	/**
+	 * What a visitor sees for a form that is missing, a draft or in the trash.
+	 * One message for all three, so it does not say which forms exist.
+	 */
+	private static function unavailable(): string {
+		return '<p class="subtleforms-error">' . esc_html__( 'Form not available.', 'subtleforms' ) . '</p>';
+	}
+
+	/**
 	 * Render form shortcode.
 	 */
 	public function render( $atts ): string {
@@ -82,12 +90,12 @@ final class Shortcode {
 		// Verify form exists
 		$form = $this->formsRepo->find( $formId );
 		if ( ! $form ) {
-			return '<p class="subtleforms-error">' . esc_html__( 'Form not found.', 'subtleforms' ) . '</p>';
+			return self::unavailable();
 		}
 
 		// Only render published forms on frontend
 		if ( $form['status'] !== 'published' ) {
-			return '<p class="subtleforms-error">' . esc_html__( 'This form is not published yet.', 'subtleforms' ) . '</p>';
+			return self::unavailable();
 		}
 
 		// Login, schedule and entry-limit rules (2.0).

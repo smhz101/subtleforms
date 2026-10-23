@@ -71,11 +71,13 @@ public static function dispatchEmail( array $payload ): bool {
 			'dispatch_id'   => self::dispatchId(),
 		);
 
-		// Schedule for immediate execution (0 delay)
+		// Schedule for immediate execution (0 delay). The cron option holds
+		// only a reference; the recipients, body and headers wait in a
+		// short-lived store and are loaded when the job runs.
 		$scheduled = wp_schedule_single_event(
 			time(),
 			'subtleforms_async_email',
-			array( $job )
+			array( self::stash( $job ) )
 		);
 
 		if ( $scheduled === false ) {
@@ -124,11 +126,11 @@ public static function dispatchEmail( array $payload ): bool {
 			'dispatch_id'   => self::dispatchId(),
 		);
 
-		// Schedule for immediate execution (0 delay)
+		// Same as email: the cron option holds a reference only.
 		$scheduled = wp_schedule_single_event(
 			time(),
 			'subtleforms_async_webhook',
-			array( $job )
+			array( self::stash( $job ) )
 		);
 
 		if ( $scheduled === false ) {
@@ -151,6 +153,11 @@ public static function dispatchEmail( array $payload ): bool {
 	 * @return void
 	 */
 	public static function executeEmail( array $job ): void {
+		$job = self::resolve( $job );
+		if ( null === $job ) {
+			self::log( 'Email job skipped: its stored details expired' );
+			return;
+		}
 		$retry_count   = $job['retry_count'] ?? 0;
 		$submission_id = isset( $job['submission_id'] ) ? (int) $job['submission_id'] : 0;
 		$step_id       = $job['step_id'] ?? 'email';
@@ -212,6 +219,7 @@ public static function dispatchEmail( array $payload ): bool {
 				'to'            => $job['to'],
 				'submission_id' => $submission_id ?: null,
 			) );
+			self::forget( $job );
 
 			// Write completion log back to submissions log table.
 			if ( $submission_id > 0 ) {
@@ -278,7 +286,7 @@ public static function dispatchEmail( array $payload ): bool {
 				wp_schedule_single_event(
 					time() + $delay,
 					'subtleforms_async_email',
-					array( $job )
+					array( self::stash( $job ) )
 				);
 
 				self::log( "Email retry scheduled (#{$job['retry_count']} in {$delay}s)", array(
@@ -290,6 +298,7 @@ public static function dispatchEmail( array $payload ): bool {
 					'to'            => $job['to'],
 					'submission_id' => $submission_id ?: null,
 				) );
+				self::forget( $job );
 			}
 		}
 	}
@@ -301,6 +310,11 @@ public static function dispatchEmail( array $payload ): bool {
 	 * @return void
 	 */
 	public static function executeWebhook( array $job ): void {
+		$job = self::resolve( $job );
+		if ( null === $job ) {
+			self::log( 'Webhook job skipped: its stored details expired' );
+			return;
+		}
 		$retry_count   = $job['retry_count'] ?? 0;
 		$submission_id = isset( $job['submission_id'] ) ? (int) $job['submission_id'] : 0;
 		$step_id       = $job['step_id'] ?? 'webhook';
@@ -343,6 +357,7 @@ public static function dispatchEmail( array $payload ): bool {
 				'status'        => $code,
 				'submission_id' => $submission_id ?: null,
 			) );
+			self::forget( $job );
 
 			// Write completion log back to submissions log table.
 			if ( $submission_id > 0 ) {
@@ -410,7 +425,7 @@ public static function dispatchEmail( array $payload ): bool {
 				wp_schedule_single_event(
 					time() + $delay,
 					'subtleforms_async_webhook',
-					array( $job )
+					array( self::stash( $job ) )
 				);
 
 				self::log( "Webhook retry scheduled (#{$job['retry_count']} in {$delay}s)", array(
@@ -422,7 +437,64 @@ public static function dispatchEmail( array $payload ): bool {
 					'url'           => $job['url'],
 					'submission_id' => $submission_id ?: null,
 				) );
+				self::forget( $job );
 			}
+		}
+	}
+
+	/**
+	 * Option name prefix of the stored job details.
+	 */
+	const JOB_PREFIX = 'subtleforms_job_';
+
+	/**
+	 * Keep a job's details (recipients, body, headers, signature) out of the
+	 * cron option. They are stored under the job's id for a day and the cron
+	 * event carries only the id and the fields needed to find the entry.
+	 *
+	 * @param array $job Full job.
+	 * @return array Reference job for wp_schedule_single_event().
+	 */
+	private static function stash( array $job ): array {
+		$ref = (string) ( $job['dispatch_id'] ?? self::dispatchId() );
+		set_transient( self::JOB_PREFIX . md5( $ref ), $job, DAY_IN_SECONDS );
+		return array(
+			'job_ref'       => $ref,
+			'dispatch_id'   => $ref,
+			'submission_id' => $job['submission_id'] ?? null,
+			'step_id'       => $job['step_id'] ?? '',
+			'retry_count'   => $job['retry_count'] ?? 0,
+		);
+	}
+
+	/**
+	 * Load the details behind a reference job (also used by tests). A job queued by an earlier
+	 * version carries everything and is returned as it is.
+	 *
+	 * @param array $job Cron argument.
+	 * @return array|null Full job, or null when the stored details are gone.
+	 */
+	public static function resolve( array $job ): ?array {
+		if ( ! isset( $job['job_ref'] ) ) {
+			return $job;
+		}
+		$stored = get_transient( self::JOB_PREFIX . md5( (string) $job['job_ref'] ) );
+		if ( ! is_array( $stored ) ) {
+			return null;
+		}
+		$stored['retry_count'] = $job['retry_count'] ?? ( $stored['retry_count'] ?? 0 );
+		$stored['dispatch_id'] = $job['dispatch_id'] ?? $job['job_ref'];
+		return $stored;
+	}
+
+	/**
+	 * Delete a finished job's stored details.
+	 *
+	 * @param array $job Full job.
+	 */
+	private static function forget( array $job ): void {
+		if ( isset( $job['dispatch_id'] ) ) {
+			delete_transient( self::JOB_PREFIX . md5( (string) $job['dispatch_id'] ) );
 		}
 	}
 

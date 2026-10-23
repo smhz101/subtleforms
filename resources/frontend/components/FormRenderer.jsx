@@ -30,6 +30,7 @@ import {
 } from '../../shared/appearance';
 
 import { restFetch, restUrl, restNonce } from '../utils/restFetch';
+import { freshSpamToken } from '../utils/spamToken';
 import { fillConfirmation } from '../../shared/confirmationTags';
 import { messageParagraphs } from '../../shared/safeLinks';
 import ConfirmationText from './ConfirmationText';
@@ -791,7 +792,7 @@ export default function FormRenderer({
         const submissionPayload = {
           ...payload,
           website_url: honeypotInput ? honeypotInput.value : '',
-          form_rendered_at: spamToken,
+          form_rendered_at: await freshSpamToken(formId, spamToken),
         };
 
         // Include CAPTCHA response (v2 or v3)

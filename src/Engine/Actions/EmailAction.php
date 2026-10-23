@@ -85,7 +85,11 @@ final class EmailAction implements ActionInterface {
 			$body = '{all_fields}';
 		}
 
-		$to      = is_string( $to ) ? \SubtleForms\Support\MergeTags::render( $to, array( 'answers' => $textPayload ) + $mergeContext, false ) : $to;
+		// A recipient may use an Email field's answer, never a free-text one: a
+		// visitor could otherwise type any address into a text box and have
+		// the site send mail to it.
+		$recipientAnswers = self::recipientAnswers( $textPayload, $schema );
+		$to      = is_string( $to ) ? \SubtleForms\Support\MergeTags::render( $to, array( 'answers' => $recipientAnswers ) + $mergeContext, false ) : $to;
 		$subject = is_string( $subject ) ? \SubtleForms\Support\MergeTags::render( $subject, array( 'answers' => $textPayload ) + $mergeContext, false ) : $subject;
 		// A subject is one line, whatever the answers merged into it hold.
 		$subject = is_string( $subject ) ? trim( (string) preg_replace( '/[\r\n]+/', ' ', $subject ) ) : $subject;
@@ -252,6 +256,30 @@ final class EmailAction implements ActionInterface {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * The answers a recipient setting may draw on: those of Email fields.
+	 * Every other answer reads as empty, so a tag that points at a text box
+	 * adds no address.
+	 *
+	 * @param array $answers Answers as text, by field key.
+	 * @param array $schema  Form schema.
+	 * @return array
+	 */
+	public static function recipientAnswers( array $answers, array $schema ): array {
+		$emailKeys = array();
+		foreach ( \SubtleForms\Support\FieldMapper::fields( $schema ) as $entry ) {
+			if ( 'email' === $entry['type'] ) {
+				$emailKeys[ $entry['key'] ] = true;
+			}
+		}
+		foreach ( $answers as $key => $value ) {
+			if ( ! isset( $emailKeys[ $key ] ) ) {
+				$answers[ $key ] = '';
+			}
+		}
+		return $answers;
 	}
 
 	/**

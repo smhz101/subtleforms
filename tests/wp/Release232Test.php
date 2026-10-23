@@ -262,7 +262,7 @@ final class Release232Test extends TestCase {
 		$jobs    = array();
 		$capture = function ( $pre, $event ) use ( &$jobs ) {
 			if ( isset( $event->hook ) && 'subtleforms_async_email' === $event->hook ) {
-				$jobs[] = $event->args[0];
+				$jobs[] = \SubtleForms\Async\AsyncDispatcher::resolve( $event->args[0] );
 				return true;
 			}
 			return $pre;

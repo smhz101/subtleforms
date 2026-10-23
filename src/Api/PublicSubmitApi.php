@@ -38,6 +38,13 @@ use WP_REST_Response;
  */
 final class PublicSubmitApi {
 
+	/**
+	 * Whether the submission being handled is a classic (no JavaScript) post.
+	 *
+	 * @var bool
+	 */
+	private $classicPost = false;
+
 	private const NAMESPACE = 'subtleforms/v1';
 
 	/** @var Pipeline */
@@ -115,8 +122,9 @@ final class PublicSubmitApi {
 		$request->set_header( 'Content-Type', 'application/json' );
 		$request->set_body( (string) wp_json_encode( $built ) );
 		$request->set_param( 'form_id', $built['form_id'] );
-		$response = $this->submit_form( $request );
-		$outcome  = ClassicResult::outcome( $response->get_status(), $response->get_data(), $built['form_id'], $built['data'] );
+		$this->classicPost = true;
+		$response          = $this->submit_form( $request );
+		$outcome           = ClassicResult::outcome( $response->get_status(), $response->get_data(), $built['form_id'], $built['data'] );
 
 		// Only a submission that went through follows a redirect confirmation.
 		if ( $outcome['ok'] && '' !== $outcome['redirect'] ) {
@@ -207,7 +215,7 @@ final class PublicSubmitApi {
 			return $rateLimitResponse;
 		}
 
-		$ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+		$ip = \SubtleForms\Security\ClientIp::get();
 
 		// Validate form ID
 		try {
@@ -256,12 +264,34 @@ final class PublicSubmitApi {
 		// nothing is stored, so a bot does not learn it was caught and retry.
 		// A site admin testing a form (builder preview) skips the time trap,
 		// since the preview has no server-issued token.
-		$spamReason = SpamProtection::block_reason(
+		$protection = SpamProtection::for_form( $this->spamSchema( $formId, ! empty( $isPreview ) ) );
+		// A classic post cannot refresh an old token, so it may use one once.
+		$protection['acceptStale'] = $this->classicPost;
+		$skipTimeTrap              = current_user_can( 'manage_options' );
+		$spamReason                = SpamProtection::block_reason(
 			$payload,
 			$formId,
-			SpamProtection::for_form( $this->spamSchema( $formId, ! empty( $isPreview ) ) ),
-			current_user_can( 'manage_options' )
+			$protection,
+			$skipTimeTrap
 		);
+		if ( 'time_token_expired' === $spamReason ) {
+			// Not spam: the page was open or cached for hours. Hand back a
+			// fresh token so the browser can send the same answers again.
+			$fresh = SpamProtection::refresh_token( $payload[ SpamProtection::TIME_FIELD ] ?? null, $formId );
+			return new WP_REST_Response(
+				array(
+					'error' => array(
+						'code'    => 'subtleforms_token_expired',
+						'message' => __( 'This form was open for a long time. Please send it again.', 'subtleforms' ),
+						'meta'    => array( 'spam_token' => (string) $fresh ),
+					),
+				),
+				409
+			);
+		}
+		$timeTokenToClaim = ( null === $spamReason && ! empty( $protection['timeTrap'] ) && ! $skipTimeTrap && empty( $isPreview ) )
+			? ( $payload[ SpamProtection::TIME_FIELD ] ?? null )
+			: null;
 		if ( null !== $spamReason ) {
 			Logger::info( 'Spam blocked (form %d): %s', $formId, $spamReason );
 			if ( empty( $isPreview ) ) {
@@ -290,7 +320,12 @@ final class PublicSubmitApi {
 			$count = null;
 
 			if ( $user_id > 0 ) {
-				$count = $this->countSubmissionsBy( $formId, 'user_id = %d', $user_id );
+				// The user_id column arrives with the schema upgrade (2.7.1).
+				// Until it has run there is nothing to count by account, so the
+				// query is not sent (it would fail and read as zero).
+				if ( \SubtleForms\Privacy\PrivacyLookup::hasUserIdColumn() ) {
+					$count = $this->countSubmissionsBy( $formId, 'user_id = %d', $user_id );
+				}
 			} elseif ( $ip !== '' ) {
 				$count = $this->countSubmissionsBy( $formId, 'ip_address = %s', $ip );
 			}
@@ -436,6 +471,25 @@ final class PublicSubmitApi {
 			}
 		};
 
+		// A time token is good for one submission. A repeat is dropped like
+		// any other spam. The mark is released again if the entry is rejected
+		// or fails, so a visitor can correct a field and send again.
+		$claimedToken = null;
+		if ( is_string( $timeTokenToClaim ) && '' !== $timeTokenToClaim ) {
+			$tokenInfo = SpamProtection::token_info( $timeTokenToClaim, $formId );
+			if ( ! SpamProtection::claim_token( $timeTokenToClaim, $tokenInfo['time'] ?? null ) ) {
+				$voidPayment();
+				SpamStats::blocked( $formId, 'time_token_reused' );
+				return ApiResponse::success(
+					array(
+						'success' => true,
+						'message' => __( 'Thank you.', 'subtleforms' ),
+					)
+				);
+			}
+			$claimedToken = $timeTokenToClaim;
+		}
+
 		// Create submission record
 		try {
 			$submissionId = $this->submissionsRepo->create(
@@ -452,9 +506,18 @@ final class PublicSubmitApi {
 			);
 		} catch ( \RuntimeException $e ) {
 			Logger::error( 'Failed to create submission record: %s', $e->getMessage() );
+			SpamProtection::release_token( $claimedToken );
 			// The entry was not saved: release an authorised payment.
 			$voidPayment();
 			return ApiResponse::server_error( __( 'Failed to create submission record', 'subtleforms' ) );
+		}
+
+		// Remember which account sent the entry, for the per-user limit and
+		// for privacy requests. Only once the column exists.
+		if ( get_current_user_id() > 0 && \SubtleForms\Privacy\PrivacyLookup::hasUserIdColumn() ) {
+			global $wpdb;
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- Single column update on the entry just created.
+			$wpdb->update( $wpdb->prefix . 'subtleforms_submissions', array( 'user_id' => get_current_user_id() ), array( 'id' => (int) $submissionId ), array( '%d' ), array( '%d' ) );
 		}
 
 		// Build submission context
@@ -548,9 +611,11 @@ final class PublicSubmitApi {
 				if ( is_array( $validationErrors ) && ! empty( $validationErrors ) ) {
 					// Rejected answers are never stored (FB-09, FF-13, FA-24).
 					$this->discard( $submissionId );
+					SpamProtection::release_token( $claimedToken );
 					return ApiResponse::validation_error( __( 'Form validation failed', 'subtleforms' ), $validationErrors );
 				}
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
+				SpamProtection::release_token( $claimedToken );
 				Logger::error( 'Pipeline execution failed for submission %d: %s', $submissionId, $e->getMessage() );
 
 				return ApiResponse::server_error( __( 'Your submission could not be completed. Please try again later.', 'subtleforms' ) );
@@ -567,9 +632,11 @@ final class PublicSubmitApi {
 				if ( is_array( $validationErrors ) && ! empty( $validationErrors ) ) {
 					// Rejected answers are never stored (FB-09, FF-13, FA-24).
 					$this->discard( $submissionId );
+					SpamProtection::release_token( $claimedToken );
 					return ApiResponse::validation_error( __( 'Form validation failed', 'subtleforms' ), $validationErrors );
 				}
 				$this->submissionsRepo->update( $submissionId, array( 'status' => 'failed' ) );
+				SpamProtection::release_token( $claimedToken );
 				Logger::error( 'Pipeline execution failed for submission %d: %s', $submissionId, $result->error );
 
 				return ApiResponse::server_error( $result->error );
@@ -1172,9 +1239,8 @@ final class PublicSubmitApi {
 
 	private function guardRateLimit( WP_REST_Request $request ): ?WP_REST_Response {
 		$userId = get_current_user_id() ?: null;
-		$ip     = isset( $_SERVER['REMOTE_ADDR'] )
-			? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) )
-			: '0.0.0.0';
+		$ip     = \SubtleForms\Security\ClientIp::get();
+		$ip     = '' !== $ip ? $ip : '0.0.0.0';
 		$route  = $request->get_route();
 		$method = $request->get_method();
 

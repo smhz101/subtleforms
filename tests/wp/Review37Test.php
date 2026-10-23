@@ -137,7 +137,7 @@ final class Review37Test extends TestCase {
 			$ok = count( $calls ) === 1;
 			return array(
 				'headers'  => array(),
-				'body'     => wp_json_encode( array( 'success' => $ok, 'score' => 0.9, 'error-codes' => $ok ? array() : array( 'timeout-or-duplicate' ) ) ),
+				'body'     => wp_json_encode( array( 'success' => $ok, 'score' => 0.9, 'action' => 'submit', 'error-codes' => $ok ? array() : array( 'timeout-or-duplicate' ) ) ),
 				'response' => array( 'code' => 200, 'message' => 'OK' ),
 				'cookies'  => array(),
 				'filename' => null,

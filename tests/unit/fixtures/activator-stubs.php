@@ -12,9 +12,17 @@ defined( 'ARRAY_A' ) || define( 'ARRAY_A', 'ARRAY_A' );
 
 if ( ! function_exists( 'add_option' ) ) {
 	function add_option( $name, $value = '', $deprecated = '', $autoload = null ) {
-		if ( ! array_key_exists( $name, $GLOBALS['sf_test_options'] ) ) {
-			$GLOBALS['sf_test_options'][ $name ] = $value;
+		if ( array_key_exists( $name, $GLOBALS['sf_test_options'] ) ) {
+			return false;
 		}
+		$GLOBALS['sf_test_options'][ $name ] = $value;
+		return true;
+	}
+}
+
+if ( ! function_exists( 'delete_option' ) ) {
+	function delete_option( $name ) {
+		unset( $GLOBALS['sf_test_options'][ $name ] );
 		return true;
 	}
 }

@@ -260,6 +260,30 @@ final class FormsApi {
 		)
 	);
 
+		// A page that was open or cached for hours trades its old time token
+		// for a fresh one just before it submits (2.7.1).
+		register_rest_route(
+			self::NAMESPACE,
+			'/forms/(?P<id>\d+)/spam-token',
+			array(
+				'methods'             => 'POST',
+				'callback'            => array( $this, 'refresh_spam_token' ),
+				'permission_callback' => '__return_true',
+				'args'                => array(
+					'id'    => array(
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					),
+					'token' => array(
+						'type'              => 'string',
+						'required'          => true,
+						'sanitize_callback' => 'sanitize_text_field',
+					),
+				),
+			)
+		);
+
 		register_rest_route(
 			self::NAMESPACE,
 			'/forms/(?P<id>\d+)/schema',
@@ -475,7 +499,7 @@ final class FormsApi {
 			return ApiResponse::not_found( __( 'Form not available', 'subtleforms' ) );
 		}
 
-		$isAuthenticated = is_user_logged_in() && current_user_can( 'edit_posts' );
+		$isAuthenticated = is_user_logged_in() && current_user_can( 'manage_options' );
 		$isPublished     = isset( $form['status'] ) && $form['status'] === 'published';
 		$requestsDraft   = $context === 'builder';
 
@@ -559,6 +583,33 @@ final class FormsApi {
 				'version' => $schema['version'] ?? null,
 			)
 		);
+	}
+
+	/**
+	 * Give a visitor's expired time token a fresh one. Only a validly signed
+	 * token for this published form is answered; a missing or forged token,
+	 * or an unknown form, gets a 404 so nothing can be minted from scratch.
+	 *
+	 * @param WP_REST_Request $request REST request.
+	 */
+	public function refresh_spam_token( WP_REST_Request $request ): WP_REST_Response {
+		$rateLimitResponse = $this->guardRateLimit( $request );
+		if ( $rateLimitResponse ) {
+			return $rateLimitResponse;
+		}
+
+		$formId = absint( $request->get_param( 'id' ) );
+		$form   = $this->formsRepo->find( $formId );
+		if ( ! $form || 'published' !== ( $form['status'] ?? '' ) ) {
+			return ApiResponse::not_found( __( 'Form not available', 'subtleforms' ) );
+		}
+
+		$token = \SubtleForms\Engine\SpamProtection::refresh_token( $request->get_param( 'token' ), $formId );
+		if ( null === $token ) {
+			return ApiResponse::not_found( __( 'Form not available', 'subtleforms' ) );
+		}
+
+		return ApiResponse::success( array( 'spam_token' => $token ) );
 	}
 
 	/**

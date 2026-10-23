@@ -35,7 +35,7 @@ final class EmailTest extends TestCase {
 
 	public function capture( $pre, $event ) {
 		if ( isset( $event->hook ) && $event->hook === 'subtleforms_async_email' ) {
-			$this->jobs[] = $event->args[0];
+			$this->jobs[] = \SubtleForms\Async\AsyncDispatcher::resolve( $event->args[0] );
 			return true;
 		}
 		return $pre;

@@ -118,6 +118,18 @@ class RecaptchaProvider implements CaptchaProviderInterface {
 		$result        = json_decode( $response_body, true );
 
 		if ( ! empty( $result['success'] ) ) {
+			// Only v3 answers carry a score. A v3 token passes when it is for
+			// our action and the score reaches the threshold; a bare
+			// success:true says nothing about whether the visitor is a bot.
+			if ( array_key_exists( 'score', $result ) ) {
+				$check = self::check_v3( $result );
+				if ( true !== $check ) {
+					return array(
+						'success' => false,
+						'error'   => $check,
+					);
+				}
+			}
 			return array( 'success' => true );
 		}
 
@@ -126,6 +138,35 @@ class RecaptchaProvider implements CaptchaProviderInterface {
 			'success' => false,
 			'error'   => __( 'CAPTCHA verification failed.', 'subtleforms' ) . ' (' . implode( ', ', $error_codes ) . ')',
 		);
+	}
+
+	/**
+	 * Check the score and action of a v3 verification answer.
+	 *
+	 * @param array $result Decoded siteverify response.
+	 * @return true|string True when it passes, otherwise the error text.
+	 */
+	public static function check_v3( array $result ) {
+		/**
+		 * Lowest reCAPTCHA v3 score that passes (0.0 to 1.0).
+		 *
+		 * @param float $min_score Default 0.5.
+		 */
+		$min_score = (float) apply_filters( 'subtleforms/captcha/recaptcha_min_score', 0.5 );
+		/**
+		 * The reCAPTCHA v3 action the form page requests.
+		 *
+		 * @param string $action Default "submit".
+		 */
+		$action = (string) apply_filters( 'subtleforms/captcha/recaptcha_action', 'submit' );
+
+		if ( '' !== $action && ( $result['action'] ?? '' ) !== $action ) {
+			return __( 'CAPTCHA verification failed.', 'subtleforms' ) . ' (action-mismatch)';
+		}
+		if ( (float) $result['score'] < $min_score ) {
+			return __( 'CAPTCHA verification failed.', 'subtleforms' ) . ' (low-score)';
+		}
+		return true;
 	}
 
 	/**

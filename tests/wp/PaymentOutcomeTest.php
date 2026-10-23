@@ -43,7 +43,7 @@ final class PaymentOutcomeTest extends TestCase {
 
 	public function catchJob( $pre, $event ) {
 		if ( isset( $event->hook ) && 'subtleforms_async_email' === $event->hook ) {
-			$this->jobs[] = $event->args[0];
+			$this->jobs[] = \SubtleForms\Async\AsyncDispatcher::resolve( $event->args[0] );
 			return true;
 		}
 		return $pre;
