@@ -134,9 +134,7 @@ class SettingsApi {
 	 */
 	private function guardRateLimit( WP_REST_Request $request ): ?WP_REST_Response {
 		$userId = get_current_user_id() ?: null;
-		$ip     = isset( $_SERVER['REMOTE_ADDR'] )
-			? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) )
-			: '0.0.0.0';
+		$ip     = \SubtleForms\Security\ClientIp::get() ?: '0.0.0.0';
 		$route  = $request->get_route();
 		$method = $request->get_method();
 
@@ -460,6 +458,27 @@ class SettingsApi {
 				'type'    => 'integer',
 				'minimum' => 1,
 				'maximum' => 300,
+			),
+			// Visitor IP behind a proxy
+			'trusted_proxy_cidrs'       => array(
+				'type'              => 'array',
+				'items'             => array( 'type' => 'string' ),
+				'validate_callback' => static function ( $value ) {
+					$list = \SubtleForms\Security\ClientIp::parse_list( $value );
+					if ( count( $list ) > 100 ) {
+						return new \WP_Error( 'rest_invalid_param', __( 'Enter at most 100 proxy addresses or ranges.', 'subtleforms' ), array( 'status' => 400 ) );
+					}
+					foreach ( $list as $entry ) {
+						if ( ! \SubtleForms\Security\ClientIp::valid_range( $entry ) ) {
+							/* translators: %s: the rejected address */
+							return new \WP_Error( 'rest_invalid_param', sprintf( __( '"%s" is not an IP address or CIDR range.', 'subtleforms' ), sanitize_text_field( $entry ) ), array( 'status' => 400 ) );
+						}
+					}
+					return true;
+				},
+			),
+			'trust_cloudflare'          => array(
+				'type' => 'boolean',
 			),
 			'admin_notification_enabled' => array(
 				'type' => 'boolean',

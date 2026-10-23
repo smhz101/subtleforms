@@ -22,6 +22,9 @@ final class SubtleFormsBlock {
 	/** Handle of the small script that carries the editor settings and loads the preview. */
 	private const LOADER_HANDLE = 'subtleforms-block-editor-loader';
 
+	/** Handle of the lazily loaded front-end renderer used as the editor preview. */
+	private const PREVIEW_HANDLE = 'subtleforms-frontend-preview';
+
 	/**
 	 * Initialize block registration hooks.
 	 */
@@ -272,7 +275,7 @@ final class SubtleFormsBlock {
 		// REST address and nonce for the block, always present, because the
 		// form list in the block settings needs them even before the preview
 		// script has loaded.
-		wp_register_script( self::LOADER_HANDLE, false, array( 'wp-data', 'wp-dom-ready' ), SUBTLEFORMS_VERSION, true );
+		wp_register_script( self::LOADER_HANDLE, false, array( 'wp-data', 'wp-dom-ready', 'wp-i18n' ), SUBTLEFORMS_VERSION, true );
 		wp_enqueue_script( self::LOADER_HANDLE );
 		wp_localize_script(
 			self::LOADER_HANDLE,
@@ -291,21 +294,32 @@ final class SubtleFormsBlock {
 		$has_form = ! $post instanceof \WP_Post || has_block( 'subtleforms/form', $post );
 		if ( $has_form ) {
 			wp_enqueue_script(
-				'subtleforms-frontend-preview',
+				self::PREVIEW_HANDLE,
 				$src,
 				$asset_file['dependencies'],
 				$asset_file['version'],
 				true
 			);
-			wp_set_script_translations( 'subtleforms-frontend-preview', 'subtleforms', SUBTLEFORMS_PLUGIN_DIR . 'languages' );
+			wp_set_script_translations( self::PREVIEW_HANDLE, 'subtleforms', SUBTLEFORMS_PLUGIN_DIR . 'languages' );
 			return;
+		}
+
+		// The preview script is added later by the loader below, so WordPress
+		// never prints its translations. Register the handle, ask for the
+		// translations and print them with the loader, ahead of the script.
+		wp_register_script( self::PREVIEW_HANDLE, $src, $asset_file['dependencies'], $asset_file['version'], true );
+		wp_set_script_translations( self::PREVIEW_HANDLE, 'subtleforms', SUBTLEFORMS_PLUGIN_DIR . 'languages' );
+		$translations = wp_scripts()->print_translations( self::PREVIEW_HANDLE, false );
+		if ( is_string( $translations ) && '' !== $translations ) {
+			wp_add_inline_script( self::LOADER_HANDLE, $translations, 'before' );
 		}
 
 		wp_add_inline_script(
 			self::LOADER_HANDLE,
 			'( function () {'
 			. 'var src = ' . wp_json_encode( add_query_arg( 'ver', (string) $asset_file['version'], $src ) ) . ', started = false;'
-			. 'function load() { if ( started ) { return; } started = true; var s = document.createElement( "script" ); s.src = src; document.head.appendChild( s ); }'
+			. 'function load() { if ( started ) { return; } started = true; var s = document.createElement( "script" ); s.src = src;'
+			. ' s.onload = function () { window.dispatchEvent( new Event( "subtleforms:frontend-ready" ) ); }; document.head.appendChild( s ); }'
 			. 'function hasBlock( blocks ) { return blocks.some( function ( b ) { return b.name === "subtleforms/form" || hasBlock( b.innerBlocks || [] ); } ); }'
 			. 'function inserterOpen() { try { var ed = wp.data.select( "core/editor" ), ep = wp.data.select( "core/edit-post" );'
 			. ' return !! ( ( ed && ed.isInserterOpened && ed.isInserterOpened() ) || ( ep && ep.isInserterOpened && ep.isInserterOpened() ) ); } catch ( e ) { return false; } }'

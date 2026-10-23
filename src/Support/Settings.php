@@ -66,6 +66,10 @@ class Settings {
 		'enable_honeypot'            => true,
 		'min_submission_time'        => 3,
 
+		// Visitor IP (proxies). Forwarding headers are believed only from these.
+		'trusted_proxy_cidrs'        => array(),
+		'trust_cloudflare'           => false,
+
 		// CAPTCHA
 		'captcha_enabled'            => false,
 		'captcha_provider'           => '', // Deprecated: kept for backwards compatibility
@@ -171,6 +175,8 @@ class Settings {
 			'min' => 0,
 			'max' => 60,
 		),
+		'trusted_proxy_cidrs'        => 'cidr_list',
+		'trust_cloudflare'           => 'boolean',
 		'data_retention_days'        => array(
 			'integer',
 			'min' => 0,
@@ -340,6 +346,16 @@ class Settings {
 
 			case 'string':
 				return sanitize_text_field( $value );
+
+			case 'cidr_list':
+				// Proxy addresses or CIDR ranges, as a list or one per line.
+				$list = \SubtleForms\Security\ClientIp::parse_list( $value );
+				foreach ( $list as $entry ) {
+					if ( ! \SubtleForms\Security\ClientIp::valid_range( $entry ) ) {
+						throw new \InvalidArgumentException( "{$key} has an invalid address or range: " . sanitize_text_field( $entry ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+					}
+				}
+				return array_values( array_unique( $list ) );
 
 			case 'email':
 				if ( ! empty( $value ) && ! is_email( $value ) ) {

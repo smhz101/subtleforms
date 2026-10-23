@@ -22,6 +22,7 @@ import {
 	Button,
 } from '@wordpress/components';
 import { FORM_PRESETS } from '../../shared/appearance';
+import { whenRendererReady } from './rendererReady';
 
 /**
  * Fetch published forms from REST API
@@ -121,6 +122,8 @@ function FormPreview({ attributes }) {
 	// The element the form is drawn in. Kept in state so the effects below run
 	// when it appears (it is not rendered while the form loads).
 	const [container, setContainer] = useState(null);
+	// True while the renderer script has not loaded yet.
+	const [waiting, setWaiting] = useState(false);
 
 	useEffect(() => {
 		let mounted = true;
@@ -149,32 +152,40 @@ function FormPreview({ attributes }) {
 		};
 	}, [formId]);
 
-	// Draw (and redraw on a change) with the renderer's own mount().
+	// Draw (and redraw on a change) with the renderer's own mount(). The
+	// renderer script can still be loading when the block is first inserted;
+	// the preview then draws as soon as it is ready.
 	useEffect(() => {
 		if (!schema || !container) {
-			return;
+			return undefined;
 		}
-		if (typeof window.SubtleForms?.mount !== 'function') {
-			console.error('SubtleForms block: window.SubtleForms.mount not available');
-			setError(
-				__(
-					'Form renderer not loaded. Frontend preview unavailable.',
-					'subtleforms'
-				)
-			);
-			return;
-		}
-		window.SubtleForms.mount(container, {
-			formId,
-			schema,
-			preview: true,
-			blockOptions: { theme, showTitle, showDescription },
-			onSubmit: () => {
-				console.warn(
-					'SubtleForms: Form submission disabled in editor preview'
-				);
+		setWaiting(typeof window.SubtleForms?.mount !== 'function');
+		return whenRendererReady(
+			() => {
+				setWaiting(false);
+				window.SubtleForms.mount(container, {
+					formId,
+					schema,
+					preview: true,
+					blockOptions: { theme, showTitle, showDescription },
+					onSubmit: () => {
+						console.warn(
+							'SubtleForms: Form submission disabled in editor preview'
+						);
+					},
+				});
 			},
-		});
+			() => {
+				console.error('SubtleForms block: window.SubtleForms.mount not available');
+				setWaiting(false);
+				setError(
+					__(
+						'Form renderer not loaded. Frontend preview unavailable.',
+						'subtleforms'
+					)
+				);
+			}
+		);
 	}, [schema, container, formId, theme, showTitle, showDescription]);
 
 	// Release the form when its element goes away or the block is removed.
@@ -210,6 +221,7 @@ function FormPreview({ attributes }) {
 			<span className='subtleforms-block-preview__label'>
 				{__('Preview', 'subtleforms')}
 			</span>
+			{waiting && <Spinner />}
 			{/* inert: no focus, typing, clicks or submit in the editor. */}
 			<div
 				ref={setContainer}

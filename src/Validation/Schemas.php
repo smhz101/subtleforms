@@ -134,6 +134,9 @@ class Schemas {
 					// Spam Protection
 					'enable_honeypot',
 					'min_submission_time',
+					// Visitor IP
+					'trusted_proxy_cidrs',
+					'trust_cloudflare',
 					// CAPTCHA
 					'captcha_enabled',
 					'captcha_provider',
@@ -192,6 +195,9 @@ class Schemas {
 				// Spam Protection
 				'enable_honeypot'              => 'optional|bool',
 				'min_submission_time'          => 'optional|int|min:0|max:300',
+				// Visitor IP
+				'trusted_proxy_cidrs'          => 'optional|array',
+				'trust_cloudflare'             => 'optional|bool',
 				// CAPTCHA
 				'captcha_enabled'              => 'optional|bool',
 				'captcha_provider'             => 'optional|string|max:50',

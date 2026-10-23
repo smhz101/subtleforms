@@ -376,7 +376,10 @@ final class FrontendAssets {
 		if ( 'conversational' === strtolower( (string) ( $schema['metadata']['type'] ?? '' ) ) ) {
 			$groups['conversational'] = true;
 		}
-		$walk = static function ( $node ) use ( &$walk, &$groups ): void {
+		// Fields of an add-on that is not active are left off the live form,
+		// so their code is not downloaded either.
+		$absent = \SubtleForms\Fields\AddonFieldTypes::missing();
+		$walk   = static function ( $node ) use ( &$walk, &$groups, $absent ): void {
 			if ( ! is_array( $node ) ) {
 				return;
 			}
@@ -390,7 +393,7 @@ final class FrontendAssets {
 			$config = is_array( $node['config'] ?? null ) ? $node['config'] : array();
 			if ( ( 'phone' === $type || 'tel' === $type ) && ( ! empty( $node['enableCountryCode'] ) || ! empty( $config['enableCountryCode'] ) ) ) {
 				$groups['geo'] = true;
-			} elseif ( isset( self::TYPE_GROUPS[ $type ] ) ) {
+			} elseif ( isset( self::TYPE_GROUPS[ $type ] ) && ! in_array( $type, $absent, true ) ) {
 				$groups[ self::TYPE_GROUPS[ $type ] ] = true;
 			}
 			foreach ( array( 'fields', 'children', 'columns' ) as $key ) {

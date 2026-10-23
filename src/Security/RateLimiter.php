@@ -120,14 +120,8 @@ class RateLimiter
             return sprintf('subtleforms_rl_user_%d_%s_%s', $userId, $method, md5($route));
         }
         
-        // Callers pass REMOTE_ADDR; behind a trusted proxy the real visitor
-        // address comes from the shared helper.
-        if (isset($_SERVER['REMOTE_ADDR']) && $ip === sanitize_text_field(wp_unslash($_SERVER['REMOTE_ADDR']))) {
-            $resolved = ClientIp::get();
-            if ('' !== $resolved) {
-                $ip = $resolved;
-            }
-        }
+        // Callers pass \SubtleForms\Security\ClientIp::get(), which already
+        // honours the trusted proxy settings.
         // Fall back to IP-based limiting for anonymous requests
         $sanitizedIp = self::sanitizeIp($ip);
         return sprintf('subtleforms_rl_ip_%s_%s_%s', $sanitizedIp, $method, md5($route));

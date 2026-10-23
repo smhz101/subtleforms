@@ -125,6 +125,24 @@ final class ClientIp {
 	}
 
 	/**
+	 * Whether a string is an IP address or a CIDR range with a sensible prefix length.
+	 *
+	 * @param string $range Address or "address/bits".
+	 * @return bool
+	 */
+	public static function valid_range( string $range ): bool {
+		$parts = explode( '/', trim( $range ), 2 );
+		if ( ! self::valid( $parts[0] ) ) {
+			return false;
+		}
+		if ( ! isset( $parts[1] ) ) {
+			return true;
+		}
+		$bits = false !== strpos( $parts[0], ':' ) ? 128 : 32;
+		return ctype_digit( $parts[1] ) && (int) $parts[1] <= $bits;
+	}
+
+	/**
 	 * Whether an address is inside any of the given addresses or CIDR ranges.
 	 *
 	 * @param string   $ip     Address.

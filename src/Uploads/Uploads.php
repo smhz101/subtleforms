@@ -120,7 +120,7 @@ final class Uploads {
 	 * @return WP_REST_Response
 	 */
 	public static function handleUpload( WP_REST_Request $request ): WP_REST_Response {
-		$ip    = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+		$ip    = \SubtleForms\Security\ClientIp::get();
 		$limit = RateLimiter::check( 'subtleforms_rl_upload_' . md5( $ip ), 30, 10 * MINUTE_IN_SECONDS );
 		if ( empty( $limit['allowed'] ) ) {
 			return self::error( 'subtleforms_upload_rate', __( 'Too many uploads. Please wait a few minutes and try again.', 'subtleforms' ), 429 );
