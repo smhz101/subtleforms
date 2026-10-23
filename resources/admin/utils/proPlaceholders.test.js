@@ -14,6 +14,14 @@ describe('Pro placeholders in the field library', () => {
     });
   });
 
+  test('lists the four payment fields as locked Pro tiles in the Payments group', () => {
+    const out = withProPlaceholders(groups);
+    expect(out.payment.map((f) => f.type)).toEqual(['payment_amount', 'payment_summary', 'payment_coupon', 'payment_hidden_price']);
+    out.payment.forEach((tile) => {
+      expect(tile).toMatchObject({ is_pro: true, is_pro_locked: true, upgrade_key: 'fields.payments', category: 'payment' });
+    });
+  });
+
   test('has nothing behind it: no definition, settings or default', () => {
     const tile = withProPlaceholders(groups).choices.find((f) => f.type === 'picture_choice');
     expect(Object.keys(tile).sort()).toEqual(
@@ -35,6 +43,6 @@ describe('Pro placeholders in the field library', () => {
   });
 
   test('creates the choices group when the library has none', () => {
-    expect(Object.keys(withProPlaceholders({ basic: [] }))).toEqual(['basic', 'choices']);
+    expect(Object.keys(withProPlaceholders({ basic: [] }))).toEqual(['basic', 'choices', 'payment']);
   });
 });

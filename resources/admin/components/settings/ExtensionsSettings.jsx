@@ -1,64 +1,59 @@
 import { useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import WebhooksPanel from './extensions/WebhooksPanel';
-import EmailMarketingPanel from './extensions/EmailMarketingPanel';
-import CrmPanel from './extensions/CrmPanel';
-import EcommercePanel from './extensions/EcommercePanel';
-import PdfPanel from './extensions/PdfPanel';
-import MultilanguagePanel from './extensions/MultilanguagePanel';
-import PaymentsPanel from './extensions/PaymentsPanel';
 import { getSlotItems } from '../../../shared/extend';
 
 // Panels add-ons bring are registered in the `settings.extensions` slot with
 // the integration slug as id (form analytics is one, from SubtleForms Pro).
+// Webhooks is the only panel this plugin ships.
 const EXTENSION_PANELS = {
   webhooks: WebhooksPanel,
-  email_marketing: EmailMarketingPanel,
-  crm: CrmPanel,
-  ecommerce: EcommercePanel,
-  pdf: PdfPanel,
-  multilanguage: MultilanguagePanel,
-  payments: PaymentsPanel,
 };
 
-// Ordered list of extensions to display in the sidebar.
-const EXTENSION_ORDER = [
-  'webhooks',
-  'email_marketing',
-  'crm',
-  'analytics',
-  'ecommerce',
-  'pdf',
-  'multilanguage',
-  'payments',
-];
+/**
+ * The panel for an integration slug, or null when nothing provides one.
+ *
+ * @param {string} slug Integration slug.
+ * @return {Function|null} Component.
+ */
+function panelFor(slug) {
+  return (
+    EXTENSION_PANELS[slug] ??
+    getSlotItems('settings.extensions').find((item) => item.id === slug)?.component ??
+    null
+  );
+}
 
 /**
- * Live status of an integration from the settings being edited (PRO-30), so
- * the dot changes as soon as a switch or a key changes, not after a reload.
+ * Slugs to list in the sidebar: Webhooks first, then what an add-on lists.
+ * An entry is shown only when something can draw it: a panel, or the locked
+ * card for an integration the plan does not include.
  *
- * @param {string} slug     Integration slug.
- * @param {Object} ext      Status from page load.
- * @param {Object} settings Current settings.
+ * @param {Object} extensions Integrations by slug.
+ * @return {string[]} Slugs.
+ */
+export function listedExtensions(extensions) {
+  const slugs = Object.keys(extensions).sort((a, b) => (a === 'webhooks' ? -1 : b === 'webhooks' ? 1 : 0));
+  return slugs.filter((slug) => {
+    const ext = extensions[slug];
+    return ext && (ext.available ? !!panelFor(slug) : !!ext.requires);
+  });
+}
+
+/**
+ * Live status of an integration from the settings being edited (PRO-30).
+ * Webhooks need no setup. For anything else the status comes from the
+ * add-on that lists it.
+ *
+ * @param {string} slug Integration slug.
+ * @param {Object} ext  Status from page load.
  * @return {{enabled: boolean, configured: boolean}} Status.
  */
-export function extensionStatus(slug, ext, settings = {}) {
-  const has = (key) => !!(settings[key] !== undefined ? settings[key] : null);
-  let enabled = !!ext?.enabled;
-  if (['email_marketing', 'crm', 'multilanguage', 'payments'].includes(slug) && settings[`ext_${slug}_enabled`] !== undefined) {
-    enabled = !!settings[`ext_${slug}_enabled`] && ext?.available !== false;
+export function extensionStatus(slug, ext) {
+  if (slug === 'webhooks') {
+    return { enabled: !!ext?.enabled, configured: true };
   }
-  let configured = !!ext?.configured;
-  if (slug === 'email_marketing' && settings.ext_email_marketing_api_key !== undefined) {
-    configured = has('ext_email_marketing_api_key');
-  } else if (slug === 'crm' && settings.ext_crm_provider !== undefined) {
-    configured = has(settings.ext_crm_provider === 'webhook' ? 'ext_crm_webhook_url' : 'ext_crm_api_key');
-  } else if (slug === 'payments' && settings.ext_payments_stripe_pk !== undefined) {
-    configured = has('ext_payments_stripe_pk');
-  } else if (['webhooks', 'ecommerce', 'pdf', 'multilanguage'].includes(slug)) {
-    configured = true;
-  }
-  return { enabled, configured };
+  return { enabled: !!ext?.enabled && ext?.available !== false, configured: !!ext?.configured };
 }
 
 /**
@@ -80,7 +75,7 @@ function StatusDot({ enabled, configured }) {
  */
 export default function ExtensionsSettings({ settings, updateSetting, fieldErrors = {} }) {
   // Only integrations this site can use are listed. SubtleForms Pro adds
-  // its own (email marketing, CRM, WooCommerce, PDF, translation, payments).
+  // its own through the `subtleforms/admin/integrations` filter.
   const allExtensions = window.subtleformsAdmin?.extensions ?? {};
   // Integrations the plan does not include are listed with the plan that has
   // them (PRO-08), when SubtleForms Pro says which one.
@@ -90,25 +85,19 @@ export default function ExtensionsSettings({ settings, updateSetting, fieldError
   const hideUpgrade = !!window.subtleformsAdmin?.branding?.hideUpgrade;
   const hasPro = !!window.subtleformsAdmin?.hasProPlugin;
   const hashSlug = (window.location.hash.match(/[#&]ext=([\w-]+)/) || [])[1];
-  const firstSlug =
-    (hashSlug && extensions[hashSlug] ? hashSlug : null) ??
-    EXTENSION_ORDER.find((s) => extensions[s]) ??
-    EXTENSION_ORDER[0];
+  const listed = listedExtensions(extensions);
+  const firstSlug = (hashSlug && listed.includes(hashSlug) ? hashSlug : null) ?? listed[0] ?? 'webhooks';
   const [activeSlug, setActiveSlug] = useState(firstSlug);
 
-  const ActivePanel =
-    EXTENSION_PANELS[activeSlug] ??
-    getSlotItems('settings.extensions').find((item) => item.id === activeSlug)?.component ??
-    null;
+  const ActivePanel = panelFor(activeSlug);
 
   return (
     <div className='sf-ext-settings'>
       {/* Sidebar */}
       <nav className='sf-ext-settings__sidebar'>
         <ul className='sf-ext-settings__list'>
-          {EXTENSION_ORDER.map((slug) => {
+          {listed.map((slug) => {
             const ext = extensions[slug];
-            if (!ext) return null;
             return (
               <li key={slug}>
                 <button
@@ -125,7 +114,7 @@ export default function ExtensionsSettings({ settings, updateSetting, fieldError
                   }}>
                   <span className='sf-ext-settings__item-label'>{ext.label}</span>
                   {ext.available ? (
-                    <StatusDot {...extensionStatus(slug, ext, settings)} />
+                    <StatusDot {...extensionStatus(slug, ext)} />
                   ) : (
                     <span className='sf-ext-settings__item-plan'>
                       {

@@ -23,7 +23,7 @@ export const PRO_PILLARS = [
 		key: 'payments',
 		icon: Icon.CreditCard,
 		title: __( 'Stripe payments', 'subtleforms' ),
-		text: __( 'A Card Payment field for the free Product, Priced Options and Coupon fields.', 'subtleforms' ),
+		text: __( 'Product, Priced Options, Custom Amount, Order Summary and Coupon fields, with a Card Payment field for Stripe.', 'subtleforms' ),
 	},
 	{
 		key: 'automation',

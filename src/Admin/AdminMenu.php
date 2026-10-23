@@ -263,35 +263,13 @@ class AdminMenu {
 		// than merely differently themed.
 		wp_enqueue_style( 'wp-components' );
 
-		// Main admin CSS
-		wp_enqueue_style(
-			'subtleforms-admin',
-			SUBTLEFORMS_PLUGIN_URL . 'assets/css/admin.css',
-			array( 'wp-components' ),
-			SUBTLEFORMS_VERSION
-		);
-
-		wp_add_inline_style(
-			'subtleforms-admin',
-			'.subtleforms-placeholder{text-align:center;padding:60px 20px;max-width:800px;margin:0 auto}.subtleforms-placeholder-icon{font-size:64px;color:#ddd;margin-bottom:20px}.subtleforms-placeholder h2{font-size:24px;margin-bottom:10px}.subtleforms-quick-list{margin-top:40px;text-align:left}'
-		);
-
 		// Component styles from wp-scripts build (Settings, Dashboard, etc.)
 		wp_enqueue_style(
 			'subtleforms-components',
 			SUBTLEFORMS_PLUGIN_URL . 'build/admin/index.jsx.css',
-			array( 'subtleforms-admin' ),
+			array( 'wp-components' ),
 			SUBTLEFORMS_VERSION
 		);
-
-		if ( $this->is_builder_screen( $hook ) ) {
-			wp_enqueue_style(
-				'subtleforms-admin-builder',
-				SUBTLEFORMS_PLUGIN_URL . 'assets/css/admin-builder.css',
-				array( 'subtleforms-admin' ),
-				SUBTLEFORMS_VERSION
-			);
-		}
 
 		// Main admin JS (built bundle at build/admin/admin.js)
 		$asset_file = SUBTLEFORMS_PLUGIN_DIR . 'build/admin/admin.asset.php';

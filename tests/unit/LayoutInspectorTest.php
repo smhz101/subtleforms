@@ -42,17 +42,4 @@ final class LayoutInspectorTest extends TestCase {
 		$this->assertSame( array( 'title' => 'general', 'description' => 'general' ), self::sections( 'section_break' ) );
 		$this->assertSame( array( 'title' => 'general', 'description' => 'general' ), self::sections( 'step' ) );
 	}
-
-	public function test_fixed_fee_description_help_names_the_order_line(): void {
-		self::sections( 'step' );
-		$def  = self::$registry->get( 'payment_hidden_price' );
-		$help = '';
-		foreach ( (array) $def->inspectorControls as $c ) {
-			if ( ( $c['name'] ?? '' ) === 'description' ) {
-				$help = (string) ( $c['help'] ?? '' );
-			}
-		}
-		$this->assertStringNotContainsString( 'debugging', $help );
-		$this->assertStringContainsString( 'order summary', $help );
-	}
 }

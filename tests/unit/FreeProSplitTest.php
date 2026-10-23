@@ -63,6 +63,10 @@ final class FreeProSplitTest extends TestCase {
 		// Product and Priced options moved to SubtleForms Pro in 2.8.0.
 		$this->assertFalse( $registry->has( 'payment_product' ) );
 		$this->assertFalse( $registry->has( 'payment_choice' ) );
+		// Custom Amount, Order Summary, Coupon Code and Fixed Fee moved in 2.8.0 as well.
+		foreach ( array( 'payment_amount', 'payment_summary', 'payment_coupon', 'payment_hidden_price' ) as $type ) {
+			$this->assertFalse( $registry->has( $type ), "{$type} is not registered by the free plugin" );
+		}
 		$this->assertFalse( class_exists( 'SubtleForms\\Payments\\Pricing' ) );
 		$this->assertFalse( class_exists( 'SubtleForms\\Engine\\Formula' ) );
 		$this->assertFileDoesNotExist( self::root() . '/resources/frontend/components/fields/SignaturePad.jsx' );
@@ -95,8 +99,26 @@ final class FreeProSplitTest extends TestCase {
 		$this->assertSame( 'text', $out[0]['type'] );
 		$this->assertSame( array( 'email' ), array_column( $out[1]['children'], 'type' ) );
 		$missing = AddonFieldTypes::missing( self::registry() );
-		foreach ( array( 'signature', 'calculation', 'payment_card', 'payment_product', 'payment_choice' ) as $type ) {
+		foreach ( array( 'signature', 'calculation', 'payment_card', 'payment_product', 'payment_choice', 'payment_amount', 'payment_summary', 'payment_coupon', 'payment_hidden_price' ) as $type ) {
 			$this->assertContains( $type, $missing );
+		}
+	}
+
+	/** The moved payment fields are left out of a saved form's live schema, at any depth, and their answers are dropped. */
+	public function test_moved_payment_fields_degrade_without_pro(): void {
+		$types  = array( 'payment_amount', 'payment_summary', 'payment_coupon', 'payment_hidden_price' );
+		$nodes  = array(
+			array( 'type' => 'text', 'key' => 'name' ),
+			array( 'type' => 'payment_amount', 'key' => 'amt', 'required' => true ),
+			array( 'type' => 'step', 'children' => array( array( 'type' => 'payment_coupon', 'key' => 'cp' ), array( 'type' => 'payment_hidden_price', 'key' => 'fee' ), array( 'type' => 'payment_summary', 'key' => 'sum' ) ) ),
+		);
+		$out = AddonFieldTypes::strip( $nodes, $types );
+		$this->assertCount( 2, $out );
+		$this->assertSame( array(), $out[1]['children'] );
+		// Never a validation type of its own: nothing here can reject a submission.
+		foreach ( $types as $type ) {
+			$this->assertSame( $type, AddonFieldTypes::validationType( $type ) );
+			$this->assertContains( $type, AddonFieldTypes::types() );
 		}
 	}
 

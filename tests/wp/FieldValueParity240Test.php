@@ -101,9 +101,6 @@ final class FieldValueParity240Test extends TestCase {
 			'phone code only, required'  => array( array( 'type' => 'phone', 'enableCountryCode' => true, 'required' => true ), '+1', '+92 300 1234567', '+92 3001234567' ),
 			// FA-17: rich text with nothing in it is empty.
 			'rich text required'         => array( array( 'type' => 'rich_text', 'required' => true ), '<p><br></p>', '<p>Hello</p>' ),
-			// PAY-05, PAY-06: payment field limits (Product and Priced options moved to SubtleForms Pro in 2.8.0).
-			'custom amount max'          => array( array( 'type' => 'payment_amount', 'min' => 5, 'max' => 500 ), 600, 50, null, 'Payment amount cannot exceed 500.00.' ),
-			'custom amount min'          => array( array( 'type' => 'payment_amount', 'min' => 5, 'max' => 500 ), 1, 5 ),
 		);
 	}
 

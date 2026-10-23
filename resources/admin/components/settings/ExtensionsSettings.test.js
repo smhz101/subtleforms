@@ -6,33 +6,31 @@ import { act } from 'react';
 import { createRoot } from 'react-dom/client';
 
 jest.mock('./extensions/WebhooksPanel', () => () => null);
-jest.mock('./extensions/EmailMarketingPanel', () => () => null);
-jest.mock('./extensions/CrmPanel', () => () => null);
-jest.mock('./extensions/EcommercePanel', () => () => null);
-jest.mock('./extensions/PdfPanel', () => () => null);
-jest.mock('./extensions/MultilanguagePanel', () => () => null);
-jest.mock('./extensions/PaymentsPanel', () => () => null);
-import ExtensionsSettings, { extensionStatus } from './ExtensionsSettings';
+import ExtensionsSettings, { extensionStatus, listedExtensions } from './ExtensionsSettings';
 
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
 describe('extensionStatus (PRO-30)', () => {
-  const loaded = { available: true, enabled: false, configured: false };
-
-  test('turning email marketing on with a key makes it active without a reload', () => {
-    expect(extensionStatus('email_marketing', loaded, { ext_email_marketing_enabled: true, ext_email_marketing_api_key: '********6789' })).toEqual({ enabled: true, configured: true });
-    expect(extensionStatus('email_marketing', loaded, { ext_email_marketing_enabled: true, ext_email_marketing_api_key: '' })).toEqual({ enabled: true, configured: false });
-    expect(extensionStatus('email_marketing', loaded, { ext_email_marketing_enabled: false })).toEqual({ enabled: false, configured: false });
-  });
-
-  test('the CRM checks the field its provider needs', () => {
-    const s = { ext_crm_enabled: true, ext_crm_provider: 'webhook', ext_crm_webhook_url: 'https://h.example', ext_crm_api_key: '' };
-    expect(extensionStatus('crm', loaded, s).configured).toBe(true);
-    expect(extensionStatus('crm', loaded, { ...s, ext_crm_provider: 'hubspot' }).configured).toBe(false);
+  test('webhooks are always configured', () => {
+    expect(extensionStatus('webhooks', { enabled: true })).toEqual({ enabled: true, configured: true });
   });
 
   test('an unavailable integration never shows as enabled', () => {
-    expect(extensionStatus('crm', { available: false }, { ext_crm_enabled: true }).enabled).toBe(false);
+    expect(extensionStatus('crm', { available: false, enabled: true })).toEqual({ enabled: false, configured: false });
+  });
+});
+
+describe('listed integrations', () => {
+  test('the removed Free panels are gone: only Webhooks and locked cards are listed', () => {
+    const list = listedExtensions({
+      webhooks: { available: true },
+      email_marketing: { available: true },
+      crm: { available: true },
+      payments: { available: true },
+      pdf: { available: true },
+      multilanguage: { available: false, requires: 'Agency' },
+    });
+    expect(list).toEqual(['webhooks', 'multilanguage']);
   });
 });
 

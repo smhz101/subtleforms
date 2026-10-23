@@ -123,4 +123,35 @@ final class FeatureGateTest extends TestCase {
 		$gate = new FeatureGate( new Capabilities(), $mock );
 		$this->assertTrue( $gate->hasFeature( 'conditional_logic' ) );
 	}
+
+	// ── setters (add-on boot) ──────────────────────────────────────────
+
+	public function test_set_license_manager_takes_any_object_with_the_two_methods(): void {
+		$manager = new class() {
+			public function isValid(): bool {
+				return true;
+			}
+			public function hasFeature( string $feature ): bool {
+				return 'x' === $feature;
+			}
+		};
+		$gate = $this->makeGate();
+		$gate->setLicenseManager( $manager );
+		$this->assertTrue( $gate->isPro() );
+		$this->assertTrue( $gate->hasFeature( 'x' ) );
+		$this->assertFalse( $gate->hasFeature( 'y' ) );
+		$gate->setLicenseManager( null );
+		$this->assertFalse( $gate->isPro() );
+	}
+
+	public function test_set_license_manager_refuses_an_object_without_the_methods(): void {
+		$this->expectException( \InvalidArgumentException::class );
+		$this->makeGate()->setLicenseManager( new \stdClass() );
+	}
+
+	public function test_set_capabilities_swaps_the_map(): void {
+		$gate = $this->makeGate( array( 'a' => false ) );
+		$gate->setCapabilities( new Capabilities( array( 'a' => true ) ) );
+		$this->assertTrue( $gate->allows( 'a' ) );
+	}
 }

@@ -9,6 +9,21 @@
  */
 import { __ } from '@wordpress/i18n';
 
+function payment(type, label, icon, kind, description) {
+  return {
+    type,
+    label,
+    icon,
+    kind,
+    enabled: true,
+    category: 'payment',
+    meta: { description },
+    is_pro: true,
+    is_pro_locked: true,
+    upgrade_key: 'fields.payments',
+  };
+}
+
 function placeholders() {
   return [
     {
@@ -25,6 +40,14 @@ function placeholders() {
       is_pro_locked: true,
       upgrade_key: 'fields.picture_choice',
     },
+    payment('payment_amount', __('Custom Amount', 'subtleforms'), 'payment_amount', 'input',
+      __('Visitors enter the amount to pay. Part of SubtleForms Pro.', 'subtleforms')),
+    payment('payment_summary', __('Order Summary', 'subtleforms'), 'payment_summary', 'dynamic',
+      __('Order summary with totals. Part of SubtleForms Pro.', 'subtleforms')),
+    payment('payment_coupon', __('Coupon Code', 'subtleforms'), 'payment_coupon', 'input',
+      __('Separate discount code field. Part of SubtleForms Pro.', 'subtleforms')),
+    payment('payment_hidden_price', __('Fixed Fee', 'subtleforms'), 'payment_hidden_price', 'system',
+      __('Fixed fee added to every order. Part of SubtleForms Pro.', 'subtleforms')),
   ];
 }
 

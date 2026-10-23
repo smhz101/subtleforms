@@ -91,6 +91,18 @@ const FEATURE_COPY = {
     ],
   },
 
+  'fields.payments': {
+    title: __( 'Payment fields', 'subtleforms' ),
+    description: __( 'SubtleForms Pro adds the fields that price an order: Custom Amount, Order Summary, Coupon and Fixed Fee.', 'subtleforms' ),
+    cta: __( 'About SubtleForms Pro', 'subtleforms' ),
+    lossLine: null,
+    benefits: [
+      __( 'Let visitors enter an amount, or add a fixed fee to every order', 'subtleforms' ),
+      __( 'Show the order total with a coupon box', 'subtleforms' ),
+      __( 'Forms that use these fields keep them and leave them off the live form without Pro', 'subtleforms' ),
+    ],
+  },
+
   'actions.payment': {
     title: __( 'Card payments', 'subtleforms' ),
     description: __( 'SubtleForms Pro adds a Card Payment field that takes payments with Stripe.', 'subtleforms' ),
@@ -98,7 +110,7 @@ const FEATURE_COPY = {
     lossLine: null,
     benefits: [
       __( 'Cards, wallets and bank payments through Stripe', 'subtleforms' ),
-      __( 'Works with the free Product, Priced Options and Coupon fields', 'subtleforms' ),
+      __( 'Works with the Product, Priced Options, Custom Amount and Coupon fields', 'subtleforms' ),
       __( 'Payment status on every entry', 'subtleforms' ),
     ],
   },
@@ -110,7 +122,7 @@ const FEATURE_COPY = {
     lossLine: null,
     benefits: [
       __( 'Cards, wallets and bank payments through Stripe', 'subtleforms' ),
-      __( 'Works with the free Product, Priced Options and Coupon fields', 'subtleforms' ),
+      __( 'Works with the Product, Priced Options, Custom Amount and Coupon fields', 'subtleforms' ),
       __( 'Payment status on every entry', 'subtleforms' ),
     ],
   },

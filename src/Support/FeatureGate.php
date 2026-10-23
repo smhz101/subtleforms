@@ -131,9 +131,13 @@ final class FeatureGate {
 	 *
 	 * @since 2.7.1
 	 *
-	 * @param LicenseManagerInterface|null $licenseManager Manager, or null to remove it.
+	 * @param object|null $licenseManager An object with isValid() and hasFeature(), or null to remove it.
+	 * @throws \InvalidArgumentException When the object lacks either method.
 	 */
-	public function setLicenseManager( ?LicenseManagerInterface $licenseManager ): void {
+	public function setLicenseManager( ?object $licenseManager ): void {
+		if ( null !== $licenseManager && ( ! method_exists( $licenseManager, 'isValid' ) || ! method_exists( $licenseManager, 'hasFeature' ) ) ) {
+			throw new \InvalidArgumentException( 'A license manager needs isValid() and hasFeature().' );
+		}
 		$this->licenseManager = $licenseManager;
 	}
 
