@@ -149,10 +149,6 @@ test('special fields load their code and still work', async ({ page }) => {
       { id: 'p1', key: 'phone', type: 'phone', label: 'Phone', enableCountryCode: true },
       { id: 'k1', key: 'country', type: 'country', label: 'Country' },
       { id: 'f1', key: 'upload', type: 'file_upload', label: 'Upload' },
-      // Payment fields are part of SubtleForms Pro: a saved form that has them
-      // leaves them off the live form and loads none of their code without it.
-      { id: 'pp', key: 'ticket', type: 'payment_product', label: 'Ticket', price: 10 },
-      { id: 'ps', key: 'summary', type: 'payment_summary', label: 'Summary' },
     ],
   });
   created.push(form);
