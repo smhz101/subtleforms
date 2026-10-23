@@ -1,5 +1,5 @@
 import {
-  ColorPicker,
+  ColorPalette,
   Dropdown,
   Button,
   SelectControl,
@@ -8,6 +8,8 @@ import {
 } from '@wordpress/components';
 import { __, sprintf } from '@wordpress/i18n';
 import { tokenLabel, optionLabel } from './labels';
+import { useThemeStyles } from '../../../data/themeStyles';
+import { paletteVar, resolveThemeColor } from './themeColors';
 import './AppearanceControls.scss';
 
 /**
@@ -20,13 +22,42 @@ import './AppearanceControls.scss';
  */
 
 const SWATCHES = [
-  '#131417', '#3c434a', '#ffffff', '#f4f5f7',
-  '#3858e9', '#4f5bd5', '#0f766e', '#008a20',
-  '#e5484d', '#d63638', '#f0b849', '#8a3b12',
+  { name: __( 'Ink', 'subtleforms' ), color: '#131417' },
+  { name: __( 'Slate', 'subtleforms' ), color: '#3c434a' },
+  { name: __( 'White', 'subtleforms' ), color: '#ffffff' },
+  { name: __( 'Mist', 'subtleforms' ), color: '#f4f5f7' },
+  { name: __( 'Blue', 'subtleforms' ), color: '#3858e9' },
+  { name: __( 'Indigo', 'subtleforms' ), color: '#4f5bd5' },
+  { name: __( 'Teal', 'subtleforms' ), color: '#0f766e' },
+  { name: __( 'Green', 'subtleforms' ), color: '#008a20' },
+  { name: __( 'Red', 'subtleforms' ), color: '#e5484d' },
+  { name: __( 'Crimson', 'subtleforms' ), color: '#d63638' },
+  { name: __( 'Amber', 'subtleforms' ), color: '#f0b849' },
+  { name: __( 'Rust', 'subtleforms' ), color: '#8a3b12' },
 ];
 
-function ColorToken( { label, value, inherited, onChange, disabled, inheritLabel } ) {
-  const shown = value || inherited || '';
+/**
+ * One colour. The theme's palette comes first (2.7.2): a swatch from it is
+ * stored as the theme's variable, so the form follows the theme if the theme
+ * changes. Any other colour is stored as a hex value.
+ */
+export function ColorToken( { label, value, inherited, onChange, disabled, inheritLabel } ) {
+  const theme = useThemeStyles();
+  const themeColors = ( theme?.palette || [] ).map( ( c ) => ( { name: c.name, color: c.color, slug: c.slug } ) );
+  const groups = [
+    ...( themeColors.length ? [ { name: __( 'Theme colours', 'subtleforms' ), colors: themeColors } ] : [] ),
+    { name: __( 'Suggested', 'subtleforms' ), colors: SWATCHES },
+  ];
+  const resolve = ( v ) => resolveThemeColor( v, theme );
+  const shown = resolve( value ) || resolve( inherited ) || '';
+  const named = themeColors.find( ( c ) => value === paletteVar( c.slug ) );
+  const store = ( color ) => {
+    if ( ! color ) {
+      return onChange( '' );
+    }
+    const swatch = themeColors.find( ( c ) => c.color.toLowerCase() === String( color ).toLowerCase() );
+    return onChange( swatch ? paletteVar( swatch.slug ) : String( color ).toLowerCase() );
+  };
   return (
     <Dropdown
       className='sf-color-token'
@@ -51,26 +82,21 @@ function ColorToken( { label, value, inherited, onChange, disabled, inheritLabel
           <span className='sf-color-token__text'>
             <span className='sf-color-token__label'>{ label }</span>
             <span className='sf-color-token__value'>
-              { value ? value.toUpperCase() : inheritLabel }
+              { named ? named.name : value ? value.toUpperCase() : inheritLabel }
             </span>
           </span>
         </button>
       ) }
       renderContent={ ( { onClose } ) => (
         <div className='sf-color-token__picker'>
-          <div className='sf-color-token__swatches'>
-            { SWATCHES.map( ( c ) => (
-              <button
-                key={ c }
-                type='button'
-                className={ `sf-color-token__swatch${ c === value ? ' is-active' : '' }` }
-                style={ { background: c } }
-                aria-label={ c }
-                onClick={ () => onChange( c ) }
-              />
-            ) ) }
-          </div>
-          <ColorPicker color={ shown || '#000000' } onChange={ onChange } enableAlpha={ false } />
+          <ColorPalette
+            colors={ groups }
+            value={ shown }
+            onChange={ store }
+            clearable={ false }
+            enableAlpha={ false }
+            __experimentalIsRenderedInSidebar
+          />
           <div className='sf-color-token__actions'>
             <Button
               variant='tertiary'

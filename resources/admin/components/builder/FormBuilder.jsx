@@ -13,6 +13,7 @@ import {
   fieldAppearanceClasses,
   appearanceBackdrop,
 } from '../../../shared/appearance';
+import { useThemeStyles, injectThemeStyles, themeSurfaceStyle, THEME_SCOPE_CLASS } from '../../data/themeStyles';
 import { useBuilder } from './context/BuilderContext';
 import FieldRenderer from './FieldRenderer';
 import ContainerRenderer from './ContainerRenderer';
@@ -493,15 +494,40 @@ export default function FormBuilder({ appearance } = {}) {
 
   // The canvas wears the form's Appearance (colours, type, radius, input and
   // button styles) so every styling change is visible while building.
+  // A theme form is drawn with the theme's own fonts and colours (2.7.2), the
+  // same ones the site prints, so the canvas matches the page.
+  const theme = useThemeStyles();
+  const isThemeForm = appearance?.preset === 'theme';
+  useEffect(() => {
+    if (isThemeForm && theme) {
+      injectThemeStyles(theme);
+    }
+  }, [isThemeForm, theme]);
+
   const canvasStyle = useMemo(() => {
     const style = formAppearanceStyle(appearance);
     delete style.maxWidth;
+    delete style.marginLeft;
+    delete style.marginRight;
     const backdrop = appearanceBackdrop(appearance);
     if (backdrop) {
       style.background = backdrop;
     }
+    if (isThemeForm && theme) {
+      const surface = themeSurfaceStyle(theme);
+      const tokens = appearance?.tokens || {};
+      if (surface.fontFamily && !(tokens.fontFamily && tokens.fontFamily !== 'inherit')) {
+        style.fontFamily = surface.fontFamily;
+      }
+      if (surface.color && !tokens.colorText) {
+        style['--subtleforms-color-text'] = surface.color;
+      }
+      if (surface.backgroundColor && (!tokens.colorBackground || tokens.colorBackground === 'transparent')) {
+        style.backgroundColor = surface.backgroundColor;
+      }
+    }
     return style;
-  }, [appearance]);
+  }, [appearance, isThemeForm, theme]);
 
   // Field width/spacing live on the wrapper that holds the field and its
   // insert line, so narrow fields sit side by side like on the page.
@@ -663,7 +689,7 @@ export default function FormBuilder({ appearance } = {}) {
   return (
     <div className='subtleforms-builder-canvas' onClick={handleCanvasClick}>
       <div
-        className={clsx('subtleforms-builder-canvas__surface', 'sf-canvas-styled', formAppearanceClasses(appearance))}
+        className={clsx('subtleforms-builder-canvas__surface', 'sf-canvas-styled', formAppearanceClasses(appearance), isThemeForm && THEME_SCOPE_CLASS)}
         style={canvasStyle}>          <div className='subtleforms-builder-canvas__toolbar'>
             <button
               type='button'

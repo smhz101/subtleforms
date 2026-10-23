@@ -90,8 +90,8 @@
 
 /* ===== Form Title ===== */
 .subtleforms-form-title {
-	font-size: 1.75rem;
-	font-weight: 600;
+	font-size: var(--subtleforms-title-size, 1.75rem);
+	font-weight: var(--subtleforms-title-weight, 600);
 	margin: 0 0 var(--subtleforms-spacing-lg);
 	color: var(--subtleforms-color-text);
 }

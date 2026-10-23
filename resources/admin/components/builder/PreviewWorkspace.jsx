@@ -177,6 +177,7 @@ export default function PreviewWorkspace( {
               schema={ schema }
               onChange={ onChange }
               isReadOnly={ isReadOnly }
+              formId={ formId }
             />
           </aside>
         ) }

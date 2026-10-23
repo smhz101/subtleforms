@@ -1696,12 +1696,17 @@ textarea.sf-field-renderer__input {
 	.sf-field-renderer__label--editable {
 		color: var(--subtleforms-label-color, var(--subtleforms-color-text, var(--sf-text)));
 		font-weight: var(--subtleforms-label-weight, var(--sf-weight-medium));
-		font-size: var(--subtleforms-font-size-base, var(--sf-text-sm));
+		font-size: var(--subtleforms-label-size, var(--subtleforms-font-size-base, var(--sf-text-sm)));
+		font-family: var(--subtleforms-label-font, inherit);
+		letter-spacing: var(--subtleforms-label-letter-spacing, normal);
+		line-height: var(--subtleforms-label-line-height, inherit);
+		text-transform: var(--subtleforms-label-transform, none);
 	}
 
 	.sf-field-renderer__help-text,
 	.sf-field-renderer__description {
-		color: var(--subtleforms-color-text-light, var(--sf-text-muted));
+		color: var(--subtleforms-color-help, var(--subtleforms-color-text-light, var(--sf-text-muted)));
+		font-size: var(--subtleforms-help-size, inherit);
 	}
 
 	input.sf-field-renderer__input,
@@ -1711,16 +1716,19 @@ textarea.sf-field-renderer__input {
 	select.sf-field-renderer__select,
 	.sf-field-renderer__textarea[readonly] {
 		border-width: var(--subtleforms-border-width, 1px);
+		border-style: var(--subtleforms-border-style, solid);
 		border-color: var(--subtleforms-color-border, var(--sf-border-strong));
 		border-radius: var(--subtleforms-radius-md, var(--sf-radius-control));
 		background-color: var(--subtleforms-canvas-input-bg, var(--sf-bg-surface));
 		color: var(--subtleforms-input-text, var(--subtleforms-color-text, var(--sf-text)));
-		font-size: var(--subtleforms-font-size-base, var(--sf-text-sm));
-		font-family: inherit;
+		font-size: var(--subtleforms-input-size, var(--subtleforms-font-size-base, var(--sf-text-sm)));
+		font-family: var(--subtleforms-input-font, inherit);
+		font-weight: var(--subtleforms-input-weight, 400);
+		box-shadow: var(--subtleforms-field-shadow, none);
 		padding-top: var(--subtleforms-input-padding-y, 8px);
 		padding-bottom: var(--subtleforms-input-padding-y, 8px);
 
-		&::placeholder { color: var(--subtleforms-color-text-light, var(--sf-text-subtle)); }
+		&::placeholder { color: var(--subtleforms-color-placeholder, var(--subtleforms-color-text-light, var(--sf-text-subtle))); }
 	}
 
 	.sf-field-renderer__affix-item,
@@ -1736,7 +1744,7 @@ textarea.sf-field-renderer__input {
 	input[type='checkbox'],
 	input[type='radio'],
 	input[type='range'] {
-		accent-color: var(--subtleforms-color-primary, var(--sf-brand));
+		accent-color: var(--subtleforms-choice-accent, var(--subtleforms-color-primary, var(--sf-brand)));
 	}
 
 	.sf-field-renderer__checkbox-label,

@@ -158,6 +158,9 @@ final class RestController {
 		$reportsApi = new ReportsApi( $this->formsRepo, $this->submissionsRepo, $this->gate );
 		$reportsApi->registerRoutes();
 
+		// The active theme's colours, fonts and button look for the builder (2.7.2).
+		( new AppearanceApi( $this->gate ) )->registerRoutes();
+
 		// Blocked spam counts and the spam protection offer (2.6.0).
 		( new SpamApi( $this->formsRepo, $this->gate ) )->registerRoutes();
 

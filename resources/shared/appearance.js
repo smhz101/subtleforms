@@ -62,7 +62,23 @@ export const FORM_TOKENS = [
   { key: 'fieldGap', cssVar: '--subtleforms-field-gap', type: 'size', group: 'shape', label: 'Space between fields', units: ['px', 'rem'], min: 0, max: 64 },
   { key: 'inputPaddingY', cssVar: '--subtleforms-input-padding-y', type: 'size', group: 'shape', label: 'Input height', units: ['px'], min: 4, max: 28 },
   { key: 'buttonRadius', cssVar: '--subtleforms-button-radius', type: 'size', group: 'button', label: 'Button radius', units: ['px'], min: 0, max: 999 },
+
 ];
+
+/**
+ * Tokens added in 2.7.2 have no entry above: each one is the property named
+ * after its key (labelSize sets --subtleforms-label-size). The builder
+ * describes the controls in resources/admin/components/builder/appearance/tokenDefs.js.
+ * Shadows and the focus style are words in the schema, so they read well and
+ * validate simply; they become longer CSS values here.
+ */
+const SHADOW = { none: 'none', subtle: '0 1px 2px rgba(19,20,23,.14)', medium: '0 4px 12px rgba(19,20,23,.18)' };
+const RING = 'var(--subtleforms-color-focus-ring,var(--subtleforms-color-primary-hover,#4048b8))';
+const TOKEN_VALUES = {
+  fieldShadow: SHADOW,
+  buttonShadow: SHADOW,
+  focusStyle: { ring: `0 0 0 3px color-mix(in srgb,${ RING } 35%,transparent)`, border: `0 0 0 1px ${ RING }` },
+};
 
 /** Variants are classes rather than properties, they change structure, not values. */
 export const FORM_VARIANTS = [
@@ -545,7 +561,8 @@ export function tokensToStyle( tokens, definition ) {
 
   definition.forEach( ( { key, cssVar } ) => {
     if ( isSet( tokens[ key ] ) ) {
-      style[ cssVar ] = String( tokens[ key ] );
+      const value = String( tokens[ key ] );
+      style[ cssVar ] = ( TOKEN_VALUES[ key ] && TOKEN_VALUES[ key ][ value ] ) || value;
     }
   } );
 
@@ -560,14 +577,41 @@ export function tokensToStyle( tokens, definition ) {
  */
 export function formAppearanceStyle( appearance ) {
   const style = tokensToStyle( appearance?.tokens, FORM_TOKENS );
+  const known = FORM_TOKENS.map( ( t ) => t.key );
+  Object.keys( appearance?.tokens || {} ).forEach( ( key ) => {
+    const value = appearance.tokens[ key ];
+    if ( ! known.includes( key ) && isSet( value ) ) {
+      style[ `--subtleforms-${ key.replace( /[A-Z]/g, ( c ) => `-${ c.toLowerCase() }` ) }` ] =
+        ( TOKEN_VALUES[ key ] && TOKEN_VALUES[ key ][ value ] ) || String( value );
+    }
+  } );
   const width = appearance?.variants?.width;
 
   if ( width && FORM_WIDTHS[ width ] ) {
     style.maxWidth = FORM_WIDTHS[ width ];
   }
 
+  // A width typed in Layout wins over the Form width choice (2.7.2).
+  const tokens = appearance?.tokens || {};
+  if ( isSet( tokens.formMaxWidth ) ) {
+    style.maxWidth = String( tokens.formMaxWidth );
+  }
+  if ( tokens.formAlign === 'center' ) {
+    style.marginLeft = 'auto';
+    style.marginRight = 'auto';
+  }
+
   return style;
 }
+
+/**
+ * The class that names one form, so a form's own CSS and a site's CSS can
+ * point at it (2.7.2).
+ *
+ * @param {number|string} formId Form ID.
+ * @return {string} Class name.
+ */
+export const formScopeClass = ( formId ) => `subtleforms-form-${ Number( formId ) || 0 }`;
 
 /**
  * Class names carrying the structural variants.

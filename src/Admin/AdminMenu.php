@@ -371,6 +371,8 @@ class AdminMenu {
 			'themeStylesheets'   => self::themeStylesheets(),
 			'themeGlobalCss'     => function_exists( 'wp_get_global_stylesheet' ) ? wp_get_global_stylesheet() : '',
 			'themeFontFaces'     => self::themeFontFaces(),
+			// Whether this person may write a form's custom CSS (2.7.2).
+			'canCustomCss'       => current_user_can( 'unfiltered_html' ),
 			// Submissions inbox. A personal choice wins; otherwise these are the site defaults.
 			'submissionsView'    => ( new Settings() )->resolvedInboxView( get_current_user_id() ),
 		);
@@ -436,12 +438,7 @@ class AdminMenu {
 	 * @return string
 	 */
 	public static function themeFontFaces(): string {
-		if ( ! function_exists( 'wp_print_font_faces' ) ) {
-			return '';
-		}
-		ob_start();
-		wp_print_font_faces();
-		return (string) ob_get_clean();
+		return \SubtleForms\Support\ThemeStyles::fontFaceCss();
 	}
 
 	private static function themeStylesheets(): array {

@@ -427,6 +427,8 @@ class Schemas {
 				'preset'   => 'optional|string|max:40',
 				'tokens'   => 'optional|object',
 				'variants' => 'optional|object',
+				// 2.7.2: a form's own CSS, checked by Support\Appearance.
+				'customCss' => 'optional|string|max:20000',
 			),
 
 			// PaymentConfig (Phase A2-P3: at_least_one for flexible pricing)
