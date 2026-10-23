@@ -25,9 +25,15 @@ describe( 'scopeCustomCss', () => {
     );
   } );
 
-  it( 'moves @import to the front and drops other statements', () => {
+  it( 'drops @import and other statements, since an imported sheet cannot be scoped', () => {
     expect( scopeCustomCss( '.a{color:red} @import url("https://x.test/a.css"); @charset "utf-8";', 2 ) ).toBe(
-      '@import url("https://x.test/a.css");.subtleforms-form-2 .a{color:red}'
+      '.subtleforms-form-2 .a{color:red}'
+    );
+  } );
+
+  it( 'drops a root selector followed by a sibling combinator', () => {
+    expect( scopeCustomCss( 'body + .banner{display:none} html ~ p{x:y} body > .a{color:red}', 2 ) ).toBe(
+      '.subtleforms-form-2 > .a{color:red}'
     );
   } );
 

@@ -15,7 +15,7 @@ import { formScopeClass } from './appearance';
  * page, so a rule means the same thing in all three. Selectors get the form's
  * class in front; `:root`, `html` and `body` mean the form itself. Rules inside
  * @media, @supports, @container and @layer are scoped; @keyframes and
- * @font-face are kept as they are. `@import` goes first, as CSS needs.
+ * @font-face are kept as they are. `@import` is dropped, since an imported sheet cannot be scoped.
  *
  * @param {string}        css    CSS the server already checked.
  * @param {number|string} formId Form ID.
@@ -23,7 +23,6 @@ import { formScopeClass } from './appearance';
  */
 export function scopeCustomCss( css, formId ) {
   const scope = `.${ formScopeClass( formId ) }`;
-  const imports = [];
   // Index of the first stop character outside strings and brackets, or -1.
   const scan = ( text, stops, from = 0 ) => {
     let depth = 0;
@@ -54,7 +53,12 @@ export function scopeCustomCss( css, formId ) {
       return sel;
     }
     const root = sel.match( /^(?::root|html|body)(?![\w-])/ );
-    return root ? scope + sel.slice( root[ 0 ].length ) : `${ scope } ${ sel }`;
+    if ( ! root ) {
+      return `${ scope } ${ sel }`;
+    }
+    const rest = sel.slice( root[ 0 ].length );
+    // A sibling combinator after a root alias would reach outside the form.
+    return /^\s*[+~]/.test( rest ) ? '' : scope + rest;
   };
   const walk = ( text ) => {
     let out = '';
@@ -66,9 +70,7 @@ export function scopeCustomCss( css, formId ) {
       }
       const prelude = text.slice( i, stop ).trim();
       if ( text[ stop ] === ';' ) {
-        if ( /^@import/i.test( prelude ) ) {
-          imports.push( `${ prelude };` );
-        }
+        // @import is dropped: a remote stylesheet cannot be limited to the form.
         i = stop + 1;
         continue;
       }
@@ -106,13 +108,16 @@ export function scopeCustomCss( css, formId ) {
           b = b < 0 ? prelude.length : b;
           list.push( selector( prelude.slice( a, b ) ) );
         }
-        out += `${ list.filter( Boolean ).join( ',' ) }{${ body }}`;
+        const kept = list.filter( Boolean );
+        if ( kept.length ) {
+          out += `${ kept.join( ',' ) }{${ body }}`;
+        }
       }
       i = end;
     }
     return out;
   };
   const rules = walk( String( css || '' ) );
-  return imports.join( '' ) + rules;
+  return rules;
 }
 
