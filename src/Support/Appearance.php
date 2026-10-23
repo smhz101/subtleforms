@@ -283,14 +283,8 @@ final class Appearance {
 			return '';
 		}
 
-		// Statements that load something: only https.
-		$css = (string) preg_replace_callback(
-			'/@import\s+(?:url\(\s*)?(["\']?)([^"\')\s;]+)\1\s*\)?[^;{}]*;?/i',
-			static function ( $m ) {
-				return preg_match( '#^https://[^\s"\'()<>\\\\]+$#i', $m[2] ) ? '@import url("' . $m[2] . '");' : '';
-			},
-			$css
-		);
+		// An imported stylesheet cannot be limited to the form, so it is dropped.
+		$css = (string) preg_replace( '/@import\b[^;{}]*;?/i', '', $css );
 		$css = (string) preg_replace( '/@(?:charset|namespace)\b[^;{}]*;?/i', '', $css );
 		$css = (string) preg_replace_callback(
 			'/url\(\s*(["\']?)([^"\')]*)\1\s*\)/i',
@@ -363,7 +357,7 @@ final class Appearance {
 			if ( in_array( $key, self::COLOR_TOKENS, true ) ) {
 				$sanitized = self::sanitizeColor( $value );
 			} elseif ( isset( self::RANGED_SIZE_TOKENS[ $key ] ) ) {
-				$sanitized = self::sanitizeRangedLength( $value, self::RANGED_SIZE_TOKENS[ $key ] );
+				$sanitized = ( in_array( $key, self::THEME_SIZE_TOKENS, true ) && self::isThemeVar( $value, 'font-size' ) ) ? $value : self::sanitizeRangedLength( $value, self::RANGED_SIZE_TOKENS[ $key ] );
 			} elseif ( isset( self::RANGED_NUMBER_TOKENS[ $key ] ) ) {
 				$sanitized = ( is_numeric( $value ) && (float) $value >= self::RANGED_NUMBER_TOKENS[ $key ][0] && (float) $value <= self::RANGED_NUMBER_TOKENS[ $key ][1] ) ? (string) ( 0 + $value ) : null;
 			} elseif ( in_array( $key, self::SIZE_TOKENS, true ) ) {

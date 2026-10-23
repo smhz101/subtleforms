@@ -100,7 +100,7 @@ final class CustomStyling272Test extends TestCase {
 		$this->assertStringNotContainsString( 'style>', $tags );
 
 		$this->assertSame( '.a{color:red}', Appearance::sanitizeCustomCss( '@import url(http://evil.test/x.css); .a{color:red}' ) );
-		$this->assertStringContainsString( '@import url("https://fonts.example/css")', Appearance::sanitizeCustomCss( '@import url(https://fonts.example/css); .a{color:red}' ) );
+		$this->assertSame( '.a{color:red}', trim( Appearance::sanitizeCustomCss( '@import url(https://fonts.example/css); .a{color:red}' ) ) );
 		$this->assertStringContainsString( 'background:none', Appearance::sanitizeCustomCss( '.a{background:url(//evil.test/x.png)}' ) );
 		$this->assertStringContainsString( 'url("https://ok.test/x.png")', Appearance::sanitizeCustomCss( '.a{background:url(https://ok.test/x.png)}' ) );
 	}
@@ -138,5 +138,18 @@ final class CustomStyling272Test extends TestCase {
 		}
 		$custom = array( 'metadata' => array( 'type' => 'regular', 'appearance' => array( 'preset' => 'minimal', 'tokens' => array( 'labelSize' => '14px' ) ) ), 'fields' => $fields );
 		$this->assertFalse( FrontendAssets::isPlainThemeForm( $custom ) );
+	}
+
+	public function test_theme_font_size_variables_survive_on_ranged_size_tokens(): void {
+		$tokens = array();
+		foreach ( array( 'labelSize', 'inputSize', 'helpSize', 'titleSize', 'buttonSize' ) as $key ) {
+			$tokens[ $key ] = 'var(--wp--preset--font-size--large)';
+		}
+		$tokens['labelGap'] = 'var(--wp--preset--font-size--large)';
+		$clean = array( 'tokens' => $this->tokens( $tokens ) );
+		foreach ( array( 'labelSize', 'inputSize', 'helpSize', 'titleSize', 'buttonSize' ) as $key ) {
+			$this->assertSame( 'var(--wp--preset--font-size--large)', $clean['tokens'][ $key ], $key );
+		}
+		$this->assertArrayNotHasKey( 'labelGap', $clean['tokens'] );
 	}
 }
