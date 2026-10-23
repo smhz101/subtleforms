@@ -305,7 +305,7 @@
 .subtleforms-field-label {
 	/*! inherit: keep */
 	display: block;
-	margin-bottom: 6px;
+	margin-bottom: var(--subtleforms-label-gap, 6px);
 }
 
 /* A group of choices is a fieldset: drop the browser's box, keep the legend
@@ -339,10 +339,10 @@ fieldset.subtleforms-field > legend.subtleforms-field-label {
 .subtleforms-textarea,
 .subtleforms-select {
 	width: 100%;
-	padding: var(--subtleforms-input-padding-y, 10px) 12px;
-	border: var(--subtleforms-border-width, 1px) solid var(--subtleforms-color-border);
+	padding: var(--subtleforms-input-padding-y, 10px) var(--subtleforms-input-padding-x, 12px);
+	border: var(--subtleforms-border-width, 1px) var(--subtleforms-border-style, solid) var(--subtleforms-color-border);
 	border-radius: var(--subtleforms-radius-md, 4px);
-	font-size: var(--subtleforms-font-size-base, 1rem);
+	font-size: var(--subtleforms-input-size, var(--subtleforms-font-size-base, 1rem));
 	font-family: inherit;
 	color: var(--subtleforms-color-text);
 	background-color: var(--subtleforms-color-bg-subtle, transparent);
@@ -472,11 +472,11 @@ fieldset.subtleforms-field > legend.subtleforms-field-label {
 }
 
 .subtleforms-button {
-	padding: 12px 24px;
+	padding: var(--subtleforms-button-padding-y, 12px) var(--subtleforms-button-padding-x, 24px);
 	border: var(--subtleforms-border-width, 1px) solid transparent;
 	border-radius: var(--subtleforms-radius-md, 4px);
-	font-size: var(--subtleforms-font-size-base, 1rem);
-	font-weight: 500;
+	font-size: var(--subtleforms-button-size, var(--subtleforms-font-size-base, 1rem));
+	font-weight: var(--subtleforms-button-weight, 500);
 	font-family: inherit;
 	cursor: pointer;
 	transition: background-color var(--subtleforms-transition-fast, 0.2s),

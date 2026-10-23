@@ -257,7 +257,7 @@
 
 .subtleforms.subtleforms--theme-tuned .subtleforms-button-next,
 .subtleforms.subtleforms--theme-tuned .subtleforms-button-submit {
-	border-radius: var(--subtleforms-radius-button, 4px);
+	border-radius: var(--subtleforms-button-radius, var(--subtleforms-radius-button, 4px));
 }
 
 /* A form on a dark footer or hero: no card of its own. */
@@ -322,4 +322,97 @@
 		flex-basis: 100% !important;
 		max-width: 100% !important;
 	}
+}
+
+/* ── More control (2.7.2) ─────────────────────────────────────────────────────
+   Each rule applies only when the form sets its variable on the root, so a form
+   that does not set one looks exactly as it did. The inline style carries the
+   variable, so the test is on the style attribute. Properties the stylesheet
+   already set read their variable where they are declared instead. */
+
+.subtleforms[style*="--subtleforms-label-font"] .subtleforms-field-label {
+	font-family:var(--subtleforms-label-font);
+}
+
+.subtleforms[style*="--subtleforms-label-size"] .subtleforms-field-label {
+	font-size:var(--subtleforms-label-size);
+}
+
+.subtleforms[style*="--subtleforms-label-letter-spacing"] .subtleforms-field-label {
+	letter-spacing:var(--subtleforms-label-letter-spacing);
+}
+
+.subtleforms[style*="--subtleforms-label-line-height"] .subtleforms-field-label {
+	line-height:var(--subtleforms-label-line-height);
+}
+
+.subtleforms[style*="--subtleforms-label-transform"] .subtleforms-field-label {
+	text-transform:var(--subtleforms-label-transform);
+}
+
+.subtleforms[style*="--subtleforms-input-weight"] .subtleforms-input,
+.subtleforms[style*="--subtleforms-input-weight"] .subtleforms-textarea,
+.subtleforms[style*="--subtleforms-input-weight"] .subtleforms-select {
+	font-weight:var(--subtleforms-input-weight);
+}
+
+.subtleforms[style*="--subtleforms-field-shadow"] .subtleforms-input,
+.subtleforms[style*="--subtleforms-field-shadow"] .subtleforms-textarea,
+.subtleforms[style*="--subtleforms-field-shadow"] .subtleforms-select {
+	box-shadow:var(--subtleforms-field-shadow);
+}
+
+.subtleforms[style*="--subtleforms-color-placeholder"] .subtleforms-input::placeholder,
+.subtleforms[style*="--subtleforms-color-placeholder"] .subtleforms-textarea::placeholder {
+	color:var(--subtleforms-color-placeholder);
+	opacity:1;
+}
+
+.subtleforms[style*="--subtleforms-color-link"] a:not(.subtleforms-button) {
+	color:var(--subtleforms-color-link);
+}
+
+.subtleforms[style*="--subtleforms-color-focus-ring"] .subtleforms-input:focus,
+.subtleforms[style*="--subtleforms-color-focus-ring"] .subtleforms-textarea:focus,
+.subtleforms[style*="--subtleforms-color-focus-ring"] .subtleforms-select:focus {
+	border-color:var(--subtleforms-color-focus-ring);
+	box-shadow:0 0 0 1px var(--subtleforms-color-focus-ring);
+}
+
+.subtleforms[style*="--subtleforms-focus-style"] .subtleforms-input:focus,
+.subtleforms[style*="--subtleforms-focus-style"] .subtleforms-textarea:focus,
+.subtleforms[style*="--subtleforms-focus-style"] .subtleforms-select:focus {
+	box-shadow:var(--subtleforms-focus-style);
+}
+
+.subtleforms[style*="--subtleforms-column-gap"] .subtleforms-fields {
+	column-gap:var(--subtleforms-column-gap);
+}
+
+.subtleforms[style*="--subtleforms-button-transform"] .subtleforms-button {
+	text-transform:var(--subtleforms-button-transform);
+}
+
+.subtleforms[style*="--subtleforms-button-shadow"] .subtleforms-button {
+	box-shadow:var(--subtleforms-button-shadow);
+}
+
+.subtleforms[style*="--subtleforms-color-button-hover-text"] .subtleforms-button-submit:hover,
+.subtleforms[style*="--subtleforms-color-button-hover-text"] .subtleforms-button-next:hover {
+	color:var(--subtleforms-color-button-hover-text);
+}
+
+.subtleforms[style*="--subtleforms-choice-accent"] input[type="checkbox"],
+.subtleforms[style*="--subtleforms-choice-accent"] input[type="radio"] {
+	accent-color:var(--subtleforms-choice-accent);
+}
+
+.subtleforms[style*="--subtleforms-choice-size"] input[type="checkbox"],
+.subtleforms[style*="--subtleforms-choice-size"] input[type="radio"] {
+	width:var(--subtleforms-choice-size);
+	height:var(--subtleforms-choice-size);
+}
+
+.subtleforms[style*="--subtleforms-choice-accent"] .subtleforms-toggle__input:checked + .subtleforms-toggle__track {
+	background: var(--subtleforms-choice-accent);
 }
