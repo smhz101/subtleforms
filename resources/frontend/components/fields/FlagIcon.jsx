@@ -1,62 +1,37 @@
-import { useEffect, useRef, useState } from '@wordpress/element';
-import {
-  flagCode,
-  flagHref,
-  flagSpriteUrl,
-  inlineSprite,
-  INLINE_SPRITE_ID,
-  isCrossOrigin,
-} from '../../../shared/flagSprite';
+import { flagCode, flagUrl } from '../../../shared/flagFiles';
 import { flagMark } from '../../../shared/phone';
 
 /**
- * A small country flag, drawn from the sprite (see shared/flagSprite.js).
- * Decorative: the country is always named in text beside it.
+ * A small country flag image (shared/flagFiles.js). Decorative: the country
+ * is always named in text beside it.
  *
- * Falls back to the two letters the pickers always showed when the sprite
- * address is unknown or the code is not a country code.
+ * `eager` is for the flag in the closed button, so the selected flag shows at
+ * once. Flags in the open list are lazy, so only the rows in view load.
  *
- * @param {Object} props      Props.
- * @param {string} props.code Two-letter country code.
+ * Falls back to the two letters the pickers always showed when the folder is
+ * unknown or the code is not a country code.
+ *
+ * @param {Object}  props       Props.
+ * @param {string}  props.code  Two-letter country code.
+ * @param {boolean} props.eager Load now instead of when in view.
  * @return {JSX.Element|string}
  */
-export default function FlagIcon({ code }) {
-  const url = flagSpriteUrl();
-  const ref = useRef(null);
-  const [inline, setInline] = useState(false);
-  const clean = flagCode(code);
-
-  useEffect(() => {
-    const doc = ref.current?.ownerDocument;
-    if (!url || !doc) {
-      return;
-    }
-    if (doc.getElementById(INLINE_SPRITE_ID)) {
-      setInline(true);
-      return;
-    }
-    if (isCrossOrigin(url, doc)) {
-      inlineSprite(url, doc).then(() => {
-        if (doc.getElementById(INLINE_SPRITE_ID)) {
-          setInline(true);
-        }
-      });
-    }
-  }, [url]);
-
-  if (!clean || !url) {
+export default function FlagIcon({ code, eager = false }) {
+  const src = flagUrl(code);
+  if (!src) {
     return flagMark(code);
   }
   return (
-    <svg
-      ref={ref}
+    <img
       className='subtleforms-flag'
+      src={src}
+      alt=''
+      aria-hidden='true'
       width='20'
       height='15'
-      aria-hidden='true'
-      focusable='false'
-      data-flag={clean}>
-      <use href={flagHref(clean, url, inline)} />
-    </svg>
+      decoding='async'
+      loading={eager ? 'eager' : 'lazy'}
+      data-flag={flagCode(code)}
+    />
   );
 }

@@ -1,6 +1,6 @@
 /**
  * Country flags (2.7.2): the "Show country flags" setting of the Phone and
- * Country fields. Flags are decorative images from one sprite file; with the
+ * Country fields. Flags are decorative images, one small file each; with the
  * setting off nothing changes.
  */
 import { createRoot } from '@wordpress/element';
@@ -11,24 +11,22 @@ import PhoneField from './PhoneField';
 import CountrySelect from './CountrySelect';
 import FlagIcon from './FlagIcon';
 import { fieldGroups, FIELD_GROUPS } from './lazyFields';
-import { flagCode, flagHref, flagSpriteUrl, forgetInlineSprite, isCrossOrigin } from '../../../shared/flagSprite';
+import { flagCode, flagUrl, flagBaseUrl } from '../../../shared/flagFiles';
 import { flagsOn } from '../../../shared/flagsOn';
 import { COUNTRIES } from '../../../shared/countries';
 import { phoneCountries } from '../../../shared/phone';
 
-const { buildSprite } = require('../../../../bin/build-flag-sprite');
+const { buildFlags } = require('../../../../bin/build-flag-files');
 
 global.IS_REACT_ACT_ENVIRONMENT = true;
 
-const SPRITE = 'https://example.test/wp-content/plugins/subtleforms/build/frontend/flags.svg';
+const BASE = 'https://example.test/wp-content/plugins/subtleforms/build/frontend/flags/';
 
 beforeAll(() => {
   Element.prototype.scrollIntoView = () => {};
 });
 
 beforeEach(() => {
-  global.fetch = jest.fn(() => Promise.resolve({ ok: false, text: () => Promise.resolve('') }));
-  forgetInlineSprite(document);
   window.subtleformsFrontend = { assetsUrl: 'https://example.test/wp-content/plugins/subtleforms/build/frontend/' };
   delete window.subtleformsAdmin;
 });
@@ -62,7 +60,7 @@ function type(input, text) {
   });
 }
 
-const useHref = (el) => el.querySelector('use').getAttribute('href');
+const useHref = (el) => el.querySelector('img.subtleforms-flag').getAttribute('src');
 
 describe('phone country list with flags', () => {
   const phone = (props = {}) =>
@@ -73,31 +71,37 @@ describe('phone country list with flags', () => {
     const trigger = container.querySelector('.subtleforms-phone__trigger');
     const flag = trigger.querySelector('.subtleforms-phone__flag');
     expect(flag.getAttribute('aria-hidden')).toBe('true');
-    expect(flag.querySelector('svg.subtleforms-flag').getAttribute('aria-hidden')).toBe('true');
-    expect(useHref(flag)).toBe(`${SPRITE}#sf-pk`);
+    const image = flag.querySelector('img.subtleforms-flag');
+    expect(image.getAttribute('aria-hidden')).toBe('true');
+    expect(image.getAttribute('alt')).toBe('');
+    expect(image.getAttribute('loading')).toBe('eager');
+    expect(image.getAttribute('width')).toBe('20');
+    expect(image.getAttribute('height')).toBe('15');
+    expect(useHref(flag)).toBe(`${BASE}pk.svg`);
     expect(trigger.querySelector('.subtleforms-phone__dial').textContent).toBe('+92');
 
     click(trigger);
     const options = container.querySelectorAll('[role="option"]');
     expect(options.length).toBeGreaterThan(100);
     options.forEach((option) => {
-      expect(option.querySelectorAll('svg.subtleforms-flag')).toHaveLength(1);
+      expect(option.querySelectorAll('img.subtleforms-flag')).toHaveLength(1);
+      expect(option.querySelector('img.subtleforms-flag').getAttribute('loading')).toBe('lazy');
       expect(option.querySelector('.subtleforms-phone__flag').getAttribute('aria-hidden')).toBe('true');
     });
     const pakistan = [...options].find((option) => option.textContent.includes('Pakistan'));
     expect(pakistan.textContent).toContain('+92');
-    expect(useHref(pakistan)).toBe(`${SPRITE}#sf-pk`);
+    expect(useHref(pakistan)).toBe(`${BASE}pk.svg`);
     unmount();
   });
 
   test('off: no image anywhere, the letters stay as before', () => {
     const { container, unmount } = phone();
     const trigger = container.querySelector('.subtleforms-phone__trigger');
-    expect(trigger.querySelector('svg.subtleforms-flag')).toBeNull();
+    expect(trigger.querySelector('img.subtleforms-flag')).toBeNull();
     expect(trigger.querySelector('.subtleforms-phone__flag').textContent).toBe('PK');
     click(trigger);
-    expect(container.querySelector('svg.subtleforms-flag')).toBeNull();
-    expect(container.querySelector('use')).toBeNull();
+    expect(container.querySelector('img.subtleforms-flag')).toBeNull();
+    expect(container.querySelector('img')).toBeNull();
     unmount();
   });
 
@@ -120,7 +124,7 @@ describe('phone country list with flags', () => {
     let options = container.querySelectorAll('[role="option"]');
     expect(options).toHaveLength(1);
     expect(options[0].textContent).toContain('Pakistan');
-    expect(options[0].querySelector('svg.subtleforms-flag')).not.toBeNull();
+    expect(options[0].querySelector('img.subtleforms-flag')).not.toBeNull();
     type(search, '+44');
     options = [...container.querySelectorAll('[role="option"]')];
     expect(options.some((option) => option.textContent.includes('United Kingdom'))).toBe(true);
@@ -135,7 +139,7 @@ describe('phone country list with flags', () => {
     click(pakistan);
     const trigger = container.querySelector('.subtleforms-phone__trigger');
     expect(trigger.querySelector('.subtleforms-phone__dial').textContent).toBe('+92');
-    expect(useHref(trigger)).toBe(`${SPRITE}#sf-pk`);
+    expect(useHref(trigger)).toBe(`${BASE}pk.svg`);
     expect(onChange).toHaveBeenCalledTimes(1);
     unmount();
   });
@@ -152,10 +156,10 @@ describe('country field with flags', () => {
     const on = mount(<CountrySelect inputId='c1' name='c' value='PK' onChange={() => {}} flagImages />);
     const trigger = on.container.querySelector('#c1');
     expect(trigger.querySelector('.subtleforms-picker__flag').getAttribute('aria-hidden')).toBe('true');
-    expect(useHref(trigger)).toBe(`${SPRITE}#sf-pk`);
+    expect(useHref(trigger)).toBe(`${BASE}pk.svg`);
     click(trigger);
     const options = on.container.querySelectorAll('[role="option"]');
-    expect(on.container.querySelectorAll('.subtleforms-picker__list svg.subtleforms-flag').length).toBeGreaterThan(100);
+    expect(on.container.querySelectorAll('.subtleforms-picker__list img.subtleforms-flag').length).toBeGreaterThan(100);
     expect(options.length).toBeGreaterThan(100);
     const search = on.container.querySelector('.subtleforms-picker__search');
     type(search, 'pak');
@@ -164,68 +168,44 @@ describe('country field with flags', () => {
     );
     expect(found).toHaveLength(1);
     expect(found[0].textContent).toContain('Pakistan');
-    expect(found[0].querySelector('svg.subtleforms-flag')).not.toBeNull();
+    expect(found[0].querySelector('img.subtleforms-flag')).not.toBeNull();
     on.unmount();
 
     const off = mount(<CountrySelect inputId='c2' name='c' value='PK' onChange={() => {}} />);
-    expect(off.container.querySelector('svg.subtleforms-flag')).toBeNull();
+    expect(off.container.querySelector('img.subtleforms-flag')).toBeNull();
     expect(off.container.querySelector('.subtleforms-picker__flag').textContent).toBe('PK');
     off.unmount();
   });
 });
 
 describe('FlagIcon', () => {
-  test('falls back to the two letters when the sprite address is unknown', () => {
+  test('falls back to the two letters when the folder address is unknown', () => {
     delete window.subtleformsFrontend;
     const { container, unmount } = mount(<span><FlagIcon code='pk' /></span>);
-    expect(container.querySelector('svg')).toBeNull();
+    expect(container.querySelector('img')).toBeNull();
     expect(container.textContent).toBe('PK');
     unmount();
   });
 
-  test('the builder gets the sprite address from the admin data', () => {
+  test('the builder gets the folder address from the admin data', () => {
     delete window.subtleformsFrontend;
-    window.subtleformsAdmin = { flagSpriteUrl: 'https://example.test/admin/flags.svg' };
-    expect(flagSpriteUrl()).toBe('https://example.test/admin/flags.svg');
+    window.subtleformsAdmin = { flagBaseUrl: 'https://example.test/admin/flags' };
+    expect(flagBaseUrl()).toBe('https://example.test/admin/flags/');
     const { container, unmount } = mount(<FlagIcon code='GB' />);
-    expect(useHref(container)).toBe('https://example.test/admin/flags.svg#sf-gb');
+    expect(useHref(container)).toBe('https://example.test/admin/flags/gb.svg');
     unmount();
   });
 
-  test('only a two-letter code can become a fragment', () => {
+  test('only a two-letter code can become a file name', () => {
     expect(flagCode('pk')).toBe('PK');
     ['', 'pak', 'p', 'p1', '../x', 'pk"><script>', null, undefined].forEach((bad) => {
       expect(flagCode(bad)).toBe('');
-      expect(flagHref(bad, SPRITE)).toBe('');
+      expect(flagUrl(bad, BASE)).toBe('');
     });
-    expect(flagHref('pk', SPRITE)).toBe(`${SPRITE}#sf-pk`);
-    expect(flagHref('pk', SPRITE, true)).toBe('#sf-pk');
+    expect(flagUrl('pk', BASE)).toBe(`${BASE}pk.svg`);
     const { container, unmount } = mount(<span><FlagIcon code='x"/><script>' /></span>);
-    expect(container.querySelector('use')).toBeNull();
+    expect(container.querySelector('img')).toBeNull();
     unmount();
-  });
-
-  test('a sprite on another origin is fetched once and copied into the page', async () => {
-    global.fetch = jest.fn(() =>
-      Promise.resolve({ ok: true, text: () => Promise.resolve('<svg><symbol id="sf-pk" viewBox="0 0 640 480"></symbol></svg>') })
-    );
-    const { container, unmount } = mount(<span><FlagIcon code='PK' /><FlagIcon code='GB' /></span>);
-    await act(async () => {
-      await Promise.resolve();
-      await Promise.resolve();
-      await Promise.resolve();
-    });
-    expect(global.fetch).toHaveBeenCalledTimes(1);
-    expect(document.getElementById('subtleforms-flag-sprite')).not.toBeNull();
-    expect(container.querySelector('use').getAttribute('href')).toBe('#sf-pk');
-    document.getElementById('subtleforms-flag-sprite').remove();
-    unmount();
-  });
-
-  test('a sprite on another origin is recognised', () => {
-    expect(isCrossOrigin('https://cdn.example.net/flags.svg', document)).toBe(true);
-    expect(isCrossOrigin(`${window.location.origin}/flags.svg`, document)).toBe(false);
-    expect(isCrossOrigin('/wp-content/flags.svg', document)).toBe(false);
   });
 });
 
@@ -248,35 +228,31 @@ describe('the flags feature in the browser', () => {
   });
 });
 
-describe('the flag sprite', () => {
+describe('the flag files', () => {
+  const os = require('os');
   const source = path.join(__dirname, '../../../../node_modules/flag-icons/flags/4x3');
-  const { svg, codes } = buildSprite(source);
+  const target = fs.mkdtempSync(path.join(os.tmpdir(), 'sf-flags-'));
+  const { codes, sizes } = buildFlags(source, target);
 
-  test('has a symbol for every country the pickers offer', () => {
+  afterAll(() => fs.rmSync(target, { recursive: true, force: true }));
+
+  test('has a file for every country the pickers offer', () => {
     const missing = [...new Set([...COUNTRIES, ...phoneCountries()].map((country) => country.code))]
       .filter((code) => !codes.includes(code.toLowerCase()));
     expect(missing).toEqual([]);
-    codes.forEach((code) => expect(svg).toContain(`<symbol id="sf-${code}" viewBox="0 0 640 480">`));
+    codes.forEach((code) => expect(fs.existsSync(path.join(target, `${code}.svg`))).toBe(true));
   });
 
-  test('is valid and no id is used twice', () => {
-    const ids = [...svg.matchAll(/\sid="([^"]+)"/g)].map((match) => match[1]);
-    expect(new Set(ids).size).toBe(ids.length);
-    expect(svg).not.toMatch(/<script|<image|data:|javascript:/i);
-    const opens = (svg.match(/<symbol\b/g) || []).length;
-    expect(opens).toBe((svg.match(/<\/symbol>/g) || []).length);
-    expect(opens).toBe(codes.length);
+  test('every file is a plain 4x3 image', () => {
+    codes.forEach((code) => {
+      const svg = fs.readFileSync(path.join(target, `${code}.svg`), 'utf8');
+      expect(svg).toMatch(/viewBox="0 0 640 480"/);
+      expect(svg).not.toMatch(/<script|<image|data:|javascript:|onload=/i);
+    });
   });
 
-  test('stays small enough to download on demand', () => {
-    const gzip = require('zlib').gzipSync(Buffer.from(svg), { level: 9 }).length;
-    expect(gzip).toBeLessThan(160 * 1024);
-  });
-
-  test('the built file, when there is one, is the same sprite', () => {
-    const built = path.join(__dirname, '../../../../build/frontend/flags.svg');
-    if (fs.existsSync(built)) {
-      expect(fs.readFileSync(built, 'utf8')).toBe(svg);
-    }
+  test('the flag of a country is small', () => {
+    const sorted = [...sizes].sort((a, b) => a - b);
+    expect(sorted[Math.floor(sorted.length / 2)]).toBeLessThan(4096);
   });
 });

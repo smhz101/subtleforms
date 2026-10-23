@@ -13,7 +13,7 @@
     "build:frontend": "wp-scripts build ./resources/frontend/index.jsx --output-path=./build/frontend --output-filename=frontend.js",
     "start:block": "wp-scripts start ./resources/blocks/form/index.js --output-path=./build/blocks/form",
     "build:block": "wp-scripts build ./resources/blocks/form/index.js --output-path=./build/blocks/form && cp resources/blocks/form/block.json resources/blocks/form/editor.css build/blocks/form/",
-    "build:flags": "node bin/build-flag-sprite.js",
+    "build:flags": "node bin/build-flag-files.js",
     "build:all": "npm run build && npm run build:frontend && npm run build:block && npm run build:flags",
     "size": "node bin/check-bundle-size.js",
     "test": "wp-scripts test-unit-js",

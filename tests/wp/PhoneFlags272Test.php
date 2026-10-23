@@ -91,8 +91,8 @@ final class PhoneFlags272Test extends TestCase {
 		$this->assertContains( $flagsUrl, $hrefs );
 	}
 
-	public function test_admin_receives_the_sprite_address(): void {
+	public function test_admin_receives_the_flag_folder_address(): void {
 		$php = (string) file_get_contents( SUBTLEFORMS_PLUGIN_DIR . 'src/Admin/AdminMenu.php' );
-		$this->assertStringContainsString( "'flagSpriteUrl'  => SUBTLEFORMS_PLUGIN_URL . 'build/frontend/flags.svg'", $php );
+		$this->assertStringContainsString( "'flagBaseUrl'    => SUBTLEFORMS_PLUGIN_URL . 'build/frontend/flags/'", $php );
 	}
 }

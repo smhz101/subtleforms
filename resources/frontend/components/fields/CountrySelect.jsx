@@ -174,7 +174,7 @@ export default function CountrySelect({
           }
         }}>
         <span className={selected ? 'subtleforms-picker__value' : 'subtleforms-picker__placeholder'}>
-          {selected && <span className='subtleforms-picker__flag' aria-hidden='true'>{flagImages ? <FlagIcon code={selected.code} /> : flagMark(selected.code)}</span>}
+          {selected && <span className='subtleforms-picker__flag' aria-hidden='true'>{flagImages ? <FlagIcon code={selected.code} eager /> : flagMark(selected.code)}</span>}
           {selected ? selected.name : prompt}
         </span>
         <ChevronIcon />

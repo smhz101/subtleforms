@@ -138,7 +138,7 @@ export default function PhoneField({
         >
           {showFlags && country && (
             <span className="subtleforms-phone__flag" aria-hidden="true">
-              {flagImages ? <FlagIcon code={country.code} /> : flagMark(country.code)}
+              {flagImages ? <FlagIcon code={country.code} eager /> : flagMark(country.code)}
             </span>
           )}
           <span className="subtleforms-phone__dial">
