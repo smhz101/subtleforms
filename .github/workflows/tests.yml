@@ -111,16 +111,25 @@ jobs:
 
       - name: Start WordPress (wp-env)
         run: |
-          ok=0
+          started=0
           for attempt in 1 2 3; do
-            if timeout 600 npx --yes @wordpress/env@10 start; then ok=1; break; fi
-            echo "wp-env start failed (attempt $attempt), cleaning up"
+            if timeout 600 npx --yes @wordpress/env@10 start; then
+              started=1
+              break
+            fi
+            echo "wp-env start failed (attempt $attempt of 3)"
             npx --yes @wordpress/env@10 stop || true
-            npx --yes @wordpress/env@10 clean all || true
+            npx --yes @wordpress/env@10 clean all || npx --yes @wordpress/env@10 destroy --force || true
             sleep 20
           done
-          if [ "$ok" != "1" ]; then echo "::error::wp-env did not start after 3 attempts"; exit 1; fi
-          for i in $(seq 1 60); do curl -sf http://localhost:8888/wp-login.php >/dev/null && break; sleep 5; done
+          if [ "$started" != "1" ]; then
+            echo "::error::wp-env did not start after 3 attempts"
+            exit 1
+          fi
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:8888/wp-login.php >/dev/null && break
+            sleep 5
+          done
           npx --yes @wordpress/env@10 run cli wp rewrite structure '/%postname%/' --hard
           npx --yes @wordpress/env@10 run cli wp plugin list
 

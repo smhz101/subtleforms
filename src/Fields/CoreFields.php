@@ -211,6 +211,7 @@ final class CoreFields {
 					'format'             => 'international',
 					'enableCountryCode'  => false,
 					'defaultCountry'     => 'US',
+					'showFlags'          => false,
 				),
 				inspectorControls: array(
 					array(
@@ -237,6 +238,13 @@ final class CoreFields {
 						'placeholder' => 'US',
 						'help'        => __( 'Two-letter country code used when the country picker is on, for example US, GB or PK.', 'subtleforms' ),
 						'section'     => 'general',
+					),
+					array(
+						'type'    => 'checkbox',
+						'name'    => 'showFlags',
+						'label'   => __( 'Show country flags', 'subtleforms' ),
+						'help'    => __( 'Shows a small flag next to the country code. Loads a flag image only for forms that use it.', 'subtleforms' ),
+						'section' => 'general',
 					),
 					array(
 						'type'    => 'select',
@@ -650,6 +658,7 @@ final class CoreFields {
 					'preferred_countries' => array(), // ISO codes for countries to show at top
 					'searchable'         => true,
 					'output_format'      => 'code', // 'code' or 'name'
+					'showFlags'          => false,
 				),
 				inspectorControls: array(
 					array(
@@ -674,6 +683,13 @@ final class CoreFields {
 						'name'    => 'preferred_countries',
 						'label'   => __( 'Preferred countries', 'subtleforms' ),
 						'help'    => __( 'ISO codes shown first, one per line. Example: US', 'subtleforms' ),
+						'section' => 'appearance',
+					),
+					array(
+						'type'    => 'checkbox',
+						'name'    => 'showFlags',
+						'label'   => __( 'Show country flags', 'subtleforms' ),
+						'help'    => __( 'Shows a small flag next to the country code. Loads a flag image only for forms that use it.', 'subtleforms' ),
 						'section' => 'appearance',
 					),
 					array(

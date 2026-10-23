@@ -272,6 +272,8 @@ class Schemas {
 				'required'     => 'optional|bool|default:false',
 				'options'      => 'optional|array',
 				'defaultValue' => 'optional|string|max:500',
+				// Phone and Country fields: draw a small flag beside each country (2.7.2).
+				'showFlags'    => 'optional|bool',
 				'attributes'   => 'optional|object',
 				'config'       => 'optional|object',
 				'children'     => 'optional|array',
