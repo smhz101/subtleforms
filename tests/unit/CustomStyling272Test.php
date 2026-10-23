@@ -123,7 +123,7 @@ final class CustomStyling272Test extends TestCase {
 		);
 		$this->assertTrue( FrontendAssets::isPlainThemeForm( $schema ) );
 		// The only CSS it gets is the 2.7 layout lines.
-		$this->assertSame( '7de4b10b9b348c5c3bdb2900d9654ac1', md5( FrontendAssets::layoutCss() ) );
+		$this->assertSame( 'a49d7b177ba961146f36a08ce1e134aa', md5( FrontendAssets::layoutCss() ) ); // 2.7 layout lines plus the 2.7.2 flag rule.
 		$this->assertStringNotContainsString( 'var(--subtleforms-label', FrontendAssets::layoutCss() );
 		// Custom CSS alone does not bring the stylesheet back: it is printed with the form.
 		$schema['metadata']['appearance']['customCss'] = '.a{color:red}';
