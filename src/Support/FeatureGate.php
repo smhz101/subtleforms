@@ -5,7 +5,8 @@
  *
  * Single entry point for both capability checks (freemium gate)
  * and license checks (Pro gate). The optional LicenseManager can
- * be injected when the licensing module is available.
+ * be injected when the licensing module is available, through the
+ * constructor or setLicenseManager().
  *
  * @package SubtleForms\Support
  * @since   0.1.0
@@ -117,6 +118,33 @@ final class FeatureGate {
 
 		// Fall back to capability map for freemium gating.
 		return $this->allows( $feature );
+	}
+
+	/**
+	 * Inject the license manager into this gate.
+	 *
+	 * The container keeps one FeatureGate, and services built before an
+	 * add-on boots hold that same instance, so setting the manager here
+	 * reaches all of them. Use this instead of replacing the container entry.
+	 *
+	 * @since 2.7.1
+	 *
+	 * @param LicenseManagerInterface|null $licenseManager Manager, or null to remove it.
+	 */
+	public function setLicenseManager( ?LicenseManagerInterface $licenseManager ): void {
+		$this->licenseManager = $licenseManager;
+	}
+
+	/**
+	 * Swap the capability map this gate checks, for example after an add-on
+	 * has added its `subtleforms/capabilities` filter.
+	 *
+	 * @since 2.7.1
+	 *
+	 * @param Capabilities $caps Capability map.
+	 */
+	public function setCapabilities( Capabilities $caps ): void {
+		$this->caps = $caps;
 	}
 
 	/**

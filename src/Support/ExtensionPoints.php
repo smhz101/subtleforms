@@ -21,8 +21,14 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 final class ExtensionPoints {
 
-	/** Version of the extension point contract. Raised when a hook changes. */
-	public const LEVEL = 1;
+	/**
+	 * Version of the extension point contract. Raised on every breaking change
+	 * to a hook, a class constant or a method an add-on uses. Add-ons check it
+	 * with an exact or range match and refuse to run outside that range.
+	 *
+	 * 2: logic, upload and add-on feature hooks of 2.7.0; FeatureGate setters.
+	 */
+	public const LEVEL = 2;
 
 	/** Field types that an add-on registers with its own renderer, controls and checks. */
 	public const PICTURE_CHOICE = 'picture_choice';
