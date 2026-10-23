@@ -9,7 +9,7 @@ This page lists the hooks an add-on such as SubtleForms Pro uses to add field ty
 | `subtleforms/fields/register` | action `( FieldRegistry $registry )` | Register a `FieldDefinition`. Fires before the free types are added, so an add-on can also replace one. |
 | `subtleforms/fields/validate_value` | filter `( ?string $error, string $type, mixed $value, array $field )` | Return an error message for a bad value of your type, or null. |
 | `subtleforms/fields/non_input_types` | filter `( string[] $types )` | Types that never collect an answer, so they cannot be required. |
-| `subtleforms/fields/addon_types` | filter `( string[] $types )` | Types that exist only while an add-on registers them. Default: `signature`, `calculation`, `payment_card`, `payment_product`, `payment_choice`, `payment_amount`, `payment_summary`, `payment_coupon`, `payment_hidden_price`. When the type is not registered, the live form leaves those fields out and the builder shows a note. |
+| `subtleforms/fields/addon_types` | filter `( string[] $types )` | Types that exist only while an add-on registers them. Default: `signature`, `calculation`, `payment_card`, `payment_product`, `payment_choice`, `payment_amount`, `payment_summary`, `payment_coupon`, `payment_hidden_price`. When the type is not registered, the live form leaves those fields out and the builder shows a note. A payment type makes the whole form unavailable instead. |
 | `subtleforms/public_schema` | filter `( array $schema, int $formId )` | The schema sent to the browser to render a form. |
 
 ## Computed values and prices (PHP)
@@ -135,9 +135,15 @@ Payments are part of SubtleForms Pro. The free submit route keeps two hooks wher
 | Hook | Type | Use |
 | --- | --- | --- |
 | `subtleforms/submit/price_order` | filter `( array\|WP_REST_Response $order, int $formId, mixed $schema, array $payload, WP_REST_Request $request, ?array $logicValues )` | Price the order, check the coupon and confirm payment. The start value is an empty order (`quote`, `coupon`, `payment`, `customer` all empty). Return the order array, or a `WP_REST_Response` to refuse the submission. Anything else is ignored. |
-| `subtleforms/submit/finish_order` | action `( int $submissionId, array $submission, array $order, string $status )` | Fires once a priced submission is stored. Store the order on the entry, set the final status and count the coupon. |
+| `subtleforms/submit/finish_order` | action `( int $submissionId, array $submission, array $order, string $status, ?SubmissionContext $context )` | Fires at each step of a priced order. Status `saved`: the entry is stored and the order has a `payment`; settle it and report with `$context->setMeta( 'order_result', array( 'error' => string ) )` (the visitor gets HTTP 402) or `array( 'payment' => array )`. Status `abandoned` (ID 0): the order will not be stored, release what it holds. Any other status is the final status of the entry; store the order on it and count the coupon. |
 
-Gateways still confirm money through `subtleforms/payment/verify`, `subtleforms/payment/capture` and `subtleforms/payment/void`.
+The free plugin has no other payment hook. Gateways are the add-on's business: how it confirms, captures or voids money is not part of this plugin.
+
+A form with a payment field and no add-on that registers it is not shown to visitors ("This form is not available right now.") and does not accept entries.
+
+## Spam time token (PHP)
+
+The page carries a render ticket (`t1.<time>.<form id>.<signature>`), the same for every visitor of a cached page. It is never accepted for a submission. On first interaction the browser trades it with `POST /forms/{id}/spam-token` (rate limited per client address) for a single-use submit token (`s1.<time>.<form id>.<nonce>.<signature>`) that keeps the render time, so the minimum-time check still applies. `s2` is the same for a visitor whose page was open longer than two hours. A submit token is claimed on use; a replay is dropped like any other spam.
 
 ## Visitor IP (PHP and settings)
 

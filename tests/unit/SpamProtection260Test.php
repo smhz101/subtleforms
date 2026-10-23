@@ -101,22 +101,27 @@ final class SpamProtection260Test extends TestCase {
 	public function test_an_old_token_is_traded_for_a_refreshed_one_that_skips_the_minimum_time(): void {
 		$on  = array( 'honeypot' => true, 'timeTrap' => true, 'minSeconds' => 3 );
 		$now = 1800000000;
-		$old = SpamProtection::issue_token( 7, $now - 86400 );
+		$old = SpamProtection::issue_ticket( 7, $now - 86400 );
 
 		$fresh = SpamProtection::refresh_token( $old, 7, $now );
-		$this->assertStringStartsWith( 'v2.', $fresh );
+		$this->assertStringStartsWith( 's2.', $fresh );
 		$this->assertNull( SpamProtection::block_reason( array( 'form_rendered_at' => $fresh ), 7, $on, false, $now ), 'sent at once, still passes' );
 		$this->assertSame( 'time_token_expired', SpamProtection::block_reason( array( 'form_rendered_at' => $fresh ), 7, $on, false, $now + SpamProtection::TOKEN_TTL + 1 ) );
 
-		// A valid token is returned as it is; nothing is minted from nothing.
-		$recent = SpamProtection::issue_token( 7, $now - 60 );
-		$this->assertSame( $recent, SpamProtection::refresh_token( $recent, 7, $now ) );
-		$this->assertNull( SpamProtection::refresh_token( 'v2.1799999999.7.' . str_repeat( 'a', 32 ), 7, $now ), 'forged' );
+		// A recent ticket keeps its render time in a new submit token; nothing is minted from nothing.
+		$recent = SpamProtection::issue_ticket( 7, $now - 60 );
+		$traded = SpamProtection::exchange_ticket( $recent, 7, $now );
+		$this->assertStringStartsWith( 's1.', $traded );
+		$this->assertSame( $now - 60, SpamProtection::token_time( $traded, 7 ) );
+		$this->assertNotSame( $traded, SpamProtection::exchange_ticket( $recent, 7, $now ), 'every trade is a different token' );
+		$this->assertNull( SpamProtection::refresh_token( 's2.1799999999.7.' . str_repeat( 'a', 16 ) . '.' . str_repeat( 'a', 32 ), 7, $now ), 'forged' );
 		$this->assertNull( SpamProtection::refresh_token( $old, 8, $now ), 'another form' );
 		$this->assertNull( SpamProtection::refresh_token( null, 7, $now ) );
-		// A v1 signature cannot be passed off as v2.
-		$v1 = SpamProtection::issue_token( 7, $now - 86400 );
-		$this->assertNull( SpamProtection::token_info( 'v2' . substr( $v1, 2 ), 7 ) );
+		// An s1 signature cannot be passed off as s2, and a ticket is not a submit token.
+		$s1 = SpamProtection::issue_token( 7, $now - 86400 );
+		$this->assertNull( SpamProtection::token_info( 's2' . substr( $s1, 2 ), 7 ) );
+		$this->assertNull( SpamProtection::token_info( $recent, 7 ) );
+		$this->assertSame( 'time_ticket', SpamProtection::block_reason( array( 'form_rendered_at' => $recent ), 7, $on, false, $now ), 'a ticket is never accepted for a submission' );
 	}
 
 	public function test_a_token_is_good_for_one_submission(): void {

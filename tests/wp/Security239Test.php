@@ -90,7 +90,7 @@ class Security239Test extends TestCase {
 		$request = new \WP_REST_Request( 'GET', '/subtleforms/v1/forms/' . $id . '/schema' );
 		$data    = rest_do_request( $request )->get_data();
 		$token   = $data['data']['spam_token'] ?? '';
-		$this->assertNotNull( SpamProtection::token_time( $token, $id ) );
+		$this->assertNotNull( SpamProtection::ticket_time( $token, $id ) );
 	}
 
 	/** FF-03: a stale nonce on a public route is treated as a visitor. */

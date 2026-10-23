@@ -268,15 +268,21 @@ final class PublicSubmitApi {
 		// A classic post cannot refresh an old token, so it may use one once.
 		$protection['acceptStale'] = $this->classicPost;
 		$skipTimeTrap              = current_user_can( 'manage_options' );
+		// A classic post cannot trade the page ticket in the browser, so the
+		// server trades it here, before the checks.
+		if ( $this->classicPost && null !== SpamProtection::ticket_time( $payload[ SpamProtection::TIME_FIELD ] ?? null, $formId ) ) {
+			$payload[ SpamProtection::TIME_FIELD ] = (string) SpamProtection::exchange_ticket( $payload[ SpamProtection::TIME_FIELD ], $formId );
+		}
 		$spamReason                = SpamProtection::block_reason(
 			$payload,
 			$formId,
 			$protection,
 			$skipTimeTrap
 		);
-		if ( 'time_token_expired' === $spamReason ) {
-			// Not spam: the page was open or cached for hours. Hand back a
-			// fresh token so the browser can send the same answers again.
+		if ( 'time_token_expired' === $spamReason || 'time_ticket' === $spamReason ) {
+			// Not spam: the page was open or cached for hours, or the browser
+			// sent the page ticket before trading it. Hand back a submit token
+			// so the browser can send the same answers again.
 			$fresh = SpamProtection::refresh_token( $payload[ SpamProtection::TIME_FIELD ] ?? null, $formId );
 			return new WP_REST_Response(
 				array(
@@ -459,15 +465,11 @@ final class PublicSubmitApi {
 			return $order;
 		}
 		unset( $payload['_coupon'], $payload['_payment'] );
-		$voidPayment = static function () use ( $order ) {
+		// An order that was priced but not stored is handed back as
+		// abandoned, so the add-on that priced it can release what it holds.
+		$voidPayment = function () use ( $order ) {
 			if ( ! empty( $order['payment'] ) ) {
-				/**
-				 * The submission failed after the gateway authorised the payment.
-				 * Gateways release the hold here.
-				 *
-				 * @param array $payment Payment details.
-				 */
-				do_action( 'subtleforms/payment/void', $order['payment'] );
+				$this->finishOrder( 0, array(), $order, 'abandoned' );
 			}
 		};
 
@@ -579,7 +581,7 @@ final class PublicSubmitApi {
 				return ApiResponse::bad_request( __( 'This form could not be processed. Please contact the site owner.', 'subtleforms' ) );
 			}
 
-			// A payment the gateway only authorised is captured after the entry
+			// An order that still has to be settled is settled after the entry
 			// is saved. Emails, webhooks and integrations wait for that result,
 			// so nobody gets a receipt for a payment that then fails (PAY-04).
 			$deferActions = $isPaymentForm && 'authorized' === ( $paymentMetadata['status'] ?? '' );
@@ -656,27 +658,20 @@ final class PublicSubmitApi {
 					$this->finishOrder( $submissionId, $finalSubmission, $order, 'free' );
 				}
 			} else {
-				/**
-				 * Capture an authorised payment now that the submission is safely
-				 * stored. Return the updated payment array, or a WP_Error.
-				 *
-				 * @param array $payment      Payment details.
-				 * @param int   $submissionId Submission ID.
-				 */
-				$captured = apply_filters( 'subtleforms/payment/capture', $paymentMetadata, $submissionId );
-				if ( is_wp_error( $captured ) ) {
-					$order['payment']['status'] = 'failed';
-					$order['payment']['error']  = $captured->get_error_message();
-					$this->finishOrder( $submissionId, $finalSubmission, $order, 'payment_failed' );
-					// No receipts or integrations for a failed payment; the site
-					// owner is told instead (PAY-04).
-					self::notifyPaymentFailed( $formId, $submissionId, $activeSchema['schema'] ?? array(), $captured->get_error_message() );
-					return ApiResponse::error( 'subtleforms_payment_failed', $captured->get_error_message(), 402 );
+				// The entry is safely stored: the add-on settles the order and
+				// reports the outcome through the context (`order_result`:
+				// error, status, payment).
+				$this->finishOrder( $submissionId, $finalSubmission, $order, 'saved', $context );
+				$result = $context->getMeta( 'order_result', array() );
+				$result = is_array( $result ) ? $result : array();
+				if ( ! empty( $result['error'] ) ) {
+					return ApiResponse::error( 'subtleforms_payment_failed', (string) $result['error'], 402 );
 				}
+				$captured = is_array( $result['payment'] ?? null ) ? $result['payment'] : $paymentMetadata;
 				if ( $laterSteps ) {
 					// The payment went through: now send the emails and run the
 					// integrations that waited for it.
-					$captureStatus = is_array( $captured ) ? (string) ( $captured['status'] ?? '' ) : '';
+					$captureStatus = (string) ( $captured['status'] ?? '' );
 					$context->setMeta( 'entry_status', in_array( $captureStatus, array( 'paid', 'succeeded' ), true ) ? 'completed' : 'payment_pending' );
 					$info           = $context->getMeta( 'payment_info', array() );
 					$info['status'] = '' !== $captureStatus ? $captureStatus : ( $info['status'] ?? '' );
@@ -687,19 +682,9 @@ final class PublicSubmitApi {
 						Logger::error( 'Actions after payment failed for submission %d: %s', $submissionId, $e->getMessage() );
 					}
 				}
-				$order['payment'] = is_array( $captured ) ? $captured : $paymentMetadata;
+				$order['payment'] = $captured;
 				$status           = in_array( $order['payment']['status'] ?? '', array( 'paid', 'succeeded' ), true ) ? 'completed' : 'payment_pending';
 				$this->finishOrder( $submissionId, $finalSubmission, $order, $status );
-
-				/**
-				 * Hook: a payment form was submitted.
-				 *
-				 * @param int               $submissionId    The submission ID.
-				 * @param array             $paymentMetadata Payment details.
-				 * @param SubmissionContext $context         Full submission context.
-				 * @since 1.2.0
-				 */
-				do_action( 'subtleforms/payment/required', $submissionId, $order['payment'], $context );
 			}
 			} elseif ( ! $finalSubmission || $finalSubmission['status'] === 'processing' ) {
 				Logger::error( 'Submission %d did not reach saved status', $submissionId );
@@ -859,9 +844,8 @@ final class PublicSubmitApi {
 		 * Price this submission's order, check its coupon and confirm payment.
 		 *
 		 * Return the order array ({ quote, coupon, payment, customer }), or a
-		 * WP_REST_Response to refuse the submission. Gateways confirm payment
-		 * through `subtleforms/payment/verify`, `subtleforms/payment/capture` and
-		 * `subtleforms/payment/void`.
+		 * WP_REST_Response to refuse the submission. An order with a `payment`
+		 * is settled and released through `subtleforms/submit/finish_order`.
 		 *
 		 * @param array|WP_REST_Response $order       Empty order.
 		 * @param int                    $formId      Form ID.
@@ -885,47 +869,27 @@ final class PublicSubmitApi {
 	 * @param array  $order        Result of priceOrder().
 	 * @param string $status       Final submission status.
 	 */
-	private function finishOrder( int $submissionId, array $submission, array $order, string $status ): void {
+	private function finishOrder( int $submissionId, array $submission, array $order, string $status, ?SubmissionContext $context = null ): void {
 		/**
-		 * Fires when a priced submission has been stored.
+		 * Fires at each step of a priced order after the entry is stored, and
+		 * when an order is dropped.
 		 *
-		 * @param int    $submissionId Submission ID.
-		 * @param array  $submission   Stored submission.
-		 * @param array  $order        Order from `subtleforms/submit/price_order`.
-		 * @param string $status       Final submission status.
+		 * Status `saved`: the entry is stored and the order has a `payment`
+		 * to settle. The add-on settles it and reports back with
+		 * `$context->setMeta( 'order_result', array( 'error' => string,
+		 * 'status' => string, 'payment' => array ) )`; an error answers the
+		 * visitor with HTTP 402. Status `abandoned` (submission ID 0): the
+		 * order will not be stored, release what it holds. Any other status is
+		 * the final status of the entry (completed, payment_pending, free).
+		 *
+		 * @param int                    $submissionId Submission ID.
+		 * @param array                  $submission   Stored submission.
+		 * @param array                  $order        Order from `subtleforms/submit/price_order`.
+		 * @param string                 $status       Step or final status.
+		 * @param SubmissionContext|null $context      Submission context, for `saved`.
 		 * @since 2.8.0
 		 */
-		do_action( 'subtleforms/submit/finish_order', $submissionId, $submission, $order, $status );
-	}
-
-	/**
-	 * Email the site owner that a payment failed after the entry was saved,
-	 * unless switched off under Settings > Integrations > Payments (PAY-04).
-	 *
-	 * @param int    $formId       Form ID.
-	 * @param int    $submissionId Entry ID.
-	 * @param mixed  $schema       Form schema.
-	 * @param string $reason       Gateway message.
-	 */
-	public static function notifyPaymentFailed( int $formId, int $submissionId, $schema, string $reason ): void {
-		$settings = get_option( 'subtleforms_settings', array() );
-		if ( is_array( $settings ) && array_key_exists( 'ext_payments_failed_email', $settings ) && ! $settings['ext_payments_failed_email'] ) {
-			return;
-		}
-		$to = is_array( $settings ) && ! empty( $settings['admin_email'] ) && is_email( $settings['admin_email'] )
-			? (string) $settings['admin_email']
-			: (string) get_option( 'admin_email' );
-		$title = is_array( $schema ) ? (string) ( $schema['metadata']['title'] ?? '' ) : '';
-		/* translators: %s: form title */
-		$subject = sprintf( __( 'Payment failed: %s', 'subtleforms' ), '' !== $title ? $title : '#' . $formId );
-		$body    = sprintf(
-			/* translators: 1: entry ID, 2: gateway message, 3: link to the entry */
-			__( "The payment for entry #%1\$d did not go through, so no receipt or notification was sent.\n\nReason: %2\$s\n\nOpen the entry: %3\$s", 'subtleforms' ),
-			$submissionId,
-			'' !== $reason ? $reason : __( 'not given', 'subtleforms' ),
-			admin_url( 'admin.php?page=subtleforms-submissions&submission_id=' . $submissionId )
-		);
-		wp_mail( $to, $subject, $body );
+		do_action( 'subtleforms/submit/finish_order', $submissionId, $submission, $order, $status, $context );
 	}
 
 	/**

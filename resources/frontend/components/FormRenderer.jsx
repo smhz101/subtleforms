@@ -30,7 +30,7 @@ import {
 } from '../../shared/appearance';
 
 import { restFetch, restUrl, restNonce } from '../utils/restFetch';
-import { freshSpamToken } from '../utils/spamToken';
+import { createSpamTokenSource } from '../utils/spamToken';
 import { fillConfirmation } from '../../shared/confirmationTags';
 import { messageParagraphs } from '../../shared/safeLinks';
 import ConfirmationText from './ConfirmationText';
@@ -103,6 +103,9 @@ export default function FormRenderer({
   // THIS form only, document.querySelector would jump across forms when two
   // forms share a page (A2/P1-5).
   const formRootRef = useRef(null);
+  // Trades the page ticket for this visitor's submit token (spamToken.js).
+  const spamTokens = useMemo(() => createSpamTokenSource(formId), [formId]);
+  const primeSpamToken = useCallback(() => spamTokens.prime(spamToken), [spamTokens, spamToken]);
   // Random per mount: a name like "website" invites autofill (bug 16). The
   // value is still sent to the server as website_url.
   const honeypotSuffix = useMemo(
@@ -795,7 +798,7 @@ export default function FormRenderer({
         const submissionPayload = {
           ...payload,
           website_url: honeypotInput ? honeypotInput.value : '',
-          form_rendered_at: await freshSpamToken(formId, spamToken),
+          form_rendered_at: await spamTokens.take(spamToken),
         };
 
         // Include CAPTCHA response (v2 or v3)
@@ -1006,6 +1009,7 @@ export default function FormRenderer({
       quote,
       hasCardField,
       spamToken,
+      spamTokens,
     ]
   );
 
@@ -1201,6 +1205,8 @@ export default function FormRenderer({
   return (
     <div
       ref={formRootRef}
+      onFocusCapture={primeSpamToken}
+      onInputCapture={primeSpamToken}
       className={formClassNames}
       style={appearanceStyle}
       data-sf-step={hasSteps ? currentStepIndex : undefined}>

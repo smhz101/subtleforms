@@ -1,4 +1,4 @@
-import { freshSpamToken } from '../utils/spamToken';
+import { createSpamTokenSource } from '../utils/spamToken';
 import { useState, useEffect, useCallback, useMemo, useRef } from '@wordpress/element';
 import { currencySymbol as symbolFor, currencyDecimals } from '../../shared/currencies';
 import { __, sprintf } from '@wordpress/i18n';
@@ -39,6 +39,8 @@ export default function ConversationalFormRenderer({
   onSubmit: customOnSubmit = null,
   spamToken = '',
 }) {
+  const spamTokens = useMemo(() => createSpamTokenSource(formId), [formId]);
+  const primeSpamToken = useCallback(() => spamTokens.prime(spamToken), [spamTokens, spamToken]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [currentStep, setCurrentStep] = useState('questions'); // 'questions', 'review', 'payment'
   const [values, setValues] = useState({});
@@ -332,7 +334,7 @@ export default function ConversationalFormRenderer({
       try {
         const response = await restFetch('/submit', {
           method: 'POST',
-          body: { form_id: formId, data: { ...payload, form_rendered_at: await freshSpamToken(formId, spamToken) } },
+          body: { form_id: formId, data: { ...payload, form_rendered_at: await spamTokens.take(spamToken) } },
         });
 
         const result = await response.json();
@@ -383,7 +385,7 @@ export default function ConversationalFormRenderer({
         setSubmitting(false);
       }
     },
-    [formId, values, leafPaths, preview, customOnSubmit, hiddenFields, spamToken]
+    [formId, values, leafPaths, preview, customOnSubmit, hiddenFields, spamToken, spamTokens]
   );
 
   const handleSubmit = useCallback(
@@ -634,7 +636,7 @@ export default function ConversationalFormRenderer({
 
   // Render Questions Step (default)
   return (
-    <div className={formClassNames} style={appearanceStyle}>
+    <div className={formClassNames} style={appearanceStyle} onFocusCapture={primeSpamToken} onInputCapture={primeSpamToken}>
       {trackingInputs}
       {/* Progress Bar */}
       <div className='subtleforms-progress'>

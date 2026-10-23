@@ -260,8 +260,8 @@ final class FormsApi {
 		)
 	);
 
-		// A page that was open or cached for hours trades its old time token
-		// for a fresh one just before it submits (2.7.1).
+		// The page ticket is traded for a per-visitor single-use submit token on
+		// first interaction, and an old token for a fresh one (2.7.1).
 		register_rest_route(
 			self::NAMESPACE,
 			'/forms/(?P<id>\d+)/spam-token',
@@ -586,8 +586,9 @@ final class FormsApi {
 	}
 
 	/**
-	 * Give a visitor's expired time token a fresh one. Only a validly signed
-	 * token for this published form is answered; a missing or forged token,
+	 * Trade the page's render ticket (or an expired submit token) for a
+	 * per-visitor single-use submit token. Rate limited per client address.
+	 * Only a validly signed value for this published form is answered; a missing or forged token,
 	 * or an unknown form, gets a 404 so nothing can be minted from scratch.
 	 *
 	 * @param WP_REST_Request $request REST request.
@@ -650,8 +651,9 @@ final class FormsApi {
 			),
 			'schema'     => self::filterPublicSchema( $this->buildPublicSchema( $schemaData ), $formId ),
 			'version'    => $schema['version'] ?? null,
-			// Server-signed load time for the spam time trap (FF-11, FF-12).
-			'spam_token' => \SubtleForms\Engine\SpamProtection::issue_token( $formId ),
+			// Server-signed build time (a render ticket) for the spam time trap
+			// (FF-11, FF-12). The browser trades it for a submit token.
+			'spam_token' => \SubtleForms\Engine\SpamProtection::issue_ticket( $formId ),
 		);
 	}
 

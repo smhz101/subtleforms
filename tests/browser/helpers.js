@@ -196,11 +196,16 @@ module.exports.openPanel = openPanel;
  * @return {Promise<string>} Token.
  */
 async function spamToken(api, formId) {
-  // A token works once (it is claimed on submit), so each call gets a new one.
+  // The schema holds a render ticket that is never accepted for a submit. It
+  // is traded for a single-use submit token, as the browser does on first
+  // interaction. Each call gets a new one.
   const res = await api.get(`/wp-json/subtleforms/v1/forms/${formId}/schema`);
   const body = await res.json();
+  const ticket = body?.data?.spam_token || '';
+  const traded = await api.post(`/wp-json/subtleforms/v1/forms/${formId}/spam-token`, { data: { token: ticket } });
+  const token = (await traded.json())?.data?.spam_token || '';
   // The default minimum time between loading and sending a form is 3 seconds.
   await new Promise((resolve) => setTimeout(resolve, 3500));
-  return body?.data?.spam_token || '';
+  return token;
 }
 module.exports.spamToken = spamToken;

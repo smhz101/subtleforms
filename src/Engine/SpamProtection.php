@@ -160,7 +160,7 @@ final class SpamProtection {
 	 * @param array $protection    From for_form().
 	 * @param bool  $skip_time_trap True for a site admin testing a form.
 	 * @param int|null $now        Unix time. Defaults to now.
-	 * @return string|null honeypot_filled, time_token_missing, submission_too_fast or null.
+	 * @return string|null honeypot_filled, time_token_missing, time_ticket, time_token_expired, submission_too_fast or null.
 	 */
 	public static function block_reason( array $data, int $form_id, array $protection, bool $skip_time_trap = false, ?int $now = null ): ?string {
 		if ( ! empty( $protection['honeypot'] ) ) {
@@ -173,7 +173,8 @@ final class SpamProtection {
 		if ( ! empty( $protection['timeTrap'] ) && ! $skip_time_trap ) {
 			$info = self::token_info( $data[ self::TIME_FIELD ] ?? null, $form_id );
 			if ( null === $info ) {
-				return 'time_token_missing';
+				// A page ticket is not a submit token: it must be traded first.
+				return null !== self::ticket_time( $data[ self::TIME_FIELD ] ?? null, $form_id ) ? 'time_ticket' : 'time_token_missing';
 			}
 			$now = $now ?? time();
 			$age = $now - $info['time'];
@@ -195,40 +196,101 @@ final class SpamProtection {
 	}
 
 	/**
-	 * A signed time token for a form, issued by the server when the form is
-	 * loaded. The time comes from the server clock, so a visitor whose device
-	 * clock is wrong is not mistaken for a bot (FF-11), and a bot cannot make
-	 * one up (FF-12).
+	 * The render ticket printed into a page: a signed build time for a form.
+	 * A cached page hands the same ticket to every visitor, so a ticket is
+	 * never accepted for a submission. The browser trades it for a
+	 * per-visitor submit token (exchange_ticket) on first interaction.
 	 *
 	 * @param int      $form_id Form ID.
-	 * @param int|null $time    Issue time (default now).
-	 * @return string Token: v1.<time>.<form id>.<signature>.
+	 * @param int|null $time    Build time (default now).
+	 * @return string Ticket: t1.<time>.<form id>.<signature>.
 	 */
-	public static function issue_token( int $form_id, ?int $time = null ): string {
+	public static function issue_ticket( int $form_id, ?int $time = null ): string {
 		$time = null === $time ? time() : $time;
-		return 'v1.' . $time . '.' . $form_id . '.' . self::sign( $time, $form_id );
+		return 't1.' . $time . '.' . $form_id . '.' . self::sign( $time, $form_id, 't' );
 	}
 
 	/**
-	 * A token for a visitor whose page token is older than the lifetime. It
-	 * is issued only against a validly signed old token (a bot cannot ask for
-	 * one from nothing), and it skips the minimum-time check.
+	 * Whether a value is a validly signed render ticket for this form.
 	 *
-	 * @param mixed    $old     The page's token.
+	 * @param mixed $value   Value from a request.
+	 * @param int   $form_id Form ID.
+	 * @return int|null The ticket's build time, or null.
+	 */
+	public static function ticket_time( $value, int $form_id ): ?int {
+		if ( ! is_string( $value ) || 1 !== preg_match( '/^t1\.(\d{9,11})\.(\d+)\.([a-f0-9]{32})$/', $value, $m ) ) {
+			return null;
+		}
+		$time = (int) $m[1];
+		if ( (int) $m[2] !== $form_id || ! hash_equals( self::sign( $time, $form_id, 't' ), $m[3] ) ) {
+			return null;
+		}
+		return $time;
+	}
+
+	/**
+	 * A single-use submit token carrying a render time. Every call returns a
+	 * different token (random part), so each visitor and each submission
+	 * has their own to claim.
+	 *
+	 * @param int      $form_id Form ID.
+	 * @param int|null $time    Render time (default now).
+	 * @return string Token: s1.<time>.<form id>.<nonce>.<signature>.
+	 */
+	public static function issue_token( int $form_id, ?int $time = null ): string {
+		$time = null === $time ? time() : $time;
+		return self::build_token( 's1', $time, $form_id );
+	}
+
+	/**
+	 * Build a submit token of a kind (s1 normal, s2 refreshed).
+	 */
+	private static function build_token( string $prefix, int $time, int $form_id ): string {
+		$nonce = bin2hex( random_bytes( 8 ) );
+		return $prefix . '.' . $time . '.' . $form_id . '.' . $nonce . '.' . self::sign( $time, $form_id, $prefix . $nonce );
+	}
+
+	/**
+	 * Trade a render ticket (or an earlier submit token) for a new submit
+	 * token. The new token keeps the original render time, so the minimum
+	 * time check still applies. When that time is older than the token
+	 * lifetime, a refreshed token (minimum time skipped) is issued instead.
+	 * Only a validly signed value is answered, so nothing is minted from
+	 * scratch.
+	 *
+	 * @param mixed    $old     Ticket or submit token.
 	 * @param int      $form_id Form ID.
 	 * @param int|null $now     Unix time. Defaults to now.
-	 * @return string|null New token, the same token while it is still valid, or null when the old one is not valid.
+	 * @return string|null New submit token, or null when the old value is not valid.
 	 */
-	public static function refresh_token( $old, int $form_id, ?int $now = null ): ?string {
+	public static function exchange_ticket( $old, int $form_id, ?int $now = null ): ?string {
+		$now  = $now ?? time();
+		$time = self::ticket_time( $old, $form_id );
+		if ( null !== $time ) {
+			return ( $now - $time ) <= self::TOKEN_TTL
+				? self::build_token( 's1', $time, $form_id )
+				: self::build_token( 's2', $now, $form_id );
+		}
 		$info = self::token_info( $old, $form_id );
 		if ( null === $info ) {
 			return null;
 		}
-		$now = $now ?? time();
 		if ( ( $now - $info['time'] ) <= self::TOKEN_TTL ) {
-			return (string) $old;
+			return self::build_token( $info['refreshed'] ? 's2' : 's1', $info['time'], $form_id );
 		}
-		return 'v2.' . $now . '.' . $form_id . '.' . self::sign( $now, $form_id, 'r' );
+		return self::build_token( 's2', $now, $form_id );
+	}
+
+	/**
+	 * Same as exchange_ticket(); kept for the expired-token response.
+	 *
+	 * @param mixed    $old     Ticket or submit token.
+	 * @param int      $form_id Form ID.
+	 * @param int|null $now     Unix time. Defaults to now.
+	 * @return string|null New submit token or null.
+	 */
+	public static function refresh_token( $old, int $form_id, ?int $now = null ): ?string {
+		return self::exchange_ticket( $old, $form_id, $now );
 	}
 
 	/**
@@ -299,17 +361,16 @@ final class SpamProtection {
 	 * @return array{time: int, refreshed: bool}|null
 	 */
 	public static function token_info( $token, int $form_id ): ?array {
-		if ( ! is_string( $token ) || 1 !== preg_match( '/^(v1|v2)\.(\d{9,11})\.(\d+)\.([a-f0-9]{32})$/', $token, $m ) ) {
+		if ( ! is_string( $token ) || 1 !== preg_match( '/^(s1|s2)\.(\d{9,11})\.(\d+)\.([a-f0-9]{16})\.([a-f0-9]{32})$/', $token, $m ) ) {
 			return null;
 		}
-		$time      = (int) $m[2];
-		$refreshed = 'v2' === $m[1];
-		if ( (int) $m[3] !== $form_id || ! hash_equals( self::sign( $time, $form_id, $refreshed ? 'r' : '' ), $m[4] ) ) {
+		$time = (int) $m[2];
+		if ( (int) $m[3] !== $form_id || ! hash_equals( self::sign( $time, $form_id, $m[1] . $m[4] ), $m[5] ) ) {
 			return null;
 		}
 		return array(
 			'time'      => $time,
-			'refreshed' => $refreshed,
+			'refreshed' => 's2' === $m[1],
 		);
 	}
 
@@ -317,7 +378,7 @@ final class SpamProtection {
 	 * Signature for a token.
 	 */
 	private static function sign( int $time, int $form_id, string $kind = '' ): string {
-		$data = '' === $kind ? $time . '|' . $form_id : $kind . '|' . $time . '|' . $form_id;
+		$data = $kind . '|' . $time . '|' . $form_id;
 		return substr( hash_hmac( 'sha256', $data, wp_salt( 'nonce' ) ), 0, 32 );
 	}
 
@@ -399,7 +460,7 @@ final class SpamProtection {
 			esc_html__( 'Leave this field empty', 'subtleforms' ),
 			esc_attr( $honeypot_name ),
 			esc_attr( $time_name ),
-			esc_attr( self::issue_token( $form_id, $current_time ) )
+			esc_attr( self::issue_ticket( $form_id, $current_time ) )
 		);
 
 		return $html;
