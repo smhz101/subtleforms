@@ -88,7 +88,7 @@ final class ClientIp {
 			return $remote;
 		}
 
-		if ( $cloudflare ) {
+		if ( $cloudflare && self::in_ranges( $remote, self::CLOUDFLARE_RANGES ) ) {
 			$cf = self::server_value( 'HTTP_CF_CONNECTING_IP' );
 			if ( self::valid( $cf ) ) {
 				return $cf;

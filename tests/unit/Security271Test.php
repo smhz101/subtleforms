@@ -70,6 +70,20 @@ final class Security271Test extends TestCase {
 		$this->assertSame( '203.0.113.9', ClientIp::get(), 'a non-Cloudflare sender cannot use the header' );
 	}
 
+	public function test_cloudflare_header_needs_a_cloudflare_connection_even_with_a_custom_proxy(): void {
+		$GLOBALS['sf_test_options']['subtleforms_settings'] = array(
+			'trust_cloudflare'    => true,
+			'trusted_proxy_cidrs' => array( '10.0.0.0/8' ),
+		);
+		$_SERVER['REMOTE_ADDR']           = '10.1.2.3';
+		$_SERVER['HTTP_CF_CONNECTING_IP'] = '198.51.100.77';
+		unset( $_SERVER['HTTP_X_FORWARDED_FOR'] );
+		$this->assertSame( '10.1.2.3', ClientIp::get(), 'a custom proxy cannot vouch for the Cloudflare header' );
+
+		$_SERVER['REMOTE_ADDR'] = '104.16.0.5';
+		$this->assertSame( '198.51.100.77', ClientIp::get() );
+	}
+
 	public function test_cidr_matching_covers_ipv4_and_ipv6(): void {
 		$this->assertTrue( ClientIp::in_range( '10.1.2.3', '10.0.0.0/8' ) );
 		$this->assertFalse( ClientIp::in_range( '11.1.2.3', '10.0.0.0/8' ) );
