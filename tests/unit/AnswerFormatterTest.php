@@ -23,6 +23,11 @@ use SubtleForms\Support\FieldMapper;
  */
 class AnswerFormatterTest extends TestCase {
 
+	protected function tearDown(): void {
+		unset( $GLOBALS['sf_test_filters']['subtleforms/format/currency'] );
+		parent::tearDown();
+	}
+
 	private function choices(): array {
 		return array(
 			'fields' => array(
@@ -119,6 +124,7 @@ class AnswerFormatterTest extends TestCase {
 
 	/** PAY-23: payment options read as labels, products as lines with prices. */
 	public function test_pay23_payment_labels_and_product_lines() {
+		$GLOBALS['sf_test_filters']['subtleforms/format/currency'] = static fn( $c, $schema ) => strtoupper( (string) ( $schema['metadata']['payment']['currency'] ?? '' ) );
 		$schema  = array(
 			'metadata' => array( 'payment' => array( 'currency' => 'usd' ) ),
 			'fields'   => array(

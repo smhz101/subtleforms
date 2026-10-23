@@ -84,21 +84,6 @@ final class FieldsApi {
 	// ────────────────────────────────────────────────────────────────────
 
 	/**
-	 * Whether every capability in the list is granted.
-	 *
-	 * @param array $caps Capability keys.
-	 * @return bool
-	 */
-	private function allowsAll( array $caps ): bool {
-		foreach ( $caps as $cap ) {
-			if ( is_string( $cap ) && ! $this->gate->allows( $cap ) ) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	/**
 	 * Get all registered field definitions.
 	 */
 	public function get_fields( WP_REST_Request $request ): WP_REST_Response {
@@ -134,8 +119,7 @@ final class FieldsApi {
 								$fieldArray['enabled'] = true;
 							}
 
-							$fieldArray['is_pro']        = ! empty( $field->requiredCapabilities );
-							$fieldArray['is_pro_locked'] = $fieldArray['is_pro'] && ! $this->allowsAll( $field->requiredCapabilities );
+							$fieldArray['is_pro'] = ! empty( $field->requiredCapabilities );
 
 							return $fieldArray;
 						},
@@ -160,8 +144,7 @@ final class FieldsApi {
 						}
 					}
 
-					$fieldArray['is_pro']        = ! empty( $fieldArray['requiredCapabilities'] );
-					$fieldArray['is_pro_locked'] = $fieldArray['is_pro'] && ! $this->allowsAll( (array) ( $fieldArray['requiredCapabilities'] ?? array() ) );
+					$fieldArray['is_pro'] = ! empty( $fieldArray['requiredCapabilities'] );
 
 					return $fieldArray;
 				},

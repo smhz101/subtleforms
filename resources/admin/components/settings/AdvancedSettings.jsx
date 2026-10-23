@@ -450,6 +450,21 @@ export default function AdvancedSettings( {
 					) }
 				/>
 				<FieldError errors={ fieldErrors.entries_trash_days } />
+				<ToggleControl
+					label={ __(
+						'Keep my data when the plugin is deleted',
+						'subtleforms'
+					) }
+					checked={ !! settings.keep_data_on_uninstall }
+					onChange={ ( value ) =>
+						updateSetting( 'keep_data_on_uninstall', !! value )
+					}
+					help={ __(
+						'Off by default. When this is off, deleting SubtleForms from the Plugins screen removes its forms, entries, settings and uploaded files. SubtleForms Pro settings and license are never removed.',
+						'subtleforms'
+					) }
+				/>
+				<FieldError errors={ fieldErrors.keep_data_on_uninstall } />
 				<p className="sf-section-description">
 					{ __(
 						'Note: Submissions can also be exported or erased via WordPress Privacy Tools (Tools → Export/Erase Personal Data).',

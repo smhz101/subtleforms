@@ -18,7 +18,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-use SubtleForms\Contracts\LicenseManagerInterface;
 use RuntimeException;
 
 /**
@@ -32,13 +31,16 @@ final class FeatureGate {
 	private $caps;
 
 	/**
-	 * @var LicenseManagerInterface|null
+	 * An add-on's license manager (an object with isValid() and hasFeature()),
+	 * or null.
+	 *
+	 * @var object|null
 	 */
 	private $licenseManager;
 
 	/**
-	 * @param Capabilities                 $caps           Capability map.
-	 * @param LicenseManagerInterface|null $licenseManager Optional license manager (Pro).
+	 * @param Capabilities $caps           Capability map.
+	 * @param object|null  $licenseManager Optional license manager supplied by an add-on.
 	 */
 	public function __construct( $caps, $licenseManager = null ) {
 		$this->caps           = $caps;
@@ -122,9 +124,9 @@ final class FeatureGate {
 	/**
 	 * Get the LicenseManager, if available.
 	 *
-	 * @return LicenseManagerInterface|null
+	 * @return object|null
 	 */
-	public function getLicenseManager(): ?LicenseManagerInterface {
+	public function getLicenseManager(): ?object {
 		return $this->licenseManager;
 	}
 }

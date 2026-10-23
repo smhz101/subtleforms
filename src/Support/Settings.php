@@ -83,6 +83,7 @@ class Settings {
 		// Privacy & GDPR
 		'data_retention_days'        => 0, // 0 = keep forever
 		'entries_trash_days'         => 30, // Days an entry stays in the Trash (2.3.1).
+		'keep_data_on_uninstall'     => false, // Keep forms, entries and settings when the plugin is deleted (2.8.0).
 
 		// ── Extensions ───────────────────────────────────────────────────────
 
@@ -91,47 +92,6 @@ class Settings {
 		'ext_webhooks_signing_secret'       => '',
 		'ext_webhooks_events'               => array( 'submission.created' ),
 		'ext_webhooks_retries'              => 3,
-
-		// Email Marketing
-		'ext_email_marketing_enabled'       => false,
-		'ext_email_marketing_provider'      => 'mailchimp', // mailchimp|brevo|convertkit (Kit)
-		'ext_email_marketing_api_key'       => '',
-		'ext_email_marketing_list_id'       => '',
-		'ext_email_marketing_double_optin'  => false,
-
-		// CRM (HubSpot)
-		'ext_crm_enabled'                   => false,
-		'ext_crm_provider'                  => 'hubspot',
-		'ext_crm_api_key'                   => '',
-		'ext_crm_portal_id'                 => '',
-		'ext_crm_webhook_url'               => '',
-		'ext_crm_add_note'                  => true,
-
-		// E-commerce (WooCommerce)
-		'ext_ecommerce_enabled'             => false,
-		'ext_ecommerce_default_processor'   => 'woocommerce',
-		'ext_ecommerce_empty_cart'          => true,
-		'ext_ecommerce_destination'         => 'checkout',
-
-		// PDF Generation
-		'ext_pdf_enabled'                   => false,
-		'ext_pdf_template'                  => 'default',
-		'ext_pdf_attach_to_email'           => false,
-
-		// Multilanguage
-		'ext_multilanguage_enabled'         => false,
-		'ext_multilanguage_provider'        => 'wpml', // wpml|polylang
-
-		// Payments (Stripe / PayPal)
-		'ext_payments_enabled'              => false,
-		'ext_payments_provider'             => 'stripe', // stripe|paypal
-		'ext_payments_stripe_pk'            => '',
-		'ext_payments_stripe_sk'            => '',
-		'ext_payments_paypal_client_id'     => '',
-		'ext_payments_paypal_client_secret' => '',
-		'ext_payments_currency'             => 'USD',
-		'ext_payments_mode'                 => 'test', // test|live
-		'ext_payments_failed_email'         => true,
 	);
 
 	/**
@@ -221,41 +181,13 @@ class Settings {
 			'min' => 1,
 			'max' => 365,
 		),
+		'keep_data_on_uninstall'     => 'boolean',
 
 		// Extensions
 		'ext_webhooks_enabled'              => 'boolean',
 		'ext_webhooks_signing_secret'       => array( 'string', 'max' => 200 ),
 		'ext_webhooks_events'               => 'array',
 		'ext_webhooks_retries'              => array( 'integer', 'min' => 0, 'max' => 5 ),
-		'ext_email_marketing_enabled'       => 'boolean',
-		'ext_email_marketing_provider'      => array( 'mailchimp', 'brevo', 'convertkit' ),
-		'ext_email_marketing_api_key'       => array( 'string', 'max' => 500 ),
-		'ext_email_marketing_list_id'       => array( 'string', 'max' => 200 ),
-		'ext_email_marketing_double_optin'  => 'boolean',
-		'ext_crm_enabled'                   => 'boolean',
-		'ext_crm_provider'                  => array( 'hubspot', 'webhook' ),
-		'ext_crm_api_key'                   => array( 'string', 'max' => 500 ),
-		'ext_crm_portal_id'                 => array( 'string', 'max' => 100 ),
-		'ext_crm_webhook_url'               => array( 'string', 'max' => 2000 ),
-		'ext_crm_add_note'                  => 'boolean',
-		'ext_ecommerce_enabled'             => 'boolean',
-		'ext_ecommerce_default_processor'   => array( 'woocommerce', 'subtleforms' ),
-		'ext_ecommerce_empty_cart'          => 'boolean',
-		'ext_ecommerce_destination'         => array( 'checkout', 'cart' ),
-		'ext_pdf_enabled'                   => 'boolean',
-		'ext_pdf_template'                  => array( 'string', 'max' => 100 ),
-		'ext_pdf_attach_to_email'           => 'boolean',
-		'ext_multilanguage_enabled'         => 'boolean',
-		'ext_multilanguage_provider'        => array( 'wpml', 'polylang' ),
-		'ext_payments_enabled'              => 'boolean',
-		'ext_payments_provider'             => array( 'stripe', 'paypal' ),
-		'ext_payments_stripe_pk'            => array( 'string', 'max' => 500 ),
-		'ext_payments_stripe_sk'            => array( 'string', 'max' => 500 ),
-		'ext_payments_paypal_client_id'     => array( 'string', 'max' => 500 ),
-		'ext_payments_paypal_client_secret' => array( 'string', 'max' => 500 ),
-		'ext_payments_currency'             => array( 'string', 'max' => 10 ),
-		'ext_payments_mode'                 => array( 'test', 'live' ),
-		'ext_payments_failed_email'         => 'boolean',
 	);
 
 	/**

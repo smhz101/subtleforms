@@ -4,6 +4,11 @@ namespace SubtleForms\Tests\WP;
 
 /**
  * PAY-04 (2.3.9): emails and integrations wait for the payment result.
+ *
+ * Pricing lives in SubtleForms Pro since 2.8.0. These tests stand in for it
+ * through the `subtleforms/submit/price_order` filter and the
+ * `subtleforms/submit/finish_order` action, which are the contract between
+ * this plugin and a payment add-on.
  */
 final class PaymentOutcomeTest extends TestCase {
 
@@ -22,14 +27,16 @@ final class PaymentOutcomeTest extends TestCase {
 		$this->mails = array();
 		add_filter( 'pre_schedule_event', array( $this, 'catchJob' ), 10, 2 );
 		add_filter( 'pre_wp_mail', array( $this, 'catchMail' ), 10, 2 );
-		add_filter( 'subtleforms/payment/verify', array( $this, 'authorise' ), 10, 5 );
+		add_filter( 'subtleforms/submit/price_order', array( $this, 'priceOrder' ), 10, 3 );
+		add_action( 'subtleforms/submit/finish_order', array( $this, 'finishOrder' ), 10, 4 );
 		add_filter( 'subtleforms/payment/capture', array( $this, 'capture' ), 10, 2 );
 	}
 
 	protected function tearDown(): void {
 		remove_filter( 'pre_schedule_event', array( $this, 'catchJob' ), 10 );
 		remove_filter( 'pre_wp_mail', array( $this, 'catchMail' ), 10 );
-		remove_filter( 'subtleforms/payment/verify', array( $this, 'authorise' ), 10 );
+		remove_filter( 'subtleforms/submit/price_order', array( $this, 'priceOrder' ), 10 );
+		remove_action( 'subtleforms/submit/finish_order', array( $this, 'finishOrder' ), 10 );
 		remove_filter( 'subtleforms/payment/capture', array( $this, 'capture' ), 10 );
 		parent::tearDown();
 	}
@@ -47,8 +54,17 @@ final class PaymentOutcomeTest extends TestCase {
 		return true;
 	}
 
-	public function authorise( $result, $quote, $payload, $formId, $schema ) {
-		return array( 'status' => 'authorized', 'gateway' => 'test', 'transaction_id' => 'pi_test' );
+	public function priceOrder( $order, $formId, $schema ) {
+		return array(
+			'quote'    => array( 'subtotal' => 10.0, 'total' => 10.0, 'currency' => 'USD', 'items' => array() ),
+			'coupon'   => null,
+			'payment'  => array( 'status' => 'authorized', 'gateway' => 'test', 'transaction_id' => 'pi_test', 'amount' => 10.0, 'currency' => 'USD' ),
+			'customer' => '',
+		);
+	}
+
+	public function finishOrder( $submissionId, $submission, $order, $status ) {
+		( new \SubtleForms\Repositories\SubmissionsRepository() )->update( $submissionId, array( 'status' => $status ) );
 	}
 
 	public function capture( $payment, $submissionId ) {
@@ -58,7 +74,6 @@ final class PaymentOutcomeTest extends TestCase {
 	private function payForm(): int {
 		return $this->publish(
 			array(
-				array( 'id' => 'p', 'key' => 'ticket', 'type' => 'payment_product', 'label' => 'Ticket', 'price' => 10, 'allowQuantity' => false ),
 				array( 'id' => 'e', 'key' => 'email', 'type' => 'email', 'label' => 'Email' ),
 			),
 			array(
@@ -71,7 +86,7 @@ final class PaymentOutcomeTest extends TestCase {
 	public function test_a_failed_capture_sends_no_receipt_and_tells_the_owner() {
 		$this->capture = new \WP_Error( 'card_declined', 'Your card was declined.' );
 		$id            = $this->payForm();
-		$res           = $this->submit( $id, array( 'ticket' => '1', 'email' => 'buyer@example.com' ) );
+		$res           = $this->submit( $id, array( 'email' => 'buyer@example.com' ) );
 		$this->assertSame( 402, $res['status'] );
 		$this->assertSame( array(), $this->jobs, 'no order email is queued' );
 		$subjects = array_column( $this->mails, 'subject' );
@@ -83,7 +98,7 @@ final class PaymentOutcomeTest extends TestCase {
 	public function test_a_captured_payment_sends_the_emails() {
 		$this->capture = null;
 		$id            = $this->payForm();
-		$res           = $this->submit( $id, array( 'ticket' => '1', 'email' => 'buyer@example.com' ) );
+		$res           = $this->submit( $id, array( 'email' => 'buyer@example.com' ) );
 		$this->assertSame( 200, $res['status'], wp_json_encode( $res['data'] ) );
 		$this->assertCount( 1, $this->jobs, 'the order email goes out after the capture' );
 		$this->assertSame( 'completed', $this->storedStatus( $id ) );

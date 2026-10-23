@@ -143,7 +143,7 @@ final class TransferService {
 	 */
 	public static function cleanPayload( array $payload, array $schema ): array {
 		$rich = array();
-		foreach ( \SubtleForms\Payments\Pricing::fields( $schema ) as $field ) {
+		foreach ( \SubtleForms\Support\SchemaFields::flat( $schema ) as $field ) {
 			if ( ( $field['type'] ?? '' ) === 'rich_text' && ! empty( $field['key'] ) ) {
 				$rich[] = (string) $field['key'];
 			}

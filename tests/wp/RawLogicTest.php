@@ -50,12 +50,11 @@ final class RawLogicTest extends TestCase {
 		);
 	}
 
-	public function test_rules_match_the_website_as_typed_for_storage_pricing_and_actions(): void {
+	public function test_rules_match_the_website_as_typed_for_storage_order_pricing_and_actions(): void {
 		$id = $this->publish(
 			array(
 				array( 'type' => 'url', 'key' => 'site', 'label' => 'Website' ),
 				array( 'type' => 'text', 'key' => 'company', 'label' => 'Company', 'logic' => self::whenSite( 'example.com' ) ),
-				array( 'type' => 'payment_product', 'key' => 'audit', 'label' => 'Site audit', 'price' => 30, 'logic' => self::whenSite( 'example.com' ) ),
 			),
 			array(
 				array( 'id' => 'save', 'type' => 'save', 'enabled' => true ),
@@ -69,7 +68,16 @@ final class RawLogicTest extends TestCase {
 			)
 		);
 
+		// Pricing is done by a payment add-on; it is handed the answers as typed.
+		$typed = null;
+		$spy   = static function ( $order, $formId, $schema, $payload, $request, $logicValues ) use ( &$typed ) {
+			$typed = $logicValues;
+			return $order;
+		};
+		add_filter( 'subtleforms/submit/price_order', $spy, 10, 6 );
+
 		$res = $this->submit( $id, array( 'site' => 'example.com', 'company' => 'Acme' ) );
+		remove_filter( 'subtleforms/submit/price_order', $spy, 10 );
 		$this->assertSame( 200, $res['status'], wp_json_encode( $res['data'] ) );
 
 		$stored = $this->storedPayload( $id );
@@ -79,8 +87,8 @@ final class RawLogicTest extends TestCase {
 		$this->assertSame( 'Acme', $stored['company'] ?? null );
 
 		$row = $this->storedRow( $id );
-		// The product the visitor saw is charged.
-		$this->assertStringContainsString( '"total":30', $row );
+		// The order pricing sees the website as typed.
+		$this->assertSame( 'example.com', $typed['site'] ?? null );
 		// The answers as typed are not stored in the entry meta.
 		$this->assertStringNotContainsString( 'logic_payload', $row );
 

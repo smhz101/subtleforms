@@ -46,22 +46,6 @@ export const NAV_ITEMS = [
     match: (pathname) => pathname.startsWith('/reports'),
   },
   {
-    key: 'payments',
-    path: '/payments',
-    page: 'subtleforms-payments',
-    label: __('Payments', 'subtleforms'),
-    icon: Icon.CreditCard,
-    match: (pathname) => pathname.startsWith('/payments'),
-  },
-  {
-    key: 'extensions',
-    path: '/extensions',
-    page: 'subtleforms-extensions',
-    label: __('Extensions', 'subtleforms'),
-    icon: Icon.Puzzle,
-    match: (pathname) => pathname.startsWith('/extensions'),
-  },
-  {
     key: 'settings',
     path: '/settings',
     page: 'subtleforms-settings',

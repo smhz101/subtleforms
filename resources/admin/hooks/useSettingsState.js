@@ -48,20 +48,12 @@ function normalizeSettings( data ) {
 		admin_notification_enabled: Boolean( data.admin_notification_enabled ),
 		user_confirmation_enabled: Boolean( data.user_confirmation_enabled ),
 		debug_mode: Boolean( data.debug_mode ),
+		keep_data_on_uninstall: Boolean( data.keep_data_on_uninstall ),
 		captcha_enabled: Boolean( data.captcha_enabled ),
 		captcha_recaptcha_enabled: Boolean( data.captcha_recaptcha_enabled ),
 		captcha_hcaptcha_enabled: Boolean( data.captcha_hcaptcha_enabled ),
 		captcha_turnstile_enabled: Boolean( data.captcha_turnstile_enabled ),
 		ext_webhooks_enabled: Boolean( data.ext_webhooks_enabled ),
-		ext_email_marketing_enabled: Boolean( data.ext_email_marketing_enabled ),
-		ext_email_marketing_double_optin: Boolean( data.ext_email_marketing_double_optin ),
-		ext_crm_enabled: Boolean( data.ext_crm_enabled ),
-		ext_crm_add_note: data.ext_crm_add_note === undefined ? true : Boolean( data.ext_crm_add_note ),
-		ext_ecommerce_enabled: Boolean( data.ext_ecommerce_enabled ),
-		ext_pdf_enabled: Boolean( data.ext_pdf_enabled ),
-		ext_pdf_attach_to_email: Boolean( data.ext_pdf_attach_to_email ),
-		ext_multilanguage_enabled: Boolean( data.ext_multilanguage_enabled ),
-		ext_payments_enabled: Boolean( data.ext_payments_enabled ),
 	};
 }
 

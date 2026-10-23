@@ -21,7 +21,7 @@ final class AddonFieldTypes {
 	/**
 	 * Field types this plugin knows belong to add-ons.
 	 */
-	const TYPES = array( 'signature', 'calculation', 'payment_card' );
+	const TYPES = array( 'signature', 'calculation', 'payment_card', 'payment_product', 'payment_choice', 'payment_amount', 'payment_summary', 'payment_coupon', 'payment_hidden_price' );
 
 	/**
 	 * Field types an add-on provides that still work without it, as a plain
@@ -167,7 +167,7 @@ final class AddonFieldTypes {
 		if ( ! $missing || ! is_array( $schema ) ) {
 			return $payload;
 		}
-		foreach ( \SubtleForms\Payments\Pricing::fields( $schema ) as $field ) {
+		foreach ( \SubtleForms\Support\SchemaFields::flat( $schema ) as $field ) {
 			if ( in_array( (string) ( $field['type'] ?? '' ), $missing, true ) && ! empty( $field['key'] ) ) {
 				unset( $payload[ (string) $field['key'] ] );
 			}
