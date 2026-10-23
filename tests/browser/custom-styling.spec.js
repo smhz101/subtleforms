@@ -119,7 +119,7 @@ test('custom CSS applies only to its own form', async ({ page, context }) => {
 });
 
 test.afterAll(() => {
-  for (const f of fs.readdirSync(SHOTS)) {
+  for (const f of fs.existsSync(SHOTS) ? fs.readdirSync(SHOTS) : []) {
     if (DIST && /^styling-.*\.png$/.test(f)) fs.copyFileSync(`${SHOTS}/${f}`, `${DIST}/${f}`);
   }
 });
