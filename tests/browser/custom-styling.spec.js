@@ -9,7 +9,7 @@ const { test, expect } = require('@playwright/test');
 const { adminApi, cleanup, publishForm, loginPage, openBuilder } = require('./helpers');
 
 const SHOTS = process.env.SF_SHOTS_DIR || 'test-results/shots/custom-styling';
-const DIST = '/home/claude/dist/screens-2.7.2';
+const DIST = process.env.SF_DIST_DIR || '';
 const fields = (label) => [
   { id: 'a', key: 'name', type: 'text', label: `${label} name`, help: 'Help text' },
   { id: 'b', key: 'email', type: 'email', label: `${label} email` },
@@ -30,7 +30,7 @@ test.beforeAll(async () => {
   form = await publishForm(client, { title: `Styling ${Date.now()}`, metadata: { appearance: themeAppearance() }, fields: fields('Styled') });
   other = await publishForm(client, { title: `Styling other ${Date.now()}`, metadata: { appearance: themeAppearance() }, fields: fields('Other') });
   fs.mkdirSync(SHOTS, { recursive: true });
-  fs.mkdirSync(DIST, { recursive: true });
+  if (DIST) fs.mkdirSync(DIST, { recursive: true });
 });
 
 test.afterAll(async () => {
@@ -120,6 +120,6 @@ test('custom CSS applies only to its own form', async ({ page, context }) => {
 
 test.afterAll(() => {
   for (const f of fs.readdirSync(SHOTS)) {
-    if (/^styling-.*\.png$/.test(f)) fs.copyFileSync(`${SHOTS}/${f}`, `${DIST}/${f}`);
+    if (DIST && /^styling-.*\.png$/.test(f)) fs.copyFileSync(`${SHOTS}/${f}`, `${DIST}/${f}`);
   }
 });
